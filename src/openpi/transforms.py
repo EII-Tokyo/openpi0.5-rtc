@@ -311,13 +311,15 @@ class PromptFromLeRobotTask(DataTransformFn):
     """Extracts a prompt from the current LeRobot dataset task."""
 
     # Contains the LeRobot dataset tasks (dataset.meta.tasks).
-    tasks: dict[int, str]
+    # tasks: dict[int, str]
 
     def __call__(self, data: DataDict) -> DataDict:
         if "task" not in data:
             raise ValueError('Cannot extract prompt without "task"')
 
         prompt = data["task"]
+
+        print(f"data prompt{prompt}")
         
         # task_index = int(data["task_index"])
         # if (prompt := self.tasks.get(task_index)) is None:
