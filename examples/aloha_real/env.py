@@ -13,7 +13,7 @@ class AlohaRealEnvironment(_environment.Environment):
 
     def __init__(
         self,
-        reset_position: Optional[List[float]] = None,  # noqa: UP006,UP007
+        reset_position: Optional[List[List[float]]] = None,  # noqa: UP006,UP007
         render_height: int = 224,
         render_width: int = 224,
     ) -> None:

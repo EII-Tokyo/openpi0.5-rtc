@@ -37,16 +37,11 @@ class RealEnv:
                                    "cam_right_wrist": (480x640x3)} # h, w, c, dtype='uint8'
     """
 
-    def __init__(self, init_node, *, reset_position: Optional[List[float]] = None, setup_robots: bool = True):
+    def __init__(self, init_node, *, reset_position: Optional[List[List[float]]] = None, setup_robots: bool = True):
         # reset_position = START_ARM_POSE[:6]
         # self._reset_position = reset_position[:6] if reset_position else DEFAULT_RESET_POSITION
 
-        self._reset_position = [
-            [0.0, -0.96, 1.16, 0.0, -0.0, 0.0],
-            #[0.0, -0.96, 1.16, 0.0, -0.0, 0.0],
-            [0.0, -0.96, 1.16, 1.57, -0.0, -1.57],
-            
-        ]
+        self._reset_position = reset_position
 
         self.puppet_bot_left = InterbotixManipulatorXS(
             robot_model="vx300s",
@@ -67,8 +62,8 @@ class RealEnv:
         self.gripper_command = JointSingleCommand(name="gripper")
 
     def setup_robots(self):
-        robot_utils.setup_puppet_bot(self.puppet_bot_left)
-        robot_utils.setup_puppet_bot(self.puppet_bot_right)
+        robot_utils.setup_puppet_bot(self.puppet_bot_left, current_limit=300)
+        robot_utils.setup_puppet_bot(self.puppet_bot_right, current_limit=550)
 
     def get_qpos(self):
         left_qpos_raw = self.recorder_left.qpos
@@ -179,5 +174,5 @@ def get_action(master_bot_left, master_bot_right):
     return action
 
 
-def make_real_env(init_node, *, reset_position: Optional[List[float]] = None, setup_robots: bool = True) -> RealEnv:
+def make_real_env(init_node, *, reset_position: Optional[List[List[float]]] = None, setup_robots: bool = True) -> RealEnv:
     return RealEnv(init_node, reset_position=reset_position, setup_robots=setup_robots)

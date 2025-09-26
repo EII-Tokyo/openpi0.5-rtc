@@ -1,5 +1,6 @@
 import dataclasses
 import logging
+from typing import List
 
 from openpi_client import action_chunk_broker
 from openpi_client import websocket_client_policy as _websocket_client_policy
@@ -21,6 +22,16 @@ class Args:
     max_episode_steps: int = 1000
 
     use_rtc: bool = True
+    # reset_position: List[List[float]] = dataclasses.field(default_factory=lambda: [
+    #         [0.0, -0.96, 1.16, 0.0, -0.0, 0.0],
+    #         #[0.0, -0.96, 1.16, 0.0, -0.0, 0.0],
+    #         [0.0, -0.96, 1.16, 0.0, -0.0, 0.0]         
+    #     ])
+    reset_position: List[List[float]] = dataclasses.field(default_factory=lambda: [
+            [0.0, -0.96, 1.16, 0.0, -0.0, 0.0],
+            #[0.0, -0.96, 1.16, 0.0, -0.0, 0.0],
+            [0.0, -0.96, 1.16, 1.57, -0.0, -1.57]         
+        ])
 
 
 def main(args: Args) -> None:
@@ -32,7 +43,8 @@ def main(args: Args) -> None:
 
     metadata = ws_client_policy.get_server_metadata()
     runtime = _runtime.Runtime(
-        environment=_env.AlohaRealEnvironment(reset_position=metadata.get("reset_pose")),
+        # environment=_env.AlohaRealEnvironment(reset_position=metadata.get("reset_pose")),
+        environment=_env.AlohaRealEnvironment(reset_position=args.reset_position),
         agent=_policy_agent.PolicyAgent(
             policy=action_chunk_broker.ActionChunkBroker(
                 policy=ws_client_policy,
