@@ -796,7 +796,24 @@ _CONFIGS = [
         model=pi0_config.Pi0Config(pi05=True),
         data=LeRobotAlohaDataConfig(
             # repo_id="physical-intelligence/aloha_pen_uncap_diverse",
-            repo_ids=["lyl472324464/aloha_static_ziploc_slide","lyl472324464/aloha_static_vinh_cup"],
+            repo_ids=[
+                "lyl472324464/twist-new/",
+                "lyl472324464/aloha_static_battery",
+                "lyl472324464/aloha_static_candy",
+                "lyl472324464/aloha_static_coffee",
+                "lyl472324464/aloha_static_coffee_new",
+                "lyl472324464/aloha_static_cups_open",
+                "lyl472324464/aloha_static_fork_pick_up",
+                "lyl472324464/aloha_static_pingpong_test",
+                "lyl472324464/aloha_static_pro_pencil",
+                "lyl472324464/aloha_static_screw_driver",
+                "lyl472324464/aloha_static_tape",
+                "lyl472324464/aloha_static_thread_velcro",
+                "lyl472324464/aloha_static_towel",
+                "lyl472324464/aloha_static_vinh_cup",
+                "lyl472324464/aloha_static_vinh_cup_left",
+                "lyl472324464/aloha_static_ziploc_slide",
+            ],
             assets=AssetsConfig(
                 assets_dir="gs://openpi-assets/checkpoints/pi05_base/assets",
                 asset_id="trossen",
@@ -814,13 +831,14 @@ _CONFIGS = [
                             },
                             "state": "observation.state",
                             "actions": "action",
+                            "prompt": "prompt",
                         }
                     )
                 ]
             ),
         ),
         weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_base/params"),
-        num_train_steps=20_000,
+        num_train_steps=40_000,
         batch_size=64,
     ),
     #

@@ -140,6 +140,7 @@ def create_torch_dataset(
     if repo_ids is not None:
         dataset = lerobot_dataset.MultiLeRobotDataset(
             repo_ids,
+            root="/home/ubuntu/aloha",
             delta_timestamps={
                 key: [t / 50 for t in range(action_horizon)] for key in data_config.action_sequence_keys
             },
@@ -152,10 +153,10 @@ def create_torch_dataset(
                 key: [t / dataset_meta.fps for t in range(action_horizon)] for key in data_config.action_sequence_keys
             },
         )
-    print(data_config)
-    if data_config.prompt_from_task:
-        # dataset = TransformedDataset(dataset, [_transforms.PromptFromLeRobotTask(dataset_meta.tasks)])
-        dataset = TransformedDataset(dataset, [_transforms.PromptFromLeRobotTask()])
+    # print(data_config)
+    # if data_config.prompt_from_task:
+    #     # dataset = TransformedDataset(dataset, [_transforms.PromptFromLeRobotTask(dataset_meta.tasks)])
+    #     dataset = TransformedDataset(dataset, [_transforms.PromptFromLeRobotTask()])
 
     return dataset
 
@@ -192,6 +193,7 @@ def transform_dataset(dataset: Dataset, data_config: _config.DataConfig, *, skip
     return TransformedDataset(
         dataset,
         [
+            _transforms.PromptFromLeRobotTask(),
             *data_config.repack_transforms.inputs,
             *data_config.data_transforms.inputs,
             _transforms.Normalize(norm_stats, use_quantiles=data_config.use_quantile_norm),

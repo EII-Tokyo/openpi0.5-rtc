@@ -20,6 +20,8 @@ class Args:
     num_episodes: int = 1
     max_episode_steps: int = 1000
 
+    use_rtc: bool = True
+
 
 def main(args: Args) -> None:
     ws_client_policy = _websocket_client_policy.WebsocketClientPolicy(
@@ -35,6 +37,7 @@ def main(args: Args) -> None:
             policy=action_chunk_broker.ActionChunkBroker(
                 policy=ws_client_policy,
                 action_horizon=args.action_horizon,
+                use_rtc=args.use_rtc,
             )
         ),
         subscribers=[],

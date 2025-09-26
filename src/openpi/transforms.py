@@ -261,7 +261,7 @@ class TokenizePrompt(DataTransformFn):
 
         if not isinstance(prompt, str):
             prompt = prompt.item()
-
+        
         tokens, token_masks = self.tokenizer.tokenize(prompt, state)
         return {**data, "tokenized_prompt": tokens, "tokenized_prompt_mask": token_masks}
 
@@ -318,8 +318,6 @@ class PromptFromLeRobotTask(DataTransformFn):
             raise ValueError('Cannot extract prompt without "task"')
 
         prompt = data["task"]
-
-        print(f"data prompt{prompt}")
         
         # task_index = int(data["task_index"])
         # if (prompt := self.tasks.get(task_index)) is None:
