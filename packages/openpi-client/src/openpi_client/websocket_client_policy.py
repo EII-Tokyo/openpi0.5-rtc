@@ -1,6 +1,7 @@
 import logging
 import time
 from typing import Dict, Optional, Tuple
+import numpy as np
 
 from typing_extensions import override
 import websockets.sync.client
@@ -43,7 +44,7 @@ class WebsocketClientPolicy(_base_policy.BasePolicy):
     @override
     def infer(self, obs: Dict, prev_action: np.ndarray | None = None, use_rtc: bool = True) -> Dict:  # noqa: UP006
         data = {
-            "observation": obs,
+            "obs": obs,
             "prev_action": prev_action,
             "use_rtc": use_rtc,
         }

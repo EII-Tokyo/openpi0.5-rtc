@@ -39,7 +39,14 @@ class RealEnv:
 
     def __init__(self, init_node, *, reset_position: Optional[List[float]] = None, setup_robots: bool = True):
         # reset_position = START_ARM_POSE[:6]
-        self._reset_position = reset_position[:6] if reset_position else DEFAULT_RESET_POSITION
+        # self._reset_position = reset_position[:6] if reset_position else DEFAULT_RESET_POSITION
+
+        self._reset_position = [
+            [0.0, -0.96, 1.16, 0.0, -0.0, 0.0],
+            #[0.0, -0.96, 1.16, 0.0, -0.0, 0.0],
+            [0.0, -0.96, 1.16, 1.57, -0.0, -1.57],
+            
+        ]
 
         self.puppet_bot_left = InterbotixManipulatorXS(
             robot_model="vx300s",
@@ -108,7 +115,7 @@ class RealEnv:
 
     def _reset_joints(self):
         robot_utils.move_arms(
-            [self.puppet_bot_left, self.puppet_bot_right], [self._reset_position, self._reset_position], move_time=1
+            [self.puppet_bot_left, self.puppet_bot_right], self._reset_position, move_time=1
         )
 
     def _reset_gripper(self):

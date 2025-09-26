@@ -4,7 +4,9 @@ import logging
 import socket
 
 import tyro
+import numpy as np
 
+from openpi.policies import aloha_policy as _aloha_policy
 from openpi.policies import policy as _policy
 from openpi.policies import policy_config as _policy_config
 from openpi.serving import websocket_policy_server
@@ -59,8 +61,16 @@ class Args:
 DEFAULT_CHECKPOINT: dict[EnvMode, Checkpoint] = {
     EnvMode.ALOHA: Checkpoint(
         config="pi05_aloha",
-        dir="gs://openpi-assets/checkpoints/pi05_base",
+        dir="./checkpoints/20250926/4000",
     ),
+    # EnvMode.ALOHA: Checkpoint(
+    #     config="pi05_aloha",
+    #     dir="gs://openpi-assets/checkpoints/pi05_base",
+    # ),
+    # EnvMode.ALOHA: Checkpoint(
+    #     config="pi0_aloha",
+    #     dir="./checkpoints/twist/19999",
+    # ),
     EnvMode.ALOHA_SIM: Checkpoint(
         config="pi0_aloha_sim",
         dir="gs://openpi-assets/checkpoints/pi0_aloha_sim",
@@ -99,7 +109,10 @@ def create_policy(args: Args) -> _policy.Policy:
 def main(args: Args) -> None:
     policy = create_policy(args)
     policy_metadata = policy.metadata
-
+    dummy_obs = _aloha_policy.make_aloha_example()
+    dummy_prev_action = np.random.rand(50, 32)
+    policy.infer(dummy_obs, dummy_prev_action, use_rtc=True)
+    policy.infer(dummy_obs, dummy_prev_action, use_rtc=False)
     # Record the policy's behavior.
     if args.record:
         policy = _policy.PolicyRecorder(policy, "policy_records")
