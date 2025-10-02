@@ -70,11 +70,14 @@ class RealEnv:
         right_qpos_raw = self.recorder_right.qpos
         left_arm_qpos = left_qpos_raw[:6]
         right_arm_qpos = right_qpos_raw[:6]
+        # print(left_qpos_raw[7], right_qpos_raw[7])
         left_gripper_qpos = [
-            constants.PUPPET_GRIPPER_POSITION_NORMALIZE_FN(left_qpos_raw[7])
+            constants.PUPPET_GRIPPER_POSITION_NORMALIZE_FN(left_qpos_raw[6])
+            # constants.PUPPET_GRIPPER_POSITION_NORMALIZE_FN(left_qpos_raw[7])
         ]  # this is position not joint
         right_gripper_qpos = [
-            constants.PUPPET_GRIPPER_POSITION_NORMALIZE_FN(right_qpos_raw[7])
+            # constants.PUPPET_GRIPPER_POSITION_NORMALIZE_FN(right_qpos_raw[7])
+            constants.PUPPET_GRIPPER_POSITION_NORMALIZE_FN(right_qpos_raw[6])
         ]  # this is position not joint
         return np.concatenate([left_arm_qpos, left_gripper_qpos, right_arm_qpos, right_gripper_qpos])
 

@@ -140,7 +140,7 @@ def create_torch_dataset(
     if repo_ids is not None:
         dataset = lerobot_dataset.MultiLeRobotDataset(
             repo_ids,
-            root="/home/ubuntu/aloha",
+            # root="/home/ubuntu/aloha",
             delta_timestamps={
                 key: [t / 50 for t in range(action_horizon)] for key in data_config.action_sequence_keys
             },

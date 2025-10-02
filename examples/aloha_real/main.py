@@ -19,7 +19,7 @@ class Args:
     action_horizon: int = 25
 
     num_episodes: int = 1
-    max_episode_steps: int = 1000
+    max_episode_steps: int = 10000
 
     use_rtc: bool = True
     # reset_position: List[List[float]] = dataclasses.field(default_factory=lambda: [

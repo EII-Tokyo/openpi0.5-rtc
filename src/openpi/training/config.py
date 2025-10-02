@@ -766,7 +766,7 @@ _CONFIGS = [
         name="pi0_aloha_pen_uncap",
         model=pi0_config.Pi0Config(),
         data=LeRobotAlohaDataConfig(
-            repo_id="physical-intelligence/aloha_pen_uncap_diverse",
+            repo_id="lyl472324464/twist",
             assets=AssetsConfig(
                 assets_dir="gs://openpi-assets/checkpoints/pi0_base/assets",
                 asset_id="trossen",
@@ -797,7 +797,7 @@ _CONFIGS = [
         data=LeRobotAlohaDataConfig(
             # repo_id="physical-intelligence/aloha_pen_uncap_diverse",
             repo_ids=[
-                "lyl472324464/twist-new/",
+                "lyl472324464/twist",
                 "lyl472324464/aloha_static_battery",
                 "lyl472324464/aloha_static_candy",
                 "lyl472324464/aloha_static_coffee",

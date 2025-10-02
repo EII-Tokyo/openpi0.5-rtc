@@ -13,8 +13,8 @@ from interbotix_xs_msgs.msg import JointSingleCommand
 
 # SLEEPY_POSTION = [0.0, -1.8799999952316284, 1.600000023841858, 0.0, -1.600000023841858, 0.0]
 SLEEPY_POSTION = [0.0, -1.8399999952316284, 1.600000023841858, 0.0, -1.600000023841858, 0.0]
-SLEEPY_POSTION = [0.0, -0.96, 1.16, 0.0, 0.0, 0.0]
-START_POSITION = [0, -1.36, 1.16, 0, -0.3, 0]
+# SLEEPY_POSTION = [0.0, -0.96, 1.16, 0.0, 0.0, 0.0]
+# START_POSITION = [0, -1.36, 1.16, 0, -0.3, 0]
 
 
 
@@ -25,8 +25,8 @@ class GripperController:
         self.robot_name = robot_name
         
         # 夹爪位置常量
-        self.GRIPPER_JOINT_OPEN = 1.4910    # 完全打开
-        self.GRIPPER_JOINT_CLOSE = -0.6213  # 完全关闭
+        self.GRIPPER_JOINT_OPEN = 1.6110    # 完全打开
+        self.GRIPPER_JOINT_CLOSE = 0.6213  # 完全关闭
         self.GRIPPER_JOINT_MID = (self.GRIPPER_JOINT_OPEN + self.GRIPPER_JOINT_CLOSE) / 2
 
         # 机器人运动控制常量

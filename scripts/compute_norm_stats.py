@@ -41,6 +41,7 @@ def create_torch_dataloader(
             RemoveStrings(),
         ],
     )
+    # print(data_config.data_transforms.inputs)
     if max_frames is not None and max_frames < len(dataset):
         num_batches = max_frames // batch_size
         shuffle = True
