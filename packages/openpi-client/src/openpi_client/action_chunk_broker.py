@@ -34,7 +34,7 @@ class ActionChunkBroker(_base_policy.BasePolicy):
         self._d = 10
         self._use_rtc = use_rtc
         # self._norm_stats = json.loads(pathlib.Path("/app/checkpoints/twist/19999/assets/trossen/norm_stats.json").read_text())["norm_stats"]
-        self._norm_stats = json.loads(pathlib.Path("/app/checkpoints/20250926/4000/assets/trossen/norm_stats.json").read_text())["norm_stats"]
+        self._norm_stats = json.loads(pathlib.Path("/app/checkpoints/20250926/19000/assets/trossen/norm_stats.json").read_text())["norm_stats"]
 
         if self._use_rtc:
             self._infer_thread = threading.Thread(target=self._background_infer)
