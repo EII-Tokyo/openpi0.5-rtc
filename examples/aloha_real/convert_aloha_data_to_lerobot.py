@@ -10,9 +10,9 @@ import shutil
 from typing import Literal
 
 import h5py
-from lerobot.common.datasets.lerobot_dataset import LEROBOT_HOME
+from lerobot.common.datasets.lerobot_dataset import HF_LEROBOT_HOME as LEROBOT_HOME
 from lerobot.common.datasets.lerobot_dataset import LeRobotDataset
-from lerobot.common.datasets.push_dataset_to_hub._download_raw import download_raw
+# from lerobot.common.datasets.push_dataset_to_hub._download_raw import download_raw
 import numpy as np
 import torch
 import tqdm
@@ -41,13 +41,6 @@ def create_empty_dataset(
     dataset_config: DatasetConfig = DEFAULT_DATASET_CONFIG,
 ) -> LeRobotDataset:
     motors = [
-        "right_waist",
-        "right_shoulder",
-        "right_elbow",
-        "right_forearm_roll",
-        "right_wrist_angle",
-        "right_wrist_rotate",
-        "right_gripper",
         "left_waist",
         "left_shoulder",
         "left_elbow",
@@ -55,6 +48,13 @@ def create_empty_dataset(
         "left_wrist_angle",
         "left_wrist_rotate",
         "left_gripper",
+        "right_waist",
+        "right_shoulder",
+        "right_elbow",
+        "right_forearm_roll",
+        "right_wrist_angle",
+        "right_wrist_rotate",
+        "right_gripper",
     ]
     cameras = [
         "cam_high",
@@ -143,18 +143,24 @@ def has_effort(hdf5_files: list[Path]) -> bool:
 
 def load_raw_images_per_camera(ep: h5py.File, cameras: list[str]) -> dict[str, np.ndarray]:
     imgs_per_cam = {}
-    for camera in cameras:
-        uncompressed = ep[f"/observations/images/{camera}"].ndim == 4
+    true_cameras = [
+        "camera_high",
+        "camera_low",
+        "camera_wrist_left",
+        "camera_wrist_right",
+    ]
+    for index, camera in enumerate(cameras):
+        uncompressed = ep[f"/observations/images/{true_cameras[index]}"].ndim == 4
 
         if uncompressed:
             # load all images in RAM
-            imgs_array = ep[f"/observations/images/{camera}"][:]
+            imgs_array = ep[f"/observations/images/{true_cameras[index]}"][:]
         else:
             import cv2
 
             # load one compressed image after the other in RAM and uncompress
             imgs_array = []
-            for data in ep[f"/observations/images/{camera}"]:
+            for data in ep[f"/observations/images/{true_cameras[index]}"]:
                 imgs_array.append(cv2.imdecode(data, 1))
             imgs_array = np.array(imgs_array)
 
@@ -166,16 +172,16 @@ def load_raw_episode_data(
     ep_path: Path,
 ) -> tuple[dict[str, np.ndarray], torch.Tensor, torch.Tensor, torch.Tensor | None, torch.Tensor | None]:
     with h5py.File(ep_path, "r") as ep:
-        state = torch.from_numpy(ep["/observations/qpos"][:])
-        action = torch.from_numpy(ep["/action"][:])
+        state = torch.from_numpy(np.concatenate([ep["/observations/qpos"][:, 7:], ep["/observations/qpos"][:, :7]], axis=1))
+        action = torch.from_numpy(np.concatenate([ep["/action"][:, 7:], ep["/action"][:, :7]], axis=1))
 
         velocity = None
         if "/observations/qvel" in ep:
-            velocity = torch.from_numpy(ep["/observations/qvel"][:])
+            velocity = torch.from_numpy(np.concatenate([ep["/observations/qvel"][:, 7:], ep["/observations/qvel"][:, :7]], axis=1))
 
         effort = None
         if "/observations/effort" in ep:
-            effort = torch.from_numpy(ep["/observations/effort"][:])
+            effort = torch.from_numpy(np.concatenate([ep["/observations/effort"][:, 7:], ep["/observations/effort"][:, :7]], axis=1))
 
         imgs_per_cam = load_raw_images_per_camera(
             ep,
@@ -209,6 +215,7 @@ def populate_dataset(
             frame = {
                 "observation.state": state[i],
                 "action": action[i],
+                "task": task,
             }
 
             for camera, img_array in imgs_per_cam.items():
@@ -221,7 +228,7 @@ def populate_dataset(
 
             dataset.add_frame(frame)
 
-        dataset.save_episode(task=task)
+        dataset.save_episode()
 
     return dataset
 
@@ -241,10 +248,10 @@ def port_aloha(
     if (LEROBOT_HOME / repo_id).exists():
         shutil.rmtree(LEROBOT_HOME / repo_id)
 
-    if not raw_dir.exists():
-        if raw_repo_id is None:
-            raise ValueError("raw_repo_id must be provided if raw_dir does not exist")
-        download_raw(raw_dir, repo_id=raw_repo_id)
+    # if not raw_dir.exists():
+    #     if raw_repo_id is None:
+    #         raise ValueError("raw_repo_id must be provided if raw_dir does not exist")
+    #     download_raw(raw_dir, repo_id=raw_repo_id)
 
     hdf5_files = sorted(raw_dir.glob("episode_*.hdf5"))
 
@@ -262,7 +269,7 @@ def port_aloha(
         task=task,
         episodes=episodes,
     )
-    dataset.consolidate()
+    # dataset.consolidate()
 
     if push_to_hub:
         dataset.push_to_hub()
