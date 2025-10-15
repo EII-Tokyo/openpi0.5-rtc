@@ -7,6 +7,7 @@ import tyro
 import numpy as np
 
 from openpi.policies import aloha_policy as _aloha_policy
+from openpi.policies import droid_policy as _droid_policy
 from openpi.policies import policy as _policy
 from openpi.policies import policy_config as _policy_config
 from openpi.serving import websocket_policy_server
@@ -109,7 +110,11 @@ def create_policy(args: Args) -> _policy.Policy:
 def main(args: Args) -> None:
     policy = create_policy(args)
     policy_metadata = policy.metadata
-    dummy_obs = _aloha_policy.make_aloha_example()
+    config_name = args.policy.config if isinstance(args.policy, Checkpoint) else None
+    if config_name and ("droid" in config_name.lower() or args.env == EnvMode.DROID):
+        dummy_obs = _droid_policy.make_droid_example()
+    else:
+        dummy_obs = _aloha_policy.make_aloha_example()
     dummy_prev_action = np.random.rand(50, 32)
     policy.infer(dummy_obs, dummy_prev_action, use_rtc=True)
     policy.infer(dummy_obs, dummy_prev_action, use_rtc=False)
