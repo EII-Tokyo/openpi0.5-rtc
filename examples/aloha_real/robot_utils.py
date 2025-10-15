@@ -212,7 +212,8 @@ def move_grippers(bot_list, target_pose_list, move_time):
 
 
 def setup_puppet_bot(bot, current_limit=550):  
-    torque_off(bot)
+    # torque_off(bot)
+    bot.dxl.robot_torque_enable("single", "gripper", False)
     bot.dxl.robot_set_motor_registers('single', 'gripper', 'Current_Limit', current_limit)
     bot.dxl.robot_reboot_motors("single", "gripper", True)
     bot.dxl.robot_set_operating_modes("group", "arm", "position")

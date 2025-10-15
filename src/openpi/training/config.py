@@ -794,6 +794,13 @@ _CONFIGS = [
     TrainConfig(
         name="pi05_aloha_pen_uncap",
         model=pi0_config.Pi0Config(pi05=True),
+        lr_schedule=_optimizer.CosineDecaySchedule(
+            warmup_steps=10_000,
+            peak_lr=2.5e-5,
+            decay_steps=1_000_000,
+            decay_lr=2.5e-5,
+        ),
+        log_interval=10,
         data=LeRobotAlohaDataConfig(
             # repo_id="physical-intelligence/aloha_pen_uncap_diverse",
             repo_ids=[

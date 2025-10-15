@@ -16,6 +16,7 @@ services:
     tty: true
     network_mode: host
     privileged: true
+    user: "1000:1000"
     volumes:
       - $PWD:/app
       - ../../data:/data
@@ -54,6 +55,7 @@ services:
     init: true
     tty: true
     network_mode: host
+    user: "1000:1000"
     volumes:
       - $PWD:/app
       - ${OPENPI_DATA_HOME:-~/.cache/openpi}:/openpi_assets
