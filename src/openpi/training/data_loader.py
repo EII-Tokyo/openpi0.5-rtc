@@ -138,11 +138,13 @@ def create_torch_dataset(
     if repo_id == "fake":
         return FakeDataset(model_config, num_samples=1024)
     if repo_ids is not None:
+        # Get FPS from first dataset (assume all datasets in multi-dataset have same FPS)
+        first_dataset_meta = lerobot_dataset.LeRobotDatasetMetadata(repo_ids[0])
         dataset = lerobot_dataset.MultiLeRobotDataset(
             repo_ids,
             # root="/home/ubuntu/aloha",
             delta_timestamps={
-                key: [t / 50 for t in range(action_horizon)] for key in data_config.action_sequence_keys
+                key: [t / first_dataset_meta.fps for t in range(action_horizon)] for key in data_config.action_sequence_keys
             },
         )
     if repo_id is not None:
