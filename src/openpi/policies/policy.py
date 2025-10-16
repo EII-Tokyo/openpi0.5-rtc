@@ -63,7 +63,7 @@ class Policy(BasePolicy):
             # JAX model setup
             self._sample_actions = nnx_utils.module_jit(model.sample_actions)
             self._guided_inference = nnx_utils.module_jit(model.guided_inference)
-            self._rng = rng or jax.random.key(0)
+            self._rng = rng if rng is not None else jax.random.key(0)
 
     @override
     def infer(self, obs: dict, prev_action: np.ndarray | None = None, use_rtc: bool = True, noise: np.ndarray | None = None) -> dict:  # type: ignore[misc]
@@ -92,7 +92,7 @@ class Policy(BasePolicy):
         start_time = time.monotonic()
         if use_rtc:
             if prev_action is None:
-                origin_actions = self._sample_actions(sample_rng_or_pytorch_device, _model.Observation.from_dict(inputs), **self._sample_kwargs)
+                origin_actions, _ = self._sample_actions(sample_rng_or_pytorch_device, _model.Observation.from_dict(inputs), **self._sample_kwargs)
                 outputs = {
                     "state": inputs["state"],
                     "actions": origin_actions,
@@ -100,14 +100,14 @@ class Policy(BasePolicy):
                 }
             else:
                 prev_action = jnp.asarray(prev_action)[np.newaxis, ...]  # Add batch dimension
-                origin_actions = self._guided_inference(sample_rng_or_pytorch_device, prev_action, _model.Observation.from_dict(inputs), **self._sample_kwargs)
+                origin_actions, _ = self._guided_inference(sample_rng_or_pytorch_device, prev_action, _model.Observation.from_dict(inputs), **self._sample_kwargs)
                 outputs = {
                     "state": inputs["state"],
                     "actions": origin_actions,
                     "origin_actions": origin_actions,
                 }
         else:
-            origin_actions = self._sample_actions(sample_rng_or_pytorch_device, _model.Observation.from_dict(inputs), **self._sample_kwargs)
+            origin_actions, _ = self._sample_actions(sample_rng_or_pytorch_device, _model.Observation.from_dict(inputs), **self._sample_kwargs)
             outputs = {
                 "state": inputs["state"],
                 "actions": origin_actions,

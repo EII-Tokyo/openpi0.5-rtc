@@ -1,4 +1,5 @@
 import logging
+from typing import Union
 
 import einops
 import flax.nnx as nnx
@@ -221,7 +222,7 @@ class Pi0(_model.BaseModel):
         *,
         num_steps: int | at.Int[at.Array, ""] = 10,
         noise: at.Float[at.Array, "b ah ad"] | None = None,
-    ) -> _model.Actions:
+    ):
         observation = _model.preprocess_observation(None, observation, train=False)
         # note that we use the convention more common in diffusion literature, where t=1 is noise and t=0 is the target
         # distribution. yes, this is the opposite of the pi0 paper, and I'm sorry.
@@ -234,9 +235,9 @@ class Pi0(_model.BaseModel):
         prefix_tokens, prefix_mask, prefix_ar_mask = self.embed_prefix(observation)
         prefix_attn_mask = make_attn_mask(prefix_mask, prefix_ar_mask)
         positions = jnp.cumsum(prefix_mask, axis=1) - 1
-        _, kv_cache = self.PaliGemma.llm([prefix_tokens, None], mask=prefix_attn_mask, positions=positions)
+        _, kv_cache, _ = self.PaliGemma.llm([prefix_tokens, None], mask=prefix_attn_mask, positions=positions)
 
-        def step(carry):
+        def step(carry, _):
             x_t, time = carry
             suffix_tokens, suffix_mask, suffix_ar_mask, adarms_cond = self.embed_suffix(
                 observation, x_t, jnp.broadcast_to(time, batch_size)
@@ -258,37 +259,40 @@ class Pi0(_model.BaseModel):
             # `positions` is shape (b, suffix_len) indicating the positions of the suffix tokens
             positions = jnp.sum(prefix_mask, axis=-1)[:, None] + jnp.cumsum(suffix_mask, axis=-1) - 1
 
-            (prefix_out, suffix_out), _ = self.PaliGemma.llm(
+            (prefix_out, suffix_out), _, attn_weights = self.PaliGemma.llm(
                 [None, suffix_tokens],
                 mask=full_attn_mask,
                 positions=positions,
                 kv_cache=kv_cache,
                 adarms_cond=[None, adarms_cond],
+                output_attentions=True,
             )
+
             assert prefix_out is None
             v_t = self.action_out_proj(suffix_out[:, -self.action_horizon :])
 
-            return x_t + dt * v_t, time + dt
+            return (x_t + dt * v_t, time + dt), attn_weights
 
-        def cond(carry):
-            x_t, time = carry
-            # robust to floating-point error
-            return time >= -dt / 2
+        # Use scan instead of while_loop to collect attention weights
+        (x_0, _), attention_weights_list = jax.lax.scan(step, (noise, 1.0), None, length=num_steps)
 
-        x_0, _ = jax.lax.while_loop(cond, step, (noise, 1.0))
-        return x_0
-        
+        # Convert tuple of attention weights to list for compatibility
+        return x_0, list(attention_weights_list)
+
     def guided_inference(
         self,
         rng: at.KeyArrayLike,
         prev_action: _model.Actions,
         observation: _model.Observation,
         *,
-        num_steps: int | at.Int[at.Array, ""] = 10,       
-        s: int = 25,
+        num_steps: int | at.Int[at.Array, ""] = 10,
+        s: int | None = None,
         d: int = 10,
         beta: float = 8.0,
-    ) -> _model.Actions:
+    ):
+        # If s is not provided, use action_horizon as default
+        if s is None:
+            s = self.action_horizon
         observation = _model.preprocess_observation(None, observation, train=False)
         # note that we use the convention more common in diffusion literature, where t=1 is noise and t=0 is the target
         # distribution. yes, this is the opposite of the pi0 paper, and I'm sorry.
@@ -352,7 +356,7 @@ class Pi0(_model.BaseModel):
         prefix_tokens, prefix_mask, prefix_ar_mask = self.embed_prefix(observation)
         prefix_attn_mask = make_attn_mask(prefix_mask, prefix_ar_mask)
         positions = jnp.cumsum(prefix_mask, axis=1) - 1
-        _, kv_cache = self.PaliGemma.llm([prefix_tokens, None], mask=prefix_attn_mask, positions=positions)
+        _, kv_cache, _ = self.PaliGemma.llm([prefix_tokens, None], mask=prefix_attn_mask, positions=positions, output_attentions=False)
 
         def func_a_1_prime(x_t, time):
             suffix_tokens, suffix_mask, suffix_ar_mask, adarms_cond = self.embed_suffix(
@@ -375,17 +379,27 @@ class Pi0(_model.BaseModel):
             # `positions` is shape (b, suffix_len) indicating the positions of the suffix tokens
             positions = jnp.sum(prefix_mask, axis=-1)[:, None] + jnp.cumsum(suffix_mask, axis=-1) - 1
 
-            (prefix_out, suffix_out), _ = self.PaliGemma.llm(
-                [None, suffix_tokens], mask=full_attn_mask, positions=positions, kv_cache=kv_cache, adarms_cond=[None, adarms_cond]
+            (prefix_out, suffix_out), _, attn_weights = self.PaliGemma.llm(
+                [None, suffix_tokens], mask=full_attn_mask, positions=positions, kv_cache=kv_cache, adarms_cond=[None, adarms_cond], output_attentions=True
             )
             assert prefix_out is None
             v_t = self.action_out_proj(suffix_out[:, -self.action_horizon :])
 
-            return x_t - time * v_t, v_t
+            return (x_t - time * v_t, v_t), attn_weights
 
-        def step(carry):
+        def step(carry, _):
             x_t, time = carry
-            (a_1_prime, v_t), f_vjp = jax.vjp(func_a_1_prime, x_t, time)
+
+            # For VJP, we need a version that only returns the differentiated outputs
+            def func_for_vjp(x_t, time):
+                (a_1_prime, v_t), _ = func_a_1_prime(x_t, time)
+                return a_1_prime, v_t
+
+            # Get both the result and the VJP function
+            (a_1_prime, v_t), f_vjp = jax.vjp(func_for_vjp, x_t, time)
+
+            # Get attention weights separately (VJP doesn't preserve auxiliary outputs)
+            _, attn_weights = func_a_1_prime(x_t, time)
 
             e = prev_action_slice - a_1_prime
             e = jnp.matmul(diag_W, e)
@@ -396,36 +410,11 @@ class Pi0(_model.BaseModel):
             r_t = time * time / (time * time + (1 - time) * (1 - time))
 
             a_2_prime = x_t + dt * (v_t - jax.lax.min(beta, time / ((1 - time) * r_t * r_t + 1e-6)) * grad_a_1_prime_x_t[0])
-            
-            return a_2_prime, time + dt
 
-        def cond(carry):
-            x_t, time = carry
-            # robust to floating-point error
-            return time >= -dt / 2
+            return (a_2_prime, time + dt), attn_weights
 
-        x_0, _ = jax.lax.while_loop(cond, step, (noise, 1.0))
-        
-        # 在guided_inference最后保存前14个关节的平均值，每次调用都保存一次
-        def save_guided_inference_result(x_0):
-            import numpy as np
-            import time as time_module
-            # 计算前14个关节的平均值
-            first_14_joints = x_0[:, :, :14]
-            joint_averages = np.mean(first_14_joints, axis=1)
-            # 创建时间戳
-            timestamp = time_module.strftime("%Y%m%d_%H%M%S")
-            # 保存为numpy格式
-            # np.save(f'guided_inference_joint_averages_{timestamp}.npy', joint_averages)
-            # 保存为文本格式便于查看
-            np.savetxt(f'guided_inference_joint_averages_{timestamp}.txt', first_14_joints[0], fmt='%.6f')
-            # 保存详细信息
-            # with open(f'guided_inference_info_{timestamp}.txt', 'w') as f:
-            #     f.write(f"Timestamp: {timestamp}\n")
-            #     f.write(f"Joint averages shape: {joint_averages.shape}\n")
-            #     f.write(f"Full action shape: {x_0.shape}\n")
-            #     f.write(f"Joint averages:\n{joint_averages}\n")
-            return x_0
-        # 使用jax.pure_callback来执行文件保存操作
-        # x_0 = jax.pure_callback(save_guided_inference_result, jax.ShapeDtypeStruct(x_0.shape, x_0.dtype), x_0)
-        return x_0
+        # Use scan instead of while_loop to collect attention weights
+        (x_0, _), attention_weights_list = jax.lax.scan(step, (noise, 1.0), None, length=num_steps)
+
+        # Convert tuple of attention weights to list for compatibility
+        return x_0, list(attention_weights_list)
