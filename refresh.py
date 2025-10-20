@@ -1,186 +1,71 @@
-import torch
 from lerobot.common.datasets.lerobot_dataset import LeRobotDataset
-import dataclasses
-from typing import Literal
-from pathlib import Path
+import os
+import time
 import shutil
-import cv2
-import numpy as np
 
-@dataclasses.dataclass(frozen=True)
-class DatasetConfig:
-    use_videos: bool = True
-    tolerance_s: float = 0.0001
-    image_writer_processes: int = 10
-    image_writer_threads: int = 5
-    video_backend: str | None = None
-
-
-DEFAULT_DATASET_CONFIG = DatasetConfig()
-
-def create_empty_dataset(
-    repo_id: str,
-    robot_type: str,
-    mode: Literal["video", "image"] = "video",
-    *,
-    has_velocity: bool = False,
-    has_effort: bool = False,
-    dataset_config: DatasetConfig = DEFAULT_DATASET_CONFIG,
-) -> LeRobotDataset:
-    motors = [
-        "left_waist",
-        "left_shoulder",
-        "left_elbow",
-        "left_forearm_roll",
-        "left_wrist_angle",
-        "left_wrist_rotate",
-        "left_gripper",
-        "right_waist",
-        "right_shoulder",
-        "right_elbow",
-        "right_forearm_roll",
-        "right_wrist_angle",
-        "right_wrist_rotate",
-        "right_gripper",
-    ]
-    cameras = [
-        "cam_high",
-        "cam_low",
-        "cam_left_wrist",
-        "cam_right_wrist",
-    ]
-
-    features = {
-        "observation.state": {
-            "dtype": "float32",
-            "shape": (len(motors),),
-            "names": [
-                motors,
-            ],
-        },
-        "action": {
-            "dtype": "float32",
-            "shape": (len(motors),),
-            "names": [
-                motors,
-            ],
-        },
-    }
-
-    if has_velocity:
-        features["observation.velocity"] = {
-            "dtype": "float32",
-            "shape": (len(motors),),
-            "names": [
-                motors,
-            ],
-        }
-
-    if has_effort:
-        features["observation.effort"] = {
-            "dtype": "float32",
-            "shape": (len(motors),),
-            "names": [
-                motors,
-            ],
-        }
-
-    for cam in cameras:
-        features[f"observation.images.{cam}"] = {
-            "dtype": mode,
-            "shape": (3, 480, 640),
-            "names": [
-                "channels",
-                "height",
-                "width",
-            ],
-        }
-
-
-    features["task_index"] = {
-        "dtype": "int64",
-        "shape": (1,),
-        "names": None,
-    }
-    if Path('/home/eii/.cache/huggingface/lerobot/' + repo_id).exists():
-        shutil.rmtree('/home/eii/.cache/huggingface/lerobot/' + repo_id)
-    return LeRobotDataset.create(
-        repo_id=repo_id,
-        fps=50,
-        robot_type=robot_type,
-        features=features,
-        use_videos=dataset_config.use_videos,
-        tolerance_s=dataset_config.tolerance_s,
-        image_writer_processes=dataset_config.image_writer_processes,
-        image_writer_threads=dataset_config.image_writer_threads,
-        video_backend=dataset_config.video_backend,
-    )
+repo_ids=[
+                "lyl472324464/twist",
+                "lyl472324464/twist",
+                "lyl472324464/twist",
+                "lyl472324464/twist",
+                "lyl472324464/twist",
+                "lyl472324464/twist",
+                "lyl472324464/twist",
+                "lyl472324464/aloha_static_battery",
+                "lyl472324464/aloha_static_candy",
+                "lyl472324464/aloha_static_coffee",
+                "lyl472324464/aloha_static_coffee_new",
+                "lyl472324464/aloha_static_cups_open",
+                "lyl472324464/aloha_static_fork_pick_up",
+                "lyl472324464/aloha_static_pingpong_test",
+                "lyl472324464/aloha_static_pro_pencil",
+                "lyl472324464/aloha_static_screw_driver",
+                "lyl472324464/aloha_static_tape",
+                "lyl472324464/aloha_static_thread_velcro",
+                "lyl472324464/aloha_static_towel",
+                "lyl472324464/aloha_static_vinh_cup",
+                "lyl472324464/aloha_static_vinh_cup_left",
+                "lyl472324464/aloha_static_ziploc_slide",
+                "lyl472324464/hook_cable_8pin",
+                "lyl472324464/handover_clear_zip_bag_upright",
+                "lyl472324464/hook_cable_narrow_8pin",
+                "lyl472324464/handover_metallic_zip_bag_upright",
+                "lyl472324464/hook_rubber_shaft",
+                "lyl472324464/handover_towel",
+                "lyl472324464/hit_mark_with_hammer",
+                "lyl472324464/fold_big_towel",
+                "lyl472324464/fold_towel_assist",
+                "lyl472324464/fold_towel_in_random_places",
+                "lyl472324464/fold_green_towel",
+                "lyl472324464/fold_yellow_towel",
+                "lyl472324464/fold_light_blue_towel",
+                "lyl472324464/fold_bath_towel",
+                "lyl472324464/fold_orange_towel",
+                "lyl472324464/fit_small_gear_shaft",
+                "lyl472324464/fit_large_gear_shaft",
+                "lyl472324464/find_insert_small_gear_shaft",
+                "lyl472324464/find_insert_large_gear_shaft",        
+                "lyl472324464/find_hole_and_insert_into_gear",
+                "lyl472324464/close_toolbox",
+                "lyl472324464/close_cardboard_box",
+                "lyl472324464/brush_screws_into_dustpan_left_brush_human_hold",
+                "lyl472324464/brush_screws_into_dustpan_human_brush_left_hold",
+            ]
 
 datasets = [
-    "twist",
-    "aloha_static_battery",
-    "aloha_static_candy",
-    "aloha_static_coffee",
-    "aloha_static_coffee_new",
-    "aloha_static_cups_open",
-    "aloha_static_fork_pick_up",
-    "aloha_static_pingpong_test",
-    "aloha_static_screw_driver",
-    "aloha_static_tape",
-    "aloha_static_thread_velcro",
-    "aloha_static_towel",
-    "aloha_static_vinh_cup",
-    "aloha_static_vinh_cup_left",
-    "aloha_static_ziploc_slide",
+                "remove-label-20251014"
 ]
 
-for dataset_name in datasets:
-    repo_id = f"lyl472324464/{dataset_name}"
-
-    new_repo_id = f"lyl472324464/{dataset_name}_new"
-
-    print(f"Processing {dataset_name}...")   
-
-    # 1) Load from the Hub (cached locally)
-    dataset = LeRobotDataset(repo_id)
-
-    has_velocity = "observation.velocity" in dataset[0]
-    has_effort = "observation.effort" in dataset[0]
-
-    new_dataset = create_empty_dataset(new_repo_id, "aloha", "image", has_velocity=has_velocity, has_effort=has_effort)
-
-    # 2) Random access by index
-    last_eposide_index = 0
-    for i in range(len(dataset)):
-        data = dataset[i]
-        new_data = {
-            "observation.state": data["observation.state"],
-            "action": data["action"],
-            "task": data["task"],
-        }
-        if has_velocity:
-            new_data["observation.velocity"] = data["observation.velocity"]
-        if has_effort:
-            new_data["observation.effort"] = data["observation.effort"]
-        new_data["observation.images.cam_high"] = cv2.resize(cv2.cvtColor(np.transpose(np.array(data["observation.images.cam_high"]), (1, 2, 0)), cv2.COLOR_RGB2BGR), (640, 480))        
-        new_data["observation.images.cam_low"] = cv2.resize(cv2.cvtColor(np.transpose(np.array(data["observation.images.cam_low"]), (1, 2, 0)), cv2.COLOR_RGB2BGR), (640, 480))
-        new_data["observation.images.cam_left_wrist"] = cv2.resize(cv2.cvtColor(np.transpose(np.array(data["observation.images.cam_left_wrist"]), (1, 2, 0)), cv2.COLOR_RGB2BGR), (640, 480))
-        new_data["observation.images.cam_right_wrist"] = cv2.resize(cv2.cvtColor(np.transpose(np.array(data["observation.images.cam_right_wrist"]), (1, 2, 0)), cv2.COLOR_RGB2BGR), (640, 480))
-        if data["episode_index"] != last_eposide_index :
-            new_dataset.save_episode()
-            last_eposide_index = data["episode_index"]
-        if i == len(dataset) - 1:
-            new_dataset.add_frame(new_data)
-            new_dataset.save_episode()
-        else:
-            new_dataset.add_frame(new_data)
-    # new_dataset.push_to_hub()
-    # shutil.rmtree(new_repo_id)
-    # shutil.rmtree(repo_id)
-    # shutil.rmtree(f"~/.cache/huggingface/lerobot/{new_repo_id}")
-    shutil.rmtree(f"/home/eii/.cache/huggingface/lerobot/{repo_id}")
-    shutil.move(f"/home/eii/.cache/huggingface/lerobot/{new_repo_id}", f"/home/eii/.cache/huggingface/lerobot/{repo_id}")
-    shutil.rmtree(f"/home/eii/.cache/huggingface/datasets")
-    # shutil.rmtree(f"~/.cache/huggingface/lerobot/{new_repo_id}_new")
-    # shutil.rmtree(f"~/.cache/huggingface/lerobot/{repo_id}_new")
-    # shutil.rmtree(f"~/.cache/huggingface/lerobot/{new_repo_id}_new")
+for dataset in datasets:
+    success = False
+    while not success:
+        try:
+            print(f"Processing {dataset}...")
+            dataset = LeRobotDataset(f"lyl472324464/{dataset}")
+            dataset.push_to_hub()
+            success = True
+            # shutil.rmtree(f"/home/eii/.cache/huggingface/datasets/")
+            # shutil.rmtree(f"/home/eii/.cache/huggingface/lerobot/lyl472324464/{dataset}")           
+        except Exception as e:
+            print(f"Error: {e}")
+            time.sleep(10)
