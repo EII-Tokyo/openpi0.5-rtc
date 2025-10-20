@@ -33,7 +33,8 @@ RUN chmod +x xsarm_amd64_install.sh
 RUN export TZ='America/Los_Angeles' && ./xsarm_amd64_install.sh -d noetic -n
 
 COPY ./third_party/aloha /root/interbotix_ws/src/aloha
-RUN cd /root/interbotix_ws && source /opt/ros/noetic/setup.sh && source /root/interbotix_ws/devel/setup.sh && catkin_make
+RUN cd /root/interbotix_ws && source /opt/ros/noetic/setup.sh && source /root/interbotix_ws/devel/setup.sh && catkin_make && \
+    chmod -R 755 /root/interbotix_ws/devel/
 
 # Install python 3.10 because this ROS image comes with 3.8
 RUN mkdir /python && \
@@ -56,13 +57,18 @@ COPY ./examples/aloha_real/requirements.txt /tmp/requirements.txt
 COPY ./packages/openpi-client/pyproject.toml /tmp/openpi-client/pyproject.toml
 RUN uv pip sync --python 3.10 --system /tmp/requirements.txt /tmp/openpi-client/pyproject.toml
 
-ENV PYTHONPATH=/app:/app/src:/app/packages/openpi-client/src:/root/interbotix_ws/src/aloha/aloha_scripts:/root/interbotix_ws/src/aloha
+ENV PYTHONPATH=/app:/app/src:/app/packages/openpi-client/src:/root/interbotix_ws/src/aloha/aloha_scripts:/root/interbotix_ws/src/aloha:/root/interbotix_ws/devel/lib/python3/dist-packages
+
+# Create app directory
+RUN mkdir -p /app
 WORKDIR /app
 
 # Create an entrypoint script to run the setup commands, followed by the command passed in.
 RUN cat <<'EOF' > /usr/local/bin/entrypoint.sh
 #!/bin/bash
-source /opt/ros/noetic/setup.sh && source /root/interbotix_ws/devel/setup.sh && "$@"
+source /opt/ros/noetic/setup.sh
+source /root/interbotix_ws/devel/setup.sh
+exec "$@"
 EOF
 RUN chmod +x /usr/local/bin/entrypoint.sh
 

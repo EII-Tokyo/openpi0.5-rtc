@@ -16,9 +16,12 @@ services:
     tty: true
     network_mode: host
     privileged: true
-    user: "1000:1000"
     volumes:
-      - $PWD:/app
+      - $PWD/examples:/app/examples
+      - $PWD/src:/app/src
+      - $PWD/packages:/app/packages
+      - $PWD/scripts:/app/scripts
+      - $PWD/checkpoints:/app/checkpoints
       - ../../data:/data
 
   aloha_ros_nodes:
@@ -55,9 +58,16 @@ services:
     init: true
     tty: true
     network_mode: host
-    user: "1000:1000"
     volumes:
-      - $PWD:/app
+      - $PWD/examples:/app/examples
+      - $PWD/src:/app/src
+      - $PWD/packages:/app/packages
+      - $PWD/scripts:/app/scripts
+      - $PWD/pyproject.toml:/app/pyproject.toml
+      - $PWD/uv.lock:/app/uv.lock
+      - $PWD/LICENSE:/app/LICENSE
+      - $PWD/README.md:/app/README.md
+      - $PWD/checkpoints:/app/checkpoints
       - ${OPENPI_DATA_HOME:-~/.cache/openpi}:/openpi_assets
     environment:
       - SERVER_ARGS

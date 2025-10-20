@@ -18,11 +18,11 @@ RUN apt-get update && apt-get install -y git git-lfs linux-headers-generic build
 # Copy from the cache instead of linking since it's a mounted volume
 ENV UV_LINK_MODE=copy
 
-# Write the virtual environment outside of the project directory so it doesn't
-# leak out of the container when we mount the application code.
+# Use the host's virtual environment instead of creating a new one
+# The venv will be mounted from the host via docker-compose volumes
 ENV UV_PROJECT_ENVIRONMENT=/.venv
 
-# Install the project's dependencies using the lockfile and settings
+# Skip creating venv in Docker - it will be mounted from host
 RUN uv venv --python 3.11.9 $UV_PROJECT_ENVIRONMENT
 RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=uv.lock,target=uv.lock \

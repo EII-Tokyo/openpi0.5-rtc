@@ -5,7 +5,9 @@ Example usage: uv run examples/aloha_real/convert_aloha_data_to_lerobot.py --raw
 """
 
 import dataclasses
+import gc
 from pathlib import Path
+import psutil
 import shutil
 from typing import Literal
 
@@ -205,9 +207,11 @@ def populate_dataset(
     if episodes is None:
         episodes = range(len(hdf5_files))
 
+    process = psutil.Process()
+
     for ep_idx in tqdm.tqdm(episodes):
         ep_path = hdf5_files[ep_idx]
-
+        print("start processing path: ", ep_path)
         imgs_per_cam, state, action, velocity, effort = load_raw_episode_data(ep_path)
         num_frames = state.shape[0]
 
@@ -229,6 +233,15 @@ def populate_dataset(
             dataset.add_frame(frame)
 
         dataset.save_episode()
+        
+        # Explicitly delete large arrays and force garbage collection
+        del imgs_per_cam, state, action, velocity, effort
+        gc.collect()
+        
+        # Log memory usage after each episode
+        mem_info = process.memory_info()
+        mem_gb = mem_info.rss / (1024 ** 3)
+        print(f"Episode {ep_idx} done. Memory usage: {mem_gb:.2f} GB")
 
     return dataset
 
@@ -254,7 +267,9 @@ def port_aloha(
     #     download_raw(raw_dir, repo_id=raw_repo_id)
 
     hdf5_files = sorted(raw_dir.glob("episode_*.hdf5"))
-
+    # for hdf5_file in hdf5_files:
+    #     print(hdf5_file)
+    # exit()
     dataset = create_empty_dataset(
         repo_id,
         robot_type="mobile_aloha" if is_mobile else "aloha",

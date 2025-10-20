@@ -4,8 +4,9 @@ docker compose -f examples/aloha_real/compose-local.yml exec -it runtime /bin/ba
 python3 /app/examples/aloha_real/main.py
 docker compose -f examples/aloha_real/compose-local.yml exec -it openpi_server /bin/bash
 uv run scripts/serve_policy.py --env ALOHA --default_prompt='uncap the pen'
-uv run scripts/serve_policy.py --env ALOHA --default_prompt='twist off the bottle cap'
-Remove the label from the bottle.
+uv run scripts/serve_policy.py --env ALOHA --default_prompt='Twist off the bottle cap.'
+uv run scripts/serve_policy.py --env ALOHA --default_prompt='Remove the label from the bottle.'
+
 python3 scripts/robot_reset_controller.py 
 
 

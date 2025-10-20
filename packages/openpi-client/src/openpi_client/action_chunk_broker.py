@@ -98,7 +98,7 @@ class ActionChunkBroker(_base_policy.BasePolicy):
                 self._last_state = self._background_results["state"]
                 self._last_results = {"actions": self._background_results["actions"]}
                 self._cur_step -= self._s
-
+            # print(results)
             return results
         else:
             if self._last_results is None:
