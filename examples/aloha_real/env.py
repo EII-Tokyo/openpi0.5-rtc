@@ -55,3 +55,13 @@ class AlohaRealEnvironment(_environment.Environment):
     @override
     def apply_action(self, action: dict) -> None:
         self._ts = self._env.step(action["actions"])
+
+    @override
+    def stop(self) -> None:
+        """Stop the environment."""
+        self._ts = self._env.stop()
+
+    @override
+    def sleep_arms(self) -> None:
+        """Sleep the arms."""
+        self._ts = self._env.sleep_arms()

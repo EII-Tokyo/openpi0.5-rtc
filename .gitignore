@@ -1,3 +1,5 @@
+examples/aloha_real/voice_assistant/.env
+
 # Data directories.
 assets/
 checkpoints/

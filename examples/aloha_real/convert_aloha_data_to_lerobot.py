@@ -6,20 +6,24 @@ Example usage: uv run examples/aloha_real/convert_aloha_data_to_lerobot.py --raw
 
 import dataclasses
 import gc
+import sys
+import tracemalloc
 from pathlib import Path
 import psutil
 import shutil
 from typing import Literal
 
 import h5py
-from lerobot.common.datasets.lerobot_dataset import HF_LEROBOT_HOME as LEROBOT_HOME
-from lerobot.common.datasets.lerobot_dataset import LeRobotDataset
+from lerobot.datasets.lerobot_dataset import HF_LEROBOT_HOME as LEROBOT_HOME
+from lerobot.datasets.lerobot_dataset import LeRobotDataset
 # from lerobot.common.datasets.push_dataset_to_hub._download_raw import download_raw
 import numpy as np
+import cv2
 import torch
 import tqdm
 import tyro
-
+from PIL import Image
+import io
 
 @dataclasses.dataclass(frozen=True)
 class DatasetConfig:
@@ -31,6 +35,47 @@ class DatasetConfig:
 
 
 DEFAULT_DATASET_CONFIG = DatasetConfig()
+
+
+def get_size_mb(obj, name="object"):
+    """Get the size of an object in MB"""
+    try:
+        size_bytes = sys.getsizeof(obj)
+        if hasattr(obj, '__dict__'):
+            size_bytes += sum(sys.getsizeof(v) for v in obj.__dict__.values())
+        if hasattr(obj, '__iter__') and not isinstance(obj, (str, bytes, bytearray)):
+            try:
+                size_bytes += sum(sys.getsizeof(item) for item in obj)
+            except:
+                pass
+        return size_bytes / (1024 * 1024)  # Convert to MB
+    except:
+        return 0.0
+
+
+def analyze_memory_with_tracemalloc(stage_name=""):
+    """Use tracemalloc to analyze memory allocations"""
+    print(f"\n📊 Tracemalloc Analysis - {stage_name}")
+    
+    if not tracemalloc.is_tracing():
+        print("Tracemalloc not started")
+        return
+    
+    # Get current memory snapshot
+    snapshot = tracemalloc.take_snapshot()
+    top_stats = snapshot.statistics('lineno')
+    
+    print("Top 10 memory allocations:")
+    for index, stat in enumerate(top_stats[:10], 1):
+        size_mb = stat.size / (1024 * 1024)
+        print(f"{index:2d}. {stat.traceback.format()[-1]} - {size_mb:.2f} MB")
+    
+    # Get total traced memory
+    total_traced = sum(stat.size for stat in top_stats)
+    total_traced_mb = total_traced / (1024 * 1024)
+    print(f"Total traced memory: {total_traced_mb:.2f} MB")
+    
+    print("=" * 50)
 
 
 def create_empty_dataset(
@@ -143,59 +188,67 @@ def has_effort(hdf5_files: list[Path]) -> bool:
         return "/observations/effort" in ep
 
 
-def load_raw_images_per_camera(ep: h5py.File, cameras: list[str]) -> dict[str, np.ndarray]:
-    imgs_per_cam = {}
+def get_camera_image_at_frame(ep: h5py.File, camera: str, frame_idx: int) -> np.ndarray:
+    """Get a single image for a specific camera at a specific frame"""
     true_cameras = [
         "camera_high",
-        "camera_low",
+        "camera_low", 
         "camera_wrist_left",
         "camera_wrist_right",
     ]
-    for index, camera in enumerate(cameras):
-        uncompressed = ep[f"/observations/images/{true_cameras[index]}"].ndim == 4
+    
+    camera_mapping = {
+        "cam_high": "camera_high",
+        "cam_low": "camera_low",
+        "cam_left_wrist": "camera_wrist_left",
+        "cam_right_wrist": "camera_wrist_right",
+    }
+    
+    true_camera_name = camera_mapping[camera]
+    camera_path = f"/observations/images/{true_camera_name}"
+    
+    uncompressed = ep[camera_path].ndim == 4
+    
+    if uncompressed:
+        # Direct access to uncompressed image
+        return ep[camera_path][frame_idx]
+    else:
+        # Decode compressed image with memory management
+        
+        compressed_data = ep[camera_path][frame_idx]
+        
+        decoded_image = Image.open(io.BytesIO(compressed_data))
 
-        if uncompressed:
-            # load all images in RAM
-            imgs_array = ep[f"/observations/images/{true_cameras[index]}"][:]
-        else:
-            import cv2
+        decoded_image = np.array(decoded_image)
 
-            # load one compressed image after the other in RAM and uncompress
-            imgs_array = []
-            for data in ep[f"/observations/images/{true_cameras[index]}"]:
-                imgs_array.append(cv2.imdecode(data, 1))
-            imgs_array = np.array(imgs_array)
+        decoded_image = cv2.cvtColor(decoded_image, cv2.COLOR_RGB2BGR)
+        
+        # decoded_image = cv2.cvtColor(np.array(Image.open(io.BytesIO(compressed_data))), cv2.COLOR_RGB2BGR)
+        # cv2.imwrite("decoded_image.jpg", decoded_image)
+        # decoded_image = cv2.imdecode(compressed_data, 1)
 
-        imgs_per_cam[camera] = imgs_array
-    return imgs_per_cam
+        # del compressed_data, decoded_image
+        # gc.collect()
+        return decoded_image
 
 
 def load_raw_episode_data(
     ep_path: Path,
-) -> tuple[dict[str, np.ndarray], torch.Tensor, torch.Tensor, torch.Tensor | None, torch.Tensor | None]:
-    with h5py.File(ep_path, "r") as ep:
-        state = torch.from_numpy(np.concatenate([ep["/observations/qpos"][:, 7:], ep["/observations/qpos"][:, :7]], axis=1))
-        action = torch.from_numpy(np.concatenate([ep["/action"][:, 7:], ep["/action"][:, :7]], axis=1))
+) -> tuple[h5py.File, torch.Tensor, torch.Tensor, torch.Tensor | None, torch.Tensor | None]:
+    ep = h5py.File(ep_path, "r")
+    
+    state = torch.from_numpy(np.concatenate([ep["/observations/qpos"][:, 7:], ep["/observations/qpos"][:, :7]], axis=1))
+    action = torch.from_numpy(np.concatenate([ep["/action"][:, 7:], ep["/action"][:, :7]], axis=1))
 
-        velocity = None
-        if "/observations/qvel" in ep:
-            velocity = torch.from_numpy(np.concatenate([ep["/observations/qvel"][:, 7:], ep["/observations/qvel"][:, :7]], axis=1))
+    velocity = None
+    if "/observations/qvel" in ep:
+        velocity = torch.from_numpy(np.concatenate([ep["/observations/qvel"][:, 7:], ep["/observations/qvel"][:, :7]], axis=1))
 
-        effort = None
-        if "/observations/effort" in ep:
-            effort = torch.from_numpy(np.concatenate([ep["/observations/effort"][:, 7:], ep["/observations/effort"][:, :7]], axis=1))
+    effort = None
+    if "/observations/effort" in ep:
+        effort = torch.from_numpy(np.concatenate([ep["/observations/effort"][:, 7:], ep["/observations/effort"][:, :7]], axis=1))
 
-        imgs_per_cam = load_raw_images_per_camera(
-            ep,
-            [
-                "cam_high",
-                "cam_low",
-                "cam_left_wrist",
-                "cam_right_wrist",
-            ],
-        )
-
-    return imgs_per_cam, state, action, velocity, effort
+    return ep, state, action, velocity, effort
 
 
 def populate_dataset(
@@ -207,13 +260,22 @@ def populate_dataset(
     if episodes is None:
         episodes = range(len(hdf5_files))
 
+    # Start memory tracing
+    tracemalloc.start()
+    print("🔍 Started memory tracing with tracemalloc")
+    
     process = psutil.Process()
 
     for ep_idx in tqdm.tqdm(episodes):
         ep_path = hdf5_files[ep_idx]
         print("start processing path: ", ep_path)
-        imgs_per_cam, state, action, velocity, effort = load_raw_episode_data(ep_path)
+        
+        # Analyze memory before loading episode
+        analyze_memory_with_tracemalloc(f"Before Episode {ep_idx}")
+        
+        ep, state, action, velocity, effort = load_raw_episode_data(ep_path)
         num_frames = state.shape[0]
+        cameras = ["cam_high", "cam_low", "cam_left_wrist", "cam_right_wrist"]
 
         for i in range(num_frames):
             frame = {
@@ -222,8 +284,12 @@ def populate_dataset(
                 "task": task,
             }
 
-            for camera, img_array in imgs_per_cam.items():
-                frame[f"observation.images.{camera}"] = img_array[i]
+            # Load images one by one for this frame
+            for camera in cameras:
+                img = get_camera_image_at_frame(ep, camera, i)
+                frame[f"observation.images.{camera}"] = img
+                # Immediately delete the image to free memory
+                # del img
 
             if velocity is not None:
                 frame["observation.velocity"] = velocity[i]
@@ -231,12 +297,17 @@ def populate_dataset(
                 frame["observation.effort"] = effort[i]
 
             dataset.add_frame(frame)
+                
+            # Force garbage collection every 50 frames
+            if i % 50 == 0:
+                gc.collect()
 
         dataset.save_episode()
         
-        # Explicitly delete large arrays and force garbage collection
-        del imgs_per_cam, state, action, velocity, effort
-        gc.collect()
+        # break
+        
+        # Analyze memory after cleanup
+        analyze_memory_with_tracemalloc(f"After Cleanup Episode {ep_idx}")
         
         # Log memory usage after each episode
         mem_info = process.memory_info()
@@ -291,4 +362,10 @@ def port_aloha(
 
 
 if __name__ == "__main__":
-    tyro.cli(port_aloha)
+    # tyro.cli(port_aloha)
+    port_aloha(
+        raw_dir=Path(f"../aloha-2.0/aloha_data/aloha_stationary/6.medium_full/"),
+        repo_id=f"lyl472324464/remove-label-20251021",
+        task="Remove the label from the bottle with the knife in the right hand.",
+        push_to_hub=False,
+    )

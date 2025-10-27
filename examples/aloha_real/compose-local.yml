@@ -10,8 +10,8 @@ services:
     build:
       context: ../..
       dockerfile: examples/aloha_real/Dockerfile
-    command: /bin/bash
-    # command: python3 /app/examples/aloha_real/main.py
+    # command: /bin/bash
+    command: python3 /app/examples/aloha_real/main.py
     init: true 
     tty: true
     network_mode: host
@@ -51,8 +51,8 @@ services:
     build:
       context: ../..
       dockerfile: scripts/docker/serve_policy.Dockerfile
-    command: /bin/bash
-    # command: uv run scripts/serve_policy.py --env ALOHA --default_prompt='fold the towel'
+    # command: /bin/bash
+    command: uv run scripts/serve_policy.py --env ALOHA
     # command: uv run scripts/serve_policy.py --env ALOHA --default_prompt='open the tupperware and put the food on the plate'
     # command: uv run scripts/serve_policy.py --env ALOHA --default_prompt='uncap the pen'
     init: true
@@ -70,15 +70,70 @@ services:
       - $PWD/checkpoints:/app/checkpoints
       - ${OPENPI_DATA_HOME:-~/.cache/openpi}:/openpi_assets
     environment:
+      - GIT_LFS_SKIP_SMUDGE=1
+      - XLA_PYTHON_CLIENT_MEM_FRACTION=0.4
       - SERVER_ARGS
       - OPENPI_DATA_HOME=/openpi_assets
       - IS_DOCKER=true
 
     # Comment out this block if not running on a machine with GPUs.
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+
     deploy:
       resources:
         reservations:
           devices:
             - driver: nvidia
-              count: 1
+              count: all        # 或写具体数量，如 1 / 2
               capabilities: [gpu]
+
+  redis:
+    image: redis:7.4.2
+    restart: always
+    network_mode: "host"
+    healthcheck:
+      test:  ["CMD", "redis-cli" ,"ping"]
+      interval: 3s
+      timeout: 3s
+      retries: 5
+      start_period: 2s
+    ports:
+      - 6379:6379
+
+  voice_assistant:
+    image: lyl472324464/robot:voice_assistant
+    build:
+      context: ./voice_assistant
+      dockerfile: Dockerfile
+    restart: always
+    network_mode: "host"
+    privileged: true
+    volumes:
+      - ./voice_assistant:/app
+      - /dev:/dev
+      - /tmp:/tmp
+      - /dev/snd:/dev/snd
+      - /run/user/1000/pulse:/run/user/1000/pulse
+      - /etc/machine-id:/etc/machine-id:ro
+    env_file:
+      - ./voice_assistant/.env
+    environment:
+      - PULSE_RUNTIME_PATH=/run/user/1000/pulse
+      - PULSE_STATE_PATH=/run/user/1000/pulse
+      - DISPLAY=${DISPLAY}
+    depends_on:
+      - redis
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    command: /bin/bash -c "tail -f /dev/null"

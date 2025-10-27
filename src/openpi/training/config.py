@@ -804,6 +804,8 @@ _CONFIGS = [
         data=LeRobotAlohaDataConfig(
             # repo_id="physical-intelligence/aloha_pen_uncap_diverse",
             repo_ids=[
+                "lyl472324464/remove-label-20251021",
+                # "lyl472324464/remove-label-20251014",
                 "lyl472324464/twist",
                 # "lyl472324464/twist",
                 # "lyl472324464/twist",
@@ -819,13 +821,6 @@ _CONFIGS = [
                 # "lyl472324464/twist-20251014",
                 # "lyl472324464/twist-20251014",
                 # "lyl472324464/twist-20251014",
-                # "lyl472324464/remove-label-20251014",
-                # "lyl472324464/remove-label-20251014",
-                # "lyl472324464/remove-label-20251014",
-                # "lyl472324464/remove-label-20251014",
-                # "lyl472324464/remove-label-20251014",
-                # "lyl472324464/remove-label-20251014",
-                # "lyl472324464/remove-label-20251014",
                 # "lyl472324464/aloha_static_battery",
                 # "lyl472324464/aloha_static_candy",
                 # "lyl472324464/aloha_static_coffee",
@@ -873,7 +868,14 @@ _CONFIGS = [
                 "lyl472324464/insert_small_gear_shaft",
                 "lyl472324464/insert_random_shaft_random_small_gear",
                 "lyl472324464/insert_gear_onto_shaft_sliding",
-                "lyl472324464/insert_rod_board"
+                "lyl472324464/insert_rod_board",
+                "lyl472324464/insert_usb_cable_board",
+                "lyl472324464/insert_usb_pcbox",
+                "lyl472324464/insert_usb_cable_fixed_by_robot",
+                "lyl472324464/insert_usb_port_hub",
+                "lyl472324464/insert_usb_cable_fix_parts",
+                "lyl472324464/insert_washer_shaft_both_hands",
+                "lyl472324464/insert_usb_cable",
             ],
             assets=AssetsConfig(
                 assets_dir="gs://openpi-assets/checkpoints/pi05_base/assets",
