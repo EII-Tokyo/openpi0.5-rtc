@@ -19,14 +19,14 @@ import shutil
 
 import cv2
 import h5py
-from lerobot.common.datasets.lerobot_dataset import HF_LEROBOT_HOME
-from lerobot.common.datasets.lerobot_dataset import LeRobotDataset
+from lerobot.datasets.lerobot_dataset import HF_LEROBOT_HOME
+from lerobot.datasets.lerobot_dataset import LeRobotDataset
 import numpy as np
 from PIL import Image
 from tqdm import tqdm
 import tyro
 
-REPO_NAME = "your_hf_username/my_droid_dataset"  # Name of the output dataset, also used for the Hugging Face Hub
+REPO_NAME = "michios/droid_xxjd_4"  # Name of the output dataset, also used for the Hugging Face Hub
 
 
 def resize_image(image, size):
@@ -87,8 +87,22 @@ def main(data_dir: str, *, push_to_hub: bool = False):
 
     # Load language annotations
     # Note: we load the DROID language annotations for this example, but you can manually define them for your own data
-    with (data_dir / "aggregated-annotations-030724.json").open() as f:
-        language_annotations = json.load(f)
+    # Find annotations.json in the data directory (it could be in data_dir or in subdirectories like data_dir/success)
+    annotation_files = list(data_dir.glob("**/annotations.jsonl"))
+    if not annotation_files:
+        raise FileNotFoundError(f"Could not find annotations.jsonl in {data_dir}")
+
+    annotation_path = annotation_files[0]
+    language_annotations = {}
+    print(f"Loading annotations from: {annotation_path}")
+    with open(annotation_path, 'r') as f:
+        json_list = list(f)
+    
+    for json_str in json_list:
+        data = json.loads(json_str)
+        language_annotations[data['uuid']] = data['language_instruction1']
+
+    # print(language_annotations)
 
     # Loop over raw DROID fine-tuning datasets and write episodes to the LeRobot dataset
     # We assume the following directory structure:
@@ -108,14 +122,39 @@ def main(data_dir: str, *, push_to_hub: bool = False):
         recording_folderpath = episode_path.parent / "recordings" / "MP4"
         trajectory = load_trajectory(str(episode_path), recording_folderpath=str(recording_folderpath))
 
-        # To load the language instruction, we need to parse out the episode_id from the metadata file
-        # Again, you can modify this step for your own data, to load your own language instructions
-        metadata_filepath = next(iter(episode_path.parent.glob("metadata_*.json")))
-        episode_id = metadata_filepath.name.split(".")[0].split("_")[-1]
-        language_instruction = language_annotations.get(episode_id, {"language_instruction1": "Do something"})[
-            "language_instruction1"
-        ]
-        print(f"Converting episode with language instruction: {language_instruction}")
+        # To load the language instruction, we need to parse out the episode_id from the directory name
+        # Parse directory name to match annotation key format
+        # Directory format: Wed_Oct_22_14:41:44_2025
+        # Annotation key format: EII+4b1a56cc+2025-10-22-14h-41m-44s
+        episode_dir_name = episode_path.parent.name
+
+        # Try to find matching annotation by searching for the timestamp pattern in the annotation keys
+        # Extract timestamp from directory name (e.g., "14:41:44" from "Wed_Oct_22_14:41:44_2025")
+        parts = episode_dir_name.split("_")
+        if len(parts) >= 5:
+            time_part = parts[-2]  # e.g., "14:41:44"
+            year = parts[-1]  # e.g., "2025"
+
+            # Convert to annotation format timestamp: "14h-41m-44s"
+            annotation_time = time_part.replace(":", "h-", 1).replace(":", "m-", 1) + "s"
+
+            # Try to find matching annotation key
+            episode_id = None
+            for key in language_annotations.keys():
+                if annotation_time in key and year in key:
+                    episode_id = key
+                    break
+
+            if episode_id is None:
+                print(f"Warning: Could not find annotation for episode {episode_dir_name}, using default instruction")
+                language_instruction = "Do something"
+            else:
+                language_instruction = language_annotations[episode_id]
+        else:
+            print(f"Warning: Could not parse episode directory name {episode_dir_name}, using default instruction")
+            language_instruction = "Do something"
+
+        print(f"Converting episode {episode_dir_name} with language instruction: {language_instruction}")
 
         # Write to LeRobot dataset
         for step in trajectory:
