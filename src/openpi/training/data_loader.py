@@ -127,6 +127,102 @@ class FakeDataset(Dataset):
         return self._num_samples
 
 
+class SchemaRemappingLeRobotDataset:
+    """Wrapper around LeRobotDataset that remaps cadene DROID schema to michios schema.
+
+    This allows MultiLeRobotDataset to see a unified schema across all datasets.
+    """
+
+    # Schema mapping from cadene to michios format
+    CADENE_TO_MICHIOS_MAPPING = {
+        "action.joint_velocity": "actions",
+        "observation.images.exterior_1_left": "exterior_image_1_left",
+        "observation.images.exterior_2_left": "exterior_image_2_left",
+        "observation.images.wrist_left": "wrist_image_left",
+        "observation.state.joint_position": "joint_position",
+        "action.gripper_position": "gripper_position",
+        "language_instruction": "prompt",
+    }
+
+    def __init__(self, repo_id: str, **kwargs):
+        """Initialize the dataset with schema remapping.
+
+        Args:
+            repo_id: The HuggingFace repo ID
+            **kwargs: Additional arguments to pass to LeRobotDataset
+        """
+        self.repo_id = repo_id
+        self._is_cadene = "cadene" in repo_id.lower()
+
+        # If cadene, we need to remap delta_timestamps keys
+        if self._is_cadene and "delta_timestamps" in kwargs and kwargs["delta_timestamps"]:
+            # Reverse map the delta_timestamps keys from michios to cadene
+            original_delta_timestamps = kwargs["delta_timestamps"]
+            remapped_delta_timestamps = {}
+
+            reverse_mapping = {v: k for k, v in self.CADENE_TO_MICHIOS_MAPPING.items()}
+            for key, timestamps in original_delta_timestamps.items():
+                # Map michios key to cadene key
+                cadene_key = reverse_mapping.get(key, key)
+                remapped_delta_timestamps[cadene_key] = timestamps
+
+            kwargs["delta_timestamps"] = remapped_delta_timestamps
+
+        # Create the underlying dataset
+        self._dataset = lerobot_dataset.LeRobotDataset(repo_id, **kwargs)
+
+        # Remap features if cadene
+        if self._is_cadene:
+            self._features = {}
+            for cadene_key, michios_key in self.CADENE_TO_MICHIOS_MAPPING.items():
+                if cadene_key in self._dataset.features:
+                    self._features[michios_key] = self._dataset.features[cadene_key]
+            # Also include other common features
+            for key in ["episode_index", "frame_index", "index", "timestamp", "task_index", "task"]:
+                if key in self._dataset.features:
+                    self._features[key] = self._dataset.features[key]
+        else:
+            self._features = self._dataset.features
+
+    @property
+    def features(self):
+        return self._features
+
+    @property
+    def meta(self):
+        return self._dataset.meta
+
+    @property
+    def hf_dataset(self):
+        return self._dataset.hf_dataset
+
+    @property
+    def num_frames(self):
+        return self._dataset.num_frames
+
+    def __len__(self):
+        return len(self._dataset)
+
+    def __getitem__(self, index):
+        item = self._dataset[index]
+
+        if not self._is_cadene:
+            return item
+
+        # Remap cadene keys to michios keys
+        remapped_item = {}
+        for cadene_key, michios_key in self.CADENE_TO_MICHIOS_MAPPING.items():
+            if cadene_key in item:
+                remapped_item[michios_key] = item[cadene_key]
+
+        # Copy over other keys that don't need remapping
+        for key in ["episode_index", "frame_index", "index", "timestamp", "task_index", "task"]:
+            if key in item:
+                remapped_item[key] = item[key]
+
+        return remapped_item
+
+
 def create_torch_dataset(
     data_config: _config.DataConfig, action_horizon: int, model_config: _model.BaseModelConfig
 ) -> Dataset:
@@ -140,14 +236,56 @@ def create_torch_dataset(
     if repo_ids is not None:
         # Get FPS from first dataset (assume all datasets in multi-dataset have same FPS)
         first_dataset_meta = lerobot_dataset.LeRobotDatasetMetadata(repo_ids[0])
-        dataset = lerobot_dataset.MultiLeRobotDataset(
-            repo_ids,
-            # root="/home/ubuntu/aloha",
-            delta_timestamps={
-                key: [t / first_dataset_meta.fps for t in range(action_horizon)] for key in data_config.action_sequence_keys
-            },
-        )
-    if repo_id is not None:
+        delta_timestamps = {
+            key: [t / first_dataset_meta.fps for t in range(action_horizon)] for key in data_config.action_sequence_keys
+        }
+
+        # Create wrapped datasets that handle schema remapping
+        wrapped_datasets = [
+            SchemaRemappingLeRobotDataset(
+                repo_id,
+                delta_timestamps=delta_timestamps,
+            )
+            for repo_id in repo_ids
+        ]
+
+        # Create a custom MultiLeRobotDataset using our wrapped datasets
+        dataset = lerobot_dataset.MultiLeRobotDataset.__new__(lerobot_dataset.MultiLeRobotDataset)
+        dataset.repo_ids = repo_ids
+        dataset.root = lerobot_dataset.HF_LEROBOT_HOME
+        dataset.tolerances_s = dict.fromkeys(repo_ids, 0.0001)
+        dataset._datasets = wrapped_datasets
+        dataset.disabled_features = set()
+
+        # Find common features across wrapped datasets
+        intersection_features = set(wrapped_datasets[0].features)
+        for ds in wrapped_datasets:
+            intersection_features.intersection_update(ds.features)
+
+        if len(intersection_features) == 0:
+            raise RuntimeError(
+                "Multiple datasets were provided but they had no keys common to all of them. "
+                "The multi-dataset functionality currently only keeps common keys."
+            )
+
+        for repo_id, ds in zip(repo_ids, wrapped_datasets, strict=True):
+            extra_keys = set(ds.features).difference(intersection_features)
+            if extra_keys:
+                logging.warning(
+                    f"keys {extra_keys} of {repo_id} were disabled as they are not contained in all the "
+                    "other datasets."
+                )
+            dataset.disabled_features.update(extra_keys)
+
+        dataset.image_transforms = None
+        dataset.delta_timestamps = delta_timestamps
+        dataset.stats = lerobot_dataset.aggregate_stats([ds.meta.stats for ds in wrapped_datasets])
+
+        # Set up dataset indexing
+        dataset._len_by_dataset = [len(ds) for ds in wrapped_datasets]
+        dataset._cumulative_len = np.cumsum([0] + dataset._len_by_dataset)
+
+    elif repo_id is not None:
         dataset_meta = lerobot_dataset.LeRobotDatasetMetadata(repo_id)
         dataset = lerobot_dataset.LeRobotDataset(
             data_config.repo_id,

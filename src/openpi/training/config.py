@@ -987,7 +987,7 @@ _CONFIGS = [
                 "michios/droid_xxjd",
                 "michios/droid_xxjd_2",
                 "michios/droid_xxjd_3",
-                "michios/droid_xxjd_4",
+                "michios/droid_xxjd_4_2",
                 "cadene/droid_1.0.1_v30_compact_3",
             ],
             base_config=DataConfig(prompt_from_task=True),
@@ -999,7 +999,7 @@ _CONFIGS = [
         ),
         weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_droid/params"),
         num_train_steps=20_000,
-        batch_size=4,
+        batch_size=32,
     ),
     #
     # ALOHA Sim configs. This config is used to demonstrate how to train on a simple simulated environment.

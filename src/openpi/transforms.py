@@ -102,6 +102,37 @@ class RepackTransform(DataTransformFn):
 
 
 @dataclasses.dataclass(frozen=True)
+class NormalizeDroidSchemaTransform(DataTransformFn):
+    """Normalizes cadene DROID schema to match michios schema."""
+
+    def __call__(self, data: DataDict) -> DataDict:
+        # Check if this is cadene format (has "action.joint_velocity")
+        flat_data = flatten_dict(data)
+
+        if "action/joint_velocity" in flat_data:
+            # Cadene format - rename keys to match michios
+            mapping = {
+                "action/joint_velocity": "actions",
+                "observation/images/exterior_1_left": "exterior_image_1_left",
+                "observation/images/exterior_2_left": "exterior_image_2_left",
+                "observation/images/wrist_left": "wrist_image_left",
+                "observation/state/joint_position": "joint_position",
+                "action/gripper_position": "gripper_position",
+                "language_instruction": "prompt",
+            }
+
+            new_flat = {}
+            for key, value in flat_data.items():
+                new_key = mapping.get(key, key)
+                new_flat[new_key] = value
+
+            return unflatten_dict(new_flat)
+
+        # Already michios format or no conversion needed
+        return data
+
+
+@dataclasses.dataclass(frozen=True)
 class InjectDefaultPrompt(DataTransformFn):
     prompt: str | None
 
