@@ -1,5 +1,7 @@
 
 docker compose -f examples/aloha_real/compose-local.yml up
+docker compose -f examples/aloha_real/compose-local.yml exec -it voice_assistant /bin/bash
+cd /app & uv run voice_assistant.py
 docker compose -f examples/aloha_real/compose-local.yml exec -it runtime /bin/bash
 python3 /app/examples/aloha_real/main.py
 docker compose -f examples/aloha_real/compose-local.yml exec -it openpi_server /bin/bash

@@ -30,7 +30,7 @@ class Args:
     #     ])
     reset_position: List[List[float]] = dataclasses.field(default_factory=lambda: [
             [0.0, -0.96, 1.16, 0.0, -0.0, 0.0],
-            #[0.0, -0.96, 1.16, 0.0, -0.0, 0.0],
+            # [0.0, -0.96, 1.16, 0.0, -0.0, 0.0],
             [0.0, -0.96, 1.16, 1.57, -0.0, -1.57]         
         ])
 
