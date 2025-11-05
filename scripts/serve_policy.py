@@ -116,8 +116,8 @@ def main(args: Args) -> None:
     else:
         dummy_obs = _aloha_policy.make_aloha_example()
     dummy_prev_action = np.random.rand(15, 32)
-    # policy.infer(dummy_obs, dummy_prev_action, use_rtc=True)
-    policy.infer(dummy_obs, dummy_prev_action, use_rtc=False)
+    policy.infer(dummy_obs, dummy_prev_action, use_rtc=True)
+    # policy.infer(dummy_obs, dummy_prev_action, use_rtc=False)
     # Record the policy's behavior.
     if args.record:
         policy = _policy.PolicyRecorder(policy, "policy_records")
