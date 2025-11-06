@@ -161,11 +161,30 @@ class SchemaRemappingLeRobotDataset:
             remapped_delta_timestamps = {}
 
             reverse_mapping = {v: k for k, v in self.CADENE_TO_MICHIOS_MAPPING.items()}
+
+            # Group image keys together to ensure they use the same timestamps
+            image_timestamps = None
+            image_keys_cadene = []
+
             for key, timestamps in original_delta_timestamps.items():
                 # Map michios key to cadene key
                 cadene_key = reverse_mapping.get(key, key)
-                remapped_delta_timestamps[cadene_key] = timestamps
 
+                # Check if this is an image key
+                is_image_key = any(img_key in cadene_key for img_key in ["exterior_1_left", "exterior_2_left", "wrist_left"])
+
+                if is_image_key:
+                    # Store image timestamps (should be the same for all cameras)
+                    if image_timestamps is None:
+                        image_timestamps = timestamps
+                    elif image_timestamps != timestamps:
+                        logging.warning(f"Different timestamps for image keys! {key}: {timestamps} vs {image_timestamps}")
+                    image_keys_cadene.append(cadene_key)
+                    remapped_delta_timestamps[cadene_key] = image_timestamps
+                else:
+                    remapped_delta_timestamps[cadene_key] = timestamps
+
+            logging.info(f"Remapped {len(image_keys_cadene)} cadene image keys to use synchronized timestamps")
             kwargs["delta_timestamps"] = remapped_delta_timestamps
 
         # Create the underlying dataset
@@ -236,9 +255,60 @@ def create_torch_dataset(
     if repo_ids is not None:
         # Get FPS from first dataset (assume all datasets in multi-dataset have same FPS)
         first_dataset_meta = lerobot_dataset.LeRobotDatasetMetadata(repo_ids[0])
+
+        # Create delta_timestamps for actions
         delta_timestamps = {
-            key: [t / first_dataset_meta.fps for t in range(action_horizon)] for key in data_config.action_sequence_keys
+            key: [t / first_dataset_meta.fps for t in range(action_horizon)]
+            for key in data_config.action_sequence_keys
         }
+
+        # IMPORTANT: Also add delta_timestamps for images (all at [0.0] for current frame)
+        # This ensures all cameras are fetched from the same frame
+        # We need to check which keys actually exist in each dataset to avoid KeyError
+        common_image_keys = set()
+        common_state_keys = set()
+
+        for repo_id in repo_ids:
+            meta = lerobot_dataset.LeRobotDatasetMetadata(repo_id)
+            features = meta.features
+
+            # Find image keys in this dataset
+            for key in features.keys():
+                if 'image' in key.lower():
+                    # Normalize the key to michios format if it's cadene
+                    if "cadene" in repo_id.lower():
+                        # Map cadene key to michios key
+                        for cadene_key, michios_key in SchemaRemappingLeRobotDataset.CADENE_TO_MICHIOS_MAPPING.items():
+                            if cadene_key == key:
+                                common_image_keys.add(michios_key)
+                                break
+                    else:
+                        # Already michios format
+                        common_image_keys.add(key)
+
+            # Find state keys in this dataset
+            for key in features.keys():
+                if any(state_word in key.lower() for state_word in ['joint_position', 'gripper_position', 'state']):
+                    # Normalize the key to michios format if it's cadene
+                    if "cadene" in repo_id.lower():
+                        for cadene_key, michios_key in SchemaRemappingLeRobotDataset.CADENE_TO_MICHIOS_MAPPING.items():
+                            if cadene_key == key:
+                                common_state_keys.add(michios_key)
+                                break
+                    else:
+                        common_state_keys.add(key)
+
+        # Add delta_timestamps for all found image and state keys
+        for img_key in common_image_keys:
+            if img_key not in delta_timestamps:
+                delta_timestamps[img_key] = [0.0]  # Current frame only
+
+        for state_key in common_state_keys:
+            if state_key not in delta_timestamps:
+                delta_timestamps[state_key] = [0.0]  # Current state only
+
+        logging.info(f"Added delta_timestamps for image keys: {common_image_keys}")
+        logging.info(f"Added delta_timestamps for state keys: {common_state_keys}")
 
         # Create wrapped datasets that handle schema remapping
         wrapped_datasets = [
