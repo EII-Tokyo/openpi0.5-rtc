@@ -998,12 +998,6 @@ _CONFIGS = [
                 "michios/droid_xxjd_4_2",
                 "cadene/droid_1.0.1_v30_compact_3",
             ],
-            lr_schedule=_optimizer.CosineDecaySchedule(
-                    warmup_steps=5_000,
-                    peak_lr=5e-5,
-                    decay_steps=95_000,     # 100k - 5k warmup
-                    decay_lr=5e-5,
-                ),
             base_config=DataConfig(prompt_from_task=True),
             assets=AssetsConfig(
                 # Important: reuse the original DROID norm stats during fine-tuning!
@@ -1011,6 +1005,12 @@ _CONFIGS = [
                 asset_id="droid",
             ),
         ),
+        lr_schedule=_optimizer.CosineDecaySchedule(
+                warmup_steps=5_000,
+                peak_lr=5e-5,
+                decay_steps=95_000,     # 100k - 5k warmup
+                decay_lr=5e-5,
+            ),
         weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_droid/params"),
         num_train_steps=100_000,
         batch_size=128,
