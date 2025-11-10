@@ -14,8 +14,8 @@ import shutil
 from typing import Literal
 
 import h5py
-from lerobot.datasets.lerobot_dataset import HF_LEROBOT_HOME as LEROBOT_HOME
-from lerobot.datasets.lerobot_dataset import LeRobotDataset
+from lerobot.common.datasets.lerobot_dataset import HF_LEROBOT_HOME as LEROBOT_HOME
+from lerobot.common.datasets.lerobot_dataset import LeRobotDataset
 # from lerobot.common.datasets.push_dataset_to_hub._download_raw import download_raw
 import numpy as np
 import cv2
@@ -337,7 +337,7 @@ def port_aloha(
     #         raise ValueError("raw_repo_id must be provided if raw_dir does not exist")
     #     download_raw(raw_dir, repo_id=raw_repo_id)
 
-    hdf5_files = sorted(raw_dir.glob("episode_*.hdf5"))
+    hdf5_files = sorted(raw_dir.glob("*.hdf5"))
     # for hdf5_file in hdf5_files:
     #     print(hdf5_file)
     # exit()
@@ -362,10 +362,10 @@ def port_aloha(
 
 
 if __name__ == "__main__":
-    # tyro.cli(port_aloha)
-    port_aloha(
-        raw_dir=Path(f"../aloha-2.0/aloha_data/aloha_stationary/6.medium_full/"),
-        repo_id=f"lyl472324464/remove-label-20251021",
-        task="Remove the label from the bottle with the knife in the right hand.",
-        push_to_hub=False,
-    )
+    tyro.cli(port_aloha)
+    # port_aloha(
+    #     raw_dir=Path(f"../aloha-2.0/aloha_data/aloha_stationary/6.medium_full/"),
+    #     repo_id=f"lyl472324464/remove-label-20251021",
+    #     task="Remove the label from the bottle with the knife in the right hand.",
+    #     push_to_hub=False,
+    # )

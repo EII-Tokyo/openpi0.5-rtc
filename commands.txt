@@ -1,7 +1,11 @@
 
 docker compose -f examples/aloha_real/compose-local.yml up
 docker compose -f examples/aloha_real/compose-local.yml exec -it voice_assistant /bin/bash
-cd /app & uv run voice_assistant.py
+cd /app 
+uv run voice_assistant.py
+
+
+
 docker compose -f examples/aloha_real/compose-local.yml exec -it runtime /bin/bash
 python3 /app/examples/aloha_real/main.py
 docker compose -f examples/aloha_real/compose-local.yml exec -it openpi_server /bin/bash
@@ -10,6 +14,16 @@ uv run scripts/serve_policy.py --env ALOHA --default_prompt='Twist off the bottl
 uv run scripts/serve_policy.py --env ALOHA --default_prompt='Remove the label from the bottle.'
 
 python3 scripts/robot_reset_controller.py 
+
+
+
+Follower 夹爪位置：
+打开位置：0.0579 m
+关闭位置：0.0440 m
+有效范围：0.0440 ~ 0.0579 m
+Leader 夹爪位置：
+打开位置：0.0323 m
+关闭位置：0.0185 m
 
 
 15,000 steps:

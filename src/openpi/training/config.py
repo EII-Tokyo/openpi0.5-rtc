@@ -797,8 +797,8 @@ _CONFIGS = [
         lr_schedule=_optimizer.CosineDecaySchedule(
             warmup_steps=10_000,
             peak_lr=2.5e-5,
-            decay_steps=1_000_000,
-            decay_lr=2.5e-5,
+            decay_steps=40_000,
+            decay_lr=2.5e-6,
         ),
         log_interval=10,
         data=LeRobotAlohaDataConfig(
@@ -901,6 +901,7 @@ _CONFIGS = [
             ),
         ),
         weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_base/params"),
+        save_interval=1000,
         num_train_steps=40_000,
         batch_size=64,
     ),
