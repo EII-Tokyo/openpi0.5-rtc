@@ -14,6 +14,7 @@ import json
 import time
 import threading
 import queue
+import uuid
 import redis
 import openai
 import pyaudio
@@ -33,7 +34,16 @@ class VoiceAssistant:
         self.redis_host = os.getenv('REDIS_HOST', REDIS_HOST)
         self.redis_port = int(os.getenv('REDIS_PORT', REDIS_PORT))
         self.redis_db = int(os.getenv('REDIS_DB', REDIS_DB))
-        
+
+        # Redis pub/sub channels - match buildup_demo.py configuration
+        self.instruction_channel = os.getenv('INSTRUCTION_CHANNEL', 'robot_instructions')
+        self.status_channel = os.getenv('STATUS_CHANNEL', 'robot_status')
+
+        # Status monitoring
+        self.enable_status_monitoring = os.getenv('ENABLE_STATUS_MONITORING', 'false').lower() == 'true'
+        self.status_thread = None
+        self.status_running = False
+
         # 初始化组件
         self.setup_audio()
         self.setup_vad()
@@ -45,38 +55,24 @@ class VoiceAssistant:
         # 音频队列
         self.audio_queue = queue.Queue()
         self.is_recording = False
+
+        # ChatGPT提示词模板 - 用于翻译任何语言到英文
+        # Load the prompt template from file
+        template_path = os.path.join(os.path.dirname(__file__), 'system_prompt_template.txt')
+        with open(template_path, 'r', encoding='utf-8') as f:
+            self.chatgpt_prompt_template = f.read()
         
-        # 任务映射
-        self.task_mapping = {
-            "1": "Remove the label from the bottle with the knife in the right hand.",
-            "2": "Twist off the bottle cap.", 
-            "3": "Stop",
-            "4": "Return to sleep position"
-        }
-        
-        # ChatGPT提示词模板
-        self.chatgpt_prompt_template = """The user is now using voice control to operate the Franka robot. This robot supports the following tasks: {task_list}. Determine which operation the user wants to perform and return the corresponding number. The detected language is: {detected_language}. Generate a response statement in the appropriate language.
+        # Start status monitoring if enabled
+        if self.enable_status_monitoring:
+            self.start_status_monitoring()
 
-User's speech: {user_text}
-Detected language: {detected_language}
-
-Please reply in JSON format only:
-{{
-    "task_number": "X",
-    "response_statement": "Z"
-}}
-
-Where:
-- X is one of the task numbers: {task_numbers}
-- Z is a response statement generated in the detected language ({detected_language})
-
-Important: Return ONLY the JSON object, no additional text or explanation."""
-        
         print("语音助手初始化完成！")
-        print("支持的任务：")
-        for key, task in self.task_mapping.items():
-            print(f"  {key}: {task}")
-        print("等待语音输入...")
+        print(f"Redis连接: {self.redis_host}:{self.redis_port}")
+        print(f"发送指令到频道: {self.instruction_channel}")
+        print(f"监听状态频道: {self.status_channel}")
+        if self.enable_status_monitoring:
+            print("状态监控: 已启用")
+        print("\n等待语音输入...")
 
     def setup_audio(self):
         """设置音频设备"""
@@ -158,20 +154,38 @@ Important: Return ONLY the JSON object, no additional text or explanation."""
     def setup_tts(self):
         """设置TTS"""
         pygame.mixer.init()
-        
+
         # 初始化Coqui TTS
         print("正在加载Coqui TTS模型...")
-        
+
         # 强制检查CUDA
         if not torch.cuda.is_available():
             raise RuntimeError("CUDA不可用！此系统必须使用CUDA。")
-        
+
         print(f"TTS使用CUDA设备: {torch.cuda.get_device_name(0)}")
-        
+
+        # 修复 PyTorch 2.6+ 的 TTS 加载问题 - 猴子补丁 load_fsspec 函数
+        try:
+            import TTS.utils.io as tts_io
+            original_load_fsspec = tts_io.load_fsspec
+
+            def patched_load_fsspec(path, map_location=None, cache=True, **kwargs):
+                """Patched version that disables weights_only for TTS model loading"""
+                # Remove weights_only from kwargs if present
+                kwargs.pop('weights_only', None)
+                # Force weights_only=False for TTS models (they are from a trusted source)
+                kwargs['weights_only'] = False
+                return original_load_fsspec(path, map_location, cache, **kwargs)
+
+            tts_io.load_fsspec = patched_load_fsspec
+            print("已应用TTS加载补丁以兼容PyTorch 2.6+")
+        except Exception as e:
+            print(f"Warning: Could not patch TTS loading: {e}")
+
         # 使用多语言TTS模型
         self.tts = TTS(model_name="tts_models/multilingual/multi-dataset/xtts_v2", progress_bar=False).to("cuda")
         print("Coqui TTS多语言模型加载完成")
-        
+
         print("TTS初始化完成")
 
     def detect_voice_activity(self, audio_data):
@@ -250,38 +264,26 @@ Important: Return ONLY the JSON object, no additional text or explanation."""
         return text, detected_language
 
     def get_chatgpt_response(self, user_text, detected_language):
-        """获取ChatGPT响应"""
+        """获取ChatGPT翻译响应"""
         try:
-            # 动态生成任务列表
-            task_list = []
-            task_numbers = []
-            for key, task in self.task_mapping.items():
-                task_list.append(f"{key}) {task}")
-                task_numbers.append(key)
-            
-            task_list_str = ", ".join(task_list)
-            task_numbers_str = ", ".join(task_numbers)
-            
             # 使用初始化中定义的提示词模板
             prompt = self.chatgpt_prompt_template.format(
-                task_list=task_list_str,
-                task_numbers=task_numbers_str,
                 user_text=user_text,
                 detected_language=detected_language
             )
 
             response = self.openai_client.chat.completions.create(
-                model="gpt-4o",
+                model="gpt-4.1-mini",
                 messages=[
-                    {"role": "system", "content": "You are an intelligent assistant helping users control the Franka robot. Always respond with valid JSON only."},
+                    {"role": "system", "content": "You are a translation assistant for a robot control system. Always respond with valid JSON only."},
                     {"role": "user", "content": prompt}
                 ],
                 max_completion_tokens=200,
             )
-            
+
             response_text = response.choices[0].message.content.strip()
             print(f"ChatGPT响应: {response_text}")
-            
+
             # 清理响应文本，移除markdown代码块标记
             if response_text.startswith("```json"):
                 response_text = response_text[7:]  # 移除 ```json
@@ -290,36 +292,44 @@ Important: Return ONLY the JSON object, no additional text or explanation."""
             if response_text.endswith("```"):
                 response_text = response_text[:-3]   # 移除结尾的 ```
             response_text = response_text.strip()
-            
+
             # 解析JSON响应
             try:
                 response_json = json.loads(response_text)
-                task_num = response_json.get("task_number")
+                english_instruction = response_json.get("english_instruction")
                 reply_text = response_json.get("response_statement", "")
-                
-                return task_num, reply_text
+
+                return english_instruction, reply_text
             except json.JSONDecodeError as e:
                 print(f"JSON解析失败: {e}")
                 print(f"清理后的响应: {response_text}")
-                # 如果JSON解析失败，尝试从响应中提取信息
                 return None, None
-            
+
         except Exception as e:
             print(f"ChatGPT请求失败: {e}")
             return None, None
 
-    def send_to_redis(self, task_num):
-        """发送任务到Redis使用pub/sub模式"""
-        task_name = self.task_mapping.get(task_num, "未知任务")
-        message = {
-            "task": task_num,
-            "task_name": task_name,
-            "timestamp": time.time()
-        }
-        
+    def send_to_redis(self, english_instruction):
+        """发送指令到Redis使用pub/sub模式
+
+        发送英文指令到机器人控制系统
+        """
+        # Check if it's a stop command
+        if "stop" in english_instruction.lower():
+            message = {"command": "stop"}
+            print(f"发送停止命令: {english_instruction}")
+        else:
+            # Send as instruction
+            task_id = f"task_{uuid.uuid4().hex[:8]}"
+            message = {
+                "instruction": english_instruction,
+                "task_id": task_id,
+            }
+            print(f"发送任务指令 {task_id}: {english_instruction}")
+
         # 使用pub/sub模式发布消息
-        self.redis_client.publish("droid_voice_commands", json.dumps(message))
-        print(f"任务已通过Redis pub/sub发送: {task_name}")
+        self.redis_client.publish(self.instruction_channel, json.dumps(message))
+        print(f"消息已发送到频道: {self.instruction_channel}")
 
     def text_to_speech(self, text, detected_language=None):
         """文字转语音"""
@@ -355,11 +365,11 @@ Important: Return ONLY the JSON object, no additional text or explanation."""
         self.is_recording = True
         audio_data = self.record_audio()
         self.is_recording = False
-        
+
         if len(audio_data) == 0:
             print("没有检测到语音")
             return
-        
+
         # 语音转文字
         text, detected_language = self.speech_to_text(audio_data)
         if text is None:
@@ -370,33 +380,20 @@ Important: Return ONLY the JSON object, no additional text or explanation."""
             print("没有检测到语音")
             self.text_to_speech("申し訳ございませんが、よく聞き取れませんでした。もう一度お話しください。", "ja")
             return
-        
-        # ChatGPT处理
-        task_num, reply_text = self.get_chatgpt_response(text, detected_language)
-        
+
+        # ChatGPT翻译成英文
+        english_instruction, reply_text = self.get_chatgpt_response(text, detected_language)
+
         # 打印检测到的语言
         print(f"检测到的语言: {detected_language}")
-        
-        # 发送任务到Redis
-        if task_num:
-            self.send_to_redis(task_num)
+        print(f"英文指令: {english_instruction}")
+
+        # 发送英文指令到Redis
+        if english_instruction:
+            self.send_to_redis(english_instruction)
             self.text_to_speech(reply_text, detected_language)
         else:
             self.text_to_speech("申し訳ございませんが、お話の内容を理解できませんでした。もう一度お話しください。", "ja")
-
-    def process_numeric_command(self, numeric_input):
-        """处理数字输入指令"""
-        # 检查输入是否为有效的任务编号
-        if numeric_input in self.task_mapping:
-            task_name = self.task_mapping[numeric_input]
-            print(f"执行数字指令: {numeric_input} - {task_name}")
-            
-            # 发送任务到Redis
-            self.send_to_redis(numeric_input)
-            
-        else:
-            print(f"无效的任务编号: {numeric_input}")
-            print("有效的任务编号: 1, 2, 3, 4")
 
     def run(self):
         """主运行循环"""
@@ -404,28 +401,91 @@ Important: Return ONLY the JSON object, no additional text or explanation."""
             while True:
                 print("\n控制方式:")
                 print("  - 按Enter键开始语音识别")
-                print("  - 输入数字1-4直接执行任务")
                 print("  - 输入'quit'退出")
                 print("等待输入...")
-                
+
                 user_input = input().strip()
-                
+
                 if user_input.lower() == 'quit':
                     break
                 elif user_input == '':
                     self.process_voice_command()
-                elif user_input.isdigit():
-                    self.process_numeric_command(user_input)
                 else:
-                    print("无效输入，请按Enter进行语音识别，或输入1-4的数字")
-                    
+                    print("无效输入，请按Enter进行语音识别")
+
         except KeyboardInterrupt:
             print("\n程序被用户中断")
         finally:
             self.cleanup()
 
+    def start_status_monitoring(self):
+        """启动状态监控线程"""
+        if self.status_running:
+            return
+
+        self.status_running = True
+        self.status_thread = threading.Thread(target=self._status_listener, daemon=True)
+        self.status_thread.start()
+        print("状态监控线程已启动")
+
+    def stop_status_monitoring(self):
+        """停止状态监控线程"""
+        self.status_running = False
+        if self.status_thread and self.status_thread.is_alive():
+            self.status_thread.join(timeout=2.0)
+        print("状态监控线程已停止")
+
+    def _status_listener(self):
+        """监听机器人状态更新"""
+        # Create a separate Redis connection for the pubsub
+        pubsub_client = redis.Redis(
+            host=self.redis_host,
+            port=self.redis_port,
+            db=self.redis_db,
+            decode_responses=True
+        )
+        pubsub = pubsub_client.pubsub()
+        pubsub.subscribe(self.status_channel)
+
+        print(f"开始监听状态频道: {self.status_channel}")
+
+        try:
+            while self.status_running:
+                message = pubsub.get_message(timeout=1.0)
+                if message and message['type'] == 'message':
+                    try:
+                        data = json.loads(message['data'])
+                        task_id = data.get('task_id', 'unknown')
+                        status = data.get('status', 'unknown')
+
+                        # Format status message for display
+                        status_msg = f"[状态更新] 任务 {task_id}: {status}"
+
+                        if 'instruction' in data:
+                            status_msg += f" - {data['instruction']}"
+                        if 'progress' in data:
+                            progress = data['progress']
+                            status_msg += f" ({progress['current_step']}/{progress['max_steps']})"
+                        if 'error' in data:
+                            status_msg += f" - 错误: {data['error']}"
+
+                        print(f"\n{status_msg}")
+
+                    except json.JSONDecodeError as e:
+                        print(f"状态消息JSON解析失败: {e}")
+        except Exception as e:
+            print(f"状态监听线程异常: {e}")
+        finally:
+            pubsub.close()
+            pubsub_client.close()
+            print("状态监听线程结束")
+
     def cleanup(self):
         """清理资源"""
+        # Stop status monitoring
+        if self.enable_status_monitoring:
+            self.stop_status_monitoring()
+
         if hasattr(self, 'stream'):
             self.stream.stop_stream()
             self.stream.close()

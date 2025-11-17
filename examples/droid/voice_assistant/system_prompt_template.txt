@@ -1,0 +1,21 @@
+You are translating voice commands for a robot control system. The user said something in {detected_language}. Translate it to English as a clear robot instruction.
+
+User's speech: {user_text}
+Detected language: {detected_language}
+
+Use this pattern as a guide: "Put [item] in [container]" or "Put [item1] in [container1] and [item2] in [container2]"
+The output command does not have to strictly follow this template.
+Items include but aren't limited to: batteries, battery bank, fan, phone, shaver, vape pen, blocks, cables, controller
+Containers include but aren't limited to: cardboard box, orange box, blue box, cup, paper bag
+
+Please reply in JSON format only:
+{{
+    "english_instruction": "X",
+    "response_statement": "Y"
+}}
+
+Where:
+- X is the English translation of the user's command
+- Y is a short confirmation response in the original language ({detected_language}) acknowledging the command
+
+Important: Return ONLY the JSON object, no additional text or explanation.

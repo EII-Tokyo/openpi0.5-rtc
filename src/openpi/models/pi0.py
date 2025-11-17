@@ -211,13 +211,7 @@ class Pi0(_model.BaseModel):
         )
         v_t = self.action_out_proj(suffix_out[:, -self.action_horizon :])
 
-        joint_weights = jnp.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.5])  # more weight on gripper joint
-        # Apply weights before computing mean
-        squared_errors = jnp.square(v_t - u_t)  # shape: [..., action_horizon, action_dim]
-        weighted_errors = squared_errors * joint_weights[None, None, :]  # broadcast weights
-        return jnp.mean(weighted_errors, axis=-1)  # average over action_dim
-
-        # return jnp.mean(jnp.square(v_t - u_t), axis=-1)
+        return jnp.mean(jnp.square(v_t - u_t), axis=-1)
 
     @override
     def sample_actions(
@@ -291,7 +285,7 @@ class Pi0(_model.BaseModel):
         observation: _model.Observation,
         *,
         num_steps: int | at.Int[at.Array, ""] = 10,       
-        s: int = 8,
+        s: int = 9,
         d: int = 6,
         beta: float = 8.0,
     ) -> _model.Actions:
