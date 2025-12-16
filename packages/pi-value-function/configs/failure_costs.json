@@ -1,0 +1,242 @@
+[
+  {
+    "prompt": "pick up the cup",
+    "average_time": 45.0,
+    "c_fail": 90.0
+  },
+  {
+    "prompt": "Do anything you like that takes multiple steps to complete.",
+    "average_time": 0,
+    "c_fail": 679
+  },
+  {
+    "prompt": "Put the batteries in the cardboard box",
+    "average_time": 0,
+    "c_fail": 554
+  },
+  {
+    "prompt": "Put the batteries in the cardboard box and the blocks in the cup",
+    "average_time": 0,
+    "c_fail": 919
+  },
+  {
+    "prompt": "Put the batteries in the cardboard box.",
+    "average_time": 0,
+    "c_fail": 771
+  },
+  {
+    "prompt": "Put the battery bank in the orange box",
+    "average_time": 0,
+    "c_fail": 510
+  },
+  {
+    "prompt": "Put the battery bank in the orange box and the battery in the blue box",
+    "average_time": 0,
+    "c_fail": 538
+  },
+  {
+    "prompt": "Put the battery bank in the orange box and the fan in the blue box",
+    "average_time": 0,
+    "c_fail": 232
+  },
+  {
+    "prompt": "Put the battery bank in the orange box and the phone in the blue box",
+    "average_time": 0,
+    "c_fail": 323
+  },
+  {
+    "prompt": "Put the battery bank in the orange box and the shaver in the blue box",
+    "average_time": 0,
+    "c_fail": 182
+  },
+  {
+    "prompt": "Put the battery in the cardboard box",
+    "average_time": 0,
+    "c_fail": 240
+  },
+  {
+    "prompt": "Put the battery in the orange box and the battery bank in the blue box",
+    "average_time": 0,
+    "c_fail": 216
+  },
+  {
+    "prompt": "Put the battery in the orange box and the fan in the blue box",
+    "average_time": 0,
+    "c_fail": 314
+  },
+  {
+    "prompt": "Put the battery in the orange box and the phone in the blue box",
+    "average_time": 0,
+    "c_fail": 603
+  },
+  {
+    "prompt": "Put the battery in the orange box and the shaver in the blue box",
+    "average_time": 0,
+    "c_fail": 937
+  },
+  {
+    "prompt": "Put the battery in the orange box and the vape pen in the blue box",
+    "average_time": 0,
+    "c_fail": 199
+  },
+  {
+    "prompt": "Put the black fan in the cardboard box",
+    "average_time": 0,
+    "c_fail": 348
+  },
+  {
+    "prompt": "Put the blocks in the cup",
+    "average_time": 0,
+    "c_fail": 627
+  },
+  {
+    "prompt": "Put the cables in the cardboard box and the batteries in the paper bag",
+    "average_time": 0,
+    "c_fail": 997
+  },
+  {
+    "prompt": "Put the fan in the cardboard box",
+    "average_time": 0,
+    "c_fail": 146
+  },
+  {
+    "prompt": "Put the fan in the orange box and the battery bank in the blue box",
+    "average_time": 0,
+    "c_fail": 432
+  },
+  {
+    "prompt": "Put the fan in the orange box and the battery in the blue box",
+    "average_time": 0,
+    "c_fail": 912
+  },
+  {
+    "prompt": "Put the fan in the orange box and the phone in the blue box",
+    "average_time": 0,
+    "c_fail": 695
+  },
+  {
+    "prompt": "Put the fan in the orange box and the shaver in the blue box",
+    "average_time": 0,
+    "c_fail": 312
+  },
+  {
+    "prompt": "Put the fan in the orange box and the vape pen in the blue box",
+    "average_time": 0,
+    "c_fail": 161
+  },
+  {
+    "prompt": "Put the fan, the controller, and the battery in the cardboard box",
+    "average_time": 0,
+    "c_fail": 774
+  },
+  {
+    "prompt": "Put the fans in the cardboard box",
+    "average_time": 0,
+    "c_fail": 952
+  },
+  {
+    "prompt": "Put the fans in the orange box and the batteries in the blue box",
+    "average_time": 0,
+    "c_fail": 140
+  },
+  {
+    "prompt": "Put the phone in the blue box",
+    "average_time": 0,
+    "c_fail": 753
+  },
+  {
+    "prompt": "Put the phone in the orange box",
+    "average_time": 0,
+    "c_fail": 994
+  },
+  {
+    "prompt": "Put the phone in the orange box and the battery bank in the blue box",
+    "average_time": 0,
+    "c_fail": 308
+  },
+  {
+    "prompt": "Put the phone in the orange box and the battery in the blue box",
+    "average_time": 0,
+    "c_fail": 663
+  },
+  {
+    "prompt": "Put the phone in the orange box and the fan in the blue box",
+    "average_time": 0,
+    "c_fail": 547
+  },
+  {
+    "prompt": "Put the phone in the orange box and the shaver in the blue box",
+    "average_time": 0,
+    "c_fail": 855
+  },
+  {
+    "prompt": "Put the phone in the orange box and the vape pen in the blue box",
+    "average_time": 0,
+    "c_fail": 161
+  },
+  {
+    "prompt": "Put the phone in the orange box and the vape pen in the blue box and Put the phone in the orange box and the vape pen in the blue box",
+    "average_time": 0,
+    "c_fail": 867
+  },
+  {
+    "prompt": "Put the phone in the orange box and the vape pen in the blue box and Put the vape pen in the orange box and the phone in the blue box",
+    "average_time": 0,
+    "c_fail": 614
+  },
+  {
+    "prompt": "Put the pink fan in the cardboard box",
+    "average_time": 0,
+    "c_fail": 177
+  },
+  {
+    "prompt": "Put the shaver in the orange box and the battery bank in the blue box",
+    "average_time": 0,
+    "c_fail": 433
+  },
+  {
+    "prompt": "Put the shaver in the orange box and the battery in the blue box",
+    "average_time": 0,
+    "c_fail": 608
+  },
+  {
+    "prompt": "Put the shaver in the orange box and the fan in the blue box",
+    "average_time": 0,
+    "c_fail": 810
+  },
+  {
+    "prompt": "Put the shaver in the orange box and the phone in the blue box",
+    "average_time": 0,
+    "c_fail": 788
+  },
+  {
+    "prompt": "Put the shaver in the orange box and the vape pen in the blue box",
+    "average_time": 0,
+    "c_fail": 422
+  },
+  {
+    "prompt": "Put the vape pen in the orange box and the battery bank in the blue box",
+    "average_time": 0,
+    "c_fail": 933
+  },
+  {
+    "prompt": "Put the vape pen in the orange box and the battery in the blue box",
+    "average_time": 0,
+    "c_fail": 734
+  },
+  {
+    "prompt": "Put the vape pen in the orange box and the phone in the blue box",
+    "average_time": 0,
+    "c_fail": 312
+  },
+  {
+    "prompt": "Put the vape pen in the orange box and the phone in the blue box and put the phone in the orange box and the vape pen in the blue box",
+    "average_time": 0,
+    "c_fail": 348
+  },
+  {
+    "prompt": "Put the vape pen in the orange box and the shaver in the blue box",
+    "average_time": 0,
+    "c_fail": 380
+  }
+]

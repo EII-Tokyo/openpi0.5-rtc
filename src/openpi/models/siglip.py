@@ -181,7 +181,7 @@ class MAPHead(nn.Module):
         )(probe, x)
 
         y = nn.LayerNorm(dtype=self.dtype_mm)(x)
-        x = x + MlpBlock(mlp_dim=self.mlp_dim, dtype=self.dtype_mm)(y)
+        x = x + MlpBlock(mlp_dim=self.mlp_dim, dtype_mm=self.dtype_mm)(y)
         return x[:, 0]
 
 
@@ -254,7 +254,7 @@ class _Module(nn.Module):
             x = out["head_input"] = MAPHead(
                 num_heads=self.num_heads,
                 mlp_dim=self.mlp_dim,
-                dtype=self.dtype_mm,
+                dtype_mm=self.dtype_mm,
             )(x)
         elif self.pool_type == "gap":
             x = out["head_input"] = jnp.mean(x, axis=1)

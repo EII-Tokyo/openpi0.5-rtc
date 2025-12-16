@@ -26,7 +26,7 @@ from PIL import Image
 from tqdm import tqdm
 import tyro
 
-REPO_NAME = "your_hf_username/my_droid_dataset"  # Name of the output dataset, also used for the Hugging Face Hub
+REPO_NAME = "michios/droid_xxjd_7"  # Name of the output dataset, also used for the Hugging Face Hub
 
 
 def resize_image(image, size):
@@ -88,7 +88,7 @@ def main(data_dir: str, *, push_to_hub: bool = False):
     # Load language annotations
     # Note: we load the DROID language annotations for this example, but you can manually define them for your own data
     # Find annotations.json in the data directory (it could be in data_dir or in subdirectories like data_dir/success)
-    annotation_files = list(data_dir.glob("**/annotations.jsonl"))
+    annotation_files = list(data_dir.glob("**/annotations_temp.jsonl"))
     if not annotation_files:
         raise FileNotFoundError(f"Could not find annotations.jsonl in {data_dir}")
 
