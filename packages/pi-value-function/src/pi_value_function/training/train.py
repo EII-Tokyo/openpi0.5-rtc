@@ -10,6 +10,7 @@ Main training script for PiValue model. Handles:
 import dataclasses
 import functools
 import pathlib
+import time
 from typing import Any
 
 import jax
@@ -84,15 +85,21 @@ def create_model_with_weights(config: TrainConfig, rng: jax.Array) -> PiValue:
     siglip_loader = SigLIP2WeightLoader(checkpoint_path=str(siglip_checkpoint))
 
     # Get siglip params as dict, load weights, update back
+    t0 = time.time()
     siglip_state = nnx.state(model.siglip, nnx.Param)
     siglip_dict = siglip_state.to_pure_dict()
+    t1 = time.time()
     loaded_siglip = siglip_loader.load(siglip_dict)
+    t2 = time.time()
 
     # Create new state with updated values
     updated_siglip = selective_tree_update(siglip_dict, loaded_siglip)
+    t3 = time.time()
     new_siglip_state = nnx.State(updated_siglip)
     nnx.update(model.siglip, new_siglip_state)
+    t4 = time.time()
     print(f"✓ Loaded SigLIP weights from {siglip_checkpoint}")
+    print(f"  Timing: state_extract={t1-t0:.2f}s, load={t2-t1:.2f}s, merge={t3-t2:.2f}s, update={t4-t3:.2f}s")
 
     # Load Gemma weights
     gemma_checkpoint = repo_root / "checkpoints" / "gemma-3-270m"
@@ -102,15 +109,21 @@ def create_model_with_weights(config: TrainConfig, rng: jax.Array) -> PiValue:
     )
 
     # Get gemma params as dict, load weights, update back
+    t0 = time.time()
     gemma_state = nnx.state(model.gemma, nnx.Param)
     gemma_dict = gemma_state.to_pure_dict()
+    t1 = time.time()
     loaded_gemma = gemma_loader.load(gemma_dict)
+    t2 = time.time()
 
     # Create new state with updated values
     updated_gemma = selective_tree_update(gemma_dict, loaded_gemma)
+    t3 = time.time()
     new_gemma_state = nnx.State(updated_gemma)
     nnx.update(model.gemma, new_gemma_state)
+    t4 = time.time()
     print(f"✓ Loaded Gemma weights from {gemma_checkpoint}")
+    print(f"  Timing: state_extract={t1-t0:.2f}s, load={t2-t1:.2f}s, merge={t3-t2:.2f}s, update={t4-t3:.2f}s")
 
     # Return model (no need for merge since we updated directly)
     return model
@@ -197,12 +210,17 @@ def train_step(
     # Compute loss and gradients
     loss, grads = nnx.value_and_grad(loss_fn)(model)
 
+    # Compute gradient norm before update
+    grad_leaves = jax.tree_util.tree_leaves(grads)
+    grad_norm = jnp.sqrt(sum(jnp.sum(g**2) for g in grad_leaves if hasattr(g, 'shape')))
+
     # Update parameters
     optimizer.update(grads)
 
     # Collect metrics
     metrics = {
         "loss": loss,
+        "grad_norm": grad_norm,
     }
 
     return model, optimizer, metrics
@@ -309,6 +327,10 @@ def train(config: TrainConfig) -> None:
     log_count = 0
     max_console_logs = 5  # Only print first 5 log messages
 
+    # Timing tracking
+    last_log_time = time.time()
+    last_log_step = 0
+
     for step in range(total_steps):
         # Get batch and convert to JAX arrays
         batch = next(data_iter)
@@ -331,17 +353,36 @@ def train(config: TrainConfig) -> None:
             # Convert metrics to host
             metrics_host = jax.device_get(metrics)
 
+            # Compute timing stats
+            current_time = time.time()
+            time_elapsed = current_time - last_log_time
+            steps_since_log = step - last_log_step
+            steps_per_sec = steps_since_log / time_elapsed if time_elapsed > 0 else 0
+
             # Print to console (only first 5 times)
             if log_count < max_console_logs:
                 loss_value = float(metrics_host["loss"])
-                print(f"Step {step}/{total_steps}: loss={loss_value:.4f}")
+                grad_norm_value = float(metrics_host.get("grad_norm", 0.0))
+                print(f"Step {step}/{total_steps}: loss={loss_value:.4f}, grad_norm={grad_norm_value:.4f}, "
+                      f"time={time_elapsed:.2f}s, steps/sec={steps_per_sec:.2f}")
                 log_count += 1
                 if log_count == max_console_logs:
                     print(f"... (suppressing further console logs, training continues)")
 
+            # Update timing trackers
+            last_log_time = current_time
+            last_log_step = step
+
             # Log to W&B
             if config.logging.wandb_enabled:
                 wandb.log(metrics_host, step=step)
+
+        # Save checkpoint
+        if step > 0 and step % config.checkpoint.save_every_n_steps == 0:
+            ckpt_path = pathlib.Path(config.checkpoint.checkpoint_dir) / str(config.model_config.model_type()) / config.exp_name
+            ckpt_path.mkdir(parents=True, exist_ok=True)
+            # For now, just print checkpoint would be saved (actual saving requires orbax setup)
+            print(f"  [Checkpoint would be saved at step {step} to {ckpt_path}]")
 
     print("\n=== Training complete! ===")
 
