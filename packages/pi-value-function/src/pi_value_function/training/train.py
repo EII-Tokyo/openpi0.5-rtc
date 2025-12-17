@@ -19,15 +19,18 @@ import numpy as np
 from flax import nnx
 import optax
 import torch
+from tqdm import tqdm
 
 from pi_value_function.config import PiValueConfig
 from pi_value_function.pi_value import PiValue
-from pi_value_function.training.train_config import TrainConfig
+from pi_value_function.training.train_config import TrainConfig, ValueDataConfig, CheckpointConfig, LoggingConfig
 from pi_value_function.training.data_loader import create_value_dataloader
 from pi_value_function.training.weight_loader import SigLIP2WeightLoader
 from pi_value_function.training.direct_checkpoint_loader import DirectGemma3WeightLoader
+from pi_value_function.training import checkpoint_manager as ckpt_manager
 from openpi.models.model import Observation
 from openpi.models.tokenizer import PaligemmaTokenizer
+import openpi.training.optimizer as _optimizer
 
 # Optional W&B import
 try:
@@ -129,55 +132,6 @@ def create_model_with_weights(config: TrainConfig, rng: jax.Array) -> PiValue:
     return model
 
 
-def batch_to_observation(batch: dict[str, Any], tokenizer: PaligemmaTokenizer) -> Observation:
-    """Convert data loader batch to Observation format.
-
-    Args:
-        batch: Batch from data loader with keys:
-            - "image": dict[str, ndarray] - Images as uint8 or float32
-            - "image_mask": dict[str, ndarray] - Image validity masks
-            - "state": ndarray - Robot state (8-dim from DROID)
-            - "prompt": list[str] - Task prompts as strings
-            - "returns": ndarray - Value targets
-        tokenizer: Tokenizer for converting prompt strings to tokens
-
-    Returns:
-        Observation object with all fields converted to JAX arrays
-    """
-    # Tokenize prompts (batch of strings -> batch of token arrays)
-    prompts = batch["prompt"]
-    tokenized_prompts = []
-    tokenized_prompt_masks = []
-
-    for prompt in prompts:
-        tokens, mask = tokenizer.tokenize(prompt, state=None)  # state=None for Pi0 format
-        tokenized_prompts.append(tokens)
-        tokenized_prompt_masks.append(mask)
-
-    tokenized_prompts = np.stack(tokenized_prompts, axis=0)
-    tokenized_prompt_masks = np.stack(tokenized_prompt_masks, axis=0)
-
-    # Pad state from 8-dim (DROID) to 32-dim (expected by model)
-    state = batch["state"]  # Shape: (batch, 8)
-    batch_size = state.shape[0]
-    padded_state = np.zeros((batch_size, 32), dtype=np.float32)
-    padded_state[:, :state.shape[1]] = state
-
-    # Create batch dict with tokenized prompts
-    batch_dict = {
-        "image": batch["image"],
-        "image_mask": batch["image_mask"],
-        "state": padded_state,
-        "tokenized_prompt": tokenized_prompts,
-        "tokenized_prompt_mask": tokenized_prompt_masks,
-    }
-
-    # Use Observation.from_dict to handle image normalization and conversion
-    obs = Observation.from_dict(batch_dict)
-
-    return obs
-
-
 @functools.partial(nnx.jit, donate_argnums=(0,))
 def train_step(
     model: PiValue,
@@ -267,6 +221,27 @@ def train(config: TrainConfig) -> None:
     print(f"  Peak LR: {config.lr_schedule.peak_lr}")
     print(f"  Warmup steps: {config.lr_schedule.warmup_steps}")
 
+    # Initialize checkpoint manager
+    print("\n=== Setting up checkpointing ===")
+    ckpt_path = pathlib.Path(config.checkpoint.checkpoint_dir) / str(config.model_config.model_type()) / config.exp_name
+    checkpoint_mgr, resuming = ckpt_manager.initialize_checkpoint_manager(
+        ckpt_path,
+        max_to_keep=config.checkpoint.keep_n_checkpoints,
+        keep_period=config.checkpoint.keep_period,
+        overwrite=config.checkpoint.overwrite,
+        resume=config.checkpoint.resume,
+    )
+    print(f"✓ Checkpoint manager initialized: {ckpt_path}")
+
+    # Restore from checkpoint if resuming
+    start_step = 0
+    if resuming:
+        print("\n=== Restoring from checkpoint ===")
+        model, optimizer, start_step = ckpt_manager.restore_checkpoint(
+            checkpoint_mgr, model, optimizer
+        )
+        print(f"✓ Resumed from step {start_step}")
+
     # Create tokenizer
     print("\n=== Creating tokenizer ===")
     tokenizer = PaligemmaTokenizer(max_len=48)  # Match model's tokenized_prompt shape
@@ -274,9 +249,27 @@ def train(config: TrainConfig) -> None:
 
     # Create data loader
     print("\n=== Creating data loader ===")
-    # For debug config, use fake data (no repo IDs provided)
-    if config.data.data_path is None:
-        print("Warning: No data_path provided, using dummy data for testing")
+    # Check if real LeRobot repo IDs are provided
+    if config.data.success_repo_ids or config.data.failure_repo_ids:
+        print("Using real LeRobot datasets:")
+        if config.data.success_repo_ids:
+            print(f"  Success repos: {config.data.success_repo_ids}")
+        if config.data.failure_repo_ids:
+            print(f"  Failure repos: {config.data.failure_repo_ids}")
+
+        dataloader = create_value_dataloader(
+            tokenizer=tokenizer,
+            success_repo_ids=config.data.success_repo_ids,
+            failure_repo_ids=config.data.failure_repo_ids,
+            batch_size=config.batch_size,
+            failure_cost_json=config.data.failure_cost_json,
+            default_c_fail=config.data.default_c_fail,
+            success_sampling_ratio=config.data.success_sampling_ratio,
+            num_workers=config.num_workers,
+            seed=config.seed,
+        )
+    else:
+        print("Warning: No repo IDs provided, using dummy data for testing")
         # Create a dummy dataloader that yields random batches
         # This is just for testing the training loop
         class DummyDataLoader:
@@ -303,12 +296,6 @@ def train(config: TrainConfig) -> None:
                     }
 
         dataloader = DummyDataLoader(batch_size=config.batch_size)
-    else:
-        # Real data loader (to be implemented when repo IDs are provided)
-        raise NotImplementedError(
-            "Real data loading not yet implemented. "
-            "Please provide success_repo_ids and failure_repo_ids in the config."
-        )
 
     print("✓ Data loader created")
 
@@ -321,23 +308,24 @@ def train(config: TrainConfig) -> None:
     print(f"\n=== Starting training for {total_steps} steps ===")
     print(f"Batch size: {config.batch_size}")
     print(f"Log interval: {config.logging.log_every_n_steps}")
+    if resuming:
+        print(f"Resuming from step: {start_step}")
 
     # Training loop
     data_iter = iter(dataloader)
-    log_count = 0
-    max_console_logs = 5  # Only print first 5 log messages
 
-    # Timing tracking
-    last_log_time = time.time()
-    last_log_step = 0
+    # Create progress bar
+    pbar = tqdm(range(start_step, total_steps), desc="Training", unit="step", initial=start_step, total=total_steps)
 
-    for step in range(total_steps):
-        # Get batch and convert to JAX arrays
+    for step in pbar:
+        # Get batch (already has tokenized prompts from collate_fn)
         batch = next(data_iter)
+
+        # Convert to JAX arrays
         batch_jax = jax.tree.map(lambda x: jnp.array(x) if isinstance(x, np.ndarray) else x, batch)
 
-        # Convert batch to Observation
-        observation = batch_to_observation(batch_jax, tokenizer)
+        # Convert batch to Observation (prompts already tokenized in collate_fn)
+        observation = Observation.from_dict(batch_jax)
 
         # Get returns
         returns = batch_jax["returns"]
@@ -353,25 +341,13 @@ def train(config: TrainConfig) -> None:
             # Convert metrics to host
             metrics_host = jax.device_get(metrics)
 
-            # Compute timing stats
-            current_time = time.time()
-            time_elapsed = current_time - last_log_time
-            steps_since_log = step - last_log_step
-            steps_per_sec = steps_since_log / time_elapsed if time_elapsed > 0 else 0
-
-            # Print to console (only first 5 times)
-            if log_count < max_console_logs:
-                loss_value = float(metrics_host["loss"])
-                grad_norm_value = float(metrics_host.get("grad_norm", 0.0))
-                print(f"Step {step}/{total_steps}: loss={loss_value:.4f}, grad_norm={grad_norm_value:.4f}, "
-                      f"time={time_elapsed:.2f}s, steps/sec={steps_per_sec:.2f}")
-                log_count += 1
-                if log_count == max_console_logs:
-                    print(f"... (suppressing further console logs, training continues)")
-
-            # Update timing trackers
-            last_log_time = current_time
-            last_log_step = step
+            # Update progress bar with metrics
+            loss_value = float(metrics_host["loss"])
+            grad_norm_value = float(metrics_host.get("grad_norm", 0.0))
+            pbar.set_postfix({
+                "loss": f"{loss_value:.4f}",
+                "grad_norm": f"{grad_norm_value:.2f}",
+            })
 
             # Log to W&B
             if config.logging.wandb_enabled:
@@ -379,11 +355,11 @@ def train(config: TrainConfig) -> None:
 
         # Save checkpoint
         if step > 0 and step % config.checkpoint.save_every_n_steps == 0:
-            ckpt_path = pathlib.Path(config.checkpoint.checkpoint_dir) / str(config.model_config.model_type()) / config.exp_name
-            ckpt_path.mkdir(parents=True, exist_ok=True)
-            # For now, just print checkpoint would be saved (actual saving requires orbax setup)
-            print(f"  [Checkpoint would be saved at step {step} to {ckpt_path}]")
+            pbar.write(f"  Saving checkpoint at step {step}...")
+            ckpt_manager.save_checkpoint(checkpoint_mgr, model, optimizer, step)
+            pbar.write(f"  ✓ Checkpoint saved")
 
+    pbar.close()
     print("\n=== Training complete! ===")
 
     # Finish W&B run
@@ -394,8 +370,58 @@ def train(config: TrainConfig) -> None:
 
 def main() -> None:
     """CLI entry point."""
-    # Use debug config for testing
-    config = TrainConfig.debug_config()
+    # Create config with real LeRobot data
+    config = TrainConfig(
+        exp_name="pi_value_droid",
+        model_config=PiValueConfig(
+            value_dims=201,  # 201 bins for categorical distribution over [-1, 0]
+            gemma_variant="gemma-3-270m",
+            siglip_variant="siglip2-so400m-patch16-384",
+        ),
+        lr_schedule=_optimizer.CosineDecaySchedule(
+            warmup_steps=100,
+            peak_lr=3e-4,
+            decay_steps=10_000,
+            decay_lr=3e-5,
+        ),
+        optimizer=_optimizer.AdamW(
+            weight_decay=0.01,
+            clip_gradient_norm=1.0,
+        ),
+        num_train_steps=10_000,
+        batch_size=16,
+        data=ValueDataConfig(
+            success_repo_ids=[
+                "michios/droid_xxjd",
+                "michios/droid_xxjd_2",
+                "michios/droid_xxjd_3",
+                "michios/droid_xxjd_4",
+                "michios/droid_xxjd_5",
+                "michios/droid_xxjd_6",
+                "michios/droid_xxjd_7",
+            ],
+            failure_repo_ids=[
+                "michios/droid_xxjd_fail_1"
+                # "michios/droid_xxjd_4",
+            ],
+            failure_cost_json="configs/failure_costs.json",
+            default_c_fail=100.0,
+            success_sampling_ratio=0.5,
+        ),
+        checkpoint=CheckpointConfig(
+            checkpoint_dir="./checkpoints",
+            save_every_n_steps=1_000,
+            keep_n_checkpoints=5,
+        ),
+        logging=LoggingConfig(
+            log_every_n_steps=50,
+            wandb_enabled=True,
+            wandb_project="pi-value-function",
+            wandb_run_name="droid_value_training",
+        ),
+        num_workers=4,
+        seed=42,
+    )
 
     print("=" * 60)
     print("Pi Value Function Training")

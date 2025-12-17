@@ -13,16 +13,14 @@ from __future__ import annotations
 import dataclasses
 import json
 import pathlib
-from collections.abc import Callable
 from typing import Any
 
 import einops
+import jax
 import numpy as np
 import torch
 import torch.utils.data
-from lerobot.common.datasets import lerobot_dataset
-
-from openpi.training.data_loader import _collate_fn
+from lerobot.datasets import lerobot_dataset
 
 
 def _parse_image(image: np.ndarray | Any) -> np.ndarray:
@@ -48,10 +46,10 @@ def _parse_image(image: np.ndarray | Any) -> np.ndarray:
 def parse_observation(data: dict) -> dict:
     """Parse LeRobot observation to model format.
 
-    Camera mapping:
-    - observation/exterior_image_1_left → base_0_rgb
-    - observation/wrist_image_left → left_wrist_0_rgb
-    - observation/wrist_image_right → right_wrist_0_rgb
+    Camera mapping (v3.0 DROID format to Pi0 expected format):
+    - exterior_image_1_left → base_0_rgb
+    - exterior_image_2_left → right_wrist_0_rgb (repurpose as right wrist)
+    - wrist_image_left → left_wrist_0_rgb
 
     Args:
         data: Sample from LeRobot dataset
@@ -60,29 +58,34 @@ def parse_observation(data: dict) -> dict:
         Dictionary with standardized observation format
     """
     # State: concatenate joint + gripper
-    gripper_pos = np.asarray(data["observation/gripper_position"])
+    # v3.0 format uses keys without "observation/" prefix
+    gripper_pos = np.asarray(data["gripper_position"])
     if gripper_pos.ndim == 0:
         gripper_pos = gripper_pos[np.newaxis]
-    state = np.concatenate([data["observation/joint_position"], gripper_pos])
+    state = np.concatenate([data["joint_position"], gripper_pos])
 
     # Images: parse to uint8 [H, W, C]
-    base_image = _parse_image(data["observation/exterior_image_1_left"])
-    left_wrist_image = _parse_image(data["observation/wrist_image_left"])
-    right_wrist_image = _parse_image(data["observation/wrist_image_right"])
+    # Map DROID cameras to Pi0 expected format
+    base_0_image = _parse_image(data["exterior_image_1_left"])
+    right_wrist_image = _parse_image(data["exterior_image_2_left"])  # Repurpose base_1 as right wrist
+    left_wrist_image = _parse_image(data["wrist_image_left"])
+
+    # Get task string (lerobot v3.0 adds this by looking up task_index in meta/tasks.parquet)
+    task = data.get("task", "")
 
     return {
         "state": state,
         "image": {
-            "base_0_rgb": base_image,
+            "base_0_rgb": base_0_image,
             "left_wrist_0_rgb": left_wrist_image,
             "right_wrist_0_rgb": right_wrist_image,
         },
         "image_mask": {
             "base_0_rgb": np.True_,
             "left_wrist_0_rgb": np.True_,
-            "right_wrist_0_rgb": np.True_,  # All cameras valid
+            "right_wrist_0_rgb": np.True_,
         },
-        "prompt": data.get("task", ""),
+        "prompt": task,
     }
 
 
@@ -256,6 +259,7 @@ class ValueFunctionDataset(torch.utils.data.Dataset):
 
         # Sampling
         self.success_ratio = success_sampling_ratio
+        self.base_seed = seed  # Store base seed for worker initialization
         self.rng = np.random.RandomState(seed)
 
         # Value normalization params
@@ -424,11 +428,74 @@ def _worker_init_fn(worker_id: int) -> None:
     if worker_info is not None:
         dataset = worker_info.dataset
         if isinstance(dataset, ValueFunctionDataset):
-            # Reseed with worker_id to get different samples per worker
-            dataset.rng = np.random.RandomState(worker_info.seed + worker_id)
+            # Generate worker-specific seed from base seed using hash
+            # This is similar to key splitting but stays in pure Python
+            worker_seed = hash((dataset.base_seed, worker_id)) % (2**32)
+            dataset.rng = np.random.RandomState(worker_seed)
+
+
+class CollateFnWithTokenizer:
+    """Collate function that tokenizes prompts before batching.
+
+    This follows the openpi approach of tokenizing prompts per-sample before
+    batching, avoiding numpy string arrays that JAX can't handle.
+
+    This is implemented as a class instead of a nested function to make it
+    picklable for PyTorch's multiprocessing DataLoader.
+    """
+
+    def __init__(self, tokenizer):
+        """Initialize collate function with tokenizer.
+
+        Args:
+            tokenizer: Tokenizer with a tokenize(prompt, state) method
+        """
+        self.tokenizer = tokenizer
+
+    def __call__(self, items: list[dict]) -> dict:
+        """Collate batch items, tokenizing prompts individually."""
+        # Extract and tokenize prompts
+        prompts = [item.pop("prompt") for item in items]
+        tokenized_prompts = []
+        tokenized_prompt_masks = []
+
+        for prompt in prompts:
+            # Handle numpy scalar strings (like openpi transforms.py:263)
+            if not isinstance(prompt, str):
+                prompt = prompt.item()
+
+            # Tokenize (state=None for Pi0 format)
+            tokens, mask = self.tokenizer.tokenize(prompt, state=None)
+            tokenized_prompts.append(tokens)
+            tokenized_prompt_masks.append(mask)
+
+        # Stack tokenized prompts
+        batch = {
+            "tokenized_prompt": np.stack(tokenized_prompts, axis=0),
+            "tokenized_prompt_mask": np.stack(tokenized_prompt_masks, axis=0),
+        }
+
+        # Stack all other fields (images, returns, etc.)
+        for key in items[0].keys():
+            if key == "state":
+                continue  # Handle state separately for padding
+            batch[key] = jax.tree.map(
+                lambda *xs: np.stack([np.asarray(x) for x in xs], axis=0),
+                *[item[key] for item in items]
+            )
+
+        # Pad state from 8-dim (DROID) to 32-dim (expected by model)
+        states = np.stack([item["state"] for item in items], axis=0)  # Shape: (batch, 8)
+        batch_size = states.shape[0]
+        padded_states = np.zeros((batch_size, 32), dtype=np.float32)
+        padded_states[:, :states.shape[1]] = states
+        batch["state"] = padded_states
+
+        return batch
 
 
 def create_value_dataloader(
+    tokenizer,  # Tokenizer for prompts
     success_repo_ids: list[str] | None = None,
     failure_repo_ids: list[str] | None = None,
     batch_size: int = 64,
@@ -479,7 +546,7 @@ def create_value_dataloader(
         batch_size=batch_size,
         sampler=sampler,
         num_workers=num_workers,
-        collate_fn=_collate_fn,
+        collate_fn=CollateFnWithTokenizer(tokenizer),
         persistent_workers=num_workers > 0,
         worker_init_fn=_worker_init_fn,
         multiprocessing_context="spawn" if num_workers > 0 else None,

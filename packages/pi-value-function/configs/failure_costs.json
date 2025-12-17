@@ -2,7 +2,7 @@
   {
     "prompt": "pick up the cup",
     "average_time": 45.0,
-    "c_fail": 90.0
+    "c_fail": 900
   },
   {
     "prompt": "Do anything you like that takes multiple steps to complete.",

@@ -28,6 +28,21 @@ class ValueDataConfig:
     # Path to the training data directory (RLDS, LeRobot, or custom format)
     data_path: str | None = None
 
+    # LeRobot repo IDs for success trajectories
+    success_repo_ids: list[str] | None = None
+
+    # LeRobot repo IDs for failure trajectories
+    failure_repo_ids: list[str] | None = None
+
+    # Path to JSON file with failure costs per prompt
+    failure_cost_json: str | None = None
+
+    # Default failure cost if prompt not in JSON
+    default_c_fail: float = 100.0
+
+    # Fraction of samples from success dataset (0.0 to 1.0)
+    success_sampling_ratio: float = 0.5
+
     # Train/validation split ratios
     train_split: float = 0.9
     val_split: float = 0.1

@@ -14,9 +14,9 @@ import shutil
 from typing import Literal
 
 import h5py
-from lerobot.common.datasets.lerobot_dataset import HF_LEROBOT_HOME as LEROBOT_HOME
-from lerobot.common.datasets.lerobot_dataset import LeRobotDataset
-# from lerobot.common.datasets.push_dataset_to_hub._download_raw import download_raw
+from lerobot.datasets.lerobot_dataset import HF_LEROBOT_HOME as LEROBOT_HOME
+from lerobot.datasets.lerobot_dataset import LeRobotDataset
+# from lerobot.datasets.push_dataset_to_hub._download_raw import download_raw
 import numpy as np
 import cv2
 import torch
