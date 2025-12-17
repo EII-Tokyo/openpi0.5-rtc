@@ -29,7 +29,8 @@ class PiValueConfig(BaseValueModelConfig):
     siglip_variant: str = "siglip2-so400m-patch16-384"
     
     def model_type(self) -> str:
-        return ValueModelType.SHARED_BACKBONE
+        # return ValueModelType.SHARED_BACKBONE
+        return "pi_value"
     
     def create(self, rng: at.KeyArrayLike) -> "PiValue":
         from pi_value_function.pi_value import PiValue
