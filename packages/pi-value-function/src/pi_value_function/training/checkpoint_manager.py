@@ -6,7 +6,6 @@ Based on openpi.training.checkpoints but simplified for value function training.
 
 from __future__ import annotations
 
-import dataclasses
 import logging
 import pathlib
 from typing import Any
@@ -14,12 +13,14 @@ from typing import Any
 from etils import epath
 from flax import nnx
 import jax
+from flax import struct
 import orbax.checkpoint as ocp
+from openpi.shared import array_typing as at
 
 logger = logging.getLogger(__name__)
 
-
-@dataclasses.dataclass
+@at.typecheck
+@struct.dataclass
 class ValueTrainState:
     """Training state for value function.
 

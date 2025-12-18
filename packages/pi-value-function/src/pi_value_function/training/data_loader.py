@@ -116,6 +116,39 @@ class FailureCostManager:
         if json_path is not None:
             self._load_from_json(json_path)
 
+    def _resolve_path(self, json_path: str | pathlib.Path) -> pathlib.Path:
+        """Resolve JSON path, checking multiple locations.
+
+        Tries in order:
+        1. Path as-is (absolute or relative to cwd)
+        2. Relative to package root (pi-value-function/)
+        3. Relative to this script's directory
+        """
+        json_path = pathlib.Path(json_path)
+        if json_path.exists():
+            return json_path
+
+        # Get package root (4 levels up from this file: training/ -> pi_value_function/ -> src/ -> pi-value-function/)
+        script_dir = pathlib.Path(__file__).parent
+        package_root = script_dir.parent.parent.parent
+
+        # Try relative to package root
+        package_relative = package_root / json_path
+        if package_relative.exists():
+            return package_relative
+
+        # Try relative to script directory
+        script_relative = script_dir / json_path
+        if script_relative.exists():
+            return script_relative
+
+        raise FileNotFoundError(
+            f"Failure cost JSON not found. Tried:\n"
+            f"  - {json_path}\n"
+            f"  - {package_relative}\n"
+            f"  - {script_relative}"
+        )
+
     def _load_from_json(self, json_path: str | pathlib.Path) -> None:
         """Load failure costs from JSON file.
 
@@ -125,9 +158,7 @@ class FailureCostManager:
             ...
         ]
         """
-        json_path = pathlib.Path(json_path)
-        if not json_path.exists():
-            raise FileNotFoundError(f"Failure cost JSON not found: {json_path}")
+        json_path = self._resolve_path(json_path)
 
         with open(json_path) as f:
             data = json.load(f)
@@ -279,7 +310,10 @@ class ValueFunctionDataset(torch.utils.data.Dataset):
         dataset: lerobot_dataset.MultiLeRobotDataset,
         success: bool
     ) -> list[EpisodeMetadata]:
-        """Build episode index by scanning dataset.
+        """Build episode index from dataset metadata.
+
+        Uses ds.meta.episodes for O(num_episodes) complexity instead of
+        scanning all samples which would be O(num_samples).
 
         Args:
             dataset: LeRobot dataset
@@ -289,57 +323,22 @@ class ValueFunctionDataset(torch.utils.data.Dataset):
             List of episode metadata
         """
         episodes = []
-        current_episode_id = None
-        episode_start = 0
+        offset = 0  # Track global index offset for multi-dataset
 
-        for i in range(len(dataset)):
-            sample = dataset[i]
-
-            # Try to get episode ID from different possible keys
-            episode_id = None
-            for key in ["episode_index", "episode_id"]:
-                if key in sample:
-                    episode_id = int(sample[key])
-                    break
-
-            if episode_id is None:
-                # Fallback: treat entire dataset as one episode
+        for ds in dataset._datasets:
+            ep_meta = ds.meta.episodes
+            for i in range(len(ep_meta)):
+                ep = ep_meta[i]
+                task = ep["tasks"][0] if ep["tasks"] else None
                 episodes.append(EpisodeMetadata(
-                    episode_id=0,
-                    start_idx=0,
-                    end_idx=len(dataset) - 1,
-                    length=len(dataset),
+                    episode_id=ep["episode_index"],
+                    start_idx=offset + ep["dataset_from_index"],
+                    end_idx=offset + ep["dataset_to_index"] - 1,  # inclusive
+                    length=ep["length"],
                     success=success,
-                    prompt=dataset[0].get("task"),
+                    prompt=task,
                 ))
-                break
-
-            if current_episode_id is None:
-                current_episode_id = episode_id
-                episode_start = i
-            elif episode_id != current_episode_id:
-                # Episode boundary detected
-                episodes.append(EpisodeMetadata(
-                    episode_id=current_episode_id,
-                    start_idx=episode_start,
-                    end_idx=i - 1,
-                    length=i - episode_start,
-                    success=success,
-                    prompt=dataset[episode_start].get("task"),
-                ))
-                current_episode_id = episode_id
-                episode_start = i
-
-        # Add last episode
-        if current_episode_id is not None:
-            episodes.append(EpisodeMetadata(
-                episode_id=current_episode_id,
-                start_idx=episode_start,
-                end_idx=len(dataset) - 1,
-                length=len(dataset) - episode_start,
-                success=success,
-                prompt=dataset[episode_start].get("task"),
-            ))
+            offset += len(ds)
 
         return episodes
 
@@ -525,6 +524,9 @@ def create_value_dataloader(
     Returns:
         DataLoader yielding batches of observations and value targets
     """
+    import time
+    start_time = time.time()
+    print("Creating ValueFunctionDataset...")
     dataset = ValueFunctionDataset(
         success_repo_ids=success_repo_ids,
         failure_repo_ids=failure_repo_ids,
@@ -533,6 +535,9 @@ def create_value_dataloader(
         success_sampling_ratio=success_sampling_ratio,
         seed=seed,
     )
+    print(f"Dataset created in {time.time() - start_time:.2f} seconds.")
+    start_time = time.time()
+    print("Creating Sampler...")
 
     # Use RandomSampler for infinite iteration
     sampler = torch.utils.data.RandomSampler(
@@ -540,6 +545,7 @@ def create_value_dataloader(
         replacement=True,  # Infinite sampling with replacement
         num_samples=int(1e9),  # Very large number
     )
+    print(f"Sampler created in {time.time() - start_time:.2f} seconds.")
 
     return torch.utils.data.DataLoader(
         dataset,

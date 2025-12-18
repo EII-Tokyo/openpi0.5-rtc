@@ -11,15 +11,13 @@ import dataclasses
 import functools
 import pathlib
 import time
-from typing import Any
 
 import jax
 import jax.numpy as jnp
 import numpy as np
 from flax import nnx
-import optax
-import torch
 from tqdm import tqdm
+import wandb
 
 from pi_value_function.config import PiValueConfig
 from pi_value_function.pi_value import PiValue
@@ -28,16 +26,14 @@ from pi_value_function.training.data_loader import create_value_dataloader
 from pi_value_function.training.weight_loader import SigLIP2WeightLoader
 from pi_value_function.training.direct_checkpoint_loader import DirectGemma3WeightLoader
 from pi_value_function.training import checkpoint_manager as ckpt_manager
+from pi_value_function.training.checkpoint_downloader import (
+    download_checkpoint,
+    download_gemma_from_kaggle,
+    SIGLIP2_SO400M14_224_URL,
+)
 from openpi.models.model import Observation
 from openpi.models.tokenizer import PaligemmaTokenizer
 import openpi.training.optimizer as _optimizer
-
-# Optional W&B import
-try:
-    import wandb
-    WANDB_AVAILABLE = True
-except ImportError:
-    WANDB_AVAILABLE = False
 
 
 def create_model_with_weights(config: TrainConfig, rng: jax.Array) -> PiValue:
@@ -52,9 +48,6 @@ def create_model_with_weights(config: TrainConfig, rng: jax.Array) -> PiValue:
     """
     # Create model using config
     model = config.model_config.create(rng)
-
-    # Navigate from packages/pi-value-function/src/pi_value_function/training/train.py -> repo root
-    repo_root = pathlib.Path(__file__).parent.parent.parent.parent.parent.parent
 
     # Load weights by directly updating the model (skip split/merge pattern)
     # This approach avoids State conversion issues
@@ -83,8 +76,8 @@ def create_model_with_weights(config: TrainConfig, rng: jax.Array) -> PiValue:
             # Not a dict or array, keep original
             return original
 
-    # Load SigLIP weights
-    siglip_checkpoint = repo_root / "checkpoints" / "siglip2_so400m14_224.npz"
+    # Load SigLIP weights (downloaded to ~/.cache/openpi)
+    siglip_checkpoint = download_checkpoint(SIGLIP2_SO400M14_224_URL)
     siglip_loader = SigLIP2WeightLoader(checkpoint_path=str(siglip_checkpoint))
 
     # Get siglip params as dict, load weights, update back
@@ -104,8 +97,8 @@ def create_model_with_weights(config: TrainConfig, rng: jax.Array) -> PiValue:
     print(f"✓ Loaded SigLIP weights from {siglip_checkpoint}")
     print(f"  Timing: state_extract={t1-t0:.2f}s, load={t2-t1:.2f}s, merge={t3-t2:.2f}s, update={t4-t3:.2f}s")
 
-    # Load Gemma weights
-    gemma_checkpoint = repo_root / "checkpoints" / "gemma-3-270m"
+    # Load Gemma weights (downloaded from Kaggle to ~/.cache/openpi)
+    gemma_checkpoint = download_gemma_from_kaggle()
     gemma_loader = DirectGemma3WeightLoader(
         checkpoint_path=str(gemma_checkpoint),
         param_key=None
@@ -188,20 +181,13 @@ def train(config: TrainConfig) -> None:
     """
     # Initialize W&B
     if config.logging.wandb_enabled:
-        if not WANDB_AVAILABLE:
-            print("Warning: wandb not installed, disabling W&B logging")
-            config = dataclasses.replace(
-                config,
-                logging=dataclasses.replace(config.logging, wandb_enabled=False)
-            )
-        else:
-            wandb.init(
-                project=config.logging.wandb_project,
-                name=config.logging.wandb_run_name or config.exp_name,
-                entity=config.logging.wandb_entity,
-                config=dataclasses.asdict(config),
-            )
-            print(f"✓ Initialized W&B project: {config.logging.wandb_project}")
+        wandb.init(
+            project=config.logging.wandb_project,
+            name=config.logging.wandb_run_name or config.exp_name,
+            entity=config.logging.wandb_entity,
+            config=dataclasses.asdict(config),
+        )
+        print(f"✓ Initialized W&B project: {config.logging.wandb_project}")
 
     # RNG setup
     rng = jax.random.PRNGKey(config.seed)
@@ -402,7 +388,6 @@ def main() -> None:
             ],
             failure_repo_ids=[
                 "michios/droid_xxjd_fail_1"
-                # "michios/droid_xxjd_4",
             ],
             failure_cost_json="configs/failure_costs.json",
             default_c_fail=100.0,
