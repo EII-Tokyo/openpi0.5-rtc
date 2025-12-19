@@ -492,9 +492,9 @@ def main(args: Args) -> None:
     else:
         dummy_obs = _aloha_policy.make_aloha_example()
 
-    dummy_prev_action = np.random.rand(15, 32)
+    dummy_prev_action = np.random.rand(16, 32)
     logger.info("Warming up policy with dummy inference...")
-    policy.infer(dummy_obs, dummy_prev_action, use_rtc=True)
+    # policy.infer(dummy_obs, dummy_prev_action, use_rtc=True)
     policy.infer(dummy_obs, dummy_prev_action, use_rtc=False)
     logger.info("Warmup complete")
 
