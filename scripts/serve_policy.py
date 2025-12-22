@@ -113,7 +113,7 @@ def main(args: Args) -> None:
     config_name = args.policy.config if isinstance(args.policy, Checkpoint) else None
     if config_name and ("droid" in config_name.lower() or args.env == EnvMode.DROID):
         dummy_obs = _droid_policy.make_droid_example()
-        freq = 15
+        freq = 16
     else:
         dummy_obs = _aloha_policy.make_aloha_example()
         freq = 50
