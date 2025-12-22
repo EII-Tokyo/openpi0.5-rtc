@@ -464,7 +464,7 @@ class CollateFnWithTokenizer:
                 prompt = prompt.item()
 
             # Tokenize (state=None for Pi0 format)
-            tokens, mask = self.tokenizer.tokenize(prompt, state=None)
+            tokens, mask = self.tokenizer.tokenize(prompt, include_image_tag=False)
             tokenized_prompts.append(tokens)
             tokenized_prompt_masks.append(mask)
 

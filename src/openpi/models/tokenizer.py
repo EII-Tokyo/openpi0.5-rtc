@@ -6,11 +6,75 @@ import numpy as np
 import orbax.checkpoint as ocp
 import sentencepiece
 from transformers import AutoProcessor
+import pathlib
 
 import openpi.models.utils.fsq_tokenizer as fsq_tokenizer
 import openpi.shared.download as download
 
+class Gemma3Tokenizer:
+    def __init__(self, path: pathlib.Path, max_len: int = 48):
+        """
+        Custom Tokenizer for Gemma 3 Robotics flow.
+        
+        Args:
+            path: Path to the 'tokenizer.model' file from Kaggle.
+            max_len: Total context window for text tokens.
+        """
+        self._max_len = max_len
+        self._tokenizer = sentencepiece.SentencePieceProcessor()
+        self._tokenizer.load(str(path))
 
+        # Standard Gemma 3 Control Tokens
+        self.pad_id = self._tokenizer.pad_id()  # 0
+        self.eos_id = self._tokenizer.eos_id()  # 1
+        self.bos_id = self._tokenizer.bos_id()  # 2
+        self.unk_id = self._tokenizer.unk_id()  # 3
+        
+        # Multimodal Tags (In case we use a model larger than Gemma 270m that has multimodal capabilities)
+        self.img_start = "<img>"
+        self.img_end = "</img>"
+        
+    # TODO: try to include state in tokenizer
+
+    def tokenize(self, prompt: str, add_bos: bool = True, include_image_tag: bool = True) -> tuple[np.ndarray, np.ndarray]:
+        """
+        Prepares tokens for the Gemma 3 model.
+        
+        Args:
+            prompt: The instruction text (e.g., "Pick up the red block").
+            add_bos: Prepend the Beginning of Sentence token.
+            include_image_tag: Automatically adds <img> tag at the start for SigLIP alignment.
+        """
+        text = prompt.strip()
+        
+        # In Gemma 3, images are typically placed between <img> and </img> tags.
+        # Even if SigLIP is external, including the tag helps the model 'know' 
+        # where the visual context begins.
+        if include_image_tag and self.img_start not in text:
+            text = f"{self.img_start}{text}"
+
+        # Encode text to IDs
+        tokens = self._tokenizer.encode(text, add_bos=add_bos)
+        tokens_len = len(tokens)
+
+        if tokens_len < self._max_len:
+            # Padding with pad_id (0)
+            padding_size = self._max_len - tokens_len
+            mask = [True] * tokens_len + [False] * padding_size
+            tokens = tokens + [self.pad_id] * padding_size
+        else:
+            if tokens_len > self._max_len:
+                logging.warning(f"Prompt length {tokens_len} exceeds max_len {self._max_len}. Truncating.")
+            tokens = tokens[:self._max_len]
+            mask = [True] * self._max_len
+
+        return np.asarray(tokens, dtype=np.int32), np.asarray(mask, dtype=bool)
+
+    @property
+    def vocab_size(self) -> int:
+        return self._tokenizer.get_piece_size()
+    
+    
 class PaligemmaTokenizer:
     def __init__(self, max_len: int = 48):
         self._max_len = max_len

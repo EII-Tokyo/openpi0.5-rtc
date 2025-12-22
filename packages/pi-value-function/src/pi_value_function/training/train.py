@@ -32,7 +32,7 @@ from pi_value_function.training.checkpoint_downloader import (
     SIGLIP2_SO400M14_224_URL,
 )
 from openpi.models.model import Observation
-from openpi.models.tokenizer import PaligemmaTokenizer
+from openpi.models.tokenizer import Gemma3Tokenizer
 import openpi.training.optimizer as _optimizer
 
 
@@ -98,9 +98,9 @@ def create_model_with_weights(config: TrainConfig, rng: jax.Array) -> PiValue:
     print(f"  Timing: state_extract={t1-t0:.2f}s, load={t2-t1:.2f}s, merge={t3-t2:.2f}s, update={t4-t3:.2f}s")
 
     # Load Gemma weights (downloaded from Kaggle to ~/.cache/openpi)
-    gemma_checkpoint = download_gemma_from_kaggle()
+    gemma_model_path, gemma_tokenizer_path = download_gemma_from_kaggle()
     gemma_loader = DirectGemma3WeightLoader(
-        checkpoint_path=str(gemma_checkpoint),
+        checkpoint_path=str(gemma_model_path),
         param_key=None
     )
 
@@ -118,11 +118,11 @@ def create_model_with_weights(config: TrainConfig, rng: jax.Array) -> PiValue:
     new_gemma_state = nnx.State(updated_gemma)
     nnx.update(model.gemma, new_gemma_state)
     t4 = time.time()
-    print(f"✓ Loaded Gemma weights from {gemma_checkpoint}")
+    print(f"✓ Loaded Gemma weights from {gemma_model_path}")
     print(f"  Timing: state_extract={t1-t0:.2f}s, load={t2-t1:.2f}s, merge={t3-t2:.2f}s, update={t4-t3:.2f}s")
 
-    # Return model (no need for merge since we updated directly)
-    return model
+    # Return model and tokenizer
+    return model, gemma_tokenizer_path
 
 
 @functools.partial(nnx.jit, donate_argnums=(0,))
@@ -195,7 +195,7 @@ def train(config: TrainConfig) -> None:
 
     # Create model with pretrained weights
     print("\n=== Creating model with pretrained weights ===")
-    model = create_model_with_weights(config, model_rng)
+    model, tokenizer_path = create_model_with_weights(config, model_rng)
     print("✓ Model created successfully")
 
     # Create optimizer
@@ -230,7 +230,7 @@ def train(config: TrainConfig) -> None:
 
     # Create tokenizer
     print("\n=== Creating tokenizer ===")
-    tokenizer = PaligemmaTokenizer(max_len=48)  # Match model's tokenized_prompt shape
+    tokenizer = Gemma3Tokenizer(max_len=48, path=tokenizer_path)
     print("✓ Tokenizer created")
 
     # Create data loader
@@ -278,7 +278,7 @@ def train(config: TrainConfig) -> None:
                         },
                         "state": np.random.randn(self.batch_size, 8).astype(np.float32),
                         "prompt": ["pick up the cup"] * self.batch_size,
-                        "returns": np.random.randn(self.batch_size).astype(np.float32) * 0.5 - 0.5,
+                        "returns": np.random.uniform(low=-1.0, high=0.0, size=self.batch_size).astype(np.float32)
                     }
 
         dataloader = DummyDataLoader(batch_size=config.batch_size)
@@ -357,56 +357,58 @@ def train(config: TrainConfig) -> None:
 def main() -> None:
     """CLI entry point."""
     # Create config with real LeRobot data
-    config = TrainConfig(
-        exp_name="pi_value_droid",
-        model_config=PiValueConfig(
-            value_dims=201,  # 201 bins for categorical distribution over [-1, 0]
-            gemma_variant="gemma-3-270m",
-            siglip_variant="siglip2-so400m-patch16-384",
-        ),
-        lr_schedule=_optimizer.CosineDecaySchedule(
-            warmup_steps=100,
-            peak_lr=3e-4,
-            decay_steps=10_000,
-            decay_lr=3e-5,
-        ),
-        optimizer=_optimizer.AdamW(
-            weight_decay=0.01,
-            clip_gradient_norm=1.0,
-        ),
-        num_train_steps=10_000,
-        batch_size=16,
-        data=ValueDataConfig(
-            success_repo_ids=[
-                "michios/droid_xxjd",
-                "michios/droid_xxjd_2",
-                "michios/droid_xxjd_3",
-                "michios/droid_xxjd_4",
-                "michios/droid_xxjd_5",
-                "michios/droid_xxjd_6",
-                "michios/droid_xxjd_7",
-            ],
-            failure_repo_ids=[
-                "michios/droid_xxjd_fail_1"
-            ],
-            failure_cost_json="configs/failure_costs.json",
-            default_c_fail=100.0,
-            success_sampling_ratio=0.5,
-        ),
-        checkpoint=CheckpointConfig(
-            checkpoint_dir="./checkpoints",
-            save_every_n_steps=1_000,
-            keep_n_checkpoints=5,
-        ),
-        logging=LoggingConfig(
-            log_every_n_steps=50,
-            wandb_enabled=True,
-            wandb_project="pi-value-function",
-            wandb_run_name="droid_value_training",
-        ),
-        num_workers=4,
-        seed=42,
-    )
+    # config = TrainConfig(
+    #     exp_name="pi_value_droid",
+    #     model_config=PiValueConfig(
+    #         value_dims=201,  # 201 bins for categorical distribution over [-1, 0]
+    #         gemma_variant="gemma-3-270m",
+    #         siglip_variant="siglip2-so400m-patch16-384",
+    #     ),
+    #     lr_schedule=_optimizer.CosineDecaySchedule(
+    #         warmup_steps=100,
+    #         peak_lr=3e-4,
+    #         decay_steps=10_000,
+    #         decay_lr=3e-5,
+    #     ),
+    #     optimizer=_optimizer.AdamW(
+    #         weight_decay=0.01,
+    #         clip_gradient_norm=1.0,
+    #     ),
+    #     num_train_steps=10_000,
+    #     batch_size=16,
+    #     data=ValueDataConfig(
+    #         success_repo_ids=[
+    #             "michios/droid_xxjd",
+    #             "michios/droid_xxjd_2",
+    #             "michios/droid_xxjd_3",
+    #             "michios/droid_xxjd_4",
+    #             "michios/droid_xxjd_5",
+    #             "michios/droid_xxjd_6",
+    #             "michios/droid_xxjd_7",
+    #         ],
+    #         failure_repo_ids=[
+    #             "michios/droid_xxjd_fail_1"
+    #         ],
+    #         failure_cost_json="configs/failure_costs.json",
+    #         default_c_fail=100.0,
+    #         success_sampling_ratio=0.5,
+    #     ),
+    #     checkpoint=CheckpointConfig(
+    #         checkpoint_dir="./checkpoints",
+    #         save_every_n_steps=1_000,
+    #         keep_n_checkpoints=5,
+    #     ),
+    #     logging=LoggingConfig(
+    #         log_every_n_steps=50,
+    #         wandb_enabled=True,
+    #         wandb_project="pi-value-function",
+    #         wandb_run_name="droid_value_training",
+    #     ),
+    #     num_workers=4,
+    #     seed=42,
+    # )
+    
+    config = TrainConfig.debug_config()
 
     print("=" * 60)
     print("Pi Value Function Training")

@@ -8,6 +8,7 @@ import os
 import pathlib
 import subprocess
 import tarfile
+from typing import Tuple
 
 from openpi.shared.download import maybe_download, get_cache_dir
 
@@ -47,62 +48,34 @@ def download_checkpoint(url: str, cache_dir: pathlib.Path | None = None) -> path
         # Use openpi's shared download utility with ~/.cache/openpi
         return maybe_download(url)
 
+def download_gemma_from_kaggle(extract_name: str = "gemma-3-270m") -> Tuple[pathlib.Path, pathlib.Path]:
+    # 1. Use the correct base path and expand the ~
+    base_cache = pathlib.Path("~/.cache/kagglehub/models/google/gemma-3/flax/gemma-3-270m").expanduser()
+    
+    # Use glob to find the version folder (e.g., '1') and the tokenizer inside it
+    # This looks for any folder (*/) that contains a tokenizer.model
+    existing_tokenizers = list(base_cache.glob("*/tokenizer.model"))
 
-def download_gemma_from_kaggle(extract_name: str = "gemma-3-270m") -> pathlib.Path:
-    """Download Gemma checkpoint from Kaggle and extract it.
+    if existing_tokenizers:
+        # Get the directory where the tokenizer was found (this is the '1' folder)
+        download_path = existing_tokenizers[0].parent
+        model_path = download_path / extract_name
+        
+        if model_path.exists():
+            print(f"Using cached Gemma checkpoint: {download_path}")
+            return model_path, existing_tokenizers[0]
 
-    Requires KAGGLE_USERNAME and KAGGLE_KEY environment variables to be set.
+    # Fallback to kagglehub if not found
+    import kagglehub
+    kagglehub.login()
+    
+    # This returns the path to the version folder (e.g., .../gemma-3-270m/1)
+    download_path = pathlib.Path(kagglehub.model_download("google/gemma-3/flax/gemma-3-270m"))
+    
+    model_path = download_path / extract_name
+    tokenizer_path = download_path / "tokenizer.model"
 
-    Args:
-        extract_name: Name for the extracted checkpoint directory
-
-    Returns:
-        Path to the extracted checkpoint directory
-    """
-    cache_dir = get_cache_dir()
-    extract_dir = cache_dir / extract_name
-
-    if extract_dir.exists():
-        print(f"Using cached Gemma checkpoint: {extract_dir}")
-        return extract_dir
-
-    # Check for Kaggle credentials
-    kaggle_username = os.environ.get("KAGGLE_USERNAME")
-    kaggle_key = os.environ.get("KAGGLE_KEY")
-
-    if not kaggle_username or not kaggle_key:
-        raise EnvironmentError(
-            "Kaggle credentials not found. Please set KAGGLE_USERNAME and KAGGLE_KEY environment variables.\n"
-            "You can get these from https://www.kaggle.com/settings -> API -> Create New Token"
-        )
-
-    # Download tar.gz to cache
-    tar_path = cache_dir / "gemma-3-270m.tar.gz"
-
-    if not tar_path.exists():
-        print(f"Downloading Gemma checkpoint from Kaggle to {tar_path}...")
-        result = subprocess.run(
-            [
-                "curl", "-L",
-                "-u", f"{kaggle_username}:{kaggle_key}",
-                "-o", str(tar_path),
-                GEMMA_3_KAGGLE_URL
-            ],
-            capture_output=True,
-            text=True
-        )
-        if result.returncode != 0:
-            raise RuntimeError(f"Failed to download Gemma checkpoint: {result.stderr}")
-        print(f"Downloaded to {tar_path}")
-
-    # Extract
-    print(f"Extracting {tar_path.name} to {extract_dir}...")
-    extract_dir.mkdir(parents=True, exist_ok=True)
-    with tarfile.open(tar_path, 'r:gz') as tar:
-        tar.extractall(extract_dir)
-    print(f"Extracted to {extract_dir}")
-
-    return extract_dir
+    return model_path, tokenizer_path
 
 
 def download_and_extract_checkpoint(url: str, extract_name: str | None = None) -> pathlib.Path:
