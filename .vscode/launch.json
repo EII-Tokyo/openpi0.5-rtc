@@ -1,0 +1,17 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python Debugger: Current File",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "env": {
+                "JAX_DISABLE_JIT": "1",
+                "JAX_DEBUG_NANS": "True"  // Optional: helps catch NaNs immediately
+            },
+            "justMyCode": false           // Recommended to see into JAX internals if needed
+        }
+    ]
+}
