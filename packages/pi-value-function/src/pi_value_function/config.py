@@ -23,7 +23,7 @@ class PiValueConfig(BaseValueModelConfig):
 
     value_dims: int = 1
     value_min: float = -1.0
-    value_max: float = 1.0
+    value_max: float = 0.0
     dtype: str = "bfloat16"
     gemma_variant: str = "gemma-3-270m"
     siglip_variant: str = "siglip2-so400m-patch16-384"

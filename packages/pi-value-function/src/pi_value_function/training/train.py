@@ -332,7 +332,7 @@ def train(config: TrainConfig) -> None:
             grad_norm_value = float(metrics_host.get("grad_norm", 0.0))
             pbar.set_postfix({
                 "loss": f"{loss_value:.4f}",
-                "grad_norm": f"{grad_norm_value:.2f}",
+                "gn": f"{grad_norm_value:.2f}",
             })
 
             # Log to W&B
@@ -357,58 +357,61 @@ def train(config: TrainConfig) -> None:
 def main() -> None:
     """CLI entry point."""
     # Create config with real LeRobot data
-    # config = TrainConfig(
-    #     exp_name="pi_value_droid",
-    #     model_config=PiValueConfig(
-    #         value_dims=201,  # 201 bins for categorical distribution over [-1, 0]
-    #         gemma_variant="gemma-3-270m",
-    #         siglip_variant="siglip2-so400m-patch16-384",
-    #     ),
-    #     lr_schedule=_optimizer.CosineDecaySchedule(
-    #         warmup_steps=100,
-    #         peak_lr=3e-4,
-    #         decay_steps=10_000,
-    #         decay_lr=3e-5,
-    #     ),
-    #     optimizer=_optimizer.AdamW(
-    #         weight_decay=0.01,
-    #         clip_gradient_norm=1.0,
-    #     ),
-    #     num_train_steps=10_000,
-    #     batch_size=16,
-    #     data=ValueDataConfig(
-    #         success_repo_ids=[
-    #             "michios/droid_xxjd",
-    #             "michios/droid_xxjd_2",
-    #             "michios/droid_xxjd_3",
-    #             "michios/droid_xxjd_4",
-    #             "michios/droid_xxjd_5",
-    #             "michios/droid_xxjd_6",
-    #             "michios/droid_xxjd_7",
-    #         ],
-    #         failure_repo_ids=[
-    #             "michios/droid_xxjd_fail_1"
-    #         ],
-    #         failure_cost_json="configs/failure_costs.json",
-    #         default_c_fail=100.0,
-    #         success_sampling_ratio=0.5,
-    #     ),
-    #     checkpoint=CheckpointConfig(
-    #         checkpoint_dir="./checkpoints",
-    #         save_every_n_steps=1_000,
-    #         keep_n_checkpoints=5,
-    #     ),
-    #     logging=LoggingConfig(
-    #         log_every_n_steps=50,
-    #         wandb_enabled=True,
-    #         wandb_project="pi-value-function",
-    #         wandb_run_name="droid_value_training",
-    #     ),
-    #     num_workers=4,
-    #     seed=42,
-    # )
+    config = TrainConfig(
+        exp_name="pi_value_droid_bs64_30k",
+        model_config=PiValueConfig(
+            value_dims=201,  # 201 bins for categorical distribution over [-1, 0]
+            value_min=-1.0,
+            value_max=0.0,
+            gemma_variant="gemma-3-270m",
+            siglip_variant="siglip2-so400m-patch16-384",
+        ),
+        lr_schedule=_optimizer.CosineDecaySchedule(
+            warmup_steps=500,
+            peak_lr=3e-5,
+            decay_steps=10_000,
+            decay_lr=3e-6,
+        ),
+        optimizer=_optimizer.AdamW(
+            weight_decay=0.01,
+            clip_gradient_norm=1.0,
+        ),
+        num_train_steps=30_000,
+        batch_size=64,
+        data=ValueDataConfig(
+            success_repo_ids=[
+                "michios/droid_xxjd",
+                "michios/droid_xxjd_2",
+                "michios/droid_xxjd_3",
+                "michios/droid_xxjd_4",
+                "michios/droid_xxjd_5",
+                "michios/droid_xxjd_6",
+                "michios/droid_xxjd_7",
+            ],
+            failure_repo_ids=[
+                "michios/droid_xxjd_fail_1"
+            ],
+            failure_cost_json="configs/failure_costs.json",
+            default_c_fail=100.0,
+            success_sampling_ratio=0.5,
+        ),
+        checkpoint=CheckpointConfig(
+            checkpoint_dir="./checkpoints",
+            save_every_n_steps=1_000,
+            keep_n_checkpoints=5,
+            overwrite=True,
+        ),
+        logging=LoggingConfig(
+            log_every_n_steps=50,
+            wandb_enabled=True,
+            wandb_project="pi-value-function",
+            wandb_run_name="droid_value_training",
+        ),
+        num_workers=4,
+        seed=42,
+    )
     
-    config = TrainConfig.debug_config()
+    # config = TrainConfig.debug_config()
 
     print("=" * 60)
     print("Pi Value Function Training")

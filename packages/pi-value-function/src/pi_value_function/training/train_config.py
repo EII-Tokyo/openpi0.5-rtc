@@ -395,6 +395,8 @@ class TrainConfig:
             exp_name="debug",
             model_config=PiValueConfig(
                 value_dims=201,  # 201 bins for categorical distribution over [-1, 0]
+                value_min=-1.0,
+                value_max=0.0,
                 gemma_variant="gemma-3-270m",  # Smallest variant
                 siglip_variant="siglip2-so400m-patch16-384",
             ),
