@@ -61,6 +61,7 @@ class PiValue(BaseValueModel):
                 pool_type="none",  # Return all tokens unpooled
                 scan=True,
                 dtype_mm="float32",
+                head_zeroinit=False,
             )
         )
         self.siglip.lazy_init(next(iter(config.fake_obs().images.values())), train=False, rngs=rngs)
