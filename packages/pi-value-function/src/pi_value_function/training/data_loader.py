@@ -343,22 +343,35 @@ class ValueFunctionDataset(torch.utils.data.Dataset):
         return episodes
 
     def _compute_normalization_stats(self) -> None:
-        """Compute normalization statistics from episode metadata."""
-        # Find max episode length
-        max_episode_length = max(
-            max((ep.length for ep in self.success_episodes), default=0),
-            max((ep.length for ep in self.failure_episodes), default=0),
-        )
+        """Compute normalization statistics from episode metadata.
 
-        # Find max C_fail
-        max_c_fail = max(
-            (self.cost_manager.get_cost(ep.prompt) for ep in self.failure_episodes),
-            default=self.cost_manager._default_c_fail,
-        )
+        Uses 75th percentile for episode length and mean for failure cost
+        to provide good dynamic range for typical episodes while handling outliers.
+        """
+        # Use 75th percentile episode length for better resolution of typical episodes
+        # Using median (50th) or 75th percentile instead of 95th gives more dynamic range
+        # to the majority of episodes while still handling most cases
+        all_lengths = [ep.length for ep in self.success_episodes + self.failure_episodes]
+        if all_lengths:
+            typical_episode_length = int(np.percentile(all_lengths, 75))
+        else:
+            typical_episode_length = 0
 
-        # Raw value range
+        # Use mean C_fail instead of max to avoid extreme values
+        if self.failure_episodes:
+            failure_costs = [self.cost_manager.get_cost(ep.prompt) for ep in self.failure_episodes]
+            typical_c_fail = np.mean(failure_costs)
+        else:
+            typical_c_fail = self.cost_manager._default_c_fail
+
+        # Raw value range based on typical values, not extremes
         self.raw_value_max = 0.0  # End of successful episode
-        self.raw_value_min = -(max_episode_length + max_c_fail)
+        self.raw_value_min = -(typical_episode_length + typical_c_fail)
+
+        # Log normalization params for debugging
+        print(f"Value normalization range: [{self.raw_value_min:.1f}, {self.raw_value_max:.1f}]")
+        print(f"  Based on 95th percentile episode length: {typical_episode_length}")
+        print(f"  Based on mean failure cost: {typical_c_fail:.1f}")
 
     def __len__(self) -> int:
         """Return total number of timesteps across all episodes."""
