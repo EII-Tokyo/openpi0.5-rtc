@@ -108,55 +108,6 @@ def print_param_structure(params, prefix="", max_depth=3, current_depth=0):
             print(f"{'  ' * current_depth}{prefix}{key}: {value.shape}")
 
 
-def test_siglip1_forward_pass():
-    """Test forward pass with SigLIP 1 (current setup)."""
-    print("\n" + "="*80)
-    print("Testing SigLIP 1 (Current Setup - Random Initialization)")
-    print("="*80)
-
-    # For comparison, use same config as SigLIP 2 (MAP pooling, no classification head)
-    # This way we can compare pre_logits fairly
-    model = _siglip.Module(
-        num_classes=None,
-        variant="So400m/14",
-        pool_type="map",
-        scan=True,
-        dtype_mm="float32",
-    )
-
-    # Create dummy image
-    test_image = create_test_image()
-    print(f"Input image shape: {test_image.shape}")
-
-    # Initialize model parameters
-    rng = jax.random.PRNGKey(0)
-    variables = model.init(rng, test_image, train=False)
-
-    # Print parameter structure
-    print("\nSigLIP 1 Model Parameter Structure:")
-    print_param_structure(variables['params'], max_depth=3)
-
-    # Forward pass
-    output, aux = model.apply(variables, test_image, train=False)
-
-    print(f"\nOutput shape: {output.shape}")
-    print(f"Output dtype: {output.dtype}")
-    print(f"Output stats: min={output.min():.4f}, max={output.max():.4f}, mean={output.mean():.4f}")
-    print(f"Auxiliary outputs keys: {list(aux.keys())}")
-
-    # Check pre_logits_2d which is what we use in Pi0
-    if 'pre_logits_2d' in aux:
-        print(f"pre_logits_2d shape: {aux['pre_logits_2d'].shape}")
-
-    return {
-        'model': model,
-        'variables': variables,
-        'output': output,
-        'aux': aux,
-        'test_image': test_image,
-    }
-
-
 def test_siglip2_weight_loading():
     """Test loading SigLIP 2 weights into the same architecture."""
     print("\n" + "="*80)
@@ -216,82 +167,27 @@ def test_siglip2_forward_pass(siglip2_weights: dict, test_image: jnp.ndarray):
     }
 
 
-def compare_outputs(siglip1_results: dict, siglip2_results: dict):
-    """Compare outputs from SigLIP 1 and SigLIP 2."""
-    print("\n" + "="*80)
-    print("Comparing Outputs")
-    print("="*80)
-
-    # Note: When num_classes=None, output is just the pooled pre_logits
-    output1 = siglip1_results['output']
-    output2 = siglip2_results['output']
-
-    print(f"Output type: {'pre_logits' if output1.ndim == 2 else 'logits'}")
-    print(f"Shape match: {output1.shape == output2.shape}")
-    print(f"Random init shape: {output1.shape}")
-    print(f"SigLIP 2 shape: {output2.shape}")
-
-    if output1.shape == output2.shape:
-        # Compare actual output values
-        diff = jnp.abs(output1 - output2)
-        print(f"\nOutput Difference Statistics:")
-        print(f"  Mean absolute difference: {diff.mean():.6f}")
-        print(f"  Max absolute difference: {diff.max():.6f}")
-        print(f"  Min absolute difference: {diff.min():.6f}")
-
-        # Compute cosine similarity for each example in batch
-        print(f"\nCosine Similarity (per example, random vs pretrained):")
-        for i in range(output1.shape[0]):
-            # Flatten each example's output
-            if output1.ndim == 2:
-                o1_flat = output1[i]
-                o2_flat = output2[i]
-            else:
-                o1_flat = output1[i].reshape(-1)
-                o2_flat = output2[i].reshape(-1)
-
-            # Compute cosine similarity
-            cosine_sim = jnp.sum(o1_flat * o2_flat) / (jnp.linalg.norm(o1_flat) * jnp.linalg.norm(o2_flat))
-            print(f"  Example {i}: {cosine_sim:.6f}")
-
-    # Compare pre_logits_2d (what we use in Pi0)
-    if 'pre_logits_2d' in siglip1_results['aux'] and 'pre_logits_2d' in siglip2_results['aux']:
-        pre1 = siglip1_results['aux']['pre_logits_2d']
-        pre2 = siglip2_results['aux']['pre_logits_2d']
-
-        print(f"\npre_logits_2d Comparison:")
-        print(f"  SigLIP 1: {pre1.shape}, mean={pre1.mean():.4f}, std={pre1.std():.4f}")
-        print(f"  SigLIP 2: {pre2.shape}, mean={pre2.mean():.4f}, std={pre2.std():.4f}")
-
-        diff = jnp.abs(pre1 - pre2)
-        print(f"  Mean absolute difference: {diff.mean():.6f}")
-        print(f"  Max absolute difference: {diff.max():.6f}")
-
-
 def main():
     """Run all tests."""
     print("SigLIP 1 -> SigLIP 2 Weight Switching Test")
     print("=" * 80)
 
-    # Test 1: SigLIP 1 forward pass
-    siglip1_results = test_siglip1_forward_pass()
-
     # Test 2: Load SigLIP 2 weights
     siglip2_weights = test_siglip2_weight_loading()
+    
+    test_image = create_test_image()
 
     # Test 3: SigLIP 2 forward pass with same architecture
     siglip2_results = test_siglip2_forward_pass(
         siglip2_weights,
-        siglip1_results['test_image']
+        test_image
     )
-
-    # Test 4: Compare outputs
-    compare_outputs(siglip1_results, siglip2_results)
-
-    print("\n" + "="*80)
-    print("Test Complete!")
-    print("="*80)
-
+    
+    outputs = siglip2_results.output
+    
+    print(outputs)
+    
+    
 
 if __name__ == "__main__":
     main()
