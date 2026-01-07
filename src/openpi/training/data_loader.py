@@ -7,7 +7,7 @@ from typing import Literal, Protocol, SupportsIndex, TypeVar
 
 import jax
 import jax.numpy as jnp
-import lerobot.common.datasets.lerobot_dataset as lerobot_dataset
+import lerobot.datasets.lerobot_dataset as lerobot_dataset
 import numpy as np
 import torch
 
@@ -139,7 +139,7 @@ def create_torch_dataset(
         return FakeDataset(model_config, num_samples=1024)
     if repo_ids is not None:
         # Get FPS from first dataset (assume all datasets in multi-dataset have same FPS)
-        first_dataset_meta = lerobot_dataset.LeRobotDatasetMetadata(repo_ids[0])
+        first_dataset_meta = lerobot_dataset.LeRobotDatasetMetadata(repo_ids[0], force_cache_sync=True)
         dataset = lerobot_dataset.MultiLeRobotDataset(
             repo_ids,
             # root="/home/ubuntu/aloha",
@@ -148,7 +148,7 @@ def create_torch_dataset(
             },
         )
     if repo_id is not None:
-        dataset_meta = lerobot_dataset.LeRobotDatasetMetadata(repo_id)
+        dataset_meta = lerobot_dataset.LeRobotDatasetMetadata(repo_id, force_cache_sync=True)
         dataset = lerobot_dataset.LeRobotDataset(
             data_config.repo_id,
             delta_timestamps={
