@@ -14,8 +14,8 @@ import shutil
 from typing import Literal
 
 import h5py
-from lerobot.common.datasets.lerobot_dataset import HF_LEROBOT_HOME as LEROBOT_HOME
-from lerobot.common.datasets.lerobot_dataset import LeRobotDataset
+from lerobot.datasets.lerobot_dataset import HF_LEROBOT_HOME as LEROBOT_HOME
+from lerobot.datasets.lerobot_dataset import LeRobotDataset
 # from lerobot.common.datasets.push_dataset_to_hub._download_raw import download_raw
 import numpy as np
 import cv2
@@ -281,7 +281,6 @@ def populate_dataset(
             frame = {
                 "observation.state": state[i],
                 "action": action[i],
-                "task": task,
             }
 
             # Load images one by one for this frame
@@ -296,7 +295,7 @@ def populate_dataset(
             if effort is not None:
                 frame["observation.effort"] = effort[i]
 
-            dataset.add_frame(frame)
+            dataset.add_frame(frame, task)
                 
             # Force garbage collection every 50 frames
             if i % 50 == 0:
@@ -362,10 +361,10 @@ def port_aloha(
 
 
 if __name__ == "__main__":
-    tyro.cli(port_aloha)
-    # port_aloha(
-    #     raw_dir=Path(f"../aloha-2.0/aloha_data/aloha_stationary/6.medium_full/"),
-    #     repo_id=f"lyl472324464/remove-label-20251021",
-    #     task="Remove the label from the bottle with the knife in the right hand.",
-    #     push_to_hub=False,
-    # )
+    # tyro.cli(port_aloha)
+    port_aloha(
+        raw_dir=Path(f"/home/eii/aloha-2.0/aloha_data/cut_data/2025.11.18_twist_two"),
+        repo_id=f"lyl472324464/twist_two_20251118",
+        task="Twist off the bottle cap.",
+        push_to_hub=False,
+    )

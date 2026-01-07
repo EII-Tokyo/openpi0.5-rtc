@@ -1,6 +1,6 @@
-from lerobot.common.datasets.lerobot_dataset import LeRobotDataset
+from lerobot.datasets.lerobot_dataset import LeRobotDataset
 
-repo_id = "lyl472324464/remove-label-20251021"
+repo_id = "lyl472324464/twist_two_20251118"
 
 dataset = LeRobotDataset(repo_id)
 

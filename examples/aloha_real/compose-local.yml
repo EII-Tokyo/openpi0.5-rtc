@@ -10,8 +10,8 @@ services:
     build:
       context: ../..
       dockerfile: examples/aloha_real/Dockerfile
-    # command: /bin/bash
-    command: python3 /app/examples/aloha_real/main.py
+    command: /bin/bash
+    # command: python3 /app/examples/aloha_real/main.py
     init: true 
     tty: true
     network_mode: host
@@ -51,8 +51,8 @@ services:
     build:
       context: ../..
       dockerfile: scripts/docker/serve_policy.Dockerfile
-    # command: /bin/bash
-    command: uv run scripts/serve_policy.py --env ALOHA
+    command: /bin/bash
+    # command: uv run scripts/serve_policy.py --env ALOHA
     # command: uv run scripts/serve_policy.py --env ALOHA --default_prompt='open the tupperware and put the food on the plate'
     # command: uv run scripts/serve_policy.py --env ALOHA --default_prompt='uncap the pen'
     init: true

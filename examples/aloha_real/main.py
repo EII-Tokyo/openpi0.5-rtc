@@ -9,6 +9,7 @@ from openpi_client.runtime.agents import policy_agent as _policy_agent
 import tyro
 
 from examples.aloha_real import env as _env
+from examples.aloha_real import h5df_saver
 
 
 @dataclasses.dataclass
@@ -33,6 +34,11 @@ class Args:
             # [0.0, -0.96, 1.16, 0.0, -0.0, 0.0],
             [0.0, -0.96, 1.16, 1.57, -0.0, -1.57]         
         ])
+    
+    # H5dfSaver 配置
+    dataset_dir: str = "~/aloha_data"
+    compress_images: bool = True
+    is_mobile: bool = False
 
 
 def main(args: Args) -> None:
@@ -43,6 +49,14 @@ def main(args: Args) -> None:
     logging.info(f"Server metadata: {ws_client_policy.get_server_metadata()}")
 
     metadata = ws_client_policy.get_server_metadata()
+    
+    # 创建 H5dfSaver subscriber
+    h5df_saver_instance = h5df_saver.H5dfSaver(
+        dataset_dir=args.dataset_dir,
+        compress_images=args.compress_images,
+        is_mobile=args.is_mobile,
+    )
+    
     runtime = _runtime.Runtime(
         # environment=_env.AlohaRealEnvironment(reset_position=metadata.get("reset_pose")),
         environment=_env.AlohaRealEnvironment(reset_position=args.reset_position),
@@ -53,7 +67,7 @@ def main(args: Args) -> None:
                 use_rtc=args.use_rtc,
             )
         ),
-        subscribers=[],
+        subscribers=[h5df_saver_instance],
         max_hz=50,
         num_episodes=args.num_episodes,
         max_episode_steps=args.max_episode_steps,

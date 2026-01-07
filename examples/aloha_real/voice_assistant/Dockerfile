@@ -15,6 +15,9 @@ RUN apt-get update && apt-get install -y \
     pulseaudio \
     pulseaudio-utils \
     libpulse-dev \
+    mecab\
+    mecab-ipadic-utf8 \
+    libmecab-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # 安装 uv
@@ -29,6 +32,9 @@ COPY pyproject.toml .
 
 # 安装Python依赖
 RUN uv pip install --system -e .
+
+# 初始化 unidic 字典（日语分词所需）
+RUN uv run python3 -m unidic download || echo "unidic dictionary download failed, will download at runtime"
 
 # 预下载Whisper模型 (CPU，运行时再切换到CUDA)
 RUN uv run python3 -c "import whisper; whisper.load_model('large-v3', device='cpu')"

@@ -49,6 +49,9 @@ class AlohaRealEnvironment(_environment.Environment):
 
         return {
             "state": obs["qpos"],
+            "qpos": obs["qpos"],
+            "qvel": obs["qvel"],
+            "effort": obs["effort"],
             "images": obs["images"],
         }
 

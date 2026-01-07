@@ -804,78 +804,89 @@ _CONFIGS = [
         data=LeRobotAlohaDataConfig(
             # repo_id="physical-intelligence/aloha_pen_uncap_diverse",
             repo_ids=[
-                "lyl472324464/remove-label-20251021",
-                # "lyl472324464/remove-label-20251014",
-                "lyl472324464/twist",
-                # "lyl472324464/twist",
-                # "lyl472324464/twist",
-                # "lyl472324464/twist",
-                # "lyl472324464/twist",
-                # "lyl472324464/twist",
-                # "lyl472324464/twist",
-                "lyl472324464/twist-one-20251015",
-                "lyl472324464/twist-many-20251015",
-                # "lyl472324464/twist-20251014",
-                # "lyl472324464/twist-20251014",
-                # "lyl472324464/twist-20251014",
-                # "lyl472324464/twist-20251014",
-                # "lyl472324464/twist-20251014",
-                # "lyl472324464/twist-20251014",
-                # "lyl472324464/aloha_static_battery",
-                # "lyl472324464/aloha_static_candy",
-                # "lyl472324464/aloha_static_coffee",
-                # "lyl472324464/aloha_static_coffee_new",
-                # "lyl472324464/aloha_static_cups_open",
-                # "lyl472324464/aloha_static_fork_pick_up",
-                # "lyl472324464/aloha_static_pingpong_test",
-                # "lyl472324464/aloha_static_pro_pencil",
-                # "lyl472324464/aloha_static_screw_driver",
-                # "lyl472324464/aloha_static_tape",
-                # "lyl472324464/aloha_static_thread_velcro",
-                # "lyl472324464/aloha_static_towel",
-                # "lyl472324464/aloha_static_vinh_cup",
-                # "lyl472324464/aloha_static_vinh_cup_left",
-                # "lyl472324464/aloha_static_ziploc_slide",
-                # "lyl472324464/hook_cable_8pin",
-                # "lyl472324464/handover_clear_zip_bag_upright",
-                # "lyl472324464/hook_cable_narrow_8pin",
-                # "lyl472324464/handover_metallic_zip_bag_upright",
-                # "lyl472324464/hook_rubber_shaft",
-                # "lyl472324464/handover_towel",
-                # "lyl472324464/hit_mark_with_hammer",
-                # "lyl472324464/fold_big_towel",
-                # "lyl472324464/fold_towel_assist",
-                # "lyl472324464/fold_towel_in_random_places",
-                # "lyl472324464/fold_green_towel",
-                # "lyl472324464/fold_yellow_towel",
-                # "lyl472324464/fold_light_blue_towel",
-                # "lyl472324464/fold_bath_towel",
-                # "lyl472324464/fold_orange_towel",
-                # "lyl472324464/fit_small_gear_shaft",
-                # "lyl472324464/fit_large_gear_shaft",
-                # "lyl472324464/find_insert_small_gear_shaft",
-                # "lyl472324464/find_insert_large_gear_shaft",        
-                # "lyl472324464/find_hole_and_insert_into_gear",
-                # "lyl472324464/close_toolbox",
-                # "lyl472324464/close_cardboard_box",
-                # "lyl472324464/brush_screws_into_dustpan_left_brush_human_hold",
-                # "lyl472324464/brush_screws_into_dustpan_human_brush_left_hold",
-                "lyl472324464/insert_lan_cable_into_the_hub",
-                "lyl472324464/insert_rod_moved_board",
-                "lyl472324464/insert_large_gear_shaft",
-                "lyl472324464/insert_shaft_into_gear",
-                "lyl472324464/insert_random_shaft_random_medium_gear",
-                "lyl472324464/insert_small_gear_shaft",
-                "lyl472324464/insert_random_shaft_random_small_gear",
-                "lyl472324464/insert_gear_onto_shaft_sliding",
-                "lyl472324464/insert_rod_board",
-                "lyl472324464/insert_usb_cable_board",
-                "lyl472324464/insert_usb_pcbox",
-                "lyl472324464/insert_usb_cable_fixed_by_robot",
-                "lyl472324464/insert_usb_port_hub",
-                "lyl472324464/insert_usb_cable_fix_parts",
-                "lyl472324464/insert_washer_shaft_both_hands",
-                "lyl472324464/insert_usb_cable",
+                "lyl472324464/twist",                           # 65.9k 
+                "lyl472324464/twist-one-20251015",              # 63.5k 
+                "lyl472324464/twist",                           # 65.9k 
+                "lyl472324464/twist-one-20251015",              # 63.5k 
+                "lyl472324464/twist",                           # 65.9k 
+                "lyl472324464/twist-one-20251015",              # 63.5k 
+                "lyl472324464/twist",                           # 65.9k 
+                "lyl472324464/twist-one-20251015",              # 63.5k 
+                "lyl472324464/twist",                           # 65.9k 
+
+                "lyl472324464/twist_two_20251118",              # 37.1k  
+                "lyl472324464/twist_two_20251114",              # 94.5k  
+                "lyl472324464/twist_two_20251126",              # 92.4k 
+                "lyl472324464/twist_two_20251118",              # 37.1k  
+                "lyl472324464/twist_two_20251114",              # 94.5k  
+                "lyl472324464/twist_two_20251126",              # 92.4k 
+                "lyl472324464/twist_two_20251126",              # 92.4k 
+                # "lyl472324464/twist-many-20251015",             # 25k   
+                "lyl472324464/twist-20251014",                  # 44.9k 
+                "lyl472324464/twist-20251014",                  # 44.9k 
+                "lyl472324464/twist-20251014",                  # 44.9k 
+                "lyl472324464/twist-20251014",                  # 44.9k
+
+                # "lyl472324464/remove-label-20251021",             # 89.1k  
+                # "lyl472324464/remove-label-20251014",             # 43.3k  
+                
+                "lyl472324464/aloha_static_battery",              # 29.4k  静态任务：抓取或操作电池
+                "lyl472324464/aloha_static_candy",                # 35k    静态任务：操作糖果物体
+                "lyl472324464/aloha_static_coffee",               # 55k    静态任务：操作咖啡杯
+                "lyl472324464/aloha_static_coffee_new",           # 55k    静态任务：操作咖啡杯（新版）
+                "lyl472324464/aloha_static_cups_open",            # 20k    打开杯子/容器
+                "lyl472324464/aloha_static_fork_pick_up",         # 60k    拾取叉子
+                "lyl472324464/aloha_static_pingpong_test",        # 6k     乒乓球相关操作测试
+                "lyl472324464/aloha_static_pro_pencil",           # 8.75k  拾取或移动专业铅笔
+                "lyl472324464/aloha_static_screw_driver",         # 20k    操作螺丝刀
+                "lyl472324464/aloha_static_tape",                 # 35k    操作胶带
+                "lyl472324464/aloha_static_thread_velcro",        # 20.4k  操作魔术贴
+                "lyl472324464/aloha_static_towel",                # 25k    折叠或移动毛巾
+                "lyl472324464/aloha_static_vinh_cup",             # 45.5k  操作 Vinh 杯子
+                "lyl472324464/aloha_static_vinh_cup_left",        # 50k    操作 Vinh 杯子（左手）
+                "lyl472324464/aloha_static_ziploc_slide",         # 16.8k  拉滑 Ziploc 密封袋
+                "lyl472324464/hook_cable_8pin",                   # 50k    钩住 8pin 线缆
+                "lyl472324464/handover_clear_zip_bag_upright",    # 30k    直立交递透明袋
+                # "lyl472324464/hook_cable_narrow_8pin",            # 50k    钩住窄的 8pin 线缆
+                # "lyl472324464/handover_metallic_zip_bag_upright", # 94k    直立交递金属拉链袋
+                # "lyl472324464/hook_rubber_shaft",                 # 75k    钩住橡胶轴
+                "lyl472324464/handover_towel",                    # 50k    传递毛巾
+                "lyl472324464/hit_mark_with_hammer",              # 150k   使用锤子敲击标记
+                # "lyl472324464/fold_big_towel",                    # 50k    折叠大毛巾
+                # "lyl472324464/fold_towel_assist",                 # 50k    辅助折叠毛巾
+                # "lyl472324464/fold_towel_in_random_places",       # 100k   随机位置折毛巾
+                # "lyl472324464/fold_green_towel",                  # 100k   折绿色毛巾
+                # "lyl472324464/fold_yellow_towel",                 # 35k    折黄色毛巾
+                # "lyl472324464/fold_light_blue_towel",             # 100k   折浅蓝色毛巾
+                # "lyl472324464/fold_bath_towel",                   # 50k    折浴巾
+                # "lyl472324464/fold_orange_towel",                 # 100k   折橙色毛巾
+                "lyl472324464/fit_small_gear_shaft",              # 35k    安装小齿轮到轴
+                # "lyl472324464/fit_large_gear_shaft",              # 25k    安装大齿轮到轴
+                # "lyl472324464/find_insert_small_gear_shaft",      # 85k    寻找位置并插小齿轮到轴
+                # "lyl472324464/find_insert_large_gear_shaft",      # 100k   寻找位置并插大齿轮到轴
+                "lyl472324464/find_hole_and_insert_into_gear",    # 50k    找到孔并将物体插入齿轮
+                # "lyl472324464/close_toolbox",                     # 25k    关闭工具箱
+                "lyl472324464/close_cardboard_box",               # 80k    关闭纸箱
+                # "lyl472324464/brush_screws_into_dustpan_left_brush_human_hold", # 25k 左手刷螺丝进入簸箕（人手固定）
+                "lyl472324464/brush_screws_into_dustpan_human_brush_left_hold", # 25k 人刷螺丝，机器人左手持簸箕
+
+                "lyl472324464/insert_lan_cable_into_the_hub",           # 50k   将网线插入交换机端口
+                # "lyl472324464/insert_rod_moved_board",                  # 60k   将杆插入可移动板结构
+                # "lyl472324464/insert_large_gear_shaft",                 # 100k  将大齿轮套入轴
+                # "lyl472324464/insert_shaft_into_gear",                  # 25k   将轴插入齿轮孔
+                # "lyl472324464/insert_random_shaft_random_medium_gear",  # 150k  随机轴插入随机中齿轮
+                # "lyl472324464/insert_small_gear_shaft",                 # 100k  将小齿轮套到轴上
+                # "lyl472324464/insert_random_shaft_random_small_gear",   # 150k  随机轴插入随机小齿轮
+                # "lyl472324464/insert_gear_onto_shaft_sliding",          # 50k   将齿轮沿轴滑动插入
+                # "lyl472324464/insert_rod_board",                        # 30k   将杆插入板孔
+                "lyl472324464/insert_usb_cable_board",                  # 50k   将 USB 插入板载接口
+                # "lyl472324464/insert_usb_pcbox",                        # 50k   将 USB 插入电脑主机
+                # "lyl472324464/insert_usb_cable_fixed_by_robot",         # 50k   在机器人固定电缆时插 USB
+                # "lyl472324464/insert_usb_port_hub",                     # 150k  将 USB 插入 USB Hub
+                # "lyl472324464/insert_usb_cable_fix_parts",              # 50k   插 USB 并穿过固定件
+                "lyl472324464/insert_washer_shaft_both_hands",          # 193k  双手将垫圈装到轴上
+                # "lyl472324464/insert_usb_cable",                        # 50k   基础 USB 插线任务
+
             ],
             assets=AssetsConfig(
                 assets_dir="gs://openpi-assets/checkpoints/pi05_base/assets",

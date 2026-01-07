@@ -328,14 +328,30 @@ Important: Return ONLY the JSON object, no additional text or explanation."""
         # 生成临时音频文件
         temp_file = "/tmp/tts_output.wav"
         
-        # 使用指定的TTS参数
-        self.tts.tts_to_file(
-            text=text,
-            file_path=temp_file,
-            speaker="Alexandra Hisakawa",
-            language=detected_language,
-            split_sentences=True
-        )
+        try:
+            print("=== TTS 调试信息 ===")
+            print(f"text: {text}")
+            print(f"detected_language: {detected_language}")
+            print("speaker: Alexandra Hisakawa")
+            print(f"output: {temp_file}")
+            print("====================")
+
+            self.tts.tts_to_file(
+                text=text,
+                file_path=temp_file,
+                speaker="Alexandra Hisakawa",
+                language=detected_language,
+                split_sentences=True
+            )
+
+        except Exception as e:
+            print("\n================ TTS ERROR ================")
+            print("❌ 语音合成失败，捕获到异常：")
+            print(f"异常类型: {type(e).__name__}")
+            print(f"异常内容: {e}")
+            print("\n--- 完整 traceback ---")
+            print("===========================================\n")
+        
         
         # 使用pygame播放
         pygame.mixer.music.load(temp_file)
@@ -362,6 +378,7 @@ Important: Return ONLY the JSON object, no additional text or explanation."""
         
         # 语音转文字
         text, detected_language = self.speech_to_text(audio_data)
+        print(text)
         if text is None:
             print("不支持的语言")
             self.text_to_speech("申し訳ございませんが、対応していない言語です。英語、中国語、または日本語でお話しください。", "ja")
