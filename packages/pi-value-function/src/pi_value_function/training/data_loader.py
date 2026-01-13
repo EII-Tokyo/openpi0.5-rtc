@@ -246,7 +246,7 @@ class ValueFunctionDataset(torch.utils.data.Dataset):
         success_repo_ids: list[str] | None = None,
         failure_repo_ids: list[str] | None = None,
         failure_cost_json: str | pathlib.Path | None = None,
-        default_c_fail: float = 100.0,
+        default_c_fail: float = 2000.0,
         success_sampling_ratio: float = 0.5,
         value_min: float = -1.0,
         value_max: float = 0.0,
@@ -343,35 +343,73 @@ class ValueFunctionDataset(torch.utils.data.Dataset):
         return episodes
 
     def _compute_normalization_stats(self) -> None:
-        """Compute normalization statistics from episode metadata.
+        """Compute per-task normalization statistics from episode metadata.
 
-        Uses 75th percentile for episode length and mean for failure cost
-        to provide good dynamic range for typical episodes while handling outliers.
+        Uses 75th percentile episode length per task to provide task-specific
+        normalization that preserves resolution for tasks with different durations.
         """
-        # Use 75th percentile episode length for better resolution of typical episodes
-        # Using median (50th) or 75th percentile instead of 95th gives more dynamic range
-        # to the majority of episodes while still handling most cases
+        # Group episodes by task
+        from collections import defaultdict
+        task_episodes: dict[str | None, list[EpisodeMetadata]] = defaultdict(list)
+
+        for ep in self.success_episodes + self.failure_episodes:
+            # Normalize task prompt for consistent grouping
+            task_key = ep.prompt.lower().strip() if ep.prompt else None
+            task_episodes[task_key].append(ep)
+
+        # Compute per-task normalization ranges
+        self.task_normalization: dict[str | None, tuple[float, float]] = {}
+
+        print("\n=== Per-Task Normalization Statistics ===")
+        for task_key, episodes in sorted(task_episodes.items(), key=lambda x: (x[0] is None, x[0])):
+            # Get episode lengths for this task
+            lengths = [ep.length for ep in episodes]
+
+            # Get failure costs for this task
+            failure_episodes = [ep for ep in episodes if not ep.success]
+            if failure_episodes:
+                c_fail = self.cost_manager.get_cost(task_key)
+            else:
+                c_fail = 0.0  # No failures for this task
+
+            # Compute 75th percentile episode length for this task
+            if len(lengths) >= 4:  # Need at least 4 episodes for reasonable percentile
+                typical_length = int(np.percentile(lengths, 75))
+            else:
+                typical_length = int(np.mean(lengths)) if lengths else 0
+
+            # Compute task-specific raw value range
+            raw_value_max = 0.0  # End of successful episode
+            raw_value_min = -(typical_length + c_fail)
+
+            self.task_normalization[task_key] = (raw_value_min, raw_value_max)
+
+            # Log task statistics
+            task_name = task_key if task_key else "<no task>"
+            print(f"  Task '{task_name}':")
+            print(f"    Episodes: {len(episodes)} ({sum(1 for e in episodes if e.success)} success, {len(failure_episodes)} failure)")
+            print(f"    Length (75th percentile): {typical_length}")
+            print(f"    C_fail: {c_fail:.1f}")
+            print(f"    Normalization range: [{raw_value_min:.1f}, {raw_value_max:.1f}]")
+
+        # Compute global fallback for unseen tasks (use overall statistics)
         all_lengths = [ep.length for ep in self.success_episodes + self.failure_episodes]
         if all_lengths:
-            typical_episode_length = int(np.percentile(all_lengths, 75))
+            global_typical_length = int(np.percentile(all_lengths, 75))
         else:
-            typical_episode_length = 0
+            global_typical_length = 0
 
-        # Use mean C_fail instead of max to avoid extreme values
         if self.failure_episodes:
             failure_costs = [self.cost_manager.get_cost(ep.prompt) for ep in self.failure_episodes]
-            typical_c_fail = np.mean(failure_costs)
+            global_c_fail = np.mean(failure_costs)
         else:
-            typical_c_fail = self.cost_manager._default_c_fail
+            global_c_fail = self.cost_manager._default_c_fail
 
-        # Raw value range based on typical values, not extremes
-        self.raw_value_max = 0.0  # End of successful episode
-        self.raw_value_min = -(typical_episode_length + typical_c_fail)
+        self.global_raw_value_min = -(global_typical_length + global_c_fail)
+        self.global_raw_value_max = 0.0
 
-        # Log normalization params for debugging
-        print(f"Value normalization range: [{self.raw_value_min:.1f}, {self.raw_value_max:.1f}]")
-        print(f"  Based on 95th percentile episode length: {typical_episode_length}")
-        print(f"  Based on mean failure cost: {typical_c_fail:.1f}")
+        print(f"\n  Global fallback range: [{self.global_raw_value_min:.1f}, {self.global_raw_value_max:.1f}]")
+        print("=" * 50 + "\n")
 
     def __len__(self) -> int:
         """Return total number of timesteps across all episodes."""
@@ -414,15 +452,23 @@ class ValueFunctionDataset(torch.utils.data.Dataset):
         # Parse observation to model format
         parsed = parse_observation(sample)
 
-        # Compute value target
+        # Get task-specific normalization range
+        task_key = episode_meta.prompt.lower().strip() if episode_meta.prompt else None
+        if task_key in self.task_normalization:
+            raw_value_min, raw_value_max = self.task_normalization[task_key]
+        else:
+            # Fallback to global normalization for unseen tasks
+            raw_value_min, raw_value_max = self.global_raw_value_min, self.global_raw_value_max
+
+        # Compute value target with task-specific normalization
         c_fail = 0.0 if is_success else self.cost_manager.get_cost(episode_meta.prompt)
         value = compute_value_target(
             timestep=timestep_offset,
             episode_length=episode_meta.length,
             is_success=is_success,
             c_fail=c_fail,
-            raw_value_min=self.raw_value_min,
-            raw_value_max=self.raw_value_max,
+            raw_value_min=raw_value_min,
+            raw_value_max=raw_value_max,
             value_min=self.value_min,
             value_max=self.value_max,
         )
