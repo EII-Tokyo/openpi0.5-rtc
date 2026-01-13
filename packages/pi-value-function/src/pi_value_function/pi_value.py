@@ -16,7 +16,7 @@ from openpi.models.model import Observation, preprocess_observation
 import openpi.shared.array_typing as at
 from pi_value_function.value_model_base import BaseValueModel, BaseValueModelConfig
 import openpi.models.siglip as _siglip
-from pi_value_function.gemma3 import Gemma3Module, get_config as get_gemma3_config
+from pi_value_function.gemma3 import Gemma3Module, get_config as get_gemma3_config, GEMMA3_VOCAB_SIZE
 
 class PiValue(BaseValueModel):
     """Value model using SigLIP + Gemma3 backbone.
@@ -25,9 +25,10 @@ class PiValue(BaseValueModel):
     1. SigLIP encodes images to embeddings (projected to Gemma3 width)
     2. Gemma3 embedder encodes text tokens
     3. Image and text embeddings are concatenated
-    4. Gemma3 transformer processes the combined sequence
-    5. Mean pooling over valid tokens
-    6. Linear projection to categorical value distribution (201 bins)
+    4. An EOS (end-of-sequence) token is appended to the sequence
+    5. Gemma3 transformer processes the combined sequence
+    6. The hidden state at the EOS token position is extracted
+    7. Linear projection to categorical value distribution (201 bins)
 
     The value distribution follows RECAP/π*0.6:
     - 201 categorical bins over range (-1, 0)
@@ -40,6 +41,10 @@ class PiValue(BaseValueModel):
         self.value_min = config.value_min
         self.value_max = config.value_max
         self.rngs = rngs
+
+        # EOS token ID for Gemma3 (standard EOS token)
+        # Gemma uses token ID 1 as EOS
+        self.eos_token_id = 1
 
         # Get Gemma3 config
         gemma3_config = get_gemma3_config("gemma3_270m")
@@ -76,15 +81,15 @@ class PiValue(BaseValueModel):
     def embed_prefix(
         self, obs: Observation
     ) -> tuple[at.Float[at.Array, "b s emb"], at.Bool[at.Array, "b s"], at.Bool[at.Array, " s"]]:
-        """Embed observation (images + text) into a sequence of embeddings.
+        """Embed observation (images + text) into a sequence of embeddings with EOS token.
 
         Args:
             obs: Observation containing images, image_masks, tokenized_prompt, etc.
 
         Returns:
-            tokens: Concatenated embeddings [batch, seq_len, embed_dim]
-            input_mask: Valid token mask [batch, seq_len]
-            ar_mask: Autoregressive mask pattern [seq_len] (False = bidirectional)
+            tokens: Concatenated embeddings [batch, seq_len + 1, embed_dim] (includes EOS)
+            input_mask: Valid token mask [batch, seq_len + 1]
+            ar_mask: Autoregressive mask pattern [seq_len + 1] (False = bidirectional)
         """
         input_mask = []
         ar_mask = []
@@ -113,8 +118,22 @@ class PiValue(BaseValueModel):
             # Language tokens also use bidirectional attention for value estimation
             ar_mask += [False] * tokenized_inputs.shape[1]
 
+        # Concatenate all embeddings
         tokens = jnp.concatenate(tokens, axis=1)
         input_mask = jnp.concatenate(input_mask, axis=1)
+
+        # Append EOS token
+        batch_size = tokens.shape[0]
+        eos_token_ids = jnp.full((batch_size, 1), self.eos_token_id, dtype=jnp.int32)
+        eos_embeddings = self.gemma(eos_token_ids, method="embed")  # (batch, 1, embed_dim)
+
+        tokens = jnp.concatenate([tokens, eos_embeddings], axis=1)
+        # EOS token is always valid
+        eos_mask = jnp.ones((batch_size, 1), dtype=bool)
+        input_mask = jnp.concatenate([input_mask, eos_mask], axis=1)
+        # EOS token also uses bidirectional attention
+        ar_mask += [False]
+
         ar_mask = jnp.array(ar_mask)
         return tokens, input_mask, ar_mask
 
@@ -162,7 +181,7 @@ class PiValue(BaseValueModel):
         Returns:
             Logits over value bins, shape (batch, value_dims)
         """
-        # Get observation embeddings
+        # Get observation embeddings (includes EOS token at the end)
         tokens, input_mask, ar_mask = self.embed_prefix(observation)
 
         # Build full attention mask (bidirectional for value estimation)
@@ -180,14 +199,12 @@ class PiValue(BaseValueModel):
             deterministic=not train,
         )  # Shape: (batch, seq_len, embed_dim)
 
-        # Mean pooling over valid tokens
-        mask_expanded = input_mask[:, :, None].astype(hidden_states.dtype)
-        pooled = jnp.sum(hidden_states * mask_expanded, axis=1) / (
-            jnp.sum(mask_expanded, axis=1) + 1e-8
-        )  # Shape: (batch, embed_dim)
+        # Extract hidden state at EOS token position (last position)
+        # The EOS token is always at the last position since we appended it
+        eos_hidden_state = hidden_states[:, -1, :]  # (batch, embed_dim)
 
         # Project to value distribution logits
-        logits = self.value_proj(pooled)  # Shape: (batch, value_dims)
+        logits = self.value_proj(eos_hidden_state)  # Shape: (batch, value_dims)
 
         return logits
 
