@@ -178,6 +178,26 @@ def get_arm_gripper_positions(bot):
 
 
 def move_arms(bot_list, target_pose_list, move_time=1):
+    # vx300s机器人关节位置限制（从URDF文件中获取的真实值）
+    # 来源: interbotix_xsarm_descriptions/urdf/vx300s.urdf.xacro
+    import math
+    joint_limits_lower = np.array([
+        -math.pi + 0.00001,  # waist
+        math.radians(-106),  # shoulder: -1.850049
+        math.radians(-101),  # elbow: -1.76278
+        -math.pi + 0.00001,  # forearm_roll
+        math.radians(-107),  # wrist_angle: -1.86750
+        -math.pi + 0.00001   # wrist_rotate
+    ])
+    joint_limits_upper = np.array([
+        math.pi - 0.00001,   # waist
+        math.radians(72),    # shoulder: 1.256637
+        math.radians(92),    # elbow: 1.60570
+        math.pi - 0.00001,   # forearm_roll
+        math.radians(128),   # wrist_angle: 2.23402
+        math.pi - 0.00001    # wrist_rotate
+    ])
+    
     num_steps = int(move_time / constants.DT)
     curr_pose_list = [get_arm_joint_positions(bot) for bot in bot_list]
     traj_list = [
@@ -186,7 +206,9 @@ def move_arms(bot_list, target_pose_list, move_time=1):
     ]
     for t in range(num_steps):
         for bot_id, bot in enumerate(bot_list):
-            bot.arm.set_joint_positions(traj_list[bot_id][t], blocking=False)
+            # 裁剪关节位置到限制范围内，避免警告
+            clipped_positions = np.clip(traj_list[bot_id][t], joint_limits_lower, joint_limits_upper)
+            bot.arm.set_joint_positions(clipped_positions, blocking=False)
         time.sleep(constants.DT)
 
 
@@ -200,15 +222,11 @@ def move_grippers(bot_list, target_pose_list, move_time):
         for curr_pose, target_pose in zip(curr_pose_list, target_pose_list)
     ]
 
-    with open(f"/data/gripper_traj_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.jsonl", "a") as f:
-        for t in range(num_steps):
-            d = {}
-            for bot_id, bot in enumerate(bot_list):
-                gripper_command.cmd = traj_list[bot_id][t]
-                bot.gripper.core.pub_single.publish(gripper_command)
-                d[bot_id] = {"obs": get_arm_gripper_positions(bot), "act": traj_list[bot_id][t]}
-            f.write(json.dumps(d) + "\n")
-            time.sleep(constants.DT)
+    for t in range(num_steps):
+        for bot_id, bot in enumerate(bot_list):
+            gripper_command.cmd = traj_list[bot_id][t]
+            bot.gripper.core.pub_single.publish(gripper_command)
+        time.sleep(constants.DT)
 
 
 def setup_puppet_bot(bot, current_limit=550):  
@@ -221,10 +239,17 @@ def setup_puppet_bot(bot, current_limit=550):
     torque_on(bot)
 
 
-def setup_master_bot(bot):
-    bot.dxl.robot_set_operating_modes("group", "arm", "pwm")
+def restart_puppet_bot_gripper(bot, current_limit=550):
+    bot.dxl.robot_torque_enable("single", "gripper", False)
+    bot.dxl.robot_set_motor_registers('single', 'gripper', 'Current_Limit', current_limit)
+    bot.dxl.robot_reboot_motors("single", "gripper", True)
     bot.dxl.robot_set_operating_modes("single", "gripper", "current_based_position")
-    torque_off(bot)
+
+
+def setup_master_bot(bot):
+    bot.dxl.robot_set_operating_modes("group", "arm", "position")
+    bot.dxl.robot_set_operating_modes("single", "gripper", "current_based_position")
+    torque_on(bot)
 
 
 def set_standard_pid_gains(bot):

@@ -1,5 +1,3 @@
-# Run with:
-# docker compose -f examples/aloha_real/compose.yml up --build
 services:
   runtime:
     image: lyl472324464/robot:aloha-ros1.0
@@ -7,36 +5,31 @@ services:
       - aloha_ros_nodes
       - ros_master
       - openpi_server
-    build:
-      context: ../..
-      dockerfile: examples/aloha_real/Dockerfile
+    # build:
+    #   context: .
+    #   dockerfile: examples/aloha_real/Dockerfile
     command: /bin/bash
-    # command: python3 /app/examples/aloha_real/main.py
-    init: true 
+    init: true
     tty: true
     network_mode: host
     privileged: true
     volumes:
-      - $PWD/examples:/app/examples
-      - $PWD/src:/app/src
-      - $PWD/packages:/app/packages
-      - $PWD/scripts:/app/scripts
-      - $PWD/checkpoints:/app/checkpoints
-      - ../../data:/data
+      - $PWD:/app
 
   aloha_ros_nodes:
     image: lyl472324464/robot:aloha-ros1.0
     depends_on:
       - ros_master
-    build:
-      context: ../..
-      dockerfile: examples/aloha_real/Dockerfile
+    # build:
+    #   context: .
+    #   dockerfile: examples/aloha_real/Dockerfile
     init: true
     tty: true
     network_mode: host
     privileged: true
     volumes:
       - /dev:/dev
+      - $PWD/third_party/aloha:/root/interbotix_ws/src/aloha
     command: roslaunch --wait aloha ros_nodes.launch
 
   ros_master:
@@ -49,25 +42,14 @@ services:
   openpi_server:
     image: lyl472324464/robot:openpi_server
     build:
-      context: ../..
+      context: .
       dockerfile: scripts/docker/serve_policy.Dockerfile
-    command: /bin/bash
-    # command: uv run scripts/serve_policy.py --env ALOHA
-    # command: uv run scripts/serve_policy.py --env ALOHA --default_prompt='open the tupperware and put the food on the plate'
-    # command: uv run scripts/serve_policy.py --env ALOHA --default_prompt='uncap the pen'
+    command: uv run scripts/serve_policy.py --env ALOHA
     init: true
     tty: true
     network_mode: host
     volumes:
-      - $PWD/examples:/app/examples
-      - $PWD/src:/app/src
-      - $PWD/packages:/app/packages
-      - $PWD/scripts:/app/scripts
-      - $PWD/pyproject.toml:/app/pyproject.toml
-      - $PWD/uv.lock:/app/uv.lock
-      - $PWD/LICENSE:/app/LICENSE
-      - $PWD/README.md:/app/README.md
-      - $PWD/checkpoints:/app/checkpoints
+      - $PWD:/app
       - ${OPENPI_DATA_HOME:-~/.cache/openpi}:/openpi_assets
     environment:
       - GIT_LFS_SKIP_SMUDGE=1
@@ -75,23 +57,9 @@ services:
       - SERVER_ARGS
       - OPENPI_DATA_HOME=/openpi_assets
       - IS_DOCKER=true
-
-    # Comment out this block if not running on a machine with GPUs.
-    # deploy:
-    #   resources:
-    #     reservations:
-    #       devices:
-    #         - driver: nvidia
-    #           count: 1
-    #           capabilities: [gpu]
-
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all        # 或写具体数量，如 1 / 2
-              capabilities: [gpu]
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
+    gpus: all
 
   redis:
     image: redis:7.4.2
@@ -114,6 +82,7 @@ services:
     restart: always
     network_mode: "host"
     privileged: true
+    gpus: all
     volumes:
       - ./voice_assistant:/app
       - /dev:/dev
@@ -127,13 +96,8 @@ services:
       - PULSE_RUNTIME_PATH=/run/user/1000/pulse
       - PULSE_STATE_PATH=/run/user/1000/pulse
       - DISPLAY=${DISPLAY}
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
     depends_on:
       - redis
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
     command: /bin/bash -c "tail -f /dev/null"

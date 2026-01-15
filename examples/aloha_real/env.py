@@ -1,10 +1,9 @@
 from typing import List, Optional  # noqa: UP035
-
+import copy
 import einops
 from openpi_client import image_tools
 from openpi_client.runtime import environment as _environment
 from typing_extensions import override
-
 from examples.aloha_real import real_env as _real_env
 
 
@@ -14,18 +13,19 @@ class AlohaRealEnvironment(_environment.Environment):
     def __init__(
         self,
         reset_position: Optional[List[List[float]]] = None,  # noqa: UP006,UP007
+        gripper_current_limits: Optional[List[int]] = None,
         render_height: int = 224,
         render_width: int = 224,
     ) -> None:
-        self._env = _real_env.make_real_env(init_node=True, reset_position=reset_position)
+        self._env = _real_env.make_real_env(init_node=True, reset_position=reset_position, gripper_current_limits=gripper_current_limits)
         self._render_height = render_height
         self._render_width = render_width
 
         self._ts = None
 
     @override
-    def reset(self) -> None:
-        self._ts = self._env.reset()
+    def reset(self, *, reset_position=True) -> None:
+        self._ts = self._env.reset(reset_position=reset_position)
 
     @override
     def is_episode_complete(self) -> bool:
@@ -35,24 +35,24 @@ class AlohaRealEnvironment(_environment.Environment):
     def get_observation(self) -> dict:
         if self._ts is None:
             raise RuntimeError("Timestep is not set. Call reset() first.")
-
+        origin_observation = copy.deepcopy(self._ts.observation)
         obs = self._ts.observation
         for k in list(obs["images"].keys()):
             if "_depth" in k:
                 del obs["images"][k]
 
-        for cam_name in obs["images"]:
-            img = image_tools.convert_to_uint8(
-                image_tools.resize_with_pad(obs["images"][cam_name], self._render_height, self._render_width)
-            )
-            obs["images"][cam_name] = einops.rearrange(img, "h w c -> c h w")
-
+        # for cam_name in obs["images"]:
+        #     img = image_tools.convert_to_uint8(
+        #         image_tools.resize_with_pad(obs["images"][cam_name], self._render_height, self._render_width)
+        #     )
+        #     obs["images"][cam_name] = einops.rearrange(img, "h w c -> c h w")
         return {
             "state": obs["qpos"],
             "qpos": obs["qpos"],
             "qvel": obs["qvel"],
             "effort": obs["effort"],
             "images": obs["images"],
+            "origin_observation": origin_observation,
         }
 
     @override

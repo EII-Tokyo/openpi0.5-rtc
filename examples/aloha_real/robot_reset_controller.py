@@ -54,6 +54,7 @@ class GripperController:
     def setup_gripper(self):
         """设置夹爪操作模式"""
         try:
+            
             # 重启夹爪电机
             # self.bot.dxl.robot_reboot_motors("group", "arm", True)
             # print("arm电机重启完成")
@@ -78,10 +79,24 @@ class GripperController:
             # gripper_profile_type = self.bot.dxl.robot_get_motor_registers("single", "gripper", "profile_type")
             # print(f"Current arm profile type: {arm_profile_type}")
             # print(f"Current gripper profile type: {gripper_profile_type}")
+            # self.bot.dxl.robot_torque_enable("single", "gripper", False)
+            # self.bot.dxl.robot_torque_enable('group', 'arm', False)
             
         except Exception as e:
             print(f"设置夹爪时出错: {e}")
     
+    def get_gripper_error(self):
+        try:
+            err = self.bot.dxl.robot_get_motor_registers(
+                "single",
+                "gripper",
+                "Hardware_Error_Status"
+            )
+            return err
+        except Exception as e:
+            print("Read gripper error failed:", e)
+            return None
+
     def get_gripper_position(self):
         """获取当前夹爪位置"""
         try:
@@ -272,17 +287,49 @@ def main():
     
     try:
         # 初始化控制器
-        controller_right = GripperController(robot_name=right_robot_name, init_node=True)
-        controller_left = GripperController(robot_name=left_robot_name, init_node=False)
-        
+        master_left = GripperController(robot_name="master_left", init_node=True)
+        master_right = GripperController(robot_name="master_right", init_node=False)
+        puppet_left = GripperController(robot_name="puppet_left", init_node=False)
+        puppet_right = GripperController(robot_name="puppet_right", init_node=False)
+        MASTER_GRIPPER_JOINT_OPEN = 0.8298
+        MASTER_GRIPPER_JOINT_CLOSE = -0.1052
+        PUPPET_GRIPPER_JOINT_OPEN = 1.7014
+        PUPPET_GRIPPER_JOINT_CLOSE = 0.6197
+        a = 1
+        b=0
+        # master_left.set_gripper_position(a*MASTER_GRIPPER_JOINT_OPEN+b*MASTER_GRIPPER_JOINT_CLOSE)
+        # master_right.set_gripper_position(a*MASTER_GRIPPER_JOINT_OPEN+b*MASTER_GRIPPER_JOINT_CLOSE)
+        # puppet_left.set_gripper_position(a*PUPPET_GRIPPER_JOINT_OPEN+b*PUPPET_GRIPPER_JOINT_CLOSE)
+        # puppet_right.set_gripper_position(a*PUPPET_GRIPPER_JOINT_OPEN+b*PUPPET_GRIPPER_JOINT_CLOSE)
+        print(master_left.get_gripper_position())
+        print(master_right.get_gripper_position())
+        print(puppet_left.get_gripper_position())
+        print(puppet_right.get_gripper_position())
         # 运行测试序列
-        controller_right.open_gripper()
-        controller_left.open_gripper()
-        
+        # start_pos = 0.6
+        for i in range(1000):
+            # err_left = controller_left.get_gripper_error()
+            # err_right = controller_right.get_gripper_error()
+            # print(f"Left gripper error: {err_left}, Right gripper error: {err_right}")
+            # controller_left.set_gripper_position(start_pos)
+            # controller_right.set_gripper_position(start_pos)
+            # yushu = i % 100
+            # if yushu > 49:
+            #     start_pos -= 0.02
+            # else:
+            #     start_pos += 0.02
+            left_gripper_error = puppet_left.bot.dxl.robot_get_motor_registers(
+                "single",
+                "gripper",
+                "Hardware_Error_Status"
+            )
+            print(f"Left gripper error: {left_gripper_error}")
+            puppet_left.set_gripper_position(PUPPET_GRIPPER_JOINT_CLOSE)
+            time.sleep(0.2)
         # DEFAULT_RESET_POSITION = [0, -1.36, 1.16, 0, -0.3, 0]
         # controller.move_to_position(DEFAULT_RESET_POSITION)
-        controller_right.move_to_position(SLEEPY_POSTION)
-        controller_left.move_to_position(SLEEPY_POSTION)
+        # controller_right.move_to_position(SLEEPY_POSTION)
+        # controller_left.move_to_position(SLEEPY_POSTION)
         # # 交互式控制
         # controller.interactive_control()
         

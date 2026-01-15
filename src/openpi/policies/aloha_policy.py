@@ -171,8 +171,11 @@ def _decode_aloha(data: dict, *, adapt_to_pi: bool = False) -> dict:
         # Convert to uint8 if using float images.
         if np.issubdtype(img.dtype, np.floating):
             img = (255 * img).astype(np.uint8)
-        # Convert from [channel, height, width] to [height, width, channel].
-        return einops.rearrange(img, "c h w -> h w c")
+        if img.ndim == 3 and img.shape[-1] in (1, 3, 4):
+            return img
+        if img.ndim == 3 and img.shape[0] in (1, 3, 4):
+            return einops.rearrange(img, "c h w -> h w c")
+        return img
 
     images = data["images"]
     images_dict = {name: convert_image(img) for name, img in images.items()}

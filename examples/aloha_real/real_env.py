@@ -10,6 +10,7 @@ import numpy as np
 
 from examples.aloha_real import constants
 from examples.aloha_real import robot_utils
+import logging
 
 # This is the reset position that is used by the standard Aloha runtime.
 DEFAULT_RESET_POSITION = [0, -0.96, 1.16, 0, -0.3, 0]
@@ -37,12 +38,12 @@ class RealEnv:
                                    "cam_right_wrist": (480x640x3)} # h, w, c, dtype='uint8'
     """
 
-    def __init__(self, init_node, *, reset_position: Optional[List[List[float]]] = None, setup_robots: bool = True):
+    def __init__(self, init_node, *, reset_position: Optional[List[List[float]]] = None, gripper_current_limits: Optional[List[int]] = None, setup_robots: bool = True):
         # reset_position = START_ARM_POSE[:6]
         # self._reset_position = reset_position[:6] if reset_position else DEFAULT_RESET_POSITION
 
         self._reset_position = reset_position
-
+        self._gripper_current_limits = gripper_current_limits
         self.puppet_bot_left = InterbotixManipulatorXS(
             robot_model="vx300s",
             group_name="arm",
@@ -53,6 +54,12 @@ class RealEnv:
         self.puppet_bot_right = InterbotixManipulatorXS(
             robot_model="vx300s", group_name="arm", gripper_name="gripper", robot_name="puppet_right", init_node=False
         )
+        self.master_bot_left = InterbotixManipulatorXS(
+            robot_model="wx250s", group_name="arm", gripper_name="gripper", robot_name="master_left", init_node=False
+        )
+        self.master_bot_right = InterbotixManipulatorXS(
+            robot_model="wx250s", group_name="arm", gripper_name="gripper", robot_name="master_right", init_node=False
+        )
         if setup_robots:
             self.setup_robots()
 
@@ -60,24 +67,31 @@ class RealEnv:
         self.recorder_right = robot_utils.Recorder("right", init_node=False)
         self.image_recorder = robot_utils.ImageRecorder(init_node=False)
         self.gripper_command = JointSingleCommand(name="gripper")
+        self.last_left_gripper_error = [0]
+        self.last_right_gripper_error = [0]
+        self.last_left_gripper_desired_pos_normalized = 0.0
+        self.last_right_gripper_desired_pos_normalized = 0.0
 
     def setup_robots(self):
-        robot_utils.setup_puppet_bot(self.puppet_bot_left, current_limit=300)
-        robot_utils.setup_puppet_bot(self.puppet_bot_right, current_limit=550)
-
+        robot_utils.setup_puppet_bot(self.puppet_bot_left, current_limit=self._gripper_current_limits[0])
+        robot_utils.setup_puppet_bot(self.puppet_bot_right, current_limit=self._gripper_current_limits[1])
+        robot_utils.setup_master_bot(self.master_bot_left)
+        robot_utils.setup_master_bot(self.master_bot_right)
+        
     def get_qpos(self):
         left_qpos_raw = self.recorder_left.qpos
         right_qpos_raw = self.recorder_right.qpos
         left_arm_qpos = left_qpos_raw[:6]
         right_arm_qpos = right_qpos_raw[:6]
         # print(left_qpos_raw[7], right_qpos_raw[7])
+        
         left_gripper_qpos = [
-            constants.PUPPET_GRIPPER_POSITION_NORMALIZE_FN(left_qpos_raw[6])
+            constants.PUPPET_GRIPPER_JOINT_NORMALIZE_FN(left_qpos_raw[6])
             # constants.PUPPET_GRIPPER_POSITION_NORMALIZE_FN(left_qpos_raw[7])
         ]  # this is position not joint
         right_gripper_qpos = [
             # constants.PUPPET_GRIPPER_POSITION_NORMALIZE_FN(right_qpos_raw[7])
-            constants.PUPPET_GRIPPER_POSITION_NORMALIZE_FN(right_qpos_raw[6])
+            constants.PUPPET_GRIPPER_JOINT_NORMALIZE_FN(right_qpos_raw[6])
         ]  # this is position not joint
         return np.concatenate([left_arm_qpos, left_gripper_qpos, right_arm_qpos, right_gripper_qpos])
 
@@ -110,6 +124,51 @@ class RealEnv:
         )
         self.gripper_command.cmd = right_gripper_desired_joint
         self.puppet_bot_right.gripper.core.pub_single.publish(self.gripper_command)
+        left_gripper_error = self.puppet_bot_left.dxl.robot_get_motor_registers(
+            "single",
+            "gripper",
+            "Hardware_Error_Status"
+        )
+        right_gripper_error = self.puppet_bot_right.dxl.robot_get_motor_registers(
+            "single",
+            "gripper",
+            "Hardware_Error_Status"
+        )
+        if left_gripper_error.values[0] != 0 :
+            print("left gripper error occured")
+            print(f"left gripper error: {left_gripper_error}")
+            print(f"last left gripper command: {self.last_left_gripper_desired_pos_normalized}")           
+            print(f"current left gripper command: {left_gripper_desired_pos_normalized}")
+            # robot_utils.setup_puppet_bot(self.puppet_bot_left, current_limit=self._gripper_current_limits[0])
+            # time.sleep(0.5)
+            robot_utils.restart_puppet_bot_gripper(self.puppet_bot_left, current_limit=self._gripper_current_limits[0])
+            self.gripper_command.cmd = constants.PUPPET_GRIPPER_JOINT_OPEN
+            self.puppet_bot_left.gripper.core.pub_single.publish(self.gripper_command)
+            print("left gripper motor rebooted")
+        if right_gripper_error.values[0] != 0:
+            print("right gripper error occured")
+            print(f"right gripper error: {right_gripper_error}")
+            print(f"last right gripper command: {self.last_right_gripper_desired_pos_normalized}")
+            print(f"current right gripper command: {right_gripper_desired_pos_normalized}")
+            # robot_utils.setup_puppet_bot(self.puppet_bot_right, current_limit=self._gripper_current_limits[1])
+            # time.sleep(0.5)
+            robot_utils.restart_puppet_bot_gripper(self.puppet_bot_right, current_limit=self._gripper_current_limits[1])
+            self.gripper_command.cmd = constants.PUPPET_GRIPPER_JOINT_OPEN
+            self.puppet_bot_right.gripper.core.pub_single.publish(self.gripper_command)
+            print("right gripper motor rebooted")
+
+        if abs(left_gripper_desired_pos_normalized - self.last_left_gripper_desired_pos_normalized) > 0.2:
+            print("left gripper command changed larger than 0.2")
+            print(f"last left gripper command: {self.last_left_gripper_desired_pos_normalized}")
+            print(f"left gripper command changed: {left_gripper_desired_pos_normalized}")
+        if abs(right_gripper_desired_pos_normalized - self.last_right_gripper_desired_pos_normalized) > 0.2:
+            print("right gripper command changed larger than 0.2")
+            print(f"last right gripper command: {self.last_right_gripper_desired_pos_normalized}")
+            print(f"right gripper command changed: {right_gripper_desired_pos_normalized}")
+        self.last_left_gripper_error = left_gripper_error
+        self.last_right_gripper_error = right_gripper_error
+        self.last_left_gripper_desired_pos_normalized = left_gripper_desired_pos_normalized
+        self.last_right_gripper_desired_pos_normalized = right_gripper_desired_pos_normalized
 
     def _reset_joints(self):
         robot_utils.move_arms(
@@ -141,8 +200,8 @@ class RealEnv:
     def get_reward(self):
         return 0
 
-    def reset(self, *, fake=False):
-        if not fake:
+    def reset(self, *, reset_position=True):
+        if reset_position:
             # Reboot puppet robot gripper motors
             self.puppet_bot_left.dxl.robot_reboot_motors("single", "gripper", True)
             self.puppet_bot_right.dxl.robot_reboot_motors("single", "gripper", True)
@@ -168,20 +227,51 @@ class RealEnv:
             [self.puppet_bot_left, self.puppet_bot_right], [[0.0, -1.8399999952316284, 1.600000023841858, 0.0, -1.600000023841858, 0.0]] * 2, move_time=1
         )
         robot_utils.move_grippers(
-            [self.puppet_bot_left, self.puppet_bot_right], [constants.PUPPET_GRIPPER_JOINT_OPEN] * 2, move_time=0.5
+            [self.puppet_bot_left, self.puppet_bot_right], [constants.PUPPET_GRIPPER_JOINT_OPEN] * 2, move_time=1
         )
         return dm_env.TimeStep(
             step_type=dm_env.StepType.MID, reward=self.get_reward(), discount=None, observation=self.get_observation()
         )
         
     def step(self, action):
+        # vx300s机器人关节位置限制（从URDF文件中获取的真实值）
+        # 来源: interbotix_xsarm_descriptions/urdf/vx300s.urdf.xacro
+        # 关节顺序: [waist, shoulder, elbow, forearm_roll, wrist_angle, wrist_rotate]
+        # waist: [-π, π] (约 [-3.14159, 3.14159])
+        # shoulder: [radians(-106), radians(72)] = [-1.850049, 1.256637]
+        # elbow: [radians(-101), radians(92)] = [-1.76278, 1.60570]
+        # forearm_roll: [-π, π] (约 [-3.14159, 3.14159])
+        # wrist_angle: [radians(-107), radians(128)] = [-1.86750, 2.23402]
+        # wrist_rotate: [-π, π] (约 [-3.14159, 3.14159])
+        start_time = time.time()
+        import math
+        joint_limits_lower = np.array([
+            -math.pi + 0.00001,  # waist
+            math.radians(-106),  # shoulder: -1.850049
+            math.radians(-101),  # elbow: -1.76278
+            -math.pi + 0.00001,  # forearm_roll
+            math.radians(-107),  # wrist_angle: -1.86750
+            -math.pi + 0.00001   # wrist_rotate
+        ])
+        joint_limits_upper = np.array([
+            math.pi - 0.00001,   # waist
+            math.radians(72),    # shoulder: 1.256637
+            math.radians(92),    # elbow: 1.60570
+            math.pi - 0.00001,   # forearm_roll
+            math.radians(128),   # wrist_angle: 2.23402
+            math.pi - 0.00001    # wrist_rotate
+        ])
+        
         state_len = int(len(action) / 2)
         left_action = action[:state_len]
         right_action = action[state_len:]
-        self.puppet_bot_left.arm.set_joint_positions(left_action[:6], blocking=False)
-        self.puppet_bot_right.arm.set_joint_positions(right_action[:6], blocking=False)
+        
+        # 裁剪关节位置到限制范围内，避免警告
+        left_arm_positions = np.clip(left_action[:6], joint_limits_lower, joint_limits_upper)
+        right_arm_positions = np.clip(right_action[:6], joint_limits_lower, joint_limits_upper)
+        self.puppet_bot_left.arm.set_joint_positions(left_arm_positions, blocking=False)
+        self.puppet_bot_right.arm.set_joint_positions(right_arm_positions, blocking=False)
         self.set_gripper_pose(left_action[-1], right_action[-1])
-        time.sleep(constants.DT)
         return dm_env.TimeStep(
             step_type=dm_env.StepType.MID, reward=self.get_reward(), discount=None, observation=self.get_observation()
         )
@@ -199,5 +289,5 @@ def get_action(master_bot_left, master_bot_right):
     return action
 
 
-def make_real_env(init_node, *, reset_position: Optional[List[List[float]]] = None, setup_robots: bool = True) -> RealEnv:
-    return RealEnv(init_node, reset_position=reset_position, setup_robots=setup_robots)
+def make_real_env(init_node, *, reset_position: Optional[List[List[float]]] = None, gripper_current_limits: Optional[List[int]] = None, setup_robots: bool = True) -> RealEnv:
+    return RealEnv(init_node, reset_position=reset_position, gripper_current_limits=gripper_current_limits, setup_robots=setup_robots)

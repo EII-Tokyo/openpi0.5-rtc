@@ -50,7 +50,6 @@ class Policy(BasePolicy):
         self._model = model
         self._input_transform = _transforms.compose(transforms)
         self._output_transform = _transforms.compose(output_transforms)
-        print(self._output_transform)
         self._sample_kwargs = sample_kwargs or {}
         self._metadata = metadata or {}
         self._is_pytorch_model = is_pytorch
@@ -67,7 +66,7 @@ class Policy(BasePolicy):
             self._rng = rng or jax.random.key(0)
 
     @override
-    def infer(self, obs: dict, prev_action: np.ndarray | None = None, use_rtc: bool = True, noise: np.ndarray | None = None) -> dict:  # type: ignore[misc]
+    def infer(self, obs: dict, prev_action: np.ndarray | None = None, use_rtc: bool = False, noise: np.ndarray | None = None) -> dict:  # type: ignore[misc]
         # Make a copy since transformations may modify the inputs in place.
         inputs = jax.tree.map(lambda x: x, obs)
         inputs = self._input_transform(inputs)

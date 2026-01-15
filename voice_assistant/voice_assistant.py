@@ -49,9 +49,10 @@ class VoiceAssistant:
         # 任务映射
         self.task_mapping = {
             "1": "Remove the label from the bottle with the knife in the right hand.",
-            "2": "Twist off the bottle cap.", 
-            "3": "Stop",
-            "4": "Return to sleep position"
+            "2": "Do the followings: 1. Twist off the bottle cap. 2. Put the bottle into the box on the left. 3. Put the cap into the box on the right. 4. Return to home position.", 
+            "3": "Stop and human hand control",
+            "4": "Return to home position and save hdf5",
+            "5": "Return to sleep position, save hdf5 and quit robot runtime"
         }
         
         # ChatGPT提示词模板
@@ -157,6 +158,7 @@ Important: Return ONLY the JSON object, no additional text or explanation."""
 
     def setup_tts(self):
         """设置TTS"""
+        self._patch_torch_safe_load()
         pygame.mixer.init()
         
         # 初始化Coqui TTS
@@ -173,6 +175,34 @@ Important: Return ONLY the JSON object, no additional text or explanation."""
         print("Coqui TTS多语言模型加载完成")
         
         print("TTS初始化完成")
+
+    def _patch_torch_safe_load(self):
+        """Work around PyTorch safe-load failures in tokenizer/model loading."""
+        try:
+            from TTS.tts.configs.xtts_config import XttsConfig
+
+            torch.serialization.add_safe_globals([XttsConfig])
+        except Exception:
+            pass
+
+        original_load = torch.load
+
+        def _load_with_fallback(*args, **kwargs):
+            try:
+                return original_load(*args, **kwargs)
+            except Exception as exc:
+                msg = str(exc)
+                if "Weights only load failed" in msg or "safe_load" in msg:
+                    if args and hasattr(args[0], "seek"):
+                        try:
+                            args[0].seek(0)
+                        except Exception:
+                            pass
+                    kwargs["weights_only"] = False
+                    return original_load(*args, **kwargs)
+                raise
+
+        torch.load = _load_with_fallback
 
     def detect_voice_activity(self, audio_data):
         """检测语音活动"""
@@ -421,7 +451,7 @@ Important: Return ONLY the JSON object, no additional text or explanation."""
             while True:
                 print("\n控制方式:")
                 print("  - 按Enter键开始语音识别")
-                print("  - 输入数字1-4直接执行任务")
+                print("  - 输入数字1-5直接执行任务")
                 print("  - 输入'quit'退出")
                 print("等待输入...")
                 

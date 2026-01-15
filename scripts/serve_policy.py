@@ -62,8 +62,12 @@ class Args:
 DEFAULT_CHECKPOINT: dict[EnvMode, Checkpoint] = {
     EnvMode.ALOHA: Checkpoint(
         config="pi05_aloha",
-        dir="./checkpoints/20251014/30000",
+        dir="./checkpoints/20260108/13000",
     ),
+    # EnvMode.ALOHA: Checkpoint(
+    #     config="pi05_aloha",
+    #     dir="./checkpoints/20251014/30000",
+    # ),
     # EnvMode.ALOHA: Checkpoint(
     #     config="pi05_aloha",
     #     dir="gs://openpi-assets/checkpoints/pi05_base",
