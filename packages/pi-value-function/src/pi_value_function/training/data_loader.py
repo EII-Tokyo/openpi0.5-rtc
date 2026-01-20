@@ -21,6 +21,7 @@ import numpy as np
 import torch
 import torch.utils.data
 from lerobot.datasets import lerobot_dataset
+from lerobot.datasets.lerobot_dataset import LeRobotDatasetMetadata
 
 
 def _parse_image(image: np.ndarray | Any) -> np.ndarray:
@@ -41,6 +42,65 @@ def _parse_image(image: np.ndarray | Any) -> np.ndarray:
     if image.shape[0] == 3:
         image = einops.rearrange(image, "c h w -> h w c")
     return image
+
+
+def compute_episode_splits(
+    repo_ids: list[str],
+    train_ratio: float,
+    seed: int,
+) -> tuple[dict[str, list[int]], dict[str, list[int]]]:
+    """Compute random but deterministic train/val episode splits.
+
+    For each dataset, shuffles episode indices using the provided seed,
+    then splits into train and validation based on train_ratio.
+
+    Args:
+        repo_ids: List of dataset repo IDs
+        train_ratio: Fraction of episodes for training (e.g., 0.9)
+        seed: Random seed for deterministic shuffling
+
+    Returns:
+        Tuple of (train_episodes_dict, val_episodes_dict)
+        Each dict maps repo_id -> list of episode indices (sorted)
+
+    Example:
+        >>> train_eps, val_eps = compute_episode_splits(
+        ...     ["michios/droid_xxjd", "michios/droid_xxjd_2"],
+        ...     train_ratio=0.9,
+        ...     seed=42
+        ... )
+        >>> # Train and val episodes are disjoint
+        >>> len(set(train_eps["michios/droid_xxjd"]) & set(val_eps["michios/droid_xxjd"]))
+        0
+    """
+    rng = np.random.RandomState(seed)
+    train_episodes = {}
+    val_episodes = {}
+
+    for repo_id in repo_ids:
+        # Load metadata to get total episodes
+        # Use default cache location
+        from pathlib import Path
+        from lerobot.datasets.lerobot_dataset import HF_LEROBOT_HOME as LEROBOT_CACHE
+
+        meta = LeRobotDatasetMetadata(
+            repo_id,
+            root=LEROBOT_CACHE / repo_id,
+            revision=None,
+            force_cache_sync=False
+        )
+        total_episodes = meta.info['total_episodes']
+
+        # Shuffle episode indices
+        all_episodes = np.arange(total_episodes)
+        rng.shuffle(all_episodes)
+
+        # Split
+        n_train = int(total_episodes * train_ratio)
+        train_episodes[repo_id] = sorted(all_episodes[:n_train].tolist())
+        val_episodes[repo_id] = sorted(all_episodes[n_train:].tolist())
+
+    return train_episodes, val_episodes
 
 
 def parse_observation(data: dict) -> dict:
@@ -98,6 +158,7 @@ class EpisodeMetadata:
     length: int         # Episode length (T)
     success: bool       # Success/failure label
     prompt: str | None  # Task prompt for C_fail lookup
+    dataset: Any        # Reference to the dataset this episode belongs to
 
 
 class FailureCostManager:
@@ -251,6 +312,11 @@ class ValueFunctionDataset(torch.utils.data.Dataset):
         value_min: float = -1.0,
         value_max: float = 0.0,
         seed: int = 42,
+        split: str = "train",
+        train_split: float = 0.9,
+        split_seed: int = 42,
+        target_task: str | None = None,
+        treat_other_tasks_as_failure: bool = False,
     ):
         """Initialize value function dataset.
 
@@ -263,6 +329,11 @@ class ValueFunctionDataset(torch.utils.data.Dataset):
             value_min: Minimum value for normalization (default: -1.0)
             value_max: Maximum value for normalization (default: 0.0)
             seed: Random seed
+            split: Which split to use - "train" or "val"
+            train_split: Fraction of episodes for training (default: 0.9)
+            split_seed: Random seed for deterministic episode shuffling
+            target_task: If provided, only episodes with this task are treated as success
+            treat_other_tasks_as_failure: If True with target_task, non-matching tasks become failures
         """
         # Validate inputs
         if not success_repo_ids and not failure_repo_ids:
@@ -271,13 +342,73 @@ class ValueFunctionDataset(torch.utils.data.Dataset):
         if not 0.0 <= success_sampling_ratio <= 1.0:
             raise ValueError(f"success_sampling_ratio must be in [0, 1], got {success_sampling_ratio}")
 
-        # Load datasets
-        self.success_dataset = self._load_multi_dataset(success_repo_ids) if success_repo_ids else None
-        self.failure_dataset = self._load_multi_dataset(failure_repo_ids) if failure_repo_ids else None
+        if split not in ("train", "val"):
+            raise ValueError(f"split must be 'train' or 'val', got '{split}'")
+
+        # Compute episode splits for train/val
+        # Combine all repo IDs to compute splits consistently
+        all_repo_ids = []
+        if success_repo_ids:
+            all_repo_ids.extend(success_repo_ids)
+        if failure_repo_ids:
+            all_repo_ids.extend(failure_repo_ids)
+
+        train_episodes_dict, val_episodes_dict = compute_episode_splits(
+            all_repo_ids,
+            train_ratio=train_split,
+            seed=split_seed
+        )
+
+        # Select episodes based on split
+        episodes_dict = train_episodes_dict if split == "train" else val_episodes_dict
+
+        # Filter episodes dict to only include repos we're actually loading
+        success_episodes = {k: v for k, v in episodes_dict.items() if k in (success_repo_ids or [])}
+        failure_episodes = {k: v for k, v in episodes_dict.items() if k in (failure_repo_ids or [])}
+
+        # Load datasets with episode filtering
+        self.success_dataset = self._load_multi_dataset(success_repo_ids, success_episodes) if success_repo_ids else None
+        self.failure_dataset = self._load_multi_dataset(failure_repo_ids, failure_episodes) if failure_repo_ids else None
 
         # Build episode indices
         self.success_episodes = self._build_episode_index(self.success_dataset, success=True) if self.success_dataset else []
         self.failure_episodes = self._build_episode_index(self.failure_dataset, success=False) if self.failure_dataset else []
+
+        # Task-based filtering: Move non-matching tasks to failures
+        if target_task and treat_other_tasks_as_failure:
+            # Normalize target task for comparison
+            target_normalized = target_task.lower().strip()
+
+            # Filter success episodes - keep only matching task
+            matching_episodes = []
+            other_task_episodes = []
+
+            for ep in self.success_episodes:
+                ep_task = (ep.prompt or "").lower().strip()
+                if ep_task == target_normalized:
+                    matching_episodes.append(ep)
+                else:
+                    # Convert to failure episode
+                    other_task_episodes.append(
+                        EpisodeMetadata(
+                            episode_id=ep.episode_id,
+                            start_idx=ep.start_idx,
+                            end_idx=ep.end_idx,
+                            length=ep.length,
+                            success=False,  # Now treated as failure
+                            prompt=target_task,  # Use target task prompt instead of original
+                            dataset=ep.dataset,  # Preserve dataset reference
+                        )
+                    )
+
+            # Update episode lists
+            self.success_episodes = matching_episodes
+            self.failure_episodes.extend(other_task_episodes)
+
+            print(f"Task filtering: '{target_task}'")
+            print(f"  Success episodes (matching task): {len(self.success_episodes)}")
+            print(f"  Failure episodes (other tasks + original failures): {len(self.failure_episodes)}")
+            print(f"  Moved {len(other_task_episodes)} non-matching episodes to failures")
 
         # Validate episode indices
         if not self.success_episodes and success_repo_ids:
@@ -298,47 +429,39 @@ class ValueFunctionDataset(torch.utils.data.Dataset):
         self.value_max = value_max
         self._compute_normalization_stats()
 
-    def _load_multi_dataset(self, repo_ids: list[str]) -> lerobot_dataset.MultiLeRobotDataset:
-        """Load MultiLeRobotDataset from repo IDs."""
+    def _load_multi_dataset(self, repo_ids: list[str], episodes_dict: dict[str, list[int]] | None = None) -> lerobot_dataset.MultiLeRobotDataset:
+        """Load MultiLeRobotDataset from repo IDs.
+
+        Args:
+            repo_ids: List of repository IDs to load
+            episodes_dict: Optional dict mapping repo_id to episode indices. If None, loads all episodes.
+        """
         if not repo_ids:
             raise ValueError("repo_ids cannot be empty")
 
-        return lerobot_dataset.MultiLeRobotDataset(repo_ids)
+        return lerobot_dataset.MultiLeRobotDataset(repo_ids, episodes=episodes_dict)
 
     def _build_episode_index(
         self,
         dataset: lerobot_dataset.MultiLeRobotDataset,
         success: bool
     ) -> list[EpisodeMetadata]:
-        """Build episode index from dataset metadata.
 
-        Uses ds.meta.episodes for O(num_episodes) complexity instead of
-        scanning all samples which would be O(num_samples).
-
-        Args:
-            dataset: LeRobot dataset
-            success: Whether this is a success dataset
-
-        Returns:
-            List of episode metadata
-        """
         episodes = []
-        offset = 0  # Track global index offset for multi-dataset
 
         for ds in dataset._datasets:
             ep_meta = ds.meta.episodes
-            for i in range(len(ep_meta)):
-                ep = ep_meta[i]
+            for ep in ep_meta:
                 task = ep["tasks"][0] if ep["tasks"] else None
                 episodes.append(EpisodeMetadata(
                     episode_id=ep["episode_index"],
-                    start_idx=offset + ep["dataset_from_index"],
-                    end_idx=offset + ep["dataset_to_index"] - 1,  # inclusive
+                    start_idx=ep["dataset_from_index"],
+                    end_idx=ep["dataset_to_index"] - 1,  # inclusive
                     length=ep["length"],
                     success=success,
                     prompt=task,
+                    dataset=dataset,  # Store reference to dataset
                 ))
-            offset += len(ds)
 
         return episodes
 
@@ -434,10 +557,8 @@ class ValueFunctionDataset(torch.utils.data.Dataset):
 
         if is_success:
             episodes = self.success_episodes
-            dataset = self.success_dataset
         else:
             episodes = self.failure_episodes
-            dataset = self.failure_dataset
 
         # Sample random episode
         episode_meta = episodes[self.rng.randint(len(episodes))]
@@ -446,8 +567,8 @@ class ValueFunctionDataset(torch.utils.data.Dataset):
         timestep_offset = self.rng.randint(episode_meta.length)
         global_idx = episode_meta.start_idx + timestep_offset
 
-        # Get observation from dataset
-        sample = dataset[global_idx]
+        # Get observation from episode's own dataset (important for task filtering!)
+        sample = episode_meta.dataset[global_idx]
 
         # Parse observation to model format
         parsed = parse_observation(sample)
@@ -562,6 +683,11 @@ def create_value_dataloader(
     success_sampling_ratio: float = 0.5,
     num_workers: int = 4,
     seed: int = 42,
+    split: str = "train",
+    train_split: float = 0.9,
+    split_seed: int = 42,
+    target_task: str | None = None,
+    treat_other_tasks_as_failure: bool = False,
 ) -> torch.utils.data.DataLoader:
     """Create value function data loader.
 
@@ -579,6 +705,11 @@ def create_value_dataloader(
         success_sampling_ratio: Fraction of samples from success dataset
         num_workers: Number of worker processes
         seed: Random seed
+        split: Which split to use - "train" or "val"
+        train_split: Fraction of episodes for training (default: 0.9)
+        split_seed: Random seed for deterministic episode shuffling
+        target_task: If provided, only episodes with this task are treated as success
+        treat_other_tasks_as_failure: If True with target_task, non-matching tasks become failures
 
     Returns:
         DataLoader yielding batches of observations and value targets
@@ -593,6 +724,11 @@ def create_value_dataloader(
         default_c_fail=default_c_fail,
         success_sampling_ratio=success_sampling_ratio,
         seed=seed,
+        split=split,
+        train_split=train_split,
+        split_seed=split_seed,
+        target_task=target_task,
+        treat_other_tasks_as_failure=treat_other_tasks_as_failure,
     )
     print(f"Dataset created in {time.time() - start_time:.2f} seconds.")
     start_time = time.time()

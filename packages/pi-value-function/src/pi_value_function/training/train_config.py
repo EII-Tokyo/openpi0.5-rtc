@@ -28,10 +28,10 @@ class ValueDataConfig:
     # Path to the training data directory (RLDS, LeRobot, or custom format)
     data_path: str | None = None
 
-    # LeRobot repo IDs for success trajectories
+    # LeRobot repo IDs for success trajectories (training)
     success_repo_ids: list[str] | None = None
 
-    # LeRobot repo IDs for failure trajectories
+    # LeRobot repo IDs for failure trajectories (training)
     failure_repo_ids: list[str] | None = None
 
     # Path to JSON file with failure costs per prompt
@@ -46,6 +46,15 @@ class ValueDataConfig:
     # Train/validation split ratios
     train_split: float = 0.9
     val_split: float = 0.1
+
+    # Random seed for deterministic episode shuffling in train/val split
+    split_seed: int = 42
+
+    # Task-specific training: only episodes with this task are treated as success
+    target_task: str | None = None
+
+    # If True with target_task, treat episodes with other tasks as failures
+    treat_other_tasks_as_failure: bool = False
 
     # Shuffle buffer size for data loading
     shuffle_buffer_size: int = 10_000
@@ -196,6 +205,9 @@ class TrainConfig:
 
     # Number of workers for data loading
     num_workers: int = 4
+    
+    # Number of steps between validations (if 0, validation is disabled)
+    num_steps_per_validation: int = 0
 
     # =========================================================================
     # Data settings

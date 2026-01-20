@@ -172,6 +172,33 @@ def train_step(
 
     return model, optimizer, metrics
 
+def validate_step(
+    model: PiValue,
+    rng: jax.Array,
+    observation: Observation,
+    returns: jax.Array,
+) -> dict[str, jax.Array]:  
+    """Single validation step.
+
+    Args:
+        model: PiValue model
+        rng: Random key for this step
+
+    Returns:
+        Validation metrics dict
+    """
+    def loss_fn(model: PiValue) -> jax.Array:
+        """Compute mean loss over batch."""
+        losses = model.compute_loss(rng, observation, returns, train=False)
+        return jnp.mean(losses)
+
+    # Compute validation loss
+    loss = loss_fn(model)
+    metrics = {
+        "val_loss": loss,
+    }
+    return metrics
+
 
 def train(config: TrainConfig) -> None:
     """Main training function.
@@ -233,8 +260,8 @@ def train(config: TrainConfig) -> None:
     tokenizer = Gemma3Tokenizer(max_len=48, path=tokenizer_path)
     print("✓ Tokenizer created")
 
-    # Create data loader
-    print("\n=== Creating data loader ===")
+    # Create data loaders
+    print("\n=== Creating data loaders ===")
     # Check if real LeRobot repo IDs are provided
     if config.data.success_repo_ids or config.data.failure_repo_ids:
         print("Using real LeRobot datasets:")
@@ -243,6 +270,8 @@ def train(config: TrainConfig) -> None:
         if config.data.failure_repo_ids:
             print(f"  Failure repos: {config.data.failure_repo_ids}")
 
+        # Create training dataloader
+        print("Creating training dataloader...")
         dataloader = create_value_dataloader(
             tokenizer=tokenizer,
             success_repo_ids=config.data.success_repo_ids,
@@ -253,7 +282,35 @@ def train(config: TrainConfig) -> None:
             success_sampling_ratio=config.data.success_sampling_ratio,
             num_workers=config.num_workers,
             seed=config.seed,
+            target_task=config.data.target_task,
+            treat_other_tasks_as_failure=config.data.treat_other_tasks_as_failure,
         )
+        print("✓ Training dataloader created")
+
+        # Create validation dataloader if validation is enabled
+        val_dataloader = None
+        if config.num_steps_per_validation > 0:
+            print("Creating validation dataloader...")
+            print(f"  Using same repos as training with 'val' split")
+            print(f"  Train/val ratio: {config.data.train_split:.0%} / {config.data.val_split:.0%}")
+
+            val_dataloader = create_value_dataloader(
+                tokenizer=tokenizer,
+                success_repo_ids=config.data.success_repo_ids,  # Same as training
+                failure_repo_ids=config.data.failure_repo_ids,  # Same as training
+                batch_size=config.batch_size,
+                failure_cost_json=config.data.failure_cost_json,
+                default_c_fail=config.data.default_c_fail,
+                success_sampling_ratio=config.data.success_sampling_ratio,
+                num_workers=config.num_workers,
+                seed=config.seed + 1,  # Different seed for validation
+                split="val",  # Use validation split
+                train_split=config.data.train_split,
+                split_seed=config.data.split_seed,
+                target_task=config.data.target_task,
+                treat_other_tasks_as_failure=config.data.treat_other_tasks_as_failure,
+            )
+            print("✓ Validation dataloader created")
     else:
         print("Warning: No repo IDs provided, using dummy data for testing")
         # Create a dummy dataloader that yields random batches
@@ -282,8 +339,7 @@ def train(config: TrainConfig) -> None:
                     }
 
         dataloader = DummyDataLoader(batch_size=config.batch_size)
-
-    print("✓ Data loader created")
+        val_dataloader = None
 
     # Compute total steps
     if config.num_train_steps is not None:
@@ -299,13 +355,19 @@ def train(config: TrainConfig) -> None:
 
     # Training loop
     data_iter = iter(dataloader)
+    val_iter = iter(val_dataloader) if val_dataloader is not None else None
 
     # Create progress bar
     pbar = tqdm(range(start_step, total_steps), desc="Training", unit="step", initial=start_step, total=total_steps)
 
     for step in pbar:
         # Get batch (already has tokenized prompts from collate_fn)
-        batch = next(data_iter)
+        try:
+            batch = next(data_iter)
+        except IndexError as e:
+            pbar.write(f"DataLoader IndexError at step {step}: {e}. Resetting data iterator and retrying...")
+            data_iter = iter(dataloader)
+            batch = next(data_iter)
 
         # Convert to JAX arrays
         batch_jax = jax.tree.map(lambda x: jnp.array(x) if isinstance(x, np.ndarray) else x, batch)
@@ -321,6 +383,31 @@ def train(config: TrainConfig) -> None:
 
         # Training step
         model, optimizer, metrics = train_step(model, optimizer, step_rng, observation, returns)
+
+        # Validation
+        if val_iter is not None and config.num_steps_per_validation != 0 and step % config.num_steps_per_validation == 0 and step != 0:
+            # Get validation batch
+            try:
+                val_batch = next(val_iter)
+            except StopIteration:
+                val_iter = iter(val_dataloader) if val_dataloader is not None else None
+                val_batch = next(val_iter)
+
+            val_batch_jax = jax.tree.map(lambda x: jnp.array(x) if isinstance(x, np.ndarray) else x, val_batch)
+            val_observation = Observation.from_dict(val_batch_jax)
+            val_returns = val_batch_jax["returns"]
+
+            # Run validation step
+            val_metrics = validate_step(model, step_rng, val_observation, val_returns)
+
+            # Convert to host and log
+            val_metrics_host = jax.device_get(val_metrics)
+            val_loss_value = float(val_metrics_host["val_loss"])
+            pbar.write(f"  Validation at step {step}: val_loss={val_loss_value:.4f}")
+
+            # Log to W&B
+            if config.logging.wandb_enabled:
+                wandb.log(val_metrics_host, step=step)
 
         # Logging
         if step % config.logging.log_every_n_steps == 0:
@@ -379,6 +466,7 @@ def main() -> None:
         num_train_steps=30_000,
         batch_size=64,
         data=ValueDataConfig(
+            # Dataset repos (episodes will be split randomly into train/val)
             success_repo_ids=[
                 "michios/droid_xxjd",
                 "michios/droid_xxjd_2",
@@ -391,13 +479,15 @@ def main() -> None:
             failure_repo_ids=[
                 "michios/droid_xxjd_fail_1"
             ],
+            train_split=0.9,  # 90% train, 10% val
+            split_seed=42,  # Random but deterministic episode shuffling
             failure_cost_json="configs/failure_costs.json",
             default_c_fail=100.0,
             success_sampling_ratio=0.5,
         ),
         checkpoint=CheckpointConfig(
             checkpoint_dir="./checkpoints",
-            save_every_n_steps=1_000,
+            save_every_n_steps=2_500,
             keep_n_checkpoints=5,
             overwrite=True,
         ),
@@ -405,9 +495,10 @@ def main() -> None:
             log_every_n_steps=50,
             wandb_enabled=True,
             wandb_project="pi-value-function",
-            wandb_run_name="droid_value_training",
+            wandb_run_name="droid_value_training_v2",
         ),
         num_workers=4,
+        num_steps_per_validation=500,  # Run validation every 500 steps
         seed=42,
     )
     

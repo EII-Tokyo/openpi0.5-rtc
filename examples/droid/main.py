@@ -7,7 +7,7 @@ import faulthandler
 import os
 import signal
 import time
-from moviepy.editor import ImageSequenceClip
+# from moviepy.editor import ImageSequenceClip
 import numpy as np
 from openpi_client import image_tools
 from openpi_client import websocket_client_policy
@@ -116,6 +116,7 @@ def main(args: Args):
 
                     # We resize images on the robot laptop to minimize the amount of data sent to the policy server
                     # and improve latency.
+                    # optional: exterior_image_2_left
                     request_data = {
                         "observation/exterior_image_1_left": image_tools.resize_with_pad(
                             curr_obs[f"{args.external_camera}_image"], 224, 224
@@ -157,10 +158,17 @@ def main(args: Args):
             except KeyboardInterrupt:
                 break
 
-        video = np.stack(video)
-        save_filename = "video_" + timestamp
-        ImageSequenceClip(list(video), fps=10).write_videofile(save_filename + ".mp4", codec="libx264")
-
+        # video = np.stack(video)
+        # if len(video) > 0:
+        #     import cv2
+        #     save_filename = "video_" + timestamp + ".mp4"
+        #     # simple opencv save
+        #     height, width, layers = video[0].shape
+        #     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+        #     out = cv2.VideoWriter(save_filename, fourcc, 10, (width, height))
+        #     for frame in video:
+        #         out.write(cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
+        #     out.release()
         success: str | float | None = None
         while not isinstance(success, float):
             success = input(
