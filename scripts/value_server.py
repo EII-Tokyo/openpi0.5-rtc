@@ -102,8 +102,20 @@ def main():
 
     # 5. Create Policy
     policy = ValuePolicy(model, tokenizer)
-    
-    # 6. Start Server
+
+    # 6. Warmup JIT compilation
+    print("Running JIT warmup...")
+    warmup_obs = {
+        "observation/exterior_image_1_left": np.zeros((224, 224, 3), dtype=np.uint8),
+        "observation/wrist_image_left": np.zeros((224, 224, 3), dtype=np.uint8),
+        "observation/joint_position": np.zeros(7, dtype=np.float32),
+        "observation/gripper_position": np.zeros(1, dtype=np.float32),
+        "prompt": "warmup",
+    }
+    _ = policy.infer(warmup_obs)
+    print("JIT warmup complete.")
+
+    # 7. Start Server
     print(f"Starting Value Policy Server on {args.host}:{args.port}")
     server = websocket_policy_server.WebsocketPolicyServer(policy, host=args.host, port=args.port)
     server.serve_forever()
