@@ -159,6 +159,7 @@ class EpisodeMetadata:
     success: bool       # Success/failure label
     prompt: str | None  # Task prompt for C_fail lookup
     dataset: Any        # Reference to the dataset this episode belongs to
+    repo_id: str        # Repository ID this episode belongs to
 
 
 class FailureCostManager:
@@ -317,6 +318,8 @@ class ValueFunctionDataset(torch.utils.data.Dataset):
         split_seed: int = 42,
         target_task: str | None = None,
         treat_other_tasks_as_failure: bool = False,
+        use_dynamic_task_augmentation: bool = False,
+        min_episodes_per_task: int = 10,
     ):
         """Initialize value function dataset.
 
@@ -334,6 +337,11 @@ class ValueFunctionDataset(torch.utils.data.Dataset):
             split_seed: Random seed for deterministic episode shuffling
             target_task: If provided, only episodes with this task are treated as success
             treat_other_tasks_as_failure: If True with target_task, non-matching tasks become failures
+            use_dynamic_task_augmentation: If True, each sample randomly picks a target task.
+                Episodes matching the task are treated as success, others as failure.
+                This augments failure data by using successful episodes with different prompts.
+            min_episodes_per_task: Minimum number of episodes for a task to be included
+                in dynamic task augmentation. Tasks with fewer episodes are excluded.
         """
         # Validate inputs
         if not success_repo_ids and not failure_repo_ids:
@@ -345,34 +353,72 @@ class ValueFunctionDataset(torch.utils.data.Dataset):
         if split not in ("train", "val"):
             raise ValueError(f"split must be 'train' or 'val', got '{split}'")
 
-        # Compute episode splits for train/val
-        # Combine all repo IDs to compute splits consistently
-        all_repo_ids = []
-        if success_repo_ids:
-            all_repo_ids.extend(success_repo_ids)
-        if failure_repo_ids:
-            all_repo_ids.extend(failure_repo_ids)
+        # For dynamic task augmentation, we need unfiltered datasets
+        # because we'll be mixing episodes from different datasets and need valid global indices
+        if use_dynamic_task_augmentation:
+            # Load full datasets without episode filtering
+            self.success_dataset = self._load_multi_dataset(success_repo_ids, None) if success_repo_ids else None
+            self.failure_dataset = self._load_multi_dataset(failure_repo_ids, None) if failure_repo_ids else None
 
-        train_episodes_dict, val_episodes_dict = compute_episode_splits(
-            all_repo_ids,
-            train_ratio=train_split,
-            seed=split_seed
-        )
+            # Build full episode lists
+            full_success_episodes = self._build_episode_index(self.success_dataset, success=True) if self.success_dataset else []
+            full_failure_episodes = self._build_episode_index(self.failure_dataset, success=False) if self.failure_dataset else []
 
-        # Select episodes based on split
-        episodes_dict = train_episodes_dict if split == "train" else val_episodes_dict
+            # Compute train/val split and manually filter episode lists
+            all_repo_ids = []
+            if success_repo_ids:
+                all_repo_ids.extend(success_repo_ids)
+            if failure_repo_ids:
+                all_repo_ids.extend(failure_repo_ids)
 
-        # Filter episodes dict to only include repos we're actually loading
-        success_episodes = {k: v for k, v in episodes_dict.items() if k in (success_repo_ids or [])}
-        failure_episodes = {k: v for k, v in episodes_dict.items() if k in (failure_repo_ids or [])}
+            train_episodes_dict, val_episodes_dict = compute_episode_splits(
+                all_repo_ids,
+                train_ratio=train_split,
+                seed=split_seed
+            )
 
-        # Load datasets with episode filtering
-        self.success_dataset = self._load_multi_dataset(success_repo_ids, success_episodes) if success_repo_ids else None
-        self.failure_dataset = self._load_multi_dataset(failure_repo_ids, failure_episodes) if failure_repo_ids else None
+            # Select episodes based on split
+            episodes_dict = train_episodes_dict if split == "train" else val_episodes_dict
 
-        # Build episode indices
-        self.success_episodes = self._build_episode_index(self.success_dataset, success=True) if self.success_dataset else []
-        self.failure_episodes = self._build_episode_index(self.failure_dataset, success=False) if self.failure_dataset else []
+            # Filter episode lists to only include episodes in the split
+            def episode_in_split(ep: EpisodeMetadata, episodes_dict: dict) -> bool:
+                # Check if this episode's repo is in the split and if the episode_id is included
+                if ep.repo_id in episodes_dict and ep.episode_id in episodes_dict[ep.repo_id]:
+                    return True
+                return False
+
+            self.success_episodes = [ep for ep in full_success_episodes if episode_in_split(ep, episodes_dict)]
+            self.failure_episodes = [ep for ep in full_failure_episodes if episode_in_split(ep, episodes_dict)]
+
+        else:
+            # Standard mode: use episode filtering at dataset level
+            # Compute episode splits for train/val
+            all_repo_ids = []
+            if success_repo_ids:
+                all_repo_ids.extend(success_repo_ids)
+            if failure_repo_ids:
+                all_repo_ids.extend(failure_repo_ids)
+
+            train_episodes_dict, val_episodes_dict = compute_episode_splits(
+                all_repo_ids,
+                train_ratio=train_split,
+                seed=split_seed
+            )
+
+            # Select episodes based on split
+            episodes_dict = train_episodes_dict if split == "train" else val_episodes_dict
+
+            # Filter episodes dict to only include repos we're actually loading
+            success_episodes = {k: v for k, v in episodes_dict.items() if k in (success_repo_ids or [])}
+            failure_episodes = {k: v for k, v in episodes_dict.items() if k in (failure_repo_ids or [])}
+
+            # Load datasets with episode filtering
+            self.success_dataset = self._load_multi_dataset(success_repo_ids, success_episodes) if success_repo_ids else None
+            self.failure_dataset = self._load_multi_dataset(failure_repo_ids, failure_episodes) if failure_repo_ids else None
+
+            # Build episode indices
+            self.success_episodes = self._build_episode_index(self.success_dataset, success=True) if self.success_dataset else []
+            self.failure_episodes = self._build_episode_index(self.failure_dataset, success=False) if self.failure_dataset else []
 
         # Task-based filtering: Move non-matching tasks to failures
         if target_task and treat_other_tasks_as_failure:
@@ -398,6 +444,7 @@ class ValueFunctionDataset(torch.utils.data.Dataset):
                             success=False,  # Now treated as failure
                             prompt=target_task,  # Use target task prompt instead of original
                             dataset=ep.dataset,  # Preserve dataset reference
+                            repo_id=ep.repo_id,  # Preserve repo_id
                         )
                     )
 
@@ -427,6 +474,63 @@ class ValueFunctionDataset(torch.utils.data.Dataset):
         # Value normalization params
         self.value_min = value_min
         self.value_max = value_max
+
+        # Dynamic task augmentation
+        self.use_dynamic_task_augmentation = use_dynamic_task_augmentation
+        if use_dynamic_task_augmentation:
+            # Group episodes by task
+            from collections import defaultdict
+            task_to_episodes: dict[str, list[EpisodeMetadata]] = defaultdict(list)
+            for ep in self.success_episodes:
+                if ep.prompt:
+                    task_key = ep.prompt.lower().strip()
+                    task_to_episodes[task_key].append(ep)
+
+            # Filter tasks by minimum episodes
+            all_tasks = list(task_to_episodes.keys())
+            filtered_tasks = {
+                task: eps for task, eps in task_to_episodes.items()
+                if len(eps) >= min_episodes_per_task
+            }
+
+            print(f"\n{'=' * 60}")
+            print(f"Dynamic Task Augmentation ENABLED")
+            print(f"{'=' * 60}")
+            print(f"Total unique tasks: {len(all_tasks)}")
+            print(f"Tasks with >= {min_episodes_per_task} episodes: {len(filtered_tasks)}")
+            print(f"\nFiltered tasks:")
+            for task in sorted(filtered_tasks.keys()):
+                print(f"  - '{task}' ({len(filtered_tasks[task])} episodes)")
+
+            if len(filtered_tasks) < 2:
+                raise ValueError(
+                    f"Need at least 2 tasks with >= {min_episodes_per_task} episodes for "
+                    f"dynamic task augmentation. Found {len(filtered_tasks)}. "
+                    f"Try lowering min_episodes_per_task."
+                )
+
+            # Store for balanced sampling
+            self.available_tasks = list(filtered_tasks.keys())
+            self.task_to_episodes = filtered_tasks
+
+            # Also filter success_episodes to only include episodes from filtered tasks
+            self.success_episodes = [
+                ep for ep in self.success_episodes
+                if ep.prompt and ep.prompt.lower().strip() in filtered_tasks
+            ]
+
+            print(f"\nStrategy (BALANCED per sample):")
+            print(f"  1. 50% chance: pick episode's own task → SUCCESS")
+            print(f"  2. 50% chance: pick a DIFFERENT task → FAILURE (cost={default_c_fail})")
+            print(f"\nWith {len(self.available_tasks)} tasks:")
+            print(f"  - Success samples: 50%")
+            print(f"  - Failure samples: 50% (from other tasks)")
+            print(f"  - Total success episodes: {len(self.success_episodes)}")
+            print(f"{'=' * 60}\n")
+        else:
+            self.available_tasks = None
+            self.task_to_episodes = None
+
         self._compute_normalization_stats()
 
     def _load_multi_dataset(self, repo_ids: list[str], episodes_dict: dict[str, list[int]] | None = None) -> lerobot_dataset.MultiLeRobotDataset:
@@ -450,6 +554,7 @@ class ValueFunctionDataset(torch.utils.data.Dataset):
         episodes = []
 
         for ds in dataset._datasets:
+            repo_id = ds.repo_id  # Get repo_id from individual dataset
             ep_meta = ds.meta.episodes
             for ep in ep_meta:
                 task = ep["tasks"][0] if ep["tasks"] else None
@@ -461,6 +566,7 @@ class ValueFunctionDataset(torch.utils.data.Dataset):
                     success=success,
                     prompt=task,
                     dataset=dataset,  # Store reference to dataset
+                    repo_id=repo_id,  # Store repo_id for filtering
                 ))
 
         return episodes
@@ -541,10 +647,17 @@ class ValueFunctionDataset(torch.utils.data.Dataset):
     def __getitem__(self, idx: int) -> dict:
         """Sample a random timestep and compute value target.
 
-        Note: idx is ignored for random sampling. We sample:
-        1. Success or failure dataset (based on success_ratio)
-        2. Random episode from selected dataset
-        3. Random timestep from selected episode
+        With dynamic task augmentation (per sample randomization):
+        1. Randomly pick a target task for THIS sample
+        2. Sample an episode from ALL episodes (success + failure)
+        3. Check if episode's task matches the target task
+        4. Compute value as success/failure accordingly
+        5. Replace prompt with target task (teaches: "value of this state for THIS task")
+
+        Without dynamic augmentation (standard mode):
+        1. Sample success or failure dataset (based on success_ratio)
+        2. Sample episode from selected dataset
+        3. Compute value based on episode's original label
 
         Args:
             idx: Index (ignored, sampling is random)
@@ -552,47 +665,107 @@ class ValueFunctionDataset(torch.utils.data.Dataset):
         Returns:
             Dictionary with observation and value target
         """
-        # Sample dataset
-        is_success = self.rng.random() < self.success_ratio if self.success_episodes and self.failure_episodes else bool(self.success_episodes)
+        if self.use_dynamic_task_augmentation:
+            # ===== DYNAMIC TASK AUGMENTATION MODE (BALANCED sampling) =====
+            # 50% success, 50% failure to avoid extreme class imbalance
 
-        if is_success:
-            episodes = self.success_episodes
+            # First, sample a random episode from filtered success episodes
+            episode_meta = self.success_episodes[self.rng.randint(len(self.success_episodes))]
+            episode_task = (episode_meta.prompt or "").lower().strip()
+
+            # Decide: success (use episode's own task) or failure (use different task)
+            is_success = self.rng.random() < 0.5
+
+            if is_success:
+                # Use the episode's own task as target
+                target_task = episode_task
+            else:
+                # Pick a DIFFERENT task as target (this makes it a "failure")
+                other_tasks = [t for t in self.available_tasks if t != episode_task]
+                if other_tasks:
+                    target_task = other_tasks[self.rng.randint(len(other_tasks))]
+                else:
+                    # Fallback: if only one task, treat as success
+                    target_task = episode_task
+                    is_success = True
+
+            # Sample random timestep within episode
+            timestep_offset = self.rng.randint(episode_meta.length)
+            global_idx = episode_meta.start_idx + timestep_offset
+
+            # Get observation from dataset
+            sample = episode_meta.dataset[global_idx]
+            parsed = parse_observation(sample)
+
+            # CRITICAL: Replace prompt with the TARGET task (not episode's original task)
+            # This teaches: "What's the value of this state trajectory for THIS specific task?"
+            parsed["prompt"] = target_task
+
+            # Get task-specific normalization for the target task
+            task_key = target_task.lower().strip()
+            if task_key in self.task_normalization:
+                raw_value_min, raw_value_max = self.task_normalization[task_key]
+            else:
+                raw_value_min, raw_value_max = self.global_raw_value_min, self.global_raw_value_max
+
+            # Compute value target
+            # If episode task matches target: success (c_fail=0)
+            # If episode task differs: failure (c_fail from cost manager)
+            c_fail = 0.0 if is_success else self.cost_manager.get_cost(target_task)
+            value = compute_value_target(
+                timestep=timestep_offset,
+                episode_length=episode_meta.length,
+                is_success=is_success,
+                c_fail=c_fail,
+                raw_value_min=raw_value_min,
+                raw_value_max=raw_value_max,
+                value_min=self.value_min,
+                value_max=self.value_max,
+            )
+
         else:
-            episodes = self.failure_episodes
+            # ===== STANDARD MODE (original behavior) =====
+            # Sample dataset
+            is_success = self.rng.random() < self.success_ratio if self.success_episodes and self.failure_episodes else bool(self.success_episodes)
 
-        # Sample random episode
-        episode_meta = episodes[self.rng.randint(len(episodes))]
+            if is_success:
+                episodes = self.success_episodes
+            else:
+                episodes = self.failure_episodes
 
-        # Sample random timestep within episode
-        timestep_offset = self.rng.randint(episode_meta.length)
-        global_idx = episode_meta.start_idx + timestep_offset
+            # Sample random episode
+            episode_meta = episodes[self.rng.randint(len(episodes))]
 
-        # Get observation from episode's own dataset (important for task filtering!)
-        sample = episode_meta.dataset[global_idx]
+            # Sample random timestep within episode
+            timestep_offset = self.rng.randint(episode_meta.length)
+            global_idx = episode_meta.start_idx + timestep_offset
 
-        # Parse observation to model format
-        parsed = parse_observation(sample)
+            # Get observation from episode's own dataset (important for task filtering!)
+            sample = episode_meta.dataset[global_idx]
 
-        # Get task-specific normalization range
-        task_key = episode_meta.prompt.lower().strip() if episode_meta.prompt else None
-        if task_key in self.task_normalization:
-            raw_value_min, raw_value_max = self.task_normalization[task_key]
-        else:
-            # Fallback to global normalization for unseen tasks
-            raw_value_min, raw_value_max = self.global_raw_value_min, self.global_raw_value_max
+            # Parse observation to model format
+            parsed = parse_observation(sample)
 
-        # Compute value target with task-specific normalization
-        c_fail = 0.0 if is_success else self.cost_manager.get_cost(episode_meta.prompt)
-        value = compute_value_target(
-            timestep=timestep_offset,
-            episode_length=episode_meta.length,
-            is_success=is_success,
-            c_fail=c_fail,
-            raw_value_min=raw_value_min,
-            raw_value_max=raw_value_max,
-            value_min=self.value_min,
-            value_max=self.value_max,
-        )
+            # Get task-specific normalization range
+            task_key = episode_meta.prompt.lower().strip() if episode_meta.prompt else None
+            if task_key in self.task_normalization:
+                raw_value_min, raw_value_max = self.task_normalization[task_key]
+            else:
+                # Fallback to global normalization for unseen tasks
+                raw_value_min, raw_value_max = self.global_raw_value_min, self.global_raw_value_max
+
+            # Compute value target with task-specific normalization
+            c_fail = 0.0 if is_success else self.cost_manager.get_cost(episode_meta.prompt)
+            value = compute_value_target(
+                timestep=timestep_offset,
+                episode_length=episode_meta.length,
+                is_success=is_success,
+                c_fail=c_fail,
+                raw_value_min=raw_value_min,
+                raw_value_max=raw_value_max,
+                value_min=self.value_min,
+                value_max=self.value_max,
+            )
 
         # Add value target (named "returns" to match PiValue.compute_loss signature)
         parsed["returns"] = np.array(value, dtype=np.float32)
@@ -688,6 +861,8 @@ def create_value_dataloader(
     split_seed: int = 42,
     target_task: str | None = None,
     treat_other_tasks_as_failure: bool = False,
+    use_dynamic_task_augmentation: bool = False,
+    min_episodes_per_task: int = 10,
 ) -> torch.utils.data.DataLoader:
     """Create value function data loader.
 
@@ -697,6 +872,7 @@ def create_value_dataloader(
     - Uses multiple workers for parallel loading
 
     Args:
+        tokenizer: Tokenizer for prompts
         success_repo_ids: LeRobot repo IDs for success trajectories
         failure_repo_ids: LeRobot repo IDs for failure trajectories
         batch_size: Batch size
@@ -710,6 +886,10 @@ def create_value_dataloader(
         split_seed: Random seed for deterministic episode shuffling
         target_task: If provided, only episodes with this task are treated as success
         treat_other_tasks_as_failure: If True with target_task, non-matching tasks become failures
+        use_dynamic_task_augmentation: If True, each sample randomly picks a target task.
+            Episodes matching the task are treated as success, others as failure.
+            This augments failure data by using successful episodes with different prompts.
+        min_episodes_per_task: Minimum episodes per task for dynamic augmentation.
 
     Returns:
         DataLoader yielding batches of observations and value targets
@@ -729,6 +909,8 @@ def create_value_dataloader(
         split_seed=split_seed,
         target_task=target_task,
         treat_other_tasks_as_failure=treat_other_tasks_as_failure,
+        use_dynamic_task_augmentation=use_dynamic_task_augmentation,
+        min_episodes_per_task=min_episodes_per_task,
     )
     print(f"Dataset created in {time.time() - start_time:.2f} seconds.")
     start_time = time.time()

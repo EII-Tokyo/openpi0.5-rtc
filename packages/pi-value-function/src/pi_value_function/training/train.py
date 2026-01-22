@@ -284,6 +284,8 @@ def train(config: TrainConfig) -> None:
             seed=config.seed,
             target_task=config.data.target_task,
             treat_other_tasks_as_failure=config.data.treat_other_tasks_as_failure,
+            use_dynamic_task_augmentation=config.data.use_dynamic_task_augmentation,
+            min_episodes_per_task=config.data.min_episodes_per_task,
         )
         print("✓ Training dataloader created")
 
@@ -309,6 +311,8 @@ def train(config: TrainConfig) -> None:
                 split_seed=config.data.split_seed,
                 target_task=config.data.target_task,
                 treat_other_tasks_as_failure=config.data.treat_other_tasks_as_failure,
+                use_dynamic_task_augmentation=config.data.use_dynamic_task_augmentation,
+                min_episodes_per_task=config.data.min_episodes_per_task,
             )
             print("✓ Validation dataloader created")
     else:

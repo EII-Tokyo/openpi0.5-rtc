@@ -56,6 +56,14 @@ class ValueDataConfig:
     # If True with target_task, treat episodes with other tasks as failures
     treat_other_tasks_as_failure: bool = False
 
+    # Dynamic task augmentation: randomly sample target task per sample (not per batch!)
+    # This augments failures by treating successful episodes with different prompts as failures
+    # Each sample independently picks a random target task, then checks if the episode matches
+    use_dynamic_task_augmentation: bool = False
+
+    # Minimum episodes per task for dynamic augmentation (filters out rare tasks)
+    min_episodes_per_task: int = 10
+
     # Shuffle buffer size for data loading
     shuffle_buffer_size: int = 10_000
 
