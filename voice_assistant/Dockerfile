@@ -35,7 +35,7 @@ COPY pyproject.toml uv.lock /app/
 
 # 安装Python依赖
 RUN uv venv --python python3 $UV_PROJECT_ENVIRONMENT
-RUN uv sync --python $UV_PROJECT_ENVIRONMENT/bin/python
+RUN uv sync --python $UV_PROJECT_ENVIRONMENT/bin/python --no-install-project
 
 # 复制项目代码
 COPY . /app
@@ -54,4 +54,4 @@ RUN uv run python3 -c "from TTS.api import TTS; tts = TTS('tts_models/multilingu
 RUN uv run python3 -c "import torch; torch.hub.load('snakers4/silero-vad', 'silero_vad', force_reload=False, onnx=False)"
 
 # 默认命令
-CMD ["uv", "run", "/app/voice_assistant.py"]
+CMD ["uv", "run", "python3", "/app/voice_assistant.py"]

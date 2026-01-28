@@ -804,7 +804,7 @@ _CONFIGS = [
         data=LeRobotAlohaDataConfig(
             # repo_id="physical-intelligence/aloha_pen_uncap_diverse",
             repo_ids=[
-                "lyl472324464/2025.12.23_twist_one",                           # 65.9k 
+                "lyl472324464/2025-10-15-twist-one-bottle-no-box-in-the-front",                           # 65.9k 
                 # "lyl472324464/2025.12.23_twist_one",              # 63.5k 
                 # "lyl472324464/2025.12.23_twist_one",                           # 65.9k 
                 # "lyl472324464/2025.12.23_twist_one",              # 63.5k 

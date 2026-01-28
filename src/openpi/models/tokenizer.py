@@ -25,7 +25,11 @@ class PaligemmaTokenizer:
             # This is the Pi05 format, where the state is part of the discrete language input.
             discretized_state = np.digitize(state, bins=np.linspace(-1, 1, 256 + 1)[:-1]) - 1
             state_str = " ".join(map(str, discretized_state))
-            full_prompt = f"Task: {cleaned_text}, State: {state_str};\nAction: "
+            if "[bad action]" in cleaned_text:
+                cleaned_text = cleaned_text.replace("[bad action] ", "")
+                full_prompt = f"Task: {cleaned_text}, State: {state_str};\nGive a bad action: "
+            else:
+                full_prompt = f"Task: {cleaned_text}, State: {state_str};\nGive a good action: "
             tokens = self._tokenizer.encode(full_prompt, add_bos=True)
         else:
             # This is the Pi0 format, where the state is part of the continuous action expert input.

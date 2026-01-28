@@ -47,7 +47,7 @@ class Args:
     manual_dataset_dir: str = "/app/examples/aloha_real/manual_override"
     compress_images: bool = True
     is_mobile: bool = False
-    if_save_hdf5: bool = True
+    if_save_hdf5: bool = False
 
 
 def main(args: Args) -> None:
