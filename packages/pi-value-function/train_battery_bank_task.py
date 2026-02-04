@@ -35,7 +35,14 @@ config = TrainConfig(
     data=ValueDataConfig(
         # Load ALL success datasets
         success_repo_ids=[
-            "michios/droid_xxjd_7"
+            "michios/droid_xxjd",
+            "michios/droid_xxjd_2",
+            "michios/droid_xxjd_3",
+            "michios/droid_xxjd_4",
+            "michios/droid_xxjd_5",
+            "michios/droid_xxjd_6",
+            "michios/droid_xxjd_7",
+            "michios/droid_xxjd_8_2",
         ],
         failure_repo_ids=[
             "michios/droid_xxjd_fail_1"
@@ -48,7 +55,7 @@ config = TrainConfig(
         treat_other_tasks_as_failure=True,  # Treat all other tasks as failures!
 
         failure_cost_json="configs/failure_costs.json",
-        default_c_fail=2000.0,
+        default_c_fail=1000.0,
         success_sampling_ratio=0.5,
     ),
     checkpoint=CheckpointConfig(
