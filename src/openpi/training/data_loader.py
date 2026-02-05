@@ -454,7 +454,7 @@ class TorchDataLoader:
             multiprocessing_context=mp_context,
             persistent_workers=num_workers > 0,
             collate_fn=_collate_fn,
-            worker_init_fn=_worker_init_fn,
+            worker_init_fn=_create_worker_init_fn(seed),
             drop_last=True,
             generator=generator,
         )
@@ -489,12 +489,19 @@ def _collate_fn(items):
     return jax.tree.map(lambda *xs: np.stack([np.asarray(x) for x in xs], axis=0), *items)
 
 
-def _worker_init_fn(worker_id: int) -> None:
-    """Tell JAX inside the worker process not to preallocate the GPU memory."""
-    # NOTE: This is called after jax is imported inside the worker process. This
-    # means that this approach will not work for selecting the backend.
-    os.environ["XLA_PYTHON_CLIENT_PREALLOCATE"] = "false"
-    os.environ["XLA_PYTHON_CLIENT_ALLOCATOR"] = "platform"
+def _create_worker_init_fn(seed: int):
+    """Create a worker init function with the given seed."""
+    def _worker_init_fn(worker_id: int) -> None:
+        """Initialize worker process with JAX settings and numpy random seed."""
+        # Tell JAX inside the worker process not to preallocate the GPU memory.
+        # NOTE: This is called after jax is imported inside the worker process. This
+        # means that this approach will not work for selecting the backend.
+        os.environ["XLA_PYTHON_CLIENT_PREALLOCATE"] = "false"
+        os.environ["XLA_PYTHON_CLIENT_ALLOCATOR"] = "platform"
+        # Set numpy random seed for each worker to ensure different random states
+        # Use seed + worker_id to ensure each worker has a different seed
+        np.random.seed(seed + worker_id)
+    return _worker_init_fn
 
 
 class RLDSDataLoader:
