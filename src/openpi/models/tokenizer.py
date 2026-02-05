@@ -29,7 +29,8 @@ class PaligemmaTokenizer:
                 cleaned_text = cleaned_text.replace("[bad action] ", "")
                 full_prompt = f"Task: {cleaned_text}, State: {state_str};\nGive a bad action: "
             else:
-                if np.random.random() < 0.2:
+                ran_num = np.random.random()                
+                if ran_num < 0.2:
                     full_prompt = f"Task: {cleaned_text}, State: {state_str};\nGive a good action: "
                 else:
                     full_prompt = f"Task: {cleaned_text}, State: {state_str};\nAction: "

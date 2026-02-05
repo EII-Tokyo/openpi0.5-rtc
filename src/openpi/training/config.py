@@ -805,17 +805,17 @@ _CONFIGS = [
             # repo_id="physical-intelligence/aloha_pen_uncap_diverse",
             repo_ids=[
                 "lyl472324464/2026-02-03-no-cap-and-direction",                           # 70.9k 
-                "lyl472324464/2026-01-28-twist-many-bottle",              # 92.8k 
-                "lyl472324464/2026-01-20-twist-one-bottle",                           # 40.2k 
-                "lyl472324464/2025-12-23-twist-one-bottle",              # 121k 
-                "lyl472324464/2025-12-10-twist-one-bottle",              # 23.1k 
-                "lyl472324464/2025-11-26-twist-two-bottles",                           # 82k 
-                "lyl472324464/2025-11-18-twist-two-bottles",              # 32.3k 
-                "lyl472324464/2025-11-14-twist-two-bottles",                           # 95.3k 
+                # "lyl472324464/2026-01-28-twist-many-bottle",              # 92.8k 
+                # "lyl472324464/2026-01-20-twist-one-bottle",                           # 40.2k 
+                # "lyl472324464/2025-12-23-twist-one-bottle",              # 121k 
+                # "lyl472324464/2025-12-10-twist-one-bottle",              # 23.1k 
+                # "lyl472324464/2025-11-26-twist-two-bottles",                           # 82k 
+                # "lyl472324464/2025-11-18-twist-two-bottles",              # 32.3k 
+                # "lyl472324464/2025-11-14-twist-two-bottles",                           # 95.3k 
 
-                "lyl472324464/2025-11-06-twist-many-bottles",              # 55k  
-                "lyl472324464/2025-10-15-twist-one-bottle-no-box-in-the-front",      # 49.9k 
-                "lyl472324464/2025-09-15-twist-one-bottle-no-box-in-the-front",              # 54.8k  
+                # "lyl472324464/2025-11-06-twist-many-bottles",              # 55k  
+                # "lyl472324464/2025-10-15-twist-one-bottle-no-box-in-the-front",      # 49.9k 
+                # "lyl472324464/2025-09-15-twist-one-bottle-no-box-in-the-front",              # 54.8k  
                 
                 # "lyl472324464/aloha_static_battery",              # 29.4k  静态任务：抓取或操作电池
                 # "lyl472324464/aloha_static_candy",                # 35k    静态任务：操作糖果物体
@@ -901,7 +901,8 @@ _CONFIGS = [
         weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_base/params"),
         save_interval=1000,
         num_train_steps=40_000,
-        batch_size=128,
+        batch_size=32,
+        num_workers=4,
     ),
     #
     # Fine-tuning DROID configs.
