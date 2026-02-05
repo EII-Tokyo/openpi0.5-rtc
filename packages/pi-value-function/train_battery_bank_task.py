@@ -22,20 +22,27 @@ config = TrainConfig(
     ),
     lr_schedule=_optimizer.CosineDecaySchedule(
         warmup_steps=500,
-        peak_lr=3e-5,
+        peak_lr=1e-5,
         decay_steps=10_000,
-        decay_lr=3e-6,
+        decay_lr=1e-6,
     ),
     optimizer=_optimizer.AdamW(
         weight_decay=0.01,
         clip_gradient_norm=1.0,
     ),
     num_train_steps=30_000,
-    batch_size=16,
+    batch_size=128,
     data=ValueDataConfig(
         # Load ALL success datasets
         success_repo_ids=[
-            "michios/droid_xxjd_7"
+            "michios/droid_xxjd",
+            "michios/droid_xxjd_2",
+            "michios/droid_xxjd_3",
+            "michios/droid_xxjd_4",
+            "michios/droid_xxjd_5",
+            "michios/droid_xxjd_6",
+            "michios/droid_xxjd_7",
+            "michios/droid_xxjd_8_2",
         ],
         failure_repo_ids=[
             "michios/droid_xxjd_fail_1"
@@ -48,7 +55,7 @@ config = TrainConfig(
         treat_other_tasks_as_failure=True,  # Treat all other tasks as failures!
 
         failure_cost_json="configs/failure_costs.json",
-        default_c_fail=2000.0,
+        default_c_fail=1000.0,
         success_sampling_ratio=0.5,
     ),
     checkpoint=CheckpointConfig(
@@ -61,7 +68,7 @@ config = TrainConfig(
         log_every_n_steps=50,
         wandb_enabled=True,
         wandb_project="pi-value-function",
-        wandb_run_name="battery_bank_in_box_task_v1",
+        wandb_run_name="battery_bank_in_box_task_v2_bs128",
     ),
     num_workers=0,
     num_steps_per_validation=500,

@@ -433,6 +433,12 @@ def train(config: TrainConfig) -> None:
             pbar.write(f"  ✓ Checkpoint saved")
 
     pbar.close()
+
+    # Save final checkpoint
+    print(f"\nSaving final checkpoint at step {total_steps}...")
+    ckpt_manager.save_checkpoint(checkpoint_mgr, model, optimizer, total_steps)
+    print("✓ Final checkpoint saved")
+
     print("\n=== Training complete! ===")
 
     # Finish W&B run
