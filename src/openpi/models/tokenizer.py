@@ -29,7 +29,10 @@ class PaligemmaTokenizer:
                 cleaned_text = cleaned_text.replace("[bad action] ", "")
                 full_prompt = f"Task: {cleaned_text}, State: {state_str};\nGive a bad action: "
             else:
-                full_prompt = f"Task: {cleaned_text}, State: {state_str};\nGive a good action: "
+                if np.random.random() < 0.2:
+                    full_prompt = f"Task: {cleaned_text}, State: {state_str};\nGive a good action: "
+                else:
+                    full_prompt = f"Task: {cleaned_text}, State: {state_str};\nAction: "
             tokens = self._tokenizer.encode(full_prompt, add_bos=True)
         else:
             # This is the Pi0 format, where the state is part of the continuous action expert input.

@@ -124,51 +124,51 @@ class RealEnv:
         )
         self.gripper_command.cmd = right_gripper_desired_joint
         self.puppet_bot_right.gripper.core.pub_single.publish(self.gripper_command)
-        left_gripper_error = self.puppet_bot_left.dxl.robot_get_motor_registers(
-            "single",
-            "gripper",
-            "Hardware_Error_Status"
-        )
-        right_gripper_error = self.puppet_bot_right.dxl.robot_get_motor_registers(
-            "single",
-            "gripper",
-            "Hardware_Error_Status"
-        )
-        if left_gripper_error.values[0] != 0 :
-            print("left gripper error occured")
-            print(f"left gripper error: {left_gripper_error}")
-            print(f"last left gripper command: {self.last_left_gripper_desired_pos_normalized}")           
-            print(f"current left gripper command: {left_gripper_desired_pos_normalized}")
-            # robot_utils.setup_puppet_bot(self.puppet_bot_left, current_limit=self._gripper_current_limits[0])
-            # time.sleep(0.5)
-            robot_utils.restart_puppet_bot_gripper(self.puppet_bot_left, current_limit=self._gripper_current_limits[0])
-            self.gripper_command.cmd = constants.PUPPET_GRIPPER_JOINT_OPEN
-            self.puppet_bot_left.gripper.core.pub_single.publish(self.gripper_command)
-            print("left gripper motor rebooted")
-        if right_gripper_error.values[0] != 0:
-            print("right gripper error occured")
-            print(f"right gripper error: {right_gripper_error}")
-            print(f"last right gripper command: {self.last_right_gripper_desired_pos_normalized}")
-            print(f"current right gripper command: {right_gripper_desired_pos_normalized}")
-            # robot_utils.setup_puppet_bot(self.puppet_bot_right, current_limit=self._gripper_current_limits[1])
-            # time.sleep(0.5)
-            robot_utils.restart_puppet_bot_gripper(self.puppet_bot_right, current_limit=self._gripper_current_limits[1])
-            self.gripper_command.cmd = constants.PUPPET_GRIPPER_JOINT_OPEN
-            self.puppet_bot_right.gripper.core.pub_single.publish(self.gripper_command)
-            print("right gripper motor rebooted")
+        # left_gripper_error = self.puppet_bot_left.dxl.robot_get_motor_registers(
+        #     "single",
+        #     "gripper",
+        #     "Hardware_Error_Status"
+        # )
+        # right_gripper_error = self.puppet_bot_right.dxl.robot_get_motor_registers(
+        #     "single",
+        #     "gripper",
+        #     "Hardware_Error_Status"
+        # )
+        # if left_gripper_error.values[0] != 0 :
+        #     print("left gripper error occured")
+        #     print(f"left gripper error: {left_gripper_error}")
+        #     print(f"last left gripper command: {self.last_left_gripper_desired_pos_normalized}")           
+        #     print(f"current left gripper command: {left_gripper_desired_pos_normalized}")
+        #     # robot_utils.setup_puppet_bot(self.puppet_bot_left, current_limit=self._gripper_current_limits[0])
+        #     # time.sleep(0.5)
+        #     robot_utils.restart_puppet_bot_gripper(self.puppet_bot_left, current_limit=self._gripper_current_limits[0])
+        #     self.gripper_command.cmd = constants.PUPPET_GRIPPER_JOINT_OPEN
+        #     self.puppet_bot_left.gripper.core.pub_single.publish(self.gripper_command)
+        #     print("left gripper motor rebooted")
+        # if right_gripper_error.values[0] != 0:
+        #     print("right gripper error occured")
+        #     print(f"right gripper error: {right_gripper_error}")
+        #     print(f"last right gripper command: {self.last_right_gripper_desired_pos_normalized}")
+        #     print(f"current right gripper command: {right_gripper_desired_pos_normalized}")
+        #     # robot_utils.setup_puppet_bot(self.puppet_bot_right, current_limit=self._gripper_current_limits[1])
+        #     # time.sleep(0.5)
+        #     robot_utils.restart_puppet_bot_gripper(self.puppet_bot_right, current_limit=self._gripper_current_limits[1])
+        #     self.gripper_command.cmd = constants.PUPPET_GRIPPER_JOINT_OPEN
+        #     self.puppet_bot_right.gripper.core.pub_single.publish(self.gripper_command)
+        #     print("right gripper motor rebooted")
 
-        if abs(left_gripper_desired_pos_normalized - self.last_left_gripper_desired_pos_normalized) > 0.2:
-            print("left gripper command changed larger than 0.2")
-            print(f"last left gripper command: {self.last_left_gripper_desired_pos_normalized}")
-            print(f"left gripper command changed: {left_gripper_desired_pos_normalized}")
-        if abs(right_gripper_desired_pos_normalized - self.last_right_gripper_desired_pos_normalized) > 0.2:
-            print("right gripper command changed larger than 0.2")
-            print(f"last right gripper command: {self.last_right_gripper_desired_pos_normalized}")
-            print(f"right gripper command changed: {right_gripper_desired_pos_normalized}")
-        self.last_left_gripper_error = left_gripper_error
-        self.last_right_gripper_error = right_gripper_error
-        self.last_left_gripper_desired_pos_normalized = left_gripper_desired_pos_normalized
-        self.last_right_gripper_desired_pos_normalized = right_gripper_desired_pos_normalized
+        # if abs(left_gripper_desired_pos_normalized - self.last_left_gripper_desired_pos_normalized) > 0.2:
+        #     print("left gripper command changed larger than 0.2")
+        #     print(f"last left gripper command: {self.last_left_gripper_desired_pos_normalized}")
+        #     print(f"left gripper command changed: {left_gripper_desired_pos_normalized}")
+        # if abs(right_gripper_desired_pos_normalized - self.last_right_gripper_desired_pos_normalized) > 0.2:
+        #     print("right gripper command changed larger than 0.2")
+        #     print(f"last right gripper command: {self.last_right_gripper_desired_pos_normalized}")
+        #     print(f"right gripper command changed: {right_gripper_desired_pos_normalized}")
+        # self.last_left_gripper_error = left_gripper_error
+        # self.last_right_gripper_error = right_gripper_error
+        # self.last_left_gripper_desired_pos_normalized = left_gripper_desired_pos_normalized
+        # self.last_right_gripper_desired_pos_normalized = right_gripper_desired_pos_normalized
 
     def _reset_joints(self):
         robot_utils.move_arms(
@@ -245,23 +245,24 @@ class RealEnv:
         # wrist_rotate: [-π, π] (约 [-3.14159, 3.14159])
         start_time = time.time()
         import math
-        joint_limits_lower = np.array([
-            -math.pi + 0.00001,  # waist
-            math.radians(-106),  # shoulder: -1.850049
-            math.radians(-101),  # elbow: -1.76278
-            -math.pi + 0.00001,  # forearm_roll
-            math.radians(-107),  # wrist_angle: -1.86750
-            -math.pi + 0.00001   # wrist_rotate
-        ])
-        joint_limits_upper = np.array([
-            math.pi - 0.00001,   # waist
-            math.radians(72),    # shoulder: 1.256637
-            math.radians(92),    # elbow: 1.60570
-            math.pi - 0.00001,   # forearm_roll
-            math.radians(128),   # wrist_angle: 2.23402
-            math.pi - 0.00001    # wrist_rotate
-        ])
-        
+        # joint_limits_lower = np.array([
+        #     -math.pi + 0.00001,  # waist
+        #     math.radians(-106),  # shoulder: -1.850049
+        #     math.radians(-101),  # elbow: -1.76278
+        #     -math.pi + 0.00001,  # forearm_roll
+        #     math.radians(-107),  # wrist_angle: -1.86750
+        #     -math.pi + 0.00001   # wrist_rotate
+        # ])
+        # joint_limits_upper = np.array([
+        #     math.pi - 0.00001,   # waist
+        #     math.radians(72),    # shoulder: 1.256637
+        #     math.radians(92),    # elbow: 1.60570
+        #     math.pi - 0.00001,   # forearm_roll
+        #     math.radians(128),   # wrist_angle: 2.23402
+        #     math.pi - 0.00001    # wrist_rotate
+        # ])
+        joint_limits_lower = np.asarray(self.puppet_bot_left.arm.group_info.joint_lower_limits, dtype=float)
+        joint_limits_upper = np.asarray(self.puppet_bot_left.arm.group_info.joint_upper_limits, dtype=float)
         state_len = int(len(action) / 2)
         left_action = action[:state_len]
         right_action = action[state_len:]
