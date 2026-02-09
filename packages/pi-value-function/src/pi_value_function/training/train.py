@@ -229,10 +229,47 @@ def train(config: TrainConfig) -> None:
     print("\n=== Setting up optimizer ===")
     lr_schedule = config.lr_schedule.create()
     tx = config.optimizer.create(lr_schedule)
-    optimizer = nnx.Optimizer(model, tx)
+
+    # Freeze SigLIP backbone and Gemma - only train projection heads
+    # Get full model state for parameter counting
+    full_state = nnx.state(model, nnx.Param)
+
+    # Create a filter to select only trainable parameters:
+    # 1. Value MLP head (model.value_mlp - Sequential with Linear + GELU + Linear)
+    # 2. SigLIP projection head (the 'head' layer in model.siglip)
+    def trainable_filter(path, value):
+        """Filter to select only trainable parameters."""
+        path_str = '/'.join(str(p) for p in path)
+        # Train value_mlp (non-linear value head)
+        if 'value_mlp' in path_str:
+            return True
+        # Train SigLIP's projection head (projects to Gemma dimension)
+        # The head is typically named 'head' in the SigLIP module
+        if 'siglip' in path_str and 'head' in path_str:
+            return True
+        return False
+
+    # Split model into trainable and frozen parameters
+    trainable_state = nnx.State({
+        k: v for k, v in nnx.iter_graph(full_state)
+        if trainable_filter(k, v)
+    })
+
+    # Create optimizer with only trainable parameters
+    optimizer = nnx.Optimizer(trainable_state, tx)
+
+    # Count parameters
+    trainable_params = sum(x.size for x in jax.tree_util.tree_leaves(trainable_state) if hasattr(x, 'size'))
+    total_params = sum(x.size for x in jax.tree_util.tree_leaves(full_state) if hasattr(x, 'size'))
+    frozen_params = total_params - trainable_params
+
     print(f"✓ Optimizer created: {config.optimizer.__class__.__name__}")
     print(f"  Peak LR: {config.lr_schedule.peak_lr}")
     print(f"  Warmup steps: {config.lr_schedule.warmup_steps}")
+    print(f"  Trainable params: {trainable_params:,} ({trainable_params/total_params*100:.2f}%)")
+    print(f"  Frozen params: {frozen_params:,} ({frozen_params/total_params*100:.2f}%)")
+    print(f"  ⚠️  Frozen: SigLIP backbone and Gemma")
+    print(f"  ✓ Training: SigLIP projection head + Value projection head")
 
     # Initialize checkpoint manager
     print("\n=== Setting up checkpointing ===")

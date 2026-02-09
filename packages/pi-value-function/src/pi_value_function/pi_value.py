@@ -72,7 +72,13 @@ class PiValue(BaseValueModel):
         self.siglip.lazy_init(next(iter(config.fake_obs().images.values())), train=False, rngs=rngs)
 
         # Value projection head: Gemma output -> categorical distribution
-        self.value_proj = nnx.Linear(gemma_width, self.value_dims, rngs=rngs)
+        # linear nonlinear linear
+        hidden_dim = gemma_width
+        self.value_mlp = nnx.Sequential(
+            nnx.Linear(gemma_width, hidden_dim, rngs=rngs),
+            nnx.gelu,  # GELU activation
+            nnx.Linear(hidden_dim, self.value_dims, rngs=rngs),
+        )
 
     # TODO: Do I need masks?
     # should not be autoregressive for value function
@@ -204,7 +210,7 @@ class PiValue(BaseValueModel):
         eos_hidden_state = hidden_states[:, -1, :]  # (batch, embed_dim)
 
         # Project to value distribution logits
-        logits = self.value_proj(eos_hidden_state)  # Shape: (batch, value_dims)
+        logits = self.value_mlp(eos_hidden_state)  # Shape: (batch, value_dims)
 
         return logits
 
