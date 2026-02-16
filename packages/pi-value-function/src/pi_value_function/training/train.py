@@ -35,6 +35,34 @@ from openpi.models.model import Observation
 from openpi.models.tokenizer import Gemma3Tokenizer
 import openpi.training.optimizer as _optimizer
 
+# Data parallelism sharding
+BATCH_AXIS = "batch"
+
+
+def _create_data_parallel_mesh() -> jax.sharding.Mesh:
+    """Create a 1D mesh for data parallelism across all devices."""
+    devices = jax.devices()
+    return jax.sharding.Mesh(devices, (BATCH_AXIS,))
+
+
+def _shard_batch(batch, mesh: jax.sharding.Mesh):
+    """Shard a batch along the batch axis across devices."""
+    data_sharding = jax.sharding.NamedSharding(mesh, jax.sharding.PartitionSpec(BATCH_AXIS))
+    replicated = jax.sharding.NamedSharding(mesh, jax.sharding.PartitionSpec())
+
+    def _shard_leaf(x):
+        if isinstance(x, (np.ndarray, jnp.ndarray)) and x.ndim > 0:
+            return jax.device_put(x, data_sharding)
+        return jax.device_put(x, replicated)
+
+    return jax.tree.map(_shard_leaf, batch)
+
+
+def _replicate_on_mesh(pytree, mesh: jax.sharding.Mesh):
+    """Replicate a pytree across all devices in the mesh."""
+    replicated = jax.sharding.NamedSharding(mesh, jax.sharding.PartitionSpec())
+    return jax.device_put(pytree, replicated)
+
 
 def create_model_with_weights(config: TrainConfig, rng: jax.Array) -> PiValue:
     """Create PiValue model and load pretrained weights.
@@ -334,6 +362,18 @@ def train(config: TrainConfig) -> None:
         )
         print(f"✓ Resumed from step {start_step}")
 
+    # Set up data parallelism across all devices
+    mesh = _create_data_parallel_mesh()
+    num_devices = len(jax.devices())
+    print(f"\n=== Data parallelism ===")
+    print(f"  Devices: {num_devices} ({[str(d) for d in jax.devices()]})")
+    print(f"  Mesh: {mesh.shape}")
+    if num_devices > 1:
+        print(f"  Replicating model across {num_devices} devices...")
+        model = _replicate_on_mesh(model, mesh)
+        optimizer = _replicate_on_mesh(optimizer, mesh)
+        print(f"  ✓ Model and optimizer replicated")
+
     # Create tokenizer
     print("\n=== Creating tokenizer ===")
     tokenizer = Gemma3Tokenizer(max_len=48, path=tokenizer_path)
@@ -426,8 +466,15 @@ def train(config: TrainConfig) -> None:
     else:
         raise ValueError("num_train_steps must be provided in config")
 
+    # Validate batch size divisibility for data parallelism
+    if num_devices > 1 and config.batch_size % num_devices != 0:
+        raise ValueError(
+            f"batch_size ({config.batch_size}) must be divisible by num_devices ({num_devices}) "
+            f"for data parallelism. Use batch_size={config.batch_size // num_devices * num_devices} or {(config.batch_size // num_devices + 1) * num_devices}."
+        )
+
     print(f"\n=== Starting training for {total_steps} steps ===")
-    print(f"Batch size: {config.batch_size}")
+    print(f"Batch size: {config.batch_size}" + (f" ({config.batch_size // num_devices} per device)" if num_devices > 1 else ""))
     print(f"Log interval: {config.logging.log_every_n_steps}")
     if resuming:
         print(f"Resuming from step: {start_step}")
@@ -483,8 +530,10 @@ def train(config: TrainConfig) -> None:
             data_iter = iter(dataloader)
             batch = next(data_iter)
 
-        # Convert to JAX arrays
+        # Convert to JAX arrays and shard across devices
         batch_jax = jax.tree.map(lambda x: jnp.array(x) if isinstance(x, np.ndarray) else x, batch)
+        if num_devices > 1:
+            batch_jax = _shard_batch(batch_jax, mesh)
 
         # Convert batch to Observation (prompts already tokenized in collate_fn)
         observation = Observation.from_dict(batch_jax)
@@ -508,6 +557,8 @@ def train(config: TrainConfig) -> None:
                 val_batch = next(val_iter)
 
             val_batch_jax = jax.tree.map(lambda x: jnp.array(x) if isinstance(x, np.ndarray) else x, val_batch)
+            if num_devices > 1:
+                val_batch_jax = _shard_batch(val_batch_jax, mesh)
             val_observation = Observation.from_dict(val_batch_jax)
             val_returns = val_batch_jax["returns"]
 

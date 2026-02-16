@@ -763,5 +763,6 @@ def create_value_dataloader(
         collate_fn=CollateFnWithTokenizer(tokenizer),
         persistent_workers=num_workers > 0,
         worker_init_fn=_worker_init_fn,
-        multiprocessing_context="spawn" if num_workers > 0 else None,
+        prefetch_factor=4 if num_workers > 0 else None,
+        multiprocessing_context="fork" if num_workers > 0 else None,
     )

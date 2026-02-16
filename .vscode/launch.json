@@ -9,9 +9,49 @@
             "console": "integratedTerminal",
             "env": {
                 "JAX_DISABLE_JIT": "1",
-                "JAX_DEBUG_NANS": "True"  // Optional: helps catch NaNs immediately
+                "JAX_DEBUG_NANS": "True"
             },
-            "justMyCode": false           // Recommended to see into JAX internals if needed
+            "justMyCode": false
+        },
+        {
+            "name": "Debug: Value Server",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/scripts/value_server.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--checkpoint", "${input:checkpointPath}",
+                "--host", "0.0.0.0",
+                "--port", "8001"
+            ],
+            "env": {
+                "JAX_DEBUG_NANS": "True"
+            },
+            "justMyCode": false
+        },
+        {
+            "name": "Debug: Value Server (no JIT)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/scripts/value_server.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--checkpoint", "${input:checkpointPath}",
+                "--host", "0.0.0.0",
+                "--port", "8001"
+            ],
+            "env": {
+                "JAX_DISABLE_JIT": "1",
+                "JAX_DEBUG_NANS": "True"
+            },
+            "justMyCode": false
+        }
+    ],
+    "inputs": [
+        {
+            "id": "checkpointPath",
+            "type": "promptString",
+            "description": "Path to checkpoint directory (e.g. /path/to/checkpoints/1000)"
         }
     ]
 }

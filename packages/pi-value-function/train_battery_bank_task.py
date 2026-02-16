@@ -24,7 +24,7 @@ config = TrainConfig(
     ),
     lr_schedule=_optimizer.CosineDecaySchedule(
         warmup_steps=500,
-        peak_lr=1e-4, # 10x because freeze
+        peak_lr=1e-4, # 100x because freeze
         decay_steps=10_000,
         decay_lr=1e-5,
     ),
