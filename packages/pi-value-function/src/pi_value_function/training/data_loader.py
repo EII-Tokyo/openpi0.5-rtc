@@ -345,6 +345,10 @@ class ValueFunctionDataset(torch.utils.data.Dataset):
         if split not in ("train", "val"):
             raise ValueError(f"split must be 'train' or 'val', got '{split}'")
 
+        # Store task override config
+        self.target_task = target_task
+        self.treat_other_tasks_as_failure = treat_other_tasks_as_failure
+
         # Compute episode splits for train/val
         # Combine all repo IDs to compute splits consistently
         all_repo_ids = []
@@ -460,7 +464,7 @@ class ValueFunctionDataset(torch.utils.data.Dataset):
                     length=ep["length"],
                     success=success,
                     prompt=task,
-                    dataset=dataset,  # Store reference to dataset
+                    dataset=ds,  # Store reference to individual sub-dataset (indices are per-dataset)
                 ))
 
         return episodes
@@ -572,6 +576,10 @@ class ValueFunctionDataset(torch.utils.data.Dataset):
 
         # Parse observation to model format
         parsed = parse_observation(sample)
+
+        # Force all prompts to target task when configured
+        if self.target_task and self.treat_other_tasks_as_failure:
+            parsed["prompt"] = self.target_task
 
         # Get task-specific normalization range
         task_key = episode_meta.prompt.lower().strip() if episode_meta.prompt else None
