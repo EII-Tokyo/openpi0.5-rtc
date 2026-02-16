@@ -604,6 +604,7 @@ class ValueFunctionDataset(torch.utils.data.Dataset):
 
         # Add value target (named "returns" to match PiValue.compute_loss signature)
         parsed["returns"] = np.array(value, dtype=np.float32)
+        parsed["is_success"] = is_success
 
         return parsed
 
@@ -641,6 +642,10 @@ class CollateFnWithTokenizer:
 
     def __call__(self, items: list[dict]) -> dict:
         """Collate batch items, tokenizing prompts individually."""
+        # Remove fields not needed for training
+        for item in items:
+            item.pop("is_success", None)
+
         # Extract and tokenize prompts
         prompts = [item.pop("prompt") for item in items]
         tokenized_prompts = []

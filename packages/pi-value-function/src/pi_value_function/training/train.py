@@ -231,45 +231,87 @@ def train(config: TrainConfig) -> None:
     tx = config.optimizer.create(lr_schedule)
 
     # Freeze SigLIP backbone and Gemma - only train projection heads
-    # Get full model state for parameter counting
-    full_state = nnx.state(model, nnx.Param)
+    # Define a Frozen variable type to mark parameters that shouldn't be trained
+    class Frozen(nnx.Variable):
+        """Parameters that are frozen and won't be optimized."""
+        pass
 
-    # Create a filter to select only trainable parameters:
-    # 1. Value MLP head (model.value_mlp - Sequential with Linear + GELU + Linear)
-    # 2. SigLIP projection head (the 'head' layer in model.siglip)
-    def trainable_filter(path, value):
-        """Filter to select only trainable parameters."""
-        path_str = '/'.join(str(p) for p in path)
+    # Get all parameters and reclassify frozen ones
+    # Use ... to capture all other variable types (RNG state, etc.)
+    graphdef, params, other_vars = nnx.split(model, nnx.Param, ...)
+
+    # Filter function to determine which parameters to train
+    def should_freeze(path_tuple):
+        """Return True if parameter should be frozen."""
+        path_str = '/'.join(str(p.key) if hasattr(p, 'key') else str(p) for p in path_tuple)
         # Train value_mlp (non-linear value head)
         if 'value_mlp' in path_str:
-            return True
+            return False
         # Train SigLIP's projection head (projects to Gemma dimension)
-        # The head is typically named 'head' in the SigLIP module
         if 'siglip' in path_str and 'head' in path_str:
-            return True
-        return False
+            return False
+        # Freeze everything else (SigLIP backbone, Gemma)
+        return True
 
-    # Split model into trainable and frozen parameters
-    trainable_state = nnx.State({
-        k: v for k, v in nnx.iter_graph(full_state)
-        if trainable_filter(k, v)
-    })
+    # Convert State to pure dict, reclassify, and convert back
+    params_dict = params.to_pure_dict()
 
-    # Create optimizer with only trainable parameters
-    optimizer = nnx.Optimizer(trainable_state, tx)
+    # Debug: print first few paths to understand structure
+    print("Debugging parameter paths (first 10):")
+    for i, (path, _) in enumerate(jax.tree_util.tree_leaves_with_path(params_dict)):
+        if i < 10:
+            path_str = '/'.join(str(p.key) if hasattr(p, 'key') else str(p) for p in path)
+            print(f"  Path {i}: {path_str}")
+        else:
+            break
 
-    # Count parameters
-    trainable_params = sum(x.size for x in jax.tree_util.tree_leaves(trainable_state) if hasattr(x, 'size'))
-    total_params = sum(x.size for x in jax.tree_util.tree_leaves(full_state) if hasattr(x, 'size'))
-    frozen_params = total_params - trainable_params
+    def reclassify_variable(path, value):
+        """Convert arrays to Frozen or Param based on path."""
+        path_str = '/'.join(str(p.key) if hasattr(p, 'key') else str(p) for p in path)
+        freeze = should_freeze(path)
+        # Debug: print decisions for value_mlp and siglip head params
+        if 'value_mlp' in path_str or ('siglip' in path_str and 'head' in path_str):
+            print(f"  {'FREEZE' if freeze else 'TRAIN'}: {path_str}")
+        if freeze:
+            return Frozen(value)
+        else:
+            return nnx.Param(value)
+
+    # Apply reclassification to the pure dict
+    print("Reclassifying parameters...")
+    reclassified_dict = jax.tree_util.tree_map_with_path(reclassify_variable, params_dict)
+
+    # Convert back to State
+    params = nnx.State(reclassified_dict)
+
+    # Merge back into model (include other_vars like RNG state)
+    model = nnx.merge(graphdef, params, other_vars)
+
+    # Create optimizer - it will only optimize nnx.Param (not Frozen)
+    optimizer = nnx.Optimizer(model, tx, wrt=nnx.Param)
+
+    # Count parameters for logging
+    all_params = nnx.state(model, nnx.Param, Frozen)
+    trainable_params_state = nnx.state(model, nnx.Param)
+    frozen_params_state = nnx.state(model, Frozen)
+
+    trainable_count = sum(
+        x.value.size if hasattr(x, 'value') and hasattr(x.value, 'size') else 0
+        for x in jax.tree_util.tree_leaves(trainable_params_state)
+    )
+    total_count = sum(
+        x.value.size if hasattr(x, 'value') and hasattr(x.value, 'size') else 0
+        for x in jax.tree_util.tree_leaves(all_params)
+    )
+    frozen_count = total_count - trainable_count
 
     print(f"✓ Optimizer created: {config.optimizer.__class__.__name__}")
     print(f"  Peak LR: {config.lr_schedule.peak_lr}")
     print(f"  Warmup steps: {config.lr_schedule.warmup_steps}")
-    print(f"  Trainable params: {trainable_params:,} ({trainable_params/total_params*100:.2f}%)")
-    print(f"  Frozen params: {frozen_params:,} ({frozen_params/total_params*100:.2f}%)")
+    print(f"  Trainable params: {trainable_count:,} ({trainable_count/total_count*100:.2f}%)")
+    print(f"  Frozen params: {frozen_count:,} ({frozen_count/total_count*100:.2f}%)")
     print(f"  ⚠️  Frozen: SigLIP backbone and Gemma")
-    print(f"  ✓ Training: SigLIP projection head + Value projection head")
+    print(f"  ✓ Training: SigLIP projection head + Value MLP head")
 
     # Initialize checkpoint manager
     print("\n=== Setting up checkpointing ===")
@@ -389,6 +431,41 @@ def train(config: TrainConfig) -> None:
     print(f"Log interval: {config.logging.log_every_n_steps}")
     if resuming:
         print(f"Resuming from step: {start_step}")
+
+    # Sanity check: log first 5 samples to W&B
+    if config.logging.wandb_enabled:
+        print("\n=== Sanity check: logging first 5 samples to W&B ===")
+        n_sanity = 5
+        sanity_dataset = dataloader.dataset
+        camera_keys = ["base_0_rgb", "left_wrist_0_rgb", "right_wrist_0_rgb"]
+
+        # Build table
+        table_columns = ["sample_idx", "prompt", "is_success", "return_target"]
+        table = wandb.Table(columns=table_columns)
+
+        # Collect per-camera images across samples for panel display
+        camera_images = {cam: [] for cam in camera_keys}
+
+        for i in range(n_sanity):
+            sample = sanity_dataset[i]
+            prompt = sample["prompt"]
+            ret = float(sample["returns"])
+            is_success = sample["is_success"]
+            table.add_data(i, prompt, is_success, ret)
+
+            for cam in camera_keys:
+                img = sample["image"][cam]  # uint8 [H, W, C]
+                camera_images[cam].append(
+                    wandb.Image(img, caption=f"Sample {i}")
+                )
+
+        # Log table and camera views
+        log_dict = {"sanity_check/samples": table}
+        for cam in camera_keys:
+            log_dict[f"sanity_check/camera_views/{cam}"] = camera_images[cam]
+
+        wandb.log(log_dict, step=0)
+        print("✓ Sanity check logged to W&B")
 
     # Training loop
     data_iter = iter(dataloader)
