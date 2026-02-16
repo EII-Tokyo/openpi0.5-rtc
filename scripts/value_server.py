@@ -63,33 +63,60 @@ def main():
 
     print(f"Restoring model from {checkpoint_base_dir} at step {step_number}")
 
-    # Load checkpoint directly using Orbax - we need to load the full state
-    # then extract just the model parts
+    # Load checkpoint using PyTreeCheckpointer which handles multi-shard OCDBT checkpoints.
+    # The checkpoint may have been saved on multiple devices (e.g. 8 GPUs) with sharding.
+    # We restore onto the current device(s) using ArrayRestoreArgs with a single-device sharding.
     import orbax.checkpoint as ocp
-    from pi_value_function.training.checkpoint_manager import ValueTrainState
+    from flax.traverse_util import flatten_dict, unflatten_dict
 
-    checkpointer = ocp.Checkpointer(ocp.PyTreeCheckpointHandler())
     ckpt_step_dir = checkpoint_base_dir / str(step_number) / "state"
 
-    # Restore the full checkpoint by loading it as raw data
-    restored = checkpointer.restore(ckpt_step_dir)
+    # Create a single-device sharding to restore all arrays onto available device(s)
+    mesh = jax.sharding.Mesh(jax.devices(), ("x",))
+    sharding = jax.sharding.NamedSharding(mesh, jax.sharding.PartitionSpec())
 
-    # Extract the model state (graphdef is not stored, only the state/parameters)
+    with ocp.PyTreeCheckpointer() as ckptr:
+        metadata = ckptr.metadata(ckpt_step_dir)
+
+        # Use the full metadata as the item tree (Orbax requires matching structure).
+        # This restores everything; we extract model_state afterwards.
+        item = {k: metadata[k] for k in metadata}
+
+        restored = ckptr.restore(
+            ckpt_step_dir,
+            ocp.args.PyTreeRestore(
+                item=item,
+                restore_args=jax.tree.map(
+                    lambda _: ocp.ArrayRestoreArgs(sharding=sharding, restore_type=jax.Array),
+                    item,
+                ),
+            ),
+        )
+
     print(f"Loaded checkpoint from step: {restored['step']}")
     model_state_data = restored["model_state"]
 
-    # NNX saves state with "value" wrappers - we need to unwrap them
-    # This code is adapted from openpi/models/model.py:restore_params
-    from flax.traverse_util import flatten_dict, unflatten_dict
-
+    # NNX saves state with "value" wrappers - unwrap them
     flat_state = flatten_dict(model_state_data)
     if all(kp[-1] == "value" for kp in flat_state):
         print("Unwrapping 'value' keys from checkpoint state...")
         flat_state = {kp[:-1]: v for kp, v in flat_state.items()}
         model_state_data = unflatten_dict(flat_state)
 
-    # Update our initialized model with the loaded parameters
-    nnx.update(model, model_state_data)
+    # Update model parameters using the model's own state structure.
+    # We can't use nnx.update(model, raw_dict) directly because nnx.Sequential
+    # stores layers in a Python list, but the checkpoint restores them as a dict
+    # with string keys ("0", "2"). Instead, we flatten both trees and replace values.
+    _, model_state = nnx.split(model)
+    flat_model = flatten_dict(model_state.to_pure_dict())
+    flat_ckpt = flatten_dict(model_state_data)
+    for key in flat_model:
+        if key in flat_ckpt:
+            flat_model[key] = flat_ckpt[key]
+        else:
+            print(f"Warning: key {key} not found in checkpoint")
+    restored_state = nnx.State(unflatten_dict(flat_model))
+    nnx.update(model, restored_state)
 
     print(f"Successfully loaded model parameters from step {restored['step']}")
 
