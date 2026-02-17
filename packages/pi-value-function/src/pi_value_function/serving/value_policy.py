@@ -1,26 +1,45 @@
 import logging
 from typing import Dict, Optional
-import pathlib
 
 import jax
 import jax.numpy as jnp
 import numpy as np
-import einops
 from flax import nnx
 
 from openpi_client import base_policy
 from openpi.models import model as _model
 from openpi.models import tokenizer as _tokenizer
-from openpi.shared import image_tools
 from pi_value_function.pi_value import PiValue
 
 logger = logging.getLogger(__name__)
 
+
+def _coerce_bool(value: object) -> bool:
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, (int, np.integer)):
+        return value != 0
+    if isinstance(value, str):
+        normalized = value.strip().lower()
+        if normalized in {"1", "true", "t", "yes", "y", "on"}:
+            return True
+        if normalized in {"0", "false", "f", "no", "n", "off"}:
+            return False
+    return bool(value)
+
+
 class ValuePolicy(base_policy.BasePolicy):
-    def __init__(self, model: PiValue, tokenizer: _tokenizer.Gemma3Tokenizer):
+    def __init__(
+        self,
+        model: PiValue,
+        tokenizer: _tokenizer.Gemma3Tokenizer,
+        *,
+        return_distribution: bool = False,
+    ):
         self._model = model
         self._tokenizer = tokenizer
         self._rng = jax.random.PRNGKey(0)
+        self._return_distribution_default = return_distribution
 
         # Create JIT-compiled inference function for speed
         # Extract graphdef and state for stateless JIT function
@@ -32,12 +51,28 @@ class ValuePolicy(base_policy.BasePolicy):
             model_instance = nnx.merge(graphdef, state)
             return model_instance.predict_value(rng_key, observation_dict)
 
+        @jax.jit
+        def _jit_forward(rng_key, observation_dict, state):
+            model_instance = nnx.merge(graphdef, state)
+            logits = model_instance.forward(rng_key, observation_dict, train=False)
+            probs = jax.nn.softmax(logits, axis=-1)
+            value_support = jnp.linspace(model_instance.value_min, model_instance.value_max, model_instance.value_dims)
+            expected_value = jnp.sum(probs * value_support, axis=-1)
+            return expected_value, probs
+
         self._jit_predict_value = _jit_predict_value
+        self._jit_forward = _jit_forward
         self._model_state = state
 
         logger.info("Value policy initialized with JIT-compiled inference")
 
-    def infer(self, obs: Dict, prev_action: Optional[Dict] = None, use_rtc: bool = False) -> Dict:
+    def infer(
+        self,
+        obs: Dict,
+        prev_action: Optional[Dict] = None,
+        use_rtc: bool = False,
+        return_distribution: Optional[bool] = None,
+    ) -> Dict:
         # 1. Map client image keys to model image keys
         # Model keys based on train.py: base_0_rgb, left_wrist_0_rgb, right_wrist_0_rgb
         # Client keys based on main.py: exterior_image_1_left, wrist_image_left, (maybe exterior_image_2_left)
@@ -131,16 +166,34 @@ class ValuePolicy(base_policy.BasePolicy):
             tokenized_prompt_mask=tokenized_prompt_mask
         )
 
-        # 5. Run Inference
+        # 5. Determine output mode.
+        # `return_distribution` can be set:
+        # 1) per-request via infer arg (if called directly), or
+        # 2) per-request via obs["return_distribution"] / obs["observation/return_distribution"], or
+        # 3) by server default from CLI.
+        obs_return_distribution = obs.get("return_distribution")
+        if obs_return_distribution is None:
+            obs_return_distribution = obs.get("observation/return_distribution")
+        if return_distribution is None:
+            if obs_return_distribution is None:
+                return_distribution = self._return_distribution_default
+            else:
+                return_distribution = _coerce_bool(obs_return_distribution)
+
+        # 6. Run Inference
         self._rng, key = jax.random.split(self._rng)
 
-        # Use JIT-compiled inference for speed
-        predicted_value = self._jit_predict_value(key, observation, self._model_state)
-
-        # Convert to python float
-        value_float = float(predicted_value[0])
-        
-        return {
-            "value": value_float,
-            # Echo back timestamp or other meta if needed
-        }
+        if return_distribution:
+            expected_value, probs = self._jit_forward(key, observation, self._model_state)
+            value_float = float(expected_value[0])
+            distribution = np.array(probs[0])  # (201,)
+            return {
+                "value": value_float,
+                "distribution": distribution.tolist(),
+            }
+        else:
+            predicted_value = self._jit_predict_value(key, observation, self._model_state)
+            value_float = float(predicted_value[0])
+            return {
+                "value": value_float,
+            }

@@ -72,13 +72,20 @@ class PiValue(BaseValueModel):
         self.siglip.lazy_init(next(iter(config.fake_obs().images.values())), train=False, rngs=rngs)
 
         # Value projection head: Gemma output -> categorical distribution
-        # linear nonlinear linear
-        hidden_dim = gemma_width
-        self.value_mlp = nnx.Sequential(
-            nnx.Linear(gemma_width, hidden_dim, rngs=rngs),
-            nnx.gelu,  # GELU activation
-            nnx.Linear(hidden_dim, self.value_dims, rngs=rngs),
-        )
+        value_head_layers = getattr(config, 'value_head_layers', 2)
+        if value_head_layers == 1:
+            # Old architecture: single linear projection
+            self.value_proj = nnx.Linear(gemma_width, self.value_dims, rngs=rngs)
+            self.value_mlp = None
+        else:
+            # New architecture: Linear + GELU + Linear
+            hidden_dim = gemma_width
+            self.value_mlp = nnx.Sequential(
+                nnx.Linear(gemma_width, hidden_dim, rngs=rngs),
+                nnx.gelu,
+                nnx.Linear(hidden_dim, self.value_dims, rngs=rngs),
+            )
+            self.value_proj = None
 
     # TODO: Do I need masks?
     # should not be autoregressive for value function
@@ -210,7 +217,8 @@ class PiValue(BaseValueModel):
         eos_hidden_state = hidden_states[:, -1, :]  # (batch, embed_dim)
 
         # Project to value distribution logits
-        logits = self.value_mlp(eos_hidden_state)  # Shape: (batch, value_dims)
+        head = self.value_mlp if self.value_mlp is not None else self.value_proj
+        logits = head(eos_hidden_state)  # Shape: (batch, value_dims)
 
         return logits
 
