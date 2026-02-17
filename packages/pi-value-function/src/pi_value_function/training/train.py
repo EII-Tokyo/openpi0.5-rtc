@@ -339,7 +339,7 @@ def train(config: TrainConfig) -> None:
 
     def _count_params(state: nnx.State) -> int:
         return sum(
-            x.value.size if hasattr(x, "value") and hasattr(x.value, "size") else 0
+            x.size if hasattr(x, "size") else 0
             for x in jax.tree_util.tree_leaves(state)
         )
 
