@@ -1,4 +1,5 @@
 from typing import TYPE_CHECKING
+from typing import Literal
 import dataclasses
 
 from flax import nnx
@@ -6,6 +7,9 @@ import jax
 import jax.numpy as jnp
 
 from openpi.models.model import Observation
+from pi_value_function.backbone_type import BACKBONE_QWEN3VL
+from pi_value_function.backbone_type import BACKBONE_SIGLIP_GEMMA3
+from pi_value_function.backbone_type import BackboneType
 from pi_value_function.value_model_base import BaseValueModelConfig, ValueModelType
 import openpi.shared.array_typing as at
 from openpi.models import model as _model
@@ -27,6 +31,9 @@ class PiValueConfig(BaseValueModelConfig):
     dtype: str = "bfloat16"
     gemma_variant: str = "gemma-3-270m"
     siglip_variant: str = "siglip2-so400m-patch16-384"
+    backbone: BackboneType = BACKBONE_SIGLIP_GEMMA3
+    hf_model_id: str = "Qwen/Qwen3-VL-2B-Instruct"
+    backbone_dtype: Literal["bfloat16", "float16", "float32"] = "bfloat16"
     value_head_layers: int = 2  # 1 = single Linear (old), 2 = Linear+GELU+Linear (new)
     
     def model_type(self) -> str:
@@ -34,6 +41,11 @@ class PiValueConfig(BaseValueModelConfig):
         return "pi_value"
     
     def create(self, rng: at.KeyArrayLike) -> "PiValue":
+        if self.backbone == BACKBONE_QWEN3VL:
+            raise ValueError(
+                "PiValueConfig.create() only supports the legacy JAX backbone path. "
+                "Use train_qwen_torch / PiValueQwen3VLTorch for backbone='qwen3vl'."
+            )
         from pi_value_function.pi_value import PiValue
 
         return PiValue(self, rngs=nnx.Rngs(rng))

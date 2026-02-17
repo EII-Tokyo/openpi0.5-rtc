@@ -3632,6 +3632,9 @@ dependencies = [
     { name = "numpy" },
     { name = "openpi" },
     { name = "optax" },
+    { name = "safetensors" },
+    { name = "torch" },
+    { name = "transformers" },
 ]
 
 [package.dev-dependencies]
@@ -3648,6 +3651,9 @@ requires-dist = [
     { name = "numpy", specifier = ">=1.22.4" },
     { name = "openpi", editable = "." },
     { name = "optax", specifier = ">=0.1.7" },
+    { name = "safetensors", specifier = ">=0.4.5" },
+    { name = "torch", specifier = ">=2.7.1" },
+    { name = "transformers", specifier = ">=4.53.2" },
 ]
 
 [package.metadata.requires-dev]

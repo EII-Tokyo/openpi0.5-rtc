@@ -19,9 +19,11 @@ from flax import nnx
 from tqdm import tqdm
 import wandb
 
+from pi_value_function.backbone_type import BACKBONE_QWEN3VL
 from pi_value_function.config import PiValueConfig
 from pi_value_function.pi_value import PiValue
 from pi_value_function.training.train_config import TrainConfig, ValueDataConfig, CheckpointConfig, LoggingConfig
+from pi_value_function.training.train_qwen_torch import train_qwen_torch
 from pi_value_function.training.data_loader import create_value_dataloader
 from pi_value_function.training.weight_loader import SigLIP2WeightLoader
 from pi_value_function.training.direct_checkpoint_loader import DirectGemma3WeightLoader
@@ -311,6 +313,11 @@ def train(config: TrainConfig) -> None:
     Args:
         config: Training configuration
     """
+    if config.model_config.backbone == BACKBONE_QWEN3VL:
+        print("\n=== Using Qwen3-VL PyTorch training path ===")
+        train_qwen_torch(config)
+        return
+
     # Initialize W&B
     if config.logging.wandb_enabled:
         wandb.init(

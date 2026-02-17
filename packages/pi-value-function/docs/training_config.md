@@ -6,6 +6,11 @@ This document describes the training configuration system for the Pi Value Funct
 
 The training configuration is defined in `train_config.py` and follows the same patterns as the main OpenPI training configuration. It provides a comprehensive, type-safe way to configure all aspects of value function training.
 
+The project now supports two backbone paths:
+
+- Legacy JAX path: `backbone="siglip_gemma3"` (SigLIP + Gemma 3)
+- New PyTorch path: `backbone="qwen3vl"` (Qwen3-VL multimodal backbone)
+
 ## Main Components
 
 ### 1. TrainConfig
@@ -35,6 +40,14 @@ Defines data loading and preprocessing:
 - `gamma`: Discount factor for returns
 - `normalize_rewards`: Whether to normalize rewards
 - `data_format`: Data format type ("rlds", "lerobot", "custom")
+
+### 2b. PiValueConfig Backbone Fields
+
+`PiValueConfig` exposes backbone controls:
+
+- `backbone`: `"siglip_gemma3"` or `"qwen3vl"`
+- `hf_model_id`: Hugging Face model id (used by Qwen path)
+- `backbone_dtype`: `"bfloat16"`, `"float16"`, or `"float32"` (used by Qwen path)
 
 ### 3. CheckpointConfig
 
@@ -98,6 +111,8 @@ config = TrainConfig(freeze_gemma=True, ...)
 # Custom freeze filter
 config = TrainConfig(freeze_filter=custom_filter, ...)
 ```
+
+For `backbone="qwen3vl"`, training uses a frozen Qwen backbone with a trainable value head in the PyTorch trainer.
 
 ### Multi-Device Training
 
@@ -209,6 +224,30 @@ config = TrainConfig(
     batch_size=64,
 )
 ```
+
+### 4. Qwen3-VL Value Training
+
+```python
+config = TrainConfig(
+    exp_name="qwen3vl_value_head",
+    model_config=PiValueConfig(
+        backbone="qwen3vl",
+        hf_model_id="Qwen/Qwen3-VL-2B-Instruct",
+        backbone_dtype="bfloat16",
+        value_dims=201,
+        value_min=-1.0,
+        value_max=0.0,
+    ),
+    num_train_steps=30_000,
+    batch_size=64,
+)
+```
+
+When `backbone="qwen3vl"`, `train.py` dispatches to the torch trainer and checkpoints are written as:
+
+- `model.safetensors`
+- `optimizer.pt`
+- `metadata.pt`
 
 ### 3. RLDS Data Loading
 
