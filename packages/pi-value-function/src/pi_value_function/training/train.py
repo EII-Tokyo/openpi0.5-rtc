@@ -334,80 +334,20 @@ def train(config: TrainConfig) -> None:
     print("\n=== Setting up optimizer ===")
     lr_schedule = config.lr_schedule.create()
     tx = config.optimizer.create(lr_schedule)
+    trainable_filter = config.trainable_filter
+    optimizer = nnx.Optimizer(model, tx, wrt=trainable_filter)
 
-    # Freeze SigLIP backbone and Gemma - only train projection heads
-    # Define a Frozen variable type to mark parameters that shouldn't be trained
-    class Frozen(nnx.Variable):
-        """Parameters that are frozen and won't be optimized."""
-        pass
-
-    # Get all parameters and reclassify frozen ones
-    # Use ... to capture all other variable types (RNG state, etc.)
-    graphdef, params, other_vars = nnx.split(model, nnx.Param, ...)
-
-    # Filter function to determine which parameters to train
-    def should_freeze(path_tuple):
-        """Return True if parameter should be frozen."""
-        path_str = '/'.join(str(p.key) if hasattr(p, 'key') else str(p) for p in path_tuple)
-        # Train value_mlp (non-linear value head)
-        if 'value_mlp' in path_str:
-            return False
-        # Train SigLIP's projection head (projects to Gemma dimension)
-        if 'siglip' in path_str and 'head' in path_str:
-            return False
-        # Freeze everything else (SigLIP backbone, Gemma)
-        return True
-
-    # Convert State to pure dict, reclassify, and convert back
-    params_dict = params.to_pure_dict()
-
-    # Debug: print first few paths to understand structure
-    print("Debugging parameter paths (first 10):")
-    for i, (path, _) in enumerate(jax.tree_util.tree_leaves_with_path(params_dict)):
-        if i < 10:
-            path_str = '/'.join(str(p.key) if hasattr(p, 'key') else str(p) for p in path)
-            print(f"  Path {i}: {path_str}")
-        else:
-            break
-
-    def reclassify_variable(path, value):
-        """Convert arrays to Frozen or Param based on path."""
-        path_str = '/'.join(str(p.key) if hasattr(p, 'key') else str(p) for p in path)
-        freeze = should_freeze(path)
-        # Debug: print decisions for value_mlp and siglip head params
-        if 'value_mlp' in path_str or ('siglip' in path_str and 'head' in path_str):
-            print(f"  {'FREEZE' if freeze else 'TRAIN'}: {path_str}")
-        if freeze:
-            return Frozen(value)
-        else:
-            return nnx.Param(value)
-
-    # Apply reclassification to the pure dict
-    print("Reclassifying parameters...")
-    reclassified_dict = jax.tree_util.tree_map_with_path(reclassify_variable, params_dict)
-
-    # Convert back to State
-    params = nnx.State(reclassified_dict)
-
-    # Merge back into model (include other_vars like RNG state)
-    model = nnx.merge(graphdef, params, other_vars)
-
-    # Create optimizer - it will only optimize nnx.Param (not Frozen)
-    optimizer = nnx.Optimizer(model, tx, wrt=nnx.Param)
+    def _count_params(state: nnx.State) -> int:
+        return sum(
+            x.value.size if hasattr(x, "value") and hasattr(x.value, "size") else 0
+            for x in jax.tree_util.tree_leaves(state)
+        )
 
     # Count parameters for logging
-    all_params = nnx.state(model, nnx.Param, Frozen)
-    trainable_params_state = nnx.state(model, nnx.Param)
-    frozen_params_state = nnx.state(model, Frozen)
-
-    trainable_count = sum(
-        x.value.size if hasattr(x, 'value') and hasattr(x.value, 'size') else 0
-        for x in jax.tree_util.tree_leaves(trainable_params_state)
-    )
-    total_count = sum(
-        x.value.size if hasattr(x, 'value') and hasattr(x.value, 'size') else 0
-        for x in jax.tree_util.tree_leaves(all_params)
-    )
+    all_params_state = nnx.state(model, nnx.Param)
+    trainable_params_state = nnx.state(model, trainable_filter)
+    total_count = _count_params(all_params_state)
+    trainable_count = _count_params(trainable_params_state)
     frozen_count = total_count - trainable_count
 
     print(f"✓ Optimizer created: {config.optimizer.__class__.__name__}")
@@ -415,8 +355,10 @@ def train(config: TrainConfig) -> None:
     print(f"  Warmup steps: {config.lr_schedule.warmup_steps}")
     print(f"  Trainable params: {trainable_count:,} ({trainable_count/total_count*100:.2f}%)")
     print(f"  Frozen params: {frozen_count:,} ({frozen_count/total_count*100:.2f}%)")
-    print(f"  ⚠️  Frozen: SigLIP backbone and Gemma")
-    print(f"  ✓ Training: SigLIP projection head + Value MLP head")
+    print("  Freeze settings:")
+    print(f"    freeze_backbone={config.freeze_backbone}")
+    print(f"    freeze_siglip={config.freeze_siglip}")
+    print(f"    freeze_gemma={config.freeze_gemma}")
 
     # Initialize checkpoint manager
     print("\n=== Setting up checkpointing ===")
@@ -430,9 +372,41 @@ def train(config: TrainConfig) -> None:
     )
     print(f"✓ Checkpoint manager initialized: {ckpt_path}")
 
-    # Restore from checkpoint if resuming
+    # Restore from checkpoint if requested.
+    # Two modes:
+    # 1) Full resume (model + optimizer + step): checkpoint.resume=True
+    # 2) Warm start (model only): checkpoint.resume_checkpoint_path is set and resume=False
     start_step = 0
-    if resuming:
+    if config.checkpoint.resume_checkpoint_path:
+        source_path = pathlib.Path(config.checkpoint.resume_checkpoint_path).expanduser().resolve()
+        source_mgr, source_resuming = ckpt_manager.initialize_checkpoint_manager(
+            source_path,
+            max_to_keep=None,
+            keep_period=None,
+            overwrite=False,
+            resume=True,
+        )
+        if not source_resuming:
+            raise ValueError(f"No valid checkpoints found at resume_checkpoint_path={source_path}")
+
+        print(f"\n=== Loading checkpoint from {source_path} ===")
+        restored_model, restored_optimizer, restored_step = ckpt_manager.restore_checkpoint(
+            source_mgr, model, optimizer
+        )
+
+        # Full resume only when explicitly requested.
+        if config.checkpoint.resume:
+            model = restored_model
+            optimizer = restored_optimizer
+            start_step = restored_step
+            print(f"✓ Fully resumed model+optimizer from step {start_step}")
+        else:
+            model = restored_model
+            optimizer = nnx.Optimizer(model, tx, wrt=trainable_filter)
+            start_step = 0
+            print("✓ Warm-started model weights from checkpoint")
+            print("✓ Reinitialized optimizer for current trainable filter")
+    elif resuming:
         print("\n=== Restoring from checkpoint ===")
         model, optimizer, start_step = ckpt_manager.restore_checkpoint(
             checkpoint_mgr, model, optimizer
