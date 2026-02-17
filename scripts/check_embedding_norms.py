@@ -475,12 +475,12 @@ if __name__ == "__main__":
     params_path = sys.argv[1] if len(sys.argv) > 1 else None
     
     # 计算 "good" 和 "bad" 的 embedding 并计算内积
-    get_word_embeddings_and_dot_product("yes", "no", params_path)
+    get_word_embeddings_and_dot_product("good", "bad", params_path)
     
     # 深入分析语义空间
-    comparison_words = ["excellent", "terrible", "great", "awful", "nice", "horrible", 
-                       "perfect", "wrong", "correct", "yes", "no", "right", "left"]
-    analyze_semantic_space("good", "bad", params_path, comparison_words)
+    # comparison_words = ["excellent", "terrible", "great", "awful", "nice", "horrible", 
+    #                    "perfect", "wrong", "correct", "yes", "no", "right", "left"]
+    # analyze_semantic_space("good", "bad", params_path, comparison_words)
     
     # 可选：计算 embedding 范数统计
     # compute_embedding_norms(params_path)

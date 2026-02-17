@@ -31,6 +31,10 @@ class Pi0Config(_model.BaseModelConfig):
     pi05: bool = False
     # This config option is not used directly by the model, but it is read by the ModelTransformFactory.
     discrete_state_input: bool = None  # type: ignore
+    # Optional weight for AR subtask loss.
+    subtask_loss_weight: float = 0.0
+    # Max sequence length for tokenized subtask targets.
+    subtask_max_token_len: int = 64
 
     def __post_init__(self):
         if self.max_token_len is None:
@@ -71,6 +75,9 @@ class Pi0Config(_model.BaseModelConfig):
                 state=jax.ShapeDtypeStruct([batch_size, self.action_dim], jnp.float32),
                 tokenized_prompt=jax.ShapeDtypeStruct([batch_size, self.max_token_len], jnp.int32),
                 tokenized_prompt_mask=jax.ShapeDtypeStruct([batch_size, self.max_token_len], bool),
+                tokenized_subtask=None,
+                tokenized_subtask_mask=None,
+                tokenized_subtask_loss_mask=None,
             )
         action_spec = jax.ShapeDtypeStruct([batch_size, self.action_horizon, self.action_dim], jnp.float32)
 

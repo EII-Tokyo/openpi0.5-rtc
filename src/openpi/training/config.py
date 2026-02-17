@@ -110,7 +110,6 @@ class ModelTransformFactory(GroupFactory):
 
     # If provided, will determine the default prompt that be used by the model.
     default_prompt: str | None = None
-
     def __call__(self, model_config: _model.BaseModelConfig) -> _transforms.Group:
         match model_config.model_type:
             case _model.ModelType.PI0:
@@ -126,17 +125,23 @@ class ModelTransformFactory(GroupFactory):
                 )
             case _model.ModelType.PI05:
                 assert isinstance(model_config, pi0_config.Pi0Config)
-                return _transforms.Group(
-                    inputs=[
-                        _transforms.InjectDefaultPrompt(self.default_prompt),
-                        _transforms.ResizeImages(224, 224),
-                        _transforms.TokenizePrompt(
-                            _tokenizer.PaligemmaTokenizer(model_config.max_token_len),
-                            discrete_state_input=model_config.discrete_state_input,
-                        ),
-                        _transforms.PadStatesAndActions(model_config.action_dim),
-                    ],
+                tokenizer = _tokenizer.PaligemmaTokenizer(
+                    model_config.max_token_len,
+                    subtask_max_len=model_config.subtask_max_token_len,
                 )
+                discrete_state_input = model_config.discrete_state_input
+                transforms = [
+                    _transforms.InjectDefaultPrompt(self.default_prompt),
+                    _transforms.ResizeImages(224, 224),
+                ]
+                transforms += [
+                    _transforms.TokenizePrompt(
+                        tokenizer,
+                        discrete_state_input=discrete_state_input,
+                    ),
+                ]
+                transforms += [_transforms.PadStatesAndActions(model_config.action_dim)]
+                return _transforms.Group(inputs=transforms)
             case _model.ModelType.PI0_FAST:
                 tokenizer_cls = (
                     _tokenizer.FASTTokenizer
@@ -240,7 +245,6 @@ class LeRobotAlohaDataConfig(DataConfigFactory):
     # the space used by the pi internal runtime which was used to train the base model. People who
     # use standard Aloha data should set this to true.
     adapt_to_pi: bool = True
-
     # Repack transforms.
     repack_transforms: tyro.conf.Suppress[_transforms.Group] = dataclasses.field(
         default=_transforms.Group(
@@ -271,7 +275,9 @@ class LeRobotAlohaDataConfig(DataConfigFactory):
                 outputs=[_transforms.AbsoluteActions(delta_action_mask)],
             )
 
-        model_transforms = ModelTransformFactory(default_prompt=self.default_prompt)(model_config)
+        model_transforms = ModelTransformFactory(
+            default_prompt=self.default_prompt,
+        )(model_config)
 
         return dataclasses.replace(
             self.create_base_config(assets_dirs, model_config),
@@ -793,7 +799,13 @@ _CONFIGS = [
     ),
     TrainConfig(
         name="pi05_aloha_pen_uncap",
-        model=pi0_config.Pi0Config(pi05=True),
+        model=pi0_config.Pi0Config(
+            pi05=True,
+            paligemma_variant="gemma_2b_lora",
+            action_expert_variant="gemma_300m_lora",
+            subtask_loss_weight=1.0,
+            subtask_max_token_len=64,
+        ),
         lr_schedule=_optimizer.CosineDecaySchedule(
             warmup_steps=10_000,
             peak_lr=2.5e-5,
@@ -804,8 +816,7 @@ _CONFIGS = [
         data=LeRobotAlohaDataConfig(
             # repo_id="physical-intelligence/aloha_pen_uncap_diverse",
             repo_ids=[
-                "lyl472324464/2026-02-03-no-cap-and-direction",                           # 70.9k 
-                # "lyl472324464/2026-01-28-twist-many-bottle",              # 92.8k 
+                "lyl472324464/2025-12-23-twist-one-bottle",
                 # "lyl472324464/2026-01-20-twist-one-bottle",                           # 40.2k 
                 # "lyl472324464/2025-12-23-twist-one-bottle",              # 121k 
                 # "lyl472324464/2025-12-10-twist-one-bottle",              # 23.1k 
@@ -893,16 +904,25 @@ _CONFIGS = [
                             "state": "observation.state",
                             "actions": "action",
                             "prompt": "prompt",
+                            "subtask": "subtask",
                         }
                     )
                 ]
             ),
         ),
+        freeze_filter=pi0_config.Pi0Config(
+            pi05=True,
+            paligemma_variant="gemma_2b_lora",
+            action_expert_variant="gemma_300m_lora",
+            subtask_loss_weight=1.0,
+            subtask_max_token_len=64,
+        ).get_freeze_filter(),
+        ema_decay=None,
         weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_base/params"),
         save_interval=1000,
         num_train_steps=40_000,
-        batch_size=32,
-        num_workers=4,
+        batch_size=8,
+        num_workers=0,
     ),
     #
     # Fine-tuning DROID configs.

@@ -147,15 +147,28 @@ def train_step(
     def loss_fn(
         model: _model.BaseModel, rng: at.KeyArrayLike, observation: _model.Observation, actions: _model.Actions
     ):
+        if hasattr(model, "compute_loss_with_metrics"):
+            chunked_loss, flow_chunked_loss, subtask_ar_chunked_loss = model.compute_loss_with_metrics(
+                rng, observation, actions, train=True
+            )
+            return jnp.mean(chunked_loss), {
+                "flow_loss": jnp.mean(flow_chunked_loss),
+                "subtask_ar_loss": jnp.mean(subtask_ar_chunked_loss),
+            }
         chunked_loss = model.compute_loss(rng, observation, actions, train=True)
-        return jnp.mean(chunked_loss)
+        return jnp.mean(chunked_loss), {
+            "flow_loss": jnp.mean(chunked_loss),
+            "subtask_ar_loss": jnp.asarray(0.0, dtype=chunked_loss.dtype),
+        }
 
     train_rng = jax.random.fold_in(rng, state.step)
     observation, actions = batch
 
     # Filter out frozen params.
     diff_state = nnx.DiffState(0, config.trainable_filter)
-    loss, grads = nnx.value_and_grad(loss_fn, argnums=diff_state)(model, train_rng, observation, actions)
+    (loss, aux_metrics), grads = nnx.value_and_grad(loss_fn, argnums=diff_state, has_aux=True)(
+        model, train_rng, observation, actions
+    )
 
     params = state.params.filter(config.trainable_filter)
     updates, new_opt_state = state.tx.update(grads, state.opt_state, params)
@@ -185,6 +198,8 @@ def train_step(
     )
     info = {
         "loss": loss,
+        "flow_loss": aux_metrics["flow_loss"],
+        "subtask_ar_loss": aux_metrics["subtask_ar_loss"],
         "grad_norm": optax.global_norm(grads),
         "param_norm": optax.global_norm(kernel_params),
     }

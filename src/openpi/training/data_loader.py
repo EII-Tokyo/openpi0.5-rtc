@@ -138,19 +138,33 @@ def create_torch_dataset(
     if repo_id == "fake":
         return FakeDataset(model_config, num_samples=1024)
     if repo_ids is not None:
-        # Get FPS from first dataset (assume all datasets in multi-dataset have same FPS)
-        first_dataset_meta = lerobot_dataset.LeRobotDatasetMetadata(repo_ids[0], force_cache_sync=True)
-        dataset = lerobot_dataset.MultiLeRobotDataset(
-            repo_ids,
-            # root="/home/ubuntu/aloha",
-            delta_timestamps={
-                key: [t / first_dataset_meta.fps for t in range(action_horizon)] for key in data_config.action_sequence_keys
-            },
-        )
+        # Single-repo list is common in our configs; keep it on `main` revision to preserve new fields (e.g. subtask).
+        if len(repo_ids) == 1:
+            dataset_meta = lerobot_dataset.LeRobotDatasetMetadata(repo_ids[0], revision="main", force_cache_sync=True)
+            dataset = lerobot_dataset.LeRobotDataset(
+                repo_ids[0],
+                revision="main",
+                force_cache_sync=True,
+                delta_timestamps={
+                    key: [t / dataset_meta.fps for t in range(action_horizon)] for key in data_config.action_sequence_keys
+                },
+            )
+        else:
+            # MultiLeRobotDataset currently does not expose a `revision` argument.
+            # For multi-repo training, all repos should expose compatible schemas on their default revision.
+            first_dataset_meta = lerobot_dataset.LeRobotDatasetMetadata(repo_ids[0], force_cache_sync=True)
+            dataset = lerobot_dataset.MultiLeRobotDataset(
+                repo_ids,
+                # root="/home/ubuntu/aloha",
+                delta_timestamps={
+                    key: [t / first_dataset_meta.fps for t in range(action_horizon)] for key in data_config.action_sequence_keys
+                },
+            )
     if repo_id is not None:
-        dataset_meta = lerobot_dataset.LeRobotDatasetMetadata(repo_id, force_cache_sync=True)
+        dataset_meta = lerobot_dataset.LeRobotDatasetMetadata(repo_id, revision="main", force_cache_sync=True)
         dataset = lerobot_dataset.LeRobotDataset(
             data_config.repo_id,
+            revision="main",
             delta_timestamps={
                 key: [t / dataset_meta.fps for t in range(action_horizon)] for key in data_config.action_sequence_keys
             },

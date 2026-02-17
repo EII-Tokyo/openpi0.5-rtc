@@ -12,48 +12,110 @@ import openpi.shared.download as download
 
 
 class PaligemmaTokenizer:
-    def __init__(self, max_len: int = 48):
+    def __init__(self, max_len: int = 48, subtask_max_len: int | None = None):
         self._max_len = max_len
+        self._subtask_max_len = subtask_max_len if subtask_max_len is not None else max_len
 
         path = download.maybe_download("gs://big_vision/paligemma_tokenizer.model", gs={"token": "anon"})
         with path.open("rb") as f:
             self._tokenizer = sentencepiece.SentencePieceProcessor(model_proto=f.read())
 
-    def tokenize(self, prompt: str, state: np.ndarray | None = None) -> tuple[np.ndarray, np.ndarray]:
+    def _pad_tokens(self, tokens: list[int], max_len: int, *, left_pad: bool = False) -> tuple[np.ndarray, np.ndarray]:
+        tokens_len = len(tokens)
+        if tokens_len < max_len:
+            padding = [0] * (max_len - tokens_len)
+            if left_pad:
+                mask = [False] * (max_len - tokens_len) + [True] * tokens_len
+                tokens = padding + tokens
+            else:
+                mask = [True] * tokens_len + [False] * (max_len - tokens_len)
+                tokens = tokens + padding
+        else:
+            if len(tokens) > max_len:
+                logging.warning(
+                    f"Token length ({len(tokens)}) exceeds max length ({max_len}), truncating. "
+                    "Consider increasing max token length if this happens frequently."
+                )
+            tokens = tokens[:max_len]
+            mask = [True] * max_len
+        return np.asarray(tokens), np.asarray(mask)
+
+    def tokenize(
+        self,
+        prompt: str,
+        state: np.ndarray | None = None,
+        subtask: str | None = None,
+        *,
+        for_subtask_generation: bool = False,
+    ) -> tuple[np.ndarray, np.ndarray] | tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         cleaned_text = prompt.strip().replace("_", " ").replace("\n", " ")
-        if state is not None:
-            # This is the Pi05 format, where the state is part of the discrete language input.
-            discretized_state = np.digitize(state, bins=np.linspace(-1, 1, 256 + 1)[:-1]) - 1
-            state_str = " ".join(map(str, discretized_state))
+        if state is None:
+            # This is the Pi0 format, where the state is part of the continuous action expert input.
+            # tokenize "\n" separately as the "start of answer" token
+            tokens = self._tokenizer.encode(cleaned_text, add_bos=True) + self._tokenizer.encode("\n")
+            return self._pad_tokens(tokens, self._max_len)
+
+        # Pi05 format.
+        discretized_state = np.digitize(state, bins=np.linspace(-1, 1, 256 + 1)[:-1]) - 1
+        state_str = " ".join(map(str, discretized_state))
+        if subtask is None and not for_subtask_generation:
+            # Keep legacy pi05 tokenization behavior unchanged when subtask is absent.
             if "[bad action]" in cleaned_text:
                 cleaned_text = cleaned_text.replace("[bad action] ", "")
                 full_prompt = f"Task: {cleaned_text}, State: {state_str};\nGive a bad action: "
             else:
-                ran_num = np.random.random()                
-                if ran_num < 0.2:
+                if np.random.random() < 0.2:
                     full_prompt = f"Task: {cleaned_text}, State: {state_str};\nGive a good action: "
                 else:
                     full_prompt = f"Task: {cleaned_text}, State: {state_str};\nAction: "
             tokens = self._tokenizer.encode(full_prompt, add_bos=True)
-        else:
-            # This is the Pi0 format, where the state is part of the continuous action expert input.
-            # tokenize "\n" separately as the "start of answer" token
-            tokens = self._tokenizer.encode(cleaned_text, add_bos=True) + self._tokenizer.encode("\n")
-        tokens_len = len(tokens)
-        if tokens_len < self._max_len:
-            padding = [False] * (self._max_len - tokens_len)
-            mask = [True] * tokens_len + padding
-            tokens = tokens + padding
-        else:
-            if len(tokens) > self._max_len:
-                logging.warning(
-                    f"Token length ({len(tokens)}) exceeds max length ({self._max_len}), truncating. "
-                    "Consider increasing the `max_token_len` in your model config if this happens frequently."
-                )
-            tokens = tokens[: self._max_len]
-            mask = [True] * self._max_len
+            return self._pad_tokens(tokens, self._max_len)
 
-        return np.asarray(tokens), np.asarray(mask)
+        prompt_prefix = f"Task: {cleaned_text}, State: {state_str}, Subtask: "
+        prompt_tokens = self._tokenizer.encode(prompt_prefix, add_bos=True)
+        prompt_tokens, prompt_mask = self._pad_tokens(prompt_tokens, self._max_len)
+
+        if subtask is None:
+            subtask_tokens = np.zeros((self._subtask_max_len,), dtype=np.int32)
+            subtask_mask = np.zeros((self._subtask_max_len,), dtype=bool)
+            loss_mask = np.zeros((self._subtask_max_len,), dtype=bool)
+            return prompt_tokens, prompt_mask, subtask_tokens, subtask_mask, loss_mask
+
+        cleaned_subtask = subtask.strip().replace("_", " ").replace("\n", " ")
+        action_suffix = " Action: "
+        subtask_only_tokens = self._tokenizer.encode(cleaned_subtask, add_bos=False)
+        eos_token = [self.eos_token_id]
+        action_suffix_tokens = self._tokenizer.encode(action_suffix, add_bos=False)
+        full_subtask_tokens = subtask_only_tokens + eos_token + action_suffix_tokens
+        subtask_tokens, subtask_mask = self._pad_tokens(full_subtask_tokens, self._subtask_max_len)
+        # Compute AR loss on subtask text and EOS token only. Exclude the Action suffix.
+        loss_mask = np.asarray([True] * (len(subtask_only_tokens) + 1) + [False] * len(action_suffix_tokens))
+        if loss_mask.shape[0] < self._subtask_max_len:
+            loss_mask = np.concatenate(
+                [loss_mask, np.zeros((self._subtask_max_len - loss_mask.shape[0],), dtype=bool)],
+                axis=0,
+            )
+        else:
+            loss_mask = loss_mask[: self._subtask_max_len]
+
+        return prompt_tokens, prompt_mask, subtask_tokens, subtask_mask, loss_mask
+
+    @property
+    def eos_token_id(self) -> int:
+        return int(self._tokenizer.eos_id())
+
+    @property
+    def vocab_size(self) -> int:
+        return int(self._tokenizer.vocab_size())
+
+    @property
+    def subtask_max_len(self) -> int:
+        return int(self._subtask_max_len)
+
+    def decode(self, tokens: np.ndarray | list[int]) -> str:
+        if isinstance(tokens, np.ndarray):
+            tokens = tokens.astype(np.int32).tolist()
+        return self._tokenizer.decode(tokens)
 
 
 class FASTTokenizer:

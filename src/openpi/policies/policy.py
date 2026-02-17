@@ -1,4 +1,5 @@
 from collections.abc import Sequence
+import dataclasses
 import logging
 import pathlib
 import time
@@ -15,6 +16,7 @@ from typing_extensions import override
 
 from openpi import transforms as _transforms
 from openpi.models import model as _model
+from openpi.models import tokenizer as _tokenizer
 from openpi.shared import array_typing as at
 from openpi.shared import nnx_utils
 
@@ -48,21 +50,47 @@ class Policy(BasePolicy):
             is_pytorch: Whether the model is a PyTorch model. If False, assumes JAX model.
         """
         self._model = model
+        self._input_transforms_raw = list(transforms)
         self._input_transform = _transforms.compose(transforms)
+        subtask_transforms = [
+            dataclasses.replace(t, for_subtask_generation=True)
+            if isinstance(t, _transforms.TokenizePrompt)
+            else t
+            for t in transforms
+        ]
+        self._input_transform_subtask = _transforms.compose(subtask_transforms)
         self._output_transform = _transforms.compose(output_transforms)
         self._sample_kwargs = sample_kwargs or {}
         self._metadata = metadata or {}
         self._is_pytorch_model = is_pytorch
         self._pytorch_device = pytorch_device
+        self._tokenizer = _tokenizer.PaligemmaTokenizer(getattr(model, "max_token_len", 200))
+        for transform in self._input_transforms_raw:
+            if isinstance(transform, _transforms.TokenizePrompt):
+                self._tokenizer = transform.tokenizer
+                break
 
         if self._is_pytorch_model:
             self._model = self._model.to(pytorch_device)
             self._model.eval()
             self._sample_actions = model.sample_actions
+            self._sample_subtask_tokens = getattr(model, "sample_subtask_tokens", None)
         else:
             # JAX model setup
             self._sample_actions = nnx_utils.module_jit(model.sample_actions)
             self._guided_inference = nnx_utils.module_jit(model.guided_inference)
+            if hasattr(model, "sample_subtask_tokens"):
+                self._sample_subtask_tokens = nnx_utils.module_jit(
+                    model.sample_subtask_tokens,
+                    static_argnames=(
+                        "temperature",
+                        "eos_token_id",
+                        "max_text_token_id",
+                        "debug_top_logits",
+                    ),
+                )
+            else:
+                self._sample_subtask_tokens = None
             self._rng = rng or jax.random.key(0)
 
     @override
@@ -124,6 +152,51 @@ class Policy(BasePolicy):
             "infer_ms": model_time * 1000,
         }
         return outputs
+
+    def infer_subtask(
+        self,
+        obs: dict,
+        *,
+        max_new_tokens: int = 32,
+        max_decoding_steps: int | None = None,
+        temperature: float = 0.0,
+        max_text_token_id: int = 240000,
+        debug_top_logits: bool = False,
+    ) -> dict:
+        """Autoregressively decode high-level subtask text from image+prompt inputs."""
+        if self._sample_subtask_tokens is None:
+            raise NotImplementedError("Current model does not support autoregressive subtask decoding.")
+
+        inputs = jax.tree.map(lambda x: x, obs)
+        inputs = self._input_transform_subtask(inputs)
+
+        if self._is_pytorch_model:
+            raise NotImplementedError("infer_subtask is currently implemented for JAX PI0/PI05 models.")
+
+        inputs = jax.tree.map(lambda x: jnp.asarray(x)[np.newaxis, ...], inputs)
+        self._rng, sample_rng = jax.random.split(self._rng)
+        tokens = self._sample_subtask_tokens(
+            sample_rng,
+            _model.Observation.from_dict(inputs),
+            temperature=temperature,
+            eos_token_id=self._tokenizer.eos_token_id,
+            max_text_token_id=max_text_token_id,
+            debug_top_logits=debug_top_logits,
+        )
+        token_ids = np.asarray(tokens[0], dtype=np.int32)
+        # Trim after EOS/zero pad.
+        eos = self._tokenizer.eos_token_id
+        stop = len(token_ids)
+        for idx, tid in enumerate(token_ids.tolist()):
+            if tid == eos or tid == 0:
+                stop = idx + (1 if tid == eos else 0)
+                break
+        token_ids = token_ids[:stop]
+        text = self._tokenizer.decode(token_ids.tolist()) if len(token_ids) else ""
+        return {
+            "subtask_tokens": token_ids,
+            "subtask_text": text,
+        }
 
     @property
     def metadata(self) -> dict[str, Any]:

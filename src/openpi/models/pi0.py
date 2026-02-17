@@ -44,6 +44,15 @@ def make_attn_mask(input_mask, mask_ar):
     return jnp.logical_and(attn_mask, valid_mask)
 
 
+def put_along_last_axis(arr, indices, values):
+    """Like np.put_along_axis(..., axis=-1), since jax is missing it."""
+    assert arr.ndim == indices.ndim == values.ndim, (arr.ndim, indices.ndim, values.ndim)
+    onehot = jax.nn.one_hot(indices, arr.shape[-1], dtype=values.dtype)
+    put_mask = jnp.einsum("...i,...in->...n", jnp.ones(values.shape, jnp.int32), onehot)
+    put_values = jnp.einsum("...i,...in->...n", values, onehot)
+    return jnp.where(put_mask, put_values, arr)
+
+
 @at.typecheck
 def posemb_sincos(
     pos: at.Real[at.Array, " b"], embedding_dim: int, min_period: float, max_period: float
@@ -67,6 +76,7 @@ class Pi0(_model.BaseModel):
     def __init__(self, config: pi0_config.Pi0Config, rngs: nnx.Rngs):
         super().__init__(config.action_dim, config.action_horizon, config.max_token_len)
         self.pi05 = config.pi05
+        self.subtask_loss_weight = config.subtask_loss_weight
         paligemma_config = _gemma.get_config(config.paligemma_variant)
         action_expert_config = _gemma.get_config(config.action_expert_variant)
         # TODO: rewrite gemma in NNX. For now, use bridge.
@@ -131,6 +141,12 @@ class Pi0(_model.BaseModel):
             input_mask.append(obs.tokenized_prompt_mask)
             # full attention between image and language inputs
             ar_mask += [False] * tokenized_inputs.shape[1]
+        if obs.tokenized_subtask is not None:
+            tokenized_subtask = self.PaliGemma.llm(obs.tokenized_subtask, method="embed")
+            tokens.append(tokenized_subtask)
+            input_mask.append(obs.tokenized_subtask_mask)
+            # subtask tokens are autoregressive, but can attend to prompt/image prefix.
+            ar_mask += [True] * tokenized_subtask.shape[1]
         tokens = jnp.concatenate(tokens, axis=1)
         input_mask = jnp.concatenate(input_mask, axis=1)
         ar_mask = jnp.array(ar_mask)
@@ -189,6 +205,12 @@ class Pi0(_model.BaseModel):
     def compute_loss(
         self, rng: at.KeyArrayLike, observation: _model.Observation, actions: _model.Actions, *, train: bool = False
     ) -> at.Float[at.Array, "*b ah"]:
+        total_loss, _, _ = self.compute_loss_with_metrics(rng, observation, actions, train=train)
+        return total_loss
+
+    def compute_loss_with_metrics(
+        self, rng: at.KeyArrayLike, observation: _model.Observation, actions: _model.Actions, *, train: bool = False
+    ) -> tuple[at.Float[at.Array, "*b ah"], at.Float[at.Array, "*b ah"], at.Float[at.Array, "*b 1"]]:
         preprocess_rng, noise_rng, time_rng = jax.random.split(rng, 3)
         observation = _model.preprocess_observation(preprocess_rng, observation, train=train)
 
@@ -210,8 +232,38 @@ class Pi0(_model.BaseModel):
             [prefix_tokens, suffix_tokens], mask=attn_mask, positions=positions, adarms_cond=[None, adarms_cond]
         )
         v_t = self.action_out_proj(suffix_out[:, -self.action_horizon :])
-
-        return jnp.mean(jnp.square(v_t - u_t), axis=-1)
+        flow_loss = jnp.mean(jnp.square(v_t - u_t), axis=-1)
+        if self.subtask_loss_weight <= 0.0:
+            subtask_ar_loss = jnp.zeros((flow_loss.shape[0], 1), dtype=flow_loss.dtype)
+            return flow_loss, flow_loss, subtask_ar_loss
+        if (
+            observation.tokenized_subtask is None
+            or observation.tokenized_subtask_mask is None
+            or observation.tokenized_subtask_loss_mask is None
+            or observation.tokenized_prompt_mask is None
+        ):
+            subtask_ar_loss = jnp.zeros((flow_loss.shape[0], 1), dtype=flow_loss.dtype)
+            return flow_loss, flow_loss, subtask_ar_loss
+        assert prefix_out is not None
+        target_tokens = observation.tokenized_subtask.astype(jnp.int32)
+        target_mask = observation.tokenized_subtask_mask
+        loss_mask = jnp.logical_and(target_mask, observation.tokenized_subtask_loss_mask).astype(jnp.float32)
+        subtask_len = target_tokens.shape[1]
+        subtask_start = prefix_out.shape[1] - subtask_len
+        # Subtask token i is predicted from hidden state at (subtask_start - 1 + i).
+        idx = (subtask_start - 1) + jnp.arange(subtask_len, dtype=jnp.int32)[None, :]
+        idx = jnp.broadcast_to(idx, (prefix_out.shape[0], subtask_len))
+        pre_logits = jnp.take_along_axis(prefix_out, idx[..., None], axis=1)
+        embed_table = self.PaliGemma.llm.embedder["input_embedding"].value
+        logits = jnp.einsum("bld,vd->blv", pre_logits, embed_table, preferred_element_type=jnp.float32)
+        logp = jax.nn.log_softmax(logits, axis=-1)
+        targets = jax.nn.one_hot(target_tokens, embed_table.shape[0])
+        token_logp = jnp.sum(targets * logp, axis=-1)
+        denom = jnp.clip(jnp.sum(loss_mask, axis=-1), a_min=1.0)
+        subtask_ar_loss = -jnp.sum(token_logp * loss_mask, axis=-1)
+        subtask_ar_loss = (subtask_ar_loss / denom)[:, None]
+        total_loss = flow_loss + self.subtask_loss_weight * subtask_ar_loss
+        return total_loss, flow_loss, subtask_ar_loss
 
     @override
     def sample_actions(
@@ -277,6 +329,113 @@ class Pi0(_model.BaseModel):
 
         x_0, _ = jax.lax.while_loop(cond, step, (noise, 1.0))
         return x_0
+
+    @at.typecheck
+    def sample_subtask_tokens(
+        self,
+        rng: at.KeyArrayLike,
+        observation: _model.Observation,
+        *,
+        temperature: float = 0.0,
+        eos_token_id: int | None = None,
+        max_text_token_id: int = 240000,
+        debug_top_logits: bool = False,
+    ) -> at.Int[at.Array, "b _t"]:
+        """Autoregressively decode language tokens from image+prompt prefix."""
+        observation = _model.preprocess_observation(None, observation, train=False)
+        if observation.tokenized_prompt is None or observation.tokenized_prompt_mask is None:
+            raise ValueError("tokenized_prompt and tokenized_prompt_mask are required for subtask decoding.")
+        if observation.tokenized_subtask is None:
+            raise ValueError("tokenized_subtask is required for subtask decoding.")
+        # jax.debug.print("observation.tokenized_prompt={tokenized_prompt}", tokenized_prompt=observation.tokenized_prompt)
+        prefix_tokens, prefix_mask, prefix_ar_mask = self.embed_prefix(observation)
+        max_steps = int(observation.tokenized_subtask.shape[1])
+        prefix_len = prefix_tokens.shape[1]
+        subtask_len = int(observation.tokenized_subtask.shape[1])
+        subtask_start = prefix_len - subtask_len
+
+        embed_table = self.PaliGemma.llm.embedder["input_embedding"].value
+        vocab_size = embed_table.shape[0]
+        # Last 128 ids are reserved/special in the project tokenization stack.
+        special_token_mask = jnp.arange(vocab_size) >= (vocab_size - 128)
+        non_text_mask = jnp.arange(vocab_size) > max_text_token_id
+
+        # Prefix forward pass to get initial next-token logits context.
+        prefix_positions = jnp.cumsum(prefix_mask, axis=1) - 1
+        prefix_attn_mask = make_attn_mask(prefix_mask, prefix_ar_mask)
+        (prefix_out, _), _ = self.PaliGemma.llm(
+            [prefix_tokens, None], mask=prefix_attn_mask, positions=prefix_positions
+        )
+        assert prefix_out is not None
+        batch_size = prefix_out.shape[0]
+        last_valid_idx = jnp.max(
+            jnp.where(prefix_mask, jnp.arange(prefix_len)[None, :], -1),
+            axis=1,
+        )
+        last_hidden = prefix_out[jnp.arange(batch_size), last_valid_idx, :]
+
+        def step(carry):
+            rng, last_hidden, output_tokens, finished, step_i = carry
+            logits = jnp.einsum("bd,vd->bv", last_hidden, embed_table, preferred_element_type=jnp.float32)
+            # top_vals, top_idx = jax.lax.top_k(logits[0], 100)
+            # jax.debug.print("subtask step {s} top10 logits idx={i} val={v}", s=step_i, i=top_idx, v=top_vals)
+            logits = jnp.where(special_token_mask[None, :], -jnp.inf, logits)
+            logits = jnp.where(non_text_mask[None, :], -jnp.inf, logits)
+            logits = logits.at[:, 0].set(-jnp.inf)  # never emit pad token
+            if debug_top_logits:
+                top_vals, top_idx = jax.lax.top_k(logits[0], 2)
+                jax.debug.print(
+                    "subtask step {s}: top1={i1}({v1}) top2={i2}({v2}) gap={g}",
+                    s=step_i,
+                    i1=top_idx[0],
+                    v1=top_vals[0],
+                    i2=top_idx[1],
+                    v2=top_vals[1],
+                    g=top_vals[0] - top_vals[1],
+                )
+            if temperature <= 0.0:
+                next_token = jnp.argmax(logits, axis=-1).astype(jnp.int32)
+            else:
+                rng, sample_rng = jax.random.split(rng)
+                next_token = jax.random.categorical(sample_rng, logits / temperature, axis=-1).astype(jnp.int32)
+
+            if eos_token_id is not None:
+                next_token = jnp.where(finished, jnp.asarray(eos_token_id, dtype=jnp.int32), next_token)
+                finished = jnp.logical_or(finished, next_token == jnp.asarray(eos_token_id, dtype=jnp.int32))
+            output_tokens = put_along_last_axis(
+                output_tokens,
+                jnp.broadcast_to(step_i, (next_token.shape[0], 1)),
+                next_token[:, None],
+            )
+            # Fill subtask slots inside the existing prefix token block.
+            generated_valid = jnp.arange(max_steps)[None, :] <= step_i
+            subtask_tokens = jnp.where(generated_valid, output_tokens, 0)
+            subtask_embeddings = self.PaliGemma.llm(subtask_tokens, method="embed")
+            full_prefix_tokens = prefix_tokens.at[:, subtask_start:, :].set(subtask_embeddings)
+
+            full_prefix_mask = prefix_mask.at[:, subtask_start:].set(generated_valid)
+            full_attn_mask = make_attn_mask(full_prefix_mask, prefix_ar_mask)
+            positions = jnp.cumsum(full_prefix_mask, axis=-1) - 1
+            (full_out, _), _ = self.PaliGemma.llm([full_prefix_tokens, None], mask=full_attn_mask, positions=positions)
+            assert full_out is not None
+            last_hidden = full_out[:, subtask_start + step_i, :]
+
+            return rng, last_hidden, output_tokens, finished, step_i + 1
+
+        def cond(carry):
+            _, _, _, finished, step_i = carry
+            if eos_token_id is None:
+                return step_i < max_steps
+            return (~jnp.all(finished)) & (step_i < max_steps)
+
+        init_tokens = jnp.zeros((batch_size, max_steps), dtype=jnp.int32)
+        init_finished = jnp.zeros((batch_size,), dtype=jnp.bool_)
+        _, _, output_tokens, _, _ = jax.lax.while_loop(
+            cond,
+            step,
+            (rng, last_hidden, init_tokens, init_finished, 0),
+        )
+        return output_tokens
         
     def guided_inference(
         self,

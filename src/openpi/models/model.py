@@ -66,6 +66,9 @@ IMAGE_RESOLUTION = (224, 224)
 #     "state": float32[*b, s],  # Low-dimensional robot state
 #     "tokenized_prompt": int32[*b, l],  # Optional, tokenized language prompt
 #     "tokenized_prompt_mask": bool[*b, l],  # Optional, mask for tokenized prompt
+#     "tokenized_subtask": int32[*b, l],  # Optional, tokenized AR subtask targets
+#     "tokenized_subtask_mask": bool[*b, l],  # Optional, mask for AR subtask targets
+#     "tokenized_subtask_loss_mask": bool[*b, l],  # Optional, AR loss mask for subtask targets
 #     "token_ar_mask": int32[*b, l],  # Optional, autoregressive mask for FAST model
 #     "token_loss_mask": bool[*b, l],  # Optional, loss mask for FAST model
 #
@@ -98,6 +101,10 @@ class Observation(Generic[ArrayT]):
     tokenized_prompt: at.Int[ArrayT, "*b l"] | None = None
     # Tokenized prompt mask.
     tokenized_prompt_mask: at.Bool[ArrayT, "*b l"] | None = None
+    # Optional autoregressive subtask targets.
+    tokenized_subtask: at.Int[ArrayT, "*b ls"] | None = None
+    tokenized_subtask_mask: at.Bool[ArrayT, "*b ls"] | None = None
+    tokenized_subtask_loss_mask: at.Bool[ArrayT, "*b ls"] | None = None
 
     # pi0-fast model specific fields.
 
@@ -112,6 +119,10 @@ class Observation(Generic[ArrayT]):
         # Ensure that tokenized_prompt and tokenized_prompt_mask are provided together.
         if ("tokenized_prompt" in data) != ("tokenized_prompt_mask" in data):
             raise ValueError("tokenized_prompt and tokenized_prompt_mask must be provided together.")
+        if ("tokenized_subtask" in data) != ("tokenized_subtask_mask" in data):
+            raise ValueError("tokenized_subtask and tokenized_subtask_mask must be provided together.")
+        if ("tokenized_subtask" in data) != ("tokenized_subtask_loss_mask" in data):
+            raise ValueError("tokenized_subtask and tokenized_subtask_loss_mask must be provided together.")
         # If images are uint8, convert them to [-1, 1] float32.
         for key in data["image"]:
             if data["image"][key].dtype == np.uint8:
@@ -124,6 +135,9 @@ class Observation(Generic[ArrayT]):
             state=data["state"],
             tokenized_prompt=data.get("tokenized_prompt"),
             tokenized_prompt_mask=data.get("tokenized_prompt_mask"),
+            tokenized_subtask=data.get("tokenized_subtask"),
+            tokenized_subtask_mask=data.get("tokenized_subtask_mask"),
+            tokenized_subtask_loss_mask=data.get("tokenized_subtask_loss_mask"),
             token_ar_mask=data.get("token_ar_mask"),
             token_loss_mask=data.get("token_loss_mask"),
         )
@@ -203,6 +217,9 @@ def preprocess_observation(
         state=observation.state,
         tokenized_prompt=observation.tokenized_prompt,
         tokenized_prompt_mask=observation.tokenized_prompt_mask,
+        tokenized_subtask=observation.tokenized_subtask,
+        tokenized_subtask_mask=observation.tokenized_subtask_mask,
+        tokenized_subtask_loss_mask=observation.tokenized_subtask_loss_mask,
         token_ar_mask=observation.token_ar_mask,
         token_loss_mask=observation.token_loss_mask,
     )

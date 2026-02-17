@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 class WebsocketPolicyServer:
     """Serves a policy using the websocket protocol. See websocket_client_policy.py for a client implementation.
 
-    Currently only implements the `load` and `infer` methods.
+    Supports standard diffusion inference (`infer`) and optional subtask decoding (`infer_subtask`).
     """
 
     def __init__(
@@ -60,8 +60,22 @@ class WebsocketPolicyServer:
                 obs = data.get("obs", None)  
                 prev_action = data.get("prev_action", None)     
                 use_rtc = data.get("use_rtc", False)
+                decode_subtask = data.get("decode_subtask", False)
+                max_new_tokens = data.get("max_new_tokens", 32)
+                temperature = data.get("temperature", 0.0)
+                max_text_token_id = data.get("max_text_token_id", 240000)
                 infer_time = time.monotonic()
-                action = self._policy.infer(obs, prev_action, use_rtc)
+                if decode_subtask:
+                    if not hasattr(self._policy, "infer_subtask"):
+                        raise NotImplementedError("Policy does not support subtask decoding.")
+                    action = self._policy.infer_subtask(  # type: ignore[attr-defined]
+                        obs,
+                        max_new_tokens=max_new_tokens,
+                        temperature=temperature,
+                        max_text_token_id=max_text_token_id,
+                    )
+                else:
+                    action = self._policy.infer(obs, prev_action, use_rtc)
                 infer_time = time.monotonic() - infer_time
 
                 action["server_timing"] = {

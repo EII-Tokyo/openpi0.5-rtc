@@ -248,6 +248,8 @@ class AbsoluteActions(DataTransformFn):
 class TokenizePrompt(DataTransformFn):
     tokenizer: _tokenizer.PaligemmaTokenizer
     discrete_state_input: bool = False
+    # If true, build prompt in subtask-generation format and always return subtask tensors.
+    for_subtask_generation: bool = False
 
     def __call__(self, data: DataDict) -> DataDict:
         if (prompt := data.pop("prompt", None)) is None:
@@ -261,9 +263,32 @@ class TokenizePrompt(DataTransformFn):
 
         if not isinstance(prompt, str):
             prompt = prompt.item()
-        
-        tokens, token_masks = self.tokenizer.tokenize(prompt, state)
-        return {**data, "tokenized_prompt": tokens, "tokenized_prompt_mask": token_masks}
+
+        subtask = data.pop("subtask", None)
+        if subtask is not None and not isinstance(subtask, str):
+            subtask = subtask.item()
+        tokenized = self.tokenizer.tokenize(
+            prompt,
+            state,
+            subtask,
+            for_subtask_generation=self.for_subtask_generation,
+        )
+        if len(tokenized) == 2:
+            prompt_tokens, prompt_masks = tokenized
+            return {
+                **data,
+                "tokenized_prompt": prompt_tokens,
+                "tokenized_prompt_mask": prompt_masks,
+            }
+        prompt_tokens, prompt_masks, subtask_tokens, subtask_masks, subtask_loss_masks = tokenized
+        return {
+            **data,
+            "tokenized_prompt": prompt_tokens,
+            "tokenized_prompt_mask": prompt_masks,
+            "tokenized_subtask": subtask_tokens,
+            "tokenized_subtask_mask": subtask_masks,
+            "tokenized_subtask_loss_mask": subtask_loss_masks,
+        }
 
 
 @dataclasses.dataclass(frozen=True)
@@ -286,6 +311,21 @@ class TokenizeFASTInputs(DataTransformFn):
             "token_ar_mask": ar_mask,
             "token_loss_mask": loss_mask,
         }
+
+
+@dataclasses.dataclass(frozen=True)
+class TokenizeSubtask(DataTransformFn):
+    tokenizer: _tokenizer.PaligemmaTokenizer
+
+    def __call__(self, data: DataDict) -> DataDict:
+        if (subtask := data.pop("subtask", None)) is None:
+            raise ValueError("Subtask is required")
+
+        if not isinstance(subtask, str):
+            subtask = subtask.item()
+
+        tokens, token_masks, _, _, _ = self.tokenizer.tokenize(subtask, state=None)
+        return {**data, "tokenized_subtask": tokens, "tokenized_subtask_mask": token_masks}
 
 
 @dataclasses.dataclass(frozen=True)

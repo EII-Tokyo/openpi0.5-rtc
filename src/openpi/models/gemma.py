@@ -170,9 +170,12 @@ class Attention(nn.Module):
         dtype = next(x.dtype for x in xs if x is not None)  # original dtype, could be half-precision
 
         qkvs = []
+        token_lens = []
         for i, (x, config) in enumerate(zip(xs, self.configs, strict=True)):
             if x is None:
+                token_lens.append(0)
                 continue
+            token_lens.append(x.shape[1])
             if config.num_kv_heads == config.num_heads:
                 qkv_einsum = lora.Einsum(
                     shape=(3, config.num_heads, config.width, config.head_dim),
@@ -208,13 +211,44 @@ class Attention(nn.Module):
         # should still be half-precision here (if input was half-precision)
         assert q.dtype == k.dtype == v.dtype == dtype
 
+        cache_len = 0
         if kv_cache is not None:
             cache_k, cache_v = kv_cache
+            cache_len = cache_k.shape[1]
             k = jnp.concatenate([cache_k, k], axis=1)
             v = jnp.concatenate([cache_v, v], axis=1)
 
+        # Pi05 knowledge insulation:
+        # block gradients from action expert queries into backbone expert key/value features.
+        #
+        # Enable insulation only in training-style joint forward (prefix + suffix together).
+        # Keep suffix-only decode path (with kv-cache) identical to legacy behavior.
+        has_action_queries = len(self.configs) >= 2 and (token_lens[1] > 0)
+        has_backbone_queries = token_lens[0] > 0
+        use_gradient_insulation = has_action_queries and has_backbone_queries
+        if use_gradient_insulation:
+            backbone_query_len = token_lens[0]
+            action_query_len = token_lens[1]
+            total_query_len = q.shape[1]
+            query_action_mask = jnp.logical_and(
+                jnp.arange(total_query_len) >= backbone_query_len,
+                jnp.arange(total_query_len) < (backbone_query_len + action_query_len),
+            )
+            backbone_key_len = cache_len + token_lens[0]
+            backbone_key_mask = jnp.arange(k.shape[1]) < backbone_key_len
+        else:
+            query_action_mask = None
+            backbone_key_mask = None
+
         q = einops.rearrange(q, "B T (K G) H -> B T K G H", K=self.configs[0].num_kv_heads)
         logits = jnp.einsum("BTKGH,BSKH->BKGTS", q, k, preferred_element_type=jnp.float32)
+        if use_gradient_insulation:
+            logits_sgk = jnp.einsum("BTKGH,BSKH->BKGTS", q, jax.lax.stop_gradient(k), preferred_element_type=jnp.float32)
+            cross_mask = jnp.logical_and(
+                query_action_mask[None, None, None, :, None],
+                backbone_key_mask[None, None, None, None, :],
+            )
+            logits = jnp.where(cross_mask, logits_sgk, logits)
 
         if attn_mask.shape != (q.shape[0], 1, q.shape[1], k.shape[1]):
             raise ValueError(
@@ -228,6 +262,10 @@ class Attention(nn.Module):
         probs = jax.nn.softmax(masked_logits, axis=-1).astype(dtype)
 
         encoded = jnp.einsum("BKGTS,BSKH->BTKGH", probs, v)
+        if use_gradient_insulation:
+            v_sg = jnp.where(backbone_key_mask[None, :, None, None], jax.lax.stop_gradient(v), v)
+            encoded_sg = jnp.einsum("BKGTS,BSKH->BTKGH", probs, v_sg)
+            encoded = jnp.where(query_action_mask[None, :, None, None, None], encoded_sg, encoded)
         encoded = einops.rearrange(encoded, "B T K G H -> B T (K G) H")
 
         out = []
