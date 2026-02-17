@@ -96,6 +96,7 @@ def create_qwen_value_dataloader(
     target_task: str | None = None,
     treat_other_tasks_as_failure: bool = False,
     max_token_len: int = 256,
+    rank: int = 0,
 ) -> torch.utils.data.DataLoader:
     """Create a DataLoader that emits multimodal Qwen3-VL batches plus returns."""
 
@@ -105,7 +106,8 @@ def create_qwen_value_dataloader(
         failure_cost_json=failure_cost_json,
         default_c_fail=default_c_fail,
         success_sampling_ratio=success_sampling_ratio,
-        seed=seed,
+        # Dataset sampling is RNG-driven in __getitem__, so offset per-rank seeds in DDP.
+        seed=seed + rank * 10_000,
         split=split,
         train_split=train_split,
         split_seed=split_seed,
