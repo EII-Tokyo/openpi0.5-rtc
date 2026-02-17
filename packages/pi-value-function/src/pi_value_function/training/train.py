@@ -58,11 +58,6 @@ def _shard_batch(batch, mesh: jax.sharding.Mesh):
     return jax.tree.map(_shard_leaf, batch)
 
 
-def _replicate_on_mesh(pytree, mesh: jax.sharding.Mesh):
-    """Replicate a pytree across all devices in the mesh."""
-    replicated = jax.sharding.NamedSharding(mesh, jax.sharding.PartitionSpec())
-    return jax.device_put(pytree, replicated)
-
 
 def create_model_with_weights(config: TrainConfig, rng: jax.Array) -> PiValue:
     """Create PiValue model and load pretrained weights.
@@ -153,29 +148,18 @@ def create_model_with_weights(config: TrainConfig, rng: jax.Array) -> PiValue:
     return model, gemma_tokenizer_path
 
 
-@functools.partial(nnx.jit, donate_argnums=(0,))
-def train_step(
+def _train_step_impl(
     model: PiValue,
     optimizer: nnx.Optimizer,
     rng: jax.Array,
     observation: Observation,
     returns: jax.Array,
 ) -> tuple[PiValue, nnx.Optimizer, dict[str, jax.Array]]:
-    """Single training step with gradient update.
+    """Single training step with gradient update (pure implementation).
 
     Uses NNX patterns:
     - nnx.value_and_grad for gradient computation
     - optimizer.update() for parameter updates
-
-    Args:
-        model: PiValue model
-        optimizer: NNX optimizer
-        rng: Random key for this step
-        observation: Observation inputs
-        returns: Target return values
-
-    Returns:
-        Updated model, optimizer, and metrics dict
     """
     def loss_fn(model: PiValue) -> jax.Array:
         """Compute mean loss over batch."""
@@ -200,21 +184,14 @@ def train_step(
 
     return model, optimizer, metrics
 
-def validate_step(
+
+def _validate_step_impl(
     model: PiValue,
     rng: jax.Array,
     observation: Observation,
     returns: jax.Array,
-) -> dict[str, jax.Array]:  
-    """Single validation step.
-
-    Args:
-        model: PiValue model
-        rng: Random key for this step
-
-    Returns:
-        Validation metrics dict
-    """
+) -> dict[str, jax.Array]:
+    """Single validation step (pure implementation)."""
     def loss_fn(model: PiValue) -> jax.Array:
         """Compute mean loss over batch."""
         losses = model.compute_loss(rng, observation, returns, train=False)
@@ -226,6 +203,106 @@ def validate_step(
         "val_loss": loss,
     }
     return metrics
+
+
+def create_jitted_train_step(mesh: jax.sharding.Mesh | None, model, optimizer):
+    """Create a JIT-compiled train step with proper sharding for multi-GPU.
+
+    For single GPU: uses simple nnx.jit.
+    For multi-GPU: uses jax.jit with explicit in/out shardings via the mesh.
+    """
+    if mesh is None or len(mesh.devices.flat) <= 1:
+        # Single device - simple JIT
+        return nnx.jit(_train_step_impl)
+
+    # Multi-device: extract state, create shardings, JIT with explicit shardings
+    replicated = jax.sharding.NamedSharding(mesh, jax.sharding.PartitionSpec())
+    data_sharding = jax.sharding.NamedSharding(mesh, jax.sharding.PartitionSpec(BATCH_AXIS))
+
+    # Get the NNX state structure for sharding specs
+    model_graphdef, model_state = nnx.split(model)
+    opt_graphdef, opt_state = nnx.split(optimizer)
+
+    # All model/optimizer state is replicated; batch data is sharded
+    model_state_sharding = jax.tree.map(lambda _: replicated, model_state)
+    opt_state_sharding = jax.tree.map(lambda _: replicated, opt_state)
+
+    def _pure_train_step(model_state, opt_state, rng, observation, returns):
+        """Pure function operating on state pytrees (not NNX objects)."""
+        model = nnx.merge(model_graphdef, model_state)
+        optimizer = nnx.merge(opt_graphdef, opt_state)
+
+        model, optimizer, metrics = _train_step_impl(model, optimizer, rng, observation, returns)
+
+        _, new_model_state = nnx.split(model)
+        _, new_opt_state = nnx.split(optimizer)
+        return new_model_state, new_opt_state, metrics
+
+    # Build sharding specs for observation (batch-sharded for arrays, replicated for scalars)
+    def _obs_sharding(x):
+        if hasattr(x, 'ndim') and x.ndim > 0:
+            return data_sharding
+        return replicated
+
+    @functools.wraps(_pure_train_step)
+    def _jitted_wrapper(model_obj, optimizer_obj, rng, observation, returns):
+        # Split NNX objects into state
+        nonlocal model_graphdef, opt_graphdef
+        model_graphdef, m_state = nnx.split(model_obj)
+        opt_graphdef, o_state = nnx.split(optimizer_obj)
+
+        # Build observation sharding from actual structure
+        obs_sharding = jax.tree.map(_obs_sharding, observation)
+        returns_sharding = data_sharding
+
+        in_shardings = (model_state_sharding, opt_state_sharding, replicated, obs_sharding, returns_sharding)
+        out_shardings = (model_state_sharding, opt_state_sharding, replicated)
+
+        # JIT with explicit shardings (cached after first call)
+        jitted_fn = jax.jit(_pure_train_step, in_shardings=in_shardings, out_shardings=out_shardings)
+        new_m_state, new_o_state, metrics = jitted_fn(m_state, o_state, rng, observation, returns)
+
+        # Merge state back into NNX objects
+        nnx.update(model_obj, new_m_state)
+        nnx.update(optimizer_obj, new_o_state)
+        return model_obj, optimizer_obj, metrics
+
+    return _jitted_wrapper
+
+
+def create_jitted_validate_step(mesh: jax.sharding.Mesh | None, model):
+    """Create a JIT-compiled validation step with proper sharding."""
+    if mesh is None or len(mesh.devices.flat) <= 1:
+        return nnx.jit(_validate_step_impl)
+
+    replicated = jax.sharding.NamedSharding(mesh, jax.sharding.PartitionSpec())
+    data_sharding = jax.sharding.NamedSharding(mesh, jax.sharding.PartitionSpec(BATCH_AXIS))
+
+    model_graphdef, model_state = nnx.split(model)
+    model_state_sharding = jax.tree.map(lambda _: replicated, model_state)
+
+    def _obs_sharding(x):
+        if hasattr(x, 'ndim') and x.ndim > 0:
+            return data_sharding
+        return replicated
+
+    def _pure_validate_step(model_state, rng, observation, returns):
+        model = nnx.merge(model_graphdef, model_state)
+        return _validate_step_impl(model, rng, observation, returns)
+
+    @functools.wraps(_pure_validate_step)
+    def _jitted_wrapper(model_obj, rng, observation, returns):
+        nonlocal model_graphdef
+        model_graphdef, m_state = nnx.split(model_obj)
+
+        obs_sharding = jax.tree.map(_obs_sharding, observation)
+        in_shardings = (model_state_sharding, replicated, obs_sharding, data_sharding)
+        out_shardings = replicated
+
+        jitted_fn = jax.jit(_pure_validate_step, in_shardings=in_shardings, out_shardings=out_shardings)
+        return jitted_fn(m_state, rng, observation, returns)
+
+    return _jitted_wrapper
 
 
 def train(config: TrainConfig) -> None:
@@ -369,10 +446,21 @@ def train(config: TrainConfig) -> None:
     print(f"  Devices: {num_devices} ({[str(d) for d in jax.devices()]})")
     print(f"  Mesh: {mesh.shape}")
     if num_devices > 1:
+        # Replicate model/optimizer state across all devices
         print(f"  Replicating model across {num_devices} devices...")
-        model = _replicate_on_mesh(model, mesh)
-        optimizer = _replicate_on_mesh(optimizer, mesh)
+        replicated = jax.sharding.NamedSharding(mesh, jax.sharding.PartitionSpec())
+        graphdef, state = nnx.split(model)
+        state = jax.device_put(state, replicated)
+        model = nnx.merge(graphdef, state)
+        graphdef, state = nnx.split(optimizer)
+        state = jax.device_put(state, replicated)
+        optimizer = nnx.merge(graphdef, state)
         print(f"  ✓ Model and optimizer replicated")
+
+    # Create JIT-compiled train/validate steps with proper sharding
+    train_step = create_jitted_train_step(mesh if num_devices > 1 else None, model, optimizer)
+    validate_step = create_jitted_validate_step(mesh if num_devices > 1 else None, model)
+    print(f"  ✓ JIT-compiled train/validate steps created ({'multi-device' if num_devices > 1 else 'single-device'})")
 
     # Create tokenizer
     print("\n=== Creating tokenizer ===")
@@ -602,6 +690,8 @@ def train(config: TrainConfig) -> None:
     # Save final checkpoint
     print(f"\nSaving final checkpoint at step {total_steps}...")
     ckpt_manager.save_checkpoint(checkpoint_mgr, model, optimizer, total_steps)
+    # Wait for async checkpoint writes to complete before exiting
+    checkpoint_mgr.wait_until_finished()
     print("✓ Final checkpoint saved")
 
     print("\n=== Training complete! ===")

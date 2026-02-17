@@ -455,17 +455,24 @@ class ValueFunctionDataset(torch.utils.data.Dataset):
 
         for ds in dataset._datasets:
             ep_meta = ds.meta.episodes
+
+            # When loading a subset of episodes, hf_dataset is filtered but
+            # metadata still has original indices. Recompute start indices
+            # by accumulating episode lengths in the order they appear.
+            cumulative_idx = 0
             for ep in ep_meta:
                 task = ep["tasks"][0] if ep["tasks"] else None
+                length = ep["length"]
                 episodes.append(EpisodeMetadata(
                     episode_id=ep["episode_index"],
-                    start_idx=ep["dataset_from_index"],
-                    end_idx=ep["dataset_to_index"] - 1,  # inclusive
-                    length=ep["length"],
+                    start_idx=cumulative_idx,
+                    end_idx=cumulative_idx + length - 1,  # inclusive
+                    length=length,
                     success=success,
                     prompt=task,
-                    dataset=ds,  # Store reference to individual sub-dataset (indices are per-dataset)
+                    dataset=ds,  # Store reference to individual sub-dataset
                 ))
+                cumulative_idx += length
 
         return episodes
 
@@ -764,5 +771,5 @@ def create_value_dataloader(
         persistent_workers=num_workers > 0,
         worker_init_fn=_worker_init_fn,
         prefetch_factor=4 if num_workers > 0 else None,
-        multiprocessing_context="fork" if num_workers > 0 else None,
+        multiprocessing_context="forkserver" if num_workers > 0 else None,
     )

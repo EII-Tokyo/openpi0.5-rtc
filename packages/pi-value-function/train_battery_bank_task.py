@@ -23,17 +23,17 @@ config = TrainConfig(
         siglip_variant="siglip2-so400m-patch16-384",
     ),
     lr_schedule=_optimizer.CosineDecaySchedule(
-        warmup_steps=500,
-        peak_lr=1e-4, # 100x because freeze
-        decay_steps=10_000,
-        decay_lr=1e-5,
+        warmup_steps=1000,
+        peak_lr=2e-3, # 100x because freeze
+        decay_steps=15_000,
+        decay_lr=1e-4,
     ),
     optimizer=_optimizer.AdamW(
         weight_decay=0.01,
         clip_gradient_norm=1.0,
     ),
     num_train_steps=30_000,
-    batch_size=16,
+    batch_size=128,
     data=ValueDataConfig(
         # Load ALL success datasets
         success_repo_ids=[
@@ -64,13 +64,14 @@ config = TrainConfig(
         checkpoint_dir=str(Path(__file__).resolve().parents[2] / "checkpoints"),
         save_every_n_steps=5_000,
         keep_n_checkpoints=2,
-        overwrite=True,
+        overwrite=False,
+        resume=True,
     ),
     logging=LoggingConfig(
         log_every_n_steps=50,
         wandb_enabled=True,
         wandb_project="pi-value-function",
-        wandb_run_name="battery_bank_in_box_task_v2_bs32",
+        wandb_run_name="battery_bank_in_box_task_v2_bs128_sharded_resumed",
     ),
     num_workers=8,
     num_steps_per_validation=500,
