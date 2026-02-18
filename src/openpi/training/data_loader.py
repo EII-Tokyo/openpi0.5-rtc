@@ -54,9 +54,28 @@ class TransformedDataset(Dataset[T_co]):
     def __init__(self, dataset: Dataset, transforms: Sequence[_transforms.DataTransformFn]):
         self._dataset = dataset
         self._transform = _transforms.compose(transforms)
+        self._getitem_error_count = 0
 
     def __getitem__(self, index: SupportsIndex) -> T_co:
-        return self._transform(self._dataset[index])
+        # Some external LeRobot datasets may contain occasional metadata/task index
+        # mismatches that raise IndexError in worker processes. Retry on the next item
+        # to keep training from crashing on a single bad sample.
+        max_retries = 4096
+        dataset_len = len(self._dataset)
+        idx = index.__index__()
+        last_error: Exception | None = None
+        for retry in range(max_retries):
+            try:
+                return self._transform(self._dataset[idx % dataset_len])
+            except IndexError as e:
+                last_error = e
+                idx += 1
+                if self._getitem_error_count < 8:
+                    logging.warning("Skipping bad dataset sample at index=%d due to IndexError: %s", idx - 1, e)
+                self._getitem_error_count += 1
+        if last_error is not None:
+            raise last_error
+        raise RuntimeError("TransformedDataset.__getitem__ retry loop failed unexpectedly.")
 
     def __len__(self) -> int:
         return len(self._dataset)

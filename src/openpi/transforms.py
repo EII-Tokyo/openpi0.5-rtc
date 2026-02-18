@@ -275,11 +275,19 @@ class TokenizePrompt(DataTransformFn):
         )
         if len(tokenized) == 2:
             prompt_tokens, prompt_masks = tokenized
-            return {
+            out = {
                 **data,
                 "tokenized_prompt": prompt_tokens,
                 "tokenized_prompt_mask": prompt_masks,
             }
+            # Keep legacy prompt tokenization, but make training batches structurally
+            # consistent when some samples miss subtask annotations.
+            if self.discrete_state_input and "actions" in data and hasattr(self.tokenizer, "subtask_max_len"):
+                subtask_max_len = int(getattr(self.tokenizer, "subtask_max_len"))
+                out["tokenized_subtask"] = np.zeros((subtask_max_len,), dtype=np.int32)
+                out["tokenized_subtask_mask"] = np.zeros((subtask_max_len,), dtype=bool)
+                out["tokenized_subtask_loss_mask"] = np.zeros((subtask_max_len,), dtype=bool)
+            return out
         prompt_tokens, prompt_masks, subtask_tokens, subtask_masks, subtask_loss_masks = tokenized
         return {
             **data,

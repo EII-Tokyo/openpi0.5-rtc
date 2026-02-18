@@ -83,6 +83,8 @@ class AlohaInputs(transforms.DataTransformFn):
 
         if "prompt" in data:
             inputs["prompt"] = data["prompt"]
+        if "subtask" in data:
+            inputs["subtask"] = data["subtask"]
 
         return inputs
 
