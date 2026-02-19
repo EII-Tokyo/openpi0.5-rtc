@@ -66,20 +66,24 @@ def _build_prompt(cleaned_text: str, state: np.ndarray) -> str:
 
 
 def _episode_bounds(dataset, episode_index: int) -> tuple[int, int]:
-    start = None
-    end = None
-    for i in range(len(dataset)):
-        ep = int(dataset[i]["episode_index"])
-        if ep == episode_index and start is None:
-            start = i
-        elif ep != episode_index and start is not None:
-            end = i
-            break
-    if start is None:
+    # Fast path: query raw Arrow metadata column directly, avoiding expensive
+    # sample decoding (images/video) in dataset[i].
+    ep_col = dataset.hf_dataset.data.column("episode_index").combine_chunks()
+    ep_arr = ep_col.to_numpy(zero_copy_only=False)
+
+    # Most LeRobot datasets are sorted by episode_index; use binary search.
+    if ep_arr.size > 1 and np.all(ep_arr[1:] >= ep_arr[:-1]):
+        start = int(np.searchsorted(ep_arr, episode_index, side="left"))
+        end = int(np.searchsorted(ep_arr, episode_index, side="right"))
+        if start == end:
+            raise ValueError(f"episode_index={episode_index} not found")
+        return start, end
+
+    # Fallback for non-monotonic metadata.
+    match = np.flatnonzero(ep_arr == episode_index)
+    if match.size == 0:
         raise ValueError(f"episode_index={episode_index} not found")
-    if end is None:
-        end = len(dataset)
-    return start, end
+    return int(match[0]), int(match[-1] + 1)
 
 
 def main() -> None:
@@ -90,19 +94,18 @@ def main() -> None:
     parser.add_argument("--prompt", type=str, default="", help="If empty, use task text from dataset.")
     parser.add_argument("--config", type=str, default="pi05_aloha")
     parser.add_argument("--checkpoint", type=str, default="gs://openpi-assets/checkpoints/pi05_base")
-    parser.add_argument("--decode-every", type=int, default=100)
-    parser.add_argument("--max-new-tokens", type=int, default=16)
+    parser.add_argument("--decode-every", type=int, default=50)
     parser.add_argument("--temperature", type=float, default=0.0)
     parser.add_argument("--max-text-token-id", type=int, default=240000)
     parser.add_argument("--disable-max-text-token-id", action="store_true")
     parser.add_argument(
         "--debug-top-logits",
         action=argparse.BooleanOptionalAction,
-        default=True,
+        default=False,
         help="Print per-step top1/top2 logits and their gap during subtask decoding.",
     )
     parser.add_argument("--frame-limit", type=int, default=0, help="0 means full episode")
-    parser.add_argument("--fps", type=float, default=20.0)
+    parser.add_argument("--fps", type=float, default=50.0)
     args = parser.parse_args()
 
     ds = lerobot_dataset.LeRobotDataset(args.repo_id)
@@ -131,19 +134,19 @@ def main() -> None:
     total = end - start
     for idx, i in enumerate(range(start, end)):
         item = ds[i]
-        images = {
-            "cam_high": _to_uint8_hwc(item["observation.images.cam_high"]),
-            "cam_left_wrist": _to_uint8_hwc(item["observation.images.cam_left_wrist"]),
-            "cam_right_wrist": _to_uint8_hwc(item["observation.images.cam_right_wrist"]),
-        }
-        state = np.asarray(item["observation.state"], dtype=np.float32)
+        cam_high = _to_uint8_hwc(item["observation.images.cam_high"])
 
         if idx % args.decode_every == 0 or not current_subtask:
+            images = {
+                "cam_high": cam_high,
+                "cam_left_wrist": _to_uint8_hwc(item["observation.images.cam_left_wrist"]),
+                "cam_right_wrist": _to_uint8_hwc(item["observation.images.cam_right_wrist"]),
+            }
+            state = np.asarray(item["observation.state"], dtype=np.float32)
             full_prompt = _build_prompt(cleaned_text, state)
             current_prompt_for_overlay = full_prompt
             obs = {"state": state, "images": images, "prompt": cleaned_text}
             infer_kwargs = {
-                "max_new_tokens": args.max_new_tokens,
                 "temperature": args.temperature,
                 "debug_top_logits": args.debug_top_logits,
             }
@@ -155,7 +158,7 @@ def main() -> None:
             print(f"Time taken to infer subtask: {end_time - start_time} seconds", flush=True)
             current_subtask = str(out["subtask_text"]).strip()
 
-        writer.write(_draw_overlay(images["cam_high"], current_subtask, idx, current_prompt_for_overlay))
+        writer.write(_draw_overlay(cam_high, current_subtask, idx, current_prompt_for_overlay))
         if (idx + 1) % 20 == 0 or idx + 1 == total:
             print(f"[{idx + 1}/{total}] subtask={current_subtask}", flush=True)
 
