@@ -12,9 +12,17 @@ import openpi.shared.download as download
 
 
 class PaligemmaTokenizer:
-    def __init__(self, max_len: int = 48, subtask_max_len: int | None = None):
+    def __init__(
+        self,
+        max_len: int = 48,
+        subtask_max_len: int | None = None,
+        fast_tokenizer_path: str = "physical-intelligence/fast",
+    ):
         self._max_len = max_len
         self._subtask_max_len = subtask_max_len if subtask_max_len is not None else max_len
+        self._fast_tokenizer_path = fast_tokenizer_path
+        self._fast_tokenizer = None
+        self._fast_skip_tokens = 128
 
         path = download.maybe_download("gs://big_vision/paligemma_tokenizer.model", gs={"token": "anon"})
         with path.open("rb") as f:
@@ -45,9 +53,10 @@ class PaligemmaTokenizer:
         prompt: str,
         state: np.ndarray | None = None,
         subtask: str | None = None,
+        actions: np.ndarray | None = None,
         *,
         for_subtask_generation: bool = False,
-    ) -> tuple[np.ndarray, np.ndarray] | tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    ) -> tuple[np.ndarray, np.ndarray] | tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         cleaned_text = prompt.strip().replace("_", " ").replace("\n", " ")
         if state is None:
             # This is the Pi0 format, where the state is part of the continuous action expert input.
@@ -73,23 +82,37 @@ class PaligemmaTokenizer:
 
         prompt_prefix = f"Task: {cleaned_text}, State: {state_str}, Subtask: "
         prompt_tokens = self._tokenizer.encode(prompt_prefix, add_bos=True)
-        prompt_tokens, prompt_mask = self._pad_tokens(prompt_tokens, self._max_len)
+        prompt_tokens, prompt_mask = self._pad_tokens(prompt_tokens, self._max_len, left_pad=True)
 
         if subtask is None:
             subtask_tokens = np.zeros((self._subtask_max_len,), dtype=np.int32)
             subtask_mask = np.zeros((self._subtask_max_len,), dtype=bool)
             loss_mask = np.zeros((self._subtask_max_len,), dtype=bool)
-            return prompt_tokens, prompt_mask, subtask_tokens, subtask_mask, loss_mask
+            fast_mask = np.zeros((self._subtask_max_len,), dtype=bool)
+            return prompt_tokens, prompt_mask, subtask_tokens, subtask_mask, loss_mask, fast_mask
 
         cleaned_subtask = subtask.strip().replace("_", " ").replace("\n", " ")
         action_suffix = " Action: "
         subtask_only_tokens = self._tokenizer.encode(cleaned_subtask, add_bos=False)
+        fast_action_tokens: list[int] = []
+        if actions is not None:
+            actions_np = np.asarray(actions)
+            if actions_np.ndim == 2:
+                fast_action_tokens_raw = self._get_fast_tokenizer()(actions_np[None])[0]
+                fast_action_tokens = self._act_tokens_to_paligemma_tokens(fast_action_tokens_raw).tolist()
         eos_token = [self.eos_token_id]
         action_suffix_tokens = self._tokenizer.encode(action_suffix, add_bos=False)
-        full_subtask_tokens = subtask_only_tokens + eos_token + action_suffix_tokens
+        full_subtask_tokens = subtask_only_tokens + eos_token + action_suffix_tokens + fast_action_tokens
         subtask_tokens, subtask_mask = self._pad_tokens(full_subtask_tokens, self._subtask_max_len)
-        # Compute AR loss on subtask text and EOS token only. Exclude the Action suffix.
-        loss_mask = np.asarray([True] * (len(subtask_only_tokens) + 1) + [False] * len(action_suffix_tokens))
+        # Compute AR loss on subtask text + EOS + fast action tokens. Exclude "Action:" suffix text itself.
+        loss_mask = np.asarray(
+            [True] * (len(subtask_only_tokens) + 1)
+            + [False] * len(action_suffix_tokens)
+            + [True] * len(fast_action_tokens)
+        )
+        fast_mask = np.asarray(
+            [False] * (len(subtask_only_tokens) + 1 + len(action_suffix_tokens)) + [True] * len(fast_action_tokens)
+        )
         if loss_mask.shape[0] < self._subtask_max_len:
             loss_mask = np.concatenate(
                 [loss_mask, np.zeros((self._subtask_max_len - loss_mask.shape[0],), dtype=bool)],
@@ -97,8 +120,15 @@ class PaligemmaTokenizer:
             )
         else:
             loss_mask = loss_mask[: self._subtask_max_len]
+        if fast_mask.shape[0] < self._subtask_max_len:
+            fast_mask = np.concatenate(
+                [fast_mask, np.zeros((self._subtask_max_len - fast_mask.shape[0],), dtype=bool)],
+                axis=0,
+            )
+        else:
+            fast_mask = fast_mask[: self._subtask_max_len]
 
-        return prompt_tokens, prompt_mask, subtask_tokens, subtask_mask, loss_mask
+        return prompt_tokens, prompt_mask, subtask_tokens, subtask_mask, loss_mask, fast_mask
 
     @property
     def eos_token_id(self) -> int:
@@ -116,6 +146,16 @@ class PaligemmaTokenizer:
         if isinstance(tokens, np.ndarray):
             tokens = tokens.astype(np.int32).tolist()
         return self._tokenizer.decode(tokens)
+
+    def _get_fast_tokenizer(self):
+        if self._fast_tokenizer is None:
+            self._fast_tokenizer = AutoProcessor.from_pretrained(self._fast_tokenizer_path, trust_remote_code=True)
+        return self._fast_tokenizer
+
+    def _act_tokens_to_paligemma_tokens(self, tokens: np.ndarray | list[int]) -> np.ndarray:
+        if isinstance(tokens, list):
+            tokens = np.array(tokens)
+        return self._tokenizer.vocab_size() - 1 - self._fast_skip_tokens - tokens
 
 
 class FASTTokenizer:

@@ -69,6 +69,7 @@ IMAGE_RESOLUTION = (224, 224)
 #     "tokenized_subtask": int32[*b, l],  # Optional, tokenized AR subtask targets
 #     "tokenized_subtask_mask": bool[*b, l],  # Optional, mask for AR subtask targets
 #     "tokenized_subtask_loss_mask": bool[*b, l],  # Optional, AR loss mask for subtask targets
+#     "tokenized_subtask_fast_mask": bool[*b, l],  # Optional, FAST-action-token mask inside subtask stream
 #     "token_ar_mask": int32[*b, l],  # Optional, autoregressive mask for FAST model
 #     "token_loss_mask": bool[*b, l],  # Optional, loss mask for FAST model
 #
@@ -105,6 +106,7 @@ class Observation(Generic[ArrayT]):
     tokenized_subtask: at.Int[ArrayT, "*b ls"] | None = None
     tokenized_subtask_mask: at.Bool[ArrayT, "*b ls"] | None = None
     tokenized_subtask_loss_mask: at.Bool[ArrayT, "*b ls"] | None = None
+    tokenized_subtask_fast_mask: at.Bool[ArrayT, "*b ls"] | None = None
 
     # pi0-fast model specific fields.
 
@@ -123,6 +125,8 @@ class Observation(Generic[ArrayT]):
             raise ValueError("tokenized_subtask and tokenized_subtask_mask must be provided together.")
         if ("tokenized_subtask" in data) != ("tokenized_subtask_loss_mask" in data):
             raise ValueError("tokenized_subtask and tokenized_subtask_loss_mask must be provided together.")
+        if ("tokenized_subtask" in data) != ("tokenized_subtask_fast_mask" in data):
+            raise ValueError("tokenized_subtask and tokenized_subtask_fast_mask must be provided together.")
         # If images are uint8, convert them to [-1, 1] float32.
         for key in data["image"]:
             if data["image"][key].dtype == np.uint8:
@@ -138,6 +142,7 @@ class Observation(Generic[ArrayT]):
             tokenized_subtask=data.get("tokenized_subtask"),
             tokenized_subtask_mask=data.get("tokenized_subtask_mask"),
             tokenized_subtask_loss_mask=data.get("tokenized_subtask_loss_mask"),
+            tokenized_subtask_fast_mask=data.get("tokenized_subtask_fast_mask"),
             token_ar_mask=data.get("token_ar_mask"),
             token_loss_mask=data.get("token_loss_mask"),
         )
@@ -220,6 +225,7 @@ def preprocess_observation(
         tokenized_subtask=observation.tokenized_subtask,
         tokenized_subtask_mask=observation.tokenized_subtask_mask,
         tokenized_subtask_loss_mask=observation.tokenized_subtask_loss_mask,
+        tokenized_subtask_fast_mask=observation.tokenized_subtask_fast_mask,
         token_ar_mask=observation.token_ar_mask,
         token_loss_mask=observation.token_loss_mask,
     )

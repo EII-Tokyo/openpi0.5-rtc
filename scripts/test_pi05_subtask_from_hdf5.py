@@ -38,7 +38,6 @@ def main() -> None:
     parser.add_argument("--prompt", type=str, required=True)
     parser.add_argument("--config", type=str, default="pi05_aloha")
     parser.add_argument("--checkpoint", type=str, default="gs://openpi-assets/checkpoints/pi05_base")
-    parser.add_argument("--max-new-tokens", type=int, default=32)
     parser.add_argument("--temperature", type=float, default=0.0)
     parser.add_argument("--max-text-token-id", type=int, default=240000)
     args = parser.parse_args()
@@ -50,7 +49,6 @@ def main() -> None:
     )
     result = policy.infer_subtask(
         obs,
-        max_new_tokens=args.max_new_tokens,
         temperature=args.temperature,
         max_text_token_id=args.max_text_token_id,
     )

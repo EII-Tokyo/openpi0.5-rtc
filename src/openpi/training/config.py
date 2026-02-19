@@ -803,7 +803,7 @@ _CONFIGS = [
             pi05=True,
             paligemma_variant="gemma_2b_lora",
             action_expert_variant="gemma_300m_lora",
-            subtask_loss_weight=1.0,
+            subtask_loss_weight=0.1,
             subtask_max_token_len=64,
         ),
         lr_schedule=_optimizer.CosineDecaySchedule(

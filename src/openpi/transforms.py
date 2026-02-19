@@ -267,10 +267,12 @@ class TokenizePrompt(DataTransformFn):
         subtask = data.pop("subtask", None)
         if subtask is not None and not isinstance(subtask, str):
             subtask = subtask.item()
+        actions = data.get("actions", None)
         tokenized = self.tokenizer.tokenize(
             prompt,
             state,
             subtask,
+            actions=actions,
             for_subtask_generation=self.for_subtask_generation,
         )
         if len(tokenized) == 2:
@@ -287,8 +289,13 @@ class TokenizePrompt(DataTransformFn):
                 out["tokenized_subtask"] = np.zeros((subtask_max_len,), dtype=np.int32)
                 out["tokenized_subtask_mask"] = np.zeros((subtask_max_len,), dtype=bool)
                 out["tokenized_subtask_loss_mask"] = np.zeros((subtask_max_len,), dtype=bool)
+                out["tokenized_subtask_fast_mask"] = np.zeros((subtask_max_len,), dtype=bool)
             return out
-        prompt_tokens, prompt_masks, subtask_tokens, subtask_masks, subtask_loss_masks = tokenized
+        if len(tokenized) == 5:
+            prompt_tokens, prompt_masks, subtask_tokens, subtask_masks, subtask_loss_masks = tokenized
+            subtask_fast_masks = np.zeros_like(subtask_masks, dtype=bool)
+        else:
+            prompt_tokens, prompt_masks, subtask_tokens, subtask_masks, subtask_loss_masks, subtask_fast_masks = tokenized
         return {
             **data,
             "tokenized_prompt": prompt_tokens,
@@ -296,6 +303,7 @@ class TokenizePrompt(DataTransformFn):
             "tokenized_subtask": subtask_tokens,
             "tokenized_subtask_mask": subtask_masks,
             "tokenized_subtask_loss_mask": subtask_loss_masks,
+            "tokenized_subtask_fast_mask": subtask_fast_masks,
         }
 
 

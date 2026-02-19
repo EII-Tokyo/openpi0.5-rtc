@@ -44,6 +44,16 @@ def make_attn_mask(input_mask, mask_ar):
     return jnp.logical_and(attn_mask, valid_mask)
 
 
+def apply_block_attention_mask(
+    attn_mask: at.Bool[at.Array, "b q k"],
+    query_block_mask: at.Bool[at.Array, "b q"],
+    key_block_mask: at.Bool[at.Array, "b k"],
+) -> at.Bool[at.Array, "b q k"]:
+    """Forbid attention edges where query_block_mask and key_block_mask are both true."""
+    blocked = jnp.logical_and(query_block_mask[:, :, None], key_block_mask[:, None, :])
+    return jnp.logical_and(attn_mask, jnp.logical_not(blocked))
+
+
 def put_along_last_axis(arr, indices, values):
     """Like np.put_along_axis(..., axis=-1), since jax is missing it."""
     assert arr.ndim == indices.ndim == values.ndim, (arr.ndim, indices.ndim, values.ndim)
@@ -201,6 +211,33 @@ class Pi0(_model.BaseModel):
         ar_mask = jnp.array(ar_mask)
         return tokens, input_mask, ar_mask, adarms_cond
 
+    def _prefix_fast_token_mask(
+        self, observation: _model.Observation, prefix_len: int
+    ) -> at.Bool[at.Array, "b p"]:
+        """Mask for FAST action tokens that live inside tokenized_subtask span within prefix."""
+        batch_size = observation.state.shape[0]
+        out = jnp.zeros((batch_size, prefix_len), dtype=jnp.bool_)
+        if (
+            observation.tokenized_subtask is None
+            or observation.tokenized_subtask_mask is None
+            or observation.tokenized_subtask_fast_mask is None
+        ):
+            return out
+
+        prompt_len = observation.tokenized_prompt.shape[1] if observation.tokenized_prompt is not None else 0
+        subtask_len = int(observation.tokenized_subtask.shape[1])
+        image_len = prefix_len - prompt_len - subtask_len
+        if image_len < 0:
+            return out
+
+        subtask_fast_mask = jnp.logical_and(
+            observation.tokenized_subtask_mask.astype(jnp.bool_),
+            observation.tokenized_subtask_fast_mask.astype(jnp.bool_),
+        )
+        subtask_start = image_len + prompt_len
+        out = out.at[:, subtask_start : subtask_start + subtask_len].set(subtask_fast_mask)
+        return out
+
     @override
     def compute_loss(
         self, rng: at.KeyArrayLike, observation: _model.Observation, actions: _model.Actions, *, train: bool = False
@@ -227,6 +264,14 @@ class Pi0(_model.BaseModel):
         input_mask = jnp.concatenate([prefix_mask, suffix_mask], axis=1)
         ar_mask = jnp.concatenate([prefix_ar_mask, suffix_ar_mask], axis=0)
         attn_mask = make_attn_mask(input_mask, ar_mask)
+        # Knowledge-insulation mask extension:
+        # forbid FAST language tokens <-> flow suffix tokens attention in both directions.
+        prefix_fast_mask = self._prefix_fast_token_mask(observation, prefix_mask.shape[1])
+        zeros_prefix = jnp.zeros_like(prefix_mask)
+        full_fast_mask = jnp.concatenate([prefix_fast_mask, jnp.zeros_like(suffix_mask)], axis=1)
+        full_flow_mask = jnp.concatenate([zeros_prefix, suffix_mask], axis=1)
+        attn_mask = apply_block_attention_mask(attn_mask, full_flow_mask, full_fast_mask)  # flow q -> fast k
+        attn_mask = apply_block_attention_mask(attn_mask, full_fast_mask, full_flow_mask)  # fast q -> flow k
         positions = jnp.cumsum(input_mask, axis=1) - 1
         (prefix_out, suffix_out), _ = self.PaliGemma.llm(
             [prefix_tokens, suffix_tokens], mask=attn_mask, positions=positions, adarms_cond=[None, adarms_cond]

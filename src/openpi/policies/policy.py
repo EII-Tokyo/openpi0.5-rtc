@@ -157,8 +157,6 @@ class Policy(BasePolicy):
         self,
         obs: dict,
         *,
-        max_new_tokens: int = 32,
-        max_decoding_steps: int | None = None,
         temperature: float = 0.0,
         max_text_token_id: int = 240000,
         debug_top_logits: bool = False,
