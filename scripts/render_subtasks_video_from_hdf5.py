@@ -24,7 +24,8 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 def _decode_jpeg_bytes(buf: np.ndarray) -> np.ndarray:
     img = Image.open(io.BytesIO(np.asarray(buf, dtype=np.uint8).tobytes())).convert("RGB")
-    return np.asarray(img, dtype=np.uint8)
+    # cv2.imwrite("test.jpg", np.asarray(img, dtype=np.uint8))
+    return cv2.cvtColor(np.asarray(img, dtype=np.uint8), cv2.COLOR_BGR2RGB)
 
 
 def _wrap_text(text: str, max_chars_per_line: int = 42) -> list[str]:

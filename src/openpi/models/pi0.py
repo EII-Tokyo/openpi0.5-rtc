@@ -272,7 +272,12 @@ class Pi0(_model.BaseModel):
         full_flow_mask = jnp.concatenate([zeros_prefix, suffix_mask], axis=1)
         attn_mask = apply_block_attention_mask(attn_mask, full_flow_mask, full_fast_mask)  # flow q -> fast k
         attn_mask = apply_block_attention_mask(attn_mask, full_fast_mask, full_flow_mask)  # fast q -> flow k
-        positions = jnp.cumsum(input_mask, axis=1) - 1
+        # Block-aware positions:
+        # suffix(flow) positions should not be shifted by prefix FAST token count.
+        prefix_positions = jnp.cumsum(prefix_mask, axis=1) - 1
+        prefix_nonfast_mask = jnp.logical_and(prefix_mask, jnp.logical_not(prefix_fast_mask))
+        suffix_positions = jnp.sum(prefix_nonfast_mask, axis=1, keepdims=True) + jnp.cumsum(suffix_mask, axis=1) - 1
+        positions = jnp.concatenate([prefix_positions, suffix_positions], axis=1)
         (prefix_out, suffix_out), _ = self.PaliGemma.llm(
             [prefix_tokens, suffix_tokens], mask=attn_mask, positions=positions, adarms_cond=[None, adarms_cond]
         )
@@ -388,6 +393,7 @@ class Pi0(_model.BaseModel):
     ) -> at.Int[at.Array, "b _t"]:
         """Autoregressively decode language tokens from image+prompt prefix."""
         observation = _model.preprocess_observation(None, observation, train=False)
+
         if observation.tokenized_prompt is None or observation.tokenized_prompt_mask is None:
             raise ValueError("tokenized_prompt and tokenized_prompt_mask are required for subtask decoding.")
         if observation.tokenized_subtask is None:
