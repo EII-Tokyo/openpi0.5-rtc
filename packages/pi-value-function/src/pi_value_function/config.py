@@ -28,6 +28,7 @@ class PiValueConfig(BaseValueModelConfig):
     gemma_variant: str = "gemma-3-270m"
     siglip_variant: str = "siglip2-so400m-patch16-384"
     value_head_layers: int = 2  # 1 = single Linear (old), 2 = Linear+GELU+Linear (new)
+    max_token_len: int = 48
     
     def model_type(self) -> str:
         # return ValueModelType.SHARED_BACKBONE
@@ -40,7 +41,7 @@ class PiValueConfig(BaseValueModelConfig):
     
     def inputs_spec(self, *, batch_size: int = 1) -> Observation:
         image_spec = jax.ShapeDtypeStruct([batch_size, *_model.IMAGE_RESOLUTION, 3], jnp.float32)
-        image_mask_spec = jax.ShapeDtypeStruct([batch_size], jnp.bool_) #TODO: Do i need image masking?
+        image_mask_spec = jax.ShapeDtypeStruct([batch_size], jnp.bool_)
         with at.disable_typechecking():
             observation_spec = _model.Observation(
                 images={
@@ -54,7 +55,7 @@ class PiValueConfig(BaseValueModelConfig):
                     "right_wrist_0_rgb": image_mask_spec,
                 },
                 state=jax.ShapeDtypeStruct([batch_size, 32], jnp.float32),
-                tokenized_prompt=jax.ShapeDtypeStruct([batch_size, 48], jnp.int32),
-                tokenized_prompt_mask=jax.ShapeDtypeStruct([batch_size, 48], bool),
+                tokenized_prompt=jax.ShapeDtypeStruct([batch_size, self.max_token_len], jnp.int32),
+                tokenized_prompt_mask=jax.ShapeDtypeStruct([batch_size, self.max_token_len], bool),
             )
         return observation_spec

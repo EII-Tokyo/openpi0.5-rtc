@@ -438,7 +438,7 @@ def train(config: TrainConfig) -> None:
 
     # Create tokenizer
     print("\n=== Creating tokenizer ===")
-    tokenizer = Gemma3Tokenizer(max_len=48, path=tokenizer_path)
+    tokenizer = Gemma3Tokenizer(max_len=config.model_config.max_token_len, path=tokenizer_path)
     print("✓ Tokenizer created")
 
     # Create data loaders

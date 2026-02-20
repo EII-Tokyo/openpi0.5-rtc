@@ -124,7 +124,7 @@ class BaseValueModel(nnx.Module, abc.ABC):
         """
         logits = self.forward(rng, observation, train=False)
         probs = jax.nn.softmax(logits, axis=-1)
-        value_support = jnp.linspace(self.value_min, self.value_max, self.value_dims)
+        value_support = self.value_support()
         expected_value = jnp.sum(probs * value_support, axis=-1)
         return expected_value
 

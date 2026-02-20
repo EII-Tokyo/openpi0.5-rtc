@@ -127,7 +127,7 @@ def main():
     # We need the tokenizer model file. 
     # download_gemma_from_kaggle ensures it's in cache and returns path.
     _, tokenizer_path = download_gemma_from_kaggle()
-    tokenizer = Gemma3Tokenizer(path=tokenizer_path, max_len=48)
+    tokenizer = Gemma3Tokenizer(path=tokenizer_path, max_len=config.max_token_len)
     print("Tokenizer initialized.")
 
     # 5. Create Policy

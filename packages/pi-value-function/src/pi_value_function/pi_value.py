@@ -195,7 +195,7 @@ class PiValue(BaseValueModel):
             Logits over value bins, shape (batch, value_dims)
         """
         # Get observation embeddings (includes EOS token at the end)
-        tokens, input_mask, ar_mask = self.embed_prefix(observation)
+        tokens, input_mask, _ = self.embed_prefix(observation)
 
         # Build full attention mask (bidirectional for value estimation)
         # Shape: (batch, seq_len, seq_len)

@@ -144,19 +144,27 @@ class ValuePolicy(base_policy.BasePolicy):
              state = jnp.concatenate([jp, gp], axis=-1)
         else:
             # Create dummy state if missing, though unlikely for real bot
-            state = jnp.zeros((1, 8)) # Assuming 7 DoF + gripper ? Or just use dummy size
+            state = jnp.zeros((1, 8))
+            # tell the user that state is missing
+            print("Warning: No state information in observation.")
 
         # 3. Prompt
         prompt = obs.get("prompt", "")
         if isinstance(prompt, list):
             prompt = prompt[0] # Take first if list
             
-        tokenized_prompt_ids, tokenized_prompt_mask = self._tokenizer.tokenize(prompt)
+        # Match training tokenization behavior (automatic <img> prefix when missing).
+        tokenized_prompt_ids, tokenized_prompt_mask = self._tokenizer.tokenize(
+            prompt,
+            include_image_tag=True,
+        )
         
         # Add batch dim
         tokenized_prompt_ids = jnp.array(tokenized_prompt_ids[None, ...])
         tokenized_prompt_mask = jnp.array(tokenized_prompt_mask[None, ...])
-
+        
+        # TODO: experiment robot velocity appended as state
+        
         # 4. Create Observation
         observation = _model.Observation(
             images=images,
