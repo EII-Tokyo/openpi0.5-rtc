@@ -1,8 +1,20 @@
-# 采集数据的时候
+# Gripper Data Flow (ALOHA)
 
-state是如何获取的？
+## Key Ranges (Critical)
 
-aloha-2.0/aloha/real_env.py第144行 
+| Component | Open | Close | Location |
+|---|---:|---:|---|
+| `FOLLOWER_GRIPPER_JOINT_*` | `1.6214` | `0.6197` | `aloha-2.0/aloha/real_env.py` |
+| `LEADER_GRIPPER_JOINT_*` | `0.8298` | `-0.0552` | `aloha-2.0/aloha/real_env.py` |
+
+Notes:
+- `get_gripper_position()` here is joint angle, not linear position.
+- These ranges directly affect normalization consistency across collection/training/inference.
+
+## 1) Data Collection
+
+### State source
+File: `aloha-2.0/aloha/real_env.py`
 
 ```python
 gripper_qpos = [FOLLOWER_GRIPPER_JOINT_NORMALIZE_FN(
@@ -10,11 +22,9 @@ gripper_qpos = [FOLLOWER_GRIPPER_JOINT_NORMALIZE_FN(
 FOLLOWER_GRIPPER_JOINT_OPEN = 1.6214
 FOLLOWER_GRIPPER_JOINT_CLOSE = 0.6197
 ```
-需要注意的是这里的get_gripper_position返回的是关节角度不是位置，这个函数有bug。
 
-action是如何获取的？
-
-aloha-2.0/aloha/real_env.py第333行 
+### Action source
+File: `aloha-2.0/aloha/real_env.py`
 
 ```python
 action[index+num_arm_joints] = LEADER_GRIPPER_JOINT_NORMALIZE_FN(
@@ -23,11 +33,10 @@ LEADER_GRIPPER_JOINT_OPEN = 0.8298
 LEADER_GRIPPER_JOINT_CLOSE = -0.0552
 ```
 
-# 训练的时候
+## 2) Training-Time Transform
 
-state会进行什么处理？
-
-openpi0.5-rtc/src/openpi/policies/aloha_policy.py第185行 
+### State transform
+File: `openpi0.5-rtc/src/openpi/policies/aloha_policy.py`
 
 ```python
 def _decode_state(state: np.ndarray, *, adapt_to_pi: bool = False) -> np.ndarray:
@@ -39,9 +48,8 @@ def _decode_state(state: np.ndarray, *, adapt_to_pi: bool = False) -> np.ndarray
     return state
 ```
 
-action会进行什么处理？
-
-openpi0.5-rtc/src/openpi/policies/aloha_policy.py第202行 
+### Action transform
+File: `openpi0.5-rtc/src/openpi/policies/aloha_policy.py`
 
 ```python
 def _encode_actions_inv(actions: np.ndarray, *, adapt_to_pi: bool = False) -> np.ndarray:
@@ -51,11 +59,10 @@ def _encode_actions_inv(actions: np.ndarray, *, adapt_to_pi: bool = False) -> np
     return actions
 ```
 
-# 推理的时候
+## 3) Inference-Time Flow
 
-state如何获得和会进行什么处理？
-
-openpi0.5-rtc/examples/aloha_real/real_env.py第68行 
+### State acquisition
+File: `openpi0.5-rtc/examples/aloha_real/real_env.py`
 
 ```python
 def get_qpos(self):
@@ -63,21 +70,17 @@ def get_qpos(self):
     right_qpos_raw = self.recorder_right.qpos
     left_arm_qpos = left_qpos_raw[:6]
     right_arm_qpos = right_qpos_raw[:6]
-    # print(left_qpos_raw[7], right_qpos_raw[7])
     left_gripper_qpos = [
         constants.PUPPET_GRIPPER_POSITION_NORMALIZE_FN(left_qpos_raw[6])
-        # constants.PUPPET_GRIPPER_POSITION_NORMALIZE_FN(left_qpos_raw[7])
     ]  # this is position not joint
     right_gripper_qpos = [
-        # constants.PUPPET_GRIPPER_POSITION_NORMALIZE_FN(right_qpos_raw[7])
         constants.PUPPET_GRIPPER_POSITION_NORMALIZE_FN(right_qpos_raw[6])
     ]  # this is position not joint
     return np.concatenate([left_arm_qpos, left_gripper_qpos, right_arm_qpos, right_gripper_qpos])
 ```
 
-模型生成的action会怎么处理
-
-openpi0.5-rtc/src/openpi/policies/aloha_policy.py第194行 
+### Model action decode
+File: `openpi0.5-rtc/src/openpi/policies/aloha_policy.py`
 
 ```python
 def _encode_actions(actions: np.ndarray, *, adapt_to_pi: bool = False) -> np.ndarray:
@@ -88,9 +91,8 @@ def _encode_actions(actions: np.ndarray, *, adapt_to_pi: bool = False) -> np.nda
     return actions
 ```
 
-然后发送给机器人之前还要
-
-openpi0.5-rtc/examples/aloha_real/real_env.py第103行 
+### Final command before publishing
+File: `openpi0.5-rtc/examples/aloha_real/real_env.py`
 
 ```python
 def set_gripper_pose(self, left_gripper_desired_pos_normalized, right_gripper_desired_pos_normalized):
