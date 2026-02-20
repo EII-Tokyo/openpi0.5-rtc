@@ -14,13 +14,13 @@ import openpi.training.optimizer as _optimizer
 
 # Task-specific value function training
 config = TrainConfig(
-    exp_name="battery_bank_in_box_task_value",
+    exp_name="qwen_value_lr_decay30k",
     model_config=PiValueConfig(
         value_dims=201,
         value_min=-1.0,
         value_max=0.0,
         backbone="qwen3vl",
-        hf_model_id="Qwen/Qwen3-VL-2B-Instruct",
+        hf_model_id="Qwen/Qwen3-VL-8B-Instruct",
         backbone_dtype="bfloat16",
         gemma_variant="gemma-3-270m",
         siglip_variant="siglip2-so400m-patch16-384",
@@ -28,15 +28,15 @@ config = TrainConfig(
     lr_schedule=_optimizer.CosineDecaySchedule(
         warmup_steps=1000,
         peak_lr=2e-3, # 100x because freeze
-        decay_steps=15_000,
-        decay_lr=1e-4,
+        decay_steps=30_000,
+        decay_lr=2e-4,
     ),
     optimizer=_optimizer.AdamW(
         weight_decay=0.01,
         clip_gradient_norm=1.0,
     ),
     num_train_steps=30_000,
-    batch_size=128,
+    batch_size=256, # is per processor,  effective batch size is 256 * num_gpus
     data=ValueDataConfig(
         # Load ALL success datasets
         success_repo_ids=[
@@ -60,7 +60,7 @@ config = TrainConfig(
         treat_other_tasks_as_failure=True,  # Treat all other tasks as failures!
 
         failure_cost_json="configs/failure_costs.json",
-        default_c_fail=2000.0,
+    default_c_fail=1000.0,
         success_sampling_ratio=0.5,
     ),
     checkpoint=CheckpointConfig(
@@ -74,7 +74,7 @@ config = TrainConfig(
         log_every_n_steps=50,
         wandb_enabled=True,
         wandb_project="pi-value-function",
-        wandb_run_name="battery_bank_in_box_task_v2_bs128_sharded_resumed",
+        wandb_run_name="qwen3vl_frozenbackbone_bb_in_box_bs256_lr2e-3_decay30k",
     ),
     num_workers=8,
     num_steps_per_validation=500,
