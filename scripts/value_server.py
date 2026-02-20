@@ -149,11 +149,13 @@ def _load_torch_policy(step_dir: pathlib.Path, return_distribution: bool) -> Val
             f"Torch checkpoint requires both metadata.pt and model.safetensors, missing in {step_dir}"
         )
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    runtime_device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # Load on CPU first to avoid peak VRAM spikes from loading HF weights + checkpoint tensors simultaneously.
+    load_device = torch.device("cpu")
     try:
-        metadata = torch.load(metadata_path, map_location=device, weights_only=False)
+        metadata = torch.load(metadata_path, map_location=load_device, weights_only=False)
     except TypeError:
-        metadata = torch.load(metadata_path, map_location=device)
+        metadata = torch.load(metadata_path, map_location=load_device)
 
     config = PiValueConfig(
         value_dims=int(metadata.get("value_dims", 201)),
@@ -165,14 +167,17 @@ def _load_torch_policy(step_dir: pathlib.Path, return_distribution: bool) -> Val
         value_head_layers=int(metadata.get("value_head_layers", 2)),
     )
 
-    model = PiValueQwen3VLTorch(config, device=device)
-    safetensors.torch.load_model(model, model_path, device=str(device))
+    model = PiValueQwen3VLTorch(config, device=load_device)
+    safetensors.torch.load_model(model, model_path, device=str(load_device))
+    if runtime_device.type == "cuda":
+        model.to(runtime_device)
+        model.device = runtime_device
     model.eval()
 
     return ValuePolicyTorch(
         model,
         return_distribution=return_distribution,
-        device=device,
+        device=runtime_device,
     )
 
 
