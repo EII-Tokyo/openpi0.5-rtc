@@ -113,12 +113,16 @@ class ModelTransformFactory(GroupFactory):
     def __call__(self, model_config: _model.BaseModelConfig) -> _transforms.Group:
         match model_config.model_type:
             case _model.ModelType.PI0:
+                assert isinstance(model_config, pi0_config.Pi0Config)
                 return _transforms.Group(
                     inputs=[
                         _transforms.InjectDefaultPrompt(self.default_prompt),
                         _transforms.ResizeImages(224, 224),
                         _transforms.TokenizePrompt(
-                            _tokenizer.PaligemmaTokenizer(model_config.max_token_len),
+                            _tokenizer.PaligemmaTokenizer(
+                                model_config.max_token_len,
+                                fast_tokenizer_path=model_config.fast_tokenizer_path,
+                            ),
                         ),
                         _transforms.PadStatesAndActions(model_config.action_dim),
                     ],
@@ -128,6 +132,7 @@ class ModelTransformFactory(GroupFactory):
                 tokenizer = _tokenizer.PaligemmaTokenizer(
                     model_config.max_token_len,
                     subtask_max_len=model_config.subtask_max_token_len,
+                    fast_tokenizer_path=model_config.fast_tokenizer_path,
                 )
                 discrete_state_input = model_config.discrete_state_input
                 transforms = [
@@ -803,8 +808,11 @@ _CONFIGS = [
             pi05=True,
             paligemma_variant="gemma_2b_lora",
             action_expert_variant="gemma_300m_lora",
+            max_token_len=100,
             subtask_loss_weight=0.1,
-            subtask_max_token_len=64,
+            subtask_max_token_len=150,
+            # fast_tokenizer_path="physical-intelligence/fast",
+            fast_tokenizer_path="lyl472324464/fast",
         ),
         lr_schedule=_optimizer.CosineDecaySchedule(
             warmup_steps=10_000,

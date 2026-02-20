@@ -35,6 +35,8 @@ class Pi0Config(_model.BaseModelConfig):
     subtask_loss_weight: float = 0.0
     # Max sequence length for tokenized subtask targets.
     subtask_max_token_len: int = 64
+    # FAST tokenizer path used when subtask tokenization appends FAST action tokens.
+    fast_tokenizer_path: str = "physical-intelligence/fast"
 
     def __post_init__(self):
         if self.max_token_len is None:

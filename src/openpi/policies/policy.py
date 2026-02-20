@@ -64,11 +64,13 @@ class Policy(BasePolicy):
         self._metadata = metadata or {}
         self._is_pytorch_model = is_pytorch
         self._pytorch_device = pytorch_device
-        self._tokenizer = _tokenizer.PaligemmaTokenizer(getattr(model, "max_token_len", 200))
+        self._tokenizer = None
         for transform in self._input_transforms_raw:
             if isinstance(transform, _transforms.TokenizePrompt):
                 self._tokenizer = transform.tokenizer
                 break
+        if self._tokenizer is None:
+            raise ValueError("Policy requires a TokenizePrompt transform with a configured tokenizer.")
 
         if self._is_pytorch_model:
             self._model = self._model.to(pytorch_device)
