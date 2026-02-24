@@ -219,6 +219,19 @@ def _l2_param_norm(state: nnx.State) -> float:
     return float(jax.device_get(jnp.sqrt(total_sq)))
 
 
+def _mean_abs_param(state: nnx.State) -> float:
+    """Compute mean absolute parameter value over a state subtree."""
+    total_abs = jnp.array(0.0, dtype=jnp.float32)
+    total_count = jnp.array(0.0, dtype=jnp.float32)
+    for x in jax.tree_util.tree_leaves(state):
+        if hasattr(x, "shape"):
+            x_f32 = jnp.asarray(x, dtype=jnp.float32)
+            total_abs = total_abs + jnp.sum(jnp.abs(x_f32))
+            total_count = total_count + jnp.asarray(x_f32.size, dtype=jnp.float32)
+    mean_abs = jnp.where(total_count > 0, total_abs / total_count, 0.0)
+    return float(jax.device_get(mean_abs))
+
+
 def create_jitted_train_step(mesh: jax.sharding.Mesh | None, model, optimizer, trainable_filter):
     """Create a JIT-compiled train step with proper sharding for multi-GPU.
 
@@ -722,16 +735,20 @@ def train(config: TrainConfig) -> None:
             value_head = model.value_mlp if model.value_mlp is not None else model.value_proj
             value_head_state = nnx.state(value_head, nnx.Param)
             value_head_param_norm = _l2_param_norm(value_head_state)
+            value_head_param_abs_mean = _mean_abs_param(value_head_state)
             metrics_host["value_head_param_norm"] = value_head_param_norm
+            metrics_host["value_head_param_abs_mean"] = value_head_param_abs_mean
 
             # Update progress bar with metrics
             loss_value = float(metrics_host["loss"])
             grad_norm_value = float(metrics_host.get("grad_norm", 0.0))
             value_head_norm_value = float(metrics_host.get("value_head_param_norm", 0.0))
+            value_head_abs_mean_value = float(metrics_host.get("value_head_param_abs_mean", 0.0))
             pbar.set_postfix({
                 "loss": f"{loss_value:.4f}",
                 "gn": f"{grad_norm_value:.2f}",
                 "vhn": f"{value_head_norm_value:.2f}",
+                "vham": f"{value_head_abs_mean_value:.4f}",
             })
 
             # Log to W&B
