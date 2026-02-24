@@ -154,6 +154,7 @@ def _train_step_impl(
     rng: jax.Array,
     observation: Observation,
     returns: jax.Array,
+    trainable_filter: nnx.filterlib.Filter,
 ) -> tuple[PiValue, nnx.Optimizer, dict[str, jax.Array]]:
     """Single training step with gradient update (pure implementation).
 
@@ -167,7 +168,10 @@ def _train_step_impl(
         return jnp.mean(losses)
 
     # Compute loss and gradients
-    loss, grads = nnx.value_and_grad(loss_fn)(model)
+    loss, grads = nnx.value_and_grad(
+        loss_fn,
+        argnums=nnx.DiffState(0, trainable_filter),
+    )(model)
 
     # Compute gradient norm before update
     grad_leaves = jax.tree_util.tree_leaves(grads)
@@ -205,7 +209,17 @@ def _validate_step_impl(
     return metrics
 
 
-def create_jitted_train_step(mesh: jax.sharding.Mesh | None, model, optimizer):
+def _l2_param_norm(state: nnx.State) -> float:
+    """Compute L2 norm over all parameter tensors in a state subtree."""
+    total_sq = jnp.array(0.0, dtype=jnp.float32)
+    for x in jax.tree_util.tree_leaves(state):
+        if hasattr(x, "shape"):
+            x_f32 = jnp.asarray(x, dtype=jnp.float32)
+            total_sq = total_sq + jnp.sum(x_f32 * x_f32)
+    return float(jax.device_get(jnp.sqrt(total_sq)))
+
+
+def create_jitted_train_step(mesh: jax.sharding.Mesh | None, model, optimizer, trainable_filter):
     """Create a JIT-compiled train step with proper sharding for multi-GPU.
 
     For single GPU: uses simple nnx.jit.
@@ -213,7 +227,7 @@ def create_jitted_train_step(mesh: jax.sharding.Mesh | None, model, optimizer):
     """
     if mesh is None or len(mesh.devices.flat) <= 1:
         # Single device - simple JIT
-        return nnx.jit(_train_step_impl)
+        return nnx.jit(functools.partial(_train_step_impl, trainable_filter=trainable_filter))
 
     # Multi-device: extract state, create shardings, JIT with explicit shardings
     replicated = jax.sharding.NamedSharding(mesh, jax.sharding.PartitionSpec())
@@ -232,7 +246,14 @@ def create_jitted_train_step(mesh: jax.sharding.Mesh | None, model, optimizer):
         model = nnx.merge(model_graphdef, model_state)
         optimizer = nnx.merge(opt_graphdef, opt_state)
 
-        model, optimizer, metrics = _train_step_impl(model, optimizer, rng, observation, returns)
+        model, optimizer, metrics = _train_step_impl(
+            model,
+            optimizer,
+            rng,
+            observation,
+            returns,
+            trainable_filter=trainable_filter,
+        )
 
         _, new_model_state = nnx.split(model)
         _, new_opt_state = nnx.split(optimizer)
@@ -361,57 +382,64 @@ def train(config: TrainConfig) -> None:
     print(f"    freeze_gemma={config.freeze_gemma}")
 
     # Initialize checkpoint manager
-    print("\n=== Setting up checkpointing ===")
-    ckpt_path = pathlib.Path(config.checkpoint.checkpoint_dir) / str(config.model_config.model_type()) / config.exp_name
-    checkpoint_mgr, resuming = ckpt_manager.initialize_checkpoint_manager(
-        ckpt_path,
-        max_to_keep=config.checkpoint.keep_n_checkpoints,
-        keep_period=config.checkpoint.keep_period,
-        overwrite=config.checkpoint.overwrite,
-        resume=config.checkpoint.resume,
-    )
-    print(f"✓ Checkpoint manager initialized: {ckpt_path}")
-
-    # Restore from checkpoint if requested.
-    # Two modes:
-    # 1) Full resume (model + optimizer + step): checkpoint.resume=True
-    # 2) Warm start (model only): checkpoint.resume_checkpoint_path is set and resume=False
+    checkpoint_mgr = None
+    resuming = False
     start_step = 0
-    if config.checkpoint.resume_checkpoint_path:
-        source_path = pathlib.Path(config.checkpoint.resume_checkpoint_path).expanduser().resolve()
-        source_mgr, source_resuming = ckpt_manager.initialize_checkpoint_manager(
-            source_path,
-            max_to_keep=None,
-            keep_period=None,
-            overwrite=False,
-            resume=True,
+    if config.disable_checkpointing:
+        print("\n=== Checkpointing disabled ===")
+        if config.checkpoint.resume or config.checkpoint.resume_checkpoint_path:
+            print("Warning: checkpoint resume settings are ignored because disable_checkpointing=True")
+    else:
+        print("\n=== Setting up checkpointing ===")
+        ckpt_path = pathlib.Path(config.checkpoint.checkpoint_dir) / str(config.model_config.model_type()) / config.exp_name
+        checkpoint_mgr, resuming = ckpt_manager.initialize_checkpoint_manager(
+            ckpt_path,
+            max_to_keep=config.checkpoint.keep_n_checkpoints,
+            keep_period=config.checkpoint.keep_period,
+            overwrite=config.checkpoint.overwrite,
+            resume=config.checkpoint.resume,
         )
-        if not source_resuming:
-            raise ValueError(f"No valid checkpoints found at resume_checkpoint_path={source_path}")
+        print(f"✓ Checkpoint manager initialized: {ckpt_path}")
 
-        print(f"\n=== Loading checkpoint from {source_path} ===")
-        restored_model, restored_optimizer, restored_step = ckpt_manager.restore_checkpoint(
-            source_mgr, model, optimizer
-        )
+        # Restore from checkpoint if requested.
+        # Two modes:
+        # 1) Full resume (model + optimizer + step): checkpoint.resume=True
+        # 2) Warm start (model only): checkpoint.resume_checkpoint_path is set and resume=False
+        if config.checkpoint.resume_checkpoint_path:
+            source_path = pathlib.Path(config.checkpoint.resume_checkpoint_path).expanduser().resolve()
+            source_mgr, source_resuming = ckpt_manager.initialize_checkpoint_manager(
+                source_path,
+                max_to_keep=None,
+                keep_period=None,
+                overwrite=False,
+                resume=True,
+            )
+            if not source_resuming:
+                raise ValueError(f"No valid checkpoints found at resume_checkpoint_path={source_path}")
 
-        # Full resume only when explicitly requested.
-        if config.checkpoint.resume:
-            model = restored_model
-            optimizer = restored_optimizer
-            start_step = restored_step
-            print(f"✓ Fully resumed model+optimizer from step {start_step}")
-        else:
-            model = restored_model
-            optimizer = nnx.Optimizer(model, tx, wrt=trainable_filter)
-            start_step = 0
-            print("✓ Warm-started model weights from checkpoint")
-            print("✓ Reinitialized optimizer for current trainable filter")
-    elif resuming:
-        print("\n=== Restoring from checkpoint ===")
-        model, optimizer, start_step = ckpt_manager.restore_checkpoint(
-            checkpoint_mgr, model, optimizer
-        )
-        print(f"✓ Resumed from step {start_step}")
+            print(f"\n=== Loading checkpoint from {source_path} ===")
+            restored_model, restored_optimizer, restored_step = ckpt_manager.restore_checkpoint(
+                source_mgr, model, optimizer
+            )
+
+            # Full resume only when explicitly requested.
+            if config.checkpoint.resume:
+                model = restored_model
+                optimizer = restored_optimizer
+                start_step = restored_step
+                print(f"✓ Fully resumed model+optimizer from step {start_step}")
+            else:
+                model = restored_model
+                optimizer = nnx.Optimizer(model, tx, wrt=trainable_filter)
+                start_step = 0
+                print("✓ Warm-started model weights from checkpoint")
+                print("✓ Reinitialized optimizer for current trainable filter")
+        elif resuming:
+            print("\n=== Restoring from checkpoint ===")
+            model, optimizer, start_step = ckpt_manager.restore_checkpoint(
+                checkpoint_mgr, model, optimizer
+            )
+            print(f"✓ Resumed from step {start_step}")
 
     # Set up data parallelism across all devices
     mesh = _create_data_parallel_mesh()
@@ -432,7 +460,12 @@ def train(config: TrainConfig) -> None:
         print(f"  ✓ Model and optimizer replicated")
 
     # Create JIT-compiled train/validate steps with proper sharding
-    train_step = create_jitted_train_step(mesh if num_devices > 1 else None, model, optimizer)
+    train_step = create_jitted_train_step(
+        mesh if num_devices > 1 else None,
+        model,
+        optimizer,
+        trainable_filter,
+    )
     validate_step = create_jitted_validate_step(mesh if num_devices > 1 else None, model)
     print(f"  ✓ JIT-compiled train/validate steps created ({'multi-device' if num_devices > 1 else 'single-device'})")
 
@@ -465,6 +498,10 @@ def train(config: TrainConfig) -> None:
             seed=config.seed,
             target_task=config.data.target_task,
             treat_other_tasks_as_failure=config.data.treat_other_tasks_as_failure,
+            keep_augmented_failure_prompt=config.data.keep_augmented_failure_prompt,
+            augmented_failure_max_prompt_similarity=config.data.augmented_failure_max_prompt_similarity,
+            augmented_failure_sampling_ratio=config.data.augmented_failure_sampling_ratio,
+            include_image_tag=config.data.include_image_tag,
         )
         print("✓ Training dataloader created")
 
@@ -490,6 +527,10 @@ def train(config: TrainConfig) -> None:
                 split_seed=config.data.split_seed,
                 target_task=config.data.target_task,
                 treat_other_tasks_as_failure=config.data.treat_other_tasks_as_failure,
+                keep_augmented_failure_prompt=config.data.keep_augmented_failure_prompt,
+                augmented_failure_max_prompt_similarity=config.data.augmented_failure_max_prompt_similarity,
+                augmented_failure_sampling_ratio=config.data.augmented_failure_sampling_ratio,
+                include_image_tag=config.data.include_image_tag,
             )
             print("✓ Validation dataloader created")
     else:
@@ -538,6 +579,12 @@ def train(config: TrainConfig) -> None:
     print(f"\n=== Starting training for {total_steps} steps ===")
     print(f"Batch size: {config.batch_size}" + (f" ({config.batch_size // num_devices} per device)" if num_devices > 1 else ""))
     print(f"Log interval: {config.logging.log_every_n_steps}")
+    if config.num_steps_per_validation > 0:
+        print(
+            "Validation: "
+            f"every {config.num_steps_per_validation} steps, "
+            f"avg over {config.num_validation_batches} batches"
+        )
     if resuming:
         print(f"Resuming from step: {start_step}")
 
@@ -580,17 +627,31 @@ def train(config: TrainConfig) -> None:
     data_iter = iter(dataloader)
     val_iter = iter(val_dataloader) if val_dataloader is not None else None
 
+    fixed_overfit_batch = None
+    if config.overfit_one_batch:
+        try:
+            fixed_overfit_batch = next(data_iter)
+        except IndexError as e:
+            raise RuntimeError(f"Failed to sample overfit batch: {e}") from e
+        print(
+            "Overfit mode enabled: reusing a single training batch for all steps "
+            f"(batch_size={config.batch_size})."
+        )
+
     # Create progress bar
     pbar = tqdm(range(start_step, total_steps), desc="Training", unit="step", initial=start_step, total=total_steps)
 
     for step in pbar:
         # Get batch (already has tokenized prompts from collate_fn)
-        try:
-            batch = next(data_iter)
-        except IndexError as e:
-            pbar.write(f"DataLoader IndexError at step {step}: {e}. Resetting data iterator and retrying...")
-            data_iter = iter(dataloader)
-            batch = next(data_iter)
+        if fixed_overfit_batch is not None:
+            batch = fixed_overfit_batch
+        else:
+            try:
+                batch = next(data_iter)
+            except IndexError as e:
+                pbar.write(f"DataLoader IndexError at step {step}: {e}. Resetting data iterator and retrying...")
+                data_iter = iter(dataloader)
+                batch = next(data_iter)
 
         # Convert to JAX arrays and shard across devices
         batch_jax = jax.tree.map(lambda x: jnp.array(x) if isinstance(x, np.ndarray) else x, batch)
@@ -611,42 +672,63 @@ def train(config: TrainConfig) -> None:
 
         # Validation
         if val_iter is not None and config.num_steps_per_validation != 0 and step % config.num_steps_per_validation == 0 and step != 0:
-            # Get validation batch
-            try:
-                val_batch = next(val_iter)
-            except StopIteration:
-                val_iter = iter(val_dataloader) if val_dataloader is not None else None
-                val_batch = next(val_iter)
+            val_losses = []
+            for val_i in range(config.num_validation_batches):
+                # Get validation batch
+                try:
+                    val_batch = next(val_iter)
+                except (StopIteration, IndexError):
+                    val_iter = iter(val_dataloader) if val_dataloader is not None else None
+                    val_batch = next(val_iter)
 
-            val_batch_jax = jax.tree.map(lambda x: jnp.array(x) if isinstance(x, np.ndarray) else x, val_batch)
-            if num_devices > 1:
-                val_batch_jax = _shard_batch(val_batch_jax, mesh)
-            val_observation = Observation.from_dict(val_batch_jax)
-            val_returns = val_batch_jax["returns"]
+                val_batch_jax = jax.tree.map(lambda x: jnp.array(x) if isinstance(x, np.ndarray) else x, val_batch)
+                if num_devices > 1:
+                    val_batch_jax = _shard_batch(val_batch_jax, mesh)
+                val_observation = Observation.from_dict(val_batch_jax)
+                val_returns = val_batch_jax["returns"]
 
-            # Run validation step
-            val_metrics = validate_step(model, step_rng, val_observation, val_returns)
+                # Use a distinct rng per validation mini-step.
+                val_rng = jax.random.fold_in(step_rng, val_i)
+                val_metrics = validate_step(model, val_rng, val_observation, val_returns)
+                val_metrics_host = jax.device_get(val_metrics)
+                val_losses.append(float(val_metrics_host["val_loss"]))
 
-            # Convert to host and log
-            val_metrics_host = jax.device_get(val_metrics)
-            val_loss_value = float(val_metrics_host["val_loss"])
-            pbar.write(f"  Validation at step {step}: val_loss={val_loss_value:.4f}")
+            val_loss_mean = float(np.mean(val_losses))
+            val_loss_std = float(np.std(val_losses))
+            pbar.write(
+                f"  Validation at step {step}: "
+                f"val_loss={val_loss_mean:.4f} "
+                f"(std={val_loss_std:.4f}, n={config.num_validation_batches})"
+            )
 
-            # Log to W&B
             if config.logging.wandb_enabled:
-                wandb.log(val_metrics_host, step=step)
+                wandb.log(
+                    {
+                        "val_loss": val_loss_mean,
+                        "val_loss_std": val_loss_std,
+                    },
+                    step=step,
+                )
 
         # Logging
         if step % config.logging.log_every_n_steps == 0:
             # Convert metrics to host
             metrics_host = jax.device_get(metrics)
 
+            # Log value-head parameter norm (L2 over all head params).
+            value_head = model.value_mlp if model.value_mlp is not None else model.value_proj
+            value_head_state = nnx.state(value_head, nnx.Param)
+            value_head_param_norm = _l2_param_norm(value_head_state)
+            metrics_host["value_head_param_norm"] = value_head_param_norm
+
             # Update progress bar with metrics
             loss_value = float(metrics_host["loss"])
             grad_norm_value = float(metrics_host.get("grad_norm", 0.0))
+            value_head_norm_value = float(metrics_host.get("value_head_param_norm", 0.0))
             pbar.set_postfix({
                 "loss": f"{loss_value:.4f}",
                 "gn": f"{grad_norm_value:.2f}",
+                "vhn": f"{value_head_norm_value:.2f}",
             })
 
             # Log to W&B
@@ -654,7 +736,7 @@ def train(config: TrainConfig) -> None:
                 wandb.log(metrics_host, step=step)
 
         # Save checkpoint
-        if step > 0 and step % config.checkpoint.save_every_n_steps == 0:
+        if checkpoint_mgr is not None and step > 0 and step % config.checkpoint.save_every_n_steps == 0:
             pbar.write(f"  Saving checkpoint at step {step}...")
             ckpt_manager.save_checkpoint(checkpoint_mgr, model, optimizer, step)
             pbar.write(f"  ✓ Checkpoint saved")
@@ -662,11 +744,14 @@ def train(config: TrainConfig) -> None:
     pbar.close()
 
     # Save final checkpoint
-    print(f"\nSaving final checkpoint at step {total_steps}...")
-    ckpt_manager.save_checkpoint(checkpoint_mgr, model, optimizer, total_steps)
-    # Wait for async checkpoint writes to complete before exiting
-    checkpoint_mgr.wait_until_finished()
-    print("✓ Final checkpoint saved")
+    if checkpoint_mgr is not None:
+        print(f"\nSaving final checkpoint at step {total_steps}...")
+        ckpt_manager.save_checkpoint(checkpoint_mgr, model, optimizer, total_steps)
+        # Wait for async checkpoint writes to complete before exiting
+        checkpoint_mgr.wait_until_finished()
+        print("✓ Final checkpoint saved")
+    else:
+        print("\nCheckpointing disabled: skipping final checkpoint save")
 
     print("\n=== Training complete! ===")
 

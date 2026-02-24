@@ -56,6 +56,20 @@ class ValueDataConfig:
     # If True with target_task, treat episodes with other tasks as failures
     treat_other_tasks_as_failure: bool = False
 
+    # If True, keep original prompts for augmented failures instead of replacing
+    # them with target_task. Useful for training across all prompts.
+    keep_augmented_failure_prompt: bool = False
+
+    # For augmented failures, skip candidates that contain the same target
+    # subgoal (object -> destination). If prompt parsing fails, fall back to
+    # lexical filtering using this threshold.
+    augmented_failure_max_prompt_similarity: float = 1.0
+
+    # Optional split inside the failure pool:
+    # fraction sampled from augmented failures (vs real failure repos).
+    # If None, sample proportionally from combined failure pool.
+    augmented_failure_sampling_ratio: float | None = None
+
     # Shuffle buffer size for data loading
     shuffle_buffer_size: int = 10_000
 
@@ -76,6 +90,10 @@ class ValueDataConfig:
 
     # Whether to use reward normalization
     normalize_rewards: bool = True
+
+    # Prompt tokenization behavior.
+    # If True, prepend Gemma image tag token(s) during tokenization.
+    include_image_tag: bool = False
 
 
 @dataclasses.dataclass(frozen=True)
@@ -209,6 +227,14 @@ class TrainConfig:
     # Number of steps between validations (if 0, validation is disabled)
     num_steps_per_validation: int = 0
 
+    # Number of validation batches to average at each validation step.
+    # Set >1 to reduce noise from single-batch estimates.
+    num_validation_batches: int = 1
+
+    # If True, repeatedly train on a single sampled training batch.
+    # Useful for quick optimization sanity checks (can the model memorize?).
+    overfit_one_batch: bool = False
+
     # =========================================================================
     # Data settings
     # =========================================================================
@@ -222,6 +248,9 @@ class TrainConfig:
 
     # Checkpoint configuration
     checkpoint: CheckpointConfig = dataclasses.field(default_factory=CheckpointConfig)
+
+    # If True, skip checkpoint manager init and all checkpoint saves/restores.
+    disable_checkpointing: bool = False
 
     # =========================================================================
     # Logging settings
@@ -323,8 +352,9 @@ class TrainConfig:
         Returns:
             Filter for trainable parameters.
         """
-        # If custom freeze filter is provided, use it
-        if self.freeze_filter is not nnx.Nothing():
+        # If custom freeze filter is provided, use it.
+        # Note: nnx.Nothing() instances are equal but not identical, so use !=.
+        if self.freeze_filter != nnx.Nothing():
             return nnx.All(nnx.Param, nnx.Not(self.freeze_filter))
 
         # Build freeze filter based on freeze settings
@@ -354,8 +384,8 @@ class TrainConfig:
         Raises:
             ValueError: If configuration is invalid.
         """
-        # Validate resume/overwrite
-        if self.checkpoint.resume and self.checkpoint.overwrite:
+        # Validate resume/overwrite when checkpointing is enabled.
+        if not self.disable_checkpointing and self.checkpoint.resume and self.checkpoint.overwrite:
             raise ValueError("Cannot set both resume=True and overwrite=True")
 
         # Validate splits
@@ -374,6 +404,10 @@ class TrainConfig:
         # Validate batch size
         if self.batch_size <= 0:
             raise ValueError(f"batch_size must be positive, got {self.batch_size}")
+
+        # Validate validation batch averaging
+        if self.num_validation_batches <= 0:
+            raise ValueError(f"num_validation_batches must be positive, got {self.num_validation_batches}")
 
         # Validate value loss weight
         if self.value_loss_weight <= 0:

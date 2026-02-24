@@ -13,6 +13,7 @@ from __future__ import annotations
 import dataclasses
 import json
 import pathlib
+import re
 from typing import Any
 
 import einops
@@ -22,6 +23,89 @@ import torch
 import torch.utils.data
 from lerobot.datasets import lerobot_dataset
 from lerobot.datasets.lerobot_dataset import LeRobotDatasetMetadata
+
+_TOKEN_SPLIT_RE = re.compile(r"[^a-z0-9]+")
+_PROMPT_STOPWORDS = {
+    "a",
+    "an",
+    "and",
+    "box",
+    "in",
+    "into",
+    "of",
+    "on",
+    "put",
+    "the",
+    "to",
+    "with",
+}
+
+
+def _normalize_prompt(prompt: str | None) -> str:
+    if prompt is None:
+        return ""
+    return prompt.lower().strip()
+
+
+def _prompt_content_tokens(prompt: str | None) -> set[str]:
+    normalized = _normalize_prompt(prompt)
+    if not normalized:
+        return set()
+    return {
+        token
+        for token in _TOKEN_SPLIT_RE.split(normalized)
+        if token and token not in _PROMPT_STOPWORDS
+    }
+
+
+def _prompt_similarity(prompt_a: str | None, prompt_b: str | None) -> float:
+    """Compute a lightweight lexical similarity in [0, 1].
+
+    Uses:
+    1) exact/substring match shortcut -> 1.0
+    2) Jaccard similarity on content tokens
+    """
+    a_norm = _normalize_prompt(prompt_a)
+    b_norm = _normalize_prompt(prompt_b)
+
+    if not a_norm or not b_norm:
+        return 0.0
+    if a_norm == b_norm or a_norm in b_norm or b_norm in a_norm:
+        return 1.0
+
+    a_tokens = _prompt_content_tokens(a_norm)
+    b_tokens = _prompt_content_tokens(b_norm)
+    if not a_tokens or not b_tokens:
+        return 0.0
+
+    union = a_tokens | b_tokens
+    if not union:
+        return 0.0
+    return len(a_tokens & b_tokens) / len(union)
+
+
+def _extract_goal_pairs(prompt: str | None) -> set[tuple[str, str]]:
+    """Extract `(object, destination)` goals from DROID-style task prompts.
+
+    Example:
+      "Put the battery bank in the orange box and the phone in the blue box"
+      -> {("battery bank", "orange box"), ("phone", "blue box")}
+    """
+    normalized = _normalize_prompt(prompt)
+    if not normalized.startswith("put the "):
+        return set()
+
+    goals: set[tuple[str, str]] = set()
+    remainder = normalized[len("put the "):]
+    for chunk in remainder.split(" and the "):
+        if " in the " not in chunk:
+            continue
+        obj, destination = chunk.split(" in the ", 1)
+        obj = obj.strip()
+        destination = destination.strip()
+        if obj and destination:
+            goals.add((obj, destination))
+    return goals
 
 
 def _parse_image(image: np.ndarray | Any) -> np.ndarray:
@@ -78,18 +162,21 @@ def compute_episode_splits(
     val_episodes = {}
 
     for repo_id in repo_ids:
-        # Load metadata to get total episodes
-        # Use default cache location
-        from pathlib import Path
         from lerobot.datasets.lerobot_dataset import HF_LEROBOT_HOME as LEROBOT_CACHE
 
-        meta = LeRobotDatasetMetadata(
-            repo_id,
-            root=LEROBOT_CACHE / repo_id,
-            revision=None,
-            force_cache_sync=False
-        )
-        total_episodes = meta.info['total_episodes']
+        # Fast path: read from cached info.json to avoid extra metadata init.
+        info_path = LEROBOT_CACHE / repo_id / "meta" / "info.json"
+        if info_path.exists():
+            with open(info_path) as f:
+                total_episodes = int(json.load(f)["total_episodes"])
+        else:
+            meta = LeRobotDatasetMetadata(
+                repo_id,
+                root=LEROBOT_CACHE / repo_id,
+                revision=None,
+                force_cache_sync=False,
+            )
+            total_episodes = int(meta.info["total_episodes"])
 
         # Shuffle episode indices
         all_episodes = np.arange(total_episodes)
@@ -317,6 +404,9 @@ class ValueFunctionDataset(torch.utils.data.Dataset):
         split_seed: int = 42,
         target_task: str | None = None,
         treat_other_tasks_as_failure: bool = False,
+        keep_augmented_failure_prompt: bool = False,
+        augmented_failure_max_prompt_similarity: float = 1.0,
+        augmented_failure_sampling_ratio: float | None = None,
     ):
         """Initialize value function dataset.
 
@@ -334,6 +424,12 @@ class ValueFunctionDataset(torch.utils.data.Dataset):
             split_seed: Random seed for deterministic episode shuffling
             target_task: If provided, only episodes with this task are treated as success
             treat_other_tasks_as_failure: If True with target_task, non-matching tasks become failures
+            keep_augmented_failure_prompt: If True, keep original prompts for augmented failures
+            augmented_failure_max_prompt_similarity: Exclude augmented failures with
+                similarity above this threshold to target_task
+            augmented_failure_sampling_ratio: Optional fraction of failure samples that
+                should come from augmented failures (vs real failures). If None, sample
+                from the merged failure pool proportionally to pool size.
         """
         # Validate inputs
         if not success_repo_ids and not failure_repo_ids:
@@ -345,9 +441,23 @@ class ValueFunctionDataset(torch.utils.data.Dataset):
         if split not in ("train", "val"):
             raise ValueError(f"split must be 'train' or 'val', got '{split}'")
 
+        if not 0.0 <= augmented_failure_max_prompt_similarity <= 1.0:
+            raise ValueError(
+                "augmented_failure_max_prompt_similarity must be in [0, 1], "
+                f"got {augmented_failure_max_prompt_similarity}"
+            )
+        if augmented_failure_sampling_ratio is not None and not 0.0 <= augmented_failure_sampling_ratio <= 1.0:
+            raise ValueError(
+                "augmented_failure_sampling_ratio must be in [0, 1] when provided, "
+                f"got {augmented_failure_sampling_ratio}"
+            )
+
         # Store task override config
         self.target_task = target_task
         self.treat_other_tasks_as_failure = treat_other_tasks_as_failure
+        self.keep_augmented_failure_prompt = keep_augmented_failure_prompt
+        self.augmented_failure_max_prompt_similarity = augmented_failure_max_prompt_similarity
+        self.augmented_failure_sampling_ratio = augmented_failure_sampling_ratio
 
         # Compute episode splits for train/val
         # Combine all repo IDs to compute splits consistently
@@ -377,6 +487,8 @@ class ValueFunctionDataset(torch.utils.data.Dataset):
         # Build episode indices
         self.success_episodes = self._build_episode_index(self.success_dataset, success=True) if self.success_dataset else []
         self.failure_episodes = self._build_episode_index(self.failure_dataset, success=False) if self.failure_dataset else []
+        self.real_failure_episodes = list(self.failure_episodes)
+        self.augmented_failure_episodes: list[EpisodeMetadata] = []
 
         # Task-based filtering: Move non-matching tasks to failures
         if target_task and treat_other_tasks_as_failure:
@@ -386,12 +498,32 @@ class ValueFunctionDataset(torch.utils.data.Dataset):
             # Filter success episodes - keep only matching task
             matching_episodes = []
             other_task_episodes = []
+            skipped_goal_overlap = 0
+            skipped_near_target = 0
+            target_goals = _extract_goal_pairs(target_task)
 
             for ep in self.success_episodes:
                 ep_task = (ep.prompt or "").lower().strip()
                 if ep_task == target_normalized:
                     matching_episodes.append(ep)
                 else:
+                    # Prefer goal-level filtering: if candidate includes any exact
+                    # target subgoal (object -> destination), do not use it as an
+                    # augmented failure. This keeps semantically distinct variants
+                    # such as "battery bank -> blue box".
+                    candidate_goals = _extract_goal_pairs(ep.prompt)
+                    if target_goals and candidate_goals:
+                        if target_goals & candidate_goals:
+                            skipped_goal_overlap += 1
+                            continue
+                    else:
+                        # Fallback for prompts that fail structured parsing.
+                        similarity = _prompt_similarity(target_task, ep.prompt)
+                        if similarity > self.augmented_failure_max_prompt_similarity:
+                            skipped_near_target += 1
+                            continue
+
+                    failure_prompt = ep.prompt if self.keep_augmented_failure_prompt else target_task
                     # Convert to failure episode
                     other_task_episodes.append(
                         EpisodeMetadata(
@@ -400,19 +532,31 @@ class ValueFunctionDataset(torch.utils.data.Dataset):
                             end_idx=ep.end_idx,
                             length=ep.length,
                             success=False,  # Now treated as failure
-                            prompt=target_task,  # Use target task prompt instead of original
+                            prompt=failure_prompt,
                             dataset=ep.dataset,  # Preserve dataset reference
                         )
                     )
 
             # Update episode lists
             self.success_episodes = matching_episodes
-            self.failure_episodes.extend(other_task_episodes)
+            self.augmented_failure_episodes = other_task_episodes
+            self.failure_episodes = self.real_failure_episodes + self.augmented_failure_episodes
 
             print(f"Task filtering: '{target_task}'")
             print(f"  Success episodes (matching task): {len(self.success_episodes)}")
-            print(f"  Failure episodes (other tasks + original failures): {len(self.failure_episodes)}")
-            print(f"  Moved {len(other_task_episodes)} non-matching episodes to failures")
+            print(f"  Real failure episodes: {len(self.real_failure_episodes)}")
+            print(f"  Augmented failure episodes: {len(self.augmented_failure_episodes)}")
+            if skipped_goal_overlap > 0:
+                print(
+                    "  Skipped goal-overlap episodes from augmentation: "
+                    f"{skipped_goal_overlap}"
+                )
+            if skipped_near_target > 0:
+                print(
+                    "  Skipped near-target episodes from augmentation (fallback lexical filter): "
+                    f"{skipped_near_target} (similarity > {self.augmented_failure_max_prompt_similarity:.2f})"
+                )
+            print(f"  Total failure episodes: {len(self.failure_episodes)}")
 
         # Validate episode indices
         if not self.success_episodes and success_repo_ids:
@@ -454,27 +598,64 @@ class ValueFunctionDataset(torch.utils.data.Dataset):
         episodes = []
 
         for ds in dataset._datasets:
-            ep_meta = ds.meta.episodes
+            requested_episodes = set(ds.episodes) if ds.episodes else None
 
-            # When loading a subset of episodes, hf_dataset is filtered but
-            # metadata still has original indices. Recompute start indices
-            # by accumulating episode lengths in the order they appear.
-            cumulative_idx = 0
-            for ep in ep_meta:
-                task = ep["tasks"][0] if ep["tasks"] else None
-                length = ep["length"]
-                episodes.append(EpisodeMetadata(
-                    episode_id=ep["episode_index"],
-                    start_idx=cumulative_idx,
-                    end_idx=cumulative_idx + length - 1,  # inclusive
-                    length=length,
-                    success=success,
-                    prompt=task,
-                    dataset=ds,  # Store reference to individual sub-dataset
-                ))
-                cumulative_idx += length
+            # Map episode id -> task string from metadata (for prompt labels).
+            task_by_episode: dict[int, str | None] = {}
+            for ep in ds.meta.episodes:
+                ep_id = int(ep["episode_index"])
+                task_by_episode[ep_id] = ep["tasks"][0] if ep["tasks"] else None
+
+            # Build episode ranges from the actual rows in hf_dataset so indices
+            # are always valid for ds[idx], regardless of split materialization.
+            row_episode_ids = [int(ep_id) for ep_id in ds.hf_dataset["episode_index"]]
+            first_idx: dict[int, int] = {}
+            last_idx: dict[int, int] = {}
+            counts: dict[int, int] = {}
+            episode_order: list[int] = []
+
+            for row_idx, ep_id in enumerate(row_episode_ids):
+                if ep_id not in first_idx:
+                    first_idx[ep_id] = row_idx
+                    episode_order.append(ep_id)
+                last_idx[ep_id] = row_idx
+                counts[ep_id] = counts.get(ep_id, 0) + 1
+
+            for ep_id in episode_order:
+                if requested_episodes is not None and ep_id not in requested_episodes:
+                    continue
+
+                start_idx = first_idx[ep_id]
+                end_idx = last_idx[ep_id]
+                length = counts[ep_id]
+                task = task_by_episode.get(ep_id)
+
+                episodes.append(
+                    EpisodeMetadata(
+                        episode_id=ep_id,
+                        start_idx=start_idx,
+                        end_idx=end_idx,  # inclusive
+                        length=length,
+                        success=success,
+                        prompt=task,
+                        dataset=ds,  # Store reference to individual sub-dataset
+                    )
+                )
 
         return episodes
+
+    def _choose_failure_pool(self) -> list[EpisodeMetadata]:
+        """Choose which failure pool to sample from."""
+        real_failures = getattr(self, "real_failure_episodes", self.failure_episodes)
+        augmented_failures = getattr(self, "augmented_failure_episodes", [])
+        augmented_ratio = getattr(self, "augmented_failure_sampling_ratio", None)
+
+        if real_failures and augmented_failures:
+            if augmented_ratio is None:
+                return self.failure_episodes
+            use_augmented = self.rng.random() < augmented_ratio
+            return augmented_failures if use_augmented else real_failures
+        return self.failure_episodes
 
     def _compute_normalization_stats(self) -> None:
         """Compute per-task normalization statistics from episode metadata.
@@ -494,7 +675,6 @@ class ValueFunctionDataset(torch.utils.data.Dataset):
         # Compute per-task normalization ranges
         self.task_normalization: dict[str | None, tuple[float, float]] = {}
 
-        print("\n=== Per-Task Normalization Statistics ===")
         for task_key, episodes in sorted(task_episodes.items(), key=lambda x: (x[0] is None, x[0])):
             # Get episode lengths for this task
             lengths = [ep.length for ep in episodes]
@@ -518,14 +698,6 @@ class ValueFunctionDataset(torch.utils.data.Dataset):
 
             self.task_normalization[task_key] = (raw_value_min, raw_value_max)
 
-            # Log task statistics
-            task_name = task_key if task_key else "<no task>"
-            print(f"  Task '{task_name}':")
-            print(f"    Episodes: {len(episodes)} ({sum(1 for e in episodes if e.success)} success, {len(failure_episodes)} failure)")
-            print(f"    Length (75th percentile): {typical_length}")
-            print(f"    C_fail: {c_fail:.1f}")
-            print(f"    Normalization range: [{raw_value_min:.1f}, {raw_value_max:.1f}]")
-
         # Compute global fallback for unseen tasks (use overall statistics)
         all_lengths = [ep.length for ep in self.success_episodes + self.failure_episodes]
         if all_lengths:
@@ -541,9 +713,6 @@ class ValueFunctionDataset(torch.utils.data.Dataset):
 
         self.global_raw_value_min = -(global_typical_length + global_c_fail)
         self.global_raw_value_max = 0.0
-
-        print(f"\n  Global fallback range: [{self.global_raw_value_min:.1f}, {self.global_raw_value_max:.1f}]")
-        print("=" * 50 + "\n")
 
     def __len__(self) -> int:
         """Return total number of timesteps across all episodes."""
@@ -569,7 +738,7 @@ class ValueFunctionDataset(torch.utils.data.Dataset):
         if is_success:
             episodes = self.success_episodes
         else:
-            episodes = self.failure_episodes
+            episodes = self._choose_failure_pool()
 
         # Sample random episode
         episode_meta = episodes[self.rng.randint(len(episodes))]
@@ -585,7 +754,8 @@ class ValueFunctionDataset(torch.utils.data.Dataset):
         parsed = parse_observation(sample)
 
         # Force all prompts to target task when configured
-        if self.target_task and self.treat_other_tasks_as_failure:
+        keep_augmented_prompt = getattr(self, "keep_augmented_failure_prompt", False)
+        if self.target_task and self.treat_other_tasks_as_failure and not keep_augmented_prompt:
             parsed["prompt"] = self.target_task
 
         # Get task-specific normalization range
@@ -623,9 +793,8 @@ def _worker_init_fn(worker_id: int) -> None:
     if worker_info is not None:
         dataset = worker_info.dataset
         if isinstance(dataset, ValueFunctionDataset):
-            # Generate worker-specific seed from base seed using hash
-            # This is similar to key splitting but stays in pure Python
-            worker_seed = hash((dataset.base_seed, worker_id)) % (2**32)
+            # Deterministic worker-specific seed (independent of PYTHONHASHSEED).
+            worker_seed = (dataset.base_seed * 1315423911 + worker_id * 2654435761) % (2**32)
             dataset.rng = np.random.RandomState(worker_seed)
 
 
@@ -639,13 +808,15 @@ class CollateFnWithTokenizer:
     picklable for PyTorch's multiprocessing DataLoader.
     """
 
-    def __init__(self, tokenizer):
+    def __init__(self, tokenizer, include_image_tag: bool = False):
         """Initialize collate function with tokenizer.
 
         Args:
             tokenizer: Tokenizer with a tokenize(prompt, state) method
+            include_image_tag: Whether to prepend image tag tokens in prompts
         """
         self.tokenizer = tokenizer
+        self.include_image_tag = include_image_tag
 
     def __call__(self, items: list[dict]) -> dict:
         """Collate batch items, tokenizing prompts individually."""
@@ -663,8 +834,10 @@ class CollateFnWithTokenizer:
             if not isinstance(prompt, str):
                 prompt = prompt.item()
 
-            # Tokenize with explicit <img> tag behavior to match serving.
-            tokens, mask = self.tokenizer.tokenize(prompt, include_image_tag=True)
+            tokens, mask = self.tokenizer.tokenize(
+                prompt,
+                include_image_tag=self.include_image_tag,
+            )
             tokenized_prompts.append(tokens)
             tokenized_prompt_masks.append(mask)
 
@@ -708,6 +881,10 @@ def create_value_dataloader(
     split_seed: int = 42,
     target_task: str | None = None,
     treat_other_tasks_as_failure: bool = False,
+    keep_augmented_failure_prompt: bool = False,
+    augmented_failure_max_prompt_similarity: float = 1.0,
+    augmented_failure_sampling_ratio: float | None = None,
+    include_image_tag: bool = False,
 ) -> torch.utils.data.DataLoader:
     """Create value function data loader.
 
@@ -730,6 +907,12 @@ def create_value_dataloader(
         split_seed: Random seed for deterministic episode shuffling
         target_task: If provided, only episodes with this task are treated as success
         treat_other_tasks_as_failure: If True with target_task, non-matching tasks become failures
+        keep_augmented_failure_prompt: If True, keep original prompts for augmented failures
+        augmented_failure_max_prompt_similarity: Exclude augmented failures with
+            similarity above this threshold to target_task
+        augmented_failure_sampling_ratio: Optional fraction of failure samples from
+            augmented failures (vs real failures)
+        include_image_tag: Whether to prepend image tag tokens in prompt tokenization
 
     Returns:
         DataLoader yielding batches of observations and value targets
@@ -749,6 +932,9 @@ def create_value_dataloader(
         split_seed=split_seed,
         target_task=target_task,
         treat_other_tasks_as_failure=treat_other_tasks_as_failure,
+        keep_augmented_failure_prompt=keep_augmented_failure_prompt,
+        augmented_failure_max_prompt_similarity=augmented_failure_max_prompt_similarity,
+        augmented_failure_sampling_ratio=augmented_failure_sampling_ratio,
     )
     print(f"Dataset created in {time.time() - start_time:.2f} seconds.")
     start_time = time.time()
@@ -767,7 +953,7 @@ def create_value_dataloader(
         batch_size=batch_size,
         sampler=sampler,
         num_workers=num_workers,
-        collate_fn=CollateFnWithTokenizer(tokenizer),
+        collate_fn=CollateFnWithTokenizer(tokenizer, include_image_tag=include_image_tag),
         persistent_workers=num_workers > 0,
         worker_init_fn=_worker_init_fn,
         prefetch_factor=4 if num_workers > 0 else None,

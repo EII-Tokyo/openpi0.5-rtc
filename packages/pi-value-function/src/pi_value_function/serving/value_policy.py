@@ -153,10 +153,10 @@ class ValuePolicy(base_policy.BasePolicy):
         if isinstance(prompt, list):
             prompt = prompt[0] # Take first if list
             
-        # Match training tokenization behavior (automatic <img> prefix when missing).
+        # Match training tokenization behavior (no automatic <img> prefix).
         tokenized_prompt_ids, tokenized_prompt_mask = self._tokenizer.tokenize(
             prompt,
-            include_image_tag=True,
+            include_image_tag=False,
         )
         
         # Add batch dim
