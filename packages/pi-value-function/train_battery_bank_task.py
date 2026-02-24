@@ -7,7 +7,7 @@ from pi_value_function.training.train_config import TrainConfig, ValueDataConfig
 from pi_value_function.config import PiValueConfig
 import openpi.training.optimizer as _optimizer
 
-RUN_NAME = "normal_target_unfreeze_sim0p45_bs16_lr1e4"
+RUN_NAME = "normal_target_unfreeze_sim0p45_bs16_lr1e4_velocity"
 
 # Multi-task value function training
 config = TrainConfig(
@@ -57,6 +57,7 @@ config = TrainConfig(
         treat_other_tasks_as_failure=True,
         augmented_failure_max_prompt_similarity=0.45,
         include_image_tag=True,
+        include_velocity=True,
 
         failure_cost_json="configs/failure_costs.json",
         default_c_fail=800.0,

@@ -190,7 +190,7 @@ def compute_episode_splits(
     return train_episodes, val_episodes
 
 
-def parse_observation(data: dict) -> dict:
+def parse_observation(data: dict, *, include_velocity: bool = False) -> dict:
     """Parse LeRobot observation to model format.
 
     Camera mapping (v3.0 DROID format to Pi0 expected format):
@@ -200,16 +200,39 @@ def parse_observation(data: dict) -> dict:
 
     Args:
         data: Sample from LeRobot dataset
+        include_velocity: Whether to append velocity features to state.
 
     Returns:
         Dictionary with standardized observation format
     """
-    # State: concatenate joint + gripper
+    def _as_1d(x: Any) -> np.ndarray:
+        arr = np.asarray(x, dtype=np.float32)
+        if arr.ndim == 0:
+            arr = arr[np.newaxis]
+        return arr.reshape(-1)
+
+    # State: concatenate joint + gripper (+ optional velocities)
     # v3.0 format uses keys without "observation/" prefix
-    gripper_pos = np.asarray(data["gripper_position"])
-    if gripper_pos.ndim == 0:
-        gripper_pos = gripper_pos[np.newaxis]
-    state = np.concatenate([data["joint_position"], gripper_pos])
+    joint_pos = _as_1d(data["joint_position"])
+    gripper_pos = _as_1d(data["gripper_position"])
+    state_parts = [joint_pos, gripper_pos]
+
+    if include_velocity:
+        joint_vel_raw = data.get("joint_velocity", data.get("observation/joint_velocity"))
+        if joint_vel_raw is None:
+            joint_vel = np.zeros_like(joint_pos, dtype=np.float32)
+        else:
+            joint_vel = _as_1d(joint_vel_raw)
+
+        gripper_vel_raw = data.get("gripper_velocity", data.get("observation/gripper_velocity"))
+        if gripper_vel_raw is None:
+            gripper_vel = np.zeros_like(gripper_pos, dtype=np.float32)
+        else:
+            gripper_vel = _as_1d(gripper_vel_raw)
+
+        state_parts.extend([joint_vel, gripper_vel])
+
+    state = np.concatenate(state_parts, axis=0)
 
     # Images: parse to uint8 [H, W, C]
     # Map DROID cameras to Pi0 expected format
@@ -407,6 +430,7 @@ class ValueFunctionDataset(torch.utils.data.Dataset):
         keep_augmented_failure_prompt: bool = False,
         augmented_failure_max_prompt_similarity: float = 1.0,
         augmented_failure_sampling_ratio: float | None = None,
+        include_velocity: bool = False,
     ):
         """Initialize value function dataset.
 
@@ -430,6 +454,7 @@ class ValueFunctionDataset(torch.utils.data.Dataset):
             augmented_failure_sampling_ratio: Optional fraction of failure samples that
                 should come from augmented failures (vs real failures). If None, sample
                 from the merged failure pool proportionally to pool size.
+            include_velocity: Whether to append velocity features to state.
         """
         # Validate inputs
         if not success_repo_ids and not failure_repo_ids:
@@ -458,6 +483,7 @@ class ValueFunctionDataset(torch.utils.data.Dataset):
         self.keep_augmented_failure_prompt = keep_augmented_failure_prompt
         self.augmented_failure_max_prompt_similarity = augmented_failure_max_prompt_similarity
         self.augmented_failure_sampling_ratio = augmented_failure_sampling_ratio
+        self.include_velocity = include_velocity
 
         # Compute episode splits for train/val
         # Combine all repo IDs to compute splits consistently
@@ -751,7 +777,10 @@ class ValueFunctionDataset(torch.utils.data.Dataset):
         sample = episode_meta.dataset[global_idx]
 
         # Parse observation to model format
-        parsed = parse_observation(sample)
+        parsed = parse_observation(
+            sample,
+            include_velocity=getattr(self, "include_velocity", False),
+        )
 
         # Force all prompts to target task when configured
         keep_augmented_prompt = getattr(self, "keep_augmented_failure_prompt", False)
@@ -885,6 +914,7 @@ def create_value_dataloader(
     augmented_failure_max_prompt_similarity: float = 1.0,
     augmented_failure_sampling_ratio: float | None = None,
     include_image_tag: bool = False,
+    include_velocity: bool = False,
 ) -> torch.utils.data.DataLoader:
     """Create value function data loader.
 
@@ -913,6 +943,7 @@ def create_value_dataloader(
         augmented_failure_sampling_ratio: Optional fraction of failure samples from
             augmented failures (vs real failures)
         include_image_tag: Whether to prepend image tag tokens in prompt tokenization
+        include_velocity: Whether to append velocity features to state.
 
     Returns:
         DataLoader yielding batches of observations and value targets
@@ -935,6 +966,7 @@ def create_value_dataloader(
         keep_augmented_failure_prompt=keep_augmented_failure_prompt,
         augmented_failure_max_prompt_similarity=augmented_failure_max_prompt_similarity,
         augmented_failure_sampling_ratio=augmented_failure_sampling_ratio,
+        include_velocity=include_velocity,
     )
     print(f"Dataset created in {time.time() - start_time:.2f} seconds.")
     start_time = time.time()

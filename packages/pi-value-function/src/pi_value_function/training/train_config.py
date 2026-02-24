@@ -95,6 +95,11 @@ class ValueDataConfig:
     # If True, prepend Gemma image tag token(s) during tokenization.
     include_image_tag: bool = False
 
+    # If True, append velocity features to state:
+    # [joint_position, gripper_position, joint_velocity, gripper_velocity].
+    # If False, state contains only position features.
+    include_velocity: bool = False
+
 
 @dataclasses.dataclass(frozen=True)
 class CheckpointConfig:

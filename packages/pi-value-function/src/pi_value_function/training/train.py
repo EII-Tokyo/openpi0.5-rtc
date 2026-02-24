@@ -502,6 +502,7 @@ def train(config: TrainConfig) -> None:
             augmented_failure_max_prompt_similarity=config.data.augmented_failure_max_prompt_similarity,
             augmented_failure_sampling_ratio=config.data.augmented_failure_sampling_ratio,
             include_image_tag=config.data.include_image_tag,
+            include_velocity=config.data.include_velocity,
         )
         print("✓ Training dataloader created")
 
@@ -531,6 +532,7 @@ def train(config: TrainConfig) -> None:
                 augmented_failure_max_prompt_similarity=config.data.augmented_failure_max_prompt_similarity,
                 augmented_failure_sampling_ratio=config.data.augmented_failure_sampling_ratio,
                 include_image_tag=config.data.include_image_tag,
+                include_velocity=config.data.include_velocity,
             )
             print("✓ Validation dataloader created")
     else:
@@ -542,6 +544,7 @@ def train(config: TrainConfig) -> None:
                 self.batch_size = batch_size
 
             def __iter__(self):
+                state_dim = 16 if config.data.include_velocity else 8
                 while True:
                     # Generate fake batch matching expected format
                     yield {
@@ -555,7 +558,7 @@ def train(config: TrainConfig) -> None:
                             "left_wrist_0_rgb": np.ones(self.batch_size, dtype=bool),
                             "right_wrist_0_rgb": np.ones(self.batch_size, dtype=bool),
                         },
-                        "state": np.random.randn(self.batch_size, 8).astype(np.float32),
+                        "state": np.random.randn(self.batch_size, state_dim).astype(np.float32),
                         "prompt": ["pick up the cup"] * self.batch_size,
                         "returns": np.random.uniform(low=-1.0, high=0.0, size=self.batch_size).astype(np.float32)
                     }
