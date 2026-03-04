@@ -39,7 +39,7 @@ import numpy as np
 # print(decoded_token, decoded_tokens)
 
 if __name__ == '__main__':
-    config = _config.get_config("pi05_aloha_pen_uncap")
+    config = _config.get_config("twist_off_the_bottle_cap")
     # 设置 num_workers=0 以确保数据顺序严格按顺序输出
     # config = dataclasses.replace(config, num_workers=0)
     test_dataloader = _data_loader.create_data_loader(config, shuffle=False)

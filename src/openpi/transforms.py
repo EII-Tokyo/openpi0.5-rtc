@@ -262,7 +262,8 @@ class TokenizePrompt(DataTransformFn):
         if not isinstance(prompt, str):
             prompt = prompt.item()
         
-        tokens, token_masks = self.tokenizer.tokenize(prompt, state)
+        subtask = data.pop("subtask", None)
+        tokens, token_masks = self.tokenizer.tokenize(prompt, state, subtask)
         return {**data, "tokenized_prompt": tokens, "tokenized_prompt_mask": token_masks}
 
 

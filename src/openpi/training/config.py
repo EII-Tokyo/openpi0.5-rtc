@@ -250,6 +250,7 @@ class LeRobotAlohaDataConfig(DataConfigFactory):
                         "images": {"cam_high": "observation.images.top"},
                         "state": "observation.state",
                         "actions": "action",
+                        "subtask": "subtask",
                     }
                 )
             ]
@@ -792,7 +793,7 @@ _CONFIGS = [
         num_train_steps=20_000,
     ),
     TrainConfig(
-        name="pi05_aloha_pen_uncap",
+        name="twist_off_the_bottle_cap",
         model=pi0_config.Pi0Config(pi05=True),
         lr_schedule=_optimizer.CosineDecaySchedule(
             warmup_steps=10_000,
@@ -892,6 +893,7 @@ _CONFIGS = [
                             },
                             "state": "observation.state",
                             "actions": "action",
+                            "subtask": "subtask",
                             "prompt": "prompt",
                         }
                     )
@@ -899,6 +901,59 @@ _CONFIGS = [
             ),
         ),
         weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_base/params"),
+        save_interval=1000,
+        num_train_steps=40_000,
+        batch_size=32,
+        num_workers=4,
+    ),
+    TrainConfig(
+        name="twist_off_the_bottle_cap_lora",
+        model=pi0_config.Pi0Config(
+            pi05=True,
+            paligemma_variant="gemma_2b_lora",
+            action_expert_variant="gemma_300m_lora",
+        ),
+        lr_schedule=_optimizer.CosineDecaySchedule(
+            warmup_steps=10_000,
+            peak_lr=2.5e-5,
+            decay_steps=40_000,
+            decay_lr=2.5e-6,
+        ),
+        log_interval=10,
+        data=LeRobotAlohaDataConfig(
+            repo_ids=[
+                "lyl472324464/2026-02-03-no-cap-and-direction",
+            ],
+            assets=AssetsConfig(
+                assets_dir="gs://openpi-assets/checkpoints/pi05_base/assets",
+                asset_id="trossen",
+            ),
+            base_config=DataConfig(prompt_from_task=True),
+            repack_transforms=_transforms.Group(
+                inputs=[
+                    _transforms.RepackTransform(
+                        {
+                            "images": {
+                                "cam_high": "observation.images.cam_high",
+                                "cam_left_wrist": "observation.images.cam_left_wrist",
+                                "cam_right_wrist": "observation.images.cam_right_wrist",
+                            },
+                            "state": "observation.state",
+                            "actions": "action",
+                            "subtask": "subtask",
+                            "prompt": "prompt",
+                        }
+                    )
+                ]
+            ),
+        ),
+        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_base/params"),
+        freeze_filter=pi0_config.Pi0Config(
+            pi05=True,
+            paligemma_variant="gemma_2b_lora",
+            action_expert_variant="gemma_300m_lora",
+        ).get_freeze_filter(),
+        ema_decay=None,
         save_interval=1000,
         num_train_steps=40_000,
         batch_size=32,

@@ -11,6 +11,14 @@ def test_tokenize():
     assert masks.shape == (10,)
 
 
+def test_get_good_bad_action_label():
+    assert _tokenizer.get_good_bad_action_label(None) == "normal"
+    assert _tokenizer.get_good_bad_action_label("") == "normal"
+    assert _tokenizer.get_good_bad_action_label('{"good_bad_action":"good action"}') == "good action"
+    assert _tokenizer.get_good_bad_action_label({"good_bad_action": "bad action"}) == "bad action"
+    assert _tokenizer.get_good_bad_action_label('{"good_bad_action":"unexpected"}') == "normal"
+
+
 def test_fast_tokenizer():
     prompt = "Hello, world!"
     state = np.random.rand(5).astype(np.float32)

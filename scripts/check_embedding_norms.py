@@ -462,7 +462,7 @@ def tokennize_text(text: str):
     return tokens
 
 def dataloader_test():
-    config = _config.get_config("pi05_aloha_pen_uncap")
+    config = _config.get_config("twist_off_the_bottle_cap")
     data_loader = _data_loader.create_data_loader(config)
     data_iter = iter(data_loader)
     batch = next(data_iter)
