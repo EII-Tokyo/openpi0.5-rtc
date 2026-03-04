@@ -132,8 +132,9 @@ class RealEnv:
         # right_gripper_error = self.puppet_bot_right.dxl.robot_get_motor_registers(
         #     "single",
         #     "gripper",
-        #     "Hardware_Error_Status"
+        #     "Present_Current"
         # )
+        # print(f"right gripper present current: {right_gripper_error}")
         # if left_gripper_error.values[0] != 0 :
         #     print("left gripper error occured")
         #     print(f"left gripper error: {left_gripper_error}")

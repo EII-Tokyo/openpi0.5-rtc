@@ -44,7 +44,8 @@ services:
     build:
       context: .
       dockerfile: scripts/docker/serve_policy.Dockerfile
-    command: uv run scripts/serve_policy.py --env ALOHA
+    command: /bin/bash
+    # command: uv run scripts/serve_policy.py --env ALOHA
     init: true
     tty: true
     network_mode: host
@@ -59,6 +60,8 @@ services:
       - IS_DOCKER=true
       - NVIDIA_VISIBLE_DEVICES=all
       - NVIDIA_DRIVER_CAPABILITIES=all
+      - UV_PROJECT_ENVIRONMENT=/.venv
+      - VIRTUAL_ENV=/.venv
     gpus: all
 
   redis:
@@ -71,8 +74,6 @@ services:
       timeout: 3s
       retries: 5
       start_period: 2s
-    ports:
-      - 6379:6379
 
   voice_assistant:
     image: lyl472324464/robot:voice_assistant
@@ -98,6 +99,9 @@ services:
       - DISPLAY=${DISPLAY}
       - NVIDIA_VISIBLE_DEVICES=all
       - NVIDIA_DRIVER_CAPABILITIES=all
+      # 确保 uv 使用构建时创建的虚拟环境
+      - UV_PROJECT_ENVIRONMENT=/.venv
+      - VIRTUAL_ENV=/.venv
     depends_on:
       - redis
     command: /bin/bash -c "tail -f /dev/null"

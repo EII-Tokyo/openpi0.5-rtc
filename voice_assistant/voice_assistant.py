@@ -49,7 +49,7 @@ class VoiceAssistant:
         # 任务映射
         self.task_mapping = {
             "1": "Remove the label from the bottle with the knife in the right hand.",
-            "2": "Do the followings: 1. Twist off the bottle cap. 2. Put the bottle into the box on the left. 3. Put the cap into the box on the right. 4. Return to home position.", 
+            "2": "Do the followings: 1. If the bottle cap is facing left, rotate the bottle 180 degrees. 2. Pick up the bottle. 3. Twist off the bottle cap if the bottle has a cap. 4. Put the bottle into the box on the left. 5. Put the cap into the box on the right. If the bottle cap falls onto the table, pick it up. 6. Return to home position.", 
             "3": "Stop and human hand control",
             "4": "Return to home position and save hdf5",
             "5": "Return to sleep position, save hdf5 and quit robot runtime"
@@ -88,33 +88,63 @@ Important: Return ONLY the JSON object, no additional text or explanation."""
         
         self.audio = pyaudio.PyAudio()
         
-        # 查找Pulse设备
+        # 查找音频设备（优先 Pulse，也支持其他）
         device_count = self.audio.get_device_count()
         pulse_device = None
+        fallback_device = None
         
+        print(f"扫描音频设备，共找到 {device_count} 个设备:")
         for i in range(device_count):
-            device_info = self.audio.get_device_info_by_index(i)
-            # print(f"设备信息: {device_info}")
-            if device_info['maxInputChannels'] > 0 and 'pulse' in device_info['name'].lower():
-                pulse_device = i
-                print(f"找到Pulse设备: {device_info['name']}")
-                break
+            try:
+                device_info = self.audio.get_device_info_by_index(i)
+                device_name = device_info['name']
+                max_input = device_info['maxInputChannels']
+                
+                print(f"  设备 {i}: {device_name} (输入通道: {max_input})")
+                
+                if max_input > 0:
+                    # 优先选择 Pulse 设备
+                    if 'pulse' in device_name.lower():
+                        pulse_device = i
+                        print(f"  ✓ 找到 Pulse 设备: {device_name}")
+                        break
+                    # 如果没有 Pulse，使用第一个可用的输入设备作为备选
+                    elif fallback_device is None:
+                        fallback_device = i
+                        print(f"  → 备选设备: {device_name}")
+            except Exception as e:
+                print(f"  设备 {i}: 无法获取信息 ({e})")
+                continue
         
-        if pulse_device is None:
-            raise RuntimeError("未找到Pulse音频设备")
+        # 优先使用 Pulse，否则使用备选设备
+        selected_device = pulse_device if pulse_device is not None else fallback_device
+        
+        if selected_device is None:
+            print("\n❌ 错误: 未找到任何可用的音频输入设备")
+            print("请检查:")
+            print("  1. 是否连接了麦克风")
+            print("  2. PulseAudio 是否运行: pulseaudio --check -v")
+            print("  3. 音频设备权限是否正确")
+            print("  4. Docker 容器是否正确挂载了音频设备")
+            raise RuntimeError("未找到可用的音频输入设备")
         
         # 保存设备索引以便重新打开时使用
-        self.pulse_device = pulse_device
+        self.pulse_device = selected_device
+        device_name = self.audio.get_device_info_by_index(selected_device)['name']
         
-        self.stream = self.audio.open(
-            format=self.FORMAT,
-            channels=self.CHANNELS,
-            rate=self.RATE,
-            input=True,
-            input_device_index=pulse_device,
-            frames_per_buffer=self.CHUNK
-        )
-        print(f"Pulse设备初始化成功，采样率: {self.RATE}Hz")
+        try:
+            self.stream = self.audio.open(
+                format=self.FORMAT,
+                channels=self.CHANNELS,
+                rate=self.RATE,
+                input=True,
+                input_device_index=selected_device,
+                frames_per_buffer=self.CHUNK
+            )
+            print(f"✓ 音频设备初始化成功: {device_name} (采样率: {self.RATE}Hz)")
+        except Exception as e:
+            print(f"\n❌ 无法打开音频设备: {e}")
+            raise RuntimeError(f"无法打开音频设备 {device_name}: {e}")
 
     def setup_vad(self):
         """设置语音活动检测"""

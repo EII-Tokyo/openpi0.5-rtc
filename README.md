@@ -8,19 +8,29 @@ Commands:
 docker compose up
 
 docker compose exec -it voice_assistant /bin/bash
+# 方式1: 直接使用虚拟环境中的 Python（推荐，最快）
+/.venv/bin/python3 voice_assistant.py
+
+# 方式2: 使用 uv run（会自动检查依赖同步，可能较慢）
 uv run voice_assistant.py
 
 docker compose exec -it runtime /bin/bash
 python3 /app/examples/aloha_real/main.py --norm-stats-path /app/checkpoints/20260108/13000/assets/trossen/norm_stats.json
-
-
-
 
 docker compose exec -it openpi_server /bin/bash
 uv run scripts/serve_policy.py --env ALOHA
 
 uv run scripts/robot_reset_controller.py
 ```
+
+清理redis：
+
+sudo lsof -i :6379
+sudo kill 2394
+
+docker ps | grep redis
+docker stop 7e
+
 
 Follower gripper positions:
 - Open: 0.0579 m

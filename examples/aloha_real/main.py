@@ -28,7 +28,7 @@ class Args:
     max_episode_steps: int = 10000
 
     use_rtc: bool = True
-    policy_hz: float = 50.0
+    policy_hz: float = 33.0
     manual_hz: float = 50.0
     
     # reset_position: List[List[float]] = dataclasses.field(default_factory=lambda: [
@@ -41,7 +41,7 @@ class Args:
             # [0.0, -0.96, 1.16, 0.0, -0.0, 0.0],
             [0.0, -0.96, 1.16, 1.57, -0.0, -1.57]         
         ])
-    gripper_current_limits: List[int] = dataclasses.field(default_factory=lambda: [300, 500])
+    gripper_current_limits: List[int] = dataclasses.field(default_factory=lambda: [400, 800])
     # H5dfSaver 配置
     dataset_dir: str = "/app/examples/aloha_real/inference_hdf5"
     manual_dataset_dir: str = "/app/examples/aloha_real/manual_override"
