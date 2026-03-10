@@ -7,6 +7,7 @@ assets/
 checkpoints/
 data/
 wandb/
+tmp/
 attention_outputs/
 
 # Byte-compiled / optimized / DLL files

@@ -35,6 +35,7 @@ class PaligemmaTokenizer:
             elif action_label == "good action":
                 full_prompt = f"Task: {cleaned_text}, State: {state_str};\nGive a good action: "
             else:
+                # full_prompt = f"Task: {cleaned_text}, State: {state_str};\nGive a good action: "
                 full_prompt = f"Task: {cleaned_text}, State: {state_str};\nAction: "
             tokens = self._tokenizer.encode(full_prompt, add_bos=True)
         else:

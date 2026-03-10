@@ -60,26 +60,15 @@ class Args:
 
 # Default checkpoints that should be used for each environment.
 DEFAULT_CHECKPOINT: dict[EnvMode, Checkpoint] = {
+    # EnvMode.ALOHA: Checkpoint(
+    #     config="twist_off_the_bottle_cap_lora",
+    #     dir="./checkpoints/twist_off_the_bottle_cap_lora/lora_7repo_20260306/39999",
+    # ),
     EnvMode.ALOHA: Checkpoint(
-        config="pi05_aloha",
+        config="twist_off_the_bottle_cap",
         dir="./checkpoints/20260205/39999",
     ),
-    # EnvMode.ALOHA: Checkpoint(
-    #     config="pi05_aloha",
-    #     dir="./checkpoints/20260108/13000",
-    # ),
-    # EnvMode.ALOHA: Checkpoint(
-    #     config="pi05_aloha",
-    #     dir="./checkpoints/20251014/30000",
-    # ),
-    # EnvMode.ALOHA: Checkpoint(
-    #     config="pi05_aloha",
-    #     dir="gs://openpi-assets/checkpoints/pi05_base",
-    # ),
-    # EnvMode.ALOHA: Checkpoint(
-    #     config="pi05_aloha",
-    #     dir="./checkpoints/20251210/b128_25000",
-    # ),
+    
     EnvMode.ALOHA_SIM: Checkpoint(
         config="pi0_aloha_sim",
         dir="gs://openpi-assets/checkpoints/pi0_aloha_sim",

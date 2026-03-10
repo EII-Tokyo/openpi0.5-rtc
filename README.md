@@ -5,21 +5,30 @@
 Commands:
 
 ```bash
+# 启动整个本地推理栈，包括 redis、voice_assistant、runtime、openpi_server 等容器
 docker compose up
 
+# 进入语音助手容器，用于手动启动语音识别与任务下发进程
 docker compose exec -it voice_assistant /bin/bash
+# 在 voice_assistant 容器内启动语音助手，负责把语音解析成任务并写入 Redis
 # 方式1: 直接使用虚拟环境中的 Python（推荐，最快）
 /.venv/bin/python3 voice_assistant.py
 
+# 在 voice_assistant 容器内启动语音助手；和上面作用相同，只是通过 uv 管理环境
 # 方式2: 使用 uv run（会自动检查依赖同步，可能较慢）
 uv run voice_assistant.py
 
+# 进入 runtime 容器，用于手动启动机器人侧主循环
 docker compose exec -it runtime /bin/bash
+# 在 runtime 容器内启动 ALOHA 实机控制主程序，负责读机器人观测并请求策略输出动作
 python3 /app/examples/aloha_real/main.py --norm-stats-path /app/checkpoints/20260108/13000/assets/trossen/norm_stats.json
 
+# 进入 openpi_server 容器，用于手动启动策略推理服务
 docker compose exec -it openpi_server /bin/bash
+# 在 openpi_server 容器内启动 policy server，负责加载模型并对 runtime 提供推理接口
 uv run scripts/serve_policy.py --env ALOHA
 
+# 在宿主机执行机器人复位控制脚本，用于把机器人回到初始位姿
 uv run scripts/robot_reset_controller.py
 ```
 

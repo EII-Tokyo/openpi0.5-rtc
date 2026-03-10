@@ -2,6 +2,7 @@ from collections.abc import Iterator, Sequence
 import logging
 import multiprocessing
 import os
+from pathlib import Path
 import typing
 from typing import Literal, Protocol, SupportsIndex, TypeVar
 
@@ -9,6 +10,7 @@ import jax
 import jax.numpy as jnp
 import lerobot.datasets.lerobot_dataset as lerobot_dataset
 import numpy as np
+import pyarrow.parquet as pq
 import torch
 
 import openpi.models.model as _model
@@ -60,6 +62,66 @@ class TransformedDataset(Dataset[T_co]):
 
     def __len__(self) -> int:
         return len(self._dataset)
+
+
+class IsForTrainingWrapper(Dataset[T_co]):
+    """Redirect indices marked as not-for-training to random trainable samples."""
+
+    def __init__(self, dataset: Dataset):
+        self._dataset = dataset
+        self._trainable_mask = self._build_trainable_mask(dataset)
+        self._trainable_indices = np.flatnonzero(self._trainable_mask)
+        if len(self._trainable_indices) == 0:
+            raise ValueError("Dataset has no samples with is_for_training=true.")
+
+    def __getitem__(self, index: SupportsIndex) -> T_co:
+        idx = index.__index__()
+        if idx < 0 or idx >= len(self):
+            raise IndexError(f"Index {idx} out of bounds for dataset of length {len(self)}.")
+        if not self._trainable_mask[idx]:
+            idx = int(self._trainable_indices[torch.randint(len(self._trainable_indices), (1,)).item()])
+        return self._dataset[idx]
+
+    def __len__(self) -> int:
+        return len(self._dataset)
+
+    @classmethod
+    def _build_trainable_mask(cls, dataset: Dataset) -> np.ndarray:
+        if isinstance(dataset, lerobot_dataset.MultiLeRobotDataset):
+            masks = [cls._build_lerobot_mask(ds) for ds in dataset._datasets]
+            return np.concatenate(masks, axis=0) if masks else np.zeros(0, dtype=bool)
+        if isinstance(dataset, lerobot_dataset.LeRobotDataset):
+            return cls._build_lerobot_mask(dataset)
+        return np.ones(len(dataset), dtype=bool)
+
+    @staticmethod
+    def _build_lerobot_mask(dataset: lerobot_dataset.LeRobotDataset) -> np.ndarray:
+        mask = np.ones(len(dataset), dtype=bool)
+        found_column = False
+        parquet_files = sorted(Path(dataset.root).glob("data/**/*.parquet"))
+        for parquet_file in parquet_files:
+            pf = pq.ParquetFile(parquet_file)
+            if "is_for_training" not in pf.schema.names:
+                continue
+            found_column = True
+            table = pf.read(columns=["index", "is_for_training"])
+            indices = np.asarray(table.column("index").to_pylist(), dtype=np.int64)
+            values = np.asarray(table.column("is_for_training").to_pylist(), dtype=bool)
+            mask[indices] = values
+        if found_column:
+            logging.info(
+                "Loaded is_for_training mask for %s: %d/%d trainable",
+                dataset.repo_id,
+                int(mask.sum()),
+                len(mask),
+            )
+        else:
+            logging.info(
+                "Dataset %s has no is_for_training column locally; treating all %d samples as trainable",
+                dataset.repo_id,
+                len(mask),
+            )
+        return mask
 
 
 class IterableTransformedDataset(IterableDataset[T_co]):
@@ -160,7 +222,7 @@ def create_torch_dataset(
     #     # dataset = TransformedDataset(dataset, [_transforms.PromptFromLeRobotTask(dataset_meta.tasks)])
     #     dataset = TransformedDataset(dataset, [_transforms.PromptFromLeRobotTask()])
 
-    return dataset
+    return IsForTrainingWrapper(dataset)
 
 
 def create_rlds_dataset(

@@ -922,7 +922,17 @@ _CONFIGS = [
         log_interval=10,
         data=LeRobotAlohaDataConfig(
             repo_ids=[
+                "lyl472324464/2026-03-09-no-cap-inference",
                 "lyl472324464/2026-02-03-no-cap-and-direction",
+                "lyl472324464/2026-01-28-twist-many-bottle",
+                "lyl472324464/2026-01-20-twist-one-bottle",
+                "lyl472324464/2025-12-23-twist-one-bottle",
+                "lyl472324464/2025-12-10-twist-one-bottle",
+                "lyl472324464/2025-11-26-twist-two-bottles",
+                "lyl472324464/2025-11-18-twist-two-bottles",
+                "lyl472324464/2025-11-14-twist-two-bottles",
+                "lyl472324464/2025-10-15-twist-one-bottle-no-box-in-the-front",
+                "lyl472324464/2025-09-15-twist-one-bottle-no-box-in-the-front",
             ],
             assets=AssetsConfig(
                 assets_dir="gs://openpi-assets/checkpoints/pi05_base/assets",
