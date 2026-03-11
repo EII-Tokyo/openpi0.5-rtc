@@ -4,6 +4,7 @@ import time
 import json
 import redis
 import os
+import re
 import sys
 import termios
 import tty
@@ -88,6 +89,8 @@ class Runtime:
             "4": "Return to home position and save hdf5",
             "5": "Return to sleep position, save hdf5 and quit robot runtime",
         }
+        self._model_task_nums = {"1", "2"}
+        self._stop_task_nums = {"4", "5"}
 
     def _setup_redis(self) -> None:
         """设置Redis连接"""
@@ -158,15 +161,38 @@ class Runtime:
             self._redis_thread.join(timeout=2.0)
         logging.info("Redis监听线程已停止")
 
-    def get_latest_task(self):
-        """获取最新的任务"""
-        with self._task_lock:
-            return self._latest_task
+    def _publish_runtime_state(self, *, qpos=None, latest_action=None, mode: str | None = None) -> None:
+        """发布轻量运行时状态给可视化前端。"""
+        if self._redis_client is None:
+            return
 
-    def clear_latest_task(self):
-        """清除最新任务"""
+        current_task = self._current_task.get("task_name") if self._current_task else None
+        if qpos is None and hasattr(self._environment, "_ts") and getattr(self._environment, "_ts") is not None:
+            qpos = self._environment._ts.observation.get("qpos")
+
+        payload = {
+            "timestamp": time.time(),
+            "mode": mode or ("waiting" if self._is_waiting_for_task else "policy"),
+            "current_task": current_task,
+            "qpos": list(qpos) if qpos is not None else [],
+            "latest_action": list(latest_action) if latest_action is not None else [],
+        }
+        try:
+            self._redis_client.publish("aloha_runtime_state", json.dumps(payload))
+        except Exception as exc:
+            logging.debug("发布运行时状态失败: %s", exc)
+
+    def _take_latest_task(self, allowed_task_nums: set[str] | None = None):
+        """获取并消费最新的 Redis 任务。"""
         with self._task_lock:
+            if self._latest_task is None:
+                return None
+            task_num = str(self._latest_task.get("task_num"))
+            if allowed_task_nums is not None and task_num not in allowed_task_nums:
+                return None
+            latest_task = self._latest_task
             self._latest_task = None
+            return latest_task
     
     def is_waiting_for_task(self) -> bool:
         """检查是否正在等待任务"""
@@ -215,6 +241,7 @@ class Runtime:
         # 初始状态为等待任务
         self._is_waiting_for_task = True
         self._current_task = None
+        self._publish_runtime_state(mode="waiting")
         fd = None
         old_settings = None
         if sys.stdin.isatty():
@@ -227,15 +254,9 @@ class Runtime:
 
         try:
             while not self._stop:
-                keyboard_task = self._poll_keyboard_task()
-                if keyboard_task:
-                    self._handle_voice_task(keyboard_task)
-
-                # 检查是否有新的Redis任务
-                latest_task = self.get_latest_task()
-                if latest_task:
-                    self._handle_voice_task(latest_task)
-                    self.clear_latest_task()
+                task_data = self._poll_task_from_inputs()
+                if task_data:
+                    self._handle_task(task_data)
                 
                 if self._is_waiting_for_task:
                     # 等待状态下，短sleep并持续监听键盘/Redis
@@ -256,24 +277,45 @@ class Runtime:
             if fd is not None and old_settings is not None:
                 termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
 
-    def _poll_keyboard_task(self):
-        """在主循环中非阻塞轮询键盘任务输入。"""
+    def _poll_single_key(self, timeout: float = 0.0) -> str | None:
+        """非阻塞读取单个按键，支持方向键。"""
         if not sys.stdin.isatty():
             return None
 
-        ready, _, _ = select.select([sys.stdin], [], [], 0)
+        ready, _, _ = select.select([sys.stdin], [], [], timeout)
         if not ready:
             return None
 
         key = sys.stdin.read(1)
         if key == "\x03":
             raise KeyboardInterrupt
-        if key in ("\n", "\r"):
+        if key == "\x1b":
+            next_1 = sys.stdin.read(1)
+            if next_1 == "[":
+                next_2 = sys.stdin.read(1)
+                return f"\x1b[{next_2}"
+            return key + next_1
+        return key
+
+    def _build_task_from_key(
+        self,
+        key: str | None,
+        *,
+        allowed_task_nums: set[str] | None = None,
+        prompt_for_manual_dataset: bool = True,
+        log_invalid: bool = True,
+    ):
+        """将单个键盘输入解析成统一 task_data。"""
+        if key is None or key in ("\n", "\r"):
             return None
 
         task_name = self._keyboard_task_mapping.get(key)
         if task_name is None:
-            logging.info("忽略键盘输入 %r；可用快捷键: 2/3/4/5", key)
+            if log_invalid:
+                valid_keys = "/".join(sorted(allowed_task_nums or set(self._keyboard_task_mapping)))
+                logging.info("忽略键盘输入 %r；可用快捷键: %s", key, valid_keys)
+            return None
+        if allowed_task_nums is not None and key not in allowed_task_nums:
             return None
 
         task_data = {
@@ -281,18 +323,40 @@ class Runtime:
             "task_name": task_name,
             "timestamp": time.time(),
         }
-        if key == "3":
-            dataset_subdir = self._read_line_from_keyboard(
-                "请输入人工接管数据保存子目录名，然后回车: "
-            ).strip()
-            if not dataset_subdir:
-                logging.warning("未输入人工接管数据保存子目录名，已取消进入人工接管模式。")
-                return None
+        if key == "3" and prompt_for_manual_dataset:
+            while True:
+                dataset_subdir = self._read_line_from_keyboard(
+                    "请输入人工接管数据保存子目录名，然后回车: "
+                ).strip()
+                if not dataset_subdir:
+                    logging.warning("未输入人工接管数据保存子目录名，已取消进入人工接管模式。")
+                    return None
+                if re.fullmatch(r"[A-Za-z0-9]+", dataset_subdir):
+                    break
+                logging.warning("目录名只允许字母和数字，请重新输入。")
             task_data["manual_dataset_subdir"] = dataset_subdir
             logging.info("人工接管数据将保存到子目录: %s", dataset_subdir)
 
         logging.info("收到键盘任务: %s - %s", key, task_name)
         return task_data
+
+    def _poll_task_from_inputs(
+        self,
+        *,
+        allowed_task_nums: set[str] | None = None,
+        keyboard_timeout: float = 0.0,
+        prompt_for_manual_dataset: bool = True,
+    ):
+        """统一轮询键盘和 Redis 任务输入。"""
+        key = self._poll_single_key(timeout=keyboard_timeout)
+        task_data = self._build_task_from_key(
+            key,
+            allowed_task_nums=allowed_task_nums,
+            prompt_for_manual_dataset=prompt_for_manual_dataset,
+        )
+        if task_data is not None:
+            return task_data
+        return self._take_latest_task(allowed_task_nums=allowed_task_nums)
 
     def _read_line_from_keyboard(self, prompt: str) -> str:
         """在cbreak模式下读取一行输入。"""
@@ -318,21 +382,22 @@ class Runtime:
             sys.stdout.flush()
         
 
-    def _handle_voice_task(self, task_data) -> None:
-        """处理语音任务"""
+    def _handle_task(self, task_data) -> None:
+        """处理来自键盘或 Redis 的任务。"""
         task_num = task_data.get('task_num')
         task_name = task_data.get('task_name', '未知任务')
         
         logging.info(f"处理语音任务: {task_num} - {task_name}")
         
-        if task_num in ["1", "2"]:  # 其他任务
+        if task_num in self._model_task_nums:
             logging.info(f"开始执行任务: {task_name}")
             for subscriber in self._subscribers:
                 subscriber.on_episode_start()
             # 设置当前任务
             self._current_task = task_data
             self._is_waiting_for_task = False 
-        elif task_num == "3":  # stop任务 - 人机协作模式
+            self._publish_runtime_state(mode="policy")
+        elif task_num == "3":
             logging.info("收到停止指令，进入人机协作模式")
             self._current_task = task_data
             # 停止agent
@@ -341,8 +406,9 @@ class Runtime:
             episode_subdir = task_data.get("manual_dataset_subdir")
             for subscriber in self._subscribers:
                 subscriber.on_episode_end(episode_subdir=episode_subdir) 
+            self._publish_runtime_state(mode="teleop_prepare")
             self._handle_human_teleop_mode()  
-        elif task_num == "4":  # 回到初始位置任务
+        elif task_num == "4":
             logging.info("收到停止指令，回到初始位置并停止agent")
             # 设置等待状态
             self._is_waiting_for_task = True
@@ -354,15 +420,21 @@ class Runtime:
             # 通知subscriber episode结束
             for subscriber in self._subscribers:
                 subscriber.on_episode_end()   
-        elif task_num == "5":  # quit任务
+            self._publish_runtime_state(mode="waiting")
+        elif task_num == "5":
             logging.info("收到回到sleep位置并退出指令，退出程序")
             self._environment.sleep_arms()
             self._agent.reset()
             for subscriber in self._subscribers:
                 subscriber.on_episode_end()
+            self._publish_runtime_state(mode="sleep")
             self._stop = True
         else:
             logging.warning(f"未知任务编号: {task_num}")
+
+    def _handle_voice_task(self, task_data) -> None:
+        """兼容旧调用点。"""
+        self._handle_task(task_data)
 
     def _step(self) -> None:
         """A single step of the runtime loop."""
@@ -379,6 +451,7 @@ class Runtime:
         self._last_action = action.get("actions") if isinstance(action, dict) and "actions" in action else None
         if self._last_action is not None:
             self._recent_puppet_actions.append(list(self._last_action))
+        self._publish_runtime_state(latest_action=self._last_action, mode="policy")
 
         for subscriber in self._subscribers:
             subscriber.on_step(observation["origin_observation"], action)
@@ -405,6 +478,7 @@ class Runtime:
 
         # 通过环境 wrapper 驱动 puppet，这样 AlohaRealEnvironment._ts 会按既有逻辑更新。
         self._environment.apply_action({"actions": action})
+        self._publish_runtime_state(latest_action=action, mode="teleop_preview")
 
         master_bot_left.arm.set_joint_positions(left_arm_pos, blocking=False)
         master_bot_right.arm.set_joint_positions(right_arm_pos, blocking=False)
@@ -496,27 +570,21 @@ class Runtime:
             logging.info("等待按下'b'键开始人机控制...")
             logging.info(f"（按左方向键每次回退0.25秒，约 {rewind_steps} 个policy step；按'b'键开始）")
             
-            def _read_single_key() -> str:
-                """Read a single keypress without requiring Enter."""
-                fd = sys.stdin.fileno()
-                old_settings = termios.tcgetattr(fd)
-                try:
-                    tty.setcbreak(fd)
-                    key = sys.stdin.read(1)
-                    if key == "\x03":
-                        raise KeyboardInterrupt
-                    if key == "\x1b":
-                        next_1 = sys.stdin.read(1)
-                        if next_1 == "[":
-                            next_2 = sys.stdin.read(1)
-                            return f"\x1b[{next_2}"
-                        return key + next_1
-                    return key
-                finally:
-                    termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
-
             while True:
-                key = _read_single_key()
+                latest_task = self._take_latest_task(
+                    allowed_task_nums=self._model_task_nums | self._stop_task_nums
+                )
+                if latest_task:
+                    logging.info(
+                        "人工接管准备阶段收到Redis任务 %s，退出人工接管准备并执行对应任务",
+                        latest_task["task_num"],
+                    )
+                    self._handle_task(latest_task)
+                    return
+
+                key = self._poll_single_key(timeout=0.05)
+                if key is None:
+                    continue
                 if key.lower() == 'b':
                     break
                 if key == "\x1b[D":
@@ -529,16 +597,17 @@ class Runtime:
                         len(history_actions),
                     )
                     continue
-                if key in ("1", "2"):
-                    task_data = {
-                        "task_num": key,
-                        "task_name": self._keyboard_task_mapping[key],
-                        "timestamp": time.time(),
-                    }
-                    logging.info("收到输入 %r，退出人工接管准备并继续模型任务", key)
-                    self._handle_voice_task(task_data)
+                task_data = self._build_task_from_key(
+                    key,
+                    allowed_task_nums=self._model_task_nums | self._stop_task_nums,
+                    prompt_for_manual_dataset=False,
+                    log_invalid=False,
+                )
+                if task_data is not None:
+                    logging.info("收到输入 %r，退出人工接管准备并执行对应任务", key)
+                    self._handle_task(task_data)
                     return
-                logging.info("收到输入 %r；按左方向键回退，按'1'/'2'继续模型，按'b'键开始", key)
+                logging.info("收到输入 %r；按左方向键回退，按'1'/'2'继续模型，按'4'/'5'执行停止任务，按'b'键开始", key)
             
             logging.info("收到'b'键，开始人机控制模式")
             
@@ -604,6 +673,7 @@ class Runtime:
                 # 应用action到puppet
                 self._environment.apply_action({"actions": action})
                 ts = self._environment._ts
+                self._publish_runtime_state(qpos=ts.observation.get("qpos"), latest_action=action, mode="human_teleop")
                 t2 = time.time()
                 
                 timesteps.append(ts)
@@ -635,6 +705,7 @@ class Runtime:
             # 设置等待状态
             self._is_waiting_for_task = True
             self._current_task = None
+            self._publish_runtime_state(mode="waiting")
                 
         except Exception as e:
             logging.error(f"人机协作模式出错: {e}", exc_info=True)
@@ -650,5 +721,6 @@ class Runtime:
             # 设置等待状态
             self._is_waiting_for_task = True
             self._current_task = None
+            self._publish_runtime_state(mode="waiting")
         finally:
             self._last_action = None

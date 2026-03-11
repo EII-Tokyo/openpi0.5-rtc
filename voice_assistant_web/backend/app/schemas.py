@@ -1,0 +1,37 @@
+from __future__ import annotations
+
+from typing import Any
+
+from pydantic import BaseModel, Field
+
+
+class HealthResponse(BaseModel):
+    status: str = "ok"
+
+
+class RuntimeStatePayload(BaseModel):
+    timestamp: float | None = None
+    mode: str = "waiting"
+    current_task: str | None = None
+    qpos: list[float] = Field(default_factory=list)
+    latest_action: list[float] = Field(default_factory=list)
+
+
+class RealtimePayload(BaseModel):
+    robot: RuntimeStatePayload
+    camera_status: dict[str, bool]
+
+
+class VoiceRequest(BaseModel):
+    text: str
+    language: str = "en"
+
+
+class VoiceResponse(BaseModel):
+    transcript: str
+    reply_text: str
+    task_number: str | None
+    task_name: str | None
+    audio_base64: str | None = None
+    audio_mime_type: str | None = None
+    debug: dict[str, Any] = Field(default_factory=dict)

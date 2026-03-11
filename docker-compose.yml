@@ -75,33 +75,39 @@ services:
       retries: 5
       start_period: 2s
 
-  voice_assistant:
-    image: lyl472324464/robot:voice_assistant
+  voice_web_backend:
+    image: voice_assistant_web_backend
     build:
-      context: ./voice_assistant
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: voice_assistant_web/backend/Dockerfile
     restart: always
     network_mode: "host"
     privileged: true
-    gpus: all
+    init: true
+    tty: true
     volumes:
-      - ./voice_assistant:/app
+      - $PWD:/app
       - /dev:/dev
-      - /tmp:/tmp
-      - /dev/snd:/dev/snd
-      - /run/user/1000/pulse:/run/user/1000/pulse
-      - /etc/machine-id:/etc/machine-id:ro
     env_file:
       - ./voice_assistant/.env
     environment:
-      - PULSE_RUNTIME_PATH=/run/user/1000/pulse
-      - PULSE_STATE_PATH=/run/user/1000/pulse
-      - DISPLAY=${DISPLAY}
-      - NVIDIA_VISIBLE_DEVICES=all
-      - NVIDIA_DRIVER_CAPABILITIES=all
-      # 确保 uv 使用构建时创建的虚拟环境
-      - UV_PROJECT_ENVIRONMENT=/.venv
-      - VIRTUAL_ENV=/.venv
+      - REDIS_HOST=${REDIS_HOST:-localhost}
+      - REDIS_PORT=${REDIS_PORT:-6379}
+      - REDIS_DB=${REDIS_DB:-0}
     depends_on:
       - redis
-    command: /bin/bash -c "tail -f /dev/null"
+
+  voice_web_frontend:
+    image: voice_assistant_web_frontend
+    build:
+      context: .
+      dockerfile: voice_assistant_web/frontend/Dockerfile
+    restart: always
+    network_mode: "host"
+    init: true
+    tty: true
+    environment:
+      - VITE_API_BASE=${VITE_API_BASE:-http://localhost:8011}
+      - VITE_WS_BASE=${VITE_WS_BASE:-ws://localhost:8011}
+    depends_on:
+      - voice_web_backend

@@ -223,11 +223,19 @@ class RealEnv:
         )
 
     def sleep_arms(self):
+        robot_utils.torque_on(self.master_bot_left)
+        robot_utils.torque_on(self.master_bot_right)
         robot_utils.move_arms(
             [self.puppet_bot_left, self.puppet_bot_right], [[0.0, -1.8399999952316284, 1.600000023841858, 0.0, -1.600000023841858, 0.0]] * 2, move_time=1
         )
+        robot_utils.move_arms(
+            [self.master_bot_left, self.master_bot_right], [[0.0, -1.8399999952316284, 1.600000023841858, 0.0, -1.600000023841858, 0.0]] * 2, move_time=1
+        )
         robot_utils.move_grippers(
             [self.puppet_bot_left, self.puppet_bot_right], [constants.PUPPET_GRIPPER_JOINT_OPEN] * 2, move_time=1
+        )
+        robot_utils.move_grippers(
+            [self.master_bot_left, self.master_bot_right], [constants.MASTER_GRIPPER_JOINT_OPEN] * 2, move_time=1
         )
         return dm_env.TimeStep(
             step_type=dm_env.StepType.MID, reward=self.get_reward(), discount=None, observation=self.get_observation()

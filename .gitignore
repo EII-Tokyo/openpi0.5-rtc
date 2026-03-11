@@ -3,6 +3,9 @@ examples/aloha_real/inference_hdf5/
 examples/aloha_real/manual_override/
 examples/aloha_real/error_hdf5/
 examples/aloha_real/manual_override_hdf5/
+voice_assistant_web/frontend/node_modules/
+voice_assistant_web/frontend/dist/
+voice_assistant_web/**/__pycache__/
 
 # Data directories.
 assets/
@@ -30,6 +33,10 @@ eggs/
 .eggs/
 lib/
 lib64/
+!voice_assistant_web/frontend/src/lib/
+!voice_assistant_web/frontend/src/lib/loaders/
+!voice_assistant_web/frontend/src/lib/loaders/URDFLoader.js
+!voice_assistant_web/frontend/src/lib/loaders/URDFClasses.js
 parts/
 sdist/
 var/
