@@ -201,13 +201,12 @@ class RealEnv:
     def get_reward(self):
         return 0
 
-    def reset(self, *, reset_position=True):
-        if reset_position:
-            # Reboot puppet robot gripper motors
-            self.puppet_bot_left.dxl.robot_reboot_motors("single", "gripper", True)
-            self.puppet_bot_right.dxl.robot_reboot_motors("single", "gripper", True)
-            self._reset_joints()
-            self._reset_gripper()
+    def reset(self):
+        # Reboot puppet robot gripper motors
+        self.puppet_bot_left.dxl.robot_reboot_motors("single", "gripper", True)
+        self.puppet_bot_right.dxl.robot_reboot_motors("single", "gripper", True)
+        self._reset_joints()
+        self._reset_gripper()
         return dm_env.TimeStep(
             step_type=dm_env.StepType.FIRST, reward=self.get_reward(), discount=None, observation=self.get_observation()
         )

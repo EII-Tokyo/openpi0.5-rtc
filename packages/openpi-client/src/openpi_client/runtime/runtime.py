@@ -7,6 +7,8 @@ import os
 import sys
 import termios
 import tty
+import select
+from collections import deque
 
 from openpi_client.runtime import agent as _agent
 from openpi_client.runtime import environment as _environment
@@ -74,9 +76,17 @@ class Runtime:
         
         # 存储最后的action（用于task_num==3时移动master）
         self._last_action = None
+        history_size = max(1, int((self._max_hz if self._max_hz > 0 else 1) * 10))
+        self._recent_puppet_actions = deque(maxlen=history_size)
 
         # 退出标志
         self._stop = False
+        self._keyboard_task_mapping = {
+            "2": "Do the followings: 1. If the bottle cap is facing left, rotate the bottle 180 degrees. 2. Pick up the bottle. 3. Twist off the bottle cap if the bottle has a cap. 4. Put the bottle into the box on the left. 5. Put the cap into the box on the right. If the bottle cap falls onto the table, pick it up. 6. Return to home position.",
+            "3": "Stop and human hand control",
+            "4": "Return to home position and save hdf5",
+            "5": "Return to sleep position, save hdf5 and quit robot runtime",
+        }
 
     def _setup_redis(self) -> None:
         """设置Redis连接"""
@@ -204,30 +214,73 @@ class Runtime:
         # 初始状态为等待任务
         self._is_waiting_for_task = True
         self._current_task = None
+        fd = None
+        old_settings = None
+        if sys.stdin.isatty():
+            fd = sys.stdin.fileno()
+            old_settings = termios.tcgetattr(fd)
+            tty.setcbreak(fd)
+            logging.info("键盘快捷键已启用：2 执行任务，3 人工接管，4 回 home 并保存，5 回 sleep 并退出")
+        else:
+            logging.warning("stdin 不是 TTY，主循环中无法监听键盘快捷键")
 
-        while not self._stop:
-            # 检查是否有新的Redis任务
-            latest_task = self.get_latest_task()
-            if latest_task:
-                self._handle_voice_task(latest_task)
-                self.clear_latest_task()
-            
-            if self._is_waiting_for_task:
-                # 等待状态下，1秒sleep一次
-                logging.debug("等待新任务中...")
-                time.sleep(1.0)
-            else:
-                # 有任务时正常执行step
-                self._step()
-                self._episode_steps += 1
-                # Sleep to maintain the desired frame rate
-                now = time.time()
-                dt = now - last_step_time
-                if dt < self._step_time:
-                    time.sleep(self._step_time - dt)
-                    last_step_time = time.time()
+        try:
+            while not self._stop:
+                keyboard_task = self._poll_keyboard_task()
+                if keyboard_task:
+                    self._handle_voice_task(keyboard_task)
+
+                # 检查是否有新的Redis任务
+                latest_task = self.get_latest_task()
+                if latest_task:
+                    self._handle_voice_task(latest_task)
+                    self.clear_latest_task()
+                
+                if self._is_waiting_for_task:
+                    # 等待状态下，短sleep并持续监听键盘/Redis
+                    time.sleep(0.05)
                 else:
-                    last_step_time = now
+                    # 有任务时正常执行step
+                    self._step()
+                    self._episode_steps += 1
+                    # Sleep to maintain the desired frame rate
+                    now = time.time()
+                    dt = now - last_step_time
+                    if dt < self._step_time:
+                        time.sleep(self._step_time - dt)
+                        last_step_time = time.time()
+                    else:
+                        last_step_time = now
+        finally:
+            if fd is not None and old_settings is not None:
+                termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+
+    def _poll_keyboard_task(self):
+        """在主循环中非阻塞轮询键盘任务输入。"""
+        if not sys.stdin.isatty():
+            return None
+
+        ready, _, _ = select.select([sys.stdin], [], [], 0)
+        if not ready:
+            return None
+
+        key = sys.stdin.read(1)
+        if key == "\x03":
+            raise KeyboardInterrupt
+        if key in ("\n", "\r"):
+            return None
+
+        task_name = self._keyboard_task_mapping.get(key)
+        if task_name is None:
+            logging.info("忽略键盘输入 %r；可用快捷键: 2/3/4/5", key)
+            return None
+
+        logging.info("收到键盘任务: %s - %s", key, task_name)
+        return {
+            "task_num": key,
+            "task_name": task_name,
+            "timestamp": time.time(),
+        }
         
 
     def _handle_voice_task(self, task_data) -> None:
@@ -252,7 +305,6 @@ class Runtime:
             for subscriber in self._subscribers:
                 subscriber.on_episode_end() 
             self._handle_human_teleop_mode()  
-            self._environment.reset(reset_position=False)      
         elif task_num == "4":  # 回到初始位置任务
             logging.info("收到停止指令，回到初始位置并停止agent")
             # 设置等待状态
@@ -278,22 +330,54 @@ class Runtime:
     def _step(self) -> None:
         """A single step of the runtime loop."""
         observation = self._environment.get_observation()
-        # 将当前任务信息添加到observation中传递给agent
-        if self._current_task:
-            observation_with_task = {
-                **observation,
-                'prompt': self._current_task.get('task_name')
-            }
-        else:
-            observation_with_task = observation
+        assert self._current_task is not None, "_current_task must be set before calling _step()"
+        observation_with_task = {
+            **observation,
+            'prompt': self._current_task.get('task_name')
+        }
             
         action = self._agent.get_action(observation_with_task)
         self._environment.apply_action(action)
         # 存储最后的action（用于task_num==3时移动master）
         self._last_action = action.get("actions") if isinstance(action, dict) and "actions" in action else None
+        if self._last_action is not None:
+            self._recent_puppet_actions.append(list(self._last_action))
 
         for subscriber in self._subscribers:
             subscriber.on_step(observation["origin_observation"], action)
+
+    def _move_robots_to_action(self, real_env, action, move_time: float = 0.25) -> None:
+        """将puppet和master同时移动到指定action位置。"""
+        from examples.aloha_real import robot_utils
+        from examples.aloha_real import constants
+
+        master_bot_left = real_env.master_bot_left
+        master_bot_right = real_env.master_bot_right
+
+        left_arm_pos = action[:6]
+        left_gripper_normalized = action[6]
+        right_arm_pos = action[7:13]
+        right_gripper_normalized = action[13]
+
+        master_left_gripper_joint = constants.MASTER_GRIPPER_JOINT_UNNORMALIZE_FN(left_gripper_normalized)
+        master_right_gripper_joint = constants.MASTER_GRIPPER_JOINT_UNNORMALIZE_FN(right_gripper_normalized)
+
+        robot_utils.torque_on(master_bot_left)
+        robot_utils.torque_on(master_bot_right)
+
+        # 通过环境 wrapper 驱动 puppet，这样 AlohaRealEnvironment._ts 会按既有逻辑更新。
+        self._environment.apply_action({"actions": action})
+
+        robot_utils.move_arms(
+            [master_bot_left, master_bot_right],
+            [left_arm_pos, right_arm_pos],
+            move_time=move_time,
+        )
+        robot_utils.move_grippers(
+            [master_bot_left, master_bot_right],
+            [master_left_gripper_joint, master_right_gripper_joint],
+            move_time=min(move_time, 0.5),
+        )
 
 
     def _handle_human_teleop_mode(self) -> None:
@@ -301,7 +385,6 @@ class Runtime:
         try:
             # 导入必要的模块
             from examples.aloha_real import robot_utils
-            from examples.aloha_real import constants 
             from examples.aloha_real.real_env import get_action
             
             # 获取real_env实例
@@ -318,41 +401,23 @@ class Runtime:
                 self._is_waiting_for_task = True
                 self._current_task = None
                 return
+
+            if not self._recent_puppet_actions:
+                self._recent_puppet_actions.append(list(self._last_action))
+
+            rewind_steps = max(1, int(round((self._max_hz if self._max_hz > 0 else 1) * 0.25)))
+            history_actions = list(self._recent_puppet_actions)
+            history_index = len(history_actions) - 1
             
             # 步骤1: 将master移动到上次模型输出的位置
-            robot_utils.torque_on(master_bot_left)
-            robot_utils.torque_on(master_bot_right)
             action = self._last_action
-
-            # action格式: [left_arm_qpos (6), left_gripper (1), right_arm_qpos (6), right_gripper (1)]
-            left_arm_pos = action[:6]
-            left_gripper_normalized = action[6]
-            right_arm_pos = action[7:7+6]
-            right_gripper_normalized = action[7+6]
-
-            # 转换gripper从normalized到master joint位置
-            left_gripper_joint = constants.MASTER_GRIPPER_JOINT_UNNORMALIZE_FN(left_gripper_normalized)
-            right_gripper_joint = constants.MASTER_GRIPPER_JOINT_UNNORMALIZE_FN(right_gripper_normalized)
-
-            # 移动master arms
-            robot_utils.move_arms(
-                [master_bot_left, master_bot_right],
-                [left_arm_pos, right_arm_pos],
-                move_time=1.0
-            )
-
-            # 移动master grippers
-            robot_utils.move_grippers(
-                [master_bot_left, master_bot_right],
-                [left_gripper_joint, right_gripper_joint],
-                move_time=0.5
-            )
+            self._move_robots_to_action(real_env, action, move_time=0.5)
                 
-            logging.info("master已移动到上次模型输出位置")
+            logging.info("leader和puppet已移动到上次模型输出位置")
             
-            # 步骤2: 等待s键按下
+            # 步骤2: 等待按键
             logging.info("等待按下'b'键开始人机控制...")
-            logging.info("（按'b'键开始，按'b'键退出并保存）")
+            logging.info(f"（按左方向键每次回退0.25秒，约 {rewind_steps} 个policy step；按'b'键开始）")
             
             def _read_single_key() -> str:
                 """Read a single keypress without requiring Enter."""
@@ -363,17 +428,32 @@ class Runtime:
                     key = sys.stdin.read(1)
                     if key == "\x03":
                         raise KeyboardInterrupt
+                    if key == "\x1b":
+                        next_1 = sys.stdin.read(1)
+                        if next_1 == "[":
+                            next_2 = sys.stdin.read(1)
+                            return f"\x1b[{next_2}"
+                        return key + next_1
                     return key
                 finally:
                     termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
 
-            # 等待b键开始（阻塞方式）
-            key = _read_single_key()
-            if key.lower() != 'b':
-                logging.info("未收到'b'键，取消人机协作模式")
-                self._is_waiting_for_task = True
-                self._current_task = None
-                return
+            while True:
+                key = _read_single_key()
+                if key.lower() == 'b':
+                    break
+                if key == "\x1b[D":
+                    history_index = max(0, history_index - rewind_steps)
+                    action = history_actions[history_index]
+                    self._move_robots_to_action(real_env, action, move_time=0.25)
+                    self._last_action = list(action)
+                    logging.info(
+                        "已回退0.25秒，当前位于最近轨迹第 %d/%d 帧",
+                        history_index + 1,
+                        len(history_actions),
+                    )
+                    continue
+                logging.info("收到输入 %r；按左方向键回退，按'b'键开始", key)
             
             logging.info("收到'b'键，开始人机控制模式")
             
@@ -426,7 +506,8 @@ class Runtime:
                 t1 = time.time()
                 
                 # 应用action到puppet
-                ts = real_env.step(action)
+                self._environment.apply_action({"actions": action})
+                ts = self._environment._ts
                 t2 = time.time()
                 
                 timesteps.append(ts)
