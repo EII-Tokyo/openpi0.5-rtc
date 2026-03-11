@@ -19,7 +19,7 @@ from examples.aloha_real import h5df_saver
 @dataclasses.dataclass
 class Args:
     model_dir: str
-    config: str
+    adapt_to_pi: bool = True
     host: str = "0.0.0.0"
     port: int = 8000
 
@@ -76,7 +76,7 @@ def main(args: Args) -> None:
             policy=ws_client_policy,
             action_horizon=args.action_horizon,
             model_dir=args.model_dir,
-            config_name=args.config,
+            adapt_to_pi=args.adapt_to_pi,
             use_rtc=args.use_rtc,
         )
         ),

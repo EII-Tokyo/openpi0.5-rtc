@@ -24,7 +24,7 @@ class ActionChunkBroker(_base_policy.BasePolicy):
         policy: _base_policy.BasePolicy,
         action_horizon: int,
         model_dir: str | None = None,
-        config_name: str | None = None,
+        adapt_to_pi: bool = True,
         use_rtc: bool = True,
     ):
         self._policy = policy
@@ -44,29 +44,38 @@ class ActionChunkBroker(_base_policy.BasePolicy):
         self._joint_signs = np.ones(14)
 
         if self._use_rtc:
-            if model_dir is None or config_name is None:
-                raise ValueError("model_dir and config_name are required when use_rtc=True.")
-            self._norm_stats, self._joint_signs = self._load_runtime_assets(model_dir, config_name)
+            if model_dir is None:
+                raise ValueError("model_dir is required when use_rtc=True.")
+            self._norm_stats, self._joint_signs = self._load_runtime_assets(model_dir, adapt_to_pi)
 
             self._infer_thread = threading.Thread(target=self._background_infer)
             self._infer_thread.start()
 
-    def _load_runtime_assets(self, model_dir: str, config_name: str):
-        from openpi.policies import aloha_policy as _aloha_policy
-        from openpi.training import config as _train_config
+    @staticmethod
+    def _joint_flip_mask() -> np.ndarray:
+        return np.array([1, -1, -1, 1, 1, 1, 1, 1, -1, -1, 1, 1, 1, 1])
 
-        train_config = _train_config.get_config(config_name)
-        data_factory = train_config.data
-        assets = getattr(data_factory, "assets", None)
-        asset_id = getattr(assets, "asset_id", None) or getattr(data_factory, "repo_id", None)
-        if asset_id is None:
-            raise ValueError(f"Could not determine asset_id for config '{config_name}'.")
+    @staticmethod
+    def _resolve_asset_id(model_dir: str) -> str:
+        assets_dir = pathlib.Path(model_dir) / "assets"
+        asset_dirs = sorted(
+            p.name for p in assets_dir.iterdir() if p.is_dir() and (p / "norm_stats.json").exists()
+        ) if assets_dir.exists() else []
 
+        if len(asset_dirs) == 1:
+            return asset_dirs[0]
+        if "trossen" in asset_dirs:
+            return "trossen"
+        raise ValueError(
+            f"Could not determine asset_id for checkpoint '{model_dir}'. "
+            f"Found assets={asset_dirs}"
+        )
+
+    def _load_runtime_assets(self, model_dir: str, adapt_to_pi: bool):
+        asset_id = self._resolve_asset_id(model_dir)
         norm_stats_path = pathlib.Path(model_dir) / "assets" / asset_id / "norm_stats.json"
         norm_stats = json.loads(norm_stats_path.read_text())["norm_stats"]
-
-        adapt_to_pi = bool(getattr(data_factory, "adapt_to_pi", True))
-        joint_signs = _aloha_policy._joint_flip_mask() if adapt_to_pi else np.ones(14)
+        joint_signs = self._joint_flip_mask() if adapt_to_pi else np.ones(14)
         return norm_stats, joint_signs
 
     def _background_infer(self):
