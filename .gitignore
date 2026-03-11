@@ -1,6 +1,8 @@
 examples/aloha_real/voice_assistant/.env
 examples/aloha_real/inference_hdf5/
 examples/aloha_real/manual_override/
+examples/aloha_real/error_hdf5/
+examples/aloha_real/manual_override_hdf5/
 
 # Data directories.
 assets/
