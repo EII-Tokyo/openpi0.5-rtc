@@ -18,7 +18,8 @@ from examples.aloha_real import h5df_saver
 
 @dataclasses.dataclass
 class Args:
-    norm_stats_path: str
+    model_dir: str
+    config: str
     host: str = "0.0.0.0"
     port: int = 8000
 
@@ -43,11 +44,11 @@ class Args:
         ])
     gripper_current_limits: List[int] = dataclasses.field(default_factory=lambda: [400, 800])
     # H5dfSaver 配置
-    dataset_dir: str = "/app/examples/aloha_real/inference_hdf5"
-    manual_dataset_dir: str = "/app/examples/aloha_real/manual_override/2026-03-10_inforence"
+    dataset_dir: str = "/app/examples/aloha_real/error_hdf5/2026-03-11_inference_lora_error"
+    manual_dataset_dir: str = "/app/examples/aloha_real/manual_override_hdf5/2026-03-11_inference_lora"
     compress_images: bool = True
     is_mobile: bool = False
-    if_save_hdf5: bool = False
+    if_save_hdf5: bool = True
 
 
 def main(args: Args) -> None:
@@ -74,7 +75,8 @@ def main(args: Args) -> None:
             policy=action_chunk_broker.ActionChunkBroker(
             policy=ws_client_policy,
             action_horizon=args.action_horizon,
-            norm_stats_path=args.norm_stats_path,
+            model_dir=args.model_dir,
+            config_name=args.config,
             use_rtc=args.use_rtc,
         )
         ),

@@ -33,9 +33,11 @@ uv run voice_assistant.py
 # 进入 runtime 容器
 docker compose exec -it runtime /bin/bash
 
-# 在 runtime 容器内启动 ALOHA 实机控制主循环，负责读取观测并请求策略动作
+# 在 runtime 容器内启动 ALOHA 实机控制主循环；会根据 checkpoint 目录和训练 config
+# 自动读取对应的 checkpoint assets/<asset_id>/norm_stats.json，并按 config 的 adapt_to_pi 选择 joint flip 规则
 python3 /app/examples/aloha_real/main.py \
-  --norm-stats-path /app/checkpoints/20260108/13000/assets/trossen/norm_stats.json
+  --model-dir /app/checkpoints/20260108/13000 \
+  --config twist_off_the_bottle_cap_lora
 
 # 进入 openpi_server 容器
 docker compose exec -it openpi_server /bin/bash

@@ -39,6 +39,7 @@ def main(args: Args) -> None:
                     port=args.port,
                 ),
                 action_horizon=args.action_horizon,
+                use_rtc=False,
             )
         ),
         subscribers=[

@@ -23,7 +23,8 @@ class ActionChunkBroker(_base_policy.BasePolicy):
         self,
         policy: _base_policy.BasePolicy,
         action_horizon: int,
-        norm_stats_path: str,
+        model_dir: str | None = None,
+        config_name: str | None = None,
         use_rtc: bool = True,
     ):
         self._policy = policy
@@ -39,11 +40,34 @@ class ActionChunkBroker(_base_policy.BasePolicy):
         self._s = 25
         self._d = 10
         self._use_rtc = use_rtc
-        self._norm_stats = json.loads(pathlib.Path(norm_stats_path).read_text())["norm_stats"]
+        self._norm_stats = None
+        self._joint_signs = np.ones(14)
 
         if self._use_rtc:
+            if model_dir is None or config_name is None:
+                raise ValueError("model_dir and config_name are required when use_rtc=True.")
+            self._norm_stats, self._joint_signs = self._load_runtime_assets(model_dir, config_name)
+
             self._infer_thread = threading.Thread(target=self._background_infer)
             self._infer_thread.start()
+
+    def _load_runtime_assets(self, model_dir: str, config_name: str):
+        from openpi.policies import aloha_policy as _aloha_policy
+        from openpi.training import config as _train_config
+
+        train_config = _train_config.get_config(config_name)
+        data_factory = train_config.data
+        assets = getattr(data_factory, "assets", None)
+        asset_id = getattr(assets, "asset_id", None) or getattr(data_factory, "repo_id", None)
+        if asset_id is None:
+            raise ValueError(f"Could not determine asset_id for config '{config_name}'.")
+
+        norm_stats_path = pathlib.Path(model_dir) / "assets" / asset_id / "norm_stats.json"
+        norm_stats = json.loads(norm_stats_path.read_text())["norm_stats"]
+
+        adapt_to_pi = bool(getattr(data_factory, "adapt_to_pi", True))
+        joint_signs = _aloha_policy._joint_flip_mask() if adapt_to_pi else np.ones(14)
+        return norm_stats, joint_signs
 
     def _background_infer(self):
         while True:
@@ -54,10 +78,9 @@ class ActionChunkBroker(_base_policy.BasePolicy):
                 # flip, normalize joint actions
                 # norm_action = (np.array([1, -1, -1, 1, 1, 1, 1, 1, -1, -1, 1, 1, 1, 1]) * self._last_results["actions"] - np.array([1, -1, -1, 1, 1, 1, 1, 1, -1, -1, 1, 1, 1, 1]) * self._obs["state"][:14] - np.array(self._norm_stats["actions"]["mean"])[:14]) / (np.array(self._norm_stats["actions"]["std"])[:14] + 1e-6)
 
-                signs = np.array([1, -1, -1, 1, 1, 1, 1, 1, -1, -1, 1, 1, 1, 1])
                 q01 = np.array(self._norm_stats["actions"]["q01"])[:14]
                 q99 = np.array(self._norm_stats["actions"]["q99"])[:14]
-                scaled = signs * (self._last_results["actions"] - self._obs["state"][:14])
+                scaled = self._joint_signs * (self._last_results["actions"] - self._obs["state"][:14])
                 norm_action = (scaled - q01) / (q99 - q01 + 1e-6) * 2.0 - 1.0
                 
                 # get normalized gripper action

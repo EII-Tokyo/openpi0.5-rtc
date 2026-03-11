@@ -803,9 +803,10 @@ _CONFIGS = [
         ),
         log_interval=10,
         data=LeRobotAlohaDataConfig(
+            adapt_to_pi=True,
             # repo_id="physical-intelligence/aloha_pen_uncap_diverse",
             repo_ids=[
-                "lyl472324464/2026-02-03-no-cap-and-direction",                           # 70.9k 
+                # "lyl472324464/2026-02-03-no-cap-and-direction",                           # 70.9k 
                 # "lyl472324464/2026-01-28-twist-many-bottle",              # 92.8k 
                 # "lyl472324464/2026-01-20-twist-one-bottle",                           # 40.2k 
                 # "lyl472324464/2025-12-23-twist-one-bottle",              # 121k 
@@ -921,12 +922,12 @@ _CONFIGS = [
         ),
         log_interval=10,
         data=LeRobotAlohaDataConfig(
+            adapt_to_pi=True,
             repo_ids=[
                 "lyl472324464/2026-03-09-inference-with-and-without-cap",
                 "lyl472324464/2026-03-09-no-cap-inference",
                 "lyl472324464/2026-03-05-two-direction",
                 "lyl472324464/2026-03-04-one-direction",
-                "lyl472324464/2026-02-03-no-cap-and-direction",
                 "lyl472324464/2026-01-28-twist-many-bottle",
                 "lyl472324464/2026-01-20-twist-one-bottle",
                 "lyl472324464/2025-12-23-twist-one-bottle",
@@ -935,7 +936,6 @@ _CONFIGS = [
                 "lyl472324464/2025-11-18-twist-two-bottles",
                 "lyl472324464/2025-11-14-twist-two-bottles",
                 "lyl472324464/2025-11-06-twist-many-bottles",
-                "lyl472324464/2025-10-15-twist-one-bottle-no-box-in-the-front",
                 "lyl472324464/2025-09-15-twist-one-bottle-no-box-in-the-front",
             ],
             assets=AssetsConfig(
