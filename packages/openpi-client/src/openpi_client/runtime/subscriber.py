@@ -16,5 +16,5 @@ class Subscriber(abc.ABC):
         """Append a step to the episode."""
 
     @abc.abstractmethod
-    def on_episode_end(self) -> None:
+    def on_episode_end(self, episode_subdir: str | None = None) -> None:
         """Called when an episode ends."""

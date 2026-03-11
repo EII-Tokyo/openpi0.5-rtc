@@ -82,6 +82,7 @@ class Runtime:
         # 退出标志
         self._stop = False
         self._keyboard_task_mapping = {
+            "1": "Remove the label from the bottle with the knife in the right hand.",
             "2": "Do the followings: 1. If the bottle cap is facing left, rotate the bottle 180 degrees. 2. Pick up the bottle. 3. Twist off the bottle cap if the bottle has a cap. 4. Put the bottle into the box on the left. 5. Put the cap into the box on the right. If the bottle cap falls onto the table, pick it up. 6. Return to home position.",
             "3": "Stop and human hand control",
             "4": "Return to home position and save hdf5",
@@ -275,12 +276,46 @@ class Runtime:
             logging.info("忽略键盘输入 %r；可用快捷键: 2/3/4/5", key)
             return None
 
-        logging.info("收到键盘任务: %s - %s", key, task_name)
-        return {
+        task_data = {
             "task_num": key,
             "task_name": task_name,
             "timestamp": time.time(),
         }
+        if key == "3":
+            dataset_subdir = self._read_line_from_keyboard(
+                "请输入人工接管数据保存子目录名，然后回车: "
+            ).strip()
+            if not dataset_subdir:
+                logging.warning("未输入人工接管数据保存子目录名，已取消进入人工接管模式。")
+                return None
+            task_data["manual_dataset_subdir"] = dataset_subdir
+            logging.info("人工接管数据将保存到子目录: %s", dataset_subdir)
+
+        logging.info("收到键盘任务: %s - %s", key, task_name)
+        return task_data
+
+    def _read_line_from_keyboard(self, prompt: str) -> str:
+        """在cbreak模式下读取一行输入。"""
+        sys.stdout.write(prompt)
+        sys.stdout.flush()
+        chars: list[str] = []
+        while True:
+            ch = sys.stdin.read(1)
+            if ch == "\x03":
+                raise KeyboardInterrupt
+            if ch in ("\n", "\r"):
+                sys.stdout.write("\n")
+                sys.stdout.flush()
+                return "".join(chars)
+            if ch in ("\x7f", "\b"):
+                if chars:
+                    chars.pop()
+                    sys.stdout.write("\b \b")
+                    sys.stdout.flush()
+                continue
+            chars.append(ch)
+            sys.stdout.write(ch)
+            sys.stdout.flush()
         
 
     def _handle_voice_task(self, task_data) -> None:
@@ -299,11 +334,13 @@ class Runtime:
             self._is_waiting_for_task = False 
         elif task_num == "3":  # stop任务 - 人机协作模式
             logging.info("收到停止指令，进入人机协作模式")
+            self._current_task = task_data
             # 停止agent
             self._agent.reset() 
             # 通知subscriber episode结束, 并录制数据
+            episode_subdir = task_data.get("manual_dataset_subdir")
             for subscriber in self._subscribers:
-                subscriber.on_episode_end() 
+                subscriber.on_episode_end(episode_subdir=episode_subdir) 
             self._handle_human_teleop_mode()  
         elif task_num == "4":  # 回到初始位置任务
             logging.info("收到停止指令，回到初始位置并停止agent")
@@ -346,10 +383,11 @@ class Runtime:
         for subscriber in self._subscribers:
             subscriber.on_step(observation["origin_observation"], action)
 
-    def _move_robots_to_action(self, real_env, action, move_time: float = 0.25) -> None:
-        """将puppet和master同时移动到指定action位置。"""
+    def _move_robots_to_action(self, real_env, action, step_sleep: float = 0.0) -> None:
+        """将puppet和master同步到单个action。"""
         from examples.aloha_real import robot_utils
         from examples.aloha_real import constants
+        from interbotix_xs_msgs.msg import JointSingleCommand
 
         master_bot_left = real_env.master_bot_left
         master_bot_right = real_env.master_bot_right
@@ -368,6 +406,35 @@ class Runtime:
         # 通过环境 wrapper 驱动 puppet，这样 AlohaRealEnvironment._ts 会按既有逻辑更新。
         self._environment.apply_action({"actions": action})
 
+        master_bot_left.arm.set_joint_positions(left_arm_pos, blocking=False)
+        master_bot_right.arm.set_joint_positions(right_arm_pos, blocking=False)
+        gripper_command = JointSingleCommand(name="gripper")
+        gripper_command.cmd = master_left_gripper_joint
+        master_bot_left.gripper.core.pub_single.publish(gripper_command)
+        gripper_command.cmd = master_right_gripper_joint
+        master_bot_right.gripper.core.pub_single.publish(gripper_command)
+
+        if step_sleep > 0:
+            time.sleep(step_sleep)
+
+    def _move_master_to_action(self, real_env, action, move_time: float = 0.5) -> None:
+        """仅将master移动到指定action。"""
+        from examples.aloha_real import robot_utils
+        from examples.aloha_real import constants
+
+        master_bot_left = real_env.master_bot_left
+        master_bot_right = real_env.master_bot_right
+
+        left_arm_pos = action[:6]
+        left_gripper_normalized = action[6]
+        right_arm_pos = action[7:13]
+        right_gripper_normalized = action[13]
+
+        master_left_gripper_joint = constants.MASTER_GRIPPER_JOINT_UNNORMALIZE_FN(left_gripper_normalized)
+        master_right_gripper_joint = constants.MASTER_GRIPPER_JOINT_UNNORMALIZE_FN(right_gripper_normalized)
+
+        robot_utils.torque_on(master_bot_left)
+        robot_utils.torque_on(master_bot_right)
         robot_utils.move_arms(
             [master_bot_left, master_bot_right],
             [left_arm_pos, right_arm_pos],
@@ -378,6 +445,16 @@ class Runtime:
             [master_left_gripper_joint, master_right_gripper_joint],
             move_time=min(move_time, 0.5),
         )
+
+    def _replay_history_actions(self, real_env, history_actions, start_index: int, target_index: int) -> int:
+        """按history里的action逐步回放到目标帧。"""
+        if target_index >= start_index:
+            return start_index
+
+        step_sleep = self._step_time if self._step_time > 0 else 0.0
+        for idx in range(start_index - 1, target_index - 1, -1):
+            self._move_robots_to_action(real_env, history_actions[idx], step_sleep=step_sleep)
+        return target_index
 
 
     def _handle_human_teleop_mode(self) -> None:
@@ -411,9 +488,9 @@ class Runtime:
             
             # 步骤1: 将master移动到上次模型输出的位置
             action = self._last_action
-            self._move_robots_to_action(real_env, action, move_time=0.5)
+            self._move_master_to_action(real_env, action, move_time=0.5)
                 
-            logging.info("leader和puppet已移动到上次模型输出位置")
+            logging.info("leader已移动到上次模型输出位置")
             
             # 步骤2: 等待按键
             logging.info("等待按下'b'键开始人机控制...")
@@ -443,17 +520,25 @@ class Runtime:
                 if key.lower() == 'b':
                     break
                 if key == "\x1b[D":
-                    history_index = max(0, history_index - rewind_steps)
-                    action = history_actions[history_index]
-                    self._move_robots_to_action(real_env, action, move_time=0.25)
-                    self._last_action = list(action)
+                    target_index = max(0, history_index - rewind_steps)
+                    history_index = self._replay_history_actions(real_env, history_actions, history_index, target_index)
+                    self._last_action = list(history_actions[history_index])
                     logging.info(
                         "已回退0.25秒，当前位于最近轨迹第 %d/%d 帧",
                         history_index + 1,
                         len(history_actions),
                     )
                     continue
-                logging.info("收到输入 %r；按左方向键回退，按'b'键开始", key)
+                if key in ("1", "2"):
+                    task_data = {
+                        "task_num": key,
+                        "task_name": self._keyboard_task_mapping[key],
+                        "timestamp": time.time(),
+                    }
+                    logging.info("收到输入 %r，退出人工接管准备并继续模型任务", key)
+                    self._handle_voice_task(task_data)
+                    return
+                logging.info("收到输入 %r；按左方向键回退，按'1'/'2'继续模型，按'b'键开始", key)
             
             logging.info("收到'b'键，开始人机控制模式")
             
@@ -473,6 +558,17 @@ class Runtime:
             logging.info("提示：在当前终端直接按 'b' 键退出并保存数据")
             logging.info("（后台线程正在等待您的输入）")
             logging.info("=" * 60)
+
+            if not self._current_task or not self._current_task.get("manual_dataset_subdir"):
+                logging.warning("未找到人工接管数据保存子目录名，取消本次人工接管数据保存。")
+                self._is_waiting_for_task = True
+                self._current_task = None
+                return
+            episode_dataset_dir = os.path.join(
+                self._manual_dataset_dir,
+                self._current_task["manual_dataset_subdir"],
+            )
+            os.makedirs(episode_dataset_dir, exist_ok=True)
             
             # 使用线程来监听键盘输入（非阻塞方式）
             key_pressed = threading.Event()
@@ -529,7 +625,7 @@ class Runtime:
                 _hdf5_utils.save_hdf5_episode(
                     observations,
                     actions,
-                    self._manual_dataset_dir,
+                    episode_dataset_dir,
                     compress_images=True,
                     is_mobile=False,
                     fps=self._manual_hz if self._manual_hz > 0 else None,

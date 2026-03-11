@@ -27,7 +27,7 @@ class VideoSaver(_subscriber.Subscriber):
         self._images.append(im)
 
     @override
-    def on_episode_end(self) -> None:
+    def on_episode_end(self, episode_subdir: str | None = None) -> None:
         existing = list(self._out_dir.glob("out_[0-9]*.mp4"))
         next_idx = max([int(p.stem.split("_")[1]) for p in existing], default=-1) + 1
         out_path = self._out_dir / f"out_{next_idx}.mp4"
