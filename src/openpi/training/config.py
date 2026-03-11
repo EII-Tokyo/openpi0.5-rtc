@@ -973,6 +973,61 @@ _CONFIGS = [
         batch_size=32,
         num_workers=4,
     ),
+    TrainConfig(
+        name="twist_off_the_bottle_cap_no_adapt_to_pi",
+        model=pi0_config.Pi0Config(pi05=True),
+        lr_schedule=_optimizer.CosineDecaySchedule(
+            warmup_steps=10_000,
+            peak_lr=2.5e-5,
+            decay_steps=40_000,
+            decay_lr=2.5e-6,
+        ),
+        log_interval=10,
+        data=LeRobotAlohaDataConfig(
+            adapt_to_pi=False,
+            repo_ids=[
+                "lyl472324464/2026-03-09-inference-with-and-without-cap",
+                "lyl472324464/2026-03-09-no-cap-inference",
+                "lyl472324464/2026-03-05-two-direction",
+                "lyl472324464/2026-03-04-one-direction",
+                "lyl472324464/2026-01-28-twist-many-bottle",
+                "lyl472324464/2026-01-20-twist-one-bottle",
+                "lyl472324464/2025-12-23-twist-one-bottle",
+                "lyl472324464/2025-12-10-twist-one-bottle",
+                "lyl472324464/2025-11-26-twist-two-bottles",
+                "lyl472324464/2025-11-18-twist-two-bottles",
+                "lyl472324464/2025-11-14-twist-two-bottles",
+                "lyl472324464/2025-11-06-twist-many-bottles",
+                "lyl472324464/2025-09-15-twist-one-bottle-no-box-in-the-front",
+            ],
+            assets=AssetsConfig(
+                asset_id="trossen",
+            ),
+            base_config=DataConfig(prompt_from_task=True),
+            repack_transforms=_transforms.Group(
+                inputs=[
+                    _transforms.RepackTransform(
+                        {
+                            "images": {
+                                "cam_high": "observation.images.cam_high",
+                                "cam_left_wrist": "observation.images.cam_left_wrist",
+                                "cam_right_wrist": "observation.images.cam_right_wrist",
+                            },
+                            "state": "observation.state",
+                            "actions": "action",
+                            "subtask": "subtask",
+                            "prompt": "prompt",
+                        }
+                    )
+                ]
+            ),
+        ),
+        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_base/params"),
+        save_interval=1000,
+        num_train_steps=40_000,
+        batch_size=32,
+        num_workers=4,
+    ),
     #
     # Fine-tuning DROID configs.
     #
