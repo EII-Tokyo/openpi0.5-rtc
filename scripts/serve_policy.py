@@ -60,14 +60,14 @@ class Args:
 
 # Default checkpoints that should be used for each environment.
 DEFAULT_CHECKPOINT: dict[EnvMode, Checkpoint] = {
-    # EnvMode.ALOHA: Checkpoint(
-    #     config="twist_off_the_bottle_cap_lora",
-    #     dir="./checkpoints/twist_off_the_bottle_cap_lora/lora_7repo_20260306/39999",
-    # ),
     EnvMode.ALOHA: Checkpoint(
-        config="twist_off_the_bottle_cap",
-        dir="./checkpoints/20260205/39999",
+        config="twist_off_the_bottle_cap_no_adapt_to_pi",
+        dir="./checkpoints/20260311/5000",
     ),
+    # EnvMode.ALOHA: Checkpoint(
+    #     config="twist_off_the_bottle_cap",
+    #     dir="./checkpoints/20260205/39999",
+    # ),
     
     EnvMode.ALOHA_SIM: Checkpoint(
         config="pi0_aloha_sim",

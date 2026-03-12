@@ -36,7 +36,8 @@ docker compose exec -it runtime /bin/bash
 # 在 runtime 容器内启动 ALOHA 实机控制主循环；根据 model_dir 自动读取
 # checkpoint assets/<asset_id>/norm_stats.json。默认 adapt_to_pi=True，如需关闭请加 --no-adapt-to-pi
 python3 /app/examples/aloha_real/main.py \
-  --model-dir /app/checkpoints/20260108/13000
+  --no-adapt-to-pi \
+  --model-dir /app/checkpoints/20260311/5000
 
 # 进入 openpi_server 容器
 docker compose exec -it openpi_server /bin/bash
