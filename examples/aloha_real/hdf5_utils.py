@@ -89,7 +89,7 @@ def save_hdf5_episode(
     compressed_len = None
     if compress_images and camera_names:
         t0 = time.time()
-        encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 50]
+        encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 100]
         compressed_len = []
         for cam_name in camera_names:
             image_list = data_dict[f"/observations/images/{cam_name}"]
