@@ -811,36 +811,39 @@ _CONFIGS = [
         log_interval=10,
         data=LeRobotAlohaDataConfig(
             adapt_to_pi=True,
+            image_size=(448, 448),
             # repo_id="physical-intelligence/aloha_pen_uncap_diverse",
             repo_ids=[
-                # "lyl472324464/2026-02-03-no-cap-and-direction",                           # 70.9k 
-                # "lyl472324464/2026-01-28-twist-many-bottle",              # 92.8k 
-                # "lyl472324464/2026-01-20-twist-one-bottle",                           # 40.2k 
-                # "lyl472324464/2025-12-23-twist-one-bottle",              # 121k 
-                # "lyl472324464/2025-12-10-twist-one-bottle",              # 23.1k 
-                # "lyl472324464/2025-11-26-twist-two-bottles",                           # 82k 
-                # "lyl472324464/2025-11-18-twist-two-bottles",              # 32.3k 
-                # "lyl472324464/2025-11-14-twist-two-bottles",                           # 95.3k 
-
-                # "lyl472324464/2025-11-06-twist-many-bottles",              # 55k  
-                # "lyl472324464/2025-10-15-twist-one-bottle-no-box-in-the-front",      # 49.9k 
-                # "lyl472324464/2025-09-15-twist-one-bottle-no-box-in-the-front",              # 54.8k  
+                "lyl472324464/2026-03-09-inference-with-and-without-cap",
+                "lyl472324464/2026-03-09-no-cap-inference",
+                "lyl472324464/2026-03-05-two-direction",
+                "lyl472324464/2026-03-04-one-direction",
+                "lyl472324464/2026-02-03-no-cap-and-direction",
+                "lyl472324464/2026-01-28-twist-many-bottle",
+                "lyl472324464/2026-01-20-twist-one-bottle",
+                "lyl472324464/2025-12-23-twist-one-bottle",
+                "lyl472324464/2025-12-10-twist-one-bottle",
+                "lyl472324464/2025-11-26-twist-two-bottles",
+                "lyl472324464/2025-11-18-twist-two-bottles",
+                "lyl472324464/2025-11-14-twist-two-bottles",
+                "lyl472324464/2025-11-06-twist-many-bottles",
+                "lyl472324464/2025-09-15-twist-one-bottle-no-box-in-the-front",
                 
-                # "lyl472324464/aloha_static_battery",              # 29.4k  静态任务：抓取或操作电池
-                # "lyl472324464/aloha_static_candy",                # 35k    静态任务：操作糖果物体
-                # "lyl472324464/aloha_static_coffee",               # 55k    静态任务：操作咖啡杯
-                # "lyl472324464/aloha_static_coffee_new",           # 55k    静态任务：操作咖啡杯（新版）
-                # "lyl472324464/aloha_static_cups_open",            # 20k    打开杯子/容器
-                # "lyl472324464/aloha_static_fork_pick_up",         # 60k    拾取叉子
-                # "lyl472324464/aloha_static_pingpong_test",        # 6k     乒乓球相关操作测试
-                # "lyl472324464/aloha_static_pro_pencil",           # 8.75k  拾取或移动专业铅笔
-                # "lyl472324464/aloha_static_screw_driver",         # 20k    操作螺丝刀
-                # "lyl472324464/aloha_static_tape",                 # 35k    操作胶带
-                # "lyl472324464/aloha_static_thread_velcro",        # 20.4k  操作魔术贴
-                # "lyl472324464/aloha_static_towel",                # 25k    折叠或移动毛巾
-                # "lyl472324464/aloha_static_vinh_cup",             # 45.5k  操作 Vinh 杯子
-                # "lyl472324464/aloha_static_vinh_cup_left",        # 50k    操作 Vinh 杯子（左手）
-                # "lyl472324464/aloha_static_ziploc_slide",         # 16.8k  拉滑 Ziploc 密封袋
+                "lyl472324464/aloha_static_battery",              # 29.4k  静态任务：抓取或操作电池
+                "lyl472324464/aloha_static_candy",                # 35k    静态任务：操作糖果物体
+                "lyl472324464/aloha_static_coffee",               # 55k    静态任务：操作咖啡杯
+                "lyl472324464/aloha_static_coffee_new",           # 55k    静态任务：操作咖啡杯（新版）
+                "lyl472324464/aloha_static_cups_open",            # 20k    打开杯子/容器
+                "lyl472324464/aloha_static_fork_pick_up",         # 60k    拾取叉子
+                "lyl472324464/aloha_static_pingpong_test",        # 6k     乒乓球相关操作测试
+                "lyl472324464/aloha_static_pro_pencil",           # 8.75k  拾取或移动专业铅笔
+                "lyl472324464/aloha_static_screw_driver",         # 20k    操作螺丝刀
+                "lyl472324464/aloha_static_tape",                 # 35k    操作胶带
+                "lyl472324464/aloha_static_thread_velcro",        # 20.4k  操作魔术贴
+                "lyl472324464/aloha_static_towel",                # 25k    折叠或移动毛巾
+                "lyl472324464/aloha_static_vinh_cup",             # 45.5k  操作 Vinh 杯子
+                "lyl472324464/aloha_static_vinh_cup_left",        # 50k    操作 Vinh 杯子（左手）
+                "lyl472324464/aloha_static_ziploc_slide",         # 16.8k  拉滑 Ziploc 密封袋
                 # "lyl472324464/hook_cable_8pin",                   # 50k    钩住 8pin 线缆
                 # "lyl472324464/handover_clear_zip_bag_upright",    # 30k    直立交递透明袋
                 # "lyl472324464/hook_cable_narrow_8pin",            # 50k    钩住窄的 8pin 线缆
@@ -911,8 +914,8 @@ _CONFIGS = [
         weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_base/params"),
         save_interval=1000,
         num_train_steps=40_000,
-        batch_size=32,
-        num_workers=4,
+        batch_size=256,
+        num_workers=16,
     ),
     TrainConfig(
         name="twist_off_the_bottle_cap_lora",
@@ -935,6 +938,7 @@ _CONFIGS = [
                 "lyl472324464/2026-03-09-no-cap-inference",
                 "lyl472324464/2026-03-05-two-direction",
                 "lyl472324464/2026-03-04-one-direction",
+                "lyl472324464/2026-02-03-no-cap-and-direction",
                 "lyl472324464/2026-01-28-twist-many-bottle",
                 "lyl472324464/2026-01-20-twist-one-bottle",
                 "lyl472324464/2025-12-23-twist-one-bottle",
@@ -969,6 +973,61 @@ _CONFIGS = [
             ),
         ),
         weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_base/params"),
+        freeze_filter=pi0_config.Pi0Config(
+            pi05=True,
+            paligemma_variant="gemma_2b_lora",
+            action_expert_variant="gemma_300m_lora",
+        ).get_freeze_filter(),
+        ema_decay=None,
+        save_interval=1000,
+        num_train_steps=40_000,
+        batch_size=32,
+        num_workers=4,
+    ),
+    TrainConfig(
+        name="two_direction_lora_from_20260205_39999",
+        model=pi0_config.Pi0Config(
+            pi05=True,
+            paligemma_variant="gemma_2b_lora",
+            action_expert_variant="gemma_300m_lora",
+        ),
+        lr_schedule=_optimizer.CosineDecaySchedule(
+            warmup_steps=10_000,
+            peak_lr=2.5e-5,
+            decay_steps=40_000,
+            decay_lr=2.5e-6,
+        ),
+        log_interval=10,
+        data=LeRobotAlohaDataConfig(
+            adapt_to_pi=True,
+            repo_ids=[
+                "lyl472324464/2026-03-05-two-direction",
+                "lyl472324464/2026-03-04-one-direction",
+            ],
+            assets=AssetsConfig(
+                assets_dir="./checkpoints/20260205/39999/assets",
+                asset_id="trossen",
+            ),
+            base_config=DataConfig(prompt_from_task=True),
+            repack_transforms=_transforms.Group(
+                inputs=[
+                    _transforms.RepackTransform(
+                        {
+                            "images": {
+                                "cam_high": "observation.images.cam_high",
+                                "cam_left_wrist": "observation.images.cam_left_wrist",
+                                "cam_right_wrist": "observation.images.cam_right_wrist",
+                            },
+                            "state": "observation.state",
+                            "actions": "action",
+                            "subtask": "subtask",
+                            "prompt": "prompt",
+                        }
+                    )
+                ]
+            ),
+        ),
+        weight_loader=weight_loaders.CheckpointWeightLoader("./checkpoints/20260205/39999/params"),
         freeze_filter=pi0_config.Pi0Config(
             pi05=True,
             paligemma_variant="gemma_2b_lora",
