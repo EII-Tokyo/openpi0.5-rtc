@@ -3,7 +3,6 @@ from typing import ClassVar
 
 import einops
 import numpy as np
-import cv2
 from openpi import transforms
 
 
@@ -48,7 +47,6 @@ class AlohaInputs(transforms.DataTransformFn):
 
         # Assume that base image always exists.
         base_image = in_images["cam_high"]
-        cv2.imwrite("base_image.png", base_image)
 
         images = {
             "base_0_rgb": base_image,
