@@ -37,6 +37,7 @@ class Pi0Config(_model.BaseModelConfig):
     subtask_max_token_len: int = 64
     # FAST tokenizer path used when subtask tokenization appends FAST action tokens.
     fast_tokenizer_path: str = "physical-intelligence/fast"
+    image_resolution: tuple[int, int] = _model.IMAGE_RESOLUTION
 
     def __post_init__(self):
         if self.max_token_len is None:
@@ -59,7 +60,7 @@ class Pi0Config(_model.BaseModelConfig):
 
     @override
     def inputs_spec(self, *, batch_size: int = 1) -> tuple[_model.Observation, _model.Actions]:
-        image_spec = jax.ShapeDtypeStruct([batch_size, *_model.IMAGE_RESOLUTION, 3], jnp.float32)
+        image_spec = jax.ShapeDtypeStruct([batch_size, *self.image_resolution, 3], jnp.float32)
         image_mask_spec = jax.ShapeDtypeStruct([batch_size], jnp.bool_)
 
         with at.disable_typechecking():

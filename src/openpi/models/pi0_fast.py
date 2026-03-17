@@ -87,6 +87,7 @@ class Pi0FASTConfig(_model.BaseModelConfig):
     fast_model_tokenizer: Any | None = None
     # Keyword arguments for the fast model tokenizer.
     fast_model_tokenizer_kwargs: dict[str, Any] | None = None
+    image_resolution: tuple[int, int] = _model.IMAGE_RESOLUTION
 
     @property
     @override
@@ -99,7 +100,7 @@ class Pi0FASTConfig(_model.BaseModelConfig):
 
     @override
     def inputs_spec(self, *, batch_size: int = 1) -> tuple[_model.Observation, _model.Actions]:
-        image_spec = jax.ShapeDtypeStruct([batch_size, *_model.IMAGE_RESOLUTION, 3], jnp.float32)
+        image_spec = jax.ShapeDtypeStruct([batch_size, *self.image_resolution, 3], jnp.float32)
         image_mask_spec = jax.ShapeDtypeStruct([batch_size], jnp.bool_)
 
         with at.disable_typechecking():
@@ -134,6 +135,7 @@ class Pi0FASTConfig(_model.BaseModelConfig):
 class Pi0FAST(_model.BaseModel):
     def __init__(self, config: Pi0FASTConfig, rngs: nnx.Rngs):
         super().__init__(config.action_dim, config.action_horizon, config.max_token_len)
+        self.image_resolution = config.image_resolution
         paligemma_config = _gemma.get_config(config.paligemma_variant)
         # TODO: rewrite gemma in NNX. For now, use bridge.
         llm = nnx_bridge.ToNNX(
@@ -199,7 +201,11 @@ class Pi0FAST(_model.BaseModel):
         self, rng: at.KeyArrayLike, observation: _model.Observation, actions: _model.Actions, *, train: bool = False
     ) -> at.Float[at.Array, "*b ah"]:
         observation = _model.preprocess_observation(
-            rng, observation, train=train, image_keys=list(observation.images.keys())
+            rng,
+            observation,
+            train=train,
+            image_keys=list(observation.images.keys()),
+            image_resolution=self.image_resolution,
         )
 
         # Compute inputs: one big forward pass of prefix + suffix at once
@@ -243,7 +249,11 @@ class Pi0FAST(_model.BaseModel):
     ) -> _model.Actions:
         # TODO: this is a hack to get the image keys.
         observation = _model.preprocess_observation(
-            None, observation, train=False, image_keys=list(observation.images.keys())
+            None,
+            observation,
+            train=False,
+            image_keys=list(observation.images.keys()),
+            image_resolution=self.image_resolution,
         )
 
         # embed inputs
@@ -322,7 +332,9 @@ class Pi0FAST(_model.BaseModel):
         d: int = 10,
         beta: float = 8.0,
     ) -> _model.Actions:
-        observation = _model.preprocess_observation(None, observation, train=False)
+        observation = _model.preprocess_observation(
+            None, observation, train=False, image_resolution=self.image_resolution
+        )
         # note that we use the convention more common in diffusion literature, where t=1 is noise and t=0 is the target
         # distribution. yes, this is the opposite of the pi0 paper, and I'm sorry.
         dt = -1.0 / num_steps

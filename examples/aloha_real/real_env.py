@@ -132,8 +132,9 @@ class RealEnv:
         # right_gripper_error = self.puppet_bot_right.dxl.robot_get_motor_registers(
         #     "single",
         #     "gripper",
-        #     "Hardware_Error_Status"
+        #     "Present_Current"
         # )
+        # print(f"right gripper present current: {right_gripper_error}")
         # if left_gripper_error.values[0] != 0 :
         #     print("left gripper error occured")
         #     print(f"left gripper error: {left_gripper_error}")
@@ -200,13 +201,12 @@ class RealEnv:
     def get_reward(self):
         return 0
 
-    def reset(self, *, reset_position=True):
-        if reset_position:
-            # Reboot puppet robot gripper motors
-            self.puppet_bot_left.dxl.robot_reboot_motors("single", "gripper", True)
-            self.puppet_bot_right.dxl.robot_reboot_motors("single", "gripper", True)
-            self._reset_joints()
-            self._reset_gripper()
+    def reset(self):
+        # Reboot puppet robot gripper motors
+        self.puppet_bot_left.dxl.robot_reboot_motors("single", "gripper", True)
+        self.puppet_bot_right.dxl.robot_reboot_motors("single", "gripper", True)
+        self._reset_joints()
+        self._reset_gripper()
         return dm_env.TimeStep(
             step_type=dm_env.StepType.FIRST, reward=self.get_reward(), discount=None, observation=self.get_observation()
         )
@@ -223,11 +223,19 @@ class RealEnv:
         )
 
     def sleep_arms(self):
+        robot_utils.torque_on(self.master_bot_left)
+        robot_utils.torque_on(self.master_bot_right)
         robot_utils.move_arms(
             [self.puppet_bot_left, self.puppet_bot_right], [[0.0, -1.8399999952316284, 1.600000023841858, 0.0, -1.600000023841858, 0.0]] * 2, move_time=1
         )
+        robot_utils.move_arms(
+            [self.master_bot_left, self.master_bot_right], [[0.0, -1.8399999952316284, 1.600000023841858, 0.0, -1.600000023841858, 0.0]] * 2, move_time=1
+        )
         robot_utils.move_grippers(
             [self.puppet_bot_left, self.puppet_bot_right], [constants.PUPPET_GRIPPER_JOINT_OPEN] * 2, move_time=1
+        )
+        robot_utils.move_grippers(
+            [self.master_bot_left, self.master_bot_right], [constants.MASTER_GRIPPER_JOINT_OPEN] * 2, move_time=1
         )
         return dm_env.TimeStep(
             step_type=dm_env.StepType.MID, reward=self.get_reward(), discount=None, observation=self.get_observation()

@@ -15,16 +15,18 @@ GIT_LFS_SKIP_SMUDGE=1 uv pip install -e .
 Commands:
 
 ```bash
-# Start services
+# Start services, including redis, voice web, runtime, and policy server
 docker compose up
 
-# Voice assistant
-docker compose exec -it voice_assistant /bin/bash
-uv run voice_assistant.py
+# Voice web backend logs
+docker compose logs -f voice_web_backend
+
+# Voice web frontend logs
+docker compose logs -f voice_web_frontend
 
 # Runtime
 docker compose exec -it runtime /bin/bash
-python3 /app/examples/aloha_real/main.py --norm-stats-path /app/checkpoints/20260108/13000/assets/trossen/norm_stats.json
+python3 /app/examples/aloha_real/main.py --model-dir /app/checkpoints/20260108/13000
 
 # Policy server
 docker compose exec -it openpi_server /bin/bash

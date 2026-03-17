@@ -18,7 +18,8 @@ from examples.aloha_real import h5df_saver
 
 @dataclasses.dataclass
 class Args:
-    norm_stats_path: str
+    model_dir: str
+    adapt_to_pi: bool = True
     host: str = "0.0.0.0"
     port: int = 8000
 
@@ -74,7 +75,8 @@ def main(args: Args) -> None:
             policy=action_chunk_broker.ActionChunkBroker(
             policy=ws_client_policy,
             action_horizon=args.action_horizon,
-            norm_stats_path=args.norm_stats_path,
+            model_dir=args.model_dir,
+            adapt_to_pi=args.adapt_to_pi,
             use_rtc=args.use_rtc,
         )
         ),

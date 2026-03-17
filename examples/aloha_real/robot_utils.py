@@ -1,7 +1,6 @@
 # Ignore lint errors because this file is mostly copied from ACT (https://github.com/tonyzhaozh/act).
 # ruff: noqa
 from collections import deque
-import datetime
 import json
 import time
 
@@ -46,10 +45,11 @@ class ImageRecorder:
         time.sleep(0.5)
 
     def image_cb(self, cam_name, data):
+        rgb_image = self.bridge.imgmsg_to_cv2(data.images[0], desired_encoding="passthrough")
         setattr(
             self,
             f"{cam_name}_rgb_image",
-            self.bridge.imgmsg_to_cv2(data.images[0], desired_encoding="bgr8"),
+            rgb_image,
         )
         # setattr(
         #     self,

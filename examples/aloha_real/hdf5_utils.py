@@ -89,14 +89,15 @@ def save_hdf5_episode(
     compressed_len = None
     if compress_images and camera_names:
         t0 = time.time()
-        encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 50]
+        encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 100]
         compressed_len = []
         for cam_name in camera_names:
             image_list = data_dict[f"/observations/images/{cam_name}"]
             compressed_list = []
             compressed_len.append([])
             for image in image_list:
-                result, encoded_image = cv2.imencode(".jpg", image, encode_param)
+                image_bgr = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+                result, encoded_image = cv2.imencode(".jpg", image_bgr, encode_param)
                 if not result:
                     logging.error(f"图像编码失败: {cam_name}")
                     encoded_image = np.array([], dtype=np.uint8)

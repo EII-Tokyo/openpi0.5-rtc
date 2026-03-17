@@ -1,5 +1,7 @@
+import json
 import logging
 import os
+from typing import Any
 
 import jax
 import numpy as np
@@ -9,6 +11,102 @@ from transformers import AutoProcessor
 
 import openpi.models.utils.fsq_tokenizer as fsq_tokenizer
 import openpi.shared.download as download
+
+
+def _parse_subtask_payload(subtask: Any | None) -> dict[str, Any] | None:
+    if subtask is None:
+        return None
+
+    if isinstance(subtask, bytes):
+        subtask = subtask.decode("utf-8")
+    elif hasattr(subtask, "item") and not isinstance(subtask, str):
+        try:
+            subtask = subtask.item()
+        except ValueError:
+            pass
+
+    if isinstance(subtask, dict):
+        return subtask
+
+    if not isinstance(subtask, str):
+        return None
+
+    stripped = subtask.strip()
+    if not stripped:
+        return None
+
+    try:
+        parsed = json.loads(stripped)
+    except json.JSONDecodeError:
+        return None
+    return parsed if isinstance(parsed, dict) else None
+
+
+def get_good_bad_action_label(subtask: Any | None) -> str:
+    parsed = _parse_subtask_payload(subtask)
+    if parsed is None:
+        return "normal"
+
+    label = parsed.get("good_bad_action", "normal")
+    if not isinstance(label, str):
+        return "normal"
+
+    normalized = label.strip().lower()
+    if normalized in {"good action", "bad action", "normal"}:
+        return normalized
+    return "normal"
+
+
+def get_subtask_text(subtask: Any | None) -> str | None:
+    parsed = _parse_subtask_payload(subtask)
+    if parsed is not None:
+        bottle_description = parsed.get("bottle_description")
+        bottle_position = parsed.get("bottle_position")
+        subtask_value = parsed.get("subtask")
+
+        if isinstance(subtask_value, str):
+            cleaned_subtask = subtask_value.strip()
+        else:
+            cleaned_subtask = ""
+
+        parts: list[str] = []
+        if bottle_position is not None:
+            if isinstance(bottle_description, str):
+                cleaned_description = bottle_description.strip()
+                if cleaned_description:
+                    parts.append(f"Target: {cleaned_description}")
+
+            if isinstance(bottle_position, str):
+                cleaned_position = bottle_position.strip()
+            elif bottle_position is not None:
+                cleaned_position = json.dumps(bottle_position, ensure_ascii=False, sort_keys=True)
+            else:
+                cleaned_position = ""
+            if cleaned_position:
+                parts.append(f"Bottle Position: {cleaned_position}")
+
+        if cleaned_subtask:
+            parts.append(f"Subtask: {cleaned_subtask}")
+
+        if parts:
+            return ", ".join(parts)
+        return None
+
+    if subtask is None:
+        return None
+
+    if isinstance(subtask, bytes):
+        subtask = subtask.decode("utf-8")
+    elif hasattr(subtask, "item") and not isinstance(subtask, str):
+        try:
+            subtask = subtask.item()
+        except ValueError:
+            pass
+
+    if isinstance(subtask, str):
+        cleaned = subtask.strip()
+        return cleaned if cleaned else None
+    return None
 
 
 class PaligemmaTokenizer:
@@ -52,7 +150,7 @@ class PaligemmaTokenizer:
         self,
         prompt: str,
         state: np.ndarray | None = None,
-        subtask: str | None = None,
+        subtask: Any | None = None,
         actions: np.ndarray | None = None,
         *,
         for_subtask_generation: bool = False,
@@ -67,20 +165,20 @@ class PaligemmaTokenizer:
         # Pi05 format.
         discretized_state = np.digitize(state, bins=np.linspace(-1, 1, 256 + 1)[:-1]) - 1
         state_str = " ".join(map(str, discretized_state))
-        if subtask is None and not for_subtask_generation:
-            # Keep legacy pi05 tokenization behavior unchanged when subtask is absent.
-            if "[bad action]" in cleaned_text:
-                cleaned_text = cleaned_text.replace("[bad action] ", "")
+        action_label = get_good_bad_action_label(subtask)
+        subtask_text = get_subtask_text(subtask)
+
+        if subtask_text is None and not for_subtask_generation:
+            if action_label == "bad action":
                 full_prompt = f"Task: {cleaned_text}, State: {state_str};\nGive a bad action: "
+            elif action_label == "good action":
+                full_prompt = f"Task: {cleaned_text}, State: {state_str};\nGive a good action: "
             else:
-                if np.random.random() < 0.2:
-                    full_prompt = f"Task: {cleaned_text}, State: {state_str};\nGive a good action: "
-                else:
-                    full_prompt = f"Task: {cleaned_text}, State: {state_str};\nAction: "
+                full_prompt = f"Task: {cleaned_text}, State: {state_str};\nAction: "
             tokens = self._tokenizer.encode(full_prompt, add_bos=True)
             return self._pad_tokens(tokens, self._max_len)
 
-        prompt_prefix = f"Task: {cleaned_text}, State: {state_str}, Subtask: "
+        prompt_prefix = f"Task: {cleaned_text}, State: {state_str}, "
         prompt_tokens = self._tokenizer.encode(prompt_prefix, add_bos=True)
         prompt_tokens, prompt_mask = self._pad_tokens(prompt_tokens, self._max_len, left_pad=True)
 
@@ -91,8 +189,13 @@ class PaligemmaTokenizer:
             fast_mask = np.zeros((self._subtask_max_len,), dtype=bool)
             return prompt_tokens, prompt_mask, subtask_tokens, subtask_mask, loss_mask, fast_mask
 
-        cleaned_subtask = subtask.strip().replace("_", " ").replace("\n", " ")
-        action_suffix = " Action: "
+        cleaned_subtask = subtask_text.strip().replace("_", " ").replace("\n", " ")
+        if action_label == "bad action":
+            action_suffix = " Give a bad action: "
+        elif action_label == "good action":
+            action_suffix = " Give a good action: "
+        else:
+            action_suffix = " Action: "
         subtask_only_tokens = self._tokenizer.encode(cleaned_subtask, add_bos=False)
         fast_action_tokens: list[int] = []
         if actions is not None:

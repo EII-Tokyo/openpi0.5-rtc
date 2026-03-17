@@ -1,6 +1,7 @@
 import dataclasses
 
 import jax
+import numpy as np
 
 from openpi.models import pi0_config
 from openpi.training import config as _config
@@ -82,3 +83,34 @@ def test_with_real_dataset():
 
     for _, actions in batches:
         assert actions.shape == (config.batch_size, config.model.action_horizon, config.model.action_dim)
+
+
+class _ToyDataset:
+    def __init__(self):
+        self.samples = [{"index": i} for i in range(5)]
+
+    def __getitem__(self, index):
+        return self.samples[index]
+
+    def __len__(self):
+        return len(self.samples)
+
+
+def test_is_for_training_wrapper_redirects_non_trainable_indices(monkeypatch):
+    dataset = _ToyDataset()
+    wrapper = _data_loader.IsForTrainingWrapper(dataset)
+    wrapper._trainable_mask = np.array([True, False, True, False, True], dtype=bool)
+    wrapper._trainable_indices = np.flatnonzero(wrapper._trainable_mask)
+
+    monkeypatch.setattr(_data_loader.torch, "randint", lambda high, size: _data_loader.torch.tensor([1]))
+
+    assert wrapper[0]["index"] == 0
+    assert wrapper[1]["index"] == 2
+    assert wrapper[3]["index"] == 2
+
+
+def test_is_for_training_wrapper_defaults_to_all_trainable():
+    dataset = _ToyDataset()
+    wrapper = _data_loader.IsForTrainingWrapper(dataset)
+
+    assert wrapper[4]["index"] == 4

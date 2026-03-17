@@ -1,10 +1,13 @@
 import dataclasses
 import logging
+import math
 import re
 from typing import Protocol, runtime_checkable
 
 import flax.traverse_util
 import numpy as np
+import torch
+import torch.nn.functional as F
 
 import openpi.models.model as _model
 import openpi.shared.array_typing as at
@@ -91,6 +94,7 @@ def _merge_params(loaded_params: at.Params, params: at.Params, *, missing_regex:
     result = {}
     for k, v in flat_loaded.items():
         if k in flat_ref:
+            v = _adapt_param_for_shape(k, v, flat_ref[k])
             result[k] = v.astype(flat_ref[k].dtype) if v.dtype != flat_ref[k].dtype else v
 
     flat_loaded.clear()
@@ -102,3 +106,32 @@ def _merge_params(loaded_params: at.Params, params: at.Params, *, missing_regex:
             result[k] = flat_ref[k]
 
     return flax.traverse_util.unflatten_dict(result, sep="/")
+
+
+def _adapt_param_for_shape(key: str, value: np.ndarray, ref_value: np.ndarray) -> np.ndarray:
+    if value.shape == ref_value.shape:
+        return value
+    if key.endswith("pos_embedding"):
+        resized = _resize_pos_embedding(value, ref_value.shape)
+        if resized is not None:
+            logger.info("Resized %s from %s to %s", key, value.shape, ref_value.shape)
+            return resized
+    return value
+
+
+def _resize_pos_embedding(value: np.ndarray, target_shape: tuple[int, ...]) -> np.ndarray | None:
+    if value.ndim != 3 or len(target_shape) != 3:
+        return None
+    if value.shape[0] != target_shape[0] or value.shape[2] != target_shape[2]:
+        return None
+
+    src_tokens = value.shape[1]
+    dst_tokens = target_shape[1]
+    src_size = int(round(math.sqrt(src_tokens)))
+    dst_size = int(round(math.sqrt(dst_tokens)))
+    if src_size * src_size != src_tokens or dst_size * dst_size != dst_tokens:
+        return None
+
+    tensor = torch.from_numpy(value).permute(0, 2, 1).reshape(value.shape[0], value.shape[2], src_size, src_size)
+    tensor = F.interpolate(tensor, size=(dst_size, dst_size), mode="bicubic", align_corners=False)
+    return tensor.reshape(value.shape[0], value.shape[2], dst_tokens).permute(0, 2, 1).cpu().numpy()

@@ -110,14 +110,20 @@ class ModelTransformFactory(GroupFactory):
 
     # If provided, will determine the default prompt that be used by the model.
     default_prompt: str | None = None
+    # If provided, always overwrite any existing prompt before tokenization.
+    force_prompt: str | None = None
+    image_size: tuple[int, int] = (224, 224)
+
     def __call__(self, model_config: _model.BaseModelConfig) -> _transforms.Group:
+        image_height, image_width = self.image_size
         match model_config.model_type:
             case _model.ModelType.PI0:
                 assert isinstance(model_config, pi0_config.Pi0Config)
                 return _transforms.Group(
                     inputs=[
+                        _transforms.ForcePrompt(self.force_prompt),
                         _transforms.InjectDefaultPrompt(self.default_prompt),
-                        _transforms.ResizeImages(224, 224),
+                        _transforms.ResizeImages(image_height, image_width),
                         _transforms.TokenizePrompt(
                             _tokenizer.PaligemmaTokenizer(
                                 model_config.max_token_len,
@@ -136,8 +142,9 @@ class ModelTransformFactory(GroupFactory):
                 )
                 discrete_state_input = model_config.discrete_state_input
                 transforms = [
+                    _transforms.ForcePrompt(self.force_prompt),
                     _transforms.InjectDefaultPrompt(self.default_prompt),
-                    _transforms.ResizeImages(224, 224),
+                    _transforms.ResizeImages(image_height, image_width),
                 ]
                 transforms += [
                     _transforms.TokenizePrompt(
@@ -158,8 +165,9 @@ class ModelTransformFactory(GroupFactory):
                 )
                 return _transforms.Group(
                     inputs=[
+                        _transforms.ForcePrompt(self.force_prompt),
                         _transforms.InjectDefaultPrompt(self.default_prompt),
-                        _transforms.ResizeImages(224, 224),
+                        _transforms.ResizeImages(image_height, image_width),
                         _transforms.TokenizeFASTInputs(
                             tokenizer_cls(model_config.max_token_len, **tokenizer_kwargs),
                         ),
@@ -246,6 +254,10 @@ class LeRobotAlohaDataConfig(DataConfigFactory):
     use_delta_joint_actions: bool = True
     # If provided, will be injected into the input data if the "prompt" key is not present.
     default_prompt: str | None = None
+    # If provided, always overwrite prompt before tokenization.
+    force_prompt: str | None = None
+    # Training/inference image resize target (height, width).
+    image_size: tuple[int, int] = (224, 224)
     # If true, this will convert the joint and gripper values from the standard Aloha space to
     # the space used by the pi internal runtime which was used to train the base model. People who
     # use standard Aloha data should set this to true.
@@ -259,6 +271,7 @@ class LeRobotAlohaDataConfig(DataConfigFactory):
                         "images": {"cam_high": "observation.images.top"},
                         "state": "observation.state",
                         "actions": "action",
+                        "subtask": "subtask",
                     }
                 )
             ]
@@ -282,6 +295,8 @@ class LeRobotAlohaDataConfig(DataConfigFactory):
 
         model_transforms = ModelTransformFactory(
             default_prompt=self.default_prompt,
+            force_prompt=self.force_prompt,
+            image_size=self.image_size,
         )(model_config)
 
         return dataclasses.replace(
@@ -561,6 +576,10 @@ class TrainConfig:
     def __post_init__(self) -> None:
         if self.resume and self.overwrite:
             raise ValueError("Cannot resume and overwrite at the same time.")
+        image_size = getattr(self.data, "image_size", None)
+        image_resolution = getattr(self.model, "image_resolution", None)
+        if image_size is not None and image_resolution != image_size:
+            object.__setattr__(self, "model", dataclasses.replace(self.model, image_resolution=image_size))
 
 
 # Use `get_config` if you need to get a config by name in your code.
@@ -803,14 +822,14 @@ _CONFIGS = [
         num_train_steps=20_000,
     ),
     TrainConfig(
-        name="pi05_aloha_pen_uncap",
+        name="twist_off_the_bottle_cap_subtask_lora",
         model=pi0_config.Pi0Config(
             pi05=True,
             paligemma_variant="gemma_2b_lora",
             action_expert_variant="gemma_300m_lora",
-            max_token_len=100,
+            max_token_len=80,
             subtask_loss_weight=0.1,
-            subtask_max_token_len=150,
+            subtask_max_token_len=200,
             # fast_tokenizer_path="physical-intelligence/fast",
             fast_tokenizer_path="lyl472324464/fast",
         ),
@@ -822,6 +841,8 @@ _CONFIGS = [
         ),
         log_interval=10,
         data=LeRobotAlohaDataConfig(
+            image_size=(224, 224),
+            force_prompt="process all bottles",
             # repo_id="physical-intelligence/aloha_pen_uncap_diverse",
             repo_ids=[
                 "lyl472324464/2025-12-23-twist-one-bottle",
