@@ -6,6 +6,7 @@ examples/aloha_real/manual_override/
 assets/
 checkpoints/
 data/
+tmp/
 wandb/
 attention_outputs/
 
