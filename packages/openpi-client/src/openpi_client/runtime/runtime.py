@@ -176,6 +176,7 @@ class Runtime:
             "current_task": current_task,
             "qpos": list(qpos) if qpos is not None else [],
             "latest_action": list(latest_action) if latest_action is not None else [],
+            "hierarchical": {},
         }
         try:
             self._redis_client.publish("aloha_runtime_state", json.dumps(payload))
@@ -451,7 +452,22 @@ class Runtime:
         self._last_action = action.get("actions") if isinstance(action, dict) and "actions" in action else None
         if self._last_action is not None:
             self._recent_puppet_actions.append(list(self._last_action))
-        self._publish_runtime_state(latest_action=self._last_action, mode="policy")
+        hierarchical = action.get("hierarchical", {}) if isinstance(action, dict) else {}
+        if not isinstance(hierarchical, dict):
+            hierarchical = {}
+
+        payload = {
+            "timestamp": time.time(),
+            "mode": "policy",
+            "current_task": self._current_task.get("task_name"),
+            "qpos": list(observation.get("qpos") or []),
+            "latest_action": list(self._last_action) if self._last_action is not None else [],
+            "hierarchical": hierarchical,
+        }
+        try:
+            self._redis_client.publish("aloha_runtime_state", json.dumps(payload))
+        except Exception as exc:
+            logging.debug("发布运行时状态失败: %s", exc)
 
         for subscriber in self._subscribers:
             subscriber.on_step(observation["origin_observation"], action)

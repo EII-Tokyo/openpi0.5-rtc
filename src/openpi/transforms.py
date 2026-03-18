@@ -275,7 +275,7 @@ class TokenizePrompt(DataTransformFn):
             prompt = prompt.item()
 
         subtask = data.pop("subtask", None)
-        if subtask is not None and not isinstance(subtask, str):
+        if subtask is not None and not isinstance(subtask, (str, dict)):
             subtask = subtask.item()
         actions = data.get("actions", None)
         tokenized = self.tokenizer.tokenize(

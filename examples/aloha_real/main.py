@@ -7,6 +7,7 @@ import time
 from typing import List
 
 from openpi_client import action_chunk_broker
+from openpi_client import hierarchical_policy as _hierarchical_policy
 from openpi_client import websocket_client_policy as _websocket_client_policy
 from openpi_client.runtime import runtime as _runtime
 from openpi_client.runtime.agents import policy_agent as _policy_agent
@@ -20,8 +21,11 @@ from examples.aloha_real import h5df_saver
 class Args:
     model_dir: str
     adapt_to_pi: bool = True
-    host: str = "0.0.0.0"
-    port: int = 8000
+    low_level_host: str = "0.0.0.0"
+    low_level_port: int = 8000
+    high_level_host: str = "0.0.0.0"
+    high_level_port: int = 8001
+    use_hierarchical_policy: bool = True
 
     action_horizon: int = 25
 
@@ -52,13 +56,23 @@ class Args:
 
 
 def main(args: Args) -> None:
-    ws_client_policy = _websocket_client_policy.WebsocketClientPolicy(
-        host=args.host,
-        port=args.port,
+    low_level_policy = _websocket_client_policy.WebsocketClientPolicy(
+        host=args.low_level_host,
+        port=args.low_level_port,
     )
-    logging.info(f"Server metadata: {ws_client_policy.get_server_metadata()}")
+    logging.info(f"Server metadata: {low_level_policy.get_server_metadata()}")
 
-    metadata = ws_client_policy.get_server_metadata()
+    metadata = low_level_policy.get_server_metadata()
+    runtime_policy = low_level_policy
+    if args.use_hierarchical_policy:
+        high_level_policy = _websocket_client_policy.WebsocketClientPolicy(
+            host=args.high_level_host,
+            port=args.high_level_port,
+        )
+        runtime_policy = _hierarchical_policy.HierarchicalPolicy(
+            high_level_policy=high_level_policy,
+            low_level_policy=low_level_policy,
+        )
     
     # 创建 H5dfSaver subscriber
     h5df_saver_instance = h5df_saver.H5dfSaver(
@@ -73,7 +87,7 @@ def main(args: Args) -> None:
         environment=_env.AlohaRealEnvironment(reset_position=args.reset_position, gripper_current_limits=args.gripper_current_limits),
         agent=_policy_agent.PolicyAgent(
             policy=action_chunk_broker.ActionChunkBroker(
-            policy=ws_client_policy,
+            policy=runtime_policy,
             action_horizon=args.action_horizon,
             model_dir=args.model_dir,
             adapt_to_pi=args.adapt_to_pi,

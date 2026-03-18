@@ -116,6 +116,11 @@ class ActionChunkBroker(_base_policy.BasePolicy):
             else:
                 time.sleep(0.01)
 
+    def _slice_result(self, value):
+        if isinstance(value, np.ndarray) and value.ndim > 0 and value.shape[0] == self._action_horizon:
+            return value[self._cur_step, ...]
+        return value
+
     @override
     def infer(self, obs: Dict) -> Dict:  # noqa: UP006
         if self._use_rtc:
@@ -123,11 +128,9 @@ class ActionChunkBroker(_base_policy.BasePolicy):
             if self._last_results is None:
                 self._last_results = self._policy.infer(obs, None, self._use_rtc)
                 self._last_origin_actions = self._last_results["origin_actions"]
-                self._last_state = self._last_results["state"]
-                self._last_results = {"actions": self._last_results["actions"]}
                 self._cur_step = 0
 
-            results = tree.map_structure(lambda x: x[self._cur_step, ...], self._last_results)
+            results = tree.map_structure(self._slice_result, self._last_results)
             self._obs = obs
             self._cur_step += 1
 
@@ -136,23 +139,15 @@ class ActionChunkBroker(_base_policy.BasePolicy):
                 while self._background_running:
                     time.sleep(0.01)
                 self._last_origin_actions = self._background_results["origin_actions"]
-                self._last_state = self._background_results["state"]
-                self._last_results = {"actions": self._background_results["actions"]}
+                self._last_results = self._background_results
                 self._cur_step -= self._s
-            # print(results)
             return results
         else:
             if self._last_results is None:
                 self._last_results = self._policy.infer(obs)
                 self._cur_step = 0
 
-            def slicer(x):
-                if isinstance(x, np.ndarray):
-                    return x[self._cur_step, ...]
-                else:
-                    return x
-
-            results = tree.map_structure(slicer, self._last_results)
+            results = tree.map_structure(self._slice_result, self._last_results)
             self._cur_step += 1
 
             if self._cur_step >= self._action_horizon:

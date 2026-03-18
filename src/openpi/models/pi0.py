@@ -87,7 +87,6 @@ class Pi0(_model.BaseModel):
         super().__init__(config.action_dim, config.action_horizon, config.max_token_len)
         self.pi05 = config.pi05
         self.subtask_loss_weight = config.subtask_loss_weight
-        self.image_resolution = config.image_resolution
         paligemma_config = _gemma.get_config(config.paligemma_variant)
         action_expert_config = _gemma.get_config(config.action_expert_variant)
         # TODO: rewrite gemma in NNX. For now, use bridge.
@@ -250,9 +249,7 @@ class Pi0(_model.BaseModel):
         self, rng: at.KeyArrayLike, observation: _model.Observation, actions: _model.Actions, *, train: bool = False
     ) -> tuple[at.Float[at.Array, "*b ah"], at.Float[at.Array, "*b ah"], at.Float[at.Array, "*b 1"]]:
         preprocess_rng, noise_rng, time_rng = jax.random.split(rng, 3)
-        observation = _model.preprocess_observation(
-            preprocess_rng, observation, train=train, image_resolution=self.image_resolution
-        )
+        observation = _model.preprocess_observation(preprocess_rng, observation, train=train)
 
         batch_shape = actions.shape[:-2]
         noise = jax.random.normal(noise_rng, actions.shape)
@@ -327,9 +324,7 @@ class Pi0(_model.BaseModel):
         num_steps: int | at.Int[at.Array, ""] = 10,
         noise: at.Float[at.Array, "b ah ad"] | None = None,
     ) -> _model.Actions:
-        observation = _model.preprocess_observation(
-            None, observation, train=False, image_resolution=self.image_resolution
-        )
+        observation = _model.preprocess_observation(None, observation, train=False)
         # note that we use the convention more common in diffusion literature, where t=1 is noise and t=0 is the target
         # distribution. yes, this is the opposite of the pi0 paper, and I'm sorry.
         dt = -1.0 / num_steps
@@ -398,9 +393,7 @@ class Pi0(_model.BaseModel):
         debug_top_logits: bool = False,
     ) -> at.Int[at.Array, "b _t"]:
         """Autoregressively decode language tokens from image+prompt prefix."""
-        observation = _model.preprocess_observation(
-            None, observation, train=False, image_resolution=self.image_resolution
-        )
+        observation = _model.preprocess_observation(None, observation, train=False)
 
         if observation.tokenized_prompt is None or observation.tokenized_prompt_mask is None:
             raise ValueError("tokenized_prompt and tokenized_prompt_mask are required for subtask decoding.")
@@ -513,9 +506,7 @@ class Pi0(_model.BaseModel):
         d: int = 10,
         beta: float = 8.0,
     ) -> _model.Actions:
-        observation = _model.preprocess_observation(
-            None, observation, train=False, image_resolution=self.image_resolution
-        )
+        observation = _model.preprocess_observation(None, observation, train=False)
         # note that we use the convention more common in diffusion literature, where t=1 is noise and t=0 is the target
         # distribution. yes, this is the opposite of the pi0 paper, and I'm sorry.
         dt = -1.0 / num_steps

@@ -32,6 +32,10 @@ python3 /app/examples/aloha_real/main.py --model-dir /app/checkpoints/20260108/1
 docker compose exec -it openpi_server /bin/bash
 uv run scripts/serve_policy.py --env ALOHA
 
+# High-level policy server (infer_subtask)
+docker compose exec -it openpi_server_high_level /bin/bash
+uv run scripts/serve_policy.py --port 8001 --env ALOHA
+
 # Robot reset
 uv run scripts/robot_reset_controller.py
 ```

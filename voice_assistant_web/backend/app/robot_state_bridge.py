@@ -21,6 +21,7 @@ class RobotStateBridge:
             "current_task": None,
             "qpos": [],
             "latest_action": [],
+            "hierarchical": {},
         }
         self._running = False
         self._poll_thread: threading.Thread | None = None
@@ -93,6 +94,7 @@ class RobotStateBridge:
                             "current_task": payload.get("current_task"),
                             "latest_action": payload.get("latest_action", self._state.get("latest_action", [])),
                             "qpos": payload.get("qpos", self._state.get("qpos", [])),
+                            "hierarchical": payload.get("hierarchical", self._state.get("hierarchical", {})),
                         }
                     )
         except Exception:
@@ -106,6 +108,7 @@ class RobotStateBridge:
                 "current_task": self._state.get("current_task"),
                 "qpos": list(self._state.get("qpos", [])),
                 "latest_action": list(self._state.get("latest_action", [])),
+                "hierarchical": dict(self._state.get("hierarchical", {})),
             }
 
     def _combine_qpos(self, left_qpos: list[float], right_qpos: list[float]) -> list[float]:

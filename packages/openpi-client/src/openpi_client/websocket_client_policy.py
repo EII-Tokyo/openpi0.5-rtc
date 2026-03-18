@@ -56,6 +56,28 @@ class WebsocketClientPolicy(_base_policy.BasePolicy):
             raise RuntimeError(f"Error in inference server:\n{response}")
         return msgpack_numpy.unpackb(response)
 
+    def infer_subtask(
+        self,
+        obs: Dict,
+        *,
+        max_new_tokens: int = 32,
+        temperature: float = 0.0,
+        max_text_token_id: int = 240000,
+    ) -> Dict:
+        data = {
+            "obs": obs,
+            "decode_subtask": True,
+            "max_new_tokens": max_new_tokens,
+            "temperature": temperature,
+            "max_text_token_id": max_text_token_id,
+        }
+        data = self._packer.pack(data)
+        self._ws.send(data)
+        response = self._ws.recv()
+        if isinstance(response, str):
+            raise RuntimeError(f"Error in inference server:\n{response}")
+        return msgpack_numpy.unpackb(response)
+
     @override
     def reset(self) -> None:
         pass

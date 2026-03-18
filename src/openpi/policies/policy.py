@@ -159,6 +159,7 @@ class Policy(BasePolicy):
         self,
         obs: dict,
         *,
+        max_new_tokens: int | None = None,
         temperature: float = 0.0,
         max_text_token_id: int = 240000,
         debug_top_logits: bool = False,
@@ -184,6 +185,8 @@ class Policy(BasePolicy):
             debug_top_logits=debug_top_logits,
         )
         token_ids = np.asarray(tokens[0], dtype=np.int32)
+        if max_new_tokens is not None and max_new_tokens >= 0:
+            token_ids = token_ids[:max_new_tokens]
         # Trim after EOS/zero pad.
         eos = self._tokenizer.eos_token_id
         stop = len(token_ids)

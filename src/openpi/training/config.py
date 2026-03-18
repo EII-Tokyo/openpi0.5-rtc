@@ -846,6 +846,8 @@ _CONFIGS = [
             # repo_id="physical-intelligence/aloha_pen_uncap_diverse",
             repo_ids=[
                 "lyl472324464/2025-12-23-twist-one-bottle",
+                "lyl472324464/2026-01-20-twist-one-bottle",
+                "lyl472324464/2026-02-03-no-cap-and-direction",
                 # "lyl472324464/2026-01-20-twist-one-bottle",                           # 40.2k 
                 # "lyl472324464/2025-12-23-twist-one-bottle",              # 121k 
                 # "lyl472324464/2025-12-10-twist-one-bottle",              # 23.1k 

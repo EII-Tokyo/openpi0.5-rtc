@@ -167,22 +167,13 @@ class PaligemmaTokenizer:
         state_str = " ".join(map(str, discretized_state))
         action_label = get_good_bad_action_label(subtask)
         subtask_text = get_subtask_text(subtask)
-
-        if subtask_text is None and not for_subtask_generation:
-            if action_label == "bad action":
-                full_prompt = f"Task: {cleaned_text}, State: {state_str};\nGive a bad action: "
-            elif action_label == "good action":
-                full_prompt = f"Task: {cleaned_text}, State: {state_str};\nGive a good action: "
-            else:
-                full_prompt = f"Task: {cleaned_text}, State: {state_str};\nAction: "
-            tokens = self._tokenizer.encode(full_prompt, add_bos=True)
-            return self._pad_tokens(tokens, self._max_len)
+        for_subtask_generation = for_subtask_generation or subtask_text is None
 
         prompt_prefix = f"Task: {cleaned_text}, State: {state_str}, "
         prompt_tokens = self._tokenizer.encode(prompt_prefix, add_bos=True)
         prompt_tokens, prompt_mask = self._pad_tokens(prompt_tokens, self._max_len, left_pad=True)
 
-        if subtask is None:
+        if for_subtask_generation:
             subtask_tokens = np.zeros((self._subtask_max_len,), dtype=np.int32)
             subtask_mask = np.zeros((self._subtask_max_len,), dtype=bool)
             loss_mask = np.zeros((self._subtask_max_len,), dtype=bool)
