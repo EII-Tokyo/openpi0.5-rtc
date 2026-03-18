@@ -258,8 +258,6 @@ class AbsoluteActions(DataTransformFn):
 class TokenizePrompt(DataTransformFn):
     tokenizer: _tokenizer.PaligemmaTokenizer
     discrete_state_input: bool = False
-    # If true, build prompt in subtask-generation format and always return subtask tensors.
-    for_subtask_generation: bool = False
 
     def __call__(self, data: DataDict) -> DataDict:
         if (prompt := data.pop("prompt", None)) is None:
@@ -283,7 +281,6 @@ class TokenizePrompt(DataTransformFn):
             state,
             subtask,
             actions=actions,
-            for_subtask_generation=self.for_subtask_generation,
         )
         if len(tokenized) == 2:
             prompt_tokens, prompt_masks = tokenized

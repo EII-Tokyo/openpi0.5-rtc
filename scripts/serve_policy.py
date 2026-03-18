@@ -61,8 +61,8 @@ class Args:
 # Default checkpoints that should be used for each environment.
 DEFAULT_CHECKPOINT: dict[EnvMode, Checkpoint] = {
     EnvMode.ALOHA: Checkpoint(
-        config="pi05_aloha",
-        dir="./checkpoints/20260108/13000",
+        config="twist_off_the_bottle_cap_subtask_lora",
+        dir="./checkpoints/twist_off_the_bottle_cap_subtask_lora/twist_off_the_bottle_cap_subtask_lora_20260317/32000",
     ),
     # EnvMode.ALOHA: Checkpoint(
     #     config="pi05_aloha",
@@ -123,6 +123,10 @@ def main(args: Args) -> None:
         dummy_prev_action = np.random.rand(50, 32)
         policy.infer(dummy_obs, dummy_prev_action, use_rtc=True)
     policy.infer(dummy_obs, dummy_prev_action, use_rtc=False)
+    try:
+        policy.infer_subtask(dummy_obs)
+    except (AttributeError, NotImplementedError):
+        logging.info("Skipping infer_subtask warmup because the current policy does not support it.")
     # Record the policy's behavior.
     if args.record:
         policy = _policy.PolicyRecorder(policy, "policy_records")

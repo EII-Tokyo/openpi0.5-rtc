@@ -84,7 +84,7 @@ class Runtime:
         self._stop = False
         self._keyboard_task_mapping = {
             "1": "Remove the label from the bottle with the knife in the right hand.",
-            "2": "Do the followings: 1. If the bottle cap is facing left, rotate the bottle 180 degrees. 2. Pick up the bottle. 3. Twist off the bottle cap if the bottle has a cap. 4. Put the bottle into the box on the left. 5. Put the cap into the box on the right. If the bottle cap falls onto the table, pick it up. 6. Return to home position.",
+            "2": "process all bottles",
             "3": "Stop and human hand control",
             "4": "Return to home position and save hdf5",
             "5": "Return to sleep position, save hdf5 and quit robot runtime",
@@ -456,11 +456,12 @@ class Runtime:
         if not isinstance(hierarchical, dict):
             hierarchical = {}
 
+        qpos = observation.get("qpos")
         payload = {
             "timestamp": time.time(),
             "mode": "policy",
             "current_task": self._current_task.get("task_name"),
-            "qpos": list(observation.get("qpos") or []),
+            "qpos": list(qpos) if qpos is not None else [],
             "latest_action": list(self._last_action) if self._last_action is not None else [],
             "hierarchical": hierarchical,
         }

@@ -9,7 +9,7 @@ class Environment(abc.ABC):
     """
 
     @abc.abstractmethod
-    def reset(self, *, reset_position=True) -> None:
+    def reset(self) -> None:
         """Reset the environment to its initial state.
 
         This will be called once before starting each episode.

@@ -62,6 +62,7 @@ def get_subtask_text(subtask: Any | None) -> str | None:
     if parsed is not None:
         bottle_description = parsed.get("bottle_description")
         bottle_position = parsed.get("bottle_position")
+        bottle_state = parsed.get("bottle_state")
         subtask_value = parsed.get("subtask")
 
         if isinstance(subtask_value, str):
@@ -70,20 +71,26 @@ def get_subtask_text(subtask: Any | None) -> str | None:
             cleaned_subtask = ""
 
         parts: list[str] = []
-        if bottle_position is not None:
-            if isinstance(bottle_description, str):
-                cleaned_description = bottle_description.strip()
-                if cleaned_description:
-                    parts.append(f"Target: {cleaned_description}")
+        if isinstance(bottle_description, str):
+            cleaned_description = bottle_description.strip()
+            if cleaned_description:
+                parts.append(f"Target: {cleaned_description}")
 
-            if isinstance(bottle_position, str):
-                cleaned_position = bottle_position.strip()
-            elif bottle_position is not None:
-                cleaned_position = json.dumps(bottle_position, ensure_ascii=False, sort_keys=True)
-            else:
-                cleaned_position = ""
-            if cleaned_position:
-                parts.append(f"Bottle Position: {cleaned_position}")
+        if isinstance(bottle_position, str):
+            cleaned_position = bottle_position.strip()
+        elif bottle_position is not None:
+            cleaned_position = json.dumps(bottle_position, ensure_ascii=False, sort_keys=True)
+        else:
+            cleaned_position = ""
+        if cleaned_position:
+            parts.append(f"Bottle Position: {cleaned_position}")
+
+        if isinstance(bottle_state, str):
+            cleaned_bottle_state = bottle_state.strip()
+        else:
+            cleaned_bottle_state = ""
+        if cleaned_bottle_state:
+            parts.append(f"Bottle State: {cleaned_bottle_state}")
 
         if cleaned_subtask:
             parts.append(f"Subtask: {cleaned_subtask}")
@@ -152,8 +159,6 @@ class PaligemmaTokenizer:
         state: np.ndarray | None = None,
         subtask: Any | None = None,
         actions: np.ndarray | None = None,
-        *,
-        for_subtask_generation: bool = False,
     ) -> tuple[np.ndarray, np.ndarray] | tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         cleaned_text = prompt.strip().replace("_", " ").replace("\n", " ")
         if state is None:
@@ -167,13 +172,12 @@ class PaligemmaTokenizer:
         state_str = " ".join(map(str, discretized_state))
         action_label = get_good_bad_action_label(subtask)
         subtask_text = get_subtask_text(subtask)
-        for_subtask_generation = for_subtask_generation or subtask_text is None
 
         prompt_prefix = f"Task: {cleaned_text}, State: {state_str}, "
         prompt_tokens = self._tokenizer.encode(prompt_prefix, add_bos=True)
         prompt_tokens, prompt_mask = self._pad_tokens(prompt_tokens, self._max_len, left_pad=True)
 
-        if for_subtask_generation:
+        if subtask_text is None:
             subtask_tokens = np.zeros((self._subtask_max_len,), dtype=np.int32)
             subtask_mask = np.zeros((self._subtask_max_len,), dtype=bool)
             loss_mask = np.zeros((self._subtask_max_len,), dtype=bool)
