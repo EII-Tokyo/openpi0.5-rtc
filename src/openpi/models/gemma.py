@@ -160,6 +160,23 @@ class Attention(nn.Module):
 
     configs: Sequence[Config]
 
+    def _init_cache(self, k, v, cache_size):
+        cache_dtype = k.dtype
+        prefill_len = k.shape[1]
+        pad_width = ((0, 0), (0, cache_size - prefill_len), (0, 0), (0, 0))
+        k_cache = jnp.pad(k.astype(cache_dtype), pad_width)
+        v_cache = jnp.pad(v.astype(cache_dtype), pad_width)
+        idx = jnp.full((k.shape[0],), prefill_len, dtype=jnp.int32)
+        return idx, k_cache, v_cache
+
+    def _update_cache(self, k, v, idx, k_cache, v_cache):
+        update_len = k.shape[1]
+        indices = (0, idx[0], 0, 0)
+        k_new = jax.lax.dynamic_update_slice(k_cache, k.astype(k_cache.dtype), indices)
+        v_new = jax.lax.dynamic_update_slice(v_cache, v.astype(v_cache.dtype), indices)
+        idx_new = idx + update_len
+        return idx_new, k_new, v_new
+
     @nn.compact
     def __call__(self, xs, positions, attn_mask, kv_cache):
         # all experts must share the same head dim, num heads, and num kv heads for self-attention to work
@@ -212,11 +229,16 @@ class Attention(nn.Module):
         assert q.dtype == k.dtype == v.dtype == dtype
 
         cache_len = 0
-        if kv_cache is not None:
-            cache_k, cache_v = kv_cache
-            cache_len = cache_k.shape[1]
-            k = jnp.concatenate([cache_k, k], axis=1)
-            v = jnp.concatenate([cache_v, v], axis=1)
+        if kv_cache is None:
+            idx, k_cache, v_cache = self._init_cache(k, v, attn_mask.shape[-1])
+        else:
+            idx, k_cache, v_cache = kv_cache
+            cache_len = idx[0]
+            idx, k_cache, v_cache = self._update_cache(k, v, idx, k_cache, v_cache)
+
+        k = k_cache
+        v = v_cache
+        kv_cache = (idx, k_cache, v_cache)
 
         # Pi05 knowledge insulation:
         # block gradients from action expert queries into backbone expert key/value features.
@@ -284,7 +306,7 @@ class Attention(nn.Module):
             else:
                 out.append(None)
 
-        return out, (k, v)
+        return out, kv_cache
 
 
 @at.typecheck
@@ -371,7 +393,11 @@ class Block(nn.Module):
         return xs, kv_cache
 
 
-KVCache: TypeAlias = tuple[at.Float[at.Array, "l b _t _k _h"], at.Float[at.Array, "l b _t _v _h"]]
+KVCache: TypeAlias = tuple[
+    at.Int[at.Array, "l b"],
+    at.Float[at.Array, "l b _t _k _h"],
+    at.Float[at.Array, "l b _t _v _h"],
+]
 
 
 @at.typecheck

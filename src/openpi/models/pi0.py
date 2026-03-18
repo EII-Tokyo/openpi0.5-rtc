@@ -340,6 +340,7 @@ class Pi0(_model.BaseModel):
         # first fill KV cache with a forward pass of the prefix
         prefix_tokens, prefix_mask, prefix_ar_mask = self.embed_prefix(observation)
         prefix_attn_mask = make_attn_mask(prefix_mask, prefix_ar_mask)
+        prefix_attn_mask = jnp.pad(prefix_attn_mask, ((0, 0), (0, 0), (0, self.action_horizon)))
         positions = jnp.cumsum(prefix_mask, axis=1) - 1
         _, kv_cache = self.PaliGemma.llm([prefix_tokens, None], mask=prefix_attn_mask, positions=positions)
 
@@ -408,9 +409,11 @@ class Pi0(_model.BaseModel):
         # jax.debug.print("observation.tokenized_prompt={tokenized_prompt}", tokenized_prompt=observation.tokenized_prompt)
         prefix_tokens, prefix_mask, prefix_ar_mask = self.embed_prefix(observation)
         max_steps = int(observation.tokenized_subtask.shape[1])
-        prefix_len = prefix_tokens.shape[1]
         subtask_len = int(observation.tokenized_subtask.shape[1])
-        subtask_start = prefix_len - subtask_len
+        prefix_tokens = prefix_tokens[:, :-subtask_len, :]
+        prefix_mask = prefix_mask[:, :-subtask_len]
+        prefix_ar_mask = prefix_ar_mask[:-subtask_len]
+        prefix_len = prefix_tokens.shape[1]
 
         embed_table = self.PaliGemma.llm.embedder["input_embedding"].value
         vocab_size = embed_table.shape[0]
@@ -421,7 +424,8 @@ class Pi0(_model.BaseModel):
         # Prefix forward pass to get initial next-token logits context.
         prefix_positions = jnp.cumsum(prefix_mask, axis=1) - 1
         prefix_attn_mask = make_attn_mask(prefix_mask, prefix_ar_mask)
-        (prefix_out, _), _ = self.PaliGemma.llm(
+        prefix_attn_mask = jnp.pad(prefix_attn_mask, ((0, 0), (0, 0), (0, max_steps)))
+        (prefix_out, _), kv_cache = self.PaliGemma.llm(
             [prefix_tokens, None], mask=prefix_attn_mask, positions=prefix_positions
         )
         assert prefix_out is not None
@@ -432,8 +436,10 @@ class Pi0(_model.BaseModel):
         )
         last_hidden = prefix_out[jnp.arange(batch_size), last_valid_idx, :]
 
+        prefix_valid_len = jnp.sum(prefix_mask, axis=1, dtype=jnp.int32)
+
         def step(carry):
-            rng, last_hidden, output_tokens, finished, step_i = carry
+            rng, last_hidden, output_tokens, finished, step_i, kv_cache = carry
             logits = jnp.einsum("bd,vd->bv", last_hidden, embed_table, preferred_element_type=jnp.float32)
             # top_vals, top_idx = jax.lax.top_k(logits[0], 100)
             # jax.debug.print("subtask step {s} top10 logits idx={i} val={v}", s=step_i, i=top_idx, v=top_vals)
@@ -465,33 +471,34 @@ class Pi0(_model.BaseModel):
                 jnp.broadcast_to(step_i, (next_token.shape[0], 1)),
                 next_token[:, None],
             )
-            # Fill subtask slots inside the existing prefix token block.
-            generated_valid = jnp.arange(max_steps)[None, :] <= step_i
-            subtask_tokens = jnp.where(generated_valid, output_tokens, 0)
-            subtask_embeddings = self.PaliGemma.llm(subtask_tokens, method="embed")
-            full_prefix_tokens = prefix_tokens.at[:, subtask_start:, :].set(subtask_embeddings)
-
-            full_prefix_mask = prefix_mask.at[:, subtask_start:].set(generated_valid)
-            full_attn_mask = make_attn_mask(full_prefix_mask, prefix_ar_mask)
-            positions = jnp.cumsum(full_prefix_mask, axis=-1) - 1
-            (full_out, _), _ = self.PaliGemma.llm([full_prefix_tokens, None], mask=full_attn_mask, positions=positions)
+            token_embeddings = self.PaliGemma.llm(next_token[:, None], method="embed")
+            generated_valid = (jnp.arange(max_steps)[None, :] <= step_i)
+            key_mask = jnp.concatenate([prefix_mask, generated_valid], axis=1)
+            full_attn_mask = key_mask[:, None, :]
+            positions = prefix_valid_len[:, None] + step_i
+            (full_out, _), kv_cache = self.PaliGemma.llm(
+                [token_embeddings, None],
+                mask=full_attn_mask,
+                positions=positions,
+                kv_cache=kv_cache,
+            )
             assert full_out is not None
-            last_hidden = full_out[:, subtask_start + step_i, :]
+            last_hidden = full_out[:, 0, :]
 
-            return rng, last_hidden, output_tokens, finished, step_i + 1
+            return rng, last_hidden, output_tokens, finished, step_i + 1, kv_cache
 
         def cond(carry):
-            _, _, _, finished, step_i = carry
+            _, _, _, finished, step_i, _ = carry
             if eos_token_id is None:
                 return step_i < max_steps
             return (~jnp.all(finished)) & (step_i < max_steps)
 
         init_tokens = jnp.zeros((batch_size, max_steps), dtype=jnp.int32)
         init_finished = jnp.zeros((batch_size,), dtype=jnp.bool_)
-        _, _, output_tokens, _, _ = jax.lax.while_loop(
+        _, _, output_tokens, _, _, _ = jax.lax.while_loop(
             cond,
             step,
-            (rng, last_hidden, init_tokens, init_finished, 0),
+            (rng, last_hidden, init_tokens, init_finished, 0, kv_cache),
         )
         return output_tokens
         
@@ -570,6 +577,7 @@ class Pi0(_model.BaseModel):
         # first fill KV cache with a forward pass of the prefix
         prefix_tokens, prefix_mask, prefix_ar_mask = self.embed_prefix(observation)
         prefix_attn_mask = make_attn_mask(prefix_mask, prefix_ar_mask)
+        prefix_attn_mask = jnp.pad(prefix_attn_mask, ((0, 0), (0, 0), (0, self.action_horizon)))
         positions = jnp.cumsum(prefix_mask, axis=1) - 1
         _, kv_cache = self.PaliGemma.llm([prefix_tokens, None], mask=prefix_attn_mask, positions=positions)
 
