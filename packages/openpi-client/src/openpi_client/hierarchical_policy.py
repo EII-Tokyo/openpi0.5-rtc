@@ -33,7 +33,6 @@ def _extract_bottle_state(raw_text: str) -> str:
         return ""
     return match.group(1).strip().rstrip(",")
 
-
 def _extract_bbox(raw_text: str) -> dict[str, Any] | None:
     match = re.search(r"Bottle Position\s*:\s*(\{.*?\})", raw_text or "", flags=re.IGNORECASE)
     if not match:
