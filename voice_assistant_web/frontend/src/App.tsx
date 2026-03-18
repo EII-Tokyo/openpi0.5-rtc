@@ -11,6 +11,7 @@ type HierarchicalState = {
   high_level_text?: string
   bottle_description?: string | null
   bottle_position?: Record<string, unknown> | null
+  bottle_state?: string | null
   subtask?: string | null
   high_level_server_timing?: Record<string, unknown>
   low_level_server_timing?: Record<string, unknown>
@@ -193,6 +194,10 @@ export default function App() {
               <div className="info-block">
                 <span className="info-label">{t.bottlePosition}</span>
                 <pre>{hierarchical.bottle_position ? JSON.stringify(hierarchical.bottle_position, null, 2) : 'N/A'}</pre>
+              </div>
+              <div className="info-block">
+                <span className="info-label">{t.bottleState}</span>
+                <pre>{hierarchical.bottle_state || 'N/A'}</pre>
               </div>
               <div className="info-block">
                 <span className="info-label">{t.subtask}</span>

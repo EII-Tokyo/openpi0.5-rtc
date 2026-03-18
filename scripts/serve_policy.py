@@ -123,6 +123,10 @@ def main(args: Args) -> None:
         dummy_prev_action = np.random.rand(50, 32)
         policy.infer(dummy_obs, dummy_prev_action, use_rtc=True)
     policy.infer(dummy_obs, dummy_prev_action, use_rtc=False)
+    try:
+        policy.infer_subtask(dummy_obs)
+    except (AttributeError, NotImplementedError):
+        logging.info("Skipping infer_subtask warmup because the current policy does not support it.")
     # Record the policy's behavior.
     if args.record:
         policy = _policy.PolicyRecorder(policy, "policy_records")

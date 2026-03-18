@@ -1,4 +1,7 @@
 services:
+  # Default checkpoint used for both low-level infer and high-level infer_subtask
+  # unless SERVER_ARGS / HIGH_LEVEL_SERVER_ARGS are explicitly overridden.
+  # This keeps compose-up aligned with the current ALOHA subtask runtime.
   runtime:
     image: lyl472324464/robot:aloha-ros1.0
     depends_on:
@@ -45,7 +48,9 @@ services:
     build:
       context: .
       dockerfile: scripts/docker/serve_policy.Dockerfile
-    command: /bin/bash -lc "uv run scripts/serve_policy.py ${SERVER_ARGS:---env ALOHA}"
+    command: >-
+      /bin/bash -lc
+      "uv run scripts/serve_policy.py ${SERVER_ARGS:-policy:checkpoint --policy.config twist_off_the_bottle_cap_subtask_lora --policy.dir /app/checkpoints/twist_off_the_bottle_cap_subtask_lora/twist_off_the_bottle_cap_subtask_lora_20260317/32000}"
     init: true
     tty: true
     network_mode: host
@@ -68,7 +73,9 @@ services:
     build:
       context: .
       dockerfile: scripts/docker/serve_policy.Dockerfile
-    command: /bin/bash -lc "uv run scripts/serve_policy.py --port 8001 ${HIGH_LEVEL_SERVER_ARGS:---env ALOHA}"
+    command: >-
+      /bin/bash -lc
+      "uv run scripts/serve_policy.py --port 8001 ${HIGH_LEVEL_SERVER_ARGS:-policy:checkpoint --policy.config twist_off_the_bottle_cap_subtask_lora --policy.dir /app/checkpoints/twist_off_the_bottle_cap_subtask_lora/twist_off_the_bottle_cap_subtask_lora_20260317/32000}"
     init: true
     tty: true
     network_mode: host

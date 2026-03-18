@@ -1,5 +1,4 @@
 from collections.abc import Sequence
-import dataclasses
 import logging
 import pathlib
 import time
@@ -52,13 +51,7 @@ class Policy(BasePolicy):
         self._model = model
         self._input_transforms_raw = list(transforms)
         self._input_transform = _transforms.compose(transforms)
-        subtask_transforms = [
-            dataclasses.replace(t, for_subtask_generation=True)
-            if isinstance(t, _transforms.TokenizePrompt)
-            else t
-            for t in transforms
-        ]
-        self._input_transform_subtask = _transforms.compose(subtask_transforms)
+        self._input_transform_subtask = self._input_transform
         self._output_transform = _transforms.compose(output_transforms)
         self._sample_kwargs = sample_kwargs or {}
         self._metadata = metadata or {}
@@ -169,6 +162,7 @@ class Policy(BasePolicy):
             raise NotImplementedError("Current model does not support autoregressive subtask decoding.")
 
         inputs = jax.tree.map(lambda x: x, obs)
+        inputs.pop("subtask", None)
         inputs = self._input_transform_subtask(inputs)
 
         if self._is_pytorch_model:

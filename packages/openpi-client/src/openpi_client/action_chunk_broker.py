@@ -116,8 +116,13 @@ class ActionChunkBroker(_base_policy.BasePolicy):
             else:
                 time.sleep(0.01)
 
-    def _slice_result(self, value):
-        if isinstance(value, np.ndarray) and value.ndim > 0 and value.shape[0] == self._action_horizon:
+    def _slice_result(self, value, chunk_len: int | None):
+        if (
+            chunk_len is not None
+            and isinstance(value, np.ndarray)
+            and value.ndim > 0
+            and value.shape[0] == chunk_len
+        ):
             return value[self._cur_step, ...]
         return value
 
@@ -130,7 +135,12 @@ class ActionChunkBroker(_base_policy.BasePolicy):
                 self._last_origin_actions = self._last_results["origin_actions"]
                 self._cur_step = 0
 
-            results = tree.map_structure(self._slice_result, self._last_results)
+            chunk_len = None
+            actions = self._last_results.get("actions")
+            if isinstance(actions, np.ndarray) and actions.ndim > 0:
+                chunk_len = int(actions.shape[0])
+
+            results = tree.map_structure(lambda x: self._slice_result(x, chunk_len), self._last_results)
             self._obs = obs
             self._cur_step += 1
 
@@ -147,7 +157,12 @@ class ActionChunkBroker(_base_policy.BasePolicy):
                 self._last_results = self._policy.infer(obs)
                 self._cur_step = 0
 
-            results = tree.map_structure(self._slice_result, self._last_results)
+            chunk_len = None
+            actions = self._last_results.get("actions")
+            if isinstance(actions, np.ndarray) and actions.ndim > 0:
+                chunk_len = int(actions.shape[0])
+
+            results = tree.map_structure(lambda x: self._slice_result(x, chunk_len), self._last_results)
             self._cur_step += 1
 
             if self._cur_step >= self._action_horizon:

@@ -1,10 +1,15 @@
-from typing import List, Optional  # noqa: UP035
 import copy
+from typing import List, Optional  # noqa: UP035
 import einops
 from openpi_client import image_tools
 from openpi_client.runtime import environment as _environment
 from typing_extensions import override
 from examples.aloha_real import real_env as _real_env
+
+_DEFAULT_RESET_POSITION = [
+    [0.0, -0.96, 1.16, 0.0, -0.0, 0.0],
+    [0.0, -0.96, 1.16, 1.57, -0.0, -1.57],
+]
 
 
 class AlohaRealEnvironment(_environment.Environment):
@@ -17,6 +22,10 @@ class AlohaRealEnvironment(_environment.Environment):
         render_height: int = 224,
         render_width: int = 224,
     ) -> None:
+        if reset_position is None:
+            reset_position = [list(joints) for joints in _DEFAULT_RESET_POSITION]
+        if gripper_current_limits is None:
+            gripper_current_limits = [300, 500]
         self._env = _real_env.make_real_env(init_node=True, reset_position=reset_position, gripper_current_limits=gripper_current_limits)
         self._render_height = render_height
         self._render_width = render_width
@@ -24,8 +33,8 @@ class AlohaRealEnvironment(_environment.Environment):
         self._ts = None
 
     @override
-    def reset(self, *, reset_position=True) -> None:
-        self._ts = self._env.reset(reset_position=reset_position)
+    def reset(self) -> None:
+        self._ts = self._env.reset()
 
     @override
     def is_episode_complete(self) -> bool:
