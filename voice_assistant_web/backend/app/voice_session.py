@@ -87,7 +87,8 @@ class VoiceAssistantEngine:
         text: str,
         *,
         language: str = "en",
-        manual_dataset_subdir: str | None = None,
+        dataset_dir: str | None = None,
+        manual_dataset_dir: str | None = None,
         debug: dict | None = None,
     ) -> VoiceResponse:
         transcript = text.strip()
@@ -157,7 +158,8 @@ class VoiceAssistantEngine:
             publish_task(
                 self._redis,
                 task_number,
-                manual_dataset_subdir=manual_dataset_subdir if task_number == "3" else None,
+                dataset_dir=dataset_dir,
+                manual_dataset_dir=manual_dataset_dir,
             )
         logging.info(
             "voice_text classified language=%s task=%s reply_len=%d",
@@ -208,7 +210,8 @@ class VoiceAssistantEngine:
         audio_file: UploadFile,
         *,
         language: str = "en",
-        manual_dataset_subdir: str | None = None,
+        dataset_dir: str | None = None,
+        manual_dataset_dir: str | None = None,
     ) -> VoiceResponse:
         fallback_language = self._normalize_language(language)
         if self._openai is None:
@@ -246,7 +249,8 @@ class VoiceAssistantEngine:
             return await self.process_text(
                 transcript,
                 language=detected_language,
-                manual_dataset_subdir=manual_dataset_subdir,
+                dataset_dir=dataset_dir,
+                manual_dataset_dir=manual_dataset_dir,
                 debug={
                     "transcription_language": getattr(transcription, "language", None),
                     "detected_language": detected_language,

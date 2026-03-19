@@ -42,7 +42,8 @@ type VoiceResponse = {
 }
 
 type UiConfig = {
-  manualDatasetSubdir: string
+  datasetDir: string
+  manualDatasetDir: string
 }
 
 type VoiceStatus = 'idle' | 'recording' | 'thinking' | 'speaking'
@@ -60,7 +61,8 @@ const initialState: RealtimeState = {
 }
 
 const defaultConfig: UiConfig = {
-  manualDatasetSubdir: '12345',
+  datasetDir: '',
+  manualDatasetDir: '',
 }
 
 function loadUiConfig(): UiConfig {
@@ -70,10 +72,11 @@ function loadUiConfig(): UiConfig {
     if (!raw) return defaultConfig
     const parsed = JSON.parse(raw)
     return {
-      manualDatasetSubdir:
-        typeof parsed?.manualDatasetSubdir === 'string' && parsed.manualDatasetSubdir.trim()
-          ? parsed.manualDatasetSubdir.trim()
-          : defaultConfig.manualDatasetSubdir,
+      datasetDir: typeof parsed?.datasetDir === 'string' ? parsed.datasetDir.trim() : defaultConfig.datasetDir,
+      manualDatasetDir:
+        typeof parsed?.manualDatasetDir === 'string'
+          ? parsed.manualDatasetDir.trim()
+          : defaultConfig.manualDatasetDir,
     }
   } catch {
     return defaultConfig
@@ -191,7 +194,8 @@ export default function App() {
         body: JSON.stringify({
           text,
           language,
-          manual_dataset_subdir: uiConfig.manualDatasetSubdir.trim() || undefined,
+          dataset_dir: uiConfig.datasetDir.trim() || undefined,
+          manual_dataset_dir: uiConfig.manualDatasetDir.trim() || undefined,
         }),
       })
       if (!response.ok) {
@@ -221,8 +225,11 @@ export default function App() {
       const formData = new FormData()
       formData.append('file', blob, `voice.${fileExtension}`)
       formData.append('language', language)
-      if (uiConfig.manualDatasetSubdir.trim()) {
-        formData.append('manual_dataset_subdir', uiConfig.manualDatasetSubdir.trim())
+      if (uiConfig.datasetDir.trim()) {
+        formData.append('dataset_dir', uiConfig.datasetDir.trim())
+      }
+      if (uiConfig.manualDatasetDir.trim()) {
+        formData.append('manual_dataset_dir', uiConfig.manualDatasetDir.trim())
       }
       const response = await fetch(`${apiBase}/api/voice/audio`, {
         method: 'POST',
@@ -536,16 +543,29 @@ export default function App() {
               </button>
             </div>
             <label className="config-field">
-              <span>{t.saveFolder}</span>
+              <span>{t.inferenceSavePath}</span>
               <input
-                value={uiConfig.manualDatasetSubdir}
+                value={uiConfig.datasetDir}
                 onChange={(event) =>
                   setUiConfig((current) => ({
                     ...current,
-                    manualDatasetSubdir: event.target.value.replace(/[^A-Za-z0-9_-]/g, ''),
+                    datasetDir: event.target.value,
                   }))
                 }
-                placeholder="12345"
+                placeholder="/app/examples/aloha_real/inference_hdf5"
+              />
+            </label>
+            <label className="config-field">
+              <span>{t.manualSavePath}</span>
+              <input
+                value={uiConfig.manualDatasetDir}
+                onChange={(event) =>
+                  setUiConfig((current) => ({
+                    ...current,
+                    manualDatasetDir: event.target.value,
+                  }))
+                }
+                placeholder="/app/examples/aloha_real/manual_override"
               />
             </label>
             <p className="config-help">{t.configHelp}</p>

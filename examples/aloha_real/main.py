@@ -48,8 +48,8 @@ class Args:
         ])
     gripper_current_limits: List[int] = dataclasses.field(default_factory=lambda: [300, 500])
     # H5dfSaver 配置
-    dataset_dir: str = "/app/examples/aloha_real/inference_hdf5"
-    manual_dataset_dir: str = "/app/examples/aloha_real/manual_override"
+    dataset_dir: str | None = None
+    manual_dataset_dir: str | None = None
     compress_images: bool = True
     is_mobile: bool = False
     if_save_hdf5: bool = False

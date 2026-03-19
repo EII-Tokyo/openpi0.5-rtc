@@ -54,7 +54,8 @@ class Runtime:
 
         self._step_time = 1 / self._max_hz if self._max_hz > 0 else 0
         self._manual_step_time = 1 / self._manual_hz if self._manual_hz > 0 else 0
-        self._manual_dataset_dir = manual_dataset_dir or "/app/examples/aloha_real/manual_override"
+        self._manual_dataset_dir = manual_dataset_dir
+        self._dataset_dir = None
         self._high_level_policy = high_level_policy
         self._high_level_step_time = 1 / high_level_hz if high_level_hz > 0 else 0.0
         self._good_bad_action = _subtask_parsing.normalize_good_bad_action(good_bad_action)
@@ -97,6 +98,17 @@ class Runtime:
         self._model_task_nums = {"1", "2"}
         self._stop_task_nums = {"4", "5"}
 
+    def _apply_task_paths(self, task_data: dict) -> None:
+        dataset_dir = task_data.get("dataset_dir")
+        manual_dataset_dir = task_data.get("manual_dataset_dir")
+        if isinstance(dataset_dir, str) and dataset_dir.strip():
+            self._dataset_dir = dataset_dir.strip()
+        if isinstance(manual_dataset_dir, str) and manual_dataset_dir.strip():
+            self._manual_dataset_dir = manual_dataset_dir.strip()
+        for subscriber in self._subscribers:
+            if hasattr(subscriber, "set_dataset_dir"):
+                subscriber.set_dataset_dir(self._dataset_dir)
+
     def _setup_redis(self) -> None:
         """设置Redis连接"""
         try:
@@ -135,7 +147,9 @@ class Runtime:
                             self._latest_task = {
                                 'task_num': task_num,
                                 'task_name': task_name,
-                                'timestamp': timestamp
+                                'timestamp': timestamp,
+                                'dataset_dir': data.get('dataset_dir'),
+                                'manual_dataset_dir': data.get('manual_dataset_dir'),
                             }
                             
                     except json.JSONDecodeError as e:
@@ -361,6 +375,7 @@ class Runtime:
         task_name = task_data.get('task_name', '未知任务')
         
         logging.info(f"处理语音任务: {task_num} - {task_name}")
+        self._apply_task_paths(task_data)
         
         if task_num in self._model_task_nums:
             logging.info(f"开始执行任务: {task_name}")
@@ -376,9 +391,8 @@ class Runtime:
             self._current_task = task_data
             self._agent.reset() 
             self._reset_high_level_state()
-            episode_subdir = task_data.get("manual_dataset_subdir")
             for subscriber in self._subscribers:
-                subscriber.on_episode_end(episode_subdir=episode_subdir) 
+                subscriber.on_episode_end()
             self._publish_runtime_state(mode="teleop_prepare")
             self._handle_human_teleop_mode()  
         elif task_num == "4":
@@ -524,16 +538,13 @@ class Runtime:
             
             logging.info("开始人机协作数据收集；后续通过 voice web 发送任务 1/2/4/5 退出或切换模式")
 
-            if not self._current_task or not self._current_task.get("manual_dataset_subdir"):
-                logging.warning("未找到人工接管数据保存子目录名，取消本次人工接管数据保存。")
+            if not self._manual_dataset_dir:
+                logging.warning("未从 voice web 收到人工接管保存路径，取消本次人工接管数据保存。")
                 self._is_waiting_for_task = True
                 self._current_task = None
                 self._publish_runtime_state(mode="waiting")
                 return
-            episode_dataset_dir = os.path.join(
-                self._manual_dataset_dir,
-                self._current_task["manual_dataset_subdir"],
-            )
+            episode_dataset_dir = self._manual_dataset_dir
             os.makedirs(episode_dataset_dir, exist_ok=True)
 
             step_count = 0

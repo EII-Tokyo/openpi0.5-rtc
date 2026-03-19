@@ -29,7 +29,8 @@ def publish_task(
     redis_client: redis.Redis,
     task_num: str,
     *,
-    manual_dataset_subdir: str | None = None,
+    dataset_dir: str | None = None,
+    manual_dataset_dir: str | None = None,
 ) -> dict:
     task_name = TASK_MAPPING[task_num]
     message = {
@@ -37,7 +38,9 @@ def publish_task(
         "task_name": task_name,
         "timestamp": time.time(),
     }
-    if manual_dataset_subdir:
-        message["manual_dataset_subdir"] = manual_dataset_subdir
+    if dataset_dir:
+        message["dataset_dir"] = dataset_dir
+    if manual_dataset_dir:
+        message["manual_dataset_dir"] = manual_dataset_dir
     redis_client.publish(settings.voice_command_channel, json.dumps(message))
     return message

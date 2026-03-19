@@ -13,7 +13,7 @@ class H5dfSaver(_subscriber.Subscriber):
 
     def __init__(
         self,
-        dataset_dir: str,
+        dataset_dir: str | None,
         compress_images: bool = True,
         is_mobile: bool = False,
         fps: float | None = None,
@@ -25,8 +25,8 @@ class H5dfSaver(_subscriber.Subscriber):
         :param compress_images: 是否压缩图像
         :param is_mobile: 是否是移动机器人（需要保存 base_action）
         """
-        self._dataset_dir = pathlib.Path(dataset_dir)
-        self._dataset_dir.mkdir(parents=True, exist_ok=True)
+        self._dataset_dir: pathlib.Path | None = None
+        self.set_dataset_dir(dataset_dir)
         self._compress_images = compress_images
         self._is_mobile = is_mobile
         self._fps = fps
@@ -35,6 +35,13 @@ class H5dfSaver(_subscriber.Subscriber):
         self._observations: List[dict] = []
         self._actions: List[dict] = []
         self._timestamps: List[float] = []
+
+    def set_dataset_dir(self, dataset_dir: str | None) -> None:
+        if dataset_dir is None or not str(dataset_dir).strip():
+            self._dataset_dir = None
+            return
+        self._dataset_dir = pathlib.Path(str(dataset_dir).strip())
+        self._dataset_dir.mkdir(parents=True, exist_ok=True)
 
     @override
     def on_episode_start(self) -> None:
@@ -57,6 +64,12 @@ class H5dfSaver(_subscriber.Subscriber):
         """Episode 结束时保存数据到 h5df 文件。"""
         if not self._observations:
             logging.warning("没有数据可保存，跳过保存。")
+            return
+        if self._dataset_dir is None:
+            logging.warning("未配置自动保存 dataset_dir，跳过 hdf5 保存。")
+            self._observations = []
+            self._actions = []
+            self._timestamps = []
             return
 
         actions = [action["actions"] for action in self._actions]

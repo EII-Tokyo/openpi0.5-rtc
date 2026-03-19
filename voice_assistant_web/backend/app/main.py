@@ -101,7 +101,8 @@ async def voice_text(request: VoiceRequest) -> VoiceResponse:
         message = publish_task(
             redis_client,
             direct_task,
-            manual_dataset_subdir=request.manual_dataset_subdir if direct_task == "3" else None,
+            dataset_dir=request.dataset_dir,
+            manual_dataset_dir=request.manual_dataset_dir,
         )
         return VoiceResponse(
             transcript=request.text,
@@ -113,7 +114,8 @@ async def voice_text(request: VoiceRequest) -> VoiceResponse:
     return await voice_engine.process_text(
         request.text,
         language=request.language,
-        manual_dataset_subdir=request.manual_dataset_subdir,
+        dataset_dir=request.dataset_dir,
+        manual_dataset_dir=request.manual_dataset_dir,
     )
 
 
@@ -121,10 +123,12 @@ async def voice_text(request: VoiceRequest) -> VoiceResponse:
 async def voice_audio(
     file: UploadFile = File(...),
     language: str = Form("en"),
-    manual_dataset_subdir: str | None = Form(None),
+    dataset_dir: str | None = Form(None),
+    manual_dataset_dir: str | None = Form(None),
 ) -> VoiceResponse:
     return await voice_engine.process_audio(
         file,
         language=language,
-        manual_dataset_subdir=manual_dataset_subdir,
+        dataset_dir=dataset_dir,
+        manual_dataset_dir=manual_dataset_dir,
     )
