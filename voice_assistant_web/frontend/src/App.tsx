@@ -41,6 +41,7 @@ type VoiceResponse = {
 type UiConfig = {
   apiBase: string
   wsBase: string
+  cameraRefreshMs: number
   datasetDir: string
   manualDatasetDir: string
 }
@@ -62,6 +63,7 @@ const initialState: RealtimeState = {
 const defaultConfig: UiConfig = {
   apiBase: import.meta.env.VITE_API_BASE || `http://${defaultHost}:8011`,
   wsBase: import.meta.env.VITE_WS_BASE || `ws://${defaultHost}:8011`,
+  cameraRefreshMs: 1000,
   datasetDir: '',
   manualDatasetDir: '',
 }
@@ -75,6 +77,10 @@ function loadUiConfig(): UiConfig {
     return {
       apiBase: typeof parsed?.apiBase === 'string' && parsed.apiBase.trim() ? parsed.apiBase.trim() : defaultConfig.apiBase,
       wsBase: typeof parsed?.wsBase === 'string' && parsed.wsBase.trim() ? parsed.wsBase.trim() : defaultConfig.wsBase,
+      cameraRefreshMs:
+        typeof parsed?.cameraRefreshMs === 'number' && parsed.cameraRefreshMs > 0
+          ? parsed.cameraRefreshMs
+          : defaultConfig.cameraRefreshMs,
       datasetDir: typeof parsed?.datasetDir === 'string' ? parsed.datasetDir.trim() : defaultConfig.datasetDir,
       manualDatasetDir:
         typeof parsed?.manualDatasetDir === 'string'
@@ -110,6 +116,7 @@ export default function App() {
   const [error, setError] = useState<string | null>(null)
   const [configOpen, setConfigOpen] = useState(false)
   const [cameraView, setCameraView] = useState<'focus' | 'quad'>('focus')
+  const [cameraRefreshToken, setCameraRefreshToken] = useState<number>(Date.now())
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const mediaChunksRef = useRef<Blob[]>([])
   const mediaStreamRef = useRef<MediaStream | null>(null)
@@ -164,6 +171,14 @@ export default function App() {
     }
   }, [])
 
+  useEffect(() => {
+    const intervalMs = Math.max(100, Number(uiConfig.cameraRefreshMs) || defaultConfig.cameraRefreshMs)
+    const timer = window.setInterval(() => {
+      setCameraRefreshToken(Date.now())
+    }, intervalMs)
+    return () => window.clearInterval(timer)
+  }, [uiConfig.cameraRefreshMs])
+
   const freshness = useMemo(() => {
     if (!state.robot.timestamp) return t.waitingForRobot
     const age = Date.now() / 1000 - state.robot.timestamp
@@ -173,6 +188,8 @@ export default function App() {
   const hierarchical = state.robot.hierarchical || {}
   const primaryCamera = 'cam_high'
   const secondaryCameras = cameraNames.filter((name) => name !== primaryCamera)
+  const cameraSrc = (cameraName: (typeof cameraNames)[number]) =>
+    `${uiConfig.apiBase}/api/cameras/${cameraName}/latest.jpg?t=${cameraRefreshToken}`
 
   const sendCommand = async (rawText: string) => {
     const text = rawText.trim()
@@ -363,7 +380,7 @@ export default function App() {
             </div>
             {cameraView === 'focus' ? (
               <div className="camera-stage-frame">
-                <img src={`${uiConfig.apiBase}/api/cameras/${primaryCamera}/stream.mjpg`} alt={primaryCamera} />
+                <img src={cameraSrc(primaryCamera)} alt={primaryCamera} />
                 <div className="camera-stage-overlay">
                   <div className="stage-task">
                     <span>{t.taskPrompt}</span>
@@ -379,7 +396,7 @@ export default function App() {
                       <span>{t.cameraLabels[cameraName] || cameraName}</span>
                       <span className={`dot ${state.camera_status[cameraName] ? 'live' : 'offline'}`} />
                     </div>
-                    <img src={`${uiConfig.apiBase}/api/cameras/${cameraName}/stream.mjpg`} alt={cameraName} />
+                    <img src={cameraSrc(cameraName)} alt={cameraName} />
                   </article>
                 ))}
               </div>
@@ -394,7 +411,7 @@ export default function App() {
                     <span>{t.cameraLabels[cameraName] || cameraName}</span>
                     <span className={`dot ${state.camera_status[cameraName] ? 'live' : 'offline'}`} />
                   </div>
-                  <img src={`${uiConfig.apiBase}/api/cameras/${cameraName}/stream.mjpg`} alt={cameraName} />
+                  <img src={cameraSrc(cameraName)} alt={cameraName} />
                 </article>
               ))}
             </div>
@@ -560,6 +577,22 @@ export default function App() {
                   }))
                 }
                 placeholder={`ws://${defaultHost}:8011`}
+              />
+            </label>
+            <label className="config-field">
+              <span>{t.cameraRefreshLabel}</span>
+              <input
+                type="number"
+                min={100}
+                step={100}
+                value={uiConfig.cameraRefreshMs}
+                onChange={(event) =>
+                  setUiConfig((current) => ({
+                    ...current,
+                    cameraRefreshMs: Math.max(100, Number(event.target.value) || defaultConfig.cameraRefreshMs),
+                  }))
+                }
+                placeholder="1000"
               />
             </label>
             <label className="config-field">
