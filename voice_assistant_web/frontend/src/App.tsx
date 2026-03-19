@@ -115,6 +115,7 @@ export default function App() {
   const [sending, setSending] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [configOpen, setConfigOpen] = useState(false)
+  const [runtimeOpen, setRuntimeOpen] = useState(false)
   const [cameraView, setCameraView] = useState<'focus' | 'quad'>('focus')
   const [cameraRefreshToken, setCameraRefreshToken] = useState<number>(Date.now())
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
@@ -344,6 +345,9 @@ export default function App() {
         <div className="hero-badges">
           <span className="status-pill live">{freshness}</span>
           <span className="status-pill mode">{state.robot.mode || t.waiting}</span>
+          <button type="button" className="ghost-button" onClick={() => setRuntimeOpen(true)}>
+            {t.openRuntime}
+          </button>
           <button type="button" className="ghost-button" onClick={() => setConfigOpen(true)}>
             {t.openConfig}
           </button>
@@ -475,60 +479,6 @@ export default function App() {
             </div>
             {error ? <div className="error-banner">{error}</div> : null}
           </section>
-
-          <section className="panel runtime-panel">
-            <div className="panel-header">
-              <div>
-                <p className="eyebrow">{t.runtimeEyebrow}</p>
-                <h2>{t.runtimeTitle}</h2>
-              </div>
-              <span className="robot-task-badge" title={state.robot.current_task || t.noActiveTask}>
-                {state.robot.current_task || t.noActiveTask}
-              </span>
-            </div>
-            <div className="runtime-grid">
-              <div className="info-block">
-                <span className="info-label">{t.bottleDescription}</span>
-                <pre>{hierarchical.bottle_description || 'N/A'}</pre>
-              </div>
-              <div className="info-block">
-                <span className="info-label">{t.bottleState}</span>
-                <pre>{hierarchical.bottle_state || 'N/A'}</pre>
-              </div>
-              <div className="info-block">
-                <span className="info-label">{t.bottlePosition}</span>
-                <pre>{hierarchical.bottle_position ? JSON.stringify(hierarchical.bottle_position, null, 2) : 'N/A'}</pre>
-              </div>
-              <div className="info-block">
-                <span className="info-label">{t.subtask}</span>
-                <pre>{hierarchical.subtask || 'N/A'}</pre>
-              </div>
-              <div className="info-block wide">
-                <span className="info-label">{t.highLevelText}</span>
-                <pre>{hierarchical.high_level_text || 'N/A'}</pre>
-              </div>
-              <div className="info-block wide">
-                <span className="info-label">{t.lowLevelPrompt}</span>
-                <pre>{hierarchical.low_level_prompt || 'N/A'}</pre>
-              </div>
-              <div className="info-block compact">
-                <span className="info-label">{t.highLevelTiming}</span>
-                <pre>{formatTiming(hierarchical.high_level_server_timing)}</pre>
-              </div>
-              <div className="info-block compact">
-                <span className="info-label">{t.lowLevelTiming}</span>
-                <pre>{formatTiming(hierarchical.low_level_server_timing)}</pre>
-              </div>
-              <div className="info-block compact">
-                <span className="info-label">{t.qpos}</span>
-                <pre>{formatArray(state.robot.qpos)}</pre>
-              </div>
-              <div className="info-block compact">
-                <span className="info-label">{t.latestAction}</span>
-                <pre>{formatArray(state.robot.latest_action)}</pre>
-              </div>
-            </div>
-          </section>
         </aside>
       </section>
 
@@ -624,6 +574,67 @@ export default function App() {
             <p className="config-help">{t.configHelp}</p>
           </aside>
         </>
+      ) : null}
+
+      {runtimeOpen ? (
+        <aside className="runtime-drawer" onClick={(event) => event.stopPropagation()}>
+          <div className="panel-header">
+            <div>
+              <p className="eyebrow">{t.runtimeEyebrow}</p>
+              <h2>{t.runtimeTitle}</h2>
+            </div>
+            <div className="drawer-actions">
+              <span className="robot-task-badge" title={state.robot.current_task || t.noActiveTask}>
+                {state.robot.current_task || t.noActiveTask}
+              </span>
+              <button type="button" className="ghost-button" onClick={() => setRuntimeOpen(false)}>
+                {t.close}
+              </button>
+            </div>
+          </div>
+          <div className="runtime-grid">
+            <div className="info-block">
+              <span className="info-label">{t.bottleDescription}</span>
+              <pre>{hierarchical.bottle_description || 'N/A'}</pre>
+            </div>
+            <div className="info-block">
+              <span className="info-label">{t.bottleState}</span>
+              <pre>{hierarchical.bottle_state || 'N/A'}</pre>
+            </div>
+            <div className="info-block">
+              <span className="info-label">{t.bottlePosition}</span>
+              <pre>{hierarchical.bottle_position ? JSON.stringify(hierarchical.bottle_position, null, 2) : 'N/A'}</pre>
+            </div>
+            <div className="info-block">
+              <span className="info-label">{t.subtask}</span>
+              <pre>{hierarchical.subtask || 'N/A'}</pre>
+            </div>
+            <div className="info-block wide">
+              <span className="info-label">{t.highLevelText}</span>
+              <pre>{hierarchical.high_level_text || 'N/A'}</pre>
+            </div>
+            <div className="info-block wide">
+              <span className="info-label">{t.lowLevelPrompt}</span>
+              <pre>{hierarchical.low_level_prompt || 'N/A'}</pre>
+            </div>
+            <div className="info-block compact">
+              <span className="info-label">{t.highLevelTiming}</span>
+              <pre>{formatTiming(hierarchical.high_level_server_timing)}</pre>
+            </div>
+            <div className="info-block compact">
+              <span className="info-label">{t.lowLevelTiming}</span>
+              <pre>{formatTiming(hierarchical.low_level_server_timing)}</pre>
+            </div>
+            <div className="info-block compact">
+              <span className="info-label">{t.qpos}</span>
+              <pre>{formatArray(state.robot.qpos)}</pre>
+            </div>
+            <div className="info-block compact">
+              <span className="info-label">{t.latestAction}</span>
+              <pre>{formatArray(state.robot.latest_action)}</pre>
+            </div>
+          </div>
+        </aside>
       ) : null}
     </main>
   )

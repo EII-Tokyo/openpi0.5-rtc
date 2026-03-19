@@ -185,7 +185,7 @@ button {
 
 .control-rail {
   display: grid;
-  grid-template-rows: minmax(280px, auto) minmax(0, 1fr);
+  grid-template-rows: minmax(280px, auto);
   gap: 18px;
   min-height: 0;
 }
@@ -318,12 +318,36 @@ button {
   background: #d68c7f;
 }
 
-.command-panel,
-.runtime-panel {
+.command-panel {
   display: grid;
   grid-template-rows: auto auto auto auto minmax(0, 1fr);
   gap: 14px;
   min-height: 0;
+}
+
+.runtime-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 21;
+  width: min(560px, 100vw);
+  height: 100dvh;
+  padding: 22px;
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  overflow: auto;
+  border-left: 1px solid rgba(54, 45, 37, 0.08);
+  background: rgba(255, 252, 248, 0.97);
+  box-shadow: -18px 0 40px rgba(69, 54, 37, 0.16);
+}
+
+.drawer-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .voice-orb-wrap {
