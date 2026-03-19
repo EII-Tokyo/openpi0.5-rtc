@@ -7,7 +7,7 @@ import os
 import sys
 from collections import deque
 
-from openpi_client import hierarchical_policy as _hierarchical_policy
+from openpi_client import subtask_parsing as _subtask_parsing
 from openpi_client.runtime import agent as _agent
 from openpi_client.runtime import environment as _environment
 from openpi_client.runtime import subscriber as _subscriber
@@ -221,8 +221,8 @@ class Runtime:
             try:
                 high_level_result = self._high_level_policy.infer_subtask(obs)
                 high_level_text = str(high_level_result.get("subtask_text") or "").strip()
-                structured_subtask = _hierarchical_policy._build_low_level_subtask_payload(high_level_text)
-                parsed = _hierarchical_policy._parse_structured_fields(high_level_text)
+                structured_subtask = _subtask_parsing.build_low_level_subtask_payload(high_level_text)
+                parsed = _subtask_parsing.parse_structured_fields(high_level_text)
                 hierarchical_state = {
                     "task_prompt": str(obs.get("prompt") or "").strip(),
                     "low_level_prompt": json.dumps(structured_subtask, ensure_ascii=False)
