@@ -38,7 +38,7 @@ class CameraBridge:
             from aloha.msg import RGBGrayscaleImage
 
             if not rospy.core.is_initialized():
-                rospy.init_node("voice_assistant_web_backend", anonymous=True)
+                rospy.init_node("voice_assistant_web_backend", anonymous=True, disable_signals=True)
             quality = max(10, min(settings.camera_jpeg_quality, 95))
             encode_args = [int(cv2.IMWRITE_JPEG_QUALITY), quality]
 

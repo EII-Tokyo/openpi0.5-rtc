@@ -10,7 +10,7 @@ from fastapi.responses import Response, StreamingResponse
 
 from .camera_bridge import CameraBridge
 from .config import settings
-from .redis_commands import create_redis_client
+from .redis_commands import create_redis_client, publish_task
 from .robot_state_bridge import RobotStateBridge
 from .schemas import HealthResponse, RealtimePayload, RuntimeStatePayload, VoiceRequest, VoiceResponse
 from .voice_session import VoiceAssistantEngine
@@ -34,13 +34,6 @@ voice_engine = VoiceAssistantEngine(redis_client)
 
 @app.on_event("startup")
 def on_startup() -> None:
-    try:
-        import rospy
-
-        if not rospy.core.is_initialized():
-            rospy.init_node("voice_assistant_web_backend", anonymous=True)
-    except Exception:
-        logging.exception("ROS node initialization failed")
     camera_bridge.start()
     robot_state_bridge.start()
 
@@ -103,7 +96,25 @@ async def realtime_socket(websocket: WebSocket) -> None:
 
 @app.post("/api/voice/text", response_model=VoiceResponse)
 async def voice_text(request: VoiceRequest) -> VoiceResponse:
-    return await voice_engine.process_text(request.text, language=request.language)
+    direct_task = request.text.strip()
+    if direct_task in {"1", "2", "3", "4", "5"}:
+        message = publish_task(
+            redis_client,
+            direct_task,
+            manual_dataset_subdir=request.manual_dataset_subdir if direct_task == "3" else None,
+        )
+        return VoiceResponse(
+            transcript=request.text,
+            reply_text=f"Sent task {direct_task}.",
+            task_number=direct_task,
+            task_name=message["task_name"],
+            debug={"direct_task": True},
+        )
+    return await voice_engine.process_text(
+        request.text,
+        language=request.language,
+        manual_dataset_subdir=request.manual_dataset_subdir,
+    )
 
 
 @app.post("/api/voice/audio", response_model=VoiceResponse)

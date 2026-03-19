@@ -137,8 +137,5 @@ services:
     network_mode: "host"
     init: true
     tty: true
-    environment:
-      - VITE_API_BASE=${VITE_API_BASE:-http://localhost:8011}
-      - VITE_WS_BASE=${VITE_WS_BASE:-ws://localhost:8011}
     depends_on:
       - voice_web_backend

@@ -25,12 +25,19 @@ def create_redis_client() -> redis.Redis:
     )
 
 
-def publish_task(redis_client: redis.Redis, task_num: str) -> dict:
+def publish_task(
+    redis_client: redis.Redis,
+    task_num: str,
+    *,
+    manual_dataset_subdir: str | None = None,
+) -> dict:
     task_name = TASK_MAPPING[task_num]
     message = {
         "task": task_num,
         "task_name": task_name,
         "timestamp": time.time(),
     }
+    if manual_dataset_subdir:
+        message["manual_dataset_subdir"] = manual_dataset_subdir
     redis_client.publish(settings.voice_command_channel, json.dumps(message))
     return message

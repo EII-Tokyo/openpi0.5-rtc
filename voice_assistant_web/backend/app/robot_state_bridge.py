@@ -50,7 +50,7 @@ class RobotStateBridge:
             from sensor_msgs.msg import JointState
 
             if not rospy.core.is_initialized():
-                rospy.init_node("voice_assistant_web_backend", anonymous=True)
+                rospy.init_node("voice_assistant_web_backend", anonymous=True, disable_signals=True)
 
             def left_callback(message: JointState) -> None:
                 self._left_qpos = [float(v) for v in message.position]
@@ -77,28 +77,31 @@ class RobotStateBridge:
             logging.exception("Robot state ROS polling failed")
 
     def _listen_runtime_state(self) -> None:
-        try:
-            redis_client = create_redis_client()
-            pubsub = redis_client.pubsub()
-            pubsub.subscribe(settings.runtime_state_channel)
-            while self._running:
-                message = pubsub.get_message(timeout=1.0)
-                if not message or message["type"] != "message":
-                    continue
-                payload = json.loads(message["data"])
-                with self._lock:
-                    self._state.update(
-                        {
-                            "timestamp": payload.get("timestamp", time.time()),
-                            "mode": payload.get("mode", self._state.get("mode", "waiting")),
-                            "current_task": payload.get("current_task"),
-                            "latest_action": payload.get("latest_action", self._state.get("latest_action", [])),
-                            "qpos": payload.get("qpos", self._state.get("qpos", [])),
-                            "hierarchical": payload.get("hierarchical", self._state.get("hierarchical", {})),
-                        }
-                    )
-        except Exception:
-            logging.exception("Runtime state redis listener failed")
+        while self._running:
+            try:
+                redis_client = create_redis_client()
+                pubsub = redis_client.pubsub()
+                pubsub.subscribe(settings.runtime_state_channel)
+                while self._running:
+                    message = pubsub.get_message(timeout=1.0)
+                    if not message or message["type"] != "message":
+                        continue
+                    payload = json.loads(message["data"])
+                    with self._lock:
+                        self._state.update(
+                            {
+                                "timestamp": payload.get("timestamp", time.time()),
+                                "mode": payload.get("mode", self._state.get("mode", "waiting")),
+                                "current_task": payload.get("current_task"),
+                                "latest_action": payload.get("latest_action", self._state.get("latest_action", [])),
+                                "qpos": payload.get("qpos", self._state.get("qpos", [])),
+                                "hierarchical": payload.get("hierarchical", self._state.get("hierarchical", {})),
+                            }
+                        )
+            except Exception:
+                logging.exception("Runtime state redis listener failed")
+                if self._running:
+                    time.sleep(1.0)
 
     def snapshot(self) -> dict[str, Any]:
         with self._lock:

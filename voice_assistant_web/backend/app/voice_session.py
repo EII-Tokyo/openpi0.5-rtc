@@ -82,7 +82,14 @@ class VoiceAssistantEngine:
 
         return None
 
-    async def process_text(self, text: str, *, language: str = "en", debug: dict | None = None) -> VoiceResponse:
+    async def process_text(
+        self,
+        text: str,
+        *,
+        language: str = "en",
+        manual_dataset_subdir: str | None = None,
+        debug: dict | None = None,
+    ) -> VoiceResponse:
         transcript = text.strip()
         language = self._normalize_language(language, transcript=transcript)
         reply_language = {
@@ -147,7 +154,11 @@ class VoiceAssistantEngine:
         reply_text = parsed.get("response_statement", "")
         task_name = TASK_MAPPING.get(task_number)
         if task_number in TASK_MAPPING:
-            publish_task(self._redis, task_number)
+            publish_task(
+                self._redis,
+                task_number,
+                manual_dataset_subdir=manual_dataset_subdir if task_number == "3" else None,
+            )
         logging.info(
             "voice_text classified language=%s task=%s reply_len=%d",
             language,

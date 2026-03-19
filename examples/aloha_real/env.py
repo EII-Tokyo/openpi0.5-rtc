@@ -1,5 +1,6 @@
 import copy
 from typing import List, Optional  # noqa: UP035
+import dm_env
 import einops
 from openpi_client import image_tools
 from openpi_client.runtime import environment as _environment
@@ -34,7 +35,14 @@ class AlohaRealEnvironment(_environment.Environment):
 
     @override
     def reset(self) -> None:
-        self._ts = self._env.reset()
+        # Avoid blocking the runtime loop on a long hardware reset at startup.
+        # Task-specific homing / sleep flows are handled elsewhere in the runtime.
+        self._ts = dm_env.TimeStep(
+            step_type=dm_env.StepType.FIRST,
+            reward=self._env.get_reward(),
+            discount=None,
+            observation=self._env.get_observation(),
+        )
 
     @override
     def is_episode_complete(self) -> bool:

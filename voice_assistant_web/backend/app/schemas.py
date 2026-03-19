@@ -26,6 +26,7 @@ class RealtimePayload(BaseModel):
 class VoiceRequest(BaseModel):
     text: str
     language: str = "en"
+    manual_dataset_subdir: str | None = None
 
 
 class VoiceResponse(BaseModel):
