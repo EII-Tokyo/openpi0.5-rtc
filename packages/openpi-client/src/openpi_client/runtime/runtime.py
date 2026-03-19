@@ -651,22 +651,6 @@ class Runtime:
 
                 if latest_task is None:
                     while True:
-                        latest_task = self._take_latest_task(
-                            allowed_task_nums=self._model_task_nums | self._stop_task_nums
-                        )
-                        if latest_task:
-                            logging.info(
-                                "人机协作模式收到任务 %s，结束当前人工接管并切换流程",
-                                latest_task["task_num"],
-                            )
-                            break
-
-                        local_key = self._poll_local_key(timeout=0.0)
-                        if local_key in {"1", "2", "4", "5"}:
-                            latest_task = self._make_local_task(local_key)
-                            logging.info("采集阶段收到本地按键 %s，停止采集并切换任务。", local_key)
-                            break
-
                         t0 = time.time()
                         action = get_action(master_bot_left, master_bot_right)
                         t1 = time.time()
@@ -687,10 +671,6 @@ class Runtime:
                         stop_key = self._poll_local_key(timeout=max(0, self._manual_step_time - (time.time() - t0)))
                         if stop_key == "b":
                             logging.info("检测到按键 b，停止人工接管数据采集。")
-                            break
-                        if stop_key in {"1", "2", "4", "5"}:
-                            latest_task = self._make_local_task(stop_key)
-                            logging.info("采集阶段收到本地按键 %s，停止采集并切换任务。", stop_key)
                             break
             finally:
                 if old_termios is not None:
