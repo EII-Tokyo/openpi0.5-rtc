@@ -4,6 +4,7 @@ import time
 import json
 import redis
 import os
+import re
 import select
 import sys
 import termios
@@ -125,6 +126,27 @@ class Runtime:
             return
         termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, self._stdin_termios_backup)
         self._stdin_termios_backup = None
+
+    def _prompt_subfolder_name(self) -> str | None:
+        if not self._stdin_is_tty():
+            logging.error("stdin 不是 TTY，无法输入人工接管 subfolder。")
+            return None
+        self._restore_local_keyboard_mode()
+        try:
+            while True:
+                raw_value = input("请输入人工接管保存 subfolder: ").strip()
+                if not raw_value:
+                    print("subfolder 不能为空。")
+                    continue
+                sanitized = re.sub(r"[^A-Za-z0-9._-]", "_", raw_value)
+                if not sanitized:
+                    print("subfolder 无效，请重新输入。")
+                    continue
+                if sanitized != raw_value:
+                    print(f"subfolder 已规范化为: {sanitized}")
+                return sanitized
+        finally:
+            self._enable_local_keyboard_mode()
 
     def _read_local_key_raw(self, timeout: float = 0.0) -> str | None:
         if not self._stdin_is_tty():
@@ -667,7 +689,14 @@ class Runtime:
                 self._current_task = None
                 self._publish_runtime_state(mode="waiting")
                 return
-            episode_dataset_dir = self._manual_dataset_dir
+            episode_subfolder = self._prompt_subfolder_name()
+            if not episode_subfolder:
+                logging.warning("未输入人工接管 subfolder，取消本次人工接管数据保存。")
+                self._is_waiting_for_task = True
+                self._current_task = None
+                self._publish_runtime_state(mode="waiting")
+                return
+            episode_dataset_dir = os.path.join(self._manual_dataset_dir, episode_subfolder)
             os.makedirs(episode_dataset_dir, exist_ok=True)
 
             step_count = 0
