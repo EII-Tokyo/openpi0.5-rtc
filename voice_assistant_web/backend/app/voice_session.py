@@ -203,7 +203,13 @@ class VoiceAssistantEngine:
             },
         )
 
-    async def process_audio(self, audio_file: UploadFile, *, language: str = "en") -> VoiceResponse:
+    async def process_audio(
+        self,
+        audio_file: UploadFile,
+        *,
+        language: str = "en",
+        manual_dataset_subdir: str | None = None,
+    ) -> VoiceResponse:
         fallback_language = self._normalize_language(language)
         if self._openai is None:
             return VoiceResponse(
@@ -240,6 +246,7 @@ class VoiceAssistantEngine:
             return await self.process_text(
                 transcript,
                 language=detected_language,
+                manual_dataset_subdir=manual_dataset_subdir,
                 debug={
                     "transcription_language": getattr(transcription, "language", None),
                     "detected_language": detected_language,

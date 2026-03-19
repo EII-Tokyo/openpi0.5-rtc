@@ -155,9 +155,8 @@ export default function App() {
     setSecretClicks(next)
   }
 
-  const submitCommand = async (event: FormEvent) => {
-    event.preventDefault()
-    const text = command.trim()
+  const sendCommand = async (rawText: string) => {
+    const text = rawText.trim()
     if (!text) return
     setSending(true)
     setError(null)
@@ -182,6 +181,11 @@ export default function App() {
     } finally {
       setSending(false)
     }
+  }
+
+  const submitCommand = async (event: FormEvent) => {
+    event.preventDefault()
+    await sendCommand(command)
   }
 
   return (
@@ -296,7 +300,7 @@ export default function App() {
             </form>
             <div className="quick-tasks">
               {['1', '2', '3', '4', '5'].map((taskNum) => (
-                <button key={taskNum} type="button" className="quick-task" onClick={() => setCommand(taskNum)}>
+                <button key={taskNum} type="button" className="quick-task" onClick={() => void sendCommand(taskNum)}>
                   {taskNum}
                 </button>
               ))}

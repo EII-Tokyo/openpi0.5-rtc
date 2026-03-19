@@ -118,5 +118,13 @@ async def voice_text(request: VoiceRequest) -> VoiceResponse:
 
 
 @app.post("/api/voice/audio", response_model=VoiceResponse)
-async def voice_audio(file: UploadFile = File(...), language: str = Form("en")) -> VoiceResponse:
-    return await voice_engine.process_audio(file, language=language)
+async def voice_audio(
+    file: UploadFile = File(...),
+    language: str = Form("en"),
+    manual_dataset_subdir: str | None = Form(None),
+) -> VoiceResponse:
+    return await voice_engine.process_audio(
+        file,
+        language=language,
+        manual_dataset_subdir=manual_dataset_subdir,
+    )
