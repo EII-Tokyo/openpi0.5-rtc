@@ -676,10 +676,6 @@ class Runtime:
                         break
 
                     local_key = self._take_local_key(timeout=0.05)
-                    if local_key in {"1", "2", "4", "5"}:
-                        latest_task = self._take_local_task(self._model_task_nums | self._stop_task_nums) or self._make_local_task(local_key)
-                        logging.info("人工接管准备阶段收到本地按键 %s，切换任务。", local_key)
-                        break
                     if local_key == "left":
                         rewound_action = self._rewind_action_history(real_env, action_history)
                         if rewound_action is not None:
