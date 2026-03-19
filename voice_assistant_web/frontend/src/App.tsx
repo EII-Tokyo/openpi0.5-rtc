@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useMemo, useState } from 'react'
+import { FormEvent, useEffect, useMemo, useRef, useState } from 'react'
 import { AppLanguage, translations } from './i18n'
 
 const defaultHost = typeof window !== 'undefined' ? window.location.hostname : 'localhost'
@@ -37,11 +37,15 @@ type VoiceResponse = {
   reply_text: string
   task_number: string | null
   task_name: string | null
+  audio_base64?: string | null
+  audio_mime_type?: string | null
 }
 
 type UiConfig = {
   manualDatasetSubdir: string
 }
+
+type VoiceStatus = 'idle' | 'recording' | 'thinking' | 'speaking'
 
 const initialState: RealtimeState = {
   robot: {
@@ -94,12 +98,17 @@ export default function App() {
   const [language, setLanguage] = useState<AppLanguage>('en')
   const [command, setCommand] = useState('')
   const [voiceResponse, setVoiceResponse] = useState<VoiceResponse | null>(null)
+  const [voiceStatus, setVoiceStatus] = useState<VoiceStatus>('idle')
   const [sending, setSending] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [configOpen, setConfigOpen] = useState(false)
   const [secretClicks, setSecretClicks] = useState(0)
   const [uiConfig, setUiConfig] = useState<UiConfig>(() => loadUiConfig())
   const [cameraView, setCameraView] = useState<'focus' | 'quad'>('focus')
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
+  const mediaChunksRef = useRef<Blob[]>([])
+  const mediaStreamRef = useRef<MediaStream | null>(null)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
   const t = translations[language]
 
   useEffect(() => {
@@ -133,6 +142,21 @@ export default function App() {
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause()
+        audioRef.current.src = ''
+      }
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+        mediaRecorderRef.current.stop()
+      }
+      if (mediaStreamRef.current) {
+        mediaStreamRef.current.getTracks().forEach((track) => track.stop())
+      }
+    }
   }, [])
 
   const freshness = useMemo(() => {
@@ -187,6 +211,112 @@ export default function App() {
     event.preventDefault()
     await sendCommand(command)
   }
+
+  const uploadAudio = async (blob: Blob) => {
+    setSending(true)
+    setVoiceStatus('thinking')
+    setError(null)
+    try {
+      const fileExtension = blob.type.includes('webm') ? 'webm' : 'wav'
+      const formData = new FormData()
+      formData.append('file', blob, `voice.${fileExtension}`)
+      formData.append('language', language)
+      if (uiConfig.manualDatasetSubdir.trim()) {
+        formData.append('manual_dataset_subdir', uiConfig.manualDatasetSubdir.trim())
+      }
+      const response = await fetch(`${apiBase}/api/voice/audio`, {
+        method: 'POST',
+        body: formData,
+      })
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`)
+      }
+      const payload = (await response.json()) as VoiceResponse
+      setVoiceResponse(payload)
+      if (payload.audio_base64 && payload.audio_mime_type) {
+        const audio = new Audio(`data:${payload.audio_mime_type};base64,${payload.audio_base64}`)
+        audioRef.current?.pause()
+        audioRef.current = audio
+        setVoiceStatus('speaking')
+        audio.onended = () => setVoiceStatus('idle')
+        audio.onerror = () => setVoiceStatus('idle')
+        void audio.play().catch(() => setVoiceStatus('idle'))
+      } else {
+        setVoiceStatus('idle')
+      }
+    } catch (err) {
+      setVoiceStatus('idle')
+      setError(err instanceof Error ? err.message : t.requestFailed)
+    } finally {
+      setSending(false)
+    }
+  }
+
+  const stopRecording = async () => {
+    const recorder = mediaRecorderRef.current
+    if (!recorder || recorder.state === 'inactive') return
+    recorder.stop()
+  }
+
+  const startRecording = async () => {
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setError(t.micUnavailable)
+      return
+    }
+    setError(null)
+    try {
+      if (audioRef.current) {
+        audioRef.current.pause()
+        audioRef.current = null
+      }
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      mediaStreamRef.current = stream
+      mediaChunksRef.current = []
+      const mimeType = MediaRecorder.isTypeSupported('audio/webm')
+        ? 'audio/webm'
+        : MediaRecorder.isTypeSupported('audio/mp4')
+          ? 'audio/mp4'
+          : ''
+      const recorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream)
+      mediaRecorderRef.current = recorder
+      recorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          mediaChunksRef.current.push(event.data)
+        }
+      }
+      recorder.onstop = () => {
+        const blobType = recorder.mimeType || 'audio/webm'
+        const audioBlob = new Blob(mediaChunksRef.current, { type: blobType })
+        mediaChunksRef.current = []
+        mediaStreamRef.current?.getTracks().forEach((track) => track.stop())
+        mediaStreamRef.current = null
+        void uploadAudio(audioBlob)
+      }
+      recorder.start()
+      setVoiceStatus('recording')
+    } catch {
+      setVoiceStatus('idle')
+      setError(t.micFailed)
+    }
+  }
+
+  const toggleRecording = async () => {
+    if (voiceStatus === 'recording') {
+      await stopRecording()
+      return
+    }
+    if (sending || voiceStatus === 'thinking') return
+    await startRecording()
+  }
+
+  const voiceStatusLabel =
+    voiceStatus === 'recording'
+      ? t.recording
+      : voiceStatus === 'thinking'
+        ? t.thinking
+        : voiceStatus === 'speaking'
+          ? t.speaking
+          : t.idle
 
   return (
     <main className="app-shell">
@@ -287,6 +417,21 @@ export default function App() {
                 <h2>{t.voiceTitle}</h2>
               </div>
               <span className="command-hint">{t.directTaskHint}</span>
+            </div>
+            <div className="voice-orb-wrap">
+              <button
+                type="button"
+                className={`voice-orb halo ripple ${voiceStatus}`}
+                onClick={() => void toggleRecording()}
+                disabled={sending}
+                aria-label={voiceStatus === 'recording' ? t.stop : t.talk}
+              >
+                <span>{voiceStatus === 'recording' ? t.stop : t.talk}</span>
+              </button>
+              <p className="voice-status">{voiceStatusLabel}</p>
+              <p className="voice-hint">
+                {voiceStatus === 'recording' ? t.autoSendHint : t.listeningHint}
+              </p>
             </div>
             <form className="command-form" onSubmit={submitCommand}>
               <input
