@@ -28,8 +28,6 @@ class Args:
     good_bad_action: Literal["good action", "bad action", "normal"] = "good action"
 
     action_horizon: int = 25
-
-    num_episodes: int = 1
     max_episode_steps: int = 10000
 
     use_rtc: bool = True
@@ -56,18 +54,20 @@ class Args:
 
 
 def main(args: Args) -> None:
+    logging.info("Runtime startup config:\n%s", dataclasses.asdict(args))
     low_level_policy = _websocket_client_policy.WebsocketClientPolicy(
         host=args.low_level_host,
         port=args.low_level_port,
     )
-    logging.info(f"Server metadata: {low_level_policy.get_server_metadata()}")
+    low_level_metadata = low_level_policy.get_server_metadata()
+    logging.info("Low-level server metadata: %s", low_level_metadata)
 
-    metadata = low_level_policy.get_server_metadata()
     runtime_policy = low_level_policy
     high_level_policy = _websocket_client_policy.WebsocketClientPolicy(
         host=args.high_level_host,
         port=args.high_level_port,
     )
+    logging.info("High-level server metadata: %s", high_level_policy.get_server_metadata())
     
     # 创建 H5dfSaver subscriber
     h5df_saver_instance = h5df_saver.H5dfSaver(
@@ -92,7 +92,6 @@ def main(args: Args) -> None:
         subscribers=[h5df_saver_instance] if args.if_save_hdf5 else [],
         max_hz=args.policy_hz,
         manual_hz=args.manual_hz,
-        num_episodes=args.num_episodes,
         max_episode_steps=args.max_episode_steps,
         manual_dataset_dir=args.manual_dataset_dir,
         high_level_policy=high_level_policy,

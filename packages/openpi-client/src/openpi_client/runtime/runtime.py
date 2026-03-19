@@ -34,7 +34,6 @@ class Runtime:
         subscribers: list[_subscriber.Subscriber],
         max_hz: float = 0,
         manual_hz: float = 0,
-        num_episodes: int = 1,
         max_episode_steps: int = 0,
         redis_host: str = "localhost",
         redis_port: int = 6379,
@@ -49,7 +48,6 @@ class Runtime:
         self._subscribers = subscribers
         self._max_hz = max_hz
         self._manual_hz = manual_hz
-        self._num_episodes = num_episodes
         self._max_episode_steps = max_episode_steps
 
         self._step_time = 1 / self._max_hz if self._max_hz > 0 else 0
