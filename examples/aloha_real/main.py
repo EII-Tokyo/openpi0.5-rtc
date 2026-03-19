@@ -24,7 +24,6 @@ class Args:
     low_level_port: int = 8000
     high_level_host: str = "0.0.0.0"
     high_level_port: int = 8001
-    use_hierarchical_policy: bool = True
     high_level_hz: float = 0.0
 
     action_horizon: int = 25
@@ -64,12 +63,10 @@ def main(args: Args) -> None:
 
     metadata = low_level_policy.get_server_metadata()
     runtime_policy = low_level_policy
-    high_level_policy = None
-    if args.use_hierarchical_policy:
-        high_level_policy = _websocket_client_policy.WebsocketClientPolicy(
-            host=args.high_level_host,
-            port=args.high_level_port,
-        )
+    high_level_policy = _websocket_client_policy.WebsocketClientPolicy(
+        host=args.high_level_host,
+        port=args.high_level_port,
+    )
     
     # 创建 H5dfSaver subscriber
     h5df_saver_instance = h5df_saver.H5dfSaver(
