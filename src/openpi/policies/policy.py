@@ -113,7 +113,7 @@ class Policy(BasePolicy):
         start_time = time.monotonic()
         if use_rtc:
             if prev_action is None:
-                origin_actions = self._sample_actions(sample_rng_or_pytorch_device, _model.Observation.from_dict(inputs), **self._sample_kwargs)
+                origin_actions = self._sample_actions(sample_rng_or_pytorch_device, observation, **self._sample_kwargs)
                 outputs = {
                     "state": inputs["state"],
                     "actions": origin_actions,
@@ -121,14 +121,14 @@ class Policy(BasePolicy):
                 }
             else:
                 prev_action = jnp.asarray(prev_action)[np.newaxis, ...]  # Add batch dimension
-                origin_actions = self._guided_inference(sample_rng_or_pytorch_device, prev_action, _model.Observation.from_dict(inputs), **self._sample_kwargs)
+                origin_actions = self._guided_inference(sample_rng_or_pytorch_device, prev_action, observation, **self._sample_kwargs)
                 outputs = {
                     "state": inputs["state"],
                     "actions": origin_actions,
                     "origin_actions": origin_actions,
                 }
         else:
-            origin_actions = self._sample_actions(sample_rng_or_pytorch_device, _model.Observation.from_dict(inputs), **self._sample_kwargs)
+            origin_actions = self._sample_actions(sample_rng_or_pytorch_device, observation, **self._sample_kwargs)
             outputs = {
                 "state": inputs["state"],
                 "actions": origin_actions,
