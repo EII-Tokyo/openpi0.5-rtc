@@ -11,6 +11,7 @@ import tty
 import select
 from collections import deque
 
+from openpi_client import hierarchical_policy as _hierarchical_policy
 from openpi_client.runtime import agent as _agent
 from openpi_client.runtime import environment as _environment
 from openpi_client.runtime import subscriber as _subscriber
@@ -43,6 +44,8 @@ class Runtime:
         redis_port: int = 6379,
         redis_db: int = 0,
         manual_dataset_dir: str | None = None,
+        high_level_policy=None,
+        high_level_hz: float = 0.0,
     ) -> None:
         self._environment = environment
         self._agent = agent
@@ -55,6 +58,8 @@ class Runtime:
         self._step_time = 1 / self._max_hz if self._max_hz > 0 else 0
         self._manual_step_time = 1 / self._manual_hz if self._manual_hz > 0 else 0
         self._manual_dataset_dir = manual_dataset_dir or "/app/examples/aloha_real/manual_override"
+        self._high_level_policy = high_level_policy
+        self._high_level_step_time = 1 / high_level_hz if high_level_hz > 0 else 0.0
 
         self._in_episode = False
         self._episode_steps = 0
@@ -79,6 +84,15 @@ class Runtime:
         self._last_action = None
         history_size = max(1, int((self._max_hz if self._max_hz > 0 else 1) * 10))
         self._recent_puppet_actions = deque(maxlen=history_size)
+
+        self._high_level_running = False
+        self._high_level_thread = None
+        self._high_level_obs = None
+        self._high_level_obs_version = 0
+        self._high_level_obs_lock = threading.Lock()
+        self._high_level_state_lock = threading.Lock()
+        self._latest_structured_subtask = None
+        self._latest_hierarchical_state = {}
 
         # 退出标志
         self._stop = False
@@ -161,6 +175,87 @@ class Runtime:
             self._redis_thread.join(timeout=2.0)
         logging.info("Redis监听线程已停止")
 
+    def _reset_high_level_state(self) -> None:
+        with self._high_level_obs_lock:
+            self._high_level_obs = None
+            self._high_level_obs_version += 1
+        with self._high_level_state_lock:
+            self._latest_structured_subtask = None
+            self._latest_hierarchical_state = {}
+        if self._high_level_policy is not None:
+            self._high_level_policy.reset()
+
+    def _start_high_level_worker(self) -> None:
+        if self._high_level_policy is None or self._high_level_thread is not None:
+            return
+        self._high_level_running = True
+        self._high_level_thread = threading.Thread(target=self._high_level_worker, daemon=True)
+        self._high_level_thread.start()
+
+    def _stop_high_level_worker(self) -> None:
+        self._high_level_running = False
+        if self._high_level_thread and self._high_level_thread.is_alive():
+            self._high_level_thread.join(timeout=2.0)
+        self._high_level_thread = None
+
+    def _update_high_level_observation(self, observation_with_task: dict) -> None:
+        if self._high_level_policy is None:
+            return
+        obs_for_high_level = {
+            k: v for k, v in observation_with_task.items() if k != "origin_observation" and k != "subtask"
+        }
+        with self._high_level_obs_lock:
+            self._high_level_obs = obs_for_high_level
+            self._high_level_obs_version += 1
+
+    def _get_high_level_state(self) -> tuple[dict | None, dict]:
+        with self._high_level_state_lock:
+            structured_subtask = self._latest_structured_subtask
+            hierarchical_state = dict(self._latest_hierarchical_state)
+        return structured_subtask, hierarchical_state
+
+    def _high_level_worker(self) -> None:
+        last_processed_version = -1
+        while self._high_level_running:
+            if self._is_waiting_for_task or self._current_task is None:
+                time.sleep(0.01)
+                continue
+
+            with self._high_level_obs_lock:
+                obs = self._high_level_obs
+                version = self._high_level_obs_version
+
+            if obs is None or version == last_processed_version:
+                time.sleep(0.005)
+                continue
+
+            try:
+                high_level_result = self._high_level_policy.infer_subtask(obs)
+                high_level_text = str(high_level_result.get("subtask_text") or "").strip()
+                structured_subtask = _hierarchical_policy._build_low_level_subtask_payload(high_level_text)
+                parsed = _hierarchical_policy._parse_structured_fields(high_level_text)
+                hierarchical_state = {
+                    "task_prompt": str(obs.get("prompt") or "").strip(),
+                    "low_level_prompt": json.dumps(structured_subtask, ensure_ascii=False)
+                    if structured_subtask is not None
+                    else (high_level_text or str(obs.get("prompt") or "").strip()),
+                    "high_level_server_timing": high_level_result.get("server_timing", {}),
+                    "low_level_server_timing": {},
+                    "good_bad_action": "good action" if structured_subtask is not None else None,
+                    **parsed,
+                }
+                with self._high_level_state_lock:
+                    self._latest_structured_subtask = structured_subtask
+                    self._latest_hierarchical_state = hierarchical_state
+                last_processed_version = version
+            except Exception as exc:
+                logging.warning("High-level infer failed: %s", exc)
+                time.sleep(0.05)
+                continue
+
+            if self._high_level_step_time > 0:
+                time.sleep(self._high_level_step_time)
+
     def _publish_runtime_state(self, *, qpos=None, latest_action=None, mode: str | None = None) -> None:
         """发布轻量运行时状态给可视化前端。"""
         if self._redis_client is None:
@@ -218,6 +313,7 @@ class Runtime:
             self._run()
         finally:
             # 停止Redis监听
+            self._stop_high_level_worker()
             self._stop_redis_listener()
 
     def mark_episode_complete(self) -> None:
@@ -233,6 +329,8 @@ class Runtime:
         logging.info("Starting episode...")
         self._environment.reset()
         self._agent.reset()
+        self._reset_high_level_state()
+        self._start_high_level_worker()
 
         self._in_episode = True
         self._episode_steps = 0
@@ -397,12 +495,14 @@ class Runtime:
             # 设置当前任务
             self._current_task = task_data
             self._is_waiting_for_task = False 
+            self._reset_high_level_state()
             self._publish_runtime_state(mode="policy")
         elif task_num == "3":
             logging.info("收到停止指令，进入人机协作模式")
             self._current_task = task_data
             # 停止agent
             self._agent.reset() 
+            self._reset_high_level_state()
             # 通知subscriber episode结束, 并录制数据
             episode_subdir = task_data.get("manual_dataset_subdir")
             for subscriber in self._subscribers:
@@ -414,6 +514,7 @@ class Runtime:
             # 设置等待状态
             self._is_waiting_for_task = True
             self._current_task = None
+            self._reset_high_level_state()
             # 回到初始位置
             self._environment.stop()
             # 停止agent
@@ -426,6 +527,7 @@ class Runtime:
             logging.info("收到回到sleep位置并退出指令，退出程序")
             self._environment.sleep_arms()
             self._agent.reset()
+            self._reset_high_level_state()
             for subscriber in self._subscribers:
                 subscriber.on_episode_end()
             self._publish_runtime_state(mode="sleep")
@@ -445,16 +547,26 @@ class Runtime:
             **observation,
             'prompt': self._current_task.get('task_name')
         }
-            
+
+        self._update_high_level_observation(observation_with_task)
+        structured_subtask, hierarchical = self._get_high_level_state()
+        if structured_subtask is not None:
+            observation_with_task["subtask"] = structured_subtask
+
         action = self._agent.get_action(observation_with_task)
         self._environment.apply_action(action)
         # 存储最后的action（用于task_num==3时移动master）
         self._last_action = action.get("actions") if isinstance(action, dict) and "actions" in action else None
         if self._last_action is not None:
             self._recent_puppet_actions.append(list(self._last_action))
-        hierarchical = action.get("hierarchical", {}) if isinstance(action, dict) else {}
         if not isinstance(hierarchical, dict):
             hierarchical = {}
+        low_level_timing = action.get("server_timing", {}) if isinstance(action, dict) else {}
+        if not isinstance(low_level_timing, dict):
+            low_level_timing = {}
+        hierarchical["low_level_server_timing"] = low_level_timing
+        if isinstance(action, dict):
+            action["hierarchical"] = hierarchical
 
         qpos = observation.get("qpos")
         payload = {
