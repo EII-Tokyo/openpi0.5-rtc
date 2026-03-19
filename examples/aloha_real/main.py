@@ -81,12 +81,12 @@ def main(args: Args) -> None:
         environment=_env.AlohaRealEnvironment(reset_position=args.reset_position, gripper_current_limits=args.gripper_current_limits),
         agent=_policy_agent.PolicyAgent(
             policy=action_chunk_broker.ActionChunkBroker(
-            policy=runtime_policy,
-            action_horizon=args.action_horizon,
-            model_dir=args.model_dir,
-            adapt_to_pi=args.adapt_to_pi,
-            use_rtc=args.use_rtc,
-        )
+                policy=runtime_policy,
+                action_horizon=args.action_horizon,
+                model_dir=args.model_dir,
+                adapt_to_pi=args.adapt_to_pi,
+                use_rtc=args.use_rtc,
+            )
         ),
         subscribers=[h5df_saver_instance] if args.if_save_hdf5 else [],
         max_hz=args.policy_hz,
