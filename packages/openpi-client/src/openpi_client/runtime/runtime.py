@@ -613,7 +613,6 @@ class Runtime:
             step_count = 0
             latest_task = None
 
-            collecting = False
             old_termios = None
             if self._stdin_is_tty():
                 old_termios = termios.tcgetattr(sys.stdin.fileno())
@@ -628,59 +627,71 @@ class Runtime:
                     )
                     if latest_task:
                         logging.info(
-                            "人机协作模式收到任务 %s，结束当前人工接管并切换流程",
+                            "人工接管准备阶段收到任务 %s，结束当前人工接管并切换流程",
                             latest_task["task_num"],
                         )
                         break
 
-                    local_key = self._poll_local_key(timeout=0.0)
+                    local_key = self._poll_local_key(timeout=0.05)
                     if local_key in {"1", "2", "4", "5"}:
                         latest_task = self._make_local_task(local_key)
-                        logging.info("人工接管模式收到本地按键 %s，切换任务。", local_key)
+                        logging.info("人工接管准备阶段收到本地按键 %s，切换任务。", local_key)
                         break
-
-                    if not collecting:
-                        if local_key == "left":
-                            rewound_action = self._rewind_action_history(real_env, action_history)
-                            if rewound_action is not None:
-                                self._publish_runtime_state(latest_action=rewound_action, mode="teleop_prepare")
-                            time.sleep(0.05)
-                            continue
-                        if local_key == "b":
-                            robot_utils.torque_off(master_bot_left)
-                            robot_utils.torque_off(master_bot_right)
-                            collecting = True
-                            logging.info("master torque已关闭，开始人工接管数据采集。再次按 b 可停止采集。")
-                        else:
-                            self._publish_runtime_state(mode="teleop_prepare")
-                            time.sleep(0.05)
-                            continue
-
-                    t0 = time.time()
-                    action = get_action(master_bot_left, master_bot_right)
-                    t1 = time.time()
-
-                    self._environment.apply_action({"actions": action})
-                    ts = self._environment._ts
-                    self._publish_runtime_state(qpos=ts.observation.get("qpos"), latest_action=action, mode="human_teleop")
-                    t2 = time.time()
-
-                    action_list = list(action)
-                    timesteps.append(ts)
-                    actions.append(action_list)
-                    action_history.append(action_list)
-                    actual_dt_history.append([t0, t1, t2])
-                    timestamps.append(t0)
-                    step_count += 1
-
-                    stop_key = self._poll_local_key(timeout=max(0, self._manual_step_time - (time.time() - t0)))
-                    if stop_key == "b":
-                        logging.info("检测到按键 b，停止人工接管数据采集。")
+                    if local_key == "left":
+                        rewound_action = self._rewind_action_history(real_env, action_history)
+                        if rewound_action is not None:
+                            self._publish_runtime_state(latest_action=rewound_action, mode="teleop_prepare")
+                        continue
+                    if local_key == "b":
+                        robot_utils.torque_off(master_bot_left)
+                        robot_utils.torque_off(master_bot_right)
+                        logging.info("master torque已关闭，开始人工接管数据采集。再次按 b 可停止采集。")
                         break
-                    if stop_key in {"1", "2", "4", "5"}:
-                        latest_task = self._make_local_task(stop_key)
-                        logging.info("采集阶段收到本地按键 %s，停止采集并切换任务。", stop_key)
-                        break
+                    self._publish_runtime_state(mode="teleop_prepare")
+
+                if latest_task is None:
+                    while True:
+                        latest_task = self._take_latest_task(
+                            allowed_task_nums=self._model_task_nums | self._stop_task_nums
+                        )
+                        if latest_task:
+                            logging.info(
+                                "人机协作模式收到任务 %s，结束当前人工接管并切换流程",
+                                latest_task["task_num"],
+                            )
+                            break
+
+                        local_key = self._poll_local_key(timeout=0.0)
+                        if local_key in {"1", "2", "4", "5"}:
+                            latest_task = self._make_local_task(local_key)
+                            logging.info("采集阶段收到本地按键 %s，停止采集并切换任务。", local_key)
+                            break
+
+                        t0 = time.time()
+                        action = get_action(master_bot_left, master_bot_right)
+                        t1 = time.time()
+
+                        self._environment.apply_action({"actions": action})
+                        ts = self._environment._ts
+                        self._publish_runtime_state(qpos=ts.observation.get("qpos"), latest_action=action, mode="human_teleop")
+                        t2 = time.time()
+
+                        action_list = list(action)
+                        timesteps.append(ts)
+                        actions.append(action_list)
+                        action_history.append(action_list)
+                        actual_dt_history.append([t0, t1, t2])
+                        timestamps.append(t0)
+                        step_count += 1
+
+                        stop_key = self._poll_local_key(timeout=max(0, self._manual_step_time - (time.time() - t0)))
+                        if stop_key == "b":
+                            logging.info("检测到按键 b，停止人工接管数据采集。")
+                            break
+                        if stop_key in {"1", "2", "4", "5"}:
+                            latest_task = self._make_local_task(stop_key)
+                            logging.info("采集阶段收到本地按键 %s，停止采集并切换任务。", stop_key)
+                            break
             finally:
                 if old_termios is not None:
                     termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, old_termios)
