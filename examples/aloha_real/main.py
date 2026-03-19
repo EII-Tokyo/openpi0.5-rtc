@@ -4,7 +4,7 @@ import signal
 import sys
 import threading
 import time
-from typing import List
+from typing import List, Literal
 
 from openpi_client import action_chunk_broker
 from openpi_client import websocket_client_policy as _websocket_client_policy
@@ -25,6 +25,7 @@ class Args:
     high_level_host: str = "0.0.0.0"
     high_level_port: int = 8001
     high_level_hz: float = 0.0
+    good_bad_action: Literal["good action", "bad action", "normal"] = "good action"
 
     action_horizon: int = 25
 
@@ -96,6 +97,7 @@ def main(args: Args) -> None:
         manual_dataset_dir=args.manual_dataset_dir,
         high_level_policy=high_level_policy,
         high_level_hz=args.high_level_hz,
+        good_bad_action=args.good_bad_action,
     )
 
     def _handle_exit_signal(signum, frame):

@@ -76,7 +76,16 @@ def parse_structured_fields(raw_text: str) -> dict[str, Any]:
     }
 
 
-def build_low_level_subtask_payload(raw_text: str) -> dict[str, Any] | None:
+def normalize_good_bad_action(value: str | None) -> str | None:
+    if value is None:
+        return None
+    normalized = str(value).strip().lower()
+    if normalized in {"good action", "bad action", "normal"}:
+        return normalized
+    return None
+
+
+def build_low_level_subtask_payload(raw_text: str, *, good_bad_action: str | None = None) -> dict[str, Any] | None:
     parsed = parse_structured_fields(raw_text)
     bottle_description = parsed.get("bottle_description")
     bottle_position = parsed.get("bottle_position")
@@ -84,10 +93,13 @@ def build_low_level_subtask_payload(raw_text: str) -> dict[str, Any] | None:
     subtask = parsed.get("subtask")
     if bottle_description is None and bottle_position is None and bottle_state is None and subtask is None:
         return None
-    return {
+    payload = {
         "bottle_description": bottle_description,
         "bottle_position": bottle_position,
         "bottle_state": bottle_state,
         "subtask": subtask,
-        "good_bad_action": "good action",
     }
+    action_label = normalize_good_bad_action(good_bad_action)
+    if action_label is not None:
+        payload["good_bad_action"] = action_label
+    return payload
