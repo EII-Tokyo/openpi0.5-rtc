@@ -28,7 +28,8 @@ body {
 
 button,
 input,
-select {
+select,
+textarea {
   font: inherit;
 }
 
@@ -571,29 +572,34 @@ button {
   }
 }
 
-.config-overlay {
+.drawer-backdrop {
   position: fixed;
   inset: 0;
-  display: grid;
-  place-items: center;
-  padding: 24px;
   background: rgba(44, 33, 24, 0.36);
   backdrop-filter: blur(18px);
+  z-index: 20;
 }
 
-.config-panel {
-  width: min(560px, 100%);
+.config-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 21;
+  width: min(520px, 100vw);
+  height: 100dvh;
   padding: 22px;
-  border-radius: 24px;
-  border: 1px solid rgba(54, 45, 37, 0.08);
-  background: rgba(255, 252, 248, 0.94);
-  box-shadow: 0 24px 60px rgba(69, 54, 37, 0.18);
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  overflow: auto;
+  border-left: 1px solid rgba(54, 45, 37, 0.08);
+  background: rgba(255, 252, 248, 0.97);
+  box-shadow: -18px 0 40px rgba(69, 54, 37, 0.16);
 }
 
 .config-field {
   display: grid;
   gap: 10px;
-  margin-top: 16px;
 }
 
 .config-field span {
@@ -602,8 +608,21 @@ button {
   color: #6e5a4a;
 }
 
+.config-field select,
+.config-field input {
+  width: 100%;
+  min-width: 0;
+  height: 48px;
+  padding: 0 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(60, 48, 38, 0.1);
+  background: rgba(255, 250, 243, 0.72);
+  color: #1c1712;
+  outline: none;
+}
+
 .config-help {
-  margin: 14px 0 0;
+  margin: 0;
   color: #7b6858;
   font-size: 12px;
 }

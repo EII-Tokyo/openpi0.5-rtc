@@ -2,10 +2,7 @@ import { FormEvent, useEffect, useMemo, useRef, useState } from 'react'
 import { AppLanguage, translations } from './i18n'
 
 const defaultHost = typeof window !== 'undefined' ? window.location.hostname : 'localhost'
-const apiBase = import.meta.env.VITE_API_BASE || `http://${defaultHost}:8011`
-const wsBase = import.meta.env.VITE_WS_BASE || `ws://${defaultHost}:8011`
 const cameraNames = ['cam_high', 'cam_low', 'cam_left_wrist', 'cam_right_wrist'] as const
-const hiddenConfigClicks = 5
 const configStorageKey = 'aloha-ui-config-v1'
 
 type HierarchicalState = {
@@ -42,6 +39,8 @@ type VoiceResponse = {
 }
 
 type UiConfig = {
+  apiBase: string
+  wsBase: string
   datasetDir: string
   manualDatasetDir: string
 }
@@ -61,6 +60,8 @@ const initialState: RealtimeState = {
 }
 
 const defaultConfig: UiConfig = {
+  apiBase: import.meta.env.VITE_API_BASE || `http://${defaultHost}:8011`,
+  wsBase: import.meta.env.VITE_WS_BASE || `ws://${defaultHost}:8011`,
   datasetDir: '',
   manualDatasetDir: '',
 }
@@ -72,6 +73,8 @@ function loadUiConfig(): UiConfig {
     if (!raw) return defaultConfig
     const parsed = JSON.parse(raw)
     return {
+      apiBase: typeof parsed?.apiBase === 'string' && parsed.apiBase.trim() ? parsed.apiBase.trim() : defaultConfig.apiBase,
+      wsBase: typeof parsed?.wsBase === 'string' && parsed.wsBase.trim() ? parsed.wsBase.trim() : defaultConfig.wsBase,
       datasetDir: typeof parsed?.datasetDir === 'string' ? parsed.datasetDir.trim() : defaultConfig.datasetDir,
       manualDatasetDir:
         typeof parsed?.manualDatasetDir === 'string'
@@ -97,6 +100,7 @@ function formatTiming(value: Record<string, unknown> | undefined) {
 }
 
 export default function App() {
+  const [uiConfig, setUiConfig] = useState<UiConfig>(() => loadUiConfig())
   const [state, setState] = useState<RealtimeState>(initialState)
   const [language, setLanguage] = useState<AppLanguage>('en')
   const [command, setCommand] = useState('')
@@ -105,8 +109,6 @@ export default function App() {
   const [sending, setSending] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [configOpen, setConfigOpen] = useState(false)
-  const [secretClicks, setSecretClicks] = useState(0)
-  const [uiConfig, setUiConfig] = useState<UiConfig>(() => loadUiConfig())
   const [cameraView, setCameraView] = useState<'focus' | 'quad'>('focus')
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const mediaChunksRef = useRef<Blob[]>([])
@@ -115,7 +117,7 @@ export default function App() {
   const t = translations[language]
 
   useEffect(() => {
-    const ws = new WebSocket(`${wsBase}/ws/realtime`)
+    const ws = new WebSocket(`${uiConfig.wsBase}/ws/realtime`)
     ws.onopen = () => setError(null)
     ws.onmessage = (event) => {
       try {
@@ -127,7 +129,7 @@ export default function App() {
     }
     ws.onerror = () => setError('Realtime websocket disconnected')
     return () => ws.close()
-  }, [])
+  }, [uiConfig.wsBase])
 
   useEffect(() => {
     window.localStorage.setItem(configStorageKey, JSON.stringify(uiConfig))
@@ -172,23 +174,13 @@ export default function App() {
   const primaryCamera = 'cam_high'
   const secondaryCameras = cameraNames.filter((name) => name !== primaryCamera)
 
-  const revealConfig = () => {
-    const next = secretClicks + 1
-    if (next >= hiddenConfigClicks) {
-      setConfigOpen(true)
-      setSecretClicks(0)
-      return
-    }
-    setSecretClicks(next)
-  }
-
   const sendCommand = async (rawText: string) => {
     const text = rawText.trim()
     if (!text) return
     setSending(true)
     setError(null)
     try {
-      const response = await fetch(`${apiBase}/api/voice/text`, {
+      const response = await fetch(`${uiConfig.apiBase}/api/voice/text`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -231,7 +223,7 @@ export default function App() {
       if (uiConfig.manualDatasetDir.trim()) {
         formData.append('manual_dataset_dir', uiConfig.manualDatasetDir.trim())
       }
-      const response = await fetch(`${apiBase}/api/voice/audio`, {
+      const response = await fetch(`${uiConfig.apiBase}/api/voice/audio`, {
         method: 'POST',
         body: formData,
       })
@@ -329,22 +321,15 @@ export default function App() {
     <main className="app-shell">
       <header className="hero">
         <div className="hero-copy">
-          <p className="eyebrow" onClick={revealConfig}>
-            {t.eyebrow}
-          </p>
-          <h1 onClick={revealConfig}>{t.title}</h1>
+          <p className="eyebrow">{t.eyebrow}</p>
+          <h1>{t.title}</h1>
         </div>
         <div className="hero-badges">
-          <label className="language-switch">
-            <span>{t.language}</span>
-            <select value={language} onChange={(event) => setLanguage(event.target.value as AppLanguage)}>
-              <option value="en">{t.english}</option>
-              <option value="ja">{t.japanese}</option>
-              <option value="zh">{t.chinese}</option>
-            </select>
-          </label>
           <span className="status-pill live">{freshness}</span>
           <span className="status-pill mode">{state.robot.mode || t.waiting}</span>
+          <button type="button" className="ghost-button" onClick={() => setConfigOpen(true)}>
+            {t.openConfig}
+          </button>
         </div>
       </header>
 
@@ -378,7 +363,7 @@ export default function App() {
             </div>
             {cameraView === 'focus' ? (
               <div className="camera-stage-frame">
-                <img src={`${apiBase}/api/cameras/${primaryCamera}/stream.mjpg`} alt={primaryCamera} />
+                <img src={`${uiConfig.apiBase}/api/cameras/${primaryCamera}/stream.mjpg`} alt={primaryCamera} />
                 <div className="camera-stage-overlay">
                   <div className="stage-task">
                     <span>{t.taskPrompt}</span>
@@ -394,7 +379,7 @@ export default function App() {
                       <span>{t.cameraLabels[cameraName] || cameraName}</span>
                       <span className={`dot ${state.camera_status[cameraName] ? 'live' : 'offline'}`} />
                     </div>
-                    <img src={`${apiBase}/api/cameras/${cameraName}/stream.mjpg`} alt={cameraName} />
+                    <img src={`${uiConfig.apiBase}/api/cameras/${cameraName}/stream.mjpg`} alt={cameraName} />
                   </article>
                 ))}
               </div>
@@ -409,7 +394,7 @@ export default function App() {
                     <span>{t.cameraLabels[cameraName] || cameraName}</span>
                     <span className={`dot ${state.camera_status[cameraName] ? 'live' : 'offline'}`} />
                   </div>
-                  <img src={`${apiBase}/api/cameras/${cameraName}/stream.mjpg`} alt={cameraName} />
+                  <img src={`${uiConfig.apiBase}/api/cameras/${cameraName}/stream.mjpg`} alt={cameraName} />
                 </article>
               ))}
             </div>
@@ -531,8 +516,9 @@ export default function App() {
       </section>
 
       {configOpen ? (
-        <div className="config-overlay" onClick={() => setConfigOpen(false)}>
-          <section className="config-panel" onClick={(event) => event.stopPropagation()}>
+        <>
+          <div className="drawer-backdrop" onClick={() => setConfigOpen(false)} />
+          <aside className="config-drawer" onClick={(event) => event.stopPropagation()}>
             <div className="panel-header">
               <div>
                 <p className="eyebrow">{t.configEyebrow}</p>
@@ -542,6 +528,40 @@ export default function App() {
                 {t.close}
               </button>
             </div>
+            <label className="config-field">
+              <span>{t.language}</span>
+              <select value={language} onChange={(event) => setLanguage(event.target.value as AppLanguage)}>
+                <option value="en">{t.english}</option>
+                <option value="ja">{t.japanese}</option>
+                <option value="zh">{t.chinese}</option>
+              </select>
+            </label>
+            <label className="config-field">
+              <span>{t.apiBaseLabel}</span>
+              <input
+                value={uiConfig.apiBase}
+                onChange={(event) =>
+                  setUiConfig((current) => ({
+                    ...current,
+                    apiBase: event.target.value,
+                  }))
+                }
+                placeholder={`http://${defaultHost}:8011`}
+              />
+            </label>
+            <label className="config-field">
+              <span>{t.wsBaseLabel}</span>
+              <input
+                value={uiConfig.wsBase}
+                onChange={(event) =>
+                  setUiConfig((current) => ({
+                    ...current,
+                    wsBase: event.target.value,
+                  }))
+                }
+                placeholder={`ws://${defaultHost}:8011`}
+              />
+            </label>
             <label className="config-field">
               <span>{t.inferenceSavePath}</span>
               <input
@@ -569,8 +589,8 @@ export default function App() {
               />
             </label>
             <p className="config-help">{t.configHelp}</p>
-          </section>
-        </div>
+          </aside>
+        </>
       ) : null}
     </main>
   )
