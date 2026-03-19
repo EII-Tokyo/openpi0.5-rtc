@@ -10,6 +10,7 @@ import sys
 import termios
 import tty
 from collections import deque
+import numpy as np
 
 from openpi_client import subtask_parsing as _subtask_parsing
 from openpi_client.runtime import agent as _agent
@@ -234,7 +235,7 @@ class Runtime:
         rewind_steps = max(1, int(round((self._manual_hz if self._manual_hz > 0 else 50.0) * 0.25)))
         rewind_index = max(0, len(action_history) - 1 - rewind_steps)
         rewind_action = list(action_history[rewind_index])
-        self._environment.apply_action({"actions": rewind_action})
+        self._move_puppet_to_action(rewind_action, move_time=0.35)
         self._move_master_to_action(real_env, rewind_action, move_time=0.35)
         self._last_action = rewind_action
         logging.info("已回退到约 %.2f 秒前的动作状态。", rewind_steps / (self._manual_hz if self._manual_hz > 0 else 50.0))
@@ -646,6 +647,34 @@ class Runtime:
             [master_left_gripper_joint, master_right_gripper_joint],
             move_time=min(move_time, 0.5),
         )
+
+    def _move_puppet_to_action(self, target_action, move_time: float = 0.35) -> None:
+        """平滑回退 puppet，避免单次 apply_action 造成机械臂突跳。"""
+        if target_action is None:
+            return
+
+        current_qpos = None
+        if hasattr(self._environment, "_ts") and getattr(self._environment, "_ts") is not None:
+            current_qpos = self._environment._ts.observation.get("qpos")
+        if current_qpos is None:
+            current_qpos = target_action
+
+        start = np.asarray(current_qpos, dtype=float)
+        target = np.asarray(target_action, dtype=float)
+        if start.shape != target.shape:
+            logging.warning("回退动作维度不匹配，跳过平滑插值。")
+            self._environment.apply_action({"actions": list(target)})
+            return
+
+        control_hz = self._manual_hz if self._manual_hz > 0 else (self._max_hz if self._max_hz > 0 else 50.0)
+        num_steps = max(2, int(round(move_time * control_hz)))
+        trajectory = np.linspace(start, target, num_steps)
+        step_sleep = move_time / max(1, num_steps - 1)
+
+        for step_action in trajectory[1:]:
+            self._environment.apply_action({"actions": step_action.tolist()})
+            if step_sleep > 0:
+                time.sleep(step_sleep)
 
     def _handle_human_teleop_mode(self) -> None:
         """处理人机协作模式（task_num==3）"""
