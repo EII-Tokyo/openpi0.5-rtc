@@ -453,7 +453,7 @@ export default function App() {
               </button>
             </form>
             <div className="quick-tasks">
-              {['1', '2', '3', '4', '5'].map((taskNum) => (
+              {['1', '2', '3', '4'].map((taskNum) => (
                 <button key={taskNum} type="button" className="quick-task" onClick={() => void sendCommand(taskNum)}>
                   {taskNum}
                 </button>

@@ -96,13 +96,13 @@ class Runtime:
 
         # 退出标志
         self._stop = False
-        self._model_task_nums = {"1", "2"}
-        self._stop_task_nums = {"4", "5"}
+        self._model_task_nums = {"1"}
+        self._stop_task_nums = {"3", "4"}
         self._local_task_names = {
-            "1": "Remove the label from the bottle with the knife in the right hand.",
-            "2": "process all bottles",
-            "4": "Return to home position and save hdf5",
-            "5": "Return to sleep position, save hdf5 and quit robot runtime",
+            "1": "process all bottles",
+            "2": "Stop and human hand control",
+            "3": "Return to home position and save hdf5",
+            "4": "Return to sleep position, save hdf5 and quit robot runtime",
         }
         self._local_key_ttl_s = 1.0
         self._local_key_queue = deque()
@@ -512,7 +512,7 @@ class Runtime:
             self._is_waiting_for_task = False 
             self._reset_high_level_state()
             self._publish_runtime_state(mode="policy")
-        elif task_num == "3":
+        elif task_num == "2":
             logging.info("收到停止指令，进入人机协作模式")
             self._current_task = task_data
             self._agent.reset() 
@@ -521,7 +521,7 @@ class Runtime:
                 subscriber.on_episode_end()
             self._publish_runtime_state(mode="teleop_prepare")
             self._handle_human_teleop_mode()  
-        elif task_num == "4":
+        elif task_num == "3":
             logging.info("收到停止指令，回到初始位置并停止agent")
             # 设置等待状态
             self._is_waiting_for_task = True
@@ -535,7 +535,7 @@ class Runtime:
             for subscriber in self._subscribers:
                 subscriber.on_episode_end()   
             self._publish_runtime_state(mode="waiting")
-        elif task_num == "5":
+        elif task_num == "4":
             logging.info("收到回到sleep位置并退出指令，退出程序")
             self._environment.sleep_arms()
             self._agent.reset()
@@ -659,7 +659,7 @@ class Runtime:
             timestamps = []
             actual_dt_history = []
 
-            logging.info("进入人工接管准备阶段：按 b 开始采集，按左方向键回退约 0.25 秒，按 1/2/4/5 切换状态。")
+            logging.info("进入人工接管准备阶段：按 b 开始采集，按左方向键回退约 0.25 秒，按 1/2/3/4 切换状态。")
 
             if not self._manual_dataset_dir:
                 logging.warning("未从 voice web 收到人工接管保存路径，取消本次人工接管数据保存。")

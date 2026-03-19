@@ -62,7 +62,7 @@ class VoiceAssistantEngine:
             "ねじって開け",
         ]
         if any(keyword in normalized or keyword in compact for keyword in task_2_keywords):
-            return "2"
+            return "1"
 
         task_3_keywords = [
             "human control",
@@ -78,7 +78,7 @@ class VoiceAssistantEngine:
             "テレオペ",
         ]
         if any(keyword in normalized or keyword in compact for keyword in task_3_keywords):
-            return "3"
+            return "2"
 
         return None
 
@@ -140,9 +140,9 @@ class VoiceAssistantEngine:
                     "content": (
                         f"{self._base_prompt}\n"
                         f"The response_statement must be written in {reply_language}.\n"
-                        "Map bottle cap opening / twisting requests to task 2.\n"
-                        "Map manual takeover / teleoperation requests to task 3.\n"
-                        "Do not choose task 3 unless the user explicitly asks for manual or human control."
+                        "Map bottle cap opening / twisting requests to task 1.\n"
+                        "Map manual takeover / teleoperation requests to task 2.\n"
+                        "Do not choose task 2 unless the user explicitly asks for manual or human control."
                     ),
                 },
                 {"role": "user", "content": transcript},

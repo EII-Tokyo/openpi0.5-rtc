@@ -97,7 +97,7 @@ async def realtime_socket(websocket: WebSocket) -> None:
 @app.post("/api/voice/text", response_model=VoiceResponse)
 async def voice_text(request: VoiceRequest) -> VoiceResponse:
     direct_task = request.text.strip()
-    if direct_task in {"1", "2", "3", "4", "5"}:
+    if direct_task in {"1", "2", "3", "4"}:
         message = publish_task(
             redis_client,
             direct_task,
