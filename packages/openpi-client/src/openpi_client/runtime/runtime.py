@@ -4,7 +4,10 @@ import time
 import json
 import redis
 import os
+import select
 import sys
+import termios
+import tty
 from collections import deque
 
 from openpi_client import subtask_parsing as _subtask_parsing
@@ -95,6 +98,71 @@ class Runtime:
         self._stop = False
         self._model_task_nums = {"1", "2"}
         self._stop_task_nums = {"4", "5"}
+        self._local_task_names = {
+            "1": "Remove the label from the bottle with the knife in the right hand.",
+            "2": "process all bottles",
+            "4": "Return to home position and save hdf5",
+            "5": "Return to sleep position, save hdf5 and quit robot runtime",
+        }
+
+    def _stdin_is_tty(self) -> bool:
+        try:
+            return sys.stdin.isatty()
+        except Exception:
+            return False
+
+    def _poll_local_key(self, timeout: float = 0.0) -> str | None:
+        if not self._stdin_is_tty():
+            return None
+        ready, _, _ = select.select([sys.stdin], [], [], timeout)
+        if not ready:
+            return None
+        first = sys.stdin.read(1)
+        if first == "\x1b":
+            ready, _, _ = select.select([sys.stdin], [], [], 0.02)
+            if not ready:
+                return "esc"
+            second = sys.stdin.read(1)
+            if second != "[":
+                return None
+            ready, _, _ = select.select([sys.stdin], [], [], 0.02)
+            if not ready:
+                return None
+            third = sys.stdin.read(1)
+            arrow_map = {
+                "A": "up",
+                "B": "down",
+                "C": "right",
+                "D": "left",
+            }
+            return arrow_map.get(third)
+        return first
+
+    def _make_local_task(self, task_num: str) -> dict | None:
+        task_num = str(task_num)
+        task_name = self._local_task_names.get(task_num)
+        if task_name is None:
+            return None
+        return {
+            "task_num": task_num,
+            "task_name": task_name,
+            "timestamp": time.time(),
+            "dataset_dir": self._dataset_dir,
+            "manual_dataset_dir": self._manual_dataset_dir,
+        }
+
+    def _rewind_action_history(self, real_env, action_history: deque[list[float]]) -> list[float] | None:
+        if not action_history:
+            logging.warning("没有可回退的动作历史。")
+            return None
+        rewind_steps = max(1, int(round((self._manual_hz if self._manual_hz > 0 else 50.0) * 0.25)))
+        rewind_index = max(0, len(action_history) - 1 - rewind_steps)
+        rewind_action = list(action_history[rewind_index])
+        self._environment.apply_action({"actions": rewind_action})
+        self._move_master_to_action(real_env, rewind_action, move_time=0.35)
+        self._last_action = rewind_action
+        logging.info("已回退到约 %.2f 秒前的动作状态。", rewind_steps / (self._manual_hz if self._manual_hz > 0 else 50.0))
+        return rewind_action
 
     def _apply_task_paths(self, task_data: dict) -> None:
         dataset_dir = task_data.get("dataset_dir")
@@ -346,7 +414,7 @@ class Runtime:
         self._is_waiting_for_task = True
         self._current_task = None
         self._publish_runtime_state(mode="waiting")
-        logging.info("Runtime 已切换为仅接受 Redis / voice web 任务，不再监听本地键盘")
+        logging.info("Runtime 默认仅接受 Redis / voice web 任务；仅在人工接管 teleop 阶段监听本地按键")
 
         while not self._stop:
             task_data = self._take_latest_task()
@@ -520,21 +588,18 @@ class Runtime:
 
             if not self._recent_puppet_actions:
                 self._recent_puppet_actions.append(list(self._last_action))
-            
+
+            action_history = deque((list(action) for action in self._recent_puppet_actions), maxlen=self._recent_puppet_actions.maxlen)
             action = self._last_action
             self._move_master_to_action(real_env, action, move_time=0.5)
             logging.info("leader已移动到上次模型输出位置")
-
-            robot_utils.torque_off(master_bot_left)
-            robot_utils.torque_off(master_bot_right)
-            logging.info("master torque已关闭")
 
             timesteps = []
             actions = []
             timestamps = []
             actual_dt_history = []
-            
-            logging.info("开始人机协作数据收集；后续通过 voice web 发送任务 1/2/4/5 退出或切换模式")
+
+            logging.info("进入人工接管准备阶段：按 b 开始采集，按左方向键回退约 0.25 秒，按 1/2/4/5 切换状态。")
 
             if not self._manual_dataset_dir:
                 logging.warning("未从 voice web 收到人工接管保存路径，取消本次人工接管数据保存。")
@@ -547,34 +612,81 @@ class Runtime:
 
             step_count = 0
             latest_task = None
-            while True:
-                latest_task = self._take_latest_task(
-                    allowed_task_nums=self._model_task_nums | self._stop_task_nums
-                )
-                if latest_task:
-                    logging.info(
-                        "人机协作模式收到任务 %s，结束当前人工接管并切换流程",
-                        latest_task["task_num"],
-                    )
-                    break
 
-                t0 = time.time()
-                action = get_action(master_bot_left, master_bot_right)
-                t1 = time.time()
-                
-                self._environment.apply_action({"actions": action})
-                ts = self._environment._ts
-                self._publish_runtime_state(qpos=ts.observation.get("qpos"), latest_action=action, mode="human_teleop")
-                t2 = time.time()
-                
-                timesteps.append(ts)
-                actions.append(action)
-                actual_dt_history.append([t0, t1, t2])
-                timestamps.append(t0)
-                
-                time.sleep(max(0, self._manual_step_time - (time.time() - t0)))
-                
-                step_count += 1
+            collecting = False
+            old_termios = None
+            if self._stdin_is_tty():
+                old_termios = termios.tcgetattr(sys.stdin.fileno())
+                tty.setcbreak(sys.stdin.fileno())
+            else:
+                logging.warning("stdin 不是 TTY，人工接管只能通过 voice web 任务切换，无法使用本地按键。")
+
+            try:
+                while True:
+                    latest_task = self._take_latest_task(
+                        allowed_task_nums=self._model_task_nums | self._stop_task_nums
+                    )
+                    if latest_task:
+                        logging.info(
+                            "人机协作模式收到任务 %s，结束当前人工接管并切换流程",
+                            latest_task["task_num"],
+                        )
+                        break
+
+                    local_key = self._poll_local_key(timeout=0.0)
+                    if local_key in {"1", "2", "4", "5"}:
+                        latest_task = self._make_local_task(local_key)
+                        logging.info("人工接管模式收到本地按键 %s，切换任务。", local_key)
+                        break
+
+                    if not collecting:
+                        if local_key == "left":
+                            rewound_action = self._rewind_action_history(real_env, action_history)
+                            if rewound_action is not None:
+                                self._publish_runtime_state(latest_action=rewound_action, mode="teleop_prepare")
+                            time.sleep(0.05)
+                            continue
+                        if local_key == "b":
+                            robot_utils.torque_off(master_bot_left)
+                            robot_utils.torque_off(master_bot_right)
+                            collecting = True
+                            logging.info("master torque已关闭，开始人工接管数据采集。再次按 b 可停止采集。")
+                        else:
+                            self._publish_runtime_state(mode="teleop_prepare")
+                            time.sleep(0.05)
+                            continue
+
+                    t0 = time.time()
+                    action = get_action(master_bot_left, master_bot_right)
+                    t1 = time.time()
+
+                    self._environment.apply_action({"actions": action})
+                    ts = self._environment._ts
+                    self._publish_runtime_state(qpos=ts.observation.get("qpos"), latest_action=action, mode="human_teleop")
+                    t2 = time.time()
+
+                    action_list = list(action)
+                    timesteps.append(ts)
+                    actions.append(action_list)
+                    action_history.append(action_list)
+                    actual_dt_history.append([t0, t1, t2])
+                    timestamps.append(t0)
+                    step_count += 1
+
+                    stop_key = self._poll_local_key(timeout=max(0, self._manual_step_time - (time.time() - t0)))
+                    if stop_key == "b":
+                        logging.info("检测到按键 b，停止人工接管数据采集。")
+                        break
+                    if stop_key in {"1", "2", "4", "5"}:
+                        latest_task = self._make_local_task(stop_key)
+                        logging.info("采集阶段收到本地按键 %s，停止采集并切换任务。", stop_key)
+                        break
+            finally:
+                if old_termios is not None:
+                    termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, old_termios)
+                robot_utils.torque_on(master_bot_left)
+                robot_utils.torque_on(master_bot_right)
+                logging.info("master torque已恢复")
             
             logging.info(f"停止数据收集，共收集 {step_count} 步数据")
             
