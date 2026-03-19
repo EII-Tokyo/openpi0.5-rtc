@@ -15,7 +15,6 @@ from typing_extensions import override
 
 from openpi import transforms as _transforms
 from openpi.models import model as _model
-from openpi.models import tokenizer as _tokenizer
 from openpi.shared import array_typing as at
 from openpi.shared import nnx_utils
 
@@ -51,7 +50,6 @@ class Policy(BasePolicy):
         self._model = model
         self._input_transforms_raw = list(transforms)
         self._input_transform = _transforms.compose(transforms)
-        self._input_transform_subtask = self._input_transform
         self._output_transform = _transforms.compose(output_transforms)
         self._sample_kwargs = sample_kwargs or {}
         self._metadata = metadata or {}
@@ -163,7 +161,7 @@ class Policy(BasePolicy):
 
         inputs = jax.tree.map(lambda x: x, obs)
         inputs.pop("subtask", None)
-        inputs = self._input_transform_subtask(inputs)
+        inputs = self._input_transform(inputs)
 
         if self._is_pytorch_model:
             raise NotImplementedError("infer_subtask is currently implemented for JAX PI0/PI05 models.")
