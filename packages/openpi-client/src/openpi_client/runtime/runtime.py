@@ -104,6 +104,7 @@ class Runtime:
             "4": "Return to home position and save hdf5",
             "5": "Return to sleep position, save hdf5 and quit robot runtime",
         }
+        self._local_key_ttl_s = 1.0
         self._local_key_queue = deque()
         self._stdin_termios_backup = None
 
@@ -152,24 +153,36 @@ class Runtime:
             return arrow_map.get(third)
         return first
 
+    def _prune_local_key_queue(self) -> None:
+        if not self._local_key_queue:
+            return
+        now = time.time()
+        while self._local_key_queue and now - self._local_key_queue[0][1] > self._local_key_ttl_s:
+            self._local_key_queue.popleft()
+
     def _pump_local_keys(self, timeout: float = 0.0) -> None:
+        self._prune_local_key_queue()
         key = self._read_local_key_raw(timeout)
         if key is not None:
-            self._local_key_queue.append(key)
+            self._local_key_queue.append((key, time.time()))
 
     def _take_local_key(self, timeout: float = 0.0) -> str | None:
+        self._prune_local_key_queue()
         if self._local_key_queue:
-            return self._local_key_queue.popleft()
+            key, _ = self._local_key_queue.popleft()
+            return key
         self._pump_local_keys(timeout)
         if self._local_key_queue:
-            return self._local_key_queue.popleft()
+            key, _ = self._local_key_queue.popleft()
+            return key
         return None
 
     def _take_local_task(self, allowed_task_nums: set[str] | None = None) -> dict | None:
+        self._prune_local_key_queue()
         if not self._local_key_queue:
             return None
         keys = list(self._local_key_queue)
-        for index, key in enumerate(keys):
+        for index, (key, key_ts) in enumerate(keys):
             if key not in self._local_task_names:
                 continue
             if allowed_task_nums is not None and key not in allowed_task_nums:
