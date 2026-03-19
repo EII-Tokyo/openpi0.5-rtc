@@ -104,6 +104,8 @@ class Runtime:
             "4": "Return to home position and save hdf5",
             "5": "Return to sleep position, save hdf5 and quit robot runtime",
         }
+        self._local_key_queue = deque()
+        self._stdin_termios_backup = None
 
     def _stdin_is_tty(self) -> bool:
         try:
@@ -111,7 +113,19 @@ class Runtime:
         except Exception:
             return False
 
-    def _poll_local_key(self, timeout: float = 0.0) -> str | None:
+    def _enable_local_keyboard_mode(self) -> None:
+        if not self._stdin_is_tty() or self._stdin_termios_backup is not None:
+            return
+        self._stdin_termios_backup = termios.tcgetattr(sys.stdin.fileno())
+        tty.setcbreak(sys.stdin.fileno())
+
+    def _restore_local_keyboard_mode(self) -> None:
+        if self._stdin_termios_backup is None:
+            return
+        termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, self._stdin_termios_backup)
+        self._stdin_termios_backup = None
+
+    def _read_local_key_raw(self, timeout: float = 0.0) -> str | None:
         if not self._stdin_is_tty():
             return None
         ready, _, _ = select.select([sys.stdin], [], [], timeout)
@@ -137,6 +151,33 @@ class Runtime:
             }
             return arrow_map.get(third)
         return first
+
+    def _pump_local_keys(self, timeout: float = 0.0) -> None:
+        key = self._read_local_key_raw(timeout)
+        if key is not None:
+            self._local_key_queue.append(key)
+
+    def _take_local_key(self, timeout: float = 0.0) -> str | None:
+        if self._local_key_queue:
+            return self._local_key_queue.popleft()
+        self._pump_local_keys(timeout)
+        if self._local_key_queue:
+            return self._local_key_queue.popleft()
+        return None
+
+    def _take_local_task(self, allowed_task_nums: set[str] | None = None) -> dict | None:
+        if not self._local_key_queue:
+            return None
+        keys = list(self._local_key_queue)
+        for index, key in enumerate(keys):
+            if key not in self._local_task_names:
+                continue
+            if allowed_task_nums is not None and key not in allowed_task_nums:
+                continue
+            del keys[index]
+            self._local_key_queue = deque(keys)
+            return self._make_local_task(key)
+        return None
 
     def _make_local_task(self, task_num: str) -> dict | None:
         task_num = str(task_num)
@@ -354,6 +395,10 @@ class Runtime:
 
     def _take_latest_task(self, allowed_task_nums: set[str] | None = None):
         """获取并消费最新的 Redis 任务。"""
+        self._pump_local_keys(timeout=0.0)
+        local_task = self._take_local_task(allowed_task_nums)
+        if local_task is not None:
+            return local_task
         with self._task_lock:
             if self._latest_task is None:
                 return None
@@ -380,6 +425,7 @@ class Runtime:
 
     def run(self) -> None:
         """Runs the runtime loop continuously until stop() is called or the environment is done."""
+        self._enable_local_keyboard_mode()
         # 启动Redis监听
         self._start_redis_listener()
         
@@ -389,6 +435,7 @@ class Runtime:
             # 停止Redis监听
             self._stop_high_level_worker()
             self._stop_redis_listener()
+            self._restore_local_keyboard_mode()
 
     def mark_episode_complete(self) -> None:
         """Marks the end of an episode."""
@@ -613,11 +660,7 @@ class Runtime:
             step_count = 0
             latest_task = None
 
-            old_termios = None
-            if self._stdin_is_tty():
-                old_termios = termios.tcgetattr(sys.stdin.fileno())
-                tty.setcbreak(sys.stdin.fileno())
-            else:
+            if not self._stdin_is_tty():
                 logging.warning("stdin 不是 TTY，人工接管只能通过 voice web 任务切换，无法使用本地按键。")
 
             try:
@@ -632,9 +675,9 @@ class Runtime:
                         )
                         break
 
-                    local_key = self._poll_local_key(timeout=0.05)
+                    local_key = self._take_local_key(timeout=0.05)
                     if local_key in {"1", "2", "4", "5"}:
-                        latest_task = self._make_local_task(local_key)
+                        latest_task = self._take_local_task(self._model_task_nums | self._stop_task_nums) or self._make_local_task(local_key)
                         logging.info("人工接管准备阶段收到本地按键 %s，切换任务。", local_key)
                         break
                     if local_key == "left":
@@ -668,13 +711,11 @@ class Runtime:
                         timestamps.append(t0)
                         step_count += 1
 
-                        stop_key = self._poll_local_key(timeout=max(0, self._manual_step_time - (time.time() - t0)))
+                        stop_key = self._take_local_key(timeout=max(0, self._manual_step_time - (time.time() - t0)))
                         if stop_key == "b":
                             logging.info("检测到按键 b，停止人工接管数据采集。")
                             break
             finally:
-                if old_termios is not None:
-                    termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, old_termios)
                 robot_utils.torque_on(master_bot_left)
                 robot_utils.torque_on(master_bot_right)
                 logging.info("master torque已恢复")
