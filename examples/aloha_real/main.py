@@ -25,7 +25,7 @@ class Args:
     high_level_host: str = "0.0.0.0"
     high_level_port: int = 8001
     high_level_hz: float = 0.0
-    good_bad_action: Literal["good action", "bad action", "normal"] = "good action"
+    good_bad_action: Literal["good action", "bad action", "normal"] = "normal"
 
     action_horizon: int = 25
     max_episode_steps: int = 10000

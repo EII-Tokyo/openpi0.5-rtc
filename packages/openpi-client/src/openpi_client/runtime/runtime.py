@@ -46,7 +46,7 @@ class Runtime:
         manual_dataset_dir: str | None = None,
         high_level_policy=None,
         high_level_hz: float = 0.0,
-        good_bad_action: str | None = "good action",
+        good_bad_action: str | None = "normal",
     ) -> None:
         self._environment = environment
         self._agent = agent
@@ -62,6 +62,9 @@ class Runtime:
         self._high_level_policy = high_level_policy
         self._high_level_step_time = 1 / high_level_hz if high_level_hz > 0 else 0.0
         self._good_bad_action = _subtask_parsing.normalize_good_bad_action(good_bad_action)
+        self._fixed_bottle_description = "Clear plastic water bottle with blue label and blue cap"
+        self._fixed_bottle_state = "Bottle on table, opening faces right"
+        self._fixed_subtask = "Pick up with left hand"
 
         self._in_episode = False
         self._episode_steps = 0
@@ -381,11 +384,14 @@ class Runtime:
             try:
                 high_level_result = self._high_level_policy.infer_subtask(obs)
                 high_level_text = str(high_level_result.get("subtask_text") or "").strip()
-                structured_subtask = _subtask_parsing.build_low_level_subtask_payload(
-                    high_level_text,
-                    good_bad_action=self._good_bad_action,
-                )
                 parsed = _subtask_parsing.parse_structured_fields(high_level_text)
+                structured_subtask = {
+                    "bottle_description": self._fixed_bottle_description,
+                    "bottle_position": parsed.get("bottle_position"),
+                    "bottle_state": self._fixed_bottle_state,
+                    "subtask": self._fixed_subtask,
+                    "good_bad_action": self._good_bad_action,
+                }
                 hierarchical_state = {
                     "task_prompt": str(obs.get("prompt") or "").strip(),
                     "low_level_prompt": json.dumps(structured_subtask, ensure_ascii=False)
@@ -393,7 +399,7 @@ class Runtime:
                     else (high_level_text or str(obs.get("prompt") or "").strip()),
                     "high_level_server_timing": high_level_result.get("server_timing", {}),
                     "low_level_server_timing": {},
-                    "good_bad_action": structured_subtask.get("good_bad_action") if structured_subtask is not None else None,
+                    "good_bad_action": self._good_bad_action,
                     **parsed,
                 }
                 logging.info("High-level raw output: %s", high_level_text)
