@@ -53,6 +53,12 @@ class Args:
     port: int = 8000
     # Record the policy's behavior for debugging.
     record: bool = False
+    # Warm up the RTC low-level path.
+    warmup_rtc: bool = True
+    # Warm up the non-RTC low-level path.
+    warmup_non_rtc: bool = True
+    # Warm up infer_subtask for hierarchical/high-level usage.
+    warmup_subtask: bool = True
 
     # Specifies how to load the policy. If not provided, the default policy for the environment will be used.
     policy: Checkpoint | Default = dataclasses.field(default_factory=Default)
@@ -121,12 +127,21 @@ def main(args: Args) -> None:
     else:
         dummy_obs = _aloha_policy.make_aloha_example()
         dummy_prev_action = np.random.rand(50, 32)
-        policy.infer(dummy_obs, dummy_prev_action, use_rtc=True)
-    policy.infer(dummy_obs, dummy_prev_action, use_rtc=False)
-    try:
-        policy.infer_subtask(dummy_obs)
-    except (AttributeError, NotImplementedError):
-        logging.info("Skipping infer_subtask warmup because the current policy does not support it.")
+        if args.warmup_rtc:
+            policy.infer(dummy_obs, dummy_prev_action, use_rtc=True)
+        else:
+            logging.info("Skipping RTC warmup by request.")
+    if args.warmup_non_rtc:
+        policy.infer(dummy_obs, dummy_prev_action, use_rtc=False)
+    else:
+        logging.info("Skipping non-RTC warmup by request.")
+    if not args.warmup_subtask:
+        logging.info("Skipping infer_subtask warmup by request.")
+    else:
+        try:
+            policy.infer_subtask(dummy_obs)
+        except (AttributeError, NotImplementedError):
+            logging.info("Skipping infer_subtask warmup because the current policy does not support it.")
     # Record the policy's behavior.
     if args.record:
         policy = _policy.PolicyRecorder(policy, "policy_records")
