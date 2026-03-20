@@ -595,6 +595,21 @@ class Runtime:
         structured_subtask, hierarchical = self._get_high_level_state()
         if structured_subtask is not None:
             observation_with_task["subtask"] = structured_subtask
+        if self._episode_steps < 5 or self._episode_steps % 25 == 0:
+            state = observation_with_task.get("state")
+            images = observation_with_task.get("images", {})
+            image_shapes = {
+                key: list(value.shape) if hasattr(value, "shape") else None
+                for key, value in images.items()
+            } if isinstance(images, dict) else {}
+            logging.info(
+                "Low-level input step=%d prompt=%s subtask=%s state_shape=%s image_shapes=%s",
+                self._episode_steps,
+                observation_with_task.get("prompt"),
+                observation_with_task.get("subtask"),
+                list(state.shape) if hasattr(state, "shape") else None,
+                image_shapes,
+            )
 
         action = self._agent.get_action(observation_with_task)
         self._environment.apply_action(action)
