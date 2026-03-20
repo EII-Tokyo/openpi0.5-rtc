@@ -406,7 +406,7 @@ export default function App() {
       </header>
 
       <section className="layout">
-        <section className={`stage-panel ${cameraView === 'focus' ? 'focus-mode' : 'quad-mode'}`}>
+        <section className={`stage-panel ${cameraView === 'quad' ? 'quad-mode' : 'focus-mode'}`}>
           <article className="hero-camera">
             <div className="camera-panel-header">
               <div>
@@ -448,14 +448,6 @@ export default function App() {
                     }}
                   />
                 ) : null}
-                <div className="camera-pip-strip">
-                  {secondaryCameras.map((cameraName) => (
-                    <article key={cameraName} className="mini-camera-card pip-camera-card">
-                      <img src={cameraSrc(cameraName)} alt={cameraName} />
-                      <div className="camera-frame-top">{renderCameraOverlay(cameraName)}</div>
-                    </article>
-                  ))}
-                </div>
                 <div className="camera-stage-overlay">
                   <div className="stage-task">
                     <span>{t.taskPrompt}</span>
@@ -474,6 +466,16 @@ export default function App() {
               </div>
             )}
           </article>
+          {cameraView === 'focus' ? (
+            <div className="camera-strip">
+              {secondaryCameras.map((cameraName) => (
+                <article key={cameraName} className="mini-camera-card">
+                  <img src={cameraSrc(cameraName)} alt={cameraName} />
+                  <div className="camera-frame-top">{renderCameraOverlay(cameraName)}</div>
+                </article>
+              ))}
+            </div>
+          ) : null}
         </section>
 
         <aside className="control-rail">
