@@ -12,33 +12,98 @@ GIT_LFS_SKIP_SMUDGE=1 uv pip install -e .
 
 ## ALOHA Real (Local Notes)
 
-Commands:
+### Safety
+
+- `runtime` will talk to the real robot. Do not start it unless someone is physically present to watch the robot.
+- It is safe to run offline HDF5 evaluation and policy-server startup checks without `runtime`.
+
+### Voice Web Only
+
+Start only the web stack without any model containers:
 
 ```bash
-# Start services, including redis, voice web, runtime, and policy server
-docker compose up
-
-# Voice web backend logs
-docker compose logs -f voice_web_backend
-
-# Voice web frontend logs
-docker compose logs -f voice_web_frontend
-
-# Runtime
-docker compose exec -it runtime /bin/bash
-python3 /app/examples/aloha_real/main.py --model-dir /app/checkpoints/20260108/13000
-
-# Policy server
-docker compose exec -it openpi_server /bin/bash
-uv run scripts/serve_policy.py --env ALOHA
-
-# High-level policy server (infer_subtask)
-docker compose exec -it openpi_server_high_level /bin/bash
-uv run scripts/serve_policy.py --port 8001 --env ALOHA
-
-# Robot reset
-uv run scripts/robot_reset_controller.py
+docker compose up -d redis voice_web_backend voice_web_frontend
 ```
+
+Useful logs:
+
+```bash
+docker compose logs -f voice_web_backend
+docker compose logs -f voice_web_frontend
+```
+
+### Training
+
+Train `twist_off_the_bottle_cap_subtask_lora`:
+
+```bash
+PYTHONPATH=src uv run scripts/train.py \
+  twist_off_the_bottle_cap_subtask_lora \
+  --exp_name twist_off_the_bottle_cap_subtask_lora_$(date +%Y%m%d_%H%M%S) \
+  --overwrite
+```
+
+Resume an existing run:
+
+```bash
+PYTHONPATH=src uv run scripts/train.py \
+  twist_off_the_bottle_cap_subtask_lora \
+  --exp_name <existing_exp_name> \
+  --resume
+```
+
+### Policy Servers Only
+
+Start both policy servers without `runtime`:
+
+```bash
+SERVER_ARGS='--warmup-rtc --warmup-non-rtc --no-warmup-subtask policy:checkpoint --policy.config twist_off_the_bottle_cap_subtask_lora --policy.dir /app/checkpoints/twist_off_the_bottle_cap_subtask_lora/<exp_name>/<step>' \
+HIGH_LEVEL_SERVER_ARGS='--no-warmup-rtc --no-warmup-non-rtc --warmup-subtask policy:checkpoint --policy.config twist_off_the_bottle_cap_subtask_lora --policy.dir /app/checkpoints/twist_off_the_bottle_cap_subtask_lora/<exp_name>/<step>' \
+docker compose up -d openpi_server openpi_server_high_level
+```
+
+Expected ports:
+
+- low-level websocket server: `127.0.0.1:8000`
+- high-level websocket server: `127.0.0.1:8001`
+
+This warmup split is intentional:
+
+- low-level server warms up `infer(..., use_rtc=True)` and `infer(..., use_rtc=False)`
+- high-level server warms up only `infer_subtask(...)`
+
+### Runtime
+
+When it is safe to move the robot, `examples/aloha_real/main.py` will now reset the robot to its initial pose on startup again, via `AlohaRealEnvironment.reset() -> RealEnv.reset()`.
+
+Do not run this remotely unless someone is in front of the robot:
+
+```bash
+docker compose exec runtime bash -lc '
+source /opt/ros/noetic/setup.bash &&
+source /root/interbotix_ws/devel/setup.bash &&
+cd /app &&
+export PYTHONPATH=/app:/app/src:/app/packages/openpi-client/src:$PYTHONPATH &&
+python3 -u examples/aloha_real/main.py \
+  --model-dir /app/checkpoints/twist_off_the_bottle_cap_subtask_lora/<exp_name>/<step> \
+  --low-level-host 127.0.0.1 \
+  --low-level-port 8000 \
+  --high-level-host 127.0.0.1 \
+  --high-level-port 8001
+'
+```
+
+### Measured VRAM (RTX 5090 32GB, offline HDF5)
+
+- low-level `infer(..., use_rtc=False)`: about `8.8 GiB`
+- low-level `infer(..., use_rtc=True)`: about `8.8 GiB`
+- high-level `infer_subtask(...)`: about `16.6 GiB`
+- low-level + high-level servers resident together: about `26.8 GiB`
+
+Notes:
+
+- Low-level warmup for RTC and non-RTC does not create two copies of the model weights in steady state.
+- It can still increase startup compile time and transient peak memory.
 
 ### Gripper Data Flow
 
