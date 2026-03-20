@@ -23,6 +23,8 @@ type RealtimeState = {
     mode: string
     current_task: string | null
     qpos: number[]
+    runtime_qpos: number[]
+    ros_qpos: number[]
     latest_action: number[]
     hierarchical: HierarchicalState
   }
@@ -55,6 +57,8 @@ const initialState: RealtimeState = {
     mode: 'waiting',
     current_task: null,
     qpos: [],
+    runtime_qpos: [],
+    ros_qpos: [],
     latest_action: [],
     hierarchical: {},
   },
@@ -683,7 +687,11 @@ export default function App() {
             </div>
             <div className="info-block compact">
               <span className="info-label">{t.qpos}</span>
-              <pre>{formatArray(state.robot.qpos)}</pre>
+              <pre>{formatArray(state.robot.runtime_qpos.length ? state.robot.runtime_qpos : state.robot.qpos)}</pre>
+            </div>
+            <div className="info-block compact">
+              <span className="info-label">{t.rosQpos}</span>
+              <pre>{formatArray(state.robot.ros_qpos)}</pre>
             </div>
             <div className="info-block compact">
               <span className="info-label">{t.latestAction}</span>

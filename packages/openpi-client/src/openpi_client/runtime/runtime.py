@@ -506,6 +506,7 @@ class Runtime:
         self._episode_steps = 0
         
         last_step_time = time.time()
+        last_waiting_state_publish = 0.0
         
         self._is_waiting_for_task = True
         self._current_task = None
@@ -518,6 +519,11 @@ class Runtime:
                 self._handle_task(task_data)
             
             if self._is_waiting_for_task:
+                now = time.time()
+                if now - last_waiting_state_publish >= 0.2:
+                    observation = self._environment.get_observation()
+                    self._publish_runtime_state(qpos=observation.get("qpos"), mode="waiting")
+                    last_waiting_state_publish = now
                 time.sleep(0.05)
             else:
                 self._step()

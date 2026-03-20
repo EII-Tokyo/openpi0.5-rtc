@@ -14,6 +14,8 @@ class RuntimeStatePayload(BaseModel):
     mode: str = "waiting"
     current_task: str | None = None
     qpos: list[float] = Field(default_factory=list)
+    runtime_qpos: list[float] = Field(default_factory=list)
+    ros_qpos: list[float] = Field(default_factory=list)
     latest_action: list[float] = Field(default_factory=list)
     hierarchical: dict[str, Any] = Field(default_factory=dict)
 

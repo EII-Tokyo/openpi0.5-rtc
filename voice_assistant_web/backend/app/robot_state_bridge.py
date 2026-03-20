@@ -20,6 +20,8 @@ class RobotStateBridge:
             "mode": "waiting",
             "current_task": None,
             "qpos": [],
+            "runtime_qpos": [],
+            "ros_qpos": [],
             "latest_action": [],
             "hierarchical": {},
         }
@@ -65,7 +67,9 @@ class RobotStateBridge:
                 if self._left_qpos is not None and self._right_qpos is not None:
                     qpos = self._combine_qpos(self._left_qpos, self._right_qpos)
                     with self._lock:
-                        self._state["qpos"] = qpos
+                        self._state["ros_qpos"] = qpos
+                        if not self._state["runtime_qpos"]:
+                            self._state["qpos"] = qpos
                         if not self._state["latest_action"]:
                             self._state["latest_action"] = qpos.copy()
                         self._state["timestamp"] = time.time()
@@ -95,6 +99,7 @@ class RobotStateBridge:
                                 "current_task": payload.get("current_task"),
                                 "latest_action": payload.get("latest_action", self._state.get("latest_action", [])),
                                 "qpos": payload.get("qpos", self._state.get("qpos", [])),
+                                "runtime_qpos": payload.get("qpos", self._state.get("runtime_qpos", [])),
                                 "hierarchical": payload.get("hierarchical", self._state.get("hierarchical", {})),
                             }
                         )
@@ -110,6 +115,8 @@ class RobotStateBridge:
                 "mode": self._state.get("mode", "waiting"),
                 "current_task": self._state.get("current_task"),
                 "qpos": list(self._state.get("qpos", [])),
+                "runtime_qpos": list(self._state.get("runtime_qpos", [])),
+                "ros_qpos": list(self._state.get("ros_qpos", [])),
                 "latest_action": list(self._state.get("latest_action", [])),
                 "hierarchical": dict(self._state.get("hierarchical", {})),
             }

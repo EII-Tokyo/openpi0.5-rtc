@@ -55,6 +55,7 @@ export const translations = {
     highLevelTiming: 'High-Level Timing',
     lowLevelTiming: 'Low-Level Timing',
     qpos: 'QPos',
+    rosQpos: 'ROS Joint QPos',
     latestAction: 'Latest Action',
     voiceTask: 'Voice Task',
     cameraLabels: {
@@ -138,6 +139,7 @@ export const translations = {
     highLevelTiming: 'High-Level 時間',
     lowLevelTiming: 'Low-Level 時間',
     qpos: 'QPos',
+    rosQpos: 'ROS Joint QPos',
     latestAction: '最新アクション',
     voiceTask: '音声タスク',
     cameraLabels: {
@@ -221,6 +223,7 @@ export const translations = {
     highLevelTiming: '高层耗时',
     lowLevelTiming: '低层耗时',
     qpos: 'QPos',
+    rosQpos: 'ROS 原始关节 QPos',
     latestAction: '最新动作',
     voiceTask: '语音任务',
     cameraLabels: {
