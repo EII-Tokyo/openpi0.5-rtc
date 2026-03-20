@@ -60,7 +60,7 @@ class WebsocketClientPolicy(_base_policy.BasePolicy):
         self,
         obs: Dict,
         *,
-        max_new_tokens: int = 32,
+        max_new_tokens: int | None = None,
         temperature: float = 0.0,
         max_text_token_id: int = 240000,
     ) -> Dict:

@@ -61,7 +61,7 @@ class WebsocketPolicyServer:
                 prev_action = data.get("prev_action", None)     
                 use_rtc = data.get("use_rtc", False)
                 decode_subtask = data.get("decode_subtask", False)
-                max_new_tokens = data.get("max_new_tokens", 32)
+                max_new_tokens = data.get("max_new_tokens", None)
                 temperature = data.get("temperature", 0.0)
                 max_text_token_id = data.get("max_text_token_id", 240000)
                 infer_time = time.monotonic()

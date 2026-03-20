@@ -17,7 +17,7 @@ def _extract_target(raw_text: str) -> str:
 def _extract_subtask(raw_text: str) -> str:
     match = re.search(r"Subtask\s*:\s*(.*)$", raw_text or "", flags=re.IGNORECASE)
     if not match:
-        return (raw_text or "").strip()
+        return ""
     return match.group(1).strip()
 
 

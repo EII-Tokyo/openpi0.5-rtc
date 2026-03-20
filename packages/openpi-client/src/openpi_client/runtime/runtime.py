@@ -395,6 +395,8 @@ class Runtime:
                     "good_bad_action": structured_subtask.get("good_bad_action") if structured_subtask is not None else None,
                     **parsed,
                 }
+                logging.info("High-level raw output: %s", high_level_text)
+                logging.info("Structured subtask payload: %s", structured_subtask)
                 with self._high_level_state_lock:
                     self._latest_structured_subtask = structured_subtask
                     self._latest_hierarchical_state = hierarchical_state
@@ -415,6 +417,9 @@ class Runtime:
         current_task = self._current_task.get("task_name") if self._current_task else None
         if qpos is None and hasattr(self._environment, "_ts") and getattr(self._environment, "_ts") is not None:
             qpos = self._environment._ts.observation.get("qpos")
+        _, hierarchical = self._get_high_level_state()
+        if not isinstance(hierarchical, dict):
+            hierarchical = {}
 
         payload = {
             "timestamp": time.time(),
@@ -422,7 +427,7 @@ class Runtime:
             "current_task": current_task,
             "qpos": list(qpos) if qpos is not None else [],
             "latest_action": list(latest_action) if latest_action is not None else [],
-            "hierarchical": {},
+            "hierarchical": hierarchical,
         }
         try:
             self._redis_client.publish("aloha_runtime_state", json.dumps(payload))
