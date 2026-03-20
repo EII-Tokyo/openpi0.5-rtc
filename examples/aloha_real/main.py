@@ -31,7 +31,7 @@ class Args:
     max_episode_steps: int = 10000
 
     use_rtc: bool = True
-    policy_hz: float = 50.0
+    policy_hz: float = 20.0
     manual_hz: float = 50.0
     
     # reset_position: List[List[float]] = dataclasses.field(default_factory=lambda: [

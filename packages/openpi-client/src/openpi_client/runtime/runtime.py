@@ -95,6 +95,7 @@ class Runtime:
         self._high_level_state_lock = threading.Lock()
         self._latest_structured_subtask = None
         self._latest_hierarchical_state = {}
+        self._last_policy_action_ts = None
 
         # 退出标志
         self._stop = False
@@ -493,6 +494,7 @@ class Runtime:
         self._agent.reset()
         self._reset_high_level_state()
         self._start_high_level_worker()
+        self._last_policy_action_ts = None
 
         self._in_episode = True
         self._episode_steps = 0
@@ -581,6 +583,7 @@ class Runtime:
 
     def _step(self) -> None:
         """A single step of the runtime loop."""
+        step_started_at = time.monotonic()
         observation = self._environment.get_observation()
         assert self._current_task is not None, "_current_task must be set before calling _step()"
         observation_with_task = {
@@ -606,6 +609,23 @@ class Runtime:
         hierarchical["low_level_server_timing"] = low_level_timing
         if isinstance(action, dict):
             action["hierarchical"] = hierarchical
+        action_applied_at = time.monotonic()
+        action_interval_ms = None
+        if self._last_policy_action_ts is not None:
+            action_interval_ms = (action_applied_at - self._last_policy_action_ts) * 1000.0
+        self._last_policy_action_ts = action_applied_at
+        low_level_infer_ms = low_level_timing.get("infer_ms")
+        if low_level_infer_ms is not None:
+            low_level_infer_ms = round(float(low_level_infer_ms), 1)
+        logging.info(
+            "Policy action step=%d interval_ms=%s target_ms=%.1f step_compute_ms=%.1f low_level_infer_ms=%s subtask=%s",
+            self._episode_steps,
+            f"{action_interval_ms:.1f}" if action_interval_ms is not None else "n/a",
+            self._step_time * 1000.0,
+            (action_applied_at - step_started_at) * 1000.0,
+            low_level_infer_ms if low_level_infer_ms is not None else "n/a",
+            (hierarchical.get("subtask") if isinstance(hierarchical, dict) else None) or "n/a",
+        )
 
         qpos = observation.get("qpos")
         payload = {
