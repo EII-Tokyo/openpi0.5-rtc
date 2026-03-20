@@ -54,7 +54,7 @@ PYTHONPATH=src uv run scripts/train.py \
 
 ### Policy Servers Only
 
-Start both policy servers without `runtime`:
+Start both policy servers on the local machine without `runtime`:
 
 ```bash
 SERVER_ARGS='--warmup-rtc --warmup-non-rtc --no-warmup-subtask policy:checkpoint --policy.config twist_off_the_bottle_cap_subtask_lora --policy.dir /app/checkpoints/twist_off_the_bottle_cap_subtask_lora/<exp_name>/<step>' \
@@ -72,11 +72,42 @@ This warmup split is intentional:
 - low-level server warms up `infer(..., use_rtc=True)` and `infer(..., use_rtc=False)`
 - high-level server warms up only `infer_subtask(...)`
 
+### Split Deployment
+
+The current recommended online setup is:
+
+- local machine (`192.168.1.42`): `runtime`, `openpi_server_high_level`, `voice_web_backend`, `voice_web_frontend`
+- remote machine (`192.168.1.40`): low-level `openpi_server`
+
+The remote low-level repo is:
+
+```bash
+/home/eii/openpi0.5-rtc-lowlevel-run
+```
+
+Restart the remote low-level container:
+
+```bash
+ssh eii@192.168.1.40
+cd /home/eii/openpi0.5-rtc-lowlevel-run
+docker restart openpi05-rtc-lowlevel-run-openpi_server-1
+docker logs -f openpi05-rtc-lowlevel-run-openpi_server-1
+```
+
+Wait for:
+
+- `Creating server (...)`
+- `server listening on 0.0.0.0:8000`
+
+before reconnecting `runtime`.
+
 ### Runtime
 
 When it is safe to move the robot, `examples/aloha_real/main.py` will now reset the robot to its initial pose on startup again, via `AlohaRealEnvironment.reset() -> RealEnv.reset()`.
 
-Do not run this remotely unless someone is in front of the robot:
+Do not run this remotely unless someone is in front of the robot.
+
+If low-level runs on `192.168.1.40`, start `runtime` locally with:
 
 ```bash
 docker compose exec runtime bash -lc '
@@ -86,12 +117,22 @@ cd /app &&
 export PYTHONPATH=/app:/app/src:/app/packages/openpi-client/src:$PYTHONPATH &&
 python3 -u examples/aloha_real/main.py \
   --model-dir /app/checkpoints/twist_off_the_bottle_cap_subtask_lora/<exp_name>/<step> \
-  --low-level-host 127.0.0.1 \
+  --low-level-host 192.168.1.40 \
   --low-level-port 8000 \
   --high-level-host 127.0.0.1 \
   --high-level-port 8001
 '
 ```
+
+Notes:
+
+- `runtime` must be started from a shell that has both `/opt/ros/noetic/setup.bash` and `/root/interbotix_ws/devel/setup.bash` sourced.
+- If the remote low-level server is still warming up, `runtime` may connect once and then exit on the first websocket request. In that case, wait for remote `server listening on 0.0.0.0:8000`, then restart `runtime`.
+- `runtime` is considered healthy only after it reaches:
+  - `Redis连接成功`
+  - `Redis监听线程已启动`
+  - `Starting episode...`
+  - `Runtime 默认仅接受 Redis / voice web 任务`
 
 ### Measured VRAM (RTX 5090 32GB, offline HDF5)
 
