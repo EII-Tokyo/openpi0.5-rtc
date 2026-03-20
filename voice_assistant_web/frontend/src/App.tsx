@@ -65,7 +65,7 @@ const initialState: RealtimeState = {
 const defaultConfig: UiConfig = {
   apiBase: import.meta.env.VITE_API_BASE || `http://${defaultHost}:8011`,
   wsBase: import.meta.env.VITE_WS_BASE || `ws://${defaultHost}:8011`,
-  cameraRefreshMs: 1000,
+  cameraRefreshMs: 100,
   datasetDir: '',
   manualDatasetDir: '',
 }
@@ -111,6 +111,22 @@ function formatCameraAge(timestamp: number | null | undefined) {
   if (!timestamp) return 'N/A'
   const age = Math.max(0, Date.now() / 1000 - timestamp)
   return `${age.toFixed(age < 1 ? 2 : 1)}s`
+}
+
+function parseBottleBox(value: Record<string, unknown> | null | undefined) {
+  if (!value) return null
+  const xMin = Number(value['x min'])
+  const xMax = Number(value['x max'])
+  const yMin = Number(value['y min'])
+  const yMax = Number(value['y max'])
+  if (![xMin, xMax, yMin, yMax].every(Number.isFinite)) return null
+  if (xMax <= xMin || yMax <= yMin) return null
+  return {
+    left: `${Math.max(0, Math.min(100, xMin))}%`,
+    top: `${Math.max(0, Math.min(100, yMin))}%`,
+    width: `${Math.max(0, Math.min(100, xMax - xMin))}%`,
+    height: `${Math.max(0, Math.min(100, yMax - yMin))}%`,
+  }
 }
 
 export default function App() {
@@ -208,6 +224,7 @@ export default function App() {
   const voiceTaskWithHighLevel = [voiceResponse?.task_name, hierarchical.high_level_text]
     .filter((value) => typeof value === 'string' && value.trim())
     .join('\n')
+  const primaryCameraBbox = primaryCamera === 'cam_high' ? parseBottleBox(hierarchical.bottle_position || null) : null
 
   const renderCameraOverlay = (cameraName: (typeof cameraNames)[number]) => {
     const isLive = Boolean(state.camera_status[cameraName])
@@ -389,7 +406,7 @@ export default function App() {
       </header>
 
       <section className="layout">
-        <section className="stage-panel">
+        <section className={`stage-panel ${cameraView === 'focus' ? 'focus-mode' : 'quad-mode'}`}>
           <article className="hero-camera">
             <div className="camera-panel-header">
               <div>
@@ -420,6 +437,25 @@ export default function App() {
               <div className="camera-stage-frame">
                 <img src={cameraSrc(primaryCamera)} alt={primaryCamera} />
                 <div className="camera-frame-top">{renderCameraOverlay(primaryCamera)}</div>
+                {primaryCameraBbox ? (
+                  <div
+                    className="camera-bbox"
+                    style={{
+                      left: primaryCameraBbox.left,
+                      top: primaryCameraBbox.top,
+                      width: primaryCameraBbox.width,
+                      height: primaryCameraBbox.height,
+                    }}
+                  />
+                ) : null}
+                <div className="camera-pip-strip">
+                  {secondaryCameras.map((cameraName) => (
+                    <article key={cameraName} className="mini-camera-card pip-camera-card">
+                      <img src={cameraSrc(cameraName)} alt={cameraName} />
+                      <div className="camera-frame-top">{renderCameraOverlay(cameraName)}</div>
+                    </article>
+                  ))}
+                </div>
                 <div className="camera-stage-overlay">
                   <div className="stage-task">
                     <span>{t.taskPrompt}</span>
@@ -438,17 +474,6 @@ export default function App() {
               </div>
             )}
           </article>
-
-          {cameraView === 'focus' ? (
-            <div className="camera-strip">
-              {secondaryCameras.map((cameraName) => (
-                <article key={cameraName} className="mini-camera-card">
-                  <img src={cameraSrc(cameraName)} alt={cameraName} />
-                  <div className="camera-frame-top">{renderCameraOverlay(cameraName)}</div>
-                </article>
-              ))}
-            </div>
-          ) : null}
         </section>
 
         <aside className="control-rail">
