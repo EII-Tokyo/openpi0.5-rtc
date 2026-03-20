@@ -20,7 +20,7 @@ from examples.aloha_real import h5df_saver
 class Args:
     model_dir: str
     adapt_to_pi: bool = True
-    low_level_host: str = "0.0.0.0"
+    low_level_host: str = "192.168.1.40"
     low_level_port: int = 8000
     high_level_host: str = "0.0.0.0"
     high_level_port: int = 8001
@@ -31,7 +31,7 @@ class Args:
     max_episode_steps: int = 10000
 
     use_rtc: bool = True
-    policy_hz: float = 20.0
+    policy_hz: float = 50.0
     manual_hz: float = 50.0
     
     # reset_position: List[List[float]] = dataclasses.field(default_factory=lambda: [
