@@ -50,8 +50,7 @@ button {
 .hero,
 .panel-header,
 .hero-badges,
-.camera-panel-header,
-.mini-camera-header {
+.camera-panel-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -244,6 +243,45 @@ button {
   display: block;
 }
 
+.camera-frame-top {
+  position: absolute;
+  inset: 12px 12px auto 12px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.camera-overlay-chip {
+  display: inline-grid;
+  gap: 4px;
+  max-width: min(260px, 100%);
+  padding: 8px 10px;
+  border-radius: 14px;
+  background: rgba(26, 20, 15, 0.48);
+  border: 1px solid rgba(255, 248, 239, 0.14);
+  backdrop-filter: blur(10px);
+  color: #fff7ec;
+}
+
+.camera-overlay-head,
+.camera-overlay-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.camera-overlay-head {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.camera-overlay-meta {
+  font-size: 11px;
+  color: rgba(255, 247, 236, 0.82);
+}
+
 .camera-stage-overlay {
   position: absolute;
   inset: auto 18px 18px 18px;
@@ -282,10 +320,11 @@ button {
 }
 
 .mini-camera-card {
+  position: relative;
   overflow: hidden;
-  display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
+  display: block;
   min-height: 0;
+  height: 100%;
 }
 
 .camera-grid {
@@ -294,20 +333,15 @@ button {
   grid-template-rows: repeat(2, minmax(0, 1fr));
   gap: 14px;
   min-height: 0;
-}
-
-.mini-camera-header {
-  padding: 12px 14px;
-  font-size: 12px;
-  font-weight: 700;
-  color: #2f241b;
+  height: 100%;
 }
 
 .dot {
-  width: 9px;
-  height: 9px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   background: #9f8e7d;
+  box-shadow: 0 0 0 2px rgba(255, 248, 239, 0.16);
 }
 
 .dot.live {
@@ -715,6 +749,11 @@ button {
   .response-grid,
   .runtime-grid {
     grid-template-columns: 1fr;
+  }
+
+  .camera-grid {
+    grid-template-rows: repeat(4, minmax(180px, 1fr));
+    height: auto;
   }
 
   .command-form {

@@ -87,6 +87,7 @@ async def realtime_socket(websocket: WebSocket) -> None:
             payload = RealtimePayload(
                 robot=RuntimeStatePayload(**robot_state_bridge.snapshot()),
                 camera_status=camera_bridge.get_camera_status(),
+                camera_timestamps=camera_bridge.get_camera_timestamps(),
             )
             await websocket.send_json(payload.model_dump())
             await asyncio.sleep(interval)

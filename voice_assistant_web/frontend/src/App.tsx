@@ -27,6 +27,7 @@ type RealtimeState = {
     hierarchical: HierarchicalState
   }
   camera_status: Record<string, boolean>
+  camera_timestamps: Record<string, number | null>
 }
 
 type VoiceResponse = {
@@ -58,6 +59,7 @@ const initialState: RealtimeState = {
     hierarchical: {},
   },
   camera_status: {},
+  camera_timestamps: {},
 }
 
 const defaultConfig: UiConfig = {
@@ -103,6 +105,12 @@ function formatTiming(value: Record<string, unknown> | undefined) {
   return Object.entries(value)
     .map(([key, entry]) => `${key}=${typeof entry === 'number' ? entry.toFixed(1) : String(entry)}`)
     .join('  ')
+}
+
+function formatCameraAge(timestamp: number | null | undefined) {
+  if (!timestamp) return 'N/A'
+  const age = Math.max(0, Date.now() / 1000 - timestamp)
+  return `${age.toFixed(age < 1 ? 2 : 1)}s`
 }
 
 export default function App() {
@@ -191,6 +199,32 @@ export default function App() {
   const secondaryCameras = cameraNames.filter((name) => name !== primaryCamera)
   const cameraSrc = (cameraName: (typeof cameraNames)[number]) =>
     `${uiConfig.apiBase}/api/cameras/${cameraName}/latest.jpg?t=${cameraRefreshToken}`
+  const displayFps = useMemo(() => {
+    const intervalMs = Math.max(100, Number(uiConfig.cameraRefreshMs) || defaultConfig.cameraRefreshMs)
+    return 1000 / intervalMs
+  }, [uiConfig.cameraRefreshMs])
+  const primaryCameraAge = formatCameraAge(state.camera_timestamps[primaryCamera])
+  const primaryCameraStats = `${displayFps.toFixed(1)} FPS · ${primaryCameraAge}`
+  const voiceTaskWithHighLevel = [voiceResponse?.task_name, hierarchical.high_level_text]
+    .filter((value) => typeof value === 'string' && value.trim())
+    .join('\n')
+
+  const renderCameraOverlay = (cameraName: (typeof cameraNames)[number]) => {
+    const isLive = Boolean(state.camera_status[cameraName])
+    const cameraAge = formatCameraAge(state.camera_timestamps[cameraName])
+    return (
+      <div className="camera-overlay-chip">
+        <div className="camera-overlay-head">
+          <span>{t.cameraLabels[cameraName] || cameraName}</span>
+          <span className={`dot ${isLive ? 'live' : 'offline'}`} />
+        </div>
+        <div className="camera-overlay-meta">
+          <span>{displayFps.toFixed(1)} FPS</span>
+          <span>{cameraAge}</span>
+        </div>
+      </div>
+    )
+  }
 
   const sendCommand = async (rawText: string) => {
     const text = rawText.trim()
@@ -378,13 +412,14 @@ export default function App() {
                   Quad
                 </button>
                 <span className={`status-pill ${state.camera_status[primaryCamera] ? 'live' : 'offline'}`}>
-                  {state.camera_status[primaryCamera] ? t.live : t.offline}
+                  {state.camera_status[primaryCamera] ? `${t.live} · ${primaryCameraStats}` : `${t.offline} · ${primaryCameraStats}`}
                 </span>
               </div>
             </div>
             {cameraView === 'focus' ? (
               <div className="camera-stage-frame">
                 <img src={cameraSrc(primaryCamera)} alt={primaryCamera} />
+                <div className="camera-frame-top">{renderCameraOverlay(primaryCamera)}</div>
                 <div className="camera-stage-overlay">
                   <div className="stage-task">
                     <span>{t.taskPrompt}</span>
@@ -396,11 +431,8 @@ export default function App() {
               <div className="camera-grid">
                 {cameraNames.map((cameraName) => (
                   <article key={cameraName} className="mini-camera-card">
-                    <div className="mini-camera-header">
-                      <span>{t.cameraLabels[cameraName] || cameraName}</span>
-                      <span className={`dot ${state.camera_status[cameraName] ? 'live' : 'offline'}`} />
-                    </div>
                     <img src={cameraSrc(cameraName)} alt={cameraName} />
+                    <div className="camera-frame-top">{renderCameraOverlay(cameraName)}</div>
                   </article>
                 ))}
               </div>
@@ -411,11 +443,8 @@ export default function App() {
             <div className="camera-strip">
               {secondaryCameras.map((cameraName) => (
                 <article key={cameraName} className="mini-camera-card">
-                  <div className="mini-camera-header">
-                    <span>{t.cameraLabels[cameraName] || cameraName}</span>
-                    <span className={`dot ${state.camera_status[cameraName] ? 'live' : 'offline'}`} />
-                  </div>
                   <img src={cameraSrc(cameraName)} alt={cameraName} />
+                  <div className="camera-frame-top">{renderCameraOverlay(cameraName)}</div>
                 </article>
               ))}
             </div>
@@ -474,7 +503,7 @@ export default function App() {
               </div>
               <div className="info-block compact">
                 <span className="info-label">{t.voiceTask}</span>
-                <pre>{voiceResponse?.task_name || 'N/A'}</pre>
+                <pre>{voiceTaskWithHighLevel || 'N/A'}</pre>
               </div>
             </div>
             {error ? <div className="error-banner">{error}</div> : null}
