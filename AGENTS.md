@@ -2,6 +2,9 @@
 
 ## Image flow (inference)
 - Source: `/home/eii/openpi0.5-rtc/examples/aloha_real/real_env.py` -> `RealEnv.get_observation()` -> `obs["images"]` from `ImageRecorder.get_images()` (HWC uint8 from RealSense).
+- Real camera publish rate is set in `third_party/aloha/aloha_scripts/realsense_publisher.py`.
+  - Keep `FPS = 50` for online robot testing.
+  - A `30 FPS` camera publisher caps the effective control loop well below the intended `50Hz`.
 - Runtime adapter: `/home/eii/openpi0.5-rtc/examples/aloha_real/env.py`
   - Removes `*_depth` keys.
   - Resize + pad to target size via `openpi_client.image_tools.resize_with_pad`.
@@ -23,10 +26,17 @@
 ## Gripper flow
 
 ### Data collection
+- Runtime launch detail:
+  - Data collection is launched with Docker bind-mount:
+    `-v .:/root/interbotix_ws/src/aloha`
+  - This means the host working tree overrides the image copy of `/root/interbotix_ws/src/aloha`.
+  - Effective collection behavior therefore comes from the host repo contents, not the image's bundled `aloha` source.
 - State (gripper qpos) source:
   - `aloha-2.0/aloha/real_env.py`
   - Uses `FOLLOWER_GRIPPER_JOINT_NORMALIZE_FN(bot.gripper.get_gripper_position())`.
-  - `get_gripper_position()` returns joint angle (not linear position); this is a known issue.
+  - In `lyl472324464/robot:aloha-2.0`, `bot.gripper.get_gripper_position()` returns gripper joint angle `[rad]`.
+  - In `lyl472324464/robot:aloha-2.0`, linear finger position `[m]` is exposed by `bot.gripper.get_finger_position()`.
+  - Because the container bind-mounts the host `aloha` repo, long-running data collection used the host copy of `aloha/real_env.py`, which is self-consistent with joint-based gripper normalization.
 - Action (gripper) source:
   - `aloha-2.0/aloha/real_env.py` uses `LEADER_GRIPPER_JOINT_NORMALIZE_FN(robot.gripper.get_gripper_position())`.
 

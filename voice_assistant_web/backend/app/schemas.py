@@ -31,6 +31,7 @@ class VoiceRequest(BaseModel):
     language: str = "en"
     dataset_dir: str | None = None
     manual_dataset_dir: str | None = None
+    include_bottle_position: bool = False
 
 
 class VoiceResponse(BaseModel):

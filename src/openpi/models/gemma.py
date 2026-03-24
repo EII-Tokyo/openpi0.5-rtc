@@ -175,7 +175,6 @@ class Attention(nn.Module):
         k_new = jax.lax.dynamic_update_slice(k_cache, k.astype(k_cache.dtype), indices)
         v_new = jax.lax.dynamic_update_slice(v_cache, v.astype(v_cache.dtype), indices)
         idx_new = idx + update_len
-        jax.debug.print("idx_new ={idx_new}", idx_new=idx_new)
         return idx_new, k_new, v_new
 
     @nn.compact

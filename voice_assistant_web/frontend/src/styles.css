@@ -581,6 +581,64 @@ button {
   color: #2b221a;
 }
 
+.history-list {
+  display: grid;
+  gap: 8px;
+  max-height: 260px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.history-item {
+  display: grid;
+  gap: 4px;
+  text-align: left;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(60, 48, 38, 0.1);
+  background: rgba(255, 255, 255, 0.72);
+  color: #2b221a;
+}
+
+.history-item.active {
+  border-color: rgba(74, 125, 23, 0.45);
+  background: rgba(230, 245, 212, 0.8);
+}
+
+.history-item strong {
+  font-size: 12px;
+}
+
+.history-item span {
+  font-size: 11px;
+  color: #6f5d4e;
+}
+
+.history-image-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.history-image-card {
+  margin: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.history-image-card img {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid rgba(60, 48, 38, 0.08);
+  background: #f4eee7;
+}
+
+.history-image-card figcaption {
+  font-size: 11px;
+  font-weight: 700;
+  color: #6f5d4e;
+}
+
 .error-banner {
   padding: 12px 14px;
   border-radius: 16px;
@@ -650,6 +708,11 @@ button {
   background: rgba(44, 33, 24, 0.36);
   backdrop-filter: blur(18px);
   z-index: 20;
+}
+
+.runtime-drawer-backdrop {
+  background: transparent;
+  backdrop-filter: none;
 }
 
 .config-drawer {

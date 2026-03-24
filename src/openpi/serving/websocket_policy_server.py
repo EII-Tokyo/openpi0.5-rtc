@@ -52,10 +52,16 @@ class WebsocketPolicyServer:
         await websocket.send(packer.pack(self._metadata))
 
         prev_total_time = None
+        prev_send_ms = None
         while True:
             try:
                 start_time = time.monotonic()
-                data = msgpack_numpy.unpackb(await websocket.recv())
+                recv_started_at = time.monotonic()
+                payload = await websocket.recv()
+                recv_ms = (time.monotonic() - recv_started_at) * 1000.0
+                unpack_started_at = time.monotonic()
+                data = msgpack_numpy.unpackb(payload)
+                unpack_ms = (time.monotonic() - unpack_started_at) * 1000.0
 
                 obs = data.get("obs", None)  
                 prev_action = data.get("prev_action", None)     
@@ -64,7 +70,7 @@ class WebsocketPolicyServer:
                 max_new_tokens = data.get("max_new_tokens", None)
                 temperature = data.get("temperature", 0.0)
                 max_text_token_id = data.get("max_text_token_id", 240000)
-                infer_time = time.monotonic()
+                infer_started_at = time.monotonic()
                 if decode_subtask:
                     if not hasattr(self._policy, "infer_subtask"):
                         raise NotImplementedError("Policy does not support subtask decoding.")
@@ -76,16 +82,27 @@ class WebsocketPolicyServer:
                     )
                 else:
                     action = self._policy.infer(obs, prev_action, use_rtc)
-                infer_time = time.monotonic() - infer_time
+                infer_ms = (time.monotonic() - infer_started_at) * 1000.0
 
                 action["server_timing"] = {
-                    "infer_ms": infer_time * 1000,
+                    "recv_ms": recv_ms,
+                    "unpack_ms": unpack_ms,
+                    "infer_ms": infer_ms,
                 }
                 if prev_total_time is not None:
                     # We can only record the last total time since we also want to include the send time.
                     action["server_timing"]["prev_total_ms"] = prev_total_time * 1000
+                if prev_send_ms is not None:
+                    action["server_timing"]["prev_send_ms"] = prev_send_ms
 
-                await websocket.send(packer.pack(action))
+                pack_started_at = time.monotonic()
+                packed = packer.pack(action)
+                pack_ms = (time.monotonic() - pack_started_at) * 1000.0
+                action["server_timing"]["pack_ms"] = pack_ms
+                packed = packer.pack(action)
+                send_started_at = time.monotonic()
+                await websocket.send(packed)
+                prev_send_ms = (time.monotonic() - send_started_at) * 1000.0
                 prev_total_time = time.monotonic() - start_time
 
             except websockets.ConnectionClosed:

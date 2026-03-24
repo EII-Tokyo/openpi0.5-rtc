@@ -133,6 +133,7 @@ Notes:
   - `Redis监听线程已启动`
   - `Starting episode...`
   - `Runtime 默认仅接受 Redis / voice web 任务`
+- Camera publish rate matters for real control frequency. `third_party/aloha/aloha_scripts/realsense_publisher.py` should run at `FPS = 50`; when it was left at `30`, the online loop could not realistically sustain `50Hz`.
 
 ### Measured VRAM (RTX 5090 32GB, offline HDF5)
 

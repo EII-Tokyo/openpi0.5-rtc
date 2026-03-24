@@ -45,6 +45,16 @@ class AlohaRealEnvironment(_environment.Environment):
     def get_observation(self) -> dict:
         if self._ts is None:
             raise RuntimeError("Timestep is not set. Call reset() first.")
+        # Always pull a fresh sensor snapshot instead of reusing the last timestep's
+        # cached observation. Otherwise task switches can feed stale camera frames and
+        # robot state from the previous stop/reset event into high-level inference.
+        fresh_observation = self._env.get_observation()
+        self._ts = dm_env.TimeStep(
+            step_type=self._ts.step_type,
+            reward=self._ts.reward,
+            discount=self._ts.discount,
+            observation=fresh_observation,
+        )
         origin_observation = copy.deepcopy(self._ts.observation)
         obs = self._ts.observation
         for k in list(obs["images"].keys()):

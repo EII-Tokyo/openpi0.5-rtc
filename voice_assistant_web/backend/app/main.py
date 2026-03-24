@@ -104,6 +104,7 @@ async def voice_text(request: VoiceRequest) -> VoiceResponse:
             direct_task,
             dataset_dir=request.dataset_dir,
             manual_dataset_dir=request.manual_dataset_dir,
+            include_bottle_position=request.include_bottle_position,
         )
         return VoiceResponse(
             transcript=request.text,
@@ -117,6 +118,7 @@ async def voice_text(request: VoiceRequest) -> VoiceResponse:
         language=request.language,
         dataset_dir=request.dataset_dir,
         manual_dataset_dir=request.manual_dataset_dir,
+        include_bottle_position=request.include_bottle_position,
     )
 
 
@@ -126,10 +128,12 @@ async def voice_audio(
     language: str = Form("en"),
     dataset_dir: str | None = Form(None),
     manual_dataset_dir: str | None = Form(None),
+    include_bottle_position: bool = Form(False),
 ) -> VoiceResponse:
     return await voice_engine.process_audio(
         file,
         language=language,
         dataset_dir=dataset_dir,
         manual_dataset_dir=manual_dataset_dir,
+        include_bottle_position=include_bottle_position,
     )

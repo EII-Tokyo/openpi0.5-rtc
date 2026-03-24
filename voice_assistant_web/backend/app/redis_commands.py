@@ -30,6 +30,7 @@ def publish_task(
     *,
     dataset_dir: str | None = None,
     manual_dataset_dir: str | None = None,
+    include_bottle_position: bool = False,
 ) -> dict:
     task_name = TASK_MAPPING[task_num]
     message = {
@@ -41,5 +42,6 @@ def publish_task(
         message["dataset_dir"] = dataset_dir
     if manual_dataset_dir:
         message["manual_dataset_dir"] = manual_dataset_dir
+    message["include_bottle_position"] = bool(include_bottle_position)
     redis_client.publish(settings.voice_command_channel, json.dumps(message))
     return message

@@ -446,17 +446,6 @@ class Pi0(_model.BaseModel):
             logits = jnp.where(special_token_mask[None, :], -jnp.inf, logits)
             logits = jnp.where(non_text_mask[None, :], -jnp.inf, logits)
             logits = logits.at[:, 0].set(-jnp.inf)  # never emit pad token
-            if debug_top_logits:
-                top_vals, top_idx = jax.lax.top_k(logits[0], 2)
-                jax.debug.print(
-                    "subtask step {s}: top1={i1}({v1}) top2={i2}({v2}) gap={g}",
-                    s=step_i,
-                    i1=top_idx[0],
-                    v1=top_vals[0],
-                    i2=top_idx[1],
-                    v2=top_vals[1],
-                    g=top_vals[0] - top_vals[1],
-                )
             if temperature <= 0.0:
                 next_token = jnp.argmax(logits, axis=-1).astype(jnp.int32)
             else:
@@ -509,10 +498,11 @@ class Pi0(_model.BaseModel):
         observation: _model.Observation,
         *,
         num_steps: int | at.Int[at.Array, ""] = 10,       
-        s: int = 25,
-        d: int = 10,
+        s: int = 20,
+        d: int = 17,
         beta: float = 8.0,
     ) -> _model.Actions:
+        assert d < s, f"RTC requires d < s, got s={s}, d={d}"
         observation = _model.preprocess_observation(
             None, observation, train=False, image_resolution=self.image_resolution
         )

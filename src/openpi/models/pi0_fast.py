@@ -328,10 +328,11 @@ class Pi0FAST(_model.BaseModel):
         observation: _model.Observation,
         *,
         num_steps: int | at.Int[at.Array, ""] = 10,       
-        s: int = 25,
-        d: int = 10,
+        s: int = 20,
+        d: int = 15,
         beta: float = 8.0,
     ) -> _model.Actions:
+        assert d < s, f"RTC requires d < s, got s={s}, d={d}"
         observation = _model.preprocess_observation(
             None, observation, train=False, image_resolution=self.image_resolution
         )

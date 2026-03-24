@@ -3,7 +3,7 @@ import { AppLanguage, translations } from './i18n'
 
 const defaultHost = typeof window !== 'undefined' ? window.location.hostname : 'localhost'
 const cameraNames = ['cam_high', 'cam_low', 'cam_left_wrist', 'cam_right_wrist'] as const
-const configStorageKey = 'aloha-ui-config-v1'
+const configStorageKey = 'aloha-ui-config-v2'
 
 type HierarchicalState = {
   task_prompt?: string
@@ -13,8 +13,25 @@ type HierarchicalState = {
   bottle_position?: Record<string, unknown> | null
   bottle_state?: string | null
   subtask?: string | null
+  locked_bottle_description?: string | null
+  raw_subtask?: string | null
+  effective_subtask?: string | null
+  pending_subtask?: string | null
+  pending_subtask_count?: number
   high_level_server_timing?: Record<string, unknown>
   low_level_server_timing?: Record<string, unknown>
+  history?: Array<{
+    id: string
+    timestamp: number
+    obs_version: number
+    task_prompt?: string
+    high_level_text?: string
+    bottle_description?: string | null
+    bottle_position?: Record<string, unknown> | null
+    bottle_state?: string | null
+    subtask?: string | null
+    images?: Record<string, string>
+  }>
 }
 
 type RealtimeState = {
@@ -47,6 +64,7 @@ type UiConfig = {
   cameraRefreshMs: number
   datasetDir: string
   manualDatasetDir: string
+  includeBottlePosition: boolean
 }
 
 type VoiceStatus = 'idle' | 'recording' | 'thinking' | 'speaking'
@@ -72,6 +90,7 @@ const defaultConfig: UiConfig = {
   cameraRefreshMs: 100,
   datasetDir: '',
   manualDatasetDir: '',
+  includeBottlePosition: false,
 }
 
 function loadUiConfig(): UiConfig {
@@ -80,6 +99,12 @@ function loadUiConfig(): UiConfig {
     const raw = window.localStorage.getItem(configStorageKey)
     if (!raw) return defaultConfig
     const parsed = JSON.parse(raw)
+    const includeBottlePosition =
+      typeof parsed?.includeBottlePosition === 'boolean'
+        ? parsed.includeBottlePosition
+        : typeof parsed?.includeBottlePosition === 'string'
+          ? parsed.includeBottlePosition === 'true'
+          : defaultConfig.includeBottlePosition
     return {
       apiBase: typeof parsed?.apiBase === 'string' && parsed.apiBase.trim() ? parsed.apiBase.trim() : defaultConfig.apiBase,
       wsBase: typeof parsed?.wsBase === 'string' && parsed.wsBase.trim() ? parsed.wsBase.trim() : defaultConfig.wsBase,
@@ -92,6 +117,7 @@ function loadUiConfig(): UiConfig {
         typeof parsed?.manualDatasetDir === 'string'
           ? parsed.manualDatasetDir.trim()
           : defaultConfig.manualDatasetDir,
+      includeBottlePosition,
     }
   } catch {
     return defaultConfig
@@ -144,6 +170,7 @@ export default function App() {
   const [error, setError] = useState<string | null>(null)
   const [configOpen, setConfigOpen] = useState(false)
   const [runtimeOpen, setRuntimeOpen] = useState(false)
+  const [selectedHistoryId, setSelectedHistoryId] = useState<string | null>(null)
   const [cameraView, setCameraView] = useState<'focus' | 'quad'>('focus')
   const [cameraRefreshToken, setCameraRefreshToken] = useState<number>(Date.now())
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
@@ -151,6 +178,17 @@ export default function App() {
   const mediaStreamRef = useRef<MediaStream | null>(null)
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const t = translations[language]
+
+  const clearHighLevelDisplay = () => {
+    setSelectedHistoryId(null)
+    setState((current) => ({
+      ...current,
+      robot: {
+        ...current.robot,
+        hierarchical: {},
+      },
+    }))
+  }
 
   useEffect(() => {
     const ws = new WebSocket(`${uiConfig.wsBase}/ws/realtime`)
@@ -215,6 +253,11 @@ export default function App() {
   }, [state.robot.timestamp, t])
 
   const hierarchical = state.robot.hierarchical || {}
+  const history = Array.isArray(hierarchical.history) ? hierarchical.history : []
+  const selectedHistory =
+    history.find((entry) => entry.id === selectedHistoryId) ||
+    history[history.length - 1] ||
+    null
   const primaryCamera = 'cam_high'
   const secondaryCameras = cameraNames.filter((name) => name !== primaryCamera)
   const cameraSrc = (cameraName: (typeof cameraNames)[number]) =>
@@ -250,6 +293,9 @@ export default function App() {
   const sendCommand = async (rawText: string) => {
     const text = rawText.trim()
     if (!text) return
+    if (text === '1') {
+      clearHighLevelDisplay()
+    }
     setSending(true)
     setError(null)
     try {
@@ -261,6 +307,7 @@ export default function App() {
           language,
           dataset_dir: uiConfig.datasetDir.trim() || undefined,
           manual_dataset_dir: uiConfig.manualDatasetDir.trim() || undefined,
+          include_bottle_position: uiConfig.includeBottlePosition,
         }),
       })
       if (!response.ok) {
@@ -296,6 +343,7 @@ export default function App() {
       if (uiConfig.manualDatasetDir.trim()) {
         formData.append('manual_dataset_dir', uiConfig.manualDatasetDir.trim())
       }
+      formData.append('include_bottle_position', String(uiConfig.includeBottlePosition))
       const response = await fetch(`${uiConfig.apiBase}/api/voice/audio`, {
         method: 'POST',
         body: formData,
@@ -606,6 +654,21 @@ export default function App() {
               />
             </label>
             <label className="config-field">
+              <span>{t.includeBottlePosition}</span>
+              <select
+                value={uiConfig.includeBottlePosition ? 'true' : 'false'}
+                onChange={(event) =>
+                  setUiConfig((current) => ({
+                    ...current,
+                    includeBottlePosition: event.target.value === 'true',
+                  }))
+                }
+              >
+                <option value="false">{t.no}</option>
+                <option value="true">{t.yes}</option>
+              </select>
+            </label>
+            <label className="config-field">
               <span>{t.inferenceSavePath}</span>
               <input
                 value={uiConfig.datasetDir}
@@ -637,68 +700,113 @@ export default function App() {
       ) : null}
 
       {runtimeOpen ? (
-        <aside className="runtime-drawer" onClick={(event) => event.stopPropagation()}>
-          <div className="panel-header">
-            <div>
-              <p className="eyebrow">{t.runtimeEyebrow}</p>
-              <h2>{t.runtimeTitle}</h2>
+        <>
+          <div className="drawer-backdrop runtime-drawer-backdrop" onClick={() => setRuntimeOpen(false)} />
+          <aside className="runtime-drawer" onClick={(event) => event.stopPropagation()}>
+            <div className="panel-header">
+              <div>
+                <p className="eyebrow">{t.runtimeEyebrow}</p>
+                <h2>{t.runtimeTitle}</h2>
+              </div>
+              <div className="drawer-actions">
+                <span className="robot-task-badge" title={state.robot.current_task || t.noActiveTask}>
+                  {state.robot.current_task || t.noActiveTask}
+                </span>
+                <button type="button" className="ghost-button" onClick={() => setRuntimeOpen(false)}>
+                  {t.close}
+                </button>
+              </div>
             </div>
-            <div className="drawer-actions">
-              <span className="robot-task-badge" title={state.robot.current_task || t.noActiveTask}>
-                {state.robot.current_task || t.noActiveTask}
-              </span>
-              <button type="button" className="ghost-button" onClick={() => setRuntimeOpen(false)}>
-                {t.close}
-              </button>
+            <div className="runtime-grid">
+              <div className="info-block">
+                <span className="info-label">{t.bottleDescription}</span>
+                <pre>{hierarchical.bottle_description || 'N/A'}</pre>
+              </div>
+              <div className="info-block">
+                <span className="info-label">{t.effectiveBottleDescription}</span>
+                <pre>{hierarchical.locked_bottle_description || 'N/A'}</pre>
+              </div>
+              <div className="info-block">
+                <span className="info-label">{t.bottleState}</span>
+                <pre>{hierarchical.bottle_state || 'N/A'}</pre>
+              </div>
+              <div className="info-block">
+                <span className="info-label">{t.bottlePosition}</span>
+                <pre>{hierarchical.bottle_position ? JSON.stringify(hierarchical.bottle_position, null, 2) : 'N/A'}</pre>
+              </div>
+              <div className="info-block">
+                <span className="info-label">{t.subtask}</span>
+                <pre>{hierarchical.subtask || 'N/A'}</pre>
+              </div>
+              <div className="info-block wide">
+                <span className="info-label">{t.highLevelText}</span>
+                <pre>{hierarchical.high_level_text || 'N/A'}</pre>
+              </div>
+              <div className="info-block wide">
+                <span className="info-label">{t.lowLevelPrompt}</span>
+                <pre>{hierarchical.low_level_prompt || 'N/A'}</pre>
+              </div>
+              <div className="info-block wide">
+                <span className="info-label">{t.stabilizer}</span>
+                <pre>{JSON.stringify({
+                  pending_subtask: hierarchical.pending_subtask ?? null,
+                  pending_subtask_count: hierarchical.pending_subtask_count ?? 0,
+                }, null, 2)}</pre>
+              </div>
+              <div className="info-block wide">
+                <span className="info-label">{t.subtaskHistory}</span>
+                <div className="history-list">
+                  {history.length ? history.map((entry) => (
+                    <button
+                      key={entry.id}
+                      type="button"
+                      className={`history-item ${selectedHistory?.id === entry.id ? 'active' : ''}`}
+                      onClick={() => setSelectedHistoryId(entry.id)}
+                    >
+                      <strong>{entry.subtask || 'N/A'}</strong>
+                      <span>{entry.bottle_state || 'N/A'}</span>
+                    </button>
+                  )) : <pre>N/A</pre>}
+                </div>
+              </div>
+              <div className="info-block wide">
+                <span className="info-label">{t.selectedHighLevelOutput}</span>
+                <pre>{selectedHistory?.high_level_text || 'N/A'}</pre>
+              </div>
+              <div className="info-block wide">
+                <span className="info-label">{t.selectedHighLevelImages}</span>
+                <div className="history-image-grid">
+                  {selectedHistory?.images && Object.keys(selectedHistory.images).length ? Object.entries(selectedHistory.images).map(([name, data]) => (
+                    <figure key={name} className="history-image-card">
+                      <img src={`data:image/jpeg;base64,${data}`} alt={name} />
+                      <figcaption>{t.cameraLabels[name as keyof typeof t.cameraLabels] || name}</figcaption>
+                    </figure>
+                  )) : <pre>N/A</pre>}
+                </div>
+              </div>
+              <div className="info-block compact">
+                <span className="info-label">{t.highLevelTiming}</span>
+                <pre>{formatTiming(hierarchical.high_level_server_timing)}</pre>
+              </div>
+              <div className="info-block compact">
+                <span className="info-label">{t.lowLevelTiming}</span>
+                <pre>{formatTiming(hierarchical.low_level_server_timing)}</pre>
+              </div>
+              <div className="info-block compact">
+                <span className="info-label">{t.qpos}</span>
+                <pre>{formatArray(state.robot.runtime_qpos.length ? state.robot.runtime_qpos : state.robot.qpos)}</pre>
+              </div>
+              <div className="info-block compact">
+                <span className="info-label">{t.rosQpos}</span>
+                <pre>{formatArray(state.robot.ros_qpos)}</pre>
+              </div>
+              <div className="info-block compact">
+                <span className="info-label">{t.latestAction}</span>
+                <pre>{formatArray(state.robot.latest_action)}</pre>
+              </div>
             </div>
-          </div>
-          <div className="runtime-grid">
-            <div className="info-block">
-              <span className="info-label">{t.bottleDescription}</span>
-              <pre>{hierarchical.bottle_description || 'N/A'}</pre>
-            </div>
-            <div className="info-block">
-              <span className="info-label">{t.bottleState}</span>
-              <pre>{hierarchical.bottle_state || 'N/A'}</pre>
-            </div>
-            <div className="info-block">
-              <span className="info-label">{t.bottlePosition}</span>
-              <pre>{hierarchical.bottle_position ? JSON.stringify(hierarchical.bottle_position, null, 2) : 'N/A'}</pre>
-            </div>
-            <div className="info-block">
-              <span className="info-label">{t.subtask}</span>
-              <pre>{hierarchical.subtask || 'N/A'}</pre>
-            </div>
-            <div className="info-block wide">
-              <span className="info-label">{t.highLevelText}</span>
-              <pre>{hierarchical.high_level_text || 'N/A'}</pre>
-            </div>
-            <div className="info-block wide">
-              <span className="info-label">{t.lowLevelPrompt}</span>
-              <pre>{hierarchical.low_level_prompt || 'N/A'}</pre>
-            </div>
-            <div className="info-block compact">
-              <span className="info-label">{t.highLevelTiming}</span>
-              <pre>{formatTiming(hierarchical.high_level_server_timing)}</pre>
-            </div>
-            <div className="info-block compact">
-              <span className="info-label">{t.lowLevelTiming}</span>
-              <pre>{formatTiming(hierarchical.low_level_server_timing)}</pre>
-            </div>
-            <div className="info-block compact">
-              <span className="info-label">{t.qpos}</span>
-              <pre>{formatArray(state.robot.runtime_qpos.length ? state.robot.runtime_qpos : state.robot.qpos)}</pre>
-            </div>
-            <div className="info-block compact">
-              <span className="info-label">{t.rosQpos}</span>
-              <pre>{formatArray(state.robot.ros_qpos)}</pre>
-            </div>
-            <div className="info-block compact">
-              <span className="info-label">{t.latestAction}</span>
-              <pre>{formatArray(state.robot.latest_action)}</pre>
-            </div>
-          </div>
-        </aside>
+          </aside>
+        </>
       ) : null}
     </main>
   )

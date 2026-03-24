@@ -89,6 +89,7 @@ class VoiceAssistantEngine:
         language: str = "en",
         dataset_dir: str | None = None,
         manual_dataset_dir: str | None = None,
+        include_bottle_position: bool = False,
         debug: dict | None = None,
     ) -> VoiceResponse:
         transcript = text.strip()
@@ -160,6 +161,7 @@ class VoiceAssistantEngine:
                 task_number,
                 dataset_dir=dataset_dir,
                 manual_dataset_dir=manual_dataset_dir,
+                include_bottle_position=include_bottle_position,
             )
         logging.info(
             "voice_text classified language=%s task=%s reply_len=%d",
@@ -212,6 +214,7 @@ class VoiceAssistantEngine:
         language: str = "en",
         dataset_dir: str | None = None,
         manual_dataset_dir: str | None = None,
+        include_bottle_position: bool = False,
     ) -> VoiceResponse:
         fallback_language = self._normalize_language(language)
         if self._openai is None:
@@ -251,6 +254,7 @@ class VoiceAssistantEngine:
                 language=detected_language,
                 dataset_dir=dataset_dir,
                 manual_dataset_dir=manual_dataset_dir,
+                include_bottle_position=include_bottle_position,
                 debug={
                     "transcription_language": getattr(transcription, "language", None),
                     "detected_language": detected_language,
