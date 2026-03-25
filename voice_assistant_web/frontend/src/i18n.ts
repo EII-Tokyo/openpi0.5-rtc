@@ -91,6 +91,9 @@ export const translations = {
     inferenceSavePath: 'Inference Save Path',
     manualSavePath: 'Manual Save Path',
     includeBottlePosition: 'Send Bottle Position To Low-Level',
+    forcedSubtask: 'Force Low-Level Subtask',
+    forcedSubtaskAuto: 'Use High-Level Subtask',
+    micRequiresSecureContext: 'Microphone requires HTTPS or localhost in this browser.',
     close: 'Close',
   },
   ja: {
@@ -183,6 +186,9 @@ export const translations = {
     inferenceSavePath: '推論保存パス',
     manualSavePath: '手動保存パス',
     includeBottlePosition: 'Bottle Position を Low-Level に渡す',
+    forcedSubtask: 'Low-Level サブタスク固定',
+    forcedSubtaskAuto: 'High-Level サブタスクを使う',
+    micRequiresSecureContext: 'このブラウザでは HTTPS または localhost でないとマイクを使えません。',
     close: '閉じる',
   },
   zh: {
@@ -275,6 +281,9 @@ export const translations = {
     inferenceSavePath: '推理保存路径',
     manualSavePath: '手动保存路径',
     includeBottlePosition: '是否将 Bottle Position 传给 Low-Level',
+    forcedSubtask: '强制低层 Subtask',
+    forcedSubtaskAuto: '使用 High-Level Subtask',
+    micRequiresSecureContext: '当前浏览器只有在 HTTPS 或 localhost 下才能使用麦克风。',
     close: '关闭',
   },
 } as const

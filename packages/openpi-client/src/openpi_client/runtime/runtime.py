@@ -52,6 +52,16 @@ class Runtime:
         "Rotate so opening faces right",
         "Pick up with left hand",
     }
+    _LOW_LEVEL_SUBTASK_OPTIONS = (
+        "Rotate so opening faces right",
+        "Pick up with left hand",
+        "Unscrew cap",
+        "Bottle to left trash bin, cap to right trash bin",
+        "Bottle to left trash bin",
+        "Use right hand to remove and place into left trash bin",
+        "Pick up cap and place into right trash bin",
+        "Return to initial pose",
+    )
 
     def __init__(
         self,
@@ -122,6 +132,7 @@ class Runtime:
         self._pending_subtask = None
         self._pending_subtask_count = 0
         self._include_bottle_position = False
+        self._forced_low_level_subtask = None
         self._high_level_history: deque[dict] = deque(maxlen=100)
         self._applied_action_trace_path = Path("/tmp/runtime_applied_actions.jsonl")
         self._applied_action_trace_path.write_text("")
@@ -261,6 +272,7 @@ class Runtime:
             "dataset_dir": self._dataset_dir,
             "manual_dataset_dir": self._manual_dataset_dir,
             "include_bottle_position": self._include_bottle_position,
+            "forced_low_level_subtask": self._forced_low_level_subtask,
         }
 
     def _rewind_action_history(self, real_env, action_history: deque[list[float]]) -> list[float] | None:
@@ -280,12 +292,17 @@ class Runtime:
         dataset_dir = task_data.get("dataset_dir")
         manual_dataset_dir = task_data.get("manual_dataset_dir")
         include_bottle_position = task_data.get("include_bottle_position")
+        forced_low_level_subtask = task_data.get("forced_low_level_subtask")
         if isinstance(dataset_dir, str) and dataset_dir.strip():
             self._dataset_dir = dataset_dir.strip()
         if isinstance(manual_dataset_dir, str) and manual_dataset_dir.strip():
             self._manual_dataset_dir = manual_dataset_dir.strip()
         if isinstance(include_bottle_position, bool):
             self._include_bottle_position = include_bottle_position
+        if forced_low_level_subtask in self._LOW_LEVEL_SUBTASK_OPTIONS:
+            self._forced_low_level_subtask = forced_low_level_subtask
+        elif forced_low_level_subtask in ("", None):
+            self._forced_low_level_subtask = None
         for subscriber in self._subscribers:
             if hasattr(subscriber, "set_dataset_dir"):
                 subscriber.set_dataset_dir(self._dataset_dir)
@@ -318,6 +335,15 @@ class Runtime:
                 if message and message['type'] == 'message':
                     try:
                         data = json.loads(message['data'])
+                        if not data.get('task'):
+                            self._apply_task_paths(data)
+                            self._publish_runtime_state(mode="waiting" if self._is_waiting_for_task else None)
+                            logging.info(
+                                "收到Redis运行配置更新: include_bottle_position=%s forced_low_level_subtask=%s",
+                                self._include_bottle_position,
+                                self._forced_low_level_subtask,
+                            )
+                            continue
                         task_num = data.get('task')
                         task_name = data.get('task_name', '未知任务')
                         timestamp = data.get('timestamp', time.time())
@@ -332,6 +358,7 @@ class Runtime:
                                 'dataset_dir': data.get('dataset_dir'),
                                 'manual_dataset_dir': data.get('manual_dataset_dir'),
                                 'include_bottle_position': data.get('include_bottle_position'),
+                                'forced_low_level_subtask': data.get('forced_low_level_subtask'),
                             }
                             
                     except json.JSONDecodeError as e:
@@ -555,6 +582,7 @@ class Runtime:
                     "locked_bottle_description": self._locked_bottle_description,
                     "raw_subtask": parsed.get("subtask"),
                     "effective_subtask": self._committed_subtask,
+                    "forced_low_level_subtask": self._forced_low_level_subtask,
                     "pending_subtask": self._pending_subtask,
                     "pending_subtask_count": self._pending_subtask_count,
                     "history": list(self._high_level_history),
@@ -743,6 +771,8 @@ class Runtime:
             self._reset_high_level_state()
             # 回到初始位置
             self._environment.stop()
+            if hasattr(self._environment, "close_grippers"):
+                self._environment.close_grippers()
             # 停止agent
             self._agent.reset()   
             # 通知subscriber episode结束
@@ -805,6 +835,11 @@ class Runtime:
                 structured_subtask = {
                     **structured_subtask,
                     "bottle_position": None,
+                }
+            if self._forced_low_level_subtask is not None and isinstance(structured_subtask, dict):
+                structured_subtask = {
+                    **structured_subtask,
+                    "subtask": self._forced_low_level_subtask,
                 }
             observation_with_task["subtask"] = structured_subtask
         high_level_state_ready_at = time.monotonic()

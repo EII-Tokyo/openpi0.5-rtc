@@ -537,6 +537,23 @@ button {
   border: 1px solid rgba(60, 48, 38, 0.1);
 }
 
+.subtask-override-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.subtask-override-button {
+  min-height: 72px;
+  height: auto;
+  padding: 10px 12px;
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.25;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
 .response-grid,
 .runtime-grid {
   min-height: 0;

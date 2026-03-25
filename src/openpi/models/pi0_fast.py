@@ -329,7 +329,7 @@ class Pi0FAST(_model.BaseModel):
         *,
         num_steps: int | at.Int[at.Array, ""] = 10,       
         s: int = 20,
-        d: int = 15,
+        d: int = 17,
         beta: float = 8.0,
     ) -> _model.Actions:
         assert d < s, f"RTC requires d < s, got s={s}, d={d}"

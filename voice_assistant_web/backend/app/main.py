@@ -10,9 +10,16 @@ from fastapi.responses import Response, StreamingResponse
 
 from .camera_bridge import CameraBridge
 from .config import settings
-from .redis_commands import create_redis_client, publish_task
+from .redis_commands import create_redis_client, publish_runtime_config, publish_task
 from .robot_state_bridge import RobotStateBridge
-from .schemas import HealthResponse, RealtimePayload, RuntimeStatePayload, VoiceRequest, VoiceResponse
+from .schemas import (
+    HealthResponse,
+    RealtimePayload,
+    RuntimeConfigRequest,
+    RuntimeStatePayload,
+    VoiceRequest,
+    VoiceResponse,
+)
 from .voice_session import VoiceAssistantEngine
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
@@ -105,6 +112,7 @@ async def voice_text(request: VoiceRequest) -> VoiceResponse:
             dataset_dir=request.dataset_dir,
             manual_dataset_dir=request.manual_dataset_dir,
             include_bottle_position=request.include_bottle_position,
+            forced_low_level_subtask=request.forced_low_level_subtask,
         )
         return VoiceResponse(
             transcript=request.text,
@@ -119,6 +127,7 @@ async def voice_text(request: VoiceRequest) -> VoiceResponse:
         dataset_dir=request.dataset_dir,
         manual_dataset_dir=request.manual_dataset_dir,
         include_bottle_position=request.include_bottle_position,
+        forced_low_level_subtask=request.forced_low_level_subtask,
     )
 
 
@@ -129,6 +138,7 @@ async def voice_audio(
     dataset_dir: str | None = Form(None),
     manual_dataset_dir: str | None = Form(None),
     include_bottle_position: bool = Form(False),
+    forced_low_level_subtask: str | None = Form(None),
 ) -> VoiceResponse:
     return await voice_engine.process_audio(
         file,
@@ -136,4 +146,17 @@ async def voice_audio(
         dataset_dir=dataset_dir,
         manual_dataset_dir=manual_dataset_dir,
         include_bottle_position=include_bottle_position,
+        forced_low_level_subtask=forced_low_level_subtask,
     )
+
+
+@app.post("/api/runtime/config", response_model=HealthResponse)
+def runtime_config(request: RuntimeConfigRequest) -> HealthResponse:
+    publish_runtime_config(
+        redis_client,
+        dataset_dir=request.dataset_dir,
+        manual_dataset_dir=request.manual_dataset_dir,
+        include_bottle_position=request.include_bottle_position,
+        forced_low_level_subtask=request.forced_low_level_subtask,
+    )
+    return HealthResponse()

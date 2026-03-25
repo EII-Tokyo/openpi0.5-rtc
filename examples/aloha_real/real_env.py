@@ -214,6 +214,14 @@ class RealEnv:
             step_type=dm_env.StepType.MID, reward=self.get_reward(), discount=None, observation=self.get_observation()
         )
 
+    def close_grippers(self):
+        robot_utils.move_grippers(
+            [self.puppet_bot_left, self.puppet_bot_right], [constants.PUPPET_GRIPPER_JOINT_CLOSE] * 2, move_time=0.5
+        )
+        return dm_env.TimeStep(
+            step_type=dm_env.StepType.MID, reward=self.get_reward(), discount=None, observation=self.get_observation()
+        )
+
     def sleep_arms(self):
         robot_utils.torque_on(self.master_bot_left)
         robot_utils.torque_on(self.master_bot_right)

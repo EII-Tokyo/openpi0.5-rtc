@@ -32,6 +32,14 @@ class VoiceRequest(BaseModel):
     dataset_dir: str | None = None
     manual_dataset_dir: str | None = None
     include_bottle_position: bool = False
+    forced_low_level_subtask: str | None = None
+
+
+class RuntimeConfigRequest(BaseModel):
+    dataset_dir: str | None = None
+    manual_dataset_dir: str | None = None
+    include_bottle_position: bool | None = None
+    forced_low_level_subtask: str | None = None
 
 
 class VoiceResponse(BaseModel):

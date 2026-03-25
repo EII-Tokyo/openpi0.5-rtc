@@ -84,6 +84,10 @@ class AlohaRealEnvironment(_environment.Environment):
         """Stop the environment."""
         self._ts = self._env.stop()
 
+    def close_grippers(self) -> None:
+        """Close the follower grippers while keeping the latest observation updated."""
+        self._ts = self._env.close_grippers()
+
     @override
     def sleep_arms(self) -> None:
         """Sleep the arms."""

@@ -4,6 +4,16 @@ import { AppLanguage, translations } from './i18n'
 const defaultHost = typeof window !== 'undefined' ? window.location.hostname : 'localhost'
 const cameraNames = ['cam_high', 'cam_low', 'cam_left_wrist', 'cam_right_wrist'] as const
 const configStorageKey = 'aloha-ui-config-v2'
+const lowLevelSubtaskOptions = [
+  'Rotate so opening faces right',
+  'Pick up with left hand',
+  'Unscrew cap',
+  'Bottle to left trash bin, cap to right trash bin',
+  'Bottle to left trash bin',
+  'Use right hand to remove and place into left trash bin',
+  'Pick up cap and place into right trash bin',
+  'Return to initial pose',
+] as const
 
 type HierarchicalState = {
   task_prompt?: string
@@ -65,6 +75,7 @@ type UiConfig = {
   datasetDir: string
   manualDatasetDir: string
   includeBottlePosition: boolean
+  forcedLowLevelSubtask: string | null
 }
 
 type VoiceStatus = 'idle' | 'recording' | 'thinking' | 'speaking'
@@ -91,6 +102,7 @@ const defaultConfig: UiConfig = {
   datasetDir: '',
   manualDatasetDir: '',
   includeBottlePosition: false,
+  forcedLowLevelSubtask: null,
 }
 
 function loadUiConfig(): UiConfig {
@@ -118,6 +130,10 @@ function loadUiConfig(): UiConfig {
           ? parsed.manualDatasetDir.trim()
           : defaultConfig.manualDatasetDir,
       includeBottlePosition,
+      forcedLowLevelSubtask:
+        typeof parsed?.forcedLowLevelSubtask === 'string' && parsed.forcedLowLevelSubtask.trim()
+          ? parsed.forcedLowLevelSubtask.trim()
+          : defaultConfig.forcedLowLevelSubtask,
     }
   } catch {
     return defaultConfig
@@ -170,6 +186,7 @@ export default function App() {
   const [error, setError] = useState<string | null>(null)
   const [configOpen, setConfigOpen] = useState(false)
   const [runtimeOpen, setRuntimeOpen] = useState(false)
+  const [overrideOpen, setOverrideOpen] = useState(false)
   const [selectedHistoryId, setSelectedHistoryId] = useState<string | null>(null)
   const [cameraView, setCameraView] = useState<'focus' | 'quad'>('focus')
   const [cameraRefreshToken, setCameraRefreshToken] = useState<number>(Date.now())
@@ -177,6 +194,9 @@ export default function App() {
   const mediaChunksRef = useRef<Blob[]>([])
   const mediaStreamRef = useRef<MediaStream | null>(null)
   const audioRef = useRef<HTMLAudioElement | null>(null)
+  const audioContextRef = useRef<AudioContext | null>(null)
+  const vadAnimationRef = useRef<number | null>(null)
+  const vadSilenceStartedAtRef = useRef<number | null>(null)
   const t = translations[language]
 
   const clearHighLevelDisplay = () => {
@@ -234,6 +254,12 @@ export default function App() {
       }
       if (mediaStreamRef.current) {
         mediaStreamRef.current.getTracks().forEach((track) => track.stop())
+      }
+      if (vadAnimationRef.current !== null) {
+        window.cancelAnimationFrame(vadAnimationRef.current)
+      }
+      if (audioContextRef.current) {
+        void audioContextRef.current.close()
       }
     }
   }, [])
@@ -308,6 +334,7 @@ export default function App() {
           dataset_dir: uiConfig.datasetDir.trim() || undefined,
           manual_dataset_dir: uiConfig.manualDatasetDir.trim() || undefined,
           include_bottle_position: uiConfig.includeBottlePosition,
+          forced_low_level_subtask: uiConfig.forcedLowLevelSubtask || undefined,
         }),
       })
       if (!response.ok) {
@@ -320,6 +347,27 @@ export default function App() {
       setError(err instanceof Error ? err.message : t.requestFailed)
     } finally {
       setSending(false)
+    }
+  }
+
+  const pushRuntimeConfig = async (nextConfig: UiConfig) => {
+    try {
+      const response = await fetch(`${nextConfig.apiBase}/api/runtime/config`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          dataset_dir: nextConfig.datasetDir.trim(),
+          manual_dataset_dir: nextConfig.manualDatasetDir.trim(),
+          include_bottle_position: nextConfig.includeBottlePosition,
+          forced_low_level_subtask: nextConfig.forcedLowLevelSubtask,
+        }),
+      })
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`)
+      }
+      setError(null)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t.requestFailed)
     }
   }
 
@@ -344,6 +392,9 @@ export default function App() {
         formData.append('manual_dataset_dir', uiConfig.manualDatasetDir.trim())
       }
       formData.append('include_bottle_position', String(uiConfig.includeBottlePosition))
+      if (uiConfig.forcedLowLevelSubtask) {
+        formData.append('forced_low_level_subtask', uiConfig.forcedLowLevelSubtask)
+      }
       const response = await fetch(`${uiConfig.apiBase}/api/voice/audio`, {
         method: 'POST',
         body: formData,
@@ -375,12 +426,25 @@ export default function App() {
   const stopRecording = async () => {
     const recorder = mediaRecorderRef.current
     if (!recorder || recorder.state === 'inactive') return
+    if (vadAnimationRef.current !== null) {
+      window.cancelAnimationFrame(vadAnimationRef.current)
+      vadAnimationRef.current = null
+    }
+    vadSilenceStartedAtRef.current = null
+    if (audioContextRef.current) {
+      void audioContextRef.current.close()
+      audioContextRef.current = null
+    }
     recorder.stop()
   }
 
   const startRecording = async () => {
     if (!navigator.mediaDevices?.getUserMedia) {
       setError(t.micUnavailable)
+      return
+    }
+    if (!window.isSecureContext && !['localhost', '127.0.0.1'].includes(window.location.hostname)) {
+      setError(t.micRequiresSecureContext)
       return
     }
     setError(null)
@@ -412,8 +476,50 @@ export default function App() {
         mediaStreamRef.current = null
         void uploadAudio(audioBlob)
       }
+      const audioContext = new AudioContext()
+      audioContextRef.current = audioContext
+      const source = audioContext.createMediaStreamSource(stream)
+      const analyser = audioContext.createAnalyser()
+      analyser.fftSize = 2048
+      analyser.smoothingTimeConstant = 0.85
+      source.connect(analyser)
+      const sampleBuffer = new Uint8Array(analyser.fftSize)
+      const silenceThreshold = 0.018
+      const silenceDurationMs = 900
+      const minRecordMs = 600
+      const recordingStartedAt = performance.now()
+      const monitorSilence = () => {
+        if (mediaRecorderRef.current?.state !== 'recording') {
+          vadAnimationRef.current = null
+          return
+        }
+        analyser.getByteTimeDomainData(sampleBuffer)
+        let sum = 0
+        for (const value of sampleBuffer) {
+          const normalized = value / 128 - 1
+          sum += normalized * normalized
+        }
+        const rms = Math.sqrt(sum / sampleBuffer.length)
+        const now = performance.now()
+        if (rms < silenceThreshold) {
+          if (vadSilenceStartedAtRef.current === null) {
+            vadSilenceStartedAtRef.current = now
+          } else if (
+            now - recordingStartedAt >= minRecordMs &&
+            now - vadSilenceStartedAtRef.current >= silenceDurationMs
+          ) {
+            void stopRecording()
+            return
+          }
+        } else {
+          vadSilenceStartedAtRef.current = null
+        }
+        vadAnimationRef.current = window.requestAnimationFrame(monitorSilence)
+      }
       recorder.start()
       setVoiceStatus('recording')
+      vadSilenceStartedAtRef.current = null
+      vadAnimationRef.current = window.requestAnimationFrame(monitorSilence)
     } catch {
       setVoiceStatus('idle')
       setError(t.micFailed)
@@ -450,6 +556,9 @@ export default function App() {
           <span className="status-pill mode">{state.robot.mode || t.waiting}</span>
           <button type="button" className="ghost-button" onClick={() => setRuntimeOpen(true)}>
             {t.openRuntime}
+          </button>
+          <button type="button" className="ghost-button" onClick={() => setOverrideOpen(true)}>
+            {t.forcedSubtask}
           </button>
           <button type="button" className="ghost-button" onClick={() => setConfigOpen(true)}>
             {t.openConfig}
@@ -658,10 +767,14 @@ export default function App() {
               <select
                 value={uiConfig.includeBottlePosition ? 'true' : 'false'}
                 onChange={(event) =>
-                  setUiConfig((current) => ({
-                    ...current,
-                    includeBottlePosition: event.target.value === 'true',
-                  }))
+                  setUiConfig((current) => {
+                    const nextConfig = {
+                      ...current,
+                      includeBottlePosition: event.target.value === 'true',
+                    }
+                    void pushRuntimeConfig(nextConfig)
+                    return nextConfig
+                  })
                 }
               >
                 <option value="false">{t.no}</option>
@@ -673,10 +786,14 @@ export default function App() {
               <input
                 value={uiConfig.datasetDir}
                 onChange={(event) =>
-                  setUiConfig((current) => ({
-                    ...current,
-                    datasetDir: event.target.value,
-                  }))
+                  setUiConfig((current) => {
+                    const nextConfig = {
+                      ...current,
+                      datasetDir: event.target.value,
+                    }
+                    void pushRuntimeConfig(nextConfig)
+                    return nextConfig
+                  })
                 }
                 placeholder="/app/examples/aloha_real/inference_hdf5"
               />
@@ -686,15 +803,76 @@ export default function App() {
               <input
                 value={uiConfig.manualDatasetDir}
                 onChange={(event) =>
-                  setUiConfig((current) => ({
-                    ...current,
-                    manualDatasetDir: event.target.value,
-                  }))
+                  setUiConfig((current) => {
+                    const nextConfig = {
+                      ...current,
+                      manualDatasetDir: event.target.value,
+                    }
+                    void pushRuntimeConfig(nextConfig)
+                    return nextConfig
+                  })
                 }
                 placeholder="/app/examples/aloha_real/manual_override"
               />
             </label>
             <p className="config-help">{t.configHelp}</p>
+          </aside>
+        </>
+      ) : null}
+
+      {overrideOpen ? (
+        <>
+          <div className="drawer-backdrop runtime-drawer-backdrop" onClick={() => setOverrideOpen(false)} />
+          <aside className="config-drawer" onClick={(event) => event.stopPropagation()}>
+            <div className="panel-header">
+              <div>
+                <p className="eyebrow">{t.runtimeEyebrow}</p>
+                <h2>{t.forcedSubtask}</h2>
+              </div>
+              <button type="button" className="ghost-button" onClick={() => setOverrideOpen(false)}>
+                {t.close}
+              </button>
+            </div>
+            <div className="config-field">
+              <span>{t.forcedSubtask}</span>
+              <div className="quick-tasks subtask-override-grid">
+                <button
+                  type="button"
+                  className={`quick-task ${uiConfig.forcedLowLevelSubtask === null ? 'active' : ''}`}
+                  onClick={() =>
+                    setUiConfig((current) => {
+                      const nextConfig = {
+                        ...current,
+                        forcedLowLevelSubtask: null,
+                      }
+                      void pushRuntimeConfig(nextConfig)
+                      return nextConfig
+                    })
+                  }
+                >
+                  {t.forcedSubtaskAuto}
+                </button>
+                {lowLevelSubtaskOptions.map((subtask) => (
+                <button
+                  key={subtask}
+                  type="button"
+                  className={`quick-task subtask-override-button ${uiConfig.forcedLowLevelSubtask === subtask ? 'active' : ''}`}
+                  onClick={() =>
+                    setUiConfig((current) => {
+                      const nextConfig = {
+                        ...current,
+                        forcedLowLevelSubtask: subtask,
+                      }
+                      void pushRuntimeConfig(nextConfig)
+                      return nextConfig
+                    })
+                  }
+                  >
+                    {subtask}
+                  </button>
+                ))}
+              </div>
+            </div>
           </aside>
         </>
       ) : null}
