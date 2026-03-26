@@ -48,6 +48,7 @@ class Runtime:
         ("No bottle on table", "Return to initial pose"),
     }
     _VALID_SUBTASKS = {subtask for _, subtask in _VALID_STATE_SUBTASK_PAIRS}
+    _SUBTASK_TO_BOTTLE_STATE = {subtask: bottle_state for bottle_state, subtask in _VALID_STATE_SUBTASK_PAIRS}
     _BOTTLE_START_SUBTASKS = {
         "Rotate so opening faces right",
         "Pick up with left hand",
@@ -839,9 +840,24 @@ class Runtime:
             if self._forced_low_level_subtask is not None and isinstance(structured_subtask, dict):
                 structured_subtask = {
                     **structured_subtask,
+                    "bottle_state": self._SUBTASK_TO_BOTTLE_STATE.get(
+                        self._forced_low_level_subtask,
+                        structured_subtask.get("bottle_state"),
+                    ),
                     "subtask": self._forced_low_level_subtask,
                 }
             observation_with_task["subtask"] = structured_subtask
+            if not isinstance(hierarchical, dict):
+                hierarchical = {}
+            hierarchical["low_level_prompt"] = (
+                json.dumps(structured_subtask, ensure_ascii=False)
+                if isinstance(structured_subtask, dict)
+                else str(structured_subtask)
+            )
+            if isinstance(structured_subtask, dict):
+                hierarchical["effective_subtask"] = structured_subtask.get("subtask")
+                hierarchical["bottle_state"] = structured_subtask.get("bottle_state")
+                hierarchical["bottle_position"] = structured_subtask.get("bottle_position")
         high_level_state_ready_at = time.monotonic()
         if self._episode_steps < 5 or self._episode_steps % 25 == 0:
             state = observation_with_task.get("state")
@@ -930,6 +946,9 @@ class Runtime:
         high_level_prev_total_ms = high_level_timing.get("prev_total_ms")
         if high_level_prev_total_ms is not None:
             high_level_prev_total_ms = round(float(high_level_prev_total_ms), 1)
+        effective_subtask = observation_with_task.get("subtask")
+        if isinstance(effective_subtask, dict):
+            effective_subtask = effective_subtask.get("subtask")
         logging.info(
             "Policy action step=%d interval_ms=%s target_ms=%.1f step_compute_ms=%.1f "
             "high_level_infer_ms=%s high_level_prev_total_ms=%s "
@@ -947,7 +966,7 @@ class Runtime:
             low_level_pack_ms if low_level_pack_ms is not None else "n/a",
             low_level_prev_send_ms if low_level_prev_send_ms is not None else "n/a",
             low_level_prev_total_ms if low_level_prev_total_ms is not None else "n/a",
-            (hierarchical.get("subtask") if isinstance(hierarchical, dict) else None) or "n/a",
+            effective_subtask or "n/a",
         )
 
         qpos = observation.get("qpos")

@@ -16,8 +16,8 @@ class Settings:
     realtime_hz: float = float(os.getenv("REALTIME_HZ", "10"))
     allow_origins: list[str] = field(default_factory=lambda: os.getenv("ALLOW_ORIGINS", "*").split(","))
     openai_chat_model: str = os.getenv("OPENAI_CHAT_MODEL", "gpt-4o-mini")
-    openai_tts_model: str = os.getenv("OPENAI_TTS_MODEL", "tts-1")
-    openai_tts_voice: str = os.getenv("OPENAI_TTS_VOICE", "alloy")
+    openai_tts_model: str = os.getenv("OPENAI_TTS_MODEL", "tts-1-hd")
+    openai_tts_voice: str = os.getenv("OPENAI_TTS_VOICE", "nova")
     openai_transcription_model: str = os.getenv("OPENAI_TRANSCRIPTION_MODEL", "whisper-1")
 
 

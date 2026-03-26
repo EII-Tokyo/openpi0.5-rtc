@@ -76,6 +76,7 @@ type UiConfig = {
   manualDatasetDir: string
   includeBottlePosition: boolean
   forcedLowLevelSubtask: string | null
+  announcementLanguage: 'zh' | 'ja'
 }
 
 type VoiceStatus = 'idle' | 'recording' | 'thinking' | 'speaking'
@@ -103,6 +104,26 @@ const defaultConfig: UiConfig = {
   manualDatasetDir: '',
   includeBottlePosition: false,
   forcedLowLevelSubtask: null,
+  announcementLanguage: 'zh',
+}
+
+function getAnnouncementLocale(language: UiConfig['announcementLanguage']) {
+  return language === 'ja' ? 'ja-JP' : 'zh-CN'
+}
+
+function getAnnouncementTranslation(language: UiConfig['announcementLanguage']) {
+  return translations[language === 'ja' ? 'ja' : 'zh']
+}
+
+function pickSpeechVoice(locale: string) {
+  if (typeof window === 'undefined' || !('speechSynthesis' in window)) return null
+  const voices = window.speechSynthesis.getVoices()
+  if (!voices.length) return null
+  return (
+    voices.find((voice) => voice.lang === locale) ||
+    voices.find((voice) => voice.lang.toLowerCase().startsWith(locale.slice(0, 2).toLowerCase())) ||
+    null
+  )
 }
 
 function loadUiConfig(): UiConfig {
@@ -134,6 +155,10 @@ function loadUiConfig(): UiConfig {
         typeof parsed?.forcedLowLevelSubtask === 'string' && parsed.forcedLowLevelSubtask.trim()
           ? parsed.forcedLowLevelSubtask.trim()
           : defaultConfig.forcedLowLevelSubtask,
+      announcementLanguage:
+        parsed?.announcementLanguage === 'ja' || parsed?.announcementLanguage === 'zh'
+          ? parsed.announcementLanguage
+          : defaultConfig.announcementLanguage,
     }
   } catch {
     return defaultConfig
@@ -197,6 +222,8 @@ export default function App() {
   const audioContextRef = useRef<AudioContext | null>(null)
   const vadAnimationRef = useRef<number | null>(null)
   const vadSilenceStartedAtRef = useRef<number | null>(null)
+  const lastAnnouncedBottleDescriptionRef = useRef<string | null>(null)
+  const translatedAnnouncementCacheRef = useRef<Record<string, string>>({})
   const t = translations[language]
 
   const clearHighLevelDisplay = () => {
@@ -292,6 +319,70 @@ export default function App() {
     const intervalMs = Math.max(100, Number(uiConfig.cameraRefreshMs) || defaultConfig.cameraRefreshMs)
     return 1000 / intervalMs
   }, [uiConfig.cameraRefreshMs])
+  useEffect(() => {
+    if (state.robot.current_task !== 'process all bottles') {
+      lastAnnouncedBottleDescriptionRef.current = null
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel()
+      }
+      return
+    }
+    const description =
+      typeof hierarchical.locked_bottle_description === 'string'
+        ? hierarchical.locked_bottle_description.trim()
+        : ''
+    if (!description) return
+    if (lastAnnouncedBottleDescriptionRef.current === description) return
+    lastAnnouncedBottleDescriptionRef.current = description
+    if (!('speechSynthesis' in window)) return
+    const targetLanguage = uiConfig.announcementLanguage
+    const cacheKey = `${targetLanguage}:${description}`
+    const announcementTranslation = getAnnouncementTranslation(targetLanguage)
+    const announcementLocale = getAnnouncementLocale(targetLanguage)
+    const speak = (translatedDescription: string) => {
+      const utterance = new SpeechSynthesisUtterance(announcementTranslation.announceBottle(translatedDescription))
+      utterance.lang = announcementLocale
+      const voice = pickSpeechVoice(announcementLocale)
+      if (voice) {
+        utterance.voice = voice
+      }
+      window.speechSynthesis.cancel()
+      window.speechSynthesis.speak(utterance)
+    }
+    const cached = translatedAnnouncementCacheRef.current[cacheKey]
+    if (cached) {
+      speak(cached)
+      return
+    }
+    let cancelled = false
+    void fetch(`${uiConfig.apiBase}/api/runtime/translate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        text: description,
+        target_language: targetLanguage,
+      }),
+    })
+      .then(async (response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`)
+        }
+        return response.json() as Promise<{ translated_text: string }>
+      })
+      .then((payload) => {
+        if (cancelled) return
+        const translatedDescription = (payload.translated_text || description).trim() || description
+        translatedAnnouncementCacheRef.current[cacheKey] = translatedDescription
+        speak(translatedDescription)
+      })
+      .catch(() => {
+        if (cancelled) return
+        speak(description)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [hierarchical.locked_bottle_description, state.robot.current_task, uiConfig.announcementLanguage, uiConfig.apiBase])
   const primaryCameraAge = formatCameraAge(state.camera_timestamps[primaryCamera])
   const primaryCameraStats = `${displayFps.toFixed(1)} FPS · ${primaryCameraAge}`
   const voiceTaskWithHighLevel = [voiceResponse?.task_name, hierarchical.high_level_text]
@@ -718,6 +809,21 @@ export default function App() {
                 <option value="en">{t.english}</option>
                 <option value="ja">{t.japanese}</option>
                 <option value="zh">{t.chinese}</option>
+              </select>
+            </label>
+            <label className="config-field">
+              <span>{t.announcementLanguage}</span>
+              <select
+                value={uiConfig.announcementLanguage}
+                onChange={(event) =>
+                  setUiConfig((current) => ({
+                    ...current,
+                    announcementLanguage: event.target.value as 'zh' | 'ja',
+                  }))
+                }
+              >
+                <option value="zh">{t.announcementChinese}</option>
+                <option value="ja">{t.announcementJapanese}</option>
               </select>
             </label>
             <label className="config-field">

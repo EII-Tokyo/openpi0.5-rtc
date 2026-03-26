@@ -42,6 +42,26 @@ class RuntimeConfigRequest(BaseModel):
     forced_low_level_subtask: str | None = None
 
 
+class TranslateRequest(BaseModel):
+    text: str
+    target_language: str
+
+
+class TranslateResponse(BaseModel):
+    translated_text: str
+
+
+class AnnouncementAudioRequest(BaseModel):
+    text: str
+    target_language: str
+
+
+class AnnouncementAudioResponse(BaseModel):
+    translated_text: str
+    audio_base64: str | None = None
+    audio_mime_type: str | None = None
+
+
 class VoiceResponse(BaseModel):
     transcript: str
     reply_text: str

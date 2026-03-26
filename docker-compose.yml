@@ -50,7 +50,7 @@ services:
       dockerfile: scripts/docker/serve_policy.Dockerfile
     command: >-
       /bin/bash -lc
-      "uv run scripts/serve_policy.py ${SERVER_ARGS:-policy:checkpoint --policy.config twist_off_the_bottle_cap_subtask_lora --policy.dir /app/checkpoints/twist_off_the_bottle_cap_subtask_lora/twist_off_the_bottle_cap_subtask_lora_20260317/32000}"
+      "uv run scripts/serve_policy.py ${SERVER_ARGS:-policy:checkpoint --policy.config twist_off_the_bottle_cap_subtask_full_finetune --policy.dir /app/checkpoints/twist_off_the_bottle_cap_subtask_full_finetune/twist_off_the_bottle_cap_subtask_full_finetune_bs128_20260321_232825/10000}"
     init: true
     tty: true
     network_mode: host
@@ -75,7 +75,7 @@ services:
       dockerfile: scripts/docker/serve_policy.Dockerfile
     command: >-
       /bin/bash -lc
-      "uv run scripts/serve_policy.py --port 8001 ${HIGH_LEVEL_SERVER_ARGS:-policy:checkpoint --policy.config twist_off_the_bottle_cap_subtask_lora --policy.dir /app/checkpoints/twist_off_the_bottle_cap_subtask_lora/twist_off_the_bottle_cap_subtask_lora_20260317/32000}"
+      "uv run scripts/serve_policy.py --no-warmup-rtc --no-warmup-non-rtc --no-warmup-subtask --port 8001 ${HIGH_LEVEL_SERVER_ARGS:-policy:checkpoint --policy.config twist_off_the_bottle_cap_subtask_full_finetune --policy.dir /app/checkpoints/twist_off_the_bottle_cap_subtask_full_finetune/twist_off_the_bottle_cap_subtask_full_finetune_bs128_20260321_232825/10000}"
     init: true
     tty: true
     network_mode: host

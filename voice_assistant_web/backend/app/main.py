@@ -13,10 +13,14 @@ from .config import settings
 from .redis_commands import create_redis_client, publish_runtime_config, publish_task
 from .robot_state_bridge import RobotStateBridge
 from .schemas import (
+    AnnouncementAudioRequest,
+    AnnouncementAudioResponse,
     HealthResponse,
     RealtimePayload,
     RuntimeConfigRequest,
     RuntimeStatePayload,
+    TranslateRequest,
+    TranslateResponse,
     VoiceRequest,
     VoiceResponse,
 )
@@ -160,3 +164,25 @@ def runtime_config(request: RuntimeConfigRequest) -> HealthResponse:
         forced_low_level_subtask=request.forced_low_level_subtask,
     )
     return HealthResponse()
+
+
+@app.post("/api/runtime/translate", response_model=TranslateResponse)
+def runtime_translate(request: TranslateRequest) -> TranslateResponse:
+    translated_text = voice_engine.translate_text(
+        request.text,
+        target_language=request.target_language,
+    )
+    return TranslateResponse(translated_text=translated_text)
+
+
+@app.post("/api/runtime/announcement-audio", response_model=AnnouncementAudioResponse)
+def runtime_announcement_audio(request: AnnouncementAudioRequest) -> AnnouncementAudioResponse:
+    translated_text, audio_base64, audio_mime_type = voice_engine.synthesize_announcement(
+        request.text,
+        target_language=request.target_language,
+    )
+    return AnnouncementAudioResponse(
+        translated_text=translated_text,
+        audio_base64=audio_base64,
+        audio_mime_type=audio_mime_type,
+    )

@@ -962,7 +962,7 @@ _CONFIGS = [
             max_token_len=80,
             subtask_loss_weight=0.1,
             subtask_max_token_len=250,
-            fast_tokenizer_path="lyl472324464/fast",
+            fast_tokenizer_path="physical-intelligence/fast",
         ),
         lr_schedule=_optimizer.CosineDecaySchedule(
             warmup_steps=10_000,

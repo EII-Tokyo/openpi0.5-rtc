@@ -23,6 +23,63 @@ class VoiceAssistantEngine:
             + "\nReturn JSON only with keys task_number and response_statement."
         )
 
+    def translate_text(self, text: str, *, target_language: str) -> str:
+        source = text.strip()
+        if not source:
+            return ""
+        normalized_target = (target_language or "").strip().lower()
+        if normalized_target not in {"zh", "ja"}:
+            return source
+        if self._openai is None:
+            return source
+        target_name = "Simplified Chinese" if normalized_target == "zh" else "Japanese"
+        try:
+            completion = self._openai.chat.completions.create(
+                model=settings.openai_chat_model,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": (
+                            f"Translate the given bottle description into {target_name} for robot speech output. "
+                            "Keep product and brand names natural. Output only the translation."
+                        ),
+                    },
+                    {"role": "user", "content": source},
+                ],
+            )
+            translated = (completion.choices[0].message.content or "").strip()
+            return translated or source
+        except Exception:
+            logging.exception("translate_text failed target_language=%s", normalized_target)
+            return source
+
+    def synthesize_announcement(self, text: str, *, target_language: str) -> tuple[str, str | None, str | None]:
+        translated = self.translate_text(text, target_language=target_language)
+        if not translated or self._openai is None:
+            return self._localized_text(
+                target_language,
+                en=f"Now handling {translated}",
+                ja=f"現在処理中: {translated}",
+                zh=f"我要处理{translated}",
+            ), None, None
+        announcement_text = self._localized_text(
+            target_language,
+            en=f"Now handling {translated}",
+            ja=f"現在処理中: {translated}",
+            zh=f"我要处理{translated}",
+        )
+        try:
+            speech = self._openai.audio.speech.create(
+                model=settings.openai_tts_model,
+                voice=settings.openai_tts_voice,
+                input=announcement_text,
+            )
+            audio_bytes = speech.read()
+            return announcement_text, base64.b64encode(audio_bytes).decode("ascii"), "audio/mpeg"
+        except Exception:
+            logging.exception("announcement_tts failed target_language=%s", target_language)
+            return announcement_text, None, None
+
     def _normalize_language(self, language: str | None, *, transcript: str = "") -> str:
         normalized = (language or "").strip().lower()
         if normalized in {"zh", "zh-cn", "zh-hans", "chinese", "cn"}:
