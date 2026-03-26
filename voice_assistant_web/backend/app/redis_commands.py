@@ -30,7 +30,10 @@ def publish_task(
     *,
     dataset_dir: str | None = None,
     manual_dataset_dir: str | None = None,
+    include_bottle_description: bool = True,
     include_bottle_position: bool = False,
+    include_bottle_state: bool = True,
+    include_subtask: bool = True,
     forced_low_level_subtask: str | None = None,
 ) -> dict:
     task_name = TASK_MAPPING[task_num]
@@ -43,7 +46,10 @@ def publish_task(
         message["dataset_dir"] = dataset_dir
     if manual_dataset_dir:
         message["manual_dataset_dir"] = manual_dataset_dir
+    message["include_bottle_description"] = bool(include_bottle_description)
     message["include_bottle_position"] = bool(include_bottle_position)
+    message["include_bottle_state"] = bool(include_bottle_state)
+    message["include_subtask"] = bool(include_subtask)
     if isinstance(forced_low_level_subtask, str) and forced_low_level_subtask.strip():
         message["forced_low_level_subtask"] = forced_low_level_subtask.strip()
     redis_client.publish(settings.voice_command_channel, json.dumps(message))
@@ -55,7 +61,10 @@ def publish_runtime_config(
     *,
     dataset_dir: str | None = None,
     manual_dataset_dir: str | None = None,
+    include_bottle_description: bool | None = None,
     include_bottle_position: bool | None = None,
+    include_bottle_state: bool | None = None,
+    include_subtask: bool | None = None,
     forced_low_level_subtask: str | None = None,
 ) -> dict:
     message = {
@@ -66,8 +75,14 @@ def publish_runtime_config(
         message["dataset_dir"] = dataset_dir.strip()
     if isinstance(manual_dataset_dir, str):
         message["manual_dataset_dir"] = manual_dataset_dir.strip()
+    if isinstance(include_bottle_description, bool):
+        message["include_bottle_description"] = include_bottle_description
     if isinstance(include_bottle_position, bool):
         message["include_bottle_position"] = include_bottle_position
+    if isinstance(include_bottle_state, bool):
+        message["include_bottle_state"] = include_bottle_state
+    if isinstance(include_subtask, bool):
+        message["include_subtask"] = include_subtask
     if forced_low_level_subtask is None:
         message["forced_low_level_subtask"] = None
     elif isinstance(forced_low_level_subtask, str):

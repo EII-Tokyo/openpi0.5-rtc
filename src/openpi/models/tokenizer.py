@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import random
 from typing import Any
 
 import jax
@@ -71,6 +72,9 @@ def get_subtask_text(subtask: Any | None) -> str | None:
             cleaned_subtask = ""
 
         parts: list[str] = []
+        if isinstance(bottle_description, list):
+            valid_descriptions = [item.strip() for item in bottle_description if isinstance(item, str) and item.strip()]
+            bottle_description = random.choice(valid_descriptions) if valid_descriptions else None
         if isinstance(bottle_description, str):
             cleaned_description = bottle_description.strip()
             if cleaned_description:
@@ -177,39 +181,45 @@ class PaligemmaTokenizer:
         prompt_tokens = self._tokenizer.encode(prompt_prefix, add_bos=True)
         prompt_tokens, prompt_mask = self._pad_tokens(prompt_tokens, self._max_len, left_pad=True)
 
-        if subtask_text is None:
-            subtask_tokens = np.zeros((self._subtask_max_len,), dtype=np.int32)
-            subtask_mask = np.zeros((self._subtask_max_len,), dtype=bool)
-            loss_mask = np.zeros((self._subtask_max_len,), dtype=bool)
-            fast_mask = np.zeros((self._subtask_max_len,), dtype=bool)
-            return prompt_tokens, prompt_mask, subtask_tokens, subtask_mask, loss_mask, fast_mask
-
-        cleaned_subtask = subtask_text.strip().replace("_", " ").replace("\n", " ")
         if action_label == "bad action":
             action_suffix = " Give a bad action: "
         elif action_label == "good action":
             action_suffix = " Give a good action: "
         else:
             action_suffix = " Action: "
-        subtask_only_tokens = self._tokenizer.encode(cleaned_subtask, add_bos=False)
+
+        subtask_only_tokens: list[int] = []
+        if subtask_text is not None:
+            cleaned_subtask = subtask_text.strip().replace("_", " ").replace("\n", " ")
+            if cleaned_subtask:
+                subtask_only_tokens = self._tokenizer.encode(cleaned_subtask, add_bos=False)
         fast_action_tokens: list[int] = []
         if actions is not None:
             actions_np = np.asarray(actions)
             if actions_np.ndim == 2:
                 fast_action_tokens_raw = self._get_fast_tokenizer()(actions_np[None])[0]
                 fast_action_tokens = self._act_tokens_to_paligemma_tokens(fast_action_tokens_raw).tolist()
-        eos_token = [self.eos_token_id]
         action_suffix_tokens = self._tokenizer.encode(action_suffix, add_bos=False)
+
+        if not subtask_only_tokens and not fast_action_tokens:
+            subtask_tokens = np.zeros((self._subtask_max_len,), dtype=np.int32)
+            subtask_mask = np.zeros((self._subtask_max_len,), dtype=bool)
+            loss_mask = np.zeros((self._subtask_max_len,), dtype=bool)
+            fast_mask = np.zeros((self._subtask_max_len,), dtype=bool)
+            return prompt_tokens, prompt_mask, subtask_tokens, subtask_mask, loss_mask, fast_mask
+
+        eos_token = [self.eos_token_id] if subtask_only_tokens else []
         full_subtask_tokens = subtask_only_tokens + eos_token + action_suffix_tokens + fast_action_tokens
         subtask_tokens, subtask_mask = self._pad_tokens(full_subtask_tokens, self._subtask_max_len)
-        # Compute AR loss on subtask text + EOS + fast action tokens. Exclude "Action:" suffix text itself.
+        # Compute AR loss on subtask text + EOS + fast action tokens. Exclude the action suffix text itself.
         loss_mask = np.asarray(
-            [True] * (len(subtask_only_tokens) + 1)
+            [True] * (len(subtask_only_tokens) + len(eos_token))
             + [False] * len(action_suffix_tokens)
             + [True] * len(fast_action_tokens)
         )
         fast_mask = np.asarray(
-            [False] * (len(subtask_only_tokens) + 1 + len(action_suffix_tokens)) + [True] * len(fast_action_tokens)
+            [False] * (len(subtask_only_tokens) + len(eos_token) + len(action_suffix_tokens))
+            + [True] * len(fast_action_tokens)
         )
         if loss_mask.shape[0] < self._subtask_max_len:
             loss_mask = np.concatenate(
@@ -225,7 +235,6 @@ class PaligemmaTokenizer:
             )
         else:
             fast_mask = fast_mask[: self._subtask_max_len]
-
         return prompt_tokens, prompt_mask, subtask_tokens, subtask_mask, loss_mask, fast_mask
 
     @property

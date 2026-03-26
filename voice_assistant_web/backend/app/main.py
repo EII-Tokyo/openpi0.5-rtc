@@ -115,7 +115,10 @@ async def voice_text(request: VoiceRequest) -> VoiceResponse:
             direct_task,
             dataset_dir=request.dataset_dir,
             manual_dataset_dir=request.manual_dataset_dir,
+            include_bottle_description=request.include_bottle_description,
             include_bottle_position=request.include_bottle_position,
+            include_bottle_state=request.include_bottle_state,
+            include_subtask=request.include_subtask,
             forced_low_level_subtask=request.forced_low_level_subtask,
         )
         return VoiceResponse(
@@ -130,7 +133,10 @@ async def voice_text(request: VoiceRequest) -> VoiceResponse:
         language=request.language,
         dataset_dir=request.dataset_dir,
         manual_dataset_dir=request.manual_dataset_dir,
+        include_bottle_description=request.include_bottle_description,
         include_bottle_position=request.include_bottle_position,
+        include_bottle_state=request.include_bottle_state,
+        include_subtask=request.include_subtask,
         forced_low_level_subtask=request.forced_low_level_subtask,
     )
 
@@ -141,7 +147,10 @@ async def voice_audio(
     language: str = Form("en"),
     dataset_dir: str | None = Form(None),
     manual_dataset_dir: str | None = Form(None),
+    include_bottle_description: bool = Form(True),
     include_bottle_position: bool = Form(False),
+    include_bottle_state: bool = Form(True),
+    include_subtask: bool = Form(True),
     forced_low_level_subtask: str | None = Form(None),
 ) -> VoiceResponse:
     return await voice_engine.process_audio(
@@ -149,7 +158,10 @@ async def voice_audio(
         language=language,
         dataset_dir=dataset_dir,
         manual_dataset_dir=manual_dataset_dir,
+        include_bottle_description=include_bottle_description,
         include_bottle_position=include_bottle_position,
+        include_bottle_state=include_bottle_state,
+        include_subtask=include_subtask,
         forced_low_level_subtask=forced_low_level_subtask,
     )
 
@@ -160,7 +172,10 @@ def runtime_config(request: RuntimeConfigRequest) -> HealthResponse:
         redis_client,
         dataset_dir=request.dataset_dir,
         manual_dataset_dir=request.manual_dataset_dir,
+        include_bottle_description=request.include_bottle_description,
         include_bottle_position=request.include_bottle_position,
+        include_bottle_state=request.include_bottle_state,
+        include_subtask=request.include_subtask,
         forced_low_level_subtask=request.forced_low_level_subtask,
     )
     return HealthResponse()

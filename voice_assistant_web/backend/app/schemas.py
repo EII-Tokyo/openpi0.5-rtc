@@ -31,14 +31,20 @@ class VoiceRequest(BaseModel):
     language: str = "en"
     dataset_dir: str | None = None
     manual_dataset_dir: str | None = None
+    include_bottle_description: bool = True
     include_bottle_position: bool = False
+    include_bottle_state: bool = True
+    include_subtask: bool = True
     forced_low_level_subtask: str | None = None
 
 
 class RuntimeConfigRequest(BaseModel):
     dataset_dir: str | None = None
     manual_dataset_dir: str | None = None
+    include_bottle_description: bool | None = None
     include_bottle_position: bool | None = None
+    include_bottle_state: bool | None = None
+    include_subtask: bool | None = None
     forced_low_level_subtask: str | None = None
 
 

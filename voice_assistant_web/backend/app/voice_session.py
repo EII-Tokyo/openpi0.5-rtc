@@ -146,7 +146,10 @@ class VoiceAssistantEngine:
         language: str = "en",
         dataset_dir: str | None = None,
         manual_dataset_dir: str | None = None,
+        include_bottle_description: bool = True,
         include_bottle_position: bool = False,
+        include_bottle_state: bool = True,
+        include_subtask: bool = True,
         forced_low_level_subtask: str | None = None,
         debug: dict | None = None,
     ) -> VoiceResponse:
@@ -219,7 +222,10 @@ class VoiceAssistantEngine:
                 task_number,
                 dataset_dir=dataset_dir,
                 manual_dataset_dir=manual_dataset_dir,
+                include_bottle_description=include_bottle_description,
                 include_bottle_position=include_bottle_position,
+                include_bottle_state=include_bottle_state,
+                include_subtask=include_subtask,
                 forced_low_level_subtask=forced_low_level_subtask,
             )
         logging.info(
@@ -273,7 +279,10 @@ class VoiceAssistantEngine:
         language: str = "en",
         dataset_dir: str | None = None,
         manual_dataset_dir: str | None = None,
+        include_bottle_description: bool = True,
         include_bottle_position: bool = False,
+        include_bottle_state: bool = True,
+        include_subtask: bool = True,
         forced_low_level_subtask: str | None = None,
     ) -> VoiceResponse:
         fallback_language = self._normalize_language(language)
@@ -314,7 +323,10 @@ class VoiceAssistantEngine:
                 language=detected_language,
                 dataset_dir=dataset_dir,
                 manual_dataset_dir=manual_dataset_dir,
+                include_bottle_description=include_bottle_description,
                 include_bottle_position=include_bottle_position,
+                include_bottle_state=include_bottle_state,
+                include_subtask=include_subtask,
                 forced_low_level_subtask=forced_low_level_subtask,
                 debug={
                     "transcription_language": getattr(transcription, "language", None),

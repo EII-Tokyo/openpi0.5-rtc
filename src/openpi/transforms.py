@@ -1,7 +1,7 @@
 from collections.abc import Callable, Mapping, Sequence
 import dataclasses
 import re
-from typing import Protocol, TypeAlias, TypeVar, runtime_checkable
+from typing import Any, Protocol, TypeAlias, TypeVar, runtime_checkable
 
 import flax.traverse_util as traverse_util
 import jax
@@ -112,6 +112,17 @@ class InjectDefaultPrompt(DataTransformFn):
 
 
 @dataclasses.dataclass(frozen=True)
+class InjectDefaultField(DataTransformFn):
+    key: str
+    value: Any
+
+    def __call__(self, data: DataDict) -> DataDict:
+        if self.key not in data:
+            data[self.key] = self.value
+        return data
+
+
+@dataclasses.dataclass(frozen=True)
 class ForcePrompt(DataTransformFn):
     prompt: str | None
 
@@ -119,6 +130,28 @@ class ForcePrompt(DataTransformFn):
         if self.prompt is not None:
             data["prompt"] = np.asarray(self.prompt)
         return data
+
+
+@dataclasses.dataclass(frozen=True)
+class FilterSubtaskPayload(DataTransformFn):
+    include_bottle_description: bool = True
+    include_bottle_position: bool = True
+    include_bottle_state: bool = True
+    include_subtask: bool = True
+
+    def __call__(self, data: DataDict) -> DataDict:
+        parsed = _tokenizer._parse_subtask_payload(data.get("subtask"))
+        if parsed is None:
+            return data
+
+        filtered = {
+            **parsed,
+            "bottle_description": parsed.get("bottle_description") if self.include_bottle_description else None,
+            "bottle_position": parsed.get("bottle_position") if self.include_bottle_position else None,
+            "bottle_state": parsed.get("bottle_state") if self.include_bottle_state else None,
+            "subtask": parsed.get("subtask") if self.include_subtask else None,
+        }
+        return {**data, "subtask": filtered}
 
 
 @dataclasses.dataclass(frozen=True)
@@ -284,20 +317,11 @@ class TokenizePrompt(DataTransformFn):
         )
         if len(tokenized) == 2:
             prompt_tokens, prompt_masks = tokenized
-            out = {
+            return {
                 **data,
                 "tokenized_prompt": prompt_tokens,
                 "tokenized_prompt_mask": prompt_masks,
             }
-            # Keep legacy prompt tokenization, but make training batches structurally
-            # consistent when some samples miss subtask annotations.
-            if self.discrete_state_input and "actions" in data and hasattr(self.tokenizer, "subtask_max_len"):
-                subtask_max_len = int(getattr(self.tokenizer, "subtask_max_len"))
-                out["tokenized_subtask"] = np.zeros((subtask_max_len,), dtype=np.int32)
-                out["tokenized_subtask_mask"] = np.zeros((subtask_max_len,), dtype=bool)
-                out["tokenized_subtask_loss_mask"] = np.zeros((subtask_max_len,), dtype=bool)
-                out["tokenized_subtask_fast_mask"] = np.zeros((subtask_max_len,), dtype=bool)
-            return out
         if len(tokenized) == 5:
             prompt_tokens, prompt_masks, subtask_tokens, subtask_masks, subtask_loss_masks = tokenized
             subtask_fast_masks = np.zeros_like(subtask_masks, dtype=bool)

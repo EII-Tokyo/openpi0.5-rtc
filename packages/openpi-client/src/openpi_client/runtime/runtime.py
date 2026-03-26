@@ -132,7 +132,10 @@ class Runtime:
         self._committed_subtask = None
         self._pending_subtask = None
         self._pending_subtask_count = 0
+        self._include_bottle_description = True
         self._include_bottle_position = False
+        self._include_bottle_state = True
+        self._include_subtask = True
         self._forced_low_level_subtask = None
         self._high_level_history: deque[dict] = deque(maxlen=100)
         self._applied_action_trace_path = Path("/tmp/runtime_applied_actions.jsonl")
@@ -273,6 +276,9 @@ class Runtime:
             "dataset_dir": self._dataset_dir,
             "manual_dataset_dir": self._manual_dataset_dir,
             "include_bottle_position": self._include_bottle_position,
+            "include_bottle_description": self._include_bottle_description,
+            "include_bottle_state": self._include_bottle_state,
+            "include_subtask": self._include_subtask,
             "forced_low_level_subtask": self._forced_low_level_subtask,
         }
 
@@ -292,14 +298,23 @@ class Runtime:
     def _apply_task_paths(self, task_data: dict) -> None:
         dataset_dir = task_data.get("dataset_dir")
         manual_dataset_dir = task_data.get("manual_dataset_dir")
+        include_bottle_description = task_data.get("include_bottle_description")
         include_bottle_position = task_data.get("include_bottle_position")
+        include_bottle_state = task_data.get("include_bottle_state")
+        include_subtask = task_data.get("include_subtask")
         forced_low_level_subtask = task_data.get("forced_low_level_subtask")
         if isinstance(dataset_dir, str) and dataset_dir.strip():
             self._dataset_dir = dataset_dir.strip()
         if isinstance(manual_dataset_dir, str) and manual_dataset_dir.strip():
             self._manual_dataset_dir = manual_dataset_dir.strip()
+        if isinstance(include_bottle_description, bool):
+            self._include_bottle_description = include_bottle_description
         if isinstance(include_bottle_position, bool):
             self._include_bottle_position = include_bottle_position
+        if isinstance(include_bottle_state, bool):
+            self._include_bottle_state = include_bottle_state
+        if isinstance(include_subtask, bool):
+            self._include_subtask = include_subtask
         if forced_low_level_subtask in self._LOW_LEVEL_SUBTASK_OPTIONS:
             self._forced_low_level_subtask = forced_low_level_subtask
         elif forced_low_level_subtask in ("", None):
@@ -340,8 +355,11 @@ class Runtime:
                             self._apply_task_paths(data)
                             self._publish_runtime_state(mode="waiting" if self._is_waiting_for_task else None)
                             logging.info(
-                                "收到Redis运行配置更新: include_bottle_position=%s forced_low_level_subtask=%s",
+                                "收到Redis运行配置更新: include_bottle_description=%s include_bottle_position=%s include_bottle_state=%s include_subtask=%s forced_low_level_subtask=%s",
+                                self._include_bottle_description,
                                 self._include_bottle_position,
+                                self._include_bottle_state,
+                                self._include_subtask,
                                 self._forced_low_level_subtask,
                             )
                             continue
@@ -358,7 +376,10 @@ class Runtime:
                                 'timestamp': timestamp,
                                 'dataset_dir': data.get('dataset_dir'),
                                 'manual_dataset_dir': data.get('manual_dataset_dir'),
+                                'include_bottle_description': data.get('include_bottle_description'),
                                 'include_bottle_position': data.get('include_bottle_position'),
+                                'include_bottle_state': data.get('include_bottle_state'),
+                                'include_subtask': data.get('include_subtask'),
                                 'forced_low_level_subtask': data.get('forced_low_level_subtask'),
                             }
                             
@@ -836,6 +857,21 @@ class Runtime:
                 structured_subtask = {
                     **structured_subtask,
                     "bottle_position": None,
+                }
+            if not self._include_bottle_description and isinstance(structured_subtask, dict):
+                structured_subtask = {
+                    **structured_subtask,
+                    "bottle_description": None,
+                }
+            if not self._include_bottle_state and isinstance(structured_subtask, dict):
+                structured_subtask = {
+                    **structured_subtask,
+                    "bottle_state": None,
+                }
+            if not self._include_subtask and isinstance(structured_subtask, dict):
+                structured_subtask = {
+                    **structured_subtask,
+                    "subtask": None,
                 }
             if self._forced_low_level_subtask is not None and isinstance(structured_subtask, dict):
                 structured_subtask = {

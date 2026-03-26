@@ -168,6 +168,7 @@ class Policy(BasePolicy):
 
         inputs = jax.tree.map(lambda x: jnp.asarray(x)[np.newaxis, ...], inputs)
         self._rng, sample_rng = jax.random.split(self._rng)
+        decode_start = time.perf_counter()
         tokens = self._sample_subtask_tokens(
             sample_rng,
             _model.Observation.from_dict(inputs),
@@ -176,6 +177,7 @@ class Policy(BasePolicy):
             max_text_token_id=max_text_token_id,
             debug_top_logits=debug_top_logits,
         )
+        decode_ms = (time.perf_counter() - decode_start) * 1000.0
         token_ids = np.asarray(tokens[0], dtype=np.int32)
         if max_new_tokens is not None and max_new_tokens >= 0:
             token_ids = token_ids[:max_new_tokens]
@@ -188,9 +190,15 @@ class Policy(BasePolicy):
                 break
         token_ids = token_ids[:stop]
         text = self._tokenizer.decode(token_ids.tolist()) if len(token_ids) else ""
+        generated_steps = len(token_ids)
         return {
             "subtask_tokens": token_ids,
             "subtask_text": text,
+            "policy_timing": {
+                "decode_ms": decode_ms,
+                "generated_steps": generated_steps,
+                "decode_ms_per_step": (decode_ms / generated_steps) if generated_steps > 0 else None,
+            },
         }
 
     @property

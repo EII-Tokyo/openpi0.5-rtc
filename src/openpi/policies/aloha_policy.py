@@ -56,8 +56,10 @@ class AlohaInputs(transforms.DataTransformFn):
             "base_0_rgb": np.True_,
         }
 
-        # Add the extra images.
+        # Add the extra images that are actually present. Missing views are omitted instead of
+        # being replaced with black frames so the model can run with either 3 or 4 cameras.
         extra_image_names = {
+            "base_1_rgb": "cam_low",
             "left_wrist_0_rgb": "cam_left_wrist",
             "right_wrist_0_rgb": "cam_right_wrist",
         }
@@ -65,9 +67,6 @@ class AlohaInputs(transforms.DataTransformFn):
             if source in in_images:
                 images[dest] = in_images[source]
                 image_masks[dest] = np.True_
-            else:
-                images[dest] = np.zeros_like(base_image)
-                image_masks[dest] = np.False_
 
         inputs = {
             "image": images,

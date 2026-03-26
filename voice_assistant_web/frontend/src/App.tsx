@@ -74,7 +74,10 @@ type UiConfig = {
   cameraRefreshMs: number
   datasetDir: string
   manualDatasetDir: string
+  includeBottleDescription: boolean
   includeBottlePosition: boolean
+  includeBottleState: boolean
+  includeSubtask: boolean
   forcedLowLevelSubtask: string | null
   announcementLanguage: 'zh' | 'ja'
 }
@@ -102,7 +105,10 @@ const defaultConfig: UiConfig = {
   cameraRefreshMs: 100,
   datasetDir: '',
   manualDatasetDir: '',
+  includeBottleDescription: true,
   includeBottlePosition: false,
+  includeBottleState: true,
+  includeSubtask: true,
   forcedLowLevelSubtask: null,
   announcementLanguage: 'zh',
 }
@@ -138,6 +144,24 @@ function loadUiConfig(): UiConfig {
         : typeof parsed?.includeBottlePosition === 'string'
           ? parsed.includeBottlePosition === 'true'
           : defaultConfig.includeBottlePosition
+    const includeBottleDescription =
+      typeof parsed?.includeBottleDescription === 'boolean'
+        ? parsed.includeBottleDescription
+        : typeof parsed?.includeBottleDescription === 'string'
+          ? parsed.includeBottleDescription === 'true'
+          : defaultConfig.includeBottleDescription
+    const includeBottleState =
+      typeof parsed?.includeBottleState === 'boolean'
+        ? parsed.includeBottleState
+        : typeof parsed?.includeBottleState === 'string'
+          ? parsed.includeBottleState === 'true'
+          : defaultConfig.includeBottleState
+    const includeSubtask =
+      typeof parsed?.includeSubtask === 'boolean'
+        ? parsed.includeSubtask
+        : typeof parsed?.includeSubtask === 'string'
+          ? parsed.includeSubtask === 'true'
+          : defaultConfig.includeSubtask
     return {
       apiBase: typeof parsed?.apiBase === 'string' && parsed.apiBase.trim() ? parsed.apiBase.trim() : defaultConfig.apiBase,
       wsBase: typeof parsed?.wsBase === 'string' && parsed.wsBase.trim() ? parsed.wsBase.trim() : defaultConfig.wsBase,
@@ -150,7 +174,10 @@ function loadUiConfig(): UiConfig {
         typeof parsed?.manualDatasetDir === 'string'
           ? parsed.manualDatasetDir.trim()
           : defaultConfig.manualDatasetDir,
+      includeBottleDescription,
       includeBottlePosition,
+      includeBottleState,
+      includeSubtask,
       forcedLowLevelSubtask:
         typeof parsed?.forcedLowLevelSubtask === 'string' && parsed.forcedLowLevelSubtask.trim()
           ? parsed.forcedLowLevelSubtask.trim()
@@ -424,7 +451,10 @@ export default function App() {
           language,
           dataset_dir: uiConfig.datasetDir.trim() || undefined,
           manual_dataset_dir: uiConfig.manualDatasetDir.trim() || undefined,
+          include_bottle_description: uiConfig.includeBottleDescription,
           include_bottle_position: uiConfig.includeBottlePosition,
+          include_bottle_state: uiConfig.includeBottleState,
+          include_subtask: uiConfig.includeSubtask,
           forced_low_level_subtask: uiConfig.forcedLowLevelSubtask || undefined,
         }),
       })
@@ -449,7 +479,10 @@ export default function App() {
         body: JSON.stringify({
           dataset_dir: nextConfig.datasetDir.trim(),
           manual_dataset_dir: nextConfig.manualDatasetDir.trim(),
+          include_bottle_description: nextConfig.includeBottleDescription,
           include_bottle_position: nextConfig.includeBottlePosition,
+          include_bottle_state: nextConfig.includeBottleState,
+          include_subtask: nextConfig.includeSubtask,
           forced_low_level_subtask: nextConfig.forcedLowLevelSubtask,
         }),
       })
@@ -482,7 +515,10 @@ export default function App() {
       if (uiConfig.manualDatasetDir.trim()) {
         formData.append('manual_dataset_dir', uiConfig.manualDatasetDir.trim())
       }
+      formData.append('include_bottle_description', String(uiConfig.includeBottleDescription))
       formData.append('include_bottle_position', String(uiConfig.includeBottlePosition))
+      formData.append('include_bottle_state', String(uiConfig.includeBottleState))
+      formData.append('include_subtask', String(uiConfig.includeSubtask))
       if (uiConfig.forcedLowLevelSubtask) {
         formData.append('forced_low_level_subtask', uiConfig.forcedLowLevelSubtask)
       }
@@ -869,6 +905,25 @@ export default function App() {
               />
             </label>
             <label className="config-field">
+              <span>{t.includeBottleDescription}</span>
+              <select
+                value={uiConfig.includeBottleDescription ? 'true' : 'false'}
+                onChange={(event) =>
+                  setUiConfig((current) => {
+                    const nextConfig = {
+                      ...current,
+                      includeBottleDescription: event.target.value === 'true',
+                    }
+                    void pushRuntimeConfig(nextConfig)
+                    return nextConfig
+                  })
+                }
+              >
+                <option value="false">{t.no}</option>
+                <option value="true">{t.yes}</option>
+              </select>
+            </label>
+            <label className="config-field">
               <span>{t.includeBottlePosition}</span>
               <select
                 value={uiConfig.includeBottlePosition ? 'true' : 'false'}
@@ -877,6 +932,44 @@ export default function App() {
                     const nextConfig = {
                       ...current,
                       includeBottlePosition: event.target.value === 'true',
+                    }
+                    void pushRuntimeConfig(nextConfig)
+                    return nextConfig
+                  })
+                }
+              >
+                <option value="false">{t.no}</option>
+                <option value="true">{t.yes}</option>
+              </select>
+            </label>
+            <label className="config-field">
+              <span>{t.includeBottleState}</span>
+              <select
+                value={uiConfig.includeBottleState ? 'true' : 'false'}
+                onChange={(event) =>
+                  setUiConfig((current) => {
+                    const nextConfig = {
+                      ...current,
+                      includeBottleState: event.target.value === 'true',
+                    }
+                    void pushRuntimeConfig(nextConfig)
+                    return nextConfig
+                  })
+                }
+              >
+                <option value="false">{t.no}</option>
+                <option value="true">{t.yes}</option>
+              </select>
+            </label>
+            <label className="config-field">
+              <span>{t.includeSubtask}</span>
+              <select
+                value={uiConfig.includeSubtask ? 'true' : 'false'}
+                onChange={(event) =>
+                  setUiConfig((current) => {
+                    const nextConfig = {
+                      ...current,
+                      includeSubtask: event.target.value === 'true',
                     }
                     void pushRuntimeConfig(nextConfig)
                     return nextConfig

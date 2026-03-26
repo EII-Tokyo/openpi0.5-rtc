@@ -10,6 +10,7 @@ logger = logging.getLogger("openpi")
 # Constants moved from model.py
 IMAGE_KEYS = (
     "base_0_rgb",
+    "base_1_rgb",
     "left_wrist_0_rgb",
     "right_wrist_0_rgb",
 )
@@ -21,13 +22,16 @@ def preprocess_observation_pytorch(
     observation,
     *,
     train: bool = False,
-    image_keys: Sequence[str] = IMAGE_KEYS,
+    image_keys: Sequence[str] | None = None,
     image_resolution: tuple[int, int] = IMAGE_RESOLUTION,
 ):
     """Torch.compile-compatible version of preprocess_observation_pytorch with simplified type annotations.
 
     This function avoids complex type annotations that can cause torch.compile issues.
     """
+    if image_keys is None:
+        image_keys = tuple(observation.images.keys())
+
     if not set(image_keys).issubset(observation.images):
         raise ValueError(f"images dict missing keys: expected {image_keys}, got {list(observation.images)}")
 

@@ -113,6 +113,10 @@ class ModelTransformFactory(GroupFactory):
     # If provided, always overwrite any existing prompt before tokenization.
     force_prompt: str | None = None
     image_size: tuple[int, int] = (224, 224)
+    include_bottle_description: bool = True
+    include_bottle_position: bool = True
+    include_bottle_state: bool = True
+    include_subtask: bool = True
 
     def __call__(self, model_config: _model.BaseModelConfig) -> _transforms.Group:
         image_height, image_width = self.image_size
@@ -145,6 +149,12 @@ class ModelTransformFactory(GroupFactory):
                     _transforms.ForcePrompt(self.force_prompt),
                     _transforms.InjectDefaultPrompt(self.default_prompt),
                     _transforms.ResizeImages(image_height, image_width),
+                    _transforms.FilterSubtaskPayload(
+                        include_bottle_description=self.include_bottle_description,
+                        include_bottle_position=self.include_bottle_position,
+                        include_bottle_state=self.include_bottle_state,
+                        include_subtask=self.include_subtask,
+                    ),
                 ]
                 transforms += [
                     _transforms.TokenizePrompt(
@@ -262,6 +272,10 @@ class LeRobotAlohaDataConfig(DataConfigFactory):
     # the space used by the pi internal runtime which was used to train the base model. People who
     # use standard Aloha data should set this to true.
     adapt_to_pi: bool = True
+    include_bottle_description: bool = True
+    include_bottle_position: bool = True
+    include_bottle_state: bool = True
+    include_subtask: bool = True
     # Repack transforms.
     repack_transforms: tyro.conf.Suppress[_transforms.Group] = dataclasses.field(
         default=_transforms.Group(
@@ -297,6 +311,10 @@ class LeRobotAlohaDataConfig(DataConfigFactory):
             default_prompt=self.default_prompt,
             force_prompt=self.force_prompt,
             image_size=self.image_size,
+            include_bottle_description=self.include_bottle_description,
+            include_bottle_position=self.include_bottle_position,
+            include_bottle_state=self.include_bottle_state,
+            include_subtask=self.include_subtask,
         )(model_config)
 
         return dataclasses.replace(
@@ -935,7 +953,6 @@ _CONFIGS = [
                             "state": "observation.state",
                             "actions": "action",
                             "prompt": "prompt",
-                            "subtask": "subtask",
                         }
                     )
                 ]
@@ -975,10 +992,11 @@ _CONFIGS = [
             image_size=(224, 224),
             force_prompt="process all bottles",
             repo_ids=[
-                "lyl472324464/2025-12-23-twist-one-bottle",
-                "lyl472324464/2026-01-20-twist-one-bottle",
-                "lyl472324464/2026-01-28-twist-many-bottle",
-                "lyl472324464/2026-02-03-no-cap-and-direction",
+                "lyl472324464/wipe_the_desk_with_a_blue_cloth",
+                # "lyl472324464/2025-12-23-twist-one-bottle",
+                # "lyl472324464/2026-01-20-twist-one-bottle",
+                # "lyl472324464/2026-01-28-twist-many-bottle",
+                # "lyl472324464/2026-02-03-no-cap-and-direction",
             ],
             assets=AssetsConfig(
                 assets_dir="gs://openpi-assets/checkpoints/pi05_base/assets",
@@ -987,6 +1005,7 @@ _CONFIGS = [
             base_config=DataConfig(prompt_from_task=True),
             repack_transforms=_transforms.Group(
                 inputs=[
+                    _transforms.InjectDefaultField("subtask", None),
                     _transforms.RepackTransform(
                         {
                             "images": {
@@ -1007,6 +1026,73 @@ _CONFIGS = [
         save_interval=1000,
         num_train_steps=40_000,
         batch_size=128,
+        num_workers=0,
+    ),
+    TrainConfig(
+        name="wipe_the_desk_with_a_blue_cloth_lora",
+        model=pi0_config.Pi0Config(
+            pi05=True,
+            paligemma_variant="gemma_2b_lora",
+            action_expert_variant="gemma_300m_lora",
+            max_token_len=80,
+            subtask_loss_weight=0.1,
+            subtask_max_token_len=250,
+            fast_tokenizer_path="physical-intelligence/fast",
+        ),
+        lr_schedule=_optimizer.CosineDecaySchedule(
+            warmup_steps=2_000,
+            peak_lr=2.5e-5,
+            decay_steps=20_000,
+            decay_lr=2.5e-6,
+        ),
+        log_interval=10,
+        data=LeRobotAlohaDataConfig(
+            image_size=(224, 224),
+            force_prompt="wipe the desk",
+            include_bottle_description=False,
+            include_bottle_position=False,
+            include_bottle_state=True,
+            include_subtask=True,
+            repo_ids=[
+                "lyl472324464/wipe_the_desk_with_a_blue_cloth",
+            ],
+            assets=AssetsConfig(
+                assets_dir="gs://openpi-assets/checkpoints/pi05_base/assets",
+                asset_id="trossen",
+            ),
+            base_config=DataConfig(prompt_from_task=True),
+            repack_transforms=_transforms.Group(
+                inputs=[
+                    _transforms.InjectDefaultField("subtask", None),
+                    _transforms.RepackTransform(
+                        {
+                            "images": {
+                                "cam_high": "observation.images.cam_high",
+                                # "cam_low": "observation.images.cam_low",
+                                # "cam_left_wrist": "observation.images.cam_left_wrist",
+                                # "cam_right_wrist": "observation.images.cam_right_wrist",                               
+                            },
+                            "state": "observation.state",
+                            "actions": "action",
+                            "prompt": "prompt",
+                            "subtask": "subtask",
+                        }
+                    )
+                ]
+            ),
+        ),
+        freeze_filter=pi0_config.Pi0Config(
+            pi05=True,
+            paligemma_variant="gemma_2b_lora",
+            action_expert_variant="gemma_300m_lora",
+            subtask_loss_weight=0.1,
+            subtask_max_token_len=250,
+        ).get_freeze_filter(),
+        ema_decay=None,
+        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_base/params"),
+        save_interval=1000,
+        num_train_steps=20_000,
+        batch_size=1,
         num_workers=0,
     ),
     #
