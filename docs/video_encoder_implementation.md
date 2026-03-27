@@ -1,233 +1,244 @@
-## Video Encoder Implementation
+## 视频 Encoder 实现说明
 
-This document describes the current video-memory image encoder implementation in
-`src/openpi/models/siglip.py`, together with the matching training/inference
-data flow and a local latency measurement.
+这份文档说明当前视频 memory 图像 encoder 的实现方式，主要对应：
 
-### Goal
+- [siglip.py](/home/eii/openpi0.5-rtc-feat-pi05-subtask-train-lambda-20260218/src/openpi/models/siglip.py)
 
-The current implementation extends the original single-frame SigLIP image
-encoder so that it can consume multiple frames per camera, while keeping the
-change set close to the old code:
+同时记录训练/推理两侧的数据流，以及本地的延迟测试结果。
 
-- keep the original `nn.MultiHeadDotProductAttention`
-- keep the original spatial attention + MLP block structure
-- add temporal mixing only every `N` layers
-- keep old checkpoints loadable
+### 目标
 
-This is intentionally closer to TimeSformer-style divided attention than to a
-custom memory-intensive separable attention implementation.
+当前实现是在原始单帧 SigLIP image encoder 基础上，扩展出多帧输入能力，同时尽量保持对旧代码的最小改动：
 
-### Input / Output Contract
+- 保留原始的 `nn.MultiHeadDotProductAttention`
+- 保留原始的 `spatial attention + MLP` block 结构
+- 只在每隔 `N` 层时加入 temporal mixing
+- 保持旧 checkpoint 可加载
 
-The encoder now supports both:
+实现路线更接近 TimeSformer 风格的 divided attention，而不是新写一套更吃显存的自定义 separable attention。
 
-- image input: `[B, H, W, C]`
-- video input: `[B, T, H, W, C]`
+### 输入 / 输出约定
 
-For video input:
+encoder 现在同时支持两种输入：
 
-1. each frame is patchified independently
-2. spatial position embeddings are added per frame
-3. fixed temporal sinusoidal position embeddings are added across time
-4. the transformer runs on `[B, T, P, D]`
-5. only the latest timestep output `x[:, -1, :, :]` is exposed downstream
+- 单帧图像：`[B, H, W, C]`
+- 视频输入：`[B, T, H, W, C]`
 
-`P` is the number of spatial patches and `D` is the token width.
+对视频输入，处理过程是：
 
-### Spatial and Temporal Position Embeddings
+1. 每一帧单独做 patchify
+2. 每一帧都加空间位置编码
+3. 再沿时间维加固定的时间位置编码
+4. transformer 在 `[B, T, P, D]` 上运行
+5. 最后只把最新时刻 `x[:, -1, :, :]` 的输出传给下游
 
-The current implementation keeps the original spatial position embedding:
+其中：
 
-- `pos_embedding` from the old SigLIP path
+- `P` 是空间 patch 数
+- `D` 是 token hidden dim
 
-For video input it additionally adds:
+### 空间位置编码和时间位置编码
 
-- fixed 1D sinusoidal temporal position embedding
+当前实现保留了原始 SigLIP 的空间位置编码：
 
-Important detail:
+- `pos_embedding`
 
-- the latest frame is shifted to temporal offset `0`
-- i.e. `e(0) = 0`
+对视频输入，额外加入：
 
-This keeps the single-frame path as close as possible to the original model
-behavior.
+- 固定的 1D sinusoidal temporal position embedding
 
-Code path:
+这里有一个关键细节：
+
+- 会把“当前帧”平移到时间偏移 `0`
+- 也就是 `e(0) = 0`
+
+这样做的目的，是让单帧路径尽量和原模型行为一致。
+
+对应代码位置：
 
 - `posemb_sincos_1d(...)`
 - `_Module.__call__(...)`
 
-### Transformer Block Structure
+### Transformer Block 结构
 
-The encoder block remains based on the old `Encoder1DBlock` using:
+encoder block 仍然基于原来的 `Encoder1DBlock`，继续使用这些老模块：
 
 - `LayerNorm_0`
 - `MultiHeadDotProductAttention_0`
 - `LayerNorm_1`
 - `MlpBlock_0`
 
-There are now two behaviors:
+现在一共有两种层：
 
-1. normal layer
+1. 普通层
 
 - spatial attention
 - MLP
 
-2. temporal layer (`(lyr + 1) % temporal_every_n_layers == 0`)
+2. temporal 层（满足 `(lyr + 1) % temporal_every_n_layers == 0`）
 
 - temporal attention
 - spatial attention
 - MLP
 
-This is implemented by reusing the same attention module twice in the same
-block when `temporal_first=True`.
+实现方式是：
 
-Temporal attention details:
+- 在同一个 block 里复用同一套 attention 模块两次
+- 当 `temporal_first=True` 时，先走时间注意力，再走空间注意力
 
-- input is reshaped from `[B, T, P, D]` to `[B * P, T, D]`
-- attention is causal over time
-- causal mask shape is `[1, 1, T, T]`
+#### Temporal attention 的具体做法
 
-Spatial attention details:
+- 输入先从 `[B, T, P, D]` reshape 成 `[B * P, T, D]`
+- 在时间维上做 causal attention
+- causal mask 形状是 `[1, 1, T, T]`
 
-- temporal output is reshaped back to `[B, T, P, D]`
-- then reshaped to `[B * T, P, D]`
-- spatial attention is applied patch-wise within each frame
+#### Spatial attention 的具体做法
 
-This preserves the old attention implementation and avoids introducing a new
-custom separable attention kernel.
+- temporal 输出再 reshape 回 `[B, T, P, D]`
+- 然后变成 `[B * T, P, D]`
+- 在每一帧内部按 patch 做空间 attention
 
-### Why This Is a Minimal Change
+这样做的好处是：
 
-Compared with the old single-frame code, the required changes are limited to:
+- 继续复用原始 attention 实现
+- 不需要引入新的自定义 space-time attention kernel
+- 显存开销比之前那版新 attention 更小
 
-- allow video-shaped input in `_Module.__call__`
-- add temporal position embedding
-- allow `MlpBlock` to operate on tensors with more than 3 dims by reading the
-  last dimension as channel width
-- add a `temporal_first` path inside `Encoder1DBlock`
-- add a periodic temporal layer trigger in `Encoder`
-- keep only the latest timestep after the image encoder
+### 为什么说这是“最小改动”
 
-The old checkpoint parameter names are preserved:
+相对旧版单帧代码，这次必须引入的改动只有这些：
 
-- no new temporal-only parameter subtree is introduced
-- existing attention / MLP weights are reused
+- `_Module.__call__` 支持视频形状输入
+- 增加时间位置编码
+- `MlpBlock` 读取最后一维作为通道宽度，兼容 4 维 token tensor
+- 在 `Encoder1DBlock` 里加 `temporal_first` 分支
+- 在 `Encoder` 里按周期触发 temporal 层
+- 图像 encoder 输出只保留最新时刻
 
-### Training Data Flow
+同时旧 checkpoint 的参数名保持不变：
 
-Multi-frame samples are built in:
+- 没有新增一棵 temporal-only 参数子树
+- attention / MLP 还是复用原来的权重
 
-- `src/openpi/training/data_loader.py`
+### 训练数据流
 
-using:
+多帧样本是在：
+
+- [data_loader.py](/home/eii/openpi0.5-rtc-feat-pi05-subtask-train-lambda-20260218/src/openpi/training/data_loader.py)
+
+里通过：
 
 - `TemporalFrameStackDataset`
 
-Current behavior:
+构造出来的。
+
+当前配置是：
 
 - `video_memory_num_frames = 4`
 - `video_memory_stride_seconds = 1.0`
 
-So a sample at time `t` uses:
+所以一个时间点 `t` 的样本，会取：
 
 - `t-3s`
 - `t-2s`
 - `t-1s`
 - `t`
 
-for every camera.
+而且对每一路相机都这样取。
 
-If the sample is near the beginning of an episode and there is not enough
-history:
+如果样本靠近 episode 开头，历史帧不够：
 
-- the earliest available frame in the same episode is repeated
+- 就重复同一个 episode 内最早可用的那一帧
 
-Implementation assumptions:
+当前实现依赖两个前提：
 
-- `frame_index` starts at `0`
-- `frame_index` is contiguous within an episode
+- `frame_index` 从 `0` 开始
+- 同一个 episode 内 `frame_index` 连续
 
-To avoid mixing trainability remapping with temporal lookup:
+为了避免 trainability remapping 干扰 temporal lookup：
 
-- `IsForTrainingWrapper` logic is applied only to the top-level sampled index
-- temporal history indices are resolved directly against the underlying raw
-  dataset
+- `IsForTrainingWrapper` 只作用在顶层采样的那个 idx
+- 历史帧索引直接对原始 dataset 做连续索引
 
-### Inference Data Flow
+### 推理数据流
 
-Online inference mirrors the training structure:
+在线推理侧和训练保持同样的时间结构，主要逻辑在：
 
-- `packages/openpi-client/src/openpi_client/runtime/runtime.py`
+- [runtime.py](/home/eii/openpi0.5-rtc-feat-pi05-subtask-train-lambda-20260218/packages/openpi-client/src/openpi_client/runtime/runtime.py)
 
-Current runtime behavior:
+当前 runtime 行为是：
 
-- keep per-camera history buffers
-- sample frames at `now-3s`, `now-2s`, `now-1s`, `now`
-- if history is insufficient, repeat the earliest available frame
+- 为每一路相机维护历史帧缓冲
+- 每次推理时取：
+  - `now-3s`
+  - `now-2s`
+  - `now-1s`
+  - `now`
+- 如果历史不够，就重复最早可用帧
 
-So training and inference use the same temporal layout.
+所以训练和推理在时间采样结构上是一致的。
 
-### Local Latency Measurement
+### 本地延迟测试
 
-Local measurement was run on:
+本地测试环境：
 
-- GPU: `NVIDIA GeForce RTX 5090`
-- checkpoint:
+- GPU：`NVIDIA GeForce RTX 5090`
+- checkpoint：
   `checkpoints/twist_off_the_bottle_cap_subtask_full_finetune/twist_off_the_bottle_cap_subtask_full_finetune_bs128_20260321_232825/10000`
-- input:
+- 输入样本：
   `tmp/test_hdf5/episode_0.hdf5`
-- cameras:
-  `cam_high`, `cam_low`, `cam_left_wrist`, `cam_right_wrist`
+- 相机：
+  - `cam_high`
+  - `cam_low`
+  - `cam_left_wrist`
+  - `cam_right_wrist`
 
-Measurement method:
+测试方法：
 
-- same checkpoint
-- same current state / prompt / structured subtask
-- compare single-frame input vs 4-frame input
-- warmup once
-- then average 5 runs
+- 同一份 checkpoint
+- 同一个 state / prompt / structured subtask
+- 比较单帧输入和 4 帧输入
+- 先 warmup 1 次
+- 然后各跑 5 次取平均
 
-Results:
+测试结果：
 
-- 1 frame:
+- 单帧：
   - low-level `infer`: `58.49 ms`
   - high-level decode: `583.95 ms`
   - high-level decode per token: `8.225 ms/token`
-  - average generated steps: `71`
+  - 平均生成 token 数：`71`
 
-- 4 frames (1s stride):
+- 4 帧（1 秒间隔）：
   - low-level `infer`: `72.86 ms`
   - high-level decode: `584.95 ms`
   - high-level decode per token: `8.356 ms/token`
-  - average generated steps: `70`
+  - 平均生成 token 数：`70`
 
-Delta from 1 frame to 4 frames:
+从单帧到 4 帧的增量：
 
-- low-level `+14.37 ms`
-- high-level total decode `+1.00 ms`
-- high-level decode per token `+0.131 ms/token`
+- low-level：`+14.37 ms`
+- high-level 总 decode：`+1.00 ms`
+- high-level 每 token：`+0.131 ms/token`
 
-Interpretation:
+可以这样理解：
 
-- low-level latency increases noticeably but remains moderate
-- high-level total decode is almost unchanged in this measurement
-- per-token decode cost rises slightly
+- low-level 的延迟增加比较明显，但还在可接受范围
+- high-level 总 decode 时间在这次测试里几乎没变
+- high-level 每 token 成本有轻微上升
 
-### Current Limitations
+### 当前限制
 
-- temporal attention is inserted periodically, not in every layer
-- the implementation uses TimeSformer-style divided attention using the
-  existing attention module, not a new custom joint space-time attention kernel
-- latest-frame-only output means downstream VLA still consumes the current
-  timestep representation, not all temporal tokens
+- temporal attention 不是每层都有，而是周期性插入
+- 当前实现是基于现有 attention 模块的 TimeSformer 风格 divided attention
+- 不是一套新的联合 space-time attention kernel
+- 下游 VLA 仍然只消费“当前时刻”的表示，不消费所有 temporal token
 
-### Files Touched by This Feature
+### 本次功能涉及的文件
 
-- `src/openpi/models/siglip.py`
-- `src/openpi/training/data_loader.py`
-- `src/openpi/training/config.py`
-- `src/openpi/models/model.py`
-- `src/openpi/policies/aloha_policy.py`
-- `packages/openpi-client/src/openpi_client/runtime/runtime.py`
+- [siglip.py](/home/eii/openpi0.5-rtc-feat-pi05-subtask-train-lambda-20260218/src/openpi/models/siglip.py)
+- [data_loader.py](/home/eii/openpi0.5-rtc-feat-pi05-subtask-train-lambda-20260218/src/openpi/training/data_loader.py)
+- [config.py](/home/eii/openpi0.5-rtc-feat-pi05-subtask-train-lambda-20260218/src/openpi/training/config.py)
+- [model.py](/home/eii/openpi0.5-rtc-feat-pi05-subtask-train-lambda-20260218/src/openpi/models/model.py)
+- [aloha_policy.py](/home/eii/openpi0.5-rtc-feat-pi05-subtask-train-lambda-20260218/src/openpi/policies/aloha_policy.py)
+- [runtime.py](/home/eii/openpi0.5-rtc-feat-pi05-subtask-train-lambda-20260218/packages/openpi-client/src/openpi_client/runtime/runtime.py)
