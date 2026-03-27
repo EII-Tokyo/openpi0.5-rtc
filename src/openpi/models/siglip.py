@@ -37,6 +37,16 @@ def posemb_sincos_2d(h, w, width, temperature=10_000.0, dtype=jnp.float32):
     return jnp.asarray(pe, dtype)[None, :, :]
 
 
+def posemb_sincos_1d(length, width, temperature=10_000.0, dtype=jnp.float32):
+    positions = jnp.arange(length)
+    assert width % 2 == 0, "Width must be even for 1D sincos posemb"
+    omega = jnp.arange(width // 2) / jnp.maximum(width // 2 - 1, 1)
+    omega = 1.0 / (temperature**omega)
+    pos = jnp.einsum("m,d->md", positions, omega)
+    pe = jnp.concatenate([jnp.sin(pos), jnp.cos(pos)], axis=1)
+    return jnp.asarray(pe, dtype)[None, :, None, :]
+
+
 def get_posemb(self, typ, seqshape, width, name, dtype=jnp.float32):
     if typ == "learn":
         return self.param(
@@ -65,7 +75,7 @@ class MlpBlock(nn.Module):
             "bias_init": nn.initializers.normal(stddev=1e-6),
         }
 
-        _, _, d = x.shape  # n,l,d
+        d = x.shape[-1]
         x = nn.Dense(self.mlp_dim or 4 * d, dtype=self.dtype_mm, **inits)(x)
         x = nn.gelu(x)
         x = nn.Dropout(rate=self.dropout)(x, deterministic)
@@ -81,26 +91,55 @@ class Encoder1DBlock(nn.Module):
     dtype_mm: str = "float32"
 
     @nn.compact
-    def __call__(self, x, deterministic=True):  # noqa: FBT002
+    def __call__(
+        self,
+        x,
+        deterministic=True,
+        attn_mask=None,
+        temporal_first=False,
+        temporal_attn_mask=None,
+    ):  # noqa: FBT002
         out = {}
-        x = sharding.activation_sharding_constraint(x)
-        y = nn.LayerNorm(dtype=self.dtype_mm)(x)
-        y = out["sa"] = nn.MultiHeadDotProductAttention(
+        ln0 = nn.LayerNorm(name="LayerNorm_0", dtype=self.dtype_mm)
+        attn = nn.MultiHeadDotProductAttention(
             num_heads=self.num_heads,
             kernel_init=nn.initializers.xavier_uniform(),
             deterministic=deterministic,
             dtype=self.dtype_mm,
-        )(y, y)
-        y = sharding.activation_sharding_constraint(y)
-        y = nn.Dropout(rate=self.dropout)(y, deterministic)
-        x = out["+sa"] = x + y
-
-        y = nn.LayerNorm(dtype=self.dtype_mm)(x)
-        y = out["mlp"] = MlpBlock(
+            name="MultiHeadDotProductAttention_0",
+        )
+        ln1 = nn.LayerNorm(name="LayerNorm_1", dtype=self.dtype_mm)
+        mlp = MlpBlock(
             mlp_dim=self.mlp_dim,
             dropout=self.dropout,
             dtype_mm=self.dtype_mm,
-        )(y, deterministic)
+            name="MlpBlock_0",
+        )
+
+        def _apply_attention(seq, mask, name):
+            seq = sharding.activation_sharding_constraint(seq)
+            y = ln0(seq)
+            y = out[name] = attn(y, y, mask=mask)
+            y = sharding.activation_sharding_constraint(y)
+            y = nn.Dropout(rate=self.dropout)(y, deterministic)
+            return seq + y
+
+        if x.ndim == 4 and temporal_first and x.shape[1] > 1:
+            batch_size, time_size, seq_len, width = x.shape
+            temporal_x = jnp.swapaxes(x, 1, 2)
+            temporal_x = jnp.reshape(temporal_x, [batch_size * seq_len, time_size, width])
+            temporal_x = _apply_attention(temporal_x, temporal_attn_mask, "temporal_sa")
+            temporal_x = jnp.reshape(temporal_x, [batch_size, seq_len, time_size, width])
+            x = jnp.swapaxes(temporal_x, 1, 2)
+
+            spatial_x = jnp.reshape(x, [batch_size * time_size, seq_len, width])
+            spatial_x = _apply_attention(spatial_x, attn_mask, "sa")
+            x = jnp.reshape(spatial_x, [batch_size, time_size, seq_len, width])
+        else:
+            x = _apply_attention(x, attn_mask, "sa")
+
+        y = ln1(x)
+        y = out["mlp"] = mlp(y, deterministic)
         y = sharding.activation_sharding_constraint(y)
         y = nn.Dropout(rate=self.dropout)(y, deterministic)
         x = out["+mlp"] = x + y
@@ -118,12 +157,13 @@ class Encoder(nn.Module):
     scan: bool = False
     remat_policy: str = "nothing_saveable"
     dtype_mm: str = "float32"
+    temporal_every_n_layers: int = 4
 
     @nn.compact
     def __call__(self, x, deterministic=True):  # noqa: FBT002
         out = {}
 
-        if self.scan:
+        if self.scan and x.ndim != 4:
             block = nn.remat(
                 Encoder1DBlock,
                 prevent_cse=False,
@@ -155,7 +195,20 @@ class Encoder(nn.Module):
                     num_heads=self.num_heads,
                     dropout=self.dropout,
                 )
-                x, out[f"block{lyr:02d}"] = block_cur(x, deterministic)
+                if x.ndim == 4:
+                    batch_size, time_size, seq_len, width = x.shape
+                    if time_size > 1 and (lyr + 1) % self.temporal_every_n_layers == 0:
+                        causal_mask = jnp.tril(jnp.ones((time_size, time_size), dtype=jnp.bool_))[None, None, :, :]
+                        x, out[f"block{lyr:02d}"] = block_cur(
+                            x,
+                            deterministic,
+                            temporal_first=True,
+                            temporal_attn_mask=causal_mask,
+                        )
+                    else:
+                        x, out[f"block{lyr:02d}"] = block_cur(x, deterministic)
+                else:
+                    x, out[f"block{lyr:02d}"] = block_cur(x, deterministic)
             out["pre_ln"] = x  # Alias for last block, but without the number in it.
 
         return nn.LayerNorm(name="encoder_norm", dtype=self.dtype_mm)(x), out
@@ -203,6 +256,7 @@ class _Module(nn.Module):
     # or "dots_with_no_batch_dims_saveable" for more speed (memory costly)
     remat_policy: str = "nothing_saveable"
     dtype_mm: str = "float32"
+    temporal_every_n_layers: int = 4
 
     @nn.compact
     def __call__(self, image, *, train=False):
@@ -211,6 +265,14 @@ class _Module(nn.Module):
         # Kevin edit: do patch extraction and posemb in float32,
         # because I feel like it's a bit safer.
         image = jnp.asarray(image, jnp.float32)
+
+        is_video = image.ndim == 5
+        if is_video:
+            batch_size, time_size, image_h, image_w, image_c = image.shape
+            image = jnp.reshape(image, [batch_size * time_size, image_h, image_w, image_c])
+        else:
+            batch_size = image.shape[0]
+            time_size = 1
 
         # Patch extraction
         x = out["stem"] = nn.Conv(
@@ -223,16 +285,23 @@ class _Module(nn.Module):
         )(image)
 
         n, h, w, c = x.shape
-        x = jnp.reshape(x, [n, h * w, c])
+        x = jnp.reshape(x, [batch_size, time_size, h * w, c])
 
-        # Add posemb before adding extra token.
-        x = out["with_posemb"] = x + get_posemb(self, self.posemb, (h, w), c, "pos_embedding", jnp.float32)
+        # Add spatial posemb before any temporal mixing.
+        spatial_posemb = get_posemb(self, self.posemb, (h, w), c, "pos_embedding", jnp.float32)
+        x = x + spatial_posemb[:, None, :, :]
+        if time_size > 1:
+            # Keep the current frame at zero temporal offset so K=1 matches the original model.
+            temporal_posemb = posemb_sincos_1d(time_size, c, dtype=jnp.float32)
+            temporal_posemb = temporal_posemb - temporal_posemb[:, -1:, :, :]
+            x = x + temporal_posemb
+        x = out["with_posemb"] = x
 
         if self.pool_type == "tok":
             cls = self.param("cls", nn.initializers.zeros, (1, 1, c), x.dtype)
-            x = jnp.concatenate([jnp.tile(cls, [n, 1, 1]), x], axis=1)
+            cls = jnp.tile(cls[:, None, :, :], [batch_size, time_size, 1, 1])
+            x = jnp.concatenate([cls, x], axis=2)
 
-        n, _, c = x.shape  # n,l,d
         x = nn.Dropout(rate=self.dropout)(x, not train)
 
         # Kevin edit: now cast back to dtype_mm (potentially half precision)
@@ -246,29 +315,31 @@ class _Module(nn.Module):
             scan=self.scan,
             remat_policy=self.remat_policy,
             dtype_mm=self.dtype_mm,
+            temporal_every_n_layers=self.temporal_every_n_layers,
             name="Transformer",
         )(x, deterministic=not train)
-        encoded = out["encoded"] = x
+        # Only expose the current timestep to the downstream VLA stack.
+        encoded = out["encoded"] = x[:, -1, :, :]
 
         if self.pool_type == "map":
             x = out["head_input"] = MAPHead(
                 num_heads=self.num_heads,
                 mlp_dim=self.mlp_dim,
                 dtype=self.dtype_mm,
-            )(x)
+            )(encoded)
         elif self.pool_type == "gap":
-            x = out["head_input"] = jnp.mean(x, axis=1)
+            x = out["head_input"] = jnp.mean(encoded, axis=1)
         elif self.pool_type == "0":
-            x = out["head_input"] = x[:, 0]
+            x = out["head_input"] = encoded[:, 0]
         elif self.pool_type == "tok":
-            x = out["head_input"] = x[:, 0]
+            x = out["head_input"] = encoded[:, 0]
             encoded = encoded[:, 1:]
         elif self.pool_type == "none":
-            pass
+            x = encoded
         else:
             raise ValueError(f"Unknown pool type: '{self.pool_type}'")
 
-        x_2d = jnp.reshape(encoded, [n, h, w, -1])
+        x_2d = jnp.reshape(encoded, [batch_size, h, w, -1])
 
         if self.rep_size:
             rep_size = self.width if self.rep_size is True else self.rep_size

@@ -48,6 +48,60 @@ IMAGE_KEYS = (
 IMAGE_RESOLUTION = (224, 224)
 
 
+def _first_leaf(tree):
+    if isinstance(tree, dict):
+        for value in tree.values():
+            leaf = _first_leaf(value)
+            if leaf is not None:
+                return leaf
+        return None
+    return tree
+
+
+def _slice_tree_leading_axis(tree, index: int):
+    if isinstance(tree, dict):
+        return {k: _slice_tree_leading_axis(v, index) for k, v in tree.items()}
+    return tree[index]
+
+
+def _expand_scanned_siglip_encoder_params(expected: dict, params: dict) -> dict:
+    """Expands scanned SigLIP encoder params to per-layer params when the model is unscanned.
+
+    Older checkpoints store SigLIP encoder block params under:
+      PaliGemma/img/Transformer/encoderblock
+    with a leading layer axis. The current video-enabled encoder materializes blocks as:
+      PaliGemma/img/Transformer/encoderblock_{i}
+    """
+
+    try:
+        expected_transformer = expected["PaliGemma"]["img"]["Transformer"]
+        got_transformer = params["PaliGemma"]["img"]["Transformer"]
+    except KeyError:
+        return params
+
+    if "encoderblock" not in got_transformer:
+        return params
+    if not any(key.startswith("encoderblock_") for key in expected_transformer):
+        return params
+
+    scanned = got_transformer["encoderblock"]
+    first_leaf = _first_leaf(scanned)
+    if first_leaf is None or not hasattr(first_leaf, "shape") or len(first_leaf.shape) == 0:
+        return params
+
+    depth = int(first_leaf.shape[0])
+    expanded = dict(got_transformer)
+    expanded.pop("encoderblock", None)
+    for i in range(depth):
+        expanded[f"encoderblock_{i}"] = _slice_tree_leading_axis(scanned, i)
+
+    params = dict(params)
+    params["PaliGemma"] = dict(params["PaliGemma"])
+    params["PaliGemma"]["img"] = dict(params["PaliGemma"]["img"])
+    params["PaliGemma"]["img"]["Transformer"] = expanded
+    return params
+
+
 # Data format
 #
 # Data transforms produce the model input as a nested dictionary which is later converted
@@ -57,11 +111,11 @@ IMAGE_RESOLUTION = (224, 224)
 # {
 #     # Observation data.
 #     "image": {
-#         "base_0_rgb": (float32|uint8)[*b, h, w, 3],  # RGB image in [-1, 1] or [0, 255]
+#         "base_0_rgb": (float32|uint8)[*ib, h, w, 3],  # RGB image in [-1, 1] or [0, 255]
 #         ...  # Additional camera views
 #     },
 #     "image_mask": {
-#         "base_0_rgb": bool[*b],  # True if image is valid
+#         "base_0_rgb": bool[*mb],  # True if image is valid (typically batch dims only)
 #         ...  # Masks for additional views
 #     },
 #     "state": float32[*b, s],  # Low-dimensional robot state
@@ -93,9 +147,10 @@ class Observation(Generic[ArrayT]):
     """
 
     # Images, in [-1, 1] float32.
-    images: dict[str, at.Float[ArrayT, "*b h w c"]]
-    # Image masks, with same keys as images.
-    image_masks: dict[str, at.Bool[ArrayT, "*b"]]
+    images: dict[str, at.Float[ArrayT, "*ib h w c"]]
+    # Image masks, with same keys as images. These typically follow batch dims only and do not
+    # include an explicit temporal dimension when video memory is enabled.
+    image_masks: dict[str, at.Bool[ArrayT, "*mb"]]
     # Low-dimensional robot state.
     state: at.Float[ArrayT, "*b s"]
 
@@ -184,17 +239,24 @@ def preprocess_observation(
     out_images = {}
     for key in image_keys:
         image = observation.images[key]
-        if image.shape[1:3] != image_resolution:
-            logger.info(f"Resizing image {key} from {image.shape[1:3]} to {image_resolution}")
-            image = image_tools.resize_with_pad(image, *image_resolution)
+        had_time_dim = image.ndim == 5
+        if had_time_dim:
+            batch_size, time_size, height, width, channels = image.shape
+            flat_image = image.reshape(batch_size * time_size, height, width, channels)
+        else:
+            flat_image = image
+
+        if flat_image.shape[1:3] != image_resolution:
+            logger.info(f"Resizing image {key} from {flat_image.shape[1:3]} to {image_resolution}")
+            flat_image = image_tools.resize_with_pad(flat_image, *image_resolution)
 
         if train:
             # Convert from [-1, 1] to [0, 1] for augmax.
-            image = image / 2.0 + 0.5
+            flat_image = flat_image / 2.0 + 0.5
 
             transforms = []
             if "wrist" not in key:
-                height, width = image.shape[1:3]
+                height, width = flat_image.shape[1:3]
                 transforms += [
                     augmax.RandomCrop(int(width * 0.95), int(height * 0.95)),
                     augmax.Resize(width, height),
@@ -203,11 +265,16 @@ def preprocess_observation(
             transforms += [
                 augmax.ColorJitter(brightness=0.3, contrast=0.4, saturation=0.5),
             ]
-            sub_rngs = jax.random.split(rng, image.shape[0])
-            image = jax.vmap(augmax.Chain(*transforms))(sub_rngs, image)
+            sub_rngs = jax.random.split(rng, flat_image.shape[0])
+            flat_image = jax.vmap(augmax.Chain(*transforms))(sub_rngs, flat_image)
 
             # Back to [-1, 1].
-            image = image * 2.0 - 1.0
+            flat_image = flat_image * 2.0 - 1.0
+
+        if had_time_dim:
+            image = flat_image.reshape(batch_size, time_size, *image_resolution, channels)
+        else:
+            image = flat_image
 
         out_images[key] = image
 
@@ -261,6 +328,7 @@ class BaseModelConfig(abc.ABC):
         """Create a model with the given parameters."""
         model = nnx.eval_shape(self.create, jax.random.key(0))
         graphdef, state = nnx.split(model)
+        params = _expand_scanned_siglip_encoder_params(state.to_pure_dict(), params)
         if remove_extra_params:
             params = ocp.transform_utils.intersect_trees(state.to_pure_dict(), params)
         at.check_pytree_equality(expected=state.to_pure_dict(), got=params, check_shapes=True, check_dtypes=False)

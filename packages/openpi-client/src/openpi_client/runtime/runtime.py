@@ -138,6 +138,10 @@ class Runtime:
         self._include_subtask = True
         self._forced_low_level_subtask = None
         self._high_level_history: deque[dict] = deque(maxlen=100)
+        self._video_memory_num_frames = 4
+        self._video_memory_stride_seconds = 1.0
+        self._image_history_horizon_seconds = max(5.0, self._video_memory_num_frames * self._video_memory_stride_seconds + 2.0)
+        self._image_history: dict[str, deque[tuple[float, np.ndarray]]] = {}
         self._applied_action_trace_path = Path("/tmp/runtime_applied_actions.jsonl")
         self._applied_action_trace_path.write_text("")
         logging.info("Applied action trace will be written to %s", self._applied_action_trace_path)
@@ -488,6 +492,51 @@ class Runtime:
             self._high_level_obs = obs_for_high_level
             self._high_level_obs_version += 1
 
+    def _reset_temporal_image_history(self) -> None:
+        self._image_history.clear()
+
+    def _record_temporal_images(self, images: dict, timestamp: float) -> None:
+        if self._video_memory_num_frames <= 1 or not isinstance(images, dict):
+            return
+        for key, value in images.items():
+            arr = np.asarray(value)
+            history = self._image_history.setdefault(key, deque())
+            history.append((timestamp, np.array(arr, copy=True)))
+            while history and timestamp - history[0][0] > self._image_history_horizon_seconds:
+                history.popleft()
+
+    def _build_temporal_images(self, images: dict, timestamp: float) -> dict:
+        if self._video_memory_num_frames <= 1 or not isinstance(images, dict):
+            return images
+
+        self._record_temporal_images(images, timestamp)
+        targets = [
+            timestamp - (self._video_memory_num_frames - 1 - i) * self._video_memory_stride_seconds
+            for i in range(self._video_memory_num_frames)
+        ]
+        stacked_images = {}
+        for key, current_value in images.items():
+            history = list(self._image_history.get(key, ()))
+            if not history:
+                base = np.asarray(current_value)
+                stacked_images[key] = np.stack([base] * self._video_memory_num_frames, axis=0)
+                continue
+
+            selected_frames: list[np.ndarray] = []
+            earliest_frame = history[0][1]
+            for target_ts in targets:
+                chosen = None
+                for hist_ts, hist_frame in history:
+                    if hist_ts <= target_ts:
+                        chosen = hist_frame
+                    else:
+                        break
+                if chosen is None:
+                    chosen = earliest_frame
+                selected_frames.append(np.asarray(chosen))
+            stacked_images[key] = np.stack(selected_frames, axis=0)
+        return stacked_images
+
     def _get_high_level_state(self) -> tuple[dict | None, dict]:
         with self._high_level_state_lock:
             structured_subtask = self._latest_structured_subtask
@@ -539,6 +588,8 @@ class Runtime:
         for key, value in images.items():
             try:
                 arr = np.asarray(value)
+                if arr.ndim == 4:
+                    arr = arr[-1]
                 if arr.ndim != 3:
                     continue
                 if arr.shape[0] in (1, 3, 4) and arr.shape[-1] not in (1, 3, 4):
@@ -717,6 +768,7 @@ class Runtime:
         self._environment.reset()
         self._agent.reset()
         self._reset_high_level_state()
+        self._reset_temporal_image_history()
         self._start_high_level_worker()
         self._last_policy_action_ts = None
 
@@ -773,6 +825,7 @@ class Runtime:
             self._is_waiting_for_task = False 
             self._high_level_history.clear()
             self._reset_high_level_state()
+            self._reset_temporal_image_history()
             self._awaiting_initial_subtask = self._high_level_policy is not None
             self._last_initial_subtask_wait_log_ts = 0.0
             self._publish_runtime_state(mode="policy")
@@ -781,6 +834,7 @@ class Runtime:
             self._current_task = task_data
             self._agent.reset() 
             self._reset_high_level_state()
+            self._reset_temporal_image_history()
             for subscriber in self._subscribers:
                 subscriber.on_episode_end()
             self._publish_runtime_state(mode="teleop_prepare")
@@ -791,6 +845,7 @@ class Runtime:
             self._is_waiting_for_task = True
             self._current_task = None
             self._reset_high_level_state()
+            self._reset_temporal_image_history()
             # 回到初始位置
             self._environment.stop()
             if hasattr(self._environment, "close_grippers"):
@@ -806,6 +861,7 @@ class Runtime:
             self._environment.sleep_arms()
             self._agent.reset()
             self._reset_high_level_state()
+            self._reset_temporal_image_history()
             for subscriber in self._subscribers:
                 subscriber.on_episode_end()
             self._publish_runtime_state(mode="sleep")
@@ -822,6 +878,11 @@ class Runtime:
         step_started_at = time.monotonic()
         observation = self._environment.get_observation()
         observation_ready_at = time.monotonic()
+        temporal_timestamp = time.time()
+        observation = {
+            **observation,
+            "images": self._build_temporal_images(observation.get("images", {}), temporal_timestamp),
+        }
         assert self._current_task is not None, "_current_task must be set before calling _step()"
         observation_with_task = {
             **observation,

@@ -90,6 +90,10 @@ class DataConfig:
 
     # If true, will use the LeRobot dataset task to define the prompt.
     prompt_from_task: bool = False
+    # Number of temporally spaced frames to stack for each camera observation.
+    video_memory_num_frames: int = 1
+    # Temporal stride between stacked frames, in seconds.
+    video_memory_stride_seconds: float = 1.0
 
     # Only used for RLDS data loader (ie currently only used for DROID).
     rlds_data_dir: str | None = None
@@ -272,6 +276,8 @@ class LeRobotAlohaDataConfig(DataConfigFactory):
     # the space used by the pi internal runtime which was used to train the base model. People who
     # use standard Aloha data should set this to true.
     adapt_to_pi: bool = True
+    video_memory_num_frames: int = 1
+    video_memory_stride_seconds: float = 1.0
     include_bottle_description: bool = True
     include_bottle_position: bool = True
     include_bottle_state: bool = True
@@ -323,6 +329,8 @@ class LeRobotAlohaDataConfig(DataConfigFactory):
             data_transforms=data_transforms,
             model_transforms=model_transforms,
             action_sequence_keys=self.action_sequence_keys,
+            video_memory_num_frames=self.video_memory_num_frames,
+            video_memory_stride_seconds=self.video_memory_stride_seconds,
         )
 
 
@@ -826,6 +834,7 @@ _CONFIGS = [
                         {
                             "images": {
                                 "cam_high": "observation.images.cam_high",
+                                "cam_low": "observation.images.cam_low",
                                 "cam_left_wrist": "observation.images.cam_left_wrist",
                                 "cam_right_wrist": "observation.images.cam_right_wrist",
                             },
@@ -947,6 +956,7 @@ _CONFIGS = [
                         {
                             "images": {
                                 "cam_high": "observation.images.cam_high",
+                                "cam_low": "observation.images.cam_low",
                                 "cam_left_wrist": "observation.images.cam_left_wrist",
                                 "cam_right_wrist": "observation.images.cam_right_wrist",
                             },
@@ -1010,6 +1020,7 @@ _CONFIGS = [
                         {
                             "images": {
                                 "cam_high": "observation.images.cam_high",
+                                "cam_low": "observation.images.cam_low",
                                 "cam_left_wrist": "observation.images.cam_left_wrist",
                                 "cam_right_wrist": "observation.images.cam_right_wrist",
                             },
@@ -1053,8 +1064,10 @@ _CONFIGS = [
             include_bottle_position=False,
             include_bottle_state=True,
             include_subtask=True,
+            video_memory_num_frames=4,
+            video_memory_stride_seconds=1.0,
             repo_ids=[
-                "lyl472324464/wipe_the_desk_with_a_blue_cloth",
+                "lyl472324464/2026-02-03-no-cap-and-direction",
             ],
             assets=AssetsConfig(
                 assets_dir="gs://openpi-assets/checkpoints/pi05_base/assets",
@@ -1068,9 +1081,9 @@ _CONFIGS = [
                         {
                             "images": {
                                 "cam_high": "observation.images.cam_high",
-                                # "cam_low": "observation.images.cam_low",
-                                # "cam_left_wrist": "observation.images.cam_left_wrist",
-                                # "cam_right_wrist": "observation.images.cam_right_wrist",                               
+                                "cam_low": "observation.images.cam_low",
+                                "cam_left_wrist": "observation.images.cam_left_wrist",
+                                "cam_right_wrist": "observation.images.cam_right_wrist",
                             },
                             "state": "observation.state",
                             "actions": "action",

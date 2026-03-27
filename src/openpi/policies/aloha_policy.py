@@ -26,7 +26,8 @@ class AlohaInputs(transforms.DataTransformFn):
     """Inputs for the Aloha policy.
 
     Expected inputs:
-    - images: dict[name, img] where img is [channel, height, width]. name must be in EXPECTED_CAMERAS.
+    - images: dict[name, img] where img is [channel, height, width] or [time, channel, height, width].
+      name must be in EXPECTED_CAMERAS.
     - state: [14]
     - actions: [action_horizon, 14]
     """
@@ -35,10 +36,9 @@ class AlohaInputs(transforms.DataTransformFn):
     # the space used by the pi internal runtime which was used to train the base model.
     adapt_to_pi: bool = True
 
-    # The expected cameras names. All input cameras must be in this set. Missing cameras will be
-    # replaced with black images and the corresponding `image_mask` will be set to False.
+    # The expected cameras names. All input cameras must be in this set. Missing optional cameras
+    # are omitted so the model can run with either 3-camera or 4-camera inputs.
     EXPECTED_CAMERAS: ClassVar[tuple[str, ...]] = ("cam_high", "cam_low", "cam_left_wrist", "cam_right_wrist")
-
     def __call__(self, data: dict) -> dict:
         data = _decode_aloha(data, adapt_to_pi=self.adapt_to_pi)
 
@@ -172,6 +172,10 @@ def _decode_aloha(data: dict, *, adapt_to_pi: bool = False) -> dict:
         # Convert to uint8 if using float images.
         if np.issubdtype(img.dtype, np.floating):
             img = (255 * img).astype(np.uint8)
+        if img.ndim == 4 and img.shape[-1] in (1, 3, 4):
+            return img
+        if img.ndim == 4 and img.shape[1] in (1, 3, 4):
+            return einops.rearrange(img, "t c h w -> t h w c")
         if img.ndim == 3 and img.shape[-1] in (1, 3, 4):
             return img
         if img.ndim == 3 and img.shape[0] in (1, 3, 4):

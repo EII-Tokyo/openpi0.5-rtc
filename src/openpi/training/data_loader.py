@@ -143,6 +143,76 @@ class IsForTrainingWrapper(Dataset[T_co]):
         return mask
 
 
+class TemporalFrameStackDataset(Dataset[dict]):
+    """Stacks image observations from earlier timesteps in the same episode.
+
+    Frames are sampled at fixed second intervals and returned in oldest->newest order.
+    If the requested history is not available inside the episode, the earliest valid frame
+    is repeated.
+    """
+
+    IMAGE_PREFIX = "observation.images."
+
+    def __init__(
+        self,
+        dataset: Dataset,
+        *,
+        fps: float,
+        num_frames: int,
+        stride_seconds: float,
+        trainable_mask: np.ndarray | None = None,
+    ):
+        self._dataset = dataset
+        self._fps = fps
+        self._num_frames = num_frames
+        self._stride_seconds = stride_seconds
+        self._stride_frames = max(1, int(round(fps * stride_seconds)))
+        self._trainable_mask = trainable_mask
+        self._trainable_indices = None if trainable_mask is None else np.flatnonzero(trainable_mask)
+
+    def __len__(self) -> int:
+        return len(self._dataset)
+
+    def __getitem__(self, index: SupportsIndex) -> dict:
+        idx = index.__index__()
+        if idx < 0 or idx >= len(self):
+            raise IndexError(f"Index {idx} out of bounds for dataset of length {len(self)}.")
+        if self._trainable_mask is not None and not self._trainable_mask[idx]:
+            idx = int(self._trainable_indices[torch.randint(len(self._trainable_indices), (1,)).item()])
+        current = self._dataset[idx]
+        if self._num_frames <= 1:
+            return current
+
+        episode_index = self._to_int(current["episode_index"])
+        frame_index = self._to_int(current["frame_index"])
+        episode_start_idx = idx - frame_index
+        history_indices: list[int] = []
+        for offset in reversed(range(self._num_frames)):
+            target_frame = max(frame_index - offset * self._stride_frames, 0)
+            candidate_idx = episode_start_idx + target_frame
+            if candidate_idx < 0 or candidate_idx >= len(self._dataset):
+                candidate_idx = idx
+            else:
+                candidate = self._dataset[candidate_idx]
+                if self._to_int(candidate["episode_index"]) != episode_index:
+                    candidate_idx = idx
+            history_indices.append(candidate_idx)
+
+        frames = [self._dataset[hist_idx] for hist_idx in history_indices]
+        result = dict(current)
+        for key in current:
+            if key.startswith(self.IMAGE_PREFIX):
+                stacked = [np.asarray(frame[key]) for frame in frames]
+                result[key] = np.stack(stacked, axis=0)
+        return result
+
+    @staticmethod
+    def _to_int(value) -> int:
+        if hasattr(value, "item"):
+            return int(value.item())
+        return int(value)
+
+
 class IterableTransformedDataset(IterableDataset[T_co]):
     def __init__(
         self,
@@ -254,8 +324,26 @@ def create_torch_dataset(
     # if data_config.prompt_from_task:
     #     # dataset = TransformedDataset(dataset, [_transforms.PromptFromLeRobotTask(dataset_meta.tasks)])
     #     dataset = TransformedDataset(dataset, [_transforms.PromptFromLeRobotTask()])
-
-    return IsForTrainingWrapper(dataset)
+    trainable_mask = IsForTrainingWrapper._build_trainable_mask(dataset)
+    if getattr(data_config, "video_memory_num_frames", 1) > 1:
+        if repo_id is not None:
+            fps = dataset_meta.fps
+        elif repo_ids is not None and len(repo_ids) == 1:
+            fps = dataset_meta.fps
+        elif repo_ids is not None:
+            fps = first_dataset_meta.fps
+        else:
+            fps = 50.0
+        dataset = TemporalFrameStackDataset(
+            dataset,
+            fps=float(fps),
+            num_frames=data_config.video_memory_num_frames,
+            stride_seconds=data_config.video_memory_stride_seconds,
+            trainable_mask=trainable_mask,
+        )
+    else:
+        dataset = IsForTrainingWrapper(dataset)
+    return dataset
 
 
 def create_rlds_dataset(
