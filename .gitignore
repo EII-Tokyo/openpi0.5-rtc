@@ -180,3 +180,14 @@ quick_data_check_small.py
 quick_data_check.py
 siglip_test.ipynb
 trajectory_videos
+
+# Videos and images
+packages/pi-value-function/failure_videos/
+packages/pi-value-function/paired_videos/
+packages/pi-value-function/*.png
+
+# Sweep scripts
+packages/pi-value-function/run_*_sweep.sh
+
+# Embedded repos
+packages/TOPReward/
