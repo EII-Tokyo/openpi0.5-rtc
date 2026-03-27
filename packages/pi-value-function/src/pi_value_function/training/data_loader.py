@@ -23,6 +23,7 @@ import torch
 import torch.utils.data
 from lerobot.datasets import lerobot_dataset
 from lerobot.datasets.lerobot_dataset import LeRobotDatasetMetadata
+from pi_value_function.training.train_config import ValueDataConfig
 
 _TOKEN_SPLIT_RE = re.compile(r"[^a-z0-9]+")
 _PROMPT_STOPWORDS = {
@@ -414,6 +415,7 @@ class ValueFunctionDataset(torch.utils.data.Dataset):
 
     def __init__(
         self,
+        episodes: dict[str, list[int]],
         success_repo_ids: list[str] | None = None,
         failure_repo_ids: list[str] | None = None,
         failure_cost_json: str | pathlib.Path | None = None,
@@ -422,19 +424,19 @@ class ValueFunctionDataset(torch.utils.data.Dataset):
         value_min: float = -1.0,
         value_max: float = 0.0,
         seed: int = 42,
-        split: str = "train",
-        train_split: float = 0.9,
-        split_seed: int = 42,
         target_task: str | None = None,
         treat_other_tasks_as_failure: bool = False,
         keep_augmented_failure_prompt: bool = False,
         augmented_failure_max_prompt_similarity: float = 1.0,
         augmented_failure_sampling_ratio: float | None = None,
         include_velocity: bool = False,
+        prompt_swap_manifest: str | pathlib.Path | None = None,
     ):
         """Initialize value function dataset.
 
         Args:
+            episodes: Dict mapping repo_id -> list of episode indices for this split.
+                Obtained from compute_episode_splits (either train or val dict).
             success_repo_ids: LeRobot repo IDs for success trajectories
             failure_repo_ids: LeRobot repo IDs for failure trajectories
             failure_cost_json: Path to JSON with failure costs per prompt
@@ -443,9 +445,6 @@ class ValueFunctionDataset(torch.utils.data.Dataset):
             value_min: Minimum value for normalization (default: -1.0)
             value_max: Maximum value for normalization (default: 0.0)
             seed: Random seed
-            split: Which split to use - "train" or "val"
-            train_split: Fraction of episodes for training (default: 0.9)
-            split_seed: Random seed for deterministic episode shuffling
             target_task: If provided, only episodes with this task are treated as success
             treat_other_tasks_as_failure: If True with target_task, non-matching tasks become failures
             keep_augmented_failure_prompt: If True, keep original prompts for augmented failures
@@ -462,9 +461,6 @@ class ValueFunctionDataset(torch.utils.data.Dataset):
 
         if not 0.0 <= success_sampling_ratio <= 1.0:
             raise ValueError(f"success_sampling_ratio must be in [0, 1], got {success_sampling_ratio}")
-
-        if split not in ("train", "val"):
-            raise ValueError(f"split must be 'train' or 'val', got '{split}'")
 
         if not 0.0 <= augmented_failure_max_prompt_similarity <= 1.0:
             raise ValueError(
@@ -485,26 +481,9 @@ class ValueFunctionDataset(torch.utils.data.Dataset):
         self.augmented_failure_sampling_ratio = augmented_failure_sampling_ratio
         self.include_velocity = include_velocity
 
-        # Compute episode splits for train/val
-        # Combine all repo IDs to compute splits consistently
-        all_repo_ids = []
-        if success_repo_ids:
-            all_repo_ids.extend(success_repo_ids)
-        if failure_repo_ids:
-            all_repo_ids.extend(failure_repo_ids)
-
-        train_episodes_dict, val_episodes_dict = compute_episode_splits(
-            all_repo_ids,
-            train_ratio=train_split,
-            seed=split_seed
-        )
-
-        # Select episodes based on split
-        episodes_dict = train_episodes_dict if split == "train" else val_episodes_dict
-
         # Filter episodes dict to only include repos we're actually loading
-        success_episodes = {k: v for k, v in episodes_dict.items() if k in (success_repo_ids or [])}
-        failure_episodes = {k: v for k, v in episodes_dict.items() if k in (failure_repo_ids or [])}
+        success_episodes = {k: v for k, v in episodes.items() if k in (success_repo_ids or [])}
+        failure_episodes = {k: v for k, v in episodes.items() if k in (failure_repo_ids or [])}
 
         # Load datasets with episode filtering
         self.success_dataset = self._load_multi_dataset(success_repo_ids, success_episodes) if success_repo_ids else None
@@ -584,10 +563,55 @@ class ValueFunctionDataset(torch.utils.data.Dataset):
                 )
             print(f"  Total failure episodes: {len(self.failure_episodes)}")
 
+        # Manifest-based prompt swap augmentation
+        if prompt_swap_manifest is not None:
+            import pandas as pd_lib
+
+            manifest_path = pathlib.Path(prompt_swap_manifest)
+            if not manifest_path.exists():
+                raise FileNotFoundError(f"Prompt swap manifest not found: {manifest_path}")
+
+            manifest_df = pd_lib.read_parquet(manifest_path)
+            swap_by_ep = {
+                int(row["source_episode_index"]): row["swapped_task"]
+                for _, row in manifest_df.iterrows()
+            }
+
+            # Build lookup from episode_id -> EpisodeMetadata for success episodes
+            success_by_id: dict[int, EpisodeMetadata] = {
+                ep.episode_id: ep for ep in self.success_episodes
+            }
+
+            manifest_augmented: list[EpisodeMetadata] = []
+            for src_ep_id, swapped_task in swap_by_ep.items():
+                src_meta = success_by_id.get(src_ep_id)
+                if src_meta is None:
+                    continue  # Episode not in current split
+                manifest_augmented.append(
+                    EpisodeMetadata(
+                        episode_id=src_meta.episode_id,
+                        start_idx=src_meta.start_idx,
+                        end_idx=src_meta.end_idx,
+                        length=src_meta.length,
+                        success=False,
+                        prompt=swapped_task,
+                        dataset=src_meta.dataset,
+                    )
+                )
+
+            self.augmented_failure_episodes.extend(manifest_augmented)
+            self.failure_episodes = self.real_failure_episodes + self.augmented_failure_episodes
+
+            print(f"Prompt swap manifest: {manifest_path.name}")
+            print(f"  Manifest entries: {len(swap_by_ep)}")
+            print(f"  Matched to current split: {len(manifest_augmented)}")
+            print(f"  Total augmented failures: {len(self.augmented_failure_episodes)}")
+            print(f"  Total failure episodes: {len(self.failure_episodes)}")
+
         # Validate episode indices
         if not self.success_episodes and success_repo_ids:
             raise ValueError("Success dataset is empty or has no valid episodes")
-        if not self.failure_episodes and failure_repo_ids:
+        if not self.failure_episodes and failure_repo_ids and not prompt_swap_manifest:
             raise ValueError("Failure dataset is empty or has no valid episodes")
 
         # Failure cost manager
@@ -897,24 +921,12 @@ class CollateFnWithTokenizer:
 
 def create_value_dataloader(
     tokenizer,  # Tokenizer for prompts
-    success_repo_ids: list[str] | None = None,
-    failure_repo_ids: list[str] | None = None,
+    config: ValueDataConfig,
+    episodes: dict[str, list[int]],
+    *,
     batch_size: int = 64,
-    failure_cost_json: str | pathlib.Path | None = None,
-    default_c_fail: float = 100.0,
-    success_sampling_ratio: float = 0.5,
     num_workers: int = 4,
     seed: int = 42,
-    split: str = "train",
-    train_split: float = 0.9,
-    split_seed: int = 42,
-    target_task: str | None = None,
-    treat_other_tasks_as_failure: bool = False,
-    keep_augmented_failure_prompt: bool = False,
-    augmented_failure_max_prompt_similarity: float = 1.0,
-    augmented_failure_sampling_ratio: float | None = None,
-    include_image_tag: bool = False,
-    include_velocity: bool = False,
 ) -> torch.utils.data.DataLoader:
     """Create value function data loader.
 
@@ -924,68 +936,46 @@ def create_value_dataloader(
     - Uses multiple workers for parallel loading
 
     Args:
-        success_repo_ids: LeRobot repo IDs for success trajectories
-        failure_repo_ids: LeRobot repo IDs for failure trajectories
+        tokenizer: Tokenizer for prompts
+        config: Data configuration (ValueDataConfig)
+        episodes: Dict mapping repo_id -> episode indices for this split,
+            obtained from compute_episode_splits.
         batch_size: Batch size
-        failure_cost_json: Path to JSON with failure costs per prompt
-        default_c_fail: Default failure cost if prompt not in JSON
-        success_sampling_ratio: Fraction of samples from success dataset
         num_workers: Number of worker processes
         seed: Random seed
-        split: Which split to use - "train" or "val"
-        train_split: Fraction of episodes for training (default: 0.9)
-        split_seed: Random seed for deterministic episode shuffling
-        target_task: If provided, only episodes with this task are treated as success
-        treat_other_tasks_as_failure: If True with target_task, non-matching tasks become failures
-        keep_augmented_failure_prompt: If True, keep original prompts for augmented failures
-        augmented_failure_max_prompt_similarity: Exclude augmented failures with
-            similarity above this threshold to target_task
-        augmented_failure_sampling_ratio: Optional fraction of failure samples from
-            augmented failures (vs real failures)
-        include_image_tag: Whether to prepend image tag tokens in prompt tokenization
-        include_velocity: Whether to append velocity features to state.
 
     Returns:
         DataLoader yielding batches of observations and value targets
     """
-    import time
-    start_time = time.time()
-    print("Creating ValueFunctionDataset...")
     dataset = ValueFunctionDataset(
-        success_repo_ids=success_repo_ids,
-        failure_repo_ids=failure_repo_ids,
-        failure_cost_json=failure_cost_json,
-        default_c_fail=default_c_fail,
-        success_sampling_ratio=success_sampling_ratio,
+        episodes=episodes,
+        success_repo_ids=config.success_repo_ids,
+        failure_repo_ids=config.failure_repo_ids,
+        failure_cost_json=config.failure_cost_json,
+        default_c_fail=config.default_c_fail,
+        success_sampling_ratio=config.success_sampling_ratio,
         seed=seed,
-        split=split,
-        train_split=train_split,
-        split_seed=split_seed,
-        target_task=target_task,
-        treat_other_tasks_as_failure=treat_other_tasks_as_failure,
-        keep_augmented_failure_prompt=keep_augmented_failure_prompt,
-        augmented_failure_max_prompt_similarity=augmented_failure_max_prompt_similarity,
-        augmented_failure_sampling_ratio=augmented_failure_sampling_ratio,
-        include_velocity=include_velocity,
+        target_task=config.target_task,
+        treat_other_tasks_as_failure=config.treat_other_tasks_as_failure,
+        keep_augmented_failure_prompt=config.keep_augmented_failure_prompt,
+        augmented_failure_max_prompt_similarity=config.augmented_failure_max_prompt_similarity,
+        augmented_failure_sampling_ratio=config.augmented_failure_sampling_ratio,
+        include_velocity=config.include_velocity,
+        prompt_swap_manifest=config.prompt_swap_manifest,
     )
-    print(f"Dataset created in {time.time() - start_time:.2f} seconds.")
-    start_time = time.time()
-    print("Creating Sampler...")
-
     # Use RandomSampler for infinite iteration
     sampler = torch.utils.data.RandomSampler(
         dataset,
         replacement=True,  # Infinite sampling with replacement
         num_samples=int(1e9),  # Very large number
     )
-    print(f"Sampler created in {time.time() - start_time:.2f} seconds.")
 
     return torch.utils.data.DataLoader(
         dataset,
         batch_size=batch_size,
         sampler=sampler,
         num_workers=num_workers,
-        collate_fn=CollateFnWithTokenizer(tokenizer, include_image_tag=include_image_tag),
+        collate_fn=CollateFnWithTokenizer(tokenizer, include_image_tag=config.include_image_tag),
         persistent_workers=num_workers > 0,
         worker_init_fn=_worker_init_fn,
         prefetch_factor=4 if num_workers > 0 else None,

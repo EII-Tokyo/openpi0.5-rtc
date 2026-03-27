@@ -1,0 +1,33 @@
+model:
+  name: "Qwen/Qwen3-VL-8B-Instruct"
+  dtype: "bfloat16"
+  attn_implementation: "flash_attention_2"
+  use_chat_template: false
+
+progress:
+  K: 16
+  normalize: true
+  eps: 1e-8
+
+success_detection:
+  n_final_frames: 3
+  threshold: null
+
+advantage:
+  tau: 2.0
+  delta_max: 2.0
+  good_threshold: 0.6
+  bad_threshold: -0.2
+  good_weight: 2.0
+  neutral_weight: 1.0
+  bad_weight: 0.1
+
+realtime:
+  score_interval: 5
+  max_buffer_frames: 64
+  subsample_factor: 3
+
+cameras:
+  franka: "observation.images.top"
+  aloha: "observation.images.cam_high"
+  default: "observation.images.top"

@@ -7,7 +7,7 @@ from pi_value_function.training.train_config import TrainConfig, ValueDataConfig
 from pi_value_function.config import PiValueConfig
 import openpi.training.optimizer as _optimizer
 
-RUN_NAME = "normal_target_unfreeze_sim0p45_bs16_lr1e4_velocity"
+RUN_NAME = "normal_target_unfreeze_sim0p45_bs16_lr1e4_velocity_relu"
 
 # Multi-task value function training
 config = TrainConfig(
@@ -23,7 +23,7 @@ config = TrainConfig(
     freeze_gemma=False,
     freeze_siglip=False,
     lr_schedule=_optimizer.CosineDecaySchedule(
-        warmup_steps=1000,
+        warmup_steps=2000,
         peak_lr=1e-4,
         decay_steps=25_000,
         decay_lr=5e-5,
@@ -73,7 +73,7 @@ config = TrainConfig(
     ),
     logging=LoggingConfig(
         log_every_n_steps=50,
-        wandb_enabled=True,
+        wandb_enabled=False,
         wandb_project="pi-value-function",
         wandb_run_name=RUN_NAME,
     ),

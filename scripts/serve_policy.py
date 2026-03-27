@@ -113,7 +113,7 @@ def main(args: Args) -> None:
     config_name = args.policy.config if isinstance(args.policy, Checkpoint) else None
     if (config_name and "droid" in config_name.lower()) or args.env == EnvMode.DROID:
         dummy_obs = _droid_policy.make_droid_example()
-        dummy_prev_action = np.random.rand(15, 32)
+        dummy_prev_action = np.random.rand(16, 32)
     else:
         dummy_obs = _aloha_policy.make_aloha_example()
         dummy_prev_action = np.random.rand(50, 32)

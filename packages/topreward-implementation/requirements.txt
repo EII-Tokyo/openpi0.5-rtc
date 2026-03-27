@@ -1,0 +1,15 @@
+torch>=2.4
+transformers>=4.45
+accelerate
+flash-attn
+qwen-vl-utils
+lerobot
+scipy
+numpy
+openpi-client
+pillow
+pyyaml
+tqdm
+matplotlib
+safetensors
+websockets>=11.0

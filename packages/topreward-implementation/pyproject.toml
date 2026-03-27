@@ -1,0 +1,33 @@
+[project]
+name = "topreward-reimpl"
+version = "0.1.0"
+description = "TOPReward utilities for offline and real-time trajectory scoring"
+requires-python = ">=3.11"
+dependencies = [
+    "accelerate",
+    "flash-attn",
+    "lerobot",
+    "matplotlib",
+    "numpy",
+    "openpi-client",
+    "pillow",
+    "pyyaml",
+    "qwen-vl-utils",
+    "safetensors",
+    "scipy",
+    "torch>=2.4",
+    "tqdm",
+    "transformers>=4.45",
+    "websockets>=11.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+dev-dependencies = ["pytest>=8.3.4"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"

@@ -22,7 +22,7 @@ import wandb
 from pi_value_function.config import PiValueConfig
 from pi_value_function.pi_value import PiValue
 from pi_value_function.training.train_config import TrainConfig, ValueDataConfig, CheckpointConfig, LoggingConfig
-from pi_value_function.training.data_loader import create_value_dataloader
+from pi_value_function.training.data_loader import create_value_dataloader, compute_episode_splits
 from pi_value_function.training.weight_loader import SigLIP2WeightLoader
 from pi_value_function.training.direct_checkpoint_loader import DirectGemma3WeightLoader
 from pi_value_function.training import checkpoint_manager as ckpt_manager
@@ -482,72 +482,50 @@ def train(config: TrainConfig) -> None:
     validate_step = create_jitted_validate_step(mesh if num_devices > 1 else None, model)
     print(f"  ✓ JIT-compiled train/validate steps created ({'multi-device' if num_devices > 1 else 'single-device'})")
 
-    # Create tokenizer
     print("\n=== Creating tokenizer ===")
     tokenizer = Gemma3Tokenizer(max_len=config.model_config.max_token_len, path=tokenizer_path)
     print("✓ Tokenizer created")
 
-    # Create data loaders
     print("\n=== Creating data loaders ===")
     # Check if real LeRobot repo IDs are provided
     if config.data.success_repo_ids or config.data.failure_repo_ids:
-        print("Using real LeRobot datasets:")
         if config.data.success_repo_ids:
             print(f"  Success repos: {config.data.success_repo_ids}")
         if config.data.failure_repo_ids:
             print(f"  Failure repos: {config.data.failure_repo_ids}")
 
+        # Compute episode splits once; pass the appropriate half to each dataloader
+        all_repo_ids = list(config.data.success_repo_ids or []) + list(config.data.failure_repo_ids or [])
+        train_episodes, val_episodes = compute_episode_splits(
+            all_repo_ids,
+            train_ratio=config.data.train_split,
+            seed=config.data.split_seed,
+        )
+
         # Create training dataloader
         print("Creating training dataloader...")
         dataloader = create_value_dataloader(
             tokenizer=tokenizer,
-            success_repo_ids=config.data.success_repo_ids,
-            failure_repo_ids=config.data.failure_repo_ids,
+            config=config.data,
+            episodes=train_episodes,
             batch_size=config.batch_size,
-            failure_cost_json=config.data.failure_cost_json,
-            default_c_fail=config.data.default_c_fail,
-            success_sampling_ratio=config.data.success_sampling_ratio,
             num_workers=config.num_workers,
             seed=config.seed,
-            target_task=config.data.target_task,
-            treat_other_tasks_as_failure=config.data.treat_other_tasks_as_failure,
-            keep_augmented_failure_prompt=config.data.keep_augmented_failure_prompt,
-            augmented_failure_max_prompt_similarity=config.data.augmented_failure_max_prompt_similarity,
-            augmented_failure_sampling_ratio=config.data.augmented_failure_sampling_ratio,
-            include_image_tag=config.data.include_image_tag,
-            include_velocity=config.data.include_velocity,
         )
-        print("✓ Training dataloader created")
+        print(f"✓ Training dataloader created, size {len(dataloader)}")
 
-        # Create validation dataloader if validation is enabled
-        val_dataloader = None
         if config.num_steps_per_validation > 0:
             print("Creating validation dataloader...")
-            print(f"  Using same repos as training with 'val' split")
-            print(f"  Train/val ratio: {config.data.train_split:.0%} / {config.data.val_split:.0%}")
 
             val_dataloader = create_value_dataloader(
                 tokenizer=tokenizer,
-                success_repo_ids=config.data.success_repo_ids,  # Same as training
-                failure_repo_ids=config.data.failure_repo_ids,  # Same as training
+                config=config.data,
+                episodes=val_episodes,
                 batch_size=config.batch_size,
-                failure_cost_json=config.data.failure_cost_json,
-                default_c_fail=config.data.default_c_fail,
-                success_sampling_ratio=config.data.success_sampling_ratio,
                 num_workers=config.num_workers,
                 seed=config.seed + 1,  # Different seed for validation
-                split="val",  # Use validation split
-                train_split=config.data.train_split,
-                split_seed=config.data.split_seed,
-                target_task=config.data.target_task,
-                treat_other_tasks_as_failure=config.data.treat_other_tasks_as_failure,
-                keep_augmented_failure_prompt=config.data.keep_augmented_failure_prompt,
-                augmented_failure_max_prompt_similarity=config.data.augmented_failure_max_prompt_similarity,
-                augmented_failure_sampling_ratio=config.data.augmented_failure_sampling_ratio,
-                include_image_tag=config.data.include_image_tag,
-                include_velocity=config.data.include_velocity,
             )
-            print("✓ Validation dataloader created")
+            print(f"✓ Validation dataloader created, size {len(val_dataloader)}")
     else:
         print("Warning: No repo IDs provided, using dummy data for testing")
         # Create a dummy dataloader that yields random batches
@@ -779,83 +757,3 @@ def train(config: TrainConfig) -> None:
     if config.logging.wandb_enabled:
         wandb.finish()
         print("✓ W&B run finished")
-
-
-def main() -> None:
-    """CLI entry point."""
-    # Create config with real LeRobot data
-    config = TrainConfig(
-        exp_name="pi_value_droid_bs64_30k",
-        model_config=PiValueConfig(
-            value_dims=201,  # 201 bins for categorical distribution over [-1, 0]
-            value_min=-1.0,
-            value_max=0.0,
-            gemma_variant="gemma-3-270m",
-            siglip_variant="siglip2-so400m-patch16-384",
-        ),
-        lr_schedule=_optimizer.CosineDecaySchedule(
-            warmup_steps=500,
-            peak_lr=3e-5,
-            decay_steps=10_000,
-            decay_lr=3e-6,
-        ),
-        optimizer=_optimizer.AdamW(
-            weight_decay=0.01,
-            clip_gradient_norm=1.0,
-        ),
-        num_train_steps=30_000,
-        batch_size=64,
-        data=ValueDataConfig(
-            # Dataset repos (episodes will be split randomly into train/val)
-            success_repo_ids=[
-                "michios/droid_xxjd",
-                "michios/droid_xxjd_2",
-                "michios/droid_xxjd_3",
-                "michios/droid_xxjd_4",
-                "michios/droid_xxjd_5",
-                "michios/droid_xxjd_6",
-                "michios/droid_xxjd_7",
-            ],
-            failure_repo_ids=[
-                "michios/droid_xxjd_fail_1"
-            ],
-            train_split=0.9,  # 90% train, 10% val
-            split_seed=42,  # Random but deterministic episode shuffling
-            failure_cost_json="configs/failure_costs.json",
-            default_c_fail=100.0,
-            success_sampling_ratio=0.5,
-        ),
-        checkpoint=CheckpointConfig(
-            checkpoint_dir="./checkpoints",
-            save_every_n_steps=2_500,
-            keep_n_checkpoints=5,
-            overwrite=True,
-        ),
-        logging=LoggingConfig(
-            log_every_n_steps=50,
-            wandb_enabled=True,
-            wandb_project="pi-value-function",
-            wandb_run_name="droid_value_training_v2",
-        ),
-        num_workers=4,
-        num_steps_per_validation=500,  # Run validation every 500 steps
-        seed=42,
-    )
-    
-    # config = TrainConfig.debug_config()
-
-    print("=" * 60)
-    print("Pi Value Function Training")
-    print("=" * 60)
-    print(f"Experiment: {config.exp_name}")
-    print(f"Model: {config.model_config.__class__.__name__}")
-    print(f"Value dims: {config.model_config.value_dims}")
-    print(f"Seed: {config.seed}")
-    print("=" * 60)
-
-    # Run training
-    train(config)
-
-
-if __name__ == "__main__":
-    main()

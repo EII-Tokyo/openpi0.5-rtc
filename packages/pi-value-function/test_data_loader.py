@@ -16,6 +16,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
 from pi_value_function.training.data_loader import create_value_dataloader
+from pi_value_function.training.train_config import ValueDataConfig
 
 
 def test_data_loader():
@@ -47,12 +48,15 @@ def test_data_loader():
     print(f"\n{'Creating data loader...'}")
     try:
         dataloader = create_value_dataloader(
-            success_repo_ids=success_repo_ids,
-            failure_repo_ids=failure_repo_ids,
+            tokenizer=None,
+            config=ValueDataConfig(
+                success_repo_ids=success_repo_ids,
+                failure_repo_ids=failure_repo_ids,
+                failure_cost_json=str(failure_cost_json) if failure_cost_json.exists() else None,
+                default_c_fail=100.0,
+                success_sampling_ratio=0.5,
+            ),
             batch_size=batch_size,
-            failure_cost_json=str(failure_cost_json) if failure_cost_json.exists() else None,
-            default_c_fail=100.0,
-            success_sampling_ratio=0.5,
             num_workers=0,  # Use 0 workers for testing to avoid multiprocessing issues
             seed=42,
         )

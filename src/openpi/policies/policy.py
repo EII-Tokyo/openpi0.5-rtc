@@ -101,6 +101,12 @@ class Policy(BasePolicy):
                 }
             else:
                 prev_action = jnp.asarray(prev_action)[np.newaxis, ...]  # Add batch dimension
+                # Pad prev_action to model's action_dim if client sent fewer dims (e.g., 8 -> 32).
+                model_action_dim = self._model.action_dim
+                client_action_dim = prev_action.shape[-1]
+                if client_action_dim < model_action_dim:
+                    pad_width = model_action_dim - client_action_dim
+                    prev_action = jnp.pad(prev_action, ((0, 0), (0, 0), (0, pad_width)))
                 origin_actions = self._guided_inference(sample_rng_or_pytorch_device, prev_action, _model.Observation.from_dict(inputs), **self._sample_kwargs)
                 outputs = {
                     "state": inputs["state"],

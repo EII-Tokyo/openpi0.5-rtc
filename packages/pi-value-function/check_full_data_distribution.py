@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 from pathlib import Path
 
 from pi_value_function.training.data_loader import create_value_dataloader
+from pi_value_function.training.train_config import ValueDataConfig
 from openpi.models.tokenizer import Gemma3Tokenizer
 from pi_value_function.training.checkpoint_downloader import download_gemma_from_kaggle
 
@@ -36,22 +37,22 @@ def main():
 
     dataloader = create_value_dataloader(
         tokenizer=tokenizer,
-        success_repo_ids=[
-            "michios/droid_xxjd",
-            "michios/droid_xxjd_2",
-            "michios/droid_xxjd_3",
-            "michios/droid_xxjd_4",
-            "michios/droid_xxjd_5",
-            "michios/droid_xxjd_6",
-            "michios/droid_xxjd_7",
-        ],
-        failure_repo_ids=[
-            "michios/droid_xxjd_fail_1"
-        ],
+        config=ValueDataConfig(
+            success_repo_ids=[
+                "michios/droid_xxjd",
+                "michios/droid_xxjd_2",
+                "michios/droid_xxjd_3",
+                "michios/droid_xxjd_4",
+                "michios/droid_xxjd_5",
+                "michios/droid_xxjd_6",
+                "michios/droid_xxjd_7",
+            ],
+            failure_repo_ids=["michios/droid_xxjd_fail_1"],
+            failure_cost_json="configs/failure_costs.json",
+            default_c_fail=100.0,
+            success_sampling_ratio=0.5,
+        ),
         batch_size=128,  # Larger batch for efficiency
-        failure_cost_json="configs/failure_costs.json",
-        default_c_fail=100.0,
-        success_sampling_ratio=0.5,  # 50/50 mix
         num_workers=4,  # Parallel loading
         seed=42,
     )
