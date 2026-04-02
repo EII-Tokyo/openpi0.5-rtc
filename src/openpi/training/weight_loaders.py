@@ -53,6 +53,7 @@ class CheckpointWeightLoader(WeightLoader):
     def load(self, params: at.Params) -> at.Params:
         # We are loading np.ndarray and relying on the training code to properly convert and shard the params.
         loaded_params = _model.restore_params(download.maybe_download(self.params_path), restore_type=np.ndarray)
+        loaded_params = _model._expand_scanned_siglip_encoder_params(params, loaded_params)
         # Add all missing LoRA weights.
         return _merge_params(loaded_params, params, missing_regex=".*lora.*")
 
@@ -72,6 +73,7 @@ class PaliGemmaWeightLoader(WeightLoader):
         with path.open("rb") as f:
             flat_params = dict(np.load(f, allow_pickle=False))
         loaded_params = {"PaliGemma": flax.traverse_util.unflatten_dict(flat_params, sep="/")["params"]}
+        loaded_params = _model._expand_scanned_siglip_encoder_params(params, loaded_params)
         # Add all missing weights.
         return _merge_params(loaded_params, params, missing_regex=".*")
 

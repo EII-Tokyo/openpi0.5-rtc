@@ -1,7 +1,10 @@
 import copy
+import threading
+import time
 from typing import List, Optional  # noqa: UP035
 import dm_env
 import einops
+import numpy as np
 from openpi_client import image_tools
 from openpi_client.runtime import environment as _environment
 from typing_extensions import override
@@ -32,31 +35,33 @@ class AlohaRealEnvironment(_environment.Environment):
         self._render_width = render_width
 
         self._ts = None
+        self._ts_lock = threading.Lock()
 
-    @override
-    def reset(self) -> None:
-        self._ts = self._env.reset()
+    def _snapshot_origin_observation(self, obs: dict) -> dict:
+        image_items = []
+        for _ in range(5):
+            try:
+                image_items = list(obs.get("images", {}).items())
+                break
+            except RuntimeError:
+                time.sleep(0.001)
+        images = {k: np.array(v, copy=True) for k, v in image_items}
+        snapshot = {
+            "images": images,
+        }
+        for key in ("qpos", "qvel", "effort", "base_vel"):
+            if key in obs:
+                snapshot[key] = np.array(obs[key], copy=True)
+        for key, value in obs.items():
+            if key not in snapshot:
+                snapshot[key] = copy.deepcopy(value)
+        return snapshot
 
-    @override
-    def is_episode_complete(self) -> bool:
-        return False
-
-    @override
-    def get_observation(self) -> dict:
-        if self._ts is None:
+    def _format_observation(self, observation: dict) -> dict:
+        if observation is None:
             raise RuntimeError("Timestep is not set. Call reset() first.")
-        # Always pull a fresh sensor snapshot instead of reusing the last timestep's
-        # cached observation. Otherwise task switches can feed stale camera frames and
-        # robot state from the previous stop/reset event into high-level inference.
-        fresh_observation = self._env.get_observation()
-        self._ts = dm_env.TimeStep(
-            step_type=self._ts.step_type,
-            reward=self._ts.reward,
-            discount=self._ts.discount,
-            observation=fresh_observation,
-        )
-        origin_observation = copy.deepcopy(self._ts.observation)
-        obs = self._ts.observation
+        origin_observation = self._snapshot_origin_observation(observation)
+        obs = observation
         for k in list(obs["images"].keys()):
             if "_depth" in k:
                 del obs["images"][k]
@@ -76,19 +81,54 @@ class AlohaRealEnvironment(_environment.Environment):
         }
 
     @override
+    def reset(self) -> None:
+        with self._ts_lock:
+            self._ts = self._env.reset()
+
+    @override
+    def is_episode_complete(self) -> bool:
+        return False
+
+    @override
+    def get_observation(self) -> dict:
+        with self._ts_lock:
+            if self._ts is None:
+                raise RuntimeError("Timestep is not set. Call reset() first.")
+            observation = self._ts.observation
+        return self._format_observation(observation)
+
+    def get_fresh_observation(self) -> dict:
+        with self._ts_lock:
+            if self._ts is None:
+                raise RuntimeError("Timestep is not set. Call reset() first.")
+            fresh_observation = self._env.get_observation()
+            self._ts = dm_env.TimeStep(
+                step_type=self._ts.step_type,
+                reward=self._ts.reward,
+                discount=self._ts.discount,
+                observation=fresh_observation,
+            )
+            observation = self._ts.observation
+        return self._format_observation(observation)
+
+    @override
     def apply_action(self, action: dict) -> None:
-        self._ts = self._env.step(action["actions"])
+        with self._ts_lock:
+            self._ts = self._env.step(action["actions"])
 
     @override
     def stop(self) -> None:
         """Stop the environment."""
-        self._ts = self._env.stop()
+        with self._ts_lock:
+            self._ts = self._env.stop()
 
     def close_grippers(self) -> None:
         """Close the follower grippers while keeping the latest observation updated."""
-        self._ts = self._env.close_grippers()
+        with self._ts_lock:
+            self._ts = self._env.close_grippers()
 
     @override
     def sleep_arms(self) -> None:
         """Sleep the arms."""
-        self._ts = self._env.sleep_arms()
+        with self._ts_lock:
+            self._ts = self._env.sleep_arms()

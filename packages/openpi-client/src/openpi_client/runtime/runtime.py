@@ -9,11 +9,13 @@ import redis
 import os
 import re
 import select
+import subprocess
 import sys
 import termios
 import tty
 from collections import deque
 from pathlib import Path
+import cv2
 import numpy as np
 from PIL import Image
 
@@ -138,10 +140,19 @@ class Runtime:
         self._include_subtask = True
         self._forced_low_level_subtask = None
         self._high_level_history: deque[dict] = deque(maxlen=100)
-        self._video_memory_num_frames = 4
+        self._video_memory_num_frames = 1
         self._video_memory_stride_seconds = 1.0
+        self._temporal_build_interval_seconds = 10.0
         self._image_history_horizon_seconds = max(5.0, self._video_memory_num_frames * self._video_memory_stride_seconds + 2.0)
         self._image_history: dict[str, deque[tuple[float, np.ndarray]]] = {}
+        self._image_history_lock = threading.Lock()
+        self._cached_temporal_images: dict[str, np.ndarray] | None = None
+        self._cached_temporal_images_ts: float | None = None
+        self._temporal_cache_lock = threading.Lock()
+        self._temporal_builder_running = False
+        self._temporal_builder_thread = None
+        self._temporal_video_debug_dir = Path.cwd() / "temporal_debug_videos"
+        self._temporal_video_debug_dir.mkdir(parents=True, exist_ok=True)
         self._applied_action_trace_path = Path("/tmp/runtime_applied_actions.jsonl")
         self._applied_action_trace_path.write_text("")
         logging.info("Applied action trace will be written to %s", self._applied_action_trace_path)
@@ -492,36 +503,73 @@ class Runtime:
             self._high_level_obs = obs_for_high_level
             self._high_level_obs_version += 1
 
+    def _get_environment_observation(self, *, fresh: bool = False) -> dict:
+        if fresh and hasattr(self._environment, "get_fresh_observation"):
+            return self._environment.get_fresh_observation()
+        return self._environment.get_observation()
+
+    def _decorate_observation(self, observation: dict) -> dict:
+        temporal_timestamp = time.time()
+        return {
+            **observation,
+            "images": self._get_temporal_images(observation.get("images", {}), temporal_timestamp),
+        }
+
+    def _refresh_high_level_observation(self) -> None:
+        if self._high_level_policy is None or self._current_task is None:
+            return
+        observation = self._decorate_observation(self._get_environment_observation(fresh=True))
+        observation_with_task = {
+            **observation,
+            "prompt": self._current_task.get("task_name"),
+        }
+        self._update_high_level_observation(observation_with_task)
+
     def _reset_temporal_image_history(self) -> None:
-        self._image_history.clear()
+        with self._image_history_lock:
+            self._image_history.clear()
+        with self._temporal_cache_lock:
+            self._cached_temporal_images = None
+            self._cached_temporal_images_ts = None
 
     def _record_temporal_images(self, images: dict, timestamp: float) -> None:
         if self._video_memory_num_frames <= 1 or not isinstance(images, dict):
             return
-        for key, value in images.items():
-            arr = np.asarray(value)
-            history = self._image_history.setdefault(key, deque())
-            history.append((timestamp, np.array(arr, copy=True)))
-            while history and timestamp - history[0][0] > self._image_history_horizon_seconds:
-                history.popleft()
+        with self._image_history_lock:
+            for key, value in images.items():
+                arr = np.asarray(value)
+                history = self._image_history.setdefault(key, deque())
+                history.append((timestamp, np.array(arr, copy=True)))
+                while history and timestamp - history[0][0] > self._image_history_horizon_seconds:
+                    history.popleft()
 
     def _build_temporal_images(self, images: dict, timestamp: float) -> dict:
         if self._video_memory_num_frames <= 1 or not isinstance(images, dict):
             return images
-
-        self._record_temporal_images(images, timestamp)
+        history_copy_start = time.perf_counter()
+        with self._image_history_lock:
+            image_history = {
+                key: list(history)
+                for key, history in self._image_history.items()
+            }
+        history_copy_ms = (time.perf_counter() - history_copy_start) * 1000.0
         targets = [
             timestamp - (self._video_memory_num_frames - 1 - i) * self._video_memory_stride_seconds
             for i in range(self._video_memory_num_frames)
         ]
         stacked_images = {}
+        lookup_ms = 0.0
+        stack_ms = 0.0
         for key, current_value in images.items():
-            history = list(self._image_history.get(key, ()))
+            history = image_history.get(key, ())
             if not history:
+                stack_start = time.perf_counter()
                 base = np.asarray(current_value)
                 stacked_images[key] = np.stack([base] * self._video_memory_num_frames, axis=0)
+                stack_ms += (time.perf_counter() - stack_start) * 1000.0
                 continue
 
+            lookup_start = time.perf_counter()
             selected_frames: list[np.ndarray] = []
             earliest_frame = history[0][1]
             for target_ts in targets:
@@ -534,8 +582,162 @@ class Runtime:
                 if chosen is None:
                     chosen = earliest_frame
                 selected_frames.append(np.asarray(chosen))
+            lookup_ms += (time.perf_counter() - lookup_start) * 1000.0
+            stack_start = time.perf_counter()
             stacked_images[key] = np.stack(selected_frames, axis=0)
+            stack_ms += (time.perf_counter() - stack_start) * 1000.0
+        total_ms = history_copy_ms + lookup_ms + stack_ms
+        logging.info(
+            "_build_temporal_images timing: total=%.2f ms copy_history=%.2f ms lookup=%.2f ms stack=%.2f ms",
+            total_ms,
+            history_copy_ms,
+            lookup_ms,
+            stack_ms,
+        )
         return stacked_images
+
+    def _get_temporal_images(self, images: dict, timestamp: float) -> dict:
+        if self._video_memory_num_frames <= 1 or not isinstance(images, dict):
+            return images
+        self._record_temporal_images(images, timestamp)
+        with self._temporal_cache_lock:
+            cached = self._cached_temporal_images
+        if cached is not None:
+            return cached
+        start_time = time.perf_counter()
+        stacked_images = self._build_temporal_images(images, timestamp)
+        elapsed_ms = (time.perf_counter() - start_time) * 1000.0
+        logging.info("Temporal image build took %.1f ms (foreground bootstrap)", elapsed_ms)
+        with self._temporal_cache_lock:
+            self._cached_temporal_images = stacked_images
+            self._cached_temporal_images_ts = timestamp
+        return stacked_images
+
+    def _temporal_builder_loop(self) -> None:
+        while self._temporal_builder_running:
+            try:
+                with self._image_history_lock:
+                    latest_images = {
+                        key: np.array(history[-1][1], copy=True)
+                        for key, history in self._image_history.items()
+                        if history
+                    }
+                    latest_ts = max((history[-1][0] for history in self._image_history.values() if history), default=None)
+                if latest_images and latest_ts is not None:
+                    start_time = time.perf_counter()
+                    stacked_images = self._build_temporal_images(latest_images, latest_ts)
+                    self._export_temporal_images_video(stacked_images)
+                    elapsed_ms = (time.perf_counter() - start_time) * 1000.0
+                    with self._temporal_cache_lock:
+                        self._cached_temporal_images = stacked_images
+                        self._cached_temporal_images_ts = latest_ts
+                    logging.info("Temporal image build took %.1f ms", elapsed_ms)
+            except Exception:
+                logging.exception("后台 temporal image build 失败")
+            for _ in range(int(self._temporal_build_interval_seconds * 10)):
+                if not self._temporal_builder_running:
+                    break
+                time.sleep(0.1)
+
+    def _start_temporal_builder(self) -> None:
+        if self._video_memory_num_frames <= 1 or self._temporal_builder_thread is not None:
+            return
+        self._temporal_builder_running = True
+        self._temporal_builder_thread = threading.Thread(target=self._temporal_builder_loop, daemon=True)
+        self._temporal_builder_thread.start()
+
+    def _stop_temporal_builder(self) -> None:
+        self._temporal_builder_running = False
+        if self._temporal_builder_thread and self._temporal_builder_thread.is_alive():
+            self._temporal_builder_thread.join(timeout=2.0)
+        self._temporal_builder_thread = None
+
+    def _export_temporal_images_video(self, stacked_images: dict) -> None:
+        return
+        if not isinstance(stacked_images, dict) or not stacked_images:
+            return
+
+        def _to_hwc_uint8(frame: np.ndarray) -> np.ndarray:
+            arr = np.asarray(frame)
+            if arr.ndim != 3:
+                raise ValueError(f"expected 3D frame, got {arr.shape}")
+            if arr.shape[0] in (1, 3, 4) and arr.shape[-1] not in (1, 3, 4):
+                arr = np.transpose(arr, (1, 2, 0))
+            if arr.dtype != np.uint8:
+                arr = np.clip(arr, 0, 255).astype(np.uint8)
+            if arr.shape[-1] == 1:
+                arr = np.repeat(arr, 3, axis=-1)
+            return arr
+
+        camera_order = ("cam_high", "cam_low", "cam_left_wrist", "cam_right_wrist")
+        first_stack = next((np.asarray(v) for v in stacked_images.values() if np.asarray(v).ndim == 4), None)
+        if first_stack is None:
+            return
+
+        num_frames = int(first_stack.shape[0])
+        sample_frame = _to_hwc_uint8(first_stack[0])
+        h, w = sample_frame.shape[:2]
+        blank = np.zeros((h, w, 3), dtype=np.uint8)
+        def _build_grid(frame_idx: int) -> np.ndarray:
+            tiles = []
+            for cam_name in camera_order:
+                stack = stacked_images.get(cam_name)
+                if stack is None:
+                    tiles.append(blank)
+                    continue
+                stack_arr = np.asarray(stack)
+                if stack_arr.ndim != 4 or frame_idx >= stack_arr.shape[0]:
+                    tiles.append(blank)
+                    continue
+                tiles.append(_to_hwc_uint8(stack_arr[frame_idx]))
+            top = np.concatenate([tiles[0], tiles[1]], axis=1)
+            bottom = np.concatenate([tiles[2], tiles[3]], axis=1)
+            return np.concatenate([top, bottom], axis=0)
+
+        if num_frames <= 1:
+            out_path = self._temporal_video_debug_dir / "stacked_images_grid.png"
+            try:
+                grid = _build_grid(0)
+                Image.fromarray(grid).save(out_path)
+            except Exception as exc:
+                logging.warning("导出 temporal stacked image 失败: %s", exc)
+            return
+
+        out_path = self._temporal_video_debug_dir / "stacked_images_grid.mp4"
+
+        try:
+            ffmpeg_cmd = [
+                "ffmpeg",
+                "-y",
+                "-f",
+                "rawvideo",
+                "-pix_fmt",
+                "rgb24",
+                "-s",
+                f"{w * 2}x{h * 2}",
+                "-r",
+                "1",
+                "-i",
+                "-",
+                "-an",
+                "-c:v",
+                "libx264",
+                "-pix_fmt",
+                "yuv420p",
+                str(out_path),
+            ]
+            proc = subprocess.Popen(ffmpeg_cmd, stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            try:
+                for idx in range(num_frames):
+                    grid = _build_grid(idx)
+                    assert proc.stdin is not None
+                    proc.stdin.write(grid.tobytes())
+            finally:
+                if proc.stdin is not None:
+                    proc.stdin.close()
+                proc.wait(timeout=10)
+        except Exception as exc:
+            logging.warning("导出 temporal stacked video 失败: %s", exc)
 
     def _get_high_level_state(self) -> tuple[dict | None, dict]:
         with self._high_level_state_lock:
@@ -611,6 +813,8 @@ class Runtime:
             if self._is_waiting_for_task or self._current_task is None:
                 time.sleep(0.01)
                 continue
+
+            self._refresh_high_level_observation()
 
             with self._high_level_obs_lock:
                 obs = self._high_level_obs
@@ -745,11 +949,13 @@ class Runtime:
         self._enable_local_keyboard_mode()
         # 启动Redis监听
         self._start_redis_listener()
+        self._start_temporal_builder()
         
         try:
             self._run()
         finally:
             # 停止Redis监听
+            self._stop_temporal_builder()
             self._stop_high_level_worker()
             self._stop_redis_listener()
             self._restore_local_keyboard_mode()
@@ -791,7 +997,7 @@ class Runtime:
             if self._is_waiting_for_task:
                 now = time.time()
                 if now - last_waiting_state_publish >= 0.2:
-                    observation = self._environment.get_observation()
+                    observation = self._get_environment_observation()
                     self._publish_runtime_state(qpos=observation.get("qpos"), mode="waiting")
                     last_waiting_state_publish = now
                 time.sleep(0.05)
@@ -826,6 +1032,7 @@ class Runtime:
             self._high_level_history.clear()
             self._reset_high_level_state()
             self._reset_temporal_image_history()
+            self._refresh_high_level_observation()
             self._awaiting_initial_subtask = self._high_level_policy is not None
             self._last_initial_subtask_wait_log_ts = 0.0
             self._publish_runtime_state(mode="policy")
@@ -876,16 +1083,12 @@ class Runtime:
     def _step(self) -> None:
         """A single step of the runtime loop."""
         step_started_at = time.monotonic()
-        observation = self._environment.get_observation()
+        observation = self._get_environment_observation()
         observation_ready_at = time.monotonic()
-        temporal_timestamp = time.time()
-        observation = {
-            **observation,
-            "images": self._build_temporal_images(observation.get("images", {}), temporal_timestamp),
-        }
+        observation = self._decorate_observation(observation)
         assert self._current_task is not None, "_current_task must be set before calling _step()"
         observation_with_task = {
-            **observation,
+            **{k: v for k, v in observation.items() if k != "origin_observation"},
             'prompt': self._current_task.get('task_name')
         }
 

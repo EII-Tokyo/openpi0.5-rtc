@@ -341,7 +341,7 @@ export default function App() {
   const primaryCamera = 'cam_high'
   const secondaryCameras = cameraNames.filter((name) => name !== primaryCamera)
   const cameraSrc = (cameraName: (typeof cameraNames)[number]) =>
-    `${uiConfig.apiBase}/api/cameras/${cameraName}/latest.jpg?t=${cameraRefreshToken}`
+    `${uiConfig.apiBase}/api/cameras/${cameraName}/stream.mjpg?t=${cameraRefreshToken}`
   const displayFps = useMemo(() => {
     const intervalMs = Math.max(100, Number(uiConfig.cameraRefreshMs) || defaultConfig.cameraRefreshMs)
     return 1000 / intervalMs
@@ -1095,26 +1095,6 @@ export default function App() {
               </div>
             </div>
             <div className="runtime-grid">
-              <div className="info-block">
-                <span className="info-label">{t.bottleDescription}</span>
-                <pre>{hierarchical.bottle_description || 'N/A'}</pre>
-              </div>
-              <div className="info-block">
-                <span className="info-label">{t.effectiveBottleDescription}</span>
-                <pre>{hierarchical.locked_bottle_description || 'N/A'}</pre>
-              </div>
-              <div className="info-block">
-                <span className="info-label">{t.bottleState}</span>
-                <pre>{hierarchical.bottle_state || 'N/A'}</pre>
-              </div>
-              <div className="info-block">
-                <span className="info-label">{t.bottlePosition}</span>
-                <pre>{hierarchical.bottle_position ? JSON.stringify(hierarchical.bottle_position, null, 2) : 'N/A'}</pre>
-              </div>
-              <div className="info-block">
-                <span className="info-label">{t.subtask}</span>
-                <pre>{hierarchical.subtask || 'N/A'}</pre>
-              </div>
               <div className="info-block wide">
                 <span className="info-label">{t.highLevelText}</span>
                 <pre>{hierarchical.high_level_text || 'N/A'}</pre>
@@ -1122,13 +1102,6 @@ export default function App() {
               <div className="info-block wide">
                 <span className="info-label">{t.lowLevelPrompt}</span>
                 <pre>{hierarchical.low_level_prompt || 'N/A'}</pre>
-              </div>
-              <div className="info-block wide">
-                <span className="info-label">{t.stabilizer}</span>
-                <pre>{JSON.stringify({
-                  pending_subtask: hierarchical.pending_subtask ?? null,
-                  pending_subtask_count: hierarchical.pending_subtask_count ?? 0,
-                }, null, 2)}</pre>
               </div>
               <div className="info-block wide">
                 <span className="info-label">{t.subtaskHistory}</span>

@@ -230,7 +230,17 @@ class ResizeImages(DataTransformFn):
     width: int
 
     def __call__(self, data: DataDict) -> DataDict:
-        data["image"] = {k: image_tools.resize_with_pad(v, self.height, self.width) for k, v in data["image"].items()}
+        resized = {}
+        for key, value in data["image"].items():
+            image = np.asarray(value)
+            if image.ndim == 4:
+                resized[key] = np.stack(
+                    [image_tools.resize_with_pad(frame, self.height, self.width) for frame in image],
+                    axis=0,
+                )
+            else:
+                resized[key] = image_tools.resize_with_pad(image, self.height, self.width)
+        data["image"] = resized
         return data
 
 

@@ -34,7 +34,7 @@ services:
     volumes:
       - /dev:/dev
       - $PWD/third_party/aloha:/root/interbotix_ws/src/aloha
-    command: roslaunch --wait aloha ros_nodes.launch
+    command: /bin/bash /root/interbotix_ws/src/aloha/launch/ros_nodes_entrypoint.sh
 
   ros_master:
     image: ros:noetic-robot
@@ -75,7 +75,7 @@ services:
       dockerfile: scripts/docker/serve_policy.Dockerfile
     command: >-
       /bin/bash -lc
-      "uv run scripts/serve_policy.py --no-warmup-rtc --no-warmup-non-rtc --no-warmup-subtask --port 8001 ${HIGH_LEVEL_SERVER_ARGS:-policy:checkpoint --policy.config twist_off_the_bottle_cap_subtask_full_finetune --policy.dir /app/checkpoints/twist_off_the_bottle_cap_subtask_full_finetune/twist_off_the_bottle_cap_subtask_full_finetune_bs128_20260321_232825/10000}"
+      "uv run scripts/serve_policy.py --no-warmup-rtc --no-warmup-non-rtc --port 8001 ${HIGH_LEVEL_SERVER_ARGS:-policy:checkpoint --policy.config twist_off_the_bottle_cap_subtask_full_finetune --policy.dir /app/checkpoints/twist_off_the_bottle_cap_subtask_full_finetune/twist_off_the_bottle_cap_subtask_full_finetune_bs128_20260321_232825/10000}"
     init: true
     tty: true
     network_mode: host

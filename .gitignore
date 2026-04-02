@@ -9,6 +9,7 @@ data/
 tmp/
 wandb/
 attention_outputs/
+voice_assistant_web/frontend/node_modules/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

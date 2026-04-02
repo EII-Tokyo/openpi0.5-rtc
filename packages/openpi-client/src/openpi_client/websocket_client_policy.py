@@ -10,6 +10,50 @@ from openpi_client import base_policy as _base_policy
 from openpi_client import msgpack_numpy
 
 
+def _find_unsupported_numpy(value, path: str = "root"):
+    if isinstance(value, np.ndarray):
+        if value.dtype.kind in ("V", "O", "c"):
+            return path, value.dtype, value.shape
+        return None
+    if isinstance(value, np.generic):
+        if value.dtype.kind in ("V", "O", "c"):
+            return path, value.dtype, ()
+        return None
+    if isinstance(value, dict):
+        for key, item in value.items():
+            found = _find_unsupported_numpy(item, f"{path}.{key}")
+            if found is not None:
+                return found
+        return None
+    if isinstance(value, (list, tuple)):
+        for i, item in enumerate(value):
+            found = _find_unsupported_numpy(item, f"{path}[{i}]")
+            if found is not None:
+                return found
+        return None
+    return None
+
+
+def _collect_numpy_summaries(value, path: str = "root", out=None):
+    if out is None:
+        out = []
+    if isinstance(value, np.ndarray):
+        out.append(f"{path}: ndarray dtype={value.dtype} shape={value.shape}")
+        return out
+    if isinstance(value, np.generic):
+        out.append(f"{path}: np.generic dtype={value.dtype}")
+        return out
+    if isinstance(value, dict):
+        for key, item in value.items():
+            _collect_numpy_summaries(item, f"{path}.{key}", out)
+        return out
+    if isinstance(value, (list, tuple)):
+        for i, item in enumerate(value):
+            _collect_numpy_summaries(item, f"{path}[{i}]", out)
+        return out
+    return out
+
+
 class WebsocketClientPolicy(_base_policy.BasePolicy):
     """Implements the Policy interface by communicating with a server over websocket.
 
@@ -48,7 +92,21 @@ class WebsocketClientPolicy(_base_policy.BasePolicy):
             "prev_action": prev_action,
             "use_rtc": use_rtc,
         }
-        data = self._packer.pack(data)
+        unsupported = _find_unsupported_numpy(data)
+        if unsupported is not None:
+            bad_path, bad_dtype, bad_shape = unsupported
+            logging.error(
+                "Unsupported numpy payload before msgpack: path=%s dtype=%s shape=%s",
+                bad_path,
+                bad_dtype,
+                bad_shape,
+            )
+        try:
+            data = self._packer.pack(data)
+        except ValueError:
+            summaries = _collect_numpy_summaries(data)
+            logging.error("NumPy payload summary before msgpack failure:\n%s", "\n".join(summaries[:200]))
+            raise
         self._ws.send(data)
         response = self._ws.recv()
         if isinstance(response, str):

@@ -99,15 +99,33 @@ def main(args: Args) -> None:
         good_bad_action=args.good_bad_action,
     )
 
+    shutdown_started = False
+
+    def _shutdown_runtime_to_sleep() -> None:
+        nonlocal shutdown_started
+        if shutdown_started:
+            return
+        shutdown_started = True
+        try:
+            logging.info("准备关闭 runtime，先让机械臂回到 sleep 位置")
+            runtime._environment.sleep_arms()
+        except Exception:
+            logging.exception("runtime 关闭前回 sleep 失败")
+        finally:
+            runtime.stop()
+
     def _handle_exit_signal(signum, frame):
         logging.info(f"收到退出信号 {signum}，准备退出")
-        runtime.stop()
+        _shutdown_runtime_to_sleep()
         raise SystemExit(0)
 
     signal.signal(signal.SIGINT, _handle_exit_signal)
     signal.signal(signal.SIGTERM, _handle_exit_signal)
 
-    runtime.run()
+    try:
+        runtime.run()
+    finally:
+        _shutdown_runtime_to_sleep()
 
 
 def _start_logging_stdout_guard(interval: float = 1.0) -> None:
