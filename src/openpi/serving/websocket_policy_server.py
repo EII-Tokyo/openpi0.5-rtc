@@ -69,7 +69,6 @@ class WebsocketPolicyServer:
                 decode_subtask = data.get("decode_subtask", False)
                 max_new_tokens = data.get("max_new_tokens", None)
                 temperature = data.get("temperature", 0.0)
-                max_text_token_id = data.get("max_text_token_id", 240000)
                 infer_started_at = time.monotonic()
                 if decode_subtask:
                     if not hasattr(self._policy, "infer_subtask"):
@@ -78,7 +77,6 @@ class WebsocketPolicyServer:
                         obs,
                         max_new_tokens=max_new_tokens,
                         temperature=temperature,
-                        max_text_token_id=max_text_token_id,
                     )
                 else:
                     action = self._policy.infer(obs, prev_action, use_rtc)

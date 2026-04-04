@@ -50,7 +50,7 @@ services:
       dockerfile: scripts/docker/serve_policy.Dockerfile
     command: >-
       /bin/bash -lc
-      "uv run scripts/serve_policy.py ${SERVER_ARGS:-policy:checkpoint --policy.config twist_off_the_bottle_cap_subtask_full_finetune --policy.dir /app/checkpoints/twist_off_the_bottle_cap_subtask_full_finetune/twist_off_the_bottle_cap_subtask_full_finetune_bs128_20260321_232825/10000}"
+      "uv run scripts/serve_policy.py ${SERVER_ARGS:-policy:checkpoint --policy.config twist_and_static_mixture_full_finetune --policy.dir /app/checkpoints/twist_and_static_mixture_full_finetune/twist_and_static_mixture_full_finetune_20260402_062540/47000}"
     init: true
     tty: true
     network_mode: host
@@ -75,7 +75,7 @@ services:
       dockerfile: scripts/docker/serve_policy.Dockerfile
     command: >-
       /bin/bash -lc
-      "uv run scripts/serve_policy.py --no-warmup-rtc --no-warmup-non-rtc --port 8001 ${HIGH_LEVEL_SERVER_ARGS:-policy:checkpoint --policy.config twist_off_the_bottle_cap_subtask_full_finetune --policy.dir /app/checkpoints/twist_off_the_bottle_cap_subtask_full_finetune/twist_off_the_bottle_cap_subtask_full_finetune_bs128_20260321_232825/10000}"
+      "uv run scripts/serve_policy.py --no-warmup-rtc --no-warmup-non-rtc --port 8001 ${HIGH_LEVEL_SERVER_ARGS:-policy:checkpoint --policy.config twist_and_static_mixture_full_finetune --policy.dir /app/checkpoints/twist_and_static_mixture_full_finetune/twist_and_static_mixture_full_finetune_20260402_062540/10000}"
     init: true
     tty: true
     network_mode: host
@@ -106,6 +106,19 @@ services:
     ports:
       - 6379:6379
 
+  mongo:
+    image: mongo:7.0
+    restart: always
+    network_mode: "host"
+    command:
+      - mongod
+      - --bind_ip
+      - 127.0.0.1
+      - --port
+      - "27017"
+    volumes:
+      - mongo_data:/data/db
+
   voice_web_backend:
     image: voice_assistant_web_backend
     build:
@@ -125,8 +138,12 @@ services:
       - REDIS_HOST=${REDIS_HOST:-localhost}
       - REDIS_PORT=${REDIS_PORT:-6379}
       - REDIS_DB=${REDIS_DB:-0}
+      - MONGO_URI=${MONGO_URI:-mongodb://127.0.0.1:27017}
+      - MONGO_DB=${MONGO_DB:-aloha_voice_assistant}
+      - MONGO_RUNTIME_CONFIG_COLLECTION=${MONGO_RUNTIME_CONFIG_COLLECTION:-runtime_config}
     depends_on:
       - redis
+      - mongo
 
   voice_web_frontend:
     image: voice_assistant_web_frontend
@@ -139,3 +156,6 @@ services:
     tty: true
     depends_on:
       - voice_web_backend
+
+volumes:
+  mongo_data:

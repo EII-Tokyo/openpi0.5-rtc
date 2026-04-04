@@ -151,6 +151,7 @@ class VoiceAssistantEngine:
         include_bottle_state: bool = True,
         include_subtask: bool = True,
         forced_low_level_subtask: str | None = None,
+        video_memory_num_frames: int = 1,
         debug: dict | None = None,
     ) -> VoiceResponse:
         transcript = text.strip()
@@ -227,6 +228,7 @@ class VoiceAssistantEngine:
                 include_bottle_state=include_bottle_state,
                 include_subtask=include_subtask,
                 forced_low_level_subtask=forced_low_level_subtask,
+                video_memory_num_frames=video_memory_num_frames,
             )
         logging.info(
             "voice_text classified language=%s task=%s reply_len=%d",
@@ -284,6 +286,7 @@ class VoiceAssistantEngine:
         include_bottle_state: bool = True,
         include_subtask: bool = True,
         forced_low_level_subtask: str | None = None,
+        video_memory_num_frames: int = 1,
     ) -> VoiceResponse:
         fallback_language = self._normalize_language(language)
         if self._openai is None:
@@ -328,6 +331,7 @@ class VoiceAssistantEngine:
                 include_bottle_state=include_bottle_state,
                 include_subtask=include_subtask,
                 forced_low_level_subtask=forced_low_level_subtask,
+                video_memory_num_frames=video_memory_num_frames,
                 debug={
                     "transcription_language": getattr(transcription, "language", None),
                     "detected_language": detected_language,

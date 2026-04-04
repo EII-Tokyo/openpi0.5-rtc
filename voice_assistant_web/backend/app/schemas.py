@@ -36,6 +36,7 @@ class VoiceRequest(BaseModel):
     include_bottle_state: bool = True
     include_subtask: bool = True
     forced_low_level_subtask: str | None = None
+    video_memory_num_frames: int = 1
 
 
 class RuntimeConfigRequest(BaseModel):
@@ -46,6 +47,18 @@ class RuntimeConfigRequest(BaseModel):
     include_bottle_state: bool | None = None
     include_subtask: bool | None = None
     forced_low_level_subtask: str | None = None
+    video_memory_num_frames: int | None = None
+
+
+class RuntimeConfigPayload(BaseModel):
+    dataset_dir: str = ""
+    manual_dataset_dir: str = ""
+    include_bottle_description: bool = True
+    include_bottle_position: bool = False
+    include_bottle_state: bool = True
+    include_subtask: bool = True
+    forced_low_level_subtask: str | None = None
+    video_memory_num_frames: int = 1
 
 
 class TranslateRequest(BaseModel):

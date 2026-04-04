@@ -35,6 +35,7 @@ def publish_task(
     include_bottle_state: bool = True,
     include_subtask: bool = True,
     forced_low_level_subtask: str | None = None,
+    video_memory_num_frames: int = 1,
 ) -> dict:
     task_name = TASK_MAPPING[task_num]
     message = {
@@ -50,6 +51,7 @@ def publish_task(
     message["include_bottle_position"] = bool(include_bottle_position)
     message["include_bottle_state"] = bool(include_bottle_state)
     message["include_subtask"] = bool(include_subtask)
+    message["video_memory_num_frames"] = int(video_memory_num_frames) if int(video_memory_num_frames) in (1, 4) else 1
     if isinstance(forced_low_level_subtask, str) and forced_low_level_subtask.strip():
         message["forced_low_level_subtask"] = forced_low_level_subtask.strip()
     redis_client.publish(settings.voice_command_channel, json.dumps(message))
@@ -66,6 +68,7 @@ def publish_runtime_config(
     include_bottle_state: bool | None = None,
     include_subtask: bool | None = None,
     forced_low_level_subtask: str | None = None,
+    video_memory_num_frames: int | None = None,
 ) -> dict:
     message = {
         "timestamp": time.time(),
@@ -83,6 +86,8 @@ def publish_runtime_config(
         message["include_bottle_state"] = include_bottle_state
     if isinstance(include_subtask, bool):
         message["include_subtask"] = include_subtask
+    if isinstance(video_memory_num_frames, int) and video_memory_num_frames in (1, 4):
+        message["video_memory_num_frames"] = video_memory_num_frames
     if forced_low_level_subtask is None:
         message["forced_low_level_subtask"] = None
     elif isinstance(forced_low_level_subtask, str):

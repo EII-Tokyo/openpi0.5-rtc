@@ -2,8 +2,13 @@ import { FormEvent, useEffect, useMemo, useRef, useState } from 'react'
 import { AppLanguage, translations } from './i18n'
 
 const defaultHost = typeof window !== 'undefined' ? window.location.hostname : 'localhost'
+const defaultHttpOrigin = typeof window !== 'undefined' ? window.location.origin : `http://${defaultHost}`
+const defaultWsOrigin =
+  typeof window !== 'undefined'
+    ? `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}`
+    : `ws://${defaultHost}`
 const cameraNames = ['cam_high', 'cam_low', 'cam_left_wrist', 'cam_right_wrist'] as const
-const configStorageKey = 'aloha-ui-config-v2'
+const configStorageKey = 'aloha-ui-config-v3'
 const lowLevelSubtaskOptions = [
   'Rotate so opening faces right',
   'Pick up with left hand',
@@ -78,8 +83,28 @@ type UiConfig = {
   includeBottlePosition: boolean
   includeBottleState: boolean
   includeSubtask: boolean
+  videoMemoryNumFrames: 1 | 4
   forcedLowLevelSubtask: string | null
   announcementLanguage: 'zh' | 'ja'
+}
+
+type UiPreferenceConfig = {
+  apiBase: string
+  wsBase: string
+  cameraRefreshMs: number
+  language?: AppLanguage
+  announcementLanguage: 'zh' | 'ja'
+}
+
+type RuntimeConfigPayload = {
+  datasetDir: string
+  manualDatasetDir: string
+  includeBottleDescription: boolean
+  includeBottlePosition: boolean
+  includeBottleState: boolean
+  includeSubtask: boolean
+  videoMemoryNumFrames: 1 | 4
+  forcedLowLevelSubtask: string | null
 }
 
 type VoiceStatus = 'idle' | 'recording' | 'thinking' | 'speaking'
@@ -100,8 +125,8 @@ const initialState: RealtimeState = {
 }
 
 const defaultConfig: UiConfig = {
-  apiBase: import.meta.env.VITE_API_BASE || `http://${defaultHost}:8011`,
-  wsBase: import.meta.env.VITE_WS_BASE || `ws://${defaultHost}:8011`,
+  apiBase: import.meta.env.VITE_API_BASE || defaultHttpOrigin,
+  wsBase: import.meta.env.VITE_WS_BASE || defaultWsOrigin,
   cameraRefreshMs: 100,
   datasetDir: '',
   manualDatasetDir: '',
@@ -109,6 +134,7 @@ const defaultConfig: UiConfig = {
   includeBottlePosition: false,
   includeBottleState: true,
   includeSubtask: true,
+  videoMemoryNumFrames: 1,
   forcedLowLevelSubtask: null,
   announcementLanguage: 'zh',
 }
@@ -132,36 +158,12 @@ function pickSpeechVoice(locale: string) {
   )
 }
 
-function loadUiConfig(): UiConfig {
+function loadUiConfig(): UiPreferenceConfig {
   if (typeof window === 'undefined') return defaultConfig
   try {
     const raw = window.localStorage.getItem(configStorageKey)
     if (!raw) return defaultConfig
     const parsed = JSON.parse(raw)
-    const includeBottlePosition =
-      typeof parsed?.includeBottlePosition === 'boolean'
-        ? parsed.includeBottlePosition
-        : typeof parsed?.includeBottlePosition === 'string'
-          ? parsed.includeBottlePosition === 'true'
-          : defaultConfig.includeBottlePosition
-    const includeBottleDescription =
-      typeof parsed?.includeBottleDescription === 'boolean'
-        ? parsed.includeBottleDescription
-        : typeof parsed?.includeBottleDescription === 'string'
-          ? parsed.includeBottleDescription === 'true'
-          : defaultConfig.includeBottleDescription
-    const includeBottleState =
-      typeof parsed?.includeBottleState === 'boolean'
-        ? parsed.includeBottleState
-        : typeof parsed?.includeBottleState === 'string'
-          ? parsed.includeBottleState === 'true'
-          : defaultConfig.includeBottleState
-    const includeSubtask =
-      typeof parsed?.includeSubtask === 'boolean'
-        ? parsed.includeSubtask
-        : typeof parsed?.includeSubtask === 'string'
-          ? parsed.includeSubtask === 'true'
-          : defaultConfig.includeSubtask
     return {
       apiBase: typeof parsed?.apiBase === 'string' && parsed.apiBase.trim() ? parsed.apiBase.trim() : defaultConfig.apiBase,
       wsBase: typeof parsed?.wsBase === 'string' && parsed.wsBase.trim() ? parsed.wsBase.trim() : defaultConfig.wsBase,
@@ -169,19 +171,6 @@ function loadUiConfig(): UiConfig {
         typeof parsed?.cameraRefreshMs === 'number' && parsed.cameraRefreshMs > 0
           ? parsed.cameraRefreshMs
           : defaultConfig.cameraRefreshMs,
-      datasetDir: typeof parsed?.datasetDir === 'string' ? parsed.datasetDir.trim() : defaultConfig.datasetDir,
-      manualDatasetDir:
-        typeof parsed?.manualDatasetDir === 'string'
-          ? parsed.manualDatasetDir.trim()
-          : defaultConfig.manualDatasetDir,
-      includeBottleDescription,
-      includeBottlePosition,
-      includeBottleState,
-      includeSubtask,
-      forcedLowLevelSubtask:
-        typeof parsed?.forcedLowLevelSubtask === 'string' && parsed.forcedLowLevelSubtask.trim()
-          ? parsed.forcedLowLevelSubtask.trim()
-          : defaultConfig.forcedLowLevelSubtask,
       announcementLanguage:
         parsed?.announcementLanguage === 'ja' || parsed?.announcementLanguage === 'zh'
           ? parsed.announcementLanguage
@@ -228,17 +217,27 @@ function parseBottleBox(value: Record<string, unknown> | null | undefined) {
 }
 
 export default function App() {
-  const [uiConfig, setUiConfig] = useState<UiConfig>(() => loadUiConfig())
+  const savedPreferences = loadUiConfig()
+  const [uiConfig, setUiConfig] = useState<UiConfig>(() => {
+    const migratedPreferences = { ...savedPreferences }
+    if (migratedPreferences.apiBase === `http://${defaultHost}:8011`) {
+      migratedPreferences.apiBase = defaultHttpOrigin
+    }
+    if (migratedPreferences.wsBase === `ws://${defaultHost}:8011`) {
+      migratedPreferences.wsBase = defaultWsOrigin
+    }
+    return { ...defaultConfig, ...migratedPreferences }
+  })
   const [state, setState] = useState<RealtimeState>(initialState)
-  const [language, setLanguage] = useState<AppLanguage>('en')
+  const [language, setLanguage] = useState<AppLanguage>(savedPreferences.language || 'en')
   const [command, setCommand] = useState('')
   const [voiceResponse, setVoiceResponse] = useState<VoiceResponse | null>(null)
   const [voiceStatus, setVoiceStatus] = useState<VoiceStatus>('idle')
   const [sending, setSending] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [configOpen, setConfigOpen] = useState(false)
-  const [runtimeOpen, setRuntimeOpen] = useState(false)
-  const [overrideOpen, setOverrideOpen] = useState(false)
+  const [avatarMenuOpen, setAvatarMenuOpen] = useState(false)
+  const [consoleView, setConsoleView] = useState<'voice' | 'runtime'>('voice')
   const [selectedHistoryId, setSelectedHistoryId] = useState<string | null>(null)
   const [cameraView, setCameraView] = useState<'focus' | 'quad'>('focus')
   const [cameraRefreshToken, setCameraRefreshToken] = useState<number>(Date.now())
@@ -280,8 +279,45 @@ export default function App() {
   }, [uiConfig.wsBase])
 
   useEffect(() => {
-    window.localStorage.setItem(configStorageKey, JSON.stringify(uiConfig))
-  }, [uiConfig])
+    const preferenceConfig: UiPreferenceConfig = {
+      apiBase: uiConfig.apiBase,
+      wsBase: uiConfig.wsBase,
+      cameraRefreshMs: uiConfig.cameraRefreshMs,
+      language,
+      announcementLanguage: uiConfig.announcementLanguage,
+    }
+    window.localStorage.setItem(configStorageKey, JSON.stringify(preferenceConfig))
+  }, [uiConfig, language])
+
+  useEffect(() => {
+    const controller = new AbortController()
+    const loadRuntimeConfig = async () => {
+      try {
+        const response = await fetch(`${uiConfig.apiBase}/api/runtime/config`, { signal: controller.signal })
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`)
+        }
+        const runtimeConfig = (await response.json()) as RuntimeConfigPayload
+        setUiConfig((current) => ({
+          ...current,
+          datasetDir: runtimeConfig.datasetDir || '',
+          manualDatasetDir: runtimeConfig.manualDatasetDir || '',
+          includeBottleDescription: Boolean(runtimeConfig.includeBottleDescription),
+          includeBottlePosition: Boolean(runtimeConfig.includeBottlePosition),
+          includeBottleState: Boolean(runtimeConfig.includeBottleState),
+          includeSubtask: Boolean(runtimeConfig.includeSubtask),
+          videoMemoryNumFrames: runtimeConfig.videoMemoryNumFrames === 4 ? 4 : 1,
+          forcedLowLevelSubtask: runtimeConfig.forcedLowLevelSubtask || null,
+        }))
+      } catch (err) {
+        if (!(err instanceof DOMException && err.name === 'AbortError')) {
+          console.error('Failed to load runtime config', err)
+        }
+      }
+    }
+    void loadRuntimeConfig()
+    return () => controller.abort()
+  }, [uiConfig.apiBase])
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -291,6 +327,7 @@ export default function App() {
       }
       if (event.key === 'Escape') {
         setConfigOpen(false)
+        setAvatarMenuOpen(false)
       }
     }
     window.addEventListener('keydown', handleKeyDown)
@@ -331,6 +368,14 @@ export default function App() {
     const age = Date.now() / 1000 - state.robot.timestamp
     return age < 1 ? t.live : t.stale(age.toFixed(1))
   }, [state.robot.timestamp, t])
+  const robotLive = useMemo(() => {
+    if (!state.robot.timestamp) return false
+    return Date.now() / 1000 - state.robot.timestamp < 1
+  }, [state.robot.timestamp])
+  const camerasLive = useMemo(() => {
+    if (!cameraNames.length) return false
+    return cameraNames.every((name) => Boolean(state.camera_status[name]))
+  }, [state.camera_status])
 
   const hierarchical = state.robot.hierarchical || {}
   const history = Array.isArray(hierarchical.history) ? hierarchical.history : []
@@ -341,7 +386,7 @@ export default function App() {
   const primaryCamera = 'cam_high'
   const secondaryCameras = cameraNames.filter((name) => name !== primaryCamera)
   const cameraSrc = (cameraName: (typeof cameraNames)[number]) =>
-    `${uiConfig.apiBase}/api/cameras/${cameraName}/stream.mjpg?t=${cameraRefreshToken}`
+    `${uiConfig.apiBase}/api/cameras/${cameraName}/latest.jpg?t=${cameraRefreshToken}`
   const displayFps = useMemo(() => {
     const intervalMs = Math.max(100, Number(uiConfig.cameraRefreshMs) || defaultConfig.cameraRefreshMs)
     return 1000 / intervalMs
@@ -456,6 +501,7 @@ export default function App() {
           include_bottle_state: uiConfig.includeBottleState,
           include_subtask: uiConfig.includeSubtask,
           forced_low_level_subtask: uiConfig.forcedLowLevelSubtask || undefined,
+          video_memory_num_frames: uiConfig.videoMemoryNumFrames,
         }),
       })
       if (!response.ok) {
@@ -484,6 +530,7 @@ export default function App() {
           include_bottle_state: nextConfig.includeBottleState,
           include_subtask: nextConfig.includeSubtask,
           forced_low_level_subtask: nextConfig.forcedLowLevelSubtask,
+          video_memory_num_frames: nextConfig.videoMemoryNumFrames,
         }),
       })
       if (!response.ok) {
@@ -519,6 +566,7 @@ export default function App() {
       formData.append('include_bottle_position', String(uiConfig.includeBottlePosition))
       formData.append('include_bottle_state', String(uiConfig.includeBottleState))
       formData.append('include_subtask', String(uiConfig.includeSubtask))
+      formData.append('video_memory_num_frames', String(uiConfig.videoMemoryNumFrames))
       if (uiConfig.forcedLowLevelSubtask) {
         formData.append('forced_low_level_subtask', uiConfig.forcedLowLevelSubtask)
       }
@@ -673,23 +721,45 @@ export default function App() {
 
   return (
     <main className="app-shell">
-      <header className="hero">
-        <div className="hero-copy">
-          <p className="eyebrow">{t.eyebrow}</p>
+      <header className="app-header">
+        <div className="header-brand">
           <h1>{t.title}</h1>
         </div>
-        <div className="hero-badges">
-          <span className="status-pill live">{freshness}</span>
+        <div className="header-actions">
           <span className="status-pill mode">{state.robot.mode || t.waiting}</span>
-          <button type="button" className="ghost-button" onClick={() => setRuntimeOpen(true)}>
-            {t.openRuntime}
+          <div className="header-status-lamps">
+            <span className="status-lamp-chip" title={freshness}>
+              <span className={`lamp ${robotLive ? 'green' : 'red'}`} />
+              <span>Robot</span>
+            </span>
+            <span className="status-lamp-chip" title={cameraNames.map((name) => `${name}:${state.camera_status[name] ? 'on' : 'off'}`).join(' | ')}>
+              <span className={`lamp ${camerasLive ? 'green' : 'red'}`} />
+              <span>Camera</span>
+            </span>
+          </div>
+          {avatarMenuOpen ? <div className="avatar-menu-backdrop" onClick={() => setAvatarMenuOpen(false)} /> : null}
+          <button
+            type="button"
+            className="avatar-button"
+            onClick={() => setAvatarMenuOpen((current) => !current)}
+            aria-label={t.menuSettings}
+          >
+            <span>AV</span>
           </button>
-          <button type="button" className="ghost-button" onClick={() => setOverrideOpen(true)}>
-            {t.forcedSubtask}
-          </button>
-          <button type="button" className="ghost-button" onClick={() => setConfigOpen(true)}>
-            {t.openConfig}
-          </button>
+          {avatarMenuOpen ? (
+            <div className="avatar-menu">
+              <button
+                type="button"
+                className="avatar-menu-item"
+                onClick={() => {
+                  setConfigOpen(true)
+                  setAvatarMenuOpen(false)
+                }}
+              >
+                {t.openConfig}
+              </button>
+            </div>
+          ) : null}
         </div>
       </header>
 
@@ -699,7 +769,6 @@ export default function App() {
             <div className="camera-panel-header">
               <div>
                 <p className="eyebrow">{t.camerasEyebrow}</p>
-                <h2>{cameraView === 'focus' ? t.cameraLabels[primaryCamera] : 'Quad View'}</h2>
               </div>
               <div className="camera-controls">
                 <button
@@ -771,56 +840,136 @@ export default function App() {
             <div className="panel-header">
               <div>
                 <p className="eyebrow">{t.voiceEyebrow}</p>
-                <h2>{t.voiceTitle}</h2>
               </div>
-              <span className="command-hint">{t.directTaskHint}</span>
-            </div>
-            <div className="voice-orb-wrap">
-              <button
-                type="button"
-                className={`voice-orb halo ripple ${voiceStatus}`}
-                onClick={() => void toggleRecording()}
-                disabled={sending}
-                aria-label={voiceStatus === 'recording' ? t.stop : t.talk}
-              >
-                <span>{voiceStatus === 'recording' ? t.stop : t.talk}</span>
-              </button>
-              <p className="voice-status">{voiceStatusLabel}</p>
-              <p className="voice-hint">
-                {voiceStatus === 'recording' ? t.autoSendHint : t.listeningHint}
-              </p>
-            </div>
-            <form className="command-form" onSubmit={submitCommand}>
-              <input
-                value={command}
-                onChange={(event) => setCommand(event.target.value)}
-                placeholder={t.commandPlaceholder}
-              />
-              <button type="submit" disabled={sending || !command.trim()}>
-                {sending ? t.thinking : t.send}
-              </button>
-            </form>
-            <div className="quick-tasks">
-              {['1', '2', '3', '4'].map((taskNum) => (
-                <button key={taskNum} type="button" className="quick-task" onClick={() => void sendCommand(taskNum)}>
-                  {taskNum}
+              <div className="console-switch">
+                <button
+                  type="button"
+                  className={`ghost-button ${consoleView === 'voice' ? 'active' : ''}`}
+                  onClick={() => setConsoleView('voice')}
+                >
+                  {t.consoleVoice}
                 </button>
-              ))}
-            </div>
-            <div className="response-grid">
-              <div className="info-block compact">
-                <span className="info-label">{t.you}</span>
-                <pre>{voiceResponse?.transcript || t.noConversation}</pre>
-              </div>
-              <div className="info-block compact">
-                <span className="info-label">{t.aloha}</span>
-                <pre>{voiceResponse?.reply_text || t.noReply}</pre>
-              </div>
-              <div className="info-block compact">
-                <span className="info-label">{t.voiceTask}</span>
-                <pre>{voiceTaskWithHighLevel || 'N/A'}</pre>
+                <button
+                  type="button"
+                  className={`ghost-button ${consoleView === 'runtime' ? 'active' : ''}`}
+                  onClick={() => setConsoleView('runtime')}
+                >
+                  {t.consoleRuntime}
+                </button>
               </div>
             </div>
+            {consoleView === 'voice' ? (
+              <>
+                <div className="voice-orb-wrap">
+                  <button
+                    type="button"
+                    className={`voice-orb halo ripple ${voiceStatus}`}
+                    onClick={() => void toggleRecording()}
+                    disabled={sending}
+                    aria-label={voiceStatus === 'recording' ? t.stop : t.talk}
+                  >
+                    <span>{voiceStatus === 'recording' ? t.stop : t.talk}</span>
+                  </button>
+                  <p className="voice-status">{voiceStatusLabel}</p>
+                  <p className="voice-hint">
+                    {voiceStatus === 'recording' ? t.autoSendHint : t.listeningHint}
+                  </p>
+                </div>
+                <form className="command-form" onSubmit={submitCommand}>
+                  <input
+                    value={command}
+                    onChange={(event) => setCommand(event.target.value)}
+                    placeholder={t.commandPlaceholder}
+                  />
+                  <button type="submit" disabled={sending || !command.trim()}>
+                    {sending ? t.thinking : t.send}
+                  </button>
+                </form>
+                <div className="quick-tasks">
+                  {['1', '2', '3', '4'].map((taskNum) => (
+                    <button key={taskNum} type="button" className="quick-task" onClick={() => void sendCommand(taskNum)}>
+                      {taskNum}
+                    </button>
+                  ))}
+                </div>
+                <div className="response-grid">
+                  <div className="info-block compact">
+                    <span className="info-label">{t.you}</span>
+                    <pre>{voiceResponse?.transcript || t.noConversation}</pre>
+                  </div>
+                  <div className="info-block compact">
+                    <span className="info-label">{t.aloha}</span>
+                    <pre>{voiceResponse?.reply_text || t.noReply}</pre>
+                  </div>
+                  <div className="info-block compact">
+                    <span className="info-label">{t.voiceTask}</span>
+                    <pre>{voiceTaskWithHighLevel || 'N/A'}</pre>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="runtime-grid runtime-inline">
+                <div className="info-block wide">
+                  <span className="info-label">{t.highLevelText}</span>
+                  <pre>{hierarchical.high_level_text || 'N/A'}</pre>
+                </div>
+                <div className="info-block wide">
+                  <span className="info-label">{t.lowLevelPrompt}</span>
+                  <pre>{hierarchical.low_level_prompt || 'N/A'}</pre>
+                </div>
+                <div className="info-block wide">
+                  <span className="info-label">{t.subtaskHistory}</span>
+                  <div className="history-list">
+                    {history.length ? history.map((entry) => (
+                      <button
+                        key={entry.id}
+                        type="button"
+                        className={`history-item ${selectedHistory?.id === entry.id ? 'active' : ''}`}
+                        onClick={() => setSelectedHistoryId(entry.id)}
+                      >
+                        <strong>{entry.subtask || 'N/A'}</strong>
+                        <span>{entry.bottle_state || 'N/A'}</span>
+                      </button>
+                    )) : <pre>N/A</pre>}
+                  </div>
+                </div>
+                <div className="info-block wide">
+                  <span className="info-label">{t.selectedHighLevelOutput}</span>
+                  <pre>{selectedHistory?.high_level_text || 'N/A'}</pre>
+                </div>
+                <div className="info-block wide">
+                  <span className="info-label">{t.selectedHighLevelImages}</span>
+                  <div className="history-image-grid">
+                    {selectedHistory?.images && Object.keys(selectedHistory.images).length ? Object.entries(selectedHistory.images).map(([name, data]) => (
+                      <figure key={name} className="history-image-card">
+                        <img src={`data:image/jpeg;base64,${data}`} alt={name} />
+                        <figcaption>{t.cameraLabels[name as keyof typeof t.cameraLabels] || name}</figcaption>
+                      </figure>
+                    )) : <pre>N/A</pre>}
+                  </div>
+                </div>
+                <div className="info-block compact">
+                  <span className="info-label">{t.highLevelTiming}</span>
+                  <pre>{formatTiming(hierarchical.high_level_server_timing)}</pre>
+                </div>
+                <div className="info-block compact">
+                  <span className="info-label">{t.lowLevelTiming}</span>
+                  <pre>{formatTiming(hierarchical.low_level_server_timing)}</pre>
+                </div>
+                <div className="info-block compact">
+                  <span className="info-label">{t.qpos}</span>
+                  <pre>{formatArray(state.robot.runtime_qpos.length ? state.robot.runtime_qpos : state.robot.qpos)}</pre>
+                </div>
+                <div className="info-block compact">
+                  <span className="info-label">{t.rosQpos}</span>
+                  <pre>{formatArray(state.robot.ros_qpos)}</pre>
+                </div>
+                <div className="info-block compact">
+                  <span className="info-label">{t.latestAction}</span>
+                  <pre>{formatArray(state.robot.latest_action)}</pre>
+                </div>
+              </div>
+            )}
             {error ? <div className="error-banner">{error}</div> : null}
           </section>
         </aside>
@@ -981,6 +1130,66 @@ export default function App() {
               </select>
             </label>
             <label className="config-field">
+              <span>{t.videoMemoryNumFrames}</span>
+              <select
+                value={String(uiConfig.videoMemoryNumFrames)}
+                onChange={(event) =>
+                  setUiConfig((current) => {
+                    const nextVideoMemoryNumFrames: UiConfig['videoMemoryNumFrames'] = event.target.value === '4' ? 4 : 1
+                    const nextConfig = {
+                      ...current,
+                      videoMemoryNumFrames: nextVideoMemoryNumFrames,
+                    }
+                    void pushRuntimeConfig(nextConfig)
+                    return nextConfig
+                  })
+                }
+              >
+                <option value="1">{t.videoMemoryOneFrame}</option>
+                <option value="4">{t.videoMemoryFourFrames}</option>
+              </select>
+            </label>
+            <div className="config-field">
+              <span>{t.forcedSubtask}</span>
+              <div className="quick-tasks subtask-override-grid">
+                <button
+                  type="button"
+                  className={`quick-task ${uiConfig.forcedLowLevelSubtask === null ? 'active' : ''}`}
+                  onClick={() =>
+                    setUiConfig((current) => {
+                      const nextConfig = {
+                        ...current,
+                        forcedLowLevelSubtask: null,
+                      }
+                      void pushRuntimeConfig(nextConfig)
+                      return nextConfig
+                    })
+                  }
+                >
+                  {t.forcedSubtaskAuto}
+                </button>
+                {lowLevelSubtaskOptions.map((subtask) => (
+                  <button
+                    key={subtask}
+                    type="button"
+                    className={`quick-task subtask-override-button ${uiConfig.forcedLowLevelSubtask === subtask ? 'active' : ''}`}
+                    onClick={() =>
+                      setUiConfig((current) => {
+                        const nextConfig = {
+                          ...current,
+                          forcedLowLevelSubtask: subtask,
+                        }
+                        void pushRuntimeConfig(nextConfig)
+                        return nextConfig
+                      })
+                    }
+                  >
+                    {subtask}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <label className="config-field">
               <span>{t.inferenceSavePath}</span>
               <input
                 value={uiConfig.datasetDir}
@@ -1015,146 +1224,6 @@ export default function App() {
               />
             </label>
             <p className="config-help">{t.configHelp}</p>
-          </aside>
-        </>
-      ) : null}
-
-      {overrideOpen ? (
-        <>
-          <div className="drawer-backdrop runtime-drawer-backdrop" onClick={() => setOverrideOpen(false)} />
-          <aside className="config-drawer" onClick={(event) => event.stopPropagation()}>
-            <div className="panel-header">
-              <div>
-                <p className="eyebrow">{t.runtimeEyebrow}</p>
-                <h2>{t.forcedSubtask}</h2>
-              </div>
-              <button type="button" className="ghost-button" onClick={() => setOverrideOpen(false)}>
-                {t.close}
-              </button>
-            </div>
-            <div className="config-field">
-              <span>{t.forcedSubtask}</span>
-              <div className="quick-tasks subtask-override-grid">
-                <button
-                  type="button"
-                  className={`quick-task ${uiConfig.forcedLowLevelSubtask === null ? 'active' : ''}`}
-                  onClick={() =>
-                    setUiConfig((current) => {
-                      const nextConfig = {
-                        ...current,
-                        forcedLowLevelSubtask: null,
-                      }
-                      void pushRuntimeConfig(nextConfig)
-                      return nextConfig
-                    })
-                  }
-                >
-                  {t.forcedSubtaskAuto}
-                </button>
-                {lowLevelSubtaskOptions.map((subtask) => (
-                <button
-                  key={subtask}
-                  type="button"
-                  className={`quick-task subtask-override-button ${uiConfig.forcedLowLevelSubtask === subtask ? 'active' : ''}`}
-                  onClick={() =>
-                    setUiConfig((current) => {
-                      const nextConfig = {
-                        ...current,
-                        forcedLowLevelSubtask: subtask,
-                      }
-                      void pushRuntimeConfig(nextConfig)
-                      return nextConfig
-                    })
-                  }
-                  >
-                    {subtask}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </aside>
-        </>
-      ) : null}
-
-      {runtimeOpen ? (
-        <>
-          <div className="drawer-backdrop runtime-drawer-backdrop" onClick={() => setRuntimeOpen(false)} />
-          <aside className="runtime-drawer" onClick={(event) => event.stopPropagation()}>
-            <div className="panel-header">
-              <div>
-                <p className="eyebrow">{t.runtimeEyebrow}</p>
-                <h2>{t.runtimeTitle}</h2>
-              </div>
-              <div className="drawer-actions">
-                <span className="robot-task-badge" title={state.robot.current_task || t.noActiveTask}>
-                  {state.robot.current_task || t.noActiveTask}
-                </span>
-                <button type="button" className="ghost-button" onClick={() => setRuntimeOpen(false)}>
-                  {t.close}
-                </button>
-              </div>
-            </div>
-            <div className="runtime-grid">
-              <div className="info-block wide">
-                <span className="info-label">{t.highLevelText}</span>
-                <pre>{hierarchical.high_level_text || 'N/A'}</pre>
-              </div>
-              <div className="info-block wide">
-                <span className="info-label">{t.lowLevelPrompt}</span>
-                <pre>{hierarchical.low_level_prompt || 'N/A'}</pre>
-              </div>
-              <div className="info-block wide">
-                <span className="info-label">{t.subtaskHistory}</span>
-                <div className="history-list">
-                  {history.length ? history.map((entry) => (
-                    <button
-                      key={entry.id}
-                      type="button"
-                      className={`history-item ${selectedHistory?.id === entry.id ? 'active' : ''}`}
-                      onClick={() => setSelectedHistoryId(entry.id)}
-                    >
-                      <strong>{entry.subtask || 'N/A'}</strong>
-                      <span>{entry.bottle_state || 'N/A'}</span>
-                    </button>
-                  )) : <pre>N/A</pre>}
-                </div>
-              </div>
-              <div className="info-block wide">
-                <span className="info-label">{t.selectedHighLevelOutput}</span>
-                <pre>{selectedHistory?.high_level_text || 'N/A'}</pre>
-              </div>
-              <div className="info-block wide">
-                <span className="info-label">{t.selectedHighLevelImages}</span>
-                <div className="history-image-grid">
-                  {selectedHistory?.images && Object.keys(selectedHistory.images).length ? Object.entries(selectedHistory.images).map(([name, data]) => (
-                    <figure key={name} className="history-image-card">
-                      <img src={`data:image/jpeg;base64,${data}`} alt={name} />
-                      <figcaption>{t.cameraLabels[name as keyof typeof t.cameraLabels] || name}</figcaption>
-                    </figure>
-                  )) : <pre>N/A</pre>}
-                </div>
-              </div>
-              <div className="info-block compact">
-                <span className="info-label">{t.highLevelTiming}</span>
-                <pre>{formatTiming(hierarchical.high_level_server_timing)}</pre>
-              </div>
-              <div className="info-block compact">
-                <span className="info-label">{t.lowLevelTiming}</span>
-                <pre>{formatTiming(hierarchical.low_level_server_timing)}</pre>
-              </div>
-              <div className="info-block compact">
-                <span className="info-label">{t.qpos}</span>
-                <pre>{formatArray(state.robot.runtime_qpos.length ? state.robot.runtime_qpos : state.robot.qpos)}</pre>
-              </div>
-              <div className="info-block compact">
-                <span className="info-label">{t.rosQpos}</span>
-                <pre>{formatArray(state.robot.ros_qpos)}</pre>
-              </div>
-              <div className="info-block compact">
-                <span className="info-label">{t.latestAction}</span>
-                <pre>{formatArray(state.robot.latest_action)}</pre>
-              </div>
-            </div>
           </aside>
         </>
       ) : null}

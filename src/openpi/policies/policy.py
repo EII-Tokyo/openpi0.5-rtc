@@ -78,7 +78,6 @@ class Policy(BasePolicy):
                     static_argnames=(
                         "temperature",
                         "eos_token_id",
-                        "max_text_token_id",
                         "debug_top_logits",
                     ),
                 )
@@ -152,7 +151,6 @@ class Policy(BasePolicy):
         *,
         max_new_tokens: int | None = None,
         temperature: float = 0.0,
-        max_text_token_id: int = 240000,
         debug_top_logits: bool = False,
     ) -> dict:
         """Autoregressively decode high-level subtask text from image+prompt inputs."""
@@ -174,7 +172,6 @@ class Policy(BasePolicy):
             _model.Observation.from_dict(inputs),
             temperature=temperature,
             eos_token_id=self._tokenizer.eos_token_id,
-            max_text_token_id=max_text_token_id,
             debug_top_logits=debug_top_logits,
         )
         decode_ms = (time.perf_counter() - decode_start) * 1000.0

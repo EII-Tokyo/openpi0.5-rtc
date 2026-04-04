@@ -10,6 +10,7 @@ from fastapi.responses import Response, StreamingResponse
 
 from .camera_bridge import CameraBridge
 from .config import settings
+from .config_store import RuntimeConfigStore
 from .redis_commands import create_redis_client, publish_runtime_config, publish_task
 from .robot_state_bridge import RobotStateBridge
 from .schemas import (
@@ -17,6 +18,7 @@ from .schemas import (
     AnnouncementAudioResponse,
     HealthResponse,
     RealtimePayload,
+    RuntimeConfigPayload,
     RuntimeConfigRequest,
     RuntimeStatePayload,
     TranslateRequest,
@@ -41,12 +43,55 @@ camera_bridge = CameraBridge()
 robot_state_bridge = RobotStateBridge()
 redis_client = create_redis_client()
 voice_engine = VoiceAssistantEngine(redis_client)
+runtime_config_store = RuntimeConfigStore()
+
+
+def _merge_runtime_config_request(request: RuntimeConfigRequest) -> RuntimeConfigPayload:
+    current = runtime_config_store.load()
+    return RuntimeConfigPayload(
+        dataset_dir=request.dataset_dir if request.dataset_dir is not None else current.dataset_dir,
+        manual_dataset_dir=request.manual_dataset_dir if request.manual_dataset_dir is not None else current.manual_dataset_dir,
+        include_bottle_description=(
+            request.include_bottle_description
+            if request.include_bottle_description is not None
+            else current.include_bottle_description
+        ),
+        include_bottle_position=(
+            request.include_bottle_position
+            if request.include_bottle_position is not None
+            else current.include_bottle_position
+        ),
+        include_bottle_state=request.include_bottle_state if request.include_bottle_state is not None else current.include_bottle_state,
+        include_subtask=request.include_subtask if request.include_subtask is not None else current.include_subtask,
+        forced_low_level_subtask=(
+            request.forced_low_level_subtask
+            if request.forced_low_level_subtask is not None
+            else current.forced_low_level_subtask
+        ),
+        video_memory_num_frames=(
+            request.video_memory_num_frames
+            if request.video_memory_num_frames in (1, 4)
+            else current.video_memory_num_frames
+        ),
+    )
 
 
 @app.on_event("startup")
 def on_startup() -> None:
     camera_bridge.start()
     robot_state_bridge.start()
+    stored = runtime_config_store.load()
+    publish_runtime_config(
+        redis_client,
+        dataset_dir=stored.dataset_dir,
+        manual_dataset_dir=stored.manual_dataset_dir,
+        include_bottle_description=stored.include_bottle_description,
+        include_bottle_position=stored.include_bottle_position,
+        include_bottle_state=stored.include_bottle_state,
+        include_subtask=stored.include_subtask,
+        forced_low_level_subtask=stored.forced_low_level_subtask,
+        video_memory_num_frames=stored.video_memory_num_frames,
+    )
 
 
 @app.on_event("shutdown")
@@ -120,6 +165,7 @@ async def voice_text(request: VoiceRequest) -> VoiceResponse:
             include_bottle_state=request.include_bottle_state,
             include_subtask=request.include_subtask,
             forced_low_level_subtask=request.forced_low_level_subtask,
+            video_memory_num_frames=request.video_memory_num_frames,
         )
         return VoiceResponse(
             transcript=request.text,
@@ -138,6 +184,7 @@ async def voice_text(request: VoiceRequest) -> VoiceResponse:
         include_bottle_state=request.include_bottle_state,
         include_subtask=request.include_subtask,
         forced_low_level_subtask=request.forced_low_level_subtask,
+        video_memory_num_frames=request.video_memory_num_frames,
     )
 
 
@@ -152,6 +199,7 @@ async def voice_audio(
     include_bottle_state: bool = Form(True),
     include_subtask: bool = Form(True),
     forced_low_level_subtask: str | None = Form(None),
+    video_memory_num_frames: int = Form(1),
 ) -> VoiceResponse:
     return await voice_engine.process_audio(
         file,
@@ -163,22 +211,31 @@ async def voice_audio(
         include_bottle_state=include_bottle_state,
         include_subtask=include_subtask,
         forced_low_level_subtask=forced_low_level_subtask,
+        video_memory_num_frames=video_memory_num_frames,
     )
 
 
-@app.post("/api/runtime/config", response_model=HealthResponse)
-def runtime_config(request: RuntimeConfigRequest) -> HealthResponse:
+@app.get("/api/runtime/config", response_model=RuntimeConfigPayload)
+def get_runtime_config() -> RuntimeConfigPayload:
+    return runtime_config_store.load()
+
+
+@app.post("/api/runtime/config", response_model=RuntimeConfigPayload)
+def runtime_config(request: RuntimeConfigRequest) -> RuntimeConfigPayload:
+    merged = _merge_runtime_config_request(request)
+    runtime_config_store.save(merged)
     publish_runtime_config(
         redis_client,
-        dataset_dir=request.dataset_dir,
-        manual_dataset_dir=request.manual_dataset_dir,
-        include_bottle_description=request.include_bottle_description,
-        include_bottle_position=request.include_bottle_position,
-        include_bottle_state=request.include_bottle_state,
-        include_subtask=request.include_subtask,
-        forced_low_level_subtask=request.forced_low_level_subtask,
+        dataset_dir=merged.dataset_dir,
+        manual_dataset_dir=merged.manual_dataset_dir,
+        include_bottle_description=merged.include_bottle_description,
+        include_bottle_position=merged.include_bottle_position,
+        include_bottle_state=merged.include_bottle_state,
+        include_subtask=merged.include_subtask,
+        forced_low_level_subtask=merged.forced_low_level_subtask,
+        video_memory_num_frames=merged.video_memory_num_frames,
     )
-    return HealthResponse()
+    return merged
 
 
 @app.post("/api/runtime/translate", response_model=TranslateResponse)

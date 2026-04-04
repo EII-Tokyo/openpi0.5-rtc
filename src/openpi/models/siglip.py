@@ -95,8 +95,8 @@ class Encoder1DBlock(nn.Module):
         self,
         x,
         deterministic=True,
-        attn_mask=None,
         temporal_first=False,
+        attn_mask=None,
         temporal_attn_mask=None,
     ):  # noqa: FBT002
         out = {}
@@ -116,27 +116,38 @@ class Encoder1DBlock(nn.Module):
             name="MlpBlock_0",
         )
 
-        def _apply_attention(seq, mask, name):
+        def _apply_attention(seq, mask):
             seq = sharding.activation_sharding_constraint(seq)
             y = ln0(seq)
-            y = out[name] = attn(y, y, mask=mask)
+            y = attn(y, y, mask=mask)
             y = sharding.activation_sharding_constraint(y)
             y = nn.Dropout(rate=self.dropout)(y, deterministic)
-            return seq + y
+            return seq + y, y
 
-        if x.ndim == 4 and temporal_first and x.shape[1] > 1:
+        if x.ndim == 4:
             batch_size, time_size, seq_len, width = x.shape
-            temporal_x = jnp.swapaxes(x, 1, 2)
-            temporal_x = jnp.reshape(temporal_x, [batch_size * seq_len, time_size, width])
-            temporal_x = _apply_attention(temporal_x, temporal_attn_mask, "temporal_sa")
-            temporal_x = jnp.reshape(temporal_x, [batch_size, seq_len, time_size, width])
-            x = jnp.swapaxes(temporal_x, 1, 2)
+            if time_size > 1:
+                temporal_x = jnp.swapaxes(x, 1, 2)
+                temporal_x = jnp.reshape(temporal_x, [batch_size * seq_len, time_size, width])
+                temporal_x, temporal_y = _apply_attention(temporal_x, temporal_attn_mask)
+                temporal_x = jnp.reshape(temporal_x, [batch_size, seq_len, time_size, width])
+                temporal_y = jnp.reshape(temporal_y, [batch_size, seq_len, time_size, width])
+                temporal_x = jnp.swapaxes(temporal_x, 1, 2)
+                temporal_y = jnp.swapaxes(temporal_y, 1, 2)
+                temporal_gate = jnp.asarray(temporal_first, dtype=x.dtype).reshape((1, 1, 1, 1))
+                x = x + temporal_gate * (temporal_x - x)
+                out["temporal_sa"] = temporal_gate * temporal_y
+            else:
+                out["temporal_sa"] = jnp.zeros_like(x)
 
             spatial_x = jnp.reshape(x, [batch_size * time_size, seq_len, width])
-            spatial_x = _apply_attention(spatial_x, attn_mask, "sa")
+            spatial_x, spatial_y = _apply_attention(spatial_x, attn_mask)
             x = jnp.reshape(spatial_x, [batch_size, time_size, seq_len, width])
+            out["sa"] = jnp.reshape(spatial_y, [batch_size, time_size, seq_len, width])
         else:
-            x = _apply_attention(x, attn_mask, "sa")
+            x, sa_y = _apply_attention(x, attn_mask)
+            out["temporal_sa"] = jnp.zeros_like(x)
+            out["sa"] = sa_y
 
         y = ln1(x)
         y = out["mlp"] = mlp(y, deterministic)
@@ -163,18 +174,26 @@ class Encoder(nn.Module):
     def __call__(self, x, deterministic=True):  # noqa: FBT002
         out = {}
 
-        if self.scan and x.ndim != 4:
+        if self.scan:
             block = nn.remat(
                 Encoder1DBlock,
                 prevent_cse=False,
                 static_argnums=(2,),  # 0=self, 2=deterministic
                 policy=getattr(jax.checkpoint_policies, self.remat_policy, None),
             )
+            temporal_flags = jnp.asarray(
+                [(lyr + 1) % self.temporal_every_n_layers == 0 for lyr in range(self.depth)],
+                dtype=jnp.bool_,
+            )
+            temporal_attn_mask = None
+            if x.ndim == 4 and x.shape[1] > 1:
+                time_size = x.shape[1]
+                temporal_attn_mask = jnp.tril(jnp.ones((time_size, time_size), dtype=jnp.bool_))[None, None, :, :]
             x, scan_out = nn.scan(
                 block,
                 variable_axes={"params": 0},
                 split_rngs={"params": True, "dropout": True},
-                in_axes=nn.broadcast,
+                in_axes=(nn.broadcast, 0, nn.broadcast, nn.broadcast),
                 length=self.depth,
             )(
                 name="encoderblock",
@@ -182,7 +201,7 @@ class Encoder(nn.Module):
                 mlp_dim=self.mlp_dim,
                 num_heads=self.num_heads,
                 dropout=self.dropout,
-            )(x, deterministic)
+            )(x, deterministic, temporal_flags, None, temporal_attn_mask)
             for lyr in range(self.depth):
                 out[f"block{lyr:02d}"] = jax.tree.map(lambda o, lyr=lyr: o[lyr], scan_out)
         else:

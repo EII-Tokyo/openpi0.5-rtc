@@ -174,6 +174,21 @@ class Runtime:
         self._local_key_queue = deque()
         self._stdin_termios_backup = None
 
+    def _apply_video_memory_config(self, num_frames: int) -> None:
+        next_num_frames = int(num_frames)
+        if next_num_frames not in (1, 4):
+            return
+        if next_num_frames == self._video_memory_num_frames:
+            return
+        self._video_memory_num_frames = next_num_frames
+        self._image_history_horizon_seconds = max(
+            5.0,
+            self._video_memory_num_frames * self._video_memory_stride_seconds + 2.0,
+        )
+        self._reset_temporal_image_history()
+        self._stop_temporal_builder()
+        self._start_temporal_builder()
+
     def _stdin_is_tty(self) -> bool:
         try:
             return sys.stdin.isatty()
@@ -318,6 +333,7 @@ class Runtime:
         include_bottle_state = task_data.get("include_bottle_state")
         include_subtask = task_data.get("include_subtask")
         forced_low_level_subtask = task_data.get("forced_low_level_subtask")
+        video_memory_num_frames = task_data.get("video_memory_num_frames")
         if isinstance(dataset_dir, str) and dataset_dir.strip():
             self._dataset_dir = dataset_dir.strip()
         if isinstance(manual_dataset_dir, str) and manual_dataset_dir.strip():
@@ -334,6 +350,8 @@ class Runtime:
             self._forced_low_level_subtask = forced_low_level_subtask
         elif forced_low_level_subtask in ("", None):
             self._forced_low_level_subtask = None
+        if isinstance(video_memory_num_frames, int):
+            self._apply_video_memory_config(video_memory_num_frames)
         for subscriber in self._subscribers:
             if hasattr(subscriber, "set_dataset_dir"):
                 subscriber.set_dataset_dir(self._dataset_dir)
@@ -370,12 +388,13 @@ class Runtime:
                             self._apply_task_paths(data)
                             self._publish_runtime_state(mode="waiting" if self._is_waiting_for_task else None)
                             logging.info(
-                                "收到Redis运行配置更新: include_bottle_description=%s include_bottle_position=%s include_bottle_state=%s include_subtask=%s forced_low_level_subtask=%s",
+                                "收到Redis运行配置更新: include_bottle_description=%s include_bottle_position=%s include_bottle_state=%s include_subtask=%s forced_low_level_subtask=%s video_memory_num_frames=%s",
                                 self._include_bottle_description,
                                 self._include_bottle_position,
                                 self._include_bottle_state,
                                 self._include_subtask,
                                 self._forced_low_level_subtask,
+                                self._video_memory_num_frames,
                             )
                             continue
                         task_num = data.get('task')
@@ -396,6 +415,7 @@ class Runtime:
                                 'include_bottle_state': data.get('include_bottle_state'),
                                 'include_subtask': data.get('include_subtask'),
                                 'forced_low_level_subtask': data.get('forced_low_level_subtask'),
+                                'video_memory_num_frames': data.get('video_memory_num_frames'),
                             }
                             
                     except json.JSONDecodeError as e:

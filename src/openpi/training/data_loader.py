@@ -6,6 +6,7 @@ from pathlib import Path
 import typing
 from typing import Literal, Protocol, SupportsIndex, TypeVar
 
+import datasets
 import jax
 import jax.numpy as jnp
 import lerobot.datasets.lerobot_dataset as lerobot_dataset
@@ -213,6 +214,61 @@ class TemporalFrameStackDataset(Dataset[dict]):
         return int(value)
 
 
+class MultiLeRobotDatasetWithOptionalKeys(lerobot_dataset.MultiLeRobotDataset):
+    """Multi-dataset wrapper that preserves selected optional keys with defaults.
+
+    LeRobot's MultiLeRobotDataset drops any key that is not shared by all datasets.
+    For mixed training we still want fields like `subtask` to survive, defaulting to
+    an empty value on datasets that do not provide them.
+    """
+
+    def __init__(self, *args, optional_defaults: dict[str, typing.Any] | None = None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._optional_defaults = dict(optional_defaults or {})
+
+    def __getitem__(self, idx: int) -> dict[str, torch.Tensor]:
+        if idx >= len(self):
+            raise IndexError(f"Index {idx} out of bounds.")
+
+        start_idx = 0
+        dataset_idx = 0
+        for dataset in self._datasets:
+            if idx >= start_idx + dataset.num_frames:
+                start_idx += dataset.num_frames
+                dataset_idx += 1
+                continue
+            break
+        else:
+            raise AssertionError("We expect the loop to break out as long as the index is within bounds.")
+
+        item = self._datasets[dataset_idx][idx - start_idx]
+        item["dataset_index"] = torch.tensor(dataset_idx)
+        for data_key in self.disabled_features:
+            if data_key in self._optional_defaults:
+                item.setdefault(data_key, self._optional_defaults[data_key])
+            elif data_key in item:
+                del item[data_key]
+
+        for data_key, default_value in self._optional_defaults.items():
+            item.setdefault(data_key, default_value)
+        return item
+
+    @property
+    def features(self) -> datasets.Features:
+        features: dict[str, typing.Any] = {}
+        for dataset in self._datasets:
+            features.update(
+                {
+                    k: v
+                    for k, v in dataset.hf_features.items()
+                    if k not in self.disabled_features or k in self._optional_defaults
+                }
+            )
+        for key in self._optional_defaults:
+            features.setdefault(key, datasets.Value("string"))
+        return datasets.Features(features)
+
+
 class IterableTransformedDataset(IterableDataset[T_co]):
     def __init__(
         self,
@@ -304,12 +360,13 @@ def create_torch_dataset(
             # MultiLeRobotDataset currently does not expose a `revision` argument.
             # For multi-repo training, all repos should expose compatible schemas on their default revision.
             first_dataset_meta = lerobot_dataset.LeRobotDatasetMetadata(repo_ids[0], force_cache_sync=True)
-            dataset = lerobot_dataset.MultiLeRobotDataset(
+            dataset = MultiLeRobotDatasetWithOptionalKeys(
                 repo_ids,
                 # root="/home/ubuntu/aloha",
                 delta_timestamps={
                     key: [t / first_dataset_meta.fps for t in range(action_horizon)] for key in data_config.action_sequence_keys
                 },
+                optional_defaults={"subtask": ""},
             )
     if repo_id is not None:
         dataset_meta = lerobot_dataset.LeRobotDatasetMetadata(repo_id, revision="main", force_cache_sync=True)

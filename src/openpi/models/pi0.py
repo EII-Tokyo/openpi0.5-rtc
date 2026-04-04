@@ -394,7 +394,6 @@ class Pi0(_model.BaseModel):
         *,
         temperature: float = 0.0,
         eos_token_id: int | None = None,
-        max_text_token_id: int = 240000,
         debug_top_logits: bool = False,
     ) -> at.Int[at.Array, "b _t"]:
         """Autoregressively decode language tokens from image+prompt prefix."""
@@ -419,7 +418,6 @@ class Pi0(_model.BaseModel):
         vocab_size = embed_table.shape[0]
         # Last 128 ids are reserved/special in the project tokenization stack.
         special_token_mask = jnp.arange(vocab_size) >= (vocab_size - 128)
-        non_text_mask = jnp.arange(vocab_size) > max_text_token_id
 
         # Prefix forward pass to get initial next-token logits context.
         prefix_positions = jnp.cumsum(prefix_mask, axis=1) - 1
@@ -444,7 +442,6 @@ class Pi0(_model.BaseModel):
             # top_vals, top_idx = jax.lax.top_k(logits[0], 100)
             # jax.debug.print("subtask step {s} top10 logits idx={i} val={v}", s=step_i, i=top_idx, v=top_vals)
             logits = jnp.where(special_token_mask[None, :], -jnp.inf, logits)
-            logits = jnp.where(non_text_mask[None, :], -jnp.inf, logits)
             logits = logits.at[:, 0].set(-jnp.inf)  # never emit pad token
             if temperature <= 0.0:
                 next_token = jnp.argmax(logits, axis=-1).astype(jnp.int32)
