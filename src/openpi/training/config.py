@@ -537,6 +537,7 @@ _CONFIGS = [
             subtask_loss_weight=0.1,
             subtask_max_token_len=250,
             fast_tokenizer_path="physical-intelligence/fast",
+            image_resolution=(448, 448),
         ),
         lr_schedule=_optimizer.CosineDecaySchedule(
             warmup_steps=10_000,
