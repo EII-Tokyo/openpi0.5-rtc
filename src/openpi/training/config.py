@@ -547,7 +547,7 @@ _CONFIGS = [
         ),
         log_interval=10,
         data=LeRobotAlohaDataConfig(
-            image_size=(224, 224),
+            image_size=(448, 448),
             include_bottle_description=True,
             include_bottle_position=False,
             include_bottle_state=True,
