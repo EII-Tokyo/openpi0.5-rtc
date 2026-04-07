@@ -73,7 +73,7 @@ def test_tokenize_prompt():
 
     data = transform({"prompt": "Hello, world!"})
 
-    tok_prompt, tok_mask, _, _, _ = tokenizer.tokenize("Hello, world!")
+    tok_prompt, tok_mask = tokenizer.tokenize("Hello, world!")
     assert np.allclose(tok_prompt, data["tokenized_prompt"])
     assert np.allclose(tok_mask, data["tokenized_prompt_mask"])
 
@@ -112,10 +112,12 @@ def test_transform_dict():
 
 
 def test_extract_prompt_from_task():
-    transform = _transforms.PromptFromLeRobotTask({1: "Hello, world!"})
+    transform = _transforms.PromptFromLeRobotTask()
 
-    data = transform({"task_index": 1})
+    data = transform({"task": "Hello, world!", "state": np.zeros(3)})
     assert data["prompt"] == "Hello, world!"
+    assert "task" not in data
+    assert "state" in data
 
-    with pytest.raises(ValueError, match="task_index=2 not found in task mapping"):
-        transform({"task_index": 2})
+    with pytest.raises(ValueError, match='Cannot extract prompt without "task"'):
+        transform({"state": np.zeros(3)})

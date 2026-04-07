@@ -1,3 +1,4 @@
+import copy
 from collections.abc import Sequence
 import logging
 import pathlib
@@ -83,13 +84,17 @@ class Policy(BasePolicy):
                 )
             else:
                 self._sample_subtask_tokens = None
-            self._rng = rng or jax.random.key(0)
+            # Avoid `rng or ...`: bool(jax.Array key) can raise on PRNG keys.
+            self._rng = jax.random.key(0) if rng is None else rng
 
     @override
     def infer(self, obs: dict, prev_action: np.ndarray | None = None, use_rtc: bool = False, noise: np.ndarray | None = None) -> dict:  # type: ignore[misc]
         # Make a copy since transformations may modify the inputs in place.
+        
         inputs = jax.tree.map(lambda x: x, obs)
         inputs = self._input_transform(inputs)
+        if "subtask" in obs:
+            print("infer", obs["subtask"])
         if not self._is_pytorch_model:
             # Make a batch and convert to jax.Array.
             inputs = jax.tree.map(lambda x: jnp.asarray(x)[np.newaxis, ...], inputs)
@@ -197,6 +202,89 @@ class Policy(BasePolicy):
                 "decode_ms_per_step": (decode_ms / generated_steps) if generated_steps > 0 else None,
             },
         }
+
+    def infer_subtask_batch(
+        self,
+        obs_list: list[dict],
+        *,
+        batch_size: int = 8,
+        max_new_tokens: int | None = None,
+        temperature: float = 0.0,
+        debug_top_logits: bool = False,
+    ) -> list[dict]:
+        """Same as `infer_subtask` but batches GPU work for faster eval (JAX PI05 only).
+
+        Each element of ``obs_list`` is one raw observation dict (before transforms). Runs
+        ``_input_transform`` per item (still sequential), then stacks leaves and calls
+        ``sample_subtask_tokens`` once per chunk.
+        """
+        if self._sample_subtask_tokens is None:
+            raise NotImplementedError("Current model does not support autoregressive subtask decoding.")
+        if self._is_pytorch_model:
+            raise NotImplementedError("infer_subtask_batch is currently implemented for JAX PI0/PI05 models.")
+        if batch_size < 1:
+            raise ValueError("batch_size must be >= 1")
+
+        eos = self._tokenizer.eos_token_id
+        out_all: list[dict] = []
+
+        def _decode_row(token_ids_1d: np.ndarray) -> tuple[np.ndarray, str, int]:
+            token_ids = np.asarray(token_ids_1d, dtype=np.int32)
+            if max_new_tokens is not None and max_new_tokens >= 0:
+                token_ids = token_ids[:max_new_tokens]
+            stop = len(token_ids)
+            for idx, tid in enumerate(token_ids.tolist()):
+                if tid == eos or tid == 0:
+                    stop = idx + (1 if tid == eos else 0)
+                    break
+            token_ids = token_ids[:stop]
+            text = self._tokenizer.decode(token_ids.tolist()) if len(token_ids) else ""
+            return token_ids, text, len(token_ids)
+
+        for start in range(0, len(obs_list), batch_size):
+            chunk = obs_list[start : start + batch_size]
+            transformed: list[dict] = []
+            for obs in chunk:
+                # Transforms may mutate leaves; callers may repeat the same dict reference per batch slot.
+                inputs = copy.deepcopy(obs)
+                inputs.pop("subtask", None)
+                transformed.append(self._input_transform(inputs))
+
+            batched = jax.tree.map(
+                lambda *xs: jnp.stack([jnp.asarray(x) for x in xs], axis=0),
+                *transformed,
+            )
+            self._rng, sample_rng = jax.random.split(self._rng)
+            decode_start = time.perf_counter()
+            tokens = self._sample_subtask_tokens(
+                sample_rng,
+                _model.Observation.from_dict(batched),
+                temperature=temperature,
+                eos_token_id=eos,
+                debug_top_logits=debug_top_logits,
+            )
+            decode_ms = (time.perf_counter() - decode_start) * 1000.0
+            tokens_np = np.asarray(tokens, dtype=np.int32)
+            b = tokens_np.shape[0]
+            per_row_ms = decode_ms / b if b else decode_ms
+
+            for i in range(b):
+                token_ids, text, generated_steps = _decode_row(tokens_np[i])
+                out_all.append(
+                    {
+                        "subtask_tokens": token_ids,
+                        "subtask_text": text,
+                        "policy_timing": {
+                            "decode_ms": per_row_ms,
+                            "generated_steps": generated_steps,
+                            "decode_ms_per_step": (per_row_ms / generated_steps) if generated_steps > 0 else None,
+                            "batch_decode_ms": decode_ms,
+                            "batch_size": b,
+                        },
+                    }
+                )
+
+        return out_all
 
     @property
     def metadata(self) -> dict[str, Any]:

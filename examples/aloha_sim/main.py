@@ -24,6 +24,8 @@ class Args:
     port: int = 8000
 
     display: bool = False
+    # Subtask History 下发到前端的最大条数（1–500）
+    high_level_history_max_len: int = 50
 
 
 def main(args: Args) -> None:
@@ -45,6 +47,7 @@ def main(args: Args) -> None:
             _saver.VideoSaver(args.out_dir),
         ],
         max_hz=50,
+        high_level_history_max_len=args.high_level_history_max_len,
     )
 
     runtime.run()

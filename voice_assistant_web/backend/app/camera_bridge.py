@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 import logging
 import threading
 import time
@@ -84,6 +85,11 @@ class CameraBridge:
     def get_camera_timestamps(self) -> dict[str, float | None]:
         with self._lock:
             return {name: self._latest_timestamps.get(name) for name in self.camera_names}
+
+    def snapshot_jpeg_b64_all(self) -> dict[str, str]:
+        """当前缓冲内各相机 JPEG 的 base64，用于 realtime WebSocket 推送。"""
+        with self._lock:
+            return {name: base64.b64encode(jpeg).decode("ascii") for name, jpeg in self._latest_jpegs.items()}
 
     def _image_msg_to_bgr(self, image_msg) -> np.ndarray | None:
         dtype = np.uint8

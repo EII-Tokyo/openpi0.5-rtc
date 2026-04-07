@@ -4,7 +4,7 @@ services:
   runtime:
     image: libero
     depends_on:
-      - openpi_server
+      - openpi_server_low_level
     build:
       context: ../..
       dockerfile: examples/libero/Dockerfile
@@ -28,8 +28,8 @@ services:
               count: 1
               capabilities: [gpu]
 
-  openpi_server:
-    image: openpi_server
+  openpi_server_low_level:
+    image: openpi_server_low_level
     build:
       context: ../..
       dockerfile: scripts/docker/serve_policy.Dockerfile

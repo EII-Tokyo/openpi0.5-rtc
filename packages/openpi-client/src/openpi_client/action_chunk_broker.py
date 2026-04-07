@@ -35,12 +35,10 @@ class ActionChunkBroker(_base_policy.BasePolicy):
         self._last_origin_actions: np.ndarray | None = None
         self._background_results: Dict[str, np.ndarray] | None = None
         self._background_running: bool = False
-        self._chunk_id: int = 0
-        self._background_chunk_id: int | None = None
 
         self._obs: Dict[str, np.ndarray] | None = None
-        self._s = 20
-        self._d = 17
+        self._s = 25
+        self._d = 10
         assert self._d < self._s, f"RTC requires d < s, got s={self._s}, d={self._d}"
         self._use_rtc = use_rtc
         self._norm_stats = None
@@ -104,7 +102,6 @@ class ActionChunkBroker(_base_policy.BasePolicy):
                 # np.savetxt("norm_action.txt", norm_action, fmt='%.6f')
                 # np.savetxt("last_origin_actions.txt", self._last_origin_actions, fmt='%.6f')
                 self._background_results = self._policy.infer(self._obs, norm_action, self._use_rtc)
-                self._background_chunk_id = self._chunk_id + 1
                 # break
                 # 将后面18列都设为0
                 # modified_actions = None
@@ -147,7 +144,6 @@ class ActionChunkBroker(_base_policy.BasePolicy):
             results = tree.map_structure(lambda x: self._slice_result(x, chunk_len), self._last_results)
             self._obs = obs
             self._cur_step += 1
-            switched = False
 
             # if current step equals s+d, wait for background inference to complete
             if self._cur_step == self._s + self._d:
@@ -155,17 +151,8 @@ class ActionChunkBroker(_base_policy.BasePolicy):
                     time.sleep(0.01)
                 self._last_origin_actions = self._background_results["origin_actions"]
                 self._last_results = self._background_results
-                if self._background_chunk_id is not None:
-                    self._chunk_id = self._background_chunk_id
                 self._cur_step -= self._s
-                switched = True
-            results["rtc_debug"] = {
-                "chunk_id": self._chunk_id,
-                "local_step": self._cur_step - 1 if not switched else self._cur_step,
-                "s": self._s,
-                "d": self._d,
-                "switched": switched,
-            }
+
             return results
         else:
             if self._last_results is None:

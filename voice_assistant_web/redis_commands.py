@@ -9,7 +9,7 @@ from .config import settings
 
 TASK_MAPPING = {
     "1": "Remove the label from the bottle with the knife in the right hand.",
-    "2": "process all bottles",
+    "2": "Process all bottles",
     "3": "Stop and human hand control",
     "4": "Return to home position and save hdf5",
     "5": "Return to sleep position, save hdf5 and quit robot runtime",

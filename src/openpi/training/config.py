@@ -239,10 +239,17 @@ class DataConfigFactory(abc.ABC):
 @dataclasses.dataclass(frozen=True)
 class FakeDataConfig(DataConfigFactory):
     repo_id: str = "fake"
+    # Satisfy tyro (base `DataConfigFactory.repo_ids` is MISSING); fake path uses `repo_id` only.
+    repo_ids: list[str] = dataclasses.field(default_factory=list)
 
     @override
     def create(self, assets_dirs: pathlib.Path, model_config: _model.BaseModelConfig) -> DataConfig:
-        return DataConfig(repo_id=self.repo_id)
+        model_transforms = ModelTransformFactory()(model_config)
+        return DataConfig(
+            repo_id=self.repo_id,
+            model_transforms=model_transforms,
+            use_quantile_norm=model_config.model_type != ModelType.PI0,
+        )
 
 
 @dataclasses.dataclass(frozen=True)
@@ -582,6 +589,16 @@ class TrainConfig:
     # data parallel between 2 groups of devices.
     fsdp_devices: int = 1
 
+    # Subtask (bottle_state, subtask) holdout + periodic val accuracy (JAX LeRobot training only).
+    subtask_eval_enabled: bool = False
+    subtask_eval_holdout_fraction: float = 0.1
+    subtask_eval_interval_steps: int = 1000
+    subtask_eval_batch_size: int = 8
+    subtask_eval_max_samples_per_class: int | None = None
+    """Cap val frames per class each eval pass; None = use full val split."""
+    subtask_eval_canonical_pairs: tuple[tuple[str, str], ...] | None = None
+    """If None, use `DEFAULT_STATE_SUBTASK_PAIRS` from openpi_client (nine classes)."""
+
     @property
     def assets_dirs(self) -> pathlib.Path:
         """Get the assets directory for this config."""
@@ -602,6 +619,8 @@ class TrainConfig:
     def __post_init__(self) -> None:
         if self.resume and self.overwrite:
             raise ValueError("Cannot resume and overwrite at the same time.")
+        if not (0.0 < self.subtask_eval_holdout_fraction < 1.0):
+            raise ValueError("subtask_eval_holdout_fraction must be in (0, 1).")
         image_size = getattr(self.data, "image_size", None)
         image_resolution = getattr(self.model, "image_resolution", None)
         if image_size is not None and image_resolution != image_size:
@@ -869,7 +888,7 @@ _CONFIGS = [
         log_interval=10,
         data=LeRobotAlohaDataConfig(
             image_size=(224, 224),
-            force_prompt="process all bottles",
+            force_prompt="Process all bottles",
             # repo_id="physical-intelligence/aloha_pen_uncap_diverse",
             repo_ids=[
                 "lyl472324464/2025-12-23-twist-one-bottle",
@@ -1237,6 +1256,113 @@ _CONFIGS = [
         num_train_steps=40_000,
         batch_size=128,
         num_workers=4,
+        subtask_eval_enabled=True,
+        subtask_eval_interval_steps=1000,
+        # Cap per-class val frames so periodic eval finishes in bounded time (full split is ~75k disk reads).
+        subtask_eval_max_samples_per_class=128,
+    ),
+    TrainConfig(
+        name="twist_and_static_mixture_lora",
+        model=pi0_config.Pi0Config(
+            pi05=True,
+            paligemma_variant="gemma_2b_lora",
+            action_expert_variant="gemma_300m_lora",
+            max_token_len=80,
+            subtask_loss_weight=0.1,
+            subtask_max_token_len=250,
+            fast_tokenizer_path="physical-intelligence/fast",
+        ),
+        lr_schedule=_optimizer.CosineDecaySchedule(
+            warmup_steps=10_000,
+            peak_lr=2.5e-5,
+            decay_steps=40_000,
+            decay_lr=2.5e-6,
+        ),
+        log_interval=10,
+        data=LeRobotAlohaDataConfig(
+            image_size=(224, 224),
+            include_bottle_description=True,
+            include_bottle_position=False,
+            include_bottle_state=True,
+            include_subtask=True,
+            video_memory_num_frames=1,
+            video_memory_stride_seconds=1.0,
+            repo_ids=[
+                "lyl472324464/2025-11-18-twist-two-bottles",
+                "lyl472324464/2025-11-26-twist-two-bottles",
+                "lyl472324464/2025-12-10-twist-one-bottle",
+                "lyl472324464/2025-12-23-twist-one-bottle",
+                "lyl472324464/2026-01-20-twist-one-bottle",
+                "lyl472324464/2026-01-28-twist-many-bottle",
+                "lyl472324464/2026-02-03-no-cap-and-direction",
+                "lyl472324464/2026-03-04-one-direction",
+                "lyl472324464/2026-03-05-two-direction",
+                "lyl472324464/2026-03-09-no-cap-inference",
+                "lyl472324464/2026-03-09-inference-with-and-without-cap",
+                "lyl472324464/2026-03-12-one-have-cap",
+                "lyl472324464/2026-03-12-one-have-cap-direction",
+                "lyl472324464/2026-03-12-one-havent-cap",
+                "lyl472324464/2026-03-12-one-havent-cap-direction",
+                "lyl472324464/2026-03-12-two-have-all-left",
+                "lyl472324464/2026-03-12-two-have-cap-all-right",
+                "lyl472324464/2026-03-12-two-have-cap-one-right",
+                "lyl472324464/aloha_static_battery",
+                "lyl472324464/aloha_static_candy",
+                "lyl472324464/aloha_static_coffee",
+                "lyl472324464/aloha_static_coffee_new",
+                "lyl472324464/aloha_static_cups_open",
+                "lyl472324464/aloha_static_fork_pick_up",
+                "lyl472324464/aloha_static_pingpong_test",
+                "lyl472324464/aloha_static_pro_pencil",
+                "lyl472324464/aloha_static_screw_driver",
+                "lyl472324464/aloha_static_tape",
+                "lyl472324464/aloha_static_thread_velcro",
+                "lyl472324464/aloha_static_towel",
+                "lyl472324464/aloha_static_vinh_cup",
+                "lyl472324464/aloha_static_vinh_cup_left",
+                "lyl472324464/aloha_static_ziploc_slide",
+            ],
+            assets=AssetsConfig(
+                assets_dir="gs://openpi-assets/checkpoints/pi05_base/assets",
+                asset_id="trossen",
+            ),
+            base_config=DataConfig(prompt_from_task=True),
+            repack_transforms=_transforms.Group(
+                inputs=[
+                    _transforms.InjectDefaultField("subtask", None),
+                    _transforms.RepackTransform(
+                        {
+                            "images": {
+                                "cam_high": "observation.images.cam_high",
+                                "cam_low": "observation.images.cam_low",
+                                "cam_left_wrist": "observation.images.cam_left_wrist",
+                                "cam_right_wrist": "observation.images.cam_right_wrist",
+                            },
+                            "state": "observation.state",
+                            "actions": "action",
+                            "prompt": "prompt",
+                            "subtask": "subtask",
+                        }
+                    )
+                ]
+            ),
+        ),
+        freeze_filter=pi0_config.Pi0Config(
+            pi05=True,
+            paligemma_variant="gemma_2b_lora",
+            action_expert_variant="gemma_300m_lora",
+            subtask_loss_weight=1.0,
+            subtask_max_token_len=64,
+        ).get_freeze_filter(),
+        ema_decay=None,
+        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_base/params"),
+        save_interval=1000,
+        num_train_steps=40_000,
+        batch_size=128,
+        num_workers=4,
+        subtask_eval_enabled=True,
+        subtask_eval_interval_steps=1000,
+        subtask_eval_max_samples_per_class=128,
     ),
     #
     # Fine-tuning DROID configs.

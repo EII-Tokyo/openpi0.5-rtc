@@ -292,7 +292,9 @@ button {
 }
 
 .camera-stage-frame img,
-.mini-camera-card img {
+.camera-stage-frame canvas,
+.mini-camera-card img,
+.mini-camera-card canvas {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -602,6 +604,87 @@ button {
   justify-content: flex-start;
 }
 
+.config-subtask-editor-block {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.config-subtask-editor-help {
+  margin: 0 0 4px;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.subtask-catalog-rows,
+.state-subtask-pair-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 220px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.subtask-catalog-row,
+.state-subtask-pair-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.state-subtask-pair-row {
+  grid-template-columns: 1fr 1fr auto;
+}
+
+.subtask-catalog-subtask-input,
+.pair-bottle-state,
+.pair-subtask {
+  min-width: 0;
+  font-size: 12px;
+}
+
+.subtask-catalog-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  white-space: nowrap;
+  color: #5c4d40;
+}
+
+.subtask-catalog-checkbox input {
+  margin: 0;
+}
+
+.subtask-catalog-goodbad {
+  min-width: 108px;
+  font-size: 11px;
+}
+
+.subtask-row-remove {
+  font-size: 11px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(60, 48, 38, 0.15);
+  background: rgba(255, 250, 243, 0.9);
+  cursor: pointer;
+  color: #4a3d32;
+}
+
+.subtask-add-row {
+  align-self: flex-start;
+  margin-top: 4px;
+  font-size: 12px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(74, 125, 23, 0.25);
+  background: rgba(232, 244, 220, 0.5);
+  cursor: pointer;
+  color: #2d3d1f;
+}
+
 .response-grid,
 .runtime-grid {
   min-height: 0;
@@ -650,6 +733,39 @@ button {
   color: #2b221a;
 }
 
+.history-block-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.history-autoscroll-toggle {
+  flex-shrink: 0;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(60, 48, 38, 0.18);
+  background: rgba(255, 255, 255, 0.55);
+  color: #5c4d40;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
+.history-autoscroll-toggle:hover {
+  border-color: rgba(74, 125, 23, 0.35);
+  color: #2f241b;
+}
+
+.history-autoscroll-toggle.active {
+  border-color: rgba(74, 125, 23, 0.45);
+  background: rgba(230, 245, 212, 0.85);
+  color: #2a4a12;
+}
+
 .history-list {
   display: grid;
   gap: 8px;
@@ -681,6 +797,18 @@ button {
 .history-item span {
   font-size: 11px;
   color: #6f5d4e;
+}
+
+.history-item .history-item-time {
+  font-size: 10px;
+  color: #8a7865;
+}
+
+.history-item .history-item-qpos {
+  font-family: "IBM Plex Mono", "SFMono-Regular", monospace;
+  font-size: 10px;
+  color: #5c4d40;
+  word-break: break-all;
 }
 
 .history-image-grid {
@@ -775,7 +903,6 @@ button {
   position: fixed;
   inset: 0;
   background: rgba(44, 33, 24, 0.36);
-  backdrop-filter: blur(18px);
   z-index: 20;
 }
 

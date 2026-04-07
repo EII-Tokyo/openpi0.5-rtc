@@ -1,6 +1,7 @@
 from collections.abc import Iterator, Sequence
 import logging
 import multiprocessing
+import time
 import os
 from pathlib import Path
 import typing
@@ -16,6 +17,7 @@ import torch
 
 import openpi.models.model as _model
 import openpi.training.config as _config
+import openpi.training.subtask_eval as _subtask_eval
 from openpi.training.droid_rlds_dataset import DroidRldsDataset
 import openpi.transforms as _transforms
 
@@ -82,6 +84,30 @@ class TransformedDataset(Dataset[T_co]):
 
     def __len__(self) -> int:
         return len(self._dataset)
+
+
+def _restrict_trainable_mask_for_holdout(dataset: Dataset, allowed_mask: np.ndarray) -> None:
+    """Restrict random trainable-index redirection to the training split only."""
+    if isinstance(dataset, TransformedDataset):
+        _restrict_trainable_mask_for_holdout(dataset._dataset, allowed_mask)
+        return
+
+    if isinstance(dataset, IsForTrainingWrapper):
+        dataset._trainable_mask = np.asarray(dataset._trainable_mask, dtype=bool) & np.asarray(allowed_mask, dtype=bool)
+        dataset._trainable_indices = np.flatnonzero(dataset._trainable_mask)
+        if len(dataset._trainable_indices) == 0:
+            raise ValueError("Holdout removed all trainable indices from IsForTrainingWrapper.")
+        return
+
+    if isinstance(dataset, TemporalFrameStackDataset):
+        if dataset._trainable_mask is None:
+            dataset._trainable_mask = np.asarray(allowed_mask, dtype=bool).copy()
+        else:
+            dataset._trainable_mask = np.asarray(dataset._trainable_mask, dtype=bool) & np.asarray(allowed_mask, dtype=bool)
+        dataset._trainable_indices = np.flatnonzero(dataset._trainable_mask)
+        if len(dataset._trainable_indices) == 0:
+            raise ValueError("Holdout removed all trainable indices from TemporalFrameStackDataset.")
+        return
 
 
 class IsForTrainingWrapper(Dataset[T_co]):
@@ -325,9 +351,17 @@ class FakeDataset(Dataset):
         observation = jax.tree.map(make_from_spec, self._observation_spec)
         action = jax.tree.map(make_from_spec, self._action_spec)
 
+        obs_dict = observation.to_dict()
+        # Model transforms (e.g. `TokenizePrompt`) populate these; drop spec placeholders so collate is numeric-only.
+        for k in list(obs_dict):
+            if k.startswith("tokenized_") or k in ("token_ar_mask", "token_loss_mask"):
+                obs_dict.pop(k, None)
+
         return {
-            **observation.to_dict(),
+            **obs_dict,
             "actions": action,
+            # `transform_dataset` always runs `PromptFromLeRobotTask`, which needs a LeRobot-style task string.
+            "task": "debug",
         }
 
     def __len__(self) -> int:
@@ -518,6 +552,7 @@ def create_data_loader(
         seed=config.seed,
         skip_norm_stats=skip_norm_stats,
         framework=framework,
+        train_config=config,
     )
 
 
@@ -534,6 +569,7 @@ def create_torch_data_loader(
     num_workers: int = 0,
     seed: int = 0,
     framework: str = "jax",
+    train_config: _config.TrainConfig | None = None,
 ) -> DataLoader[tuple[_model.Observation, _model.Actions]]:
     """Create a data loader for training.
 
@@ -551,9 +587,121 @@ def create_torch_data_loader(
         num_workers: The number of worker processes to use. If zero, the data loader will
             execute in the main process.
         seed: The seed to use for shuffling the data.
+        train_config: When set, may apply subtask-eval holdout (see TrainConfig.subtask_eval_*).
     """
-    dataset = create_torch_dataset(data_config, action_horizon, model_config)
-    dataset = transform_dataset(dataset, data_config, skip_norm_stats=skip_norm_stats)
+    t_pipe = time.perf_counter()
+    logging.info("data_loader: [1/4] create_torch_dataset starting (raw LeRobot / multi-repo)")
+    base_dataset = create_torch_dataset(data_config, action_horizon, model_config)
+    logging.info(
+        "data_loader: [1/4] create_torch_dataset done len=%d elapsed=%.2fs",
+        len(base_dataset),
+        time.perf_counter() - t_pipe,
+    )
+
+    t_tf = time.perf_counter()
+    logging.info("data_loader: [2/4] transform_dataset starting (prompt/norm/model transforms)")
+    dataset = transform_dataset(base_dataset, data_config, skip_norm_stats=skip_norm_stats)
+    logging.info("data_loader: [2/4] transform_dataset done elapsed=%.2fs", time.perf_counter() - t_tf)
+
+    subtask_eval_outer = None
+    subtask_eval_split = None
+    subtask_eval_index_to_class: dict[int, int] | None = None
+    repo_id = getattr(data_config, "repo_id", None)
+    if (
+        train_config is not None
+        and train_config.subtask_eval_enabled
+        and framework == "jax"
+        and repo_id != "fake"
+    ):
+        try:
+            t_se = time.perf_counter()
+            canonical = _subtask_eval.resolve_canonical_pairs(train_config)
+            t_lm = time.perf_counter()
+            subtask_label_map = _subtask_eval.try_build_parquet_subtask_label_map(base_dataset)
+            if subtask_label_map is not None:
+                logging.info(
+                    "data_loader: [3/4] subtask_eval holdout ENABLED — parquet label_map len=%d built in %.2fs (split+map skip __getitem__)",
+                    len(subtask_label_map),
+                    time.perf_counter() - t_lm,
+                )
+            else:
+                logging.info(
+                    "data_loader: [3/4] subtask_eval holdout ENABLED — parquet fast path unavailable; scanning every frame via __getitem__ (slow on huge datasets)"
+                )
+            split = _subtask_eval.compute_subtask_eval_split(
+                outer_torch_dataset=base_dataset,
+                canonical_pairs=canonical,
+                holdout_fraction=train_config.subtask_eval_holdout_fraction,
+                seed=train_config.seed,
+                label_map=subtask_label_map,
+            )
+            logging.info(
+                "data_loader: [3a] compute_subtask_eval_split finished elapsed=%.2fs",
+                time.perf_counter() - t_se,
+            )
+            _subtask_eval.log_split_summary(split)
+            subtask_eval_outer = base_dataset
+            subtask_eval_split = split
+            t_map = time.perf_counter()
+            subtask_eval_index_to_class = _subtask_eval.build_index_to_class_map(
+                base_dataset, canonical, label_map=subtask_label_map
+            )
+            logging.info(
+                "data_loader: [3b] build_index_to_class_map finished elapsed=%.2fs",
+                time.perf_counter() - t_map,
+            )
+            t_sub = time.perf_counter()
+            train_list = split.train_indices.tolist()
+            logging.info(
+                "data_loader: [3c] Subset: train_indices.tolist() done count=%d in %.2fs (large list alloc)",
+                len(train_list),
+                time.perf_counter() - t_sub,
+            )
+            train_allowed_mask = np.zeros(len(base_dataset), dtype=bool)
+            train_allowed_mask[split.train_indices] = True
+            _restrict_trainable_mask_for_holdout(dataset, train_allowed_mask)
+            dataset = torch.utils.data.Subset(dataset, train_list)
+            logging.info(
+                "data_loader: [3/4] subtask_eval subset total elapsed=%.2fs (split+map+subset)",
+                time.perf_counter() - t_se,
+            )
+            split_path = None
+            try:
+                split_path = train_config.checkpoint_dir / "subtask_eval_split.json"
+            except ValueError:
+                logging.warning("subtask_eval_split.json not saved: set exp_name to define checkpoint_dir.")
+            if split_path is not None:
+                try:
+                    t_json = time.perf_counter()
+                    _subtask_eval.save_split_json(
+                        split_path,
+                        split,
+                        seed=train_config.seed,
+                        holdout_fraction=train_config.subtask_eval_holdout_fraction,
+                    )
+                    logging.info(
+                        "data_loader: wrote %s in %.2fs",
+                        split_path,
+                        time.perf_counter() - t_json,
+                    )
+                except Exception as e:
+                    logging.warning("Could not write subtask_eval_split.json: %s", e)
+        except Exception:
+            logging.exception("subtask_eval_enabled: holdout failed; training on full dataset without holdout")
+            subtask_eval_outer = None
+            subtask_eval_split = None
+            subtask_eval_index_to_class = None
+    else:
+        if train_config is not None and train_config.subtask_eval_enabled and repo_id == "fake":
+            logging.info("data_loader: subtask_eval skipped (repo_id=fake)")
+        elif train_config is not None and train_config.subtask_eval_enabled and framework != "jax":
+            logging.info("data_loader: subtask_eval skipped (framework=%s)", framework)
+
+    logging.info(
+        "data_loader: [4/4] torch DataLoader about to start len(dataset)=%d total_since_entry=%.2fs",
+        len(dataset),
+        time.perf_counter() - t_pipe,
+    )
 
     # Use TorchDataLoader for both frameworks
     # For PyTorch DDP, create DistributedSampler and divide batch size by world size
@@ -588,7 +736,13 @@ def create_torch_data_loader(
         framework=framework,
     )
 
-    return DataLoaderImpl(data_config, data_loader)
+    return DataLoaderImpl(
+        data_config,
+        data_loader,
+        subtask_eval_outer_dataset=subtask_eval_outer,
+        subtask_eval_split=subtask_eval_split,
+        subtask_eval_index_to_class=subtask_eval_index_to_class,
+    )
 
 
 def create_rlds_data_loader(
@@ -792,9 +946,20 @@ class RLDSDataLoader:
 
 
 class DataLoaderImpl(DataLoader):
-    def __init__(self, data_config: _config.DataConfig, data_loader: TorchDataLoader | RLDSDataLoader):
+    def __init__(
+        self,
+        data_config: _config.DataConfig,
+        data_loader: TorchDataLoader | RLDSDataLoader,
+        *,
+        subtask_eval_outer_dataset: typing.Any = None,
+        subtask_eval_split: typing.Any = None,
+        subtask_eval_index_to_class: dict[int, int] | None = None,
+    ):
         self._data_config = data_config
         self._data_loader = data_loader
+        self.subtask_eval_outer_dataset = subtask_eval_outer_dataset
+        self.subtask_eval_split = subtask_eval_split
+        self.subtask_eval_index_to_class = subtask_eval_index_to_class or {}
 
     def data_config(self) -> _config.DataConfig:
         return self._data_config

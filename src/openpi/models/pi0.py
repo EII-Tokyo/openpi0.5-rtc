@@ -458,7 +458,11 @@ class Pi0(_model.BaseModel):
                 next_token[:, None],
             )
             token_embeddings = self.PaliGemma.llm(next_token[:, None], method="embed")
-            generated_valid = (jnp.arange(max_steps)[None, :] <= step_i)
+            # Broadcast to batch dim: [None, :] is (1, max_steps) and breaks concat when B > 1.
+            generated_valid = jnp.broadcast_to(
+                jnp.arange(max_steps)[None, :] <= step_i,
+                (batch_size, max_steps),
+            )
             key_mask = jnp.concatenate([prefix_mask, generated_valid], axis=1)
             full_attn_mask = key_mask[:, None, :]
             positions = prefix_valid_len[:, None] + step_i
@@ -495,8 +499,8 @@ class Pi0(_model.BaseModel):
         observation: _model.Observation,
         *,
         num_steps: int | at.Int[at.Array, ""] = 10,       
-        s: int = 20,
-        d: int = 17,
+        s: int = 25,
+        d: int = 10,
         beta: float = 8.0,
     ) -> _model.Actions:
         assert d < s, f"RTC requires d < s, got s={s}, d={d}"

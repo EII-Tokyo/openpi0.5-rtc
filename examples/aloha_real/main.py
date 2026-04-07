@@ -25,7 +25,8 @@ class Args:
     high_level_host: str = "0.0.0.0"
     high_level_port: int = 8001
     high_level_hz: float = 0.0
-    good_bad_action: Literal["good action", "bad action", "normal"] = "normal"
+    # Subtask History 下发到前端的最大条数（1–500），减轻 WebSocket 负载
+    high_level_history_max_len: int = 50
 
     action_horizon: int = 25
     max_episode_steps: int = 10000
@@ -96,7 +97,7 @@ def main(args: Args) -> None:
         manual_dataset_dir=args.manual_dataset_dir,
         high_level_policy=high_level_policy,
         high_level_hz=args.high_level_hz,
-        good_bad_action=args.good_bad_action,
+        high_level_history_max_len=args.high_level_history_max_len,
     )
 
     shutdown_started = False

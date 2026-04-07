@@ -59,7 +59,7 @@ Start both policy servers on the local machine without `runtime`:
 ```bash
 SERVER_ARGS='--warmup-rtc --warmup-non-rtc --no-warmup-subtask policy:checkpoint --policy.config twist_off_the_bottle_cap_subtask_lora --policy.dir /app/checkpoints/twist_off_the_bottle_cap_subtask_lora/<exp_name>/<step>' \
 HIGH_LEVEL_SERVER_ARGS='--no-warmup-rtc --no-warmup-non-rtc --warmup-subtask policy:checkpoint --policy.config twist_off_the_bottle_cap_subtask_lora --policy.dir /app/checkpoints/twist_off_the_bottle_cap_subtask_lora/<exp_name>/<step>' \
-docker compose up -d openpi_server openpi_server_high_level
+docker compose up -d openpi_server_low_level openpi_server_high_level
 ```
 
 Expected ports:
@@ -77,7 +77,7 @@ This warmup split is intentional:
 The current recommended online setup is:
 
 - local machine (`192.168.1.42`): `runtime`, `openpi_server_high_level`, `voice_web_backend`, `voice_web_frontend`
-- remote machine (`192.168.1.40`): low-level `openpi_server`
+- remote machine (`192.168.1.40`): low-level service `openpi_server_low_level` (image `lyl472324464/robot:openpi_server`)
 
 The remote low-level repo is:
 
@@ -90,8 +90,8 @@ Restart the remote low-level container:
 ```bash
 ssh eii@192.168.1.40
 cd /home/eii/openpi0.5-rtc-lowlevel-run
-docker restart openpi05-rtc-lowlevel-run-openpi_server-1
-docker logs -f openpi05-rtc-lowlevel-run-openpi_server-1
+docker restart openpi05-rtc-lowlevel-run-openpi_server_low_level-1
+docker logs -f openpi05-rtc-lowlevel-run-openpi_server_low_level-1
 ```
 
 Wait for:
@@ -116,11 +116,12 @@ source /root/interbotix_ws/devel/setup.bash &&
 cd /app &&
 export PYTHONPATH=/app:/app/src:/app/packages/openpi-client/src:$PYTHONPATH &&
 python3 -u examples/aloha_real/main.py \
-  --model-dir /app/checkpoints/twist_off_the_bottle_cap_subtask_lora/<exp_name>/<step> \
-  --low-level-host 192.168.1.40 \
+  --model-dir /app/checkpoints/twist_and_static_mixture_full_finetune/twist_and_static_mixture_full_finetune_vast_20260405_100600/39999 \
+  --low-level-host 127.0.0.1 \
   --low-level-port 8000 \
   --high-level-host 127.0.0.1 \
-  --high-level-port 8001
+  --high-level-port 8001 \
+  --no-use-rtc
 '
 ```
 

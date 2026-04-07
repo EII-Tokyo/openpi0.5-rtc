@@ -46,15 +46,51 @@ voice_engine = VoiceAssistantEngine(redis_client)
 runtime_config_store = RuntimeConfigStore()
 
 
+def _merge_forced_low_level_subtask(request: RuntimeConfigRequest, current: str | None) -> str | None:
+    """Explicit JSON `null` must clear the override; omitting the key keeps the stored value."""
+    fields_set = getattr(request, "model_fields_set", None) or getattr(request, "__fields_set__", set())
+    if "forced_low_level_subtask" not in fields_set:
+        return current
+    val = request.forced_low_level_subtask
+    if val is None:
+        return None
+    if isinstance(val, str) and not val.strip():
+        return None
+    return val.strip()
+
+
 def _merge_runtime_config_request(request: RuntimeConfigRequest) -> RuntimeConfigPayload:
     current = runtime_config_store.load()
-    return RuntimeConfigPayload(
+    fields_set = getattr(request, "model_fields_set", None) or getattr(request, "__fields_set__", set())
+    merged_camera_refresh_ms = current.camera_refresh_ms
+    if request.camera_refresh_ms is not None:
+        try:
+            merged_camera_refresh_ms = max(100, int(request.camera_refresh_ms))
+        except (TypeError, ValueError):
+            merged_camera_refresh_ms = current.camera_refresh_ms
+
+    if "subtask_catalog" in fields_set and request.subtask_catalog is not None:
+        subtask_catalog = list(request.subtask_catalog)
+    else:
+        subtask_catalog = list(current.subtask_catalog)
+
+    if "state_subtask_pairs" in fields_set and request.state_subtask_pairs is not None:
+        state_subtask_pairs = list(request.state_subtask_pairs)
+    else:
+        state_subtask_pairs = list(current.state_subtask_pairs)
+
+    merged = RuntimeConfigPayload(
         dataset_dir=request.dataset_dir if request.dataset_dir is not None else current.dataset_dir,
         manual_dataset_dir=request.manual_dataset_dir if request.manual_dataset_dir is not None else current.manual_dataset_dir,
         include_bottle_description=(
             request.include_bottle_description
             if request.include_bottle_description is not None
             else current.include_bottle_description
+        ),
+        lock_bottle_description=(
+            request.lock_bottle_description
+            if request.lock_bottle_description is not None
+            else current.lock_bottle_description
         ),
         include_bottle_position=(
             request.include_bottle_position
@@ -63,17 +99,28 @@ def _merge_runtime_config_request(request: RuntimeConfigRequest) -> RuntimeConfi
         ),
         include_bottle_state=request.include_bottle_state if request.include_bottle_state is not None else current.include_bottle_state,
         include_subtask=request.include_subtask if request.include_subtask is not None else current.include_subtask,
-        forced_low_level_subtask=(
-            request.forced_low_level_subtask
-            if request.forced_low_level_subtask is not None
-            else current.forced_low_level_subtask
-        ),
+        forced_low_level_subtask=_merge_forced_low_level_subtask(request, current.forced_low_level_subtask),
         video_memory_num_frames=(
             request.video_memory_num_frames
             if request.video_memory_num_frames in (1, 4)
             else current.video_memory_num_frames
         ),
+        announcement_language=(
+            request.announcement_language
+            if request.announcement_language is not None
+            else current.announcement_language
+        ),
+        api_base=request.api_base if request.api_base is not None else current.api_base,
+        ws_base=request.ws_base if request.ws_base is not None else current.ws_base,
+        camera_refresh_ms=merged_camera_refresh_ms,
+        ui_language=request.ui_language if request.ui_language is not None else current.ui_language,
+        subtask_catalog=subtask_catalog,
+        state_subtask_pairs=state_subtask_pairs,
     )
+    allowed_subtasks = {e.subtask for e in merged.subtask_catalog}
+    if merged.forced_low_level_subtask and merged.forced_low_level_subtask not in allowed_subtasks:
+        merged = merged.model_copy(update={"forced_low_level_subtask": None})
+    return merged
 
 
 @app.on_event("startup")
@@ -86,11 +133,14 @@ def on_startup() -> None:
         dataset_dir=stored.dataset_dir,
         manual_dataset_dir=stored.manual_dataset_dir,
         include_bottle_description=stored.include_bottle_description,
+        lock_bottle_description=stored.lock_bottle_description,
         include_bottle_position=stored.include_bottle_position,
         include_bottle_state=stored.include_bottle_state,
         include_subtask=stored.include_subtask,
         forced_low_level_subtask=stored.forced_low_level_subtask,
         video_memory_num_frames=stored.video_memory_num_frames,
+        subtask_catalog=stored.subtask_catalog,
+        state_subtask_pairs=stored.state_subtask_pairs,
     )
 
 
@@ -138,12 +188,21 @@ def stream_camera(camera_name: str) -> StreamingResponse:
 async def realtime_socket(websocket: WebSocket) -> None:
     await websocket.accept()
     interval = 1.0 / settings.realtime_hz if settings.realtime_hz > 0 else 0.1
+    last_camera_push = 0.0
     try:
         while True:
+            cfg = runtime_config_store.load()
+            cam_interval_s = max(0.05, float(cfg.camera_refresh_ms) / 1000.0)
+            now = time.time()
+            camera_jpeg_b64: dict[str, str] = {}
+            if last_camera_push == 0.0 or now - last_camera_push >= cam_interval_s:
+                camera_jpeg_b64 = camera_bridge.snapshot_jpeg_b64_all()
+                last_camera_push = now
             payload = RealtimePayload(
                 robot=RuntimeStatePayload(**robot_state_bridge.snapshot()),
                 camera_status=camera_bridge.get_camera_status(),
                 camera_timestamps=camera_bridge.get_camera_timestamps(),
+                camera_jpeg_b64=camera_jpeg_b64,
             )
             await websocket.send_json(payload.model_dump())
             await asyncio.sleep(interval)
@@ -161,6 +220,7 @@ async def voice_text(request: VoiceRequest) -> VoiceResponse:
             dataset_dir=request.dataset_dir,
             manual_dataset_dir=request.manual_dataset_dir,
             include_bottle_description=request.include_bottle_description,
+            lock_bottle_description=request.lock_bottle_description,
             include_bottle_position=request.include_bottle_position,
             include_bottle_state=request.include_bottle_state,
             include_subtask=request.include_subtask,
@@ -180,6 +240,7 @@ async def voice_text(request: VoiceRequest) -> VoiceResponse:
         dataset_dir=request.dataset_dir,
         manual_dataset_dir=request.manual_dataset_dir,
         include_bottle_description=request.include_bottle_description,
+        lock_bottle_description=request.lock_bottle_description,
         include_bottle_position=request.include_bottle_position,
         include_bottle_state=request.include_bottle_state,
         include_subtask=request.include_subtask,
@@ -195,6 +256,7 @@ async def voice_audio(
     dataset_dir: str | None = Form(None),
     manual_dataset_dir: str | None = Form(None),
     include_bottle_description: bool = Form(True),
+    lock_bottle_description: bool = Form(True),
     include_bottle_position: bool = Form(False),
     include_bottle_state: bool = Form(True),
     include_subtask: bool = Form(True),
@@ -207,6 +269,7 @@ async def voice_audio(
         dataset_dir=dataset_dir,
         manual_dataset_dir=manual_dataset_dir,
         include_bottle_description=include_bottle_description,
+        lock_bottle_description=lock_bottle_description,
         include_bottle_position=include_bottle_position,
         include_bottle_state=include_bottle_state,
         include_subtask=include_subtask,
@@ -229,11 +292,14 @@ def runtime_config(request: RuntimeConfigRequest) -> RuntimeConfigPayload:
         dataset_dir=merged.dataset_dir,
         manual_dataset_dir=merged.manual_dataset_dir,
         include_bottle_description=merged.include_bottle_description,
+        lock_bottle_description=merged.lock_bottle_description,
         include_bottle_position=merged.include_bottle_position,
         include_bottle_state=merged.include_bottle_state,
         include_subtask=merged.include_subtask,
         forced_low_level_subtask=merged.forced_low_level_subtask,
         video_memory_num_frames=merged.video_memory_num_frames,
+        subtask_catalog=merged.subtask_catalog,
+        state_subtask_pairs=merged.state_subtask_pairs,
     )
     return merged
 

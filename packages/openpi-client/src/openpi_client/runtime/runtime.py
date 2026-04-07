@@ -1,6 +1,7 @@
 import logging
 import threading
 import time
+from typing import Any
 import json
 import hashlib
 import io
@@ -22,11 +23,26 @@ from PIL import Image
 from openpi_client import subtask_parsing as _subtask_parsing
 from openpi_client.runtime import agent as _agent
 from openpi_client.runtime import environment as _environment
+from openpi_client.runtime import low_level_subtask_defaults as _ll_defaults
 from openpi_client.runtime import subscriber as _subscriber
 from examples.aloha_real import hdf5_utils as _hdf5_utils
 
 # 确保 logging 有 handler（如果主程序没有配置）
 _logger = logging.getLogger(__name__)
+
+
+def _observation_qpos_list(obs: dict | None) -> list[float]:
+    """将观测里的 qpos 转为可 JSON 序列化的 float 列表（用于 high-level 历史）。"""
+    if not obs or not isinstance(obs, dict):
+        return []
+    q = obs.get("qpos")
+    if q is None:
+        return []
+    try:
+        arr = np.asarray(q, dtype=np.float64).reshape(-1)
+        return [float(x) for x in arr.tolist()]
+    except Exception:
+        return []
 if not _logger.handlers and not logging.root.handlers:
     logging.basicConfig(
         level=logging.INFO,
@@ -38,33 +54,6 @@ if not _logger.handlers and not logging.root.handlers:
 
 class Runtime:
     """The core module orchestrating interactions between key components of the system."""
-
-    _VALID_STATE_SUBTASK_PAIRS = {
-        ("Bottle on table, opening faces left", "Rotate so opening faces right"),
-        ("Bottle on table, opening faces right", "Pick up with left hand"),
-        ("Bottle in left hand and capped", "Unscrew cap"),
-        ("Bottle in left hand, cap removed, and cap in right hand", "Bottle to left trash bin, cap to right trash bin"),
-        ("Bottle in left hand, cap removed, and cap not in right hand", "Bottle to left trash bin"),
-        ("Bottle stuck in left hand", "Use right hand to remove and place into left trash bin"),
-        ("Cap on table", "Pick up cap and place into right trash bin"),
-        ("No bottle on table", "Return to initial pose"),
-    }
-    _VALID_SUBTASKS = {subtask for _, subtask in _VALID_STATE_SUBTASK_PAIRS}
-    _SUBTASK_TO_BOTTLE_STATE = {subtask: bottle_state for bottle_state, subtask in _VALID_STATE_SUBTASK_PAIRS}
-    _BOTTLE_START_SUBTASKS = {
-        "Rotate so opening faces right",
-        "Pick up with left hand",
-    }
-    _LOW_LEVEL_SUBTASK_OPTIONS = (
-        "Rotate so opening faces right",
-        "Pick up with left hand",
-        "Unscrew cap",
-        "Bottle to left trash bin, cap to right trash bin",
-        "Bottle to left trash bin",
-        "Use right hand to remove and place into left trash bin",
-        "Pick up cap and place into right trash bin",
-        "Return to initial pose",
-    )
 
     def __init__(
         self,
@@ -80,7 +69,7 @@ class Runtime:
         manual_dataset_dir: str | None = None,
         high_level_policy=None,
         high_level_hz: float = 0.0,
-        good_bad_action: str | None = "normal",
+        high_level_history_max_len: int = 50,
     ) -> None:
         self._environment = environment
         self._agent = agent
@@ -95,7 +84,23 @@ class Runtime:
         self._dataset_dir = None
         self._high_level_policy = high_level_policy
         self._high_level_step_time = 1 / high_level_hz if high_level_hz > 0 else 0.0
-        self._good_bad_action = _subtask_parsing.normalize_good_bad_action(good_bad_action)
+
+        self._last_subtask_catalog: list | None = None
+        self._last_state_subtask_pairs: list | None = None
+        self._valid_state_subtask_pairs: tuple[tuple[str, str], ...] = ()
+        self._valid_state_subtask_pairs_set: frozenset[tuple[str, str]] = frozenset()
+        self._subtask_to_bottle_state: dict[str, str] = {}
+        self._bottle_start_subtasks: frozenset[str] = frozenset()
+        self._low_level_subtask_options: tuple[str, ...] = ()
+        self._low_level_subtask_options_set: frozenset[str] = frozenset()
+        self._subtask_good_bad_override: dict[str, str] = {}
+        self._valid_subtasks: frozenset[str] = frozenset()
+        self._forced_low_level_subtask = None
+        self._include_bottle_description = True
+        self._include_bottle_position = False
+        self._include_bottle_state = True
+        self._include_subtask = True
+        self._apply_low_level_subtask_config(None, None)
 
         self._in_episode = False
         self._episode_steps = 0
@@ -125,21 +130,17 @@ class Runtime:
         self._high_level_thread = None
         self._high_level_obs = None
         self._high_level_obs_version = 0
+        self._high_level_task_generation = 0
         self._high_level_obs_lock = threading.Lock()
         self._high_level_state_lock = threading.Lock()
         self._latest_structured_subtask = None
         self._latest_hierarchical_state = {}
         self._last_policy_action_ts = None
         self._locked_bottle_description = None
+        self._lock_bottle_description = True
         self._committed_subtask = None
-        self._pending_subtask = None
-        self._pending_subtask_count = 0
-        self._include_bottle_description = True
-        self._include_bottle_position = False
-        self._include_bottle_state = True
-        self._include_subtask = True
-        self._forced_low_level_subtask = None
-        self._high_level_history: deque[dict] = deque(maxlen=100)
+        self._high_level_history_max_len = max(1, min(500, int(high_level_history_max_len)))
+        self._high_level_history: deque[dict] = deque(maxlen=self._high_level_history_max_len)
         self._video_memory_num_frames = 1
         self._video_memory_stride_seconds = 1.0
         self._temporal_build_interval_seconds = 10.0
@@ -165,7 +166,7 @@ class Runtime:
         self._model_task_nums = {"1"}
         self._stop_task_nums = {"3", "4"}
         self._local_task_names = {
-            "1": "process all bottles",
+            "1": "Process all bottles",
             "2": "Stop and human hand control",
             "3": "Return to home position and save hdf5",
             "4": "Return to sleep position, save hdf5 and quit robot runtime",
@@ -188,6 +189,37 @@ class Runtime:
         self._reset_temporal_image_history()
         self._stop_temporal_builder()
         self._start_temporal_builder()
+
+    def _apply_low_level_subtask_config(self, catalog: list | None, pairs: list | None) -> None:
+        """由 Redis/Mongo 下发的目录与 (bottle_state, subtask) 对重建查表；None 表示不更新该侧快照。"""
+        if catalog is not None:
+            self._last_subtask_catalog = list(catalog)
+        if pairs is not None:
+            self._last_state_subtask_pairs = list(pairs)
+        (
+            self._valid_state_subtask_pairs,
+            self._valid_state_subtask_pairs_set,
+            self._subtask_to_bottle_state,
+            self._bottle_start_subtasks,
+            self._low_level_subtask_options,
+            self._subtask_good_bad_override,
+            self._valid_subtasks,
+        ) = _ll_defaults.materialize_low_level_subtask_tables(self._last_subtask_catalog, self._last_state_subtask_pairs)
+        self._low_level_subtask_options_set = frozenset(self._low_level_subtask_options)
+        if self._forced_low_level_subtask and self._forced_low_level_subtask not in self._valid_subtasks:
+            logging.warning("强制子任务不在当前目录中，已清除: %s", self._forced_low_level_subtask)
+            self._forced_low_level_subtask = None
+
+    def _good_bad_action_label_for_subtask(self, subtask: str | None) -> str:
+        if not isinstance(subtask, str) or not subtask.strip():
+            return "normal"
+        key = subtask.strip()
+        override = self._subtask_good_bad_override.get(key)
+        if override in ("good action", "bad action", "normal"):
+            return override
+        if key == "Unscrew cap":
+            return "good action"
+        return "normal"
 
     def _stdin_is_tty(self) -> bool:
         try:
@@ -307,6 +339,7 @@ class Runtime:
             "manual_dataset_dir": self._manual_dataset_dir,
             "include_bottle_position": self._include_bottle_position,
             "include_bottle_description": self._include_bottle_description,
+            "lock_bottle_description": self._lock_bottle_description,
             "include_bottle_state": self._include_bottle_state,
             "include_subtask": self._include_subtask,
             "forced_low_level_subtask": self._forced_low_level_subtask,
@@ -326,9 +359,15 @@ class Runtime:
         return rewind_action
 
     def _apply_task_paths(self, task_data: dict) -> None:
+        if "subtask_catalog" in task_data or "state_subtask_pairs" in task_data:
+            self._apply_low_level_subtask_config(
+                task_data.get("subtask_catalog") if "subtask_catalog" in task_data else None,
+                task_data.get("state_subtask_pairs") if "state_subtask_pairs" in task_data else None,
+            )
         dataset_dir = task_data.get("dataset_dir")
         manual_dataset_dir = task_data.get("manual_dataset_dir")
         include_bottle_description = task_data.get("include_bottle_description")
+        lock_bottle_description = task_data.get("lock_bottle_description")
         include_bottle_position = task_data.get("include_bottle_position")
         include_bottle_state = task_data.get("include_bottle_state")
         include_subtask = task_data.get("include_subtask")
@@ -340,14 +379,18 @@ class Runtime:
             self._manual_dataset_dir = manual_dataset_dir.strip()
         if isinstance(include_bottle_description, bool):
             self._include_bottle_description = include_bottle_description
+        if isinstance(lock_bottle_description, bool):
+            self._lock_bottle_description = lock_bottle_description
+            if not self._lock_bottle_description:
+                self._locked_bottle_description = None
         if isinstance(include_bottle_position, bool):
             self._include_bottle_position = include_bottle_position
         if isinstance(include_bottle_state, bool):
             self._include_bottle_state = include_bottle_state
         if isinstance(include_subtask, bool):
             self._include_subtask = include_subtask
-        if forced_low_level_subtask in self._LOW_LEVEL_SUBTASK_OPTIONS:
-            self._forced_low_level_subtask = forced_low_level_subtask
+        if isinstance(forced_low_level_subtask, str) and forced_low_level_subtask.strip() in self._low_level_subtask_options_set:
+            self._forced_low_level_subtask = forced_low_level_subtask.strip()
         elif forced_low_level_subtask in ("", None):
             self._forced_low_level_subtask = None
         if isinstance(video_memory_num_frames, int):
@@ -388,8 +431,9 @@ class Runtime:
                             self._apply_task_paths(data)
                             self._publish_runtime_state(mode="waiting" if self._is_waiting_for_task else None)
                             logging.info(
-                                "收到Redis运行配置更新: include_bottle_description=%s include_bottle_position=%s include_bottle_state=%s include_subtask=%s forced_low_level_subtask=%s video_memory_num_frames=%s",
+                                "收到Redis运行配置更新: include_bottle_description=%s lock_bottle_description=%s include_bottle_position=%s include_bottle_state=%s include_subtask=%s forced_low_level_subtask=%s video_memory_num_frames=%s",
                                 self._include_bottle_description,
+                                self._lock_bottle_description,
                                 self._include_bottle_position,
                                 self._include_bottle_state,
                                 self._include_subtask,
@@ -411,6 +455,7 @@ class Runtime:
                                 'dataset_dir': data.get('dataset_dir'),
                                 'manual_dataset_dir': data.get('manual_dataset_dir'),
                                 'include_bottle_description': data.get('include_bottle_description'),
+                                'lock_bottle_description': data.get('lock_bottle_description'),
                                 'include_bottle_position': data.get('include_bottle_position'),
                                 'include_bottle_state': data.get('include_bottle_state'),
                                 'include_subtask': data.get('include_subtask'),
@@ -450,13 +495,12 @@ class Runtime:
         with self._high_level_obs_lock:
             self._high_level_obs = None
             self._high_level_obs_version += 1
+            self._high_level_task_generation += 1
         with self._high_level_state_lock:
             self._latest_structured_subtask = None
             self._latest_hierarchical_state = {}
         self._locked_bottle_description = None
         self._committed_subtask = None
-        self._pending_subtask = None
-        self._pending_subtask_count = 0
         self._awaiting_initial_subtask = False
         self._last_initial_subtask_wait_log_ts = 0.0
         if self._high_level_policy is not None:
@@ -467,37 +511,34 @@ class Runtime:
         bottle_state = parsed.get("bottle_state")
 
         raw_subtask = parsed.get("subtask")
-        if (bottle_state, raw_subtask) not in self._VALID_STATE_SUBTASK_PAIRS:
+        if (bottle_state, raw_subtask) not in self._valid_state_subtask_pairs_set:
             raw_subtask = None
             bottle_state = None
 
         if raw_subtask:
-            should_refresh_description = False
-            if self._locked_bottle_description is None:
-                should_refresh_description = True
-            elif (
-                raw_subtask in self._BOTTLE_START_SUBTASKS
-                and self._committed_subtask not in self._BOTTLE_START_SUBTASKS
-            ):
-                should_refresh_description = True
+            if self._lock_bottle_description:
+                should_refresh_description = False
+                if self._locked_bottle_description is None:
+                    should_refresh_description = True
+                elif (
+                    raw_subtask in self._bottle_start_subtasks
+                    and self._committed_subtask not in self._bottle_start_subtasks
+                ):
+                    should_refresh_description = True
 
-            if should_refresh_description and bottle_description:
-                self._locked_bottle_description = bottle_description
+                if should_refresh_description and bottle_description:
+                    self._locked_bottle_description = bottle_description
 
             self._committed_subtask = raw_subtask
-            self._pending_subtask = None
-            self._pending_subtask_count = 0
 
         effective = {
-            "bottle_description": self._locked_bottle_description,
+            "bottle_description": self._locked_bottle_description if self._lock_bottle_description else bottle_description,
             "bottle_position": parsed.get("bottle_position"),
             "bottle_state": bottle_state,
             "subtask": self._committed_subtask,
         }
         if all(value is None for value in effective.values()):
             return None
-        if self._good_bad_action is not None:
-            effective["good_bad_action"] = self._good_bad_action
         return effective
 
     def _start_high_level_worker(self) -> None:
@@ -512,16 +553,6 @@ class Runtime:
         if self._high_level_thread and self._high_level_thread.is_alive():
             self._high_level_thread.join(timeout=2.0)
         self._high_level_thread = None
-
-    def _update_high_level_observation(self, observation_with_task: dict) -> None:
-        if self._high_level_policy is None:
-            return
-        obs_for_high_level = {
-            k: v for k, v in observation_with_task.items() if k != "origin_observation" and k != "subtask"
-        }
-        with self._high_level_obs_lock:
-            self._high_level_obs = obs_for_high_level
-            self._high_level_obs_version += 1
 
     def _get_environment_observation(self, *, fresh: bool = False) -> dict:
         if fresh and hasattr(self._environment, "get_fresh_observation"):
@@ -539,11 +570,13 @@ class Runtime:
         if self._high_level_policy is None or self._current_task is None:
             return
         observation = self._decorate_observation(self._get_environment_observation(fresh=True))
-        observation_with_task = {
-            **observation,
+        obs_for_high_level = {
+            **{k: v for k, v in observation.items() if k != "origin_observation"},
             "prompt": self._current_task.get("task_name"),
         }
-        self._update_high_level_observation(observation_with_task)
+        with self._high_level_obs_lock:
+            self._high_level_obs = obs_for_high_level
+            self._high_level_obs_version += 1
 
     def _reset_temporal_image_history(self) -> None:
         with self._image_history_lock:
@@ -795,13 +828,6 @@ class Runtime:
             "state_summary": state_summary,
         }
 
-    def _append_high_level_trace(self, payload: dict) -> None:
-        try:
-            with self._high_level_trace_path.open("a", encoding="utf-8") as f:
-                f.write(json.dumps(payload, ensure_ascii=False) + "\n")
-        except Exception as exc:
-            logging.debug("写 high-level trace 失败: %s", exc)
-
     def _encode_history_images(self, obs: dict) -> dict[str, str]:
         encoded: dict[str, str] = {}
         images = obs.get("images", {})
@@ -839,19 +865,26 @@ class Runtime:
             with self._high_level_obs_lock:
                 obs = self._high_level_obs
                 version = self._high_level_obs_version
+                task_generation = self._high_level_task_generation
 
             if obs is None or version == last_processed_version:
                 time.sleep(0.005)
                 continue
 
             try:
-                trace_payload = {
-                    "kind": "request",
-                    "obs_version": version,
-                    **self._summarize_high_level_obs(obs),
-                }
-                self._append_high_level_trace(trace_payload)
                 high_level_result = self._high_level_policy.infer_subtask(obs)
+                with self._high_level_obs_lock:
+                    current_version = self._high_level_obs_version
+                    current_task_generation = self._high_level_task_generation
+                if current_task_generation != task_generation or current_version != version:
+                    logging.info(
+                        "Discard stale high-level result obs_version=%s task_generation=%s current_version=%s current_task_generation=%s",
+                        version,
+                        task_generation,
+                        current_version,
+                        current_task_generation,
+                    )
+                    continue
                 high_level_text = str(high_level_result.get("subtask_text") or "").strip()
                 parsed = _subtask_parsing.parse_structured_fields(high_level_text)
                 structured_subtask = self._stabilize_high_level_payload(parsed)
@@ -861,42 +894,21 @@ class Runtime:
                     "obs_version": version,
                     "task_prompt": str(obs.get("prompt") or "").strip(),
                     "high_level_text": high_level_text,
-                    "bottle_description": parsed.get("bottle_description"),
-                    "bottle_state": parsed.get("bottle_state"),
-                    "bottle_position": parsed.get("bottle_position"),
-                    "subtask": parsed.get("subtask"),
                     "images": self._encode_history_images(obs),
+                    "qpos": _observation_qpos_list(obs),
                 }
                 self._high_level_history.append(history_entry)
                 hierarchical_state = {
                     "task_prompt": str(obs.get("prompt") or "").strip(),
-                    "low_level_prompt": json.dumps(structured_subtask, ensure_ascii=False)
-                    if structured_subtask is not None
-                    else (high_level_text or str(obs.get("prompt") or "").strip()),
+                    "high_level_text": high_level_text,
+                    "low_level_prompt": json.dumps(structured_subtask, ensure_ascii=False) if structured_subtask is not None else None,
                     "high_level_server_timing": high_level_result.get("server_timing", {}),
                     "low_level_server_timing": {},
-                    "good_bad_action": self._good_bad_action,
-                    "locked_bottle_description": self._locked_bottle_description,
-                    "raw_subtask": parsed.get("subtask"),
-                    "effective_subtask": self._committed_subtask,
-                    "forced_low_level_subtask": self._forced_low_level_subtask,
-                    "pending_subtask": self._pending_subtask,
-                    "pending_subtask_count": self._pending_subtask_count,
+                    # deque 已按 _high_level_history_max_len 截断，与下发条数一致，无需再 slice
                     "history": list(self._high_level_history),
-                    **parsed,
                 }
-                self._append_high_level_trace(
-                    {
-                        "kind": "response",
-                        "obs_version": version,
-                        "timestamp": time.time(),
-                        "subtask_text": high_level_text,
-                        "structured_subtask": structured_subtask,
-                        "server_timing": high_level_result.get("server_timing", {}),
-                    }
-                )
-                logging.info("High-level raw output: %s", high_level_text)
-                logging.info("Structured subtask payload: %s", structured_subtask)
+                # logging.info("High-level raw output: %s", high_level_text)
+                # logging.info("Structured subtask payload: %s", structured_subtask)
                 with self._high_level_state_lock:
                     self._latest_structured_subtask = structured_subtask
                     self._latest_hierarchical_state = hierarchical_state
@@ -1071,7 +1083,6 @@ class Runtime:
             # 设置等待状态
             self._is_waiting_for_task = True
             self._current_task = None
-            self._reset_high_level_state()
             self._reset_temporal_image_history()
             # 回到初始位置
             self._environment.stop()
@@ -1096,9 +1107,44 @@ class Runtime:
         else:
             logging.warning(f"未知任务编号: {task_num}")
 
-    def _handle_voice_task(self, task_data) -> None:
-        """兼容旧调用点。"""
-        self._handle_task(task_data)
+    def _log_step_phase(self, phase: str, **kwargs: Any) -> None:
+        """_step() 内各类日志集中在此，避免主流程臃肿。"""
+        if phase == "waiting_initial_subtask":
+            observation_with_task = kwargs["observation_with_task"]
+            state = observation_with_task.get("state")
+            logging.info(
+                "Waiting for initial high-level subtask before starting low-level control "
+                "prompt=%s state_shape=%s",
+                observation_with_task.get("prompt"),
+                list(state.shape) if hasattr(state, "shape") else None,
+            )
+        elif phase == "initial_subtask_ready":
+            logging.info("Initial high-level subtask ready: %s", kwargs["structured_subtask"])
+        elif phase == "redis_publish_failed":
+            logging.debug("发布运行时状态失败: %s", kwargs["exc"])
+        elif phase == "policy_step_breakdown":
+            observation_with_task = kwargs["observation_with_task"]
+            images = observation_with_task.get("images", {})
+            image_shapes = {
+                key: list(value.shape) if hasattr(value, "shape") else None
+                for key, value in images.items()
+            }
+            # logging.info(
+            #     "Policy step breakdown step=%d prompt=%s subtask=%s image_shapes=%s get_obs_ms=%.1f high_level_state_ms=%.1f "
+            #     "get_action_ms=%.1f apply_action_ms=%.1f publish_state_ms=%.1f total_step_ms=%.1f",
+            #     kwargs["episode_steps"],
+            #     observation_with_task.get("prompt"),
+            #     observation_with_task.get("subtask"),
+            #     image_shapes,
+            #     kwargs["get_obs_ms"],
+            #     kwargs["high_level_state_ms"],
+            #     kwargs["get_action_ms"],
+            #     kwargs["apply_action_ms"],
+            #     kwargs["publish_state_ms"],
+            #     kwargs["total_step_ms"],
+            # )
+        else:
+            raise ValueError(f"unknown _log_step_phase: {phase!r}")
 
     def _step(self) -> None:
         """A single step of the runtime loop."""
@@ -1111,21 +1157,13 @@ class Runtime:
             **{k: v for k, v in observation.items() if k != "origin_observation"},
             'prompt': self._current_task.get('task_name')
         }
-
-        self._update_high_level_observation(observation_with_task)
         structured_subtask, hierarchical = self._get_high_level_state()
         if self._awaiting_initial_subtask:
             if structured_subtask is None:
+                print("waiting_initial_subtask")
                 now = time.monotonic()
                 if now - self._last_initial_subtask_wait_log_ts >= 0.5:
-                    logging.info(
-                        "Waiting for initial high-level subtask before starting low-level control "
-                        "prompt=%s state_shape=%s",
-                        observation_with_task.get("prompt"),
-                        list(observation_with_task.get("state").shape)
-                        if hasattr(observation_with_task.get("state"), "shape")
-                        else None,
-                    )
+                    self._log_step_phase("waiting_initial_subtask", observation_with_task=observation_with_task)
                     self._last_initial_subtask_wait_log_ts = now
                 self._publish_runtime_state(
                     qpos=observation.get("qpos"),
@@ -1135,7 +1173,7 @@ class Runtime:
                 return False
             self._awaiting_initial_subtask = False
             self._last_initial_subtask_wait_log_ts = 0.0
-            logging.info("Initial high-level subtask ready: %s", structured_subtask)
+            self._log_step_phase("initial_subtask_ready", structured_subtask=structured_subtask)
         if structured_subtask is not None:
             if not self._include_bottle_position and isinstance(structured_subtask, dict):
                 structured_subtask = {
@@ -1160,134 +1198,38 @@ class Runtime:
             if self._forced_low_level_subtask is not None and isinstance(structured_subtask, dict):
                 structured_subtask = {
                     **structured_subtask,
-                    "bottle_state": self._SUBTASK_TO_BOTTLE_STATE.get(
+                    "bottle_state": self._subtask_to_bottle_state.get(
                         self._forced_low_level_subtask,
                         structured_subtask.get("bottle_state"),
                     ),
                     "subtask": self._forced_low_level_subtask,
                 }
+            if isinstance(structured_subtask, dict):
+                st_raw = structured_subtask.get("subtask")
+                sub_key = st_raw.strip() if isinstance(st_raw, str) else None
+                structured_subtask = {
+                    **structured_subtask,
+                    "good_bad_action": self._good_bad_action_label_for_subtask(sub_key),
+                }
             observation_with_task["subtask"] = structured_subtask
-            if not isinstance(hierarchical, dict):
-                hierarchical = {}
             hierarchical["low_level_prompt"] = (
                 json.dumps(structured_subtask, ensure_ascii=False)
                 if isinstance(structured_subtask, dict)
                 else str(structured_subtask)
             )
-            if isinstance(structured_subtask, dict):
-                hierarchical["effective_subtask"] = structured_subtask.get("subtask")
-                hierarchical["bottle_state"] = structured_subtask.get("bottle_state")
-                hierarchical["bottle_position"] = structured_subtask.get("bottle_position")
         high_level_state_ready_at = time.monotonic()
-        if self._episode_steps < 5 or self._episode_steps % 25 == 0:
-            state = observation_with_task.get("state")
-            images = observation_with_task.get("images", {})
-            image_shapes = {
-                key: list(value.shape) if hasattr(value, "shape") else None
-                for key, value in images.items()
-            } if isinstance(images, dict) else {}
-            logging.info(
-                "Low-level input step=%d prompt=%s subtask=%s state_shape=%s image_shapes=%s",
-                self._episode_steps,
-                observation_with_task.get("prompt"),
-                observation_with_task.get("subtask"),
-                list(state.shape) if hasattr(state, "shape") else None,
-                image_shapes,
-            )
 
         action = self._agent.get_action(observation_with_task)
         action_ready_at = time.monotonic()
-        rtc_debug = action.get("rtc_debug", {}) if isinstance(action, dict) else {}
-        if not isinstance(rtc_debug, dict):
-            rtc_debug = {}
-        qpos_before = observation.get("qpos")
-        applied_action = action.get("actions") if isinstance(action, dict) and "actions" in action else None
-        trace_record = {
-            "timestamp": time.time(),
-            "episode_step": self._episode_steps,
-            "task": self._current_task.get("task_name") if self._current_task else None,
-            "qpos_before": list(qpos_before) if qpos_before is not None else None,
-            "applied_action": list(applied_action) if applied_action is not None else None,
-            "rtc_debug": rtc_debug,
-            "subtask": hierarchical.get("subtask") if isinstance(hierarchical, dict) else None,
-            "bottle_state": hierarchical.get("bottle_state") if isinstance(hierarchical, dict) else None,
-        }
-        with self._applied_action_trace_path.open("a", encoding="utf-8") as f:
-            f.write(json.dumps(trace_record, ensure_ascii=True) + "\n")
-        if rtc_debug.get("switched"):
-            logging.info(
-                "RTC chunk switched at episode_step=%d chunk_id=%s local_step=%s trace=%s",
-                self._episode_steps,
-                rtc_debug.get("chunk_id"),
-                rtc_debug.get("local_step"),
-                self._applied_action_trace_path,
-            )
         self._environment.apply_action(action)
         action_applied_at = time.monotonic()
         self._last_action = action.get("actions") if isinstance(action, dict) and "actions" in action else None
         if self._last_action is not None:
             self._recent_puppet_actions.append(list(self._last_action))
-        if not isinstance(hierarchical, dict):
-            hierarchical = {}
         low_level_timing = action.get("server_timing", {}) if isinstance(action, dict) else {}
         if not isinstance(low_level_timing, dict):
             low_level_timing = {}
         hierarchical["low_level_server_timing"] = low_level_timing
-        if isinstance(action, dict):
-            action["hierarchical"] = hierarchical
-        action_interval_ms = None
-        if self._last_policy_action_ts is not None:
-            action_interval_ms = (action_applied_at - self._last_policy_action_ts) * 1000.0
-        self._last_policy_action_ts = action_applied_at
-        low_level_infer_ms = low_level_timing.get("infer_ms")
-        if low_level_infer_ms is not None:
-            low_level_infer_ms = round(float(low_level_infer_ms), 1)
-        low_level_recv_ms = low_level_timing.get("recv_ms")
-        if low_level_recv_ms is not None:
-            low_level_recv_ms = round(float(low_level_recv_ms), 1)
-        low_level_unpack_ms = low_level_timing.get("unpack_ms")
-        if low_level_unpack_ms is not None:
-            low_level_unpack_ms = round(float(low_level_unpack_ms), 1)
-        low_level_pack_ms = low_level_timing.get("pack_ms")
-        if low_level_pack_ms is not None:
-            low_level_pack_ms = round(float(low_level_pack_ms), 1)
-        low_level_prev_send_ms = low_level_timing.get("prev_send_ms")
-        if low_level_prev_send_ms is not None:
-            low_level_prev_send_ms = round(float(low_level_prev_send_ms), 1)
-        low_level_prev_total_ms = low_level_timing.get("prev_total_ms")
-        if low_level_prev_total_ms is not None:
-            low_level_prev_total_ms = round(float(low_level_prev_total_ms), 1)
-        high_level_timing = hierarchical.get("high_level_server_timing", {}) if isinstance(hierarchical, dict) else {}
-        if not isinstance(high_level_timing, dict):
-            high_level_timing = {}
-        high_level_infer_ms = high_level_timing.get("infer_ms")
-        if high_level_infer_ms is not None:
-            high_level_infer_ms = round(float(high_level_infer_ms), 1)
-        high_level_prev_total_ms = high_level_timing.get("prev_total_ms")
-        if high_level_prev_total_ms is not None:
-            high_level_prev_total_ms = round(float(high_level_prev_total_ms), 1)
-        effective_subtask = observation_with_task.get("subtask")
-        if isinstance(effective_subtask, dict):
-            effective_subtask = effective_subtask.get("subtask")
-        logging.info(
-            "Policy action step=%d interval_ms=%s target_ms=%.1f step_compute_ms=%.1f "
-            "high_level_infer_ms=%s high_level_prev_total_ms=%s "
-            "low_level_recv_ms=%s low_level_unpack_ms=%s low_level_infer_ms=%s low_level_pack_ms=%s "
-            "low_level_prev_send_ms=%s low_level_prev_total_ms=%s subtask=%s",
-            self._episode_steps,
-            f"{action_interval_ms:.1f}" if action_interval_ms is not None else "n/a",
-            self._step_time * 1000.0,
-            (action_applied_at - step_started_at) * 1000.0,
-            high_level_infer_ms if high_level_infer_ms is not None else "n/a",
-            high_level_prev_total_ms if high_level_prev_total_ms is not None else "n/a",
-            low_level_recv_ms if low_level_recv_ms is not None else "n/a",
-            low_level_unpack_ms if low_level_unpack_ms is not None else "n/a",
-            low_level_infer_ms if low_level_infer_ms is not None else "n/a",
-            low_level_pack_ms if low_level_pack_ms is not None else "n/a",
-            low_level_prev_send_ms if low_level_prev_send_ms is not None else "n/a",
-            low_level_prev_total_ms if low_level_prev_total_ms is not None else "n/a",
-            effective_subtask or "n/a",
-        )
 
         qpos = observation.get("qpos")
         payload = {
@@ -1301,20 +1243,20 @@ class Runtime:
         try:
             self._redis_client.publish("aloha_runtime_state", json.dumps(payload))
         except Exception as exc:
-            logging.debug("发布运行时状态失败: %s", exc)
+            self._log_step_phase("redis_publish_failed", exc=exc)
         publish_done_at = time.monotonic()
 
         if self._episode_steps < 5 or self._episode_steps % 25 == 0:
-            logging.info(
-                "Policy step breakdown step=%d get_obs_ms=%.1f high_level_state_ms=%.1f "
-                "get_action_ms=%.1f apply_action_ms=%.1f publish_state_ms=%.1f total_step_ms=%.1f",
-                self._episode_steps,
-                (observation_ready_at - step_started_at) * 1000.0,
-                (high_level_state_ready_at - observation_ready_at) * 1000.0,
-                (action_ready_at - high_level_state_ready_at) * 1000.0,
-                (action_applied_at - action_ready_at) * 1000.0,
-                (publish_done_at - action_applied_at) * 1000.0,
-                (publish_done_at - step_started_at) * 1000.0,
+            self._log_step_phase(
+                "policy_step_breakdown",
+                episode_steps=self._episode_steps,
+                observation_with_task=observation_with_task,
+                get_obs_ms=(observation_ready_at - step_started_at) * 1000.0,
+                high_level_state_ms=(high_level_state_ready_at - observation_ready_at) * 1000.0,
+                get_action_ms=(action_ready_at - high_level_state_ready_at) * 1000.0,
+                apply_action_ms=(action_applied_at - action_ready_at) * 1000.0,
+                publish_state_ms=(publish_done_at - action_applied_at) * 1000.0,
+                total_step_ms=(publish_done_at - step_started_at) * 1000.0,
             )
 
         for subscriber in self._subscribers:

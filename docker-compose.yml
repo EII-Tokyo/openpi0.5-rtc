@@ -1,13 +1,13 @@
 services:
   # Default checkpoint used for both low-level infer and high-level infer_subtask
   # unless SERVER_ARGS / HIGH_LEVEL_SERVER_ARGS are explicitly overridden.
-  # This keeps compose-up aligned with the current ALOHA subtask runtime.
+  # Host path: ./checkpoints/... must exist (params + assets; train_state not required).
   runtime:
     image: lyl472324464/robot:aloha-ros1.0
     depends_on:
       - aloha_ros_nodes
       - ros_master
-      - openpi_server
+      - openpi_server_low_level
       - openpi_server_high_level
     # build:
     #   context: .
@@ -43,14 +43,16 @@ services:
     command:
       - roscore
 
-  openpi_server:
+  # Low-level policy server (:8000). Registry image tag remains `openpi_server`.
+  openpi_server_low_level:
     image: lyl472324464/robot:openpi_server
     build:
       context: .
       dockerfile: scripts/docker/serve_policy.Dockerfile
+    # command: /bin/bash
     command: >-
       /bin/bash -lc
-      "uv run scripts/serve_policy.py ${SERVER_ARGS:-policy:checkpoint --policy.config twist_and_static_mixture_full_finetune --policy.dir /app/checkpoints/twist_and_static_mixture_full_finetune/twist_and_static_mixture_full_finetune_20260402_062540/47000}"
+      "uv run --no-sync scripts/serve_policy.py --no-warmup-subtask ${SERVER_ARGS:-policy:checkpoint --policy.config twist_and_static_mixture_full_finetune --policy.dir /app/checkpoints/twist_and_static_mixture_full_finetune/twist_and_static_mixture_full_finetune_vast_20260405_100600/39999}"
     init: true
     tty: true
     network_mode: host
@@ -66,6 +68,8 @@ services:
       - IS_DOCKER=true
       - NVIDIA_VISIBLE_DEVICES=all
       - NVIDIA_DRIVER_CAPABILITIES=all
+      # serve_policy.Dockerfile uses `uv sync --no-install-project`; without sync, openpi is not on sys.path.
+      - PYTHONPATH=/app/src
     gpus: all
 
   openpi_server_high_level:
@@ -75,7 +79,7 @@ services:
       dockerfile: scripts/docker/serve_policy.Dockerfile
     command: >-
       /bin/bash -lc
-      "uv run scripts/serve_policy.py --no-warmup-rtc --no-warmup-non-rtc --port 8001 ${HIGH_LEVEL_SERVER_ARGS:-policy:checkpoint --policy.config twist_and_static_mixture_full_finetune --policy.dir /app/checkpoints/twist_and_static_mixture_full_finetune/twist_and_static_mixture_full_finetune_20260402_062540/10000}"
+      "uv run --no-sync scripts/serve_policy.py --no-warmup-rtc --no-warmup-non-rtc --port 8001 ${HIGH_LEVEL_SERVER_ARGS:-policy:checkpoint --policy.config twist_and_static_mixture_full_finetune --policy.dir /app/checkpoints/twist_and_static_mixture_full_finetune/twist_and_static_mixture_full_finetune_vast_20260405_100600/39999}"
     init: true
     tty: true
     network_mode: host
@@ -91,6 +95,7 @@ services:
       - IS_DOCKER=true
       - NVIDIA_VISIBLE_DEVICES=all
       - NVIDIA_DRIVER_CAPABILITIES=all
+      - PYTHONPATH=/app/src
     gpus: all
 
   redis:
@@ -154,6 +159,9 @@ services:
     network_mode: "host"
     init: true
     tty: true
+    # Serve host-built assets so `npm run build` in voice_assistant_web/frontend updates UI without rebuilding this image.
+    volumes:
+      - $PWD/voice_assistant_web/frontend/dist:/usr/share/nginx/html:ro
     depends_on:
       - voice_web_backend
 

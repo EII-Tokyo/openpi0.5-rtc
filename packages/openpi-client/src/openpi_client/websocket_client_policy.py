@@ -129,7 +129,24 @@ class WebsocketClientPolicy(_base_policy.BasePolicy):
             "temperature": temperature,
             "max_text_token_id": max_text_token_id,
         }
-        data = self._packer.pack(data)
+        unsupported = _find_unsupported_numpy(data)
+        if unsupported is not None:
+            bad_path, bad_dtype, bad_shape = unsupported
+            logging.error(
+                "Unsupported numpy payload before msgpack (infer_subtask): path=%s dtype=%s shape=%s",
+                bad_path,
+                bad_dtype,
+                bad_shape,
+            )
+        try:
+            data = self._packer.pack(data)
+        except ValueError:
+            summaries = _collect_numpy_summaries(data)
+            logging.error(
+                "NumPy payload summary before msgpack failure (infer_subtask):\n%s",
+                "\n".join(summaries[:200]),
+            )
+            raise
         self._ws.send(data)
         response = self._ws.recv()
         if isinstance(response, str):

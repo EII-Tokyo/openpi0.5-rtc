@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useMemo, useRef, useState } from 'react'
+import { FormEvent, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { AppLanguage, translations } from './i18n'
 
 const defaultHost = typeof window !== 'undefined' ? window.location.hostname : 'localhost'
@@ -8,45 +8,152 @@ const defaultWsOrigin =
     ? `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}`
     : `ws://${defaultHost}`
 const cameraNames = ['cam_high', 'cam_low', 'cam_left_wrist', 'cam_right_wrist'] as const
-const configStorageKey = 'aloha-ui-config-v3'
-const lowLevelSubtaskOptions = [
-  'Rotate so opening faces right',
-  'Pick up with left hand',
-  'Unscrew cap',
-  'Bottle to left trash bin, cap to right trash bin',
-  'Bottle to left trash bin',
-  'Use right hand to remove and place into left trash bin',
-  'Pick up cap and place into right trash bin',
-  'Return to initial pose',
-] as const
+
+export type SubtaskCatalogEntry = {
+  subtask: string
+  is_start_subtask: boolean
+  good_bad_action?: 'good action' | 'bad action' | 'normal' | null
+}
+
+export type StateSubtaskPairRow = {
+  bottle_state: string
+  subtask: string
+}
+
+/** 与后端 `low_level_subtask_defaults` 一致；Mongo 空文档时由服务端回填 */
+const DEFAULT_SUBTASK_CATALOG: SubtaskCatalogEntry[] = [
+  { subtask: 'Rotate so opening faces right', is_start_subtask: true },
+  { subtask: 'Pick up with left hand', is_start_subtask: true },
+  { subtask: 'Unscrew cap', is_start_subtask: false },
+  { subtask: 'Bottle to left trash bin, cap to right trash bin', is_start_subtask: false },
+  { subtask: 'Bottle to left trash bin', is_start_subtask: false },
+  { subtask: 'Use right hand to remove and place into left trash bin', is_start_subtask: false },
+  { subtask: 'Pick up cap and place into right trash bin', is_start_subtask: false },
+  { subtask: 'Return to initial pose', is_start_subtask: false },
+]
+
+const DEFAULT_STATE_SUBTASK_PAIRS: StateSubtaskPairRow[] = [
+  { bottle_state: 'Bottle on table, opening faces left', subtask: 'Rotate so opening faces right' },
+  { bottle_state: 'Bottle on table, opening faces right', subtask: 'Pick up with left hand' },
+  { bottle_state: 'Bottle in left hand and capped', subtask: 'Unscrew cap' },
+  {
+    bottle_state: 'Bottle in left hand, cap removed, and cap in right hand',
+    subtask: 'Bottle to left trash bin, cap to right trash bin',
+  },
+  {
+    bottle_state: 'Bottle in left hand, cap removed, and cap not in right hand',
+    subtask: 'Bottle to left trash bin',
+  },
+  { bottle_state: 'Bottle in left hand and upside down', subtask: 'Bottle to left trash bin' },
+  {
+    bottle_state: 'Bottle stuck in left hand',
+    subtask: 'Use right hand to remove and place into left trash bin',
+  },
+  { bottle_state: 'Cap on table', subtask: 'Pick up cap and place into right trash bin' },
+  { bottle_state: 'No bottle on table', subtask: 'Return to initial pose' },
+]
+
+function parseSubtaskCatalogFromApi(raw: unknown): SubtaskCatalogEntry[] {
+  if (!Array.isArray(raw) || raw.length === 0) {
+    return DEFAULT_SUBTASK_CATALOG.map((e) => ({ ...e }))
+  }
+  const out: SubtaskCatalogEntry[] = []
+  for (const x of raw) {
+    if (!x || typeof x !== 'object') continue
+    const o = x as Record<string, unknown>
+    const sub = String(o.subtask ?? '').trim()
+    if (!sub) continue
+    const isStart = Boolean(o.is_start_subtask ?? o.isStartSubtask)
+    const gba = o.good_bad_action ?? o.goodBadAction
+    let good_bad_action: SubtaskCatalogEntry['good_bad_action'] = null
+    if (gba === 'good action' || gba === 'bad action' || gba === 'normal') {
+      good_bad_action = gba
+    }
+    out.push({ subtask: sub, is_start_subtask: isStart, good_bad_action })
+  }
+  return out.length > 0 ? out : DEFAULT_SUBTASK_CATALOG.map((e) => ({ ...e }))
+}
+
+function parseStateSubtaskPairsFromApi(raw: unknown): StateSubtaskPairRow[] {
+  if (!Array.isArray(raw) || raw.length === 0) {
+    return DEFAULT_STATE_SUBTASK_PAIRS.map((e) => ({ ...e }))
+  }
+  const out: StateSubtaskPairRow[] = []
+  for (const x of raw) {
+    if (Array.isArray(x) && x.length >= 2) {
+      const bs = String(x[0]).trim()
+      const st = String(x[1]).trim()
+      if (bs && st) out.push({ bottle_state: bs, subtask: st })
+      continue
+    }
+    if (x && typeof x === 'object') {
+      const o = x as Record<string, unknown>
+      const bs = String(o.bottle_state ?? o.bottleState ?? '').trim()
+      const st = String(o.subtask ?? '').trim()
+      if (bs && st) out.push({ bottle_state: bs, subtask: st })
+    }
+  }
+  return out.length > 0 ? out : DEFAULT_STATE_SUBTASK_PAIRS.map((e) => ({ ...e }))
+}
+
+/** `low_level_prompt` 为 runtime 下发的 `json.dumps(structured_subtask)` */
+function parseStructuredLowLevelPrompt(raw: string | null | undefined): {
+  subtask: string | null
+  bottle_description: string | null
+} | null {
+  if (raw == null || !String(raw).trim()) return null
+  try {
+    const o = JSON.parse(String(raw)) as Record<string, unknown>
+    if (!o || typeof o !== 'object') return null
+    const sub = o.subtask
+    const bd = o.bottle_description
+    return {
+      subtask: typeof sub === 'string' && sub.trim() ? sub.trim() : null,
+      bottle_description: typeof bd === 'string' && bd.trim() ? bd.trim() : null,
+    }
+  } catch {
+    return null
+  }
+}
+
+function getAnnouncementLocale(language: 'zh' | 'ja') {
+  return language === 'ja' ? 'ja-JP' : 'zh-CN'
+}
+
+function getAnnouncementTranslation(language: 'zh' | 'ja') {
+  return translations[language === 'ja' ? 'ja' : 'zh']
+}
+
+function pickSpeechVoice(locale: string) {
+  if (typeof window === 'undefined' || !('speechSynthesis' in window)) return null
+  const voices = window.speechSynthesis.getVoices()
+  if (!voices.length) return null
+  return (
+    voices.find((voice) => voice.lang === locale) ||
+    voices.find((voice) => voice.lang.toLowerCase().startsWith(locale.slice(0, 2).toLowerCase())) ||
+    null
+  )
+}
+
+/** Matches `hierarchical` published by runtime (top-level keys only). */
+type HierarchicalHistoryEntry = {
+  id: string
+  timestamp: number
+  obs_version: number
+  task_prompt?: string
+  high_level_text?: string
+  images?: Record<string, string>
+  /** 该条 high-level 推理时刻观测中的关节角（与 runtime 观测一致）。 */
+  qpos?: number[]
+}
 
 type HierarchicalState = {
   task_prompt?: string
-  low_level_prompt?: string
+  low_level_prompt?: string | null
   high_level_text?: string
-  bottle_description?: string | null
-  bottle_position?: Record<string, unknown> | null
-  bottle_state?: string | null
-  subtask?: string | null
-  locked_bottle_description?: string | null
-  raw_subtask?: string | null
-  effective_subtask?: string | null
-  pending_subtask?: string | null
-  pending_subtask_count?: number
   high_level_server_timing?: Record<string, unknown>
   low_level_server_timing?: Record<string, unknown>
-  history?: Array<{
-    id: string
-    timestamp: number
-    obs_version: number
-    task_prompt?: string
-    high_level_text?: string
-    bottle_description?: string | null
-    bottle_position?: Record<string, unknown> | null
-    bottle_state?: string | null
-    subtask?: string | null
-    images?: Record<string, string>
-  }>
+  history?: HierarchicalHistoryEntry[]
 }
 
 type RealtimeState = {
@@ -77,22 +184,21 @@ type UiConfig = {
   apiBase: string
   wsBase: string
   cameraRefreshMs: number
+  uiLanguage: AppLanguage
   datasetDir: string
   manualDatasetDir: string
   includeBottleDescription: boolean
+  lockBottleDescription: boolean
   includeBottlePosition: boolean
   includeBottleState: boolean
   includeSubtask: boolean
   videoMemoryNumFrames: 1 | 4
   forcedLowLevelSubtask: string | null
-  announcementLanguage: 'zh' | 'ja'
-}
-
-type UiPreferenceConfig = {
-  apiBase: string
-  wsBase: string
-  cameraRefreshMs: number
-  language?: AppLanguage
+  /** 低层子任务目录（Mongo）；含 is_start_subtask、可选 good_bad_action */
+  subtaskCatalog: SubtaskCatalogEntry[]
+  /** (bottle_state, subtask) 合法对 */
+  stateSubtaskPairs: StateSubtaskPairRow[]
+  /** 语音播报 / 合成等目标语言（中/日），持久化在服务端 */
   announcementLanguage: 'zh' | 'ja'
 }
 
@@ -100,11 +206,70 @@ type RuntimeConfigPayload = {
   datasetDir: string
   manualDatasetDir: string
   includeBottleDescription: boolean
+  lockBottleDescription: boolean
   includeBottlePosition: boolean
   includeBottleState: boolean
   includeSubtask: boolean
   videoMemoryNumFrames: 1 | 4
   forcedLowLevelSubtask: string | null
+  subtaskCatalog: SubtaskCatalogEntry[]
+  stateSubtaskPairs: StateSubtaskPairRow[]
+  announcementLanguage: 'zh' | 'ja'
+  apiBase: string
+  wsBase: string
+  cameraRefreshMs: number
+  uiLanguage: AppLanguage
+}
+
+/** FastAPI returns snake_case field names; accept camelCase too for robustness. */
+function parseRuntimeConfigResponse(data: unknown): RuntimeConfigPayload {
+  const r = data as Record<string, unknown>
+  const str = (camel: string, snake: string) => {
+    const v = r[camel] ?? r[snake]
+    return typeof v === 'string' ? v : ''
+  }
+  const bool = (camel: string, snake: string, fallback: boolean) => {
+    const v = r[camel] ?? r[snake]
+    if (v === undefined || v === null) return fallback
+    return Boolean(v)
+  }
+  const rawFrames = r['video_memory_num_frames'] ?? r['videoMemoryNumFrames']
+  const videoMemoryNumFrames: 1 | 4 = rawFrames === 4 ? 4 : 1
+  const forced = r['forced_low_level_subtask'] ?? r['forcedLowLevelSubtask']
+  const ann = r['announcement_language'] ?? r['announcementLanguage']
+  const announcementLanguage: 'zh' | 'ja' = ann === 'ja' ? 'ja' : 'zh'
+  const apiBase = str('apiBase', 'api_base')
+  const wsBase = str('wsBase', 'ws_base')
+  const rawCam = r['camera_refresh_ms'] ?? r['cameraRefreshMs']
+  let cameraRefreshMs = 100
+  if (typeof rawCam === 'number' && Number.isFinite(rawCam)) {
+    cameraRefreshMs = Math.max(100, Math.floor(rawCam))
+  } else if (typeof rawCam === 'string' && rawCam.trim()) {
+    const n = Number.parseInt(rawCam, 10)
+    if (Number.isFinite(n)) cameraRefreshMs = Math.max(100, n)
+  }
+  const uiLangRaw = r['ui_language'] ?? r['uiLanguage']
+  const uiLanguage: AppLanguage =
+    uiLangRaw === 'en' || uiLangRaw === 'ja' || uiLangRaw === 'zh' ? uiLangRaw : 'en'
+  return {
+    datasetDir: str('datasetDir', 'dataset_dir'),
+    manualDatasetDir: str('manualDatasetDir', 'manual_dataset_dir'),
+    includeBottleDescription: bool('includeBottleDescription', 'include_bottle_description', true),
+    lockBottleDescription: bool('lockBottleDescription', 'lock_bottle_description', true),
+    includeBottlePosition: bool('includeBottlePosition', 'include_bottle_position', false),
+    includeBottleState: bool('includeBottleState', 'include_bottle_state', true),
+    includeSubtask: bool('includeSubtask', 'include_subtask', true),
+    videoMemoryNumFrames,
+    forcedLowLevelSubtask:
+      typeof forced === 'string' && forced.trim() ? forced.trim() : null,
+    subtaskCatalog: parseSubtaskCatalogFromApi(r['subtask_catalog'] ?? r['subtaskCatalog']),
+    stateSubtaskPairs: parseStateSubtaskPairsFromApi(r['state_subtask_pairs'] ?? r['stateSubtaskPairs']),
+    announcementLanguage,
+    apiBase,
+    wsBase,
+    cameraRefreshMs,
+    uiLanguage,
+  }
 }
 
 type VoiceStatus = 'idle' | 'recording' | 'thinking' | 'speaking'
@@ -128,63 +293,73 @@ const defaultConfig: UiConfig = {
   apiBase: import.meta.env.VITE_API_BASE || defaultHttpOrigin,
   wsBase: import.meta.env.VITE_WS_BASE || defaultWsOrigin,
   cameraRefreshMs: 100,
+  uiLanguage: 'en',
   datasetDir: '',
   manualDatasetDir: '',
   includeBottleDescription: true,
+  lockBottleDescription: true,
   includeBottlePosition: false,
   includeBottleState: true,
   includeSubtask: true,
   videoMemoryNumFrames: 1,
   forcedLowLevelSubtask: null,
+  subtaskCatalog: DEFAULT_SUBTASK_CATALOG.map((e) => ({ ...e })),
+  stateSubtaskPairs: DEFAULT_STATE_SUBTASK_PAIRS.map((e) => ({ ...e })),
   announcementLanguage: 'zh',
 }
 
-function getAnnouncementLocale(language: UiConfig['announcementLanguage']) {
-  return language === 'ja' ? 'ja-JP' : 'zh-CN'
-}
-
-function getAnnouncementTranslation(language: UiConfig['announcementLanguage']) {
-  return translations[language === 'ja' ? 'ja' : 'zh']
-}
-
-function pickSpeechVoice(locale: string) {
-  if (typeof window === 'undefined' || !('speechSynthesis' in window)) return null
-  const voices = window.speechSynthesis.getVoices()
-  if (!voices.length) return null
-  return (
-    voices.find((voice) => voice.lang === locale) ||
-    voices.find((voice) => voice.lang.toLowerCase().startsWith(locale.slice(0, 2).toLowerCase())) ||
-    null
-  )
-}
-
-function loadUiConfig(): UiPreferenceConfig {
-  if (typeof window === 'undefined') return defaultConfig
-  try {
-    const raw = window.localStorage.getItem(configStorageKey)
-    if (!raw) return defaultConfig
-    const parsed = JSON.parse(raw)
-    return {
-      apiBase: typeof parsed?.apiBase === 'string' && parsed.apiBase.trim() ? parsed.apiBase.trim() : defaultConfig.apiBase,
-      wsBase: typeof parsed?.wsBase === 'string' && parsed.wsBase.trim() ? parsed.wsBase.trim() : defaultConfig.wsBase,
-      cameraRefreshMs:
-        typeof parsed?.cameraRefreshMs === 'number' && parsed.cameraRefreshMs > 0
-          ? parsed.cameraRefreshMs
-          : defaultConfig.cameraRefreshMs,
-      announcementLanguage:
-        parsed?.announcementLanguage === 'ja' || parsed?.announcementLanguage === 'zh'
-          ? parsed.announcementLanguage
-          : defaultConfig.announcementLanguage,
-    }
-  } catch {
-    return defaultConfig
+function createInitialUiConfig(): UiConfig {
+  let apiBase = defaultConfig.apiBase
+  let wsBase = defaultConfig.wsBase
+  if (apiBase === `http://${defaultHost}:8011`) {
+    apiBase = defaultHttpOrigin
   }
+  if (wsBase === `ws://${defaultHost}:8011`) {
+    wsBase = defaultWsOrigin
+  }
+  return { ...defaultConfig, apiBase, wsBase }
 }
 
 function formatArray(values: number[], maxItems = 6) {
   if (!values.length) return '[]'
   const head = values.slice(0, maxItems).map((value) => value.toFixed(3)).join(', ')
   return values.length > maxItems ? `[${head}, ...]` : `[${head}]`
+}
+
+function formatHistoryTimestamp(ts: number | undefined) {
+  if (ts == null || !Number.isFinite(ts)) return '—'
+  return new Date(ts * 1000).toLocaleString()
+}
+
+async function drawJpegB64ToCanvas(b64: string, canvas: HTMLCanvasElement | null) {
+  if (!canvas || !b64) return
+  try {
+    const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0))
+    const blob = new Blob([bytes], { type: 'image/jpeg' })
+    const bmp = await createImageBitmap(blob)
+    const ctx = canvas.getContext('2d')
+    if (!ctx) {
+      bmp.close()
+      return
+    }
+    if (canvas.width !== bmp.width || canvas.height !== bmp.height) {
+      canvas.width = bmp.width
+      canvas.height = bmp.height
+    }
+    ctx.drawImage(bmp, 0, 0)
+    bmp.close()
+  } catch (err) {
+    console.error('Failed to decode camera frame', err)
+  }
+}
+
+async function drawCameraFramesToCanvases(
+  frames: Record<string, string>,
+  canvases: Record<string, HTMLCanvasElement | null>,
+) {
+  await Promise.all(
+    Object.entries(frames).map(([name, b64]) => drawJpegB64ToCanvas(b64, canvases[name] ?? null)),
+  )
 }
 
 function formatTiming(value: Record<string, unknown> | undefined) {
@@ -200,36 +375,9 @@ function formatCameraAge(timestamp: number | null | undefined) {
   return `${age.toFixed(age < 1 ? 2 : 1)}s`
 }
 
-function parseBottleBox(value: Record<string, unknown> | null | undefined) {
-  if (!value) return null
-  const xMin = Number(value['x min'])
-  const xMax = Number(value['x max'])
-  const yMin = Number(value['y min'])
-  const yMax = Number(value['y max'])
-  if (![xMin, xMax, yMin, yMax].every(Number.isFinite)) return null
-  if (xMax <= xMin || yMax <= yMin) return null
-  return {
-    left: `${Math.max(0, Math.min(100, xMin))}%`,
-    top: `${Math.max(0, Math.min(100, yMin))}%`,
-    width: `${Math.max(0, Math.min(100, xMax - xMin))}%`,
-    height: `${Math.max(0, Math.min(100, yMax - yMin))}%`,
-  }
-}
-
 export default function App() {
-  const savedPreferences = loadUiConfig()
-  const [uiConfig, setUiConfig] = useState<UiConfig>(() => {
-    const migratedPreferences = { ...savedPreferences }
-    if (migratedPreferences.apiBase === `http://${defaultHost}:8011`) {
-      migratedPreferences.apiBase = defaultHttpOrigin
-    }
-    if (migratedPreferences.wsBase === `ws://${defaultHost}:8011`) {
-      migratedPreferences.wsBase = defaultWsOrigin
-    }
-    return { ...defaultConfig, ...migratedPreferences }
-  })
+  const [uiConfig, setUiConfig] = useState<UiConfig>(() => createInitialUiConfig())
   const [state, setState] = useState<RealtimeState>(initialState)
-  const [language, setLanguage] = useState<AppLanguage>(savedPreferences.language || 'en')
   const [command, setCommand] = useState('')
   const [voiceResponse, setVoiceResponse] = useState<VoiceResponse | null>(null)
   const [voiceStatus, setVoiceStatus] = useState<VoiceStatus>('idle')
@@ -239,8 +387,9 @@ export default function App() {
   const [avatarMenuOpen, setAvatarMenuOpen] = useState(false)
   const [consoleView, setConsoleView] = useState<'voice' | 'runtime'>('voice')
   const [selectedHistoryId, setSelectedHistoryId] = useState<string | null>(null)
+  const [historyAutoScroll, setHistoryAutoScroll] = useState(true)
   const [cameraView, setCameraView] = useState<'focus' | 'quad'>('focus')
-  const [cameraRefreshToken, setCameraRefreshToken] = useState<number>(Date.now())
+  const cameraCanvasRefs = useRef<Record<string, HTMLCanvasElement | null>>({})
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const mediaChunksRef = useRef<Blob[]>([])
   const mediaStreamRef = useRef<MediaStream | null>(null)
@@ -248,9 +397,43 @@ export default function App() {
   const audioContextRef = useRef<AudioContext | null>(null)
   const vadAnimationRef = useRef<number | null>(null)
   const vadSilenceStartedAtRef = useRef<number | null>(null)
-  const lastAnnouncedBottleDescriptionRef = useRef<string | null>(null)
+  const historyListRef = useRef<HTMLDivElement>(null)
+  const prevHistoryLenRef = useRef(0)
+  const prevLastHistoryIdRef = useRef<string | null>(null)
+  const prevSubtaskForAnnouncementRef = useRef<string | null>(null)
   const translatedAnnouncementCacheRef = useRef<Record<string, string>>({})
-  const t = translations[language]
+  const t = translations[uiConfig.uiLanguage]
+
+  const bottleStartSubtasksSet = useMemo(() => {
+    return new Set(
+      uiConfig.subtaskCatalog
+        .filter((e) => e.is_start_subtask)
+        .map((e) => e.subtask.trim())
+        .filter(Boolean),
+    )
+  }, [uiConfig.subtaskCatalog])
+
+  const forcedSubtaskChoices = useMemo(() => {
+    const seen = new Set<string>()
+    const out: string[] = []
+    for (const e of uiConfig.subtaskCatalog) {
+      const s = e.subtask.trim()
+      if (!s || seen.has(s)) continue
+      seen.add(s)
+      out.push(s)
+    }
+    return out
+  }, [uiConfig.subtaskCatalog])
+
+  const cameraCanvasBinders = useMemo(() => {
+    const out: Record<string, (el: HTMLCanvasElement | null) => void> = {}
+    for (const name of cameraNames) {
+      out[name] = (el: HTMLCanvasElement | null) => {
+        cameraCanvasRefs.current[name] = el
+      }
+    }
+    return out
+  }, [])
 
   const clearHighLevelDisplay = () => {
     setSelectedHistoryId(null)
@@ -268,8 +451,22 @@ export default function App() {
     ws.onopen = () => setError(null)
     ws.onmessage = (event) => {
       try {
-        setState(JSON.parse(event.data))
+        const data = JSON.parse(event.data) as {
+          robot: RealtimeState['robot']
+          camera_status: Record<string, boolean>
+          camera_timestamps?: Record<string, number | null>
+          camera_jpeg_b64?: Record<string, string>
+        }
+        setState({
+          robot: data.robot,
+          camera_status: data.camera_status,
+          camera_timestamps: data.camera_timestamps ?? {},
+        })
         setError(null)
+        const frames = data.camera_jpeg_b64
+        if (frames && Object.keys(frames).length > 0) {
+          void drawCameraFramesToCanvases(frames, cameraCanvasRefs.current)
+        }
       } catch (err) {
         console.error('Failed to parse realtime payload', err)
       }
@@ -279,15 +476,86 @@ export default function App() {
   }, [uiConfig.wsBase])
 
   useEffect(() => {
-    const preferenceConfig: UiPreferenceConfig = {
-      apiBase: uiConfig.apiBase,
-      wsBase: uiConfig.wsBase,
-      cameraRefreshMs: uiConfig.cameraRefreshMs,
-      language,
-      announcementLanguage: uiConfig.announcementLanguage,
+    if (state.robot.current_task !== 'Process all bottles') {
+      prevSubtaskForAnnouncementRef.current = null
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel()
+      }
+      return
     }
-    window.localStorage.setItem(configStorageKey, JSON.stringify(preferenceConfig))
-  }, [uiConfig, language])
+    const parsed = parseStructuredLowLevelPrompt(state.robot.hierarchical?.low_level_prompt)
+    if (!parsed) {
+      return
+    }
+    const sub = parsed.subtask
+    const desc = parsed.bottle_description ?? ''
+    const prev = prevSubtaskForAnnouncementRef.current
+    const inStart = sub != null && bottleStartSubtasksSet.has(sub)
+    const prevInStart = prev != null && bottleStartSubtasksSet.has(prev)
+    const enteredStart = inStart && !prevInStart
+
+    prevSubtaskForAnnouncementRef.current = sub
+
+    if (!enteredStart || !desc.trim()) {
+      return
+    }
+    if (!('speechSynthesis' in window)) {
+      return
+    }
+    const targetLanguage = uiConfig.announcementLanguage
+    const cacheKey = `${targetLanguage}:${desc}`
+    const announcementTranslation = getAnnouncementTranslation(targetLanguage)
+    const announcementLocale = getAnnouncementLocale(targetLanguage)
+    const speak = (translatedDescription: string) => {
+      const utterance = new SpeechSynthesisUtterance(announcementTranslation.announceBottle(translatedDescription))
+      utterance.lang = announcementLocale
+      const voice = pickSpeechVoice(announcementLocale)
+      if (voice) {
+        utterance.voice = voice
+      }
+      window.speechSynthesis.cancel()
+      window.speechSynthesis.speak(utterance)
+    }
+    const cached = translatedAnnouncementCacheRef.current[cacheKey]
+    if (cached) {
+      speak(cached)
+      return
+    }
+    let cancelled = false
+    void fetch(`${uiConfig.apiBase}/api/runtime/translate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        text: desc,
+        target_language: targetLanguage,
+      }),
+    })
+      .then(async (response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`)
+        }
+        return response.json() as Promise<{ translated_text: string }>
+      })
+      .then((payload) => {
+        if (cancelled) return
+        const translatedDescription = (payload.translated_text || desc).trim() || desc
+        translatedAnnouncementCacheRef.current[cacheKey] = translatedDescription
+        speak(translatedDescription)
+      })
+      .catch(() => {
+        if (cancelled) return
+        speak(desc)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [
+    state.robot.current_task,
+    state.robot.hierarchical?.low_level_prompt,
+    uiConfig.announcementLanguage,
+    uiConfig.apiBase,
+    bottleStartSubtasksSet,
+  ])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -297,17 +565,25 @@ export default function App() {
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}`)
         }
-        const runtimeConfig = (await response.json()) as RuntimeConfigPayload
+        const runtimeConfig = parseRuntimeConfigResponse(await response.json())
         setUiConfig((current) => ({
           ...current,
           datasetDir: runtimeConfig.datasetDir || '',
           manualDatasetDir: runtimeConfig.manualDatasetDir || '',
-          includeBottleDescription: Boolean(runtimeConfig.includeBottleDescription),
-          includeBottlePosition: Boolean(runtimeConfig.includeBottlePosition),
-          includeBottleState: Boolean(runtimeConfig.includeBottleState),
-          includeSubtask: Boolean(runtimeConfig.includeSubtask),
-          videoMemoryNumFrames: runtimeConfig.videoMemoryNumFrames === 4 ? 4 : 1,
+          includeBottleDescription: runtimeConfig.includeBottleDescription,
+          lockBottleDescription: runtimeConfig.lockBottleDescription,
+          includeBottlePosition: runtimeConfig.includeBottlePosition,
+          includeBottleState: runtimeConfig.includeBottleState,
+          includeSubtask: runtimeConfig.includeSubtask,
+          videoMemoryNumFrames: runtimeConfig.videoMemoryNumFrames,
           forcedLowLevelSubtask: runtimeConfig.forcedLowLevelSubtask || null,
+          subtaskCatalog: runtimeConfig.subtaskCatalog.map((e) => ({ ...e })),
+          stateSubtaskPairs: runtimeConfig.stateSubtaskPairs.map((e) => ({ ...e })),
+          announcementLanguage: runtimeConfig.announcementLanguage,
+          apiBase: runtimeConfig.apiBase.trim() || defaultHttpOrigin,
+          wsBase: runtimeConfig.wsBase.trim() || defaultWsOrigin,
+          cameraRefreshMs: runtimeConfig.cameraRefreshMs,
+          uiLanguage: runtimeConfig.uiLanguage,
         }))
       } catch (err) {
         if (!(err instanceof DOMException && err.name === 'AbortError')) {
@@ -355,14 +631,6 @@ export default function App() {
     }
   }, [])
 
-  useEffect(() => {
-    const intervalMs = Math.max(100, Number(uiConfig.cameraRefreshMs) || defaultConfig.cameraRefreshMs)
-    const timer = window.setInterval(() => {
-      setCameraRefreshToken(Date.now())
-    }, intervalMs)
-    return () => window.clearInterval(timer)
-  }, [uiConfig.cameraRefreshMs])
-
   const freshness = useMemo(() => {
     if (!state.robot.timestamp) return t.waitingForRobot
     const age = Date.now() / 1000 - state.robot.timestamp
@@ -383,84 +651,36 @@ export default function App() {
     history.find((entry) => entry.id === selectedHistoryId) ||
     history[history.length - 1] ||
     null
+  const historyLen = history.length
+  const lastHistoryId = historyLen > 0 ? (history[history.length - 1]?.id ?? null) : null
+
+  useLayoutEffect(() => {
+    const el = historyListRef.current
+    const prevLen = prevHistoryLenRef.current
+    const prevLastId = prevLastHistoryIdRef.current
+    const grew = historyLen > prevLen
+    const lastChanged = lastHistoryId != null && lastHistoryId !== prevLastId
+
+    prevHistoryLenRef.current = historyLen
+    prevLastHistoryIdRef.current = lastHistoryId
+
+    if (!el || !historyAutoScroll) return
+    if (grew || lastChanged) {
+      el.scrollTop = el.scrollHeight
+    }
+  }, [historyLen, lastHistoryId, historyAutoScroll])
+
   const primaryCamera = 'cam_high'
   const secondaryCameras = cameraNames.filter((name) => name !== primaryCamera)
-  const cameraSrc = (cameraName: (typeof cameraNames)[number]) =>
-    `${uiConfig.apiBase}/api/cameras/${cameraName}/latest.jpg?t=${cameraRefreshToken}`
   const displayFps = useMemo(() => {
     const intervalMs = Math.max(100, Number(uiConfig.cameraRefreshMs) || defaultConfig.cameraRefreshMs)
     return 1000 / intervalMs
   }, [uiConfig.cameraRefreshMs])
-  useEffect(() => {
-    if (state.robot.current_task !== 'process all bottles') {
-      lastAnnouncedBottleDescriptionRef.current = null
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel()
-      }
-      return
-    }
-    const description =
-      typeof hierarchical.locked_bottle_description === 'string'
-        ? hierarchical.locked_bottle_description.trim()
-        : ''
-    if (!description) return
-    if (lastAnnouncedBottleDescriptionRef.current === description) return
-    lastAnnouncedBottleDescriptionRef.current = description
-    if (!('speechSynthesis' in window)) return
-    const targetLanguage = uiConfig.announcementLanguage
-    const cacheKey = `${targetLanguage}:${description}`
-    const announcementTranslation = getAnnouncementTranslation(targetLanguage)
-    const announcementLocale = getAnnouncementLocale(targetLanguage)
-    const speak = (translatedDescription: string) => {
-      const utterance = new SpeechSynthesisUtterance(announcementTranslation.announceBottle(translatedDescription))
-      utterance.lang = announcementLocale
-      const voice = pickSpeechVoice(announcementLocale)
-      if (voice) {
-        utterance.voice = voice
-      }
-      window.speechSynthesis.cancel()
-      window.speechSynthesis.speak(utterance)
-    }
-    const cached = translatedAnnouncementCacheRef.current[cacheKey]
-    if (cached) {
-      speak(cached)
-      return
-    }
-    let cancelled = false
-    void fetch(`${uiConfig.apiBase}/api/runtime/translate`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        text: description,
-        target_language: targetLanguage,
-      }),
-    })
-      .then(async (response) => {
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`)
-        }
-        return response.json() as Promise<{ translated_text: string }>
-      })
-      .then((payload) => {
-        if (cancelled) return
-        const translatedDescription = (payload.translated_text || description).trim() || description
-        translatedAnnouncementCacheRef.current[cacheKey] = translatedDescription
-        speak(translatedDescription)
-      })
-      .catch(() => {
-        if (cancelled) return
-        speak(description)
-      })
-    return () => {
-      cancelled = true
-    }
-  }, [hierarchical.locked_bottle_description, state.robot.current_task, uiConfig.announcementLanguage, uiConfig.apiBase])
   const primaryCameraAge = formatCameraAge(state.camera_timestamps[primaryCamera])
   const primaryCameraStats = `${displayFps.toFixed(1)} FPS · ${primaryCameraAge}`
   const voiceTaskWithHighLevel = [voiceResponse?.task_name, hierarchical.high_level_text]
     .filter((value) => typeof value === 'string' && value.trim())
     .join('\n')
-  const primaryCameraBbox = primaryCamera === 'cam_high' ? parseBottleBox(hierarchical.bottle_position || null) : null
 
   const renderCameraOverlay = (cameraName: (typeof cameraNames)[number]) => {
     const isLive = Boolean(state.camera_status[cameraName])
@@ -493,10 +713,11 @@ export default function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           text,
-          language,
+          language: uiConfig.uiLanguage,
           dataset_dir: uiConfig.datasetDir.trim() || undefined,
           manual_dataset_dir: uiConfig.manualDatasetDir.trim() || undefined,
           include_bottle_description: uiConfig.includeBottleDescription,
+          lock_bottle_description: uiConfig.lockBottleDescription,
           include_bottle_position: uiConfig.includeBottlePosition,
           include_bottle_state: uiConfig.includeBottleState,
           include_subtask: uiConfig.includeSubtask,
@@ -526,11 +747,30 @@ export default function App() {
           dataset_dir: nextConfig.datasetDir.trim(),
           manual_dataset_dir: nextConfig.manualDatasetDir.trim(),
           include_bottle_description: nextConfig.includeBottleDescription,
+          lock_bottle_description: nextConfig.lockBottleDescription,
           include_bottle_position: nextConfig.includeBottlePosition,
           include_bottle_state: nextConfig.includeBottleState,
           include_subtask: nextConfig.includeSubtask,
           forced_low_level_subtask: nextConfig.forcedLowLevelSubtask,
           video_memory_num_frames: nextConfig.videoMemoryNumFrames,
+          announcement_language: nextConfig.announcementLanguage,
+          api_base: nextConfig.apiBase.trim(),
+          ws_base: nextConfig.wsBase.trim(),
+          camera_refresh_ms: nextConfig.cameraRefreshMs,
+          ui_language: nextConfig.uiLanguage,
+          subtask_catalog: nextConfig.subtaskCatalog
+            .filter((e) => e.subtask.trim())
+            .map((e) => ({
+              subtask: e.subtask.trim(),
+              is_start_subtask: e.is_start_subtask,
+              ...(e.good_bad_action ? { good_bad_action: e.good_bad_action } : {}),
+            })),
+          state_subtask_pairs: nextConfig.stateSubtaskPairs
+            .filter((p) => p.bottle_state.trim() && p.subtask.trim())
+            .map((p) => ({
+              bottle_state: p.bottle_state.trim(),
+              subtask: p.subtask.trim(),
+            })),
         }),
       })
       if (!response.ok) {
@@ -555,7 +795,7 @@ export default function App() {
       const fileExtension = blob.type.includes('webm') ? 'webm' : 'wav'
       const formData = new FormData()
       formData.append('file', blob, `voice.${fileExtension}`)
-      formData.append('language', language)
+      formData.append('language', uiConfig.uiLanguage)
       if (uiConfig.datasetDir.trim()) {
         formData.append('dataset_dir', uiConfig.datasetDir.trim())
       }
@@ -563,6 +803,7 @@ export default function App() {
         formData.append('manual_dataset_dir', uiConfig.manualDatasetDir.trim())
       }
       formData.append('include_bottle_description', String(uiConfig.includeBottleDescription))
+      formData.append('lock_bottle_description', String(uiConfig.lockBottleDescription))
       formData.append('include_bottle_position', String(uiConfig.includeBottlePosition))
       formData.append('include_bottle_state', String(uiConfig.includeBottleState))
       formData.append('include_subtask', String(uiConfig.includeSubtask))
@@ -792,19 +1033,12 @@ export default function App() {
             </div>
             {cameraView === 'focus' ? (
               <div className="camera-stage-frame">
-                <img src={cameraSrc(primaryCamera)} alt={primaryCamera} />
+                <canvas
+                  ref={cameraCanvasBinders[primaryCamera]}
+                  className="camera-feed-canvas"
+                  aria-label={t.cameraLabels[primaryCamera] || primaryCamera}
+                />
                 <div className="camera-frame-top">{renderCameraOverlay(primaryCamera)}</div>
-                {primaryCameraBbox ? (
-                  <div
-                    className="camera-bbox"
-                    style={{
-                      left: primaryCameraBbox.left,
-                      top: primaryCameraBbox.top,
-                      width: primaryCameraBbox.width,
-                      height: primaryCameraBbox.height,
-                    }}
-                  />
-                ) : null}
                 <div className="camera-stage-overlay">
                   <div className="stage-task">
                     <span>{t.taskPrompt}</span>
@@ -816,7 +1050,11 @@ export default function App() {
               <div className="camera-grid">
                 {cameraNames.map((cameraName) => (
                   <article key={cameraName} className="mini-camera-card">
-                    <img src={cameraSrc(cameraName)} alt={cameraName} />
+                    <canvas
+                      ref={cameraCanvasBinders[cameraName]}
+                      className="camera-feed-canvas"
+                      aria-label={t.cameraLabels[cameraName] || cameraName}
+                    />
                     <div className="camera-frame-top">{renderCameraOverlay(cameraName)}</div>
                   </article>
                 ))}
@@ -827,7 +1065,11 @@ export default function App() {
             <div className="camera-strip">
               {secondaryCameras.map((cameraName) => (
                 <article key={cameraName} className="mini-camera-card">
-                  <img src={cameraSrc(cameraName)} alt={cameraName} />
+                  <canvas
+                    ref={cameraCanvasBinders[cameraName]}
+                    className="camera-feed-canvas"
+                    aria-label={t.cameraLabels[cameraName] || cameraName}
+                  />
                   <div className="camera-frame-top">{renderCameraOverlay(cameraName)}</div>
                 </article>
               ))}
@@ -918,8 +1160,18 @@ export default function App() {
                   <pre>{hierarchical.low_level_prompt || 'N/A'}</pre>
                 </div>
                 <div className="info-block wide">
-                  <span className="info-label">{t.subtaskHistory}</span>
-                  <div className="history-list">
+                  <div className="history-block-header">
+                    <span className="info-label">{t.subtaskHistory}</span>
+                    <button
+                      type="button"
+                      className={`history-autoscroll-toggle ${historyAutoScroll ? 'active' : ''}`}
+                      aria-pressed={historyAutoScroll}
+                      onClick={() => setHistoryAutoScroll((v) => !v)}
+                    >
+                      {historyAutoScroll ? t.historyAutoScrollOn : t.historyAutoScrollOff}
+                    </button>
+                  </div>
+                  <div className="history-list" ref={historyListRef}>
                     {history.length ? history.map((entry) => (
                       <button
                         key={entry.id}
@@ -927,8 +1179,12 @@ export default function App() {
                         className={`history-item ${selectedHistory?.id === entry.id ? 'active' : ''}`}
                         onClick={() => setSelectedHistoryId(entry.id)}
                       >
-                        <strong>{entry.subtask || 'N/A'}</strong>
-                        <span>{entry.bottle_state || 'N/A'}</span>
+                        <strong>{entry.high_level_text?.trim() || 'N/A'}</strong>
+                        <span className="history-item-time">{formatHistoryTimestamp(entry.timestamp)}</span>
+                        <span>{entry.task_prompt?.trim() || `obs ${entry.obs_version}`}</span>
+                        <span className="history-item-qpos">
+                          {t.qpos}: {formatArray(entry.qpos ?? [], 6)}
+                        </span>
                       </button>
                     )) : <pre>N/A</pre>}
                   </div>
@@ -936,6 +1192,14 @@ export default function App() {
                 <div className="info-block wide">
                   <span className="info-label">{t.selectedHighLevelOutput}</span>
                   <pre>{selectedHistory?.high_level_text || 'N/A'}</pre>
+                </div>
+                <div className="info-block compact">
+                  <span className="info-label">{t.historyEntryTime}</span>
+                  <pre>{selectedHistory ? formatHistoryTimestamp(selectedHistory.timestamp) : 'N/A'}</pre>
+                </div>
+                <div className="info-block wide">
+                  <span className="info-label">{t.historyEntryQpos}</span>
+                  <pre>{selectedHistory ? formatArray(selectedHistory.qpos ?? [], 32) : 'N/A'}</pre>
                 </div>
                 <div className="info-block wide">
                   <span className="info-label">{t.selectedHighLevelImages}</span>
@@ -990,7 +1254,16 @@ export default function App() {
             </div>
             <label className="config-field">
               <span>{t.language}</span>
-              <select value={language} onChange={(event) => setLanguage(event.target.value as AppLanguage)}>
+              <select
+                value={uiConfig.uiLanguage}
+                onChange={(event) =>
+                  setUiConfig((current) => {
+                    const nextConfig = { ...current, uiLanguage: event.target.value as AppLanguage }
+                    void pushRuntimeConfig(nextConfig)
+                    return nextConfig
+                  })
+                }
+              >
                 <option value="en">{t.english}</option>
                 <option value="ja">{t.japanese}</option>
                 <option value="zh">{t.chinese}</option>
@@ -1001,10 +1274,14 @@ export default function App() {
               <select
                 value={uiConfig.announcementLanguage}
                 onChange={(event) =>
-                  setUiConfig((current) => ({
-                    ...current,
-                    announcementLanguage: event.target.value as 'zh' | 'ja',
-                  }))
+                  setUiConfig((current) => {
+                    const nextConfig = {
+                      ...current,
+                      announcementLanguage: event.target.value as 'zh' | 'ja',
+                    }
+                    void pushRuntimeConfig(nextConfig)
+                    return nextConfig
+                  })
                 }
               >
                 <option value="zh">{t.announcementChinese}</option>
@@ -1016,10 +1293,11 @@ export default function App() {
               <input
                 value={uiConfig.apiBase}
                 onChange={(event) =>
-                  setUiConfig((current) => ({
-                    ...current,
-                    apiBase: event.target.value,
-                  }))
+                  setUiConfig((current) => {
+                    const nextConfig = { ...current, apiBase: event.target.value }
+                    void pushRuntimeConfig(nextConfig)
+                    return nextConfig
+                  })
                 }
                 placeholder={`http://${defaultHost}:8011`}
               />
@@ -1029,10 +1307,11 @@ export default function App() {
               <input
                 value={uiConfig.wsBase}
                 onChange={(event) =>
-                  setUiConfig((current) => ({
-                    ...current,
-                    wsBase: event.target.value,
-                  }))
+                  setUiConfig((current) => {
+                    const nextConfig = { ...current, wsBase: event.target.value }
+                    void pushRuntimeConfig(nextConfig)
+                    return nextConfig
+                  })
                 }
                 placeholder={`ws://${defaultHost}:8011`}
               />
@@ -1045,10 +1324,14 @@ export default function App() {
                 step={100}
                 value={uiConfig.cameraRefreshMs}
                 onChange={(event) =>
-                  setUiConfig((current) => ({
-                    ...current,
-                    cameraRefreshMs: Math.max(100, Number(event.target.value) || defaultConfig.cameraRefreshMs),
-                  }))
+                  setUiConfig((current) => {
+                    const nextConfig = {
+                      ...current,
+                      cameraRefreshMs: Math.max(100, Number(event.target.value) || defaultConfig.cameraRefreshMs),
+                    }
+                    void pushRuntimeConfig(nextConfig)
+                    return nextConfig
+                  })
                 }
                 placeholder="1000"
               />
@@ -1062,6 +1345,25 @@ export default function App() {
                     const nextConfig = {
                       ...current,
                       includeBottleDescription: event.target.value === 'true',
+                    }
+                    void pushRuntimeConfig(nextConfig)
+                    return nextConfig
+                  })
+                }
+              >
+                <option value="false">{t.no}</option>
+                <option value="true">{t.yes}</option>
+              </select>
+            </label>
+            <label className="config-field">
+              <span>{t.lockBottleDescription}</span>
+              <select
+                value={uiConfig.lockBottleDescription ? 'true' : 'false'}
+                onChange={(event) =>
+                  setUiConfig((current) => {
+                    const nextConfig = {
+                      ...current,
+                      lockBottleDescription: event.target.value === 'true',
                     }
                     void pushRuntimeConfig(nextConfig)
                     return nextConfig
@@ -1149,6 +1451,172 @@ export default function App() {
                 <option value="4">{t.videoMemoryFourFrames}</option>
               </select>
             </label>
+            <div className="config-field config-subtask-editor-block">
+              <span>{t.subtaskCatalogSection}</span>
+              <p className="config-help config-subtask-editor-help">{t.subtaskCatalogHelp}</p>
+              <div className="subtask-catalog-rows">
+                {uiConfig.subtaskCatalog.map((row, idx) => (
+                  <div key={`cat-${idx}`} className="subtask-catalog-row">
+                    <input
+                      className="subtask-catalog-subtask-input"
+                      value={row.subtask}
+                      placeholder={t.subtaskTextLabel}
+                      onChange={(event) =>
+                        setUiConfig((current) => {
+                          const nextCatalog = current.subtaskCatalog.map((e, i) =>
+                            i === idx ? { ...e, subtask: event.target.value } : e,
+                          )
+                          const nextConfig = { ...current, subtaskCatalog: nextCatalog }
+                          void pushRuntimeConfig(nextConfig)
+                          return nextConfig
+                        })
+                      }
+                    />
+                    <label className="subtask-catalog-checkbox">
+                      <input
+                        type="checkbox"
+                        checked={row.is_start_subtask}
+                        onChange={(event) =>
+                          setUiConfig((current) => {
+                            const nextCatalog = current.subtaskCatalog.map((e, i) =>
+                              i === idx ? { ...e, is_start_subtask: event.target.checked } : e,
+                            )
+                            const nextConfig = { ...current, subtaskCatalog: nextCatalog }
+                            void pushRuntimeConfig(nextConfig)
+                            return nextConfig
+                          })
+                        }
+                      />
+                      <span>{t.startSubtaskLabel}</span>
+                    </label>
+                    <select
+                      className="subtask-catalog-goodbad"
+                      value={row.good_bad_action ?? ''}
+                      onChange={(event) =>
+                        setUiConfig((current) => {
+                          const v = event.target.value
+                          const good_bad_action: SubtaskCatalogEntry['good_bad_action'] =
+                            v === 'good action' || v === 'bad action' || v === 'normal' ? v : null
+                          const nextCatalog = current.subtaskCatalog.map((e, i) =>
+                            i === idx ? { ...e, good_bad_action } : e,
+                          )
+                          const nextConfig = { ...current, subtaskCatalog: nextCatalog }
+                          void pushRuntimeConfig(nextConfig)
+                          return nextConfig
+                        })
+                      }
+                      aria-label={t.goodBadLabel}
+                    >
+                      <option value="">{t.goodBadDefault}</option>
+                      <option value="good action">good action</option>
+                      <option value="bad action">bad action</option>
+                      <option value="normal">normal</option>
+                    </select>
+                    <button
+                      type="button"
+                      className="subtask-row-remove"
+                      onClick={() =>
+                        setUiConfig((current) => {
+                          const nextCatalog = current.subtaskCatalog.filter((_, i) => i !== idx)
+                          const nextConfig = { ...current, subtaskCatalog: nextCatalog }
+                          void pushRuntimeConfig(nextConfig)
+                          return nextConfig
+                        })
+                      }
+                    >
+                      {t.subtaskCatalogRemoveRow}
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <button
+                type="button"
+                className="subtask-add-row"
+                onClick={() =>
+                  setUiConfig((current) => {
+                    const nextCatalog = [
+                      ...current.subtaskCatalog,
+                      { subtask: '', is_start_subtask: false, good_bad_action: null },
+                    ]
+                    const nextConfig = { ...current, subtaskCatalog: nextCatalog }
+                    void pushRuntimeConfig(nextConfig)
+                    return nextConfig
+                  })
+                }
+              >
+                {t.subtaskCatalogAddRow}
+              </button>
+            </div>
+            <div className="config-field config-subtask-editor-block">
+              <span>{t.stateSubtaskPairsSection}</span>
+              <div className="state-subtask-pair-rows">
+                {uiConfig.stateSubtaskPairs.map((row, idx) => (
+                  <div key={`pair-${idx}`} className="state-subtask-pair-row">
+                    <input
+                      className="pair-bottle-state"
+                      value={row.bottle_state}
+                      placeholder={t.pairBottleState}
+                      onChange={(event) =>
+                        setUiConfig((current) => {
+                          const nextPairs = current.stateSubtaskPairs.map((e, i) =>
+                            i === idx ? { ...e, bottle_state: event.target.value } : e,
+                          )
+                          const nextConfig = { ...current, stateSubtaskPairs: nextPairs }
+                          void pushRuntimeConfig(nextConfig)
+                          return nextConfig
+                        })
+                      }
+                    />
+                    <input
+                      className="pair-subtask"
+                      value={row.subtask}
+                      placeholder={t.pairSubtask}
+                      onChange={(event) =>
+                        setUiConfig((current) => {
+                          const nextPairs = current.stateSubtaskPairs.map((e, i) =>
+                            i === idx ? { ...e, subtask: event.target.value } : e,
+                          )
+                          const nextConfig = { ...current, stateSubtaskPairs: nextPairs }
+                          void pushRuntimeConfig(nextConfig)
+                          return nextConfig
+                        })
+                      }
+                    />
+                    <button
+                      type="button"
+                      className="subtask-row-remove"
+                      onClick={() =>
+                        setUiConfig((current) => {
+                          const nextPairs = current.stateSubtaskPairs.filter((_, i) => i !== idx)
+                          const nextConfig = { ...current, stateSubtaskPairs: nextPairs }
+                          void pushRuntimeConfig(nextConfig)
+                          return nextConfig
+                        })
+                      }
+                    >
+                      {t.pairRemoveRow}
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <button
+                type="button"
+                className="subtask-add-row"
+                onClick={() =>
+                  setUiConfig((current) => {
+                    const nextPairs = [
+                      ...current.stateSubtaskPairs,
+                      { bottle_state: '', subtask: '' },
+                    ]
+                    const nextConfig = { ...current, stateSubtaskPairs: nextPairs }
+                    void pushRuntimeConfig(nextConfig)
+                    return nextConfig
+                  })
+                }
+              >
+                {t.pairAddRow}
+              </button>
+            </div>
             <div className="config-field">
               <span>{t.forcedSubtask}</span>
               <div className="quick-tasks subtask-override-grid">
@@ -1168,7 +1636,7 @@ export default function App() {
                 >
                   {t.forcedSubtaskAuto}
                 </button>
-                {lowLevelSubtaskOptions.map((subtask) => (
+                {forcedSubtaskChoices.map((subtask) => (
                   <button
                     key={subtask}
                     type="button"

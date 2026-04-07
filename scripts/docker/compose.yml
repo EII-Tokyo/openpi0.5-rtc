@@ -1,8 +1,8 @@
 # Run with:
 # docker compose -f scripts/docker/compose.yml up --build
 services:
-  openpi_server:
-    image: openpi_server
+  openpi_server_low_level:
+    image: openpi_server_low_level
     build:
       context: ../..
       dockerfile: scripts/docker/serve_policy.Dockerfile

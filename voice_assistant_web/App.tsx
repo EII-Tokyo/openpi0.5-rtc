@@ -5,7 +5,6 @@ const apiBase = import.meta.env.VITE_API_BASE || 'http://localhost:8011'
 const wsBase = import.meta.env.VITE_WS_BASE || 'ws://localhost:8011'
 const cameraNames = ['cam_high', 'cam_low', 'cam_left_wrist', 'cam_right_wrist'] as const
 const hiddenConfigClicks = 5
-const configStorageKey = 'aloha-ui-config-v1'
 
 type HierarchicalState = {
   task_prompt?: string
@@ -58,23 +57,6 @@ const defaultConfig: UiConfig = {
   manualDatasetSubdir: '12345',
 }
 
-function loadUiConfig(): UiConfig {
-  if (typeof window === 'undefined') return defaultConfig
-  try {
-    const raw = window.localStorage.getItem(configStorageKey)
-    if (!raw) return defaultConfig
-    const parsed = JSON.parse(raw)
-    return {
-      manualDatasetSubdir:
-        typeof parsed?.manualDatasetSubdir === 'string' && parsed.manualDatasetSubdir.trim()
-          ? parsed.manualDatasetSubdir.trim()
-          : defaultConfig.manualDatasetSubdir,
-    }
-  } catch {
-    return defaultConfig
-  }
-}
-
 function formatArray(values: number[], maxItems = 6) {
   if (!values.length) return '[]'
   const head = values.slice(0, maxItems).map((value) => value.toFixed(3)).join(', ')
@@ -97,7 +79,7 @@ export default function App() {
   const [error, setError] = useState<string | null>(null)
   const [configOpen, setConfigOpen] = useState(false)
   const [secretClicks, setSecretClicks] = useState(0)
-  const [uiConfig, setUiConfig] = useState<UiConfig>(() => loadUiConfig())
+  const [uiConfig, setUiConfig] = useState<UiConfig>(() => ({ ...defaultConfig }))
   const t = translations[language]
 
   useEffect(() => {
@@ -112,10 +94,6 @@ export default function App() {
     ws.onerror = () => setError('Realtime websocket disconnected')
     return () => ws.close()
   }, [])
-
-  useEffect(() => {
-    window.localStorage.setItem(configStorageKey, JSON.stringify(uiConfig))
-  }, [uiConfig])
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
