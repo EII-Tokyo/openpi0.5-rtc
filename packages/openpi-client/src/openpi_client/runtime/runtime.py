@@ -60,6 +60,7 @@ class Runtime:
         environment: _environment.Environment,
         agent: _agent.Agent,
         subscribers: list[_subscriber.Subscriber],
+        prompt: str,
         max_hz: float = 0,
         manual_hz: float = 0,
         max_episode_steps: int = 0,
@@ -74,6 +75,9 @@ class Runtime:
         self._environment = environment
         self._agent = agent
         self._subscribers = subscribers
+        self._prompt = str(prompt).strip()
+        if not self._prompt:
+            raise ValueError("Runtime prompt must be a non-empty string.")
         self._max_hz = max_hz
         self._manual_hz = manual_hz
         self._max_episode_steps = max_episode_steps
@@ -118,8 +122,8 @@ class Runtime:
         self._task_lock = threading.Lock()
         
         # 任务状态管理
-        self._current_task = None
-        self._is_waiting_for_task = False
+        self._is_policy_mode = False
+        self._runtime_mode = "waiting"
         
         # 存储最后的action（用于task_num==3时移动master）
         self._last_action = None
@@ -137,7 +141,7 @@ class Runtime:
         self._latest_hierarchical_state = {}
         self._last_policy_action_ts = None
         self._locked_bottle_description = None
-        self._lock_bottle_description = True
+        self._if_lock_bottle_description = True
         self._committed_subtask = None
         self._high_level_history_max_len = max(1, min(500, int(high_level_history_max_len)))
         self._high_level_history: deque[dict] = deque(maxlen=self._high_level_history_max_len)
@@ -339,7 +343,7 @@ class Runtime:
             "manual_dataset_dir": self._manual_dataset_dir,
             "include_bottle_position": self._include_bottle_position,
             "include_bottle_description": self._include_bottle_description,
-            "lock_bottle_description": self._lock_bottle_description,
+            "lock_bottle_description": self._if_lock_bottle_description,
             "include_bottle_state": self._include_bottle_state,
             "include_subtask": self._include_subtask,
             "forced_low_level_subtask": self._forced_low_level_subtask,
@@ -380,8 +384,8 @@ class Runtime:
         if isinstance(include_bottle_description, bool):
             self._include_bottle_description = include_bottle_description
         if isinstance(lock_bottle_description, bool):
-            self._lock_bottle_description = lock_bottle_description
-            if not self._lock_bottle_description:
+            self._if_lock_bottle_description = lock_bottle_description
+            if not self._if_lock_bottle_description:
                 self._locked_bottle_description = None
         if isinstance(include_bottle_position, bool):
             self._include_bottle_position = include_bottle_position
@@ -429,11 +433,10 @@ class Runtime:
                         data = json.loads(message['data'])
                         if not data.get('task'):
                             self._apply_task_paths(data)
-                            self._publish_runtime_state(mode="waiting" if self._is_waiting_for_task else None)
                             logging.info(
                                 "收到Redis运行配置更新: include_bottle_description=%s lock_bottle_description=%s include_bottle_position=%s include_bottle_state=%s include_subtask=%s forced_low_level_subtask=%s video_memory_num_frames=%s",
                                 self._include_bottle_description,
-                                self._lock_bottle_description,
+                                self._if_lock_bottle_description,
                                 self._include_bottle_position,
                                 self._include_bottle_state,
                                 self._include_subtask,
@@ -516,7 +519,7 @@ class Runtime:
             bottle_state = None
 
         if raw_subtask:
-            if self._lock_bottle_description:
+            if self._if_lock_bottle_description:
                 should_refresh_description = False
                 if self._locked_bottle_description is None:
                     should_refresh_description = True
@@ -532,7 +535,7 @@ class Runtime:
             self._committed_subtask = raw_subtask
 
         effective = {
-            "bottle_description": self._locked_bottle_description if self._lock_bottle_description else bottle_description,
+            "bottle_description": self._locked_bottle_description if self._if_lock_bottle_description else bottle_description,
             "bottle_position": parsed.get("bottle_position"),
             "bottle_state": bottle_state,
             "subtask": self._committed_subtask,
@@ -567,12 +570,12 @@ class Runtime:
         }
 
     def _refresh_high_level_observation(self) -> None:
-        if self._high_level_policy is None or self._current_task is None:
+        if self._high_level_policy is None:
             return
         observation = self._decorate_observation(self._get_environment_observation(fresh=True))
         obs_for_high_level = {
             **{k: v for k, v in observation.items() if k != "origin_observation"},
-            "prompt": self._current_task.get("task_name"),
+            "prompt": self._prompt,
         }
         with self._high_level_obs_lock:
             self._high_level_obs = obs_for_high_level
@@ -856,9 +859,9 @@ class Runtime:
     def _high_level_worker(self) -> None:
         last_processed_version = -1
         while self._high_level_running:
-            if self._is_waiting_for_task or self._current_task is None:
-                time.sleep(0.01)
-                continue
+            # if not self._is_policy_mode:
+            #     time.sleep(0.01)
+            #     continue
 
             self._refresh_high_level_observation()
 
@@ -901,7 +904,7 @@ class Runtime:
                 hierarchical_state = {
                     "task_prompt": str(obs.get("prompt") or "").strip(),
                     "high_level_text": high_level_text,
-                    "low_level_prompt": json.dumps(structured_subtask, ensure_ascii=False) if structured_subtask is not None else None,
+                    "low_level_prompt": "",
                     "high_level_server_timing": high_level_result.get("server_timing", {}),
                     "low_level_server_timing": {},
                     # deque 已按 _high_level_history_max_len 截断，与下发条数一致，无需再 slice
@@ -912,6 +915,7 @@ class Runtime:
                 with self._high_level_state_lock:
                     self._latest_structured_subtask = structured_subtask
                     self._latest_hierarchical_state = hierarchical_state
+                self._publish_runtime_state()
                 last_processed_version = version
             except Exception as exc:
                 logging.warning("High-level infer failed: %s", exc)
@@ -926,7 +930,6 @@ class Runtime:
         if self._redis_client is None:
             return
 
-        current_task = self._current_task.get("task_name") if self._current_task else None
         if qpos is None and hasattr(self._environment, "_ts") and getattr(self._environment, "_ts") is not None:
             qpos = self._environment._ts.observation.get("qpos")
         _, hierarchical = self._get_high_level_state()
@@ -935,8 +938,8 @@ class Runtime:
 
         payload = {
             "timestamp": time.time(),
-            "mode": mode or ("waiting" if self._is_waiting_for_task else "policy"),
-            "current_task": current_task,
+            "mode": mode or self._runtime_mode,
+            "current_task": self._prompt,
             "qpos": list(qpos) if qpos is not None else [],
             "latest_action": list(latest_action) if latest_action is not None else [],
             "hierarchical": hierarchical,
@@ -960,21 +963,7 @@ class Runtime:
                 return None
             latest_task = self._latest_task
             self._latest_task = None
-            return latest_task
-    
-    def is_waiting_for_task(self) -> bool:
-        """检查是否正在等待任务"""
-        return self._is_waiting_for_task
-    
-    def get_current_task(self):
-        """获取当前任务"""
-        return self._current_task
-    
-    def set_waiting_state(self, waiting: bool):
-        """设置等待状态"""
-        self._is_waiting_for_task = waiting
-        if waiting:
-            self._current_task = None
+            return latest_task   
 
     def run(self) -> None:
         """Runs the runtime loop continuously until stop() is called or the environment is done."""
@@ -1001,8 +990,7 @@ class Runtime:
         self._stop = True
 
     def _run(self) -> None:
-        """Runs a single episode."""
-        logging.info("Starting episode...")
+        """Runs the runtime loop continuously until stop() is called or the environment is done."""
         self._environment.reset()
         self._agent.reset()
         self._reset_high_level_state()
@@ -1016,9 +1004,8 @@ class Runtime:
         last_step_time = time.time()
         last_waiting_state_publish = 0.0
         
-        self._is_waiting_for_task = True
-        self._current_task = None
-        self._publish_runtime_state(mode="waiting")
+        self._runtime_mode = "waiting"
+        self._publish_runtime_state()
         logging.info("Runtime 默认仅接受 Redis / voice web 任务；仅在人工接管 teleop 阶段监听本地按键")
 
         while not self._stop:
@@ -1026,14 +1013,7 @@ class Runtime:
             if task_data:
                 self._handle_task(task_data)
             
-            if self._is_waiting_for_task:
-                now = time.time()
-                if now - last_waiting_state_publish >= 0.2:
-                    observation = self._get_environment_observation()
-                    self._publish_runtime_state(qpos=observation.get("qpos"), mode="waiting")
-                    last_waiting_state_publish = now
-                time.sleep(0.05)
-            else:
+            if self._is_policy_mode:
                 action_applied = self._step()
                 if action_applied:
                     self._episode_steps += 1
@@ -1044,7 +1024,13 @@ class Runtime:
                     last_step_time = time.time()
                 else:
                     last_step_time = now
-        
+            else:
+                now = time.time()
+                if now - last_waiting_state_publish >= 0.2:
+                    observation = self._get_environment_observation()
+                    self._publish_runtime_state(qpos=observation.get("qpos"))
+                    last_waiting_state_publish = now
+                time.sleep(0.05)           
 
     def _handle_task(self, task_data) -> None:
         """处理来自 Redis / voice web 的任务。"""
@@ -1058,31 +1044,30 @@ class Runtime:
             logging.info(f"开始执行任务: {task_name}")
             for subscriber in self._subscribers:
                 subscriber.on_episode_start()
-            # 设置当前任务
-            self._current_task = task_data
-            self._is_waiting_for_task = False 
+            self._is_policy_mode = True
+            self._runtime_mode = "start_ai"
             self._high_level_history.clear()
             self._reset_high_level_state()
             self._reset_temporal_image_history()
             self._refresh_high_level_observation()
             self._awaiting_initial_subtask = self._high_level_policy is not None
             self._last_initial_subtask_wait_log_ts = 0.0
-            self._publish_runtime_state(mode="policy")
+            self._publish_runtime_state()
         elif task_num == "2":
             logging.info("收到停止指令，进入人机协作模式")
-            self._current_task = task_data
+            self._is_policy_mode = False
+            self._runtime_mode = "human_intervention"
             self._agent.reset() 
             self._reset_high_level_state()
             self._reset_temporal_image_history()
             for subscriber in self._subscribers:
                 subscriber.on_episode_end()
-            self._publish_runtime_state(mode="teleop_prepare")
+            self._publish_runtime_state()
             self._handle_human_teleop_mode()  
         elif task_num == "3":
             logging.info("收到停止指令，回到初始位置并停止agent")
-            # 设置等待状态
-            self._is_waiting_for_task = True
-            self._current_task = None
+            self._is_policy_mode = False
+            self._runtime_mode = "return_home"
             self._reset_temporal_image_history()
             # 回到初始位置
             self._environment.stop()
@@ -1093,16 +1078,18 @@ class Runtime:
             # 通知subscriber episode结束
             for subscriber in self._subscribers:
                 subscriber.on_episode_end()   
-            self._publish_runtime_state(mode="waiting")
+            self._publish_runtime_state()
         elif task_num == "4":
             logging.info("收到回到sleep位置并退出指令，退出程序")
             self._environment.sleep_arms()
+            self._is_policy_mode = False
+            self._runtime_mode = "return_sleep"
             self._agent.reset()
             self._reset_high_level_state()
             self._reset_temporal_image_history()
             for subscriber in self._subscribers:
                 subscriber.on_episode_end()
-            self._publish_runtime_state(mode="sleep")
+            self._publish_runtime_state()
             self._stop = True
         else:
             logging.warning(f"未知任务编号: {task_num}")
@@ -1152,15 +1139,13 @@ class Runtime:
         observation = self._get_environment_observation()
         observation_ready_at = time.monotonic()
         observation = self._decorate_observation(observation)
-        assert self._current_task is not None, "_current_task must be set before calling _step()"
         observation_with_task = {
             **{k: v for k, v in observation.items() if k != "origin_observation"},
-            'prompt': self._current_task.get('task_name')
+            'prompt': self._prompt,
         }
         structured_subtask, hierarchical = self._get_high_level_state()
         if self._awaiting_initial_subtask:
             if structured_subtask is None:
-                print("waiting_initial_subtask")
                 now = time.monotonic()
                 if now - self._last_initial_subtask_wait_log_ts >= 0.5:
                     self._log_step_phase("waiting_initial_subtask", observation_with_task=observation_with_task)
@@ -1168,7 +1153,7 @@ class Runtime:
                 self._publish_runtime_state(
                     qpos=observation.get("qpos"),
                     latest_action=self._last_action,
-                    mode="policy_waiting_subtask",
+                    mode="start_ai",
                 )
                 return False
             self._awaiting_initial_subtask = False
@@ -1234,8 +1219,8 @@ class Runtime:
         qpos = observation.get("qpos")
         payload = {
             "timestamp": time.time(),
-            "mode": "policy",
-            "current_task": self._current_task.get("task_name"),
+            "mode": self._runtime_mode,
+            "current_task": self._prompt,
             "qpos": list(qpos) if qpos is not None else [],
             "latest_action": list(self._last_action) if self._last_action is not None else [],
             "hierarchical": hierarchical,
@@ -1336,9 +1321,8 @@ class Runtime:
 
             if self._last_action is None:
                 logging.warning("没有上次的action，退出人机协作模式")
-                self._is_waiting_for_task = True
-                self._current_task = None
-                self._publish_runtime_state(mode="waiting")
+                self._runtime_mode = "waiting"
+                self._publish_runtime_state()
                 return
 
             if not self._recent_puppet_actions:
@@ -1358,16 +1342,14 @@ class Runtime:
 
             if not self._manual_dataset_dir:
                 logging.warning("未从 voice web 收到人工接管保存路径，取消本次人工接管数据保存。")
-                self._is_waiting_for_task = True
-                self._current_task = None
-                self._publish_runtime_state(mode="waiting")
+                self._runtime_mode = "waiting"
+                self._publish_runtime_state()
                 return
             episode_subfolder = self._prompt_subfolder_name()
             if not episode_subfolder:
                 logging.warning("未输入人工接管 subfolder，取消本次人工接管数据保存。")
-                self._is_waiting_for_task = True
-                self._current_task = None
-                self._publish_runtime_state(mode="waiting")
+                self._runtime_mode = "waiting"
+                self._publish_runtime_state()
                 return
             episode_dataset_dir = os.path.join(self._manual_dataset_dir, episode_subfolder)
             os.makedirs(episode_dataset_dir, exist_ok=True)
@@ -1394,14 +1376,14 @@ class Runtime:
                     if local_key == "left":
                         rewound_action = self._rewind_action_history(real_env, action_history)
                         if rewound_action is not None:
-                            self._publish_runtime_state(latest_action=rewound_action, mode="teleop_prepare")
+                            self._publish_runtime_state(latest_action=rewound_action)
                         continue
                     if local_key == "b":
                         robot_utils.torque_off(master_bot_left)
                         robot_utils.torque_off(master_bot_right)
                         logging.info("master torque已关闭，开始人工接管数据采集。再次按 b 可停止采集。")
                         break
-                    self._publish_runtime_state(mode="teleop_prepare")
+                    self._publish_runtime_state()
 
                 if latest_task is None:
                     while True:
@@ -1411,7 +1393,7 @@ class Runtime:
 
                         self._environment.apply_action({"actions": action})
                         ts = self._environment._ts
-                        self._publish_runtime_state(qpos=ts.observation.get("qpos"), latest_action=action, mode="human_teleop")
+                        self._publish_runtime_state(qpos=ts.observation.get("qpos"), latest_action=action)
                         t2 = time.time()
 
                         action_list = list(action)
@@ -1447,9 +1429,8 @@ class Runtime:
                     timestamps=timestamps,
                 )
             
-            self._is_waiting_for_task = True
-            self._current_task = None
-            self._publish_runtime_state(mode="waiting")
+            self._runtime_mode = "waiting"
+            self._publish_runtime_state()
             if latest_task:
                 self._handle_task(latest_task)
                 
@@ -1463,8 +1444,7 @@ class Runtime:
                     robot_utils.torque_on(real_env.master_bot_right)
             except:
                 pass
-            self._is_waiting_for_task = True
-            self._current_task = None
-            self._publish_runtime_state(mode="waiting")
+            self._runtime_mode = "waiting"
+            self._publish_runtime_state()
         finally:
             self._last_action = None

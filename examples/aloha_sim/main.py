@@ -46,6 +46,7 @@ def main(args: Args) -> None:
         subscribers=[
             _saver.VideoSaver(args.out_dir),
         ],
+        prompt=args.task,
         max_hz=50,
         high_level_history_max_len=args.high_level_history_max_len,
     )

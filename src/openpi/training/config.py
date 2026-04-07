@@ -631,6 +631,95 @@ _CONFIGS = [
         subtask_eval_interval_steps=1000,
         subtask_eval_max_samples_per_class=128,
     ),
+    TrainConfig(
+        name="twist_only_lora",
+        model=pi0_config.Pi0Config(
+            pi05=True,
+            paligemma_variant="gemma_2b_lora",
+            action_expert_variant="gemma_300m_lora",
+            max_token_len=80,
+            subtask_loss_weight=0.1,
+            subtask_max_token_len=250,
+            fast_tokenizer_path="physical-intelligence/fast",
+            image_resolution=(448, 448),
+        ),
+        lr_schedule=_optimizer.CosineDecaySchedule(
+            warmup_steps=10_000,
+            peak_lr=2.5e-5,
+            decay_steps=40_000,
+            decay_lr=2.5e-6,
+        ),
+        log_interval=10,
+        data=LeRobotAlohaDataConfig(
+            image_size=(448, 448),
+            include_bottle_description=True,
+            include_bottle_position=False,
+            include_bottle_state=True,
+            include_subtask=True,
+            video_memory_num_frames=1,
+            video_memory_stride_seconds=1.0,
+            repo_ids=[
+                "lyl472324464/2025-11-18-twist-two-bottles",
+                "lyl472324464/2025-11-26-twist-two-bottles",
+                "lyl472324464/2025-12-10-twist-one-bottle",
+                "lyl472324464/2025-12-23-twist-one-bottle",
+                "lyl472324464/2026-01-20-twist-one-bottle",
+                "lyl472324464/2026-01-28-twist-many-bottle",
+                "lyl472324464/2026-02-03-no-cap-and-direction",
+                "lyl472324464/2026-03-04-one-direction",
+                "lyl472324464/2026-03-05-two-direction",
+                "lyl472324464/2026-03-09-no-cap-inference",
+                "lyl472324464/2026-03-09-inference-with-and-without-cap",
+                "lyl472324464/2026-03-12-one-have-cap",
+                "lyl472324464/2026-03-12-one-have-cap-direction",
+                "lyl472324464/2026-03-12-one-havent-cap",
+                "lyl472324464/2026-03-12-one-havent-cap-direction",
+                "lyl472324464/2026-03-12-two-have-all-left",
+                "lyl472324464/2026-03-12-two-have-cap-all-right",
+                "lyl472324464/2026-03-12-two-have-cap-one-right",
+            ],
+            assets=AssetsConfig(
+                assets_dir="gs://openpi-assets/checkpoints/pi05_base/assets",
+                asset_id="trossen",
+            ),
+            base_config=DataConfig(prompt_from_task=True),
+            repack_transforms=_transforms.Group(
+                inputs=[
+                    _transforms.InjectDefaultField("subtask", None),
+                    _transforms.RepackTransform(
+                        {
+                            "images": {
+                                "cam_high": "observation.images.cam_high",
+                                "cam_low": "observation.images.cam_low",
+                                "cam_left_wrist": "observation.images.cam_left_wrist",
+                                "cam_right_wrist": "observation.images.cam_right_wrist",
+                            },
+                            "state": "observation.state",
+                            "actions": "action",
+                            "prompt": "prompt",
+                            "subtask": "subtask",
+                        }
+                    )
+                ]
+            ),
+        ),
+        freeze_filter=pi0_config.Pi0Config(
+            pi05=True,
+            paligemma_variant="gemma_2b_lora",
+            action_expert_variant="gemma_300m_lora",
+            subtask_loss_weight=1.0,
+            subtask_max_token_len=64,
+        ).get_freeze_filter(),
+        ema_decay=None,
+        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_base/params"),
+        save_interval=1000,
+        num_train_steps=40_000,
+        batch_size=8,
+        num_workers=4,
+        subtask_eval_enabled=True,
+        subtask_eval_interval_steps=1000,
+        subtask_eval_max_samples_per_class=128,
+    ),
 ]
 
 if len({config.name for config in _CONFIGS}) != len(_CONFIGS):

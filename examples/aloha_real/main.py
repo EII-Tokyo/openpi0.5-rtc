@@ -19,6 +19,7 @@ from examples.aloha_real import h5df_saver
 @dataclasses.dataclass
 class Args:
     model_dir: str
+    prompt: str
     adapt_to_pi: bool = True
     low_level_host: str = "192.168.1.40"
     low_level_port: int = 8000
@@ -98,6 +99,7 @@ def main(args: Args) -> None:
         high_level_policy=high_level_policy,
         high_level_hz=args.high_level_hz,
         high_level_history_max_len=args.high_level_history_max_len,
+        prompt=args.prompt,
     )
 
     shutdown_started = False

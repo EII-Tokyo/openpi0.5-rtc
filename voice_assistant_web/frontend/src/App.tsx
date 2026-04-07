@@ -375,6 +375,30 @@ function formatCameraAge(timestamp: number | null | undefined) {
   return `${age.toFixed(age < 1 ? 2 : 1)}s`
 }
 
+function formatRuntimeModeLabel(
+  mode: string | null | undefined,
+  t: (typeof translations)[AppLanguage],
+) {
+  switch (mode) {
+    case 'start_ai':
+    case 'policy':
+    case 'policy_waiting_subtask':
+      return t.modeAiRunning
+    case 'human_intervention':
+    case 'teleop_prepare':
+    case 'human_teleop':
+      return t.modeManualControl
+    case 'return_home':
+      return t.modeHoming
+    case 'return_sleep':
+    case 'sleep':
+      return t.modeSleeping
+    case 'waiting':
+    default:
+      return t.waiting
+  }
+}
+
 export default function App() {
   const [uiConfig, setUiConfig] = useState<UiConfig>(() => createInitialUiConfig())
   const [state, setState] = useState<RealtimeState>(initialState)
@@ -402,7 +426,19 @@ export default function App() {
   const prevLastHistoryIdRef = useRef<string | null>(null)
   const prevSubtaskForAnnouncementRef = useRef<string | null>(null)
   const translatedAnnouncementCacheRef = useRef<Record<string, string>>({})
+  /** Bumps when a new announce/translate should supersede an in-flight fetch (not on every WS tick). */
+  const bottleAnnounceGenerationRef = useRef(0)
   const t = translations[uiConfig.uiLanguage]
+
+  /** Subtask + description only; ignores noisy JSON churn in `low_level_prompt` from realtime pushes. */
+  const bottleAnnounceStableKey = useMemo(() => {
+    const p = parseStructuredLowLevelPrompt(state.robot.hierarchical?.low_level_prompt)
+    if (!p) return ''
+    const sub = (p.subtask ?? '').trim()
+    const desc = (p.bottle_description ?? '').trim()
+    if (!sub && !desc) return ''
+    return `${sub}\0${desc}`
+  }, [state.robot.hierarchical?.low_level_prompt])
 
   const bottleStartSubtasksSet = useMemo(() => {
     return new Set(
@@ -476,15 +512,28 @@ export default function App() {
   }, [uiConfig.wsBase])
 
   useEffect(() => {
+    const log = (level: 'info' | 'debug', phase: string, extra: Record<string, unknown> = {}) => {
+      const row = { phase, current_task: state.robot.current_task, ...extra }
+      if (level === 'info') console.info('[bottle-announce]', row)
+      else console.debug('[bottle-announce]', row)
+    }
+
     if (state.robot.current_task !== 'Process all bottles') {
+      log('debug', 'skip_wrong_task', { expected: 'Process all bottles' })
       prevSubtaskForAnnouncementRef.current = null
       if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel()
       }
       return
     }
-    const parsed = parseStructuredLowLevelPrompt(state.robot.hierarchical?.low_level_prompt)
+    const rawLow = state.robot.hierarchical?.low_level_prompt
+    const parsed = parseStructuredLowLevelPrompt(rawLow)
     if (!parsed) {
+      const rawLen = rawLow != null ? String(rawLow).length : 0
+      log(rawLen > 0 ? 'info' : 'debug', 'skip_unparseable_low_level', {
+        raw_len: rawLen,
+        raw_head: rawLow != null ? String(rawLow).slice(0, 120) : null,
+      })
       return
     }
     const sub = parsed.subtask
@@ -494,12 +543,26 @@ export default function App() {
     const prevInStart = prev != null && bottleStartSubtasksSet.has(prev)
     const enteredStart = inStart && !prevInStart
 
-    prevSubtaskForAnnouncementRef.current = sub
-
-    if (!enteredStart || !desc.trim()) {
+    // Do not update `prev` when we are in an "entered start" edge but bottle_description is not
+    // ready yet. Otherwise the next tick sets prevInStart=true and we never announce (regression).
+    if (!enteredStart) {
+      log('debug', 'skip_not_entered_start', {
+        sub,
+        prev,
+        inStart,
+        prevInStart,
+        start_subtask_count: bottleStartSubtasksSet.size,
+      })
+      prevSubtaskForAnnouncementRef.current = sub
       return
     }
+    if (!desc.trim()) {
+      log('info', 'wait_bottle_description', { sub, enteredStart: true, desc_len: 0 })
+      return
+    }
+    prevSubtaskForAnnouncementRef.current = sub
     if (!('speechSynthesis' in window)) {
+      log('info', 'skip_no_speech_synthesis', { sub, desc_len: desc.length })
       return
     }
     const targetLanguage = uiConfig.announcementLanguage
@@ -507,7 +570,9 @@ export default function App() {
     const announcementTranslation = getAnnouncementTranslation(targetLanguage)
     const announcementLocale = getAnnouncementLocale(targetLanguage)
     const speak = (translatedDescription: string) => {
-      const utterance = new SpeechSynthesisUtterance(announcementTranslation.announceBottle(translatedDescription))
+      const text = announcementTranslation.announceBottle(translatedDescription)
+      log('info', 'speak', { sub, desc_len: desc.length, utterance_len: text.length, locale: announcementLocale })
+      const utterance = new SpeechSynthesisUtterance(text)
       utterance.lang = announcementLocale
       const voice = pickSpeechVoice(announcementLocale)
       if (voice) {
@@ -518,10 +583,13 @@ export default function App() {
     }
     const cached = translatedAnnouncementCacheRef.current[cacheKey]
     if (cached) {
+      bottleAnnounceGenerationRef.current += 1
+      log('info', 'speak_cached_translation', { sub, cacheKey: cacheKey.slice(0, 80) })
       speak(cached)
       return
     }
-    let cancelled = false
+    log('info', 'translate_request', { sub, targetLanguage, api: `${uiConfig.apiBase}/api/runtime/translate` })
+    const myGen = (bottleAnnounceGenerationRef.current += 1)
     void fetch(`${uiConfig.apiBase}/api/runtime/translate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -537,21 +605,41 @@ export default function App() {
         return response.json() as Promise<{ translated_text: string }>
       })
       .then((payload) => {
-        if (cancelled) return
+        if (myGen !== bottleAnnounceGenerationRef.current) {
+          console.info('[bottle-announce]', {
+            phase: 'translate_superseded',
+            sub,
+            myGen,
+            currentGen: bottleAnnounceGenerationRef.current,
+          })
+          return
+        }
         const translatedDescription = (payload.translated_text || desc).trim() || desc
         translatedAnnouncementCacheRef.current[cacheKey] = translatedDescription
+        console.info('[bottle-announce]', {
+          phase: 'translate_ok',
+          sub,
+          translated_len: translatedDescription.length,
+        })
         speak(translatedDescription)
       })
-      .catch(() => {
-        if (cancelled) return
+      .catch((err: unknown) => {
+        if (myGen !== bottleAnnounceGenerationRef.current) {
+          console.info('[bottle-announce]', {
+            phase: 'translate_error_superseded',
+            sub,
+            myGen,
+            err: String(err),
+          })
+          return
+        }
+        console.info('[bottle-announce]', { phase: 'translate_failed_use_original', sub, err: String(err) })
         speak(desc)
       })
-    return () => {
-      cancelled = true
-    }
+    return undefined
   }, [
     state.robot.current_task,
-    state.robot.hierarchical?.low_level_prompt,
+    bottleAnnounceStableKey,
     uiConfig.announcementLanguage,
     uiConfig.apiBase,
     bottleStartSubtasksSet,
@@ -640,6 +728,7 @@ export default function App() {
     if (!state.robot.timestamp) return false
     return Date.now() / 1000 - state.robot.timestamp < 1
   }, [state.robot.timestamp])
+  const runtimeModeLabel = useMemo(() => formatRuntimeModeLabel(state.robot.mode, t), [state.robot.mode, t])
   const camerasLive = useMemo(() => {
     if (!cameraNames.length) return false
     return cameraNames.every((name) => Boolean(state.camera_status[name]))
@@ -967,7 +1056,7 @@ export default function App() {
           <h1>{t.title}</h1>
         </div>
         <div className="header-actions">
-          <span className="status-pill mode">{state.robot.mode || t.waiting}</span>
+          <span className="status-pill mode">{runtimeModeLabel}</span>
           <div className="header-status-lamps">
             <span className="status-lamp-chip" title={freshness}>
               <span className={`lamp ${robotLive ? 'green' : 'red'}`} />
@@ -1128,9 +1217,14 @@ export default function App() {
                   </button>
                 </form>
                 <div className="quick-tasks">
-                  {['1', '2', '3', '4'].map((taskNum) => (
+                  {[
+                    ['1', t.quickTask1],
+                    ['2', t.quickTask2],
+                    ['3', t.quickTask3],
+                    ['4', t.quickTask4],
+                  ].map(([taskNum, label]) => (
                     <button key={taskNum} type="button" className="quick-task" onClick={() => void sendCommand(taskNum)}>
-                      {taskNum}
+                      {label}
                     </button>
                   ))}
                 </div>

@@ -34,12 +34,12 @@ docker compose logs -f voice_web_frontend
 
 ### Training
 
-Train `twist_off_the_bottle_cap_subtask_lora`:
+Train `twist_and_static_mixture_lora`:
 
 ```bash
 PYTHONPATH=src uv run scripts/train.py \
-  twist_off_the_bottle_cap_subtask_lora \
-  --exp_name twist_off_the_bottle_cap_subtask_lora_$(date +%Y%m%d_%H%M%S) \
+  twist_and_static_mixture_lora \
+  --exp_name twist_and_static_mixture_lora_$(date +%Y%m%d_%H%M%S) \
   --overwrite
 ```
 
@@ -47,7 +47,7 @@ Resume an existing run:
 
 ```bash
 PYTHONPATH=src uv run scripts/train.py \
-  twist_off_the_bottle_cap_subtask_lora \
+  twist_and_static_mixture_lora \
   --exp_name <existing_exp_name> \
   --resume
 ```
@@ -57,8 +57,8 @@ PYTHONPATH=src uv run scripts/train.py \
 Start both policy servers on the local machine without `runtime`:
 
 ```bash
-SERVER_ARGS='--warmup-rtc --warmup-non-rtc --no-warmup-subtask policy:checkpoint --policy.config twist_off_the_bottle_cap_subtask_lora --policy.dir /app/checkpoints/twist_off_the_bottle_cap_subtask_lora/<exp_name>/<step>' \
-HIGH_LEVEL_SERVER_ARGS='--no-warmup-rtc --no-warmup-non-rtc --warmup-subtask policy:checkpoint --policy.config twist_off_the_bottle_cap_subtask_lora --policy.dir /app/checkpoints/twist_off_the_bottle_cap_subtask_lora/<exp_name>/<step>' \
+SERVER_ARGS='--warmup-rtc --warmup-non-rtc --no-warmup-subtask policy:checkpoint --policy.config twist_and_static_mixture_lora --policy.dir /app/checkpoints/twist_and_static_mixture_lora/<exp_name>/<step>' \
+HIGH_LEVEL_SERVER_ARGS='--no-warmup-rtc --no-warmup-non-rtc --warmup-subtask policy:checkpoint --policy.config twist_and_static_mixture_lora --policy.dir /app/checkpoints/twist_and_static_mixture_lora/<exp_name>/<step>' \
 docker compose up -d openpi_server_low_level openpi_server_high_level
 ```
 
@@ -117,6 +117,7 @@ cd /app &&
 export PYTHONPATH=/app:/app/src:/app/packages/openpi-client/src:$PYTHONPATH &&
 python3 -u examples/aloha_real/main.py \
   --model-dir /app/checkpoints/twist_and_static_mixture_full_finetune/twist_and_static_mixture_full_finetune_vast_20260405_100600/39999 \
+  --prompt "Process all bottles" \
   --low-level-host 127.0.0.1 \
   --low-level-port 8000 \
   --high-level-host 127.0.0.1 \
@@ -127,6 +128,7 @@ python3 -u examples/aloha_real/main.py \
 
 Notes:
 
+- `--prompt` is now required. High-level preview uses this fixed prompt continuously, even before task `1` is pressed.
 - `runtime` must be started from a shell that has both `/opt/ros/noetic/setup.bash` and `/root/interbotix_ws/devel/setup.bash` sourced.
 - If the remote low-level server is still warming up, `runtime` may connect once and then exit on the first websocket request. In that case, wait for remote `server listening on 0.0.0.0:8000`, then restart `runtime`.
 - `runtime` is considered healthy only after it reaches:
@@ -135,6 +137,25 @@ Notes:
   - `Starting episode...`
   - `Runtime 默认仅接受 Redis / voice web 任务`
 - Camera publish rate matters for real control frequency. `third_party/aloha/aloha_scripts/realsense_publisher.py` should run at `FPS = 50`; when it was left at `30`, the online loop could not realistically sustain `50Hz`.
+
+### Local Twist-Only Training
+
+For local subtask experiments without `aloha_static_*`, use:
+
+```bash
+PYTHONPATH=src uv run scripts/train.py \
+  twist_only_lora \
+  --exp_name twist_only_lora_$(date +%Y%m%d_%H%M%S) \
+  --batch-size 4 \
+  --overwrite
+```
+
+Notes:
+
+- `batch_size=8` OOMed locally at `448x448`; `batch_size=4` is the safe local fallback.
+- Episode-level validation holdout is written to:
+  - `checkpoints/twist_only_lora/<exp_name>/subtask_eval_split.json`
+- That file contains `val_episodes_by_repo`, i.e. the exact EPs excluded from training and reserved for testing.
 
 ### Measured VRAM (RTX 5090 32GB, offline HDF5)
 
