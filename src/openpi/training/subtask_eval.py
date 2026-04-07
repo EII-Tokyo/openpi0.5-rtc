@@ -151,6 +151,49 @@ def _read_lerobot_parquet_subtask_strings(ds: Any) -> dict[int, str] | None:
     return out
 
 
+def _read_lerobot_parquet_episode_indices(ds: Any) -> dict[int, int] | None:
+    """Read local `data/**/*.parquet` index -> episode_index for one LeRobotDataset."""
+    root = getattr(ds, "root", None)
+    if root is None:
+        return None
+    root_path = Path(root)
+    if not root_path.is_dir():
+        return None
+    paths = sorted(root_path.glob("data/**/*.parquet"))
+    if not paths:
+        return None
+    out: dict[int, int] = {}
+    for path in paths:
+        try:
+            pf = pq.ParquetFile(path)
+        except Exception:
+            return None
+        names = pf.schema.names
+        if "index" not in names or "episode_index" not in names:
+            return None
+        try:
+            table = pq.read_table(path, columns=["index", "episode_index"])
+        except Exception:
+            return None
+        idx_list = table["index"].to_pylist()
+        ep_list = table["episode_index"].to_pylist()
+        if len(ep_list) != len(idx_list):
+            return None
+        for ix, ep in zip(idx_list, ep_list, strict=True):
+            out[int(ix)] = int(ep)
+
+    expected = int(len(ds))
+    if len(out) < max(1, int(expected * 0.95)):
+        logging.warning(
+            "subtask_eval parquet: repo %s episode rows=%d expected~%d; episode fast path disabled",
+            getattr(ds, "repo_id", root_path.name),
+            len(out),
+            expected,
+        )
+        return None
+    return out
+
+
 def try_build_parquet_subtask_label_map(outer_torch_dataset: Any) -> dict[int, str] | None:
     """Global frame index -> subtask cell string via Parquet only (no __getitem__)."""
     import lerobot.datasets.lerobot_dataset as lerobot_dataset
@@ -210,6 +253,66 @@ def try_build_parquet_subtask_label_map(outer_torch_dataset: Any) -> dict[int, s
     return None
 
 
+def try_build_parquet_episode_map(outer_torch_dataset: Any) -> dict[int, tuple[int, int]] | None:
+    """Global frame index -> (repo_idx, episode_index) via Parquet only (no __getitem__)."""
+    import lerobot.datasets.lerobot_dataset as lerobot_dataset
+
+    t0 = time.perf_counter()
+    inner = _unwrap_lerobot_for_parquet(outer_torch_dataset)
+
+    if isinstance(inner, lerobot_dataset.MultiLeRobotDataset):
+        n_outer = len(outer_torch_dataset)
+        offset = 0
+        full: dict[int, tuple[int, int]] = {}
+        for repo_idx, sub in enumerate(inner._datasets):
+            part = _read_lerobot_parquet_episode_indices(sub)
+            if part is None:
+                logging.info(
+                    "subtask_eval parquet: episode fast path disabled (sub-repo %s)",
+                    getattr(sub, "repo_id", "?"),
+                )
+                return None
+            for li, ep in part.items():
+                full[offset + int(li)] = (repo_idx, int(ep))
+            offset += int(len(sub))
+        if offset != n_outer:
+            logging.warning(
+                "subtask_eval parquet: episode length mismatch outer_len=%d parquet_span=%d; fast path disabled",
+                n_outer,
+                offset,
+            )
+            return None
+        logging.info(
+            "subtask_eval parquet: built global episode map len=%d from %d repos in %.2fs",
+            len(full),
+            len(inner._datasets),
+            time.perf_counter() - t0,
+        )
+        return full
+
+    if isinstance(inner, lerobot_dataset.LeRobotDataset):
+        part = _read_lerobot_parquet_episode_indices(inner)
+        if part is None:
+            logging.info(
+                "subtask_eval parquet: episode fast path disabled for single repo %s",
+                getattr(inner, "repo_id", "?"),
+            )
+            return None
+        full = {int(i): (0, int(ep)) for i, ep in part.items()}
+        logging.info(
+            "subtask_eval parquet: built episode map len=%d in %.2fs",
+            len(full),
+            time.perf_counter() - t0,
+        )
+        return full
+
+    logging.info(
+        "subtask_eval parquet: episode fast path not applicable (dataset type=%s)",
+        type(inner).__name__,
+    )
+    return None
+
+
 @dataclass(frozen=True)
 class SubtaskEvalSplit:
     train_indices: np.ndarray  # int64, sorted
@@ -218,6 +321,7 @@ class SubtaskEvalSplit:
     per_class_total: dict[int, int]
     per_class_val: dict[int, int]
     unknown_label_indices: int
+    val_episodes_by_repo: dict[str, tuple[int, ...]]
     """Frames with subtask JSON that did not match any canonical pair."""
 
     @property
@@ -232,16 +336,18 @@ def compute_subtask_eval_split(
     holdout_fraction: float,
     seed: int,
     label_map: dict[int, str] | None = None,
+    episode_map: dict[int, tuple[int, int]] | None = None,
 ) -> SubtaskEvalSplit:
-    """Stratified val split on frames that map to a canonical class; trainable indices only."""
+    """Hold out a random fraction of episodes per dataset; report canonical-class frame stats on top."""
     t_all = time.perf_counter()
     n = len(outer_torch_dataset)
     logging.info(
-        "subtask_eval.split: START compute_subtask_eval_split n_frames=%d num_canonical_classes=%d holdout_fraction=%g%s",
+        "subtask_eval.split: START compute_subtask_eval_split n_frames=%d num_canonical_classes=%d holdout_fraction=%g%s%s",
         n,
         len(canonical_pairs),
         holdout_fraction,
         f" (parquet label_map len={len(label_map)})" if label_map is not None else "",
+        f" (parquet episode_map len={len(episode_map)})" if episode_map is not None else "",
     )
     t0 = time.perf_counter()
     mask = _trainable_mask_for_outer(outer_torch_dataset)
@@ -253,14 +359,29 @@ def compute_subtask_eval_split(
     )
     rng = np.random.default_rng(seed)
 
-    by_class: dict[int, list[int]] = {i: [] for i in range(len(canonical_pairs))}
+    by_class_total: dict[int, int] = {i: 0 for i in range(len(canonical_pairs))}
+    by_class_val: dict[int, int] = {i: 0 for i in range(len(canonical_pairs))}
     unknown = 0
+    episodes_by_repo: dict[int, set[int]] = {}
+    frame_episode_key: dict[int, tuple[int, int]] = {}
+    repo_names: dict[int, str] = {}
+
+    inner = _unwrap_lerobot_for_parquet(outer_torch_dataset)
+    try:
+        import lerobot.datasets.lerobot_dataset as lerobot_dataset
+
+        if isinstance(inner, lerobot_dataset.MultiLeRobotDataset):
+            repo_names = {i: str(getattr(ds, "repo_id", f"repo_{i}")) for i, ds in enumerate(inner._datasets)}
+        elif isinstance(inner, lerobot_dataset.LeRobotDataset):
+            repo_names = {0: str(getattr(inner, "repo_id", "repo_0"))}
+    except Exception:
+        repo_names = {}
 
     step = _full_scan_progress_interval(n)
     t_scan = time.perf_counter()
     last_log_i = 0
     for i in range(n):
-        if label_map is None and i > 0 and i % step == 0:
+        if label_map is None and episode_map is None and i > 0 and i % step == 0:
             now = time.perf_counter()
             dt = now - t_scan
             rate = (i - last_log_i) / dt if dt > 0 else 0.0
@@ -274,12 +395,27 @@ def compute_subtask_eval_split(
             )
             t_scan = now
             last_log_i = i
+        row = None
+        if episode_map is not None:
+            ep_key = episode_map.get(i)
+        else:
+            row = _frame_row_at_index(outer_torch_dataset, i)
+            repo_idx = int(row.get("dataset_index", 0)) if isinstance(row, dict) else 0
+            episode_value = row.get("episode_index") if isinstance(row, dict) else 0
+            if hasattr(episode_value, "item"):
+                episode_value = episode_value.item()
+            ep_key = (repo_idx, int(episode_value))
+        if ep_key is not None:
+            frame_episode_key[i] = ep_key
+            episodes_by_repo.setdefault(ep_key[0], set()).add(ep_key[1])
+
         if not bool(mask[i]):
             continue
         if label_map is not None:
             cell = label_map.get(i, "")
         else:
-            row = _frame_row_at_index(outer_torch_dataset, i)
+            if row is None:
+                row = _frame_row_at_index(outer_torch_dataset, i)
             cell = row.get("subtask")
         parsed = _obs.parse_json_bottle_state_subtask(_obs.subtask_cell_to_str(cell))
         if parsed is None:
@@ -289,38 +425,71 @@ def compute_subtask_eval_split(
         if cid is None:
             unknown += 1
             continue
-        by_class[cid].append(i)
+        by_class_total[cid] += 1
 
     logging.info(
-        "subtask_eval.split: full index scan finished in %.2fs unknown_labels=%d",
+        "subtask_eval.split: metadata scan finished in %.2fs unknown_labels=%d repos=%d",
         time.perf_counter() - t_all,
         unknown,
+        len(episodes_by_repo),
     )
 
-    per_class_total = {c: len(by_class[c]) for c in by_class}
-    val_lists: list[int] = []
-    per_class_val: dict[int, int] = {}
-
-    for c, idxs in by_class.items():
-        if not idxs:
-            per_class_val[c] = 0
+    val_episode_keys: set[tuple[int, int]] = set()
+    for repo_idx, episodes in episodes_by_repo.items():
+        episode_list = sorted(episodes)
+        if not episode_list:
             continue
-        order = rng.permutation(len(idxs))
-        shuffled = [idxs[j] for j in order]
-        k = _val_count_for_class(len(shuffled), holdout_fraction)
-        take = shuffled[:k]
-        val_lists.extend(take)
-        per_class_val[c] = len(take)
+        if len(episode_list) == 1:
+            continue
+        k = max(1, int(np.ceil(len(episode_list) * holdout_fraction)))
+        k = min(k, len(episode_list) - 1)
+        picked = rng.choice(len(episode_list), size=k, replace=False)
+        for j in picked.tolist():
+            val_episode_keys.add((repo_idx, episode_list[j]))
 
-    val_set = set(val_lists)
+    val_episodes_by_repo: dict[str, tuple[int, ...]] = {}
+    for repo_idx, episodes in episodes_by_repo.items():
+        repo_name = repo_names.get(repo_idx, f"repo_{repo_idx}")
+        picked = sorted(ep for r, ep in val_episode_keys if r == repo_idx)
+        val_episodes_by_repo[repo_name] = tuple(picked)
+
+    val_mask = np.zeros(n, dtype=bool)
+    for i, ep_key in frame_episode_key.items():
+        if ep_key in val_episode_keys:
+            val_mask[i] = True
+    val_indices = np.flatnonzero(val_mask).astype(np.int64)
+    train_indices = np.flatnonzero(~val_mask).astype(np.int64)
+
+    if label_map is not None:
+        for i in val_indices.tolist():
+            if not bool(mask[i]):
+                continue
+            cell = label_map.get(i, "")
+            parsed = _obs.parse_json_bottle_state_subtask(_obs.subtask_cell_to_str(cell))
+            if parsed is None:
+                continue
+            cid = class_id_for_pair(parsed[0], parsed[1], canonical_pairs)
+            if cid is not None:
+                by_class_val[cid] += 1
+    else:
+        for i in val_indices.tolist():
+            if not bool(mask[i]):
+                continue
+            row = _frame_row_at_index(outer_torch_dataset, i)
+            parsed = _obs.parse_json_bottle_state_subtask(_obs.subtask_cell_to_str(row.get("subtask")))
+            if parsed is None:
+                continue
+            cid = class_id_for_pair(parsed[0], parsed[1], canonical_pairs)
+            if cid is not None:
+                by_class_val[cid] += 1
+
     t_tr = time.perf_counter()
     logging.info(
-        "subtask_eval.split: building train_indices / val_indices (n=%d |val_set|=%d)",
+        "subtask_eval.split: built train/val by episode (n=%d val_frames=%d val_episodes=%d)",
         n,
-        len(val_set),
+        int(val_indices.size),
+        len(val_episode_keys),
     )
-    train_indices = np.array([i for i in range(n) if i not in val_set], dtype=np.int64)
-    val_indices = np.array(sorted(val_set), dtype=np.int64)
     logging.info(
         "subtask_eval.split: index arrays done in %.2fs train_size=%d val_size=%d TOTAL=%.2fs",
         time.perf_counter() - t_tr,
@@ -333,9 +502,10 @@ def compute_subtask_eval_split(
         train_indices=train_indices,
         val_indices=val_indices,
         canonical_pairs=canonical_pairs,
-        per_class_total=per_class_total,
-        per_class_val=per_class_val,
+        per_class_total=by_class_total,
+        per_class_val=by_class_val,
         unknown_label_indices=unknown,
+        val_episodes_by_repo=val_episodes_by_repo,
     )
 
 
@@ -350,6 +520,7 @@ def save_split_json(path: Path, split: SubtaskEvalSplit, *, seed: int, holdout_f
         "per_class_total": {str(k): v for k, v in split.per_class_total.items()},
         "per_class_val": {str(k): v for k, v in split.per_class_val.items()},
         "unknown_label_indices": split.unknown_label_indices,
+        "val_episodes_by_repo": {k: list(v) for k, v in split.val_episodes_by_repo.items()},
     }
     path.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
 

@@ -18,7 +18,6 @@ import torch
 import openpi.models.model as _model
 import openpi.training.config as _config
 import openpi.training.subtask_eval as _subtask_eval
-from openpi.training.droid_rlds_dataset import DroidRldsDataset
 import openpi.transforms as _transforms
 
 T_co = TypeVar("T_co", covariant=True)
@@ -29,16 +28,6 @@ class Dataset(Protocol[T_co]):
 
     def __getitem__(self, index: SupportsIndex) -> T_co:
         raise NotImplementedError("Subclasses of Dataset should implement __getitem__.")
-
-    def __len__(self) -> int:
-        raise NotImplementedError("Subclasses of Dataset should implement __len__.")
-
-
-class IterableDataset(Protocol[T_co]):
-    """Interface for an iterable dataset."""
-
-    def __iter__(self) -> Iterator[T_co]:
-        raise NotImplementedError("Subclasses of IterableDataset should implement __iter__.")
 
     def __len__(self) -> int:
         raise NotImplementedError("Subclasses of Dataset should implement __len__.")
@@ -59,28 +48,9 @@ class TransformedDataset(Dataset[T_co]):
     def __init__(self, dataset: Dataset, transforms: Sequence[_transforms.DataTransformFn]):
         self._dataset = dataset
         self._transform = _transforms.compose(transforms)
-        self._getitem_error_count = 0
 
     def __getitem__(self, index: SupportsIndex) -> T_co:
-        # Some external LeRobot datasets may contain occasional metadata/task index
-        # mismatches that raise IndexError in worker processes. Retry on the next item
-        # to keep training from crashing on a single bad sample.
-        max_retries = 4096
-        dataset_len = len(self._dataset)
-        idx = index.__index__()
-        last_error: Exception | None = None
-        for retry in range(max_retries):
-            try:
-                return self._transform(self._dataset[idx % dataset_len])
-            except IndexError as e:
-                last_error = e
-                idx += 1
-                if self._getitem_error_count < 8:
-                    logging.warning("Skipping bad dataset sample at index=%d due to IndexError: %s", idx - 1, e)
-                self._getitem_error_count += 1
-        if last_error is not None:
-            raise last_error
-        raise RuntimeError("TransformedDataset.__getitem__ retry loop failed unexpectedly.")
+        return self._transform(self._dataset[index.__index__()])
 
     def __len__(self) -> int:
         return len(self._dataset)
@@ -295,40 +265,6 @@ class MultiLeRobotDatasetWithOptionalKeys(lerobot_dataset.MultiLeRobotDataset):
         return datasets.Features(features)
 
 
-class IterableTransformedDataset(IterableDataset[T_co]):
-    def __init__(
-        self,
-        dataset: IterableDataset,
-        transforms: Sequence[_transforms.DataTransformFn],
-        *,
-        is_batched: bool = False,
-    ):
-        self._dataset = dataset
-        self._transform = _transforms.compose(transforms)
-        self._is_batched = is_batched
-
-    def __iter__(self):
-        for sample in self._dataset:
-            if self._is_batched:
-                # Transforms are designed to be applied to individual samples. So we need to split the batch into
-                # individual samples and apply the transform to each sample individually.
-                batch_size = next(v.shape[0] for v in sample.values())
-
-                # Split batch into individual samples using tree_map
-                individual_samples = [jax.tree.map(lambda x: x[i], sample) for i in range(batch_size)]  # noqa: B023
-
-                # Transform each sample
-                transformed = [self._transform(s) for s in individual_samples]
-
-                # Recombine batch with tree_map
-                yield jax.tree.map(lambda *x: np.stack(x, axis=0), *transformed)
-            else:
-                yield self._transform(sample)
-
-    def __len__(self) -> int:
-        return len(self._dataset)
-
-
 class FakeDataset(Dataset):
     def __init__(self, model_config: _model.BaseModelConfig, num_samples: int):
         self._num_samples = num_samples
@@ -374,60 +310,49 @@ def create_torch_dataset(
     """Create a dataset for training."""
     repo_id = data_config.repo_id
     repo_ids = data_config.repo_ids
-    if repo_id is None and repo_ids is None:
-        raise ValueError("Repo ID or repo IDs is not set. Cannot create dataset.")
     if repo_id == "fake":
         return FakeDataset(model_config, num_samples=1024)
-    if repo_ids is not None:
-        # Single-repo list is common in our configs; keep it on `main` revision to preserve new fields (e.g. subtask).
+
+    def _delta_timestamps(fps: float) -> dict[str, list[float]]:
+        return {
+            key: [t / fps for t in range(action_horizon)] for key in data_config.action_sequence_keys
+        }
+
+    fps_meta: lerobot_dataset.LeRobotDatasetMetadata | None = None
+    if repo_ids is not None and len(repo_ids) > 0:
         if len(repo_ids) == 1:
-            dataset_meta = lerobot_dataset.LeRobotDatasetMetadata(repo_ids[0], revision="main", force_cache_sync=True)
+            fps_meta = lerobot_dataset.LeRobotDatasetMetadata(
+                repo_ids[0], revision="main", force_cache_sync=True
+            )
             dataset = lerobot_dataset.LeRobotDataset(
                 repo_ids[0],
                 revision="main",
                 force_cache_sync=True,
-                delta_timestamps={
-                    key: [t / dataset_meta.fps for t in range(action_horizon)] for key in data_config.action_sequence_keys
-                },
+                delta_timestamps=_delta_timestamps(fps_meta.fps),
             )
         else:
-            # MultiLeRobotDataset currently does not expose a `revision` argument.
-            # For multi-repo training, all repos should expose compatible schemas on their default revision.
-            first_dataset_meta = lerobot_dataset.LeRobotDatasetMetadata(repo_ids[0], force_cache_sync=True)
+            fps_meta = lerobot_dataset.LeRobotDatasetMetadata(repo_ids[0], force_cache_sync=True)
             dataset = MultiLeRobotDatasetWithOptionalKeys(
                 repo_ids,
-                # root="/home/ubuntu/aloha",
-                delta_timestamps={
-                    key: [t / first_dataset_meta.fps for t in range(action_horizon)] for key in data_config.action_sequence_keys
-                },
+                delta_timestamps=_delta_timestamps(fps_meta.fps),
                 optional_defaults={"subtask": ""},
             )
-    if repo_id is not None:
-        dataset_meta = lerobot_dataset.LeRobotDatasetMetadata(repo_id, revision="main", force_cache_sync=True)
+    elif repo_id is not None:
+        fps_meta = lerobot_dataset.LeRobotDatasetMetadata(repo_id, revision="main", force_cache_sync=True)
         dataset = lerobot_dataset.LeRobotDataset(
-            data_config.repo_id,
+            repo_id,
             revision="main",
-            delta_timestamps={
-                key: [t / dataset_meta.fps for t in range(action_horizon)] for key in data_config.action_sequence_keys
-            },
+            force_cache_sync=True,
+            delta_timestamps=_delta_timestamps(fps_meta.fps),
         )
-    # print(data_config)
-    # if data_config.prompt_from_task:
-    #     # dataset = TransformedDataset(dataset, [_transforms.PromptFromLeRobotTask(dataset_meta.tasks)])
-    #     dataset = TransformedDataset(dataset, [_transforms.PromptFromLeRobotTask()])
+    else:
+        raise ValueError("Repo ID or non-empty repo_ids is required. Cannot create dataset.")
+
     trainable_mask = IsForTrainingWrapper._build_trainable_mask(dataset)
     if getattr(data_config, "video_memory_num_frames", 1) > 1:
-        if repo_id is not None:
-            fps = dataset_meta.fps
-        elif repo_ids is not None and len(repo_ids) == 1:
-            fps = dataset_meta.fps
-        elif repo_ids is not None:
-            fps = first_dataset_meta.fps
-        else:
-            fps = 50.0
         dataset = TemporalFrameStackDataset(
             dataset,
-            fps=float(fps),
+            fps=float(fps_meta.fps),
             num_frames=data_config.video_memory_num_frames,
             stride_seconds=data_config.video_memory_stride_seconds,
             trainable_mask=trainable_mask,
@@ -435,24 +360,6 @@ def create_torch_dataset(
     else:
         dataset = IsForTrainingWrapper(dataset)
     return dataset
-
-
-def create_rlds_dataset(
-    data_config: _config.DataConfig,
-    action_horizon: int,
-    batch_size: int,
-    *,
-    shuffle: bool = False,
-) -> Dataset:
-    # At the moment, we only support DROID for RLDS datasets.
-    return DroidRldsDataset(
-        data_dir=data_config.rlds_data_dir,
-        batch_size=batch_size,
-        shuffle=shuffle,
-        action_chunk_size=action_horizon,
-        action_space=data_config.action_space,
-        filter_dict_path=data_config.filter_dict_path,
-    )
 
 
 def transform_dataset(dataset: Dataset, data_config: _config.DataConfig, *, skip_norm_stats: bool = False) -> Dataset:
@@ -478,35 +385,6 @@ def transform_dataset(dataset: Dataset, data_config: _config.DataConfig, *, skip
     )
 
 
-def transform_iterable_dataset(
-    dataset: IterableDataset,
-    data_config: _config.DataConfig,
-    *,
-    skip_norm_stats: bool = False,
-    is_batched: bool = False,
-) -> IterableDataset:
-    """Transform the dataset by applying the data transforms."""
-    norm_stats = {}
-    if data_config.repo_id != "fake" and not skip_norm_stats:
-        if data_config.norm_stats is None:
-            raise ValueError(
-                "Normalization stats not found. "
-                "Make sure to run `scripts/compute_norm_stats.py --config-name=<your-config>`."
-            )
-        norm_stats = data_config.norm_stats
-
-    return IterableTransformedDataset(
-        dataset,
-        [
-            *data_config.repack_transforms.inputs,
-            *data_config.data_transforms.inputs,
-            _transforms.Normalize(norm_stats, use_quantiles=data_config.use_quantile_norm),
-            *data_config.model_transforms.inputs,
-        ],
-        is_batched=is_batched,
-    )
-
-
 def create_data_loader(
     config: _config.TrainConfig,
     *,
@@ -516,174 +394,73 @@ def create_data_loader(
     skip_norm_stats: bool = False,
     framework: Literal["jax", "pytorch"] = "jax",
 ) -> DataLoader[tuple[_model.Observation, _model.Actions]]:
-    """Create a data loader for training.
-
-    Args:
-        config: The training configuration.
-        sharding: The sharding to use for the data loader (JAX only).
-        shuffle: Whether to shuffle the data.
-        num_batches: Determines the number of batches to return.
-        skip_norm_stats: Whether to skip data normalization.
-        framework: The framework to use ("jax" or "pytorch").
-    """
+    """Build LeRobot dataset + transforms + optional subtask-eval holdout + PyTorch DataLoader."""
     data_config = config.data.create(config.assets_dirs, config.model)
-    logging.info(f"data_config: {data_config}")
-
+    logging.info("data_config: %s", data_config)
     if data_config.rlds_data_dir is not None:
-        return create_rlds_data_loader(
-            data_config,
-            action_horizon=config.model.action_horizon,
-            batch_size=config.batch_size,
-            sharding=sharding,
-            shuffle=shuffle,
-            num_batches=num_batches,
-            skip_norm_stats=skip_norm_stats,
-            framework=framework,
+        raise ValueError(
+            "RLDS data loading was removed from this fork; use a LeRobot config with repo_id / repo_ids only."
         )
-    return create_torch_data_loader(
-        data_config,
-        model_config=config.model,
-        action_horizon=config.model.action_horizon,
-        batch_size=config.batch_size,
-        sharding=sharding,
-        shuffle=shuffle,
-        num_batches=num_batches,
-        num_workers=config.num_workers,
-        seed=config.seed,
-        skip_norm_stats=skip_norm_stats,
-        framework=framework,
-        train_config=config,
-    )
 
+    model_config = config.model
+    action_horizon = model_config.action_horizon
+    batch_size = config.batch_size
+    num_workers = config.num_workers
+    seed = config.seed
 
-def create_torch_data_loader(
-    data_config: _config.DataConfig,
-    model_config: _model.BaseModelConfig,
-    action_horizon: int,
-    batch_size: int,
-    *,
-    sharding: jax.sharding.Sharding | None = None,
-    skip_norm_stats: bool = False,
-    shuffle: bool = False,
-    num_batches: int | None = None,
-    num_workers: int = 0,
-    seed: int = 0,
-    framework: str = "jax",
-    train_config: _config.TrainConfig | None = None,
-) -> DataLoader[tuple[_model.Observation, _model.Actions]]:
-    """Create a data loader for training.
-
-    Args:
-        data_config: The data configuration.
-        action_horizon: The action horizon.
-        batch_size: The batch size.
-        sharding: The sharding to use for the data loader. If None, the data loader will
-            use a single device sharding.
-        skip_norm_stats: Whether to skip data normalization.
-        shuffle: Whether to shuffle the data.
-        num_batches: Determines the number of batches to return. If the number exceeds the
-            number of batches in the dataset, the data loader will loop over the dataset.
-            If not provided, will iterate over the dataset indefinitely.
-        num_workers: The number of worker processes to use. If zero, the data loader will
-            execute in the main process.
-        seed: The seed to use for shuffling the data.
-        train_config: When set, may apply subtask-eval holdout (see TrainConfig.subtask_eval_*).
-    """
-    t_pipe = time.perf_counter()
-    logging.info("data_loader: [1/4] create_torch_dataset starting (raw LeRobot / multi-repo)")
+    t0 = time.perf_counter()
     base_dataset = create_torch_dataset(data_config, action_horizon, model_config)
-    logging.info(
-        "data_loader: [1/4] create_torch_dataset done len=%d elapsed=%.2fs",
-        len(base_dataset),
-        time.perf_counter() - t_pipe,
-    )
-
-    t_tf = time.perf_counter()
-    logging.info("data_loader: [2/4] transform_dataset starting (prompt/norm/model transforms)")
     dataset = transform_dataset(base_dataset, data_config, skip_norm_stats=skip_norm_stats)
-    logging.info("data_loader: [2/4] transform_dataset done elapsed=%.2fs", time.perf_counter() - t_tf)
 
     subtask_eval_outer = None
     subtask_eval_split = None
     subtask_eval_index_to_class: dict[int, int] | None = None
     repo_id = getattr(data_config, "repo_id", None)
-    if (
-        train_config is not None
-        and train_config.subtask_eval_enabled
-        and framework == "jax"
-        and repo_id != "fake"
-    ):
+    if config.subtask_eval_enabled and framework == "jax" and repo_id != "fake":
         try:
             t_se = time.perf_counter()
-            canonical = _subtask_eval.resolve_canonical_pairs(train_config)
-            t_lm = time.perf_counter()
+            canonical = _subtask_eval.resolve_canonical_pairs(config)
             subtask_label_map = _subtask_eval.try_build_parquet_subtask_label_map(base_dataset)
-            if subtask_label_map is not None:
-                logging.info(
-                    "data_loader: [3/4] subtask_eval holdout ENABLED — parquet label_map len=%d built in %.2fs (split+map skip __getitem__)",
-                    len(subtask_label_map),
-                    time.perf_counter() - t_lm,
-                )
-            else:
-                logging.info(
-                    "data_loader: [3/4] subtask_eval holdout ENABLED — parquet fast path unavailable; scanning every frame via __getitem__ (slow on huge datasets)"
-                )
+            episode_index_map = _subtask_eval.try_build_parquet_episode_map(base_dataset)
             split = _subtask_eval.compute_subtask_eval_split(
                 outer_torch_dataset=base_dataset,
                 canonical_pairs=canonical,
-                holdout_fraction=train_config.subtask_eval_holdout_fraction,
-                seed=train_config.seed,
+                holdout_fraction=config.subtask_eval_holdout_fraction,
+                seed=config.seed,
                 label_map=subtask_label_map,
-            )
-            logging.info(
-                "data_loader: [3a] compute_subtask_eval_split finished elapsed=%.2fs",
-                time.perf_counter() - t_se,
+                episode_map=episode_index_map,
             )
             _subtask_eval.log_split_summary(split)
             subtask_eval_outer = base_dataset
             subtask_eval_split = split
-            t_map = time.perf_counter()
             subtask_eval_index_to_class = _subtask_eval.build_index_to_class_map(
                 base_dataset, canonical, label_map=subtask_label_map
             )
-            logging.info(
-                "data_loader: [3b] build_index_to_class_map finished elapsed=%.2fs",
-                time.perf_counter() - t_map,
-            )
-            t_sub = time.perf_counter()
             train_list = split.train_indices.tolist()
-            logging.info(
-                "data_loader: [3c] Subset: train_indices.tolist() done count=%d in %.2fs (large list alloc)",
-                len(train_list),
-                time.perf_counter() - t_sub,
-            )
             train_allowed_mask = np.zeros(len(base_dataset), dtype=bool)
             train_allowed_mask[split.train_indices] = True
             _restrict_trainable_mask_for_holdout(dataset, train_allowed_mask)
             dataset = torch.utils.data.Subset(dataset, train_list)
             logging.info(
-                "data_loader: [3/4] subtask_eval subset total elapsed=%.2fs (split+map+subset)",
+                "data_loader: subtask_eval holdout done (parquet_map=%s) in %.2fs, train_subset=%d",
+                subtask_label_map is not None,
                 time.perf_counter() - t_se,
+                len(train_list),
             )
             split_path = None
             try:
-                split_path = train_config.checkpoint_dir / "subtask_eval_split.json"
+                split_path = config.checkpoint_dir / "subtask_eval_split.json"
             except ValueError:
                 logging.warning("subtask_eval_split.json not saved: set exp_name to define checkpoint_dir.")
             if split_path is not None:
                 try:
-                    t_json = time.perf_counter()
                     _subtask_eval.save_split_json(
                         split_path,
                         split,
-                        seed=train_config.seed,
-                        holdout_fraction=train_config.subtask_eval_holdout_fraction,
+                        seed=config.seed,
+                        holdout_fraction=config.subtask_eval_holdout_fraction,
                     )
-                    logging.info(
-                        "data_loader: wrote %s in %.2fs",
-                        split_path,
-                        time.perf_counter() - t_json,
-                    )
+                    logging.info("data_loader: wrote %s", split_path)
                 except Exception as e:
                     logging.warning("Could not write subtask_eval_split.json: %s", e)
         except Exception:
@@ -691,21 +468,11 @@ def create_torch_data_loader(
             subtask_eval_outer = None
             subtask_eval_split = None
             subtask_eval_index_to_class = None
-    else:
-        if train_config is not None and train_config.subtask_eval_enabled and repo_id == "fake":
-            logging.info("data_loader: subtask_eval skipped (repo_id=fake)")
-        elif train_config is not None and train_config.subtask_eval_enabled and framework != "jax":
-            logging.info("data_loader: subtask_eval skipped (framework=%s)", framework)
+    elif config.subtask_eval_enabled and repo_id == "fake":
+        logging.info("data_loader: subtask_eval skipped (repo_id=fake)")
+    elif config.subtask_eval_enabled and framework != "jax":
+        logging.info("data_loader: subtask_eval skipped (framework=%s)", framework)
 
-    logging.info(
-        "data_loader: [4/4] torch DataLoader about to start len(dataset)=%d total_since_entry=%.2fs",
-        len(dataset),
-        time.perf_counter() - t_pipe,
-    )
-
-    # Use TorchDataLoader for both frameworks
-    # For PyTorch DDP, create DistributedSampler and divide batch size by world size
-    # For JAX, divide by process count
     sampler = None
     if framework == "pytorch":
         if torch.distributed.is_initialized():
@@ -722,8 +489,12 @@ def create_torch_data_loader(
     else:
         local_batch_size = batch_size // jax.process_count()
 
-    logging.info(f"dataset length: {len(dataset)}")
-    logging.info(f"local_batch_size: {local_batch_size}")
+    logging.info(
+        "data_loader: len=%d local_batch_size=%d build_time=%.2fs",
+        len(dataset),
+        local_batch_size,
+        time.perf_counter() - t0,
+    )
     data_loader = TorchDataLoader(
         dataset,
         local_batch_size=local_batch_size,
@@ -743,47 +514,6 @@ def create_torch_data_loader(
         subtask_eval_split=subtask_eval_split,
         subtask_eval_index_to_class=subtask_eval_index_to_class,
     )
-
-
-def create_rlds_data_loader(
-    data_config: _config.DataConfig,
-    action_horizon: int,
-    batch_size: int,
-    *,
-    sharding: jax.sharding.Sharding | None = None,
-    skip_norm_stats: bool = False,
-    shuffle: bool = False,
-    num_batches: int | None = None,
-    framework: str = "jax",
-) -> DataLoader[tuple[_model.Observation, _model.Actions]]:
-    """Create an RLDS data loader for training.
-
-    Note: This data loader requires some extra dependencies -- see examples/droid/README_train.md
-
-    Args:
-        data_config: The data configuration.
-        action_horizon: The action horizon.
-        batch_size: The batch size.
-        sharding: The sharding to use for the data loader. If None, the data loader will
-            use a single device sharding.
-        skip_norm_stats: Whether to skip data normalization.
-        shuffle: Whether to shuffle the data.
-        num_batches: Determines the number of batches to return. If the number exceeds the
-            number of batches in the dataset, the data loader will loop over the dataset.
-            If not provided, will iterate over the dataset indefinitely.
-    """
-    if framework == "pytorch":
-        raise NotImplementedError("PyTorch RLDS data loader is not supported yet")
-    dataset = create_rlds_dataset(data_config, action_horizon, batch_size, shuffle=shuffle)
-    dataset = transform_iterable_dataset(dataset, data_config, skip_norm_stats=skip_norm_stats, is_batched=True)
-
-    data_loader = RLDSDataLoader(
-        dataset,
-        sharding=sharding,
-        num_batches=num_batches,
-    )
-
-    return DataLoaderImpl(data_config, data_loader)
 
 
 class TorchDataLoader:
@@ -885,10 +615,10 @@ def _collate_fn(items):
 
 class _WorkerInitFn:
     """Worker initialization function that can be pickled for multiprocessing."""
-    
+
     def __init__(self, seed: int):
         self.seed = seed
-    
+
     def __call__(self, worker_id: int) -> None:
         """Initialize worker process with JAX settings and numpy random seed."""
         # Tell JAX inside the worker process not to preallocate the GPU memory.
@@ -901,55 +631,11 @@ class _WorkerInitFn:
         np.random.seed(self.seed + worker_id)
 
 
-class RLDSDataLoader:
-    """Shallow wrapper around the DROID data loader to make it compatible with openpi.
-
-    All batching already happens in the DROID dataset, so we don't need to do anything here.
-    """
-
-    def __init__(
-        self,
-        dataset: DroidRldsDataset,
-        *,
-        sharding: jax.sharding.Sharding | None = None,
-        num_batches: int | None = None,
-    ):
-        self._dataset = dataset
-        self._num_batches = num_batches
-
-        if jax.process_count() > 1:
-            raise NotImplementedError("Data loading with multiple processes is not supported.")
-
-        if sharding is None:
-            # Use data parallel sharding by default.
-            sharding = jax.sharding.NamedSharding(
-                jax.sharding.Mesh(jax.devices(), ("B",)),
-                jax.sharding.PartitionSpec("B"),
-            )
-
-        self._sharding = sharding
-        self._num_batches = num_batches
-
-    def __iter__(self):
-        num_items = 0
-        while True:
-            data_iter = iter(self._dataset)
-            while True:
-                if self._num_batches is not None and num_items >= self._num_batches:
-                    return
-                try:
-                    batch = next(data_iter)
-                except StopIteration:
-                    break  # We've exhausted the dataset. Create a new iterator and start over.
-                num_items += 1
-                yield jax.tree.map(lambda x: jax.make_array_from_process_local_data(self._sharding, x), batch)
-
-
 class DataLoaderImpl(DataLoader):
     def __init__(
         self,
         data_config: _config.DataConfig,
-        data_loader: TorchDataLoader | RLDSDataLoader,
+        data_loader: TorchDataLoader,
         *,
         subtask_eval_outer_dataset: typing.Any = None,
         subtask_eval_split: typing.Any = None,
