@@ -69,20 +69,60 @@ def test_make_bool_mask():
 
 def test_tokenize_prompt():
     tokenizer = _tokenizer.PaligemmaTokenizer(max_len=12)
-    transform = _transforms.TokenizePrompt(tokenizer)
+    transform = _transforms.TokenizePrompt(tokenizer, discrete_state_input=True)
 
-    data = transform({"prompt": "Hello, world!"})
+    data = transform({"prompt": "Hello, world!", "state": np.zeros((14,), dtype=np.float32), "actions": np.zeros((2, 14), dtype=np.float32)})
 
-    tok_prompt, tok_mask = tokenizer.tokenize("Hello, world!")
+    tok_prompt, tok_mask, *_ = tokenizer.tokenize(
+        "Hello, world!",
+        state=np.zeros((14,), dtype=np.float32),
+        actions=np.zeros((2, 14), dtype=np.float32),
+    )
     assert np.allclose(tok_prompt, data["tokenized_prompt"])
     assert np.allclose(tok_mask, data["tokenized_prompt_mask"])
 
 
 def test_tokenize_no_prompt():
-    transform = _transforms.TokenizePrompt(_tokenizer.PaligemmaTokenizer())
+    transform = _transforms.TokenizePrompt(_tokenizer.PaligemmaTokenizer(), discrete_state_input=True)
 
     with pytest.raises(ValueError, match="Prompt is required"):
         transform({})
+
+
+def test_tokenize_prompt_vqa_mode_omits_state_and_actions():
+    calls = {}
+
+    class _FakeTokenizer:
+        def tokenize(self, prompt, state=None, subtask=None, actions=None, *, train_action=True):
+            calls["prompt"] = prompt
+            calls["state"] = state
+            calls["subtask"] = subtask
+            calls["actions"] = actions
+            calls["train_action"] = train_action
+            return (
+                np.zeros((4,), dtype=np.int32),
+                np.ones((4,), dtype=bool),
+                np.zeros((4,), dtype=np.int32),
+                np.ones((4,), dtype=bool),
+                np.ones((4,), dtype=bool),
+                np.zeros((4,), dtype=bool),
+            )
+
+    transform = _transforms.TokenizePrompt(_FakeTokenizer(), discrete_state_input=True)
+    out = transform(
+        {
+            "prompt": "Is the cap still on?",
+            "state": np.ones((14,), dtype=np.float32),
+            "actions": np.ones((2, 14), dtype=np.float32),
+            "actions_mask": np.asarray(False),
+            "subtask": "yes",
+        }
+    )
+
+    assert calls["train_action"] is False
+    assert calls["state"] is None
+    assert calls["actions"] is None
+    assert "tokenized_subtask" in out
 
 
 def test_transform_dict():

@@ -105,6 +105,17 @@ def _merge_runtime_config_request(request: RuntimeConfigRequest) -> RuntimeConfi
             if request.video_memory_num_frames in (1, 4)
             else current.video_memory_num_frames
         ),
+        high_level_source=(
+            request.high_level_source
+            if request.high_level_source is not None
+            else current.high_level_source
+        ),
+        gpt_model=request.gpt_model if request.gpt_model is not None else current.gpt_model,
+        gpt_image_mode=(
+            request.gpt_image_mode
+            if request.gpt_image_mode is not None
+            else current.gpt_image_mode
+        ),
         announcement_language=(
             request.announcement_language
             if request.announcement_language is not None
@@ -139,6 +150,9 @@ def on_startup() -> None:
         include_subtask=stored.include_subtask,
         forced_low_level_subtask=stored.forced_low_level_subtask,
         video_memory_num_frames=stored.video_memory_num_frames,
+        high_level_source=stored.high_level_source,
+        gpt_model=stored.gpt_model,
+        gpt_image_mode=stored.gpt_image_mode,
         subtask_catalog=stored.subtask_catalog,
         state_subtask_pairs=stored.state_subtask_pairs,
     )
@@ -298,6 +312,9 @@ def runtime_config(request: RuntimeConfigRequest) -> RuntimeConfigPayload:
         include_subtask=merged.include_subtask,
         forced_low_level_subtask=merged.forced_low_level_subtask,
         video_memory_num_frames=merged.video_memory_num_frames,
+        high_level_source=merged.high_level_source,
+        gpt_model=merged.gpt_model,
+        gpt_image_mode=merged.gpt_image_mode,
         subtask_catalog=merged.subtask_catalog,
         state_subtask_pairs=merged.state_subtask_pairs,
     )

@@ -49,7 +49,15 @@ def test_torch_data_loader_parallel():
 
 
 def test_with_fake_dataset():
-    config = _config.get_config("debug")
+    config = _config.TrainConfig(
+        name="_local_fake_test",
+        exp_name="test",
+        data=_config.LeRobotAlohaDataConfig(repo_id="fake", repo_ids=[]),
+        model=pi0_config.Pi0Config(paligemma_variant="dummy", action_expert_variant="dummy"),
+        batch_size=2,
+        num_train_steps=10,
+        wandb_enabled=False,
+    )
 
     loader = _data_loader.create_data_loader(config, skip_norm_stats=True, num_batches=2)
     batches = list(loader)
@@ -59,12 +67,14 @@ def test_with_fake_dataset():
     for batch in batches:
         assert all(x.shape[0] == config.batch_size for x in jax.tree.leaves(batch))
 
-    for _, actions in batches:
+    for _, actions, actions_mask in batches:
         assert actions.shape == (config.batch_size, config.model.action_horizon, config.model.action_dim)
+        assert actions_mask.shape == (config.batch_size,)
+        assert np.all(actions_mask)
 
 
 def test_with_real_dataset():
-    config = _config.get_config("pi0_aloha_sim")
+    config = _config.get_config("twist_and_static_mixture_full_finetune")
     config = dataclasses.replace(config, batch_size=4)
 
     loader = _data_loader.create_data_loader(
@@ -81,8 +91,10 @@ def test_with_real_dataset():
 
     assert len(batches) == 2
 
-    for _, actions in batches:
+    for _, actions, actions_mask in batches:
         assert actions.shape == (config.batch_size, config.model.action_horizon, config.model.action_dim)
+        assert actions_mask.shape == (config.batch_size,)
+        assert np.all(actions_mask)
 
 
 class _ToyDataset:

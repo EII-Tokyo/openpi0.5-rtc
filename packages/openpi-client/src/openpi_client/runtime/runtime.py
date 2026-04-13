@@ -104,6 +104,9 @@ class Runtime:
         self._include_bottle_position = False
         self._include_bottle_state = True
         self._include_subtask = True
+        self._high_level_source = "gpt"
+        self._gpt_model = "gpt-5.4"
+        self._gpt_image_mode = "all_cameras"
         self._apply_low_level_subtask_config(None, None)
 
         self._in_episode = False
@@ -158,10 +161,12 @@ class Runtime:
         self._temporal_builder_thread = None
         self._temporal_video_debug_dir = Path.cwd() / "temporal_debug_videos"
         self._temporal_video_debug_dir.mkdir(parents=True, exist_ok=True)
-        self._applied_action_trace_path = Path("/tmp/runtime_applied_actions.jsonl")
+        self._trace_dir = Path("/app/logs")
+        self._trace_dir.mkdir(parents=True, exist_ok=True)
+        self._applied_action_trace_path = self._trace_dir / "runtime_applied_actions.jsonl"
         self._applied_action_trace_path.write_text("")
         logging.info("Applied action trace will be written to %s", self._applied_action_trace_path)
-        self._high_level_trace_path = Path("/tmp/runtime_high_level_requests.jsonl")
+        self._high_level_trace_path = self._trace_dir / "runtime_high_level_requests.jsonl"
         self._high_level_trace_path.write_text("")
         logging.info("High-level request trace will be written to %s", self._high_level_trace_path)
 
@@ -178,6 +183,22 @@ class Runtime:
         self._local_key_ttl_s = 1.0
         self._local_key_queue = deque()
         self._stdin_termios_backup = None
+
+    def _is_bottle_disposal_subtask(self, subtask: str | None) -> bool:
+        if not isinstance(subtask, str):
+            return False
+        return subtask in {
+            "Bottle to left trash bin, cap to right trash bin",
+            "Bottle to left trash bin",
+            "Use right hand to remove and place into left trash bin",
+        }
+
+    def _should_require_new_bottle_description(self, previous_subtask: str | None, next_subtask: str | None) -> bool:
+        if next_subtask not in self._bottle_start_subtasks:
+            return False
+        if previous_subtask in self._bottle_start_subtasks:
+            return False
+        return self._is_bottle_disposal_subtask(previous_subtask) or previous_subtask == "Return to initial pose"
 
     def _apply_video_memory_config(self, num_frames: int) -> None:
         next_num_frames = int(num_frames)
@@ -213,6 +234,11 @@ class Runtime:
         if self._forced_low_level_subtask and self._forced_low_level_subtask not in self._valid_subtasks:
             logging.warning("强制子任务不在当前目录中，已清除: %s", self._forced_low_level_subtask)
             self._forced_low_level_subtask = None
+        if hasattr(self._high_level_policy, "set_low_level_schema"):
+            self._high_level_policy.set_low_level_schema(
+                state_subtask_pairs=list(self._valid_state_subtask_pairs),
+                start_subtasks=tuple(self._bottle_start_subtasks),
+            )
 
     def _good_bad_action_label_for_subtask(self, subtask: str | None) -> str:
         if not isinstance(subtask, str) or not subtask.strip():
@@ -346,6 +372,9 @@ class Runtime:
             "lock_bottle_description": self._if_lock_bottle_description,
             "include_bottle_state": self._include_bottle_state,
             "include_subtask": self._include_subtask,
+            "high_level_source": self._high_level_source,
+            "gpt_model": self._gpt_model,
+            "gpt_image_mode": self._gpt_image_mode,
             "forced_low_level_subtask": self._forced_low_level_subtask,
         }
 
@@ -377,6 +406,9 @@ class Runtime:
         include_subtask = task_data.get("include_subtask")
         forced_low_level_subtask = task_data.get("forced_low_level_subtask")
         video_memory_num_frames = task_data.get("video_memory_num_frames")
+        high_level_source = task_data.get("high_level_source")
+        gpt_model = task_data.get("gpt_model")
+        gpt_image_mode = task_data.get("gpt_image_mode")
         if isinstance(dataset_dir, str) and dataset_dir.strip():
             self._dataset_dir = dataset_dir.strip()
         if isinstance(manual_dataset_dir, str) and manual_dataset_dir.strip():
@@ -399,9 +431,26 @@ class Runtime:
             self._forced_low_level_subtask = None
         if isinstance(video_memory_num_frames, int):
             self._apply_video_memory_config(video_memory_num_frames)
+        if high_level_source in {"gpt", "service"}:
+            self._high_level_source = high_level_source
+        if isinstance(gpt_model, str) and gpt_model.strip():
+            self._gpt_model = gpt_model.strip()
+        if gpt_image_mode in {"high_only", "all_cameras"}:
+            self._gpt_image_mode = gpt_image_mode
+        if hasattr(self._high_level_policy, "set_config"):
+            self._high_level_policy.set_config(
+                source=self._high_level_source,
+                gpt_model=self._gpt_model,
+                gpt_image_mode=self._gpt_image_mode,
+            )
         for subscriber in self._subscribers:
             if hasattr(subscriber, "set_dataset_dir"):
                 subscriber.set_dataset_dir(self._dataset_dir)
+
+    def apply_runtime_config(self, config_data: dict[str, Any]) -> None:
+        if not isinstance(config_data, dict):
+            raise TypeError("config_data must be a dict")
+        self._apply_task_paths(dict(config_data))
 
     def _setup_redis(self) -> None:
         """设置Redis连接"""
@@ -434,7 +483,7 @@ class Runtime:
                         if not data.get('task'):
                             self._apply_task_paths(data)
                             logging.info(
-                                "收到Redis运行配置更新: include_bottle_description=%s lock_bottle_description=%s include_bottle_position=%s include_bottle_state=%s include_subtask=%s forced_low_level_subtask=%s video_memory_num_frames=%s",
+                                "收到Redis运行配置更新: include_bottle_description=%s lock_bottle_description=%s include_bottle_position=%s include_bottle_state=%s include_subtask=%s forced_low_level_subtask=%s video_memory_num_frames=%s high_level_source=%s gpt_model=%s gpt_image_mode=%s",
                                 self._include_bottle_description,
                                 self._if_lock_bottle_description,
                                 self._include_bottle_position,
@@ -442,6 +491,9 @@ class Runtime:
                                 self._include_subtask,
                                 self._forced_low_level_subtask,
                                 self._video_memory_num_frames,
+                                self._high_level_source,
+                                self._gpt_model,
+                                self._gpt_image_mode,
                             )
                             continue
                         task_num = data.get('task')
@@ -464,6 +516,9 @@ class Runtime:
                                 'include_subtask': data.get('include_subtask'),
                                 'forced_low_level_subtask': data.get('forced_low_level_subtask'),
                                 'video_memory_num_frames': data.get('video_memory_num_frames'),
+                                'high_level_source': data.get('high_level_source'),
+                                'gpt_model': data.get('gpt_model'),
+                                'gpt_image_mode': data.get('gpt_image_mode'),
                             }
                             
                     except json.JSONDecodeError as e:
@@ -512,6 +567,7 @@ class Runtime:
     def _stabilize_high_level_payload(self, parsed: dict) -> dict | None:
         bottle_description = parsed.get("bottle_description")
         bottle_state = parsed.get("bottle_state")
+        previous_subtask = self._committed_subtask
 
         raw_subtask = parsed.get("subtask")
         if (bottle_state, raw_subtask) not in self._valid_state_subtask_pairs_set:
@@ -525,7 +581,7 @@ class Runtime:
                     should_refresh_description = True
                 elif (
                     raw_subtask in self._bottle_start_subtasks
-                    and self._committed_subtask not in self._bottle_start_subtasks
+                    and previous_subtask not in self._bottle_start_subtasks
                 ):
                     should_refresh_description = True
 
@@ -576,10 +632,56 @@ class Runtime:
         obs_for_high_level = {
             **{k: v for k, v in observation.items() if k != "origin_observation"},
             "prompt": self._prompt,
+            "runtime_context": {
+                "committed_subtask": self._committed_subtask,
+                "locked_bottle_description": self._locked_bottle_description,
+                "previous_structured_result": self._latest_structured_subtask,
+                "should_describe_next_bottle_if_start": self._should_require_new_bottle_description(
+                    self._committed_subtask,
+                    "Rotate so opening faces right",
+                ) or self._should_require_new_bottle_description(
+                    self._committed_subtask,
+                    "Pick up with left hand",
+                ),
+                "bottle_disposal_subtask_active": self._is_bottle_disposal_subtask(self._committed_subtask),
+                "high_level_source": self._high_level_source,
+                "gpt_model": self._gpt_model,
+                "gpt_image_mode": self._gpt_image_mode,
+            },
         }
         with self._high_level_obs_lock:
             self._high_level_obs = obs_for_high_level
             self._high_level_obs_version += 1
+
+    def _append_high_level_trace(
+        self,
+        *,
+        obs: dict[str, Any],
+        high_level_result: dict[str, Any],
+        high_level_text: str,
+        structured_subtask: dict[str, Any] | None,
+        version: int,
+        task_generation: int,
+    ) -> None:
+        trace_payload = high_level_result.get("trace_payload", {}) if isinstance(high_level_result, dict) else {}
+        if not isinstance(trace_payload, dict):
+            trace_payload = {}
+        record = {
+            "timestamp": time.time(),
+            "obs_version": version,
+            "task_generation": task_generation,
+            "task_prompt": str(obs.get("prompt") or "").strip(),
+            "runtime_context": obs.get("runtime_context"),
+            "server_timing": high_level_result.get("server_timing", {}) if isinstance(high_level_result, dict) else {},
+            "high_level_text": high_level_text,
+            "structured_subtask": structured_subtask,
+            "trace_payload": trace_payload,
+        }
+        try:
+            with self._high_level_trace_path.open("a", encoding="utf-8") as f:
+                f.write(json.dumps(record, ensure_ascii=False) + "\n")
+        except Exception:
+            logging.exception("Failed to append high-level trace to %s", self._high_level_trace_path)
 
     def _reset_temporal_image_history(self) -> None:
         with self._image_history_lock:
@@ -907,6 +1009,9 @@ class Runtime:
                     "low_level_prompt": "",
                     "high_level_server_timing": high_level_result.get("server_timing", {}),
                     "low_level_server_timing": {},
+                    "high_level_source": self._high_level_source,
+                    "gpt_model": self._gpt_model,
+                    "gpt_image_mode": self._gpt_image_mode,
                     # deque 已按 _high_level_history_max_len 截断，与下发条数一致，无需再 slice
                     "history": list(self._high_level_history),
                 }
@@ -915,6 +1020,14 @@ class Runtime:
                 with self._high_level_state_lock:
                     self._latest_structured_subtask = structured_subtask
                     self._latest_hierarchical_state = hierarchical_state
+                self._append_high_level_trace(
+                    obs=obs,
+                    high_level_result=high_level_result,
+                    high_level_text=high_level_text,
+                    structured_subtask=structured_subtask,
+                    version=version,
+                    task_generation=task_generation,
+                )
                 self._publish_runtime_state()
                 last_processed_version = version
             except Exception as exc:
@@ -1070,9 +1183,7 @@ class Runtime:
             self._runtime_mode = "return_home"
             self._reset_temporal_image_history()
             # 回到初始位置
-            self._environment.stop()
-            if hasattr(self._environment, "close_grippers"):
-                self._environment.close_grippers()
+            self._environment.reset()
             # 停止agent
             self._agent.reset()   
             # 通知subscriber episode结束

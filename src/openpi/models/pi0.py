@@ -286,9 +286,14 @@ class Pi0(_model.BaseModel):
         )
         v_t = self.action_out_proj(suffix_out[:, -self.action_horizon :])
         flow_loss = jnp.mean(jnp.square(v_t - u_t), axis=-1)
+        if observation.action_loss_mask is None:
+            action_loss_mask = jnp.ones((flow_loss.shape[0],), dtype=bool)
+        else:
+            action_loss_mask = observation.action_loss_mask.astype(jnp.bool_)
+        masked_flow_loss = jnp.where(action_loss_mask[:, None], flow_loss, 0.0)
         if self.subtask_loss_weight <= 0.0:
             subtask_ar_loss = jnp.zeros((flow_loss.shape[0], 1), dtype=flow_loss.dtype)
-            return flow_loss, flow_loss, subtask_ar_loss
+            return masked_flow_loss, masked_flow_loss, subtask_ar_loss
         if (
             observation.tokenized_subtask is None
             or observation.tokenized_subtask_mask is None
@@ -296,7 +301,7 @@ class Pi0(_model.BaseModel):
             or observation.tokenized_prompt_mask is None
         ):
             subtask_ar_loss = jnp.zeros((flow_loss.shape[0], 1), dtype=flow_loss.dtype)
-            return flow_loss, flow_loss, subtask_ar_loss
+            return masked_flow_loss, masked_flow_loss, subtask_ar_loss
         assert prefix_out is not None
         target_tokens = observation.tokenized_subtask.astype(jnp.int32)
         target_mask = observation.tokenized_subtask_mask
@@ -315,8 +320,8 @@ class Pi0(_model.BaseModel):
         denom = jnp.clip(jnp.sum(loss_mask, axis=-1), a_min=1.0)
         subtask_ar_loss = -jnp.sum(token_logp * loss_mask, axis=-1)
         subtask_ar_loss = (subtask_ar_loss / denom)[:, None]
-        total_loss = flow_loss + self.subtask_loss_weight * subtask_ar_loss
-        return total_loss, flow_loss, subtask_ar_loss
+        total_loss = masked_flow_loss + self.subtask_loss_weight * subtask_ar_loss
+        return total_loss, masked_flow_loss, subtask_ar_loss
 
     @override
     def sample_actions(

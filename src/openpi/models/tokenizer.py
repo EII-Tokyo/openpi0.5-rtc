@@ -61,6 +61,12 @@ def get_good_bad_action_label(subtask: Any | None) -> str:
 def get_subtask_text(subtask: Any | None) -> str | None:
     parsed = _parse_subtask_payload(subtask)
     if parsed is not None:
+        answer = parsed.get("answer")
+        if isinstance(answer, str):
+            cleaned_answer = answer.strip()
+            if cleaned_answer:
+                return cleaned_answer
+
         bottle_description = parsed.get("bottle_description")
         bottle_position = parsed.get("bottle_position")
         bottle_state = parsed.get("bottle_state")
@@ -120,6 +126,34 @@ def get_subtask_text(subtask: Any | None) -> str | None:
     return None
 
 
+def get_vqa_answer_text(subtask: Any | None) -> str | None:
+    if subtask is None:
+        return None
+
+    if isinstance(subtask, bytes):
+        subtask = subtask.decode("utf-8")
+    elif hasattr(subtask, "item") and not isinstance(subtask, str):
+        try:
+            subtask = subtask.item()
+        except ValueError:
+            pass
+
+    if isinstance(subtask, str):
+        cleaned = subtask.strip()
+        return cleaned if cleaned else None
+
+    parsed = _parse_subtask_payload(subtask)
+    if parsed is None:
+        return None
+
+    answer = parsed.get("answer")
+    if isinstance(answer, str):
+        cleaned = answer.strip()
+        return cleaned if cleaned else None
+
+    return get_subtask_text(parsed)
+
+
 class PaligemmaTokenizer:
     def __init__(
         self,
@@ -163,13 +197,37 @@ class PaligemmaTokenizer:
         state: np.ndarray | None = None,
         subtask: Any | None = None,
         actions: np.ndarray | None = None,
+        *,
+        train_action: bool = True,
     ) -> tuple[np.ndarray, np.ndarray] | tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         cleaned_text = prompt.strip().replace("_", " ").replace("\n", " ")
+        if not train_action:
+            prompt_prefix = cleaned_text
+            prompt_tokens = self._tokenizer.encode(prompt_prefix, add_bos=True)
+            prompt_tokens, prompt_mask = self._pad_tokens(prompt_tokens, self._max_len, left_pad=True)
+
+            answer_text = get_vqa_answer_text(subtask)
+            if answer_text is None:
+                subtask_tokens = np.zeros((self._subtask_max_len,), dtype=np.int32)
+                subtask_mask = np.zeros((self._subtask_max_len,), dtype=bool)
+                loss_mask = np.zeros((self._subtask_max_len,), dtype=bool)
+                fast_mask = np.zeros((self._subtask_max_len,), dtype=bool)
+                return prompt_tokens, prompt_mask, subtask_tokens, subtask_mask, loss_mask, fast_mask
+
+            answer_tokens = self._tokenizer.encode(answer_text.strip().replace("_", " ").replace("\n", " "), add_bos=False)
+            full_subtask_tokens = answer_tokens + [self.eos_token_id]
+            subtask_tokens, subtask_mask = self._pad_tokens(full_subtask_tokens, self._subtask_max_len)
+            loss_mask = np.asarray([True] * min(len(full_subtask_tokens), self._subtask_max_len), dtype=bool)
+            if loss_mask.shape[0] < self._subtask_max_len:
+                loss_mask = np.concatenate(
+                    [loss_mask, np.zeros((self._subtask_max_len - loss_mask.shape[0],), dtype=bool)],
+                    axis=0,
+                )
+            fast_mask = np.zeros((self._subtask_max_len,), dtype=bool)
+            return prompt_tokens, prompt_mask, subtask_tokens, subtask_mask, loss_mask, fast_mask
+
         if state is None:
-            # This is the Pi0 format, where the state is part of the continuous action expert input.
-            # tokenize "\n" separately as the "start of answer" token
-            tokens = self._tokenizer.encode(cleaned_text, add_bos=True) + self._tokenizer.encode("\n")
-            return self._pad_tokens(tokens, self._max_len)
+            raise ValueError("State is required when train_action=True.")
 
         # Pi05 format.
         discretized_state = np.digitize(state, bins=np.linspace(-1, 1, 256 + 1)[:-1]) - 1
@@ -262,98 +320,6 @@ class PaligemmaTokenizer:
         if isinstance(tokens, list):
             tokens = np.array(tokens)
         return self._tokenizer.vocab_size() - 1 - self._fast_skip_tokens - tokens
-
-
-class FASTTokenizer:
-    def __init__(self, max_len: int = 256, fast_tokenizer_path: str = "physical-intelligence/fast"):
-        self._max_len = max_len
-
-        # Download base PaliGemma tokenizer
-        path = download.maybe_download("gs://big_vision/paligemma_tokenizer.model", gs={"token": "anon"})
-        with path.open("rb") as f:
-            self._paligemma_tokenizer = sentencepiece.SentencePieceProcessor(model_proto=f.read())
-
-        # Instantiate FAST tokenizer
-        self._fast_tokenizer = AutoProcessor.from_pretrained(fast_tokenizer_path, trust_remote_code=True)
-        self._fast_skip_tokens = 128  # Skip last 128 tokens in PaliGemma vocab since they are special tokens
-
-    def tokenize(
-        self, prompt: str, state: np.ndarray, actions: np.ndarray | None
-    ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-        cleaned_text = prompt.lower().strip().replace("_", " ")
-
-        # Convention: state gets discretized into 256 discrete bins (assumed range after normalization: [-1, 1])
-        discretized_state = np.digitize(state, bins=np.linspace(-1, 1, 256 + 1)[:-1]) - 1
-
-        # Convention: prefix includes prompt and string-representation of state, followed by ';'
-        state_str = " ".join(map(str, discretized_state))
-        prefix = f"Task: {cleaned_text}, State: {state_str};\n"
-        prefix_tokens = self._paligemma_tokenizer.encode(prefix, add_bos=True)
-
-        if actions is not None:
-            # Tokenize actions with FAST tokenizer --> map to last tokens in PaliGemma vocab
-            action_tokens = self._fast_tokenizer(actions[None])[0]
-            action_tokens_in_pg = self._act_tokens_to_paligemma_tokens(action_tokens)
-
-            # Convention: postfix contains 'Action:' followed by FAST tokens, followed by '|'
-            postfix_tokens = (
-                self._paligemma_tokenizer.encode("Action: ")
-                + action_tokens_in_pg.tolist()
-                + self._paligemma_tokenizer.encode("|", add_eos=True)
-            )
-        else:
-            postfix_tokens = []
-
-        # Create output token sequence & masks
-        # AR mask is 0 on prefix (bidirectional attention) and 1 on postfix (causal attention to all previous tokens)
-        tokens = prefix_tokens + postfix_tokens
-        token_mask = [True] * len(tokens)
-        ar_mask = [0] * len(prefix_tokens) + [1] * len(postfix_tokens)
-        loss_mask = [False] * len(prefix_tokens) + [True] * len(postfix_tokens)  # Loss on postfix only
-
-        # Pad tokens to max length
-        tokens_len = len(tokens)
-        if tokens_len < self._max_len:
-            padding = [False] * (self._max_len - tokens_len)
-            tokens = tokens + padding
-            token_mask = token_mask + padding
-            ar_mask = ar_mask + padding
-            loss_mask = loss_mask + padding
-        else:
-            if len(tokens) > self._max_len:
-                logging.warning(
-                    f"Token length ({len(tokens)}) exceeds max length ({self._max_len}), truncating. "
-                    "Consider increasing the `max_token_len` in your model config if this happens frequently."
-                )
-            tokens = tokens[: self._max_len]
-            token_mask = token_mask[: self._max_len]
-            ar_mask = ar_mask[: self._max_len]
-            loss_mask = loss_mask[: self._max_len]
-
-        return np.asarray(tokens), np.asarray(token_mask), np.asarray(ar_mask), np.asarray(loss_mask)
-
-    def extract_actions(self, tokens: np.ndarray, action_horizon: int, action_dim: int) -> np.ndarray:
-        # Decode predicted output tokens
-        decoded_tokens = self._paligemma_tokenizer.decode(tokens.tolist())
-
-        # Extract actions from FAST model outputs
-        if "Action: " not in decoded_tokens:
-            return np.zeros((action_horizon, action_dim), dtype=np.float32)
-
-        # Extract actions from decoded tokens
-        raw_action_tokens = np.array(
-            self._paligemma_tokenizer.encode(decoded_tokens.split("Action: ")[1].split("|")[0].strip())
-        )
-        action_tokens = self._act_tokens_to_paligemma_tokens(raw_action_tokens)
-        return self._fast_tokenizer.decode(
-            [action_tokens.tolist()], time_horizon=action_horizon, action_dim=action_dim
-        )[0]
-
-    def _act_tokens_to_paligemma_tokens(self, tokens: np.ndarray | list[int]) -> np.ndarray:
-        if isinstance(tokens, list):
-            tokens = np.array(tokens)
-        return self._paligemma_tokenizer.vocab_size() - 1 - self._fast_skip_tokens - tokens
-
 
 ###########################################################################
 ## The tokenizers below are used for RoboArena baseline implementations. ##

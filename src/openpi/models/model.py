@@ -170,6 +170,8 @@ class Observation(Generic[ArrayT]):
     token_ar_mask: at.Int[ArrayT, "*b l"] | None = None
     # Token loss mask (for FAST autoregressive model).
     token_loss_mask: at.Bool[ArrayT, "*b l"] | None = None
+    # Per-sample mask controlling whether action/flow loss is trained.
+    action_loss_mask: at.Bool[ArrayT, "*b"] | None = None
 
     @classmethod
     def from_dict(cls, data: at.PyTree[ArrayT]) -> "Observation[ArrayT]":
@@ -201,6 +203,7 @@ class Observation(Generic[ArrayT]):
             tokenized_subtask_fast_mask=data.get("tokenized_subtask_fast_mask"),
             token_ar_mask=data.get("token_ar_mask"),
             token_loss_mask=data.get("token_loss_mask"),
+            action_loss_mask=data.get("actions_mask"),
         )
 
     def to_dict(self) -> at.PyTree[ArrayT]:
@@ -287,18 +290,10 @@ def preprocess_observation(
         else:
             out_masks[key] = jnp.asarray(observation.image_masks[key])
 
-    return Observation(
+    return dataclasses.replace(
+        observation,
         images=out_images,
         image_masks=out_masks,
-        state=observation.state,
-        tokenized_prompt=observation.tokenized_prompt,
-        tokenized_prompt_mask=observation.tokenized_prompt_mask,
-        tokenized_subtask=observation.tokenized_subtask,
-        tokenized_subtask_mask=observation.tokenized_subtask_mask,
-        tokenized_subtask_loss_mask=observation.tokenized_subtask_loss_mask,
-        tokenized_subtask_fast_mask=observation.tokenized_subtask_fast_mask,
-        token_ar_mask=observation.token_ar_mask,
-        token_loss_mask=observation.token_loss_mask,
     )
 
 

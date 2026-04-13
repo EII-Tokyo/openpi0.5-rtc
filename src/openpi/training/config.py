@@ -120,22 +120,6 @@ class ModelTransformFactory(GroupFactory):
     def __call__(self, model_config: _model.BaseModelConfig) -> _transforms.Group:
         image_height, image_width = self.image_size
         match model_config.model_type:
-            case _model.ModelType.PI0:
-                assert isinstance(model_config, pi0_config.Pi0Config)
-                return _transforms.Group(
-                    inputs=[
-                        _transforms.ForcePrompt(self.force_prompt),
-                        _transforms.InjectDefaultPrompt(self.default_prompt),
-                        _transforms.ResizeImages(image_height, image_width),
-                        _transforms.TokenizePrompt(
-                            _tokenizer.PaligemmaTokenizer(
-                                model_config.max_token_len,
-                                fast_tokenizer_path=model_config.fast_tokenizer_path,
-                            ),
-                        ),
-                        _transforms.PadStatesAndActions(model_config.action_dim),
-                    ],
-                )
             case _model.ModelType.PI05:
                 assert isinstance(model_config, pi0_config.Pi0Config)
                 tokenizer = _tokenizer.PaligemmaTokenizer(
@@ -163,32 +147,8 @@ class ModelTransformFactory(GroupFactory):
                 ]
                 transforms += [_transforms.PadStatesAndActions(model_config.action_dim)]
                 return _transforms.Group(inputs=transforms)
-            case _model.ModelType.PI0_FAST:
-                tokenizer_cls = (
-                    _tokenizer.FASTTokenizer
-                    if model_config.fast_model_tokenizer is None
-                    else model_config.fast_model_tokenizer
-                )
-                tokenizer_kwargs = (
-                    {} if model_config.fast_model_tokenizer_kwargs is None else model_config.fast_model_tokenizer_kwargs
-                )
-                return _transforms.Group(
-                    inputs=[
-                        _transforms.ForcePrompt(self.force_prompt),
-                        _transforms.InjectDefaultPrompt(self.default_prompt),
-                        _transforms.ResizeImages(image_height, image_width),
-                        _transforms.TokenizeFASTInputs(
-                            tokenizer_cls(model_config.max_token_len, **tokenizer_kwargs),
-                        ),
-                    ],
-                    outputs=[
-                        _transforms.ExtractFASTActions(
-                            tokenizer_cls(model_config.max_token_len, **tokenizer_kwargs),
-                            action_horizon=model_config.action_horizon,
-                            action_dim=model_config.action_dim,
-                        )
-                    ],
-                )
+            case _:
+                raise NotImplementedError(f"Unsupported model_type for training: {model_config.model_type}")
 
 
 @dataclasses.dataclass(frozen=True)
@@ -246,6 +206,7 @@ class LeRobotAlohaDataConfig(DataConfigFactory):
     # the space used by the pi internal runtime which was used to train the base model. People who
     # use standard Aloha data should set this to true.
     adapt_to_pi: bool = True
+    force_cache_sync: bool = False
     video_memory_num_frames: int = 1
     video_memory_stride_seconds: float = 1.0
     include_bottle_description: bool = True
@@ -254,16 +215,28 @@ class LeRobotAlohaDataConfig(DataConfigFactory):
     include_subtask: bool = True
     # Repack transforms.
     repack_transforms: tyro.conf.Suppress[_transforms.Group] = dataclasses.field(
-        default=_transforms.Group(
+        default_factory=lambda: _transforms.Group(
             inputs=[
+                _transforms.InjectDefaultField("train_action", True),
+                _transforms.InjectDefaultField("cam_high_mask", 1),
+                _transforms.InjectDefaultField("cam_low_mask", 1),
+                _transforms.InjectDefaultField("cam_left_wrist_mask", 1),
+                _transforms.InjectDefaultField("cam_right_wrist_mask", 1),
                 _transforms.RepackTransform(
                     {
                         "images": {"cam_high": "observation.images.top"},
+                        "image_masks": {
+                            "cam_high": "cam_high_mask",
+                            "cam_low": "cam_low_mask",
+                            "cam_left_wrist": "cam_left_wrist_mask",
+                            "cam_right_wrist": "cam_right_wrist_mask",
+                        },
                         "state": "observation.state",
                         "actions": "action",
+                        "actions_mask": "train_action",
                         "subtask": "subtask",
                     }
-                )
+                ),
             ]
         )
     )
@@ -437,9 +410,9 @@ _CONFIGS = [
         name="twist_and_static_mixture_full_finetune",
         model=pi0_config.Pi0Config(
             pi05=True,
-            max_token_len=80,
+            max_token_len=96,
             subtask_loss_weight=0.1,
-            subtask_max_token_len=250,
+            subtask_max_token_len=64,
             fast_tokenizer_path="physical-intelligence/fast",
         ),
         lr_schedule=_optimizer.CosineDecaySchedule(
@@ -450,7 +423,7 @@ _CONFIGS = [
         ),
         log_interval=10,
         data=LeRobotAlohaDataConfig(
-            image_size=(448, 448),
+            image_size=(224, 224),
             include_bottle_description=True,
             include_bottle_position=False,
             include_bottle_state=True,
@@ -499,6 +472,11 @@ _CONFIGS = [
             base_config=DataConfig(prompt_from_task=True),
             repack_transforms=_transforms.Group(
                 inputs=[
+                    _transforms.InjectDefaultField("train_action", True),
+                    _transforms.InjectDefaultField("cam_high_mask", 1),
+                    _transforms.InjectDefaultField("cam_low_mask", 1),
+                    _transforms.InjectDefaultField("cam_left_wrist_mask", 1),
+                    _transforms.InjectDefaultField("cam_right_wrist_mask", 1),
                     _transforms.InjectDefaultField("subtask", None),
                     _transforms.RepackTransform(
                         {
@@ -508,8 +486,15 @@ _CONFIGS = [
                                 "cam_left_wrist": "observation.images.cam_left_wrist",
                                 "cam_right_wrist": "observation.images.cam_right_wrist",
                             },
+                            "image_masks": {
+                                "cam_high": "cam_high_mask",
+                                "cam_low": "cam_low_mask",
+                                "cam_left_wrist": "cam_left_wrist_mask",
+                                "cam_right_wrist": "cam_right_wrist_mask",
+                            },
                             "state": "observation.state",
                             "actions": "action",
+                            "actions_mask": "train_action",
                             "prompt": "prompt",
                             "subtask": "subtask",
                         }
@@ -533,11 +518,11 @@ _CONFIGS = [
             pi05=True,
             paligemma_variant="gemma_2b_lora",
             action_expert_variant="gemma_300m_lora",
-            max_token_len=80,
+            max_token_len=96,
             subtask_loss_weight=0.1,
-            subtask_max_token_len=250,
+            subtask_max_token_len=64,
             fast_tokenizer_path="physical-intelligence/fast",
-            image_resolution=(448, 448),
+            image_resolution=(224, 224),
         ),
         lr_schedule=_optimizer.CosineDecaySchedule(
             warmup_steps=10_000,
@@ -547,7 +532,7 @@ _CONFIGS = [
         ),
         log_interval=10,
         data=LeRobotAlohaDataConfig(
-            image_size=(448, 448),
+            image_size=(224, 224),
             include_bottle_description=True,
             include_bottle_position=False,
             include_bottle_state=True,
@@ -596,6 +581,11 @@ _CONFIGS = [
             base_config=DataConfig(prompt_from_task=True),
             repack_transforms=_transforms.Group(
                 inputs=[
+                    _transforms.InjectDefaultField("train_action", True),
+                    _transforms.InjectDefaultField("cam_high_mask", 1),
+                    _transforms.InjectDefaultField("cam_low_mask", 1),
+                    _transforms.InjectDefaultField("cam_left_wrist_mask", 1),
+                    _transforms.InjectDefaultField("cam_right_wrist_mask", 1),
                     _transforms.InjectDefaultField("subtask", None),
                     _transforms.RepackTransform(
                         {
@@ -605,8 +595,15 @@ _CONFIGS = [
                                 "cam_left_wrist": "observation.images.cam_left_wrist",
                                 "cam_right_wrist": "observation.images.cam_right_wrist",
                             },
+                            "image_masks": {
+                                "cam_high": "cam_high_mask",
+                                "cam_low": "cam_low_mask",
+                                "cam_left_wrist": "cam_left_wrist_mask",
+                                "cam_right_wrist": "cam_right_wrist_mask",
+                            },
                             "state": "observation.state",
                             "actions": "action",
+                            "actions_mask": "train_action",
                             "prompt": "prompt",
                             "subtask": "subtask",
                         }
@@ -637,11 +634,11 @@ _CONFIGS = [
             pi05=True,
             paligemma_variant="gemma_2b_lora",
             action_expert_variant="gemma_300m_lora",
-            max_token_len=80,
+            max_token_len=96,
             subtask_loss_weight=0.1,
-            subtask_max_token_len=250,
+            subtask_max_token_len=64,
             fast_tokenizer_path="physical-intelligence/fast",
-            image_resolution=(448, 448),
+            image_resolution=(224, 224),
         ),
         lr_schedule=_optimizer.CosineDecaySchedule(
             warmup_steps=10_000,
@@ -651,7 +648,7 @@ _CONFIGS = [
         ),
         log_interval=10,
         data=LeRobotAlohaDataConfig(
-            image_size=(448, 448),
+            image_size=(224, 224),
             include_bottle_description=True,
             include_bottle_position=False,
             include_bottle_state=True,
@@ -685,6 +682,11 @@ _CONFIGS = [
             base_config=DataConfig(prompt_from_task=True),
             repack_transforms=_transforms.Group(
                 inputs=[
+                    _transforms.InjectDefaultField("train_action", True),
+                    _transforms.InjectDefaultField("cam_high_mask", 1),
+                    _transforms.InjectDefaultField("cam_low_mask", 1),
+                    _transforms.InjectDefaultField("cam_left_wrist_mask", 1),
+                    _transforms.InjectDefaultField("cam_right_wrist_mask", 1),
                     _transforms.InjectDefaultField("subtask", None),
                     _transforms.RepackTransform(
                         {
@@ -694,8 +696,15 @@ _CONFIGS = [
                                 "cam_left_wrist": "observation.images.cam_left_wrist",
                                 "cam_right_wrist": "observation.images.cam_right_wrist",
                             },
+                            "image_masks": {
+                                "cam_high": "cam_high_mask",
+                                "cam_low": "cam_low_mask",
+                                "cam_left_wrist": "cam_left_wrist_mask",
+                                "cam_right_wrist": "cam_right_wrist_mask",
+                            },
                             "state": "observation.state",
                             "actions": "action",
+                            "actions_mask": "train_action",
                             "prompt": "prompt",
                             "subtask": "subtask",
                         }
@@ -715,6 +724,179 @@ _CONFIGS = [
         save_interval=1000,
         num_train_steps=40_000,
         batch_size=8,
+        num_workers=4,
+        subtask_eval_enabled=True,
+        subtask_eval_interval_steps=1000,
+        subtask_eval_max_samples_per_class=128,
+    ),
+    TrainConfig(
+        name="twist_only_lora_triplet_10k",
+        model=pi0_config.Pi0Config(
+            pi05=True,
+            paligemma_variant="gemma_2b_lora",
+            action_expert_variant="gemma_300m_lora",
+            max_token_len=96,
+            subtask_loss_weight=0.1,
+            subtask_max_token_len=512,
+            fast_tokenizer_path="physical-intelligence/fast",
+            image_resolution=(448, 448),
+        ),
+        lr_schedule=_optimizer.CosineDecaySchedule(
+            warmup_steps=10_000,
+            peak_lr=2.5e-5,
+            decay_steps=40_000,
+            decay_lr=2.5e-6,
+        ),
+        log_interval=10,
+        data=LeRobotAlohaDataConfig(
+            image_size=(448, 448),
+            include_bottle_description=True,
+            include_bottle_position=False,
+            include_bottle_state=True,
+            include_subtask=True,
+            video_memory_num_frames=1,
+            video_memory_stride_seconds=1.0,
+            repo_ids=[
+                "lyl472324464/openai_logs_gpt54_process_all_bottles_1054_224",
+                "lyl472324464/vqav2_masked_10k_224",
+                "lyl472324464/twist_subset_10k_224_from_2025_12_10",
+            ],
+            assets=AssetsConfig(
+                assets_dir="gs://openpi-assets/checkpoints/pi05_base/assets",
+                asset_id="trossen",
+            ),
+            base_config=DataConfig(prompt_from_task=True),
+            repack_transforms=_transforms.Group(
+                inputs=[
+                    _transforms.InjectDefaultField("train_action", True),
+                    _transforms.InjectDefaultField("cam_high_mask", 1),
+                    _transforms.InjectDefaultField("cam_low_mask", 1),
+                    _transforms.InjectDefaultField("cam_left_wrist_mask", 1),
+                    _transforms.InjectDefaultField("cam_right_wrist_mask", 1),
+                    _transforms.InjectDefaultField("subtask", None),
+                    _transforms.RepackTransform(
+                        {
+                            "images": {
+                                "cam_high": "observation.images.cam_high",
+                                "cam_low": "observation.images.cam_low",
+                                "cam_left_wrist": "observation.images.cam_left_wrist",
+                                "cam_right_wrist": "observation.images.cam_right_wrist",
+                            },
+                            "image_masks": {
+                                "cam_high": "cam_high_mask",
+                                "cam_low": "cam_low_mask",
+                                "cam_left_wrist": "cam_left_wrist_mask",
+                                "cam_right_wrist": "cam_right_wrist_mask",
+                            },
+                            "state": "observation.state",
+                            "actions": "action",
+                            "actions_mask": "train_action",
+                            "prompt": "prompt",
+                            "subtask": "subtask",
+                        }
+                    ),
+                ]
+            ),
+        ),
+        freeze_filter=pi0_config.Pi0Config(
+            pi05=True,
+            paligemma_variant="gemma_2b_lora",
+            action_expert_variant="gemma_300m_lora",
+            subtask_loss_weight=1.0,
+            subtask_max_token_len=64,
+        ).get_freeze_filter(),
+        ema_decay=None,
+        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_base/params"),
+        save_interval=1000,
+        num_train_steps=40_000,
+        batch_size=2,
+        num_workers=4,
+        subtask_eval_enabled=True,
+        subtask_eval_interval_steps=1000,
+        subtask_eval_max_samples_per_class=128,
+    ),
+    TrainConfig(
+        name="twist_only_lora_triplet_100k",
+        model=pi0_config.Pi0Config(
+            pi05=True,
+            paligemma_variant="gemma_2b_lora",
+            action_expert_variant="gemma_300m_lora",
+            max_token_len=96,
+            subtask_loss_weight=0.1,
+            subtask_max_token_len=512,
+            fast_tokenizer_path="physical-intelligence/fast",
+            image_resolution=(448, 448),
+        ),
+        lr_schedule=_optimizer.CosineDecaySchedule(
+            warmup_steps=10_000,
+            peak_lr=2.5e-5,
+            decay_steps=40_000,
+            decay_lr=2.5e-6,
+        ),
+        log_interval=10,
+        data=LeRobotAlohaDataConfig(
+            image_size=(448, 448),
+            include_bottle_description=True,
+            include_bottle_position=False,
+            include_bottle_state=True,
+            include_subtask=True,
+            video_memory_num_frames=1,
+            video_memory_stride_seconds=1.0,
+            repo_ids=[
+                "lyl472324464/openai_logs_gpt54_process_all_bottles_1054_224",
+                "lyl472324464/vqav2_100k_224",
+                "lyl472324464/twist_subset_100k_224_from_2025_12_10",
+            ],
+            assets=AssetsConfig(
+                assets_dir="gs://openpi-assets/checkpoints/pi05_base/assets",
+                asset_id="trossen",
+            ),
+            base_config=DataConfig(prompt_from_task=True),
+            repack_transforms=_transforms.Group(
+                inputs=[
+                    _transforms.InjectDefaultField("train_action", True),
+                    _transforms.InjectDefaultField("cam_high_mask", 1),
+                    _transforms.InjectDefaultField("cam_low_mask", 1),
+                    _transforms.InjectDefaultField("cam_left_wrist_mask", 1),
+                    _transforms.InjectDefaultField("cam_right_wrist_mask", 1),
+                    _transforms.InjectDefaultField("subtask", None),
+                    _transforms.RepackTransform(
+                        {
+                            "images": {
+                                "cam_high": "observation.images.cam_high",
+                                "cam_low": "observation.images.cam_low",
+                                "cam_left_wrist": "observation.images.cam_left_wrist",
+                                "cam_right_wrist": "observation.images.cam_right_wrist",
+                            },
+                            "image_masks": {
+                                "cam_high": "cam_high_mask",
+                                "cam_low": "cam_low_mask",
+                                "cam_left_wrist": "cam_left_wrist_mask",
+                                "cam_right_wrist": "cam_right_wrist_mask",
+                            },
+                            "state": "observation.state",
+                            "actions": "action",
+                            "actions_mask": "train_action",
+                            "prompt": "prompt",
+                            "subtask": "subtask",
+                        }
+                    ),
+                ]
+            ),
+        ),
+        freeze_filter=pi0_config.Pi0Config(
+            pi05=True,
+            paligemma_variant="gemma_2b_lora",
+            action_expert_variant="gemma_300m_lora",
+            subtask_loss_weight=1.0,
+            subtask_max_token_len=64,
+        ).get_freeze_filter(),
+        ema_decay=None,
+        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_base/params"),
+        save_interval=5000,
+        keep_period=None,
+        num_train_steps=40_000,
+        batch_size=2,
         num_workers=4,
         subtask_eval_enabled=True,
         subtask_eval_interval_steps=1000,

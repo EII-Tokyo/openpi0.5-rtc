@@ -193,6 +193,9 @@ type UiConfig = {
   includeBottleState: boolean
   includeSubtask: boolean
   videoMemoryNumFrames: 1 | 4
+  highLevelSource: 'gpt' | 'service'
+  gptModel: string
+  gptImageMode: 'high_only' | 'all_cameras'
   forcedLowLevelSubtask: string | null
   /** 低层子任务目录（Mongo）；含 is_start_subtask、可选 good_bad_action */
   subtaskCatalog: SubtaskCatalogEntry[]
@@ -211,6 +214,9 @@ type RuntimeConfigPayload = {
   includeBottleState: boolean
   includeSubtask: boolean
   videoMemoryNumFrames: 1 | 4
+  highLevelSource: 'gpt' | 'service'
+  gptModel: string
+  gptImageMode: 'high_only' | 'all_cameras'
   forcedLowLevelSubtask: string | null
   subtaskCatalog: SubtaskCatalogEntry[]
   stateSubtaskPairs: StateSubtaskPairRow[]
@@ -235,6 +241,13 @@ function parseRuntimeConfigResponse(data: unknown): RuntimeConfigPayload {
   }
   const rawFrames = r['video_memory_num_frames'] ?? r['videoMemoryNumFrames']
   const videoMemoryNumFrames: 1 | 4 = rawFrames === 4 ? 4 : 1
+  const rawSource = r['high_level_source'] ?? r['highLevelSource']
+  const highLevelSource: 'gpt' | 'service' = rawSource === 'service' ? 'service' : 'gpt'
+  const rawModel = r['gpt_model'] ?? r['gptModel']
+  const gptModel = typeof rawModel === 'string' && rawModel.trim() ? rawModel.trim() : 'gpt-5.4'
+  const rawImageMode = r['gpt_image_mode'] ?? r['gptImageMode']
+  const gptImageMode: 'high_only' | 'all_cameras' =
+    rawImageMode === 'high_only' ? 'high_only' : 'all_cameras'
   const forced = r['forced_low_level_subtask'] ?? r['forcedLowLevelSubtask']
   const ann = r['announcement_language'] ?? r['announcementLanguage']
   const announcementLanguage: 'zh' | 'ja' = ann === 'ja' ? 'ja' : 'zh'
@@ -260,6 +273,9 @@ function parseRuntimeConfigResponse(data: unknown): RuntimeConfigPayload {
     includeBottleState: bool('includeBottleState', 'include_bottle_state', true),
     includeSubtask: bool('includeSubtask', 'include_subtask', true),
     videoMemoryNumFrames,
+    highLevelSource,
+    gptModel,
+    gptImageMode,
     forcedLowLevelSubtask:
       typeof forced === 'string' && forced.trim() ? forced.trim() : null,
     subtaskCatalog: parseSubtaskCatalogFromApi(r['subtask_catalog'] ?? r['subtaskCatalog']),
@@ -302,6 +318,9 @@ const defaultConfig: UiConfig = {
   includeBottleState: true,
   includeSubtask: true,
   videoMemoryNumFrames: 1,
+  highLevelSource: 'gpt',
+  gptModel: 'gpt-5.4',
+  gptImageMode: 'all_cameras',
   forcedLowLevelSubtask: null,
   subtaskCatalog: DEFAULT_SUBTASK_CATALOG.map((e) => ({ ...e })),
   stateSubtaskPairs: DEFAULT_STATE_SUBTASK_PAIRS.map((e) => ({ ...e })),
@@ -664,6 +683,9 @@ export default function App() {
           includeBottleState: runtimeConfig.includeBottleState,
           includeSubtask: runtimeConfig.includeSubtask,
           videoMemoryNumFrames: runtimeConfig.videoMemoryNumFrames,
+          highLevelSource: runtimeConfig.highLevelSource,
+          gptModel: runtimeConfig.gptModel,
+          gptImageMode: runtimeConfig.gptImageMode,
           forcedLowLevelSubtask: runtimeConfig.forcedLowLevelSubtask || null,
           subtaskCatalog: runtimeConfig.subtaskCatalog.map((e) => ({ ...e })),
           stateSubtaskPairs: runtimeConfig.stateSubtaskPairs.map((e) => ({ ...e })),
@@ -812,6 +834,9 @@ export default function App() {
           include_subtask: uiConfig.includeSubtask,
           forced_low_level_subtask: uiConfig.forcedLowLevelSubtask || undefined,
           video_memory_num_frames: uiConfig.videoMemoryNumFrames,
+          high_level_source: uiConfig.highLevelSource,
+          gpt_model: uiConfig.gptModel.trim(),
+          gpt_image_mode: uiConfig.gptImageMode,
         }),
       })
       if (!response.ok) {
@@ -842,6 +867,9 @@ export default function App() {
           include_subtask: nextConfig.includeSubtask,
           forced_low_level_subtask: nextConfig.forcedLowLevelSubtask,
           video_memory_num_frames: nextConfig.videoMemoryNumFrames,
+          high_level_source: nextConfig.highLevelSource,
+          gpt_model: nextConfig.gptModel.trim(),
+          gpt_image_mode: nextConfig.gptImageMode,
           announcement_language: nextConfig.announcementLanguage,
           api_base: nextConfig.apiBase.trim(),
           ws_base: nextConfig.wsBase.trim(),
@@ -1429,6 +1457,62 @@ export default function App() {
                 }
                 placeholder="1000"
               />
+            </label>
+            <label className="config-field">
+              <span>{t.highLevelSource}</span>
+              <select
+                value={uiConfig.highLevelSource}
+                onChange={(event) =>
+                  setUiConfig((current) => {
+                    const nextHighLevelSource: UiConfig['highLevelSource'] =
+                      event.target.value === 'service' ? 'service' : 'gpt'
+                    const nextConfig = {
+                      ...current,
+                      highLevelSource: nextHighLevelSource,
+                    }
+                    void pushRuntimeConfig(nextConfig)
+                    return nextConfig
+                  })
+                }
+              >
+                <option value="gpt">{t.highLevelSourceGpt}</option>
+                <option value="service">{t.highLevelSourceService}</option>
+              </select>
+            </label>
+            <label className="config-field">
+              <span>{t.gptModel}</span>
+              <input
+                value={uiConfig.gptModel}
+                onChange={(event) =>
+                  setUiConfig((current) => {
+                    const nextConfig = { ...current, gptModel: event.target.value }
+                    void pushRuntimeConfig(nextConfig)
+                    return nextConfig
+                  })
+                }
+                placeholder="gpt-5.4"
+              />
+            </label>
+            <label className="config-field">
+              <span>{t.gptImageMode}</span>
+              <select
+                value={uiConfig.gptImageMode}
+                onChange={(event) =>
+                  setUiConfig((current) => {
+                    const nextGptImageMode: UiConfig['gptImageMode'] =
+                      event.target.value === 'high_only' ? 'high_only' : 'all_cameras'
+                    const nextConfig = {
+                      ...current,
+                      gptImageMode: nextGptImageMode,
+                    }
+                    void pushRuntimeConfig(nextConfig)
+                    return nextConfig
+                  })
+                }
+              >
+                <option value="all_cameras">{t.gptImageModeAll}</option>
+                <option value="high_only">{t.gptImageModeHighOnly}</option>
+              </select>
             </label>
             <label className="config-field">
               <span>{t.includeBottleDescription}</span>

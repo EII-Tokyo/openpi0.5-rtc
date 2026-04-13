@@ -69,7 +69,7 @@ def main() -> None:
     parser.add_argument("--hdf5", type=Path, default=Path("episode_0.hdf5"))
     parser.add_argument("--output", type=Path, default=Path("episode_0_subtasks.mp4"))
     parser.add_argument("--prompt", type=str, default="twist off the bottle cap")
-    parser.add_argument("--config", type=str, default="pi05_aloha_pen_uncap")
+    parser.add_argument("--config", type=str, default="twist_and_static_mixture_full_finetune")
     parser.add_argument("--checkpoint", type=str, default="checkpoints/20260219/1500/")
     parser.add_argument("--temperature", type=float, default=0.0)
     parser.add_argument("--max-text-token-id", type=int, default=240000)

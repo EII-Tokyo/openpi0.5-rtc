@@ -87,6 +87,32 @@ class Policy(BasePolicy):
             # Avoid `rng or ...`: bool(jax.Array key) can raise on PRNG keys.
             self._rng = jax.random.key(0) if rng is None else rng
 
+    def _filter_subtask_inputs(self, inputs: dict[str, Any]) -> dict[str, Any]:
+        """Drop non-numeric leaves before converting high-level inputs to JAX arrays."""
+
+        dropped: list[str] = []
+
+        def _filter(value: Any, path: str) -> Any | None:
+            if isinstance(value, dict):
+                out: dict[str, Any] = {}
+                for k, v in value.items():
+                    child = _filter(v, f"{path}.{k}" if path else str(k))
+                    if child is not None:
+                        out[k] = child
+                return out
+
+            arr = np.asarray(value)
+            if arr.dtype.kind in {"b", "i", "u", "f", "c"}:
+                return value
+
+            dropped.append(path)
+            return None
+
+        filtered = _filter(inputs, "")
+        if dropped:
+            logging.debug("Dropping non-numeric high-level input keys: %s", dropped)
+        return filtered or {}
+
     @override
     def infer(self, obs: dict, prev_action: np.ndarray | None = None, use_rtc: bool = False, noise: np.ndarray | None = None) -> dict:  # type: ignore[misc]
         # Make a copy since transformations may modify the inputs in place.
@@ -165,6 +191,9 @@ class Policy(BasePolicy):
         inputs = jax.tree.map(lambda x: x, obs)
         inputs.pop("subtask", None)
         inputs = self._input_transform(inputs)
+        for key, value in inputs.items():
+            print(key)
+        inputs = self._filter_subtask_inputs(inputs)
 
         if self._is_pytorch_model:
             raise NotImplementedError("infer_subtask is currently implemented for JAX PI0/PI05 models.")
@@ -248,7 +277,7 @@ class Policy(BasePolicy):
                 # Transforms may mutate leaves; callers may repeat the same dict reference per batch slot.
                 inputs = copy.deepcopy(obs)
                 inputs.pop("subtask", None)
-                transformed.append(self._input_transform(inputs))
+                transformed.append(self._filter_subtask_inputs(self._input_transform(inputs)))
 
             batched = jax.tree.map(
                 lambda *xs: jnp.stack([jnp.asarray(x) for x in xs], axis=0),

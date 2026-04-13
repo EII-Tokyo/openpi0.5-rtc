@@ -96,6 +96,9 @@ def publish_runtime_config(
     include_subtask: bool | None = None,
     forced_low_level_subtask: str | None = None,
     video_memory_num_frames: int | None = None,
+    high_level_source: str | None = None,
+    gpt_model: str | None = None,
+    gpt_image_mode: str | None = None,
     subtask_catalog: Any = None,
     state_subtask_pairs: Any = None,
 ) -> dict:
@@ -119,6 +122,12 @@ def publish_runtime_config(
         message["include_subtask"] = include_subtask
     if isinstance(video_memory_num_frames, int) and video_memory_num_frames in (1, 4):
         message["video_memory_num_frames"] = video_memory_num_frames
+    if high_level_source in {"gpt", "service"}:
+        message["high_level_source"] = high_level_source
+    if isinstance(gpt_model, str) and gpt_model.strip():
+        message["gpt_model"] = gpt_model.strip()
+    if gpt_image_mode in {"high_only", "all_cameras"}:
+        message["gpt_image_mode"] = gpt_image_mode
     if forced_low_level_subtask is None:
         message["forced_low_level_subtask"] = None
     elif isinstance(forced_low_level_subtask, str):

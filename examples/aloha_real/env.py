@@ -11,8 +11,20 @@ from typing_extensions import override
 from examples.aloha_real import real_env as _real_env
 
 _DEFAULT_RESET_POSITION = [
-    [0.0, -0.96, 1.16, 0.0, -0.0, 0.0],
-    [0.0, -0.96, 1.16, 1.57, -0.0, -1.57],
+    0.0,
+    -0.96,
+    1.16,
+    0.0,
+    -0.0,
+    0.0,
+    0.0,
+    0.0,
+    -0.96,
+    1.16,
+    1.57,
+    -0.0,
+    -1.57,
+    0.0,
 ]
 
 
@@ -21,16 +33,20 @@ class AlohaRealEnvironment(_environment.Environment):
 
     def __init__(
         self,
-        reset_position: Optional[List[List[float]]] = None,  # noqa: UP006,UP007
+        reset_position: Optional[List[float]] = None,  # noqa: UP006,UP007
         gripper_current_limits: Optional[List[int]] = None,
         render_height: int = 224,
         render_width: int = 224,
     ) -> None:
         if reset_position is None:
-            reset_position = [list(joints) for joints in _DEFAULT_RESET_POSITION]
+            reset_position = list(_DEFAULT_RESET_POSITION)
         if gripper_current_limits is None:
             gripper_current_limits = [300, 500]
-        self._env = _real_env.make_real_env(init_node=True, reset_position=reset_position, gripper_current_limits=gripper_current_limits)
+        self._env = _real_env.make_real_env(
+            init_node=True,
+            reset_position=reset_position,
+            gripper_current_limits=gripper_current_limits,
+        )
         self._render_height = render_height
         self._render_width = render_width
 
@@ -115,17 +131,6 @@ class AlohaRealEnvironment(_environment.Environment):
     def apply_action(self, action: dict) -> None:
         with self._ts_lock:
             self._ts = self._env.step(action["actions"])
-
-    @override
-    def stop(self) -> None:
-        """Stop the environment."""
-        with self._ts_lock:
-            self._ts = self._env.stop()
-
-    def close_grippers(self) -> None:
-        """Close the follower grippers while keeping the latest observation updated."""
-        with self._ts_lock:
-            self._ts = self._env.close_grippers()
 
     @override
     def sleep_arms(self) -> None:

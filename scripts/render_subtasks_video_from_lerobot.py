@@ -92,7 +92,7 @@ def main() -> None:
     parser.add_argument("--episode-index", type=int, default=0)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--prompt", type=str, default="", help="If empty, use task text from dataset.")
-    parser.add_argument("--config", type=str, default="pi05_aloha")
+    parser.add_argument("--config", type=str, default="twist_and_static_mixture_full_finetune")
     parser.add_argument("--checkpoint", type=str, default="gs://openpi-assets/checkpoints/pi05_base")
     parser.add_argument("--decode-every", type=int, default=50)
     parser.add_argument("--temperature", type=float, default=0.0)

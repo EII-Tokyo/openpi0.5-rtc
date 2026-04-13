@@ -306,7 +306,9 @@ class TokenizePrompt(DataTransformFn):
         if (prompt := data.pop("prompt", None)) is None:
             raise ValueError("Prompt is required")
 
-        if self.discrete_state_input:
+        train_action = bool(np.asarray(data.get("actions_mask", True)).item())
+
+        if self.discrete_state_input and train_action:
             if (state := data.get("state", None)) is None:
                 raise ValueError("State is required.")
         else:
@@ -323,7 +325,8 @@ class TokenizePrompt(DataTransformFn):
             prompt,
             state,
             subtask,
-            actions=actions,
+            actions=actions if train_action else None,
+            train_action=train_action,
         )
         if len(tokenized) == 2:
             prompt_tokens, prompt_masks = tokenized
@@ -349,28 +352,6 @@ class TokenizePrompt(DataTransformFn):
 
 
 @dataclasses.dataclass(frozen=True)
-class TokenizeFASTInputs(DataTransformFn):
-    tokenizer: _tokenizer.FASTTokenizer
-
-    def __call__(self, data: DataDict) -> DataDict:
-        if (prompt := data.pop("prompt", None)) is None:
-            raise ValueError("Prompt is required")
-
-        if not isinstance(prompt, str):
-            prompt = prompt.item()
-
-        state, actions = data["state"], data.get("actions")
-        tokens, token_mask, ar_mask, loss_mask = self.tokenizer.tokenize(prompt, state, actions)
-        return {
-            **data,
-            "tokenized_prompt": tokens,
-            "tokenized_prompt_mask": token_mask,
-            "token_ar_mask": ar_mask,
-            "token_loss_mask": loss_mask,
-        }
-
-
-@dataclasses.dataclass(frozen=True)
 class TokenizeSubtask(DataTransformFn):
     tokenizer: _tokenizer.PaligemmaTokenizer
 
@@ -381,26 +362,8 @@ class TokenizeSubtask(DataTransformFn):
         if not isinstance(subtask, str):
             subtask = subtask.item()
 
-        tokens, token_masks, _, _, _ = self.tokenizer.tokenize(subtask, state=None)
+        tokens, token_masks, _, _, _, _ = self.tokenizer.tokenize(subtask, state=None, train_action=False)
         return {**data, "tokenized_subtask": tokens, "tokenized_subtask_mask": token_masks}
-
-
-@dataclasses.dataclass(frozen=True)
-class ExtractFASTActions(DataTransformFn):
-    tokenizer: _tokenizer.FASTTokenizer
-    action_horizon: int
-    action_dim: int
-
-    def __call__(self, data: DataDict) -> DataDict:
-        if "actions" not in data:
-            return data
-        # Model outputs are saved in "actions", but for FAST models they represent tokens.
-        tokens = data.pop("actions")
-        actions = self.tokenizer.extract_actions(tokens.astype(np.int32), self.action_horizon, self.action_dim)
-        return {
-            **data,
-            "actions": actions,
-        }
 
 
 @dataclasses.dataclass(frozen=True)

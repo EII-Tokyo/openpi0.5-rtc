@@ -64,7 +64,7 @@ def _fit_action_horizon(actions: np.ndarray, target_horizon: int) -> np.ndarray:
 def main():
     parser = argparse.ArgumentParser(description="Compute PI0/PI05 loss from one HDF5 trajectory slice.")
     parser.add_argument("--hdf5", type=Path, required=True)
-    parser.add_argument("--config", type=str, default="pi05_aloha_pen_uncap")
+    parser.add_argument("--config", type=str, default="twist_and_static_mixture_full_finetune")
     parser.add_argument("--checkpoint", type=str, required=True)
     parser.add_argument("--prompt", type=str, default="twist off the bottle cap")
     parser.add_argument("--subtask", type=str, default=None, help="If empty, fallback to --prompt.")

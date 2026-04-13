@@ -79,6 +79,9 @@ class RuntimeConfigRequest(BaseModel):
     include_subtask: bool | None = None
     forced_low_level_subtask: str | None = None
     video_memory_num_frames: int | None = None
+    high_level_source: Literal["gpt", "service"] | None = None
+    gpt_model: str | None = None
+    gpt_image_mode: Literal["high_only", "all_cameras"] | None = None
     announcement_language: Literal["zh", "ja"] | None = None
     api_base: str | None = None
     ws_base: str | None = None
@@ -98,6 +101,9 @@ class RuntimeConfigPayload(BaseModel):
     include_subtask: bool = True
     forced_low_level_subtask: str | None = None
     video_memory_num_frames: int = 1
+    high_level_source: Literal["gpt", "service"] = "gpt"
+    gpt_model: str = "gpt-5.4"
+    gpt_image_mode: Literal["high_only", "all_cameras"] = "all_cameras"
     announcement_language: Literal["zh", "ja"] = "zh"
     api_base: str = ""
     ws_base: str = ""

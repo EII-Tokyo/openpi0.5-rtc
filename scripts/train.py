@@ -155,14 +155,17 @@ def train_step(
     config: _config.TrainConfig,
     rng: at.KeyArrayLike,
     state: training_utils.TrainState,
-    batch: tuple[_model.Observation, _model.Actions],
+    batch: tuple[_model.Observation, _model.Actions, at.Bool[at.Array, " b"]],
 ) -> tuple[training_utils.TrainState, dict[str, at.Array]]:
     model = nnx.merge(state.model_def, state.params)
     model.train()
 
     @at.typecheck
     def loss_fn(
-        model: _model.BaseModel, rng: at.KeyArrayLike, observation: _model.Observation, actions: _model.Actions
+        model: _model.BaseModel,
+        rng: at.KeyArrayLike,
+        observation: _model.Observation,
+        actions: _model.Actions,
     ):
         if hasattr(model, "compute_loss_with_metrics"):
             chunked_loss, flow_chunked_loss, subtask_ar_chunked_loss = model.compute_loss_with_metrics(
@@ -179,7 +182,7 @@ def train_step(
         }
 
     train_rng = jax.random.fold_in(rng, state.step)
-    observation, actions = batch
+    observation, actions, actions_mask = batch
 
     # Filter out frozen params.
     diff_state = nnx.DiffState(0, config.trainable_filter)
@@ -217,6 +220,7 @@ def train_step(
         "loss": loss,
         "flow_loss": aux_metrics["flow_loss"],
         "subtask_ar_loss": aux_metrics["subtask_ar_loss"],
+        "actionless_fraction": 1.0 - jnp.mean(actions_mask.astype(jnp.float32)),
         "grad_norm": optax.global_norm(grads),
         "param_norm": optax.global_norm(kernel_params),
     }

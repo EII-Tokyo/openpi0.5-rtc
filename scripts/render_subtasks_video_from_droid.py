@@ -87,7 +87,7 @@ def main() -> None:
     parser.add_argument("--episode-dir", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--prompt", type=str, default="clean the bedroom")
-    parser.add_argument("--config", type=str, default="pi05_droid")
+    parser.add_argument("--config", type=str, default="twist_and_static_mixture_full_finetune")
     parser.add_argument("--checkpoint", type=str, default="gs://openpi-assets/checkpoints/pi05_base")
     parser.add_argument(
         "--norm-stats-checkpoint",

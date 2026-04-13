@@ -27,9 +27,9 @@ class EnvMode(enum.Enum):
 class Checkpoint:
     """Load a policy from a trained checkpoint."""
 
-    # Training config name (e.g., "pi0_aloha_sim").
+    # Training config name (e.g., "twist_and_static_mixture_full_finetune").
     config: str
-    # Checkpoint directory (e.g., "checkpoints/pi0_aloha_sim/exp/10000").
+    # Checkpoint directory (e.g., "gs://openpi-assets/checkpoints/pi05_base").
     dir: str
 
 
@@ -67,8 +67,8 @@ class Args:
 # Default checkpoints that should be used for each environment.
 DEFAULT_CHECKPOINT: dict[EnvMode, Checkpoint] = {
     EnvMode.ALOHA: Checkpoint(
-        config="twist_off_the_bottle_cap_subtask_lora",
-        dir="./checkpoints/twist_off_the_bottle_cap_subtask_lora/twist_off_the_bottle_cap_subtask_lora_20260317/32000",
+        config="twist_and_static_mixture_full_finetune",
+        dir="gs://openpi-assets/checkpoints/pi05_base",
     ),
     # EnvMode.ALOHA: Checkpoint(
     #     config="pi05_aloha",
@@ -83,16 +83,17 @@ DEFAULT_CHECKPOINT: dict[EnvMode, Checkpoint] = {
     #     dir="./checkpoints/20251210/b128_25000",
     # ),
     EnvMode.ALOHA_SIM: Checkpoint(
-        config="pi0_aloha_sim",
-        dir="gs://openpi-assets/checkpoints/pi0_aloha_sim",
+        config="twist_and_static_mixture_full_finetune",
+        dir="gs://openpi-assets/checkpoints/pi05_base",
     ),
     EnvMode.DROID: Checkpoint(
-        config="pi05_droid",
-        dir="gs://openpi-assets/checkpoints/pi05_droid",
+        config="twist_and_static_mixture_full_finetune",
+        dir="gs://openpi-assets/checkpoints/pi05_base",
     ),
+    # LIBERO env kept for CLI compatibility; uses same Aloha PI05 checkpoint as default ALOHA.
     EnvMode.LIBERO: Checkpoint(
-        config="pi05_libero",
-        dir="gs://openpi-assets/checkpoints/pi05_libero",
+        config="twist_and_static_mixture_full_finetune",
+        dir="gs://openpi-assets/checkpoints/pi05_base",
     ),
 }
 

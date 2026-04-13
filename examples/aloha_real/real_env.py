@@ -38,12 +38,24 @@ class RealEnv:
                                    "cam_right_wrist": (480x640x3)} # h, w, c, dtype='uint8'
     """
 
-    def __init__(self, init_node, *, reset_position: Optional[List[List[float]]] = None, gripper_current_limits: Optional[List[int]] = None, setup_robots: bool = True):
+    def __init__(
+        self,
+        init_node,
+        *,
+        reset_position: Optional[List[float]] = None,
+        gripper_current_limits: Optional[List[int]] = None,
+        setup_robots: bool = True,
+    ):
         # reset_position = START_ARM_POSE[:6]
         # self._reset_position = reset_position[:6] if reset_position else DEFAULT_RESET_POSITION
 
         self._reset_position = reset_position
         self._gripper_current_limits = gripper_current_limits
+        if self._reset_position is None or len(self._reset_position) != 14:
+            raise ValueError(
+                "reset_position must contain exactly 14 values: "
+                "[left_arm(6), left_gripper(1), right_arm(6), right_gripper(1)]."
+            )
         self.puppet_bot_left = InterbotixManipulatorXS(
             robot_model="vx300s",
             group_name="arm",
@@ -171,16 +183,12 @@ class RealEnv:
         # self.last_left_gripper_desired_pos_normalized = left_gripper_desired_pos_normalized
         # self.last_right_gripper_desired_pos_normalized = right_gripper_desired_pos_normalized
 
-    def _reset_joints(self):
-        robot_utils.move_arms(
-            [self.puppet_bot_left, self.puppet_bot_right], self._reset_position, move_time=1
-        )
-
-    def _reset_gripper(self):
-        """Reset follower grippers to the closed start pose used during data collection."""
-        robot_utils.move_grippers(
-            [self.puppet_bot_left, self.puppet_bot_right], [constants.PUPPET_GRIPPER_JOINT_CLOSE] * 2, move_time=1
-        )
+    def _reset_targets(self) -> tuple[list[list[float]], list[float]]:
+        left_arm = [float(value) for value in self._reset_position[:6]]
+        left_gripper = float(self._reset_position[6])
+        right_arm = [float(value) for value in self._reset_position[7:13]]
+        right_gripper = float(self._reset_position[13])
+        return [left_arm, right_arm], [left_gripper, right_gripper]
 
     def get_observation(self):
         obs = collections.OrderedDict()
@@ -197,29 +205,20 @@ class RealEnv:
         # Reboot puppet robot gripper motors
         self.puppet_bot_left.dxl.robot_reboot_motors("single", "gripper", True)
         self.puppet_bot_right.dxl.robot_reboot_motors("single", "gripper", True)
-        self._reset_joints()
-        self._reset_gripper()
+        reset_arms, reset_grippers_normalized = self._reset_targets()
+        robot_utils.move_arms(
+            [self.puppet_bot_left, self.puppet_bot_right], reset_arms, move_time=1
+        )
+        robot_utils.move_grippers(
+            [self.puppet_bot_left, self.puppet_bot_right],
+            [
+                constants.PUPPET_GRIPPER_JOINT_UNNORMALIZE_FN(reset_grippers_normalized[0]),
+                constants.PUPPET_GRIPPER_JOINT_UNNORMALIZE_FN(reset_grippers_normalized[1]),
+            ],
+            move_time=1,
+        )
         return dm_env.TimeStep(
             step_type=dm_env.StepType.FIRST, reward=self.get_reward(), discount=None, observation=self.get_observation()
-        )
-
-    def stop(self):
-        robot_utils.move_arms(
-            [self.puppet_bot_left, self.puppet_bot_right], self._reset_position, move_time=1
-        )
-        robot_utils.move_grippers(
-            [self.puppet_bot_left, self.puppet_bot_right], [constants.PUPPET_GRIPPER_JOINT_OPEN] * 2, move_time=0.5
-        )
-        return dm_env.TimeStep(
-            step_type=dm_env.StepType.MID, reward=self.get_reward(), discount=None, observation=self.get_observation()
-        )
-
-    def close_grippers(self):
-        robot_utils.move_grippers(
-            [self.puppet_bot_left, self.puppet_bot_right], [constants.PUPPET_GRIPPER_JOINT_CLOSE] * 2, move_time=0.5
-        )
-        return dm_env.TimeStep(
-            step_type=dm_env.StepType.MID, reward=self.get_reward(), discount=None, observation=self.get_observation()
         )
 
     def sleep_arms(self):
@@ -298,5 +297,16 @@ def get_action(master_bot_left, master_bot_right):
     return action
 
 
-def make_real_env(init_node, *, reset_position: Optional[List[List[float]]] = None, gripper_current_limits: Optional[List[int]] = None, setup_robots: bool = True) -> RealEnv:
-    return RealEnv(init_node, reset_position=reset_position, gripper_current_limits=gripper_current_limits, setup_robots=setup_robots)
+def make_real_env(
+    init_node,
+    *,
+    reset_position: Optional[List[float]] = None,
+    gripper_current_limits: Optional[List[int]] = None,
+    setup_robots: bool = True,
+) -> RealEnv:
+    return RealEnv(
+        init_node,
+        reset_position=reset_position,
+        gripper_current_limits=gripper_current_limits,
+        setup_robots=setup_robots,
+    )

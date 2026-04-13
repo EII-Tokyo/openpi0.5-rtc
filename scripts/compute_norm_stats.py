@@ -1,8 +1,6 @@
-"""Compute normalization statistics for a config.
+"""Compute normalization statistics for a config (LeRobot / torch path only).
 
-This script is used to compute the normalization statistics for a given config. It
-will compute the mean and standard deviation of the data in the dataset and save it
-to the config assets directory.
+Writes mean and std under the config assets directory for the given ``repo_id``.
 """
 
 import numpy as np
@@ -41,7 +39,6 @@ def create_torch_dataloader(
             RemoveStrings(),
         ],
     )
-    # print(data_config.data_transforms.inputs)
     if max_frames is not None and max_frames < len(dataset):
         num_batches = max_frames // batch_size
         shuffle = True
@@ -58,47 +55,19 @@ def create_torch_dataloader(
     return data_loader, num_batches
 
 
-def create_rlds_dataloader(
-    data_config: _config.DataConfig,
-    action_horizon: int,
-    batch_size: int,
-    max_frames: int | None = None,
-) -> tuple[_data_loader.Dataset, int]:
-    dataset = _data_loader.create_rlds_dataset(data_config, action_horizon, batch_size, shuffle=False)
-    dataset = _data_loader.IterableTransformedDataset(
-        dataset,
-        [
-            *data_config.repack_transforms.inputs,
-            *data_config.data_transforms.inputs,
-            # Remove strings since they are not supported by JAX and are not needed to compute norm stats.
-            RemoveStrings(),
-        ],
-        is_batched=True,
-    )
-    if max_frames is not None and max_frames < len(dataset):
-        num_batches = max_frames // batch_size
-    else:
-        # NOTE: this length is currently hard-coded for DROID.
-        num_batches = len(dataset) // batch_size
-    data_loader = _data_loader.RLDSDataLoader(
-        dataset,
-        num_batches=num_batches,
-    )
-    return data_loader, num_batches
-
-
 def main(config_name: str, max_frames: int | None = None):
     config = _config.get_config(config_name)
     data_config = config.data.create(config.assets_dirs, config.model)
 
     if data_config.rlds_data_dir is not None:
-        data_loader, num_batches = create_rlds_dataloader(
-            data_config, config.model.action_horizon, config.batch_size, max_frames
+        raise ValueError(
+            "This script only supports LeRobot (torch) configs. "
+            "RLDS/DROID norm stats are not supported here; use a config without rlds_data_dir."
         )
-    else:
-        data_loader, num_batches = create_torch_dataloader(
-            data_config, config.model.action_horizon, config.batch_size, config.model, config.num_workers, max_frames
-        )
+
+    data_loader, num_batches = create_torch_dataloader(
+        data_config, config.model.action_horizon, config.batch_size, config.model, config.num_workers, max_frames
+    )
 
     keys = ["state", "actions"]
     stats = {key: normalize.RunningStats() for key in keys}

@@ -81,7 +81,7 @@ def _build_visual_transform(data_config, image_size: tuple[int, int]):
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--config", default="twist_off_the_bottle_cap_subtask_lora")
+    parser.add_argument("--config", default="twist_and_static_mixture_full_finetune")
     parser.add_argument("--episode-index", type=int, default=0)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--fps", type=float, default=25.0)

@@ -85,7 +85,7 @@ def main() -> None:
         help="Path to episode hdf5 file.",
     )
     parser.add_argument("--frame-idx", type=int, default=0, help="Frame index to load.")
-    parser.add_argument("--config", default="pi05_aloha", help="Train config name.")
+    parser.add_argument("--config", default="twist_and_static_mixture_full_finetune", help="Train config name.")
     parser.add_argument(
         "--checkpoint",
         default="gs://openpi-assets/checkpoints/pi05_base",

@@ -1,19 +1,42 @@
 import dataclasses
+import json
 import logging
+import os
+from pathlib import Path
 import signal
 import sys
 import threading
 import time
-from typing import List, Literal
+from typing import Any, List
+import urllib.error
+import urllib.request
 
 from openpi_client import action_chunk_broker
 from openpi_client import websocket_client_policy as _websocket_client_policy
 from openpi_client.runtime import runtime as _runtime
 from openpi_client.runtime.agents import policy_agent as _policy_agent
+from openpi_client.runtime import gpt_high_level_policy as _gpt_high_level_policy
 import tyro
 
 from examples.aloha_real import env as _env
 from examples.aloha_real import h5df_saver
+
+_DEFAULT_RESET_POSITION = [
+    0.0,
+    -0.96,
+    1.16,
+    0.0,
+    -0.0,
+    0.0,
+    0.0,
+    0.0,
+    -0.96,
+    1.16,
+    1.57,
+    -0.0,
+    -1.57,
+    0.0,
+]
 
 
 @dataclasses.dataclass
@@ -41,11 +64,7 @@ class Args:
     #         #[0.0, -0.96, 1.16, 0.0, -0.0, 0.0],
     #         [0.0, -0.96, 1.16, 0.0, -0.0, 0.0]         
     #     ])
-    reset_position: List[List[float]] = dataclasses.field(default_factory=lambda: [
-            [0.0, -0.96, 1.16, 0.0, -0.0, 0.0],
-            # [0.0, -0.96, 1.16, 0.0, -0.0, 0.0],
-            [0.0, -0.96, 1.16, 1.57, -0.0, -1.57]         
-        ])
+    reset_position: str = json.dumps(_DEFAULT_RESET_POSITION)
     gripper_current_limits: List[int] = dataclasses.field(default_factory=lambda: [300, 500])
     # H5dfSaver 配置
     dataset_dir: str | None = None
@@ -53,9 +72,62 @@ class Args:
     compress_images: bool = True
     is_mobile: bool = False
     if_save_hdf5: bool = False
+    runtime_config_url: str = "http://127.0.0.1:8011/api/runtime/config"
+
+
+def _repo_root() -> Path:
+    return Path(__file__).resolve().parents[2]
+
+
+def _load_repo_env(env_path: Path) -> None:
+    if not env_path.exists():
+        return
+    try:
+        for raw_line in env_path.read_text(encoding="utf-8").splitlines():
+            line = raw_line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, value = line.split("=", 1)
+            key = key.strip()
+            if not key or key in os.environ:
+                continue
+            value = value.strip().strip("'").strip('"')
+            os.environ[key] = value
+    except Exception:
+        logging.exception("Failed to load .env from %s", env_path)
+
+
+def _fetch_runtime_config(runtime_config_url: str) -> dict[str, Any] | None:
+    url = str(runtime_config_url or "").strip()
+    if not url:
+        return None
+    try:
+        with urllib.request.urlopen(url, timeout=2.0) as response:
+            return json.loads(response.read().decode("utf-8"))
+    except (urllib.error.URLError, TimeoutError, json.JSONDecodeError):
+        logging.warning("Could not fetch runtime config from %s; using local defaults.", url)
+    except Exception:
+        logging.exception("Failed to fetch runtime config from %s", url)
+    return None
+
+
+def _parse_reset_position(raw_value: str) -> list[float]:
+    try:
+        parsed: Any = json.loads(raw_value)
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"Invalid --reset-position JSON: {exc}") from exc
+    if not isinstance(parsed, list) or len(parsed) != 14:
+        raise ValueError(
+            "--reset-position must be a JSON array with exactly 14 values: "
+            "[left_arm(6), left_gripper(1), right_arm(6), right_gripper(1)]."
+        )
+    return [float(value) for value in parsed]
 
 
 def main(args: Args) -> None:
+    _load_repo_env(_repo_root() / ".env")
+    reset_position = _parse_reset_position(args.reset_position)
+    initial_runtime_config = _fetch_runtime_config(args.runtime_config_url)
     logging.info("Runtime startup config:\n%s", dataclasses.asdict(args))
     low_level_policy = _websocket_client_policy.WebsocketClientPolicy(
         host=args.low_level_host,
@@ -65,11 +137,17 @@ def main(args: Args) -> None:
     logging.info("Low-level server metadata: %s", low_level_metadata)
 
     runtime_policy = low_level_policy
-    high_level_policy = _websocket_client_policy.WebsocketClientPolicy(
-        host=args.high_level_host,
-        port=args.high_level_port,
+    high_level_policy = _gpt_high_level_policy.RoutedHighLevelPolicy(
+        service_host=args.high_level_host,
+        service_port=args.high_level_port,
     )
-    logging.info("High-level server metadata: %s", high_level_policy.get_server_metadata())
+    if initial_runtime_config and hasattr(high_level_policy, "set_config"):
+        high_level_policy.set_config(
+            source=initial_runtime_config.get("high_level_source"),
+            gpt_model=initial_runtime_config.get("gpt_model"),
+            gpt_image_mode=initial_runtime_config.get("gpt_image_mode"),
+        )
+    logging.info("High-level policy metadata: %s", high_level_policy.get_server_metadata())
     
     # 创建 H5dfSaver subscriber
     h5df_saver_instance = h5df_saver.H5dfSaver(
@@ -81,7 +159,10 @@ def main(args: Args) -> None:
     
     runtime = _runtime.Runtime(
         # environment=_env.AlohaRealEnvironment(reset_position=metadata.get("reset_pose")),
-        environment=_env.AlohaRealEnvironment(reset_position=args.reset_position, gripper_current_limits=args.gripper_current_limits),
+        environment=_env.AlohaRealEnvironment(
+            reset_position=reset_position,
+            gripper_current_limits=args.gripper_current_limits,
+        ),
         agent=_policy_agent.PolicyAgent(
             policy=action_chunk_broker.ActionChunkBroker(
                 policy=runtime_policy,
@@ -101,6 +182,14 @@ def main(args: Args) -> None:
         high_level_history_max_len=args.high_level_history_max_len,
         prompt=args.prompt,
     )
+    if initial_runtime_config:
+        runtime.apply_runtime_config(initial_runtime_config)
+        logging.info(
+            "Applied initial runtime config: high_level_source=%s gpt_model=%s gpt_image_mode=%s",
+            initial_runtime_config.get("high_level_source"),
+            initial_runtime_config.get("gpt_model"),
+            initial_runtime_config.get("gpt_image_mode"),
+        )
 
     shutdown_started = False
 

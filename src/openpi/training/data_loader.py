@@ -321,9 +321,7 @@ def create_torch_dataset(
     fps_meta: lerobot_dataset.LeRobotDatasetMetadata | None = None
     if repo_ids is not None and len(repo_ids) > 0:
         if len(repo_ids) == 1:
-            fps_meta = lerobot_dataset.LeRobotDatasetMetadata(
-                repo_ids[0], revision="main", force_cache_sync=True
-            )
+            fps_meta = lerobot_dataset.LeRobotDatasetMetadata(repo_ids[0], revision="main", force_cache_sync=False)
             dataset = lerobot_dataset.LeRobotDataset(
                 repo_ids[0],
                 revision="main",
@@ -331,14 +329,14 @@ def create_torch_dataset(
                 delta_timestamps=_delta_timestamps(fps_meta.fps),
             )
         else:
-            fps_meta = lerobot_dataset.LeRobotDatasetMetadata(repo_ids[0], force_cache_sync=True)
+            fps_meta = lerobot_dataset.LeRobotDatasetMetadata(repo_ids[0], force_cache_sync=False)
             dataset = MultiLeRobotDatasetWithOptionalKeys(
                 repo_ids,
                 delta_timestamps=_delta_timestamps(fps_meta.fps),
-                optional_defaults={"subtask": ""},
+                optional_defaults={"subtask": "", "train_action": True},
             )
     elif repo_id is not None:
-        fps_meta = lerobot_dataset.LeRobotDatasetMetadata(repo_id, revision="main", force_cache_sync=True)
+        fps_meta = lerobot_dataset.LeRobotDatasetMetadata(repo_id, revision="main", force_cache_sync=False)
         dataset = lerobot_dataset.LeRobotDataset(
             repo_id,
             revision="main",
@@ -393,7 +391,7 @@ def create_data_loader(
     num_batches: int | None = None,
     skip_norm_stats: bool = False,
     framework: Literal["jax", "pytorch"] = "jax",
-) -> DataLoader[tuple[_model.Observation, _model.Actions]]:
+) -> DataLoader[tuple[_model.Observation, _model.Actions, np.ndarray]]:
     """Build LeRobot dataset + transforms + optional subtask-eval holdout + PyTorch DataLoader."""
     data_config = config.data.create(config.assets_dirs, config.model)
     logging.info("data_config: %s", data_config)
@@ -608,9 +606,30 @@ class TorchDataLoader:
 
 def _collate_fn(items):
     """Collate the batch elements into batched numpy arrays."""
-    # Make sure to convert to numpy arrays before stacking since some of the incoming elements
-    # may be JAX arrays.
-    return jax.tree.map(lambda *xs: np.stack([np.asarray(x) for x in xs], axis=0), *items)
+    def _stack_with_context(path: str, values):
+        arrays = [np.asarray(x) for x in values]
+        try:
+            return np.stack(arrays, axis=0)
+        except ValueError as e:
+            shapes = [arr.shape for arr in arrays]
+            dtypes = [str(arr.dtype) for arr in arrays]
+            raise ValueError(f"Failed to collate '{path}': shapes={shapes}, dtypes={dtypes}") from e
+
+    def _collate(path: str, values):
+        first = values[0]
+        if isinstance(first, dict):
+            return {k: _collate(f"{path}.{k}" if path else k, [v[k] for v in values]) for k in first}
+        if hasattr(first, "_asdict"):
+            data = {
+                k: _collate(f"{path}.{k}" if path else k, [getattr(v, k) for v in values])
+                for k in first._asdict()
+            }
+            return type(first)(**data)
+        if isinstance(first, tuple):
+            return type(first)(_collate(f"{path}[{i}]", [v[i] for v in values]) for i in range(len(first)))
+        return _stack_with_context(path or "<root>", values)
+
+    return _collate("", items)
 
 
 class _WorkerInitFn:
@@ -652,4 +671,11 @@ class DataLoaderImpl(DataLoader):
 
     def __iter__(self):
         for batch in self._data_loader:
-            yield _model.Observation.from_dict(batch), batch["actions"]
+            actions_mask = batch.get("actions_mask")
+            if actions_mask is None:
+                batch_size = batch["actions"].shape[0]
+                actions_mask = jnp.ones((batch_size,), dtype=jnp.bool_)
+            else:
+                actions_mask = jnp.asarray(actions_mask, dtype=jnp.bool_)
+            batch["actions_mask"] = actions_mask
+            yield _model.Observation.from_dict(batch), batch["actions"], actions_mask

@@ -8,19 +8,19 @@ from openpi.training import config as _config
 
 @pytest.mark.manual
 def test_infer():
-    config = _config.get_config("pi0_aloha_sim")
-    policy = _policy_config.create_trained_policy(config, "gs://openpi-assets/checkpoints/pi0_aloha_sim")
+    config = _config.get_config("twist_and_static_mixture_full_finetune")
+    policy = _policy_config.create_trained_policy(config, "gs://openpi-assets/checkpoints/pi05_base")
 
     example = aloha_policy.make_aloha_example()
     result = policy.infer(example)
 
-    assert result["actions"].shape == (config.model.action_horizon, 14)
+    assert result["actions"].shape == (config.model.action_horizon, config.model.action_dim)
 
 
 @pytest.mark.manual
 def test_broker():
-    config = _config.get_config("pi0_aloha_sim")
-    policy = _policy_config.create_trained_policy(config, "gs://openpi-assets/checkpoints/pi0_aloha_sim")
+    config = _config.get_config("twist_and_static_mixture_full_finetune")
+    policy = _policy_config.create_trained_policy(config, "gs://openpi-assets/checkpoints/pi05_base")
 
     broker = action_chunk_broker.ActionChunkBroker(
         policy,
@@ -31,4 +31,4 @@ def test_broker():
     example = aloha_policy.make_aloha_example()
     for _ in range(config.model.action_horizon):
         outputs = broker.infer(example)
-        assert outputs["actions"].shape == (14,)
+        assert outputs["actions"].shape == (config.model.action_dim,)

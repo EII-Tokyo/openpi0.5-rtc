@@ -186,7 +186,7 @@ def main() -> None:
         "--config",
         type=str,
         default="",
-        help="Optional OpenPI train config name (e.g. pi05_aloha_pen_uncap) to auto-load norm stats.",
+        help="Optional OpenPI train config name (e.g. twist_and_static_mixture_full_finetune) to auto-load norm stats.",
     )
     parser.add_argument("--adapt-to-pi", action=argparse.BooleanOptionalAction, default=True)
     parser.add_argument(

@@ -123,7 +123,7 @@ def run_benchmark(args: argparse.Namespace) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Video export or dataloader throughput benchmark.")
     parser.add_argument("--mode", choices=["video", "benchmark"], default="video")
-    parser.add_argument("--config", type=str, default="pi05_aloha_pen_uncap")
+    parser.add_argument("--config", type=str, default="twist_and_static_mixture_full_finetune")
 
     # shared-ish
     parser.add_argument("--num-workers", type=int, default=0)
