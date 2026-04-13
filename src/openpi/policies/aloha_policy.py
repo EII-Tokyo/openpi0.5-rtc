@@ -3,6 +3,7 @@ from typing import ClassVar
 
 import einops
 import numpy as np
+
 from openpi import transforms
 
 
@@ -25,7 +26,8 @@ class AlohaInputs(transforms.DataTransformFn):
     """Inputs for the Aloha policy.
 
     Expected inputs:
-    - images: dict[name, img] where img is [channel, height, width]. name must be in EXPECTED_CAMERAS.
+    - images: dict[name, img] where img is [channel, height, width] or [time, channel, height, width].
+      name must be in EXPECTED_CAMERAS.
     - state: [14]
     - actions: [action_horizon, 14]
     """
@@ -33,9 +35,8 @@ class AlohaInputs(transforms.DataTransformFn):
     # If true, this will convert the joint and gripper values from the standard Aloha space to
     # the space used by the pi internal runtime which was used to train the base model.
     adapt_to_pi: bool = True
-
-    # The expected cameras names. All input cameras must be in this set. Missing cameras will be
-    # replaced with black images and the corresponding `image_mask` will be set to False.
+    # The expected cameras names. All input cameras must be in this set. Missing optional cameras
+    # are omitted so the model can run with either 3-camera or 4-camera inputs.
     EXPECTED_CAMERAS: ClassVar[tuple[str, ...]] = ("cam_high", "cam_low", "cam_left_wrist", "cam_right_wrist")
 
     def __call__(self, data: dict) -> dict:
@@ -48,42 +49,41 @@ class AlohaInputs(transforms.DataTransformFn):
         # Assume that base image always exists.
         base_image = in_images["cam_high"]
 
+        source_image_masks = data.get("image_masks", {})
+
+        def _to_scalar_bool(value: object, default: bool = True) -> np.ndarray:
+            arr = np.asarray(default if value is None else value, dtype=bool)
+            return np.asarray(arr.reshape(-1)[0], dtype=bool)
+
         images = {
             "base_0_rgb": base_image,
         }
         image_masks = {
-            "base_0_rgb": np.True_,
+            "base_0_rgb": _to_scalar_bool(source_image_masks.get("cam_high", True)),
         }
 
-        # Add the extra images.
         extra_image_names = {
+            "base_1_rgb": "cam_low",
             "left_wrist_0_rgb": "cam_left_wrist",
             "right_wrist_0_rgb": "cam_right_wrist",
         }
         for dest, source in extra_image_names.items():
             if source in in_images:
                 images[dest] = in_images[source]
-                image_masks[dest] = np.True_
-            else:
-                images[dest] = np.zeros_like(base_image)
-                image_masks[dest] = np.False_
+                image_masks[dest] = _to_scalar_bool(source_image_masks.get(source, True))
 
-        inputs = {
-            "image": images,
-            "image_mask": image_masks,
-            "state": data["state"],
-        }
+        inputs = dict(data)
+        inputs["image"] = images
+        inputs["image_mask"] = image_masks
+        inputs["state"] = data["state"]
 
         # Actions are only available during training.
         if "actions" in data:
             actions = np.asarray(data["actions"])
             actions = _encode_actions_inv(actions, adapt_to_pi=self.adapt_to_pi)
             inputs["actions"] = actions
-
-        if "prompt" in data:
-            inputs["prompt"] = data["prompt"]
-        if "subtask" in data:
-            inputs["subtask"] = data["subtask"]
+        if "actions_mask" in data:
+            inputs["actions_mask"] = _to_scalar_bool(data["actions_mask"])
 
         return inputs
 
@@ -172,6 +172,10 @@ def _decode_aloha(data: dict, *, adapt_to_pi: bool = False) -> dict:
         # Convert to uint8 if using float images.
         if np.issubdtype(img.dtype, np.floating):
             img = (255 * img).astype(np.uint8)
+        if img.ndim == 4 and img.shape[-1] in (1, 3, 4):
+            return img
+        if img.ndim == 4 and img.shape[1] in (1, 3, 4):
+            return einops.rearrange(img, "t c h w -> t h w c")
         if img.ndim == 3 and img.shape[-1] in (1, 3, 4):
             return img
         if img.ndim == 3 and img.shape[0] in (1, 3, 4):
@@ -184,8 +188,6 @@ def _decode_aloha(data: dict, *, adapt_to_pi: bool = False) -> dict:
     data["images"] = images_dict
     data["state"] = state
     return data
-
-
 def _decode_state(state: np.ndarray, *, adapt_to_pi: bool = False) -> np.ndarray:
     if adapt_to_pi:
         # Flip the joints.

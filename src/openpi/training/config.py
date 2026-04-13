@@ -87,9 +87,12 @@ class DataConfig:
     # sequence is defined by the `action_horizon` field in the model config. This should be adjusted if your
     # LeRobot dataset is using different keys to represent the action.
     action_sequence_keys: Sequence[str] = ("actions",)
-
     # If true, will use the LeRobot dataset task to define the prompt.
     prompt_from_task: bool = False
+    # Number of temporally spaced frames to stack for each camera observation.
+    video_memory_num_frames: int = 1
+    # Temporal stride between stacked frames, in seconds.
+    video_memory_stride_seconds: float = 1.0
 
     # Only used for RLDS data loader (ie currently only used for DROID).
     rlds_data_dir: str | None = None
@@ -244,6 +247,8 @@ class LeRobotAlohaDataConfig(DataConfigFactory):
     # the space used by the pi internal runtime which was used to train the base model. People who
     # use standard Aloha data should set this to true.
     adapt_to_pi: bool = True
+    video_memory_num_frames: int = 1
+    video_memory_stride_seconds: float = 1.0
 
     # Repack transforms.
     repack_transforms: tyro.conf.Suppress[_transforms.Group] = dataclasses.field(
@@ -266,7 +271,11 @@ class LeRobotAlohaDataConfig(DataConfigFactory):
     @override
     def create(self, assets_dirs: pathlib.Path, model_config: _model.BaseModelConfig) -> DataConfig:
         data_transforms = _transforms.Group(
-            inputs=[aloha_policy.AlohaInputs(adapt_to_pi=self.adapt_to_pi)],
+            inputs=[
+                aloha_policy.AlohaInputs(
+                    adapt_to_pi=self.adapt_to_pi,
+                )
+            ],
             outputs=[aloha_policy.AlohaOutputs(adapt_to_pi=self.adapt_to_pi)],
         )
         if self.use_delta_joint_actions:
@@ -287,6 +296,8 @@ class LeRobotAlohaDataConfig(DataConfigFactory):
             data_transforms=data_transforms,
             model_transforms=model_transforms,
             action_sequence_keys=self.action_sequence_keys,
+            video_memory_num_frames=self.video_memory_num_frames,
+            video_memory_stride_seconds=self.video_memory_stride_seconds,
         )
 
 
@@ -558,6 +569,10 @@ class TrainConfig:
     def __post_init__(self) -> None:
         if self.resume and self.overwrite:
             raise ValueError("Cannot resume and overwrite at the same time.")
+        image_size = getattr(self.data, "image_size", None)
+        image_resolution = getattr(self.model, "image_resolution", None)
+        if image_size is not None and image_resolution != image_size:
+            object.__setattr__(self, "model", dataclasses.replace(self.model, image_resolution=image_size))
 
 
 # Use `get_config` if you need to get a config by name in your code.
@@ -786,6 +801,7 @@ _CONFIGS = [
                         {
                             "images": {
                                 "cam_high": "observation.images.cam_high",
+                                "cam_low": "observation.images.cam_low",
                                 "cam_left_wrist": "observation.images.cam_left_wrist",
                                 "cam_right_wrist": "observation.images.cam_right_wrist",
                             },
@@ -811,7 +827,7 @@ _CONFIGS = [
         log_interval=10,
         data=LeRobotAlohaDataConfig(
             adapt_to_pi=True,
-            image_size=(448, 448),
+            image_size=(224, 224),
             # repo_id="physical-intelligence/aloha_pen_uncap_diverse",
             repo_ids=[
                 "lyl472324464/2026-03-09-inference-with-and-without-cap",
@@ -899,6 +915,7 @@ _CONFIGS = [
                         {
                             "images": {
                                 "cam_high": "observation.images.cam_high",
+                                "cam_low": "observation.images.cam_low",
                                 "cam_left_wrist": "observation.images.cam_left_wrist",
                                 "cam_right_wrist": "observation.images.cam_right_wrist",
                             },
@@ -933,6 +950,8 @@ _CONFIGS = [
         log_interval=10,
         data=LeRobotAlohaDataConfig(
             adapt_to_pi=True,
+            video_memory_num_frames=1,
+            video_memory_stride_seconds=1.0,
             repo_ids=[
                 "lyl472324464/2026-03-09-inference-with-and-without-cap",
                 "lyl472324464/2026-03-09-no-cap-inference",
@@ -960,6 +979,7 @@ _CONFIGS = [
                         {
                             "images": {
                                 "cam_high": "observation.images.cam_high",
+                                "cam_low": "observation.images.cam_low",
                                 "cam_left_wrist": "observation.images.cam_left_wrist",
                                 "cam_right_wrist": "observation.images.cam_right_wrist",
                             },

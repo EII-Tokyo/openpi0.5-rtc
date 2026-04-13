@@ -7,9 +7,9 @@ from openpi.shared import image_tools
 
 logger = logging.getLogger("openpi")
 
-# Constants moved from model.py
 IMAGE_KEYS = (
     "base_0_rgb",
+    "base_1_rgb",
     "left_wrist_0_rgb",
     "right_wrist_0_rgb",
 )
@@ -21,13 +21,16 @@ def preprocess_observation_pytorch(
     observation,
     *,
     train: bool = False,
-    image_keys: Sequence[str] = IMAGE_KEYS,
+    image_keys: Sequence[str] | None = IMAGE_KEYS,
     image_resolution: tuple[int, int] = IMAGE_RESOLUTION,
 ):
     """Torch.compile-compatible version of preprocess_observation_pytorch with simplified type annotations.
 
     This function avoids complex type annotations that can cause torch.compile issues.
     """
+    if image_keys is None:
+        image_keys = tuple(observation.images.keys())
+
     if not set(image_keys).issubset(observation.images):
         raise ValueError(f"images dict missing keys: expected {image_keys}, got {list(observation.images)}")
 
@@ -36,6 +39,10 @@ def preprocess_observation_pytorch(
     out_images = {}
     for key in image_keys:
         image = observation.images[key]
+        had_time_dim = image.ndim == 5
+        if had_time_dim:
+            batch_size, time_size = image.shape[:2]
+            image = image.reshape(batch_size * time_size, *image.shape[2:])
 
         # TODO: This is a hack to handle both [B, C, H, W] and [B, H, W, C] formats
         # Handle both [B, C, H, W] and [B, H, W, C] formats
@@ -144,6 +151,9 @@ def preprocess_observation_pytorch(
         # Convert back to [B, C, H, W] format if it was originally channels-first
         if is_channels_first:
             image = image.permute(0, 3, 1, 2)  # [B, H, W, C] -> [B, C, H, W]
+
+        if had_time_dim:
+            image = image.reshape(batch_size, time_size, *image.shape[1:])
 
         out_images[key] = image
 

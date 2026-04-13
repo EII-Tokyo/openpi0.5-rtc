@@ -7,6 +7,7 @@ from torch import nn
 import torch.nn.functional as F  # noqa: N812
 
 import openpi.models.gemma as _gemma
+from openpi.models import model as _model
 from openpi.models_pytorch.gemma_pytorch import PaliGemmaWithExpertModel
 import openpi.models_pytorch.preprocessing_pytorch as _preprocessing
 
@@ -86,6 +87,7 @@ class PI0Pytorch(nn.Module):
         super().__init__()
         self.config = config
         self.pi05 = config.pi05
+        self.image_keys = _model.IMAGE_KEYS
 
         paligemma_config = _gemma.get_config(config.paligemma_variant)
         action_expert_config = _gemma.get_config(config.action_expert_variant)
@@ -160,7 +162,7 @@ class PI0Pytorch(nn.Module):
 
     def _preprocess_observation(self, observation, *, train=True):
         """Helper method to preprocess observation."""
-        observation = _preprocessing.preprocess_observation_pytorch(observation, train=train)
+        observation = _preprocessing.preprocess_observation_pytorch(observation, train=train, image_keys=None)
         return (
             list(observation.images.values()),
             list(observation.image_masks.values()),

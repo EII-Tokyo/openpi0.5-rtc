@@ -31,6 +31,7 @@ class Pi0Config(_model.BaseModelConfig):
     pi05: bool = False
     # This config option is not used directly by the model, but it is read by the ModelTransformFactory.
     discrete_state_input: bool = None  # type: ignore
+    image_resolution: tuple[int, int] = _model.IMAGE_RESOLUTION
 
     def __post_init__(self):
         if self.max_token_len is None:
@@ -53,18 +54,20 @@ class Pi0Config(_model.BaseModelConfig):
 
     @override
     def inputs_spec(self, *, batch_size: int = 1) -> tuple[_model.Observation, _model.Actions]:
-        image_spec = jax.ShapeDtypeStruct([batch_size, *_model.IMAGE_RESOLUTION, 3], jnp.float32)
+        image_spec = jax.ShapeDtypeStruct([batch_size, *self.image_resolution, 3], jnp.float32)
         image_mask_spec = jax.ShapeDtypeStruct([batch_size], jnp.bool_)
 
         with at.disable_typechecking():
             observation_spec = _model.Observation(
                 images={
                     "base_0_rgb": image_spec,
+                    "base_1_rgb": image_spec,
                     "left_wrist_0_rgb": image_spec,
                     "right_wrist_0_rgb": image_spec,
                 },
                 image_masks={
                     "base_0_rgb": image_mask_spec,
+                    "base_1_rgb": image_mask_spec,
                     "left_wrist_0_rgb": image_mask_spec,
                     "right_wrist_0_rgb": image_mask_spec,
                 },

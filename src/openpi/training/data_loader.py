@@ -124,6 +124,71 @@ class IsForTrainingWrapper(Dataset[T_co]):
         return mask
 
 
+class TemporalFrameStackDataset(Dataset[dict]):
+    """Stacks image observations from earlier timesteps in the same episode."""
+
+    IMAGE_PREFIX = "observation.images."
+
+    def __init__(
+        self,
+        dataset: Dataset,
+        *,
+        fps: float,
+        num_frames: int,
+        stride_seconds: float,
+        trainable_mask: np.ndarray | None = None,
+    ):
+        self._dataset = dataset
+        self._fps = fps
+        self._num_frames = num_frames
+        self._stride_seconds = stride_seconds
+        self._stride_frames = max(1, int(round(fps * stride_seconds)))
+        self._trainable_mask = trainable_mask
+        self._trainable_indices = None if trainable_mask is None else np.flatnonzero(trainable_mask)
+
+    def __len__(self) -> int:
+        return len(self._dataset)
+
+    def __getitem__(self, index: SupportsIndex) -> dict:
+        idx = index.__index__()
+        if idx < 0 or idx >= len(self):
+            raise IndexError(f"Index {idx} out of bounds for dataset of length {len(self)}.")
+        if self._trainable_mask is not None and not self._trainable_mask[idx]:
+            idx = int(self._trainable_indices[torch.randint(len(self._trainable_indices), (1,)).item()])
+        current = self._dataset[idx]
+        if self._num_frames <= 1:
+            return current
+
+        episode_index = self._to_int(current["episode_index"])
+        frame_index = self._to_int(current["frame_index"])
+        episode_start_idx = idx - frame_index
+        history_indices: list[int] = []
+        for offset in reversed(range(self._num_frames)):
+            target_frame = max(frame_index - offset * self._stride_frames, 0)
+            candidate_idx = episode_start_idx + target_frame
+            if candidate_idx < 0 or candidate_idx >= len(self._dataset):
+                candidate_idx = idx
+            else:
+                candidate = self._dataset[candidate_idx]
+                if self._to_int(candidate["episode_index"]) != episode_index:
+                    candidate_idx = idx
+            history_indices.append(candidate_idx)
+
+        frames = [self._dataset[hist_idx] for hist_idx in history_indices]
+        result = dict(current)
+        for key in current:
+            if key.startswith(self.IMAGE_PREFIX):
+                stacked = [np.asarray(frame[key]) for frame in frames]
+                result[key] = np.stack(stacked, axis=0)
+        return result
+
+    @staticmethod
+    def _to_int(value) -> int:
+        if hasattr(value, "item"):
+            return int(value.item())
+        return int(value)
+
+
 class IterableTransformedDataset(IterableDataset[T_co]):
     def __init__(
         self,
@@ -199,30 +264,38 @@ def create_torch_dataset(
         raise ValueError("Repo ID or repo IDs is not set. Cannot create dataset.")
     if repo_id == "fake":
         return FakeDataset(model_config, num_samples=1024)
-    if repo_ids is not None:
-        # Get FPS from first dataset (assume all datasets in multi-dataset have same FPS)
-        first_dataset_meta = lerobot_dataset.LeRobotDatasetMetadata(repo_ids[0], force_cache_sync=True)
-        dataset = lerobot_dataset.MultiLeRobotDataset(
-            repo_ids,
-            # root="/home/ubuntu/aloha",
-            delta_timestamps={
-                key: [t / first_dataset_meta.fps for t in range(action_horizon)] for key in data_config.action_sequence_keys
-            },
-        )
-    if repo_id is not None:
-        dataset_meta = lerobot_dataset.LeRobotDatasetMetadata(repo_id, force_cache_sync=True)
+    fps_meta: lerobot_dataset.LeRobotDatasetMetadata | None = None
+    if repo_ids is not None and len(repo_ids) > 0:
+        fps_meta = lerobot_dataset.LeRobotDatasetMetadata(repo_ids[0], force_cache_sync=True)
+        delta_timestamps = {key: [t / fps_meta.fps for t in range(action_horizon)] for key in data_config.action_sequence_keys}
+        dataset = lerobot_dataset.MultiLeRobotDataset(repo_ids, delta_timestamps=delta_timestamps)
+    elif repo_id is not None:
+        fps_meta = lerobot_dataset.LeRobotDatasetMetadata(repo_id, force_cache_sync=True)
+        delta_timestamps = {key: [t / fps_meta.fps for t in range(action_horizon)] for key in data_config.action_sequence_keys}
         dataset = lerobot_dataset.LeRobotDataset(
             data_config.repo_id,
-            delta_timestamps={
-                key: [t / dataset_meta.fps for t in range(action_horizon)] for key in data_config.action_sequence_keys
-            },
+            delta_timestamps=delta_timestamps,
         )
+    else:
+        raise ValueError("Repo ID or non-empty repo_ids is required. Cannot create dataset.")
     # print(data_config)
     # if data_config.prompt_from_task:
     #     # dataset = TransformedDataset(dataset, [_transforms.PromptFromLeRobotTask(dataset_meta.tasks)])
     #     dataset = TransformedDataset(dataset, [_transforms.PromptFromLeRobotTask()])
 
-    return IsForTrainingWrapper(dataset)
+    trainable_mask = IsForTrainingWrapper._build_trainable_mask(dataset)
+    if getattr(data_config, "video_memory_num_frames", 1) > 1:
+        dataset = TemporalFrameStackDataset(
+            dataset,
+            fps=float(fps_meta.fps),
+            num_frames=data_config.video_memory_num_frames,
+            stride_seconds=data_config.video_memory_stride_seconds,
+            trainable_mask=trainable_mask,
+        )
+    else:
+        dataset = IsForTrainingWrapper(dataset)
+
+    return dataset
 
 
 def create_rlds_dataset(
