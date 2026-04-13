@@ -17,18 +17,14 @@ GIT_LFS_SKIP_SMUDGE=1 uv pip install -e .
 ### Startup
 
 ```bash
-# 启动整个本地推理栈，包括 redis、voice_assistant、runtime、openpi_server 等容器
+# 启动整个本地推理栈，包括 redis、voice_web_backend、voice_web_frontend、runtime、openpi_server 等容器
 docker compose up
 
-# 进入 voice_assistant 容器
-docker compose exec -it voice_assistant /bin/bash
+# voice web 后端服务，负责语音/文本命令、Redis 和机器人状态桥接
+docker compose logs -f voice_web_backend
 
-# 在 voice_assistant 容器内启动语音助手，负责把语音解析成任务并写入 Redis
-# 方式 1：直接用虚拟环境 Python
-/.venv/bin/python3 voice_assistant.py
-
-# 方式 2：用 uv run
-uv run voice_assistant.py
+# voice web 前端页面，默认通过浏览器访问 http://localhost:3011
+docker compose logs -f voice_web_frontend
 
 # 进入 runtime 容器
 docker compose exec -it runtime /bin/bash
@@ -36,8 +32,8 @@ docker compose exec -it runtime /bin/bash
 # 在 runtime 容器内启动 ALOHA 实机控制主循环；根据 model_dir 自动读取
 # checkpoint assets/<asset_id>/norm_stats.json。默认 adapt_to_pi=True，如需关闭请加 --no-adapt-to-pi
 python3 /app/examples/aloha_real/main.py \
-  --no-adapt-to-pi \
-  --model-dir /app/checkpoints/20260311/5000
+  --model-dir /app/checkpoints/<your_experiment>/<step>
+
 
 # 进入 openpi_server 容器
 docker compose exec -it openpi_server /bin/bash

@@ -89,7 +89,7 @@ services:
       - $PWD:/app
       - /dev:/dev
     env_file:
-      - ./voice_assistant/.env
+      - ./voice_assistant_web/.env
     environment:
       - REDIS_HOST=${REDIS_HOST:-localhost}
       - REDIS_PORT=${REDIS_PORT:-6379}
