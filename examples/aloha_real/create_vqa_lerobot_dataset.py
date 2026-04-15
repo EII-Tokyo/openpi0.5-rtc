@@ -8,6 +8,7 @@ import sys
 from datasets import Image as HFImage
 from datasets import load_dataset
 import numpy as np
+from PIL import Image
 import tyro
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -15,6 +16,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from lerobot_dataset_build_utils import create_aloha_subtask_dataset
 from lerobot_dataset_build_utils import add_frame_compat
 from lerobot_dataset_build_utils import normalize_hf_image
+from lerobot_dataset_build_utils import load_pil_image
 from lerobot_dataset_build_utils import save_episode_compat
 from lerobot_dataset_build_utils import save_episode_if_needed
 
@@ -24,6 +26,11 @@ class VQAPreset:
     source_dataset: str
     source_config: str | None = None
     source_split: str = "train"
+    paired_image_dataset: str | None = None
+    paired_image_config: str | None = None
+    paired_image_split: str | None = None
+    paired_image_id_key: str = "id"
+    paired_question_image_id_key: str = "imageId"
     question_keys: tuple[str, ...] = ("question",)
     answer_keys: tuple[str, ...] = ("answer", "multiple_choice_answer")
     answers_list_keys: tuple[str, ...] = ("answers",)
@@ -71,12 +78,17 @@ PRESETS: dict[str, VQAPreset] = {
     ),
     "gqa": VQAPreset(
         source_dataset="lmms-lab/GQA",
-        source_config="train_balanced_images",
+        source_config="train_balanced_instructions",
+        paired_image_dataset="lmms-lab/GQA",
+        paired_image_config="train_balanced_images",
+        paired_image_split="train",
+        paired_image_id_key="id",
+        paired_question_image_id_key="imageId",
         question_keys=("question",),
         answer_keys=("answer", "multiple_choice_answer"),
         answers_list_keys=("answers",),
         image_keys=("image",),
-        default_streaming=True,
+        default_streaming=False,
         sample_with_replacement=False,
     ),
 }
@@ -94,7 +106,8 @@ class Args:
     answers_list_keys: tuple[str, ...] = ("answers",)
     image_keys: tuple[str, ...] = ("image",)
     num_samples: int = 100000
-    image_size: tuple[int, int] = (224, 224)
+    image_size: tuple[int, int] | None = (224, 224)
+    schema_image_size: tuple[int, int] | None = None
     overwrite: bool = True
     use_videos: bool = False
     seed: int = 0
@@ -102,6 +115,9 @@ class Args:
     streaming: bool | None = None
     sample_with_replacement: bool | None = None
     frames_per_episode: int = 100
+    data_files_size_in_mb: int = 300
+    require_exact_num_samples: bool = True
+    preserve_original_images: bool = False
 
 
 def _strip_marker(text: str) -> str:
@@ -179,6 +195,7 @@ def _dataset_arg(value: str | None, fallback: str | None) -> str | None:
 
 def _iter_examples(args: Args):
     preset, streaming, sample_with_replacement = _resolve_config(args)
+    rng = np.random.default_rng(args.seed)
     source_dataset = _dataset_arg(args.source_dataset, preset.source_dataset)
     source_config = _dataset_arg(args.source_config, preset.source_config)
     source_split = _dataset_arg(args.source_split, preset.source_split)
@@ -192,10 +209,37 @@ def _iter_examples(args: Args):
         ds = ds.cast_column(image_keys[0], HFImage(decode=False))
         if len(ds) == 0:
             raise ValueError(f"Dataset {source_dataset} split {source_split} is empty")
-            indices = rng.integers(0, len(ds), size=args.num_samples)
+        indices = rng.integers(0, len(ds), size=args.num_samples)
         for index in indices:
             row = ds[int(index)]
             yield row, question_keys, answer_keys, answers_list_keys, image_keys
+        return
+
+    if preset.paired_image_dataset:
+        image_dataset = load_dataset(
+            preset.paired_image_dataset,
+            preset.paired_image_config,
+            split=preset.paired_image_split or "train",
+        )
+        image_dataset = image_dataset.cast_column(image_keys[0], HFImage(decode=False))
+        image_map = {
+            str(row[preset.paired_image_id_key]): row[image_keys[0]]
+            for row in image_dataset
+            if row.get(preset.paired_image_id_key) is not None and row.get(image_keys[0]) is not None
+        }
+        qa_dataset = load_dataset(
+            source_dataset,
+            source_config,
+            split=f"{source_split}[:{args.num_samples}]",
+        )
+        for row in qa_dataset:
+            image_id = str(row.get(preset.paired_question_image_id_key, ""))
+            image = image_map.get(image_id)
+            if image is None:
+                continue
+            merged = dict(row)
+            merged[image_keys[0]] = image
+            yield merged, question_keys, answer_keys, answers_list_keys, image_keys
         return
 
     if streaming:
@@ -213,26 +257,46 @@ def _iter_examples(args: Args):
 
 
 def main(args: Args) -> None:
+    schema_image_size = args.schema_image_size
+    if args.preserve_original_images and schema_image_size is None:
+        schema_image_size = (1, 1)
     dataset = create_aloha_subtask_dataset(
         args.repo_id,
         image_size=args.image_size,
+        schema_image_size=schema_image_size,
         overwrite=args.overwrite,
         use_videos=args.use_videos,
-        image_feature_keys=("observation.images.cam_high",),
+        data_files_size_in_mb=args.data_files_size_in_mb,
+        image_feature_keys=(
+            "observation.images.cam_high",
+            "observation.images.cam_low",
+            "observation.images.cam_left_wrist",
+            "observation.images.cam_right_wrist",
+        ),
     )
     zeros = np.zeros((14,), dtype=np.float32)
     false_scalar = np.asarray([[0]], dtype=np.int64)
     true_scalar = np.asarray([[1]], dtype=np.int64)
     count = 0
     frames_in_episode = 0
+    placeholder_size = schema_image_size or args.image_size
+    if placeholder_size is None:
+        raise ValueError("A placeholder image size is required")
+    placeholder_image = np.zeros((placeholder_size[1], placeholder_size[0], 3), dtype=np.uint8)
 
-    width, height = args.image_size
     for row, question_keys, answer_keys, answers_list_keys, image_keys in _iter_examples(args):
         question = _extract_field(row, question_keys)
         answer = _extract_answer(row, answer_keys, answers_list_keys)
         if not question or not answer:
             continue
-        image = normalize_hf_image(_extract_image(row, image_keys), (width, height))
+        raw_image = _extract_image(row, image_keys)
+        if args.preserve_original_images:
+            image: Image.Image | np.ndarray = load_pil_image(raw_image)
+        else:
+            if args.image_size is None:
+                raise ValueError("image_size must be provided when preserve_original_images is False")
+            width, height = args.image_size
+            image = normalize_hf_image(raw_image, (width, height))
         add_frame_compat(
             dataset,
             {
@@ -245,9 +309,9 @@ def main(args: Args) -> None:
                 "cam_right_wrist_mask": false_scalar.copy(),
                 "subtask": answer,
                 "observation.images.cam_high": image,
-                "observation.images.cam_low": np.zeros_like(image),
-                "observation.images.cam_left_wrist": np.zeros_like(image),
-                "observation.images.cam_right_wrist": np.zeros_like(image),
+                "observation.images.cam_low": placeholder_image.copy(),
+                "observation.images.cam_left_wrist": placeholder_image.copy(),
+                "observation.images.cam_right_wrist": placeholder_image.copy(),
                 "task": question,
             }
         )
@@ -257,6 +321,11 @@ def main(args: Args) -> None:
 
     if frames_in_episode > 0:
         save_episode_compat(dataset)
+    if args.require_exact_num_samples and count != args.num_samples:
+        raise RuntimeError(
+            f"Expected to create {args.num_samples} samples for {args.repo_id}, but created {count}. "
+            "This usually means the source iterator exhausted early or too many rows were filtered."
+        )
     dataset.finalize()
     shutil.rmtree(Path(dataset.root) / "images", ignore_errors=True)
     if args.push_to_hub:

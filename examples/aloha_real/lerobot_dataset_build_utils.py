@@ -14,9 +14,11 @@ from PIL import Image
 def create_aloha_subtask_dataset(
     repo_id: str,
     *,
-    image_size: tuple[int, int] = (640, 480),
+    image_size: tuple[int, int] | None = (640, 480),
+    schema_image_size: tuple[int, int] | None = None,
     overwrite: bool = True,
     use_videos: bool = False,
+    data_files_size_in_mb: int = 300,
     image_feature_keys: tuple[str, ...] = (
         "observation.images.cam_high",
         "observation.images.cam_low",
@@ -24,7 +26,9 @@ def create_aloha_subtask_dataset(
         "observation.images.cam_right_wrist",
     ),
 ) -> LeRobotDataset:
-    width, height = image_size
+    if image_size is None and schema_image_size is None:
+        raise ValueError("Either image_size or schema_image_size must be provided")
+    width, height = schema_image_size or image_size
     all_camera_keys = (
         "observation.images.cam_high",
         "observation.images.cam_low",
@@ -91,7 +95,7 @@ def create_aloha_subtask_dataset(
     if overwrite and dataset_path.exists():
         shutil.rmtree(dataset_path)
 
-    return LeRobotDataset.create(
+    dataset = LeRobotDataset.create(
         repo_id=repo_id,
         fps=50,
         robot_type="aloha",
@@ -100,12 +104,25 @@ def create_aloha_subtask_dataset(
         image_writer_processes=0,
         image_writer_threads=0,
     )
+    if hasattr(dataset, "meta") and hasattr(dataset.meta, "update_chunk_settings"):
+        dataset.meta.update_chunk_settings(data_files_size_in_mb=data_files_size_in_mb)
+    return dataset
 
 
 def normalize_pil_image(image: Image.Image, size: tuple[int, int]) -> np.ndarray:
     image = image.convert("RGB")
     image = image.resize(size, resample=Image.BICUBIC)
     return np.asarray(image, dtype=np.uint8)
+
+
+def load_pil_image(image: Image.Image | dict) -> Image.Image:
+    if isinstance(image, Image.Image):
+        return image.convert("RGB")
+    if image.get("bytes") is not None:
+        loaded = Image.open(io.BytesIO(image["bytes"]))
+    else:
+        loaded = Image.open(image["path"])
+    return loaded.convert("RGB")
 
 
 def resize_hwc_uint8(image: np.ndarray, size: tuple[int, int]) -> np.ndarray:
@@ -119,13 +136,7 @@ def decode_data_url_image(data_url: str, size: tuple[int, int]) -> np.ndarray:
 
 
 def normalize_hf_image(example_image: dict | Image.Image, size: tuple[int, int]) -> np.ndarray:
-    if isinstance(example_image, Image.Image):
-        return normalize_pil_image(example_image, size)
-    if example_image.get("bytes") is not None:
-        image = Image.open(io.BytesIO(example_image["bytes"]))
-    else:
-        image = Image.open(example_image["path"])
-    return normalize_pil_image(image, size)
+    return normalize_pil_image(load_pil_image(example_image), size)
 
 
 def chw_float_to_hwc_uint8(image: torch.Tensor | np.ndarray) -> np.ndarray:

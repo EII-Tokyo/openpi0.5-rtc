@@ -7,6 +7,7 @@ import random
 import shutil
 import sys
 
+from PIL import Image
 print("[top] importing LeRobotDataset", flush=True)
 from lerobot.datasets.lerobot_dataset import LeRobotDataset
 print("[top] imported LeRobotDataset", flush=True)
@@ -83,9 +84,13 @@ class Args:
     seed: int = 0
     overwrite: bool = True
     use_videos: bool = False
-    image_size: tuple[int, int] = (224, 224)
+    image_size: tuple[int, int] | None = (224, 224)
+    schema_image_size: tuple[int, int] | None = None
     push_to_hub: bool = True
     frames_per_episode: int = 100
+    data_files_size_in_mb: int = 300
+    require_exact_num_samples: bool = True
+    preserve_original_images: bool = False
     stats_json: Path | None = Path("logs/twist_subset_balanced_100k_224_multi_repo_stats.json")
     video_backend: str | None = None
 
@@ -139,7 +144,7 @@ def _sample_indices(candidates: list[Candidate], n: int, rng: random.Random) -> 
     return [rng.choice(candidates) for _ in range(n)]
 
 
-def _tensor_to_numpy_rgb(image: object, image_size: tuple[int, int]) -> np.ndarray:
+def _tensor_to_numpy_rgb(image: object, image_size: tuple[int, int] | None, preserve_original_images: bool) -> Image.Image | np.ndarray:
     arr = np.asarray(image)
     if arr.ndim != 3:
         raise ValueError(f"Unexpected image shape {arr.shape}")
@@ -150,6 +155,10 @@ def _tensor_to_numpy_rgb(image: object, image_size: tuple[int, int]) -> np.ndarr
             arr = np.clip(arr * 255.0, 0, 255).astype(np.uint8)
         else:
             arr = arr.astype(np.uint8)
+    if preserve_original_images:
+        return Image.fromarray(arr, mode="RGB")
+    if image_size is None:
+        raise ValueError("image_size must be provided when preserve_original_images is False")
     return resize_hwc_uint8(arr, image_size)
 
 
@@ -181,11 +190,16 @@ def main(args: Args) -> None:
     rng = random.Random(args.seed)
     templates = load_templates(Path("assets/short_language_templates.json"))
     _log("[main] creating output dataset")
+    schema_image_size = args.schema_image_size
+    if args.preserve_original_images and schema_image_size is None:
+        schema_image_size = (640, 480)
     dataset = create_aloha_subtask_dataset(
         args.repo_id,
         image_size=args.image_size,
+        schema_image_size=schema_image_size,
         overwrite=args.overwrite,
         use_videos=args.use_videos,
+        data_files_size_in_mb=args.data_files_size_in_mb,
     )
     _log("[main] building buckets from source repos")
     buckets, source_datasets = _build_buckets(args.source_repo_ids, args.video_backend)
@@ -206,6 +220,12 @@ def main(args: Args) -> None:
             source_counts[pick.repo_id] += 1
     rng.shuffle(sampled)
     _log(f"[sampling] total_sampled={len(sampled)}")
+    if args.require_exact_num_samples and len(sampled) != args.num_samples:
+        missing = args.num_samples - len(sampled)
+        raise RuntimeError(
+            f"Requested {args.num_samples} samples for {args.repo_id}, but only sampled {len(sampled)} "
+            f"(missing {missing}). At least one state/subtask bucket is empty or underfilled."
+        )
 
     false_scalar = np.asarray([[0]], dtype=np.int64)
     true_scalar = np.asarray([[1]], dtype=np.int64)
@@ -244,7 +264,7 @@ def main(args: Args) -> None:
             "cam_right_wrist_mask": true_scalar.copy(),
         }
         for camera_key in CAMERA_KEYS:
-            frame[camera_key] = _tensor_to_numpy_rgb(row[camera_key], args.image_size)
+            frame[camera_key] = _tensor_to_numpy_rgb(row[camera_key], args.image_size, args.preserve_original_images)
         add_frame_compat(dataset, frame)
         if sample_idx < 5:
             _log(f"[sample] wrote frame idx={sample_idx}")
@@ -277,7 +297,7 @@ def main(args: Args) -> None:
 
     if args.push_to_hub:
         _log("[main] pushing to hub")
-        dataset.push_to_hub()
+        dataset.push_to_hub(upload_large_folder=True)
     _log("[main] done")
 
 
