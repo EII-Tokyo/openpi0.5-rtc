@@ -84,6 +84,45 @@ def _extract_responses_output_text(response_body: dict[str, Any]) -> str:
     raise RuntimeError("Responses API output did not include any output_text blocks.")
 
 
+def _extract_chat_output_text(response_body: dict[str, Any]) -> str:
+    choices = response_body.get("choices")
+    if not isinstance(choices, list) or not choices:
+        raise RuntimeError("Chat Completions payload does not contain choices.")
+    message = choices[0].get("message")
+    if not isinstance(message, dict):
+        raise RuntimeError("Chat Completions payload does not contain a message.")
+    content = message.get("content")
+    if isinstance(content, str) and content.strip():
+        return content.strip()
+    if isinstance(content, list):
+        text_chunks: list[str] = []
+        for block in content:
+            if not isinstance(block, dict):
+                continue
+            text = block.get("text")
+            if isinstance(text, str) and text.strip():
+                text_chunks.append(text.strip())
+        if text_chunks:
+            return "\n".join(text_chunks)
+    raise RuntimeError("Chat Completions payload did not include message content.")
+
+
+def _default_api_key(api_base: str, api_key: str | None) -> str:
+    if isinstance(api_key, str) and api_key.strip():
+        return api_key.strip()
+    if "api.openai.com" in api_base:
+        return os.getenv("OPENAI_API_KEY", "")
+    return os.getenv("OPENAI_API_KEY", "EMPTY")
+
+
+def _default_api_mode(api_base: str, api_mode: str | None) -> str:
+    if api_mode in {"responses", "chat_completions"}:
+        return api_mode
+    if "api.openai.com" in api_base:
+        return "responses"
+    return "chat_completions"
+
+
 class GptHighLevelPolicy:
     def __init__(
         self,
@@ -92,19 +131,33 @@ class GptHighLevelPolicy:
         model: str = "gpt-5.4",
         image_mode: str = "all_cameras",
         api_base: str | None = None,
+        api_mode: str | None = None,
     ) -> None:
-        self._api_key = api_key or os.getenv("OPENAI_API_KEY", "")
+        self._api_base = (api_base or os.getenv("OPENAI_API_BASE", "https://api.openai.com")).rstrip("/")
+        self._api_key = _default_api_key(self._api_base, api_key)
+        self._api_mode = _default_api_mode(self._api_base, api_mode or os.getenv("OPENAI_API_MODE"))
         self._model = model
         self._image_mode = image_mode
-        self._api_base = (api_base or os.getenv("OPENAI_API_BASE", "https://api.openai.com")).rstrip("/")
         self._state_subtask_pairs: list[tuple[str, str]] = []
         self._start_subtasks: tuple[str, ...] = ()
 
-    def set_config(self, *, model: str | None = None, image_mode: str | None = None) -> None:
+    def set_config(
+        self,
+        *,
+        model: str | None = None,
+        image_mode: str | None = None,
+        api_base: str | None = None,
+        api_mode: str | None = None,
+    ) -> None:
         if isinstance(model, str) and model.strip():
             self._model = model.strip()
         if image_mode in {"high_only", "all_cameras"}:
             self._image_mode = image_mode
+        if isinstance(api_base, str) and api_base.strip():
+            self._api_base = api_base.strip().rstrip("/")
+            self._api_key = _default_api_key(self._api_base, self._api_key)
+        if api_mode in {"responses", "chat_completions"}:
+            self._api_mode = api_mode
 
     def set_low_level_schema(self, *, state_subtask_pairs: list[tuple[str, str]], start_subtasks: tuple[str, ...]) -> None:
         self._state_subtask_pairs = list(state_subtask_pairs)
@@ -221,58 +274,90 @@ Rules:
             user_content.append({"type": "input_text", "text": f"camera={camera_name}"})
             user_content.append({"type": "input_image", "image_url": _jpeg_data_url(image)})
 
-        request_payload = {
-            "model": self._model,
-            "input": [
-                {
-                    "role": "system",
-                    "content": [{"type": "input_text", "text": system_text}],
+        output_schema = {
+            "type": "object",
+            "properties": {
+                "bottle_description": {
+                    "anyOf": [
+                        {"type": "string", "minLength": 1},
+                        {"type": "null"},
+                    ]
                 },
-                {"role": "user", "content": user_content},
-            ],
-            "temperature": 0,
-            "store": True,
-            "text": {
-                "format": {
-                    "type": "json_schema",
-                    "name": "aloha_high_level_subtask",
-                    "strict": True,
-                    "schema": {
-                        "type": "object",
-                        "properties": {
-                            "bottle_description": {
-                                "anyOf": [
-                                    {"type": "string", "minLength": 1},
-                                    {"type": "null"},
-                                ]
-                            },
-                            "bottle_state": {
-                                "type": "string",
-                                "enum": allowed_states,
-                            },
-                            "subtask": {
-                                "type": "string",
-                                "enum": allowed_subtasks,
-                            },
-                        },
-                        "required": ["bottle_description", "bottle_state", "subtask"],
-                        "additionalProperties": False,
-                    },
-                }
+                "bottle_state": {
+                    "type": "string",
+                    "enum": allowed_states,
+                },
+                "subtask": {
+                    "type": "string",
+                    "enum": allowed_subtasks,
+                },
             },
+            "required": ["bottle_description", "bottle_state", "subtask"],
+            "additionalProperties": False,
         }
+
+        request_payload: dict[str, Any]
+        endpoint_path: str
+        if self._api_mode == "chat_completions":
+            chat_user_content: list[dict[str, Any]] = []
+            for item in user_content:
+                if item["type"] == "input_text":
+                    chat_user_content.append({"type": "text", "text": item["text"]})
+                else:
+                    chat_user_content.append({"type": "image_url", "image_url": {"url": item["image_url"]}})
+            request_payload = {
+                "model": self._model,
+                "messages": [
+                    {"role": "system", "content": system_text},
+                    {"role": "user", "content": chat_user_content},
+                ],
+                "temperature": 0,
+                "response_format": {
+                    "type": "json_schema",
+                    "json_schema": {
+                        "name": "aloha_high_level_subtask",
+                        "strict": True,
+                        "schema": output_schema,
+                    },
+                },
+            }
+            endpoint_path = "/v1/chat/completions"
+        else:
+            request_payload = {
+                "model": self._model,
+                "input": [
+                    {
+                        "role": "system",
+                        "content": [{"type": "input_text", "text": system_text}],
+                    },
+                    {"role": "user", "content": user_content},
+                ],
+                "temperature": 0,
+                "store": True,
+                "text": {
+                    "format": {
+                        "type": "json_schema",
+                        "name": "aloha_high_level_subtask",
+                        "strict": True,
+                        "schema": output_schema,
+                    }
+                },
+            }
+            endpoint_path = "/v1/responses"
 
         body = json.dumps(request_payload).encode("utf-8")
         client_request_id = f"aloha-high-level-{uuid.uuid4()}"
+        headers = {
+            "Content-Type": "application/json",
+            "X-Client-Request-Id": client_request_id,
+        }
+        if self._api_key:
+            headers["Authorization"] = f"Bearer {self._api_key}"
         req = urllib.request.Request(
-            f"{self._api_base}/v1/responses",
+            f"{self._api_base}{endpoint_path}",
             data=body,
             method="POST",
-            headers={
-                "Authorization": f"Bearer {self._api_key}",
-                "Content-Type": "application/json",
-                "X-Client-Request-Id": client_request_id,
-            },
+            headers=headers,
         )
         started_at = time.perf_counter()
         try:
@@ -281,13 +366,16 @@ Rules:
                 request_id = response.headers.get("x-request-id")
         except urllib.error.HTTPError as exc:
             detail = exc.read().decode("utf-8", errors="replace")
-            raise RuntimeError(f"OpenAI HTTP {exc.code}: {detail}") from exc
+            raise RuntimeError(f"High-level API HTTP {exc.code}: {detail}") from exc
         except urllib.error.URLError as exc:
-            raise RuntimeError(f"OpenAI request failed: {exc}") from exc
+            raise RuntimeError(f"High-level API request failed: {exc}") from exc
         elapsed_ms = (time.perf_counter() - started_at) * 1000.0
 
         parsed = json.loads(response_body.decode("utf-8"))
-        message_content = _extract_responses_output_text(parsed)
+        if self._api_mode == "chat_completions":
+            message_content = _extract_chat_output_text(parsed)
+        else:
+            message_content = _extract_responses_output_text(parsed)
         selected_image_payloads = {
             camera_name: _jpeg_data_url(image)
             for camera_name, image in selected_images
@@ -295,7 +383,8 @@ Rules:
         response_id = parsed.get("id")
 
         logging.info(
-            "GPT high-level inference ok endpoint=responses model=%s image_mode=%s cameras=%s elapsed_ms=%.1f request_id=%s client_request_id=%s",
+            "High-level inference ok api_mode=%s model=%s image_mode=%s cameras=%s elapsed_ms=%.1f request_id=%s client_request_id=%s",
+            self._api_mode,
             self._model,
             self._image_mode,
             [name for name, _ in selected_images],
@@ -307,9 +396,11 @@ Rules:
             "subtask_text": message_content,
             "server_timing": {
                 "provider": "gpt",
-                "endpoint": "responses",
+                "endpoint": endpoint_path.removeprefix("/v1/"),
                 "model": self._model,
                 "image_mode": self._image_mode,
+                "api_base": self._api_base,
+                "api_mode": self._api_mode,
                 "num_images": len(selected_images),
                 "elapsed_ms": round(elapsed_ms, 1),
                 "response_id": response_id,
@@ -318,9 +409,11 @@ Rules:
             },
             "trace_payload": {
                 "provider": "gpt",
-                "endpoint": "responses",
+                "endpoint": endpoint_path.removeprefix("/v1/"),
                 "model": self._model,
                 "image_mode": self._image_mode,
+                "api_base": self._api_base,
+                "api_mode": self._api_mode,
                 "selected_cameras": [name for name, _ in selected_images],
                 "payload_text": payload_text,
                 "system_text": system_text,
