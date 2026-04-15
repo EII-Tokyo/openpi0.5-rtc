@@ -1,6 +1,7 @@
 import base64
 import io
 import inspect
+import os
 import shutil
 from pathlib import Path
 
@@ -19,6 +20,9 @@ def create_aloha_subtask_dataset(
     overwrite: bool = True,
     use_videos: bool = False,
     data_files_size_in_mb: int = 300,
+    image_writer_processes: int = 0,
+    image_writer_threads: int = 0,
+    batch_encoding_size: int = 1,
     image_feature_keys: tuple[str, ...] = (
         "observation.images.cam_high",
         "observation.images.cam_low",
@@ -101,8 +105,9 @@ def create_aloha_subtask_dataset(
         robot_type="aloha",
         features=features,
         use_videos=use_videos,
-        image_writer_processes=0,
-        image_writer_threads=0,
+        image_writer_processes=image_writer_processes,
+        image_writer_threads=image_writer_threads,
+        batch_encoding_size=batch_encoding_size,
     )
     if hasattr(dataset, "meta") and hasattr(dataset.meta, "update_chunk_settings"):
         dataset.meta.update_chunk_settings(data_files_size_in_mb=data_files_size_in_mb)
@@ -115,9 +120,11 @@ def normalize_pil_image(image: Image.Image, size: tuple[int, int]) -> np.ndarray
     return np.asarray(image, dtype=np.uint8)
 
 
-def load_pil_image(image: Image.Image | dict) -> Image.Image:
+def load_pil_image(image: Image.Image | dict | torch.Tensor | np.ndarray) -> Image.Image:
     if isinstance(image, Image.Image):
         return image.convert("RGB")
+    if isinstance(image, (torch.Tensor, np.ndarray)):
+        return Image.fromarray(chw_float_to_hwc_uint8(image)).convert("RGB")
     if image.get("bytes") is not None:
         loaded = Image.open(io.BytesIO(image["bytes"]))
     else:
@@ -178,3 +185,22 @@ def add_frame_compat(dataset: LeRobotDataset, frame: dict) -> None:
         dataset.add_frame(payload, task=task)
         return
     dataset.add_frame(frame)
+
+
+def push_dataset_to_hub_robust(dataset: LeRobotDataset, *, prefer_large_folder: bool = True) -> None:
+    try:
+        dataset.push_to_hub(upload_large_folder=prefer_large_folder)
+        return
+    except Exception as exc:
+        message = str(exc)
+        if "Failed to preupload LFS" not in message and "failed to fill whole buffer" not in message:
+            raise
+        old_hf_transfer = os.environ.get("HF_HUB_ENABLE_HF_TRANSFER")
+        os.environ["HF_HUB_ENABLE_HF_TRANSFER"] = "0"
+        try:
+            dataset.push_to_hub(upload_large_folder=False)
+        finally:
+            if old_hf_transfer is None:
+                os.environ.pop("HF_HUB_ENABLE_HF_TRANSFER", None)
+            else:
+                os.environ["HF_HUB_ENABLE_HF_TRANSFER"] = old_hf_transfer

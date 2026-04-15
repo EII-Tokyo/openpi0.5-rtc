@@ -17,7 +17,6 @@ import torch
 
 import openpi.models.model as _model
 import openpi.training.config as _config
-import openpi.training.subtask_eval as _subtask_eval
 import openpi.transforms as _transforms
 
 T_co = TypeVar("T_co", covariant=True)
@@ -54,30 +53,6 @@ class TransformedDataset(Dataset[T_co]):
 
     def __len__(self) -> int:
         return len(self._dataset)
-
-
-def _restrict_trainable_mask_for_holdout(dataset: Dataset, allowed_mask: np.ndarray) -> None:
-    """Restrict random trainable-index redirection to the training split only."""
-    if isinstance(dataset, TransformedDataset):
-        _restrict_trainable_mask_for_holdout(dataset._dataset, allowed_mask)
-        return
-
-    if isinstance(dataset, IsForTrainingWrapper):
-        dataset._trainable_mask = np.asarray(dataset._trainable_mask, dtype=bool) & np.asarray(allowed_mask, dtype=bool)
-        dataset._trainable_indices = np.flatnonzero(dataset._trainable_mask)
-        if len(dataset._trainable_indices) == 0:
-            raise ValueError("Holdout removed all trainable indices from IsForTrainingWrapper.")
-        return
-
-    if isinstance(dataset, TemporalFrameStackDataset):
-        if dataset._trainable_mask is None:
-            dataset._trainable_mask = np.asarray(allowed_mask, dtype=bool).copy()
-        else:
-            dataset._trainable_mask = np.asarray(dataset._trainable_mask, dtype=bool) & np.asarray(allowed_mask, dtype=bool)
-        dataset._trainable_indices = np.flatnonzero(dataset._trainable_mask)
-        if len(dataset._trainable_indices) == 0:
-            raise ValueError("Holdout removed all trainable indices from TemporalFrameStackDataset.")
-        return
 
 
 class IsForTrainingWrapper(Dataset[T_co]):
@@ -362,14 +337,12 @@ def create_torch_dataset(
 
 def transform_dataset(dataset: Dataset, data_config: _config.DataConfig, *, skip_norm_stats: bool = False) -> Dataset:
     """Transform the dataset by applying the data transforms."""
-    norm_stats = {}
     if data_config.repo_id != "fake" and not skip_norm_stats:
         if data_config.norm_stats is None:
             raise ValueError(
                 "Normalization stats not found. "
                 "Make sure to run `scripts/compute_norm_stats.py --config-name=<your-config>`."
             )
-        norm_stats = data_config.norm_stats
 
     return TransformedDataset(
         dataset,
@@ -377,7 +350,6 @@ def transform_dataset(dataset: Dataset, data_config: _config.DataConfig, *, skip
             _transforms.PromptFromLeRobotTask(),
             *data_config.repack_transforms.inputs,
             *data_config.data_transforms.inputs,
-            _transforms.Normalize(norm_stats, use_quantiles=data_config.use_quantile_norm),
             *data_config.model_transforms.inputs,
         ],
     )
@@ -392,7 +364,7 @@ def create_data_loader(
     skip_norm_stats: bool = False,
     framework: Literal["jax", "pytorch"] = "jax",
 ) -> DataLoader[tuple[_model.Observation, _model.Actions, np.ndarray]]:
-    """Build LeRobot dataset + transforms + optional subtask-eval holdout + PyTorch DataLoader."""
+    """Build LeRobot dataset + transforms + PyTorch DataLoader."""
     data_config = config.data.create(config.assets_dirs, config.model)
     logging.info("data_config: %s", data_config)
     if data_config.rlds_data_dir is not None:
@@ -413,63 +385,10 @@ def create_data_loader(
     subtask_eval_outer = None
     subtask_eval_split = None
     subtask_eval_index_to_class: dict[int, int] | None = None
-    repo_id = getattr(data_config, "repo_id", None)
-    if config.subtask_eval_enabled and framework == "jax" and repo_id != "fake":
-        try:
-            t_se = time.perf_counter()
-            canonical = _subtask_eval.resolve_canonical_pairs(config)
-            subtask_label_map = _subtask_eval.try_build_parquet_subtask_label_map(base_dataset)
-            episode_index_map = _subtask_eval.try_build_parquet_episode_map(base_dataset)
-            split = _subtask_eval.compute_subtask_eval_split(
-                outer_torch_dataset=base_dataset,
-                canonical_pairs=canonical,
-                holdout_fraction=config.subtask_eval_holdout_fraction,
-                seed=config.seed,
-                label_map=subtask_label_map,
-                episode_map=episode_index_map,
-            )
-            _subtask_eval.log_split_summary(split)
-            subtask_eval_outer = base_dataset
-            subtask_eval_split = split
-            subtask_eval_index_to_class = _subtask_eval.build_index_to_class_map(
-                base_dataset, canonical, label_map=subtask_label_map
-            )
-            train_list = split.train_indices.tolist()
-            train_allowed_mask = np.zeros(len(base_dataset), dtype=bool)
-            train_allowed_mask[split.train_indices] = True
-            _restrict_trainable_mask_for_holdout(dataset, train_allowed_mask)
-            dataset = torch.utils.data.Subset(dataset, train_list)
-            logging.info(
-                "data_loader: subtask_eval holdout done (parquet_map=%s) in %.2fs, train_subset=%d",
-                subtask_label_map is not None,
-                time.perf_counter() - t_se,
-                len(train_list),
-            )
-            split_path = None
-            try:
-                split_path = config.checkpoint_dir / "subtask_eval_split.json"
-            except ValueError:
-                logging.warning("subtask_eval_split.json not saved: set exp_name to define checkpoint_dir.")
-            if split_path is not None:
-                try:
-                    _subtask_eval.save_split_json(
-                        split_path,
-                        split,
-                        seed=config.seed,
-                        holdout_fraction=config.subtask_eval_holdout_fraction,
-                    )
-                    logging.info("data_loader: wrote %s", split_path)
-                except Exception as e:
-                    logging.warning("Could not write subtask_eval_split.json: %s", e)
-        except Exception:
-            logging.exception("subtask_eval_enabled: holdout failed; training on full dataset without holdout")
-            subtask_eval_outer = None
-            subtask_eval_split = None
-            subtask_eval_index_to_class = None
-    elif config.subtask_eval_enabled and repo_id == "fake":
-        logging.info("data_loader: subtask_eval skipped (repo_id=fake)")
-    elif config.subtask_eval_enabled and framework != "jax":
-        logging.info("data_loader: subtask_eval skipped (framework=%s)", framework)
+    if config.subtask_eval_enabled:
+        logging.info(
+            "data_loader: subtask_eval holdout disabled; training uses full dataset and no automatic val split is created"
+        )
 
     sampler = None
     if framework == "pytorch":

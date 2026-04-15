@@ -1,11 +1,13 @@
 import dataclasses
 print("[top] module import start", flush=True)
+import itertools
 import json
 from collections import Counter, defaultdict
 from pathlib import Path
 import random
 import shutil
 import sys
+import time
 
 from PIL import Image
 print("[top] importing LeRobotDataset", flush=True)
@@ -23,6 +25,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 print("[top] importing local helpers", flush=True)
 from lerobot_dataset_build_utils import add_frame_compat
 from lerobot_dataset_build_utils import create_aloha_subtask_dataset
+from lerobot_dataset_build_utils import push_dataset_to_hub_robust
 from lerobot_dataset_build_utils import resize_hwc_uint8
 from lerobot_dataset_build_utils import save_episode_compat
 from lerobot_dataset_build_utils import save_episode_if_needed
@@ -73,6 +76,7 @@ def _log(message: str) -> None:
 class Candidate:
     repo_id: str
     index: int
+    episode_index: int
     descriptions: tuple[str, ...]
 
 
@@ -87,12 +91,17 @@ class Args:
     image_size: tuple[int, int] | None = (224, 224)
     schema_image_size: tuple[int, int] | None = None
     push_to_hub: bool = True
-    frames_per_episode: int = 100
+    frames_per_episode: int = 1000
     data_files_size_in_mb: int = 300
     require_exact_num_samples: bool = True
     preserve_original_images: bool = False
     stats_json: Path | None = Path("logs/twist_subset_balanced_100k_224_multi_repo_stats.json")
     video_backend: str | None = None
+    read_order: str = "repo_sorted"
+    log_every: int = 1000
+    source_decode_batch_size: int = 32
+    image_writer_processes: int = 0
+    image_writer_threads: int = 8
 
 
 def _normalize_descriptions(raw: object) -> tuple[str, ...]:
@@ -179,13 +188,106 @@ def _build_buckets(source_repo_ids: tuple[str, ...], video_backend: str | None) 
             key = f"{state}|||{subtask}"
             if key not in PAIR_KEYS:
                 continue
-            buckets[key].append(Candidate(repo_id=repo_id, index=int(row["index"]), descriptions=descriptions))
+            buckets[key].append(
+                Candidate(
+                    repo_id=repo_id,
+                    index=int(row["index"]),
+                    episode_index=int(row["episode_index"]),
+                    descriptions=descriptions,
+                )
+            )
             added += 1
         _log(f"[build_buckets] bucketed {repo_id}: matched_rows={added}")
     return buckets, datasets
 
 
+def _order_samples(sampled: list[tuple[str, Candidate]], read_order: str, rng: random.Random) -> list[tuple[str, Candidate]]:
+    if read_order == "random":
+        ordered = list(sampled)
+        rng.shuffle(ordered)
+        return ordered
+    if read_order == "repo_sorted":
+        ordered = list(sampled)
+        ordered.sort(key=lambda item: (item[1].repo_id, item[1].episode_index, item[1].index))
+        return ordered
+    raise ValueError(f"Unsupported read_order={read_order!r}")
+
+
+def _column_length(batch: object) -> int:
+    if isinstance(batch, dict):
+        first_value = next(iter(batch.values()))
+        return len(first_value)
+    return len(batch)
+
+
+def _value_at(column: object, idx: int) -> object:
+    if isinstance(column, np.ndarray):
+        return column[idx]
+    return column[idx]
+
+
+def _ensure_frame_batch(frames: object) -> object:
+    if isinstance(frames, np.ndarray):
+        if frames.ndim == 3:
+            return frames[None, ...]
+        return frames
+    if hasattr(frames, "ndim") and getattr(frames, "ndim") == 3:
+        return frames.unsqueeze(0)
+    return frames
+
+
+def _fetch_rows_batched(
+    ds: LeRobotDataset,
+    candidates: list[Candidate],
+) -> list[dict[str, object]]:
+    ds._ensure_hf_dataset_loaded()
+    indices = [candidate.index for candidate in candidates]
+    batch = ds.hf_dataset[indices]
+    batch_size = _column_length(batch)
+    if batch_size != len(candidates):
+        raise RuntimeError(f"Expected {len(candidates)} rows, got {batch_size}")
+
+    episode_indices = [_value_at(batch["episode_index"], i) for i in range(batch_size)]
+    first_episode = int(np.asarray(episode_indices[0]).item())
+    if any(int(np.asarray(ep).item()) != first_episode for ep in episode_indices):
+        raise RuntimeError("Batched fetch requires all rows to come from the same source episode")
+
+    timestamps = [float(np.asarray(_value_at(batch["timestamp"], i)).item()) for i in range(batch_size)]
+    query_timestamps = {camera_key: timestamps for camera_key in CAMERA_KEYS}
+    video_frames = {
+        camera_key: _ensure_frame_batch(frames)
+        for camera_key, frames in ds._query_videos(query_timestamps, first_episode).items()
+    }
+
+    rows: list[dict[str, object]] = []
+    for i in range(batch_size):
+        row = {
+            "observation.state": _value_at(batch["observation.state"], i),
+            "action": _value_at(batch["action"], i),
+        }
+        for camera_key in CAMERA_KEYS:
+            row[camera_key] = _value_at(video_frames[camera_key], i)
+        rows.append(row)
+    return rows
+
+
+def _iter_batched_samples(
+    ordered_samples: list[tuple[str, Candidate]],
+    source_decode_batch_size: int,
+) -> list[list[tuple[str, Candidate]]]:
+    batches: list[list[tuple[str, Candidate]]] = []
+    for _, group in itertools.groupby(
+        ordered_samples,
+        key=lambda item: (item[1].repo_id, item[1].episode_index),
+    ):
+        episode_samples = list(group)
+        for start in range(0, len(episode_samples), source_decode_batch_size):
+            batches.append(episode_samples[start : start + source_decode_batch_size])
+    return batches
+
+
 def main(args: Args) -> None:
+    wall_start = time.perf_counter()
     _log(f"[main] start repo_id={args.repo_id} num_samples={args.num_samples} video_backend={args.video_backend}")
     rng = random.Random(args.seed)
     templates = load_templates(Path("assets/short_language_templates.json"))
@@ -200,9 +302,13 @@ def main(args: Args) -> None:
         overwrite=args.overwrite,
         use_videos=args.use_videos,
         data_files_size_in_mb=args.data_files_size_in_mb,
+        image_writer_processes=args.image_writer_processes,
+        image_writer_threads=args.image_writer_threads,
     )
     _log("[main] building buckets from source repos")
+    bucket_start = time.perf_counter()
     buckets, source_datasets = _build_buckets(args.source_repo_ids, args.video_backend)
+    bucket_seconds = time.perf_counter() - bucket_start
     _log("[main] finished building buckets")
     per_class = args.num_samples // len(PAIR_KEYS)
     remainder = args.num_samples % len(PAIR_KEYS)
@@ -218,7 +324,11 @@ def main(args: Args) -> None:
         class_counts[key] += len(picks)
         for pick in picks:
             source_counts[pick.repo_id] += 1
-    rng.shuffle(sampled)
+    sample_plan_seconds = time.perf_counter() - wall_start - bucket_seconds
+    order_start = time.perf_counter()
+    ordered_samples = _order_samples(sampled, args.read_order, rng)
+    batched_samples = _iter_batched_samples(ordered_samples, args.source_decode_batch_size)
+    order_seconds = time.perf_counter() - order_start
     _log(f"[sampling] total_sampled={len(sampled)}")
     if args.require_exact_num_samples and len(sampled) != args.num_samples:
         missing = args.num_samples - len(sampled)
@@ -230,50 +340,88 @@ def main(args: Args) -> None:
     false_scalar = np.asarray([[0]], dtype=np.int64)
     true_scalar = np.asarray([[1]], dtype=np.int64)
     frames_in_episode = 0
+    timing = {
+        "bucket_build_seconds": bucket_seconds,
+        "sample_plan_seconds": sample_plan_seconds,
+        "order_seconds": order_seconds,
+        "fetch_row_seconds": 0.0,
+        "build_frame_seconds": 0.0,
+        "image_convert_seconds": 0.0,
+        "add_frame_seconds": 0.0,
+        "save_episode_seconds": 0.0,
+    }
 
-    for sample_idx, (key, candidate) in enumerate(sampled):
-        if sample_idx < 5 or sample_idx % 100 == 0:
-            _log(f"[sample] idx={sample_idx} key={key} repo={candidate.repo_id} source_index={candidate.index}")
-        state, subtask = key.split("|||", 1)
-        target = rng.choice(candidate.descriptions) if candidate.descriptions else shorten_target(state)
-        question = _sample_target_prompt(templates, rng, target)
-        answer = choose_answer(templates, rng, state, subtask)
+    sample_idx = 0
+    for batch in batched_samples:
+        if not batch:
+            continue
+        fetch_start = time.perf_counter()
+        rows = _fetch_rows_batched(
+            source_datasets[batch[0][1].repo_id],
+            [candidate for _, candidate in batch],
+        )
+        timing["fetch_row_seconds"] += time.perf_counter() - fetch_start
+        for (key, candidate), row in zip(batch, rows, strict=True):
+            if sample_idx < 5 or sample_idx % args.log_every == 0:
+                _log(
+                    f"[sample] idx={sample_idx} key={key} repo={candidate.repo_id} "
+                    f"source_index={candidate.index}"
+                )
+            frame_start = time.perf_counter()
+            state, subtask = key.split("|||", 1)
+            target = rng.choice(candidate.descriptions) if candidate.descriptions else shorten_target(state)
+            question = _sample_target_prompt(templates, rng, target)
+            answer = choose_answer(templates, rng, state, subtask)
 
-        row = source_datasets[candidate.repo_id][candidate.index]
-        if sample_idx < 5:
-            _log(f"[sample] fetched row idx={sample_idx}")
-        state_vec = np.asarray(row["observation.state"], dtype=np.float32)
-        action_vec = np.asarray(row["action"], dtype=np.float32)
-        frame = {
-            "observation.state": state_vec,
-            "action": action_vec,
-            "train_action": true_scalar.copy(),
-            "task": question,
-            "subtask": json.dumps(
-                {
-                    "bottle_state": state,
-                    "subtask": subtask,
-                    "answer": answer,
-                    "bottle_description": list(candidate.descriptions),
-                },
-                ensure_ascii=True,
-            ),
-            "cam_high_mask": true_scalar.copy(),
-            "cam_low_mask": true_scalar.copy(),
-            "cam_left_wrist_mask": true_scalar.copy(),
-            "cam_right_wrist_mask": true_scalar.copy(),
-        }
-        for camera_key in CAMERA_KEYS:
-            frame[camera_key] = _tensor_to_numpy_rgb(row[camera_key], args.image_size, args.preserve_original_images)
-        add_frame_compat(dataset, frame)
-        if sample_idx < 5:
-            _log(f"[sample] wrote frame idx={sample_idx}")
-        frames_in_episode += 1
-        frames_in_episode = save_episode_if_needed(dataset, frames_in_episode, args.frames_per_episode)
+            state_vec = np.asarray(row["observation.state"], dtype=np.float32)
+            action_vec = np.asarray(row["action"], dtype=np.float32)
+            frame = {
+                "observation.state": state_vec,
+                "action": action_vec,
+                # This dataset is built from randomly sampled frames, so the action chunk is not
+                # temporally valid for action-expert training.
+                "train_action": false_scalar.copy(),
+                "task": question,
+                "subtask": json.dumps(
+                    {
+                        "bottle_state": state,
+                        "subtask": subtask,
+                        "answer": answer,
+                        "bottle_description": list(candidate.descriptions),
+                    },
+                    ensure_ascii=True,
+                ),
+                "cam_high_mask": true_scalar.copy(),
+                "cam_low_mask": true_scalar.copy(),
+                "cam_left_wrist_mask": true_scalar.copy(),
+                "cam_right_wrist_mask": true_scalar.copy(),
+            }
+            image_convert_start = time.perf_counter()
+            for camera_key in CAMERA_KEYS:
+                frame[camera_key] = _tensor_to_numpy_rgb(
+                    row[camera_key],
+                    args.image_size,
+                    args.preserve_original_images,
+                )
+            timing["image_convert_seconds"] += time.perf_counter() - image_convert_start
+            timing["build_frame_seconds"] += time.perf_counter() - frame_start
+            add_start = time.perf_counter()
+            add_frame_compat(dataset, frame)
+            timing["add_frame_seconds"] += time.perf_counter() - add_start
+            if sample_idx < 5:
+                _log(f"[sample] wrote frame idx={sample_idx}")
+            frames_in_episode += 1
+            if frames_in_episode >= args.frames_per_episode:
+                save_start = time.perf_counter()
+                frames_in_episode = save_episode_if_needed(dataset, frames_in_episode, args.frames_per_episode)
+                timing["save_episode_seconds"] += time.perf_counter() - save_start
+            sample_idx += 1
 
     _log(f"[main] finished frame loop frames_in_episode={frames_in_episode}")
     if frames_in_episode > 0:
+        save_start = time.perf_counter()
         save_episode_compat(dataset)
+        timing["save_episode_seconds"] += time.perf_counter() - save_start
         _log("[main] saved final episode")
 
     if args.stats_json is not None:
@@ -283,9 +431,15 @@ def main(args: Args) -> None:
             json.dumps(
                 {
                     "repo_id": args.repo_id,
-                    "num_samples": len(sampled),
+                    "num_samples": len(ordered_samples),
+                    "read_order": args.read_order,
+                    "source_decode_batch_size": args.source_decode_batch_size,
+                    "frames_per_episode": args.frames_per_episode,
+                    "image_writer_threads": args.image_writer_threads,
                     "per_class_counts": dict(class_counts),
                     "per_source_repo_counts": dict(source_counts),
+                    "timing_seconds": timing,
+                    "total_wall_seconds": time.perf_counter() - wall_start,
                 },
                 indent=2,
                 ensure_ascii=True,
@@ -297,7 +451,7 @@ def main(args: Args) -> None:
 
     if args.push_to_hub:
         _log("[main] pushing to hub")
-        dataset.push_to_hub(upload_large_folder=True)
+        push_dataset_to_hub_robust(dataset, prefer_large_folder=True)
     _log("[main] done")
 
 
