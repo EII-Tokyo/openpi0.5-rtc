@@ -155,7 +155,6 @@ Notes:
 
 - `batch_size=8` OOMed locally at `448x448`; `batch_size=4` is the safe local fallback.
 - Episode-level validation holdout is written to:
-  - `checkpoints/twist_only_lora/<exp_name>/subtask_eval_split.json`
 - That file contains `val_episodes_by_repo`, i.e. the exact EPs excluded from training and reserved for testing.
 
 ### Measured VRAM (RTX 5090 32GB, offline HDF5)
