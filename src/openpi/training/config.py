@@ -3,6 +3,7 @@
 import abc
 from collections.abc import Sequence
 import dataclasses
+import os
 import difflib
 import logging
 import pathlib
@@ -17,6 +18,7 @@ import openpi.models.model as _model
 import openpi.models.pi0_config as pi0_config
 import openpi.models.tokenizer as _tokenizer
 import openpi.policies.aloha_policy as aloha_policy
+import openpi.policies.droid_policy as droid_policy
 import openpi.shared.download as _download
 import openpi.shared.normalize as _normalize
 import openpi.training.optimizer as _optimizer
@@ -24,6 +26,7 @@ import openpi.training.weight_loaders as weight_loaders
 import openpi.transforms as _transforms
 
 ModelType: TypeAlias = _model.ModelType
+FAST_TOKENIZER_PATH = os.getenv("OPENPI_FAST_TOKENIZER_PATH", "physical-intelligence/fast")
 # Work around a tyro issue with using nnx.filterlib.Filter directly.
 Filter: TypeAlias = nnx.filterlib.Filter
 
@@ -260,9 +263,22 @@ class LeRobotAlohaDataConfig(DataConfigFactory):
                 model_transforms=model_transforms,
                 use_quantile_norm=model_config.model_type != ModelType.PI0,
             )
+        base_config = self.create_base_config(assets_dirs, model_config)
         data_transforms = _transforms.Group(
-            inputs=[aloha_policy.AlohaInputs(adapt_to_pi=self.adapt_to_pi)],
-            outputs=[aloha_policy.AlohaOutputs(adapt_to_pi=self.adapt_to_pi)],
+            inputs=[
+                aloha_policy.AlohaInputs(
+                    adapt_to_pi=self.adapt_to_pi,
+                    norm_stats=base_config.norm_stats,
+                    use_quantile_norm=base_config.use_quantile_norm,
+                )
+            ],
+            outputs=[
+                aloha_policy.AlohaOutputs(
+                    adapt_to_pi=self.adapt_to_pi,
+                    norm_stats=base_config.norm_stats,
+                    use_quantile_norm=base_config.use_quantile_norm,
+                )
+            ],
         )
         if self.use_delta_joint_actions:
             delta_action_mask = _transforms.make_bool_mask(6, -1, 6, -1)
@@ -282,7 +298,88 @@ class LeRobotAlohaDataConfig(DataConfigFactory):
         )(model_config)
 
         return dataclasses.replace(
-            self.create_base_config(assets_dirs, model_config),
+            base_config,
+            repack_transforms=self.repack_transforms,
+            data_transforms=data_transforms,
+            model_transforms=model_transforms,
+            action_sequence_keys=self.action_sequence_keys,
+            video_memory_num_frames=self.video_memory_num_frames,
+            video_memory_stride_seconds=self.video_memory_stride_seconds,
+        )
+
+
+@dataclasses.dataclass(frozen=True)
+class LeRobotDroidDataConfig(DataConfigFactory):
+    default_prompt: str | None = None
+    force_prompt: str | None = None
+    image_size: tuple[int, int] = (224, 224)
+    use_delta_joint_actions: bool = False
+    video_memory_num_frames: int = 1
+    video_memory_stride_seconds: float = 1.0
+    repack_transforms: tyro.conf.Suppress[_transforms.Group] = dataclasses.field(
+        default_factory=lambda: _transforms.Group(
+            inputs=[
+                _transforms.InjectDefaultField("train_action", True),
+                _transforms.RepackTransform(
+                    {
+                        "observation/exterior_image_1_left": "observation.exterior_image_1_left",
+                        "observation/wrist_image_left": "observation.wrist_image_left",
+                        "observation/joint_position": "observation.joint_position",
+                        "observation/gripper_position": "observation.gripper_position",
+                        "actions": "action",
+                        "actions_mask": "train_action",
+                    }
+                ),
+            ]
+        )
+    )
+    action_sequence_keys: Sequence[str] = ("action",)
+
+    @override
+    def create(self, assets_dirs: pathlib.Path, model_config: _model.BaseModelConfig) -> DataConfig:
+        if self.repo_id == "fake":
+            model_transforms = ModelTransformFactory(
+                default_prompt=self.default_prompt,
+                force_prompt=self.force_prompt,
+                image_size=self.image_size,
+            )(model_config)
+            return DataConfig(
+                repo_id="fake",
+                model_transforms=model_transforms,
+                use_quantile_norm=model_config.model_type != ModelType.PI0,
+            )
+
+        base_config = self.create_base_config(assets_dirs, model_config)
+        data_transforms = _transforms.Group(
+            inputs=[
+                droid_policy.DroidInputs(
+                    model_type=model_config.model_type,
+                    norm_stats=base_config.norm_stats,
+                    use_quantile_norm=base_config.use_quantile_norm,
+                )
+            ],
+            outputs=[
+                droid_policy.DroidOutputs(
+                    norm_stats=base_config.norm_stats,
+                    use_quantile_norm=base_config.use_quantile_norm,
+                )
+            ],
+        )
+        if self.use_delta_joint_actions:
+            delta_action_mask = _transforms.make_bool_mask(7, -1)
+            data_transforms = data_transforms.push(
+                inputs=[_transforms.DeltaActions(delta_action_mask)],
+                outputs=[_transforms.AbsoluteActions(delta_action_mask)],
+            )
+
+        model_transforms = ModelTransformFactory(
+            default_prompt=self.default_prompt,
+            force_prompt=self.force_prompt,
+            image_size=self.image_size,
+        )(model_config)
+
+        return dataclasses.replace(
+            base_config,
             repack_transforms=self.repack_transforms,
             data_transforms=data_transforms,
             model_transforms=model_transforms,
@@ -366,16 +463,6 @@ class TrainConfig:
     # data parallel between 2 groups of devices.
     fsdp_devices: int = 1
 
-    # Subtask (bottle_state, subtask) holdout + periodic val accuracy (JAX LeRobot training only).
-    subtask_eval_enabled: bool = False
-    subtask_eval_holdout_fraction: float = 0.1
-    subtask_eval_interval_steps: int = 1000
-    subtask_eval_batch_size: int = 8
-    subtask_eval_max_samples_per_class: int | None = None
-    """Cap val frames per class each eval pass; None = use full val split."""
-    subtask_eval_canonical_pairs: tuple[tuple[str, str], ...] | None = None
-    """If None, use `DEFAULT_STATE_SUBTASK_PAIRS` from openpi_client (nine classes)."""
-
     @property
     def assets_dirs(self) -> pathlib.Path:
         """Get the assets directory for this config."""
@@ -396,8 +483,6 @@ class TrainConfig:
     def __post_init__(self) -> None:
         if self.resume and self.overwrite:
             raise ValueError("Cannot resume and overwrite at the same time.")
-        if not (0.0 < self.subtask_eval_holdout_fraction < 1.0):
-            raise ValueError("subtask_eval_holdout_fraction must be in (0, 1).")
         image_size = getattr(self.data, "image_size", None)
         image_resolution = getattr(self.model, "image_resolution", None)
         if image_size is not None and image_resolution != image_size:
@@ -413,7 +498,7 @@ _CONFIGS = [
             max_token_len=96,
             subtask_loss_weight=0.1,
             subtask_max_token_len=64,
-            fast_tokenizer_path="physical-intelligence/fast",
+            fast_tokenizer_path=FAST_TOKENIZER_PATH,
         ),
         lr_schedule=_optimizer.CosineDecaySchedule(
             warmup_steps=10_000,
@@ -507,10 +592,6 @@ _CONFIGS = [
         num_train_steps=40_000,
         batch_size=128,
         num_workers=4,
-        subtask_eval_enabled=True,
-        subtask_eval_interval_steps=1000,
-        # Cap per-class val frames so periodic eval finishes in bounded time (full split is ~75k disk reads).
-        subtask_eval_max_samples_per_class=128,
     ),
     TrainConfig(
         name="twist_and_static_mixture_lora",
@@ -521,7 +602,7 @@ _CONFIGS = [
             max_token_len=96,
             subtask_loss_weight=0.1,
             subtask_max_token_len=64,
-            fast_tokenizer_path="physical-intelligence/fast",
+            fast_tokenizer_path=FAST_TOKENIZER_PATH,
             image_resolution=(224, 224),
         ),
         lr_schedule=_optimizer.CosineDecaySchedule(
@@ -624,9 +705,6 @@ _CONFIGS = [
         num_train_steps=40_000,
         batch_size=128,
         num_workers=4,
-        subtask_eval_enabled=True,
-        subtask_eval_interval_steps=1000,
-        subtask_eval_max_samples_per_class=128,
     ),
     TrainConfig(
         name="twist_only_lora",
@@ -637,7 +715,7 @@ _CONFIGS = [
             max_token_len=96,
             subtask_loss_weight=0.1,
             subtask_max_token_len=64,
-            fast_tokenizer_path="physical-intelligence/fast",
+            fast_tokenizer_path=FAST_TOKENIZER_PATH,
             image_resolution=(224, 224),
         ),
         lr_schedule=_optimizer.CosineDecaySchedule(
@@ -725,9 +803,6 @@ _CONFIGS = [
         num_train_steps=40_000,
         batch_size=8,
         num_workers=4,
-        subtask_eval_enabled=True,
-        subtask_eval_interval_steps=1000,
-        subtask_eval_max_samples_per_class=128,
     ),
     TrainConfig(
         name="twist_only_lora_triplet_10k",
@@ -738,7 +813,7 @@ _CONFIGS = [
             max_token_len=96,
             subtask_loss_weight=0.1,
             subtask_max_token_len=512,
-            fast_tokenizer_path="physical-intelligence/fast",
+            fast_tokenizer_path=FAST_TOKENIZER_PATH,
             image_resolution=(448, 448),
         ),
         lr_schedule=_optimizer.CosineDecaySchedule(
@@ -811,9 +886,6 @@ _CONFIGS = [
         num_train_steps=40_000,
         batch_size=2,
         num_workers=4,
-        subtask_eval_enabled=True,
-        subtask_eval_interval_steps=1000,
-        subtask_eval_max_samples_per_class=128,
     ),
     TrainConfig(
         name="twist_only_lora_triplet_100k",
@@ -824,7 +896,7 @@ _CONFIGS = [
             max_token_len=96,
             subtask_loss_weight=0.1,
             subtask_max_token_len=512,
-            fast_tokenizer_path="physical-intelligence/fast",
+            fast_tokenizer_path=FAST_TOKENIZER_PATH,
             image_resolution=(448, 448),
         ),
         lr_schedule=_optimizer.CosineDecaySchedule(
@@ -898,9 +970,6 @@ _CONFIGS = [
         num_train_steps=40_000,
         batch_size=2,
         num_workers=4,
-        subtask_eval_enabled=True,
-        subtask_eval_interval_steps=1000,
-        subtask_eval_max_samples_per_class=128,
     ),
 ]
 

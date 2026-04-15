@@ -25,7 +25,6 @@ import openpi.training.config as _config
 import openpi.training.data_loader as _data_loader
 import openpi.training.optimizer as _optimizer
 import openpi.training.sharding as sharding
-import openpi.training.subtask_eval as _subtask_eval
 import openpi.training.utils as training_utils
 import openpi.training.weight_loaders as _weight_loaders
 
@@ -260,14 +259,6 @@ def main(config: _config.TrainConfig):
         shuffle=True,
     )
     logging.info("train.py: create_data_loader returned in %.2fs", time.perf_counter() - t_dl)
-    se_split = getattr(data_loader, "subtask_eval_split", None)
-    se_outer = getattr(data_loader, "subtask_eval_outer_dataset", None)
-    se_i2c: dict[int, int] = getattr(data_loader, "subtask_eval_index_to_class", None) or {}
-    if config.subtask_eval_enabled and config.fsdp_devices > 1:
-        logging.warning(
-            "subtask_eval_enabled with fsdp_devices>1: holdout still applies; periodic infer_subtask eval is skipped."
-        )
-
     t_first = time.perf_counter()
     logging.info("train.py: requesting first training batch (may compile transforms + I/O)...")
     data_iter = iter(data_loader)
@@ -330,49 +321,6 @@ def main(config: _config.TrainConfig):
 
         if (step % config.save_interval == 0 and step > start_step) or step == config.num_train_steps - 1:
             _checkpoints.save_state(checkpoint_manager, train_state, data_loader, step)
-
-        if (
-            config.subtask_eval_enabled
-            and se_split is not None
-            and se_outer is not None
-            and se_split.val_indices.size > 0
-            and config.fsdp_devices == 1
-            and config.subtask_eval_interval_steps > 0
-            and step > 0
-            and step % config.subtask_eval_interval_steps == 0
-        ):
-            try:
-                rng_eval = jax.random.fold_in(train_rng, 424242 + int(step))
-                policy = _subtask_eval.eval_policy_from_train_state(config, train_state, policy_rng=rng_eval)
-                rng_sub = np.random.default_rng(int(config.seed) + int(step))
-                vix = _subtask_eval.subsample_val_indices(
-                    se_split.val_indices,
-                    index_to_class=se_i2c,
-                    max_per_class=config.subtask_eval_max_samples_per_class,
-                    rng=rng_sub,
-                )
-                logging.info(
-                    "Subtask val at step %s: evaluating %d frames (subsampled from %d val indices)",
-                    step,
-                    int(vix.size),
-                    int(se_split.val_indices.size),
-                )
-                metrics, _ = _subtask_eval.run_subtask_val_eval(
-                    policy=policy,
-                    outer_torch_dataset=se_outer,
-                    val_indices=vix,
-                    canonical_pairs=se_split.canonical_pairs,
-                    index_to_class=se_i2c,
-                    action_horizon=config.model.action_horizon,
-                    infer_batch_size=config.subtask_eval_batch_size,
-                )
-                if config.wandb_enabled:
-                    wandb.log(metrics, step=step)
-                acc = metrics.get("subtask_val/accuracy", 0.0)
-                pbar.write(f"Step {step}: subtask_val/accuracy={acc:.4f}")
-            except Exception:
-                logging.exception("Subtask eval failed at step %s", step)
-
     logging.info("Waiting for checkpoint manager to finish")
     checkpoint_manager.wait_until_finished()
 

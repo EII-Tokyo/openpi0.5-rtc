@@ -382,14 +382,6 @@ def create_data_loader(
     base_dataset = create_torch_dataset(data_config, action_horizon, model_config)
     dataset = transform_dataset(base_dataset, data_config, skip_norm_stats=skip_norm_stats)
 
-    subtask_eval_outer = None
-    subtask_eval_split = None
-    subtask_eval_index_to_class: dict[int, int] | None = None
-    if config.subtask_eval_enabled:
-        logging.info(
-            "data_loader: subtask_eval holdout disabled; training uses full dataset and no automatic val split is created"
-        )
-
     sampler = None
     if framework == "pytorch":
         if torch.distributed.is_initialized():
@@ -427,9 +419,6 @@ def create_data_loader(
     return DataLoaderImpl(
         data_config,
         data_loader,
-        subtask_eval_outer_dataset=subtask_eval_outer,
-        subtask_eval_split=subtask_eval_split,
-        subtask_eval_index_to_class=subtask_eval_index_to_class,
     )
 
 
@@ -574,16 +563,9 @@ class DataLoaderImpl(DataLoader):
         self,
         data_config: _config.DataConfig,
         data_loader: TorchDataLoader,
-        *,
-        subtask_eval_outer_dataset: typing.Any = None,
-        subtask_eval_split: typing.Any = None,
-        subtask_eval_index_to_class: dict[int, int] | None = None,
     ):
         self._data_config = data_config
         self._data_loader = data_loader
-        self.subtask_eval_outer_dataset = subtask_eval_outer_dataset
-        self.subtask_eval_split = subtask_eval_split
-        self.subtask_eval_index_to_class = subtask_eval_index_to_class or {}
 
     def data_config(self) -> _config.DataConfig:
         return self._data_config
