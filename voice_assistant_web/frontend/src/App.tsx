@@ -36,14 +36,43 @@ const TASK_NUMBERS = ['1', '2', '3', '4', '5'] as const
 export default function App() {
   const [state, setState] = useState<RealtimeState>(initialState)
   const [language, setLanguage] = useState<AppLanguage>('en')
-  const [highOnly, setHighOnly] = useState(false)
   const [dispatchError, setDispatchError] = useState('')
+  const [cameraView, setCameraView] = useState<'focus' | 'quad'>('quad')
   const t = translations[language]
 
   useEffect(() => {
-    const ws = new WebSocket(`${wsBase}/ws/realtime`)
-    ws.onmessage = (event) => setState(JSON.parse(event.data))
-    return () => ws.close()
+    let isActive = true
+    let socket: WebSocket | null = null
+    let reconnectTimer: number | null = null
+
+    const connect = () => {
+      const ws = new WebSocket(`${wsBase}/ws/realtime`)
+      socket = ws
+
+      ws.onmessage = (event) => {
+        if (!isActive) return
+        setState(JSON.parse(event.data))
+      }
+
+      ws.onclose = () => {
+        if (!isActive) return
+        reconnectTimer = window.setTimeout(connect, 1000)
+      }
+
+      ws.onerror = () => {
+        ws.close()
+      }
+    }
+
+    connect()
+
+    return () => {
+      isActive = false
+      if (reconnectTimer !== null) {
+        window.clearTimeout(reconnectTimer)
+      }
+      socket?.close()
+    }
   }, [])
 
   const freshness = useMemo(() => {
@@ -112,9 +141,9 @@ export default function App() {
           cameraTimestamps={state.camera_timestamps}
           cameraFrames={state.camera_jpeg_b64}
           language={language}
-          highOnly={highOnly}
           currentTask={state.robot.current_task}
-          onToggleHighOnly={() => setHighOnly((current) => !current)}
+          cameraView={cameraView}
+          onCameraViewChange={setCameraView}
         />
         <aside className="control-rail">
           <RobotViewer

@@ -79,7 +79,7 @@ def stream_camera(camera_name: str) -> StreamingResponse:
                     b"--frame\r\n"
                     b"Content-Type: image/jpeg\r\n\r\n" + jpeg + b"\r\n"
                 )
-            await asyncio.sleep(0.15)
+            await asyncio.sleep(0.1)
 
     return StreamingResponse(
         frame_generator(),

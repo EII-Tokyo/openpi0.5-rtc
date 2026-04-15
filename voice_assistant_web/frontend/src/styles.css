@@ -168,8 +168,7 @@ button {
   color: #6e5a4a;
 }
 
-.robot-task-badge,
-.command-hint {
+.robot-task-badge {
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -221,6 +220,9 @@ button {
 .panel,
 .hero-camera {
   padding: 16px;
+}
+
+.panel {
   overflow: hidden;
 }
 
@@ -229,6 +231,13 @@ button {
   grid-template-rows: auto minmax(0, 1fr);
   gap: 14px;
   min-height: 0;
+}
+
+.camera-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
 }
 
 .camera-controls {
@@ -248,6 +257,15 @@ button {
   background: #171411;
 }
 
+.camera-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  min-height: 0;
+  height: 100%;
+}
+
 .camera-stage-frame img,
 .camera-stage-frame canvas,
 .mini-camera-card img,
@@ -260,6 +278,9 @@ button {
 
 .camera-feed-canvas {
   background: #0f0b08;
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
 .camera-frame-top {
@@ -344,6 +365,37 @@ button {
   display: block;
   min-height: 0;
   height: 100%;
+}
+
+.quad-camera-card {
+  min-height: 260px;
+  background: #171411;
+}
+
+.ghost-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(93, 74, 53, 0.14);
+  background: rgba(255, 252, 248, 0.72);
+  color: #5a4736;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 160ms ease, border-color 160ms ease, color 160ms ease, transform 160ms ease;
+}
+
+.ghost-button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(93, 74, 53, 0.28);
+}
+
+.ghost-button.active {
+  background: #2f241a;
+  color: #fff7ec;
+  border-color: rgba(47, 36, 26, 0.85);
 }
 
 .dot {
@@ -535,7 +587,7 @@ button {
 
 .voice-transcript-panel {
   display: grid;
-  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  grid-template-rows: auto minmax(0, 1fr) auto;
   gap: 12px;
   min-height: 0;
 }
@@ -543,22 +595,6 @@ button {
 .voice-shortcuts {
   display: grid;
   gap: 10px;
-}
-
-.voice-shortcuts-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.voice-panel-title {
-  margin: 0;
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #7b6858;
 }
 
 .conversation-card {

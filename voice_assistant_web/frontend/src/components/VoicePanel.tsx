@@ -332,10 +332,6 @@ export function VoicePanel({ mode, language, dispatchTask, dispatchError }: Prop
         </div>
         <div className="voice-transcript-panel">
           <div className="voice-shortcuts">
-            <div className="voice-shortcuts-header">
-              <p className="voice-panel-title">{t.quickDispatch}</p>
-              <span className="command-hint">{t.directTaskHint}</span>
-            </div>
             <div className="task-grid compact">
               {TASK_NUMBERS.map((taskNumber) => (
                 <button
@@ -352,7 +348,6 @@ export function VoicePanel({ mode, language, dispatchTask, dispatchError }: Prop
             </div>
             {dispatchError ? <p className="voice-error inline-error">{dispatchError}</p> : null}
           </div>
-          <p className="voice-panel-title">{t.latestExchange}</p>
           <div className="conversation-card">
             <div className="conversation-line">
               <span>{t.you}</span>

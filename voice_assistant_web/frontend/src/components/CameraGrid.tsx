@@ -13,9 +13,9 @@ type Props = {
   cameraTimestamps: Record<string, number | null>
   cameraFrames: Record<string, string>
   language: AppLanguage
-  highOnly: boolean
   currentTask: string | null
-  onToggleHighOnly: () => void
+  cameraView: 'focus' | 'quad'
+  onCameraViewChange: (view: 'focus' | 'quad') => void
 }
 
 async function drawJpegB64ToCanvas(b64: string, canvas: HTMLCanvasElement | null) {
@@ -23,18 +23,18 @@ async function drawJpegB64ToCanvas(b64: string, canvas: HTMLCanvasElement | null
   try {
     const bytes = Uint8Array.from(atob(b64), (char) => char.charCodeAt(0))
     const blob = new Blob([bytes], { type: 'image/jpeg' })
-    const bitmap = await createImageBitmap(blob)
-    const context = canvas.getContext('2d')
-    if (!context) {
-      bitmap.close()
+    const bmp = await createImageBitmap(blob)
+    const ctx = canvas.getContext('2d')
+    if (!ctx) {
+      bmp.close()
       return
     }
-    if (canvas.width !== bitmap.width || canvas.height !== bitmap.height) {
-      canvas.width = bitmap.width
-      canvas.height = bitmap.height
+    if (canvas.width !== bmp.width || canvas.height !== bmp.height) {
+      canvas.width = bmp.width
+      canvas.height = bmp.height
     }
-    context.drawImage(bitmap, 0, 0)
-    bitmap.close()
+    ctx.drawImage(bmp, 0, 0)
+    bmp.close()
   } catch (error) {
     console.error('Failed to decode camera frame', error)
   }
@@ -51,14 +51,15 @@ export function CameraGrid({
   cameraTimestamps,
   cameraFrames,
   language,
-  highOnly,
   currentTask,
-  onToggleHighOnly,
+  cameraView,
+  onCameraViewChange,
 }: Props) {
   const t = translations[language]
-  const heroCamera = CAMERAS[0]
-  const stripCameras = highOnly ? [] : CAMERAS.slice(1)
   const canvasRefs = useRef<Record<string, HTMLCanvasElement | null>>({})
+  const primaryCamera = 'cam_high'
+  const secondaryCameras = CAMERAS.filter((camera) => camera.key !== primaryCamera)
+
   useEffect(() => {
     void Promise.all(
       Object.entries(cameraFrames).map(([name, b64]) => drawJpegB64ToCanvas(b64, canvasRefs.current[name] ?? null)),
@@ -83,45 +84,54 @@ export function CameraGrid({
   )
 
   return (
-    <section className={`stage-panel${highOnly ? ' quad-mode' : ''}`}>
+    <section className={`stage-panel ${cameraView === 'quad' ? 'quad-mode' : 'focus-mode'}`}>
       <article className="hero-camera">
         <div className="camera-panel-header">
-          <div className="hero-camera-copy">
-            <p className="eyebrow">{t.camerasEyebrow}</p>
-            <h2>{t.camerasTitle}</h2>
-          </div>
           <div className="camera-controls">
-            <span className={cameraStatus[heroCamera.key] ? 'status-pill live' : 'status-pill offline'}>
-              {cameraStatus[heroCamera.key] ? t.live : t.waiting}
-            </span>
-            <button type="button" className="ghost-button" onClick={onToggleHighOnly}>
-              {highOnly ? t.showAllCameras : t.showHighCameraOnly}
+            <button
+              type="button"
+              className={`ghost-button ${cameraView === 'focus' ? 'active' : ''}`}
+              onClick={() => onCameraViewChange('focus')}
+            >
+              {t.cameraFocus}
+            </button>
+            <button
+              type="button"
+              className={`ghost-button ${cameraView === 'quad' ? 'active' : ''}`}
+              onClick={() => onCameraViewChange('quad')}
+            >
+              {t.cameraQuad}
             </button>
           </div>
         </div>
-        <div className="camera-stage-frame">
-          <canvas ref={bindCanvas(heroCamera.key)} className="camera-feed-canvas" aria-label={t[heroCamera.labelKey]} />
-          <div className="camera-frame-top">{renderOverlay(heroCamera.key, t[heroCamera.labelKey])}</div>
-          {currentTask ? (
-            <div className="camera-stage-overlay">
-              <div className="stage-task">
-                <span>{t.latestDispatch}</span>
-                <strong>{currentTask}</strong>
-              </div>
-            </div>
-          ) : null}
-        </div>
+
+        {cameraView === 'focus' ? (
+          <div className="camera-stage-frame">
+            <canvas ref={bindCanvas(primaryCamera)} className="camera-feed-canvas" aria-label={t.high} />
+            <div className="camera-frame-top">{renderOverlay(primaryCamera, t.high)}</div>
+          </div>
+        ) : (
+          <div className="camera-grid">
+            {CAMERAS.map((camera) => (
+              <article key={camera.key} className="mini-camera-card quad-camera-card">
+                <canvas ref={bindCanvas(camera.key)} className="camera-feed-canvas" aria-label={t[camera.labelKey]} />
+                <div className="camera-frame-top">{renderOverlay(camera.key, t[camera.labelKey])}</div>
+              </article>
+            ))}
+          </div>
+        )}
       </article>
-      {highOnly ? null : (
+
+      {cameraView === 'focus' ? (
         <div className="camera-strip">
-          {stripCameras.map((camera) => (
+          {secondaryCameras.map((camera) => (
             <article key={camera.key} className="mini-camera-card">
               <canvas ref={bindCanvas(camera.key)} className="camera-feed-canvas" aria-label={t[camera.labelKey]} />
               <div className="camera-frame-top">{renderOverlay(camera.key, t[camera.labelKey])}</div>
             </article>
           ))}
         </div>
-      )}
+      ) : null}
     </section>
   )
 }
