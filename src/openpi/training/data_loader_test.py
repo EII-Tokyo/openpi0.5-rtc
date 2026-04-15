@@ -95,7 +95,7 @@ def test_is_for_training_wrapper_defaults_to_all_trainable():
 
 
 def test_with_real_dataset():
-    config = _config.get_config("pi0_aloha_sim")
+    config = _config.get_config("pi05_aloha_sim")
     config = dataclasses.replace(config, batch_size=4)
 
     loader = _data_loader.create_data_loader(

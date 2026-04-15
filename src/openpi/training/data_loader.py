@@ -330,7 +330,7 @@ def transform_dataset(dataset: Dataset, data_config: _config.DataConfig, *, skip
     return TransformedDataset(
         dataset,
         [
-            _transforms.PromptFromLeRobotTask(),
+            *([_transforms.PromptFromLeRobotTask()] if data_config.prompt_from_task else []),
             *data_config.repack_transforms.inputs,
             *data_config.data_transforms.inputs,
             _transforms.Normalize(norm_stats, use_quantiles=data_config.use_quantile_norm),

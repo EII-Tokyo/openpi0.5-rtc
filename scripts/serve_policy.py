@@ -7,7 +7,6 @@ import tyro
 import numpy as np
 
 from openpi.policies import aloha_policy as _aloha_policy
-from openpi.policies import droid_policy as _droid_policy
 from openpi.policies import policy as _policy
 from openpi.policies import policy_config as _policy_config
 from openpi.serving import websocket_policy_server
@@ -19,17 +18,15 @@ class EnvMode(enum.Enum):
 
     ALOHA = "aloha"
     ALOHA_SIM = "aloha_sim"
-    DROID = "droid"
-    LIBERO = "libero"
 
 
 @dataclasses.dataclass
 class Checkpoint:
     """Load a policy from a trained checkpoint."""
 
-    # Training config name (e.g., "pi0_aloha_sim").
+    # Training config name.
     config: str
-    # Checkpoint directory (e.g., "checkpoints/pi0_aloha_sim/exp/10000").
+    # Checkpoint directory.
     dir: str
 
 
@@ -43,7 +40,7 @@ class Args:
     """Arguments for the serve_policy script."""
 
     # Environment to serve the policy for. This is only used when serving default policies.
-    env: EnvMode = EnvMode.ALOHA_SIM
+    env: EnvMode = EnvMode.ALOHA
 
     # If provided, will be used in case the "prompt" key is not present in the data, or if the model doesn't have a default
     # prompt.
@@ -64,32 +61,14 @@ class Args:
     policy: Checkpoint | Default = dataclasses.field(default_factory=Default)
 
 
-# Default checkpoints that should be used for each environment.
 DEFAULT_CHECKPOINT: dict[EnvMode, Checkpoint] = {
-    # EnvMode.ALOHA: Checkpoint(
-    #     config="two_direction_lora_from_20260205_39999",
-    #     dir="./checkpoints/two_direction_lora_from_20260205_39999/two_direction_lora_20260313/6000",
-    # ),
-    # EnvMode.ALOHA: Checkpoint(
-    #     config="twist_off_the_bottle_cap_no_adapt_to_pi",
-    #     dir="./checkpoints/20260311/5000",
-    # ),
     EnvMode.ALOHA: Checkpoint(
         config="twist_off_the_bottle_cap",
         dir="./checkpoints/20260205/39999",
     ),
-    
     EnvMode.ALOHA_SIM: Checkpoint(
-        config="pi0_aloha_sim",
+        config="pi05_aloha_sim",
         dir="gs://openpi-assets/checkpoints/pi0_aloha_sim",
-    ),
-    EnvMode.DROID: Checkpoint(
-        config="pi05_droid",
-        dir="gs://openpi-assets/checkpoints/pi05_droid",
-    ),
-    EnvMode.LIBERO: Checkpoint(
-        config="pi05_libero",
-        dir="gs://openpi-assets/checkpoints/pi05_libero",
     ),
 }
 
@@ -117,17 +96,12 @@ def create_policy(args: Args) -> _policy.Policy:
 def main(args: Args) -> None:
     policy = create_policy(args)
     policy_metadata = policy.metadata
-    config_name = args.policy.config if isinstance(args.policy, Checkpoint) else None
-    if (config_name and "droid" in config_name.lower()) or args.env == EnvMode.DROID:
-        dummy_obs = _droid_policy.make_droid_example()
-        dummy_prev_action = np.random.rand(15, 32)
+    dummy_obs = _aloha_policy.make_aloha_example()
+    dummy_prev_action = np.random.rand(50, 32)
+    if args.warmup_rtc:
+        policy.infer(dummy_obs, dummy_prev_action, use_rtc=True)
     else:
-        dummy_obs = _aloha_policy.make_aloha_example()
-        dummy_prev_action = np.random.rand(50, 32)
-        if args.warmup_rtc:
-            policy.infer(dummy_obs, dummy_prev_action, use_rtc=True)
-        else:
-            logging.info("Skipping RTC warmup by request.")
+        logging.info("Skipping RTC warmup by request.")
     if args.warmup_non_rtc:
         policy.infer(dummy_obs, dummy_prev_action, use_rtc=False)
     else:
