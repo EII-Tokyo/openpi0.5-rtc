@@ -151,8 +151,8 @@ export function RobotViewer({ latestAction, qpos, mode, currentTask, language }:
           <h2>{t.robotTitle}</h2>
         </div>
         <div className="robot-meta">
-          <span className="status ok">{mode}</span>
-          <span className="robot-task" title={currentTask || t.noActiveTask}>
+          <span className="status-pill mode">{mode}</span>
+          <span className="robot-task-badge" title={currentTask || t.noActiveTask}>
             {currentTask || t.noActiveTask}
           </span>
         </div>

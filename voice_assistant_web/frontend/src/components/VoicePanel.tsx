@@ -5,14 +5,20 @@ import { apiBase } from '../services/api'
 type Props = {
   mode: string
   language: AppLanguage
+  dispatchTask: (taskNumber: string) => Promise<void>
+  dispatchError: string
 }
 
-export function VoicePanel({ mode, language }: Props) {
+const TASK_NUMBERS = ['1', '2', '3', '4', '5'] as const
+
+export function VoicePanel({ mode, language, dispatchTask, dispatchError }: Props) {
   const t = translations[language]
   const [status, setStatus] = useState<'idle' | 'recording' | 'thinking' | 'speaking'>('idle')
   const [errorText, setErrorText] = useState('')
+  const [textCommand, setTextCommand] = useState('')
   const [level, setLevel] = useState(0)
   const [orbStyle, setOrbStyle] = useState<'pulse' | 'halo' | 'ripple'>('pulse')
+  const [latestExchange, setLatestExchange] = useState<{ transcript: string; reply: string } | null>(null)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const chunksRef = useRef<Blob[]>([])
   const audioRef = useRef<HTMLAudioElement | null>(null)
@@ -130,6 +136,10 @@ export function VoicePanel({ mode, language }: Props) {
       throw new Error(`HTTP ${response.status}`)
     }
     const payload = await response.json()
+    setLatestExchange({
+      transcript: payload.transcript || '',
+      reply: payload.reply_text || '',
+    })
     if (payload.audio_base64 && payload.audio_mime_type) {
       setStatus('speaking')
       const audio = new Audio(`data:${payload.audio_mime_type};base64,${payload.audio_base64}`)
@@ -142,6 +152,25 @@ export function VoicePanel({ mode, language }: Props) {
       }
     } else {
       setStatus('idle')
+    }
+  }
+
+  const submitTextCommand = async () => {
+    const transcript = textCommand.trim()
+    if (!transcript) return
+    setErrorText('')
+    setStatus('thinking')
+    try {
+      const response = await fetch(`${apiBase}/api/voice/text`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: transcript, language }),
+      })
+      await handleVoiceResponse(response)
+      setTextCommand('')
+    } catch {
+      setStatus('idle')
+      setErrorText(t.requestFailed)
     }
   }
 
@@ -257,7 +286,6 @@ export function VoicePanel({ mode, language }: Props) {
     <section className="panel voice-panel">
       <div className="panel-header">
         <div>
-          <p className="eyebrow">{t.voiceEyebrow}</p>
           <h2>{t.voiceTitle}</h2>
         </div>
         <div className="voice-toolbar">
@@ -284,11 +312,12 @@ export function VoicePanel({ mode, language }: Props) {
               {t.voiceStyleRipple}
             </button>
           </div>
-          <span className="robot-task" title={`${t.runtime}: ${mode}`}>{t.runtime}: {mode}</span>
+          <span className="status-pill mode" title={`${t.runtime}: ${mode}`}>{t.runtime}: {mode}</span>
         </div>
       </div>
 
-      <div className="voice-orb-wrap">
+      <div className="voice-console-layout">
+        <div className="voice-orb-wrap">
         <button
           className={`voice-orb ${status} ${orbStyle}`}
           onClick={toggleRecording}
@@ -300,6 +329,52 @@ export function VoicePanel({ mode, language }: Props) {
         <p className="voice-status">{t[status]}</p>
         <p className="voice-hint">{status === 'thinking' ? t.waitingMusic : t.autoSendHint}</p>
         {errorText ? <p className="voice-error">{errorText}</p> : null}
+        </div>
+        <div className="voice-transcript-panel">
+          <div className="voice-shortcuts">
+            <div className="voice-shortcuts-header">
+              <p className="voice-panel-title">{t.quickDispatch}</p>
+              <span className="command-hint">{t.directTaskHint}</span>
+            </div>
+            <div className="task-grid compact">
+              {TASK_NUMBERS.map((taskNumber) => (
+                <button
+                  key={taskNumber}
+                  type="button"
+                  className="task-card compact"
+                  onClick={() => void dispatchTask(taskNumber)}
+                  title={t.taskDescriptions[taskNumber]}
+                >
+                  <span className="task-key">{t.taskKey(taskNumber)}</span>
+                  <strong>{t.taskShortLabels[taskNumber]}</strong>
+                </button>
+              ))}
+            </div>
+            {dispatchError ? <p className="voice-error inline-error">{dispatchError}</p> : null}
+          </div>
+          <p className="voice-panel-title">{t.latestExchange}</p>
+          <div className="conversation-card">
+            <div className="conversation-line">
+              <span>{t.you}</span>
+              <p>{latestExchange?.transcript || t.noConversation}</p>
+            </div>
+            <div className="conversation-line reply">
+              <span>{t.aloha}</span>
+              <p>{latestExchange?.reply || t.noReply}</p>
+            </div>
+          </div>
+          <div className="voice-composer">
+            <textarea
+              value={textCommand}
+              onChange={(event) => setTextCommand(event.target.value)}
+              placeholder={t.commandPlaceholder}
+              rows={3}
+            />
+            <button type="button" onClick={() => void submitTextCommand()}>
+              {t.sendCommand}
+            </button>
+          </div>
+        </div>
       </div>
     </section>
   )

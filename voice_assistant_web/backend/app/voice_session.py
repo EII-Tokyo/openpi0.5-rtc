@@ -48,6 +48,24 @@ class VoiceAssistantEngine:
         normalized = transcript.lower().strip()
         compact = normalized.replace(" ", "")
 
+        task_1_keywords = [
+            "process bottles",
+            "rinse the bottle",
+            "rinsing bottles",
+            "tear off labels",
+            "tear off the label",
+            "remove labels",
+            "处理瓶子",
+            "清洗瓶子",
+            "撕掉标签",
+            "撕标签",
+            "ラベルを剥がす",
+            "ボトルをすすぐ",
+            "ボトル処理",
+        ]
+        if any(keyword in normalized or keyword in compact for keyword in task_1_keywords):
+            return "1"
+
         task_2_keywords = [
             "twist off the bottle cap",
             "unscrew the cap",

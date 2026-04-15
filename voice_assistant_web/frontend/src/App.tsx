@@ -3,7 +3,7 @@ import { CameraGrid } from './components/CameraGrid'
 import { RobotViewer } from './components/RobotViewer'
 import { VoicePanel } from './components/VoicePanel'
 import { AppLanguage, translations } from './i18n'
-import { wsBase } from './services/api'
+import { apiBase, wsBase } from './services/api'
 
 type RealtimeState = {
   robot: {
@@ -14,6 +14,8 @@ type RealtimeState = {
     latest_action: number[]
   }
   camera_status: Record<string, boolean>
+  camera_timestamps: Record<string, number | null>
+  camera_jpeg_b64: Record<string, string>
 }
 
 const initialState: RealtimeState = {
@@ -25,12 +27,17 @@ const initialState: RealtimeState = {
     latest_action: [],
   },
   camera_status: {},
+  camera_timestamps: {},
+  camera_jpeg_b64: {},
 }
+
+const TASK_NUMBERS = ['1', '2', '3', '4', '5'] as const
 
 export default function App() {
   const [state, setState] = useState<RealtimeState>(initialState)
   const [language, setLanguage] = useState<AppLanguage>('en')
   const [highOnly, setHighOnly] = useState(false)
+  const [dispatchError, setDispatchError] = useState('')
   const t = translations[language]
 
   useEffect(() => {
@@ -45,14 +52,50 @@ export default function App() {
     return age < 1 ? t.live : t.stale(age.toFixed(1))
   }, [state.robot.timestamp, t])
 
+  const dispatchTask = async (taskNumber: string) => {
+    setDispatchError('')
+    try {
+      const response = await fetch(`${apiBase}/api/tasks/${taskNumber}`, { method: 'POST' })
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`)
+      }
+    } catch {
+      setDispatchError(t.dispatchFailed)
+    }
+  }
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey || event.repeat) return
+      const active = document.activeElement
+      if (
+        active instanceof HTMLInputElement ||
+        active instanceof HTMLTextAreaElement ||
+        active instanceof HTMLSelectElement ||
+        active?.getAttribute('contenteditable') === 'true'
+      ) {
+        return
+      }
+      if (TASK_NUMBERS.includes(event.key as (typeof TASK_NUMBERS)[number])) {
+        void dispatchTask(event.key)
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [t.dispatchFailed])
+
   return (
     <main className="app-shell">
-      <header className="hero">
-        <div>
-          <p className="eyebrow">{t.eyebrow}</p>
+      <header className="app-header">
+        <div className="header-brand">
           <h1>{t.title}</h1>
         </div>
-        <div className="hero-badges">
+        <div className="header-actions">
+          <span className={`status-pill ${state.robot.timestamp ? 'live' : 'offline'}`}>{freshness}</span>
+          <span className="status-pill mode">{state.robot.mode}</span>
+          <span className="robot-task-badge" title={state.robot.current_task || t.noActiveTask}>
+            {state.robot.current_task || t.noActiveTask}
+          </span>
           <label className="language-switch">
             <span>{t.language}</span>
             <select value={language} onChange={(event) => setLanguage(event.target.value as AppLanguage)}>
@@ -60,21 +103,20 @@ export default function App() {
               <option value="ja">{t.japanese}</option>
             </select>
           </label>
-          <span className="status ok">{freshness}</span>
-          <span className="robot-task" title={state.robot.current_task || t.noActiveTask}>
-            {state.robot.current_task || t.noActiveTask}
-          </span>
         </div>
       </header>
 
       <section className="layout">
         <CameraGrid
           cameraStatus={state.camera_status}
+          cameraTimestamps={state.camera_timestamps}
+          cameraFrames={state.camera_jpeg_b64}
           language={language}
           highOnly={highOnly}
+          currentTask={state.robot.current_task}
           onToggleHighOnly={() => setHighOnly((current) => !current)}
         />
-        <div className="sidebar">
+        <aside className="control-rail">
           <RobotViewer
             latestAction={state.robot.latest_action.length ? state.robot.latest_action : null}
             qpos={state.robot.qpos.length ? state.robot.qpos : null}
@@ -82,8 +124,13 @@ export default function App() {
             currentTask={state.robot.current_task}
             language={language}
           />
-          <VoicePanel mode={state.robot.mode} language={language} />
-        </div>
+          <VoicePanel
+            mode={state.robot.mode}
+            language={language}
+            dispatchTask={dispatchTask}
+            dispatchError={dispatchError}
+          />
+        </aside>
       </section>
     </main>
   )

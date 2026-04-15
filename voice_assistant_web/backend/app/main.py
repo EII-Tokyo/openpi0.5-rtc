@@ -10,7 +10,9 @@ from fastapi.responses import Response, StreamingResponse
 
 from .camera_bridge import CameraBridge
 from .config import settings
+from .redis_commands import TASK_MAPPING
 from .redis_commands import create_redis_client
+from .redis_commands import publish_task
 from .robot_state_bridge import RobotStateBridge
 from .schemas import HealthResponse, RealtimePayload, RuntimeStatePayload, VoiceRequest, VoiceResponse
 from .voice_session import VoiceAssistantEngine
@@ -89,11 +91,19 @@ def stream_camera(camera_name: str) -> StreamingResponse:
 async def realtime_socket(websocket: WebSocket) -> None:
     await websocket.accept()
     interval = 1.0 / settings.realtime_hz if settings.realtime_hz > 0 else 0.1
+    last_camera_push = 0.0
     try:
         while True:
+            now = time.time()
+            camera_jpeg_b64: dict[str, str] = {}
+            if last_camera_push == 0.0 or now - last_camera_push >= 0.1:
+                camera_jpeg_b64 = camera_bridge.snapshot_jpeg_b64_all()
+                last_camera_push = now
             payload = RealtimePayload(
                 robot=RuntimeStatePayload(**robot_state_bridge.snapshot()),
                 camera_status=camera_bridge.get_camera_status(),
+                camera_timestamps=camera_bridge.get_camera_timestamps(),
+                camera_jpeg_b64=camera_jpeg_b64,
             )
             await websocket.send_json(payload.model_dump())
             await asyncio.sleep(interval)
@@ -104,6 +114,18 @@ async def realtime_socket(websocket: WebSocket) -> None:
 @app.post("/api/voice/text", response_model=VoiceResponse)
 async def voice_text(request: VoiceRequest) -> VoiceResponse:
     return await voice_engine.process_text(request.text, language=request.language)
+
+
+@app.post("/api/tasks/{task_number}")
+def dispatch_task(task_number: str) -> dict[str, str]:
+    if task_number not in TASK_MAPPING:
+        raise HTTPException(status_code=404, detail=f"Unknown task {task_number}")
+    publish_task(redis_client, task_number)
+    return {
+        "status": "ok",
+        "task_number": task_number,
+        "task_name": TASK_MAPPING[task_number],
+    }
 
 
 @app.post("/api/voice/audio", response_model=VoiceResponse)

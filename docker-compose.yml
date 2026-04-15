@@ -44,8 +44,9 @@ services:
     build:
       context: .
       dockerfile: scripts/docker/serve_policy.Dockerfile
-    command: /bin/bash
-    # command: uv run scripts/serve_policy.py --env ALOHA
+    command: >-
+      /bin/bash -lc
+      "uv run --no-sync scripts/serve_policy.py --no-warmup-rtc --no-warmup-non-rtc --no-warmup-subtask ${SERVER_ARGS:-policy:checkpoint --policy.config twist_off_the_bottle_cap_lora --policy.dir /app/checkpoints/20260414/5000}"
     init: true
     tty: true
     network_mode: host
@@ -54,6 +55,7 @@ services:
       - ${OPENPI_DATA_HOME:-~/.cache/openpi}:/openpi_assets
     environment:
       - GIT_LFS_SKIP_SMUDGE=1
+      - XLA_PYTHON_CLIENT_PREALLOCATE=false
       - XLA_PYTHON_CLIENT_MEM_FRACTION=0.4
       - SERVER_ARGS
       - OPENPI_DATA_HOME=/openpi_assets
@@ -62,6 +64,9 @@ services:
       - NVIDIA_DRIVER_CAPABILITIES=all
       - UV_PROJECT_ENVIRONMENT=/.venv
       - VIRTUAL_ENV=/.venv
+      - UV_NO_SYNC=1
+      - UV_NO_DEV=1
+      - PYTHONPATH=/app/src
     gpus: all
 
   redis:
@@ -106,8 +111,5 @@ services:
     network_mode: "host"
     init: true
     tty: true
-    environment:
-      - VITE_API_BASE=${VITE_API_BASE:-http://localhost:8011}
-      - VITE_WS_BASE=${VITE_WS_BASE:-ws://localhost:8011}
     depends_on:
       - voice_web_backend

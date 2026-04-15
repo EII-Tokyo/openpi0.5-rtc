@@ -20,6 +20,8 @@ class RuntimeStatePayload(BaseModel):
 class RealtimePayload(BaseModel):
     robot: RuntimeStatePayload
     camera_status: dict[str, bool]
+    camera_timestamps: dict[str, float | None] = Field(default_factory=dict)
+    camera_jpeg_b64: dict[str, str] = Field(default_factory=dict)
 
 
 class VoiceRequest(BaseModel):

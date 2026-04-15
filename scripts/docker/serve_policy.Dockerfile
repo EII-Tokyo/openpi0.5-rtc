@@ -17,6 +17,7 @@ RUN apt-get update && apt-get install -y git git-lfs linux-headers-generic build
 
 # Copy from the cache instead of linking since it's a mounted volume
 ENV UV_LINK_MODE=copy
+ENV UV_HTTP_TIMEOUT=300
 
 # Use the host's virtual environment instead of creating a new one
 # The venv will be mounted from the host via docker-compose volumes
@@ -27,9 +28,12 @@ RUN uv venv --python 3.11.9 $UV_PROJECT_ENVIRONMENT
 RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=uv.lock,target=uv.lock \
     --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+    --mount=type=bind,source=README.md,target=README.md \
+    --mount=type=bind,source=LICENSE,target=LICENSE \
+    --mount=type=bind,source=src,target=src \
     --mount=type=bind,source=packages/openpi-client/pyproject.toml,target=packages/openpi-client/pyproject.toml \
     --mount=type=bind,source=packages/openpi-client/src,target=packages/openpi-client/src \
-    GIT_LFS_SKIP_SMUDGE=1 uv sync --frozen --no-install-project --no-dev
+    GIT_LFS_SKIP_SMUDGE=1 uv sync --frozen --no-dev
 
 # Copy transformers_replace files while preserving directory structure
 COPY src/openpi/models_pytorch/transformers_replace/ /tmp/transformers_replace/

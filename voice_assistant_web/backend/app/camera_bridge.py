@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 import logging
 import threading
 import time
@@ -16,6 +17,7 @@ class CameraBridge:
     def __init__(self) -> None:
         self._lock = threading.Lock()
         self._latest_jpegs: dict[str, bytes] = {}
+        self._latest_timestamps: dict[str, float] = {}
         self._running = False
         self._thread: threading.Thread | None = None
         self._error: str | None = None
@@ -54,6 +56,7 @@ class CameraBridge:
                         return
                     with self._lock:
                         self._latest_jpegs[camera_name] = jpeg.tobytes()
+                        self._latest_timestamps[camera_name] = time.time()
 
                 return _callback
 
@@ -78,6 +81,14 @@ class CameraBridge:
     def get_camera_status(self) -> dict[str, bool]:
         with self._lock:
             return {name: name in self._latest_jpegs for name in self.camera_names}
+
+    def get_camera_timestamps(self) -> dict[str, float | None]:
+        with self._lock:
+            return {name: self._latest_timestamps.get(name) for name in self.camera_names}
+
+    def snapshot_jpeg_b64_all(self) -> dict[str, str]:
+        with self._lock:
+            return {name: base64.b64encode(jpeg).decode("ascii") for name, jpeg in self._latest_jpegs.items()}
 
     def _image_msg_to_bgr(self, image_msg) -> np.ndarray | None:
         dtype = np.uint8
