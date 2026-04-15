@@ -19,6 +19,7 @@ from lerobot_dataset_build_utils import normalize_hf_image
 from lerobot_dataset_build_utils import load_pil_image
 from lerobot_dataset_build_utils import save_episode_compat
 from lerobot_dataset_build_utils import save_episode_if_needed
+from lerobot_dataset_build_utils import push_dataset_to_hub_robust
 
 
 @dataclasses.dataclass(frozen=True)
@@ -329,7 +330,7 @@ def main(args: Args) -> None:
     dataset.finalize()
     shutil.rmtree(Path(dataset.root) / "images", ignore_errors=True)
     if args.push_to_hub:
-        dataset.push_to_hub(upload_large_folder=True)
+        push_dataset_to_hub_robust(dataset, prefer_large_folder=True)
     print(f"Created {count} samples at {Path(dataset.root)}")
 
 

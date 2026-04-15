@@ -230,17 +230,23 @@ class ResizeImages(DataTransformFn):
     width: int
 
     def __call__(self, data: DataDict) -> DataDict:
-        resized = {}
-        for key, value in data["image"].items():
-            image = np.asarray(value)
-            if image.ndim == 4:
-                resized[key] = np.stack(
-                    [image_tools.resize_with_pad(frame, self.height, self.width) for frame in image],
-                    axis=0,
-                )
-            else:
-                resized[key] = image_tools.resize_with_pad(image, self.height, self.width)
-        data["image"] = resized
+        # Resize both the single-image and multi-camera namespaces.
+        # Mixed datasets can surface raw `images` before batching, so both paths
+        # need to be normalized here to keep collation shape-stable.
+        for image_key in ("image", "images"):
+            if image_key not in data:
+                continue
+            resized = {}
+            for key, value in data[image_key].items():
+                image = np.asarray(value)
+                if image.ndim == 4:
+                    resized[key] = np.stack(
+                        [image_tools.resize_with_pad(frame, self.height, self.width) for frame in image],
+                        axis=0,
+                    )
+                else:
+                    resized[key] = image_tools.resize_with_pad(image, self.height, self.width)
+            data[image_key] = resized
         return data
 
 
