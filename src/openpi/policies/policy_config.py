@@ -1,3 +1,4 @@
+import dataclasses
 import logging
 import os
 import pathlib
@@ -14,6 +15,27 @@ from openpi.training import config as _config
 import openpi.transforms as transforms
 
 
+def _override_group_norm_stats(
+    group: transforms.Group,
+    *,
+    norm_stats: dict[str, transforms.NormStats] | None,
+    use_quantile_norm: bool,
+) -> transforms.Group:
+    def _override(sequence):
+        out = []
+        for transform in sequence:
+            if hasattr(transform, "norm_stats"):
+                kwargs: dict[str, Any] = {"norm_stats": norm_stats}
+                if hasattr(transform, "use_quantile_norm"):
+                    kwargs["use_quantile_norm"] = use_quantile_norm
+                out.append(dataclasses.replace(transform, **kwargs))
+            else:
+                out.append(transform)
+        return tuple(out)
+
+    return transforms.Group(inputs=_override(group.inputs), outputs=_override(group.outputs))
+
+
 def policy_from_model_and_data_config(
     train_config: _config.TrainConfig,
     model: Any,
@@ -28,20 +50,22 @@ def policy_from_model_and_data_config(
     data_config = train_config.data.create(train_config.assets_dirs, train_config.model)
     if data_config.norm_stats is None:
         raise ValueError("norm_stats is required; run `scripts/compute_norm_stats.py` for this config.")
-    norm_stats = data_config.norm_stats
+    data_transforms = _override_group_norm_stats(
+        data_config.data_transforms,
+        norm_stats=data_config.norm_stats,
+        use_quantile_norm=data_config.use_quantile_norm,
+    )
     return _policy.Policy(
         model,
         transforms=[
             *repack_transforms.inputs,
             transforms.InjectDefaultPrompt(default_prompt),
-            *data_config.data_transforms.inputs,
-            transforms.Normalize(norm_stats, use_quantiles=data_config.use_quantile_norm),
+            *data_transforms.inputs,
             *data_config.model_transforms.inputs,
         ],
         output_transforms=[
             *data_config.model_transforms.outputs,
-            transforms.Unnormalize(norm_stats, use_quantiles=data_config.use_quantile_norm),
-            *data_config.data_transforms.outputs,
+            *data_transforms.outputs,
             *repack_transforms.outputs,
         ],
         sample_kwargs=sample_kwargs,
@@ -101,6 +125,11 @@ def create_trained_policy(
         if data_config.asset_id is None:
             raise ValueError("Asset id is required to load norm stats.")
         norm_stats = _checkpoints.load_norm_stats(checkpoint_dir / "assets", data_config.asset_id)
+    data_transforms = _override_group_norm_stats(
+        data_config.data_transforms,
+        norm_stats=norm_stats,
+        use_quantile_norm=data_config.use_quantile_norm,
+    )
 
     # Determine the device to use for PyTorch models
     if is_pytorch and pytorch_device is None:
@@ -116,14 +145,12 @@ def create_trained_policy(
         transforms=[
             *repack_transforms.inputs,
             transforms.InjectDefaultPrompt(default_prompt),
-            *data_config.data_transforms.inputs,
-            transforms.Normalize(norm_stats, use_quantiles=data_config.use_quantile_norm),
+            *data_transforms.inputs,
             *data_config.model_transforms.inputs,
         ],
         output_transforms=[
             *data_config.model_transforms.outputs,
-            transforms.Unnormalize(norm_stats, use_quantiles=data_config.use_quantile_norm),
-            *data_config.data_transforms.outputs,
+            *data_transforms.outputs,
             *repack_transforms.outputs,
         ],
         sample_kwargs=sample_kwargs,

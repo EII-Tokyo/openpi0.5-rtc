@@ -5,6 +5,7 @@ import numpy as np
 
 from openpi import transforms
 from openpi.models import model as _model
+from openpi.shared.normalize import NormStats
 
 
 def make_droid_example() -> dict:
@@ -31,6 +32,9 @@ def _parse_image(image) -> np.ndarray:
 class DroidInputs(transforms.DataTransformFn):
     # Determines which model will be used.
     model_type: _model.ModelType
+    norm_stats: dict[str, NormStats] | None = None
+    use_quantile_norm: bool = False
+    apply_norm: bool = True
 
     def __call__(self, data: dict) -> dict:
         gripper_pos = np.asarray(data["observation/gripper_position"])
@@ -71,11 +75,42 @@ class DroidInputs(transforms.DataTransformFn):
                 data["prompt"] = data["prompt"].decode("utf-8")
             inputs["prompt"] = data["prompt"]
 
+        if self.apply_norm:
+            _apply_normalize_in_place(inputs, self.norm_stats, use_quantiles=self.use_quantile_norm)
+
         return inputs
 
 
 @dataclasses.dataclass(frozen=True)
 class DroidOutputs(transforms.DataTransformFn):
+    norm_stats: dict[str, NormStats] | None = None
+    use_quantile_norm: bool = False
+    apply_norm: bool = True
+
     def __call__(self, data: dict) -> dict:
+        outputs = dict(data)
+        if self.apply_norm:
+            _apply_unnormalize_in_place(outputs, self.norm_stats, use_quantiles=self.use_quantile_norm)
         # Only return the first 8 dims.
-        return {"actions": np.asarray(data["actions"][:, :8])}
+        return {"actions": np.asarray(outputs["actions"][:, :8]), "state": outputs.get("state")}
+
+
+def _apply_normalize_in_place(data: dict, norm_stats: dict[str, NormStats] | None, *, use_quantiles: bool) -> None:
+    if norm_stats is None:
+        raise ValueError("norm_stats is required when apply_norm=True")
+    normalized = transforms.Normalize(norm_stats, use_quantiles=use_quantiles, strict=False)(
+        {key: data[key] for key in ("state", "actions") if key in data}
+    )
+    data.update(normalized)
+
+
+def _apply_unnormalize_in_place(data: dict, norm_stats: dict[str, NormStats] | None, *, use_quantiles: bool) -> None:
+    if norm_stats is None:
+        raise ValueError("norm_stats is required when apply_norm=True")
+    keys = tuple(key for key in ("state", "actions") if key in data)
+    if not keys:
+        return
+    unnormalized = transforms.Unnormalize(norm_stats, use_quantiles=use_quantiles)(
+        {key: data[key] for key in keys}
+    )
+    data.update(unnormalized)

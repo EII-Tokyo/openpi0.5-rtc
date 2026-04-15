@@ -5,6 +5,7 @@ import einops
 import numpy as np
 
 from openpi import transforms
+from openpi.shared.normalize import NormStats
 
 
 def make_aloha_example() -> dict:
@@ -35,6 +36,9 @@ class AlohaInputs(transforms.DataTransformFn):
     # If true, this will convert the joint and gripper values from the standard Aloha space to
     # the space used by the pi internal runtime which was used to train the base model.
     adapt_to_pi: bool = True
+    norm_stats: dict[str, NormStats] | None = None
+    use_quantile_norm: bool = False
+    apply_norm: bool = True
 
     # The expected cameras names. All input cameras must be in this set. Missing optional cameras
     # are omitted so the model can run with either 3-camera or 4-camera inputs.
@@ -87,6 +91,9 @@ class AlohaInputs(transforms.DataTransformFn):
         if "actions_mask" in data:
             inputs["actions_mask"] = _to_scalar_bool(data["actions_mask"])
 
+        if self.apply_norm:
+            _apply_normalize_in_place(inputs, self.norm_stats, use_quantiles=self.use_quantile_norm)
+
         return inputs
 
 
@@ -97,15 +104,42 @@ class AlohaOutputs(transforms.DataTransformFn):
     # If true, this will convert the joint and gripper values from the standard Aloha space to
     # the space used by the pi internal runtime which was used to train the base model.
     adapt_to_pi: bool = True
+    norm_stats: dict[str, NormStats] | None = None
+    use_quantile_norm: bool = False
+    apply_norm: bool = True
 
     def __call__(self, data: dict) -> dict:
+        outputs = dict(data)
+        if self.apply_norm:
+            _apply_unnormalize_in_place(outputs, self.norm_stats, use_quantiles=self.use_quantile_norm)
         # Only return the first 14 dims.
-        actions = np.asarray(data["actions"][:, :14])
+        actions = np.asarray(outputs["actions"][:, :14])
         return {
             "actions": _encode_actions(actions, adapt_to_pi=self.adapt_to_pi),
-            "state": data["state"],
-            "origin_actions": data["origin_actions"],
+            "state": outputs.get("state"),
+            "origin_actions": outputs.get("origin_actions"),
         }
+
+
+def _apply_normalize_in_place(data: dict, norm_stats: dict[str, NormStats] | None, *, use_quantiles: bool) -> None:
+    if norm_stats is None:
+        raise ValueError("norm_stats is required when apply_norm=True")
+    normalized = transforms.Normalize(norm_stats, use_quantiles=use_quantiles, strict=False)(
+        {key: data[key] for key in ("state", "actions") if key in data}
+    )
+    data.update(normalized)
+
+
+def _apply_unnormalize_in_place(data: dict, norm_stats: dict[str, NormStats] | None, *, use_quantiles: bool) -> None:
+    if norm_stats is None:
+        raise ValueError("norm_stats is required when apply_norm=True")
+    keys = tuple(key for key in ("state", "actions") if key in data)
+    if not keys:
+        return
+    unnormalized = transforms.Unnormalize(norm_stats, use_quantiles=use_quantiles)(
+        {key: data[key] for key in keys}
+    )
+    data.update(unnormalized)
 
 
 def _joint_flip_mask() -> np.ndarray:

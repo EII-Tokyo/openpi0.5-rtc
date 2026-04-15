@@ -3,6 +3,7 @@
 Writes mean and std under the config assets directory for the given ``repo_id``.
 """
 
+import dataclasses
 import numpy as np
 import tqdm
 import tyro
@@ -17,6 +18,16 @@ import openpi.transforms as transforms
 class RemoveStrings(transforms.DataTransformFn):
     def __call__(self, x: dict) -> dict:
         return {k: v for k, v in x.items() if not np.issubdtype(np.asarray(v).dtype, np.str_)}
+
+
+def _disable_norm(transforms_seq: list[transforms.DataTransformFn]) -> list[transforms.DataTransformFn]:
+    disabled: list[transforms.DataTransformFn] = []
+    for transform in transforms_seq:
+        if hasattr(transform, "apply_norm"):
+            disabled.append(dataclasses.replace(transform, apply_norm=False))
+        else:
+            disabled.append(transform)
+    return disabled
 
 
 def create_torch_dataloader(
@@ -34,7 +45,7 @@ def create_torch_dataloader(
         dataset,
         [
             *data_config.repack_transforms.inputs,
-            *data_config.data_transforms.inputs,
+            *_disable_norm(list(data_config.data_transforms.inputs)),
             # Remove strings since they are not supported by JAX and are not needed to compute norm stats.
             RemoveStrings(),
         ],
@@ -78,7 +89,9 @@ def main(config_name: str, max_frames: int | None = None):
 
     norm_stats = {key: stats.get_statistics() for key, stats in stats.items()}
 
-    output_path = config.assets_dirs / data_config.repo_id
+    if data_config.asset_id is None:
+        raise ValueError("Data config must define asset_id to write norm stats.")
+    output_path = config.assets_dirs / data_config.asset_id
     print(f"Writing stats to: {output_path}")
     normalize.save(output_path, norm_stats)
 
