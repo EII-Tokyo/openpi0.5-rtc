@@ -83,7 +83,7 @@ class Runtime:
         # 退出标志
         self._stop = False
         self._keyboard_task_mapping = {
-            "1": "Remove the label from the bottle with the knife in the right hand.",
+            "1": "Process bottles, including unscrewing caps, rinsing bottles, and tearing off labels.",
             "2": "Do the followings: 1. If the bottle cap is facing left, rotate the bottle 180 degrees. 2. Pick up the bottle. 3. Twist off the bottle cap if the bottle has a cap. 4. Put the bottle into the box on the left. 5. Put the cap into the box on the right. If the bottle cap falls onto the table, pick it up. 6. Return to home position.",
             "3": "Stop and human hand control",
             "4": "Return to home position and save hdf5",
@@ -248,7 +248,9 @@ class Runtime:
             fd = sys.stdin.fileno()
             old_settings = termios.tcgetattr(fd)
             tty.setcbreak(fd)
-            logging.info("键盘快捷键已启用：2 执行任务，3 人工接管，4 回 home 并保存，5 回 sleep 并退出")
+            logging.info(
+                "键盘快捷键已启用：1 综合处理瓶子，2 拧瓶盖任务，3 人工接管，4 回 home 并保存，5 回 sleep 并退出"
+            )
         else:
             logging.warning("stdin 不是 TTY，主循环中无法监听键盘快捷键")
 
@@ -444,7 +446,7 @@ class Runtime:
             **observation,
             'prompt': self._current_task.get('task_name')
         }
-            
+
         action = self._agent.get_action(observation_with_task)
         self._environment.apply_action(action)
         # 存储最后的action（用于task_num==3时移动master）

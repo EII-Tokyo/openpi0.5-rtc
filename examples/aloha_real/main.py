@@ -49,6 +49,8 @@ class Args:
     compress_images: bool = True
     is_mobile: bool = False
     if_save_hdf5: bool = True
+    # Set <= 0 to save the full episode instead of a rolling tail buffer.
+    hdf5_max_buffer_seconds: float = 60.0
 
 
 def main(args: Args) -> None:
@@ -66,6 +68,7 @@ def main(args: Args) -> None:
         compress_images=args.compress_images,
         is_mobile=args.is_mobile,
         fps=args.policy_hz,
+        max_buffer_seconds=args.hdf5_max_buffer_seconds,
     )
     
     runtime = _runtime.Runtime(

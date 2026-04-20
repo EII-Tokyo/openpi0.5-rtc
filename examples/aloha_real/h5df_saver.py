@@ -10,14 +10,13 @@ from typing_extensions import override
 class H5dfSaver(_subscriber.Subscriber):
     """保存 episode 数据到 h5df 文件。"""
 
-    _MAX_BUFFER_SECONDS = 5.0
-
     def __init__(
         self,
         dataset_dir: str,
         compress_images: bool = True,
         is_mobile: bool = False,
         fps: float | None = None,
+        max_buffer_seconds: float | None = 60.0,
     ) -> None:
         """
         初始化 H5dfSaver。
@@ -31,6 +30,7 @@ class H5dfSaver(_subscriber.Subscriber):
         self._compress_images = compress_images
         self._is_mobile = is_mobile
         self._fps = fps
+        self._max_buffer_seconds = max_buffer_seconds
 
         # 临时存储原始数据（不在on_step中填充data_dict）
         self._observations = deque()
@@ -54,10 +54,11 @@ class H5dfSaver(_subscriber.Subscriber):
         self._actions.append(action)
         self._timestamps.append(now)
 
-        while self._timestamps and now - self._timestamps[0] > self._MAX_BUFFER_SECONDS:
-            self._observations.popleft()
-            self._actions.popleft()
-            self._timestamps.popleft()
+        if self._max_buffer_seconds is not None and self._max_buffer_seconds > 0:
+            while self._timestamps and now - self._timestamps[0] > self._max_buffer_seconds:
+                self._observations.popleft()
+                self._actions.popleft()
+                self._timestamps.popleft()
 
     @override
     def on_episode_end(self, episode_subdir: str | None = None) -> None:

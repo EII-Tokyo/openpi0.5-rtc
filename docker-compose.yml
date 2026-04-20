@@ -46,7 +46,7 @@ services:
       dockerfile: scripts/docker/serve_policy.Dockerfile
     command: >-
       /bin/bash -lc
-      "uv run --no-sync scripts/serve_policy.py --no-warmup-subtask ${SERVER_ARGS:-policy:checkpoint --policy.config twist_off_the_bottle_cap_lora --policy.dir /app/checkpoints/20260414/7000}"
+      "uv run --no-sync scripts/serve_policy.py --no-warmup-subtask ${SERVER_ARGS:-policy:checkpoint --policy.config twist_off_the_bottle_cap --policy.dir /app/checkpoints/20260205/39999}"
     init: true
     tty: true
     network_mode: host
@@ -111,5 +111,7 @@ services:
     network_mode: "host"
     init: true
     tty: true
+    volumes:
+      - $PWD/voice_assistant_web/frontend/dist:/usr/share/nginx/html:ro
     depends_on:
       - voice_web_backend
