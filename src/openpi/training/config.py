@@ -270,6 +270,7 @@ class LeRobotAlohaDataConfig(DataConfigFactory):
                     adapt_to_pi=self.adapt_to_pi,
                     norm_stats=base_config.norm_stats,
                     use_quantile_norm=base_config.use_quantile_norm,
+                    apply_norm=False,
                 )
             ],
             outputs=[
@@ -277,6 +278,7 @@ class LeRobotAlohaDataConfig(DataConfigFactory):
                     adapt_to_pi=self.adapt_to_pi,
                     norm_stats=base_config.norm_stats,
                     use_quantile_norm=base_config.use_quantile_norm,
+                    apply_norm=False,
                 )
             ],
         )
@@ -286,6 +288,20 @@ class LeRobotAlohaDataConfig(DataConfigFactory):
                 inputs=[_transforms.DeltaActions(delta_action_mask)],
                 outputs=[_transforms.AbsoluteActions(delta_action_mask)],
             )
+        data_transforms = data_transforms.push(
+            inputs=[
+                _transforms.Normalize(
+                    base_config.norm_stats,
+                    use_quantiles=base_config.use_quantile_norm,
+                )
+            ],
+            outputs=[
+                _transforms.Unnormalize(
+                    base_config.norm_stats,
+                    use_quantiles=base_config.use_quantile_norm,
+                )
+            ],
+        )
 
         model_transforms = ModelTransformFactory(
             default_prompt=self.default_prompt,
@@ -811,8 +827,8 @@ _CONFIGS = [
             paligemma_variant="gemma_2b_lora",
             action_expert_variant="gemma_300m_lora",
             max_token_len=96,
-            subtask_loss_weight=0.1,
-            subtask_max_token_len=512,
+            subtask_loss_weight=1.0,
+            subtask_max_token_len=160,
             fast_tokenizer_path=FAST_TOKENIZER_PATH,
             image_resolution=(448, 448),
         ),
@@ -893,9 +909,9 @@ _CONFIGS = [
             pi05=True,
             paligemma_variant="gemma_2b_lora",
             action_expert_variant="gemma_300m_lora",
-            max_token_len=96,
-            subtask_loss_weight=0.1,
-            subtask_max_token_len=512,
+            max_token_len=128,
+            subtask_loss_weight=1.0,
+            subtask_max_token_len=256,
             fast_tokenizer_path=FAST_TOKENIZER_PATH,
             image_resolution=(448, 448),
         ),
@@ -915,9 +931,14 @@ _CONFIGS = [
             video_memory_num_frames=1,
             video_memory_stride_seconds=1.0,
             repo_ids=[
-                "lyl472324464/openai_logs_gpt54_process_all_bottles_1054_224",
-                "lyl472324464/vqav2_100k_224",
-                "lyl472324464/twist_subset_100k_224_from_2025_12_10",
+                "lyl472324464/gqa_train_balanced_100k_224_700fpe",
+                "lyl472324464/twist_subset_balanced_100k_448_multi_repo_300mb",
+                "lyl472324464/vqav2_train_100k_448",
+                "lyl472324464/2026-03-12-two-have-cap-one-right",
+                "lyl472324464/2026-03-12-two-have-cap-all-right",
+                "lyl472324464/2026-03-12-two-have-all-left",
+                "lyl472324464/2026-02-03-no-cap-and-direction",
+                "lyl472324464/2026-01-28-twist-many-bottle",
             ],
             assets=AssetsConfig(
                 assets_dir="gs://openpi-assets/checkpoints/pi05_base/assets",
@@ -961,7 +982,7 @@ _CONFIGS = [
             paligemma_variant="gemma_2b_lora",
             action_expert_variant="gemma_300m_lora",
             subtask_loss_weight=1.0,
-            subtask_max_token_len=64,
+            subtask_max_token_len=256,
         ).get_freeze_filter(),
         ema_decay=None,
         weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_base/params"),

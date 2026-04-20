@@ -2,7 +2,66 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import os
+import socket
+import threading
 import time
+from urllib.parse import urlparse
+
+
+def _ros_master_host_port() -> tuple[str, int]:
+    uri = os.environ.get("ROS_MASTER_URI", "http://127.0.0.1:11311").strip()
+    try:
+        parsed = urlparse(uri)
+        host = parsed.hostname or "127.0.0.1"
+        port = int(parsed.port or 11311)
+        return host, port
+    except Exception:
+        return "127.0.0.1", 11311
+
+
+def _wait_for_ros_master_socket(*, timeout_s: float) -> bool:
+    """rospy.init_node 在 master 未就绪时会长时间阻塞；先探测端口再 init。"""
+    host, port = _ros_master_host_port()
+    deadline = time.time() + max(0.5, timeout_s)
+    while time.time() < deadline:
+        try:
+            with socket.create_connection((host, port), timeout=1.0):
+                logging.info("ROS master reachable at %s:%s", host, port)
+                return True
+        except OSError:
+            time.sleep(0.25)
+    logging.warning("ROS master not reachable at %s:%s within %.1fs", host, port, timeout_s)
+    return False
+
+
+def _init_ros_node_once() -> None:
+    """单进程只应调用一次 rospy.init_node；避免 camera / robot_state 两个线程竞态初始化。"""
+    try:
+        import rospy
+
+        if not rospy.core.is_initialized():
+            rospy.init_node("voice_assistant_web_backend", anonymous=True, disable_signals=True)
+    except Exception:
+        logging.exception("ROS init failed; camera feeds and /puppet_* joint states may stay empty")
+
+
+def _start_ros_bridges_background() -> None:
+    """不阻塞 HTTP 启动：等 roscore 就绪后再 init_node 并启动相机 / 关节订阅。"""
+
+    def _worker() -> None:
+        timeout = float(os.environ.get("VOICE_WEB_ROS_MASTER_TIMEOUT", "120"))
+        if not _wait_for_ros_master_socket(timeout_s=timeout):
+            return
+        try:
+            _init_ros_node_once()
+        except Exception:
+            logging.exception("ROS init failed after master was reachable")
+            return
+        camera_bridge.start()
+        robot_state_bridge.start()
+
+    threading.Thread(target=_worker, name="voice_web_ros_bridges", daemon=True).start()
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
@@ -136,8 +195,7 @@ def _merge_runtime_config_request(request: RuntimeConfigRequest) -> RuntimeConfi
 
 @app.on_event("startup")
 def on_startup() -> None:
-    camera_bridge.start()
-    robot_state_bridge.start()
+    _start_ros_bridges_background()
     stored = runtime_config_store.load()
     publish_runtime_config(
         redis_client,

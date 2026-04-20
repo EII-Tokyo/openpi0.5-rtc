@@ -44,9 +44,11 @@ class Args:
     model_dir: str
     prompt: str
     adapt_to_pi: bool = True
-    low_level_host: str = "192.168.1.40"
+    # 与 docker compose（network_mode: host）同机部署时，策略服务在本机 8000/8001。
+    # 远端策略机请用 CLI 或环境变量 OPENPI_LOW_LEVEL_HOST / OPENPI_HIGH_LEVEL_HOST 覆盖。
+    low_level_host: str = "127.0.0.1"
     low_level_port: int = 8000
-    high_level_host: str = "0.0.0.0"
+    high_level_host: str = "127.0.0.1"
     high_level_port: int = 8001
     high_level_hz: float = 0.0
     # Subtask History 下发到前端的最大条数（1–500），减轻 WebSocket 负载
@@ -261,4 +263,10 @@ if __name__ == "__main__":
     sys.stderr.reconfigure(line_buffering=True) if hasattr(sys.stderr, 'reconfigure') else None
     _start_logging_stdout_guard()
     args = tyro.cli(Args)
+    low_env = os.getenv("OPENPI_LOW_LEVEL_HOST", "").strip()
+    if low_env:
+        args.low_level_host = low_env
+    high_env = os.getenv("OPENPI_HIGH_LEVEL_HOST", "").strip()
+    if high_env:
+        args.high_level_host = high_env
     main(args)

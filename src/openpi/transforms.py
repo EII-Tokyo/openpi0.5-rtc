@@ -275,6 +275,8 @@ class DeltaActions(DataTransformFn):
         state, actions = data["state"], data["actions"]
         mask = np.asarray(self.mask)
         dims = mask.shape[-1]
+        # Policy 输出 / msgpack 等可能给出只读 ndarray，原地 -= 会报错。
+        actions = np.asarray(actions).copy()
         actions[..., :dims] -= np.expand_dims(np.where(mask, state[..., :dims], 0), axis=-2)
         data["actions"] = actions
 
@@ -297,6 +299,7 @@ class AbsoluteActions(DataTransformFn):
         state, actions = data["state"], data["actions"]
         mask = np.asarray(self.mask)
         dims = mask.shape[-1]
+        actions = np.asarray(actions).copy()
         actions[..., :dims] += np.expand_dims(np.where(mask, state[..., :dims], 0), axis=-2)
         data["actions"] = actions
 

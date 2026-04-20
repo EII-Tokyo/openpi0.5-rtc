@@ -2,6 +2,7 @@ services:
   # Default checkpoints used for low-level infer and high-level infer_subtask
   # unless SERVER_ARGS / HIGH_LEVEL_SERVER_ARGS are explicitly overridden.
   # Host path: ./checkpoints/... must exist (params + assets; train_state not required).
+  # Defaults below: b200 triplet 100k LoRA @10000 (override with env vars when needed).
   runtime:
     image: lyl472324464/robot:aloha-ros1.0
     depends_on:
@@ -9,6 +10,10 @@ services:
       - ros_master
       - openpi_server_low_level
       - openpi_server_high_level
+    environment:
+      # examples/aloha_real/main.py 默认连本机策略；跨机时在 shell 或 .env 里设置这两项。
+      - OPENPI_LOW_LEVEL_HOST=${OPENPI_LOW_LEVEL_HOST:-127.0.0.1}
+      - OPENPI_HIGH_LEVEL_HOST=${OPENPI_HIGH_LEVEL_HOST:-127.0.0.1}
     env_file:
       - ./.env
     # build:
@@ -52,9 +57,20 @@ services:
       context: .
       dockerfile: scripts/docker/serve_policy.Dockerfile
     # command: /bin/bash
-    command: >-
-      /bin/bash -lc
-      "uv run --no-sync scripts/serve_policy.py --no-warmup-subtask ${SERVER_ARGS:-policy:checkpoint --policy.config twist_and_static_mixture_full_finetune --policy.dir /app/checkpoints/twist_and_static_mixture_full_finetune/twist_and_static_mixture_full_finetune_vast_20260405_100600/39999}"
+    command:
+      - /bin/bash
+      - -lc
+      - |
+        if [ -n "$$SERVER_ARGS" ]; then
+          set -- $$SERVER_ARGS
+        else
+          set -- policy:checkpoint \
+            --policy.config twist_only_lora_triplet_100k \
+            --policy.dir /app/checkpoints/from_s3/openpi-tokyo/twist_only_lora_triplet_100k/b200_triplet_bs32_tok160_real/10000/10000
+        fi
+        uv run --no-sync scripts/serve_policy.py \
+          --no-warmup-subtask \
+          "$$@"
     init: true
     tty: true
     network_mode: host
@@ -79,9 +95,22 @@ services:
     build:
       context: .
       dockerfile: scripts/docker/serve_policy.Dockerfile
-    command: >-
-      /bin/bash -lc
-      "uv run --no-sync scripts/serve_policy.py --no-warmup-rtc --no-warmup-non-rtc --port 8001 ${HIGH_LEVEL_SERVER_ARGS:-policy:checkpoint --policy.config twist_only_lora_triplet_10k --policy.dir /app/checkpoints/twist_only_lora_triplet_10k/twist_only_lora_triplet_10k_20260410_tok96_sub64/20000}"
+    command:
+      - /bin/bash
+      - -lc
+      - |
+        if [ -n "$$HIGH_LEVEL_SERVER_ARGS" ]; then
+          set -- $$HIGH_LEVEL_SERVER_ARGS
+        else
+          set -- policy:checkpoint \
+            --policy.config twist_only_lora_triplet_100k \
+            --policy.dir /app/checkpoints/from_s3/openpi-tokyo/twist_only_lora_triplet_100k/b200_triplet_bs32_tok160_real/10000/10000
+        fi
+        uv run --no-sync scripts/serve_policy.py \
+          --no-warmup-rtc \
+          --no-warmup-non-rtc \
+          --port 8001 \
+          "$$@"
     init: true
     tty: true
     network_mode: host
@@ -110,8 +139,6 @@ services:
       timeout: 3s
       retries: 5
       start_period: 2s
-    ports:
-      - 6379:6379
 
   mongo:
     image: mongo:7.0
@@ -151,6 +178,7 @@ services:
     depends_on:
       - redis
       - mongo
+      - ros_master
 
   voice_web_frontend:
     image: voice_assistant_web_frontend

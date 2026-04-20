@@ -119,8 +119,6 @@ class Policy(BasePolicy):
         
         inputs = jax.tree.map(lambda x: x, obs)
         inputs = self._input_transform(inputs)
-        if "subtask" in obs:
-            print("infer", obs["subtask"])
         if not self._is_pytorch_model:
             # Make a batch and convert to jax.Array.
             inputs = jax.tree.map(lambda x: jnp.asarray(x)[np.newaxis, ...], inputs)
@@ -191,8 +189,6 @@ class Policy(BasePolicy):
         inputs = jax.tree.map(lambda x: x, obs)
         inputs.pop("subtask", None)
         inputs = self._input_transform(inputs)
-        for key, value in inputs.items():
-            print(key)
         inputs = self._filter_subtask_inputs(inputs)
 
         if self._is_pytorch_model:

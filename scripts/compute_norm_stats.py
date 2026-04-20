@@ -23,6 +23,8 @@ class RemoveStrings(transforms.DataTransformFn):
 def _disable_norm(transforms_seq: list[transforms.DataTransformFn]) -> list[transforms.DataTransformFn]:
     disabled: list[transforms.DataTransformFn] = []
     for transform in transforms_seq:
+        if isinstance(transform, (transforms.Normalize, transforms.Unnormalize)):
+            continue
         if hasattr(transform, "apply_norm"):
             disabled.append(dataclasses.replace(transform, apply_norm=False))
         else:

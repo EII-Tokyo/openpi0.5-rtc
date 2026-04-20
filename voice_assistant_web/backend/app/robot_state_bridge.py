@@ -51,9 +51,6 @@ class RobotStateBridge:
             import rospy
             from sensor_msgs.msg import JointState
 
-            if not rospy.core.is_initialized():
-                rospy.init_node("voice_assistant_web_backend", anonymous=True, disable_signals=True)
-
             def left_callback(message: JointState) -> None:
                 self._left_qpos = [float(v) for v in message.position]
 
