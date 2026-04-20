@@ -65,8 +65,8 @@ services:
           set -- $$SERVER_ARGS
         else
           set -- policy:checkpoint \
-            --policy.config twist_only_lora_triplet_100k \
-            --policy.dir /app/checkpoints/from_s3/openpi-tokyo/twist_only_lora_triplet_100k/b200_triplet_bs32_tok160_real/10000/10000
+            --policy.config twist_and_static_mixture_full_finetune \
+            --policy.dir /app/checkpoints/twist_and_static_mixture_full_finetune/twist_and_static_mixture_full_finetune_vast_20260405_100600/39999
         fi
         uv run --no-sync scripts/serve_policy.py \
           --no-warmup-subtask \
@@ -103,8 +103,8 @@ services:
           set -- $$HIGH_LEVEL_SERVER_ARGS
         else
           set -- policy:checkpoint \
-            --policy.config twist_only_lora_triplet_100k \
-            --policy.dir /app/checkpoints/from_s3/openpi-tokyo/twist_only_lora_triplet_100k/b200_triplet_bs32_tok160_real/10000/10000
+            --policy.config twist_and_static_mixture_full_finetune \
+            --policy.dir /app/checkpoints/twist_and_static_mixture_full_finetune/twist_and_static_mixture_full_finetune_vast_20260405_100600/39999
         fi
         uv run --no-sync scripts/serve_policy.py \
           --no-warmup-rtc \
