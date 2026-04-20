@@ -159,6 +159,11 @@ def _merge_runtime_config_request(request: RuntimeConfigRequest) -> RuntimeConfi
         include_bottle_state=request.include_bottle_state if request.include_bottle_state is not None else current.include_bottle_state,
         include_subtask=request.include_subtask if request.include_subtask is not None else current.include_subtask,
         forced_low_level_subtask=_merge_forced_low_level_subtask(request, current.forced_low_level_subtask),
+        hdf5_recent_seconds=(
+            max(0.0, float(request.hdf5_recent_seconds))
+            if request.hdf5_recent_seconds is not None
+            else current.hdf5_recent_seconds
+        ),
         video_memory_num_frames=(
             request.video_memory_num_frames
             if request.video_memory_num_frames in (1, 4)
@@ -207,6 +212,7 @@ def on_startup() -> None:
         include_bottle_state=stored.include_bottle_state,
         include_subtask=stored.include_subtask,
         forced_low_level_subtask=stored.forced_low_level_subtask,
+        hdf5_recent_seconds=stored.hdf5_recent_seconds,
         video_memory_num_frames=stored.video_memory_num_frames,
         high_level_source=stored.high_level_source,
         gpt_model=stored.gpt_model,
@@ -297,6 +303,7 @@ async def voice_text(request: VoiceRequest) -> VoiceResponse:
             include_bottle_state=request.include_bottle_state,
             include_subtask=request.include_subtask,
             forced_low_level_subtask=request.forced_low_level_subtask,
+            hdf5_recent_seconds=request.hdf5_recent_seconds,
             video_memory_num_frames=request.video_memory_num_frames,
         )
         return VoiceResponse(
@@ -317,6 +324,7 @@ async def voice_text(request: VoiceRequest) -> VoiceResponse:
         include_bottle_state=request.include_bottle_state,
         include_subtask=request.include_subtask,
         forced_low_level_subtask=request.forced_low_level_subtask,
+        hdf5_recent_seconds=request.hdf5_recent_seconds,
         video_memory_num_frames=request.video_memory_num_frames,
     )
 
@@ -333,6 +341,7 @@ async def voice_audio(
     include_bottle_state: bool = Form(True),
     include_subtask: bool = Form(True),
     forced_low_level_subtask: str | None = Form(None),
+    hdf5_recent_seconds: float = Form(5.0),
     video_memory_num_frames: int = Form(1),
 ) -> VoiceResponse:
     return await voice_engine.process_audio(
@@ -346,6 +355,7 @@ async def voice_audio(
         include_bottle_state=include_bottle_state,
         include_subtask=include_subtask,
         forced_low_level_subtask=forced_low_level_subtask,
+        hdf5_recent_seconds=hdf5_recent_seconds,
         video_memory_num_frames=video_memory_num_frames,
     )
 
@@ -369,6 +379,7 @@ def runtime_config(request: RuntimeConfigRequest) -> RuntimeConfigPayload:
         include_bottle_state=merged.include_bottle_state,
         include_subtask=merged.include_subtask,
         forced_low_level_subtask=merged.forced_low_level_subtask,
+        hdf5_recent_seconds=merged.hdf5_recent_seconds,
         video_memory_num_frames=merged.video_memory_num_frames,
         high_level_source=merged.high_level_source,
         gpt_model=merged.gpt_model,

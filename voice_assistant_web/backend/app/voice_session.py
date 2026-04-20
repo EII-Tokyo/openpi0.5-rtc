@@ -152,6 +152,7 @@ class VoiceAssistantEngine:
         include_bottle_state: bool = True,
         include_subtask: bool = True,
         forced_low_level_subtask: str | None = None,
+        hdf5_recent_seconds: float = 5.0,
         video_memory_num_frames: int = 1,
         debug: dict | None = None,
     ) -> VoiceResponse:
@@ -230,6 +231,7 @@ class VoiceAssistantEngine:
                 include_bottle_state=include_bottle_state,
                 include_subtask=include_subtask,
                 forced_low_level_subtask=forced_low_level_subtask,
+                hdf5_recent_seconds=hdf5_recent_seconds,
                 video_memory_num_frames=video_memory_num_frames,
             )
         logging.info(
@@ -289,6 +291,7 @@ class VoiceAssistantEngine:
         include_bottle_state: bool = True,
         include_subtask: bool = True,
         forced_low_level_subtask: str | None = None,
+        hdf5_recent_seconds: float = 5.0,
         video_memory_num_frames: int = 1,
     ) -> VoiceResponse:
         fallback_language = self._normalize_language(language)
@@ -335,6 +338,7 @@ class VoiceAssistantEngine:
                 include_bottle_state=include_bottle_state,
                 include_subtask=include_subtask,
                 forced_low_level_subtask=forced_low_level_subtask,
+                hdf5_recent_seconds=hdf5_recent_seconds,
                 video_memory_num_frames=video_memory_num_frames,
                 debug={
                     "transcription_language": getattr(transcription, "language", None),

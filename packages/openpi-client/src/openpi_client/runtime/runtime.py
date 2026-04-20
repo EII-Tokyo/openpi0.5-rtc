@@ -71,6 +71,7 @@ class Runtime:
         high_level_policy=None,
         high_level_hz: float = 0.0,
         high_level_history_max_len: int = 50,
+        hdf5_recent_seconds: float | None = 5.0,
     ) -> None:
         self._environment = environment
         self._agent = agent
@@ -86,6 +87,7 @@ class Runtime:
         self._manual_step_time = 1 / self._manual_hz if self._manual_hz > 0 else 0
         self._manual_dataset_dir = manual_dataset_dir
         self._dataset_dir = None
+        self._hdf5_recent_seconds = self._normalize_hdf5_recent_seconds(hdf5_recent_seconds)
         self._high_level_policy = high_level_policy
         self._high_level_step_time = 1 / high_level_hz if high_level_hz > 0 else 0.0
 
@@ -376,6 +378,7 @@ class Runtime:
             "gpt_model": self._gpt_model,
             "gpt_image_mode": self._gpt_image_mode,
             "forced_low_level_subtask": self._forced_low_level_subtask,
+            "hdf5_recent_seconds": self._hdf5_recent_seconds,
         }
 
     def _rewind_action_history(self, real_env, action_history: deque[list[float]]) -> list[float] | None:
@@ -405,6 +408,7 @@ class Runtime:
         include_bottle_state = task_data.get("include_bottle_state")
         include_subtask = task_data.get("include_subtask")
         forced_low_level_subtask = task_data.get("forced_low_level_subtask")
+        hdf5_recent_seconds = task_data.get("hdf5_recent_seconds")
         video_memory_num_frames = task_data.get("video_memory_num_frames")
         high_level_source = task_data.get("high_level_source")
         gpt_model = task_data.get("gpt_model")
@@ -429,6 +433,8 @@ class Runtime:
             self._forced_low_level_subtask = forced_low_level_subtask.strip()
         elif forced_low_level_subtask in ("", None):
             self._forced_low_level_subtask = None
+        if hdf5_recent_seconds is not None:
+            self._hdf5_recent_seconds = self._normalize_hdf5_recent_seconds(hdf5_recent_seconds)
         if isinstance(video_memory_num_frames, int):
             self._apply_video_memory_config(video_memory_num_frames)
         if high_level_source in {"gpt", "service"}:
@@ -446,11 +452,25 @@ class Runtime:
         for subscriber in self._subscribers:
             if hasattr(subscriber, "set_dataset_dir"):
                 subscriber.set_dataset_dir(self._dataset_dir)
+            if hasattr(subscriber, "set_recent_seconds"):
+                subscriber.set_recent_seconds(self._hdf5_recent_seconds)
 
     def apply_runtime_config(self, config_data: dict[str, Any]) -> None:
         if not isinstance(config_data, dict):
             raise TypeError("config_data must be a dict")
         self._apply_task_paths(dict(config_data))
+
+    @staticmethod
+    def _normalize_hdf5_recent_seconds(value: Any) -> float | None:
+        if value is None:
+            return None
+        try:
+            seconds = float(value)
+        except (TypeError, ValueError):
+            return None
+        if seconds <= 0:
+            return None
+        return seconds
 
     def _setup_redis(self) -> None:
         """设置Redis连接"""
@@ -515,6 +535,7 @@ class Runtime:
                                 'include_bottle_state': data.get('include_bottle_state'),
                                 'include_subtask': data.get('include_subtask'),
                                 'forced_low_level_subtask': data.get('forced_low_level_subtask'),
+                                'hdf5_recent_seconds': data.get('hdf5_recent_seconds'),
                                 'video_memory_num_frames': data.get('video_memory_num_frames'),
                                 'high_level_source': data.get('high_level_source'),
                                 'gpt_model': data.get('gpt_model'),

@@ -66,6 +66,7 @@ class VoiceRequest(BaseModel):
     include_bottle_state: bool = True
     include_subtask: bool = True
     forced_low_level_subtask: str | None = None
+    hdf5_recent_seconds: float = 5.0
     video_memory_num_frames: int = 1
 
 
@@ -78,6 +79,7 @@ class RuntimeConfigRequest(BaseModel):
     include_bottle_state: bool | None = None
     include_subtask: bool | None = None
     forced_low_level_subtask: str | None = None
+    hdf5_recent_seconds: float | None = None
     video_memory_num_frames: int | None = None
     high_level_source: Literal["gpt", "service"] | None = None
     gpt_model: str | None = None
@@ -100,6 +102,7 @@ class RuntimeConfigPayload(BaseModel):
     include_bottle_state: bool = True
     include_subtask: bool = True
     forced_low_level_subtask: str | None = None
+    hdf5_recent_seconds: float = 5.0
     video_memory_num_frames: int = 1
     high_level_source: Literal["gpt", "service"] = "gpt"
     gpt_model: str = "gpt-5.4"

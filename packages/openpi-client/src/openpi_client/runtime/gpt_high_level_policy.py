@@ -244,13 +244,17 @@ At this stage, simply decide:
 Rules:
 
 - Use `cam_high` together with `cam_right_wrist` when available to judge upside-down versus upright and capped versus uncapped.
-- Only an upright capped bottle may produce:
-  `Bottle in left hand and capped` -> `Unscrew cap`
+- Orientation has priority over cap detection: first decide whether the left-hand bottle is upside down, then decide cap state only if it is upright.
 - If the left-hand bottle is upside down, you must produce:
   `Bottle in left hand and upside down` -> `Bottle to left trash bin`
+- Never output `Unscrew cap` for an upside-down bottle, even if a cap is visible.
+- Only an upright capped bottle may produce:
+  `Bottle in left hand and capped` -> `Unscrew cap`
 - If the left-hand bottle no longer has a cap, you must not output `Unscrew cap`.
 - If the cap is removed, choose the correct cap-removed disposal state depending on whether the cap is in the right hand.
-- `Bottle stuck in left hand` is only valid right after a disposal attempt into the left trash bin when the bottle visibly remains stuck in the left gripper.
+- Do not confuse an upside-down bottle in the left hand with `Bottle stuck in left hand`.
+- `Bottle stuck in left hand` is only valid when the left gripper has already moved forward to the front trash-bin area, is at or next to the left trash bin, and the robot has just attempted to discard the bottle but the bottle visibly remains stuck in the left gripper.
+- If the left gripper is not at the front trash-bin area, never output `Bottle stuck in left hand`; classify the held bottle by orientation and cap state instead.
 
 ## 4. Only After The Current Bottle Is Finished May A New Bottle Start
 

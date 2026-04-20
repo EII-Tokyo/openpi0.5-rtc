@@ -69,11 +69,12 @@ class Args:
     reset_position: str = json.dumps(_DEFAULT_RESET_POSITION)
     gripper_current_limits: List[int] = dataclasses.field(default_factory=lambda: [300, 500])
     # H5dfSaver 配置
-    dataset_dir: str | None = None
-    manual_dataset_dir: str | None = None
+    dataset_dir: str | None = "/app/examples/aloha_real/inference_hdf5/"
+    manual_dataset_dir: str | None = "/app/examples/aloha_real/manual_override_hdf5/"
     compress_images: bool = True
     is_mobile: bool = False
-    if_save_hdf5: bool = False
+    if_save_hdf5: bool = True
+    hdf5_recent_seconds: float = 5.0
     runtime_config_url: str = "http://127.0.0.1:8011/api/runtime/config"
 
 
@@ -157,6 +158,7 @@ def main(args: Args) -> None:
         compress_images=args.compress_images,
         is_mobile=args.is_mobile,
         fps=args.policy_hz,
+        recent_seconds=args.hdf5_recent_seconds,
     )
     
     runtime = _runtime.Runtime(
@@ -182,6 +184,7 @@ def main(args: Args) -> None:
         high_level_policy=high_level_policy,
         high_level_hz=args.high_level_hz,
         high_level_history_max_len=args.high_level_history_max_len,
+        hdf5_recent_seconds=args.hdf5_recent_seconds,
         prompt=args.prompt,
     )
     if initial_runtime_config:

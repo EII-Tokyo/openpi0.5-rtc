@@ -187,6 +187,7 @@ type UiConfig = {
   uiLanguage: AppLanguage
   datasetDir: string
   manualDatasetDir: string
+  hdf5RecentSeconds: number
   includeBottleDescription: boolean
   lockBottleDescription: boolean
   includeBottlePosition: boolean
@@ -208,6 +209,7 @@ type UiConfig = {
 type RuntimeConfigPayload = {
   datasetDir: string
   manualDatasetDir: string
+  hdf5RecentSeconds: number
   includeBottleDescription: boolean
   lockBottleDescription: boolean
   includeBottlePosition: boolean
@@ -241,6 +243,14 @@ function parseRuntimeConfigResponse(data: unknown): RuntimeConfigPayload {
   }
   const rawFrames = r['video_memory_num_frames'] ?? r['videoMemoryNumFrames']
   const videoMemoryNumFrames: 1 | 4 = rawFrames === 4 ? 4 : 1
+  const rawHdf5RecentSeconds = r['hdf5_recent_seconds'] ?? r['hdf5RecentSeconds']
+  let hdf5RecentSeconds = 5
+  if (typeof rawHdf5RecentSeconds === 'number' && Number.isFinite(rawHdf5RecentSeconds)) {
+    hdf5RecentSeconds = Math.max(0, rawHdf5RecentSeconds)
+  } else if (typeof rawHdf5RecentSeconds === 'string' && rawHdf5RecentSeconds.trim()) {
+    const n = Number.parseFloat(rawHdf5RecentSeconds)
+    if (Number.isFinite(n)) hdf5RecentSeconds = Math.max(0, n)
+  }
   const rawSource = r['high_level_source'] ?? r['highLevelSource']
   const highLevelSource: 'gpt' | 'service' = rawSource === 'service' ? 'service' : 'gpt'
   const rawModel = r['gpt_model'] ?? r['gptModel']
@@ -267,6 +277,7 @@ function parseRuntimeConfigResponse(data: unknown): RuntimeConfigPayload {
   return {
     datasetDir: str('datasetDir', 'dataset_dir'),
     manualDatasetDir: str('manualDatasetDir', 'manual_dataset_dir'),
+    hdf5RecentSeconds,
     includeBottleDescription: bool('includeBottleDescription', 'include_bottle_description', true),
     lockBottleDescription: bool('lockBottleDescription', 'lock_bottle_description', true),
     includeBottlePosition: bool('includeBottlePosition', 'include_bottle_position', false),
@@ -312,6 +323,7 @@ const defaultConfig: UiConfig = {
   uiLanguage: 'en',
   datasetDir: '',
   manualDatasetDir: '',
+  hdf5RecentSeconds: 5,
   includeBottleDescription: true,
   lockBottleDescription: true,
   includeBottlePosition: false,
@@ -677,6 +689,7 @@ export default function App() {
           ...current,
           datasetDir: runtimeConfig.datasetDir || '',
           manualDatasetDir: runtimeConfig.manualDatasetDir || '',
+          hdf5RecentSeconds: runtimeConfig.hdf5RecentSeconds,
           includeBottleDescription: runtimeConfig.includeBottleDescription,
           lockBottleDescription: runtimeConfig.lockBottleDescription,
           includeBottlePosition: runtimeConfig.includeBottlePosition,
@@ -827,6 +840,7 @@ export default function App() {
           language: uiConfig.uiLanguage,
           dataset_dir: uiConfig.datasetDir.trim() || undefined,
           manual_dataset_dir: uiConfig.manualDatasetDir.trim() || undefined,
+          hdf5_recent_seconds: uiConfig.hdf5RecentSeconds,
           include_bottle_description: uiConfig.includeBottleDescription,
           lock_bottle_description: uiConfig.lockBottleDescription,
           include_bottle_position: uiConfig.includeBottlePosition,
@@ -860,6 +874,7 @@ export default function App() {
         body: JSON.stringify({
           dataset_dir: nextConfig.datasetDir.trim(),
           manual_dataset_dir: nextConfig.manualDatasetDir.trim(),
+          hdf5_recent_seconds: nextConfig.hdf5RecentSeconds,
           include_bottle_description: nextConfig.includeBottleDescription,
           lock_bottle_description: nextConfig.lockBottleDescription,
           include_bottle_position: nextConfig.includeBottlePosition,
@@ -920,6 +935,7 @@ export default function App() {
         formData.append('manual_dataset_dir', uiConfig.manualDatasetDir.trim())
       }
       formData.append('include_bottle_description', String(uiConfig.includeBottleDescription))
+      formData.append('hdf5_recent_seconds', String(uiConfig.hdf5RecentSeconds))
       formData.append('lock_bottle_description', String(uiConfig.lockBottleDescription))
       formData.append('include_bottle_position', String(uiConfig.includeBottlePosition))
       formData.append('include_bottle_state', String(uiConfig.includeBottleState))
@@ -1867,6 +1883,26 @@ export default function App() {
                   })
                 }
                 placeholder="/app/examples/aloha_real/manual_override"
+              />
+            </label>
+            <label className="config-field">
+              <span>{t.hdf5RecentSeconds}</span>
+              <input
+                min="0"
+                step="0.5"
+                type="number"
+                value={String(uiConfig.hdf5RecentSeconds)}
+                onChange={(event) =>
+                  setUiConfig((current) => {
+                    const parsed = Number.parseFloat(event.target.value)
+                    const nextConfig = {
+                      ...current,
+                      hdf5RecentSeconds: Number.isFinite(parsed) ? Math.max(0, parsed) : 0,
+                    }
+                    void pushRuntimeConfig(nextConfig)
+                    return nextConfig
+                  })
+                }
               />
             </label>
             <p className="config-help">{t.configHelp}</p>

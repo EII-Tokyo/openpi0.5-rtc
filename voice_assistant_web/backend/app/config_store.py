@@ -21,6 +21,14 @@ def _clamp_camera_refresh_ms(raw: Any) -> int:
         return 100
 
 
+def _hdf5_recent_seconds(raw: Any) -> float:
+    try:
+        value = float(raw)
+    except (TypeError, ValueError):
+        return 5.0
+    return max(0.0, value)
+
+
 class RuntimeConfigStore:
     def __init__(self) -> None:
         self._client = MongoClient(
@@ -68,6 +76,7 @@ class RuntimeConfigStore:
                 include_bottle_state=bool(doc.get("include_bottle_state", True)),
                 include_subtask=bool(doc.get("include_subtask", True)),
                 forced_low_level_subtask=(str(doc["forced_low_level_subtask"]).strip() if doc.get("forced_low_level_subtask") else None),
+                hdf5_recent_seconds=_hdf5_recent_seconds(doc.get("hdf5_recent_seconds", 5.0)),
                 video_memory_num_frames=4 if doc.get("video_memory_num_frames") == 4 else 1,
                 high_level_source="service" if doc.get("high_level_source") == "service" else "gpt",
                 gpt_model=str(doc.get("gpt_model") or "gpt-5.4"),

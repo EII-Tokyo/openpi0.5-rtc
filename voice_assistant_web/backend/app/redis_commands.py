@@ -37,6 +37,7 @@ def publish_task(
     include_bottle_state: bool = True,
     include_subtask: bool = True,
     forced_low_level_subtask: str | None = None,
+    hdf5_recent_seconds: float = 5.0,
     video_memory_num_frames: int = 1,
 ) -> dict:
     task_name = TASK_MAPPING[task_num]
@@ -54,6 +55,7 @@ def publish_task(
     message["include_bottle_position"] = bool(include_bottle_position)
     message["include_bottle_state"] = bool(include_bottle_state)
     message["include_subtask"] = bool(include_subtask)
+    message["hdf5_recent_seconds"] = max(0.0, float(hdf5_recent_seconds))
     message["video_memory_num_frames"] = int(video_memory_num_frames) if int(video_memory_num_frames) in (1, 4) else 1
     if isinstance(forced_low_level_subtask, str) and forced_low_level_subtask.strip():
         message["forced_low_level_subtask"] = forced_low_level_subtask.strip()
@@ -95,6 +97,7 @@ def publish_runtime_config(
     include_bottle_state: bool | None = None,
     include_subtask: bool | None = None,
     forced_low_level_subtask: str | None = None,
+    hdf5_recent_seconds: float | None = None,
     video_memory_num_frames: int | None = None,
     high_level_source: str | None = None,
     gpt_model: str | None = None,
@@ -120,6 +123,8 @@ def publish_runtime_config(
         message["include_bottle_state"] = include_bottle_state
     if isinstance(include_subtask, bool):
         message["include_subtask"] = include_subtask
+    if hdf5_recent_seconds is not None:
+        message["hdf5_recent_seconds"] = max(0.0, float(hdf5_recent_seconds))
     if isinstance(video_memory_num_frames, int) and video_memory_num_frames in (1, 4):
         message["video_memory_num_frames"] = video_memory_num_frames
     if high_level_source in {"gpt", "service"}:
