@@ -155,7 +155,22 @@ def train_step(
 
     # Filter out frozen params.
     diff_state = nnx.DiffState(0, config.trainable_filter)
-    loss, grads = nnx.value_and_grad(loss_fn, argnums=diff_state)(model, train_rng, observation, actions)
+
+    if config.gradient_accumulation_steps == 1:
+        loss, grads = nnx.value_and_grad(loss_fn, argnums=diff_state)(model, train_rng, observation, actions)
+    else:
+        grads = None
+        loss = jnp.array(0.0)
+        for micro_step in range(config.gradient_accumulation_steps):
+            micro_rng = jax.random.fold_in(train_rng, micro_step)
+            micro_observation = jax.tree.map(lambda x, i=micro_step: x[i], observation)
+            micro_actions = jax.tree.map(lambda x, i=micro_step: x[i], actions)
+            micro_loss, micro_grads = nnx.value_and_grad(loss_fn, argnums=diff_state)(
+                model, micro_rng, micro_observation, micro_actions
+            )
+            loss = loss + micro_loss / config.gradient_accumulation_steps
+            micro_grads = jax.tree.map(lambda x: x / config.gradient_accumulation_steps, micro_grads)
+            grads = micro_grads if grads is None else jax.tree.map(lambda x, y: x + y, grads, micro_grads)
 
     params = state.params.filter(config.trainable_filter)
     updates, new_opt_state = state.tx.update(grads, state.opt_state, params)
@@ -187,8 +202,14 @@ def train_step(
         "loss": loss,
         "grad_norm": optax.global_norm(grads),
         "param_norm": optax.global_norm(kernel_params),
+        "gradient_accumulation_steps": jnp.asarray(config.gradient_accumulation_steps),
+        "effective_batch_size": jnp.asarray(config.batch_size * config.gradient_accumulation_steps),
     }
     return new_state, info
+
+
+def _stack_microbatches(microbatches):
+    return jax.tree.map(lambda *xs: jnp.stack(xs), *microbatches)
 
 
 def main(config: _config.TrainConfig):
@@ -199,6 +220,8 @@ def main(config: _config.TrainConfig):
         raise ValueError(
             f"Batch size {config.batch_size} must be divisible by the number of devices {jax.device_count()}."
         )
+    if config.gradient_accumulation_steps < 1:
+        raise ValueError("gradient_accumulation_steps must be >= 1.")
 
     jax.config.update("jax_compilation_cache_dir", str(epath.Path("~/.cache/jax").expanduser()))
 
@@ -222,10 +245,16 @@ def main(config: _config.TrainConfig):
         sharding=data_sharding,
         shuffle=True,
     )
-    
+
     data_iter = iter(data_loader)
     batch = next(data_iter)
     logging.info(f"Initialized data loader:\n{training_utils.array_tree_to_info(batch)}")
+    logging.info(
+        "Gradient accumulation: microbatch_size=%d, accumulation_steps=%d, effective_batch_size=%d",
+        config.batch_size,
+        config.gradient_accumulation_steps,
+        config.batch_size * config.gradient_accumulation_steps,
+    )
 
     # Log images from first batch to sanity check.
     images_to_log = [
@@ -258,8 +287,15 @@ def main(config: _config.TrainConfig):
 
     infos = []
     for step in pbar:
+        if config.gradient_accumulation_steps == 1:
+            train_batch = batch
+        else:
+            microbatches = [batch]
+            microbatches.extend(next(data_iter) for _ in range(config.gradient_accumulation_steps - 1))
+            train_batch = _stack_microbatches(microbatches)
+
         with sharding.set_mesh(mesh):
-            train_state, info = ptrain_step(train_rng, train_state, batch)
+            train_state, info = ptrain_step(train_rng, train_state, train_batch)
         infos.append(info)
         if step % config.log_interval == 0:
             stacked_infos = common_utils.stack_forest(infos)
@@ -268,7 +304,8 @@ def main(config: _config.TrainConfig):
             pbar.write(f"Step {step}: {info_str}")
             wandb.log(reduced_info, step=step)
             infos = []
-        batch = next(data_iter)
+        if step != config.num_train_steps - 1:
+            batch = next(data_iter)
 
         if (step % config.save_interval == 0 and step > start_step) or step == config.num_train_steps - 1:
             _checkpoints.save_state(checkpoint_manager, train_state, data_loader, step)

@@ -4,7 +4,7 @@ import signal
 import sys
 import threading
 import time
-from typing import List
+from typing import Literal
 
 from openpi_client import action_chunk_broker
 from openpi_client import websocket_client_policy as _websocket_client_policy
@@ -22,6 +22,7 @@ class Args:
     adapt_to_pi: bool = True
     host: str = "0.0.0.0"
     port: int = 8000
+    action_prompt: Literal["normal", "good", "bad"] = "normal"
 
     action_horizon: int = 25
 
@@ -31,18 +32,20 @@ class Args:
     use_rtc: bool = True
     policy_hz: float = 50.0
     manual_hz: float = 50.0
-    
+
     # reset_position: List[List[float]] = dataclasses.field(default_factory=lambda: [
     #         [0.0, -0.96, 1.16, 0.0, -0.0, 0.0],
     #         #[0.0, -0.96, 1.16, 0.0, -0.0, 0.0],
-    #         [0.0, -0.96, 1.16, 0.0, -0.0, 0.0]         
+    #         [0.0, -0.96, 1.16, 0.0, -0.0, 0.0]
     #     ])
-    reset_position: List[List[float]] = dataclasses.field(default_factory=lambda: [
+    reset_position: list[list[float]] = dataclasses.field(
+        default_factory=lambda: [
             [0.0, -0.96, 1.16, 0.0, -0.0, 0.0],
             # [0.0, -0.96, 1.16, 0.0, -0.0, 0.0],
-            [0.0, -0.96, 1.16, 1.57, -0.0, -1.57]         
-        ])
-    gripper_current_limits: List[int] = dataclasses.field(default_factory=lambda: [400, 800])
+            [0.0, -0.96, 1.16, 1.57, -0.0, -1.57],
+        ]
+    )
+    gripper_current_limits: list[int] = dataclasses.field(default_factory=lambda: [400, 800])
     # H5dfSaver 配置
     dataset_dir: str = "/app/examples/aloha_real/error_hdf5/2026-03-11_inference_lora_error"
     manual_dataset_dir: str = "/app/examples/aloha_real/manual_override_hdf5/2026-03-11_inference_lora"
@@ -54,14 +57,24 @@ class Args:
 
 
 def main(args: Args) -> None:
+    action_label_by_prompt = {
+        "normal": "normal",
+        "good": "good action",
+        "bad": "bad action",
+    }
+    action_label = action_label_by_prompt[args.action_prompt]
+    logging.info(
+        "Using action prompt mode: %s (subtask.good_bad_action=%s)",
+        args.action_prompt,
+        action_label,
+    )
+
     ws_client_policy = _websocket_client_policy.WebsocketClientPolicy(
         host=args.host,
         port=args.port,
     )
     logging.info(f"Server metadata: {ws_client_policy.get_server_metadata()}")
 
-    metadata = ws_client_policy.get_server_metadata()
-    
     # 创建 H5dfSaver subscriber
     h5df_saver_instance = h5df_saver.H5dfSaver(
         dataset_dir=args.dataset_dir,
@@ -70,18 +83,22 @@ def main(args: Args) -> None:
         fps=args.policy_hz,
         max_buffer_seconds=args.hdf5_max_buffer_seconds,
     )
-    
+
     runtime = _runtime.Runtime(
         # environment=_env.AlohaRealEnvironment(reset_position=metadata.get("reset_pose")),
-        environment=_env.AlohaRealEnvironment(reset_position=args.reset_position, gripper_current_limits=args.gripper_current_limits),
+        environment=_env.AlohaRealEnvironment(
+            reset_position=args.reset_position,
+            gripper_current_limits=args.gripper_current_limits,
+            action_label=action_label,
+        ),
         agent=_policy_agent.PolicyAgent(
             policy=action_chunk_broker.ActionChunkBroker(
-            policy=ws_client_policy,
-            action_horizon=args.action_horizon,
-            model_dir=args.model_dir,
-            adapt_to_pi=args.adapt_to_pi,
-            use_rtc=args.use_rtc,
-        )
+                policy=ws_client_policy,
+                action_horizon=args.action_horizon,
+                model_dir=args.model_dir,
+                adapt_to_pi=args.adapt_to_pi,
+                use_rtc=args.use_rtc,
+            )
         ),
         subscribers=[h5df_saver_instance] if args.if_save_hdf5 else [],
         max_hz=args.policy_hz,
@@ -92,7 +109,7 @@ def main(args: Args) -> None:
     )
 
     def _handle_exit_signal(signum, frame):
-        logging.info(f"收到退出信号 {signum}，准备退出")
+        logging.info(f"收到退出信号 {signum}, 准备退出")
         runtime.stop()
         raise SystemExit(0)
 
@@ -116,8 +133,7 @@ def _start_logging_stdout_guard(interval: float = 1.0) -> None:
         root = logging.getLogger()
         root.setLevel(logging.INFO)
         if not any(
-            isinstance(h, logging.StreamHandler) and getattr(h, "stream", None) is sys.stdout
-            for h in root.handlers
+            isinstance(h, logging.StreamHandler) and getattr(h, "stream", None) is sys.stdout for h in root.handlers
         ):
             root.addHandler(handler)
 
@@ -134,13 +150,13 @@ def _start_logging_stdout_guard(interval: float = 1.0) -> None:
 if __name__ == "__main__":
     logging.basicConfig(
         level=logging.INFO,
-        format='%(asctime)s [%(levelname)s] %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S',
+        format="%(asctime)s [%(levelname)s] %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
         handlers=[logging.StreamHandler(sys.stdout)],
         force=True,
     )
-    sys.stdout.reconfigure(line_buffering=True) if hasattr(sys.stdout, 'reconfigure') else None
-    sys.stderr.reconfigure(line_buffering=True) if hasattr(sys.stderr, 'reconfigure') else None
+    sys.stdout.reconfigure(line_buffering=True) if hasattr(sys.stdout, "reconfigure") else None
+    sys.stderr.reconfigure(line_buffering=True) if hasattr(sys.stderr, "reconfigure") else None
     _start_logging_stdout_guard()
     args = tyro.cli(Args)
     main(args)

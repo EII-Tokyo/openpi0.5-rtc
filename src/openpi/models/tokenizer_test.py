@@ -17,6 +17,13 @@ def test_get_good_bad_action_label():
     assert _tokenizer.get_good_bad_action_label('{"good_bad_action":"good action"}') == "good action"
     assert _tokenizer.get_good_bad_action_label({"good_bad_action": "bad action"}) == "bad action"
     assert _tokenizer.get_good_bad_action_label('{"good_bad_action":"unexpected"}') == "normal"
+    assert (
+        _tokenizer.get_good_bad_action_label(
+            '{"bottle_state":"Bottle in left hand and capped","subtask":"Unscrew cap",'
+            '"good_bad_action":"good action"}'
+        )
+        == "good action"
+    )
 
 
 def test_fast_tokenizer():

@@ -281,6 +281,7 @@ class TrainConfig:
     checkpoint_base_dir: str = "./checkpoints"
     seed: int = 42
     batch_size: int = 32
+    gradient_accumulation_steps: int = 1
     num_workers: int = 2
     num_train_steps: int = 30_000
     log_interval: int = 100
@@ -309,6 +310,8 @@ class TrainConfig:
     def __post_init__(self) -> None:
         if self.resume and self.overwrite:
             raise ValueError("Cannot resume and overwrite at the same time.")
+        if self.gradient_accumulation_steps < 1:
+            raise ValueError("gradient_accumulation_steps must be >= 1.")
         image_size = getattr(self.data, "image_size", None)
         image_resolution = getattr(self.model, "image_resolution", None)
         if image_size is not None and image_resolution != image_size:

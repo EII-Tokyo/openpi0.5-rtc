@@ -1,10 +1,8 @@
-from typing import List, Optional  # noqa: UP035
 import copy
-import einops
-from openpi_client import image_tools
+from typing import Any
+
 from openpi_client.runtime import environment as _environment
 from typing_extensions import override
-from examples.aloha_real import real_env as _real_env
 
 
 class AlohaRealEnvironment(_environment.Environment):
@@ -12,14 +10,22 @@ class AlohaRealEnvironment(_environment.Environment):
 
     def __init__(
         self,
-        reset_position: Optional[List[List[float]]] = None,  # noqa: UP006,UP007
-        gripper_current_limits: Optional[List[int]] = None,
+        reset_position: list[list[float]] | None = None,
+        gripper_current_limits: list[int] | None = None,
+        action_label: str = "normal",
         render_height: int = 224,
         render_width: int = 224,
     ) -> None:
-        self._env = _real_env.make_real_env(init_node=True, reset_position=reset_position, gripper_current_limits=gripper_current_limits)
+        from examples.aloha_real import real_env as _real_env
+
+        self._env = _real_env.make_real_env(
+            init_node=True,
+            reset_position=reset_position,
+            gripper_current_limits=gripper_current_limits,
+        )
         self._render_height = render_height
         self._render_width = render_width
+        self._subtask: dict[str, Any] = {"good_bad_action": action_label}
 
         self._ts = None
 
@@ -52,6 +58,7 @@ class AlohaRealEnvironment(_environment.Environment):
             "qvel": obs["qvel"],
             "effort": obs["effort"],
             "images": obs["images"],
+            "subtask": self._subtask,
             "origin_observation": origin_observation,
         }
 
