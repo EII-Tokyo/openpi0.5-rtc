@@ -169,7 +169,7 @@ button {
 }
 
 .robot-task-badge {
-  max-width: 100%;
+  max-width: min(360px, 42vw);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

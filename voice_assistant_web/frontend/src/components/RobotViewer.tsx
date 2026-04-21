@@ -4,6 +4,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js'
 import { AppLanguage, translations } from '../i18n'
 import URDFLoader from '../lib/loaders/URDFLoader.js'
+import { truncateLabel } from '../utils/text'
 
 const JOINT_NAMES = ['waist', 'shoulder', 'elbow', 'forearm_roll', 'wrist_angle', 'wrist_rotate', 'left_finger']
 const DEFAULT_LEFT = [0.0, -0.96, 1.16, 1.57, 0.0, -1.57, 0.02239]
@@ -20,6 +21,7 @@ type Props = {
 
 export function RobotViewer({ latestAction, qpos, mode, currentTask, language }: Props) {
   const t = translations[language]
+  const currentTaskLabel = currentTask ? truncateLabel(currentTask) : t.noActiveTask
   const containerRef = useRef<HTMLDivElement | null>(null)
   const leftRobotRef = useRef<any>(null)
   const rightRobotRef = useRef<any>(null)
@@ -153,7 +155,7 @@ export function RobotViewer({ latestAction, qpos, mode, currentTask, language }:
         <div className="robot-meta">
           <span className="status-pill mode">{mode}</span>
           <span className="robot-task-badge" title={currentTask || t.noActiveTask}>
-            {currentTask || t.noActiveTask}
+            {currentTaskLabel}
           </span>
         </div>
       </div>

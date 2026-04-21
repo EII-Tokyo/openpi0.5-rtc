@@ -4,6 +4,7 @@ import { RobotViewer } from './components/RobotViewer'
 import { VoicePanel } from './components/VoicePanel'
 import { AppLanguage, translations } from './i18n'
 import { apiBase, wsBase } from './services/api'
+import { truncateLabel } from './utils/text'
 
 type RealtimeState = {
   robot: {
@@ -39,6 +40,7 @@ export default function App() {
   const [dispatchError, setDispatchError] = useState('')
   const [cameraView, setCameraView] = useState<'focus' | 'quad'>('quad')
   const t = translations[language]
+  const currentTaskLabel = state.robot.current_task ? truncateLabel(state.robot.current_task) : t.noActiveTask
 
   useEffect(() => {
     let isActive = true
@@ -123,7 +125,7 @@ export default function App() {
           <span className={`status-pill ${state.robot.timestamp ? 'live' : 'offline'}`}>{freshness}</span>
           <span className="status-pill mode">{state.robot.mode}</span>
           <span className="robot-task-badge" title={state.robot.current_task || t.noActiveTask}>
-            {state.robot.current_task || t.noActiveTask}
+            {currentTaskLabel}
           </span>
           <label className="language-switch">
             <span>{t.language}</span>

@@ -81,9 +81,11 @@ _TWIST_ONLY_REPO_IDS = [
 
 _TWIST_WATER_TEAR_REPO_IDS = [
     "lyl472324464/2026.04.10_twist_tear_water-direction_tabacco-top",
-    "lyl472324464/2026.04.09_twist-and-water-and-tear-test1",
-    "lyl472324464/2026.04.10_twist-and-water-and-tear-test2",
-    "lyl472324464/2026.04.10_twist-and-water-and-tear-test3",
+    "lyl472324464/2026.04.10_twist-and-tear-and-water-direction-and-tabacco-top",
+    "lyl472324464/2026.04.13_twist_tear_water-direction_tabacco-top-2",
+    "lyl472324464/2026-04-14_tear_twist_water-direction_tabacco-mid_lower",
+    "lyl472324464/2026-04-14_twist_tear_water-direction_tabacco-mid_lower",
+    "lyl472324464/2026-04-14_twist_tear_water-direction_tabacco-all"
 ]
 
 
