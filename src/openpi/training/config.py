@@ -420,6 +420,94 @@ class RLDSDroidDataConfig(DataConfigFactory):
 
 
 @dataclasses.dataclass(frozen=True)
+class CanonicalLeRobotDROIDDataConfig(DataConfigFactory):
+    """
+    Data config for canonical DROID datasets produced by convert_raw_droid_to_canonical_lerobot.py.
+    Uses the canonical feature key schema directly (observation.images.*, observation.state.*,
+    action.source_joint_velocity_gripper, language_instruction) without any schema remapping.
+    """
+
+    @override
+    def create(self, assets_dirs: pathlib.Path, model_config: _model.BaseModelConfig) -> DataConfig:
+        repack_transform = _transforms.Group(
+            inputs=[
+                _transforms.RepackTransform(
+                    {
+                        "observation/exterior_image_1_left": "observation.images.exterior_1_left",
+                        "observation/exterior_image_2_left": "observation.images.exterior_2_left",
+                        "observation/wrist_image_left": "observation.images.wrist_left",
+                        "observation/joint_position": "observation.state.joint_position",
+                        "observation/gripper_position": "observation.state.gripper_position",
+                        # Velocity-based action: 7 joint velocities + 1 gripper position.
+                        "actions": "action.source_joint_velocity_gripper",
+                        "prompt": "language_instruction",
+                    }
+                )
+            ]
+        )
+        data_transforms = _transforms.Group(
+            inputs=[droid_policy.DroidInputs(model_type=model_config.model_type)],
+            outputs=[droid_policy.DroidOutputs()],
+        )
+        model_transforms = ModelTransformFactory()(model_config)
+
+        return dataclasses.replace(
+            self.create_base_config(assets_dirs, model_config),
+            repack_transforms=repack_transform,
+            data_transforms=data_transforms,
+            model_transforms=model_transforms,
+            # Tell the data loader to use the canonical key when building delta_timestamps.
+            # The repack transform above then renames it to "actions" for the model.
+            action_sequence_keys=("action.source_joint_velocity_gripper",),
+        )
+
+
+@dataclasses.dataclass(frozen=True)
+class CanonicalLeRobotDROIDConveyorDataConfig(CanonicalLeRobotDROIDDataConfig):
+    """
+    Like CanonicalLeRobotDROIDDataConfig but also ingests environment.conveyor_speed and
+    appends conveyor belt status (' Conveyor belt: On/Off.') to the prompt with 70% probability
+    (30% dropout so the model doesn't over-rely on this signal).
+    """
+
+    @override
+    def create(self, assets_dirs: pathlib.Path, model_config: _model.BaseModelConfig) -> DataConfig:
+        repack_transform = _transforms.Group(
+            inputs=[
+                _transforms.RepackTransform(
+                    {
+                        "observation/exterior_image_1_left": "observation.images.exterior_1_left",
+                        "observation/exterior_image_2_left": "observation.images.exterior_2_left",
+                        "observation/wrist_image_left": "observation.images.wrist_left",
+                        "observation/joint_position": "observation.state.joint_position",
+                        "observation/gripper_position": "observation.state.gripper_position",
+                        # Velocity-based action: 7 joint velocities + 1 gripper position.
+                        "actions": "action.source_joint_velocity_gripper",
+                        "prompt": "language_instruction",
+                        "conveyor_speed": "environment.conveyor_speed",
+                    }
+                )
+            ]
+        )
+        data_transforms = _transforms.Group(
+            inputs=[
+                _transforms.AppendConveyorInfo(dropout=0.3),
+                droid_policy.DroidInputs(model_type=model_config.model_type),
+            ],
+            outputs=[droid_policy.DroidOutputs()],
+        )
+        model_transforms = ModelTransformFactory()(model_config)
+
+        return dataclasses.replace(
+            self.create_base_config(assets_dirs, model_config),
+            repack_transforms=repack_transform,
+            data_transforms=data_transforms,
+            model_transforms=model_transforms,
+            action_sequence_keys=("action.source_joint_velocity_gripper",),
+        )
+
+
+@dataclasses.dataclass(frozen=True)
 class LeRobotDROIDDataConfig(DataConfigFactory):
     """
     Example data config for custom DROID dataset in LeRobot format.
@@ -987,16 +1075,12 @@ _CONFIGS = [
                 "michios/droid_xxjd",
                 "michios/droid_xxjd_2",
                 "michios/droid_xxjd_3",
-                "michios/droid_xxjd_4_2",
-                "michios/droid_xxjd",
-                "michios/droid_xxjd_2",
-                "michios/droid_xxjd_3",
-                "michios/droid_xxjd_4_2",
-                "michios/droid_xxjd",
-                "michios/droid_xxjd_2",
-                "michios/droid_xxjd_3",
-                "michios/droid_xxjd_4_2",
-                "cadene/droid_1.0.1_v30_compact_3",
+                "michios/droid_xxjd_4",
+                "michios/droid_xxjd_5",
+                "michios/droid_xxjd_6",
+                "michios/droid_xxjd_7",
+                "michios/droid_xxjd_8_2",
+                # "cadene/droid_1.0.1_v30_compact_3",
             ],
             base_config=DataConfig(prompt_from_task=True),
             assets=AssetsConfig(
@@ -1014,6 +1098,103 @@ _CONFIGS = [
         weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_droid/params"),
         num_train_steps=100_000,
         batch_size=128,
+    ),
+    TrainConfig(
+        # LoRA fine-tune of pi05-DROID datasets.
+        # Use this as the LoRA counterpart to pi05_droid_finetune for comparison.
+        # LoRA is applied to both the PaliGemma backbone and the action expert.
+        name="pi05_droid_lora_baseline",
+        model=pi0_config.Pi0Config(
+            pi05=True,
+            action_dim=32,
+            action_horizon=16,
+            paligemma_variant="gemma_2b_lora",
+            action_expert_variant="gemma_300m_lora",
+        ),
+        data=CanonicalLeRobotDROIDDataConfig(
+            repo_ids=[
+                "michios/droid_xxjd_canonical",
+                "michios/droid_xxjd_2_canonical",
+                "michios/droid_xxjd_3_canonical",
+                "michios/droid_xxjd_4_canonical",
+                "michios/droid_xxjd_5_canonical",
+                "michios/droid_xxjd_6_canonical",
+                "michios/droid_xxjd_7_canonical",
+                "michios/droid_xxjd_8_2_canonical",
+                "michios/droid_xxjd_20260202"
+                #TODO: bottle dataset
+            ],
+            base_config=DataConfig(prompt_from_task=True),
+            assets=AssetsConfig(
+                assets_dir="gs://openpi-assets/checkpoints/pi05_droid/assets",
+                asset_id="droid",
+            ),
+        ),
+        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_droid/params"),
+        freeze_filter=pi0_config.Pi0Config(
+            pi05=True,
+            action_dim=32,
+            action_horizon=16,
+            paligemma_variant="gemma_2b_lora",
+            action_expert_variant="gemma_300m_lora",
+        ).get_freeze_filter(),
+        ema_decay=None,
+        lr_schedule=_optimizer.CosineDecaySchedule(
+            warmup_steps=5_000,
+            peak_lr=5e-5,
+            decay_steps=95_000,
+            decay_lr=5e-5,
+        ),
+        num_train_steps=100_000,
+        batch_size=32,
+    ),
+    TrainConfig(
+        # LoRA fine-tune conditioned on conveyor belt status.
+        # Like pi05_droid_lora_baseline but appends ' Conveyor belt: On/Off.' to the prompt
+        # (with 30% dropout) so the model can condition on belt state.
+        name="pi05_droid_lora_conveyor",
+        model=pi0_config.Pi0Config(
+            pi05=True,
+            action_dim=32,
+            action_horizon=16,
+            paligemma_variant="gemma_2b_lora",
+            action_expert_variant="gemma_300m_lora",
+        ),
+        data=CanonicalLeRobotDROIDConveyorDataConfig(
+            repo_ids=[
+                "michios/droid_xxjd_canonical",
+                "michios/droid_xxjd_2_canonical",
+                "michios/droid_xxjd_3_canonical",
+                "michios/droid_xxjd_4_canonical",
+                "michios/droid_xxjd_5_canonical",
+                "michios/droid_xxjd_6_canonical",
+                "michios/droid_xxjd_7_canonical",
+                "michios/droid_xxjd_8_2_canonical",
+                "michios/droid_xxjd_20260202",
+            ],
+            base_config=DataConfig(prompt_from_task=True),
+            assets=AssetsConfig(
+                assets_dir="gs://openpi-assets/checkpoints/pi05_droid/assets",
+                asset_id="droid",
+            ),
+        ),
+        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_droid/params"),
+        freeze_filter=pi0_config.Pi0Config(
+            pi05=True,
+            action_dim=32,
+            action_horizon=16,
+            paligemma_variant="gemma_2b_lora",
+            action_expert_variant="gemma_300m_lora",
+        ).get_freeze_filter(),
+        ema_decay=None,
+        lr_schedule=_optimizer.CosineDecaySchedule(
+            warmup_steps=5_000,
+            peak_lr=5e-5,
+            decay_steps=95_000,
+            decay_lr=5e-5,
+        ),
+        num_train_steps=100_000,
+        batch_size=32,
     ),
     #
     # ALOHA Sim configs. This config is used to demonstrate how to train on a simple simulated environment.

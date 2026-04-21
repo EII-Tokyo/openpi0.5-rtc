@@ -485,6 +485,31 @@ def make_bool_mask(*dims: int) -> tuple[bool, ...]:
     return tuple(result)
 
 
+@dataclasses.dataclass(frozen=True)
+class AppendConveyorInfo(DataTransformFn):
+    """Appends conveyor belt status to the prompt based on conveyor_speed.
+
+    With probability (1 - dropout), appends ' Conveyor belt: Off.' or ' Conveyor belt: On.'
+    to the prompt. With probability dropout, leaves the prompt unchanged.
+    Also removes 'conveyor_speed' from the data dict since it is metadata, not a model input.
+    """
+
+    dropout: float = 0.3
+
+    def __call__(self, data: DataDict) -> DataDict:
+        conveyor_speed = data.pop("conveyor_speed", None)
+        if conveyor_speed is None or "prompt" not in data:
+            return data
+        speed_val = float(conveyor_speed)
+        if np.isnan(speed_val):
+            return data
+        if np.random.random() < self.dropout:
+            return data
+        suffix = " Conveyor belt: Off." if speed_val == 0 else " Conveyor belt: On."
+        data["prompt"] = data["prompt"] + suffix
+        return data
+
+
 def _assert_quantile_stats(norm_stats: at.PyTree[NormStats]) -> None:
     for k, v in flatten_dict(norm_stats).items():
         if v.q01 is None or v.q99 is None:

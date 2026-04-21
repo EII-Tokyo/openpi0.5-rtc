@@ -17,6 +17,7 @@ import tqdm_loggable.auto as tqdm
 import wandb
 
 import openpi.models.model as _model
+import openpi.models.tokenizer as _tokenizer
 import openpi.shared.array_typing as at
 import openpi.shared.nnx_utils as nnx_utils
 import openpi.training.checkpoints as _checkpoints
@@ -234,6 +235,18 @@ def main(config: _config.TrainConfig):
     ]
     wandb.log({"camera_views": images_to_log}, step=0)
 
+    # Log decoded prompts from first batch to sanity check.
+    if batch[0].tokenized_prompt is not None:
+        tok = _tokenizer.PaligemmaTokenizer()
+        n_samples = min(8, batch[0].tokenized_prompt.shape[0])
+        prompt_rows = []
+        for i in range(n_samples):
+            tokens = np.array(batch[0].tokenized_prompt[i])
+            mask = np.array(batch[0].tokenized_prompt_mask[i])
+            decoded = tok._tokenizer.decode(tokens[mask].tolist())
+            prompt_rows.append([i, decoded])
+        wandb.log({"prompts": wandb.Table(columns=["idx", "prompt"], data=prompt_rows)}, step=0)
+
     train_state, train_state_sharding = init_train_state(config, init_rng, mesh, resume=resuming)
     jax.block_until_ready(train_state)
     logging.info(f"Initialized train state:\n{training_utils.array_tree_to_info(train_state.params)}")
@@ -256,10 +269,27 @@ def main(config: _config.TrainConfig):
         dynamic_ncols=True,
     )
 
+    _PROFILE_START = start_step + 3  # skip first steps (JIT compilation)
+    _PROFILE_END = start_step + 8
+    _profiling = False
+
     infos = []
-    for step in pbar:
-        with sharding.set_mesh(mesh):
-            train_state, info = ptrain_step(train_rng, train_state, batch)
+    try:
+      for step in pbar:
+        if step == _PROFILE_START:
+            jax.profiler.start_trace("/tmp/jax_profile")
+            _profiling = True
+
+        with jax.profiler.StepTraceAnnotation("train", step_num=step):
+            with sharding.set_mesh(mesh):
+                train_state, info = ptrain_step(train_rng, train_state, batch)
+
+        if step == _PROFILE_END:
+            jax.block_until_ready(train_state)
+            jax.profiler.stop_trace()
+            _profiling = False
+            logging.info("Profiling complete. View with: tensorboard --logdir /tmp/jax_profile")
+
         infos.append(info)
         if step % config.log_interval == 0:
             stacked_infos = common_utils.stack_forest(infos)
@@ -272,6 +302,11 @@ def main(config: _config.TrainConfig):
 
         if (step % config.save_interval == 0 and step > start_step) or step == config.num_train_steps - 1:
             _checkpoints.save_state(checkpoint_manager, train_state, data_loader, step)
+    finally:
+        if _profiling:
+            jax.block_until_ready(train_state)
+            jax.profiler.stop_trace()
+            logging.info("Profiling saved (interrupted). View with: tensorboard --logdir /tmp/jax_profile")
 
     logging.info("Waiting for checkpoint manager to finish")
     checkpoint_manager.wait_until_finished()

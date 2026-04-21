@@ -115,7 +115,7 @@ def main(args: Args) -> None:
         dummy_obs = _droid_policy.make_droid_example()
     else:
         dummy_obs = _aloha_policy.make_aloha_example()
-    dummy_prev_action = np.random.rand(15, 32)
+    dummy_prev_action = np.random.rand(16, 32)
     policy.infer(dummy_obs, dummy_prev_action, use_rtc=True)
     # policy.infer(dummy_obs, dummy_prev_action, use_rtc=False)
     # Record the policy's behavior.

@@ -6,6 +6,8 @@ checkpoints/
 data/
 wandb/
 attention_outputs/
+packages/pi-value-function/paired_videos
+packages/pi-value-function/failure_videos
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
