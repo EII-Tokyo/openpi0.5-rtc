@@ -144,15 +144,29 @@ def main():
             summary_fix.append((repo_id, rev, reason))
 
             if args.apply:
-                hf_api.upload_file(
-                    path_or_fileobj=str(new_path),
-                    path_in_repo="meta/tasks.parquet",
-                    repo_id=repo_id,
-                    repo_type="dataset",
-                    revision=rev,
-                    commit_message="chore: set canonical twist+bottle task in tasks.parquet",
-                )
-                print(f"        uploaded -> {repo_id} (revision={rev})")
+                upload_revisions = [rev]
+                if rev == "v3.0":
+                    upload_revisions = ["refs/heads/v3.0", "v3.0"]
+                uploaded = False
+                last_err = None
+                for urev in upload_revisions:
+                    try:
+                        hf_api.upload_file(
+                            path_or_fileobj=str(new_path),
+                            path_in_repo="meta/tasks.parquet",
+                            repo_id=repo_id,
+                            repo_type="dataset",
+                            revision=urev,
+                            commit_message="chore: set canonical twist+bottle task in tasks.parquet",
+                        )
+                        print(f"        uploaded -> {repo_id} (revision={urev})")
+                        uploaded = True
+                        break
+                    except Exception as e:
+                        last_err = e
+                if not uploaded:
+                    print(f"        [UPLOAD FAIL] {repo_id} @{rev}: {last_err}")
+                    summary_skip.append((repo_id, rev, f"upload fail: {last_err}"))
 
     print("\n=== Summary ===")
     print(f"ok (already canonical): {len(summary_ok)}")
