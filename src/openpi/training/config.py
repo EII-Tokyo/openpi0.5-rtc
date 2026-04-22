@@ -270,6 +270,7 @@ class LeRobotAlohaDataConfig(DataConfigFactory):
                     adapt_to_pi=self.adapt_to_pi,
                     norm_stats=base_config.norm_stats,
                     use_quantile_norm=base_config.use_quantile_norm,
+                    apply_norm=False,
                 )
             ],
             outputs=[
@@ -277,6 +278,7 @@ class LeRobotAlohaDataConfig(DataConfigFactory):
                     adapt_to_pi=self.adapt_to_pi,
                     norm_stats=base_config.norm_stats,
                     use_quantile_norm=base_config.use_quantile_norm,
+                    apply_norm=False,
                 )
             ],
         )
@@ -286,6 +288,20 @@ class LeRobotAlohaDataConfig(DataConfigFactory):
                 inputs=[_transforms.DeltaActions(delta_action_mask)],
                 outputs=[_transforms.AbsoluteActions(delta_action_mask)],
             )
+        data_transforms = data_transforms.push(
+            inputs=[
+                _transforms.Normalize(
+                    base_config.norm_stats,
+                    use_quantiles=base_config.use_quantile_norm,
+                )
+            ],
+            outputs=[
+                _transforms.Unnormalize(
+                    base_config.norm_stats,
+                    use_quantiles=base_config.use_quantile_norm,
+                )
+            ],
+        )
 
         model_transforms = ModelTransformFactory(
             default_prompt=self.default_prompt,
