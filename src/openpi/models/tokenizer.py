@@ -160,10 +160,12 @@ class PaligemmaTokenizer:
         max_len: int = 48,
         subtask_max_len: int | None = None,
         fast_tokenizer_path: str = "physical-intelligence/fast",
+        train_fast_action_tokens: bool = True,
     ):
         self._max_len = max_len
         self._subtask_max_len = subtask_max_len if subtask_max_len is not None else max_len
         self._fast_tokenizer_path = fast_tokenizer_path
+        self._train_fast_action_tokens = train_fast_action_tokens
         self._fast_tokenizer = None
         self._fast_skip_tokens = 128
 
@@ -251,12 +253,12 @@ class PaligemmaTokenizer:
             if cleaned_subtask:
                 subtask_only_tokens = self._tokenizer.encode(cleaned_subtask, add_bos=False)
         fast_action_tokens: list[int] = []
-        if actions is not None:
+        if self._train_fast_action_tokens and actions is not None:
             actions_np = np.asarray(actions)
             if actions_np.ndim == 2:
                 fast_action_tokens_raw = self._get_fast_tokenizer()(actions_np[None])[0]
                 fast_action_tokens = self._act_tokens_to_paligemma_tokens(fast_action_tokens_raw).tolist()
-        action_suffix_tokens = self._tokenizer.encode(action_suffix, add_bos=False)
+        action_suffix_tokens = self._tokenizer.encode(action_suffix, add_bos=False) if fast_action_tokens else []
 
         if not subtask_only_tokens and not fast_action_tokens:
             subtask_tokens = np.zeros((self._subtask_max_len,), dtype=np.int32)
@@ -267,6 +269,7 @@ class PaligemmaTokenizer:
 
         eos_token = [self.eos_token_id] if subtask_only_tokens else []
         full_subtask_tokens = subtask_only_tokens + eos_token + action_suffix_tokens + fast_action_tokens
+        print(prompt_prefix, subtask_text, action_suffix)
         subtask_tokens, subtask_mask = self._pad_tokens(full_subtask_tokens, self._subtask_max_len)
         # Compute AR loss on subtask text + EOS + fast action tokens. Exclude the action suffix text itself.
         loss_mask = np.asarray(

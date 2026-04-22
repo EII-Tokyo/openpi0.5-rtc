@@ -127,7 +127,7 @@ def publish_runtime_config(
         message["hdf5_recent_seconds"] = max(0.0, float(hdf5_recent_seconds))
     if isinstance(video_memory_num_frames, int) and video_memory_num_frames in (1, 4):
         message["video_memory_num_frames"] = video_memory_num_frames
-    if high_level_source in {"gpt", "service"}:
+    if high_level_source in {"gpt", "service", "qwen"}:
         message["high_level_source"] = high_level_source
     if isinstance(gpt_model, str) and gpt_model.strip():
         message["gpt_model"] = gpt_model.strip()

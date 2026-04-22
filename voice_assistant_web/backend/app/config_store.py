@@ -78,7 +78,11 @@ class RuntimeConfigStore:
                 forced_low_level_subtask=(str(doc["forced_low_level_subtask"]).strip() if doc.get("forced_low_level_subtask") else None),
                 hdf5_recent_seconds=_hdf5_recent_seconds(doc.get("hdf5_recent_seconds", 5.0)),
                 video_memory_num_frames=4 if doc.get("video_memory_num_frames") == 4 else 1,
-                high_level_source="service" if doc.get("high_level_source") == "service" else "gpt",
+                high_level_source=(
+                    doc.get("high_level_source")
+                    if doc.get("high_level_source") in {"gpt", "service", "qwen"}
+                    else "gpt"
+                ),
                 gpt_model=str(doc.get("gpt_model") or "gpt-5.4"),
                 gpt_image_mode="high_only" if doc.get("gpt_image_mode") == "high_only" else "all_cameras",
                 announcement_language=announcement_language,

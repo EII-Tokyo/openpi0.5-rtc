@@ -436,14 +436,19 @@ class RoutedHighLevelPolicy:
         *,
         service_host: str,
         service_port: int,
+        qwen_host: str | None = None,
+        qwen_port: int | None = None,
         source: str = "gpt",
         gpt_model: str = "gpt-5.4",
         gpt_image_mode: str = "all_cameras",
     ) -> None:
         self._service_host = service_host
         self._service_port = service_port
-        self._source = source if source in {"gpt", "service"} else "gpt"
+        self._qwen_host = qwen_host or service_host
+        self._qwen_port = int(qwen_port if qwen_port is not None else 8002)
+        self._source = source if source in {"gpt", "service", "qwen"} else "gpt"
         self._service_policy = None
+        self._qwen_policy = None
         self._gpt_policy = GptHighLevelPolicy(model=gpt_model, image_mode=gpt_image_mode)
         self._state_subtask_pairs: list[tuple[str, str]] = []
         self._start_subtasks: tuple[str, ...] = ()
@@ -455,7 +460,7 @@ class RoutedHighLevelPolicy:
         gpt_model: str | None = None,
         gpt_image_mode: str | None = None,
     ) -> None:
-        if source in {"gpt", "service"}:
+        if source in {"gpt", "service", "qwen"}:
             self._source = source
         self._gpt_policy.set_config(model=gpt_model, image_mode=gpt_image_mode)
 
@@ -470,6 +475,8 @@ class RoutedHighLevelPolicy:
     def reset(self) -> None:
         if self._service_policy is not None:
             self._service_policy.reset()
+        if self._qwen_policy is not None:
+            self._qwen_policy.reset()
         self._gpt_policy.reset()
 
     def get_server_metadata(self) -> dict[str, Any]:
@@ -477,6 +484,8 @@ class RoutedHighLevelPolicy:
             "provider": self._source,
             "service_host": self._service_host,
             "service_port": self._service_port,
+            "qwen_host": self._qwen_host,
+            "qwen_port": self._qwen_port,
         }
 
     def _get_service_policy(self):
@@ -487,6 +496,15 @@ class RoutedHighLevelPolicy:
                 wait_for_server=False,
             )
         return self._service_policy
+
+    def _get_qwen_policy(self):
+        if self._qwen_policy is None:
+            self._qwen_policy = _websocket_client_policy.WebsocketClientPolicy(
+                host=self._qwen_host,
+                port=self._qwen_port,
+                wait_for_server=False,
+            )
+        return self._qwen_policy
 
     def infer_subtask(self, obs: dict[str, Any]) -> dict[str, Any]:
         if self._source == "service":
@@ -506,6 +524,32 @@ class RoutedHighLevelPolicy:
                 timing = {**timing, "provider": "service"}
             else:
                 timing = {"provider": "service"}
+            result["server_timing"] = timing
+            return result
+        if self._source == "qwen":
+            try:
+                result = self._get_qwen_policy().infer_subtask(obs)
+            except Exception as exc:
+                logging.warning(
+                    "Qwen high-level service request failed at ws://%s:%s, reconnecting once: %s",
+                    self._qwen_host,
+                    self._qwen_port,
+                    exc,
+                )
+                self._qwen_policy = None
+                try:
+                    result = self._get_qwen_policy().infer_subtask(obs)
+                except Exception as retry_exc:
+                    self._qwen_policy = None
+                    raise RuntimeError(
+                        "Qwen high-level service unavailable at "
+                        f"ws://{self._qwen_host}:{self._qwen_port}. Start scripts/serve_qwen_high_level.py first."
+                    ) from retry_exc
+            timing = result.get("server_timing", {})
+            if isinstance(timing, dict):
+                timing = {**timing, "provider": "qwen"}
+            else:
+                timing = {"provider": "qwen"}
             result["server_timing"] = timing
             return result
         return self._gpt_policy.infer_subtask(obs)

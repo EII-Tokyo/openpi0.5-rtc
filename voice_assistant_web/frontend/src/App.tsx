@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { AppLanguage, translations } from './i18n'
+import { RobotViewer } from './components/RobotViewer'
 
 const defaultHost = typeof window !== 'undefined' ? window.location.hostname : 'localhost'
 const defaultHttpOrigin = typeof window !== 'undefined' ? window.location.origin : `http://${defaultHost}`
@@ -194,7 +195,7 @@ type UiConfig = {
   includeBottleState: boolean
   includeSubtask: boolean
   videoMemoryNumFrames: 1 | 4
-  highLevelSource: 'gpt' | 'service'
+  highLevelSource: 'gpt' | 'service' | 'qwen'
   gptModel: string
   gptImageMode: 'high_only' | 'all_cameras'
   forcedLowLevelSubtask: string | null
@@ -216,7 +217,7 @@ type RuntimeConfigPayload = {
   includeBottleState: boolean
   includeSubtask: boolean
   videoMemoryNumFrames: 1 | 4
-  highLevelSource: 'gpt' | 'service'
+  highLevelSource: 'gpt' | 'service' | 'qwen'
   gptModel: string
   gptImageMode: 'high_only' | 'all_cameras'
   forcedLowLevelSubtask: string | null
@@ -252,7 +253,8 @@ function parseRuntimeConfigResponse(data: unknown): RuntimeConfigPayload {
     if (Number.isFinite(n)) hdf5RecentSeconds = Math.max(0, n)
   }
   const rawSource = r['high_level_source'] ?? r['highLevelSource']
-  const highLevelSource: 'gpt' | 'service' = rawSource === 'service' ? 'service' : 'gpt'
+  const highLevelSource: 'gpt' | 'service' | 'qwen' =
+    rawSource === 'service' || rawSource === 'qwen' ? rawSource : 'gpt'
   const rawModel = r['gpt_model'] ?? r['gptModel']
   const gptModel = typeof rawModel === 'string' && rawModel.trim() ? rawModel.trim() : 'gpt-5.4'
   const rawImageMode = r['gpt_image_mode'] ?? r['gptImageMode']
@@ -764,6 +766,7 @@ export default function App() {
     return Date.now() / 1000 - state.robot.timestamp < 1
   }, [state.robot.timestamp])
   const runtimeModeLabel = useMemo(() => formatRuntimeModeLabel(state.robot.mode, t), [state.robot.mode, t])
+  const robotViewerQpos = state.robot.runtime_qpos.length ? state.robot.runtime_qpos : state.robot.qpos
   const camerasLive = useMemo(() => {
     if (!cameraNames.length) return false
     return cameraNames.every((name) => Boolean(state.camera_status[name]))
@@ -1374,6 +1377,13 @@ export default function App() {
             )}
             {error ? <div className="error-banner">{error}</div> : null}
           </section>
+          <RobotViewer
+            latestAction={state.robot.latest_action.length ? state.robot.latest_action : null}
+            qpos={robotViewerQpos.length ? robotViewerQpos : null}
+            mode={runtimeModeLabel}
+            currentTask={state.robot.current_task}
+            language={uiConfig.uiLanguage}
+          />
         </aside>
       </section>
 
@@ -1480,8 +1490,9 @@ export default function App() {
                 value={uiConfig.highLevelSource}
                 onChange={(event) =>
                   setUiConfig((current) => {
+                    const rawSource = event.target.value
                     const nextHighLevelSource: UiConfig['highLevelSource'] =
-                      event.target.value === 'service' ? 'service' : 'gpt'
+                      rawSource === 'service' || rawSource === 'qwen' ? rawSource : 'gpt'
                     const nextConfig = {
                       ...current,
                       highLevelSource: nextHighLevelSource,
@@ -1492,6 +1503,7 @@ export default function App() {
                 }
               >
                 <option value="gpt">{t.highLevelSourceGpt}</option>
+                <option value="qwen">{t.highLevelSourceQwen}</option>
                 <option value="service">{t.highLevelSourceService}</option>
               </select>
             </label>

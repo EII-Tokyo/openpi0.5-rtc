@@ -163,15 +163,6 @@ class Runtime:
         self._temporal_builder_thread = None
         self._temporal_video_debug_dir = Path.cwd() / "temporal_debug_videos"
         self._temporal_video_debug_dir.mkdir(parents=True, exist_ok=True)
-        self._trace_dir = Path("/app/logs")
-        self._trace_dir.mkdir(parents=True, exist_ok=True)
-        self._applied_action_trace_path = self._trace_dir / "runtime_applied_actions.jsonl"
-        self._applied_action_trace_path.write_text("")
-        logging.info("Applied action trace will be written to %s", self._applied_action_trace_path)
-        self._high_level_trace_path = self._trace_dir / "runtime_high_level_requests.jsonl"
-        self._high_level_trace_path.write_text("")
-        logging.info("High-level request trace will be written to %s", self._high_level_trace_path)
-
         # 退出标志
         self._stop = False
         self._model_task_nums = {"1"}
@@ -437,7 +428,7 @@ class Runtime:
             self._hdf5_recent_seconds = self._normalize_hdf5_recent_seconds(hdf5_recent_seconds)
         if isinstance(video_memory_num_frames, int):
             self._apply_video_memory_config(video_memory_num_frames)
-        if high_level_source in {"gpt", "service"}:
+        if high_level_source in {"gpt", "service", "qwen"}:
             self._high_level_source = high_level_source
         if isinstance(gpt_model, str) and gpt_model.strip():
             self._gpt_model = gpt_model.strip()
@@ -684,25 +675,7 @@ class Runtime:
         version: int,
         task_generation: int,
     ) -> None:
-        trace_payload = high_level_result.get("trace_payload", {}) if isinstance(high_level_result, dict) else {}
-        if not isinstance(trace_payload, dict):
-            trace_payload = {}
-        record = {
-            "timestamp": time.time(),
-            "obs_version": version,
-            "task_generation": task_generation,
-            "task_prompt": str(obs.get("prompt") or "").strip(),
-            "runtime_context": obs.get("runtime_context"),
-            "server_timing": high_level_result.get("server_timing", {}) if isinstance(high_level_result, dict) else {},
-            "high_level_text": high_level_text,
-            "structured_subtask": structured_subtask,
-            "trace_payload": trace_payload,
-        }
-        try:
-            with self._high_level_trace_path.open("a", encoding="utf-8") as f:
-                f.write(json.dumps(record, ensure_ascii=False) + "\n")
-        except Exception:
-            logging.exception("Failed to append high-level trace to %s", self._high_level_trace_path)
+        return
 
     def _reset_temporal_image_history(self) -> None:
         with self._image_history_lock:

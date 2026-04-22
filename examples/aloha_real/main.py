@@ -7,7 +7,7 @@ import signal
 import sys
 import threading
 import time
-from typing import Any, List
+from typing import Any, List, Literal
 import urllib.error
 import urllib.request
 
@@ -50,6 +50,9 @@ class Args:
     low_level_port: int = 8000
     high_level_host: str = "127.0.0.1"
     high_level_port: int = 8001
+    qwen_high_level_host: str = "127.0.0.1"
+    qwen_high_level_port: int = 8002
+    high_level_source: Literal["gpt", "service", "qwen"] | None = None
     high_level_hz: float = 0.0
     # Subtask History 下发到前端的最大条数（1–500），减轻 WebSocket 负载
     high_level_history_max_len: int = 50
@@ -131,6 +134,9 @@ def main(args: Args) -> None:
     _load_repo_env(_repo_root() / ".env")
     reset_position = _parse_reset_position(args.reset_position)
     initial_runtime_config = _fetch_runtime_config(args.runtime_config_url)
+    if args.high_level_source in {"gpt", "service", "qwen"}:
+        initial_runtime_config = dict(initial_runtime_config or {})
+        initial_runtime_config["high_level_source"] = args.high_level_source
     logging.info("Runtime startup config:\n%s", dataclasses.asdict(args))
     low_level_policy = _websocket_client_policy.WebsocketClientPolicy(
         host=args.low_level_host,
@@ -143,6 +149,9 @@ def main(args: Args) -> None:
     high_level_policy = _gpt_high_level_policy.RoutedHighLevelPolicy(
         service_host=args.high_level_host,
         service_port=args.high_level_port,
+        qwen_host=args.qwen_high_level_host,
+        qwen_port=args.qwen_high_level_port,
+        source=args.high_level_source or "gpt",
     )
     if initial_runtime_config and hasattr(high_level_policy, "set_config"):
         high_level_policy.set_config(
@@ -272,4 +281,10 @@ if __name__ == "__main__":
     high_env = os.getenv("OPENPI_HIGH_LEVEL_HOST", "").strip()
     if high_env:
         args.high_level_host = high_env
+    qwen_high_env = os.getenv("OPENPI_QWEN_HIGH_LEVEL_HOST", "").strip()
+    if qwen_high_env:
+        args.qwen_high_level_host = qwen_high_env
+    qwen_port_env = os.getenv("OPENPI_QWEN_HIGH_LEVEL_PORT", "").strip()
+    if qwen_port_env:
+        args.qwen_high_level_port = int(qwen_port_env)
     main(args)

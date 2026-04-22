@@ -120,8 +120,9 @@ python3 -u examples/aloha_real/main.py \
   --prompt "Process all bottles" \
   --low-level-host 127.0.0.1 \
   --low-level-port 8000 \
-  --high-level-host 127.0.0.1 \
-  --high-level-port 8001 \
+  --high-level-source qwen \
+  --qwen-high-level-host 127.0.0.1 \
+  --qwen-high-level-port 8002 \
   --reset-position '[[0.02761165425181389,-0.5706408619880676,0.9848157167434692,0,0.22856314480304718,-0.03834952041506767],[-0.019941750913858414,-0.5890486240386963,0.9863497018814087,1.716524600982666,-0.026077674701809883,-1.5784662961959839]]' \
   --no-use-rtc
 '
@@ -130,6 +131,10 @@ python3 -u examples/aloha_real/main.py \
 Notes:
 
 - `--prompt` is now required. High-level preview uses this fixed prompt continuously, even before task `1` is pressed.
+- `--high-level-source qwen` forces the runtime to use the Qwen high-level websocket service. Start `openpi_server_qwen_high_level` first; it listens on `127.0.0.1:8002` by default.
+- Qwen only predicts the 0-8 class. The Qwen high-level service fills `bottle_description` with a fixed string, `clear bottle with white label` by default. Override it with `QWEN_HIGH_LEVEL_ARGS='--host 0.0.0.0 --port 8002 --adapter /app/output/qwen35-2b-twist-lora/v6-20260422-113134/checkpoint-4000 --bottle-description "your description"'`.
+- To use Pi0.5 high-level instead, use `--high-level-source service --high-level-host 127.0.0.1 --high-level-port 8001` and start `openpi_server_high_level`.
+- To use GPT high-level instead, use `--high-level-source gpt`; the Qwen/Pi0.5 websocket ports are ignored.
 - `runtime` must be started from a shell that has both `/opt/ros/noetic/setup.bash` and `/root/interbotix_ws/devel/setup.bash` sourced.
 - If the remote low-level server is still warming up, `runtime` may connect once and then exit on the first websocket request. In that case, wait for remote `server listening on 0.0.0.0:8000`, then restart `runtime`.
 - `runtime` is considered healthy only after it reaches:

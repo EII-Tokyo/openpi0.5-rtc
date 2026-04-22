@@ -7,12 +7,19 @@ import random
 import re
 import time
 from collections import Counter, defaultdict
+from io import BytesIO
 from pathlib import Path
 
+import pyarrow.parquet as pq
 import torch
+from huggingface_hub import HfApi, hf_hub_download
 from PIL import Image
-from lerobot.datasets.lerobot_dataset import LeRobotDataset
 from transformers import AutoModelForImageTextToText, AutoProcessor
+
+try:
+    from lerobot.datasets.lerobot_dataset import LeRobotDataset
+except ImportError:
+    LeRobotDataset = None
 
 
 CLASS_MAP = {
@@ -27,10 +34,23 @@ CLASS_MAP = {
     8: ("No bottle on table", "Return to initial pose"),
 }
 
+DEFAULT_CAMERA_COLUMNS = (
+    "observation.images.cam_high",
+    "observation.images.cam_low",
+    "observation.images.cam_left_wrist",
+    "observation.images.cam_right_wrist",
+)
+
 
 def _to_pil(x) -> Image.Image:
     if isinstance(x, Image.Image):
         return x.convert("RGB")
+    if isinstance(x, dict):
+        image_bytes = x.get("bytes")
+        if image_bytes is not None:
+            return Image.open(BytesIO(image_bytes)).convert("RGB")
+        if x.get("path"):
+            return Image.open(x["path"]).convert("RGB")
     t = x
     if hasattr(t, "detach"):
         t = t.detach().cpu()
@@ -46,7 +66,7 @@ def _to_pil(x) -> Image.Image:
     return Image.fromarray(t).convert("RGB")
 
 
-def _pick_indices(ds: LeRobotDataset, max_samples: int | None, seed: int) -> list[int]:
+def _pick_indices(ds, max_samples: int | None, seed: int) -> list[int]:
     if max_samples is None or max_samples >= len(ds):
         return list(range(len(ds)))
     rng = random.Random(seed)
@@ -55,10 +75,59 @@ def _pick_indices(ds: LeRobotDataset, max_samples: int | None, seed: int) -> lis
     return indices[:max_samples]
 
 
-def _prompt() -> str:
+class HfParquetDataset:
+    def __init__(self, repo_id: str):
+        self.repo_id = repo_id
+        self.files = sorted(
+            filename
+            for filename in HfApi().list_repo_files(repo_id=repo_id, repo_type="dataset")
+            if filename.startswith("data/") and filename.endswith(".parquet")
+        )
+        if not self.files:
+            raise FileNotFoundError(f"No parquet files found in dataset repo: {repo_id}")
+        self.paths = [hf_hub_download(repo_id=repo_id, filename=filename, repo_type="dataset") for filename in self.files]
+        self.row_counts = [pq.ParquetFile(path).metadata.num_rows for path in self.paths]
+        self.cumulative = []
+        total = 0
+        for count in self.row_counts:
+            total += count
+            self.cumulative.append(total)
+        self._tables = {}
+
+    def __len__(self) -> int:
+        return self.cumulative[-1]
+
+    def __getitem__(self, idx: int) -> dict:
+        if idx < 0 or idx >= len(self):
+            raise IndexError(idx)
+        prev = 0
+        for file_idx, end in enumerate(self.cumulative):
+            if idx < end:
+                local_idx = idx - prev
+                table = self._tables.get(file_idx)
+                if table is None:
+                    table = pq.read_table(self.paths[file_idx])
+                    self._tables[file_idx] = table
+                return dict(table.slice(local_idx, 1).to_pylist()[0])
+            prev = end
+        raise IndexError(idx)
+
+
+def _load_eval_dataset(repo_id: str, root: Path | None):
+    if root is not None:
+        if LeRobotDataset is None:
+            raise ImportError("lerobot is required when --root is provided")
+        return LeRobotDataset(repo_id, root=root, force_cache_sync=False, download_videos=False, delta_timestamps=None)
+    return HfParquetDataset(repo_id)
+
+
+def _camera_name(column: str) -> str:
+    return column.rsplit(".", 1)[-1]
+
+
+def _system_prompt() -> str:
     lines = [
         "Classify the robot scene into exactly one of 9 classes.",
-        "Use all four images in this order: cam_high, cam_low, cam_left_wrist, cam_right_wrist.",
         "Output exactly one character: 0 or 1 or 2 or 3 or 4 or 5 or 6 or 7 or 8.",
         "Do not output words.",
         "Do not output punctuation.",
@@ -68,6 +137,11 @@ def _prompt() -> str:
     for cid, (state, subtask) in CLASS_MAP.items():
         lines.append(f"{cid}: state={state}; action={subtask}")
     return "\n".join(lines)
+
+
+def _user_prompt(camera_columns: tuple[str, ...]) -> str:
+    camera_names = ", ".join(_camera_name(column) for column in camera_columns)
+    return f"Use all {len(camera_columns)} images in this order: {camera_names}. Classify the current scene."
 
 
 def _parse_class_id(text: str) -> int | None:
@@ -83,19 +157,43 @@ def _scalar_int(x) -> int:
     return int(x)
 
 
+def _row_class_id(row: dict) -> int:
+    value = row.get("class_id")
+    if value is not None:
+        return _scalar_int(value)
+
+    bottle_state = str(row.get("bottle_state", "")).strip()
+    subtask = str(row.get("subtask", "")).strip()
+    if subtask.startswith("{"):
+        try:
+            payload = json.loads(subtask)
+        except json.JSONDecodeError:
+            payload = {}
+        bottle_state = str(payload.get("bottle_state", bottle_state)).strip()
+        subtask = str(payload.get("subtask", "")).strip()
+
+    pair = (bottle_state, subtask)
+    for cid, class_pair in CLASS_MAP.items():
+        if pair == class_pair:
+            return cid
+    raise KeyError(f"Cannot infer class_id from row fields: bottle_state={bottle_state!r}, subtask={subtask!r}")
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--repo-id", required=True)
     ap.add_argument("--root", type=Path, default=None)
     ap.add_argument("--model-id", default="Qwen/Qwen3.5-2B")
+    ap.add_argument("--adapter", default=None, help="Path to a PEFT LoRA checkpoint directory.")
     ap.add_argument("--device", default="mps")
     ap.add_argument("--max-samples", type=int, default=200)
     ap.add_argument("--seed", type=int, default=7)
     ap.add_argument("--max-new-tokens", type=int, default=32)
+    ap.add_argument("--camera-columns", nargs="+", default=list(DEFAULT_CAMERA_COLUMNS))
     ap.add_argument("--output", type=Path, required=True)
     args = ap.parse_args()
 
-    ds = LeRobotDataset(args.repo_id, root=args.root, force_cache_sync=False, download_videos=False, delta_timestamps=None)
+    ds = _load_eval_dataset(args.repo_id, args.root)
     processor = AutoProcessor.from_pretrained(args.model_id, trust_remote_code=True)
     model = AutoModelForImageTextToText.from_pretrained(
         args.model_id,
@@ -104,9 +202,15 @@ def main() -> None:
         device_map=args.device,
         low_cpu_mem_usage=True,
     )
+    if args.adapter is not None:
+        from peft import PeftModel
+
+        model = PeftModel.from_pretrained(model, args.adapter)
     model.eval()
 
-    prompt = _prompt()
+    camera_columns = tuple(args.camera_columns)
+    system_prompt = _system_prompt()
+    user_prompt = _user_prompt(camera_columns)
     indices = _pick_indices(ds, args.max_samples, args.seed)
     total = 0
     correct = 0
@@ -118,14 +222,15 @@ def main() -> None:
 
     for i, idx in enumerate(indices):
         sample = ds[idx]
-        true_id = _scalar_int(sample["class_id"])
-        images = [
-            _to_pil(sample["observation.images.cam_high"]),
-            _to_pil(sample["observation.images.cam_low"]),
-            _to_pil(sample["observation.images.cam_left_wrist"]),
-            _to_pil(sample["observation.images.cam_right_wrist"]),
+        true_id = _row_class_id(sample)
+        images = [_to_pil(sample[column]) for column in camera_columns]
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {
+                "role": "user",
+                "content": [{"type": "image", "image": img} for img in images] + [{"type": "text", "text": user_prompt}],
+            },
         ]
-        messages = [{"role": "user", "content": [{"type": "image", "image": img} for img in images] + [{"type": "text", "text": prompt}]}]
         text = processor.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
         inputs = processor(text=[text], images=images, return_tensors="pt")
         inputs = {k: v.to(args.device) if hasattr(v, "to") else v for k, v in inputs.items()}
@@ -165,7 +270,9 @@ def main() -> None:
     result = {
         "repo_id": args.repo_id,
         "model_id": args.model_id,
+        "adapter": args.adapter,
         "device": args.device,
+        "camera_columns": list(camera_columns),
         "num_samples": total,
         "accuracy": correct / max(total, 1),
         "avg_latency_sec": sum(latencies) / max(len(latencies), 1),

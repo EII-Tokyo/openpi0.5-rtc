@@ -288,6 +288,12 @@ def create_torch_dataset(
     if repo_id == "fake":
         return FakeDataset(model_config, num_samples=1024)
 
+    force_cache_sync = os.getenv("OPENPI_LEROBOT_FORCE_CACHE_SYNC", "true").lower() not in {
+        "0",
+        "false",
+        "no",
+    }
+
     def _delta_timestamps(fps: float) -> dict[str, list[float]]:
         return {
             key: [t / fps for t in range(action_horizon)] for key in data_config.action_sequence_keys
@@ -300,7 +306,7 @@ def create_torch_dataset(
             dataset = lerobot_dataset.LeRobotDataset(
                 repo_ids[0],
                 revision="main",
-                force_cache_sync=True,
+                force_cache_sync=force_cache_sync,
                 delta_timestamps=_delta_timestamps(fps_meta.fps),
             )
         else:
@@ -315,7 +321,7 @@ def create_torch_dataset(
         dataset = lerobot_dataset.LeRobotDataset(
             repo_id,
             revision="main",
-            force_cache_sync=True,
+            force_cache_sync=force_cache_sync,
             delta_timestamps=_delta_timestamps(fps_meta.fps),
         )
     else:

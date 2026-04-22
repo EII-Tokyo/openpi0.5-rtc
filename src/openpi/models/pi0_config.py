@@ -37,6 +37,8 @@ class Pi0Config(_model.BaseModelConfig):
     subtask_max_token_len: int = 64
     # FAST tokenizer path used when subtask tokenization appends FAST action tokens.
     fast_tokenizer_path: str = "physical-intelligence/fast"
+    # If true, train the AR subtask stream to emit FAST action tokens after the high-level text.
+    train_fast_action_tokens: bool = True
     image_resolution: tuple[int, int] = _model.IMAGE_RESOLUTION
 
     def __post_init__(self):

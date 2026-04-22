@@ -9,11 +9,13 @@ services:
       - aloha_ros_nodes
       - ros_master
       - openpi_server_low_level
-      - openpi_server_high_level
+      - openpi_server_qwen_high_level
     environment:
       # examples/aloha_real/main.py 默认连本机策略；跨机时在 shell 或 .env 里设置这两项。
       - OPENPI_LOW_LEVEL_HOST=${OPENPI_LOW_LEVEL_HOST:-127.0.0.1}
       - OPENPI_HIGH_LEVEL_HOST=${OPENPI_HIGH_LEVEL_HOST:-127.0.0.1}
+      - OPENPI_QWEN_HIGH_LEVEL_HOST=${OPENPI_QWEN_HIGH_LEVEL_HOST:-127.0.0.1}
+      - OPENPI_QWEN_HIGH_LEVEL_PORT=${OPENPI_QWEN_HIGH_LEVEL_PORT:-8002}
     env_file:
       - ./.env
     # build:
@@ -90,43 +92,76 @@ services:
       - PYTHONPATH=/app/src
     gpus: all
 
-  openpi_server_high_level:
-    image: lyl472324464/robot:openpi_server_high_level
+  # Pi0.5 high-level service (:8001) is intentionally disabled while testing Qwen high-level (:8002).
+  # openpi_server_high_level:
+  #   image: lyl472324464/robot:openpi_server_high_level
+  #   build:
+  #     context: .
+  #     dockerfile: scripts/docker/serve_policy.Dockerfile
+  #   command:
+  #     - /bin/bash
+  #     - -lc
+  #     - |
+  #       if [ -n "$$HIGH_LEVEL_SERVER_ARGS" ]; then
+  #         set -- $$HIGH_LEVEL_SERVER_ARGS
+  #       else
+  #         set -- policy:checkpoint \
+  #           --policy.config twist_and_static_mixture_full_finetune \
+  #           --policy.dir /app/checkpoints/twist_and_static_mixture_full_finetune/twist_and_static_mixture_full_finetune_vast_20260405_100600/39999
+  #       fi
+  #       uv run --no-sync scripts/serve_policy.py \
+  #         --no-warmup-rtc \
+  #         --no-warmup-non-rtc \
+  #         --port 8001 \
+  #         "$$@"
+  #   init: true
+  #   tty: true
+  #   network_mode: host
+  #   volumes:
+  #     - $PWD:/app
+  #     - ${OPENPI_DATA_HOME:-~/.cache/openpi}:/openpi_assets
+  #   environment:
+  #     - GIT_LFS_SKIP_SMUDGE=1
+  #     - XLA_PYTHON_CLIENT_PREALLOCATE=false
+  #     - XLA_PYTHON_CLIENT_MEM_FRACTION=${HIGH_LEVEL_XLA_MEM_FRACTION:-0.60}
+  #     - HIGH_LEVEL_SERVER_ARGS
+  #     - OPENPI_DATA_HOME=/openpi_assets
+  #     - IS_DOCKER=true
+  #     - NVIDIA_VISIBLE_DEVICES=all
+  #     - NVIDIA_DRIVER_CAPABILITIES=all
+  #     - PYTHONPATH=/app/src
+  #   gpus: all
+
+  openpi_server_qwen_high_level:
+    image: lyl472324464/robot:qwen_high_level
     build:
       context: .
-      dockerfile: scripts/docker/serve_policy.Dockerfile
+      dockerfile: scripts/docker/qwen_high_level.Dockerfile
     command:
       - /bin/bash
       - -lc
       - |
-        if [ -n "$$HIGH_LEVEL_SERVER_ARGS" ]; then
-          set -- $$HIGH_LEVEL_SERVER_ARGS
+        if [ -n "$$QWEN_HIGH_LEVEL_ARGS" ]; then
+          set -- $$QWEN_HIGH_LEVEL_ARGS
         else
-          set -- policy:checkpoint \
-            --policy.config twist_and_static_mixture_full_finetune \
-            --policy.dir /app/checkpoints/twist_and_static_mixture_full_finetune/twist_and_static_mixture_full_finetune_vast_20260405_100600/39999
+          set -- \
+            --host 0.0.0.0 \
+            --port 8002 \
+            --adapter /app/output/qwen35-2b-twist-lora/v3-20260421-091009/checkpoint-797
         fi
-        uv run --no-sync scripts/serve_policy.py \
-          --no-warmup-rtc \
-          --no-warmup-non-rtc \
-          --port 8001 \
-          "$$@"
+        python scripts/serve_qwen_high_level.py "$$@"
     init: true
     tty: true
     network_mode: host
     volumes:
       - $PWD:/app
-      - ${OPENPI_DATA_HOME:-~/.cache/openpi}:/openpi_assets
+      - ${HF_HOME:-~/.cache/huggingface}:/root/.cache/huggingface
     environment:
-      - GIT_LFS_SKIP_SMUDGE=1
-      - XLA_PYTHON_CLIENT_PREALLOCATE=false
-      - XLA_PYTHON_CLIENT_MEM_FRACTION=${HIGH_LEVEL_XLA_MEM_FRACTION:-0.60}
-      - HIGH_LEVEL_SERVER_ARGS
-      - OPENPI_DATA_HOME=/openpi_assets
-      - IS_DOCKER=true
+      - PYTHONPATH=/app/src:/app/packages/openpi-client/src
+      - HF_HOME=/root/.cache/huggingface
+      - QWEN_HIGH_LEVEL_ARGS
       - NVIDIA_VISIBLE_DEVICES=all
       - NVIDIA_DRIVER_CAPABILITIES=all
-      - PYTHONPATH=/app/src
     gpus: all
 
   redis:

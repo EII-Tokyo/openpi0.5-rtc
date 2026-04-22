@@ -129,6 +129,7 @@ class ModelTransformFactory(GroupFactory):
                     model_config.max_token_len,
                     subtask_max_len=model_config.subtask_max_token_len,
                     fast_tokenizer_path=model_config.fast_tokenizer_path,
+                    train_fast_action_tokens=model_config.train_fast_action_tokens,
                 )
                 discrete_state_input = model_config.discrete_state_input
                 transforms = [
@@ -302,7 +303,6 @@ class LeRobotAlohaDataConfig(DataConfigFactory):
                 )
             ],
         )
-
         model_transforms = ModelTransformFactory(
             default_prompt=self.default_prompt,
             force_prompt=self.force_prompt,
@@ -993,6 +993,19 @@ _CONFIGS = [
         num_workers=4,
     ),
 ]
+
+_twist_100k_config = next(config for config in _CONFIGS if config.name == "twist_only_lora_triplet_100k")
+_CONFIGS.append(
+    dataclasses.replace(
+        _twist_100k_config,
+        name="twist_only_lora_triplet_100k_no_fast_action_tokens",
+        model=dataclasses.replace(_twist_100k_config.model, train_fast_action_tokens=False),
+        data=dataclasses.replace(
+            _twist_100k_config.data,
+            repo_ids=["lyl472324464/twist_subset_balanced_100k_448_multi_repo_300mb"],
+        ),
+    )
+)
 
 if len({config.name for config in _CONFIGS}) != len(_CONFIGS):
     raise ValueError("Config names must be unique.")

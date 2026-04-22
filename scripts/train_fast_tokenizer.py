@@ -34,6 +34,15 @@ def _load_seq_from_hdf5(path: Path, action_key: str, state_key: str) -> tuple[np
 
 
 def _load_from_lerobot_with_state(repo_id: str, action_key: str, state_key: str) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Load only numeric columns from a LeRobot repo.
+
+    Prefer parquet reads to avoid image decoding and the full HF dataset object overhead.
+    """
+    try:
+        return _load_from_lerobot_parquet(repo_id, action_key, state_key)
+    except Exception as parquet_error:
+        print(f"Falling back to LeRobotDataset for {repo_id}: {parquet_error}")
+
     from lerobot.datasets import lerobot_dataset
 
     ds = lerobot_dataset.LeRobotDataset(repo_id)
@@ -52,6 +61,37 @@ def _load_from_lerobot_with_state(repo_id: str, action_key: str, state_key: str)
     if len(actions) != len(states) or len(actions) != len(episode_index):
         raise ValueError("Mismatched lengths among action/state/episode_index")
     return actions, states, episode_index
+
+
+def _load_from_lerobot_parquet(
+    repo_id: str, action_key: str, state_key: str
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    import pyarrow.parquet as pq
+    from lerobot.datasets.lerobot_dataset import LeRobotDatasetMetadata
+
+    meta = LeRobotDatasetMetadata(repo_id, revision="main", force_cache_sync=False)
+    parquet_files = sorted(Path(meta.root).glob("data/**/*.parquet"))
+    if not parquet_files:
+        raise FileNotFoundError(f"No parquet files found under {meta.root}/data")
+
+    columns = [state_key, action_key, "episode_index", "index"]
+    actions: list[np.ndarray] = []
+    states: list[np.ndarray] = []
+    episode_indices: list[np.ndarray] = []
+    global_indices: list[np.ndarray] = []
+    for parquet_file in parquet_files:
+        table = pq.read_table(parquet_file, columns=columns)
+        actions.append(np.asarray(table[action_key].to_pylist(), dtype=np.float32))
+        states.append(np.asarray(table[state_key].to_pylist(), dtype=np.float32))
+        episode_indices.append(np.asarray(table["episode_index"].to_pylist(), dtype=np.int64))
+        global_indices.append(np.asarray(table["index"].to_pylist(), dtype=np.int64))
+
+    actions_np = np.concatenate(actions, axis=0)
+    states_np = np.concatenate(states, axis=0)
+    episode_index_np = np.concatenate(episode_indices, axis=0)
+    global_index_np = np.concatenate(global_indices, axis=0)
+    order = np.argsort(global_index_np)
+    return actions_np[order], states_np[order], episode_index_np[order]
 
 
 def _load_from_lerobot_preprocessed(
@@ -203,6 +243,8 @@ def main() -> None:
     )
 
     parser.add_argument("--base-tokenizer", type=str, default="physical-intelligence/fast")
+    parser.add_argument("--vocab-size", type=int, default=2048, help="BPE vocab size for the trained FAST tokenizer")
+    parser.add_argument("--scale", type=float, default=10.0, help="DCT coefficient quantization scale")
     parser.add_argument("--output-dir", type=Path, required=True, help="Where to save trained tokenizer")
     parser.add_argument("--push-to-hub", type=str, default="", help="Optional repo id to push, e.g. user/my_fast")
     parser.add_argument("--trust-remote-code", action=argparse.BooleanOptionalAction, default=True)
@@ -234,9 +276,11 @@ def main() -> None:
             use_quantile_norm = data_cfg.use_quantile_norm
     else:
         if norm_stats_path is None:
-            norm_stats_path = Path("assets/trossen/norm_stats.json")
-        if not norm_stats_path.exists():
-            raise FileNotFoundError(f"norm stats not found: {norm_stats_path}")
+            norm_stats_path = Path("assets/trossen")
+        if norm_stats_path.name == "norm_stats.json":
+            norm_stats_path = norm_stats_path.parent
+        if not (norm_stats_path / "norm_stats.json").exists():
+            raise FileNotFoundError(f"norm stats not found: {norm_stats_path / 'norm_stats.json'}")
         norm_stats = _normalize.load(norm_stats_path)
 
     if args.repo_ids:
@@ -274,7 +318,7 @@ def main() -> None:
     )
 
     tokenizer = AutoProcessor.from_pretrained(args.base_tokenizer, trust_remote_code=args.trust_remote_code)
-    tokenizer = tokenizer.fit(chunks)
+    tokenizer = tokenizer.fit(chunks, scale=args.scale, vocab_size=args.vocab_size)
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
     tokenizer.save_pretrained(str(args.output_dir))
