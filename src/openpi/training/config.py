@@ -88,6 +88,37 @@ _TWIST_WATER_TEAR_REPO_IDS = [
     "lyl472324464/2026-04-14_twist_tear_water-direction_tabacco-all"
 ]
 
+# Hugging Face Hub dataset roots under `eii-data-system-prod/data/huggingface/hub` on 192.168.1.40
+# (datasets--org--name), excluding any repo_id whose name contains "tear" (case-insensitive).
+_EII_DATA_SYSTEM_HUB_NO_TEAR_REPO_IDS = [
+    "lyl472324464/2025-09-15-twist-one-bottle-no-box-in-the-front",
+    "lyl472324464/2025-11-06-twist-many-bottles",
+    "lyl472324464/2025-11-14-twist-two-bottles",
+    "lyl472324464/2025-11-18-twist-two-bottles",
+    "lyl472324464/2025-11-26-twist-two-bottles",
+    "lyl472324464/2025-12-10-twist-one-bottle",
+    "lyl472324464/2025-12-23-twist-one-bottle",
+    "lyl472324464/2026-01-20-twist-one-bottle",
+    "lyl472324464/2026-01-28-twist-many-bottle",
+    "lyl472324464/2026-02-03-no-cap-and-direction",
+    "lyl472324464/2026-03-04-one-direction",
+    "lyl472324464/2026-03-05-two-direction",
+    "lyl472324464/2026-03-09-inference-with-and-without-cap",
+    "lyl472324464/2026-03-09-no-cap-inference",
+    "lyl472324464/2026-03-12-one-have-cap",
+    "lyl472324464/2026-03-12-one-have-cap-direction",
+    "lyl472324464/2026-03-12-one-havent-cap",
+    "lyl472324464/2026-03-12-one-havent-cap-direction",
+    "lyl472324464/2026-03-12-two-have-all-left",
+    "lyl472324464/2026-03-12-two-have-cap-all-right",
+    "lyl472324464/2026-03-12-two-have-cap-one-right",
+    # 2026-04-21 (HF Hub ids use `-lerobot` suffix)
+    "lyl472324464/2026-04-21_direction-lerobot",
+    "lyl472324464/2026-04-21_direction_2-lerobot",
+    "lyl472324464/2026-04-21_direction_havent_cap-lerobot",
+    "lyl472324464/2026-04-21_direction_havent_cap_water-lerobot",
+]
+
 
 @dataclasses.dataclass(frozen=True)
 class AssetsConfig:
@@ -331,6 +362,8 @@ def _make_twist_train_config(
     lora: bool,
     batch_size: int,
     num_workers: int,
+    include_low: bool = True,
+    include_subtask: bool = True,
 ) -> TrainConfig:
     if lora:
         model = pi0_config.Pi0Config(
@@ -368,9 +401,9 @@ def _make_twist_train_config(
             assets=_pi05_base_assets(),
             base_config=DataConfig(prompt_from_task=True),
             repack_transforms=_aloha_real_repack_transforms(
-                include_low=True,
+                include_low=include_low,
                 include_prompt=True,
-                include_subtask=True,
+                include_subtask=include_subtask,
             ),
         ),
         weight_loader=weight_loaders.CheckpointWeightLoader(_PI05_BASE_PARAMS),
@@ -404,6 +437,15 @@ _CONFIGS = [
         lora=True,
         batch_size=64,
         num_workers=4,
+    ),
+    _make_twist_train_config(
+        "eii_data_system_no_tear_cam3_lora",
+        repo_ids=_EII_DATA_SYSTEM_HUB_NO_TEAR_REPO_IDS,
+        lora=True,
+        batch_size=32,
+        num_workers=4,
+        include_low=False,
+        include_subtask=False,
     ),
     TrainConfig(
         name="pi05_aloha_sim",
