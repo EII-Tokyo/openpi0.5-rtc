@@ -3,6 +3,8 @@
 
 Repo IDs are parsed from _EII_DATA_SYSTEM_HUB_NO_TEAR_REPO_IDS in src/openpi/training/config.py.
 Checks Hugging Face dataset revisions main and v3.0.
+For v3.0, if it is a lightweight tag (not a branch), updates meta/tasks.parquet by
+branching from the tag, committing the file, deleting the tag, and recreating v3.0 on the new tip.
 
   .venv/bin/python scripts/sync_eii_canonical_tasks_parquet.py --dry-run
   HF_TOKEN=... .venv/bin/python scripts/sync_eii_canonical_tasks_parquet.py --apply
@@ -72,6 +74,46 @@ def tasks_need_update(df):
     if cur == CANONICAL_TASK:
         return False, "ok"
     return True, "task text differs from canonical"
+
+
+def _v3_is_tag_only(hf_api, repo_id: str) -> bool:
+    """True if ref v3.0 exists as a tag and not as a branch (Hub cannot commit directly to the tag)."""
+    refs = hf_api.list_repo_refs(repo_id, repo_type="dataset")
+    tags = {t.name for t in refs.tags}
+    branches = {b.name for b in refs.branches}
+    return "v3.0" in tags and "v3.0" not in branches
+
+
+def _upload_meta_tasks_replace_v3_tag(hf_api, repo_id: str, local_parquet: pathlib.Path) -> None:
+    """Move lightweight tag v3.0 to a new commit that updates meta/tasks.parquet."""
+    tag = "v3.0"
+    tmp = "__eii_tmp_v3_tasks_update"
+    commit_message = "chore: set canonical twist+bottle task in tasks.parquet (tag v3.0)"
+    info = hf_api.repo_info(repo_id, repo_type="dataset", revision=tag)
+    base_sha = info.sha
+    try:
+        hf_api.delete_branch(repo_id, branch=tmp, repo_type="dataset")
+    except Exception:
+        pass
+    hf_api.create_branch(repo_id, branch=tmp, revision=base_sha, repo_type="dataset")
+    try:
+        hf_api.upload_file(
+            path_or_fileobj=str(local_parquet),
+            path_in_repo="meta/tasks.parquet",
+            repo_id=repo_id,
+            repo_type="dataset",
+            revision=tmp,
+            commit_message=commit_message,
+        )
+        tip = hf_api.repo_info(repo_id, repo_type="dataset", revision=tmp).sha
+        hf_api.delete_tag(repo_id, tag=tag, repo_type="dataset")
+        hf_api.create_tag(repo_id, tag=tag, revision=tip, repo_type="dataset", exist_ok=False)
+    finally:
+        try:
+            hf_api.delete_branch(repo_id, branch=tmp, repo_type="dataset")
+        except Exception:
+            pass
+
 
 
 def main():
@@ -144,29 +186,24 @@ def main():
             summary_fix.append((repo_id, rev, reason))
 
             if args.apply:
-                upload_revisions = [rev]
-                if rev == "v3.0":
-                    upload_revisions = ["refs/heads/v3.0", "v3.0"]
-                uploaded = False
-                last_err = None
-                for urev in upload_revisions:
-                    try:
+                commit_msg = "chore: set canonical twist+bottle task in tasks.parquet"
+                try:
+                    if rev == "v3.0" and _v3_is_tag_only(hf_api, repo_id):
+                        _upload_meta_tasks_replace_v3_tag(hf_api, repo_id, new_path)
+                        print(f"        uploaded -> {repo_id} (tag v3.0 moved to new commit)")
+                    else:
                         hf_api.upload_file(
                             path_or_fileobj=str(new_path),
                             path_in_repo="meta/tasks.parquet",
                             repo_id=repo_id,
                             repo_type="dataset",
-                            revision=urev,
-                            commit_message="chore: set canonical twist+bottle task in tasks.parquet",
+                            revision=rev,
+                            commit_message=commit_msg,
                         )
-                        print(f"        uploaded -> {repo_id} (revision={urev})")
-                        uploaded = True
-                        break
-                    except Exception as e:
-                        last_err = e
-                if not uploaded:
-                    print(f"        [UPLOAD FAIL] {repo_id} @{rev}: {last_err}")
-                    summary_skip.append((repo_id, rev, f"upload fail: {last_err}"))
+                        print(f"        uploaded -> {repo_id} (revision={rev})")
+                except Exception as e:
+                    print(f"        [UPLOAD FAIL] {repo_id} @{rev}: {e}")
+                    summary_skip.append((repo_id, rev, f"upload fail: {e}"))
 
     print("\n=== Summary ===")
     print(f"ok (already canonical): {len(summary_ok)}")
