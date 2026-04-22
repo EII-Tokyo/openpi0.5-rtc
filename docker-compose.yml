@@ -81,7 +81,7 @@ services:
       dockerfile: scripts/docker/serve_policy.Dockerfile
     command: >-
       /bin/bash -lc
-      "uv run --no-sync scripts/serve_policy.py --no-warmup-rtc --no-warmup-non-rtc --port 8001 ${HIGH_LEVEL_SERVER_ARGS:-policy:checkpoint --policy.config twist_only_lora_triplet_10k --policy.dir /app/checkpoints/twist_only_lora_triplet_10k/twist_only_lora_triplet_10k_20260410_tok96_sub64/20000}"
+      "uv run --no-sync scripts/serve_policy.py --no-warmup-rtc --no-warmup-non-rtc --port 8001 ${HIGH_LEVEL_SERVER_ARGS:-policy:checkpoint --policy.config twist_and_static_mixture_full_finetune --policy.dir /app/checkpoints/twist_and_static_mixture_full_finetune/twist_and_static_mixture_full_finetune_vast_20260405_100600/39999}"
     init: true
     tty: true
     network_mode: host

@@ -9,6 +9,10 @@ data/
 tmp/
 wandb/
 attention_outputs/
+logs/
+output/
+qwen_twist_swift_data/
+qwen_twist_swift_data_full/
 voice_assistant_web/frontend/node_modules/
 
 # Byte-compiled / optimized / DLL files
