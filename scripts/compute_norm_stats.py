@@ -29,12 +29,13 @@ def create_torch_dataloader(
     num_workers: int,
     max_frames: int | None = None,
 ) -> tuple[_data_loader.Dataset, int]:
-    if data_config.repo_id is None:
-        raise ValueError("Data config must have a repo_id")
+    if data_config.repo_id is None and not data_config.repo_ids:
+        raise ValueError("Data config must have a repo_id or non-empty repo_ids")
     dataset = _data_loader.create_torch_dataset(data_config, action_horizon, model_config)
     dataset = _data_loader.TransformedDataset(
         dataset,
         [
+            *([transforms.PromptFromLeRobotTask()] if data_config.prompt_from_task else []),
             *data_config.repack_transforms.inputs,
             *data_config.data_transforms.inputs,
             # Remove strings since they are not supported by JAX and are not needed to compute norm stats.
@@ -68,6 +69,7 @@ def create_rlds_dataloader(
     dataset = _data_loader.IterableTransformedDataset(
         dataset,
         [
+            *([transforms.PromptFromLeRobotTask()] if data_config.prompt_from_task else []),
             *data_config.repack_transforms.inputs,
             *data_config.data_transforms.inputs,
             # Remove strings since they are not supported by JAX and are not needed to compute norm stats.
@@ -109,7 +111,10 @@ def main(config_name: str, max_frames: int | None = None):
 
     norm_stats = {key: stats.get_statistics() for key, stats in stats.items()}
 
-    output_path = config.assets_dirs / data_config.repo_id
+    out_id = data_config.repo_id or data_config.asset_id
+    if out_id is None:
+        raise ValueError("Cannot determine output directory: repo_id and asset_id are both None")
+    output_path = config.assets_dirs / out_id
     print(f"Writing stats to: {output_path}")
     normalize.save(output_path, norm_stats)
 

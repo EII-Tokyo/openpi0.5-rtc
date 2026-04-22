@@ -103,6 +103,13 @@ _EII_DATA_SYSTEM_HUB_NO_TEAR_REPO_IDS = [
     "lyl472324464/2026-02-03-no-cap-and-direction",
     "lyl472324464/2026-03-04-one-direction",
     "lyl472324464/2026-03-05-two-direction",
+    # 2026-03-09 two repos ~28.3k frames total on Hub; repeat 4x each (~113k weighted) to target ~100k.
+    "lyl472324464/2026-03-09-inference-with-and-without-cap",
+    "lyl472324464/2026-03-09-no-cap-inference",
+    "lyl472324464/2026-03-09-inference-with-and-without-cap",
+    "lyl472324464/2026-03-09-no-cap-inference",
+    "lyl472324464/2026-03-09-inference-with-and-without-cap",
+    "lyl472324464/2026-03-09-no-cap-inference",
     "lyl472324464/2026-03-09-inference-with-and-without-cap",
     "lyl472324464/2026-03-09-no-cap-inference",
     "lyl472324464/2026-03-12-one-have-cap",
@@ -112,7 +119,12 @@ _EII_DATA_SYSTEM_HUB_NO_TEAR_REPO_IDS = [
     "lyl472324464/2026-03-12-two-have-all-left",
     "lyl472324464/2026-03-12-two-have-cap-all-right",
     "lyl472324464/2026-03-12-two-have-cap-one-right",
-    # 2026-04-21 (HF Hub ids use `-lerobot` suffix)
+    "lyl472324464/2026.03.16_twist_many",
+    # 2026-04-21 (HF Hub ids use `-lerobot` suffix) — rotate-heavy; listed twice to up-weight in training.
+    "lyl472324464/2026-04-21_direction-lerobot",
+    "lyl472324464/2026-04-21_direction_2-lerobot",
+    "lyl472324464/2026-04-21_direction_havent_cap-lerobot",
+    "lyl472324464/2026-04-21_direction_havent_cap_water-lerobot",
     "lyl472324464/2026-04-21_direction-lerobot",
     "lyl472324464/2026-04-21_direction_2-lerobot",
     "lyl472324464/2026-04-21_direction_havent_cap-lerobot",
@@ -364,6 +376,8 @@ def _make_twist_train_config(
     num_workers: int,
     include_low: bool = True,
     include_subtask: bool = True,
+    gradient_accumulation_steps: int = 1,
+    assets: AssetsConfig | None = None,
 ) -> TrainConfig:
     if lora:
         model = pi0_config.Pi0Config(
@@ -398,7 +412,7 @@ def _make_twist_train_config(
             video_memory_num_frames=1,
             video_memory_stride_seconds=1.0,
             repo_ids=repo_ids,
-            assets=_pi05_base_assets(),
+            assets=assets if assets is not None else _pi05_base_assets(),
             base_config=DataConfig(prompt_from_task=True),
             repack_transforms=_aloha_real_repack_transforms(
                 include_low=include_low,
@@ -413,6 +427,7 @@ def _make_twist_train_config(
         num_train_steps=40_000,
         batch_size=batch_size,
         num_workers=num_workers,
+        gradient_accumulation_steps=gradient_accumulation_steps,
     )
 
 
@@ -442,10 +457,14 @@ _CONFIGS = [
         "eii_data_system_no_tear_cam3_lora",
         repo_ids=_EII_DATA_SYSTEM_HUB_NO_TEAR_REPO_IDS,
         lora=True,
-        batch_size=32,
+        # micro-batch 64 x 2 accum = 128 effective (scripts/train.py). H100 80GB + LoRA + 3x224 cams: 64 is used elsewhere (tear_lora); OOM则改 32x4。
+        batch_size=64,
         num_workers=4,
         include_low=False,
         include_subtask=False,
+        gradient_accumulation_steps=2,
+        # Load norm stats from ./assets/<config.name>/trossen (compute_norm_stats), not gs:// pi05_base.
+        assets=AssetsConfig(assets_dir=None, asset_id="trossen"),
     ),
     TrainConfig(
         name="pi05_aloha_sim",
