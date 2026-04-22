@@ -147,8 +147,13 @@ def main():
         # 注意：索引末尾可能有空格，所以需要精确匹配
         old_desc1 = 'Do the followings: 1. Pick up the bottle. 2. Twist off the bottle cap. '
         old_desc2 = '[bad action] Do the followings: 1. Pick up the bottle. 2. Twist off the bottle cap. '
-        new_desc1 = 'Do the followings: 1. If the bottle cap is facing left, rotate the bottle 180 degrees. 2. Pick up the bottle. 3. Twist off the bottle cap.'
-        new_desc2 = '[bad action] Do the followings: 1. If the bottle cap is facing left, rotate the bottle 180 degrees. 2. Pick up the bottle. 3. Twist off the bottle cap.'
+        new_desc1 = (
+            'Do the followings: 1. If the bottle cap is facing left, rotate the bottle 180 degrees. '
+            '2. Pick up the bottle. 3. Twist off the bottle cap. 4. Put the bottle into the box on the left. '
+            '5. Put the cap into the box on the right. If the bottle cap falls onto the table, pick it up. '
+            '6. Return to home position.'
+        )
+        new_desc2 = '[bad action] ' + new_desc1
         df_before = df.copy()
         df = modify_task(df, old_desc1, new_desc1)
         df = modify_task(df, old_desc2, new_desc2)
