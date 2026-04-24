@@ -1167,10 +1167,11 @@ _CONFIGS = [
                 "michios/droid_xxjd_3_canonical",
                 "michios/droid_xxjd_4_canonical",
                 "michios/droid_xxjd_5_canonical",
-                "michios/droid_xxjd_6_canonical",
-                "michios/droid_xxjd_7_canonical",
+                "michios/droid_xxjd_6_2",
+                "michios/droid_xxjd_7_2",
                 "michios/droid_xxjd_8_2_canonical",
                 "michios/droid_xxjd_20260202",
+                "michios/droid_xxjd_20260421"
             ],
             base_config=DataConfig(prompt_from_task=True),
             assets=AssetsConfig(
