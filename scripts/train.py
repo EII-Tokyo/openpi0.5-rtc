@@ -308,6 +308,12 @@ def main(config: _config.TrainConfig):
             jax.profiler.stop_trace()
             logging.info("Profiling saved (interrupted). View with: tensorboard --logdir /tmp/jax_profile")
 
+        skipped_items_report = data_loader.skipped_items_report()
+        if skipped_items_report is None:
+            logging.info("Skipped 0 frames due to recoverable video timestamp mismatches.")
+        else:
+            logging.info(skipped_items_report)
+
     logging.info("Waiting for checkpoint manager to finish")
     checkpoint_manager.wait_until_finished()
 

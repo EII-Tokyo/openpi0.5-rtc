@@ -2,7 +2,9 @@ from collections.abc import Iterator, Sequence
 import logging
 import multiprocessing
 import os
+import queue
 import typing
+import warnings
 from typing import Literal, Protocol, SupportsIndex, TypeVar
 
 import jax
@@ -49,6 +51,10 @@ class DataLoader(Protocol[T_co]):
     def __iter__(self) -> Iterator[T_co]:
         raise NotImplementedError("Subclasses of DataLoader should implement __iter__.")
 
+    def skipped_items_report(self) -> str | None:
+        """Get a summary of skipped dataset items, if any."""
+        raise NotImplementedError("Subclasses of DataLoader should implement skipped_items_report.")
+
 
 class TransformedDataset(Dataset[T_co]):
     def __init__(self, dataset: Dataset, transforms: Sequence[_transforms.DataTransformFn]):
@@ -57,6 +63,137 @@ class TransformedDataset(Dataset[T_co]):
 
     def __getitem__(self, index: SupportsIndex) -> T_co:
         return self._transform(self._dataset[index])
+
+    def __len__(self) -> int:
+        return len(self._dataset)
+
+
+def _is_skippable_lerobot_video_tolerance_error(exc: Exception) -> bool:
+    if not isinstance(exc, AssertionError):
+        return False
+    message = str(exc)
+    return "unexpectedly violate the tolerance" in message and "ignore this item during training" in message
+
+
+def _to_int(value) -> int | None:
+    if value is None:
+        return None
+    if hasattr(value, "item"):
+        value = value.item()
+    return int(value)
+
+
+def _extract_lerobot_sample_context(dataset, index: int) -> dict[str, typing.Any] | None:
+    if hasattr(dataset, "_dataset"):
+        inner_context = _extract_lerobot_sample_context(dataset._dataset, index)
+        if inner_context is not None:
+            return inner_context
+
+    if hasattr(dataset, "get_sample_context"):
+        return dataset.get_sample_context(index)
+
+    if hasattr(dataset, "_datasets") and hasattr(dataset, "_cumulative_len"):
+        dataset_idx = int(np.searchsorted(dataset._cumulative_len, index, side="right") - 1)
+        start_idx = int(dataset._cumulative_len[dataset_idx])
+        return _extract_lerobot_sample_context(dataset._datasets[dataset_idx], index - start_idx)
+
+    return None
+
+
+class SkippedItemTracker:
+    """Aggregates skipped sample counts across workers."""
+
+    def __init__(self, event_queue=None):
+        self._counts: dict[tuple[str, str], int] = {}
+        self._event_queue = event_queue
+
+    def record_skip(self, context: dict[str, typing.Any] | None) -> None:
+        if context is None:
+            key = ("<unknown>", "<unknown>")
+        else:
+            key = (str(context.get("repo_id", "<unknown>")), str(context.get("episode_index", "<unknown>")))
+
+        if self._event_queue is None:
+            self._counts[key] = self._counts.get(key, 0) + 1
+            return
+
+        self._event_queue.put(key)
+
+    def _drain_events(self) -> None:
+        if self._event_queue is None:
+            return
+        while True:
+            try:
+                key = self._event_queue.get_nowait()
+            except queue.Empty:
+                return
+            self._counts[key] = self._counts.get(key, 0) + 1
+
+    def report(self) -> str | None:
+        self._drain_events()
+        counts = dict(self._counts)
+        if not counts:
+            return None
+
+        total = sum(counts.values())
+        lines = [f"Skipped {total} frame(s) due to recoverable video timestamp mismatches:"]
+        for (repo_id, episode_index), count in sorted(counts.items(), key=lambda item: (-item[1], item[0][0], item[0][1])):
+            lines.append(f"  - dataset={repo_id}, episode={episode_index}, skipped_frames={count}")
+        return "\n".join(lines)
+
+
+def _find_retry_dataset(dataset):
+    current = dataset
+    while current is not None:
+        if isinstance(current, RetryOnErrorDataset):
+            return current
+        current = getattr(current, "_dataset", None)
+    return None
+
+
+class RetryOnErrorDataset(Dataset[T_co]):
+    """Retries nearby samples when a known recoverable dataset item fails to load."""
+
+    def __init__(self, dataset: Dataset[T_co], *, max_retries: int = 32, tracker: SkippedItemTracker | None = None):
+        self._dataset = dataset
+        self._max_retries = max_retries
+        self._tracker = tracker
+
+    def __getitem__(self, index: SupportsIndex) -> T_co:
+        dataset_len = len(self._dataset)
+        start_index = index.__index__()
+
+        for attempt in range(self._max_retries + 1):
+            current_index = (start_index + attempt) % dataset_len
+            try:
+                return self._dataset[current_index]
+            except Exception as exc:
+                if not _is_skippable_lerobot_video_tolerance_error(exc):
+                    raise
+                sample_context = _extract_lerobot_sample_context(self._dataset, current_index)
+                if self._tracker is not None:
+                    self._tracker.record_skip(sample_context)
+                context_str = ""
+                if sample_context is not None:
+                    context_str = (
+                        ", "
+                        f"dataset={sample_context.get('repo_id', '<unknown>')}, "
+                        f"episode={sample_context.get('episode_index', '<unknown>')}, "
+                        f"frame_index={sample_context.get('frame_index', '<unknown>')}"
+                    )
+                warnings.warn(
+                    (
+                        "Skipping dataset item due to recoverable LeRobot video timestamp mismatch "
+                        f"(requested index={current_index}, retry={attempt + 1}/{self._max_retries + 1}{context_str})."
+                    ),
+                    RuntimeWarning,
+                    stacklevel=2,
+                )
+
+        raise RuntimeError(
+            "Exceeded retry budget while skipping recoverable LeRobot video timestamp mismatches. "
+            f"Tried {self._max_retries + 1} items starting from index {start_index}."
+        )
 
     def __len__(self) -> int:
         return len(self._dataset)
@@ -221,6 +358,17 @@ class SchemaRemappingLeRobotDataset:
 
     def __len__(self):
         return len(self._dataset)
+
+    def get_sample_context(self, index: int) -> dict[str, typing.Any]:
+        self._dataset._ensure_hf_dataset_loaded()
+        item = self._dataset.hf_dataset[index]
+        return {
+            "repo_id": self.repo_id,
+            "episode_index": _to_int(item.get("episode_index")),
+            "frame_index": _to_int(item.get("frame_index")),
+            "index": _to_int(item.get("index")),
+            "timestamp": float(item["timestamp"].item()) if "timestamp" in item else None,
+        }
 
     def __getitem__(self, index):
         item = self._dataset[index]
@@ -404,16 +552,23 @@ def transform_dataset(dataset: Dataset, data_config: _config.DataConfig, *, skip
     if data_config.drop_wrist_camera > 0:
         training_only_transforms.append(_transforms.DropWristCamera(dropout=data_config.drop_wrist_camera))
 
-    return TransformedDataset(
-        dataset,
-        [
-            _transforms.PromptFromLeRobotTask(),
-            *data_config.repack_transforms.inputs,
-            *training_only_transforms,
-            *data_config.data_transforms.inputs,
-            _transforms.Normalize(norm_stats, use_quantiles=data_config.use_quantile_norm),
-            *data_config.model_transforms.inputs,
-        ],
+    prompt_transforms = [] if data_config.repo_id == "fake" else [_transforms.PromptFromLeRobotTask()]
+
+    tracker = SkippedItemTracker() if data_config.repo_id != "fake" else None
+
+    return RetryOnErrorDataset(
+        TransformedDataset(
+            dataset,
+            [
+                *prompt_transforms,
+                *data_config.repack_transforms.inputs,
+                *training_only_transforms,
+                *data_config.data_transforms.inputs,
+                _transforms.Normalize(norm_stats, use_quantiles=data_config.use_quantile_norm),
+                *data_config.model_transforms.inputs,
+            ],
+        ),
+        tracker=tracker,
     )
 
 
@@ -660,6 +815,9 @@ class TorchDataLoader:
         mp_context = None
         if num_workers > 0:
             mp_context = multiprocessing.get_context("spawn")
+            retry_dataset = _find_retry_dataset(dataset)
+            if retry_dataset is not None:
+                retry_dataset._tracker = SkippedItemTracker(mp_context.Queue())
 
         generator = torch.Generator()
         generator.manual_seed(seed)
@@ -680,6 +838,12 @@ class TorchDataLoader:
     @property
     def torch_loader(self) -> torch.utils.data.DataLoader:
         return self._data_loader
+
+    def skipped_items_report(self) -> str | None:
+        retry_dataset = _find_retry_dataset(self._data_loader.dataset)
+        if retry_dataset is None or retry_dataset._tracker is None:
+            return None
+        return retry_dataset._tracker.report()
 
     def __iter__(self):
         num_items = 0
@@ -758,6 +922,9 @@ class RLDSDataLoader:
                 num_items += 1
                 yield jax.tree.map(lambda x: jax.make_array_from_process_local_data(self._sharding, x), batch)
 
+    def skipped_items_report(self) -> str | None:
+        return None
+
 
 class DataLoaderImpl(DataLoader):
     def __init__(self, data_config: _config.DataConfig, data_loader: TorchDataLoader | RLDSDataLoader):
@@ -770,3 +937,8 @@ class DataLoaderImpl(DataLoader):
     def __iter__(self):
         for batch in self._data_loader:
             yield _model.Observation.from_dict(batch), batch["actions"]
+
+    def skipped_items_report(self) -> str | None:
+        if hasattr(self._data_loader, "skipped_items_report"):
+            return self._data_loader.skipped_items_report()
+        return None
