@@ -17,6 +17,20 @@ import numpy as np
 import pandas as pd
 from lerobot.datasets.lerobot_dataset import HF_LEROBOT_HOME, LeRobotDataset
 
+# Numpy 2.0+ no longer allows float()/int()/bool() on shape-(1,) arrays.
+# Lerobot 0.4.1 passes shape-(1,) arrays to HuggingFace datasets which maps
+# them to scalar Value features and calls float() — fix by squeezing at encode time.
+import datasets.features.features as _hf_feat_mod
+
+def _patched_value_encode(self, value, _orig=_hf_feat_mod.Value.encode_example):
+    if isinstance(value, np.ndarray) and value.shape == (1,):
+        value = value[0]
+    return _orig(self, value)
+
+
+_hf_feat_mod.Value.encode_example = _patched_value_encode
+del _hf_feat_mod, _patched_value_encode
+
 CANONICAL_FPS = 15
 CANONICAL_ROBOT_TYPE = "Franka"
 UNKNOWN_LABEL = "unknown"
@@ -219,7 +233,7 @@ def normalize_datetime(value: str | None) -> str:
     if underscore:
         return _canonicalize_datetime_tokens(*(int(part) for part in underscore.groups()))
 
-    weekday = re.fullmatch(r"[A-Za-z]{3}_([A-Za-z]{3})_(\d{1,2})_(\d{2}):(\d{2}):(\d{2})_(\d{4})", text)
+    weekday = re.fullmatch(r"[A-Za-z]{3}_([A-Za-z]{3})__?(\d{1,2})_(\d{2}):(\d{2}):(\d{2})_(\d{4})", text)
     if weekday:
         month_name, day, hour, minute, second, year = weekday.groups()
         month = _MONTH_TO_NUM[month_name]
@@ -414,7 +428,18 @@ def _annotation_from_payload(payload: dict[str, Any]) -> EpisodeAnnotation:
 def _coerce_conveyor_speed(value: Any) -> float | None:
     if value is None or value == "":
         return None
-    return float(value)
+    try:
+        return float(value)
+    except (ValueError, TypeError):
+        text = str(value)
+        for pattern in (
+            r"speed\s*:\s*([-+]?\d*\.?\d+)",
+            r"([-+]?\d*\.?\d+)\s*(?:m/s|mps)\b",
+        ):
+            m = re.search(pattern, text, flags=re.IGNORECASE)
+            if m:
+                return float(m.group(1))
+        return None
 
 
 def resolve_subtask_for_frame(
@@ -486,8 +511,11 @@ def compute_env_stats_for_frame(
 def finalize_frame(frame: dict[str, Any]) -> dict[str, Any]:
     finalized: dict[str, Any] = {}
     for key, value in frame.items():
-        if isinstance(value, np.ndarray) and value.dtype == np.float64:
-            finalized[key] = value.astype(np.float32)
+        if isinstance(value, np.ndarray):
+            if value.dtype == np.float64:
+                finalized[key] = value.astype(np.float32)
+            else:
+                finalized[key] = value
         else:
             finalized[key] = value
     return finalized
@@ -561,9 +589,17 @@ def validate_raw_camera_timestamps(
     if len(timestamps) < 2:
         return
 
-    if max(timestamps) - min(timestamps) > tolerance_s:
-        raise ValueError(
-            f"Raw camera timestamps are out of sync: {timestamps}. Allowed spread is {tolerance_s:.6f}s."
+    # Timestamps may be in milliseconds (values > 1e10) or seconds. Normalise to seconds.
+    if max(timestamps) > 1e10:
+        timestamps = [t / 1000.0 for t in timestamps]
+
+    spread = max(timestamps) - min(timestamps)
+    if spread > tolerance_s:
+        logging.warning(
+            "Raw camera timestamps are out of sync: %s (spread %.3fs, allowed %.3fs). Continuing.",
+            timestamps,
+            spread,
+            tolerance_s,
         )
 
 

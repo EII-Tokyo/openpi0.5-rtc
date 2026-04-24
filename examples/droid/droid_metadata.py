@@ -173,6 +173,8 @@ def resolve_raw_episode_metadata(
     elif annotation is not None and getattr(annotation, "task", None):
         task = str(annotation.task)
     speed = parse_speed_value(mongo_episode.prompts if mongo_episode is not None else None)
+    if speed is None and annotation is not None:
+        speed = getattr(annotation, "conveyor_speed", None)
     return MongoBackedEpisodeMetadata(
         uuid=annotation_uuid,
         task=task,

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import logging
 
 import numpy as np
 
@@ -109,18 +110,24 @@ def test_subtask_registry_round_trip(tmp_path):
     assert reloaded.get_or_add("reach") == 1
 
 
-def test_validate_raw_camera_timestamps_rejects_desync():
+def test_validate_raw_camera_timestamps_warns_on_desync(caplog):
     timestamps = {
         "wrist_frame_received": 0.0,
         "ext1_frame_received": 0.0,
         "ext2_frame_received": 0.2,
     }
-    try:
+    with caplog.at_level(logging.WARNING):
         validate_raw_camera_timestamps(timestamps, ["wrist", "ext1", "ext2"], tolerance_s=0.05)
-    except ValueError as exc:
-        assert "out of sync" in str(exc)
-    else:
-        raise AssertionError("Expected raw camera timestamp validation to fail.")
+    assert "out of sync" in caplog.text
+
+
+def test_validate_raw_camera_timestamps_accepts_millisecond_inputs():
+    timestamps = {
+        "wrist_frame_received": 1_730_000_000_000.0,
+        "ext1_frame_received": 1_730_000_000_010.0,
+        "ext2_frame_received": 1_730_000_000_020.0,
+    }
+    validate_raw_camera_timestamps(timestamps, ["wrist", "ext1", "ext2"], tolerance_s=0.05)
 
 
 def test_validate_episode_frames_sync_rejects_missing_camera():
