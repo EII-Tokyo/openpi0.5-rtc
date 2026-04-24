@@ -97,6 +97,8 @@ class DataConfig:
     action_space: droid_rlds_dataset.DroidActionSpace | None = None
     # Path to the data filter file for DROID dataset
     filter_dict_path: str | None = None
+    # Training-only wrist camera dropout probability for DROID data. Must be in [0, 1].
+    drop_wrist_camera: float = 0.0
 
 
 class GroupFactory(Protocol):
@@ -171,6 +173,8 @@ class DataConfigFactory(abc.ABC):
     repo_ids: list[str] = tyro.MISSING
     # Determines how the assets will be loaded.
     assets: AssetsConfig = dataclasses.field(default_factory=AssetsConfig)
+    # Training-only wrist camera dropout probability for DROID data. Must be in [0, 1].
+    drop_wrist_camera: float = 0.0
     # Base config that will be updated by the factory.
     base_config: tyro.conf.Suppress[DataConfig | None] = None
 
@@ -182,6 +186,8 @@ class DataConfigFactory(abc.ABC):
         repo_id = self.repo_id if self.repo_id is not tyro.MISSING else None
         repo_ids = self.repo_ids if self.repo_ids is not tyro.MISSING else None
         asset_id = self.assets.asset_id or repo_id
+        if not 0.0 <= self.drop_wrist_camera <= 1.0:
+            raise ValueError(f"drop_wrist_camera must be in [0, 1], got {self.drop_wrist_camera}.")
         return dataclasses.replace(
             self.base_config or DataConfig(),
             repo_id=repo_id,
@@ -189,6 +195,7 @@ class DataConfigFactory(abc.ABC):
             asset_id=asset_id,
             norm_stats=self._load_norm_stats(epath.Path(self.assets.assets_dir or assets_dirs), asset_id),
             use_quantile_norm=model_config.model_type != ModelType.PI0,
+            drop_wrist_camera=self.drop_wrist_camera,
         )
 
     def _load_norm_stats(self, assets_dir: epath.Path, asset_id: str | None) -> dict[str, _transforms.NormStats] | None:

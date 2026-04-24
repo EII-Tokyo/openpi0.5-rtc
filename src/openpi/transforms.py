@@ -512,6 +512,27 @@ class AppendConveyorInfo(DataTransformFn):
         return data
 
 
+@dataclasses.dataclass(frozen=True)
+class DropWristCamera(DataTransformFn):
+    """Zeros the repacked DROID wrist camera and records a false mask when sampled."""
+
+    dropout: float = 0.1
+    image_key: str = "observation/wrist_image_left"
+    mask_key: str = "observation/wrist_image_left_mask"
+
+    def __post_init__(self):
+        if not 0.0 <= self.dropout <= 1.0:
+            raise ValueError(f"dropout must be in [0, 1], got {self.dropout}.")
+
+    def __call__(self, data: DataDict) -> DataDict:
+        if self.image_key not in data or np.random.random() >= self.dropout:
+            return data
+
+        data[self.image_key] = np.zeros_like(np.asarray(data[self.image_key]))
+        data[self.mask_key] = np.False_
+        return data
+
+
 def _assert_quantile_stats(norm_stats: at.PyTree[NormStats]) -> None:
     for k, v in flatten_dict(norm_stats).items():
         if v.q01 is None or v.q99 is None:
