@@ -503,9 +503,11 @@ class AppendConveyorInfo(DataTransformFn):
         speed_val = float(conveyor_speed)
         if np.isnan(speed_val):
             return data
-        if np.random.random() < self.dropout:
+        # Only apply dropout when belt is off — non-zero speed data is rare so
+        # we always condition on it to maximise learning signal.
+        if speed_val == 0 and np.random.random() < self.dropout:
             return data
-        suffix = " Conveyor belt: Off." if speed_val == 0 else " Conveyor belt: On."
+        suffix = ", Conveyor: Off" if speed_val == 0 else ", Conveyor: On"
         data["prompt"] = data["prompt"] + suffix
         return data
 
