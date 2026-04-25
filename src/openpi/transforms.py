@@ -330,12 +330,14 @@ class TokenizePrompt(DataTransformFn):
         if subtask is not None and not isinstance(subtask, (str, dict)):
             subtask = subtask.item()
         actions = data.get("actions", None)
+        training = subtask is not None and ("actions" in data or "actions_mask" in data)
         tokenized = self.tokenizer.tokenize(
             prompt,
             state,
             subtask,
             actions=actions if train_action else None,
             train_action=train_action,
+            training=training,
         )
         if len(tokenized) == 2:
             prompt_tokens, prompt_masks = tokenized

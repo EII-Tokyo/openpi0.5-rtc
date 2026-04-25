@@ -93,12 +93,13 @@ def test_tokenize_prompt_vqa_mode_omits_state_and_actions():
     calls = {}
 
     class _FakeTokenizer:
-        def tokenize(self, prompt, state=None, subtask=None, actions=None, *, train_action=True):
+        def tokenize(self, prompt, state=None, subtask=None, actions=None, *, train_action=True, training=False):
             calls["prompt"] = prompt
             calls["state"] = state
             calls["subtask"] = subtask
             calls["actions"] = actions
             calls["train_action"] = train_action
+            calls["training"] = training
             return (
                 np.zeros((4,), dtype=np.int32),
                 np.ones((4,), dtype=bool),
@@ -120,6 +121,7 @@ def test_tokenize_prompt_vqa_mode_omits_state_and_actions():
     )
 
     assert calls["train_action"] is False
+    assert calls["training"] is True
     assert calls["state"] is None
     assert calls["actions"] is None
     assert "tokenized_subtask" in out
