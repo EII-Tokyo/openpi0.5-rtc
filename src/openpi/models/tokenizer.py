@@ -1,7 +1,5 @@
 import json
 import logging
-import os
-import random
 from typing import Any
 
 import jax
@@ -117,6 +115,40 @@ def get_subtask_text(subtask: Any | None) -> str | None:
         return cleaned if cleaned else None
     return None
 
+
+def get_prompt_text(
+    prompt: str,
+    subtask: Any | None = None,
+    *,
+    bottle_description_dropout: float = 0.0,
+    training: bool = False,
+) -> str:
+    cleaned_prompt = prompt.strip().replace("_", " ").replace("\n", " ")
+    parsed = _parse_subtask_payload(subtask)
+    if parsed is None:
+        return cleaned_prompt
+
+    bottle_description = parsed.get("bottle_description")
+    if isinstance(bottle_description, list):
+        valid_descriptions = [item.strip() for item in bottle_description if isinstance(item, str) and item.strip()]
+        if valid_descriptions:
+            bottle_description = valid_descriptions[np.random.randint(len(valid_descriptions))]
+        else:
+            bottle_description = None
+    if not isinstance(bottle_description, str):
+        return cleaned_prompt
+
+    cleaned_description = bottle_description.strip()
+    if not cleaned_description:
+        return cleaned_prompt
+    if "target:" in cleaned_prompt.lower():
+        return cleaned_prompt
+    if training and bottle_description_dropout > 0.0 and np.random.random() < bottle_description_dropout:
+        return cleaned_prompt
+
+    return f"{cleaned_prompt}, Target: {cleaned_description}" if cleaned_prompt else f"Target: {cleaned_description}"
+
+
 def get_vqa_answer_text(subtask: Any | None) -> str | None:
     if subtask is None:
         return None
@@ -152,11 +184,15 @@ class PaligemmaTokenizer:
         subtask_max_len: int | None = None,
         fast_tokenizer_path: str = "physical-intelligence/fast",
         train_fast_action_tokens: bool = True,
+        bottle_description_dropout: float = 0.0,
     ):
+        if not 0.0 <= bottle_description_dropout <= 1.0:
+            raise ValueError(f"bottle_description_dropout must be in [0, 1], got {bottle_description_dropout}.")
         self._max_len = max_len
         self._subtask_max_len = subtask_max_len if subtask_max_len is not None else max_len
         self._fast_tokenizer_path = fast_tokenizer_path
         self._train_fast_action_tokens = train_fast_action_tokens
+        self._bottle_description_dropout = bottle_description_dropout
         self._fast_tokenizer = None
         self._fast_skip_tokens = 128
 
@@ -192,11 +228,16 @@ class PaligemmaTokenizer:
         actions: np.ndarray | None = None,
         *,
         train_action: bool = True,
+        training: bool = False,
     ) -> tuple[np.ndarray, np.ndarray] | tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-        cleaned_text = prompt.strip().replace("_", " ").replace("\n", " ")
+        cleaned_text = get_prompt_text(
+            prompt,
+            subtask,
+            bottle_description_dropout=self._bottle_description_dropout,
+            training=training,
+        )
         if not train_action:
-            prompt_prefix = cleaned_text
-            prompt_tokens = self._tokenizer.encode(prompt_prefix, add_bos=True)
+            prompt_tokens = self._tokenizer.encode(cleaned_text, add_bos=True)
             prompt_tokens, prompt_mask = self._pad_tokens(prompt_tokens, self._max_len, left_pad=True)
 
             answer_text = get_vqa_answer_text(subtask)

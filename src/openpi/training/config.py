@@ -119,6 +119,7 @@ class ModelTransformFactory(GroupFactory):
     include_bottle_position: bool = True
     include_bottle_state: bool = True
     include_subtask: bool = True
+    bottle_description_dropout: float = 0.0
 
     def __call__(self, model_config: _model.BaseModelConfig) -> _transforms.Group:
         image_height, image_width = self.image_size
@@ -130,6 +131,7 @@ class ModelTransformFactory(GroupFactory):
                     subtask_max_len=model_config.subtask_max_token_len,
                     fast_tokenizer_path=model_config.fast_tokenizer_path,
                     train_fast_action_tokens=model_config.train_fast_action_tokens,
+                    bottle_description_dropout=self.bottle_description_dropout,
                 )
                 discrete_state_input = model_config.discrete_state_input
                 transforms = [
@@ -217,6 +219,7 @@ class LeRobotAlohaDataConfig(DataConfigFactory):
     include_bottle_position: bool = True
     include_bottle_state: bool = True
     include_subtask: bool = True
+    bottle_description_dropout: float = 0.0
     # Repack transforms.
     repack_transforms: tyro.conf.Suppress[_transforms.Group] = dataclasses.field(
         default_factory=lambda: _transforms.Group(
@@ -258,6 +261,7 @@ class LeRobotAlohaDataConfig(DataConfigFactory):
                 include_bottle_position=self.include_bottle_position,
                 include_bottle_state=self.include_bottle_state,
                 include_subtask=self.include_subtask,
+                bottle_description_dropout=self.bottle_description_dropout,
             )(model_config)
             return DataConfig(
                 repo_id="fake",
@@ -311,6 +315,7 @@ class LeRobotAlohaDataConfig(DataConfigFactory):
             include_bottle_position=self.include_bottle_position,
             include_bottle_state=self.include_bottle_state,
             include_subtask=self.include_subtask,
+            bottle_description_dropout=self.bottle_description_dropout,
         )(model_config)
 
         return dataclasses.replace(
