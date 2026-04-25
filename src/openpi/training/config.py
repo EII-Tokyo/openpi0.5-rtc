@@ -449,6 +449,8 @@ class TrainConfig:
     seed: int = 42
     # Global batch size.
     batch_size: int = 32
+    # Number of microbatches to split each global batch into before applying one optimizer update.
+    gradient_accumulation_steps: int = 1
     # Number of workers to use for the data loader. Increasing this number will speed up data loading but
     # will increase memory and CPU usage.
     num_workers: int = 2
@@ -1003,6 +1005,28 @@ _CONFIGS.append(
         data=dataclasses.replace(
             _twist_100k_config.data,
             repo_ids=["lyl472324464/twist_subset_balanced_100k_448_multi_repo_300mb"],
+        ),
+    )
+)
+_CONFIGS.append(
+    dataclasses.replace(
+        _twist_100k_config,
+        name="twist_only_lora_triplet_100k_fast_action_tokens_scale1",
+        model=dataclasses.replace(
+            _twist_100k_config.model,
+            train_fast_action_tokens=True,
+            fast_tokenizer_path=(
+                "output/fast_tokenizers/"
+                "twist_subset_balanced_100k_448_multi_repo_300mb/"
+                "fast_tokenizer_v2048_100k_scale1"
+            ),
+        ),
+        data=dataclasses.replace(
+            _twist_100k_config.data,
+            repo_ids=[
+                "lyl472324464/"
+                "twist_subset_balanced_100k_448_multi_repo_300mb_train_action_true_process_all_bottles"
+            ],
         ),
     )
 )

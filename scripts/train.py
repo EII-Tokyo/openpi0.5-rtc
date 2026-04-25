@@ -150,44 +150,59 @@ def init_train_state(
 
 
 @at.typecheck
-def train_step(
+def _loss_fn(
+    model: _model.BaseModel,
+    rng: at.KeyArrayLike,
+    observation: _model.Observation,
+    actions: _model.Actions,
+):
+    if hasattr(model, "compute_loss_with_metrics"):
+        chunked_loss, flow_chunked_loss, subtask_ar_chunked_loss = model.compute_loss_with_metrics(
+            rng, observation, actions, train=True
+        )
+        return jnp.mean(chunked_loss), {
+            "flow_loss": jnp.mean(flow_chunked_loss),
+            "subtask_ar_loss": jnp.mean(subtask_ar_chunked_loss),
+        }
+    chunked_loss = model.compute_loss(rng, observation, actions, train=True)
+    return jnp.mean(chunked_loss), {
+        "flow_loss": jnp.mean(chunked_loss),
+        "subtask_ar_loss": jnp.asarray(0.0, dtype=chunked_loss.dtype),
+    }
+
+
+@at.typecheck
+def train_microbatch_grads(
     config: _config.TrainConfig,
     rng: at.KeyArrayLike,
     state: training_utils.TrainState,
     batch: tuple[_model.Observation, _model.Actions, at.Bool[at.Array, " b"]],
-) -> tuple[training_utils.TrainState, dict[str, at.Array]]:
+) -> tuple[Any, dict[str, at.Array]]:
     model = nnx.merge(state.model_def, state.params)
     model.train()
-
-    @at.typecheck
-    def loss_fn(
-        model: _model.BaseModel,
-        rng: at.KeyArrayLike,
-        observation: _model.Observation,
-        actions: _model.Actions,
-    ):
-        if hasattr(model, "compute_loss_with_metrics"):
-            chunked_loss, flow_chunked_loss, subtask_ar_chunked_loss = model.compute_loss_with_metrics(
-                rng, observation, actions, train=True
-            )
-            return jnp.mean(chunked_loss), {
-                "flow_loss": jnp.mean(flow_chunked_loss),
-                "subtask_ar_loss": jnp.mean(subtask_ar_chunked_loss),
-            }
-        chunked_loss = model.compute_loss(rng, observation, actions, train=True)
-        return jnp.mean(chunked_loss), {
-            "flow_loss": jnp.mean(chunked_loss),
-            "subtask_ar_loss": jnp.asarray(0.0, dtype=chunked_loss.dtype),
-        }
-
     train_rng = jax.random.fold_in(rng, state.step)
     observation, actions, actions_mask = batch
 
-    # Filter out frozen params.
     diff_state = nnx.DiffState(0, config.trainable_filter)
-    (loss, aux_metrics), grads = nnx.value_and_grad(loss_fn, argnums=diff_state, has_aux=True)(
+    (loss, aux_metrics), grads = nnx.value_and_grad(_loss_fn, argnums=diff_state, has_aux=True)(
         model, train_rng, observation, actions
     )
+    info = {
+        "loss": loss,
+        "flow_loss": aux_metrics["flow_loss"],
+        "subtask_ar_loss": aux_metrics["subtask_ar_loss"],
+        "actionless_fraction": 1.0 - jnp.mean(actions_mask.astype(jnp.float32)),
+    }
+    return grads, info
+
+
+@at.typecheck
+def apply_gradients(
+    config: _config.TrainConfig,
+    state: training_utils.TrainState,
+    grads: Any,
+) -> tuple[training_utils.TrainState, dict[str, at.Array]]:
+    model = nnx.merge(state.model_def, state.params)
 
     params = state.params.filter(config.trainable_filter)
     updates, new_opt_state = state.tx.update(grads, state.opt_state, params)
@@ -216,14 +231,27 @@ def train_step(
         ),
     )
     info = {
-        "loss": loss,
-        "flow_loss": aux_metrics["flow_loss"],
-        "subtask_ar_loss": aux_metrics["subtask_ar_loss"],
-        "actionless_fraction": 1.0 - jnp.mean(actions_mask.astype(jnp.float32)),
         "grad_norm": optax.global_norm(grads),
         "param_norm": optax.global_norm(kernel_params),
     }
     return new_state, info
+
+
+@at.typecheck
+def train_step(
+    config: _config.TrainConfig,
+    rng: at.KeyArrayLike,
+    state: training_utils.TrainState,
+    batch: tuple[_model.Observation, _model.Actions, at.Bool[at.Array, " b"]],
+) -> tuple[training_utils.TrainState, dict[str, at.Array]]:
+    grads, loss_info = train_microbatch_grads(config, rng, state, batch)
+    new_state, update_info = apply_gradients(config, state, grads)
+    return new_state, {
+        **loss_info,
+        **update_info,
+        "microbatch_size": jnp.asarray(config.batch_size),
+        "gradient_accumulation_steps": jnp.asarray(1),
+    }
 
 
 def main(config: _config.TrainConfig):
@@ -234,6 +262,26 @@ def main(config: _config.TrainConfig):
         raise ValueError(
             f"Batch size {config.batch_size} must be divisible by the number of devices {jax.device_count()}."
         )
+    if config.gradient_accumulation_steps < 1:
+        raise ValueError(
+            f"Gradient accumulation steps must be at least 1, got {config.gradient_accumulation_steps}."
+        )
+    if config.batch_size % config.gradient_accumulation_steps != 0:
+        raise ValueError(
+            f"Batch size {config.batch_size} must be divisible by gradient accumulation steps "
+            f"{config.gradient_accumulation_steps}."
+        )
+    microbatch_size = config.batch_size // config.gradient_accumulation_steps
+    if microbatch_size % jax.device_count() != 0:
+        raise ValueError(
+            f"Microbatch size {microbatch_size} must be divisible by the number of devices {jax.device_count()}."
+        )
+    logging.info(
+        "Effective batch size %d with gradient_accumulation_steps=%d and microbatch_size=%d",
+        config.batch_size,
+        config.gradient_accumulation_steps,
+        microbatch_size,
+    )
 
     jax.config.update("jax_compilation_cache_dir", str(epath.Path("~/.cache/jax").expanduser()))
 
@@ -296,6 +344,23 @@ def main(config: _config.TrainConfig):
         out_shardings=(train_state_sharding, replicated_sharding),
         donate_argnums=(1,),
     )
+    grad_sharding = train_state_sharding.params.filter(config.trainable_filter)
+    ptrain_microbatch_grads = jax.jit(
+        functools.partial(train_microbatch_grads, config),
+        in_shardings=(replicated_sharding, train_state_sharding, data_sharding),
+        out_shardings=(grad_sharding, replicated_sharding),
+    )
+    papply_gradients = jax.jit(
+        functools.partial(apply_gradients, config),
+        in_shardings=(train_state_sharding, grad_sharding),
+        out_shardings=(train_state_sharding, replicated_sharding),
+        donate_argnums=(0,),
+    )
+
+    def slice_batch(tree, microbatch_index: int):
+        start = microbatch_index * microbatch_size
+        end = start + microbatch_size
+        return jax.tree.map(lambda x: x[start:end], tree)
 
     start_step = int(train_state.step)
     pbar = tqdm.tqdm(
@@ -308,8 +373,35 @@ def main(config: _config.TrainConfig):
     infos = []
     log_start_time = time.perf_counter()
     for step in pbar:
-        with sharding.set_mesh(mesh):
-            train_state, info = ptrain_step(train_rng, train_state, batch)
+        if config.gradient_accumulation_steps == 1:
+            with sharding.set_mesh(mesh):
+                train_state, info = ptrain_step(train_rng, train_state, batch)
+        else:
+            accumulated_grads = None
+            micro_infos = []
+            with sharding.set_mesh(mesh):
+                for microbatch_index in range(config.gradient_accumulation_steps):
+                    microbatch = slice_batch(batch, microbatch_index)
+                    micro_rng = jax.random.fold_in(train_rng, microbatch_index)
+                    micro_grads, micro_info = ptrain_microbatch_grads(micro_rng, train_state, microbatch)
+                    accumulated_grads = (
+                        micro_grads
+                        if accumulated_grads is None
+                        else jax.tree.map(jnp.add, accumulated_grads, micro_grads)
+                    )
+                    micro_infos.append(micro_info)
+
+                accumulation_scale = 1.0 / config.gradient_accumulation_steps
+                accumulated_grads = jax.tree.map(lambda x: x * accumulation_scale, accumulated_grads)
+                train_state, update_info = papply_gradients(train_state, accumulated_grads)
+
+            micro_info = jax.tree.map(jnp.mean, common_utils.stack_forest(micro_infos))
+            info = {
+                **micro_info,
+                **update_info,
+                "microbatch_size": jnp.asarray(microbatch_size),
+                "gradient_accumulation_steps": jnp.asarray(config.gradient_accumulation_steps),
+            }
         infos.append(info)
         if step % config.log_interval == 0:
             elapsed = time.perf_counter() - log_start_time

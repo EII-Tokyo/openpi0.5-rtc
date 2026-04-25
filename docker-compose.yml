@@ -9,7 +9,7 @@ services:
       - aloha_ros_nodes
       - ros_master
       - openpi_server_low_level
-      - openpi_server_qwen_high_level
+      # - openpi_server_qwen_high_level
     environment:
       # examples/aloha_real/main.py 默认连本机策略；跨机时在 shell 或 .env 里设置这两项。
       - OPENPI_LOW_LEVEL_HOST=${OPENPI_LOW_LEVEL_HOST:-127.0.0.1}
@@ -106,8 +106,8 @@ services:
   #         set -- $$HIGH_LEVEL_SERVER_ARGS
   #       else
   #         set -- policy:checkpoint \
-  #           --policy.config twist_and_static_mixture_full_finetune \
-  #           --policy.dir /app/checkpoints/twist_and_static_mixture_full_finetune/twist_and_static_mixture_full_finetune_vast_20260405_100600/39999
+  #           --policy.config twist_only_lora_triplet_100k_no_fast_action_tokens \
+  #           --policy.dir /app/downloaded_checkpoints/pi05-twist-100k-fast-action-scale1-bs8-ga1-wandb-restart-save1000-20260423-055040/11000
   #       fi
   #       uv run --no-sync scripts/serve_policy.py \
   #         --no-warmup-rtc \
@@ -147,7 +147,7 @@ services:
           set -- \
             --host 0.0.0.0 \
             --port 8002 \
-            --adapter /app/output/qwen35-2b-twist-lora/v3-20260421-091009/checkpoint-797
+            --adapter /app/output/qwen35-2b-twist-lora/v6-20260422-113134/checkpoint-4000
         fi
         python scripts/serve_qwen_high_level.py "$$@"
     init: true

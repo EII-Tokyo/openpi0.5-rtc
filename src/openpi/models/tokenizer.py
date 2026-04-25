@@ -78,14 +78,6 @@ def get_subtask_text(subtask: Any | None) -> str | None:
             cleaned_subtask = ""
 
         parts: list[str] = []
-        if isinstance(bottle_description, list):
-            valid_descriptions = [item.strip() for item in bottle_description if isinstance(item, str) and item.strip()]
-            bottle_description = random.choice(valid_descriptions) if valid_descriptions else None
-        if isinstance(bottle_description, str):
-            cleaned_description = bottle_description.strip()
-            if cleaned_description:
-                parts.append(f"Target: {cleaned_description}")
-
         if isinstance(bottle_position, str):
             cleaned_position = bottle_position.strip()
         elif bottle_position is not None:
@@ -124,7 +116,6 @@ def get_subtask_text(subtask: Any | None) -> str | None:
         cleaned = subtask.strip()
         return cleaned if cleaned else None
     return None
-
 
 def get_vqa_answer_text(subtask: Any | None) -> str | None:
     if subtask is None:
@@ -258,7 +249,9 @@ class PaligemmaTokenizer:
             if actions_np.ndim == 2:
                 fast_action_tokens_raw = self._get_fast_tokenizer()(actions_np[None])[0]
                 fast_action_tokens = self._act_tokens_to_paligemma_tokens(fast_action_tokens_raw).tolist()
-        action_suffix_tokens = self._tokenizer.encode(action_suffix, add_bos=False) if fast_action_tokens else []
+        # The low-level flow action head is always conditioned on this action
+        # suffix, even when the AR stream is not training FAST action tokens.
+        action_suffix_tokens = self._tokenizer.encode(action_suffix, add_bos=False)
 
         if not subtask_only_tokens and not fast_action_tokens:
             subtask_tokens = np.zeros((self._subtask_max_len,), dtype=np.int32)
@@ -269,7 +262,6 @@ class PaligemmaTokenizer:
 
         eos_token = [self.eos_token_id] if subtask_only_tokens else []
         full_subtask_tokens = subtask_only_tokens + eos_token + action_suffix_tokens + fast_action_tokens
-        print(prompt_prefix, subtask_text, action_suffix)
         subtask_tokens, subtask_mask = self._pad_tokens(full_subtask_tokens, self._subtask_max_len)
         # Compute AR loss on subtask text + EOS + fast action tokens. Exclude the action suffix text itself.
         loss_mask = np.asarray(
