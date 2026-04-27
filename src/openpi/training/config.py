@@ -1175,8 +1175,9 @@ _CONFIGS = [
                 "michios/droid_xxjd_4_canonical",
                 "michios/droid_xxjd_5_canonical",
                 "michios/droid_xxjd_6_2",
-                "michios/droid_xxjd_7_2",
-                "michios/droid_xxjd_8_2_canonical",
+                "michios/droid_xxjd_combined",
+                # "michios/droid_xxjd_7_2",
+                # "michios/droid_xxjd_8_2_canonical",
                 "michios/droid_xxjd_20260202",
                 "michios/droid_xxjd_20260421"
             ],
