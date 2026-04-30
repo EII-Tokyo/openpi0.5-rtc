@@ -2,6 +2,7 @@ import dataclasses
 import enum
 import logging
 import socket
+import dataclasses as dc
 
 import tyro
 import numpy as np
@@ -56,6 +57,9 @@ class Args:
     warmup_non_rtc: bool = True
     # Warm up infer_subtask for hierarchical/high-level usage.
     warmup_subtask: bool = True
+    # Override temporal image history used by the training data config at inference time.
+    video_memory_num_frames: int = 1
+    video_memory_stride_seconds: float = 1.0
 
     # Specifies how to load the policy. If not provided, the default policy for the environment will be used.
     policy: Checkpoint | Default = dataclasses.field(default_factory=Default)
@@ -73,30 +77,74 @@ DEFAULT_CHECKPOINT: dict[EnvMode, Checkpoint] = {
 }
 
 
-def create_default_policy(env: EnvMode, *, default_prompt: str | None = None) -> _policy.Policy:
+def create_default_policy(
+    env: EnvMode,
+    *,
+    default_prompt: str | None = None,
+    video_memory_num_frames: int = 1,
+    video_memory_stride_seconds: float = 1.0,
+) -> _policy.Policy:
     """Create a default policy for the given environment."""
     if checkpoint := DEFAULT_CHECKPOINT.get(env):
+        train_config = _config.get_config(checkpoint.config)
         return _policy_config.create_trained_policy(
-            _config.get_config(checkpoint.config), checkpoint.dir, default_prompt=default_prompt
+            dc.replace(
+                train_config,
+                data=dc.replace(
+                    train_config.data,
+                    video_memory_num_frames=video_memory_num_frames,
+                    video_memory_stride_seconds=video_memory_stride_seconds,
+                ),
+            ),
+            checkpoint.dir,
+            default_prompt=default_prompt,
         )
     raise ValueError(f"Unsupported environment mode: {env}")
 
 
 def create_policy(args: Args) -> _policy.Policy:
     """Create a policy from the given arguments."""
+    def _override_history(train_config: _config.TrainConfig) -> _config.TrainConfig:
+        return dc.replace(
+            train_config,
+            data=dc.replace(
+                train_config.data,
+                video_memory_num_frames=args.video_memory_num_frames,
+                video_memory_stride_seconds=args.video_memory_stride_seconds,
+            ),
+        )
+
     match args.policy:
         case Checkpoint():
             return _policy_config.create_trained_policy(
-                _config.get_config(args.policy.config), args.policy.dir, default_prompt=args.default_prompt
+                _override_history(_config.get_config(args.policy.config)),
+                args.policy.dir,
+                default_prompt=args.default_prompt,
             )
         case Default():
-            return create_default_policy(args.env, default_prompt=args.default_prompt)
+            return create_default_policy(
+                args.env,
+                default_prompt=args.default_prompt,
+                video_memory_num_frames=args.video_memory_num_frames,
+                video_memory_stride_seconds=args.video_memory_stride_seconds,
+            )
+
+
+def _make_dummy_obs(num_frames: int) -> dict:
+    obs = _aloha_policy.make_aloha_example()
+    if num_frames <= 1:
+        return obs
+    obs["images"] = {
+        cam_name: np.stack([img] * num_frames, axis=0)
+        for cam_name, img in obs["images"].items()
+    }
+    return obs
 
 
 def main(args: Args) -> None:
     policy = create_policy(args)
     policy_metadata = policy.metadata
-    dummy_obs = _aloha_policy.make_aloha_example()
+    dummy_obs = _make_dummy_obs(args.video_memory_num_frames)
     dummy_prev_action = np.random.rand(50, 32)
     if args.warmup_rtc:
         policy.infer(dummy_obs, dummy_prev_action, use_rtc=True)

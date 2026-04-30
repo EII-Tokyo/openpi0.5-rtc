@@ -30,6 +30,10 @@ if not _logger.handlers and not logging.root.handlers:
 class Runtime:
     """The core module orchestrating interactions between key components of the system."""
 
+    _TASK_PROMPT_BY_NUM = {
+        "1": "Rinse bottle",
+    }
+
     def __init__(
         self,
         environment: _environment.Environment,
@@ -83,7 +87,7 @@ class Runtime:
         # 退出标志
         self._stop = False
         self._keyboard_task_mapping = {
-            "1": "Process bottles, including unscrewing caps, rinsing bottles, and tearing off labels.",
+            "1": self._TASK_PROMPT_BY_NUM["1"],
             "2": "Do the followings: 1. If the bottle cap is facing left, rotate the bottle 180 degrees. 2. Pick up the bottle. 3. Twist off the bottle cap if the bottle has a cap. 4. Put the bottle into the box on the left. 5. Put the cap into the box on the right. If the bottle cap falls onto the table, pick it up. 6. Return to home position.",
             "3": "Stop and human hand control",
             "4": "Return to home position and save hdf5",
@@ -193,6 +197,16 @@ class Runtime:
             latest_task = self._latest_task
             self._latest_task = None
             return latest_task
+
+    def _normalize_task_data(self, task_data):
+        """Canonicalize task prompts before they are shown or sent to the policy."""
+        if task_data is None:
+            return None
+        normalized = dict(task_data)
+        task_num = str(normalized.get("task_num"))
+        if task_num in self._TASK_PROMPT_BY_NUM:
+            normalized["task_name"] = self._TASK_PROMPT_BY_NUM[task_num]
+        return normalized
     
     def is_waiting_for_task(self) -> bool:
         """检查是否正在等待任务"""
@@ -339,7 +353,8 @@ class Runtime:
             task_data["manual_dataset_subdir"] = dataset_subdir
             logging.info("人工接管数据将保存到子目录: %s", dataset_subdir)
 
-        logging.info("收到键盘任务: %s - %s", key, task_name)
+        task_data = self._normalize_task_data(task_data)
+        logging.info("收到键盘任务: %s - %s", key, task_data["task_name"])
         return task_data
 
     def _poll_task_from_inputs(
@@ -358,7 +373,7 @@ class Runtime:
         )
         if task_data is not None:
             return task_data
-        return self._take_latest_task(allowed_task_nums=allowed_task_nums)
+        return self._normalize_task_data(self._take_latest_task(allowed_task_nums=allowed_task_nums))
 
     def _read_line_from_keyboard(self, prompt: str) -> str:
         """在cbreak模式下读取一行输入。"""

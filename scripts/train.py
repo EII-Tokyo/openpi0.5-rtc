@@ -257,8 +257,15 @@ def main(config: _config.TrainConfig):
     )
 
     # Log images from first batch to sanity check.
+    def _image_for_logging(img: np.ndarray, index: int) -> np.ndarray:
+        sample = np.array(img[index])
+        # Temporal frame stacking produces [time, height, width, channels]. Log the most recent frame.
+        if sample.ndim == 4:
+            sample = sample[-1]
+        return sample
+
     images_to_log = [
-        wandb.Image(np.concatenate([np.array(img[i]) for img in batch[0].images.values()], axis=1))
+        wandb.Image(np.concatenate([_image_for_logging(img, i) for img in batch[0].images.values()], axis=1))
         for i in range(min(5, len(next(iter(batch[0].images.values())))))
     ]
     wandb.log({"camera_views": images_to_log}, step=0)

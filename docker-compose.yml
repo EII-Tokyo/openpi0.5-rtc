@@ -44,9 +44,17 @@ services:
     build:
       context: .
       dockerfile: scripts/docker/serve_policy.Dockerfile
-    command: >-
-      /bin/bash -lc
-      "uv run --no-sync scripts/serve_policy.py --no-warmup-subtask ${SERVER_ARGS:-policy:checkpoint --policy.config twist_off_the_bottle_cap --policy.dir /app/checkpoints/20260205/39999}"
+    command:
+      - /bin/bash
+      - -lc
+      - >-
+        uv run --no-sync scripts/serve_policy.py --no-warmup-subtask
+        ${SERVER_ARGS:---video-memory-num-frames 6
+        --video-memory-stride-seconds 4
+        policy:checkpoint
+        --policy.config eii_rinse_cam4_lora
+        --policy.dir
+        /app/checkpoints/eii_rinse_cam4_lora/rinse_bottle_cam4_f6s4_bs64_20260428/7000}
     init: true
     tty: true
     network_mode: host

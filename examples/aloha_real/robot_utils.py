@@ -16,10 +16,20 @@ from examples.aloha_real import constants
 
 
 class ImageRecorder:
-    def __init__(self, init_node=True, is_debug=False):
+    def __init__(
+        self,
+        init_node=True,
+        is_debug=False,
+        history_num_frames: int = 1,
+        history_stride_seconds: float = 1.0,
+    ):
         self.is_debug = is_debug
         self.bridge = CvBridge()
         self.camera_names = ["cam_high", "cam_low", "cam_left_wrist", "cam_right_wrist"]
+        self.history_num_frames = max(1, history_num_frames)
+        self.history_stride_seconds = max(0.0, history_stride_seconds)
+        self.history_window_seconds = max(2.0, self.history_stride_seconds * max(1, self.history_num_frames - 1) + 1.0)
+        self.image_histories = {cam_name: deque() for cam_name in self.camera_names}
 
         if init_node:
             rospy.init_node("image_recorder", anonymous=True)
@@ -46,6 +56,7 @@ class ImageRecorder:
 
     def image_cb(self, cam_name, data):
         rgb_image = self.bridge.imgmsg_to_cv2(data.images[0], desired_encoding="passthrough")
+        timestamp = data.header.stamp.secs + data.header.stamp.nsecs * 1e-9
         setattr(
             self,
             f"{cam_name}_rgb_image",
@@ -59,8 +70,12 @@ class ImageRecorder:
         setattr(
             self,
             f"{cam_name}_timestamp",
-            data.header.stamp.secs + data.header.stamp.nsecs * 1e-9,
+            timestamp,
         )
+        history = self.image_histories[cam_name]
+        history.append((timestamp, rgb_image))
+        while history and timestamp - history[0][0] > self.history_window_seconds:
+            history.popleft()
         # setattr(self, f'{cam_name}_secs', data.images[0].header.stamp.secs)
         # setattr(self, f'{cam_name}_nsecs', data.images[0].header.stamp.nsecs)
         # cv2.imwrite('/home/lucyshi/Desktop/sample.jpg', cv_image)
@@ -68,6 +83,23 @@ class ImageRecorder:
             getattr(self, f"{cam_name}_timestamps").append(
                 data.images[0].header.stamp.secs + data.images[0].header.stamp.nsecs * 1e-9
             )
+
+    def _select_history_frames(self, cam_name):
+        history = list(self.image_histories[cam_name])
+        if not history:
+            return None
+        latest_timestamp = history[-1][0]
+        selected_frames = []
+        for offset in reversed(range(self.history_num_frames)):
+            target_timestamp = latest_timestamp - offset * self.history_stride_seconds
+            candidate_frame = history[0][1]
+            for frame_timestamp, frame in history:
+                if frame_timestamp <= target_timestamp:
+                    candidate_frame = frame
+                else:
+                    break
+            selected_frames.append(candidate_frame)
+        return np.stack(selected_frames, axis=0)
 
     def image_cb_cam_high(self, data):
         cam_name = "cam_high"
@@ -93,7 +125,11 @@ class ImageRecorder:
             rgb_image = getattr(self, f"{cam_name}_rgb_image")
             depth_image = getattr(self, f"{cam_name}_depth_image")
             self.cam_last_timestamps[cam_name] = getattr(self, f"{cam_name}_timestamp")
-            image_dict[cam_name] = rgb_image
+            if self.history_num_frames > 1:
+                history_frames = self._select_history_frames(cam_name)
+                image_dict[cam_name] = history_frames if history_frames is not None else rgb_image
+            else:
+                image_dict[cam_name] = rgb_image
             image_dict[f"{cam_name}_depth"] = depth_image
         return image_dict
 

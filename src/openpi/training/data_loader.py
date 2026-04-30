@@ -145,6 +145,7 @@ class TemporalFrameStackDataset(Dataset[dict]):
         self._stride_frames = max(1, int(round(fps * stride_seconds)))
         self._trainable_mask = trainable_mask
         self._trainable_indices = None if trainable_mask is None else np.flatnonzero(trainable_mask)
+        self._episode_indices, self._frame_indices = self._load_temporal_metadata(dataset)
 
     def __len__(self) -> int:
         return len(self._dataset)
@@ -159,22 +160,36 @@ class TemporalFrameStackDataset(Dataset[dict]):
         if self._num_frames <= 1:
             return current
 
-        episode_index = self._to_int(current["episode_index"])
-        frame_index = self._to_int(current["frame_index"])
+        episode_index = self._episode_indices[idx]
+        frame_index = self._frame_indices[idx]
         episode_start_idx = idx - frame_index
         history_indices: list[int] = []
         for offset in reversed(range(self._num_frames)):
             target_frame = max(frame_index - offset * self._stride_frames, 0)
             candidate_idx = episode_start_idx + target_frame
             if candidate_idx < 0 or candidate_idx >= len(self._dataset):
-                candidate_idx = idx
-            else:
-                candidate = self._dataset[candidate_idx]
-                if self._to_int(candidate["episode_index"]) != episode_index:
-                    candidate_idx = idx
+                raise AssertionError(
+                    f"Temporal history index {candidate_idx} out of bounds for dataset length {len(self._dataset)} "
+                    f"(idx={idx}, episode_index={episode_index}, frame_index={frame_index}, "
+                    f"offset={offset}, stride_frames={self._stride_frames})"
+                )
+            if self._episode_indices[candidate_idx] != episode_index:
+                raise AssertionError(
+                    f"Temporal history crossed episode boundary: current episode {episode_index}, "
+                    f"candidate episode {self._episode_indices[candidate_idx]} "
+                    f"(idx={idx}, candidate_idx={candidate_idx}, frame_index={frame_index}, "
+                    f"offset={offset}, stride_frames={self._stride_frames})"
+                )
             history_indices.append(candidate_idx)
 
-        frames = [self._dataset[hist_idx] for hist_idx in history_indices]
+        frame_cache = {idx: current}
+        frames = []
+        for hist_idx in history_indices:
+            frame = frame_cache.get(hist_idx)
+            if frame is None:
+                frame = self._dataset[hist_idx]
+                frame_cache[hist_idx] = frame
+            frames.append(frame)
         result = dict(current)
         for key in current:
             if key.startswith(self.IMAGE_PREFIX):
@@ -187,6 +202,22 @@ class TemporalFrameStackDataset(Dataset[dict]):
         if hasattr(value, "item"):
             return int(value.item())
         return int(value)
+
+    @classmethod
+    def _load_temporal_metadata(cls, dataset: Dataset) -> tuple[np.ndarray | None, np.ndarray | None]:
+        episode_indices = cls._get_column(dataset, "episode_index")
+        frame_indices = cls._get_column(dataset, "frame_index")
+        return episode_indices, frame_indices
+
+    @classmethod
+    def _get_column(cls, dataset: Dataset, column: str) -> np.ndarray:
+        if isinstance(dataset, lerobot_dataset.MultiLeRobotDataset):
+            parts = [cls._get_column(ds, column) for ds in dataset._datasets]
+            return np.concatenate(parts, axis=0) if parts else np.zeros(0, dtype=np.int64)
+        if isinstance(dataset, lerobot_dataset.LeRobotDataset):
+            values = dataset.hf_dataset[column]
+            return np.asarray([cls._to_int(value) for value in values], dtype=np.int64)
+        return np.asarray([cls._to_int(dataset[i][column]) for i in range(len(dataset))], dtype=np.int64)
 
 
 class IterableTransformedDataset(IterableDataset[T_co]):

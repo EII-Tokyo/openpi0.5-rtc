@@ -32,6 +32,8 @@ class Args:
     use_rtc: bool = True
     policy_hz: float = 50.0
     manual_hz: float = 50.0
+    video_memory_num_frames: int = 1
+    video_memory_stride_seconds: float = 1.0
 
     # reset_position: List[List[float]] = dataclasses.field(default_factory=lambda: [
     #         [0.0, -0.96, 1.16, 0.0, -0.0, 0.0],
@@ -90,6 +92,8 @@ def main(args: Args) -> None:
             reset_position=args.reset_position,
             gripper_current_limits=args.gripper_current_limits,
             action_label=action_label,
+            video_memory_num_frames=args.video_memory_num_frames,
+            video_memory_stride_seconds=args.video_memory_stride_seconds,
         ),
         agent=_policy_agent.PolicyAgent(
             policy=action_chunk_broker.ActionChunkBroker(

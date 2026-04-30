@@ -15,6 +15,8 @@ class AlohaRealEnvironment(_environment.Environment):
         action_label: str = "normal",
         render_height: int = 224,
         render_width: int = 224,
+        video_memory_num_frames: int = 1,
+        video_memory_stride_seconds: float = 1.0,
     ) -> None:
         from examples.aloha_real import real_env as _real_env
 
@@ -22,6 +24,8 @@ class AlohaRealEnvironment(_environment.Environment):
             init_node=True,
             reset_position=reset_position,
             gripper_current_limits=gripper_current_limits,
+            video_memory_num_frames=video_memory_num_frames,
+            video_memory_stride_seconds=video_memory_stride_seconds,
         )
         self._render_height = render_height
         self._render_width = render_width

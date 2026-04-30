@@ -5,6 +5,7 @@ import numpy as np
 
 from typing_extensions import override
 import websockets.sync.client
+from websockets.exceptions import WebSocketException
 
 from openpi_client import base_policy as _base_policy
 from openpi_client import msgpack_numpy
@@ -33,7 +34,12 @@ class WebsocketClientPolicy(_base_policy.BasePolicy):
             try:
                 headers = {"Authorization": f"Api-Key {self._api_key}"} if self._api_key else None
                 conn = websockets.sync.client.connect(
-                    self._uri, compression=None, max_size=None, additional_headers=headers
+                    self._uri,
+                    compression=None,
+                    max_size=None,
+                    additional_headers=headers,
+                    ping_interval=None,
+                    ping_timeout=None,
                 )
                 metadata = msgpack_numpy.unpackb(conn.recv())
                 return conn, metadata
@@ -49,8 +55,14 @@ class WebsocketClientPolicy(_base_policy.BasePolicy):
             "use_rtc": use_rtc,
         }
         data = self._packer.pack(data)
-        self._ws.send(data)
-        response = self._ws.recv()
+        try:
+            self._ws.send(data)
+            response = self._ws.recv()
+        except WebSocketException:
+            logging.warning("Websocket connection to policy server dropped; reconnecting and retrying once.")
+            self._ws, self._server_metadata = self._wait_for_server()
+            self._ws.send(data)
+            response = self._ws.recv()
         if isinstance(response, str):
             # we're expecting bytes; if the server sends a string, it's an error.
             raise RuntimeError(f"Error in inference server:\n{response}")

@@ -81,12 +81,12 @@ class ActionChunkBroker(_base_policy.BasePolicy):
     def _background_infer(self):
         while True:
             if self._cur_step == self._s:
-                # start_time = time.time()
+                total_start = time.monotonic()
                 self._background_running = True
 
                 # flip, normalize joint actions
                 # norm_action = (np.array([1, -1, -1, 1, 1, 1, 1, 1, -1, -1, 1, 1, 1, 1]) * self._last_results["actions"] - np.array([1, -1, -1, 1, 1, 1, 1, 1, -1, -1, 1, 1, 1, 1]) * self._obs["state"][:14] - np.array(self._norm_stats["actions"]["mean"])[:14]) / (np.array(self._norm_stats["actions"]["std"])[:14] + 1e-6)
-
+                prep_start = time.monotonic()
                 q01 = np.array(self._norm_stats["actions"]["q01"])[:14]
                 q99 = np.array(self._norm_stats["actions"]["q99"])[:14]
                 scaled = self._joint_signs * (self._last_results["actions"] - self._obs["state"][:14])
@@ -98,9 +98,12 @@ class ActionChunkBroker(_base_policy.BasePolicy):
                 
                 zeros_padding = np.zeros((norm_action.shape[0], 18))
                 norm_action = np.concatenate([norm_action, zeros_padding], axis=1)
+                prep_ms = (time.monotonic() - prep_start) * 1000.0
                 # np.savetxt("norm_action.txt", norm_action, fmt='%.6f')
                 # np.savetxt("last_origin_actions.txt", self._last_origin_actions, fmt='%.6f')
+                rpc_start = time.monotonic()
                 self._background_results = self._policy.infer(self._obs, norm_action, self._use_rtc)
+                rpc_ms = (time.monotonic() - rpc_start) * 1000.0
                 # break
                 # 将后面18列都设为0
                 # modified_actions = None
@@ -111,8 +114,30 @@ class ActionChunkBroker(_base_policy.BasePolicy):
                 # self._background_results = self._policy.infer(self._obs, modified_actions, self._use_rtc)
 
                 self._background_running = False
-                # end_time = time.time()
-                # print(f"Time taken to infer: {end_time - start_time}")
+                total_ms = (time.monotonic() - total_start) * 1000.0
+                server_timing = self._background_results.get("server_timing", {})
+                policy_timing = self._background_results.get("policy_timing", {})
+                server_infer_ms = server_timing.get("infer_ms")
+                prev_total_ms = server_timing.get("prev_total_ms")
+                policy_infer_ms = policy_timing.get("infer_ms")
+                overhead_ms = None
+                if server_infer_ms is not None:
+                    overhead_ms = rpc_ms - float(server_infer_ms)
+                log_parts = [
+                    "RTC infer timing:",
+                    f"prep_ms={prep_ms:.1f}",
+                    f"rpc_ms={rpc_ms:.1f}",
+                    f"total_ms={total_ms:.1f}",
+                ]
+                if server_infer_ms is not None:
+                    log_parts.append(f"server_infer_ms={float(server_infer_ms):.1f}")
+                if policy_infer_ms is not None:
+                    log_parts.append(f"policy_infer_ms={float(policy_infer_ms):.1f}")
+                if overhead_ms is not None:
+                    log_parts.append(f"rpc_overhead_ms={float(overhead_ms):.1f}")
+                if prev_total_ms is not None:
+                    log_parts.append(f"prev_total_ms={float(prev_total_ms):.1f}")
+                print(" ".join(log_parts))
             else:
                 time.sleep(0.01)
 

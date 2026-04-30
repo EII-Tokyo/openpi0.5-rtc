@@ -38,7 +38,16 @@ class RealEnv:
                                    "cam_right_wrist": (480x640x3)} # h, w, c, dtype='uint8'
     """
 
-    def __init__(self, init_node, *, reset_position: Optional[List[List[float]]] = None, gripper_current_limits: Optional[List[int]] = None, setup_robots: bool = True):
+    def __init__(
+        self,
+        init_node,
+        *,
+        reset_position: Optional[List[List[float]]] = None,
+        gripper_current_limits: Optional[List[int]] = None,
+        setup_robots: bool = True,
+        video_memory_num_frames: int = 1,
+        video_memory_stride_seconds: float = 1.0,
+    ):
         # reset_position = START_ARM_POSE[:6]
         # self._reset_position = reset_position[:6] if reset_position else DEFAULT_RESET_POSITION
 
@@ -65,7 +74,11 @@ class RealEnv:
 
         self.recorder_left = robot_utils.Recorder("left", init_node=False)
         self.recorder_right = robot_utils.Recorder("right", init_node=False)
-        self.image_recorder = robot_utils.ImageRecorder(init_node=False)
+        self.image_recorder = robot_utils.ImageRecorder(
+            init_node=False,
+            history_num_frames=video_memory_num_frames,
+            history_stride_seconds=video_memory_stride_seconds,
+        )
         self.gripper_command = JointSingleCommand(name="gripper")
         self.last_left_gripper_error = [0]
         self.last_right_gripper_error = [0]
@@ -298,5 +311,20 @@ def get_action(master_bot_left, master_bot_right):
     return action
 
 
-def make_real_env(init_node, *, reset_position: Optional[List[List[float]]] = None, gripper_current_limits: Optional[List[int]] = None, setup_robots: bool = True) -> RealEnv:
-    return RealEnv(init_node, reset_position=reset_position, gripper_current_limits=gripper_current_limits, setup_robots=setup_robots)
+def make_real_env(
+    init_node,
+    *,
+    reset_position: Optional[List[List[float]]] = None,
+    gripper_current_limits: Optional[List[int]] = None,
+    setup_robots: bool = True,
+    video_memory_num_frames: int = 1,
+    video_memory_stride_seconds: float = 1.0,
+) -> RealEnv:
+    return RealEnv(
+        init_node,
+        reset_position=reset_position,
+        gripper_current_limits=gripper_current_limits,
+        setup_robots=setup_robots,
+        video_memory_num_frames=video_memory_num_frames,
+        video_memory_stride_seconds=video_memory_stride_seconds,
+    )

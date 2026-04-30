@@ -131,6 +131,16 @@ _EII_DATA_SYSTEM_HUB_NO_TEAR_REPO_IDS = [
     "lyl472324464/2026-04-21_direction_havent_cap_water-lerobot",
 ]
 
+_EII_RINSE_REPO_IDS = [
+    "lyl472324464/2026-04-21_direction-lerobot-with-rinse",
+    "lyl472324464/2026-04-21_direction_2-lerobot-with-rinse",
+    "lyl472324464/2026-04-21_direction_havent_cap-lerobot-with-rinse",
+    "lyl472324464/2026-04-21_direction_havent_cap_water-lerobot-with-rinse",
+    "lyl472324464/2026-04-23_direction_havent_cap_water-lerobot-with-rinse",
+    "lyl472324464/2026.03.18_twist-and-water_one_no_cap-with-rinse",
+    "lyl472324464/2026.03.30_twist-and-water_two_have_cap-with-rinse",
+]
+
 
 @dataclasses.dataclass(frozen=True)
 class AssetsConfig:
@@ -464,6 +474,17 @@ _CONFIGS = [
         include_subtask=False,
         gradient_accumulation_steps=2,
         # Load norm stats from ./assets/<config.name>/trossen (compute_norm_stats), not gs:// pi05_base.
+        assets=AssetsConfig(assets_dir=None, asset_id="trossen"),
+    ),
+    _make_twist_train_config(
+        "eii_rinse_cam4_lora",
+        repo_ids=_EII_RINSE_REPO_IDS,
+        lora=True,
+        batch_size=32,
+        num_workers=4,
+        include_low=True,
+        include_subtask=True,
+        gradient_accumulation_steps=2,
         assets=AssetsConfig(assets_dir=None, asset_id="trossen"),
     ),
     TrainConfig(
