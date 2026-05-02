@@ -34,6 +34,11 @@ docker compose exec -it runtime /bin/bash
 python3 /app/examples/aloha_real/main.py \  --model-dir /app/checkpoints/eii_data_system_no_tear_cam3_lora/eii_no_tear_cam3_20260422/18000 
   --model-dir /app/checkpoints/20260205/39999
   --model-dir /app/checkpoints/two_direction_lora_from_20260205_39999/two_direction_lora_20260313/6000
+
+python3 /app/examples/aloha_real/main.py \
+    --model-dir /app/checkpoints/eii_rinse_cam4_fullft/h200_fullft_13repos_bs128_nw16_f6_s5_log10_20260430_085556/10000 \
+    --video-memory-num-frames 6 \
+    --video-memory-stride-seconds 5.0
   
 
 # 进入 openpi_server 容器
@@ -186,3 +191,19 @@ uv run python scripts/compute_loss_from_hdf5.py \
 
 - ALOHA Real: `examples/aloha_real`
 - ALOHA Sim: `examples/aloha_sim`
+
+
+XLA_PYTHON_CLIENT_PREALLOCATE=false   OPENBLAS_NUM_THREADS=4   OMP_NUM_THREADS=4   MKL_NUM_THREADS=4   NUMEXPR_NUM_THREADS=4   ./.venv/bin/python -W ignore scripts/profile_temporal_dataloader_batches.py     --repo-ids '[                                               "lyl472324464/2026-04-21_direction-lerobot-with-rinse",
+      "lyl472324464/2026-04-21_direction_2-lerobot-with-rinse",
+      "lyl472324464/2026-04-21_direction_havent_cap-lerobot-with-rinse",
+      "lyl472324464/2026-04-21_direction_havent_cap_water-lerobot-with-rinse",
+      "lyl472324464/2026-04-23_direction_have_cap_water-lerobot-with-rinse",
+      "lyl472324464/2026-04-23_direction_havent_cap_water-lerobot-with-rinse",
+      "lyl472324464/2026-04-27_direction_have_cap_water2-lerobot-with-rinse",
+      "lyl472324464/2026-04-27direction_have_cap_water-lerobot-with-rinse",
+      "lyl472324464/2026-04-28_direction_have_cap_water-lerobot-with-rinse",
+      "lyl472324464/2026-04-28_direction_have_cap_water2-lerobot-with-rinse",
+      "lyl472324464/2026-04-28_water1-lerobot-with-rinse",
+      "lyl472324464/2026.03.18_twist-and-water_one_no_cap-with-rinse",
+      "lyl472324464/2026.03.30_twist-and-water_two_have_cap-with-rinse"
+    ]'     --batch-size 256     --num-workers 32     --prefetch-factor 2     --timed-batches 100     --warmup-batches 1     --video-memory-num-frames 6     --video-memory-stride-seconds 5.0     --assets-base-dir /workspace/openpi0.5-rtc/assets     --checkpoint-base-dir /workspace/openpi0.5-rtc/checkpoints

@@ -21,6 +21,38 @@ import openpi.transforms as _transforms
 T_co = TypeVar("T_co", covariant=True)
 
 
+def _patch_lerobot_numpy_bool_compat() -> None:
+    """Make LeRobot padding masks robust to numpy bool scalars under numpy 2.x."""
+
+    original = getattr(lerobot_dataset.LeRobotDataset, "_get_query_indices", None)
+    if original is None or getattr(original, "_openpi_numpy_bool_compat", False):
+        return
+
+    def _patched_get_query_indices(self, idx: int, ep_idx: int):
+        ep = self.meta.episodes[ep_idx]
+        ep_start = int(ep["dataset_from_index"])
+        ep_end = int(ep["dataset_to_index"])
+        idx = int(idx)
+        query_indices = {
+            key: [max(ep_start, min(ep_end - 1, idx + int(delta))) for delta in delta_idx]
+            for key, delta_idx in self.delta_indices.items()
+        }
+        padding = {
+            f"{key}_is_pad": torch.tensor(
+                [bool((idx + int(delta) < ep_start) or (idx + int(delta) >= ep_end)) for delta in delta_idx],
+                dtype=torch.bool,
+            )
+            for key, delta_idx in self.delta_indices.items()
+        }
+        return query_indices, padding
+
+    _patched_get_query_indices._openpi_numpy_bool_compat = True
+    lerobot_dataset.LeRobotDataset._get_query_indices = _patched_get_query_indices
+
+
+_patch_lerobot_numpy_bool_compat()
+
+
 class Dataset(Protocol[T_co]):
     """Interface for a dataset with random access."""
 
@@ -145,7 +177,9 @@ class TemporalFrameStackDataset(Dataset[dict]):
         self._stride_frames = max(1, int(round(fps * stride_seconds)))
         self._trainable_mask = trainable_mask
         self._trainable_indices = None if trainable_mask is None else np.flatnonzero(trainable_mask)
-        self._episode_indices, self._frame_indices = self._load_temporal_metadata(dataset)
+        self._episode_indices, self._frame_indices, self._timestamps, self._dataset_indices = self._load_temporal_metadata(
+            dataset
+        )
 
     def __len__(self) -> int:
         return len(self._dataset)
@@ -180,8 +214,16 @@ class TemporalFrameStackDataset(Dataset[dict]):
                     f"(idx={idx}, candidate_idx={candidate_idx}, frame_index={frame_index}, "
                     f"offset={offset}, stride_frames={self._stride_frames})"
                 )
+            if self._dataset_indices is not None and self._dataset_indices[candidate_idx] != self._dataset_indices[idx]:
+                raise AssertionError(
+                    f"Temporal history crossed dataset boundary: current dataset {self._dataset_indices[idx]}, "
+                    f"candidate dataset {self._dataset_indices[candidate_idx]} "
+                    f"(idx={idx}, candidate_idx={candidate_idx}, frame_index={frame_index}, "
+                    f"offset={offset}, stride_frames={self._stride_frames})"
+                )
             history_indices.append(candidate_idx)
 
+        result = dict(current)
         frame_cache = {idx: current}
         frames = []
         for hist_idx in history_indices:
@@ -190,7 +232,6 @@ class TemporalFrameStackDataset(Dataset[dict]):
                 frame = self._dataset[hist_idx]
                 frame_cache[hist_idx] = frame
             frames.append(frame)
-        result = dict(current)
         for key in current:
             if key.startswith(self.IMAGE_PREFIX):
                 stacked = [np.asarray(frame[key]) for frame in frames]
@@ -204,20 +245,42 @@ class TemporalFrameStackDataset(Dataset[dict]):
         return int(value)
 
     @classmethod
-    def _load_temporal_metadata(cls, dataset: Dataset) -> tuple[np.ndarray | None, np.ndarray | None]:
+    def _load_temporal_metadata(
+        cls, dataset: Dataset
+    ) -> tuple[np.ndarray | None, np.ndarray | None, np.ndarray | None, np.ndarray | None]:
         episode_indices = cls._get_column(dataset, "episode_index")
         frame_indices = cls._get_column(dataset, "frame_index")
-        return episode_indices, frame_indices
+        timestamps = cls._get_column(dataset, "timestamp", dtype=np.float64)
+        dataset_indices = cls._get_index_maps(dataset)
+        return episode_indices, frame_indices, timestamps, dataset_indices
 
     @classmethod
-    def _get_column(cls, dataset: Dataset, column: str) -> np.ndarray:
+    def _get_column(cls, dataset: Dataset, column: str, dtype=np.int64) -> np.ndarray:
         if isinstance(dataset, lerobot_dataset.MultiLeRobotDataset):
-            parts = [cls._get_column(ds, column) for ds in dataset._datasets]
-            return np.concatenate(parts, axis=0) if parts else np.zeros(0, dtype=np.int64)
+            parts = [cls._get_column(ds, column, dtype=dtype) for ds in dataset._datasets]
+            return np.concatenate(parts, axis=0) if parts else np.zeros(0, dtype=dtype)
         if isinstance(dataset, lerobot_dataset.LeRobotDataset):
             values = dataset.hf_dataset[column]
-            return np.asarray([cls._to_int(value) for value in values], dtype=np.int64)
-        return np.asarray([cls._to_int(dataset[i][column]) for i in range(len(dataset))], dtype=np.int64)
+            if np.issubdtype(np.dtype(dtype), np.floating):
+                return np.asarray([float(value.item() if hasattr(value, "item") else value) for value in values], dtype=dtype)
+            return np.asarray([cls._to_int(value) for value in values], dtype=dtype)
+        if np.issubdtype(np.dtype(dtype), np.floating):
+            return np.asarray(
+                [float(dataset[i][column].item() if hasattr(dataset[i][column], "item") else dataset[i][column]) for i in range(len(dataset))],
+                dtype=dtype,
+            )
+        return np.asarray([cls._to_int(dataset[i][column]) for i in range(len(dataset))], dtype=dtype)
+
+    @staticmethod
+    def _get_index_maps(dataset: Dataset) -> np.ndarray | None:
+        if isinstance(dataset, lerobot_dataset.MultiLeRobotDataset):
+            dataset_indices = []
+            for dataset_index, subdataset in enumerate(dataset._datasets):
+                dataset_indices.append(np.full(len(subdataset), dataset_index, dtype=np.int32))
+            return np.concatenate(dataset_indices, axis=0)
+        if isinstance(dataset, lerobot_dataset.LeRobotDataset):
+            return np.zeros(len(dataset), dtype=np.int32)
+        return None
 
 
 class IterableTransformedDataset(IterableDataset[T_co]):

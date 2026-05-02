@@ -2,6 +2,7 @@ import dataclasses
 import functools
 import logging
 import platform
+import time
 from typing import Any
 
 import etils.epath as epath
@@ -212,6 +213,12 @@ def _stack_microbatches(microbatches):
     return jax.tree.map(lambda *xs: jnp.stack(xs), *microbatches)
 
 
+def _timed_next(data_iter):
+    start = time.perf_counter()
+    batch = next(data_iter)
+    return batch, time.perf_counter() - start
+
+
 def main(config: _config.TrainConfig):
     init_logging()
     logging.info(f"Running on: {platform.node()}")
@@ -247,7 +254,7 @@ def main(config: _config.TrainConfig):
     )
 
     data_iter = iter(data_loader)
-    batch = next(data_iter)
+    batch, next_batch_wait_time = _timed_next(data_iter)
     logging.info(f"Initialized data loader:\n{training_utils.array_tree_to_info(batch)}")
     logging.info(
         "Gradient accumulation: microbatch_size=%d, accumulation_steps=%d, effective_batch_size=%d",
@@ -256,19 +263,22 @@ def main(config: _config.TrainConfig):
         config.batch_size * config.gradient_accumulation_steps,
     )
 
-    # Log images from first batch to sanity check.
-    def _image_for_logging(img: np.ndarray, index: int) -> np.ndarray:
-        sample = np.array(img[index])
-        # Temporal frame stacking produces [time, height, width, channels]. Log the most recent frame.
-        if sample.ndim == 4:
-            sample = sample[-1]
-        return sample
+    # Optional sanity-check image logging. Disabled by default because converting
+    # sharded device arrays to host images can trip backend-specific failures and
+    # should never block training startup.
+    if config.wandb_enabled and os.environ.get("OPENPI_LOG_FIRST_BATCH_IMAGES") == "1":
+        def _image_for_logging(img: np.ndarray, index: int) -> np.ndarray:
+            sample = np.array(img[index])
+            # Temporal frame stacking produces [time, height, width, channels]. Log the most recent frame.
+            if sample.ndim == 4:
+                sample = sample[-1]
+            return sample
 
-    images_to_log = [
-        wandb.Image(np.concatenate([_image_for_logging(img, i) for img in batch[0].images.values()], axis=1))
-        for i in range(min(5, len(next(iter(batch[0].images.values())))))
-    ]
-    wandb.log({"camera_views": images_to_log}, step=0)
+        images_to_log = [
+            wandb.Image(np.concatenate([_image_for_logging(img, i) for img in batch[0].images.values()], axis=1))
+            for i in range(min(5, len(next(iter(batch[0].images.values())))))
+        ]
+        wandb.log({"camera_views": images_to_log}, step=0)
 
     train_state, train_state_sharding = init_train_state(config, init_rng, mesh, resume=resuming)
     jax.block_until_ready(train_state)
@@ -293,26 +303,52 @@ def main(config: _config.TrainConfig):
     )
 
     infos = []
+    data_wait_times = []
+    train_dispatch_times = []
+    train_block_times = []
+    train_step_times = []
     for step in pbar:
+        data_wait_time = next_batch_wait_time
         if config.gradient_accumulation_steps == 1:
             train_batch = batch
         else:
             microbatches = [batch]
-            microbatches.extend(next(data_iter) for _ in range(config.gradient_accumulation_steps - 1))
+            for _ in range(config.gradient_accumulation_steps - 1):
+                extra_batch, extra_wait_time = _timed_next(data_iter)
+                microbatches.append(extra_batch)
+                data_wait_time += extra_wait_time
             train_batch = _stack_microbatches(microbatches)
 
+        train_step_start = time.perf_counter()
         with sharding.set_mesh(mesh):
             train_state, info = ptrain_step(train_rng, train_state, train_batch)
+        train_dispatch_time = time.perf_counter() - train_step_start
+        train_block_start = time.perf_counter()
+        jax.block_until_ready(train_state)
+        train_block_time = time.perf_counter() - train_block_start
+        train_step_time = time.perf_counter() - train_step_start
         infos.append(info)
+        data_wait_times.append(data_wait_time)
+        train_dispatch_times.append(train_dispatch_time)
+        train_block_times.append(train_block_time)
+        train_step_times.append(train_step_time)
         if step % config.log_interval == 0:
             stacked_infos = common_utils.stack_forest(infos)
             reduced_info = jax.device_get(jax.tree.map(jnp.mean, stacked_infos))
+            reduced_info["data_wait_time"] = float(np.mean(data_wait_times))
+            reduced_info["train_dispatch_time"] = float(np.mean(train_dispatch_times))
+            reduced_info["train_block_time"] = float(np.mean(train_block_times))
+            reduced_info["train_step_time"] = float(np.mean(train_step_times))
             info_str = ", ".join(f"{k}={v:.4f}" for k, v in reduced_info.items())
             pbar.write(f"Step {step}: {info_str}")
             wandb.log(reduced_info, step=step)
             infos = []
+            data_wait_times = []
+            train_dispatch_times = []
+            train_block_times = []
+            train_step_times = []
         if step != config.num_train_steps - 1:
-            batch = next(data_iter)
+            batch, next_batch_wait_time = _timed_next(data_iter)
 
         if (step % config.save_interval == 0 and step > start_step) or step == config.num_train_steps - 1:
             _checkpoints.save_state(checkpoint_manager, train_state, data_loader, step)

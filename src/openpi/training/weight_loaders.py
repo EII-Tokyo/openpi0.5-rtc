@@ -1,5 +1,6 @@
 import dataclasses
 import logging
+import pathlib
 import re
 from typing import Protocol, runtime_checkable
 
@@ -11,6 +12,8 @@ import openpi.shared.array_typing as at
 import openpi.shared.download as download
 
 logger = logging.getLogger(__name__)
+
+_CHECKPOINT_SENTINELS = ("_CHECKPOINT_METADATA", "_METADATA", "manifest.ocdbt")
 
 
 @runtime_checkable
@@ -49,7 +52,8 @@ class CheckpointWeightLoader(WeightLoader):
 
     def load(self, params: at.Params) -> at.Params:
         # We are loading np.ndarray and relying on the training code to properly convert and shard the params.
-        loaded_params = _model.restore_params(download.maybe_download(self.params_path), restore_type=np.ndarray)
+        checkpoint_path = _resolve_checkpoint_path(download.maybe_download(self.params_path))
+        loaded_params = _model.restore_params(checkpoint_path, restore_type=np.ndarray)
         # Add all missing LoRA weights.
         return _merge_params(loaded_params, params, missing_regex=".*lora.*")
 
@@ -102,3 +106,12 @@ def _merge_params(loaded_params: at.Params, params: at.Params, *, missing_regex:
             result[k] = flat_ref[k]
 
     return flax.traverse_util.unflatten_dict(result, sep="/")
+
+
+def _resolve_checkpoint_path(path: pathlib.Path) -> pathlib.Path:
+    """Handle directory downloads that wrap the checkpoint in an extra same-name subdirectory."""
+    nested = path / path.name
+    if nested.is_dir() and all((nested / sentinel).exists() for sentinel in _CHECKPOINT_SENTINELS):
+        logger.info("Using nested checkpoint directory %s instead of %s", nested, path)
+        return nested
+    return path

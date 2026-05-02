@@ -17,6 +17,7 @@ class AlohaRealEnvironment(_environment.Environment):
         render_width: int = 224,
         video_memory_num_frames: int = 1,
         video_memory_stride_seconds: float = 1.0,
+        continuous_roll_joints: bool = True,
     ) -> None:
         from examples.aloha_real import real_env as _real_env
 
@@ -26,6 +27,7 @@ class AlohaRealEnvironment(_environment.Environment):
             gripper_current_limits=gripper_current_limits,
             video_memory_num_frames=video_memory_num_frames,
             video_memory_stride_seconds=video_memory_stride_seconds,
+            continuous_roll_joints=continuous_roll_joints,
         )
         self._render_height = render_height
         self._render_width = render_width

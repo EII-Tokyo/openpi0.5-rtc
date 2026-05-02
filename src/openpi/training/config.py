@@ -445,6 +445,7 @@ _CONFIGS = [
     _make_twist_train_config(
         "twist_off_the_bottle_cap",
         repo_ids=_TWIST_AND_STATIC_REPO_IDS,
+        include_low=False,
         lora=False,
         batch_size=256,
         num_workers=16,
@@ -485,6 +486,17 @@ _CONFIGS = [
         include_low=True,
         include_subtask=True,
         gradient_accumulation_steps=2,
+        assets=AssetsConfig(assets_dir=None, asset_id="trossen"),
+    ),
+    _make_twist_train_config(
+        "eii_rinse_cam4_fullft",
+        repo_ids=_EII_RINSE_REPO_IDS,
+        lora=False,
+        batch_size=128,
+        num_workers=16,
+        include_low=True,
+        include_subtask=True,
+        gradient_accumulation_steps=1,
         assets=AssetsConfig(assets_dir=None, asset_id="trossen"),
     ),
     TrainConfig(

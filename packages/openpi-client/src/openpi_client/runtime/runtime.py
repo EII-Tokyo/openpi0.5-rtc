@@ -497,8 +497,20 @@ class Runtime:
         self._environment.apply_action({"actions": action})
         self._publish_runtime_state(latest_action=action, mode="teleop_preview")
 
-        master_bot_left.arm.set_joint_positions(left_arm_pos, blocking=False)
-        master_bot_right.arm.set_joint_positions(right_arm_pos, blocking=False)
+        master_left_arm_positions = robot_utils.clip_arm_joint_positions(
+            left_arm_pos,
+            master_bot_left.arm.group_info.joint_lower_limits,
+            master_bot_left.arm.group_info.joint_upper_limits,
+            continuous_roll_joints=True,
+        )
+        master_right_arm_positions = robot_utils.clip_arm_joint_positions(
+            right_arm_pos,
+            master_bot_right.arm.group_info.joint_lower_limits,
+            master_bot_right.arm.group_info.joint_upper_limits,
+            continuous_roll_joints=True,
+        )
+        robot_utils.publish_arm_positions(master_bot_left, master_left_arm_positions)
+        robot_utils.publish_arm_positions(master_bot_right, master_right_arm_positions)
         gripper_command = JointSingleCommand(name="gripper")
         gripper_command.cmd = master_left_gripper_joint
         master_bot_left.gripper.core.pub_single.publish(gripper_command)
@@ -530,6 +542,7 @@ class Runtime:
             [master_bot_left, master_bot_right],
             [left_arm_pos, right_arm_pos],
             move_time=move_time,
+            continuous_roll_joints=True,
         )
         robot_utils.move_grippers(
             [master_bot_left, master_bot_right],
@@ -563,6 +576,7 @@ class Runtime:
             real_env = self._environment._env
             master_bot_left = real_env.master_bot_left
             master_bot_right = real_env.master_bot_right
+            joint_unwrapper = robot_utils.JointPositionUnwrapper()
 
             if self._last_action is None:
                 logging.warning("没有上次的action，退出人机协作模式")
@@ -684,7 +698,12 @@ class Runtime:
             step_count = 0
             while not key_pressed.is_set():
                 t0 = time.time()
-                action = get_action(master_bot_left, master_bot_right)
+                action = get_action(
+                    master_bot_left,
+                    master_bot_right,
+                    joint_unwrapper=joint_unwrapper,
+                    use_continuous_joints=True,
+                )
                 t1 = time.time()
                 
                 # 应用action到puppet

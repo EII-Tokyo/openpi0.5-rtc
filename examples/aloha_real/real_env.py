@@ -14,6 +14,7 @@ import logging
 
 # This is the reset position that is used by the standard Aloha runtime.
 DEFAULT_RESET_POSITION = [0, -0.96, 1.16, 0, -0.3, 0]
+_DEFAULT_ACTION_UNWRAPPER = robot_utils.JointPositionUnwrapper()
 
 
 class RealEnv:
@@ -47,12 +48,14 @@ class RealEnv:
         setup_robots: bool = True,
         video_memory_num_frames: int = 1,
         video_memory_stride_seconds: float = 1.0,
+        continuous_roll_joints: bool = True,
     ):
         # reset_position = START_ARM_POSE[:6]
         # self._reset_position = reset_position[:6] if reset_position else DEFAULT_RESET_POSITION
 
         self._reset_position = reset_position
         self._gripper_current_limits = gripper_current_limits
+        self._continuous_roll_joints = continuous_roll_joints
         self.puppet_bot_left = InterbotixManipulatorXS(
             robot_model="vx300s",
             group_name="arm",
@@ -86,10 +89,24 @@ class RealEnv:
         self.last_right_gripper_desired_pos_normalized = 0.0
 
     def setup_robots(self):
-        robot_utils.setup_puppet_bot(self.puppet_bot_left, current_limit=self._gripper_current_limits[0])
-        robot_utils.setup_puppet_bot(self.puppet_bot_right, current_limit=self._gripper_current_limits[1])
-        robot_utils.setup_master_bot(self.master_bot_left)
-        robot_utils.setup_master_bot(self.master_bot_right)
+        robot_utils.setup_puppet_bot(
+            self.puppet_bot_left,
+            current_limit=self._gripper_current_limits[0],
+            continuous_roll_joints=self._continuous_roll_joints,
+        )
+        robot_utils.setup_puppet_bot(
+            self.puppet_bot_right,
+            current_limit=self._gripper_current_limits[1],
+            continuous_roll_joints=self._continuous_roll_joints,
+        )
+        robot_utils.setup_master_bot(
+            self.master_bot_left,
+            continuous_roll_joints=self._continuous_roll_joints,
+        )
+        robot_utils.setup_master_bot(
+            self.master_bot_right,
+            continuous_roll_joints=self._continuous_roll_joints,
+        )
         
     def get_qpos(self):
         left_qpos_raw = self.recorder_left.qpos
@@ -186,7 +203,10 @@ class RealEnv:
 
     def _reset_joints(self):
         robot_utils.move_arms(
-            [self.puppet_bot_left, self.puppet_bot_right], self._reset_position, move_time=1
+            [self.puppet_bot_left, self.puppet_bot_right],
+            self._reset_position,
+            move_time=1,
+            continuous_roll_joints=self._continuous_roll_joints,
         )
 
     def _reset_gripper(self):
@@ -226,7 +246,10 @@ class RealEnv:
 
     def stop(self):
         robot_utils.move_arms(
-            [self.puppet_bot_left, self.puppet_bot_right], self._reset_position, move_time=1
+            [self.puppet_bot_left, self.puppet_bot_right],
+            self._reset_position,
+            move_time=1,
+            continuous_roll_joints=self._continuous_roll_joints,
         )
         robot_utils.move_grippers(
             [self.puppet_bot_left, self.puppet_bot_right], [constants.PUPPET_GRIPPER_JOINT_OPEN] * 2, move_time=0.5
@@ -239,10 +262,16 @@ class RealEnv:
         robot_utils.torque_on(self.master_bot_left)
         robot_utils.torque_on(self.master_bot_right)
         robot_utils.move_arms(
-            [self.puppet_bot_left, self.puppet_bot_right], [[0.0, -1.8399999952316284, 1.600000023841858, 0.0, -1.600000023841858, 0.0]] * 2, move_time=1
+            [self.puppet_bot_left, self.puppet_bot_right],
+            [[0.0, -1.8399999952316284, 1.600000023841858, 0.0, -1.600000023841858, 0.0]] * 2,
+            move_time=1,
+            continuous_roll_joints=self._continuous_roll_joints,
         )
         robot_utils.move_arms(
-            [self.master_bot_left, self.master_bot_right], [[0.0, -1.8399999952316284, 1.600000023841858, 0.0, -1.600000023841858, 0.0]] * 2, move_time=1
+            [self.master_bot_left, self.master_bot_right],
+            [[0.0, -1.8399999952316284, 1.600000023841858, 0.0, -1.600000023841858, 0.0]] * 2,
+            move_time=1,
+            continuous_roll_joints=self._continuous_roll_joints,
         )
         robot_utils.move_grippers(
             [self.puppet_bot_left, self.puppet_bot_right], [constants.PUPPET_GRIPPER_JOINT_OPEN] * 2, move_time=1
@@ -255,55 +284,47 @@ class RealEnv:
         )
         
     def step(self, action):
-        # vx300s机器人关节位置限制（从URDF文件中获取的真实值）
-        # 来源: interbotix_xsarm_descriptions/urdf/vx300s.urdf.xacro
-        # 关节顺序: [waist, shoulder, elbow, forearm_roll, wrist_angle, wrist_rotate]
-        # waist: [-π, π] (约 [-3.14159, 3.14159])
-        # shoulder: [radians(-106), radians(72)] = [-1.850049, 1.256637]
-        # elbow: [radians(-101), radians(92)] = [-1.76278, 1.60570]
-        # forearm_roll: [-π, π] (约 [-3.14159, 3.14159])
-        # wrist_angle: [radians(-107), radians(128)] = [-1.86750, 2.23402]
-        # wrist_rotate: [-π, π] (约 [-3.14159, 3.14159])
-        start_time = time.time()
-        import math
-        # joint_limits_lower = np.array([
-        #     -math.pi + 0.00001,  # waist
-        #     math.radians(-106),  # shoulder: -1.850049
-        #     math.radians(-101),  # elbow: -1.76278
-        #     -math.pi + 0.00001,  # forearm_roll
-        #     math.radians(-107),  # wrist_angle: -1.86750
-        #     -math.pi + 0.00001   # wrist_rotate
-        # ])
-        # joint_limits_upper = np.array([
-        #     math.pi - 0.00001,   # waist
-        #     math.radians(72),    # shoulder: 1.256637
-        #     math.radians(92),    # elbow: 1.60570
-        #     math.pi - 0.00001,   # forearm_roll
-        #     math.radians(128),   # wrist_angle: 2.23402
-        #     math.pi - 0.00001    # wrist_rotate
-        # ])
         joint_limits_lower = np.asarray(self.puppet_bot_left.arm.group_info.joint_lower_limits, dtype=float)
         joint_limits_upper = np.asarray(self.puppet_bot_left.arm.group_info.joint_upper_limits, dtype=float)
         state_len = int(len(action) / 2)
         left_action = action[:state_len]
         right_action = action[state_len:]
-        
-        # 裁剪关节位置到限制范围内，避免警告
-        left_arm_positions = np.clip(left_action[:6], joint_limits_lower, joint_limits_upper)
-        right_arm_positions = np.clip(right_action[:6], joint_limits_lower, joint_limits_upper)
-        self.puppet_bot_left.arm.set_joint_positions(left_arm_positions, blocking=False)
-        self.puppet_bot_right.arm.set_joint_positions(right_arm_positions, blocking=False)
+
+        left_arm_positions = robot_utils.clip_arm_joint_positions(
+            left_action[:6],
+            joint_limits_lower,
+            joint_limits_upper,
+            continuous_roll_joints=self._continuous_roll_joints,
+        )
+        right_arm_positions = robot_utils.clip_arm_joint_positions(
+            right_action[:6],
+            joint_limits_lower,
+            joint_limits_upper,
+            continuous_roll_joints=self._continuous_roll_joints,
+        )
+        if self._continuous_roll_joints:
+            robot_utils.publish_arm_positions(self.puppet_bot_left, left_arm_positions)
+            robot_utils.publish_arm_positions(self.puppet_bot_right, right_arm_positions)
+        else:
+            self.puppet_bot_left.arm.set_joint_positions(left_arm_positions, blocking=False)
+            self.puppet_bot_right.arm.set_joint_positions(right_arm_positions, blocking=False)
         self.set_gripper_pose(left_action[-1], right_action[-1])
         return dm_env.TimeStep(
             step_type=dm_env.StepType.MID, reward=self.get_reward(), discount=None, observation=self.get_observation()
         )
 
 
-def get_action(master_bot_left, master_bot_right):
+def get_action(master_bot_left, master_bot_right, *, joint_unwrapper=None, use_continuous_joints=True):
     action = np.zeros(14)  # 6 joint + 1 gripper, for two arms
     # Arm actions
-    action[:6] = master_bot_left.dxl.joint_states.position[:6]
-    action[7 : 7 + 6] = master_bot_right.dxl.joint_states.position[:6]
+    left_arm = np.asarray(master_bot_left.dxl.joint_states.position[:6], dtype=float)
+    right_arm = np.asarray(master_bot_right.dxl.joint_states.position[:6], dtype=float)
+    if use_continuous_joints:
+        joint_unwrapper = joint_unwrapper or _DEFAULT_ACTION_UNWRAPPER
+        left_arm = joint_unwrapper.unwrap(left_arm)
+        right_arm = joint_unwrapper.unwrap(right_arm)
+    action[:6] = left_arm
+    action[7 : 7 + 6] = right_arm
     # Gripper actions
     action[6] = constants.MASTER_GRIPPER_JOINT_NORMALIZE_FN(master_bot_left.dxl.joint_states.position[6])
     action[7 + 6] = constants.MASTER_GRIPPER_JOINT_NORMALIZE_FN(master_bot_right.dxl.joint_states.position[6])
@@ -319,6 +340,7 @@ def make_real_env(
     setup_robots: bool = True,
     video_memory_num_frames: int = 1,
     video_memory_stride_seconds: float = 1.0,
+    continuous_roll_joints: bool = True,
 ) -> RealEnv:
     return RealEnv(
         init_node,
@@ -327,4 +349,5 @@ def make_real_env(
         setup_robots=setup_robots,
         video_memory_num_frames=video_memory_num_frames,
         video_memory_stride_seconds=video_memory_stride_seconds,
+        continuous_roll_joints=continuous_roll_joints,
     )

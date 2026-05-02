@@ -50,11 +50,11 @@ services:
       - >-
         uv run --no-sync scripts/serve_policy.py --no-warmup-subtask
         ${SERVER_ARGS:---video-memory-num-frames 6
-        --video-memory-stride-seconds 4
+        --video-memory-stride-seconds 5.0
         policy:checkpoint
-        --policy.config eii_rinse_cam4_lora
+        --policy.config eii_rinse_cam4_fullft
         --policy.dir
-        /app/checkpoints/eii_rinse_cam4_lora/rinse_bottle_cam4_f6s4_bs64_20260428/7000}
+        /app/checkpoints/eii_rinse_cam4_fullft/h200_fullft_13repos_bs128_nw16_f6_s5_log10_20260430_085556/10000}
     init: true
     tty: true
     network_mode: host

@@ -72,7 +72,9 @@ class AlohaInputs(transforms.DataTransformFn):
                 images[dest] = in_images[source]
                 image_masks[dest] = _to_scalar_bool(source_image_masks.get(source, True))
 
-        inputs = dict(data)
+        # Drop the original camera dict after remapping into the model-facing image keys.
+        # Keeping both `images` and `image` doubles image memory inside DataLoader workers.
+        inputs = {k: v for k, v in data.items() if k != "images"}
         inputs["image"] = images
         inputs["image_mask"] = image_masks
         inputs["state"] = data["state"]

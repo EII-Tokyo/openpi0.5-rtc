@@ -2,6 +2,7 @@
 # ruff: noqa
 from collections import deque
 import json
+import math
 import time
 
 from aloha.msg import RGBGrayscaleImage
@@ -13,6 +14,36 @@ import rospy
 from sensor_msgs.msg import JointState
 
 from examples.aloha_real import constants
+
+CONTINUOUS_JOINT_NAMES = ("forearm_roll", "wrist_rotate")
+CONTINUOUS_JOINT_INDICES = (3, 5)
+CONTINUOUS_JOINT_OPERATING_MODE = "ext_position"
+
+
+class JointPositionUnwrapper:
+    """Convert wrapped joint readings into continuous multi-turn angles."""
+
+    def __init__(self, continuous_joint_indices=CONTINUOUS_JOINT_INDICES):
+        self.continuous_joint_indices = tuple(continuous_joint_indices)
+        self.prev_unwrapped = None
+
+    def unwrap(self, joint_positions):
+        current = np.asarray(joint_positions, dtype=float).copy()
+        if self.prev_unwrapped is None:
+            self.prev_unwrapped = current
+            return current.copy()
+
+        new_unwrapped = current.copy()
+        for joint_index in self.continuous_joint_indices:
+            delta = current[joint_index] - self.prev_unwrapped[joint_index]
+            if delta > math.pi:
+                delta -= 2 * math.pi
+            elif delta < -math.pi:
+                delta += 2 * math.pi
+            new_unwrapped[joint_index] = self.prev_unwrapped[joint_index] + delta
+
+        self.prev_unwrapped = new_unwrapped
+        return new_unwrapped.copy()
 
 
 class ImageRecorder:
@@ -213,27 +244,29 @@ def get_arm_gripper_positions(bot):
     return bot.gripper.core.joint_states.position[6]
 
 
-def move_arms(bot_list, target_pose_list, move_time=1):
-    # vx300s机器人关节位置限制（从URDF文件中获取的真实值）
-    # 来源: interbotix_xsarm_descriptions/urdf/vx300s.urdf.xacro
-    import math
-    joint_limits_lower = np.array([
-        -math.pi + 0.00001,  # waist
-        math.radians(-106),  # shoulder: -1.850049
-        math.radians(-101),  # elbow: -1.76278
-        -math.pi + 0.00001,  # forearm_roll
-        math.radians(-107),  # wrist_angle: -1.86750
-        -math.pi + 0.00001   # wrist_rotate
-    ])
-    joint_limits_upper = np.array([
-        math.pi - 0.00001,   # waist
-        math.radians(72),    # shoulder: 1.256637
-        math.radians(92),    # elbow: 1.60570
-        math.pi - 0.00001,   # forearm_roll
-        math.radians(128),   # wrist_angle: 2.23402
-        math.pi - 0.00001    # wrist_rotate
-    ])
-    
+def clip_arm_joint_positions(positions, joint_limits_lower, joint_limits_upper, *, continuous_roll_joints=False):
+    clipped = np.asarray(positions, dtype=float).copy()
+    lower = np.asarray(joint_limits_lower, dtype=float)
+    upper = np.asarray(joint_limits_upper, dtype=float)
+    for joint_index in range(clipped.shape[0]):
+        if continuous_roll_joints and joint_index in CONTINUOUS_JOINT_INDICES:
+            continue
+        clipped[joint_index] = np.clip(clipped[joint_index], lower[joint_index], upper[joint_index])
+    return clipped
+
+
+def publish_arm_positions(bot, positions):
+    bot.arm.core.pub_group.publish(JointGroupCommand(name="arm", cmd=list(np.asarray(positions, dtype=float))))
+
+
+def set_arm_operating_mode(bot, *, continuous_roll_joints=False):
+    bot.dxl.robot_set_operating_modes("group", "arm", "position")
+    if continuous_roll_joints:
+        for joint_name in CONTINUOUS_JOINT_NAMES:
+            bot.dxl.robot_set_operating_modes("single", joint_name, CONTINUOUS_JOINT_OPERATING_MODE)
+
+
+def move_arms(bot_list, target_pose_list, move_time=1, *, continuous_roll_joints=False):
     num_steps = int(move_time / constants.DT)
     curr_pose_list = [get_arm_joint_positions(bot) for bot in bot_list]
     traj_list = [
@@ -242,9 +275,16 @@ def move_arms(bot_list, target_pose_list, move_time=1):
     ]
     for t in range(num_steps):
         for bot_id, bot in enumerate(bot_list):
-            # 裁剪关节位置到限制范围内，避免警告
-            clipped_positions = np.clip(traj_list[bot_id][t], joint_limits_lower, joint_limits_upper)
-            bot.arm.set_joint_positions(clipped_positions, blocking=False)
+            clipped_positions = clip_arm_joint_positions(
+                traj_list[bot_id][t],
+                bot.arm.group_info.joint_lower_limits,
+                bot.arm.group_info.joint_upper_limits,
+                continuous_roll_joints=continuous_roll_joints,
+            )
+            if continuous_roll_joints:
+                publish_arm_positions(bot, clipped_positions)
+            else:
+                bot.arm.set_joint_positions(clipped_positions, blocking=False)
         time.sleep(constants.DT)
 
 
@@ -265,12 +305,12 @@ def move_grippers(bot_list, target_pose_list, move_time):
         time.sleep(constants.DT)
 
 
-def setup_puppet_bot(bot, current_limit=550):  
+def setup_puppet_bot(bot, current_limit=550, *, continuous_roll_joints=True):
     # torque_off(bot)
     bot.dxl.robot_torque_enable("single", "gripper", False)
     bot.dxl.robot_set_motor_registers('single', 'gripper', 'Current_Limit', current_limit)
     bot.dxl.robot_reboot_motors("single", "gripper", True)
-    bot.dxl.robot_set_operating_modes("group", "arm", "position")
+    set_arm_operating_mode(bot, continuous_roll_joints=continuous_roll_joints)
     bot.dxl.robot_set_operating_modes("single", "gripper", "current_based_position")
     torque_on(bot)
 
@@ -282,8 +322,8 @@ def restart_puppet_bot_gripper(bot, current_limit=550):
     bot.dxl.robot_set_operating_modes("single", "gripper", "current_based_position")
 
 
-def setup_master_bot(bot):
-    bot.dxl.robot_set_operating_modes("group", "arm", "position")
+def setup_master_bot(bot, *, continuous_roll_joints=True):
+    set_arm_operating_mode(bot, continuous_roll_joints=continuous_roll_joints)
     bot.dxl.robot_set_operating_modes("single", "gripper", "current_based_position")
     torque_on(bot)
 
@@ -329,6 +369,7 @@ def sync_puppet_to_master(master_bot_left, master_bot_right, puppet_bot_left, pu
         [master_bot_left, master_bot_right],
         [puppet_left_qpos, puppet_right_qpos],
         move_time=1,
+        continuous_roll_joints=True,
     )
 
     # move master grippers to puppet positions
