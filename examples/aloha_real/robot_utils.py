@@ -178,26 +178,23 @@ def get_arm_gripper_positions(bot):
 
 
 def move_arms(bot_list, target_pose_list, move_time=1):
-    # vx300s机器人关节位置限制（从URDF文件中获取的真实值）
-    # 来源: interbotix_xsarm_descriptions/urdf/vx300s.urdf.xacro
     import math
     joint_limits_lower = np.array([
-        -math.pi + 0.00001,  # waist
-        math.radians(-106),  # shoulder: -1.850049
-        math.radians(-101),  # elbow: -1.76278
-        -math.pi + 0.00001,  # forearm_roll
-        math.radians(-107),  # wrist_angle: -1.86750
-        -math.pi + 0.00001   # wrist_rotate
+        -math.pi + 0.00001,
+        math.radians(-106),
+        math.radians(-101),
+        -math.pi + 0.00001,
+        math.radians(-107),
+        -math.pi + 0.00001,
     ])
     joint_limits_upper = np.array([
-        math.pi - 0.00001,   # waist
-        math.radians(72),    # shoulder: 1.256637
-        math.radians(92),    # elbow: 1.60570
-        math.pi - 0.00001,   # forearm_roll
-        math.radians(128),   # wrist_angle: 2.23402
-        math.pi - 0.00001    # wrist_rotate
+        math.pi - 0.00001,
+        math.radians(72),
+        math.radians(92),
+        math.pi - 0.00001,
+        math.radians(128),
+        math.pi - 0.00001,
     ])
-    
     num_steps = int(move_time / constants.DT)
     curr_pose_list = [get_arm_joint_positions(bot) for bot in bot_list]
     traj_list = [
@@ -206,7 +203,6 @@ def move_arms(bot_list, target_pose_list, move_time=1):
     ]
     for t in range(num_steps):
         for bot_id, bot in enumerate(bot_list):
-            # 裁剪关节位置到限制范围内，避免警告
             clipped_positions = np.clip(traj_list[bot_id][t], joint_limits_lower, joint_limits_upper)
             bot.arm.set_joint_positions(clipped_positions, blocking=False)
         time.sleep(constants.DT)

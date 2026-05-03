@@ -2,14 +2,19 @@ services:
   # Default checkpoints used for low-level infer and high-level infer_subtask
   # unless SERVER_ARGS / HIGH_LEVEL_SERVER_ARGS are explicitly overridden.
   # Host path: ./checkpoints/... must exist (params + assets; train_state not required).
-  # Defaults below: b200 triplet 100k LoRA @10000 (override with env vars when needed).
+  # Defaults below:
+  # - low-level: twist_direction_full_finetune_triplet_27_datasets @26000
+  # - high-level: Qwen adapter (override with env vars when needed).
   runtime:
     image: lyl472324464/robot:aloha-ros1.0
     depends_on:
       - aloha_ros_nodes
       - ros_master
+      - redis
+      - voice_web_backend
       - openpi_server_low_level
-      - openpi_server_qwen_high_level
+      # - openpi_server_qwen_high_level
+    working_dir: /app
     environment:
       # examples/aloha_real/main.py 默认连本机策略；跨机时在 shell 或 .env 里设置这两项。
       - OPENPI_LOW_LEVEL_HOST=${OPENPI_LOW_LEVEL_HOST:-127.0.0.1}
@@ -18,10 +23,18 @@ services:
       - OPENPI_QWEN_HIGH_LEVEL_PORT=${OPENPI_QWEN_HIGH_LEVEL_PORT:-8002}
     env_file:
       - ./.env
-    # build:
-    #   context: .
-    #   dockerfile: examples/aloha_real/Dockerfile
-    command: /bin/bash
+    command:
+      - /bin/bash
+      # - -lc
+      # - |
+      #   python3 -u examples/aloha_real/main.py \
+      #     --model-dir /app/checkpoints/twist_direction_full_finetune_triplet_27_datasets/twist_direction_full_ft_bs256_8xh200_fsdp8_nw32/26000 \
+      #     --prompt "Twist off the bottle cap" \
+      #     --low-level-host ${OPENPI_LOW_LEVEL_HOST:-127.0.0.1} \
+      #     --low-level-port 8000 \
+      #     --high-level-source qwen \
+      #     --qwen-high-level-host ${OPENPI_QWEN_HIGH_LEVEL_HOST:-127.0.0.1} \
+      #     --qwen-high-level-port ${OPENPI_QWEN_HIGH_LEVEL_PORT:-8002}
     init: true
     tty: true
     network_mode: host
@@ -59,6 +72,8 @@ services:
       context: .
       dockerfile: scripts/docker/serve_policy.Dockerfile
     # command: /bin/bash
+    # --policy.config twist_direction_full_finetune_triplet_27_datasets \
+    # --policy.dir /app/checkpoints/twist_direction_full_finetune_triplet_27_datasets/twist_direction_full_ft_bs256_8xh200_fsdp8_nw32/26000
     command:
       - /bin/bash
       - -lc
@@ -106,8 +121,8 @@ services:
   #         set -- $$HIGH_LEVEL_SERVER_ARGS
   #       else
   #         set -- policy:checkpoint \
-  #           --policy.config twist_and_static_mixture_full_finetune \
-  #           --policy.dir /app/checkpoints/twist_and_static_mixture_full_finetune/twist_and_static_mixture_full_finetune_vast_20260405_100600/39999
+  #           --policy.config twist_direction_full_finetune_triplet_27_datasets \
+  #           --policy.dir /app/checkpoints/twist_direction_full_finetune_triplet_27_datasets/twist_direction_full_ft_bs256_8xh200_fsdp8_nw32/26000
   #       fi
   #       uv run --no-sync scripts/serve_policy.py \
   #         --no-warmup-rtc \
@@ -132,37 +147,38 @@ services:
   #     - PYTHONPATH=/app/src
   #   gpus: all
 
-  openpi_server_qwen_high_level:
-    image: lyl472324464/robot:qwen_high_level
-    build:
-      context: .
-      dockerfile: scripts/docker/qwen_high_level.Dockerfile
-    command:
-      - /bin/bash
-      - -lc
-      - |
-        if [ -n "$$QWEN_HIGH_LEVEL_ARGS" ]; then
-          set -- $$QWEN_HIGH_LEVEL_ARGS
-        else
-          set -- \
-            --host 0.0.0.0 \
-            --port 8002 \
-            --adapter /app/output/qwen35-2b-twist-lora/v3-20260421-091009/checkpoint-797
-        fi
-        python scripts/serve_qwen_high_level.py "$$@"
-    init: true
-    tty: true
-    network_mode: host
-    volumes:
-      - $PWD:/app
-      - ${HF_HOME:-~/.cache/huggingface}:/root/.cache/huggingface
-    environment:
-      - PYTHONPATH=/app/src:/app/packages/openpi-client/src
-      - HF_HOME=/root/.cache/huggingface
-      - QWEN_HIGH_LEVEL_ARGS
-      - NVIDIA_VISIBLE_DEVICES=all
-      - NVIDIA_DRIVER_CAPABILITIES=all
-    gpus: all
+  # openpi_server_qwen_high_level:
+  #   image: lyl472324464/robot:qwen_high_level
+  #   build:
+  #     context: .
+  #     dockerfile: scripts/docker/qwen_high_level.Dockerfile
+  #   command:
+  #     - /bin/bash
+  #     - -lc
+  #     - |
+  #       if [ -n "$$QWEN_HIGH_LEVEL_ARGS" ]; then
+  #         set -- $$QWEN_HIGH_LEVEL_ARGS
+  #       else
+  #         set -- \
+  #           --host 0.0.0.0 \
+  #           --port 8002 \
+  #           --adapter /app/output/qwen_twist27_9class_2b_nolow_20260502_195129_resume/v0-20260502-232229/checkpoint-1000 \
+  #           --runtime-config-url http://127.0.0.1:8011/api/runtime/config
+  #       fi
+  #       python scripts/serve_qwen_high_level.py "$$@"
+  #   init: true
+  #   tty: true
+  #   network_mode: host
+  #   volumes:
+  #     - $PWD:/app
+  #     - ${HF_HOME:-~/.cache/huggingface}:/root/.cache/huggingface
+  #   environment:
+  #     - PYTHONPATH=/app/src:/app/packages/openpi-client/src
+  #     - HF_HOME=/root/.cache/huggingface
+  #     - QWEN_HIGH_LEVEL_ARGS
+  #     - NVIDIA_VISIBLE_DEVICES=all
+  #     - NVIDIA_DRIVER_CAPABILITIES=all
+  #   gpus: all
 
   redis:
     image: redis:7.4.2
@@ -210,6 +226,9 @@ services:
       - MONGO_URI=${MONGO_URI:-mongodb://127.0.0.1:27017}
       - MONGO_DB=${MONGO_DB:-aloha_voice_assistant}
       - MONGO_RUNTIME_CONFIG_COLLECTION=${MONGO_RUNTIME_CONFIG_COLLECTION:-runtime_config}
+      - OPENPI_DEFAULT_HIGH_LEVEL_SOURCE=${OPENPI_DEFAULT_HIGH_LEVEL_SOURCE:-qwen}
+      - OPENPI_DEFAULT_GPT_MODEL=${OPENPI_DEFAULT_GPT_MODEL:-gpt-5.4}
+      - OPENPI_DEFAULT_GPT_IMAGE_MODE=${OPENPI_DEFAULT_GPT_IMAGE_MODE:-all_cameras}
     depends_on:
       - redis
       - mongo

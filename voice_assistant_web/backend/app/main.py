@@ -70,6 +70,7 @@ from fastapi.responses import Response, StreamingResponse
 from .camera_bridge import CameraBridge
 from .config import settings
 from .config_store import RuntimeConfigStore
+from .low_level_subtask_defaults import normalize_preset_name, resolve_preset_payload
 from .redis_commands import create_redis_client, publish_runtime_config, publish_task
 from .robot_state_bridge import RobotStateBridge
 from .schemas import (
@@ -80,6 +81,8 @@ from .schemas import (
     RuntimeConfigPayload,
     RuntimeConfigRequest,
     RuntimeStatePayload,
+    StateSubtaskPairPayload,
+    SubtaskCatalogEntryPayload,
     TranslateRequest,
     TranslateResponse,
     VoiceRequest,
@@ -121,6 +124,28 @@ def _merge_forced_low_level_subtask(request: RuntimeConfigRequest, current: str 
 def _merge_runtime_config_request(request: RuntimeConfigRequest) -> RuntimeConfigPayload:
     current = runtime_config_store.load()
     fields_set = getattr(request, "model_fields_set", None) or getattr(request, "__fields_set__", set())
+    if "low_level_subtask_preset" in fields_set:
+        low_level_subtask_preset = normalize_preset_name(request.low_level_subtask_preset)
+        preset_payload = resolve_preset_payload(low_level_subtask_preset)
+        subtask_catalog = [
+            SubtaskCatalogEntryPayload.model_validate(x) for x in preset_payload["subtask_catalog"]
+        ]
+        state_subtask_pairs = [
+            StateSubtaskPairPayload.model_validate({"bottle_state": x[0], "subtask": x[1]})
+            for x in preset_payload["state_subtask_pairs"]
+        ]
+    else:
+        low_level_subtask_preset = current.low_level_subtask_preset
+        if "subtask_catalog" in fields_set and request.subtask_catalog is not None:
+            subtask_catalog = list(request.subtask_catalog)
+        else:
+            subtask_catalog = list(current.subtask_catalog)
+
+        if "state_subtask_pairs" in fields_set and request.state_subtask_pairs is not None:
+            state_subtask_pairs = list(request.state_subtask_pairs)
+        else:
+            state_subtask_pairs = list(current.state_subtask_pairs)
+
     merged_camera_refresh_ms = current.camera_refresh_ms
     if request.camera_refresh_ms is not None:
         try:
@@ -128,17 +153,8 @@ def _merge_runtime_config_request(request: RuntimeConfigRequest) -> RuntimeConfi
         except (TypeError, ValueError):
             merged_camera_refresh_ms = current.camera_refresh_ms
 
-    if "subtask_catalog" in fields_set and request.subtask_catalog is not None:
-        subtask_catalog = list(request.subtask_catalog)
-    else:
-        subtask_catalog = list(current.subtask_catalog)
-
-    if "state_subtask_pairs" in fields_set and request.state_subtask_pairs is not None:
-        state_subtask_pairs = list(request.state_subtask_pairs)
-    else:
-        state_subtask_pairs = list(current.state_subtask_pairs)
-
     merged = RuntimeConfigPayload(
+        low_level_subtask_preset=low_level_subtask_preset,
         dataset_dir=request.dataset_dir if request.dataset_dir is not None else current.dataset_dir,
         manual_dataset_dir=request.manual_dataset_dir if request.manual_dataset_dir is not None else current.manual_dataset_dir,
         include_bottle_description=(

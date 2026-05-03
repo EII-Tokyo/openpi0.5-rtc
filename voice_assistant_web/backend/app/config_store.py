@@ -6,7 +6,11 @@ import logging
 from pymongo import MongoClient
 
 from .config import settings
-from .low_level_subtask_defaults import DEFAULT_STATE_SUBTASK_PAIRS, DEFAULT_SUBTASK_CATALOG
+from .low_level_subtask_defaults import (
+    DEFAULT_PRESET_NAME,
+    normalize_preset_name,
+    resolve_preset_payload,
+)
 from .schemas import (
     RuntimeConfigPayload,
     StateSubtaskPairPayload,
@@ -42,6 +46,8 @@ class RuntimeConfigStore:
     def load(self) -> RuntimeConfigPayload:
         try:
             doc = self._collection.find_one({"_id": "default"}) or {}
+            low_level_subtask_preset = normalize_preset_name(doc.get("low_level_subtask_preset", DEFAULT_PRESET_NAME))
+            preset_payload = resolve_preset_payload(low_level_subtask_preset)
             ann = doc.get("announcement_language", "zh")
             announcement_language = "ja" if ann == "ja" else "zh"
             ui = doc.get("ui_language", "en")
@@ -50,7 +56,7 @@ class RuntimeConfigStore:
             if isinstance(raw_cat, list) and len(raw_cat) > 0:
                 subtask_catalog = [SubtaskCatalogEntryPayload.model_validate(x) for x in raw_cat]
             else:
-                subtask_catalog = [SubtaskCatalogEntryPayload.model_validate(x) for x in DEFAULT_SUBTASK_CATALOG]
+                subtask_catalog = [SubtaskCatalogEntryPayload.model_validate(x) for x in preset_payload["subtask_catalog"]]
 
             raw_pairs = doc.get("state_subtask_pairs")
             state_subtask_pairs: list[StateSubtaskPairPayload] = []
@@ -64,10 +70,11 @@ class RuntimeConfigStore:
                         state_subtask_pairs.append(StateSubtaskPairPayload.model_validate(p))
             if not state_subtask_pairs:
                 state_subtask_pairs = [
-                    StateSubtaskPairPayload(bottle_state=a, subtask=b) for a, b in DEFAULT_STATE_SUBTASK_PAIRS
+                    StateSubtaskPairPayload(bottle_state=a, subtask=b) for a, b in preset_payload["state_subtask_pairs"]
                 ]
 
             return RuntimeConfigPayload(
+                low_level_subtask_preset=low_level_subtask_preset,
                 dataset_dir=str(doc.get("dataset_dir") or ""),
                 manual_dataset_dir=str(doc.get("manual_dataset_dir") or ""),
                 include_bottle_description=bool(doc.get("include_bottle_description", True)),

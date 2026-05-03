@@ -116,6 +116,7 @@ class ModelTransformFactory(GroupFactory):
     force_prompt: str | None = None
     image_size: tuple[int, int] = (224, 224)
     include_bottle_description: bool = True
+    bottle_description_dropout_prob: float = 0.0
     include_bottle_position: bool = True
     include_bottle_state: bool = True
     include_subtask: bool = True
@@ -130,6 +131,7 @@ class ModelTransformFactory(GroupFactory):
                     subtask_max_len=model_config.subtask_max_token_len,
                     fast_tokenizer_path=model_config.fast_tokenizer_path,
                     train_fast_action_tokens=model_config.train_fast_action_tokens,
+                    bottle_description_dropout_prob=self.bottle_description_dropout_prob,
                 )
                 discrete_state_input = model_config.discrete_state_input
                 transforms = [
@@ -214,6 +216,7 @@ class LeRobotAlohaDataConfig(DataConfigFactory):
     video_memory_num_frames: int = 1
     video_memory_stride_seconds: float = 1.0
     include_bottle_description: bool = True
+    bottle_description_dropout_prob: float = 0.0
     include_bottle_position: bool = True
     include_bottle_state: bool = True
     include_subtask: bool = True
@@ -255,6 +258,7 @@ class LeRobotAlohaDataConfig(DataConfigFactory):
                 force_prompt=self.force_prompt,
                 image_size=self.image_size,
                 include_bottle_description=self.include_bottle_description,
+                bottle_description_dropout_prob=self.bottle_description_dropout_prob,
                 include_bottle_position=self.include_bottle_position,
                 include_bottle_state=self.include_bottle_state,
                 include_subtask=self.include_subtask,
@@ -308,6 +312,7 @@ class LeRobotAlohaDataConfig(DataConfigFactory):
             force_prompt=self.force_prompt,
             image_size=self.image_size,
             include_bottle_description=self.include_bottle_description,
+            bottle_description_dropout_prob=self.bottle_description_dropout_prob,
             include_bottle_position=self.include_bottle_position,
             include_bottle_state=self.include_bottle_state,
             include_subtask=self.include_subtask,
@@ -1027,6 +1032,142 @@ _CONFIGS.append(
                 "lyl472324464/"
                 "twist_subset_balanced_100k_448_multi_repo_300mb_train_action_true_process_all_bottles"
             ],
+        ),
+    )
+)
+
+_TWIST_RINSE_REMOTE_REPOS = [
+    "lyl472324464/2025-09-15-twist-one-bottle-no-box-in-the-front",
+    "lyl472324464/2025-11-06-twist-many-bottles",
+    "lyl472324464/2025-11-14-twist-two-bottles",
+    "lyl472324464/2025-11-18-twist-two-bottles",
+    "lyl472324464/2025-11-26-twist-two-bottles",
+    "lyl472324464/2025-12-10-twist-one-bottle",
+    "lyl472324464/2025-12-23-twist-one-bottle",
+    "lyl472324464/2026-01-20-twist-one-bottle",
+    "lyl472324464/2026-01-28-twist-many-bottle",
+    "lyl472324464/2026-02-03-no-cap-and-direction",
+    "lyl472324464/2026-03-04-one-direction",
+    "lyl472324464/2026-03-05-two-direction",
+    "lyl472324464/2026-03-09-no-cap-inference",
+    "lyl472324464/2026-03-09-inference-with-and-without-cap",
+    "lyl472324464/2026-03-12-one-have-cap",
+    "lyl472324464/2026-03-12-one-have-cap-direction",
+    "lyl472324464/2026-03-12-one-havent-cap",
+    "lyl472324464/2026-03-12-one-havent-cap-direction",
+    "lyl472324464/2026-03-12-two-have-all-left",
+    "lyl472324464/2026-03-12-two-have-cap-all-right",
+    "lyl472324464/2026-03-12-two-have-cap-one-right",
+    "lyl472324464/2026.03.16_twist_many-without-rinse",
+    "lyl472324464/2026-04-21_direction_2-lerobot-with-rinse",
+    "lyl472324464/2026-04-21_direction_havent_cap_water-lerobot-with-rinse",
+    "lyl472324464/2026-04-21_direction_havent_cap-lerobot-with-rinse",
+    "lyl472324464/2026-04-21_direction-lerobot-with-rinse",
+    "lyl472324464/2026-04-23_direction_have_cap_water-lerobot-with-rinse",
+    "lyl472324464/2026-04-23_direction_havent_cap_water-lerobot-with-rinse",
+    "lyl472324464/2026-04-27_direction_have_cap_water2-lerobot-with-rinse",
+    "lyl472324464/2026-04-27direction_have_cap_water-lerobot-with-rinse",
+    "lyl472324464/2026-04-28_direction_have_cap_water-lerobot-with-rinse",
+    "lyl472324464/2026-04-28_direction_have_cap_water2-lerobot-with-rinse",
+    "lyl472324464/2026-04-28_water1-lerobot-with-rinse",
+    "lyl472324464/2026.03.18_twist-and-water_one_no_cap-with-rinse",
+    "lyl472324464/2026.03.30_twist-and-water_two_have_cap-with-rinse",
+]
+
+_TRIPLET_REPACK_TRANSFORMS = _transforms.Group(
+    inputs=[
+        _transforms.InjectDefaultField("train_action", True),
+        _transforms.InjectDefaultField("cam_high_mask", 1),
+        _transforms.InjectDefaultField("cam_left_wrist_mask", 1),
+        _transforms.InjectDefaultField("cam_right_wrist_mask", 1),
+        _transforms.InjectDefaultField("subtask", None),
+        _transforms.RepackTransform(
+            {
+                "images": {
+                    "cam_high": "observation.images.cam_high",
+                    "cam_left_wrist": "observation.images.cam_left_wrist",
+                    "cam_right_wrist": "observation.images.cam_right_wrist",
+                },
+                "image_masks": {
+                    "cam_high": "cam_high_mask",
+                    "cam_left_wrist": "cam_left_wrist_mask",
+                    "cam_right_wrist": "cam_right_wrist_mask",
+                },
+                "state": "observation.state",
+                "actions": "action",
+                "actions_mask": "train_action",
+                "prompt": "prompt",
+                "subtask": "subtask",
+            }
+        ),
+    ]
+)
+
+_twist_only_lora_config = next(config for config in _CONFIGS if config.name == "twist_only_lora")
+_CONFIGS.append(
+    dataclasses.replace(
+        _twist_only_lora_config,
+        name="twist_rinse_lora_triplet_remote",
+        batch_size=32,
+        data=dataclasses.replace(
+            _twist_only_lora_config.data,
+            repo_ids=_TWIST_RINSE_REMOTE_REPOS,
+            repack_transforms=_TRIPLET_REPACK_TRANSFORMS,
+        ),
+    )
+)
+
+_TWIST_DIRECTION_27_REPOS = [
+    "lyl472324464/2025-09-15-twist-one-bottle-no-box-in-the-front-without-rinse",
+    "lyl472324464/2025-11-06-twist-many-bottles-without-rinse",
+    "lyl472324464/2025-11-14-twist-two-bottles",
+    "lyl472324464/2025-11-18-twist-two-bottles",
+    "lyl472324464/2025-11-26-twist-two-bottles",
+    "lyl472324464/2025-12-10-twist-one-bottle",
+    "lyl472324464/2025-12-23-twist-one-bottle",
+    "lyl472324464/2026-01-20-twist-one-bottle",
+    "lyl472324464/2026-01-28-twist-many-bottle",
+    "lyl472324464/2026-02-03-no-cap-and-direction",
+    "lyl472324464/2026-03-04-one-direction",
+    "lyl472324464/2026-03-05-two-direction",
+    "lyl472324464/2026-03-09-inference-with-and-without-cap",
+    "lyl472324464/2026-03-09-no-cap-inference",
+    "lyl472324464/2026-03-12-one-have-cap",
+    "lyl472324464/2026-03-12-one-have-cap-direction",
+    "lyl472324464/2026-03-12-one-havent-cap",
+    "lyl472324464/2026-03-12-one-havent-cap-direction",
+    "lyl472324464/2026-03-12-two-have-all-left",
+    "lyl472324464/2026-03-12-two-have-cap-all-right",
+    "lyl472324464/2026-03-12-two-have-cap-one-right",
+    "lyl472324464/2026.03.16_twist_many-without-rinse",
+    "lyl472324464/2026-04-21_direction-lerobot-without-rinse",
+    "lyl472324464/2026-04-21_direction_2-lerobot-without-rinse",
+    "lyl472324464/2026-04-21_direction_havent_cap-lerobot-without-rinse",
+    "lyl472324464/2026-04-21_direction_havent_cap_water-lerobot-without-rinse",
+    "lyl472324464/2026-04-23_direction_havent_cap_water-lerobot-without-rinse",
+]
+
+_twist_full_finetune_config = next(config for config in _CONFIGS if config.name == "twist_and_static_mixture_full_finetune")
+_CONFIGS.append(
+    dataclasses.replace(
+        _twist_full_finetune_config,
+        name="twist_direction_full_finetune_triplet_27_datasets",
+        model=dataclasses.replace(
+            _twist_full_finetune_config.model,
+            subtask_max_token_len=160,
+        ),
+        batch_size=32,
+        data=dataclasses.replace(
+            _twist_full_finetune_config.data,
+            repo_ids=_TWIST_DIRECTION_27_REPOS,
+            video_memory_num_frames=1,
+            video_memory_stride_seconds=1.0,
+            include_bottle_description=True,
+            bottle_description_dropout_prob=0.3,
+            include_bottle_position=False,
+            include_bottle_state=True,
+            include_subtask=True,
+            repack_transforms=_TRIPLET_REPACK_TRANSFORMS,
         ),
     )
 )

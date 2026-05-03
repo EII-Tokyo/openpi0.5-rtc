@@ -4,7 +4,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from .low_level_subtask_defaults import DEFAULT_STATE_SUBTASK_PAIRS, DEFAULT_SUBTASK_CATALOG
+from .low_level_subtask_defaults import DEFAULT_PRESET_NAME, DEFAULT_STATE_SUBTASK_PAIRS, DEFAULT_SUBTASK_CATALOG
 
 
 class HealthResponse(BaseModel):
@@ -71,6 +71,7 @@ class VoiceRequest(BaseModel):
 
 
 class RuntimeConfigRequest(BaseModel):
+    low_level_subtask_preset: str | None = None
     dataset_dir: str | None = None
     manual_dataset_dir: str | None = None
     include_bottle_description: bool | None = None
@@ -94,6 +95,7 @@ class RuntimeConfigRequest(BaseModel):
 
 
 class RuntimeConfigPayload(BaseModel):
+    low_level_subtask_preset: str = DEFAULT_PRESET_NAME
     dataset_dir: str = ""
     manual_dataset_dir: str = ""
     include_bottle_description: bool = True

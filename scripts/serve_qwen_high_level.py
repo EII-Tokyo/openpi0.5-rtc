@@ -6,27 +6,24 @@ import json
 import logging
 import time
 from typing import Any
+import urllib.error
+import urllib.request
 
 import numpy as np
 from PIL import Image
 import torch
 from transformers import AutoModelForImageTextToText
 from transformers import AutoProcessor
+from qwen_high_level_utils import (
+    DEFAULT_CLASS_SPEC_PATH,
+    describe_task_mode,
+    infer_task_mode_from_prompt,
+    load_class_map,
+    parse_class_id,
+    system_prompt,
+)
 
 from openpi.serving.websocket_policy_server import WebsocketPolicyServer
-
-
-CLASS_MAP: dict[int, tuple[str, str]] = {
-    0: ("Bottle on table, opening faces left", "Rotate so opening faces right"),
-    1: ("Bottle on table, opening faces right", "Pick up with left hand"),
-    2: ("Bottle in left hand and capped", "Unscrew cap"),
-    3: ("Bottle in left hand, cap removed, and cap in right hand", "Bottle to left trash bin, cap to right trash bin"),
-    4: ("Bottle in left hand, cap removed, and cap not in right hand", "Bottle to left trash bin"),
-    5: ("Bottle in left hand and upside down", "Bottle to left trash bin"),
-    6: ("Bottle stuck in left hand", "Use right hand to remove and place into left trash bin"),
-    7: ("Cap on table", "Pick up cap and place into right trash bin"),
-    8: ("No bottle on table", "Return to initial pose"),
-}
 
 DEFAULT_CAMERA_ORDER = ("cam_high", "cam_low", "cam_left_wrist", "cam_right_wrist")
 
@@ -51,27 +48,6 @@ def _to_pil(value: Any) -> Image.Image:
     return Image.fromarray(arr).convert("RGB")
 
 
-def _system_prompt() -> str:
-    lines = [
-        "Classify the robot scene into exactly one of 9 classes.",
-        "Output exactly one character: 0 or 1 or 2 or 3 or 4 or 5 or 6 or 7 or 8.",
-        "Do not output words.",
-        "Do not output punctuation.",
-        "Do not explain your answer.",
-        "Classes:",
-    ]
-    for cid, (state, subtask) in CLASS_MAP.items():
-        lines.append(f"{cid}: state={state}; action={subtask}")
-    return "\n".join(lines)
-
-
-def _parse_class_id(raw_text: str) -> int | None:
-    for ch in str(raw_text):
-        if ch in "012345678":
-            return int(ch)
-    return None
-
-
 class QwenHighLevelPolicy:
     def __init__(
         self,
@@ -82,6 +58,7 @@ class QwenHighLevelPolicy:
         camera_order: tuple[str, ...],
         max_new_tokens: int,
         bottle_description: str,
+        class_spec: str | None,
     ) -> None:
         self._model_id = model_id
         self._adapter = adapter
@@ -89,6 +66,10 @@ class QwenHighLevelPolicy:
         self._camera_order = camera_order
         self._max_new_tokens = max_new_tokens
         self._bottle_description = bottle_description
+        self._class_map = load_class_map(class_spec)
+        self._runtime_config_url = ""
+        self._runtime_config_cache_ttl_s = 1.0
+        self._last_runtime_config_fetch_s = 0.0
         self._processor = AutoProcessor.from_pretrained(model_id, trust_remote_code=True)
         self._model = AutoModelForImageTextToText.from_pretrained(
             model_id,
@@ -102,7 +83,45 @@ class QwenHighLevelPolicy:
 
             self._model = PeftModel.from_pretrained(self._model, adapter)
         self._model.eval()
-        self._system_prompt = _system_prompt()
+
+    def set_runtime_config_source(self, *, runtime_config_url: str, cache_ttl_s: float = 1.0) -> None:
+        self._runtime_config_url = str(runtime_config_url or "").strip()
+        self._runtime_config_cache_ttl_s = max(0.1, float(cache_ttl_s))
+
+    def _refresh_class_map_from_runtime_config(self) -> None:
+        if not self._runtime_config_url:
+            return
+        now = time.monotonic()
+        if now - self._last_runtime_config_fetch_s < self._runtime_config_cache_ttl_s:
+            return
+        self._last_runtime_config_fetch_s = now
+        try:
+            with urllib.request.urlopen(self._runtime_config_url, timeout=2.0) as response:
+                payload = json.loads(response.read().decode("utf-8"))
+        except (urllib.error.URLError, TimeoutError, json.JSONDecodeError):
+            logging.warning("Could not fetch qwen runtime config from %s; using cached class map.", self._runtime_config_url)
+            return
+        except Exception:
+            logging.exception("Failed to fetch qwen runtime config from %s", self._runtime_config_url)
+            return
+
+        raw_pairs = payload.get("state_subtask_pairs")
+        if not isinstance(raw_pairs, list) or not raw_pairs:
+            return
+        class_map: dict[int, tuple[str, str]] = {}
+        for idx, item in enumerate(raw_pairs):
+            bottle_state = ""
+            subtask = ""
+            if isinstance(item, dict):
+                bottle_state = str(item.get("bottle_state") or "").strip()
+                subtask = str(item.get("subtask") or "").strip()
+            elif isinstance(item, (list, tuple)) and len(item) >= 2:
+                bottle_state = str(item[0]).strip()
+                subtask = str(item[1]).strip()
+            if bottle_state and subtask:
+                class_map[idx] = (bottle_state, subtask)
+        if class_map:
+            self._class_map = class_map
 
     def reset(self) -> None:
         pass
@@ -114,6 +133,7 @@ class QwenHighLevelPolicy:
         max_new_tokens: int | None = None,
         temperature: float = 0.0,
     ) -> dict[str, Any]:
+        self._refresh_class_map_from_runtime_config()
         images_dict = obs.get("images")
         if not isinstance(images_dict, dict):
             raise ValueError("Qwen high-level policy requires obs['images'] dict.")
@@ -124,10 +144,15 @@ class QwenHighLevelPolicy:
         if not selected:
             raise ValueError(f"No images available for camera_order={self._camera_order}")
 
+        task_mode = str(obs.get("task_mode") or "").strip().lower() or infer_task_mode_from_prompt(str(obs.get("prompt") or ""))
         camera_names = ", ".join(name for name, _ in selected)
-        user_prompt = f"Use all {len(selected)} images in this order: {camera_names}. Classify the current scene."
+        sys_prompt = system_prompt(self._class_map, task_mode)
+        user_prompt = (
+            f"Use all {len(selected)} images in this order: {camera_names}. "
+            f"Known task mode: {describe_task_mode(task_mode)}. Classify the current scene."
+        )
         messages = [
-            {"role": "system", "content": self._system_prompt},
+            {"role": "system", "content": sys_prompt},
             {
                 "role": "user",
                 "content": [{"type": "image", "image": image} for _, image in selected]
@@ -151,13 +176,13 @@ class QwenHighLevelPolicy:
         elapsed_ms = (time.perf_counter() - started_at) * 1000.0
         new_ids = output_ids[:, inputs["input_ids"].shape[1] :]
         raw_text = self._processor.batch_decode(new_ids, skip_special_tokens=True)[0].strip()
-        class_id = _parse_class_id(raw_text)
-        if class_id is None or class_id not in CLASS_MAP:
-            raise RuntimeError(f"Qwen output did not contain a class id 0-8: {raw_text!r}")
+        class_id = parse_class_id(raw_text, self._class_map)
+        if class_id is None or class_id not in self._class_map:
+            raise RuntimeError(f"Qwen output did not contain a valid class id: {raw_text!r}")
 
-        bottle_state, subtask = CLASS_MAP[class_id]
+        bottle_state, subtask = self._class_map[class_id]
         payload = {
-            "bottle_description": self._bottle_description,
+            "bottle_description": self._bottle_description or None,
             "bottle_state": bottle_state,
             "subtask": subtask,
         }
@@ -172,6 +197,7 @@ class QwenHighLevelPolicy:
                 "selected_cameras": [name for name, _ in selected],
                 "raw_text": raw_text,
                 "class_id": class_id,
+                "task_mode": task_mode,
                 "infer_ms": round(elapsed_ms, 1),
             },
             "trace_payload": {
@@ -179,7 +205,8 @@ class QwenHighLevelPolicy:
                 "model": self._model_id,
                 "adapter": self._adapter,
                 "selected_cameras": [name for name, _ in selected],
-                "system_text": self._system_prompt,
+                "task_mode": task_mode,
+                "system_text": sys_prompt,
                 "user_prompt": user_prompt,
                 "raw_text": raw_text,
                 "class_id": class_id,
@@ -200,7 +227,10 @@ def main() -> None:
     parser.add_argument("--device", default="cuda")
     parser.add_argument("--camera-order", nargs="+", default=list(DEFAULT_CAMERA_ORDER))
     parser.add_argument("--max-new-tokens", type=int, default=8)
-    parser.add_argument("--bottle-description", default="clear bottle with white label")
+    parser.add_argument("--bottle-description", default="")
+    parser.add_argument("--class-spec", default=str(DEFAULT_CLASS_SPEC_PATH))
+    parser.add_argument("--runtime-config-url", default="http://127.0.0.1:8011/api/runtime/config")
+    parser.add_argument("--runtime-config-cache-ttl-s", type=float, default=1.0)
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
@@ -211,6 +241,11 @@ def main() -> None:
         camera_order=tuple(args.camera_order),
         max_new_tokens=args.max_new_tokens,
         bottle_description=args.bottle_description,
+        class_spec=args.class_spec,
+    )
+    policy.set_runtime_config_source(
+        runtime_config_url=args.runtime_config_url,
+        cache_ttl_s=args.runtime_config_cache_ttl_s,
     )
     metadata = {
         "provider": "qwen",
@@ -218,6 +253,8 @@ def main() -> None:
         "adapter": args.adapter,
         "camera_order": list(args.camera_order),
         "bottle_description": args.bottle_description,
+        "class_spec": args.class_spec,
+        "runtime_config_url": args.runtime_config_url,
     }
     WebsocketPolicyServer(policy, host=args.host, port=args.port, metadata=metadata).serve_forever()
 

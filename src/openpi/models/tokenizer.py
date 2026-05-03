@@ -58,7 +58,7 @@ def get_good_bad_action_label(subtask: Any | None) -> str:
     return "normal"
 
 
-def get_subtask_text(subtask: Any | None) -> str | None:
+def get_subtask_text(subtask: Any | None, *, bottle_description_dropout_prob: float = 0.0) -> str | None:
     parsed = _parse_subtask_payload(subtask)
     if parsed is not None:
         answer = parsed.get("answer")
@@ -83,7 +83,7 @@ def get_subtask_text(subtask: Any | None) -> str | None:
             bottle_description = random.choice(valid_descriptions) if valid_descriptions else None
         if isinstance(bottle_description, str):
             cleaned_description = bottle_description.strip()
-            if cleaned_description:
+            if cleaned_description and random.random() >= bottle_description_dropout_prob:
                 parts.append(f"Target: {cleaned_description}")
 
         if isinstance(bottle_position, str):
@@ -161,11 +161,13 @@ class PaligemmaTokenizer:
         subtask_max_len: int | None = None,
         fast_tokenizer_path: str = "physical-intelligence/fast",
         train_fast_action_tokens: bool = True,
+        bottle_description_dropout_prob: float = 0.0,
     ):
         self._max_len = max_len
         self._subtask_max_len = subtask_max_len if subtask_max_len is not None else max_len
         self._fast_tokenizer_path = fast_tokenizer_path
         self._train_fast_action_tokens = train_fast_action_tokens
+        self._bottle_description_dropout_prob = bottle_description_dropout_prob
         self._fast_tokenizer = None
         self._fast_skip_tokens = 128
 
@@ -235,7 +237,10 @@ class PaligemmaTokenizer:
         discretized_state = np.digitize(state, bins=np.linspace(-1, 1, 256 + 1)[:-1]) - 1
         state_str = " ".join(map(str, discretized_state))
         action_label = get_good_bad_action_label(subtask)
-        subtask_text = get_subtask_text(subtask)
+        subtask_text = get_subtask_text(
+            subtask,
+            bottle_description_dropout_prob=self._bottle_description_dropout_prob,
+        )
         prompt_prefix = f"Task: {cleaned_text}, State: {state_str}, "
         prompt_tokens = self._tokenizer.encode(prompt_prefix, add_bos=True)
         prompt_tokens, prompt_mask = self._pad_tokens(prompt_tokens, self._max_len, left_pad=True)
@@ -269,7 +274,6 @@ class PaligemmaTokenizer:
 
         eos_token = [self.eos_token_id] if subtask_only_tokens else []
         full_subtask_tokens = subtask_only_tokens + eos_token + action_suffix_tokens + fast_action_tokens
-        print(prompt_prefix, subtask_text, action_suffix)
         subtask_tokens, subtask_mask = self._pad_tokens(full_subtask_tokens, self._subtask_max_len)
         # Compute AR loss on subtask text + EOS + fast action tokens. Exclude the action suffix text itself.
         loss_mask = np.asarray(

@@ -1,0 +1,47 @@
+[
+  {
+    "class_id": 0,
+    "bottle_state": "Bottle position is incorrect",
+    "subtask": "Adjust bottle position"
+  },
+  {
+    "class_id": 1,
+    "bottle_state": "Bottle on table, opening faces right",
+    "subtask": "Pick up with left hand"
+  },
+  {
+    "class_id": 2,
+    "bottle_state": "Bottle in left hand and capped",
+    "subtask": "Unscrew cap"
+  },
+  {
+    "class_id": 3,
+    "bottle_state": "Bottle in left hand, cap removed, and cap in right hand",
+    "subtask": "Bottle to left trash bin, cap to right trash bin"
+  },
+  {
+    "class_id": 4,
+    "bottle_state": "Bottle in left hand, cap removed, and cap not in right hand",
+    "subtask": "Bottle to left trash bin"
+  },
+  {
+    "class_id": 5,
+    "bottle_state": "Bottle in left hand and upside down",
+    "subtask": "Bottle to left trash bin"
+  },
+  {
+    "class_id": 6,
+    "bottle_state": "Bottle stuck in left hand",
+    "subtask": "Use right hand to remove and place into left trash bin"
+  },
+  {
+    "class_id": 7,
+    "bottle_state": "Cap on table",
+    "subtask": "Pick up cap and place into right trash bin"
+  },
+  {
+    "class_id": 8,
+    "bottle_state": "No bottle on table",
+    "subtask": "Return to initial pose"
+  }
+]

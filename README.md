@@ -132,7 +132,7 @@ Notes:
 
 - `--prompt` is now required. High-level preview uses this fixed prompt continuously, even before task `1` is pressed.
 - `--high-level-source qwen` forces the runtime to use the Qwen high-level websocket service. Start `openpi_server_qwen_high_level` first; it listens on `127.0.0.1:8002` by default.
-- Qwen only predicts the 0-8 class. The Qwen high-level service fills `bottle_description` with a fixed string, `clear bottle with white label` by default. Override it with `QWEN_HIGH_LEVEL_ARGS='--host 0.0.0.0 --port 8002 --adapter /app/output/qwen35-2b-twist-lora/v6-20260422-113134/checkpoint-4000 --bottle-description "your description"'`.
+- Qwen high-level now reads its class list from `scripts/qwen_high_level_classes.json`. The default spec contains 12 classes (`0-11`) covering twist and rinse scenes. The service fills `bottle_description` with a fixed string, `clear bottle with white label` by default. Override it with `QWEN_HIGH_LEVEL_ARGS='--host 0.0.0.0 --port 8002 --adapter /app/output/qwen35-2b-twist-lora/v6-20260422-113134/checkpoint-4000 --bottle-description "your description"'`.
 - To use Pi0.5 high-level instead, use `--high-level-source service --high-level-host 127.0.0.1 --high-level-port 8001` and start `openpi_server_high_level`.
 - To use GPT high-level instead, use `--high-level-source gpt`; the Qwen/Pi0.5 websocket ports are ignored.
 - `runtime` must be started from a shell that has both `/opt/ros/noetic/setup.bash` and `/root/interbotix_ws/devel/setup.bash` sourced.

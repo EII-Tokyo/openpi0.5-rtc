@@ -43,6 +43,15 @@ def _observation_qpos_list(obs: dict | None) -> list[float]:
         return [float(x) for x in arr.tolist()]
     except Exception:
         return []
+
+
+def _infer_task_mode_from_prompt(prompt: str) -> str:
+    text = str(prompt).strip().lower()
+    if any(token in text for token in ("rinse", "wash", "washing", "clean", "water")):
+        return "rinse"
+    if any(token in text for token in ("twist", "cap", "uncap", "unscrew", "open bottle")):
+        return "twist"
+    return ""
 if not _logger.handlers and not logging.root.handlers:
     logging.basicConfig(
         level=logging.INFO,
@@ -644,6 +653,7 @@ class Runtime:
         obs_for_high_level = {
             **{k: v for k, v in observation.items() if k != "origin_observation"},
             "prompt": self._prompt,
+            "task_mode": _infer_task_mode_from_prompt(self._prompt),
             "runtime_context": {
                 "committed_subtask": self._committed_subtask,
                 "locked_bottle_description": self._locked_bottle_description,
@@ -923,6 +933,7 @@ class Runtime:
         return {
             "timestamp": time.time(),
             "prompt": str(obs.get("prompt") or ""),
+            "task_mode": str(obs.get("task_mode") or ""),
             "image_summary": image_summary,
             "state_summary": state_summary,
         }
@@ -1375,6 +1386,7 @@ class Runtime:
             [master_bot_left, master_bot_right],
             [left_arm_pos, right_arm_pos],
             move_time=move_time,
+            continuous_roll_joints=True,
         )
         robot_utils.move_grippers(
             [master_bot_left, master_bot_right],
@@ -1423,7 +1435,6 @@ class Runtime:
             real_env = self._environment._env
             master_bot_left = real_env.master_bot_left
             master_bot_right = real_env.master_bot_right
-
             if self._last_action is None:
                 logging.warning("没有上次的action，退出人机协作模式")
                 self._runtime_mode = "waiting"
@@ -1493,7 +1504,10 @@ class Runtime:
                 if latest_task is None:
                     while True:
                         t0 = time.time()
-                        action = get_action(master_bot_left, master_bot_right)
+                        action = get_action(
+                            master_bot_left,
+                            master_bot_right,
+                        )
                         t1 = time.time()
 
                         self._environment.apply_action({"actions": action})

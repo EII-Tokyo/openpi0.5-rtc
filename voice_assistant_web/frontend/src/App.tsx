@@ -21,6 +21,8 @@ export type StateSubtaskPairRow = {
   subtask: string
 }
 
+type LowLevelSubtaskPreset = 'default_12' | 'legacy_twist_9' | 'adjust_first_twist_9'
+
 /** 与后端 `low_level_subtask_defaults` 一致；Mongo 空文档时由服务端回填 */
 const DEFAULT_SUBTASK_CATALOG: SubtaskCatalogEntry[] = [
   { subtask: 'Rotate so opening faces right', is_start_subtask: true },
@@ -28,8 +30,11 @@ const DEFAULT_SUBTASK_CATALOG: SubtaskCatalogEntry[] = [
   { subtask: 'Unscrew cap', is_start_subtask: false },
   { subtask: 'Bottle to left trash bin, cap to right trash bin', is_start_subtask: false },
   { subtask: 'Bottle to left trash bin', is_start_subtask: false },
+  { subtask: 'Cap to right trash bin', is_start_subtask: false },
   { subtask: 'Use right hand to remove and place into left trash bin', is_start_subtask: false },
   { subtask: 'Pick up cap and place into right trash bin', is_start_subtask: false },
+  { subtask: 'Adjust bottle position', is_start_subtask: false },
+  { subtask: 'Rinse bottle', is_start_subtask: false },
   { subtask: 'Return to initial pose', is_start_subtask: false },
 ]
 
@@ -47,10 +52,16 @@ const DEFAULT_STATE_SUBTASK_PAIRS: StateSubtaskPairRow[] = [
   },
   { bottle_state: 'Bottle in left hand and upside down', subtask: 'Bottle to left trash bin' },
   {
+    bottle_state: 'Bottle in left hand, cap removed, and cap in right hand',
+    subtask: 'Cap to right trash bin',
+  },
+  {
     bottle_state: 'Bottle stuck in left hand',
     subtask: 'Use right hand to remove and place into left trash bin',
   },
   { bottle_state: 'Cap on table', subtask: 'Pick up cap and place into right trash bin' },
+  { bottle_state: 'Bottle position is incorrect', subtask: 'Adjust bottle position' },
+  { bottle_state: 'Bottle needs rinsing', subtask: 'Rinse bottle' },
   { bottle_state: 'No bottle on table', subtask: 'Return to initial pose' },
 ]
 
@@ -198,6 +209,7 @@ type UiConfig = {
   highLevelSource: 'gpt' | 'service' | 'qwen'
   gptModel: string
   gptImageMode: 'high_only' | 'all_cameras'
+  lowLevelSubtaskPreset: LowLevelSubtaskPreset
   forcedLowLevelSubtask: string | null
   /** 低层子任务目录（Mongo）；含 is_start_subtask、可选 good_bad_action */
   subtaskCatalog: SubtaskCatalogEntry[]
@@ -220,6 +232,7 @@ type RuntimeConfigPayload = {
   highLevelSource: 'gpt' | 'service' | 'qwen'
   gptModel: string
   gptImageMode: 'high_only' | 'all_cameras'
+  lowLevelSubtaskPreset: LowLevelSubtaskPreset
   forcedLowLevelSubtask: string | null
   subtaskCatalog: SubtaskCatalogEntry[]
   stateSubtaskPairs: StateSubtaskPairRow[]
@@ -260,6 +273,9 @@ function parseRuntimeConfigResponse(data: unknown): RuntimeConfigPayload {
   const rawImageMode = r['gpt_image_mode'] ?? r['gptImageMode']
   const gptImageMode: 'high_only' | 'all_cameras' =
     rawImageMode === 'high_only' ? 'high_only' : 'all_cameras'
+  const rawPreset = r['low_level_subtask_preset'] ?? r['lowLevelSubtaskPreset']
+  const lowLevelSubtaskPreset: LowLevelSubtaskPreset =
+    rawPreset === 'legacy_twist_9' || rawPreset === 'adjust_first_twist_9' ? rawPreset : 'default_12'
   const forced = r['forced_low_level_subtask'] ?? r['forcedLowLevelSubtask']
   const ann = r['announcement_language'] ?? r['announcementLanguage']
   const announcementLanguage: 'zh' | 'ja' = ann === 'ja' ? 'ja' : 'zh'
@@ -289,6 +305,7 @@ function parseRuntimeConfigResponse(data: unknown): RuntimeConfigPayload {
     highLevelSource,
     gptModel,
     gptImageMode,
+    lowLevelSubtaskPreset,
     forcedLowLevelSubtask:
       typeof forced === 'string' && forced.trim() ? forced.trim() : null,
     subtaskCatalog: parseSubtaskCatalogFromApi(r['subtask_catalog'] ?? r['subtaskCatalog']),
@@ -335,6 +352,7 @@ const defaultConfig: UiConfig = {
   highLevelSource: 'gpt',
   gptModel: 'gpt-5.4',
   gptImageMode: 'all_cameras',
+  lowLevelSubtaskPreset: 'default_12',
   forcedLowLevelSubtask: null,
   subtaskCatalog: DEFAULT_SUBTASK_CATALOG.map((e) => ({ ...e })),
   stateSubtaskPairs: DEFAULT_STATE_SUBTASK_PAIRS.map((e) => ({ ...e })),
@@ -701,6 +719,7 @@ export default function App() {
           highLevelSource: runtimeConfig.highLevelSource,
           gptModel: runtimeConfig.gptModel,
           gptImageMode: runtimeConfig.gptImageMode,
+          lowLevelSubtaskPreset: runtimeConfig.lowLevelSubtaskPreset,
           forcedLowLevelSubtask: runtimeConfig.forcedLowLevelSubtask || null,
           subtaskCatalog: runtimeConfig.subtaskCatalog.map((e) => ({ ...e })),
           stateSubtaskPairs: runtimeConfig.stateSubtaskPairs.map((e) => ({ ...e })),
@@ -888,6 +907,7 @@ export default function App() {
           high_level_source: nextConfig.highLevelSource,
           gpt_model: nextConfig.gptModel.trim(),
           gpt_image_mode: nextConfig.gptImageMode,
+          low_level_subtask_preset: nextConfig.lowLevelSubtaskPreset,
           announcement_language: nextConfig.announcementLanguage,
           api_base: nextConfig.apiBase.trim(),
           ws_base: nextConfig.wsBase.trim(),
@@ -1540,6 +1560,31 @@ export default function App() {
               >
                 <option value="all_cameras">{t.gptImageModeAll}</option>
                 <option value="high_only">{t.gptImageModeHighOnly}</option>
+              </select>
+            </label>
+            <label className="config-field">
+              <span>{t.lowLevelSubtaskPreset}</span>
+              <select
+                value={uiConfig.lowLevelSubtaskPreset}
+                onChange={(event) =>
+                  setUiConfig((current) => {
+                    const rawPreset = event.target.value
+                    const lowLevelSubtaskPreset: LowLevelSubtaskPreset =
+                      rawPreset === 'legacy_twist_9' || rawPreset === 'adjust_first_twist_9'
+                        ? rawPreset
+                        : 'default_12'
+                    const nextConfig = {
+                      ...current,
+                      lowLevelSubtaskPreset,
+                    }
+                    void pushRuntimeConfig(nextConfig)
+                    return nextConfig
+                  })
+                }
+              >
+                <option value="default_12">{t.lowLevelSubtaskPresetDefault12}</option>
+                <option value="legacy_twist_9">{t.lowLevelSubtaskPresetLegacy9}</option>
+                <option value="adjust_first_twist_9">{t.lowLevelSubtaskPresetAdjustFirst9}</option>
               </select>
             </label>
             <label className="config-field">

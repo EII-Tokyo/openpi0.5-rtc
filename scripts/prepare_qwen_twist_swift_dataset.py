@@ -12,19 +12,14 @@ from datasets import load_dataset
 from huggingface_hub import HfApi
 from PIL import Image
 
-
-CLASS_MAP = {
-    0: ("Bottle on table, opening faces left", "Rotate so opening faces right"),
-    1: ("Bottle on table, opening faces right", "Pick up with left hand"),
-    2: ("Bottle in left hand and capped", "Unscrew cap"),
-    3: ("Bottle in left hand, cap removed, and cap in right hand", "Bottle to left trash bin, cap to right trash bin"),
-    4: ("Bottle in left hand, cap removed, and cap not in right hand", "Bottle to left trash bin"),
-    5: ("Bottle in left hand and upside down", "Bottle to left trash bin"),
-    6: ("Bottle stuck in left hand", "Use right hand to remove and place into left trash bin"),
-    7: ("Cap on table", "Pick up cap and place into right trash bin"),
-    8: ("No bottle on table", "Return to initial pose"),
-}
-PAIR_TO_CLASS_ID = {(state, subtask): cid for cid, (state, subtask) in CLASS_MAP.items()}
+from qwen_high_level_utils import (
+    DEFAULT_CLASS_SPEC_PATH,
+    describe_task_mode,
+    infer_task_mode_from_repo_id,
+    load_class_map,
+    row_class_id,
+    system_prompt,
+)
 
 DEFAULT_CAMERA_COLUMNS = (
     "observation.images.cam_high",
@@ -80,41 +75,9 @@ def _camera_name(column: str) -> str:
     return column.rsplit(".", 1)[-1]
 
 
-def _system_prompt() -> str:
-    lines = [
-        "Classify the robot scene into exactly one of 9 classes.",
-        "Output exactly one character: 0 or 1 or 2 or 3 or 4 or 5 or 6 or 7 or 8.",
-        "Do not output words.",
-        "Do not output punctuation.",
-        "Do not explain your answer.",
-        "Classes:",
-    ]
-    for cid, (state, subtask) in CLASS_MAP.items():
-        lines.append(f"{cid}: state={state}; action={subtask}")
-    return "\n".join(lines)
-
-
 def _user_prompt(camera_columns: tuple[str, ...]) -> str:
     camera_names = ", ".join(_camera_name(column) for column in camera_columns)
     return f"Use all {len(camera_columns)} images in this order: {camera_names}. Classify the current scene."
-
-
-def _row_class_id(row: dict[str, Any]) -> int | None:
-    value = row.get("class_id")
-    if value is not None:
-        if hasattr(value, "item"):
-            return int(value.item())
-        return int(value)
-
-    subtask_value = row.get("subtask")
-    if isinstance(subtask_value, str) and subtask_value.strip().startswith("{"):
-        try:
-            payload = json.loads(subtask_value)
-        except json.JSONDecodeError:
-            payload = {}
-        pair = (str(payload.get("bottle_state", "")).strip(), str(payload.get("subtask", "")).strip())
-        return PAIR_TO_CLASS_ID.get(pair)
-    return None
 
 
 def _write_row_images(
@@ -146,21 +109,23 @@ def _export_repos(
     limit_per_repo: int,
     max_parquet_files_per_repo: int,
     seed: int,
+    class_map: dict[int, tuple[str, str]],
 ) -> dict[str, int]:
-    system_prompt = _system_prompt()
-    user_prompt = _user_prompt(camera_columns)
     counts: dict[str, int] = {}
     output_jsonl.parent.mkdir(parents=True, exist_ok=True)
     with output_jsonl.open("w", encoding="utf-8") as f:
         for repo_id in repo_ids:
             ds = _load_rows(repo_id, limit=limit_per_repo, seed=seed, max_parquet_files=max_parquet_files_per_repo)
             repo_slug = _repo_name(repo_id)
+            task_mode = infer_task_mode_from_repo_id(repo_id)
+            prompt = system_prompt(class_map, task_mode)
+            user_prompt = f"{_user_prompt(camera_columns)} Known task mode: {describe_task_mode(task_mode)}."
             written = 0
             skipped = 0
             for row_idx, row in enumerate(ds):
                 row_dict = dict(row)
-                class_id = _row_class_id(row_dict)
-                if class_id is None or class_id not in CLASS_MAP:
+                class_id = row_class_id(row_dict, class_map)
+                if class_id is None or class_id not in class_map:
                     skipped += 1
                     continue
                 image_paths = _write_row_images(
@@ -177,7 +142,7 @@ def _export_repos(
                     "messages": [
                         {
                             "role": "system",
-                            "content": system_prompt,
+                            "content": prompt,
                         },
                         {
                             "role": "user",
@@ -210,8 +175,10 @@ def main() -> None:
     parser.add_argument("--max-val-parquet-files-per-repo", type=int, default=0)
     parser.add_argument("--seed", type=int, default=7)
     parser.add_argument("--camera-columns", nargs="+", default=list(DEFAULT_CAMERA_COLUMNS))
+    parser.add_argument("--class-spec", type=Path, default=DEFAULT_CLASS_SPEC_PATH)
     args = parser.parse_args()
 
+    class_map = load_class_map(args.class_spec)
     camera_columns = tuple(args.camera_columns)
     args.output_dir.mkdir(parents=True, exist_ok=True)
     train_counts = _export_repos(
@@ -222,6 +189,7 @@ def main() -> None:
         limit_per_repo=args.limit_per_train_repo,
         max_parquet_files_per_repo=args.max_train_parquet_files_per_repo,
         seed=args.seed,
+        class_map=class_map,
     )
     val_counts = {}
     if args.val_repo_id:
@@ -233,10 +201,12 @@ def main() -> None:
             limit_per_repo=args.limit_per_val_repo,
             max_parquet_files_per_repo=args.max_val_parquet_files_per_repo,
             seed=args.seed,
+            class_map=class_map,
         )
     metadata = {
         "camera_columns": list(camera_columns),
-        "class_map": {str(cid): {"bottle_state": state, "subtask": subtask} for cid, (state, subtask) in CLASS_MAP.items()},
+        "class_spec": str(args.class_spec),
+        "class_map": {str(cid): {"bottle_state": state, "subtask": subtask} for cid, (state, subtask) in class_map.items()},
         "train_counts": train_counts,
         "val_counts": val_counts,
     }

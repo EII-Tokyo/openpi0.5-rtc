@@ -241,40 +241,11 @@ class RealEnv:
         )
         
     def step(self, action):
-        # vx300s机器人关节位置限制（从URDF文件中获取的真实值）
-        # 来源: interbotix_xsarm_descriptions/urdf/vx300s.urdf.xacro
-        # 关节顺序: [waist, shoulder, elbow, forearm_roll, wrist_angle, wrist_rotate]
-        # waist: [-π, π] (约 [-3.14159, 3.14159])
-        # shoulder: [radians(-106), radians(72)] = [-1.850049, 1.256637]
-        # elbow: [radians(-101), radians(92)] = [-1.76278, 1.60570]
-        # forearm_roll: [-π, π] (约 [-3.14159, 3.14159])
-        # wrist_angle: [radians(-107), radians(128)] = [-1.86750, 2.23402]
-        # wrist_rotate: [-π, π] (约 [-3.14159, 3.14159])
-        start_time = time.time()
-        import math
-        # joint_limits_lower = np.array([
-        #     -math.pi + 0.00001,  # waist
-        #     math.radians(-106),  # shoulder: -1.850049
-        #     math.radians(-101),  # elbow: -1.76278
-        #     -math.pi + 0.00001,  # forearm_roll
-        #     math.radians(-107),  # wrist_angle: -1.86750
-        #     -math.pi + 0.00001   # wrist_rotate
-        # ])
-        # joint_limits_upper = np.array([
-        #     math.pi - 0.00001,   # waist
-        #     math.radians(72),    # shoulder: 1.256637
-        #     math.radians(92),    # elbow: 1.60570
-        #     math.pi - 0.00001,   # forearm_roll
-        #     math.radians(128),   # wrist_angle: 2.23402
-        #     math.pi - 0.00001    # wrist_rotate
-        # ])
         joint_limits_lower = np.asarray(self.puppet_bot_left.arm.group_info.joint_lower_limits, dtype=float)
         joint_limits_upper = np.asarray(self.puppet_bot_left.arm.group_info.joint_upper_limits, dtype=float)
         state_len = int(len(action) / 2)
         left_action = action[:state_len]
         right_action = action[state_len:]
-        
-        # 裁剪关节位置到限制范围内，避免警告
         left_arm_positions = np.clip(left_action[:6], joint_limits_lower, joint_limits_upper)
         right_arm_positions = np.clip(right_action[:6], joint_limits_lower, joint_limits_upper)
         self.puppet_bot_left.arm.set_joint_positions(left_arm_positions, blocking=False)
@@ -287,10 +258,8 @@ class RealEnv:
 
 def get_action(master_bot_left, master_bot_right):
     action = np.zeros(14)  # 6 joint + 1 gripper, for two arms
-    # Arm actions
     action[:6] = master_bot_left.dxl.joint_states.position[:6]
     action[7 : 7 + 6] = master_bot_right.dxl.joint_states.position[:6]
-    # Gripper actions
     action[6] = constants.MASTER_GRIPPER_JOINT_NORMALIZE_FN(master_bot_left.dxl.joint_states.position[6])
     action[7 + 6] = constants.MASTER_GRIPPER_JOINT_NORMALIZE_FN(master_bot_right.dxl.joint_states.position[6])
 

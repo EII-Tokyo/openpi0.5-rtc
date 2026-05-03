@@ -4,7 +4,6 @@ from __future__ import annotations
 import argparse
 import json
 import random
-import re
 import time
 from collections import Counter, defaultdict
 from io import BytesIO
@@ -15,24 +14,20 @@ import torch
 from huggingface_hub import HfApi, hf_hub_download
 from PIL import Image
 from transformers import AutoModelForImageTextToText, AutoProcessor
+from qwen_high_level_utils import (
+    DEFAULT_CLASS_SPEC_PATH,
+    describe_task_mode,
+    infer_task_mode_from_repo_id,
+    load_class_map,
+    parse_class_id,
+    row_class_id,
+    system_prompt,
+)
 
 try:
     from lerobot.datasets.lerobot_dataset import LeRobotDataset
 except ImportError:
     LeRobotDataset = None
-
-
-CLASS_MAP = {
-    0: ("Bottle on table, opening faces left", "Rotate so opening faces right"),
-    1: ("Bottle on table, opening faces right", "Pick up with left hand"),
-    2: ("Bottle in left hand and capped", "Unscrew cap"),
-    3: ("Bottle in left hand, cap removed, and cap in right hand", "Bottle to left trash bin, cap to right trash bin"),
-    4: ("Bottle in left hand, cap removed, and cap not in right hand", "Bottle to left trash bin"),
-    5: ("Bottle in left hand and upside down", "Bottle to left trash bin"),
-    6: ("Bottle stuck in left hand", "Use right hand to remove and place into left trash bin"),
-    7: ("Cap on table", "Pick up cap and place into right trash bin"),
-    8: ("No bottle on table", "Return to initial pose"),
-}
 
 DEFAULT_CAMERA_COLUMNS = (
     "observation.images.cam_high",
@@ -125,28 +120,9 @@ def _camera_name(column: str) -> str:
     return column.rsplit(".", 1)[-1]
 
 
-def _system_prompt() -> str:
-    lines = [
-        "Classify the robot scene into exactly one of 9 classes.",
-        "Output exactly one character: 0 or 1 or 2 or 3 or 4 or 5 or 6 or 7 or 8.",
-        "Do not output words.",
-        "Do not output punctuation.",
-        "Do not explain your answer.",
-        "Classes:",
-    ]
-    for cid, (state, subtask) in CLASS_MAP.items():
-        lines.append(f"{cid}: state={state}; action={subtask}")
-    return "\n".join(lines)
-
-
 def _user_prompt(camera_columns: tuple[str, ...]) -> str:
     camera_names = ", ".join(_camera_name(column) for column in camera_columns)
     return f"Use all {len(camera_columns)} images in this order: {camera_names}. Classify the current scene."
-
-
-def _parse_class_id(text: str) -> int | None:
-    m = re.search(r"\b([0-8])\b", text)
-    return int(m.group(1)) if m else None
 
 
 def _scalar_int(x) -> int:
@@ -155,28 +131,6 @@ def _scalar_int(x) -> int:
     if hasattr(x, "__len__") and not isinstance(x, (str, bytes)):
         return int(x[0])
     return int(x)
-
-
-def _row_class_id(row: dict) -> int:
-    value = row.get("class_id")
-    if value is not None:
-        return _scalar_int(value)
-
-    bottle_state = str(row.get("bottle_state", "")).strip()
-    subtask = str(row.get("subtask", "")).strip()
-    if subtask.startswith("{"):
-        try:
-            payload = json.loads(subtask)
-        except json.JSONDecodeError:
-            payload = {}
-        bottle_state = str(payload.get("bottle_state", bottle_state)).strip()
-        subtask = str(payload.get("subtask", "")).strip()
-
-    pair = (bottle_state, subtask)
-    for cid, class_pair in CLASS_MAP.items():
-        if pair == class_pair:
-            return cid
-    raise KeyError(f"Cannot infer class_id from row fields: bottle_state={bottle_state!r}, subtask={subtask!r}")
 
 
 def main() -> None:
@@ -191,9 +145,11 @@ def main() -> None:
     ap.add_argument("--max-new-tokens", type=int, default=32)
     ap.add_argument("--camera-columns", nargs="+", default=list(DEFAULT_CAMERA_COLUMNS))
     ap.add_argument("--output", type=Path, required=True)
+    ap.add_argument("--class-spec", type=Path, default=DEFAULT_CLASS_SPEC_PATH)
     args = ap.parse_args()
 
     ds = _load_eval_dataset(args.repo_id, args.root)
+    class_map = load_class_map(args.class_spec)
     processor = AutoProcessor.from_pretrained(args.model_id, trust_remote_code=True)
     model = AutoModelForImageTextToText.from_pretrained(
         args.model_id,
@@ -209,8 +165,9 @@ def main() -> None:
     model.eval()
 
     camera_columns = tuple(args.camera_columns)
-    system_prompt = _system_prompt()
-    user_prompt = _user_prompt(camera_columns)
+    task_mode = infer_task_mode_from_repo_id(args.repo_id)
+    prompt = system_prompt(class_map, task_mode)
+    user_prompt = f"{_user_prompt(camera_columns)} Known task mode: {describe_task_mode(task_mode)}."
     indices = _pick_indices(ds, args.max_samples, args.seed)
     total = 0
     correct = 0
@@ -222,10 +179,12 @@ def main() -> None:
 
     for i, idx in enumerate(indices):
         sample = ds[idx]
-        true_id = _row_class_id(sample)
+        true_id = row_class_id(sample, class_map)
+        if true_id is None:
+            raise KeyError("Cannot infer class_id from row.")
         images = [_to_pil(sample[column]) for column in camera_columns]
         messages = [
-            {"role": "system", "content": system_prompt},
+            {"role": "system", "content": prompt},
             {
                 "role": "user",
                 "content": [{"type": "image", "image": img} for img in images] + [{"type": "text", "text": user_prompt}],
@@ -243,7 +202,7 @@ def main() -> None:
 
         new_ids = output_ids[:, inputs["input_ids"].shape[1]:]
         raw_text = processor.batch_decode(new_ids, skip_special_tokens=True)[0].strip()
-        pred_id = _parse_class_id(raw_text)
+        pred_id = parse_class_id(raw_text, class_map)
 
         total += 1
         per_class[true_id]["total"] += 1
@@ -273,6 +232,7 @@ def main() -> None:
         "adapter": args.adapter,
         "device": args.device,
         "camera_columns": list(camera_columns),
+        "task_mode": task_mode,
         "num_samples": total,
         "accuracy": correct / max(total, 1),
         "avg_latency_sec": sum(latencies) / max(len(latencies), 1),
@@ -284,7 +244,7 @@ def main() -> None:
                 "total": stats["total"],
                 "correct": stats["correct"],
                 "accuracy": stats["correct"] / max(stats["total"], 1),
-                "label": {"bottle_state": CLASS_MAP[cid][0], "subtask": CLASS_MAP[cid][1]},
+                "label": {"bottle_state": class_map[cid][0], "subtask": class_map[cid][1]},
             }
             for cid, stats in sorted(per_class.items())
         },
