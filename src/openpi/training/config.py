@@ -141,6 +141,45 @@ _EII_RINSE_REPO_IDS = [
     "lyl472324464/2026.03.30_twist-and-water_two_have_cap-with-rinse",
 ]
 
+_EII_DATA_SYSTEM_WITHOUT_RINSE_36_REPO_IDS = [
+    "lyl472324464/2025-09-15-twist-one-bottle-no-box-in-the-front-without-rinse",
+    "lyl472324464/2025-11-06-twist-many-bottles-without-rinse",
+    "lyl472324464/2025-11-14-twist-two-bottles",
+    "lyl472324464/2025-11-18-twist-two-bottles",
+    "lyl472324464/2025-11-26-twist-two-bottles",
+    "lyl472324464/2025-12-10-twist-one-bottle",
+    "lyl472324464/2025-12-23-twist-one-bottle",
+    "lyl472324464/2026-01-20-twist-one-bottle",
+    "lyl472324464/2026-01-28-twist-many-bottle",
+    "lyl472324464/2026-02-03-no-cap-and-direction",
+    "lyl472324464/2026-03-04-one-direction",
+    "lyl472324464/2026-03-05-two-direction",
+    "lyl472324464/2026-03-12-one-have-cap",
+    "lyl472324464/2026-03-12-one-have-cap-direction",
+    "lyl472324464/2026-03-12-one-havent-cap",
+    "lyl472324464/2026-03-12-one-havent-cap-direction",
+    "lyl472324464/2026-03-12-two-have-all-left",
+    "lyl472324464/2026-03-12-two-have-cap-all-right",
+    "lyl472324464/2026-03-12-two-have-cap-one-right",
+    "lyl472324464/2026.03.16_twist_many-without-rinse",
+    "lyl472324464/2026-04-21_direction-lerobot-without-rinse",
+    "lyl472324464/2026-04-21_direction_2-lerobot-without-rinse",
+    "lyl472324464/2026-04-21_direction_havent_cap-lerobot-without-rinse",
+    "lyl472324464/2026-04-21_direction_havent_cap_water-lerobot-without-rinse",
+    "lyl472324464/2026-04-23_direction_havent_cap_water-lerobot-without-rinse",
+    "lyl472324464/2026-04-23_direction_have_cap_water-lerobot-without-rinse",
+    "lyl472324464/2026-04-27direction_have_cap_water-lerobot-without-rinse",
+    "lyl472324464/2026-04-27_direction_have_cap_water2-lerobot-without-rinse",
+    "lyl472324464/2026-04-28_direction_have_cap_water-lerobot-without-rinse",
+    "lyl472324464/2026-04-28_direction_have_cap_water2-lerobot-without-rinse",
+    "lyl472324464/2026-05-01_turn_over-lerobot-without-rinse",
+    "lyl472324464/2026-05-03_turn_over-lerobot-without-rinse",
+    "lyl472324464/2026-05-04_direction-lerobot-without-rinse",
+    "lyl472324464/2026-05-04_direction-twist-water-lerobot-without-rinse",
+    "lyl472324464/2026-05-04_turn_over-lerobot-without-rinse",
+    "lyl472324464/2026-05-05_direction-water-lerobot-without-rinse",
+]
+
 
 @dataclasses.dataclass(frozen=True)
 class AssetsConfig:
@@ -384,10 +423,17 @@ def _make_twist_train_config(
     lora: bool,
     batch_size: int,
     num_workers: int,
+    fsdp_devices: int = 1,
     include_low: bool = True,
     include_subtask: bool = True,
     gradient_accumulation_steps: int = 1,
     assets: AssetsConfig | None = None,
+    exp_name: str = tyro.MISSING,
+    assets_base_dir: str = "./assets",
+    checkpoint_base_dir: str = "./checkpoints",
+    wandb_enabled: bool = True,
+    overwrite: bool = False,
+    resume: bool = False,
 ) -> TrainConfig:
     if lora:
         model = pi0_config.Pi0Config(
@@ -408,6 +454,7 @@ def _make_twist_train_config(
 
     return TrainConfig(
         name=name,
+        exp_name=exp_name,
         model=model,
         lr_schedule=_optimizer.CosineDecaySchedule(
             warmup_steps=10_000,
@@ -437,7 +484,13 @@ def _make_twist_train_config(
         num_train_steps=40_000,
         batch_size=batch_size,
         num_workers=num_workers,
+        fsdp_devices=fsdp_devices,
         gradient_accumulation_steps=gradient_accumulation_steps,
+        assets_base_dir=assets_base_dir,
+        checkpoint_base_dir=checkpoint_base_dir,
+        wandb_enabled=wandb_enabled,
+        overwrite=overwrite,
+        resume=resume,
     )
 
 
@@ -475,6 +528,90 @@ _CONFIGS = [
         include_subtask=False,
         gradient_accumulation_steps=2,
         # Load norm stats from ./assets/<config.name>/trossen (compute_norm_stats), not gs:// pi05_base.
+        assets=AssetsConfig(assets_dir=None, asset_id="trossen"),
+    ),
+    _make_twist_train_config(
+        "eii_data_system_without_rinse_cam3_fullft_h200",
+        repo_ids=_EII_DATA_SYSTEM_WITHOUT_RINSE_36_REPO_IDS,
+        lora=False,
+        batch_size=256,
+        num_workers=128,
+        fsdp_devices=8,
+        include_low=False,
+        include_subtask=False,
+        gradient_accumulation_steps=1,
+        exp_name="no_rinse_cam3_fullft_36repo_bs256_nw128_fsdp8_20260510",
+        assets_base_dir="/workspace/openpi0.5-rtc/assets",
+        checkpoint_base_dir="/workspace/openpi0.5-rtc/checkpoints",
+        wandb_enabled=True,
+        overwrite=True,
+        resume=False,
+        # 2026-05-08 benchmarked on 8x H200:
+        # This config for the 2026-05-10 36-repo production run:
+        # fsdp=8, nw=128, bs=256, 3 cameras, full fine-tune, 40k steps,
+        # video_memory_num_frames=1, video_memory_stride_seconds=1.0,
+        # log_interval=10, save_interval=1000, wandb_enabled=True,
+        # overwrite=True, resume=False.
+        # Norm stats are loaded from:
+        # /workspace/openpi0.5-rtc/assets/eii_data_system_without_rinse_cam3_fullft_h200/trossen/norm_stats.json
+        # Nearby H200 benchmark:
+        # - fsdp=2, nw=64, bs=256:
+        #   train_step_time ~= 1.78s/step on a single-repo smoke benchmark,
+        #   data_wait_time ~= 0.03s - 0.37s/step in steady state.
+        # - fsdp=4, nw=32, bs=256:
+        #   train_step_time ~= 1.58s/step,
+        #   data_wait_time ~= 0.04s - 3.58s/step.
+        # - fsdp=4, nw=64, bs=256:
+        #   train_step_time ~= 1.57s - 1.84s/step,
+        #   data_wait_time ~= 0.03s - 2.76s/step.
+        # - fsdp=8, nw=64, bs=256:
+        #   train_step_time ~= 1.43s - 1.45s/step after warmup,
+        #   data_wait_time ~= 0.04s - 0.29s/step over a longer run.
+        # - fsdp=8, nw=64, bs=512:
+        #   train_step_time ~= 2.74s - 3.37s/step,
+        #   data_wait_time can spike badly (observed up to ~= 24.95s).
+        # - fsdp=8, nw=64, bs=1024:
+        #   train_step_time ~= 5.29s - 5.50s/step,
+        #   data_wait_time ~= 0.10s - 0.99s/step in early steady state,
+        #   VRAM ~= 99.8 GiB / GPU in steady state.
+        # Nearby 8x H100 80GB benchmarks:
+        # - fsdp=8, nw=64, bs=256:
+        #   train_step_time ~= 1.50s - 1.90s/step,
+        #   data_wait_time settles to ~= 0.03s - 0.04s/step after a few steps,
+        #   with early spikes up to ~= 6.54s.
+        # - fsdp=8, nw=64, bs=512:
+        #   train_step_time ~= 2.86s - 3.15s/step,
+        #   data_wait_time is usually ~= 0.05s - 0.10s/step,
+        #   with observed spikes up to ~= 19.79s and ~= 6.43s,
+        #   VRAM ~= 62.4 GiB / GPU after step execution.
+        assets=AssetsConfig(assets_dir=None, asset_id="trossen"),
+    ),
+    _make_twist_train_config(
+        "eii_data_system_without_rinse_cam3_fullft_a100",
+        repo_ids=_EII_DATA_SYSTEM_WITHOUT_RINSE_36_REPO_IDS,
+        lora=False,
+        batch_size=256,
+        num_workers=16,
+        fsdp_devices=4,
+        include_low=False,
+        include_subtask=False,
+        gradient_accumulation_steps=1,
+        # 2026-05-07 benchmarked on 8x A100 80GB:
+        # This config: fsdp=4, nw=16, bs=256
+        # train_step_time ~= 14.6s/step on a single-repo smoke benchmark.
+        # data_wait_time ~= 0.04s - 1.90s/step in steady state.
+        # Other A100 full-ft cam3 single-repo benchmarks:
+        # - fsdp=4, nw=16, bs=128:
+        #   train_step_time ~= 12.4s/step,
+        #   data_wait_time ~= 0.02s - 0.49s/step.
+        # - fsdp=8, nw=16, bs=128:
+        #   train_step_time ~= 20.2s/step,
+        #   data_wait_time ~= 0.04s - 0.24s/step.
+        # - fsdp=2, nw=16, bs=128:
+        #   train_step_time ~= 21.5s/step,
+        #   data_wait_time ~= 0.02s - 1.10s/step.
+        # - fsdp=1, nw=16, bs=128:
+        #   OOM on step 0.
         assets=AssetsConfig(assets_dir=None, asset_id="trossen"),
     ),
     _make_twist_train_config(
