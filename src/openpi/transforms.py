@@ -513,6 +513,35 @@ class AppendConveyorInfo(DataTransformFn):
 
 
 @dataclasses.dataclass(frozen=True)
+class AppendSubtaskInfo(DataTransformFn):
+    """Appends resolved DROID subtask text to the prompt."""
+
+    prefix: str = ", Subtask: "
+    skip_labels: tuple[str, ...] = ("unknown",)
+
+    def __call__(self, data: DataDict) -> DataDict:
+        subtask = data.pop("subtask", None)
+        if subtask is None or "prompt" not in data:
+            return data
+
+        if isinstance(subtask, bytes):
+            subtask = subtask.decode("utf-8")
+        elif not isinstance(subtask, str):
+            subtask = subtask.item()
+        subtask = subtask.strip()
+        if not subtask or subtask.lower() in self.skip_labels:
+            return data
+
+        prompt = data["prompt"]
+        if isinstance(prompt, bytes):
+            prompt = prompt.decode("utf-8")
+        elif not isinstance(prompt, str):
+            prompt = prompt.item()
+        data["prompt"] = f"{prompt}{self.prefix}{subtask}"
+        return data
+
+
+@dataclasses.dataclass(frozen=True)
 class DropWristCamera(DataTransformFn):
     """Zeros the repacked DROID wrist camera and records a false mask when sampled."""
 

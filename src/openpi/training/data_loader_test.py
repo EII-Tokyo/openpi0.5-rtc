@@ -1,6 +1,7 @@
 import dataclasses
 
 import jax
+import pandas as pd
 import pytest
 
 from openpi.models import pi0_config
@@ -151,3 +152,15 @@ def test_torch_data_loader_parallel_skips_recoverable_errors():
         "  - dataset=test/repo, episode=0, skipped_frames=1\n"
         "  - dataset=test/repo, episode=2, skipped_frames=1"
     )
+
+
+def test_load_subtask_mapping(tmp_path):
+    meta_dir = tmp_path / "meta"
+    meta_dir.mkdir()
+    pd.DataFrame({"subtask_index": [0, 3]}, index=pd.Index(["reach", "insert"], name="subtask")).to_parquet(
+        meta_dir / "subtasks.parquet"
+    )
+
+    mapping = _data_loader._load_subtask_mapping(tmp_path)
+
+    assert mapping == {0: "reach", 3: "insert"}

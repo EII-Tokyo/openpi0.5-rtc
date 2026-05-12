@@ -112,10 +112,28 @@ def test_transform_dict():
 
 
 def test_extract_prompt_from_task():
-    transform = _transforms.PromptFromLeRobotTask({1: "Hello, world!"})
+    transform = _transforms.PromptFromLeRobotTask()
 
-    data = transform({"task_index": 1})
+    data = transform({"task": "Hello, world!"})
     assert data["prompt"] == "Hello, world!"
 
-    with pytest.raises(ValueError, match="task_index=2 not found in task mapping"):
+    with pytest.raises(ValueError, match='Cannot extract prompt without "task"'):
         transform({"task_index": 2})
+
+
+def test_append_subtask_info():
+    transform = _transforms.AppendSubtaskInfo()
+
+    data = transform({"prompt": "insert the shaft", "subtask": "reach"})
+
+    assert data["prompt"] == "insert the shaft, Subtask: reach"
+    assert "subtask" not in data
+
+
+def test_append_subtask_info_skips_unknown():
+    transform = _transforms.AppendSubtaskInfo()
+
+    data = transform({"prompt": "insert the shaft", "subtask": "unknown"})
+
+    assert data["prompt"] == "insert the shaft"
+    assert "subtask" not in data

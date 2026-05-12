@@ -473,32 +473,41 @@ class CanonicalLeRobotDROIDDataConfig(DataConfigFactory):
 class CanonicalLeRobotDROIDConveyorDataConfig(CanonicalLeRobotDROIDDataConfig):
     """
     Like CanonicalLeRobotDROIDDataConfig but also ingests environment.conveyor_speed and
-    appends conveyor belt status (' Conveyor belt: On/Off.') to the prompt with 70% probability
-    (30% dropout so the model doesn't over-rely on this signal).
+    resolved subtask text, appending both to the prompt before tokenization.
     """
+
+    use_subtasks: bool = False
 
     @override
     def create(self, assets_dirs: pathlib.Path, model_config: _model.BaseModelConfig) -> DataConfig:
+        repack_structure = {
+            "observation/exterior_image_1_left": "observation.images.exterior_1_left",
+            "observation/exterior_image_2_left": "observation.images.exterior_2_left",
+            "observation/wrist_image_left": "observation.images.wrist_left",
+            "observation/joint_position": "observation.state.joint_position",
+            "observation/gripper_position": "observation.state.gripper_position",
+            # Velocity-based action: 7 joint velocities + 1 gripper position.
+            "actions": "action.source_joint_velocity_gripper",
+            "prompt": "language_instruction",
+            "conveyor_speed": "environment.conveyor_speed",
+        }
+        if self.use_subtasks:
+            repack_structure["subtask"] = "subtask"
+
         repack_transform = _transforms.Group(
             inputs=[
                 _transforms.RepackTransform(
-                    {
-                        "observation/exterior_image_1_left": "observation.images.exterior_1_left",
-                        "observation/exterior_image_2_left": "observation.images.exterior_2_left",
-                        "observation/wrist_image_left": "observation.images.wrist_left",
-                        "observation/joint_position": "observation.state.joint_position",
-                        "observation/gripper_position": "observation.state.gripper_position",
-                        # Velocity-based action: 7 joint velocities + 1 gripper position.
-                        "actions": "action.source_joint_velocity_gripper",
-                        "prompt": "language_instruction",
-                        "conveyor_speed": "environment.conveyor_speed",
-                    }
+                    repack_structure
                 )
             ]
         )
+        prompt_metadata_transforms: list[_transforms.DataTransformFn] = []
+        if self.use_subtasks:
+            prompt_metadata_transforms.append(_transforms.AppendSubtaskInfo())
+        prompt_metadata_transforms.append(_transforms.AppendConveyorInfo(dropout=0.3))
         data_transforms = _transforms.Group(
             inputs=[
-                _transforms.AppendConveyorInfo(dropout=0.3),
+                *prompt_metadata_transforms,
                 droid_policy.DroidInputs(model_type=model_config.model_type),
             ],
             outputs=[droid_policy.DroidOutputs()],
@@ -1157,8 +1166,8 @@ _CONFIGS = [
     ),
     TrainConfig(
         # LoRA fine-tune conditioned on conveyor belt status.
-        # Like pi05_droid_lora_baseline but appends ' Conveyor belt: On/Off.' to the prompt
-        # (with 30% dropout) so the model can condition on belt state.
+        # Like pi05_droid_lora_baseline but also appends resolved DROID subtasks and
+        # conveyor state to the prompt so the model can condition on both signals.
         name="pi05_droid_lora_conveyor",
         model=pi0_config.Pi0Config(
             pi05=True,
@@ -1168,6 +1177,7 @@ _CONFIGS = [
             action_expert_variant="gemma_300m_lora",
         ),
         data=CanonicalLeRobotDROIDConveyorDataConfig(
+            use_subtasks=True,
             repo_ids=[
                 "michios/droid_xxjd_canonical",
                 "michios/droid_xxjd_2_canonical",
@@ -1175,11 +1185,12 @@ _CONFIGS = [
                 "michios/droid_xxjd_4_canonical",
                 "michios/droid_xxjd_5_canonical",
                 "michios/droid_xxjd_6_2",
-                "michios/droid_xxjd_combined",
-                # "michios/droid_xxjd_7_2",
-                # "michios/droid_xxjd_8_2_canonical",
+                "michios/droid_xxjd_7_2",
+                "michios/droid_xxjd_8_2_canonical",
                 "michios/droid_xxjd_20260202",
-                "michios/droid_xxjd_20260421"
+                "michios/droid_xxjd_20260421",
+                "michios/droid_xxjd_20260423",
+                "michios/droid_xxjd_20260511_20260512",                
             ],
             base_config=DataConfig(prompt_from_task=True),
             assets=AssetsConfig(

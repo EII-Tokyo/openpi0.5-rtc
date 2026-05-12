@@ -2,6 +2,7 @@ from collections.abc import Iterator, Sequence
 import logging
 import multiprocessing
 import os
+from pathlib import Path
 import queue
 import typing
 import warnings
@@ -11,6 +12,7 @@ import jax
 import jax.numpy as jnp
 import lerobot.datasets.lerobot_dataset as lerobot_dataset
 import numpy as np
+import pandas as pd
 import torch
 
 import openpi.models.model as _model
@@ -151,6 +153,29 @@ def _find_retry_dataset(dataset):
     return None
 
 
+def _load_subtask_mapping(dataset_root: str | Path) -> dict[int, str]:
+    subtasks_path = Path(dataset_root) / "meta" / "subtasks.parquet"
+    if not subtasks_path.exists():
+        return {}
+
+    subtasks = pd.read_parquet(subtasks_path)
+    if "subtask_index" not in subtasks.columns:
+        logging.warning("Ignoring %s because it is missing the subtask_index column", subtasks_path)
+        return {}
+
+    if "subtask" in subtasks.columns:
+        labels = subtasks["subtask"]
+    else:
+        labels = subtasks.index
+
+    mapping = {}
+    for label, index in zip(labels, subtasks["subtask_index"], strict=False):
+        if pd.isna(label) or pd.isna(index):
+            continue
+        mapping[int(index)] = str(label)
+    return mapping
+
+
 class RetryOnErrorDataset(Dataset[T_co]):
     """Retries nearby samples when a known recoverable dataset item fails to load."""
 
@@ -270,6 +295,8 @@ class SchemaRemappingLeRobotDataset:
     This allows MultiLeRobotDataset to see a unified schema across all datasets.
     """
 
+    SUBTASK_FEATURE = {"dtype": "string", "shape": (1,), "names": None}
+
     # Schema mapping from cadene to michios format
     CADENE_TO_MICHIOS_MAPPING = {
         "action.joint_velocity": "actions",
@@ -326,6 +353,7 @@ class SchemaRemappingLeRobotDataset:
 
         # Create the underlying dataset
         self._dataset = lerobot_dataset.LeRobotDataset(repo_id, **kwargs)
+        self._subtasks = _load_subtask_mapping(self._dataset.meta.root)
 
         # Remap features if cadene
         if self._is_cadene:
@@ -338,7 +366,8 @@ class SchemaRemappingLeRobotDataset:
                 if key in self._dataset.features:
                     self._features[key] = self._dataset.features[key]
         else:
-            self._features = self._dataset.features
+            self._features = dict(self._dataset.features)
+        self._features["subtask"] = self.SUBTASK_FEATURE
 
     @property
     def features(self):
@@ -372,9 +401,10 @@ class SchemaRemappingLeRobotDataset:
 
     def __getitem__(self, index):
         item = self._dataset[index]
+        subtask = self._resolve_subtask(item)
 
         if not self._is_cadene:
-            return item
+            return {**item, "subtask": subtask}
 
         # Remap cadene keys to michios keys
         remapped_item = {}
@@ -386,8 +416,24 @@ class SchemaRemappingLeRobotDataset:
         for key in ["episode_index", "frame_index", "index", "timestamp", "task_index", "task"]:
             if key in item:
                 remapped_item[key] = item[key]
+        remapped_item["subtask"] = subtask
 
         return remapped_item
+
+    def _resolve_subtask(self, item: dict) -> str:
+        if not self._subtasks:
+            return ""
+
+        subtask_index = item.get("subtask_index")
+        if subtask_index is None:
+            return ""
+        if hasattr(subtask_index, "item"):
+            subtask_index = subtask_index.item()
+
+        try:
+            return self._subtasks.get(int(subtask_index), "")
+        except (TypeError, ValueError):
+            return ""
 
 
 def create_torch_dataset(
@@ -505,7 +551,7 @@ def create_torch_dataset(
 
     elif repo_id is not None:
         dataset_meta = lerobot_dataset.LeRobotDatasetMetadata(repo_id)
-        dataset = lerobot_dataset.LeRobotDataset(
+        dataset = SchemaRemappingLeRobotDataset(
             data_config.repo_id,
             delta_timestamps={
                 key: [t / dataset_meta.fps for t in range(action_horizon)] for key in data_config.action_sequence_keys
