@@ -82,6 +82,35 @@ def _load_weights_and_validate(loader: _weight_loaders.WeightLoader, params_shap
     )
 
 
+def _log_wandb_sanity_samples(observation: _model.Observation, *, step: int = 0) -> None:
+    """Log first-batch samples with aligned images and decoded prompts."""
+    batch_size = len(next(iter(observation.images.values())))
+    n_samples = min(8, batch_size)
+
+    tokenizer = _tokenizer.PaligemmaTokenizer() if observation.tokenized_prompt is not None else None
+    rows = []
+    gallery = []
+    for i in range(n_samples):
+        image_strip = np.concatenate([np.array(img[i]) for img in observation.images.values()], axis=1)
+
+        prompt = ""
+        if tokenizer is not None:
+            tokens = np.array(observation.tokenized_prompt[i])
+            mask = np.array(observation.tokenized_prompt_mask[i])
+            prompt = tokenizer._tokenizer.decode(tokens[mask].tolist())
+
+        rows.append([i, wandb.Image(image_strip), prompt])
+        gallery.append(wandb.Image(image_strip, caption=prompt))
+
+    wandb.log(
+        {
+            "sanity_check/camera_views": gallery,
+            "sanity_check/samples": wandb.Table(columns=["idx", "image", "prompt"], data=rows),
+        },
+        step=step,
+    )
+
+
 @at.typecheck
 def init_train_state(
     config: _config.TrainConfig, init_rng: at.KeyArrayLike, mesh: jax.sharding.Mesh, *, resume: bool
@@ -228,24 +257,7 @@ def main(config: _config.TrainConfig):
     batch = next(data_iter)
     logging.info(f"Initialized data loader:\n{training_utils.array_tree_to_info(batch)}")
 
-    # Log images from first batch to sanity check.
-    images_to_log = [
-        wandb.Image(np.concatenate([np.array(img[i]) for img in batch[0].images.values()], axis=1))
-        for i in range(min(5, len(next(iter(batch[0].images.values())))))
-    ]
-    wandb.log({"camera_views": images_to_log}, step=0)
-
-    # Log decoded prompts from first batch to sanity check.
-    if batch[0].tokenized_prompt is not None:
-        tok = _tokenizer.PaligemmaTokenizer()
-        n_samples = min(8, batch[0].tokenized_prompt.shape[0])
-        prompt_rows = []
-        for i in range(n_samples):
-            tokens = np.array(batch[0].tokenized_prompt[i])
-            mask = np.array(batch[0].tokenized_prompt_mask[i])
-            decoded = tok._tokenizer.decode(tokens[mask].tolist())
-            prompt_rows.append([i, decoded])
-        wandb.log({"prompts": wandb.Table(columns=["idx", "prompt"], data=prompt_rows)}, step=0)
+    _log_wandb_sanity_samples(batch[0], step=0)
 
     train_state, train_state_sharding = init_train_state(config, init_rng, mesh, resume=resuming)
     jax.block_until_ready(train_state)

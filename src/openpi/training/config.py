@@ -1165,6 +1165,49 @@ _CONFIGS = [
         batch_size=32,
     ),
     TrainConfig(
+        # Full fine-tune conditioned on conveyor belt status and resolved DROID subtasks.
+        # This mirrors pi05_droid_lora_conveyor but uses the base pi05-DROID model without LoRA.
+        # Batch size is raised for an 8x A100 setup.
+        name="pi05_droid_conveyor_8xa100",
+        model=pi0_config.Pi0Config(
+            pi05=True,
+            action_dim=32,
+            action_horizon=16,
+        ),
+        data=CanonicalLeRobotDROIDConveyorDataConfig(
+            use_subtasks=True,
+            repo_ids=[
+                "michios/droid_xxjd_canonical",
+                "michios/droid_xxjd_2_canonical",
+                "michios/droid_xxjd_3_canonical",
+                "michios/droid_xxjd_4_canonical",
+                "michios/droid_xxjd_5_canonical",
+                "michios/droid_xxjd_6_2",
+                "michios/droid_xxjd_7_2",
+                "michios/droid_xxjd_8_2_canonical",
+                "michios/droid_xxjd_20260202",
+                "michios/droid_xxjd_20260421",
+                "michios/droid_xxjd_20260423",
+                "michios/droid_xxjd_20260511_20260512",
+            ],
+            base_config=DataConfig(prompt_from_task=True),
+            assets=AssetsConfig(
+                assets_dir="gs://openpi-assets/checkpoints/pi05_droid/assets",
+                asset_id="droid",
+            ),
+        ),
+        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_droid/params"),
+        ema_decay=None,
+        lr_schedule=_optimizer.CosineDecaySchedule(
+            warmup_steps=5_000,
+            peak_lr=5e-5,
+            decay_steps=95_000,
+            decay_lr=5e-5,
+        ),
+        num_train_steps=100_000,
+        batch_size=128,
+    ),
+    TrainConfig(
         # LoRA fine-tune conditioned on conveyor belt status.
         # Like pi05_droid_lora_baseline but also appends resolved DROID subtasks and
         # conveyor state to the prompt so the model can condition on both signals.
