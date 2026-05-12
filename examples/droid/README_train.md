@@ -75,6 +75,11 @@ Note: We use LeRobot here, since we assume the custom DROID fine-tuning dataset 
 
 ## Step 1: Converting your custom DROID dataset to LeRobot
 
+See [`README_lerobot_conversion.md`](README_lerobot_conversion.md) for the
+difference between the older/simple LeRobot schema and the newer canonical DROID
+schema. Prefer the canonical format for new DROID datasets, especially when
+combining datasets or using the current canonical DROID training configs.
+
 We will use a small subset of the real DROID dataset for this example. This is a subset of just 30 demonstrations -- we assume that you will use your own dataset instead, but here is the command to download our subset (1.6GB):
 ```
 gsutil -m cp -r gs://gresearch/robotics/droid_raw/1.0.1/IRIS/success/2023-12-04 <your_target_path>
@@ -103,4 +108,3 @@ uv run scripts/train.py pi05_droid_finetune --exp-name=my_experiment --overwrite
 ```
 
 Once trained, you can follow the instructions in [`examples/droid/README.md`](examples/droid/README.md) to serve the policy and run it on the robot.
-
