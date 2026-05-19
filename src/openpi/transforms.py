@@ -292,7 +292,7 @@ class TokenizePrompt(DataTransformFn):
 
         if not isinstance(prompt, str):
             prompt = prompt.item()
-        
+
         tokens, token_masks = self.tokenizer.tokenize(prompt, state)
         return {**data, "tokenized_prompt": tokens, "tokenized_prompt_mask": token_masks}
 
@@ -349,12 +349,38 @@ class PromptFromLeRobotTask(DataTransformFn):
             raise ValueError('Cannot extract prompt without "task"')
 
         prompt = data["task"]
-        
+
         # task_index = int(data["task_index"])
         # if (prompt := self.tasks.get(task_index)) is None:
         #     raise ValueError(f"{task_index=} not found in task mapping: {self.tasks}")
 
         return {**data, "prompt": prompt}
+
+
+@dataclasses.dataclass(frozen=True)
+class RandomPromptChoice(DataTransformFn):
+    """Randomly choose between prompt fields, ignoring empty alternates."""
+
+    keys: Sequence[str] = ("prompt", "prompt_2")
+    output_key: str = "prompt"
+
+    def __call__(self, data: DataDict) -> DataDict:
+        choices = []
+        for key in self.keys:
+            prompt = data.get(key)
+            if prompt is None:
+                continue
+            prompt_text = prompt.decode("utf-8") if isinstance(prompt, bytes) else prompt
+            if not isinstance(prompt_text, str):
+                prompt_text = prompt_text.item()
+            if str(prompt_text).strip():
+                choices.append(prompt)
+
+        if not choices:
+            return data
+
+        data[self.output_key] = choices[np.random.randint(len(choices))]
+        return data
 
 
 @dataclasses.dataclass(frozen=True)

@@ -448,12 +448,16 @@ class CanonicalLeRobotDROIDDataConfig(DataConfigFactory):
                         # Velocity-based action: 7 joint velocities + 1 gripper position.
                         "actions": "action.source_joint_velocity_gripper",
                         "prompt": "language_instruction",
+                        "prompt_2": "language_instruction_2",
                     }
                 )
             ]
         )
         data_transforms = _transforms.Group(
-            inputs=[droid_policy.DroidInputs(model_type=model_config.model_type)],
+            inputs=[
+                _transforms.RandomPromptChoice(keys=("prompt", "prompt_2")),
+                droid_policy.DroidInputs(model_type=model_config.model_type),
+            ],
             outputs=[droid_policy.DroidOutputs()],
         )
         model_transforms = ModelTransformFactory()(model_config)
@@ -489,6 +493,7 @@ class CanonicalLeRobotDROIDConveyorDataConfig(CanonicalLeRobotDROIDDataConfig):
             # Velocity-based action: 7 joint velocities + 1 gripper position.
             "actions": "action.source_joint_velocity_gripper",
             "prompt": "language_instruction",
+            "prompt_2": "language_instruction_2",
             "conveyor_speed": "environment.conveyor_speed",
         }
         if self.use_subtasks:
@@ -507,6 +512,7 @@ class CanonicalLeRobotDROIDConveyorDataConfig(CanonicalLeRobotDROIDDataConfig):
         prompt_metadata_transforms.append(_transforms.AppendConveyorInfo(dropout=0.3))
         data_transforms = _transforms.Group(
             inputs=[
+                _transforms.RandomPromptChoice(keys=("prompt", "prompt_2")),
                 *prompt_metadata_transforms,
                 droid_policy.DroidInputs(model_type=model_config.model_type),
             ],
@@ -958,7 +964,7 @@ _CONFIGS = [
                 # "lyl472324464/fit_small_gear_shaft",
                 # "lyl472324464/fit_large_gear_shaft",
                 # "lyl472324464/find_insert_small_gear_shaft",
-                # "lyl472324464/find_insert_large_gear_shaft",        
+                # "lyl472324464/find_insert_large_gear_shaft",
                 # "lyl472324464/find_hole_and_insert_into_gear",
                 # "lyl472324464/close_toolbox",
                 # "lyl472324464/close_cardboard_box",
@@ -1233,7 +1239,7 @@ _CONFIGS = [
                 "michios/droid_xxjd_20260202",
                 "michios/droid_xxjd_20260421",
                 "michios/droid_xxjd_20260423",
-                "michios/droid_xxjd_20260511_20260512",                
+                "michios/droid_xxjd_20260511_20260512",
             ],
             base_config=DataConfig(prompt_from_task=True),
             assets=AssetsConfig(
