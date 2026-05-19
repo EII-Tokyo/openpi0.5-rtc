@@ -24,3 +24,4 @@ WHISPER_MODEL = "base"  # tiny, base, small, medium, large
 
 # TTS配置
 TTS_LANGUAGE = "zh"  # 中文
+COQUI_TOS_AGREED = "1"

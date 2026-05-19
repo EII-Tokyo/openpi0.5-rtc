@@ -6,7 +6,8 @@ Detected language: {detected_language}
 Use this pattern as a guide: "Put [item] in [container]" or "Put [item1] in [container1] and [item2] in [container2]"
 The output command does not have to strictly follow this template.
 Items include but aren't limited to: batteries, battery bank, fan, phone, shaver, vape pen, blocks, cables, controller
-Containers include but aren't limited to: cardboard box, orange box, blue box, cup, paper bag
+Containers include but aren't limited to: orange box, blue box, cardboard box, cup, paper bag, yellow box.
+If the user says yellow box, the english instruction should correspond to orange box, but the response statement should stay as yellow.
 
 Please reply in JSON format only:
 {{

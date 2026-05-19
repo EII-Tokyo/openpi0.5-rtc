@@ -4,8 +4,11 @@ import contextlib
 import dataclasses
 import datetime
 import faulthandler
+import json
 import os
+import queue
 import signal
+import threading
 import time
 from moviepy.editor import ImageSequenceClip
 import numpy as np
@@ -16,6 +19,7 @@ from PIL import Image
 from droid.robot_env import RobotEnv
 import tqdm
 import tyro
+import redis
 
 faulthandler.enable()
 
@@ -37,6 +41,7 @@ class Args:
 
     # Rollout parameters
     max_timesteps: int = 600
+    prompt_for_success: bool = True
     # How many actions to execute from a predicted action chunk before querying policy server again
     # 8 is usually a good default (equals 0.5 seconds of action execution).
     open_loop_horizon: int = 8
@@ -46,6 +51,109 @@ class Args:
     remote_port: int = (
         8000  # point this to the port of the policy server, default server port for openpi servers is 8000
     )
+
+    # Instruction source. Use "manual" for typed prompts or "redis" for the voice assistant.
+    instruction_source: str = "manual"
+
+    # Redis parameters used by examples/droid/voice_assistant.
+    redis_host: str = "localhost"
+    redis_port: int = 6379
+    redis_db: int = 0
+    redis_instruction_channel: str = "robot_instructions"
+    redis_status_channel: str = "robot_status"
+
+
+class RedisInstructionSource:
+    def __init__(self, args: Args):
+        self._redis_client = redis.Redis(
+            host=args.redis_host,
+            port=args.redis_port,
+            db=args.redis_db,
+            decode_responses=True,
+        )
+        self._instruction_channel = args.redis_instruction_channel
+        self._status_channel = args.redis_status_channel
+        self._instruction_queue = queue.Queue()
+        self._stop_requested = threading.Event()
+        self._running = False
+        self._thread = None
+
+    def start(self):
+        self._redis_client.ping()
+        self._running = True
+        self._thread = threading.Thread(target=self._listen, daemon=True)
+        self._thread.start()
+        print(f"Listening for voice instructions on Redis channel: {self._instruction_channel}")
+
+    def stop(self):
+        self._running = False
+        if self._thread is not None and self._thread.is_alive():
+            self._thread.join(timeout=2.0)
+        self._redis_client.close()
+
+    def wait_for_instruction(self):
+        print("Waiting for voice instruction...")
+        while True:
+            item = self._instruction_queue.get()
+            if item["type"] == "instruction":
+                self._stop_requested.clear()
+                return item["instruction"], item.get("task_id")
+            if item["type"] == "stop":
+                print("Received stop while idle; ignoring.")
+
+    def stop_requested(self):
+        return self._stop_requested.is_set()
+
+    def clear_stop(self):
+        self._stop_requested.clear()
+
+    def publish_status(self, status, *, task_id=None, instruction=None, error=None, progress=None):
+        message = {
+            "status": status,
+            "task_id": task_id or "unknown",
+            "timestamp": time.time(),
+        }
+        if instruction is not None:
+            message["instruction"] = instruction
+        if error is not None:
+            message["error"] = error
+        if progress is not None:
+            message["progress"] = progress
+        self._redis_client.publish(self._status_channel, json.dumps(message))
+
+    def _listen(self):
+        pubsub = self._redis_client.pubsub()
+        pubsub.subscribe(self._instruction_channel)
+        try:
+            while self._running:
+                message = pubsub.get_message(timeout=1.0)
+                if not message or message["type"] != "message":
+                    continue
+
+                try:
+                    data = json.loads(message["data"])
+                except json.JSONDecodeError as exc:
+                    print(f"Skipping invalid Redis message: {exc}")
+                    continue
+
+                if data.get("command") == "stop":
+                    self._stop_requested.set()
+                    self._instruction_queue.put({"type": "stop", "task_id": data.get("task_id")})
+                    continue
+
+                instruction = data.get("instruction")
+                if instruction:
+                    self._instruction_queue.put(
+                        {
+                            "type": "instruction",
+                            "instruction": instruction,
+                            "task_id": data.get("task_id"),
+                        }
+                    )
+                else:
+                    print(f"Skipping Redis message without instruction: {data}")
+        finally:
+            pubsub.close()
 
 
 # We are using Ctrl+C to optionally terminate rollouts early -- however, if we press Ctrl+C while the policy server is
@@ -75,6 +183,10 @@ def main(args: Args):
     assert (
         args.external_camera is not None and args.external_camera in ["left", "right"]
     ), f"Please specify an external camera to use for the policy, choose from ['left', 'right'], but got {args.external_camera}"
+    assert args.instruction_source in [
+        "manual",
+        "redis",
+    ], f"Please specify instruction_source as 'manual' or 'redis', but got {args.instruction_source}"
 
     # Initialize the Panda environment. Using joint velocity action space and gripper position action space is very important.
     env = RobotEnv(action_space="joint_velocity", gripper_action_space="position")
@@ -82,111 +194,151 @@ def main(args: Args):
 
     # Connect to the policy server
     policy_client = websocket_client_policy.WebsocketClientPolicy(args.remote_host, args.remote_port)
+    instruction_source = None
+    if args.instruction_source == "redis":
+        instruction_source = RedisInstructionSource(args)
+        instruction_source.start()
 
     df = pd.DataFrame(columns=["success", "duration", "video_filename"])
 
-    while True:
-        instruction = input("Enter instruction: ")
+    try:
+        while True:
+            task_id = None
+            if instruction_source is None:
+                instruction = input("Enter instruction: ")
+            else:
+                instruction, task_id = instruction_source.wait_for_instruction()
+                instruction_source.publish_status("started", task_id=task_id, instruction=instruction)
+            print(f"Instruction: {instruction}")
 
-        # Rollout parameters
-        actions_from_chunk_completed = 0
-        pred_action_chunk = None
+            # Rollout parameters
+            actions_from_chunk_completed = 0
+            pred_action_chunk = None
 
-        # Prepare to save video of rollout
-        timestamp = datetime.datetime.now().strftime("%Y_%m_%d_%H:%M:%S")
-        video = []
-        bar = tqdm.tqdm(range(args.max_timesteps))
-        print("Running rollout... press Ctrl+C to stop early.")
-        for t_step in bar:
-            start_time = time.time()
-            try:
-                # Get the current observation
-                curr_obs = _extract_observation(
-                    args,
-                    env.get_observation(),
-                    # Save the first observation to disk
-                    save_to_disk=t_step == 0,
-                )
+            # Prepare to save video of rollout
+            timestamp = datetime.datetime.now().strftime("%Y_%m_%d_%H:%M:%S")
+            video = []
+            bar = tqdm.tqdm(range(args.max_timesteps))
+            print("Running rollout... press Ctrl+C or say stop to stop early.")
+            for t_step in bar:
+                start_time = time.time()
+                try:
+                    if instruction_source is not None and instruction_source.stop_requested():
+                        print("Received voice stop command; ending rollout.")
+                        instruction_source.publish_status("stopped", task_id=task_id, instruction=instruction)
+                        instruction_source.clear_stop()
+                        break
 
-                video.append(curr_obs[f"{args.external_camera}_image"])
+                    # Get the current observation
+                    curr_obs = _extract_observation(
+                        args,
+                        env.get_observation(),
+                        # Save the first observation to disk
+                        save_to_disk=t_step == 0,
+                    )
 
-                # Send websocket request to policy server if it's time to predict a new chunk
-                if actions_from_chunk_completed == 0 or actions_from_chunk_completed >= args.open_loop_horizon:
-                    actions_from_chunk_completed = 0
+                    video.append(curr_obs[f"{args.external_camera}_image"])
 
-                    # We resize images on the robot laptop to minimize the amount of data sent to the policy server
-                    # and improve latency.
-                    request_data = {
-                        "observation/exterior_image_1_left": image_tools.resize_with_pad(
-                            curr_obs[f"{args.external_camera}_image"], 224, 224
-                        ),
-                        "observation/wrist_image_left": image_tools.resize_with_pad(curr_obs["wrist_image"], 224, 224),
-                        "observation/joint_position": curr_obs["joint_position"],
-                        "observation/gripper_position": curr_obs["gripper_position"],
-                        "prompt": instruction,
-                    }
+                    # Send websocket request to policy server if it's time to predict a new chunk
+                    if actions_from_chunk_completed == 0 or actions_from_chunk_completed >= args.open_loop_horizon:
+                        actions_from_chunk_completed = 0
 
-                    # Wrap the server call in a context manager to prevent Ctrl+C from interrupting it
-                    # Ctrl+C will be handled after the server call is complete
-                    with prevent_keyboard_interrupt():
-                        # this returns action chunk [10, 8] of 10 joint velocity actions (7) + gripper position (1)
-                        pred_action_chunk = policy_client.infer(request_data)["actions"]
-                    assert pred_action_chunk.shape == (10, 8)
+                        # We resize images on the robot laptop to minimize the amount of data sent to the policy server
+                        # and improve latency.
+                        request_data = {
+                            "observation/exterior_image_1_left": image_tools.resize_with_pad(
+                                curr_obs[f"{args.external_camera}_image"], 224, 224
+                            ),
+                            "observation/wrist_image_left": image_tools.resize_with_pad(
+                                curr_obs["wrist_image"], 224, 224
+                            ),
+                            "observation/joint_position": curr_obs["joint_position"],
+                            "observation/gripper_position": curr_obs["gripper_position"],
+                            "prompt": instruction,
+                        }
 
-                # Select current action to execute from chunk
-                action = pred_action_chunk[actions_from_chunk_completed]
-                actions_from_chunk_completed += 1
+                        # Wrap the server call in a context manager to prevent Ctrl+C from interrupting it
+                        # Ctrl+C will be handled after the server call is complete
+                        with prevent_keyboard_interrupt():
+                            # this returns action chunk [10, 8] of 10 joint velocity actions (7) + gripper position (1)
+                            pred_action_chunk = policy_client.infer(request_data)["actions"]
+                        assert pred_action_chunk.shape == (10, 8)
 
-                # Binarize gripper action
-                if action[-1].item() > 0.5:
-                    # action[-1] = 1.0
-                    action = np.concatenate([action[:-1], np.ones((1,))])
-                else:
-                    # action[-1] = 0.0
-                    action = np.concatenate([action[:-1], np.zeros((1,))])
+                    # Select current action to execute from chunk
+                    action = pred_action_chunk[actions_from_chunk_completed]
+                    actions_from_chunk_completed += 1
 
-                # clip all dimensions of action to [-1, 1]
-                action = np.clip(action, -1, 1)
+                    # Binarize gripper action
+                    if action[-1].item() > 0.5:
+                        # action[-1] = 1.0
+                        action = np.concatenate([action[:-1], np.ones((1,))])
+                    else:
+                        # action[-1] = 0.0
+                        action = np.concatenate([action[:-1], np.zeros((1,))])
 
-                env.step(action)
+                    # clip all dimensions of action to [-1, 1]
+                    action = np.clip(action, -1, 1)
 
-                # Sleep to match DROID data collection frequency
-                elapsed_time = time.time() - start_time
-                if elapsed_time < 1 / DROID_CONTROL_FREQUENCY:
-                    time.sleep(1 / DROID_CONTROL_FREQUENCY - elapsed_time)
-            except KeyboardInterrupt:
-                break
+                    env.step(action)
 
-        video = np.stack(video)
-        save_filename = "video_" + timestamp
-        ImageSequenceClip(list(video), fps=10).write_videofile(save_filename + ".mp4", codec="libx264")
+                    # Sleep to match DROID data collection frequency
+                    elapsed_time = time.time() - start_time
+                    if elapsed_time < 1 / DROID_CONTROL_FREQUENCY:
+                        time.sleep(1 / DROID_CONTROL_FREQUENCY - elapsed_time)
+                except KeyboardInterrupt:
+                    if instruction_source is not None:
+                        instruction_source.publish_status("stopped", task_id=task_id, instruction=instruction)
+                    break
 
-        success: str | float | None = None
-        while not isinstance(success, float):
-            success = input(
-                "Did the rollout succeed? (enter y for 100%, n for 0%), or a numeric value 0-100 based on the evaluation spec"
+            if video:
+                video = np.stack(video)
+                save_filename = "video_" + timestamp
+                ImageSequenceClip(list(video), fps=10).write_videofile(save_filename + ".mp4", codec="libx264")
+            else:
+                save_filename = None
+
+            success: float | None = None
+            if args.prompt_for_success:
+                success_input: str | float | None = None
+                while not isinstance(success_input, float):
+                    success_input = input(
+                        "Did the rollout succeed? (enter y for 100%, n for 0%), or a numeric value 0-100 based on the evaluation spec"
+                    )
+                    if success_input == "y":
+                        success_input = 100.0
+                    elif success_input == "n":
+                        success_input = 0.0
+
+                    success_input = float(success_input) / 100
+                    if not (0 <= success_input <= 1):
+                        print(f"Success must be a number in [0, 100] but got: {success_input * 100}")
+                    else:
+                        success = success_input
+
+            df = pd.concat(
+                [
+                    df,
+                    pd.DataFrame(
+                        [
+                            {
+                                "success": success,
+                                "duration": t_step,
+                                "video_filename": save_filename,
+                            }
+                        ]
+                    ),
+                ],
+                ignore_index=True,
             )
-            if success == "y":
-                success = 1.0
-            elif success == "n":
-                success = 0.0
+            if instruction_source is not None:
+                instruction_source.publish_status("completed", task_id=task_id, instruction=instruction)
 
-            success = float(success) / 100
-            if not (0 <= success <= 1):
-                print(f"Success must be a number in [0, 100] but got: {success * 100}")
-
-        df = df.append(
-            {
-                "success": success,
-                "duration": t_step,
-                "video_filename": save_filename,
-            },
-            ignore_index=True,
-        )
-
-        if input("Do one more eval? (enter y or n) ").lower() != "y":
-            break
-        env.reset()
+            if instruction_source is None and input("Do one more eval? (enter y or n) ").lower() != "y":
+                break
+            env.reset()
+    finally:
+        if instruction_source is not None:
+            instruction_source.stop()
 
     os.makedirs("results", exist_ok=True)
     timestamp = datetime.datetime.now().strftime("%I:%M%p_%B_%d_%Y")

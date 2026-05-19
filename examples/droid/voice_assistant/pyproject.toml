@@ -11,9 +11,9 @@ dependencies = [
     # 语音识别
     "openai-whisper",
 
-    # PyTorch (2.5.x for RTX 5090 sm_90 support + TTS compatibility)
-    "torch>=2.5.0,<2.6.0",
-    "torchaudio>=2.5.0,<2.6.0",
+    # PyTorch 2.7+ CUDA 12.8 wheels support RTX 50-series / Blackwell sm_120.
+    "torch>=2.7.0",
+    "torchaudio>=2.7.0",
 
     # 文本转语音
     "TTS==0.22.0",

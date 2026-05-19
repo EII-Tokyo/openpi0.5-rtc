@@ -15,6 +15,9 @@ import time
 import threading
 import queue
 import uuid
+import sys
+import termios
+import tty
 import redis
 import openai
 import pyaudio
@@ -25,7 +28,40 @@ from io import BytesIO
 import pygame
 from TTS.api import TTS
 import os
-from config import OPENAI_API_KEY, REDIS_HOST, REDIS_PORT, REDIS_DB, VAD_THRESHOLD
+from config import COQUI_TOS_AGREED, OPENAI_API_KEY, REDIS_HOST, REDIS_PORT, REDIS_DB, VAD_THRESHOLD
+
+class Console:
+    COLORS = {
+        "green": "\033[32m",
+        "yellow": "\033[33m",
+        "red": "\033[31m",
+        "cyan": "\033[36m",
+        "dim": "\033[2m",
+        "reset": "\033[0m",
+    }
+
+    @classmethod
+    def color(cls, text, color):
+        if not sys.stdout.isatty() or os.getenv("NO_COLOR"):
+            return text
+        return f"{cls.COLORS[color]}{text}{cls.COLORS['reset']}"
+
+    @staticmethod
+    def read_key():
+        if not sys.stdin.isatty():
+            return input().strip()
+
+        fd = sys.stdin.fileno()
+        old_settings = termios.tcgetattr(fd)
+        try:
+            tty.setraw(fd)
+            ch = sys.stdin.read(1)
+            if ch == "\r":
+                ch = "\n"
+            return ch
+        finally:
+            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+
 
 class VoiceAssistant:
     def __init__(self):
@@ -38,11 +74,13 @@ class VoiceAssistant:
         # Redis pub/sub channels - match buildup_demo.py configuration
         self.instruction_channel = os.getenv('INSTRUCTION_CHANNEL', 'robot_instructions')
         self.status_channel = os.getenv('STATUS_CHANNEL', 'robot_status')
+        self.conveyor_status_channel = os.getenv('CONVEYOR_STATUS_CHANNEL', 'robot_conveyor_status')
 
         # Status monitoring
         self.enable_status_monitoring = os.getenv('ENABLE_STATUS_MONITORING', 'false').lower() == 'true'
         self.status_thread = None
         self.status_running = False
+        self.conveyor_status = None
 
         # 初始化组件
         self.setup_audio()
@@ -66,12 +104,13 @@ class VoiceAssistant:
         if self.enable_status_monitoring:
             self.start_status_monitoring()
 
-        print("语音助手初始化完成！")
-        print(f"Redis连接: {self.redis_host}:{self.redis_port}")
-        print(f"发送指令到频道: {self.instruction_channel}")
-        print(f"监听状态频道: {self.status_channel}")
+        print(Console.color("语音助手初始化完成！", "green"))
+        print(f"Redis连接: {Console.color(f'{self.redis_host}:{self.redis_port}', 'green')}")
+        print(f"发送指令到频道: {Console.color(self.instruction_channel, 'cyan')}")
+        print(f"发送传送带状态到频道: {Console.color(self.conveyor_status_channel, 'cyan')}")
+        print(f"监听状态频道: {Console.color(self.status_channel, 'cyan')}")
         if self.enable_status_monitoring:
-            print("状态监控: 已启用")
+            print(f"状态监控: {Console.color('已启用', 'green')}")
         print("\n等待语音输入...")
 
     def setup_audio(self):
@@ -83,33 +122,52 @@ class VoiceAssistant:
         
         self.audio = pyaudio.PyAudio()
         
-        # 查找Pulse设备
+        configured_device = os.getenv("AUDIO_INPUT_DEVICE_INDEX")
         device_count = self.audio.get_device_count()
-        pulse_device = None
+        input_device = None
+
+        if configured_device:
+            input_device = int(configured_device)
+            device_info = self.audio.get_device_info_by_index(input_device)
+            if device_info["maxInputChannels"] <= 0:
+                raise RuntimeError(f"AUDIO_INPUT_DEVICE_INDEX={input_device} 不是输入设备")
+            print(f"使用配置的音频输入设备: {input_device} {device_info['name']}")
+        else:
+            # Prefer desktop audio servers first. Bluetooth microphones are usually
+            # routed through PipeWire/PulseAudio instead of raw ALSA hardware.
+            preferred_names = ("pulse", "pipewire", "default")
         
-        for i in range(device_count):
-            device_info = self.audio.get_device_info_by_index(i)
-            # print(f"设备信息: {device_info}")
-            if device_info['maxInputChannels'] > 0 and 'pulse' in device_info['name'].lower():
-                pulse_device = i
-                print(f"找到Pulse设备: {device_info['name']}")
-                break
-        
-        if pulse_device is None:
-            raise RuntimeError("未找到Pulse音频设备")
+            for preferred_name in preferred_names:
+                for i in range(device_count):
+                    device_info = self.audio.get_device_info_by_index(i)
+                    device_name = device_info["name"].lower()
+                    if device_info["maxInputChannels"] > 0 and preferred_name in device_name:
+                        input_device = i
+                        print(f"找到音频输入设备: {device_info['name']}")
+                        break
+                if input_device is not None:
+                    break
+
+        if input_device is None:
+            available_inputs = []
+            for i in range(device_count):
+                device_info = self.audio.get_device_info_by_index(i)
+                if device_info["maxInputChannels"] > 0:
+                    available_inputs.append(f"{i}: {device_info['name']}")
+            raise RuntimeError("未找到可用音频输入设备。可用输入设备: " + ", ".join(available_inputs))
         
         # 保存设备索引以便重新打开时使用
-        self.pulse_device = pulse_device
+        self.pulse_device = input_device
         
         self.stream = self.audio.open(
             format=self.FORMAT,
             channels=self.CHANNELS,
             rate=self.RATE,
             input=True,
-            input_device_index=pulse_device,
+            input_device_index=input_device,
             frames_per_buffer=self.CHUNK
         )
-        print(f"Pulse设备初始化成功，采样率: {self.RATE}Hz")
+        print(f"音频输入设备初始化成功，采样率: {self.RATE}Hz")
 
     def setup_vad(self):
         """设置语音活动检测"""
@@ -154,6 +212,7 @@ class VoiceAssistant:
     def setup_tts(self):
         """设置TTS"""
         pygame.mixer.init()
+        os.environ.setdefault("COQUI_TOS_AGREED", COQUI_TOS_AGREED)
 
         # 初始化Coqui TTS
         print("正在加载Coqui TTS模型...")
@@ -309,7 +368,12 @@ class VoiceAssistant:
             print(f"ChatGPT请求失败: {e}")
             return None, None
 
-    def send_to_redis(self, english_instruction):
+    def send_to_redis(
+        self,
+        english_instruction,
+        response_statement=None,
+        user_original_statement=None,
+    ):
         """发送指令到Redis使用pub/sub模式
 
         发送英文指令到机器人控制系统
@@ -327,9 +391,38 @@ class VoiceAssistant:
             }
             print(f"发送任务指令 {task_id}: {english_instruction}")
 
+        if response_statement:
+            message["response_statement"] = response_statement
+        if user_original_statement:
+            message["user_original_statement"] = user_original_statement
+
         # 使用pub/sub模式发布消息
         self.redis_client.publish(self.instruction_channel, json.dumps(message))
-        print(f"消息已发送到频道: {self.instruction_channel}")
+        print(Console.color(f"消息已发送到频道: {self.instruction_channel}", "green"))
+        print(json.dumps(message, ensure_ascii=False, indent=2))
+
+    def publish_conveyor_status(self):
+        """Publish the current conveyor status independently from robot instructions."""
+        message = {
+            "type": "conveyor_status",
+            "conveyor_status": self.conveyor_status,
+            "source": "keyboard",
+            "timestamp": time.time(),
+        }
+        self.redis_client.publish(self.conveyor_status_channel, json.dumps(message))
+        print(Console.color(f"conveyor_status已发送到频道: {self.conveyor_status_channel}", "green"))
+        print(json.dumps(message, ensure_ascii=False, indent=2))
+
+    def send_kill_to_redis(self):
+        """Send a local keyboard kill command for the active robot run."""
+        message = {
+            "command": "stop",
+            "response_statement": "Kill current run.",
+            "user_original_statement": "keyboard:k",
+        }
+        self.redis_client.publish(self.instruction_channel, json.dumps(message))
+        print(Console.color(f"kill已发送到频道: {self.instruction_channel}", "red"))
+        print(json.dumps(message, ensure_ascii=False, indent=2))
 
     def text_to_speech(self, text, detected_language=None):
         """文字转语音"""
@@ -362,6 +455,7 @@ class VoiceAssistant:
     def process_voice_command(self):
         """处理语音指令"""
         # 开始录音
+        print(Console.color("开始语音识别...", "yellow"))
         self.is_recording = True
         audio_data = self.record_audio()
         self.is_recording = False
@@ -387,10 +481,15 @@ class VoiceAssistant:
         # 打印检测到的语言
         print(f"检测到的语言: {detected_language}")
         print(f"英文指令: {english_instruction}")
+        print(f"传送带状态: {self.conveyor_status}")
 
         # 发送英文指令到Redis
         if english_instruction:
-            self.send_to_redis(english_instruction)
+            self.send_to_redis(
+                english_instruction,
+                response_statement=reply_text,
+                user_original_statement=text,
+            )
             self.text_to_speech(reply_text, detected_language)
         else:
             self.text_to_speech("申し訳ございませんが、お話の内容を理解できませんでした。もう一度お話しください。", "ja")
@@ -399,19 +498,46 @@ class VoiceAssistant:
         """主运行循环"""
         try:
             while True:
-                print("\n控制方式:")
-                print("  - 按Enter键开始语音识别")
-                print("  - 输入'quit'退出")
-                print("等待输入...")
-
-                user_input = input().strip()
-
-                if user_input.lower() == 'quit':
-                    break
-                elif user_input == '':
-                    self.process_voice_command()
+                conveyor_label = self.conveyor_status if self.conveyor_status is not None else "None"
+                if self.conveyor_status == "On":
+                    conveyor_text = Console.color(conveyor_label, "green")
+                elif self.conveyor_status == "Off":
+                    conveyor_text = Console.color(conveyor_label, "red")
                 else:
-                    print("无效输入，请按Enter进行语音识别")
+                    conveyor_text = Console.color(conveyor_label, "dim")
+                print(
+                    f"\n[conveyor: {conveyor_text}] "
+                    f"{Console.color('Enter', 'cyan')}=record  "
+                    f"{Console.color('1', 'green')}=On  "
+                    f"{Console.color('2', 'red')}=Off  "
+                    f"{Console.color('3', 'dim')}=None  "
+                    f"{Console.color('k', 'red')}=kill  "
+                    f"{Console.color('q', 'yellow')}=quit"
+                )
+
+                user_input = Console.read_key()
+                print()
+
+                if user_input.lower() in ('q', 'quit'):
+                    break
+                elif user_input in ('', '\n'):
+                    self.process_voice_command()
+                elif user_input == '1':
+                    self.conveyor_status = "On"
+                    print(Console.color("conveyor_status已设置为On", "green"))
+                    self.publish_conveyor_status()
+                elif user_input == '2':
+                    self.conveyor_status = "Off"
+                    print(Console.color("conveyor_status已设置为Off", "red"))
+                    self.publish_conveyor_status()
+                elif user_input == '3':
+                    self.conveyor_status = None
+                    print(Console.color("conveyor_status已设置为None", "dim"))
+                    self.publish_conveyor_status()
+                elif user_input.lower() == 'k':
+                    self.send_kill_to_redis()
+                else:
+                    print(Console.color("无效输入，请按Enter、1、2、3、k或q", "red"))
 
         except KeyboardInterrupt:
             print("\n程序被用户中断")
