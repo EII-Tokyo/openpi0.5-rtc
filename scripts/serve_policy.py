@@ -4,8 +4,8 @@ import logging
 import socket
 import dataclasses as dc
 
-import tyro
 import numpy as np
+import tyro
 
 from openpi.policies import aloha_policy as _aloha_policy
 from openpi.policies import policy as _policy
@@ -18,7 +18,6 @@ class EnvMode(enum.Enum):
     """Supported environments."""
 
     ALOHA = "aloha"
-    ALOHA_SIM = "aloha_sim"
 
 
 @dataclasses.dataclass
@@ -69,10 +68,6 @@ DEFAULT_CHECKPOINT: dict[EnvMode, Checkpoint] = {
     EnvMode.ALOHA: Checkpoint(
         config="twist_off_the_bottle_cap",
         dir="./checkpoints/20260205/39999",
-    ),
-    EnvMode.ALOHA_SIM: Checkpoint(
-        config="pi05_aloha_sim",
-        dir="gs://openpi-assets/checkpoints/pi0_aloha_sim",
     ),
 }
 

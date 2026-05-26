@@ -1019,17 +1019,6 @@ _CONFIGS = [
         assets=AssetsConfig(assets_dir=None, asset_id="trossen"),
     ),
     TrainConfig(
-        name="pi05_aloha_sim",
-        model=pi0_config.Pi0Config(pi05=True),
-        data=LeRobotAlohaDataConfig(
-            repo_id="lerobot/aloha_sim_transfer_cube_human",
-            default_prompt="Transfer cube",
-            use_delta_joint_actions=False,
-        ),
-        weight_loader=weight_loaders.CheckpointWeightLoader(_PI05_BASE_PARAMS),
-        num_train_steps=20_000,
-    ),
-    TrainConfig(
         name="debug",
         data=FakeDataConfig(),
         batch_size=2,

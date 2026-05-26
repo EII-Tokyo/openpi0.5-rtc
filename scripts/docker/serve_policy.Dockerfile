@@ -12,8 +12,10 @@ COPY --from=ghcr.io/astral-sh/uv:0.5.1 /uv /uvx /bin/
 
 WORKDIR /app
 
-# Needed because LeRobot uses git-lfs.
-RUN apt-get update && apt-get install -y git git-lfs linux-headers-generic build-essential clang
+# Needed because LeRobot uses git-lfs and torchcodec needs FFmpeg shared libraries.
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends git git-lfs linux-headers-generic build-essential clang ffmpeg && \
+    rm -rf /var/lib/apt/lists/*
 
 # Copy from the cache instead of linking since it's a mounted volume
 ENV UV_LINK_MODE=copy
@@ -34,9 +36,5 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=packages/openpi-client/pyproject.toml,target=packages/openpi-client/pyproject.toml \
     --mount=type=bind,source=packages/openpi-client/src,target=packages/openpi-client/src \
     GIT_LFS_SKIP_SMUDGE=1 uv sync --frozen --no-dev
-
-# Copy transformers_replace files while preserving directory structure
-COPY src/openpi/models_pytorch/transformers_replace/ /tmp/transformers_replace/
-RUN /.venv/bin/python -c "import transformers; print(transformers.__file__)" | xargs dirname | xargs -I{} cp -r /tmp/transformers_replace/* {} && rm -rf /tmp/transformers_replace
 
 CMD /bin/bash -c "uv run scripts/serve_policy.py $SERVER_ARGS"

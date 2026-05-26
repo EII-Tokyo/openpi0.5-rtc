@@ -70,36 +70,6 @@ def create_torch_dataloader(
     return data_loader, num_batches
 
 
-def create_rlds_dataloader(
-    data_config: _config.DataConfig,
-    action_horizon: int,
-    batch_size: int,
-    max_frames: int | None = None,
-) -> tuple[_data_loader.Dataset, int]:
-    dataset = _data_loader.create_rlds_dataset(data_config, action_horizon, batch_size, shuffle=False)
-    dataset = _data_loader.IterableTransformedDataset(
-        dataset,
-        [
-            *([transforms.PromptFromLeRobotTask()] if data_config.prompt_from_task else []),
-            *data_config.repack_transforms.inputs,
-            *data_config.data_transforms.inputs,
-            # Remove strings since they are not supported by JAX and are not needed to compute norm stats.
-            RemoveStrings(),
-        ],
-        is_batched=True,
-    )
-    if max_frames is not None and max_frames < len(dataset):
-        num_batches = max_frames // batch_size
-    else:
-        # NOTE: this length is currently hard-coded for DROID.
-        num_batches = len(dataset) // batch_size
-    data_loader = _data_loader.RLDSDataLoader(
-        dataset,
-        num_batches=num_batches,
-    )
-    return data_loader, num_batches
-
-
 def _compute_stats_from_data_loader(data_loader, num_batches: int) -> dict[str, normalize.NormStats]:
     keys = ["state", "actions"]
     stats = {key: normalize.RunningStats() for key in keys}
@@ -365,9 +335,7 @@ def main(
 
     if method == "dataloader":
         if data_config.rlds_data_dir is not None:
-            data_loader, num_batches = create_rlds_dataloader(
-                data_config, config.model.action_horizon, config.batch_size, max_frames
-            )
+            raise ValueError("RLDS datasets were removed from this ALOHA-real-only branch.")
         else:
             data_loader, num_batches = create_torch_dataloader(
                 data_config,
