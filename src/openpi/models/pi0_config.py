@@ -28,7 +28,7 @@ class Pi0Config(_model.BaseModelConfig):
     # PI05 puts state in the discrete language tokens and uses adaRMSNorm for the action expert.
     discrete_state_input: bool = None  # type: ignore
     image_resolution: tuple[int, int] = (224, 224)
-    image_keys: tuple[str, ...] = ("cam_high", "cam_left_wrist", "cam_right_wrist", "cam_low")
+    image_keys: tuple[str, ...] = ("cam_high", "cam_low", "cam_left_wrist", "cam_right_wrist")
 
     def __post_init__(self):
         if self.max_token_len is None:

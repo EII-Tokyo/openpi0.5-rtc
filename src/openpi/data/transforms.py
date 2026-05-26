@@ -292,7 +292,7 @@ class AlohaInputs(DataTransformFn):
     image_keys: tuple[str, ...] | None = None
     include_prompt: bool = True
     include_subtask: bool = True
-    EXPECTED_CAMERAS: ClassVar[tuple[str, ...]] = ("cam_high", "cam_left_wrist", "cam_right_wrist", "cam_low")
+    EXPECTED_CAMERAS: ClassVar[tuple[str, ...]] = ("cam_high", "cam_low", "cam_left_wrist", "cam_right_wrist")
 
     def __call__(self, data: dict) -> dict:
         data = _extract_aloha_fields(data, include_prompt=self.include_prompt, include_subtask=self.include_subtask)
@@ -358,9 +358,10 @@ class AlohaTransformPipeline:
 
     @property
     def raw_image_keys(self) -> tuple[str, ...]:
-        keys = ["cam_high", "cam_left_wrist", "cam_right_wrist"]
+        keys = ["cam_high"]
         if self.include_low:
             keys.append("cam_low")
+        keys.extend(["cam_left_wrist", "cam_right_wrist"])
         return tuple(keys)
 
     def _model_input_transforms(self, norm_stats: dict[str, NormStats] | None, *, use_quantile_norm: bool) -> list[DataTransformFn]:
@@ -559,18 +560,18 @@ def _extract_aloha_fields(data: dict, *, include_prompt: bool, include_subtask: 
 
     flat = flatten_dict(data)
     images = {
-        key: flat[f"observation.images.{key}"]
+        key: _get_first_key(flat, (f"observation.images.{key}", f"observation/images/{key}"))
         for key in AlohaInputs.EXPECTED_CAMERAS
-        if f"observation.images.{key}" in flat
+        if _has_any_key(data, flat, (f"observation.images.{key}", f"observation/images/{key}", f"images/{key}", f"images.{key}"))
     }
     if not images:
         raise ValueError(f"Expected LeRobot image keys observation.images.<camera>, got keys: {sorted(flat)[:20]}")
-    if "observation.state" not in flat:
+    if not _has_any_key(data, flat, ("observation.state", "observation/state", "state")):
         raise ValueError("Expected LeRobot key observation.state")
 
     extracted = {
         "images": images,
-        "state": flat["observation.state"],
+        "state": _get_first_key(flat, ("observation.state", "observation/state", "state")),
     }
     if "action" in flat:
         extracted["actions"] = flat["action"]
@@ -600,6 +601,13 @@ def _has_any_key(data: Mapping, flat: Mapping, keys: Sequence[str]) -> bool:
         else:
             return True
     return False
+
+
+def _get_first_key(flat: Mapping, keys: Sequence[str]):
+    for key in keys:
+        if key in flat:
+            return flat[key]
+    raise KeyError(keys)
 
 
 def _joint_flip_mask() -> np.ndarray:
