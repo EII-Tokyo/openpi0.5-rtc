@@ -17,7 +17,6 @@ def create_trained_policy(
     checkpoint_dir: pathlib.Path | str,
     *,
     sample_kwargs: dict[str, Any] | None = None,
-    default_prompt: str | None = None,
     norm_stats: dict[str, transforms.NormStats] | None = None,
 ) -> _policy.Policy:
     """Create a policy from a trained checkpoint.
@@ -27,8 +26,6 @@ def create_trained_policy(
         checkpoint_dir: The directory to load the model from.
         sample_kwargs: The kwargs to pass to the `sample_actions` method. If not provided, the default
             kwargs will be used.
-        default_prompt: The default prompt to use for the policy. Will inject the prompt into the input
-            data if it doesn't already exist.
         norm_stats: The norm stats to use for the policy. If not provided, the norm stats will be loaded
             from the checkpoint directory.
     """
@@ -49,7 +46,6 @@ def create_trained_policy(
     input_transforms = data_config.transform_pipeline.policy_input_transforms(
         norm_stats,
         use_quantile_norm=data_config.use_quantile_norm,
-        default_prompt=default_prompt,
     )
     logging.info("Filtering policy input images to training camera keys: %s", data_config.transform_pipeline.raw_image_keys)
 

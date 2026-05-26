@@ -21,7 +21,6 @@ import openpi.training.optimizer as _optimizer
 import openpi.training.weight_loaders as weight_loaders
 from openpi.data import transforms as _transforms
 
-ModelType: TypeAlias = _model.ModelType
 Filter: TypeAlias = nnx.filterlib.Filter
 
 _TROSSEN_RESET_POSE = {"reset_pose": [0, -1.5, 1.5, 0, 0, 0]}
@@ -441,7 +440,7 @@ class DataConfigFactory(abc.ABC):
             repo_ids=repo_ids,
             asset_id=asset_id,
             norm_stats=self._load_norm_stats(epath.Path(self.assets.assets_dir or assets_dirs), asset_id),
-            use_quantile_norm=model_config.model_type != ModelType.PI0,
+            use_quantile_norm=True,
         )
 
     def _load_norm_stats(self, assets_dir: epath.Path, asset_id: str | None) -> dict[str, _transforms.NormStats] | None:
@@ -469,7 +468,6 @@ class FakeDataConfig(DataConfigFactory):
 @dataclasses.dataclass(frozen=True)
 class LeRobotAlohaDataConfig(DataConfigFactory):
     use_delta_joint_actions: bool = True
-    default_prompt: str | None = None
     image_size: tuple[int, int] = (224, 224)
     adapt_to_pi: bool = True
     video_memory_num_frames: int = 1
@@ -493,7 +491,6 @@ class LeRobotAlohaDataConfig(DataConfigFactory):
                 include_prompt=self.include_prompt,
                 include_subtask=self.include_subtask,
                 prompt_from_task=self.prompt_from_task,
-                default_prompt=self.default_prompt,
                 image_size=self.image_size,
                 max_token_len=model_config.max_token_len,
                 discrete_state_input=model_config.discrete_state_input,
@@ -512,9 +509,7 @@ class TrainConfig:
     name: tyro.conf.Suppress[str]
     project_name: str = "openpi"
     exp_name: str = tyro.MISSING
-    model: _model.BaseModelConfig = dataclasses.field(
-        default_factory=lambda: pi0_config.Pi0Config(pi05=True)
-    )
+    model: _model.BaseModelConfig = dataclasses.field(default_factory=pi0_config.Pi0Config)
     weight_loader: weight_loaders.WeightLoader = dataclasses.field(default_factory=weight_loaders.NoOpWeightLoader)
     pytorch_weight_path: str | None = None
     pytorch_training_precision: Literal["bfloat16", "float32"] = "bfloat16"
@@ -590,18 +585,16 @@ def _make_twist_train_config(
 ) -> TrainConfig:
     if lora:
         model = pi0_config.Pi0Config(
-            pi05=True,
             paligemma_variant="gemma_2b_lora",
             action_expert_variant="gemma_300m_lora",
         )
         freeze_filter = pi0_config.Pi0Config(
-            pi05=True,
             paligemma_variant="gemma_2b_lora",
             action_expert_variant="gemma_300m_lora",
         ).get_freeze_filter()
         ema_decay = None
     else:
-        model = pi0_config.Pi0Config(pi05=True)
+        model = pi0_config.Pi0Config()
         freeze_filter = nnx.Nothing()
         ema_decay = 0.99
 
@@ -950,7 +943,6 @@ _CONFIGS = [
         data=FakeDataConfig(),
         batch_size=2,
         model=pi0_config.Pi0Config(
-            pi05=True,
             paligemma_variant="dummy",
             action_expert_variant="dummy",
         ),

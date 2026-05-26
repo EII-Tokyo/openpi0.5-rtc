@@ -22,22 +22,7 @@ ArrayT = TypeVar("ArrayT", bound=jax.Array | torch.Tensor | np.ndarray)
 class ModelType(enum.Enum):
     """Supported model types."""
 
-    PI0 = "pi0"
-    PI0_FAST = "pi0_fast"
     PI05 = "pi05"
-
-
-# The model always expects these image views.
-IMAGE_KEYS = (
-    "base_0_rgb",
-    "base_1_rgb",
-    "left_wrist_0_rgb",
-    "right_wrist_0_rgb",
-)
-
-
-# This may need change if we release a small model.
-IMAGE_RESOLUTION = (224, 224)
 
 
 # Data format
@@ -49,11 +34,11 @@ IMAGE_RESOLUTION = (224, 224)
 # {
 #     # Observation data.
 #     "image": {
-#         "base_0_rgb": (float32|uint8)[*b, h, w, 3],  # RGB image in [-1, 1] or [0, 255]
+#         "cam_high": (float32|uint8)[*b, h, w, 3],  # RGB image in [-1, 1] or [0, 255]
 #         ...  # Additional camera views
 #     },
 #     "image_mask": {
-#         "base_0_rgb": bool[*b],  # True if image is valid
+#         "cam_high": bool[*b],  # True if image is valid
 #         ...  # Masks for additional views
 #     },
 #     "state": float32[*b, s],  # Low-dimensional robot state

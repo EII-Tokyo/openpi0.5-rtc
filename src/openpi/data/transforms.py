@@ -59,41 +59,6 @@ def compose(transforms: Sequence[DataTransformFn]) -> DataTransformFn:
 
 
 @dataclasses.dataclass(frozen=True)
-class RepackTransform(DataTransformFn):
-    """Repacks an input dictionary into a new dictionary.
-
-    Repacking is defined using a dictionary where the keys are the new keys and the values
-    are the flattened paths to the old keys. We use '/' as the separator during flattening.
-
-    Example:
-    {
-        "images": {
-            "cam_high": "observation.images.top",
-            "cam_low": "observation.images.bottom",
-        },
-        "state": "observation.state",
-        "actions": "action",
-    }
-    """
-
-    structure: at.PyTree[str]
-
-    def __call__(self, data: DataDict) -> DataDict:
-        flat_item = flatten_dict(data)
-        return jax.tree.map(lambda k: flat_item[k], self.structure)
-
-
-@dataclasses.dataclass(frozen=True)
-class InjectDefaultPrompt(DataTransformFn):
-    prompt: str | None
-
-    def __call__(self, data: DataDict) -> DataDict:
-        if self.prompt is not None and "prompt" not in data:
-            data["prompt"] = np.asarray(self.prompt)
-        return data
-
-
-@dataclasses.dataclass(frozen=True)
 class FilterImages(DataTransformFn):
     """Keep only the image keys used by the policy's training config."""
 
@@ -291,34 +256,26 @@ class AlohaInputs(DataTransformFn):
     """Converts raw ALOHA observations/actions to the model-facing dictionary."""
 
     adapt_to_pi: bool = True
-    EXPECTED_CAMERAS: ClassVar[tuple[str, ...]] = ("cam_high", "cam_low", "cam_left_wrist", "cam_right_wrist")
+    include_prompt: bool = True
+    include_subtask: bool = True
+    EXPECTED_CAMERAS: ClassVar[tuple[str, ...]] = ("cam_high", "cam_left_wrist", "cam_right_wrist", "cam_low")
 
     def __call__(self, data: dict) -> dict:
+        data = _extract_aloha_fields(data, include_prompt=self.include_prompt, include_subtask=self.include_subtask)
         data = _decode_aloha(data, adapt_to_pi=self.adapt_to_pi)
 
         in_images = data["images"]
         if set(in_images) - set(self.EXPECTED_CAMERAS):
             raise ValueError(f"Expected images to contain {self.EXPECTED_CAMERAS}, got {tuple(in_images)}")
 
-        base_image = in_images["cam_high"]
         source_image_masks = data.get("image_masks", {})
 
         def _to_scalar_bool(value: object, default: bool = True) -> np.ndarray:
             arr = np.asarray(default if value is None else value, dtype=bool)
             return np.asarray(arr.reshape(-1)[0], dtype=bool)
 
-        images = {"base_0_rgb": base_image}
-        image_masks = {"base_0_rgb": _to_scalar_bool(source_image_masks.get("cam_high", True))}
-
-        extra_image_names = {
-            "base_1_rgb": "cam_low",
-            "left_wrist_0_rgb": "cam_left_wrist",
-            "right_wrist_0_rgb": "cam_right_wrist",
-        }
-        for dest, source in extra_image_names.items():
-            if source in in_images:
-                images[dest] = in_images[source]
-                image_masks[dest] = _to_scalar_bool(source_image_masks.get(source, True))
+        images = {key: in_images[key] for key in self.EXPECTED_CAMERAS if key in in_images}
+        image_masks = {key: _to_scalar_bool(source_image_masks.get(key, True)) for key in images}
 
         inputs = {k: v for k, v in data.items() if k != "images"}
         inputs["image"] = images
@@ -357,7 +314,6 @@ class AlohaTransformPipeline:
     include_prompt: bool
     include_subtask: bool
     prompt_from_task: bool
-    default_prompt: str | None
     image_size: tuple[int, int]
     max_token_len: int
     discrete_state_input: bool
@@ -372,36 +328,19 @@ class AlohaTransformPipeline:
             keys.append("cam_low")
         return tuple(keys)
 
-    def lerobot_repack_transform(self) -> RepackTransform:
-        image_mapping = {
-            "cam_high": "observation.images.cam_high",
-            "cam_left_wrist": "observation.images.cam_left_wrist",
-            "cam_right_wrist": "observation.images.cam_right_wrist",
-        }
-        if self.include_low:
-            image_mapping["cam_low"] = "observation.images.cam_low"
-
-        mapping: dict[str, object] = {
-            "images": image_mapping,
-            "state": "observation.state",
-            "actions": "action",
-        }
-        if self.include_subtask:
-            mapping["subtask"] = "subtask"
-        if self.include_prompt:
-            mapping["prompt"] = "prompt"
-        return RepackTransform(mapping)
-
     def _model_input_transforms(self, norm_stats: dict[str, NormStats] | None, *, use_quantile_norm: bool) -> list[DataTransformFn]:
         transforms: list[DataTransformFn] = [
-            AlohaInputs(adapt_to_pi=self.adapt_to_pi),
+            AlohaInputs(
+                adapt_to_pi=self.adapt_to_pi,
+                include_prompt=self.include_prompt,
+                include_subtask=self.include_subtask,
+            ),
         ]
         if self.use_delta_joint_actions:
             transforms.append(DeltaActions(ALOHA_DELTA_ACTION_MASK))
         transforms.extend(
             [
                 Normalize(norm_stats, use_quantiles=use_quantile_norm),
-                InjectDefaultPrompt(self.default_prompt),
                 ResizeImages(*self.image_size),
                 TokenizePrompt(
                     _tokenizer.PaligemmaTokenizer(self.max_token_len),
@@ -415,19 +354,23 @@ class AlohaTransformPipeline:
     def training_input_transforms(self, norm_stats: dict[str, NormStats] | None, *, use_quantile_norm: bool) -> list[DataTransformFn]:
         return [
             *([PromptFromLeRobotTask()] if self.prompt_from_task else []),
-            self.lerobot_repack_transform(),
             *self._model_input_transforms(norm_stats, use_quantile_norm=use_quantile_norm),
         ]
 
     def stats_input_transforms(self) -> list[DataTransformFn]:
         return [
             *([PromptFromLeRobotTask()] if self.prompt_from_task else []),
-            self.lerobot_repack_transform(),
             *self.raw_state_action_transforms(),
         ]
 
     def raw_state_action_transforms(self) -> list[DataTransformFn]:
-        transforms: list[DataTransformFn] = [AlohaInputs(adapt_to_pi=self.adapt_to_pi)]
+        transforms: list[DataTransformFn] = [
+            AlohaInputs(
+                adapt_to_pi=self.adapt_to_pi,
+                include_prompt=self.include_prompt,
+                include_subtask=self.include_subtask,
+            )
+        ]
         if self.use_delta_joint_actions:
             transforms.append(DeltaActions(ALOHA_DELTA_ACTION_MASK))
         return transforms
@@ -437,12 +380,10 @@ class AlohaTransformPipeline:
         norm_stats: dict[str, NormStats] | None,
         *,
         use_quantile_norm: bool,
-        default_prompt: str | None = None,
     ) -> list[DataTransformFn]:
-        pipeline = dataclasses.replace(self, default_prompt=default_prompt)
         return [
-            FilterImages(pipeline.raw_image_keys),
-            *pipeline._model_input_transforms(norm_stats, use_quantile_norm=use_quantile_norm),
+            FilterImages(self.raw_image_keys),
+            *self._model_input_transforms(norm_stats, use_quantile_norm=use_quantile_norm),
         ]
 
     def policy_output_transforms(self, norm_stats: dict[str, NormStats] | None, *, use_quantile_norm: bool) -> list[DataTransformFn]:
@@ -467,6 +408,46 @@ def make_aloha_example() -> dict:
         },
         "prompt": "do something",
     }
+
+
+def _extract_aloha_fields(data: dict, *, include_prompt: bool, include_subtask: bool) -> dict:
+    """Read ALOHA fields directly from LeRobot-style sample keys."""
+    if "images" in data and "state" in data:
+        data = dict(data)
+        if not include_prompt:
+            data.pop("prompt", None)
+        if not include_subtask:
+            data.pop("subtask", None)
+        return data
+
+    flat = flatten_dict(data)
+    images = {
+        key: flat[f"observation.images.{key}"]
+        for key in AlohaInputs.EXPECTED_CAMERAS
+        if f"observation.images.{key}" in flat
+    }
+    if not images:
+        raise ValueError(f"Expected LeRobot image keys observation.images.<camera>, got keys: {sorted(flat)[:20]}")
+    if "observation.state" not in flat:
+        raise ValueError("Expected LeRobot key observation.state")
+
+    extracted = {
+        "images": images,
+        "state": flat["observation.state"],
+    }
+    if "action" in flat:
+        extracted["actions"] = flat["action"]
+    optional_keys = ["task", "actions_mask"]
+    if include_prompt:
+        optional_keys.append("prompt")
+    if include_subtask:
+        optional_keys.append("subtask")
+    for key in optional_keys:
+        if key in data:
+            extracted[key] = data[key]
+        elif key in flat:
+            extracted[key] = flat[key]
+    return extracted
 
 
 def preprocess_observation(

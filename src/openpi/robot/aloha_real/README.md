@@ -12,7 +12,7 @@ This repo uses a fork of the ALOHA repo, with very minor modifications to use Re
 ## With Docker
 
 ```bash
-export SERVER_ARGS="--env ALOHA --default_prompt='take the toast out of the toaster'"
+export SERVER_ARGS="--env ALOHA"
 docker compose -f src/openpi/robot/aloha_real/compose.yml up --build
 ```
 
@@ -39,7 +39,7 @@ roslaunch aloha ros_nodes.launch
 Terminal window 3:
 
 ```bash
-uv run scripts/serve_policy.py --env ALOHA --default_prompt='take the toast out of the toaster'
+uv run scripts/serve_policy.py --env ALOHA
 ```
 
 ## **ALOHA Checkpoint Guide**

@@ -25,26 +25,21 @@ class Pi0Config(_model.BaseModelConfig):
     action_dim: int = 32
     action_horizon: int = 50
     max_token_len: int = None  # type: ignore
-    # Pi05 has two differences from Pi0:
-    # - the state input is part of the discrete language tokens rather than a continuous input that is part of the suffix
-    # - the action expert uses adaRMSNorm to inject the flow matching timestep
-    pi05: bool = False
-    # This config option is not used directly by the model, but it is read by the ModelTransformFactory.
+    # PI05 puts state in the discrete language tokens and uses adaRMSNorm for the action expert.
     discrete_state_input: bool = None  # type: ignore
-    image_resolution: tuple[int, int] = _model.IMAGE_RESOLUTION
+    image_resolution: tuple[int, int] = (224, 224)
+    image_keys: tuple[str, ...] = ("cam_high", "cam_left_wrist", "cam_right_wrist", "cam_low")
 
     def __post_init__(self):
         if self.max_token_len is None:
-            object.__setattr__(self, "max_token_len", 200 if self.pi05 else 48)
+            object.__setattr__(self, "max_token_len", 200)
         if self.discrete_state_input is None:
-            object.__setattr__(self, "discrete_state_input", self.pi05)
+            object.__setattr__(self, "discrete_state_input", True)
 
     @property
     @override
     def model_type(self) -> _model.ModelType:
-        if self.pi05:
-            return _model.ModelType.PI05
-        return _model.ModelType.PI0
+        return _model.ModelType.PI05
 
     @override
     def create(self, rng: at.KeyArrayLike) -> "Pi0":
@@ -59,18 +54,8 @@ class Pi0Config(_model.BaseModelConfig):
 
         with at.disable_typechecking():
             observation_spec = _model.Observation(
-                images={
-                    "base_0_rgb": image_spec,
-                    "base_1_rgb": image_spec,
-                    "left_wrist_0_rgb": image_spec,
-                    "right_wrist_0_rgb": image_spec,
-                },
-                image_masks={
-                    "base_0_rgb": image_mask_spec,
-                    "base_1_rgb": image_mask_spec,
-                    "left_wrist_0_rgb": image_mask_spec,
-                    "right_wrist_0_rgb": image_mask_spec,
-                },
+                images={key: image_spec for key in self.image_keys},
+                image_masks={key: image_mask_spec for key in self.image_keys},
                 state=jax.ShapeDtypeStruct([batch_size, self.action_dim], jnp.float32),
                 tokenized_prompt=jax.ShapeDtypeStruct([batch_size, self.max_token_len], jnp.int32),
                 tokenized_prompt_mask=jax.ShapeDtypeStruct([batch_size, self.max_token_len], bool),
