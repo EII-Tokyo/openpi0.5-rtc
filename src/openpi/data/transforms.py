@@ -1,6 +1,5 @@
 from collections.abc import Callable, Mapping, Sequence
 import dataclasses
-import re
 from typing import Protocol, TypeAlias, TypeVar, runtime_checkable
 
 import flax.traverse_util as traverse_util
@@ -216,15 +215,6 @@ class ResizeImages(DataTransformFn):
 
 
 @dataclasses.dataclass(frozen=True)
-class SubsampleActions(DataTransformFn):
-    stride: int
-
-    def __call__(self, data: DataDict) -> DataDict:
-        data["actions"] = data["actions"][:: self.stride]
-        return data
-
-
-@dataclasses.dataclass(frozen=True)
 class DeltaActions(DataTransformFn):
     """Repacks absolute actions into delta action space."""
 
@@ -285,70 +275,21 @@ class TokenizePrompt(DataTransformFn):
 
         if not isinstance(prompt, str):
             prompt = prompt.item()
-        
+
         subtask = data.pop("subtask", None)
         tokens, token_masks = self.tokenizer.tokenize(prompt, state, subtask)
         return {**data, "tokenized_prompt": tokens, "tokenized_prompt_mask": token_masks}
 
 
 @dataclasses.dataclass(frozen=True)
-class TokenizeFASTInputs(DataTransformFn):
-    tokenizer: _tokenizer.FASTTokenizer
-
-    def __call__(self, data: DataDict) -> DataDict:
-        if (prompt := data.pop("prompt", None)) is None:
-            raise ValueError("Prompt is required")
-
-        if not isinstance(prompt, str):
-            prompt = prompt.item()
-
-        state, actions = data["state"], data.get("actions")
-        tokens, token_mask, ar_mask, loss_mask = self.tokenizer.tokenize(prompt, state, actions)
-        return {
-            **data,
-            "tokenized_prompt": tokens,
-            "tokenized_prompt_mask": token_mask,
-            "token_ar_mask": ar_mask,
-            "token_loss_mask": loss_mask,
-        }
-
-
-@dataclasses.dataclass(frozen=True)
-class ExtractFASTActions(DataTransformFn):
-    tokenizer: _tokenizer.FASTTokenizer
-    action_horizon: int
-    action_dim: int
-
-    def __call__(self, data: DataDict) -> DataDict:
-        if "actions" not in data:
-            return data
-        # Model outputs are saved in "actions", but for FAST models they represent tokens.
-        tokens = data.pop("actions")
-        actions = self.tokenizer.extract_actions(tokens.astype(np.int32), self.action_horizon, self.action_dim)
-        return {
-            **data,
-            "actions": actions,
-        }
-
-
-@dataclasses.dataclass(frozen=True)
 class PromptFromLeRobotTask(DataTransformFn):
     """Extracts a prompt from the current LeRobot dataset task."""
-
-    # Contains the LeRobot dataset tasks (dataset.meta.tasks).
-    # tasks: dict[int, str]
 
     def __call__(self, data: DataDict) -> DataDict:
         if "task" not in data:
             raise ValueError('Cannot extract prompt without "task"')
 
-        prompt = data["task"]
-        
-        # task_index = int(data["task_index"])
-        # if (prompt := self.tasks.get(task_index)) is None:
-        #     raise ValueError(f"{task_index=} not found in task mapping: {self.tasks}")
-
-        return {**data, "prompt": prompt}
+        return {**data, "prompt": data["task"]}
 
 
 @dataclasses.dataclass(frozen=True)
@@ -372,60 +313,6 @@ def flatten_dict(tree: at.PyTree) -> dict:
 def unflatten_dict(tree: dict) -> at.PyTree:
     """Unflatten a flattened dictionary. Assumes that '/' was used as a separator."""
     return traverse_util.unflatten_dict(tree, sep="/")
-
-
-def transform_dict(patterns: Mapping[str, str | None], tree: at.PyTree) -> at.PyTree:
-    """Transform the structure of a nested dictionary using a set of patterns.
-
-    The transformation is defined using the `patterns` dictionary. The keys are the
-    input keys that should be matched and the values are the new names inside the output
-    dictionary. If the value is None, the input key is removed.
-
-    Both keys and values should represent flattened paths using '/' as the separator.
-    Keys can be regular expressions and values can include backreferences to the
-    matched groups (see `re.sub` for more details). Note that the regular expression
-    must match the entire key.
-
-    The order inside the `patterns` dictionary is important. Only the first pattern that
-    matches the input key will be used.
-
-    See unit tests for more examples.
-
-    Args:
-        patterns: A mapping from old keys to new keys.
-        tree: The nested dictionary to transform.
-
-    Returns:
-        The transformed nested dictionary.
-    """
-    data = flatten_dict(tree)
-
-    # Compile the patterns.
-    compiled = {re.compile(k): v for k, v in patterns.items()}
-
-    output = {}
-    for k in data:
-        for pattern, repl in compiled.items():
-            if pattern.fullmatch(k):
-                new_k = pattern.sub(repl, k, count=1) if repl is not None else None
-                break
-        else:
-            # Use the original key if no match is found.
-            new_k = k
-
-        if new_k is not None:
-            if new_k in output:
-                raise ValueError(f"Key '{new_k}' already exists in output")
-            output[new_k] = data[k]
-
-    # Validate the output structure to make sure that it can be unflattened.
-    names = sorted(output)
-    for i in range(len(names) - 1):
-        name, next_name = names[i : i + 2]
-        if next_name.startswith(name + "/"):
-            raise ValueError(f"Leaf '{name}' aliases a node of '{next_name}'")
-
-    return unflatten_dict(output)
 
 
 def apply_tree(

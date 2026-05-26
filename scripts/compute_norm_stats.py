@@ -22,8 +22,9 @@ import tyro
 import openpi.models.model as _model
 import openpi.shared.normalize as normalize
 import openpi.training.config as _config
-import openpi.training.data_loader as _data_loader
-import openpi.transforms as transforms
+from openpi.data import dataloaders as _data_loader
+from openpi.data import datasets as _datasets
+from openpi.data import transforms
 
 
 class RemoveStrings(transforms.DataTransformFn):
@@ -39,11 +40,11 @@ def create_torch_dataloader(
     num_workers: int,
     max_frames: int | None = None,
     shuffle_if_truncated: bool = True,
-) -> tuple[_data_loader.Dataset, int]:
+) -> tuple[_datasets.Dataset, int]:
     if data_config.repo_id is None and not data_config.repo_ids:
         raise ValueError("Data config must have a repo_id or non-empty repo_ids")
-    dataset = _data_loader.create_torch_dataset(data_config, action_horizon, model_config)
-    dataset = _data_loader.TransformedDataset(
+    dataset = _datasets.create_torch_dataset(data_config, action_horizon, model_config)
+    dataset = _datasets.TransformedDataset(
         dataset,
         [
             *([transforms.PromptFromLeRobotTask()] if data_config.prompt_from_task else []),

@@ -9,7 +9,7 @@ import openpi.policies.policy as _policy
 import openpi.shared.download as download
 from openpi.training import checkpoints as _checkpoints
 from openpi.training import config as _config
-import openpi.transforms as transforms
+from openpi.data import transforms
 
 
 def _training_image_keys(data_config: _config.DataConfig) -> tuple[str, ...] | None:

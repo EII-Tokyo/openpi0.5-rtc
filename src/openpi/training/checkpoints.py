@@ -13,7 +13,7 @@ import orbax.checkpoint.future as future
 
 from openpi.shared import array_typing as at
 import openpi.shared.normalize as _normalize
-import openpi.training.data_loader as _data_loader
+from openpi.data import dataloaders as _data_loader
 import openpi.training.utils as training_utils
 
 

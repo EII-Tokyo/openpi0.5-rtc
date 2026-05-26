@@ -13,7 +13,7 @@ from openpi_client import base_policy as _base_policy
 import torch
 from typing_extensions import override
 
-from openpi import transforms as _transforms
+from openpi.data import transforms as _transforms
 from openpi.models import model as _model
 from openpi.shared import array_typing as at
 from openpi.shared import nnx_utils
