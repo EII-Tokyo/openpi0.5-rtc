@@ -8,8 +8,8 @@ from interbotix_xs_modules.arm import InterbotixManipulatorXS
 from interbotix_xs_msgs.msg import JointSingleCommand
 import numpy as np
 
-from examples.aloha_real import constants
-from examples.aloha_real import robot_utils
+from openpi.robot.aloha_real import constants
+from openpi.robot.aloha_real import robot_utils
 import logging
 
 # This is the reset position that is used by the standard Aloha runtime.

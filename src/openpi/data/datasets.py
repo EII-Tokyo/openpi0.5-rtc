@@ -357,11 +357,6 @@ def create_torch_dataset(
         )
     else:
         raise ValueError("Repo ID or non-empty repo_ids is required. Cannot create dataset.")
-    # print(data_config)
-    # if data_config.prompt_from_task:
-    #     # dataset = TransformedDataset(dataset, [_transforms.PromptFromLeRobotTask(dataset_meta.tasks)])
-    #     dataset = TransformedDataset(dataset, [_transforms.PromptFromLeRobotTask()])
-
     trainable_mask = IsForTrainingWrapper._build_trainable_mask(dataset)
     if getattr(data_config, "video_memory_num_frames", 1) > 1:
         dataset = TemporalFrameStackDataset(
@@ -379,6 +374,9 @@ def create_torch_dataset(
 
 def transform_dataset(dataset: Dataset, data_config: _config.DataConfig, *, skip_norm_stats: bool = False) -> Dataset:
     """Transform the dataset by applying the data transforms."""
+    if data_config.transform_pipeline is None:
+        return dataset
+
     norm_stats = {}
     if data_config.repo_id != "fake" and not skip_norm_stats:
         if data_config.norm_stats is None:
@@ -390,13 +388,10 @@ def transform_dataset(dataset: Dataset, data_config: _config.DataConfig, *, skip
 
     return TransformedDataset(
         dataset,
-        [
-            *([_transforms.PromptFromLeRobotTask()] if data_config.prompt_from_task else []),
-            *data_config.repack_transforms.inputs,
-            *data_config.data_transforms.inputs,
-            _transforms.Normalize(norm_stats, use_quantiles=data_config.use_quantile_norm),
-            *data_config.model_transforms.inputs,
-        ],
+        data_config.transform_pipeline.training_input_transforms(
+            norm_stats,
+            use_quantile_norm=data_config.use_quantile_norm,
+        ),
     )
 
 
@@ -408,6 +403,9 @@ def transform_iterable_dataset(
     is_batched: bool = False,
 ) -> IterableDataset:
     """Transform the dataset by applying the data transforms."""
+    if data_config.transform_pipeline is None:
+        return dataset
+
     norm_stats = {}
     if data_config.repo_id != "fake" and not skip_norm_stats:
         if data_config.norm_stats is None:
@@ -419,11 +417,9 @@ def transform_iterable_dataset(
 
     return IterableTransformedDataset(
         dataset,
-        [
-            *data_config.repack_transforms.inputs,
-            *data_config.data_transforms.inputs,
-            _transforms.Normalize(norm_stats, use_quantiles=data_config.use_quantile_norm),
-            *data_config.model_transforms.inputs,
-        ],
+        data_config.transform_pipeline.training_input_transforms(
+            norm_stats,
+            use_quantile_norm=data_config.use_quantile_norm,
+        ),
         is_batched=is_batched,
     )

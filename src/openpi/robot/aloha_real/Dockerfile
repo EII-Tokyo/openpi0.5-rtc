@@ -1,7 +1,7 @@
 # Dockerfile for the Aloha real environment.
 
 # Build the container:
-# docker build . -t aloha_real -f examples/aloha_real/Dockerfile
+# docker build . -t aloha_real -f src/openpi/robot/aloha_real/Dockerfile
 
 # Run the container:
 # docker run --rm -it --network=host -v /dev:/dev -v .:/app --privileged aloha_real /bin/bash
@@ -53,11 +53,10 @@ RUN mkdir /python && \
 COPY --from=ghcr.io/astral-sh/uv:0.5.6 /uv /bin/uv
 ENV UV_HTTP_TIMEOUT=120
 ENV UV_LINK_MODE=copy
-COPY ./examples/aloha_real/requirements.txt /tmp/requirements.txt
-COPY ./packages/openpi-client/pyproject.toml /tmp/openpi-client/pyproject.toml
-RUN uv pip sync --python 3.10 --system /tmp/requirements.txt /tmp/openpi-client/pyproject.toml
+COPY ./src/openpi/robot/aloha_real/requirements.txt /tmp/requirements.txt
+RUN uv pip sync --python 3.10 --system /tmp/requirements.txt
 
-ENV PYTHONPATH=/app:/app/src:/app/packages/openpi-client/src:/root/interbotix_ws/src/aloha/aloha_scripts:/root/interbotix_ws/src/aloha:/root/interbotix_ws/devel/lib/python3/dist-packages
+ENV PYTHONPATH=/app:/app/src:/root/interbotix_ws/src/aloha/aloha_scripts:/root/interbotix_ws/src/aloha:/root/interbotix_ws/devel/lib/python3/dist-packages
 
 # Create app directory
 RUN mkdir -p /app
@@ -73,4 +72,4 @@ EOF
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
-CMD ["python3", "/app/examples/aloha_real/main.py"]
+CMD ["python3", "/app/src/openpi/robot/aloha_real/main.py"]

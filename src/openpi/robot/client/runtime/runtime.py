@@ -11,10 +11,10 @@ import tty
 import select
 from collections import deque
 
-from openpi_client.runtime import agent as _agent
-from openpi_client.runtime import environment as _environment
-from openpi_client.runtime import subscriber as _subscriber
-from examples.aloha_real import hdf5_utils as _hdf5_utils
+from openpi.robot.client.runtime import agent as _agent
+from openpi.robot.client.runtime import environment as _environment
+from openpi.robot.client.runtime import subscriber as _subscriber
+from openpi.robot.aloha_real import hdf5_utils as _hdf5_utils
 
 # 确保 logging 有 handler（如果主程序没有配置）
 _logger = logging.getLogger(__name__)
@@ -61,7 +61,7 @@ class Runtime:
 
         self._step_time = 1 / self._max_hz if self._max_hz > 0 else 0
         self._manual_step_time = 1 / self._manual_hz if self._manual_hz > 0 else 0
-        self._manual_dataset_dir = manual_dataset_dir or "/app/examples/aloha_real/manual_override"
+        self._manual_dataset_dir = manual_dataset_dir or "/app/src/openpi/robot/aloha_real/manual_override"
 
         self._in_episode = False
         self._episode_steps = 0
@@ -490,8 +490,8 @@ class Runtime:
 
     def _move_robots_to_action(self, real_env, action, step_sleep: float = 0.0) -> None:
         """将puppet和master同步到单个action。"""
-        from examples.aloha_real import robot_utils
-        from examples.aloha_real import constants
+        from openpi.robot.aloha_real import robot_utils
+        from openpi.robot.aloha_real import constants
         from interbotix_xs_msgs.msg import JointSingleCommand
 
         master_bot_left = real_env.master_bot_left
@@ -537,8 +537,8 @@ class Runtime:
 
     def _move_master_to_action(self, real_env, action, move_time: float = 0.5) -> None:
         """仅将master移动到指定action。"""
-        from examples.aloha_real import robot_utils
-        from examples.aloha_real import constants
+        from openpi.robot.aloha_real import robot_utils
+        from openpi.robot.aloha_real import constants
 
         master_bot_left = real_env.master_bot_left
         master_bot_right = real_env.master_bot_right
@@ -580,8 +580,8 @@ class Runtime:
         """处理人机协作模式（task_num==3）"""
         try:
             # 导入必要的模块
-            from examples.aloha_real import robot_utils
-            from examples.aloha_real.real_env import get_action
+            from openpi.robot.aloha_real import robot_utils
+            from openpi.robot.aloha_real.real_env import get_action
             
             # 获取real_env实例
             if not hasattr(self._environment, '_env'):
@@ -762,7 +762,7 @@ class Runtime:
             logging.error(f"人机协作模式出错: {e}", exc_info=True)
             # 确保恢复master torque
             try:
-                from examples.aloha_real import robot_utils
+                from openpi.robot.aloha_real import robot_utils
                 if hasattr(self._environment, '_env'):
                     real_env = self._environment._env
                     robot_utils.torque_on(real_env.master_bot_left)
@@ -780,9 +780,9 @@ class Runtime:
         """Task 6: simple customer-facing leader-follower demo without hdf5 saving."""
         switched_task = False
         try:
-            from examples.aloha_real import constants
-            from examples.aloha_real import robot_utils
-            from examples.aloha_real.real_env import get_action
+            from openpi.robot.aloha_real import constants
+            from openpi.robot.aloha_real import robot_utils
+            from openpi.robot.aloha_real.real_env import get_action
 
             if not hasattr(self._environment, "_env"):
                 logging.error("无法访问real_env，跳过遥操作体验模式")
@@ -924,7 +924,7 @@ class Runtime:
             self._current_task = None
         finally:
             try:
-                from examples.aloha_real import robot_utils
+                from openpi.robot.aloha_real import robot_utils
                 if hasattr(self._environment, "_env"):
                     real_env = self._environment._env
                     robot_utils.torque_on(real_env.master_bot_left)

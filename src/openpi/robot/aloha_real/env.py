@@ -1,6 +1,6 @@
 import copy
 
-from openpi_client.runtime import environment as _environment
+from openpi.robot.client.runtime import environment as _environment
 from typing_extensions import override
 
 
@@ -17,7 +17,7 @@ class AlohaRealEnvironment(_environment.Environment):
         video_memory_stride_seconds: float = 1.0,
         continuous_roll_joints: bool = True,
     ) -> None:
-        from examples.aloha_real import real_env as _real_env
+        from openpi.robot.aloha_real import real_env as _real_env
 
         self._env = _real_env.make_real_env(
             init_node=True,

@@ -47,8 +47,6 @@ def create_data_loader(
     data_config = config.data.create(config.assets_dirs, config.model)
     logging.info(f"data_config: {data_config}")
 
-    if data_config.rlds_data_dir is not None:
-        raise ValueError("RLDS datasets were removed from this ALOHA-real-only branch.")
     return create_torch_data_loader(
         data_config,
         model_config=config.model,

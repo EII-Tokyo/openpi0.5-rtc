@@ -1,5 +1,5 @@
 # Run with:
-# docker compose -f examples/aloha_real/compose.yml up --build
+# docker compose -f src/openpi/robot/aloha_real/compose.yml up --build
 services:
   runtime:
     image: aloha_real
@@ -9,7 +9,7 @@ services:
       - openpi_server
     build:
       context: ../..
-      dockerfile: examples/aloha_real/Dockerfile
+      dockerfile: src/openpi/robot/aloha_real/Dockerfile
     init: true
     tty: true
     network_mode: host
@@ -24,7 +24,7 @@ services:
       - ros_master
     build:
       context: ../..
-      dockerfile: examples/aloha_real/Dockerfile
+      dockerfile: src/openpi/robot/aloha_real/Dockerfile
     init: true
     tty: true
     network_mode: host

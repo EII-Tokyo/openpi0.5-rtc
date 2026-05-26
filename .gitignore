@@ -1,8 +1,8 @@
-examples/aloha_real/voice_assistant/.env
-examples/aloha_real/inference_hdf5/
-examples/aloha_real/manual_override/
-examples/aloha_real/error_hdf5/
-examples/aloha_real/manual_override_hdf5/
+src/openpi/robot/aloha_real/voice_assistant/.env
+src/openpi/robot/aloha_real/inference_hdf5/
+src/openpi/robot/aloha_real/manual_override/
+src/openpi/robot/aloha_real/error_hdf5/
+src/openpi/robot/aloha_real/manual_override_hdf5/
 voice_assistant_web/frontend/node_modules/
 voice_assistant_web/frontend/dist/
 voice_assistant_web/**/__pycache__/

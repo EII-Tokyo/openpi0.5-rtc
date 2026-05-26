@@ -1,11 +1,15 @@
 from collections.abc import Callable, Mapping, Sequence
 import dataclasses
-from typing import Protocol, TypeAlias, TypeVar, runtime_checkable
+import logging
+from typing import ClassVar, Protocol, TypeAlias, TypeVar, runtime_checkable
 
+import augmax
+import einops
 import flax.traverse_util as traverse_util
 import jax
+import jax.numpy as jnp
 import numpy as np
-from openpi_client import image_tools
+from openpi.robot.client import image_tools
 
 from openpi.models import tokenizer as _tokenizer
 from openpi.shared import array_typing as at
@@ -17,6 +21,8 @@ NormStats: TypeAlias = _normalize.NormStats
 
 T = TypeVar("T")
 S = TypeVar("S")
+ALOHA_DELTA_ACTION_MASK = (True, True, True, True, True, True, False, True, True, True, True, True, True, False)
+ALOHA_MODEL_ACTION_DIM = 32
 
 
 @runtime_checkable
@@ -33,29 +39,6 @@ class DataTransformFn(Protocol):
         Returns:
             The transformed data. Could be the input `data` that was modified in place, or a new data structure.
         """
-
-
-@dataclasses.dataclass(frozen=True)
-class Group:
-    """A group of transforms."""
-
-    # Transforms that are applied to the model input data.
-    inputs: Sequence[DataTransformFn] = ()
-
-    # Transforms that are applied to the model output data.
-    outputs: Sequence[DataTransformFn] = ()
-
-    def push(self, *, inputs: Sequence[DataTransformFn] = (), outputs: Sequence[DataTransformFn] = ()) -> "Group":
-        """Append transforms to the group and return a new group.
-
-        Args:
-            inputs: Appended to the *end* of the current input transforms.
-            outputs: Appended to the *beginning* of the current output transforms.
-
-        Returns:
-            A new group with the appended transforms.
-        """
-        return Group(inputs=(*self.inputs, *inputs), outputs=(*outputs, *self.outputs))
 
 
 @dataclasses.dataclass(frozen=True)
@@ -220,7 +203,6 @@ class DeltaActions(DataTransformFn):
 
     # Boolean mask for the action dimensions to be repacked into delta action space. Length
     # can be smaller than the actual number of dimensions. If None, this transform is a no-op.
-    # See `make_bool_mask` for more details.
     mask: Sequence[bool] | None
 
     def __call__(self, data: DataDict) -> DataDict:
@@ -242,7 +224,6 @@ class AbsoluteActions(DataTransformFn):
 
     # Boolean mask for the action dimensions to be repacked into absolute action space. Length
     # can be smaller than the actual number of dimensions. If None, this transform is a no-op.
-    # See `make_bool_mask` for more details.
     mask: Sequence[bool] | None
 
     def __call__(self, data: DataDict) -> DataDict:
@@ -305,6 +286,338 @@ class PadStatesAndActions(DataTransformFn):
         return data
 
 
+@dataclasses.dataclass(frozen=True)
+class AlohaInputs(DataTransformFn):
+    """Converts raw ALOHA observations/actions to the model-facing dictionary."""
+
+    adapt_to_pi: bool = True
+    EXPECTED_CAMERAS: ClassVar[tuple[str, ...]] = ("cam_high", "cam_low", "cam_left_wrist", "cam_right_wrist")
+
+    def __call__(self, data: dict) -> dict:
+        data = _decode_aloha(data, adapt_to_pi=self.adapt_to_pi)
+
+        in_images = data["images"]
+        if set(in_images) - set(self.EXPECTED_CAMERAS):
+            raise ValueError(f"Expected images to contain {self.EXPECTED_CAMERAS}, got {tuple(in_images)}")
+
+        base_image = in_images["cam_high"]
+        source_image_masks = data.get("image_masks", {})
+
+        def _to_scalar_bool(value: object, default: bool = True) -> np.ndarray:
+            arr = np.asarray(default if value is None else value, dtype=bool)
+            return np.asarray(arr.reshape(-1)[0], dtype=bool)
+
+        images = {"base_0_rgb": base_image}
+        image_masks = {"base_0_rgb": _to_scalar_bool(source_image_masks.get("cam_high", True))}
+
+        extra_image_names = {
+            "base_1_rgb": "cam_low",
+            "left_wrist_0_rgb": "cam_left_wrist",
+            "right_wrist_0_rgb": "cam_right_wrist",
+        }
+        for dest, source in extra_image_names.items():
+            if source in in_images:
+                images[dest] = in_images[source]
+                image_masks[dest] = _to_scalar_bool(source_image_masks.get(source, True))
+
+        inputs = {k: v for k, v in data.items() if k != "images"}
+        inputs["image"] = images
+        inputs["image_mask"] = image_masks
+        inputs["state"] = data["state"]
+
+        if "actions" in data:
+            actions = np.asarray(data["actions"])
+            inputs["actions"] = _encode_actions_inv(actions, adapt_to_pi=self.adapt_to_pi)
+        if "actions_mask" in data:
+            inputs["actions_mask"] = _to_scalar_bool(data["actions_mask"])
+
+        return inputs
+
+
+@dataclasses.dataclass(frozen=True)
+class AlohaOutputs(DataTransformFn):
+    """Converts model actions back to ALOHA robot action space."""
+
+    adapt_to_pi: bool = True
+
+    def __call__(self, data: dict) -> dict:
+        actions = np.asarray(data["actions"][:, :14])
+        return {
+            "actions": _encode_actions(actions, adapt_to_pi=self.adapt_to_pi),
+            "state": data["state"],
+            "origin_actions": data["origin_actions"],
+        }
+
+
+@dataclasses.dataclass(frozen=True)
+class AlohaTransformPipeline:
+    """The single transform pipeline used by this ALOHA-real-only branch."""
+
+    include_low: bool
+    include_prompt: bool
+    include_subtask: bool
+    prompt_from_task: bool
+    default_prompt: str | None
+    image_size: tuple[int, int]
+    max_token_len: int
+    discrete_state_input: bool
+    adapt_to_pi: bool = True
+    use_delta_joint_actions: bool = True
+    action_dim: int = ALOHA_MODEL_ACTION_DIM
+
+    @property
+    def raw_image_keys(self) -> tuple[str, ...]:
+        keys = ["cam_high", "cam_left_wrist", "cam_right_wrist"]
+        if self.include_low:
+            keys.append("cam_low")
+        return tuple(keys)
+
+    def lerobot_repack_transform(self) -> RepackTransform:
+        image_mapping = {
+            "cam_high": "observation.images.cam_high",
+            "cam_left_wrist": "observation.images.cam_left_wrist",
+            "cam_right_wrist": "observation.images.cam_right_wrist",
+        }
+        if self.include_low:
+            image_mapping["cam_low"] = "observation.images.cam_low"
+
+        mapping: dict[str, object] = {
+            "images": image_mapping,
+            "state": "observation.state",
+            "actions": "action",
+        }
+        if self.include_subtask:
+            mapping["subtask"] = "subtask"
+        if self.include_prompt:
+            mapping["prompt"] = "prompt"
+        return RepackTransform(mapping)
+
+    def _model_input_transforms(self, norm_stats: dict[str, NormStats] | None, *, use_quantile_norm: bool) -> list[DataTransformFn]:
+        transforms: list[DataTransformFn] = [
+            AlohaInputs(adapt_to_pi=self.adapt_to_pi),
+        ]
+        if self.use_delta_joint_actions:
+            transforms.append(DeltaActions(ALOHA_DELTA_ACTION_MASK))
+        transforms.extend(
+            [
+                Normalize(norm_stats, use_quantiles=use_quantile_norm),
+                InjectDefaultPrompt(self.default_prompt),
+                ResizeImages(*self.image_size),
+                TokenizePrompt(
+                    _tokenizer.PaligemmaTokenizer(self.max_token_len),
+                    discrete_state_input=self.discrete_state_input,
+                ),
+                PadStatesAndActions(self.action_dim),
+            ]
+        )
+        return transforms
+
+    def training_input_transforms(self, norm_stats: dict[str, NormStats] | None, *, use_quantile_norm: bool) -> list[DataTransformFn]:
+        return [
+            *([PromptFromLeRobotTask()] if self.prompt_from_task else []),
+            self.lerobot_repack_transform(),
+            *self._model_input_transforms(norm_stats, use_quantile_norm=use_quantile_norm),
+        ]
+
+    def stats_input_transforms(self) -> list[DataTransformFn]:
+        return [
+            *([PromptFromLeRobotTask()] if self.prompt_from_task else []),
+            self.lerobot_repack_transform(),
+            *self.raw_state_action_transforms(),
+        ]
+
+    def raw_state_action_transforms(self) -> list[DataTransformFn]:
+        transforms: list[DataTransformFn] = [AlohaInputs(adapt_to_pi=self.adapt_to_pi)]
+        if self.use_delta_joint_actions:
+            transforms.append(DeltaActions(ALOHA_DELTA_ACTION_MASK))
+        return transforms
+
+    def policy_input_transforms(
+        self,
+        norm_stats: dict[str, NormStats] | None,
+        *,
+        use_quantile_norm: bool,
+        default_prompt: str | None = None,
+    ) -> list[DataTransformFn]:
+        pipeline = dataclasses.replace(self, default_prompt=default_prompt)
+        return [
+            FilterImages(pipeline.raw_image_keys),
+            *pipeline._model_input_transforms(norm_stats, use_quantile_norm=use_quantile_norm),
+        ]
+
+    def policy_output_transforms(self, norm_stats: dict[str, NormStats] | None, *, use_quantile_norm: bool) -> list[DataTransformFn]:
+        transforms: list[DataTransformFn] = [
+            Unnormalize(norm_stats, use_quantiles=use_quantile_norm),
+        ]
+        if self.use_delta_joint_actions:
+            transforms.append(AbsoluteActions(ALOHA_DELTA_ACTION_MASK))
+        transforms.append(AlohaOutputs(adapt_to_pi=self.adapt_to_pi))
+        return transforms
+
+
+def make_aloha_example() -> dict:
+    """Creates a random input example for the ALOHA policy."""
+    return {
+        "state": np.ones((14,)),
+        "images": {
+            "cam_high": np.random.randint(256, size=(3, 224, 224), dtype=np.uint8),
+            "cam_low": np.random.randint(256, size=(3, 224, 224), dtype=np.uint8),
+            "cam_left_wrist": np.random.randint(256, size=(3, 224, 224), dtype=np.uint8),
+            "cam_right_wrist": np.random.randint(256, size=(3, 224, 224), dtype=np.uint8),
+        },
+        "prompt": "do something",
+    }
+
+
+def preprocess_observation(
+    rng: at.KeyArrayLike | None,
+    observation,
+    *,
+    train: bool = False,
+    image_keys: Sequence[str] | None = None,
+    image_resolution: tuple[int, int] = (224, 224),
+):
+    """Preprocess images and masks before model execution."""
+
+    if image_keys is None:
+        image_keys = tuple(observation.images.keys())
+
+    if not set(image_keys).issubset(observation.images):
+        raise ValueError(f"images dict missing keys: expected {image_keys}, got {list(observation.images)}")
+
+    batch_shape = observation.state.shape[:-1]
+
+    out_images = {}
+    for key in image_keys:
+        image = observation.images[key]
+        had_time_dim = image.ndim == 5
+        if had_time_dim:
+            batch_size, time_size, height, width, channels = image.shape
+            flat_image = image.reshape(batch_size * time_size, height, width, channels)
+        else:
+            flat_image = image
+
+        if flat_image.shape[1:3] != image_resolution:
+            logging.getLogger("openpi").info("Resizing image %s from %s to %s", key, flat_image.shape[1:3], image_resolution)
+            flat_image = image_tools.resize_with_pad(flat_image, *image_resolution)
+
+        if train:
+            flat_image = flat_image / 2.0 + 0.5
+
+            image_transforms = []
+            if "wrist" not in key:
+                height, width = flat_image.shape[1:3]
+                image_transforms += [
+                    augmax.RandomCrop(int(width * 0.95), int(height * 0.95)),
+                    augmax.Resize(width, height),
+                    augmax.Rotate((-5, 5)),
+                ]
+            image_transforms += [
+                augmax.ColorJitter(brightness=0.3, contrast=0.4, saturation=0.5),
+            ]
+            sub_rngs = jax.random.split(rng, flat_image.shape[0])
+            flat_image = jax.vmap(augmax.Chain(*image_transforms))(sub_rngs, flat_image)
+            flat_image = flat_image * 2.0 - 1.0
+
+        if had_time_dim:
+            image = flat_image.reshape(batch_size, time_size, *image_resolution, channels)
+        else:
+            image = flat_image
+
+        out_images[key] = image
+
+    out_masks = {}
+    for key in out_images:
+        if key not in observation.image_masks:
+            out_masks[key] = jnp.ones(batch_shape, dtype=jnp.bool)
+        else:
+            out_masks[key] = jnp.asarray(observation.image_masks[key])
+
+    return observation.__class__(
+        images=out_images,
+        image_masks=out_masks,
+        state=observation.state,
+        tokenized_prompt=observation.tokenized_prompt,
+        tokenized_prompt_mask=observation.tokenized_prompt_mask,
+        token_ar_mask=observation.token_ar_mask,
+        token_loss_mask=observation.token_loss_mask,
+    )
+
+
+def _joint_flip_mask() -> np.ndarray:
+    return np.array([1, -1, -1, 1, 1, 1, 1, 1, -1, -1, 1, 1, 1, 1])
+
+
+def _normalize(x, min_val, max_val):
+    return (x - min_val) / (max_val - min_val)
+
+
+def _unnormalize(x, min_val, max_val):
+    return x * (max_val - min_val) + min_val
+
+
+def _gripper_to_angular(value):
+    value = _unnormalize(value, min_val=0.01844, max_val=0.05800)
+
+    def linear_to_radian(linear_position, arm_length, horn_radius):
+        value = (horn_radius**2 + linear_position**2 - arm_length**2) / (2 * horn_radius * linear_position)
+        return np.arcsin(np.clip(value, -1.0, 1.0))
+
+    value = linear_to_radian(value, arm_length=0.036, horn_radius=0.022)
+    return _normalize(value, min_val=0.5476, max_val=1.6296)
+
+
+def _gripper_from_angular(value):
+    value = value + 0.5476
+    return _normalize(value, min_val=-0.6213, max_val=1.4910)
+
+
+def _gripper_from_angular_inv(value):
+    value = _unnormalize(value, min_val=-0.6213, max_val=1.4910)
+    return value - 0.5476
+
+
+def _decode_aloha(data: dict, *, adapt_to_pi: bool = False) -> dict:
+    state = np.asarray(data["state"])
+    state = _decode_state(state, adapt_to_pi=adapt_to_pi)
+
+    def convert_image(img):
+        img = np.asarray(img)
+        if np.issubdtype(img.dtype, np.floating):
+            img = (255 * img).astype(np.uint8)
+        if img.ndim == 4 and img.shape[-1] in (1, 3, 4):
+            return img
+        if img.ndim == 4 and img.shape[1] in (1, 3, 4):
+            return einops.rearrange(img, "t c h w -> t h w c")
+        if img.ndim == 3 and img.shape[-1] in (1, 3, 4):
+            return img
+        if img.ndim == 3 and img.shape[0] in (1, 3, 4):
+            return einops.rearrange(img, "c h w -> h w c")
+        return img
+
+    data["images"] = {name: convert_image(img) for name, img in data["images"].items()}
+    data["state"] = state
+    return data
+
+
+def _decode_state(state: np.ndarray, *, adapt_to_pi: bool = False) -> np.ndarray:
+    if adapt_to_pi:
+        state = _joint_flip_mask() * state
+    return state
+
+
+def _encode_actions(actions: np.ndarray, *, adapt_to_pi: bool = False) -> np.ndarray:
+    if adapt_to_pi:
+        actions = _joint_flip_mask() * actions
+    return actions
+
+
+def _encode_actions_inv(actions: np.ndarray, *, adapt_to_pi: bool = False) -> np.ndarray:
+    if adapt_to_pi:
+        actions = _joint_flip_mask() * actions
+    return actions
+
+
 def flatten_dict(tree: at.PyTree) -> dict:
     """Flatten a nested dictionary. Uses '/' as the separator."""
     return traverse_util.flatten_dict(tree, sep="/")
@@ -342,28 +655,6 @@ def pad_to_dim(x: np.ndarray, target_dim: int, axis: int = -1, value: float = 0.
         pad_width[axis] = (0, target_dim - current_dim)
         return np.pad(x, pad_width, constant_values=value)
     return x
-
-
-def make_bool_mask(*dims: int) -> tuple[bool, ...]:
-    """Make a boolean mask for the given dimensions.
-
-    Example:
-        make_bool_mask(2, -2, 2) == (True, True, False, False, True, True)
-        make_bool_mask(2, 0, 2) == (True, True, True, True)
-
-    Args:
-        dims: The dimensions to make the mask for.
-
-    Returns:
-        A tuple of booleans.
-    """
-    result = []
-    for dim in dims:
-        if dim > 0:
-            result.extend([True] * (dim))
-        else:
-            result.extend([False] * (-dim))
-    return tuple(result)
 
 
 def _assert_quantile_stats(norm_stats: at.PyTree[NormStats]) -> None:

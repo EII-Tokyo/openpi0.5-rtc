@@ -33,8 +33,6 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=README.md,target=README.md \
     --mount=type=bind,source=LICENSE,target=LICENSE \
     --mount=type=bind,source=src,target=src \
-    --mount=type=bind,source=packages/openpi-client/pyproject.toml,target=packages/openpi-client/pyproject.toml \
-    --mount=type=bind,source=packages/openpi-client/src,target=packages/openpi-client/src \
     GIT_LFS_SKIP_SMUDGE=1 uv sync --frozen --no-dev
 
 CMD /bin/bash -c "uv run scripts/serve_policy.py $SERVER_ARGS"

@@ -9,6 +9,7 @@ import jax
 import jax.numpy as jnp
 from typing_extensions import override
 
+from openpi.data import transforms as _transforms
 from openpi.models import model as _model
 import openpi.models.gemma_fast as _gemma
 import openpi.models.siglip as _siglip
@@ -200,7 +201,7 @@ class Pi0FAST(_model.BaseModel):
     def compute_loss(
         self, rng: at.KeyArrayLike, observation: _model.Observation, actions: _model.Actions, *, train: bool = False
     ) -> at.Float[at.Array, "*b ah"]:
-        observation = _model.preprocess_observation(
+        observation = _transforms.preprocess_observation(
             rng,
             observation,
             train=train,
@@ -248,7 +249,7 @@ class Pi0FAST(_model.BaseModel):
         temperature: float = 0.0,
     ) -> _model.Actions:
         # TODO: this is a hack to get the image keys.
-        observation = _model.preprocess_observation(
+        observation = _transforms.preprocess_observation(
             None,
             observation,
             train=False,
@@ -332,7 +333,7 @@ class Pi0FAST(_model.BaseModel):
         d: int = 10,
         beta: float = 8.0,
     ) -> _model.Actions:
-        observation = _model.preprocess_observation(
+        observation = _transforms.preprocess_observation(
             None, observation, train=False, image_resolution=self.image_resolution
         )
         # note that we use the convention more common in diffusion literature, where t=1 is noise and t=0 is the target

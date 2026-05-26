@@ -13,7 +13,7 @@ This repo uses a fork of the ALOHA repo, with very minor modifications to use Re
 
 ```bash
 export SERVER_ARGS="--env ALOHA --default_prompt='take the toast out of the toaster'"
-docker compose -f examples/aloha_real/compose.yml up --build
+docker compose -f src/openpi/robot/aloha_real/compose.yml up --build
 ```
 
 ## Without Docker
@@ -22,13 +22,12 @@ Terminal window 1:
 
 ```bash
 # Create virtual environment
-uv venv --python 3.10 examples/aloha_real/.venv
-source examples/aloha_real/.venv/bin/activate
-uv pip sync examples/aloha_real/requirements.txt
-uv pip install -e packages/openpi-client
+uv venv --python 3.10 src/openpi/robot/aloha_real/.venv
+source src/openpi/robot/aloha_real/.venv/bin/activate
+uv pip sync src/openpi/robot/aloha_real/requirements.txt
 
 # Run the robot
-python -m examples.aloha_real.main
+python -m openpi.robot.aloha_real.main
 ```
 
 Terminal window 2:

@@ -6,14 +6,14 @@ import threading
 import time
 from typing import Literal
 
-from openpi_client import action_chunk_broker
-from openpi_client import websocket_client_policy as _websocket_client_policy
-from openpi_client.runtime import runtime as _runtime
-from openpi_client.runtime.agents import policy_agent as _policy_agent
+from openpi.robot.client import action_chunk_broker
+from openpi.robot.client import websocket_client_policy as _websocket_client_policy
+from openpi.robot.client.runtime import runtime as _runtime
+from openpi.robot.client.runtime.agents import policy_agent as _policy_agent
 import tyro
 
-from examples.aloha_real import env as _env
-from examples.aloha_real import h5df_saver
+from openpi.robot.aloha_real import env as _env
+from openpi.robot.aloha_real import h5df_saver
 
 
 @dataclasses.dataclass
@@ -52,8 +52,8 @@ class Args:
     )
     gripper_current_limits: list[int] = dataclasses.field(default_factory=lambda: [300, 800])
     # H5dfSaver 配置
-    dataset_dir: str = "/app/examples/aloha_real/error_hdf5/2026-03-11_inference_lora_error"
-    manual_dataset_dir: str = "/app/examples/aloha_real/manual_override_hdf5/2026-03-11_inference_lora"
+    dataset_dir: str = "/app/src/openpi/robot/aloha_real/error_hdf5/2026-03-11_inference_lora_error"
+    manual_dataset_dir: str = "/app/src/openpi/robot/aloha_real/manual_override_hdf5/2026-03-11_inference_lora"
     compress_images: bool = True
     is_mobile: bool = False
     if_save_hdf5: bool = True

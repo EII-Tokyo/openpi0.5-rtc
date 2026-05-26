@@ -1,12 +1,9 @@
 import abc
-from collections.abc import Sequence
 import dataclasses
 import enum
-import logging
 import pathlib
 from typing import Generic, TypeVar
 
-import augmax
 from flax import nnx
 from flax import struct
 from flax import traverse_util
@@ -16,10 +13,7 @@ import numpy as np
 import orbax.checkpoint as ocp
 import torch
 
-from openpi.shared import image_tools
 import openpi.shared.array_typing as at
-
-logger = logging.getLogger("openpi")
 
 # Type variable for array types (JAX arrays, PyTorch tensors, or numpy arrays)
 ArrayT = TypeVar("ArrayT", bound=jax.Array | torch.Tensor | np.ndarray)
@@ -185,88 +179,6 @@ def _expand_scanned_siglip_encoder_params(expected: dict, params: dict) -> dict:
     params["PaliGemma"]["img"] = dict(params["PaliGemma"]["img"])
     params["PaliGemma"]["img"]["Transformer"] = expanded
     return params
-
-
-def preprocess_observation(
-    rng: at.KeyArrayLike | None,
-    observation: Observation,
-    *,
-    train: bool = False,
-    image_keys: Sequence[str] | None = None,
-    image_resolution: tuple[int, int] = IMAGE_RESOLUTION,
-) -> Observation:
-    """Preprocess the observations by performing image augmentations (if train=True), resizing (if necessary), and
-    filling in a default image mask (if necessary).
-    """
-
-    if image_keys is None:
-        image_keys = tuple(observation.images.keys())
-
-    if not set(image_keys).issubset(observation.images):
-        raise ValueError(f"images dict missing keys: expected {image_keys}, got {list(observation.images)}")
-
-    batch_shape = observation.state.shape[:-1]
-
-    out_images = {}
-    for key in image_keys:
-        image = observation.images[key]
-        had_time_dim = image.ndim == 5
-        if had_time_dim:
-            batch_size, time_size, height, width, channels = image.shape
-            flat_image = image.reshape(batch_size * time_size, height, width, channels)
-        else:
-            flat_image = image
-
-        if flat_image.shape[1:3] != image_resolution:
-            logger.info(f"Resizing image {key} from {flat_image.shape[1:3]} to {image_resolution}")
-            flat_image = image_tools.resize_with_pad(flat_image, *image_resolution)
-
-        if train:
-            # Convert from [-1, 1] to [0, 1] for augmax.
-            flat_image = flat_image / 2.0 + 0.5
-
-            transforms = []
-            if "wrist" not in key:
-                height, width = flat_image.shape[1:3]
-                transforms += [
-                    augmax.RandomCrop(int(width * 0.95), int(height * 0.95)),
-                    augmax.Resize(width, height),
-                    augmax.Rotate((-5, 5)),
-                ]
-            transforms += [
-                augmax.ColorJitter(brightness=0.3, contrast=0.4, saturation=0.5),
-            ]
-            sub_rngs = jax.random.split(rng, flat_image.shape[0])
-            flat_image = jax.vmap(augmax.Chain(*transforms))(sub_rngs, flat_image)
-
-            # Back to [-1, 1].
-            flat_image = flat_image * 2.0 - 1.0
-
-        if had_time_dim:
-            image = flat_image.reshape(batch_size, time_size, *image_resolution, channels)
-        else:
-            image = flat_image
-
-        out_images[key] = image
-
-    # obtain mask
-    out_masks = {}
-    for key in out_images:
-        if key not in observation.image_masks:
-            # do not mask by default
-            out_masks[key] = jnp.ones(batch_shape, dtype=jnp.bool)
-        else:
-            out_masks[key] = jnp.asarray(observation.image_masks[key])
-
-    return Observation(
-        images=out_images,
-        image_masks=out_masks,
-        state=observation.state,
-        tokenized_prompt=observation.tokenized_prompt,
-        tokenized_prompt_mask=observation.tokenized_prompt_mask,
-        token_ar_mask=observation.token_ar_mask,
-        token_loss_mask=observation.token_loss_mask,
-    )
 
 
 @dataclasses.dataclass(frozen=True)

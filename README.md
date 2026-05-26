@@ -30,13 +30,11 @@ docker compose logs -f voice_web_frontend
 docker compose exec -it runtime /bin/bash
 
 # 在 runtime 容器内启动 ALOHA 实机控制主循环；根据 model_dir 自动读取
-# checkpoint assets/<asset_id>/norm_stats.json。默认 adapt_to_pi=True，如需关闭请加 --no-adapt-to-p
-python3 /app/examples/aloha_real/main.py \  --model-dir /app/checkpoints/eii_data_system_no_tear_cam3_lora/eii_no_tear_cam3_20260422/18000 
-  --model-dir /app/checkpoints/20260205/39999
-  --model-dir /app/checkpoints/two_direction_lora_from_20260205_39999/two_direction_lora_20260313/6000
-  --model-dir /app/checkpoints/eii_data_system_without_rinse_cam3_fullft_h200_34repo/no_rinse_cam3_fullft_34repo_freespinx6_bs256_nw64_fsdp4_20260513/28000
+# checkpoint assets/<asset_id>/norm_stats.json。默认 adapt_to_pi=True，如需关闭请加 --no-adapt-to-pi
+python3 /app/src/openpi/robot/aloha_real/main.py \
+    --model-dir /app/checkpoints/eii_data_system_no_tear_cam3_lora/eii_no_tear_cam3_20260422/18000
 
-python3 /app/examples/aloha_real/main.py \
+python3 /app/src/openpi/robot/aloha_real/main.py \
     --model-dir /app/checkpoints/eii_rinse_cam4_fullft/h200_fullft_13repos_bs128_nw16_f6_s5_log10_20260430_085556/10000 \
     --video-memory-num-frames 6 \
     --video-memory-stride-seconds 5.0
@@ -67,9 +65,9 @@ docker stop <container_id>
 | Stage | State (gripper) | Action (gripper) | Key code path | Notes |
 |---|---|---|---|---|
 | Data collection | `FOLLOWER_GRIPPER_JOINT_NORMALIZE_FN(bot.gripper.get_gripper_position())` | `LEADER_GRIPPER_JOINT_NORMALIZE_FN(robot.gripper.get_gripper_position())` | `aloha-2.0/aloha/real_env.py` | `get_gripper_position()` returns joint angle, not linear position. |
-| Training preprocess | `_decode_state(...): state[[6, 13]] = _gripper_to_angular(...)` when `adapt_to_pi=True` | `_encode_actions_inv(...): actions[:, [6, 13]] = _gripper_from_angular_inv(...)` when `adapt_to_pi=True` | `src/openpi/policies/aloha_policy.py` | Joint flip + gripper conversion before model input. |
-| Inference input | `PUPPET_GRIPPER_POSITION_NORMALIZE_FN(...)` in `get_qpos()` | N/A | `examples/aloha_real/real_env.py` | Runtime state uses normalized position. |
-| Inference output | N/A | `_encode_actions(...)` then `PUPPET_GRIPPER_JOINT_UNNORMALIZE_FN(...)` in `set_gripper_pose()` | `src/openpi/policies/aloha_policy.py`, `examples/aloha_real/real_env.py` | Model output is converted to robot joint command before publish. |
+| Training preprocess | `_decode_state(...): state[[6, 13]] = _gripper_to_angular(...)` when `adapt_to_pi=True` | `_encode_actions_inv(...): actions[:, [6, 13]] = _gripper_from_angular_inv(...)` when `adapt_to_pi=True` | `src/openpi/data/transforms.py` | Joint flip + gripper conversion before model input. |
+| Inference input | `PUPPET_GRIPPER_POSITION_NORMALIZE_FN(...)` in `get_qpos()` | N/A | `src/openpi/robot/aloha_real/real_env.py` | Runtime state uses normalized position. |
+| Inference output | N/A | `_encode_actions(...)` then `PUPPET_GRIPPER_JOINT_UNNORMALIZE_FN(...)` in `set_gripper_pose()` | `src/openpi/data/transforms.py`, `src/openpi/robot/aloha_real/real_env.py` | Model output is converted to robot joint command before publish. |
 
 ### Gripper Reference
 
@@ -190,7 +188,7 @@ uv run python scripts/compute_loss_from_hdf5.py \
 
 ## Examples
 
-- ALOHA Real: `examples/aloha_real`
+- ALOHA Real: `src/openpi/robot/aloha_real`
 - ALOHA Sim: `examples/aloha_sim`
 
 

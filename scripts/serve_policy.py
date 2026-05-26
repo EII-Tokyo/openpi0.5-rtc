@@ -7,7 +7,7 @@ import dataclasses as dc
 import numpy as np
 import tyro
 
-from openpi.policies import aloha_policy as _aloha_policy
+from openpi.data import transforms as _transforms
 from openpi.policies import policy as _policy
 from openpi.policies import policy_config as _policy_config
 from openpi.serving import websocket_policy_server
@@ -126,7 +126,7 @@ def create_policy(args: Args) -> _policy.Policy:
 
 
 def _make_dummy_obs(num_frames: int) -> dict:
-    obs = _aloha_policy.make_aloha_example()
+    obs = _transforms.make_aloha_example()
     if num_frames <= 1:
         return obs
     obs["images"] = {

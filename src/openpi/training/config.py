@@ -6,7 +6,7 @@ import dataclasses
 import difflib
 import logging
 import pathlib
-from typing import Any, Literal, Protocol, TypeAlias
+from typing import Any, Literal, TypeAlias
 
 import etils.epath as epath
 import flax.nnx as nnx
@@ -15,8 +15,6 @@ import tyro
 
 import openpi.models.model as _model
 import openpi.models.pi0_config as pi0_config
-import openpi.models.tokenizer as _tokenizer
-import openpi.policies.aloha_policy as aloha_policy
 import openpi.shared.download as _download
 import openpi.shared.normalize as _normalize
 import openpi.training.optimizer as _optimizer
@@ -416,45 +414,11 @@ class DataConfig:
     repo_ids: list[str] | None = None
     asset_id: str | None = None
     norm_stats: dict[str, _transforms.NormStats] | None = None
-    repack_transforms: _transforms.Group = dataclasses.field(default_factory=_transforms.Group)
-    data_transforms: _transforms.Group = dataclasses.field(default_factory=_transforms.Group)
-    model_transforms: _transforms.Group = dataclasses.field(default_factory=_transforms.Group)
+    transform_pipeline: _transforms.AlohaTransformPipeline | None = None
     use_quantile_norm: bool = False
     action_sequence_keys: Sequence[str] = ("actions",)
-    prompt_from_task: bool = False
     video_memory_num_frames: int = 1
     video_memory_stride_seconds: float = 1.0
-    rlds_data_dir: str | None = None
-    action_space: Any | None = None
-    filter_dict_path: str | None = None
-
-
-class GroupFactory(Protocol):
-    def __call__(self, model_config: _model.BaseModelConfig) -> _transforms.Group:
-        """Create a transform group."""
-
-
-@dataclasses.dataclass(frozen=True)
-class ModelTransformFactory(GroupFactory):
-    default_prompt: str | None = None
-    image_size: tuple[int, int] = (224, 224)
-
-    def __call__(self, model_config: _model.BaseModelConfig) -> _transforms.Group:
-        if model_config.model_type != _model.ModelType.PI05:
-            raise NotImplementedError(f"Unsupported model type: {model_config.model_type}")
-        assert isinstance(model_config, pi0_config.Pi0Config)
-        image_height, image_width = self.image_size
-        return _transforms.Group(
-            inputs=[
-                _transforms.InjectDefaultPrompt(self.default_prompt),
-                _transforms.ResizeImages(image_height, image_width),
-                _transforms.TokenizePrompt(
-                    _tokenizer.PaligemmaTokenizer(model_config.max_token_len),
-                    discrete_state_input=model_config.discrete_state_input,
-                ),
-                _transforms.PadStatesAndActions(model_config.action_dim),
-            ],
-        )
 
 
 @dataclasses.dataclass(frozen=True)
@@ -462,7 +426,6 @@ class DataConfigFactory(abc.ABC):
     repo_id: str | None = None
     repo_ids: list[str] = tyro.MISSING
     assets: AssetsConfig = dataclasses.field(default_factory=AssetsConfig)
-    base_config: tyro.conf.Suppress[DataConfig | None] = None
 
     @abc.abstractmethod
     def create(self, assets_dirs: pathlib.Path, model_config: _model.BaseModelConfig) -> DataConfig:
@@ -473,7 +436,7 @@ class DataConfigFactory(abc.ABC):
         repo_ids = self.repo_ids if self.repo_ids is not tyro.MISSING else None
         asset_id = self.assets.asset_id or repo_id
         return dataclasses.replace(
-            self.base_config or DataConfig(),
+            DataConfig(),
             repo_id=repo_id,
             repo_ids=repo_ids,
             asset_id=asset_id,
@@ -503,41 +466,6 @@ class FakeDataConfig(DataConfigFactory):
         return DataConfig(repo_id=self.repo_id)
 
 
-def _aloha_lerobot_repack_transforms() -> _transforms.Group:
-    return _transforms.Group(
-        inputs=[
-            _transforms.RepackTransform(
-                {
-                    "images": {"cam_high": "observation.images.top"},
-                    "state": "observation.state",
-                    "actions": "action",
-                }
-            )
-        ]
-    )
-
-
-def _aloha_real_repack_transforms(*, include_low: bool, include_prompt: bool, include_subtask: bool) -> _transforms.Group:
-    image_mapping = {
-        "cam_high": "observation.images.cam_high",
-        "cam_left_wrist": "observation.images.cam_left_wrist",
-        "cam_right_wrist": "observation.images.cam_right_wrist",
-    }
-    if include_low:
-        image_mapping["cam_low"] = "observation.images.cam_low"
-
-    mapping: dict[str, Any] = {
-        "images": image_mapping,
-        "state": "observation.state",
-        "actions": "action",
-    }
-    if include_subtask:
-        mapping["subtask"] = "subtask"
-    if include_prompt:
-        mapping["prompt"] = "prompt"
-    return _transforms.Group(inputs=[_transforms.RepackTransform(mapping)])
-
-
 @dataclasses.dataclass(frozen=True)
 class LeRobotAlohaDataConfig(DataConfigFactory):
     use_delta_joint_actions: bool = True
@@ -546,32 +474,33 @@ class LeRobotAlohaDataConfig(DataConfigFactory):
     adapt_to_pi: bool = True
     video_memory_num_frames: int = 1
     video_memory_stride_seconds: float = 1.0
-    repack_transforms: tyro.conf.Suppress[_transforms.Group] = dataclasses.field(
-        default_factory=_aloha_lerobot_repack_transforms
-    )
+    prompt_from_task: bool = True
+    include_low: bool = True
+    include_prompt: bool = True
+    include_subtask: bool = True
     action_sequence_keys: Sequence[str] = ("action",)
 
     @override
     def create(self, assets_dirs: pathlib.Path, model_config: _model.BaseModelConfig) -> DataConfig:
-        data_transforms = _transforms.Group(
-            inputs=[aloha_policy.AlohaInputs(adapt_to_pi=self.adapt_to_pi)],
-            outputs=[aloha_policy.AlohaOutputs(adapt_to_pi=self.adapt_to_pi)],
-        )
-        if self.use_delta_joint_actions:
-            delta_action_mask = _transforms.make_bool_mask(6, -1, 6, -1)
-            data_transforms = data_transforms.push(
-                inputs=[_transforms.DeltaActions(delta_action_mask)],
-                outputs=[_transforms.AbsoluteActions(delta_action_mask)],
-            )
+        if model_config.model_type != _model.ModelType.PI05:
+            raise NotImplementedError(f"Unsupported model type: {model_config.model_type}")
+        assert isinstance(model_config, pi0_config.Pi0Config)
 
         return dataclasses.replace(
             self.create_base_config(assets_dirs, model_config),
-            repack_transforms=self.repack_transforms,
-            data_transforms=data_transforms,
-            model_transforms=ModelTransformFactory(
+            transform_pipeline=_transforms.AlohaTransformPipeline(
+                include_low=self.include_low,
+                include_prompt=self.include_prompt,
+                include_subtask=self.include_subtask,
+                prompt_from_task=self.prompt_from_task,
                 default_prompt=self.default_prompt,
                 image_size=self.image_size,
-            )(model_config),
+                max_token_len=model_config.max_token_len,
+                discrete_state_input=model_config.discrete_state_input,
+                adapt_to_pi=self.adapt_to_pi,
+                use_delta_joint_actions=self.use_delta_joint_actions,
+                action_dim=model_config.action_dim,
+            ),
             action_sequence_keys=self.action_sequence_keys,
             video_memory_num_frames=self.video_memory_num_frames,
             video_memory_stride_seconds=self.video_memory_stride_seconds,
@@ -694,12 +623,10 @@ def _make_twist_train_config(
             video_memory_stride_seconds=1.0,
             repo_ids=repo_ids,
             assets=assets if assets is not None else _pi05_base_assets(),
-            base_config=DataConfig(prompt_from_task=True),
-            repack_transforms=_aloha_real_repack_transforms(
-                include_low=include_low,
-                include_prompt=True,
-                include_subtask=include_subtask,
-            ),
+            prompt_from_task=True,
+            include_low=include_low,
+            include_prompt=True,
+            include_subtask=include_subtask,
         ),
         weight_loader=weight_loaders.CheckpointWeightLoader(_PI05_BASE_PARAMS),
         freeze_filter=freeze_filter,

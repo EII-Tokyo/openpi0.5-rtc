@@ -3,8 +3,8 @@ import pathlib
 import time
 from collections import deque
 
-from openpi_client.runtime import subscriber as _subscriber
-from examples.aloha_real import hdf5_utils as _hdf5_utils
+from openpi.robot.client.runtime import subscriber as _subscriber
+from openpi.robot.aloha_real import hdf5_utils as _hdf5_utils
 from typing_extensions import override
 
 class H5dfSaver(_subscriber.Subscriber):

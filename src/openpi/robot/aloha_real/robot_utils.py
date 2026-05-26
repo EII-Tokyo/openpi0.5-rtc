@@ -13,7 +13,7 @@ import numpy as np
 import rospy
 from sensor_msgs.msg import JointState
 
-from examples.aloha_real import constants
+from openpi.robot.aloha_real import constants
 
 CONTINUOUS_JOINT_NAMES = ("forearm_roll", "wrist_rotate")
 CONTINUOUS_JOINT_INDICES = (3, 5)

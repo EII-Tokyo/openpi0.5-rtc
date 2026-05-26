@@ -7,9 +7,9 @@ services:
       - openpi_server
     # build:
     #   context: .
-    #   dockerfile: examples/aloha_real/Dockerfile
+    #   dockerfile: src/openpi/robot/aloha_real/Dockerfile
     command: >-
-      python3 /app/examples/aloha_real/main.py
+      python3 /app/src/openpi/robot/aloha_real/main.py
       --model-dir
       /app/checkpoints/eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo/no_rinse_cam3_fullft_return_home_29repo_bs256_nw64_fsdp4_20260520/19000
       --action-quality good
@@ -27,7 +27,7 @@ services:
       - ros_master
     # build:
     #   context: .
-    #   dockerfile: examples/aloha_real/Dockerfile
+    #   dockerfile: src/openpi/robot/aloha_real/Dockerfile
     init: true
     tty: true
     network_mode: host

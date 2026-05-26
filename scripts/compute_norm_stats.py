@@ -44,17 +44,16 @@ def create_torch_dataloader(
     if data_config.repo_id is None and not data_config.repo_ids:
         raise ValueError("Data config must have a repo_id or non-empty repo_ids")
     dataset = _datasets.create_torch_dataset(data_config, action_horizon, model_config)
+    if data_config.transform_pipeline is None:
+        raise ValueError("A transform pipeline is required to compute norm stats.")
     dataset = _datasets.TransformedDataset(
         dataset,
         [
-            *([transforms.PromptFromLeRobotTask()] if data_config.prompt_from_task else []),
-            *data_config.repack_transforms.inputs,
-            *data_config.data_transforms.inputs,
+            *data_config.transform_pipeline.stats_input_transforms(),
             # Remove strings since they are not supported by JAX and are not needed to compute norm stats.
             RemoveStrings(),
         ],
     )
-    # print(data_config.data_transforms.inputs)
     if max_frames is not None and max_frames < len(dataset):
         num_batches = max_frames // batch_size
         shuffle = shuffle_if_truncated
@@ -171,10 +170,12 @@ def _apply_state_action_transforms(
     state_batch: np.ndarray,
     actions_batch: np.ndarray,
 ) -> tuple[np.ndarray, np.ndarray]:
+    if data_config.transform_pipeline is None:
+        raise ValueError("A transform pipeline is required to compute norm stats.")
     # AlohaInputs expects images to exist even though norm stats only need state/actions.
     dummy_images = {"cam_high": np.zeros((len(state_batch), 1, 1, 3), dtype=np.uint8)}
     data = {"images": dummy_images, "state": state_batch, "actions": actions_batch}
-    for transform in data_config.data_transforms.inputs:
+    for transform in data_config.transform_pipeline.raw_state_action_transforms():
         data = transform(data)
     return np.asarray(data["state"]), np.asarray(data["actions"])
 
@@ -187,8 +188,6 @@ def compute_parquet_norm_stats(
     chunk_size: int = 8192,
     seed: int = 0,
 ) -> dict[str, normalize.NormStats]:
-    if data_config.rlds_data_dir is not None:
-        raise ValueError("Parquet fast path only supports LeRobot datasets, not RLDS datasets.")
     if tuple(data_config.action_sequence_keys) != ("action",):
         raise ValueError(
             "Parquet fast path currently supports action_sequence_keys=('action',) only. "
@@ -335,17 +334,14 @@ def main(
         )
 
     if method == "dataloader":
-        if data_config.rlds_data_dir is not None:
-            raise ValueError("RLDS datasets were removed from this ALOHA-real-only branch.")
-        else:
-            data_loader, num_batches = create_torch_dataloader(
-                data_config,
-                config.model.action_horizon,
-                config.batch_size,
-                config.model,
-                config.num_workers,
-                max_frames,
-            )
+        data_loader, num_batches = create_torch_dataloader(
+            data_config,
+            config.model.action_horizon,
+            config.batch_size,
+            config.model,
+            config.num_workers,
+            max_frames,
+        )
         norm_stats = _compute_stats_from_data_loader(data_loader, num_batches)
     else:
         norm_stats = compute_parquet_norm_stats(

@@ -16,3 +16,6 @@ requests
 rospkg
 tyro
 websockets
+
+redis
+tree
