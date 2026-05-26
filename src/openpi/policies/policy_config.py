@@ -13,6 +13,21 @@ from openpi.training import config as _config
 import openpi.transforms as transforms
 
 
+def _training_image_keys(data_config: _config.DataConfig) -> tuple[str, ...] | None:
+    """Return the camera keys selected by the training repack transform, if available."""
+    for transform in data_config.repack_transforms.inputs:
+        if not isinstance(transform, transforms.RepackTransform):
+            continue
+        structure = transform.structure
+        if not isinstance(structure, dict):
+            continue
+        images = structure.get("images")
+        if not isinstance(images, dict):
+            continue
+        return tuple(images)
+    return None
+
+
 def create_trained_policy(
     train_config: _config.TrainConfig,
     checkpoint_dir: pathlib.Path | str,
@@ -72,15 +87,22 @@ def create_trained_policy(
         except ImportError:
             pytorch_device = "cpu"
 
+    image_keys = _training_image_keys(data_config)
+    filter_transforms = [transforms.FilterImages(image_keys)] if image_keys is not None else []
+    input_transforms = [
+        *repack_transforms.inputs,
+        *filter_transforms,
+        transforms.InjectDefaultPrompt(default_prompt),
+        *data_config.data_transforms.inputs,
+        transforms.Normalize(norm_stats, use_quantiles=data_config.use_quantile_norm),
+        *data_config.model_transforms.inputs,
+    ]
+    if image_keys is not None:
+        logging.info("Filtering policy input images to training camera keys: %s", image_keys)
+
     return _policy.Policy(
         model,
-        transforms=[
-            *repack_transforms.inputs,
-            transforms.InjectDefaultPrompt(default_prompt),
-            *data_config.data_transforms.inputs,
-            transforms.Normalize(norm_stats, use_quantiles=data_config.use_quantile_norm),
-            *data_config.model_transforms.inputs,
-        ],
+        transforms=input_transforms,
         output_transforms=[
             *data_config.model_transforms.outputs,
             transforms.Unnormalize(norm_stats, use_quantiles=data_config.use_quantile_norm),

@@ -141,6 +141,41 @@ _EII_RINSE_REPO_IDS = [
     "lyl472324464/2026.03.30_twist-and-water_two_have_cap-with-rinse",
 ]
 
+_EII_RINSE_9REPO_REPO_IDS = [
+    "lyl472324464/2026-05-07_water-lerobot-with-rinse",
+    "lyl472324464/2026-05-05_water-lerobot-with-rinse",
+    "lyl472324464/2026-05-05_direction-water-lerobot-with-rinse",
+    "lyl472324464/2026-05-04_direction-lerobot-with-rinse",
+    "lyl472324464/2026-05-04_turn_over-lerobot-with-rinse",
+    "lyl472324464/2026-05-04_direction-twist-water-lerobot-with-rinse",
+    "lyl472324464/2026-05-03_turn_over-lerobot-with-rinse",
+    "lyl472324464/2026-05-01_water1-lerobot-with-rinse",
+    "lyl472324464/2026-05-01_turn_over-lerobot-with-rinse",
+]
+
+_EII_RINSE_11REPO_REPO_IDS = [
+    "lyl472324464/2026-05-01_turn_over-lerobot-with-rinse",
+    "lyl472324464/2026-05-01_water1-lerobot-with-rinse",
+    "lyl472324464/2026-05-03_turn_over-lerobot-with-rinse",
+    "lyl472324464/2026-05-04_direction-twist-water-lerobot-with-rinse",
+    "lyl472324464/2026-05-04_turn_over-lerobot-with-rinse",
+    "lyl472324464/2026-05-04_direction-lerobot-with-rinse",
+    "lyl472324464/2026-05-05_direction-water-lerobot-with-rinse",
+    "lyl472324464/2026-05-05_water-lerobot-with-rinse",
+    "lyl472324464/2026-05-07_water-lerobot-with-rinse",
+    "lyl472324464/2026-05-12_insert-to-nozzle_realign-lerobot-with-rinse",
+    "lyl472324464/2026-05-13-insert-to-nozzle-no-cap-with-rinse",
+]
+
+_EII_RINSE_INSERT_REALIGN_REPO_ID = "lyl472324464/2026-05-12_insert-to-nozzle_realign-lerobot-with-rinse"
+_EII_RINSE_INSERT_NO_CAP_REPO_ID = "lyl472324464/2026-05-13-insert-to-nozzle-no-cap-with-rinse"
+
+_EII_RINSE_11REPO_INSERT_X5_REPO_IDS = [
+    *_EII_RINSE_11REPO_REPO_IDS,
+    *([_EII_RINSE_INSERT_REALIGN_REPO_ID] * 4),
+    *([_EII_RINSE_INSERT_NO_CAP_REPO_ID] * 4),
+]
+
 _EII_DATA_SYSTEM_WITHOUT_RINSE_36_REPO_IDS = [
     "lyl472324464/2025-09-15-twist-one-bottle-no-box-in-the-front-without-rinse",
     "lyl472324464/2025-11-06-twist-many-bottles-without-rinse",
@@ -180,6 +215,194 @@ _EII_DATA_SYSTEM_WITHOUT_RINSE_36_REPO_IDS = [
     "lyl472324464/2026-05-05_direction-water-lerobot-without-rinse",
 ]
 
+_EII_DATA_SYSTEM_WITHOUT_RINSE_41_REPO_IDS = [
+    "lyl472324464/2025-09-15-twist-one-bottle-no-box-in-the-front-without-rinse",
+    "lyl472324464/2025-11-06-twist-many-bottles-without-rinse",
+    "lyl472324464/2025-11-14-twist-two-bottles",
+    "lyl472324464/2025-11-18-twist-two-bottles",
+    "lyl472324464/2025-11-26-twist-two-bottles",
+    "lyl472324464/2025-12-10-twist-one-bottle",
+    "lyl472324464/2025-12-23-twist-one-bottle",
+    "lyl472324464/2026-01-20-twist-one-bottle",
+    "lyl472324464/2026-01-28-twist-many-bottle",
+    "lyl472324464/2026-02-03-no-cap-and-direction-without-rinse",
+    "lyl472324464/2026-03-04-one-direction-lerobot-without-rinse",
+    "lyl472324464/2026-03-05-two-direction-lerobot-without-rinse",
+    "lyl472324464/2026-03-12-one-havent-cap",
+    "lyl472324464/2026-03-12-one-havent-cap-direction",
+    "lyl472324464/2026-04-21_direction-lerobot-without-rinse",
+    "lyl472324464/2026-04-21_direction_2-lerobot-without-rinse",
+    "lyl472324464/2026-04-21_direction_haven-t_cap-lerobot-without-rinse",
+    "lyl472324464/2026-04-21_direction_havent_cap_water-lerobot-without-rinse",
+    "lyl472324464/2026-04-23_direction_have_cap_water-lerobot-without-rinse",
+    "lyl472324464/2026-04-23_direction_havent_cap_water-lerobot-without-rinse",
+    "lyl472324464/2026-04-27_direction_have_cap_water2-lerobot-without-rinse",
+    "lyl472324464/2026-04-27direction_have_cap_water-lerobot-without-rinse",
+    "lyl472324464/2026-04-28_direction_have_cap_water-lerobot-without-rinse",
+    "lyl472324464/2026-04-28_direction_have_cap_water2-lerobot-without-rinse",
+    "lyl472324464/2026-05-01_turn_over-lerobot-without-rinse",
+    "lyl472324464/2026-05-03_turn_over-lerobot-without-rinse",
+    "lyl472324464/2026-05-04_direction-lerobot-without-rinse",
+    "lyl472324464/2026-05-04_direction-twist-water-lerobot-without-rinse",
+    "lyl472324464/2026-05-04_turn_over-lerobot-without-rinse",
+    "lyl472324464/2026-05-05_direction-water-lerobot-without-rinse",
+    "lyl472324464/2026-05-11_cap-lerobot-without-rinse",
+    "lyl472324464/2026-05-11_free-spinning-lerobot-without-rinse",
+    "lyl472324464/2026-05-11_twist-lerobot-without-rinse",
+    "lyl472324464/2026-05-12_twist-lerobot-without-rinse",
+    "lyl472324464/2026-05-12_twist2-lerobot-without-rinse",
+    "lyl472324464/2026.03.12_one_have_cap-lerobot-without-rinse",
+    "lyl472324464/2026.03.12_one_have_cap_direction-lerobot-without-rinse",
+    "lyl472324464/2026.03.12_two_have_all_left-lerobot-without-rinse",
+    "lyl472324464/2026.03.12_two_have_cap_all_right-lerobot-without-rinse",
+    "lyl472324464/2026.03.12_two_have_cap_one_right-lerobot-without-rinse",
+    "lyl472324464/2026.03.16_twist_many-lerobot-without-rinse",
+]
+
+_EII_DATA_SYSTEM_WITHOUT_RINSE_34_EXCLUDED_REPO_IDS = {
+    "lyl472324464/2025-09-15-twist-one-bottle-no-box-in-the-front-without-rinse",
+    "lyl472324464/2025-11-14-twist-two-bottles",
+    "lyl472324464/2025-11-18-twist-two-bottles",
+    "lyl472324464/2025-11-26-twist-two-bottles",
+    "lyl472324464/2025-12-10-twist-one-bottle",
+    "lyl472324464/2025-12-23-twist-one-bottle",
+    "lyl472324464/2026-01-20-twist-one-bottle",
+}
+
+_EII_DATA_SYSTEM_WITHOUT_RINSE_34_REPO_IDS = [
+    repo_id
+    for repo_id in _EII_DATA_SYSTEM_WITHOUT_RINSE_41_REPO_IDS
+    if repo_id not in _EII_DATA_SYSTEM_WITHOUT_RINSE_34_EXCLUDED_REPO_IDS
+]
+
+_EII_FREE_SPINNING_REPO_ID = "lyl472324464/2026-05-11_free-spinning-lerobot-without-rinse"
+
+_EII_DATA_SYSTEM_WITHOUT_RINSE_34_REPO_IDS_FREE_SPIN_X6 = [
+    *_EII_DATA_SYSTEM_WITHOUT_RINSE_34_REPO_IDS,
+    *([_EII_FREE_SPINNING_REPO_ID] * 5),
+]
+
+_EII_DATA_SYSTEM_WITHOUT_RINSE_25_REPO_IDS = [
+    "lyl472324464/2025-09-15-twist-one-bottle-no-box-in-the-front-without-rinse",
+    "lyl472324464/2025-11-06-twist-many-bottles-without-rinse",
+    "lyl472324464/2025-11-14-twist-two-bottles-without-rinse",
+    "lyl472324464/2025-11-18-twist-two-bottles",
+    "lyl472324464/2025-11-26-twist-two-bottles-without-rinse",
+    "lyl472324464/2025-12-10-twist-one-bottle",
+    "lyl472324464/2025-12-23-twist-one-bottle-without-rinse",
+    "lyl472324464/2026-01-20-twist-one-bottle",
+    "lyl472324464/2026-01-28-twist-many-bottle-without-rinse",
+    "lyl472324464/2026-02-03-no-cap-and-direction-without-rinse",
+    "lyl472324464/2026-03-04-one-direction-lerobot-without-rinse",
+    "lyl472324464/2026-03-05-two-direction-lerobot-without-rinse",
+    "lyl472324464/2026.03.12_one_have_cap-lerobot-without-rinse",
+    "lyl472324464/2026.03.12_one_have_cap_direction-lerobot-without-rinse",
+    "lyl472324464/2026-03-12-one-havent-cap",
+    "lyl472324464/2026-03-12-one-havent-cap-direction",
+    "lyl472324464/2026.03.12_two_have_all_left-lerobot-without-rinse",
+    "lyl472324464/2026.03.12_two_have_cap_all_right-lerobot-without-rinse",
+    "lyl472324464/2026.03.12_two_have_cap_one_right-lerobot-without-rinse",
+    "lyl472324464/2026.03.16_twist_many-lerobot-without-rinse",
+    "lyl472324464/2026-04-21_direction-lerobot-without-rinse",
+    "lyl472324464/2026-04-21_direction_2-lerobot-without-rinse",
+    "lyl472324464/2026-04-21_direction_haven-t_cap-lerobot-without-rinse",
+    "lyl472324464/2026-04-21_direction_havent_cap_water-lerobot-without-rinse",
+    "lyl472324464/2026-04-23_direction_havent_cap_water-lerobot-without-rinse",
+]
+
+_EII_DATA_SYSTEM_WITHOUT_RINSE_MERGED_ADJUST_PICKUP_36_REPO_IDS = [
+    "lyl472324464/2025-09-15-twist-one-bottle-no-box-in-the-front-without-rinse-merged-adjust-pickup",
+    "lyl472324464/2025-11-06-twist-many-bottles-without-rinse-merged-adjust-pickup",
+    "lyl472324464/2025-11-14-twist-two-bottles-without-rinse-merged-adjust-pickup",
+    "lyl472324464/2025-11-18-twist-two-bottles-merged-adjust-pickup",
+    "lyl472324464/2025-11-26-twist-two-bottles-without-rinse-merged-adjust-pickup",
+    "lyl472324464/2025-12-10-twist-one-bottle-merged-adjust-pickup",
+    "lyl472324464/2025-12-23-twist-one-bottle-without-rinse-merged-adjust-pickup",
+    "lyl472324464/2026-01-20-twist-one-bottle-merged-adjust-pickup",
+    "lyl472324464/2026-01-28-twist-many-bottle-without-rinse-merged-adjust-pickup",
+    "lyl472324464/2026-02-03-no-cap-and-direction-without-rinse-merged-adjust-pickup",
+    "lyl472324464/2026-03-04-one-direction-lerobot-without-rinse-merged-adjust-pickup",
+    "lyl472324464/2026-03-05-two-direction-lerobot-without-rinse-merged-adjust-pickup",
+    "lyl472324464/2026.03.12_one_have_cap-lerobot-without-rinse-merged-adjust-pickup",
+    "lyl472324464/2026.03.12_one_have_cap_direction-lerobot-without-rinse-merged-adjust-pickup",
+    "lyl472324464/2026-03-12-one-havent-cap-merged-adjust-pickup",
+    "lyl472324464/2026-03-12-one-havent-cap-direction-merged-adjust-pickup",
+    "lyl472324464/2026.03.12_two_have_all_left-lerobot-without-rinse-merged-adjust-pickup",
+    "lyl472324464/2026.03.12_two_have_cap_all_right-lerobot-without-rinse-merged-adjust-pickup",
+    "lyl472324464/2026.03.12_two_have_cap_one_right-lerobot-without-rinse-merged-adjust-pickup",
+    "lyl472324464/2026.03.16_twist_many-lerobot-without-rinse-merged-adjust-pickup",
+    "lyl472324464/2026-04-21_direction-lerobot-without-rinse-merged-adjust-pickup",
+    "lyl472324464/2026-04-21_direction_2-lerobot-without-rinse-merged-adjust-pickup",
+    "lyl472324464/2026-04-21_direction_haven-t_cap-lerobot-without-rinse-merged-adjust-pickup",
+    "lyl472324464/2026-04-21_direction_havent_cap_water-lerobot-without-rinse-merged-adjust-pickup",
+    "lyl472324464/2026-04-23_direction_havent_cap_water-lerobot-without-rinse-merged-adjust-pickup",
+    "lyl472324464/2026-04-28_direction_have_cap_water-lerobot-without-rinse-merged-adjust-pickup",
+    "lyl472324464/2026-04-28_direction_have_cap_water2-lerobot-without-rinse-merged-adjust-pickup",
+    "lyl472324464/2026-05-11_free-spinning-lerobot-without-rinse-merged-adjust-pickup",
+    "lyl472324464/2026-05-11_free-spinning-lerobot-without-rinse-merged-adjust-pickup",
+    "lyl472324464/2026-05-11_free-spinning-lerobot-without-rinse-merged-adjust-pickup",
+    "lyl472324464/2026-05-11_free-spinning-lerobot-without-rinse-merged-adjust-pickup",
+    "lyl472324464/2026-05-11_free-spinning-lerobot-without-rinse-merged-adjust-pickup",
+    "lyl472324464/2026-05-11_cap-lerobot-without-rinse-merged-adjust-pickup",
+    "lyl472324464/2026-05-11_twist-lerobot-without-rinse-merged-adjust-pickup",
+    "lyl472324464/2026-05-12_twist-lerobot-without-rinse-merged-adjust-pickup",
+    "lyl472324464/2026-05-12_twist2-lerobot-without-rinse-merged-adjust-pickup",
+]
+
+_EII_DATA_SYSTEM_WITHOUT_RINSE_RETURN_HOME_29_REPO_IDS = [
+    "lyl472324464/2025-09-15-twist-one-bottle-no-box-in-the-front-without-rinse-merged-adjust-pickup",
+    "lyl472324464/2025-12-10-twist-one-bottle-merged-adjust-pickup",
+    "lyl472324464/2025-12-23-twist-one-bottle-without-rinse-merged-adjust-pickup",
+    "lyl472324464/2026-01-20-twist-one-bottle-merged-adjust-pickup",
+    "lyl472324464/2026-02-03-no-cap-and-direction-without-rinse-merged-adjust-pickup",
+    "lyl472324464/2026-03-04-one-direction-lerobot-without-rinse-merged-adjust-pickup",
+    "lyl472324464/2026.03.12_one_have_cap-lerobot-without-rinse-merged-adjust-pickup",
+    "lyl472324464/2026.03.12_one_have_cap_direction-lerobot-without-rinse-merged-adjust-pickup",
+    "lyl472324464/2026-03-12-one-havent-cap-merged-adjust-pickup",
+    "lyl472324464/2026-03-12-one-havent-cap-direction-merged-adjust-pickup",
+    "lyl472324464/2026-04-21_direction-lerobot-without-rinse-merged-adjust-pickup",
+    "lyl472324464/2026-04-21_direction_2-lerobot-without-rinse-merged-adjust-pickup",
+    "lyl472324464/2026-04-21_direction_haven-t_cap-lerobot-without-rinse-merged-adjust-pickup",
+    "lyl472324464/2026-04-21_direction_havent_cap_water-lerobot-without-rinse-merged-adjust-pickup",
+    "lyl472324464/2026-04-23_direction_havent_cap_water-lerobot-without-rinse-merged-adjust-pickup",
+    "lyl472324464/2026-04-28_direction_have_cap_water-lerobot-without-rinse-merged-adjust-pickup",
+    "lyl472324464/2026-04-28_direction_have_cap_water2-lerobot-without-rinse-merged-adjust-pickup",
+    "lyl472324464/2026-05-11_free-spinning-lerobot-without-rinse-merged-adjust-pickup",
+    "lyl472324464/2026-05-11_free-spinning-lerobot-without-rinse-merged-adjust-pickup",
+    "lyl472324464/2026-05-11_free-spinning-lerobot-without-rinse-merged-adjust-pickup",
+    "lyl472324464/2026-05-11_free-spinning-lerobot-without-rinse-merged-adjust-pickup",
+    "lyl472324464/2026-05-11_free-spinning-lerobot-without-rinse-merged-adjust-pickup",
+    "lyl472324464/2026-05-11_cap-lerobot-without-rinse-merged-adjust-pickup",
+    "lyl472324464/2026-05-11_twist-lerobot-truncated-return-home-exp-truncated-return-home-20260520-095140",
+    "lyl472324464/2026-05-12_twist-lerobot-truncated-return-home-exp-truncated-return-home-20260520-095140",
+    "lyl472324464/2026-05-12_twist2-lerobot-truncated-return-home-exp-truncated-return-home-20260520-095140",
+    "lyl472324464/2026-05-04_turn_over-lerobot-without-rinse",
+    "lyl472324464/2026-05-03_turn_over-lerobot-without-rinse",
+    "lyl472324464/2026-05-01_turn_over-lerobot-without-rinse",
+]
+
+_EII_TURN_OVER_WITHOUT_RINSE_REPO_IDS = [
+    "lyl472324464/2026-05-04_turn_over-lerobot-without-rinse",
+    "lyl472324464/2026-05-03_turn_over-lerobot-without-rinse",
+    "lyl472324464/2026-05-01_turn_over-lerobot-without-rinse",
+]
+
+# Used by `eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo`:
+# the base list above has 29 entries, then the three turn_over repos are repeated
+# four extra times each, and free-spinning is repeated ten extra times.
+_EII_DATA_SYSTEM_WITHOUT_RINSE_RETURN_HOME_TURN_OVER_X5_REPO_IDS = [
+    *_EII_DATA_SYSTEM_WITHOUT_RINSE_RETURN_HOME_29_REPO_IDS,
+    *[repo_id for repo_id in _EII_TURN_OVER_WITHOUT_RINSE_REPO_IDS for _ in range(4)],
+]
+
+_EII_FREE_SPINNING_MERGED_ADJUST_PICKUP_REPO_ID = (
+    "lyl472324464/2026-05-11_free-spinning-lerobot-without-rinse-merged-adjust-pickup"
+)
+
+_EII_DATA_SYSTEM_WITHOUT_RINSE_RETURN_HOME_TURN_OVER_X5_FREE_SPIN_PLUS10_REPO_IDS = [
+    *_EII_DATA_SYSTEM_WITHOUT_RINSE_RETURN_HOME_TURN_OVER_X5_REPO_IDS,
+    *([_EII_FREE_SPINNING_MERGED_ADJUST_PICKUP_REPO_ID] * 10),
+]
 
 @dataclasses.dataclass(frozen=True)
 class AssetsConfig:
@@ -434,6 +657,7 @@ def _make_twist_train_config(
     wandb_enabled: bool = True,
     overwrite: bool = False,
     resume: bool = False,
+    num_train_steps: int = 40_000,
 ) -> TrainConfig:
     if lora:
         model = pi0_config.Pi0Config(
@@ -481,7 +705,7 @@ def _make_twist_train_config(
         freeze_filter=freeze_filter,
         ema_decay=ema_decay,
         save_interval=1000,
-        num_train_steps=40_000,
+        num_train_steps=num_train_steps,
         batch_size=batch_size,
         num_workers=num_workers,
         fsdp_devices=fsdp_devices,
@@ -587,6 +811,118 @@ _CONFIGS = [
         assets=AssetsConfig(assets_dir=None, asset_id="trossen"),
     ),
     _make_twist_train_config(
+        "eii_data_system_without_rinse_cam3_fullft_h200_41repo",
+        repo_ids=_EII_DATA_SYSTEM_WITHOUT_RINSE_41_REPO_IDS,
+        lora=False,
+        batch_size=256,
+        num_workers=128,
+        fsdp_devices=8,
+        include_low=False,
+        include_subtask=False,
+        gradient_accumulation_steps=1,
+        exp_name="no_rinse_cam3_fullft_41repo_bs256_nw128_fsdp8_20260513",
+        assets_base_dir="/workspace/openpi0.5-rtc/assets",
+        checkpoint_base_dir="/workspace/openpi0.5-rtc/checkpoints",
+        wandb_enabled=True,
+        overwrite=True,
+        resume=False,
+        # 2026-05-13 setup for the 41-repo production run. Matches the
+        # 36-repo H200 full fine-tune shape: 3 cameras, no temporal memory,
+        # full fine-tune, fsdp=8, bs=256, nw=128, 40k steps.
+        assets=AssetsConfig(assets_dir=None, asset_id="trossen"),
+    ),
+    _make_twist_train_config(
+        "eii_data_system_without_rinse_cam3_fullft_h200_34repo",
+        repo_ids=_EII_DATA_SYSTEM_WITHOUT_RINSE_34_REPO_IDS_FREE_SPIN_X6,
+        lora=False,
+        batch_size=256,
+        num_workers=64,
+        fsdp_devices=4,
+        include_low=False,
+        include_subtask=False,
+        gradient_accumulation_steps=1,
+        exp_name="no_rinse_cam3_fullft_34repo_freespinx6_bs256_nw64_fsdp4_20260513",
+        assets_base_dir="/workspace/openpi0.5-rtc/assets",
+        checkpoint_base_dir="/workspace/openpi0.5-rtc/checkpoints",
+        wandb_enabled=True,
+        overwrite=True,
+        resume=False,
+        # 2026-05-13 setup excluding the 7 early twist-only repos that
+        # should not participate in this production run. This remote has
+        # 4x B200, so use fsdp=4 while keeping the 34-repo norm path.
+        # num_workers=128 failed during multiprocessing spawn on this host;
+        # 64 is the current setting to reduce dataloader wait spikes.
+        # Duplicate the free-spinning dataset 5 extra times to weight its
+        # specialized task 6x in the sampler while keeping the 34-repo assets.
+        assets=AssetsConfig(assets_dir=None, asset_id="trossen"),
+    ),
+    _make_twist_train_config(
+        "eii_data_system_without_rinse_cam3_fullft_h200_25repo",
+        repo_ids=_EII_DATA_SYSTEM_WITHOUT_RINSE_25_REPO_IDS,
+        lora=False,
+        batch_size=256,
+        num_workers=64,
+        fsdp_devices=4,
+        include_low=False,
+        include_subtask=False,
+        gradient_accumulation_steps=1,
+        exp_name="no_rinse_cam3_fullft_25repo_bs256_nw64_fsdp4_20260514",
+        assets_base_dir="/workspace/openpi0.5-rtc/assets",
+        checkpoint_base_dir="/workspace/openpi0.5-rtc/checkpoints",
+        wandb_enabled=True,
+        overwrite=True,
+        resume=False,
+        # 2026-05-14 setup for the user-specified 25-repo no-rinse run.
+        # Same 3-camera full fine-tune shape as the 34-repo B200 config:
+        # cam_high/cam_left_wrist/cam_right_wrist, no temporal memory,
+        # bs=256, nw=64, fsdp=4, 40k steps.
+        assets=AssetsConfig(assets_dir=None, asset_id="trossen"),
+    ),
+    _make_twist_train_config(
+        "eii_data_system_without_rinse_cam3_fullft_h200_merged_adjust_pickup_36repo",
+        repo_ids=_EII_DATA_SYSTEM_WITHOUT_RINSE_MERGED_ADJUST_PICKUP_36_REPO_IDS,
+        lora=False,
+        batch_size=256,
+        num_workers=64,
+        fsdp_devices=4,
+        include_low=False,
+        include_subtask=False,
+        gradient_accumulation_steps=1,
+        exp_name="no_rinse_cam3_fullft_merged_adjust_pickup_36repo_bs256_nw64_fsdp4_20260516",
+        assets_base_dir="/workspace/openpi0.5-rtc/assets",
+        checkpoint_base_dir="/workspace/openpi0.5-rtc/checkpoints",
+        wandb_enabled=True,
+        overwrite=True,
+        resume=False,
+        # 2026-05-16 setup for merged-adjust-pickup datasets. The
+        # free-spinning repo is intentionally repeated five times exactly
+        # as requested, so both sampler weight and norm stats reflect it.
+        assets=AssetsConfig(assets_dir=None, asset_id="trossen"),
+    ),
+    _make_twist_train_config(
+        "eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo",
+        repo_ids=_EII_DATA_SYSTEM_WITHOUT_RINSE_RETURN_HOME_TURN_OVER_X5_FREE_SPIN_PLUS10_REPO_IDS,
+        lora=False,
+        batch_size=256,
+        num_workers=64,
+        fsdp_devices=4,
+        include_low=False,
+        include_subtask=False,
+        gradient_accumulation_steps=1,
+        exp_name="no_rinse_cam3_fullft_return_home_29repo_bs256_nw64_fsdp4_20260520",
+        assets_base_dir="/workspace/openpi0.5-rtc/assets",
+        checkpoint_base_dir="/workspace/openpi0.5-rtc/checkpoints",
+        wandb_enabled=True,
+        overwrite=False,
+        resume=True,
+        # 2026-05-22 resume setup: keep the same checkpoint directory and
+        # continue from the latest saved step. The three turn-over no-rinse
+        # repos remain weighted to five total copies each, and free-spinning
+        # merged-adjust-pickup has ten additional copies.
+        num_train_steps=60_000,
+        assets=AssetsConfig(assets_dir=None, asset_id="trossen"),
+    ),
+    _make_twist_train_config(
         "eii_data_system_without_rinse_cam3_fullft_a100",
         repo_ids=_EII_DATA_SYSTEM_WITHOUT_RINSE_36_REPO_IDS,
         lora=False,
@@ -623,6 +959,52 @@ _CONFIGS = [
         include_low=True,
         include_subtask=True,
         gradient_accumulation_steps=2,
+        assets=AssetsConfig(assets_dir=None, asset_id="trossen"),
+    ),
+    _make_twist_train_config(
+        "eii_rinse_9repo_cam4_lora",
+        repo_ids=_EII_RINSE_9REPO_REPO_IDS,
+        lora=True,
+        batch_size=32,
+        num_workers=16,
+        include_low=True,
+        include_subtask=True,
+        gradient_accumulation_steps=2,
+        assets=AssetsConfig(assets_dir=None, asset_id="trossen"),
+    ),
+    _make_twist_train_config(
+        "eii_rinse_11repo_cam4_fullft",
+        repo_ids=_EII_RINSE_11REPO_INSERT_X5_REPO_IDS,
+        lora=False,
+        batch_size=256,
+        num_workers=128,
+        include_low=True,
+        include_subtask=True,
+        gradient_accumulation_steps=1,
+        assets=AssetsConfig(assets_dir=None, asset_id="trossen"),
+    ),
+    _make_twist_train_config(
+        "eii_rinse_9repo_cam4_lora_6000",
+        repo_ids=_EII_RINSE_9REPO_REPO_IDS,
+        lora=True,
+        batch_size=32,
+        num_workers=16,
+        include_low=True,
+        include_subtask=True,
+        gradient_accumulation_steps=2,
+        exp_name="eii_rinse_9repo_cam4_lora_wandb_bs32_acc2_nw16_nomem_20260510_093635",
+        assets=AssetsConfig(assets_dir=None, asset_id="trossen"),
+    ),
+    _make_twist_train_config(
+        "eii_rinse_9repo_cam4_lora_15000",
+        repo_ids=_EII_RINSE_9REPO_REPO_IDS,
+        lora=True,
+        batch_size=32,
+        num_workers=16,
+        include_low=True,
+        include_subtask=True,
+        gradient_accumulation_steps=2,
+        exp_name="eii_rinse_9repo_cam4_lora_wandb_bs32_acc2_nw16_nomem_20260510_093635",
         assets=AssetsConfig(assets_dir=None, asset_id="trossen"),
     ),
     _make_twist_train_config(

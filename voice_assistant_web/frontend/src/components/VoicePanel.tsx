@@ -9,7 +9,16 @@ type Props = {
   dispatchError: string
 }
 
-const TASK_NUMBERS = ['1', '2', '3', '4', '5'] as const
+const TASK_NUMBERS = ['1', '2', '3', '4', '5', '6'] as const
+
+const extensionForAudioType = (mimeType: string) => {
+  const normalized = mimeType.split(';', 1)[0].trim().toLowerCase()
+  if (normalized === 'audio/mp4') return 'm4a'
+  if (normalized === 'audio/ogg') return 'ogg'
+  if (normalized === 'audio/wav') return 'wav'
+  if (normalized === 'audio/mpeg') return 'mp3'
+  return 'webm'
+}
 
 export function VoicePanel({ mode, language, dispatchTask, dispatchError }: Props) {
   const t = translations[language]
@@ -28,6 +37,7 @@ export function VoicePanel({ mode, language, dispatchTask, dispatchError }: Prop
   const silenceTimerRef = useRef<number | null>(null)
   const rafRef = useRef<number | null>(null)
   const speechStartedRef = useRef(false)
+  const recordingStartedAtRef = useRef(0)
   const waitingAudioContextRef = useRef<AudioContext | null>(null)
   const waitingIntervalRef = useRef<number | null>(null)
 
@@ -131,6 +141,27 @@ export function VoicePanel({ mode, language, dispatchTask, dispatchError }: Prop
     return candidates.find((candidate) => !candidate || MediaRecorder.isTypeSupported(candidate)) || ''
   }
 
+  const stopRecording = () => {
+    const recorder = mediaRecorderRef.current
+    if (!recorder || recorder.state !== 'recording') return
+    try {
+      recorder.requestData()
+    } catch {
+      // Some browsers do not allow requestData() during shutdown.
+    }
+    const elapsedMs = Date.now() - recordingStartedAtRef.current
+    const stop = () => {
+      if (recorder.state === 'recording') {
+        recorder.stop()
+      }
+    }
+    if (elapsedMs < 750) {
+      window.setTimeout(stop, 750 - elapsedMs)
+    } else {
+      stop()
+    }
+  }
+
   const handleVoiceResponse = async (response: Response) => {
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`)
@@ -180,7 +211,7 @@ export function VoicePanel({ mode, language, dispatchTask, dispatchError }: Prop
       return
     }
     if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
-      mediaRecorderRef.current.stop()
+      stopRecording()
       return
     }
 
@@ -210,8 +241,8 @@ export function VoicePanel({ mode, language, dispatchTask, dispatchError }: Prop
       recorder.onstop = async () => {
         try {
           setStatus('thinking')
-          const blobType = mimeType || 'audio/webm'
-          const extension = blobType.includes('mp4') ? 'm4a' : 'webm'
+          const blobType = recorder.mimeType || chunksRef.current[0]?.type || mimeType || 'audio/webm'
+          const extension = extensionForAudioType(blobType)
           const blob = new Blob(chunksRef.current, { type: blobType })
           if (blob.size === 0) {
             setStatus('idle')
@@ -235,6 +266,7 @@ export function VoicePanel({ mode, language, dispatchTask, dispatchError }: Prop
         }
       }
       mediaRecorderRef.current = recorder
+      recordingStartedAtRef.current = Date.now()
       setStatus('recording')
       recorder.start(250)
 
@@ -266,7 +298,7 @@ export function VoicePanel({ mode, language, dispatchTask, dispatchError }: Prop
         } else if (speechStartedRef.current && silenceTimerRef.current === null) {
           silenceTimerRef.current = window.setTimeout(() => {
             if (mediaRecorderRef.current?.state === 'recording') {
-              mediaRecorderRef.current.stop()
+              stopRecording()
             }
           }, silenceMs)
         }

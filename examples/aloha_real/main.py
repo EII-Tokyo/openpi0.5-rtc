@@ -42,12 +42,15 @@ class Args:
     #     ])
     reset_position: list[list[float]] = dataclasses.field(
         default_factory=lambda: [
-            [0.0, -0.96, 1.16, 0.0, -0.0, 0.0],
+            #[0.0, -0.96, 1.16, 0.0, -0.0, 0.0],
             # [0.0, -0.96, 1.16, 0.0, -0.0, 0.0],
+            #[0.0, -0.96, 1.16, -1.57, -0.0, 1.57],
             [0.0, -0.96, 1.16, 1.57, -0.0, -1.57],
+            [0.0, -0.96, 1.16, 0.0, -0.0, 0.0],
+            #[0.0, -0.96, 1.16, -1.57, -0.0, 1.57],
         ]
     )
-    gripper_current_limits: list[int] = dataclasses.field(default_factory=lambda: [400, 800])
+    gripper_current_limits: list[int] = dataclasses.field(default_factory=lambda: [300, 800])
     # H5dfSaver 配置
     dataset_dir: str = "/app/examples/aloha_real/error_hdf5/2026-03-11_inference_lora_error"
     manual_dataset_dir: str = "/app/examples/aloha_real/manual_override_hdf5/2026-03-11_inference_lora"

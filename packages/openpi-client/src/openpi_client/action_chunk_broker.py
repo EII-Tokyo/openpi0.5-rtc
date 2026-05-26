@@ -1,5 +1,6 @@
 from typing import Dict
 import json
+import logging
 import pathlib
 import time
 import threading
@@ -137,7 +138,7 @@ class ActionChunkBroker(_base_policy.BasePolicy):
                     log_parts.append(f"rpc_overhead_ms={float(overhead_ms):.1f}")
                 if prev_total_ms is not None:
                     log_parts.append(f"prev_total_ms={float(prev_total_ms):.1f}")
-                print(" ".join(log_parts))
+                logging.debug(" ".join(log_parts))
             else:
                 time.sleep(0.01)
 

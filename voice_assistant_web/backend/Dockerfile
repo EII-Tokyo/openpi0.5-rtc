@@ -2,6 +2,10 @@ FROM lyl472324464/robot:aloha-ros1.0
 
 WORKDIR /app
 
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends ffmpeg && \
+    rm -rf /var/lib/apt/lists/*
+
 COPY voice_assistant_web/backend/requirements.txt /tmp/voice-assistant-web-requirements.txt
 RUN uv pip install --python 3.10 --system -r /tmp/voice-assistant-web-requirements.txt
 

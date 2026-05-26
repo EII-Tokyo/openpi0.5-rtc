@@ -32,7 +32,7 @@ const initialState: RealtimeState = {
   camera_jpeg_b64: {},
 }
 
-const TASK_NUMBERS = ['1', '2', '3', '4', '5'] as const
+const TASK_NUMBERS = ['1', '2', '3', '4', '5', '6'] as const
 
 export default function App() {
   const [state, setState] = useState<RealtimeState>(initialState)

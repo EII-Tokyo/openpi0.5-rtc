@@ -12,6 +12,7 @@ import time
 from typing import Literal
 
 import lerobot.datasets.lerobot_dataset as lerobot_dataset
+from huggingface_hub import snapshot_download
 import numpy as np
 import pyarrow.parquet as pq
 import torch
@@ -118,9 +119,24 @@ def _get_repo_ids(data_config: _config.DataConfig) -> list[str]:
     raise ValueError("Data config must have a repo_id or non-empty repo_ids")
 
 
+def _repo_parquet_files(repo_id: str, meta: lerobot_dataset.LeRobotDatasetMetadata) -> list[Path]:
+    snapshot_root = Path(
+        snapshot_download(
+            repo_id=repo_id,
+            repo_type="dataset",
+            allow_patterns=["data/**/*.parquet"],
+        )
+    )
+    parquet_files = sorted(snapshot_root.glob("data/**/*.parquet"))
+    if parquet_files:
+        return parquet_files
+
+    return sorted(Path(meta.root).glob("data/**/*.parquet"))
+
+
 def _load_repo_arrays(repo_id: str) -> tuple[lerobot_dataset.LeRobotDatasetMetadata, dict[str, np.ndarray]]:
     meta = lerobot_dataset.LeRobotDatasetMetadata(repo_id, force_cache_sync=True)
-    parquet_files = sorted(Path(meta.root).glob("data/**/*.parquet"))
+    parquet_files = _repo_parquet_files(repo_id, meta)
     if not parquet_files:
         raise FileNotFoundError(f"No parquet files found for repo: {repo_id}")
 
@@ -130,14 +146,21 @@ def _load_repo_arrays(repo_id: str) -> tuple[lerobot_dataset.LeRobotDatasetMetad
     trainable_parts: list[np.ndarray] = []
 
     for parquet_file in parquet_files:
+        columns = pq.ParquetFile(parquet_file).schema.names
+        read_columns = ["observation.state", "action", "episode_index"]
+        if "is_for_training" in columns:
+            read_columns.append("is_for_training")
         table = pq.read_table(
             parquet_file,
-            columns=["observation.state", "action", "episode_index", "is_for_training"],
+            columns=read_columns,
         )
         state_parts.append(np.asarray(table["observation.state"].to_pylist(), dtype=np.float32))
         action_parts.append(np.asarray(table["action"].to_pylist(), dtype=np.float32))
         episode_parts.append(np.asarray(table["episode_index"].to_pylist(), dtype=np.int64))
-        trainable_parts.append(np.asarray(table["is_for_training"].to_pylist(), dtype=bool))
+        if "is_for_training" in read_columns:
+            trainable_parts.append(np.asarray(table["is_for_training"].to_pylist(), dtype=bool))
+        else:
+            trainable_parts.append(np.ones(table.num_rows, dtype=bool))
 
     arrays = {
         "state": np.concatenate(state_parts, axis=0),

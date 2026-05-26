@@ -112,6 +112,30 @@ class InjectDefaultPrompt(DataTransformFn):
 
 
 @dataclasses.dataclass(frozen=True)
+class FilterImages(DataTransformFn):
+    """Keep only the image keys used by the policy's training config."""
+
+    image_keys: tuple[str, ...]
+    strict: bool = True
+
+    def __call__(self, data: DataDict) -> DataDict:
+        images = data.get("images")
+        if not isinstance(images, Mapping):
+            return data
+
+        missing = [key for key in self.image_keys if key not in images]
+        if missing and self.strict:
+            raise ValueError(
+                f"Missing required images from training config: {tuple(missing)}. "
+                f"Available images: {tuple(images)}"
+            )
+
+        allowed = set(self.image_keys)
+        data["images"] = {key: value for key, value in images.items() if key in allowed}
+        return data
+
+
+@dataclasses.dataclass(frozen=True)
 class Normalize(DataTransformFn):
     norm_stats: at.PyTree[NormStats] | None
     # If true, will use quantile normalization. Otherwise, normal z-score normalization will be used.

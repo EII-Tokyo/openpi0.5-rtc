@@ -3,14 +3,29 @@ from __future__ import annotations
 import base64
 import json
 import logging
+import subprocess
+import uuid
 from pathlib import Path
 
-from fastapi import UploadFile
-from openai import OpenAI
+from fastapi import HTTPException, UploadFile
+from openai import BadRequestError, OpenAI
 
 from .config import settings
 from .redis_commands import TASK_MAPPING, publish_task
 from .schemas import VoiceResponse
+
+_SUPPORTED_AUDIO_SUFFIXES = {".flac", ".m4a", ".mp3", ".mp4", ".mpeg", ".mpga", ".oga", ".ogg", ".wav", ".webm"}
+_AUDIO_SUFFIX_BY_CONTENT_TYPE = {
+    "audio/flac": ".flac",
+    "audio/mp4": ".m4a",
+    "audio/mpeg": ".mp3",
+    "audio/mpga": ".mpga",
+    "audio/ogg": ".ogg",
+    "audio/wav": ".wav",
+    "audio/webm": ".webm",
+    "video/mp4": ".mp4",
+    "video/webm": ".webm",
+}
 
 
 class VoiceAssistantEngine:
@@ -20,6 +35,7 @@ class VoiceAssistantEngine:
         self._base_prompt = (
             "The user is operating an aloha robot. Supported tasks are:\n"
             + "\n".join(f"{key}: {value}" for key, value in TASK_MAPPING.items())
+            + "\nMap leader-follower demo or teleoperation experience requests to task 6."
             + "\nReturn JSON only with keys task_number and response_statement."
         )
 
@@ -49,24 +65,6 @@ class VoiceAssistantEngine:
         compact = normalized.replace(" ", "")
 
         task_1_keywords = [
-            "process bottles",
-            "rinse the bottle",
-            "rinsing bottles",
-            "tear off labels",
-            "tear off the label",
-            "remove labels",
-            "处理瓶子",
-            "清洗瓶子",
-            "撕掉标签",
-            "撕标签",
-            "ラベルを剥がす",
-            "ボトルをすすぐ",
-            "ボトル処理",
-        ]
-        if any(keyword in normalized or keyword in compact for keyword in task_1_keywords):
-            return "1"
-
-        task_2_keywords = [
             "twist off the bottle cap",
             "unscrew the cap",
             "open the bottle cap",
@@ -79,8 +77,51 @@ class VoiceAssistantEngine:
             "キャップを開け",
             "ねじって開け",
         ]
+        if any(keyword in normalized or keyword in compact for keyword in task_1_keywords):
+            return "1"
+
+        task_2_keywords = [
+            "process bottles",
+            "rinse the bottle",
+            "rinse bottle",
+            "rinsing bottles",
+            "tear off labels",
+            "tear off the label",
+            "remove labels",
+            "处理瓶子",
+            "清洗瓶子",
+            "冲洗瓶子",
+            "撕掉标签",
+            "撕标签",
+            "ラベルを剥がす",
+            "ボトルをすすぐ",
+            "ボトル処理",
+        ]
         if any(keyword in normalized or keyword in compact for keyword in task_2_keywords):
             return "2"
+
+        task_6_keywords = [
+            "leader follower",
+            "leader-follower",
+            "leader demo",
+            "follower demo",
+            "teleoperation experience",
+            "teleop experience",
+            "teleoperation demo",
+            "teleop demo",
+            "customer demo",
+            "遥操作体验",
+            "遥操作演示",
+            "客户演示",
+            "主从演示",
+            "leader跟随",
+            "follower跟随",
+            "リーダーフォロワー",
+            "遠隔操作体験",
+            "遠隔操作デモ",
+        ]
+        if any(keyword in normalized or keyword in compact for keyword in task_6_keywords):
+            return "6"
 
         task_3_keywords = [
             "human control",
@@ -150,7 +191,8 @@ class VoiceAssistantEngine:
                     "content": (
                         f"{self._base_prompt}\n"
                         f"The response_statement must be written in {reply_language}.\n"
-                        "Map bottle cap opening / twisting requests to task 2.\n"
+                        "Map bottle cap opening / twisting requests to task 1.\n"
+                        "Map bottle rinsing / washing requests to task 2.\n"
                         "Map manual takeover / teleoperation requests to task 3.\n"
                         "Do not choose task 3 unless the user explicitly asks for manual or human control."
                     ),
@@ -220,23 +262,90 @@ class VoiceAssistantEngine:
                 task_name=None,
             )
 
-        suffix = Path(audio_file.filename or "recording.webm").suffix or ".webm"
-        temp_path = Path("/tmp") / f"voice_assistant_web_upload{suffix}"
-        temp_path.write_bytes(await audio_file.read())
+        content_type = (audio_file.content_type or "").split(";", 1)[0].strip().lower()
+        suffix = Path(audio_file.filename or "").suffix.lower()
+        if suffix not in _SUPPORTED_AUDIO_SUFFIXES:
+            suffix = _AUDIO_SUFFIX_BY_CONTENT_TYPE.get(content_type, ".webm")
+
+        audio_bytes = await audio_file.read()
+        if not audio_bytes:
+            raise HTTPException(status_code=400, detail="Empty audio upload")
+
+        temp_path = Path("/tmp") / f"voice_assistant_web_upload_{uuid.uuid4().hex}{suffix}"
+        temp_path.write_bytes(audio_bytes)
+        transcription_path = temp_path
+        converted_path: Path | None = None
         try:
             logging.info(
-                "voice_audio start filename=%s suffix=%s fallback_language=%s size=%d",
+                "voice_audio start filename=%s content_type=%s suffix=%s fallback_language=%s size=%d",
                 audio_file.filename,
+                audio_file.content_type,
                 suffix,
                 fallback_language,
                 temp_path.stat().st_size,
             )
-            with temp_path.open("rb") as handle:
-                transcription = self._openai.audio.transcriptions.create(
-                    model=settings.openai_transcription_model,
-                    file=handle,
-                    response_format="verbose_json",
+            if suffix != ".wav":
+                converted_path = temp_path.with_suffix(".wav")
+                try:
+                    conversion = subprocess.run(
+                        [
+                            "ffmpeg",
+                            "-hide_banner",
+                            "-loglevel",
+                            "error",
+                            "-y",
+                            "-i",
+                            str(temp_path),
+                            "-ac",
+                            "1",
+                            "-ar",
+                            "16000",
+                            "-f",
+                            "wav",
+                            str(converted_path),
+                        ],
+                        check=False,
+                        capture_output=True,
+                        text=True,
+                        timeout=15,
+                    )
+                except FileNotFoundError as exc:
+                    logging.error("voice_audio ffmpeg is not installed")
+                    raise HTTPException(status_code=500, detail="Audio conversion tool is not installed") from exc
+                if conversion.returncode != 0 or not converted_path.exists() or converted_path.stat().st_size == 0:
+                    logging.warning(
+                        "voice_audio ffmpeg conversion failed filename=%s content_type=%s suffix=%s size=%d stderr=%s",
+                        audio_file.filename,
+                        audio_file.content_type,
+                        suffix,
+                        temp_path.stat().st_size,
+                        conversion.stderr[-1000:],
+                    )
+                    raise HTTPException(status_code=400, detail="Invalid audio recording")
+                transcription_path = converted_path
+                logging.info(
+                    "voice_audio converted to wav original_size=%d wav_size=%d",
+                    temp_path.stat().st_size,
+                    transcription_path.stat().st_size,
                 )
+
+            with transcription_path.open("rb") as handle:
+                try:
+                    transcription = self._openai.audio.transcriptions.create(
+                        model=settings.openai_transcription_model,
+                        file=handle,
+                        response_format="verbose_json",
+                    )
+                except BadRequestError as exc:
+                    logging.warning(
+                        "voice_audio transcription rejected filename=%s content_type=%s suffix=%s size=%d error=%s",
+                        audio_file.filename,
+                        audio_file.content_type,
+                        suffix,
+                        transcription_path.stat().st_size,
+                        exc,
+                    )
+                    raise HTTPException(status_code=400, detail="Unsupported or invalid audio format") from exc
             transcript = getattr(transcription, "text", "") or ""
             detected_language = self._normalize_language(getattr(transcription, "language", None), transcript=transcript)
             logging.info(
@@ -254,4 +363,6 @@ class VoiceAssistantEngine:
                 },
             )
         finally:
+            if converted_path is not None:
+                converted_path.unlink(missing_ok=True)
             temp_path.unlink(missing_ok=True)

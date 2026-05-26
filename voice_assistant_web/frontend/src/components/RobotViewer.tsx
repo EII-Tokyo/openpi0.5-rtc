@@ -34,7 +34,7 @@ export function RobotViewer({ latestAction, qpos, mode, currentTask, language }:
     scene.background = new THREE.Color(0xf6f1e8)
 
     const camera = new THREE.PerspectiveCamera(55, container.clientWidth / container.clientHeight, 0.01, 100)
-    camera.position.set(1.25, 1.02, 1.22)
+    camera.position.set(0, 1.02, 1.75)
 
     const renderer = new THREE.WebGLRenderer({ antialias: true })
     renderer.setSize(container.clientWidth, container.clientHeight)
@@ -42,6 +42,7 @@ export function RobotViewer({ latestAction, qpos, mode, currentTask, language }:
 
     const controls = new OrbitControls(camera, renderer.domElement)
     controls.target.set(0, 0.32, 0)
+    camera.lookAt(controls.target)
     controls.enableDamping = true
     controls.minDistance = 0.8
     controls.maxDistance = 3.5

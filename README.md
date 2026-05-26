@@ -34,6 +34,7 @@ docker compose exec -it runtime /bin/bash
 python3 /app/examples/aloha_real/main.py \  --model-dir /app/checkpoints/eii_data_system_no_tear_cam3_lora/eii_no_tear_cam3_20260422/18000 
   --model-dir /app/checkpoints/20260205/39999
   --model-dir /app/checkpoints/two_direction_lora_from_20260205_39999/two_direction_lora_20260313/6000
+  --model-dir /app/checkpoints/eii_data_system_without_rinse_cam3_fullft_h200_34repo/no_rinse_cam3_fullft_34repo_freespinx6_bs256_nw64_fsdp4_20260513/28000
 
 python3 /app/examples/aloha_real/main.py \
     --model-dir /app/checkpoints/eii_rinse_cam4_fullft/h200_fullft_13repos_bs128_nw16_f6_s5_log10_20260430_085556/10000 \
