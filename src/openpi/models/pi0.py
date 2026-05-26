@@ -7,7 +7,6 @@ import jax
 import jax.numpy as jnp
 from typing_extensions import override
 
-from openpi.data import transforms as _transforms
 from openpi.models import model as _model
 from openpi.models import pi0_config
 import openpi.models.gemma as _gemma
@@ -166,13 +165,7 @@ class Pi0(_model.BaseModel):
     def compute_loss(
         self, rng: at.KeyArrayLike, observation: _model.Observation, actions: _model.Actions, *, train: bool = False
     ) -> at.Float[at.Array, "*b ah"]:
-        preprocess_rng, noise_rng, time_rng = jax.random.split(rng, 3)
-        observation = _transforms.AlohaTransformPipeline.preprocess_observation(
-            preprocess_rng,
-            observation,
-            train=train,
-            image_resolution=self.image_resolution,
-        )
+        _, noise_rng, time_rng = jax.random.split(rng, 3)
 
         batch_shape = actions.shape[:-2]
         noise = jax.random.normal(noise_rng, actions.shape)
@@ -204,12 +197,6 @@ class Pi0(_model.BaseModel):
         num_steps: int | at.Int[at.Array, ""] = 10,
         noise: at.Float[at.Array, "b ah ad"] | None = None,
     ) -> _model.Actions:
-        observation = _transforms.AlohaTransformPipeline.preprocess_observation(
-            None,
-            observation,
-            train=False,
-            image_resolution=self.image_resolution,
-        )
         # note that we use the convention more common in diffusion literature, where t=1 is noise and t=0 is the target
         # distribution. yes, this is the opposite of the pi0 paper, and I'm sorry.
         dt = -1.0 / num_steps
@@ -276,12 +263,6 @@ class Pi0(_model.BaseModel):
         d: int = 10,
         beta: float = 8.0,
     ) -> _model.Actions:
-        observation = _transforms.AlohaTransformPipeline.preprocess_observation(
-            None,
-            observation,
-            train=False,
-            image_resolution=self.image_resolution,
-        )
         # note that we use the convention more common in diffusion literature, where t=1 is noise and t=0 is the target
         # distribution. yes, this is the opposite of the pi0 paper, and I'm sorry.
         dt = -1.0 / num_steps

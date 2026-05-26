@@ -56,6 +56,12 @@ def create_trained_policy(
             norm_stats,
             use_quantile_norm=data_config.use_quantile_norm,
         ),
+        observation_transform=lambda observation: data_config.transform_pipeline.preprocess_observation(
+            None,
+            observation,
+            train=False,
+            image_resolution=train_config.model.image_resolution,
+        ),
         sample_kwargs=sample_kwargs,
         metadata=train_config.policy_metadata,
     )

@@ -24,6 +24,7 @@ import openpi.shared.nnx_utils as nnx_utils
 import openpi.training.checkpoints as _checkpoints
 import openpi.training.config as _config
 from openpi.data import dataloaders as _data_loader
+from openpi.data import transforms as _transforms
 import openpi.training.optimizer as _optimizer
 import openpi.training.sharding as sharding
 import openpi.training.utils as training_utils
@@ -149,6 +150,13 @@ def train_step(
     def loss_fn(
         model: _model.BaseModel, rng: at.KeyArrayLike, observation: _model.Observation, actions: _model.Actions
     ):
+        preprocess_rng = jax.random.split(rng, 3)[0]
+        observation = _transforms.AlohaTransformPipeline.preprocess_observation(
+            preprocess_rng,
+            observation,
+            train=True,
+            image_resolution=config.model.image_resolution,
+        )
         chunked_loss = model.compute_loss(rng, observation, actions, train=True)
         return jnp.mean(chunked_loss)
 
