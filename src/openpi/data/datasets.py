@@ -334,7 +334,7 @@ class FakeDataset(Dataset):
 
 
 def create_torch_dataset(
-    data_config: _config.DataConfig, action_horizon: int, model_config: _model.BaseModelConfig
+    data_config: _config.LeRobotAlohaDataConfig, action_horizon: int, model_config: _model.BaseModelConfig
 ) -> Dataset:
     """Create a dataset for training."""
     repo_id = data_config.repo_id
@@ -372,7 +372,7 @@ def create_torch_dataset(
     return dataset
 
 
-def transform_dataset(dataset: Dataset, data_config: _config.DataConfig, *, skip_norm_stats: bool = False) -> Dataset:
+def transform_dataset(dataset: Dataset, data_config: _config.LeRobotAlohaDataConfig, *, skip_norm_stats: bool = False) -> Dataset:
     """Transform the dataset by applying the data transforms."""
     if data_config.transform_pipeline is None:
         return dataset
@@ -397,7 +397,7 @@ def transform_dataset(dataset: Dataset, data_config: _config.DataConfig, *, skip
 
 def transform_iterable_dataset(
     dataset: IterableDataset,
-    data_config: _config.DataConfig,
+    data_config: _config.LeRobotAlohaDataConfig,
     *,
     skip_norm_stats: bool = False,
     is_batched: bool = False,

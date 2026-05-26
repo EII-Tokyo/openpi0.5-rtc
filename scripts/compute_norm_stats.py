@@ -33,7 +33,7 @@ class RemoveStrings(transforms.DataTransformFn):
 
 
 def create_torch_dataloader(
-    data_config: _config.DataConfig,
+    data_config: _config.LeRobotAlohaDataConfig,
     action_horizon: int,
     batch_size: int,
     model_config: _model.BaseModelConfig,
@@ -81,7 +81,7 @@ def _compute_stats_from_data_loader(data_loader, num_batches: int) -> dict[str, 
     return {key: stats.get_statistics() for key, stats in stats.items()}
 
 
-def _get_repo_ids(data_config: _config.DataConfig) -> list[str]:
+def _get_repo_ids(data_config: _config.LeRobotAlohaDataConfig) -> list[str]:
     if data_config.repo_ids:
         return list(data_config.repo_ids)
     if data_config.repo_id:
@@ -166,7 +166,7 @@ def _sample_effective_indices(is_for_training: np.ndarray, generator: torch.Gene
 
 
 def _apply_state_action_transforms(
-    data_config: _config.DataConfig,
+    data_config: _config.LeRobotAlohaDataConfig,
     state_batch: np.ndarray,
     actions_batch: np.ndarray,
 ) -> tuple[np.ndarray, np.ndarray]:
@@ -181,7 +181,7 @@ def _apply_state_action_transforms(
 
 
 def compute_parquet_norm_stats(
-    data_config: _config.DataConfig,
+    data_config: _config.LeRobotAlohaDataConfig,
     action_horizon: int,
     *,
     max_frames: int | None = None,
@@ -247,7 +247,7 @@ def compute_parquet_norm_stats(
     return {key: value.get_statistics() for key, value in stats.items()}
 
 
-def _single_repo_data_config(data_config: _config.DataConfig, repo_id: str) -> _config.DataConfig:
+def _single_repo_data_config(data_config: _config.LeRobotAlohaDataConfig, repo_id: str) -> _config.LeRobotAlohaDataConfig:
     return dataclasses.replace(data_config, repo_id=repo_id, repo_ids=None, asset_id=None, norm_stats=None)
 
 
@@ -265,7 +265,7 @@ def _max_stat_diff(lhs: normalize.NormStats, rhs: normalize.NormStats) -> float:
 
 def benchmark_methods(
     config: _config.TrainConfig,
-    data_config: _config.DataConfig,
+    data_config: _config.LeRobotAlohaDataConfig,
     repo_id: str,
     *,
     max_frames: int | None = None,
@@ -320,7 +320,7 @@ def main(
     seed: int = 0,
 ):
     config = _config.get_config(config_name)
-    data_config = config.data.create(config.assets_dirs, config.model)
+    data_config = config.data.resolve(config.assets_dirs, config.model)
 
     if compare_repo is not None:
         benchmark_methods(

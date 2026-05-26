@@ -19,7 +19,7 @@ T_co = TypeVar("T_co", covariant=True)
 class DataLoader(Protocol[T_co]):
     """Interface for a data loader."""
 
-    def data_config(self) -> _config.DataConfig:
+    def data_config(self) -> _config.LeRobotAlohaDataConfig:
         """Get the data config for this data loader."""
         raise NotImplementedError("Subclasses of DataLoader should implement data_config.")
 
@@ -44,7 +44,7 @@ def create_data_loader(
         num_batches: Determines the number of batches to return.
         skip_norm_stats: Whether to skip data normalization.
     """
-    data_config = config.data.create(config.assets_dirs, config.model)
+    data_config = config.data.resolve(config.assets_dirs, config.model)
     logging.info(f"data_config: {data_config}")
 
     return create_torch_data_loader(
@@ -62,7 +62,7 @@ def create_data_loader(
 
 
 def create_torch_data_loader(
-    data_config: _config.DataConfig,
+    data_config: _config.LeRobotAlohaDataConfig,
     model_config: _model.BaseModelConfig,
     action_horizon: int,
     batch_size: int,
@@ -218,11 +218,11 @@ class _WorkerInitFn:
 
 
 class DataLoaderImpl(DataLoader):
-    def __init__(self, data_config: _config.DataConfig, data_loader: TorchDataLoader):
+    def __init__(self, data_config: _config.LeRobotAlohaDataConfig, data_loader: TorchDataLoader):
         self._data_config = data_config
         self._data_loader = data_loader
 
-    def data_config(self) -> _config.DataConfig:
+    def data_config(self) -> _config.LeRobotAlohaDataConfig:
         return self._data_config
 
     def __iter__(self):

@@ -1,6 +1,5 @@
 """See _CONFIGS for the list of available configs."""
 
-import abc
 from collections.abc import Sequence
 import dataclasses
 import difflib
@@ -10,7 +9,6 @@ from typing import Any, Literal, TypeAlias
 
 import etils.epath as epath
 import flax.nnx as nnx
-from typing_extensions import override
 import tyro
 
 import openpi.models.model as _model
@@ -408,65 +406,14 @@ class AssetsConfig:
 
 
 @dataclasses.dataclass(frozen=True)
-class DataConfig:
+class LeRobotAlohaDataConfig:
     repo_id: str | None = None
     repo_ids: list[str] | None = None
+    assets: AssetsConfig = dataclasses.field(default_factory=AssetsConfig)
     asset_id: str | None = None
     norm_stats: dict[str, _transforms.NormStats] | None = None
     transform_pipeline: _transforms.AlohaTransformPipeline | None = None
-    use_quantile_norm: bool = False
-    action_sequence_keys: Sequence[str] = ("actions",)
-    video_memory_num_frames: int = 1
-    video_memory_stride_seconds: float = 1.0
-
-
-@dataclasses.dataclass(frozen=True)
-class DataConfigFactory(abc.ABC):
-    repo_id: str | None = None
-    repo_ids: list[str] = tyro.MISSING
-    assets: AssetsConfig = dataclasses.field(default_factory=AssetsConfig)
-
-    @abc.abstractmethod
-    def create(self, assets_dirs: pathlib.Path, model_config: _model.BaseModelConfig) -> DataConfig:
-        """Create a data config."""
-
-    def create_base_config(self, assets_dirs: pathlib.Path, model_config: _model.BaseModelConfig) -> DataConfig:
-        repo_id = self.repo_id if self.repo_id is not tyro.MISSING else None
-        repo_ids = self.repo_ids if self.repo_ids is not tyro.MISSING else None
-        asset_id = self.assets.asset_id or repo_id
-        return dataclasses.replace(
-            DataConfig(),
-            repo_id=repo_id,
-            repo_ids=repo_ids,
-            asset_id=asset_id,
-            norm_stats=self._load_norm_stats(epath.Path(self.assets.assets_dir or assets_dirs), asset_id),
-            use_quantile_norm=True,
-        )
-
-    def _load_norm_stats(self, assets_dir: epath.Path, asset_id: str | None) -> dict[str, _transforms.NormStats] | None:
-        if asset_id is None:
-            return None
-        data_assets_dir = str(assets_dir / asset_id)
-        try:
-            norm_stats = _normalize.load(_download.maybe_download(data_assets_dir))
-            logging.info("Loaded norm stats from %s", data_assets_dir)
-            return norm_stats
-        except FileNotFoundError:
-            logging.info("Norm stats not found in %s, skipping.", data_assets_dir)
-            return None
-
-
-@dataclasses.dataclass(frozen=True)
-class FakeDataConfig(DataConfigFactory):
-    repo_id: str = "fake"
-
-    @override
-    def create(self, assets_dirs: pathlib.Path, model_config: _model.BaseModelConfig) -> DataConfig:
-        return DataConfig(repo_id=self.repo_id)
-
-
-@dataclasses.dataclass(frozen=True)
-class LeRobotAlohaDataConfig(DataConfigFactory):
+    use_quantile_norm: bool = True
     use_delta_joint_actions: bool = True
     image_size: tuple[int, int] = (224, 224)
     adapt_to_pi: bool = True
@@ -478,14 +425,16 @@ class LeRobotAlohaDataConfig(DataConfigFactory):
     include_subtask: bool = True
     action_sequence_keys: Sequence[str] = ("action",)
 
-    @override
-    def create(self, assets_dirs: pathlib.Path, model_config: _model.BaseModelConfig) -> DataConfig:
-        if model_config.model_type != _model.ModelType.PI05:
-            raise NotImplementedError(f"Unsupported model type: {model_config.model_type}")
-        assert isinstance(model_config, pi0_config.Pi0Config)
+    def resolve(self, assets_dirs: pathlib.Path, model_config: _model.BaseModelConfig) -> "LeRobotAlohaDataConfig":
+        """Load derived runtime fields for the single supported LeRobot ALOHA data path."""
 
+        asset_id = self.assets.asset_id or self.asset_id or self.repo_id
+        if self.repo_id == "fake":
+            return dataclasses.replace(self, asset_id=asset_id, norm_stats=None, transform_pipeline=None)
         return dataclasses.replace(
-            self.create_base_config(assets_dirs, model_config),
+            self,
+            asset_id=asset_id,
+            norm_stats=self._load_norm_stats(epath.Path(self.assets.assets_dir or assets_dirs), asset_id),
             transform_pipeline=_transforms.AlohaTransformPipeline(
                 include_low=self.include_low,
                 include_prompt=self.include_prompt,
@@ -503,6 +452,18 @@ class LeRobotAlohaDataConfig(DataConfigFactory):
             video_memory_stride_seconds=self.video_memory_stride_seconds,
         )
 
+    def _load_norm_stats(self, assets_dir: epath.Path, asset_id: str | None) -> dict[str, _transforms.NormStats] | None:
+        if asset_id is None:
+            return None
+        data_assets_dir = str(assets_dir / asset_id)
+        try:
+            norm_stats = _normalize.load(_download.maybe_download(data_assets_dir))
+            logging.info("Loaded norm stats from %s", data_assets_dir)
+            return norm_stats
+        except FileNotFoundError:
+            logging.info("Norm stats not found in %s, skipping.", data_assets_dir)
+            return None
+
 
 @dataclasses.dataclass(frozen=True)
 class TrainConfig:
@@ -517,7 +478,7 @@ class TrainConfig:
     optimizer: _optimizer.OptimizerConfig = dataclasses.field(default_factory=_optimizer.AdamW)
     ema_decay: float | None = 0.99
     freeze_filter: tyro.conf.Suppress[Filter] = dataclasses.field(default_factory=nnx.Nothing)
-    data: DataConfigFactory = dataclasses.field(default_factory=FakeDataConfig)
+    data: LeRobotAlohaDataConfig = dataclasses.field(default_factory=lambda: LeRobotAlohaDataConfig(repo_id="fake"))
     assets_base_dir: str = "./assets"
     checkpoint_base_dir: str = "./checkpoints"
     seed: int = 42
@@ -940,7 +901,7 @@ _CONFIGS = [
     ),
     TrainConfig(
         name="debug",
-        data=FakeDataConfig(),
+        data=LeRobotAlohaDataConfig(repo_id="fake"),
         batch_size=2,
         model=pi0_config.Pi0Config(
             paligemma_variant="dummy",

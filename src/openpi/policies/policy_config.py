@@ -33,7 +33,7 @@ def create_trained_policy(
 
     logging.info("Loading model...")
     model = train_config.model.load(_model.restore_params(checkpoint_dir / "params", dtype=jnp.bfloat16))
-    data_config = train_config.data.create(train_config.assets_dirs, train_config.model)
+    data_config = train_config.data.resolve(train_config.assets_dirs, train_config.model)
     if data_config.transform_pipeline is None:
         raise ValueError("A transform pipeline is required for policy inference.")
     if norm_stats is None:
