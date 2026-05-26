@@ -22,7 +22,7 @@ class Args:
     adapt_to_pi: bool = True
     host: str = "0.0.0.0"
     port: int = 8000
-    action_prompt: Literal["normal", "good", "bad"] = "normal"
+    action_quality: Literal["normal", "good", "bad"] = "normal"
 
     action_horizon: int = 25
 
@@ -59,16 +59,16 @@ class Args:
 
 
 def main(args: Args) -> None:
-    action_label_by_prompt = {
+    good_bad_action_by_quality = {
         "normal": "normal",
         "good": "good action",
         "bad": "bad action",
     }
-    action_label = action_label_by_prompt[args.action_prompt]
+    good_bad_action = good_bad_action_by_quality[args.action_quality]
     logging.info(
-        "Using action prompt mode: %s (subtask.good_bad_action=%s)",
-        args.action_prompt,
-        action_label,
+        "Using action quality mode: %s (subtask.good_bad_action=%s)",
+        args.action_quality,
+        good_bad_action,
     )
 
     ws_client_policy = _websocket_client_policy.WebsocketClientPolicy(
@@ -91,7 +91,6 @@ def main(args: Args) -> None:
         environment=_env.AlohaRealEnvironment(
             reset_position=args.reset_position,
             gripper_current_limits=args.gripper_current_limits,
-            action_label=action_label,
             video_memory_num_frames=args.video_memory_num_frames,
             video_memory_stride_seconds=args.video_memory_stride_seconds,
         ),
@@ -110,6 +109,7 @@ def main(args: Args) -> None:
         num_episodes=args.num_episodes,
         max_episode_steps=args.max_episode_steps,
         manual_dataset_dir=args.manual_dataset_dir,
+        good_bad_action=good_bad_action,
     )
 
     def _handle_exit_signal(signum, frame):

@@ -47,6 +47,7 @@ class Runtime:
         redis_port: int = 6379,
         redis_db: int = 0,
         manual_dataset_dir: str | None = None,
+        good_bad_action: str = "normal",
     ) -> None:
         self._environment = environment
         self._agent = agent
@@ -55,6 +56,7 @@ class Runtime:
         self._manual_hz = manual_hz
         self._num_episodes = num_episodes
         self._max_episode_steps = max_episode_steps
+        self._good_bad_action = good_bad_action
 
         self._step_time = 1 / self._max_hz if self._max_hz > 0 else 0
         self._manual_step_time = 1 / self._manual_hz if self._manual_hz > 0 else 0
@@ -459,7 +461,8 @@ class Runtime:
         assert self._current_task is not None, "_current_task must be set before calling _step()"
         observation_with_task = {
             **observation,
-            'prompt': self._current_task.get('task_name')
+            'prompt': self._current_task.get('task_name'),
+            'subtask': {'good_bad_action': self._good_bad_action},
         }
 
         action = self._agent.get_action(observation_with_task)
