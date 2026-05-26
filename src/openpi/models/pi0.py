@@ -167,7 +167,7 @@ class Pi0(_model.BaseModel):
         self, rng: at.KeyArrayLike, observation: _model.Observation, actions: _model.Actions, *, train: bool = False
     ) -> at.Float[at.Array, "*b ah"]:
         preprocess_rng, noise_rng, time_rng = jax.random.split(rng, 3)
-        observation = _transforms.preprocess_observation(
+        observation = _transforms.AlohaTransformPipeline.preprocess_observation(
             preprocess_rng,
             observation,
             train=train,
@@ -204,7 +204,7 @@ class Pi0(_model.BaseModel):
         num_steps: int | at.Int[at.Array, ""] = 10,
         noise: at.Float[at.Array, "b ah ad"] | None = None,
     ) -> _model.Actions:
-        observation = _transforms.preprocess_observation(
+        observation = _transforms.AlohaTransformPipeline.preprocess_observation(
             None,
             observation,
             train=False,
@@ -276,7 +276,7 @@ class Pi0(_model.BaseModel):
         d: int = 10,
         beta: float = 8.0,
     ) -> _model.Actions:
-        observation = _transforms.preprocess_observation(
+        observation = _transforms.AlohaTransformPipeline.preprocess_observation(
             None,
             observation,
             train=False,

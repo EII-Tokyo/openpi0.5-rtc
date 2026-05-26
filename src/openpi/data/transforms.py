@@ -239,6 +239,39 @@ class PromptFromLeRobotTask(DataTransformFn):
 
 
 @dataclasses.dataclass(frozen=True)
+class ValidateAlohaSample(DataTransformFn):
+    """Fail early when a raw ALOHA sample is missing fields required by this pipeline."""
+
+    image_keys: tuple[str, ...]
+    require_action: bool
+    require_task: bool = False
+    require_prompt: bool = False
+    require_subtask: bool = False
+
+    def __call__(self, data: DataDict) -> DataDict:
+        flat = flatten_dict(data)
+        missing: list[str] = []
+
+        for image_key in self.image_keys:
+            if not _has_any_key(data, flat, (f"observation.images.{image_key}", f"images/{image_key}", f"images.{image_key}")):
+                missing.append(f"observation.images.{image_key}")
+        if not _has_any_key(data, flat, ("observation.state", "state")):
+            missing.append("observation.state")
+        if self.require_action and not _has_any_key(data, flat, ("action", "actions")):
+            missing.append("action")
+        if self.require_task and "task" not in data and "task" not in flat:
+            missing.append("task")
+        if self.require_prompt and "prompt" not in data and "prompt" not in flat:
+            missing.append("prompt")
+        if self.require_subtask and "subtask" not in data and "subtask" not in flat:
+            missing.append("subtask")
+
+        if missing:
+            raise ValueError(f"Missing required ALOHA sample fields: {tuple(missing)}")
+        return data
+
+
+@dataclasses.dataclass(frozen=True)
 class PadStatesAndActions(DataTransformFn):
     """Zero-pads states and actions to the model action dimension."""
 
@@ -256,6 +289,7 @@ class AlohaInputs(DataTransformFn):
     """Converts raw ALOHA observations/actions to the model-facing dictionary."""
 
     adapt_to_pi: bool = True
+    image_keys: tuple[str, ...] | None = None
     include_prompt: bool = True
     include_subtask: bool = True
     EXPECTED_CAMERAS: ClassVar[tuple[str, ...]] = ("cam_high", "cam_left_wrist", "cam_right_wrist", "cam_low")
@@ -274,7 +308,8 @@ class AlohaInputs(DataTransformFn):
             arr = np.asarray(default if value is None else value, dtype=bool)
             return np.asarray(arr.reshape(-1)[0], dtype=bool)
 
-        images = {key: in_images[key] for key in self.EXPECTED_CAMERAS if key in in_images}
+        image_keys = self.image_keys or self.EXPECTED_CAMERAS
+        images = {key: in_images[key] for key in image_keys if key in in_images}
         image_masks = {key: _to_scalar_bool(source_image_masks.get(key, True)) for key in images}
 
         inputs = {k: v for k, v in data.items() if k != "images"}
@@ -332,6 +367,7 @@ class AlohaTransformPipeline:
         transforms: list[DataTransformFn] = [
             AlohaInputs(
                 adapt_to_pi=self.adapt_to_pi,
+                image_keys=self.raw_image_keys,
                 include_prompt=self.include_prompt,
                 include_subtask=self.include_subtask,
             ),
@@ -351,14 +387,33 @@ class AlohaTransformPipeline:
         )
         return transforms
 
+    def _validate_input_transform(self, *, require_action: bool, require_task: bool, require_prompt: bool) -> ValidateAlohaSample:
+        return ValidateAlohaSample(
+            image_keys=self.raw_image_keys,
+            require_action=require_action,
+            require_task=require_task,
+            require_prompt=require_prompt,
+            require_subtask=self.include_subtask,
+        )
+
     def training_input_transforms(self, norm_stats: dict[str, NormStats] | None, *, use_quantile_norm: bool) -> list[DataTransformFn]:
         return [
+            self._validate_input_transform(
+                require_action=True,
+                require_task=self.prompt_from_task,
+                require_prompt=self.include_prompt and not self.prompt_from_task,
+            ),
             *([PromptFromLeRobotTask()] if self.prompt_from_task else []),
             *self._model_input_transforms(norm_stats, use_quantile_norm=use_quantile_norm),
         ]
 
     def stats_input_transforms(self) -> list[DataTransformFn]:
         return [
+            self._validate_input_transform(
+                require_action=True,
+                require_task=self.prompt_from_task,
+                require_prompt=False,
+            ),
             *([PromptFromLeRobotTask()] if self.prompt_from_task else []),
             *self.raw_state_action_transforms(),
         ]
@@ -367,6 +422,7 @@ class AlohaTransformPipeline:
         transforms: list[DataTransformFn] = [
             AlohaInputs(
                 adapt_to_pi=self.adapt_to_pi,
+                image_keys=self.raw_image_keys,
                 include_prompt=self.include_prompt,
                 include_subtask=self.include_subtask,
             )
@@ -382,6 +438,11 @@ class AlohaTransformPipeline:
         use_quantile_norm: bool,
     ) -> list[DataTransformFn]:
         return [
+            self._validate_input_transform(
+                require_action=False,
+                require_task=False,
+                require_prompt=self.include_prompt,
+            ),
             FilterImages(self.raw_image_keys),
             *self._model_input_transforms(norm_stats, use_quantile_norm=use_quantile_norm),
         ]
@@ -395,6 +456,81 @@ class AlohaTransformPipeline:
         transforms.append(AlohaOutputs(adapt_to_pi=self.adapt_to_pi))
         return transforms
 
+    @staticmethod
+    def preprocess_observation(
+        rng: at.KeyArrayLike | None,
+        observation,
+        *,
+        train: bool = False,
+        image_keys: Sequence[str] | None = None,
+        image_resolution: tuple[int, int] = (224, 224),
+    ):
+        """Preprocess images and masks before model execution."""
+
+        if image_keys is None:
+            image_keys = tuple(observation.images.keys())
+
+        if not set(image_keys).issubset(observation.images):
+            raise ValueError(f"images dict missing keys: expected {image_keys}, got {list(observation.images)}")
+
+        batch_shape = observation.state.shape[:-1]
+
+        out_images = {}
+        for key in image_keys:
+            image = observation.images[key]
+            had_time_dim = image.ndim == 5
+            if had_time_dim:
+                batch_size, time_size, height, width, channels = image.shape
+                flat_image = image.reshape(batch_size * time_size, height, width, channels)
+            else:
+                flat_image = image
+
+            if flat_image.shape[1:3] != image_resolution:
+                logging.getLogger("openpi").info("Resizing image %s from %s to %s", key, flat_image.shape[1:3], image_resolution)
+                flat_image = image_tools.resize_with_pad(flat_image, *image_resolution)
+
+            if train:
+                flat_image = flat_image / 2.0 + 0.5
+
+                image_transforms = []
+                if "wrist" not in key:
+                    height, width = flat_image.shape[1:3]
+                    image_transforms += [
+                        augmax.RandomCrop(int(width * 0.95), int(height * 0.95)),
+                        augmax.Resize(width, height),
+                        augmax.Rotate((-5, 5)),
+                    ]
+                image_transforms += [
+                    augmax.ColorJitter(brightness=0.3, contrast=0.4, saturation=0.5),
+                ]
+                sub_rngs = jax.random.split(rng, flat_image.shape[0])
+                flat_image = jax.vmap(augmax.Chain(*image_transforms))(sub_rngs, flat_image)
+                flat_image = flat_image * 2.0 - 1.0
+
+            if had_time_dim:
+                image = flat_image.reshape(batch_size, time_size, *image_resolution, channels)
+            else:
+                image = flat_image
+
+            out_images[key] = image
+
+        out_masks = {}
+        for key in out_images:
+            if key not in observation.image_masks:
+                out_masks[key] = jnp.ones(batch_shape, dtype=jnp.bool)
+            else:
+                out_masks[key] = jnp.asarray(observation.image_masks[key])
+
+        return observation.__class__(
+            images=out_images,
+            image_masks=out_masks,
+            state=observation.state,
+            tokenized_prompt=observation.tokenized_prompt,
+            tokenized_prompt_mask=observation.tokenized_prompt_mask,
+            token_ar_mask=observation.token_ar_mask,
+            token_loss_mask=observation.token_loss_mask,
+        )
+
 
 def make_aloha_example() -> dict:
     """Creates a random input example for the ALOHA policy."""
@@ -407,6 +543,7 @@ def make_aloha_example() -> dict:
             "cam_right_wrist": np.random.randint(256, size=(3, 224, 224), dtype=np.uint8),
         },
         "prompt": "do something",
+        "subtask": "do something",
     }
 
 
@@ -450,79 +587,19 @@ def _extract_aloha_fields(data: dict, *, include_prompt: bool, include_subtask: 
     return extracted
 
 
-def preprocess_observation(
-    rng: at.KeyArrayLike | None,
-    observation,
-    *,
-    train: bool = False,
-    image_keys: Sequence[str] | None = None,
-    image_resolution: tuple[int, int] = (224, 224),
-):
-    """Preprocess images and masks before model execution."""
-
-    if image_keys is None:
-        image_keys = tuple(observation.images.keys())
-
-    if not set(image_keys).issubset(observation.images):
-        raise ValueError(f"images dict missing keys: expected {image_keys}, got {list(observation.images)}")
-
-    batch_shape = observation.state.shape[:-1]
-
-    out_images = {}
-    for key in image_keys:
-        image = observation.images[key]
-        had_time_dim = image.ndim == 5
-        if had_time_dim:
-            batch_size, time_size, height, width, channels = image.shape
-            flat_image = image.reshape(batch_size * time_size, height, width, channels)
+def _has_any_key(data: Mapping, flat: Mapping, keys: Sequence[str]) -> bool:
+    for key in keys:
+        if key in data or key in flat:
+            return True
+        parts = key.split(".")
+        value = data
+        for part in parts:
+            if not isinstance(value, Mapping) or part not in value:
+                break
+            value = value[part]
         else:
-            flat_image = image
-
-        if flat_image.shape[1:3] != image_resolution:
-            logging.getLogger("openpi").info("Resizing image %s from %s to %s", key, flat_image.shape[1:3], image_resolution)
-            flat_image = image_tools.resize_with_pad(flat_image, *image_resolution)
-
-        if train:
-            flat_image = flat_image / 2.0 + 0.5
-
-            image_transforms = []
-            if "wrist" not in key:
-                height, width = flat_image.shape[1:3]
-                image_transforms += [
-                    augmax.RandomCrop(int(width * 0.95), int(height * 0.95)),
-                    augmax.Resize(width, height),
-                    augmax.Rotate((-5, 5)),
-                ]
-            image_transforms += [
-                augmax.ColorJitter(brightness=0.3, contrast=0.4, saturation=0.5),
-            ]
-            sub_rngs = jax.random.split(rng, flat_image.shape[0])
-            flat_image = jax.vmap(augmax.Chain(*image_transforms))(sub_rngs, flat_image)
-            flat_image = flat_image * 2.0 - 1.0
-
-        if had_time_dim:
-            image = flat_image.reshape(batch_size, time_size, *image_resolution, channels)
-        else:
-            image = flat_image
-
-        out_images[key] = image
-
-    out_masks = {}
-    for key in out_images:
-        if key not in observation.image_masks:
-            out_masks[key] = jnp.ones(batch_shape, dtype=jnp.bool)
-        else:
-            out_masks[key] = jnp.asarray(observation.image_masks[key])
-
-    return observation.__class__(
-        images=out_images,
-        image_masks=out_masks,
-        state=observation.state,
-        tokenized_prompt=observation.tokenized_prompt,
-        tokenized_prompt_mask=observation.tokenized_prompt_mask,
-        token_ar_mask=observation.token_ar_mask,
-        token_loss_mask=observation.token_loss_mask,
-    )
+            return True
+    return False
 
 
 def _joint_flip_mask() -> np.ndarray:
