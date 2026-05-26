@@ -11,7 +11,7 @@ import jax.numpy as jnp
 import numpy as np
 from openpi.robot.client import image_tools
 
-from openpi.models import tokenizer as _tokenizer
+from openpi.data import tokenizer as _tokenizer
 from openpi.shared import array_typing as at
 from openpi.shared import normalize as _normalize
 
