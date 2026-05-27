@@ -408,7 +408,6 @@ class LeRobotAlohaDataConfig:
     transform_pipeline: _transforms.AlohaTransformPipeline | None = None
     use_quantile_norm: bool = True
     use_delta_joint_actions: bool = True
-    image_size: tuple[int, int] = (224, 224)
     adapt_to_pi: bool = True
     video_memory_num_frames: int = 1
     video_memory_stride_seconds: float = 1.0
@@ -422,7 +421,7 @@ class LeRobotAlohaDataConfig:
             transform_pipeline=_transforms.AlohaTransformPipeline(
                 include_low=self.include_low,
                 include_subtask=self.include_subtask,
-                image_size=self.image_size,
+                image_resolution=model_config.image_resolution,
                 max_token_len=model_config.max_token_len,
                 discrete_state_input=model_config.discrete_state_input,
                 assets_dir=self.assets.assets_dir,
@@ -478,10 +477,6 @@ class TrainConfig:
             raise ValueError("Cannot resume and overwrite at the same time.")
         if self.gradient_accumulation_steps < 1:
             raise ValueError("gradient_accumulation_steps must be >= 1.")
-        image_size = getattr(self.data, "image_size", None)
-        image_resolution = getattr(self.model, "image_resolution", None)
-        if image_size is not None and image_resolution != image_size:
-            object.__setattr__(self, "model", dataclasses.replace(self.model, image_resolution=image_size))
         object.__setattr__(self, "data", self.data.with_model(self.model))
 
 
@@ -500,6 +495,10 @@ def _make_twist_train_config(
     include_low: bool = True,
     include_subtask: bool = True,
     gradient_accumulation_steps: int = 1,
+    image_resolution: tuple[int, int] = (224, 224),
+    max_token_len: int | None = None,
+    video_memory_num_frames: int = 1,
+    video_memory_stride_seconds: float = 1.0,
     assets: AssetsConfig,
     exp_name: str = tyro.MISSING,
     checkpoint_base_dir: str = "./checkpoints",
@@ -512,6 +511,8 @@ def _make_twist_train_config(
         model = pi0_config.Pi0Config(
             paligemma_variant="gemma_2b_lora",
             action_expert_variant="gemma_300m_lora",
+            image_resolution=image_resolution,
+            max_token_len=max_token_len,
         )
         freeze_filter = pi0_config.Pi0Config(
             paligemma_variant="gemma_2b_lora",
@@ -519,7 +520,10 @@ def _make_twist_train_config(
         ).get_freeze_filter()
         ema_decay = None
     else:
-        model = pi0_config.Pi0Config()
+        model = pi0_config.Pi0Config(
+            image_resolution=image_resolution,
+            max_token_len=max_token_len,
+        )
         freeze_filter = nnx.Nothing()
         ema_decay = 0.99
 
@@ -536,9 +540,8 @@ def _make_twist_train_config(
         log_interval=10,
         data=LeRobotAlohaDataConfig(
             adapt_to_pi=True,
-            image_size=(224, 224),
-            video_memory_num_frames=1,
-            video_memory_stride_seconds=1.0,
+            video_memory_num_frames=video_memory_num_frames,
+            video_memory_stride_seconds=video_memory_stride_seconds,
             repo_ids=repo_ids,
             assets=assets,
             include_low=include_low,

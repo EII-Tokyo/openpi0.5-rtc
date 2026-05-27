@@ -357,7 +357,7 @@ class AlohaTransformPipeline:
 
     include_low: bool
     include_subtask: bool
-    image_size: tuple[int, int]
+    image_resolution: tuple[int, int]
     max_token_len: int
     discrete_state_input: bool
     assets_dir: str
@@ -424,7 +424,7 @@ class AlohaTransformPipeline:
         transforms.extend(
             [
                 Normalize(norm_stats, use_quantiles=use_quantile_norm),
-                ResizeImages(*self.image_size),
+                ResizeImages(*self.image_resolution),
                 TokenizePrompt(
                     _tokenizer.PaligemmaTokenizer(self.max_token_len),
                     discrete_state_input=self.discrete_state_input,
