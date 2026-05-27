@@ -19,129 +19,6 @@ Filter: TypeAlias = nnx.filterlib.Filter
 _TROSSEN_RESET_POSE = {"reset_pose": [0, -1.5, 1.5, 0, 0, 0]}
 _PI05_BASE_PARAMS = "gs://openpi-assets/checkpoints/pi05_base/params"
 
-_TWIST_AND_STATIC_REPO_IDS = [
-    "lyl472324464/2026-03-09-inference-with-and-without-cap",
-    "lyl472324464/2026-03-09-no-cap-inference",
-    "lyl472324464/2026-03-05-two-direction",
-    "lyl472324464/2026-03-04-one-direction",
-    "lyl472324464/2026-02-03-no-cap-and-direction",
-    "lyl472324464/2026-01-28-twist-many-bottle",
-    "lyl472324464/2026-01-20-twist-one-bottle",
-    "lyl472324464/2025-12-23-twist-one-bottle",
-    "lyl472324464/2025-12-10-twist-one-bottle",
-    "lyl472324464/2025-11-26-twist-two-bottles",
-    "lyl472324464/2025-11-18-twist-two-bottles",
-    "lyl472324464/2025-11-14-twist-two-bottles",
-    "lyl472324464/2025-11-06-twist-many-bottles",
-    "lyl472324464/2025-09-15-twist-one-bottle-no-box-in-the-front",
-    "lyl472324464/aloha_static_battery",
-    "lyl472324464/aloha_static_candy",
-    "lyl472324464/aloha_static_coffee",
-    "lyl472324464/aloha_static_coffee_new",
-    "lyl472324464/aloha_static_cups_open",
-    "lyl472324464/aloha_static_fork_pick_up",
-    "lyl472324464/aloha_static_pingpong_test",
-    "lyl472324464/aloha_static_pro_pencil",
-    "lyl472324464/aloha_static_screw_driver",
-    "lyl472324464/aloha_static_tape",
-    "lyl472324464/aloha_static_thread_velcro",
-    "lyl472324464/aloha_static_towel",
-    "lyl472324464/aloha_static_vinh_cup",
-    "lyl472324464/aloha_static_vinh_cup_left",
-    "lyl472324464/aloha_static_ziploc_slide",
-]
-
-_TWIST_ONLY_REPO_IDS = [
-    "lyl472324464/2026-03-09-inference-with-and-without-cap",
-    "lyl472324464/2026-03-09-no-cap-inference",
-    "lyl472324464/2026-03-05-two-direction",
-    "lyl472324464/2026-03-04-one-direction",
-    "lyl472324464/2026-02-03-no-cap-and-direction",
-    "lyl472324464/2026-01-28-twist-many-bottle",
-    "lyl472324464/2026-01-20-twist-one-bottle",
-    "lyl472324464/2025-12-23-twist-one-bottle",
-    "lyl472324464/2025-12-10-twist-one-bottle",
-    "lyl472324464/2025-11-26-twist-two-bottles",
-    "lyl472324464/2025-11-18-twist-two-bottles",
-    "lyl472324464/2025-11-14-twist-two-bottles",
-    "lyl472324464/2025-11-06-twist-many-bottles",
-    "lyl472324464/2025-09-15-twist-one-bottle-no-box-in-the-front",
-]
-
-_TWIST_WATER_TEAR_REPO_IDS = [
-    "lyl472324464/2026.04.10_twist_tear_water-direction_tabacco-top",
-    "lyl472324464/2026.04.10_twist-and-tear-and-water-direction-and-tabacco-top",
-    "lyl472324464/2026.04.13_twist_tear_water-direction_tabacco-top-2",
-    "lyl472324464/2026-04-14_tear_twist_water-direction_tabacco-mid_lower",
-    "lyl472324464/2026-04-14_twist_tear_water-direction_tabacco-mid_lower",
-    "lyl472324464/2026-04-14_twist_tear_water-direction_tabacco-all"
-]
-
-# Hugging Face Hub dataset roots under `eii-data-system-prod/data/huggingface/hub` on 192.168.1.40
-# (datasets--org--name), excluding any repo_id whose name contains "tear" (case-insensitive).
-_EII_DATA_SYSTEM_HUB_NO_TEAR_REPO_IDS = [
-    "lyl472324464/2025-09-15-twist-one-bottle-no-box-in-the-front",
-    "lyl472324464/2025-11-06-twist-many-bottles",
-    "lyl472324464/2025-11-14-twist-two-bottles",
-    "lyl472324464/2025-11-18-twist-two-bottles",
-    "lyl472324464/2025-11-26-twist-two-bottles",
-    "lyl472324464/2025-12-10-twist-one-bottle",
-    "lyl472324464/2025-12-23-twist-one-bottle",
-    "lyl472324464/2026-01-20-twist-one-bottle",
-    "lyl472324464/2026-01-28-twist-many-bottle",
-    "lyl472324464/2026-02-03-no-cap-and-direction",
-    "lyl472324464/2026-03-04-one-direction",
-    "lyl472324464/2026-03-05-two-direction",
-    # 2026-03-09 two repos ~28.3k frames total on Hub; repeat 4x each (~113k weighted) to target ~100k.
-    "lyl472324464/2026-03-09-inference-with-and-without-cap",
-    "lyl472324464/2026-03-09-no-cap-inference",
-    "lyl472324464/2026-03-09-inference-with-and-without-cap",
-    "lyl472324464/2026-03-09-no-cap-inference",
-    "lyl472324464/2026-03-09-inference-with-and-without-cap",
-    "lyl472324464/2026-03-09-no-cap-inference",
-    "lyl472324464/2026-03-09-inference-with-and-without-cap",
-    "lyl472324464/2026-03-09-no-cap-inference",
-    "lyl472324464/2026-03-12-one-have-cap",
-    "lyl472324464/2026-03-12-one-have-cap-direction",
-    "lyl472324464/2026-03-12-one-havent-cap",
-    "lyl472324464/2026-03-12-one-havent-cap-direction",
-    "lyl472324464/2026-03-12-two-have-all-left",
-    "lyl472324464/2026-03-12-two-have-cap-all-right",
-    "lyl472324464/2026-03-12-two-have-cap-one-right",
-    "lyl472324464/2026.03.16_twist_many",
-    # 2026-04-21 (HF Hub ids use `-lerobot` suffix) — rotate-heavy; listed twice to up-weight in training.
-    "lyl472324464/2026-04-21_direction-lerobot",
-    "lyl472324464/2026-04-21_direction_2-lerobot",
-    "lyl472324464/2026-04-21_direction_havent_cap-lerobot",
-    "lyl472324464/2026-04-21_direction_havent_cap_water-lerobot",
-    "lyl472324464/2026-04-21_direction-lerobot",
-    "lyl472324464/2026-04-21_direction_2-lerobot",
-    "lyl472324464/2026-04-21_direction_havent_cap-lerobot",
-    "lyl472324464/2026-04-21_direction_havent_cap_water-lerobot",
-]
-
-_EII_RINSE_REPO_IDS = [
-    "lyl472324464/2026-04-21_direction-lerobot-with-rinse",
-    "lyl472324464/2026-04-21_direction_2-lerobot-with-rinse",
-    "lyl472324464/2026-04-21_direction_havent_cap-lerobot-with-rinse",
-    "lyl472324464/2026-04-21_direction_havent_cap_water-lerobot-with-rinse",
-    "lyl472324464/2026-04-23_direction_havent_cap_water-lerobot-with-rinse",
-    "lyl472324464/2026.03.18_twist-and-water_one_no_cap-with-rinse",
-    "lyl472324464/2026.03.30_twist-and-water_two_have_cap-with-rinse",
-]
-
-_EII_RINSE_9REPO_REPO_IDS = [
-    "lyl472324464/2026-05-07_water-lerobot-with-rinse",
-    "lyl472324464/2026-05-05_water-lerobot-with-rinse",
-    "lyl472324464/2026-05-05_direction-water-lerobot-with-rinse",
-    "lyl472324464/2026-05-04_direction-lerobot-with-rinse",
-    "lyl472324464/2026-05-04_turn_over-lerobot-with-rinse",
-    "lyl472324464/2026-05-04_direction-twist-water-lerobot-with-rinse",
-    "lyl472324464/2026-05-03_turn_over-lerobot-with-rinse",
-    "lyl472324464/2026-05-01_water1-lerobot-with-rinse",
-    "lyl472324464/2026-05-01_turn_over-lerobot-with-rinse",
-]
-
 _EII_RINSE_11REPO_REPO_IDS = [
     "lyl472324464/2026-05-01_turn_over-lerobot-with-rinse",
     "lyl472324464/2026-05-01_water1-lerobot-with-rinse",
@@ -163,45 +40,6 @@ _EII_RINSE_11REPO_INSERT_X5_REPO_IDS = [
     *_EII_RINSE_11REPO_REPO_IDS,
     *([_EII_RINSE_INSERT_REALIGN_REPO_ID] * 4),
     *([_EII_RINSE_INSERT_NO_CAP_REPO_ID] * 4),
-]
-
-_EII_DATA_SYSTEM_WITHOUT_RINSE_36_REPO_IDS = [
-    "lyl472324464/2025-09-15-twist-one-bottle-no-box-in-the-front-without-rinse",
-    "lyl472324464/2025-11-06-twist-many-bottles-without-rinse",
-    "lyl472324464/2025-11-14-twist-two-bottles",
-    "lyl472324464/2025-11-18-twist-two-bottles",
-    "lyl472324464/2025-11-26-twist-two-bottles",
-    "lyl472324464/2025-12-10-twist-one-bottle",
-    "lyl472324464/2025-12-23-twist-one-bottle",
-    "lyl472324464/2026-01-20-twist-one-bottle",
-    "lyl472324464/2026-01-28-twist-many-bottle",
-    "lyl472324464/2026-02-03-no-cap-and-direction",
-    "lyl472324464/2026-03-04-one-direction",
-    "lyl472324464/2026-03-05-two-direction",
-    "lyl472324464/2026-03-12-one-have-cap",
-    "lyl472324464/2026-03-12-one-have-cap-direction",
-    "lyl472324464/2026-03-12-one-havent-cap",
-    "lyl472324464/2026-03-12-one-havent-cap-direction",
-    "lyl472324464/2026-03-12-two-have-all-left",
-    "lyl472324464/2026-03-12-two-have-cap-all-right",
-    "lyl472324464/2026-03-12-two-have-cap-one-right",
-    "lyl472324464/2026.03.16_twist_many-without-rinse",
-    "lyl472324464/2026-04-21_direction-lerobot-without-rinse",
-    "lyl472324464/2026-04-21_direction_2-lerobot-without-rinse",
-    "lyl472324464/2026-04-21_direction_havent_cap-lerobot-without-rinse",
-    "lyl472324464/2026-04-21_direction_havent_cap_water-lerobot-without-rinse",
-    "lyl472324464/2026-04-23_direction_havent_cap_water-lerobot-without-rinse",
-    "lyl472324464/2026-04-23_direction_have_cap_water-lerobot-without-rinse",
-    "lyl472324464/2026-04-27direction_have_cap_water-lerobot-without-rinse",
-    "lyl472324464/2026-04-27_direction_have_cap_water2-lerobot-without-rinse",
-    "lyl472324464/2026-04-28_direction_have_cap_water-lerobot-without-rinse",
-    "lyl472324464/2026-04-28_direction_have_cap_water2-lerobot-without-rinse",
-    "lyl472324464/2026-05-01_turn_over-lerobot-without-rinse",
-    "lyl472324464/2026-05-03_turn_over-lerobot-without-rinse",
-    "lyl472324464/2026-05-04_direction-lerobot-without-rinse",
-    "lyl472324464/2026-05-04_direction-twist-water-lerobot-without-rinse",
-    "lyl472324464/2026-05-04_turn_over-lerobot-without-rinse",
-    "lyl472324464/2026-05-05_direction-water-lerobot-without-rinse",
 ]
 
 _EII_DATA_SYSTEM_WITHOUT_RINSE_41_REPO_IDS = [
@@ -269,34 +107,6 @@ _EII_FREE_SPINNING_REPO_ID = "lyl472324464/2026-05-11_free-spinning-lerobot-with
 _EII_DATA_SYSTEM_WITHOUT_RINSE_34_REPO_IDS_FREE_SPIN_X6 = [
     *_EII_DATA_SYSTEM_WITHOUT_RINSE_34_REPO_IDS,
     *([_EII_FREE_SPINNING_REPO_ID] * 5),
-]
-
-_EII_DATA_SYSTEM_WITHOUT_RINSE_25_REPO_IDS = [
-    "lyl472324464/2025-09-15-twist-one-bottle-no-box-in-the-front-without-rinse",
-    "lyl472324464/2025-11-06-twist-many-bottles-without-rinse",
-    "lyl472324464/2025-11-14-twist-two-bottles-without-rinse",
-    "lyl472324464/2025-11-18-twist-two-bottles",
-    "lyl472324464/2025-11-26-twist-two-bottles-without-rinse",
-    "lyl472324464/2025-12-10-twist-one-bottle",
-    "lyl472324464/2025-12-23-twist-one-bottle-without-rinse",
-    "lyl472324464/2026-01-20-twist-one-bottle",
-    "lyl472324464/2026-01-28-twist-many-bottle-without-rinse",
-    "lyl472324464/2026-02-03-no-cap-and-direction-without-rinse",
-    "lyl472324464/2026-03-04-one-direction-lerobot-without-rinse",
-    "lyl472324464/2026-03-05-two-direction-lerobot-without-rinse",
-    "lyl472324464/2026.03.12_one_have_cap-lerobot-without-rinse",
-    "lyl472324464/2026.03.12_one_have_cap_direction-lerobot-without-rinse",
-    "lyl472324464/2026-03-12-one-havent-cap",
-    "lyl472324464/2026-03-12-one-havent-cap-direction",
-    "lyl472324464/2026.03.12_two_have_all_left-lerobot-without-rinse",
-    "lyl472324464/2026.03.12_two_have_cap_all_right-lerobot-without-rinse",
-    "lyl472324464/2026.03.12_two_have_cap_one_right-lerobot-without-rinse",
-    "lyl472324464/2026.03.16_twist_many-lerobot-without-rinse",
-    "lyl472324464/2026-04-21_direction-lerobot-without-rinse",
-    "lyl472324464/2026-04-21_direction_2-lerobot-without-rinse",
-    "lyl472324464/2026-04-21_direction_haven-t_cap-lerobot-without-rinse",
-    "lyl472324464/2026-04-21_direction_havent_cap_water-lerobot-without-rinse",
-    "lyl472324464/2026-04-23_direction_havent_cap_water-lerobot-without-rinse",
 ]
 
 _EII_DATA_SYSTEM_WITHOUT_RINSE_MERGED_ADJUST_PICKUP_36_REPO_IDS = [
@@ -531,99 +341,6 @@ def _make_twist_train_config(
 
 _CONFIGS = [
     _make_twist_train_config(
-        "twist_off_the_bottle_cap",
-        repo_ids=_TWIST_AND_STATIC_REPO_IDS,
-        include_low=False,
-        lora=False,
-        batch_size=256,
-        num_workers=16,
-        assets=_local_assets("twist_off_the_bottle_cap"),
-    ),
-    _make_twist_train_config(
-        "twist_off_the_bottle_cap_lora",
-        repo_ids=_TWIST_ONLY_REPO_IDS,
-        lora=True,
-        batch_size=32,
-        num_workers=4,
-        assets=_local_assets("twist_off_the_bottle_cap_lora"),
-    ),
-    _make_twist_train_config(
-        "twist_water_tear_promptfix_lora",
-        repo_ids=_TWIST_WATER_TEAR_REPO_IDS,
-        lora=True,
-        batch_size=64,
-        num_workers=4,
-        assets=_local_assets("twist_water_tear_promptfix_lora"),
-    ),
-    _make_twist_train_config(
-        "eii_data_system_no_tear_cam3_lora",
-        repo_ids=_EII_DATA_SYSTEM_HUB_NO_TEAR_REPO_IDS,
-        lora=True,
-        # micro-batch 64 x 2 accum = 128 effective (scripts/train.py). H100 80GB + LoRA + 3x224 cams: 64 is used elsewhere (tear_lora); OOM则改 32x4。
-        batch_size=64,
-        num_workers=4,
-        include_low=False,
-        include_subtask=False,
-        gradient_accumulation_steps=2,
-        # Load norm stats from ./assets/<config.name>/trossen (compute_norm_stats), not gs:// pi05_base.
-        assets=_local_assets("eii_data_system_no_tear_cam3_lora"),
-    ),
-    _make_twist_train_config(
-        "eii_data_system_without_rinse_cam3_fullft_h200",
-        repo_ids=_EII_DATA_SYSTEM_WITHOUT_RINSE_36_REPO_IDS,
-        lora=False,
-        batch_size=256,
-        num_workers=128,
-        fsdp_devices=8,
-        include_low=False,
-        include_subtask=False,
-        gradient_accumulation_steps=1,
-        exp_name="no_rinse_cam3_fullft_36repo_bs256_nw128_fsdp8_20260510",
-        checkpoint_base_dir="/workspace/openpi0.5-rtc/checkpoints",
-        wandb_enabled=True,
-        overwrite=True,
-        resume=False,
-        # 2026-05-08 benchmarked on 8x H200:
-        # This config for the 2026-05-10 36-repo production run:
-        # fsdp=8, nw=128, bs=256, 3 cameras, full fine-tune, 40k steps,
-        # video_memory_num_frames=1, video_memory_stride_seconds=1.0,
-        # log_interval=10, save_interval=1000, wandb_enabled=True,
-        # overwrite=True, resume=False.
-        # Norm stats are loaded from:
-        # /workspace/openpi0.5-rtc/assets/eii_data_system_without_rinse_cam3_fullft_h200/trossen/norm_stats.json
-        # Nearby H200 benchmark:
-        # - fsdp=2, nw=64, bs=256:
-        #   train_step_time ~= 1.78s/step on a single-repo smoke benchmark,
-        #   data_wait_time ~= 0.03s - 0.37s/step in steady state.
-        # - fsdp=4, nw=32, bs=256:
-        #   train_step_time ~= 1.58s/step,
-        #   data_wait_time ~= 0.04s - 3.58s/step.
-        # - fsdp=4, nw=64, bs=256:
-        #   train_step_time ~= 1.57s - 1.84s/step,
-        #   data_wait_time ~= 0.03s - 2.76s/step.
-        # - fsdp=8, nw=64, bs=256:
-        #   train_step_time ~= 1.43s - 1.45s/step after warmup,
-        #   data_wait_time ~= 0.04s - 0.29s/step over a longer run.
-        # - fsdp=8, nw=64, bs=512:
-        #   train_step_time ~= 2.74s - 3.37s/step,
-        #   data_wait_time can spike badly (observed up to ~= 24.95s).
-        # - fsdp=8, nw=64, bs=1024:
-        #   train_step_time ~= 5.29s - 5.50s/step,
-        #   data_wait_time ~= 0.10s - 0.99s/step in early steady state,
-        #   VRAM ~= 99.8 GiB / GPU in steady state.
-        # Nearby 8x H100 80GB benchmarks:
-        # - fsdp=8, nw=64, bs=256:
-        #   train_step_time ~= 1.50s - 1.90s/step,
-        #   data_wait_time settles to ~= 0.03s - 0.04s/step after a few steps,
-        #   with early spikes up to ~= 6.54s.
-        # - fsdp=8, nw=64, bs=512:
-        #   train_step_time ~= 2.86s - 3.15s/step,
-        #   data_wait_time is usually ~= 0.05s - 0.10s/step,
-        #   with observed spikes up to ~= 19.79s and ~= 6.43s,
-        #   VRAM ~= 62.4 GiB / GPU after step execution.
-        assets=_local_assets("eii_data_system_without_rinse_cam3_fullft_h200"),
-    ),
-    _make_twist_train_config(
         "eii_data_system_without_rinse_cam3_fullft_h200_41repo",
         repo_ids=_EII_DATA_SYSTEM_WITHOUT_RINSE_41_REPO_IDS,
         lora=False,
@@ -668,27 +385,6 @@ _CONFIGS = [
         assets=_local_assets("eii_data_system_without_rinse_cam3_fullft_h200_34repo"),
     ),
     _make_twist_train_config(
-        "eii_data_system_without_rinse_cam3_fullft_h200_25repo",
-        repo_ids=_EII_DATA_SYSTEM_WITHOUT_RINSE_25_REPO_IDS,
-        lora=False,
-        batch_size=256,
-        num_workers=64,
-        fsdp_devices=4,
-        include_low=False,
-        include_subtask=False,
-        gradient_accumulation_steps=1,
-        exp_name="no_rinse_cam3_fullft_25repo_bs256_nw64_fsdp4_20260514",
-        checkpoint_base_dir="/workspace/openpi0.5-rtc/checkpoints",
-        wandb_enabled=True,
-        overwrite=True,
-        resume=False,
-        # 2026-05-14 setup for the user-specified 25-repo no-rinse run.
-        # Same 3-camera full fine-tune shape as the 34-repo B200 config:
-        # cam_high/cam_left_wrist/cam_right_wrist, no temporal memory,
-        # bs=256, nw=64, fsdp=4, 40k steps.
-        assets=_local_assets("eii_data_system_without_rinse_cam3_fullft_h200_25repo"),
-    ),
-    _make_twist_train_config(
         "eii_data_system_without_rinse_cam3_fullft_h200_merged_adjust_pickup_36repo",
         repo_ids=_EII_DATA_SYSTEM_WITHOUT_RINSE_MERGED_ADJUST_PICKUP_36_REPO_IDS,
         lora=False,
@@ -731,56 +427,6 @@ _CONFIGS = [
         assets=_local_assets("eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo"),
     ),
     _make_twist_train_config(
-        "eii_data_system_without_rinse_cam3_fullft_a100",
-        repo_ids=_EII_DATA_SYSTEM_WITHOUT_RINSE_36_REPO_IDS,
-        lora=False,
-        batch_size=256,
-        num_workers=16,
-        fsdp_devices=4,
-        include_low=False,
-        include_subtask=False,
-        gradient_accumulation_steps=1,
-        # 2026-05-07 benchmarked on 8x A100 80GB:
-        # This config: fsdp=4, nw=16, bs=256
-        # train_step_time ~= 14.6s/step on a single-repo smoke benchmark.
-        # data_wait_time ~= 0.04s - 1.90s/step in steady state.
-        # Other A100 full-ft cam3 single-repo benchmarks:
-        # - fsdp=4, nw=16, bs=128:
-        #   train_step_time ~= 12.4s/step,
-        #   data_wait_time ~= 0.02s - 0.49s/step.
-        # - fsdp=8, nw=16, bs=128:
-        #   train_step_time ~= 20.2s/step,
-        #   data_wait_time ~= 0.04s - 0.24s/step.
-        # - fsdp=2, nw=16, bs=128:
-        #   train_step_time ~= 21.5s/step,
-        #   data_wait_time ~= 0.02s - 1.10s/step.
-        # - fsdp=1, nw=16, bs=128:
-        #   OOM on step 0.
-        assets=_local_assets("eii_data_system_without_rinse_cam3_fullft_a100"),
-    ),
-    _make_twist_train_config(
-        "eii_rinse_cam4_lora",
-        repo_ids=_EII_RINSE_REPO_IDS,
-        lora=True,
-        batch_size=32,
-        num_workers=4,
-        include_low=True,
-        include_subtask=True,
-        gradient_accumulation_steps=2,
-        assets=_local_assets("eii_rinse_cam4_lora"),
-    ),
-    _make_twist_train_config(
-        "eii_rinse_9repo_cam4_lora",
-        repo_ids=_EII_RINSE_9REPO_REPO_IDS,
-        lora=True,
-        batch_size=32,
-        num_workers=16,
-        include_low=True,
-        include_subtask=True,
-        gradient_accumulation_steps=2,
-        assets=_local_assets("eii_rinse_9repo_cam4_lora"),
-    ),
-    _make_twist_train_config(
         "eii_rinse_11repo_cam4_fullft",
         repo_ids=_EII_RINSE_11REPO_INSERT_X5_REPO_IDS,
         lora=False,
@@ -791,45 +437,10 @@ _CONFIGS = [
         gradient_accumulation_steps=1,
         assets=_local_assets("eii_rinse_11repo_cam4_fullft"),
     ),
-    _make_twist_train_config(
-        "eii_rinse_9repo_cam4_lora_6000",
-        repo_ids=_EII_RINSE_9REPO_REPO_IDS,
-        lora=True,
-        batch_size=32,
-        num_workers=16,
-        include_low=True,
-        include_subtask=True,
-        gradient_accumulation_steps=2,
-        exp_name="eii_rinse_9repo_cam4_lora_wandb_bs32_acc2_nw16_nomem_20260510_093635",
-        assets=_local_assets("eii_rinse_9repo_cam4_lora_6000"),
-    ),
-    _make_twist_train_config(
-        "eii_rinse_9repo_cam4_lora_15000",
-        repo_ids=_EII_RINSE_9REPO_REPO_IDS,
-        lora=True,
-        batch_size=32,
-        num_workers=16,
-        include_low=True,
-        include_subtask=True,
-        gradient_accumulation_steps=2,
-        exp_name="eii_rinse_9repo_cam4_lora_wandb_bs32_acc2_nw16_nomem_20260510_093635",
-        assets=_local_assets("eii_rinse_9repo_cam4_lora_15000"),
-    ),
-    _make_twist_train_config(
-        "eii_rinse_cam4_fullft",
-        repo_ids=_EII_RINSE_REPO_IDS,
-        lora=False,
-        batch_size=128,
-        num_workers=16,
-        include_low=True,
-        include_subtask=True,
-        gradient_accumulation_steps=1,
-        assets=_local_assets("eii_rinse_cam4_fullft"),
-    ),
     TrainConfig(
         name="debug",
         data=LeRobotAlohaDataConfig(
-            repo_ids=[_TWIST_ONLY_REPO_IDS[0]],
+            repo_ids=["lyl472324464/2026-03-09-inference-with-and-without-cap"],
             transform_pipeline=_transforms.AlohaTransformPipeline(
                 include_low=False,
                 include_subtask=False,
