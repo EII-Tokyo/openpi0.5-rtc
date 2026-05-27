@@ -1,3 +1,4 @@
+import dataclasses
 import logging
 import pathlib
 from typing import Any
@@ -7,7 +8,6 @@ import jax.numpy as jnp
 import openpi.models.model as _model
 import openpi.policies.policy as _policy
 import openpi.shared.download as download
-from openpi.training import checkpoints as _checkpoints
 from openpi.training import config as _config
 from openpi.data import transforms
 
@@ -33,19 +33,22 @@ def create_trained_policy(
 
     logging.info("Loading model...")
     model = train_config.model.load(_model.restore_params(checkpoint_dir / "params", dtype=jnp.bfloat16))
-    data_config = train_config.data.resolve(train_config.assets_dirs, train_config.model)
+    checkpoint_assets = _config.AssetsConfig(
+        assets_dir=str(checkpoint_dir / "assets"),
+        asset_id=train_config.data.assets.asset_id,
+    )
+    data_config = dataclasses.replace(
+        train_config.data,
+        assets=checkpoint_assets,
+    ).with_model(train_config.model)
     if data_config.transform_pipeline is None:
         raise ValueError("A transform pipeline is required for policy inference.")
     if norm_stats is None:
-        # We are loading the norm stats from the checkpoint instead of the config assets dir to make sure
-        # that the policy is using the same normalization stats as the original training process.
-        if data_config.asset_id is None:
-            raise ValueError("Asset id is required to load norm stats.")
-        norm_stats = _checkpoints.load_norm_stats(checkpoint_dir / "assets", data_config.asset_id)
+        norm_stats = data_config.transform_pipeline.load_norm_stats()
 
     input_transforms = data_config.transform_pipeline.policy_input_transforms(
-        norm_stats,
         use_quantile_norm=data_config.use_quantile_norm,
+        norm_stats=norm_stats,
     )
     logging.info("Filtering policy input images to training camera keys: %s", data_config.transform_pipeline.raw_image_keys)
 
@@ -53,8 +56,8 @@ def create_trained_policy(
         model,
         transforms=input_transforms,
         output_transforms=data_config.transform_pipeline.policy_output_transforms(
-            norm_stats,
             use_quantile_norm=data_config.use_quantile_norm,
+            norm_stats=norm_stats,
         ),
         observation_transform=lambda observation: data_config.transform_pipeline.preprocess_observation(
             None,

@@ -37,10 +37,10 @@ except ImportError:
     import openpi.transforms as transforms
 
 
-def resolve_data_config(cfg):
+def get_data_config(cfg):
     if hasattr(cfg.data, "resolve"):
         return cfg.data.resolve(cfg.assets_dirs, cfg.model)
-    return cfg.data.create(cfg.assets_dirs, cfg.model)
+    return cfg.data
 
 
 def transform_names(items):
@@ -92,8 +92,8 @@ def apply_all(data, items):
 def training_transforms(data_config):
     if getattr(data_config, "transform_pipeline", None) is not None:
         return data_config.transform_pipeline.training_input_transforms(
-            None,
             use_quantile_norm=data_config.use_quantile_norm,
+            norm_stats={},
         )
     prompt_from_task = getattr(data_config, "prompt_from_task", True)
     return [
@@ -108,8 +108,8 @@ def training_transforms(data_config):
 def policy_transforms(data_config):
     if getattr(data_config, "transform_pipeline", None) is not None:
         return data_config.transform_pipeline.policy_input_transforms(
-            None,
             use_quantile_norm=data_config.use_quantile_norm,
+            norm_stats={},
         )
 
     image_keys = None
@@ -148,7 +148,7 @@ def main():
     args = parser.parse_args()
 
     cfg = train_config.get_config(args.config)
-    data_config = resolve_data_config(cfg)
+    data_config = get_data_config(cfg)
     include_low = "cam_low" in getattr(data_config, "transform_pipeline", data_config).raw_image_keys if getattr(data_config, "transform_pipeline", None) else any(
         isinstance(item, transforms.RepackTransform) and isinstance(item.structure, dict) and "cam_low" in item.structure.get("images", {})
         for item in data_config.repack_transforms.inputs

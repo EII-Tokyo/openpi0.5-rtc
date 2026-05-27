@@ -71,9 +71,10 @@ def save_state(
     def save_assets(directory: epath.Path):
         # Save the normalization stats.
         data_config = data_loader.data_config()
-        norm_stats = data_config.norm_stats
-        if norm_stats is not None and data_config.asset_id is not None:
-            _normalize.save(directory / data_config.asset_id, norm_stats)
+        if data_config.transform_pipeline is None:
+            raise ValueError("A transform pipeline is required to save checkpoint assets.")
+        norm_stats = data_config.transform_pipeline.load_norm_stats()
+        _normalize.save(directory / data_config.assets.asset_id, norm_stats)
 
     # Split params that can be used for inference into a separate item.
     with at.disable_typechecking():

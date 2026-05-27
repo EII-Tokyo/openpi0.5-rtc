@@ -33,7 +33,6 @@ def create_data_loader(
     sharding: jax.sharding.Sharding | None = None,
     shuffle: bool = False,
     num_batches: int | None = None,
-    skip_norm_stats: bool = False,
 ) -> DataLoader[tuple[_model.Observation, _model.Actions]]:
     """Create a data loader for training.
 
@@ -42,59 +41,14 @@ def create_data_loader(
         sharding: The sharding to use for the data loader (JAX only).
         shuffle: Whether to shuffle the data.
         num_batches: Determines the number of batches to return.
-        skip_norm_stats: Whether to skip data normalization.
     """
-    data_config = config.data.resolve(config.assets_dirs, config.model)
+    data_config = config.data
     logging.info(f"data_config: {data_config}")
 
-    return create_torch_data_loader(
-        data_config,
-        model_config=config.model,
-        action_horizon=config.model.action_horizon,
-        batch_size=config.batch_size,
-        sharding=sharding,
-        shuffle=shuffle,
-        num_batches=num_batches,
-        num_workers=config.num_workers,
-        seed=config.seed,
-        skip_norm_stats=skip_norm_stats,
-    )
+    dataset = _datasets.create_torch_dataset(data_config, config.model.action_horizon, config.model)
+    dataset = _datasets.transform_dataset(dataset, data_config)
 
-
-def create_torch_data_loader(
-    data_config: _config.LeRobotAlohaDataConfig,
-    model_config: _model.BaseModelConfig,
-    action_horizon: int,
-    batch_size: int,
-    *,
-    sharding: jax.sharding.Sharding | None = None,
-    skip_norm_stats: bool = False,
-    shuffle: bool = False,
-    num_batches: int | None = None,
-    num_workers: int = 0,
-    seed: int = 0,
-) -> DataLoader[tuple[_model.Observation, _model.Actions]]:
-    """Create a data loader for training.
-
-    Args:
-        data_config: The data configuration.
-        action_horizon: The action horizon.
-        batch_size: The batch size.
-        sharding: The sharding to use for the data loader. If None, the data loader will
-            use a single device sharding.
-        skip_norm_stats: Whether to skip data normalization.
-        shuffle: Whether to shuffle the data.
-        num_batches: Determines the number of batches to return. If the number exceeds the
-            number of batches in the dataset, the data loader will loop over the dataset.
-            If not provided, will iterate over the dataset indefinitely.
-        num_workers: The number of worker processes to use. If zero, the data loader will
-            execute in the main process.
-        seed: The seed to use for shuffling the data.
-    """
-    dataset = _datasets.create_torch_dataset(data_config, action_horizon, model_config)
-    dataset = _datasets.transform_dataset(dataset, data_config, skip_norm_stats=skip_norm_stats)
-
-    local_batch_size = batch_size // jax.process_count()
+    local_batch_size = config.batch_size // jax.process_count()
 
     logging.info(f"dataset length: {len(dataset)}")
     logging.info(f"local_batch_size: {local_batch_size}")
@@ -104,8 +58,8 @@ def create_torch_data_loader(
         sharding=sharding,
         shuffle=shuffle,
         num_batches=num_batches,
-        num_workers=num_workers,
-        seed=seed,
+        num_workers=config.num_workers,
+        seed=config.seed,
     )
 
     return DataLoaderImpl(data_config, data_loader)

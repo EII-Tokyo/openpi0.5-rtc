@@ -3,18 +3,14 @@
 from collections.abc import Sequence
 import dataclasses
 import difflib
-import logging
 import pathlib
 from typing import Any, Literal, TypeAlias
 
-import etils.epath as epath
 import flax.nnx as nnx
 import tyro
 
 import openpi.models.model as _model
 import openpi.models.pi0_config as pi0_config
-import openpi.shared.download as _download
-import openpi.shared.normalize as _normalize
 import openpi.training.optimizer as _optimizer
 import openpi.training.weight_loaders as weight_loaders
 from openpi.data import transforms as _transforms
@@ -22,7 +18,6 @@ from openpi.data import transforms as _transforms
 Filter: TypeAlias = nnx.filterlib.Filter
 
 _TROSSEN_RESET_POSE = {"reset_pose": [0, -1.5, 1.5, 0, 0, 0]}
-_PI05_BASE_ASSETS_DIR = "gs://openpi-assets/checkpoints/pi05_base/assets"
 _PI05_BASE_PARAMS = "gs://openpi-assets/checkpoints/pi05_base/params"
 
 _TWIST_AND_STATIC_REPO_IDS = [
@@ -401,17 +396,15 @@ _EII_DATA_SYSTEM_WITHOUT_RINSE_RETURN_HOME_TURN_OVER_X5_FREE_SPIN_PLUS10_REPO_ID
 
 @dataclasses.dataclass(frozen=True)
 class AssetsConfig:
-    assets_dir: str | None = None
-    asset_id: str | None = None
+    assets_dir: str
+    asset_id: str
 
 
 @dataclasses.dataclass(frozen=True)
 class LeRobotAlohaDataConfig:
     repo_id: str | None = None
     repo_ids: list[str] | None = None
-    assets: AssetsConfig = dataclasses.field(default_factory=AssetsConfig)
-    asset_id: str | None = None
-    norm_stats: dict[str, _transforms.NormStats] | None = None
+    assets: AssetsConfig = tyro.MISSING
     transform_pipeline: _transforms.AlohaTransformPipeline | None = None
     use_quantile_norm: bool = True
     use_delta_joint_actions: bool = True
@@ -423,42 +416,22 @@ class LeRobotAlohaDataConfig:
     include_subtask: bool = True
     action_sequence_keys: Sequence[str] = ("action",)
 
-    def resolve(self, assets_dirs: pathlib.Path, model_config: _model.BaseModelConfig) -> "LeRobotAlohaDataConfig":
-        """Load derived runtime fields for the single supported LeRobot ALOHA data path."""
-
-        asset_id = self.assets.asset_id or self.asset_id or self.repo_id
-        if self.repo_id == "fake":
-            return dataclasses.replace(self, asset_id=asset_id, norm_stats=None, transform_pipeline=None)
+    def with_model(self, model_config: _model.BaseModelConfig) -> "LeRobotAlohaDataConfig":
         return dataclasses.replace(
             self,
-            asset_id=asset_id,
-            norm_stats=self._load_norm_stats(epath.Path(self.assets.assets_dir or assets_dirs), asset_id),
             transform_pipeline=_transforms.AlohaTransformPipeline(
                 include_low=self.include_low,
                 include_subtask=self.include_subtask,
                 image_size=self.image_size,
                 max_token_len=model_config.max_token_len,
                 discrete_state_input=model_config.discrete_state_input,
+                assets_dir=self.assets.assets_dir,
+                asset_id=self.assets.asset_id,
                 adapt_to_pi=self.adapt_to_pi,
                 use_delta_joint_actions=self.use_delta_joint_actions,
                 action_dim=model_config.action_dim,
             ),
-            action_sequence_keys=self.action_sequence_keys,
-            video_memory_num_frames=self.video_memory_num_frames,
-            video_memory_stride_seconds=self.video_memory_stride_seconds,
         )
-
-    def _load_norm_stats(self, assets_dir: epath.Path, asset_id: str | None) -> dict[str, _transforms.NormStats] | None:
-        if asset_id is None:
-            return None
-        data_assets_dir = str(assets_dir / asset_id)
-        try:
-            norm_stats = _normalize.load(_download.maybe_download(data_assets_dir))
-            logging.info("Loaded norm stats from %s", data_assets_dir)
-            return norm_stats
-        except FileNotFoundError:
-            logging.info("Norm stats not found in %s, skipping.", data_assets_dir)
-            return None
 
 
 @dataclasses.dataclass(frozen=True)
@@ -474,8 +447,7 @@ class TrainConfig:
     optimizer: _optimizer.OptimizerConfig = dataclasses.field(default_factory=_optimizer.AdamW)
     ema_decay: float | None = 0.99
     freeze_filter: tyro.conf.Suppress[Filter] = dataclasses.field(default_factory=nnx.Nothing)
-    data: LeRobotAlohaDataConfig = dataclasses.field(default_factory=lambda: LeRobotAlohaDataConfig(repo_id="fake"))
-    assets_base_dir: str = "./assets"
+    data: LeRobotAlohaDataConfig = tyro.MISSING
     checkpoint_base_dir: str = "./checkpoints"
     seed: int = 42
     batch_size: int = 32
@@ -490,10 +462,6 @@ class TrainConfig:
     wandb_enabled: bool = True
     policy_metadata: dict[str, Any] | None = None
     fsdp_devices: int = 1
-
-    @property
-    def assets_dirs(self) -> pathlib.Path:
-        return (pathlib.Path(self.assets_base_dir) / self.name).resolve()
 
     @property
     def checkpoint_dir(self) -> pathlib.Path:
@@ -514,10 +482,11 @@ class TrainConfig:
         image_resolution = getattr(self.model, "image_resolution", None)
         if image_size is not None and image_resolution != image_size:
             object.__setattr__(self, "model", dataclasses.replace(self.model, image_resolution=image_size))
+        object.__setattr__(self, "data", self.data.with_model(self.model))
 
 
-def _pi05_base_assets() -> AssetsConfig:
-    return AssetsConfig(assets_dir=_PI05_BASE_ASSETS_DIR, asset_id="trossen")
+def _local_assets(config_name: str, base_dir: str = "./assets") -> AssetsConfig:
+    return AssetsConfig(assets_dir=str(pathlib.Path(base_dir) / config_name), asset_id="trossen")
 
 
 def _make_twist_train_config(
@@ -531,9 +500,8 @@ def _make_twist_train_config(
     include_low: bool = True,
     include_subtask: bool = True,
     gradient_accumulation_steps: int = 1,
-    assets: AssetsConfig | None = None,
+    assets: AssetsConfig,
     exp_name: str = tyro.MISSING,
-    assets_base_dir: str = "./assets",
     checkpoint_base_dir: str = "./checkpoints",
     wandb_enabled: bool = True,
     overwrite: bool = False,
@@ -572,7 +540,7 @@ def _make_twist_train_config(
             video_memory_num_frames=1,
             video_memory_stride_seconds=1.0,
             repo_ids=repo_ids,
-            assets=assets if assets is not None else _pi05_base_assets(),
+            assets=assets,
             include_low=include_low,
             include_subtask=include_subtask,
         ),
@@ -585,7 +553,6 @@ def _make_twist_train_config(
         num_workers=num_workers,
         fsdp_devices=fsdp_devices,
         gradient_accumulation_steps=gradient_accumulation_steps,
-        assets_base_dir=assets_base_dir,
         checkpoint_base_dir=checkpoint_base_dir,
         wandb_enabled=wandb_enabled,
         overwrite=overwrite,
@@ -601,6 +568,7 @@ _CONFIGS = [
         lora=False,
         batch_size=256,
         num_workers=16,
+        assets=_local_assets("twist_off_the_bottle_cap"),
     ),
     _make_twist_train_config(
         "twist_off_the_bottle_cap_lora",
@@ -608,6 +576,7 @@ _CONFIGS = [
         lora=True,
         batch_size=32,
         num_workers=4,
+        assets=_local_assets("twist_off_the_bottle_cap_lora"),
     ),
     _make_twist_train_config(
         "twist_water_tear_promptfix_lora",
@@ -615,6 +584,7 @@ _CONFIGS = [
         lora=True,
         batch_size=64,
         num_workers=4,
+        assets=_local_assets("twist_water_tear_promptfix_lora"),
     ),
     _make_twist_train_config(
         "eii_data_system_no_tear_cam3_lora",
@@ -627,7 +597,7 @@ _CONFIGS = [
         include_subtask=False,
         gradient_accumulation_steps=2,
         # Load norm stats from ./assets/<config.name>/trossen (compute_norm_stats), not gs:// pi05_base.
-        assets=AssetsConfig(assets_dir=None, asset_id="trossen"),
+        assets=_local_assets("eii_data_system_no_tear_cam3_lora"),
     ),
     _make_twist_train_config(
         "eii_data_system_without_rinse_cam3_fullft_h200",
@@ -640,7 +610,6 @@ _CONFIGS = [
         include_subtask=False,
         gradient_accumulation_steps=1,
         exp_name="no_rinse_cam3_fullft_36repo_bs256_nw128_fsdp8_20260510",
-        assets_base_dir="/workspace/openpi0.5-rtc/assets",
         checkpoint_base_dir="/workspace/openpi0.5-rtc/checkpoints",
         wandb_enabled=True,
         overwrite=True,
@@ -683,7 +652,7 @@ _CONFIGS = [
         #   data_wait_time is usually ~= 0.05s - 0.10s/step,
         #   with observed spikes up to ~= 19.79s and ~= 6.43s,
         #   VRAM ~= 62.4 GiB / GPU after step execution.
-        assets=AssetsConfig(assets_dir=None, asset_id="trossen"),
+        assets=_local_assets("eii_data_system_without_rinse_cam3_fullft_h200"),
     ),
     _make_twist_train_config(
         "eii_data_system_without_rinse_cam3_fullft_h200_41repo",
@@ -696,7 +665,6 @@ _CONFIGS = [
         include_subtask=False,
         gradient_accumulation_steps=1,
         exp_name="no_rinse_cam3_fullft_41repo_bs256_nw128_fsdp8_20260513",
-        assets_base_dir="/workspace/openpi0.5-rtc/assets",
         checkpoint_base_dir="/workspace/openpi0.5-rtc/checkpoints",
         wandb_enabled=True,
         overwrite=True,
@@ -704,7 +672,7 @@ _CONFIGS = [
         # 2026-05-13 setup for the 41-repo production run. Matches the
         # 36-repo H200 full fine-tune shape: 3 cameras, no temporal memory,
         # full fine-tune, fsdp=8, bs=256, nw=128, 40k steps.
-        assets=AssetsConfig(assets_dir=None, asset_id="trossen"),
+        assets=_local_assets("eii_data_system_without_rinse_cam3_fullft_h200_41repo"),
     ),
     _make_twist_train_config(
         "eii_data_system_without_rinse_cam3_fullft_h200_34repo",
@@ -717,7 +685,6 @@ _CONFIGS = [
         include_subtask=False,
         gradient_accumulation_steps=1,
         exp_name="no_rinse_cam3_fullft_34repo_freespinx6_bs256_nw64_fsdp4_20260513",
-        assets_base_dir="/workspace/openpi0.5-rtc/assets",
         checkpoint_base_dir="/workspace/openpi0.5-rtc/checkpoints",
         wandb_enabled=True,
         overwrite=True,
@@ -729,7 +696,7 @@ _CONFIGS = [
         # 64 is the current setting to reduce dataloader wait spikes.
         # Duplicate the free-spinning dataset 5 extra times to weight its
         # specialized task 6x in the sampler while keeping the 34-repo assets.
-        assets=AssetsConfig(assets_dir=None, asset_id="trossen"),
+        assets=_local_assets("eii_data_system_without_rinse_cam3_fullft_h200_34repo"),
     ),
     _make_twist_train_config(
         "eii_data_system_without_rinse_cam3_fullft_h200_25repo",
@@ -742,7 +709,6 @@ _CONFIGS = [
         include_subtask=False,
         gradient_accumulation_steps=1,
         exp_name="no_rinse_cam3_fullft_25repo_bs256_nw64_fsdp4_20260514",
-        assets_base_dir="/workspace/openpi0.5-rtc/assets",
         checkpoint_base_dir="/workspace/openpi0.5-rtc/checkpoints",
         wandb_enabled=True,
         overwrite=True,
@@ -751,7 +717,7 @@ _CONFIGS = [
         # Same 3-camera full fine-tune shape as the 34-repo B200 config:
         # cam_high/cam_left_wrist/cam_right_wrist, no temporal memory,
         # bs=256, nw=64, fsdp=4, 40k steps.
-        assets=AssetsConfig(assets_dir=None, asset_id="trossen"),
+        assets=_local_assets("eii_data_system_without_rinse_cam3_fullft_h200_25repo"),
     ),
     _make_twist_train_config(
         "eii_data_system_without_rinse_cam3_fullft_h200_merged_adjust_pickup_36repo",
@@ -764,7 +730,6 @@ _CONFIGS = [
         include_subtask=False,
         gradient_accumulation_steps=1,
         exp_name="no_rinse_cam3_fullft_merged_adjust_pickup_36repo_bs256_nw64_fsdp4_20260516",
-        assets_base_dir="/workspace/openpi0.5-rtc/assets",
         checkpoint_base_dir="/workspace/openpi0.5-rtc/checkpoints",
         wandb_enabled=True,
         overwrite=True,
@@ -772,7 +737,7 @@ _CONFIGS = [
         # 2026-05-16 setup for merged-adjust-pickup datasets. The
         # free-spinning repo is intentionally repeated five times exactly
         # as requested, so both sampler weight and norm stats reflect it.
-        assets=AssetsConfig(assets_dir=None, asset_id="trossen"),
+        assets=_local_assets("eii_data_system_without_rinse_cam3_fullft_h200_merged_adjust_pickup_36repo"),
     ),
     _make_twist_train_config(
         "eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo",
@@ -785,7 +750,6 @@ _CONFIGS = [
         include_subtask=False,
         gradient_accumulation_steps=1,
         exp_name="no_rinse_cam3_fullft_return_home_29repo_bs256_nw64_fsdp4_20260520",
-        assets_base_dir="/workspace/openpi0.5-rtc/assets",
         checkpoint_base_dir="/workspace/openpi0.5-rtc/checkpoints",
         wandb_enabled=True,
         overwrite=False,
@@ -795,7 +759,7 @@ _CONFIGS = [
         # repos remain weighted to five total copies each, and free-spinning
         # merged-adjust-pickup has ten additional copies.
         num_train_steps=60_000,
-        assets=AssetsConfig(assets_dir=None, asset_id="trossen"),
+        assets=_local_assets("eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo"),
     ),
     _make_twist_train_config(
         "eii_data_system_without_rinse_cam3_fullft_a100",
@@ -823,7 +787,7 @@ _CONFIGS = [
         #   data_wait_time ~= 0.02s - 1.10s/step.
         # - fsdp=1, nw=16, bs=128:
         #   OOM on step 0.
-        assets=AssetsConfig(assets_dir=None, asset_id="trossen"),
+        assets=_local_assets("eii_data_system_without_rinse_cam3_fullft_a100"),
     ),
     _make_twist_train_config(
         "eii_rinse_cam4_lora",
@@ -834,7 +798,7 @@ _CONFIGS = [
         include_low=True,
         include_subtask=True,
         gradient_accumulation_steps=2,
-        assets=AssetsConfig(assets_dir=None, asset_id="trossen"),
+        assets=_local_assets("eii_rinse_cam4_lora"),
     ),
     _make_twist_train_config(
         "eii_rinse_9repo_cam4_lora",
@@ -845,7 +809,7 @@ _CONFIGS = [
         include_low=True,
         include_subtask=True,
         gradient_accumulation_steps=2,
-        assets=AssetsConfig(assets_dir=None, asset_id="trossen"),
+        assets=_local_assets("eii_rinse_9repo_cam4_lora"),
     ),
     _make_twist_train_config(
         "eii_rinse_11repo_cam4_fullft",
@@ -856,7 +820,7 @@ _CONFIGS = [
         include_low=True,
         include_subtask=True,
         gradient_accumulation_steps=1,
-        assets=AssetsConfig(assets_dir=None, asset_id="trossen"),
+        assets=_local_assets("eii_rinse_11repo_cam4_fullft"),
     ),
     _make_twist_train_config(
         "eii_rinse_9repo_cam4_lora_6000",
@@ -868,7 +832,7 @@ _CONFIGS = [
         include_subtask=True,
         gradient_accumulation_steps=2,
         exp_name="eii_rinse_9repo_cam4_lora_wandb_bs32_acc2_nw16_nomem_20260510_093635",
-        assets=AssetsConfig(assets_dir=None, asset_id="trossen"),
+        assets=_local_assets("eii_rinse_9repo_cam4_lora_6000"),
     ),
     _make_twist_train_config(
         "eii_rinse_9repo_cam4_lora_15000",
@@ -880,7 +844,7 @@ _CONFIGS = [
         include_subtask=True,
         gradient_accumulation_steps=2,
         exp_name="eii_rinse_9repo_cam4_lora_wandb_bs32_acc2_nw16_nomem_20260510_093635",
-        assets=AssetsConfig(assets_dir=None, asset_id="trossen"),
+        assets=_local_assets("eii_rinse_9repo_cam4_lora_15000"),
     ),
     _make_twist_train_config(
         "eii_rinse_cam4_fullft",
@@ -891,11 +855,16 @@ _CONFIGS = [
         include_low=True,
         include_subtask=True,
         gradient_accumulation_steps=1,
-        assets=AssetsConfig(assets_dir=None, asset_id="trossen"),
+        assets=_local_assets("eii_rinse_cam4_fullft"),
     ),
     TrainConfig(
         name="debug",
-        data=LeRobotAlohaDataConfig(repo_id="fake"),
+        data=LeRobotAlohaDataConfig(
+            repo_id=_TWIST_ONLY_REPO_IDS[0],
+            assets=_local_assets("debug"),
+            include_low=False,
+            include_subtask=False,
+        ),
         batch_size=2,
         model=pi0_config.Pi0Config(
             paligemma_variant="dummy",

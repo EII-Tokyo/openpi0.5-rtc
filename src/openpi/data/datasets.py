@@ -372,24 +372,14 @@ def create_torch_dataset(
     return dataset
 
 
-def transform_dataset(dataset: Dataset, data_config: _config.LeRobotAlohaDataConfig, *, skip_norm_stats: bool = False) -> Dataset:
+def transform_dataset(dataset: Dataset, data_config: _config.LeRobotAlohaDataConfig) -> Dataset:
     """Transform the dataset by applying the data transforms."""
     if data_config.transform_pipeline is None:
-        return dataset
-
-    norm_stats = {}
-    if data_config.repo_id != "fake" and not skip_norm_stats:
-        if data_config.norm_stats is None:
-            raise ValueError(
-                "Normalization stats not found. "
-                "Make sure to run `scripts/compute_norm_stats.py --config-name=<your-config>`."
-            )
-        norm_stats = data_config.norm_stats
+        raise ValueError("A transform pipeline is required for ALOHA training data.")
 
     return TransformedDataset(
         dataset,
         data_config.transform_pipeline.training_input_transforms(
-            norm_stats,
             use_quantile_norm=data_config.use_quantile_norm,
         ),
     )
@@ -399,26 +389,15 @@ def transform_iterable_dataset(
     dataset: IterableDataset,
     data_config: _config.LeRobotAlohaDataConfig,
     *,
-    skip_norm_stats: bool = False,
     is_batched: bool = False,
 ) -> IterableDataset:
     """Transform the dataset by applying the data transforms."""
     if data_config.transform_pipeline is None:
-        return dataset
-
-    norm_stats = {}
-    if data_config.repo_id != "fake" and not skip_norm_stats:
-        if data_config.norm_stats is None:
-            raise ValueError(
-                "Normalization stats not found. "
-                "Make sure to run `scripts/compute_norm_stats.py --config-name=<your-config>`."
-            )
-        norm_stats = data_config.norm_stats
+        raise ValueError("A transform pipeline is required for ALOHA training data.")
 
     return IterableTransformedDataset(
         dataset,
         data_config.transform_pipeline.training_input_transforms(
-            norm_stats,
             use_quantile_norm=data_config.use_quantile_norm,
         ),
         is_batched=is_batched,

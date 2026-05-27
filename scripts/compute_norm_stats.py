@@ -172,9 +172,17 @@ def _apply_state_action_transforms(
 ) -> tuple[np.ndarray, np.ndarray]:
     if data_config.transform_pipeline is None:
         raise ValueError("A transform pipeline is required to compute norm stats.")
-    # AlohaInputs expects images to exist even though norm stats only need state/actions.
-    dummy_images = {"cam_high": np.zeros((len(state_batch), 1, 1, 3), dtype=np.uint8)}
-    data = {"images": dummy_images, "state": state_batch, "actions": actions_batch}
+    # RepackTransform expects raw LeRobot keys even though norm stats only need state/actions.
+    data = {
+        "observation.images.cam_high": np.zeros((len(state_batch), 1, 1, 3), dtype=np.uint8),
+        "observation.images.cam_low": np.zeros((len(state_batch), 1, 1, 3), dtype=np.uint8),
+        "observation.images.cam_left_wrist": np.zeros((len(state_batch), 1, 1, 3), dtype=np.uint8),
+        "observation.images.cam_right_wrist": np.zeros((len(state_batch), 1, 1, 3), dtype=np.uint8),
+        "observation.state": state_batch,
+        "action": actions_batch,
+        "task": "compute norm stats",
+        "subtask": "compute norm stats",
+    }
     for transform in data_config.transform_pipeline.raw_state_action_transforms():
         data = transform(data)
     return np.asarray(data["state"]), np.asarray(data["actions"])
@@ -248,7 +256,7 @@ def compute_parquet_norm_stats(
 
 
 def _single_repo_data_config(data_config: _config.LeRobotAlohaDataConfig, repo_id: str) -> _config.LeRobotAlohaDataConfig:
-    return dataclasses.replace(data_config, repo_id=repo_id, repo_ids=None, asset_id=None, norm_stats=None)
+    return dataclasses.replace(data_config, repo_id=repo_id, repo_ids=None)
 
 
 def _max_stat_diff(lhs: normalize.NormStats, rhs: normalize.NormStats) -> float:
@@ -320,7 +328,7 @@ def main(
     seed: int = 0,
 ):
     config = _config.get_config(config_name)
-    data_config = config.data.resolve(config.assets_dirs, config.model)
+    data_config = config.data
 
     if compare_repo is not None:
         benchmark_methods(
@@ -352,10 +360,7 @@ def main(
             seed=seed,
         )
 
-    out_id = data_config.repo_id or data_config.asset_id
-    if out_id is None:
-        raise ValueError("Cannot determine output directory: repo_id and asset_id are both None")
-    output_path = config.assets_dirs / out_id
+    output_path = Path(data_config.assets.assets_dir) / data_config.assets.asset_id
     print(f"Writing stats to: {output_path}")
     normalize.save(output_path, norm_stats)
 

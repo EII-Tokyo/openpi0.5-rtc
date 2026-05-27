@@ -12,11 +12,12 @@ import numpy as np
 from openpi.robot.client import image_tools
 
 from openpi.data import tokenizer as _tokenizer
+import openpi.shared.download as _download
 from openpi.shared import array_typing as at
-from openpi.shared import normalize as _normalize
+from openpi.shared import normalize as _normalize_lib
 
 DataDict: TypeAlias = at.PyTree
-NormStats: TypeAlias = _normalize.NormStats
+NormStats: TypeAlias = _normalize_lib.NormStats
 
 
 T = TypeVar("T")
@@ -359,6 +360,8 @@ class AlohaTransformPipeline:
     image_size: tuple[int, int]
     max_token_len: int
     discrete_state_input: bool
+    assets_dir: str
+    asset_id: str
     adapt_to_pi: bool = True
     use_delta_joint_actions: bool = True
     action_dim: int = ALOHA_MODEL_ACTION_DIM
@@ -373,6 +376,18 @@ class AlohaTransformPipeline:
 
     def _image_structure(self, prefix: str) -> dict[str, str]:
         return {key: f"{prefix}.{key}" for key in self.raw_image_keys}
+
+    def load_norm_stats(self) -> dict[str, NormStats]:
+        data_assets_dir = f"{self.assets_dir.rstrip('/')}/{self.asset_id}"
+        try:
+            norm_stats = _normalize_lib.load(_download.maybe_download(data_assets_dir))
+        except FileNotFoundError as exc:
+            raise FileNotFoundError(
+                f"Normalization stats not found at {data_assets_dir}. "
+                "Run scripts/compute_norm_stats.py for this config before training or inference."
+            ) from exc
+        logging.info("Loaded norm stats from %s", data_assets_dir)
+        return norm_stats
 
     def training_repack_transform(self, *, include_actions: bool = True) -> RepackTransform:
         structure = {
@@ -396,7 +411,7 @@ class AlohaTransformPipeline:
             structure["subtask"] = "subtask"
         return RepackTransform(structure)
 
-    def _model_input_transforms(self, norm_stats: dict[str, NormStats] | None, *, use_quantile_norm: bool) -> list[DataTransformFn]:
+    def _model_input_transforms(self, norm_stats: dict[str, NormStats], *, use_quantile_norm: bool) -> list[DataTransformFn]:
         transforms: list[DataTransformFn] = [
             AlohaInputs(
                 adapt_to_pi=self.adapt_to_pi,
@@ -427,7 +442,8 @@ class AlohaTransformPipeline:
             require_subtask=self.include_subtask,
         )
 
-    def training_input_transforms(self, norm_stats: dict[str, NormStats] | None, *, use_quantile_norm: bool) -> list[DataTransformFn]:
+    def training_input_transforms(self, *, use_quantile_norm: bool, norm_stats: dict[str, NormStats] | None = None) -> list[DataTransformFn]:
+        norm_stats = self.load_norm_stats() if norm_stats is None else norm_stats
         return [
             self._validate_input_transform(
                 require_action=True,
@@ -460,12 +476,8 @@ class AlohaTransformPipeline:
             transforms.append(DeltaActions(ALOHA_DELTA_ACTION_MASK))
         return transforms
 
-    def policy_input_transforms(
-        self,
-        norm_stats: dict[str, NormStats] | None,
-        *,
-        use_quantile_norm: bool,
-    ) -> list[DataTransformFn]:
+    def policy_input_transforms(self, *, use_quantile_norm: bool, norm_stats: dict[str, NormStats] | None = None) -> list[DataTransformFn]:
+        norm_stats = self.load_norm_stats() if norm_stats is None else norm_stats
         return [
             self._validate_input_transform(
                 require_action=False,
@@ -477,7 +489,8 @@ class AlohaTransformPipeline:
             *self._model_input_transforms(norm_stats, use_quantile_norm=use_quantile_norm),
         ]
 
-    def policy_output_transforms(self, norm_stats: dict[str, NormStats] | None, *, use_quantile_norm: bool) -> list[DataTransformFn]:
+    def policy_output_transforms(self, *, use_quantile_norm: bool, norm_stats: dict[str, NormStats] | None = None) -> list[DataTransformFn]:
+        norm_stats = self.load_norm_stats() if norm_stats is None else norm_stats
         transforms: list[DataTransformFn] = [
             Unnormalize(norm_stats, use_quantiles=use_quantile_norm),
         ]
