@@ -12,7 +12,21 @@ services:
       python3 /app/examples/aloha_real/main.py
       --model-dir
       /app/checkpoints/eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo/no_rinse_cam3_fullft_return_home_29repo_bs256_nw64_fsdp4_20260520/19000
-      --action-quality good
+      --dataset-dir
+      /app/rollouts/old_policy/unscrew_bottle_cap/2026-05-27
+      --num-episodes
+      1
+      --max-episode-steps
+      100000
+      --hdf5-max-buffer-seconds
+      0
+      --split-hdf5-on-reset
+      --save-format
+      video_hdf5
+      --video-codec
+      h264
+      --action-quality
+      normal
 
     init: true
     tty: true
@@ -20,6 +34,8 @@ services:
     privileged: true
     volumes:
       - $PWD:/app
+      - /data/openpi0.5-rtc-reward-learning/rollouts:/app/rollouts
+      - /home/eii/openpi0.5-rtc/checkpoints:/app/checkpoints:ro
 
   aloha_ros_nodes:
     image: lyl472324464/robot:aloha-ros1.0
@@ -34,7 +50,7 @@ services:
     privileged: true
     volumes:
       - /dev:/dev
-      - $PWD/third_party/aloha:/root/interbotix_ws/src/aloha
+      - /home/eii/openpi0.5-rtc/third_party/aloha:/root/interbotix_ws/src/aloha
     command: roslaunch --wait aloha ros_nodes.launch
 
   ros_master:
@@ -65,6 +81,7 @@ services:
     network_mode: host
     volumes:
       - $PWD:/app
+      - /home/eii/openpi0.5-rtc/checkpoints:/app/checkpoints:ro
       - ${OPENPI_DATA_HOME:-~/.cache/openpi}:/openpi_assets
     environment:
       - GIT_LFS_SKIP_SMUDGE=1
@@ -105,6 +122,7 @@ services:
     tty: true
     volumes:
       - $PWD:/app
+      - /data/openpi0.5-rtc-reward-learning/rollouts:/app/rollouts:ro
       - /dev:/dev
     env_file:
       - ./voice_assistant_web/.env
@@ -112,6 +130,7 @@ services:
       - REDIS_HOST=${REDIS_HOST:-localhost}
       - REDIS_PORT=${REDIS_PORT:-6379}
       - REDIS_DB=${REDIS_DB:-0}
+      - ROLLOUTS_ROOT=/app/rollouts
     depends_on:
       - redis
 

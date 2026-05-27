@@ -14,3 +14,15 @@ export const wsBase = (() => {
   if (envBase) return envBase
   return `${browserWsProtocol}//${browserHost}:8011`
 })()
+
+export type RolloutNode = {
+  name: string
+  path: string
+  type: 'directory' | 'file'
+  extension?: string
+  size?: number
+  modified?: number
+  children?: RolloutNode[]
+}
+
+export const rolloutVideoUrl = (path: string) => `${apiBase}/api/rollouts/video?path=${encodeURIComponent(path)}`

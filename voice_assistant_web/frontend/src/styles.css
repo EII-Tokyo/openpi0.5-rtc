@@ -90,6 +90,29 @@ button {
   justify-content: flex-end;
 }
 
+.page-tabs {
+  display: inline-flex;
+  padding: 4px;
+  border-radius: 999px;
+  background: rgba(44, 35, 26, 0.08);
+}
+
+.page-tabs button {
+  min-height: 32px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: transparent;
+  color: #6e5a4a;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.page-tabs button.active {
+  background: #2f241a;
+  color: #fff7ec;
+}
+
 .robot-meta {
   min-width: 0;
   flex-wrap: wrap;
@@ -966,6 +989,175 @@ button {
   cursor: pointer;
 }
 
+.rollouts-page {
+  display: grid;
+  grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+  gap: 18px;
+  min-height: 0;
+  height: 100%;
+}
+
+.rollouts-tree-panel,
+.rollouts-player-panel {
+  min-height: 0;
+  border-radius: 18px;
+  border: 1px solid rgba(54, 45, 37, 0.08);
+  background: rgba(255, 252, 248, 0.82);
+  box-shadow: 0 12px 28px rgba(69, 54, 37, 0.1);
+}
+
+.rollouts-tree-panel {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  overflow: hidden;
+}
+
+.rollouts-panel-header,
+.rollouts-player-header,
+.rollout-file-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.rollouts-panel-header,
+.rollouts-player-header {
+  padding: 16px;
+  border-bottom: 1px solid rgba(54, 45, 37, 0.08);
+}
+
+.rollouts-panel-header h2,
+.rollouts-player-header h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.rollouts-tree-scroll {
+  min-height: 0;
+  overflow: auto;
+  padding: 8px;
+}
+
+.rollouts-tree,
+.tree-children {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.tree-children {
+  padding-left: 14px;
+}
+
+.tree-row {
+  width: 100%;
+  min-height: 34px;
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: transparent;
+  color: #2f241b;
+  text-align: left;
+  cursor: pointer;
+}
+
+.tree-row:hover {
+  background: rgba(44, 35, 26, 0.07);
+}
+
+.tree-row.selected {
+  background: #2f241a;
+  color: #fff7ec;
+}
+
+.tree-row.directory {
+  grid-template-columns: 24px minmax(0, 1fr);
+  font-weight: 800;
+}
+
+.tree-twist,
+.tree-file-mark {
+  color: #7b6858;
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.tree-row.selected .tree-file-mark {
+  color: #fff7ec;
+}
+
+.tree-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+}
+
+.tree-size {
+  color: #7b6858;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.tree-row.selected .tree-size {
+  color: rgba(255, 247, 236, 0.72);
+}
+
+.rollouts-player-panel {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  overflow: hidden;
+}
+
+.rollout-video-frame {
+  min-height: 0;
+  display: grid;
+  place-items: center;
+  padding: 14px;
+  background: #101010;
+  overflow: hidden;
+}
+
+.rollout-video-frame video {
+  width: min(100%, calc((100vh - 210px) * 1.78));
+  max-width: 100%;
+  height: auto;
+  max-height: 100%;
+  object-fit: contain;
+  background: #101010;
+  border-radius: 8px;
+}
+
+.rollout-empty-state,
+.rollout-empty {
+  color: #7b6858;
+  font-size: 13px;
+}
+
+.rollout-empty-state {
+  color: rgba(255, 247, 236, 0.74);
+}
+
+.rollout-file-meta {
+  padding: 12px 16px;
+  border-top: 1px solid rgba(54, 45, 37, 0.08);
+  color: #6e5a4a;
+  font-size: 12px;
+}
+
+.rollout-file-meta span:first-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 @media (max-width: 1080px) {
   body {
     height: auto;
@@ -983,6 +1175,13 @@ button {
   .layout {
     grid-template-columns: 1fr;
     overflow: visible;
+  }
+
+  .rollouts-page {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(260px, 38vh) minmax(360px, 1fr);
+    height: auto;
+    min-height: 760px;
   }
 
   .sidebar {
@@ -1019,5 +1218,14 @@ button {
 
   .voice-toolbar {
     gap: 8px;
+  }
+
+  .rollouts-page {
+    grid-template-rows: minmax(240px, 36vh) minmax(320px, 1fr);
+  }
+
+  .rollout-file-meta {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }

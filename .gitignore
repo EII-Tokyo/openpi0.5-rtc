@@ -11,6 +11,8 @@ voice_assistant_web/**/__pycache__/
 assets/
 checkpoints/
 data/
+rollouts
+rollouts.backup-*/
 wandb/
 tmp/
 attention_outputs/

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { CameraGrid } from './components/CameraGrid'
 import { RobotViewer } from './components/RobotViewer'
+import { RolloutBrowser } from './components/RolloutBrowser'
 import { VoicePanel } from './components/VoicePanel'
 import { AppLanguage, translations } from './i18n'
 import { apiBase, wsBase } from './services/api'
@@ -39,6 +40,7 @@ export default function App() {
   const [language, setLanguage] = useState<AppLanguage>('en')
   const [dispatchError, setDispatchError] = useState('')
   const [cameraView, setCameraView] = useState<'focus' | 'quad'>('quad')
+  const [page, setPage] = useState<'live' | 'rollouts'>('live')
   const t = translations[language]
   const currentTaskLabel = state.robot.current_task ? truncateLabel(state.robot.current_task) : t.noActiveTask
 
@@ -122,6 +124,14 @@ export default function App() {
           <h1>{t.title}</h1>
         </div>
         <div className="header-actions">
+          <nav className="page-tabs" aria-label="Primary">
+            <button className={page === 'live' ? 'active' : ''} type="button" onClick={() => setPage('live')}>
+              Live Control
+            </button>
+            <button className={page === 'rollouts' ? 'active' : ''} type="button" onClick={() => setPage('rollouts')}>
+              Rollouts
+            </button>
+          </nav>
           <span className={`status-pill ${state.robot.timestamp ? 'live' : 'offline'}`}>{freshness}</span>
           <span className="status-pill mode">{state.robot.mode}</span>
           <span className="robot-task-badge" title={state.robot.current_task || t.noActiveTask}>
@@ -137,32 +147,36 @@ export default function App() {
         </div>
       </header>
 
-      <section className="layout">
-        <CameraGrid
-          cameraStatus={state.camera_status}
-          cameraTimestamps={state.camera_timestamps}
-          cameraFrames={state.camera_jpeg_b64}
-          language={language}
-          currentTask={state.robot.current_task}
-          cameraView={cameraView}
-          onCameraViewChange={setCameraView}
-        />
-        <aside className="control-rail">
-          <RobotViewer
-            latestAction={state.robot.latest_action.length ? state.robot.latest_action : null}
-            qpos={state.robot.qpos.length ? state.robot.qpos : null}
-            mode={state.robot.mode}
+      {page === 'live' ? (
+        <section className="layout">
+          <CameraGrid
+            cameraStatus={state.camera_status}
+            cameraTimestamps={state.camera_timestamps}
+            cameraFrames={state.camera_jpeg_b64}
+            language={language}
             currentTask={state.robot.current_task}
-            language={language}
+            cameraView={cameraView}
+            onCameraViewChange={setCameraView}
           />
-          <VoicePanel
-            mode={state.robot.mode}
-            language={language}
-            dispatchTask={dispatchTask}
-            dispatchError={dispatchError}
-          />
-        </aside>
-      </section>
+          <aside className="control-rail">
+            <RobotViewer
+              latestAction={state.robot.latest_action.length ? state.robot.latest_action : null}
+              qpos={state.robot.qpos.length ? state.robot.qpos : null}
+              mode={state.robot.mode}
+              currentTask={state.robot.current_task}
+              language={language}
+            />
+            <VoicePanel
+              mode={state.robot.mode}
+              language={language}
+              dispatchTask={dispatchTask}
+              dispatchError={dispatchError}
+            />
+          </aside>
+        </section>
+      ) : (
+        <RolloutBrowser title="Collected Files" />
+      )}
     </main>
   )
 }

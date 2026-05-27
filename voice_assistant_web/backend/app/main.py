@@ -1,10 +1,16 @@
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import logging
+import mimetypes
+import os
+from pathlib import Path
+import re
+import subprocess
 import time
 
-from fastapi import FastAPI, File, Form, HTTPException, UploadFile, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, File, Form, Header, HTTPException, UploadFile, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response, StreamingResponse
 
@@ -32,6 +38,9 @@ camera_bridge = CameraBridge()
 robot_state_bridge = RobotStateBridge()
 redis_client = create_redis_client()
 voice_engine = VoiceAssistantEngine(redis_client)
+ROLLOUTS_ROOT = Path(settings.rollouts_root).expanduser().resolve()
+VIDEO_CHUNK_SIZE = 1024 * 1024
+VIDEO_CACHE_ROOT = Path(os.getenv("ROLLOUTS_VIDEO_CACHE", "/tmp/eii_rollout_video_cache"))
 
 
 @app.on_event("startup")
@@ -84,6 +93,241 @@ def stream_camera(camera_name: str) -> StreamingResponse:
     return StreamingResponse(
         frame_generator(),
         media_type="multipart/x-mixed-replace; boundary=frame",
+    )
+
+
+def _safe_rollout_path(relative_path: str) -> Path:
+    candidate = (ROLLOUTS_ROOT / relative_path).resolve()
+    if candidate != ROLLOUTS_ROOT and ROLLOUTS_ROOT not in candidate.parents:
+        raise HTTPException(status_code=400, detail="Invalid rollout path")
+    return candidate
+
+
+def _scan_rollout_tree(path: Path, relative_path: str = "") -> dict:
+    try:
+        entries = list(path.iterdir())
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail=f"Rollouts root not found: {ROLLOUTS_ROOT}") from None
+    except PermissionError:
+        raise HTTPException(status_code=403, detail=f"Permission denied: {relative_path or '.'}") from None
+
+    children = []
+    for entry in entries:
+        rel = f"{relative_path}/{entry.name}" if relative_path else entry.name
+        if entry.is_dir():
+            children.append(_scan_rollout_tree(entry, rel))
+            continue
+        if entry.suffix.lower() not in {".mp4", ".hdf5"}:
+            continue
+        stat = entry.stat()
+        children.append(
+            {
+                "name": entry.name,
+                "path": rel,
+                "type": "file",
+                "extension": entry.suffix.lower(),
+                "size": stat.st_size,
+                "modified": stat.st_mtime,
+            }
+        )
+
+    def natural_key(value: str) -> list[int | str]:
+        return [int(part) if part.isdigit() else part.lower() for part in re.split(r"(\d+)", value)]
+
+    children.sort(key=lambda item: (item["type"] == "file", natural_key(item["name"])))
+    stat = path.stat()
+    return {
+        "name": path.name or "rollouts",
+        "path": relative_path,
+        "type": "directory",
+        "modified": stat.st_mtime,
+        "children": children,
+    }
+
+
+@app.get("/api/rollouts/tree")
+def rollout_tree() -> dict:
+    return _scan_rollout_tree(ROLLOUTS_ROOT)
+
+
+def _parse_range_header(range_header: str | None, file_size: int) -> tuple[int, int, int]:
+    if not range_header:
+        return 0, file_size - 1, 200
+    unit, _, range_spec = range_header.partition("=")
+    if unit.strip().lower() != "bytes" or not range_spec:
+        raise HTTPException(status_code=416, detail="Invalid range header")
+
+    start_text, _, end_text = range_spec.partition("-")
+    try:
+        if start_text:
+            start = int(start_text)
+            end = int(end_text) if end_text else file_size - 1
+        else:
+            suffix_length = int(end_text)
+            start = max(file_size - suffix_length, 0)
+            end = file_size - 1
+    except ValueError:
+        raise HTTPException(status_code=416, detail="Invalid range header") from None
+
+    if start < 0 or end < start or start >= file_size:
+        raise HTTPException(status_code=416, detail="Requested range not satisfiable")
+    return start, min(end, file_size - 1), 206
+
+
+def _file_iterator(path: Path, start: int, end: int):
+    with path.open("rb") as file:
+        file.seek(start)
+        remaining = end - start + 1
+        while remaining > 0:
+            chunk = file.read(min(VIDEO_CHUNK_SIZE, remaining))
+            if not chunk:
+                break
+            remaining -= len(chunk)
+            yield chunk
+
+
+def _video_codec(path: Path) -> str:
+    try:
+        proc = subprocess.run(
+            [
+                "ffprobe",
+                "-v",
+                "error",
+                "-select_streams",
+                "v:0",
+                "-show_entries",
+                "stream=codec_name",
+                "-of",
+                "default=noprint_wrappers=1:nokey=1",
+                str(path),
+            ],
+            check=True,
+            text=True,
+            capture_output=True,
+        )
+    except subprocess.CalledProcessError as exc:
+        logging.warning("ffprobe failed for %s: %s", path, exc.stderr)
+        return ""
+    return proc.stdout.strip().splitlines()[0] if proc.stdout.strip() else ""
+
+
+def _cache_path_for_video(path: Path) -> Path:
+    stat = path.stat()
+    digest = hashlib.sha256(f"{path}:{stat.st_mtime_ns}:{stat.st_size}".encode()).hexdigest()
+    return VIDEO_CACHE_ROOT / f"{digest}.h264.mp4"
+
+
+def _wait_for_cache(cache_path: Path, lock_path: Path) -> None:
+    deadline = time.time() + 300
+    while lock_path.exists() and not cache_path.exists():
+        if time.time() > deadline:
+            raise HTTPException(status_code=503, detail="Timed out waiting for video transcode")
+        time.sleep(0.25)
+
+
+def _browser_playable_video(path: Path) -> Path:
+    codec = _video_codec(path)
+    if codec == "h264":
+        return path
+
+    cache_path = _cache_path_for_video(path)
+    if cache_path.exists():
+        return cache_path
+
+    VIDEO_CACHE_ROOT.mkdir(parents=True, exist_ok=True)
+    lock_path = cache_path.with_suffix(".lock")
+    try:
+        lock_fd = os.open(lock_path, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+    except FileExistsError:
+        _wait_for_cache(cache_path, lock_path)
+        if cache_path.exists():
+            return cache_path
+        raise HTTPException(status_code=503, detail="Video transcode did not complete")
+
+    tmp_path = cache_path.with_suffix(".tmp.mp4")
+    try:
+        os.close(lock_fd)
+        logging.info("Transcoding rollout video for browser playback: %s -> %s", path, cache_path)
+        subprocess.run(
+            [
+                "ffmpeg",
+                "-hide_banner",
+                "-loglevel",
+                "error",
+                "-y",
+                "-i",
+                str(path),
+                "-an",
+                "-c:v",
+                "libx264",
+                "-preset",
+                "veryfast",
+                "-crf",
+                "23",
+                "-pix_fmt",
+                "yuv420p",
+                "-movflags",
+                "+faststart",
+                str(tmp_path),
+            ],
+            check=True,
+        )
+        tmp_path.replace(cache_path)
+    except subprocess.CalledProcessError as exc:
+        if tmp_path.exists():
+            tmp_path.unlink()
+        logging.exception("Video transcode failed for %s", path)
+        raise HTTPException(status_code=500, detail="Video transcode failed") from exc
+    finally:
+        if lock_path.exists():
+            lock_path.unlink()
+    return cache_path
+
+
+@app.get("/api/rollouts/video")
+def rollout_video(path: str, range_header: str | None = Header(default=None, alias="Range")) -> StreamingResponse:
+    video_path = _safe_rollout_path(path)
+    if not video_path.exists() or not video_path.is_file():
+        raise HTTPException(status_code=404, detail="Video not found")
+    if video_path.suffix.lower() != ".mp4":
+        raise HTTPException(status_code=400, detail="Only mp4 files can be streamed")
+
+    playable_path = _browser_playable_video(video_path)
+    file_size = playable_path.stat().st_size
+    start, end, status_code = _parse_range_header(range_header, file_size)
+    media_type = mimetypes.guess_type(playable_path.name)[0] or "video/mp4"
+    headers = {
+        "Accept-Ranges": "bytes",
+        "Content-Length": str(end - start + 1),
+        "Cache-Control": "no-store",
+    }
+    if status_code == 206:
+        headers["Content-Range"] = f"bytes {start}-{end}/{file_size}"
+    return StreamingResponse(
+        _file_iterator(playable_path, start, end),
+        status_code=status_code,
+        media_type=media_type,
+        headers=headers,
+    )
+
+
+@app.head("/api/rollouts/video")
+def rollout_video_head(path: str) -> Response:
+    video_path = _safe_rollout_path(path)
+    if not video_path.exists() or not video_path.is_file():
+        raise HTTPException(status_code=404, detail="Video not found")
+    if video_path.suffix.lower() != ".mp4":
+        raise HTTPException(status_code=400, detail="Only mp4 files can be streamed")
+
+    playable_path = _browser_playable_video(video_path)
+    return Response(
+        status_code=200,
+        media_type=mimetypes.guess_type(playable_path.name)[0] or "video/mp4",
+        headers={
+            "Accept-Ranges": "bytes",
+            "Content-Length": str(playable_path.stat().st_size),
+            "Cache-Control": "no-store",
+        },
     )
 
 

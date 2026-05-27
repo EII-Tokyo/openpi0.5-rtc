@@ -14,6 +14,7 @@ class Settings:
     voice_command_channel: str = os.getenv("VOICE_COMMAND_CHANNEL", "aloha_voice_commands")
     camera_jpeg_quality: int = int(os.getenv("CAMERA_JPEG_QUALITY", "70"))
     realtime_hz: float = float(os.getenv("REALTIME_HZ", "10"))
+    rollouts_root: str = os.getenv("ROLLOUTS_ROOT", "/app/rollouts")
     allow_origins: list[str] = field(default_factory=lambda: os.getenv("ALLOW_ORIGINS", "*").split(","))
     openai_chat_model: str = os.getenv("OPENAI_CHAT_MODEL", "gpt-4o-mini")
     openai_tts_model: str = os.getenv("OPENAI_TTS_MODEL", "tts-1")

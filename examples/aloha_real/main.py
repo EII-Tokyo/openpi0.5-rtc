@@ -14,6 +14,7 @@ import tyro
 
 from examples.aloha_real import env as _env
 from examples.aloha_real import h5df_saver
+from examples.aloha_real import video_hdf5_saver
 
 
 @dataclasses.dataclass
@@ -57,8 +58,16 @@ class Args:
     compress_images: bool = True
     is_mobile: bool = False
     if_save_hdf5: bool = True
+    save_format: Literal["hdf5", "video_hdf5"] = "hdf5"
+    video_codec: Literal["h264", "mp4v", "avc1"] = "h264"
     # Set <= 0 to save the full episode instead of a rolling tail buffer.
     hdf5_max_buffer_seconds: float = 60.0
+    # Save one HDF5 rollout each time the robot leaves reset pose and returns.
+    split_hdf5_on_reset: bool = False
+    split_home_threshold: float = 0.15
+    split_leave_threshold: float = 0.30
+    split_stable_home_steps: int = 25
+    split_min_episode_steps: int = 50
 
 
 def main(args: Args) -> None:
@@ -80,14 +89,33 @@ def main(args: Args) -> None:
     )
     logging.info(f"Server metadata: {ws_client_policy.get_server_metadata()}")
 
-    # 创建 H5dfSaver subscriber
-    h5df_saver_instance = h5df_saver.H5dfSaver(
-        dataset_dir=args.dataset_dir,
-        compress_images=args.compress_images,
-        is_mobile=args.is_mobile,
-        fps=args.policy_hz,
-        max_buffer_seconds=args.hdf5_max_buffer_seconds,
-    )
+    if args.save_format == "video_hdf5":
+        saver_instance = video_hdf5_saver.VideoHdf5Saver(
+            dataset_dir=args.dataset_dir,
+            fps=args.policy_hz,
+            is_mobile=args.is_mobile,
+            split_on_reset=args.split_hdf5_on_reset,
+            reset_position=args.reset_position,
+            home_threshold=args.split_home_threshold,
+            leave_threshold=args.split_leave_threshold,
+            stable_home_steps=args.split_stable_home_steps,
+            min_episode_steps=args.split_min_episode_steps,
+            video_codec=args.video_codec,
+        )
+    else:
+        saver_instance = h5df_saver.H5dfSaver(
+            dataset_dir=args.dataset_dir,
+            compress_images=args.compress_images,
+            is_mobile=args.is_mobile,
+            fps=args.policy_hz,
+            max_buffer_seconds=args.hdf5_max_buffer_seconds,
+            split_on_reset=args.split_hdf5_on_reset,
+            reset_position=args.reset_position,
+            home_threshold=args.split_home_threshold,
+            leave_threshold=args.split_leave_threshold,
+            stable_home_steps=args.split_stable_home_steps,
+            min_episode_steps=args.split_min_episode_steps,
+        )
 
     runtime = _runtime.Runtime(
         # environment=_env.AlohaRealEnvironment(reset_position=metadata.get("reset_pose")),
@@ -106,7 +134,7 @@ def main(args: Args) -> None:
                 use_rtc=args.use_rtc,
             )
         ),
-        subscribers=[h5df_saver_instance] if args.if_save_hdf5 else [],
+        subscribers=[saver_instance] if args.if_save_hdf5 else [],
         max_hz=args.policy_hz,
         manual_hz=args.manual_hz,
         num_episodes=args.num_episodes,
