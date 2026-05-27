@@ -78,35 +78,47 @@ def create_default_policy(
     if checkpoint := DEFAULT_CHECKPOINT.get(env):
         train_config = _config.get_config(checkpoint.config)
         return _policy_config.create_trained_policy(
-            dc.replace(
+            _override_history(
                 train_config,
-                data=dc.replace(
-                    train_config.data,
-                    video_memory_num_frames=video_memory_num_frames,
-                    video_memory_stride_seconds=video_memory_stride_seconds,
-                ),
+                video_memory_num_frames=video_memory_num_frames,
+                video_memory_stride_seconds=video_memory_stride_seconds,
             ),
             checkpoint.dir,
         )
     raise ValueError(f"Unsupported environment mode: {env}")
 
 
+def _override_history(
+    train_config: _config.TrainConfig,
+    *,
+    video_memory_num_frames: int,
+    video_memory_stride_seconds: float,
+) -> _config.TrainConfig:
+    if train_config.data.transform_pipeline is None:
+        raise ValueError("A transform pipeline is required to override policy video history.")
+    return dc.replace(
+        train_config,
+        data=dc.replace(
+            train_config.data,
+            transform_pipeline=dc.replace(
+                train_config.data.transform_pipeline,
+                video_memory_num_frames=video_memory_num_frames,
+                video_memory_stride_seconds=video_memory_stride_seconds,
+            ),
+        ),
+    )
+
+
 def create_policy(args: Args) -> _policy.Policy:
     """Create a policy from the given arguments."""
-    def _override_history(train_config: _config.TrainConfig) -> _config.TrainConfig:
-        return dc.replace(
-            train_config,
-            data=dc.replace(
-                train_config.data,
-                video_memory_num_frames=args.video_memory_num_frames,
-                video_memory_stride_seconds=args.video_memory_stride_seconds,
-            ),
-        )
-
     match args.policy:
         case Checkpoint():
             return _policy_config.create_trained_policy(
-                _override_history(_config.get_config(args.policy.config)),
+                _override_history(
+                    _config.get_config(args.policy.config),
+                    video_memory_num_frames=args.video_memory_num_frames,
+                    video_memory_stride_seconds=args.video_memory_stride_seconds,
+                ),
                 args.policy.dir,
             )
         case Default():
