@@ -10,6 +10,7 @@ from typing_extensions import override
 from openpi.models import model as _model
 from openpi.models import pi0_config
 import openpi.models.gemma as _gemma
+import openpi.models.rl_token as _rl_token
 import openpi.models.siglip as _siglip
 from openpi.shared import array_typing as at
 
@@ -68,6 +69,8 @@ class Pi0(_model.BaseModel):
         super().__init__(config.action_dim, config.action_horizon, config.max_token_len)
         self.pi05 = config.pi05
         self.image_resolution = config.image_resolution
+        self.rl_token_loss_weight = config.rl_token_loss_weight
+        self.rl_token_only = config.rl_token_only
         paligemma_config = _gemma.get_config(config.paligemma_variant)
         action_expert_config = _gemma.get_config(config.action_expert_variant)
         # TODO: rewrite gemma in NNX. For now, use bridge.
@@ -90,6 +93,9 @@ class Pi0(_model.BaseModel):
         )
         img.lazy_init(next(iter(config.fake_obs().images.values())), train=False, rngs=rngs)
         self.PaliGemma = nnx.Dict(llm=llm, img=img)
+        self.rl_token_autoencoder = (
+            _rl_token.RLTokenAutoencoder(config.rl_token, rngs=rngs) if config.rl_token is not None else None
+        )
         self.action_in_proj = nnx.Linear(config.action_dim, action_expert_config.width, rngs=rngs)
         if config.pi05:
             self.time_mlp_in = nnx.Linear(action_expert_config.width, action_expert_config.width, rngs=rngs)
@@ -135,6 +141,15 @@ class Pi0(_model.BaseModel):
         input_mask = jnp.concatenate(input_mask, axis=1)
         ar_mask = jnp.array(ar_mask)
         return tokens, input_mask, ar_mask
+
+    def embed_prefix_hidden(
+        self, obs: _model.Observation
+    ) -> tuple[at.Float[at.Array, "b s emb"], at.Bool[at.Array, "b s"]]:
+        prefix_tokens, prefix_mask, prefix_ar_mask = self.embed_prefix(obs)
+        prefix_attn_mask = make_attn_mask(prefix_mask, prefix_ar_mask)
+        positions = jnp.cumsum(prefix_mask, axis=1) - 1
+        (prefix_out, _), _ = self.PaliGemma.llm([prefix_tokens, None], mask=prefix_attn_mask, positions=positions)
+        return prefix_out, prefix_mask
 
     @at.typecheck
     def embed_suffix(
@@ -197,6 +212,11 @@ class Pi0(_model.BaseModel):
             image_resolution=self.image_resolution,
         )
 
+        if self.rl_token_autoencoder is not None and self.rl_token_only:
+            prefix_out, prefix_mask = self.embed_prefix_hidden(observation)
+            rl_token_loss = self.rl_token_autoencoder.compute_loss(jax.lax.stop_gradient(prefix_out), prefix_mask)
+            return einops.repeat(rl_token_loss, "b -> b ah", ah=self.action_horizon)
+
         batch_shape = actions.shape[:-2]
         noise = jax.random.normal(noise_rng, actions.shape)
         time = jax.random.beta(time_rng, 1.5, 1, batch_shape) * 0.999 + 0.001
@@ -215,8 +235,14 @@ class Pi0(_model.BaseModel):
             [prefix_tokens, suffix_tokens], mask=attn_mask, positions=positions, adarms_cond=[None, adarms_cond]
         )
         v_t = self.action_out_proj(suffix_out[:, -self.action_horizon :])
+        action_loss = jnp.mean(jnp.square(v_t - u_t), axis=-1)
 
-        return jnp.mean(jnp.square(v_t - u_t), axis=-1)
+        if self.rl_token_autoencoder is None:
+            return action_loss
+        rl_token_loss = self.rl_token_autoencoder.compute_loss(jax.lax.stop_gradient(prefix_out), prefix_mask)
+        return action_loss + self.rl_token_loss_weight * einops.repeat(
+            rl_token_loss, "b -> b ah", ah=self.action_horizon
+        )
 
     @override
     def sample_actions(

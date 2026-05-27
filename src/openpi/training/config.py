@@ -15,9 +15,11 @@ import tyro
 
 import openpi.models.model as _model
 import openpi.models.pi0_config as pi0_config
+import openpi.models.rl_token as _rl_token
 import openpi.models.tokenizer as _tokenizer
 import openpi.policies.aloha_policy as aloha_policy
 import openpi.shared.download as _download
+import openpi.shared.nnx_utils as nnx_utils
 import openpi.shared.normalize as _normalize
 import openpi.training.optimizer as _optimizer
 import openpi.training.weight_loaders as weight_loaders
@@ -718,6 +720,84 @@ def _make_twist_train_config(
     )
 
 
+def _make_rl_token_autoencoder_config(
+    name: str,
+    *,
+    repo_ids: list[str],
+    init_checkpoint: str,
+    batch_size: int,
+    num_workers: int,
+    fsdp_devices: int = 1,
+    gradient_accumulation_steps: int = 1,
+    exp_name: str = tyro.MISSING,
+    assets_base_dir: str = "./assets",
+    checkpoint_base_dir: str = "./checkpoints",
+    wandb_enabled: bool = True,
+    overwrite: bool = False,
+    resume: bool = False,
+    num_train_steps: int = 20_000,
+) -> TrainConfig:
+    model = pi0_config.Pi0Config(
+        pi05=True,
+        rl_token=_rl_token.RLTokenConfig(
+            hidden_dim=2048,
+            encoder_layers=4,
+            decoder_layers=2,
+            num_heads=8,
+            mlp_dim=8192,
+            max_prefix_len=1224,
+        ),
+        rl_token_only=True,
+    )
+
+    return TrainConfig(
+        name=name,
+        exp_name=exp_name,
+        model=model,
+        lr_schedule=_optimizer.CosineDecaySchedule(
+            warmup_steps=2_000,
+            peak_lr=1.0e-4,
+            decay_steps=num_train_steps,
+            decay_lr=1.0e-5,
+        ),
+        log_interval=10,
+        data=LeRobotAlohaDataConfig(
+            adapt_to_pi=True,
+            image_size=(224, 224),
+            video_memory_num_frames=1,
+            video_memory_stride_seconds=1.0,
+            repo_ids=repo_ids,
+            assets=AssetsConfig(assets_dir=None, asset_id="trossen"),
+            base_config=DataConfig(prompt_from_task=True),
+            repack_transforms=_aloha_real_repack_transforms(
+                include_low=False,
+                include_prompt=True,
+                include_subtask=False,
+            ),
+        ),
+        weight_loader=weight_loaders.CheckpointWeightLoader(
+            init_checkpoint,
+            missing_regex=".*rl_token_autoencoder.*",
+        ),
+        freeze_filter=nnx.All(
+            nnx.Param,
+            nnx.Not(nnx_utils.PathRegex(".*rl_token_autoencoder.*")),
+        ),
+        ema_decay=None,
+        save_interval=1000,
+        num_train_steps=num_train_steps,
+        batch_size=batch_size,
+        num_workers=num_workers,
+        fsdp_devices=fsdp_devices,
+        gradient_accumulation_steps=gradient_accumulation_steps,
+        assets_base_dir=assets_base_dir,
+        checkpoint_base_dir=checkpoint_base_dir,
+        wandb_enabled=wandb_enabled,
+        overwrite=overwrite,
+        resume=resume,
+    )
+
+
 _CONFIGS = [
     _make_twist_train_config(
         "twist_off_the_bottle_cap",
@@ -921,6 +1001,22 @@ _CONFIGS = [
         # merged-adjust-pickup has ten additional copies.
         num_train_steps=60_000,
         assets=AssetsConfig(assets_dir=None, asset_id="trossen"),
+    ),
+    _make_rl_token_autoencoder_config(
+        "eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo_rl_token_ae",
+        repo_ids=_EII_DATA_SYSTEM_WITHOUT_RINSE_RETURN_HOME_TURN_OVER_X5_FREE_SPIN_PLUS10_REPO_IDS,
+        init_checkpoint="/workspace/openpi0.5-rtc/checkpoints/eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo/no_rinse_cam3_fullft_return_home_29repo_bs256_nw64_fsdp4_20260520/19000",
+        batch_size=64,
+        num_workers=32,
+        fsdp_devices=4,
+        gradient_accumulation_steps=1,
+        exp_name="rl_token_2048_enc4_dec2_from_19000_20260527",
+        assets_base_dir="/workspace/openpi0.5-rtc/assets",
+        checkpoint_base_dir="/workspace/openpi0.5-rtc/checkpoints",
+        wandb_enabled=True,
+        overwrite=False,
+        resume=False,
+        num_train_steps=20_000,
     ),
     _make_twist_train_config(
         "eii_data_system_without_rinse_cam3_fullft_a100",

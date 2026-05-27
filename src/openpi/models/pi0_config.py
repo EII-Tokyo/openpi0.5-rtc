@@ -8,6 +8,7 @@ from typing_extensions import override
 
 from openpi.models import model as _model
 import openpi.models.gemma as _gemma
+import openpi.models.rl_token as _rl_token
 from openpi.shared import array_typing as at
 import openpi.shared.nnx_utils as nnx_utils
 
@@ -32,6 +33,9 @@ class Pi0Config(_model.BaseModelConfig):
     # This config option is not used directly by the model, but it is read by the ModelTransformFactory.
     discrete_state_input: bool = None  # type: ignore
     image_resolution: tuple[int, int] = _model.IMAGE_RESOLUTION
+    rl_token: _rl_token.RLTokenConfig | None = None
+    rl_token_loss_weight: float = 1.0
+    rl_token_only: bool = False
 
     def __post_init__(self):
         if self.max_token_len is None:
