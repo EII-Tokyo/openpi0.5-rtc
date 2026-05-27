@@ -397,6 +397,9 @@ class AlohaTransformPipeline:
     def _image_structure(self, prefix: str) -> dict[str, str]:
         return {key: f"{prefix}.{key}" for key in self.raw_image_keys}
 
+    def _nested_image_structure(self, prefix: str) -> dict[str, str]:
+        return {key: f"{prefix}/{key}" for key in self.raw_image_keys}
+
     def _load_norm_stats(self) -> dict[str, NormStats]:
         data_assets_dir = f"{self.assets.assets_dir.rstrip('/')}/{self.assets.asset_id}"
         try:
@@ -430,7 +433,7 @@ class AlohaTransformPipeline:
 
     def policy_repack_transform(self) -> RepackTransform:
         structure = {
-            "images": self._image_structure("images"),
+            "images": self._nested_image_structure("images"),
             "state": "state",
             "task": "task",
         }
