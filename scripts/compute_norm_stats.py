@@ -348,7 +348,7 @@ def main(
             seed=seed,
         )
 
-    output_path = Path(data_config.transform_pipeline.assets_dir) / data_config.transform_pipeline.asset_id
+    output_path = Path(data_config.transform_pipeline.assets.assets_dir) / data_config.transform_pipeline.assets.asset_id
     print(f"Writing stats to: {output_path}")
     normalize.save(output_path, norm_stats)
 

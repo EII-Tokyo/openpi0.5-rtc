@@ -352,6 +352,12 @@ class AlohaOutputs(DataTransformFn):
 
 
 @dataclasses.dataclass(frozen=True)
+class AssetsConfig:
+    assets_dir: str
+    asset_id: str
+
+
+@dataclasses.dataclass(frozen=True)
 class AlohaTransformPipeline:
     """The single transform pipeline used by this ALOHA-real-only branch."""
 
@@ -360,14 +366,25 @@ class AlohaTransformPipeline:
     image_resolution: tuple[int, int]
     max_token_len: int
     discrete_state_input: bool
-    assets_dir: str
-    asset_id: str
+    assets: AssetsConfig
     use_quantile_norm: bool = True
     video_memory_num_frames: int = 1
     video_memory_stride_seconds: float = 1.0
     adapt_to_pi: bool = True
     use_delta_joint_actions: bool = True
     action_dim: int = ALOHA_MODEL_ACTION_DIM
+    norm_stats: dict[str, NormStats] | None = dataclasses.field(init=False, repr=False, compare=False)
+    norm_stats_error: FileNotFoundError | None = dataclasses.field(init=False, repr=False, compare=False)
+
+    def __post_init__(self) -> None:
+        try:
+            norm_stats = self._load_norm_stats()
+            norm_stats_error = None
+        except FileNotFoundError as exc:
+            norm_stats = None
+            norm_stats_error = exc
+        object.__setattr__(self, "norm_stats", norm_stats)
+        object.__setattr__(self, "norm_stats_error", norm_stats_error)
 
     @property
     def raw_image_keys(self) -> tuple[str, ...]:
@@ -380,8 +397,8 @@ class AlohaTransformPipeline:
     def _image_structure(self, prefix: str) -> dict[str, str]:
         return {key: f"{prefix}.{key}" for key in self.raw_image_keys}
 
-    def load_norm_stats(self) -> dict[str, NormStats]:
-        data_assets_dir = f"{self.assets_dir.rstrip('/')}/{self.asset_id}"
+    def _load_norm_stats(self) -> dict[str, NormStats]:
+        data_assets_dir = f"{self.assets.assets_dir.rstrip('/')}/{self.assets.asset_id}"
         try:
             norm_stats = _normalize_lib.load(_download.maybe_download(data_assets_dir))
         except FileNotFoundError as exc:
@@ -391,6 +408,13 @@ class AlohaTransformPipeline:
             ) from exc
         logging.info("Loaded norm stats from %s", data_assets_dir)
         return norm_stats
+
+    def _require_norm_stats(self) -> dict[str, NormStats]:
+        if self.norm_stats is None:
+            if self.norm_stats_error is not None:
+                raise self.norm_stats_error
+            raise FileNotFoundError("Normalization stats were not loaded.")
+        return self.norm_stats
 
     def training_repack_transform(self, *, include_actions: bool = True) -> RepackTransform:
         structure = {
@@ -414,7 +438,7 @@ class AlohaTransformPipeline:
             structure["subtask"] = "subtask"
         return RepackTransform(structure)
 
-    def _model_input_transforms(self, norm_stats: dict[str, NormStats]) -> list[DataTransformFn]:
+    def _model_input_transforms(self) -> list[DataTransformFn]:
         transforms: list[DataTransformFn] = [
             AlohaInputs(
                 adapt_to_pi=self.adapt_to_pi,
@@ -426,7 +450,7 @@ class AlohaTransformPipeline:
             transforms.append(DeltaActions(ALOHA_DELTA_ACTION_MASK))
         transforms.extend(
             [
-                Normalize(norm_stats, use_quantiles=self.use_quantile_norm),
+                Normalize(self._require_norm_stats(), use_quantiles=self.use_quantile_norm),
                 ResizeImages(*self.image_resolution),
                 TokenizePrompt(
                     _tokenizer.PaligemmaTokenizer(self.max_token_len),
@@ -445,8 +469,7 @@ class AlohaTransformPipeline:
             require_subtask=self.include_subtask,
         )
 
-    def training_input_transforms(self, *, norm_stats: dict[str, NormStats] | None = None) -> list[DataTransformFn]:
-        norm_stats = self.load_norm_stats() if norm_stats is None else norm_stats
+    def training_input_transforms(self) -> list[DataTransformFn]:
         return [
             self._validate_input_transform(
                 require_action=True,
@@ -454,7 +477,7 @@ class AlohaTransformPipeline:
             ),
             self.training_repack_transform(include_actions=True),
             PromptFromLeRobotTask(),
-            *self._model_input_transforms(norm_stats),
+            *self._model_input_transforms(),
         ]
 
     def stats_input_transforms(self) -> list[DataTransformFn]:
@@ -479,8 +502,7 @@ class AlohaTransformPipeline:
             transforms.append(DeltaActions(ALOHA_DELTA_ACTION_MASK))
         return transforms
 
-    def policy_input_transforms(self, *, norm_stats: dict[str, NormStats] | None = None) -> list[DataTransformFn]:
-        norm_stats = self.load_norm_stats() if norm_stats is None else norm_stats
+    def policy_input_transforms(self) -> list[DataTransformFn]:
         return [
             self._validate_input_transform(
                 require_action=False,
@@ -489,13 +511,12 @@ class AlohaTransformPipeline:
             FilterImages(self.raw_image_keys),
             self.policy_repack_transform(),
             PromptFromLeRobotTask(),
-            *self._model_input_transforms(norm_stats),
+            *self._model_input_transforms(),
         ]
 
-    def policy_output_transforms(self, *, norm_stats: dict[str, NormStats] | None = None) -> list[DataTransformFn]:
-        norm_stats = self.load_norm_stats() if norm_stats is None else norm_stats
+    def policy_output_transforms(self) -> list[DataTransformFn]:
         transforms: list[DataTransformFn] = [
-            Unnormalize(norm_stats, use_quantiles=self.use_quantile_norm),
+            Unnormalize(self._require_norm_stats(), use_quantiles=self.use_quantile_norm),
         ]
         if self.use_delta_joint_actions:
             transforms.append(AbsoluteActions(ALOHA_DELTA_ACTION_MASK))

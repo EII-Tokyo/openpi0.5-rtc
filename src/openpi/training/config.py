@@ -394,12 +394,6 @@ _EII_DATA_SYSTEM_WITHOUT_RINSE_RETURN_HOME_TURN_OVER_X5_FREE_SPIN_PLUS10_REPO_ID
 ]
 
 @dataclasses.dataclass(frozen=True)
-class AssetsConfig:
-    assets_dir: str
-    asset_id: str
-
-
-@dataclasses.dataclass(frozen=True)
 class LeRobotAlohaDataConfig:
     repo_ids: list[str]
     transform_pipeline: _transforms.AlohaTransformPipeline
@@ -444,8 +438,8 @@ class TrainConfig:
     def trainable_filter(self) -> nnx.filterlib.Filter:
         return nnx.All(nnx.Param, nnx.Not(self.freeze_filter))
 
-def _local_assets(config_name: str, base_dir: str = "./assets") -> AssetsConfig:
-    return AssetsConfig(assets_dir=str(pathlib.Path(base_dir) / config_name), asset_id="trossen")
+def _local_assets(config_name: str, base_dir: str = "./assets") -> _transforms.AssetsConfig:
+    return _transforms.AssetsConfig(assets_dir=str(pathlib.Path(base_dir) / config_name), asset_id="trossen")
 
 
 def _make_twist_train_config(
@@ -463,7 +457,7 @@ def _make_twist_train_config(
     max_token_len: int | None = None,
     video_memory_num_frames: int = 1,
     video_memory_stride_seconds: float = 1.0,
-    assets: AssetsConfig,
+    assets: _transforms.AssetsConfig,
     exp_name: str = tyro.MISSING,
     checkpoint_base_dir: str = "./checkpoints",
     wandb_enabled: bool = True,
@@ -510,8 +504,7 @@ def _make_twist_train_config(
                 image_resolution=model.image_resolution,
                 max_token_len=model.max_token_len,
                 discrete_state_input=model.discrete_state_input,
-                assets_dir=assets.assets_dir,
-                asset_id=assets.asset_id,
+                assets=assets,
                 use_quantile_norm=True,
                 video_memory_num_frames=video_memory_num_frames,
                 video_memory_stride_seconds=video_memory_stride_seconds,
@@ -843,8 +836,7 @@ _CONFIGS = [
                 image_resolution=(224, 224),
                 max_token_len=200,
                 discrete_state_input=True,
-                assets_dir=_local_assets("debug").assets_dir,
-                asset_id=_local_assets("debug").asset_id,
+                assets=_local_assets("debug"),
                 use_quantile_norm=True,
                 video_memory_num_frames=1,
                 video_memory_stride_seconds=1.0,

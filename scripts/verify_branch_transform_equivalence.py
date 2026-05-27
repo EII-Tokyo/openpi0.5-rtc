@@ -91,9 +91,7 @@ def apply_all(data, items):
 
 def training_transforms(data_config):
     if getattr(data_config, "transform_pipeline", None) is not None:
-        return data_config.transform_pipeline.training_input_transforms(
-            norm_stats={},
-        )
+        return data_config.transform_pipeline.training_input_transforms()
     prompt_from_task = getattr(data_config, "prompt_from_task", True)
     return [
         *([transforms.PromptFromLeRobotTask()] if prompt_from_task else []),
@@ -106,9 +104,7 @@ def training_transforms(data_config):
 
 def policy_transforms(data_config):
     if getattr(data_config, "transform_pipeline", None) is not None:
-        return data_config.transform_pipeline.policy_input_transforms(
-            norm_stats={},
-        )
+        return data_config.transform_pipeline.policy_input_transforms()
 
     image_keys = None
     for item in data_config.repack_transforms.inputs:
@@ -169,7 +165,7 @@ if __name__ == "__main__":
 '''
 
 
-def run_branch(tree: Path, config: str, out: Path) -> None:
+def run_branch(tree: Path, config: str, out: Path, cwd: Path) -> None:
     env = os.environ.copy()
     paths = [str(tree / "src")]
     old_client = tree / "packages" / "openpi-client" / "src"
@@ -178,7 +174,7 @@ def run_branch(tree: Path, config: str, out: Path) -> None:
     env["PYTHONPATH"] = os.pathsep.join(paths + ([env["PYTHONPATH"]] if env.get("PYTHONPATH") else []))
     subprocess.run(
         [sys.executable, "-c", BRANCH_CODE, "--config", config, "--out", str(out)],
-        cwd=tree,
+        cwd=cwd,
         env=env,
         check=True,
     )
@@ -219,14 +215,21 @@ def main() -> None:
     parser.add_argument("--main-tree", required=True, type=Path)
     parser.add_argument("--candidate-tree", required=True, type=Path)
     parser.add_argument("--config", default="eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo")
+    parser.add_argument(
+        "--assets-root",
+        type=Path,
+        default=None,
+        help="Working directory used for relative assets paths. Defaults to --candidate-tree.",
+    )
     parser.add_argument("--atol", type=float, default=0.0)
     args = parser.parse_args()
+    assets_root = args.assets_root or args.candidate_tree
 
     with tempfile.TemporaryDirectory() as td:
         main_out = Path(td) / "main.pkl"
         cand_out = Path(td) / "candidate.pkl"
-        run_branch(args.main_tree, args.config, main_out)
-        run_branch(args.candidate_tree, args.config, cand_out)
+        run_branch(args.main_tree, args.config, main_out, assets_root)
+        run_branch(args.candidate_tree, args.config, cand_out, assets_root)
         main_data = pickle.loads(main_out.read_bytes())
         cand_data = pickle.loads(cand_out.read_bytes())
 
