@@ -33,15 +33,14 @@ def create_trained_policy(
 
     logging.info("Loading model...")
     model = train_config.model.load(_model.restore_params(checkpoint_dir / "params", dtype=jnp.bfloat16))
-    checkpoint_assets = _config.AssetsConfig(
-        assets_dir=str(checkpoint_dir / "assets"),
-        asset_id=train_config.data.assets.asset_id,
-    )
     if train_config.data.transform_pipeline is None:
         raise ValueError("A transform pipeline is required for policy inference.")
+    checkpoint_assets = _config.AssetsConfig(
+        assets_dir=str(checkpoint_dir / "assets"),
+        asset_id=train_config.data.transform_pipeline.asset_id,
+    )
     data_config = dataclasses.replace(
         train_config.data,
-        assets=checkpoint_assets,
         transform_pipeline=dataclasses.replace(
             train_config.data.transform_pipeline,
             assets_dir=checkpoint_assets.assets_dir,
@@ -52,7 +51,6 @@ def create_trained_policy(
         norm_stats = data_config.transform_pipeline.load_norm_stats()
 
     input_transforms = data_config.transform_pipeline.policy_input_transforms(
-        use_quantile_norm=data_config.use_quantile_norm,
         norm_stats=norm_stats,
     )
     logging.info("Filtering policy input images to training camera keys: %s", data_config.transform_pipeline.raw_image_keys)
@@ -61,7 +59,6 @@ def create_trained_policy(
         model,
         transforms=input_transforms,
         output_transforms=data_config.transform_pipeline.policy_output_transforms(
-            use_quantile_norm=data_config.use_quantile_norm,
             norm_stats=norm_stats,
         ),
         observation_transform=lambda observation: data_config.transform_pipeline.preprocess_observation(

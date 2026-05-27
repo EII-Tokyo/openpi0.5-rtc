@@ -4,13 +4,11 @@ from pathlib import Path
 from typing import Protocol, SupportsIndex, TypeVar
 
 import jax
-import jax.numpy as jnp
 import lerobot.datasets.lerobot_dataset as lerobot_dataset
 import numpy as np
 import pyarrow.parquet as pq
 import torch
 
-import openpi.models.model as _model
 import openpi.training.config as _config
 from openpi.data import transforms as _transforms
 
@@ -302,68 +300,23 @@ class IterableTransformedDataset(IterableDataset[T_co]):
         return len(self._dataset)
 
 
-class FakeDataset(Dataset):
-    def __init__(self, model_config: _model.BaseModelConfig, num_samples: int):
-        self._num_samples = num_samples
-        self._observation_spec, self._action_spec = model_config.inputs_spec()
-
-    def __getitem__(self, index: SupportsIndex) -> dict:
-        rng = jax.random.key(index.__index__())
-
-        def make_from_spec(spec: jax.ShapeDtypeStruct):
-            nonlocal rng
-            rng, data_rng = jax.random.split(rng)
-            # Remove the batch dimension.
-            shape = spec.shape[1:]
-            if spec.dtype == jnp.float32:
-                return jax.random.uniform(data_rng, shape=shape, minval=-1.0, maxval=1.0)
-            if spec.dtype == jnp.int32:
-                return jax.random.randint(data_rng, shape=shape, minval=0, maxval=2048)
-            return jnp.zeros(shape=shape, dtype=spec.dtype)
-
-        observation = jax.tree.map(make_from_spec, self._observation_spec)
-        action = jax.tree.map(make_from_spec, self._action_spec)
-
-        return {
-            **observation.to_dict(),
-            "actions": action,
-        }
-
-    def __len__(self) -> int:
-        return self._num_samples
-
-
-def create_torch_dataset(
-    data_config: _config.LeRobotAlohaDataConfig, action_horizon: int, model_config: _model.BaseModelConfig
-) -> Dataset:
+def create_torch_dataset(data_config: _config.LeRobotAlohaDataConfig, action_horizon: int) -> Dataset:
     """Create a dataset for training."""
-    repo_id = data_config.repo_id
     repo_ids = data_config.repo_ids
-    if repo_id is None and repo_ids is None:
-        raise ValueError("Repo ID or repo IDs is not set. Cannot create dataset.")
-    if repo_id == "fake":
-        return FakeDataset(model_config, num_samples=1024)
+    if not repo_ids:
+        raise ValueError("repo_ids must be non-empty. Cannot create dataset.")
     fps_meta: lerobot_dataset.LeRobotDatasetMetadata | None = None
-    if repo_ids is not None and len(repo_ids) > 0:
-        fps_meta = lerobot_dataset.LeRobotDatasetMetadata(repo_ids[0], force_cache_sync=True)
-        delta_timestamps = {key: [t / fps_meta.fps for t in range(action_horizon)] for key in data_config.action_sequence_keys}
-        dataset = lerobot_dataset.MultiLeRobotDataset(repo_ids, delta_timestamps=delta_timestamps)
-    elif repo_id is not None:
-        fps_meta = lerobot_dataset.LeRobotDatasetMetadata(repo_id, force_cache_sync=True)
-        delta_timestamps = {key: [t / fps_meta.fps for t in range(action_horizon)] for key in data_config.action_sequence_keys}
-        dataset = lerobot_dataset.LeRobotDataset(
-            data_config.repo_id,
-            delta_timestamps=delta_timestamps,
-        )
-    else:
-        raise ValueError("Repo ID or non-empty repo_ids is required. Cannot create dataset.")
+    fps_meta = lerobot_dataset.LeRobotDatasetMetadata(repo_ids[0], force_cache_sync=True)
+    delta_timestamps = {"action": [t / fps_meta.fps for t in range(action_horizon)]}
+    dataset = lerobot_dataset.MultiLeRobotDataset(repo_ids, delta_timestamps=delta_timestamps)
     trainable_mask = IsForTrainingWrapper._build_trainable_mask(dataset)
-    if getattr(data_config, "video_memory_num_frames", 1) > 1:
+    transform_pipeline = data_config.transform_pipeline
+    if transform_pipeline.video_memory_num_frames > 1:
         dataset = TemporalFrameStackDataset(
             dataset,
             fps=float(fps_meta.fps),
-            num_frames=data_config.video_memory_num_frames,
-            stride_seconds=data_config.video_memory_stride_seconds,
+            num_frames=transform_pipeline.video_memory_num_frames,
+            stride_seconds=transform_pipeline.video_memory_stride_seconds,
             trainable_mask=trainable_mask,
         )
     else:
@@ -379,9 +332,7 @@ def transform_dataset(dataset: Dataset, data_config: _config.LeRobotAlohaDataCon
 
     return TransformedDataset(
         dataset,
-        data_config.transform_pipeline.training_input_transforms(
-            use_quantile_norm=data_config.use_quantile_norm,
-        ),
+        data_config.transform_pipeline.training_input_transforms(),
     )
 
 
@@ -397,8 +348,6 @@ def transform_iterable_dataset(
 
     return IterableTransformedDataset(
         dataset,
-        data_config.transform_pipeline.training_input_transforms(
-            use_quantile_norm=data_config.use_quantile_norm,
-        ),
+        data_config.transform_pipeline.training_input_transforms(),
         is_batched=is_batched,
     )

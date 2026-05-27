@@ -1,6 +1,5 @@
 """See _CONFIGS for the list of available configs."""
 
-from collections.abc import Sequence
 import dataclasses
 import difflib
 import pathlib
@@ -402,18 +401,8 @@ class AssetsConfig:
 
 @dataclasses.dataclass(frozen=True)
 class LeRobotAlohaDataConfig:
-    repo_id: str | None = None
-    repo_ids: list[str] | None = None
-    assets: AssetsConfig = tyro.MISSING
-    transform_pipeline: _transforms.AlohaTransformPipeline | None = None
-    use_quantile_norm: bool = True
-    use_delta_joint_actions: bool = True
-    adapt_to_pi: bool = True
-    video_memory_num_frames: int = 1
-    video_memory_stride_seconds: float = 1.0
-    include_low: bool = True
-    include_subtask: bool = True
-    action_sequence_keys: Sequence[str] = ("action",)
+    repo_ids: list[str]
+    transform_pipeline: _transforms.AlohaTransformPipeline
 
 
 @dataclasses.dataclass(frozen=True)
@@ -514,11 +503,7 @@ def _make_twist_train_config(
         ),
         log_interval=10,
         data=LeRobotAlohaDataConfig(
-            adapt_to_pi=True,
-            video_memory_num_frames=video_memory_num_frames,
-            video_memory_stride_seconds=video_memory_stride_seconds,
             repo_ids=repo_ids,
-            assets=assets,
             transform_pipeline=_transforms.AlohaTransformPipeline(
                 include_low=include_low,
                 include_subtask=include_subtask,
@@ -527,12 +512,13 @@ def _make_twist_train_config(
                 discrete_state_input=model.discrete_state_input,
                 assets_dir=assets.assets_dir,
                 asset_id=assets.asset_id,
+                use_quantile_norm=True,
+                video_memory_num_frames=video_memory_num_frames,
+                video_memory_stride_seconds=video_memory_stride_seconds,
                 adapt_to_pi=True,
                 use_delta_joint_actions=True,
                 action_dim=model.action_dim,
             ),
-            include_low=include_low,
-            include_subtask=include_subtask,
         ),
         weight_loader=weight_loaders.CheckpointWeightLoader(_PI05_BASE_PARAMS),
         freeze_filter=freeze_filter,
@@ -850,8 +836,7 @@ _CONFIGS = [
     TrainConfig(
         name="debug",
         data=LeRobotAlohaDataConfig(
-            repo_id=_TWIST_ONLY_REPO_IDS[0],
-            assets=_local_assets("debug"),
+            repo_ids=[_TWIST_ONLY_REPO_IDS[0]],
             transform_pipeline=_transforms.AlohaTransformPipeline(
                 include_low=False,
                 include_subtask=False,
@@ -860,12 +845,13 @@ _CONFIGS = [
                 discrete_state_input=True,
                 assets_dir=_local_assets("debug").assets_dir,
                 asset_id=_local_assets("debug").asset_id,
+                use_quantile_norm=True,
+                video_memory_num_frames=1,
+                video_memory_stride_seconds=1.0,
                 adapt_to_pi=True,
                 use_delta_joint_actions=True,
                 action_dim=32,
             ),
-            include_low=False,
-            include_subtask=False,
         ),
         batch_size=2,
         model=pi0_config.Pi0Config(

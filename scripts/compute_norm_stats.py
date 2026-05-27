@@ -19,7 +19,6 @@ import torch
 import tqdm
 import tyro
 
-import openpi.models.model as _model
 import openpi.shared.normalize as normalize
 import openpi.training.config as _config
 from openpi.data import dataloaders as _data_loader
@@ -36,14 +35,13 @@ def create_torch_dataloader(
     data_config: _config.LeRobotAlohaDataConfig,
     action_horizon: int,
     batch_size: int,
-    model_config: _model.BaseModelConfig,
     num_workers: int,
     max_frames: int | None = None,
     shuffle_if_truncated: bool = True,
 ) -> tuple[_datasets.Dataset, int]:
-    if data_config.repo_id is None and not data_config.repo_ids:
-        raise ValueError("Data config must have a repo_id or non-empty repo_ids")
-    dataset = _datasets.create_torch_dataset(data_config, action_horizon, model_config)
+    if not data_config.repo_ids:
+        raise ValueError("Data config must have non-empty repo_ids")
+    dataset = _datasets.create_torch_dataset(data_config, action_horizon)
     if data_config.transform_pipeline is None:
         raise ValueError("A transform pipeline is required to compute norm stats.")
     dataset = _datasets.TransformedDataset(
@@ -82,11 +80,9 @@ def _compute_stats_from_data_loader(data_loader, num_batches: int) -> dict[str, 
 
 
 def _get_repo_ids(data_config: _config.LeRobotAlohaDataConfig) -> list[str]:
-    if data_config.repo_ids:
-        return list(data_config.repo_ids)
-    if data_config.repo_id:
-        return [data_config.repo_id]
-    raise ValueError("Data config must have a repo_id or non-empty repo_ids")
+    if not data_config.repo_ids:
+        raise ValueError("Data config must have non-empty repo_ids")
+    return list(data_config.repo_ids)
 
 
 def _repo_parquet_files(repo_id: str, meta: lerobot_dataset.LeRobotDatasetMetadata) -> list[Path]:
@@ -196,12 +192,6 @@ def compute_parquet_norm_stats(
     chunk_size: int = 8192,
     seed: int = 0,
 ) -> dict[str, normalize.NormStats]:
-    if tuple(data_config.action_sequence_keys) != ("action",):
-        raise ValueError(
-            "Parquet fast path currently supports action_sequence_keys=('action',) only. "
-            f"Got: {data_config.action_sequence_keys}"
-        )
-
     repo_ids = _get_repo_ids(data_config)
     base_meta = lerobot_dataset.LeRobotDatasetMetadata(repo_ids[0], force_cache_sync=True)
     base_fps = float(base_meta.fps)
@@ -256,7 +246,7 @@ def compute_parquet_norm_stats(
 
 
 def _single_repo_data_config(data_config: _config.LeRobotAlohaDataConfig, repo_id: str) -> _config.LeRobotAlohaDataConfig:
-    return dataclasses.replace(data_config, repo_id=repo_id, repo_ids=None)
+    return dataclasses.replace(data_config, repo_ids=[repo_id])
 
 
 def _max_stat_diff(lhs: normalize.NormStats, rhs: normalize.NormStats) -> float:
@@ -288,7 +278,6 @@ def benchmark_methods(
         compare_data_config,
         config.model.action_horizon,
         config.batch_size,
-        config.model,
         compare_num_workers,
         max_frames,
         shuffle_if_truncated=False,
@@ -346,7 +335,6 @@ def main(
             data_config,
             config.model.action_horizon,
             config.batch_size,
-            config.model,
             config.num_workers,
             max_frames,
         )
@@ -360,7 +348,7 @@ def main(
             seed=seed,
         )
 
-    output_path = Path(data_config.assets.assets_dir) / data_config.assets.asset_id
+    output_path = Path(data_config.transform_pipeline.assets_dir) / data_config.transform_pipeline.asset_id
     print(f"Writing stats to: {output_path}")
     normalize.save(output_path, norm_stats)
 

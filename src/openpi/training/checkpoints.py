@@ -74,7 +74,7 @@ def save_state(
         if data_config.transform_pipeline is None:
             raise ValueError("A transform pipeline is required to save checkpoint assets.")
         norm_stats = data_config.transform_pipeline.load_norm_stats()
-        _normalize.save(directory / data_config.assets.asset_id, norm_stats)
+        _normalize.save(directory / data_config.transform_pipeline.asset_id, norm_stats)
 
     # Split params that can be used for inference into a separate item.
     with at.disable_typechecking():

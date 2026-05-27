@@ -45,7 +45,7 @@ def create_data_loader(
     data_config = config.data
     logging.info(f"data_config: {data_config}")
 
-    dataset = _datasets.create_torch_dataset(data_config, config.model.action_horizon, config.model)
+    dataset = _datasets.create_torch_dataset(data_config, config.model.action_horizon)
     dataset = _datasets.transform_dataset(dataset, data_config)
 
     local_batch_size = config.batch_size // jax.process_count()

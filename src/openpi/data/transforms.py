@@ -362,6 +362,9 @@ class AlohaTransformPipeline:
     discrete_state_input: bool
     assets_dir: str
     asset_id: str
+    use_quantile_norm: bool = True
+    video_memory_num_frames: int = 1
+    video_memory_stride_seconds: float = 1.0
     adapt_to_pi: bool = True
     use_delta_joint_actions: bool = True
     action_dim: int = ALOHA_MODEL_ACTION_DIM
@@ -411,7 +414,7 @@ class AlohaTransformPipeline:
             structure["subtask"] = "subtask"
         return RepackTransform(structure)
 
-    def _model_input_transforms(self, norm_stats: dict[str, NormStats], *, use_quantile_norm: bool) -> list[DataTransformFn]:
+    def _model_input_transforms(self, norm_stats: dict[str, NormStats]) -> list[DataTransformFn]:
         transforms: list[DataTransformFn] = [
             AlohaInputs(
                 adapt_to_pi=self.adapt_to_pi,
@@ -423,7 +426,7 @@ class AlohaTransformPipeline:
             transforms.append(DeltaActions(ALOHA_DELTA_ACTION_MASK))
         transforms.extend(
             [
-                Normalize(norm_stats, use_quantiles=use_quantile_norm),
+                Normalize(norm_stats, use_quantiles=self.use_quantile_norm),
                 ResizeImages(*self.image_resolution),
                 TokenizePrompt(
                     _tokenizer.PaligemmaTokenizer(self.max_token_len),
@@ -442,7 +445,7 @@ class AlohaTransformPipeline:
             require_subtask=self.include_subtask,
         )
 
-    def training_input_transforms(self, *, use_quantile_norm: bool, norm_stats: dict[str, NormStats] | None = None) -> list[DataTransformFn]:
+    def training_input_transforms(self, *, norm_stats: dict[str, NormStats] | None = None) -> list[DataTransformFn]:
         norm_stats = self.load_norm_stats() if norm_stats is None else norm_stats
         return [
             self._validate_input_transform(
@@ -451,7 +454,7 @@ class AlohaTransformPipeline:
             ),
             self.training_repack_transform(include_actions=True),
             PromptFromLeRobotTask(),
-            *self._model_input_transforms(norm_stats, use_quantile_norm=use_quantile_norm),
+            *self._model_input_transforms(norm_stats),
         ]
 
     def stats_input_transforms(self) -> list[DataTransformFn]:
@@ -476,7 +479,7 @@ class AlohaTransformPipeline:
             transforms.append(DeltaActions(ALOHA_DELTA_ACTION_MASK))
         return transforms
 
-    def policy_input_transforms(self, *, use_quantile_norm: bool, norm_stats: dict[str, NormStats] | None = None) -> list[DataTransformFn]:
+    def policy_input_transforms(self, *, norm_stats: dict[str, NormStats] | None = None) -> list[DataTransformFn]:
         norm_stats = self.load_norm_stats() if norm_stats is None else norm_stats
         return [
             self._validate_input_transform(
@@ -486,13 +489,13 @@ class AlohaTransformPipeline:
             FilterImages(self.raw_image_keys),
             self.policy_repack_transform(),
             PromptFromLeRobotTask(),
-            *self._model_input_transforms(norm_stats, use_quantile_norm=use_quantile_norm),
+            *self._model_input_transforms(norm_stats),
         ]
 
-    def policy_output_transforms(self, *, use_quantile_norm: bool, norm_stats: dict[str, NormStats] | None = None) -> list[DataTransformFn]:
+    def policy_output_transforms(self, *, norm_stats: dict[str, NormStats] | None = None) -> list[DataTransformFn]:
         norm_stats = self.load_norm_stats() if norm_stats is None else norm_stats
         transforms: list[DataTransformFn] = [
-            Unnormalize(norm_stats, use_quantiles=use_quantile_norm),
+            Unnormalize(norm_stats, use_quantiles=self.use_quantile_norm),
         ]
         if self.use_delta_joint_actions:
             transforms.append(AbsoluteActions(ALOHA_DELTA_ACTION_MASK))

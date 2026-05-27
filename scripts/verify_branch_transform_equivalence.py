@@ -92,7 +92,6 @@ def apply_all(data, items):
 def training_transforms(data_config):
     if getattr(data_config, "transform_pipeline", None) is not None:
         return data_config.transform_pipeline.training_input_transforms(
-            use_quantile_norm=data_config.use_quantile_norm,
             norm_stats={},
         )
     prompt_from_task = getattr(data_config, "prompt_from_task", True)
@@ -108,7 +107,6 @@ def training_transforms(data_config):
 def policy_transforms(data_config):
     if getattr(data_config, "transform_pipeline", None) is not None:
         return data_config.transform_pipeline.policy_input_transforms(
-            use_quantile_norm=data_config.use_quantile_norm,
             norm_stats={},
         )
 
