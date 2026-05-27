@@ -37,12 +37,17 @@ def create_trained_policy(
         assets_dir=str(checkpoint_dir / "assets"),
         asset_id=train_config.data.assets.asset_id,
     )
+    if train_config.data.transform_pipeline is None:
+        raise ValueError("A transform pipeline is required for policy inference.")
     data_config = dataclasses.replace(
         train_config.data,
         assets=checkpoint_assets,
-    ).with_model(train_config.model)
-    if data_config.transform_pipeline is None:
-        raise ValueError("A transform pipeline is required for policy inference.")
+        transform_pipeline=dataclasses.replace(
+            train_config.data.transform_pipeline,
+            assets_dir=checkpoint_assets.assets_dir,
+            asset_id=checkpoint_assets.asset_id,
+        ),
+    )
     if norm_stats is None:
         norm_stats = data_config.transform_pipeline.load_norm_stats()
 

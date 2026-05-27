@@ -415,23 +415,6 @@ class LeRobotAlohaDataConfig:
     include_subtask: bool = True
     action_sequence_keys: Sequence[str] = ("action",)
 
-    def with_model(self, model_config: _model.BaseModelConfig) -> "LeRobotAlohaDataConfig":
-        return dataclasses.replace(
-            self,
-            transform_pipeline=_transforms.AlohaTransformPipeline(
-                include_low=self.include_low,
-                include_subtask=self.include_subtask,
-                image_resolution=model_config.image_resolution,
-                max_token_len=model_config.max_token_len,
-                discrete_state_input=model_config.discrete_state_input,
-                assets_dir=self.assets.assets_dir,
-                asset_id=self.assets.asset_id,
-                adapt_to_pi=self.adapt_to_pi,
-                use_delta_joint_actions=self.use_delta_joint_actions,
-                action_dim=model_config.action_dim,
-            ),
-        )
-
 
 @dataclasses.dataclass(frozen=True)
 class TrainConfig:
@@ -471,14 +454,6 @@ class TrainConfig:
     @property
     def trainable_filter(self) -> nnx.filterlib.Filter:
         return nnx.All(nnx.Param, nnx.Not(self.freeze_filter))
-
-    def __post_init__(self) -> None:
-        if self.resume and self.overwrite:
-            raise ValueError("Cannot resume and overwrite at the same time.")
-        if self.gradient_accumulation_steps < 1:
-            raise ValueError("gradient_accumulation_steps must be >= 1.")
-        object.__setattr__(self, "data", self.data.with_model(self.model))
-
 
 def _local_assets(config_name: str, base_dir: str = "./assets") -> AssetsConfig:
     return AssetsConfig(assets_dir=str(pathlib.Path(base_dir) / config_name), asset_id="trossen")
@@ -544,6 +519,18 @@ def _make_twist_train_config(
             video_memory_stride_seconds=video_memory_stride_seconds,
             repo_ids=repo_ids,
             assets=assets,
+            transform_pipeline=_transforms.AlohaTransformPipeline(
+                include_low=include_low,
+                include_subtask=include_subtask,
+                image_resolution=model.image_resolution,
+                max_token_len=model.max_token_len,
+                discrete_state_input=model.discrete_state_input,
+                assets_dir=assets.assets_dir,
+                asset_id=assets.asset_id,
+                adapt_to_pi=True,
+                use_delta_joint_actions=True,
+                action_dim=model.action_dim,
+            ),
             include_low=include_low,
             include_subtask=include_subtask,
         ),
@@ -865,6 +852,18 @@ _CONFIGS = [
         data=LeRobotAlohaDataConfig(
             repo_id=_TWIST_ONLY_REPO_IDS[0],
             assets=_local_assets("debug"),
+            transform_pipeline=_transforms.AlohaTransformPipeline(
+                include_low=False,
+                include_subtask=False,
+                image_resolution=(224, 224),
+                max_token_len=200,
+                discrete_state_input=True,
+                assets_dir=_local_assets("debug").assets_dir,
+                asset_id=_local_assets("debug").asset_id,
+                adapt_to_pi=True,
+                use_delta_joint_actions=True,
+                action_dim=32,
+            ),
             include_low=False,
             include_subtask=False,
         ),
