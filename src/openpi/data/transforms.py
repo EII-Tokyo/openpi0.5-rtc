@@ -247,7 +247,10 @@ class PromptFromLeRobotTask(DataTransformFn):
         if "task" not in data:
             raise ValueError('Cannot extract prompt without "task"')
 
-        return {**data, "prompt": data["task"]}
+        data = dict(data)
+        prompt = data.pop("task")
+        data["prompt"] = prompt
+        return data
 
 
 @dataclasses.dataclass(frozen=True)
