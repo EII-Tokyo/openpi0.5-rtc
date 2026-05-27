@@ -76,6 +76,7 @@ def make_runtime_obs(include_low=True):
     return {
         "images": images,
         "state": rng.normal(size=(14,)).astype(np.float32),
+        "task": "open bottle",
         "prompt": "open bottle",
         "subtask": "unscrew",
     }
@@ -94,8 +95,9 @@ def training_transforms(data_config):
             None,
             use_quantile_norm=data_config.use_quantile_norm,
         )
+    prompt_from_task = getattr(data_config, "prompt_from_task", True)
     return [
-        *([transforms.PromptFromLeRobotTask()] if data_config.prompt_from_task else []),
+        *([transforms.PromptFromLeRobotTask()] if prompt_from_task else []),
         *data_config.repack_transforms.inputs,
         *data_config.data_transforms.inputs,
         transforms.Normalize(None, use_quantiles=data_config.use_quantile_norm),

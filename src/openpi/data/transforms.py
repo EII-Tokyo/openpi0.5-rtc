@@ -59,6 +59,17 @@ def compose(transforms: Sequence[DataTransformFn]) -> DataTransformFn:
 
 
 @dataclasses.dataclass(frozen=True)
+class RepackTransform(DataTransformFn):
+    """Repacks an input dictionary into a new dictionary using explicit source paths."""
+
+    structure: at.PyTree[str]
+
+    def __call__(self, data: DataDict) -> DataDict:
+        flat_item = flatten_dict(data)
+        return jax.tree.map(lambda key: _lookup_repack_key(flat_item, key), self.structure)
+
+
+@dataclasses.dataclass(frozen=True)
 class FilterImages(DataTransformFn):
     """Keep only the image keys used by the policy's training config."""
 
@@ -245,7 +256,6 @@ class ValidateAlohaSample(DataTransformFn):
     image_keys: tuple[str, ...]
     require_action: bool
     require_task: bool = False
-    require_prompt: bool = False
     require_subtask: bool = False
 
     def __call__(self, data: DataDict) -> DataDict:
@@ -261,8 +271,6 @@ class ValidateAlohaSample(DataTransformFn):
             missing.append("action")
         if self.require_task and "task" not in data and "task" not in flat:
             missing.append("task")
-        if self.require_prompt and "prompt" not in data and "prompt" not in flat:
-            missing.append("prompt")
         if self.require_subtask and "subtask" not in data and "subtask" not in flat:
             missing.append("subtask")
 
@@ -290,12 +298,13 @@ class AlohaInputs(DataTransformFn):
 
     adapt_to_pi: bool = True
     image_keys: tuple[str, ...] | None = None
-    include_prompt: bool = True
     include_subtask: bool = True
     EXPECTED_CAMERAS: ClassVar[tuple[str, ...]] = ("cam_high", "cam_low", "cam_left_wrist", "cam_right_wrist")
 
     def __call__(self, data: dict) -> dict:
-        data = _extract_aloha_fields(data, include_prompt=self.include_prompt, include_subtask=self.include_subtask)
+        data = dict(data)
+        if not self.include_subtask:
+            data.pop("subtask", None)
         data = _decode_aloha(data, adapt_to_pi=self.adapt_to_pi)
 
         in_images = data["images"]
@@ -346,9 +355,7 @@ class AlohaTransformPipeline:
     """The single transform pipeline used by this ALOHA-real-only branch."""
 
     include_low: bool
-    include_prompt: bool
     include_subtask: bool
-    prompt_from_task: bool
     image_size: tuple[int, int]
     max_token_len: int
     discrete_state_input: bool
@@ -364,12 +371,36 @@ class AlohaTransformPipeline:
         keys.extend(["cam_left_wrist", "cam_right_wrist"])
         return tuple(keys)
 
+    def _image_structure(self, prefix: str) -> dict[str, str]:
+        return {key: f"{prefix}.{key}" for key in self.raw_image_keys}
+
+    def training_repack_transform(self, *, include_actions: bool = True) -> RepackTransform:
+        structure = {
+            "images": self._image_structure("observation.images"),
+            "state": "observation.state",
+            "task": "task",
+        }
+        if include_actions:
+            structure["actions"] = "action"
+        if self.include_subtask:
+            structure["subtask"] = "subtask"
+        return RepackTransform(structure)
+
+    def policy_repack_transform(self) -> RepackTransform:
+        structure = {
+            "images": self._image_structure("images"),
+            "state": "state",
+            "task": "task",
+        }
+        if self.include_subtask:
+            structure["subtask"] = "subtask"
+        return RepackTransform(structure)
+
     def _model_input_transforms(self, norm_stats: dict[str, NormStats] | None, *, use_quantile_norm: bool) -> list[DataTransformFn]:
         transforms: list[DataTransformFn] = [
             AlohaInputs(
                 adapt_to_pi=self.adapt_to_pi,
                 image_keys=self.raw_image_keys,
-                include_prompt=self.include_prompt,
                 include_subtask=self.include_subtask,
             ),
         ]
@@ -388,12 +419,11 @@ class AlohaTransformPipeline:
         )
         return transforms
 
-    def _validate_input_transform(self, *, require_action: bool, require_task: bool, require_prompt: bool) -> ValidateAlohaSample:
+    def _validate_input_transform(self, *, require_action: bool, require_task: bool) -> ValidateAlohaSample:
         return ValidateAlohaSample(
             image_keys=self.raw_image_keys,
             require_action=require_action,
             require_task=require_task,
-            require_prompt=require_prompt,
             require_subtask=self.include_subtask,
         )
 
@@ -401,10 +431,10 @@ class AlohaTransformPipeline:
         return [
             self._validate_input_transform(
                 require_action=True,
-                require_task=self.prompt_from_task,
-                require_prompt=self.include_prompt and not self.prompt_from_task,
+                require_task=True,
             ),
-            *([PromptFromLeRobotTask()] if self.prompt_from_task else []),
+            self.training_repack_transform(include_actions=True),
+            PromptFromLeRobotTask(),
             *self._model_input_transforms(norm_stats, use_quantile_norm=use_quantile_norm),
         ]
 
@@ -412,19 +442,17 @@ class AlohaTransformPipeline:
         return [
             self._validate_input_transform(
                 require_action=True,
-                require_task=self.prompt_from_task,
-                require_prompt=False,
+                require_task=True,
             ),
-            *([PromptFromLeRobotTask()] if self.prompt_from_task else []),
             *self.raw_state_action_transforms(),
         ]
 
     def raw_state_action_transforms(self) -> list[DataTransformFn]:
         transforms: list[DataTransformFn] = [
+            self.training_repack_transform(include_actions=True),
             AlohaInputs(
                 adapt_to_pi=self.adapt_to_pi,
                 image_keys=self.raw_image_keys,
-                include_prompt=self.include_prompt,
                 include_subtask=self.include_subtask,
             )
         ]
@@ -441,10 +469,11 @@ class AlohaTransformPipeline:
         return [
             self._validate_input_transform(
                 require_action=False,
-                require_task=False,
-                require_prompt=self.include_prompt,
+                require_task=True,
             ),
             FilterImages(self.raw_image_keys),
+            self.policy_repack_transform(),
+            PromptFromLeRobotTask(),
             *self._model_input_transforms(norm_stats, use_quantile_norm=use_quantile_norm),
         ]
 
@@ -543,49 +572,9 @@ def make_aloha_example() -> dict:
             "cam_left_wrist": np.random.randint(256, size=(3, 224, 224), dtype=np.uint8),
             "cam_right_wrist": np.random.randint(256, size=(3, 224, 224), dtype=np.uint8),
         },
-        "prompt": "do something",
+        "task": "do something",
         "subtask": "do something",
     }
-
-
-def _extract_aloha_fields(data: dict, *, include_prompt: bool, include_subtask: bool) -> dict:
-    """Read ALOHA fields directly from LeRobot-style sample keys."""
-    if "images" in data and "state" in data:
-        data = dict(data)
-        if not include_prompt:
-            data.pop("prompt", None)
-        if not include_subtask:
-            data.pop("subtask", None)
-        return data
-
-    flat = flatten_dict(data)
-    images = {
-        key: _get_first_key(flat, (f"observation.images.{key}", f"observation/images/{key}"))
-        for key in AlohaInputs.EXPECTED_CAMERAS
-        if _has_any_key(data, flat, (f"observation.images.{key}", f"observation/images/{key}", f"images/{key}", f"images.{key}"))
-    }
-    if not images:
-        raise ValueError(f"Expected LeRobot image keys observation.images.<camera>, got keys: {sorted(flat)[:20]}")
-    if not _has_any_key(data, flat, ("observation.state", "observation/state", "state")):
-        raise ValueError("Expected LeRobot key observation.state")
-
-    extracted = {
-        "images": images,
-        "state": _get_first_key(flat, ("observation.state", "observation/state", "state")),
-    }
-    if "action" in flat:
-        extracted["actions"] = flat["action"]
-    optional_keys = ["task", "actions_mask"]
-    if include_prompt:
-        optional_keys.append("prompt")
-    if include_subtask:
-        optional_keys.append("subtask")
-    for key in optional_keys:
-        if key in data:
-            extracted[key] = data[key]
-        elif key in flat:
-            extracted[key] = flat[key]
-    return extracted
 
 
 def _has_any_key(data: Mapping, flat: Mapping, keys: Sequence[str]) -> bool:
@@ -603,11 +592,12 @@ def _has_any_key(data: Mapping, flat: Mapping, keys: Sequence[str]) -> bool:
     return False
 
 
-def _get_first_key(flat: Mapping, keys: Sequence[str]):
-    for key in keys:
-        if key in flat:
-            return flat[key]
-    raise KeyError(keys)
+def _lookup_repack_key(flat: Mapping, key: str):
+    candidates = (key, key.replace(".", "/"))
+    for candidate in candidates:
+        if candidate in flat:
+            return flat[candidate]
+    raise KeyError(f"Missing repack source key {key!r}. Available keys include: {tuple(sorted(flat))[:20]}")
 
 
 def _joint_flip_mask() -> np.ndarray:

@@ -419,9 +419,7 @@ class LeRobotAlohaDataConfig:
     adapt_to_pi: bool = True
     video_memory_num_frames: int = 1
     video_memory_stride_seconds: float = 1.0
-    prompt_from_task: bool = True
     include_low: bool = True
-    include_prompt: bool = True
     include_subtask: bool = True
     action_sequence_keys: Sequence[str] = ("action",)
 
@@ -437,9 +435,7 @@ class LeRobotAlohaDataConfig:
             norm_stats=self._load_norm_stats(epath.Path(self.assets.assets_dir or assets_dirs), asset_id),
             transform_pipeline=_transforms.AlohaTransformPipeline(
                 include_low=self.include_low,
-                include_prompt=self.include_prompt,
                 include_subtask=self.include_subtask,
-                prompt_from_task=self.prompt_from_task,
                 image_size=self.image_size,
                 max_token_len=model_config.max_token_len,
                 discrete_state_input=model_config.discrete_state_input,
@@ -577,9 +573,7 @@ def _make_twist_train_config(
             video_memory_stride_seconds=1.0,
             repo_ids=repo_ids,
             assets=assets if assets is not None else _pi05_base_assets(),
-            prompt_from_task=True,
             include_low=include_low,
-            include_prompt=True,
             include_subtask=include_subtask,
         ),
         weight_loader=weight_loaders.CheckpointWeightLoader(_PI05_BASE_PARAMS),

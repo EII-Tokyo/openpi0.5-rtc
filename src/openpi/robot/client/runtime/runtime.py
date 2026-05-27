@@ -473,7 +473,7 @@ class Runtime:
         assert self._current_task is not None, "_current_task must be set before calling _step()"
         observation_with_task = {
             **observation,
-            'prompt': self._current_task.get('task_name'),
+            'task': self._current_task.get('task_name'),
             'subtask': {'good_bad_action': self._good_bad_action},
         }
 
