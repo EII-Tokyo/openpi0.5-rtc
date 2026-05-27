@@ -24,6 +24,7 @@ OLD_TO_NEW_IMAGE_KEYS = {
 
 BRANCH_CODE = r'''
 import argparse
+import dataclasses
 import pickle
 from pathlib import Path
 
@@ -37,9 +38,13 @@ except ImportError:
     import openpi.transforms as transforms
 
 
-def get_data_config(cfg):
+def get_data_config(cfg, assets_root):
     if hasattr(cfg.data, "resolve"):
         return cfg.data.resolve(cfg.assets_dirs, cfg.model)
+    if hasattr(cfg.data, "create"):
+        if assets_root is not None and hasattr(cfg, "assets_base_dir"):
+            cfg = dataclasses.replace(cfg, assets_base_dir=str(Path(assets_root) / "assets"))
+        return cfg.data.create(cfg.assets_dirs, cfg.model)
     return cfg.data
 
 
@@ -89,16 +94,22 @@ def apply_all(data, items):
     return data
 
 
+def group_inputs(data_config, name):
+    group = getattr(data_config, name, None)
+    return list(getattr(group, "inputs", ()))
+
+
 def training_transforms(data_config):
     if getattr(data_config, "transform_pipeline", None) is not None:
         return data_config.transform_pipeline.training_input_transforms()
     prompt_from_task = getattr(data_config, "prompt_from_task", True)
+    norm_stats = getattr(data_config, "norm_stats", None)
     return [
         *([transforms.PromptFromLeRobotTask()] if prompt_from_task else []),
-        *data_config.repack_transforms.inputs,
-        *data_config.data_transforms.inputs,
-        transforms.Normalize(None, use_quantiles=data_config.use_quantile_norm),
-        *data_config.model_transforms.inputs,
+        *group_inputs(data_config, "repack_transforms"),
+        *group_inputs(data_config, "data_transforms"),
+        transforms.Normalize(norm_stats, use_quantiles=data_config.use_quantile_norm),
+        *group_inputs(data_config, "model_transforms"),
     ]
 
 
@@ -114,12 +125,13 @@ def policy_transforms(data_config):
             if isinstance(images, dict):
                 image_keys = tuple(images)
                 break
+    norm_stats = getattr(data_config, "norm_stats", None)
     return [
         *([transforms.FilterImages(image_keys)] if image_keys is not None else []),
         transforms.InjectDefaultPrompt(None),
-        *data_config.data_transforms.inputs,
-        transforms.Normalize(None, use_quantiles=data_config.use_quantile_norm),
-        *data_config.model_transforms.inputs,
+        *group_inputs(data_config, "data_transforms"),
+        transforms.Normalize(norm_stats, use_quantiles=data_config.use_quantile_norm),
+        *group_inputs(data_config, "model_transforms"),
     ]
 
 
@@ -139,10 +151,11 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", required=True)
     parser.add_argument("--out", required=True)
+    parser.add_argument("--assets-root", default=None)
     args = parser.parse_args()
 
     cfg = train_config.get_config(args.config)
-    data_config = get_data_config(cfg)
+    data_config = get_data_config(cfg, args.assets_root)
     include_low = "cam_low" in getattr(data_config, "transform_pipeline", data_config).raw_image_keys if getattr(data_config, "transform_pipeline", None) else any(
         isinstance(item, transforms.RepackTransform) and isinstance(item.structure, dict) and "cam_low" in item.structure.get("images", {})
         for item in data_config.repack_transforms.inputs
@@ -173,7 +186,17 @@ def run_branch(tree: Path, config: str, out: Path, cwd: Path) -> None:
         paths.append(str(old_client))
     env["PYTHONPATH"] = os.pathsep.join(paths + ([env["PYTHONPATH"]] if env.get("PYTHONPATH") else []))
     subprocess.run(
-        [sys.executable, "-c", BRANCH_CODE, "--config", config, "--out", str(out)],
+        [
+            sys.executable,
+            "-c",
+            BRANCH_CODE,
+            "--config",
+            config,
+            "--out",
+            str(out),
+            "--assets-root",
+            str(cwd),
+        ],
         cwd=cwd,
         env=env,
         check=True,
