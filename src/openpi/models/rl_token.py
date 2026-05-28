@@ -1,4 +1,5 @@
 import dataclasses
+from typing import Literal
 
 from flax import nnx
 import jax
@@ -15,6 +16,12 @@ class RLTokenConfig:
     num_heads: int = 8
     mlp_dim: int = 8192
     max_prefix_len: int = 1224
+    decoder_mode: Literal["teacher_forced", "query"] = "teacher_forced"
+    history_mask_ratio: float = 0.0
+    zero_margin_weight: float = 0.0
+    zero_margin: float = 0.5
+    shuffled_margin_weight: float = 0.0
+    shuffled_margin: float = 0.1
 
     def __post_init__(self):
         if self.decoder_layers != self.encoder_layers:
@@ -22,6 +29,8 @@ class RLTokenConfig:
                 "RLT RL Token autoencoder uses matched encoder/decoder depth; "
                 f"got encoder_layers={self.encoder_layers}, decoder_layers={self.decoder_layers}."
             )
+        if not 0 <= self.history_mask_ratio < 1:
+            raise ValueError(f"history_mask_ratio must be in [0, 1), got {self.history_mask_ratio}.")
 
 
 class RLTokenBlock(nnx.Module):
@@ -99,6 +108,12 @@ class RLTokenAutoencoder(nnx.Module):
         self.decoder_pos_embedding = nnx.Param(
             jax.random.normal(rngs.params(), (1, config.max_prefix_len, config.hidden_dim), dtype=jnp.float32) * 0.02
         )
+        self.decoder_query_embedding = nnx.Param(
+            jax.random.normal(rngs.params(), (1, config.max_prefix_len, config.hidden_dim), dtype=jnp.float32) * 0.02
+        )
+        self.decoder_mask_embedding = nnx.Param(
+            jax.random.normal(rngs.params(), (1, 1, config.hidden_dim), dtype=jnp.float32) * 0.02
+        )
         self.encoder_blocks = [RLTokenBlock(config, rngs=rngs) for _ in range(config.encoder_layers)]
         self.decoder_blocks = [RLTokenBlock(config, rngs=rngs) for _ in range(config.decoder_layers)]
         self.output_norm = nnx.LayerNorm(config.hidden_dim, rngs=rngs)
@@ -109,9 +124,12 @@ class RLTokenAutoencoder(nnx.Module):
         self,
         h_vla: at.Float[at.Array, "b n d"],
         prefix_mask: at.Bool[at.Array, "b n"],
+        *,
+        rng: at.KeyArrayLike | None = None,
+        train: bool = False,
     ) -> tuple[at.Float[at.Array, "b d"], at.Float[at.Array, "b n d"]]:
         z_rl = self.encode(h_vla, prefix_mask)
-        h_hat = self.decode(z_rl, h_vla, prefix_mask)
+        h_hat = self.decode(z_rl, h_vla, prefix_mask, rng=rng, train=train)
         return z_rl, h_hat
 
     def encode(
@@ -144,6 +162,9 @@ class RLTokenAutoencoder(nnx.Module):
         z_rl: at.Float[at.Array, "b d"],
         h_vla: at.Float[at.Array, "b n d"],
         prefix_mask: at.Bool[at.Array, "b n"],
+        *,
+        rng: at.KeyArrayLike | None = None,
+        train: bool = False,
     ) -> at.Float[at.Array, "b n d"]:
         if z_rl.shape[-1] != self.config.hidden_dim:
             raise ValueError(f"Expected z_rl dim {self.config.hidden_dim}, got {z_rl.shape[-1]}")
@@ -154,18 +175,43 @@ class RLTokenAutoencoder(nnx.Module):
             raise ValueError(f"prefix length {seq_len} exceeds max_prefix_len={self.config.max_prefix_len}")
 
         batch_size = h_vla.shape[0]
-        target = jnp.where(prefix_mask[..., None], jax.lax.stop_gradient(h_vla), 0)
         z_condition = self.z_to_decoder(z_rl)[:, None, :].astype(h_vla.dtype)
-        decoder_input = jnp.concatenate([z_condition, target[:, :-1, :]], axis=1)
+        if self.config.decoder_mode == "teacher_forced":
+            target = jnp.where(prefix_mask[..., None], jax.lax.stop_gradient(h_vla), 0)
+            history = target[:, :-1, :]
+            history_mask = prefix_mask[:, :-1]
+            if train and self.config.history_mask_ratio > 0:
+                if rng is None:
+                    raise ValueError("rng is required when history_mask_ratio > 0 during training.")
+                keep = jax.random.bernoulli(
+                    rng,
+                    p=1.0 - self.config.history_mask_ratio,
+                    shape=history_mask.shape,
+                )
+                keep = keep & history_mask
+                mask_embedding = self.decoder_mask_embedding.value.astype(h_vla.dtype)
+                history = jnp.where(keep[..., None], history, mask_embedding)
+            decoder_input = jnp.concatenate([z_condition, history], axis=1)
+            decoder_key_mask = jnp.concatenate(
+                [jnp.ones((batch_size, 1), dtype=prefix_mask.dtype), history_mask],
+                axis=1,
+            )
+            causal = True
+        elif self.config.decoder_mode == "query":
+            queries = jnp.broadcast_to(
+                self.decoder_query_embedding.value[:, :seq_len].astype(h_vla.dtype),
+                (batch_size, seq_len, self.config.hidden_dim),
+            )
+            decoder_input = queries + z_condition
+            decoder_key_mask = prefix_mask
+            causal = False
+        else:
+            raise ValueError(f"Unknown decoder_mode={self.config.decoder_mode}.")
         decoder_input = decoder_input + self.decoder_pos_embedding.value[:, :seq_len].astype(h_vla.dtype)
-        decoder_key_mask = jnp.concatenate(
-            [jnp.ones((batch_size, 1), dtype=prefix_mask.dtype), prefix_mask[:, :-1]],
-            axis=1,
-        )
 
         x = decoder_input
         for block in self.decoder_blocks:
-            x = block(x, prefix_mask, decoder_key_mask, causal=True)
+            x = block(x, prefix_mask, decoder_key_mask, causal=causal)
         return self.output_proj(self.output_norm(x))
 
     def reconstruct_with_z(
@@ -180,9 +226,27 @@ class RLTokenAutoencoder(nnx.Module):
         self,
         h_vla: at.Float[at.Array, "b n d"],
         prefix_mask: at.Bool[at.Array, "b n"],
+        *,
+        rng: at.KeyArrayLike | None = None,
+        train: bool = False,
     ) -> at.Float[at.Array, " b"]:
-        _, h_hat = self(h_vla, prefix_mask)
-        return self.reconstruction_loss(h_hat, h_vla, prefix_mask)
+        z_rl, h_hat = self(h_vla, prefix_mask, rng=rng, train=train)
+        real_loss = self.reconstruction_loss(h_hat, h_vla, prefix_mask)
+        if self.config.zero_margin_weight == 0 and self.config.shuffled_margin_weight == 0:
+            return real_loss
+
+        zero_loss = self.compute_loss_with_z(h_vla, prefix_mask, jnp.zeros_like(z_rl))
+        shuffled_loss = self.compute_loss_with_z(h_vla, prefix_mask, _batch_shuffle(z_rl))
+        loss = real_loss
+        if self.config.zero_margin_weight > 0:
+            loss = loss + self.config.zero_margin_weight * jnp.maximum(
+                0, self.config.zero_margin + real_loss - zero_loss
+            )
+        if self.config.shuffled_margin_weight > 0:
+            loss = loss + self.config.shuffled_margin_weight * jnp.maximum(
+                0, self.config.shuffled_margin + real_loss - shuffled_loss
+            )
+        return loss
 
     def compute_loss_with_z(
         self,
@@ -204,3 +268,9 @@ class RLTokenAutoencoder(nnx.Module):
         token_loss = jnp.where(prefix_mask, token_loss, 0)
         denom = jnp.maximum(jnp.sum(prefix_mask, axis=-1), 1)
         return jnp.sum(token_loss, axis=-1) / denom
+
+
+def _batch_shuffle(z_rl: at.Float[at.Array, "b d"]) -> at.Float[at.Array, "b d"]:
+    if z_rl.shape[0] <= 1:
+        return jnp.zeros_like(z_rl)
+    return jnp.roll(z_rl, shift=1, axis=0)

@@ -208,7 +208,7 @@ class Pi0(_model.BaseModel):
     def compute_loss(
         self, rng: at.KeyArrayLike, observation: _model.Observation, actions: _model.Actions, *, train: bool = False
     ) -> at.Float[at.Array, "*b ah"]:
-        preprocess_rng, noise_rng, time_rng = jax.random.split(rng, 3)
+        preprocess_rng, noise_rng, time_rng, rl_token_rng = jax.random.split(rng, 4)
         observation = _model.preprocess_observation(
             preprocess_rng,
             observation,
@@ -218,7 +218,9 @@ class Pi0(_model.BaseModel):
 
         if self.rl_token_autoencoder is not None and self.rl_token_only:
             prefix_out, prefix_mask = self.embed_prefix_hidden(observation, drop_language=True)
-            rl_token_loss = self.rl_token_autoencoder.compute_loss(jax.lax.stop_gradient(prefix_out), prefix_mask)
+            rl_token_loss = self.rl_token_autoencoder.compute_loss(
+                jax.lax.stop_gradient(prefix_out), prefix_mask, rng=rl_token_rng, train=train
+            )
             return einops.repeat(rl_token_loss, "b -> b ah", ah=self.action_horizon)
 
         batch_shape = actions.shape[:-2]
@@ -247,7 +249,9 @@ class Pi0(_model.BaseModel):
             image_token_count = prefix_out.shape[1] - observation.tokenized_prompt.shape[1]
             prefix_out = prefix_out[:, :image_token_count]
             prefix_mask = prefix_mask[:, :image_token_count]
-        rl_token_loss = self.rl_token_autoencoder.compute_loss(jax.lax.stop_gradient(prefix_out), prefix_mask)
+        rl_token_loss = self.rl_token_autoencoder.compute_loss(
+            jax.lax.stop_gradient(prefix_out), prefix_mask, rng=rl_token_rng, train=train
+        )
         return action_loss + self.rl_token_loss_weight * einops.repeat(
             rl_token_loss, "b -> b ah", ah=self.action_horizon
         )
