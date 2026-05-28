@@ -1,10 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { CameraGrid } from './components/CameraGrid'
-import { RobotViewer } from './components/RobotViewer'
+import { RLTConfigPanel, RLTControlPanel, RLTStatsPanel } from './components/RLTControlPanel'
 import { RolloutBrowser } from './components/RolloutBrowser'
-import { VoicePanel } from './components/VoicePanel'
 import { AppLanguage, translations } from './i18n'
-import { apiBase, wsBase } from './services/api'
+import { RLTControlState, wsBase } from './services/api'
 import { truncateLabel } from './utils/text'
 
 type RealtimeState = {
@@ -18,6 +17,34 @@ type RealtimeState = {
   camera_status: Record<string, boolean>
   camera_timestamps: Record<string, number | null>
   camera_jpeg_b64: Record<string, string>
+  rlt: RLTControlState
+}
+
+const initialRLT: RLTControlState = {
+  phase: 'idle',
+  training_phase: 'warmup',
+  warmup_target: 100,
+  warmup_count: 0,
+  warmup_success: 0,
+  warmup_failure: 0,
+  auto_rollout_count: 0,
+  auto_rollout_success: 0,
+  auto_rollout_failure: 0,
+  actor_enabled: false,
+  actor_effective: false,
+  actor_locked_reason: 'warmup',
+  beta: 10,
+  intervention_scale: 0.25,
+  max_delta: 0.1,
+  active_key_region_id: null,
+  score_deadline: null,
+  last_reward: null,
+  last_event: null,
+  wandb_url: null,
+  critic_loss: null,
+  actor_loss: null,
+  replay_size: null,
+  events: [],
 }
 
 const initialState: RealtimeState = {
@@ -31,14 +58,12 @@ const initialState: RealtimeState = {
   camera_status: {},
   camera_timestamps: {},
   camera_jpeg_b64: {},
+  rlt: initialRLT,
 }
-
-const TASK_NUMBERS = ['1', '2', '3', '4', '5', '6'] as const
 
 export default function App() {
   const [state, setState] = useState<RealtimeState>(initialState)
   const [language, setLanguage] = useState<AppLanguage>('en')
-  const [dispatchError, setDispatchError] = useState('')
   const [cameraView, setCameraView] = useState<'focus' | 'quad'>('quad')
   const [page, setPage] = useState<'live' | 'rollouts'>('live')
   const t = translations[language]
@@ -55,7 +80,8 @@ export default function App() {
 
       ws.onmessage = (event) => {
         if (!isActive) return
-        setState(JSON.parse(event.data))
+        const payload = JSON.parse(event.data)
+        setState({ ...payload, rlt: payload.rlt || initialRLT })
       }
 
       ws.onclose = () => {
@@ -85,37 +111,9 @@ export default function App() {
     return age < 1 ? t.live : t.stale(age.toFixed(1))
   }, [state.robot.timestamp, t])
 
-  const dispatchTask = async (taskNumber: string) => {
-    setDispatchError('')
-    try {
-      const response = await fetch(`${apiBase}/api/tasks/${taskNumber}`, { method: 'POST' })
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`)
-      }
-    } catch {
-      setDispatchError(t.dispatchFailed)
-    }
+  const setRLTState = (rlt: RLTControlState) => {
+    setState((current) => ({ ...current, rlt }))
   }
-
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey || event.repeat) return
-      const active = document.activeElement
-      if (
-        active instanceof HTMLInputElement ||
-        active instanceof HTMLTextAreaElement ||
-        active instanceof HTMLSelectElement ||
-        active?.getAttribute('contenteditable') === 'true'
-      ) {
-        return
-      }
-      if (TASK_NUMBERS.includes(event.key as (typeof TASK_NUMBERS)[number])) {
-        void dispatchTask(event.key)
-      }
-    }
-    window.addEventListener('keydown', onKeyDown)
-    return () => window.removeEventListener('keydown', onKeyDown)
-  }, [t.dispatchFailed])
 
   return (
     <main className="app-shell">
@@ -126,7 +124,7 @@ export default function App() {
         <div className="header-actions">
           <nav className="page-tabs" aria-label="Primary">
             <button className={page === 'live' ? 'active' : ''} type="button" onClick={() => setPage('live')}>
-              Live Control
+              RLT Control
             </button>
             <button className={page === 'rollouts' ? 'active' : ''} type="button" onClick={() => setPage('rollouts')}>
               Rollouts
@@ -148,7 +146,7 @@ export default function App() {
       </header>
 
       {page === 'live' ? (
-        <section className="layout">
+        <section className="layout rlt-layout">
           <CameraGrid
             cameraStatus={state.camera_status}
             cameraTimestamps={state.camera_timestamps}
@@ -158,20 +156,10 @@ export default function App() {
             cameraView={cameraView}
             onCameraViewChange={setCameraView}
           />
-          <aside className="control-rail">
-            <RobotViewer
-              latestAction={state.robot.latest_action.length ? state.robot.latest_action : null}
-              qpos={state.robot.qpos.length ? state.robot.qpos : null}
-              mode={state.robot.mode}
-              currentTask={state.robot.current_task}
-              language={language}
-            />
-            <VoicePanel
-              mode={state.robot.mode}
-              language={language}
-              dispatchTask={dispatchTask}
-              dispatchError={dispatchError}
-            />
+          <aside className="control-rail rlt-rail">
+            <RLTControlPanel rlt={state.rlt} onState={setRLTState} />
+            <RLTStatsPanel rlt={state.rlt} />
+            <RLTConfigPanel rlt={state.rlt} onState={setRLTState} />
           </aside>
         </section>
       ) : (

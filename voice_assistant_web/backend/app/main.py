@@ -10,22 +10,31 @@ import re
 import subprocess
 import time
 
-from fastapi import FastAPI, File, Form, Header, HTTPException, UploadFile, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI
+from fastapi import Header
+from fastapi import HTTPException
+from fastapi import WebSocket
+from fastapi import WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import Response, StreamingResponse
+from fastapi.responses import Response
+from fastapi.responses import StreamingResponse
 
 from .camera_bridge import CameraBridge
 from .config import settings
-from .redis_commands import TASK_MAPPING
 from .redis_commands import create_redis_client
-from .redis_commands import publish_task
+from .rlt_control import RLTControlStore
 from .robot_state_bridge import RobotStateBridge
-from .schemas import HealthResponse, RealtimePayload, RuntimeStatePayload, VoiceRequest, VoiceResponse
-from .voice_session import VoiceAssistantEngine
+from .schemas import HealthResponse
+from .schemas import RealtimePayload
+from .schemas import RLTConfigRequest
+from .schemas import RLTControlRequest
+from .schemas import RLTControlState
+from .schemas import RLTScoreRequest
+from .schemas import RuntimeStatePayload
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 
-app = FastAPI(title="Aloha Voice Assistant Web")
+app = FastAPI(title="EII Pilot")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.allow_origins if settings.allow_origins != ["*"] else ["*"],
@@ -37,7 +46,7 @@ app.add_middleware(
 camera_bridge = CameraBridge()
 robot_state_bridge = RobotStateBridge()
 redis_client = create_redis_client()
-voice_engine = VoiceAssistantEngine(redis_client)
+rlt_control = RLTControlStore(redis_client)
 ROLLOUTS_ROOT = Path(settings.rollouts_root).expanduser().resolve()
 VIDEO_CHUNK_SIZE = 1024 * 1024
 VIDEO_CACHE_ROOT = Path(os.getenv("ROLLOUTS_VIDEO_CACHE", "/tmp/eii_rollout_video_cache"))
@@ -49,17 +58,19 @@ def on_startup() -> None:
         import rospy
 
         if not rospy.core.is_initialized():
-            rospy.init_node("voice_assistant_web_backend", anonymous=True)
+            rospy.init_node("eii_pilot_backend", anonymous=True)
     except Exception:
         logging.exception("ROS node initialization failed")
     camera_bridge.start()
     robot_state_bridge.start()
+    rlt_control.start()
 
 
 @app.on_event("shutdown")
 def on_shutdown() -> None:
     camera_bridge.stop()
     robot_state_bridge.stop()
+    rlt_control.stop()
 
 
 @app.get("/health", response_model=HealthResponse)
@@ -242,7 +253,7 @@ def _browser_playable_video(path: Path) -> Path:
         _wait_for_cache(cache_path, lock_path)
         if cache_path.exists():
             return cache_path
-        raise HTTPException(status_code=503, detail="Video transcode did not complete")
+        raise HTTPException(status_code=503, detail="Video transcode did not complete") from None
 
     tmp_path = cache_path.with_suffix(".tmp.mp4")
     try:
@@ -348,6 +359,7 @@ async def realtime_socket(websocket: WebSocket) -> None:
                 camera_status=camera_bridge.get_camera_status(),
                 camera_timestamps=camera_bridge.get_camera_timestamps(),
                 camera_jpeg_b64=camera_jpeg_b64,
+                rlt=rlt_control.snapshot(),
             )
             await websocket.send_json(payload.model_dump())
             await asyncio.sleep(interval)
@@ -355,23 +367,35 @@ async def realtime_socket(websocket: WebSocket) -> None:
         return
 
 
-@app.post("/api/voice/text", response_model=VoiceResponse)
-async def voice_text(request: VoiceRequest) -> VoiceResponse:
-    return await voice_engine.process_text(request.text, language=request.language)
+@app.get("/api/rlt/status", response_model=RLTControlState)
+def rlt_status() -> RLTControlState:
+    return rlt_control.snapshot()
 
 
-@app.post("/api/tasks/{task_number}")
-def dispatch_task(task_number: str) -> dict[str, str]:
-    if task_number not in TASK_MAPPING:
-        raise HTTPException(status_code=404, detail=f"Unknown task {task_number}")
-    publish_task(redis_client, task_number)
-    return {
-        "status": "ok",
-        "task_number": task_number,
-        "task_name": TASK_MAPPING[task_number],
-    }
+@app.post("/api/rlt/key-region/start", response_model=RLTControlState)
+def rlt_key_region_start(request: RLTControlRequest | None = None) -> RLTControlState:
+    try:
+        return rlt_control.start_key_region(request or RLTControlRequest())
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
 
 
-@app.post("/api/voice/audio", response_model=VoiceResponse)
-async def voice_audio(file: UploadFile = File(...), language: str = Form("en")) -> VoiceResponse:
-    return await voice_engine.process_audio(file, language=language)
+@app.post("/api/rlt/key-region/end", response_model=RLTControlState)
+def rlt_key_region_end(request: RLTControlRequest | None = None) -> RLTControlState:
+    try:
+        return rlt_control.end_key_region(request or RLTControlRequest())
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+
+@app.post("/api/rlt/key-region/score", response_model=RLTControlState)
+def rlt_key_region_score(request: RLTScoreRequest) -> RLTControlState:
+    try:
+        return rlt_control.score_key_region(request.reward, source=request.source)
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+
+@app.post("/api/rlt/config", response_model=RLTControlState)
+def rlt_config(request: RLTConfigRequest) -> RLTControlState:
+    return rlt_control.update_config(request)

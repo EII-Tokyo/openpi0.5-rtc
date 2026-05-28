@@ -11,7 +11,7 @@ from openpi.shared import array_typing as at
 class RLTokenConfig:
     hidden_dim: int = 2048
     encoder_layers: int = 4
-    decoder_layers: int = 2
+    decoder_layers: int = 4
     num_heads: int = 8
     mlp_dim: int = 8192
     max_prefix_len: int = 1224
@@ -123,7 +123,7 @@ class RLTokenAutoencoder(nnx.Module):
             x = block(x, encoder_mask)
         z_rl = x[:, -1, :]
 
-        target = jnp.where(prefix_mask[..., None], h_vla, 0)
+        target = jnp.where(prefix_mask[..., None], jax.lax.stop_gradient(h_vla), 0)
         z_condition = self.z_to_decoder(z_rl)[:, None, :].astype(h_vla.dtype)
         decoder_input = jnp.concatenate([z_condition, target[:, :-1, :]], axis=1)
         decoder_input = decoder_input + self.decoder_pos_embedding.value[:, :seq_len].astype(h_vla.dtype)

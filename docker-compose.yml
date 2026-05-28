@@ -110,8 +110,8 @@ services:
       retries: 5
       start_period: 2s
 
-  voice_web_backend:
-    image: voice_assistant_web_backend
+  eii_pilot_backend:
+    image: eii_pilot_backend
     build:
       context: .
       dockerfile: voice_assistant_web/backend/Dockerfile
@@ -134,8 +134,8 @@ services:
     depends_on:
       - redis
 
-  voice_web_frontend:
-    image: voice_assistant_web_frontend
+  eii_pilot_frontend:
+    image: eii_pilot_frontend
     build:
       context: .
       dockerfile: voice_assistant_web/frontend/Dockerfile
@@ -146,4 +146,4 @@ services:
     volumes:
       - $PWD/voice_assistant_web/frontend/dist:/usr/share/nginx/html:ro
     depends_on:
-      - voice_web_backend
+      - eii_pilot_backend

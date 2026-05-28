@@ -1,1 +1,1 @@
-"""Voice assistant web package root."""
+"""EII Pilot web package root."""

@@ -70,12 +70,28 @@ class Runtime:
         self._redis_host = os.getenv('REDIS_HOST', redis_host)
         self._redis_port = int(os.getenv('REDIS_PORT', redis_port))
         self._redis_db = int(os.getenv('REDIS_DB', redis_db))
+        self._rlt_control_channel = os.getenv("RLT_CONTROL_CHANNEL", "aloha_rlt_control")
+        self._rlt_state_channel = os.getenv("RLT_STATE_CHANNEL", "aloha_rlt_state")
         
         # Redis相关
         self._redis_client = None
         self._redis_thread = None
         self._redis_running = False
         self._latest_task = None
+        self._rlt_state = {
+            "phase": "idle",
+            "training_phase": "warmup",
+            "warmup_target": int(os.getenv("RLT_DEFAULT_WARMUP_TARGET", "100")),
+            "warmup_count": 0,
+            "auto_rollout_count": 0,
+            "actor_enabled": False,
+            "actor_effective": False,
+            "beta": float(os.getenv("RLT_DEFAULT_BETA", "10.0")),
+            "intervention_scale": float(os.getenv("RLT_DEFAULT_INTERVENTION_SCALE", "0.25")),
+            "max_delta": float(os.getenv("RLT_DEFAULT_MAX_DELTA", "0.1")),
+            "active_key_region_id": None,
+            "last_reward": None,
+        }
         self._task_lock = threading.Lock()
         
         # 任务状态管理
@@ -118,9 +134,9 @@ class Runtime:
     def _redis_listener(self) -> None:
         """Redis pub/sub监听线程"""
         pubsub = self._redis_client.pubsub()
-        pubsub.subscribe("aloha_voice_commands")
-        
-        logging.info("开始监听Redis pub/sub频道: aloha_voice_commands")
+        pubsub.subscribe(self._rlt_control_channel)
+
+        logging.info("开始监听Redis pub/sub频道: %s", self._rlt_control_channel)
         
         try:
             while self._redis_running:
@@ -128,19 +144,7 @@ class Runtime:
                 if message and message['type'] == 'message':
                     try:
                         data = json.loads(message['data'])
-                        task_num = data.get('task')
-                        task_name = data.get('task_name', '未知任务')
-                        timestamp = data.get('timestamp', time.time())
-                        
-                        logging.info(f"收到Redis任务: {task_num} - {task_name}")
-                        
-                        with self._task_lock:
-                            self._latest_task = {
-                                'task_num': task_num,
-                                'task_name': task_name,
-                                'timestamp': timestamp
-                            }
-                            
+                        self._handle_rlt_control_event(data)
                     except json.JSONDecodeError as e:
                         logging.error(f"Redis消息JSON解析失败: {e}")
                     except Exception as e:
@@ -189,6 +193,47 @@ class Runtime:
             self._redis_client.publish("aloha_runtime_state", json.dumps(payload))
         except Exception as exc:
             logging.debug("发布运行时状态失败: %s", exc)
+        self._publish_rlt_state()
+
+    def _publish_rlt_state(self) -> None:
+        if self._redis_client is None:
+            return
+        with self._task_lock:
+            payload = dict(self._rlt_state)
+        payload["timestamp"] = time.time()
+        try:
+            self._redis_client.publish(self._rlt_state_channel, json.dumps(payload))
+        except Exception as exc:
+            logging.debug("发布 RLT 状态失败: %s", exc)
+
+    def _handle_rlt_control_event(self, data: dict) -> None:
+        event_type = data.get("type")
+        state = data.get("state") or {}
+        logging.info("收到 RLT 控制事件: %s", event_type)
+        with self._task_lock:
+            for key in ("warmup_target", "beta", "intervention_scale", "max_delta", "actor_enabled"):
+                if key in state:
+                    self._rlt_state[key] = state[key]
+                elif key in data:
+                    self._rlt_state[key] = data[key]
+            if event_type == "key_region_start":
+                self._rlt_state["phase"] = "key_region"
+                self._rlt_state["active_key_region_id"] = data.get("key_region_id") or state.get("active_key_region_id")
+            elif event_type == "key_region_end":
+                self._rlt_state["phase"] = "await_score"
+            elif event_type == "score":
+                reward = data.get("reward")
+                self._rlt_state["phase"] = "idle"
+                self._rlt_state["active_key_region_id"] = None
+                self._rlt_state["last_reward"] = reward
+                if self._rlt_state["warmup_count"] < self._rlt_state["warmup_target"]:
+                    self._rlt_state["warmup_count"] += 1
+                else:
+                    self._rlt_state["auto_rollout_count"] += 1
+            in_warmup = self._rlt_state["warmup_count"] < self._rlt_state["warmup_target"]
+            self._rlt_state["training_phase"] = "warmup" if in_warmup else "rl"
+            self._rlt_state["actor_effective"] = bool(self._rlt_state["actor_enabled"] and not in_warmup)
+        self._publish_rlt_state()
 
     def _take_latest_task(self, allowed_task_nums: set[str] | None = None):
         """获取并消费最新的 Redis 任务。"""
@@ -463,10 +508,6 @@ class Runtime:
         else:
             logging.warning(f"未知任务编号: {task_num}")
 
-    def _handle_voice_task(self, task_data) -> None:
-        """兼容旧调用点。"""
-        self._handle_task(task_data)
-
     def _step(self) -> None:
         """A single step of the runtime loop."""
         observation = self._environment.get_observation()
@@ -693,7 +734,10 @@ class Runtime:
                 try:
                     while not key_pressed.is_set():
                         # 等待用户按键（用户可以直接在当前终端按键）
-                        key = _read_single_key().lower()
+                        key = self._poll_single_key(timeout=0.1)
+                        if key is None:
+                            continue
+                        key = key.lower()
                         if key == 'b':
                             key_pressed.set()
                             print("收到退出信号，准备保存数据...")
@@ -767,7 +811,7 @@ class Runtime:
                     real_env = self._environment._env
                     robot_utils.torque_on(real_env.master_bot_left)
                     robot_utils.torque_on(real_env.master_bot_right)
-            except:
+            except Exception:
                 pass
             # 设置等待状态
             self._is_waiting_for_task = True

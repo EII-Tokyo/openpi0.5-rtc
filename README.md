@@ -17,14 +17,14 @@ GIT_LFS_SKIP_SMUDGE=1 uv pip install -e .
 ### Startup
 
 ```bash
-# 启动整个本地推理栈，包括 redis、voice_web_backend、voice_web_frontend、runtime、openpi_server 等容器
+# 启动整个本地推理栈，包括 redis、eii_pilot_backend、eii_pilot_frontend、runtime、openpi_server 等容器
 docker compose up
 
-# voice web 后端服务，负责语音/文本命令、Redis 和机器人状态桥接
-docker compose logs -f voice_web_backend
+# EII Pilot 后端服务，负责 RLT 控制、Redis 和机器人状态桥接
+docker compose logs -f eii_pilot_backend
 
-# voice web 前端页面，默认通过浏览器访问 http://localhost:3011
-docker compose logs -f voice_web_frontend
+# EII Pilot 前端页面，默认通过浏览器访问 http://localhost:3011
+docker compose logs -f eii_pilot_frontend
 
 # 进入 runtime 容器
 docker compose exec -it runtime /bin/bash

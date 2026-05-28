@@ -742,7 +742,7 @@ def _make_rl_token_autoencoder_config(
         rl_token=_rl_token.RLTokenConfig(
             hidden_dim=2048,
             encoder_layers=4,
-            decoder_layers=2,
+            decoder_layers=4,
             num_heads=8,
             mlp_dim=8192,
             max_prefix_len=1224,
@@ -1010,7 +1010,7 @@ _CONFIGS = [
         num_workers=4,
         fsdp_devices=1,
         gradient_accumulation_steps=1,
-        exp_name="rl_token_2048_enc4_dec2_from_19000_20260527",
+        exp_name="rl_token_2048_enc4_dec4_from_19000_20260528",
         assets_base_dir="/workspace/openpi0.5-rtc/assets",
         checkpoint_base_dir="/workspace/openpi0.5-rtc/checkpoints",
         wandb_enabled=True,

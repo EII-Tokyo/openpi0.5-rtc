@@ -1,1 +1,1 @@
-"""Voice assistant web backend package."""
+"""EII Pilot web backend package."""

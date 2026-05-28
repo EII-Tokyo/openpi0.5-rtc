@@ -6,8 +6,8 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends ffmpeg && \
     rm -rf /var/lib/apt/lists/*
 
-COPY voice_assistant_web/backend/requirements.txt /tmp/voice-assistant-web-requirements.txt
-RUN uv pip install --python 3.10 --system -r /tmp/voice-assistant-web-requirements.txt
+COPY voice_assistant_web/backend/requirements.txt /tmp/eii-pilot-backend-requirements.txt
+RUN uv pip install --python 3.10 --system -r /tmp/eii-pilot-backend-requirements.txt
 
 COPY voice_assistant_web /app/voice_assistant_web
 
