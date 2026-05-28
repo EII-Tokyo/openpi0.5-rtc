@@ -1,0 +1,800 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>EII Pilot RLT Dashboard Mock</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f6f7f9;
+        --panel: #ffffff;
+        --line: #d7dde5;
+        --text: #17202a;
+        --muted: #667085;
+        --green: #1f8a4c;
+        --green-soft: #e7f5ed;
+        --amber: #b26a00;
+        --amber-soft: #fff4dd;
+        --red: #c23b3b;
+        --red-soft: #fde8e8;
+        --blue: #2463a6;
+        --blue-soft: #e7f0fb;
+        --ink: #26313d;
+        --shadow: 0 1px 2px rgba(16, 24, 40, 0.06);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--bg);
+        color: var(--text);
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      button,
+      input,
+      select {
+        font: inherit;
+      }
+
+      .app {
+        min-height: 100vh;
+        display: grid;
+        grid-template-rows: auto auto 1fr;
+        overflow: hidden;
+      }
+
+      .topbar {
+        height: 56px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 18px;
+        background: #111827;
+        color: #f9fafb;
+        border-bottom: 1px solid #0b1220;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-weight: 700;
+        letter-spacing: 0;
+      }
+
+      .brand-mark {
+        width: 30px;
+        height: 30px;
+        display: grid;
+        place-items: center;
+        border: 1px solid #4b5563;
+        border-radius: 6px;
+        background: #1f2937;
+        font-size: 13px;
+      }
+
+      .robot-controls {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .btn {
+        min-height: 36px;
+        padding: 0 14px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: #fff;
+        color: var(--ink);
+        cursor: pointer;
+        box-shadow: var(--shadow);
+      }
+
+      .btn:hover {
+        border-color: #aab4c0;
+      }
+
+      .btn.primary {
+        background: var(--green);
+        border-color: var(--green);
+        color: #fff;
+      }
+
+      .btn.danger {
+        background: var(--red);
+        border-color: var(--red);
+        color: #fff;
+      }
+
+      .btn.dark {
+        background: #26313d;
+        border-color: #26313d;
+        color: #fff;
+      }
+
+      .btn.task {
+        background: var(--blue);
+        border-color: var(--blue);
+        color: #fff;
+      }
+
+      .btn.home {
+        background: var(--green);
+        border-color: var(--green);
+        color: #fff;
+      }
+
+      .btn.sleep {
+        background: var(--amber);
+        border-color: var(--amber);
+        color: #fff;
+      }
+
+      .status-strip {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(130px, 1fr));
+        gap: 10px;
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--line);
+        background: #fff;
+      }
+
+      .status-item {
+        min-width: 0;
+      }
+
+      .label {
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.4;
+      }
+
+      .value {
+        margin-top: 2px;
+        font-size: 16px;
+        font-weight: 650;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .value.ok {
+        color: var(--green);
+      }
+
+      .value.watch {
+        color: var(--amber);
+      }
+
+      .value.danger {
+        color: var(--red);
+      }
+
+      .main {
+        display: grid;
+        grid-template-columns: minmax(600px, 1.3fr) minmax(430px, 0.9fr);
+        gap: 10px;
+        padding: 10px 14px 12px;
+        min-height: 0;
+        height: 100%;
+        overflow: hidden;
+      }
+
+      .left,
+      .right {
+        min-width: 0;
+        display: grid;
+        gap: 8px;
+        min-height: 0;
+      }
+
+      .left {
+        grid-template-rows: 1fr;
+      }
+
+      .right {
+        grid-template-rows: auto 1fr;
+      }
+
+      .section {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        box-shadow: var(--shadow);
+        min-height: 0;
+      }
+
+      .section-header {
+        min-height: 38px;
+        padding: 7px 10px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .section-title {
+        font-weight: 700;
+      }
+
+      .camera-grid {
+        padding: 10px;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-rows: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+        min-height: 0;
+      }
+
+      .camera-tile {
+        position: relative;
+        overflow: hidden;
+        border-radius: 6px;
+        background:
+          linear-gradient(135deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0)),
+          #202a35;
+        border: 1px solid #2f3a48;
+        min-height: 0;
+      }
+
+      .camera-section {
+        display: grid;
+        grid-template-rows: auto 1fr;
+        min-height: 0;
+      }
+
+      .camera-name {
+        position: absolute;
+        left: 10px;
+        top: 8px;
+        color: #fff;
+        font-size: 12px;
+        background: rgba(0, 0, 0, 0.5);
+        padding: 3px 7px;
+        border-radius: 4px;
+      }
+
+      .crosshair {
+        position: absolute;
+        inset: 18%;
+        border: 1px dashed rgba(255, 255, 255, 0.28);
+        border-radius: 50%;
+      }
+
+      .camera-tile::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(circle at 52% 46%, rgba(86, 141, 190, 0.34), transparent 16%),
+          linear-gradient(0deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+        background-size: auto, 100% 22px;
+        pointer-events: none;
+      }
+
+      .operation-strip {
+        padding: 8px 10px 0;
+        display: grid;
+        grid-template-columns: auto repeat(4, minmax(48px, 1fr)) auto;
+        gap: 6px;
+        align-items: center;
+      }
+
+      .key-btn {
+        min-height: 32px;
+        border-radius: 6px;
+        border: 1px solid var(--line);
+        background: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        padding: 0 8px;
+        cursor: pointer;
+      }
+
+      .key-btn strong {
+        font-size: 15px;
+      }
+
+      .key-btn span {
+        color: var(--muted);
+        font-size: 11px;
+      }
+
+      .key-btn.start {
+        border-color: #93c5fd;
+        background: var(--blue-soft);
+      }
+
+      .key-btn.end {
+        border-color: #f7c56b;
+        background: var(--amber-soft);
+      }
+
+      .key-btn.success {
+        border-color: #8bd3a7;
+        background: var(--green-soft);
+      }
+
+      .key-btn.fail {
+        border-color: #efb0b0;
+        background: var(--red-soft);
+      }
+
+      .key-btn.key-flash {
+        animation: keyFlash 260ms ease-out;
+      }
+
+      @keyframes keyFlash {
+        0% {
+          transform: translateY(0) scale(1);
+          box-shadow: 0 0 0 0 rgba(36, 99, 166, 0.44);
+          filter: brightness(1);
+        }
+
+        45% {
+          transform: translateY(-4px) scale(1.08);
+          box-shadow: 0 0 0 7px rgba(36, 99, 166, 0.22);
+          filter: brightness(1.08);
+        }
+
+        100% {
+          transform: translateY(0) scale(1);
+          box-shadow: 0 0 0 0 rgba(36, 99, 166, 0);
+          filter: brightness(1);
+        }
+      }
+
+      .timeline {
+        color: var(--muted);
+        font-size: 12px;
+        white-space: nowrap;
+      }
+
+      .decision-grid {
+        padding: 8px 10px;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 6px;
+      }
+
+      .decision {
+        min-height: 48px;
+        padding: 7px 8px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: #fff;
+      }
+
+      .decision.good {
+        background: var(--green-soft);
+        border-color: #94d3ad;
+      }
+
+      .decision.watch {
+        background: var(--amber-soft);
+        border-color: #f1c16d;
+      }
+
+      .decision.danger {
+        background: var(--red-soft);
+        border-color: #eea6a6;
+      }
+
+      .decision .metric {
+        margin-top: 2px;
+        font-size: 15px;
+        font-weight: 760;
+      }
+
+      .metric-list {
+        padding: 0 10px 8px;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        column-gap: 12px;
+        row-gap: 0;
+      }
+
+      .metric-row {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 10px;
+        align-items: center;
+        min-height: 25px;
+        border-bottom: 1px solid #eef1f4;
+        font-size: 13px;
+      }
+
+      .metric-row:last-child {
+        border-bottom: 0;
+      }
+
+      .tabs {
+        min-height: 0;
+        display: grid;
+        grid-template-rows: auto 1fr;
+      }
+
+      .tab-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        padding: 7px 10px 0;
+      }
+
+      .tab {
+        min-height: 29px;
+        padding: 0 9px;
+        border: 1px solid var(--line);
+        border-radius: 6px 6px 0 0;
+        background: #f8fafc;
+        cursor: pointer;
+      }
+
+      .tab.active {
+        background: #fff;
+        border-bottom-color: #fff;
+        font-weight: 700;
+      }
+
+      .tab-panel {
+        display: none;
+        padding: 9px 10px 10px;
+        min-height: 0;
+      }
+
+      .tab-panel.active {
+        display: block;
+      }
+
+      .table {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+      }
+
+      .cell {
+        min-height: 48px;
+        padding: 7px 8px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: #fff;
+      }
+
+      .config-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px 14px;
+      }
+
+      .field {
+        display: grid;
+        gap: 4px;
+      }
+
+      .field input,
+      .field select {
+        width: 100%;
+        min-height: 30px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 0 9px;
+        background: #fff;
+      }
+
+      .alert-list {
+        display: grid;
+        gap: 6px;
+      }
+
+      .alert {
+        padding: 7px 8px;
+        border-radius: 6px;
+        border: 1px solid var(--line);
+        background: #fff;
+      }
+
+      .alert.good {
+        border-color: #94d3ad;
+        background: var(--green-soft);
+      }
+
+      .alert.watch {
+        border-color: #f1c16d;
+        background: var(--amber-soft);
+      }
+
+      @media (max-width: 1100px) {
+        .status-strip {
+          grid-template-columns: repeat(3, 1fr);
+        }
+
+        .main {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 720px) {
+        .topbar {
+          height: auto;
+          align-items: flex-start;
+          flex-direction: column;
+          gap: 10px;
+          padding: 12px;
+        }
+
+        .robot-controls {
+          width: 100%;
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+        }
+
+        .status-strip,
+        .camera-grid,
+        .operation-strip,
+        .decision-grid,
+        .table,
+        .config-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark">EII</div>
+          <div>EII Pilot · RLT Critical Phase</div>
+        </div>
+        <div class="robot-controls" aria-label="robot controls">
+          <button class="btn task">twist bottle</button>
+          <button class="btn home">home</button>
+          <button class="btn sleep">sleep</button>
+          <button class="btn dark">急停状态: Ready</button>
+        </div>
+      </header>
+
+      <section class="status-strip">
+        <div class="status-item">
+          <div class="label">Phase</div>
+          <div class="value">critic_only</div>
+        </div>
+        <div class="status-item">
+          <div class="label">Warmup</div>
+          <div class="value">37 / 90</div>
+        </div>
+        <div class="status-item">
+          <div class="label">Replay Samples</div>
+          <div class="value">4,208</div>
+        </div>
+        <div class="status-item">
+          <div class="label">Actor</div>
+          <div class="value watch">Locked</div>
+        </div>
+        <div class="status-item">
+          <div class="label">Active Actor</div>
+          <div class="value">00005000</div>
+        </div>
+        <div class="status-item">
+          <div class="label">System Alert</div>
+          <div class="value ok">OK</div>
+        </div>
+      </section>
+
+      <main class="main">
+        <div class="left">
+          <section class="section camera-section">
+            <div class="section-header">
+              <div class="section-title">实时摄像头</div>
+              <div class="label">Right wrist 优先显示</div>
+            </div>
+            <div class="camera-grid">
+              <div class="camera-tile">
+                <div class="camera-name">right_wrist</div>
+                <div class="crosshair"></div>
+              </div>
+              <div class="camera-tile"><div class="camera-name">cam_high</div></div>
+              <div class="camera-tile"><div class="camera-name">cam_low</div></div>
+              <div class="camera-tile"><div class="camera-name">left_wrist</div></div>
+            </div>
+          </section>
+
+        </div>
+
+        <div class="right">
+          <section class="section">
+            <div class="section-header">
+              <div class="section-title">接管决策</div>
+              <button class="btn">打开 Actor</button>
+            </div>
+            <div class="operation-strip">
+              <div class="label">关键区域标注</div>
+              <button class="key-btn start" data-hotkey="arrowleft"><strong>←</strong><span>开始</span></button>
+              <button class="key-btn end" data-hotkey="arrowright"><strong>→</strong><span>结束</span></button>
+              <button class="key-btn success" data-hotkey="arrowup"><strong>↑</strong><span>成功</span></button>
+              <button class="key-btn fail" data-hotkey="arrowdown"><strong>↓</strong><span>失败</span></button>
+              <div class="timeline">4.2s · score 6s</div>
+            </div>
+            <div class="decision-grid">
+              <div class="decision watch">
+                <div class="label">Warmup Readiness</div>
+                <div class="metric">Not Ready</div>
+              </div>
+              <div class="decision good">
+                <div class="label">Critic Health</div>
+                <div class="metric">Good</div>
+              </div>
+              <div class="decision watch">
+                <div class="label">Actor Safety</div>
+                <div class="metric">Locked</div>
+              </div>
+              <div class="decision good">
+                <div class="label">Rollout Trend</div>
+                <div class="metric">Stable</div>
+              </div>
+            </div>
+            <div class="metric-list">
+              <div class="metric-row"><span>critical_success_rate</span><strong>72%</strong></div>
+              <div class="metric-row"><span>first_grasp_success_rate</span><strong>68%</strong></div>
+              <div class="metric-row"><span>Q_success - Q_failure</span><strong>+0.34</strong></div>
+              <div class="metric-row"><span>Q1/Q2 gap</span><strong>0.04</strong></div>
+              <div class="metric-row"><span>actor_delta_norm</span><strong>0.031</strong></div>
+              <div class="metric-row"><span>clip_rate</span><strong>1.2%</strong></div>
+              <div class="metric-row"><span>critic_loss</span><strong>0.082</strong></div>
+              <div class="metric-row"><span>intervention_rate</span><strong>5%</strong></div>
+            </div>
+          </section>
+
+          <section class="section tabs">
+            <div class="tab-list" role="tablist">
+              <button class="tab active" data-tab="rollout">Rollout</button>
+              <button class="tab" data-tab="critic">Critic</button>
+              <button class="tab" data-tab="actor">Actor</button>
+              <button class="tab" data-tab="replay">Replay</button>
+              <button class="tab" data-tab="config">Config</button>
+              <button class="tab" data-tab="alerts">Alerts</button>
+            </div>
+
+            <div class="tab-panel active" id="rollout">
+              <div class="table">
+                <div class="cell"><div class="label">miss_rate</div><div class="value">18%</div></div>
+                <div class="cell"><div class="label">slip_rate</div><div class="value">6%</div></div>
+                <div class="cell"><div class="label">avg_key_region</div><div class="value">4.8s</div></div>
+                <div class="cell"><div class="label">timeout_failure</div><div class="value">3%</div></div>
+                <div class="cell"><div class="label">auto_rollout</div><div class="value">24</div></div>
+                <div class="cell"><div class="label">window</div><div class="value">last 50</div></div>
+              </div>
+            </div>
+
+            <div class="tab-panel" id="critic">
+              <div class="table">
+                <div class="cell"><div class="label">critic_q1_loss</div><div class="value">0.041</div></div>
+                <div class="cell"><div class="label">critic_q2_loss</div><div class="value">0.043</div></div>
+                <div class="cell"><div class="label">q_min_mean</div><div class="value">0.48</div></div>
+                <div class="cell"><div class="label">q_gap_max</div><div class="value watch">0.17</div></div>
+                <div class="cell"><div class="label">q_success_mean</div><div class="value">0.73</div></div>
+                <div class="cell"><div class="label">q_failure_mean</div><div class="value">0.39</div></div>
+              </div>
+            </div>
+
+            <div class="tab-panel" id="actor">
+              <div class="table">
+                <div class="cell"><div class="label">actor_total_loss</div><div class="value">-0.18</div></div>
+                <div class="cell"><div class="label">actor_q_term</div><div class="value">0.44</div></div>
+                <div class="cell"><div class="label">bc_reg_term</div><div class="value">0.026</div></div>
+                <div class="cell"><div class="label">actor_delta_max</div><div class="value">0.074</div></div>
+                <div class="cell"><div class="label">publish interval</div><div class="value">500</div></div>
+                <div class="cell"><div class="label">pending actor</div><div class="value">none</div></div>
+              </div>
+            </div>
+
+            <div class="tab-panel" id="replay">
+              <div class="table">
+                <div class="cell"><div class="label">success episodes</div><div class="value">14</div></div>
+                <div class="cell"><div class="label">failure episodes</div><div class="value">23</div></div>
+                <div class="cell"><div class="label">human corrections</div><div class="value">5</div></div>
+                <div class="cell"><div class="label">success samples</div><div class="value">1,320</div></div>
+                <div class="cell"><div class="label">failure samples</div><div class="value">2,888</div></div>
+                <div class="cell"><div class="label">burn-in steps</div><div class="value">1,800</div></div>
+              </div>
+            </div>
+
+            <div class="tab-panel" id="config">
+              <div class="config-grid">
+                <label class="field"><span class="label">warmup_target</span><input value="90" /></label>
+                <label class="field"><span class="label">beta</span><input value="10.0" /></label>
+                <label class="field"><span class="label">intervention_scale</span><input value="0.25" /></label>
+                <label class="field"><span class="label">max_delta</span><input value="0.10" /></label>
+                <label class="field"><span class="label">policy_delay</span><input value="2" /></label>
+                <label class="field"><span class="label">actor_publish_interval</span><input value="500" /></label>
+                <label class="field"><span class="label">critic_only_burn_in_steps</span><input value="3000" /></label>
+                <label class="field"><span class="label">evaluation_window</span><select><option>last 50</option></select></label>
+              </div>
+            </div>
+
+            <div class="tab-panel" id="alerts">
+              <div class="alert-list">
+                <div class="alert good">Q_success 大于 Q_failure，critic 区分成功/失败正常。</div>
+                <div class="alert good">Q1/Q2 gap 在可接受范围内。</div>
+                <div class="alert watch">warmup success episodes 未达到目标，actor 仍锁定。</div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <script>
+      const tabs = document.querySelectorAll(".tab");
+      const panels = document.querySelectorAll(".tab-panel");
+
+      tabs.forEach((tab) => {
+        tab.addEventListener("click", () => {
+          tabs.forEach((item) => item.classList.remove("active"));
+          panels.forEach((item) => item.classList.remove("active"));
+          tab.classList.add("active");
+          document.getElementById(tab.dataset.tab).classList.add("active");
+        });
+      });
+
+      const hotkeyByCode = new Map([
+        ["ArrowLeft", "arrowleft"],
+        ["ArrowRight", "arrowright"],
+        ["ArrowUp", "arrowup"],
+        ["ArrowDown", "arrowdown"],
+      ]);
+
+      const hotkeyByKeyCode = new Map([
+        [37, "arrowleft"],
+        [39, "arrowright"],
+        [38, "arrowup"],
+        [40, "arrowdown"],
+      ]);
+
+      function normalizeHotkey(event) {
+        const key = String(event.key || "").toLowerCase();
+        if (["arrowleft", "arrowright", "arrowup", "arrowdown"].includes(key)) return key;
+        if (hotkeyByCode.has(event.code)) return hotkeyByCode.get(event.code);
+        if (hotkeyByKeyCode.has(event.keyCode)) return hotkeyByKeyCode.get(event.keyCode);
+        if (hotkeyByKeyCode.has(event.which)) return hotkeyByKeyCode.get(event.which);
+        return "";
+      }
+
+      function flashHotkeyButton(hotkey) {
+        const button = document.querySelector(`[data-hotkey="${hotkey}"]`);
+        if (!button) return false;
+
+        button.classList.remove("key-flash");
+        void button.offsetWidth;
+        button.classList.add("key-flash");
+        return true;
+      }
+
+      window.addEventListener("keydown", (event) => {
+        if (event.metaKey || event.ctrlKey || event.altKey || event.repeat) return;
+        const active = document.activeElement;
+        if (active && ["INPUT", "TEXTAREA", "SELECT"].includes(active.tagName)) return;
+
+        const key = normalizeHotkey(event);
+        const handled = flashHotkeyButton(key);
+        if (!handled) return;
+
+        event.preventDefault();
+        event.stopPropagation();
+      }, true);
+
+      document.querySelectorAll("[data-hotkey]").forEach((button) => {
+        button.addEventListener("click", () => flashHotkeyButton(button.dataset.hotkey));
+      });
+    </script>
+  </body>
+</html>

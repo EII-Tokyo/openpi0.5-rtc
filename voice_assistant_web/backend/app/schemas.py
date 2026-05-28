@@ -74,3 +74,8 @@ class RLTConfigRequest(BaseModel):
 class RLTControlRequest(BaseModel):
     source: str = "ui"
     note: str | None = None
+
+
+class RobotTaskRequest(BaseModel):
+    task_num: str = Field(pattern="^[145]$")
+    source: str = "ui"

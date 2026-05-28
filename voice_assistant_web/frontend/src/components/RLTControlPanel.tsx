@@ -20,6 +20,7 @@ function formatCountdown(deadline: number | null) {
 export function RLTControlPanel({ rlt, onState }: Props) {
   const [error, setError] = useState('')
   const [pending, setPending] = useState('')
+  const [flashKey, setFlashKey] = useState('')
   const [countdown, setCountdown] = useState(formatCountdown(rlt.score_deadline))
 
   useEffect(() => {
@@ -39,6 +40,20 @@ export function RLTControlPanel({ rlt, onState }: Props) {
     }
   }
 
+  const flash = (key: string) => {
+    setFlashKey('')
+    window.setTimeout(() => setFlashKey(key), 0)
+    window.setTimeout(() => setFlashKey(''), 260)
+  }
+
+  const normalizeHotkey = (event: KeyboardEvent) => {
+    if (event.key === 'ArrowLeft' || event.code === 'ArrowLeft' || event.keyCode === 37) return 'start'
+    if (event.key === 'ArrowRight' || event.code === 'ArrowRight' || event.keyCode === 39) return 'end'
+    if (event.key === 'ArrowUp' || event.code === 'ArrowUp' || event.keyCode === 38) return 'score1'
+    if (event.key === 'ArrowDown' || event.code === 'ArrowDown' || event.keyCode === 40) return 'score0'
+    return ''
+  }
+
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.metaKey || event.ctrlKey || event.altKey || event.repeat) return
@@ -52,23 +67,24 @@ export function RLTControlPanel({ rlt, onState }: Props) {
         return
       }
 
-      const key = event.key.toLowerCase()
-      if (key === 's') {
-        event.preventDefault()
+      const hotkey = normalizeHotkey(event)
+      if (!hotkey) return
+      event.preventDefault()
+      event.stopPropagation()
+      flash(hotkey)
+
+      if (hotkey === 'start') {
         if (rlt.phase === 'idle') void run('start', startKeyRegion)
-      } else if (key === 'e') {
-        event.preventDefault()
+      } else if (hotkey === 'end') {
         if (rlt.phase === 'key_region') void run('end', endKeyRegion)
-      } else if (event.key === '1') {
-        event.preventDefault()
+      } else if (hotkey === 'score1') {
         if (rlt.phase === 'await_score') void run('score1', () => scoreKeyRegion(1))
-      } else if (event.key === '0') {
-        event.preventDefault()
+      } else if (hotkey === 'score0') {
         if (rlt.phase === 'await_score') void run('score0', () => scoreKeyRegion(0))
       }
     }
-    window.addEventListener('keydown', onKeyDown)
-    return () => window.removeEventListener('keydown', onKeyDown)
+    window.addEventListener('keydown', onKeyDown, true)
+    return () => window.removeEventListener('keydown', onKeyDown, true)
   }, [rlt.phase])
 
   const phaseLabel = useMemo(() => {
@@ -78,10 +94,10 @@ export function RLTControlPanel({ rlt, onState }: Props) {
   }, [rlt.phase, countdown])
 
   return (
-    <section className="panel rlt-panel">
+    <section className="panel rlt-panel rlt-control-compact">
       <div className="panel-header">
         <div>
-          <p className="eyebrow">RLT Controls</p>
+          <p className="eyebrow">Key Region</p>
           <h2>{phaseLabel}</h2>
         </div>
         <span className={`status-pill ${rlt.phase === 'idle' ? 'mode' : 'live'}`}>{rlt.training_phase}</span>
@@ -89,40 +105,52 @@ export function RLTControlPanel({ rlt, onState }: Props) {
 
       <div className="rlt-control-grid">
         <button
-          className="rlt-key-button start"
+          className={`rlt-key-button start ${flashKey === 'start' ? 'key-flash' : ''}`}
           type="button"
           disabled={rlt.phase !== 'idle' || !!pending}
-          onClick={() => void run('start', startKeyRegion)}
+          onClick={() => {
+            flash('start')
+            void run('start', startKeyRegion)
+          }}
         >
-          <span>S</span>
+          <span>←</span>
           <small>Start</small>
         </button>
         <button
-          className="rlt-key-button end"
+          className={`rlt-key-button end ${flashKey === 'end' ? 'key-flash' : ''}`}
           type="button"
           disabled={rlt.phase !== 'key_region' || !!pending}
-          onClick={() => void run('end', endKeyRegion)}
+          onClick={() => {
+            flash('end')
+            void run('end', endKeyRegion)
+          }}
         >
-          <span>E</span>
+          <span>→</span>
           <small>End</small>
         </button>
         <button
-          className="rlt-key-button success"
+          className={`rlt-key-button success ${flashKey === 'score1' ? 'key-flash' : ''}`}
           type="button"
           disabled={rlt.phase !== 'await_score' || !!pending}
-          onClick={() => void run('score1', () => scoreKeyRegion(1))}
+          onClick={() => {
+            flash('score1')
+            void run('score1', () => scoreKeyRegion(1))
+          }}
         >
-          <span>1</span>
-          <small>Success</small>
+          <span>↑</span>
+          <small>Success 1</small>
         </button>
         <button
-          className="rlt-key-button fail"
+          className={`rlt-key-button fail ${flashKey === 'score0' ? 'key-flash' : ''}`}
           type="button"
           disabled={rlt.phase !== 'await_score' || !!pending}
-          onClick={() => void run('score0', () => scoreKeyRegion(0))}
+          onClick={() => {
+            flash('score0')
+            void run('score0', () => scoreKeyRegion(0))
+          }}
         >
-          <span>0</span>
-          <small>Fail</small>
+          <span>↓</span>
+          <small>Fail 0</small>
         </button>
       </div>
 
@@ -287,4 +315,3 @@ function Metric({ label, value }: { label: string; value: number | string }) {
 function formatMetric(value: number | null) {
   return value === null ? '-' : value.toFixed(4)
 }
-

@@ -3,7 +3,7 @@ import { CameraGrid } from './components/CameraGrid'
 import { RLTConfigPanel, RLTControlPanel, RLTStatsPanel } from './components/RLTControlPanel'
 import { RolloutBrowser } from './components/RolloutBrowser'
 import { AppLanguage, translations } from './i18n'
-import { RLTControlState, wsBase } from './services/api'
+import { RLTControlState, sendRobotTask, wsBase } from './services/api'
 import { truncateLabel } from './utils/text'
 
 type RealtimeState = {
@@ -115,6 +115,10 @@ export default function App() {
     setState((current) => ({ ...current, rlt }))
   }
 
+  const runRobotTask = async (taskNum: '1' | '4' | '5') => {
+    await sendRobotTask(taskNum)
+  }
+
   return (
     <main className="app-shell">
       <header className="app-header">
@@ -122,6 +126,17 @@ export default function App() {
           <h1>{t.title}</h1>
         </div>
         <div className="header-actions">
+          <div className="robot-command-bar">
+            <button className="robot-command task" type="button" onClick={() => void runRobotTask('1')}>
+              twist bottle
+            </button>
+            <button className="robot-command home" type="button" onClick={() => void runRobotTask('4')}>
+              home
+            </button>
+            <button className="robot-command sleep" type="button" onClick={() => void runRobotTask('5')}>
+              sleep
+            </button>
+          </div>
           <nav className="page-tabs" aria-label="Primary">
             <button className={page === 'live' ? 'active' : ''} type="button" onClick={() => setPage('live')}>
               RLT Control
@@ -146,25 +161,44 @@ export default function App() {
       </header>
 
       {page === 'live' ? (
-        <section className="layout rlt-layout">
-          <CameraGrid
-            cameraStatus={state.camera_status}
-            cameraTimestamps={state.camera_timestamps}
-            cameraFrames={state.camera_jpeg_b64}
-            language={language}
-            currentTask={state.robot.current_task}
-            cameraView={cameraView}
-            onCameraViewChange={setCameraView}
-          />
-          <aside className="control-rail rlt-rail">
-            <RLTControlPanel rlt={state.rlt} onState={setRLTState} />
-            <RLTStatsPanel rlt={state.rlt} />
-            <RLTConfigPanel rlt={state.rlt} onState={setRLTState} />
-          </aside>
-        </section>
+        <>
+          <section className="rlt-status-strip">
+            <StatusItem label="Phase" value={state.rlt.training_phase} />
+            <StatusItem label="Warmup" value={`${state.rlt.warmup_count} / ${state.rlt.warmup_target}`} />
+            <StatusItem label="Replay" value={state.rlt.replay_size ?? '-'} />
+            <StatusItem label="Actor" value={state.rlt.actor_effective ? 'active' : 'locked'} tone={state.rlt.actor_effective ? 'ok' : 'watch'} />
+            <StatusItem label="Task" value={currentTaskLabel} />
+            <StatusItem label="Alert" value={state.rlt.actor_locked_reason || 'OK'} tone={state.rlt.actor_locked_reason ? 'watch' : 'ok'} />
+          </section>
+          <section className="layout rlt-layout">
+            <CameraGrid
+              cameraStatus={state.camera_status}
+              cameraTimestamps={state.camera_timestamps}
+              cameraFrames={state.camera_jpeg_b64}
+              language={language}
+              currentTask={state.robot.current_task}
+              cameraView={cameraView}
+              onCameraViewChange={setCameraView}
+            />
+            <aside className="control-rail rlt-rail">
+              <RLTControlPanel rlt={state.rlt} onState={setRLTState} />
+              <RLTStatsPanel rlt={state.rlt} />
+              <RLTConfigPanel rlt={state.rlt} onState={setRLTState} />
+            </aside>
+          </section>
+        </>
       ) : (
         <RolloutBrowser title="Collected Files" />
       )}
     </main>
+  )
+}
+
+function StatusItem({ label, value, tone }: { label: string; value: number | string; tone?: 'ok' | 'watch' }) {
+  return (
+    <div className="rlt-status-item">
+      <span>{label}</span>
+      <strong className={tone ? `tone-${tone}` : ''}>{value}</strong>
+    </div>
   )
 }

@@ -79,3 +79,9 @@ export const scoreKeyRegion = (reward: 0 | 1) =>
   postJson<RLTControlState>('/api/rlt/key-region/score', { reward, source: 'ui' })
 export const updateRLTConfig = (config: Partial<RLTControlState>) =>
   postJson<RLTControlState>('/api/rlt/config', config)
+
+export const sendRobotTask = (taskNum: '1' | '4' | '5') =>
+  postJson<{ status: string; task_num: string; task_name: string }>('/api/robot/task', {
+    task_num: taskNum,
+    source: 'ui',
+  })

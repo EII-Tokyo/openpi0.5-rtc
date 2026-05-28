@@ -16,6 +16,13 @@ class RLTokenConfig:
     mlp_dim: int = 8192
     max_prefix_len: int = 1224
 
+    def __post_init__(self):
+        if self.decoder_layers != self.encoder_layers:
+            raise ValueError(
+                "RLT RL Token autoencoder uses matched encoder/decoder depth; "
+                f"got encoder_layers={self.encoder_layers}, decoder_layers={self.decoder_layers}."
+            )
+
 
 class RLTokenBlock(nnx.Module):
     def __init__(self, config: RLTokenConfig, *, rngs: nnx.Rngs):
@@ -103,6 +110,15 @@ class RLTokenAutoencoder(nnx.Module):
         h_vla: at.Float[at.Array, "b n d"],
         prefix_mask: at.Bool[at.Array, "b n"],
     ) -> tuple[at.Float[at.Array, "b d"], at.Float[at.Array, "b n d"]]:
+        z_rl = self.encode(h_vla, prefix_mask)
+        h_hat = self.decode(z_rl, h_vla, prefix_mask)
+        return z_rl, h_hat
+
+    def encode(
+        self,
+        h_vla: at.Float[at.Array, "b n d"],
+        prefix_mask: at.Bool[at.Array, "b n"],
+    ) -> at.Float[at.Array, "b d"]:
         if h_vla.shape[-1] != self.config.hidden_dim:
             raise ValueError(f"Expected h_vla dim {self.config.hidden_dim}, got {h_vla.shape[-1]}")
         seq_len = h_vla.shape[1]
@@ -121,8 +137,23 @@ class RLTokenAutoencoder(nnx.Module):
         x = encoder_input
         for block in self.encoder_blocks:
             x = block(x, encoder_mask)
-        z_rl = x[:, -1, :]
+        return x[:, -1, :]
 
+    def decode(
+        self,
+        z_rl: at.Float[at.Array, "b d"],
+        h_vla: at.Float[at.Array, "b n d"],
+        prefix_mask: at.Bool[at.Array, "b n"],
+    ) -> at.Float[at.Array, "b n d"]:
+        if z_rl.shape[-1] != self.config.hidden_dim:
+            raise ValueError(f"Expected z_rl dim {self.config.hidden_dim}, got {z_rl.shape[-1]}")
+        if h_vla.shape[-1] != self.config.hidden_dim:
+            raise ValueError(f"Expected h_vla dim {self.config.hidden_dim}, got {h_vla.shape[-1]}")
+        seq_len = h_vla.shape[1]
+        if seq_len > self.config.max_prefix_len:
+            raise ValueError(f"prefix length {seq_len} exceeds max_prefix_len={self.config.max_prefix_len}")
+
+        batch_size = h_vla.shape[0]
         target = jnp.where(prefix_mask[..., None], jax.lax.stop_gradient(h_vla), 0)
         z_condition = self.z_to_decoder(z_rl)[:, None, :].astype(h_vla.dtype)
         decoder_input = jnp.concatenate([z_condition, target[:, :-1, :]], axis=1)
@@ -135,8 +166,15 @@ class RLTokenAutoencoder(nnx.Module):
         x = decoder_input
         for block in self.decoder_blocks:
             x = block(x, prefix_mask, decoder_key_mask, causal=True)
-        h_hat = self.output_proj(self.output_norm(x))
-        return z_rl, h_hat
+        return self.output_proj(self.output_norm(x))
+
+    def reconstruct_with_z(
+        self,
+        h_vla: at.Float[at.Array, "b n d"],
+        prefix_mask: at.Bool[at.Array, "b n"],
+        z_rl: at.Float[at.Array, "b d"],
+    ) -> at.Float[at.Array, "b n d"]:
+        return self.decode(z_rl, h_vla, prefix_mask)
 
     def compute_loss(
         self,
@@ -144,6 +182,23 @@ class RLTokenAutoencoder(nnx.Module):
         prefix_mask: at.Bool[at.Array, "b n"],
     ) -> at.Float[at.Array, " b"]:
         _, h_hat = self(h_vla, prefix_mask)
+        return self.reconstruction_loss(h_hat, h_vla, prefix_mask)
+
+    def compute_loss_with_z(
+        self,
+        h_vla: at.Float[at.Array, "b n d"],
+        prefix_mask: at.Bool[at.Array, "b n"],
+        z_rl: at.Float[at.Array, "b d"],
+    ) -> at.Float[at.Array, " b"]:
+        h_hat = self.reconstruct_with_z(h_vla, prefix_mask, z_rl)
+        return self.reconstruction_loss(h_hat, h_vla, prefix_mask)
+
+    def reconstruction_loss(
+        self,
+        h_hat: at.Float[at.Array, "b n d"],
+        h_vla: at.Float[at.Array, "b n d"],
+        prefix_mask: at.Bool[at.Array, "b n"],
+    ) -> at.Float[at.Array, " b"]:
         target = jax.lax.stop_gradient(h_vla)
         token_loss = jnp.mean(jnp.square(h_hat - target), axis=-1)
         token_loss = jnp.where(prefix_mask, token_loss, 0)

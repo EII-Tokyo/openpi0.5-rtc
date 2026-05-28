@@ -1,16 +1,30 @@
 from flax import nnx
 import jax
 import jax.numpy as jnp
+import pytest
 
 from openpi.models import pi0_config
 from openpi.models import rl_token
+from openpi.models import rl_token_eval
+
+
+def test_rl_token_config_requires_matching_encoder_decoder_layers():
+    with pytest.raises(ValueError, match="matched encoder/decoder depth"):
+        rl_token.RLTokenConfig(
+            hidden_dim=8,
+            encoder_layers=2,
+            decoder_layers=1,
+            num_heads=2,
+            mlp_dim=16,
+            max_prefix_len=5,
+        )
 
 
 def test_rl_token_autoencoder_shapes():
     config = rl_token.RLTokenConfig(
         hidden_dim=8,
         encoder_layers=2,
-        decoder_layers=1,
+        decoder_layers=2,
         num_heads=2,
         mlp_dim=16,
         max_prefix_len=5,
@@ -26,6 +40,43 @@ def test_rl_token_autoencoder_shapes():
     assert h_hat.shape == h_vla.shape
     assert loss.shape == (2,)
     assert jnp.all(jnp.isfinite(loss))
+
+
+def test_rl_token_reconstruction_ablation_metrics_shape():
+    config = rl_token.RLTokenConfig(
+        hidden_dim=8,
+        encoder_layers=2,
+        decoder_layers=2,
+        num_heads=2,
+        mlp_dim=16,
+        max_prefix_len=5,
+    )
+    model = rl_token.RLTokenAutoencoder(config, rngs=nnx.Rngs(0))
+    h_vla = jnp.ones((3, 4, 8), dtype=jnp.bfloat16)
+    prefix_mask = jnp.array(
+        [
+            [True, True, True, False],
+            [True, True, False, False],
+            [True, True, True, True],
+        ]
+    )
+
+    metrics = rl_token_eval.compute_reconstruction_ablations(model, h_vla, prefix_mask).as_dict()
+
+    expected_keys = {
+        "real_loss",
+        "shuffled_loss",
+        "zero_loss",
+        "shuffled_over_real",
+        "zero_over_real",
+        "real_vs_shuffled_gap",
+        "real_vs_zero_gap",
+        "z_rl_cosine_mean",
+        "z_rl_cosine_std",
+    }
+    assert set(metrics) == expected_keys
+    assert all(value.shape == () for value in metrics.values())
+    assert all(jnp.isfinite(value) for value in metrics.values())
 
 
 def test_pi0_rl_token_only_loss_shape():

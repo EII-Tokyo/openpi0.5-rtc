@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import hashlib
+import json
 import logging
 import mimetypes
 import os
@@ -30,6 +31,7 @@ from .schemas import RLTConfigRequest
 from .schemas import RLTControlRequest
 from .schemas import RLTControlState
 from .schemas import RLTScoreRequest
+from .schemas import RobotTaskRequest
 from .schemas import RuntimeStatePayload
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
@@ -50,6 +52,11 @@ rlt_control = RLTControlStore(redis_client)
 ROLLOUTS_ROOT = Path(settings.rollouts_root).expanduser().resolve()
 VIDEO_CHUNK_SIZE = 1024 * 1024
 VIDEO_CACHE_ROOT = Path(os.getenv("ROLLOUTS_VIDEO_CACHE", "/tmp/eii_rollout_video_cache"))
+ROBOT_TASK_LABELS = {
+    "1": "twist bottle",
+    "4": "home",
+    "5": "sleep",
+}
 
 
 @app.on_event("startup")
@@ -76,6 +83,19 @@ def on_shutdown() -> None:
 @app.get("/health", response_model=HealthResponse)
 def health() -> HealthResponse:
     return HealthResponse()
+
+
+@app.post("/api/robot/task")
+def robot_task(request: RobotTaskRequest) -> dict[str, str]:
+    payload = {
+        "type": "robot_task",
+        "task_num": request.task_num,
+        "task_name": ROBOT_TASK_LABELS[request.task_num],
+        "source": request.source,
+        "timestamp": time.time(),
+    }
+    redis_client.publish(settings.rlt_control_channel, json.dumps(payload))
+    return {"status": "ok", "task_num": request.task_num, "task_name": payload["task_name"]}
 
 
 @app.get("/api/cameras/{camera_name}/latest.jpg")

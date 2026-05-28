@@ -42,7 +42,7 @@ H_vla: [B, N, 2048]
 
 ```python
 encoder_layers = 4
-decoder_layers = 2
+decoder_layers = 4
 hidden_dim = 2048
 rl_token_dim = 2048
 ```
@@ -52,6 +52,28 @@ The compression bottleneck is token count, not feature dimension:
 ```text
 [B, N, 2048] -> [B, 1, 2048] -> [B, N, 2048]
 ```
+
+## Reconstruction Quality Checks
+
+After training, reconstruction loss alone is not enough. The RL token must contain sample-specific information, so evaluation should compare three decoder conditions:
+
+```text
+real:     decode(z_rl(real sample), H_vla previous tokens)
+shuffled: decode(z_rl(from another batch sample), H_vla previous tokens)
+zero:     decode(0, H_vla previous tokens)
+```
+
+Expected healthy ordering:
+
+```text
+real_loss < shuffled_loss << zero_loss
+```
+
+Meaning:
+
+- `real_loss` checks normal autoencoding quality.
+- `shuffled_loss` checks whether the compressed token is tied to the correct visual state.
+- `zero_loss` checks whether the decoder is cheating by reconstructing mostly from teacher-forced previous tokens and positional information.
 
 ## H_vla Extraction
 
@@ -108,29 +130,22 @@ z_rl: [B, 2048]
 
 ## Decoder
 
-Use learned reconstruction queries:
+Decoder depth is intentionally matched with encoder depth:
 
 ```text
-reconstruction_queries: [1, max_prefix_len, 2048]
+encoder_layers = decoder_layers = 4
 ```
 
-Slice to the current sequence length:
+Use teacher-forced autoregressive reconstruction, matching the RLT objective:
 
 ```text
-queries = reconstruction_queries[:, :N, :]
-queries: [B, N, 2048]
+decoder_input_i = [project(z_rl), stop_gradient(H_vla[:, :i-1])]
 ```
 
-Condition on the RL token:
+The decoder is causal. Prediction i can see z_rl and the real previous prefix embeddings, but not the current or future target embedding.
 
 ```text
-decoder_input = queries + projected/broadcast z_rl conditioning
-```
-
-Run a bidirectional Transformer decoder-style block:
-
-```text
-decoder_layers = 2
+decoder_layers = 4
 num_heads = 8 or 16
 mlp_dim = 8192
 ```

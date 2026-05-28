@@ -34,10 +34,10 @@ button {
 
 .app-shell {
   height: 100dvh;
-  padding: 16px;
+  padding: 0 14px 12px;
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
-  gap: 14px;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  gap: 10px;
   overflow: hidden;
 }
 
@@ -54,10 +54,11 @@ button {
 }
 
 .app-header {
-  margin: -16px -16px 0;
-  padding: 10px 16px;
-  background: #fffefa;
-  border-bottom: 1px solid #ddd7cc;
+  margin: 0 -14px;
+  padding: 10px 14px;
+  background: #111827;
+  border-bottom: 1px solid #0b1220;
+  color: #fffefa;
 }
 
 .app-header h1,
@@ -70,6 +71,34 @@ button {
 .header-actions {
   flex-wrap: wrap;
   justify-content: flex-end;
+}
+
+.robot-command-bar {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.robot-command {
+  min-height: 34px;
+  padding: 7px 13px;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.robot-command.task {
+  background: #2463a6;
+}
+
+.robot-command.home {
+  background: #1f8a4c;
+}
+
+.robot-command.sleep {
+  background: #b26a00;
 }
 
 .page-tabs {
@@ -144,8 +173,8 @@ button {
 
 .layout {
   display: grid;
-  grid-template-columns: minmax(0, 1.65fr) minmax(380px, 0.9fr);
-  gap: 14px;
+  grid-template-columns: minmax(600px, 1.3fr) minmax(430px, 0.9fr);
+  gap: 10px;
   min-height: 0;
 }
 
@@ -159,7 +188,7 @@ button {
 .stage-panel {
   display: grid;
   grid-template-rows: minmax(0, 1fr) 170px;
-  gap: 14px;
+  gap: 10px;
 }
 
 .stage-panel.quad-mode {
@@ -169,8 +198,8 @@ button {
 .control-rail {
   display: grid;
   grid-template-rows: auto auto minmax(0, 1fr);
-  gap: 14px;
-  overflow: auto;
+  gap: 8px;
+  overflow: hidden;
 }
 
 .panel,
@@ -187,13 +216,13 @@ button {
 .hero-camera,
 .rollouts-tree-panel,
 .rollouts-player-panel {
-  padding: 14px;
+  padding: 10px;
 }
 
 .hero-camera {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
-  gap: 12px;
+  gap: 8px;
 }
 
 .camera-panel-header {
@@ -229,7 +258,7 @@ button {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   grid-template-rows: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+  gap: 8px;
   min-height: 0;
 }
 
@@ -293,27 +322,85 @@ button {
   text-transform: uppercase;
 }
 
+.rlt-status-strip {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(110px, 1fr));
+  gap: 8px;
+  min-height: 52px;
+  padding: 8px 10px;
+  border: 1px solid #ddd7cc;
+  border-radius: 8px;
+  background: #fffefa;
+}
+
+.rlt-status-item {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.rlt-status-item span {
+  color: #635b50;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.rlt-status-item strong {
+  overflow: hidden;
+  color: #221f1a;
+  font-size: 15px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rlt-status-item .tone-ok {
+  color: #116b4f;
+}
+
+.rlt-status-item .tone-watch {
+  color: #88551d;
+}
+
 .rlt-control-grid,
 .metric-grid,
 .event-log {
   display: grid;
-  gap: 10px;
+  gap: 8px;
 }
 
-.rlt-control-grid,
+.rlt-control-grid {
+  grid-template-columns: auto repeat(4, minmax(48px, 1fr)) auto;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.rlt-control-grid::before {
+  content: "Key region";
+  color: #635b50;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.rlt-control-grid::after {
+  content: "← start · → end · ↑ 1 · ↓ 0";
+  color: #635b50;
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
 .metric-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.rlt-control-grid {
-  margin-top: 14px;
-}
-
 .rlt-key-button {
-  display: grid;
-  place-items: center;
-  min-height: 86px;
-  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 32px;
+  padding: 0 8px;
+  border-radius: 6px;
   color: #fff;
   cursor: pointer;
 }
@@ -324,13 +411,13 @@ button {
 }
 
 .rlt-key-button span {
-  font-size: 34px;
+  font-size: 17px;
   font-weight: 900;
   line-height: 1;
 }
 
 .rlt-key-button small {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 800;
 }
 
@@ -350,9 +437,30 @@ button {
   background: #8b2c24;
 }
 
+.rlt-key-button.key-flash {
+  animation: keyFlash 260ms ease-out;
+}
+
+@keyframes keyFlash {
+  0% {
+    transform: translateY(0) scale(1);
+    box-shadow: 0 0 0 0 rgba(36, 99, 166, 0.44);
+  }
+
+  45% {
+    transform: translateY(-4px) scale(1.08);
+    box-shadow: 0 0 0 7px rgba(36, 99, 166, 0.22);
+  }
+
+  100% {
+    transform: translateY(0) scale(1);
+    box-shadow: 0 0 0 0 rgba(36, 99, 166, 0);
+  }
+}
+
 .rlt-warning,
 .rlt-error {
-  margin: 12px 0 0;
+  margin: 8px 0 0;
   font-size: 12px;
   font-weight: 800;
 }
@@ -368,7 +476,7 @@ button {
 
 .progress-track {
   height: 10px;
-  margin: 14px 0;
+  margin: 10px 0;
   overflow: hidden;
   border-radius: 999px;
   background: #ebe8df;
@@ -383,7 +491,7 @@ button {
 .metric-tile,
 .event-row {
   min-width: 0;
-  padding: 10px;
+  padding: 8px;
   border-radius: 8px;
   background: #f1eee7;
 }
@@ -400,12 +508,12 @@ button {
 
 .metric-tile strong {
   display: block;
-  margin-top: 4px;
-  font-size: 20px;
+  margin-top: 2px;
+  font-size: 17px;
 }
 
 .event-log {
-  margin-top: 14px;
+  margin-top: 10px;
 }
 
 .event-row {
@@ -437,8 +545,8 @@ button {
 .rlt-field,
 .rlt-toggle {
   display: grid;
-  gap: 7px;
-  margin-top: 12px;
+  gap: 5px;
+  margin-top: 8px;
 }
 
 .rlt-field input[type="number"] {
@@ -463,10 +571,11 @@ button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin-top: 12px;
+  margin-top: 8px;
 }
 
 .rollouts-page {
+  grid-row: 2 / -1;
   display: grid;
   grid-template-columns: minmax(280px, 0.46fr) minmax(0, 1fr);
   gap: 14px;

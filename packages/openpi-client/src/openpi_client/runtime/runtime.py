@@ -210,6 +210,18 @@ class Runtime:
         event_type = data.get("type")
         state = data.get("state") or {}
         logging.info("收到 RLT 控制事件: %s", event_type)
+        if event_type == "robot_task":
+            task_data = self._normalize_task_data(
+                {
+                    "task_num": str(data.get("task_num")),
+                    "task_name": data.get("task_name"),
+                    "timestamp": data.get("timestamp", time.time()),
+                }
+            )
+            with self._task_lock:
+                self._latest_task = task_data
+            logging.info("收到前端机器人任务: %s - %s", task_data["task_num"], task_data["task_name"])
+            return
         with self._task_lock:
             for key in ("warmup_target", "beta", "intervention_scale", "max_delta", "actor_enabled"):
                 if key in state:
