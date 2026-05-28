@@ -4,6 +4,7 @@ import logging
 import pathlib
 from typing import Any
 
+from flax import nnx
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -42,6 +43,33 @@ def _average_metrics(metric_dicts: list[dict[str, Any]]) -> dict[str, float]:
     return {key: float(np.mean([_to_float(metrics[key]) for metrics in metric_dicts])) for key in keys}
 
 
+def _normalize_rl_token_block_keys(params: dict[str, Any]) -> None:
+    autoencoder = params.get("rl_token_autoencoder")
+    if not isinstance(autoencoder, dict):
+        return
+    for block_name in ("encoder_blocks", "decoder_blocks"):
+        blocks = autoencoder.get(block_name)
+        if isinstance(blocks, dict):
+            autoencoder[block_name] = {
+                int(key) if isinstance(key, str) and key.isdigit() else key: value for key, value in blocks.items()
+            }
+
+
+def _load_model(config: _config.TrainConfig, checkpoint_dir: pathlib.Path):
+    params = _model.restore_params(checkpoint_dir / "params", dtype=jnp.bfloat16)
+    try:
+        return config.model.load(params)
+    except ValueError as exc:
+        if "rl_token_autoencoder" not in str(exc):
+            raise
+        logging.info("Retrying model load with normalized RL Token block keys.")
+        _normalize_rl_token_block_keys(params)
+        model = config.model.create(jax.random.key(0))
+        graphdef, state = nnx.split(model)
+        state.replace_by_pure_dict(params)
+        return nnx.merge(graphdef, state)
+
+
 def main(args: Args) -> None:
     logging.basicConfig(level=logging.INFO)
     config = _config.get_config(args.config_name)
@@ -52,7 +80,7 @@ def main(args: Args) -> None:
     checkpoint_dir = _checkpoint_step_dir(args.checkpoint_dir)
 
     logging.info("Loading model from %s", checkpoint_dir)
-    model = config.model.load(_model.restore_params(checkpoint_dir / "params", dtype=jnp.bfloat16))
+    model = _load_model(config, checkpoint_dir)
     model.eval()
     if getattr(model, "rl_token_autoencoder", None) is None:
         raise ValueError(f"Config {args.config_name} did not create an RL Token autoencoder.")
