@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
+import { ActionDrawer } from './components/ActionDrawer'
 import { CameraGrid } from './components/CameraGrid'
+import { MotorDrawer } from './components/MotorDrawer'
 import { RobotViewer } from './components/RobotViewer'
 import { VoicePanel } from './components/VoicePanel'
 import { AppLanguage, translations } from './i18n'
@@ -12,6 +14,9 @@ type RealtimeState = {
     mode: string
     current_task: string | null
     qpos: number[]
+    effort: number[]
+    joint_effort: Record<string, { names?: string[]; values?: number[] }>
+    joint_temperature: Record<string, { names?: string[]; values?: number[] }>
     latest_action: number[]
   }
   camera_status: Record<string, boolean>
@@ -25,6 +30,9 @@ const initialState: RealtimeState = {
     mode: 'waiting',
     current_task: null,
     qpos: [],
+    effort: [],
+    joint_effort: {},
+    joint_temperature: {},
     latest_action: [],
   },
   camera_status: {},
@@ -39,6 +47,8 @@ export default function App() {
   const [language, setLanguage] = useState<AppLanguage>('en')
   const [dispatchError, setDispatchError] = useState('')
   const [cameraView, setCameraView] = useState<'focus' | 'quad'>('quad')
+  const [motorDrawerOpen, setMotorDrawerOpen] = useState(false)
+  const [actionDrawerOpen, setActionDrawerOpen] = useState(false)
   const t = translations[language]
   const currentTaskLabel = state.robot.current_task ? truncateLabel(state.robot.current_task) : t.noActiveTask
 
@@ -127,6 +137,12 @@ export default function App() {
           <span className="robot-task-badge" title={state.robot.current_task || t.noActiveTask}>
             {currentTaskLabel}
           </span>
+          <button className="ghost-button" type="button" onClick={() => setMotorDrawerOpen(true)}>
+            Motors
+          </button>
+          <button className="ghost-button" type="button" onClick={() => setActionDrawerOpen(true)}>
+            Actions
+          </button>
           <label className="language-switch">
             <span>{t.language}</span>
             <select value={language} onChange={(event) => setLanguage(event.target.value as AppLanguage)}>
@@ -163,6 +179,17 @@ export default function App() {
           />
         </aside>
       </section>
+      <MotorDrawer
+        open={motorDrawerOpen}
+        onClose={() => setMotorDrawerOpen(false)}
+        jointEffort={state.robot.joint_effort}
+        jointTemperature={state.robot.joint_temperature}
+      />
+      <ActionDrawer
+        open={actionDrawerOpen}
+        onClose={() => setActionDrawerOpen(false)}
+        latestAction={state.robot.latest_action}
+      />
     </main>
   )
 }

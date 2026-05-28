@@ -672,6 +672,162 @@ button {
   overflow: hidden;
 }
 
+.drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgba(25, 19, 14, 0.34);
+  cursor: pointer;
+}
+
+.motor-drawer {
+  position: fixed;
+  z-index: 41;
+  inset: 0 0 0 auto;
+  width: min(860px, 92vw);
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  gap: 14px;
+  padding: 18px;
+  background: rgba(255, 252, 248, 0.98);
+  border-left: 1px solid rgba(54, 45, 37, 0.12);
+  box-shadow: -24px 0 60px rgba(36, 28, 20, 0.22);
+  transform: translateX(100%);
+  transition: transform 180ms ease;
+}
+
+.motor-drawer.open {
+  transform: translateX(0);
+}
+
+.motor-drawer-header,
+.motor-chart-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.motor-drawer-header h2,
+.motor-chart-card h3,
+.motor-robot-section h3 {
+  margin: 0;
+}
+
+.motor-legend {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(246, 239, 228, 0.72);
+  border: 1px solid rgba(60, 48, 38, 0.08);
+}
+
+.motor-legend label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #5f4d3e;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.motor-legend i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+}
+
+.motor-legend input {
+  margin: 0;
+}
+
+.motor-legend small {
+  color: #9a8775;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.motor-drawer-scroll {
+  min-height: 0;
+  overflow-y: auto;
+  display: grid;
+  gap: 16px;
+  padding-right: 4px;
+}
+
+.motor-robot-section {
+  display: grid;
+  gap: 12px;
+}
+
+.motor-robot-section > h3 {
+  color: #4f4034;
+  font-size: 14px;
+}
+
+.motor-chart-card {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(255, 250, 243, 0.8);
+  border: 1px solid rgba(60, 48, 38, 0.1);
+}
+
+.motor-chart-card h3 {
+  color: #241b14;
+  font-size: 13px;
+}
+
+.motor-chart-card-head span {
+  color: #7b6858;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.motor-axis-chart {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.motor-chart-bg {
+  fill: rgba(255, 252, 248, 0.72);
+}
+
+.motor-grid-line {
+  stroke: rgba(92, 74, 58, 0.16);
+  stroke-width: 1;
+}
+
+.motor-axis-line {
+  stroke: rgba(36, 28, 20, 0.52);
+  stroke-width: 1.4;
+}
+
+.motor-axis-label {
+  fill: #7b6858;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.torque-axis-label {
+  font-size: 9px;
+}
+
+.motor-axis-title {
+  fill: #5f4d3e;
+  font-size: 10px;
+  font-weight: 900;
+}
+
 @keyframes voice-thinking-pulse {
   0%, 100% {
     transform: scale(1);

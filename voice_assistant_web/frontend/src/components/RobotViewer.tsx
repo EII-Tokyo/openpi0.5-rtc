@@ -19,7 +19,13 @@ type Props = {
   language: AppLanguage
 }
 
-export function RobotViewer({ latestAction, qpos, mode, currentTask, language }: Props) {
+export function RobotViewer({
+  latestAction,
+  qpos,
+  mode,
+  currentTask,
+  language,
+}: Props) {
   const t = translations[language]
   const currentTaskLabel = currentTask ? truncateLabel(currentTask) : t.noActiveTask
   const containerRef = useRef<HTMLDivElement | null>(null)

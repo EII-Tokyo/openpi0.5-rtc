@@ -50,7 +50,7 @@ class Args:
             #[0.0, -0.96, 1.16, -1.57, -0.0, 1.57],
         ]
     )
-    gripper_current_limits: list[int] = dataclasses.field(default_factory=lambda: [300, 800])
+    gripper_current_limits: list[int] = dataclasses.field(default_factory=lambda: [500, 800])
     # H5dfSaver 配置
     dataset_dir: str = "/app/src/openpi/robot/aloha_real/error_hdf5/2026-03-11_inference_lora_error"
     manual_dataset_dir: str = "/app/src/openpi/robot/aloha_real/manual_override_hdf5/2026-03-11_inference_lora"

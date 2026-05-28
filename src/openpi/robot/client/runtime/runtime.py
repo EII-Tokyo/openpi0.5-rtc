@@ -474,7 +474,7 @@ class Runtime:
         observation_with_task = {
             **observation,
             'task': self._current_task.get('task_name'),
-            'subtask': {'good_bad_action': self._good_bad_action},
+            'subtask': json.dumps({'good_bad_action': self._good_bad_action}),
         }
 
         action = self._agent.get_action(observation_with_task)

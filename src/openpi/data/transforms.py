@@ -267,7 +267,7 @@ class ValidateAlohaSample(DataTransformFn):
         missing: list[str] = []
 
         for image_key in self.image_keys:
-            if not _has_any_key(data, flat, (f"observation.images.{image_key}", f"images/{image_key}", f"images.{image_key}")):
+            if not _has_any_key(data, flat, (f"observation.images.{image_key}", f"images.{image_key}")):
                 missing.append(f"observation.images.{image_key}")
         if not _has_any_key(data, flat, ("observation.state", "state")):
             missing.append("observation.state")
@@ -400,9 +400,6 @@ class AlohaTransformPipeline:
     def _image_structure(self, prefix: str) -> dict[str, str]:
         return {key: f"{prefix}.{key}" for key in self.raw_image_keys}
 
-    def _nested_image_structure(self, prefix: str) -> dict[str, str]:
-        return {key: f"{prefix}/{key}" for key in self.raw_image_keys}
-
     def _load_norm_stats(self) -> dict[str, NormStats]:
         data_assets_dir = f"{self.assets.assets_dir.rstrip('/')}/{self.assets.asset_id}"
         try:
@@ -430,16 +427,6 @@ class AlohaTransformPipeline:
         }
         if include_actions:
             structure["actions"] = "action"
-        if self.include_subtask:
-            structure["subtask"] = "subtask"
-        return RepackTransform(structure)
-
-    def policy_repack_transform(self) -> RepackTransform:
-        structure = {
-            "images": self._nested_image_structure("images"),
-            "state": "state",
-            "task": "task",
-        }
         if self.include_subtask:
             structure["subtask"] = "subtask"
         return RepackTransform(structure)
@@ -515,7 +502,6 @@ class AlohaTransformPipeline:
                 require_task=True,
             ),
             FilterImages(self.raw_image_keys),
-            self.policy_repack_transform(),
             PromptFromLeRobotTask(),
             *self._model_input_transforms(),
         ]
@@ -636,10 +622,8 @@ def _has_any_key(data: Mapping, flat: Mapping, keys: Sequence[str]) -> bool:
 
 
 def _lookup_repack_key(flat: Mapping, key: str):
-    candidates = (key, key.replace(".", "/"))
-    for candidate in candidates:
-        if candidate in flat:
-            return flat[candidate]
+    if key in flat:
+        return flat[key]
     raise KeyError(f"Missing repack source key {key!r}. Available keys include: {tuple(sorted(flat))[:20]}")
 
 
@@ -718,13 +702,13 @@ def _encode_actions_inv(actions: np.ndarray, *, adapt_to_pi: bool = False) -> np
 
 
 def flatten_dict(tree: at.PyTree) -> dict:
-    """Flatten a nested dictionary. Uses '/' as the separator."""
-    return traverse_util.flatten_dict(tree, sep="/")
+    """Flatten a nested dictionary. Uses '.' as the separator."""
+    return traverse_util.flatten_dict(tree, sep=".")
 
 
 def unflatten_dict(tree: dict) -> at.PyTree:
-    """Unflatten a flattened dictionary. Assumes that '/' was used as a separator."""
-    return traverse_util.unflatten_dict(tree, sep="/")
+    """Unflatten a flattened dictionary. Assumes that '.' was used as a separator."""
+    return traverse_util.unflatten_dict(tree, sep=".")
 
 
 def apply_tree(

@@ -14,6 +14,9 @@ class RuntimeStatePayload(BaseModel):
     mode: str = "waiting"
     current_task: str | None = None
     qpos: list[float] = Field(default_factory=list)
+    effort: list[float] = Field(default_factory=list)
+    joint_effort: dict[str, Any] = Field(default_factory=dict)
+    joint_temperature: dict[str, Any] = Field(default_factory=dict)
     latest_action: list[float] = Field(default_factory=list)
 
 

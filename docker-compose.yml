@@ -125,6 +125,7 @@ services:
     init: true
     tty: true
     volumes:
-      - $PWD/voice_assistant_web/frontend/dist:/usr/share/nginx/html:ro
+      - $PWD/voice_assistant_web/frontend:/app
+      - /app/node_modules
     depends_on:
       - voice_web_backend
