@@ -140,6 +140,44 @@ class RLTActorCritic(nnx.Module):
         self.config = config
         self.actor = RLTActor(config, rngs=rngs)
         self.critic = RLTTwinCritic(config, rngs=rngs)
+        self.target_actor = RLTActor(config, rngs=rngs)
+        self.target_critic = RLTTwinCritic(config, rngs=rngs)
+        self.sync_targets()
+
+    def sync_targets(self) -> None:
+        """Hard-copy online actor/critic parameters into target networks."""
+        nnx.update(self.target_actor, nnx.state(self.actor))
+        nnx.update(self.target_critic, nnx.state(self.critic))
+
+    def soft_update_targets(self, tau: float | None = None) -> None:
+        """Polyak update target networks: target <- tau * online + (1 - tau) * target."""
+        tau = self.config.tau if tau is None else tau
+        if not 0.0 <= tau <= 1.0:
+            raise ValueError("tau must be in [0, 1]")
+        nnx.update(self.target_actor, polyak_update_state(nnx.state(self.actor), nnx.state(self.target_actor), tau))
+        nnx.update(self.target_critic, polyak_update_state(nnx.state(self.critic), nnx.state(self.target_critic), tau))
+
+    def target_action(
+        self,
+        next_x: at.Float[at.Array, "b d"],
+        next_reference_action: at.Float[at.Array, "b h a"],
+        *,
+        rng: at.KeyArrayLike | None = None,
+        sample: bool = False,
+    ) -> at.Float[at.Array, "b h a"]:
+        """Action used only for TD target computation, produced by target actor πθ'."""
+        return self.target_actor(next_x, next_reference_action, rng=rng, sample=sample)
+
+    def target_q_min(
+        self,
+        next_x: at.Float[at.Array, "b d"],
+        next_reference_action: at.Float[at.Array, "b h a"],
+        *,
+        rng: at.KeyArrayLike | None = None,
+        sample_target_actor: bool = False,
+    ) -> at.Float[at.Array, " b"]:
+        next_action = self.target_action(next_x, next_reference_action, rng=rng, sample=sample_target_actor)
+        return self.target_critic.min_q(next_x, next_action)
 
 
 def discount_chunk_rewards(
@@ -164,6 +202,34 @@ def td3_target(
     return jax.lax.stop_gradient(reward_return + bootstrap)
 
 
+def rlt_td3_target(
+    model: RLTActorCritic,
+    reward_seq: at.Float[at.Array, "b h"],
+    done: at.Bool[at.Array, " b"],
+    next_x: at.Float[at.Array, "b d"],
+    next_reference_action: at.Float[at.Array, "b h a"],
+    *,
+    rng: at.KeyArrayLike | None = None,
+    sample_target_actor: bool = False,
+) -> at.Float[at.Array, " b"]:
+    """RLT/TD3 target using target actor πθ' and target twin critics Qψ1', Qψ2'."""
+    next_q_min = model.target_q_min(
+        next_x,
+        next_reference_action,
+        rng=rng,
+        sample_target_actor=sample_target_actor,
+    )
+    return td3_target(reward_seq, done, next_q_min, gamma=model.config.gamma)
+
+
+def polyak_update_state(online_state: nnx.State, target_state: nnx.State, tau: float) -> nnx.State:
+    return jax.tree.map(
+        lambda online, target: tau * online + (1.0 - tau) * target,
+        online_state,
+        target_state,
+    )
+
+
 def critic_loss(
     q1: at.Float[at.Array, " b"],
     q2: at.Float[at.Array, " b"],
@@ -181,4 +247,3 @@ def actor_loss(
 ) -> at.Float[at.Array, ""]:
     bc_penalty = jnp.mean(jnp.square(action - reference_action), axis=(-2, -1))
     return jnp.mean(-q1_for_actor + beta * bc_penalty)
-

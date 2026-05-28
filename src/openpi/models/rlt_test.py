@@ -31,6 +31,54 @@ def test_rlt_actor_critic_shapes():
     assert jnp.max(jnp.abs(action - reference_action)) <= config.max_delta * 0.5 + 1e-6
 
 
+def test_target_networks_start_as_online_copies():
+    config = rlt.RLTConfig(
+        z_dim=8,
+        proprio_dim=4,
+        action_horizon=5,
+        action_dim=3,
+        hidden_dim=16,
+        num_layers=2,
+    )
+    model = rlt.RLTActorCritic(config, rngs=nnx.Rngs(0))
+
+    actor_state = nnx.state(model.actor).flat_state()
+    target_actor_state = nnx.state(model.target_actor).flat_state()
+    critic_state = nnx.state(model.critic).flat_state()
+    target_critic_state = nnx.state(model.target_critic).flat_state()
+
+    assert actor_state.keys() == target_actor_state.keys()
+    assert critic_state.keys() == target_critic_state.keys()
+    for key in actor_state:
+        assert jnp.allclose(actor_state[key].value, target_actor_state[key].value)
+    for key in critic_state:
+        assert jnp.allclose(critic_state[key].value, target_critic_state[key].value)
+
+
+def test_soft_update_targets_moves_toward_online_params():
+    config = rlt.RLTConfig(
+        z_dim=8,
+        proprio_dim=4,
+        action_horizon=5,
+        action_dim=3,
+        hidden_dim=16,
+        num_layers=2,
+    )
+    model = rlt.RLTActorCritic(config, rngs=nnx.Rngs(0))
+    original_target_state = nnx.state(model.target_actor)
+    updated_actor_state = jax.tree.map(lambda value: value + 2.0, nnx.state(model.actor))
+    nnx.update(model.actor, updated_actor_state)
+
+    model.soft_update_targets(tau=0.25)
+
+    online_state = nnx.state(model.actor).flat_state()
+    target_state = nnx.state(model.target_actor).flat_state()
+    original_state = original_target_state.flat_state()
+    for key in target_state:
+        expected = original_state[key].value * 0.75 + online_state[key].value * 0.25
+        assert jnp.allclose(target_state[key].value, expected)
+
+
 def test_td3_losses_are_finite():
     reward_seq = jnp.array([[0, 0, 1], [0, 0, 0]], dtype=jnp.float32)
     done = jnp.array([True, False])
@@ -50,3 +98,26 @@ def test_td3_losses_are_finite():
     assert jnp.all(jnp.isfinite(target))
     assert jnp.isfinite(q_loss)
     assert jnp.isfinite(pi_loss)
+
+
+def test_rlt_td3_target_uses_target_network_shapes():
+    config = rlt.RLTConfig(
+        z_dim=8,
+        proprio_dim=4,
+        action_horizon=5,
+        action_dim=3,
+        hidden_dim=16,
+        num_layers=2,
+        gamma=0.9,
+    )
+    model = rlt.RLTActorCritic(config, rngs=nnx.Rngs(0))
+    x_next = jnp.ones((2, 12), dtype=jnp.float32)
+    next_reference = jnp.zeros((2, 5, 3), dtype=jnp.float32)
+    reward_seq = jnp.array([[0, 0, 0, 0, 1], [0, 0, 0, 0, 0]], dtype=jnp.float32)
+    done = jnp.array([True, False])
+
+    target = rlt.rlt_td3_target(model, reward_seq, done, x_next, next_reference)
+
+    assert target.shape == (2,)
+    assert jnp.allclose(target[0], 0.9**4)
+    assert jnp.all(jnp.isfinite(target))
