@@ -20,6 +20,8 @@ class Args:
     config_name: str
     checkpoint_dir: pathlib.Path
     num_batches: int = 20
+    batch_size: int | None = None
+    num_workers: int | None = None
     output_json: pathlib.Path | None = None
     wandb_project: str | None = None
     wandb_run_name: str | None = None
@@ -43,6 +45,10 @@ def _average_metrics(metric_dicts: list[dict[str, Any]]) -> dict[str, float]:
 def main(args: Args) -> None:
     logging.basicConfig(level=logging.INFO)
     config = _config.get_config(args.config_name)
+    if args.batch_size is not None:
+        config = dataclasses.replace(config, batch_size=args.batch_size)
+    if args.num_workers is not None:
+        config = dataclasses.replace(config, num_workers=args.num_workers)
     checkpoint_dir = _checkpoint_step_dir(args.checkpoint_dir)
 
     logging.info("Loading model from %s", checkpoint_dir)
