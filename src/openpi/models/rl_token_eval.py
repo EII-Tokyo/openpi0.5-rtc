@@ -46,7 +46,7 @@ def compute_reconstruction_ablations(
     zero_loss = jnp.mean(autoencoder.compute_loss_with_z(h_vla, prefix_mask, z_zero))
     eps = jnp.asarray(1e-8, dtype=real_loss.dtype)
 
-    cosine_values = _off_diagonal_cosines(z_real)
+    cosine_mean, cosine_std = _off_diagonal_cosine_stats(z_real)
     return RLTokenAblationMetrics(
         real_loss=real_loss,
         shuffled_loss=shuffled_loss,
@@ -55,8 +55,8 @@ def compute_reconstruction_ablations(
         zero_over_real=zero_loss / jnp.maximum(real_loss, eps),
         real_vs_shuffled_gap=shuffled_loss - real_loss,
         real_vs_zero_gap=zero_loss - real_loss,
-        z_rl_cosine_mean=jnp.mean(cosine_values),
-        z_rl_cosine_std=jnp.std(cosine_values),
+        z_rl_cosine_mean=cosine_mean,
+        z_rl_cosine_std=cosine_std,
     )
 
 
@@ -66,10 +66,15 @@ def _batch_shuffle(z_rl: at.Float[at.Array, "b d"]) -> at.Float[at.Array, "b d"]
     return jnp.roll(z_rl, shift=1, axis=0)
 
 
-def _off_diagonal_cosines(z_rl: at.Float[at.Array, "b d"]) -> at.Float[at.Array, " k"]:
+def _off_diagonal_cosine_stats(
+    z_rl: at.Float[at.Array, "b d"],
+) -> tuple[at.Float[at.Array, ""], at.Float[at.Array, ""]]:
     if z_rl.shape[0] <= 1:
-        return jnp.zeros((1,), dtype=z_rl.dtype)
+        return jnp.asarray(0, dtype=z_rl.dtype), jnp.asarray(0, dtype=z_rl.dtype)
     z_norm = z_rl / jnp.maximum(jnp.linalg.norm(z_rl, axis=-1, keepdims=True), 1e-8)
     cosine = z_norm @ z_norm.T
-    off_diag_mask = ~jnp.eye(z_rl.shape[0], dtype=bool)
-    return cosine[off_diag_mask]
+    off_diag_mask = 1 - jnp.eye(z_rl.shape[0], dtype=z_rl.dtype)
+    denom = jnp.maximum(jnp.sum(off_diag_mask), 1)
+    mean = jnp.sum(cosine * off_diag_mask) / denom
+    variance = jnp.sum(jnp.square(cosine - mean) * off_diag_mask) / denom
+    return mean, jnp.sqrt(jnp.maximum(variance, 0))
