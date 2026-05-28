@@ -36,8 +36,13 @@ class RLTokenBlock(nnx.Module):
     def __call__(
         self,
         x: at.Float[at.Array, "b s d"],
-        attention_mask: at.Bool[at.Array, "b s"],
+        query_mask: at.Bool[at.Array, "b s"],
+        key_mask: at.Bool[at.Array, "b s"] | None = None,
+        *,
+        causal: bool = False,
     ) -> at.Float[at.Array, "b s d"]:
+        if key_mask is None:
+            key_mask = query_mask
         dtype = x.dtype
         residual = x
         x_norm = self.pre_attn_norm(x)
@@ -55,9 +60,12 @@ class RLTokenBlock(nnx.Module):
         logits = jnp.einsum("bhqd,bhkd->bhqk", q, k, preferred_element_type=jnp.float32)
         logits = logits * (head_dim**-0.5)
 
-        key_mask = attention_mask[:, None, None, :]
-        query_mask = attention_mask[:, None, :, None]
-        attn_mask = key_mask & query_mask
+        key_attn_mask = key_mask[:, None, None, :]
+        query_attn_mask = query_mask[:, None, :, None]
+        attn_mask = key_attn_mask & query_attn_mask
+        if causal:
+            causal_mask = jnp.tril(jnp.ones((seq_len, seq_len), dtype=bool))[None, None, :, :]
+            attn_mask = attn_mask & causal_mask
         big_neg = jnp.finfo(jnp.float32).min
         logits = jnp.where(attn_mask, logits, big_neg)
         probs = jax.nn.softmax(logits, axis=-1).astype(dtype)
@@ -68,7 +76,7 @@ class RLTokenBlock(nnx.Module):
         residual = x
         x_norm = self.pre_mlp_norm(x)
         x = residual + self.mlp_out(jax.nn.gelu(self.mlp_in(x_norm)))
-        return jnp.where(attention_mask[..., None], x, 0)
+        return jnp.where(query_mask[..., None], x, 0)
 
 
 class RLTokenAutoencoder(nnx.Module):
@@ -81,12 +89,13 @@ class RLTokenAutoencoder(nnx.Module):
             jax.random.normal(rngs.params(), (1, config.max_prefix_len + 1, config.hidden_dim), dtype=jnp.float32)
             * 0.02
         )
-        self.decoder_queries = nnx.Param(
+        self.decoder_pos_embedding = nnx.Param(
             jax.random.normal(rngs.params(), (1, config.max_prefix_len, config.hidden_dim), dtype=jnp.float32) * 0.02
         )
         self.encoder_blocks = [RLTokenBlock(config, rngs=rngs) for _ in range(config.encoder_layers)]
         self.decoder_blocks = [RLTokenBlock(config, rngs=rngs) for _ in range(config.decoder_layers)]
         self.output_norm = nnx.LayerNorm(config.hidden_dim, rngs=rngs)
+        self.output_proj = nnx.Linear(config.hidden_dim, config.hidden_dim, rngs=rngs)
         self.z_to_decoder = nnx.Linear(config.hidden_dim, config.hidden_dim, rngs=rngs)
 
     def __call__(
@@ -114,17 +123,19 @@ class RLTokenAutoencoder(nnx.Module):
             x = block(x, encoder_mask)
         z_rl = x[:, -1, :]
 
-        decoder_queries = jnp.broadcast_to(
-            self.decoder_queries.value[:, :seq_len].astype(h_vla.dtype),
-            (batch_size, seq_len, self.config.hidden_dim),
+        target = jnp.where(prefix_mask[..., None], h_vla, 0)
+        z_condition = self.z_to_decoder(z_rl)[:, None, :].astype(h_vla.dtype)
+        decoder_input = jnp.concatenate([z_condition, target[:, :-1, :]], axis=1)
+        decoder_input = decoder_input + self.decoder_pos_embedding.value[:, :seq_len].astype(h_vla.dtype)
+        decoder_key_mask = jnp.concatenate(
+            [jnp.ones((batch_size, 1), dtype=prefix_mask.dtype), prefix_mask[:, :-1]],
+            axis=1,
         )
-        z_condition = self.z_to_decoder(z_rl)[:, None, :]
-        decoder_input = decoder_queries + z_condition
 
         x = decoder_input
         for block in self.decoder_blocks:
-            x = block(x, prefix_mask)
-        h_hat = self.output_norm(x)
+            x = block(x, prefix_mask, decoder_key_mask, causal=True)
+        h_hat = self.output_proj(self.output_norm(x))
         return z_rl, h_hat
 
     def compute_loss(

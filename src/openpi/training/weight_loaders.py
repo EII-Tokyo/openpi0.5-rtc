@@ -88,8 +88,11 @@ def _merge_params(loaded_params: at.Params, params: at.Params, *, missing_regex:
     Returns:
         A new dictionary with the merged parameters.
     """
-    flat_ref = flax.traverse_util.flatten_dict(params, sep="/")
-    flat_loaded = flax.traverse_util.flatten_dict(loaded_params, sep="/")
+    flat_ref = flax.traverse_util.flatten_dict(params)
+    flat_loaded = flax.traverse_util.flatten_dict(loaded_params)
+
+    def path_str(path: tuple[object, ...]) -> str:
+        return "/".join(str(part) for part in path)
 
     # First, take all weights that are a subset of the reference weights.
     result = {}
@@ -101,11 +104,11 @@ def _merge_params(loaded_params: at.Params, params: at.Params, *, missing_regex:
 
     # Then, merge any missing weights as defined by the missing regex.
     pattern = re.compile(missing_regex)
-    for k in {k for k in flat_ref if pattern.fullmatch(k)}:
+    for k in {k for k in flat_ref if pattern.fullmatch(path_str(k))}:
         if k not in result:
             result[k] = flat_ref[k]
 
-    return flax.traverse_util.unflatten_dict(result, sep="/")
+    return flax.traverse_util.unflatten_dict(result)
 
 
 def _resolve_checkpoint_path(path: pathlib.Path) -> pathlib.Path:

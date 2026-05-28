@@ -143,12 +143,16 @@ class Pi0(_model.BaseModel):
         return tokens, input_mask, ar_mask
 
     def embed_prefix_hidden(
-        self, obs: _model.Observation
+        self, obs: _model.Observation, *, drop_language: bool = False
     ) -> tuple[at.Float[at.Array, "b s emb"], at.Bool[at.Array, "b s"]]:
         prefix_tokens, prefix_mask, prefix_ar_mask = self.embed_prefix(obs)
         prefix_attn_mask = make_attn_mask(prefix_mask, prefix_ar_mask)
         positions = jnp.cumsum(prefix_mask, axis=1) - 1
         (prefix_out, _), _ = self.PaliGemma.llm([prefix_tokens, None], mask=prefix_attn_mask, positions=positions)
+        if drop_language and obs.tokenized_prompt is not None:
+            image_token_count = prefix_out.shape[1] - obs.tokenized_prompt.shape[1]
+            prefix_out = prefix_out[:, :image_token_count]
+            prefix_mask = prefix_mask[:, :image_token_count]
         return prefix_out, prefix_mask
 
     @at.typecheck
@@ -213,7 +217,7 @@ class Pi0(_model.BaseModel):
         )
 
         if self.rl_token_autoencoder is not None and self.rl_token_only:
-            prefix_out, prefix_mask = self.embed_prefix_hidden(observation)
+            prefix_out, prefix_mask = self.embed_prefix_hidden(observation, drop_language=True)
             rl_token_loss = self.rl_token_autoencoder.compute_loss(jax.lax.stop_gradient(prefix_out), prefix_mask)
             return einops.repeat(rl_token_loss, "b -> b ah", ah=self.action_horizon)
 
@@ -239,6 +243,10 @@ class Pi0(_model.BaseModel):
 
         if self.rl_token_autoencoder is None:
             return action_loss
+        if observation.tokenized_prompt is not None:
+            image_token_count = prefix_out.shape[1] - observation.tokenized_prompt.shape[1]
+            prefix_out = prefix_out[:, :image_token_count]
+            prefix_mask = prefix_mask[:, :image_token_count]
         rl_token_loss = self.rl_token_autoencoder.compute_loss(jax.lax.stop_gradient(prefix_out), prefix_mask)
         return action_loss + self.rl_token_loss_weight * einops.repeat(
             rl_token_loss, "b -> b ah", ah=self.action_horizon
