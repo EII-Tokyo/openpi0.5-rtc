@@ -1,3 +1,5 @@
+import json
+
 import pytest
 
 import numpy as np
@@ -107,3 +109,23 @@ def test_rlt_replay_store_rejects_sample_horizon_longer_than_replay(tmp_path):
     assert store.scan() == []
     assert store.shape is None
     assert any("sample_action_horizon" in reason for reason in store.bad_shards().values())
+
+
+
+def test_rlt_replay_store_rejects_incompatible_schema_manifest(tmp_path):
+    shards_dir = tmp_path / "shards"
+    shards_dir.mkdir()
+    manifest = {
+        "schema_version": 1,
+        "train_chunk_horizon": 3,
+        "policy_horizon": 50,
+        "action_space": "pi_internal",
+        "action_dim": 2,
+        "reward_placement": "terminal_last_train_step",
+    }
+    np.savez(shards_dir / "bad_schema.npz", **_arrays(5), manifest=json.dumps(manifest))
+
+    store = rlt_replay_store.RLTReplayStore(tmp_path)
+    assert store.scan() == []
+    assert store.stats.bad_shards == 1
+    assert any("action_space" in reason for reason in store.bad_shards().values())

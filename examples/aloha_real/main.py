@@ -1,5 +1,6 @@
 import dataclasses
 import logging
+import os
 import signal
 import sys
 import threading
@@ -71,6 +72,8 @@ class Args:
     rlt_chunk_horizon: int | None = None
     rlt_chunk_stride: int = 2
     rlt_prefer_gpu_video: bool = True
+    rlt_actor_path: str | None = None
+    rlt_actor_poll_interval: float = 1.0
     # Set <= 0 to save the full episode instead of a rolling tail buffer.
     hdf5_max_buffer_seconds: float = 60.0
     # Save one HDF5 rollout each time the robot leaves reset pose and returns.
@@ -164,6 +167,8 @@ def main(args: Args) -> None:
                 model_dir=args.model_dir,
                 adapt_to_pi=args.adapt_to_pi,
                 use_rtc=args.use_rtc,
+                rlt_actor_path=args.rlt_actor_path or os.getenv("RLT_ACTOR_CHECKPOINT_PATH"),
+                rlt_actor_poll_interval=args.rlt_actor_poll_interval,
             )
         ),
         subscribers=subscribers if args.if_save_hdf5 else [],

@@ -8,6 +8,7 @@ import numpy as np
 from typing_extensions import override
 
 from openpi_client import base_policy as _base_policy
+from openpi_client.rlt_actor_runtime import RLTActorRuntime
 
 
 class ActionChunkBroker(_base_policy.BasePolicy):
@@ -26,6 +27,9 @@ class ActionChunkBroker(_base_policy.BasePolicy):
         model_dir: str | None = None,
         adapt_to_pi: bool = True,
         use_rtc: bool = True,
+        rlt_actor_path: str | None = None,
+        rlt_actor_poll_interval: float = 1.0,
+        rlt_actor_runtime=None,
     ):
         self._policy = policy
         self._action_horizon = action_horizon
@@ -36,6 +40,9 @@ class ActionChunkBroker(_base_policy.BasePolicy):
         self._last_reference_actions: np.ndarray | None = None
         self._background_results: Dict[str, np.ndarray] | None = None
         self._background_running: bool = False
+        self._rlt_actor = rlt_actor_runtime
+        if self._rlt_actor is None and rlt_actor_path is not None:
+            self._rlt_actor = RLTActorRuntime(rlt_actor_path, poll_interval_seconds=rlt_actor_poll_interval)
 
         self._obs: Dict[str, np.ndarray] | None = None
         self._s = 25
@@ -103,7 +110,9 @@ class ActionChunkBroker(_base_policy.BasePolicy):
                 # np.savetxt("norm_action.txt", norm_action, fmt='%.6f')
                 # np.savetxt("last_origin_actions.txt", self._last_origin_actions, fmt='%.6f')
                 rpc_start = time.monotonic()
-                self._background_results = self._policy.infer(self._obs, norm_action, self._use_rtc)
+                policy_obs = self._policy_obs(self._obs or {})
+                self._background_results = self._policy.infer(policy_obs, norm_action, self._use_rtc)
+                self._background_results = self._apply_rlt_actor_to_policy_results(self._background_results, self._obs or {})
                 rpc_ms = (time.monotonic() - rpc_start) * 1000.0
                 # break
                 # 将后面18列都设为0
@@ -147,7 +156,8 @@ class ActionChunkBroker(_base_policy.BasePolicy):
         if self._use_rtc:
             # init     
             if self._last_results is None:
-                policy_results = self._policy.infer(obs, None, self._use_rtc)
+                policy_results = self._policy.infer(self._policy_obs(obs), None, self._use_rtc)
+                policy_results = self._apply_rlt_actor_to_policy_results(policy_results, obs)
                 self._last_origin_actions = policy_results["origin_actions"]
                 self._last_reference_actions = policy_results.get("reference_actions", policy_results["actions"])
                 self._last_state = policy_results["state"]
@@ -174,7 +184,9 @@ class ActionChunkBroker(_base_policy.BasePolicy):
             return results
         else:
             if self._last_results is None:
-                self._last_results = self._policy.infer(obs)
+                policy_results = self._policy.infer(self._policy_obs(obs))
+                policy_results = self._apply_rlt_actor_to_policy_results(policy_results, obs)
+                self._last_results = self._build_step_result_cache(policy_results)
                 self._cur_step = 0
 
             results = self._slice_result_cache(self._last_results)
@@ -195,19 +207,101 @@ class ActionChunkBroker(_base_policy.BasePolicy):
         self._background_running = False
         self._cur_step = 0
 
+    def _policy_obs(self, obs: Dict) -> Dict:
+        return {key: value for key, value in obs.items() if key != "rlt_context"}
+
+    def _rlt_context_from_obs(self, obs: Dict) -> dict:
+        context = obs.get("rlt_context") or {}
+        return dict(context) if isinstance(context, dict) else {}
+
+    def _apply_rlt_actor_to_policy_results(self, policy_results: Dict[str, np.ndarray], obs: Dict) -> Dict[str, np.ndarray]:
+        policy_results = dict(policy_results)
+        reference_actions = np.array(policy_results["actions"], dtype=np.float32, copy=True)
+        policy_results["reference_actions"] = reference_actions
+        if self._rlt_actor is None:
+            policy_results.update(
+                {
+                    "rlt_actor_applied": False,
+                    "rlt_actor_reason": "actor_runtime_not_configured",
+                    "rlt_actor_step": None,
+                    "rlt_actor_dir": None,
+                    "rlt_actor_delta_norm": None,
+                    "rlt_actor_max_abs_delta": None,
+                }
+            )
+            return policy_results
+
+        z_rl = policy_results.get("z_rl", policy_results.get("rl_token"))
+        proprio = policy_results.get("proprio", policy_results.get("state"))
+        if z_rl is None or proprio is None:
+            policy_results.update(
+                {
+                    "rlt_actor_applied": False,
+                    "rlt_actor_reason": "missing_z_rl_or_proprio",
+                    "rlt_actor_step": None,
+                    "rlt_actor_dir": None,
+                    "rlt_actor_delta_norm": None,
+                    "rlt_actor_max_abs_delta": None,
+                }
+            )
+            return policy_results
+
+        try:
+            result = self._rlt_actor.apply(
+                reference_actions=reference_actions,
+                z_rl=np.asarray(z_rl, dtype=np.float32),
+                proprio=np.asarray(proprio, dtype=np.float32),
+                context=self._rlt_context_from_obs(obs),
+            )
+        except Exception as exc:
+            logging.exception("RLT actor failed; using reference VLA actions")
+            policy_results.update(
+                {
+                    "rlt_actor_applied": False,
+                    "rlt_actor_reason": str(exc),
+                    "rlt_actor_step": None,
+                    "rlt_actor_dir": None,
+                    "rlt_actor_delta_norm": None,
+                    "rlt_actor_max_abs_delta": None,
+                }
+            )
+            return policy_results
+
+        if result.applied:
+            policy_results["actions"] = np.asarray(result.actions, dtype=np.float32)
+        policy_results.update(
+            {
+                "rlt_actor_applied": bool(result.applied),
+                "rlt_actor_reason": result.reason,
+                "rlt_actor_step": result.actor_step,
+                "rlt_actor_dir": result.actor_dir,
+                "rlt_actor_delta_norm": result.delta_norm,
+                "rlt_actor_max_abs_delta": result.max_abs_delta,
+            }
+        )
+        return policy_results
+
     def _build_step_result_cache(self, policy_results: Dict[str, np.ndarray]) -> Dict[str, np.ndarray]:
         reference_actions = policy_results.get("reference_actions", policy_results["actions"])
         cached: Dict[str, np.ndarray] = {
             "actions": policy_results["actions"],
             "reference_action": reference_actions,
-            "action_full": policy_results.get("origin_actions", policy_results["actions"]),
+            "action_full": policy_results.get("action_full", policy_results["actions"]),
             "reference_action_full": reference_actions,
         }
+        if "origin_actions" in policy_results:
+            cached["origin_actions"] = policy_results["origin_actions"]
         for source_key, target_key in (
             ("z_rl", "z_rl"),
             ("rl_token", "z_rl"),
             ("proprio", "proprio"),
             ("state", "proprio"),
+            ("rlt_actor_applied", "rlt_actor_applied"),
+            ("rlt_actor_reason", "rlt_actor_reason"),
+            ("rlt_actor_step", "rlt_actor_step"),
+            ("rlt_actor_dir", "rlt_actor_dir"),
+            ("rlt_actor_delta_norm", "rlt_actor_delta_norm"),
+            ("rlt_actor_max_abs_delta", "rlt_actor_max_abs_delta"),
         ):
             if source_key in policy_results and target_key not in cached:
                 cached[target_key] = policy_results[source_key]

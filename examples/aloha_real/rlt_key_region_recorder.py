@@ -11,7 +11,7 @@ import shutil
 import subprocess
 import threading
 import time
-from typing import Any
+from typing import Any, Callable
 
 import h5py
 import numpy as np
@@ -112,6 +112,30 @@ class _FfmpegMp4Writer:
 _FFMPEG_ENCODER_CACHE: dict[str, bool] = {}
 
 
+class _RedisReplayAckPublisher:
+    def __init__(self) -> None:
+        self._client = None
+        self._channel = os.getenv("RLT_STATE_CHANNEL", "aloha_rlt_state")
+        try:
+            import redis
+
+            self._client = redis.Redis(
+                host=os.getenv("REDIS_HOST", "localhost"),
+                port=int(os.getenv("REDIS_PORT", "6379")),
+                db=int(os.getenv("REDIS_DB", "0")),
+                decode_responses=True,
+            )
+            self._client.ping()
+        except Exception as exc:
+            self._client = None
+            logging.warning("Disabling RLT replay ack publisher: %s", exc)
+
+    def __call__(self, payload: dict[str, Any]) -> None:
+        if self._client is None:
+            return
+        self._client.publish(self._channel, json.dumps(payload, sort_keys=True))
+
+
 def _ffmpeg_supports_encoder(encoder: str) -> bool:
     cached = _FFMPEG_ENCODER_CACHE.get(encoder)
     if cached is not None:
@@ -176,6 +200,7 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
         full_horizon: int = 50,
         chunk_stride: int = 2,
         prefer_gpu_video: bool = True,
+        ack_publisher: Callable[[dict[str, Any]], None] | None = None,
     ) -> None:
         del action_horizon  # Kept for older call sites; RLT training horizon is explicit.
         train_horizon = chunk_horizon if train_horizon is None else train_horizon
@@ -194,6 +219,7 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
         self._full_horizon = full_horizon
         self._chunk_stride = chunk_stride
         self._prefer_gpu_video = prefer_gpu_video
+        self._ack_publisher = ack_publisher if ack_publisher is not None else _RedisReplayAckPublisher()
         self._step_index = 0
         self._active_start_event: dict[str, Any] | None = None
         self._active_start_step: int | None = None
@@ -342,6 +368,7 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
         self._write_videos(rollout_dir, segment.records)
         self._write_hdf5(rollout_dir / "episode.hdf5", segment, missing_metadata=missing_metadata)
         manifest = self._write_manifest(rollout_dir / "manifest.json", segment, missing_metadata, replay_arrays)
+        shard_path = None
         if replay_arrays is not None:
             shard_tmp = replay_dir / f"{region_name}.npz.tmp"
             shard_path = replay_dir / f"{region_name}.npz"
@@ -352,6 +379,7 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
             os.replace(shard_tmp, shard_path)
             with (replay_dir.parent / "manifest.jsonl").open("a", encoding="utf-8") as file:
                 file.write(json.dumps({**manifest, "shard_path": str(shard_path)}, ensure_ascii=False) + "\n")
+        self._publish_replay_ack(manifest, shard_path=shard_path)
         logging.info("Saved RLT key region to %s", rollout_dir)
 
     def _write_videos(self, rollout_dir: pathlib.Path, records: list[StepRecord]) -> None:
@@ -425,6 +453,12 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
             "missing_rlt_metadata": missing_metadata,
             "replay_status": _replay_status(missing_metadata, replay_arrays),
             "replay_ready": replay_arrays is not None,
+            "schema_version": 1,
+            "train_chunk_horizon": self._train_horizon,
+            "policy_horizon": self._full_horizon,
+            "action_space": "aloha_exec",
+            "action_dim": 0 if replay_arrays is None else int(replay_arrays["action"].shape[-1]),
+            "reward_placement": "terminal_last_train_step",
             "train_horizon": self._train_horizon,
             "full_horizon": self._full_horizon,
             "replay_array_shapes": {}
@@ -440,6 +474,26 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
         os.replace(tmp_path, path)
         return manifest
 
+    def _publish_replay_ack(self, manifest: dict[str, Any], *, shard_path: pathlib.Path | None) -> None:
+        payload = {
+            "type": "rlt_replay_segment_written",
+            "timestamp": time.time(),
+            "key_region_id": manifest.get("key_region_id"),
+            "task": manifest.get("task"),
+            "phase": manifest.get("phase"),
+            "reward": manifest.get("reward"),
+            "score_timeout": bool(manifest.get("score_timeout", False)),
+            "replay_ready": bool(manifest.get("replay_ready", False)),
+            "replay_status": manifest.get("replay_status"),
+            "num_replay_transitions": int(manifest.get("num_replay_transitions") or 0),
+            "missing_rlt_metadata": list(manifest.get("missing_rlt_metadata") or []),
+            "shard_path": None if shard_path is None else str(shard_path),
+        }
+        try:
+            self._ack_publisher(payload)
+        except Exception:
+            logging.exception("Failed to publish RLT replay ack for key region %s", manifest.get("key_region_id"))
+
     def _build_replay_arrays(
         self,
         records: list[StepRecord],
@@ -453,8 +507,8 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
         for key, attr in (
             ("z_rl", "z_rl"),
             ("proprio", "proprio"),
-            ("action", "action"),
-            ("reference_action", "reference_action"),
+            ("action_full", "action_full"),
+            ("reference_action_full", "reference_action_full"),
         ):
             if any(getattr(record, attr) is None for record in records):
                 missing.append(key)
@@ -463,52 +517,32 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
 
         reward = float(score_event.get("reward", 0.0))
         samples: dict[str, list[np.ndarray]] = {key: [] for key in _REPLAY_KEYS}
-        full_samples: dict[str, list[np.ndarray]] = {
-            "action_full": [],
-            "reference_action_full": [],
-            "reward_seq_full": [],
-        }
         last_start = len(records) - (2 * train_horizon)
         for start in range(0, max(last_start + 1, 0), self._chunk_stride):
             current = records[start]
             next_record = records[start + train_horizon]
-            action_chunk = [record.action for record in records[start : start + train_horizon]]
-            reference_chunk = [record.reference_action for record in records[start : start + train_horizon]]
-            next_reference_chunk = [
-                record.reference_action
-                for record in records[start + train_horizon : start + (2 * train_horizon)]
-            ]
-            if any(item is None for item in action_chunk + reference_chunk + next_reference_chunk):
+            action_chunk = _prefix_full_chunk(current.action_full, full_horizon)
+            reference_chunk = _prefix_full_chunk(current.reference_action_full, full_horizon)
+            next_reference_chunk = _prefix_full_chunk(next_record.reference_action_full, full_horizon)
+            if action_chunk is None or reference_chunk is None or next_reference_chunk is None:
                 continue
-            reward_seq = np.zeros((train_horizon,), dtype=np.float32)
+            reward_seq = np.zeros((full_horizon,), dtype=np.float32)
             done = start == last_start
             if done:
-                reward_seq[-1] = reward
+                reward_seq[train_horizon - 1] = reward
             samples["z_rl"].append(np.asarray(current.z_rl, dtype=np.float32))
             samples["proprio"].append(np.asarray(current.proprio, dtype=np.float32))
-            samples["action"].append(np.asarray(action_chunk, dtype=np.float32))
-            samples["reference_action"].append(np.asarray(reference_chunk, dtype=np.float32))
+            samples["action"].append(action_chunk)
+            samples["reference_action"].append(reference_chunk)
             samples["reward_seq"].append(reward_seq)
             samples["next_z_rl"].append(np.asarray(next_record.z_rl, dtype=np.float32))
             samples["next_proprio"].append(np.asarray(next_record.proprio, dtype=np.float32))
-            samples["next_reference_action"].append(np.asarray(next_reference_chunk, dtype=np.float32))
+            samples["next_reference_action"].append(next_reference_chunk)
             samples["done"].append(np.asarray(done, dtype=np.bool_))
-
-            action_full = _prefix_full_chunk(current.action_full, full_horizon)
-            reference_action_full = _prefix_full_chunk(current.reference_action_full, full_horizon)
-            if action_full is not None and reference_action_full is not None:
-                reward_seq_full = np.zeros((full_horizon,), dtype=np.float32)
-                if done:
-                    reward_seq_full[-1] = reward
-                full_samples["action_full"].append(action_full)
-                full_samples["reference_action_full"].append(reference_action_full)
-                full_samples["reward_seq_full"].append(reward_seq_full)
 
         if not samples["z_rl"]:
             return None, ["no_valid_replay_samples"]
         arrays = {key: np.asarray(value) for key, value in samples.items()}
-        if full_samples["action_full"] and len(full_samples["action_full"]) == len(samples["z_rl"]):
-            arrays.update({key: np.asarray(value, dtype=np.float32) for key, value in full_samples.items()})
         return arrays, []
 
 

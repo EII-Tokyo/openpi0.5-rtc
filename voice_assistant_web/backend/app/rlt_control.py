@@ -91,17 +91,9 @@ class RLTControlStore:
             key_region_id = self._state.active_key_region_id
             is_warmup = self._state.warmup_count < self._state.warmup_target
             if is_warmup:
-                self._state.warmup_count += 1
-                if reward == 1:
-                    self._state.warmup_success += 1
-                else:
-                    self._state.warmup_failure += 1
+                self._state.warmup_attempts += 1
             else:
-                self._state.auto_rollout_count += 1
-                if reward == 1:
-                    self._state.auto_rollout_success += 1
-                else:
-                    self._state.auto_rollout_failure += 1
+                self._state.auto_rollout_attempts += 1
             self._state.phase = "idle"
             self._state.active_key_region_id = None
             self._state.score_deadline = None
@@ -142,10 +134,48 @@ class RLTControlStore:
 
     def update_runtime_metrics(self, payload: dict[str, Any]) -> None:
         with self._lock:
-            for key in ("critic_loss", "actor_loss", "replay_size", "wandb_url"):
-                if key in payload:
-                    setattr(self._state, key, payload[key])
+            if payload.get("type") == "rlt_replay_segment_written":
+                self._record_replay_ack_locked(payload)
+            else:
+                for key in ("critic_loss", "actor_loss", "replay_size", "replay_shards", "bad_shards", "wandb_url"):
+                    if key in payload:
+                        setattr(self._state, key, payload[key])
+                latest_actor_path = payload.get("latest_actor_path")
+                latest_actor_step = payload.get("latest_actor_step")
+                if latest_actor_path is not None:
+                    self._state.actor_checkpoint_path = latest_actor_path
+                if latest_actor_step is not None:
+                    self._state.actor_checkpoint_step = int(latest_actor_step)
+                if latest_actor_path and latest_actor_step is not None and int(latest_actor_step) > 0:
+                    self._state.actor_ready = True
             self._refresh_derived_locked()
+            self._persist_locked()
+
+    def _record_replay_ack_locked(self, payload: dict[str, Any]) -> None:
+        phase = str(payload.get("phase") or self._state.training_phase or "warmup")
+        reward = int(payload.get("reward") or 0)
+        replay_ready = bool(payload.get("replay_ready")) and int(payload.get("num_replay_transitions") or 0) > 0
+        is_warmup_ack = phase == "warmup"
+        if replay_ready:
+            if is_warmup_ack:
+                self._state.warmup_count += 1
+                if reward == 1:
+                    self._state.warmup_success += 1
+                else:
+                    self._state.warmup_failure += 1
+            else:
+                self._state.auto_rollout_count += 1
+                if reward == 1:
+                    self._state.auto_rollout_success += 1
+                else:
+                    self._state.auto_rollout_failure += 1
+            self._add_event_locked("rlt_replay_segment_written", f"reward={reward} transitions={payload.get('num_replay_transitions')}")
+        else:
+            if is_warmup_ack:
+                self._state.warmup_invalid += 1
+            else:
+                self._state.auto_rollout_invalid += 1
+            self._add_event_locked("rlt_replay_segment_invalid", str(payload.get("replay_status") or "invalid"))
 
     def _listen_runtime_state(self) -> None:
         pubsub = None
@@ -167,9 +197,21 @@ class RLTControlStore:
 
     def _refresh_derived_locked(self) -> None:
         in_warmup = self._state.warmup_count < self._state.warmup_target
+        replay_balance_ready = self._state.warmup_success > 0 and self._state.warmup_failure > 0
         self._state.training_phase = "warmup" if in_warmup else "rl"
-        self._state.actor_effective = bool(self._state.actor_enabled and not in_warmup)
-        self._state.actor_locked_reason = "warmup" if in_warmup else None
+        self._state.actor_effective = bool(
+            self._state.actor_enabled and not in_warmup and replay_balance_ready and self._state.actor_ready
+        )
+        if in_warmup:
+            self._state.actor_locked_reason = "warmup"
+        elif not replay_balance_ready:
+            self._state.actor_locked_reason = "replay_balance"
+        elif not self._state.actor_ready:
+            self._state.actor_locked_reason = "actor_not_ready"
+        elif not self._state.actor_enabled:
+            self._state.actor_locked_reason = "disabled"
+        else:
+            self._state.actor_locked_reason = None
 
     def _apply_score_timeout_locked(self) -> None:
         if (
@@ -184,11 +226,9 @@ class RLTControlStore:
         key_region_id = self._state.active_key_region_id
         is_warmup = self._state.warmup_count < self._state.warmup_target
         if is_warmup:
-            self._state.warmup_count += 1
-            self._state.warmup_failure += 1
+            self._state.warmup_attempts += 1
         else:
-            self._state.auto_rollout_count += 1
-            self._state.auto_rollout_failure += 1
+            self._state.auto_rollout_attempts += 1
         self._state.phase = "idle"
         self._state.active_key_region_id = None
         self._state.score_deadline = None

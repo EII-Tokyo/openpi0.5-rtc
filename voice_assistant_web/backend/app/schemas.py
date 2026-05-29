@@ -37,10 +37,15 @@ class RLTControlState(BaseModel):
     warmup_count: int = 0
     warmup_success: int = 0
     warmup_failure: int = 0
+    warmup_attempts: int = 0
+    warmup_invalid: int = 0
     auto_rollout_count: int = 0
     auto_rollout_success: int = 0
     auto_rollout_failure: int = 0
+    auto_rollout_attempts: int = 0
+    auto_rollout_invalid: int = 0
     actor_enabled: bool = False
+    actor_ready: bool = False
     actor_effective: bool = False
     actor_locked_reason: str | None = "warmup"
     beta: float = 10.0
@@ -54,6 +59,10 @@ class RLTControlState(BaseModel):
     critic_loss: float | None = None
     actor_loss: float | None = None
     replay_size: int | None = None
+    replay_shards: int | None = None
+    bad_shards: int | None = None
+    actor_checkpoint_path: str | None = None
+    actor_checkpoint_step: int | None = None
     rl_token_checkpoint_path: str | None = None
     events: list[RLTEvent] = Field(default_factory=list)
 

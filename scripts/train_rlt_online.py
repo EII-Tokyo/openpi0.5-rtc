@@ -1,4 +1,6 @@
 import dataclasses
+import datetime
+import hashlib
 import json
 import logging
 import pathlib
@@ -49,6 +51,11 @@ class Args:
     wandb_enabled: bool = True
     wandb_project: str = "openpi"
     wandb_run_name: str = "rlt_actor_critic_online"
+    redis_enabled: bool = False
+    redis_host: str = "localhost"
+    redis_port: int = 6379
+    redis_db: int = 0
+    redis_state_channel: str = "aloha_rlt_state"
     overwrite: bool = False
 
 
@@ -72,27 +79,142 @@ def _atomic_write_text(path: pathlib.Path, text: str) -> None:
     tmp_path.replace(path)
 
 
+def _sha256_bytes(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
+
+
+def _shape_metadata(shape: rlt_replay_store.ReplayShape | None) -> dict[str, int] | None:
+    return None if shape is None else dataclasses.asdict(shape)
+
+
+def _stats_metadata(stats: rlt_replay_store.ReplayStats | None) -> dict[str, int] | None:
+    return None if stats is None else dataclasses.asdict(stats)
+
+
+class RedisMetricsPublisher:
+    def __init__(
+        self,
+        *,
+        enabled: bool,
+        channel: str,
+        host: str = "localhost",
+        port: int = 6379,
+        db: int = 0,
+        redis_client=None,
+    ):
+        self._enabled = enabled
+        self._channel = channel
+        self._client = redis_client
+        self._warned = False
+        if not self._enabled or self._client is not None:
+            return
+        try:
+            import redis
+
+            self._client = redis.Redis(host=host, port=port, db=db, decode_responses=True)
+            self._client.ping()
+        except Exception as exc:  # pragma: no cover - depends on operator environment.
+            self._enabled = False
+            logging.warning("Disabling Redis RLT metrics publisher: %s", exc)
+
+    def publish(self, payload: dict) -> None:
+        if not self._enabled or self._client is None:
+            return
+        try:
+            self._client.publish(self._channel, json.dumps(payload, sort_keys=True))
+        except Exception as exc:
+            if not self._warned:
+                logging.warning("Failed to publish RLT trainer metrics to Redis: %s", exc)
+                self._warned = True
+
+
+def _json_float(value):
+    if value is None:
+        return None
+    return float(value)
+
+
+def _build_metrics_payload(
+    *,
+    step: int,
+    reduced: dict,
+    stats: rlt_replay_store.ReplayStats,
+    replay_shape: rlt_replay_store.ReplayShape | None,
+    train_shape: rlt_replay_store.ReplayShape | None,
+    actor_enabled: bool,
+    latest_actor_path: str | None = None,
+    latest_actor_step: int | None = None,
+    wandb_url: str | None = None,
+) -> dict:
+    return {
+        "type": "rlt_trainer_metrics",
+        "timestamp": time.time(),
+        "trainer_step": int(step),
+        "critic_loss": _json_float(reduced.get("critic_loss")),
+        "actor_loss": _json_float(reduced.get("actor_loss")),
+        "replay_size": int(stats.replay_size),
+        "wandb_url": wandb_url,
+        "actor_enabled": bool(actor_enabled),
+        "latest_actor_path": latest_actor_path,
+        "latest_actor_step": None if latest_actor_step is None else int(latest_actor_step),
+        "replay_shards": int(stats.num_shards),
+        "success_episodes": int(stats.success_episodes),
+        "failure_episodes": int(stats.failure_episodes),
+        "bad_shards": int(stats.bad_shards),
+        "replay_action_horizon": 0 if replay_shape is None else int(replay_shape.action_horizon),
+        "train_action_horizon": 0 if train_shape is None else int(train_shape.action_horizon),
+        "steps_per_sec": _json_float(reduced.get("steps_per_sec")),
+    }
+
+
+def _wandb_url() -> str | None:
+    run = getattr(wandb, "run", None)
+    if run is None:
+        return None
+    try:
+        return run.get_url()
+    except Exception:
+        return None
+
+
 def _save_actor_for_inference(
     state: rlt_training.RLTTrainState,
     output_dir: pathlib.Path,
     step: int,
     *,
     action_horizon: int,
+    replay_shape: rlt_replay_store.ReplayShape | None = None,
+    train_shape: rlt_replay_store.ReplayShape | None = None,
+    replay_stats: rlt_replay_store.ReplayStats | None = None,
 ) -> pathlib.Path:
     actor_dir = output_dir / "inference_actor" / f"{step:08d}"
     actor_dir.mkdir(parents=True, exist_ok=True)
     actor_params = rlt_training.actor_params_for_inference(state).to_pure_dict()
-    _atomic_write_bytes(actor_dir / "actor.msgpack", serialization.to_bytes(actor_params))
+    actor_bytes = serialization.to_bytes(actor_params)
+    _atomic_write_bytes(actor_dir / "actor.msgpack", actor_bytes)
+    model = nnx.merge(state.model_def, state.params)
     _atomic_write_text(
         actor_dir / "metadata.json",
         json.dumps(
             {
-                "step": step,
+                "format_version": 1,
+                "created_at_unix": time.time(),
+                "created_at_iso": datetime.datetime.now(datetime.UTC).isoformat(),
+                "source_script": "scripts/train_rlt_online.py",
+                "host": platform.node(),
+                "step": int(step),
                 "type": "rlt_inference_actor",
                 "note": "Stable actor export. Runtime should switch only at chunk/idle boundary.",
-                "action_horizon": action_horizon,
+                "actor_file": "actor.msgpack",
+                "actor_sha256": _sha256_bytes(actor_bytes),
+                "action_horizon": int(action_horizon),
+                "rlt_config": dataclasses.asdict(model.config),
+                "replay_shape": _shape_metadata(replay_shape),
+                "train_shape": _shape_metadata(train_shape),
+                "replay_stats": _stats_metadata(replay_stats),
             },
             indent=2,
+            sort_keys=True,
         ),
     )
     latest_path = output_dir / "inference_actor" / "LATEST"
@@ -263,9 +385,40 @@ def main(args: Args) -> None:
     state = rlt_training.init_train_state(config, jax.random.key(args.seed))
     replay_rng = np.random.default_rng(args.seed)
     _init_wandb(args, store)
+    metrics_publisher = RedisMetricsPublisher(
+        enabled=args.redis_enabled,
+        channel=args.redis_state_channel,
+        host=args.redis_host,
+        port=args.redis_port,
+        db=args.redis_db,
+    )
 
-    _save_actor_for_inference(state, args.output_dir, 0, action_horizon=shape.action_horizon)
+    initial_actor_dir = _save_actor_for_inference(
+        state,
+        args.output_dir,
+        0,
+        action_horizon=shape.action_horizon,
+        replay_shape=replay_shape,
+        train_shape=shape,
+        replay_stats=store.stats,
+    )
     _save_training_checkpoint(state, args.output_dir, 0, store)
+    metrics_publisher.publish(
+        _build_metrics_payload(
+            step=0,
+            reduced={},
+            stats=store.stats,
+            replay_shape=store.shape,
+            train_shape=store.sample_shape,
+            actor_enabled=False,
+            latest_actor_path=str(initial_actor_dir),
+            latest_actor_step=0,
+            wandb_url=_wandb_url(),
+        )
+    )
+
+    latest_actor_path = str(initial_actor_dir)
+    latest_actor_step = 0
 
     last_scan_time = 0.0
     log_start_time = time.perf_counter()
@@ -302,11 +455,42 @@ def main(args: Args) -> None:
 
             current_step = int(state.step)
             if bool(info["publish_actor"]):
-                actor_dir = _save_actor_for_inference(state, args.output_dir, current_step, action_horizon=shape.action_horizon)
+                actor_dir = _save_actor_for_inference(
+                    state,
+                    args.output_dir,
+                    current_step,
+                    action_horizon=shape.action_horizon,
+                    replay_shape=store.shape,
+                    train_shape=store.sample_shape,
+                    replay_stats=store.stats,
+                )
+                latest_actor_path = str(actor_dir)
+                latest_actor_step = current_step
+                metrics_publisher.publish(
+                    _build_metrics_payload(
+                        step=current_step,
+                        reduced={},
+                        stats=store.stats,
+                        replay_shape=store.shape,
+                        train_shape=store.sample_shape,
+                        actor_enabled=actor_enabled,
+                        latest_actor_path=latest_actor_path,
+                        latest_actor_step=latest_actor_step,
+                        wandb_url=_wandb_url(),
+                    )
+                )
                 logging.info("Published inference actor at step=%d path=%s", current_step, actor_dir)
             if current_step % args.save_interval == 0:
                 checkpoint_dir = _save_training_checkpoint(state, args.output_dir, current_step, store)
-                _save_actor_for_inference(state, args.output_dir / "snapshots", current_step, action_horizon=shape.action_horizon)
+                _save_actor_for_inference(
+                    state,
+                    args.output_dir / "snapshots",
+                    current_step,
+                    action_horizon=shape.action_horizon,
+                    replay_shape=store.shape,
+                    train_shape=store.sample_shape,
+                    replay_stats=store.stats,
+                )
                 logging.info("Saved RLT training checkpoint at step=%d path=%s", current_step, checkpoint_dir)
             if current_step % args.log_interval == 0 and infos:
                 reduced = {
@@ -326,6 +510,19 @@ def main(args: Args) -> None:
                         "failure_episodes": float(stats.failure_episodes),
                         "steps_per_sec": args.log_interval / max(time.perf_counter() - log_start_time, 1e-6),
                     }
+                )
+                metrics_publisher.publish(
+                    _build_metrics_payload(
+                        step=current_step,
+                        reduced=reduced,
+                        stats=stats,
+                        replay_shape=store.shape,
+                        train_shape=store.sample_shape,
+                        actor_enabled=actor_enabled,
+                        latest_actor_path=latest_actor_path,
+                        latest_actor_step=latest_actor_step,
+                        wandb_url=_wandb_url(),
+                    )
                 )
                 wandb.log({f"rlt/{key}": value for key, value in reduced.items()}, step=current_step)
                 logging.info("step=%d %s", current_step, " ".join(f"{k}={v:.4f}" for k, v in reduced.items()))

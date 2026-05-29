@@ -229,7 +229,27 @@ class Runtime:
         should_notify_key_region = event_type in {"key_region_start", "key_region_end", "score"}
         with self._task_lock:
             previous_active_key_region_id = self._rlt_state.get("active_key_region_id")
-            for key in ("warmup_target", "beta", "intervention_scale", "max_delta", "actor_enabled"):
+            for key in (
+                "warmup_target",
+                "warmup_count",
+                "warmup_success",
+                "warmup_failure",
+                "warmup_attempts",
+                "warmup_invalid",
+                "auto_rollout_count",
+                "auto_rollout_attempts",
+                "auto_rollout_invalid",
+                "training_phase",
+                "actor_enabled",
+                "actor_effective",
+                "actor_ready",
+                "actor_locked_reason",
+                "actor_checkpoint_path",
+                "actor_checkpoint_step",
+                "beta",
+                "intervention_scale",
+                "max_delta",
+            ):
                 if key in state:
                     self._rlt_state[key] = state[key]
                 elif key in data:
@@ -244,13 +264,15 @@ class Runtime:
                 self._rlt_state["phase"] = "idle"
                 self._rlt_state["active_key_region_id"] = None
                 self._rlt_state["last_reward"] = reward
-                if self._rlt_state["warmup_count"] < self._rlt_state["warmup_target"]:
-                    self._rlt_state["warmup_count"] += 1
-                else:
-                    self._rlt_state["auto_rollout_count"] += 1
+                if "warmup_attempts" in state:
+                    self._rlt_state["warmup_attempts"] = state["warmup_attempts"]
+                if "auto_rollout_attempts" in state:
+                    self._rlt_state["auto_rollout_attempts"] = state["auto_rollout_attempts"]
             in_warmup = self._rlt_state["warmup_count"] < self._rlt_state["warmup_target"]
-            self._rlt_state["training_phase"] = "warmup" if in_warmup else "rl"
-            self._rlt_state["actor_effective"] = bool(self._rlt_state["actor_enabled"] and not in_warmup)
+            if "training_phase" not in state:
+                self._rlt_state["training_phase"] = "warmup" if in_warmup else "rl"
+            if "actor_effective" not in state:
+                self._rlt_state["actor_effective"] = bool(self._rlt_state["actor_enabled"] and not in_warmup)
             rlt_state_snapshot = dict(self._rlt_state)
             current_task_snapshot = dict(self._current_task) if self._current_task is not None else None
         self._publish_rlt_state()
@@ -268,6 +290,30 @@ class Runtime:
             if current_task_snapshot is not None:
                 event_payload["current_task"] = current_task_snapshot
             self._notify_key_region_subscribers(event_type, event_payload)
+
+    def _build_rlt_context(self) -> dict:
+        with self._task_lock:
+            state = dict(self._rlt_state)
+            current_task = dict(self._current_task) if self._current_task is not None else None
+        in_warmup = int(state.get("warmup_count", 0)) < int(state.get("warmup_target", 0))
+        actor_requested = bool(state.get("actor_effective", bool(state.get("actor_enabled", False) and not in_warmup)))
+        return {
+            **state,
+            "actor_requested": actor_requested,
+            "actor_locked_reason": "warmup" if in_warmup else state.get("actor_locked_reason"),
+            "current_task": current_task,
+            "episode_step": self._episode_steps,
+        }
+
+    def _update_rlt_actor_status_from_action(self, action: dict) -> None:
+        if not isinstance(action, dict) or "rlt_actor_applied" not in action:
+            return
+        with self._task_lock:
+            self._rlt_state["actor_runtime_applied"] = bool(action.get("rlt_actor_applied"))
+            self._rlt_state["actor_runtime_reason"] = action.get("rlt_actor_reason")
+            self._rlt_state["actor_runtime_checkpoint_step"] = action.get("rlt_actor_step")
+            self._rlt_state["actor_runtime_checkpoint_path"] = action.get("rlt_actor_dir")
+            self._rlt_state["actor_last_delta_norm"] = action.get("rlt_actor_delta_norm")
 
     def _notify_key_region_subscribers(self, event_type: str, event: dict) -> None:
         hook_name_by_type = {
@@ -579,9 +625,11 @@ class Runtime:
             **observation,
             'prompt': self._current_task.get('task_name'),
             'subtask': {'good_bad_action': self._good_bad_action},
+            'rlt_context': self._build_rlt_context(),
         }
 
         action = self._agent.get_action(observation_with_task)
+        self._update_rlt_actor_status_from_action(action)
         self._environment.apply_action(action)
         # 存储最后的action（用于task_num==3时移动master）
         self._last_action = action.get("actions") if isinstance(action, dict) and "actions" in action else None

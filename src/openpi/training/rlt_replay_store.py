@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import dataclasses
+import json
 import logging
 import pathlib
 
@@ -198,9 +199,11 @@ class RLTReplayStore:
             if missing:
                 raise ReplayShardError(f"missing required arrays: {missing}")
             arrays = {key: np.asarray(data[key]) for key in REQUIRED_REPLAY_KEYS}
+            manifest = _load_manifest(data)
 
         _validate_arrays(path, arrays)
         shape = _shape_from_arrays(arrays)
+        _validate_manifest(manifest, shape)
         if self._sample_action_horizon is not None and self._sample_action_horizon > shape.action_horizon:
             raise ReplayShardError(
                 f"sample_action_horizon={self._sample_action_horizon} exceeds replay action_horizon={shape.action_horizon}"
@@ -294,3 +297,39 @@ def _validate_arrays(path: pathlib.Path, arrays: dict[str, np.ndarray]) -> None:
         raise ReplayShardError("done must have shape [N]")
     if not all(np.all(np.isfinite(arrays[key])) for key in REQUIRED_REPLAY_KEYS if key != "done"):
         raise ReplayShardError(f"{path} contains non-finite replay values")
+
+
+
+def _load_manifest(data) -> dict:
+    if "manifest" not in data:
+        return {}
+    raw = data["manifest"]
+    if isinstance(raw, np.ndarray):
+        raw = raw.item()
+    if isinstance(raw, bytes):
+        raw = raw.decode("utf-8")
+    if not raw:
+        return {}
+    return json.loads(str(raw))
+
+
+def _validate_manifest(manifest: dict, shape: ReplayShape) -> None:
+    if not manifest:
+        return
+    schema_version = manifest.get("schema_version", 1)
+    if schema_version != 1:
+        raise ReplayShardError(f"unsupported schema_version={schema_version}")
+    action_space = manifest.get("action_space", "aloha_exec")
+    if action_space != "aloha_exec":
+        raise ReplayShardError(f"action_space must be aloha_exec, got {action_space}")
+    reward_placement = manifest.get("reward_placement", "terminal_last_train_step")
+    if reward_placement != "terminal_last_train_step":
+        raise ReplayShardError(f"unsupported reward_placement={reward_placement}")
+    action_dim = manifest.get("action_dim")
+    if action_dim is not None and int(action_dim) != shape.action_dim:
+        raise ReplayShardError(f"manifest action_dim={action_dim} does not match replay action_dim={shape.action_dim}")
+    policy_horizon = manifest.get("policy_horizon")
+    if policy_horizon is not None and int(policy_horizon) != shape.action_horizon:
+        raise ReplayShardError(
+            f"manifest policy_horizon={policy_horizon} does not match replay action_horizon={shape.action_horizon}"
+        )
