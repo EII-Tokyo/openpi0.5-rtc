@@ -113,13 +113,13 @@ services:
         --recursive-scan
         --expected-replay-action-horizon ${RLT_EXPECTED_REPLAY_ACTION_HORIZON:-50}
         --train-action-horizon ${RLT_TRAIN_ACTION_HORIZON:-10}
-        --min-replay-samples ${RLT_MIN_REPLAY_SAMPLES:-512}
-        --min-success-episodes ${RLT_MIN_SUCCESS_EPISODES:-1}
-        --min-failure-episodes ${RLT_MIN_FAILURE_EPISODES:-1}
+        --min-replay-samples ${RLT_MIN_REPLAY_SAMPLES:-2048}
+        --min-success-episodes ${RLT_MIN_SUCCESS_EPISODES:-10}
+        --min-failure-episodes ${RLT_MIN_FAILURE_EPISODES:-10}
         --critic-burn-in-steps ${RLT_CRITIC_BURN_IN_STEPS:-0}
-        --actor-min-replay-samples ${RLT_ACTOR_MIN_REPLAY_SAMPLES:-1000}
-        --actor-min-success-episodes ${RLT_ACTOR_MIN_SUCCESS_EPISODES:-5}
-        --actor-min-failure-episodes ${RLT_ACTOR_MIN_FAILURE_EPISODES:-5}
+        --actor-min-replay-samples ${RLT_ACTOR_MIN_REPLAY_SAMPLES:-4096}
+        --actor-min-success-episodes ${RLT_ACTOR_MIN_SUCCESS_EPISODES:-20}
+        --actor-min-failure-episodes ${RLT_ACTOR_MIN_FAILURE_EPISODES:-20}
         --batch-size ${RLT_BATCH_SIZE:-64}
         --policy-delay ${RLT_POLICY_DELAY:-2}
         --log-interval ${RLT_LOG_INTERVAL:-50}
