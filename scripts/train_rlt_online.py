@@ -24,6 +24,7 @@ from openpi.training import rlt_training
 @dataclasses.dataclass
 class Args:
     replay_dir: pathlib.Path
+    segment_db_path: pathlib.Path | None = None
     output_dir: pathlib.Path = pathlib.Path("./checkpoints/rlt_actor_critic/online")
     num_train_steps: int = 0
     batch_size: int = 64
@@ -352,6 +353,7 @@ def main(args: Args) -> None:
         max_replay_samples=args.max_replay_samples,
         recursive=args.recursive_scan,
         sample_action_horizon=args.train_action_horizon,
+        segment_db_path=args.segment_db_path,
     )
     store.scan()
     _wait_for_replay(args, store)

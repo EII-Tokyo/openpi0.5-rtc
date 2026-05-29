@@ -306,6 +306,25 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
         logging.info("RLT key region ended: %s (%d buffered frames)", event.get("key_region_id"), len(records))
 
     @override
+    def on_key_region_discard(self, event: dict) -> None:
+        key_region_id = event.get("key_region_id")
+        with self._lock:
+            active_id = None if self._active_start_event is None else self._active_start_event.get("key_region_id")
+            pending_id = None if self._pending_end_event is None else self._pending_end_event.get("key_region_id")
+            if key_region_id and active_id and str(key_region_id) != str(active_id):
+                logging.warning("Ignoring discard for key region %s while active region is %s", key_region_id, active_id)
+                return
+            if key_region_id and pending_id and str(key_region_id) != str(pending_id):
+                logging.warning("Ignoring discard for key region %s while pending region is %s", key_region_id, pending_id)
+                return
+            self._active_start_event = None
+            self._active_start_step = None
+            self._pending_end_event = None
+            self._pending_records = None
+            self._pending_post_roll_remaining = 0
+        logging.info("RLT key region discarded: %s", key_region_id)
+
+    @override
     def on_key_region_score(self, event: dict) -> None:
         with self._lock:
             if self._active_start_event is None or self._pending_end_event is None:
@@ -453,6 +472,9 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
             "missing_rlt_metadata": missing_metadata,
             "replay_status": _replay_status(missing_metadata, replay_arrays),
             "replay_ready": replay_arrays is not None,
+            "segment_status": "committed" if replay_arrays is not None else "rejected",
+            "train_eligible": replay_arrays is not None,
+            "voided": False,
             "schema_version": 1,
             "train_chunk_horizon": self._train_horizon,
             "policy_horizon": self._full_horizon,
@@ -476,7 +498,9 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
 
     def _publish_replay_ack(self, manifest: dict[str, Any], *, shard_path: pathlib.Path | None) -> None:
         payload = {
-            "type": "rlt_replay_segment_written",
+            "type": "rlt_replay_segment_committed"
+            if bool(manifest.get("train_eligible", manifest.get("replay_ready", False)))
+            else "rlt_replay_segment_rejected",
             "timestamp": time.time(),
             "key_region_id": manifest.get("key_region_id"),
             "task": manifest.get("task"),
@@ -484,6 +508,9 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
             "reward": manifest.get("reward"),
             "score_timeout": bool(manifest.get("score_timeout", False)),
             "replay_ready": bool(manifest.get("replay_ready", False)),
+            "train_eligible": bool(manifest.get("train_eligible", manifest.get("replay_ready", False))),
+            "segment_status": manifest.get("segment_status")
+            or ("committed" if bool(manifest.get("replay_ready", False)) else "rejected"),
             "replay_status": manifest.get("replay_status"),
             "num_replay_transitions": int(manifest.get("num_replay_transitions") or 0),
             "missing_rlt_metadata": list(manifest.get("missing_rlt_metadata") or []),

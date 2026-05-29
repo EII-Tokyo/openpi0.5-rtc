@@ -27,3 +27,6 @@ class Subscriber(abc.ABC):
 
     def on_key_region_score(self, event: dict) -> None:
         """Called when an RLT key region receives a terminal score."""
+
+    def on_key_region_discard(self, event: dict) -> None:
+        """Called when an RLT key region is discarded before replay training."""

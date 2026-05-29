@@ -114,16 +114,21 @@ def test_key_region_replay_publishes_valid_and_invalid_ack(tmp_path):
     finally:
         store.close()
 
-    assert messages[0]["type"] == "rlt_replay_segment_written"
+    assert messages[0]["type"] == "rlt_replay_segment_committed"
     assert messages[0]["key_region_id"] == "valid"
     assert messages[0]["phase"] == "warmup"
     assert messages[0]["reward"] == 1
     assert messages[0]["replay_ready"] is True
+    assert messages[0]["train_eligible"] is True
+    assert messages[0]["segment_status"] == "committed"
     assert messages[0]["replay_status"] == "written"
     assert messages[0]["num_replay_transitions"] == 1
     assert messages[0]["shard_path"] == str(tmp_path / "valid.npz")
+    assert messages[1]["type"] == "rlt_replay_segment_rejected"
     assert messages[1]["key_region_id"] == "invalid"
     assert messages[1]["replay_ready"] is False
+    assert messages[1]["train_eligible"] is False
+    assert messages[1]["segment_status"] == "rejected"
     assert messages[1]["replay_status"] == "too_short"
     assert messages[1]["shard_path"] is None
 
@@ -151,3 +156,47 @@ def test_key_region_manifest_includes_replay_schema_metadata(tmp_path):
     assert manifest["action_space"] == "aloha_exec"
     assert manifest["action_dim"] == 14
     assert manifest["reward_placement"] == "terminal_last_train_step"
+
+
+def test_key_region_discard_clears_pending_region(tmp_path):
+    messages = []
+    store = recorder.KeyRegionReplayRecorder(
+        replay_root=str(tmp_path / "replay"),
+        rollouts_root=str(tmp_path / "rollouts"),
+        ack_publisher=messages.append,
+    )
+    try:
+        start = {"type": "key_region_start", "key_region_id": "discard-me", "timestamp": 1.0}
+        end = {"type": "key_region_end", "key_region_id": "discard-me", "timestamp": 2.0}
+        score = {"type": "score", "key_region_id": "discard-me", "timestamp": 3.0, "reward": 1}
+        store.on_key_region_start(start)
+        store.on_key_region_end(end)
+        store.on_key_region_discard({"type": "key_region_discard", "key_region_id": "discard-me", "timestamp": 2.5})
+        store.on_key_region_score(score)
+    finally:
+        store.close()
+
+    assert messages == []
+    assert store._active_start_event is None
+    assert store._pending_end_event is None
+
+
+def test_key_region_manifest_marks_train_eligibility(tmp_path):
+    store = recorder.KeyRegionReplayRecorder(
+        replay_root=str(tmp_path / "replay"),
+        rollouts_root=str(tmp_path / "rollouts"),
+        train_horizon=10,
+        full_horizon=50,
+        chunk_stride=10,
+        ack_publisher=lambda payload: None,
+    )
+    try:
+        arrays, missing = store._build_replay_arrays([_record(step) for step in range(25)], {"reward": 1})
+        segment = recorder.KeyRegionSegment("kid", "task", "warmup", {"timestamp": 1.0}, {"timestamp": 2.0}, {"timestamp": 3.0, "reward": 1}, [])
+        manifest = store._write_manifest(tmp_path / "manifest.json", segment, missing, arrays)
+    finally:
+        store.close()
+
+    assert manifest["train_eligible"] is True
+    assert manifest["segment_status"] == "committed"
+    assert manifest["voided"] is False

@@ -226,7 +226,7 @@ class Runtime:
                 self._latest_task = task_data
             logging.info("收到前端机器人任务: %s - %s", task_data["task_num"], task_data["task_name"])
             return
-        should_notify_key_region = event_type in {"key_region_start", "key_region_end", "score"}
+        should_notify_key_region = event_type in {"key_region_start", "key_region_end", "score", "key_region_discard"}
         with self._task_lock:
             previous_active_key_region_id = self._rlt_state.get("active_key_region_id")
             for key in (
@@ -268,6 +268,9 @@ class Runtime:
                     self._rlt_state["warmup_attempts"] = state["warmup_attempts"]
                 if "auto_rollout_attempts" in state:
                     self._rlt_state["auto_rollout_attempts"] = state["auto_rollout_attempts"]
+            elif event_type == "key_region_discard":
+                self._rlt_state["phase"] = "idle"
+                self._rlt_state["active_key_region_id"] = None
             in_warmup = self._rlt_state["warmup_count"] < self._rlt_state["warmup_target"]
             if "training_phase" not in state:
                 self._rlt_state["training_phase"] = "warmup" if in_warmup else "rl"
@@ -320,6 +323,7 @@ class Runtime:
             "key_region_start": "on_key_region_start",
             "key_region_end": "on_key_region_end",
             "score": "on_key_region_score",
+            "key_region_discard": "on_key_region_discard",
         }
         hook_name = hook_name_by_type.get(event_type)
         if hook_name is None:

@@ -1,3 +1,4 @@
+
 from __future__ import annotations
 
 import contextlib
@@ -12,6 +13,7 @@ import uuid
 import redis
 
 from .config import settings
+from .rlt_segment_ledger import RLTSegmentLedger
 from .schemas import RLTConfigRequest
 from .schemas import RLTControlRequest
 from .schemas import RLTControlState
@@ -19,10 +21,11 @@ from .schemas import RLTEvent
 
 
 class RLTControlStore:
-    def __init__(self, redis_client: redis.Redis) -> None:
+    def __init__(self, redis_client: redis.Redis, segment_ledger: RLTSegmentLedger | None = None) -> None:
         self._redis = redis_client
         self._lock = threading.Lock()
         self._state_path = Path(settings.rlt_state_path)
+        self._segment_ledger = segment_ledger or RLTSegmentLedger(settings.rlt_segment_db_path)
         self._running = False
         self._redis_thread: threading.Thread | None = None
         self._state = RLTControlState(
@@ -35,6 +38,9 @@ class RLTControlStore:
         self._load()
         if self._state.rl_token_checkpoint_path is None:
             self._state.rl_token_checkpoint_path = settings.rlt_rl_token_checkpoint_path
+        with self._lock:
+            self._apply_ledger_stats_locked()
+            self._refresh_derived_locked()
 
     def start(self) -> None:
         if self._running:
@@ -51,6 +57,7 @@ class RLTControlStore:
     def snapshot(self) -> RLTControlState:
         with self._lock:
             self._apply_score_timeout_locked()
+            self._apply_ledger_stats_locked()
             self._refresh_derived_locked()
             return self._state.model_copy(deep=True)
 
@@ -63,10 +70,11 @@ class RLTControlStore:
             self._state.active_key_region_id = uuid.uuid4().hex
             self._state.score_deadline = None
             self._state.last_reward = None
+            self._segment_ledger.record_started(self._state.active_key_region_id, phase=self._state.training_phase)
             self._add_event_locked("key_region_start", request.note or request.source)
             self._refresh_derived_locked()
             self._persist_locked()
-            self._publish_locked("key_region_start", {"source": request.source})
+            self._publish_locked("key_region_start", {"source": request.source, "key_region_id": self._state.active_key_region_id})
             return self._state.model_copy(deep=True)
 
     def end_key_region(self, request: RLTControlRequest) -> RLTControlState:
@@ -76,10 +84,12 @@ class RLTControlStore:
                 raise ValueError(f"Cannot end key region while phase={self._state.phase}")
             self._state.phase = "await_score"
             self._state.score_deadline = time.time() + 10.0
+            if self._state.active_key_region_id:
+                self._segment_ledger.record_ended(self._state.active_key_region_id, phase=self._state.training_phase)
             self._add_event_locked("key_region_end", request.note or request.source)
             self._refresh_derived_locked()
             self._persist_locked()
-            self._publish_locked("key_region_end", {"source": request.source})
+            self._publish_locked("key_region_end", {"source": request.source, "key_region_id": self._state.active_key_region_id})
             return self._state.model_copy(deep=True)
 
     def score_key_region(self, reward: int, *, source: str = "ui", timeout: bool = False) -> RLTControlState:
@@ -94,23 +104,62 @@ class RLTControlStore:
                 self._state.warmup_attempts += 1
             else:
                 self._state.auto_rollout_attempts += 1
-            self._state.phase = "idle"
-            self._state.active_key_region_id = None
+            self._state.phase = "pending_replay"
             self._state.score_deadline = None
             self._state.last_reward = reward
             event_name = "score_timeout_default_failure" if timeout else "score"
             self._add_event_locked(event_name, f"reward={reward}")
+            if key_region_id:
+                self._segment_ledger.record_accepted(key_region_id, reward=reward, phase=self._state.training_phase)
+            self._refresh_derived_locked()
+            self._persist_locked()
+            return self._state.model_copy(deep=True)
+
+    def confirm_key_region(self, *, source: str = "ui") -> RLTControlState:
+        with self._lock:
+            if self._state.phase != "pending_replay":
+                raise ValueError(f"Cannot confirm key region while phase={self._state.phase}")
+            key_region_id = self._state.active_key_region_id
+            reward = self._state.last_reward
+            if key_region_id is None or reward is None:
+                raise ValueError("No scored key region is pending confirmation")
+            self._state.phase = "idle"
+            self._state.active_key_region_id = None
+            self._add_event_locked("confirm", f"reward={reward}")
             self._refresh_derived_locked()
             self._persist_locked()
             self._publish_locked(
                 "score",
-                {
-                    "source": source,
-                    "reward": reward,
-                    "score_timeout": timeout,
-                    "key_region_id": key_region_id,
-                },
+                {"source": source, "reward": reward, "score_timeout": False, "key_region_id": key_region_id},
             )
+            return self._state.model_copy(deep=True)
+
+    def discard_key_region(self, *, source: str = "ui", reason: str = "operator_discard") -> RLTControlState:
+        with self._lock:
+            if self._state.phase not in {"key_region", "await_score", "pending_replay"}:
+                raise ValueError(f"Cannot discard key region while phase={self._state.phase}")
+            key_region_id = self._state.active_key_region_id
+            if key_region_id:
+                self._segment_ledger.record_discarded(key_region_id, phase=self._state.training_phase, reason=reason)
+            self._state.phase = "idle"
+            self._state.active_key_region_id = None
+            self._state.score_deadline = None
+            self._state.last_reward = None
+            self._add_event_locked("discard", reason)
+            self._apply_ledger_stats_locked()
+            self._refresh_derived_locked()
+            self._persist_locked()
+            self._publish_locked("key_region_discard", {"source": source, "reason": reason, "key_region_id": key_region_id})
+            return self._state.model_copy(deep=True)
+
+    def void_segment(self, key_region_id: str, *, source: str = "ui", reason: str = "operator_void") -> RLTControlState:
+        with self._lock:
+            self._segment_ledger.void_segment(key_region_id, reason=reason)
+            self._apply_ledger_stats_locked()
+            self._add_event_locked("void", f"{key_region_id}:{reason}")
+            self._refresh_derived_locked()
+            self._persist_locked()
+            self._publish_locked("key_region_void", {"source": source, "reason": reason, "key_region_id": key_region_id})
             return self._state.model_copy(deep=True)
 
     def update_config(self, request: RLTConfigRequest) -> RLTControlState:
@@ -127,6 +176,7 @@ class RLTControlStore:
                 updates["actor_enabled"] = request.actor_enabled
             if updates:
                 self._add_event_locked("config_update", json.dumps(updates, sort_keys=True))
+                self._apply_ledger_stats_locked()
                 self._refresh_derived_locked()
                 self._persist_locked()
                 self._publish_locked("config_update", updates)
@@ -134,7 +184,7 @@ class RLTControlStore:
 
     def update_runtime_metrics(self, payload: dict[str, Any]) -> None:
         with self._lock:
-            if payload.get("type") == "rlt_replay_segment_written":
+            if payload.get("type") in {"rlt_replay_segment_written", "rlt_replay_segment_committed", "rlt_replay_segment_rejected"}:
                 self._record_replay_ack_locked(payload)
             else:
                 for key in ("critic_loss", "actor_loss", "replay_size", "replay_shards", "bad_shards", "wandb_url"):
@@ -148,6 +198,7 @@ class RLTControlStore:
                     self._state.actor_checkpoint_step = int(latest_actor_step)
                 if latest_actor_path and latest_actor_step is not None and int(latest_actor_step) > 0:
                     self._state.actor_ready = True
+            self._apply_ledger_stats_locked()
             self._refresh_derived_locked()
             self._persist_locked()
 
@@ -155,27 +206,23 @@ class RLTControlStore:
         phase = str(payload.get("phase") or self._state.training_phase or "warmup")
         reward = int(payload.get("reward") or 0)
         replay_ready = bool(payload.get("replay_ready")) and int(payload.get("num_replay_transitions") or 0) > 0
-        is_warmup_ack = phase == "warmup"
-        if replay_ready:
-            if is_warmup_ack:
-                self._state.warmup_count += 1
-                if reward == 1:
-                    self._state.warmup_success += 1
-                else:
-                    self._state.warmup_failure += 1
-            else:
-                self._state.auto_rollout_count += 1
-                if reward == 1:
-                    self._state.auto_rollout_success += 1
-                else:
-                    self._state.auto_rollout_failure += 1
-            self._add_event_locked("rlt_replay_segment_written", f"reward={reward} transitions={payload.get('num_replay_transitions')}")
+        key_region_id = str(payload.get("key_region_id") or f"legacy-{time.time_ns()}")
+        if replay_ready and payload.get("type") != "rlt_replay_segment_rejected":
+            self._segment_ledger.record_committed(
+                key_region_id,
+                reward=reward,
+                phase=phase,
+                shard_path=payload.get("shard_path"),
+                num_replay_transitions=int(payload.get("num_replay_transitions") or 0),
+            )
+            self._add_event_locked("rlt_replay_segment_committed", f"reward={reward} transitions={payload.get('num_replay_transitions')}")
         else:
-            if is_warmup_ack:
-                self._state.warmup_invalid += 1
-            else:
-                self._state.auto_rollout_invalid += 1
-            self._add_event_locked("rlt_replay_segment_invalid", str(payload.get("replay_status") or "invalid"))
+            self._segment_ledger.record_rejected(
+                key_region_id,
+                phase=phase,
+                reason=str(payload.get("replay_status") or "invalid"),
+            )
+            self._add_event_locked("rlt_replay_segment_rejected", str(payload.get("replay_status") or "invalid"))
 
     def _listen_runtime_state(self) -> None:
         pubsub = None
@@ -194,6 +241,10 @@ class RLTControlStore:
             if pubsub is not None:
                 with contextlib.suppress(Exception):
                     pubsub.close()
+
+    def _apply_ledger_stats_locked(self) -> None:
+        for key, value in self._segment_ledger.stats().items():
+            setattr(self._state, key, value)
 
     def _refresh_derived_locked(self) -> None:
         in_warmup = self._state.warmup_count < self._state.warmup_target
@@ -219,26 +270,23 @@ class RLTControlStore:
             and self._state.score_deadline is not None
             and time.time() >= self._state.score_deadline
         ):
-            # Re-enter through a helper that assumes the lock is held.
             self._score_timeout_locked()
 
     def _score_timeout_locked(self) -> None:
         key_region_id = self._state.active_key_region_id
-        is_warmup = self._state.warmup_count < self._state.warmup_target
-        if is_warmup:
-            self._state.warmup_attempts += 1
-        else:
-            self._state.auto_rollout_attempts += 1
+        if key_region_id:
+            self._segment_ledger.record_discarded(key_region_id, phase=self._state.training_phase, reason="score_timeout")
         self._state.phase = "idle"
         self._state.active_key_region_id = None
         self._state.score_deadline = None
-        self._state.last_reward = 0
-        self._add_event_locked("score_timeout_default_failure", "reward=0")
+        self._state.last_reward = None
+        self._add_event_locked("score_timeout_discard", "score_timeout")
+        self._apply_ledger_stats_locked()
         self._refresh_derived_locked()
         self._persist_locked()
         self._publish_locked(
-            "score",
-            {"source": "timeout", "reward": 0, "score_timeout": True, "key_region_id": key_region_id},
+            "key_region_discard",
+            {"source": "timeout", "reason": "score_timeout", "key_region_id": key_region_id},
         )
 
     def _add_event_locked(self, event: str, detail: str = "") -> None:

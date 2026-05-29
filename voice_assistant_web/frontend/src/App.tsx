@@ -27,11 +27,16 @@ const initialRLT: RLTControlState = {
   warmup_count: 0,
   warmup_success: 0,
   warmup_failure: 0,
+  warmup_attempts: 0,
+  warmup_invalid: 0,
   auto_rollout_count: 0,
   auto_rollout_success: 0,
   auto_rollout_failure: 0,
+  auto_rollout_attempts: 0,
+  auto_rollout_invalid: 0,
   actor_enabled: false,
   actor_effective: false,
+  actor_ready: false,
   actor_locked_reason: 'warmup',
   beta: 10,
   intervention_scale: 0.25,
@@ -44,6 +49,10 @@ const initialRLT: RLTControlState = {
   critic_loss: null,
   actor_loss: null,
   replay_size: null,
+  replay_shards: null,
+  bad_shards: null,
+  actor_checkpoint_path: null,
+  actor_checkpoint_step: null,
   rl_token_checkpoint_path: null,
   events: [],
 }
@@ -171,6 +180,7 @@ export default function App() {
       {page === 'live' ? (
         <>
           <section className="rlt-status-strip">
+            <StatusItem label="Control" value={state.rlt.phase} />
             <StatusItem label="Phase" value={state.rlt.training_phase} />
             <StatusItem label="Warmup" value={`${state.rlt.warmup_count} / ${state.rlt.warmup_target}`} />
             <StatusItem label="Replay" value={state.rlt.replay_size ?? '-'} />

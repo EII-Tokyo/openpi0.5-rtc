@@ -86,6 +86,16 @@ class RLTControlRequest(BaseModel):
     note: str | None = None
 
 
+class RLTDiscardRequest(BaseModel):
+    source: str = "ui"
+    reason: str = "operator_discard"
+
+
+class RLTVoidRequest(BaseModel):
+    source: str = "ui"
+    reason: str = "operator_void"
+
+
 class RobotTaskRequest(BaseModel):
     task_num: str = Field(pattern="^[145]$")
     source: str = "ui"

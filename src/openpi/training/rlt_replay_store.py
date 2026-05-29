@@ -4,6 +4,7 @@ import dataclasses
 import json
 import logging
 import pathlib
+import sqlite3
 
 import jax.numpy as jnp
 import numpy as np
@@ -69,6 +70,7 @@ class RLTReplayStore:
         max_replay_samples: int | None = None,
         recursive: bool = False,
         sample_action_horizon: int | None = None,
+        segment_db_path: pathlib.Path | str | None = None,
     ):
         if sample_action_horizon is not None and sample_action_horizon <= 0:
             raise ValueError("sample_action_horizon must be positive when provided")
@@ -76,6 +78,7 @@ class RLTReplayStore:
         self._max_replay_samples = max_replay_samples
         self._recursive = recursive
         self._sample_action_horizon = sample_action_horizon
+        self._segment_db_path = None if segment_db_path is None else pathlib.Path(segment_db_path)
         self._shards: list[_LoadedShard] = []
         self._loaded_paths: set[pathlib.Path] = set()
         self._bad_paths: dict[pathlib.Path, str] = {}
@@ -116,6 +119,7 @@ class RLTReplayStore:
         `.npz.tmp` are intentionally ignored by the glob.
         """
 
+        self._reconcile_loaded_paths()
         added: list[ReplayShardInfo] = []
         for path in self._iter_candidate_paths():
             resolved = path.resolve()
@@ -184,6 +188,8 @@ class RLTReplayStore:
         return dict(self._bad_paths)
 
     def _iter_candidate_paths(self) -> list[pathlib.Path]:
+        if self._segment_db_path is not None:
+            return self._accepted_shard_paths()
         if not self._replay_dir.exists():
             return []
         if self._recursive:
@@ -192,6 +198,34 @@ class RLTReplayStore:
             shards_dir = self._replay_dir / "shards"
             paths = shards_dir.glob("*.npz") if shards_dir.exists() else self._replay_dir.glob("*.npz")
         return sorted(path for path in paths if path.is_file() and path.suffix == ".npz")
+
+    def _accepted_shard_paths(self) -> list[pathlib.Path]:
+        if self._segment_db_path is None or not self._segment_db_path.exists():
+            return []
+        with sqlite3.connect(self._segment_db_path) as conn:
+            rows = conn.execute(
+                "SELECT shard_path FROM segments WHERE status = 'committed' AND shard_path IS NOT NULL"
+            ).fetchall()
+        paths = [pathlib.Path(row[0]) for row in rows if row[0]]
+        return sorted(path.resolve() for path in paths if path.exists() and path.suffix == ".npz")
+
+    def _reconcile_loaded_paths(self) -> None:
+        if self._segment_db_path is None:
+            return
+        accepted = set(self._accepted_shard_paths())
+        if not accepted:
+            if self._shards:
+                self._shards = []
+                self._loaded_paths = set()
+                self._replay_size = 0
+                self._shape = None
+            return
+        if self._loaded_paths.issubset(accepted):
+            return
+        self._shards = [shard for shard in self._shards if shard.info.path in accepted]
+        self._loaded_paths = {shard.info.path for shard in self._shards}
+        self._replay_size = sum(shard.info.num_transitions for shard in self._shards)
+        self._shape = self._shards[0].arrays and _shape_from_arrays(self._shards[0].arrays) if self._shards else None
 
     def _load_shard(self, path: pathlib.Path) -> _LoadedShard:
         with np.load(path) as data:
@@ -316,6 +350,10 @@ def _load_manifest(data) -> dict:
 def _validate_manifest(manifest: dict, shape: ReplayShape) -> None:
     if not manifest:
         return
+    if manifest.get("voided") is True:
+        raise ReplayShardError("manifest marks shard as voided")
+    if manifest.get("train_eligible") is False:
+        raise ReplayShardError("manifest train_eligible is false")
     schema_version = manifest.get("schema_version", 1)
     if schema_version != 1:
         raise ReplayShardError(f"unsupported schema_version={schema_version}")

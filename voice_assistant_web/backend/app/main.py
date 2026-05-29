@@ -31,7 +31,9 @@ from .schemas import RealtimePayload
 from .schemas import RLTConfigRequest
 from .schemas import RLTControlRequest
 from .schemas import RLTControlState
+from .schemas import RLTDiscardRequest
 from .schemas import RLTScoreRequest
+from .schemas import RLTVoidRequest
 from .schemas import RobotTaskRequest
 from .schemas import RuntimeStatePayload
 
@@ -454,6 +456,30 @@ def rlt_key_region_score(request: RLTScoreRequest) -> RLTControlState:
         return rlt_control.score_key_region(request.reward, source=request.source)
     except ValueError as exc:
         raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+
+@app.post("/api/rlt/key-region/confirm", response_model=RLTControlState)
+def rlt_key_region_confirm(request: RLTControlRequest | None = None) -> RLTControlState:
+    request = request or RLTControlRequest()
+    try:
+        return rlt_control.confirm_key_region(source=request.source)
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+
+@app.post("/api/rlt/key-region/discard", response_model=RLTControlState)
+def rlt_key_region_discard(request: RLTDiscardRequest | None = None) -> RLTControlState:
+    request = request or RLTDiscardRequest()
+    try:
+        return rlt_control.discard_key_region(source=request.source, reason=request.reason)
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+
+@app.post("/api/rlt/key-region/{key_region_id}/void", response_model=RLTControlState)
+def rlt_key_region_void(key_region_id: str, request: RLTVoidRequest | None = None) -> RLTControlState:
+    request = request or RLTVoidRequest()
+    return rlt_control.void_segment(key_region_id, source=request.source, reason=request.reason)
 
 
 @app.post("/api/rlt/config", response_model=RLTControlState)

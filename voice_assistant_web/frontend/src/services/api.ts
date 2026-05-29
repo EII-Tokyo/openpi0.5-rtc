@@ -55,17 +55,22 @@ export type RLTEvent = {
 }
 
 export type RLTControlState = {
-  phase: 'idle' | 'key_region' | 'await_score' | string
+  phase: 'idle' | 'key_region' | 'await_score' | 'pending_replay' | string
   training_phase: 'warmup' | 'rl' | string
   warmup_target: number
   warmup_count: number
   warmup_success: number
   warmup_failure: number
+  warmup_attempts: number
+  warmup_invalid: number
   auto_rollout_count: number
   auto_rollout_success: number
   auto_rollout_failure: number
+  auto_rollout_attempts: number
+  auto_rollout_invalid: number
   actor_enabled: boolean
   actor_effective: boolean
+  actor_ready: boolean
   actor_locked_reason: string | null
   beta: number
   intervention_scale: number
@@ -78,6 +83,10 @@ export type RLTControlState = {
   critic_loss: number | null
   actor_loss: number | null
   replay_size: number | null
+  replay_shards: number | null
+  bad_shards: number | null
+  actor_checkpoint_path: string | null
+  actor_checkpoint_step: number | null
   rl_token_checkpoint_path: string | null
   events: RLTEvent[]
 }
@@ -99,6 +108,12 @@ export const startKeyRegion = () => postJson<RLTControlState>('/api/rlt/key-regi
 export const endKeyRegion = () => postJson<RLTControlState>('/api/rlt/key-region/end', { source: 'ui' })
 export const scoreKeyRegion = (reward: 0 | 1) =>
   postJson<RLTControlState>('/api/rlt/key-region/score', { reward, source: 'ui' })
+export const confirmKeyRegion = () =>
+  postJson<RLTControlState>('/api/rlt/key-region/confirm', { source: 'ui' })
+export const discardKeyRegion = (reason = 'operator_discard') =>
+  postJson<RLTControlState>('/api/rlt/key-region/discard', { source: 'ui', reason })
+export const voidKeyRegion = (keyRegionId: string, reason = 'operator_void') =>
+  postJson<RLTControlState>(`/api/rlt/key-region/${encodeURIComponent(keyRegionId)}/void`, { source: 'ui', reason })
 export const updateRLTConfig = (config: Partial<RLTControlState>) =>
   postJson<RLTControlState>('/api/rlt/config', config)
 

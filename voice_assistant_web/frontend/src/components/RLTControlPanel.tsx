@@ -1,10 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
+  confirmKeyRegion,
+  discardKeyRegion,
   endKeyRegion,
   RLTControlState,
   scoreKeyRegion,
   startKeyRegion,
   updateRLTConfig,
+  voidKeyRegion,
 } from '../services/api'
 
 type Props = {
@@ -51,6 +54,8 @@ export function RLTControlPanel({ rlt, onState }: Props) {
     if (event.key === 'ArrowRight' || event.code === 'ArrowRight' || event.keyCode === 39) return 'end'
     if (event.key === 'ArrowUp' || event.code === 'ArrowUp' || event.keyCode === 38) return 'score1'
     if (event.key === 'ArrowDown' || event.code === 'ArrowDown' || event.keyCode === 40) return 'score0'
+    if (event.key.toLowerCase() === 'c') return 'confirm'
+    if (event.key.toLowerCase() === 'd') return 'discard'
     return ''
   }
 
@@ -81,6 +86,12 @@ export function RLTControlPanel({ rlt, onState }: Props) {
         if (rlt.phase === 'await_score') void run('score1', () => scoreKeyRegion(1))
       } else if (hotkey === 'score0') {
         if (rlt.phase === 'await_score') void run('score0', () => scoreKeyRegion(0))
+      } else if (hotkey === 'confirm') {
+        if (rlt.phase === 'pending_replay') void run('confirm', confirmKeyRegion)
+      } else if (hotkey === 'discard') {
+        if (['key_region', 'await_score', 'pending_replay'].includes(rlt.phase)) {
+          void run('discard', () => discardKeyRegion('operator_discard'))
+        }
       }
     }
     window.addEventListener('keydown', onKeyDown, true)
@@ -90,6 +101,7 @@ export function RLTControlPanel({ rlt, onState }: Props) {
   const phaseLabel = useMemo(() => {
     if (rlt.phase === 'key_region') return 'Recording key region'
     if (rlt.phase === 'await_score') return `Awaiting score ${countdown}`
+    if (rlt.phase === 'pending_replay') return 'Review scored replay'
     return 'Idle'
   }, [rlt.phase, countdown])
 
@@ -154,8 +166,63 @@ export function RLTControlPanel({ rlt, onState }: Props) {
         </button>
       </div>
 
+      {rlt.phase === 'pending_replay' ? (
+        <div className="rlt-review-actions">
+          <button
+            className={`apply-button ${flashKey === 'confirm' ? 'key-flash' : ''}`}
+            type="button"
+            disabled={!!pending}
+            onClick={() => {
+              flash('confirm')
+              void run('confirm', confirmKeyRegion)
+            }}
+          >
+            Confirm
+          </button>
+          <button
+            className={`apply-button danger ${flashKey === 'discard' ? 'key-flash' : ''}`}
+            type="button"
+            disabled={!!pending}
+            onClick={() => {
+              flash('discard')
+              void run('discard', () => discardKeyRegion('operator_discard'))
+            }}
+          >
+            Discard
+          </button>
+        </div>
+      ) : null}
+      {['key_region', 'await_score'].includes(rlt.phase) ? (
+        <div className="rlt-review-actions">
+          <button
+            className={`apply-button danger ${flashKey === 'discard' ? 'key-flash' : ''}`}
+            type="button"
+            disabled={!!pending}
+            onClick={() => {
+              flash('discard')
+              void run('discard', () => discardKeyRegion('operator_discard'))
+            }}
+          >
+            Discard
+          </button>
+          <button
+            className="apply-button danger"
+            type="button"
+            disabled={!!pending || !rlt.active_key_region_id}
+            onClick={() => {
+              if (!rlt.active_key_region_id) return
+              void run('void', () => voidKeyRegion(rlt.active_key_region_id as string, 'operator_void'))
+            }}
+          >
+            Void
+          </button>
+        </div>
+      ) : null}
       {rlt.phase === 'await_score' ? (
-        <p className="rlt-warning">Score within 10 seconds. No score defaults to failure.</p>
+        <p className="rlt-warning">Choose the reward, then confirm or discard before replay is committed.</p>
+      ) : null}
+      {rlt.phase === 'pending_replay' ? (
+        <p className="rlt-warning">Confirm only if the start/end marks and reward are correct.</p>
       ) : null}
       {error ? <p className="rlt-error">{error}</p> : null}
     </section>
@@ -181,7 +248,11 @@ export function RLTStatsPanel({ rlt }: { rlt: RLTControlState }) {
       <div className="metric-grid">
         <Metric label="Warmup Success" value={rlt.warmup_success} />
         <Metric label="Warmup Failure" value={rlt.warmup_failure} />
+        <Metric label="Warmup Invalid" value={rlt.warmup_invalid ?? 0} />
+        <Metric label="Warmup Attempts" value={rlt.warmup_attempts ?? 0} />
         <Metric label="Auto Rollouts" value={rlt.auto_rollout_count} />
+        <Metric label="Auto Invalid" value={rlt.auto_rollout_invalid ?? 0} />
+        <Metric label="Replay Shards" value={rlt.replay_shards ?? '-'} />
         <Metric label="Last Reward" value={rlt.last_reward ?? '-'} />
       </div>
       <div className="event-log">

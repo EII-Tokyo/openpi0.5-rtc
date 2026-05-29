@@ -109,6 +109,7 @@ services:
         uv run --no-sync scripts/train_rlt_online.py
         --replay-dir /app/replay/rlt_key_regions
         --output-dir /app/rlt_online
+        --segment-db-path /app/segment_db/segments.sqlite3
         --recursive-scan
         --expected-replay-action-horizon ${RLT_EXPECTED_REPLAY_ACTION_HORIZON:-50}
         --train-action-horizon ${RLT_TRAIN_ACTION_HORIZON:-10}
@@ -138,6 +139,7 @@ services:
       - $PWD:/app
       - /data/openpi0.5-rtc-reward-learning/replay:/app/replay
       - /data/openpi0.5-rtc-reward-learning/rlt_online:/app/rlt_online
+      - /data/openpi0.5-rtc-reward-learning/segment_db:/app/segment_db
       - ${OPENPI_DATA_HOME:-~/.cache/openpi}:/openpi_assets
     environment:
       - GIT_LFS_SKIP_SMUDGE=1
@@ -156,6 +158,7 @@ services:
       - REDIS_PORT=${REDIS_PORT:-6379}
       - REDIS_DB=${REDIS_DB:-0}
       - RLT_STATE_CHANNEL=${RLT_STATE_CHANNEL:-aloha_rlt_state}
+      - RLT_SEGMENT_DB_PATH=/app/segment_db/segments.sqlite3
     gpus: all
 
   aloha_ros_nodes:
@@ -245,6 +248,7 @@ services:
     volumes:
       - $PWD:/app
       - /data/openpi0.5-rtc-reward-learning/rollouts:/app/rollouts:ro
+      - /data/openpi0.5-rtc-reward-learning/segment_db:/app/segment_db
       - /dev:/dev
     env_file:
       - ./voice_assistant_web/.env
@@ -253,6 +257,8 @@ services:
       - REDIS_PORT=${REDIS_PORT:-6379}
       - REDIS_DB=${REDIS_DB:-0}
       - ROLLOUTS_ROOT=/app/rollouts
+      - RLT_STATE_PATH=/app/segment_db/rlt_control_state.json
+      - RLT_SEGMENT_DB_PATH=/app/segment_db/segments.sqlite3
     depends_on:
       - redis
 

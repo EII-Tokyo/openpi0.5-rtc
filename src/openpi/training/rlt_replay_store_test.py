@@ -1,4 +1,5 @@
 import json
+import sqlite3
 
 import pytest
 
@@ -24,6 +25,29 @@ def _arrays(num_transitions: int, *, reward: float = 1.0) -> dict[str, np.ndarra
         "next_reference_action": action * 0.25,
         "done": done,
     }
+
+
+def _write_segment_db(db_path, rows):
+    with sqlite3.connect(db_path) as conn:
+        conn.execute(
+            """
+            CREATE TABLE segments (
+                key_region_id TEXT PRIMARY KEY,
+                status TEXT NOT NULL,
+                phase TEXT NOT NULL,
+                reward INTEGER,
+                shard_path TEXT,
+                num_replay_transitions INTEGER NOT NULL DEFAULT 0,
+                invalid_reason TEXT,
+                created_at REAL NOT NULL DEFAULT 0,
+                updated_at REAL NOT NULL DEFAULT 0
+            )
+            """
+        )
+        conn.executemany(
+            "INSERT INTO segments (key_region_id, status, phase, reward, shard_path, num_replay_transitions) VALUES (?, ?, ?, ?, ?, ?)",
+            rows,
+        )
 
 
 def test_rlt_replay_store_loads_committed_shards_and_samples(tmp_path):
@@ -129,3 +153,71 @@ def test_rlt_replay_store_rejects_incompatible_schema_manifest(tmp_path):
     assert store.scan() == []
     assert store.stats.bad_shards == 1
     assert any("action_space" in reason for reason in store.bad_shards().values())
+
+
+def test_rlt_replay_store_filters_by_segment_ledger(tmp_path):
+    shards_dir = tmp_path / "shards"
+    shards_dir.mkdir()
+    accepted = shards_dir / "accepted.npz"
+    voided = shards_dir / "voided.npz"
+    np.savez(accepted, **_arrays(5, reward=1.0), manifest=json.dumps({"schema_version": 1, "train_eligible": True, "voided": False}))
+    np.savez(voided, **_arrays(7, reward=0.0), manifest=json.dumps({"schema_version": 1, "train_eligible": True, "voided": False}))
+    db_path = tmp_path / "segments.sqlite3"
+    _write_segment_db(
+        db_path,
+        [
+            ("accepted", "committed", "warmup", 1, str(accepted), 5),
+            ("voided", "voided", "warmup", 0, str(voided), 7),
+        ],
+    )
+
+    store = rlt_replay_store.RLTReplayStore(tmp_path, segment_db_path=db_path)
+    added = store.scan()
+
+    assert [info.path for info in added] == [accepted.resolve()]
+    assert store.stats.replay_size == 5
+    assert store.stats.success_episodes == 1
+    assert store.stats.failure_episodes == 0
+
+
+def test_rlt_replay_store_evicts_loaded_shard_when_ledger_voids_it(tmp_path):
+    shards_dir = tmp_path / "shards"
+    shards_dir.mkdir()
+    shard = shards_dir / "accepted.npz"
+    np.savez(shard, **_arrays(5, reward=1.0), manifest=json.dumps({"schema_version": 1, "train_eligible": True, "voided": False}))
+    db_path = tmp_path / "segments.sqlite3"
+    _write_segment_db(db_path, [("accepted", "committed", "warmup", 1, str(shard), 5)])
+
+    store = rlt_replay_store.RLTReplayStore(tmp_path, segment_db_path=db_path)
+    store.scan()
+    assert store.stats.replay_size == 5
+
+    with sqlite3.connect(db_path) as conn:
+        conn.execute("UPDATE segments SET status='voided' WHERE key_region_id='accepted'")
+
+    store.scan()
+
+    assert store.stats.replay_size == 0
+    assert store.loaded_paths == ()
+
+
+def test_rlt_replay_store_rejects_manifest_marked_not_train_eligible(tmp_path):
+    shards_dir = tmp_path / "shards"
+    shards_dir.mkdir()
+    manifest = {"schema_version": 1, "train_eligible": False, "voided": False}
+    np.savez(shards_dir / "bad_manifest.npz", **_arrays(5), manifest=json.dumps(manifest))
+
+    store = rlt_replay_store.RLTReplayStore(tmp_path)
+    assert store.scan() == []
+    assert any("train_eligible" in reason for reason in store.bad_shards().values())
+
+
+def test_rlt_replay_store_rejects_manifest_marked_voided(tmp_path):
+    shards_dir = tmp_path / "shards"
+    shards_dir.mkdir()
+    manifest = {"schema_version": 1, "train_eligible": True, "voided": True}
+    np.savez(shards_dir / "voided_manifest.npz", **_arrays(5), manifest=json.dumps(manifest))
+
+    store = rlt_replay_store.RLTReplayStore(tmp_path)
+    assert store.scan() == []
+    assert any("voided" in reason for reason in store.bad_shards().values())
