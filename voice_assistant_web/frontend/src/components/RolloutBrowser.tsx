@@ -1,12 +1,20 @@
 import { useEffect, useMemo, useState } from 'react'
-import { rolloutTreeUrl, rolloutVideoUrl } from '../services/api'
-import type { RolloutManifestSummary, RolloutNode } from '../services/api'
+import { fetchRLTSegments, restoreKeyRegions, rolloutTreeUrl, rolloutVideoUrl, voidKeyRegions } from '../services/api'
+import type { RLTSegmentRecord, RolloutManifestSummary, RolloutNode } from '../services/api'
 
 type RolloutBrowserProps = {
   title: string
   rootPath?: string
   defaultCamera?: string
   showManifest?: boolean
+  enableKeyRegionActions?: boolean
+}
+
+type KeyRegionEntry = {
+  keyRegionId: string
+  path: string
+  label: string
+  manifest: RolloutManifestSummary
 }
 
 const formatBytes = (bytes?: number) => {
@@ -29,6 +37,22 @@ const formatModified = (seconds?: number) => {
 const flattenVideos = (node: RolloutNode): RolloutNode[] => {
   if (node.type === 'file') return node.extension === '.mp4' ? [node] : []
   return (node.children || []).flatMap(flattenVideos)
+}
+
+const flattenKeyRegions = (node: RolloutNode): KeyRegionEntry[] => {
+  const entries: KeyRegionEntry[] = []
+  if (node.type === 'directory' && node.manifest_summary?.key_region_id) {
+    entries.push({
+      keyRegionId: node.manifest_summary.key_region_id,
+      path: node.path,
+      label: node.name || node.manifest_summary.key_region_id,
+      manifest: node.manifest_summary,
+    })
+  }
+  for (const child of node.children || []) {
+    entries.push(...flattenKeyRegions(child))
+  }
+  return entries
 }
 
 const selectDefaultVideo = (videos: RolloutNode[], defaultCamera?: string) => {
@@ -143,11 +167,26 @@ function RolloutTreeNode({
   )
 }
 
-export function RolloutBrowser({ title, rootPath, defaultCamera, showManifest = false }: RolloutBrowserProps) {
+export function RolloutBrowser({
+  title,
+  rootPath,
+  defaultCamera,
+  showManifest = false,
+  enableKeyRegionActions = false,
+}: RolloutBrowserProps) {
   const [tree, setTree] = useState<RolloutNode | null>(null)
   const [selected, setSelected] = useState<RolloutNode | null>(null)
   const [expanded, setExpanded] = useState<Set<string>>(new Set(['']))
   const [error, setError] = useState('')
+  const [segments, setSegments] = useState<RLTSegmentRecord[]>([])
+  const [selectedKeyRegionIds, setSelectedKeyRegionIds] = useState<Set<string>>(new Set())
+  const [actionPending, setActionPending] = useState('')
+  const [actionError, setActionError] = useState('')
+
+  const loadSegments = async () => {
+    if (!enableKeyRegionActions) return
+    setSegments(await fetchRLTSegments())
+  }
 
   const loadTree = async () => {
     setError('')
@@ -159,6 +198,7 @@ export function RolloutBrowser({ title, rootPath, defaultCamera, showManifest = 
     setTree(payload)
     setSelected(defaultVideo)
     setExpanded(defaultVideo ? defaultExpanded(payload, defaultVideo.path) : new Set([payload.path || '']))
+    await loadSegments()
   }
 
   useEffect(() => {
@@ -175,6 +215,7 @@ export function RolloutBrowser({ title, rootPath, defaultCamera, showManifest = 
         setTree(payload)
         setSelected(newest)
         setExpanded(newest ? defaultExpanded(payload, newest.path) : new Set([payload.path || '']))
+        await loadSegments()
       } catch {
         if (!ignore) setError('Rollouts could not be loaded.')
       }
@@ -183,13 +224,48 @@ export function RolloutBrowser({ title, rootPath, defaultCamera, showManifest = 
     return () => {
       ignore = true
     }
-  }, [rootPath, defaultCamera])
+  }, [rootPath, defaultCamera, enableKeyRegionActions])
 
   const videoSrc = useMemo(() => (selected?.extension === '.mp4' ? rolloutVideoUrl(selected.path) : ''), [selected])
   const selectedManifest = useMemo(
     () => (tree && selected ? findManifestForPath(tree, selected.path) : undefined),
     [tree, selected],
   )
+  const keyRegionEntries = useMemo(() => (tree ? flattenKeyRegions(tree) : []), [tree])
+  const segmentById = useMemo(() => new Map(segments.map((segment) => [segment.key_region_id, segment])), [segments])
+  const selectedCount = selectedKeyRegionIds.size
+
+  const toggleKeyRegionSelection = (keyRegionId: string) => {
+    setSelectedKeyRegionIds((current) => {
+      const next = new Set(current)
+      if (next.has(keyRegionId)) next.delete(keyRegionId)
+      else next.add(keyRegionId)
+      return next
+    })
+  }
+
+  const selectOnlyKeyRegion = (keyRegionId: string) => {
+    setSelectedKeyRegionIds(new Set([keyRegionId]))
+  }
+
+  const clearKeyRegionSelection = () => {
+    setSelectedKeyRegionIds(new Set())
+  }
+
+  const runBatchAction = async (name: string, action: (ids: string[]) => Promise<unknown>) => {
+    const ids = [...selectedKeyRegionIds]
+    if (!ids.length) return
+    setActionError('')
+    setActionPending(name)
+    try {
+      await action(ids)
+      await loadSegments()
+    } catch (exc) {
+      setActionError(exc instanceof Error ? exc.message : 'Batch action failed')
+    } finally {
+      setActionPending('')
+    }
+  }
 
   const toggle = (path: string) => {
     setExpanded((current) => {
@@ -239,6 +315,57 @@ export function RolloutBrowser({ title, rootPath, defaultCamera, showManifest = 
             <p className="rollout-empty">Loading rollouts...</p>
           )}
         </div>
+        {enableKeyRegionActions ? (
+          <div className="key-region-review-panel">
+            <div className="key-region-review-header">
+              <strong>{selectedCount} selected</strong>
+              <button className="ghost-button" type="button" disabled={!selectedCount} onClick={clearKeyRegionSelection}>
+                Clear
+              </button>
+            </div>
+            <div className="key-region-review-actions">
+              <button
+                className="apply-button"
+                type="button"
+                disabled={!selectedCount || !!actionPending}
+                onClick={() => void runBatchAction('restore', (ids) => restoreKeyRegions(ids, 'operator_restore'))}
+              >
+                Confirm selected
+              </button>
+              <button
+                className="apply-button danger"
+                type="button"
+                disabled={!selectedCount || !!actionPending}
+                onClick={() => void runBatchAction('void', (ids) => voidKeyRegions(ids, 'operator_batch_void'))}
+              >
+                Void selected
+              </button>
+            </div>
+            {actionError ? <p className="inline-error">{actionError}</p> : null}
+            <div className="key-region-review-list">
+              {keyRegionEntries.map((entry) => {
+                const segment = segmentById.get(entry.keyRegionId)
+                const checked = selectedKeyRegionIds.has(entry.keyRegionId)
+                return (
+                  <div key={entry.keyRegionId} className={`key-region-review-row ${checked ? 'selected' : ''}`}>
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={() => toggleKeyRegionSelection(entry.keyRegionId)}
+                      />
+                      <span>{entry.label}</span>
+                    </label>
+                    <button className="ghost-button" type="button" onClick={() => selectOnlyKeyRegion(entry.keyRegionId)}>
+                      Only
+                    </button>
+                    <small>{segment?.status || 'untracked'} / {formatManifestSummary(entry.manifest)}</small>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        ) : null}
       </aside>
 
       <section className="rollouts-player-panel">

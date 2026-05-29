@@ -167,3 +167,29 @@ def test_void_segment_removes_committed_segment_from_counts(tmp_path):
     assert state.warmup_count == 0
     assert state.warmup_invalid == 1
     assert store._segment_ledger.get_segment("seg-1")["status"] == "voided"
+
+
+def test_batch_void_and_restore_segments_update_counts(tmp_path):
+    store = _store(warmup_target=2, tmp_path=tmp_path)
+    for key_region_id, reward in (("seg-1", 1), ("seg-2", 0)):
+        store.update_runtime_metrics(
+            {
+                "type": "rlt_replay_segment_committed",
+                "key_region_id": key_region_id,
+                "phase": "warmup",
+                "reward": reward,
+                "replay_ready": True,
+                "num_replay_transitions": 3,
+                "shard_path": f"/tmp/{key_region_id}.npz",
+            }
+        )
+    assert store.snapshot().warmup_count == 2
+
+    state = store.void_segments(["seg-1", "seg-2"], source="test", reason="batch_review")
+    assert state.warmup_count == 0
+    assert state.warmup_invalid == 2
+
+    state = store.restore_segments(["seg-1"], source="test", reason="reviewed_ok")
+    assert state.warmup_count == 1
+    assert state.warmup_success == 1
+    assert state.warmup_invalid == 1

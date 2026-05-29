@@ -54,8 +54,9 @@ export function RLTControlPanel({ rlt, onState }: Props) {
     if (event.key === 'ArrowRight' || event.code === 'ArrowRight' || event.keyCode === 39) return 'end'
     if (event.key === 'ArrowUp' || event.code === 'ArrowUp' || event.keyCode === 38) return 'score1'
     if (event.key === 'ArrowDown' || event.code === 'ArrowDown' || event.keyCode === 40) return 'score0'
-    if (event.key.toLowerCase() === 'c') return 'confirm'
-    if (event.key.toLowerCase() === 'd') return 'discard'
+    if (event.key === 'Enter' || event.key.toLowerCase() === 'c') return 'confirm'
+    if (event.key === 'Backspace' || event.key.toLowerCase() === 'd') return 'discard'
+    if (event.key.toLowerCase() === 'v') return 'void'
     return ''
   }
 
@@ -78,6 +79,7 @@ export function RLTControlPanel({ rlt, onState }: Props) {
       event.stopPropagation()
       flash(hotkey)
 
+      if (pending) return
       if (hotkey === 'start') {
         if (rlt.phase === 'idle') void run('start', startKeyRegion)
       } else if (hotkey === 'end') {
@@ -92,11 +94,15 @@ export function RLTControlPanel({ rlt, onState }: Props) {
         if (['key_region', 'await_score', 'pending_replay'].includes(rlt.phase)) {
           void run('discard', () => discardKeyRegion('operator_discard'))
         }
+      } else if (hotkey === 'void') {
+        if (['key_region', 'await_score'].includes(rlt.phase) && rlt.active_key_region_id) {
+          void run('void', () => voidKeyRegion(rlt.active_key_region_id as string, 'operator_void'))
+        }
       }
     }
     window.addEventListener('keydown', onKeyDown, true)
     return () => window.removeEventListener('keydown', onKeyDown, true)
-  }, [rlt.phase])
+  }, [rlt.phase, rlt.active_key_region_id, pending])
 
   const phaseLabel = useMemo(() => {
     if (rlt.phase === 'key_region') return 'Recording key region'
@@ -206,11 +212,12 @@ export function RLTControlPanel({ rlt, onState }: Props) {
             Discard
           </button>
           <button
-            className="apply-button danger"
+            className={`apply-button danger ${flashKey === 'void' ? 'key-flash' : ''}`}
             type="button"
             disabled={!!pending || !rlt.active_key_region_id}
             onClick={() => {
               if (!rlt.active_key_region_id) return
+              flash('void')
               void run('void', () => voidKeyRegion(rlt.active_key_region_id as string, 'operator_void'))
             }}
           >
@@ -219,10 +226,10 @@ export function RLTControlPanel({ rlt, onState }: Props) {
         </div>
       ) : null}
       {rlt.phase === 'await_score' ? (
-        <p className="rlt-warning">Choose the reward, then confirm or discard before replay is committed.</p>
+        <p className="rlt-warning">Choose the reward. Enter/C confirms, Backspace/D discards, V voids.</p>
       ) : null}
       {rlt.phase === 'pending_replay' ? (
-        <p className="rlt-warning">Confirm only if the start/end marks and reward are correct.</p>
+        <p className="rlt-warning">Enter/C confirms. Backspace/D discards before replay is committed.</p>
       ) : null}
       {error ? <p className="rlt-error">{error}</p> : null}
     </section>
@@ -231,6 +238,7 @@ export function RLTControlPanel({ rlt, onState }: Props) {
 
 export function RLTStatsPanel({ rlt }: { rlt: RLTControlState }) {
   const warmupPct = Math.min(100, (rlt.warmup_count / Math.max(1, rlt.warmup_target)) * 100)
+  const confirmedReplayCount = rlt.warmup_count + rlt.auto_rollout_count
   return (
     <section className="panel rlt-panel">
       <div className="panel-header">
@@ -246,6 +254,8 @@ export function RLTStatsPanel({ rlt }: { rlt: RLTControlState }) {
         <div className="progress-fill" style={{ width: `${warmupPct}%` }} />
       </div>
       <div className="metric-grid">
+        <Metric label="Confirmed Replay" value={confirmedReplayCount} />
+        <Metric label="Replay Samples" value={rlt.replay_size ?? '-'} />
         <Metric label="Warmup Success" value={rlt.warmup_success} />
         <Metric label="Warmup Failure" value={rlt.warmup_failure} />
         <Metric label="Warmup Invalid" value={rlt.warmup_invalid ?? 0} />

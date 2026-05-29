@@ -162,6 +162,34 @@ class RLTControlStore:
             self._publish_locked("key_region_void", {"source": source, "reason": reason, "key_region_id": key_region_id})
             return self._state.model_copy(deep=True)
 
+    def list_segments(self, *, limit: int = 500) -> list[dict[str, Any]]:
+        with self._lock:
+            return self._segment_ledger.list_segments(limit=limit)
+
+    def void_segments(
+        self, key_region_ids: list[str], *, source: str = "ui", reason: str = "operator_batch_void"
+    ) -> RLTControlState:
+        with self._lock:
+            changed = self._segment_ledger.void_segments(key_region_ids, reason=reason)
+            self._apply_ledger_stats_locked()
+            self._add_event_locked("batch_void", f"{len(changed)}:{reason}")
+            self._refresh_derived_locked()
+            self._persist_locked()
+            self._publish_locked("key_region_batch_void", {"source": source, "reason": reason, "key_region_ids": changed})
+            return self._state.model_copy(deep=True)
+
+    def restore_segments(
+        self, key_region_ids: list[str], *, source: str = "ui", reason: str = "operator_restore"
+    ) -> RLTControlState:
+        with self._lock:
+            changed = self._segment_ledger.restore_segments(key_region_ids, reason=reason)
+            self._apply_ledger_stats_locked()
+            self._add_event_locked("batch_restore", f"{len(changed)}:{reason}")
+            self._refresh_derived_locked()
+            self._persist_locked()
+            self._publish_locked("key_region_batch_restore", {"source": source, "reason": reason, "key_region_ids": changed})
+            return self._state.model_copy(deep=True)
+
     def update_config(self, request: RLTConfigRequest) -> RLTControlState:
         with self._lock:
             self._apply_score_timeout_locked()

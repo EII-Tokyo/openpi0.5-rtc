@@ -111,6 +111,47 @@ class RLTSegmentLedger:
             row = conn.execute("SELECT * FROM segments WHERE key_region_id = ?", (key_region_id,)).fetchone()
         return None if row is None else dict(row)
 
+    def list_segments(self, *, limit: int = 500) -> list[dict[str, Any]]:
+        with self._connect() as conn:
+            rows = conn.execute(
+                """
+                SELECT * FROM segments
+                ORDER BY updated_at DESC, created_at DESC
+                LIMIT ?
+                """,
+                (int(limit),),
+            ).fetchall()
+        return [dict(row) for row in rows]
+
+    def void_segments(self, key_region_ids: list[str], *, reason: str) -> list[str]:
+        changed = []
+        for key_region_id in key_region_ids:
+            existing = self.get_segment(key_region_id) if key_region_id else None
+            if not existing or existing.get("status") != "committed":
+                continue
+            self.void_segment(key_region_id, reason=reason)
+            changed.append(key_region_id)
+        return changed
+
+    def restore_segments(self, key_region_ids: list[str], *, reason: str) -> list[str]:
+        changed = []
+        for key_region_id in key_region_ids:
+            existing = self.get_segment(key_region_id)
+            if not existing or existing.get("status") != "voided" or not existing.get("shard_path"):
+                continue
+            self._upsert(
+                key_region_id,
+                status="committed",
+                phase=str(existing.get("phase") or "warmup"),
+                reward=existing.get("reward"),
+                shard_path=existing.get("shard_path"),
+                num_replay_transitions=int(existing.get("num_replay_transitions") or 0),
+                invalid_reason=reason,
+                event="restored",
+            )
+            changed.append(key_region_id)
+        return changed
+
     def stats(self) -> dict[str, int]:
         stats = {
             "warmup_count": 0,

@@ -183,6 +183,7 @@ export default function App() {
             <StatusItem label="Control" value={state.rlt.phase} />
             <StatusItem label="Phase" value={state.rlt.training_phase} />
             <StatusItem label="Warmup" value={`${state.rlt.warmup_count} / ${state.rlt.warmup_target}`} />
+            <StatusItem label="Confirmed" value={state.rlt.warmup_count + state.rlt.auto_rollout_count} />
             <StatusItem label="Replay" value={state.rlt.replay_size ?? '-'} />
             <StatusItem label="RL Token" value={state.rlt.rl_token_checkpoint_path ? 'query/12000' : '-'} tone={state.rlt.rl_token_checkpoint_path ? 'ok' : 'watch'} />
             <StatusItem label="Actor" value={state.rlt.actor_effective ? 'active' : 'locked'} tone={state.rlt.actor_effective ? 'ok' : 'watch'} />
@@ -212,6 +213,7 @@ export default function App() {
           rootPath="key_regions"
           defaultCamera="cam_right_wrist.mp4"
           showManifest
+          enableKeyRegionActions
         />
       ) : (
         <RolloutBrowser title="Collected Files" />

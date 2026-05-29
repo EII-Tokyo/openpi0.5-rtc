@@ -382,7 +382,7 @@ button {
 }
 
 .rlt-control-grid::after {
-  content: "← start · → end · ↑ 1 · ↓ 0 · C confirm · D discard";
+  content: "← start · → end · ↑/↓ score · Enter/C confirm · Backspace/D discard · V void";
   color: #635b50;
   font-size: 11px;
   font-weight: 800;
@@ -607,6 +607,71 @@ button {
   min-height: 0;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
+}
+
+.key-region-review-panel {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #ddd7cc;
+}
+
+.key-region-review-header,
+.key-region-review-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.key-region-review-actions {
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
+.key-region-review-list {
+  display: grid;
+  gap: 6px;
+  max-height: 220px;
+  overflow: auto;
+}
+
+.key-region-review-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 4px 8px;
+  align-items: center;
+  padding: 7px;
+  border-radius: 6px;
+  background: #f1eee7;
+}
+
+.key-region-review-row.selected {
+  outline: 2px solid #2463a6;
+}
+
+.key-region-review-row label {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.key-region-review-row label span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.key-region-review-row small {
+  grid-column: 1 / -1;
+  color: #635b50;
+  font-size: 11px;
+  font-weight: 800;
 }
 
 .rollouts-tree-scroll {

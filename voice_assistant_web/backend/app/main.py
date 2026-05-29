@@ -28,11 +28,13 @@ from .rlt_control import RLTControlStore
 from .robot_state_bridge import RobotStateBridge
 from .schemas import HealthResponse
 from .schemas import RealtimePayload
+from .schemas import RLTBatchSegmentRequest
 from .schemas import RLTConfigRequest
 from .schemas import RLTControlRequest
 from .schemas import RLTControlState
 from .schemas import RLTDiscardRequest
 from .schemas import RLTScoreRequest
+from .schemas import RLTSegmentRecord
 from .schemas import RLTVoidRequest
 from .schemas import RobotTaskRequest
 from .schemas import RuntimeStatePayload
@@ -434,6 +436,11 @@ def rlt_status() -> RLTControlState:
     return rlt_control.snapshot()
 
 
+@app.get("/api/rlt/segments", response_model=list[RLTSegmentRecord])
+def rlt_segments(limit: int = 500) -> list[RLTSegmentRecord]:
+    return [RLTSegmentRecord(**segment) for segment in rlt_control.list_segments(limit=limit)]
+
+
 @app.post("/api/rlt/key-region/start", response_model=RLTControlState)
 def rlt_key_region_start(request: RLTControlRequest | None = None) -> RLTControlState:
     try:
@@ -480,6 +487,16 @@ def rlt_key_region_discard(request: RLTDiscardRequest | None = None) -> RLTContr
 def rlt_key_region_void(key_region_id: str, request: RLTVoidRequest | None = None) -> RLTControlState:
     request = request or RLTVoidRequest()
     return rlt_control.void_segment(key_region_id, source=request.source, reason=request.reason)
+
+
+@app.post("/api/rlt/key-regions/void", response_model=RLTControlState)
+def rlt_key_regions_void(request: RLTBatchSegmentRequest) -> RLTControlState:
+    return rlt_control.void_segments(request.key_region_ids, source=request.source, reason=request.reason)
+
+
+@app.post("/api/rlt/key-regions/restore", response_model=RLTControlState)
+def rlt_key_regions_restore(request: RLTBatchSegmentRequest) -> RLTControlState:
+    return rlt_control.restore_segments(request.key_region_ids, source=request.source, reason=request.reason)
 
 
 @app.post("/api/rlt/config", response_model=RLTControlState)

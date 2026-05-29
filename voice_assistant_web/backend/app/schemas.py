@@ -96,6 +96,24 @@ class RLTVoidRequest(BaseModel):
     reason: str = "operator_void"
 
 
+class RLTBatchSegmentRequest(BaseModel):
+    key_region_ids: list[str] = Field(min_length=1, max_length=500)
+    source: str = "ui"
+    reason: str = "operator_batch_review"
+
+
+class RLTSegmentRecord(BaseModel):
+    key_region_id: str
+    status: str
+    phase: str
+    reward: int | None = None
+    shard_path: str | None = None
+    num_replay_transitions: int = 0
+    invalid_reason: str | None = None
+    created_at: float
+    updated_at: float
+
+
 class RobotTaskRequest(BaseModel):
     task_num: str = Field(pattern="^[145]$")
     source: str = "ui"

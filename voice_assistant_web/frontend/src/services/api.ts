@@ -54,6 +54,18 @@ export type RLTEvent = {
   detail: string
 }
 
+export type RLTSegmentRecord = {
+  key_region_id: string
+  status: string
+  phase: string
+  reward: number | null
+  shard_path: string | null
+  num_replay_transitions: number
+  invalid_reason: string | null
+  created_at: number
+  updated_at: number
+}
+
 export type RLTControlState = {
   phase: 'idle' | 'key_region' | 'await_score' | 'pending_replay' | string
   training_phase: 'warmup' | 'rl' | string
@@ -91,6 +103,15 @@ export type RLTControlState = {
   events: RLTEvent[]
 }
 
+const getJson = async <T>(path: string): Promise<T> => {
+  const response = await fetch(`${apiBase}${path}`)
+  if (!response.ok) {
+    const message = await response.text().catch(() => '')
+    throw new Error(message || `HTTP ${response.status}`)
+  }
+  return response.json() as Promise<T>
+}
+
 const postJson = async <T>(path: string, body: unknown = {}): Promise<T> => {
   const response = await fetch(`${apiBase}${path}`, {
     method: 'POST',
@@ -104,6 +125,7 @@ const postJson = async <T>(path: string, body: unknown = {}): Promise<T> => {
   return response.json() as Promise<T>
 }
 
+export const fetchRLTSegments = () => getJson<RLTSegmentRecord[]>('/api/rlt/segments')
 export const startKeyRegion = () => postJson<RLTControlState>('/api/rlt/key-region/start', { source: 'ui' })
 export const endKeyRegion = () => postJson<RLTControlState>('/api/rlt/key-region/end', { source: 'ui' })
 export const scoreKeyRegion = (reward: 0 | 1) =>
@@ -114,6 +136,10 @@ export const discardKeyRegion = (reason = 'operator_discard') =>
   postJson<RLTControlState>('/api/rlt/key-region/discard', { source: 'ui', reason })
 export const voidKeyRegion = (keyRegionId: string, reason = 'operator_void') =>
   postJson<RLTControlState>(`/api/rlt/key-region/${encodeURIComponent(keyRegionId)}/void`, { source: 'ui', reason })
+export const voidKeyRegions = (keyRegionIds: string[], reason = 'operator_batch_void') =>
+  postJson<RLTControlState>('/api/rlt/key-regions/void', { key_region_ids: keyRegionIds, source: 'ui', reason })
+export const restoreKeyRegions = (keyRegionIds: string[], reason = 'operator_restore') =>
+  postJson<RLTControlState>('/api/rlt/key-regions/restore', { key_region_ids: keyRegionIds, source: 'ui', reason })
 export const updateRLTConfig = (config: Partial<RLTControlState>) =>
   postJson<RLTControlState>('/api/rlt/config', config)
 
