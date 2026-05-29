@@ -5,7 +5,6 @@ import pathlib
 import time
 import threading
 import numpy as np
-import tree
 from typing_extensions import override
 
 from openpi_client import base_policy as _base_policy
@@ -34,6 +33,7 @@ class ActionChunkBroker(_base_policy.BasePolicy):
 
         self._last_results: Dict[str, np.ndarray] | None = None
         self._last_origin_actions: np.ndarray | None = None
+        self._last_reference_actions: np.ndarray | None = None
         self._background_results: Dict[str, np.ndarray] | None = None
         self._background_running: bool = False
 
@@ -147,13 +147,14 @@ class ActionChunkBroker(_base_policy.BasePolicy):
         if self._use_rtc:
             # init     
             if self._last_results is None:
-                self._last_results = self._policy.infer(obs, None, self._use_rtc)
-                self._last_origin_actions = self._last_results["origin_actions"]
-                self._last_state = self._last_results["state"]
-                self._last_results = {"actions": self._last_results["actions"]}
+                policy_results = self._policy.infer(obs, None, self._use_rtc)
+                self._last_origin_actions = policy_results["origin_actions"]
+                self._last_reference_actions = policy_results.get("reference_actions", policy_results["actions"])
+                self._last_state = policy_results["state"]
+                self._last_results = self._build_step_result_cache(policy_results)
                 self._cur_step = 0
 
-            results = tree.map_structure(lambda x: x[self._cur_step, ...], self._last_results)
+            results = self._slice_result_cache(self._last_results)
             self._obs = obs
             self._cur_step += 1
 
@@ -162,8 +163,12 @@ class ActionChunkBroker(_base_policy.BasePolicy):
                 while self._background_running:
                     time.sleep(0.01)
                 self._last_origin_actions = self._background_results["origin_actions"]
+                self._last_reference_actions = self._background_results.get(
+                    "reference_actions",
+                    self._background_results["actions"],
+                )
                 self._last_state = self._background_results["state"]
-                self._last_results = {"actions": self._background_results["actions"]}
+                self._last_results = self._build_step_result_cache(self._background_results)
                 self._cur_step -= self._s
             # print(results)
             return results
@@ -172,13 +177,7 @@ class ActionChunkBroker(_base_policy.BasePolicy):
                 self._last_results = self._policy.infer(obs)
                 self._cur_step = 0
 
-            def slicer(x):
-                if isinstance(x, np.ndarray):
-                    return x[self._cur_step, ...]
-                else:
-                    return x
-
-            results = tree.map_structure(slicer, self._last_results)
+            results = self._slice_result_cache(self._last_results)
             self._cur_step += 1
 
             if self._cur_step >= self._action_horizon:
@@ -190,4 +189,38 @@ class ActionChunkBroker(_base_policy.BasePolicy):
     def reset(self) -> None:
         self._policy.reset()
         self._last_results = None
+        self._last_origin_actions = None
+        self._last_reference_actions = None
+        self._background_results = None
+        self._background_running = False
         self._cur_step = 0
+
+    def _build_step_result_cache(self, policy_results: Dict[str, np.ndarray]) -> Dict[str, np.ndarray]:
+        reference_actions = policy_results.get("reference_actions", policy_results["actions"])
+        cached: Dict[str, np.ndarray] = {
+            "actions": policy_results["actions"],
+            "reference_action": reference_actions,
+            "action_full": policy_results.get("origin_actions", policy_results["actions"]),
+            "reference_action_full": reference_actions,
+        }
+        for source_key, target_key in (
+            ("z_rl", "z_rl"),
+            ("rl_token", "z_rl"),
+            ("proprio", "proprio"),
+            ("state", "proprio"),
+        ):
+            if source_key in policy_results and target_key not in cached:
+                cached[target_key] = policy_results[source_key]
+        return cached
+
+    def _slice_result_cache(self, results: Dict[str, np.ndarray]) -> Dict[str, np.ndarray]:
+        sliced = {}
+        action_horizon = results["actions"].shape[0]
+        for key, value in results.items():
+            if key.endswith("_full"):
+                sliced[key] = value
+            elif isinstance(value, np.ndarray) and value.ndim > 0 and value.shape[0] == action_horizon:
+                sliced[key] = value[self._cur_step, ...]
+            else:
+                sliced[key] = value
+        return sliced

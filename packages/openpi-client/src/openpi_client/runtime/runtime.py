@@ -89,6 +89,10 @@ class Runtime:
             "beta": float(os.getenv("RLT_DEFAULT_BETA", "10.0")),
             "intervention_scale": float(os.getenv("RLT_DEFAULT_INTERVENTION_SCALE", "0.25")),
             "max_delta": float(os.getenv("RLT_DEFAULT_MAX_DELTA", "0.1")),
+            "rl_token_checkpoint_path": os.getenv(
+                "RLT_RL_TOKEN_CHECKPOINT_PATH",
+                "/app/checkpoints/eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo_rl_token_query/rl_token_2048_enc4_dec4_query_from_19000_20260528/12000",
+            ),
             "active_key_region_id": None,
             "last_reward": None,
         }
@@ -222,7 +226,9 @@ class Runtime:
                 self._latest_task = task_data
             logging.info("收到前端机器人任务: %s - %s", task_data["task_num"], task_data["task_name"])
             return
+        should_notify_key_region = event_type in {"key_region_start", "key_region_end", "score"}
         with self._task_lock:
+            previous_active_key_region_id = self._rlt_state.get("active_key_region_id")
             for key in ("warmup_target", "beta", "intervention_scale", "max_delta", "actor_enabled"):
                 if key in state:
                     self._rlt_state[key] = state[key]
@@ -245,7 +251,41 @@ class Runtime:
             in_warmup = self._rlt_state["warmup_count"] < self._rlt_state["warmup_target"]
             self._rlt_state["training_phase"] = "warmup" if in_warmup else "rl"
             self._rlt_state["actor_effective"] = bool(self._rlt_state["actor_enabled"] and not in_warmup)
+            rlt_state_snapshot = dict(self._rlt_state)
+            current_task_snapshot = dict(self._current_task) if self._current_task is not None else None
         self._publish_rlt_state()
+        if should_notify_key_region:
+            event_payload = dict(data)
+            event_payload["type"] = event_type
+            event_payload.setdefault("timestamp", time.time())
+            if not event_payload.get("key_region_id"):
+                event_payload["key_region_id"] = (
+                    state.get("active_key_region_id")
+                    or rlt_state_snapshot.get("active_key_region_id")
+                    or previous_active_key_region_id
+                )
+            event_payload["state"] = rlt_state_snapshot
+            if current_task_snapshot is not None:
+                event_payload["current_task"] = current_task_snapshot
+            self._notify_key_region_subscribers(event_type, event_payload)
+
+    def _notify_key_region_subscribers(self, event_type: str, event: dict) -> None:
+        hook_name_by_type = {
+            "key_region_start": "on_key_region_start",
+            "key_region_end": "on_key_region_end",
+            "score": "on_key_region_score",
+        }
+        hook_name = hook_name_by_type.get(event_type)
+        if hook_name is None:
+            return
+        for subscriber in self._subscribers:
+            hook = getattr(subscriber, hook_name, None)
+            if hook is None:
+                continue
+            try:
+                hook(event)
+            except Exception as exc:
+                logging.exception("Subscriber %s failed handling %s: %s", subscriber, event_type, exc)
 
     def _take_latest_task(self, allowed_task_nums: set[str] | None = None):
         """获取并消费最新的 Redis 任务。"""
@@ -293,6 +333,7 @@ class Runtime:
         finally:
             # 停止Redis监听
             self._stop_redis_listener()
+            self._close_subscribers()
 
     def mark_episode_complete(self) -> None:
         """Marks the end of an episode."""
@@ -301,6 +342,16 @@ class Runtime:
     def stop(self) -> None:
         """Request the runtime loop to stop."""
         self._stop = True
+
+    def _close_subscribers(self) -> None:
+        for subscriber in self._subscribers:
+            close = getattr(subscriber, "close", None)
+            if close is None:
+                continue
+            try:
+                close()
+            except Exception as exc:
+                logging.exception("Subscriber %s failed during close: %s", subscriber, exc)
 
     def _run(self) -> None:
         """Runs a single episode."""

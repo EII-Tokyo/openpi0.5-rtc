@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import hashlib
 import json
 import logging
@@ -134,11 +135,42 @@ def _safe_rollout_path(relative_path: str) -> Path:
     return candidate
 
 
+def _manifest_summary(path: Path) -> dict | None:
+    manifest_path = path / "manifest.json"
+    if not manifest_path.exists() or not manifest_path.is_file():
+        return None
+    try:
+        with manifest_path.open("r", encoding="utf-8") as file:
+            manifest = json.load(file)
+    except (OSError, json.JSONDecodeError):
+        logging.warning("Could not read rollout manifest: %s", manifest_path)
+        return None
+
+    summary_keys = {
+        "key_region_id",
+        "task",
+        "phase",
+        "reward",
+        "score_timeout",
+        "start_time",
+        "end_time",
+        "score_time",
+        "num_frames",
+        "num_replay_transitions",
+        "fps",
+    }
+    summary = {key: manifest[key] for key in summary_keys if key in manifest}
+    if "start_time" in summary and "end_time" in summary:
+        with contextlib.suppress(TypeError, ValueError):
+            summary["duration_seconds"] = max(float(summary["end_time"]) - float(summary["start_time"]), 0.0)
+    return summary
+
+
 def _scan_rollout_tree(path: Path, relative_path: str = "") -> dict:
     try:
         entries = list(path.iterdir())
     except FileNotFoundError:
-        raise HTTPException(status_code=404, detail=f"Rollouts root not found: {ROLLOUTS_ROOT}") from None
+        raise HTTPException(status_code=404, detail=f"Rollout path not found: {relative_path or '.'}") from None
     except PermissionError:
         raise HTTPException(status_code=403, detail=f"Permission denied: {relative_path or '.'}") from None
 
@@ -167,18 +199,26 @@ def _scan_rollout_tree(path: Path, relative_path: str = "") -> dict:
 
     children.sort(key=lambda item: (item["type"] == "file", natural_key(item["name"])))
     stat = path.stat()
-    return {
+    result = {
         "name": path.name or "rollouts",
         "path": relative_path,
         "type": "directory",
         "modified": stat.st_mtime,
         "children": children,
     }
+    manifest = _manifest_summary(path)
+    if manifest:
+        result["manifest_summary"] = manifest
+    return result
 
 
 @app.get("/api/rollouts/tree")
-def rollout_tree() -> dict:
-    return _scan_rollout_tree(ROLLOUTS_ROOT)
+def rollout_tree(path: str = "") -> dict:
+    rollout_path = _safe_rollout_path(path)
+    if not rollout_path.exists() or not rollout_path.is_dir():
+        raise HTTPException(status_code=404, detail=f"Rollout path not found: {path or '.'}")
+    relative_path = "" if rollout_path == ROLLOUTS_ROOT else str(rollout_path.relative_to(ROLLOUTS_ROOT))
+    return _scan_rollout_tree(rollout_path, relative_path)
 
 
 def _parse_range_header(range_header: str | None, file_size: int) -> tuple[int, int, int]:

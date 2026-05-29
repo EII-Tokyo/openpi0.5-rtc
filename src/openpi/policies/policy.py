@@ -113,6 +113,13 @@ class Policy(BasePolicy):
                 "actions": origin_actions,
                 "origin_actions": origin_actions,
             }
+        if (
+            not self._is_pytorch_model
+            and getattr(self._model, "rl_token_autoencoder", None) is not None
+            and hasattr(self._model, "embed_prefix_hidden")
+        ):
+            prefix_out, prefix_mask = self._model.embed_prefix_hidden(observation, drop_language=True)
+            outputs["z_rl"] = self._model.rl_token_autoencoder.encode(jax.lax.stop_gradient(prefix_out), prefix_mask)
         model_time = time.monotonic() - start_time
         if self._is_pytorch_model:
             outputs = jax.tree.map(lambda x: np.asarray(x[0, ...].detach().cpu()), outputs)

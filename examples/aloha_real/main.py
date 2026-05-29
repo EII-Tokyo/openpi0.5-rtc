@@ -14,6 +14,7 @@ import tyro
 
 from examples.aloha_real import env as _env
 from examples.aloha_real import h5df_saver
+from examples.aloha_real import rlt_key_region_recorder
 from examples.aloha_real import video_hdf5_saver
 
 
@@ -58,8 +59,18 @@ class Args:
     compress_images: bool = True
     is_mobile: bool = False
     if_save_hdf5: bool = True
-    save_format: Literal["hdf5", "video_hdf5"] = "hdf5"
+    save_format: Literal["hdf5", "video_hdf5", "rlt_key_region", "video_hdf5_and_rlt_key_region"] = "hdf5"
     video_codec: Literal["h264", "mp4v", "avc1"] = "h264"
+    rlt_rollouts_root: str = "/data/openpi0.5-rtc-reward-learning/rollouts"
+    rlt_replay_root: str = "/data/openpi0.5-rtc-reward-learning/replay"
+    rlt_pre_roll_seconds: float = 2.0
+    rlt_post_roll_seconds: float = 0.3
+    rlt_max_key_region_seconds: float = 20.0
+    rlt_train_horizon: int = 10
+    rlt_full_horizon: int = 50
+    rlt_chunk_horizon: int | None = None
+    rlt_chunk_stride: int = 2
+    rlt_prefer_gpu_video: bool = True
     # Set <= 0 to save the full episode instead of a rolling tail buffer.
     hdf5_max_buffer_seconds: float = 60.0
     # Save one HDF5 rollout each time the robot leaves reset pose and returns.
@@ -89,7 +100,8 @@ def main(args: Args) -> None:
     )
     logging.info(f"Server metadata: {ws_client_policy.get_server_metadata()}")
 
-    if args.save_format == "video_hdf5":
+    subscribers = []
+    if args.save_format in {"video_hdf5", "video_hdf5_and_rlt_key_region"}:
         saver_instance = video_hdf5_saver.VideoHdf5Saver(
             dataset_dir=args.dataset_dir,
             fps=args.policy_hz,
@@ -102,7 +114,8 @@ def main(args: Args) -> None:
             min_episode_steps=args.split_min_episode_steps,
             video_codec=args.video_codec,
         )
-    else:
+        subscribers.append(saver_instance)
+    elif args.save_format == "hdf5":
         saver_instance = h5df_saver.H5dfSaver(
             dataset_dir=args.dataset_dir,
             compress_images=args.compress_images,
@@ -115,6 +128,25 @@ def main(args: Args) -> None:
             leave_threshold=args.split_leave_threshold,
             stable_home_steps=args.split_stable_home_steps,
             min_episode_steps=args.split_min_episode_steps,
+        )
+        subscribers.append(saver_instance)
+    elif args.save_format != "rlt_key_region":
+        raise ValueError(f"Unsupported save_format: {args.save_format}")
+
+    if args.save_format in {"rlt_key_region", "video_hdf5_and_rlt_key_region"}:
+        subscribers.append(
+            rlt_key_region_recorder.KeyRegionReplayRecorder(
+                rollouts_root=args.rlt_rollouts_root,
+                replay_root=args.rlt_replay_root,
+                fps=args.policy_hz,
+                pre_roll_seconds=args.rlt_pre_roll_seconds,
+                post_roll_seconds=args.rlt_post_roll_seconds,
+                max_key_region_seconds=args.rlt_max_key_region_seconds,
+                train_horizon=args.rlt_chunk_horizon or args.rlt_train_horizon,
+                full_horizon=args.rlt_full_horizon,
+                chunk_stride=args.rlt_chunk_stride,
+                prefer_gpu_video=args.rlt_prefer_gpu_video,
+            )
         )
 
     runtime = _runtime.Runtime(
@@ -134,7 +166,7 @@ def main(args: Args) -> None:
                 use_rtc=args.use_rtc,
             )
         ),
-        subscribers=[saver_instance] if args.if_save_hdf5 else [],
+        subscribers=subscribers if args.if_save_hdf5 else [],
         max_hz=args.policy_hz,
         manual_hz=args.manual_hz,
         num_episodes=args.num_episodes,

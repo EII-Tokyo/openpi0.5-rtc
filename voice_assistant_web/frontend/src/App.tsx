@@ -44,6 +44,7 @@ const initialRLT: RLTControlState = {
   critic_loss: null,
   actor_loss: null,
   replay_size: null,
+  rl_token_checkpoint_path: null,
   events: [],
 }
 
@@ -65,7 +66,7 @@ export default function App() {
   const [state, setState] = useState<RealtimeState>(initialState)
   const [language, setLanguage] = useState<AppLanguage>('en')
   const [cameraView, setCameraView] = useState<'focus' | 'quad'>('quad')
-  const [page, setPage] = useState<'live' | 'rollouts'>('live')
+  const [page, setPage] = useState<'live' | 'rollouts' | 'key_regions'>('live')
   const t = translations[language]
   const currentTaskLabel = state.robot.current_task ? truncateLabel(state.robot.current_task) : t.noActiveTask
 
@@ -144,6 +145,13 @@ export default function App() {
             <button className={page === 'rollouts' ? 'active' : ''} type="button" onClick={() => setPage('rollouts')}>
               Rollouts
             </button>
+            <button
+              className={page === 'key_regions' ? 'active' : ''}
+              type="button"
+              onClick={() => setPage('key_regions')}
+            >
+              Key Regions
+            </button>
           </nav>
           <span className={`status-pill ${state.robot.timestamp ? 'live' : 'offline'}`}>{freshness}</span>
           <span className="status-pill mode">{state.robot.mode}</span>
@@ -166,6 +174,7 @@ export default function App() {
             <StatusItem label="Phase" value={state.rlt.training_phase} />
             <StatusItem label="Warmup" value={`${state.rlt.warmup_count} / ${state.rlt.warmup_target}`} />
             <StatusItem label="Replay" value={state.rlt.replay_size ?? '-'} />
+            <StatusItem label="RL Token" value={state.rlt.rl_token_checkpoint_path ? 'query/12000' : '-'} tone={state.rlt.rl_token_checkpoint_path ? 'ok' : 'watch'} />
             <StatusItem label="Actor" value={state.rlt.actor_effective ? 'active' : 'locked'} tone={state.rlt.actor_effective ? 'ok' : 'watch'} />
             <StatusItem label="Task" value={currentTaskLabel} />
             <StatusItem label="Alert" value={state.rlt.actor_locked_reason || 'OK'} tone={state.rlt.actor_locked_reason ? 'watch' : 'ok'} />
@@ -187,6 +196,13 @@ export default function App() {
             </aside>
           </section>
         </>
+      ) : page === 'key_regions' ? (
+        <RolloutBrowser
+          title="Key Regions"
+          rootPath="key_regions"
+          defaultCamera="cam_right_wrist.mp4"
+          showManifest
+        />
       ) : (
         <RolloutBrowser title="Collected Files" />
       )}

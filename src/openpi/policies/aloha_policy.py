@@ -51,7 +51,7 @@ class AlohaInputs(transforms.DataTransformFn):
 
         source_image_masks = data.get("image_masks", {})
 
-        def _to_scalar_bool(value: object, default: bool = True) -> np.ndarray:
+        def _to_scalar_bool(value: object, default: object = np.True_) -> np.ndarray:
             arr = np.asarray(default if value is None else value, dtype=bool)
             return np.asarray(arr.reshape(-1)[0], dtype=bool)
 
@@ -101,11 +101,15 @@ class AlohaOutputs(transforms.DataTransformFn):
     def __call__(self, data: dict) -> dict:
         # Only return the first 14 dims.
         actions = np.asarray(data["actions"][:, :14])
-        return {
+        outputs = {
             "actions": _encode_actions(actions, adapt_to_pi=self.adapt_to_pi),
             "state": data["state"],
             "origin_actions": data["origin_actions"],
         }
+        for key in ("z_rl", "rl_token", "proprio", "reference_action", "reference_actions"):
+            if key in data:
+                outputs[key] = data[key]
+        return outputs
 
 
 def _joint_flip_mask() -> np.ndarray:

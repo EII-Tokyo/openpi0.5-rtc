@@ -22,7 +22,28 @@ export type RolloutNode = {
   extension?: string
   size?: number
   modified?: number
+  manifest_summary?: RolloutManifestSummary
   children?: RolloutNode[]
+}
+
+export type RolloutManifestSummary = {
+  key_region_id?: string
+  task?: string
+  phase?: string
+  reward?: number
+  score_timeout?: boolean
+  start_time?: number
+  end_time?: number
+  score_time?: number
+  num_frames?: number
+  num_replay_transitions?: number
+  fps?: number
+  duration_seconds?: number
+}
+
+export const rolloutTreeUrl = (path?: string) => {
+  const query = path ? `?path=${encodeURIComponent(path)}` : ''
+  return `${apiBase}/api/rollouts/tree${query}`
 }
 
 export const rolloutVideoUrl = (path: string) => `${apiBase}/api/rollouts/video?path=${encodeURIComponent(path)}`
@@ -57,6 +78,7 @@ export type RLTControlState = {
   critic_loss: number | null
   actor_loss: number | null
   replay_size: number | null
+  rl_token_checkpoint_path: string | null
   events: RLTEvent[]
 }
 

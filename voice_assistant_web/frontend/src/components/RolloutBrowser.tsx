@@ -1,9 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
-import { apiBase, rolloutVideoUrl } from '../services/api'
-import type { RolloutNode } from '../services/api'
+import { rolloutTreeUrl, rolloutVideoUrl } from '../services/api'
+import type { RolloutManifestSummary, RolloutNode } from '../services/api'
 
 type RolloutBrowserProps = {
   title: string
+  rootPath?: string
+  defaultCamera?: string
+  showManifest?: boolean
 }
 
 const formatBytes = (bytes?: number) => {
@@ -26,6 +29,36 @@ const formatModified = (seconds?: number) => {
 const flattenVideos = (node: RolloutNode): RolloutNode[] => {
   if (node.type === 'file') return node.extension === '.mp4' ? [node] : []
   return (node.children || []).flatMap(flattenVideos)
+}
+
+const selectDefaultVideo = (videos: RolloutNode[], defaultCamera?: string) => {
+  const sorted = [...videos].sort((a, b) => (b.modified || 0) - (a.modified || 0))
+  if (!defaultCamera) return sorted[0] || null
+  return sorted.find((video) => video.name === defaultCamera) || sorted[0] || null
+}
+
+const formatManifestSummary = (manifest?: RolloutManifestSummary) => {
+  if (!manifest) return ''
+  const parts = []
+  if (manifest.phase) parts.push(manifest.phase)
+  if (manifest.reward !== undefined) parts.push(`reward ${manifest.reward}`)
+  if (manifest.score_timeout) parts.push('timeout')
+  if (manifest.duration_seconds !== undefined) parts.push(`${manifest.duration_seconds.toFixed(1)}s`)
+  if (manifest.num_replay_transitions !== undefined) parts.push(`${manifest.num_replay_transitions} samples`)
+  return parts.join(' / ')
+}
+
+const findManifestForPath = (node: RolloutNode, selectedPath: string): RolloutManifestSummary | undefined => {
+  if (node.type !== 'directory') return undefined
+  const nodePrefix = node.path ? `${node.path}/` : ''
+  const isAncestor = node.path === '' || selectedPath === node.path || selectedPath.startsWith(nodePrefix)
+  if (!isAncestor) return undefined
+
+  for (const child of node.children || []) {
+    const childMatch = findManifestForPath(child, selectedPath)
+    if (childMatch) return childMatch
+  }
+  return node.manifest_summary
 }
 
 const defaultExpanded = (node: RolloutNode, selectedPath: string) => {
@@ -53,12 +86,14 @@ function RolloutTreeNode({
   expanded,
   onToggle,
   onSelect,
+  showManifest,
 }: {
   node: RolloutNode
   selectedPath: string
   expanded: Set<string>
   onToggle: (path: string) => void
   onSelect: (node: RolloutNode) => void
+  showManifest?: boolean
 }) {
   const isDirectory = node.type === 'directory'
   const isExpanded = expanded.has(node.path)
@@ -70,6 +105,9 @@ function RolloutTreeNode({
         <button className="tree-row directory" type="button" onClick={() => onToggle(node.path)}>
           <span className="tree-twist">{isExpanded ? 'v' : '>'}</span>
           <span className="tree-name">{node.name || 'rollouts'}</span>
+          {showManifest && node.manifest_summary ? (
+            <span className="tree-size">{formatManifestSummary(node.manifest_summary)}</span>
+          ) : null}
         </button>
         {isExpanded && node.children?.length ? (
           <ul className="tree-children">
@@ -81,6 +119,7 @@ function RolloutTreeNode({
                 expanded={expanded}
                 onToggle={onToggle}
                 onSelect={onSelect}
+                showManifest={showManifest}
               />
             ))}
           </ul>
@@ -104,37 +143,53 @@ function RolloutTreeNode({
   )
 }
 
-export function RolloutBrowser({ title }: RolloutBrowserProps) {
+export function RolloutBrowser({ title, rootPath, defaultCamera, showManifest = false }: RolloutBrowserProps) {
   const [tree, setTree] = useState<RolloutNode | null>(null)
   const [selected, setSelected] = useState<RolloutNode | null>(null)
   const [expanded, setExpanded] = useState<Set<string>>(new Set(['']))
   const [error, setError] = useState('')
 
+  const loadTree = async () => {
+    setError('')
+    const response = await fetch(rolloutTreeUrl(rootPath))
+    if (!response.ok) throw new Error(`HTTP ${response.status}`)
+    const payload = (await response.json()) as RolloutNode
+    const videos = flattenVideos(payload)
+    const defaultVideo = selectDefaultVideo(videos, defaultCamera)
+    setTree(payload)
+    setSelected(defaultVideo)
+    setExpanded(defaultVideo ? defaultExpanded(payload, defaultVideo.path) : new Set([payload.path || '']))
+  }
+
   useEffect(() => {
     let ignore = false
-    const loadTree = async () => {
+    const loadCurrentTree = async () => {
       setError('')
       try {
-        const response = await fetch(`${apiBase}/api/rollouts/tree`)
+        const response = await fetch(rolloutTreeUrl(rootPath))
         if (!response.ok) throw new Error(`HTTP ${response.status}`)
         const payload = (await response.json()) as RolloutNode
         if (ignore) return
         const videos = flattenVideos(payload)
-        const newest = videos.sort((a, b) => (b.modified || 0) - (a.modified || 0))[0] || null
+        const newest = selectDefaultVideo(videos, defaultCamera)
         setTree(payload)
         setSelected(newest)
-        setExpanded(newest ? defaultExpanded(payload, newest.path) : new Set(['']))
+        setExpanded(newest ? defaultExpanded(payload, newest.path) : new Set([payload.path || '']))
       } catch {
         if (!ignore) setError('Rollouts could not be loaded.')
       }
     }
-    void loadTree()
+    void loadCurrentTree()
     return () => {
       ignore = true
     }
-  }, [])
+  }, [rootPath, defaultCamera])
 
   const videoSrc = useMemo(() => (selected?.extension === '.mp4' ? rolloutVideoUrl(selected.path) : ''), [selected])
+  const selectedManifest = useMemo(
+    () => (tree && selected ? findManifestForPath(tree, selected.path) : undefined),
+    [tree, selected],
+  )
 
   const toggle = (path: string) => {
     setExpanded((current) => {
@@ -159,20 +214,8 @@ export function RolloutBrowser({ title }: RolloutBrowserProps) {
             onClick={() => {
               setTree(null)
               setSelected(null)
-              setExpanded(new Set(['']))
-              setError('')
-              void fetch(`${apiBase}/api/rollouts/tree`)
-                .then((response) => {
-                  if (!response.ok) throw new Error()
-                  return response.json()
-                })
-                .then((payload: RolloutNode) => {
-                  const videos = flattenVideos(payload)
-                  const newest = videos.sort((a, b) => (b.modified || 0) - (a.modified || 0))[0] || null
-                  setTree(payload)
-                  setSelected(newest)
-                  setExpanded(newest ? defaultExpanded(payload, newest.path) : new Set(['']))
-                })
+              setExpanded(new Set([rootPath || '']))
+              void loadTree()
                 .catch(() => setError('Rollouts could not be loaded.'))
             }}
           >
@@ -189,6 +232,7 @@ export function RolloutBrowser({ title }: RolloutBrowserProps) {
                 expanded={expanded}
                 onToggle={toggle}
                 onSelect={setSelected}
+                showManifest={showManifest}
               />
             </ul>
           ) : (
@@ -216,6 +260,12 @@ export function RolloutBrowser({ title }: RolloutBrowserProps) {
           <span>{selected?.path || 'No file selected'}</span>
           <span>{formatModified(selected?.modified)}</span>
         </div>
+        {showManifest && selectedManifest ? (
+          <div className="rollout-file-meta">
+            <span>{formatManifestSummary(selectedManifest)}</span>
+            <span>{selectedManifest.task || selectedManifest.key_region_id || ''}</span>
+          </div>
+        ) : null}
       </section>
     </section>
   )

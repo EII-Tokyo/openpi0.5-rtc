@@ -30,8 +30,11 @@ class RLTControlStore:
             beta=settings.rlt_default_beta,
             intervention_scale=settings.rlt_default_intervention_scale,
             max_delta=settings.rlt_default_max_delta,
+            rl_token_checkpoint_path=settings.rlt_rl_token_checkpoint_path,
         )
         self._load()
+        if self._state.rl_token_checkpoint_path is None:
+            self._state.rl_token_checkpoint_path = settings.rlt_rl_token_checkpoint_path
 
     def start(self) -> None:
         if self._running:

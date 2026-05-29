@@ -30,6 +30,8 @@ class Args:
     actor_publish_interval: int = 500
     actor_lr: float = 1e-4
     critic_lr: float = 3e-4
+    train_action_horizon: int | None = 10
+    expected_replay_action_horizon: int | None = None
     wandb_enabled: bool = True
     wandb_project: str = "openpi"
     wandb_run_name: str = "rlt_actor_critic"
@@ -51,23 +53,49 @@ def _require_arrays(data: np.lib.npyio.NpzFile, keys: tuple[str, ...]) -> dict[s
     return {key: data[key] for key in keys}
 
 
-def _sample_batch(arrays: dict[str, np.ndarray], rng: np.random.Generator, batch_size: int) -> rlt_training.RLTReplayBatch:
+def _resolve_train_action_horizon(replay_action_horizon: int, train_action_horizon: int | None) -> int:
+    horizon = replay_action_horizon if train_action_horizon is None else train_action_horizon
+    if horizon <= 0:
+        raise ValueError("train_action_horizon must be positive")
+    if horizon > replay_action_horizon:
+        raise ValueError(
+            f"train_action_horizon={horizon} exceeds replay action_horizon={replay_action_horizon}"
+        )
+    if horizon != 10:
+        logging.warning("RLT paper default train action horizon is C=10; got %d", horizon)
+    return horizon
+
+
+def _sample_batch(
+    arrays: dict[str, np.ndarray],
+    rng: np.random.Generator,
+    batch_size: int,
+    *,
+    train_action_horizon: int | None = None,
+) -> rlt_training.RLTReplayBatch:
     replay_size = len(arrays["z_rl"])
     indices = rng.integers(0, replay_size, size=batch_size)
+    horizon = _resolve_train_action_horizon(arrays["action"].shape[-2], train_action_horizon)
     return rlt_training.make_replay_batch(
         z_rl=jnp.asarray(arrays["z_rl"][indices]),
         proprio=jnp.asarray(arrays["proprio"][indices]),
-        action=jnp.asarray(arrays["action"][indices]),
-        reference_action=jnp.asarray(arrays["reference_action"][indices]),
-        reward_seq=jnp.asarray(arrays["reward_seq"][indices]),
+        action=jnp.asarray(arrays["action"][indices, :horizon]),
+        reference_action=jnp.asarray(arrays["reference_action"][indices, :horizon]),
+        reward_seq=jnp.asarray(arrays["reward_seq"][indices, :horizon]),
         next_z_rl=jnp.asarray(arrays["next_z_rl"][indices]),
         next_proprio=jnp.asarray(arrays["next_proprio"][indices]),
-        next_reference_action=jnp.asarray(arrays["next_reference_action"][indices]),
+        next_reference_action=jnp.asarray(arrays["next_reference_action"][indices, :horizon]),
         done=jnp.asarray(arrays["done"][indices].astype(np.bool_)),
     )
 
 
-def _save_actor_for_inference(state: rlt_training.RLTTrainState, output_dir: pathlib.Path, step: int) -> None:
+def _save_actor_for_inference(
+    state: rlt_training.RLTTrainState,
+    output_dir: pathlib.Path,
+    step: int,
+    *,
+    action_horizon: int,
+) -> None:
     actor_dir = output_dir / "inference_actor" / f"{step:08d}"
     actor_dir.mkdir(parents=True, exist_ok=True)
     actor_params = rlt_training.actor_params_for_inference(state).to_pure_dict()
@@ -78,6 +106,7 @@ def _save_actor_for_inference(state: rlt_training.RLTTrainState, output_dir: pat
                 "step": step,
                 "type": "rlt_inference_actor",
                 "note": "Stable actor export. Runtime should switch only at chunk/idle boundary.",
+                "action_horizon": action_horizon,
             },
             indent=2,
         )
@@ -116,7 +145,12 @@ def main(args: Args) -> None:
 
     z_dim = int(arrays["z_rl"].shape[-1])
     proprio_dim = int(arrays["proprio"].shape[-1])
-    action_horizon = int(arrays["action"].shape[-2])
+    replay_action_horizon = int(arrays["action"].shape[-2])
+    if args.expected_replay_action_horizon is not None and replay_action_horizon != args.expected_replay_action_horizon:
+        raise ValueError(
+            f"Expected replay action horizon {args.expected_replay_action_horizon}, got {replay_action_horizon}"
+        )
+    action_horizon = _resolve_train_action_horizon(replay_action_horizon, args.train_action_horizon)
     action_dim = int(arrays["action"].shape[-1])
     config = rlt_training.RLTTrainingConfig(
         model=rlt.RLTConfig(
@@ -140,25 +174,27 @@ def main(args: Args) -> None:
             config={
                 **{key: str(value) if isinstance(value, pathlib.Path) else value for key, value in dataclasses.asdict(args).items()},
                 "replay_size": replay_size,
+                "replay_action_horizon": replay_action_horizon,
+                "train_action_horizon": action_horizon,
             },
         )
     else:
         wandb.init(mode="disabled")
 
-    _save_actor_for_inference(state, args.output_dir, 0)
+    _save_actor_for_inference(state, args.output_dir, 0, action_horizon=action_horizon)
     start = time.perf_counter()
     infos = []
     for step in tqdm.tqdm(range(args.num_train_steps), total=args.num_train_steps, dynamic_ncols=True):
-        batch = _sample_batch(arrays, replay_rng, args.batch_size)
+        batch = _sample_batch(arrays, replay_rng, args.batch_size, train_action_horizon=action_horizon)
         train_rng = jax.random.fold_in(jax.random.key(args.seed), step)
         state, info = rlt_training.train_step(state, batch, train_rng)
         infos.append(jax.device_get(info))
 
         next_step = int(state.step)
         if bool(info["publish_actor"]):
-            _save_actor_for_inference(state, args.output_dir, next_step)
+            _save_actor_for_inference(state, args.output_dir, next_step, action_horizon=action_horizon)
         if next_step % args.save_interval == 0:
-            _save_actor_for_inference(state, args.output_dir / "snapshots", next_step)
+            _save_actor_for_inference(state, args.output_dir / "snapshots", next_step, action_horizon=action_horizon)
         if next_step % args.log_interval == 0:
             reduced = {
                 key: float(np.mean([np.asarray(item[key]) for item in infos]))

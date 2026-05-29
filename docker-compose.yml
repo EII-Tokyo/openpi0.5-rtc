@@ -11,7 +11,7 @@ services:
     command: >-
       python3 /app/examples/aloha_real/main.py
       --model-dir
-      /app/checkpoints/eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo/no_rinse_cam3_fullft_return_home_29repo_bs256_nw64_fsdp4_20260520/19000
+      /app/checkpoints/eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo_rl_token_query/rl_token_2048_enc4_dec4_query_from_19000_20260528/12000
       --dataset-dir
       /app/rollouts/old_policy/unscrew_bottle_cap/2026-05-27
       --num-episodes
@@ -35,7 +35,9 @@ services:
     volumes:
       - $PWD:/app
       - /data/openpi0.5-rtc-reward-learning/rollouts:/app/rollouts
-      - /home/eii/openpi0.5-rtc/checkpoints:/app/checkpoints:ro
+      - $PWD/checkpoints:/app/checkpoints:ro
+    environment:
+      - RLT_RL_TOKEN_CHECKPOINT_PATH=/app/checkpoints/eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo_rl_token_query/rl_token_2048_enc4_dec4_query_from_19000_20260528/12000
 
   aloha_ros_nodes:
     image: lyl472324464/robot:aloha-ros1.0
@@ -73,15 +75,15 @@ services:
         ${SERVER_ARGS:---video-memory-num-frames 1
         --video-memory-stride-seconds 1.0
         policy:checkpoint
-        --policy.config eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo
+        --policy.config eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo_rl_token_query
         --policy.dir
-        /app/checkpoints/eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo/no_rinse_cam3_fullft_return_home_29repo_bs256_nw64_fsdp4_20260520/19000}
+        /app/checkpoints/eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo_rl_token_query/rl_token_2048_enc4_dec4_query_from_19000_20260528/12000}
     init: true
     tty: true
     network_mode: host
     volumes:
       - $PWD:/app
-      - /home/eii/openpi0.5-rtc/checkpoints:/app/checkpoints:ro
+      - $PWD/checkpoints:/app/checkpoints:ro
       - ${OPENPI_DATA_HOME:-~/.cache/openpi}:/openpi_assets
     environment:
       - GIT_LFS_SKIP_SMUDGE=1
@@ -97,6 +99,7 @@ services:
       - UV_NO_SYNC=1
       - UV_NO_DEV=1
       - PYTHONPATH=/app/src
+      - RLT_RL_TOKEN_CHECKPOINT_PATH=/app/checkpoints/eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo_rl_token_query/rl_token_2048_enc4_dec4_query_from_19000_20260528/12000
     gpus: all
 
   redis:

@@ -54,6 +54,7 @@ class RLTControlState(BaseModel):
     critic_loss: float | None = None
     actor_loss: float | None = None
     replay_size: int | None = None
+    rl_token_checkpoint_path: str | None = None
     events: list[RLTEvent] = Field(default_factory=list)
 
 

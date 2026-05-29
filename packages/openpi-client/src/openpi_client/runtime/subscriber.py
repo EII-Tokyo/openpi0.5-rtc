@@ -18,3 +18,12 @@ class Subscriber(abc.ABC):
     @abc.abstractmethod
     def on_episode_end(self, episode_subdir: str | None = None) -> None:
         """Called when an episode ends."""
+
+    def on_key_region_start(self, event: dict) -> None:
+        """Called when an RLT key region starts."""
+
+    def on_key_region_end(self, event: dict) -> None:
+        """Called when an RLT key region ends."""
+
+    def on_key_region_score(self, event: dict) -> None:
+        """Called when an RLT key region receives a terminal score."""
