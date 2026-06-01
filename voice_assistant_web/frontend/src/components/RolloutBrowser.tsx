@@ -1,6 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
-import { deleteKeyRegions, fetchRLTSegments, restoreKeyRegions, rolloutTreeUrl, rolloutVideoUrl, voidKeyRegions } from '../services/api'
-import type { RLTSegmentRecord, RolloutManifestSummary, RolloutNode } from '../services/api'
+import {
+  deleteKeyRegions,
+  fetchRLTKeyRegionReview,
+  restoreKeyRegions,
+  rolloutTreeUrl,
+  rolloutVideoUrl,
+  voidKeyRegions,
+} from '../services/api'
+import type { RLTKeyRegionReviewRecord, RolloutManifestSummary, RolloutNode } from '../services/api'
 
 type RolloutBrowserProps = {
   title: string
@@ -38,6 +45,19 @@ const formatModified = (seconds?: number) => {
 const formatKeyRegionTime = (manifest?: RolloutManifestSummary) => {
   const timestamp = manifest?.score_time || manifest?.end_time || manifest?.start_time
   if (!timestamp) return ''
+  return new Date(timestamp * 1000).toLocaleString(undefined, {
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  })
+}
+
+const formatReviewTime = (record: RLTKeyRegionReviewRecord) => {
+  const timestamp = record.score_time || record.end_time || record.start_time || record.updated_at
+  if (!timestamp) return record.key_region_id
   return new Date(timestamp * 1000).toLocaleString(undefined, {
     month: '2-digit',
     day: '2-digit',
@@ -100,6 +120,19 @@ const formatManifestSummary = (manifest?: RolloutManifestSummary) => {
   if (manifest.score_timeout) parts.push('timeout')
   if (manifest.duration_seconds !== undefined) parts.push(`${manifest.duration_seconds.toFixed(1)}s`)
   if (manifest.num_replay_transitions !== undefined) parts.push(`${manifest.num_replay_transitions} samples`)
+  return parts.join(' / ')
+}
+
+const formatReviewSummary = (record: RLTKeyRegionReviewRecord) => {
+  const parts = []
+  if (record.status) parts.push(record.status)
+  if (record.phase) parts.push(record.phase)
+  if (record.reward !== null && record.reward !== undefined) parts.push(`reward ${record.reward}`)
+  if (record.duration_seconds !== null && record.duration_seconds !== undefined) {
+    parts.push(`${record.duration_seconds.toFixed(1)}s`)
+  }
+  if (record.num_replay_transitions !== undefined) parts.push(`${record.num_replay_transitions} samples`)
+  if (!record.trainable && record.incomplete_reason) parts.push(record.incomplete_reason)
   return parts.join(' / ')
 }
 
@@ -212,14 +245,43 @@ export function RolloutBrowser({
   const [selected, setSelected] = useState<RolloutNode | null>(null)
   const [expanded, setExpanded] = useState<Set<string>>(new Set(['']))
   const [error, setError] = useState('')
-  const [segments, setSegments] = useState<RLTSegmentRecord[]>([])
+  const [reviewRecords, setReviewRecords] = useState<RLTKeyRegionReviewRecord[]>([])
+  const [reviewTab, setReviewTab] = useState<'trainable' | 'incomplete'>('trainable')
+  const [selectedReviewId, setSelectedReviewId] = useState('')
   const [selectedKeyRegionIds, setSelectedKeyRegionIds] = useState<Set<string>>(new Set())
   const [actionPending, setActionPending] = useState('')
   const [actionError, setActionError] = useState('')
 
-  const loadSegments = async () => {
+  const selectReviewRecord = (record: RLTKeyRegionReviewRecord) => {
+    setSelectedReviewId(record.key_region_id)
+    if (!record.default_video_path) {
+      setSelected(null)
+      return
+    }
+    const name = record.default_video_path.split('/').pop() || 'cam.mp4'
+    setSelected({
+      name,
+      path: record.default_video_path,
+      type: 'file',
+      extension: '.mp4',
+      modified: record.score_time || record.end_time || record.updated_at || undefined,
+    })
+  }
+
+  const loadReviewRecords = async () => {
     if (!enableKeyRegionActions) return
-    setSegments(await fetchRLTSegments())
+    const records = await fetchRLTKeyRegionReview()
+    setReviewRecords(records)
+    const visible = records.filter((record) => (reviewTab === 'trainable' ? record.trainable : !record.trainable))
+    const selectedStillVisible = visible.some((record) => record.key_region_id === selectedReviewId)
+    if (!selectedStillVisible) {
+      const next = visible[0] || records.find((record) => record.trainable) || records[0]
+      if (next) selectReviewRecord(next)
+      else {
+        setSelectedReviewId('')
+        setSelected(null)
+      }
+    }
   }
 
   const loadTree = async () => {
@@ -228,13 +290,13 @@ export function RolloutBrowser({
     if (!response.ok) throw new Error(`HTTP ${response.status}`)
     const rawPayload = (await response.json()) as RolloutNode
     const payload = filterTree(rawPayload, excludeRootPaths) || rawPayload
-    const videos = flattenVideos(payload)
-    const defaultVideo = selectDefaultVideo(videos, defaultCamera)
-    setTree(payload)
-    setSelected(defaultVideo)
-    setExpanded(defaultVideo ? defaultExpanded(payload, defaultVideo.path) : new Set([payload.path || '']))
-    await loadSegments()
-  }
+	    const videos = flattenVideos(payload)
+	    const defaultVideo = selectDefaultVideo(videos, defaultCamera)
+	    setTree(payload)
+	    if (!enableKeyRegionActions) setSelected(defaultVideo)
+	    setExpanded(defaultVideo ? defaultExpanded(payload, defaultVideo.path) : new Set([payload.path || '']))
+	    await loadReviewRecords()
+	  }
 
   useEffect(() => {
     let ignore = false
@@ -249,9 +311,9 @@ export function RolloutBrowser({
         const videos = flattenVideos(payload)
         const newest = selectDefaultVideo(videos, defaultCamera)
         setTree(payload)
-        setSelected(newest)
-        setExpanded(newest ? defaultExpanded(payload, newest.path) : new Set([payload.path || '']))
-        await loadSegments()
+	        if (!enableKeyRegionActions) setSelected(newest)
+	        setExpanded(newest ? defaultExpanded(payload, newest.path) : new Set([payload.path || '']))
+	        await loadReviewRecords()
       } catch {
         if (!ignore) setError('Rollouts could not be loaded.')
       }
@@ -260,15 +322,19 @@ export function RolloutBrowser({
     return () => {
       ignore = true
     }
-  }, [rootPath, defaultCamera, enableKeyRegionActions, excludeRootPaths.join('|')])
+  }, [rootPath, defaultCamera, enableKeyRegionActions, excludeRootPaths.join('|'), reviewTab])
 
   const videoSrc = useMemo(() => (selected?.extension === '.mp4' ? rolloutVideoUrl(selected.path) : ''), [selected])
   const selectedManifest = useMemo(
     () => (tree && selected ? findManifestForPath(tree, selected.path) : undefined),
     [tree, selected],
   )
-  const keyRegionEntries = useMemo(() => (tree ? flattenKeyRegions(tree) : []), [tree])
-  const segmentById = useMemo(() => new Map(segments.map((segment) => [segment.key_region_id, segment])), [segments])
+  const visibleReviewRecords = useMemo(
+    () => reviewRecords.filter((record) => (reviewTab === 'trainable' ? record.trainable : !record.trainable)),
+    [reviewRecords, reviewTab],
+  )
+  const trainableReviewCount = useMemo(() => reviewRecords.filter((record) => record.trainable).length, [reviewRecords])
+  const incompleteReviewCount = reviewRecords.length - trainableReviewCount
   const selectedCount = selectedKeyRegionIds.size
 
   const toggleKeyRegionSelection = (keyRegionId: string) => {
@@ -337,8 +403,56 @@ export function RolloutBrowser({
         </div>
         <div className="rollouts-tree-scroll">
           {error ? <p className="inline-error">{error}</p> : null}
-          {tree ? (
-            <ul className="rollouts-tree">
+	          {enableKeyRegionActions ? (
+	            <>
+	              <div className="tab-strip compact">
+	                <button
+	                  className={reviewTab === 'trainable' ? 'active' : ''}
+	                  type="button"
+	                  onClick={() => setReviewTab('trainable')}
+	                >
+	                  Trainable {trainableReviewCount}
+	                </button>
+	                <button
+	                  className={reviewTab === 'incomplete' ? 'active' : ''}
+	                  type="button"
+	                  onClick={() => setReviewTab('incomplete')}
+	                >
+	                  Incomplete {incompleteReviewCount}
+	                </button>
+	              </div>
+	              <div className="key-region-review-list primary">
+	                {visibleReviewRecords.map((record) => {
+	                  const checked = selectedKeyRegionIds.has(record.key_region_id)
+	                  const active = selectedReviewId === record.key_region_id
+	                  return (
+	                    <div
+	                      key={record.key_region_id}
+	                      className={`key-region-review-row ${checked ? 'selected' : ''} ${active ? 'active' : ''}`}
+	                    >
+	                      <label>
+	                        <input
+	                          type="checkbox"
+	                          checked={checked}
+	                          onChange={() => toggleKeyRegionSelection(record.key_region_id)}
+	                        />
+	                        <button className="link-button" type="button" onClick={() => selectReviewRecord(record)}>
+	                          {formatReviewTime(record)}
+	                        </button>
+	                      </label>
+	                      <small>{formatReviewSummary(record)}</small>
+	                    </div>
+	                  )
+	                })}
+	                {!visibleReviewRecords.length ? (
+	                  <p className="rollout-empty">
+	                    {reviewTab === 'trainable' ? 'No trainable key regions.' : 'No incomplete key regions.'}
+	                  </p>
+	                ) : null}
+	              </div>
+	            </>
+	          ) : tree ? (
+	            <ul className="rollouts-tree">
               <RolloutTreeNode
                 node={tree}
                 selectedPath={selected?.path || ''}
@@ -391,28 +505,6 @@ export function RolloutBrowser({
               </button>
             </div>
             {actionError ? <p className="inline-error">{actionError}</p> : null}
-            <div className="key-region-review-list">
-              {keyRegionEntries.map((entry) => {
-                const segment = segmentById.get(entry.keyRegionId)
-                const checked = selectedKeyRegionIds.has(entry.keyRegionId)
-                return (
-                  <div key={entry.keyRegionId} className={`key-region-review-row ${checked ? 'selected' : ''}`}>
-                    <label>
-                      <input
-                        type="checkbox"
-                        checked={checked}
-                        onChange={() => toggleKeyRegionSelection(entry.keyRegionId)}
-                      />
-                      <span>{entry.label}</span>
-                    </label>
-                    <button className="ghost-button" type="button" onClick={() => selectOnlyKeyRegion(entry.keyRegionId)}>
-                      Only
-                    </button>
-                    <small>{segment?.status || 'untracked'} / {formatManifestSummary(entry.manifest)}</small>
-                  </div>
-                )
-              })}
-            </div>
           </div>
         ) : null}
       </aside>

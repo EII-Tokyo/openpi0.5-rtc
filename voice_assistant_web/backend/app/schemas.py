@@ -154,6 +154,29 @@ class RLTSegmentRecord(BaseModel):
     updated_at: float
 
 
+class RLTKeyRegionReviewRecord(BaseModel):
+    key_region_id: str
+    status: str = "untracked"
+    trainable: bool = False
+    incomplete_reason: str | None = None
+    phase: str | None = None
+    reward: int | None = None
+    shard_path: str | None = None
+    npz_exists: bool = False
+    video_exists: bool = False
+    manifest_exists: bool = False
+    rollout_path: str | None = None
+    default_video_path: str | None = None
+    video_paths: list[str] = Field(default_factory=list)
+    task: str | None = None
+    start_time: float | None = None
+    end_time: float | None = None
+    score_time: float | None = None
+    duration_seconds: float | None = None
+    num_replay_transitions: int = 0
+    updated_at: float | None = None
+
+
 class RobotTaskRequest(BaseModel):
     task_num: str = Field(pattern="^[145]$")
     source: str = "ui"

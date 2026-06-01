@@ -34,6 +34,7 @@ from .schemas import RLTConfigRequest
 from .schemas import RLTControlRequest
 from .schemas import RLTControlState
 from .schemas import RLTDiscardRequest
+from .schemas import RLTKeyRegionReviewRecord
 from .schemas import RLTScoreRequest
 from .schemas import RLTSegmentRecord
 from .schemas import RLTVoidRequest
@@ -448,6 +449,113 @@ def rlt_status() -> RLTControlState:
 @app.get("/api/rlt/segments", response_model=list[RLTSegmentRecord])
 def rlt_segments(limit: int = 500) -> list[RLTSegmentRecord]:
     return [RLTSegmentRecord(**segment) for segment in rlt_control.list_segments(limit=limit)]
+
+
+def _host_path_for_container_path(path: str | None) -> Path | None:
+    if not path:
+        return None
+    candidate = Path(path)
+    if candidate.is_absolute() and candidate.parts[:3] == ("/", "app", "replay"):
+        try:
+            return (REPLAY_ROOT / candidate.relative_to("/app/replay")).resolve()
+        except ValueError:
+            return candidate
+    return candidate
+
+
+def _key_region_video_paths(rollout_dir: Path) -> list[str]:
+    if not rollout_dir.exists() or not rollout_dir.is_dir():
+        return []
+    videos = sorted(rollout_dir.glob("*.mp4"), key=lambda item: (item.name != "cam_right_wrist.mp4", item.name))
+    result = []
+    for video in videos:
+        with contextlib.suppress(ValueError):
+            result.append(str(video.resolve().relative_to(ROLLOUTS_ROOT)))
+    return result
+
+
+def _key_region_review_records() -> list[dict]:
+    by_id: dict[str, dict] = {}
+    segments = rlt_control.list_segments(limit=100000)
+    for segment in segments:
+        key_region_id = str(segment.get("key_region_id") or "")
+        if not key_region_id:
+            continue
+        by_id[key_region_id] = {
+            "key_region_id": key_region_id,
+            "status": str(segment.get("status") or "untracked"),
+            "phase": segment.get("phase"),
+            "reward": segment.get("reward"),
+            "shard_path": segment.get("shard_path"),
+            "num_replay_transitions": int(segment.get("num_replay_transitions") or 0),
+            "updated_at": segment.get("updated_at"),
+        }
+
+    rollout_root = (ROLLOUTS_ROOT / "key_regions").resolve()
+    if rollout_root.exists():
+        for manifest_path in rollout_root.glob("**/key_region_*/manifest.json"):
+            rollout_dir = manifest_path.parent
+            key_region_id = rollout_dir.name.removeprefix("key_region_")
+            record = by_id.setdefault(key_region_id, {"key_region_id": key_region_id, "status": "untracked"})
+            manifest = _manifest_summary(rollout_dir) or {}
+            record.update(
+                {
+                    "manifest_exists": True,
+                    "video_exists": bool(_key_region_video_paths(rollout_dir)),
+                    "rollout_path": str(rollout_dir.resolve().relative_to(ROLLOUTS_ROOT)),
+                    "video_paths": _key_region_video_paths(rollout_dir),
+                    "task": manifest.get("task"),
+                    "start_time": manifest.get("start_time"),
+                    "end_time": manifest.get("end_time"),
+                    "score_time": manifest.get("score_time"),
+                    "duration_seconds": manifest.get("duration_seconds"),
+                    "phase": record.get("phase") or manifest.get("phase"),
+                    "reward": record.get("reward") if record.get("reward") is not None else manifest.get("reward"),
+                    "num_replay_transitions": record.get("num_replay_transitions") or manifest.get("num_replay_transitions") or 0,
+                }
+            )
+            if record["video_paths"]:
+                record["default_video_path"] = record["video_paths"][0]
+
+    replay_root = (REPLAY_ROOT / "rlt_key_regions").resolve()
+    if replay_root.exists():
+        for shard_path in replay_root.glob("**/shards/key_region_*.npz"):
+            key_region_id = shard_path.stem.removeprefix("key_region_")
+            record = by_id.setdefault(key_region_id, {"key_region_id": key_region_id, "status": "orphan_npz"})
+            record["npz_exists"] = True
+            record.setdefault("shard_path", str(shard_path))
+
+    for record in by_id.values():
+        shard_path = _host_path_for_container_path(record.get("shard_path"))
+        if shard_path and shard_path.exists():
+            record["npz_exists"] = True
+        record["manifest_exists"] = bool(record.get("manifest_exists"))
+        record["video_exists"] = bool(record.get("video_exists"))
+        record["trainable"] = (
+            record.get("status") == "committed"
+            and bool(record.get("shard_path"))
+            and bool(record.get("npz_exists"))
+            and bool(record.get("manifest_exists"))
+            and bool(record.get("video_exists"))
+        )
+        if not record["trainable"]:
+            if record.get("status") != "committed":
+                reason = f"not_committed:{record.get('status') or 'untracked'}"
+            elif not record.get("shard_path") or not record.get("npz_exists"):
+                reason = "missing_npz"
+            elif not record.get("manifest_exists"):
+                reason = "missing_manifest"
+            elif not record.get("video_exists"):
+                reason = "missing_video"
+            else:
+                reason = "not_trainable"
+            record["incomplete_reason"] = reason
+    return sorted(by_id.values(), key=lambda item: item.get("score_time") or item.get("updated_at") or 0, reverse=True)
+
+
+@app.get("/api/rlt/key-regions/review", response_model=list[RLTKeyRegionReviewRecord])
+def rlt_key_region_review() -> list[RLTKeyRegionReviewRecord]:
+    return [RLTKeyRegionReviewRecord(**record) for record in _key_region_review_records()]
 
 
 def _delete_key_region_files(key_region_id: str) -> None:

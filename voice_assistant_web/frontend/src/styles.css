@@ -735,6 +735,10 @@ button {
   overflow: auto;
 }
 
+.key-region-review-list.primary {
+  max-height: none;
+}
+
 .key-region-review-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -747,6 +751,52 @@ button {
 
 .key-region-review-row.selected {
   outline: 2px solid #2463a6;
+}
+
+.key-region-review-row.active {
+  background: #e6f0ea;
+  outline: 2px solid #1d7355;
+}
+
+.tab-strip.compact {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  margin-bottom: 8px;
+  padding: 4px;
+  border-radius: 8px;
+  background: #e9e5dc;
+}
+
+.tab-strip.compact button,
+.link-button {
+  border: 0;
+  font: inherit;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.tab-strip.compact button {
+  min-height: 34px;
+  border-radius: 6px;
+  background: transparent;
+  color: #645d53;
+}
+
+.tab-strip.compact button.active {
+  background: #213b32;
+  color: #fffdf8;
+}
+
+.link-button {
+  min-width: 0;
+  padding: 0;
+  background: transparent;
+  color: #201d1a;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .key-region-review-row label {

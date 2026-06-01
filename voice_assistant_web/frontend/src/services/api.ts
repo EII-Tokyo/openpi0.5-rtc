@@ -66,6 +66,29 @@ export type RLTSegmentRecord = {
   updated_at: number
 }
 
+export type RLTKeyRegionReviewRecord = {
+  key_region_id: string
+  status: string
+  trainable: boolean
+  incomplete_reason: string | null
+  phase: string | null
+  reward: number | null
+  shard_path: string | null
+  npz_exists: boolean
+  video_exists: boolean
+  manifest_exists: boolean
+  rollout_path: string | null
+  default_video_path: string | null
+  video_paths: string[]
+  task: string | null
+  start_time: number | null
+  end_time: number | null
+  score_time: number | null
+  duration_seconds: number | null
+  num_replay_transitions: number
+  updated_at: number | null
+}
+
 export type RLTControlState = {
   phase: 'idle' | 'key_region' | 'await_score' | 'pending_replay' | string
   training_phase: 'warmup' | 'rl' | string
@@ -163,6 +186,7 @@ const postJson = async <T>(path: string, body: unknown = {}): Promise<T> => {
 }
 
 export const fetchRLTSegments = () => getJson<RLTSegmentRecord[]>('/api/rlt/segments')
+export const fetchRLTKeyRegionReview = () => getJson<RLTKeyRegionReviewRecord[]>('/api/rlt/key-regions/review')
 export const startKeyRegion = () => postJson<RLTControlState>('/api/rlt/key-region/start', { source: 'ui' })
 export const endKeyRegion = () => postJson<RLTControlState>('/api/rlt/key-region/end', { source: 'ui' })
 export const scoreKeyRegion = (reward: 0 | 1) =>

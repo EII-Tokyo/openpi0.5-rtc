@@ -75,8 +75,6 @@ services:
       50
       --rlt-chunk-stride
       2
-      --rlt-actor-path
-      /app/rlt_online/run/inference_actor/LATEST
       --video-codec
       h264
       --action-quality
