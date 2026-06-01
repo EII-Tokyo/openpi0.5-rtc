@@ -192,6 +192,29 @@ class RLTControlStore:
             self._publish_locked("key_region_batch_restore", {"source": source, "reason": reason, "key_region_ids": changed})
             return self._state.model_copy(deep=True)
 
+    def commit_key_region_from_files(
+        self,
+        *,
+        key_region_id: str,
+        phase: str,
+        reward: int,
+        shard_path: str,
+        num_replay_transitions: int,
+    ) -> RLTControlState:
+        with self._lock:
+            self._segment_ledger.record_committed(
+                key_region_id,
+                reward=reward,
+                phase=phase,
+                shard_path=shard_path,
+                num_replay_transitions=num_replay_transitions,
+            )
+            self._apply_ledger_stats_locked()
+            self._add_event_locked("reconcile_commit", f"{key_region_id}:{num_replay_transitions}")
+            self._refresh_derived_locked()
+            self._persist_locked()
+            return self._state.model_copy(deep=True)
+
     def delete_segments(
         self, key_region_ids: list[str], *, source: str = "ui", reason: str = "operator_delete"
     ) -> RLTControlState:

@@ -2,10 +2,8 @@ import { useEffect, useMemo, useState } from 'react'
 import {
   deleteKeyRegions,
   fetchRLTKeyRegionReview,
-  restoreKeyRegions,
   rolloutTreeUrl,
   rolloutVideoUrl,
-  voidKeyRegions,
 } from '../services/api'
 import type { RLTKeyRegionReviewRecord, RolloutManifestSummary, RolloutNode } from '../services/api'
 
@@ -475,22 +473,6 @@ export function RolloutBrowser({
               </button>
             </div>
             <div className="key-region-review-actions">
-              <button
-                className="apply-button"
-                type="button"
-                disabled={!selectedCount || !!actionPending}
-                onClick={() => void runBatchAction('restore', (ids) => restoreKeyRegions(ids, 'operator_restore'))}
-              >
-                Confirm selected
-              </button>
-              <button
-                className="apply-button danger"
-                type="button"
-                disabled={!selectedCount || !!actionPending}
-                onClick={() => void runBatchAction('void', (ids) => voidKeyRegions(ids, 'operator_batch_void'))}
-              >
-                Void selected
-              </button>
               <button
                 className="apply-button danger"
                 type="button"

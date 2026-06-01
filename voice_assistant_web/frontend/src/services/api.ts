@@ -78,6 +78,10 @@ export type RLTKeyRegionReviewRecord = {
   video_exists: boolean
   manifest_exists: boolean
   rollout_path: string | null
+  segment_status: string | null
+  train_eligible: boolean | null
+  replay_status: string | null
+  voided: boolean | null
   default_video_path: string | null
   video_paths: string[]
   task: string | null
@@ -197,10 +201,6 @@ export const discardKeyRegion = (reason = 'operator_discard') =>
   postJson<RLTControlState>('/api/rlt/key-region/discard', { source: 'ui', reason })
 export const voidKeyRegion = (keyRegionId: string, reason = 'operator_void') =>
   postJson<RLTControlState>(`/api/rlt/key-region/${encodeURIComponent(keyRegionId)}/void`, { source: 'ui', reason })
-export const voidKeyRegions = (keyRegionIds: string[], reason = 'operator_batch_void') =>
-  postJson<RLTControlState>('/api/rlt/key-regions/void', { key_region_ids: keyRegionIds, source: 'ui', reason })
-export const restoreKeyRegions = (keyRegionIds: string[], reason = 'operator_restore') =>
-  postJson<RLTControlState>('/api/rlt/key-regions/restore', { key_region_ids: keyRegionIds, source: 'ui', reason })
 export const deleteKeyRegions = (keyRegionIds: string[], reason = 'operator_delete') =>
   postJson<RLTControlState>('/api/rlt/key-regions/delete', { key_region_ids: keyRegionIds, source: 'ui', reason })
 export const updateRLTConfig = (config: Partial<RLTControlState>) =>

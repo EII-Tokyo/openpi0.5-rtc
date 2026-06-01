@@ -165,6 +165,11 @@ def _manifest_summary(path: Path) -> dict | None:
         "num_frames",
         "num_replay_transitions",
         "fps",
+        "segment_status",
+        "train_eligible",
+        "replay_status",
+        "voided",
+        "shard_path",
     }
     summary = {key: manifest[key] for key in summary_keys if key in manifest}
     if "start_time" in summary and "end_time" in summary:
@@ -474,6 +479,37 @@ def _key_region_video_paths(rollout_dir: Path) -> list[str]:
     return result
 
 
+def _record_has_trainable_files(record: dict) -> bool:
+    return (
+        bool(record.get("manifest_exists"))
+        and bool(record.get("video_exists"))
+        and bool(record.get("npz_exists"))
+        and bool(record.get("shard_path"))
+        and bool(record.get("train_eligible"))
+        and not bool(record.get("voided"))
+        and str(record.get("segment_status") or "") == "committed"
+        and int(record.get("num_replay_transitions") or 0) > 0
+    )
+
+
+def _record_can_auto_commit(record: dict) -> bool:
+    status = str(record.get("status") or "untracked")
+    return status in {"accepted", "untracked", "orphan_npz", "ended"} and _record_has_trainable_files(record)
+
+
+def _reconcile_key_region_record(record: dict) -> None:
+    if not _record_can_auto_commit(record):
+        return
+    rlt_control.commit_key_region_from_files(
+        key_region_id=str(record["key_region_id"]),
+        phase=str(record.get("phase") or "warmup"),
+        reward=int(record.get("reward") or 0),
+        shard_path=str(record["shard_path"]),
+        num_replay_transitions=int(record.get("num_replay_transitions") or 0),
+    )
+    record["status"] = "committed"
+
+
 def _key_region_review_records() -> list[dict]:
     by_id: dict[str, dict] = {}
     segments = rlt_control.list_segments(limit=100000)
@@ -510,6 +546,11 @@ def _key_region_review_records() -> list[dict]:
                     "score_time": manifest.get("score_time"),
                     "duration_seconds": manifest.get("duration_seconds"),
                     "phase": record.get("phase") or manifest.get("phase"),
+                    "segment_status": manifest.get("segment_status"),
+                    "train_eligible": manifest.get("train_eligible"),
+                    "replay_status": manifest.get("replay_status"),
+                    "voided": manifest.get("voided"),
+                    "shard_path": record.get("shard_path") or manifest.get("shard_path"),
                     "reward": record.get("reward") if record.get("reward") is not None else manifest.get("reward"),
                     "num_replay_transitions": record.get("num_replay_transitions") or manifest.get("num_replay_transitions") or 0,
                 }
@@ -523,7 +564,8 @@ def _key_region_review_records() -> list[dict]:
             key_region_id = shard_path.stem.removeprefix("key_region_")
             record = by_id.setdefault(key_region_id, {"key_region_id": key_region_id, "status": "orphan_npz"})
             record["npz_exists"] = True
-            record.setdefault("shard_path", str(shard_path))
+            if not record.get("shard_path"):
+                record["shard_path"] = str(shard_path)
 
     for record in by_id.values():
         shard_path = _host_path_for_container_path(record.get("shard_path"))
@@ -531,16 +573,15 @@ def _key_region_review_records() -> list[dict]:
             record["npz_exists"] = True
         record["manifest_exists"] = bool(record.get("manifest_exists"))
         record["video_exists"] = bool(record.get("video_exists"))
-        record["trainable"] = (
-            record.get("status") == "committed"
-            and bool(record.get("shard_path"))
-            and bool(record.get("npz_exists"))
-            and bool(record.get("manifest_exists"))
-            and bool(record.get("video_exists"))
-        )
+        _reconcile_key_region_record(record)
+        record["trainable"] = record.get("status") == "committed" and _record_has_trainable_files(record)
         if not record["trainable"]:
             if record.get("status") != "committed":
                 reason = f"not_committed:{record.get('status') or 'untracked'}"
+            elif record.get("train_eligible") is not True or record.get("segment_status") != "committed":
+                reason = "not_train_eligible"
+            elif record.get("voided"):
+                reason = "voided_manifest"
             elif not record.get("shard_path") or not record.get("npz_exists"):
                 reason = "missing_npz"
             elif not record.get("manifest_exists"):

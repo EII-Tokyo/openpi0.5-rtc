@@ -166,6 +166,10 @@ class RLTKeyRegionReviewRecord(BaseModel):
     video_exists: bool = False
     manifest_exists: bool = False
     rollout_path: str | None = None
+    segment_status: str | None = None
+    train_eligible: bool | None = None
+    replay_status: str | None = None
+    voided: bool | None = None
     default_video_path: str | None = None
     video_paths: list[str] = Field(default_factory=list)
     task: str | None = None
