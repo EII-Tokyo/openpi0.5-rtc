@@ -51,16 +51,53 @@ class RLTControlState(BaseModel):
     beta: float = 10.0
     intervention_scale: float = 0.25
     max_delta: float = 0.1
+    critic_gate_enabled: bool = False
+    critic_gate_margin: float = 0.0
+    critic_gate_temperature: float = 0.05
+    critic_ready: bool = False
+    inference_actor_active: bool = False
+    inference_delta_norm: float | None = None
+    inference_gate_reason: str | None = None
+    key_region_probability: float | None = None
+    loaded_actor_step: int | None = None
+    inference_reference_q_value: float | None = None
+    inference_actor_q_value: float | None = None
+    inference_q_advantage: float | None = None
     active_key_region_id: str | None = None
     score_deadline: float | None = None
     last_reward: int | None = None
     last_event: str | None = None
     wandb_url: str | None = None
     critic_loss: float | None = None
+    critic_q1_loss: float | None = None
+    critic_q2_loss: float | None = None
     actor_loss: float | None = None
+    actor_q_value: float | None = None
+    reference_q_value: float | None = None
+    q_advantage: float | None = None
+    actor_delta_norm: float | None = None
+    q1_mean: float | None = None
+    q2_mean: float | None = None
+    target_q_mean: float | None = None
+    q_gap: float | None = None
+    actor_updated: bool | None = None
+    publish_actor: bool | None = None
+    trainer_step: int | None = None
+    steps_per_sec: float | None = None
+    success_episodes: int | None = None
+    failure_episodes: int | None = None
+    replay_action_horizon: int | None = None
+    train_action_horizon: int | None = None
+    rlt_metrics_timestamp: float | None = None
     replay_size: int | None = None
     replay_shards: int | None = None
     bad_shards: int | None = None
+    trainable_replay_count: int = 0
+    trainable_replay_success: int = 0
+    trainable_replay_failure: int = 0
+    trainable_replay_samples: int = 0
+    trainable_replay_shards: int = 0
+    invalid_replay_shards: int = 0
     actor_checkpoint_path: str | None = None
     actor_checkpoint_step: int | None = None
     rl_token_checkpoint_path: str | None = None
@@ -78,6 +115,9 @@ class RLTConfigRequest(BaseModel):
     actor_enabled: bool | None = None
     intervention_scale: float | None = Field(default=None, ge=0, le=1)
     max_delta: float | None = Field(default=None, ge=0, le=10)
+    critic_gate_enabled: bool | None = None
+    critic_gate_margin: float | None = Field(default=None, ge=-1000, le=1000)
+    critic_gate_temperature: float | None = Field(default=None, gt=0, le=1000)
     wandb_url: str | None = None
 
 

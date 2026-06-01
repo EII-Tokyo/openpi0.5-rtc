@@ -221,3 +221,26 @@ def test_rlt_replay_store_rejects_manifest_marked_voided(tmp_path):
     store = rlt_replay_store.RLTReplayStore(tmp_path)
     assert store.scan() == []
     assert any("voided" in reason for reason in store.bad_shards().values())
+
+def test_rlt_replay_store_ready_can_require_committed_shard_count(tmp_path):
+    shards_dir = tmp_path / "shards"
+    shards_dir.mkdir()
+    np.savez(shards_dir / "success.npz", **_arrays(5, reward=1.0))
+    np.savez(shards_dir / "failure.npz", **_arrays(7, reward=0.0))
+
+    store = rlt_replay_store.RLTReplayStore(tmp_path)
+    store.scan()
+
+    assert store.ready(
+        min_replay_samples=12,
+        min_replay_shards=2,
+        min_success_episodes=1,
+        min_failure_episodes=1,
+    )
+    assert not store.ready(
+        min_replay_samples=12,
+        min_replay_shards=3,
+        min_success_episodes=1,
+        min_failure_episodes=1,
+    )
+

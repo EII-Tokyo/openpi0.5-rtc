@@ -41,16 +41,53 @@ const initialRLT: RLTControlState = {
   beta: 10,
   intervention_scale: 0.25,
   max_delta: 0.1,
+  critic_gate_enabled: false,
+  critic_gate_margin: 0,
+  critic_gate_temperature: 0.05,
+  critic_ready: false,
+  inference_actor_active: false,
+  inference_delta_norm: null,
+  inference_gate_reason: null,
+  key_region_probability: null,
+  loaded_actor_step: null,
+  inference_reference_q_value: null,
+  inference_actor_q_value: null,
+  inference_q_advantage: null,
   active_key_region_id: null,
   score_deadline: null,
   last_reward: null,
   last_event: null,
   wandb_url: null,
   critic_loss: null,
+  critic_q1_loss: null,
+  critic_q2_loss: null,
   actor_loss: null,
+  actor_q_value: null,
+  reference_q_value: null,
+  q_advantage: null,
+  actor_delta_norm: null,
+  q1_mean: null,
+  q2_mean: null,
+  target_q_mean: null,
+  q_gap: null,
+  actor_updated: null,
+  publish_actor: null,
+  trainer_step: null,
+  steps_per_sec: null,
+  success_episodes: null,
+  failure_episodes: null,
+  replay_action_horizon: null,
+  train_action_horizon: null,
+  rlt_metrics_timestamp: null,
   replay_size: null,
   replay_shards: null,
   bad_shards: null,
+  trainable_replay_count: 0,
+  trainable_replay_success: 0,
+  trainable_replay_failure: 0,
+  trainable_replay_samples: 0,
+  trainable_replay_shards: 0,
+  invalid_replay_shards: 0,
   actor_checkpoint_path: null,
   actor_checkpoint_step: null,
   rl_token_checkpoint_path: null,
@@ -182,9 +219,9 @@ export default function App() {
           <section className="rlt-status-strip">
             <StatusItem label="Control" value={state.rlt.phase} />
             <StatusItem label="Phase" value={state.rlt.training_phase} />
-            <StatusItem label="Warmup" value={`${state.rlt.warmup_count} / ${state.rlt.warmup_target}`} />
-            <StatusItem label="Confirmed" value={state.rlt.warmup_count + state.rlt.auto_rollout_count} />
-            <StatusItem label="Replay" value={state.rlt.replay_size ?? '-'} />
+            <StatusItem label="Trainable" value={`${state.rlt.trainable_replay_count} / ${state.rlt.warmup_target}`} />
+            <StatusItem label="Success" value={state.rlt.trainable_replay_success} />
+            <StatusItem label="Failure" value={state.rlt.trainable_replay_failure} />
             <StatusItem label="RL Token" value={state.rlt.rl_token_checkpoint_path ? 'query/12000' : '-'} tone={state.rlt.rl_token_checkpoint_path ? 'ok' : 'watch'} />
             <StatusItem label="Actor" value={state.rlt.actor_effective ? 'active' : 'locked'} tone={state.rlt.actor_effective ? 'ok' : 'watch'} />
             <StatusItem label="Task" value={currentTaskLabel} />
@@ -202,8 +239,8 @@ export default function App() {
             />
             <aside className="control-rail rlt-rail">
               <RLTControlPanel rlt={state.rlt} onState={setRLTState} />
-              <RLTStatsPanel rlt={state.rlt} />
               <RLTConfigPanel rlt={state.rlt} onState={setRLTState} />
+              <RLTStatsPanel rlt={state.rlt} />
             </aside>
           </section>
         </>
@@ -216,7 +253,7 @@ export default function App() {
           enableKeyRegionActions
         />
       ) : (
-        <RolloutBrowser title="Collected Files" />
+        <RolloutBrowser title="Collected Files" excludeRootPaths={["key_regions"]} />
       )}
     </main>
   )

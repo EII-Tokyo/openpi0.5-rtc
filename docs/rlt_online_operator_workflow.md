@@ -20,7 +20,7 @@ This runtime records key-region replay and is already wired with:
 ```text
 --rlt-full-horizon 50
 --rlt-train-horizon 10
---rlt-actor-path /app/rlt_online/inference_actor/LATEST
+--rlt-actor-path /app/rlt_online/run/inference_actor/LATEST
 ```
 
 During warmup, the backend sends `actor_requested=false`, so the actor loader is fail-closed and the robot follows the VLA reference policy.
@@ -40,7 +40,7 @@ The trainer scans:
 and writes actor exports to:
 
 ```text
-/app/rlt_online/inference_actor/LATEST
+/app/rlt_online/run/inference_actor/LATEST
 ```
 
 Replay shards store the 50-step policy chunk. Training samples the first 10 steps with `--train-action-horizon 10`; `--expected-replay-action-horizon 50` guards against accidentally mixing old 10-step shards.
@@ -96,4 +96,73 @@ docker compose --profile rlt logs -f rlt_warmup_runtime
 docker compose --profile rlt logs -f rlt_online_trainer
 find /data/openpi0.5-rtc-reward-learning/replay/rlt_key_regions -path '*shards/*.npz' | wc -l
 redis-cli SUBSCRIBE aloha_rlt_state
+```
+
+## Key-Region Video Encoding Fix
+
+### Problem
+
+Key-region recording must produce all rollout artifacts before a replay shard can be used for RLT training:
+
+```text
+rollouts/key_regions/<task>/<date>/<phase>/key_region_<id>/
+  cam_high.mp4
+  cam_low.mp4
+  cam_left_wrist.mp4
+  cam_right_wrist.mp4
+  episode.hdf5
+  manifest.json
+
+replay/rlt_key_regions/<task>/<date>/shards/key_region_<id>.npz
+```
+
+A previous runtime attempted to use GPU video encoding with `h264_nvenc -preset p4`. The ffmpeg build in the robot runtime image does not support that NVENC preset, so ffmpeg failed while writing the first camera. The result was a zero-byte `cam_high.mp4` and no `episode.hdf5`, `manifest.json`, or `.npz` shard.
+
+### Implemented Code Changes
+
+- `examples/aloha_real/main.py`: `rlt_prefer_gpu_video` defaults to `True`.
+- `examples/aloha_real/rlt_key_region_recorder.py`: `_FfmpegMp4Writer` uses `h264_nvenc` when a startup smoke test succeeds.
+- `examples/aloha_real/rlt_key_region_recorder.py`: NVENC uses FFmpeg 4.2-compatible presets, first `fast`, then `medium`; it does not use unsupported `p4`.
+- `examples/aloha_real/rlt_key_region_recorder.py`: if NVENC is unavailable or the smoke test fails, recording falls back to CPU `libx264 -preset veryfast -crf 23`.
+- `examples/aloha_real/rlt_key_region_recorder.py`: MP4 output is written to `<camera>.mp4.tmp` first; the final `<camera>.mp4` appears only after successful ffmpeg close.
+- `docker-compose.yml`: `rlt_warmup_runtime` exposes NVIDIA `video` capability and no longer passes `--no-rlt-prefer-gpu-video`.
+- `examples/aloha_real/rlt_key_region_recorder_test.py`: regression tests cover GPU encoder selection, CPU fallback, and cleanup after ffmpeg failure.
+
+### Restart After Pulling This Fix
+
+```bash
+cd /home/eii/openpi0.5-rtc-reward-learning
+docker compose --profile rlt up -d --no-deps --force-recreate rlt_warmup_runtime
+```
+
+### Verification
+
+After recording and confirming one key region, check that all artifacts exist and the MP4 files are nonzero:
+
+```bash
+find /data/openpi0.5-rtc-reward-learning/rollouts/key_regions -type f -name "*.mp4" -exec ls -lh {} +
+find /data/openpi0.5-rtc-reward-learning/rollouts/key_regions -type f -name "episode.hdf5" -exec ls -lh {} +
+find /data/openpi0.5-rtc-reward-learning/rollouts/key_regions -type f -name "manifest.json" -exec ls -lh {} +
+find /data/openpi0.5-rtc-reward-learning/replay/rlt_key_regions -path "*/shards/*.npz" -type f -exec ls -lh {} +
+```
+
+A valid segment should have four MP4 files, one HDF5 file, one manifest, and one NPZ shard. If any MP4 is zero bytes, treat the segment as invalid and check `rlt_warmup_runtime` logs for ffmpeg errors.
+
+### Removing Old Broken Key-Region Data
+
+The broken segments recorded before this fix have zero-byte MP4 files and no replay shards. Stop the writer/trainer before deleting them:
+
+```bash
+cd /home/eii/openpi0.5-rtc-reward-learning
+docker compose --profile rlt stop rlt_warmup_runtime rlt_online_trainer
+
+rm -rf /data/openpi0.5-rtc-reward-learning/replay/rlt_key_regions/*
+rm -rf /data/openpi0.5-rtc-reward-learning/rollouts/key_regions/*
+rm -f /data/openpi0.5-rtc-reward-learning/segment_db/segments.sqlite3 /data/openpi0.5-rtc-reward-learning/segment_db/segments.sqlite3-*
+```
+
+Then restart the trainer and warmup runtime:
+
+```bash
+docker compose --profile rlt up -d rlt_online_trainer rlt_warmup_runtime
 ```

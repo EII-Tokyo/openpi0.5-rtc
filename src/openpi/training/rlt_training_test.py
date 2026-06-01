@@ -64,6 +64,9 @@ def test_rlt_train_step_delays_actor_and_publish():
     assert bool(info4["publish_actor"])
     assert jnp.isfinite(info4["critic_loss"])
     assert jnp.isfinite(info4["actor_loss"])
+    assert jnp.isfinite(info4["reference_q_value"])
+    assert jnp.isfinite(info4["q_advantage"])
+    assert jnp.allclose(info4["q_advantage"], info4["actor_q_value"] - info4["reference_q_value"])
 
 
 def test_actor_params_for_inference_returns_online_actor_only():
@@ -71,5 +74,14 @@ def test_actor_params_for_inference_returns_online_actor_only():
     actor_params = rlt_training.actor_params_for_inference(state)
 
     flat_keys = actor_params.flat_state().keys()
+    assert flat_keys
+    assert all("target" not in "/".join(str(part) for part in key) for key in flat_keys)
+
+
+def test_critic_params_for_inference_returns_online_critic_only():
+    state = rlt_training.init_train_state(_make_config(), jax.random.key(0))
+    critic_params = rlt_training.critic_params_for_inference(state)
+
+    flat_keys = critic_params.flat_state().keys()
     assert flat_keys
     assert all("target" not in "/".join(str(part) for part in key) for key in flat_keys)

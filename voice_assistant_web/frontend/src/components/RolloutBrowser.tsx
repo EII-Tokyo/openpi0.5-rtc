@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { fetchRLTSegments, restoreKeyRegions, rolloutTreeUrl, rolloutVideoUrl, voidKeyRegions } from '../services/api'
+import { deleteKeyRegions, fetchRLTSegments, restoreKeyRegions, rolloutTreeUrl, rolloutVideoUrl, voidKeyRegions } from '../services/api'
 import type { RLTSegmentRecord, RolloutManifestSummary, RolloutNode } from '../services/api'
 
 type RolloutBrowserProps = {
@@ -8,6 +8,7 @@ type RolloutBrowserProps = {
   defaultCamera?: string
   showManifest?: boolean
   enableKeyRegionActions?: boolean
+  excludeRootPaths?: string[]
 }
 
 type KeyRegionEntry = {
@@ -34,6 +35,36 @@ const formatModified = (seconds?: number) => {
   return new Date(seconds * 1000).toLocaleString()
 }
 
+const formatKeyRegionTime = (manifest?: RolloutManifestSummary) => {
+  const timestamp = manifest?.score_time || manifest?.end_time || manifest?.start_time
+  if (!timestamp) return ''
+  return new Date(timestamp * 1000).toLocaleString(undefined, {
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  })
+}
+
+const keyRegionDisplayName = (node: Pick<RolloutNode, 'name' | 'manifest_summary'>) => {
+  const time = formatKeyRegionTime(node.manifest_summary)
+  if (!time) return node.name || node.manifest_summary?.key_region_id || 'key region'
+  return time
+}
+
+const filterTree = (node: RolloutNode, excludeRootPaths: string[]): RolloutNode | null => {
+  if (excludeRootPaths.includes(node.path)) return null
+  if (node.type === 'file') return node
+  return {
+    ...node,
+    children: (node.children || [])
+      .map((child) => filterTree(child, excludeRootPaths))
+      .filter((child): child is RolloutNode => child !== null),
+  }
+}
+
 const flattenVideos = (node: RolloutNode): RolloutNode[] => {
   if (node.type === 'file') return node.extension === '.mp4' ? [node] : []
   return (node.children || []).flatMap(flattenVideos)
@@ -45,7 +76,7 @@ const flattenKeyRegions = (node: RolloutNode): KeyRegionEntry[] => {
     entries.push({
       keyRegionId: node.manifest_summary.key_region_id,
       path: node.path,
-      label: node.name || node.manifest_summary.key_region_id,
+      label: keyRegionDisplayName(node),
       manifest: node.manifest_summary,
     })
   }
@@ -128,7 +159,9 @@ function RolloutTreeNode({
       <li>
         <button className="tree-row directory" type="button" onClick={() => onToggle(node.path)}>
           <span className="tree-twist">{isExpanded ? 'v' : '>'}</span>
-          <span className="tree-name">{node.name || 'rollouts'}</span>
+          <span className="tree-name" title={node.manifest_summary?.key_region_id || node.name}>
+            {node.manifest_summary?.key_region_id ? keyRegionDisplayName(node) : node.name || 'rollouts'}
+          </span>
           {showManifest && node.manifest_summary ? (
             <span className="tree-size">{formatManifestSummary(node.manifest_summary)}</span>
           ) : null}
@@ -173,6 +206,7 @@ export function RolloutBrowser({
   defaultCamera,
   showManifest = false,
   enableKeyRegionActions = false,
+  excludeRootPaths = [],
 }: RolloutBrowserProps) {
   const [tree, setTree] = useState<RolloutNode | null>(null)
   const [selected, setSelected] = useState<RolloutNode | null>(null)
@@ -192,7 +226,8 @@ export function RolloutBrowser({
     setError('')
     const response = await fetch(rolloutTreeUrl(rootPath))
     if (!response.ok) throw new Error(`HTTP ${response.status}`)
-    const payload = (await response.json()) as RolloutNode
+    const rawPayload = (await response.json()) as RolloutNode
+    const payload = filterTree(rawPayload, excludeRootPaths) || rawPayload
     const videos = flattenVideos(payload)
     const defaultVideo = selectDefaultVideo(videos, defaultCamera)
     setTree(payload)
@@ -208,8 +243,9 @@ export function RolloutBrowser({
       try {
         const response = await fetch(rolloutTreeUrl(rootPath))
         if (!response.ok) throw new Error(`HTTP ${response.status}`)
-        const payload = (await response.json()) as RolloutNode
+        const rawPayload = (await response.json()) as RolloutNode
         if (ignore) return
+        const payload = filterTree(rawPayload, excludeRootPaths) || rawPayload
         const videos = flattenVideos(payload)
         const newest = selectDefaultVideo(videos, defaultCamera)
         setTree(payload)
@@ -224,7 +260,7 @@ export function RolloutBrowser({
     return () => {
       ignore = true
     }
-  }, [rootPath, defaultCamera, enableKeyRegionActions])
+  }, [rootPath, defaultCamera, enableKeyRegionActions, excludeRootPaths.join('|')])
 
   const videoSrc = useMemo(() => (selected?.extension === '.mp4' ? rolloutVideoUrl(selected.path) : ''), [selected])
   const selectedManifest = useMemo(
@@ -259,7 +295,8 @@ export function RolloutBrowser({
     setActionPending(name)
     try {
       await action(ids)
-      await loadSegments()
+      setSelectedKeyRegionIds(new Set())
+      await loadTree()
     } catch (exc) {
       setActionError(exc instanceof Error ? exc.message : 'Batch action failed')
     } finally {
@@ -339,6 +376,18 @@ export function RolloutBrowser({
                 onClick={() => void runBatchAction('void', (ids) => voidKeyRegions(ids, 'operator_batch_void'))}
               >
                 Void selected
+              </button>
+              <button
+                className="apply-button danger"
+                type="button"
+                disabled={!selectedCount || !!actionPending}
+                onClick={() => {
+                  if (window.confirm(`Delete ${selectedCount} key region(s) and their files?`)) {
+                    void runBatchAction('delete', (ids) => deleteKeyRegions(ids, 'operator_delete'))
+                  }
+                }}
+              >
+                Delete selected
               </button>
             </div>
             {actionError ? <p className="inline-error">{actionError}</p> : null}

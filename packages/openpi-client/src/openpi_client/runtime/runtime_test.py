@@ -96,3 +96,52 @@ def test_control_event_preserves_backend_actor_effective_gate():
     assert context["actor_effective"] is False
     assert context["actor_requested"] is False
     assert context["actor_locked_reason"] == "actor_not_ready"
+
+
+def test_control_event_passes_critic_gate_config_to_context():
+    runtime = _runtime()
+    runtime._handle_rlt_control_event(
+        {
+            "type": "config_update",
+            "state": {
+                "critic_gate_enabled": True,
+                "critic_gate_margin": 0.15,
+                "critic_gate_temperature": 0.2,
+            },
+        }
+    )
+
+    context = runtime._build_rlt_context()
+    assert context["critic_gate_enabled"] is True
+    assert context["critic_gate_margin"] == 0.15
+    assert context["critic_gate_temperature"] == 0.2
+
+
+def test_update_rlt_actor_status_records_inference_metrics():
+    runtime = _runtime()
+    runtime._update_rlt_actor_status_from_action(
+        {
+            "rlt_actor_applied": True,
+            "rlt_actor_reason": None,
+            "rlt_actor_step": 32,
+            "rlt_actor_dir": "/tmp/actor",
+            "rlt_actor_delta_norm": 0.03,
+            "rlt_reference_q": 0.2,
+            "rlt_actor_q": 0.7,
+            "rlt_q_advantage": 0.5,
+            "rlt_key_region_probability": 0.9,
+            "rlt_gate_reason": "critic_gate_actor_active",
+            "rlt_critic_ready": True,
+            "rlt_critic_gate_enabled": True,
+        }
+    )
+
+    assert runtime._rlt_state["inference_actor_active"] is True
+    assert runtime._rlt_state["inference_delta_norm"] == 0.03
+    assert runtime._rlt_state["loaded_actor_step"] == 32
+    assert runtime._rlt_state["inference_reference_q_value"] == 0.2
+    assert runtime._rlt_state["inference_actor_q_value"] == 0.7
+    assert runtime._rlt_state["inference_q_advantage"] == 0.5
+    assert runtime._rlt_state["key_region_probability"] == 0.9
+    assert runtime._rlt_state["inference_gate_reason"] == "critic_gate_actor_active"
+    assert runtime._rlt_state["critic_ready"] is True

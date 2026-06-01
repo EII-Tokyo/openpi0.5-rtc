@@ -15,6 +15,7 @@ class Settings:
     camera_jpeg_quality: int = int(os.getenv("CAMERA_JPEG_QUALITY", "70"))
     realtime_hz: float = float(os.getenv("REALTIME_HZ", "10"))
     rollouts_root: str = os.getenv("ROLLOUTS_ROOT", "/app/rollouts")
+    replay_root: str = os.getenv("REPLAY_ROOT", "/app/replay")
     rlt_state_path: str = os.getenv("RLT_STATE_PATH", "/app/segment_db/rlt_control_state.json")
     rlt_segment_db_path: str = os.getenv("RLT_SEGMENT_DB_PATH", "/app/segment_db/segments.sqlite3")
     rlt_default_warmup_target: int = int(os.getenv("RLT_DEFAULT_WARMUP_TARGET", "100"))

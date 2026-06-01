@@ -34,10 +34,12 @@ class Args:
     scan_interval: float = 1.0
     wait_sleep_seconds: float = 1.0
     min_replay_samples: int = 512
+    min_replay_shards: int = 0
     min_success_episodes: int = 1
     min_failure_episodes: int = 1
     critic_burn_in_steps: int = 0
     actor_min_replay_samples: int = 0
+    actor_min_replay_shards: int = 0
     actor_min_success_episodes: int = 0
     actor_min_failure_episodes: int = 0
     max_replay_samples: int | None = None
@@ -57,6 +59,7 @@ class Args:
     redis_port: int = 6379
     redis_db: int = 0
     redis_state_channel: str = "aloha_rlt_state"
+    redis_control_channel: str = "aloha_rlt_control"
     overwrite: bool = False
 
 
@@ -129,10 +132,101 @@ class RedisMetricsPublisher:
                 self._warned = True
 
 
+class RedisControlSubscriber:
+    def __init__(
+        self,
+        *,
+        enabled: bool,
+        channel: str,
+        host: str = "localhost",
+        port: int = 6379,
+        db: int = 0,
+        redis_client=None,
+    ):
+        self._enabled = enabled
+        self._channel = channel
+        self._client = redis_client
+        self._pubsub = None
+        self._warned = False
+        if not self._enabled:
+            return
+        try:
+            if self._client is None:
+                import redis
+
+                self._client = redis.Redis(host=host, port=port, db=db, decode_responses=True)
+                self._client.ping()
+            self._pubsub = self._client.pubsub()
+            self._pubsub.subscribe(channel)
+        except Exception as exc:  # pragma: no cover - depends on operator environment.
+            self._enabled = False
+            self._pubsub = None
+            logging.warning("Disabling Redis RLT control subscriber: %s", exc)
+
+    def poll_beta_update(self) -> float | None:
+        if not self._enabled or self._pubsub is None:
+            return None
+        latest_beta = None
+        try:
+            while True:
+                message = self._pubsub.get_message(timeout=0.0)
+                if message is None:
+                    break
+                if message.get("type") != "message":
+                    continue
+                try:
+                    payload = json.loads(message.get("data", "{}"))
+                except json.JSONDecodeError:
+                    continue
+                if payload.get("type") != "config_update" or "beta" not in payload:
+                    continue
+                try:
+                    beta = float(payload["beta"])
+                except (TypeError, ValueError):
+                    continue
+                if beta >= 0.0:
+                    latest_beta = beta
+        except Exception as exc:
+            if not self._warned:
+                logging.warning("Failed to read RLT control update from Redis: %s", exc)
+                self._warned = True
+        return latest_beta
+
+    def close(self) -> None:
+        if self._pubsub is None:
+            return
+        try:
+            self._pubsub.close()
+        except Exception:
+            pass
+
+
+def _with_runtime_beta(state: rlt_training.RLTTrainState, beta: float) -> rlt_training.RLTTrainState:
+    model = nnx.merge(state.model_def, state.params)
+    beta = float(beta)
+    if float(model.config.beta) == beta:
+        return state
+    config = dataclasses.replace(model.config, beta=beta)
+    model.config = config
+    model.actor.config = config
+    model.critic.q1.config = config
+    model.critic.q2.config = config
+    model.target_actor.config = config
+    model.target_critic.q1.config = config
+    model.target_critic.q2.config = config
+    return dataclasses.replace(state, model_def=nnx.graphdef(model), params=nnx.state(model))
+
+
 def _json_float(value):
     if value is None:
         return None
     return float(value)
+
+
+def _json_bool(value):
+    if value is None:
+        return None
+    return bool(value)
 
 
 def _build_metrics_payload(
@@ -147,12 +241,27 @@ def _build_metrics_payload(
     latest_actor_step: int | None = None,
     wandb_url: str | None = None,
 ) -> dict:
+    q1_mean = _json_float(reduced.get("q1_mean"))
+    q2_mean = _json_float(reduced.get("q2_mean"))
     return {
         "type": "rlt_trainer_metrics",
         "timestamp": time.time(),
         "trainer_step": int(step),
         "critic_loss": _json_float(reduced.get("critic_loss")),
+        "critic_q1_loss": _json_float(reduced.get("critic_q1_loss")),
+        "critic_q2_loss": _json_float(reduced.get("critic_q2_loss")),
         "actor_loss": _json_float(reduced.get("actor_loss")),
+        "actor_q_value": _json_float(reduced.get("actor_q_value")),
+        "reference_q_value": _json_float(reduced.get("reference_q_value")),
+        "q_advantage": _json_float(reduced.get("q_advantage")),
+        "actor_delta_norm": _json_float(reduced.get("actor_delta_norm")),
+        "q1_mean": q1_mean,
+        "q2_mean": q2_mean,
+        "target_q_mean": _json_float(reduced.get("target_q_mean")),
+        "q_gap": None if q1_mean is None or q2_mean is None else abs(q1_mean - q2_mean),
+        "actor_updated": _json_bool(reduced.get("actor_updated")),
+        "publish_actor": _json_bool(reduced.get("publish_actor")),
+        "beta": _json_float(reduced.get("beta")),
         "replay_size": int(stats.replay_size),
         "wandb_url": wandb_url,
         "actor_enabled": bool(actor_enabled),
@@ -191,8 +300,11 @@ def _save_actor_for_inference(
     actor_dir = output_dir / "inference_actor" / f"{step:08d}"
     actor_dir.mkdir(parents=True, exist_ok=True)
     actor_params = rlt_training.actor_params_for_inference(state).to_pure_dict()
+    critic_params = rlt_training.critic_params_for_inference(state).to_pure_dict()
     actor_bytes = serialization.to_bytes(actor_params)
+    critic_bytes = serialization.to_bytes(critic_params)
     _atomic_write_bytes(actor_dir / "actor.msgpack", actor_bytes)
+    _atomic_write_bytes(actor_dir / "critic.msgpack", critic_bytes)
     model = nnx.merge(state.model_def, state.params)
     _atomic_write_text(
         actor_dir / "metadata.json",
@@ -208,6 +320,8 @@ def _save_actor_for_inference(
                 "note": "Stable actor export. Runtime should switch only at chunk/idle boundary.",
                 "actor_file": "actor.msgpack",
                 "actor_sha256": _sha256_bytes(actor_bytes),
+                "critic_file": "critic.msgpack",
+                "critic_sha256": _sha256_bytes(critic_bytes),
                 "action_horizon": int(action_horizon),
                 "rlt_config": dataclasses.asdict(model.config),
                 "replay_shape": _shape_metadata(replay_shape),
@@ -293,6 +407,7 @@ def _wait_for_replay(args: Args, store: rlt_replay_store.RLTReplayStore) -> None
             min_replay_samples=args.min_replay_samples,
             min_success_episodes=args.min_success_episodes,
             min_failure_episodes=args.min_failure_episodes,
+            min_replay_shards=args.min_replay_shards,
         ):
             store.scan()
             stats = store.stats
@@ -310,10 +425,12 @@ def _actor_updates_enabled(args: Args, store: rlt_replay_store.RLTReplayStore, s
         return False
     stats = store.stats
     actor_min_replay = args.actor_min_replay_samples or args.min_replay_samples
+    actor_min_shards = args.actor_min_replay_shards or args.min_replay_shards
     actor_min_success = args.actor_min_success_episodes or args.min_success_episodes
     actor_min_failure = args.actor_min_failure_episodes or args.min_failure_episodes
     return (
         stats.replay_size >= actor_min_replay
+        and stats.num_shards >= actor_min_shards
         and stats.success_episodes >= actor_min_success
         and stats.failure_episodes >= actor_min_failure
     )
@@ -342,11 +459,6 @@ def _state_for_actor_gate(
 def main(args: Args) -> None:
     _init_logging()
     logging.info("Running online RLT trainer on %s", platform.node())
-    if args.output_dir.exists():
-        if not args.overwrite:
-            raise FileExistsError(f"{args.output_dir} exists. Pass --overwrite to replace it.")
-        shutil.rmtree(args.output_dir)
-    args.output_dir.mkdir(parents=True, exist_ok=True)
 
     store = rlt_replay_store.RLTReplayStore(
         args.replay_dir,
@@ -371,6 +483,12 @@ def main(args: Args) -> None:
         raise ValueError(f"No valid replay shards found in {args.replay_dir}")
     logging.info("Replay ready: %s, replay_shape=%s, train_shape=%s", store.stats, replay_shape, shape)
 
+    if args.output_dir.exists():
+        if not args.overwrite:
+            raise FileExistsError(f"{args.output_dir} exists. Pass --overwrite to replace it.")
+        shutil.rmtree(args.output_dir)
+    args.output_dir.mkdir(parents=True, exist_ok=True)
+
     config = rlt_training.RLTTrainingConfig(
         model=rlt.RLTConfig(
             z_dim=shape.z_dim,
@@ -394,6 +512,14 @@ def main(args: Args) -> None:
         port=args.redis_port,
         db=args.redis_db,
     )
+    control_subscriber = RedisControlSubscriber(
+        enabled=args.redis_enabled,
+        channel=args.redis_control_channel,
+        host=args.redis_host,
+        port=args.redis_port,
+        db=args.redis_db,
+    )
+    runtime_beta = float(config.model.beta)
 
     initial_actor_dir = _save_actor_for_inference(
         state,
@@ -437,11 +563,18 @@ def main(args: Args) -> None:
                 min_replay_samples=args.min_replay_samples,
                 min_success_episodes=args.min_success_episodes,
                 min_failure_episodes=args.min_failure_episodes,
+                min_replay_shards=args.min_replay_shards,
             ):
                 time.sleep(args.wait_sleep_seconds)
                 continue
 
             next_step = int(state.step) + 1
+            beta_update = control_subscriber.poll_beta_update()
+            if beta_update is not None and beta_update != runtime_beta:
+                runtime_beta = beta_update
+                state = _with_runtime_beta(state, runtime_beta)
+                logging.info("Updated runtime RLT beta to %.4f", runtime_beta)
+
             actor_enabled = _actor_updates_enabled(args, store, next_step)
             state = _state_for_actor_gate(
                 state,

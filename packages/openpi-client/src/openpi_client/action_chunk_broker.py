@@ -147,7 +147,7 @@ class ActionChunkBroker(_base_policy.BasePolicy):
                     log_parts.append(f"rpc_overhead_ms={float(overhead_ms):.1f}")
                 if prev_total_ms is not None:
                     log_parts.append(f"prev_total_ms={float(prev_total_ms):.1f}")
-                logging.debug(" ".join(log_parts))
+                logging.info(" ".join(log_parts))
             else:
                 time.sleep(0.01)
 
@@ -227,6 +227,13 @@ class ActionChunkBroker(_base_policy.BasePolicy):
                     "rlt_actor_dir": None,
                     "rlt_actor_delta_norm": None,
                     "rlt_actor_max_abs_delta": None,
+                    "rlt_reference_q": None,
+                    "rlt_actor_q": None,
+                    "rlt_q_advantage": None,
+                    "rlt_key_region_probability": None,
+                    "rlt_gate_reason": None,
+                    "rlt_critic_ready": False,
+                    "rlt_critic_gate_enabled": False,
                 }
             )
             return policy_results
@@ -242,6 +249,13 @@ class ActionChunkBroker(_base_policy.BasePolicy):
                     "rlt_actor_dir": None,
                     "rlt_actor_delta_norm": None,
                     "rlt_actor_max_abs_delta": None,
+                    "rlt_reference_q": None,
+                    "rlt_actor_q": None,
+                    "rlt_q_advantage": None,
+                    "rlt_key_region_probability": None,
+                    "rlt_gate_reason": None,
+                    "rlt_critic_ready": False,
+                    "rlt_critic_gate_enabled": False,
                 }
             )
             return policy_results
@@ -263,6 +277,13 @@ class ActionChunkBroker(_base_policy.BasePolicy):
                     "rlt_actor_dir": None,
                     "rlt_actor_delta_norm": None,
                     "rlt_actor_max_abs_delta": None,
+                    "rlt_reference_q": None,
+                    "rlt_actor_q": None,
+                    "rlt_q_advantage": None,
+                    "rlt_key_region_probability": None,
+                    "rlt_gate_reason": None,
+                    "rlt_critic_ready": False,
+                    "rlt_critic_gate_enabled": False,
                 }
             )
             return policy_results
@@ -277,6 +298,13 @@ class ActionChunkBroker(_base_policy.BasePolicy):
                 "rlt_actor_dir": result.actor_dir,
                 "rlt_actor_delta_norm": result.delta_norm,
                 "rlt_actor_max_abs_delta": result.max_abs_delta,
+                "rlt_reference_q": result.reference_q_value,
+                "rlt_actor_q": result.actor_q_value,
+                "rlt_q_advantage": result.q_advantage,
+                "rlt_key_region_probability": result.key_region_probability,
+                "rlt_gate_reason": result.gate_reason,
+                "rlt_critic_ready": result.critic_ready,
+                "rlt_critic_gate_enabled": result.critic_gate_enabled,
             }
         )
         return policy_results
@@ -302,6 +330,13 @@ class ActionChunkBroker(_base_policy.BasePolicy):
             ("rlt_actor_dir", "rlt_actor_dir"),
             ("rlt_actor_delta_norm", "rlt_actor_delta_norm"),
             ("rlt_actor_max_abs_delta", "rlt_actor_max_abs_delta"),
+            ("rlt_reference_q", "rlt_reference_q"),
+            ("rlt_actor_q", "rlt_actor_q"),
+            ("rlt_q_advantage", "rlt_q_advantage"),
+            ("rlt_key_region_probability", "rlt_key_region_probability"),
+            ("rlt_gate_reason", "rlt_gate_reason"),
+            ("rlt_critic_ready", "rlt_critic_ready"),
+            ("rlt_critic_gate_enabled", "rlt_critic_gate_enabled"),
         ):
             if source_key in policy_results and target_key not in cached:
                 cached[target_key] = policy_results[source_key]

@@ -60,12 +60,11 @@ class KeyRegionSegment:
 
 class _FfmpegMp4Writer:
     def __init__(self, path: pathlib.Path, *, fps: float, width: int, height: int, prefer_gpu: bool = True) -> None:
-        encoder = "libx264"
-        preset_args = ["-preset", "veryfast", "-crf", "23"]
-        if prefer_gpu and _ffmpeg_supports_encoder("h264_nvenc"):
-            encoder = "h264_nvenc"
-            preset_args = ["-preset", "p4", "-cq", "23"]
+        encoder, preset_args = _select_ffmpeg_video_encoder(prefer_gpu)
         self._path = path
+        self._tmp_path = path.with_suffix(path.suffix + ".tmp")
+        if self._tmp_path.exists():
+            self._tmp_path.unlink()
         self._process = subprocess.Popen(
             [
                 "ffmpeg",
@@ -91,7 +90,9 @@ class _FfmpegMp4Writer:
                 "yuv420p",
                 "-movflags",
                 "+faststart",
-                str(path),
+                "-f",
+                "mp4",
+                str(self._tmp_path),
             ],
             stdin=subprocess.PIPE,
         )
@@ -106,10 +107,14 @@ class _FfmpegMp4Writer:
             self._process.stdin.close()
         return_code = self._process.wait()
         if return_code != 0:
+            if self._tmp_path.exists():
+                self._tmp_path.unlink()
             raise RuntimeError(f"ffmpeg failed with exit code {return_code} for {self._path}")
+        os.replace(self._tmp_path, self._path)
 
 
 _FFMPEG_ENCODER_CACHE: dict[str, bool] = {}
+_FFMPEG_NVENC_SMOKE_CACHE: dict[str, bool] = {}
 
 
 class _RedisReplayAckPublisher:
@@ -157,6 +162,64 @@ def _ffmpeg_supports_encoder(encoder: str) -> bool:
     supported = encoder in result.stdout
     _FFMPEG_ENCODER_CACHE[encoder] = supported
     return supported
+
+
+def _ffmpeg_nvenc_smoke_test(preset: str) -> bool:
+    cached = _FFMPEG_NVENC_SMOKE_CACHE.get(preset)
+    if cached is not None:
+        return cached
+    if shutil.which("ffmpeg") is None:
+        _FFMPEG_NVENC_SMOKE_CACHE[preset] = False
+        return False
+    try:
+        result = subprocess.run(
+            [
+                "ffmpeg",
+                "-hide_banner",
+                "-loglevel",
+                "error",
+                "-y",
+                "-f",
+                "lavfi",
+                "-i",
+                "testsrc2=size=160x120:rate=5",
+                "-t",
+                "1",
+                "-an",
+                "-c:v",
+                "h264_nvenc",
+                "-preset",
+                preset,
+                "-rc",
+                "vbr",
+                "-cq",
+                "28",
+                "-pix_fmt",
+                "yuv420p",
+                "-f",
+                "null",
+                "-",
+            ],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+    except (OSError, subprocess.SubprocessError):
+        _FFMPEG_NVENC_SMOKE_CACHE[preset] = False
+        return False
+    supported = result.returncode == 0
+    _FFMPEG_NVENC_SMOKE_CACHE[preset] = supported
+    return supported
+
+
+def _select_ffmpeg_video_encoder(prefer_gpu: bool) -> tuple[str, list[str]]:
+    if prefer_gpu and _ffmpeg_supports_encoder("h264_nvenc"):
+        for preset in ("fast", "medium"):
+            if _ffmpeg_nvenc_smoke_test(preset):
+                return "h264_nvenc", ["-preset", preset, "-rc", "vbr", "-cq", "23"]
+        logging.warning("h264_nvenc is present but failed smoke tests; falling back to libx264")
+    return "libx264", ["-preset", "veryfast", "-crf", "23"]
 
 
 def _safe_name(value: str | None, fallback: str = "unknown") -> str:
@@ -545,7 +608,10 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
         reward = float(score_event.get("reward", 0.0))
         samples: dict[str, list[np.ndarray]] = {key: [] for key in _REPLAY_KEYS}
         last_start = len(records) - (2 * train_horizon)
-        for start in range(0, max(last_start + 1, 0), self._chunk_stride):
+        starts = list(range(0, max(last_start + 1, 0), self._chunk_stride))
+        if starts and starts[-1] != last_start:
+            starts.append(last_start)
+        for start in starts:
             current = records[start]
             next_record = records[start + train_horizon]
             action_chunk = _prefix_full_chunk(current.action_full, full_horizon)

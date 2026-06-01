@@ -35,6 +35,33 @@ class ModelType(enum.Enum):
     PI05 = "pi05"
 
 
+def _normalize_rl_token_block_keys(params: at.Params) -> at.Params:
+    if not isinstance(params, dict):
+        return params
+    autoencoder = params.get("rl_token_autoencoder")
+    if not isinstance(autoencoder, dict):
+        return params
+    for block_name in ("encoder_blocks", "decoder_blocks"):
+        blocks = autoencoder.get(block_name)
+        if isinstance(blocks, dict):
+            autoencoder[block_name] = {
+                int(key) if isinstance(key, str) and key.isdigit() else key: value for key, value in blocks.items()
+            }
+    return params
+
+
+def _fill_missing_none_leaves(expected: at.Params, params: at.Params) -> at.Params:
+    if not isinstance(expected, dict) or not isinstance(params, dict):
+        return params
+    for key, expected_value in expected.items():
+        if key not in params:
+            if expected_value is None:
+                params[key] = None
+            continue
+        params[key] = _fill_missing_none_leaves(expected_value, params[key])
+    return params
+
+
 # The model always expects these image views.
 IMAGE_KEYS = (
     "base_0_rgb",
@@ -298,9 +325,13 @@ class BaseModelConfig(abc.ABC):
         model = nnx.eval_shape(self.create, jax.random.key(0))
         graphdef, state = nnx.split(model)
         params = _expand_scanned_siglip_encoder_params(state.to_pure_dict(), params)
+        params = _normalize_rl_token_block_keys(params)
+        expected_params = state.to_pure_dict()
         if remove_extra_params:
-            params = ocp.transform_utils.intersect_trees(state.to_pure_dict(), params)
-        at.check_pytree_equality(expected=state.to_pure_dict(), got=params, check_shapes=True, check_dtypes=False)
+            params = ocp.transform_utils.intersect_trees(expected_params, params)
+            params = _normalize_rl_token_block_keys(params)
+        params = _fill_missing_none_leaves(expected_params, params)
+        at.check_pytree_equality(expected=expected_params, got=params, check_shapes=True, check_dtypes=False)
         state.replace_by_pure_dict(params)
         return nnx.merge(graphdef, state)
 

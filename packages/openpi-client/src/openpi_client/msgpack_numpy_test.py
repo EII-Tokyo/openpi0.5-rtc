@@ -43,3 +43,14 @@ def test_pack_unpack(data):
     packed = msgpack_numpy.packb(data)
     unpacked = msgpack_numpy.unpackb(packed)
     tree.map_structure(_check, data, unpacked)
+
+
+def test_pack_bfloat16_array_as_float32():
+    ml_dtypes = pytest.importorskip("ml_dtypes")
+    data = np.asarray([1.5, 2.5], dtype=ml_dtypes.bfloat16)
+
+    packed = msgpack_numpy.packb(data)
+    unpacked = msgpack_numpy.unpackb(packed)
+
+    assert unpacked.dtype == np.float32
+    np.testing.assert_allclose(unpacked, np.asarray(data, dtype=np.float32))

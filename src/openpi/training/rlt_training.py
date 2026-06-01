@@ -97,6 +97,11 @@ def actor_params_for_inference(state: RLTTrainState) -> nnx.State:
     return nnx.state(model.actor)
 
 
+def critic_params_for_inference(state: RLTTrainState) -> nnx.State:
+    model = nnx.merge(state.model_def, state.params)
+    return nnx.state(model.critic)
+
+
 def train_step(
     state: RLTTrainState,
     batch: RLTReplayBatch,
@@ -139,6 +144,8 @@ def train_step(
     actor_updated = next_step % state.policy_delay == 0
     actor_loss_value = jnp.asarray(0.0, dtype=critic_loss_value.dtype)
     actor_q_value = jnp.asarray(0.0, dtype=critic_loss_value.dtype)
+    reference_q_value = jnp.asarray(0.0, dtype=critic_loss_value.dtype)
+    q_advantage = jnp.asarray(0.0, dtype=critic_loss_value.dtype)
     actor_delta_norm = jnp.asarray(0.0, dtype=critic_loss_value.dtype)
     actor_opt_state = state.actor_opt_state
     if actor_updated:
@@ -146,10 +153,15 @@ def train_step(
         def actor_loss_fn(actor: rlt.RLTActor):
             action = actor(batch.x, batch.reference_action, rng=actor_rng, sample=False)
             q1_for_actor = model.critic.q1(batch.x, action)
+            q1_for_reference = model.critic.q1(batch.x, batch.reference_action)
             loss = rlt.actor_loss(q1_for_actor, action, batch.reference_action, beta=model.config.beta)
             delta = action - batch.reference_action
+            actor_q_mean = jnp.mean(q1_for_actor)
+            reference_q_mean = jnp.mean(q1_for_reference)
             return loss, {
-                "actor_q_value": jnp.mean(q1_for_actor),
+                "actor_q_value": actor_q_mean,
+                "reference_q_value": reference_q_mean,
+                "q_advantage": actor_q_mean - reference_q_mean,
                 "actor_delta_norm": jnp.mean(jnp.linalg.norm(delta.reshape(delta.shape[0], -1), axis=-1)),
             }
 
@@ -163,6 +175,8 @@ def train_step(
         nnx.update(model.actor, optax.apply_updates(actor_params, actor_updates))
         model.soft_update_targets()
         actor_q_value = actor_info["actor_q_value"]
+        reference_q_value = actor_info["reference_q_value"]
+        q_advantage = actor_info["q_advantage"]
         actor_delta_norm = actor_info["actor_delta_norm"]
 
     publish_actor = should_publish_actor(
@@ -185,6 +199,8 @@ def train_step(
         "actor_updated": jnp.asarray(actor_updated),
         "publish_actor": jnp.asarray(publish_actor),
         "actor_q_value": actor_q_value,
+        "reference_q_value": reference_q_value,
+        "q_advantage": q_advantage,
         "actor_delta_norm": actor_delta_norm,
         "q1_mean": critic_info["q1_mean"],
         "q2_mean": critic_info["q2_mean"],

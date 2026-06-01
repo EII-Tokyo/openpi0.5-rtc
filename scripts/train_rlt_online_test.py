@@ -3,6 +3,7 @@ import json
 
 import jax
 import numpy as np
+import pytest
 
 from openpi.models import rlt
 from openpi.training import rlt_replay_store
@@ -45,7 +46,23 @@ def _shape(action_horizon=10):
 def test_build_metrics_payload_is_json_serializable():
     payload = train_rlt_online._build_metrics_payload(
         step=50,
-        reduced={"critic_loss": np.float32(1.25), "actor_loss": np.float64(0.5), "steps_per_sec": np.float32(12.0)},
+        reduced={
+            "critic_loss": np.float32(1.25),
+            "critic_q1_loss": np.float32(0.75),
+            "critic_q2_loss": np.float32(0.5),
+            "actor_loss": np.float64(0.5),
+            "actor_q_value": np.float32(1.75),
+            "reference_q_value": np.float32(1.25),
+            "q_advantage": np.float32(0.5),
+            "actor_delta_norm": np.float32(0.025),
+            "q1_mean": np.float32(1.1),
+            "q2_mean": np.float32(0.9),
+            "target_q_mean": np.float32(1.0),
+            "actor_updated": np.float32(1.0),
+            "publish_actor": np.float32(0.0),
+            "beta": np.float32(10.0),
+            "steps_per_sec": np.float32(12.0),
+        },
         stats=_stats(),
         replay_shape=_shape(action_horizon=50),
         train_shape=_shape(action_horizon=10),
@@ -59,7 +76,20 @@ def test_build_metrics_payload_is_json_serializable():
     assert payload["type"] == "rlt_trainer_metrics"
     assert payload["trainer_step"] == 50
     assert payload["critic_loss"] == 1.25
+    assert payload["critic_q1_loss"] == 0.75
+    assert payload["critic_q2_loss"] == 0.5
     assert payload["actor_loss"] == 0.5
+    assert payload["actor_q_value"] == 1.75
+    assert payload["reference_q_value"] == 1.25
+    assert payload["q_advantage"] == 0.5
+    assert payload["actor_delta_norm"] == pytest.approx(0.025)
+    assert payload["q1_mean"] == pytest.approx(1.1)
+    assert payload["q2_mean"] == pytest.approx(0.9)
+    assert payload["target_q_mean"] == 1.0
+    assert payload["q_gap"] == pytest.approx(0.2)
+    assert payload["actor_updated"] is True
+    assert payload["publish_actor"] is False
+    assert payload["beta"] == 10.0
     assert payload["replay_size"] == 123
     assert payload["actor_enabled"] is True
     assert payload["latest_actor_path"] == "/tmp/actor"
@@ -140,9 +170,11 @@ def test_save_actor_for_inference_writes_runtime_metadata(tmp_path):
     )
 
     actor_bytes = (actor_dir / "actor.msgpack").read_bytes()
+    critic_bytes = (actor_dir / "critic.msgpack").read_bytes()
     metadata = json.loads((actor_dir / "metadata.json").read_text())
 
     assert actor_bytes
+    assert critic_bytes
     assert json.loads(json.dumps(metadata)) == metadata
     assert (tmp_path / "inference_actor" / "LATEST").read_text() == str(actor_dir)
     assert metadata["type"] == "rlt_inference_actor"
@@ -155,3 +187,98 @@ def test_save_actor_for_inference_writes_runtime_metadata(tmp_path):
     assert metadata["rlt_config"]["action_horizon"] == 10
     assert len(metadata["actor_sha256"]) == 64
     assert metadata["actor_sha256"] == train_rlt_online._sha256_bytes(actor_bytes)
+    assert metadata["critic_file"] == "critic.msgpack"
+    assert len(metadata["critic_sha256"]) == 64
+    assert metadata["critic_sha256"] == train_rlt_online._sha256_bytes(critic_bytes)
+
+
+def test_runtime_beta_update_changes_train_step_beta():
+    config = rlt_training.RLTTrainingConfig(
+        model=rlt.RLTConfig(
+            z_dim=8,
+            proprio_dim=4,
+            action_horizon=10,
+            action_dim=3,
+            hidden_dim=16,
+            num_layers=2,
+            beta=10.0,
+        ),
+        policy_delay=1,
+    )
+    state = rlt_training.init_train_state(config, jax.random.key(0))
+
+    state = train_rlt_online._with_runtime_beta(state, 5.0)
+    model = jax.tree_util.tree_leaves(rlt_training.actor_params_for_inference(state))
+    assert model
+
+    batch = rlt_training.make_replay_batch(
+        z_rl=np.zeros((2, 8), dtype=np.float32),
+        proprio=np.zeros((2, 4), dtype=np.float32),
+        action=np.zeros((2, 10, 3), dtype=np.float32),
+        reference_action=np.zeros((2, 10, 3), dtype=np.float32),
+        reward_seq=np.zeros((2, 10), dtype=np.float32),
+        next_z_rl=np.zeros((2, 8), dtype=np.float32),
+        next_proprio=np.zeros((2, 4), dtype=np.float32),
+        next_reference_action=np.zeros((2, 10, 3), dtype=np.float32),
+        done=np.ones((2,), dtype=np.bool_),
+    )
+    _, info = rlt_training.train_step(state, batch, jax.random.key(1))
+
+    assert float(jax.device_get(info["beta"])) == pytest.approx(5.0)
+
+
+def test_runtime_control_subscriber_reads_beta_update():
+    class _FakePubSub:
+        def __init__(self):
+            self.messages = [
+                {"type": "message", "data": json.dumps({"type": "config_update", "beta": 5.0})},
+                {"type": "message", "data": json.dumps({"type": "config_update", "beta": -1.0})},
+            ]
+            self.subscribed = []
+
+        def subscribe(self, channel):
+            self.subscribed.append(channel)
+
+        def get_message(self, timeout=0.0):
+            return self.messages.pop(0) if self.messages else None
+
+        def close(self):
+            pass
+
+    class _FakeControlRedis:
+        def __init__(self):
+            self.pubsub_obj = _FakePubSub()
+
+        def pubsub(self):
+            return self.pubsub_obj
+
+    subscriber = train_rlt_online.RedisControlSubscriber(
+        enabled=True,
+        channel="aloha_rlt_control",
+        redis_client=_FakeControlRedis(),
+    )
+
+    assert subscriber.poll_beta_update() == 5.0
+    assert subscriber.poll_beta_update() is None
+
+def test_actor_updates_respect_replay_shard_gate():
+    class _FakeStore:
+        @property
+        def stats(self):
+            return _stats()
+
+    args = train_rlt_online.Args(
+        replay_dir="/tmp/replay",
+        min_replay_samples=100,
+        min_replay_shards=5,
+        min_success_episodes=1,
+        min_failure_episodes=1,
+    )
+
+    assert not train_rlt_online._actor_updates_enabled(args, _FakeStore(), step=1)
+
+    args.min_replay_shards = 4
+    assert train_rlt_online._actor_updates_enabled(args, _FakeStore(), step=1)
+
+    args.actor_min_replay_shards = 5
+    assert not train_rlt_online._actor_updates_enabled(args, _FakeStore(), step=1)

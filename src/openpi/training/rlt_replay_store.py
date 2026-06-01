@@ -147,12 +147,14 @@ class RLTReplayStore:
         min_replay_samples: int,
         min_success_episodes: int = 0,
         min_failure_episodes: int = 0,
+        min_replay_shards: int = 0,
     ) -> bool:
         stats = self.stats
         return (
             stats.replay_size >= min_replay_samples
             and stats.success_episodes >= min_success_episodes
             and stats.failure_episodes >= min_failure_episodes
+            and stats.num_shards >= min_replay_shards
         )
 
     def sample_batch(self, rng: np.random.Generator, batch_size: int) -> rlt_training.RLTReplayBatch:

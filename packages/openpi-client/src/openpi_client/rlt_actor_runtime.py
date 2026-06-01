@@ -20,6 +20,13 @@ class RLTActorApplyResult:
     actor_step: int | None
     delta_norm: float | None
     max_abs_delta: float | None
+    reference_q_value: float | None = None
+    actor_q_value: float | None = None
+    q_advantage: float | None = None
+    key_region_probability: float | None = None
+    gate_reason: str | None = None
+    critic_ready: bool = False
+    critic_gate_enabled: bool = False
 
 
 class RLTActorRuntime:
@@ -28,6 +35,7 @@ class RLTActorRuntime:
         self._poll_interval_seconds = poll_interval_seconds
         self._last_poll = 0.0
         self._actor = None
+        self._critic = None
         self._config = None
         self._actor_dir: pathlib.Path | None = None
         self._actor_step: int | None = None
@@ -36,6 +44,7 @@ class RLTActorRuntime:
     def status(self) -> dict[str, Any]:
         return {
             "actor_ready": self._actor is not None,
+            "critic_ready": self._critic is not None,
             "actor_dir": None if self._actor_dir is None else str(self._actor_dir),
             "actor_step": self._actor_step,
             "actor_load_error": self._reason,
@@ -56,6 +65,7 @@ class RLTActorRuntime:
             self._load_actor(actor_dir)
         except Exception as exc:
             self._actor = None
+            self._critic = None
             self._config = None
             self._actor_dir = None
             self._actor_step = None
@@ -91,9 +101,10 @@ class RLTActorRuntime:
                 jnp.asarray(np.asarray(z_rl, dtype=np.float32)[None, :]),
                 jnp.asarray(np.asarray(proprio, dtype=np.float32)[None, :]),
             )
+            prefix_jax = jnp.asarray(prefix[None, :, :])
             action = self._actor(
                 x,
-                jnp.asarray(prefix[None, :, :]),
+                prefix_jax,
                 sample=False,
                 intervention_scale=float(context.get("intervention_scale", 1.0)),
             )
@@ -103,6 +114,26 @@ class RLTActorRuntime:
             adjusted = np.array(reference, copy=True)
             adjusted[:horizon] = adjusted_prefix
             delta = adjusted[:horizon] - reference[:horizon]
+            critic_gate_enabled = bool(context.get("critic_gate_enabled", False))
+            gate_margin = float(context.get("critic_gate_margin", 0.0) or 0.0)
+            gate_temperature = max(1e-6, float(context.get("critic_gate_temperature", 0.05) or 0.05))
+            q_metrics = self._critic_metrics(x, prefix_jax, jnp.asarray(adjusted_prefix[None, :, :]), gate_margin, gate_temperature)
+            if critic_gate_enabled and self._critic is None:
+                return self._fail(
+                    reference,
+                    "critic_gate_critic_not_loaded",
+                    gate_reason="critic_gate_critic_not_loaded",
+                    critic_gate_enabled=True,
+                )
+            if critic_gate_enabled and q_metrics.get("q_advantage") is not None and q_metrics["q_advantage"] < gate_margin:
+                return self._fail(
+                    reference,
+                    "critic_gate_q_advantage_low",
+                    gate_reason="critic_gate_q_advantage_low",
+                    critic_gate_enabled=True,
+                    **q_metrics,
+                )
+            gate_reason = "critic_gate_actor_active" if critic_gate_enabled else None
             return RLTActorApplyResult(
                 actions=adjusted,
                 applied=True,
@@ -111,12 +142,27 @@ class RLTActorRuntime:
                 actor_step=self._actor_step,
                 delta_norm=float(np.linalg.norm(delta.reshape(-1))),
                 max_abs_delta=float(np.max(np.abs(delta))) if delta.size else 0.0,
+                gate_reason=gate_reason,
+                critic_gate_enabled=critic_gate_enabled,
+                **q_metrics,
             )
         except Exception as exc:
             logging.warning("RLT actor runtime apply failed: %s", exc)
             return self._fail(reference, str(exc))
 
-    def _fail(self, reference: np.ndarray, reason: str | None) -> RLTActorApplyResult:
+    def _fail(
+        self,
+        reference: np.ndarray,
+        reason: str | None,
+        *,
+        reference_q_value: float | None = None,
+        actor_q_value: float | None = None,
+        q_advantage: float | None = None,
+        key_region_probability: float | None = None,
+        gate_reason: str | None = None,
+        critic_ready: bool | None = None,
+        critic_gate_enabled: bool = False,
+    ) -> RLTActorApplyResult:
         return RLTActorApplyResult(
             actions=np.array(reference, copy=True),
             applied=False,
@@ -125,7 +171,38 @@ class RLTActorRuntime:
             actor_step=self._actor_step,
             delta_norm=None,
             max_abs_delta=None,
+            reference_q_value=reference_q_value,
+            actor_q_value=actor_q_value,
+            q_advantage=q_advantage,
+            key_region_probability=key_region_probability,
+            gate_reason=gate_reason,
+            critic_ready=self._critic is not None if critic_ready is None else bool(critic_ready),
+            critic_gate_enabled=critic_gate_enabled,
         )
+
+    def _critic_metrics(self, x, reference_action, actor_action, margin: float, temperature: float) -> dict[str, Any]:
+        if self._critic is None:
+            return {
+                "reference_q_value": None,
+                "actor_q_value": None,
+                "q_advantage": None,
+                "key_region_probability": None,
+                "critic_ready": False,
+            }
+        import jax
+
+        reference_q = float(jax.device_get(self._critic.min_q(x, reference_action)[0]))
+        actor_q = float(jax.device_get(self._critic.min_q(x, actor_action)[0]))
+        advantage = actor_q - reference_q
+        logit = float(np.clip((advantage - margin) / temperature, -60.0, 60.0))
+        probability = float(1.0 / (1.0 + np.exp(-logit)))
+        return {
+            "reference_q_value": reference_q,
+            "actor_q_value": actor_q,
+            "q_advantage": advantage,
+            "key_region_probability": probability,
+            "critic_ready": True,
+        }
 
     def _resolve_actor_dir(self) -> pathlib.Path:
         assert self._actor_path is not None
@@ -143,6 +220,7 @@ class RLTActorRuntime:
     def _load_actor(self, actor_dir: pathlib.Path) -> None:
         metadata_path = actor_dir / "metadata.json"
         actor_path = actor_dir / "actor.msgpack"
+        critic_path = actor_dir / "critic.msgpack"
         if not metadata_path.exists():
             raise FileNotFoundError(f"metadata.json not found in {actor_dir}")
         if not actor_path.exists():
@@ -163,7 +241,15 @@ class RLTActorRuntime:
         pure_state = serialization.from_bytes(state.to_pure_dict(), actor_path.read_bytes())
         state.replace_by_pure_dict(pure_state)
         nnx.update(actor, state)
+        critic = None
+        if critic_path.exists():
+            critic = rlt.RLTTwinCritic(config, rngs=nnx.Rngs(0))
+            critic_state = nnx.state(critic)
+            pure_critic_state = serialization.from_bytes(critic_state.to_pure_dict(), critic_path.read_bytes())
+            critic_state.replace_by_pure_dict(pure_critic_state)
+            nnx.update(critic, critic_state)
         self._actor = actor
+        self._critic = critic
         self._config = config
         self._actor_dir = actor_dir
         self._actor_step = None if metadata.get("step") is None else int(metadata["step"])

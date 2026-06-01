@@ -31,8 +31,8 @@ class _Actor:
         if self.mode == "raise":
             raise RuntimeError("actor failed")
         if self.mode == "disabled":
-            return RLTActorApplyResult(reference_actions.copy(), False, "actor_not_requested", None, None, None, None)
-        return RLTActorApplyResult(reference_actions + 10, True, None, "/tmp/actor", 5, 1.0, 0.5)
+            return RLTActorApplyResult(reference_actions.copy(), False, "actor_not_requested", None, None, None, None, gate_reason="actor_not_requested")
+        return RLTActorApplyResult(reference_actions + 10, True, None, "/tmp/actor", 5, 1.0, 0.5, reference_q_value=0.2, actor_q_value=0.7, q_advantage=0.5, key_region_probability=0.9, gate_reason="critic_gate_actor_active", critic_ready=True, critic_gate_enabled=True)
 
     def status(self):
         return {"actor_ready": self.mode == "apply", "actor_step": 5}
@@ -65,6 +65,13 @@ def test_actor_enabled_replaces_actions_and_preserves_raw_reference():
     np.testing.assert_allclose(first["reference_action_full"], np.arange(6, dtype=np.float32).reshape(3, 2))
     assert first["rlt_actor_applied"] is True
     assert first["rlt_actor_step"] == 5
+    assert first["rlt_reference_q"] == 0.2
+    assert first["rlt_actor_q"] == 0.7
+    assert first["rlt_q_advantage"] == 0.5
+    assert first["rlt_key_region_probability"] == 0.9
+    assert first["rlt_gate_reason"] == "critic_gate_actor_active"
+    assert first["rlt_critic_ready"] is True
+    assert first["rlt_critic_gate_enabled"] is True
     assert second["rlt_actor_applied"] is True
     assert len(actor.calls) == 1
 

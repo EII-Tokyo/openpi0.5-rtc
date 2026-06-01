@@ -89,6 +89,18 @@ class Runtime:
             "beta": float(os.getenv("RLT_DEFAULT_BETA", "10.0")),
             "intervention_scale": float(os.getenv("RLT_DEFAULT_INTERVENTION_SCALE", "0.25")),
             "max_delta": float(os.getenv("RLT_DEFAULT_MAX_DELTA", "0.1")),
+            "critic_gate_enabled": os.getenv("RLT_DEFAULT_CRITIC_GATE_ENABLED", "0") in {"1", "true", "True"},
+            "critic_gate_margin": float(os.getenv("RLT_DEFAULT_CRITIC_GATE_MARGIN", "0.0")),
+            "critic_gate_temperature": float(os.getenv("RLT_DEFAULT_CRITIC_GATE_TEMPERATURE", "0.05")),
+            "critic_ready": False,
+            "inference_actor_active": False,
+            "inference_delta_norm": None,
+            "inference_gate_reason": None,
+            "key_region_probability": None,
+            "loaded_actor_step": None,
+            "inference_reference_q_value": None,
+            "inference_actor_q_value": None,
+            "inference_q_advantage": None,
             "rl_token_checkpoint_path": os.getenv(
                 "RLT_RL_TOKEN_CHECKPOINT_PATH",
                 "/app/checkpoints/eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo_rl_token_query/rl_token_2048_enc4_dec4_query_from_19000_20260528/12000",
@@ -249,6 +261,18 @@ class Runtime:
                 "beta",
                 "intervention_scale",
                 "max_delta",
+                "critic_gate_enabled",
+                "critic_gate_margin",
+                "critic_gate_temperature",
+                "critic_ready",
+                "inference_actor_active",
+                "inference_delta_norm",
+                "inference_gate_reason",
+                "key_region_probability",
+                "loaded_actor_step",
+                "inference_reference_q_value",
+                "inference_actor_q_value",
+                "inference_q_advantage",
             ):
                 if key in state:
                     self._rlt_state[key] = state[key]
@@ -317,6 +341,18 @@ class Runtime:
             self._rlt_state["actor_runtime_checkpoint_step"] = action.get("rlt_actor_step")
             self._rlt_state["actor_runtime_checkpoint_path"] = action.get("rlt_actor_dir")
             self._rlt_state["actor_last_delta_norm"] = action.get("rlt_actor_delta_norm")
+            self._rlt_state["inference_actor_active"] = bool(action.get("rlt_actor_applied"))
+            self._rlt_state["inference_delta_norm"] = action.get("rlt_actor_delta_norm")
+            self._rlt_state["inference_gate_reason"] = action.get("rlt_gate_reason") or action.get("rlt_actor_reason")
+            self._rlt_state["key_region_probability"] = action.get("rlt_key_region_probability")
+            self._rlt_state["loaded_actor_step"] = action.get("rlt_actor_step")
+            self._rlt_state["inference_reference_q_value"] = action.get("rlt_reference_q")
+            self._rlt_state["inference_actor_q_value"] = action.get("rlt_actor_q")
+            self._rlt_state["inference_q_advantage"] = action.get("rlt_q_advantage")
+            if "rlt_critic_ready" in action:
+                self._rlt_state["critic_ready"] = bool(action.get("rlt_critic_ready"))
+            if "rlt_critic_gate_enabled" in action:
+                self._rlt_state["critic_gate_enabled"] = bool(action.get("rlt_critic_gate_enabled"))
 
     def _notify_key_region_subscribers(self, event_type: str, event: dict) -> None:
         hook_name_by_type = {

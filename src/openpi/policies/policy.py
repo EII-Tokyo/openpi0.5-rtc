@@ -20,6 +20,19 @@ from openpi.shared import nnx_utils
 
 BasePolicy: TypeAlias = _base_policy.BasePolicy
 
+def _split_actions_and_prefix_hidden(result):
+    if isinstance(result, tuple) and len(result) == 2:
+        return result
+    return result, None
+
+
+def _drop_language_from_prefix_hidden(prefix_hidden, observation: _model.Observation):
+    prefix_out, prefix_mask = prefix_hidden
+    if observation.tokenized_prompt is None:
+        return prefix_out, prefix_mask
+    image_token_count = prefix_out.shape[1] - observation.tokenized_prompt.shape[1]
+    return prefix_out[:, :image_token_count], prefix_mask[:, :image_token_count]
+
 
 class Policy(BasePolicy):
     def __init__(
@@ -63,6 +76,16 @@ class Policy(BasePolicy):
             # JAX model setup
             self._sample_actions = nnx_utils.module_jit(model.sample_actions)
             self._guided_inference = nnx_utils.module_jit(model.guided_inference)
+            self._sample_actions_with_prefix_hidden = (
+                nnx_utils.module_jit(model.sample_actions_with_prefix_hidden)
+                if hasattr(model, "sample_actions_with_prefix_hidden")
+                else None
+            )
+            self._guided_inference_with_prefix_hidden = (
+                nnx_utils.module_jit(model.guided_inference_with_prefix_hidden)
+                if hasattr(model, "guided_inference_with_prefix_hidden")
+                else None
+            )
             self._rng = rng or jax.random.key(0)
 
     @override
@@ -89,10 +112,29 @@ class Policy(BasePolicy):
             sample_kwargs["noise"] = noise
 
         observation = _model.Observation.from_dict(inputs)
+        needs_rl_token = (
+            not self._is_pytorch_model
+            and getattr(self._model, "rl_token_autoencoder", None) is not None
+            and hasattr(self._model, "embed_prefix_hidden")
+        )
+        sample_actions_fn = self._sample_actions
+        guided_inference_fn = self._guided_inference
+        if needs_rl_token:
+            sample_with_prefix = getattr(self, "_sample_actions_with_prefix_hidden", None)
+            guided_with_prefix = getattr(self, "_guided_inference_with_prefix_hidden", None)
+            if sample_with_prefix is not None and guided_with_prefix is not None:
+                sample_actions_fn = sample_with_prefix
+                guided_inference_fn = guided_with_prefix
+            else:
+                sample_kwargs["return_prefix_hidden"] = True
+
         start_time = time.monotonic()
+        prefix_hidden = None
         if use_rtc:
             if prev_action is None:
-                origin_actions = self._sample_actions(sample_rng_or_pytorch_device, _model.Observation.from_dict(inputs), **self._sample_kwargs)
+                origin_actions, prefix_hidden = _split_actions_and_prefix_hidden(
+                    sample_actions_fn(sample_rng_or_pytorch_device, observation, **sample_kwargs)
+                )
                 outputs = {
                     "state": inputs["state"],
                     "actions": origin_actions,
@@ -100,25 +142,29 @@ class Policy(BasePolicy):
                 }
             else:
                 prev_action = jnp.asarray(prev_action)[np.newaxis, ...]  # Add batch dimension
-                origin_actions = self._guided_inference(sample_rng_or_pytorch_device, prev_action, _model.Observation.from_dict(inputs), **self._sample_kwargs)
+                origin_actions, prefix_hidden = _split_actions_and_prefix_hidden(
+                    guided_inference_fn(sample_rng_or_pytorch_device, prev_action, observation, **sample_kwargs)
+                )
                 outputs = {
                     "state": inputs["state"],
                     "actions": origin_actions,
                     "origin_actions": origin_actions,
                 }
         else:
-            origin_actions = self._sample_actions(sample_rng_or_pytorch_device, _model.Observation.from_dict(inputs), **self._sample_kwargs)
+            origin_actions, prefix_hidden = _split_actions_and_prefix_hidden(
+                sample_actions_fn(sample_rng_or_pytorch_device, observation, **sample_kwargs)
+            )
             outputs = {
                 "state": inputs["state"],
                 "actions": origin_actions,
                 "origin_actions": origin_actions,
             }
-        if (
-            not self._is_pytorch_model
-            and getattr(self._model, "rl_token_autoencoder", None) is not None
-            and hasattr(self._model, "embed_prefix_hidden")
-        ):
-            prefix_out, prefix_mask = self._model.embed_prefix_hidden(observation, drop_language=True)
+        if needs_rl_token:
+            if prefix_hidden is None:
+                prefix_hidden = self._model.embed_prefix_hidden(observation, drop_language=True)
+            else:
+                prefix_hidden = _drop_language_from_prefix_hidden(prefix_hidden, observation)
+            prefix_out, prefix_mask = prefix_hidden
             outputs["z_rl"] = self._model.rl_token_autoencoder.encode(jax.lax.stop_gradient(prefix_out), prefix_mask)
         model_time = time.monotonic() - start_time
         if self._is_pytorch_model:

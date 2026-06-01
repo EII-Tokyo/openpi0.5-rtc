@@ -9,6 +9,7 @@ import mimetypes
 import os
 from pathlib import Path
 import re
+import shutil
 import subprocess
 import time
 
@@ -55,6 +56,7 @@ robot_state_bridge = RobotStateBridge()
 redis_client = create_redis_client()
 rlt_control = RLTControlStore(redis_client)
 ROLLOUTS_ROOT = Path(settings.rollouts_root).expanduser().resolve()
+REPLAY_ROOT = Path(settings.replay_root).expanduser().resolve()
 VIDEO_CHUNK_SIZE = 1024 * 1024
 VIDEO_CACHE_ROOT = Path(os.getenv("ROLLOUTS_VIDEO_CACHE", "/tmp/eii_rollout_video_cache"))
 ROBOT_TASK_LABELS = {
@@ -201,7 +203,14 @@ def _scan_rollout_tree(path: Path, relative_path: str = "") -> dict:
     def natural_key(value: str) -> list[int | str]:
         return [int(part) if part.isdigit() else part.lower() for part in re.split(r"(\d+)", value)]
 
-    children.sort(key=lambda item: (item["type"] == "file", natural_key(item["name"])))
+    def rollout_sort_key(item: dict) -> tuple:
+        if item["type"] == "file":
+            return (2, natural_key(item["name"]))
+        if item.get("manifest_summary", {}).get("key_region_id"):
+            return (0, -(item.get("modified") or 0), natural_key(item["name"]))
+        return (1, natural_key(item["name"]))
+
+    children.sort(key=rollout_sort_key)
     stat = path.stat()
     result = {
         "name": path.name or "rollouts",
@@ -441,6 +450,24 @@ def rlt_segments(limit: int = 500) -> list[RLTSegmentRecord]:
     return [RLTSegmentRecord(**segment) for segment in rlt_control.list_segments(limit=limit)]
 
 
+def _delete_key_region_files(key_region_id: str) -> None:
+    if not re.fullmatch(r"[A-Za-z0-9_.-]+", key_region_id):
+        raise HTTPException(status_code=400, detail=f"Invalid key_region_id: {key_region_id}")
+    region_name = f"key_region_{key_region_id}"
+    rollout_root = (ROLLOUTS_ROOT / "key_regions").resolve()
+    if rollout_root.exists():
+        for path in rollout_root.glob(f"**/{region_name}"):
+            resolved = path.resolve()
+            if resolved.is_dir() and resolved.is_relative_to(rollout_root):
+                shutil.rmtree(resolved)
+    replay_root = (REPLAY_ROOT / "rlt_key_regions").resolve()
+    if replay_root.exists():
+        for path in replay_root.glob(f"**/shards/{region_name}.npz*"):
+            resolved = path.resolve()
+            if resolved.is_file() and resolved.is_relative_to(replay_root):
+                resolved.unlink()
+
+
 @app.post("/api/rlt/key-region/start", response_model=RLTControlState)
 def rlt_key_region_start(request: RLTControlRequest | None = None) -> RLTControlState:
     try:
@@ -497,6 +524,13 @@ def rlt_key_regions_void(request: RLTBatchSegmentRequest) -> RLTControlState:
 @app.post("/api/rlt/key-regions/restore", response_model=RLTControlState)
 def rlt_key_regions_restore(request: RLTBatchSegmentRequest) -> RLTControlState:
     return rlt_control.restore_segments(request.key_region_ids, source=request.source, reason=request.reason)
+
+
+@app.post("/api/rlt/key-regions/delete", response_model=RLTControlState)
+def rlt_key_regions_delete(request: RLTBatchSegmentRequest) -> RLTControlState:
+    for key_region_id in request.key_region_ids:
+        _delete_key_region_files(key_region_id)
+    return rlt_control.delete_segments(request.key_region_ids, source=request.source, reason=request.reason)
 
 
 @app.post("/api/rlt/config", response_model=RLTControlState)

@@ -264,6 +264,7 @@ class Pi0(_model.BaseModel):
         *,
         num_steps: int | at.Int[at.Array, ""] = 10,
         noise: at.Float[at.Array, "b ah ad"] | None = None,
+        return_prefix_hidden: bool = False,
     ) -> _model.Actions:
         observation = _model.preprocess_observation(
             None,
@@ -282,7 +283,7 @@ class Pi0(_model.BaseModel):
         prefix_tokens, prefix_mask, prefix_ar_mask = self.embed_prefix(observation)
         prefix_attn_mask = make_attn_mask(prefix_mask, prefix_ar_mask)
         positions = jnp.cumsum(prefix_mask, axis=1) - 1
-        _, kv_cache = self.PaliGemma.llm([prefix_tokens, None], mask=prefix_attn_mask, positions=positions)
+        (prefix_out, _), kv_cache = self.PaliGemma.llm([prefix_tokens, None], mask=prefix_attn_mask, positions=positions)
 
         def step(carry):
             x_t, time = carry
@@ -324,8 +325,26 @@ class Pi0(_model.BaseModel):
             return time >= -dt / 2
 
         x_0, _ = jax.lax.while_loop(cond, step, (noise, 1.0))
+        if return_prefix_hidden:
+            return x_0, (prefix_out, prefix_mask)
         return x_0
-        
+
+    def sample_actions_with_prefix_hidden(
+        self,
+        rng: at.KeyArrayLike,
+        observation: _model.Observation,
+        *,
+        num_steps: int | at.Int[at.Array, ""] = 10,
+        noise: at.Float[at.Array, "b ah ad"] | None = None,
+    ):
+        return self.sample_actions(
+            rng,
+            observation,
+            num_steps=num_steps,
+            noise=noise,
+            return_prefix_hidden=True,
+        )
+
     def guided_inference(
         self,
         rng: at.KeyArrayLike,
@@ -336,6 +355,7 @@ class Pi0(_model.BaseModel):
         s: int = 25,
         d: int = 10,
         beta: float = 8.0,
+        return_prefix_hidden: bool = False,
     ) -> _model.Actions:
         observation = _model.preprocess_observation(
             None,
@@ -405,7 +425,7 @@ class Pi0(_model.BaseModel):
         prefix_tokens, prefix_mask, prefix_ar_mask = self.embed_prefix(observation)
         prefix_attn_mask = make_attn_mask(prefix_mask, prefix_ar_mask)
         positions = jnp.cumsum(prefix_mask, axis=1) - 1
-        _, kv_cache = self.PaliGemma.llm([prefix_tokens, None], mask=prefix_attn_mask, positions=positions)
+        (prefix_out, _), kv_cache = self.PaliGemma.llm([prefix_tokens, None], mask=prefix_attn_mask, positions=positions)
 
         def func_a_1_prime(x_t, time):
             suffix_tokens, suffix_mask, suffix_ar_mask, adarms_cond = self.embed_suffix(
@@ -481,4 +501,28 @@ class Pi0(_model.BaseModel):
             return x_0
         # 使用jax.pure_callback来执行文件保存操作
         # x_0 = jax.pure_callback(save_guided_inference_result, jax.ShapeDtypeStruct(x_0.shape, x_0.dtype), x_0)
+        if return_prefix_hidden:
+            return x_0, (prefix_out, prefix_mask)
         return x_0
+
+    def guided_inference_with_prefix_hidden(
+        self,
+        rng: at.KeyArrayLike,
+        prev_action: _model.Actions,
+        observation: _model.Observation,
+        *,
+        num_steps: int | at.Int[at.Array, ""] = 10,
+        s: int = 25,
+        d: int = 10,
+        beta: float = 8.0,
+    ):
+        return self.guided_inference(
+            rng,
+            prev_action,
+            observation,
+            num_steps=num_steps,
+            s=s,
+            d=d,
+            beta=beta,
+            return_prefix_hidden=True,
+        )

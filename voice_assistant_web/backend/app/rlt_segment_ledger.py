@@ -152,6 +152,20 @@ class RLTSegmentLedger:
             changed.append(key_region_id)
         return changed
 
+    def delete_segments(self, key_region_ids: list[str]) -> list[str]:
+        changed = []
+        with self._connect() as conn:
+            for key_region_id in key_region_ids:
+                if not key_region_id:
+                    continue
+                row = conn.execute("SELECT key_region_id FROM segments WHERE key_region_id = ?", (key_region_id,)).fetchone()
+                if row is None:
+                    continue
+                conn.execute("DELETE FROM segment_events WHERE key_region_id = ?", (key_region_id,))
+                conn.execute("DELETE FROM segments WHERE key_region_id = ?", (key_region_id,))
+                changed.append(key_region_id)
+        return changed
+
     def stats(self) -> dict[str, int]:
         stats = {
             "warmup_count": 0,

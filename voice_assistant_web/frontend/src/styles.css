@@ -197,9 +197,12 @@ button {
 
 .control-rail {
   display: grid;
-  grid-template-rows: auto auto minmax(0, 1fr);
+  grid-template-rows: auto auto auto;
+  align-content: start;
   gap: 8px;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 2px;
 }
 
 .panel,
@@ -532,8 +535,103 @@ button {
   font-size: 17px;
 }
 
+.metric-tile.metric-ok strong {
+  color: #116b4f;
+}
+
+.metric-tile.metric-watch strong {
+  color: #88551d;
+}
+
+.metric-tile.metric-danger strong {
+  color: #8b2c24;
+}
+
+.training-panel {
+  overflow: visible;
+}
+
+.training-tabs {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 10px;
+  padding: 3px;
+  border-radius: 8px;
+  background: #ebe8df;
+}
+
+.training-tabs button {
+  min-width: 0;
+  min-height: 30px;
+  padding: 6px 5px;
+  border-radius: 6px;
+  background: transparent;
+  color: #635b50;
+  font-size: 11px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.training-tabs button.active {
+  background: #24352f;
+  color: #fffefa;
+}
+
+.training-tab-panel {
+  margin-top: 10px;
+}
+
 .event-log {
   margin-top: 10px;
+}
+
+.inference-status {
+  display: grid;
+  gap: 3px;
+  min-height: 48px;
+  padding: 8px 10px;
+  border-radius: 7px;
+  margin-bottom: 8px;
+  border: 1px solid #d6d0c5;
+  background: #ebe8df;
+}
+
+.inference-status strong {
+  font-size: 14px;
+}
+
+.inference-status span {
+  color: #635b50;
+  font-size: 11px;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.inference-live {
+  border-color: #1f8a4c;
+  background: #e6f4ec;
+  color: #07563e;
+}
+
+.inference-watch {
+  border-color: #c28a2c;
+  background: #fff4dc;
+  color: #865000;
+}
+
+.inference-danger {
+  border-color: #b3524a;
+  background: #fae7e4;
+  color: #81362e;
+}
+
+.inference-offline {
+  color: #635b50;
+}
+
+.inference-metrics .metric-tile {
+  min-width: 0;
 }
 
 .event-row {
@@ -803,5 +901,143 @@ button {
   .metric-grid,
   .rlt-control-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+.training-panel {
+  padding: 8px 10px;
+}
+
+.training-panel .panel-header {
+  align-items: start;
+}
+
+.training-panel h2 {
+  font-size: 24px;
+  line-height: 1.05;
+}
+
+.training-panel .apply-button {
+  min-height: 30px;
+  padding: 6px 11px;
+  border-radius: 7px;
+}
+
+.training-panel .training-tabs {
+  margin-top: 8px;
+  gap: 4px;
+}
+
+.training-panel .training-tabs button {
+  min-height: 26px;
+  padding: 5px 4px;
+  font-size: 11px;
+}
+
+.training-panel .training-tab-panel {
+  margin-top: 8px;
+}
+
+.training-panel .settings-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 10px;
+  align-items: end;
+}
+
+.training-panel .settings-grid .rlt-field,
+.training-panel .settings-grid .rlt-toggle {
+  margin-top: 0;
+}
+
+.training-panel .settings-grid .rlt-field span,
+.training-panel .settings-grid .rlt-toggle span {
+  font-size: 11px;
+}
+
+.training-panel .settings-grid .rlt-field input[type="number"] {
+  min-height: 30px;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.training-panel .settings-grid .rlt-field input[type="range"] {
+  height: 24px;
+}
+
+.training-panel .settings-grid .rlt-toggle,
+.training-panel .settings-grid .wandb-link {
+  align-self: center;
+}
+
+.training-panel .metric-grid {
+  gap: 6px;
+}
+
+.training-panel .metric-tile {
+  padding: 6px 7px;
+  border-radius: 6px;
+}
+
+.training-panel .metric-tile strong {
+  font-size: 15px;
+}
+
+.latest-event-log .event-row {
+  min-height: 42px;
+  padding: 7px 8px;
+}
+
+.training-panel .metric-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.training-panel .metric-tile {
+  min-height: 52px;
+  padding: 5px 7px;
+}
+
+.training-panel .metric-tile span {
+  font-size: 10px;
+  line-height: 1.15;
+}
+
+.training-panel .metric-tile strong {
+  margin-top: 1px;
+  font-size: 13px;
+  line-height: 1.15;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.training-panel .eyebrow {
+  margin-bottom: 2px;
+}
+
+.training-panel h2 {
+  font-size: 20px;
+}
+
+.training-panel .panel-header {
+  gap: 8px;
+}
+
+.training-panel .training-tabs {
+  margin-top: 6px;
+}
+
+.training-panel .training-tab-panel {
+  margin-top: 6px;
+}
+
+.training-panel .rlt-warning,
+.training-panel .rlt-error {
+  margin-top: 5px;
+}
+
+@media (max-width: 1280px) {
+  .training-panel .metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

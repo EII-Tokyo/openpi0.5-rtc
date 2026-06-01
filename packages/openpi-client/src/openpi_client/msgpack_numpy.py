@@ -18,7 +18,17 @@ import msgpack
 import numpy as np
 
 
+def _is_bfloat16(dtype: np.dtype) -> bool:
+    return np.dtype(dtype).name == "bfloat16"
+
+
 def pack_array(obj):
+    if isinstance(obj, np.ndarray) and _is_bfloat16(obj.dtype):
+        obj = obj.astype(np.float32)
+
+    if isinstance(obj, np.generic) and _is_bfloat16(obj.dtype):
+        obj = np.asarray(obj, dtype=np.float32)[()]
+
     if (isinstance(obj, (np.ndarray, np.generic))) and obj.dtype.kind in ("V", "O", "c"):
         raise ValueError(f"Unsupported dtype: {obj.dtype}")
 

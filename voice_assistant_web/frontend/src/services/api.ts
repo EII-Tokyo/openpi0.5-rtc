@@ -87,16 +87,53 @@ export type RLTControlState = {
   beta: number
   intervention_scale: number
   max_delta: number
+  critic_gate_enabled: boolean
+  critic_gate_margin: number
+  critic_gate_temperature: number
+  critic_ready: boolean
+  inference_actor_active: boolean
+  inference_delta_norm: number | null
+  inference_gate_reason: string | null
+  key_region_probability: number | null
+  loaded_actor_step: number | null
+  inference_reference_q_value: number | null
+  inference_actor_q_value: number | null
+  inference_q_advantage: number | null
   active_key_region_id: string | null
   score_deadline: number | null
   last_reward: number | null
   last_event: string | null
   wandb_url: string | null
   critic_loss: number | null
+  critic_q1_loss: number | null
+  critic_q2_loss: number | null
   actor_loss: number | null
+  actor_q_value: number | null
+  reference_q_value: number | null
+  q_advantage: number | null
+  actor_delta_norm: number | null
+  q1_mean: number | null
+  q2_mean: number | null
+  target_q_mean: number | null
+  q_gap: number | null
+  actor_updated: boolean | null
+  publish_actor: boolean | null
+  trainer_step: number | null
+  steps_per_sec: number | null
+  success_episodes: number | null
+  failure_episodes: number | null
+  replay_action_horizon: number | null
+  train_action_horizon: number | null
+  rlt_metrics_timestamp: number | null
   replay_size: number | null
   replay_shards: number | null
   bad_shards: number | null
+  trainable_replay_count: number
+  trainable_replay_success: number
+  trainable_replay_failure: number
+  trainable_replay_samples: number
+  trainable_replay_shards: number
+  invalid_replay_shards: number
   actor_checkpoint_path: string | null
   actor_checkpoint_step: number | null
   rl_token_checkpoint_path: string | null
@@ -140,6 +177,8 @@ export const voidKeyRegions = (keyRegionIds: string[], reason = 'operator_batch_
   postJson<RLTControlState>('/api/rlt/key-regions/void', { key_region_ids: keyRegionIds, source: 'ui', reason })
 export const restoreKeyRegions = (keyRegionIds: string[], reason = 'operator_restore') =>
   postJson<RLTControlState>('/api/rlt/key-regions/restore', { key_region_ids: keyRegionIds, source: 'ui', reason })
+export const deleteKeyRegions = (keyRegionIds: string[], reason = 'operator_delete') =>
+  postJson<RLTControlState>('/api/rlt/key-regions/delete', { key_region_ids: keyRegionIds, source: 'ui', reason })
 export const updateRLTConfig = (config: Partial<RLTControlState>) =>
   postJson<RLTControlState>('/api/rlt/config', config)
 

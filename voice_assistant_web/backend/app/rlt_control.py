@@ -5,6 +5,8 @@ import contextlib
 import json
 import logging
 from pathlib import Path
+
+import numpy as np
 import threading
 import time
 from typing import Any
@@ -190,12 +192,33 @@ class RLTControlStore:
             self._publish_locked("key_region_batch_restore", {"source": source, "reason": reason, "key_region_ids": changed})
             return self._state.model_copy(deep=True)
 
+    def delete_segments(
+        self, key_region_ids: list[str], *, source: str = "ui", reason: str = "operator_delete"
+    ) -> RLTControlState:
+        with self._lock:
+            changed = self._segment_ledger.delete_segments(key_region_ids)
+            self._apply_ledger_stats_locked()
+            self._add_event_locked("batch_delete", f"{len(changed)}:{reason}")
+            self._refresh_derived_locked()
+            self._persist_locked()
+            self._publish_locked("key_region_batch_delete", {"source": source, "reason": reason, "key_region_ids": changed})
+            return self._state.model_copy(deep=True)
+
     def update_config(self, request: RLTConfigRequest) -> RLTControlState:
         with self._lock:
             self._apply_score_timeout_locked()
             updates: dict[str, Any] = {}
-            for key in ("warmup_target", "beta", "intervention_scale", "max_delta", "wandb_url"):
-                value = getattr(request, key)
+            for key in (
+                "warmup_target",
+                "beta",
+                "intervention_scale",
+                "max_delta",
+                "critic_gate_enabled",
+                "critic_gate_margin",
+                "critic_gate_temperature",
+                "wandb_url",
+            ):
+                value = getattr(request, key, None)
                 if value is not None:
                     setattr(self._state, key, value)
                     updates[key] = value
@@ -215,9 +238,49 @@ class RLTControlStore:
             if payload.get("type") in {"rlt_replay_segment_written", "rlt_replay_segment_committed", "rlt_replay_segment_rejected"}:
                 self._record_replay_ack_locked(payload)
             else:
-                for key in ("critic_loss", "actor_loss", "replay_size", "replay_shards", "bad_shards", "wandb_url"):
+                metric_keys = (
+                    "critic_loss",
+                    "critic_q1_loss",
+                    "critic_q2_loss",
+                    "actor_loss",
+                    "actor_q_value",
+                    "reference_q_value",
+                    "q_advantage",
+                    "actor_delta_norm",
+                    "q1_mean",
+                    "q2_mean",
+                    "target_q_mean",
+                    "q_gap",
+                    "actor_updated",
+                    "publish_actor",
+                    "trainer_step",
+                    "steps_per_sec",
+                    "success_episodes",
+                    "failure_episodes",
+                    "replay_action_horizon",
+                    "train_action_horizon",
+                    "replay_size",
+                    "replay_shards",
+                    "bad_shards",
+                    "wandb_url",
+                    "critic_gate_enabled",
+                    "critic_gate_margin",
+                    "critic_gate_temperature",
+                    "critic_ready",
+                    "inference_actor_active",
+                    "inference_delta_norm",
+                    "inference_gate_reason",
+                    "key_region_probability",
+                    "loaded_actor_step",
+                    "inference_reference_q_value",
+                    "inference_actor_q_value",
+                    "inference_q_advantage",
+                )
+                for key in metric_keys:
                     if key in payload:
                         setattr(self._state, key, payload[key])
+                if "timestamp" in payload:
+                    self._state.rlt_metrics_timestamp = payload["timestamp"]
                 latest_actor_path = payload.get("latest_actor_path")
                 latest_actor_step = payload.get("latest_actor_step")
                 if latest_actor_path is not None:
@@ -273,10 +336,48 @@ class RLTControlStore:
     def _apply_ledger_stats_locked(self) -> None:
         for key, value in self._segment_ledger.stats().items():
             setattr(self._state, key, value)
+        self._apply_trainable_replay_stats_locked()
+
+    def _apply_trainable_replay_stats_locked(self) -> None:
+        success = 0
+        failure = 0
+        samples = 0
+        trainable_shards = 0
+        invalid_shards = 0
+        for segment in self._segment_ledger.list_segments(limit=100000):
+            if segment.get("status") != "committed" or not segment.get("shard_path"):
+                continue
+            path = Path(str(segment["shard_path"]))
+            try:
+                with np.load(path) as data:
+                    done = np.asarray(data["done"]).astype(np.bool_)
+                    reward_seq = np.asarray(data["reward_seq"], dtype=np.float32)
+            except Exception:
+                invalid_shards += 1
+                continue
+            if len(done) == 0 or not np.any(done):
+                invalid_shards += 1
+                continue
+            terminal_rewards = np.sum(reward_seq[done], axis=-1)
+            shard_success = int(np.sum(terminal_rewards > 0.0))
+            shard_failure = int(len(terminal_rewards) - shard_success)
+            success += shard_success
+            failure += shard_failure
+            trainable_shards += 1
+            samples += int(len(done))
+        self._state.trainable_replay_success = success
+        self._state.trainable_replay_failure = failure
+        self._state.trainable_replay_count = success + failure
+        self._state.trainable_replay_samples = samples
+        self._state.trainable_replay_shards = trainable_shards
+        self._state.invalid_replay_shards = invalid_shards
 
     def _refresh_derived_locked(self) -> None:
-        in_warmup = self._state.warmup_count < self._state.warmup_target
-        replay_balance_ready = self._state.warmup_success > 0 and self._state.warmup_failure > 0
+        trainable_count = self._state.trainable_replay_count
+        trainable_success = self._state.trainable_replay_success
+        trainable_failure = self._state.trainable_replay_failure
+        in_warmup = trainable_count < self._state.warmup_target
+        replay_balance_ready = trainable_success > 0 and trainable_failure > 0
         self._state.training_phase = "warmup" if in_warmup else "rl"
         self._state.actor_effective = bool(
             self._state.actor_enabled and not in_warmup and replay_balance_ready and self._state.actor_ready

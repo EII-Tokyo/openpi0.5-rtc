@@ -42,7 +42,10 @@ services:
       - RLT_RL_TOKEN_CHECKPOINT_PATH=/app/checkpoints/eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo_rl_token_query/rl_token_2048_enc4_dec4_query_from_19000_20260528/12000
 
   rlt_warmup_runtime:
-    image: lyl472324464/robot:aloha-ros1.0
+    image: openpi_reward_learning_eii/rlt_warmup_runtime:reward-learning
+    build:
+      context: .
+      dockerfile: scripts/docker/rlt_warmup_runtime.Dockerfile
     profiles:
       - rlt
     depends_on:
@@ -73,7 +76,7 @@ services:
       --rlt-chunk-stride
       2
       --rlt-actor-path
-      /app/rlt_online/inference_actor/LATEST
+      /app/rlt_online/run/inference_actor/LATEST
       --video-codec
       h264
       --action-quality
@@ -82,6 +85,7 @@ services:
     tty: true
     stdin_open: true
     network_mode: host
+    gpus: all
     privileged: true
     volumes:
       - $PWD:/app
@@ -91,6 +95,12 @@ services:
       - $PWD/checkpoints:/app/checkpoints:ro
     environment:
       - RLT_RL_TOKEN_CHECKPOINT_PATH=/app/checkpoints/eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo_rl_token_query/rl_token_2048_enc4_dec4_query_from_19000_20260528/12000
+      - PYTHONPATH=/app:/app/src:/app/packages/openpi-client/src
+      - JAX_PLATFORMS=cuda
+      - XLA_PYTHON_CLIENT_PREALLOCATE=false
+      - XLA_PYTHON_CLIENT_MEM_FRACTION=0.25
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility,video
 
   rlt_online_trainer:
     image: openpi_reward_learning_eii/openpi_server:reward-learning
@@ -108,16 +118,19 @@ services:
       - >-
         uv run --no-sync scripts/train_rlt_online.py
         --replay-dir /app/replay/rlt_key_regions
-        --output-dir /app/rlt_online
+        --output-dir /app/rlt_online/run
+        --overwrite
         --segment-db-path /app/segment_db/segments.sqlite3
         --recursive-scan
         --expected-replay-action-horizon ${RLT_EXPECTED_REPLAY_ACTION_HORIZON:-50}
         --train-action-horizon ${RLT_TRAIN_ACTION_HORIZON:-10}
         --min-replay-samples ${RLT_MIN_REPLAY_SAMPLES:-2048}
+        --min-replay-shards ${RLT_MIN_REPLAY_SHARDS:-100}
         --min-success-episodes ${RLT_MIN_SUCCESS_EPISODES:-10}
         --min-failure-episodes ${RLT_MIN_FAILURE_EPISODES:-10}
         --critic-burn-in-steps ${RLT_CRITIC_BURN_IN_STEPS:-0}
         --actor-min-replay-samples ${RLT_ACTOR_MIN_REPLAY_SAMPLES:-4096}
+        --actor-min-replay-shards ${RLT_ACTOR_MIN_REPLAY_SHARDS:-100}
         --actor-min-success-episodes ${RLT_ACTOR_MIN_SUCCESS_EPISODES:-20}
         --actor-min-failure-episodes ${RLT_ACTOR_MIN_FAILURE_EPISODES:-20}
         --batch-size ${RLT_BATCH_SIZE:-64}
@@ -127,11 +140,14 @@ services:
         --actor-publish-interval ${RLT_ACTOR_PUBLISH_INTERVAL:-500}
         --scan-interval ${RLT_SCAN_INTERVAL:-1.0}
         --wait-sleep-seconds ${RLT_WAIT_SLEEP_SECONDS:-1.0}
+        --wandb-project ${WANDB_PROJECT:-openpi-rlt-online}
+        --wandb-run-name ${WANDB_RUN_NAME:-rlt_actor_critic_online}
         --redis-enabled
         --redis-host ${REDIS_HOST:-localhost}
         --redis-port ${REDIS_PORT:-6379}
         --redis-db ${REDIS_DB:-0}
         --redis-state-channel ${RLT_STATE_CHANNEL:-aloha_rlt_state}
+        --redis-control-channel ${RLT_CONTROL_CHANNEL:-aloha_rlt_control}
     init: true
     tty: true
     network_mode: host
@@ -146,6 +162,9 @@ services:
       - XLA_PYTHON_CLIENT_PREALLOCATE=false
       - XLA_PYTHON_CLIENT_MEM_FRACTION=0.4
       - OPENPI_DATA_HOME=/openpi_assets
+      - WANDB_API_KEY=${WANDB_API_KEY:-}
+      - WANDB_PROJECT=${WANDB_PROJECT:-openpi-rlt-online}
+      - WANDB_RUN_NAME=${WANDB_RUN_NAME:-rlt_actor_critic_online}
       - IS_DOCKER=true
       - NVIDIA_VISIBLE_DEVICES=all
       - NVIDIA_DRIVER_CAPABILITIES=all
@@ -247,7 +266,8 @@ services:
     tty: true
     volumes:
       - $PWD:/app
-      - /data/openpi0.5-rtc-reward-learning/rollouts:/app/rollouts:ro
+      - /data/openpi0.5-rtc-reward-learning/rollouts:/app/rollouts
+      - /data/openpi0.5-rtc-reward-learning/replay:/app/replay
       - /data/openpi0.5-rtc-reward-learning/segment_db:/app/segment_db
       - /dev:/dev
     env_file:
@@ -257,6 +277,7 @@ services:
       - REDIS_PORT=${REDIS_PORT:-6379}
       - REDIS_DB=${REDIS_DB:-0}
       - ROLLOUTS_ROOT=/app/rollouts
+      - REPLAY_ROOT=/app/replay
       - RLT_STATE_PATH=/app/segment_db/rlt_control_state.json
       - RLT_SEGMENT_DB_PATH=/app/segment_db/segments.sqlite3
     depends_on:

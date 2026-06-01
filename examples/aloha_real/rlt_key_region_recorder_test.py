@@ -54,6 +54,28 @@ def test_key_region_replay_saves_train_horizon_and_full_horizon(tmp_path):
     assert arrays["reward_seq"][-1, 49] == 0
 
 
+
+def test_key_region_replay_always_marks_terminal_when_stride_misses_last_start(tmp_path):
+    store = recorder.KeyRegionReplayRecorder(
+        replay_root=str(tmp_path / "replay"),
+        rollouts_root=str(tmp_path / "rollouts"),
+        train_horizon=10,
+        full_horizon=50,
+        chunk_stride=2,
+    )
+    try:
+        records = [_record(step) for step in range(117)]
+        arrays, missing = store._build_replay_arrays(records, {"reward": 0})
+    finally:
+        store.close()
+
+    assert missing == []
+    assert arrays is not None
+    assert arrays["done"].sum() == 1
+    assert arrays["done"][-1]
+    assert arrays["reward_seq"][-1, 9] == 0
+
+
 def test_key_region_replay_requires_full_horizon_metadata(tmp_path):
     store = recorder.KeyRegionReplayRecorder(
         replay_root=str(tmp_path / "replay"),
@@ -122,7 +144,7 @@ def test_key_region_replay_publishes_valid_and_invalid_ack(tmp_path):
     assert messages[0]["train_eligible"] is True
     assert messages[0]["segment_status"] == "committed"
     assert messages[0]["replay_status"] == "written"
-    assert messages[0]["num_replay_transitions"] == 1
+    assert messages[0]["num_replay_transitions"] == 2
     assert messages[0]["shard_path"] == str(tmp_path / "valid.npz")
     assert messages[1]["type"] == "rlt_replay_segment_rejected"
     assert messages[1]["key_region_id"] == "invalid"
@@ -200,3 +222,96 @@ def test_key_region_manifest_marks_train_eligibility(tmp_path):
     assert manifest["train_eligible"] is True
     assert manifest["segment_status"] == "committed"
     assert manifest["voided"] is False
+
+
+class _FakeStdin:
+    def __init__(self):
+        self.closed = False
+        self.data = bytearray()
+
+    def write(self, data):
+        self.data.extend(data)
+
+    def close(self):
+        self.closed = True
+
+
+class _FakeProcess:
+    def __init__(self, return_code=0):
+        self.stdin = _FakeStdin()
+        self._return_code = return_code
+
+    def wait(self):
+        return self._return_code
+
+
+def test_ffmpeg_writer_uses_gpu_encoder_when_available_and_atomic_output(monkeypatch, tmp_path):
+    popen_calls = []
+    process = _FakeProcess(return_code=0)
+
+    def fake_popen(args, stdin):
+        popen_calls.append(args)
+        return process
+
+    monkeypatch.setattr(recorder.subprocess, "Popen", fake_popen)
+    monkeypatch.setattr(recorder, "_ffmpeg_supports_encoder", lambda encoder: encoder == "h264_nvenc")
+    monkeypatch.setattr(recorder, "_ffmpeg_nvenc_smoke_test", lambda preset: True)
+    output = tmp_path / "cam_high.mp4"
+
+    writer = recorder._FfmpegMp4Writer(output, fps=50.0, width=2, height=2, prefer_gpu=True)
+    writer.write(np.zeros((2, 2, 3), dtype=np.uint8))
+    writer._tmp_path.write_bytes(b"mp4")
+    writer.close()
+
+    args = popen_calls[0]
+    assert args[args.index("-c:v") + 1] == "h264_nvenc"
+    assert args[args.index("-preset") + 1] == "fast"
+    assert args[args.index("-rc") + 1] == "vbr"
+    assert args[args.index("-cq") + 1] == "23"
+    assert args[args.index("-f", args.index("-movflags")) + 1] == "mp4"
+    assert str(output) not in args
+    assert str(output.with_suffix(".mp4.tmp")) in args
+    assert output.read_bytes() == b"mp4"
+    assert not output.with_suffix(".mp4.tmp").exists()
+
+
+def test_ffmpeg_writer_falls_back_to_cpu_when_gpu_smoke_test_fails(monkeypatch, tmp_path):
+    popen_calls = []
+    process = _FakeProcess(return_code=0)
+
+    def fake_popen(args, stdin):
+        popen_calls.append(args)
+        return process
+
+    monkeypatch.setattr(recorder.subprocess, "Popen", fake_popen)
+    monkeypatch.setattr(recorder, "_ffmpeg_supports_encoder", lambda encoder: encoder == "h264_nvenc")
+    monkeypatch.setattr(recorder, "_ffmpeg_nvenc_smoke_test", lambda preset: False)
+    output = tmp_path / "cam_high.mp4"
+
+    writer = recorder._FfmpegMp4Writer(output, fps=50.0, width=2, height=2, prefer_gpu=True)
+    writer._tmp_path.write_bytes(b"mp4")
+    writer.close()
+
+    args = popen_calls[0]
+    assert args[args.index("-c:v") + 1] == "libx264"
+    assert args[args.index("-preset") + 1] == "veryfast"
+    assert args[args.index("-crf") + 1] == "23"
+
+
+def test_ffmpeg_writer_failure_removes_tmp_and_leaves_no_final_file(monkeypatch, tmp_path):
+    process = _FakeProcess(return_code=1)
+    monkeypatch.setattr(recorder.subprocess, "Popen", lambda *args, **kwargs: process)
+    output = tmp_path / "cam_high.mp4"
+
+    writer = recorder._FfmpegMp4Writer(output, fps=50.0, width=2, height=2, prefer_gpu=False)
+    writer._tmp_path.write_bytes(b"partial")
+
+    try:
+        writer.close()
+    except RuntimeError as exc:
+        assert "ffmpeg failed" in str(exc)
+    else:
+        raise AssertionError("Expected ffmpeg failure")
+
+    assert not output.exists()
+    assert not output.with_suffix(".mp4.tmp").exists()
