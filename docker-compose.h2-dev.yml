@@ -1,0 +1,38 @@
+services:
+  eii_pilot_backend:
+    command:
+      - python3
+      - -m
+      - uvicorn
+      - voice_assistant_web.backend.app.main:app
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8012"
+    depends_on: []
+    environment:
+      REDIS_HOST: localhost
+      REDIS_PORT: "6379"
+      ROLLOUTS_ROOT: /app/rollouts
+      REPLAY_ROOT: /app/replay
+      RLT_SEGMENT_DB_PATH: /app/segment_db/segments.sqlite3
+      RLT_STATE_PATH: /app/segment_db/rlt_control_state.json
+    volumes:
+      - /home/eii/project/openpi0.5-rtc-reward-learning:/app
+      - /home/eii/project/openpi0.5-rtc-reward-learning-local-data/rollouts:/app/rollouts
+      - /home/eii/project/openpi0.5-rtc-reward-learning-local-data/replay:/app/replay
+      - /home/eii/project/openpi0.5-rtc-reward-learning-local-data/segment_db:/app/segment_db
+
+  eii_pilot_frontend:
+    command:
+      - /bin/sh
+      - -lc
+      - npm run dev -- --host 0.0.0.0 --port 3011
+    depends_on: []
+    environment:
+      VITE_API_BASE: http://127.0.0.1:8012
+      VITE_WS_BASE: ws://127.0.0.1:8012
+    volumes:
+      - /home/eii/project/openpi0.5-rtc-reward-learning/voice_assistant_web/frontend/src:/app/src
+      - /home/eii/project/openpi0.5-rtc-reward-learning/voice_assistant_web/frontend/index.html:/app/index.html
+      - /home/eii/project/openpi0.5-rtc-reward-learning/voice_assistant_web/frontend/vite.config.ts:/app/vite.config.ts
