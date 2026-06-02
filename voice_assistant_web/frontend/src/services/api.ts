@@ -112,6 +112,12 @@ export type RLTControlState = {
   actor_ready: boolean
   actor_locked_reason: string | null
   beta: number
+  auto_beta_enabled: boolean
+  auto_beta_target_delta_norm: number | null
+  auto_beta_delta_norm_ema: number | null
+  auto_beta_q_advantage_ema: number | null
+  auto_beta_critic_loss_ema: number | null
+  auto_beta_reason: string | null
   intervention_scale: number
   max_delta: number
   critic_gate_enabled: boolean

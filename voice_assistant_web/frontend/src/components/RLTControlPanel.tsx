@@ -278,7 +278,6 @@ export function RLTStatsPanel({ rlt }: { rlt: RLTControlState }) {
 export function RLTConfigPanel({ rlt, onState }: Props) {
   const [draft, setDraft] = useState({
     warmup_target: rlt.warmup_target,
-    beta: rlt.beta,
     intervention_scale: rlt.intervention_scale,
     max_delta: rlt.max_delta,
     actor_enabled: rlt.actor_enabled,
@@ -292,7 +291,6 @@ export function RLTConfigPanel({ rlt, onState }: Props) {
   useEffect(() => {
     setDraft({
       warmup_target: rlt.warmup_target,
-      beta: rlt.beta,
       intervention_scale: rlt.intervention_scale,
       max_delta: rlt.max_delta,
       actor_enabled: rlt.actor_enabled,
@@ -302,7 +300,6 @@ export function RLTConfigPanel({ rlt, onState }: Props) {
     })
   }, [
     rlt.warmup_target,
-    rlt.beta,
     rlt.intervention_scale,
     rlt.max_delta,
     rlt.actor_enabled,
@@ -379,17 +376,6 @@ export function RLTConfigPanel({ rlt, onState }: Props) {
               min={1}
               value={draft.warmup_target}
               onChange={(event) => setDraft({ ...draft, warmup_target: Number(event.target.value) })}
-            />
-          </label>
-          <label className="rlt-field">
-            <span>Beta {draft.beta.toFixed(2)}</span>
-            <input
-              type="range"
-              min={0}
-              max={20}
-              step={0.1}
-              value={draft.beta}
-              onChange={(event) => setDraft({ ...draft, beta: Number(event.target.value) })}
             />
           </label>
           <label className="rlt-field">
@@ -493,6 +479,12 @@ export function RLTConfigPanel({ rlt, onState }: Props) {
       {activeTab === 'actor' ? (
         <div className="training-tab-panel">
           <div className="metric-grid">
+            <Metric label="Auto Beta" value={formatMetric(rlt.beta)} tone={rlt.auto_beta_enabled ? 'ok' : 'watch'} />
+            <Metric label="Beta Reason" value={rlt.auto_beta_reason || '-'} />
+            <Metric label="Target Delta" value={formatMetric(rlt.auto_beta_target_delta_norm)} />
+            <Metric label="Delta EMA" value={formatMetric(rlt.auto_beta_delta_norm_ema)} tone={actorDeltaTone} />
+            <Metric label="Q Advantage EMA" value={formatMetric(rlt.auto_beta_q_advantage_ema)} tone={rlt.auto_beta_q_advantage_ema !== null && rlt.auto_beta_q_advantage_ema < 0 ? 'watch' : undefined} />
+            <Metric label="Critic Loss EMA" value={formatMetric(rlt.auto_beta_critic_loss_ema)} />
             <Metric label="Actor Loss" value={formatMetric(rlt.actor_loss)} />
             <Metric label="Actor Q" value={formatMetric(rlt.actor_q_value)} />
             <Metric label="Delta Norm" value={formatMetric(rlt.actor_delta_norm)} tone={actorDeltaTone} />

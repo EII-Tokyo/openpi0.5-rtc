@@ -247,6 +247,12 @@ def test_trainer_metrics_update_actor_critic_diagnostics():
             "actor_updated": True,
             "publish_actor": False,
             "beta": 8.0,
+            "auto_beta_enabled": True,
+            "auto_beta_target_delta_norm": 0.05,
+            "auto_beta_delta_norm_ema": 0.03,
+            "auto_beta_q_advantage_ema": 0.2,
+            "auto_beta_critic_loss_ema": 1.25,
+            "auto_beta_reason": "delta_below_target_q_positive",
             "steps_per_sec": 2.5,
             "replay_size": 256,
             "replay_shards": 6,
@@ -274,7 +280,13 @@ def test_trainer_metrics_update_actor_critic_diagnostics():
     assert state.q_gap == 0.2
     assert state.actor_updated is True
     assert state.publish_actor is False
-    assert state.beta == 10.0
+    assert state.beta == 8.0
+    assert state.auto_beta_enabled is True
+    assert state.auto_beta_target_delta_norm == 0.05
+    assert state.auto_beta_delta_norm_ema == 0.03
+    assert state.auto_beta_q_advantage_ema == 0.2
+    assert state.auto_beta_critic_loss_ema == 1.25
+    assert state.auto_beta_reason == "delta_below_target_q_positive"
     assert state.steps_per_sec == 2.5
     assert state.success_episodes == 4
     assert state.failure_episodes == 3

@@ -151,6 +151,29 @@ class ActionChunkBroker(_base_policy.BasePolicy):
             else:
                 time.sleep(0.01)
 
+    def rlt_actor_status(self) -> dict:
+        if self._rlt_actor is None:
+            return {
+                "actor_ready": False,
+                "critic_ready": False,
+                "actor_dir": None,
+                "actor_step": None,
+                "actor_load_error": "actor_runtime_not_configured",
+            }
+        maybe_reload = getattr(self._rlt_actor, "maybe_reload", None)
+        if maybe_reload is not None:
+            maybe_reload(force=True)
+        status = getattr(self._rlt_actor, "status", None)
+        if status is None:
+            return {
+                "actor_ready": False,
+                "critic_ready": False,
+                "actor_dir": None,
+                "actor_step": None,
+                "actor_load_error": "actor_runtime_status_unavailable",
+            }
+        return dict(status())
+
     @override
     def infer(self, obs: Dict) -> Dict:  # noqa: UP006
         if self._use_rtc:

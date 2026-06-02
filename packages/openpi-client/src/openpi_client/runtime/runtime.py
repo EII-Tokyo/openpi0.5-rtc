@@ -211,10 +211,55 @@ class Runtime:
             logging.debug("发布运行时状态失败: %s", exc)
         self._publish_rlt_state()
 
+    def _rlt_actor_runtime_status(self) -> dict | None:
+        status = getattr(self._agent, "rlt_actor_status", None)
+        if status is None:
+            return None
+        try:
+            value = status()
+        except Exception as exc:
+            logging.debug("读取 RLT actor runtime 状态失败: %s", exc)
+            return {
+                "actor_ready": False,
+                "critic_ready": False,
+                "actor_dir": None,
+                "actor_step": None,
+                "actor_load_error": str(exc),
+            }
+        return dict(value) if isinstance(value, dict) else None
+
+    def _sync_rlt_actor_runtime_status_locked(self, status: dict | None) -> None:
+        if not status:
+            return
+        actor_ready = bool(status.get("actor_ready"))
+        critic_ready = bool(status.get("critic_ready"))
+        actor_step = status.get("actor_step")
+        actor_dir = status.get("actor_dir")
+        load_error = status.get("actor_load_error")
+        self._rlt_state["actor_runtime_checkpoint_path"] = actor_dir
+        self._rlt_state["actor_runtime_checkpoint_step"] = actor_step
+        if actor_ready:
+            self._rlt_state["critic_ready"] = critic_ready
+            self._rlt_state["loaded_actor_step"] = actor_step
+            if self._rlt_state.get("inference_actor_active") is not True and self._rlt_state.get("inference_gate_reason") in {
+                None,
+                "actor_runtime_not_configured",
+                "actor_path_not_configured",
+                "actor_not_loaded",
+            }:
+                self._rlt_state["inference_gate_reason"] = "waiting_for_inference"
+        elif load_error:
+            self._rlt_state["critic_ready"] = False
+            self._rlt_state["loaded_actor_step"] = None
+            self._rlt_state["inference_actor_active"] = False
+            self._rlt_state["inference_gate_reason"] = str(load_error)
+
     def _publish_rlt_state(self) -> None:
         if self._redis_client is None:
             return
+        runtime_status = self._rlt_actor_runtime_status()
         with self._task_lock:
+            self._sync_rlt_actor_runtime_status_locked(runtime_status)
             payload = dict(self._rlt_state)
         payload["timestamp"] = time.time()
         try:

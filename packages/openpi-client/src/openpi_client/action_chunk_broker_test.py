@@ -34,6 +34,9 @@ class _Actor:
             return RLTActorApplyResult(reference_actions.copy(), False, "actor_not_requested", None, None, None, None, gate_reason="actor_not_requested")
         return RLTActorApplyResult(reference_actions + 10, True, None, "/tmp/actor", 5, 1.0, 0.5, reference_q_value=0.2, actor_q_value=0.7, q_advantage=0.5, key_region_probability=0.9, gate_reason="critic_gate_actor_active", critic_ready=True, critic_gate_enabled=True)
 
+    def maybe_reload(self, *, force=False):
+        self.force_reload = force
+
     def status(self):
         return {"actor_ready": self.mode == "apply", "actor_step": 5}
 
@@ -86,3 +89,11 @@ def test_actor_failure_leaves_actions_unchanged_and_records_reason():
     np.testing.assert_allclose(result["reference_action"], np.array([0, 1], dtype=np.float32))
     assert result["rlt_actor_applied"] is False
     assert "actor failed" in result["rlt_actor_reason"]
+
+
+def test_broker_exposes_rlt_actor_runtime_status():
+    actor = _Actor(mode="apply")
+    broker = ActionChunkBroker(_Policy(), action_horizon=3, use_rtc=False, rlt_actor_runtime=actor)
+
+    assert broker.rlt_actor_status() == {"actor_ready": True, "actor_step": 5}
+    assert actor.force_reload is True

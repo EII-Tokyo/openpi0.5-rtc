@@ -75,6 +75,10 @@ services:
       50
       --rlt-chunk-stride
       2
+      --rlt-actor-path
+      ${RLT_ACTOR_CHECKPOINT_PATH:-/app/rlt_online/run/inference_actor/LATEST}
+      --rlt-actor-poll-interval
+      ${RLT_ACTOR_POLL_INTERVAL:-0.0}
       --video-codec
       h264
       --action-quality
@@ -93,6 +97,7 @@ services:
       - $PWD/checkpoints:/app/checkpoints:ro
     environment:
       - RLT_RL_TOKEN_CHECKPOINT_PATH=/app/checkpoints/eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo_rl_token_query/rl_token_2048_enc4_dec4_query_from_19000_20260528/12000
+      - RLT_ACTOR_CHECKPOINT_PATH=${RLT_ACTOR_CHECKPOINT_PATH:-/app/rlt_online/run/inference_actor/LATEST}
       - PYTHONPATH=/app:/app/src:/app/packages/openpi-client/src
       - JAX_PLATFORMS=cuda
       - XLA_PYTHON_CLIENT_PREALLOCATE=false
@@ -127,6 +132,14 @@ services:
         --min-success-episodes ${RLT_MIN_SUCCESS_EPISODES:-10}
         --min-failure-episodes ${RLT_MIN_FAILURE_EPISODES:-10}
         --critic-burn-in-steps ${RLT_CRITIC_BURN_IN_STEPS:-0}
+        --auto-beta-enabled
+        --auto-beta-target-delta-norm ${RLT_AUTO_BETA_TARGET_DELTA_NORM:-0.07}
+        --auto-beta-min ${RLT_AUTO_BETA_MIN:-1.0}
+        --auto-beta-max ${RLT_AUTO_BETA_MAX:-15.0}
+        --auto-beta-lr ${RLT_AUTO_BETA_LR:-0.03}
+        --auto-beta-ema-decay ${RLT_AUTO_BETA_EMA_DECAY:-0.95}
+        --auto-beta-update-interval ${RLT_AUTO_BETA_UPDATE_INTERVAL:-100}
+        --auto-beta-q-margin ${RLT_AUTO_BETA_Q_MARGIN:-0.001}
         --actor-min-replay-samples ${RLT_ACTOR_MIN_REPLAY_SAMPLES:-4096}
         --actor-min-replay-shards ${RLT_ACTOR_MIN_REPLAY_SHARDS:-100}
         --actor-min-success-episodes ${RLT_ACTOR_MIN_SUCCESS_EPISODES:-20}

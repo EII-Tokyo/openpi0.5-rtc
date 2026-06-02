@@ -61,6 +61,12 @@ def test_build_metrics_payload_is_json_serializable():
             "actor_updated": np.float32(1.0),
             "publish_actor": np.float32(0.0),
             "beta": np.float32(10.0),
+            "auto_beta_enabled": True,
+            "auto_beta_target_delta_norm": np.float32(0.05),
+            "auto_beta_delta_norm_ema": np.float32(0.025),
+            "auto_beta_q_advantage_ema": np.float32(0.5),
+            "auto_beta_critic_loss_ema": np.float32(1.25),
+            "auto_beta_reason": "delta_below_target_q_positive",
             "steps_per_sec": np.float32(12.0),
         },
         stats=_stats(),
@@ -90,6 +96,12 @@ def test_build_metrics_payload_is_json_serializable():
     assert payload["actor_updated"] is True
     assert payload["publish_actor"] is False
     assert payload["beta"] == 10.0
+    assert payload["auto_beta_enabled"] is True
+    assert payload["auto_beta_target_delta_norm"] == pytest.approx(0.05)
+    assert payload["auto_beta_delta_norm_ema"] == pytest.approx(0.025)
+    assert payload["auto_beta_q_advantage_ema"] == 0.5
+    assert payload["auto_beta_critic_loss_ema"] == 1.25
+    assert payload["auto_beta_reason"] == "delta_below_target_q_positive"
     assert payload["replay_size"] == 123
     assert payload["actor_enabled"] is True
     assert payload["latest_actor_path"] == "/tmp/actor"
@@ -103,6 +115,78 @@ def test_build_metrics_payload_is_json_serializable():
     assert payload["train_action_horizon"] == 10
     assert payload["steps_per_sec"] == 12.0
 
+
+
+def test_auto_beta_controller_reduces_beta_when_delta_low_and_advantage_positive():
+    controller = train_rlt_online.AutoBetaController(
+        beta=10.0,
+        target_delta_norm=0.05,
+        beta_min=1.0,
+        beta_max=15.0,
+        lr=0.1,
+        ema_decay=0.0,
+        q_margin=0.005,
+        update_interval=1,
+    )
+
+    result = controller.update(
+        step=10,
+        metrics={"actor_delta_norm": 0.025, "q_advantage": 0.02, "critic_loss": 0.01},
+    )
+
+    assert result.beta < 10.0
+    assert result.reason == "delta_below_target_q_positive"
+    assert result.metrics["auto_beta_delta_norm_ema"] == pytest.approx(0.025)
+    assert result.metrics["auto_beta_q_advantage_ema"] == pytest.approx(0.02)
+    assert result.metrics["auto_beta_enabled"] is True
+
+
+def test_auto_beta_controller_increases_beta_when_delta_high_or_advantage_weak():
+    controller = train_rlt_online.AutoBetaController(
+        beta=4.0,
+        target_delta_norm=0.05,
+        beta_min=1.0,
+        beta_max=15.0,
+        lr=0.1,
+        ema_decay=0.0,
+        q_margin=0.005,
+        update_interval=1,
+    )
+
+    high_delta = controller.update(
+        step=10,
+        metrics={"actor_delta_norm": 0.10, "q_advantage": 0.02, "critic_loss": 0.01},
+    )
+    weak_advantage = controller.update(
+        step=11,
+        metrics={"actor_delta_norm": 0.04, "q_advantage": -0.01, "critic_loss": 0.01},
+    )
+
+    assert high_delta.beta > 4.0
+    assert high_delta.reason == "delta_above_target"
+    assert weak_advantage.beta > high_delta.beta
+    assert weak_advantage.reason == "q_advantage_below_margin"
+
+
+def test_auto_beta_controller_skips_until_update_interval():
+    controller = train_rlt_online.AutoBetaController(
+        beta=4.0,
+        target_delta_norm=0.05,
+        beta_min=1.0,
+        beta_max=15.0,
+        lr=0.1,
+        ema_decay=0.0,
+        q_margin=0.005,
+        update_interval=10,
+    )
+
+    result = controller.update(
+        step=9,
+        metrics={"actor_delta_norm": 0.10, "q_advantage": 0.02, "critic_loss": 0.01},
+    )
+
+    assert result.beta == 4.0
+    assert result.reason == "waiting_for_update_interval"
 
 def test_redis_metrics_publisher_publishes_json():
     fake = _FakeRedis()

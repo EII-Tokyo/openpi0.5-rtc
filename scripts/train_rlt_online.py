@@ -3,6 +3,7 @@ import datetime
 import hashlib
 import json
 import logging
+import math
 import pathlib
 import platform
 import shutil
@@ -38,6 +39,14 @@ class Args:
     min_success_episodes: int = 1
     min_failure_episodes: int = 1
     critic_burn_in_steps: int = 0
+    auto_beta_enabled: bool = False
+    auto_beta_target_delta_norm: float = 0.05
+    auto_beta_min: float = 1.0
+    auto_beta_max: float = 15.0
+    auto_beta_lr: float = 0.03
+    auto_beta_ema_decay: float = 0.95
+    auto_beta_update_interval: int = 100
+    auto_beta_q_margin: float = 0.005
     actor_min_replay_samples: int = 0
     actor_min_replay_shards: int = 0
     actor_min_success_episodes: int = 0
@@ -201,6 +210,117 @@ class RedisControlSubscriber:
             pass
 
 
+
+@dataclasses.dataclass(frozen=True)
+class AutoBetaUpdate:
+    beta: float
+    changed: bool
+    reason: str
+    metrics: dict[str, float | bool | str | None]
+
+
+class AutoBetaController:
+    def __init__(
+        self,
+        *,
+        beta: float,
+        target_delta_norm: float,
+        beta_min: float,
+        beta_max: float,
+        lr: float,
+        ema_decay: float,
+        q_margin: float,
+        update_interval: int,
+    ):
+        if target_delta_norm <= 0:
+            raise ValueError("target_delta_norm must be positive")
+        if beta_min <= 0 or beta_max < beta_min:
+            raise ValueError("beta range must satisfy 0 < beta_min <= beta_max")
+        if lr < 0:
+            raise ValueError("lr must be non-negative")
+        if not 0 <= ema_decay < 1:
+            raise ValueError("ema_decay must be in [0, 1)")
+        if update_interval < 1:
+            raise ValueError("update_interval must be >= 1")
+        self.beta = float(np.clip(beta, beta_min, beta_max))
+        self.target_delta_norm = float(target_delta_norm)
+        self.beta_min = float(beta_min)
+        self.beta_max = float(beta_max)
+        self.lr = float(lr)
+        self.ema_decay = float(ema_decay)
+        self.q_margin = float(q_margin)
+        self.update_interval = int(update_interval)
+        self.delta_norm_ema: float | None = None
+        self.q_advantage_ema: float | None = None
+        self.critic_loss_ema: float | None = None
+        self.reason = "initializing"
+
+    def update(self, *, step: int, metrics: dict) -> AutoBetaUpdate:
+        critic_loss = _finite_float(metrics.get("critic_loss"))
+        if critic_loss is not None:
+            self.critic_loss_ema = self._ema(self.critic_loss_ema, critic_loss)
+
+        actor_updated = bool(metrics.get("actor_updated", True))
+        delta_norm = _finite_float(metrics.get("actor_delta_norm"))
+        q_advantage = _finite_float(metrics.get("q_advantage"))
+        if actor_updated:
+            if delta_norm is not None:
+                self.delta_norm_ema = self._ema(self.delta_norm_ema, delta_norm)
+            if q_advantage is not None:
+                self.q_advantage_ema = self._ema(self.q_advantage_ema, q_advantage)
+        else:
+            self.reason = "waiting_for_actor_update"
+            return self._result(changed=False)
+
+        if int(step) % self.update_interval != 0:
+            self.reason = "waiting_for_update_interval"
+            return self._result(changed=False)
+        if self.delta_norm_ema is None or self.q_advantage_ema is None:
+            self.reason = "waiting_for_actor_metrics"
+            return self._result(changed=False)
+
+        previous = self.beta
+        if self.q_advantage_ema < self.q_margin:
+            self.beta *= math.exp(self.lr)
+            self.reason = "q_advantage_below_margin"
+        else:
+            ratio = self.delta_norm_ema / self.target_delta_norm
+            if ratio > 1.0:
+                self.beta *= math.exp(self.lr * (ratio - 1.0))
+                self.reason = "delta_above_target"
+            elif ratio < 1.0:
+                self.beta *= math.exp(self.lr * (ratio - 1.0))
+                self.reason = "delta_below_target_q_positive"
+            else:
+                self.reason = "stable"
+        self.beta = float(np.clip(self.beta, self.beta_min, self.beta_max))
+        return self._result(changed=not math.isclose(previous, self.beta, rel_tol=0.0, abs_tol=1e-12))
+
+    def _ema(self, old: float | None, new: float) -> float:
+        if old is None:
+            return float(new)
+        return self.ema_decay * old + (1.0 - self.ema_decay) * float(new)
+
+    def _result(self, *, changed: bool) -> AutoBetaUpdate:
+        return AutoBetaUpdate(beta=self.beta, changed=changed, reason=self.reason, metrics=self.metrics())
+
+    def metrics(self) -> dict[str, float | bool | str | None]:
+        return {
+            "auto_beta_enabled": True,
+            "auto_beta_target_delta_norm": self.target_delta_norm,
+            "auto_beta_delta_norm_ema": self.delta_norm_ema,
+            "auto_beta_q_advantage_ema": self.q_advantage_ema,
+            "auto_beta_critic_loss_ema": self.critic_loss_ema,
+            "auto_beta_reason": self.reason,
+        }
+
+
+def _finite_float(value) -> float | None:
+    if value is None:
+        return None
+    value = float(value)
+    return value if math.isfinite(value) else None
+
 def _with_runtime_beta(state: rlt_training.RLTTrainState, beta: float) -> rlt_training.RLTTrainState:
     model = nnx.merge(state.model_def, state.params)
     beta = float(beta)
@@ -227,6 +347,14 @@ def _json_bool(value):
     if value is None:
         return None
     return bool(value)
+
+
+def _format_log_metric(key: str, value) -> str:
+    if isinstance(value, bool):
+        return f"{key}={int(value)}"
+    if isinstance(value, int | float | np.number):
+        return f"{key}={float(value):.4f}"
+    return f"{key}={value}"
 
 
 def _build_metrics_payload(
@@ -262,6 +390,12 @@ def _build_metrics_payload(
         "actor_updated": _json_bool(reduced.get("actor_updated")),
         "publish_actor": _json_bool(reduced.get("publish_actor")),
         "beta": _json_float(reduced.get("beta")),
+        "auto_beta_enabled": _json_bool(reduced.get("auto_beta_enabled")),
+        "auto_beta_target_delta_norm": _json_float(reduced.get("auto_beta_target_delta_norm")),
+        "auto_beta_delta_norm_ema": _json_float(reduced.get("auto_beta_delta_norm_ema")),
+        "auto_beta_q_advantage_ema": _json_float(reduced.get("auto_beta_q_advantage_ema")),
+        "auto_beta_critic_loss_ema": _json_float(reduced.get("auto_beta_critic_loss_ema")),
+        "auto_beta_reason": reduced.get("auto_beta_reason"),
         "replay_size": int(stats.replay_size),
         "wandb_url": wandb_url,
         "actor_enabled": bool(actor_enabled),
@@ -520,6 +654,20 @@ def main(args: Args) -> None:
         db=args.redis_db,
     )
     runtime_beta = float(config.model.beta)
+    auto_beta_controller = None
+    latest_auto_beta_metrics: dict[str, float | bool | str | None] = {"auto_beta_enabled": False}
+    if args.auto_beta_enabled:
+        auto_beta_controller = AutoBetaController(
+            beta=runtime_beta,
+            target_delta_norm=args.auto_beta_target_delta_norm,
+            beta_min=args.auto_beta_min,
+            beta_max=args.auto_beta_max,
+            lr=args.auto_beta_lr,
+            ema_decay=args.auto_beta_ema_decay,
+            q_margin=args.auto_beta_q_margin,
+            update_interval=args.auto_beta_update_interval,
+        )
+        latest_auto_beta_metrics = auto_beta_controller.metrics()
 
     initial_actor_dir = _save_actor_for_inference(
         state,
@@ -534,7 +682,7 @@ def main(args: Args) -> None:
     metrics_publisher.publish(
         _build_metrics_payload(
             step=0,
-            reduced={},
+            reduced={"beta": runtime_beta, **latest_auto_beta_metrics},
             stats=store.stats,
             replay_shape=store.shape,
             train_shape=store.sample_shape,
@@ -569,7 +717,7 @@ def main(args: Args) -> None:
                 continue
 
             next_step = int(state.step) + 1
-            beta_update = control_subscriber.poll_beta_update()
+            beta_update = None if args.auto_beta_enabled else control_subscriber.poll_beta_update()
             if beta_update is not None and beta_update != runtime_beta:
                 runtime_beta = beta_update
                 state = _with_runtime_beta(state, runtime_beta)
@@ -586,9 +734,22 @@ def main(args: Args) -> None:
             train_rng = jax.random.fold_in(jax.random.key(args.seed), int(state.step))
             state, info = rlt_training.train_step(state, batch, train_rng)
             info = jax.device_get(info)
+            current_step = int(state.step)
+            if auto_beta_controller is not None:
+                auto_beta_update = auto_beta_controller.update(step=current_step, metrics=info)
+                latest_auto_beta_metrics = auto_beta_update.metrics
+                if auto_beta_update.changed and auto_beta_update.beta != runtime_beta:
+                    runtime_beta = auto_beta_update.beta
+                    state = _with_runtime_beta(state, runtime_beta)
+                    logging.info(
+                        "Auto beta updated step=%d beta=%.4f reason=%s",
+                        current_step,
+                        runtime_beta,
+                        auto_beta_update.reason,
+                    )
+            info = {**info, "beta": np.asarray(runtime_beta), **latest_auto_beta_metrics}
             infos.append(info)
 
-            current_step = int(state.step)
             if bool(info["publish_actor"]):
                 actor_dir = _save_actor_for_inference(
                     state,
@@ -604,7 +765,7 @@ def main(args: Args) -> None:
                 metrics_publisher.publish(
                     _build_metrics_payload(
                         step=current_step,
-                        reduced={},
+                        reduced={"beta": runtime_beta, **latest_auto_beta_metrics},
                         stats=store.stats,
                         replay_shape=store.shape,
                         train_shape=store.sample_shape,
@@ -628,11 +789,12 @@ def main(args: Args) -> None:
                 )
                 logging.info("Saved RLT training checkpoint at step=%d path=%s", current_step, checkpoint_dir)
             if current_step % args.log_interval == 0 and infos:
-                reduced = {
-                    key: float(np.mean([np.asarray(item[key]) for item in infos]))
-                    for key in infos[0]
-                    if np.asarray(infos[0][key]).ndim == 0
-                }
+                reduced = {}
+                for key in infos[0]:
+                    first = np.asarray(infos[0][key])
+                    if first.ndim != 0 or first.dtype.kind not in "biuf":
+                        continue
+                    reduced[key] = float(np.mean([np.asarray(item[key]) for item in infos]))
                 stats = store.stats
                 reduced.update(
                     {
@@ -646,6 +808,7 @@ def main(args: Args) -> None:
                         "steps_per_sec": args.log_interval / max(time.perf_counter() - log_start_time, 1e-6),
                     }
                 )
+                reduced.update(latest_auto_beta_metrics)
                 metrics_publisher.publish(
                     _build_metrics_payload(
                         step=current_step,
@@ -660,7 +823,7 @@ def main(args: Args) -> None:
                     )
                 )
                 wandb.log({f"rlt/{key}": value for key, value in reduced.items()}, step=current_step)
-                logging.info("step=%d %s", current_step, " ".join(f"{k}={v:.4f}" for k, v in reduced.items()))
+                logging.info("step=%d %s", current_step, " ".join(_format_log_metric(k, v) for k, v in reduced.items()))
                 infos = []
                 log_start_time = time.perf_counter()
             progress.update(1)

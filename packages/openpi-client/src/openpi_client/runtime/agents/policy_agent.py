@@ -14,5 +14,11 @@ class PolicyAgent(_agent.Agent):
     def get_action(self, observation: dict) -> dict:
         return self._policy.infer(observation)
 
+    def rlt_actor_status(self) -> dict | None:
+        status = getattr(self._policy, "rlt_actor_status", None)
+        if status is None:
+            return None
+        return status()
+
     def reset(self) -> None:
         self._policy.reset()

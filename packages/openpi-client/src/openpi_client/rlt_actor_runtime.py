@@ -84,7 +84,7 @@ class RLTActorRuntime:
         context = context or {}
         if not bool(context.get("actor_requested", False)):
             return self._fail(reference, "actor_not_requested")
-        self.maybe_reload()
+        self.maybe_reload(force=True)
         if self._actor is None or self._config is None:
             return self._fail(reference, self._reason or "actor_not_loaded")
         reason = self._validate_shapes(reference, z_rl, proprio)
@@ -254,6 +254,12 @@ class RLTActorRuntime:
         self._actor_dir = actor_dir
         self._actor_step = None if metadata.get("step") is None else int(metadata["step"])
         self._reason = None
+        logging.info(
+            "Loaded RLT actor runtime: step=%s path=%s critic_ready=%s",
+            self._actor_step,
+            actor_dir,
+            critic is not None,
+        )
 
     def _validate_shapes(self, reference: np.ndarray, z_rl: np.ndarray, proprio: np.ndarray) -> str | None:
         if reference.ndim != 2:

@@ -13,7 +13,14 @@ COPY --from=ghcr.io/astral-sh/uv:0.5.1 /uv /uvx /bin/
 WORKDIR /app
 
 # Needed because LeRobot uses git-lfs.
-RUN apt-get update && apt-get install -y git git-lfs linux-headers-generic build-essential clang
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        git \
+        git-lfs \
+        linux-headers-generic \
+        build-essential \
+        clang && \
+    rm -rf /var/lib/apt/lists/*
 
 # Copy from the cache instead of linking since it's a mounted volume
 ENV UV_LINK_MODE=copy
@@ -34,6 +41,9 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=packages/openpi-client/pyproject.toml,target=packages/openpi-client/pyproject.toml \
     --mount=type=bind,source=packages/openpi-client/src,target=packages/openpi-client/src \
     GIT_LFS_SKIP_SMUDGE=1 uv sync --frozen --no-dev
+
+# JAX GPU profiling on RTX 50-series needs newer CUPTI than the default lock resolves.
+RUN uv pip install --python $UV_PROJECT_ENVIRONMENT "nvidia-cuda-cupti-cu12>=12.8,<12.9"
 
 # Copy transformers_replace files while preserving directory structure
 COPY src/openpi/models_pytorch/transformers_replace/ /tmp/transformers_replace/

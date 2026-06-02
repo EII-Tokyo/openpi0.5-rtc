@@ -49,6 +49,12 @@ class RLTControlState(BaseModel):
     actor_effective: bool = False
     actor_locked_reason: str | None = "warmup"
     beta: float = 10.0
+    auto_beta_enabled: bool = False
+    auto_beta_target_delta_norm: float | None = None
+    auto_beta_delta_norm_ema: float | None = None
+    auto_beta_q_advantage_ema: float | None = None
+    auto_beta_critic_loss_ema: float | None = None
+    auto_beta_reason: str | None = None
     intervention_scale: float = 0.25
     max_delta: float = 0.1
     critic_gate_enabled: bool = False

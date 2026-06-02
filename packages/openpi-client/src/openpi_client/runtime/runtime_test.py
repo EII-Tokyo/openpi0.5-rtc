@@ -145,3 +145,25 @@ def test_update_rlt_actor_status_records_inference_metrics():
     assert runtime._rlt_state["key_region_probability"] == 0.9
     assert runtime._rlt_state["inference_gate_reason"] == "critic_gate_actor_active"
     assert runtime._rlt_state["critic_ready"] is True
+
+
+class _StatusAgent(_Agent):
+    def rlt_actor_status(self):
+        return {
+            "actor_ready": True,
+            "critic_ready": True,
+            "actor_dir": "/tmp/actor",
+            "actor_step": 15000,
+            "actor_load_error": None,
+        }
+
+
+def test_publish_rlt_state_includes_loaded_actor_runtime_status():
+    runtime = Runtime(_Env(), _StatusAgent(), [], max_hz=0, num_episodes=1, max_episode_steps=1)
+    runtime._redis_client = type("Redis", (), {"publish": lambda self, channel, payload: None})()
+
+    runtime._publish_rlt_state()
+
+    assert runtime._rlt_state["critic_ready"] is True
+    assert runtime._rlt_state["loaded_actor_step"] == 15000
+    assert runtime._rlt_state["inference_gate_reason"] == "waiting_for_inference"
