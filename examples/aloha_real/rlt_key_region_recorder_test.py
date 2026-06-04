@@ -231,6 +231,10 @@ def test_key_region_manifest_includes_replay_schema_metadata(tmp_path):
     assert manifest["action_space"] == "aloha_exec"
     assert manifest["action_dim"] == 14
     assert manifest["reward_placement"] == "terminal_last_train_step"
+    assert manifest["pre_roll_seconds"] == 0.0
+    assert manifest["post_roll_seconds"] == 0.0
+    assert manifest["key_region_start_sec"] == 0.0
+    assert manifest["key_region_end_sec"] == manifest["duration_seconds"]
 
 
 def test_key_region_discard_clears_pending_region(tmp_path):
@@ -256,14 +260,14 @@ def test_key_region_discard_clears_pending_region(tmp_path):
     assert store._pending_end_event is None
 
 
-def test_key_region_score_waits_for_fixed_post_context_before_writing(tmp_path):
+def test_key_region_records_exactly_between_start_and_end(tmp_path):
     saved_segments = []
     store = recorder.KeyRegionReplayRecorder(
         replay_root=str(tmp_path / "replay"),
         rollouts_root=str(tmp_path / "rollouts"),
         fps=10.0,
-        pre_roll_seconds=0.2,
-        post_roll_seconds=0.3,
+        pre_roll_seconds=2.0,
+        post_roll_seconds=2.0,
         ack_publisher=lambda payload: None,
     )
     store._write_segment = saved_segments.append
@@ -274,16 +278,9 @@ def test_key_region_score_waits_for_fixed_post_context_before_writing(tmp_path):
         for _ in range(4):
             _push_runtime_step(store)
         store.on_key_region_end({"type": "key_region_end", "key_region_id": "post", "timestamp": 104.0})
-        store.on_key_region_score({"type": "score", "key_region_id": "post", "timestamp": 106.0, "reward": 1})
-        store._write_queue.join()
-
-        assert saved_segments == []
-        for _ in range(2):
+        for _ in range(5):
             _push_runtime_step(store)
-        store._write_queue.join()
-        assert saved_segments == []
-
-        _push_runtime_step(store)
+        store.on_key_region_score({"type": "score", "key_region_id": "post", "timestamp": 106.0, "reward": 1})
         store._write_queue.join()
     finally:
         store.close()
@@ -292,7 +289,7 @@ def test_key_region_score_waits_for_fixed_post_context_before_writing(tmp_path):
     segment = saved_segments[0]
     assert segment.active_start_step == 3
     assert segment.active_end_step == 7
-    assert [record.step_index for record in segment.records] == list(range(1, 10))
+    assert [record.step_index for record in segment.records] == list(range(3, 7))
     assert segment.score_event["timestamp"] == 106.0
 
 

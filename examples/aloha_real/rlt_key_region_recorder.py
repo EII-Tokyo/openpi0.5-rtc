@@ -276,10 +276,9 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
         self._rollouts_root = pathlib.Path(rollouts_root) / "key_regions" if rollouts_root else pathlib.Path(rollout_dir)
         self._replay_root = pathlib.Path(replay_root) / "rlt_key_regions" if replay_root else pathlib.Path(replay_dir)
         self._fps = fps
-        self._pre_roll_steps = max(0, round(pre_roll_seconds * fps))
-        self._post_roll_steps = max(0, round(post_roll_seconds * fps))
-        ring_steps = round((pre_roll_seconds + post_roll_seconds + max_key_region_seconds + 5.0) * fps)
-        self._ring: deque[StepRecord] = deque(maxlen=max(ring_steps, self._pre_roll_steps + 1))
+        del pre_roll_seconds, post_roll_seconds
+        ring_steps = round((max_key_region_seconds + 5.0) * fps)
+        self._ring: deque[StepRecord] = deque(maxlen=max(ring_steps, 1))
         self._train_horizon = train_horizon
         self._full_horizon = full_horizon
         self._chunk_stride = chunk_stride
@@ -288,11 +287,11 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
         self._step_index = 0
         self._active_start_event: dict[str, Any] | None = None
         self._active_start_step: int | None = None
+        self._active_records: list[StepRecord] | None = None
         self._pending_end_event: dict[str, Any] | None = None
         self._pending_end_step: int | None = None
         self._pending_score_event: dict[str, Any] | None = None
         self._pending_records: list[StepRecord] | None = None
-        self._pending_post_roll_remaining = 0
         self._lock = threading.Lock()
         self._write_queue: queue.Queue[KeyRegionSegment | None] = queue.Queue(maxsize=16)
         self._writer_thread = threading.Thread(target=self._writer_loop, daemon=True)
@@ -337,19 +336,8 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
         with self._lock:
             self._ring.append(record)
             self._step_index += 1
-            segment = None
-            if (
-                self._pending_end_event is not None
-                and self._pending_records is not None
-                and self._pending_post_roll_remaining > 0
-            ):
-                self._pending_records.append(record)
-                self._pending_post_roll_remaining -= 1
-                if self._pending_post_roll_remaining == 0 and self._pending_score_event is not None:
-                    segment = self._build_pending_segment_locked(self._pending_score_event)
-                    self._clear_pending_region_locked()
-        if segment is not None:
-            self._enqueue_segment(segment)
+            if self._active_start_event is not None and self._pending_end_event is None and self._active_records is not None:
+                self._active_records.append(record)
 
     @override
     def on_episode_end(self, episode_subdir: str | None = None) -> None:
@@ -360,6 +348,7 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
         with self._lock:
             self._active_start_event = dict(event)
             self._active_start_step = self._step_index
+            self._active_records = []
             self._pending_end_event = None
             self._pending_end_step = None
             self._pending_score_event = None
@@ -372,15 +361,16 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
             if self._active_start_event is None:
                 logging.warning("Ignoring key-region end without a matching start.")
                 return
-            active_start_step = self._active_start_step if self._active_start_step is not None else self._step_index
-            start_step = max(0, active_start_step - self._pre_roll_steps)
-            records = [record for record in self._ring if record.step_index >= start_step]
             self._pending_end_event = dict(event)
             self._pending_end_step = self._step_index
             self._pending_score_event = None
-            self._pending_records = records
-            self._pending_post_roll_remaining = self._post_roll_steps
-        logging.info("RLT key region ended: %s (%d buffered frames)", event.get("key_region_id"), len(records))
+            self._pending_records = list(self._active_records or [])
+            buffered_count = len(self._pending_records)
+        logging.info(
+            "RLT key region ended: %s (%d buffered frames)",
+            event.get("key_region_id"),
+            buffered_count,
+        )
 
     @override
     def on_key_region_discard(self, event: dict) -> None:
@@ -396,11 +386,11 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
                 return
             self._active_start_event = None
             self._active_start_step = None
+            self._active_records = None
             self._pending_end_event = None
             self._pending_end_step = None
             self._pending_score_event = None
             self._pending_records = None
-            self._pending_post_roll_remaining = 0
         logging.info("RLT key region discarded: %s", key_region_id)
 
     @override
@@ -410,10 +400,8 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
                 logging.warning("Ignoring key-region score without a completed region.")
                 return
             self._pending_score_event = dict(event)
-            segment = None
-            if self._pending_post_roll_remaining <= 0:
-                segment = self._build_pending_segment_locked(self._pending_score_event)
-                self._clear_pending_region_locked()
+            segment = self._build_pending_segment_locked(self._pending_score_event)
+            self._clear_pending_region_locked()
 
         if segment is not None:
             self._enqueue_segment(segment)
@@ -442,11 +430,11 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
     def _clear_pending_region_locked(self) -> None:
         self._active_start_event = None
         self._active_start_step = None
+        self._active_records = None
         self._pending_end_event = None
         self._pending_end_step = None
         self._pending_score_event = None
         self._pending_records = None
-        self._pending_post_roll_remaining = 0
 
     def _enqueue_segment(self, segment: KeyRegionSegment) -> None:
         try:
@@ -557,13 +545,9 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
         missing_metadata: list[str],
         replay_arrays: dict[str, np.ndarray] | None,
     ) -> dict[str, Any]:
-        first_step = segment.records[0].step_index if segment.records else segment.active_start_step
         duration_seconds = len(segment.records) / self._fps
-        key_region_start_sec = max((segment.active_start_step - first_step) / self._fps, 0.0)
-        key_region_end_sec = min(
-            max((segment.active_end_step - first_step) / self._fps, key_region_start_sec),
-            duration_seconds,
-        )
+        key_region_start_sec = 0.0
+        key_region_end_sec = duration_seconds
         try:
             key_region_duration_seconds = max(
                 float(segment.end_event.get("timestamp")) - float(segment.start_event.get("timestamp")),
@@ -584,8 +568,8 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
             "key_region_duration_seconds": key_region_duration_seconds,
             "key_region_start_sec": key_region_start_sec,
             "key_region_end_sec": key_region_end_sec,
-            "pre_roll_seconds": self._pre_roll_steps / self._fps,
-            "post_roll_seconds": self._post_roll_steps / self._fps,
+            "pre_roll_seconds": 0.0,
+            "post_roll_seconds": 0.0,
             "num_frames": len(segment.records),
             "num_replay_transitions": 0 if replay_arrays is None else len(replay_arrays["z_rl"]),
             "fps": self._fps,

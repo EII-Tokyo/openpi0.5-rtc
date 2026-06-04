@@ -472,18 +472,6 @@ const defaultCropRange = (record: RLTKeyRegionReviewRecord): CropRange => {
       endSec: clamp(Math.max(record.crop_start_sec, record.crop_end_sec), 0, duration),
     }
   }
-  if (
-    record.key_region_start_sec !== null &&
-    record.key_region_start_sec !== undefined &&
-    record.key_region_end_sec !== null &&
-    record.key_region_end_sec !== undefined &&
-    record.key_region_end_sec > record.key_region_start_sec
-  ) {
-    return {
-      startSec: clamp(record.key_region_start_sec, 0, duration),
-      endSec: clamp(record.key_region_end_sec, 0, duration),
-    }
-  }
   return {
     startSec: 0,
     endSec: duration,
