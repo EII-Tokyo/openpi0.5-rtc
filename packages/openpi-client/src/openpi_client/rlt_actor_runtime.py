@@ -79,6 +79,7 @@ class RLTActorRuntime:
         z_rl: np.ndarray,
         proprio: np.ndarray,
         context: dict[str, Any] | None = None,
+        action_start_index: int = 0,
     ) -> RLTActorApplyResult:
         reference = np.array(reference_actions, dtype=np.float32, copy=True)
         context = context or {}
@@ -87,7 +88,8 @@ class RLTActorRuntime:
         self.maybe_reload(force=True)
         if self._actor is None or self._config is None:
             return self._fail(reference, self._reason or "actor_not_loaded")
-        reason = self._validate_shapes(reference, z_rl, proprio)
+        action_start_index = int(action_start_index)
+        reason = self._validate_shapes(reference, z_rl, proprio, action_start_index)
         if reason is not None:
             return self._fail(reference, reason)
         try:
@@ -96,7 +98,8 @@ class RLTActorRuntime:
             import jax.numpy as jnp
 
             horizon = int(self._config.action_horizon)
-            prefix = reference[:horizon]
+            action_end_index = action_start_index + horizon
+            prefix = reference[action_start_index:action_end_index]
             x = rlt.make_state(
                 jnp.asarray(np.asarray(z_rl, dtype=np.float32)[None, :]),
                 jnp.asarray(np.asarray(proprio, dtype=np.float32)[None, :]),
@@ -112,8 +115,8 @@ class RLTActorRuntime:
             if not np.all(np.isfinite(adjusted_prefix)):
                 return self._fail(reference, "actor_output_non_finite")
             adjusted = np.array(reference, copy=True)
-            adjusted[:horizon] = adjusted_prefix
-            delta = adjusted[:horizon] - reference[:horizon]
+            adjusted[action_start_index:action_end_index] = adjusted_prefix
+            delta = adjusted[action_start_index:action_end_index] - reference[action_start_index:action_end_index]
             critic_gate_enabled = bool(context.get("critic_gate_enabled", False))
             gate_margin = float(context.get("critic_gate_margin", 0.0) or 0.0)
             gate_temperature = max(1e-6, float(context.get("critic_gate_temperature", 0.05) or 0.05))
@@ -261,11 +264,23 @@ class RLTActorRuntime:
             critic is not None,
         )
 
-    def _validate_shapes(self, reference: np.ndarray, z_rl: np.ndarray, proprio: np.ndarray) -> str | None:
+    def _validate_shapes(
+        self,
+        reference: np.ndarray,
+        z_rl: np.ndarray,
+        proprio: np.ndarray,
+        action_start_index: int,
+    ) -> str | None:
         if reference.ndim != 2:
             return "reference_actions must have shape [horizon, action_dim]"
-        if reference.shape[0] < int(self._config.action_horizon):
-            return f"reference horizon {reference.shape[0]} < actor horizon {self._config.action_horizon}"
+        if action_start_index < 0:
+            return f"action_start_index must be non-negative, got {action_start_index}"
+        required_horizon = action_start_index + int(self._config.action_horizon)
+        if reference.shape[0] < required_horizon:
+            return (
+                f"reference horizon {reference.shape[0]} < action_start_index "
+                f"{action_start_index} + actor horizon {self._config.action_horizon}"
+            )
         if reference.shape[1] != int(self._config.action_dim):
             return f"action_dim mismatch: reference={reference.shape[1]} actor={self._config.action_dim}"
         if np.asarray(z_rl).shape != (int(self._config.z_dim),):

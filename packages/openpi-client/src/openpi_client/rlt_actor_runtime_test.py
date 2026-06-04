@@ -54,6 +54,44 @@ def test_actor_runtime_loads_latest_and_preserves_suffix(tmp_path):
     assert runtime.status()["actor_ready"] is True
 
 
+def test_actor_runtime_applies_to_requested_action_window(tmp_path):
+    _write_actor(tmp_path, action_horizon=10, action_dim=3)
+    runtime = RLTActorRuntime(str(tmp_path / "inference_actor" / "LATEST"), poll_interval_seconds=0.0)
+    reference = np.ones((25, 3), dtype=np.float32)
+
+    result = runtime.apply(
+        reference_actions=reference,
+        z_rl=np.zeros((8,), dtype=np.float32),
+        proprio=np.zeros((4,), dtype=np.float32),
+        context={"actor_requested": True, "intervention_scale": 0.25},
+        action_start_index=10,
+    )
+
+    assert result.applied is True
+    result_delta = result.actions - reference
+    np.testing.assert_allclose(result_delta[:10], np.zeros((10, 3), dtype=np.float32))
+    assert np.linalg.norm(result_delta[10:20]) > 0.0
+    np.testing.assert_allclose(result_delta[20:], np.zeros((5, 3), dtype=np.float32))
+
+
+def test_actor_runtime_rejects_action_window_that_exceeds_reference(tmp_path):
+    _write_actor(tmp_path, action_horizon=10, action_dim=3)
+    runtime = RLTActorRuntime(str(tmp_path / "inference_actor" / "LATEST"), poll_interval_seconds=0.0)
+    reference = np.ones((15, 3), dtype=np.float32)
+
+    result = runtime.apply(
+        reference_actions=reference,
+        z_rl=np.zeros((8,), dtype=np.float32),
+        proprio=np.zeros((4,), dtype=np.float32),
+        context={"actor_requested": True, "intervention_scale": 0.25},
+        action_start_index=10,
+    )
+
+    assert result.applied is False
+    assert "reference horizon" in result.reason
+    np.testing.assert_allclose(result.actions, reference)
+
+
 def test_actor_runtime_bad_metadata_fails_closed(tmp_path):
     actor_dir = _write_actor(tmp_path)
     metadata_path = actor_dir / "metadata.json"

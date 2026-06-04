@@ -112,7 +112,11 @@ class ActionChunkBroker(_base_policy.BasePolicy):
                 rpc_start = time.monotonic()
                 policy_obs = self._policy_obs(self._obs or {})
                 self._background_results = self._policy.infer(policy_obs, norm_action, self._use_rtc)
-                self._background_results = self._apply_rlt_actor_to_policy_results(self._background_results, self._obs or {})
+                self._background_results = self._apply_rlt_actor_to_policy_results(
+                    self._background_results,
+                    self._obs or {},
+                    action_start_index=self._d,
+                )
                 rpc_ms = (time.monotonic() - rpc_start) * 1000.0
                 # break
                 # 将后面18列都设为0
@@ -180,7 +184,7 @@ class ActionChunkBroker(_base_policy.BasePolicy):
             # init     
             if self._last_results is None:
                 policy_results = self._policy.infer(self._policy_obs(obs), None, self._use_rtc)
-                policy_results = self._apply_rlt_actor_to_policy_results(policy_results, obs)
+                policy_results = self._apply_rlt_actor_to_policy_results(policy_results, obs, action_start_index=0)
                 self._last_origin_actions = policy_results["origin_actions"]
                 self._last_reference_actions = policy_results.get("reference_actions", policy_results["actions"])
                 self._last_state = policy_results["state"]
@@ -208,7 +212,7 @@ class ActionChunkBroker(_base_policy.BasePolicy):
         else:
             if self._last_results is None:
                 policy_results = self._policy.infer(self._policy_obs(obs))
-                policy_results = self._apply_rlt_actor_to_policy_results(policy_results, obs)
+                policy_results = self._apply_rlt_actor_to_policy_results(policy_results, obs, action_start_index=0)
                 self._last_results = self._build_step_result_cache(policy_results)
                 self._cur_step = 0
 
@@ -237,7 +241,13 @@ class ActionChunkBroker(_base_policy.BasePolicy):
         context = obs.get("rlt_context") or {}
         return dict(context) if isinstance(context, dict) else {}
 
-    def _apply_rlt_actor_to_policy_results(self, policy_results: Dict[str, np.ndarray], obs: Dict) -> Dict[str, np.ndarray]:
+    def _apply_rlt_actor_to_policy_results(
+        self,
+        policy_results: Dict[str, np.ndarray],
+        obs: Dict,
+        *,
+        action_start_index: int = 0,
+    ) -> Dict[str, np.ndarray]:
         policy_results = dict(policy_results)
         reference_actions = np.array(policy_results["actions"], dtype=np.float32, copy=True)
         policy_results["reference_actions"] = reference_actions
@@ -289,6 +299,7 @@ class ActionChunkBroker(_base_policy.BasePolicy):
                 z_rl=np.asarray(z_rl, dtype=np.float32),
                 proprio=np.asarray(proprio, dtype=np.float32),
                 context=self._rlt_context_from_obs(obs),
+                action_start_index=action_start_index,
             )
         except Exception as exc:
             logging.exception("RLT actor failed; using reference VLA actions")

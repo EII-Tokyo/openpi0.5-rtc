@@ -26,8 +26,8 @@ class _Actor:
         self.mode = mode
         self.calls = []
 
-    def apply(self, *, reference_actions, z_rl, proprio, context):
-        self.calls.append((reference_actions.copy(), z_rl.copy(), proprio.copy(), dict(context)))
+    def apply(self, *, reference_actions, z_rl, proprio, context, action_start_index=None):
+        self.calls.append((reference_actions.copy(), z_rl.copy(), proprio.copy(), dict(context), action_start_index))
         if self.mode == "raise":
             raise RuntimeError("actor failed")
         if self.mode == "disabled":
@@ -77,6 +77,25 @@ def test_actor_enabled_replaces_actions_and_preserves_raw_reference():
     assert first["rlt_critic_gate_enabled"] is True
     assert second["rlt_actor_applied"] is True
     assert len(actor.calls) == 1
+    assert actor.calls[0][4] == 0
+
+
+def test_broker_passes_delayed_execution_window_to_actor_runtime():
+    actor = _Actor(mode="apply")
+    broker = ActionChunkBroker(_Policy(), action_horizon=3, use_rtc=False, rlt_actor_runtime=actor)
+    policy_results = {
+        "actions": np.arange(100, dtype=np.float32).reshape(50, 2),
+        "z_rl": np.ones((8,), dtype=np.float32),
+        "state": np.ones((4,), dtype=np.float32),
+    }
+
+    broker._apply_rlt_actor_to_policy_results(
+        policy_results,
+        {"rlt_context": {"actor_requested": True}},
+        action_start_index=10,
+    )
+
+    assert actor.calls[0][4] == 10
 
 
 def test_actor_failure_leaves_actions_unchanged_and_records_reason():
