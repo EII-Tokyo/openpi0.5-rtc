@@ -290,6 +290,7 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
         self._active_start_step: int | None = None
         self._pending_end_event: dict[str, Any] | None = None
         self._pending_end_step: int | None = None
+        self._pending_score_event: dict[str, Any] | None = None
         self._pending_records: list[StepRecord] | None = None
         self._pending_post_roll_remaining = 0
         self._lock = threading.Lock()
@@ -336,6 +337,7 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
         with self._lock:
             self._ring.append(record)
             self._step_index += 1
+            segment = None
             if (
                 self._pending_end_event is not None
                 and self._pending_records is not None
@@ -343,6 +345,11 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
             ):
                 self._pending_records.append(record)
                 self._pending_post_roll_remaining -= 1
+                if self._pending_post_roll_remaining == 0 and self._pending_score_event is not None:
+                    segment = self._build_pending_segment_locked(self._pending_score_event)
+                    self._clear_pending_region_locked()
+        if segment is not None:
+            self._enqueue_segment(segment)
 
     @override
     def on_episode_end(self, episode_subdir: str | None = None) -> None:
@@ -355,6 +362,7 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
             self._active_start_step = self._step_index
             self._pending_end_event = None
             self._pending_end_step = None
+            self._pending_score_event = None
             self._pending_records = None
         logging.info("RLT key region started: %s", event.get("key_region_id"))
 
@@ -369,6 +377,7 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
             records = [record for record in self._ring if record.step_index >= start_step]
             self._pending_end_event = dict(event)
             self._pending_end_step = self._step_index
+            self._pending_score_event = None
             self._pending_records = records
             self._pending_post_roll_remaining = self._post_roll_steps
         logging.info("RLT key region ended: %s (%d buffered frames)", event.get("key_region_id"), len(records))
@@ -389,6 +398,7 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
             self._active_start_step = None
             self._pending_end_event = None
             self._pending_end_step = None
+            self._pending_score_event = None
             self._pending_records = None
             self._pending_post_roll_remaining = 0
         logging.info("RLT key region discarded: %s", key_region_id)
@@ -399,30 +409,46 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
             if self._active_start_event is None or self._pending_end_event is None:
                 logging.warning("Ignoring key-region score without a completed region.")
                 return
-            records = list(self._pending_records or [])
-            active_start_step = self._active_start_step if self._active_start_step is not None else self._step_index
-            active_end_step = self._pending_end_step if self._pending_end_step is not None else self._step_index
-            current_task = self._active_start_event.get("current_task") or {}
-            task = current_task.get("task_name") or self._active_start_event.get("task") or "unknown_task"
-            phase = (event.get("state") or {}).get("training_phase") or "unknown_phase"
-            segment = KeyRegionSegment(
-                key_region_id=str(event.get("key_region_id") or self._active_start_event.get("key_region_id") or time.time_ns()),
-                task=str(task),
-                phase=str(phase),
-                start_event=dict(self._active_start_event),
-                end_event=dict(self._pending_end_event),
-                score_event=dict(event),
-                records=records,
-                active_start_step=active_start_step,
-                active_end_step=active_end_step,
-            )
-            self._active_start_event = None
-            self._active_start_step = None
-            self._pending_end_event = None
-            self._pending_end_step = None
-            self._pending_records = None
-            self._pending_post_roll_remaining = 0
+            self._pending_score_event = dict(event)
+            segment = None
+            if self._pending_post_roll_remaining <= 0:
+                segment = self._build_pending_segment_locked(self._pending_score_event)
+                self._clear_pending_region_locked()
 
+        if segment is not None:
+            self._enqueue_segment(segment)
+
+    def _build_pending_segment_locked(self, score_event: dict[str, Any]) -> KeyRegionSegment:
+        if self._active_start_event is None or self._pending_end_event is None:
+            raise RuntimeError("Cannot build a key-region segment without start and end events")
+        records = list(self._pending_records or [])
+        active_start_step = self._active_start_step if self._active_start_step is not None else self._step_index
+        active_end_step = self._pending_end_step if self._pending_end_step is not None else self._step_index
+        current_task = self._active_start_event.get("current_task") or {}
+        task = current_task.get("task_name") or self._active_start_event.get("task") or "unknown_task"
+        phase = (score_event.get("state") or {}).get("training_phase") or "unknown_phase"
+        return KeyRegionSegment(
+            key_region_id=str(score_event.get("key_region_id") or self._active_start_event.get("key_region_id") or time.time_ns()),
+            task=str(task),
+            phase=str(phase),
+            start_event=dict(self._active_start_event),
+            end_event=dict(self._pending_end_event),
+            score_event=dict(score_event),
+            records=records,
+            active_start_step=active_start_step,
+            active_end_step=active_end_step,
+        )
+
+    def _clear_pending_region_locked(self) -> None:
+        self._active_start_event = None
+        self._active_start_step = None
+        self._pending_end_event = None
+        self._pending_end_step = None
+        self._pending_score_event = None
+        self._pending_records = None
+        self._pending_post_roll_remaining = 0
+
+    def _enqueue_segment(self, segment: KeyRegionSegment) -> None:
         try:
             self._write_queue.put_nowait(segment)
         except queue.Full:

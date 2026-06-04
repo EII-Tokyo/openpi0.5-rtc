@@ -27,6 +27,25 @@ def _record(step: int, *, include_full: bool = True, include_step_actions: bool 
     )
 
 
+def _push_runtime_step(store: recorder.KeyRegionReplayRecorder) -> None:
+    store.on_step(
+        {
+            "qpos": np.zeros((14,), dtype=np.float32),
+            "qvel": np.zeros((14,), dtype=np.float32),
+            "effort": np.zeros((14,), dtype=np.float32),
+            "images": {},
+        },
+        {
+            "actions": np.zeros((14,), dtype=np.float32),
+            "reference_actions": np.zeros((14,), dtype=np.float32),
+            "action_full": np.zeros((50, 14), dtype=np.float32),
+            "reference_action_full": np.zeros((50, 14), dtype=np.float32),
+            "z_rl": np.zeros((8,), dtype=np.float32),
+            "proprio": np.zeros((4,), dtype=np.float32),
+        },
+    )
+
+
 def test_key_region_replay_second_stride_action_uses_step_window(tmp_path):
     store = recorder.KeyRegionReplayRecorder(
         replay_root=str(tmp_path / "replay"),
@@ -235,6 +254,46 @@ def test_key_region_discard_clears_pending_region(tmp_path):
     assert messages == []
     assert store._active_start_event is None
     assert store._pending_end_event is None
+
+
+def test_key_region_score_waits_for_fixed_post_context_before_writing(tmp_path):
+    saved_segments = []
+    store = recorder.KeyRegionReplayRecorder(
+        replay_root=str(tmp_path / "replay"),
+        rollouts_root=str(tmp_path / "rollouts"),
+        fps=10.0,
+        pre_roll_seconds=0.2,
+        post_roll_seconds=0.3,
+        ack_publisher=lambda payload: None,
+    )
+    store._write_segment = saved_segments.append
+    try:
+        for _ in range(3):
+            _push_runtime_step(store)
+        store.on_key_region_start({"type": "key_region_start", "key_region_id": "post", "timestamp": 100.0})
+        for _ in range(4):
+            _push_runtime_step(store)
+        store.on_key_region_end({"type": "key_region_end", "key_region_id": "post", "timestamp": 104.0})
+        store.on_key_region_score({"type": "score", "key_region_id": "post", "timestamp": 106.0, "reward": 1})
+        store._write_queue.join()
+
+        assert saved_segments == []
+        for _ in range(2):
+            _push_runtime_step(store)
+        store._write_queue.join()
+        assert saved_segments == []
+
+        _push_runtime_step(store)
+        store._write_queue.join()
+    finally:
+        store.close()
+
+    assert len(saved_segments) == 1
+    segment = saved_segments[0]
+    assert segment.active_start_step == 3
+    assert segment.active_end_step == 7
+    assert [record.step_index for record in segment.records] == list(range(1, 10))
+    assert segment.score_event["timestamp"] == 106.0
 
 
 def test_key_region_manifest_marks_train_eligibility(tmp_path):
