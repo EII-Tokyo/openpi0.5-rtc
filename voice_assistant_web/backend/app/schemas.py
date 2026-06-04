@@ -44,6 +44,8 @@ class RLTControlState(BaseModel):
     auto_rollout_failure: int = 0
     auto_rollout_attempts: int = 0
     auto_rollout_invalid: int = 0
+    trainer_enabled: bool = False
+    trainer_running: bool = False
     actor_enabled: bool = False
     actor_ready: bool = False
     actor_effective: bool = False
@@ -119,6 +121,7 @@ class RLTConfigRequest(BaseModel):
     warmup_target: int | None = Field(default=None, ge=1, le=100000)
     beta: float | None = Field(default=None, ge=0, le=1000)
     actor_enabled: bool | None = None
+    trainer_enabled: bool | None = None
     intervention_scale: float | None = Field(default=None, ge=0, le=1)
     max_delta: float | None = Field(default=None, ge=0, le=10)
     critic_gate_enabled: bool | None = None

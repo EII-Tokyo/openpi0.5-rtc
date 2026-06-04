@@ -322,6 +322,32 @@ def test_config_update_publishes_critic_gate_settings():
     assert '"critic_gate_enabled": true' in payload
 
 
+def test_config_update_publishes_manual_trainer_enabled():
+    store = _store(warmup_target=1)
+
+    request = type(
+        "Req",
+        (),
+        {
+            "warmup_target": None,
+            "beta": None,
+            "intervention_scale": None,
+            "max_delta": None,
+            "wandb_url": None,
+            "actor_enabled": None,
+            "critic_gate_enabled": None,
+            "critic_gate_margin": None,
+            "critic_gate_temperature": None,
+            "trainer_enabled": True,
+        },
+    )()
+    state = store.update_config(request)
+
+    assert state.trainer_enabled is True
+    payload = store._redis.messages[-1][1]
+    assert '"trainer_enabled": true' in payload
+
+
 def test_runtime_metrics_update_inference_gate_diagnostics():
     store = _store(warmup_target=1)
 

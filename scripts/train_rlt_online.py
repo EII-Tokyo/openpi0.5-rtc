@@ -172,10 +172,10 @@ class RedisControlSubscriber:
             self._pubsub = None
             logging.warning("Disabling Redis RLT control subscriber: %s", exc)
 
-    def poll_beta_update(self) -> float | None:
+    def poll_update(self) -> dict[str, float | bool]:
         if not self._enabled or self._pubsub is None:
-            return None
-        latest_beta = None
+            return {}
+        latest_update: dict[str, float | bool] = {}
         try:
             while True:
                 message = self._pubsub.get_message(timeout=0.0)
@@ -187,19 +187,27 @@ class RedisControlSubscriber:
                     payload = json.loads(message.get("data", "{}"))
                 except json.JSONDecodeError:
                     continue
-                if payload.get("type") != "config_update" or "beta" not in payload:
+                if payload.get("type") != "config_update":
                     continue
-                try:
-                    beta = float(payload["beta"])
-                except (TypeError, ValueError):
-                    continue
-                if beta >= 0.0:
-                    latest_beta = beta
+                if "beta" in payload:
+                    try:
+                        beta = float(payload["beta"])
+                    except (TypeError, ValueError):
+                        beta = -1.0
+                    if beta >= 0.0:
+                        latest_update["beta"] = beta
+                if "trainer_enabled" in payload:
+                    latest_update["trainer_enabled"] = bool(payload["trainer_enabled"])
         except Exception as exc:
             if not self._warned:
                 logging.warning("Failed to read RLT control update from Redis: %s", exc)
                 self._warned = True
-        return latest_beta
+        return latest_update
+
+    def poll_beta_update(self) -> float | None:
+        update = self.poll_update()
+        beta = update.get("beta")
+        return float(beta) if beta is not None else None
 
     def close(self) -> None:
         if self._pubsub is None:
@@ -365,6 +373,8 @@ def _build_metrics_payload(
     replay_shape: rlt_replay_store.ReplayShape | None,
     train_shape: rlt_replay_store.ReplayShape | None,
     actor_enabled: bool,
+    trainer_enabled: bool,
+    trainer_running: bool,
     latest_actor_path: str | None = None,
     latest_actor_step: int | None = None,
     wandb_url: str | None = None,
@@ -399,6 +409,8 @@ def _build_metrics_payload(
         "replay_size": int(stats.replay_size),
         "wandb_url": wandb_url,
         "actor_enabled": bool(actor_enabled),
+        "trainer_enabled": bool(trainer_enabled),
+        "trainer_running": bool(trainer_running),
         "latest_actor_path": latest_actor_path,
         "latest_actor_step": None if latest_actor_step is None else int(latest_actor_step),
         "replay_shards": int(stats.num_shards),
@@ -654,6 +666,7 @@ def main(args: Args) -> None:
         db=args.redis_db,
     )
     runtime_beta = float(config.model.beta)
+    trainer_enabled = False
     auto_beta_controller = None
     latest_auto_beta_metrics: dict[str, float | bool | str | None] = {"auto_beta_enabled": False}
     if args.auto_beta_enabled:
@@ -687,6 +700,8 @@ def main(args: Args) -> None:
             replay_shape=store.shape,
             train_shape=store.sample_shape,
             actor_enabled=False,
+            trainer_enabled=trainer_enabled,
+            trainer_running=False,
             latest_actor_path=str(initial_actor_dir),
             latest_actor_step=0,
             wandb_url=_wandb_url(),
@@ -697,6 +712,7 @@ def main(args: Args) -> None:
     latest_actor_step = 0
 
     last_scan_time = 0.0
+    last_idle_metrics_time = 0.0
     log_start_time = time.perf_counter()
     infos: list[dict[str, np.ndarray]] = []
     progress_total = None if args.num_train_steps <= 0 else args.num_train_steps
@@ -707,6 +723,15 @@ def main(args: Args) -> None:
                 store.scan()
                 last_scan_time = now
 
+            control_update = control_subscriber.poll_update()
+            if "trainer_enabled" in control_update:
+                trainer_enabled = bool(control_update["trainer_enabled"])
+            beta_update = None if args.auto_beta_enabled else control_update.get("beta")
+            if beta_update is not None and float(beta_update) != runtime_beta:
+                runtime_beta = float(beta_update)
+                state = _with_runtime_beta(state, runtime_beta)
+                logging.info("Updated runtime RLT beta to %.4f", runtime_beta)
+
             if not store.ready(
                 min_replay_samples=args.min_replay_samples,
                 min_success_episodes=args.min_success_episodes,
@@ -716,13 +741,30 @@ def main(args: Args) -> None:
                 time.sleep(args.wait_sleep_seconds)
                 continue
 
-            next_step = int(state.step) + 1
-            beta_update = None if args.auto_beta_enabled else control_subscriber.poll_beta_update()
-            if beta_update is not None and beta_update != runtime_beta:
-                runtime_beta = beta_update
-                state = _with_runtime_beta(state, runtime_beta)
-                logging.info("Updated runtime RLT beta to %.4f", runtime_beta)
+            if not trainer_enabled:
+                if now - last_idle_metrics_time >= max(float(args.log_interval), 1.0):
+                    stats = store.stats
+                    metrics_publisher.publish(
+                        _build_metrics_payload(
+                            step=int(state.step),
+                            reduced={"beta": runtime_beta, **latest_auto_beta_metrics},
+                            stats=stats,
+                            replay_shape=store.shape,
+                            train_shape=store.sample_shape,
+                            actor_enabled=False,
+                            trainer_enabled=False,
+                            trainer_running=False,
+                            latest_actor_path=latest_actor_path,
+                            latest_actor_step=latest_actor_step,
+                            wandb_url=_wandb_url(),
+                        )
+                    )
+                    logging.info("RLT trainer idle; waiting for frontend start command. replay=%s", stats)
+                    last_idle_metrics_time = now
+                time.sleep(args.wait_sleep_seconds)
+                continue
 
+            next_step = int(state.step) + 1
             actor_enabled = _actor_updates_enabled(args, store, next_step)
             state = _state_for_actor_gate(
                 state,
@@ -770,6 +812,8 @@ def main(args: Args) -> None:
                         replay_shape=store.shape,
                         train_shape=store.sample_shape,
                         actor_enabled=actor_enabled,
+                        trainer_enabled=trainer_enabled,
+                        trainer_running=True,
                         latest_actor_path=latest_actor_path,
                         latest_actor_step=latest_actor_step,
                         wandb_url=_wandb_url(),
@@ -817,6 +861,8 @@ def main(args: Args) -> None:
                         replay_shape=store.shape,
                         train_shape=store.sample_shape,
                         actor_enabled=actor_enabled,
+                        trainer_enabled=trainer_enabled,
+                        trainer_running=True,
                         latest_actor_path=latest_actor_path,
                         latest_actor_step=latest_actor_step,
                         wandb_url=_wandb_url(),

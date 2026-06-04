@@ -276,6 +276,7 @@ class RLTControlStore:
                 "critic_gate_margin",
                 "critic_gate_temperature",
                 "wandb_url",
+                "trainer_enabled",
             ):
                 value = getattr(request, key, None)
                 if value is not None:
@@ -320,6 +321,8 @@ class RLTControlStore:
                     "actor_updated",
                     "publish_actor",
                     "trainer_step",
+                    "trainer_enabled",
+                    "trainer_running",
                     "steps_per_sec",
                     "success_episodes",
                     "failure_episodes",

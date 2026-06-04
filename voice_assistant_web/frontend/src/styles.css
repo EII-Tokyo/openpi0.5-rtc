@@ -648,6 +648,7 @@ button {
 }
 
 .apply-button,
+.secondary-button,
 .wandb-link {
   min-height: 34px;
   padding: 7px 12px;
@@ -658,6 +659,18 @@ button {
   font-weight: 800;
   text-decoration: none;
   cursor: pointer;
+}
+
+.secondary-button {
+  border: 1px solid #d6d0c5;
+  background: #fffefa;
+  color: #2f2a24;
+}
+
+.secondary-button:disabled,
+.apply-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
 }
 
 .rlt-field,
@@ -962,12 +975,21 @@ button {
   align-items: start;
 }
 
+.training-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  max-width: 360px;
+}
+
 .training-panel h2 {
   font-size: 24px;
   line-height: 1.05;
 }
 
-.training-panel .apply-button {
+.training-panel .apply-button,
+.training-panel .secondary-button {
   min-height: 30px;
   padding: 6px 11px;
   border-radius: 7px;

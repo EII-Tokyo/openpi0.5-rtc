@@ -25,6 +25,30 @@ class _BrokenRedis:
         raise RuntimeError("redis down")
 
 
+class _FakePubSub:
+    def __init__(self, messages):
+        self._messages = list(messages)
+
+    def subscribe(self, channel):
+        self.channel = channel
+
+    def get_message(self, timeout=0.0):
+        if not self._messages:
+            return None
+        return self._messages.pop(0)
+
+    def close(self):
+        pass
+
+
+class _FakeRedisWithPubSub:
+    def __init__(self, messages):
+        self._pubsub = _FakePubSub(messages)
+
+    def pubsub(self):
+        return self._pubsub
+
+
 def _stats():
     return rlt_replay_store.ReplayStats(
         replay_size=123,
@@ -81,6 +105,8 @@ def test_build_metrics_payload_is_json_serializable():
         replay_shape=_shape(action_horizon=10),
         train_shape=_shape(action_horizon=10),
         actor_enabled=True,
+        trainer_enabled=True,
+        trainer_running=True,
         latest_actor_path="/tmp/actor",
         latest_actor_step=50,
         wandb_url="https://wandb.example/run",
@@ -112,6 +138,8 @@ def test_build_metrics_payload_is_json_serializable():
     assert payload["auto_beta_reason"] == "delta_below_target_q_positive"
     assert payload["replay_size"] == 123
     assert payload["actor_enabled"] is True
+    assert payload["trainer_enabled"] is True
+    assert payload["trainer_running"] is True
     assert payload["latest_actor_path"] == "/tmp/actor"
     assert payload["latest_actor_step"] == 50
     assert payload["wandb_url"] == "https://wandb.example/run"
@@ -236,6 +264,26 @@ def test_redis_metrics_publisher_failure_does_not_raise():
     )
 
     publisher.publish({"type": "rlt_trainer_metrics", "replay_size": 7})
+
+
+def test_redis_control_subscriber_reads_trainer_enabled_and_beta_updates():
+    fake = _FakeRedisWithPubSub(
+        [
+            {"type": "subscribe", "data": "1"},
+            {"type": "message", "data": json.dumps({"type": "ignored", "trainer_enabled": True})},
+            {"type": "message", "data": json.dumps({"type": "config_update", "trainer_enabled": True})},
+            {"type": "message", "data": json.dumps({"type": "config_update", "beta": 7.5, "trainer_enabled": False})},
+        ]
+    )
+    subscriber = train_rlt_online.RedisControlSubscriber(
+        enabled=True,
+        channel="aloha_rlt_control",
+        redis_client=fake,
+    )
+
+    update = subscriber.poll_update()
+
+    assert update == {"trainer_enabled": False, "beta": 7.5}
 
 
 def test_save_actor_for_inference_writes_runtime_metadata(tmp_path):

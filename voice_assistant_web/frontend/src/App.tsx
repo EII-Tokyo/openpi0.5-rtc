@@ -34,6 +34,8 @@ const initialRLT: RLTControlState = {
   auto_rollout_failure: 0,
   auto_rollout_attempts: 0,
   auto_rollout_invalid: 0,
+  trainer_enabled: false,
+  trainer_running: false,
   actor_enabled: false,
   actor_effective: false,
   actor_ready: false,

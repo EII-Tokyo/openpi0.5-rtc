@@ -128,6 +128,8 @@ export type RLTControlState = {
   auto_rollout_failure: number
   auto_rollout_attempts: number
   auto_rollout_invalid: number
+  trainer_enabled: boolean
+  trainer_running: boolean
   actor_enabled: boolean
   actor_effective: boolean
   actor_ready: boolean

@@ -286,6 +286,7 @@ export function RLTConfigPanel({ rlt, onState }: Props) {
     critic_gate_temperature: rlt.critic_gate_temperature,
   })
   const [error, setError] = useState('')
+  const [trainerPending, setTrainerPending] = useState(false)
   const [activeTab, setActiveTab] = useState<'settings' | 'readiness' | 'q' | 'actor' | 'inference'>('readiness')
 
   useEffect(() => {
@@ -317,11 +318,24 @@ export function RLTConfigPanel({ rlt, onState }: Props) {
     }
   }
 
+  const setTrainerEnabled = async (enabled: boolean) => {
+    setError('')
+    setTrainerPending(true)
+    try {
+      onState(await updateRLTConfig({ trainer_enabled: enabled }))
+    } catch (exc) {
+      setError(exc instanceof Error ? exc.message : 'Training control update failed')
+    } finally {
+      setTrainerPending(false)
+    }
+  }
+
   const metricsAge = metricAgeSeconds(rlt.rlt_metrics_timestamp)
   const trainerTone = metricsAge !== null && metricsAge <= 10 ? 'ok' : metricsAge !== null && metricsAge <= 30 ? 'watch' : 'danger'
   const qGapTone = rlt.q_gap !== null && rlt.q_gap > Math.max(1, Math.abs(rlt.target_q_mean ?? 0) * 0.5) ? 'danger' : undefined
   const actorDeltaTone = rlt.actor_delta_norm !== null && rlt.actor_delta_norm > Math.max(0.05, rlt.max_delta * 0.8) ? 'watch' : undefined
   const trainableBalanced = rlt.trainable_replay_success > 0 && rlt.trainable_replay_failure > 0
+  const trainerLabel = rlt.trainer_running ? 'Training running' : rlt.trainer_enabled ? 'Training requested' : 'Training stopped'
   const inferenceTone = !rlt.critic_gate_enabled
     ? 'offline'
     : !rlt.critic_ready
@@ -342,11 +356,32 @@ export function RLTConfigPanel({ rlt, onState }: Props) {
       <div className="panel-header">
         <div>
           <p className="eyebrow">Actor Critic</p>
-          <h2>{rlt.actor_effective ? 'Learning Active' : 'Training Monitor'}</h2>
+          <h2>{trainerLabel}</h2>
+          <span className={`status-pill ${rlt.trainer_running ? 'live' : rlt.trainer_enabled ? 'mode' : ''}`}>
+            {rlt.trainer_running ? 'running' : rlt.trainer_enabled ? 'waiting' : 'manual'}
+          </span>
         </div>
-        <button className="apply-button" type="button" onClick={() => void submit()}>
-          Apply
-        </button>
+        <div className="training-actions">
+          <button
+            className="apply-button"
+            type="button"
+            disabled={trainerPending || rlt.trainer_enabled}
+            onClick={() => void setTrainerEnabled(true)}
+          >
+            Start training
+          </button>
+          <button
+            className="secondary-button danger-button"
+            type="button"
+            disabled={trainerPending || !rlt.trainer_enabled}
+            onClick={() => void setTrainerEnabled(false)}
+          >
+            Stop training
+          </button>
+          <button className="secondary-button" type="button" onClick={() => void submit()}>
+            Apply
+          </button>
+        </div>
       </div>
 
       <div className="training-tabs" role="tablist" aria-label="Actor critic metrics">
@@ -448,6 +483,8 @@ export function RLTConfigPanel({ rlt, onState }: Props) {
           <div className="metric-grid">
             <Metric label="Trainer Age" value={formatAge(metricsAge)} tone={trainerTone} />
             <Metric label="Trainer Step" value={formatOptionalInt(rlt.trainer_step)} />
+            <Metric label="Training Requested" value={formatBool(rlt.trainer_enabled)} tone={rlt.trainer_enabled ? 'ok' : 'watch'} />
+            <Metric label="Training Running" value={formatBool(rlt.trainer_running)} tone={rlt.trainer_running ? 'ok' : undefined} />
             <Metric label="Trainable" value={`${rlt.trainable_replay_count} / ${rlt.warmup_target}`} tone={rlt.trainable_replay_count >= rlt.warmup_target ? 'ok' : 'watch'} />
             <Metric label="Balance" value={trainableBalanced ? 'ready' : 'need both'} tone={trainableBalanced ? 'ok' : 'watch'} />
             <Metric label="Success" value={rlt.trainable_replay_success} />
