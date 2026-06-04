@@ -9,13 +9,6 @@ This repo uses a fork of the ALOHA repo, with very minor modifications to use Re
 1. Follow the [hardware installation instructions](https://github.com/tonyzhaozh/aloha?tab=readme-ov-file#hardware-installation) in the ALOHA repo.
 1. Modify the `third_party/aloha/aloha_scripts/realsense_publisher.py` file to use serial numbers for your cameras.
 
-## With Docker
-
-```bash
-export SERVER_ARGS="--env ALOHA"
-docker compose -f src/openpi/robot/aloha_real/compose.yml up --build
-```
-
 ## Without Docker
 
 Terminal window 1:
@@ -27,7 +20,7 @@ source src/openpi/robot/aloha_real/.venv/bin/activate
 uv pip sync src/openpi/robot/aloha_real/requirements.txt
 
 # Run the robot
-python -m openpi.robot.aloha_real.main
+python scripts/run_aloha_real.py
 ```
 
 Terminal window 2:
@@ -113,12 +106,7 @@ This task involves opening a tupperware filled with food and pouring the content
 
 ## Training on your own Aloha dataset
 
-1. Convert the dataset to the LeRobot dataset v2.0 format.
-
-    We provide a script [convert_aloha_data_to_lerobot.py](./convert_aloha_data_to_lerobot.py) that converts the dataset to the LeRobot dataset v2.0 format. As an example we have converted the `aloha_pen_uncap_diverse_raw` dataset from the [BiPlay repo](https://huggingface.co/datasets/oier-mees/BiPlay/tree/main/aloha_pen_uncap_diverse_raw) and uploaded it to the HuggingFace Hub as [physical-intelligence/aloha_pen_uncap_diverse](https://huggingface.co/datasets/physical-intelligence/aloha_pen_uncap_diverse).
-
-
-2. Define a training config that uses the custom dataset.
+1. Define a training config that uses the custom LeRobot dataset.
 
     We provide the [pi0_aloha_pen_uncap config](../../src/openpi/training/config.py) as an example. You should refer to the root [README](../../README.md) for how to run training with the new config.
 

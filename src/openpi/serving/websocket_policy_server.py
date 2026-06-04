@@ -4,7 +4,7 @@ import logging
 import time
 import traceback
 
-from openpi.robot.client import base_policy as _base_policy
+from openpi.serving import base_policy as _base_policy
 from openpi.robot.client import msgpack_numpy
 import websockets.asyncio.server as _server
 import websockets.frames
@@ -54,14 +54,22 @@ class WebsocketPolicyServer:
         prev_total_time = None
         while True:
             try:
-                start_time = time.monotonic()
                 data = msgpack_numpy.unpackb(await websocket.recv())
+                start_time = time.monotonic()
 
-                obs = data.get("obs", None)  
-                prev_action = data.get("prev_action", None)     
-                use_rtc = data.get("use_rtc", False)
+                obs = data.get("obs", None)
+                prev_action = data.get("prev_action", None)
+                chunking_mode = data.get("chunking_mode", None)
+                action_prefix = data.get("action_prefix", None)
+                handoff_delay_steps = data.get("handoff_delay_steps", None)
                 infer_time = time.monotonic()
-                action = self._policy.infer(obs, prev_action, use_rtc)
+                action = self._policy.infer(
+                    obs,
+                    prev_action=prev_action,
+                    chunking_mode=chunking_mode,
+                    action_prefix=action_prefix,
+                    handoff_delay_steps=handoff_delay_steps,
+                )
                 infer_time = time.monotonic() - infer_time
 
                 action["server_timing"] = {

@@ -155,6 +155,9 @@ websockets==14.1
 zipp==3.20.2
     # via etils
 
+async-timeout==5.0.1
+    # via redis
+
 redis==7.0.0
     # via runtime
 tree==0.2.4

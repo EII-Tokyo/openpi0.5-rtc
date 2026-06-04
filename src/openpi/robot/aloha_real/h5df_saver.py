@@ -3,11 +3,9 @@ import pathlib
 import time
 from collections import deque
 
-from openpi.robot.client.runtime import subscriber as _subscriber
 from openpi.robot.aloha_real import hdf5_utils as _hdf5_utils
-from typing_extensions import override
 
-class H5dfSaver(_subscriber.Subscriber):
+class H5dfSaver:
     """保存 episode 数据到 h5df 文件。"""
 
     def __init__(
@@ -37,7 +35,6 @@ class H5dfSaver(_subscriber.Subscriber):
         self._actions = deque()
         self._timestamps = deque()
 
-    @override
     def on_episode_start(self) -> None:
         """Episode 开始时初始化数据存储。"""
         # 重置临时存储
@@ -45,7 +42,6 @@ class H5dfSaver(_subscriber.Subscriber):
         self._actions.clear()
         self._timestamps.clear()
 
-    @override
     def on_step(self, observation: dict, action: dict) -> None:
         """保存每个 step 的 observation 和 action（只收集原始数据，不填充data_dict）。"""
         # 只保存原始数据
@@ -60,7 +56,6 @@ class H5dfSaver(_subscriber.Subscriber):
                 self._actions.popleft()
                 self._timestamps.popleft()
 
-    @override
     def on_episode_end(self, episode_subdir: str | None = None) -> None:
         """Episode 结束时保存数据到 h5df 文件。"""
         if not self._observations:

@@ -10,6 +10,11 @@ voice_assistant_web/**/__pycache__/
 # Data directories.
 assets/
 checkpoints/
+
+# Local checkpoint/compose backups.
+checkpoints
+checkpoints.bak.*/
+docker-compose.yml.bak.*
 data/
 wandb/
 tmp/

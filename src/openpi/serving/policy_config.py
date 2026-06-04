@@ -6,7 +6,7 @@ from typing import Any
 import jax.numpy as jnp
 
 import openpi.models.model as _model
-import openpi.policies.policy as _policy
+import openpi.serving.policy as _policy
 import openpi.shared.download as download
 from openpi.data import transforms
 from openpi.training import config as _config
@@ -23,7 +23,7 @@ def create_trained_policy(
     Args:
         train_config: The training config to use to create the model.
         checkpoint_dir: The directory to load the model from.
-        sample_kwargs: The kwargs to pass to the `sample_actions` method. If not provided, the default
+        sample_kwargs: The kwargs to pass to the `sample_action_chunk` method. If not provided, the default
             kwargs will be used.
     """
     checkpoint_dir = download.maybe_download(str(checkpoint_dir))
@@ -46,6 +46,10 @@ def create_trained_policy(
 
     input_transforms = data_config.transform_pipeline.policy_input_transforms()
     logging.info("Filtering policy input images to training camera keys: %s", data_config.transform_pipeline.raw_image_keys)
+    metadata = dict(train_config.policy_metadata or {})
+    runtime_metadata = dict(metadata.get("runtime") or {})
+    runtime_metadata["adapt_to_pi"] = bool(data_config.transform_pipeline.adapt_to_pi)
+    metadata["runtime"] = runtime_metadata
 
     return _policy.Policy(
         model,
@@ -58,5 +62,5 @@ def create_trained_policy(
             image_resolution=train_config.model.image_resolution,
         ),
         sample_kwargs=sample_kwargs,
-        metadata=train_config.policy_metadata,
+        metadata=metadata,
     )

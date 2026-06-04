@@ -6,30 +6,25 @@ import threading
 import time
 from typing import Literal
 
-from openpi.robot.client import action_chunk_broker
+from openpi.robot.aloha_real import chunked_policy
 from openpi.robot.client import websocket_client_policy as _websocket_client_policy
-from openpi.robot.client.runtime import runtime as _runtime
-from openpi.robot.client.runtime.agents import policy_agent as _policy_agent
+from openpi.robot.aloha_real import runtime as _runtime
 import tyro
 
-from openpi.robot.aloha_real import env as _env
-from openpi.robot.aloha_real import h5df_saver
 
 
 @dataclasses.dataclass
 class Args:
     model_dir: str
-    adapt_to_pi: bool = True
     host: str = "0.0.0.0"
     port: int = 8000
     action_quality: Literal["normal", "good", "bad"] = "normal"
 
-    action_horizon: int = 25
+    sync_replan_interval: int = 25
+    rtc_replan_start_step: int = 25
+    rtc_handoff_delay_steps: int = 10
 
-    num_episodes: int = 1
-    max_episode_steps: int = 10000
-
-    use_rtc: bool = True
+    chunking_mode: Literal["sync", "inference_time", "training_time"] = "inference_time"
     policy_hz: float = 50.0
     manual_hz: float = 50.0
     video_memory_num_frames: int = 1
@@ -50,10 +45,10 @@ class Args:
             #[0.0, -0.96, 1.16, -1.57, -0.0, 1.57],
         ]
     )
-    gripper_current_limits: list[int] = dataclasses.field(default_factory=lambda: [500, 800])
+    gripper_current_limits: list[int] = dataclasses.field(default_factory=lambda: [300, 800])
     # H5dfSaver 配置
-    dataset_dir: str = "/app/src/openpi/robot/aloha_real/error_hdf5/2026-03-11_inference_lora_error"
-    manual_dataset_dir: str = "/app/src/openpi/robot/aloha_real/manual_override_hdf5/2026-03-11_inference_lora"
+    dataset_dir: str = "/app/data/aloha_real/policy_episodes"
+    manual_dataset_dir: str = "/app/data/aloha_real/manual_intervention_episodes"
     compress_images: bool = True
     is_mobile: bool = False
     if_save_hdf5: bool = True
@@ -62,6 +57,9 @@ class Args:
 
 
 def main(args: Args) -> None:
+    from openpi.robot.aloha_real import h5df_saver
+    from openpi.robot.aloha_real import real_env as _real_env
+
     good_bad_action_by_quality = {
         "normal": "normal",
         "good": "good action",
@@ -78,7 +76,10 @@ def main(args: Args) -> None:
         host=args.host,
         port=args.port,
     )
-    logging.info(f"Server metadata: {ws_client_policy.get_server_metadata()}")
+    server_metadata = ws_client_policy.get_server_metadata()
+    logging.info(f"Server metadata: {server_metadata}")
+    adapt_to_pi = bool(server_metadata.get("runtime", {}).get("adapt_to_pi", True))
+    logging.info("Using runtime.adapt_to_pi from policy metadata: %s", adapt_to_pi)
 
     # 创建 H5dfSaver subscriber
     h5df_saver_instance = h5df_saver.H5dfSaver(
@@ -90,27 +91,25 @@ def main(args: Args) -> None:
     )
 
     runtime = _runtime.Runtime(
-        # environment=_env.AlohaRealEnvironment(reset_position=metadata.get("reset_pose")),
-        environment=_env.AlohaRealEnvironment(
+        # environment=_real_env.AlohaRealEnvironment(reset_position=metadata.get("reset_pose")),
+        environment=_real_env.AlohaRealEnvironment(
             reset_position=args.reset_position,
             gripper_current_limits=args.gripper_current_limits,
             video_memory_num_frames=args.video_memory_num_frames,
             video_memory_stride_seconds=args.video_memory_stride_seconds,
         ),
-        agent=_policy_agent.PolicyAgent(
-            policy=action_chunk_broker.ActionChunkBroker(
-                policy=ws_client_policy,
-                action_horizon=args.action_horizon,
-                model_dir=args.model_dir,
-                adapt_to_pi=args.adapt_to_pi,
-                use_rtc=args.use_rtc,
-            )
+        policy=chunked_policy.ChunkedPolicy(
+            policy=ws_client_policy,
+            sync_replan_interval=args.sync_replan_interval,
+            model_dir=args.model_dir,
+            adapt_to_pi=adapt_to_pi,
+            chunking_mode=args.chunking_mode,
+            rtc_replan_start_step=args.rtc_replan_start_step,
+            rtc_handoff_delay_steps=args.rtc_handoff_delay_steps,
         ),
         subscribers=[h5df_saver_instance] if args.if_save_hdf5 else [],
         max_hz=args.policy_hz,
         manual_hz=args.manual_hz,
-        num_episodes=args.num_episodes,
-        max_episode_steps=args.max_episode_steps,
         manual_dataset_dir=args.manual_dataset_dir,
         good_bad_action=good_bad_action,
     )

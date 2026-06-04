@@ -7,7 +7,7 @@ from typing_extensions import override
 import websockets.sync.client
 from websockets.exceptions import WebSocketException
 
-from openpi.robot.client import base_policy as _base_policy
+from openpi.serving import base_policy as _base_policy
 from openpi.robot.client import msgpack_numpy
 
 
@@ -61,11 +61,21 @@ class WebsocketClientPolicy(_base_policy.BasePolicy):
                 time.sleep(5)
 
     @override
-    def infer(self, obs: Dict, prev_action: np.ndarray | None = None, use_rtc: bool = True) -> Dict:  # noqa: UP006
+    def infer(
+        self,
+        obs: Dict,
+        prev_action: np.ndarray | None = None,
+        *,
+        chunking_mode: str | None = None,
+        action_prefix: np.ndarray | None = None,
+        handoff_delay_steps: int | None = None,
+    ) -> Dict:  # noqa: UP006
         data = {
             "obs": obs,
             "prev_action": prev_action,
-            "use_rtc": use_rtc,
+            "chunking_mode": chunking_mode,
+            "action_prefix": action_prefix,
+            "handoff_delay_steps": handoff_delay_steps,
         }
         data = self._packer.pack(data)
         try:

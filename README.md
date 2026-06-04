@@ -31,10 +31,10 @@ docker compose exec -it runtime /bin/bash
 
 # 在 runtime 容器内启动 ALOHA 实机控制主循环；根据 model_dir 自动读取
 # checkpoint assets/<asset_id>/norm_stats.json。默认 adapt_to_pi=True，如需关闭请加 --no-adapt-to-pi
-python3 /app/src/openpi/robot/aloha_real/main.py \
+python3 /app/scripts/run_aloha_real.py \
     --model-dir /app/checkpoints/eii_data_system_no_tear_cam3_lora/eii_no_tear_cam3_20260422/18000
 
-python3 /app/src/openpi/robot/aloha_real/main.py \
+python3 /app/scripts/run_aloha_real.py \
     --model-dir /app/checkpoints/eii_rinse_cam4_fullft/h200_fullft_13repos_bs128_nw16_f6_s5_log10_20260430_085556/10000 \
     --video-memory-num-frames 6 \
     --video-memory-stride-seconds 5.0
@@ -45,9 +45,6 @@ docker compose exec -it openpi_server /bin/bash
 
 # 在 openpi_server 容器内启动 policy server，负责加载模型并提供推理接口
 uv run scripts/serve_policy.py --env ALOHA
-
-# 在宿主机执行机器人复位脚本
-uv run scripts/robot_reset_controller.py
 ```
 
 ### Redis Cleanup

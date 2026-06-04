@@ -3,13 +3,14 @@ import dataclasses
 import logging
 from typing import ClassVar, Protocol, TypeAlias, TypeVar, runtime_checkable
 
+from PIL import Image
+
 import augmax
 import einops
 import flax.traverse_util as traverse_util
 import jax
 import jax.numpy as jnp
 import numpy as np
-from openpi.robot.client import image_tools
 
 from openpi.data import tokenizer as _tokenizer
 import openpi.shared.download as _download
@@ -24,6 +25,34 @@ T = TypeVar("T")
 S = TypeVar("S")
 ALOHA_DELTA_ACTION_MASK = (True, True, True, True, True, True, False, True, True, True, True, True, True, False)
 ALOHA_MODEL_ACTION_DIM = 32
+
+
+def resize_with_pad(images: np.ndarray, height: int, width: int, method=Image.BILINEAR) -> np.ndarray:
+    if images.shape[-3:-1] == (height, width):
+        return images
+
+    original_shape = images.shape
+    flat_images = images.reshape(-1, *original_shape[-3:])
+    resized = np.stack([_resize_with_pad_pil(Image.fromarray(image), height, width, method) for image in flat_images])
+    return resized.reshape(*original_shape[:-3], *resized.shape[-3:])
+
+
+def _resize_with_pad_pil(image: Image.Image, height: int, width: int, method: int) -> Image.Image:
+    cur_width, cur_height = image.size
+    if cur_width == width and cur_height == height:
+        return image
+
+    ratio = max(cur_width / width, cur_height / height)
+    resized_height = int(cur_height / ratio)
+    resized_width = int(cur_width / ratio)
+    resized_image = image.resize((resized_width, resized_height), resample=method)
+
+    padded_image = Image.new(resized_image.mode, (width, height), 0)
+    pad_height = max(0, int((height - resized_height) / 2))
+    pad_width = max(0, int((width - resized_width) / 2))
+    padded_image.paste(resized_image, (pad_width, pad_height))
+    assert padded_image.size == (width, height)
+    return padded_image
 
 
 @runtime_checkable
@@ -170,7 +199,7 @@ class ResizeImages(DataTransformFn):
     width: int
 
     def __call__(self, data: DataDict) -> DataDict:
-        data["image"] = {k: image_tools.resize_with_pad(v, self.height, self.width) for k, v in data["image"].items()}
+        data["image"] = {k: resize_with_pad(v, self.height, self.width) for k, v in data["image"].items()}
         return data
 
 
@@ -546,7 +575,7 @@ class AlohaTransformPipeline:
 
             if flat_image.shape[1:3] != image_resolution:
                 logging.getLogger("openpi").info("Resizing image %s from %s to %s", key, flat_image.shape[1:3], image_resolution)
-                flat_image = image_tools.resize_with_pad(flat_image, *image_resolution)
+                flat_image = resize_with_pad(flat_image, *image_resolution)
 
             if train:
                 flat_image = flat_image / 2.0 + 0.5

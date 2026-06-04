@@ -9,10 +9,11 @@ services:
     #   context: .
     #   dockerfile: src/openpi/robot/aloha_real/Dockerfile
     command: >-
-      python3 /app/src/openpi/robot/aloha_real/main.py
+      python3 /app/scripts/run_aloha_real.py
       --model-dir
-      /app/checkpoints/eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo/no_rinse_cam3_fullft_return_home_29repo_bs256_nw64_fsdp4_20260520/19000
+      /app/checkpoints/eii_data_system_without_rinse_cam3_fullft_h200_have_cap_water_return_home_49repo/no_rinse_cam3_fullft_have_cap_water_return_home_49repo_bs256_nw64_fsdp4_20260527/10000
       --action-quality good
+      --chunking-mode inference_time
 
     init: true
     tty: true
@@ -20,6 +21,7 @@ services:
     privileged: true
     volumes:
       - $PWD:/app
+      - /data/openpi0.5-rtc/checkpoints:/app/checkpoints
 
   aloha_ros_nodes:
     image: lyl472324464/robot:aloha-ros1.0
@@ -53,23 +55,24 @@ services:
       - /bin/bash
       - -lc
       - >-
-        uv run --no-sync scripts/serve_policy.py --no-warmup-subtask
+        uv run --no-sync scripts/serve_policy.py --no-warmup-subtask --denoising-steps 10
         ${SERVER_ARGS:---video-memory-num-frames 1
         --video-memory-stride-seconds 1.0
         policy:checkpoint
-        --policy.config eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo
+        --policy.config eii_data_system_without_rinse_cam3_fullft_h200_have_cap_water_return_home_49repo
         --policy.dir
-        /app/checkpoints/eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo/no_rinse_cam3_fullft_return_home_29repo_bs256_nw64_fsdp4_20260520/19000}
+        /app/checkpoints/eii_data_system_without_rinse_cam3_fullft_h200_have_cap_water_return_home_49repo/no_rinse_cam3_fullft_have_cap_water_return_home_49repo_bs256_nw64_fsdp4_20260527/10000}
     init: true
     tty: true
     network_mode: host
     volumes:
       - $PWD:/app
+      - /data/openpi0.5-rtc/checkpoints:/app/checkpoints
       - ${OPENPI_DATA_HOME:-~/.cache/openpi}:/openpi_assets
     environment:
       - GIT_LFS_SKIP_SMUDGE=1
       - XLA_PYTHON_CLIENT_PREALLOCATE=false
-      - XLA_PYTHON_CLIENT_MEM_FRACTION=0.4
+      - XLA_PYTHON_CLIENT_MEM_FRACTION=0.9
       - SERVER_ARGS
       - OPENPI_DATA_HOME=/openpi_assets
       - IS_DOCKER=true

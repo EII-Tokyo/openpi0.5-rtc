@@ -92,8 +92,8 @@ def main():
 
     result = {
         "loss": np.asarray(net.compute_loss(jax.random.key(1), loss_obs, actions, train=False)),
-        "sample_actions": np.asarray(net.sample_actions(jax.random.key(2), sample_obs, num_steps=2)),
-        "guided_inference": np.asarray(net.guided_inference(jax.random.key(3), prev_action, sample_obs, num_steps=2)),
+        "sample_action_chunk": np.asarray(net.sample_action_chunk(jax.random.key(2), sample_obs, denoising_steps=2)),
+        "sample_action_chunk_with_inference_time_rtc": np.asarray(net.sample_action_chunk_with_inference_time_rtc(jax.random.key(3), prev_action, sample_obs, denoising_steps=2)),
     }
     with Path(args.out).open("wb") as f:
         pickle.dump(result, f)
@@ -138,7 +138,7 @@ def main() -> None:
         cand_data = pickle.loads(cand_out.read_bytes())
 
     failed = False
-    for key in ("loss", "sample_actions", "guided_inference"):
+    for key in ("loss", "sample_action_chunk", "sample_action_chunk_with_inference_time_rtc"):
         diff = max_abs(main_data[key], cand_data[key])
         print(f"{key}: max_abs_diff={diff:.10g}")
         failed = failed or diff > args.atol

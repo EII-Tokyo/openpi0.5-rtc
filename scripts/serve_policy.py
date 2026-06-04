@@ -8,8 +8,8 @@ import numpy as np
 import tyro
 
 from openpi.data import transforms as _transforms
-from openpi.policies import policy as _policy
-from openpi.policies import policy_config as _policy_config
+from openpi.serving import policy as _policy
+from openpi.serving import policy_config as _policy_config
 from openpi.serving import websocket_policy_server
 from openpi.training import config as _config
 
@@ -52,6 +52,8 @@ class Args:
     warmup_non_rtc: bool = True
     # Warm up infer_subtask for hierarchical/high-level usage.
     warmup_subtask: bool = True
+    # Number of flow denoising steps to use for policy sampling.
+    denoising_steps: int = 10
     # Override temporal image history used by the training data config at inference time.
     video_memory_num_frames: int = 1
     video_memory_stride_seconds: float = 1.0
@@ -71,6 +73,7 @@ DEFAULT_CHECKPOINT: dict[EnvMode, Checkpoint] = {
 def create_default_policy(
     env: EnvMode,
     *,
+    denoising_steps: int = 10,
     video_memory_num_frames: int = 1,
     video_memory_stride_seconds: float = 1.0,
 ) -> _policy.Policy:
@@ -84,6 +87,7 @@ def create_default_policy(
                 video_memory_stride_seconds=video_memory_stride_seconds,
             ),
             checkpoint.dir,
+            sample_kwargs={"denoising_steps": denoising_steps},
         )
     raise ValueError(f"Unsupported environment mode: {env}")
 
@@ -120,10 +124,12 @@ def create_policy(args: Args) -> _policy.Policy:
                     video_memory_stride_seconds=args.video_memory_stride_seconds,
                 ),
                 args.policy.dir,
+                sample_kwargs={"denoising_steps": args.denoising_steps},
             )
         case Default():
             return create_default_policy(
                 args.env,
+                denoising_steps=args.denoising_steps,
                 video_memory_num_frames=args.video_memory_num_frames,
                 video_memory_stride_seconds=args.video_memory_stride_seconds,
             )
@@ -145,12 +151,15 @@ def main(args: Args) -> None:
     policy_metadata = policy.metadata
     dummy_obs = _make_dummy_obs(args.video_memory_num_frames)
     dummy_prev_action = np.random.rand(50, 32)
+    dummy_action_prefix = np.zeros_like(dummy_prev_action)
+    dummy_action_prefix[:10] = dummy_prev_action[25:35]
     if args.warmup_rtc:
-        policy.infer(dummy_obs, dummy_prev_action, use_rtc=True)
+        policy.infer(dummy_obs, prev_action=dummy_prev_action, chunking_mode="inference_time")
+        policy.infer(dummy_obs, chunking_mode="training_time", action_prefix=dummy_action_prefix, handoff_delay_steps=10)
     else:
         logging.info("Skipping RTC warmup by request.")
     if args.warmup_non_rtc:
-        policy.infer(dummy_obs, dummy_prev_action, use_rtc=False)
+        policy.infer(dummy_obs, chunking_mode="sync")
     else:
         logging.info("Skipping non-RTC warmup by request.")
     if not args.warmup_subtask:

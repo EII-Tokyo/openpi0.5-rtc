@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Literal
 import json
 import logging
 import pathlib
@@ -8,10 +8,10 @@ import numpy as np
 import tree
 from typing_extensions import override
 
-from openpi.robot.client import base_policy as _base_policy
+from openpi.serving import base_policy as _base_policy
 
 
-class ActionChunkBroker(_base_policy.BasePolicy):
+class ChunkedPolicy(_base_policy.BasePolicy):
     """Wraps a policy to return action chunks one-at-a-time.
 
     Assumes that the first dimension of all action fields is the chunk size.
@@ -23,13 +23,17 @@ class ActionChunkBroker(_base_policy.BasePolicy):
     def __init__(
         self,
         policy: _base_policy.BasePolicy,
-        action_horizon: int,
+        sync_replan_interval: int,
         model_dir: str | None = None,
         adapt_to_pi: bool = True,
-        use_rtc: bool = True,
+        chunking_mode: Literal["sync", "inference_time", "training_time"] = "inference_time",
+        rtc_replan_start_step: int = 25,
+        rtc_handoff_delay_steps: int = 10,
     ):
         self._policy = policy
-        self._action_horizon = action_horizon
+        self._sync_replan_interval = sync_replan_interval
+        self._rtc_replan_start_step = rtc_replan_start_step
+        self._rtc_handoff_delay_steps = rtc_handoff_delay_steps
         self._cur_step: int = 0
 
         self._last_results: Dict[str, np.ndarray] | None = None
@@ -38,18 +42,19 @@ class ActionChunkBroker(_base_policy.BasePolicy):
         self._background_running: bool = False
 
         self._obs: Dict[str, np.ndarray] | None = None
-        self._s = 25
-        self._d = 10
-        self._use_rtc = use_rtc
+        if chunking_mode not in {"sync", "inference_time", "training_time"}:
+            raise ValueError(f"Unknown chunking_mode={chunking_mode!r}")
+        self._chunking_mode = chunking_mode
         self._norm_stats = None
         self._joint_signs = np.ones(14)
 
-        if self._use_rtc:
+        if self._chunking_mode != "sync":
             if model_dir is None:
-                raise ValueError("model_dir is required when use_rtc=True.")
+                raise ValueError("model_dir is required when chunking_mode is not 'sync'.")
             self._norm_stats, self._joint_signs = self._load_runtime_assets(model_dir, adapt_to_pi)
 
             self._infer_thread = threading.Thread(target=self._background_infer)
+            self._infer_thread.daemon = True
             self._infer_thread.start()
 
     @staticmethod
@@ -81,7 +86,7 @@ class ActionChunkBroker(_base_policy.BasePolicy):
 
     def _background_infer(self):
         while True:
-            if self._cur_step == self._s:
+            if self._cur_step == self._rtc_replan_start_step:
                 total_start = time.monotonic()
                 self._background_running = True
 
@@ -103,7 +108,24 @@ class ActionChunkBroker(_base_policy.BasePolicy):
                 # np.savetxt("norm_action.txt", norm_action, fmt='%.6f')
                 # np.savetxt("last_origin_actions.txt", self._last_origin_actions, fmt='%.6f')
                 rpc_start = time.monotonic()
-                self._background_results = self._policy.infer(self._obs, norm_action, self._use_rtc)
+                if self._chunking_mode == "inference_time":
+                    self._background_results = self._policy.infer(
+                        self._obs,
+                        prev_action=norm_action,
+                        chunking_mode="inference_time",
+                    )
+                elif self._chunking_mode == "training_time":
+                    action_prefix = np.zeros_like(norm_action)
+                    overlap_prefix = norm_action[self._rtc_replan_start_step : self._rtc_replan_start_step + self._rtc_handoff_delay_steps]
+                    action_prefix[: overlap_prefix.shape[0]] = overlap_prefix
+                    self._background_results = self._policy.infer(
+                        self._obs,
+                        chunking_mode="training_time",
+                        action_prefix=action_prefix,
+                        handoff_delay_steps=overlap_prefix.shape[0],
+                    )
+                else:
+                    raise RuntimeError("Background inference should only run for RTC chunking modes.")
                 rpc_ms = (time.monotonic() - rpc_start) * 1000.0
                 # break
                 # 将后面18列都设为0
@@ -112,7 +134,7 @@ class ActionChunkBroker(_base_policy.BasePolicy):
                 #     modified_actions = self._last_origin_actions.copy()
                 #     modified_actions[:, 14:] = 0
                 
-                # self._background_results = self._policy.infer(self._obs, modified_actions, self._use_rtc)
+                # self._background_results = self._policy.infer(self._obs, modified_actions, chunking_mode="inference_time")
 
                 self._background_running = False
                 total_ms = (time.monotonic() - total_start) * 1000.0
@@ -144,10 +166,10 @@ class ActionChunkBroker(_base_policy.BasePolicy):
 
     @override
     def infer(self, obs: Dict) -> Dict:  # noqa: UP006
-        if self._use_rtc:
+        if self._chunking_mode != "sync":
             # init     
             if self._last_results is None:
-                self._last_results = self._policy.infer(obs, None, self._use_rtc)
+                self._last_results = self._policy.infer(obs, chunking_mode="sync")
                 self._last_origin_actions = self._last_results["origin_actions"]
                 self._last_state = self._last_results["state"]
                 self._last_results = {"actions": self._last_results["actions"]}
@@ -157,14 +179,14 @@ class ActionChunkBroker(_base_policy.BasePolicy):
             self._obs = obs
             self._cur_step += 1
 
-            # if current step equals s+d, wait for background inference to complete
-            if self._cur_step == self._s + self._d:
+            # Wait until the handoff point, then swap in the background RTC chunk.
+            if self._cur_step == self._rtc_replan_start_step + self._rtc_handoff_delay_steps:
                 while self._background_running:
                     time.sleep(0.01)
                 self._last_origin_actions = self._background_results["origin_actions"]
                 self._last_state = self._background_results["state"]
                 self._last_results = {"actions": self._background_results["actions"]}
-                self._cur_step -= self._s
+                self._cur_step -= self._rtc_replan_start_step
             # print(results)
             return results
         else:
@@ -181,7 +203,7 @@ class ActionChunkBroker(_base_policy.BasePolicy):
             results = tree.map_structure(slicer, self._last_results)
             self._cur_step += 1
 
-            if self._cur_step >= self._action_horizon:
+            if self._cur_step >= self._sync_replan_interval:
                 self._last_results = None
 
             return results

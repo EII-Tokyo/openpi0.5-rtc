@@ -1,11 +1,113 @@
 import logging
 import pathlib
+import shutil
+import subprocess
 import time
 from typing import Optional, Sequence, Tuple
 
 import cv2
 import h5py
 import numpy as np
+
+
+_CAMERA_NAME_MAP = {
+    "camera_top": "cam_high",
+    "camera_low": "cam_low",
+    "camera_wrist_right": "cam_right_wrist",
+    "camera_wrist_left": "cam_left_wrist",
+}
+
+
+def _save_camera_name(raw_name: str) -> str:
+    return _CAMERA_NAME_MAP.get(raw_name, raw_name)
+
+
+class _FfmpegMp4Writer:
+    def __init__(self, video_path: str | pathlib.Path, fps: float, frame_size: tuple[int, int]) -> None:
+        width, height = frame_size
+        self._process = subprocess.Popen(
+            [
+                "ffmpeg",
+                "-hide_banner",
+                "-loglevel",
+                "error",
+                "-y",
+                "-f",
+                "rawvideo",
+                "-pix_fmt",
+                "bgr24",
+                "-s",
+                f"{width}x{height}",
+                "-r",
+                str(float(max(1, int(round(fps))))),
+                "-i",
+                "-",
+                "-an",
+                "-c:v",
+                "libx264",
+                "-preset",
+                "veryfast",
+                "-crf",
+                "23",
+                "-pix_fmt",
+                "yuv420p",
+                str(video_path),
+            ],
+            stdin=subprocess.PIPE,
+        )
+
+    def write(self, image_bgr: np.ndarray) -> None:
+        if self._process.stdin is None:
+            raise RuntimeError("ffmpeg stdin is closed")
+        self._process.stdin.write(np.ascontiguousarray(image_bgr).tobytes())
+
+    def release(self) -> None:
+        if self._process.stdin is not None:
+            self._process.stdin.close()
+        returncode = self._process.wait()
+        if returncode != 0:
+            raise RuntimeError(f"ffmpeg exited with code {returncode}")
+
+
+def _open_mp4_writer(video_path: str | pathlib.Path, fps: float, frame_size: tuple[int, int]):
+    """Create a compact MP4 writer matching the collection script's H.264 intent."""
+    if shutil.which("ffmpeg") is not None:
+        return _FfmpegMp4Writer(video_path, fps, frame_size)
+
+    logging.warning("ffmpeg not found; falling back to OpenCV mp4v, which creates larger videos.")
+    writer = cv2.VideoWriter(
+        str(video_path),
+        cv2.VideoWriter_fourcc(*"mp4v"),
+        float(max(1, int(round(fps)))),
+        frame_size,
+    )
+    if writer.isOpened():
+        return writer
+    writer.release()
+    raise RuntimeError(f"无法创建 MP4 视频写入器: {video_path}")
+
+
+def _next_episode_index(dataset_dir: pathlib.Path, dataset_prefix: str) -> int:
+    max_idx = -1
+    for path in dataset_dir.iterdir() if dataset_dir.exists() else []:
+        stem = path.stem if path.is_file() else path.name
+        if not stem.startswith(dataset_prefix):
+            continue
+        suffix = stem[len(dataset_prefix) :]
+        if suffix.isdigit():
+            max_idx = max(max_idx, int(suffix))
+    return max_idx + 1
+
+
+def _as_hwc_uint8(image: np.ndarray, cam_name: str, frame_idx: int) -> np.ndarray:
+    image = np.asarray(image)
+    if image.ndim == 3 and image.shape[0] == 3 and image.shape[-1] != 3:
+        image = np.transpose(image, (1, 2, 0))
+    if image.ndim != 3 or image.shape[-1] != 3 or image.size == 0:
+        raise RuntimeError(f"相机 {cam_name} 第 {frame_idx} 帧图像无效: shape={image.shape}")
+    if image.dtype != np.uint8:
+        image = np.clip(image, 0, 255).astype(np.uint8)
+    return image
 
 
 def save_hdf5_episode(
@@ -19,23 +121,39 @@ def save_hdf5_episode(
     dataset_prefix: str = "episode_",
     fps: Optional[float] = None,
     timestamps: Optional[Sequence[float]] = None,
-) -> Tuple[pathlib.Path, Optional[np.ndarray]]:
-    """Save an episode to an hdf5 file and return (path, compress_len)."""
+) -> Tuple[pathlib.Path, None]:
+    """Save an episode using the current Aloha layout.
+
+    Each episode is saved as ``episode_N/episode.hdf5``. Images are written as
+    sidecar MP4 files in the same episode directory, and the HDF5 file stores
+    video filenames under ``/observations/videos``. ``compress_images`` is kept
+    for old callers but no longer writes JPEG-compressed images into HDF5.
+    """
+    del compress_images
     if not observations:
         logging.warning("没有数据可保存，跳过保存。")
         return pathlib.Path(dataset_dir), None
+    if len(observations) != len(actions):
+        raise ValueError(f"observations/actions 长度不一致: {len(observations)} vs {len(actions)}")
 
     start_time = time.time()
-    num_frames = len(observations)
-
     dataset_dir = pathlib.Path(dataset_dir)
     dataset_dir.mkdir(parents=True, exist_ok=True)
+    if episode_idx is None:
+        episode_idx = _next_episode_index(dataset_dir, dataset_prefix)
+    episode_dir = dataset_dir / f"{dataset_prefix}{episode_idx}"
+    dataset_path = episode_dir / "episode.hdf5"
+    if episode_dir.exists() or dataset_path.exists():
+        raise FileExistsError(f"Dataset already exists at {episode_dir}")
+    episode_dir.mkdir(parents=True, exist_ok=False)
 
-    camera_names = [
-        name
-        for name in observations[0].get("images", {}).keys()
-        if "_depth" not in name
-    ]
+    first_images = observations[0].get("images", {})
+    camera_map = {
+        raw_name: _save_camera_name(raw_name)
+        for raw_name in first_images.keys()
+        if "_depth" not in raw_name
+    }
+
     data_dict: dict[str, list] = {
         "/observations/qpos": [],
         "/observations/qvel": [],
@@ -44,132 +162,71 @@ def save_hdf5_episode(
     }
     if is_mobile:
         data_dict["/base_action"] = []
-    for cam_name in camera_names:
-        data_dict[f"/observations/images/{cam_name}"] = []
 
-    for obs, action in zip(observations, actions):
-        data_dict["/observations/qpos"].append(np.array(obs["qpos"], dtype=np.float32))
-        data_dict["/observations/qvel"].append(np.array(obs["qvel"], dtype=np.float32))
-        data_dict["/observations/effort"].append(np.array(obs["effort"], dtype=np.float32))
-        data_dict["/action"].append(np.array(action, dtype=np.float32))
-        if is_mobile:
-            data_dict["/base_action"].append(np.array(obs["base_vel"], dtype=np.float32))
-        for cam_name in camera_names:
-            data_dict[f"/observations/images/{cam_name}"].append(obs["images"][cam_name])
+    video_fps = float(fps or 50.0)
+    mp4_paths: dict[str, pathlib.Path] = {}
+    mp4_writers: dict[str, cv2.VideoWriter] = {}
+    mp4_shapes: dict[str, tuple[int, int]] = {}
 
-    logging.info("处理图像数据...")
-    for cam_name in camera_names:
-        processed_images = []
-        for img in data_dict[f"/observations/images/{cam_name}"]:
-            if len(img.shape) == 3 and img.shape[0] == 3:
-                img = np.transpose(img, (1, 2, 0))
-            processed_images.append(img)
-        data_dict[f"/observations/images/{cam_name}"] = processed_images
+    try:
+        for frame_idx, (obs, action) in enumerate(zip(observations, actions)):
+            frame_bundle = {}
+            images = obs.get("images", {})
+            for raw_name, save_name in camera_map.items():
+                if raw_name not in images:
+                    raise RuntimeError(f"相机 {raw_name} 第 {frame_idx} 帧缺失")
+                frame_bundle[raw_name] = _as_hwc_uint8(images[raw_name], raw_name, frame_idx)
 
-    if episode_idx is None:
-        existing_files = list(dataset_dir.glob(f"{dataset_prefix}[0-9]*.hdf5"))
-        if existing_files:
-            max_idx = max(
-                [
-                    int(f.stem.split("_")[1])
-                    for f in existing_files
-                    if f.stem.split("_")[1].isdigit()
-                ],
-                default=-1,
-            )
-            episode_idx = max_idx + 1
-        else:
-            episode_idx = 0
+            data_dict["/observations/qpos"].append(np.asarray(obs["qpos"], dtype=np.float32))
+            data_dict["/observations/qvel"].append(np.asarray(obs["qvel"], dtype=np.float32))
+            data_dict["/observations/effort"].append(np.asarray(obs["effort"], dtype=np.float32))
+            data_dict["/action"].append(np.asarray(action, dtype=np.float32))
+            if is_mobile:
+                data_dict["/base_action"].append(np.asarray(obs.get("base_vel", [0.0, 0.0]), dtype=np.float32))
 
-    dataset_path = dataset_dir / f"{dataset_prefix}{episode_idx}.hdf5"
-    logging.info(f"保存数据到: {dataset_path}")
+            for raw_name, save_name in camera_map.items():
+                image_bgr = cv2.cvtColor(frame_bundle[raw_name], cv2.COLOR_RGB2BGR)
+                height, width = image_bgr.shape[:2]
+                shape_hw = (height, width)
+                if save_name not in mp4_writers:
+                    mp4_path = episode_dir / f"{save_name}.mp4"
+                    mp4_paths[save_name] = mp4_path
+                    mp4_shapes[save_name] = shape_hw
+                    mp4_writers[save_name] = _open_mp4_writer(mp4_path, video_fps, (width, height))
+                    logging.info("视频写入 %s: %s (%dx%d @ %.0ffps)", save_name, mp4_path, width, height, video_fps)
+                elif mp4_shapes[save_name] != shape_hw:
+                    raise RuntimeError(
+                        f"相机 {raw_name} 分辨率变化，原始 {mp4_shapes[save_name]}，当前 {shape_hw}"
+                    )
+                mp4_writers[save_name].write(image_bgr)
+    finally:
+        for writer in mp4_writers.values():
+            writer.release()
 
-    max_timesteps = len(data_dict["/observations/qpos"])
+    arrays = {name: np.asarray(values) for name, values in data_dict.items()}
+    timesteps = len(arrays["/action"])
 
-    compressed_len = None
-    if compress_images and camera_names:
-        t0 = time.time()
-        encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 100]
-        compressed_len = []
-        for cam_name in camera_names:
-            image_list = data_dict[f"/observations/images/{cam_name}"]
-            compressed_list = []
-            compressed_len.append([])
-            for image in image_list:
-                image_bgr = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-                result, encoded_image = cv2.imencode(".jpg", image_bgr, encode_param)
-                if not result:
-                    logging.error(f"图像编码失败: {cam_name}")
-                    encoded_image = np.array([], dtype=np.uint8)
-                compressed_list.append(encoded_image)
-                compressed_len[-1].append(len(encoded_image))
-            data_dict[f"/observations/images/{cam_name}"] = compressed_list
-        logging.info(f"图像压缩耗时: {time.time() - t0:.2f}s")
-
-        if compressed_len:
-            t0 = time.time()
-            compressed_len = np.array(compressed_len)
-            padded_size = compressed_len.max()
-            for cam_name in camera_names:
-                padded_images = []
-                for compressed_image in data_dict[
-                    f"/observations/images/{cam_name}"
-                ]:
-                    padded_img = np.zeros(padded_size, dtype="uint8")
-                    padded_img[: len(compressed_image)] = compressed_image
-                    padded_images.append(padded_img)
-                data_dict[f"/observations/images/{cam_name}"] = padded_images
-            logging.info(f"图像填充耗时: {time.time() - t0:.2f}s")
-
-    for key in data_dict:
-        if len(data_dict[key]) > 0:
-            data_dict[key] = np.array(data_dict[key])
-
-    total_size = len(data_dict["/action"][0]) if len(data_dict["/action"]) > 0 else 14
-
-    t0 = time.time()
+    logging.info("保存 episode 到: %s", episode_dir)
     with h5py.File(dataset_path, "w", rdcc_nbytes=1024**2 * 2) as root:
         root.attrs["sim"] = False
-        root.attrs["compress"] = compress_images
+        root.attrs["compress"] = False
+        root.attrs["image_storage"] = "mp4"
+        root.attrs["video_fps"] = video_fps
+        root.attrs["video_frame_count"] = timesteps
 
-        obs = root.create_group("observations")
-        if camera_names:
-            image_group = obs.create_group("images")
-            for cam_name in camera_names:
-                if compress_images:
-                    padded_size = compressed_len.max() if compressed_len is not None else 0
-                    shape = (max_timesteps, padded_size)
-                else:
-                    shape = (max_timesteps, 480, 640, 3)
-                _ = image_group.create_dataset(
-                    cam_name, shape, dtype="uint8", chunks=(1, shape[1] if len(shape) > 1 else 1)
-                )
+        obs_group = root.create_group("observations")
+        if mp4_paths:
+            video_group = obs_group.create_group("videos")
+            str_dtype = h5py.string_dtype(encoding="utf-8")
+            for cam_name, mp4_path in mp4_paths.items():
+                video_group.create_dataset(cam_name, data=mp4_path.name, dtype=str_dtype)
 
-        _ = obs.create_dataset("qpos", (max_timesteps, total_size), dtype=np.float32)
-        _ = obs.create_dataset("qvel", (max_timesteps, total_size), dtype=np.float32)
-        _ = obs.create_dataset("effort", (max_timesteps, total_size), dtype=np.float32)
-        _ = root.create_dataset("action", (max_timesteps, total_size), dtype=np.float32)
-        if is_mobile:
-            _ = root.create_dataset("base_action", (max_timesteps, 2), dtype=np.float32)
+        for name, array in arrays.items():
+            root.create_dataset(name.lstrip("/"), data=array, dtype=array.dtype)
 
-        for name, array in data_dict.items():
-            if name.startswith("/"):
-                name = name[1:]
-            root[name][...] = array
-
-        if compress_images and compressed_len is not None:
-            _ = root.create_dataset(
-                "compress_len", (len(camera_names), max_timesteps), dtype=np.int32
-            )
-            root["/compress_len"][...] = compressed_len
-
-    total_time = time.time() - start_time
     if fps and fps > 0:
-        duration = num_frames / fps
-        logging.info(f"hdf5 预计时长: {duration:.2f}s (fps={fps})")
+        logging.info("hdf5 预计时长: %.2fs (fps=%.1f)", len(observations) / fps, fps)
     if timestamps and len(timestamps) >= 2:
-        duration = timestamps[-1] - timestamps[0]
-        logging.info(f"hdf5 采集时长: {duration:.2f}s (last-first)")
-    logging.info(f"保存完成，耗时: {time.time() - t0:.1f}s")
-    logging.info(f"hdf5 保存总耗时: {total_time:.1f}s, 帧数: {num_frames}")
-    return dataset_path, compressed_len
+        logging.info("hdf5 采集时长: %.2fs (last-first)", timestamps[-1] - timestamps[0])
+    logging.info("保存完成: %s, 帧数=%d, 总耗时=%.1fs", dataset_path, timesteps, time.time() - start_time)
+    return dataset_path, None

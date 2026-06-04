@@ -18,4 +18,5 @@ tyro
 websockets
 
 redis
+async-timeout
 tree

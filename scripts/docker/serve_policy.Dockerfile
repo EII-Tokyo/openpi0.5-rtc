@@ -35,4 +35,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=src,target=src \
     GIT_LFS_SKIP_SMUDGE=1 uv sync --frozen --no-dev
 
+# JAX GPU profiling on RTX 50-series needs newer CUPTI than the default lock resolves.
+RUN uv pip install --python $UV_PROJECT_ENVIRONMENT "nvidia-cuda-cupti-cu12>=12.8,<12.9"
+
 CMD /bin/bash -c "uv run scripts/serve_policy.py $SERVER_ARGS"

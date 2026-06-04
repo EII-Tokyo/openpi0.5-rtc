@@ -24,7 +24,7 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from openpi.policies import policy as policy_lib
+from openpi.serving import policy as policy_lib
 from openpi.training import config as train_config
 
 try:
@@ -100,7 +100,7 @@ class FakeTorchPolicyModel:
     def eval(self):
         return self
 
-    def sample_actions(self, device, observation, **kwargs):
+    def sample_action_chunk(self, device, observation, **kwargs):
         batch_size = observation.state.shape[0]
         total = batch_size * self.action_horizon * self.action_dim
         return torch.linspace(
@@ -111,8 +111,11 @@ class FakeTorchPolicyModel:
             device=observation.state.device,
         ).reshape(batch_size, self.action_horizon, self.action_dim)
 
-    def guided_inference(self, device, prev_action, observation, **kwargs):
-        return self.sample_actions(device, observation, **kwargs)
+    def sample_action_chunk_with_inference_time_rtc(self, device, prev_action_chunk, observation, **kwargs):
+        return self.sample_action_chunk(device, observation, **kwargs)
+
+    def sample_action_chunk_with_training_time_rtc(self, device, observation, *, action_prefix, handoff_delay_steps, **kwargs):
+        return self.sample_action_chunk(device, observation, **kwargs)
 
 
 def make_policy(model, input_transforms, output_transforms):

@@ -19,6 +19,7 @@ RUN apt-get update && \
     python3-rosinstall \
     python3-rosinstall-generator \
     whiptail \
+    ffmpeg \
     git \
     wget \
     openssh-client \
@@ -72,4 +73,4 @@ EOF
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
-CMD ["python3", "/app/src/openpi/robot/aloha_real/main.py"]
+CMD ["python3", "/app/scripts/run_aloha_real.py"]

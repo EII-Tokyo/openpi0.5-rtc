@@ -233,10 +233,17 @@ class BaseModel(nnx.Module, abc.ABC):
     ) -> at.Float[at.Array, "*b ah"]: ...
 
     @abc.abstractmethod
-    def sample_actions(self, rng: at.KeyArrayLike, observation: Observation, **kwargs) -> Actions: ...
+    def sample_action_chunk(self, rng: at.KeyArrayLike, observation: Observation, **kwargs) -> Actions: ...
 
     @abc.abstractmethod
-    def guided_inference(self, rng: at.KeyArrayLike, prev_action: Actions, observation: Observation, **kwargs) -> Actions: ...
+    def sample_action_chunk_with_inference_time_rtc(
+        self, rng: at.KeyArrayLike, prev_action_chunk: Actions, observation: Observation, **kwargs
+    ) -> Actions: ...
+
+    @abc.abstractmethod
+    def sample_action_chunk_with_training_time_rtc(
+        self, rng: at.KeyArrayLike, observation: Observation, **kwargs
+    ) -> Actions: ...
 
 
 def restore_params(
