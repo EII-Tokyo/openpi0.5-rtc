@@ -89,8 +89,29 @@ export type RLTKeyRegionReviewRecord = {
   end_time: number | null
   score_time: number | null
   duration_seconds: number | null
+  fps: number | null
+  num_frames: number | null
+  crop_start_sec: number | null
+  crop_end_sec: number | null
+  crop_start_sample: number | null
+  crop_end_sample: number | null
+  crop_original_num_replay_transitions: number | null
   num_replay_transitions: number
   updated_at: number | null
+}
+
+export type RLTKeyRegionCropResponse = {
+  key_region_id: string
+  status: string
+  trainable: boolean
+  shard_path: string
+  source_shard_path: string
+  crop_start_sec: number
+  crop_end_sec: number
+  crop_start_sample: number
+  crop_end_sample: number
+  num_replay_transitions: number
+  manifest_path: string
 }
 
 export type RLTControlState = {
@@ -209,6 +230,13 @@ export const voidKeyRegion = (keyRegionId: string, reason = 'operator_void') =>
   postJson<RLTControlState>(`/api/rlt/key-region/${encodeURIComponent(keyRegionId)}/void`, { source: 'ui', reason })
 export const deleteKeyRegions = (keyRegionIds: string[], reason = 'operator_delete') =>
   postJson<RLTControlState>('/api/rlt/key-regions/delete', { key_region_ids: keyRegionIds, source: 'ui', reason })
+export const cropKeyRegion = (keyRegionId: string, startSec: number, endSec: number) =>
+  postJson<RLTKeyRegionCropResponse>(`/api/rlt/key-region/${encodeURIComponent(keyRegionId)}/crop`, {
+    start_sec: startSec,
+    end_sec: endSec,
+    source: 'ui',
+    reason: 'operator_crop',
+  })
 export const updateRLTConfig = (config: Partial<RLTControlState>) =>
   postJson<RLTControlState>('/api/rlt/config', config)
 

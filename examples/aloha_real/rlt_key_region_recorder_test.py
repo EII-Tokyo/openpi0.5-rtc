@@ -8,9 +8,9 @@ sys.modules.setdefault("h5py", types.SimpleNamespace(File=None))
 from examples.aloha_real import rlt_key_region_recorder as recorder
 
 
-def _record(step: int, *, include_full: bool = True) -> recorder.StepRecord:
-    action = np.full((14,), step, dtype=np.float32)
-    reference_action = np.full((14,), step + 0.5, dtype=np.float32)
+def _record(step: int, *, include_full: bool = True, include_step_actions: bool = True) -> recorder.StepRecord:
+    action = np.full((14,), step, dtype=np.float32) if include_step_actions else None
+    reference_action = np.full((14,), step + 0.5, dtype=np.float32) if include_step_actions else None
     return recorder.StepRecord(
         step_index=step,
         timestamp=float(step),
@@ -25,6 +25,26 @@ def _record(step: int, *, include_full: bool = True) -> recorder.StepRecord:
         proprio=np.full((4,), step, dtype=np.float32),
         images={},
     )
+
+
+def test_key_region_replay_second_stride_action_uses_step_window(tmp_path):
+    store = recorder.KeyRegionReplayRecorder(
+        replay_root=str(tmp_path / "replay"),
+        rollouts_root=str(tmp_path / "rollouts"),
+        train_horizon=10,
+        full_horizon=50,
+        chunk_stride=2,
+    )
+    try:
+        records = [_record(step) for step in range(22)]
+        arrays, missing = store._build_replay_arrays(records, {"reward": 1})
+    finally:
+        store.close()
+
+    assert missing == []
+    assert arrays is not None
+    assert arrays["action"].shape == (2, 10, 14)
+    assert arrays["action"][1, :, 0].tolist() == list(range(2, 12))
 
 
 def test_key_region_replay_saves_train_horizon_and_full_horizon(tmp_path):
@@ -44,14 +64,13 @@ def test_key_region_replay_saves_train_horizon_and_full_horizon(tmp_path):
 
     assert missing == []
     assert arrays is not None
-    assert arrays["action"].shape == (6, 50, 14)
-    assert arrays["reference_action"].shape == (6, 50, 14)
-    assert arrays["reward_seq"].shape == (6, 50)
-    assert arrays["next_reference_action"].shape == (6, 50, 14)
+    assert arrays["action"].shape == (6, 10, 14)
+    assert arrays["reference_action"].shape == (6, 10, 14)
+    assert arrays["reward_seq"].shape == (6, 10)
+    assert arrays["next_reference_action"].shape == (6, 10, 14)
     assert arrays["next_z_rl"][-1, 0] == 60
     assert arrays["done"].tolist() == [False, False, False, False, False, True]
     assert arrays["reward_seq"][-1, 9] == 1
-    assert arrays["reward_seq"][-1, 49] == 0
 
 
 
@@ -76,7 +95,7 @@ def test_key_region_replay_always_marks_terminal_when_stride_misses_last_start(t
     assert arrays["reward_seq"][-1, 9] == 0
 
 
-def test_key_region_replay_requires_full_horizon_metadata(tmp_path):
+def test_key_region_replay_requires_step_action_metadata(tmp_path):
     store = recorder.KeyRegionReplayRecorder(
         replay_root=str(tmp_path / "replay"),
         rollouts_root=str(tmp_path / "rollouts"),
@@ -85,13 +104,16 @@ def test_key_region_replay_requires_full_horizon_metadata(tmp_path):
         chunk_stride=10,
     )
     try:
-        arrays, missing = store._build_replay_arrays([_record(step, include_full=False) for step in range(25)], {"reward": 0})
+        arrays, missing = store._build_replay_arrays(
+            [_record(step, include_step_actions=False) for step in range(25)],
+            {"reward": 0},
+        )
     finally:
         store.close()
 
     assert arrays is None
-    assert "action_full" in missing
-    assert "reference_action_full" in missing
+    assert "action" in missing
+    assert "reference_action" in missing
 
 
 
@@ -174,7 +196,9 @@ def test_key_region_manifest_includes_replay_schema_metadata(tmp_path):
 
     assert manifest["schema_version"] == 1
     assert manifest["train_chunk_horizon"] == 10
-    assert manifest["policy_horizon"] == 50
+    assert manifest["policy_horizon"] == 10
+    assert manifest["vla_policy_horizon"] == 50
+    assert manifest["full_horizon"] == 50
     assert manifest["action_space"] == "aloha_exec"
     assert manifest["action_dim"] == 14
     assert manifest["reward_placement"] == "terminal_last_train_step"

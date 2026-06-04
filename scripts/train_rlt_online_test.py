@@ -8,6 +8,7 @@ import pytest
 from openpi.models import rlt
 from openpi.training import rlt_replay_store
 from openpi.training import rlt_training
+from scripts import train_rlt
 from scripts import train_rlt_online
 
 
@@ -43,6 +44,13 @@ def _shape(action_horizon=10):
     )
 
 
+def test_trainer_defaults_expect_c10_replay_and_train_horizon():
+    assert train_rlt.Args(replay_npz="/tmp/replay.npz").expected_replay_action_horizon == 10
+    assert train_rlt.Args(replay_npz="/tmp/replay.npz").train_action_horizon == 10
+    assert train_rlt_online.Args(replay_dir="/tmp/replay").expected_replay_action_horizon == 10
+    assert train_rlt_online.Args(replay_dir="/tmp/replay").train_action_horizon == 10
+
+
 def test_build_metrics_payload_is_json_serializable():
     payload = train_rlt_online._build_metrics_payload(
         step=50,
@@ -70,7 +78,7 @@ def test_build_metrics_payload_is_json_serializable():
             "steps_per_sec": np.float32(12.0),
         },
         stats=_stats(),
-        replay_shape=_shape(action_horizon=50),
+        replay_shape=_shape(action_horizon=10),
         train_shape=_shape(action_horizon=10),
         actor_enabled=True,
         latest_actor_path="/tmp/actor",
@@ -111,7 +119,7 @@ def test_build_metrics_payload_is_json_serializable():
     assert payload["success_episodes"] == 3
     assert payload["failure_episodes"] == 2
     assert payload["bad_shards"] == 1
-    assert payload["replay_action_horizon"] == 50
+    assert payload["replay_action_horizon"] == 10
     assert payload["train_action_horizon"] == 10
     assert payload["steps_per_sec"] == 12.0
 
@@ -248,7 +256,7 @@ def test_save_actor_for_inference_writes_runtime_metadata(tmp_path):
         tmp_path,
         5,
         action_horizon=10,
-        replay_shape=_shape(action_horizon=50),
+        replay_shape=_shape(action_horizon=10),
         train_shape=_shape(action_horizon=10),
         replay_stats=_stats(),
     )
@@ -264,7 +272,7 @@ def test_save_actor_for_inference_writes_runtime_metadata(tmp_path):
     assert metadata["type"] == "rlt_inference_actor"
     assert metadata["step"] == 5
     assert metadata["action_horizon"] == 10
-    assert metadata["replay_shape"] == dataclasses.asdict(_shape(action_horizon=50))
+    assert metadata["replay_shape"] == dataclasses.asdict(_shape(action_horizon=10))
     assert metadata["train_shape"] == dataclasses.asdict(_shape(action_horizon=10))
     assert metadata["replay_stats"] == dataclasses.asdict(_stats())
     assert metadata["rlt_config"] == dataclasses.asdict(config.model)

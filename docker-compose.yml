@@ -125,7 +125,7 @@ services:
         --overwrite
         --segment-db-path /app/segment_db/segments.sqlite3
         --recursive-scan
-        --expected-replay-action-horizon ${RLT_EXPECTED_REPLAY_ACTION_HORIZON:-50}
+        --expected-replay-action-horizon ${RLT_EXPECTED_REPLAY_ACTION_HORIZON:-10}
         --train-action-horizon ${RLT_TRAIN_ACTION_HORIZON:-10}
         --min-replay-samples ${RLT_MIN_REPLAY_SAMPLES:-2048}
         --min-replay-shards ${RLT_MIN_REPLAY_SHARDS:-100}

@@ -37,6 +37,26 @@ def test_segment_ledger_is_idempotent_for_duplicate_commit(tmp_path):
     assert ledger.stats()["warmup_count"] == 1
 
 
+def test_segment_ledger_crop_updates_committed_shard_path_and_transition_count(tmp_path):
+    ledger = RLTSegmentLedger(tmp_path / "segments.sqlite3")
+    ledger.record_committed("seg", reward=1, phase="warmup", shard_path="/tmp/raw.npz", num_replay_transitions=8)
+
+    ledger.record_cropped(
+        "seg",
+        reward=1,
+        phase="warmup",
+        shard_path="/tmp/clean.npz",
+        num_replay_transitions=4,
+        reason="operator_crop",
+    )
+
+    segment = ledger.get_segment("seg")
+    assert segment["status"] == "committed"
+    assert segment["shard_path"] == "/tmp/clean.npz"
+    assert segment["num_replay_transitions"] == 4
+    assert ledger.stats()["warmup_count"] == 1
+
+
 def test_segment_ledger_lists_and_batch_restores_segments(tmp_path):
     ledger = RLTSegmentLedger(tmp_path / "segments.sqlite3")
     ledger.record_committed("seg-a", reward=1, phase="warmup", shard_path="/tmp/a.npz", num_replay_transitions=3)

@@ -83,6 +83,28 @@ class RLTSegmentLedger:
             event="committed",
         )
 
+    def record_cropped(
+        self,
+        key_region_id: str,
+        *,
+        reward: int,
+        phase: str,
+        shard_path: str,
+        num_replay_transitions: int,
+        reason: str,
+    ) -> None:
+        self._upsert(
+            key_region_id,
+            status="committed",
+            phase=phase,
+            reward=reward,
+            shard_path=shard_path,
+            num_replay_transitions=num_replay_transitions,
+            invalid_reason=reason,
+            event="cropped",
+            force_transitions=True,
+        )
+
     def record_rejected(self, key_region_id: str, *, phase: str, reason: str) -> None:
         existing = self.get_segment(key_region_id)
         if existing and existing["status"] in {"committed", "voided"}:
@@ -198,6 +220,7 @@ class RLTSegmentLedger:
         shard_path = values.get("shard_path")
         transitions = int(values.get("num_replay_transitions") or 0)
         invalid_reason = values.get("invalid_reason")
+        force_transitions = bool(values.get("force_transitions"))
         with self._connect() as conn:
             if existing is None:
                 conn.execute(
@@ -214,11 +237,22 @@ class RLTSegmentLedger:
                     """
                     UPDATE segments
                     SET status=?, phase=?, reward=COALESCE(?, reward), shard_path=COALESCE(?, shard_path),
-                        num_replay_transitions=CASE WHEN ? > 0 THEN ? ELSE num_replay_transitions END,
+                        num_replay_transitions=CASE WHEN ? OR ? > 0 THEN ? ELSE num_replay_transitions END,
                         invalid_reason=COALESCE(?, invalid_reason), updated_at=?
                     WHERE key_region_id=?
                     """,
-                    (status, phase, reward, shard_path, transitions, transitions, invalid_reason, now, key_region_id),
+                    (
+                        status,
+                        phase,
+                        reward,
+                        shard_path,
+                        force_transitions,
+                        transitions,
+                        transitions,
+                        invalid_reason,
+                        now,
+                        key_region_id,
+                    ),
                 )
             conn.execute(
                 "INSERT INTO segment_events (key_region_id, event, detail, created_at) VALUES (?, ?, ?, ?)",

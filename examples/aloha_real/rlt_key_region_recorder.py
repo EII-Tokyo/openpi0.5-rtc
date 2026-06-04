@@ -540,7 +540,8 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
             "voided": False,
             "schema_version": 1,
             "train_chunk_horizon": self._train_horizon,
-            "policy_horizon": self._full_horizon,
+            "policy_horizon": self._train_horizon,
+            "vla_policy_horizon": self._full_horizon,
             "action_space": "aloha_exec",
             "action_dim": 0 if replay_arrays is None else int(replay_arrays["action"].shape[-1]),
             "reward_placement": "terminal_last_train_step",
@@ -591,14 +592,13 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
     ) -> tuple[dict[str, np.ndarray] | None, list[str]]:
         missing = []
         train_horizon = self._train_horizon
-        full_horizon = self._full_horizon
         if len(records) < 2 * train_horizon:
             missing.append("not_enough_frames")
         for key, attr in (
             ("z_rl", "z_rl"),
             ("proprio", "proprio"),
-            ("action_full", "action_full"),
-            ("reference_action_full", "reference_action_full"),
+            ("action", "action"),
+            ("reference_action", "reference_action"),
         ):
             if any(getattr(record, attr) is None for record in records):
                 missing.append(key)
@@ -614,12 +614,12 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
         for start in starts:
             current = records[start]
             next_record = records[start + train_horizon]
-            action_chunk = _prefix_full_chunk(current.action_full, full_horizon)
-            reference_chunk = _prefix_full_chunk(current.reference_action_full, full_horizon)
-            next_reference_chunk = _prefix_full_chunk(next_record.reference_action_full, full_horizon)
+            action_chunk = _step_window(records, start, "action", train_horizon)
+            reference_chunk = _step_window(records, start, "reference_action", train_horizon)
+            next_reference_chunk = _step_window(records, start + train_horizon, "reference_action", train_horizon)
             if action_chunk is None or reference_chunk is None or next_reference_chunk is None:
                 continue
-            reward_seq = np.zeros((full_horizon,), dtype=np.float32)
+            reward_seq = np.zeros((train_horizon,), dtype=np.float32)
             done = start == last_start
             if done:
                 reward_seq[train_horizon - 1] = reward
@@ -639,14 +639,14 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
         return arrays, []
 
 
-
-def _prefix_full_chunk(value: np.ndarray | None, horizon: int) -> np.ndarray | None:
-    if value is None:
+def _step_window(records: list[StepRecord], start: int, attr: str, horizon: int) -> np.ndarray | None:
+    end = start + horizon
+    if start < 0 or end > len(records):
         return None
-    array = np.asarray(value, dtype=np.float32)
-    if array.ndim == 0 or array.shape[0] < horizon:
+    values = [getattr(record, attr) for record in records[start:end]]
+    if any(value is None for value in values):
         return None
-    return np.array(array[:horizon], copy=True)
+    return np.asarray(values, dtype=np.float32)
 
 def _replay_status(missing_metadata: list[str], replay_arrays: dict[str, np.ndarray] | None) -> str:
     if replay_arrays is not None:

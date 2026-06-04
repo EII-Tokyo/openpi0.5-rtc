@@ -148,6 +148,27 @@ class RLTBatchSegmentRequest(BaseModel):
     reason: str = "operator_batch_review"
 
 
+class RLTKeyRegionCropRequest(BaseModel):
+    start_sec: float = Field(ge=0)
+    end_sec: float = Field(gt=0)
+    source: str = "ui"
+    reason: str = "operator_crop"
+
+
+class RLTKeyRegionCropResponse(BaseModel):
+    key_region_id: str
+    status: str = "committed"
+    trainable: bool = True
+    shard_path: str
+    source_shard_path: str
+    crop_start_sec: float
+    crop_end_sec: float
+    crop_start_sample: int
+    crop_end_sample: int
+    num_replay_transitions: int
+    manifest_path: str
+
+
 class RLTSegmentRecord(BaseModel):
     key_region_id: str
     status: str
@@ -183,6 +204,13 @@ class RLTKeyRegionReviewRecord(BaseModel):
     end_time: float | None = None
     score_time: float | None = None
     duration_seconds: float | None = None
+    fps: float | None = None
+    num_frames: int | None = None
+    crop_start_sec: float | None = None
+    crop_end_sec: float | None = None
+    crop_start_sample: int | None = None
+    crop_end_sample: int | None = None
+    crop_original_num_replay_transitions: int | None = None
     num_replay_transitions: int = 0
     updated_at: float | None = None
 

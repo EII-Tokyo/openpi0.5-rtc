@@ -26,6 +26,7 @@ from .camera_bridge import CameraBridge
 from .config import settings
 from .redis_commands import create_redis_client
 from .rlt_control import RLTControlStore
+from .rlt_key_region_crop import crop_key_region_files
 from .robot_state_bridge import RobotStateBridge
 from .schemas import HealthResponse
 from .schemas import RealtimePayload
@@ -34,6 +35,8 @@ from .schemas import RLTConfigRequest
 from .schemas import RLTControlRequest
 from .schemas import RLTControlState
 from .schemas import RLTDiscardRequest
+from .schemas import RLTKeyRegionCropRequest
+from .schemas import RLTKeyRegionCropResponse
 from .schemas import RLTKeyRegionReviewRecord
 from .schemas import RLTScoreRequest
 from .schemas import RLTSegmentRecord
@@ -545,6 +548,13 @@ def _key_region_review_records() -> list[dict]:
                     "end_time": manifest.get("end_time"),
                     "score_time": manifest.get("score_time"),
                     "duration_seconds": manifest.get("duration_seconds"),
+                    "fps": manifest.get("fps"),
+                    "num_frames": manifest.get("num_frames"),
+                    "crop_start_sec": manifest.get("crop_start_sec"),
+                    "crop_end_sec": manifest.get("crop_end_sec"),
+                    "crop_start_sample": manifest.get("crop_start_sample"),
+                    "crop_end_sample": manifest.get("crop_end_sample"),
+                    "crop_original_num_replay_transitions": manifest.get("crop_original_num_replay_transitions"),
                     "phase": record.get("phase") or manifest.get("phase"),
                     "segment_status": manifest.get("segment_status"),
                     "train_eligible": manifest.get("train_eligible"),
@@ -599,6 +609,78 @@ def rlt_key_region_review() -> list[RLTKeyRegionReviewRecord]:
     return [RLTKeyRegionReviewRecord(**record) for record in _key_region_review_records()]
 
 
+def _crop_output_shard_path(source_shard_path: Path, key_region_id: str) -> Path:
+    source = source_shard_path.resolve()
+    raw_root = (REPLAY_ROOT / "rlt_key_regions").resolve()
+    clean_root = (REPLAY_ROOT / "rlt_key_regions_clean").resolve()
+    try:
+        relative = source.relative_to(raw_root)
+    except ValueError:
+        try:
+            relative = source.relative_to(clean_root)
+        except ValueError:
+            relative = Path("manual") / f"key_region_{key_region_id}.npz"
+    timestamp_ms = int(time.time() * 1000)
+    return clean_root / relative.parent / f"{source.stem}.crop_{timestamp_ms}.npz"
+
+
+@app.post("/api/rlt/key-region/{key_region_id}/crop", response_model=RLTKeyRegionCropResponse)
+def rlt_key_region_crop(key_region_id: str, request: RLTKeyRegionCropRequest) -> RLTKeyRegionCropResponse:
+    if not re.fullmatch(r"[A-Za-z0-9_.-]+", key_region_id):
+        raise HTTPException(status_code=400, detail=f"Invalid key_region_id: {key_region_id}")
+    if request.end_sec <= request.start_sec:
+        raise HTTPException(status_code=400, detail="end_sec must be greater than start_sec")
+
+    records = _key_region_review_records()
+    record = next((item for item in records if item.get("key_region_id") == key_region_id), None)
+    if record is None:
+        raise HTTPException(status_code=404, detail=f"Unknown key_region_id: {key_region_id}")
+    rollout_path = record.get("rollout_path")
+    if not rollout_path:
+        raise HTTPException(status_code=409, detail="Key region rollout manifest is missing")
+    rollout_dir = (ROLLOUTS_ROOT / str(rollout_path)).resolve()
+    if not rollout_dir.is_relative_to(ROLLOUTS_ROOT):
+        raise HTTPException(status_code=400, detail="Invalid rollout path")
+    shard_path = _host_path_for_container_path(record.get("shard_path"))
+    if shard_path is None or not shard_path.exists():
+        raise HTTPException(status_code=409, detail="Key region replay shard is missing")
+
+    output_shard_path = _crop_output_shard_path(shard_path, key_region_id)
+    try:
+        manifest = crop_key_region_files(
+            rollout_dir,
+            shard_path,
+            output_shard_path,
+            start_sec=request.start_sec,
+            end_sec=request.end_sec,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    rlt_control.crop_key_region_from_files(
+        key_region_id=key_region_id,
+        phase=str(manifest.get("phase") or record.get("phase") or "warmup"),
+        reward=int(manifest.get("reward") or record.get("reward") or 0),
+        shard_path=str(manifest["shard_path"]),
+        num_replay_transitions=int(manifest.get("num_replay_transitions") or 0),
+        source=request.source,
+        reason=request.reason,
+    )
+    return RLTKeyRegionCropResponse(
+        key_region_id=key_region_id,
+        status="committed",
+        trainable=True,
+        shard_path=str(manifest["shard_path"]),
+        source_shard_path=str(manifest.get("source_shard_path") or shard_path),
+        crop_start_sec=float(manifest["crop_start_sec"]),
+        crop_end_sec=float(manifest["crop_end_sec"]),
+        crop_start_sample=int(manifest["crop_start_sample"]),
+        crop_end_sample=int(manifest["crop_end_sample"]),
+        num_replay_transitions=int(manifest["num_replay_transitions"]),
+        manifest_path=str((rollout_dir / "manifest.json").resolve()),
+    )
+
+
 def _delete_key_region_files(key_region_id: str) -> None:
     if not re.fullmatch(r"[A-Za-z0-9_.-]+", key_region_id):
         raise HTTPException(status_code=400, detail=f"Invalid key_region_id: {key_region_id}")
@@ -614,6 +696,12 @@ def _delete_key_region_files(key_region_id: str) -> None:
         for path in replay_root.glob(f"**/shards/{region_name}.npz*"):
             resolved = path.resolve()
             if resolved.is_file() and resolved.is_relative_to(replay_root):
+                resolved.unlink()
+    clean_replay_root = (REPLAY_ROOT / "rlt_key_regions_clean").resolve()
+    if clean_replay_root.exists():
+        for path in clean_replay_root.glob(f"**/shards/{region_name}*.npz*"):
+            resolved = path.resolve()
+            if resolved.is_file() and resolved.is_relative_to(clean_replay_root):
                 resolved.unlink()
 
 

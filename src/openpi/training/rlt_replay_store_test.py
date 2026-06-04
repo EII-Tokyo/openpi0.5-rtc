@@ -100,21 +100,21 @@ def test_rlt_replay_store_rejects_invalid_shards_and_loads_new_shards(tmp_path):
     assert store.stats.replay_size == 4
 
 
-def test_rlt_replay_store_samples_train_action_horizon_from_full_replay(tmp_path):
+def test_rlt_replay_store_samples_train_action_horizon_from_c10_replay(tmp_path):
     shards_dir = tmp_path / "shards"
     shards_dir.mkdir()
     arrays = _arrays(5)
-    arrays["action"] = np.ones((5, 50, 2), dtype=np.float32)
+    arrays["action"] = np.ones((5, 10, 2), dtype=np.float32)
     arrays["reference_action"] = arrays["action"] * 0.5
     arrays["next_reference_action"] = arrays["action"] * 0.25
-    arrays["reward_seq"] = np.zeros((5, 50), dtype=np.float32)
+    arrays["reward_seq"] = np.zeros((5, 10), dtype=np.float32)
     arrays["reward_seq"][-1, 9] = 1.0
-    np.savez(shards_dir / "full_horizon.npz", **arrays)
+    np.savez(shards_dir / "c10_horizon.npz", **arrays)
 
     store = rlt_replay_store.RLTReplayStore(tmp_path, sample_action_horizon=10)
     store.scan()
 
-    assert store.shape == rlt_replay_store.ReplayShape(z_dim=4, proprio_dim=5, action_horizon=50, action_dim=2)
+    assert store.shape == rlt_replay_store.ReplayShape(z_dim=4, proprio_dim=5, action_horizon=10, action_dim=2)
     assert store.sample_shape == rlt_replay_store.ReplayShape(z_dim=4, proprio_dim=5, action_horizon=10, action_dim=2)
     batch = store.sample_batch(np.random.default_rng(0), batch_size=3)
     assert batch.action.shape == (3, 10, 2)
@@ -243,4 +243,3 @@ def test_rlt_replay_store_ready_can_require_committed_shard_count(tmp_path):
         min_success_episodes=1,
         min_failure_episodes=1,
     )
-

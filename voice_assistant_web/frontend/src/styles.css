@@ -1148,6 +1148,43 @@ button {
   gap: 8px;
 }
 
+.crop-play-button {
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 10px;
+  border: 1px solid #b9b1a5;
+  border-radius: 6px;
+  background: #fffefa;
+  color: #221f1a;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.crop-play-button.active {
+  border-color: #116b4f;
+  background: #e4f2eb;
+  color: #0d513c;
+}
+
+.crop-play-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: #221f1a;
+  color: #fffefa;
+  font-size: 10px;
+  line-height: 1;
+}
+
+.crop-play-button.active .crop-play-icon {
+  background: #116b4f;
+}
+
 .key-region-control {
   min-height: 34px;
   padding: 0 10px;
@@ -1430,6 +1467,7 @@ button {
   border: 2px solid #2463a6;
   border-radius: 6px;
   background: rgba(36, 99, 166, 0.16);
+  overflow: visible;
 }
 
 .key-region-clip.success {
@@ -1445,12 +1483,15 @@ button {
 .key-region-handle {
   position: absolute;
   top: -10px;
+  z-index: 3;
   width: 10px;
   height: 32px;
   border: 2px solid #fffefa;
   border-radius: 5px;
   background: #2463a6;
   box-shadow: 0 1px 3px rgba(34, 31, 26, 0.22);
+  cursor: ew-resize;
+  padding: 0;
 }
 
 .key-region-handle.start {
@@ -1461,12 +1502,31 @@ button {
   right: -6px;
 }
 
+.key-region-handle:focus-visible {
+  outline: 3px solid rgba(36, 99, 166, 0.28);
+  outline-offset: 2px;
+}
+
+.key-region-clip-progress {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 1;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.32);
+  pointer-events: none;
+  transition: width 100ms linear;
+}
+
 .key-region-playhead {
   position: absolute;
   top: -13px;
+  z-index: 2;
   width: 2px;
   height: 38px;
   background: #221f1a;
+  pointer-events: none;
 }
 
 .key-region-marker {

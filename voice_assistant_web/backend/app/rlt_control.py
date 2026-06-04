@@ -215,6 +215,42 @@ class RLTControlStore:
             self._persist_locked()
             return self._state.model_copy(deep=True)
 
+    def crop_key_region_from_files(
+        self,
+        *,
+        key_region_id: str,
+        phase: str,
+        reward: int,
+        shard_path: str,
+        num_replay_transitions: int,
+        source: str = "ui",
+        reason: str = "operator_crop",
+    ) -> RLTControlState:
+        with self._lock:
+            self._segment_ledger.record_cropped(
+                key_region_id,
+                reward=reward,
+                phase=phase,
+                shard_path=shard_path,
+                num_replay_transitions=num_replay_transitions,
+                reason=reason,
+            )
+            self._apply_ledger_stats_locked()
+            self._add_event_locked("crop", f"{key_region_id}:{num_replay_transitions}")
+            self._refresh_derived_locked()
+            self._persist_locked()
+            self._publish_locked(
+                "key_region_crop",
+                {
+                    "source": source,
+                    "reason": reason,
+                    "key_region_id": key_region_id,
+                    "shard_path": shard_path,
+                    "num_replay_transitions": num_replay_transitions,
+                },
+            )
+            return self._state.model_copy(deep=True)
+
     def delete_segments(
         self, key_region_ids: list[str], *, source: str = "ui", reason: str = "operator_delete"
     ) -> RLTControlState:

@@ -43,7 +43,7 @@ and writes actor exports to:
 /app/rlt_online/run/inference_actor/LATEST
 ```
 
-Replay shards store the 50-step policy chunk. Training samples the first 10 steps with `--train-action-horizon 10`; `--expected-replay-action-horizon 50` guards against accidentally mixing old 10-step shards.
+Replay shards store the 10-step training chunk. The VLA still predicts a 50-step chunk, recorded as metadata only; training keeps `--train-action-horizon 10`; `--expected-replay-action-horizon 10` guards against accidentally mixing old 50-step shards.
 
 ## 4. Warmup Collection
 

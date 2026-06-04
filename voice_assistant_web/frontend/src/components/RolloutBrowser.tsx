@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
+  cropKeyRegion,
   deleteKeyRegions,
   fetchRLTKeyRegionReview,
   rolloutTreeUrl,
@@ -21,6 +22,11 @@ type KeyRegionEntry = {
   path: string
   label: string
   manifest: RolloutManifestSummary
+}
+
+type CropRange = {
+  startSec: number
+  endSec: number
 }
 
 const formatBytes = (bytes?: number) => {
@@ -454,23 +460,57 @@ const badgeTone = (tone: 'green' | 'blue' | 'amber' | 'red' | 'slate') => `key-r
 
 const artifactBadgeTone = (exists: boolean) => (exists ? 'green' : 'amber')
 
-const cropStartPercent = (record: RLTKeyRegionReviewRecord) => (record.trainable ? 10 : 24)
-const cropWidthPercent = (record: RLTKeyRegionReviewRecord) => (record.trainable ? 76 : 54)
+const durationForRecord = (record: RLTKeyRegionReviewRecord) =>
+  Math.max(0, record.duration_seconds || record.crop_end_sec || 0)
 
-const cropSummary = (record: RLTKeyRegionReviewRecord) => {
+const defaultCropRange = (record: RLTKeyRegionReviewRecord): CropRange => {
   const duration = record.duration_seconds || 0
-  const start = record.trainable ? Math.max(0, duration * 0.1) : Math.max(0, duration * 0.25)
-  const end = record.trainable ? Math.max(start, duration * 0.9) : Math.max(start, duration * 0.75)
-  const samples = record.num_replay_transitions || 0
-  return `selected ${start.toFixed(2)}s - ${end.toFixed(2)}s / ${samples} replay samples`
+  if (record.crop_start_sec !== null && record.crop_start_sec !== undefined && record.crop_end_sec) {
+    return {
+      startSec: Math.max(0, record.crop_start_sec),
+      endSec: Math.max(record.crop_start_sec, record.crop_end_sec),
+    }
+  }
+  const startRatio = record.trainable ? 0.1 : 0.25
+  const endRatio = record.trainable ? 0.9 : 0.75
+  return {
+    startSec: Math.max(0, duration * startRatio),
+    endSec: Math.max(0, duration * endRatio),
+  }
 }
 
-const frameSummary = (record: RLTKeyRegionReviewRecord) => {
-  const duration = record.duration_seconds || 0
-  const startFrame = Math.round(duration * 30 * (record.trainable ? 0.1 : 0.25))
-  const endFrame = Math.round(duration * 30 * (record.trainable ? 0.9 : 0.75))
+const cropRangeForRecord = (
+  record: RLTKeyRegionReviewRecord,
+  cropRanges: Record<string, CropRange>,
+): CropRange => cropRanges[record.key_region_id] || defaultCropRange(record)
+
+const estimatedCropSamples = (record: RLTKeyRegionReviewRecord, range: CropRange) => {
+  const duration = durationForRecord(record)
+  const sourceSamples = record.crop_original_num_replay_transitions || record.num_replay_transitions || 0
+  if (duration <= 0 || sourceSamples <= 0) return 0
+  return Math.max(1, Math.round(((range.endSec - range.startSec) / duration) * sourceSamples))
+}
+
+const minCropDuration = (record: RLTKeyRegionReviewRecord) => {
+  const duration = durationForRecord(record)
+  const sourceSamples = record.crop_original_num_replay_transitions || record.num_replay_transitions || 0
+  if (duration <= 0 || sourceSamples <= 0) return 0
+  return Math.min(duration, Math.max(0.01, duration / sourceSamples))
+}
+
+const cropSummary = (record: RLTKeyRegionReviewRecord, range: CropRange) => {
+  const samples = estimatedCropSamples(record, range)
+  return `selected ${range.startSec.toFixed(2)}s - ${range.endSec.toFixed(2)}s / ${samples} replay samples`
+}
+
+const frameSummary = (record: RLTKeyRegionReviewRecord, range: CropRange) => {
+  const fps = record.fps || 30
+  const startFrame = Math.round(range.startSec * fps)
+  const endFrame = Math.round(range.endSec * fps)
   return { startFrame, endFrame }
 }
+
+const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max)
 
 export function RolloutBrowser({
   title,
@@ -494,8 +534,131 @@ export function RolloutBrowser({
   const [actionError, setActionError] = useState('')
   const [deleteDialogRecords, setDeleteDialogRecords] = useState<RLTKeyRegionReviewRecord[]>([])
   const [deleteDialogError, setDeleteDialogError] = useState('')
+  const [cropRanges, setCropRanges] = useState<Record<string, CropRange>>({})
+  const [playingKeyRegionId, setPlayingKeyRegionId] = useState('')
+  const [playbackTimes, setPlaybackTimes] = useState<Record<string, number>>({})
+  const [playbackError, setPlaybackError] = useState('')
+  const keyRegionVideoRefs = useRef<Record<string, Array<HTMLVideoElement | null>>>({})
   const keyRegionCardRefs = useRef<Record<string, HTMLElement | null>>({})
   const keyRegionsWorkspaceRef = useRef<HTMLElement | null>(null)
+
+  const getCropRange = (record: RLTKeyRegionReviewRecord) => cropRangeForRecord(record, cropRanges)
+
+  const setKeyRegionVideoRef = (keyRegionId: string, index: number, element: HTMLVideoElement | null) => {
+    const refs = keyRegionVideoRefs.current[keyRegionId] || []
+    refs[index] = element
+    keyRegionVideoRefs.current[keyRegionId] = refs
+  }
+
+  const keyRegionVideos = (keyRegionId: string) =>
+    (keyRegionVideoRefs.current[keyRegionId] || []).filter((video): video is HTMLVideoElement => Boolean(video))
+
+  const pauseKeyRegionVideos = (keyRegionId: string) => {
+    keyRegionVideos(keyRegionId).forEach((video) => video.pause())
+  }
+
+  const pauseAllKeyRegionVideos = () => {
+    Object.keys(keyRegionVideoRefs.current).forEach(pauseKeyRegionVideos)
+  }
+
+  const syncKeyRegionVideos = (keyRegionId: string, timeSec: number) => {
+    keyRegionVideos(keyRegionId).forEach((video) => {
+      try {
+        if (Number.isFinite(video.duration)) {
+          video.currentTime = clamp(timeSec, 0, Math.max(0, video.duration))
+        } else {
+          video.currentTime = Math.max(0, timeSec)
+        }
+      } catch {
+        // Metadata can still be loading; the next play/drag tick will retry.
+      }
+    })
+    setPlaybackTimes((current) => ({ ...current, [keyRegionId]: timeSec }))
+  }
+
+  const toggleCropPlayback = async (record: RLTKeyRegionReviewRecord) => {
+    const keyRegionId = record.key_region_id
+    if (playingKeyRegionId === keyRegionId) {
+      pauseKeyRegionVideos(keyRegionId)
+      setPlayingKeyRegionId('')
+      return
+    }
+    const videos = keyRegionVideos(keyRegionId)
+    if (!videos.length) return
+    const range = getCropRange(record)
+    pauseAllKeyRegionVideos()
+    setPlaybackError('')
+    syncKeyRegionVideos(keyRegionId, range.startSec)
+    const results = await Promise.allSettled(videos.map((video) => video.play()))
+    if (results.every((result) => result.status === 'rejected')) {
+      setPlaybackError('Preview playback failed. Try again after video metadata loads.')
+      setPlayingKeyRegionId('')
+      return
+    }
+    setPlayingKeyRegionId(keyRegionId)
+  }
+
+  const updateCropFromPointer = (
+    record: RLTKeyRegionReviewRecord,
+    edge: 'start' | 'end',
+    track: HTMLElement,
+    clientX: number,
+  ) => {
+    const duration = durationForRecord(record)
+    if (duration <= 0) return
+    const rect = track.getBoundingClientRect()
+    const ratio = rect.width > 0 ? clamp((clientX - rect.left) / rect.width, 0, 1) : 0
+    const nextSec = ratio * duration
+    const current = getCropRange(record)
+    const minDuration = minCropDuration(record)
+    const nextRange =
+      edge === 'start'
+        ? {
+            startSec: clamp(nextSec, 0, Math.max(0, current.endSec - minDuration)),
+            endSec: current.endSec,
+          }
+        : {
+            startSec: current.startSec,
+            endSec: clamp(nextSec, Math.min(duration, current.startSec + minDuration), duration),
+          }
+    setCropRanges((ranges) => ({ ...ranges, [record.key_region_id]: nextRange }))
+    syncKeyRegionVideos(record.key_region_id, edge === 'start' ? nextRange.startSec : nextRange.endSec)
+  }
+
+  const beginCropDrag = (
+    event: React.PointerEvent<HTMLButtonElement>,
+    record: RLTKeyRegionReviewRecord,
+    edge: 'start' | 'end',
+  ) => {
+    event.preventDefault()
+    event.stopPropagation()
+    const track = event.currentTarget.closest('.key-region-timeline-track')
+    if (!(track instanceof HTMLElement)) return
+    pauseKeyRegionVideos(record.key_region_id)
+    setPlayingKeyRegionId('')
+    updateCropFromPointer(record, edge, track, event.clientX)
+    const onMove = (moveEvent: PointerEvent) => updateCropFromPointer(record, edge, track, moveEvent.clientX)
+    const onUp = () => {
+      window.removeEventListener('pointermove', onMove)
+      window.removeEventListener('pointerup', onUp)
+    }
+    window.addEventListener('pointermove', onMove)
+    window.addEventListener('pointerup', onUp, { once: true })
+  }
+
+  const saveCropForQ = async (record: RLTKeyRegionReviewRecord) => {
+    const range = getCropRange(record)
+    setActionError('')
+    setActionPending(`crop-${record.key_region_id}`)
+    try {
+      await cropKeyRegion(record.key_region_id, range.startSec, range.endSec)
+      await loadTree()
+    } catch (exc) {
+      setActionError(exc instanceof Error ? exc.message : 'Crop save failed')
+    } finally {
+      setActionPending('')
+    }
+  }
 
   const selectReviewRecord = (record: RLTKeyRegionReviewRecord) => {
     setSelectedReviewId(record.key_region_id)
@@ -595,6 +758,46 @@ export function RolloutBrowser({
     [reviewRecords],
   )
   const selectedCount = selectedKeyRegionIds.size
+
+  useEffect(() => {
+    if (!enableKeyRegionActions) return undefined
+    return () => {
+      pauseAllKeyRegionVideos()
+    }
+  }, [enableKeyRegionActions])
+
+  useEffect(() => {
+    if (!enableKeyRegionActions) return
+    const visibleIds = new Set(visibleReviewRecords.map((record) => record.key_region_id))
+    Object.keys(keyRegionVideoRefs.current).forEach((keyRegionId) => {
+      if (!visibleIds.has(keyRegionId)) delete keyRegionVideoRefs.current[keyRegionId]
+    })
+  }, [enableKeyRegionActions, visibleReviewRecords])
+
+  useEffect(() => {
+    if (!enableKeyRegionActions || !playingKeyRegionId) return undefined
+    let frame = 0
+    const tick = () => {
+      const record = reviewRecords.find((item) => item.key_region_id === playingKeyRegionId)
+      const primaryVideo = keyRegionVideos(playingKeyRegionId)[0]
+      if (!record || !primaryVideo) {
+        setPlayingKeyRegionId('')
+        return
+      }
+      const range = cropRangeForRecord(record, cropRanges)
+      const currentTime = primaryVideo.currentTime
+      setPlaybackTimes((times) => ({ ...times, [playingKeyRegionId]: currentTime }))
+      if (currentTime >= range.endSec) {
+        pauseKeyRegionVideos(playingKeyRegionId)
+        syncKeyRegionVideos(playingKeyRegionId, range.endSec)
+        setPlayingKeyRegionId('')
+        return
+      }
+      frame = window.requestAnimationFrame(tick)
+    }
+    frame = window.requestAnimationFrame(tick)
+    return () => window.cancelAnimationFrame(frame)
+  }, [enableKeyRegionActions, playingKeyRegionId, cropRanges, reviewRecords])
 
   const toggleKeyRegionSelection = (keyRegionId: string) => {
     setSelectedKeyRegionIds((current) => {
@@ -762,14 +965,25 @@ export function RolloutBrowser({
 
         {error ? <p className="inline-error">{error}</p> : null}
         {actionError ? <p className="inline-error">{actionError}</p> : null}
+        {playbackError ? <p className="inline-error">{playbackError}</p> : null}
 
         <div className="key-region-card-stack">
           {visibleReviewRecords.map((record, index) => {
             const checked = selectedKeyRegionIds.has(record.key_region_id)
             const cameras = orderedCameraPaths(record)
-            const frames = frameSummary(record)
-            const clipLeft = cropStartPercent(record)
-            const clipWidth = cropWidthPercent(record)
+            const cropRange = getCropRange(record)
+            const duration = durationForRecord(record)
+            const frames = frameSummary(record, cropRange)
+            const clipLeft = duration > 0 ? clamp((cropRange.startSec / duration) * 100, 0, 100) : 0
+            const clipWidth =
+              duration > 0 ? clamp(((cropRange.endSec - cropRange.startSec) / duration) * 100, 0, 100 - clipLeft) : 0
+            const playbackTime = playbackTimes[record.key_region_id] ?? cropRange.startSec
+            const playbackProgress =
+              cropRange.endSec > cropRange.startSec
+                ? clamp((playbackTime - cropRange.startSec) / (cropRange.endSec - cropRange.startSec), 0, 1)
+                : 0
+            const cropPending = actionPending === `crop-${record.key_region_id}`
+            const isPlaying = playingKeyRegionId === record.key_region_id
             const rewardTone = record.reward === 0 ? 'red' : record.reward === 1 ? 'green' : 'slate'
             return (
               <article
@@ -809,7 +1023,14 @@ export function RolloutBrowser({
                         <div className="key-region-video-tile" key={`${record.key_region_id}-${camera}`}>
                           <span className="key-region-camera-label">{path ? cameraLabelFromPath(path) : camera}</span>
                           {path ? (
-                            <video src={rolloutVideoUrl(path)} controls preload="metadata" />
+                            <video
+                              ref={(element) => setKeyRegionVideoRef(record.key_region_id, cameraIndex, element)}
+                              src={rolloutVideoUrl(path)}
+                              preload="metadata"
+                              muted
+                              playsInline
+                              tabIndex={-1}
+                            />
                           ) : (
                             <div className="key-region-video-missing">No video</div>
                           )}
@@ -845,7 +1066,7 @@ export function RolloutBrowser({
                 <div className="key-region-trim-panel">
                   <div className="key-region-trim-head">
                     <strong>Crop for Q training</strong>
-                    <span>{cropSummary(record)}</span>
+                    <span>{cropSummary(record, cropRange)}</span>
                   </div>
                   <div className="key-region-timeline">
                     <div className="key-region-timeline-track">
@@ -853,9 +1074,20 @@ export function RolloutBrowser({
                         className={`key-region-clip ${record.reward === 0 ? 'fail' : 'success'}`}
                         style={{ left: `${clipLeft}%`, width: `${clipWidth}%` }}
                       >
-                        <span className="key-region-handle start" />
-                        <span className="key-region-handle end" />
-                        <span className="key-region-playhead" style={{ left: '52%' }} />
+                        <span className="key-region-clip-progress" style={{ width: `${playbackProgress * 100}%` }} />
+                        <button
+                          className="key-region-handle start"
+                          type="button"
+                          aria-label="Set crop start"
+                          onPointerDown={(event) => beginCropDrag(event, record, 'start')}
+                        />
+                        <button
+                          className="key-region-handle end"
+                          type="button"
+                          aria-label="Set crop end"
+                          onPointerDown={(event) => beginCropDrag(event, record, 'end')}
+                        />
+                        <span className="key-region-playhead" style={{ left: `${playbackProgress * 100}%` }} />
                         <span className={`key-region-marker ${record.reward === 0 ? 'fail' : 'success'}`} style={{ left: '92%' }} />
                       </div>
                     </div>
@@ -874,11 +1106,25 @@ export function RolloutBrowser({
                       <span>reward {formatRewardValue(record.reward)}</span>
                     </div>
                     <div className="key-region-action-group">
+                      <button
+                        className={`crop-play-button ${isPlaying ? 'active' : ''}`}
+                        type="button"
+                        aria-pressed={isPlaying}
+                        onClick={() => void toggleCropPlayback(record)}
+                      >
+                        <span className="crop-play-icon" aria-hidden="true">{isPlaying ? 'II' : '>'}</span>
+                        <span>{isPlaying ? 'Pause' : 'Play'}</span>
+                      </button>
                       <button className="ghost-button" type="button" onClick={() => selectReviewRecord(record)}>
                         Preview crop
                       </button>
-                      <button className="apply-button" type="button" disabled title="Crop save API is not wired yet">
-                        Save crop for Q
+                      <button
+                        className="apply-button"
+                        type="button"
+                        disabled={cropPending || duration <= 0 || cropRange.endSec <= cropRange.startSec}
+                        onClick={() => void saveCropForQ(record)}
+                      >
+                        {cropPending ? 'Saving crop' : 'Save crop for Q'}
                       </button>
                       <button
                         className="apply-button delete"

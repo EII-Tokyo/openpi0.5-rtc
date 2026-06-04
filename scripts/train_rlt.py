@@ -31,7 +31,7 @@ class Args:
     actor_lr: float = 1e-4
     critic_lr: float = 3e-4
     train_action_horizon: int | None = 10
-    expected_replay_action_horizon: int | None = None
+    expected_replay_action_horizon: int | None = 10
     wandb_enabled: bool = True
     wandb_project: str = "openpi"
     wandb_run_name: str = "rlt_actor_critic"
