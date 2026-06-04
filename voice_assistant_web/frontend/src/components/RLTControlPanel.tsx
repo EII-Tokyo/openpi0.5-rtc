@@ -70,8 +70,8 @@ export function RLTControlPanel({ rlt, onState }: Props) {
     if (event.key === 'Enter' || event.key.toLowerCase() === 'c') return 'confirm'
     if (event.key === 'Backspace' || event.key.toLowerCase() === 'd') return 'discard'
     if (event.key.toLowerCase() === 'v') return 'void'
-    if (event.key.toLowerCase() === 't') return 'twist'
-    if (event.key.toLowerCase() === 'h') return 'home'
+    if (event.key === 'PageDown' || event.code === 'PageDown' || event.keyCode === 34) return 'twist'
+    if (event.key === 'Home' || event.code === 'Home' || event.keyCode === 36) return 'home'
     return ''
   }
 
