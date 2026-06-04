@@ -422,7 +422,8 @@ const keyRegionInfoRows = (record: RLTKeyRegionReviewRecord): KeyRegionInfoRow[]
   { label: 'Status', value: keyRegionStatusLabel(record) },
   { label: 'Reward', value: formatRewardValue(record.reward) },
   { label: 'Phase', value: record.phase || '-' },
-  { label: 'Duration', value: formatDuration(record.duration_seconds) },
+  { label: 'Video duration', value: formatDuration(record.duration_seconds) },
+  { label: 'Key duration', value: formatDuration(record.key_region_duration_seconds) },
   { label: 'Transitions', value: `${record.num_replay_transitions || 0} samples` },
   { label: 'Full horizon', value: `${DEFAULT_REPLAY_HORIZON} actions` },
   { label: 'Train horizon', value: `${DEFAULT_TRAIN_HORIZON} actions` },
@@ -464,18 +465,28 @@ const durationForRecord = (record: RLTKeyRegionReviewRecord) =>
   Math.max(0, record.duration_seconds || record.crop_end_sec || 0)
 
 const defaultCropRange = (record: RLTKeyRegionReviewRecord): CropRange => {
-  const duration = record.duration_seconds || 0
+  const duration = durationForRecord(record)
   if (record.crop_start_sec !== null && record.crop_start_sec !== undefined && record.crop_end_sec) {
     return {
-      startSec: Math.max(0, record.crop_start_sec),
-      endSec: Math.max(record.crop_start_sec, record.crop_end_sec),
+      startSec: clamp(record.crop_start_sec, 0, duration),
+      endSec: clamp(Math.max(record.crop_start_sec, record.crop_end_sec), 0, duration),
     }
   }
-  const startRatio = record.trainable ? 0.1 : 0.25
-  const endRatio = record.trainable ? 0.9 : 0.75
+  if (
+    record.key_region_start_sec !== null &&
+    record.key_region_start_sec !== undefined &&
+    record.key_region_end_sec !== null &&
+    record.key_region_end_sec !== undefined &&
+    record.key_region_end_sec > record.key_region_start_sec
+  ) {
+    return {
+      startSec: clamp(record.key_region_start_sec, 0, duration),
+      endSec: clamp(record.key_region_end_sec, 0, duration),
+    }
+  }
   return {
-    startSec: Math.max(0, duration * startRatio),
-    endSec: Math.max(0, duration * endRatio),
+    startSec: 0,
+    endSec: duration,
   }
 }
 
@@ -1093,10 +1104,10 @@ export function RolloutBrowser({
                     </div>
                     <div className="key-region-ticks">
                       <span>0.0s</span>
-                      <span>{formatDuration((record.duration_seconds || 0) * 0.25)}</span>
-                      <span>{formatDuration((record.duration_seconds || 0) * 0.5)}</span>
-                      <span>{formatDuration((record.duration_seconds || 0) * 0.75)}</span>
-                      <span>{formatDuration(record.duration_seconds)}</span>
+                      <span>{formatDuration(duration * 0.25)}</span>
+                      <span>{formatDuration(duration * 0.5)}</span>
+                      <span>{formatDuration(duration * 0.75)}</span>
+                      <span>{formatDuration(duration)}</span>
                     </div>
                   </div>
                   <div className="key-region-trim-actions">

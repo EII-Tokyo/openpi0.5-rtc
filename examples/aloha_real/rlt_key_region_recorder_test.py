@@ -189,7 +189,17 @@ def test_key_region_manifest_includes_replay_schema_metadata(tmp_path):
     )
     try:
         arrays, missing = store._build_replay_arrays([_record(step) for step in range(25)], {"reward": 1})
-        segment = recorder.KeyRegionSegment("kid", "task", "warmup", {"timestamp": 1.0}, {"timestamp": 2.0}, {"timestamp": 3.0, "reward": 1}, [])
+        segment = recorder.KeyRegionSegment(
+            "kid",
+            "task",
+            "warmup",
+            {"timestamp": 1.0},
+            {"timestamp": 2.0},
+            {"timestamp": 3.0, "reward": 1},
+            [],
+            active_start_step=0,
+            active_end_step=50,
+        )
         manifest = store._write_manifest(tmp_path / "manifest.json", segment, missing, arrays)
     finally:
         store.close()
@@ -238,7 +248,17 @@ def test_key_region_manifest_marks_train_eligibility(tmp_path):
     )
     try:
         arrays, missing = store._build_replay_arrays([_record(step) for step in range(25)], {"reward": 1})
-        segment = recorder.KeyRegionSegment("kid", "task", "warmup", {"timestamp": 1.0}, {"timestamp": 2.0}, {"timestamp": 3.0, "reward": 1}, [])
+        segment = recorder.KeyRegionSegment(
+            "kid",
+            "task",
+            "warmup",
+            {"timestamp": 1.0},
+            {"timestamp": 2.0},
+            {"timestamp": 3.0, "reward": 1},
+            [],
+            active_start_step=0,
+            active_end_step=50,
+        )
         manifest = store._write_manifest(tmp_path / "manifest.json", segment, missing, arrays)
     finally:
         store.close()
