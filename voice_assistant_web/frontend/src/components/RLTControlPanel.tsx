@@ -5,6 +5,7 @@ import {
   endKeyRegion,
   RLTControlState,
   scoreKeyRegion,
+  sendRobotTask,
   startKeyRegion,
   updateRLTConfig,
   voidKeyRegion,
@@ -43,6 +44,18 @@ export function RLTControlPanel({ rlt, onState }: Props) {
     }
   }
 
+  const runRobotTask = async (name: string, taskNum: '1' | '4' | '5') => {
+    setError('')
+    setPending(name)
+    try {
+      await sendRobotTask(taskNum)
+    } catch (exc) {
+      setError(exc instanceof Error ? exc.message : 'Request failed')
+    } finally {
+      setPending('')
+    }
+  }
+
   const flash = (key: string) => {
     setFlashKey('')
     window.setTimeout(() => setFlashKey(key), 0)
@@ -57,6 +70,8 @@ export function RLTControlPanel({ rlt, onState }: Props) {
     if (event.key === 'Enter' || event.key.toLowerCase() === 'c') return 'confirm'
     if (event.key === 'Backspace' || event.key.toLowerCase() === 'd') return 'discard'
     if (event.key.toLowerCase() === 'v') return 'void'
+    if (event.key.toLowerCase() === 't') return 'twist'
+    if (event.key.toLowerCase() === 'h') return 'home'
     return ''
   }
 
@@ -98,6 +113,10 @@ export function RLTControlPanel({ rlt, onState }: Props) {
         if (['key_region', 'await_score'].includes(rlt.phase) && rlt.active_key_region_id) {
           void run('void', () => voidKeyRegion(rlt.active_key_region_id as string, 'operator_void'))
         }
+      } else if (hotkey === 'twist') {
+        void runRobotTask('twist', '1')
+      } else if (hotkey === 'home') {
+        void runRobotTask('home', '4')
       }
     }
     window.addEventListener('keydown', onKeyDown, true)
