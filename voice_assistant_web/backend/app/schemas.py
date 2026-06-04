@@ -207,6 +207,9 @@ class RLTKeyRegionReviewRecord(BaseModel):
     end_time: float | None = None
     score_time: float | None = None
     duration_seconds: float | None = None
+    key_region_duration_seconds: float | None = None
+    key_region_start_sec: float | None = None
+    key_region_end_sec: float | None = None
     fps: float | None = None
     num_frames: int | None = None
     crop_start_sec: float | None = None

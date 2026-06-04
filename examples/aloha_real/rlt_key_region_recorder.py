@@ -56,6 +56,8 @@ class KeyRegionSegment:
     end_event: dict[str, Any]
     score_event: dict[str, Any]
     records: list[StepRecord]
+    active_start_step: int
+    active_end_step: int
 
 
 class _FfmpegMp4Writer:
@@ -287,6 +289,7 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
         self._active_start_event: dict[str, Any] | None = None
         self._active_start_step: int | None = None
         self._pending_end_event: dict[str, Any] | None = None
+        self._pending_end_step: int | None = None
         self._pending_records: list[StepRecord] | None = None
         self._pending_post_roll_remaining = 0
         self._lock = threading.Lock()
@@ -351,6 +354,7 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
             self._active_start_event = dict(event)
             self._active_start_step = self._step_index
             self._pending_end_event = None
+            self._pending_end_step = None
             self._pending_records = None
         logging.info("RLT key region started: %s", event.get("key_region_id"))
 
@@ -364,6 +368,7 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
             start_step = max(0, active_start_step - self._pre_roll_steps)
             records = [record for record in self._ring if record.step_index >= start_step]
             self._pending_end_event = dict(event)
+            self._pending_end_step = self._step_index
             self._pending_records = records
             self._pending_post_roll_remaining = self._post_roll_steps
         logging.info("RLT key region ended: %s (%d buffered frames)", event.get("key_region_id"), len(records))
@@ -383,6 +388,7 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
             self._active_start_event = None
             self._active_start_step = None
             self._pending_end_event = None
+            self._pending_end_step = None
             self._pending_records = None
             self._pending_post_roll_remaining = 0
         logging.info("RLT key region discarded: %s", key_region_id)
@@ -394,6 +400,8 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
                 logging.warning("Ignoring key-region score without a completed region.")
                 return
             records = list(self._pending_records or [])
+            active_start_step = self._active_start_step if self._active_start_step is not None else self._step_index
+            active_end_step = self._pending_end_step if self._pending_end_step is not None else self._step_index
             current_task = self._active_start_event.get("current_task") or {}
             task = current_task.get("task_name") or self._active_start_event.get("task") or "unknown_task"
             phase = (event.get("state") or {}).get("training_phase") or "unknown_phase"
@@ -405,10 +413,13 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
                 end_event=dict(self._pending_end_event),
                 score_event=dict(event),
                 records=records,
+                active_start_step=active_start_step,
+                active_end_step=active_end_step,
             )
             self._active_start_event = None
             self._active_start_step = None
             self._pending_end_event = None
+            self._pending_end_step = None
             self._pending_records = None
             self._pending_post_roll_remaining = 0
 
@@ -520,6 +531,20 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
         missing_metadata: list[str],
         replay_arrays: dict[str, np.ndarray] | None,
     ) -> dict[str, Any]:
+        first_step = segment.records[0].step_index if segment.records else segment.active_start_step
+        duration_seconds = len(segment.records) / self._fps
+        key_region_start_sec = max((segment.active_start_step - first_step) / self._fps, 0.0)
+        key_region_end_sec = min(
+            max((segment.active_end_step - first_step) / self._fps, key_region_start_sec),
+            duration_seconds,
+        )
+        try:
+            key_region_duration_seconds = max(
+                float(segment.end_event.get("timestamp")) - float(segment.start_event.get("timestamp")),
+                0.0,
+            )
+        except (TypeError, ValueError):
+            key_region_duration_seconds = max(key_region_end_sec - key_region_start_sec, 0.0)
         manifest = {
             "key_region_id": segment.key_region_id,
             "task": segment.task,
@@ -529,6 +554,12 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
             "start_time": segment.start_event.get("timestamp"),
             "end_time": segment.end_event.get("timestamp"),
             "score_time": segment.score_event.get("timestamp"),
+            "duration_seconds": duration_seconds,
+            "key_region_duration_seconds": key_region_duration_seconds,
+            "key_region_start_sec": key_region_start_sec,
+            "key_region_end_sec": key_region_end_sec,
+            "pre_roll_seconds": self._pre_roll_steps / self._fps,
+            "post_roll_seconds": self._post_roll_steps / self._fps,
             "num_frames": len(segment.records),
             "num_replay_transitions": 0 if replay_arrays is None else len(replay_arrays["z_rl"]),
             "fps": self._fps,

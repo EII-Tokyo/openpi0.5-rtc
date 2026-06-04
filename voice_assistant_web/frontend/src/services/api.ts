@@ -89,6 +89,9 @@ export type RLTKeyRegionReviewRecord = {
   end_time: number | null
   score_time: number | null
   duration_seconds: number | null
+  key_region_duration_seconds: number | null
+  key_region_start_sec: number | null
+  key_region_end_sec: number | null
   fps: number | null
   num_frames: number | null
   crop_start_sec: number | null

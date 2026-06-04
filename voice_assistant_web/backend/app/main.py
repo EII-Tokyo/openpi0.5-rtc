@@ -63,6 +63,7 @@ ROLLOUTS_ROOT = Path(settings.rollouts_root).expanduser().resolve()
 REPLAY_ROOT = Path(settings.replay_root).expanduser().resolve()
 VIDEO_CHUNK_SIZE = 1024 * 1024
 VIDEO_CACHE_ROOT = Path(os.getenv("ROLLOUTS_VIDEO_CACHE", "/tmp/eii_rollout_video_cache"))
+DEFAULT_RLT_PRE_ROLL_SECONDS = float(os.getenv("RLT_DEFAULT_PRE_ROLL_SECONDS", "2.0"))
 ROBOT_TASK_LABELS = {
     "1": "twist bottle",
     "4": "home",
@@ -145,6 +146,12 @@ def _safe_rollout_path(relative_path: str) -> Path:
     return candidate
 
 
+def _float_or_none(value: object) -> float | None:
+    with contextlib.suppress(TypeError, ValueError):
+        return float(value)
+    return None
+
+
 def _manifest_summary(path: Path) -> dict | None:
     manifest_path = path / "manifest.json"
     if not manifest_path.exists() or not manifest_path.is_file():
@@ -165,6 +172,12 @@ def _manifest_summary(path: Path) -> dict | None:
         "start_time",
         "end_time",
         "score_time",
+        "duration_seconds",
+        "key_region_duration_seconds",
+        "key_region_start_sec",
+        "key_region_end_sec",
+        "pre_roll_seconds",
+        "post_roll_seconds",
         "num_frames",
         "num_replay_transitions",
         "fps",
@@ -175,9 +188,41 @@ def _manifest_summary(path: Path) -> dict | None:
         "shard_path",
     }
     summary = {key: manifest[key] for key in summary_keys if key in manifest}
-    if "start_time" in summary and "end_time" in summary:
-        with contextlib.suppress(TypeError, ValueError):
-            summary["duration_seconds"] = max(float(summary["end_time"]) - float(summary["start_time"]), 0.0)
+
+    key_region_duration = _float_or_none(summary.get("key_region_duration_seconds"))
+    start_time = _float_or_none(summary.get("start_time"))
+    end_time = _float_or_none(summary.get("end_time"))
+    if key_region_duration is None and start_time is not None and end_time is not None:
+        key_region_duration = max(end_time - start_time, 0.0)
+    if key_region_duration is not None:
+        summary["key_region_duration_seconds"] = key_region_duration
+
+    video_duration = None
+    with contextlib.suppress(TypeError, ValueError, ZeroDivisionError):
+        num_frames = int(summary.get("num_frames", 0))
+        fps = float(summary.get("fps", 0.0))
+        if num_frames > 0 and fps > 0:
+            video_duration = num_frames / fps
+    if video_duration is None:
+        video_duration = _float_or_none(summary.get("duration_seconds"))
+    if video_duration is None and key_region_duration is not None:
+        video_duration = key_region_duration
+    if video_duration is not None:
+        summary["duration_seconds"] = max(video_duration, 0.0)
+
+    if video_duration is not None and key_region_duration is not None:
+        key_region_start = _float_or_none(summary.get("key_region_start_sec"))
+        if key_region_start is None:
+            extra_context = max(video_duration - key_region_duration, 0.0)
+            key_region_start = min(DEFAULT_RLT_PRE_ROLL_SECONDS, extra_context)
+        key_region_end = _float_or_none(summary.get("key_region_end_sec"))
+        if key_region_end is None:
+            key_region_end = key_region_start + key_region_duration
+        summary["key_region_start_sec"] = min(max(key_region_start, 0.0), max(video_duration, 0.0))
+        summary["key_region_end_sec"] = min(
+            max(key_region_end, summary["key_region_start_sec"]),
+            max(video_duration, 0.0),
+        )
     return summary
 
 
@@ -548,6 +593,9 @@ def _key_region_review_records() -> list[dict]:
                     "end_time": manifest.get("end_time"),
                     "score_time": manifest.get("score_time"),
                     "duration_seconds": manifest.get("duration_seconds"),
+                    "key_region_duration_seconds": manifest.get("key_region_duration_seconds"),
+                    "key_region_start_sec": manifest.get("key_region_start_sec"),
+                    "key_region_end_sec": manifest.get("key_region_end_sec"),
                     "fps": manifest.get("fps"),
                     "num_frames": manifest.get("num_frames"),
                     "crop_start_sec": manifest.get("crop_start_sec"),
