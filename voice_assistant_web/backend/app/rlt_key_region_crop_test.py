@@ -2,7 +2,7 @@ import json
 
 import numpy as np
 
-from voice_assistant_web.backend.app.rlt_key_region_crop import crop_key_region_files
+from voice_assistant_web.backend.app.rlt_key_region_crop import crop_key_region_files, rescore_key_region_files
 
 
 def test_crop_key_region_replay_shard_keeps_selected_samples_and_terminal_reward(tmp_path):
@@ -72,3 +72,47 @@ def test_crop_key_region_replay_shard_rejects_invalid_range(tmp_path):
         assert "end_sec must be greater" in str(exc)
     else:
         raise AssertionError("expected invalid crop range to fail")
+
+
+def test_rescore_key_region_replay_shard_rewrites_terminal_reward(tmp_path):
+    rollout_dir = tmp_path / "rollouts" / "key_region_rescore"
+    shard_path = tmp_path / "replay" / "key_region_rescore.npz"
+    rollout_dir.mkdir(parents=True)
+    shard_path.parent.mkdir(parents=True)
+    manifest_path = rollout_dir / "manifest.json"
+    manifest_path.write_text(
+        json.dumps(
+            {
+                "key_region_id": "rescore",
+                "phase": "warmup",
+                "reward": 1,
+                "duration_seconds": 2.0,
+                "num_replay_transitions": 3,
+                "segment_status": "committed",
+                "train_eligible": True,
+                "shard_path": str(shard_path),
+                "train_horizon": 10,
+            }
+        )
+    )
+    reward_seq = np.zeros((3, 10), dtype=np.float32)
+    reward_seq[0, 9] = 1.0
+    reward_seq[2, 9] = 1.0
+    np.savez(
+        shard_path,
+        z_rl=np.zeros((3, 2), dtype=np.float32),
+        reward_seq=reward_seq,
+        done=np.asarray([False, False, True]),
+        manifest=json.dumps({"key_region_id": "rescore", "reward": 1}),
+    )
+
+    result = rescore_key_region_files(rollout_dir, shard_path, reward=0)
+
+    with np.load(shard_path, allow_pickle=False) as rescored:
+        assert rescored["reward_seq"].sum() == 0.0
+        npz_manifest = json.loads(str(rescored["manifest"]))
+        assert npz_manifest["reward"] == 0
+    manifest = json.loads(manifest_path.read_text())
+    assert result["reward"] == 0
+    assert manifest["reward"] == 0
+    assert manifest["score_timeout"] is False

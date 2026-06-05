@@ -251,6 +251,36 @@ class RLTControlStore:
             )
             return self._state.model_copy(deep=True)
 
+    def rescore_key_region_from_files(
+        self,
+        *,
+        key_region_id: str,
+        phase: str,
+        reward: int,
+        shard_path: str,
+        num_replay_transitions: int,
+        source: str = "ui",
+        reason: str = "operator_rescore",
+    ) -> RLTControlState:
+        with self._lock:
+            self._segment_ledger.record_rescored(
+                key_region_id,
+                reward=reward,
+                phase=phase,
+                shard_path=shard_path,
+                num_replay_transitions=num_replay_transitions,
+                reason=reason,
+            )
+            self._apply_ledger_stats_locked()
+            self._add_event_locked("rescore", f"{key_region_id}:reward={reward}")
+            self._refresh_derived_locked()
+            self._persist_locked()
+            self._publish_locked(
+                "key_region_rescore",
+                {"source": source, "reason": reason, "key_region_id": key_region_id, "reward": reward},
+            )
+            return self._state.model_copy(deep=True)
+
     def delete_segments(
         self, key_region_ids: list[str], *, source: str = "ui", reason: str = "operator_delete"
     ) -> RLTControlState:

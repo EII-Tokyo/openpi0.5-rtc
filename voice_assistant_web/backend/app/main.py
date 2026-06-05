@@ -27,6 +27,7 @@ from .config import settings
 from .redis_commands import create_redis_client
 from .rlt_control import RLTControlStore
 from .rlt_key_region_crop import crop_key_region_files
+from .rlt_key_region_crop import rescore_key_region_files
 from .robot_state_bridge import RobotStateBridge
 from .schemas import HealthResponse
 from .schemas import RealtimePayload
@@ -38,6 +39,7 @@ from .schemas import RLTDiscardRequest
 from .schemas import RLTKeyRegionCropRequest
 from .schemas import RLTKeyRegionCropResponse
 from .schemas import RLTKeyRegionReviewRecord
+from .schemas import RLTKeyRegionRescoreRequest
 from .schemas import RLTScoreRequest
 from .schemas import RLTSegmentRecord
 from .schemas import RLTVoidRequest
@@ -670,6 +672,41 @@ def _crop_output_shard_path(source_shard_path: Path, key_region_id: str) -> Path
             relative = Path("manual") / f"key_region_{key_region_id}.npz"
     timestamp_ms = int(time.time() * 1000)
     return clean_root / relative.parent / f"{source.stem}.crop_{timestamp_ms}.npz"
+
+
+@app.post("/api/rlt/key-region/{key_region_id}/rescore", response_model=RLTControlState)
+def rlt_key_region_rescore(key_region_id: str, request: RLTKeyRegionRescoreRequest) -> RLTControlState:
+    if not re.fullmatch(r"[A-Za-z0-9_.-]+", key_region_id):
+        raise HTTPException(status_code=400, detail=f"Invalid key_region_id: {key_region_id}")
+
+    records = _key_region_review_records()
+    record = next((item for item in records if item.get("key_region_id") == key_region_id), None)
+    if record is None:
+        raise HTTPException(status_code=404, detail=f"Unknown key_region_id: {key_region_id}")
+    rollout_path = record.get("rollout_path")
+    if not rollout_path:
+        raise HTTPException(status_code=409, detail="Key region rollout manifest is missing")
+    rollout_dir = (ROLLOUTS_ROOT / str(rollout_path)).resolve()
+    if not rollout_dir.is_relative_to(ROLLOUTS_ROOT):
+        raise HTTPException(status_code=400, detail="Invalid rollout path")
+    shard_path = _host_path_for_container_path(record.get("shard_path"))
+    if shard_path is None or not shard_path.exists():
+        raise HTTPException(status_code=409, detail="Key region replay shard is missing")
+
+    try:
+        manifest = rescore_key_region_files(rollout_dir, shard_path, reward=request.reward)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    return rlt_control.rescore_key_region_from_files(
+        key_region_id=key_region_id,
+        phase=str(manifest.get("phase") or record.get("phase") or "warmup"),
+        reward=int(manifest.get("reward") or 0),
+        shard_path=str(manifest.get("shard_path") or shard_path),
+        num_replay_transitions=int(manifest.get("num_replay_transitions") or record.get("num_replay_transitions") or 0),
+        source=request.source,
+        reason=request.reason,
+    )
 
 
 @app.post("/api/rlt/key-region/{key_region_id}/crop", response_model=RLTKeyRegionCropResponse)

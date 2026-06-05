@@ -93,3 +93,24 @@ def test_segment_ledger_batch_void_only_changes_committed_existing_segments(tmp_
     assert ledger.get_segment("committed")["status"] == "voided"
     assert ledger.get_segment("rejected")["status"] == "rejected"
     assert ledger.get_segment("missing") is None
+
+
+def test_segment_ledger_rescore_updates_reward_and_stats(tmp_path):
+    ledger = RLTSegmentLedger(tmp_path / segments.sqlite3)
+    ledger.record_committed(seg, reward=1, phase=warmup, shard_path=/tmp/a.npz, num_replay_transitions=3)
+
+    ledger.record_rescored(
+        seg,
+        reward=0,
+        phase=warmup,
+        shard_path=/tmp/a.npz,
+        num_replay_transitions=3,
+        reason="operator_rescore",
+    )
+
+    segment = ledger.get_segment(seg)
+    assert segment[status] == committed
+    assert segment[reward] == 0
+    assert segment[shard_path] == /tmp/a.npz
+    assert ledger.stats()[warmup_success] == 0
+    assert ledger.stats()[warmup_failure] == 1

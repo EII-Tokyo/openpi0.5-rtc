@@ -158,6 +158,12 @@ class RLTKeyRegionCropRequest(BaseModel):
     reason: str = "operator_crop"
 
 
+class RLTKeyRegionRescoreRequest(BaseModel):
+    reward: int = Field(ge=0, le=1)
+    source: str = "ui"
+    reason: str = "operator_rescore"
+
+
 class RLTKeyRegionCropResponse(BaseModel):
     key_region_id: str
     status: str = "committed"

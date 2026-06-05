@@ -634,6 +634,25 @@ button {
   min-width: 0;
 }
 
+.training-panel .inference-metrics {
+  grid-template-columns: repeat(auto-fit, minmax(78px, 1fr));
+}
+
+.training-panel .inference-metrics .metric-tile {
+  min-height: 38px;
+  padding: 4px 6px;
+}
+
+.training-panel .inference-metrics .metric-tile span {
+  font-size: 9px;
+  line-height: 1.1;
+}
+
+.training-panel .inference-metrics .metric-tile strong {
+  font-size: 12px;
+  line-height: 1.1;
+}
+
 .event-row {
   display: grid;
   grid-template-columns: 76px minmax(0, 1fr);
@@ -968,7 +987,9 @@ button {
 }
 
 .training-panel {
+  display: block;
   padding: 8px 10px;
+  overflow: hidden;
 }
 
 .training-panel .panel-header {
@@ -1008,6 +1029,11 @@ button {
 
 .training-panel .training-tab-panel {
   margin-top: 8px;
+  min-height: 0;
+  max-height: clamp(210px, 34vh, 360px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0 2px 12px 0;
 }
 
 .training-panel .settings-grid {
@@ -1061,12 +1087,12 @@ button {
 }
 
 .training-panel .metric-grid {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(108px, 1fr));
   gap: 5px;
 }
 
 .training-panel .metric-tile {
-  min-height: 52px;
+  min-height: 46px;
   padding: 5px 7px;
 }
 
@@ -1101,6 +1127,7 @@ button {
 
 .training-panel .training-tab-panel {
   margin-top: 6px;
+  padding-bottom: 10px;
 }
 
 .training-panel .rlt-warning,
@@ -1809,4 +1836,39 @@ button {
   .delete-dialog-actions .danger-button {
     width: 100%;
   }
+}
+
+.key-region-score-actions {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.score-button {
+  min-height: 28px;
+  border: 1px solid #d9d2c5;
+  border-radius: 6px;
+  background: #fffefa;
+  color: #3a332b;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+  padding: 0 10px;
+}
+
+.score-button.success.active {
+  border-color: #b7d8c8;
+  background: #e7f6ed;
+  color: #116b4f;
+}
+
+.score-button.fail.active {
+  border-color: #e4b8b4;
+  background: #fae7e4;
+  color: #8b2c24;
+}
+
+.score-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
 }
