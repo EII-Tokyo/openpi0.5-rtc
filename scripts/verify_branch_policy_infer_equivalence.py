@@ -21,8 +21,9 @@ import inspect
 import pickle
 from pathlib import Path
 
+import flax.nnx as nnx
+import jax.numpy as jnp
 import numpy as np
-import torch
 
 from openpi.serving import policy as policy_lib
 from openpi.training import config as train_config
@@ -88,42 +89,32 @@ def create_current_branch_transforms(cfg):
     return pipe.policy_input_transforms(), pipe.policy_output_transforms(), "cam_low" in pipe.raw_image_keys, True
 
 
-class FakeTorchPolicyModel:
+class FakePolicyModel(nnx.Module):
     def __init__(self, action_horizon, action_dim):
         self.action_horizon = action_horizon
         self.action_dim = action_dim
 
-    def to(self, device):
-        self.device = device
-        return self
-
-    def eval(self):
-        return self
-
-    def sample_action_chunk(self, device, observation, **kwargs):
+    def sample_action_chunk(self, rng, observation, **kwargs):
         batch_size = observation.state.shape[0]
         total = batch_size * self.action_horizon * self.action_dim
-        return torch.linspace(
+        return jnp.linspace(
             -0.25,
             0.25,
             total,
             dtype=observation.state.dtype,
-            device=observation.state.device,
         ).reshape(batch_size, self.action_horizon, self.action_dim)
 
-    def sample_action_chunk_with_inference_time_rtc(self, device, prev_action_chunk, observation, **kwargs):
-        return self.sample_action_chunk(device, observation, **kwargs)
+    def sample_action_chunk_with_inference_time_rtc(self, rng, prev_action_chunk, observation, **kwargs):
+        return self.sample_action_chunk(rng, observation, **kwargs)
 
-    def sample_action_chunk_with_training_time_rtc(self, device, observation, *, action_prefix, handoff_delay_steps, **kwargs):
-        return self.sample_action_chunk(device, observation, **kwargs)
+    def sample_action_chunk_with_training_time_rtc(self, rng, observation, *, action_prefix, handoff_delay_steps, **kwargs):
+        return self.sample_action_chunk(rng, observation, **kwargs)
 
 
 def make_policy(model, input_transforms, output_transforms):
     kwargs = {
         "transforms": input_transforms,
         "output_transforms": output_transforms,
-        "pytorch_device": "cpu",
-        "is_pytorch": True,
     }
     params = inspect.signature(policy_lib.Policy).parameters
     return policy_lib.Policy(model, **{key: value for key, value in kwargs.items() if key in params})
@@ -142,7 +133,7 @@ def main():
     else:
         input_transforms, output_transforms, include_low, include_task = create_old_branch_transforms(cfg, args.assets_root)
 
-    model = FakeTorchPolicyModel(
+    model = FakePolicyModel(
         action_horizon=getattr(cfg.model, "action_horizon", 50),
         action_dim=getattr(cfg.model, "action_dim", 32),
     )

@@ -206,8 +206,6 @@ class TrainConfig:
     exp_name: str = tyro.MISSING
     model: _model.BaseModelConfig = dataclasses.field(default_factory=pi0_config.Pi0Config)
     weight_loader: weight_loaders.WeightLoader = dataclasses.field(default_factory=weight_loaders.NoOpWeightLoader)
-    pytorch_weight_path: str | None = None
-    pytorch_training_precision: Literal["bfloat16", "float32"] = "bfloat16"
     lr_schedule: _optimizer.LRScheduleConfig = dataclasses.field(default_factory=_optimizer.CosineDecaySchedule)
     optimizer: _optimizer.OptimizerConfig = dataclasses.field(default_factory=_optimizer.AdamW)
     ema_decay: float | None = 0.99
@@ -413,6 +411,8 @@ _CONFIGS = [
         gradient_accumulation_steps=1,
         training_time_rtc=True,
         rtc_max_delay=10,
+        video_memory_num_frames=5,
+        video_memory_stride_seconds=1.0,
         exp_name="debug_training_time_rtc_lora_bs1",
         checkpoint_base_dir="/home/eii/openpi0.5-rtc/checkpoints",
         wandb_enabled=False,

@@ -17,6 +17,7 @@ import numpy as np
 import optax
 import tqdm_loggable.auto as tqdm
 import wandb
+from PIL import Image
 
 import openpi.models.model as _model
 import openpi.shared.array_typing as at
@@ -228,6 +229,43 @@ def _timed_next(data_iter):
     return batch, time.perf_counter() - start
 
 
+def _to_debug_image(image: np.ndarray) -> np.ndarray:
+    image = np.asarray(image)
+    if np.issubdtype(image.dtype, np.floating):
+        if image.size and image.min() < 0:
+            image = (image + 1.0) / 2.0
+        image = np.clip(image, 0.0, 1.0) * 255.0
+    return np.asarray(np.clip(image, 0, 255), dtype=np.uint8)
+
+
+def _dump_debug_observation_before_preprocess(config: _config.TrainConfig, observation: _model.Observation) -> None:
+    if config.name != "debug_training_time_rtc_lora":
+        return
+
+    output_dir = config.checkpoint_dir / "debug_observation_before_preprocess"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    metadata_lines = []
+    host_images = jax.device_get(observation.images)
+    for camera_name, camera_images in host_images.items():
+        camera_images = np.asarray(camera_images)
+        metadata_lines.append(f"{camera_name}: shape={camera_images.shape}, dtype={camera_images.dtype}")
+        # Expected shape with memory is [batch, time, height, width, channels]. Without memory it is [batch, h, w, c].
+        if camera_images.ndim == 5:
+            sample_images = camera_images[0]
+        elif camera_images.ndim == 4:
+            sample_images = camera_images[:1]
+        else:
+            raise ValueError(f"Unexpected image shape for {camera_name}: {camera_images.shape}")
+        for frame_index, image in enumerate(sample_images):
+            path = output_dir / f"{camera_name}_t{frame_index:02d}.png"
+            Image.fromarray(_to_debug_image(image)).save(path)
+            metadata_lines.append(f"  t{frame_index:02d}: {path}")
+
+    metadata_path = output_dir / "metadata.txt"
+    metadata_path.write_text("\n".join(metadata_lines) + "\n")
+    logging.info("Wrote debug observation images before preprocess to %s", output_dir)
+
+
 def main(config: _config.TrainConfig):
     init_logging()
     logging.info(f"Running on: {platform.node()}")
@@ -271,6 +309,7 @@ def main(config: _config.TrainConfig):
         config.gradient_accumulation_steps,
         config.batch_size * config.gradient_accumulation_steps,
     )
+    _dump_debug_observation_before_preprocess(config, batch[0])
 
     # Optional sanity-check image logging. Disabled by default because converting
     # sharded device arrays to host images can trip backend-specific failures and

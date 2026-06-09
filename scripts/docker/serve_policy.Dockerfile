@@ -12,7 +12,7 @@ COPY --from=ghcr.io/astral-sh/uv:0.5.1 /uv /uvx /bin/
 
 WORKDIR /app
 
-# Needed because LeRobot uses git-lfs and torchcodec needs FFmpeg shared libraries.
+# Needed because LeRobot uses git-lfs.
 RUN apt-get update && \
     apt-get install -y --no-install-recommends git git-lfs linux-headers-generic build-essential clang ffmpeg && \
     rm -rf /var/lib/apt/lists/*

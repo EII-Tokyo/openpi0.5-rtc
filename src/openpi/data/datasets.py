@@ -7,8 +7,6 @@ import jax
 import lerobot.datasets.lerobot_dataset as lerobot_dataset
 import numpy as np
 import pyarrow.parquet as pq
-import torch
-
 import openpi.training.config as _config
 from openpi.data import transforms as _transforms
 
@@ -32,9 +30,9 @@ def _patch_lerobot_numpy_bool_compat() -> None:
             for key, delta_idx in self.delta_indices.items()
         }
         padding = {
-            f"{key}_is_pad": torch.tensor(
+            f"{key}_is_pad": np.asarray(
                 [bool((idx + int(delta) < ep_start) or (idx + int(delta) >= ep_end)) for delta in delta_idx],
-                dtype=torch.bool,
+                dtype=bool,
             )
             for key, delta_idx in self.delta_indices.items()
         }
@@ -94,7 +92,7 @@ class IsForTrainingWrapper(Dataset[T_co]):
         if idx < 0 or idx >= len(self):
             raise IndexError(f"Index {idx} out of bounds for dataset of length {len(self)}.")
         if not self._trainable_mask[idx]:
-            idx = int(self._trainable_indices[torch.randint(len(self._trainable_indices), (1,)).item()])
+            idx = int(np.random.choice(self._trainable_indices))
         return self._dataset[idx]
 
     def __len__(self) -> int:
@@ -172,7 +170,7 @@ class TemporalFrameStackDataset(Dataset[dict]):
         if idx < 0 or idx >= len(self):
             raise IndexError(f"Index {idx} out of bounds for dataset of length {len(self)}.")
         if self._trainable_mask is not None and not self._trainable_mask[idx]:
-            idx = int(self._trainable_indices[torch.randint(len(self._trainable_indices), (1,)).item()])
+            idx = int(np.random.choice(self._trainable_indices))
         current = self._dataset[idx]
         if self._num_frames <= 1:
             return current
@@ -300,8 +298,8 @@ class IterableTransformedDataset(IterableDataset[T_co]):
         return len(self._dataset)
 
 
-def create_torch_dataset(data_config: _config.LeRobotAlohaDataConfig, action_horizon: int) -> Dataset:
-    """Create a dataset for training."""
+def create_dataset(data_config: _config.LeRobotAlohaDataConfig, action_horizon: int) -> Dataset:
+    """Create a random-access LeRobot dataset for training."""
     repo_ids = data_config.repo_ids
     if not repo_ids:
         raise ValueError("repo_ids must be non-empty. Cannot create dataset.")

@@ -7,8 +7,8 @@ from typing import Protocol, runtime_checkable
 
 import flax.traverse_util
 import numpy as np
-import torch
-import torch.nn.functional as F
+import jax.image
+import jax.numpy as jnp
 
 import openpi.models.model as _model
 import openpi.shared.array_typing as at
@@ -136,9 +136,13 @@ def _resize_pos_embedding(value: np.ndarray, target_shape: tuple[int, ...]) -> n
     if src_size * src_size != src_tokens or dst_size * dst_size != dst_tokens:
         return None
 
-    tensor = torch.from_numpy(value).permute(0, 2, 1).reshape(value.shape[0], value.shape[2], src_size, src_size)
-    tensor = F.interpolate(tensor, size=(dst_size, dst_size), mode="bicubic", align_corners=False)
-    return tensor.reshape(value.shape[0], value.shape[2], dst_tokens).permute(0, 2, 1).cpu().numpy()
+    grid = value.reshape(value.shape[0], src_size, src_size, value.shape[2])
+    resized = jax.image.resize(
+        jnp.asarray(grid),
+        (value.shape[0], dst_size, dst_size, value.shape[2]),
+        method="cubic",
+    )
+    return np.asarray(resized).reshape(value.shape[0], dst_tokens, value.shape[2])
 
 
 def _resolve_checkpoint_path(path: pathlib.Path) -> pathlib.Path:

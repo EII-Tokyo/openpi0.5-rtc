@@ -9,7 +9,6 @@ import flax.nnx as nnx
 import jax
 import jax.numpy as jnp
 import numpy as np
-import torch
 
 from openpi.models import pi0_config
 from openpi.models.pi0 import make_attn_mask
@@ -119,47 +118,33 @@ def _policy_obs():
     }
 
 
-class DispatchModel:
-    def __init__(self):
-        self.calls = []
+class DispatchModel(nnx.Module):
+    def sample_action_chunk(self, rng, observation, **kwargs):
+        return jnp.full((1, 50, 32), 1.0)
 
-    def to(self, device):
-        return self
+    def sample_action_chunk_with_inference_time_rtc(self, rng, prev_action_chunk, observation, **kwargs):
+        return jnp.full((1, 50, 32), 2.0)
 
-    def eval(self):
-        return self
-
-    def sample_action_chunk(self, device, observation, **kwargs):
-        self.calls.append("sample_action_chunk")
-        return torch.full((1, 50, 32), 1.0)
-
-    def sample_action_chunk_with_inference_time_rtc(self, device, prev_action_chunk, observation, **kwargs):
-        self.calls.append("sample_action_chunk_with_inference_time_rtc")
-        return torch.full((1, 50, 32), 2.0)
-
-    def sample_action_chunk_with_training_time_rtc(self, device, observation, *, action_prefix, handoff_delay_steps, **kwargs):
-        self.calls.append("sample_action_chunk_with_training_time_rtc")
-        out = torch.full((1, 50, 32), 7.0)
-        out[:, :handoff_delay_steps] = action_prefix[:, :handoff_delay_steps]
-        return out
-
+    def sample_action_chunk_with_training_time_rtc(self, rng, observation, *, action_prefix, handoff_delay_steps, **kwargs):
+        out = jnp.full((1, 50, 32), 7.0)
+        return out.at[:, :handoff_delay_steps].set(action_prefix[:, :handoff_delay_steps])
 
 
 def test_policy_dispatch():
     model = DispatchModel()
-    policy = Policy(model, is_pytorch=True, transforms=[], output_transforms=[])
+    policy = Policy(model, transforms=[], output_transforms=[])
     obs = _policy_obs()
     prev = np.zeros((50, 32), dtype=np.float32)
     prefix = np.arange(50 * 32, dtype=np.float32).reshape(50, 32)
 
-    policy.infer(obs, chunking_mode="sync")
-    policy.infer(obs, chunking_mode="inference_time", prev_action=prev)
+    sync = policy.infer(obs, chunking_mode="sync")["actions"]
+    inference = policy.infer(obs, chunking_mode="inference_time", prev_action=prev)["actions"]
     training = policy.infer(obs, chunking_mode="training_time", action_prefix=prefix, handoff_delay_steps=10)["actions"]
 
-    expected = ["sample_action_chunk", "sample_action_chunk_with_inference_time_rtc", "sample_action_chunk_with_training_time_rtc"]
-    print(f"policy calls={model.calls}")
-    if model.calls != expected:
-        raise AssertionError(f"unexpected policy calls: {model.calls}")
+    if not np.allclose(sync, 1.0):
+        raise AssertionError("sync policy did not call plain sampling")
+    if not np.allclose(inference, 2.0):
+        raise AssertionError("inference-time policy did not call RTC sampling")
     if not np.array_equal(training[:10], prefix[:10]):
         raise AssertionError("training-time policy prefix was modified")
 

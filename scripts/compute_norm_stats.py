@@ -1,82 +1,20 @@
-"""Compute normalization statistics for a config.
+"""Compute normalization statistics for a config from LeRobot parquet files.
 
-This script supports two paths:
-1. The original dataloader path, which calls dataset `__getitem__` and therefore decodes videos.
-2. A faster parquet path for LeRobot datasets that reads only `state/action` columns from parquet
-   and reconstructs the action horizon numerically, bypassing image/video decoding entirely.
+This reads only state/action columns and reconstructs action chunks numerically,
+bypassing image/video decoding.
 """
 
-import dataclasses
 from pathlib import Path
-import time
-from typing import Literal
 
 import lerobot.datasets.lerobot_dataset as lerobot_dataset
 from huggingface_hub import snapshot_download
 import numpy as np
 import pyarrow.parquet as pq
-import torch
 import tqdm
 import tyro
 
 import openpi.shared.normalize as normalize
 import openpi.training.config as _config
-from openpi.data import dataloaders as _data_loader
-from openpi.data import datasets as _datasets
-from openpi.data import transforms
-
-
-class RemoveStrings(transforms.DataTransformFn):
-    def __call__(self, x: dict) -> dict:
-        return {k: v for k, v in x.items() if not np.issubdtype(np.asarray(v).dtype, np.str_)}
-
-
-def create_torch_dataloader(
-    data_config: _config.LeRobotAlohaDataConfig,
-    action_horizon: int,
-    batch_size: int,
-    num_workers: int,
-    max_frames: int | None = None,
-    shuffle_if_truncated: bool = True,
-) -> tuple[_datasets.Dataset, int]:
-    if not data_config.repo_ids:
-        raise ValueError("Data config must have non-empty repo_ids")
-    dataset = _datasets.create_torch_dataset(data_config, action_horizon)
-    if data_config.transform_pipeline is None:
-        raise ValueError("A transform pipeline is required to compute norm stats.")
-    dataset = _datasets.TransformedDataset(
-        dataset,
-        [
-            *data_config.transform_pipeline.stats_input_transforms(),
-            # Remove strings since they are not supported by JAX and are not needed to compute norm stats.
-            RemoveStrings(),
-        ],
-    )
-    if max_frames is not None and max_frames < len(dataset):
-        num_batches = max_frames // batch_size
-        shuffle = shuffle_if_truncated
-    else:
-        num_batches = len(dataset) // batch_size
-        shuffle = False
-    data_loader = _data_loader.TorchDataLoader(
-        dataset,
-        local_batch_size=batch_size,
-        num_workers=num_workers,
-        shuffle=shuffle,
-        num_batches=num_batches,
-    )
-    return data_loader, num_batches
-
-
-def _compute_stats_from_data_loader(data_loader, num_batches: int) -> dict[str, normalize.NormStats]:
-    keys = ["state", "actions"]
-    stats = {key: normalize.RunningStats() for key in keys}
-
-    for batch in tqdm.tqdm(data_loader, total=num_batches, desc="Computing stats"):
-        for key in keys:
-            stats[key].update(np.asarray(batch[key]))
-
-    return {key: stats.get_statistics() for key, stats in stats.items()}
 
 
 def _get_repo_ids(data_config: _config.LeRobotAlohaDataConfig) -> list[str]:
@@ -147,7 +85,7 @@ def _episode_bounds(episode_index: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     return starts, ends
 
 
-def _sample_effective_indices(is_for_training: np.ndarray, generator: torch.Generator) -> np.ndarray:
+def _sample_effective_indices(is_for_training: np.ndarray, rng: np.random.Generator) -> np.ndarray:
     effective_indices = np.arange(len(is_for_training), dtype=np.int64)
     invalid = ~is_for_training
     if not invalid.any():
@@ -156,7 +94,7 @@ def _sample_effective_indices(is_for_training: np.ndarray, generator: torch.Gene
     trainable_indices = np.flatnonzero(is_for_training)
     if len(trainable_indices) == 0:
         raise ValueError("Dataset has no samples with is_for_training=true.")
-    sampled = torch.randint(len(trainable_indices), (int(invalid.sum()),), generator=generator).numpy()
+    sampled = rng.integers(len(trainable_indices), size=int(invalid.sum()))
     effective_indices[invalid] = trainable_indices[sampled]
     return effective_indices
 
@@ -196,7 +134,7 @@ def compute_parquet_norm_stats(
     base_meta = lerobot_dataset.LeRobotDatasetMetadata(repo_ids[0], force_cache_sync=True)
     base_fps = float(base_meta.fps)
     stats = {key: normalize.RunningStats() for key in ("state", "actions")}
-    generator = torch.Generator().manual_seed(seed)
+    rng = np.random.default_rng(seed)
 
     total_frames = 0
     repo_lengths: list[int] = []
@@ -218,7 +156,7 @@ def compute_parquet_norm_stats(
         repo_fps = float(meta.fps)
         delta_indices = np.asarray([round((t / base_fps) * repo_fps) for t in range(action_horizon)], dtype=np.int64)
         episode_start, episode_end = _episode_bounds(arrays["episode_index"])
-        effective_indices = _sample_effective_indices(arrays["is_for_training"], generator)
+        effective_indices = _sample_effective_indices(arrays["is_for_training"], rng)
 
         num_rows = min(repo_len, remaining)
         effective_indices = effective_indices[:num_rows]
@@ -245,108 +183,21 @@ def compute_parquet_norm_stats(
     return {key: value.get_statistics() for key, value in stats.items()}
 
 
-def _single_repo_data_config(data_config: _config.LeRobotAlohaDataConfig, repo_id: str) -> _config.LeRobotAlohaDataConfig:
-    return dataclasses.replace(data_config, repo_ids=[repo_id])
-
-
-def _max_stat_diff(lhs: normalize.NormStats, rhs: normalize.NormStats) -> float:
-    diffs = [
-        np.max(np.abs(np.asarray(lhs.mean) - np.asarray(rhs.mean))),
-        np.max(np.abs(np.asarray(lhs.std) - np.asarray(rhs.std))),
-    ]
-    if lhs.q01 is not None and rhs.q01 is not None:
-        diffs.append(np.max(np.abs(np.asarray(lhs.q01) - np.asarray(rhs.q01))))
-    if lhs.q99 is not None and rhs.q99 is not None:
-        diffs.append(np.max(np.abs(np.asarray(lhs.q99) - np.asarray(rhs.q99))))
-    return float(max(diffs))
-
-
-def benchmark_methods(
-    config: _config.TrainConfig,
-    data_config: _config.LeRobotAlohaDataConfig,
-    repo_id: str,
-    *,
+def main(
+    config_name: str,
     max_frames: int | None = None,
     parquet_chunk_size: int = 8192,
-    compare_num_workers: int = 0,
     seed: int = 0,
-) -> None:
-    compare_data_config = _single_repo_data_config(data_config, repo_id)
-
-    start = time.perf_counter()
-    data_loader, num_batches = create_torch_dataloader(
-        compare_data_config,
-        config.model.action_horizon,
-        config.batch_size,
-        compare_num_workers,
-        max_frames,
-        shuffle_if_truncated=False,
-    )
-    dataloader_stats = _compute_stats_from_data_loader(data_loader, num_batches)
-    dataloader_seconds = time.perf_counter() - start
-
-    start = time.perf_counter()
-    parquet_stats = compute_parquet_norm_stats(
-        compare_data_config,
+):
+    config = _config.get_config(config_name)
+    data_config = config.data
+    norm_stats = compute_parquet_norm_stats(
+        data_config,
         config.model.action_horizon,
         max_frames=max_frames,
         chunk_size=parquet_chunk_size,
         seed=seed,
     )
-    parquet_seconds = time.perf_counter() - start
-
-    state_diff = _max_stat_diff(dataloader_stats["state"], parquet_stats["state"])
-    action_diff = _max_stat_diff(dataloader_stats["actions"], parquet_stats["actions"])
-    speedup = dataloader_seconds / parquet_seconds if parquet_seconds > 0 else float("inf")
-
-    print(f"[benchmark] repo={repo_id}")
-    print(f"[benchmark] dataloader_seconds={dataloader_seconds:.3f}")
-    print(f"[benchmark] parquet_seconds={parquet_seconds:.3f}")
-    print(f"[benchmark] speedup={speedup:.2f}x")
-    print(f"[benchmark] max_abs_diff.state={state_diff:.8e}")
-    print(f"[benchmark] max_abs_diff.actions={action_diff:.8e}")
-
-
-def main(
-    config_name: str,
-    max_frames: int | None = None,
-    method: Literal["parquet", "dataloader"] = "parquet",
-    compare_repo: str | None = None,
-    parquet_chunk_size: int = 8192,
-    compare_num_workers: int = 0,
-    seed: int = 0,
-):
-    config = _config.get_config(config_name)
-    data_config = config.data
-
-    if compare_repo is not None:
-        benchmark_methods(
-            config,
-            data_config,
-            compare_repo,
-            max_frames=max_frames,
-            parquet_chunk_size=parquet_chunk_size,
-            compare_num_workers=compare_num_workers,
-            seed=seed,
-        )
-
-    if method == "dataloader":
-        data_loader, num_batches = create_torch_dataloader(
-            data_config,
-            config.model.action_horizon,
-            config.batch_size,
-            config.num_workers,
-            max_frames,
-        )
-        norm_stats = _compute_stats_from_data_loader(data_loader, num_batches)
-    else:
-        norm_stats = compute_parquet_norm_stats(
-            data_config,
-            config.model.action_horizon,
-            max_frames=max_frames,
-            chunk_size=parquet_chunk_size,
-            seed=seed,
-        )
 
     output_path = Path(data_config.transform_pipeline.assets.assets_dir) / data_config.transform_pipeline.assets.asset_id
     print(f"Writing stats to: {output_path}")
