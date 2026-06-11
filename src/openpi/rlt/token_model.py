@@ -135,9 +135,7 @@ def _token_pool_mask(input_mask: jax.Array) -> jax.Array:
     # VLA tokens do not need to read the final RLT token during encoding; the
     # final RLT token pools all valid VLA tokens and itself.
     attn_mask = attn_mask.at[:, :seq_len, -1].set(False)
-    # Invalid query rows can still self-attend to avoid all -inf softmax rows.
-    eye = jnp.eye(total_len, dtype=jnp.bool_)[None, :, :]
-    return jnp.logical_or(attn_mask, eye)
+    return attn_mask
 
 
 def _causal_mask(input_mask: jax.Array) -> jax.Array:
@@ -153,14 +151,13 @@ def _positions_from_mask(mask: jax.Array) -> jax.Array:
 
 
 def init_token_params(rng: jax.Array, config: RLTTokenConfig) -> Params:
-    keys = jax.random.split(rng, 3 + config.num_layers * 2)
-    enc_layer_keys = keys[3 : 3 + config.num_layers]
-    dec_layer_keys = keys[3 + config.num_layers :]
+    keys = jax.random.split(rng, 2 + config.num_layers * 2)
+    enc_layer_keys = keys[2 : 2 + config.num_layers]
+    dec_layer_keys = keys[2 + config.num_layers :]
     dim = config.dim
     return {
         "encoder_rlt_token": nn.initializers.normal()(keys[0], (dim,), jnp.float32),
-        "decoder_rlt_token_proj": _linear_params(keys[1], dim, dim),
-        "output_proj": _linear_params(keys[2], dim, config.input_dim),
+        "output_proj": _linear_params(keys[1], dim, config.input_dim),
         "encoder_layers": [_transformer_layer_params(key, dim, config.mlp_dim) for key in enc_layer_keys],
         "decoder_layers": [_transformer_layer_params(key, dim, config.mlp_dim) for key in dec_layer_keys],
     }
@@ -189,7 +186,7 @@ def decode(
         config = RLTTokenConfig(input_dim=embeddings.shape[-1], token_dim=embeddings.shape[-1])
     mask = mask.astype(jnp.bool_)
     embeddings = embeddings.astype(jnp.float32)
-    token = _linear(params["decoder_rlt_token_proj"], token)[:, None, :]
+    token = token[:, None, :]
     # Autoregressive teacher forcing: predict embedding[t] from the RLT token and
     # previous VLA embeddings, not from a learned decode query or the current target.
     decoder_inputs = jnp.concatenate([token, embeddings[:, :-1]], axis=1)
