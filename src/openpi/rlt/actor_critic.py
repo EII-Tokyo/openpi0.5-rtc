@@ -13,7 +13,7 @@ Params = dict[str, Any]
 
 @dataclasses.dataclass(frozen=True)
 class RLTActorCriticConfig:
-    token_dim: int = 256
+    token_dim: int = 2048
     state_dim: int = 32
     action_dim: int = 32
     action_horizon: int = 50
