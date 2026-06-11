@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import concurrent.futures as futures
 import dataclasses
 import functools
 import json
@@ -240,6 +241,12 @@ def _print_batch_shapes(observation, actions, train_config: _config.TrainConfig)
     print(f"  prefix_max_len={len(observation.images) * image_token_per_image + observation.tokenized_prompt.shape[1]}", flush=True)
 
 
+def _timed_next(data_iter):
+    start = time.monotonic()
+    batch = next(data_iter)
+    return batch, time.monotonic() - start
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--output-dir", default="/tmp/openpi-rlt-token")
@@ -318,78 +325,87 @@ def main():
         train_config.ema_decay,
     )
 
-    for step_idx in range(args.max_steps):
-        wait_start = time.monotonic()
-        observation, actions = next(data_iter)
-        data_wait_s = time.monotonic() - wait_start
+    prefetch_executor = futures.ThreadPoolExecutor(max_workers=1)
+    next_batch_future = prefetch_executor.submit(_timed_next, data_iter)
+    try:
+        for step_idx in range(args.max_steps):
+            wait_start = time.monotonic()
+            (observation, actions), data_load_s = next_batch_future.result()
+            data_wait_s = time.monotonic() - wait_start
+            if step_idx != args.max_steps - 1:
+                next_batch_future = prefetch_executor.submit(_timed_next, data_iter)
 
-        if args.debug_shapes and step_idx == 0:
-            _print_batch_shapes(observation, actions, train_config)
+            if args.debug_shapes and step_idx == 0:
+                _print_batch_shapes(observation, actions, train_config)
 
-        if args.dump_masks and step_idx == 0:
-            dump_rng = None
-            dump_observation = _transforms.AlohaTransformPipeline.preprocess_observation(
-                dump_rng,
+            if args.dump_masks and step_idx == 0:
+                dump_rng = None
+                dump_observation = _transforms.AlohaTransformPipeline.preprocess_observation(
+                    dump_rng,
+                    observation,
+                    train=False,
+                    image_resolution=train_config.model.image_resolution,
+                )
+                dump_rlt_state = encode_rlt_state(dump_observation)
+                debug_masks = token_model.make_debug_masks(dump_rlt_state["mask"])
+                dump_path = Path(args.dump_masks)
+                dump_path.parent.mkdir(parents=True, exist_ok=True)
+                np.savez_compressed(
+                    dump_path,
+                    **{key: np.asarray(value) for key, value in debug_masks.items()},
+                )
+                print(f"dumped_masks={dump_path}", flush=True)
+
+            train_start = time.monotonic()
+            rng, params, opt_state, ema_params, loss, metrics, step_timings = train_step(
+                params,
+                opt_state,
+                ema_params,
+                jnp.asarray(step_idx, dtype=jnp.int32),
                 observation,
-                train=False,
-                image_resolution=train_config.model.image_resolution,
+                rng,
             )
-            dump_rlt_state = encode_rlt_state(dump_observation)
-            debug_masks = token_model.make_debug_masks(dump_rlt_state["mask"])
-            dump_path = Path(args.dump_masks)
-            dump_path.parent.mkdir(parents=True, exist_ok=True)
-            np.savez_compressed(
-                dump_path,
-                **{key: np.asarray(value) for key, value in debug_masks.items()},
+            train_s = time.monotonic() - train_start
+
+            log_data = {
+                "rlt_token/loss": float(loss),
+                "rlt_token/token_norm": float(metrics["token_norm"]),
+                "rlt_token/grad_norm": float(metrics["grad_norm"]),
+                "rlt_token/learning_rate": float(metrics["learning_rate"]),
+                "rlt_token/valid_token_count": float(metrics["valid_token_count"]),
+                "rlt_token/padding_output_abs_mean": float(metrics["padding_output_abs_mean"]),
+                "rlt_token/data_wait_s": data_wait_s,
+                "rlt_token/data_load_s": data_load_s,
+                "rlt_token/preprocess_s": step_timings["preprocess_s"],
+                "rlt_token/encode_s": step_timings["encode_s"],
+                "rlt_token/update_s": step_timings["update_s"],
+                "rlt_token/train_s": train_s,
+                "rlt_token/batch_size": args.batch_size,
+            }
+            wandb.log(log_data, step=step_idx)
+            print(
+                "step={step} loss={loss:.6f} lr={lr:.3e} grad_norm={grad_norm:.6f} token_norm={token_norm:.6f} "
+                "valid_tokens={valid_tokens:.0f} padding_abs={padding_abs:.6f} "
+                "data_wait_s={data_wait_s:.3f} data_load_s={data_load_s:.3f} preprocess_s={preprocess_s:.3f} "
+                "encode_s={encode_s:.3f} update_s={update_s:.3f} train_s={train_s:.3f}".format(
+                    step=step_idx,
+                    loss=log_data["rlt_token/loss"],
+                    lr=log_data["rlt_token/learning_rate"],
+                    grad_norm=log_data["rlt_token/grad_norm"],
+                    token_norm=log_data["rlt_token/token_norm"],
+                    valid_tokens=log_data["rlt_token/valid_token_count"],
+                    padding_abs=log_data["rlt_token/padding_output_abs_mean"],
+                    data_wait_s=data_wait_s,
+                    data_load_s=data_load_s,
+                    preprocess_s=log_data["rlt_token/preprocess_s"],
+                    encode_s=log_data["rlt_token/encode_s"],
+                    update_s=log_data["rlt_token/update_s"],
+                    train_s=train_s,
+                ),
+                flush=True,
             )
-            print(f"dumped_masks={dump_path}", flush=True)
-
-        train_start = time.monotonic()
-        rng, params, opt_state, ema_params, loss, metrics, step_timings = train_step(
-            params,
-            opt_state,
-            ema_params,
-            jnp.asarray(step_idx, dtype=jnp.int32),
-            observation,
-            rng,
-        )
-        train_s = time.monotonic() - train_start
-
-        log_data = {
-            "rlt_token/loss": float(loss),
-            "rlt_token/token_norm": float(metrics["token_norm"]),
-            "rlt_token/grad_norm": float(metrics["grad_norm"]),
-            "rlt_token/learning_rate": float(metrics["learning_rate"]),
-            "rlt_token/valid_token_count": float(metrics["valid_token_count"]),
-            "rlt_token/padding_output_abs_mean": float(metrics["padding_output_abs_mean"]),
-            "rlt_token/data_wait_s": data_wait_s,
-            "rlt_token/preprocess_s": step_timings["preprocess_s"],
-            "rlt_token/encode_s": step_timings["encode_s"],
-            "rlt_token/update_s": step_timings["update_s"],
-            "rlt_token/train_s": train_s,
-            "rlt_token/batch_size": args.batch_size,
-        }
-        wandb.log(log_data, step=step_idx)
-        print(
-            "step={step} loss={loss:.6f} lr={lr:.3e} grad_norm={grad_norm:.6f} token_norm={token_norm:.6f} "
-            "valid_tokens={valid_tokens:.0f} padding_abs={padding_abs:.6f} "
-            "data_wait_s={data_wait_s:.3f} preprocess_s={preprocess_s:.3f} "
-            "encode_s={encode_s:.3f} update_s={update_s:.3f} train_s={train_s:.3f}".format(
-                step=step_idx,
-                loss=log_data["rlt_token/loss"],
-                lr=log_data["rlt_token/learning_rate"],
-                grad_norm=log_data["rlt_token/grad_norm"],
-                token_norm=log_data["rlt_token/token_norm"],
-                valid_tokens=log_data["rlt_token/valid_token_count"],
-                padding_abs=log_data["rlt_token/padding_output_abs_mean"],
-                data_wait_s=data_wait_s,
-                preprocess_s=log_data["rlt_token/preprocess_s"],
-                encode_s=log_data["rlt_token/encode_s"],
-                update_s=log_data["rlt_token/update_s"],
-                train_s=train_s,
-            ),
-            flush=True,
-        )
+    finally:
+        prefetch_executor.shutdown(wait=False, cancel_futures=True)
 
     checkpoint_dir = _save_checkpoint(
         Path(args.output_dir),
