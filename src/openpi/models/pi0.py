@@ -132,6 +132,26 @@ class Pi0(_model.BaseModel):
         return tokens, input_mask, ar_mask
 
     @at.typecheck
+    def encode_rlt_state(
+        self, obs: _model.Observation
+    ) -> dict[str, at.Array]:
+        """Return frozen VLA prefix representations for RLT heads.
+
+        The returned embeddings are the PaliGemma prefix hidden states after image/text
+        fusion. They are stop-gradient by construction so RLT training can consume them
+        without updating the base VLA.
+        """
+        prefix_tokens, prefix_mask, prefix_ar_mask = self.embed_prefix(obs)
+        prefix_attn_mask = make_attn_mask(prefix_mask, prefix_ar_mask)
+        positions = jnp.cumsum(prefix_mask, axis=1) - 1
+        (prefix_out, _), _ = self.PaliGemma.llm([prefix_tokens, None], mask=prefix_attn_mask, positions=positions)
+        return {
+            "embeddings": jax.lax.stop_gradient(prefix_out.astype(jnp.float32)),
+            "mask": jax.lax.stop_gradient(prefix_mask),
+            "state": jax.lax.stop_gradient(obs.state.astype(jnp.float32)),
+        }
+
+    @at.typecheck
     def embed_suffix(
         self, obs: _model.Observation, noisy_actions: _model.Actions, timestep: at.Float[at.Array, "..."]
     ) -> tuple[

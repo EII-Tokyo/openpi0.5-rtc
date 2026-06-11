@@ -63,6 +63,7 @@ class Policy(BasePolicy):
         chunking_mode: str | None = None,
         action_prefix: np.ndarray | None = None,
         handoff_delay_steps: int | None = None,
+        return_rlt_state: bool = False,
     ) -> dict:  # type: ignore[misc]
         # Make a copy since transformations may modify the inputs in place.
         inputs = jax.tree.map(lambda x: x, obs)
@@ -145,10 +146,21 @@ class Policy(BasePolicy):
             "actions": origin_actions,
             "origin_actions": origin_actions,
         }
+        rlt_outputs = None
+        if return_rlt_state:
+            if not hasattr(self._model, "encode_rlt_state"):
+                raise NotImplementedError("Current model does not expose encode_rlt_state().")
+            rlt_state = self._model.encode_rlt_state(observation)
+            rlt_outputs = {
+                "rlt_embeddings": rlt_state["embeddings"],
+                "rlt_mask": rlt_state["mask"],
+            }
         model_time = time.monotonic() - start_time
         outputs = jax.tree.map(lambda x: np.asarray(x[0, ...]), outputs)
 
         outputs = self._output_transform(outputs)
+        if rlt_outputs is not None:
+            outputs.update(jax.tree.map(lambda x: np.asarray(x[0, ...]), rlt_outputs))
         outputs["policy_timing"] = {
             "infer_ms": model_time * 1000,
         }
