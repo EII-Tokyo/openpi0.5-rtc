@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import dataclasses
+import functools
 import json
 import logging
 import pickle
@@ -22,20 +23,44 @@ from openpi.data import transforms as _transforms
 from openpi.rlt import token_model
 from openpi.shared import nnx_utils
 from openpi.training import config as _config
+from openpi.training import optimizer as _optimizer
 
 DEFAULT_BASE_CONFIG = "eii_rinse_11repo_cam4_fullft"
 DEFAULT_BASE_CHECKPOINT = "/home/eii/openpi0.5-rtc/checkpoints/eii_rinse_11repo_cam4_fullft/rinse_11repo_insertx5_fullft_bs256_nw64_fsdp8_20260513/9000"
+DEFAULT_NUM_TRAIN_STEPS = 10_000
+DEFAULT_WARMUP_STEPS = 2_000
 
 
-def _save(path: Path, params, config: token_model.RLTTokenConfig) -> None:
+def _save(
+    path: Path,
+    params,
+    ema_params,
+    config: token_model.RLTTokenConfig,
+    *,
+    train_config: _config.TrainConfig,
+) -> None:
     path.mkdir(parents=True, exist_ok=True)
     with (path / "params.pkl").open("wb") as f:
         pickle.dump(jax.tree.map(np.asarray, params), f)
+    if ema_params is not None:
+        with (path / "ema_params.pkl").open("wb") as f:
+            pickle.dump(jax.tree.map(np.asarray, ema_params), f)
     (path / "config.json").write_text(json.dumps(dataclasses.asdict(config), indent=2) + "\n")
+    training_metadata = {
+        "optimizer": dataclasses.asdict(train_config.optimizer),
+        "lr_schedule": dataclasses.asdict(train_config.lr_schedule),
+        "ema_decay": train_config.ema_decay,
+    }
+    (path / "training.json").write_text(json.dumps(training_metadata, indent=2) + "\n")
 
 
 def _train_config_for_real_data(args: argparse.Namespace) -> _config.TrainConfig:
     train_config = _config.get_config(args.base_config)
+    lr_schedule = dataclasses.replace(
+        train_config.lr_schedule,
+        warmup_steps=args.warmup_steps,
+        decay_steps=max(args.max_steps, args.warmup_steps + 1),
+    )
     checkpoint_assets = _transforms.AssetsConfig(
         assets_dir=str(Path(args.base_checkpoint) / "assets"),
         asset_id=train_config.data.transform_pipeline.assets.asset_id,
@@ -50,8 +75,10 @@ def _train_config_for_real_data(args: argparse.Namespace) -> _config.TrainConfig
     return dataclasses.replace(
         train_config,
         data=data_config,
+        lr_schedule=lr_schedule,
         batch_size=args.batch_size,
         num_workers=args.num_workers,
+        num_train_steps=args.max_steps,
         seed=args.seed,
     )
 
@@ -98,6 +125,7 @@ def _init_wandb(args: argparse.Namespace, *, train_config: _config.TrainConfig) 
 
 def _make_train_step(
     tx: optax.GradientTransformation,
+    lr_schedule: optax.Schedule,
     config: token_model.RLTTokenConfig,
     encode_rlt_state,
     train_config: _config.TrainConfig,
@@ -105,17 +133,28 @@ def _make_train_step(
     augment: bool,
     debug_shapes: bool,
 ):
-    @jax.jit
-    def token_update(params, opt_state, embeddings, mask):
+    @functools.partial(jax.jit, donate_argnums=(0, 1, 2))
+    def token_update(params, opt_state, ema_params, embeddings, mask, step):
         def loss_fn(p):
             return token_model.reconstruction_loss(p, embeddings, mask, config)
 
         (loss, metrics), grads = jax.value_and_grad(loss_fn, has_aux=True)(params)
         updates, opt_state = tx.update(grads, opt_state, params)
         params = optax.apply_updates(params, updates)
-        return params, opt_state, loss, metrics
+        if train_config.ema_decay is not None:
+            ema_params = jax.tree.map(
+                lambda old, new: train_config.ema_decay * old + (1 - train_config.ema_decay) * new,
+                ema_params,
+                params,
+            )
+        metrics = {
+            **metrics,
+            "grad_norm": optax.global_norm(grads),
+            "learning_rate": lr_schedule(step),
+        }
+        return params, opt_state, ema_params, loss, metrics
 
-    def step(params, opt_state, observation, rng):
+    def step(params, opt_state, ema_params, step_idx, observation, rng):
         rng, preprocess_rng = jax.random.split(rng)
 
         preprocess_start = time.monotonic()
@@ -143,11 +182,18 @@ def _make_train_step(
             )
 
         update_start = time.monotonic()
-        params, opt_state, loss, metrics = token_update(params, opt_state, embeddings, mask)
+        params, opt_state, ema_params, loss, metrics = token_update(
+            params,
+            opt_state,
+            ema_params,
+            embeddings,
+            mask,
+            step_idx,
+        )
         jax.block_until_ready(loss)
         update_s = time.monotonic() - update_start
         timings = {"preprocess_s": preprocess_s, "encode_s": encode_s, "update_s": update_s}
-        return rng, params, opt_state, loss, metrics, timings
+        return rng, params, opt_state, ema_params, loss, metrics, timings
 
     return step
 
@@ -174,14 +220,16 @@ def _print_batch_shapes(observation, actions, train_config: _config.TrainConfig)
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--output-dir", default="/tmp/openpi-rlt-token")
-    parser.add_argument("--max-steps", type=int, default=10)
+    parser.add_argument("--max-steps", type=int, default=DEFAULT_NUM_TRAIN_STEPS)
     parser.add_argument("--batch-size", type=int, default=8)
     parser.add_argument("--num-workers", type=int, default=8)
     parser.add_argument("--token-dim", type=int, default=None)
     parser.add_argument("--hidden-dim", type=int, default=None)
     parser.add_argument("--num-layers", type=int, default=2)
     parser.add_argument("--num-heads", type=int, default=8)
-    parser.add_argument("--lr", type=float, default=3e-4)
+    parser.add_argument("--lr", type=float, default=None, help="Override TrainConfig lr schedule peak_lr.")
+    parser.add_argument("--warmup-steps", type=int, default=DEFAULT_WARMUP_STEPS)
+    parser.add_argument("--ema-decay", type=float, default=None, help="Override TrainConfig EMA decay.")
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--augment", action="store_true", help="Apply train-time image augmentation before VLA encoding.")
     parser.add_argument("--debug-shapes", action="store_true", help="Print observation and RLT tensor shapes.")
@@ -197,6 +245,11 @@ def main():
     rng = jax.random.key(args.seed)
 
     train_config = _train_config_for_real_data(args)
+    if args.lr is not None:
+        lr_schedule = dataclasses.replace(train_config.lr_schedule, peak_lr=args.lr)
+        train_config = dataclasses.replace(train_config, lr_schedule=lr_schedule)
+    if args.ema_decay is not None:
+        train_config = dataclasses.replace(train_config, ema_decay=args.ema_decay)
     data_loader = _data_loader.create_data_loader(train_config, shuffle=True)
     data_iter = iter(data_loader)
     base_model = _load_frozen_base_model(train_config, args.base_checkpoint)
@@ -221,17 +274,26 @@ def main():
     )
     rng, init_rng = jax.random.split(rng)
     params = token_model.init_token_params(init_rng, token_config)
-    tx = optax.adam(args.lr)
+    lr_schedule = train_config.lr_schedule.create()
+    tx = _optimizer.create_optimizer(train_config.optimizer, train_config.lr_schedule, weight_decay_mask=None)
     opt_state = tx.init(params)
+    ema_params = None if train_config.ema_decay is None else jax.tree.map(lambda x: jnp.array(x, copy=True), params)
     train_step = _make_train_step(
         tx,
+        lr_schedule,
         token_config,
         encode_rlt_state,
         train_config,
         augment=args.augment,
         debug_shapes=args.debug_shapes,
     )
-    logging.info("Initialized RLT token model: %s", token_config)
+    logging.info(
+        "Initialized RLT token model: %s optimizer=%s lr_schedule=%s ema_decay=%s",
+        token_config,
+        train_config.optimizer,
+        train_config.lr_schedule,
+        train_config.ema_decay,
+    )
 
     for step_idx in range(args.max_steps):
         wait_start = time.monotonic()
@@ -260,12 +322,21 @@ def main():
             print(f"dumped_masks={dump_path}", flush=True)
 
         train_start = time.monotonic()
-        rng, params, opt_state, loss, metrics, step_timings = train_step(params, opt_state, observation, rng)
+        rng, params, opt_state, ema_params, loss, metrics, step_timings = train_step(
+            params,
+            opt_state,
+            ema_params,
+            jnp.asarray(step_idx, dtype=jnp.int32),
+            observation,
+            rng,
+        )
         train_s = time.monotonic() - train_start
 
         log_data = {
             "rlt_token/loss": float(loss),
             "rlt_token/token_norm": float(metrics["token_norm"]),
+            "rlt_token/grad_norm": float(metrics["grad_norm"]),
+            "rlt_token/learning_rate": float(metrics["learning_rate"]),
             "rlt_token/valid_token_count": float(metrics["valid_token_count"]),
             "rlt_token/padding_output_abs_mean": float(metrics["padding_output_abs_mean"]),
             "rlt_token/data_wait_s": data_wait_s,
@@ -277,12 +348,14 @@ def main():
         }
         wandb.log(log_data, step=step_idx)
         print(
-            "step={step} loss={loss:.6f} token_norm={token_norm:.6f} "
+            "step={step} loss={loss:.6f} lr={lr:.3e} grad_norm={grad_norm:.6f} token_norm={token_norm:.6f} "
             "valid_tokens={valid_tokens:.0f} padding_abs={padding_abs:.6f} "
             "data_wait_s={data_wait_s:.3f} preprocess_s={preprocess_s:.3f} "
             "encode_s={encode_s:.3f} update_s={update_s:.3f} train_s={train_s:.3f}".format(
                 step=step_idx,
                 loss=log_data["rlt_token/loss"],
+                lr=log_data["rlt_token/learning_rate"],
+                grad_norm=log_data["rlt_token/grad_norm"],
                 token_norm=log_data["rlt_token/token_norm"],
                 valid_tokens=log_data["rlt_token/valid_token_count"],
                 padding_abs=log_data["rlt_token/padding_output_abs_mean"],
@@ -295,7 +368,7 @@ def main():
             flush=True,
         )
 
-    _save(Path(args.output_dir) / "rlt_token", params, token_config)
+    _save(Path(args.output_dir) / "rlt_token", params, ema_params, token_config, train_config=train_config)
     wandb.finish()
     print("saved_token={}".format(Path(args.output_dir) / "rlt_token"))
 
