@@ -3,9 +3,9 @@ from __future__ import annotations
 import dataclasses
 from typing import Any
 
+import flax.linen as nn
 import jax
 import jax.numpy as jnp
-import numpy as np
 
 
 Params = dict[str, Any]
@@ -44,15 +44,13 @@ class RLTTokenConfig:
 
 
 def _linear_params(rng: jax.Array, in_dim: int, out_dim: int) -> Params:
-    scale = np.sqrt(2.0 / float(in_dim + out_dim))
     return {
-        "w": jax.random.normal(rng, (in_dim, out_dim), dtype=jnp.float32) * scale,
-        "b": jnp.zeros((out_dim,), dtype=jnp.float32),
+        "w": nn.initializers.lecun_normal(in_axis=-2, out_axis=-1)(rng, (in_dim, out_dim), jnp.float32),
     }
 
 
 def _linear(params: Params, x: jax.Array) -> jax.Array:
-    return x @ params["w"] + params["b"]
+    return x @ params["w"]
 
 
 def _rms_norm_params(dim: int) -> Params:
@@ -160,7 +158,7 @@ def init_token_params(rng: jax.Array, config: RLTTokenConfig) -> Params:
     dec_layer_keys = keys[3 + config.num_layers :]
     dim = config.dim
     return {
-        "encoder_rlt_token": jax.random.normal(keys[0], (dim,), dtype=jnp.float32) * 0.02,
+        "encoder_rlt_token": nn.initializers.normal()(keys[0], (dim,), jnp.float32),
         "decoder_rlt_token_proj": _linear_params(keys[1], dim, dim),
         "output_proj": _linear_params(keys[2], dim, config.input_dim),
         "encoder_layers": [_transformer_layer_params(key, dim, config.mlp_dim) for key in enc_layer_keys],
@@ -200,7 +198,8 @@ def decode(
     decoded = _transformer(
         params["decoder_layers"], decoder_inputs, decoder_mask, _positions_from_mask(decoder_valid), config
     )
-    return _linear(params["output_proj"], decoded)
+    output = _linear(params["output_proj"], decoded)
+    return output * mask.astype(output.dtype)[..., None]
 
 
 def reconstruction_loss(
@@ -217,4 +216,13 @@ def reconstruction_loss(
     recon = decode(params, token, embeddings, mask, config)
     sq = jnp.mean(jnp.square(recon - embeddings), axis=-1)
     loss = jnp.sum(sq * mask_f) / jnp.maximum(jnp.sum(mask_f), 1.0)
-    return loss, {"token_norm": jnp.mean(jnp.linalg.norm(token, axis=-1)), "reconstruction_loss": loss}
+    padding_f = 1.0 - mask_f
+    padding_abs = jnp.sum(jnp.abs(recon) * padding_f[..., None]) / jnp.maximum(
+        jnp.sum(padding_f) * recon.shape[-1], 1.0
+    )
+    return loss, {
+        "token_norm": jnp.mean(jnp.linalg.norm(token, axis=-1)),
+        "reconstruction_loss": loss,
+        "valid_token_count": jnp.sum(mask_f),
+        "padding_output_abs_mean": padding_abs,
+    }

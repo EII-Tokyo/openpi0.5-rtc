@@ -231,6 +231,8 @@ def main():
         log_data = {
             "rlt_token/loss": float(loss),
             "rlt_token/token_norm": float(metrics["token_norm"]),
+            "rlt_token/valid_token_count": float(metrics["valid_token_count"]),
+            "rlt_token/padding_output_abs_mean": float(metrics["padding_output_abs_mean"]),
             "rlt_token/data_wait_s": data_wait_s,
             "rlt_token/encode_s": encode_s,
             "rlt_token/train_s": train_s,
@@ -240,10 +242,13 @@ def main():
         wandb.log(log_data, step=step_idx)
         print(
             "step={step} loss={loss:.6f} token_norm={token_norm:.6f} "
+            "valid_tokens={valid_tokens:.0f} padding_abs={padding_abs:.6f} "
             "data_wait_s={data_wait_s:.3f} encode_s={encode_s:.3f} train_s={train_s:.3f}".format(
                 step=step_idx,
                 loss=log_data["rlt_token/loss"],
                 token_norm=log_data["rlt_token/token_norm"],
+                valid_tokens=log_data["rlt_token/valid_token_count"],
+                padding_abs=log_data["rlt_token/padding_output_abs_mean"],
                 data_wait_s=data_wait_s,
                 encode_s=encode_s,
                 train_s=train_s,
