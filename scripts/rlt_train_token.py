@@ -106,34 +106,48 @@ def _make_train_step(
     debug_shapes: bool,
 ):
     @jax.jit
-    def step(params, opt_state, observation, rng):
-        rng, preprocess_rng = jax.random.split(rng)
-        observation = _transforms.AlohaTransformPipeline.preprocess_observation(
-            preprocess_rng if augment else None,
-            observation,
-            train=augment,
-            image_resolution=train_config.model.image_resolution,
-        )
-        rlt_state = encode_rlt_state(observation)
-        embeddings = rlt_state["embeddings"]
-        mask = rlt_state["mask"]
-
-        if debug_shapes:
-            jax.debug.print(
-                "train_step shapes: embeddings={emb} mask={mask_shape} state={state} valid_tokens={valid}",
-                emb=embeddings.shape,
-                mask_shape=mask.shape,
-                state=rlt_state["state"].shape,
-                valid=jnp.sum(mask, axis=1),
-            )
-
+    def token_update(params, opt_state, embeddings, mask):
         def loss_fn(p):
             return token_model.reconstruction_loss(p, embeddings, mask, config)
 
         (loss, metrics), grads = jax.value_and_grad(loss_fn, has_aux=True)(params)
         updates, opt_state = tx.update(grads, opt_state, params)
         params = optax.apply_updates(params, updates)
-        return rng, params, opt_state, loss, metrics
+        return params, opt_state, loss, metrics
+
+    def step(params, opt_state, observation, rng):
+        rng, preprocess_rng = jax.random.split(rng)
+
+        preprocess_start = time.monotonic()
+        observation = _transforms.AlohaTransformPipeline.preprocess_observation(
+            preprocess_rng if augment else None,
+            observation,
+            train=augment,
+            image_resolution=train_config.model.image_resolution,
+        )
+        preprocess_s = time.monotonic() - preprocess_start
+
+        encode_start = time.monotonic()
+        rlt_state = encode_rlt_state(observation)
+        embeddings = rlt_state["embeddings"]
+        mask = rlt_state["mask"]
+        jax.block_until_ready(embeddings)
+        encode_s = time.monotonic() - encode_start
+
+        if debug_shapes:
+            print(
+                "train_step shapes: "
+                f"embeddings={embeddings.shape} mask={mask.shape} state={rlt_state['state'].shape} "
+                f"valid_tokens={np.asarray(jnp.sum(mask, axis=1))}",
+                flush=True,
+            )
+
+        update_start = time.monotonic()
+        params, opt_state, loss, metrics = token_update(params, opt_state, embeddings, mask)
+        jax.block_until_ready(loss)
+        update_s = time.monotonic() - update_start
+        timings = {"preprocess_s": preprocess_s, "encode_s": encode_s, "update_s": update_s}
+        return rng, params, opt_state, loss, metrics, timings
 
     return step
 
@@ -227,8 +241,7 @@ def main():
             _print_batch_shapes(observation, actions, train_config)
 
         train_start = time.monotonic()
-        rng, params, opt_state, loss, metrics = train_step(params, opt_state, observation, rng)
-        jax.block_until_ready(loss)
+        rng, params, opt_state, loss, metrics, step_timings = train_step(params, opt_state, observation, rng)
         train_s = time.monotonic() - train_start
 
         log_data = {
@@ -237,6 +250,9 @@ def main():
             "rlt_token/valid_token_count": float(metrics["valid_token_count"]),
             "rlt_token/padding_output_abs_mean": float(metrics["padding_output_abs_mean"]),
             "rlt_token/data_wait_s": data_wait_s,
+            "rlt_token/preprocess_s": step_timings["preprocess_s"],
+            "rlt_token/encode_s": step_timings["encode_s"],
+            "rlt_token/update_s": step_timings["update_s"],
             "rlt_token/train_s": train_s,
             "rlt_token/batch_size": args.batch_size,
         }
@@ -244,13 +260,17 @@ def main():
         print(
             "step={step} loss={loss:.6f} token_norm={token_norm:.6f} "
             "valid_tokens={valid_tokens:.0f} padding_abs={padding_abs:.6f} "
-            "data_wait_s={data_wait_s:.3f} train_s={train_s:.3f}".format(
+            "data_wait_s={data_wait_s:.3f} preprocess_s={preprocess_s:.3f} "
+            "encode_s={encode_s:.3f} update_s={update_s:.3f} train_s={train_s:.3f}".format(
                 step=step_idx,
                 loss=log_data["rlt_token/loss"],
                 token_norm=log_data["rlt_token/token_norm"],
                 valid_tokens=log_data["rlt_token/valid_token_count"],
                 padding_abs=log_data["rlt_token/padding_output_abs_mean"],
                 data_wait_s=data_wait_s,
+                preprocess_s=log_data["rlt_token/preprocess_s"],
+                encode_s=log_data["rlt_token/encode_s"],
+                update_s=log_data["rlt_token/update_s"],
                 train_s=train_s,
             ),
             flush=True,
