@@ -5,7 +5,6 @@ import dataclasses
 import functools
 import json
 import logging
-import pickle
 import time
 from pathlib import Path
 from typing import Any
@@ -14,6 +13,7 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 import optax
+import orbax.checkpoint as ocp
 import wandb
 
 import openpi.models.gemma as _gemma
@@ -31,27 +31,50 @@ DEFAULT_NUM_TRAIN_STEPS = 10_000
 DEFAULT_WARMUP_STEPS = 2_000
 
 
-def _save(
-    path: Path,
+def _save_checkpoint(
+    output_dir: Path,
+    step: int,
     params,
+    opt_state,
     ema_params,
     config: token_model.RLTTokenConfig,
     *,
     train_config: _config.TrainConfig,
-) -> None:
-    path.mkdir(parents=True, exist_ok=True)
-    with (path / "params.pkl").open("wb") as f:
-        pickle.dump(jax.tree.map(np.asarray, params), f)
-    if ema_params is not None:
-        with (path / "ema_params.pkl").open("wb") as f:
-            pickle.dump(jax.tree.map(np.asarray, ema_params), f)
-    (path / "config.json").write_text(json.dumps(dataclasses.asdict(config), indent=2) + "\n")
+) -> Path:
+    output_dir.mkdir(parents=True, exist_ok=True)
+    inference_params = ema_params if ema_params is not None else params
+    train_state = {
+        "step": np.asarray(step, dtype=np.int64),
+        "params": params,
+        "ema_params": ema_params,
+        "opt_state": opt_state,
+    }
+    manager = ocp.CheckpointManager(
+        output_dir,
+        item_handlers={
+            "params": ocp.PyTreeCheckpointHandler(),
+            "train_state": ocp.PyTreeCheckpointHandler(),
+        },
+        options=ocp.CheckpointManagerOptions(max_to_keep=None, create=True),
+    )
+    manager.save(
+        step,
+        {
+            "params": {"params": inference_params},
+            "train_state": train_state,
+        },
+    )
+    manager.wait_until_finished()
+
+    step_dir = output_dir / str(step)
+    (step_dir / "rlt_token_config.json").write_text(json.dumps(dataclasses.asdict(config), indent=2) + "\n")
     training_metadata = {
         "optimizer": dataclasses.asdict(train_config.optimizer),
         "lr_schedule": dataclasses.asdict(train_config.lr_schedule),
         "ema_decay": train_config.ema_decay,
     }
-    (path / "training.json").write_text(json.dumps(training_metadata, indent=2) + "\n")
+    (step_dir / "training.json").write_text(json.dumps(training_metadata, indent=2) + "\n")
+    return step_dir
 
 
 def _train_config_for_real_data(args: argparse.Namespace) -> _config.TrainConfig:
@@ -368,9 +391,17 @@ def main():
             flush=True,
         )
 
-    _save(Path(args.output_dir) / "rlt_token", params, ema_params, token_config, train_config=train_config)
+    checkpoint_dir = _save_checkpoint(
+        Path(args.output_dir),
+        args.max_steps - 1,
+        params,
+        opt_state,
+        ema_params,
+        token_config,
+        train_config=train_config,
+    )
     wandb.finish()
-    print("saved_token={}".format(Path(args.output_dir) / "rlt_token"))
+    print("saved_token={}".format(checkpoint_dir))
 
 
 if __name__ == "__main__":
