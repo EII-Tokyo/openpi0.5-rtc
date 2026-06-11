@@ -139,7 +139,11 @@ def _make_train_step(
 
 
 def _print_batch_shapes(observation, actions, train_config: _config.TrainConfig) -> None:
-    image_token_per_image = (train_config.model.image_resolution[0] // 16) * (train_config.model.image_resolution[1] // 16)
+    # Pi0 uses SigLIP So400m/14, so 224x224 images produce a 16x16 token grid.
+    siglip_patch_size = 14
+    image_token_per_image = (train_config.model.image_resolution[0] // siglip_patch_size) * (
+        train_config.model.image_resolution[1] // siglip_patch_size
+    )
     print("batch observation shapes:", flush=True)
     for key, image in observation.images.items():
         print(f"  image[{key}]={image.shape} image_mask={observation.image_masks[key].shape}", flush=True)
