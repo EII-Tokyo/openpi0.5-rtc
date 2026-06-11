@@ -185,6 +185,7 @@ def main():
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--augment", action="store_true", help="Apply train-time image augmentation before VLA encoding.")
     parser.add_argument("--debug-shapes", action="store_true", help="Print observation and RLT tensor shapes.")
+    parser.add_argument("--dump-masks", default=None, help="Save first-batch RLT encoder/decoder masks to this .npz path.")
     parser.add_argument("--base-config", default=DEFAULT_BASE_CONFIG)
     parser.add_argument("--base-checkpoint", default=DEFAULT_BASE_CHECKPOINT)
     parser.add_argument("--wandb-project", default="openpi-rlt")
@@ -239,6 +240,24 @@ def main():
 
         if args.debug_shapes and step_idx == 0:
             _print_batch_shapes(observation, actions, train_config)
+
+        if args.dump_masks and step_idx == 0:
+            dump_rng = None
+            dump_observation = _transforms.AlohaTransformPipeline.preprocess_observation(
+                dump_rng,
+                observation,
+                train=False,
+                image_resolution=train_config.model.image_resolution,
+            )
+            dump_rlt_state = encode_rlt_state(dump_observation)
+            debug_masks = token_model.make_debug_masks(dump_rlt_state["mask"])
+            dump_path = Path(args.dump_masks)
+            dump_path.parent.mkdir(parents=True, exist_ok=True)
+            np.savez_compressed(
+                dump_path,
+                **{key: np.asarray(value) for key, value in debug_masks.items()},
+            )
+            print(f"dumped_masks={dump_path}", flush=True)
 
         train_start = time.monotonic()
         rng, params, opt_state, loss, metrics, step_timings = train_step(params, opt_state, observation, rng)

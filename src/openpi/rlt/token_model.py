@@ -150,6 +150,21 @@ def _positions_from_mask(mask: jax.Array) -> jax.Array:
     return (jnp.cumsum(mask.astype(jnp.int32), axis=1) - 1).astype(jnp.int32)
 
 
+def make_debug_masks(mask: jax.Array) -> dict[str, jax.Array]:
+    mask = mask.astype(jnp.bool_)
+    encoder_valid = jnp.concatenate([mask, jnp.ones((mask.shape[0], 1), dtype=jnp.bool_)], axis=1)
+    decoder_valid = jnp.concatenate([jnp.ones((mask.shape[0], 1), dtype=jnp.bool_), mask[:, :-1]], axis=1)
+    return {
+        "prefix_mask": mask,
+        "encoder_valid": encoder_valid,
+        "decoder_valid": decoder_valid,
+        "encoder_positions": _positions_from_mask(encoder_valid),
+        "decoder_positions": _positions_from_mask(decoder_valid),
+        "encoder_attn_mask": _token_pool_mask(mask),
+        "decoder_attn_mask": _causal_mask(mask)[:, :-1, :-1],
+    }
+
+
 def init_token_params(rng: jax.Array, config: RLTTokenConfig) -> Params:
     keys = jax.random.split(rng, 2 + config.num_layers * 2)
     enc_layer_keys = keys[2 : 2 + config.num_layers]
