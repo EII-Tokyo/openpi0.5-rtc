@@ -18,7 +18,6 @@ class RLTTokenConfig:
     hidden_dim: int | None = None
     num_layers: int = 2
     num_heads: int = 8
-    max_seq_len: int = 2048
 
     def __post_init__(self) -> None:
         if self.token_dim is None:
@@ -32,8 +31,6 @@ class RLTTokenConfig:
             )
         if self.token_dim % self.num_heads != 0:
             raise ValueError(f"token_dim={self.token_dim} must be divisible by num_heads={self.num_heads}")
-        if self.max_seq_len < 2:
-            raise ValueError("max_seq_len must leave room for the RLT token and at least one VLA token.")
 
     @property
     def dim(self) -> int:
@@ -83,14 +80,31 @@ def _transformer_layer_params(rng: jax.Array, dim: int, hidden_dim: int) -> Para
     }
 
 
-def _attention(params: Params, x: jax.Array, attn_mask: jax.Array, num_heads: int) -> jax.Array:
+def _apply_rope(x: jax.Array, *, positions: jax.Array, max_wavelength: int = 10_000) -> jax.Array:
+    """Applies RoPE positions [B, L] to x [B, L, H, D], matching Gemma."""
+    freq_exponents = (2.0 / x.shape[-1]) * jnp.arange(x.shape[-1] // 2, dtype=jnp.float32)
+    timescale = max_wavelength**freq_exponents
+    radians = positions[..., None] / timescale[None, None, :]
+    radians = radians[..., None, :]
+    sin, cos = jnp.sin(radians), jnp.cos(radians)
+    x1, x2 = jnp.split(x, 2, axis=-1)
+    res = jnp.concatenate([x1 * cos - x2 * sin, x2 * cos + x1 * sin], axis=-1)
+    return res.astype(x.dtype)
+
+
+def _attention(params: Params, x: jax.Array, attn_mask: jax.Array, positions: jax.Array, num_heads: int) -> jax.Array:
     batch, seq_len, dim = x.shape
     head_dim = dim // num_heads
     qkv = _linear(params["qkv"], x)
     q, k, v = jnp.split(qkv, 3, axis=-1)
-    q = q.reshape(batch, seq_len, num_heads, head_dim).transpose(0, 2, 1, 3)
-    k = k.reshape(batch, seq_len, num_heads, head_dim).transpose(0, 2, 1, 3)
-    v = v.reshape(batch, seq_len, num_heads, head_dim).transpose(0, 2, 1, 3)
+    q = q.reshape(batch, seq_len, num_heads, head_dim)
+    k = k.reshape(batch, seq_len, num_heads, head_dim)
+    v = v.reshape(batch, seq_len, num_heads, head_dim)
+    q = _apply_rope(q, positions=positions)
+    k = _apply_rope(k, positions=positions)
+    q = q.transpose(0, 2, 1, 3)
+    k = k.transpose(0, 2, 1, 3)
+    v = v.transpose(0, 2, 1, 3)
     logits = jnp.einsum("bhqd,bhkd->bhqk", q, k, preferred_element_type=jnp.float32) / jnp.sqrt(
         jnp.asarray(head_dim, dtype=jnp.float32)
     )
@@ -106,9 +120,11 @@ def _feed_forward(params: Params, x: jax.Array) -> jax.Array:
     return _linear(params["down"], gate * up)
 
 
-def _transformer(params: list[Params], x: jax.Array, attn_mask: jax.Array, config: RLTTokenConfig) -> jax.Array:
+def _transformer(
+    params: list[Params], x: jax.Array, attn_mask: jax.Array, positions: jax.Array, config: RLTTokenConfig
+) -> jax.Array:
     for layer in params:
-        x = x + _attention(layer, _rms_norm(layer["pre_attention_norm"], x), attn_mask, config.num_heads)
+        x = x + _attention(layer, _rms_norm(layer["pre_attention_norm"], x), attn_mask, positions, config.num_heads)
         x = x + _feed_forward(layer, _rms_norm(layer["pre_ffw_norm"], x))
     return x
 
@@ -134,24 +150,19 @@ def _causal_mask(input_mask: jax.Array) -> jax.Array:
     return causal & valid[:, None, :] & valid[:, :, None]
 
 
-def _add_pos(params: Params, x: jax.Array) -> jax.Array:
-    max_seq_len = params["pos_embedding"].shape[0]
-    if x.shape[1] > max_seq_len:
-        raise ValueError(f"Sequence length {x.shape[1]} exceeds max_seq_len={max_seq_len}")
-    return x + params["pos_embedding"][: x.shape[1]][None, :, :]
+def _positions_from_mask(mask: jax.Array) -> jax.Array:
+    return (jnp.cumsum(mask.astype(jnp.int32), axis=1) - 1).astype(jnp.int32)
 
 
 def init_token_params(rng: jax.Array, config: RLTTokenConfig) -> Params:
-    keys = jax.random.split(rng, 5 + config.num_layers * 2)
-    enc_layer_keys = keys[5 : 5 + config.num_layers]
-    dec_layer_keys = keys[5 + config.num_layers :]
+    keys = jax.random.split(rng, 3 + config.num_layers * 2)
+    enc_layer_keys = keys[3 : 3 + config.num_layers]
+    dec_layer_keys = keys[3 + config.num_layers :]
     dim = config.dim
     return {
         "encoder_rlt_token": jax.random.normal(keys[0], (dim,), dtype=jnp.float32) * 0.02,
         "decoder_rlt_token_proj": _linear_params(keys[1], dim, dim),
-        "encoder_pos_embedding": jax.random.normal(keys[2], (config.max_seq_len, dim), dtype=jnp.float32) * 0.02,
-        "decoder_pos_embedding": jax.random.normal(keys[3], (config.max_seq_len, dim), dtype=jnp.float32) * 0.02,
-        "output_proj": _linear_params(keys[4], dim, config.input_dim),
+        "output_proj": _linear_params(keys[2], dim, config.input_dim),
         "encoder_layers": [_transformer_layer_params(key, dim, config.mlp_dim) for key in enc_layer_keys],
         "decoder_layers": [_transformer_layer_params(key, dim, config.mlp_dim) for key in dec_layer_keys],
     }
@@ -164,8 +175,8 @@ def encode(params: Params, embeddings: jax.Array, mask: jax.Array, config: RLTTo
     x = embeddings.astype(jnp.float32)
     token = jnp.broadcast_to(params["encoder_rlt_token"], (x.shape[0], 1, x.shape[-1]))
     x = jnp.concatenate([x, token], axis=1)
-    x = _add_pos({"pos_embedding": params["encoder_pos_embedding"]}, x)
-    x = _transformer(params["encoder_layers"], x, _token_pool_mask(mask), config)
+    valid = jnp.concatenate([mask, jnp.ones((mask.shape[0], 1), dtype=jnp.bool_)], axis=1)
+    x = _transformer(params["encoder_layers"], x, _token_pool_mask(mask), _positions_from_mask(valid), config)
     return x[:, -1]
 
 
@@ -178,14 +189,17 @@ def decode(
 ) -> jax.Array:
     if config is None:
         config = RLTTokenConfig(input_dim=embeddings.shape[-1], token_dim=embeddings.shape[-1])
+    mask = mask.astype(jnp.bool_)
     embeddings = embeddings.astype(jnp.float32)
     token = _linear(params["decoder_rlt_token_proj"], token)[:, None, :]
     # Autoregressive teacher forcing: predict embedding[t] from the RLT token and
     # previous VLA embeddings, not from a learned decode query or the current target.
     decoder_inputs = jnp.concatenate([token, embeddings[:, :-1]], axis=1)
-    decoder_inputs = _add_pos({"pos_embedding": params["decoder_pos_embedding"]}, decoder_inputs)
+    decoder_valid = jnp.concatenate([jnp.ones((mask.shape[0], 1), dtype=jnp.bool_), mask[:, :-1]], axis=1)
     decoder_mask = _causal_mask(mask)[:, :-1, :-1]
-    decoded = _transformer(params["decoder_layers"], decoder_inputs, decoder_mask, config)
+    decoded = _transformer(
+        params["decoder_layers"], decoder_inputs, decoder_mask, _positions_from_mask(decoder_valid), config
+    )
     return _linear(params["output_proj"], decoded)
 
 
