@@ -199,6 +199,7 @@ class RLTKeyRegionReviewRecord(BaseModel):
     segment_status: str | None = None
     train_eligible: bool | None = None
     replay_status: str | None = None
+    missing_rlt_metadata: list[str] = Field(default_factory=list)
     voided: bool | None = None
     default_video_path: str | None = None
     video_paths: list[str] = Field(default_factory=list)

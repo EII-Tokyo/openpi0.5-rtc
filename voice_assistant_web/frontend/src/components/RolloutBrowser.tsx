@@ -418,6 +418,16 @@ const keyRegionEligibility = (record: RLTKeyRegionReviewRecord) => {
   return record.train_eligible === false ? 'not eligible' : 'pending'
 }
 
+const cropSaveBlockedReason = (record: RLTKeyRegionReviewRecord, range: CropRange) => {
+  if (durationForRecord(record) <= 0) return 'No video duration'
+  if (range.endSec <= range.startSec) return 'Crop range is empty'
+  if (!record.shard_path || !record.npz_exists) {
+    const missing = record.missing_rlt_metadata?.length ? `; missing ${record.missing_rlt_metadata.join(', ')}` : ''
+    return `No replay shard${missing}`
+  }
+  return ''
+}
+
 const keyRegionInfoRows = (record: RLTKeyRegionReviewRecord): KeyRegionInfoRow[] => [
   { label: 'Status', value: keyRegionStatusLabel(record) },
   { label: 'Reward', value: formatRewardValue(record.reward) },
@@ -429,6 +439,7 @@ const keyRegionInfoRows = (record: RLTKeyRegionReviewRecord): KeyRegionInfoRow[]
   { label: 'Train horizon', value: `${DEFAULT_TRAIN_HORIZON} actions` },
   { label: 'Chunk stride', value: `${DEFAULT_CHUNK_STRIDE} frames` },
   { label: 'Replay status', value: record.replay_status || (record.npz_exists ? 'written' : 'pending crop') },
+  { label: 'Missing metadata', value: record.missing_rlt_metadata?.length ? record.missing_rlt_metadata.join(', ') : '-' },
   { label: 'Eligibility', value: keyRegionEligibility(record) },
 ]
 
@@ -982,6 +993,7 @@ export function RolloutBrowser({
                 ? clamp((playbackTime - cropRange.startSec) / (cropRange.endSec - cropRange.startSec), 0, 1)
                 : 0
             const cropPending = actionPending === `crop-${record.key_region_id}`
+            const cropBlockedReason = cropSaveBlockedReason(record, cropRange)
             const isPlaying = playingKeyRegionId === record.key_region_id
             const rewardTone = record.reward === 0 ? 'red' : record.reward === 1 ? 'green' : 'slate'
             return (
@@ -1115,12 +1127,13 @@ export function RolloutBrowser({
                         <span>{isPlaying ? 'Pause' : 'Play'}</span>
                       </button>
                       <button className="ghost-button" type="button" onClick={() => selectReviewRecord(record)}>
-                        Preview crop
+                        Open video
                       </button>
                       <button
                         className="apply-button"
                         type="button"
-                        disabled={cropPending || duration <= 0 || cropRange.endSec <= cropRange.startSec}
+                        disabled={cropPending || Boolean(cropBlockedReason)}
+                        title={cropBlockedReason || 'Save the selected replay sample range for Q training'}
                         onClick={() => void saveCropForQ(record)}
                       >
                         {cropPending ? 'Saving crop' : 'Save crop for Q'}
@@ -1134,6 +1147,7 @@ export function RolloutBrowser({
                         Delete region
                       </button>
                     </div>
+                    {cropBlockedReason ? <p className="key-region-crop-warning">{cropBlockedReason}</p> : null}
                   </div>
                 </div>
               </article>

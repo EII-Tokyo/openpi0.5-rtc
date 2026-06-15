@@ -11,6 +11,8 @@ from openpi.shared import array_typing as at
 @dataclasses.dataclass(frozen=True)
 class RLTokenConfig:
     hidden_dim: int = 2048
+    token_hidden_dim: int | None = None
+    z_dim: int | None = None
     encoder_layers: int = 4
     decoder_layers: int = 4
     num_heads: int = 8
@@ -24,10 +26,18 @@ class RLTokenConfig:
     shuffled_margin: float = 0.1
 
     def __post_init__(self):
+        if self.token_hidden_dim is None:
+            object.__setattr__(self, "token_hidden_dim", self.hidden_dim)
+        if self.z_dim is None:
+            object.__setattr__(self, "z_dim", self.hidden_dim)
         if self.decoder_layers != self.encoder_layers:
             raise ValueError(
                 "RLT RL Token autoencoder uses matched encoder/decoder depth; "
                 f"got encoder_layers={self.encoder_layers}, decoder_layers={self.decoder_layers}."
+            )
+        if self.token_hidden_dim % self.num_heads != 0:
+            raise ValueError(
+                f"token_hidden_dim={self.token_hidden_dim} must be divisible by num_heads={self.num_heads}"
             )
         if not 0 <= self.history_mask_ratio < 1:
             raise ValueError(f"history_mask_ratio must be in [0, 1), got {self.history_mask_ratio}.")
@@ -35,19 +45,16 @@ class RLTokenConfig:
 
 class RLTokenBlock(nnx.Module):
     def __init__(self, config: RLTokenConfig, *, rngs: nnx.Rngs):
-        if config.hidden_dim % config.num_heads != 0:
-            raise ValueError(
-                f"hidden_dim={config.hidden_dim} must be divisible by num_heads={config.num_heads}"
-            )
         self.config = config
-        self.pre_attn_norm = nnx.LayerNorm(config.hidden_dim, rngs=rngs)
-        self.q_proj = nnx.Linear(config.hidden_dim, config.hidden_dim, use_bias=False, rngs=rngs)
-        self.k_proj = nnx.Linear(config.hidden_dim, config.hidden_dim, use_bias=False, rngs=rngs)
-        self.v_proj = nnx.Linear(config.hidden_dim, config.hidden_dim, use_bias=False, rngs=rngs)
-        self.out_proj = nnx.Linear(config.hidden_dim, config.hidden_dim, use_bias=False, rngs=rngs)
-        self.pre_mlp_norm = nnx.LayerNorm(config.hidden_dim, rngs=rngs)
-        self.mlp_in = nnx.Linear(config.hidden_dim, config.mlp_dim, rngs=rngs)
-        self.mlp_out = nnx.Linear(config.mlp_dim, config.hidden_dim, rngs=rngs)
+        token_hidden_dim = config.token_hidden_dim
+        self.pre_attn_norm = nnx.LayerNorm(token_hidden_dim, rngs=rngs)
+        self.q_proj = nnx.Linear(token_hidden_dim, token_hidden_dim, use_bias=False, rngs=rngs)
+        self.k_proj = nnx.Linear(token_hidden_dim, token_hidden_dim, use_bias=False, rngs=rngs)
+        self.v_proj = nnx.Linear(token_hidden_dim, token_hidden_dim, use_bias=False, rngs=rngs)
+        self.out_proj = nnx.Linear(token_hidden_dim, token_hidden_dim, use_bias=False, rngs=rngs)
+        self.pre_mlp_norm = nnx.LayerNorm(token_hidden_dim, rngs=rngs)
+        self.mlp_in = nnx.Linear(token_hidden_dim, config.mlp_dim, rngs=rngs)
+        self.mlp_out = nnx.Linear(config.mlp_dim, token_hidden_dim, rngs=rngs)
 
     def __call__(
         self,
@@ -64,7 +71,7 @@ class RLTokenBlock(nnx.Module):
         x_norm = self.pre_attn_norm(x)
 
         batch_size, seq_len, _ = x_norm.shape
-        head_dim = self.config.hidden_dim // self.config.num_heads
+        head_dim = self.config.token_hidden_dim // self.config.num_heads
 
         def split_heads(y):
             y = y.reshape(batch_size, seq_len, self.config.num_heads, head_dim)
@@ -86,7 +93,7 @@ class RLTokenBlock(nnx.Module):
         logits = jnp.where(attn_mask, logits, big_neg)
         probs = jax.nn.softmax(logits, axis=-1).astype(dtype)
         attended = jnp.einsum("bhqk,bhkd->bhqd", probs, v)
-        attended = jnp.swapaxes(attended, 1, 2).reshape(batch_size, seq_len, self.config.hidden_dim)
+        attended = jnp.swapaxes(attended, 1, 2).reshape(batch_size, seq_len, self.config.token_hidden_dim)
         x = residual + self.out_proj(attended)
 
         residual = x
@@ -98,27 +105,51 @@ class RLTokenBlock(nnx.Module):
 class RLTokenAutoencoder(nnx.Module):
     def __init__(self, config: RLTokenConfig, *, rngs: nnx.Rngs):
         self.config = config
+        self.input_proj = (
+            nnx.Linear(config.hidden_dim, config.token_hidden_dim, rngs=rngs)
+            if config.token_hidden_dim != config.hidden_dim
+            else None
+        )
+        self.z_proj = (
+            nnx.Linear(config.token_hidden_dim, config.z_dim, rngs=rngs)
+            if config.z_dim != config.token_hidden_dim
+            else None
+        )
         self.rl_query = nnx.Param(
-            jax.random.normal(rngs.params(), (1, 1, config.hidden_dim), dtype=jnp.float32) * 0.02
+            jax.random.normal(rngs.params(), (1, 1, config.token_hidden_dim), dtype=jnp.float32) * 0.02
         )
         self.encoder_pos_embedding = nnx.Param(
-            jax.random.normal(rngs.params(), (1, config.max_prefix_len + 1, config.hidden_dim), dtype=jnp.float32)
+            jax.random.normal(
+                rngs.params(),
+                (1, config.max_prefix_len + 1, config.token_hidden_dim),
+                dtype=jnp.float32,
+            )
             * 0.02
         )
         self.decoder_pos_embedding = nnx.Param(
-            jax.random.normal(rngs.params(), (1, config.max_prefix_len, config.hidden_dim), dtype=jnp.float32) * 0.02
+            jax.random.normal(
+                rngs.params(),
+                (1, config.max_prefix_len, config.token_hidden_dim),
+                dtype=jnp.float32,
+            )
+            * 0.02
         )
         self.decoder_query_embedding = nnx.Param(
-            jax.random.normal(rngs.params(), (1, config.max_prefix_len, config.hidden_dim), dtype=jnp.float32) * 0.02
+            jax.random.normal(
+                rngs.params(),
+                (1, config.max_prefix_len, config.token_hidden_dim),
+                dtype=jnp.float32,
+            )
+            * 0.02
         )
         self.decoder_mask_embedding = nnx.Param(
-            jax.random.normal(rngs.params(), (1, 1, config.hidden_dim), dtype=jnp.float32) * 0.02
+            jax.random.normal(rngs.params(), (1, 1, config.token_hidden_dim), dtype=jnp.float32) * 0.02
         )
         self.encoder_blocks = [RLTokenBlock(config, rngs=rngs) for _ in range(config.encoder_layers)]
         self.decoder_blocks = [RLTokenBlock(config, rngs=rngs) for _ in range(config.decoder_layers)]
-        self.output_norm = nnx.LayerNorm(config.hidden_dim, rngs=rngs)
-        self.output_proj = nnx.Linear(config.hidden_dim, config.hidden_dim, rngs=rngs)
-        self.z_to_decoder = nnx.Linear(config.hidden_dim, config.hidden_dim, rngs=rngs)
+        self.output_norm = nnx.LayerNorm(config.token_hidden_dim, rngs=rngs)
+        self.output_proj = nnx.Linear(config.token_hidden_dim, config.hidden_dim, rngs=rngs)
+        self.z_to_decoder = nnx.Linear(config.z_dim, config.token_hidden_dim, rngs=rngs)
 
     def __call__(
         self,
@@ -144,8 +175,12 @@ class RLTokenAutoencoder(nnx.Module):
             raise ValueError(f"prefix length {seq_len} exceeds max_prefix_len={self.config.max_prefix_len}")
 
         batch_size = h_vla.shape[0]
-        rl_query = jnp.broadcast_to(self.rl_query.value.astype(h_vla.dtype), (batch_size, 1, self.config.hidden_dim))
-        encoder_input = jnp.concatenate([h_vla, rl_query], axis=1)
+        h_token = self.input_proj(h_vla) if self.input_proj is not None else h_vla
+        rl_query = jnp.broadcast_to(
+            self.rl_query.value.astype(h_token.dtype),
+            (batch_size, 1, self.config.token_hidden_dim),
+        )
+        encoder_input = jnp.concatenate([h_token, rl_query], axis=1)
         encoder_input = encoder_input + self.encoder_pos_embedding.value[:, : seq_len + 1].astype(h_vla.dtype)
         encoder_mask = jnp.concatenate(
             [prefix_mask, jnp.ones((batch_size, 1), dtype=prefix_mask.dtype)],
@@ -155,7 +190,8 @@ class RLTokenAutoencoder(nnx.Module):
         x = encoder_input
         for block in self.encoder_blocks:
             x = block(x, encoder_mask)
-        return x[:, -1, :]
+        z_rl = x[:, -1, :]
+        return self.z_proj(z_rl) if self.z_proj is not None else z_rl
 
     def decode(
         self,
@@ -166,8 +202,8 @@ class RLTokenAutoencoder(nnx.Module):
         rng: at.KeyArrayLike | None = None,
         train: bool = False,
     ) -> at.Float[at.Array, "b n d"]:
-        if z_rl.shape[-1] != self.config.hidden_dim:
-            raise ValueError(f"Expected z_rl dim {self.config.hidden_dim}, got {z_rl.shape[-1]}")
+        if z_rl.shape[-1] != self.config.z_dim:
+            raise ValueError(f"Expected z_rl dim {self.config.z_dim}, got {z_rl.shape[-1]}")
         if h_vla.shape[-1] != self.config.hidden_dim:
             raise ValueError(f"Expected h_vla dim {self.config.hidden_dim}, got {h_vla.shape[-1]}")
         seq_len = h_vla.shape[1]
@@ -178,7 +214,8 @@ class RLTokenAutoencoder(nnx.Module):
         z_condition = self.z_to_decoder(z_rl)[:, None, :].astype(h_vla.dtype)
         if self.config.decoder_mode == "teacher_forced":
             target = jnp.where(prefix_mask[..., None], jax.lax.stop_gradient(h_vla), 0)
-            history = target[:, :-1, :]
+            history = self.input_proj(target) if self.input_proj is not None else target
+            history = history[:, :-1, :]
             history_mask = prefix_mask[:, :-1]
             if train and self.config.history_mask_ratio > 0:
                 if rng is None:
@@ -200,7 +237,7 @@ class RLTokenAutoencoder(nnx.Module):
         elif self.config.decoder_mode == "query":
             queries = jnp.broadcast_to(
                 self.decoder_query_embedding.value[:, :seq_len].astype(h_vla.dtype),
-                (batch_size, seq_len, self.config.hidden_dim),
+                (batch_size, seq_len, self.config.token_hidden_dim),
             )
             decoder_input = queries + z_condition
             decoder_key_mask = prefix_mask

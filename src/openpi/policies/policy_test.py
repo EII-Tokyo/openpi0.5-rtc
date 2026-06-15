@@ -1,3 +1,7 @@
+import os
+
+os.environ.setdefault("USE_TF", "0")
+
 from openpi_client import action_chunk_broker
 import jax
 import jax.numpy as jnp
@@ -51,6 +55,7 @@ class _FakeRlTokenModel:
         self.embed_prefix_hidden_calls = 0
         self.sample_actions_calls = 0
         self.sample_actions_with_prefix_hidden_calls = 0
+        self.sample_actions_with_rl_token_calls = 0
 
     def sample_actions(self, rng, observation, **kwargs):
         self.sample_actions_calls += 1
@@ -64,6 +69,12 @@ class _FakeRlTokenModel:
     def sample_actions_with_prefix_hidden(self, rng, observation, **kwargs):
         self.sample_actions_with_prefix_hidden_calls += 1
         return self.sample_actions(rng, observation, return_prefix_hidden=True, **kwargs)
+
+    def sample_actions_with_rl_token(self, rng, observation, **kwargs):
+        self.sample_actions_with_rl_token_calls += 1
+        actions = jnp.ones((1, 2, 3), dtype=jnp.float32)
+        z_rl = jnp.full((1, 4), 2.0, dtype=jnp.float32)
+        return actions, z_rl
 
     def guided_inference(self, rng, prev_action, observation, **kwargs):
         return self.sample_actions(rng, observation, **kwargs)
@@ -89,6 +100,8 @@ def test_infer_reuses_prefix_hidden_for_rl_token():
     policy._guided_inference = model.guided_inference
     policy._sample_actions_with_prefix_hidden = model.sample_actions_with_prefix_hidden
     policy._guided_inference_with_prefix_hidden = model.guided_inference_with_prefix_hidden
+    policy._sample_actions_with_rl_token = None
+    policy._guided_inference_with_rl_token = None
     policy._rng = jax.random.key(0)
 
     result = policy.infer({
@@ -102,3 +115,33 @@ def test_infer_reuses_prefix_hidden_for_rl_token():
     assert model.embed_prefix_hidden_calls == 0
     assert result["actions"].shape == (2, 3)
     assert result["z_rl"].shape == (4,)
+
+
+def test_infer_prefers_direct_sample_actions_with_rl_token():
+    model = _FakeRlTokenModel()
+    policy = _policy.Policy.__new__(_policy.Policy)
+    policy._model = model
+    policy._input_transform = lambda x: x
+    policy._output_transform = lambda x: x
+    policy._sample_kwargs = {}
+    policy._metadata = {}
+    policy._is_pytorch_model = False
+    policy._sample_actions = model.sample_actions
+    policy._guided_inference = model.guided_inference
+    policy._sample_actions_with_prefix_hidden = model.sample_actions_with_prefix_hidden
+    policy._guided_inference_with_prefix_hidden = model.guided_inference_with_prefix_hidden
+    policy._sample_actions_with_rl_token = model.sample_actions_with_rl_token
+    policy._guided_inference_with_rl_token = None
+    policy._rng = jax.random.key(0)
+
+    result = policy.infer({
+        "state": np.zeros((3,), dtype=np.float32),
+        "image": {"cam": np.zeros((2, 2, 3), dtype=np.float32)},
+        "image_mask": {"cam": np.array(True)},
+    })
+
+    assert model.sample_actions_with_rl_token_calls == 1
+    assert model.sample_actions_with_prefix_hidden_calls == 0
+    assert model.embed_prefix_hidden_calls == 0
+    assert result["actions"].shape == (2, 3)
+    assert np.all(result["z_rl"] == 2.0)

@@ -128,20 +128,20 @@ services:
         --expected-replay-action-horizon ${RLT_EXPECTED_REPLAY_ACTION_HORIZON:-10}
         --train-action-horizon ${RLT_TRAIN_ACTION_HORIZON:-10}
         --min-replay-samples ${RLT_MIN_REPLAY_SAMPLES:-2048}
-        --min-replay-shards ${RLT_MIN_REPLAY_SHARDS:-100}
+        --min-replay-shards ${RLT_MIN_REPLAY_SHARDS:-40}
         --min-success-episodes ${RLT_MIN_SUCCESS_EPISODES:-10}
         --min-failure-episodes ${RLT_MIN_FAILURE_EPISODES:-10}
         --critic-burn-in-steps ${RLT_CRITIC_BURN_IN_STEPS:-0}
         --auto-beta-enabled
-        --auto-beta-target-delta-norm ${RLT_AUTO_BETA_TARGET_DELTA_NORM:-0.07}
+        --auto-beta-target-delta-norm ${RLT_AUTO_BETA_TARGET_DELTA_NORM:-0.13}
         --auto-beta-min ${RLT_AUTO_BETA_MIN:-1.0}
         --auto-beta-max ${RLT_AUTO_BETA_MAX:-15.0}
         --auto-beta-lr ${RLT_AUTO_BETA_LR:-0.03}
-        --auto-beta-ema-decay ${RLT_AUTO_BETA_EMA_DECAY:-0.95}
+        --auto-beta-ema-decay ${RLT_AUTO_BETA_EMA_DECAY:-0.80}
         --auto-beta-update-interval ${RLT_AUTO_BETA_UPDATE_INTERVAL:-100}
         --auto-beta-q-margin ${RLT_AUTO_BETA_Q_MARGIN:-0.001}
         --actor-min-replay-samples ${RLT_ACTOR_MIN_REPLAY_SAMPLES:-4096}
-        --actor-min-replay-shards ${RLT_ACTOR_MIN_REPLAY_SHARDS:-100}
+        --actor-min-replay-shards ${RLT_ACTOR_MIN_REPLAY_SHARDS:-40}
         --actor-min-success-episodes ${RLT_ACTOR_MIN_SUCCESS_EPISODES:-20}
         --actor-min-failure-episodes ${RLT_ACTOR_MIN_FAILURE_EPISODES:-20}
         --batch-size ${RLT_BATCH_SIZE:-64}

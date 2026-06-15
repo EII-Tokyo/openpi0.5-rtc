@@ -181,9 +181,15 @@ def _manifest_summary(path: Path) -> dict | None:
         "num_frames",
         "num_replay_transitions",
         "fps",
+        "crop_start_sec",
+        "crop_end_sec",
+        "crop_start_sample",
+        "crop_end_sample",
+        "crop_original_num_replay_transitions",
         "segment_status",
         "train_eligible",
         "replay_status",
+        "missing_rlt_metadata",
         "voided",
         "shard_path",
     }
@@ -607,6 +613,7 @@ def _key_region_review_records() -> list[dict]:
                     "segment_status": manifest.get("segment_status"),
                     "train_eligible": manifest.get("train_eligible"),
                     "replay_status": manifest.get("replay_status"),
+                    "missing_rlt_metadata": manifest.get("missing_rlt_metadata") or [],
                     "voided": manifest.get("voided"),
                     "shard_path": record.get("shard_path") or manifest.get("shard_path"),
                     "reward": record.get("reward") if record.get("reward") is not None else manifest.get("reward"),
@@ -691,7 +698,13 @@ def rlt_key_region_crop(key_region_id: str, request: RLTKeyRegionCropRequest) ->
         raise HTTPException(status_code=400, detail="Invalid rollout path")
     shard_path = _host_path_for_container_path(record.get("shard_path"))
     if shard_path is None or not shard_path.exists():
-        raise HTTPException(status_code=409, detail="Key region replay shard is missing")
+        missing_metadata = record.get("missing_rlt_metadata") or []
+        replay_status = record.get("replay_status") or "unknown"
+        detail = (
+            f"Key region replay shard is missing; replay_status={replay_status}; "
+            f"missing_rlt_metadata={missing_metadata}"
+        )
+        raise HTTPException(status_code=409, detail=detail)
 
     output_shard_path = _crop_output_shard_path(shard_path, key_region_id)
     try:

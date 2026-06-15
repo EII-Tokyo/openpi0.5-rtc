@@ -15,6 +15,7 @@ import tyro
 
 import openpi.models.model as _model
 import openpi.models.pi0_config as pi0_config
+import openpi.models.pi0_rl_config as pi0_rl_config
 import openpi.models.rl_token as _rl_token
 import openpi.models.tokenizer as _tokenizer
 import openpi.policies.aloha_policy as aloha_policy
@@ -810,6 +811,88 @@ def _make_rl_token_autoencoder_config(
     )
 
 
+def _make_small_rl_token_autoencoder_config(
+    name: str,
+    *,
+    repo_ids: list[str],
+    init_checkpoint: str,
+    batch_size: int,
+    num_workers: int,
+    fsdp_devices: int = 1,
+    gradient_accumulation_steps: int = 1,
+    exp_name: str = tyro.MISSING,
+    assets_base_dir: str = "./assets",
+    checkpoint_base_dir: str = "./checkpoints",
+    wandb_enabled: bool = True,
+    overwrite: bool = False,
+    resume: bool = False,
+    num_train_steps: int = 20_000,
+    save_interval: int = 5_000,
+) -> TrainConfig:
+    model = pi0_rl_config.Pi0RLConfig(
+        pi05=True,
+        rl_token=_rl_token.RLTokenConfig(
+            hidden_dim=2048,
+            token_hidden_dim=768,
+            z_dim=512,
+            encoder_layers=2,
+            decoder_layers=2,
+            num_heads=8,
+            mlp_dim=3072,
+            max_prefix_len=1224,
+            decoder_mode="teacher_forced",
+        ),
+        rl_token_only=True,
+    )
+
+    return TrainConfig(
+        name=name,
+        exp_name=exp_name,
+        model=model,
+        lr_schedule=_optimizer.CosineDecaySchedule(
+            warmup_steps=2_000,
+            peak_lr=1.0e-4,
+            decay_steps=num_train_steps,
+            decay_lr=1.0e-5,
+        ),
+        log_interval=10,
+        data=LeRobotAlohaDataConfig(
+            adapt_to_pi=True,
+            image_size=(224, 224),
+            video_memory_num_frames=1,
+            video_memory_stride_seconds=1.0,
+            repo_ids=repo_ids,
+            assets=AssetsConfig(assets_dir=None, asset_id="trossen"),
+            base_config=DataConfig(prompt_from_task=True),
+            repack_transforms=_aloha_real_repack_transforms(
+                include_low=True,
+                include_prompt=True,
+                include_subtask=False,
+            ),
+        ),
+        weight_loader=weight_loaders.CheckpointWeightLoader(
+            init_checkpoint,
+            missing_regex=".*rl_token_autoencoder.*",
+        ),
+        freeze_filter=nnx.All(
+            nnx.Param,
+            nnx.Not(nnx_utils.PathRegex(".*rl_token_autoencoder.*")),
+        ),
+        ema_decay=None,
+        save_interval=save_interval,
+        num_train_steps=num_train_steps,
+        batch_size=batch_size,
+        num_workers=num_workers,
+        fsdp_devices=fsdp_devices,
+        gradient_accumulation_steps=gradient_accumulation_steps,
+        assets_base_dir=assets_base_dir,
+        checkpoint_base_dir=checkpoint_base_dir,
+        wandb_enabled=wandb_enabled,
+        overwrite=overwrite,
+        resume=resume,
+    )
+
+
 _CONFIGS = [
     _make_twist_train_config(
         "twist_off_the_bottle_cap",
@@ -1146,6 +1229,23 @@ _CONFIGS = [
         include_subtask=True,
         gradient_accumulation_steps=1,
         assets=AssetsConfig(assets_dir=None, asset_id="trossen"),
+    ),
+    _make_small_rl_token_autoencoder_config(
+        "eii_rinse_11repo_cam4_fullft_rl_token_small",
+        repo_ids=_EII_RINSE_11REPO_INSERT_X5_REPO_IDS,
+        init_checkpoint="/workspace/openpi0.5-rtc/checkpoints/eii_rinse_11repo_cam4_fullft/rinse_11repo_insertx5_fullft_bs256_nw64_fsdp8_20260513/9000/params",
+        batch_size=16,
+        num_workers=4,
+        fsdp_devices=1,
+        gradient_accumulation_steps=1,
+        exp_name="rinse_11repo_rl_token_small_512_from_9000_20260605",
+        assets_base_dir="/workspace/openpi0.5-rtc/assets",
+        checkpoint_base_dir="/workspace/openpi0.5-rtc/checkpoints",
+        wandb_enabled=True,
+        overwrite=False,
+        resume=False,
+        num_train_steps=10_000,
+        save_interval=2_500,
     ),
     _make_twist_train_config(
         "eii_rinse_9repo_cam4_lora_6000",

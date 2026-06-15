@@ -81,6 +81,7 @@ export type RLTKeyRegionReviewRecord = {
   segment_status: string | null
   train_eligible: boolean | null
   replay_status: string | null
+  missing_rlt_metadata: string[]
   voided: boolean | null
   default_video_path: string | null
   video_paths: string[]

@@ -86,6 +86,16 @@ class Policy(BasePolicy):
                 if hasattr(model, "guided_inference_with_prefix_hidden")
                 else None
             )
+            self._sample_actions_with_rl_token = (
+                nnx_utils.module_jit(model.sample_actions_with_rl_token)
+                if hasattr(model, "sample_actions_with_rl_token")
+                else None
+            )
+            self._guided_inference_with_rl_token = (
+                nnx_utils.module_jit(model.guided_inference_with_rl_token)
+                if hasattr(model, "guided_inference_with_rl_token")
+                else None
+            )
             self._rng = rng or jax.random.key(0)
 
     @override
@@ -110,31 +120,49 @@ class Policy(BasePolicy):
             if noise.ndim == 2:  # If noise is (action_horizon, action_dim), add batch dimension
                 noise = noise[None, ...]  # Make it (1, action_horizon, action_dim)
             sample_kwargs["noise"] = noise
+        guided_kwargs = dict(sample_kwargs)
 
         observation = _model.Observation.from_dict(inputs)
         needs_rl_token = (
             not self._is_pytorch_model
             and getattr(self._model, "rl_token_autoencoder", None) is not None
-            and hasattr(self._model, "embed_prefix_hidden")
         )
         sample_actions_fn = self._sample_actions
         guided_inference_fn = self._guided_inference
+        sample_actions_returns_rl_token = False
+        guided_inference_returns_rl_token = False
         if needs_rl_token:
+            sample_with_rl_token = getattr(self, "_sample_actions_with_rl_token", None)
+            guided_with_rl_token = getattr(self, "_guided_inference_with_rl_token", None)
             sample_with_prefix = getattr(self, "_sample_actions_with_prefix_hidden", None)
             guided_with_prefix = getattr(self, "_guided_inference_with_prefix_hidden", None)
-            if sample_with_prefix is not None and guided_with_prefix is not None:
+            if sample_with_rl_token is not None:
+                sample_actions_fn = sample_with_rl_token
+                sample_actions_returns_rl_token = True
+            elif sample_with_prefix is not None:
                 sample_actions_fn = sample_with_prefix
-                guided_inference_fn = guided_with_prefix
             else:
                 sample_kwargs["return_prefix_hidden"] = True
+            if guided_with_rl_token is not None:
+                guided_inference_fn = guided_with_rl_token
+                guided_inference_returns_rl_token = True
+            elif guided_with_prefix is not None:
+                guided_inference_fn = guided_with_prefix
+            else:
+                guided_kwargs["return_prefix_hidden"] = True
 
         start_time = time.monotonic()
         prefix_hidden = None
+        z_rl = None
         if use_rtc:
             if prev_action is None:
-                origin_actions, prefix_hidden = _split_actions_and_prefix_hidden(
+                origin_actions, token_result = _split_actions_and_prefix_hidden(
                     sample_actions_fn(sample_rng_or_pytorch_device, observation, **sample_kwargs)
                 )
+                if sample_actions_returns_rl_token:
+                    z_rl = token_result
+                else:
+                    prefix_hidden = token_result
                 outputs = {
                     "state": inputs["state"],
                     "actions": origin_actions,
@@ -142,30 +170,40 @@ class Policy(BasePolicy):
                 }
             else:
                 prev_action = jnp.asarray(prev_action)[np.newaxis, ...]  # Add batch dimension
-                origin_actions, prefix_hidden = _split_actions_and_prefix_hidden(
-                    guided_inference_fn(sample_rng_or_pytorch_device, prev_action, observation, **sample_kwargs)
+                origin_actions, token_result = _split_actions_and_prefix_hidden(
+                    guided_inference_fn(sample_rng_or_pytorch_device, prev_action, observation, **guided_kwargs)
                 )
+                if guided_inference_returns_rl_token:
+                    z_rl = token_result
+                else:
+                    prefix_hidden = token_result
                 outputs = {
                     "state": inputs["state"],
                     "actions": origin_actions,
                     "origin_actions": origin_actions,
                 }
         else:
-            origin_actions, prefix_hidden = _split_actions_and_prefix_hidden(
+            origin_actions, token_result = _split_actions_and_prefix_hidden(
                 sample_actions_fn(sample_rng_or_pytorch_device, observation, **sample_kwargs)
             )
+            if sample_actions_returns_rl_token:
+                z_rl = token_result
+            else:
+                prefix_hidden = token_result
             outputs = {
                 "state": inputs["state"],
                 "actions": origin_actions,
                 "origin_actions": origin_actions,
             }
         if needs_rl_token:
-            if prefix_hidden is None:
-                prefix_hidden = self._model.embed_prefix_hidden(observation, drop_language=True)
-            else:
-                prefix_hidden = _drop_language_from_prefix_hidden(prefix_hidden, observation)
-            prefix_out, prefix_mask = prefix_hidden
-            outputs["z_rl"] = self._model.rl_token_autoencoder.encode(jax.lax.stop_gradient(prefix_out), prefix_mask)
+            if z_rl is None:
+                if prefix_hidden is None:
+                    prefix_hidden = self._model.embed_prefix_hidden(observation, drop_language=True)
+                else:
+                    prefix_hidden = _drop_language_from_prefix_hidden(prefix_hidden, observation)
+                prefix_out, prefix_mask = prefix_hidden
+                z_rl = self._model.rl_token_autoencoder.encode(jax.lax.stop_gradient(prefix_out), prefix_mask)
+            outputs["z_rl"] = z_rl
         model_time = time.monotonic() - start_time
         if self._is_pytorch_model:
             outputs = jax.tree.map(lambda x: np.asarray(x[0, ...].detach().cpu()), outputs)

@@ -345,6 +345,39 @@ class Pi0(_model.BaseModel):
             return_prefix_hidden=True,
         )
 
+    def _encode_rl_token_from_prefix_hidden(
+        self,
+        observation: _model.Observation,
+        prefix_hidden: tuple[at.Float[at.Array, "b s emb"], at.Bool[at.Array, "b s"]],
+    ):
+        if self.rl_token_autoencoder is None:
+            raise ValueError("RL token sampling requires rl_token_autoencoder")
+        prefix_out, prefix_mask = prefix_hidden
+        if observation.tokenized_prompt is not None:
+            image_token_count = prefix_out.shape[1] - observation.tokenized_prompt.shape[1]
+            prefix_out = prefix_out[:, :image_token_count]
+            prefix_mask = prefix_mask[:, :image_token_count]
+        z_rl = self.rl_token_autoencoder.encode(jax.lax.stop_gradient(prefix_out), prefix_mask)
+        return z_rl
+
+    def sample_actions_with_rl_token(
+        self,
+        rng: at.KeyArrayLike,
+        observation: _model.Observation,
+        *,
+        num_steps: int | at.Int[at.Array, ""] = 10,
+        noise: at.Float[at.Array, "b ah ad"] | None = None,
+    ):
+        actions, prefix_hidden = self.sample_actions(
+            rng,
+            observation,
+            num_steps=num_steps,
+            noise=noise,
+            return_prefix_hidden=True,
+        )
+        z_rl = self._encode_rl_token_from_prefix_hidden(observation, prefix_hidden)
+        return actions, z_rl
+
     def guided_inference(
         self,
         rng: at.KeyArrayLike,
@@ -526,3 +559,27 @@ class Pi0(_model.BaseModel):
             beta=beta,
             return_prefix_hidden=True,
         )
+
+    def guided_inference_with_rl_token(
+        self,
+        rng: at.KeyArrayLike,
+        prev_action: _model.Actions,
+        observation: _model.Observation,
+        *,
+        num_steps: int | at.Int[at.Array, ""] = 10,
+        s: int = 25,
+        d: int = 10,
+        beta: float = 8.0,
+    ):
+        actions, prefix_hidden = self.guided_inference(
+            rng,
+            prev_action,
+            observation,
+            num_steps=num_steps,
+            s=s,
+            d=d,
+            beta=beta,
+            return_prefix_hidden=True,
+        )
+        z_rl = self._encode_rl_token_from_prefix_hidden(observation, prefix_hidden)
+        return actions, z_rl
