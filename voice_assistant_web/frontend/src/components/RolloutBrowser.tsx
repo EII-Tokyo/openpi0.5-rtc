@@ -3,6 +3,7 @@ import {
   cropKeyRegion,
   deleteKeyRegions,
   fetchRLTKeyRegionReview,
+  rescoreKeyRegion,
   rolloutTreeUrl,
   rolloutVideoUrl,
 } from '../services/api'
@@ -670,6 +671,19 @@ export function RolloutBrowser({
     }
   }
 
+  const rescoreForQ = async (record: RLTKeyRegionReviewRecord, reward: 0 | 1) => {
+    setActionError('')
+    setActionPending(`rescore-${record.key_region_id}-${reward}`)
+    try {
+      await rescoreKeyRegion(record.key_region_id, reward)
+      await loadReviewRecords()
+    } catch (exc) {
+      setActionError(exc instanceof Error ? exc.message : 'Rescore failed')
+    } finally {
+      setActionPending('')
+    }
+  }
+
   const selectReviewRecord = (record: RLTKeyRegionReviewRecord) => {
     setSelectedReviewId(record.key_region_id)
     if (!record.default_video_path) {
@@ -994,6 +1008,8 @@ export function RolloutBrowser({
                 : 0
             const cropPending = actionPending === `crop-${record.key_region_id}`
             const cropBlockedReason = cropSaveBlockedReason(record, cropRange)
+            const rescoreZeroPending = actionPending === `rescore-${record.key_region_id}-0`
+            const rescoreOnePending = actionPending === `rescore-${record.key_region_id}-1`
             const isPlaying = playingKeyRegionId === record.key_region_id
             const rewardTone = record.reward === 0 ? 'red' : record.reward === 1 ? 'green' : 'slate'
             return (
@@ -1115,6 +1131,24 @@ export function RolloutBrowser({
                       <span>start frame {frames.startFrame}</span>
                       <span>end frame {frames.endFrame}</span>
                       <span>reward {formatRewardValue(record.reward)}</span>
+                      <span className="key-region-score-actions" aria-label="Rescore key region">
+                        <button
+                          className={`score-button fail ${record.reward === 0 ? 'active' : ''}`}
+                          type="button"
+                          disabled={rescoreZeroPending || record.reward === 0 || actionPending === 'delete-key-regions'}
+                          onClick={() => void rescoreForQ(record, 0)}
+                        >
+                          {rescoreZeroPending ? 'Saving 0' : 'Score 0'}
+                        </button>
+                        <button
+                          className={`score-button success ${record.reward === 1 ? 'active' : ''}`}
+                          type="button"
+                          disabled={rescoreOnePending || record.reward === 1 || actionPending === 'delete-key-regions'}
+                          onClick={() => void rescoreForQ(record, 1)}
+                        >
+                          {rescoreOnePending ? 'Saving 1' : 'Score 1'}
+                        </button>
+                      </span>
                     </div>
                     <div className="key-region-action-group">
                       <button

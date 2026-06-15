@@ -105,6 +105,28 @@ class RLTSegmentLedger:
             force_transitions=True,
         )
 
+    def record_rescored(
+        self,
+        key_region_id: str,
+        *,
+        reward: int,
+        phase: str,
+        shard_path: str,
+        num_replay_transitions: int,
+        reason: str,
+    ) -> None:
+        self._upsert(
+            key_region_id,
+            status="committed",
+            phase=phase,
+            reward=reward,
+            shard_path=shard_path,
+            num_replay_transitions=num_replay_transitions,
+            invalid_reason=reason,
+            event="rescored",
+            force_transitions=True,
+        )
+
     def record_rejected(self, key_region_id: str, *, phase: str, reason: str) -> None:
         existing = self.get_segment(key_region_id)
         if existing and existing["status"] in {"committed", "voided"}:

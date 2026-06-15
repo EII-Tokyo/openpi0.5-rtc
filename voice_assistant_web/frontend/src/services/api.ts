@@ -243,6 +243,12 @@ export const cropKeyRegion = (keyRegionId: string, startSec: number, endSec: num
     source: 'ui',
     reason: 'operator_crop',
   })
+export const rescoreKeyRegion = (keyRegionId: string, reward: 0 | 1) =>
+  postJson<RLTControlState>(`/api/rlt/key-region/${encodeURIComponent(keyRegionId)}/rescore`, {
+    reward,
+    source: 'ui',
+    reason: 'operator_rescore',
+  })
 export const updateRLTConfig = (config: Partial<RLTControlState>) =>
   postJson<RLTControlState>('/api/rlt/config', config)
 

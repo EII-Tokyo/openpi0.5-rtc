@@ -8,6 +8,36 @@ voice_assistant_web/frontend/dist/
 voice_assistant_web/**/__pycache__/
 
 # Data directories.
+# Image and video artifacts.
+*.[jJ][pP][gG]
+*.[jJ][pP][eE][gG]
+*.[pP][nN][gG]
+*.[gG][iI][fF]
+*.[bB][mM][pP]
+*.[tT][iI][fF]
+*.[tT][iI][fF][fF]
+*.[wW][eE][bB][pP]
+*.[hH][eE][iI][cC]
+*.[hH][eE][iI][fF]
+*.[aA][vV][iI][fF]
+*.[iI][cC][oO]
+*.[sS][vV][gG]
+*.[mM][pP]4
+*.[mM][oO][vV]
+*.[aA][vV][iI]
+*.[mM][kK][vV]
+*.[wW][eE][bB][mM]
+*.[mM]4[vV]
+*.[mM][pP][gG]
+*.[mM][pP][eE][gG]
+*.[wW][mM][vV]
+*.[fF][lL][vV]
+*.[hH]264
+*.[hH]265
+*.[hH][eE][vV][cC]
+*.[3][gG][pP]
+*.[mM]2[tT][sS]
+
 assets/
 checkpoints/
 data/

@@ -145,3 +145,45 @@ def crop_key_region_files(
     _write_npz(output_shard_path, cropped)
     _write_manifest(manifest_path, manifest)
     return manifest
+
+
+def rescore_key_region_files(rollout_dir: Path, shard_path: Path, *, reward: int) -> dict[str, Any]:
+    if reward not in (0, 1):
+        raise ValueError("reward must be 0 or 1")
+    manifest_path = rollout_dir / "manifest.json"
+    manifest = _load_manifest(manifest_path)
+    if not shard_path.exists():
+        raise ValueError("replay shard is missing")
+
+    with np.load(shard_path, allow_pickle=False) as loaded:
+        arrays = {key: loaded[key] for key in loaded.files}
+
+    reward_seq = arrays.get("reward_seq")
+    if reward_seq is None or reward_seq.ndim < 2 or int(reward_seq.shape[0]) == 0:
+        raise ValueError("replay shard reward_seq is missing or empty")
+    reward_seq = np.zeros_like(reward_seq, dtype=np.float32)
+    done = arrays.get("done")
+    if done is not None and done.ndim == 1 and np.any(done):
+        terminal_index = int(np.flatnonzero(done)[-1])
+    else:
+        terminal_index = int(reward_seq.shape[0] - 1)
+    reward_index = _train_horizon(manifest, reward_seq) - 1
+    reward_seq[terminal_index, reward_index] = float(reward)
+    arrays["reward_seq"] = reward_seq
+
+    manifest.update(
+        {
+            "reward": int(reward),
+            "score_timeout": False,
+            "rescore_time": float(__import__("time").time()),
+            "replay_status": "ready",
+            "replay_ready": True,
+            "segment_status": "committed",
+            "train_eligible": True,
+            "voided": False,
+        }
+    )
+    arrays["manifest"] = np.asarray(json.dumps(manifest))
+    _write_npz(shard_path, arrays)
+    _write_manifest(manifest_path, manifest)
+    return manifest

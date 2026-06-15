@@ -239,6 +239,7 @@ class Runtime:
         self._rlt_state["actor_runtime_checkpoint_path"] = actor_dir
         self._rlt_state["actor_runtime_checkpoint_step"] = actor_step
         if actor_ready:
+            self._rlt_state["actor_ready"] = True
             self._rlt_state["critic_ready"] = critic_ready
             self._rlt_state["loaded_actor_step"] = actor_step
             if self._rlt_state.get("inference_actor_active") is not True and self._rlt_state.get("inference_gate_reason") in {
@@ -250,6 +251,7 @@ class Runtime:
                 self._rlt_state["inference_gate_reason"] = "waiting_for_inference"
         elif load_error:
             self._rlt_state["critic_ready"] = False
+            self._rlt_state["actor_ready"] = False
             self._rlt_state["loaded_actor_step"] = None
             self._rlt_state["inference_actor_active"] = False
             self._rlt_state["inference_gate_reason"] = str(load_error)
