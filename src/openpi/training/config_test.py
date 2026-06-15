@@ -16,6 +16,22 @@ def test_rinse_small_rl_token_config_matches_base_checkpoint_inputs():
     assert _keyword_value(repack_call, "include_subtask") is False
 
 
+def test_rinse_small_query_rl_token_config_saves_only_final_checkpoint():
+    config_path = pathlib.Path(__file__).with_name("config.py")
+    tree = ast.parse(config_path.read_text())
+    call = _find_config_call(tree, "eii_rinse_11repo_cam4_fullft_rl_token_small_query")
+    small_factory = _find_function(tree, "_make_small_rl_token_autoencoder_config")
+    repack_call = _find_call(small_factory, "_aloha_real_repack_transforms")
+
+    assert _keyword_value(call, "num_train_steps") == 10_000
+    assert _keyword_value(call, "save_interval") == 10_000
+    assert _keyword_value(call, "keep_period") == 10_000
+    assert _keyword_value(call, "decoder_mode") == "query"
+    assert "9000/params" in _keyword_value(call, "init_checkpoint")
+    assert _keyword_value(repack_call, "include_low") is True
+    assert _keyword_value(repack_call, "include_subtask") is False
+
+
 def _find_config_call(tree: ast.AST, config_name: str) -> ast.Call:
     for node in ast.walk(tree):
         if not isinstance(node, ast.Call):

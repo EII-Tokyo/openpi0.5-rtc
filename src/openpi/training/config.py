@@ -829,6 +829,7 @@ def _make_small_rl_token_autoencoder_config(
     num_train_steps: int = 20_000,
     save_interval: int = 5_000,
     keep_period: int | None = None,
+    decoder_mode: str = "teacher_forced",
 ) -> TrainConfig:
     model = pi0_rl_config.Pi0RLConfig(
         pi05=True,
@@ -841,7 +842,7 @@ def _make_small_rl_token_autoencoder_config(
             num_heads=8,
             mlp_dim=3072,
             max_prefix_len=1224,
-            decoder_mode="teacher_forced",
+            decoder_mode=decoder_mode,
         ),
         rl_token_only=True,
     )
@@ -1249,6 +1250,25 @@ _CONFIGS = [
         num_train_steps=10_000,
         save_interval=2_500,
         keep_period=2_500,
+    ),
+    _make_small_rl_token_autoencoder_config(
+        "eii_rinse_11repo_cam4_fullft_rl_token_small_query",
+        repo_ids=_EII_RINSE_11REPO_INSERT_X5_REPO_IDS,
+        init_checkpoint="/workspace/openpi0.5-rtc/checkpoints/eii_rinse_11repo_cam4_fullft/rinse_11repo_insertx5_fullft_bs256_nw64_fsdp8_20260513/9000/params",
+        batch_size=16,
+        num_workers=4,
+        fsdp_devices=1,
+        gradient_accumulation_steps=1,
+        exp_name="rinse_11repo_rl_token_small_query_512_from_9000_20260615",
+        assets_base_dir="/workspace/openpi0.5-rtc/assets",
+        checkpoint_base_dir="/workspace/openpi0.5-rtc/checkpoints",
+        wandb_enabled=True,
+        overwrite=False,
+        resume=False,
+        num_train_steps=10_000,
+        save_interval=10_000,
+        keep_period=10_000,
+        decoder_mode="query",
     ),
     _make_twist_train_config(
         "eii_rinse_9repo_cam4_lora_6000",
