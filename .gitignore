@@ -41,6 +41,7 @@ voice_assistant_web/**/__pycache__/
 assets/
 checkpoints/
 data/
+evals/
 rollouts
 rollouts.backup-*/
 wandb/
