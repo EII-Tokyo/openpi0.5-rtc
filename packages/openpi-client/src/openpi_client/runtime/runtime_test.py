@@ -164,6 +164,7 @@ def test_publish_rlt_state_includes_loaded_actor_runtime_status():
 
     runtime._publish_rlt_state()
 
+    assert runtime._rlt_state["actor_ready"] is True
     assert runtime._rlt_state["critic_ready"] is True
     assert runtime._rlt_state["loaded_actor_step"] == 15000
     assert runtime._rlt_state["inference_gate_reason"] == "waiting_for_inference"

@@ -361,6 +361,7 @@ def test_runtime_metrics_update_inference_gate_diagnostics():
             "loaded_actor_step": 32,
             "inference_reference_q_value": 0.2,
             "inference_actor_q_value": 0.7,
+            "actor_ready": True,
             "inference_q_advantage": 0.5,
             "critic_ready": True,
         }
@@ -373,6 +374,7 @@ def test_runtime_metrics_update_inference_gate_diagnostics():
     assert state.key_region_probability == 0.9
     assert state.loaded_actor_step == 32
     assert state.inference_reference_q_value == 0.2
-    assert state.inference_actor_q_value == 0.7
     assert state.inference_q_advantage == 0.5
+    assert state.inference_actor_q_value == 0.7
+    assert state.actor_ready is True
     assert state.critic_ready is True

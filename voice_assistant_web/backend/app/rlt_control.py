@@ -365,6 +365,7 @@ class RLTControlStore:
                     "critic_gate_enabled",
                     "critic_gate_margin",
                     "critic_gate_temperature",
+                    "actor_ready",
                     "critic_ready",
                     "inference_actor_active",
                     "inference_delta_norm",

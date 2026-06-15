@@ -13,7 +13,7 @@ services:
     command: >-
       python3 /app/examples/aloha_real/main.py
       --model-dir
-      /app/checkpoints/eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo_rl_token_query/rl_token_2048_enc4_dec4_query_from_19000_20260528/12000
+      /app/checkpoints/eii_rinse_11repo_cam4_fullft/rinse_11repo_insertx5_fullft_bs256_nw64_fsdp8_20260513/9000
       --dataset-dir
       /app/rollouts/old_policy/unscrew_bottle_cap/2026-05-27
       --num-episodes
@@ -37,9 +37,9 @@ services:
     volumes:
       - $PWD:/app
       - /data/openpi0.5-rtc-reward-learning/rollouts:/app/rollouts
-      - $PWD/checkpoints:/app/checkpoints:ro
+      - /home/eii/openpi0.5-rtc/checkpoints:/app/checkpoints:ro
     environment:
-      - RLT_RL_TOKEN_CHECKPOINT_PATH=/app/checkpoints/eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo_rl_token_query/rl_token_2048_enc4_dec4_query_from_19000_20260528/12000
+      - RLT_RL_TOKEN_CHECKPOINT_PATH=/app/checkpoints/eii_rinse_11repo_cam4_fullft/rinse_11repo_insertx5_fullft_bs256_nw64_fsdp8_20260513/9000
 
   rlt_warmup_runtime:
     image: openpi_reward_learning_eii/rlt_warmup_runtime:reward-learning
@@ -58,7 +58,7 @@ services:
     command: >-
       python3 /app/examples/aloha_real/main.py
       --model-dir
-      /app/checkpoints/eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo_rl_token_query/rl_token_2048_enc4_dec4_query_from_19000_20260528/12000
+      /app/checkpoints/eii_rinse_11repo_cam4_fullft/rinse_11repo_insertx5_fullft_bs256_nw64_fsdp8_20260513/9000
       --num-episodes
       1
       --max-episode-steps
@@ -94,9 +94,9 @@ services:
       - /data/openpi0.5-rtc-reward-learning/rollouts:/app/rollouts
       - /data/openpi0.5-rtc-reward-learning/replay:/app/replay
       - /data/openpi0.5-rtc-reward-learning/rlt_online:/app/rlt_online
-      - $PWD/checkpoints:/app/checkpoints:ro
+      - /home/eii/openpi0.5-rtc/checkpoints:/app/checkpoints:ro
     environment:
-      - RLT_RL_TOKEN_CHECKPOINT_PATH=/app/checkpoints/eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo_rl_token_query/rl_token_2048_enc4_dec4_query_from_19000_20260528/12000
+      - RLT_RL_TOKEN_CHECKPOINT_PATH=/app/checkpoints/eii_rinse_11repo_cam4_fullft/rinse_11repo_insertx5_fullft_bs256_nw64_fsdp8_20260513/9000
       - RLT_ACTOR_CHECKPOINT_PATH=${RLT_ACTOR_CHECKPOINT_PATH:-/app/rlt_online/run/inference_actor/LATEST}
       - PYTHONPATH=/app:/app/src:/app/packages/openpi-client/src
       - JAX_PLATFORMS=cuda
@@ -148,7 +148,7 @@ services:
         --policy-delay ${RLT_POLICY_DELAY:-2}
         --log-interval ${RLT_LOG_INTERVAL:-50}
         --save-interval ${RLT_SAVE_INTERVAL:-1000}
-        --actor-publish-interval ${RLT_ACTOR_PUBLISH_INTERVAL:-500}
+        --actor-publish-interval ${RLT_ACTOR_PUBLISH_INTERVAL:-1000}
         --scan-interval ${RLT_SCAN_INTERVAL:-1.0}
         --wait-sleep-seconds ${RLT_WAIT_SLEEP_SECONDS:-1.0}
         --wandb-project ${WANDB_PROJECT:-openpi-rlt-online}
@@ -227,15 +227,15 @@ services:
         ${SERVER_ARGS:---video-memory-num-frames 1
         --video-memory-stride-seconds 1.0
         policy:checkpoint
-        --policy.config eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo_rl_token_query
+        --policy.config eii_rinse_11repo_cam4_fullft
         --policy.dir
-        /app/checkpoints/eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo_rl_token_query/rl_token_2048_enc4_dec4_query_from_19000_20260528/12000}
+        /app/checkpoints/eii_rinse_11repo_cam4_fullft/rinse_11repo_insertx5_fullft_bs256_nw64_fsdp8_20260513/9000}
     init: true
     tty: true
     network_mode: host
     volumes:
       - $PWD:/app
-      - $PWD/checkpoints:/app/checkpoints:ro
+      - /home/eii/openpi0.5-rtc/checkpoints:/app/checkpoints:ro
       - ${OPENPI_DATA_HOME:-~/.cache/openpi}:/openpi_assets
     environment:
       - GIT_LFS_SKIP_SMUDGE=1
@@ -251,7 +251,7 @@ services:
       - UV_NO_SYNC=1
       - UV_NO_DEV=1
       - PYTHONPATH=/app/src
-      - RLT_RL_TOKEN_CHECKPOINT_PATH=/app/checkpoints/eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo_rl_token_query/rl_token_2048_enc4_dec4_query_from_19000_20260528/12000
+      - RLT_RL_TOKEN_CHECKPOINT_PATH=/app/checkpoints/eii_rinse_11repo_cam4_fullft/rinse_11repo_insertx5_fullft_bs256_nw64_fsdp8_20260513/9000
     gpus: all
 
   redis:
