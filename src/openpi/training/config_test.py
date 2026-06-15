@@ -11,6 +11,7 @@ def test_rinse_small_rl_token_config_matches_base_checkpoint_inputs():
 
     assert _keyword_value(call, "num_train_steps") == 10_000
     assert _keyword_value(call, "save_interval") == 2_500
+    assert _keyword_value(call, "keep_period") == 2_500
     assert _keyword_value(repack_call, "include_low") is True
     assert _keyword_value(repack_call, "include_subtask") is False
 

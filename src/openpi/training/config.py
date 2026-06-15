@@ -828,6 +828,7 @@ def _make_small_rl_token_autoencoder_config(
     resume: bool = False,
     num_train_steps: int = 20_000,
     save_interval: int = 5_000,
+    keep_period: int | None = None,
 ) -> TrainConfig:
     model = pi0_rl_config.Pi0RLConfig(
         pi05=True,
@@ -880,6 +881,7 @@ def _make_small_rl_token_autoencoder_config(
         ),
         ema_decay=None,
         save_interval=save_interval,
+        keep_period=save_interval if keep_period is None else keep_period,
         num_train_steps=num_train_steps,
         batch_size=batch_size,
         num_workers=num_workers,
@@ -1246,6 +1248,7 @@ _CONFIGS = [
         resume=False,
         num_train_steps=10_000,
         save_interval=2_500,
+        keep_period=2_500,
     ),
     _make_twist_train_config(
         "eii_rinse_9repo_cam4_lora_6000",
