@@ -15,9 +15,13 @@ from scripts import train_rlt_online
 class _FakeRedis:
     def __init__(self):
         self.messages = []
+        self.values = {}
 
     def publish(self, channel, payload):
         self.messages.append((channel, payload))
+
+    def set(self, key, payload):
+        self.values[key] = payload
 
 
 class _BrokenRedis:
@@ -152,6 +156,33 @@ def test_build_metrics_payload_is_json_serializable():
     assert payload["steps_per_sec"] == 12.0
 
 
+def test_reduce_numeric_infos_allows_manual_beta_none_metrics():
+    reduced = train_rlt_online._reduce_numeric_infos(
+        [
+            {
+                "beta": np.asarray(10.0),
+                "critic_loss": np.asarray(0.2),
+                "auto_beta_enabled": False,
+                "auto_beta_delta_norm_ema": None,
+                "auto_beta_reason": "manual_beta",
+            },
+            {
+                "beta": np.asarray(10.0),
+                "critic_loss": np.asarray(0.4),
+                "auto_beta_enabled": False,
+                "auto_beta_delta_norm_ema": None,
+                "auto_beta_reason": "manual_beta",
+            },
+        ]
+    )
+
+    assert reduced["beta"] == 10.0
+    assert reduced["critic_loss"] == pytest.approx(0.3)
+    assert reduced["auto_beta_enabled"] == 0.0
+    assert "auto_beta_delta_norm_ema" not in reduced
+    assert "auto_beta_reason" not in reduced
+
+
 
 def test_auto_beta_controller_reduces_beta_when_delta_low_and_advantage_positive():
     controller = train_rlt_online.AutoBetaController(
@@ -241,6 +272,7 @@ def test_redis_metrics_publisher_publishes_json():
     decoded = json.loads(payload)
     assert decoded["type"] == "rlt_trainer_metrics"
     assert decoded["replay_size"] == 7
+    assert json.loads(fake.values["aloha_rlt_state:latest"]) == decoded
 
 
 def test_redis_metrics_publisher_disabled_does_not_publish():

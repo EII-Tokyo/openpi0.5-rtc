@@ -12,6 +12,9 @@ class Settings:
     runtime_state_channel: str = os.getenv("RUNTIME_STATE_CHANNEL", "aloha_runtime_state")
     rlt_control_channel: str = os.getenv("RLT_CONTROL_CHANNEL", "aloha_rlt_control")
     rlt_state_channel: str = os.getenv("RLT_STATE_CHANNEL", "aloha_rlt_state")
+    rlt_state_latest_key: str = field(
+        default_factory=lambda: os.getenv("RLT_STATE_LATEST_KEY", f"{os.getenv('RLT_STATE_CHANNEL', 'aloha_rlt_state')}:latest")
+    )
     camera_jpeg_quality: int = int(os.getenv("CAMERA_JPEG_QUALITY", "70"))
     realtime_hz: float = float(os.getenv("REALTIME_HZ", "10"))
     rollouts_root: str = os.getenv("ROLLOUTS_ROOT", "/app/rollouts")

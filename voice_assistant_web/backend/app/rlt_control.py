@@ -57,6 +57,7 @@ class RLTControlStore:
             self._redis_thread.join(timeout=1.0)
 
     def snapshot(self) -> RLTControlState:
+        self._refresh_latest_runtime_metrics()
         with self._lock:
             self._apply_score_timeout_locked()
             self._apply_ledger_stats_locked()
@@ -333,6 +334,13 @@ class RLTControlStore:
 
     def update_runtime_metrics(self, payload: dict[str, Any]) -> None:
         with self._lock:
+            incoming_timestamp = payload.get("timestamp")
+            if (
+                incoming_timestamp is not None
+                and self._state.rlt_metrics_timestamp is not None
+                and float(incoming_timestamp) <= float(self._state.rlt_metrics_timestamp)
+            ):
+                return
             if payload.get("type") in {"rlt_replay_segment_written", "rlt_replay_segment_committed", "rlt_replay_segment_rejected"}:
                 self._record_replay_ack_locked(payload)
             else:
@@ -406,6 +414,27 @@ class RLTControlStore:
             self._apply_ledger_stats_locked()
             self._refresh_derived_locked()
             self._persist_locked()
+
+    def _refresh_latest_runtime_metrics(self) -> None:
+        try:
+            raw_payload = self._redis.get(settings.rlt_state_latest_key)
+        except Exception:
+            logging.exception("Failed to read latest RLT runtime state from Redis")
+            return
+        if raw_payload is None:
+            return
+        try:
+            if isinstance(raw_payload, bytes):
+                raw_payload = raw_payload.decode("utf-8")
+            payload = json.loads(raw_payload)
+        except (UnicodeDecodeError, json.JSONDecodeError, TypeError):
+            logging.warning("Ignoring invalid latest RLT runtime state payload")
+            return
+        if not isinstance(payload, dict):
+            return
+        if payload.get("type") != "rlt_trainer_metrics":
+            return
+        self.update_runtime_metrics(payload)
 
     def _record_replay_ack_locked(self, payload: dict[str, Any]) -> None:
         phase = str(payload.get("phase") or self._state.training_phase or "warmup")

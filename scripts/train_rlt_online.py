@@ -110,6 +110,7 @@ class RedisMetricsPublisher:
         *,
         enabled: bool,
         channel: str,
+        latest_key: str | None = None,
         host: str = "localhost",
         port: int = 6379,
         db: int = 0,
@@ -117,6 +118,7 @@ class RedisMetricsPublisher:
     ):
         self._enabled = enabled
         self._channel = channel
+        self._latest_key = latest_key or f"{channel}:latest"
         self._client = redis_client
         self._warned = False
         if not self._enabled or self._client is not None:
@@ -134,7 +136,9 @@ class RedisMetricsPublisher:
         if not self._enabled or self._client is None:
             return
         try:
-            self._client.publish(self._channel, json.dumps(payload, sort_keys=True))
+            encoded = json.dumps(payload, sort_keys=True)
+            self._client.set(self._latest_key, encoded)
+            self._client.publish(self._channel, encoded)
         except Exception as exc:
             if not self._warned:
                 logging.warning("Failed to publish RLT trainer metrics to Redis: %s", exc)
@@ -525,6 +529,21 @@ def _build_metrics_payload(
         "train_action_horizon": 0 if train_shape is None else int(train_shape.action_horizon),
         "steps_per_sec": _json_float(reduced.get("steps_per_sec")),
     }
+
+
+def _reduce_numeric_infos(infos: list[dict[str, object]]) -> dict[str, float]:
+    reduced: dict[str, float] = {}
+    if not infos:
+        return reduced
+    for key in infos[0]:
+        values = [item.get(key) for item in infos]
+        if any(value is None for value in values):
+            continue
+        first = np.asarray(values[0])
+        if first.ndim != 0 or first.dtype.kind not in "biuf":
+            continue
+        reduced[key] = float(np.mean([np.asarray(value) for value in values]))
+    return reduced
 
 
 def _wandb_url() -> str | None:
@@ -977,12 +996,7 @@ def main(args: Args) -> None:
                 )
                 logging.info("Saved RLT training checkpoint at step=%d path=%s", current_step, checkpoint_dir)
             if current_step % args.log_interval == 0 and infos:
-                reduced = {}
-                for key in infos[0]:
-                    first = np.asarray(infos[0][key])
-                    if first.ndim != 0 or first.dtype.kind not in "biuf":
-                        continue
-                    reduced[key] = float(np.mean([np.asarray(item[key]) for item in infos]))
+                reduced = _reduce_numeric_infos(infos)
                 stats = store.stats
                 reduced.update(
                     {

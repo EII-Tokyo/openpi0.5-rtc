@@ -12,9 +12,13 @@ from voice_assistant_web.backend.app.schemas import RLTControlState
 class _FakeRedis:
     def __init__(self):
         self.messages = []
+        self.values = {}
 
     def publish(self, channel, payload):
         self.messages.append((channel, payload))
+
+    def get(self, key):
+        return self.values.get(key)
 
 
 class _Store(RLTControlStore):
@@ -298,6 +302,52 @@ def test_trainer_metrics_update_actor_critic_diagnostics():
     assert state.replay_action_horizon == 50
     assert state.train_action_horizon == 10
     assert state.rlt_metrics_timestamp == 1234.5
+
+
+def test_snapshot_refreshes_newer_latest_metrics_from_redis():
+    store = _store(warmup_target=1)
+    store._redis.values["aloha_rlt_state:latest"] = json.dumps(
+        {
+            "type": "rlt_trainer_metrics",
+            "trainer_step": 500,
+            "beta": 9.0,
+            "trainer_running": True,
+            "timestamp": 2000.0,
+        }
+    )
+
+    state = store.snapshot()
+
+    assert state.trainer_step == 500
+    assert state.beta == 9.0
+    assert state.trainer_running is True
+    assert state.rlt_metrics_timestamp == 2000.0
+
+
+def test_snapshot_ignores_older_latest_metrics_from_redis():
+    store = _store(warmup_target=1)
+    store.update_runtime_metrics(
+        {
+            "type": "rlt_trainer_metrics",
+            "trainer_step": 500,
+            "beta": 9.0,
+            "timestamp": 2000.0,
+        }
+    )
+    store._redis.values["aloha_rlt_state:latest"] = json.dumps(
+        {
+            "type": "rlt_trainer_metrics",
+            "trainer_step": 100,
+            "beta": 30.0,
+            "timestamp": 1000.0,
+        }
+    )
+
+    state = store.snapshot()
+
+    assert state.trainer_step == 500
+    assert state.beta == 9.0
+    assert state.rlt_metrics_timestamp == 2000.0
 
 
 def test_config_update_publishes_critic_gate_settings():
