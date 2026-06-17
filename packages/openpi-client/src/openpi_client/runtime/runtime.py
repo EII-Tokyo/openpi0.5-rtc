@@ -89,7 +89,7 @@ class Runtime:
             "beta": float(os.getenv("RLT_DEFAULT_BETA", "10.0")),
             "intervention_scale": float(os.getenv("RLT_DEFAULT_INTERVENTION_SCALE", "0.25")),
             "max_delta": float(os.getenv("RLT_DEFAULT_MAX_DELTA", "0.1")),
-            "critic_gate_enabled": os.getenv("RLT_DEFAULT_CRITIC_GATE_ENABLED", "0") in {"1", "true", "True"},
+            "critic_gate_enabled": os.getenv("RLT_DEFAULT_CRITIC_GATE_ENABLED", "1") in {"1", "true", "True"},
             "critic_gate_margin": float(os.getenv("RLT_DEFAULT_CRITIC_GATE_MARGIN", "0.0")),
             "critic_gate_temperature": float(os.getenv("RLT_DEFAULT_CRITIC_GATE_TEMPERATURE", "0.05")),
             "critic_ready": False,
