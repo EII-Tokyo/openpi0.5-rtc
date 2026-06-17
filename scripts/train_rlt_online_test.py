@@ -286,6 +286,79 @@ def test_redis_control_subscriber_reads_trainer_enabled_and_beta_updates():
     assert update == {"trainer_enabled": False, "beta": 7.5}
 
 
+def test_redis_control_subscriber_reads_auto_beta_updates():
+    fake = _FakeRedisWithPubSub(
+        [
+            {
+                "type": "message",
+                "data": json.dumps(
+                    {
+                        "type": "config_update",
+                        "auto_beta_enabled": True,
+                        "auto_beta_target_delta_norm": 0.06,
+                        "auto_beta_min": 1.0,
+                        "auto_beta_max": 30.0,
+                        "auto_beta_lr": 0.03,
+                        "auto_beta_ema_decay": 0.8,
+                        "auto_beta_update_interval": 100,
+                        "auto_beta_q_margin": 0.01,
+                    }
+                ),
+            }
+        ]
+    )
+    subscriber = train_rlt_online.RedisControlSubscriber(
+        enabled=True,
+        channel="aloha_rlt_control",
+        redis_client=fake,
+    )
+
+    update = subscriber.poll_update()
+
+    assert update == {
+        "auto_beta_enabled": True,
+        "auto_beta_target_delta_norm": 0.06,
+        "auto_beta_min": 1.0,
+        "auto_beta_max": 30.0,
+        "auto_beta_lr": 0.03,
+        "auto_beta_ema_decay": 0.8,
+        "auto_beta_update_interval": 100,
+        "auto_beta_q_margin": 0.01,
+    }
+
+
+def test_auto_beta_controller_accepts_runtime_config_update():
+    controller = train_rlt_online.AutoBetaController(
+        beta=10.0,
+        target_delta_norm=0.13,
+        beta_min=1.0,
+        beta_max=15.0,
+        lr=0.03,
+        ema_decay=0.8,
+        q_margin=0.001,
+        update_interval=100,
+    )
+
+    controller.update_config(
+        target_delta_norm=0.06,
+        beta_min=2.0,
+        beta_max=30.0,
+        lr=0.05,
+        ema_decay=0.7,
+        q_margin=0.01,
+        update_interval=50,
+    )
+
+    assert controller.target_delta_norm == 0.06
+    assert controller.beta_min == 2.0
+    assert controller.beta_max == 30.0
+    assert controller.lr == 0.05
+    assert controller.ema_decay == 0.7
+    assert controller.q_margin == 0.01
+    assert controller.update_interval == 50
+    assert controller.metrics()["auto_beta_target_delta_norm"] == 0.06
+
+
 def test_save_actor_for_inference_writes_runtime_metadata(tmp_path):
     config = rlt_training.RLTTrainingConfig(
         model=rlt.RLTConfig(

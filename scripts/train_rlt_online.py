@@ -172,10 +172,10 @@ class RedisControlSubscriber:
             self._pubsub = None
             logging.warning("Disabling Redis RLT control subscriber: %s", exc)
 
-    def poll_update(self) -> dict[str, float | bool]:
+    def poll_update(self) -> dict[str, float | bool | int]:
         if not self._enabled or self._pubsub is None:
             return {}
-        latest_update: dict[str, float | bool] = {}
+        latest_update: dict[str, float | bool | int] = {}
         try:
             while True:
                 message = self._pubsub.get_message(timeout=0.0)
@@ -198,6 +198,28 @@ class RedisControlSubscriber:
                         latest_update["beta"] = beta
                 if "trainer_enabled" in payload:
                     latest_update["trainer_enabled"] = bool(payload["trainer_enabled"])
+                if "auto_beta_enabled" in payload:
+                    latest_update["auto_beta_enabled"] = bool(payload["auto_beta_enabled"])
+                for key in (
+                    "auto_beta_target_delta_norm",
+                    "auto_beta_min",
+                    "auto_beta_max",
+                    "auto_beta_lr",
+                    "auto_beta_ema_decay",
+                    "auto_beta_q_margin",
+                ):
+                    if key not in payload:
+                        continue
+                    value = _finite_float(payload[key])
+                    if value is not None:
+                        latest_update[key] = value
+                if "auto_beta_update_interval" in payload:
+                    try:
+                        update_interval = int(payload["auto_beta_update_interval"])
+                    except (TypeError, ValueError):
+                        update_interval = 0
+                    if update_interval >= 1:
+                        latest_update["auto_beta_update_interval"] = update_interval
         except Exception as exc:
             if not self._warned:
                 logging.warning("Failed to read RLT control update from Redis: %s", exc)
@@ -263,6 +285,44 @@ class AutoBetaController:
         self.critic_loss_ema: float | None = None
         self.reason = "initializing"
 
+    def update_config(
+        self,
+        *,
+        target_delta_norm: float | None = None,
+        beta_min: float | None = None,
+        beta_max: float | None = None,
+        lr: float | None = None,
+        ema_decay: float | None = None,
+        q_margin: float | None = None,
+        update_interval: int | None = None,
+    ) -> None:
+        target_delta_norm = self.target_delta_norm if target_delta_norm is None else float(target_delta_norm)
+        beta_min = self.beta_min if beta_min is None else float(beta_min)
+        beta_max = self.beta_max if beta_max is None else float(beta_max)
+        lr = self.lr if lr is None else float(lr)
+        ema_decay = self.ema_decay if ema_decay is None else float(ema_decay)
+        q_margin = self.q_margin if q_margin is None else float(q_margin)
+        update_interval = self.update_interval if update_interval is None else int(update_interval)
+        if target_delta_norm <= 0:
+            raise ValueError("target_delta_norm must be positive")
+        if beta_min <= 0 or beta_max < beta_min:
+            raise ValueError("beta range must satisfy 0 < beta_min <= beta_max")
+        if lr < 0:
+            raise ValueError("lr must be non-negative")
+        if not 0 <= ema_decay < 1:
+            raise ValueError("ema_decay must be in [0, 1)")
+        if update_interval < 1:
+            raise ValueError("update_interval must be >= 1")
+        self.target_delta_norm = target_delta_norm
+        self.beta_min = beta_min
+        self.beta_max = beta_max
+        self.lr = lr
+        self.ema_decay = ema_decay
+        self.q_margin = q_margin
+        self.update_interval = update_interval
+        self.beta = float(np.clip(self.beta, self.beta_min, self.beta_max))
+        self.reason = "config_updated"
+
     def update(self, *, step: int, metrics: dict) -> AutoBetaUpdate:
         critic_loss = _finite_float(metrics.get("critic_loss"))
         if critic_loss is not None:
@@ -314,11 +374,17 @@ class AutoBetaController:
 
     def metrics(self) -> dict[str, float | bool | str | None]:
         return {
-            "auto_beta_enabled": True,
-            "auto_beta_target_delta_norm": self.target_delta_norm,
-            "auto_beta_delta_norm_ema": self.delta_norm_ema,
-            "auto_beta_q_advantage_ema": self.q_advantage_ema,
-            "auto_beta_critic_loss_ema": self.critic_loss_ema,
+        "auto_beta_enabled": True,
+        "auto_beta_target_delta_norm": self.target_delta_norm,
+        "auto_beta_min": self.beta_min,
+        "auto_beta_max": self.beta_max,
+        "auto_beta_lr": self.lr,
+        "auto_beta_ema_decay": self.ema_decay,
+        "auto_beta_update_interval": self.update_interval,
+        "auto_beta_q_margin": self.q_margin,
+        "auto_beta_delta_norm_ema": self.delta_norm_ema,
+        "auto_beta_q_advantage_ema": self.q_advantage_ema,
+        "auto_beta_critic_loss_ema": self.critic_loss_ema,
             "auto_beta_reason": self.reason,
         }
 
@@ -328,6 +394,36 @@ def _finite_float(value) -> float | None:
         return None
     value = float(value)
     return value if math.isfinite(value) else None
+
+
+def _disabled_auto_beta_metrics(config: dict[str, float | int]) -> dict[str, float | bool | str | None]:
+    return {
+        "auto_beta_enabled": False,
+        "auto_beta_target_delta_norm": float(config["target_delta_norm"]),
+        "auto_beta_min": float(config["beta_min"]),
+        "auto_beta_max": float(config["beta_max"]),
+        "auto_beta_lr": float(config["lr"]),
+        "auto_beta_ema_decay": float(config["ema_decay"]),
+        "auto_beta_update_interval": int(config["update_interval"]),
+        "auto_beta_q_margin": float(config["q_margin"]),
+        "auto_beta_delta_norm_ema": None,
+        "auto_beta_q_advantage_ema": None,
+        "auto_beta_critic_loss_ema": None,
+        "auto_beta_reason": "manual_beta",
+    }
+
+
+def _build_auto_beta_controller(beta: float, config: dict[str, float | int]) -> AutoBetaController:
+    return AutoBetaController(
+        beta=beta,
+        target_delta_norm=float(config["target_delta_norm"]),
+        beta_min=float(config["beta_min"]),
+        beta_max=float(config["beta_max"]),
+        lr=float(config["lr"]),
+        ema_decay=float(config["ema_decay"]),
+        q_margin=float(config["q_margin"]),
+        update_interval=int(config["update_interval"]),
+    )
 
 def _with_runtime_beta(state: rlt_training.RLTTrainState, beta: float) -> rlt_training.RLTTrainState:
     model = nnx.merge(state.model_def, state.params)
@@ -402,6 +498,14 @@ def _build_metrics_payload(
         "beta": _json_float(reduced.get("beta")),
         "auto_beta_enabled": _json_bool(reduced.get("auto_beta_enabled")),
         "auto_beta_target_delta_norm": _json_float(reduced.get("auto_beta_target_delta_norm")),
+        "auto_beta_min": _json_float(reduced.get("auto_beta_min")),
+        "auto_beta_max": _json_float(reduced.get("auto_beta_max")),
+        "auto_beta_lr": _json_float(reduced.get("auto_beta_lr")),
+        "auto_beta_ema_decay": _json_float(reduced.get("auto_beta_ema_decay")),
+        "auto_beta_update_interval": None
+        if reduced.get("auto_beta_update_interval") is None
+        else int(reduced.get("auto_beta_update_interval")),
+        "auto_beta_q_margin": _json_float(reduced.get("auto_beta_q_margin")),
         "auto_beta_delta_norm_ema": _json_float(reduced.get("auto_beta_delta_norm_ema")),
         "auto_beta_q_advantage_ema": _json_float(reduced.get("auto_beta_q_advantage_ema")),
         "auto_beta_critic_loss_ema": _json_float(reduced.get("auto_beta_critic_loss_ema")),
@@ -667,19 +771,20 @@ def main(args: Args) -> None:
     )
     runtime_beta = float(config.model.beta)
     trainer_enabled = False
+    auto_beta_enabled = bool(args.auto_beta_enabled)
+    auto_beta_config: dict[str, float | int] = {
+        "target_delta_norm": float(args.auto_beta_target_delta_norm),
+        "beta_min": float(args.auto_beta_min),
+        "beta_max": float(args.auto_beta_max),
+        "lr": float(args.auto_beta_lr),
+        "ema_decay": float(args.auto_beta_ema_decay),
+        "q_margin": float(args.auto_beta_q_margin),
+        "update_interval": int(args.auto_beta_update_interval),
+    }
     auto_beta_controller = None
-    latest_auto_beta_metrics: dict[str, float | bool | str | None] = {"auto_beta_enabled": False}
-    if args.auto_beta_enabled:
-        auto_beta_controller = AutoBetaController(
-            beta=runtime_beta,
-            target_delta_norm=args.auto_beta_target_delta_norm,
-            beta_min=args.auto_beta_min,
-            beta_max=args.auto_beta_max,
-            lr=args.auto_beta_lr,
-            ema_decay=args.auto_beta_ema_decay,
-            q_margin=args.auto_beta_q_margin,
-            update_interval=args.auto_beta_update_interval,
-        )
+    latest_auto_beta_metrics: dict[str, float | bool | str | int | None] = _disabled_auto_beta_metrics(auto_beta_config)
+    if auto_beta_enabled:
+        auto_beta_controller = _build_auto_beta_controller(runtime_beta, auto_beta_config)
         latest_auto_beta_metrics = auto_beta_controller.metrics()
 
     initial_actor_dir = _save_actor_for_inference(
@@ -726,7 +831,46 @@ def main(args: Args) -> None:
             control_update = control_subscriber.poll_update()
             if "trainer_enabled" in control_update:
                 trainer_enabled = bool(control_update["trainer_enabled"])
-            beta_update = None if args.auto_beta_enabled else control_update.get("beta")
+            auto_beta_config_changed = False
+            if "auto_beta_enabled" in control_update:
+                auto_beta_enabled = bool(control_update["auto_beta_enabled"])
+                auto_beta_config_changed = True
+            auto_beta_key_map = {
+                "auto_beta_target_delta_norm": "target_delta_norm",
+                "auto_beta_min": "beta_min",
+                "auto_beta_max": "beta_max",
+                "auto_beta_lr": "lr",
+                "auto_beta_ema_decay": "ema_decay",
+                "auto_beta_q_margin": "q_margin",
+                "auto_beta_update_interval": "update_interval",
+            }
+            for update_key, config_key in auto_beta_key_map.items():
+                if update_key in control_update:
+                    auto_beta_config[config_key] = control_update[update_key]  # type: ignore[assignment]
+                    auto_beta_config_changed = True
+            if auto_beta_config_changed:
+                if auto_beta_enabled:
+                    if auto_beta_controller is None:
+                        auto_beta_controller = _build_auto_beta_controller(runtime_beta, auto_beta_config)
+                    else:
+                        auto_beta_controller.update_config(
+                            target_delta_norm=float(auto_beta_config["target_delta_norm"]),
+                            beta_min=float(auto_beta_config["beta_min"]),
+                            beta_max=float(auto_beta_config["beta_max"]),
+                            lr=float(auto_beta_config["lr"]),
+                            ema_decay=float(auto_beta_config["ema_decay"]),
+                            q_margin=float(auto_beta_config["q_margin"]),
+                            update_interval=int(auto_beta_config["update_interval"]),
+                        )
+                    if auto_beta_controller.beta != runtime_beta:
+                        runtime_beta = auto_beta_controller.beta
+                        state = _with_runtime_beta(state, runtime_beta)
+                    latest_auto_beta_metrics = auto_beta_controller.metrics()
+                    logging.info("Updated auto beta config: %s", latest_auto_beta_metrics)
+                else:
+                    latest_auto_beta_metrics = _disabled_auto_beta_metrics(auto_beta_config)
+                    logging.info("Disabled auto beta; manual beta controls are active")
+            beta_update = None if auto_beta_enabled else control_update.get("beta")
             if beta_update is not None and float(beta_update) != runtime_beta:
                 runtime_beta = float(beta_update)
                 state = _with_runtime_beta(state, runtime_beta)
@@ -777,7 +921,7 @@ def main(args: Args) -> None:
             state, info = rlt_training.train_step(state, batch, train_rng)
             info = jax.device_get(info)
             current_step = int(state.step)
-            if auto_beta_controller is not None:
+            if auto_beta_enabled and auto_beta_controller is not None:
                 auto_beta_update = auto_beta_controller.update(step=current_step, metrics=info)
                 latest_auto_beta_metrics = auto_beta_update.metrics
                 if auto_beta_update.changed and auto_beta_update.beta != runtime_beta:

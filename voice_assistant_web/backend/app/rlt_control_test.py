@@ -1,4 +1,5 @@
 import numpy as np
+import json
 from voice_assistant_web.backend.app.rlt_control import RLTControlStore
 
 from voice_assistant_web.backend.app.rlt_segment_ledger import RLTSegmentLedger
@@ -346,6 +347,48 @@ def test_config_update_publishes_manual_trainer_enabled():
     assert state.trainer_enabled is True
     payload = store._redis.messages[-1][1]
     assert '"trainer_enabled": true' in payload
+
+
+def test_config_update_publishes_auto_beta_settings():
+    store = _store(warmup_target=1)
+
+    request = type(
+        "Req",
+        (),
+        {
+            "warmup_target": None,
+            "beta": None,
+            "intervention_scale": None,
+            "max_delta": None,
+            "wandb_url": None,
+            "actor_enabled": None,
+            "trainer_enabled": None,
+            "critic_gate_enabled": None,
+            "critic_gate_margin": None,
+            "critic_gate_temperature": None,
+            "auto_beta_enabled": True,
+            "auto_beta_target_delta_norm": 0.06,
+            "auto_beta_min": 1.0,
+            "auto_beta_max": 30.0,
+            "auto_beta_lr": 0.03,
+            "auto_beta_ema_decay": 0.8,
+            "auto_beta_update_interval": 100,
+            "auto_beta_q_margin": 0.01,
+        },
+    )()
+    state = store.update_config(request)
+
+    assert state.auto_beta_enabled is True
+    assert state.auto_beta_target_delta_norm == 0.06
+    assert state.auto_beta_max == 30.0
+    assert state.auto_beta_q_margin == 0.01
+    payload = json.loads(store._redis.messages[-1][1])
+    assert payload["auto_beta_enabled"] is True
+    assert payload["auto_beta_target_delta_norm"] == 0.06
+    assert payload["auto_beta_max"] == 30.0
+    assert payload["auto_beta_q_margin"] == 0.01
+    assert payload["state"]["auto_beta_enabled"] is True
+    assert payload["state"]["auto_beta_target_delta_norm"] == 0.06
 
 
 def test_runtime_metrics_update_inference_gate_diagnostics():

@@ -708,6 +708,17 @@ button {
   background: #fffefa;
 }
 
+.rlt-field input[type="text"],
+.rlt-field select {
+  width: 100%;
+  min-height: 36px;
+  padding: 6px 10px;
+  border: 1px solid #d6d0c5;
+  border-radius: 8px;
+  background: #fffefa;
+  color: #221f1a;
+}
+
 .rlt-field input[type="range"] {
   width: 100%;
 }
@@ -722,6 +733,93 @@ button {
   align-items: center;
   justify-content: center;
   margin-top: 8px;
+}
+
+.page-panel {
+  grid-row: 2 / -1;
+  min-height: 0;
+  overflow: auto;
+  padding: 12px;
+  border: 1px solid #ddd7cc;
+  border-radius: 8px;
+  background: #fffefa;
+}
+
+.config-page,
+.system-page {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 12px;
+}
+
+.config-grid,
+.system-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  align-content: start;
+}
+
+.config-section {
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid #ddd7cc;
+  border-radius: 8px;
+  background: #f8f6f0;
+}
+
+.config-section.wide {
+  grid-column: 1 / -1;
+}
+
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.section-head h3 {
+  margin: 0;
+  font-size: 15px;
+}
+
+.field-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 10px;
+}
+
+.readonly-row,
+.path-row {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+  padding: 8px;
+  border-radius: 8px;
+  background: #ebe8df;
+}
+
+.readonly-row span,
+.path-row span {
+  color: #635b50;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.readonly-row strong,
+.path-row strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: #221f1a;
+  font-size: 13px;
+}
+
+.system-events {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 8px;
 }
 
 .rollouts-page {
@@ -967,7 +1065,9 @@ button {
   }
 
   .layout,
-  .rollouts-page {
+  .rollouts-page,
+  .config-grid,
+  .system-grid {
     grid-template-columns: 1fr;
     overflow: visible;
   }
@@ -980,6 +1080,7 @@ button {
 @media (max-width: 720px) {
   .camera-grid,
   .camera-strip,
+  .field-grid,
   .metric-grid,
   .rlt-control-grid {
     grid-template-columns: 1fr;

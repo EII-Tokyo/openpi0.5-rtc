@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { CameraGrid } from './components/CameraGrid'
+import { RLTConfigPage } from './components/RLTConfigPage'
 import { RLTConfigPanel, RLTControlPanel, RLTStatsPanel } from './components/RLTControlPanel'
 import { RolloutBrowser } from './components/RolloutBrowser'
+import { SystemPage } from './components/SystemPage'
 import { AppLanguage, translations } from './i18n'
 import { RLTControlState, sendRobotTask, wsBase } from './services/api'
 import { truncateLabel } from './utils/text'
@@ -41,8 +43,14 @@ const initialRLT: RLTControlState = {
   actor_ready: false,
   actor_locked_reason: 'warmup',
   beta: 10,
-  auto_beta_enabled: false,
-  auto_beta_target_delta_norm: null,
+  auto_beta_enabled: true,
+  auto_beta_target_delta_norm: 0.06,
+  auto_beta_min: 1,
+  auto_beta_max: 30,
+  auto_beta_lr: 0.03,
+  auto_beta_ema_decay: 0.8,
+  auto_beta_update_interval: 100,
+  auto_beta_q_margin: 0.01,
   auto_beta_delta_norm_ema: null,
   auto_beta_q_advantage_ema: null,
   auto_beta_critic_loss_ema: null,
@@ -120,7 +128,8 @@ export default function App() {
   const [state, setState] = useState<RealtimeState>(initialState)
   const [language, setLanguage] = useState<AppLanguage>('en')
   const [cameraView, setCameraView] = useState<'focus' | 'quad'>('quad')
-  const [page, setPage] = useState<'live' | 'rollouts' | 'key_regions'>('live')
+  const [page, setPage] = useState<'live' | 'config' | 'system' | 'rollouts' | 'key_regions'>('live')
+  const [wsConnected, setWsConnected] = useState(false)
   const t = translations[language]
   const currentTaskLabel = state.robot.current_task ? truncateLabel(state.robot.current_task) : t.noActiveTask
 
@@ -135,16 +144,19 @@ export default function App() {
 
       ws.onmessage = (event) => {
         if (!isActive) return
+        setWsConnected(true)
         const payload = JSON.parse(event.data)
         setState({ ...payload, rlt: payload.rlt || initialRLT })
       }
 
       ws.onclose = () => {
         if (!isActive) return
+        setWsConnected(false)
         reconnectTimer = window.setTimeout(connect, 1000)
       }
 
       ws.onerror = () => {
+        setWsConnected(false)
         ws.close()
       }
     }
@@ -195,6 +207,12 @@ export default function App() {
           <nav className="page-tabs" aria-label="Primary">
             <button className={page === 'live' ? 'active' : ''} type="button" onClick={() => setPage('live')}>
               RLT Control
+            </button>
+            <button className={page === 'config' ? 'active' : ''} type="button" onClick={() => setPage('config')}>
+              Config
+            </button>
+            <button className={page === 'system' ? 'active' : ''} type="button" onClick={() => setPage('system')}>
+              System
             </button>
             <button className={page === 'rollouts' ? 'active' : ''} type="button" onClick={() => setPage('rollouts')}>
               Rollouts
@@ -252,6 +270,15 @@ export default function App() {
             </aside>
           </section>
         </>
+      ) : page === 'config' ? (
+        <RLTConfigPage rlt={state.rlt} onState={setRLTState} />
+      ) : page === 'system' ? (
+        <SystemPage
+          rlt={state.rlt}
+          wsConnected={wsConnected}
+          cameraStatus={state.camera_status}
+          cameraTimestamps={state.camera_timestamps}
+        />
       ) : page === 'key_regions' ? (
         <RolloutBrowser
           title="Key Regions"

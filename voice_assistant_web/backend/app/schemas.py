@@ -51,8 +51,14 @@ class RLTControlState(BaseModel):
     actor_effective: bool = False
     actor_locked_reason: str | None = "warmup"
     beta: float = 10.0
-    auto_beta_enabled: bool = False
-    auto_beta_target_delta_norm: float | None = None
+    auto_beta_enabled: bool = True
+    auto_beta_target_delta_norm: float | None = 0.06
+    auto_beta_min: float = 1.0
+    auto_beta_max: float = 30.0
+    auto_beta_lr: float = 0.03
+    auto_beta_ema_decay: float = 0.8
+    auto_beta_update_interval: int = 100
+    auto_beta_q_margin: float = 0.01
     auto_beta_delta_norm_ema: float | None = None
     auto_beta_q_advantage_ema: float | None = None
     auto_beta_critic_loss_ema: float | None = None
@@ -120,6 +126,14 @@ class RLTScoreRequest(BaseModel):
 class RLTConfigRequest(BaseModel):
     warmup_target: int | None = Field(default=None, ge=1, le=100000)
     beta: float | None = Field(default=None, ge=0, le=1000)
+    auto_beta_enabled: bool | None = None
+    auto_beta_target_delta_norm: float | None = Field(default=None, gt=0, le=10)
+    auto_beta_min: float | None = Field(default=None, gt=0, le=1000)
+    auto_beta_max: float | None = Field(default=None, gt=0, le=1000)
+    auto_beta_lr: float | None = Field(default=None, ge=0, le=10)
+    auto_beta_ema_decay: float | None = Field(default=None, ge=0, lt=1)
+    auto_beta_update_interval: int | None = Field(default=None, ge=1, le=100000)
+    auto_beta_q_margin: float | None = Field(default=None, ge=-1000, le=1000)
     actor_enabled: bool | None = None
     trainer_enabled: bool | None = None
     intervention_scale: float | None = Field(default=None, ge=0, le=1)

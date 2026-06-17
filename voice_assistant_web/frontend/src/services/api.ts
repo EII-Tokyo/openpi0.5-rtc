@@ -141,6 +141,12 @@ export type RLTControlState = {
   beta: number
   auto_beta_enabled: boolean
   auto_beta_target_delta_norm: number | null
+  auto_beta_min: number
+  auto_beta_max: number
+  auto_beta_lr: number
+  auto_beta_ema_decay: number
+  auto_beta_update_interval: number
+  auto_beta_q_margin: number
   auto_beta_delta_norm_ema: number | null
   auto_beta_q_advantage_ema: number | null
   auto_beta_critic_loss_ema: number | null
@@ -200,6 +206,27 @@ export type RLTControlState = {
   events: RLTEvent[]
 }
 
+export type RLTConfigRequest = {
+  warmup_target?: number
+  beta?: number
+  auto_beta_enabled?: boolean
+  auto_beta_target_delta_norm?: number
+  auto_beta_min?: number
+  auto_beta_max?: number
+  auto_beta_lr?: number
+  auto_beta_ema_decay?: number
+  auto_beta_update_interval?: number
+  auto_beta_q_margin?: number
+  actor_enabled?: boolean
+  trainer_enabled?: boolean
+  intervention_scale?: number
+  max_delta?: number
+  critic_gate_enabled?: boolean
+  critic_gate_margin?: number
+  critic_gate_temperature?: number
+  wandb_url?: string | null
+}
+
 const getJson = async <T>(path: string): Promise<T> => {
   const response = await fetch(`${apiBase}${path}`)
   if (!response.ok) {
@@ -249,7 +276,7 @@ export const rescoreKeyRegion = (keyRegionId: string, reward: 0 | 1) =>
     source: 'ui',
     reason: 'operator_rescore',
   })
-export const updateRLTConfig = (config: Partial<RLTControlState>) =>
+export const updateRLTConfig = (config: RLTConfigRequest) =>
   postJson<RLTControlState>('/api/rlt/config', config)
 
 export const sendRobotTask = (taskNum: '1' | '4' | '5') =>
