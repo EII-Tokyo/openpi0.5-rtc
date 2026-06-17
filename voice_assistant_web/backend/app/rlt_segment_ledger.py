@@ -71,7 +71,7 @@ class RLTSegmentLedger:
         num_replay_transitions: int,
     ) -> None:
         existing = self.get_segment(key_region_id)
-        if existing and existing["status"] in {"committed", "voided"}:
+        if existing and existing["status"] in {"committed", "voided", "deleted"}:
             return
         self._upsert(
             key_region_id,
@@ -129,7 +129,7 @@ class RLTSegmentLedger:
 
     def record_rejected(self, key_region_id: str, *, phase: str, reason: str) -> None:
         existing = self.get_segment(key_region_id)
-        if existing and existing["status"] in {"committed", "voided"}:
+        if existing and existing["status"] in {"committed", "voided", "deleted"}:
             return
         self._upsert(key_region_id, status="rejected", phase=phase, invalid_reason=reason, event="rejected")
 
@@ -198,16 +198,23 @@ class RLTSegmentLedger:
 
     def delete_segments(self, key_region_ids: list[str]) -> list[str]:
         changed = []
-        with self._connect() as conn:
-            for key_region_id in key_region_ids:
-                if not key_region_id:
-                    continue
-                row = conn.execute("SELECT key_region_id FROM segments WHERE key_region_id = ?", (key_region_id,)).fetchone()
-                if row is None:
-                    continue
-                conn.execute("DELETE FROM segment_events WHERE key_region_id = ?", (key_region_id,))
-                conn.execute("DELETE FROM segments WHERE key_region_id = ?", (key_region_id,))
-                changed.append(key_region_id)
+        for key_region_id in key_region_ids:
+            if not key_region_id:
+                continue
+            existing = self.get_segment(key_region_id)
+            if existing and existing.get("status") == "deleted":
+                continue
+            self._upsert(
+                key_region_id,
+                status="deleted",
+                phase=str((existing or {}).get("phase") or "warmup"),
+                reward=None if existing is None else existing.get("reward"),
+                shard_path=None if existing is None else existing.get("shard_path"),
+                num_replay_transitions=0 if existing is None else int(existing.get("num_replay_transitions") or 0),
+                invalid_reason="operator_delete",
+                event="deleted",
+            )
+            changed.append(key_region_id)
         return changed
 
     def stats(self) -> dict[str, int]:

@@ -573,6 +573,8 @@ def _key_region_review_records() -> list[dict]:
         key_region_id = str(segment.get("key_region_id") or "")
         if not key_region_id:
             continue
+        if str(segment.get("status") or "") == "deleted":
+            continue
         by_id[key_region_id] = {
             "key_region_id": key_region_id,
             "status": str(segment.get("status") or "untracked"),
@@ -645,16 +647,16 @@ def _key_region_review_records() -> list[dict]:
         if not record["trainable"]:
             if record.get("status") != "committed":
                 reason = f"not_committed:{record.get('status') or 'untracked'}"
-            elif record.get("train_eligible") is not True or record.get("segment_status") != "committed":
-                reason = "not_train_eligible"
-            elif record.get("voided"):
-                reason = "voided_manifest"
             elif not record.get("shard_path") or not record.get("npz_exists"):
                 reason = "missing_npz"
             elif not record.get("manifest_exists"):
                 reason = "missing_manifest"
             elif not record.get("video_exists"):
                 reason = "missing_video"
+            elif record.get("train_eligible") is not True or record.get("segment_status") != "committed":
+                reason = "not_train_eligible"
+            elif record.get("voided"):
+                reason = "voided_manifest"
             else:
                 reason = "not_trainable"
             record["incomplete_reason"] = reason

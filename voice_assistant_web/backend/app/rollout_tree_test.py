@@ -126,6 +126,57 @@ def test_key_region_review_reconciles_saved_accepted_sample_as_trainable(tmp_pat
     assert records[0].get("incomplete_reason") is None
 
 
+def test_key_region_review_hides_deleted_tombstones(tmp_path, monkeypatch):
+    rollout_root = tmp_path / "rollouts"
+    replay_root = tmp_path / "replay"
+    fake_control = _FakeRLTControl(
+        [
+            {
+                "key_region_id": "deleted",
+                "status": "deleted",
+                "phase": "warmup",
+                "reward": 1,
+                "shard_path": "/app/replay/rlt_key_regions/task/day/shards/key_region_deleted.npz",
+                "num_replay_transitions": 3,
+                "updated_at": 9.0,
+            }
+        ]
+    )
+
+    monkeypatch.setattr(main, "ROLLOUTS_ROOT", rollout_root)
+    monkeypatch.setattr(main, "REPLAY_ROOT", replay_root)
+    monkeypatch.setattr(main, "rlt_control", fake_control)
+
+    assert main._key_region_review_records() == []
+
+
+def test_key_region_review_reports_missing_npz_before_train_eligibility(tmp_path, monkeypatch):
+    rollout_root = tmp_path / "rollouts"
+    replay_root = tmp_path / "replay"
+    fake_control = _FakeRLTControl(
+        [
+            {
+                "key_region_id": "missing",
+                "status": "committed",
+                "phase": "warmup",
+                "reward": 1,
+                "shard_path": "/app/replay/rlt_key_regions/task/day/shards/key_region_missing.npz",
+                "num_replay_transitions": 3,
+                "updated_at": 9.0,
+            }
+        ]
+    )
+
+    monkeypatch.setattr(main, "ROLLOUTS_ROOT", rollout_root)
+    monkeypatch.setattr(main, "REPLAY_ROOT", replay_root)
+    monkeypatch.setattr(main, "rlt_control", fake_control)
+
+    records = main._key_region_review_records()
+
+    assert records[0]["trainable"] is False
+    assert records[0]["incomplete_reason"] == "missing_npz"
+
+
 def test_key_region_review_reports_video_duration_and_region_offsets(tmp_path, monkeypatch):
     rollout_root = tmp_path / "rollouts"
     replay_root = tmp_path / "replay"
