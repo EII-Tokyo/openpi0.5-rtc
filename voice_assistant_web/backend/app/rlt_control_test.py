@@ -241,6 +241,8 @@ def test_trainer_metrics_update_actor_critic_diagnostics():
         {
             "type": "rlt_trainer_metrics",
             "trainer_step": 120,
+            "critic_burn_in_steps": 1000,
+            "target_sync_step": 1000,
             "critic_loss": 1.25,
             "critic_q1_loss": 0.75,
             "critic_q2_loss": 0.5,
@@ -277,6 +279,8 @@ def test_trainer_metrics_update_actor_critic_diagnostics():
     state = store.snapshot()
 
     assert state.trainer_step == 120
+    assert state.critic_burn_in_steps == 1000
+    assert state.target_sync_step == 1000
     assert state.critic_q1_loss == 0.75
     assert state.critic_q2_loss == 0.5
     assert state.actor_q_value == 1.7
@@ -363,6 +367,7 @@ def test_config_update_publishes_critic_gate_settings():
             "max_delta": None,
             "wandb_url": None,
             "actor_enabled": None,
+            "critic_burn_in_steps": 1000,
             "critic_gate_enabled": True,
             "critic_gate_margin": 0.15,
             "critic_gate_temperature": 0.2,
@@ -371,10 +376,12 @@ def test_config_update_publishes_critic_gate_settings():
     state = store.update_config(request)
 
     assert state.critic_gate_enabled is True
+    assert state.critic_burn_in_steps == 1000
     assert state.critic_gate_margin == 0.15
     assert state.critic_gate_temperature == 0.2
     payload = store._redis.messages[-1][1]
     assert '"critic_gate_enabled": true' in payload
+    assert '"critic_burn_in_steps": 1000' in payload
 
 
 def test_config_update_publishes_manual_trainer_enabled():

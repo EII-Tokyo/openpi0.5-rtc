@@ -85,3 +85,21 @@ def test_critic_params_for_inference_returns_online_critic_only():
     flat_keys = critic_params.flat_state().keys()
     assert flat_keys
     assert all("target" not in "/".join(str(part) for part in key) for key in flat_keys)
+
+
+def test_sync_target_params_hard_copies_online_networks():
+    state = rlt_training.init_train_state(_make_config(), jax.random.key(0))
+    model = rlt_training.nnx.merge(state.model_def, state.params)
+    rlt_training.nnx.update(
+        model.critic,
+        jax.tree.map(lambda value: value + 1.0, rlt_training.nnx.state(model.critic)),
+    )
+    state = rlt_training.dataclasses.replace(state, params=rlt_training.nnx.state(model))
+
+    state = rlt_training.sync_target_params(state)
+    model = rlt_training.nnx.merge(state.model_def, state.params)
+
+    critic_state = rlt_training.nnx.state(model.critic).flat_state()
+    target_critic_state = rlt_training.nnx.state(model.target_critic).flat_state()
+    for key in critic_state:
+        assert jnp.allclose(critic_state[key].value, target_critic_state[key].value)

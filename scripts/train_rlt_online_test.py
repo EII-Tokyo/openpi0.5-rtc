@@ -53,13 +53,20 @@ class _FakeRedisWithPubSub:
         return self._pubsub
 
 
-def _stats():
+def _stats(
+    *,
+    replay_size: int = 123,
+    num_shards: int = 4,
+    success_episodes: int = 3,
+    failure_episodes: int = 2,
+    bad_shards: int = 1,
+):
     return rlt_replay_store.ReplayStats(
-        replay_size=123,
-        num_shards=4,
-        success_episodes=3,
-        failure_episodes=2,
-        bad_shards=1,
+        replay_size=replay_size,
+        num_shards=num_shards,
+        success_episodes=success_episodes,
+        failure_episodes=failure_episodes,
+        bad_shards=bad_shards,
     )
 
 
@@ -111,6 +118,8 @@ def test_build_metrics_payload_is_json_serializable():
         actor_enabled=True,
         trainer_enabled=True,
         trainer_running=True,
+        critic_burn_in_steps=1000,
+        target_sync_step=1000,
         latest_actor_path="/tmp/actor",
         latest_actor_step=50,
         wandb_url="https://wandb.example/run",
@@ -119,6 +128,8 @@ def test_build_metrics_payload_is_json_serializable():
     assert json.loads(json.dumps(payload)) == payload
     assert payload["type"] == "rlt_trainer_metrics"
     assert payload["trainer_step"] == 50
+    assert payload["critic_burn_in_steps"] == 1000
+    assert payload["target_sync_step"] == 1000
     assert payload["critic_loss"] == 1.25
     assert payload["critic_q1_loss"] == 0.75
     assert payload["critic_q2_loss"] == 0.5
@@ -303,7 +314,10 @@ def test_redis_control_subscriber_reads_trainer_enabled_and_beta_updates():
         [
             {"type": "subscribe", "data": "1"},
             {"type": "message", "data": json.dumps({"type": "ignored", "trainer_enabled": True})},
-            {"type": "message", "data": json.dumps({"type": "config_update", "trainer_enabled": True})},
+            {
+                "type": "message",
+                "data": json.dumps({"type": "config_update", "trainer_enabled": True, "critic_burn_in_steps": 1000}),
+            },
             {"type": "message", "data": json.dumps({"type": "config_update", "beta": 7.5, "trainer_enabled": False})},
         ]
     )
@@ -315,7 +329,7 @@ def test_redis_control_subscriber_reads_trainer_enabled_and_beta_updates():
 
     update = subscriber.poll_update()
 
-    assert update == {"trainer_enabled": False, "beta": 7.5}
+    assert update == {"trainer_enabled": False, "critic_burn_in_steps": 1000, "beta": 7.5}
 
 
 def test_redis_control_subscriber_reads_auto_beta_updates():
@@ -518,6 +532,7 @@ def test_actor_updates_respect_replay_shard_gate():
         min_replay_shards=5,
         min_success_episodes=1,
         min_failure_episodes=1,
+        critic_burn_in_steps=0,
     )
 
     assert not train_rlt_online._actor_updates_enabled(args, _FakeStore(), step=1)
@@ -527,3 +542,26 @@ def test_actor_updates_respect_replay_shard_gate():
 
     args.actor_min_replay_shards = 5
     assert not train_rlt_online._actor_updates_enabled(args, _FakeStore(), step=1)
+
+
+def test_actor_updates_default_after_critic_burn_in():
+    class _FakeStore:
+        @property
+        def stats(self):
+            return _stats(replay_size=4096, num_shards=40, success_episodes=20, failure_episodes=20)
+
+    args = train_rlt_online.Args(
+        replay_dir="/tmp/replay",
+        min_replay_samples=2048,
+        min_replay_shards=40,
+        min_success_episodes=10,
+        min_failure_episodes=10,
+        actor_min_replay_samples=4096,
+        actor_min_replay_shards=40,
+        actor_min_success_episodes=20,
+        actor_min_failure_episodes=20,
+    )
+
+    assert args.critic_burn_in_steps == 1000
+    assert not train_rlt_online._actor_updates_enabled(args, _FakeStore(), step=999)
+    assert train_rlt_online._actor_updates_enabled(args, _FakeStore(), step=1000)

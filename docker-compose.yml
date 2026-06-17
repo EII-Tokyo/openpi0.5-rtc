@@ -132,7 +132,7 @@ services:
         --min-replay-shards ${RLT_MIN_REPLAY_SHARDS:-40}
         --min-success-episodes ${RLT_MIN_SUCCESS_EPISODES:-10}
         --min-failure-episodes ${RLT_MIN_FAILURE_EPISODES:-10}
-        --critic-burn-in-steps ${RLT_CRITIC_BURN_IN_STEPS:-0}
+        --critic-burn-in-steps ${RLT_CRITIC_BURN_IN_STEPS:-1000}
         --auto-beta-enabled
         --auto-beta-target-delta-norm ${RLT_AUTO_BETA_TARGET_DELTA_NORM:-0.06}
         --auto-beta-min ${RLT_AUTO_BETA_MIN:-1.0}

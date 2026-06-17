@@ -102,6 +102,12 @@ def critic_params_for_inference(state: RLTTrainState) -> nnx.State:
     return nnx.state(model.critic)
 
 
+def sync_target_params(state: RLTTrainState) -> RLTTrainState:
+    model = nnx.merge(state.model_def, state.params)
+    model.sync_targets()
+    return dataclasses.replace(state, params=nnx.state(model))
+
+
 def train_step(
     state: RLTTrainState,
     batch: RLTReplayBatch,

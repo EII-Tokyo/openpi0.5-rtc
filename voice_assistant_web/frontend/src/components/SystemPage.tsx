@@ -1,17 +1,45 @@
-import { RLTControlState } from '../services/api'
+import { RLTControlState, updateRLTConfig } from '../services/api'
 import type { ReactNode } from 'react'
+import { useEffect, useState } from 'react'
 
 type Props = {
   rlt: RLTControlState
+  onState: (state: RLTControlState) => void
   wsConnected: boolean
   cameraStatus: Record<string, boolean>
   cameraTimestamps: Record<string, number | null>
 }
 
-export function SystemPage({ rlt, wsConnected, cameraStatus, cameraTimestamps }: Props) {
+export function SystemPage({ rlt, onState, wsConnected, cameraStatus, cameraTimestamps }: Props) {
+  const [burnInDraft, setBurnInDraft] = useState(rlt.critic_burn_in_steps ?? 1000)
+  const [burnInError, setBurnInError] = useState('')
+  const [burnInPending, setBurnInPending] = useState(false)
   const metricsAge = ageSeconds(rlt.rlt_metrics_timestamp)
   const liveCameras = Object.values(cameraStatus).filter(Boolean).length
   const knownCameras = Object.keys(cameraStatus).length
+  const actorBurnInRemaining =
+    rlt.critic_burn_in_steps === null || rlt.trainer_step === null
+      ? null
+      : Math.max(0, rlt.critic_burn_in_steps - rlt.trainer_step)
+  const burnInComplete = actorBurnInRemaining !== null && actorBurnInRemaining === 0
+
+  useEffect(() => {
+    if (rlt.critic_burn_in_steps !== null) {
+      setBurnInDraft(rlt.critic_burn_in_steps)
+    }
+  }, [rlt.critic_burn_in_steps])
+
+  const applyBurnIn = async () => {
+    setBurnInError('')
+    setBurnInPending(true)
+    try {
+      onState(await updateRLTConfig({ critic_burn_in_steps: burnInDraft }))
+    } catch (exc) {
+      setBurnInError(exc instanceof Error ? exc.message : 'Burn-in update failed')
+    } finally {
+      setBurnInPending(false)
+    }
+  }
 
   return (
     <section className="page-panel system-page">
@@ -48,9 +76,30 @@ export function SystemPage({ rlt, wsConnected, cameraStatus, cameraTimestamps }:
           <Metric label="Actor Enabled" value={formatBool(rlt.actor_enabled)} />
           <Metric label="Actor Ready" value={formatBool(rlt.actor_ready)} tone={rlt.actor_ready ? 'ok' : 'watch'} />
           <Metric label="Actor Effective" value={formatBool(rlt.actor_effective)} tone={rlt.actor_effective ? 'ok' : 'watch'} />
+          <Metric label="Critic Burn-in" value={formatInt(rlt.critic_burn_in_steps)} />
+          <Metric label="Actor Wait" value={formatInt(actorBurnInRemaining)} tone={burnInComplete ? 'ok' : 'watch'} />
+          <Metric label="Target Sync Step" value={formatInt(rlt.target_sync_step)} tone={rlt.target_sync_step !== null ? 'ok' : 'watch'} />
           <Metric label="Critic Ready" value={formatBool(rlt.critic_ready)} tone={rlt.critic_ready ? 'ok' : 'watch'} />
           <Metric label="Critic Gate" value={rlt.critic_gate_enabled ? 'on' : 'off'} />
           <Metric label="Gate Reason" value={rlt.inference_gate_reason || rlt.actor_locked_reason || '-'} />
+          <label className="rlt-field">
+            <span>Critic Burn-in Steps</span>
+            <input
+              type="number"
+              min={0}
+              max={1000000}
+              value={burnInDraft}
+              onChange={(event) => setBurnInDraft(Number(event.target.value))}
+            />
+          </label>
+          <button className="apply-button" type="button" disabled={burnInPending} onClick={() => void applyBurnIn()}>
+            Apply burn-in
+          </button>
+          <p className="rlt-warning">
+            Critic trains first. At the first actor update, online actor/critic are hard-copied to target networks, then
+            target networks continue with slow Polyak updates.
+          </p>
+          {burnInError ? <p className="rlt-error">{burnInError}</p> : null}
         </SystemSection>
 
         <SystemSection title="Q Network">

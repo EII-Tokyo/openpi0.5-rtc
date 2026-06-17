@@ -89,6 +89,8 @@ const initialRLT: RLTControlState = {
   actor_updated: null,
   publish_actor: null,
   trainer_step: null,
+  critic_burn_in_steps: 1000,
+  target_sync_step: null,
   steps_per_sec: null,
   success_episodes: null,
   failure_episodes: null,
@@ -277,6 +279,7 @@ export default function App() {
       ) : page === 'system' ? (
         <SystemPage
           rlt={state.rlt}
+          onState={setRLTState}
           wsConnected={wsConnected}
           cameraStatus={state.camera_status}
           cameraTimestamps={state.camera_timestamps}

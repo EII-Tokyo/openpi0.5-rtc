@@ -38,7 +38,7 @@ class Args:
     min_replay_shards: int = 0
     min_success_episodes: int = 1
     min_failure_episodes: int = 1
-    critic_burn_in_steps: int = 0
+    critic_burn_in_steps: int = 1_000
     auto_beta_enabled: bool = False
     auto_beta_target_delta_norm: float = 0.05
     auto_beta_min: float = 1.0
@@ -202,6 +202,13 @@ class RedisControlSubscriber:
                         latest_update["beta"] = beta
                 if "trainer_enabled" in payload:
                     latest_update["trainer_enabled"] = bool(payload["trainer_enabled"])
+                if "critic_burn_in_steps" in payload:
+                    try:
+                        critic_burn_in_steps = int(payload["critic_burn_in_steps"])
+                    except (TypeError, ValueError):
+                        critic_burn_in_steps = -1
+                    if critic_burn_in_steps >= 0:
+                        latest_update["critic_burn_in_steps"] = critic_burn_in_steps
                 if "auto_beta_enabled" in payload:
                     latest_update["auto_beta_enabled"] = bool(payload["auto_beta_enabled"])
                 for key in (
@@ -475,6 +482,8 @@ def _build_metrics_payload(
     actor_enabled: bool,
     trainer_enabled: bool,
     trainer_running: bool,
+    critic_burn_in_steps: int,
+    target_sync_step: int | None = None,
     latest_actor_path: str | None = None,
     latest_actor_step: int | None = None,
     wandb_url: str | None = None,
@@ -519,6 +528,8 @@ def _build_metrics_payload(
         "actor_enabled": bool(actor_enabled),
         "trainer_enabled": bool(trainer_enabled),
         "trainer_running": bool(trainer_running),
+        "critic_burn_in_steps": int(critic_burn_in_steps),
+        "target_sync_step": None if target_sync_step is None else int(target_sync_step),
         "latest_actor_path": latest_actor_path,
         "latest_actor_step": None if latest_actor_step is None else int(latest_actor_step),
         "replay_shards": int(stats.num_shards),
@@ -773,6 +784,7 @@ def main(args: Args) -> None:
     )
     state = rlt_training.init_train_state(config, jax.random.key(args.seed))
     replay_rng = np.random.default_rng(args.seed)
+    latest_target_sync_step: int | None = None
     _init_wandb(args, store)
     metrics_publisher = RedisMetricsPublisher(
         enabled=args.redis_enabled,
@@ -826,6 +838,8 @@ def main(args: Args) -> None:
             actor_enabled=False,
             trainer_enabled=trainer_enabled,
             trainer_running=False,
+            critic_burn_in_steps=args.critic_burn_in_steps,
+            target_sync_step=latest_target_sync_step,
             latest_actor_path=str(initial_actor_dir),
             latest_actor_step=0,
             wandb_url=_wandb_url(),
@@ -850,6 +864,8 @@ def main(args: Args) -> None:
             control_update = control_subscriber.poll_update()
             if "trainer_enabled" in control_update:
                 trainer_enabled = bool(control_update["trainer_enabled"])
+            if "critic_burn_in_steps" in control_update:
+                args.critic_burn_in_steps = int(control_update["critic_burn_in_steps"])
             auto_beta_config_changed = False
             if "auto_beta_enabled" in control_update:
                 auto_beta_enabled = bool(control_update["auto_beta_enabled"])
@@ -917,6 +933,8 @@ def main(args: Args) -> None:
                             actor_enabled=False,
                             trainer_enabled=False,
                             trainer_running=False,
+                            critic_burn_in_steps=args.critic_burn_in_steps,
+                            target_sync_step=latest_target_sync_step,
                             latest_actor_path=latest_actor_path,
                             latest_actor_step=latest_actor_step,
                             wandb_url=_wandb_url(),
@@ -929,6 +947,14 @@ def main(args: Args) -> None:
 
             next_step = int(state.step) + 1
             actor_enabled = _actor_updates_enabled(args, store, next_step)
+            if actor_enabled and latest_target_sync_step is None:
+                state = rlt_training.sync_target_params(state)
+                latest_target_sync_step = int(state.step)
+                logging.info(
+                    "Hard-synced target actor/critic before actor updates at step=%d burn_in=%d",
+                    latest_target_sync_step,
+                    args.critic_burn_in_steps,
+                )
             state = _state_for_actor_gate(
                 state,
                 actor_enabled=actor_enabled,
@@ -977,6 +1003,8 @@ def main(args: Args) -> None:
                         actor_enabled=actor_enabled,
                         trainer_enabled=trainer_enabled,
                         trainer_running=True,
+                        critic_burn_in_steps=args.critic_burn_in_steps,
+                        target_sync_step=latest_target_sync_step,
                         latest_actor_path=latest_actor_path,
                         latest_actor_step=latest_actor_step,
                         wandb_url=_wandb_url(),
@@ -1021,6 +1049,8 @@ def main(args: Args) -> None:
                         actor_enabled=actor_enabled,
                         trainer_enabled=trainer_enabled,
                         trainer_running=True,
+                        critic_burn_in_steps=args.critic_burn_in_steps,
+                        target_sync_step=latest_target_sync_step,
                         latest_actor_path=latest_actor_path,
                         latest_actor_step=latest_actor_step,
                         wandb_url=_wandb_url(),

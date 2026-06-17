@@ -185,6 +185,8 @@ export type RLTControlState = {
   actor_updated: boolean | null
   publish_actor: boolean | null
   trainer_step: number | null
+  critic_burn_in_steps: number | null
+  target_sync_step: number | null
   steps_per_sec: number | null
   success_episodes: number | null
   failure_episodes: number | null
@@ -217,6 +219,7 @@ export type RLTConfigRequest = {
   auto_beta_ema_decay?: number
   auto_beta_update_interval?: number
   auto_beta_q_margin?: number
+  critic_burn_in_steps?: number
   actor_enabled?: boolean
   trainer_enabled?: boolean
   intervention_scale?: number

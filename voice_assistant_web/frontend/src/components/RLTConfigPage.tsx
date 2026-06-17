@@ -20,6 +20,7 @@ type Draft = Required<
     | 'auto_beta_ema_decay'
     | 'auto_beta_update_interval'
     | 'auto_beta_q_margin'
+    | 'critic_burn_in_steps'
     | 'actor_enabled'
     | 'trainer_enabled'
     | 'intervention_scale'
@@ -41,6 +42,7 @@ const makeDraft = (rlt: RLTControlState): Draft => ({
   auto_beta_ema_decay: rlt.auto_beta_ema_decay,
   auto_beta_update_interval: rlt.auto_beta_update_interval,
   auto_beta_q_margin: rlt.auto_beta_q_margin,
+  critic_burn_in_steps: rlt.critic_burn_in_steps ?? 1000,
   actor_enabled: rlt.actor_enabled,
   trainer_enabled: rlt.trainer_enabled,
   intervention_scale: rlt.intervention_scale,
@@ -69,6 +71,7 @@ export function RLTConfigPage({ rlt, onState }: Props) {
     rlt.auto_beta_ema_decay,
     rlt.auto_beta_update_interval,
     rlt.auto_beta_q_margin,
+    rlt.critic_burn_in_steps,
     rlt.actor_enabled,
     rlt.trainer_enabled,
     rlt.intervention_scale,
@@ -141,6 +144,15 @@ export function RLTConfigPage({ rlt, onState }: Props) {
             checked={draft.actor_enabled}
             onChange={(actor_enabled) => setDraft({ ...draft, actor_enabled })}
           />
+          <Field label="Critic Burn-in Steps">
+            <input
+              type="number"
+              min={0}
+              max={1000000}
+              value={draft.critic_burn_in_steps}
+              onChange={(event) => setDraft({ ...draft, critic_burn_in_steps: Number(event.target.value) })}
+            />
+          </Field>
           <Field label="Wandb URL">
             <input
               type="text"

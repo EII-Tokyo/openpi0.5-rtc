@@ -97,6 +97,8 @@ class RLTControlState(BaseModel):
     actor_updated: bool | None = None
     publish_actor: bool | None = None
     trainer_step: int | None = None
+    critic_burn_in_steps: int | None = 1000
+    target_sync_step: int | None = None
     steps_per_sec: float | None = None
     success_episodes: int | None = None
     failure_episodes: int | None = None
@@ -134,6 +136,7 @@ class RLTConfigRequest(BaseModel):
     auto_beta_ema_decay: float | None = Field(default=None, ge=0, lt=1)
     auto_beta_update_interval: int | None = Field(default=None, ge=1, le=100000)
     auto_beta_q_margin: float | None = Field(default=None, ge=-1000, le=1000)
+    critic_burn_in_steps: int | None = Field(default=None, ge=0, le=1000000)
     actor_enabled: bool | None = None
     trainer_enabled: bool | None = None
     intervention_scale: float | None = Field(default=None, ge=0, le=1)
