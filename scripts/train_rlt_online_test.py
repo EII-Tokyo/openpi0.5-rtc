@@ -1,5 +1,6 @@
 import dataclasses
 import json
+import os
 
 import jax
 import numpy as np
@@ -265,6 +266,38 @@ def test_auto_beta_controller_skips_until_update_interval():
 
     assert result.beta == 4.0
     assert result.reason == "waiting_for_update_interval"
+
+
+def test_init_wandb_uses_process_api_key_without_leaking_config(monkeypatch, tmp_path):
+    calls = []
+
+    class _FakeWandb:
+        @staticmethod
+        def init(**kwargs):
+            calls.append(kwargs)
+
+    monkeypatch.setattr(train_rlt_online, "wandb", _FakeWandb)
+    monkeypatch.delenv("WANDB_API_KEY", raising=False)
+    args = train_rlt_online.Args(
+        replay_dir=tmp_path / "replay",
+        output_dir=tmp_path / "run",
+        wandb_api_key="secret-test-key",
+        wandb_project="project",
+        wandb_run_name="run",
+    )
+
+    train_rlt_online._init_wandb(args, _FakeStoreForWandb())
+
+    assert os.environ["WANDB_API_KEY"] == "secret-test-key"
+    assert calls[0]["project"] == "project"
+    assert calls[0]["name"] == "run"
+    assert calls[0]["config"]["wandb_api_key"] == "<set>"
+
+
+class _FakeStoreForWandb:
+    @property
+    def stats(self):
+        return _stats()
 
 def test_redis_metrics_publisher_publishes_json():
     fake = _FakeRedis()

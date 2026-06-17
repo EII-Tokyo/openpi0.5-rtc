@@ -4,6 +4,7 @@ import hashlib
 import json
 import logging
 import math
+import os
 import pathlib
 import platform
 import shutil
@@ -63,6 +64,10 @@ class Args:
     wandb_enabled: bool = True
     wandb_project: str = "openpi"
     wandb_run_name: str = "rlt_actor_critic_online"
+    wandb_api_key: str | None = dataclasses.field(
+        default_factory=lambda: os.getenv("WANDB_API_KEY") or None,
+        repr=False,
+    )
     redis_enabled: bool = False
     redis_host: str = "localhost"
     redis_port: int = 6379
@@ -666,14 +671,17 @@ def _convert_nnx_state_objects(value):
 
 def _init_wandb(args: Args, store: rlt_replay_store.RLTReplayStore) -> None:
     if args.wandb_enabled:
+        if args.wandb_api_key:
+            os.environ["WANDB_API_KEY"] = args.wandb_api_key
+        config = {
+            key: str(value) if isinstance(value, pathlib.Path) else value for key, value in dataclasses.asdict(args).items()
+        }
+        config["wandb_api_key"] = "<set>" if args.wandb_api_key else "<unset>"
         wandb.init(
             project=args.wandb_project,
             name=args.wandb_run_name,
             config={
-                **{
-                    key: str(value) if isinstance(value, pathlib.Path) else value
-                    for key, value in dataclasses.asdict(args).items()
-                },
+                **config,
                 "initial_replay_stats": dataclasses.asdict(store.stats),
             },
         )
