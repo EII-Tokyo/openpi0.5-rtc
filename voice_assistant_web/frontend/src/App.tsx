@@ -250,6 +250,8 @@ export default function App() {
             <StatusItem label="Failure" value={state.rlt.trainable_replay_failure} />
             <StatusItem label="RL Token" value={state.rlt.rl_token_checkpoint_path ? 'query/12000' : '-'} tone={state.rlt.rl_token_checkpoint_path ? 'ok' : 'watch'} />
             <StatusItem label="Actor" value={state.rlt.actor_effective ? 'active' : 'locked'} tone={state.rlt.actor_effective ? 'ok' : 'watch'} />
+            <StatusItem label="Step" value={state.rlt.trainer_step ?? '-'} />
+            <StatusItem label="Q Adv" value={formatStatusMetric(state.rlt.q_advantage)} tone={state.rlt.q_advantage !== null && state.rlt.q_advantage < 0 ? 'watch' : undefined} />
             <StatusItem label="Task" value={currentTaskLabel} />
             <StatusItem label="Alert" value={state.rlt.actor_locked_reason || 'OK'} tone={state.rlt.actor_locked_reason ? 'watch' : 'ok'} />
           </section>
@@ -301,4 +303,8 @@ function StatusItem({ label, value, tone }: { label: string; value: number | str
       <strong className={tone ? `tone-${tone}` : ''}>{value}</strong>
     </div>
   )
+}
+
+function formatStatusMetric(value: number | null | undefined) {
+  return value === null || value === undefined || !Number.isFinite(value) ? '-' : value.toFixed(4)
 }

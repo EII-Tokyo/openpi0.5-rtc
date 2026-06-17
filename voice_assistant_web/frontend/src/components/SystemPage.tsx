@@ -53,6 +53,19 @@ export function SystemPage({ rlt, wsConnected, cameraStatus, cameraTimestamps }:
           <Metric label="Gate Reason" value={rlt.inference_gate_reason || rlt.actor_locked_reason || '-'} />
         </SystemSection>
 
+        <SystemSection title="Q Network">
+          <Metric label="Critic Loss" value={formatMetric(rlt.critic_loss)} />
+          <Metric label="Q1 Loss" value={formatMetric(rlt.critic_q1_loss)} />
+          <Metric label="Q2 Loss" value={formatMetric(rlt.critic_q2_loss)} />
+          <Metric label="Q Gap" value={formatMetric(rlt.q_gap)} />
+          <Metric label="Q1 Mean" value={formatMetric(rlt.q1_mean)} />
+          <Metric label="Q2 Mean" value={formatMetric(rlt.q2_mean)} />
+          <Metric label="Target Q" value={formatMetric(rlt.target_q_mean)} />
+          <Metric label="Reference Q" value={formatMetric(rlt.reference_q_value)} />
+          <Metric label="Actor Q" value={formatMetric(rlt.actor_q_value)} />
+          <Metric label="Q Advantage" value={formatMetric(rlt.q_advantage)} tone={rlt.q_advantage !== null && rlt.q_advantage < 0 ? 'watch' : undefined} />
+        </SystemSection>
+
         <SystemSection title="Beta">
           <Metric label="Mode" value={rlt.auto_beta_enabled ? 'auto' : 'manual'} tone={rlt.auto_beta_enabled ? 'ok' : 'watch'} />
           <Metric label="Beta" value={formatMetric(rlt.beta)} />
