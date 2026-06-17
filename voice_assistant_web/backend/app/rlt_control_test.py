@@ -54,6 +54,10 @@ def _store(*, warmup_target=2, tmp_path=None):
     return store
 
 
+def test_critic_gate_defaults_on():
+    assert RLTControlState().critic_gate_enabled is True
+
+
 def test_score_records_attempt_but_does_not_increment_valid_warmup_count():
     store = _store(warmup_target=1)
 

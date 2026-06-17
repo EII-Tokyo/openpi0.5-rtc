@@ -65,7 +65,7 @@ class RLTControlState(BaseModel):
     auto_beta_reason: str | None = None
     intervention_scale: float = 0.25
     max_delta: float = 0.1
-    critic_gate_enabled: bool = False
+    critic_gate_enabled: bool = True
     critic_gate_margin: float = 0.0
     critic_gate_temperature: float = 0.05
     critic_ready: bool = False
