@@ -29,7 +29,13 @@ def _dir_arg(path: pathlib.Path) -> str:
 def build_pull_commands(args: TransferArgs) -> list[list[str]]:
     raw_root = _local_raw_root(args)
     return [
-        ["mkdir", "-p", str(raw_root)],
+        [
+            "mkdir",
+            "-p",
+            str(raw_root / "rollouts" / "key_regions"),
+            str(raw_root / "replay" / "rlt_key_regions"),
+            str(raw_root / "state"),
+        ],
         [
             "rsync",
             "-a",
