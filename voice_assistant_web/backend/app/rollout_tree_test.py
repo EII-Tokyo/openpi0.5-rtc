@@ -74,7 +74,7 @@ def test_key_region_review_reconciles_saved_accepted_sample_as_trainable(tmp_pat
     rollout_dir = rollout_root / "key_regions/task/2026-06-01/warmup" / f"key_region_{key_region_id}"
     shard_path = replay_root / "rlt_key_regions/task/2026-06-01/shards" / f"key_region_{key_region_id}.npz"
     rollout_dir.mkdir(parents=True)
-    shard_path.parent.mkdir(parents=True)
+    shard_path.parent.mkdir(parents=True, exist_ok=True)
     (rollout_dir / "cam_right_wrist.mp4").write_bytes(b"mp4")
     (rollout_dir / "manifest.json").write_text(
         json.dumps(
@@ -184,7 +184,7 @@ def test_key_region_review_reports_video_duration_and_region_offsets(tmp_path, m
     rollout_dir = rollout_root / "key_regions/task/2026-06-01/warmup" / f"key_region_{key_region_id}"
     shard_path = replay_root / "rlt_key_regions/task/2026-06-01/shards" / f"key_region_{key_region_id}.npz"
     rollout_dir.mkdir(parents=True)
-    shard_path.parent.mkdir(parents=True)
+    shard_path.parent.mkdir(parents=True, exist_ok=True)
     (rollout_dir / "cam_right_wrist.mp4").write_bytes(b"mp4")
     (rollout_dir / "manifest.json").write_text(
         json.dumps(
@@ -215,3 +215,68 @@ def test_key_region_review_reports_video_duration_and_region_offsets(tmp_path, m
     assert records[0]["key_region_duration_seconds"] == pytest.approx(1.214)
     assert records[0]["key_region_start_sec"] == pytest.approx(2.0)
     assert records[0]["key_region_end_sec"] == pytest.approx(3.214)
+
+
+def _write_review_record(rollout_root, replay_root, *, key_region_id, reward, score_time):
+    rollout_dir = rollout_root / "key_regions/task/2026-06-01/warmup" / f"key_region_{key_region_id}"
+    shard_path = replay_root / "rlt_key_regions/task/2026-06-01/shards" / f"key_region_{key_region_id}.npz"
+    rollout_dir.mkdir(parents=True)
+    shard_path.parent.mkdir(parents=True, exist_ok=True)
+    (rollout_dir / "cam_right_wrist.mp4").write_bytes(b"mp4")
+    (rollout_dir / "manifest.json").write_text(
+        json.dumps(
+            {
+                "key_region_id": key_region_id,
+                "phase": "warmup",
+                "reward": reward,
+                "start_time": score_time - 2.0,
+                "end_time": score_time - 1.0,
+                "score_time": score_time,
+                "num_replay_transitions": 3,
+                "segment_status": "committed",
+                "train_eligible": True,
+            }
+        )
+    )
+    np.savez(shard_path, done=np.asarray([False, False, True]), reward_seq=np.ones((3, 10)))
+    return shard_path
+
+
+def test_key_region_review_page_paginates_and_summarizes_records(tmp_path, monkeypatch):
+    rollout_root = tmp_path / "rollouts"
+    replay_root = tmp_path / "replay"
+    _write_review_record(rollout_root, replay_root, key_region_id="old_failure", reward=0, score_time=10.0)
+    _write_review_record(rollout_root, replay_root, key_region_id="middle_success", reward=1, score_time=20.0)
+    _write_review_record(rollout_root, replay_root, key_region_id="new_failure", reward=0, score_time=30.0)
+
+    monkeypatch.setattr(main, "ROLLOUTS_ROOT", rollout_root)
+    monkeypatch.setattr(main, "REPLAY_ROOT", replay_root)
+    monkeypatch.setattr(main, "rlt_control", _FakeRLTControl([]))
+
+    page = main.rlt_key_region_review(limit=1, offset=1, reward="failure")
+
+    assert page.total == 2
+    assert page.next_offset is None
+    assert page.summary.success == 1
+    assert page.summary.failure == 2
+    assert page.summary.trainable == 3
+    assert [record.key_region_id for record in page.items] == ["old_failure"]
+
+
+def test_key_region_detail_returns_single_record(tmp_path, monkeypatch):
+    rollout_root = tmp_path / "rollouts"
+    replay_root = tmp_path / "replay"
+    _write_review_record(rollout_root, replay_root, key_region_id="target", reward=1, score_time=10.0)
+    _write_review_record(rollout_root, replay_root, key_region_id="other", reward=0, score_time=20.0)
+
+    monkeypatch.setattr(main, "ROLLOUTS_ROOT", rollout_root)
+    monkeypatch.setattr(main, "REPLAY_ROOT", replay_root)
+    monkeypatch.setattr(main, "rlt_control", _FakeRLTControl([]))
+
+    record = main.rlt_key_region_detail("target")
+
+    assert record.key_region_id == "target"
+    assert record.reward == 1
+    assert record.video_paths == [
+        "key_regions/task/2026-06-01/warmup/key_region_target/cam_right_wrist.mp4"
+    ]

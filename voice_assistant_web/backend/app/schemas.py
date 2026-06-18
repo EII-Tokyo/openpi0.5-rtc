@@ -245,6 +245,24 @@ class RLTKeyRegionReviewRecord(BaseModel):
     updated_at: float | None = None
 
 
+class RLTKeyRegionReviewSummary(BaseModel):
+    total: int = 0
+    trainable: int = 0
+    needs_crop: int = 0
+    success: int = 0
+    failure: int = 0
+    replay_samples: int = 0
+
+
+class RLTKeyRegionReviewPage(BaseModel):
+    items: list[RLTKeyRegionReviewRecord] = Field(default_factory=list)
+    total: int = 0
+    limit: int = 20
+    offset: int = 0
+    next_offset: int | None = None
+    summary: RLTKeyRegionReviewSummary = Field(default_factory=RLTKeyRegionReviewSummary)
+
+
 class RobotTaskRequest(BaseModel):
     task_num: str = Field(pattern="^[145]$")
     source: str = "ui"

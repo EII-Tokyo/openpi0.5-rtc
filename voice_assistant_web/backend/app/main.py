@@ -38,7 +38,9 @@ from .schemas import RLTControlState
 from .schemas import RLTDiscardRequest
 from .schemas import RLTKeyRegionCropRequest
 from .schemas import RLTKeyRegionCropResponse
+from .schemas import RLTKeyRegionReviewPage
 from .schemas import RLTKeyRegionReviewRecord
+from .schemas import RLTKeyRegionReviewSummary
 from .schemas import RLTKeyRegionRescoreRequest
 from .schemas import RLTScoreRequest
 from .schemas import RLTSegmentRecord
@@ -663,9 +665,70 @@ def _key_region_review_records() -> list[dict]:
     return sorted(by_id.values(), key=lambda item: item.get("score_time") or item.get("updated_at") or 0, reverse=True)
 
 
-@app.get("/api/rlt/key-regions/review", response_model=list[RLTKeyRegionReviewRecord])
-def rlt_key_region_review() -> list[RLTKeyRegionReviewRecord]:
-    return [RLTKeyRegionReviewRecord(**record) for record in _key_region_review_records()]
+def _key_region_review_summary(records: list[dict]) -> RLTKeyRegionReviewSummary:
+    return RLTKeyRegionReviewSummary(
+        total=len(records),
+        trainable=sum(1 for record in records if record.get("trainable")),
+        needs_crop=sum(1 for record in records if not record.get("trainable")),
+        success=sum(1 for record in records if record.get("reward") == 1),
+        failure=sum(1 for record in records if record.get("reward") == 0),
+        replay_samples=sum(int(record.get("num_replay_transitions") or 0) for record in records),
+    )
+
+
+def _filter_key_region_review_records(
+    records: list[dict],
+    *,
+    status: str = "all",
+    reward: str = "all",
+) -> list[dict]:
+    filtered = records
+    if status == "trainable":
+        filtered = [record for record in filtered if record.get("trainable")]
+    elif status in {"needsCrop", "needs_crop"}:
+        filtered = [record for record in filtered if not record.get("trainable")]
+    elif status != "all":
+        filtered = [record for record in filtered if str(record.get("status") or "") == status]
+
+    if reward in {"success", "1"}:
+        filtered = [record for record in filtered if record.get("reward") == 1]
+    elif reward in {"failure", "0"}:
+        filtered = [record for record in filtered if record.get("reward") == 0]
+    return filtered
+
+
+@app.get("/api/rlt/key-regions/review", response_model=RLTKeyRegionReviewPage)
+def rlt_key_region_review(
+    limit: int = 20,
+    offset: int = 0,
+    status: str = "all",
+    reward: str = "all",
+) -> RLTKeyRegionReviewPage:
+    all_records = _key_region_review_records()
+    filtered = _filter_key_region_review_records(all_records, status=status, reward=reward)
+    safe_limit = min(max(limit, 1), 100)
+    safe_offset = min(max(offset, 0), len(filtered))
+    page_records = filtered[safe_offset : safe_offset + safe_limit]
+    next_offset = safe_offset + safe_limit if safe_offset + safe_limit < len(filtered) else None
+    return RLTKeyRegionReviewPage(
+        items=[RLTKeyRegionReviewRecord(**record) for record in page_records],
+        total=len(filtered),
+        limit=safe_limit,
+        offset=safe_offset,
+        next_offset=next_offset,
+        summary=_key_region_review_summary(all_records),
+    )
+
+
+@app.get("/api/rlt/key-region/{key_region_id}", response_model=RLTKeyRegionReviewRecord)
+def rlt_key_region_detail(key_region_id: str) -> RLTKeyRegionReviewRecord:
+    record = next(
+        (item for item in _key_region_review_records() if item.get("key_region_id") == key_region_id),
+        None,
+    )
+    if record is None:
+        raise HTTPException(status_code=404, detail=f"Unknown key_region_id: {key_region_id}")
+    return RLTKeyRegionReviewRecord(**record)
 
 
 def _crop_output_shard_path(source_shard_path: Path, key_region_id: str) -> Path:

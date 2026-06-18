@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { CameraGrid } from './components/CameraGrid'
+import { KeyRegionsPage } from './components/KeyRegionsPage'
 import { RLTConfigPage } from './components/RLTConfigPage'
 import { RLTConfigPanel, RLTControlPanel, RLTStatsPanel } from './components/RLTControlPanel'
 import { RolloutBrowser } from './components/RolloutBrowser'
@@ -285,13 +286,7 @@ export default function App() {
           cameraTimestamps={state.camera_timestamps}
         />
       ) : page === 'key_regions' ? (
-        <RolloutBrowser
-          title="Key Regions"
-          rootPath="key_regions"
-          defaultCamera="cam_right_wrist.mp4"
-          showManifest
-          enableKeyRegionActions
-        />
+        <KeyRegionsPage title="Key Regions" />
       ) : (
         <RolloutBrowser title="Collected Files" excludeRootPaths={["key_regions"]} />
       )}

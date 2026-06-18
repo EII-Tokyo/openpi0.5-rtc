@@ -104,6 +104,31 @@ export type RLTKeyRegionReviewRecord = {
   updated_at: number | null
 }
 
+export type RLTKeyRegionReviewSummary = {
+  total: number
+  trainable: number
+  needs_crop: number
+  success: number
+  failure: number
+  replay_samples: number
+}
+
+export type RLTKeyRegionReviewPage = {
+  items: RLTKeyRegionReviewRecord[]
+  total: number
+  limit: number
+  offset: number
+  next_offset: number | null
+  summary: RLTKeyRegionReviewSummary
+}
+
+export type RLTKeyRegionReviewQuery = {
+  limit?: number
+  offset?: number
+  status?: 'all' | 'trainable' | 'needsCrop'
+  reward?: 'all' | 'success' | 'failure'
+}
+
 export type RLTKeyRegionCropResponse = {
   key_region_id: string
   status: string
@@ -253,7 +278,17 @@ const postJson = async <T>(path: string, body: unknown = {}): Promise<T> => {
 }
 
 export const fetchRLTSegments = () => getJson<RLTSegmentRecord[]>('/api/rlt/segments')
-export const fetchRLTKeyRegionReview = () => getJson<RLTKeyRegionReviewRecord[]>('/api/rlt/key-regions/review')
+export const fetchRLTKeyRegionReview = (query: RLTKeyRegionReviewQuery = {}) => {
+  const params = new URLSearchParams()
+  if (query.limit !== undefined) params.set('limit', String(query.limit))
+  if (query.offset !== undefined) params.set('offset', String(query.offset))
+  if (query.status && query.status !== 'all') params.set('status', query.status)
+  if (query.reward && query.reward !== 'all') params.set('reward', query.reward)
+  const suffix = params.toString() ? `?${params.toString()}` : ''
+  return getJson<RLTKeyRegionReviewPage>(`/api/rlt/key-regions/review${suffix}`)
+}
+export const fetchRLTKeyRegionDetail = (keyRegionId: string) =>
+  getJson<RLTKeyRegionReviewRecord>(`/api/rlt/key-region/${encodeURIComponent(keyRegionId)}`)
 export const startKeyRegion = () => postJson<RLTControlState>('/api/rlt/key-region/start', { source: 'ui' })
 export const endKeyRegion = () => postJson<RLTControlState>('/api/rlt/key-region/end', { source: 'ui' })
 export const scoreKeyRegion = (reward: 0 | 1) =>

@@ -549,6 +549,7 @@ export function RolloutBrowser({
   const [deleteDialogError, setDeleteDialogError] = useState('')
   const [cropRanges, setCropRanges] = useState<Record<string, CropRange>>({})
   const [playingKeyRegionId, setPlayingKeyRegionId] = useState('')
+  const [pendingPlaybackKeyRegionId, setPendingPlaybackKeyRegionId] = useState('')
   const [playbackTimes, setPlaybackTimes] = useState<Record<string, number>>({})
   const [playbackError, setPlaybackError] = useState('')
   const keyRegionVideoRefs = useRef<Record<string, Array<HTMLVideoElement | null>>>({})
@@ -596,15 +597,13 @@ export function RolloutBrowser({
     setPlaybackTimes((current) => ({ ...current, [keyRegionId]: timeSec }))
   }
 
-  const toggleCropPlayback = async (record: RLTKeyRegionReviewRecord) => {
+  const playCropPreview = async (record: RLTKeyRegionReviewRecord) => {
     const keyRegionId = record.key_region_id
-    if (playingKeyRegionId === keyRegionId) {
-      pauseKeyRegionVideos(keyRegionId)
-      setPlayingKeyRegionId('')
+    const videos = keyRegionVideos(keyRegionId)
+    if (!videos.length) {
+      setPlaybackError('Preview is still loading. Try again in a moment.')
       return
     }
-    const videos = keyRegionVideos(keyRegionId)
-    if (!videos.length) return
     const range = getCropRange(record)
     pauseAllKeyRegionVideos()
     setPlaybackError('')
@@ -616,6 +615,21 @@ export function RolloutBrowser({
       return
     }
     setPlayingKeyRegionId(keyRegionId)
+  }
+
+  const toggleCropPlayback = async (record: RLTKeyRegionReviewRecord) => {
+    const keyRegionId = record.key_region_id
+    if (playingKeyRegionId === keyRegionId) {
+      pauseKeyRegionVideos(keyRegionId)
+      setPlayingKeyRegionId('')
+      return
+    }
+    if (selectedReviewId !== keyRegionId) {
+      setPendingPlaybackKeyRegionId(keyRegionId)
+      selectReviewRecord(record)
+      return
+    }
+    await playCropPreview(record)
   }
 
   const updateCropFromPointer = (
@@ -711,7 +725,8 @@ export function RolloutBrowser({
 
   const loadReviewRecords = async () => {
     if (!enableKeyRegionActions) return
-    const records = (await fetchRLTKeyRegionReview()).filter(
+    const page = await fetchRLTKeyRegionReview({ limit: 100 })
+    const records = page.items.filter(
       (record) => !record.voided && record.status.toLowerCase() !== 'voided',
     )
     setReviewRecords(records)
@@ -818,6 +833,7 @@ export function RolloutBrowser({
     setReviewRenderLimit(KEY_REGION_PAGE_SIZE)
     pauseAllKeyRegionVideos()
     setPlayingKeyRegionId('')
+    setPendingPlaybackKeyRegionId('')
     keyRegionVideoRefs.current = {}
   }, [reviewRewardFilter, reviewStatusFilter])
 
@@ -857,6 +873,39 @@ export function RolloutBrowser({
     frame = window.requestAnimationFrame(tick)
     return () => window.cancelAnimationFrame(frame)
   }, [enableKeyRegionActions, playingKeyRegionId, cropRanges, reviewRecords])
+
+  useEffect(() => {
+    if (!enableKeyRegionActions || !pendingPlaybackKeyRegionId) return undefined
+    if (selectedReviewId !== pendingPlaybackKeyRegionId) return undefined
+    const record = renderedReviewRecords.find((item) => item.key_region_id === pendingPlaybackKeyRegionId)
+    if (!record) {
+      setPendingPlaybackKeyRegionId('')
+      return undefined
+    }
+    let cancelled = false
+    let attempts = 0
+    let timer = 0
+    const attemptPlayback = () => {
+      if (cancelled) return
+      if (keyRegionVideos(pendingPlaybackKeyRegionId).length) {
+        setPendingPlaybackKeyRegionId('')
+        void playCropPreview(record)
+        return
+      }
+      attempts += 1
+      if (attempts >= 20) {
+        setPendingPlaybackKeyRegionId('')
+        setPlaybackError('Preview is still loading. Try again in a moment.')
+        return
+      }
+      timer = window.setTimeout(attemptPlayback, 50)
+    }
+    timer = window.setTimeout(attemptPlayback, 0)
+    return () => {
+      cancelled = true
+      window.clearTimeout(timer)
+    }
+  }, [enableKeyRegionActions, pendingPlaybackKeyRegionId, renderedReviewRecords, selectedReviewId])
 
   const toggleKeyRegionSelection = (keyRegionId: string) => {
     setSelectedKeyRegionIds((current) => {

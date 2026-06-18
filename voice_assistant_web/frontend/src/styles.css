@@ -1560,6 +1560,17 @@ button {
   min-width: 240px;
 }
 
+.key-region-page-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 0 0 10px;
+  color: #635b50;
+  font-size: 12px;
+  font-weight: 900;
+}
+
 .key-region-camera-label {
   position: absolute;
   left: 6px;
