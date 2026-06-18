@@ -59,6 +59,52 @@ def test_crop_key_region_replay_shard_keeps_selected_samples_and_terminal_reward
     assert manifest["shard_path"] == str(clean_shard_path)
 
 
+def test_crop_key_region_replay_shard_maps_seconds_through_replay_start_frames(tmp_path):
+    rollout_dir = tmp_path / "rollouts" / "key_regions/task/2026-06-01/warmup/key_region_precise"
+    shard_path = tmp_path / "replay" / "rlt_key_regions/task/2026-06-01/shards/key_region_precise.npz"
+    rollout_dir.mkdir(parents=True)
+    shard_path.parent.mkdir(parents=True)
+    manifest_path = rollout_dir / "manifest.json"
+    manifest_path.write_text(
+        json.dumps(
+            {
+                "key_region_id": "precise",
+                "phase": "warmup",
+                "reward": 1,
+                "duration_seconds": 3.0,
+                "num_frames": 150,
+                "num_replay_transitions": 66,
+                "segment_status": "committed",
+                "train_eligible": True,
+                "shard_path": str(shard_path),
+                "train_horizon": 10,
+                "chunk_stride": 2,
+            }
+        )
+    )
+    reward_seq = np.zeros((66, 10), dtype=np.float32)
+    reward_seq[-1, 9] = 1.0
+    np.savez(
+        shard_path,
+        z_rl=np.arange(66, dtype=np.float32).reshape(66, 1),
+        proprio=np.arange(66, dtype=np.float32).reshape(66, 1),
+        reward_seq=reward_seq,
+        done=np.asarray([False] * 65 + [True]),
+        manifest=json.dumps({"key_region_id": "precise"}),
+    )
+
+    clean_shard_path = shard_path.parent / "key_region_precise.crop.npz"
+    result = crop_key_region_files(rollout_dir, shard_path, clean_shard_path, start_sec=1.0, end_sec=2.0)
+
+    with np.load(clean_shard_path, allow_pickle=False) as cropped:
+        assert cropped["z_rl"][:, 0].tolist() == list(range(25, 51))
+        assert cropped["done"].tolist() == [False] * 25 + [True]
+        assert float(cropped["reward_seq"][-1, 9]) == 1.0
+    assert result["crop_start_sample"] == 25
+    assert result["crop_end_sample"] == 51
+    assert result["num_replay_transitions"] == 26
+
+
 def test_crop_key_region_replay_shard_rejects_invalid_range(tmp_path):
     rollout_dir = tmp_path / "key_region_crop"
     shard_path = tmp_path / "key_region_crop.npz"

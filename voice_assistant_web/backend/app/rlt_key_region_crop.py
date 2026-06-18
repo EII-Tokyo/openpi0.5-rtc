@@ -4,6 +4,7 @@ import json
 import os
 from pathlib import Path
 from typing import Any
+import bisect
 
 import numpy as np
 
@@ -39,6 +40,54 @@ def _sample_bounds(*, start_sec: float, end_sec: float, duration_sec: float, sam
         raise ValueError("replay shard has no samples")
     start = int(np.floor((start_sec / duration_sec) * sample_count))
     end = int(np.ceil((end_sec / duration_sec) * sample_count))
+    start = min(max(start, 0), sample_count - 1)
+    end = min(max(end, start + 1), sample_count)
+    return start, end
+
+
+def _replay_start_frames(manifest: dict[str, Any], *, sample_count: int) -> list[int] | None:
+    try:
+        frame_count = int(manifest.get("num_frames") or 0)
+        train_horizon = int(manifest.get("train_horizon") or manifest.get("train_chunk_horizon") or 10)
+        chunk_stride = int(manifest.get("chunk_stride") or 2)
+    except (TypeError, ValueError):
+        return None
+    if frame_count <= 0 or train_horizon <= 0 or chunk_stride <= 0:
+        return None
+    last_start = frame_count - (2 * train_horizon)
+    if last_start < 0:
+        return None
+    starts = list(range(0, last_start + 1, chunk_stride))
+    if starts and starts[-1] != last_start:
+        starts.append(last_start)
+    if len(starts) != sample_count:
+        return None
+    return starts
+
+
+def _replay_sample_bounds(
+    manifest: dict[str, Any],
+    *,
+    start_sec: float,
+    end_sec: float,
+    duration_sec: float,
+    sample_count: int,
+) -> tuple[int, int]:
+    starts = _replay_start_frames(manifest, sample_count=sample_count)
+    if starts is None:
+        return _sample_bounds(
+            start_sec=start_sec,
+            end_sec=end_sec,
+            duration_sec=duration_sec,
+            sample_count=sample_count,
+        )
+    frame_count = int(manifest.get("num_frames") or 0)
+    start_frame = int(np.floor((start_sec / duration_sec) * frame_count))
+    end_frame = int(np.ceil((end_sec / duration_sec) * frame_count))
+    start_frame = min(max(start_frame, 0), frame_count - 1)
+    end_frame = min(max(end_frame, start_frame), frame_count - 1)
+    start = bisect.bisect_left(starts, start_frame)
+    end = bisect.bisect_right(starts, end_frame)
     start = min(max(start, 0), sample_count - 1)
     end = min(max(end, start + 1), sample_count)
     return start, end
@@ -91,7 +140,8 @@ def crop_key_region_files(
         if value.ndim > 0:
             sample_count = int(value.shape[0])
             break
-    start_index, end_index = _sample_bounds(
+    start_index, end_index = _replay_sample_bounds(
+        manifest,
         start_sec=start_sec,
         end_sec=end_sec,
         duration_sec=duration_sec,

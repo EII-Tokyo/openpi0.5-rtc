@@ -10,6 +10,7 @@ from openpi.models import rlt
 from openpi.training import rlt_replay_store
 from openpi.training import rlt_training
 from scripts import train_rlt
+from scripts import train_rlt_offline
 from scripts import train_rlt_online
 
 
@@ -85,6 +86,46 @@ def test_trainer_defaults_expect_c10_replay_and_train_horizon():
     assert train_rlt.Args(replay_npz="/tmp/replay.npz").train_action_horizon == 10
     assert train_rlt_online.Args(replay_dir="/tmp/replay").expected_replay_action_horizon == 10
     assert train_rlt_online.Args(replay_dir="/tmp/replay").train_action_horizon == 10
+    assert train_rlt_offline.Args(replay_dir="/tmp/replay").expected_replay_action_horizon == 10
+    assert train_rlt_offline.Args(replay_dir="/tmp/replay").train_action_horizon == 10
+
+
+def test_offline_trainer_builds_recursive_replay_store_with_train_horizon(tmp_path):
+    args = train_rlt_offline.Args(
+        replay_dir=tmp_path / "replay" / "rlt_key_regions",
+        recursive_scan=True,
+        train_action_horizon=10,
+        max_replay_samples=123,
+    )
+
+    store = train_rlt_offline._build_replay_store(args)
+
+    assert store.sample_shape is None
+    assert store._recursive is True
+    assert store._sample_action_horizon == 10
+    assert store._max_replay_samples == 123
+
+
+def test_offline_trainer_builds_config_with_manual_beta():
+    shape = rlt_replay_store.ReplayShape(z_dim=8, proprio_dim=4, action_horizon=10, action_dim=14)
+    args = train_rlt_offline.Args(
+        replay_dir="/tmp/replay",
+        actor_lr=1e-5,
+        critic_lr=2e-4,
+        beta=12.0,
+        policy_delay=3,
+        actor_publish_interval=250,
+    )
+
+    config = train_rlt_offline._build_training_config(args, shape)
+
+    assert config.actor_lr == 1e-5
+    assert config.critic_lr == 2e-4
+    assert config.policy_delay == 3
+    assert config.actor_publish_interval == 250
+    assert config.model.beta == 12.0
+    assert config.model.action_horizon == 10
+    assert config.model.action_dim == 14
 
 
 def test_build_metrics_payload_is_json_serializable():
