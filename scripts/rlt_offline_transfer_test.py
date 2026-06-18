@@ -21,6 +21,7 @@ def test_build_pull_commands_copy_rollouts_replay_and_ledger():
     assert commands[1][:3] == ["rsync", "-a", "--info=progress2"]
     assert "eii@192.168.1.103:/data/openpi0.5-rtc-reward-learning/rollouts/key_regions/" in commands[1]
     assert commands[2][-1] == "/tmp/local/raw_from_103/replay/rlt_key_regions/"
+    assert commands[3][3] == "eii@192.168.1.103:/data/openpi0.5-rtc-reward-learning/segment_db/"
     assert commands[3][-1] == "/tmp/local/raw_from_103/state/"
 
 

@@ -14,6 +14,7 @@ class TransferArgs:
     local_root: str | pathlib.Path = "local_rlt_data"
     remote_project: str = "~/openpi0.5-rtc-reward-learning"
     remote_data_root: str = "/data/openpi0.5-rtc-reward-learning"
+    remote_state_dir: str = "/data/openpi0.5-rtc-reward-learning/segment_db"
     local_checkpoint: str | pathlib.Path | None = None
     remote_checkpoint_dir: str = "/data/openpi0.5-rtc-reward-learning/rlt_offline_checkpoints/latest"
 
@@ -54,7 +55,7 @@ def build_pull_commands(args: TransferArgs) -> list[list[str]]:
             "rsync",
             "-a",
             "--info=progress2",
-            f"{args.remote}:{args.remote_project}/voice_assistant_web/backend/state/",
+            f"{args.remote}:{args.remote_state_dir}/",
             _dir_arg(raw_root / "state"),
         ],
     ]
@@ -92,6 +93,7 @@ def main() -> None:
     pull.add_argument("--local-root", default="local_rlt_data")
     pull.add_argument("--remote-project", default="~/openpi0.5-rtc-reward-learning")
     pull.add_argument("--remote-data-root", default="/data/openpi0.5-rtc-reward-learning")
+    pull.add_argument("--remote-state-dir", default="/data/openpi0.5-rtc-reward-learning/segment_db")
     pull.add_argument("--execute", action="store_true")
 
     deploy = subparsers.add_parser("deploy")
