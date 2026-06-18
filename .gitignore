@@ -42,6 +42,8 @@ assets/
 checkpoints/
 data/
 evals/
+local_rlt_data/
+local_rlt_runs/
 rollouts
 rollouts.backup-*/
 wandb/
