@@ -40,6 +40,7 @@ class Args:
     actor_min_failure_episodes: int = 0
     max_replay_samples: int | None = None
     recursive_scan: bool = False
+    segment_db_path: pathlib.Path | None = None
     policy_delay: int = 2
     actor_publish_interval: int = 500
     actor_lr: float = 1e-4
@@ -68,6 +69,7 @@ def _build_replay_store(args: Args) -> rlt_replay_store.RLTReplayStore:
         max_replay_samples=args.max_replay_samples,
         recursive=args.recursive_scan,
         sample_action_horizon=args.train_action_horizon,
+        segment_db_path=args.segment_db_path,
     )
 
 
