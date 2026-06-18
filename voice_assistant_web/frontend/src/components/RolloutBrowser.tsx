@@ -240,6 +240,7 @@ function RolloutTreeNode({
 
 
 const KEY_REGION_CAMERA_ORDER = ['cam_high', 'cam_low', 'cam_left_wrist', 'cam_right_wrist']
+const KEY_REGION_PAGE_SIZE = 20
 const DEFAULT_REPLAY_HORIZON = 50
 const DEFAULT_TRAIN_HORIZON = 10
 const DEFAULT_CHUNK_STRIDE = 2
@@ -538,6 +539,7 @@ export function RolloutBrowser({
   const [reviewRecords, setReviewRecords] = useState<RLTKeyRegionReviewRecord[]>([])
   const [reviewStatusFilter, setReviewStatusFilter] = useState<'all' | 'trainable' | 'needsCrop'>('all')
   const [reviewRewardFilter, setReviewRewardFilter] = useState<'all' | 'success' | 'failure'>('all')
+  const [reviewRenderLimit, setReviewRenderLimit] = useState(KEY_REGION_PAGE_SIZE)
   const [activeReviewIndex, setActiveReviewIndex] = useState(1)
   const [selectedReviewId, setSelectedReviewId] = useState('')
   const [selectedKeyRegionIds, setSelectedKeyRegionIds] = useState<Set<string>>(new Set())
@@ -556,6 +558,13 @@ export function RolloutBrowser({
   const getCropRange = (record: RLTKeyRegionReviewRecord) => cropRangeForRecord(record, cropRanges)
 
   const setKeyRegionVideoRef = (keyRegionId: string, index: number, element: HTMLVideoElement | null) => {
+    if (!element) {
+      const refs = keyRegionVideoRefs.current[keyRegionId]
+      if (!refs) return
+      refs[index] = null
+      if (!refs.some(Boolean)) delete keyRegionVideoRefs.current[keyRegionId]
+      return
+    }
     const refs = keyRegionVideoRefs.current[keyRegionId] || []
     refs[index] = element
     keyRegionVideoRefs.current[keyRegionId] = refs
@@ -773,6 +782,11 @@ export function RolloutBrowser({
       }),
     [reviewRecords, reviewStatusFilter, reviewRewardFilter],
   )
+  const renderedReviewRecords = useMemo(
+    () => visibleReviewRecords.slice(0, reviewRenderLimit),
+    [reviewRenderLimit, visibleReviewRecords],
+  )
+  const hasMoreReviewRecords = renderedReviewRecords.length < visibleReviewRecords.length
   const trainableReviewCount = useMemo(() => reviewRecords.filter((record) => record.trainable).length, [reviewRecords])
   const incompleteReviewCount = reviewRecords.length - trainableReviewCount
   const successReviewCount = useMemo(() => reviewRecords.filter((record) => record.reward === 1).length, [reviewRecords])
@@ -787,16 +801,37 @@ export function RolloutBrowser({
     if (!enableKeyRegionActions) return undefined
     return () => {
       pauseAllKeyRegionVideos()
+      keyRegionVideoRefs.current = {}
+      keyRegionCardRefs.current = {}
     }
   }, [enableKeyRegionActions])
 
   useEffect(() => {
     if (!enableKeyRegionActions) return
-    const visibleIds = new Set(visibleReviewRecords.map((record) => record.key_region_id))
+    const visibleIds = new Set(renderedReviewRecords.map((record) => record.key_region_id))
     Object.keys(keyRegionVideoRefs.current).forEach((keyRegionId) => {
-      if (!visibleIds.has(keyRegionId)) delete keyRegionVideoRefs.current[keyRegionId]
+      if (!visibleIds.has(keyRegionId) || keyRegionId !== selectedReviewId) delete keyRegionVideoRefs.current[keyRegionId]
     })
-  }, [enableKeyRegionActions, visibleReviewRecords])
+  }, [enableKeyRegionActions, renderedReviewRecords, selectedReviewId])
+
+  useEffect(() => {
+    setReviewRenderLimit(KEY_REGION_PAGE_SIZE)
+    pauseAllKeyRegionVideos()
+    setPlayingKeyRegionId('')
+    keyRegionVideoRefs.current = {}
+  }, [reviewRewardFilter, reviewStatusFilter])
+
+  useEffect(() => {
+    if (!enableKeyRegionActions) return
+    if (!renderedReviewRecords.length) {
+      setSelectedReviewId('')
+      setSelected(null)
+      return
+    }
+    if (!renderedReviewRecords.some((record) => record.key_region_id === selectedReviewId)) {
+      selectReviewRecord(renderedReviewRecords[0])
+    }
+  }, [enableKeyRegionActions, renderedReviewRecords, selectedReviewId])
 
   useEffect(() => {
     if (!enableKeyRegionActions || !playingKeyRegionId) return undefined
@@ -837,7 +872,7 @@ export function RolloutBrowser({
   }
 
   const selectVisibleKeyRegions = () => {
-    setSelectedKeyRegionIds(new Set(visibleReviewRecords.map((record) => record.key_region_id)))
+    setSelectedKeyRegionIds(new Set(renderedReviewRecords.map((record) => record.key_region_id)))
   }
 
   const openDeleteDialog = (records: RLTKeyRegionReviewRecord[]) => {
@@ -897,7 +932,7 @@ export function RolloutBrowser({
     const updateActiveCard = () => {
       let nextIndex = 1
       let bestDistance = Number.POSITIVE_INFINITY
-      visibleReviewRecords.forEach((record, index) => {
+      renderedReviewRecords.forEach((record, index) => {
         const element = keyRegionCardRefs.current[record.key_region_id]
         if (!element) return
         const rect = element.getBoundingClientRect()
@@ -920,7 +955,7 @@ export function RolloutBrowser({
       window.removeEventListener('keydown', updateActiveCard)
       window.removeEventListener('resize', updateActiveCard)
     }
-  }, [enableKeyRegionActions, visibleReviewRecords])
+  }, [enableKeyRegionActions, renderedReviewRecords])
 
   if (enableKeyRegionActions) {
     const totalVisible = visibleReviewRecords.length
@@ -992,7 +1027,7 @@ export function RolloutBrowser({
         {playbackError ? <p className="inline-error">{playbackError}</p> : null}
 
         <div className="key-region-card-stack">
-          {visibleReviewRecords.map((record, index) => {
+          {renderedReviewRecords.map((record, index) => {
             const checked = selectedKeyRegionIds.has(record.key_region_id)
             const cameras = orderedCameraPaths(record)
             const cropRange = getCropRange(record)
@@ -1011,11 +1046,12 @@ export function RolloutBrowser({
             const rescoreZeroPending = actionPending === `rescore-${record.key_region_id}-0`
             const rescoreOnePending = actionPending === `rescore-${record.key_region_id}-1`
             const isPlaying = playingKeyRegionId === record.key_region_id
+            const isActiveCard = selectedReviewId === record.key_region_id
             const rewardTone = record.reward === 0 ? 'red' : record.reward === 1 ? 'green' : 'slate'
             return (
               <article
                 key={record.key_region_id}
-                className={`key-region-card ${selectedReviewId === record.key_region_id ? 'active' : ''}`}
+                className={`key-region-card ${isActiveCard ? 'active' : ''}`}
                 ref={(element) => {
                   keyRegionCardRefs.current[record.key_region_id] = element
                 }}
@@ -1049,15 +1085,23 @@ export function RolloutBrowser({
                       return (
                         <div className="key-region-video-tile" key={`${record.key_region_id}-${camera}`}>
                           <span className="key-region-camera-label">{path ? cameraLabelFromPath(path) : camera}</span>
-                          {path ? (
+                          {path && isActiveCard ? (
                             <video
                               ref={(element) => setKeyRegionVideoRef(record.key_region_id, cameraIndex, element)}
                               src={rolloutVideoUrl(path)}
-                              preload="metadata"
+                              preload="none"
                               muted
                               playsInline
                               tabIndex={-1}
                             />
+                          ) : path ? (
+                            <button
+                              className="key-region-video-placeholder"
+                              type="button"
+                              onClick={() => selectReviewRecord(record)}
+                            >
+                              <span>Load preview</span>
+                            </button>
                           ) : (
                             <div className="key-region-video-missing">No video</div>
                           )}
@@ -1187,6 +1231,22 @@ export function RolloutBrowser({
               </article>
             )
           })}
+          {hasMoreReviewRecords ? (
+            <div className="key-region-load-more">
+              <button
+                className="ghost-button"
+                type="button"
+                onClick={() =>
+                  setReviewRenderLimit((limit) =>
+                    Math.min(limit + KEY_REGION_PAGE_SIZE, visibleReviewRecords.length),
+                  )
+                }
+              >
+                Load {Math.min(KEY_REGION_PAGE_SIZE, visibleReviewRecords.length - renderedReviewRecords.length)} more
+                ({renderedReviewRecords.length} / {visibleReviewRecords.length})
+              </button>
+            </div>
+          ) : null}
           {!visibleReviewRecords.length ? <p className="rollout-empty">No key regions match the current filters.</p> : null}
         </div>
         <DeleteKeyRegionDialog
