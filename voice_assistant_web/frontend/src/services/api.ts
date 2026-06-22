@@ -196,6 +196,8 @@ export type RLTControlState = {
   inference_actor_q_value: number | null
   inference_q_advantage: number | null
   active_key_region_id: string | null
+  human_takeover_active: boolean
+  active_takeover_id: string | null
   score_deadline: number | null
   last_reward: number | null
   last_event: string | null
@@ -297,6 +299,10 @@ export const fetchRLTKeyRegionDetail = (keyRegionId: string) =>
   getJson<RLTKeyRegionReviewRecord>(`/api/rlt/key-region/${encodeURIComponent(keyRegionId)}`)
 export const startKeyRegion = () => postJson<RLTControlState>('/api/rlt/key-region/start', { source: 'ui' })
 export const endKeyRegion = () => postJson<RLTControlState>('/api/rlt/key-region/end', { source: 'ui' })
+export const startHumanTakeover = () =>
+  postJson<RLTControlState>('/api/rlt/human-takeover/start', { source: 'ui', reason: 'near_failure' })
+export const endHumanTakeover = () =>
+  postJson<RLTControlState>('/api/rlt/human-takeover/end', { source: 'ui', reason: 'operator_released' })
 export const scoreKeyRegion = (reward: 0 | 1) =>
   postJson<RLTControlState>('/api/rlt/key-region/score', { reward, source: 'ui' })
 export const confirmKeyRegion = () =>

@@ -22,6 +22,11 @@ REQUIRED_REPLAY_KEYS: tuple[str, ...] = (
     "next_reference_action",
     "done",
 )
+OPTIONAL_REPLAY_KEYS: tuple[str, ...] = (
+    "intervention_mask",
+    "action_source",
+)
+ACTION_SOURCE_UNKNOWN = -1
 
 
 @dataclasses.dataclass(frozen=True)
@@ -173,6 +178,8 @@ class RLTReplayStore:
             next_reference_action=jnp.asarray(arrays["next_reference_action"]),
             done=jnp.asarray(arrays["done"].astype(np.bool_)),
             episode_success=jnp.asarray(arrays["episode_success"].astype(np.bool_)),
+            intervention_mask=jnp.asarray(arrays["intervention_mask"].astype(np.bool_)),
+            action_source=jnp.asarray(arrays["action_source"].astype(np.int32)),
         )
 
 
@@ -185,6 +192,8 @@ class RLTReplayStore:
         sliced["reference_action"] = arrays["reference_action"][:, :horizon, :]
         sliced["next_reference_action"] = arrays["next_reference_action"][:, :horizon, :]
         sliced["reward_seq"] = arrays["reward_seq"][:, :horizon]
+        sliced["intervention_mask"] = arrays["intervention_mask"][:, :horizon]
+        sliced["action_source"] = arrays["action_source"][:, :horizon]
         return sliced
 
     def bad_shards(self) -> dict[pathlib.Path, str]:
@@ -236,6 +245,17 @@ class RLTReplayStore:
             if missing:
                 raise ReplayShardError(f"missing required arrays: {missing}")
             arrays = {key: np.asarray(data[key]) for key in REQUIRED_REPLAY_KEYS}
+            action_shape = arrays["action"].shape[:2]
+            arrays["intervention_mask"] = (
+                np.asarray(data["intervention_mask"]).astype(np.bool_)
+                if "intervention_mask" in data
+                else np.zeros(action_shape, dtype=np.bool_)
+            )
+            arrays["action_source"] = (
+                np.asarray(data["action_source"]).astype(np.int32)
+                if "action_source" in data
+                else np.full(action_shape, ACTION_SOURCE_UNKNOWN, dtype=np.int32)
+            )
             manifest = _load_manifest(data)
 
         _validate_arrays(path, arrays)
@@ -281,7 +301,9 @@ class RLTReplayStore:
         shard_indices = np.searchsorted(cumulative, indices, side="right")
         previous = np.concatenate([np.asarray([0]), cumulative[:-1]])
 
-        pieces: dict[str, list[np.ndarray]] = {key: [] for key in (*REQUIRED_REPLAY_KEYS, "episode_success")}
+        pieces: dict[str, list[np.ndarray]] = {
+            key: [] for key in (*REQUIRED_REPLAY_KEYS, *OPTIONAL_REPLAY_KEYS, "episode_success")
+        }
         order: list[np.ndarray] = []
         for shard_index, shard in enumerate(self._shards):
             positions = np.flatnonzero(shard_indices == shard_index)
@@ -334,6 +356,10 @@ def _validate_arrays(path: pathlib.Path, arrays: dict[str, np.ndarray]) -> None:
         raise ReplayShardError("next_proprio shape must match proprio")
     if arrays["done"].shape != (replay_size,):
         raise ReplayShardError("done must have shape [N]")
+    if arrays["intervention_mask"].shape != arrays["action"].shape[:2]:
+        raise ReplayShardError("intervention_mask must have shape [N, horizon]")
+    if arrays["action_source"].shape != arrays["action"].shape[:2]:
+        raise ReplayShardError("action_source must have shape [N, horizon]")
     if not all(np.all(np.isfinite(arrays[key])) for key in REQUIRED_REPLAY_KEYS if key != "done"):
         raise ReplayShardError(f"{path} contains non-finite replay values")
 

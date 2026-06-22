@@ -42,6 +42,7 @@ from .schemas import RLTKeyRegionReviewPage
 from .schemas import RLTKeyRegionReviewRecord
 from .schemas import RLTKeyRegionReviewSummary
 from .schemas import RLTKeyRegionRescoreRequest
+from .schemas import RLTHumanTakeoverRequest
 from .schemas import RLTScoreRequest
 from .schemas import RLTSegmentRecord
 from .schemas import RLTVoidRequest
@@ -112,6 +113,22 @@ def robot_task(request: RobotTaskRequest) -> dict[str, str]:
     }
     redis_client.publish(settings.rlt_control_channel, json.dumps(payload))
     return {"status": "ok", "task_num": request.task_num, "task_name": payload["task_name"]}
+
+
+@app.post("/api/rlt/human-takeover/start", response_model=RLTControlState)
+def start_human_takeover(request: RLTHumanTakeoverRequest) -> RLTControlState:
+    try:
+        return rlt_control.start_human_takeover(RLTControlRequest(source=request.source), reason=request.reason)
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+
+@app.post("/api/rlt/human-takeover/end", response_model=RLTControlState)
+def end_human_takeover(request: RLTHumanTakeoverRequest) -> RLTControlState:
+    try:
+        return rlt_control.end_human_takeover(RLTControlRequest(source=request.source), reason=request.reason)
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
 
 
 @app.get("/api/cameras/{camera_name}/latest.jpg")

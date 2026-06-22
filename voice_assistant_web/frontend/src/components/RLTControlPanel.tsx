@@ -2,10 +2,12 @@ import { useEffect, useMemo, useState } from 'react'
 import {
   confirmKeyRegion,
   discardKeyRegion,
+  endHumanTakeover,
   endKeyRegion,
   RLTControlState,
   scoreKeyRegion,
   sendRobotTask,
+  startHumanTakeover,
   startKeyRegion,
   updateRLTConfig,
   voidKeyRegion,
@@ -70,6 +72,8 @@ export function RLTControlPanel({ rlt, onState }: Props) {
     if (event.key === 'Enter' || event.key.toLowerCase() === 'c') return 'confirm'
     if (event.key === 'Backspace' || event.key.toLowerCase() === 'd') return 'discard'
     if (event.key.toLowerCase() === 'v') return 'void'
+    if (event.key === 'PageUp' || event.code === 'PageUp' || event.keyCode === 33) return 'takeoverStart'
+    if (event.key === 'End' || event.code === 'End' || event.keyCode === 35) return 'takeoverEnd'
     if (event.key === 'PageDown' || event.code === 'PageDown' || event.keyCode === 34) return 'twist'
     if (event.key === 'Home' || event.code === 'Home' || event.keyCode === 36) return 'home'
     return ''
@@ -113,6 +117,12 @@ export function RLTControlPanel({ rlt, onState }: Props) {
         if (['key_region', 'await_score'].includes(rlt.phase) && rlt.active_key_region_id) {
           void run('void', () => voidKeyRegion(rlt.active_key_region_id as string, 'operator_void'))
         }
+      } else if (hotkey === 'takeoverStart') {
+        if (['idle', 'key_region'].includes(rlt.phase) && !rlt.human_takeover_active) {
+          void run('takeoverStart', startHumanTakeover)
+        }
+      } else if (hotkey === 'takeoverEnd') {
+        if (rlt.human_takeover_active) void run('takeoverEnd', endHumanTakeover)
       } else if (hotkey === 'twist') {
         void runRobotTask('twist', '1')
       } else if (hotkey === 'home') {
@@ -121,14 +131,15 @@ export function RLTControlPanel({ rlt, onState }: Props) {
     }
     window.addEventListener('keydown', onKeyDown, true)
     return () => window.removeEventListener('keydown', onKeyDown, true)
-  }, [rlt.phase, rlt.active_key_region_id, pending])
+  }, [rlt.phase, rlt.active_key_region_id, rlt.human_takeover_active, pending])
 
   const phaseLabel = useMemo(() => {
+    if (rlt.human_takeover_active) return 'Human takeover active'
     if (rlt.phase === 'key_region') return 'Recording key region'
     if (rlt.phase === 'await_score') return `Awaiting score ${countdown}`
     if (rlt.phase === 'pending_replay') return 'Review scored replay'
     return 'Idle'
-  }, [rlt.phase, countdown])
+  }, [rlt.phase, rlt.human_takeover_active, countdown])
 
   return (
     <section className="panel rlt-panel rlt-control-compact">
@@ -138,6 +149,31 @@ export function RLTControlPanel({ rlt, onState }: Props) {
           <h2>{phaseLabel}</h2>
         </div>
         <span className={`status-pill ${rlt.phase === 'idle' ? 'mode' : 'live'}`}>{rlt.training_phase}</span>
+      </div>
+
+      <div className="rlt-review-actions">
+        <button
+          className={`apply-button ${flashKey === 'takeoverStart' ? 'key-flash' : ''}`}
+          type="button"
+          disabled={!['idle', 'key_region'].includes(rlt.phase) || rlt.human_takeover_active || !!pending}
+          onClick={() => {
+            flash('takeoverStart')
+            void run('takeoverStart', startHumanTakeover)
+          }}
+        >
+          Takeover
+        </button>
+        <button
+          className={`apply-button danger ${flashKey === 'takeoverEnd' ? 'key-flash' : ''}`}
+          type="button"
+          disabled={!rlt.human_takeover_active || !!pending}
+          onClick={() => {
+            flash('takeoverEnd')
+            void run('takeoverEnd', endHumanTakeover)
+          }}
+        >
+          Release
+        </button>
       </div>
 
       <div className="rlt-control-grid">

@@ -23,6 +23,8 @@ class RLTReplayBatch:
     next_reference_action: at.Float[at.Array, "b h a"]
     done: at.Bool[at.Array, " b"]
     episode_success: at.Bool[at.Array, " b"]
+    intervention_mask: at.Bool[at.Array, "b h"]
+    action_source: at.Int[at.Array, "b h"]
 
 
 @dataclasses.dataclass(frozen=True)
@@ -71,9 +73,15 @@ def make_replay_batch(
     next_reference_action: at.Float[at.Array, "b h a"],
     done: at.Bool[at.Array, " b"],
     episode_success: at.Bool[at.Array, " b"] | None = None,
+    intervention_mask: at.Bool[at.Array, "b h"] | None = None,
+    action_source: at.Int[at.Array, "b h"] | None = None,
 ) -> RLTReplayBatch:
     if episode_success is None:
         episode_success = jnp.sum(reward_seq, axis=-1) > 0.0
+    if intervention_mask is None:
+        intervention_mask = jnp.zeros(reward_seq.shape, dtype=jnp.bool_)
+    if action_source is None:
+        action_source = jnp.full(reward_seq.shape, -1, dtype=jnp.int32)
     return RLTReplayBatch(
         x=rlt.make_state(z_rl, proprio),
         action=action,
@@ -83,6 +91,8 @@ def make_replay_batch(
         next_reference_action=next_reference_action,
         done=done,
         episode_success=episode_success,
+        intervention_mask=intervention_mask,
+        action_source=action_source,
     )
 
 
@@ -197,6 +207,7 @@ def train_step(
     awbc_weight_mean = jnp.asarray(0.0, dtype=critic_loss_value.dtype)
     awbc_advantage_mean = jnp.asarray(0.0, dtype=critic_loss_value.dtype)
     awbc_data_delta_norm_mean = jnp.asarray(0.0, dtype=critic_loss_value.dtype)
+    awbc_intervention_fraction = jnp.asarray(0.0, dtype=critic_loss_value.dtype)
     actor_opt_state = state.actor_opt_state
     if actor_updated:
 
@@ -204,6 +215,7 @@ def train_step(
             action = actor(batch.x, batch.reference_action, rng=actor_rng, sample=False)
             q1_for_actor = model.critic.q1(batch.x, action)
             q1_for_reference = model.critic.q1(batch.x, batch.reference_action)
+            intervention_sample = jnp.any(batch.intervention_mask, axis=-1)
             if state.actor_loss_mode == ACTOR_LOSS_MODE_TD3:
                 loss = rlt.actor_loss(q1_for_actor, action, batch.reference_action, beta=model.config.beta)
                 awbc_info = {
@@ -215,6 +227,13 @@ def train_step(
             else:
                 q1_for_data = model.critic.q1(batch.x, batch.action)
                 data_advantage = jax.lax.stop_gradient(q1_for_data - q1_for_reference)
+                intervention_sample = jnp.any(batch.intervention_mask, axis=-1)
+                has_intervention = jnp.any(intervention_sample)
+                awbc_sample_mask = jnp.where(
+                    has_intervention,
+                    intervention_sample,
+                    jnp.ones_like(intervention_sample),
+                )
                 loss, awbc_info = rlt.awbc_actor_loss(
                     action,
                     batch.action,
@@ -225,6 +244,7 @@ def train_step(
                     min_advantage=state.awbc_min_advantage,
                     max_action_delta_norm=state.awbc_max_action_delta_norm,
                     data_reference_action=batch.reference_action,
+                    sample_mask=awbc_sample_mask,
                 )
             delta = action - batch.reference_action
             actor_q_mean = jnp.mean(q1_for_actor)
@@ -235,6 +255,7 @@ def train_step(
                 "q_advantage": actor_q_mean - reference_q_mean,
                 "actor_delta_norm": jnp.mean(jnp.linalg.norm(delta.reshape(delta.shape[0], -1), axis=-1)),
                 **awbc_info,
+                "awbc_intervention_fraction": jnp.mean(intervention_sample.astype(action.dtype)),
             }
 
         (actor_loss_value, actor_info), actor_grads = nnx.value_and_grad(actor_loss_fn, has_aux=True)(model.actor)
@@ -254,6 +275,7 @@ def train_step(
         awbc_weight_mean = actor_info["awbc_weight_mean"]
         awbc_advantage_mean = actor_info["awbc_advantage_mean"]
         awbc_data_delta_norm_mean = actor_info["awbc_data_delta_norm_mean"]
+        awbc_intervention_fraction = actor_info["awbc_intervention_fraction"]
 
     publish_actor = should_publish_actor(
         next_step,
@@ -287,5 +309,6 @@ def train_step(
         "awbc_weight_mean": awbc_weight_mean,
         "awbc_advantage_mean": awbc_advantage_mean,
         "awbc_data_delta_norm_mean": awbc_data_delta_norm_mean,
+        "awbc_intervention_fraction": awbc_intervention_fraction,
     }
     return new_state, info

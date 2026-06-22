@@ -28,7 +28,19 @@ _REPLAY_KEYS = (
     "next_proprio",
     "next_reference_action",
     "done",
+    "intervention_mask",
+    "action_source",
+    "takeover_id",
 )
+
+ACTION_SOURCE_TO_ID = {
+    "unknown": -1,
+    "vla": 0,
+    "reference": 0,
+    "actor": 1,
+    "rlt_actor": 1,
+    "human": 2,
+}
 
 
 @dataclasses.dataclass(frozen=True)
@@ -45,6 +57,9 @@ class StepRecord:
     z_rl: np.ndarray | None
     proprio: np.ndarray | None
     images: dict[str, np.ndarray]
+    action_source: str = "unknown"
+    human_takeover_active: bool = False
+    takeover_id: str | None = None
 
 
 @dataclasses.dataclass(frozen=True)
@@ -332,6 +347,9 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
             z_rl=_extract_action_array(action, "z_rl", "rl_token"),
             proprio=_extract_action_array(action, "proprio", "rlt_proprio", "state"),
             images=images,
+            action_source=_action_source_from_payload(action),
+            human_takeover_active=bool(action.get("human_takeover_active", action.get("intervention_mask", False))),
+            takeover_id=None if action.get("takeover_id") is None else str(action.get("takeover_id")),
         )
         with self._lock:
             self._ring.append(record)
@@ -586,6 +604,7 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
             "action_space": "aloha_exec",
             "action_dim": 0 if replay_arrays is None else int(replay_arrays["action"].shape[-1]),
             "reward_placement": "terminal_last_train_step",
+            "takeover_windows": _takeover_windows(segment.records, reward=segment.score_event.get("reward")),
             "train_horizon": self._train_horizon,
             "full_horizon": self._full_horizon,
             "replay_array_shapes": {}
@@ -661,6 +680,9 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
             if action_chunk is None or reference_chunk is None or next_reference_chunk is None:
                 continue
             reward_seq = np.zeros((train_horizon,), dtype=np.float32)
+            intervention_mask = _step_window(records, start, "human_takeover_active", train_horizon, dtype=np.bool_)
+            action_source = _action_source_window(records, start, train_horizon)
+            takeover_id = _step_window(records, start, "takeover_id", train_horizon, dtype=str, none_value="")
             done = start == last_start
             if done:
                 reward_seq[train_horizon - 1] = reward
@@ -673,6 +695,9 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
             samples["next_proprio"].append(np.asarray(next_record.proprio, dtype=np.float32))
             samples["next_reference_action"].append(next_reference_chunk)
             samples["done"].append(np.asarray(done, dtype=np.bool_))
+            samples["intervention_mask"].append(intervention_mask)
+            samples["action_source"].append(action_source)
+            samples["takeover_id"].append(takeover_id)
 
         if not samples["z_rl"]:
             return None, ["no_valid_replay_samples"]
@@ -680,14 +705,84 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
         return arrays, []
 
 
-def _step_window(records: list[StepRecord], start: int, attr: str, horizon: int) -> np.ndarray | None:
+def _step_window(
+    records: list[StepRecord],
+    start: int,
+    attr: str,
+    horizon: int,
+    *,
+    dtype=np.float32,
+    none_value=None,
+) -> np.ndarray | None:
     end = start + horizon
     if start < 0 or end > len(records):
         return None
     values = [getattr(record, attr) for record in records[start:end]]
     if any(value is None for value in values):
+        if none_value is None:
+            return None
+        values = [none_value if value is None else value for value in values]
+    return np.asarray(values, dtype=dtype)
+
+
+def _action_source_window(records: list[StepRecord], start: int, horizon: int) -> np.ndarray | None:
+    end = start + horizon
+    if start < 0 or end > len(records):
         return None
-    return np.asarray(values, dtype=np.float32)
+    return np.asarray(
+        [ACTION_SOURCE_TO_ID.get(str(record.action_source), ACTION_SOURCE_TO_ID["unknown"]) for record in records[start:end]],
+        dtype=np.int32,
+    )
+
+
+def _action_source_from_payload(action: dict) -> str:
+    source = action.get("action_source")
+    if source is not None:
+        return str(source)
+    if action.get("human_takeover_active") or action.get("intervention_mask"):
+        return "human"
+    if action.get("rlt_actor_applied"):
+        return "actor"
+    return "vla"
+
+
+def _takeover_windows(records: list[StepRecord], *, reward: Any) -> list[dict[str, Any]]:
+    windows: list[dict[str, Any]] = []
+    active_id: str | None = None
+    active_records: list[StepRecord] = []
+
+    def flush() -> None:
+        nonlocal active_id, active_records
+        if active_id is None or not active_records:
+            active_id = None
+            active_records = []
+            return
+        windows.append(
+            {
+                "takeover_id": active_id,
+                "source": "human",
+                "start_step": int(active_records[0].step_index),
+                "end_step": int(active_records[-1].step_index + 1),
+                "start_time": float(active_records[0].timestamp),
+                "end_time": float(active_records[-1].timestamp),
+                "num_frames": len(active_records),
+                "success": bool(reward == 1),
+            }
+        )
+        active_id = None
+        active_records = []
+
+    for record in records:
+        if record.human_takeover_active:
+            takeover_id = record.takeover_id or "human"
+            if active_id is not None and takeover_id != active_id:
+                flush()
+            active_id = takeover_id
+            active_records.append(record)
+        else:
+            flush()
+    flush()
+    return windows
 
 def _replay_status(missing_metadata: list[str], replay_arrays: dict[str, np.ndarray] | None) -> str:
     if replay_arrays is not None:

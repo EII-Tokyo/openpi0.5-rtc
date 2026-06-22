@@ -109,6 +109,8 @@ class Runtime:
                 "/app/checkpoints/eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo_rl_token_query/rl_token_2048_enc4_dec4_query_from_19000_20260528/12000",
             ),
             "active_key_region_id": None,
+            "human_takeover_active": False,
+            "active_takeover_id": None,
             "last_reward": None,
         }
         self._task_lock = threading.Lock()
@@ -126,6 +128,9 @@ class Runtime:
         self._stop = False
         self._manual_actor_requested = False
         self._rlt_context_epoch = 0
+        self._human_takeover_active = False
+        self._active_takeover_id = None
+        self._takeover_joint_unwrapper = None
         self._keyboard_task_mapping = {
             "1": self._TASK_PROMPT_BY_NUM["1"],
             "2": self._TASK_PROMPT_BY_NUM["2"],
@@ -325,9 +330,17 @@ class Runtime:
                 self._latest_task = task_data
             logging.info("收到前端机器人任务: %s - %s", task_data["task_num"], task_data["task_name"])
             return
-        should_notify_key_region = event_type in {"key_region_start", "key_region_end", "score", "key_region_discard"}
+        should_notify_key_region = event_type in {
+            "key_region_start",
+            "key_region_end",
+            "score",
+            "key_region_discard",
+            "human_takeover_start",
+            "human_takeover_end",
+        }
         with self._task_lock:
             previous_active_key_region_id = self._rlt_state.get("active_key_region_id")
+            previous_phase = self._rlt_state.get("phase")
             for key in (
                 "warmup_target",
                 "warmup_count",
@@ -360,6 +373,8 @@ class Runtime:
                 "inference_reference_q_value",
                 "inference_actor_q_value",
                 "inference_q_advantage",
+                "human_takeover_active",
+                "active_takeover_id",
             ):
                 if key in state:
                     self._rlt_state[key] = state[key]
@@ -368,21 +383,62 @@ class Runtime:
             if event_type == "key_region_start":
                 self._bump_rlt_context_epoch_locked()
                 self._manual_actor_requested = True
+                self._human_takeover_active = False
+                self._active_takeover_id = None
                 self._rlt_state["phase"] = "key_region"
                 self._rlt_state["active_key_region_id"] = data.get("key_region_id") or state.get("active_key_region_id")
+                self._rlt_state["human_takeover_active"] = False
+                self._rlt_state["active_takeover_id"] = None
                 self._set_agent_rlt_gate(enabled=True, reason="key_region_start")
             elif event_type == "key_region_end":
                 self._bump_rlt_context_epoch_locked()
                 self._manual_actor_requested = False
+                self._human_takeover_active = False
+                self._active_takeover_id = None
                 self._rlt_state["phase"] = "await_score"
+                self._rlt_state["human_takeover_active"] = False
+                self._rlt_state["active_takeover_id"] = None
                 self._rlt_state["inference_actor_active"] = False
                 self._rlt_state["inference_delta_norm"] = None
                 self._rlt_state["inference_gate_reason"] = "actor_not_requested"
                 self._set_agent_rlt_gate(enabled=False, reason="key_region_end")
+            elif event_type == "human_takeover_start":
+                self._bump_rlt_context_epoch_locked()
+                self._manual_actor_requested = True
+                self._human_takeover_active = True
+                self._active_takeover_id = (
+                    data.get("takeover_id")
+                    or state.get("active_takeover_id")
+                    or f"takeover-{time.time_ns()}"
+                )
+                self._rlt_state["phase"] = "key_region"
+                self._rlt_state["active_key_region_id"] = data.get("key_region_id") or state.get("active_key_region_id")
+                self._rlt_state["human_takeover_active"] = True
+                self._rlt_state["active_takeover_id"] = self._active_takeover_id
+                self._rlt_state["inference_gate_reason"] = "human_takeover_shadow_policy"
+                self._set_agent_rlt_gate(enabled=True, reason="human_takeover_start")
+                self._set_master_torque(enabled=False)
+            elif event_type == "human_takeover_end":
+                self._bump_rlt_context_epoch_locked()
+                self._manual_actor_requested = False
+                self._human_takeover_active = False
+                self._active_takeover_id = None
+                self._rlt_state["phase"] = "await_score"
+                self._rlt_state["human_takeover_active"] = False
+                self._rlt_state["active_takeover_id"] = None
+                self._rlt_state["inference_actor_active"] = False
+                self._rlt_state["inference_delta_norm"] = None
+                self._rlt_state["inference_gate_reason"] = "human_takeover_ended"
+                self._set_agent_rlt_gate(enabled=False, reason="human_takeover_end")
+                self._set_master_torque(enabled=True)
             elif event_type == "score":
                 reward = data.get("reward")
                 self._rlt_state["phase"] = "idle"
                 self._rlt_state["active_key_region_id"] = None
+                self._rlt_state["human_takeover_active"] = False
+                self._rlt_state["active_takeover_id"] = None
+                self._human_takeover_active = False
+                self._active_takeover_id = None
                 self._rlt_state["last_reward"] = reward
                 if "warmup_attempts" in state:
                     self._rlt_state["warmup_attempts"] = state["warmup_attempts"]
@@ -392,6 +448,10 @@ class Runtime:
                 self._bump_rlt_context_epoch_locked()
                 self._rlt_state["phase"] = "idle"
                 self._rlt_state["active_key_region_id"] = None
+                self._rlt_state["human_takeover_active"] = False
+                self._rlt_state["active_takeover_id"] = None
+                self._human_takeover_active = False
+                self._active_takeover_id = None
                 self._rlt_state["inference_actor_active"] = False
                 self._rlt_state["inference_delta_norm"] = None
                 self._rlt_state["inference_gate_reason"] = "actor_not_requested"
@@ -421,6 +481,8 @@ class Runtime:
             current_task_snapshot = dict(self._current_task) if self._current_task is not None else None
         self._publish_rlt_state()
         if should_notify_key_region:
+            if event_type == "human_takeover_start" and previous_phase == "key_region":
+                return
             event_payload = dict(data)
             event_payload["type"] = event_type
             event_payload.setdefault("timestamp", time.time())
@@ -462,6 +524,8 @@ class Runtime:
             "actor_effective": actor_requested,
             "actor_locked_reason": actor_locked_reason,
             "manual_actor_requested": manual_actor_requested,
+            "human_takeover_active": bool(state.get("human_takeover_active", False)),
+            "active_takeover_id": state.get("active_takeover_id"),
             "rlt_context_epoch": self._rlt_context_epoch,
             "current_task": current_task,
             "episode_step": self._episode_steps,
@@ -488,12 +552,96 @@ class Runtime:
         logging.info("RLT actor %s（%s）", "已接入" if enabled else "已停止", "左箭头" if enabled else "右箭头")
         self._publish_rlt_state()
 
+    def _set_human_takeover_active(self, enabled: bool, *, source: str = "runtime") -> None:
+        with self._task_lock:
+            if enabled:
+                if self._rlt_state.get("phase") not in {"idle", "key_region"}:
+                    logging.warning("Cannot start human takeover while phase=%s", self._rlt_state.get("phase"))
+                    return
+                if self._rlt_state.get("phase") == "idle":
+                    self._rlt_state["phase"] = "key_region"
+                    self._rlt_state["active_key_region_id"] = f"runtime-key-region-{time.time_ns()}"
+                self._bump_rlt_context_epoch_locked()
+                self._manual_actor_requested = True
+                self._human_takeover_active = True
+                self._active_takeover_id = f"takeover-{time.time_ns()}"
+                self._rlt_state["human_takeover_active"] = True
+                self._rlt_state["active_takeover_id"] = self._active_takeover_id
+                self._rlt_state["inference_gate_reason"] = "human_takeover_shadow_policy"
+                self._set_agent_rlt_gate(enabled=True, reason="human_takeover_start")
+                event_type = "human_takeover_start"
+                event_takeover_id = self._active_takeover_id
+            else:
+                if not self._human_takeover_active:
+                    return
+                event_takeover_id = self._active_takeover_id
+                self._bump_rlt_context_epoch_locked()
+                self._manual_actor_requested = False
+                self._human_takeover_active = False
+                self._active_takeover_id = None
+                self._rlt_state["phase"] = "await_score"
+                self._rlt_state["human_takeover_active"] = False
+                self._rlt_state["active_takeover_id"] = None
+                self._rlt_state["inference_actor_active"] = False
+                self._rlt_state["inference_delta_norm"] = None
+                self._rlt_state["inference_gate_reason"] = "human_takeover_ended"
+                self._set_agent_rlt_gate(enabled=False, reason="human_takeover_end")
+                event_type = "human_takeover_end"
+            event = {
+                "type": event_type,
+                "source": source,
+                "timestamp": time.time(),
+                "key_region_id": self._rlt_state.get("active_key_region_id"),
+                "takeover_id": event_takeover_id,
+                "state": dict(self._rlt_state),
+                "current_task": dict(self._current_task) if self._current_task is not None else None,
+            }
+        self._set_master_torque(enabled=not enabled)
+        self._notify_key_region_subscribers(event_type, event)
+        self._publish_rlt_state()
+
+    def _set_master_torque(self, *, enabled: bool) -> None:
+        try:
+            if not hasattr(self._environment, "_env"):
+                return
+            from examples.aloha_real import robot_utils
+
+            real_env = self._environment._env
+            fn = robot_utils.torque_on if enabled else robot_utils.torque_off
+            fn(real_env.master_bot_left)
+            fn(real_env.master_bot_right)
+            logging.info("master torque %s for human takeover", "on" if enabled else "off")
+        except Exception as exc:
+            logging.warning("Failed to set master torque for human takeover: %s", exc)
+
+    def _read_human_takeover_action(self):
+        if not hasattr(self._environment, "_env"):
+            raise RuntimeError("Cannot read human takeover action without real_env")
+        from examples.aloha_real import robot_utils
+        from examples.aloha_real.real_env import get_action
+
+        if self._takeover_joint_unwrapper is None:
+            self._takeover_joint_unwrapper = robot_utils.JointPositionUnwrapper()
+        real_env = self._environment._env
+        return get_action(
+            real_env.master_bot_left,
+            real_env.master_bot_right,
+            joint_unwrapper=self._takeover_joint_unwrapper,
+            use_continuous_joints=True,
+        )
+
     def _handle_policy_control_key(self, key: str | None) -> bool:
         if key == self._KEY_LEFT_ARROW:
             self._set_manual_actor_requested(True)
             return True
         if key == self._KEY_RIGHT_ARROW:
             self._set_manual_actor_requested(False)
+            return True
+        if key and key.lower() == "s":
+            self._set_human_takeover_active(True, source="keyboard")
+            return True
+        if key and key.lower() == "e":
+            self._set_human_takeover_active(False, source="keyboard")
             return True
         return False
 
@@ -531,6 +679,8 @@ class Runtime:
         hook_name_by_type = {
             "key_region_start": "on_key_region_start",
             "key_region_end": "on_key_region_end",
+            "human_takeover_start": "on_key_region_start",
+            "human_takeover_end": "on_key_region_end",
             "score": "on_key_region_score",
             "key_region_discard": "on_key_region_discard",
         }
@@ -844,15 +994,35 @@ class Runtime:
 
         action = self._agent.get_action(observation_with_task)
         self._update_rlt_actor_status_from_action(action)
-        self._environment.apply_action(action)
+        executed_action = action
+        if self._human_takeover_active:
+            human_action = self._read_human_takeover_action()
+            executed_action = dict(action)
+            if isinstance(action, dict) and "actions" in action:
+                executed_action["policy_actions"] = action.get("actions")
+            executed_action["actions"] = human_action
+            executed_action["action_source"] = "human"
+            executed_action["human_takeover_active"] = True
+            executed_action["takeover_id"] = self._active_takeover_id
+            executed_action["intervention_mask"] = True
+        elif isinstance(action, dict):
+            executed_action = dict(action)
+            executed_action.setdefault("action_source", "actor" if action.get("rlt_actor_applied") else "vla")
+            executed_action.setdefault("human_takeover_active", False)
+            executed_action.setdefault("takeover_id", None)
+            executed_action.setdefault("intervention_mask", False)
+        self._environment.apply_action(executed_action)
         # 存储最后的action（用于task_num==3时移动master）
-        self._last_action = action.get("actions") if isinstance(action, dict) and "actions" in action else None
+        self._last_action = executed_action.get("actions") if isinstance(executed_action, dict) and "actions" in executed_action else None
         if self._last_action is not None:
             self._recent_puppet_actions.append(list(self._last_action))
-        self._publish_runtime_state(latest_action=self._last_action, mode="policy")
+        self._publish_runtime_state(
+            latest_action=self._last_action,
+            mode="human_takeover" if self._human_takeover_active else "policy",
+        )
 
         for subscriber in self._subscribers:
-            subscriber.on_step(observation["origin_observation"], action)
+            subscriber.on_step(observation["origin_observation"], executed_action)
 
     def _move_robots_to_action(self, real_env, action, step_sleep: float = 0.0) -> None:
         """将puppet和master同步到单个action。"""

@@ -79,6 +79,8 @@ class RLTControlState(BaseModel):
     inference_actor_q_value: float | None = None
     inference_q_advantage: float | None = None
     active_key_region_id: str | None = None
+    human_takeover_active: bool = False
+    active_takeover_id: str | None = None
     score_deadline: float | None = None
     last_reward: int | None = None
     last_event: str | None = None
@@ -152,6 +154,11 @@ class RLTConfigRequest(BaseModel):
 class RLTControlRequest(BaseModel):
     source: str = "ui"
     note: str | None = None
+
+
+class RLTHumanTakeoverRequest(BaseModel):
+    source: str = "ui"
+    reason: str = "near_failure"
 
 
 class RLTDiscardRequest(BaseModel):

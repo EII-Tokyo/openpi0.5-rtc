@@ -67,6 +67,16 @@ def _make_batch() -> rlt_training.RLTReplayBatch:
         next_reference_action=jnp.zeros((4, 5, 3), dtype=jnp.float32),
         done=jnp.array([True, False, True, False]),
         episode_success=jnp.array([True, False, True, False]),
+        intervention_mask=jnp.array(
+            [
+                [False, True, True, False, False],
+                [False, True, True, False, False],
+                [False, False, False, False, False],
+                [False, True, False, False, False],
+            ],
+            dtype=jnp.bool_,
+        ),
+        action_source=jnp.zeros((4, 5), dtype=jnp.int32),
     )
 
 
@@ -105,6 +115,25 @@ def test_rlt_train_step_awbc_reports_filter_metrics():
     assert info["actor_loss_mode"] == rlt_training.ACTOR_LOSS_MODE_AWBC
     assert 0.0 <= float(info["awbc_keep_fraction"]) <= 1.0
     assert float(info["awbc_weight_mean"]) >= 0.0
+    assert 0.0 <= float(info["awbc_intervention_fraction"]) <= 1.0
+
+
+def test_make_replay_batch_defaults_intervention_metadata():
+    batch = rlt_training.make_replay_batch(
+        z_rl=jnp.ones((2, 8), dtype=jnp.float32),
+        proprio=jnp.ones((2, 4), dtype=jnp.float32),
+        action=jnp.ones((2, 5, 3), dtype=jnp.float32),
+        reference_action=jnp.zeros((2, 5, 3), dtype=jnp.float32),
+        reward_seq=jnp.zeros((2, 5), dtype=jnp.float32),
+        next_z_rl=jnp.ones((2, 8), dtype=jnp.float32),
+        next_proprio=jnp.ones((2, 4), dtype=jnp.float32),
+        next_reference_action=jnp.zeros((2, 5, 3), dtype=jnp.float32),
+        done=jnp.array([False, True]),
+    )
+
+    assert batch.intervention_mask.shape == (2, 5)
+    assert not bool(jnp.any(batch.intervention_mask))
+    assert batch.action_source.shape == (2, 5)
 
 
 def test_actor_params_for_inference_returns_online_actor_only():

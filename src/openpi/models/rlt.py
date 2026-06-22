@@ -260,6 +260,7 @@ def awbc_actor_loss(
     min_advantage: float,
     max_action_delta_norm: float,
     data_reference_action: at.Float[at.Array, "b h a"] | None = None,
+    sample_mask: at.Bool[at.Array, " b"] | None = None,
 ) -> tuple[at.Float[at.Array, ""], dict[str, at.Array]]:
     if temperature <= 0.0:
         raise ValueError("temperature must be positive")
@@ -276,6 +277,8 @@ def awbc_actor_loss(
         & (advantage >= min_advantage)
         & (data_delta_norm <= max_action_delta_norm)
     )
+    if sample_mask is not None:
+        keep = keep & sample_mask.astype(jnp.bool_)
     raw_weight = jnp.exp(jnp.maximum(advantage, 0.0) / temperature)
     weight = jnp.clip(raw_weight, 1.0, max_weight) * keep.astype(actor_action.dtype)
     per_sample_bc = jnp.mean(jnp.square(actor_action - data_action), axis=(-2, -1))
