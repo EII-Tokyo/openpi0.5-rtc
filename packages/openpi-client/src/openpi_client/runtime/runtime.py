@@ -30,6 +30,9 @@ if not _logger.handlers and not logging.root.handlers:
 class Runtime:
     """The core module orchestrating interactions between key components of the system."""
 
+    _KEY_LEFT_ARROW = "\x1b[D"
+    _KEY_RIGHT_ARROW = "\x1b[C"
+
     _TASK_PROMPT_BY_NUM = {
         "1": "Twist off the bottle cap",
         "2": "Rinse bottle",
@@ -121,6 +124,8 @@ class Runtime:
 
         # 退出标志
         self._stop = False
+        self._manual_actor_requested = False
+        self._rlt_context_epoch = 0
         self._keyboard_task_mapping = {
             "1": self._TASK_PROMPT_BY_NUM["1"],
             "2": self._TASK_PROMPT_BY_NUM["2"],
@@ -256,12 +261,47 @@ class Runtime:
             self._rlt_state["inference_actor_active"] = False
             self._rlt_state["inference_gate_reason"] = str(load_error)
 
+    def _sync_manual_actor_gate_locked(self) -> None:
+        if self._rlt_state.get("phase") == "key_region":
+            self._manual_actor_requested = True
+        in_warmup = int(self._rlt_state.get("warmup_count", 0)) < int(self._rlt_state.get("warmup_target", 0))
+        actor_ready = bool(self._rlt_state.get("actor_ready", False))
+        actor_effective = bool(self._manual_actor_requested and actor_ready and not in_warmup)
+        self._rlt_state["actor_enabled"] = self._manual_actor_requested
+        self._rlt_state["actor_effective"] = actor_effective
+        if in_warmup:
+            self._rlt_state["actor_locked_reason"] = "warmup"
+        elif not self._manual_actor_requested:
+            self._rlt_state["actor_locked_reason"] = "manual_arrow_disabled"
+        elif not actor_ready:
+            self._rlt_state["actor_locked_reason"] = "actor_not_ready"
+        elif self._rlt_state.get("actor_locked_reason") in {"warmup", "manual_arrow_disabled", "actor_not_ready"}:
+            self._rlt_state["actor_locked_reason"] = None
+
+    def _bump_rlt_context_epoch_locked(self) -> int:
+        self._rlt_context_epoch += 1
+        return self._rlt_context_epoch
+
+    def _flush_agent_action_cache(self, reason: str) -> None:
+        flush = getattr(self._agent, "flush_action_cache", None)
+        if flush is not None:
+            flush(reason)
+
+    def _set_agent_rlt_gate(self, *, enabled: bool, reason: str) -> None:
+        logging.info("RLT broker gate set: enabled=%s epoch=%s reason=%s", enabled, self._rlt_context_epoch, reason)
+        setter = getattr(self._agent, "set_rlt_gate", None)
+        if setter is not None:
+            setter(enabled=enabled, epoch=self._rlt_context_epoch, reason=reason)
+        else:
+            self._flush_agent_action_cache(reason)
+
     def _publish_rlt_state(self) -> None:
         if self._redis_client is None:
             return
         runtime_status = self._rlt_actor_runtime_status()
         with self._task_lock:
             self._sync_rlt_actor_runtime_status_locked(runtime_status)
+            self._sync_manual_actor_gate_locked()
             payload = dict(self._rlt_state)
         payload["timestamp"] = time.time()
         try:
@@ -326,10 +366,19 @@ class Runtime:
                 elif key in data:
                     self._rlt_state[key] = data[key]
             if event_type == "key_region_start":
+                self._bump_rlt_context_epoch_locked()
+                self._manual_actor_requested = True
                 self._rlt_state["phase"] = "key_region"
                 self._rlt_state["active_key_region_id"] = data.get("key_region_id") or state.get("active_key_region_id")
+                self._set_agent_rlt_gate(enabled=True, reason="key_region_start")
             elif event_type == "key_region_end":
+                self._bump_rlt_context_epoch_locked()
+                self._manual_actor_requested = False
                 self._rlt_state["phase"] = "await_score"
+                self._rlt_state["inference_actor_active"] = False
+                self._rlt_state["inference_delta_norm"] = None
+                self._rlt_state["inference_gate_reason"] = "actor_not_requested"
+                self._set_agent_rlt_gate(enabled=False, reason="key_region_end")
             elif event_type == "score":
                 reward = data.get("reward")
                 self._rlt_state["phase"] = "idle"
@@ -340,13 +389,34 @@ class Runtime:
                 if "auto_rollout_attempts" in state:
                     self._rlt_state["auto_rollout_attempts"] = state["auto_rollout_attempts"]
             elif event_type == "key_region_discard":
+                self._bump_rlt_context_epoch_locked()
                 self._rlt_state["phase"] = "idle"
                 self._rlt_state["active_key_region_id"] = None
+                self._rlt_state["inference_actor_active"] = False
+                self._rlt_state["inference_delta_norm"] = None
+                self._rlt_state["inference_gate_reason"] = "actor_not_requested"
+                self._set_agent_rlt_gate(enabled=False, reason="key_region_discard")
+            if event_type == "config_update":
+                gate_keys = {
+                    "actor_enabled",
+                    "intervention_scale",
+                    "max_delta",
+                    "critic_gate_enabled",
+                    "critic_gate_margin",
+                    "critic_gate_temperature",
+                }
+                if any(key in state or key in data for key in gate_keys):
+                    self._bump_rlt_context_epoch_locked()
+                    gate_enabled = bool(state.get("actor_enabled", data.get("actor_enabled", self._manual_actor_requested)))
+                    self._set_agent_rlt_gate(enabled=gate_enabled, reason="config_update")
+                if "actor_enabled" in state:
+                    self._manual_actor_requested = bool(state["actor_enabled"])
+                elif "actor_enabled" in data:
+                    self._manual_actor_requested = bool(data["actor_enabled"])
             in_warmup = self._rlt_state["warmup_count"] < self._rlt_state["warmup_target"]
             if "training_phase" not in state:
                 self._rlt_state["training_phase"] = "warmup" if in_warmup else "rl"
-            if "actor_effective" not in state:
-                self._rlt_state["actor_effective"] = bool(self._rlt_state["actor_enabled"] and not in_warmup)
+            self._sync_manual_actor_gate_locked()
             rlt_state_snapshot = dict(self._rlt_state)
             current_task_snapshot = dict(self._current_task) if self._current_task is not None else None
         self._publish_rlt_state()
@@ -369,20 +439,75 @@ class Runtime:
         with self._task_lock:
             state = dict(self._rlt_state)
             current_task = dict(self._current_task) if self._current_task is not None else None
+            manual_actor_requested = self._manual_actor_requested
         in_warmup = int(state.get("warmup_count", 0)) < int(state.get("warmup_target", 0))
-        actor_requested = bool(state.get("actor_effective", bool(state.get("actor_enabled", False) and not in_warmup)))
+        actor_ready = bool(state.get("actor_ready", False))
+        key_region_actor_requested = state.get("phase") == "key_region"
+        gate_requested = bool(manual_actor_requested or key_region_actor_requested)
+        actor_requested = bool(
+            not in_warmup and (key_region_actor_requested or (manual_actor_requested and actor_ready))
+        )
+        actor_locked_reason = state.get("actor_locked_reason")
+        if in_warmup:
+            actor_locked_reason = "warmup"
+        elif not gate_requested:
+            actor_locked_reason = "manual_arrow_disabled"
+        elif not actor_ready and not key_region_actor_requested:
+            actor_locked_reason = "actor_not_ready"
+        elif key_region_actor_requested:
+            actor_locked_reason = None
         return {
             **state,
             "actor_requested": actor_requested,
-            "actor_locked_reason": "warmup" if in_warmup else state.get("actor_locked_reason"),
+            "actor_effective": actor_requested,
+            "actor_locked_reason": actor_locked_reason,
+            "manual_actor_requested": manual_actor_requested,
+            "rlt_context_epoch": self._rlt_context_epoch,
             "current_task": current_task,
             "episode_step": self._episode_steps,
         }
+
+    def _set_manual_actor_requested(self, enabled: bool) -> None:
+        with self._task_lock:
+            self._bump_rlt_context_epoch_locked()
+            self._manual_actor_requested = enabled
+            self._sync_manual_actor_gate_locked()
+            self._set_agent_rlt_gate(
+                enabled=enabled,
+                reason="manual_actor_enabled" if enabled else "manual_actor_disabled",
+            )
+            if enabled and self._rlt_state.get("actor_locked_reason") == "warmup":
+                self._rlt_state["actor_locked_reason"] = "warmup"
+                self._rlt_state["inference_gate_reason"] = "warmup"
+            elif enabled:
+                self._rlt_state["inference_gate_reason"] = "manual_arrow_enabled"
+            else:
+                self._rlt_state["inference_actor_active"] = False
+                self._rlt_state["inference_delta_norm"] = None
+                self._rlt_state["inference_gate_reason"] = "manual_arrow_disabled"
+        logging.info("RLT actor %s（%s）", "已接入" if enabled else "已停止", "左箭头" if enabled else "右箭头")
+        self._publish_rlt_state()
+
+    def _handle_policy_control_key(self, key: str | None) -> bool:
+        if key == self._KEY_LEFT_ARROW:
+            self._set_manual_actor_requested(True)
+            return True
+        if key == self._KEY_RIGHT_ARROW:
+            self._set_manual_actor_requested(False)
+            return True
+        return False
 
     def _update_rlt_actor_status_from_action(self, action: dict) -> None:
         if not isinstance(action, dict) or "rlt_actor_applied" not in action:
             return
         with self._task_lock:
+            action_epoch = action.get("rlt_context_epoch")
+            if action_epoch is not None and int(action_epoch) != int(self._rlt_context_epoch):
+                self._rlt_state["inference_actor_active"] = False
+                self._rlt_state["inference_delta_norm"] = None
+                self._rlt_state["inference_gate_reason"] = "stale_actor_context"
+                self._sync_manual_actor_gate_locked()
+                return
             self._rlt_state["actor_runtime_applied"] = bool(action.get("rlt_actor_applied"))
             self._rlt_state["actor_runtime_reason"] = action.get("rlt_actor_reason")
             self._rlt_state["actor_runtime_checkpoint_step"] = action.get("rlt_actor_step")
@@ -400,6 +525,7 @@ class Runtime:
                 self._rlt_state["critic_ready"] = bool(action.get("rlt_critic_ready"))
             if "rlt_critic_gate_enabled" in action:
                 self._rlt_state["critic_gate_enabled"] = bool(action.get("rlt_critic_gate_enabled"))
+            self._sync_manual_actor_gate_locked()
 
     def _notify_key_region_subscribers(self, event_type: str, event: dict) -> None:
         hook_name_by_type = {
@@ -706,6 +832,7 @@ class Runtime:
 
     def _step(self) -> None:
         """A single step of the runtime loop."""
+        self._handle_policy_control_key(self._poll_single_key(timeout=0.0))
         observation = self._environment.get_observation()
         assert self._current_task is not None, "_current_task must be set before calling _step()"
         observation_with_task = {

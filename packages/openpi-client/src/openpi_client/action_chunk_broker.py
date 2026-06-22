@@ -38,8 +38,14 @@ class ActionChunkBroker(_base_policy.BasePolicy):
         self._last_results: Dict[str, np.ndarray] | None = None
         self._last_origin_actions: np.ndarray | None = None
         self._last_reference_actions: np.ndarray | None = None
+        self._last_rlt_context_signature: tuple | None = None
         self._background_results: Dict[str, np.ndarray] | None = None
+        self._background_rlt_context_signature: tuple | None = None
         self._background_running: bool = False
+        self._cache_generation: int = 0
+        self._cache_lock = threading.RLock()
+        self._explicit_rlt_gate_enabled: bool | None = None
+        self._explicit_rlt_gate_epoch: int | None = None
         self._rlt_actor = rlt_actor_runtime
         if self._rlt_actor is None and rlt_actor_path is not None:
             self._rlt_actor = RLTActorRuntime(rlt_actor_path, poll_interval_seconds=rlt_actor_poll_interval)
@@ -90,19 +96,28 @@ class ActionChunkBroker(_base_policy.BasePolicy):
         while True:
             if self._cur_step == self._s:
                 total_start = time.monotonic()
-                self._background_running = True
+                with self._cache_lock:
+                    self._background_running = True
+                    generation = self._cache_generation
+                    obs = dict(self._obs or {})
+                    context_signature = self._rlt_context_signature_from_obs(obs)
+                    last_results = self._last_results
+                    last_origin_actions = self._last_origin_actions
+                    if last_results is None or last_origin_actions is None:
+                        self._background_running = False
+                        continue
 
                 # flip, normalize joint actions
                 # norm_action = (np.array([1, -1, -1, 1, 1, 1, 1, 1, -1, -1, 1, 1, 1, 1]) * self._last_results["actions"] - np.array([1, -1, -1, 1, 1, 1, 1, 1, -1, -1, 1, 1, 1, 1]) * self._obs["state"][:14] - np.array(self._norm_stats["actions"]["mean"])[:14]) / (np.array(self._norm_stats["actions"]["std"])[:14] + 1e-6)
                 prep_start = time.monotonic()
                 q01 = np.array(self._norm_stats["actions"]["q01"])[:14]
                 q99 = np.array(self._norm_stats["actions"]["q99"])[:14]
-                scaled = self._joint_signs * (self._last_results["actions"] - self._obs["state"][:14])
+                scaled = self._joint_signs * (last_results["actions"] - obs["state"][:14])
                 norm_action = (scaled - q01) / (q99 - q01 + 1e-6) * 2.0 - 1.0
                 
                 # get normalized gripper action
-                norm_action[:, 6] = self._last_origin_actions[:, 6]
-                norm_action[:, 13] = self._last_origin_actions[:, 13]
+                norm_action[:, 6] = last_origin_actions[:, 6]
+                norm_action[:, 13] = last_origin_actions[:, 13]
                 
                 zeros_padding = np.zeros((norm_action.shape[0], 18))
                 norm_action = np.concatenate([norm_action, zeros_padding], axis=1)
@@ -110,13 +125,17 @@ class ActionChunkBroker(_base_policy.BasePolicy):
                 # np.savetxt("norm_action.txt", norm_action, fmt='%.6f')
                 # np.savetxt("last_origin_actions.txt", self._last_origin_actions, fmt='%.6f')
                 rpc_start = time.monotonic()
-                policy_obs = self._policy_obs(self._obs or {})
+                policy_obs = self._policy_obs(obs)
                 self._background_results = self._policy.infer(policy_obs, norm_action, self._use_rtc)
-                self._background_results = self._apply_rlt_actor_to_policy_results(
+                background_results = self._apply_rlt_actor_to_policy_results(
                     self._background_results,
-                    self._obs or {},
+                    obs,
                     action_start_index=self._d,
                 )
+                with self._cache_lock:
+                    if generation == self._cache_generation:
+                        self._background_results = background_results
+                        self._background_rlt_context_signature = context_signature
                 rpc_ms = (time.monotonic() - rpc_start) * 1000.0
                 # break
                 # 将后面18列都设为0
@@ -127,10 +146,12 @@ class ActionChunkBroker(_base_policy.BasePolicy):
                 
                 # self._background_results = self._policy.infer(self._obs, modified_actions, self._use_rtc)
 
-                self._background_running = False
+                with self._cache_lock:
+                    if generation == self._cache_generation:
+                        self._background_running = False
                 total_ms = (time.monotonic() - total_start) * 1000.0
-                server_timing = self._background_results.get("server_timing", {})
-                policy_timing = self._background_results.get("policy_timing", {})
+                server_timing = background_results.get("server_timing", {})
+                policy_timing = background_results.get("policy_timing", {})
                 server_infer_ms = server_timing.get("infer_ms")
                 prev_total_ms = server_timing.get("prev_total_ms")
                 policy_infer_ms = policy_timing.get("infer_ms")
@@ -180,16 +201,15 @@ class ActionChunkBroker(_base_policy.BasePolicy):
 
     @override
     def infer(self, obs: Dict) -> Dict:  # noqa: UP006
+        context_signature = self._rlt_context_signature_from_obs(obs)
         if self._use_rtc:
+            if self._last_results is not None and context_signature != self._last_rlt_context_signature:
+                self._clear_cached_results()
             # init     
             if self._last_results is None:
-                policy_results = self._policy.infer(self._policy_obs(obs), None, self._use_rtc)
-                policy_results = self._apply_rlt_actor_to_policy_results(policy_results, obs, action_start_index=0)
-                self._last_origin_actions = policy_results["origin_actions"]
-                self._last_reference_actions = policy_results.get("reference_actions", policy_results["actions"])
-                self._last_state = policy_results["state"]
-                self._last_results = self._build_step_result_cache(policy_results)
-                self._cur_step = 0
+                if not self._refresh_current_results(obs, context_signature):
+                    context_signature = self._rlt_context_signature_from_obs(obs)
+                    self._refresh_current_results(obs, context_signature)
 
             results = self._slice_result_cache(self._last_results)
             self._obs = obs
@@ -199,22 +219,31 @@ class ActionChunkBroker(_base_policy.BasePolicy):
             if self._cur_step == self._s + self._d:
                 while self._background_running:
                     time.sleep(0.01)
-                self._last_origin_actions = self._background_results["origin_actions"]
-                self._last_reference_actions = self._background_results.get(
-                    "reference_actions",
-                    self._background_results["actions"],
-                )
-                self._last_state = self._background_results["state"]
-                self._last_results = self._build_step_result_cache(self._background_results)
-                self._cur_step -= self._s
+                current_signature = self._rlt_context_signature_from_obs(obs)
+                if (
+                    self._background_results is not None
+                    and self._background_rlt_context_signature == current_signature
+                ):
+                    self._last_origin_actions = self._background_results["origin_actions"]
+                    self._last_reference_actions = self._background_results.get(
+                        "reference_actions",
+                        self._background_results["actions"],
+                    )
+                    self._last_state = self._background_results["state"]
+                    self._last_results = self._build_step_result_cache(self._background_results)
+                    self._last_rlt_context_signature = self._background_rlt_context_signature
+                    self._cur_step -= self._s
+                else:
+                    self._refresh_current_results(obs, current_signature)
             # print(results)
             return results
         else:
+            if self._last_results is not None and context_signature != self._last_rlt_context_signature:
+                self._clear_cached_results()
             if self._last_results is None:
-                policy_results = self._policy.infer(self._policy_obs(obs))
-                policy_results = self._apply_rlt_actor_to_policy_results(policy_results, obs, action_start_index=0)
-                self._last_results = self._build_step_result_cache(policy_results)
-                self._cur_step = 0
+                if not self._refresh_current_results(obs, context_signature):
+                    context_signature = self._rlt_context_signature_from_obs(obs)
+                    self._refresh_current_results(obs, context_signature)
 
             results = self._slice_result_cache(self._last_results)
             self._cur_step += 1
@@ -227,19 +256,89 @@ class ActionChunkBroker(_base_policy.BasePolicy):
     @override
     def reset(self) -> None:
         self._policy.reset()
-        self._last_results = None
-        self._last_origin_actions = None
-        self._last_reference_actions = None
-        self._background_results = None
-        self._background_running = False
-        self._cur_step = 0
+        self._clear_cached_results()
+
+    def _clear_cached_results(self) -> None:
+        with self._cache_lock:
+            self._cache_generation += 1
+            self._last_results = None
+            self._last_origin_actions = None
+            self._last_reference_actions = None
+            self._last_rlt_context_signature = None
+            self._background_results = None
+            self._background_rlt_context_signature = None
+            self._background_running = False
+            self._cur_step = 0
+
+    def flush_action_cache(self, reason: str | None = None) -> None:
+        del reason
+        self._clear_cached_results()
+
+    def set_rlt_gate(self, *, enabled: bool, epoch: int, reason: str | None = None) -> None:
+        logging.info("ActionChunkBroker RLT gate set: enabled=%s epoch=%s reason=%s", enabled, epoch, reason)
+        with self._cache_lock:
+            self._explicit_rlt_gate_enabled = bool(enabled)
+            self._explicit_rlt_gate_epoch = int(epoch)
+            self._clear_cached_results()
 
     def _policy_obs(self, obs: Dict) -> Dict:
         return {key: value for key, value in obs.items() if key != "rlt_context"}
 
     def _rlt_context_from_obs(self, obs: Dict) -> dict:
         context = obs.get("rlt_context") or {}
-        return dict(context) if isinstance(context, dict) else {}
+        context = dict(context) if isinstance(context, dict) else {}
+        with self._cache_lock:
+            if self._explicit_rlt_gate_enabled is not None:
+                context["actor_requested"] = bool(self._explicit_rlt_gate_enabled)
+                context["actor_effective"] = bool(self._explicit_rlt_gate_enabled)
+                context["manual_actor_requested"] = bool(self._explicit_rlt_gate_enabled)
+                context["rlt_context_epoch"] = self._explicit_rlt_gate_epoch
+                if not self._explicit_rlt_gate_enabled:
+                    context["actor_locked_reason"] = "actor_not_requested"
+        return context
+
+    def _rlt_context_signature_from_obs(self, obs: Dict) -> tuple:
+        context = self._rlt_context_from_obs(obs)
+        return tuple(
+            (key, context.get(key))
+            for key in (
+                "rlt_context_epoch",
+                "phase",
+                "active_key_region_id",
+                "actor_requested",
+                "manual_actor_requested",
+                "intervention_scale",
+                "max_delta",
+                "critic_gate_enabled",
+                "critic_gate_margin",
+                "critic_gate_temperature",
+                "actor_ready",
+                "loaded_actor_step",
+            )
+        )
+
+    def _refresh_current_results(self, obs: Dict, context_signature: tuple | None = None) -> bool:
+        if context_signature is None:
+            context_signature = self._rlt_context_signature_from_obs(obs)
+        with self._cache_lock:
+            generation = self._cache_generation
+        if self._use_rtc:
+            policy_results = self._policy.infer(self._policy_obs(obs), None, self._use_rtc)
+            policy_results = self._apply_rlt_actor_to_policy_results(policy_results, obs, action_start_index=0)
+        else:
+            policy_results = self._policy.infer(self._policy_obs(obs))
+            policy_results = self._apply_rlt_actor_to_policy_results(policy_results, obs, action_start_index=0)
+        with self._cache_lock:
+            if generation != self._cache_generation:
+                return False
+            if self._use_rtc:
+                self._last_origin_actions = policy_results["origin_actions"]
+                self._last_reference_actions = policy_results.get("reference_actions", policy_results["actions"])
+                self._last_state = policy_results["state"]
+            self._last_results = self._build_step_result_cache(policy_results)
+            self._last_rlt_context_signature = context_signature
+            self._cur_step = 0
+            return True
 
     def _apply_rlt_actor_to_policy_results(
         self,
@@ -249,6 +348,8 @@ class ActionChunkBroker(_base_policy.BasePolicy):
         action_start_index: int = 0,
     ) -> Dict[str, np.ndarray]:
         policy_results = dict(policy_results)
+        context = self._rlt_context_from_obs(obs)
+        policy_results["rlt_context_epoch"] = context.get("rlt_context_epoch")
         reference_actions = np.array(policy_results["actions"], dtype=np.float32, copy=True)
         policy_results["reference_actions"] = reference_actions
         if self._rlt_actor is None:
@@ -294,11 +395,21 @@ class ActionChunkBroker(_base_policy.BasePolicy):
             return policy_results
 
         try:
+            if context.get("phase") == "key_region" or self._explicit_rlt_gate_enabled is not None:
+                logging.info(
+                    "RLT actor apply context: requested=%s effective=%s epoch=%s phase=%s explicit_gate=%s start_index=%s",
+                    context.get("actor_requested"),
+                    context.get("actor_effective"),
+                    context.get("rlt_context_epoch"),
+                    context.get("phase"),
+                    self._explicit_rlt_gate_enabled,
+                    action_start_index,
+                )
             result = self._rlt_actor.apply(
                 reference_actions=reference_actions,
                 z_rl=np.asarray(z_rl, dtype=np.float32),
                 proprio=np.asarray(proprio, dtype=np.float32),
-                context=self._rlt_context_from_obs(obs),
+                context=context,
                 action_start_index=action_start_index,
             )
         except Exception as exc:
@@ -371,6 +482,7 @@ class ActionChunkBroker(_base_policy.BasePolicy):
             ("rlt_gate_reason", "rlt_gate_reason"),
             ("rlt_critic_ready", "rlt_critic_ready"),
             ("rlt_critic_gate_enabled", "rlt_critic_gate_enabled"),
+            ("rlt_context_epoch", "rlt_context_epoch"),
         ):
             if source_key in policy_results and target_key not in cached:
                 cached[target_key] = policy_results[source_key]

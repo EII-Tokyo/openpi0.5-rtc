@@ -73,11 +73,21 @@ class RLTControlStore:
             self._state.active_key_region_id = uuid.uuid4().hex
             self._state.score_deadline = None
             self._state.last_reward = None
+            self._state.actor_enabled = True
             self._segment_ledger.record_started(self._state.active_key_region_id, phase=self._state.training_phase)
             self._add_event_locked("key_region_start", request.note or request.source)
             self._refresh_derived_locked()
             self._persist_locked()
-            self._publish_locked("key_region_start", {"source": request.source, "key_region_id": self._state.active_key_region_id})
+            self._publish_locked(
+                "key_region_start",
+                {
+                    "source": request.source,
+                    "key_region_id": self._state.active_key_region_id,
+                    "actor_enabled": self._state.actor_enabled,
+                    "actor_effective": self._state.actor_effective,
+                    "actor_locked_reason": self._state.actor_locked_reason,
+                },
+            )
             return self._state.model_copy(deep=True)
 
     def end_key_region(self, request: RLTControlRequest) -> RLTControlState:
@@ -89,10 +99,20 @@ class RLTControlStore:
             self._state.score_deadline = time.time() + 10.0
             if self._state.active_key_region_id:
                 self._segment_ledger.record_ended(self._state.active_key_region_id, phase=self._state.training_phase)
+            self._state.actor_enabled = False
             self._add_event_locked("key_region_end", request.note or request.source)
             self._refresh_derived_locked()
             self._persist_locked()
-            self._publish_locked("key_region_end", {"source": request.source, "key_region_id": self._state.active_key_region_id})
+            self._publish_locked(
+                "key_region_end",
+                {
+                    "source": request.source,
+                    "key_region_id": self._state.active_key_region_id,
+                    "actor_enabled": self._state.actor_enabled,
+                    "actor_effective": self._state.actor_effective,
+                    "actor_locked_reason": self._state.actor_locked_reason,
+                },
+            )
             return self._state.model_copy(deep=True)
 
     def score_key_region(self, reward: int, *, source: str = "ui", timeout: bool = False) -> RLTControlState:
@@ -310,6 +330,7 @@ class RLTControlStore:
                 "auto_beta_update_interval",
                 "auto_beta_q_margin",
                 "critic_burn_in_steps",
+                "force_actor_effective",
                 "intervention_scale",
                 "max_delta",
                 "critic_gate_enabled",
@@ -376,7 +397,6 @@ class RLTControlStore:
                     "trainer_step",
                     "critic_burn_in_steps",
                     "target_sync_step",
-                    "trainer_enabled",
                     "trainer_running",
                     "steps_per_sec",
                     "success_episodes",
@@ -387,9 +407,6 @@ class RLTControlStore:
                     "replay_shards",
                     "bad_shards",
                     "wandb_url",
-                    "critic_gate_enabled",
-                    "critic_gate_margin",
-                    "critic_gate_temperature",
                     "actor_ready",
                     "critic_ready",
                     "inference_actor_active",
@@ -525,10 +542,17 @@ class RLTControlStore:
         in_warmup = trainable_count < self._state.warmup_target
         replay_balance_ready = trainable_success > 0 and trainable_failure > 0
         self._state.training_phase = "warmup" if in_warmup else "rl"
-        self._state.actor_effective = bool(
-            self._state.actor_enabled and not in_warmup and replay_balance_ready and self._state.actor_ready
-        )
-        if in_warmup:
+        if self._state.force_actor_effective:
+            self._state.actor_effective = bool(self._state.actor_enabled and self._state.actor_ready)
+        else:
+            self._state.actor_effective = bool(
+                self._state.actor_enabled and not in_warmup and replay_balance_ready and self._state.actor_ready
+            )
+        if self._state.force_actor_effective and self._state.actor_effective:
+            self._state.actor_locked_reason = None
+        elif self._state.force_actor_effective and not self._state.actor_ready:
+            self._state.actor_locked_reason = "actor_not_ready"
+        elif in_warmup:
             self._state.actor_locked_reason = "warmup"
         elif not replay_balance_ready:
             self._state.actor_locked_reason = "replay_balance"
@@ -538,6 +562,11 @@ class RLTControlStore:
             self._state.actor_locked_reason = "disabled"
         else:
             self._state.actor_locked_reason = None
+        if self._state.phase != "key_region" or not self._state.actor_enabled:
+            self._state.inference_actor_active = False
+            self._state.inference_delta_norm = None
+            self._state.inference_gate_reason = "actor_not_requested"
+            self._state.key_region_probability = None
 
     def _apply_score_timeout_locked(self) -> None:
         if (

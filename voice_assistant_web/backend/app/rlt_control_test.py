@@ -62,6 +62,31 @@ def test_critic_gate_defaults_on():
     assert RLTControlState().critic_gate_enabled is True
 
 
+def test_key_region_start_and_end_toggle_actor_and_publish_state():
+    store = _store(warmup_target=0)
+    store._state.actor_ready = True
+    store._state.force_actor_effective = True
+    store._refresh_derived_locked()
+
+    started = store.start_key_region(RLTControlRequest(source="test"))
+    assert started.phase == "key_region"
+    assert started.actor_enabled is True
+    assert started.actor_effective is True
+    start_payload = json.loads(store._redis.messages[-1][1])
+    assert start_payload["type"] == "key_region_start"
+    assert start_payload["actor_enabled"] is True
+    assert start_payload["actor_effective"] is True
+
+    ended = store.end_key_region(RLTControlRequest(source="test"))
+    assert ended.phase == "await_score"
+    assert ended.actor_enabled is False
+    assert ended.actor_effective is False
+    end_payload = json.loads(store._redis.messages[-1][1])
+    assert end_payload["type"] == "key_region_end"
+    assert end_payload["actor_enabled"] is False
+    assert end_payload["actor_effective"] is False
+
+
 def test_score_records_attempt_but_does_not_increment_valid_warmup_count():
     store = _store(warmup_target=1)
 
@@ -454,6 +479,8 @@ def test_config_update_publishes_auto_beta_settings():
 
 def test_runtime_metrics_update_inference_gate_diagnostics():
     store = _store(warmup_target=1)
+    store._state.phase = "key_region"
+    store._state.actor_enabled = True
 
     store.update_runtime_metrics(
         {
@@ -482,3 +509,54 @@ def test_runtime_metrics_update_inference_gate_diagnostics():
     assert state.inference_actor_q_value == 0.7
     assert state.actor_ready is True
     assert state.critic_ready is True
+
+
+def test_snapshot_suppresses_actor_active_diagnostics_outside_key_region():
+    store = _store(warmup_target=0)
+
+    store.update_runtime_metrics(
+        {
+            "type": "runtime_state",
+            "inference_actor_active": True,
+            "inference_delta_norm": 0.08,
+            "inference_gate_reason": None,
+            "key_region_probability": 0.56,
+            "timestamp": 1000.0,
+        }
+    )
+
+    state = store.snapshot()
+    assert state.phase == "idle"
+    assert state.actor_enabled is False
+    assert state.inference_actor_active is False
+    assert state.inference_delta_norm is None
+    assert state.inference_gate_reason == "actor_not_requested"
+    assert state.key_region_probability is None
+
+
+def test_runtime_metrics_do_not_override_key_region_actor_desired_state():
+    store = _store(warmup_target=0)
+    store._state.actor_ready = True
+    store._state.force_actor_effective = True
+    store._refresh_derived_locked()
+
+    store.start_key_region(RLTControlRequest(source="test"))
+    store.update_runtime_metrics(
+        {
+            "type": "runtime_state",
+            "actor_enabled": False,
+            "actor_effective": False,
+            "actor_locked_reason": "disabled",
+            "inference_actor_active": False,
+            "inference_gate_reason": "actor_not_requested",
+            "timestamp": 1000.0,
+        }
+    )
+
+    state = store.snapshot()
+    assert state.phase == "key_region"
+    assert state.actor_enabled is True
+    assert state.actor_effective is True
+    assert state.actor_locked_reason is None
+    assert state.inference_actor_active is False
+    assert state.inference_gate_reason == "actor_not_requested"

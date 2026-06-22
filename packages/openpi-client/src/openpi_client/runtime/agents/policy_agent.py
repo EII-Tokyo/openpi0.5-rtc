@@ -20,5 +20,17 @@ class PolicyAgent(_agent.Agent):
             return None
         return status()
 
+    def flush_action_cache(self, reason: str | None = None) -> None:
+        flush = getattr(self._policy, "flush_action_cache", None)
+        if flush is not None:
+            flush(reason)
+
+    def set_rlt_gate(self, *, enabled: bool, epoch: int, reason: str | None = None) -> None:
+        setter = getattr(self._policy, "set_rlt_gate", None)
+        if setter is not None:
+            setter(enabled=enabled, epoch=epoch, reason=reason)
+        else:
+            self.flush_action_cache(reason)
+
     def reset(self) -> None:
         self._policy.reset()

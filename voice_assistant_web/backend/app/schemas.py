@@ -49,6 +49,7 @@ class RLTControlState(BaseModel):
     actor_enabled: bool = False
     actor_ready: bool = False
     actor_effective: bool = False
+    force_actor_effective: bool = False
     actor_locked_reason: str | None = "warmup"
     beta: float = 10.0
     auto_beta_enabled: bool = True
@@ -138,6 +139,7 @@ class RLTConfigRequest(BaseModel):
     auto_beta_q_margin: float | None = Field(default=None, ge=-1000, le=1000)
     critic_burn_in_steps: int | None = Field(default=None, ge=0, le=1000000)
     actor_enabled: bool | None = None
+    force_actor_effective: bool | None = None
     trainer_enabled: bool | None = None
     intervention_scale: float | None = Field(default=None, ge=0, le=1)
     max_delta: float | None = Field(default=None, ge=0, le=10)

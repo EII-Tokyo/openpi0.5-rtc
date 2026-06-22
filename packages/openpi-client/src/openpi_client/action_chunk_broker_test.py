@@ -25,12 +25,17 @@ class _Actor:
     def __init__(self, *, mode="apply"):
         self.mode = mode
         self.calls = []
+        self.on_apply = None
 
     def apply(self, *, reference_actions, z_rl, proprio, context, action_start_index=None):
         self.calls.append((reference_actions.copy(), z_rl.copy(), proprio.copy(), dict(context), action_start_index))
+        if self.on_apply is not None:
+            callback = self.on_apply
+            self.on_apply = None
+            callback()
         if self.mode == "raise":
             raise RuntimeError("actor failed")
-        if self.mode == "disabled":
+        if self.mode == "disabled" or not context.get("actor_requested", False):
             return RLTActorApplyResult(reference_actions.copy(), False, "actor_not_requested", None, None, None, None, gate_reason="actor_not_requested")
         return RLTActorApplyResult(reference_actions + 10, True, None, "/tmp/actor", 5, 1.0, 0.5, reference_q_value=0.2, actor_q_value=0.7, q_advantage=0.5, key_region_probability=0.9, gate_reason="critic_gate_actor_active", critic_ready=True, critic_gate_enabled=True)
 
@@ -78,6 +83,84 @@ def test_actor_enabled_replaces_actions_and_preserves_raw_reference():
     assert second["rlt_actor_applied"] is True
     assert len(actor.calls) == 1
     assert actor.calls[0][4] == 0
+
+
+def test_actor_gate_on_invalidates_cached_disabled_chunk():
+    actor = _Actor(mode="apply")
+    broker = ActionChunkBroker(_Policy(), action_horizon=3, use_rtc=False, rlt_actor_runtime=actor)
+
+    first = broker.infer({"rlt_context": {"actor_requested": False}})
+    second = broker.infer({"rlt_context": {"actor_requested": True}})
+
+    np.testing.assert_allclose(first["actions"], np.array([0, 1], dtype=np.float32))
+    np.testing.assert_allclose(second["actions"], np.array([10, 11], dtype=np.float32))
+    assert first["rlt_actor_applied"] is False
+    assert second["rlt_actor_applied"] is True
+    assert len(actor.calls) == 2
+
+
+def test_actor_gate_off_invalidates_cached_actor_chunk():
+    actor = _Actor(mode="apply")
+    broker = ActionChunkBroker(_Policy(), action_horizon=3, use_rtc=False, rlt_actor_runtime=actor)
+
+    first = broker.infer({"rlt_context": {"actor_requested": True}})
+    second = broker.infer({"rlt_context": {"actor_requested": False}})
+
+    np.testing.assert_allclose(first["actions"], np.array([10, 11], dtype=np.float32))
+    np.testing.assert_allclose(second["actions"], np.array([0, 1], dtype=np.float32))
+    assert first["rlt_actor_applied"] is True
+    assert second["rlt_actor_applied"] is False
+    assert second["rlt_actor_reason"] == "actor_not_requested"
+    assert len(actor.calls) == 2
+
+
+def test_flush_action_cache_discards_cached_actor_chunk():
+    actor = _Actor(mode="apply")
+    broker = ActionChunkBroker(_Policy(), action_horizon=3, use_rtc=False, rlt_actor_runtime=actor)
+
+    first = broker.infer({"rlt_context": {"actor_requested": True, "rlt_context_epoch": 1}})
+    broker.flush_action_cache("key_region_end")
+    second = broker.infer({"rlt_context": {"actor_requested": True, "rlt_context_epoch": 1}})
+
+    np.testing.assert_allclose(first["actions"], np.array([10, 11], dtype=np.float32))
+    np.testing.assert_allclose(second["actions"], np.array([10, 11], dtype=np.float32))
+    assert len(actor.calls) == 2
+
+
+def test_explicit_rlt_gate_overrides_observation_context():
+    actor = _Actor(mode="apply")
+    broker = ActionChunkBroker(_Policy(), action_horizon=3, use_rtc=False, rlt_actor_runtime=actor)
+
+    broker.set_rlt_gate(enabled=True, epoch=7, reason="key_region_start")
+    enabled = broker.infer({"rlt_context": {"actor_requested": False, "rlt_context_epoch": 1}})
+
+    broker.set_rlt_gate(enabled=False, epoch=8, reason="key_region_end")
+    disabled = broker.infer({"rlt_context": {"actor_requested": True, "rlt_context_epoch": 7}})
+
+    assert enabled["rlt_actor_applied"] is True
+    assert enabled["rlt_context_epoch"] == 7
+    assert disabled["rlt_actor_applied"] is False
+    assert disabled["rlt_context_epoch"] == 8
+    assert actor.calls[0][3]["actor_requested"] is True
+    assert actor.calls[0][3]["rlt_context_epoch"] == 7
+    assert actor.calls[1][3]["actor_requested"] is False
+    assert actor.calls[1][3]["rlt_context_epoch"] == 8
+
+
+def test_foreground_actor_result_is_discarded_when_gate_changes_mid_inference():
+    actor = _Actor(mode="apply")
+    broker = ActionChunkBroker(_Policy(), action_horizon=3, use_rtc=False, rlt_actor_runtime=actor)
+    broker.set_rlt_gate(enabled=True, epoch=1, reason="key_region_start")
+    actor.on_apply = lambda: broker.set_rlt_gate(enabled=False, epoch=2, reason="key_region_end")
+
+    result = broker.infer({"rlt_context": {"actor_requested": True, "rlt_context_epoch": 1}})
+
+    assert result["rlt_actor_applied"] is False
+    assert result["rlt_context_epoch"] == 2
+    np.testing.assert_allclose(result["actions"], np.array([0, 1], dtype=np.float32))
+    assert len(actor.calls) == 2
+    assert actor.calls[0][3]["actor_requested"] is True
+    assert actor.calls[1][3]["actor_requested"] is False
 
 
 def test_broker_passes_delayed_execution_window_to_actor_runtime():
