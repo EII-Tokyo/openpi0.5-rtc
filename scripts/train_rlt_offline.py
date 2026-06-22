@@ -47,6 +47,11 @@ class Args:
     critic_lr: float = 3e-4
     beta: float = 10.0
     target_actor_noise: bool = False
+    actor_loss_mode: str = "td3"
+    awbc_temperature: float = 0.2
+    awbc_max_weight: float = 20.0
+    awbc_min_advantage: float = 0.0
+    awbc_max_action_delta_norm: float = 2.0
     train_action_horizon: int | None = 10
     expected_replay_action_horizon: int | None = 10
     wandb_enabled: bool = True
@@ -90,6 +95,11 @@ def _build_training_config(
         policy_delay=args.policy_delay,
         actor_publish_interval=args.actor_publish_interval,
         target_actor_noise=args.target_actor_noise,
+        actor_loss_mode=args.actor_loss_mode,
+        awbc_temperature=args.awbc_temperature,
+        awbc_max_weight=args.awbc_max_weight,
+        awbc_min_advantage=args.awbc_min_advantage,
+        awbc_max_action_delta_norm=args.awbc_max_action_delta_norm,
     )
 
 

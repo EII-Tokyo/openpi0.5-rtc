@@ -59,6 +59,11 @@ class Args:
     actor_lr: float = 1e-4
     critic_lr: float = 3e-4
     target_actor_noise: bool = False
+    actor_loss_mode: str = "td3"
+    awbc_temperature: float = 0.2
+    awbc_max_weight: float = 20.0
+    awbc_min_advantage: float = 0.0
+    awbc_max_action_delta_norm: float = 2.0
     train_action_horizon: int | None = 10
     expected_replay_action_horizon: int | None = 10
     wandb_enabled: bool = True
@@ -591,6 +596,13 @@ def _save_actor_for_inference(
     _atomic_write_bytes(actor_dir / "actor.msgpack", actor_bytes)
     _atomic_write_bytes(actor_dir / "critic.msgpack", critic_bytes)
     model = nnx.merge(state.model_def, state.params)
+    actor_loss_config = {
+        "actor_loss_mode": rlt_training.actor_loss_mode_name(int(state.actor_loss_mode)),
+        "awbc_temperature": float(state.awbc_temperature),
+        "awbc_max_weight": float(state.awbc_max_weight),
+        "awbc_min_advantage": float(state.awbc_min_advantage),
+        "awbc_max_action_delta_norm": float(state.awbc_max_action_delta_norm),
+    }
     _atomic_write_text(
         actor_dir / "metadata.json",
         json.dumps(
@@ -609,6 +621,7 @@ def _save_actor_for_inference(
                 "critic_sha256": _sha256_bytes(critic_bytes),
                 "action_horizon": int(action_horizon),
                 "rlt_config": dataclasses.asdict(model.config),
+                "actor_loss_config": actor_loss_config,
                 "replay_shape": _shape_metadata(replay_shape),
                 "train_shape": _shape_metadata(train_shape),
                 "replay_stats": _stats_metadata(replay_stats),
@@ -789,6 +802,11 @@ def main(args: Args) -> None:
         policy_delay=args.policy_delay,
         actor_publish_interval=args.actor_publish_interval,
         target_actor_noise=args.target_actor_noise,
+        actor_loss_mode=args.actor_loss_mode,
+        awbc_temperature=args.awbc_temperature,
+        awbc_max_weight=args.awbc_max_weight,
+        awbc_min_advantage=args.awbc_min_advantage,
+        awbc_max_action_delta_norm=args.awbc_max_action_delta_norm,
     )
     state = rlt_training.init_train_state(config, jax.random.key(args.seed))
     replay_rng = np.random.default_rng(args.seed)

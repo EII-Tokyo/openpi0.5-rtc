@@ -211,6 +211,7 @@ class RLTSegmentRecord(BaseModel):
 
 class RLTKeyRegionReviewRecord(BaseModel):
     key_region_id: str
+    batch: str | None = None
     status: str = "untracked"
     trainable: bool = False
     incomplete_reason: str | None = None
@@ -221,6 +222,8 @@ class RLTKeyRegionReviewRecord(BaseModel):
     video_exists: bool = False
     manifest_exists: bool = False
     rollout_path: str | None = None
+    local_rollout_path: str | None = None
+    local_shard_path: str | None = None
     segment_status: str | None = None
     train_eligible: bool | None = None
     replay_status: str | None = None
@@ -263,6 +266,7 @@ class RLTKeyRegionReviewPage(BaseModel):
     offset: int = 0
     next_offset: int | None = None
     summary: RLTKeyRegionReviewSummary = Field(default_factory=RLTKeyRegionReviewSummary)
+    batches: list[str] = Field(default_factory=list)
 
 
 class RobotTaskRequest(BaseModel):

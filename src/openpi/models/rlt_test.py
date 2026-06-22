@@ -100,6 +100,55 @@ def test_td3_losses_are_finite():
     assert jnp.isfinite(pi_loss)
 
 
+def test_awbc_actor_loss_weights_high_advantage_success_samples():
+    actor_action = jnp.array(
+        [
+            [[0.9]],
+            [[0.2]],
+            [[0.4]],
+        ],
+        dtype=jnp.float32,
+    )
+    data_action = jnp.array(
+        [
+            [[1.0]],
+            [[1.0]],
+            [[1.0]],
+        ],
+        dtype=jnp.float32,
+    )
+    advantage = jnp.array([0.4, 0.05, 0.8], dtype=jnp.float32)
+    success = jnp.array([True, True, False])
+
+    loss, info = rlt.awbc_actor_loss(
+        actor_action,
+        data_action,
+        advantage,
+        success,
+        temperature=0.2,
+        max_weight=10.0,
+        min_advantage=0.1,
+        max_action_delta_norm=2.0,
+        data_reference_action=jnp.zeros_like(data_action),
+    )
+
+    assert jnp.isfinite(loss)
+    assert int(info["awbc_kept_count"]) == 1
+    assert jnp.allclose(info["awbc_keep_fraction"], 1 / 3)
+    assert info["awbc_weight_mean"] > 1.0
+    assert loss < rlt.awbc_actor_loss(
+        actor_action + 0.5,
+        data_action,
+        advantage,
+        success,
+        temperature=0.2,
+        max_weight=10.0,
+        min_advantage=0.1,
+        max_action_delta_norm=2.0,
+        data_reference_action=jnp.zeros_like(data_action),
+    )[0]
+
+
 def test_rlt_td3_target_uses_target_network_shapes():
     config = rlt.RLTConfig(
         z_dim=8,

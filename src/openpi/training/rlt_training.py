@@ -9,6 +9,9 @@ import optax
 from openpi.models import rlt
 from openpi.shared import array_typing as at
 
+ACTOR_LOSS_MODE_TD3 = 0
+ACTOR_LOSS_MODE_AWBC = 1
+
 
 @struct.dataclass
 class RLTReplayBatch:
@@ -19,6 +22,7 @@ class RLTReplayBatch:
     next_x: at.Float[at.Array, "b d"]
     next_reference_action: at.Float[at.Array, "b h a"]
     done: at.Bool[at.Array, " b"]
+    episode_success: at.Bool[at.Array, " b"]
 
 
 @dataclasses.dataclass(frozen=True)
@@ -29,6 +33,11 @@ class RLTTrainingConfig:
     policy_delay: int = 2
     actor_publish_interval: int = 500
     target_actor_noise: bool = False
+    actor_loss_mode: str = "td3"
+    awbc_temperature: float = 0.2
+    awbc_max_weight: float = 20.0
+    awbc_min_advantage: float = 0.0
+    awbc_max_action_delta_norm: float = 2.0
 
 
 @struct.dataclass
@@ -43,6 +52,11 @@ class RLTTrainState:
     policy_delay: int = struct.field(pytree_node=False)
     actor_publish_interval: int = struct.field(pytree_node=False)
     target_actor_noise: bool = struct.field(pytree_node=False)
+    actor_loss_mode: int = struct.field(pytree_node=False)
+    awbc_temperature: float = struct.field(pytree_node=False)
+    awbc_max_weight: float = struct.field(pytree_node=False)
+    awbc_min_advantage: float = struct.field(pytree_node=False)
+    awbc_max_action_delta_norm: float = struct.field(pytree_node=False)
 
 
 def make_replay_batch(
@@ -56,7 +70,10 @@ def make_replay_batch(
     next_proprio: at.Float[at.Array, "b p"],
     next_reference_action: at.Float[at.Array, "b h a"],
     done: at.Bool[at.Array, " b"],
+    episode_success: at.Bool[at.Array, " b"] | None = None,
 ) -> RLTReplayBatch:
+    if episode_success is None:
+        episode_success = jnp.sum(reward_seq, axis=-1) > 0.0
     return RLTReplayBatch(
         x=rlt.make_state(z_rl, proprio),
         action=action,
@@ -65,6 +82,7 @@ def make_replay_batch(
         next_x=rlt.make_state(next_z_rl, next_proprio),
         next_reference_action=next_reference_action,
         done=done,
+        episode_success=episode_success,
     )
 
 
@@ -72,6 +90,7 @@ def init_train_state(config: RLTTrainingConfig, rng: at.KeyArrayLike) -> RLTTrai
     model = rlt.RLTActorCritic(config.model, rngs=nnx.Rngs(rng))
     actor_tx = optax.adam(config.actor_lr)
     critic_tx = optax.adam(config.critic_lr)
+    actor_loss_mode = _actor_loss_mode_id(config.actor_loss_mode)
     return RLTTrainState(
         step=jnp.asarray(0, dtype=jnp.int32),
         params=nnx.state(model),
@@ -83,7 +102,28 @@ def init_train_state(config: RLTTrainingConfig, rng: at.KeyArrayLike) -> RLTTrai
         policy_delay=config.policy_delay,
         actor_publish_interval=config.actor_publish_interval,
         target_actor_noise=config.target_actor_noise,
+        actor_loss_mode=actor_loss_mode,
+        awbc_temperature=config.awbc_temperature,
+        awbc_max_weight=config.awbc_max_weight,
+        awbc_min_advantage=config.awbc_min_advantage,
+        awbc_max_action_delta_norm=config.awbc_max_action_delta_norm,
     )
+
+
+def _actor_loss_mode_id(mode: str) -> int:
+    if mode == "td3":
+        return ACTOR_LOSS_MODE_TD3
+    if mode == "awbc":
+        return ACTOR_LOSS_MODE_AWBC
+    raise ValueError(f"Unsupported actor_loss_mode={mode!r}")
+
+
+def actor_loss_mode_name(mode: int) -> str:
+    if mode == ACTOR_LOSS_MODE_TD3:
+        return "td3"
+    if mode == ACTOR_LOSS_MODE_AWBC:
+        return "awbc"
+    raise ValueError(f"Unsupported actor_loss_mode id={mode!r}")
 
 
 def should_publish_actor(step: int, *, actor_updated: bool, actor_publish_interval: int) -> bool:
@@ -153,6 +193,10 @@ def train_step(
     reference_q_value = jnp.asarray(0.0, dtype=critic_loss_value.dtype)
     q_advantage = jnp.asarray(0.0, dtype=critic_loss_value.dtype)
     actor_delta_norm = jnp.asarray(0.0, dtype=critic_loss_value.dtype)
+    awbc_keep_fraction = jnp.asarray(0.0, dtype=critic_loss_value.dtype)
+    awbc_weight_mean = jnp.asarray(0.0, dtype=critic_loss_value.dtype)
+    awbc_advantage_mean = jnp.asarray(0.0, dtype=critic_loss_value.dtype)
+    awbc_data_delta_norm_mean = jnp.asarray(0.0, dtype=critic_loss_value.dtype)
     actor_opt_state = state.actor_opt_state
     if actor_updated:
 
@@ -160,7 +204,28 @@ def train_step(
             action = actor(batch.x, batch.reference_action, rng=actor_rng, sample=False)
             q1_for_actor = model.critic.q1(batch.x, action)
             q1_for_reference = model.critic.q1(batch.x, batch.reference_action)
-            loss = rlt.actor_loss(q1_for_actor, action, batch.reference_action, beta=model.config.beta)
+            if state.actor_loss_mode == ACTOR_LOSS_MODE_TD3:
+                loss = rlt.actor_loss(q1_for_actor, action, batch.reference_action, beta=model.config.beta)
+                awbc_info = {
+                    "awbc_keep_fraction": jnp.asarray(0.0, dtype=loss.dtype),
+                    "awbc_weight_mean": jnp.asarray(0.0, dtype=loss.dtype),
+                    "awbc_advantage_mean": jnp.asarray(0.0, dtype=loss.dtype),
+                    "awbc_data_delta_norm_mean": jnp.asarray(0.0, dtype=loss.dtype),
+                }
+            else:
+                q1_for_data = model.critic.q1(batch.x, batch.action)
+                data_advantage = jax.lax.stop_gradient(q1_for_data - q1_for_reference)
+                loss, awbc_info = rlt.awbc_actor_loss(
+                    action,
+                    batch.action,
+                    data_advantage,
+                    batch.episode_success,
+                    temperature=state.awbc_temperature,
+                    max_weight=state.awbc_max_weight,
+                    min_advantage=state.awbc_min_advantage,
+                    max_action_delta_norm=state.awbc_max_action_delta_norm,
+                    data_reference_action=batch.reference_action,
+                )
             delta = action - batch.reference_action
             actor_q_mean = jnp.mean(q1_for_actor)
             reference_q_mean = jnp.mean(q1_for_reference)
@@ -169,6 +234,7 @@ def train_step(
                 "reference_q_value": reference_q_mean,
                 "q_advantage": actor_q_mean - reference_q_mean,
                 "actor_delta_norm": jnp.mean(jnp.linalg.norm(delta.reshape(delta.shape[0], -1), axis=-1)),
+                **awbc_info,
             }
 
         (actor_loss_value, actor_info), actor_grads = nnx.value_and_grad(actor_loss_fn, has_aux=True)(model.actor)
@@ -184,6 +250,10 @@ def train_step(
         reference_q_value = actor_info["reference_q_value"]
         q_advantage = actor_info["q_advantage"]
         actor_delta_norm = actor_info["actor_delta_norm"]
+        awbc_keep_fraction = actor_info["awbc_keep_fraction"]
+        awbc_weight_mean = actor_info["awbc_weight_mean"]
+        awbc_advantage_mean = actor_info["awbc_advantage_mean"]
+        awbc_data_delta_norm_mean = actor_info["awbc_data_delta_norm_mean"]
 
     publish_actor = should_publish_actor(
         next_step,
@@ -212,5 +282,10 @@ def train_step(
         "q2_mean": critic_info["q2_mean"],
         "target_q_mean": critic_info["target_q_mean"],
         "beta": jnp.asarray(model.config.beta, dtype=critic_loss_value.dtype),
+        "actor_loss_mode": jnp.asarray(state.actor_loss_mode, dtype=jnp.int32),
+        "awbc_keep_fraction": awbc_keep_fraction,
+        "awbc_weight_mean": awbc_weight_mean,
+        "awbc_advantage_mean": awbc_advantage_mean,
+        "awbc_data_delta_norm_mean": awbc_data_delta_norm_mean,
     }
     return new_state, info

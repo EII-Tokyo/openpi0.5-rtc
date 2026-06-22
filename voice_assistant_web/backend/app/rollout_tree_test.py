@@ -177,6 +177,58 @@ def test_key_region_review_reports_missing_npz_before_train_eligibility(tmp_path
     assert records[0]["incomplete_reason"] == "missing_npz"
 
 
+def test_key_region_review_requires_current_segment_shard_even_when_raw_orphan_exists(tmp_path, monkeypatch):
+    rollout_root = tmp_path / "rollouts"
+    replay_root = tmp_path / "replay"
+    key_region_id = "missing_clean"
+    rollout_dir = rollout_root / "key_regions/task/2026-06-01/warmup" / f"key_region_{key_region_id}"
+    raw_shard_path = replay_root / "rlt_key_regions/task/2026-06-01/shards" / f"key_region_{key_region_id}.npz"
+    missing_clean_path = replay_root / "rlt_key_regions_clean/task/2026-06-01/shards" / f"key_region_{key_region_id}.crop_1.npz"
+    rollout_dir.mkdir(parents=True)
+    raw_shard_path.parent.mkdir(parents=True, exist_ok=True)
+    (rollout_dir / "cam_right_wrist.mp4").write_bytes(b"mp4")
+    (rollout_dir / "manifest.json").write_text(
+        json.dumps(
+            {
+                "key_region_id": key_region_id,
+                "phase": "warmup",
+                "reward": 1,
+                "start_time": 10.0,
+                "end_time": 12.0,
+                "score_time": 13.0,
+                "num_replay_transitions": 3,
+                "segment_status": "committed",
+                "train_eligible": True,
+                "shard_path": str(missing_clean_path),
+            }
+        )
+    )
+    np.savez(raw_shard_path, done=np.asarray([False, False, True]), reward_seq=np.ones((3, 10)))
+    fake_control = _FakeRLTControl(
+        [
+            {
+                "key_region_id": key_region_id,
+                "status": "committed",
+                "phase": "warmup",
+                "reward": 1,
+                "shard_path": str(missing_clean_path),
+                "num_replay_transitions": 3,
+                "updated_at": 9.0,
+            }
+        ]
+    )
+
+    monkeypatch.setattr(main, "ROLLOUTS_ROOT", rollout_root)
+    monkeypatch.setattr(main, "REPLAY_ROOT", replay_root)
+    monkeypatch.setattr(main, "rlt_control", fake_control)
+
+    records = main._key_region_review_records()
+
+    assert records[0]["npz_exists"] is False
+    assert records[0]["trainable"] is False
+    assert records[0]["incomplete_reason"] == "missing_npz"
+
+
 def test_key_region_review_reports_video_duration_and_region_offsets(tmp_path, monkeypatch):
     rollout_root = tmp_path / "rollouts"
     replay_root = tmp_path / "replay"
@@ -261,6 +313,55 @@ def test_key_region_review_page_paginates_and_summarizes_records(tmp_path, monke
     assert page.summary.failure == 2
     assert page.summary.trainable == 3
     assert [record.key_region_id for record in page.items] == ["old_failure"]
+
+
+def test_key_region_review_reports_batch_and_local_paths(tmp_path, monkeypatch):
+    rollout_root = tmp_path / "rollouts"
+    replay_root = tmp_path / "replay"
+    first_shard = _write_review_record(
+        rollout_root,
+        replay_root,
+        key_region_id="first_batch",
+        reward=1,
+        score_time=10.0,
+    )
+    second_dir = rollout_root / "key_regions/task/2026-06-02/warmup/key_region_second_batch"
+    second_shard = replay_root / "rlt_key_regions/task/2026-06-02/shards/key_region_second_batch.npz"
+    second_dir.mkdir(parents=True)
+    second_shard.parent.mkdir(parents=True, exist_ok=True)
+    (second_dir / "cam_right_wrist.mp4").write_bytes(b"mp4")
+    (second_dir / "manifest.json").write_text(
+        json.dumps(
+            {
+                "key_region_id": "second_batch",
+                "phase": "warmup",
+                "reward": 0,
+                "start_time": 18.0,
+                "end_time": 19.0,
+                "score_time": 20.0,
+                "num_replay_transitions": 3,
+                "segment_status": "committed",
+                "train_eligible": True,
+            }
+        )
+    )
+    np.savez(second_shard, done=np.asarray([False, False, True]), reward_seq=np.ones((3, 10)))
+
+    monkeypatch.setattr(main, "ROLLOUTS_ROOT", rollout_root)
+    monkeypatch.setattr(main, "REPLAY_ROOT", replay_root)
+    monkeypatch.setattr(main, "rlt_control", _FakeRLTControl([]))
+
+    page = main.rlt_key_region_review(limit=20, batch="2026-06-01")
+
+    assert page.batches == ["2026-06-02", "2026-06-01"]
+    assert [record.key_region_id for record in page.items] == ["first_batch"]
+    record = page.items[0]
+    assert record.batch == "2026-06-01"
+    assert record.local_rollout_path == str(
+        rollout_root / "key_regions/task/2026-06-01/warmup/key_region_first_batch"
+    )
+    assert record.local_shard_path == str(first_shard)
+    assert all(item.key_region_id != "second_batch" for item in page.items)
 
 
 def test_key_region_detail_returns_single_record(tmp_path, monkeypatch):

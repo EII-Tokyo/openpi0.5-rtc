@@ -1620,6 +1620,41 @@ button {
   white-space: nowrap;
 }
 
+.key-region-paths {
+  display: grid;
+  gap: 6px;
+}
+
+.key-region-paths div {
+  min-width: 0;
+  padding: 6px 7px;
+  border: 1px solid #ddd7cc;
+  border-radius: 8px;
+  background: #fffdf8;
+}
+
+.key-region-paths span,
+.key-region-paths code {
+  display: block;
+  min-width: 0;
+}
+
+.key-region-paths span {
+  color: #635b50;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.key-region-paths code {
+  margin-top: 3px;
+  overflow: hidden;
+  color: #221f1a;
+  font-size: 11px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .key-region-trim-panel {
   border-top: 1px solid #ddd7cc;
   background: #faf8f2;

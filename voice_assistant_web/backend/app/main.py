@@ -526,6 +526,22 @@ def _host_path_for_container_path(path: str | None) -> Path | None:
     return candidate
 
 
+def _batch_from_rollout_path(path: Path) -> str | None:
+    with contextlib.suppress(ValueError):
+        parts = path.resolve().relative_to(ROLLOUTS_ROOT).parts
+        if len(parts) >= 3 and parts[0] == "key_regions":
+            return parts[2]
+    return None
+
+
+def _batch_from_replay_path(path: Path) -> str | None:
+    with contextlib.suppress(ValueError):
+        parts = path.resolve().relative_to(REPLAY_ROOT).parts
+        if len(parts) >= 3 and parts[0] == "rlt_key_regions":
+            return parts[2]
+    return None
+
+
 def _key_region_video_paths(rollout_dir: Path) -> list[str]:
     if not rollout_dir.exists() or not rollout_dir.is_dir():
         return []
@@ -596,9 +612,11 @@ def _key_region_review_records() -> list[dict]:
             manifest = _manifest_summary(rollout_dir) or {}
             record.update(
                 {
+                    "batch": record.get("batch") or _batch_from_rollout_path(rollout_dir),
                     "manifest_exists": True,
                     "video_exists": bool(_key_region_video_paths(rollout_dir)),
                     "rollout_path": str(rollout_dir.resolve().relative_to(ROLLOUTS_ROOT)),
+                    "local_rollout_path": str(rollout_dir.resolve()),
                     "video_paths": _key_region_video_paths(rollout_dir),
                     "task": manifest.get("task"),
                     "start_time": manifest.get("start_time"),
@@ -635,13 +653,17 @@ def _key_region_review_records() -> list[dict]:
             key_region_id = shard_path.stem.removeprefix("key_region_")
             record = by_id.setdefault(key_region_id, {"key_region_id": key_region_id, "status": "orphan_npz"})
             record["npz_exists"] = True
+            record["batch"] = record.get("batch") or _batch_from_replay_path(shard_path)
             if not record.get("shard_path"):
                 record["shard_path"] = str(shard_path)
 
     for record in by_id.values():
         shard_path = _host_path_for_container_path(record.get("shard_path"))
+        record["npz_exists"] = False
         if shard_path and shard_path.exists():
             record["npz_exists"] = True
+            record["local_shard_path"] = str(shard_path.resolve())
+            record["batch"] = record.get("batch") or _batch_from_replay_path(shard_path)
         record["manifest_exists"] = bool(record.get("manifest_exists"))
         record["video_exists"] = bool(record.get("video_exists"))
         _reconcile_key_region_record(record)
@@ -681,8 +703,12 @@ def _filter_key_region_review_records(
     *,
     status: str = "all",
     reward: str = "all",
+    batch: str = "all",
 ) -> list[dict]:
     filtered = records
+    if batch and batch != "all":
+        filtered = [record for record in filtered if str(record.get("batch") or "") == batch]
+
     if status == "trainable":
         filtered = [record for record in filtered if record.get("trainable")]
     elif status in {"needsCrop", "needs_crop"}:
@@ -697,15 +723,20 @@ def _filter_key_region_review_records(
     return filtered
 
 
+def _key_region_review_batches(records: list[dict]) -> list[str]:
+    return sorted({str(record["batch"]) for record in records if record.get("batch")}, reverse=True)
+
+
 @app.get("/api/rlt/key-regions/review", response_model=RLTKeyRegionReviewPage)
 def rlt_key_region_review(
     limit: int = 20,
     offset: int = 0,
     status: str = "all",
     reward: str = "all",
+    batch: str = "all",
 ) -> RLTKeyRegionReviewPage:
     all_records = _key_region_review_records()
-    filtered = _filter_key_region_review_records(all_records, status=status, reward=reward)
+    filtered = _filter_key_region_review_records(all_records, status=status, reward=reward, batch=batch)
     safe_limit = min(max(limit, 1), 100)
     safe_offset = min(max(offset, 0), len(filtered))
     page_records = filtered[safe_offset : safe_offset + safe_limit]
@@ -717,6 +748,7 @@ def rlt_key_region_review(
         offset=safe_offset,
         next_offset=next_offset,
         summary=_key_region_review_summary(all_records),
+        batches=_key_region_review_batches(all_records),
     )
 
 

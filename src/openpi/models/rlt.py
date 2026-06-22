@@ -247,3 +247,45 @@ def actor_loss(
 ) -> at.Float[at.Array, ""]:
     bc_penalty = jnp.mean(jnp.square(action - reference_action), axis=(-2, -1))
     return jnp.mean(-q1_for_actor + beta * bc_penalty)
+
+
+def awbc_actor_loss(
+    actor_action: at.Float[at.Array, "b h a"],
+    data_action: at.Float[at.Array, "b h a"],
+    advantage: at.Float[at.Array, " b"],
+    episode_success: at.Bool[at.Array, " b"],
+    *,
+    temperature: float,
+    max_weight: float,
+    min_advantage: float,
+    max_action_delta_norm: float,
+    data_reference_action: at.Float[at.Array, "b h a"] | None = None,
+) -> tuple[at.Float[at.Array, ""], dict[str, at.Array]]:
+    if temperature <= 0.0:
+        raise ValueError("temperature must be positive")
+    if max_weight < 1.0:
+        raise ValueError("max_weight must be >= 1")
+    if max_action_delta_norm <= 0.0:
+        raise ValueError("max_action_delta_norm must be positive")
+    data_delta_norm = jnp.zeros_like(advantage)
+    if data_reference_action is not None:
+        data_delta = data_action - data_reference_action
+        data_delta_norm = jnp.linalg.norm(data_delta.reshape(data_delta.shape[0], -1), axis=-1)
+    keep = (
+        episode_success.astype(jnp.bool_)
+        & (advantage >= min_advantage)
+        & (data_delta_norm <= max_action_delta_norm)
+    )
+    raw_weight = jnp.exp(jnp.maximum(advantage, 0.0) / temperature)
+    weight = jnp.clip(raw_weight, 1.0, max_weight) * keep.astype(actor_action.dtype)
+    per_sample_bc = jnp.mean(jnp.square(actor_action - data_action), axis=(-2, -1))
+    denom = jnp.maximum(jnp.sum(weight), 1.0)
+    loss = jnp.sum(weight * per_sample_bc) / denom
+    kept_count = jnp.sum(keep.astype(actor_action.dtype))
+    return loss, {
+        "awbc_keep_fraction": jnp.mean(keep.astype(actor_action.dtype)),
+        "awbc_kept_count": kept_count,
+        "awbc_weight_mean": jnp.sum(weight) / jnp.maximum(kept_count, 1.0),
+        "awbc_advantage_mean": jnp.mean(advantage),
+        "awbc_data_delta_norm_mean": jnp.mean(data_delta_norm),
+    }

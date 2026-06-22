@@ -78,6 +78,9 @@ def test_rlt_replay_store_loads_committed_shards_and_samples(tmp_path):
     assert batch.reference_action.shape == (4, 3, 2)
     assert batch.reward_seq.shape == (4, 3)
     assert batch.done.shape == (4,)
+    assert batch.episode_success.shape == (4,)
+    assert bool(np.any(np.asarray(batch.episode_success)))
+    assert bool(np.any(~np.asarray(batch.episode_success)))
 
 
 def test_rlt_replay_store_rejects_invalid_shards_and_loads_new_shards(tmp_path):

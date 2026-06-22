@@ -131,6 +131,27 @@ def _summary_for_scores(labels: np.ndarray, scores: np.ndarray) -> dict[str, Any
     }
 
 
+def _summary_for_values(values: np.ndarray) -> dict[str, Any]:
+    values = np.asarray(values, dtype=np.float64)
+    values = values[np.isfinite(values)]
+    if values.size == 0:
+        return {"mean": None, "median": None, "p95": None, "max": None}
+    return {
+        "mean": float(np.mean(values)),
+        "median": float(np.median(values)),
+        "p95": float(np.percentile(values, 95)),
+        "max": float(np.max(values)),
+    }
+
+
+def _chunk_smoothness(actions: np.ndarray) -> np.ndarray:
+    actions = np.asarray(actions, dtype=np.float32)
+    if actions.shape[1] <= 1:
+        return np.zeros((actions.shape[0],), dtype=np.float32)
+    diffs = np.diff(actions, axis=1)
+    return np.mean(np.linalg.norm(diffs, axis=-1), axis=-1)
+
+
 def _plot_mean_curves(rows: list[dict[str, Any]], out_path: pathlib.Path, score_key: str) -> None:
     bins = np.linspace(0.0, 1.0, 41)
     centers = (bins[:-1] + bins[1:]) / 2.0
@@ -241,12 +262,13 @@ def main() -> None:
         if actor is None:
             actor_q = jnp.full_like(actual_q, jnp.nan)
             delta_norm = jnp.full_like(actual_q, jnp.nan)
+            actor_action = jnp.full_like(action, jnp.nan)
         else:
             actor_action = actor(x, reference_action, sample=False)
             actor_q = critic.min_q(x, actor_action)
             delta = actor_action - reference_action
             delta_norm = jnp.linalg.norm(delta.reshape(delta.shape[0], -1), axis=-1)
-        return actual_q, reference_q, actor_q, delta_norm
+        return actual_q, reference_q, actor_q, delta_norm, actor_action
 
     rows: list[dict[str, Any]] = []
     skipped: list[dict[str, str]] = []
@@ -310,6 +332,7 @@ def main() -> None:
     reference_scores = np.empty(total, dtype=np.float32)
     actor_scores = np.empty(total, dtype=np.float32)
     delta_norms = np.empty(total, dtype=np.float32)
+    actor_actions = np.empty_like(all_action, dtype=np.float32)
     for start in range(0, total, batch_size):
         end = min(start + batch_size, total)
         pad = batch_size - (end - start)
@@ -322,7 +345,7 @@ def main() -> None:
             proprio_batch = np.pad(proprio_batch, ((0, pad), (0, 0)))
             action_batch = np.pad(action_batch, ((0, pad), (0, 0), (0, 0)))
             reference_batch = np.pad(reference_batch, ((0, pad), (0, 0), (0, 0)))
-        actual_q, reference_q, actor_q, delta_norm = jax.device_get(
+        actual_q, reference_q, actor_q, delta_norm, actor_action = jax.device_get(
             score_batch(z_batch, proprio_batch, action_batch, reference_batch)
         )
         valid = end - start
@@ -330,13 +353,16 @@ def main() -> None:
         reference_scores[start:end] = reference_q[:valid]
         actor_scores[start:end] = actor_q[:valid]
         delta_norms[start:end] = delta_norm[:valid]
+        actor_actions[start:end] = actor_action[:valid]
 
+    actor_smoothness = _chunk_smoothness(actor_actions)
     for row in rows:
         score_index = int(row.pop("_score_index"))
         row["q_actual"] = float(actual_scores[score_index])
         row["q_reference"] = float(reference_scores[score_index])
         row["q_actor"] = float(actor_scores[score_index])
         row["actor_delta_norm"] = float(delta_norms[score_index])
+        row["actor_chunk_smoothness"] = float(actor_smoothness[score_index])
 
     csv_path = args.output_dir / "per_transition_q.csv"
     with csv_path.open("w", newline="") as f:
@@ -369,6 +395,14 @@ def main() -> None:
                 np.asarray([float(row[key]) for row in terminal_rows]),
             )
             for key in ["q_actual", "q_reference", "q_actor"]
+        },
+        "actor_delta_norm": {
+            "all": _summary_for_values(np.asarray([float(row["actor_delta_norm"]) for row in rows])),
+            "terminal": _summary_for_values(np.asarray([float(row["actor_delta_norm"]) for row in terminal_rows])),
+        },
+        "actor_chunk_smoothness": {
+            "all": _summary_for_values(np.asarray([float(row["actor_chunk_smoothness"]) for row in rows])),
+            "terminal": _summary_for_values(np.asarray([float(row["actor_chunk_smoothness"]) for row in terminal_rows])),
         },
         "skipped": skipped[:50],
     }

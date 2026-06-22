@@ -172,6 +172,7 @@ class RLTReplayStore:
             next_proprio=jnp.asarray(arrays["next_proprio"]),
             next_reference_action=jnp.asarray(arrays["next_reference_action"]),
             done=jnp.asarray(arrays["done"].astype(np.bool_)),
+            episode_success=jnp.asarray(arrays["episode_success"].astype(np.bool_)),
         )
 
 
@@ -251,6 +252,8 @@ class RLTReplayStore:
 
         done = arrays["done"].astype(np.bool_)
         terminal_rewards = np.sum(arrays["reward_seq"][done], axis=-1) if np.any(done) else np.asarray([], dtype=np.float32)
+        episode_success = bool(np.any(terminal_rewards > 0.0))
+        arrays["episode_success"] = np.full((len(arrays["z_rl"]),), episode_success, dtype=np.bool_)
         info = ReplayShardInfo(
             path=path,
             num_transitions=len(arrays["z_rl"]),
@@ -278,7 +281,7 @@ class RLTReplayStore:
         shard_indices = np.searchsorted(cumulative, indices, side="right")
         previous = np.concatenate([np.asarray([0]), cumulative[:-1]])
 
-        pieces: dict[str, list[np.ndarray]] = {key: [] for key in REQUIRED_REPLAY_KEYS}
+        pieces: dict[str, list[np.ndarray]] = {key: [] for key in (*REQUIRED_REPLAY_KEYS, "episode_success")}
         order: list[np.ndarray] = []
         for shard_index, shard in enumerate(self._shards):
             positions = np.flatnonzero(shard_indices == shard_index)
@@ -286,7 +289,7 @@ class RLTReplayStore:
                 continue
             local_indices = indices[positions] - previous[shard_index]
             order.append(positions)
-            for key in REQUIRED_REPLAY_KEYS:
+            for key in pieces:
                 pieces[key].append(shard.arrays[key][local_indices])
 
         if not order:

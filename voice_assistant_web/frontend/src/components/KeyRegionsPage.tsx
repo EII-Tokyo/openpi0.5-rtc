@@ -173,6 +173,7 @@ const artifactBadgeTone = (exists: boolean) => (exists ? 'green' : 'amber')
 
 const keyRegionInfoRows = (record: RLTKeyRegionReviewRecord): KeyRegionInfoRow[] => [
   { label: 'Status', value: keyRegionStatusLabel(record) },
+  { label: 'Batch', value: record.batch || '-' },
   { label: 'Reward', value: formatRewardValue(record.reward) },
   { label: 'Phase', value: record.phase || '-' },
   { label: 'Video duration', value: formatDuration(record.duration_seconds) },
@@ -243,6 +244,8 @@ export function KeyRegionsPage({ title }: { title: string }) {
   const [nextOffset, setNextOffset] = useState<number | null>(null)
   const [statusFilter, setStatusFilter] = useState<'all' | 'trainable' | 'needsCrop'>('all')
   const [rewardFilter, setRewardFilter] = useState<'all' | 'success' | 'failure'>('all')
+  const [batchFilter, setBatchFilter] = useState('all')
+  const [batches, setBatches] = useState<string[]>([])
   const [selectedReviewId, setSelectedReviewId] = useState('')
   const [selectedDetail, setSelectedDetail] = useState<RLTKeyRegionReviewRecord | null>(null)
   const [selectedKeyRegionIds, setSelectedKeyRegionIds] = useState<Set<string>>(new Set())
@@ -285,11 +288,13 @@ export function KeyRegionsPage({ title }: { title: string }) {
         offset,
         status: statusFilter,
         reward: rewardFilter,
+        batch: batchFilter,
       })
       setRecords(page.items)
       setSummary(page.summary)
       setTotal(page.total)
       setNextOffset(page.next_offset)
+      setBatches(page.batches)
       setSelectedKeyRegionIds((current) => {
         const visible = new Set(page.items.map((record) => record.key_region_id))
         return new Set([...current].filter((keyRegionId) => visible.has(keyRegionId)))
@@ -302,7 +307,7 @@ export function KeyRegionsPage({ title }: { title: string }) {
     } finally {
       setLoading(false)
     }
-  }, [offset, rewardFilter, statusFilter])
+  }, [batchFilter, offset, rewardFilter, statusFilter])
 
   useEffect(() => {
     selectedReviewIdRef.current = selectedReviewId
@@ -319,7 +324,7 @@ export function KeyRegionsPage({ title }: { title: string }) {
     setSelectedKeyRegionIds(new Set())
     unloadActiveVideos()
     setPlayingKeyRegionId('')
-  }, [rewardFilter, statusFilter, unloadActiveVideos])
+  }, [batchFilter, rewardFilter, statusFilter, unloadActiveVideos])
 
   useEffect(() => {
     if (!selectedReviewId) {
@@ -585,6 +590,16 @@ export function KeyRegionsPage({ title }: { title: string }) {
             <option value="success">Success only</option>
             <option value="failure">Failure only</option>
           </select>
+          <select
+            className="key-region-control"
+            value={batchFilter}
+            onChange={(event) => setBatchFilter(event.target.value)}
+          >
+            <option value="all">All batches</option>
+            {batches.map((batch) => (
+              <option value={batch} key={batch}>{batch}</option>
+            ))}
+          </select>
           <button className="ghost-button" type="button" onClick={selectVisibleKeyRegions} disabled={!records.length}>
             Select page
           </button>
@@ -705,6 +720,20 @@ export function KeyRegionsPage({ title }: { title: string }) {
                     <span className={badgeTone(artifactBadgeTone(renderRecord.manifest_exists))}>manifest</span>
                     <span className={badgeTone(artifactBadgeTone(renderRecord.npz_exists))}>npz</span>
                     <span className={badgeTone('slate')}>{renderRecord.video_paths.length || 0} cameras</span>
+                  </div>
+                  <div className="key-region-paths">
+                    <div>
+                      <span>Rollout path</span>
+                      <code title={renderRecord.local_rollout_path || renderRecord.rollout_path || ''}>
+                        {renderRecord.local_rollout_path || renderRecord.rollout_path || '-'}
+                      </code>
+                    </div>
+                    <div>
+                      <span>Replay shard</span>
+                      <code title={renderRecord.local_shard_path || renderRecord.shard_path || ''}>
+                        {renderRecord.local_shard_path || renderRecord.shard_path || '-'}
+                      </code>
+                    </div>
                   </div>
                 </aside>
               </div>

@@ -68,6 +68,7 @@ export type RLTSegmentRecord = {
 
 export type RLTKeyRegionReviewRecord = {
   key_region_id: string
+  batch: string | null
   status: string
   trainable: boolean
   incomplete_reason: string | null
@@ -78,6 +79,8 @@ export type RLTKeyRegionReviewRecord = {
   video_exists: boolean
   manifest_exists: boolean
   rollout_path: string | null
+  local_rollout_path: string | null
+  local_shard_path: string | null
   segment_status: string | null
   train_eligible: boolean | null
   replay_status: string | null
@@ -120,6 +123,7 @@ export type RLTKeyRegionReviewPage = {
   offset: number
   next_offset: number | null
   summary: RLTKeyRegionReviewSummary
+  batches: string[]
 }
 
 export type RLTKeyRegionReviewQuery = {
@@ -127,6 +131,7 @@ export type RLTKeyRegionReviewQuery = {
   offset?: number
   status?: 'all' | 'trainable' | 'needsCrop'
   reward?: 'all' | 'success' | 'failure'
+  batch?: string
 }
 
 export type RLTKeyRegionCropResponse = {
@@ -284,6 +289,7 @@ export const fetchRLTKeyRegionReview = (query: RLTKeyRegionReviewQuery = {}) => 
   if (query.offset !== undefined) params.set('offset', String(query.offset))
   if (query.status && query.status !== 'all') params.set('status', query.status)
   if (query.reward && query.reward !== 'all') params.set('reward', query.reward)
+  if (query.batch && query.batch !== 'all') params.set('batch', query.batch)
   const suffix = params.toString() ? `?${params.toString()}` : ''
   return getJson<RLTKeyRegionReviewPage>(`/api/rlt/key-regions/review${suffix}`)
 }
