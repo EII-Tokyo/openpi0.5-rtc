@@ -62,6 +62,7 @@ class WebsocketPolicyServer:
                 chunking_mode = data.get("chunking_mode", None)
                 action_prefix = data.get("action_prefix", None)
                 handoff_delay_steps = data.get("handoff_delay_steps", None)
+                rlt_actor_enabled = data.get("rlt_actor_enabled", None)
                 infer_time = time.monotonic()
                 action = self._policy.infer(
                     obs,
@@ -69,6 +70,7 @@ class WebsocketPolicyServer:
                     chunking_mode=chunking_mode,
                     action_prefix=action_prefix,
                     handoff_delay_steps=handoff_delay_steps,
+                    rlt_actor_enabled=rlt_actor_enabled,
                 )
                 infer_time = time.monotonic() - infer_time
 

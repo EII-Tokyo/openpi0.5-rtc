@@ -183,8 +183,8 @@ def encode(params: Params, embeddings: jax.Array, mask: jax.Array, config: RLTTo
         config = RLTTokenConfig(input_dim=embeddings.shape[-1], token_dim=embeddings.shape[-1])
     mask = mask.astype(jnp.bool_)
     x = embeddings.astype(jnp.float32)
-    token = jnp.broadcast_to(params["encoder_rlt_token"], (x.shape[0], 1, x.shape[-1]))
-    x = jnp.concatenate([x, token], axis=1)
+    rlt_token = jnp.broadcast_to(params["encoder_rlt_token"], (x.shape[0], 1, x.shape[-1]))
+    x = jnp.concatenate([x, rlt_token], axis=1)
     valid = jnp.concatenate([mask, jnp.ones((mask.shape[0], 1), dtype=jnp.bool_)], axis=1)
     x = _transformer(params["encoder_layers"], x, _token_pool_mask(mask), _positions_from_mask(valid), config)
     return x[:, -1]
@@ -192,7 +192,7 @@ def encode(params: Params, embeddings: jax.Array, mask: jax.Array, config: RLTTo
 
 def decode(
     params: Params,
-    token: jax.Array,
+    rlt_token: jax.Array,
     embeddings: jax.Array,
     mask: jax.Array,
     config: RLTTokenConfig | None = None,
@@ -201,10 +201,10 @@ def decode(
         config = RLTTokenConfig(input_dim=embeddings.shape[-1], token_dim=embeddings.shape[-1])
     mask = mask.astype(jnp.bool_)
     embeddings = embeddings.astype(jnp.float32)
-    token = token[:, None, :]
+    rlt_token = rlt_token[:, None, :]
     # Autoregressive teacher forcing: predict embedding[t] from the RLT token and
     # previous VLA embeddings, not from a learned decode query or the current target.
-    decoder_inputs = jnp.concatenate([token, embeddings[:, :-1]], axis=1)
+    decoder_inputs = jnp.concatenate([rlt_token, embeddings[:, :-1]], axis=1)
     decoder_valid = jnp.concatenate([jnp.ones((mask.shape[0], 1), dtype=jnp.bool_), mask[:, :-1]], axis=1)
     decoder_mask = _causal_mask(mask)[:, :-1, :-1]
     decoded = _transformer(
@@ -224,8 +224,8 @@ def reconstruction_loss(
         config = RLTTokenConfig(input_dim=embeddings.shape[-1], token_dim=embeddings.shape[-1])
     embeddings = jax.lax.stop_gradient(embeddings.astype(jnp.float32))
     mask_f = mask.astype(jnp.float32)
-    token = encode(params, embeddings, mask, config)
-    recon = decode(params, token, embeddings, mask, config)
+    rlt_token = encode(params, embeddings, mask, config)
+    recon = decode(params, rlt_token, embeddings, mask, config)
     sq = jnp.mean(jnp.square(recon - embeddings), axis=-1)
     loss = jnp.sum(sq * mask_f) / jnp.maximum(jnp.sum(mask_f), 1.0)
     padding_f = 1.0 - mask_f
@@ -233,7 +233,7 @@ def reconstruction_loss(
         jnp.sum(padding_f) * recon.shape[-1], 1.0
     )
     return loss, {
-        "token_norm": jnp.mean(jnp.linalg.norm(token, axis=-1)),
+        "token_norm": jnp.mean(jnp.linalg.norm(rlt_token, axis=-1)),
         "reconstruction_loss": loss,
         "valid_token_count": jnp.sum(mask_f),
         "padding_output_abs_mean": padding_abs,

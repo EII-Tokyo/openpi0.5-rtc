@@ -26,6 +26,10 @@ class RobotStateBridge:
             "joint_effort": {},
             "joint_temperature": {},
             "latest_action": [],
+            "rlt_actor_enabled": False,
+            "rlt_chunk_q_min": None,
+            "rlt_vla_chunk_q_min": None,
+            "rlt_actor_chunk_q_min": None,
         }
         self._running = False
         self._poll_thread: threading.Thread | None = None
@@ -132,6 +136,18 @@ class RobotStateBridge:
                             "joint_temperature": payload.get(
                                 "joint_temperature", self._state.get("joint_temperature", {})
                             ),
+                            "rlt_actor_enabled": payload.get(
+                                "rlt_actor_enabled", self._state.get("rlt_actor_enabled", False)
+                            ),
+                            "rlt_chunk_q_min": payload.get(
+                                "rlt_chunk_q_min", self._state.get("rlt_chunk_q_min")
+                            ),
+                            "rlt_vla_chunk_q_min": payload.get(
+                                "rlt_vla_chunk_q_min", self._state.get("rlt_vla_chunk_q_min")
+                            ),
+                            "rlt_actor_chunk_q_min": payload.get(
+                                "rlt_actor_chunk_q_min", self._state.get("rlt_actor_chunk_q_min")
+                            ),
                         }
                     )
         except Exception:
@@ -148,6 +164,10 @@ class RobotStateBridge:
                 "joint_effort": dict(self._state.get("joint_effort", {})),
                 "joint_temperature": dict(self._state.get("joint_temperature", {})),
                 "latest_action": list(self._state.get("latest_action", [])),
+                "rlt_actor_enabled": bool(self._state.get("rlt_actor_enabled", False)),
+                "rlt_chunk_q_min": self._state.get("rlt_chunk_q_min"),
+                "rlt_vla_chunk_q_min": self._state.get("rlt_vla_chunk_q_min"),
+                "rlt_actor_chunk_q_min": self._state.get("rlt_actor_chunk_q_min"),
             }
 
     def _combine_qpos(self, left_qpos: list[float], right_qpos: list[float]) -> list[float]:

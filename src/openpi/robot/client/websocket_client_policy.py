@@ -69,6 +69,7 @@ class WebsocketClientPolicy(_base_policy.BasePolicy):
         chunking_mode: str | None = None,
         action_prefix: np.ndarray | None = None,
         handoff_delay_steps: int | None = None,
+        rlt_actor_enabled: bool | None = None,
     ) -> Dict:  # noqa: UP006
         data = {
             "obs": obs,
@@ -76,6 +77,7 @@ class WebsocketClientPolicy(_base_policy.BasePolicy):
             "chunking_mode": chunking_mode,
             "action_prefix": action_prefix,
             "handoff_delay_steps": handoff_delay_steps,
+            "rlt_actor_enabled": rlt_actor_enabled,
         }
         data = self._packer.pack(data)
         try:

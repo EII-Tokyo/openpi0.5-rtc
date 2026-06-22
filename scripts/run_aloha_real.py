@@ -20,11 +20,9 @@ class Args:
     port: int = 8000
     action_quality: Literal["normal", "good", "bad"] = "normal"
 
-    sync_replan_interval: int = 25
     rtc_replan_start_step: int = 25
     rtc_handoff_delay_steps: int = 10
 
-    chunking_mode: Literal["sync", "inference_time", "training_time"] = "inference_time"
     policy_hz: float = 50.0
     manual_hz: float = 50.0
     video_memory_num_frames: int = 1
@@ -54,6 +52,10 @@ class Args:
     if_save_hdf5: bool = True
     # Set <= 0 to save the full episode instead of a rolling tail buffer.
     hdf5_max_buffer_seconds: float = 60.0
+    if_save_rlt_replay: bool = False
+    rlt_replay_dir: str = "/app/data/rlt_online_replay"
+    rlt_terminal_label: Literal["unlabeled", "success", "failure"] = "unlabeled"
+    rlt_save_images: bool = False
 
 
 def main(args: Args) -> None:
@@ -89,6 +91,39 @@ def main(args: Args) -> None:
         fps=args.policy_hz,
         max_buffer_seconds=args.hdf5_max_buffer_seconds,
     )
+    subscribers = []
+    if args.if_save_hdf5:
+        subscribers.append(h5df_saver_instance)
+    if args.if_save_rlt_replay:
+        from openpi.rlt import online_replay
+
+        replay_metadata = {
+            "policy_server": server_metadata,
+            "runtime": {
+                "model_dir": args.model_dir,
+                "action_quality": args.action_quality,
+                "chunking_mode": "inference_time",
+                "rtc_replan_start_step": args.rtc_replan_start_step,
+                "rtc_handoff_delay_steps": args.rtc_handoff_delay_steps,
+                "policy_hz": args.policy_hz,
+                "video_memory_num_frames": args.video_memory_num_frames,
+                "video_memory_stride_seconds": args.video_memory_stride_seconds,
+                "adapt_to_pi": adapt_to_pi,
+            },
+        }
+        subscribers.append(
+            online_replay.RLTOnlineReplayRecorder(
+                args.rlt_replay_dir,
+                terminal_label=args.rlt_terminal_label,
+                save_images=args.rlt_save_images,
+                policy_metadata=replay_metadata,
+            )
+        )
+        logging.info(
+            "RLT online replay saving enabled: %s save_images=%s image_storage=raw_camera_frame",
+            args.rlt_replay_dir,
+            args.rlt_save_images,
+        )
 
     runtime = _runtime.Runtime(
         # environment=_real_env.AlohaRealEnvironment(reset_position=metadata.get("reset_pose")),
@@ -100,14 +135,12 @@ def main(args: Args) -> None:
         ),
         policy=chunked_policy.ChunkedPolicy(
             policy=ws_client_policy,
-            sync_replan_interval=args.sync_replan_interval,
             model_dir=args.model_dir,
             adapt_to_pi=adapt_to_pi,
-            chunking_mode=args.chunking_mode,
             rtc_replan_start_step=args.rtc_replan_start_step,
             rtc_handoff_delay_steps=args.rtc_handoff_delay_steps,
         ),
-        subscribers=[h5df_saver_instance] if args.if_save_hdf5 else [],
+        subscribers=subscribers,
         max_hz=args.policy_hz,
         manual_hz=args.manual_hz,
         manual_dataset_dir=args.manual_dataset_dir,

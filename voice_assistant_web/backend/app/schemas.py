@@ -18,6 +18,10 @@ class RuntimeStatePayload(BaseModel):
     joint_effort: dict[str, Any] = Field(default_factory=dict)
     joint_temperature: dict[str, Any] = Field(default_factory=dict)
     latest_action: list[float] = Field(default_factory=list)
+    rlt_actor_enabled: bool = False
+    rlt_chunk_q_min: float | None = None
+    rlt_vla_chunk_q_min: float | None = None
+    rlt_actor_chunk_q_min: float | None = None
 
 
 class RealtimePayload(BaseModel):
@@ -40,3 +44,43 @@ class VoiceResponse(BaseModel):
     audio_base64: str | None = None
     audio_mime_type: str | None = None
     debug: dict[str, Any] = Field(default_factory=dict)
+
+
+class RLTLabelRequest(BaseModel):
+    label: str
+
+
+class RLTReplayStatus(BaseModel):
+    replay_dir: str
+    latest_episode: str | None = None
+    terminal_label: str | None = None
+    terminal_success: int | None = None
+    num_steps: int | None = None
+    num_chunks: int | None = None
+
+
+class RLTTrajectoryRecord(BaseModel):
+    path: str
+    name: str
+    terminal_label: str | None = None
+    terminal_success: int | None = None
+    num_steps: int
+    num_chunks: int | None = None
+    duration_s: float | None = None
+    fps: float | None = None
+    camera_names: list[str] = Field(default_factory=list)
+    trim_start_step: int
+    trim_end_step: int
+    mtime: float
+
+
+class RLTTrajectoryListResponse(BaseModel):
+    replay_dir: str
+    trajectories: list[RLTTrajectoryRecord] = Field(default_factory=list)
+
+
+class RLTTrajectoryTrimRequest(BaseModel):
+    path: str
+    trim_start_step: int
+    trim_end_step: int
+    terminal_label: str | None = None

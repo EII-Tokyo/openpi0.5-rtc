@@ -281,6 +281,67 @@ class Pi0(_model.BaseModel):
         x_0, _ = jax.lax.while_loop(cond, step, (noise, 1.0))
         return x_0
 
+    def sample_action_chunk_with_rlt_context(
+        self,
+        rng: at.KeyArrayLike,
+        observation: _model.Observation,
+        *,
+        denoising_steps: int | at.Int[at.Array, ""] = 10,
+        noise: at.Float[at.Array, "b ah ad"] | None = None,
+    ) -> dict[str, at.Array]:
+        """Sample actions and return RLT prefix context with a single prefix pass."""
+        dt = -1.0 / denoising_steps
+        batch_size = observation.state.shape[0]
+        if noise is None:
+            noise = jax.random.normal(rng, (batch_size, self.action_horizon, self.action_dim))
+
+        prefix_tokens, prefix_mask, prefix_ar_mask = self.embed_prefix(observation)
+        prefix_attn_mask = make_attn_mask(prefix_mask, prefix_ar_mask)
+        prefix_positions = jnp.cumsum(prefix_mask, axis=1) - 1
+        (prefix_out, _), kv_cache = self.PaliGemma.llm(
+            [prefix_tokens, None],
+            mask=prefix_attn_mask,
+            positions=prefix_positions,
+        )
+
+        def step(carry):
+            x_t, time = carry
+            suffix_tokens, suffix_mask, suffix_ar_mask, adarms_cond = self.embed_suffix(
+                observation, x_t, jnp.broadcast_to(time, batch_size)
+            )
+            suffix_attn_mask = make_attn_mask(suffix_mask, suffix_ar_mask)
+            prefix_attn_mask = einops.repeat(prefix_mask, "b p -> b s p", s=suffix_tokens.shape[1])
+            full_attn_mask = jnp.concatenate([prefix_attn_mask, suffix_attn_mask], axis=-1)
+            assert full_attn_mask.shape == (
+                batch_size,
+                suffix_tokens.shape[1],
+                prefix_tokens.shape[1] + suffix_tokens.shape[1],
+            )
+            positions = jnp.sum(prefix_mask, axis=-1)[:, None] + jnp.cumsum(suffix_mask, axis=-1) - 1
+
+            (prefix_step_out, suffix_out), _ = self.PaliGemma.llm(
+                [None, suffix_tokens],
+                mask=full_attn_mask,
+                positions=positions,
+                kv_cache=kv_cache,
+                adarms_cond=[None, adarms_cond],
+            )
+            assert prefix_step_out is None
+            v_t = self.action_out_proj(suffix_out[:, -self.action_horizon :])
+            return x_t + dt * v_t, time + dt
+
+        def cond(carry):
+            x_t, time = carry
+            return time >= -dt / 2
+
+        x_0, _ = jax.lax.while_loop(cond, step, (noise, 1.0))
+        return {
+            "actions": x_0,
+            "rlt_embeddings": jax.lax.stop_gradient(prefix_out.astype(jnp.float32)),
+            "rlt_mask": jax.lax.stop_gradient(prefix_mask),
+            "rlt_state": jax.lax.stop_gradient(observation.state.astype(jnp.float32)),
+        }
+
     def sample_action_chunk_with_training_time_rtc(
         self,
         rng: at.KeyArrayLike,
@@ -341,7 +402,7 @@ class Pi0(_model.BaseModel):
         x_0, _ = jax.lax.while_loop(cond, step, (preserve_prefix(noise), 1.0))
         return x_0
 
-    def sample_action_chunk_with_inference_time_rtc(
+    def _sample_action_chunk_with_inference_time_rtc_and_context(
         self,
         rng: at.KeyArrayLike,
         prev_action_chunk: _model.Actions,
@@ -351,7 +412,7 @@ class Pi0(_model.BaseModel):
         replan_start_step: int = 25,
         handoff_delay_steps: int = 10,
         guidance_scale: float = 8.0,
-    ) -> _model.Actions:
+    ) -> tuple[_model.Actions, at.Array, at.Array]:
         # note that we use the convention more common in diffusion literature, where t=1 is noise and t=0 is the target
         # distribution. yes, this is the opposite of the pi0 paper, and I'm sorry.
         dt = -1.0 / denoising_steps
@@ -384,7 +445,7 @@ class Pi0(_model.BaseModel):
         prefix_tokens, prefix_mask, prefix_ar_mask = self.embed_prefix(observation)
         prefix_attn_mask = make_attn_mask(prefix_mask, prefix_ar_mask)
         positions = jnp.cumsum(prefix_mask, axis=1) - 1
-        _, kv_cache = self.PaliGemma.llm([prefix_tokens, None], mask=prefix_attn_mask, positions=positions)
+        (prefix_out, _), kv_cache = self.PaliGemma.llm([prefix_tokens, None], mask=prefix_attn_mask, positions=positions)
 
         def func_a_1_prime(x_t, time):
             suffix_tokens, suffix_mask, suffix_ar_mask, adarms_cond = self.embed_suffix(
@@ -429,4 +490,53 @@ class Pi0(_model.BaseModel):
             return time >= -dt / 2
 
         x_0, _ = jax.lax.while_loop(cond, step, (noise, 1.0))
+        return x_0, prefix_out, prefix_mask
+
+    def sample_action_chunk_with_inference_time_rtc(
+        self,
+        rng: at.KeyArrayLike,
+        prev_action_chunk: _model.Actions,
+        observation: _model.Observation,
+        *,
+        denoising_steps: int | at.Int[at.Array, ""] = 10,
+        replan_start_step: int = 25,
+        handoff_delay_steps: int = 10,
+        guidance_scale: float = 8.0,
+    ) -> _model.Actions:
+        x_0, _, _ = self._sample_action_chunk_with_inference_time_rtc_and_context(
+            rng,
+            prev_action_chunk,
+            observation,
+            denoising_steps=denoising_steps,
+            replan_start_step=replan_start_step,
+            handoff_delay_steps=handoff_delay_steps,
+            guidance_scale=guidance_scale,
+        )
         return x_0
+
+    def sample_action_chunk_with_inference_time_rtc_context(
+        self,
+        rng: at.KeyArrayLike,
+        prev_action_chunk: _model.Actions,
+        observation: _model.Observation,
+        *,
+        denoising_steps: int | at.Int[at.Array, ""] = 10,
+        replan_start_step: int = 25,
+        handoff_delay_steps: int = 10,
+        guidance_scale: float = 8.0,
+    ) -> dict[str, at.Array]:
+        x_0, prefix_out, prefix_mask = self._sample_action_chunk_with_inference_time_rtc_and_context(
+            rng,
+            prev_action_chunk,
+            observation,
+            denoising_steps=denoising_steps,
+            replan_start_step=replan_start_step,
+            handoff_delay_steps=handoff_delay_steps,
+            guidance_scale=guidance_scale,
+        )
+        return {
+            "actions": x_0,
+            "rlt_embeddings": jax.lax.stop_gradient(prefix_out.astype(jnp.float32)),
+            "rlt_mask": jax.lax.stop_gradient(prefix_mask),
+            "rlt_state": jax.lax.stop_gradient(observation.state.astype(jnp.float32)),
+        }

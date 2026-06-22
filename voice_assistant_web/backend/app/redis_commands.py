@@ -26,12 +26,13 @@ def create_redis_client() -> redis.Redis:
     )
 
 
-def publish_task(redis_client: redis.Redis, task_num: str) -> dict:
-    task_name = TASK_MAPPING[task_num]
+def publish_task(redis_client: redis.Redis, task_num: str, **extra_fields) -> dict:
+    task_name = TASK_MAPPING.get(task_num, str(extra_fields.get("task_name", task_num)))
     message = {
         "task": task_num,
         "task_name": task_name,
         "timestamp": time.time(),
+        **extra_fields,
     }
     redis_client.publish(settings.voice_command_channel, json.dumps(message))
     return message

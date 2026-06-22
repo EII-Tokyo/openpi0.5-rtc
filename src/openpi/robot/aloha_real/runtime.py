@@ -73,6 +73,7 @@ class Runtime:
         # 任务状态管理
         self._current_task = None
         self._is_waiting_for_task = False
+        self._rlt_actor_enabled = False
         
         # 存储最后的action（用于task_num==3时移动master）
         self._last_action = None
@@ -156,6 +157,7 @@ class Runtime:
                         
                         with self._task_lock:
                             self._latest_task = {
+                                **data,
                                 'task_num': task_num,
                                 'task_name': task_name,
                                 'timestamp': timestamp
@@ -189,7 +191,16 @@ class Runtime:
             self._redis_thread.join(timeout=2.0)
         logging.info("Redis监听线程已停止")
 
-    def _publish_runtime_state(self, *, qpos=None, latest_action=None, mode: str | None = None) -> None:
+    def _publish_runtime_state(
+        self,
+        *,
+        qpos=None,
+        latest_action=None,
+        mode: str | None = None,
+        rlt_chunk_q_min: float | None = None,
+        rlt_vla_chunk_q_min: float | None = None,
+        rlt_actor_chunk_q_min: float | None = None,
+    ) -> None:
         """发布轻量运行时状态给可视化前端。"""
         if self._redis_client is None:
             return
@@ -204,6 +215,10 @@ class Runtime:
             "current_task": current_task,
             "qpos": list(qpos) if qpos is not None else [],
             "latest_action": list(latest_action) if latest_action is not None else [],
+            "rlt_actor_enabled": self._rlt_actor_enabled,
+            "rlt_chunk_q_min": rlt_chunk_q_min,
+            "rlt_vla_chunk_q_min": rlt_vla_chunk_q_min,
+            "rlt_actor_chunk_q_min": rlt_actor_chunk_q_min,
         }
         try:
             self._redis_client.publish("aloha_runtime_state", json.dumps(payload))
@@ -251,6 +266,14 @@ class Runtime:
         self._is_waiting_for_task = True
         self._current_task = None
         self._publish_runtime_state(mode="waiting")
+
+    def _set_rlt_actor_enabled(self, enabled: bool) -> None:
+        enabled = bool(enabled)
+        self._rlt_actor_enabled = enabled
+        if hasattr(self._policy, "set_rlt_actor_enabled"):
+            self._policy.set_rlt_actor_enabled(enabled)
+        logging.info("RLT actor sampling %s", "enabled" if enabled else "disabled")
+        self._publish_runtime_state(mode="waiting" if self._is_waiting_for_task else "policy")
 
     def _run(self) -> None:
         """Runs a single episode."""
@@ -447,17 +470,40 @@ class Runtime:
             self._leader_follower_demo.run()
         elif task_num == "4":
             logging.info("收到停止指令，回到初始位置并停止agent")
+            self._set_rlt_actor_enabled(False)
             self._enter_waiting()
             # 回到初始位置
             self._environment.stop()
             # 停止agent
             self._policy.reset()   
-            # 通知subscriber episode结束
-            for subscriber in self._subscribers:
-                subscriber.on_episode_end()   
+            if task_data.get("defer_episode_save"):
+                logging.info("已停止agent，等待人工标注后再保存 RLT replay")
+            else:
+                # 通知subscriber episode结束
+                for subscriber in self._subscribers:
+                    subscriber.on_episode_end()   
             self._publish_runtime_state(mode="waiting")
+        elif task_num == "rlt_save_label":
+            label = str(task_data.get("rlt_terminal_label", "unlabeled")).lower()
+            logging.info("收到 RLT 标注保存指令: %s", label)
+            for subscriber in self._subscribers:
+                if hasattr(subscriber, "set_terminal_label"):
+                    subscriber.set_terminal_label(label)
+                subscriber.on_episode_end()
+            self._publish_runtime_state(mode="waiting")
+        elif task_num == "rlt_begin_recording":
+            logging.info("收到 RLT 开始录制指令；之后的 step 会写入 npz")
+            for subscriber in self._subscribers:
+                if hasattr(subscriber, "begin_recording"):
+                    subscriber.begin_recording()
+            self._publish_runtime_state(mode="policy" if not self._is_waiting_for_task else "waiting")
+        elif task_num == "rlt_actor_enable":
+            self._set_rlt_actor_enabled(True)
+        elif task_num == "rlt_actor_disable":
+            self._set_rlt_actor_enabled(False)
         elif task_num == "5":
             logging.info("收到回到sleep位置并退出指令，退出程序")
+            self._set_rlt_actor_enabled(False)
             self._environment.sleep_arms()
             self._policy.reset()
             for subscriber in self._subscribers:
@@ -483,7 +529,28 @@ class Runtime:
         self._last_action = action.get("actions") if isinstance(action, dict) and "actions" in action else None
         if self._last_action is not None:
             self._recent_puppet_actions.append(list(self._last_action))
-        self._publish_runtime_state(latest_action=self._last_action, mode="policy")
+        replay = action.get("rlt_replay") if isinstance(action, dict) else None
+        rlt_chunk_q_min = None
+        rlt_vla_chunk_q_min = None
+        rlt_actor_chunk_q_min = None
+        if isinstance(replay, dict) and replay.get("rlt_chunk_q_min") is not None:
+            rlt_chunk_q_min = float(replay["rlt_chunk_q_min"])
+        if isinstance(replay, dict) and replay.get("rlt_vla_chunk_q_min") is not None:
+            rlt_vla_chunk_q_min = float(replay["rlt_vla_chunk_q_min"])
+        if isinstance(replay, dict) and replay.get("rlt_actor_chunk_q_min") is not None:
+            rlt_actor_chunk_q_min = float(replay["rlt_actor_chunk_q_min"])
+        self._publish_runtime_state(
+            latest_action=self._last_action,
+            mode="policy",
+            rlt_chunk_q_min=rlt_chunk_q_min,
+            rlt_vla_chunk_q_min=rlt_vla_chunk_q_min,
+            rlt_actor_chunk_q_min=rlt_actor_chunk_q_min,
+        )
 
+        subscriber_observation = {
+            **observation["origin_observation"],
+            "task": observation_with_task["task"],
+            "subtask": observation_with_task["subtask"],
+        }
         for subscriber in self._subscribers:
-            subscriber.on_step(observation["origin_observation"], action)
+            subscriber.on_step(subscriber_observation, action)

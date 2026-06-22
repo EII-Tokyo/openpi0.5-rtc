@@ -1,24 +1,62 @@
-src/openpi/robot/aloha_real/voice_assistant/.env
-src/openpi/robot/aloha_real/inference_hdf5/
-src/openpi/robot/aloha_real/manual_override/
-src/openpi/robot/aloha_real/error_hdf5/
-src/openpi/robot/aloha_real/manual_override_hdf5/
+examples/aloha_real/voice_assistant/.env
+examples/aloha_real/inference_hdf5/
+examples/aloha_real/manual_override/
+examples/aloha_real/error_hdf5/
+examples/aloha_real/manual_override_hdf5/
 voice_assistant_web/frontend/node_modules/
 voice_assistant_web/frontend/dist/
 voice_assistant_web/**/__pycache__/
 
 # Data directories.
-assets/
-checkpoints/
+# Image and video artifacts.
+*.[jJ][pP][gG]
+*.[jJ][pP][eE][gG]
+*.[pP][nN][gG]
+*.[gG][iI][fF]
+*.[bB][mM][pP]
+*.[tT][iI][fF]
+*.[tT][iI][fF][fF]
+*.[wW][eE][bB][pP]
+*.[hH][eE][iI][cC]
+*.[hH][eE][iI][fF]
+*.[aA][vV][iI][fF]
+*.[iI][cC][oO]
+*.[sS][vV][gG]
+*.[mM][pP]4
+*.[mM][oO][vV]
+*.[aA][vV][iI]
+*.[mM][kK][vV]
+*.[wW][eE][bB][mM]
+*.[mM]4[vV]
+*.[mM][pP][gG]
+*.[mM][pP][eE][gG]
+*.[wW][mM][vV]
+*.[fF][lL][vV]
+*.[hH]264
+*.[hH]265
+*.[hH][eE][vV][cC]
+*.[3][gG][pP]
+*.[mM]2[tT][sS]
 
-# Local checkpoint/compose backups.
-checkpoints
-checkpoints.bak.*/
-docker-compose.yml.bak.*
-data/
-wandb/
-tmp/
-attention_outputs/
+/assets/
+/checkpoints/
+/data/
+/evals/
+/local_rlt_data/
+/local_rlt_runs/
+/rollouts
+/rollouts.backup-*/
+/wandb/
+/tmp/
+/attention_outputs/
+/rlt_runs/
+/rlt_analysis/
+/analysis/
+/visualizations/
+/segment_db/
+/replay/
+/tmp_q_curves_old_good_on_latest_replay/
+*.bak.*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

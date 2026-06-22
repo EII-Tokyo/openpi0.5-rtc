@@ -39,7 +39,7 @@ class Policy(BasePolicy):
             rng: Random number generator key.
             transforms: Input data transformations to apply before inference.
             output_transforms: Output data transformations to apply after inference.
-            sample_kwargs: Additional keyword arguments to pass to model.sample_action_chunk.
+            sample_kwargs: Additional keyword arguments to pass to the RLT context samplers.
             metadata: Additional metadata to store with the policy.
         """
         self._model = model
@@ -48,9 +48,14 @@ class Policy(BasePolicy):
         self._observation_transform = observation_transform or (lambda observation: observation)
         self._sample_kwargs = sample_kwargs or {}
         self._metadata = metadata or {}
-        self._sample_action_chunk = nnx_utils.module_jit(model.sample_action_chunk)
-        self._sample_action_chunk_with_inference_time_rtc = nnx_utils.module_jit(model.sample_action_chunk_with_inference_time_rtc)
-        self._sample_action_chunk_with_training_time_rtc = nnx_utils.module_jit(model.sample_action_chunk_with_training_time_rtc)
+        if not hasattr(model, "sample_action_chunk_with_rlt_context"):
+            raise NotImplementedError("Policy requires sample_action_chunk_with_rlt_context().")
+        if not hasattr(model, "sample_action_chunk_with_inference_time_rtc_context"):
+            raise NotImplementedError("Policy requires sample_action_chunk_with_inference_time_rtc_context().")
+        self._sample_action_chunk_with_rlt_context = nnx_utils.module_jit(model.sample_action_chunk_with_rlt_context)
+        self._sample_action_chunk_with_inference_time_rtc_context = nnx_utils.module_jit(
+            model.sample_action_chunk_with_inference_time_rtc_context
+        )
         self._rng = rng or jax.random.key(0)
 
     @override
@@ -87,9 +92,9 @@ class Policy(BasePolicy):
             sample_kwargs["noise"] = noise
 
         if chunking_mode is None:
-            chunking_mode = "sync"
-        if chunking_mode not in {"sync", "inference_time", "training_time"}:
-            raise ValueError(f"Unknown chunking_mode={chunking_mode!r}")
+            chunking_mode = "inference_time"
+        if chunking_mode != "inference_time":
+            raise ValueError("Policy only supports chunking_mode='inference_time'.")
 
         def _inference_time_sampling_kwargs(kwargs: dict[str, Any]) -> dict[str, Any]:
             return dict(kwargs)
@@ -102,69 +107,56 @@ class Policy(BasePolicy):
 
         observation = self._observation_transform(_model.Observation.from_dict(inputs))
         start_time = time.monotonic()
-        if chunking_mode == "sync":
-            origin_actions = self._sample_action_chunk(
+        batched_prev_action = _batch_action(prev_action)
+        if batched_prev_action is None:
+            fused_outputs = self._sample_action_chunk_with_rlt_context(
                 sample_rng,
                 observation,
                 **_plain_sampling_kwargs(sample_kwargs),
             )
-        elif chunking_mode == "inference_time":
-            batched_prev_action = _batch_action(prev_action)
-            if batched_prev_action is None:
-                origin_actions = self._sample_action_chunk(
-                    sample_rng,
-                    observation,
-                    **_plain_sampling_kwargs(sample_kwargs),
-                )
-            else:
-                origin_actions = self._sample_action_chunk_with_inference_time_rtc(
-                    sample_rng,
-                    batched_prev_action,
-                    observation,
-                    **_inference_time_sampling_kwargs(sample_kwargs),
-                )
         else:
-            batched_action_prefix = _batch_action(action_prefix)
-            if batched_action_prefix is None or handoff_delay_steps is None:
-                origin_actions = self._sample_action_chunk(
-                    sample_rng,
-                    observation,
-                    **_plain_sampling_kwargs(sample_kwargs),
-                )
-            else:
-                rtc_kwargs = _plain_sampling_kwargs(sample_kwargs)
-                origin_actions = self._sample_action_chunk_with_training_time_rtc(
-                    sample_rng,
-                    observation,
-                    action_prefix=batched_action_prefix,
-                    handoff_delay_steps=handoff_delay_steps,
-                    **rtc_kwargs,
-                )
-
-        outputs = {
-            "state": inputs["state"],
-            "actions": origin_actions,
-            "origin_actions": origin_actions,
+            fused_outputs = self._sample_action_chunk_with_inference_time_rtc_context(
+                sample_rng,
+                batched_prev_action,
+                observation,
+                **_inference_time_sampling_kwargs(sample_kwargs),
+            )
+        model_actions = fused_outputs["actions"]
+        rlt_outputs = {
+            "rlt_embeddings": fused_outputs["rlt_embeddings"],
+            "rlt_mask": fused_outputs["rlt_mask"],
         }
-        rlt_outputs = None
-        if return_rlt_state:
-            if not hasattr(self._model, "encode_rlt_state"):
-                raise NotImplementedError("Current model does not expose encode_rlt_state().")
-            rlt_state = self._model.encode_rlt_state(observation)
-            rlt_outputs = {
-                "rlt_embeddings": rlt_state["embeddings"],
-                "rlt_mask": rlt_state["mask"],
-            }
-        model_time = time.monotonic() - start_time
-        outputs = jax.tree.map(lambda x: np.asarray(x[0, ...]), outputs)
 
-        outputs = self._output_transform(outputs)
-        if rlt_outputs is not None:
-            outputs.update(jax.tree.map(lambda x: np.asarray(x[0, ...]), rlt_outputs))
-        outputs["policy_timing"] = {
+        batched_model_outputs = {
+            "state": inputs["state"],
+            "actions": model_actions,
+        }
+        model_time = time.monotonic() - start_time
+        model_outputs = jax.tree.map(lambda x: np.asarray(x[0, ...]), batched_model_outputs)
+        transformed_outputs = self._output_transform(model_outputs)
+        transformed_outputs["model_actions"] = model_outputs["actions"]
+        transformed_outputs["model_state"] = model_outputs["state"]
+        if return_rlt_state:
+            transformed_outputs.update(jax.tree.map(lambda x: np.asarray(x[0, ...]), rlt_outputs))
+        transformed_outputs["policy_timing"] = {
             "infer_ms": model_time * 1000,
         }
-        return outputs
+        return transformed_outputs
+
+    def transform_model_outputs(
+        self,
+        *,
+        state: np.ndarray,
+        actions: np.ndarray,
+    ) -> dict:
+        model_outputs = {
+            "state": state,
+            "actions": actions,
+        }
+        transformed_outputs = self._output_transform(model_outputs)
+        transformed_outputs["model_actions"] = actions
+        transformed_outputs["model_state"] = state
+        return transformed_outputs
 
     @property
     def metadata(self) -> dict[str, Any]:

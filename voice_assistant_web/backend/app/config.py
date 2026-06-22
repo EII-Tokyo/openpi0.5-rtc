@@ -19,6 +19,7 @@ class Settings:
     openai_tts_model: str = os.getenv("OPENAI_TTS_MODEL", "tts-1")
     openai_tts_voice: str = os.getenv("OPENAI_TTS_VOICE", "alloy")
     openai_transcription_model: str = os.getenv("OPENAI_TRANSCRIPTION_MODEL", "whisper-1")
+    rlt_replay_dir: str = os.getenv("RLT_REPLAY_DIR", "/app/data/rlt_online_replay/rinse_smoke")
 
 
 settings = Settings()

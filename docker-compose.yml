@@ -5,18 +5,26 @@ services:
       - aloha_ros_nodes
       - ros_master
       - openpi_server
+      - redis
     # build:
     #   context: .
     #   dockerfile: src/openpi/robot/aloha_real/Dockerfile
-    command: >-
-      python3 /app/scripts/run_aloha_real.py
-      --model-dir
-      /app/checkpoints/eii_data_system_without_rinse_cam3_fullft_h200_have_cap_water_return_home_49repo/no_rinse_cam3_fullft_have_cap_water_return_home_49repo_bs256_nw64_fsdp4_20260527/10000
-      --action-quality good
-      --chunking-mode inference_time
+    command:
+      - /bin/bash
+      - -lc
+      - |
+        python3 /app/scripts/run_aloha_real.py \
+          --model-dir /app/checkpoints/eii_rinse_11repo_cam4_fullft/rinse_11repo_insertx5_fullft_bs256_nw64_fsdp8_20260513/9000 \
+          --action-quality good \
+          --no-if-save-hdf5 \
+          --if-save-rlt-replay \
+          --rlt-replay-dir /app/data/rlt_online_replay/rinse_smoke \
+          --rlt-terminal-label unlabeled \
+          --rlt-save-images
 
     init: true
     tty: true
+    restart: always
     network_mode: host
     privileged: true
     volumes:
@@ -55,13 +63,15 @@ services:
       - /bin/bash
       - -lc
       - >-
-        uv run --no-sync scripts/serve_policy.py --no-warmup-subtask --denoising-steps 10
-        ${SERVER_ARGS:---video-memory-num-frames 1
-        --video-memory-stride-seconds 1.0
-        policy:checkpoint
-        --policy.config eii_data_system_without_rinse_cam3_fullft_h200_have_cap_water_return_home_49repo
-        --policy.dir
-        /app/checkpoints/eii_data_system_without_rinse_cam3_fullft_h200_have_cap_water_return_home_49repo/no_rinse_cam3_fullft_have_cap_water_return_home_49repo_bs256_nw64_fsdp4_20260527/10000}
+        uv run --no-sync scripts/serve_rlt_policy.py
+        ${SERVER_ARGS:---base-config eii_rinse_11repo_cam4_fullft
+        --base-checkpoint
+        /app/checkpoints/eii_rinse_11repo_cam4_fullft/rinse_11repo_insertx5_fullft_bs256_nw64_fsdp8_20260513/9000
+        --rlt-token-checkpoint
+        /app/rlt_runs/rlt_token_rinse_9000_bs64_nw4_warmup2000_10000_abs/9999
+        --rlt-actor-checkpoint
+        /app/rlt_runs/rlt_actor_rinse_196eps_success_only_smooth100_bcwarmup4000_hidden512_tpn0_c30_ad14_bc100_actor2_critic3e4_bs256_4000_seed1/step_004000/rlt_actor_critic
+        --denoising-steps 10}
     init: true
     tty: true
     network_mode: host
@@ -110,11 +120,13 @@ services:
       - $PWD:/app
       - /dev:/dev
     env_file:
-      - ./voice_assistant_web/.env
+      - path: ./voice_assistant_web/.env
+        required: false
     environment:
       - REDIS_HOST=${REDIS_HOST:-localhost}
       - REDIS_PORT=${REDIS_PORT:-6379}
       - REDIS_DB=${REDIS_DB:-0}
+      - RLT_REPLAY_DIR=/app/data/rlt_online_replay/rinse_smoke
     depends_on:
       - redis
 

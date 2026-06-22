@@ -379,7 +379,6 @@ class AlohaOutputs(DataTransformFn):
         return {
             "actions": _encode_actions(actions, adapt_to_pi=self.adapt_to_pi),
             "state": data["state"],
-            "origin_actions": data["origin_actions"],
         }
 
 
