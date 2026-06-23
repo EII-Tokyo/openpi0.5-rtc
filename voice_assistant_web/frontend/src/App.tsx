@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { CameraGrid } from './components/CameraGrid'
 import { KeyRegionsPage } from './components/KeyRegionsPage'
+import { RLHFPreferencePage } from './components/RLHFPreferencePage'
 import { RLTConfigPage } from './components/RLTConfigPage'
 import { RLTConfigPanel, RLTControlPanel, RLTStatsPanel } from './components/RLTControlPanel'
 import { SystemPage } from './components/SystemPage'
@@ -20,6 +21,11 @@ type RealtimeState = {
   camera_timestamps: Record<string, number | null>
   camera_jpeg_b64: Record<string, string>
   rlt: RLTControlState
+}
+
+export type KeyRegionFocusTarget = {
+  keyRegionId: string
+  batch: string | null
 }
 
 const initialRLT: RLTControlState = {
@@ -130,7 +136,9 @@ export default function App() {
   const [state, setState] = useState<RealtimeState>(initialState)
   const [language, setLanguage] = useState<AppLanguage>('en')
   const [cameraView, setCameraView] = useState<'focus' | 'quad'>('quad')
-  const [page, setPage] = useState<'live' | 'key_regions' | 'config' | 'system'>('live')
+  const [page, setPage] = useState<'live' | 'key_regions' | 'rlhf' | 'config' | 'system'>('live')
+  const [keyRegionFocus, setKeyRegionFocus] = useState<KeyRegionFocusTarget | null>(null)
+  const [rlhfRefreshToken, setRlhfRefreshToken] = useState(0)
   const [wsConnected, setWsConnected] = useState(false)
   const t = translations[language]
   const currentTaskLabel = state.robot.current_task ? truncateLabel(state.robot.current_task) : t.noActiveTask
@@ -211,6 +219,9 @@ export default function App() {
             >
               Key Regions
             </button>
+            <button className={page === 'rlhf' ? 'active' : ''} type="button" onClick={() => setPage('rlhf')}>
+              RLHF
+            </button>
             <button className={page === 'config' ? 'active' : ''} type="button" onClick={() => setPage('config')}>
               Config
             </button>
@@ -271,7 +282,23 @@ export default function App() {
           cameraTimestamps={state.camera_timestamps}
         />
       ) : page === 'key_regions' ? (
-        <KeyRegionsPage title="Key Regions" />
+        <KeyRegionsPage
+          title="Key Regions"
+          focusTarget={keyRegionFocus}
+          onBackToRLHF={() => {
+            setPage('rlhf')
+            setKeyRegionFocus(null)
+            setRlhfRefreshToken((token) => token + 1)
+          }}
+        />
+      ) : page === 'rlhf' ? (
+        <RLHFPreferencePage
+          refreshToken={rlhfRefreshToken}
+          onEditKeyRegion={(record) => {
+            setKeyRegionFocus({ keyRegionId: record.key_region_id, batch: record.batch })
+            setPage('key_regions')
+          }}
+        />
       ) : (
         <SystemPage
           rlt={state.rlt}

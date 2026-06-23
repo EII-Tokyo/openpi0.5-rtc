@@ -8,14 +8,6 @@ import bisect
 
 import numpy as np
 
-JITTER_PENALTIES: dict[str, float] = {
-    "smooth": 0.0,
-    "mild_jitter": 0.3,
-    "severe_jitter": 1.0,
-}
-QUALITY_JITTER_LAMBDA = 0.25
-
-
 def _load_manifest(manifest_path: Path) -> dict[str, Any]:
     if not manifest_path.exists():
         raise ValueError("manifest.json is missing")
@@ -240,51 +232,6 @@ def rescore_key_region_files(rollout_dir: Path, shard_path: Path, *, reward: int
             "voided": False,
         }
     )
-    arrays["manifest"] = np.asarray(json.dumps(manifest))
-    _write_npz(shard_path, arrays)
-    _write_manifest(manifest_path, manifest)
-    return manifest
-
-
-def update_key_region_quality_files(
-    rollout_dir: Path,
-    shard_path: Path,
-    *,
-    quality_score: int,
-    jitter_level: str,
-    actor_train_mode: str,
-    notes: str | None = None,
-) -> dict[str, Any]:
-    if quality_score < 0 or quality_score > 4:
-        raise ValueError("quality_score must be between 0 and 4")
-    if jitter_level not in JITTER_PENALTIES:
-        raise ValueError(f"unsupported jitter_level={jitter_level}")
-    if actor_train_mode not in {"auto", "exclude", "low_weight", "normal", "strong"}:
-        raise ValueError(f"unsupported actor_train_mode={actor_train_mode}")
-    manifest_path = rollout_dir / "manifest.json"
-    manifest = _load_manifest(manifest_path)
-    if not shard_path.exists():
-        raise ValueError("replay shard is missing")
-
-    quality_task = float(quality_score) / 4.0
-    jitter_penalty = JITTER_PENALTIES[jitter_level]
-    quality_final = max(0.0, min(1.0, quality_task - QUALITY_JITTER_LAMBDA * jitter_penalty))
-    quality_payload = {
-        "quality_score": int(quality_score),
-        "quality_task": float(quality_task),
-        "jitter_level": jitter_level,
-        "jitter_penalty": float(jitter_penalty),
-        "quality_final": float(quality_final),
-        "actor_train_mode": actor_train_mode,
-        "quality_source": "human",
-        "quality_version": 1,
-        "quality_updated_at": float(__import__("time").time()),
-        "quality_notes": notes,
-    }
-
-    with np.load(shard_path, allow_pickle=False) as loaded:
-        arrays = {key: loaded[key] for key in loaded.files}
-    manifest.update(quality_payload)
     arrays["manifest"] = np.asarray(json.dumps(manifest))
     _write_npz(shard_path, arrays)
     _write_manifest(manifest_path, manifest)

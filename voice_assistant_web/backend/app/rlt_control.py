@@ -302,43 +302,6 @@ class RLTControlStore:
             )
             return self._state.model_copy(deep=True)
 
-    def review_key_region_quality(
-        self,
-        key_region_id: str,
-        *,
-        quality_score: int,
-        jitter_level: str,
-        actor_train_mode: str,
-        quality_final: float,
-        source: str = "ui",
-        notes: str | None = None,
-    ) -> RLTControlState:
-        with self._lock:
-            self._segment_ledger.record_quality_review(
-                key_region_id,
-                quality_score=quality_score,
-                jitter_level=jitter_level,
-                actor_train_mode=actor_train_mode,
-                quality_final=quality_final,
-                source=source,
-                notes=notes,
-            )
-            self._add_event_locked("quality_review", f"{key_region_id}:q={quality_score}:{jitter_level}:{actor_train_mode}")
-            self._refresh_derived_locked()
-            self._persist_locked()
-            self._publish_locked(
-                "key_region_quality_review",
-                {
-                    "source": source,
-                    "key_region_id": key_region_id,
-                    "quality_score": quality_score,
-                    "jitter_level": jitter_level,
-                    "actor_train_mode": actor_train_mode,
-                    "quality_final": quality_final,
-                },
-            )
-            return self._state.model_copy(deep=True)
-
     def delete_segments(
         self, key_region_ids: list[str], *, source: str = "ui", reason: str = "operator_delete"
     ) -> RLTControlState:

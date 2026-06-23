@@ -107,27 +107,6 @@ def test_rlt_train_step_awbc_reports_filter_metrics():
     assert float(info["awbc_weight_mean"]) >= 0.0
 
 
-def test_quality_actor_weight_uses_exp_weight_when_enabled():
-    config = rlt_training.dataclasses.replace(
-        _make_config(),
-        quality_actor_weight_enabled=True,
-        quality_actor_baseline=0.5,
-        quality_actor_temperature=0.25,
-        quality_actor_max_weight=10.0,
-    )
-    state = rlt_training.init_train_state(config, jax.random.key(0))
-    batch = _make_batch().replace(
-        quality_final=jnp.array([1.0, 0.5, 0.0, 0.75], dtype=jnp.float32),
-        actor_weight=jnp.array([1.0, 2.0, 1.0, 1.0], dtype=jnp.float32),
-    )
-
-    weights = rlt_training.quality_actor_weight(state, batch)
-
-    expected = jnp.exp((batch.quality_final - 0.5) / 0.25)
-    expected = jnp.clip(expected, 0.0, 10.0) * batch.actor_weight
-    assert jnp.allclose(weights, expected)
-
-
 def test_actor_params_for_inference_returns_online_actor_only():
     state = rlt_training.init_train_state(_make_config(), jax.random.key(0))
     actor_params = rlt_training.actor_params_for_inference(state)

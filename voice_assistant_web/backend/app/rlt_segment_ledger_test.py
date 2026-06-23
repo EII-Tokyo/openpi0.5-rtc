@@ -116,30 +116,6 @@ def test_segment_ledger_rescore_updates_reward_and_stats(tmp_path):
     assert ledger.stats()["warmup_failure"] == 1
 
 
-def test_segment_ledger_records_quality_review_without_changing_binary_reward(tmp_path):
-    ledger = RLTSegmentLedger(tmp_path / "segments.sqlite3")
-    ledger.record_committed("seg", reward=0, phase="rl", shard_path="/tmp/a.npz", num_replay_transitions=5)
-
-    ledger.record_quality_review(
-        "seg",
-        quality_score=2,
-        jitter_level="smooth",
-        actor_train_mode="low_weight",
-        quality_final=0.5,
-        source="ui",
-        notes="near miss",
-    )
-
-    segment = ledger.get_segment("seg")
-    assert segment["reward"] == 0
-    assert segment["quality_score"] == 2
-    assert segment["jitter_level"] == "smooth"
-    assert segment["actor_train_mode"] == "low_weight"
-    assert segment["quality_final"] == 0.5
-    assert segment["quality_source"] == "human"
-    assert segment["quality_notes"] == "near miss"
-
-
 def test_segment_ledger_delete_blocks_late_commit_ack(tmp_path):
     ledger = RLTSegmentLedger(tmp_path / "segments.sqlite3")
     ledger.record_started("seg", phase="rl")
@@ -163,3 +139,45 @@ def test_segment_ledger_delete_tombstones_missing_segment(tmp_path):
     assert changed == ["seg"]
     assert ledger.get_segment("seg")["status"] == "deleted"
     assert ledger.stats()["warmup_count"] == 0
+
+
+def test_segment_ledger_drops_legacy_quality_columns_but_preserves_binary_reward(tmp_path):
+    db_path = tmp_path / "segments.sqlite3"
+    import sqlite3
+
+    with sqlite3.connect(db_path) as conn:
+        conn.execute(
+            """
+            CREATE TABLE segments (
+                key_region_id TEXT PRIMARY KEY,
+                status TEXT NOT NULL,
+                phase TEXT NOT NULL,
+                reward INTEGER,
+                quality_score INTEGER,
+                quality_final REAL,
+                actor_train_mode TEXT NOT NULL DEFAULT 'auto',
+                shard_path TEXT,
+                num_replay_transitions INTEGER NOT NULL DEFAULT 0,
+                invalid_reason TEXT,
+                created_at REAL NOT NULL,
+                updated_at REAL NOT NULL
+            )
+            """
+        )
+        conn.execute(
+            """
+            INSERT INTO segments (
+                key_region_id, status, phase, reward, quality_score, quality_final,
+                actor_train_mode, shard_path, num_replay_transitions, created_at, updated_at
+            ) VALUES ('seg', 'committed', 'rl', 1, 4, 1.0, 'strong', '/tmp/a.npz', 5, 1.0, 2.0)
+            """
+        )
+
+    ledger = RLTSegmentLedger(db_path)
+    segment = ledger.get_segment("seg")
+
+    assert segment["reward"] == 1
+    assert segment["shard_path"] == "/tmp/a.npz"
+    assert "quality_score" not in segment
+    assert "quality_final" not in segment
+    assert "actor_train_mode" not in segment

@@ -64,10 +64,6 @@ class Args:
     awbc_max_weight: float = 20.0
     awbc_min_advantage: float = 0.0
     awbc_max_action_delta_norm: float = 2.0
-    quality_actor_weight_enabled: bool = False
-    quality_actor_baseline: float = 0.5
-    quality_actor_temperature: float = 0.2
-    quality_actor_max_weight: float = 20.0
     train_action_horizon: int | None = 10
     expected_replay_action_horizon: int | None = 10
     wandb_enabled: bool = True
@@ -811,10 +807,6 @@ def main(args: Args) -> None:
         awbc_max_weight=args.awbc_max_weight,
         awbc_min_advantage=args.awbc_min_advantage,
         awbc_max_action_delta_norm=args.awbc_max_action_delta_norm,
-        quality_actor_weight_enabled=args.quality_actor_weight_enabled,
-        quality_actor_baseline=args.quality_actor_baseline,
-        quality_actor_temperature=args.quality_actor_temperature,
-        quality_actor_max_weight=args.quality_actor_max_weight,
     )
     state = rlt_training.init_train_state(config, jax.random.key(args.seed))
     replay_rng = np.random.default_rng(args.seed)

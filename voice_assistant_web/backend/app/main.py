@@ -10,6 +10,7 @@ import os
 from pathlib import Path
 import re
 import shutil
+import sqlite3
 import subprocess
 import time
 
@@ -28,7 +29,6 @@ from .redis_commands import create_redis_client
 from .rlt_control import RLTControlStore
 from .rlt_key_region_crop import crop_key_region_files
 from .rlt_key_region_crop import rescore_key_region_files
-from .rlt_key_region_crop import update_key_region_quality_files
 from .robot_state_bridge import RobotStateBridge
 from .schemas import HealthResponse
 from .schemas import RealtimePayload
@@ -39,10 +39,13 @@ from .schemas import RLTControlState
 from .schemas import RLTDiscardRequest
 from .schemas import RLTKeyRegionCropRequest
 from .schemas import RLTKeyRegionCropResponse
+from .schemas import RLTPreferencePairResponse
+from .schemas import RLTPreferenceRecord
+from .schemas import RLTPreferenceRequest
+from .schemas import RLTPreferenceStats
 from .schemas import RLTKeyRegionReviewPage
 from .schemas import RLTKeyRegionReviewRecord
 from .schemas import RLTKeyRegionReviewSummary
-from .schemas import RLTKeyRegionQualityRequest
 from .schemas import RLTKeyRegionRescoreRequest
 from .schemas import RLTScoreRequest
 from .schemas import RLTSegmentRecord
@@ -70,36 +73,34 @@ REPLAY_ROOT = Path(settings.replay_root).expanduser().resolve()
 VIDEO_CHUNK_SIZE = 1024 * 1024
 VIDEO_CACHE_ROOT = Path(os.getenv("ROLLOUTS_VIDEO_CACHE", "/tmp/eii_rollout_video_cache"))
 DEFAULT_RLT_PRE_ROLL_SECONDS = float(os.getenv("RLT_DEFAULT_PRE_ROLL_SECONDS", "2.0"))
+PREFERENCE_ROUND_BUDGET = int(os.getenv("RLT_PREFERENCE_ROUND_BUDGET", "800"))
+PREFERENCE_SAMPLE_ROUND = int(os.getenv("RLT_PREFERENCE_SAMPLE_ROUND", "1"))
+PREFERENCE_PAIR_TYPE_QUOTAS = {
+    "success_success": 0.40,
+    "success_failure": 0.30,
+    "failure_failure": 0.20,
+}
 ROBOT_TASK_LABELS = {
     "1": "twist bottle",
     "4": "home",
     "5": "sleep",
 }
-QUALITY_REVIEW_FIELDS = (
-    "quality_score",
-    "quality_task",
-    "jitter_level",
-    "jitter_penalty",
-    "quality_final",
-    "actor_train_mode",
-    "quality_source",
-    "quality_version",
-    "quality_updated_at",
-    "quality_notes",
-)
 
 
 @app.on_event("startup")
 def on_startup() -> None:
-    try:
-        import rospy
+    if settings.enable_ros:
+        try:
+            import rospy
 
-        if not rospy.core.is_initialized():
-            rospy.init_node("eii_pilot_backend", anonymous=True)
-    except Exception:
-        logging.exception("ROS node initialization failed")
-    camera_bridge.start()
-    robot_state_bridge.start()
+            if not rospy.core.is_initialized():
+                rospy.init_node("eii_pilot_backend", anonymous=True, disable_signals=True)
+        except Exception:
+            logging.exception("ROS node initialization failed")
+        camera_bridge.start()
+        robot_state_bridge.start()
+    else:
+        logging.info("ROS bridges disabled by EII_PILOT_ENABLE_ROS=false")
     rlt_control.start()
 
 
@@ -210,7 +211,6 @@ def _manifest_summary(path: Path) -> dict | None:
         "missing_rlt_metadata",
         "voided",
         "shard_path",
-        *QUALITY_REVIEW_FIELDS,
     }
     summary = {key: manifest[key] for key in summary_keys if key in manifest}
 
@@ -586,6 +586,21 @@ def _record_can_auto_commit(record: dict) -> bool:
     return status in {"accepted", "untracked", "orphan_npz", "ended"} and _record_has_trainable_files(record)
 
 
+def _record_needs_crop(record: dict) -> bool:
+    if not bool(record.get("video_exists")):
+        return False
+    if not bool(record.get("npz_exists")) or not bool(record.get("shard_path")):
+        return False
+    if bool(record.get("voided")):
+        return False
+    return (
+        record.get("crop_start_sec") is None
+        or record.get("crop_end_sec") is None
+        or record.get("train_eligible") is not True
+        or str(record.get("segment_status") or "") != "committed"
+    )
+
+
 def _reconcile_key_region_record(record: dict) -> None:
     if not _record_can_auto_commit(record):
         return
@@ -616,7 +631,6 @@ def _key_region_review_records() -> list[dict]:
             "shard_path": segment.get("shard_path"),
             "num_replay_transitions": int(segment.get("num_replay_transitions") or 0),
             "updated_at": segment.get("updated_at"),
-            **{field: segment.get(field) for field in QUALITY_REVIEW_FIELDS},
         }
 
     rollout_root = (ROLLOUTS_ROOT / "key_regions").resolve()
@@ -658,10 +672,6 @@ def _key_region_review_records() -> list[dict]:
                     "shard_path": record.get("shard_path") or manifest.get("shard_path"),
                     "reward": record.get("reward") if record.get("reward") is not None else manifest.get("reward"),
                     "num_replay_transitions": record.get("num_replay_transitions") or manifest.get("num_replay_transitions") or 0,
-                    **{
-                        field: record.get(field) if record.get(field) is not None else manifest.get(field)
-                        for field in QUALITY_REVIEW_FIELDS
-                    },
                 }
             )
             if record["video_paths"]:
@@ -686,11 +696,9 @@ def _key_region_review_records() -> list[dict]:
             record["batch"] = record.get("batch") or _batch_from_replay_path(shard_path)
         record["manifest_exists"] = bool(record.get("manifest_exists"))
         record["video_exists"] = bool(record.get("video_exists"))
-        record["actor_train_mode"] = record.get("actor_train_mode") or "auto"
-        record["quality_source"] = record.get("quality_source") or "legacy"
-        record["quality_version"] = int(record.get("quality_version") or 1)
         _reconcile_key_region_record(record)
         record["trainable"] = record.get("status") == "committed" and _record_has_trainable_files(record)
+        record["needs_crop"] = _record_needs_crop(record)
         if not record["trainable"]:
             if record.get("status") != "committed":
                 reason = f"not_committed:{record.get('status') or 'untracked'}"
@@ -714,11 +722,10 @@ def _key_region_review_summary(records: list[dict]) -> RLTKeyRegionReviewSummary
     return RLTKeyRegionReviewSummary(
         total=len(records),
         trainable=sum(1 for record in records if record.get("trainable")),
-        needs_crop=sum(1 for record in records if not record.get("trainable")),
+        needs_crop=sum(1 for record in records if record.get("needs_crop")),
         success=sum(1 for record in records if record.get("reward") == 1),
         failure=sum(1 for record in records if record.get("reward") == 0),
         replay_samples=sum(int(record.get("num_replay_transitions") or 0) for record in records),
-        quality_reviewed=sum(1 for record in records if record.get("quality_score") is not None),
     )
 
 
@@ -736,7 +743,7 @@ def _filter_key_region_review_records(
     if status == "trainable":
         filtered = [record for record in filtered if record.get("trainable")]
     elif status in {"needsCrop", "needs_crop"}:
-        filtered = [record for record in filtered if not record.get("trainable")]
+        filtered = [record for record in filtered if record.get("needs_crop")]
     elif status != "all":
         filtered = [record for record in filtered if str(record.get("status") or "") == status]
 
@@ -751,6 +758,167 @@ def _key_region_review_batches(records: list[dict]) -> list[str]:
     return sorted({str(record["batch"]) for record in records if record.get("batch")}, reverse=True)
 
 
+def _preference_pair_key(left_key_region_id: str, right_key_region_id: str) -> str:
+    first, second = sorted((left_key_region_id, right_key_region_id))
+    return f"{first}::{second}"
+
+
+def _connect_preference_db():
+    db_path = Path(settings.rlt_segment_db_path).expanduser()
+    db_path.parent.mkdir(parents=True, exist_ok=True)
+    conn = sqlite3.connect(db_path, timeout=5.0)
+    conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA journal_mode=WAL")
+    conn.execute("PRAGMA busy_timeout=5000")
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS preference_pairs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            left_key_region_id TEXT NOT NULL,
+            right_key_region_id TEXT NOT NULL,
+            pair_key TEXT NOT NULL,
+            preference TEXT NOT NULL,
+            reason_tags TEXT NOT NULL DEFAULT '[]',
+            notes TEXT,
+            source TEXT NOT NULL DEFAULT 'ui',
+            created_at REAL NOT NULL
+        )
+        """
+    )
+    rows = conn.execute("PRAGMA table_info(preference_pairs)").fetchall()
+    columns = {str(row["name"]) for row in rows}
+    for name, definition in (
+        ("pair_type", "TEXT"),
+        ("strategy", "TEXT NOT NULL DEFAULT 'budgeted'"),
+        ("sample_round", "INTEGER NOT NULL DEFAULT 1"),
+        ("left_reward", "INTEGER"),
+        ("right_reward", "INTEGER"),
+        ("left_batch", "TEXT"),
+        ("right_batch", "TEXT"),
+    ):
+        if name not in columns:
+            conn.execute(f"ALTER TABLE preference_pairs ADD COLUMN {name} {definition}")
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_preference_pairs_pair_key ON preference_pairs(pair_key)")
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_preference_pairs_round_type ON preference_pairs(sample_round, pair_type)")
+    return conn
+
+
+def _preference_stats(conn) -> RLTPreferenceStats:
+    rows = conn.execute("SELECT preference, COUNT(*) AS count FROM preference_pairs GROUP BY preference").fetchall()
+    counts = {str(row["preference"]): int(row["count"]) for row in rows}
+    return RLTPreferenceStats(
+        total_preferences=sum(counts.values()),
+        left_wins=counts.get("left", 0),
+        right_wins=counts.get("right", 0),
+        ties=counts.get("tie", 0),
+        both_bad=counts.get("both_bad", 0),
+        skipped=counts.get("skip", 0),
+    )
+
+
+def _seen_preference_pairs(conn) -> set[str]:
+    rows = conn.execute("SELECT DISTINCT pair_key FROM preference_pairs WHERE preference != 'skip'").fetchall()
+    return {str(row["pair_key"]) for row in rows}
+
+
+def _preference_pair_type(left: dict, right: dict) -> str:
+    left_reward = int(left.get("reward") or 0)
+    right_reward = int(right.get("reward") or 0)
+    if left_reward == 1 and right_reward == 1:
+        return "success_success"
+    if left_reward == 0 and right_reward == 0:
+        return "failure_failure"
+    return "success_failure"
+
+
+def _record_is_clean_preference_candidate(record: dict) -> bool:
+    return (
+        bool(record.get("trainable"))
+        and bool(record.get("video_paths"))
+        and record.get("crop_start_sec") is not None
+        and record.get("crop_end_sec") is not None
+        and "rlt_key_regions_clean" in str(record.get("shard_path") or "")
+    )
+
+
+def _preference_candidate_records(*, batch: str, reward: str) -> list[dict]:
+    records = _filter_key_region_review_records(_key_region_review_records(), status="trainable", reward=reward, batch=batch)
+    return [record for record in records if _record_is_clean_preference_candidate(record)]
+
+
+def _preference_round_counts(conn) -> dict[str, int]:
+    rows = conn.execute(
+        """
+        SELECT pair_type, COUNT(*) AS count
+        FROM preference_pairs
+        WHERE sample_round = ? AND preference != 'skip'
+        GROUP BY pair_type
+        """,
+        (PREFERENCE_SAMPLE_ROUND,),
+    ).fetchall()
+    return {str(row["pair_type"] or ""): int(row["count"]) for row in rows}
+
+
+def _preference_degree(conn) -> dict[str, int]:
+    degree: dict[str, int] = {}
+    rows = conn.execute(
+        """
+        SELECT left_key_region_id, right_key_region_id
+        FROM preference_pairs
+        WHERE sample_round = ? AND preference != 'skip'
+        """,
+        (PREFERENCE_SAMPLE_ROUND,),
+    ).fetchall()
+    for row in rows:
+        for key in (str(row["left_key_region_id"]), str(row["right_key_region_id"])):
+            degree[key] = degree.get(key, 0) + 1
+    return degree
+
+
+def _target_pair_type(round_counts: dict[str, int], requested: str) -> str:
+    if requested in PREFERENCE_PAIR_TYPE_QUOTAS:
+        return requested
+    labeled = sum(round_counts.values())
+    if labeled >= PREFERENCE_ROUND_BUDGET:
+        return "success_success"
+    best_type = "success_success"
+    best_gap = float("-inf")
+    for pair_type, quota in PREFERENCE_PAIR_TYPE_QUOTAS.items():
+        target = PREFERENCE_ROUND_BUDGET * quota
+        gap = target - round_counts.get(pair_type, 0)
+        if gap > best_gap:
+            best_type = pair_type
+            best_gap = gap
+    return best_type
+
+
+def _select_preference_pair(
+    records: list[dict],
+    seen_pairs: set[str],
+    *,
+    pair_type: str,
+    degree: dict[str, int],
+) -> tuple[dict | None, dict | None, int]:
+    candidates: list[tuple[tuple[int, int, int, str], dict, dict]] = []
+    for left_index, left in enumerate(records):
+        for right in records[left_index + 1 :]:
+            if _preference_pair_type(left, right) != pair_type:
+                continue
+            pair_key = _preference_pair_key(str(left["key_region_id"]), str(right["key_region_id"]))
+            if pair_key in seen_pairs:
+                continue
+            left_degree = degree.get(str(left["key_region_id"]), 0)
+            right_degree = degree.get(str(right["key_region_id"]), 0)
+            same_batch_penalty = 0 if str(left.get("batch") or "") == str(right.get("batch") or "") else 1
+            stable_hash = hashlib.sha1(pair_key.encode("utf-8")).hexdigest()
+            candidates.append(((left_degree + right_degree, max(left_degree, right_degree), same_batch_penalty, stable_hash), left, right))
+    candidates.sort(key=lambda item: item[0])
+    if not candidates:
+        return None, None, 0
+    _, left, right = candidates[0]
+    return left, right, len(candidates)
+
+
 @app.get("/api/rlt/key-regions/review", response_model=RLTKeyRegionReviewPage)
 def rlt_key_region_review(
     limit: int = 20,
@@ -758,11 +926,21 @@ def rlt_key_region_review(
     status: str = "all",
     reward: str = "all",
     batch: str = "all",
+    focus_key_region_id: str | None = None,
 ) -> RLTKeyRegionReviewPage:
+    if focus_key_region_id and not re.fullmatch(r"[A-Za-z0-9_.-]+", focus_key_region_id):
+        raise HTTPException(status_code=400, detail=f"Invalid key_region_id: {focus_key_region_id}")
     all_records = _key_region_review_records()
     filtered = _filter_key_region_review_records(all_records, status=status, reward=reward, batch=batch)
     safe_limit = min(max(limit, 1), 100)
     safe_offset = min(max(offset, 0), len(filtered))
+    if focus_key_region_id:
+        focus_index = next(
+            (index for index, record in enumerate(filtered) if record.get("key_region_id") == focus_key_region_id),
+            None,
+        )
+        if focus_index is not None:
+            safe_offset = focus_index
     page_records = filtered[safe_offset : safe_offset + safe_limit]
     next_offset = safe_offset + safe_limit if safe_offset + safe_limit < len(filtered) else None
     return RLTKeyRegionReviewPage(
@@ -785,6 +963,108 @@ def rlt_key_region_detail(key_region_id: str) -> RLTKeyRegionReviewRecord:
     if record is None:
         raise HTTPException(status_code=404, detail=f"Unknown key_region_id: {key_region_id}")
     return RLTKeyRegionReviewRecord(**record)
+
+
+@app.get("/api/rlt/preferences/next-pair", response_model=RLTPreferencePairResponse)
+def rlt_preference_next_pair(
+    batch: str = "all",
+    reward: str = "all",
+    pair_type: str = "auto",
+) -> RLTPreferencePairResponse:
+    with _connect_preference_db() as conn:
+        stats = _preference_stats(conn)
+        records = _preference_candidate_records(batch=batch, reward=reward)
+        round_counts = _preference_round_counts(conn)
+        selected_pair_type = _target_pair_type(round_counts, pair_type)
+        left, right, remaining_unseen = _select_preference_pair(
+            records,
+            _seen_preference_pairs(conn),
+            pair_type=selected_pair_type,
+            degree=_preference_degree(conn),
+        )
+        if left is None and pair_type == "auto":
+            for fallback_type in PREFERENCE_PAIR_TYPE_QUOTAS:
+                if fallback_type == selected_pair_type:
+                    continue
+                left, right, remaining_unseen = _select_preference_pair(
+                    records,
+                    _seen_preference_pairs(conn),
+                    pair_type=fallback_type,
+                    degree=_preference_degree(conn),
+                )
+                if left is not None:
+                    selected_pair_type = fallback_type
+                    break
+        round_labeled = sum(round_counts.values())
+    return RLTPreferencePairResponse(
+        left=None if left is None else RLTKeyRegionReviewRecord(**left),
+        right=None if right is None else RLTKeyRegionReviewRecord(**right),
+        stats=stats,
+        remaining_unseen_pairs=remaining_unseen,
+        pair_type=None if left is None else selected_pair_type,
+        strategy="budgeted",
+        round_budget=PREFERENCE_ROUND_BUDGET,
+        round_labeled=round_labeled,
+        round_remaining=max(0, PREFERENCE_ROUND_BUDGET - round_labeled),
+    )
+
+
+@app.post("/api/rlt/preferences", response_model=RLTPreferenceRecord)
+def rlt_preference_record(request: RLTPreferenceRequest) -> RLTPreferenceRecord:
+    if request.left_key_region_id == request.right_key_region_id:
+        raise HTTPException(status_code=400, detail="Preference pair must use two different key regions")
+    for key_region_id in (request.left_key_region_id, request.right_key_region_id):
+        if not re.fullmatch(r"[A-Za-z0-9_.-]+", key_region_id):
+            raise HTTPException(status_code=400, detail=f"Invalid key_region_id: {key_region_id}")
+    pair_key = _preference_pair_key(request.left_key_region_id, request.right_key_region_id)
+    created_at = time.time()
+    reason_tags = json.dumps(request.reason_tags, ensure_ascii=False)
+    records_by_id = {str(record.get("key_region_id")): record for record in _key_region_review_records()}
+    left_record = records_by_id.get(request.left_key_region_id)
+    right_record = records_by_id.get(request.right_key_region_id)
+    pair_type = _preference_pair_type(left_record or {"reward": 0}, right_record or {"reward": 0})
+    with _connect_preference_db() as conn:
+        cursor = conn.execute(
+            """
+            INSERT INTO preference_pairs (
+                left_key_region_id, right_key_region_id, pair_key, preference,
+                reason_tags, notes, source, created_at, pair_type, strategy, sample_round,
+                left_reward, right_reward, left_batch, right_batch
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                request.left_key_region_id,
+                request.right_key_region_id,
+                pair_key,
+                request.preference,
+                reason_tags,
+                request.notes,
+                request.source,
+                created_at,
+                pair_type,
+                "budgeted",
+                PREFERENCE_SAMPLE_ROUND,
+                None if left_record is None else left_record.get("reward"),
+                None if right_record is None else right_record.get("reward"),
+                None if left_record is None else left_record.get("batch"),
+                None if right_record is None else right_record.get("batch"),
+            ),
+        )
+        row_id = int(cursor.lastrowid)
+    return RLTPreferenceRecord(
+        id=row_id,
+        left_key_region_id=request.left_key_region_id,
+        right_key_region_id=request.right_key_region_id,
+        pair_key=pair_key,
+        preference=request.preference,
+        pair_type=pair_type,
+        strategy="budgeted",
+        sample_round=PREFERENCE_SAMPLE_ROUND,
+        reason_tags=request.reason_tags,
+        notes=request.notes,
+        source=request.source,
+        created_at=created_at,
+    )
 
 
 def _crop_output_shard_path(source_shard_path: Path, key_region_id: str) -> Path:
@@ -835,55 +1115,6 @@ def rlt_key_region_rescore(key_region_id: str, request: RLTKeyRegionRescoreReque
         source=request.source,
         reason=request.reason,
     )
-
-
-@app.post("/api/rlt/key-region/{key_region_id}/quality", response_model=RLTKeyRegionReviewRecord)
-def rlt_key_region_quality(key_region_id: str, request: RLTKeyRegionQualityRequest) -> RLTKeyRegionReviewRecord:
-    if not re.fullmatch(r"[A-Za-z0-9_.-]+", key_region_id):
-        raise HTTPException(status_code=400, detail=f"Invalid key_region_id: {key_region_id}")
-
-    records = _key_region_review_records()
-    record = next((item for item in records if item.get("key_region_id") == key_region_id), None)
-    if record is None:
-        raise HTTPException(status_code=404, detail=f"Unknown key_region_id: {key_region_id}")
-    rollout_path = record.get("rollout_path")
-    if not rollout_path:
-        raise HTTPException(status_code=409, detail="Key region rollout manifest is missing")
-    rollout_dir = (ROLLOUTS_ROOT / str(rollout_path)).resolve()
-    if not rollout_dir.is_relative_to(ROLLOUTS_ROOT):
-        raise HTTPException(status_code=400, detail="Invalid rollout path")
-    shard_path = _host_path_for_container_path(record.get("shard_path"))
-    if shard_path is None or not shard_path.exists():
-        raise HTTPException(status_code=409, detail="Key region replay shard is missing")
-
-    try:
-        manifest = update_key_region_quality_files(
-            rollout_dir,
-            shard_path,
-            quality_score=request.quality_score,
-            jitter_level=request.jitter_level,
-            actor_train_mode=request.actor_train_mode,
-            notes=request.notes,
-        )
-    except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
-
-    rlt_control.review_key_region_quality(
-        key_region_id,
-        quality_score=int(manifest["quality_score"]),
-        jitter_level=str(manifest["jitter_level"]),
-        actor_train_mode=str(manifest["actor_train_mode"]),
-        quality_final=float(manifest["quality_final"]),
-        source=request.source,
-        notes=request.notes,
-    )
-    updated = next(
-        (item for item in _key_region_review_records() if item.get("key_region_id") == key_region_id),
-        None,
-    )
-    if updated is None:
-        raise HTTPException(status_code=404, detail=f"Unknown key_region_id after quality update: {key_region_id}")
-    return RLTKeyRegionReviewRecord(**updated)
 
 
 @app.post("/api/rlt/key-region/{key_region_id}/crop", response_model=RLTKeyRegionCropResponse)

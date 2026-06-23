@@ -4,16 +4,12 @@ import {
   deleteKeyRegions,
   fetchRLTKeyRegionDetail,
   fetchRLTKeyRegionReview,
-  reviewKeyRegionQuality,
   rescoreKeyRegion,
   rolloutVideoUrl,
 } from '../services/api'
 import type {
-  RLTActorTrainMode,
-  RLTJitterLevel,
   RLTKeyRegionReviewRecord,
   RLTKeyRegionReviewSummary,
-  RLTQualityScore,
 } from '../services/api'
 
 type CropRange = {
@@ -26,34 +22,13 @@ type KeyRegionInfoRow = {
   value: string
 }
 
-type QualityDraft = {
-  quality_score: RLTQualityScore
-  jitter_level: RLTJitterLevel
-  actor_train_mode: RLTActorTrainMode
-  notes: string
+type KeyRegionFocusTarget = {
+  keyRegionId: string
+  batch: string | null
 }
 
 const KEY_REGION_CAMERA_ORDER = ['cam_high', 'cam_low', 'cam_left_wrist', 'cam_right_wrist']
 const KEY_REGION_PAGE_SIZE = 10
-const QUALITY_SCORE_OPTIONS: Array<{ value: RLTQualityScore; label: string; description: string }> = [
-  { value: 0, label: '0 Bad', description: 'Far from the tube or clearly wrong direction; critic negative only.' },
-  { value: 1, label: '1 Fail', description: 'Reached the area, but bottle mouth or angle is clearly wrong.' },
-  { value: 2, label: '2 Near', description: 'Failed, but close to insertion with only small position or angle error.' },
-  { value: 3, label: '3 Weak', description: 'Inserted, but edge contact, tilted bottle, shallow depth, or unstable motion.' },
-  { value: 4, label: '4 Stable', description: 'Inserted smoothly, aligned well, and stayed stable.' },
-]
-const JITTER_OPTIONS: Array<{ value: RLTJitterLevel; label: string; penalty: string }> = [
-  { value: 'smooth', label: 'Smooth', penalty: '0.0' },
-  { value: 'mild_jitter', label: 'Mild jitter', penalty: '0.3' },
-  { value: 'severe_jitter', label: 'Severe jitter', penalty: '1.0' },
-]
-const ACTOR_TRAIN_MODE_OPTIONS: Array<{ value: RLTActorTrainMode; label: string }> = [
-  { value: 'auto', label: 'Auto' },
-  { value: 'exclude', label: 'Exclude actor' },
-  { value: 'low_weight', label: 'Low weight' },
-  { value: 'normal', label: 'Normal' },
-  { value: 'strong', label: 'Strong' },
-]
 
 const emptySummary: RLTKeyRegionReviewSummary = {
   total: 0,
@@ -62,7 +37,6 @@ const emptySummary: RLTKeyRegionReviewSummary = {
   success: 0,
   failure: 0,
   replay_samples: 0,
-  quality_reviewed: 0,
 }
 
 const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max)
@@ -91,38 +65,6 @@ const formatRewardValue = (reward?: number | null) => {
   return '-'
 }
 
-const formatQualityValue = (record: RLTKeyRegionReviewRecord) => {
-  if (record.quality_score === null || record.quality_score === undefined) return 'unreviewed'
-  const final = record.quality_final === null || record.quality_final === undefined ? '-' : record.quality_final.toFixed(2)
-  return `Q${record.quality_score} / ${final}`
-}
-
-const qualityTone = (score?: number | null): 'green' | 'blue' | 'amber' | 'red' | 'slate' => {
-  if (score === null || score === undefined) return 'slate'
-  if (score >= 4) return 'green'
-  if (score === 3) return 'blue'
-  if (score === 2) return 'amber'
-  return 'red'
-}
-
-const defaultActorMode = (record: RLTKeyRegionReviewRecord): RLTActorTrainMode => {
-  if (record.actor_train_mode && ACTOR_TRAIN_MODE_OPTIONS.some((option) => option.value === record.actor_train_mode)) {
-    return record.actor_train_mode as RLTActorTrainMode
-  }
-  return 'auto'
-}
-
-const qualityDraftForRecord = (
-  record: RLTKeyRegionReviewRecord,
-  drafts: Record<string, QualityDraft>,
-): QualityDraft =>
-  drafts[record.key_region_id] || {
-    quality_score: ((record.quality_score ?? (record.reward === 1 ? 3 : 1)) as RLTQualityScore),
-    jitter_level: ((record.jitter_level || 'smooth') as RLTJitterLevel),
-    actor_train_mode: defaultActorMode(record),
-    notes: record.quality_notes || '',
-  }
-
 const formatReviewTime = (record: RLTKeyRegionReviewRecord) => {
   const timestamp = record.score_time || record.end_time || record.start_time || record.updated_at
   if (!timestamp) return record.key_region_id
@@ -140,7 +82,7 @@ const reviewTimestamp = (record: RLTKeyRegionReviewRecord) =>
   record.score_time || record.end_time || record.start_time || record.updated_at || null
 
 const annotationTimestamp = (record: RLTKeyRegionReviewRecord) =>
-  record.quality_updated_at || record.score_time || null
+  record.score_time || record.updated_at || null
 
 const formatAnnotationTime = (record: RLTKeyRegionReviewRecord) => {
   const timestamp = annotationTimestamp(record)
@@ -154,12 +96,14 @@ const reviewTitle = (record: RLTKeyRegionReviewRecord, absoluteIndex: number, to
 }
 
 const keyRegionStatusLabel = (record: RLTKeyRegionReviewRecord) => {
+  if (record.needs_crop) return 'needs crop'
   if (record.trainable) return record.status || 'committed'
   if (record.incomplete_reason) return 'needs crop'
   return record.status || 'pending'
 }
 
 const keyRegionEligibility = (record: RLTKeyRegionReviewRecord) => {
+  if (record.needs_crop) return 'needs crop'
   if (record.trainable) return 'trainable'
   if (record.incomplete_reason) return 'pending'
   return record.train_eligible === false ? 'not eligible' : 'pending'
@@ -247,7 +191,6 @@ const keyRegionInfoRows = (record: RLTKeyRegionReviewRecord): KeyRegionInfoRow[]
   { label: 'Crop', value: `${formatDuration(record.crop_start_sec)} - ${formatDuration(record.crop_end_sec)}` },
   { label: 'Samples', value: `${record.num_replay_transitions || 0}` },
   { label: 'Reward', value: record.reward === null ? '-' : `${record.reward}` },
-  { label: 'Quality', value: formatQualityValue(record) },
   { label: 'Replay', value: record.replay_status || (record.npz_exists ? 'written' : 'pending') },
   { label: 'Eligibility', value: keyRegionEligibility(record) },
 ]
@@ -257,6 +200,8 @@ const unloadVideo = (video: HTMLVideoElement) => {
   video.removeAttribute('src')
   video.load()
 }
+
+const videoReadyForPlayback = (video: HTMLVideoElement | null) => Boolean(video && video.readyState >= 1)
 
 function KeyRegionVideoGrid({
   record,
@@ -282,7 +227,7 @@ function KeyRegionVideoGrid({
               <video
                 ref={(element) => registerVideo(cameraIndex, element)}
                 src={rolloutVideoUrl(path)}
-                preload="none"
+                preload="metadata"
                 muted
                 playsInline
                 tabIndex={-1}
@@ -301,7 +246,15 @@ function KeyRegionVideoGrid({
   )
 }
 
-export function KeyRegionsPage({ title }: { title: string }) {
+export function KeyRegionsPage({
+  title,
+  focusTarget = null,
+  onBackToRLHF,
+}: {
+  title: string
+  focusTarget?: KeyRegionFocusTarget | null
+  onBackToRLHF?: () => void
+}) {
   const [records, setRecords] = useState<RLTKeyRegionReviewRecord[]>([])
   const [summary, setSummary] = useState<RLTKeyRegionReviewSummary>(emptySummary)
   const [total, setTotal] = useState(0)
@@ -313,9 +266,10 @@ export function KeyRegionsPage({ title }: { title: string }) {
   const [batches, setBatches] = useState<string[]>([])
   const [selectedReviewId, setSelectedReviewId] = useState('')
   const [selectedDetail, setSelectedDetail] = useState<RLTKeyRegionReviewRecord | null>(null)
+  const [pendingFocusTarget, setPendingFocusTarget] = useState<KeyRegionFocusTarget | null>(null)
+  const [focusKeyRegionId, setFocusKeyRegionId] = useState('')
   const [selectedKeyRegionIds, setSelectedKeyRegionIds] = useState<Set<string>>(new Set())
   const [cropRanges, setCropRanges] = useState<Record<string, CropRange>>({})
-  const [qualityDrafts, setQualityDrafts] = useState<Record<string, QualityDraft>>({})
   const [playingKeyRegionId, setPlayingKeyRegionId] = useState('')
   const [pendingPlaybackId, setPendingPlaybackId] = useState('')
   const [playbackTimes, setPlaybackTimes] = useState<Record<string, number>>({})
@@ -356,10 +310,12 @@ export function KeyRegionsPage({ title }: { title: string }) {
         status: statusFilter,
         reward: rewardFilter,
         batch: batchFilter,
+        focusKeyRegionId: focusKeyRegionId || undefined,
       })
       setRecords(page.items)
       setSummary(page.summary)
       setTotal(page.total)
+      if (page.offset !== offset) setOffset(page.offset)
       setNextOffset(page.next_offset)
       setBatches(page.batches)
       setSelectedKeyRegionIds((current) => {
@@ -374,7 +330,7 @@ export function KeyRegionsPage({ title }: { title: string }) {
     } finally {
       setLoading(false)
     }
-  }, [batchFilter, offset, rewardFilter, statusFilter])
+  }, [batchFilter, focusKeyRegionId, offset, rewardFilter, statusFilter])
 
   useEffect(() => {
     selectedReviewIdRef.current = selectedReviewId
@@ -383,6 +339,21 @@ export function KeyRegionsPage({ title }: { title: string }) {
   useEffect(() => {
     void loadPage()
   }, [loadPage])
+
+  useEffect(() => {
+    if (!focusTarget) return
+    setPendingFocusTarget(focusTarget)
+    setFocusKeyRegionId(focusTarget.keyRegionId)
+    setStatusFilter('all')
+    setRewardFilter('all')
+    setBatchFilter(focusTarget.batch || 'all')
+    setOffset(0)
+    setSelectedReviewId('')
+    setSelectedDetail(null)
+    unloadActiveVideos()
+    setPlayingKeyRegionId('')
+    setPendingPlaybackId('')
+  }, [focusTarget, unloadActiveVideos])
 
   useEffect(() => {
     setOffset(0)
@@ -437,6 +408,20 @@ export function KeyRegionsPage({ title }: { title: string }) {
     setSelectedReviewId(record.key_region_id)
   }
 
+  useEffect(() => {
+    if (!pendingFocusTarget || loading) return
+    const focusedRecord = records.find((record) => record.key_region_id === pendingFocusTarget.keyRegionId)
+    if (focusedRecord) {
+      selectReviewRecord(focusedRecord)
+      setPendingFocusTarget(null)
+      setFocusKeyRegionId('')
+      return
+    }
+    setActionError(`Could not find key region ${pendingFocusTarget.keyRegionId} in the current dataset.`)
+    setPendingFocusTarget(null)
+    setFocusKeyRegionId('')
+  }, [loading, pendingFocusTarget, records])
+
   const syncVideos = (record: RLTKeyRegionReviewRecord, timeSec: number) => {
     videoRefs.current.forEach((video) => {
       if (!video) return
@@ -460,13 +445,19 @@ export function KeyRegionsPage({ title }: { title: string }) {
   const startCropPlayback = async (record: RLTKeyRegionReviewRecord) => {
     const videos = videoRefs.current.filter((video): video is HTMLVideoElement => Boolean(video))
     if (!videos.length) {
-      setPlaybackError('Preview is still loading. Try again in a moment.')
+      setPlaybackError('')
       return false
     }
     const range = getCropRange(record)
     setPlaybackError('')
     syncVideos(record, range.startSec)
-    const results = await Promise.allSettled(videos.map((video) => video.play()))
+    const results = await Promise.allSettled(
+      videos.map(async (video) => {
+        video.muted = true
+        if (video.readyState === 0) video.load()
+        await video.play()
+      }),
+    )
     if (results.every((result) => result.status === 'rejected')) {
       setPlaybackError('Preview playback failed. Try again after video metadata loads.')
       setPlayingKeyRegionId('')
@@ -495,12 +486,29 @@ export function KeyRegionsPage({ title }: { title: string }) {
   useEffect(() => {
     if (!pendingPlaybackId || !activeRecord || activeRecord.key_region_id !== pendingPlaybackId) return undefined
     let cancelled = false
-    const timer = window.setTimeout(() => {
+    const startedAt = Date.now()
+    let timer = 0
+    const attemptPlayback = () => {
       if (cancelled) return
-      void startCropPlayback(activeRecord).finally(() => {
-        if (!cancelled) setPendingPlaybackId('')
+      const hasReadyVideo = videoRefs.current.some(videoReadyForPlayback)
+      if (!hasReadyVideo) {
+        if (Date.now() - startedAt > 5000) {
+          setPlaybackError('Preview video could not be loaded. Try opening the card again.')
+          setPendingPlaybackId('')
+          return
+        }
+        timer = window.setTimeout(attemptPlayback, 120)
+        return
+      }
+      void startCropPlayback(activeRecord).then((started) => {
+        if (!cancelled && started) {
+          setPendingPlaybackId('')
+        } else if (!cancelled) {
+          timer = window.setTimeout(attemptPlayback, 160)
+        }
       })
-    }, 0)
+    }
+    timer = window.setTimeout(attemptPlayback, 0)
     return () => {
       cancelled = true
       window.clearTimeout(timer)
@@ -581,23 +589,11 @@ export function KeyRegionsPage({ title }: { title: string }) {
     window.addEventListener('pointerup', onUp, { once: true })
   }
 
-  const saveQualityDraft = async (record: RLTKeyRegionReviewRecord) => {
-    const draft = qualityDraftForRecord(record, qualityDrafts)
-    const updated = await reviewKeyRegionQuality(record.key_region_id, draft)
-    setQualityDrafts((drafts) => {
-      const next = { ...drafts }
-      delete next[record.key_region_id]
-      return next
-    })
-    return updated
-  }
-
   const saveCropForQ = async (record: RLTKeyRegionReviewRecord) => {
     const range = getCropRange(record)
     setActionError('')
     setActionPending(`crop-${record.key_region_id}`)
     try {
-      await saveQualityDraft(record)
       await cropKeyRegion(record.key_region_id, range.startSec, range.endSec)
       await loadPage()
       if (record.key_region_id === selectedReviewId) {
@@ -626,16 +622,6 @@ export function KeyRegionsPage({ title }: { title: string }) {
     } finally {
       setActionPending('')
     }
-  }
-
-  const updateQualityDraft = (record: RLTKeyRegionReviewRecord, patch: Partial<QualityDraft>) => {
-    setQualityDrafts((drafts) => ({
-      ...drafts,
-      [record.key_region_id]: {
-        ...qualityDraftForRecord(record, drafts),
-        ...patch,
-      },
-    }))
   }
 
   const toggleKeyRegionSelection = (keyRegionId: string) => {
@@ -733,6 +719,16 @@ export function KeyRegionsPage({ title }: { title: string }) {
           <button className="ghost-button" type="button" onClick={() => void loadPage()} disabled={loading}>
             {loading ? 'Refreshing' : 'Refresh'}
           </button>
+          {onBackToRLHF ? (
+            <button
+              className="apply-button"
+              type="button"
+              onClick={onBackToRLHF}
+              disabled={Boolean(actionPending) || loading}
+            >
+              Back to RLHF
+            </button>
+          ) : null}
         </div>
       </div>
 
@@ -741,7 +737,6 @@ export function KeyRegionsPage({ title }: { title: string }) {
         <div className="key-region-summary-tile"><span>Trainable key regions</span><strong>{summary.trainable}</strong></div>
         <div className="key-region-summary-tile"><span>Confirmed replay samples</span><strong>{summary.replay_samples}</strong></div>
         <div className="key-region-summary-tile"><span>Success / failure</span><strong>{summary.success} / {summary.failure}</strong></div>
-        <div className="key-region-summary-tile"><span>Quality reviewed</span><strong>{summary.quality_reviewed}</strong></div>
         <div className="key-region-summary-tile"><span>Needs crop review</span><strong>{summary.needs_crop}</strong></div>
         <div className="key-region-summary-tile"><span>Selected</span><strong>{selectedCount}</strong></div>
       </div>
@@ -781,8 +776,8 @@ export function KeyRegionsPage({ title }: { title: string }) {
           const cropBlockedReason = cropSaveBlockedReason(renderRecord, cropRange)
           const rescoreZeroPending = actionPending === `rescore-${renderRecord.key_region_id}-0`
           const rescoreOnePending = actionPending === `rescore-${renderRecord.key_region_id}-1`
-          const qualityDraft = qualityDraftForRecord(renderRecord, qualityDrafts)
           const isPlaying = playingKeyRegionId === renderRecord.key_region_id
+          const isPlaybackLoading = pendingPlaybackId === renderRecord.key_region_id
           return (
             <article key={record.key_region_id} className={`key-region-card ${activeCard ? 'active' : ''}`}>
               <div className="key-region-card-head">
@@ -900,62 +895,6 @@ export function KeyRegionsPage({ title }: { title: string }) {
                       </button>
                     </span>
                   </div>
-                  <div className="key-region-quality-panel">
-                    <div className="key-region-panel-title compact">
-                      <h3>Quality review</h3>
-                      <span className={badgeTone(qualityTone(qualityDraft.quality_score))}>
-                        Q{qualityDraft.quality_score}
-                      </span>
-                    </div>
-                    <div className="quality-score-actions" aria-label="Quality score">
-                      {QUALITY_SCORE_OPTIONS.map((option) => (
-                        <button
-                          className={`score-button quality q${option.value} ${qualityDraft.quality_score === option.value ? 'active' : ''}`}
-                          key={option.value}
-                          type="button"
-                          title={option.description}
-                          onClick={() => updateQualityDraft(renderRecord, { quality_score: option.value })}
-                        >
-                          {option.label}
-                        </button>
-                      ))}
-                    </div>
-                    <div className="key-region-quality-grid">
-                      <label>
-                        <span>Jitter penalty</span>
-                        <select
-                          value={qualityDraft.jitter_level}
-                          onChange={(event) => updateQualityDraft(renderRecord, { jitter_level: event.target.value as RLTJitterLevel })}
-                        >
-                          {JITTER_OPTIONS.map((option) => (
-                            <option value={option.value} key={option.value}>
-                              {option.label} ({option.penalty})
-                            </option>
-                          ))}
-                        </select>
-                      </label>
-                      <label>
-                        <span>Actor use</span>
-                        <select
-                          value={qualityDraft.actor_train_mode}
-                          onChange={(event) => updateQualityDraft(renderRecord, { actor_train_mode: event.target.value as RLTActorTrainMode })}
-                        >
-                          {ACTOR_TRAIN_MODE_OPTIONS.map((option) => (
-                            <option value={option.value} key={option.value}>{option.label}</option>
-                          ))}
-                        </select>
-                      </label>
-                      <label className="quality-notes-field">
-                        <span>Notes</span>
-                        <input
-                          type="text"
-                          value={qualityDraft.notes}
-                          placeholder="optional review note"
-                          onChange={(event) => updateQualityDraft(renderRecord, { notes: event.target.value })}
-                        />
-                      </label>
-                    </div>
-                  </div>
                   <div className="key-region-action-group">
                     <button
                       className={`crop-play-button ${isPlaying ? 'active' : ''}`}
@@ -963,8 +902,8 @@ export function KeyRegionsPage({ title }: { title: string }) {
                       aria-pressed={isPlaying}
                       onClick={() => void toggleCropPlayback(renderRecord)}
                     >
-                      <span className="crop-play-icon" aria-hidden="true">{isPlaying ? 'II' : '>'}</span>
-                      <span>{isPlaying ? 'Pause' : 'Play'}</span>
+                      <span className="crop-play-icon" aria-hidden="true">{isPlaying ? 'II' : isPlaybackLoading ? '...' : '>'}</span>
+                      <span>{isPlaying ? 'Pause' : isPlaybackLoading ? 'Loading' : 'Play'}</span>
                     </button>
                     <button className="ghost-button" type="button" onClick={() => selectReviewRecord(record)}>
                       Open video
@@ -973,7 +912,7 @@ export function KeyRegionsPage({ title }: { title: string }) {
                       className="apply-button"
                       type="button"
                       disabled={cropPending || Boolean(cropBlockedReason)}
-                      title={cropBlockedReason || 'Save quality and selected replay sample range for Q training'}
+                      title={cropBlockedReason || 'Save the selected replay sample range for Q training'}
                       onClick={() => void saveCropForQ(renderRecord)}
                     >
                       {cropPending ? 'Saving' : 'Save crop for Q'}

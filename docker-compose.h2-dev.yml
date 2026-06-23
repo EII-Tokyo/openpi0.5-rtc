@@ -17,6 +17,7 @@ services:
       REPLAY_ROOT: /app/replay
       RLT_SEGMENT_DB_PATH: /app/segment_db/segments.sqlite3
       RLT_STATE_PATH: /app/segment_db/rlt_control_state.json
+      EII_PILOT_ENABLE_ROS: "false"
     volumes:
       - /home/eii/project/openpi0.5-rtc-reward-learning:/app
       - /home/eii/data/openpi0.5-rtc-reward-learning/rollouts:/app/rollouts

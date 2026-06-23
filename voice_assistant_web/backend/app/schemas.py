@@ -183,14 +183,6 @@ class RLTKeyRegionRescoreRequest(BaseModel):
     reason: str = "operator_rescore"
 
 
-class RLTKeyRegionQualityRequest(BaseModel):
-    quality_score: int = Field(ge=0, le=4)
-    jitter_level: str = Field(pattern="^(smooth|mild_jitter|severe_jitter)$")
-    actor_train_mode: str = Field(pattern="^(auto|exclude|low_weight|normal|strong)$")
-    source: str = "ui"
-    notes: str | None = None
-
-
 class RLTKeyRegionCropResponse(BaseModel):
     key_region_id: str
     status: str = "committed"
@@ -210,16 +202,6 @@ class RLTSegmentRecord(BaseModel):
     status: str
     phase: str
     reward: int | None = None
-    quality_score: int | None = None
-    quality_task: float | None = None
-    jitter_level: str | None = None
-    jitter_penalty: float | None = None
-    quality_final: float | None = None
-    actor_train_mode: str = "auto"
-    quality_source: str = "legacy"
-    quality_version: int = 1
-    quality_updated_at: float | None = None
-    quality_notes: str | None = None
     shard_path: str | None = None
     num_replay_transitions: int = 0
     invalid_reason: str | None = None
@@ -232,19 +214,10 @@ class RLTKeyRegionReviewRecord(BaseModel):
     batch: str | None = None
     status: str = "untracked"
     trainable: bool = False
+    needs_crop: bool = False
     incomplete_reason: str | None = None
     phase: str | None = None
     reward: int | None = None
-    quality_score: int | None = None
-    quality_task: float | None = None
-    jitter_level: str | None = None
-    jitter_penalty: float | None = None
-    quality_final: float | None = None
-    actor_train_mode: str = "auto"
-    quality_source: str = "legacy"
-    quality_version: int = 1
-    quality_updated_at: float | None = None
-    quality_notes: str | None = None
     shard_path: str | None = None
     npz_exists: bool = False
     video_exists: bool = False
@@ -285,7 +258,6 @@ class RLTKeyRegionReviewSummary(BaseModel):
     success: int = 0
     failure: int = 0
     replay_samples: int = 0
-    quality_reviewed: int = 0
 
 
 class RLTKeyRegionReviewPage(BaseModel):
@@ -296,6 +268,51 @@ class RLTKeyRegionReviewPage(BaseModel):
     next_offset: int | None = None
     summary: RLTKeyRegionReviewSummary = Field(default_factory=RLTKeyRegionReviewSummary)
     batches: list[str] = Field(default_factory=list)
+
+
+class RLTPreferenceStats(BaseModel):
+    total_preferences: int = 0
+    left_wins: int = 0
+    right_wins: int = 0
+    ties: int = 0
+    both_bad: int = 0
+    skipped: int = 0
+
+
+class RLTPreferencePairResponse(BaseModel):
+    left: RLTKeyRegionReviewRecord | None = None
+    right: RLTKeyRegionReviewRecord | None = None
+    stats: RLTPreferenceStats = Field(default_factory=RLTPreferenceStats)
+    remaining_unseen_pairs: int = 0
+    pair_type: str | None = None
+    strategy: str = "budgeted"
+    round_budget: int = 800
+    round_labeled: int = 0
+    round_remaining: int = 0
+
+
+class RLTPreferenceRequest(BaseModel):
+    left_key_region_id: str
+    right_key_region_id: str
+    preference: str = Field(pattern="^(left|right|tie|both_bad|skip)$")
+    reason_tags: list[str] = Field(default_factory=list)
+    notes: str | None = None
+    source: str = "ui"
+
+
+class RLTPreferenceRecord(BaseModel):
+    id: int
+    left_key_region_id: str
+    right_key_region_id: str
+    pair_key: str
+    preference: str
+    pair_type: str | None = None
+    strategy: str = "budgeted"
+    sample_round: int = 1
+    reason_tags: list[str] = Field(default_factory=list)
+    notes: str | None = None
+    source: str = "ui"
+    created_at: float
 
 
 class RobotTaskRequest(BaseModel):

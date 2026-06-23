@@ -22,7 +22,6 @@ REQUIRED_REPLAY_KEYS: tuple[str, ...] = (
     "next_reference_action",
     "done",
 )
-OPTIONAL_QUALITY_KEYS: tuple[str, ...] = ("quality_final", "actor_weight", "actor_train_mask")
 
 
 @dataclasses.dataclass(frozen=True)
@@ -174,9 +173,6 @@ class RLTReplayStore:
             next_reference_action=jnp.asarray(arrays["next_reference_action"]),
             done=jnp.asarray(arrays["done"].astype(np.bool_)),
             episode_success=jnp.asarray(arrays["episode_success"].astype(np.bool_)),
-            quality_final=jnp.asarray(arrays["quality_final"], dtype=jnp.float32),
-            actor_weight=jnp.asarray(arrays["actor_weight"], dtype=jnp.float32),
-            actor_train_mask=jnp.asarray(arrays["actor_train_mask"].astype(np.bool_)),
         )
 
 
@@ -240,9 +236,6 @@ class RLTReplayStore:
             if missing:
                 raise ReplayShardError(f"missing required arrays: {missing}")
             arrays = {key: np.asarray(data[key]) for key in REQUIRED_REPLAY_KEYS}
-            for key in OPTIONAL_QUALITY_KEYS:
-                if key in data:
-                    arrays[key] = np.asarray(data[key])
             manifest = _load_manifest(data)
 
         _validate_arrays(path, arrays)
@@ -261,8 +254,6 @@ class RLTReplayStore:
         terminal_rewards = np.sum(arrays["reward_seq"][done], axis=-1) if np.any(done) else np.asarray([], dtype=np.float32)
         episode_success = bool(np.any(terminal_rewards > 0.0))
         arrays["episode_success"] = np.full((len(arrays["z_rl"]),), episode_success, dtype=np.bool_)
-        _populate_quality_arrays(arrays, manifest, episode_success=episode_success)
-        _validate_quality_arrays(path, arrays)
         info = ReplayShardInfo(
             path=path,
             num_transitions=len(arrays["z_rl"]),
@@ -290,9 +281,7 @@ class RLTReplayStore:
         shard_indices = np.searchsorted(cumulative, indices, side="right")
         previous = np.concatenate([np.asarray([0]), cumulative[:-1]])
 
-        pieces: dict[str, list[np.ndarray]] = {
-            key: [] for key in (*REQUIRED_REPLAY_KEYS, "episode_success", *OPTIONAL_QUALITY_KEYS)
-        }
+        pieces: dict[str, list[np.ndarray]] = {key: [] for key in (*REQUIRED_REPLAY_KEYS, "episode_success")}
         order: list[np.ndarray] = []
         for shard_index, shard in enumerate(self._shards):
             positions = np.flatnonzero(shard_indices == shard_index)
@@ -347,52 +336,6 @@ def _validate_arrays(path: pathlib.Path, arrays: dict[str, np.ndarray]) -> None:
         raise ReplayShardError("done must have shape [N]")
     if not all(np.all(np.isfinite(arrays[key])) for key in REQUIRED_REPLAY_KEYS if key != "done"):
         raise ReplayShardError(f"{path} contains non-finite replay values")
-
-
-def _populate_quality_arrays(arrays: dict[str, np.ndarray], manifest: dict, *, episode_success: bool) -> None:
-    replay_size = len(arrays["z_rl"])
-    defaults = {
-        "quality_final": float(manifest.get("quality_final", 1.0 if episode_success else 0.0)),
-        "actor_weight": float(manifest.get("actor_weight", _actor_weight_from_mode(str(manifest.get("actor_train_mode") or "auto")))),
-        "actor_train_mask": _actor_train_mask_from_mode(str(manifest.get("actor_train_mode") or "auto")),
-    }
-    for key in ("quality_final", "actor_weight"):
-        if key not in arrays:
-            arrays[key] = np.full((replay_size,), defaults[key], dtype=np.float32)
-        else:
-            arrays[key] = np.asarray(arrays[key], dtype=np.float32)
-    if "actor_train_mask" not in arrays:
-        arrays["actor_train_mask"] = np.full((replay_size,), bool(defaults["actor_train_mask"]), dtype=np.bool_)
-    else:
-        arrays["actor_train_mask"] = np.asarray(arrays["actor_train_mask"], dtype=np.bool_)
-
-
-def _actor_weight_from_mode(mode: str) -> float:
-    if mode == "low_weight":
-        return 0.25
-    if mode == "exclude":
-        return 0.0
-    if mode == "strong":
-        return 2.0
-    return 1.0
-
-
-def _actor_train_mask_from_mode(mode: str) -> bool:
-    return mode != "exclude"
-
-
-def _validate_quality_arrays(path: pathlib.Path, arrays: dict[str, np.ndarray]) -> None:
-    replay_size = len(arrays["z_rl"])
-    for key in OPTIONAL_QUALITY_KEYS:
-        if arrays[key].shape != (replay_size,):
-            raise ReplayShardError(f"{key} must have shape [N]")
-    if not np.all(np.isfinite(arrays["quality_final"])):
-        raise ReplayShardError(f"{path} contains non-finite quality_final values")
-    if not np.all(np.isfinite(arrays["actor_weight"])):
-        raise ReplayShardError(f"{path} contains non-finite actor_weight values")
-    if np.any(arrays["actor_weight"] < 0.0):
-        raise ReplayShardError(f"{path} contains negative actor_weight values")
-
 
 
 def _load_manifest(data) -> dict:

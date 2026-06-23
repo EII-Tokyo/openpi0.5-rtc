@@ -23,9 +23,6 @@ class RLTReplayBatch:
     next_reference_action: at.Float[at.Array, "b h a"]
     done: at.Bool[at.Array, " b"]
     episode_success: at.Bool[at.Array, " b"]
-    quality_final: at.Float[at.Array, " b"]
-    actor_weight: at.Float[at.Array, " b"]
-    actor_train_mask: at.Bool[at.Array, " b"]
 
 
 @dataclasses.dataclass(frozen=True)
@@ -41,10 +38,6 @@ class RLTTrainingConfig:
     awbc_max_weight: float = 20.0
     awbc_min_advantage: float = 0.0
     awbc_max_action_delta_norm: float = 2.0
-    quality_actor_weight_enabled: bool = False
-    quality_actor_baseline: float = 0.5
-    quality_actor_temperature: float = 0.2
-    quality_actor_max_weight: float = 20.0
 
 
 @struct.dataclass
@@ -64,10 +57,6 @@ class RLTTrainState:
     awbc_max_weight: float = struct.field(pytree_node=False)
     awbc_min_advantage: float = struct.field(pytree_node=False)
     awbc_max_action_delta_norm: float = struct.field(pytree_node=False)
-    quality_actor_weight_enabled: bool = struct.field(pytree_node=False)
-    quality_actor_baseline: float = struct.field(pytree_node=False)
-    quality_actor_temperature: float = struct.field(pytree_node=False)
-    quality_actor_max_weight: float = struct.field(pytree_node=False)
 
 
 def make_replay_batch(
@@ -82,19 +71,9 @@ def make_replay_batch(
     next_reference_action: at.Float[at.Array, "b h a"],
     done: at.Bool[at.Array, " b"],
     episode_success: at.Bool[at.Array, " b"] | None = None,
-    quality_final: at.Float[at.Array, " b"] | None = None,
-    actor_weight: at.Float[at.Array, " b"] | None = None,
-    actor_train_mask: at.Bool[at.Array, " b"] | None = None,
 ) -> RLTReplayBatch:
     if episode_success is None:
         episode_success = jnp.sum(reward_seq, axis=-1) > 0.0
-    batch_size = action.shape[0]
-    if quality_final is None:
-        quality_final = episode_success.astype(jnp.float32)
-    if actor_weight is None:
-        actor_weight = jnp.ones((batch_size,), dtype=jnp.float32)
-    if actor_train_mask is None:
-        actor_train_mask = jnp.ones((batch_size,), dtype=jnp.bool_)
     return RLTReplayBatch(
         x=rlt.make_state(z_rl, proprio),
         action=action,
@@ -104,9 +83,6 @@ def make_replay_batch(
         next_reference_action=next_reference_action,
         done=done,
         episode_success=episode_success,
-        quality_final=quality_final,
-        actor_weight=actor_weight,
-        actor_train_mask=actor_train_mask,
     )
 
 
@@ -131,10 +107,6 @@ def init_train_state(config: RLTTrainingConfig, rng: at.KeyArrayLike) -> RLTTrai
         awbc_max_weight=config.awbc_max_weight,
         awbc_min_advantage=config.awbc_min_advantage,
         awbc_max_action_delta_norm=config.awbc_max_action_delta_norm,
-        quality_actor_weight_enabled=config.quality_actor_weight_enabled,
-        quality_actor_baseline=config.quality_actor_baseline,
-        quality_actor_temperature=config.quality_actor_temperature,
-        quality_actor_max_weight=config.quality_actor_max_weight,
     )
 
 
@@ -174,14 +146,6 @@ def sync_target_params(state: RLTTrainState) -> RLTTrainState:
     model = nnx.merge(state.model_def, state.params)
     model.sync_targets()
     return dataclasses.replace(state, params=nnx.state(model))
-
-
-def quality_actor_weight(state: RLTTrainState, batch: RLTReplayBatch) -> at.Float[at.Array, " b"]:
-    if not state.quality_actor_weight_enabled:
-        return batch.actor_weight
-    raw_weight = jnp.exp((batch.quality_final - state.quality_actor_baseline) / state.quality_actor_temperature)
-    quality_weight = jnp.clip(raw_weight, 0.0, state.quality_actor_max_weight)
-    return batch.actor_weight * quality_weight
 
 
 def train_step(
@@ -234,7 +198,6 @@ def train_step(
     awbc_advantage_mean = jnp.asarray(0.0, dtype=critic_loss_value.dtype)
     awbc_data_delta_norm_mean = jnp.asarray(0.0, dtype=critic_loss_value.dtype)
     actor_opt_state = state.actor_opt_state
-    actor_sample_weight = quality_actor_weight(state, batch)
     if actor_updated:
 
         def actor_loss_fn(actor: rlt.RLTActor):
@@ -247,8 +210,6 @@ def train_step(
                     action,
                     batch.reference_action,
                     beta=model.config.beta,
-                    actor_weight=actor_sample_weight,
-                    actor_train_mask=batch.actor_train_mask,
                 )
                 awbc_info = {
                     "awbc_keep_fraction": jnp.asarray(0.0, dtype=loss.dtype),
@@ -269,8 +230,6 @@ def train_step(
                     min_advantage=state.awbc_min_advantage,
                     max_action_delta_norm=state.awbc_max_action_delta_norm,
                     data_reference_action=batch.reference_action,
-                    actor_weight=actor_sample_weight,
-                    actor_train_mask=batch.actor_train_mask,
                 )
             delta = action - batch.reference_action
             actor_q_mean = jnp.mean(q1_for_actor)
@@ -324,9 +283,6 @@ def train_step(
         "reference_q_value": reference_q_value,
         "q_advantage": q_advantage,
         "actor_delta_norm": actor_delta_norm,
-        "quality_final_mean": jnp.mean(batch.quality_final),
-        "actor_weight_mean": jnp.mean(actor_sample_weight),
-        "actor_train_mask_mean": jnp.mean(batch.actor_train_mask.astype(jnp.float32)),
         "q1_mean": critic_info["q1_mean"],
         "q2_mean": critic_info["q2_mean"],
         "target_q_mean": critic_info["target_q_mean"],

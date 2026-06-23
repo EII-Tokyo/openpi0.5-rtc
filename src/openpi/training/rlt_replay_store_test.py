@@ -81,9 +81,6 @@ def test_rlt_replay_store_loads_committed_shards_and_samples(tmp_path):
     assert batch.episode_success.shape == (4,)
     assert bool(np.any(np.asarray(batch.episode_success)))
     assert bool(np.any(~np.asarray(batch.episode_success)))
-    assert batch.quality_final.shape == (4,)
-    assert batch.actor_weight.shape == (4,)
-    assert batch.actor_train_mask.shape == (4,)
 
 
 def test_rlt_replay_store_rejects_invalid_shards_and_loads_new_shards(tmp_path):
@@ -106,26 +103,24 @@ def test_rlt_replay_store_rejects_invalid_shards_and_loads_new_shards(tmp_path):
     assert store.stats.replay_size == 4
 
 
-def test_rlt_replay_store_loads_quality_metadata_from_manifest(tmp_path):
+def test_rlt_replay_store_ignores_legacy_quality_metadata(tmp_path):
     shards_dir = tmp_path / "shards"
     shards_dir.mkdir()
-    manifest = {
-        "schema_version": 1,
-        "train_eligible": True,
-        "voided": False,
-        "quality_final": 0.5,
-        "actor_weight": 0.25,
-        "actor_train_mode": "low_weight",
-    }
-    np.savez(shards_dir / "quality.npz", **_arrays(5, reward=0.0), manifest=json.dumps(manifest))
+    np.savez(
+        shards_dir / "quality.npz",
+        **_arrays(5, reward=0.0),
+        quality_final=np.full((5,), 0.5, dtype=np.float32),
+        actor_weight=np.full((5,), 0.25, dtype=np.float32),
+        actor_train_mask=np.ones((5,), dtype=np.bool_),
+    )
 
     store = rlt_replay_store.RLTReplayStore(tmp_path)
     store.scan()
     batch = store.sample_batch(np.random.default_rng(0), batch_size=3)
 
-    np.testing.assert_allclose(np.asarray(batch.quality_final), np.full((3,), 0.5, dtype=np.float32))
-    np.testing.assert_allclose(np.asarray(batch.actor_weight), np.full((3,), 0.25, dtype=np.float32))
-    np.testing.assert_array_equal(np.asarray(batch.actor_train_mask), np.ones((3,), dtype=np.bool_))
+    assert not hasattr(batch, "quality_final")
+    assert not hasattr(batch, "actor_weight")
+    assert not hasattr(batch, "actor_train_mask")
 
 
 def test_rlt_replay_store_samples_train_action_horizon_from_c10_replay(tmp_path):

@@ -6,6 +6,7 @@ from dataclasses import dataclass, field
 
 @dataclass(slots=True)
 class Settings:
+    enable_ros: bool = os.getenv("EII_PILOT_ENABLE_ROS", "true").lower() not in {"0", "false", "no", "off"}
     redis_host: str = os.getenv("REDIS_HOST", "localhost")
     redis_port: int = int(os.getenv("REDIS_PORT", "6379"))
     redis_db: int = int(os.getenv("REDIS_DB", "0"))

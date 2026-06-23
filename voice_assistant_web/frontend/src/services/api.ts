@@ -71,19 +71,10 @@ export type RLTKeyRegionReviewRecord = {
   batch: string | null
   status: string
   trainable: boolean
+  needs_crop: boolean
   incomplete_reason: string | null
   phase: string | null
   reward: number | null
-  quality_score: number | null
-  quality_task: number | null
-  jitter_level: string | null
-  jitter_penalty: number | null
-  quality_final: number | null
-  actor_train_mode: string
-  quality_source: string
-  quality_version: number
-  quality_updated_at: number | null
-  quality_notes: string | null
   shard_path: string | null
   npz_exists: boolean
   video_exists: boolean
@@ -124,7 +115,6 @@ export type RLTKeyRegionReviewSummary = {
   success: number
   failure: number
   replay_samples: number
-  quality_reviewed: number
 }
 
 export type RLTKeyRegionReviewPage = {
@@ -143,17 +133,7 @@ export type RLTKeyRegionReviewQuery = {
   status?: 'all' | 'trainable' | 'needsCrop'
   reward?: 'all' | 'success' | 'failure'
   batch?: string
-}
-
-export type RLTQualityScore = 0 | 1 | 2 | 3 | 4
-export type RLTJitterLevel = 'smooth' | 'mild_jitter' | 'severe_jitter'
-export type RLTActorTrainMode = 'auto' | 'exclude' | 'low_weight' | 'normal' | 'strong'
-
-export type RLTKeyRegionQualityRequest = {
-  quality_score: RLTQualityScore
-  jitter_level: RLTJitterLevel
-  actor_train_mode: RLTActorTrainMode
-  notes?: string
+  focusKeyRegionId?: string
 }
 
 export type RLTKeyRegionCropResponse = {
@@ -168,6 +148,35 @@ export type RLTKeyRegionCropResponse = {
   crop_end_sample: number
   num_replay_transitions: number
   manifest_path: string
+}
+
+export type RLTPreferenceStats = {
+  total_preferences: number
+  left_wins: number
+  right_wins: number
+  ties: number
+  both_bad: number
+  skipped: number
+}
+
+export type RLTPreferencePairResponse = {
+  left: RLTKeyRegionReviewRecord | null
+  right: RLTKeyRegionReviewRecord | null
+  stats: RLTPreferenceStats
+  remaining_unseen_pairs: number
+  pair_type: string | null
+  strategy: string
+  round_budget: number
+  round_labeled: number
+  round_remaining: number
+}
+
+export type RLTPreferenceRequest = {
+  left_key_region_id: string
+  right_key_region_id: string
+  preference: 'left' | 'right' | 'tie' | 'both_bad' | 'skip'
+  reason_tags?: string[]
+  notes?: string
 }
 
 export type RLTControlState = {
@@ -283,7 +292,7 @@ export type RLTConfigRequest = {
 }
 
 const getJson = async <T>(path: string): Promise<T> => {
-  const response = await fetch(`${apiBase}${path}`)
+  const response = await fetch(`${apiBase}${path}`, { cache: 'no-store' })
   if (!response.ok) {
     const message = await response.text().catch(() => '')
     throw new Error(message || `HTTP ${response.status}`)
@@ -312,6 +321,7 @@ export const fetchRLTKeyRegionReview = (query: RLTKeyRegionReviewQuery = {}) => 
   if (query.status && query.status !== 'all') params.set('status', query.status)
   if (query.reward && query.reward !== 'all') params.set('reward', query.reward)
   if (query.batch && query.batch !== 'all') params.set('batch', query.batch)
+  if (query.focusKeyRegionId) params.set('focus_key_region_id', query.focusKeyRegionId)
   const suffix = params.toString() ? `?${params.toString()}` : ''
   return getJson<RLTKeyRegionReviewPage>(`/api/rlt/key-regions/review${suffix}`)
 }
@@ -342,12 +352,17 @@ export const rescoreKeyRegion = (keyRegionId: string, reward: 0 | 1) =>
     source: 'ui',
     reason: 'operator_rescore',
   })
-export const reviewKeyRegionQuality = (keyRegionId: string, review: RLTKeyRegionQualityRequest) =>
-  postJson<RLTKeyRegionReviewRecord>(`/api/rlt/key-region/${encodeURIComponent(keyRegionId)}/quality`, {
-    quality_score: review.quality_score,
-    jitter_level: review.jitter_level,
-    actor_train_mode: review.actor_train_mode,
-    notes: review.notes,
+export const fetchRLTPreferencePair = (query: { batch?: string; reward?: string; pairType?: string } = {}) => {
+  const params = new URLSearchParams()
+  if (query.batch && query.batch !== 'all') params.set('batch', query.batch)
+  if (query.reward && query.reward !== 'all') params.set('reward', query.reward)
+  if (query.pairType && query.pairType !== 'auto') params.set('pair_type', query.pairType)
+  const suffix = params.toString() ? `?${params.toString()}` : ''
+  return getJson<RLTPreferencePairResponse>(`/api/rlt/preferences/next-pair${suffix}`)
+}
+export const saveRLTPreference = (request: RLTPreferenceRequest) =>
+  postJson('/api/rlt/preferences', {
+    ...request,
     source: 'ui',
   })
 export const updateRLTConfig = (config: RLTConfigRequest) =>
