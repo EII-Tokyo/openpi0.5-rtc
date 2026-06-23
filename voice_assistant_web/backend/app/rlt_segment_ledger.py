@@ -6,6 +6,15 @@ import sqlite3
 import time
 from typing import Any
 
+JITTER_PENALTIES: dict[str, float] = {
+    "smooth": 0.0,
+    "mild_jitter": 0.3,
+    "severe_jitter": 1.0,
+}
+
+ACTOR_TRAIN_MODES = {"auto", "exclude", "low_weight", "normal", "strong"}
+QUALITY_JITTER_LAMBDA = 0.25
+
 
 class RLTSegmentLedger:
     def __init__(self, db_path: str | Path) -> None:
@@ -29,6 +38,16 @@ class RLTSegmentLedger:
                     status TEXT NOT NULL,
                     phase TEXT NOT NULL,
                     reward INTEGER,
+                    quality_score INTEGER,
+                    quality_task REAL,
+                    jitter_level TEXT,
+                    jitter_penalty REAL,
+                    quality_final REAL,
+                    actor_train_mode TEXT NOT NULL DEFAULT 'auto',
+                    quality_source TEXT NOT NULL DEFAULT 'legacy',
+                    quality_version INTEGER NOT NULL DEFAULT 1,
+                    quality_updated_at REAL,
+                    quality_notes TEXT,
                     shard_path TEXT,
                     num_replay_transitions INTEGER NOT NULL DEFAULT 0,
                     invalid_reason TEXT,
@@ -37,6 +56,7 @@ class RLTSegmentLedger:
                 )
                 """
             )
+            self._ensure_quality_columns(conn)
             conn.execute(
                 """
                 CREATE TABLE IF NOT EXISTS segment_events (
@@ -48,6 +68,24 @@ class RLTSegmentLedger:
                 )
                 """
             )
+
+    def _ensure_quality_columns(self, conn) -> None:
+        rows = conn.execute("PRAGMA table_info(segments)").fetchall()
+        columns = {row[1] for row in rows}
+        for name, definition in (
+            ("quality_score", "INTEGER"),
+            ("quality_task", "REAL"),
+            ("jitter_level", "TEXT"),
+            ("jitter_penalty", "REAL"),
+            ("quality_final", "REAL"),
+            ("actor_train_mode", "TEXT NOT NULL DEFAULT 'auto'"),
+            ("quality_source", "TEXT NOT NULL DEFAULT 'legacy'"),
+            ("quality_version", "INTEGER NOT NULL DEFAULT 1"),
+            ("quality_updated_at", "REAL"),
+            ("quality_notes", "TEXT"),
+        ):
+            if name not in columns:
+                conn.execute(f"ALTER TABLE segments ADD COLUMN {name} {definition}")
 
     def record_started(self, key_region_id: str, *, phase: str) -> None:
         self._upsert(key_region_id, status="started", phase=phase, event="started")
@@ -126,6 +164,60 @@ class RLTSegmentLedger:
             event="rescored",
             force_transitions=True,
         )
+
+    def record_quality_review(
+        self,
+        key_region_id: str,
+        *,
+        quality_score: int,
+        jitter_level: str,
+        actor_train_mode: str,
+        quality_final: float | None = None,
+        source: str = "ui",
+        notes: str | None = None,
+    ) -> None:
+        if quality_score < 0 or quality_score > 4:
+            raise ValueError("quality_score must be between 0 and 4")
+        if jitter_level not in JITTER_PENALTIES:
+            raise ValueError(f"unsupported jitter_level={jitter_level!r}")
+        if actor_train_mode not in ACTOR_TRAIN_MODES:
+            raise ValueError(f"unsupported actor_train_mode={actor_train_mode!r}")
+        quality_task = float(quality_score) / 4.0
+        jitter_penalty = JITTER_PENALTIES[jitter_level]
+        if quality_final is None:
+            quality_final = max(0.0, min(1.0, quality_task - QUALITY_JITTER_LAMBDA * jitter_penalty))
+        else:
+            quality_final = max(0.0, min(1.0, float(quality_final)))
+        now = time.time()
+        existing = self.get_segment(key_region_id)
+        if existing is None:
+            raise ValueError(f"Unknown key_region_id: {key_region_id}")
+        with self._connect() as conn:
+            conn.execute(
+                """
+                UPDATE segments
+                SET quality_score=?, quality_task=?, jitter_level=?, jitter_penalty=?, quality_final=?,
+                    actor_train_mode=?, quality_source='human', quality_version=1, quality_updated_at=?,
+                    quality_notes=?, updated_at=?
+                WHERE key_region_id=?
+                """,
+                (
+                    quality_score,
+                    quality_task,
+                    jitter_level,
+                    jitter_penalty,
+                    quality_final,
+                    actor_train_mode,
+                    now,
+                    notes,
+                    now,
+                    key_region_id,
+                ),
+            )
+            conn.execute(
+                "INSERT INTO segment_events (key_region_id, event, detail, created_at) VALUES (?, ?, ?, ?)",
+                (key_region_id, "quality_reviewed", f"{source}:{quality_score}:{jitter_level}:{actor_train_mode}", now),
+            )
 
     def record_rejected(self, key_region_id: str, *, phase: str, reason: str) -> None:
         existing = self.get_segment(key_region_id)

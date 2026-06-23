@@ -4,7 +4,6 @@ import time
 import json
 import redis
 import os
-import re
 import sys
 import termios
 import tty
@@ -14,7 +13,6 @@ from collections import deque
 from openpi_client.runtime import agent as _agent
 from openpi_client.runtime import environment as _environment
 from openpi_client.runtime import subscriber as _subscriber
-from examples.aloha_real import hdf5_utils as _hdf5_utils
 
 # 确保 logging 有 handler（如果主程序没有配置）
 _logger = logging.getLogger(__name__)
@@ -109,8 +107,6 @@ class Runtime:
                 "/app/checkpoints/eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo_rl_token_query/rl_token_2048_enc4_dec4_query_from_19000_20260528/12000",
             ),
             "active_key_region_id": None,
-            "human_takeover_active": False,
-            "active_takeover_id": None,
             "last_reward": None,
         }
         self._task_lock = threading.Lock()
@@ -119,7 +115,7 @@ class Runtime:
         self._current_task = None
         self._is_waiting_for_task = False
         
-        # 存储最后的action（用于task_num==3时移动master）
+        # 存储最近的 puppet action，用于遥操作体验模式对齐 leader/follower。
         self._last_action = None
         history_size = max(1, int((self._max_hz if self._max_hz > 0 else 1) * 10))
         self._recent_puppet_actions = deque(maxlen=history_size)
@@ -128,13 +124,9 @@ class Runtime:
         self._stop = False
         self._manual_actor_requested = False
         self._rlt_context_epoch = 0
-        self._human_takeover_active = False
-        self._active_takeover_id = None
-        self._takeover_joint_unwrapper = None
         self._keyboard_task_mapping = {
             "1": self._TASK_PROMPT_BY_NUM["1"],
             "2": self._TASK_PROMPT_BY_NUM["2"],
-            "3": "Stop and human hand control",
             "4": "Return to home position and save hdf5",
             "5": "Return to sleep position, save hdf5 and quit robot runtime",
             "6": "Leader follower demo",
@@ -330,17 +322,9 @@ class Runtime:
                 self._latest_task = task_data
             logging.info("收到前端机器人任务: %s - %s", task_data["task_num"], task_data["task_name"])
             return
-        should_notify_key_region = event_type in {
-            "key_region_start",
-            "key_region_end",
-            "score",
-            "key_region_discard",
-            "human_takeover_start",
-            "human_takeover_end",
-        }
+        should_notify_key_region = event_type in {"key_region_start", "key_region_end", "score", "key_region_discard"}
         with self._task_lock:
             previous_active_key_region_id = self._rlt_state.get("active_key_region_id")
-            previous_phase = self._rlt_state.get("phase")
             for key in (
                 "warmup_target",
                 "warmup_count",
@@ -373,8 +357,6 @@ class Runtime:
                 "inference_reference_q_value",
                 "inference_actor_q_value",
                 "inference_q_advantage",
-                "human_takeover_active",
-                "active_takeover_id",
             ):
                 if key in state:
                     self._rlt_state[key] = state[key]
@@ -383,62 +365,21 @@ class Runtime:
             if event_type == "key_region_start":
                 self._bump_rlt_context_epoch_locked()
                 self._manual_actor_requested = True
-                self._human_takeover_active = False
-                self._active_takeover_id = None
                 self._rlt_state["phase"] = "key_region"
                 self._rlt_state["active_key_region_id"] = data.get("key_region_id") or state.get("active_key_region_id")
-                self._rlt_state["human_takeover_active"] = False
-                self._rlt_state["active_takeover_id"] = None
                 self._set_agent_rlt_gate(enabled=True, reason="key_region_start")
             elif event_type == "key_region_end":
                 self._bump_rlt_context_epoch_locked()
                 self._manual_actor_requested = False
-                self._human_takeover_active = False
-                self._active_takeover_id = None
                 self._rlt_state["phase"] = "await_score"
-                self._rlt_state["human_takeover_active"] = False
-                self._rlt_state["active_takeover_id"] = None
                 self._rlt_state["inference_actor_active"] = False
                 self._rlt_state["inference_delta_norm"] = None
                 self._rlt_state["inference_gate_reason"] = "actor_not_requested"
                 self._set_agent_rlt_gate(enabled=False, reason="key_region_end")
-            elif event_type == "human_takeover_start":
-                self._bump_rlt_context_epoch_locked()
-                self._manual_actor_requested = True
-                self._human_takeover_active = True
-                self._active_takeover_id = (
-                    data.get("takeover_id")
-                    or state.get("active_takeover_id")
-                    or f"takeover-{time.time_ns()}"
-                )
-                self._rlt_state["phase"] = "key_region"
-                self._rlt_state["active_key_region_id"] = data.get("key_region_id") or state.get("active_key_region_id")
-                self._rlt_state["human_takeover_active"] = True
-                self._rlt_state["active_takeover_id"] = self._active_takeover_id
-                self._rlt_state["inference_gate_reason"] = "human_takeover_shadow_policy"
-                self._set_agent_rlt_gate(enabled=True, reason="human_takeover_start")
-                self._set_master_torque(enabled=False)
-            elif event_type == "human_takeover_end":
-                self._bump_rlt_context_epoch_locked()
-                self._manual_actor_requested = False
-                self._human_takeover_active = False
-                self._active_takeover_id = None
-                self._rlt_state["phase"] = "await_score"
-                self._rlt_state["human_takeover_active"] = False
-                self._rlt_state["active_takeover_id"] = None
-                self._rlt_state["inference_actor_active"] = False
-                self._rlt_state["inference_delta_norm"] = None
-                self._rlt_state["inference_gate_reason"] = "human_takeover_ended"
-                self._set_agent_rlt_gate(enabled=False, reason="human_takeover_end")
-                self._set_master_torque(enabled=True)
             elif event_type == "score":
                 reward = data.get("reward")
                 self._rlt_state["phase"] = "idle"
                 self._rlt_state["active_key_region_id"] = None
-                self._rlt_state["human_takeover_active"] = False
-                self._rlt_state["active_takeover_id"] = None
-                self._human_takeover_active = False
-                self._active_takeover_id = None
                 self._rlt_state["last_reward"] = reward
                 if "warmup_attempts" in state:
                     self._rlt_state["warmup_attempts"] = state["warmup_attempts"]
@@ -448,10 +389,6 @@ class Runtime:
                 self._bump_rlt_context_epoch_locked()
                 self._rlt_state["phase"] = "idle"
                 self._rlt_state["active_key_region_id"] = None
-                self._rlt_state["human_takeover_active"] = False
-                self._rlt_state["active_takeover_id"] = None
-                self._human_takeover_active = False
-                self._active_takeover_id = None
                 self._rlt_state["inference_actor_active"] = False
                 self._rlt_state["inference_delta_norm"] = None
                 self._rlt_state["inference_gate_reason"] = "actor_not_requested"
@@ -481,8 +418,6 @@ class Runtime:
             current_task_snapshot = dict(self._current_task) if self._current_task is not None else None
         self._publish_rlt_state()
         if should_notify_key_region:
-            if event_type == "human_takeover_start" and previous_phase == "key_region":
-                return
             event_payload = dict(data)
             event_payload["type"] = event_type
             event_payload.setdefault("timestamp", time.time())
@@ -524,8 +459,6 @@ class Runtime:
             "actor_effective": actor_requested,
             "actor_locked_reason": actor_locked_reason,
             "manual_actor_requested": manual_actor_requested,
-            "human_takeover_active": bool(state.get("human_takeover_active", False)),
-            "active_takeover_id": state.get("active_takeover_id"),
             "rlt_context_epoch": self._rlt_context_epoch,
             "current_task": current_task,
             "episode_step": self._episode_steps,
@@ -552,96 +485,12 @@ class Runtime:
         logging.info("RLT actor %s（%s）", "已接入" if enabled else "已停止", "左箭头" if enabled else "右箭头")
         self._publish_rlt_state()
 
-    def _set_human_takeover_active(self, enabled: bool, *, source: str = "runtime") -> None:
-        with self._task_lock:
-            if enabled:
-                if self._rlt_state.get("phase") not in {"idle", "key_region"}:
-                    logging.warning("Cannot start human takeover while phase=%s", self._rlt_state.get("phase"))
-                    return
-                if self._rlt_state.get("phase") == "idle":
-                    self._rlt_state["phase"] = "key_region"
-                    self._rlt_state["active_key_region_id"] = f"runtime-key-region-{time.time_ns()}"
-                self._bump_rlt_context_epoch_locked()
-                self._manual_actor_requested = True
-                self._human_takeover_active = True
-                self._active_takeover_id = f"takeover-{time.time_ns()}"
-                self._rlt_state["human_takeover_active"] = True
-                self._rlt_state["active_takeover_id"] = self._active_takeover_id
-                self._rlt_state["inference_gate_reason"] = "human_takeover_shadow_policy"
-                self._set_agent_rlt_gate(enabled=True, reason="human_takeover_start")
-                event_type = "human_takeover_start"
-                event_takeover_id = self._active_takeover_id
-            else:
-                if not self._human_takeover_active:
-                    return
-                event_takeover_id = self._active_takeover_id
-                self._bump_rlt_context_epoch_locked()
-                self._manual_actor_requested = False
-                self._human_takeover_active = False
-                self._active_takeover_id = None
-                self._rlt_state["phase"] = "await_score"
-                self._rlt_state["human_takeover_active"] = False
-                self._rlt_state["active_takeover_id"] = None
-                self._rlt_state["inference_actor_active"] = False
-                self._rlt_state["inference_delta_norm"] = None
-                self._rlt_state["inference_gate_reason"] = "human_takeover_ended"
-                self._set_agent_rlt_gate(enabled=False, reason="human_takeover_end")
-                event_type = "human_takeover_end"
-            event = {
-                "type": event_type,
-                "source": source,
-                "timestamp": time.time(),
-                "key_region_id": self._rlt_state.get("active_key_region_id"),
-                "takeover_id": event_takeover_id,
-                "state": dict(self._rlt_state),
-                "current_task": dict(self._current_task) if self._current_task is not None else None,
-            }
-        self._set_master_torque(enabled=not enabled)
-        self._notify_key_region_subscribers(event_type, event)
-        self._publish_rlt_state()
-
-    def _set_master_torque(self, *, enabled: bool) -> None:
-        try:
-            if not hasattr(self._environment, "_env"):
-                return
-            from examples.aloha_real import robot_utils
-
-            real_env = self._environment._env
-            fn = robot_utils.torque_on if enabled else robot_utils.torque_off
-            fn(real_env.master_bot_left)
-            fn(real_env.master_bot_right)
-            logging.info("master torque %s for human takeover", "on" if enabled else "off")
-        except Exception as exc:
-            logging.warning("Failed to set master torque for human takeover: %s", exc)
-
-    def _read_human_takeover_action(self):
-        if not hasattr(self._environment, "_env"):
-            raise RuntimeError("Cannot read human takeover action without real_env")
-        from examples.aloha_real import robot_utils
-        from examples.aloha_real.real_env import get_action
-
-        if self._takeover_joint_unwrapper is None:
-            self._takeover_joint_unwrapper = robot_utils.JointPositionUnwrapper()
-        real_env = self._environment._env
-        return get_action(
-            real_env.master_bot_left,
-            real_env.master_bot_right,
-            joint_unwrapper=self._takeover_joint_unwrapper,
-            use_continuous_joints=True,
-        )
-
     def _handle_policy_control_key(self, key: str | None) -> bool:
         if key == self._KEY_LEFT_ARROW:
             self._set_manual_actor_requested(True)
             return True
         if key == self._KEY_RIGHT_ARROW:
             self._set_manual_actor_requested(False)
-            return True
-        if key and key.lower() == "s":
-            self._set_human_takeover_active(True, source="keyboard")
-            return True
-        if key and key.lower() == "e":
-            self._set_human_takeover_active(False, source="keyboard")
             return True
         return False
 
@@ -679,8 +528,6 @@ class Runtime:
         hook_name_by_type = {
             "key_region_start": "on_key_region_start",
             "key_region_end": "on_key_region_end",
-            "human_takeover_start": "on_key_region_start",
-            "human_takeover_end": "on_key_region_end",
             "score": "on_key_region_score",
             "key_region_discard": "on_key_region_discard",
         }
@@ -784,7 +631,7 @@ class Runtime:
             old_settings = termios.tcgetattr(fd)
             tty.setcbreak(fd)
             logging.info(
-                "键盘快捷键已启用：1 拧瓶盖任务，2 冲洗瓶子，3 人工接管，4 回 home 并保存，5 回 sleep 并退出，6 遥操作体验"
+                "键盘快捷键已启用：1 拧瓶盖任务，2 冲洗瓶子，4 回 home 并保存，5 回 sleep 并退出，6 遥操作体验"
             )
         else:
             logging.warning("stdin 不是 TTY，主循环中无法监听键盘快捷键")
@@ -839,7 +686,6 @@ class Runtime:
         key: str | None,
         *,
         allowed_task_nums: set[str] | None = None,
-        prompt_for_manual_dataset: bool = True,
         log_invalid: bool = True,
     ):
         """将单个键盘输入解析成统一 task_data。"""
@@ -860,20 +706,6 @@ class Runtime:
             "task_name": task_name,
             "timestamp": time.time(),
         }
-        if key == "3" and prompt_for_manual_dataset:
-            while True:
-                dataset_subdir = self._read_line_from_keyboard(
-                    "请输入人工接管数据保存子目录名，然后回车: "
-                ).strip()
-                if not dataset_subdir:
-                    logging.warning("未输入人工接管数据保存子目录名，已取消进入人工接管模式。")
-                    return None
-                if re.fullmatch(r"[A-Za-z0-9]+", dataset_subdir):
-                    break
-                logging.warning("目录名只允许字母和数字，请重新输入。")
-            task_data["manual_dataset_subdir"] = dataset_subdir
-            logging.info("人工接管数据将保存到子目录: %s", dataset_subdir)
-
         task_data = self._normalize_task_data(task_data)
         logging.info("收到键盘任务: %s - %s", key, task_data["task_name"])
         return task_data
@@ -883,14 +715,12 @@ class Runtime:
         *,
         allowed_task_nums: set[str] | None = None,
         keyboard_timeout: float = 0.0,
-        prompt_for_manual_dataset: bool = True,
     ):
         """统一轮询键盘和 Redis 任务输入。"""
         key = self._poll_single_key(timeout=keyboard_timeout)
         task_data = self._build_task_from_key(
             key,
             allowed_task_nums=allowed_task_nums,
-            prompt_for_manual_dataset=prompt_for_manual_dataset,
         )
         if task_data is not None:
             return task_data
@@ -935,17 +765,6 @@ class Runtime:
             self._current_task = task_data
             self._is_waiting_for_task = False 
             self._publish_runtime_state(mode="policy")
-        elif task_num == "3":
-            logging.info("收到停止指令，进入人机协作模式")
-            self._current_task = task_data
-            # 停止agent
-            self._agent.reset() 
-            # 通知subscriber episode结束, 并录制数据
-            episode_subdir = task_data.get("manual_dataset_subdir")
-            for subscriber in self._subscribers:
-                subscriber.on_episode_end(episode_subdir=episode_subdir) 
-            self._publish_runtime_state(mode="teleop_prepare")
-            self._handle_human_teleop_mode()  
         elif task_num == "6":
             logging.info("收到遥操作体验指令，进入leader-follower演示模式")
             self._current_task = task_data
@@ -994,35 +813,15 @@ class Runtime:
 
         action = self._agent.get_action(observation_with_task)
         self._update_rlt_actor_status_from_action(action)
-        executed_action = action
-        if self._human_takeover_active:
-            human_action = self._read_human_takeover_action()
-            executed_action = dict(action)
-            if isinstance(action, dict) and "actions" in action:
-                executed_action["policy_actions"] = action.get("actions")
-            executed_action["actions"] = human_action
-            executed_action["action_source"] = "human"
-            executed_action["human_takeover_active"] = True
-            executed_action["takeover_id"] = self._active_takeover_id
-            executed_action["intervention_mask"] = True
-        elif isinstance(action, dict):
-            executed_action = dict(action)
-            executed_action.setdefault("action_source", "actor" if action.get("rlt_actor_applied") else "vla")
-            executed_action.setdefault("human_takeover_active", False)
-            executed_action.setdefault("takeover_id", None)
-            executed_action.setdefault("intervention_mask", False)
-        self._environment.apply_action(executed_action)
-        # 存储最后的action（用于task_num==3时移动master）
-        self._last_action = executed_action.get("actions") if isinstance(executed_action, dict) and "actions" in executed_action else None
+        self._environment.apply_action(action)
+        # 存储最近 action，用于 6 号 leader/follower demo 对齐。
+        self._last_action = action.get("actions") if isinstance(action, dict) and "actions" in action else None
         if self._last_action is not None:
             self._recent_puppet_actions.append(list(self._last_action))
-        self._publish_runtime_state(
-            latest_action=self._last_action,
-            mode="human_takeover" if self._human_takeover_active else "policy",
-        )
+        self._publish_runtime_state(latest_action=self._last_action, mode="policy")
 
         for subscriber in self._subscribers:
-            subscriber.on_step(observation["origin_observation"], executed_action)
+            subscriber.on_step(observation["origin_observation"], action)
 
     def _move_robots_to_action(self, real_env, action, step_sleep: float = 0.0) -> None:
         """将puppet和master同步到单个action。"""
@@ -1111,210 +910,6 @@ class Runtime:
             self._move_robots_to_action(real_env, history_actions[idx], step_sleep=step_sleep)
         return target_index
 
-
-    def _handle_human_teleop_mode(self) -> None:
-        """处理人机协作模式（task_num==3）"""
-        try:
-            # 导入必要的模块
-            from examples.aloha_real import robot_utils
-            from examples.aloha_real.real_env import get_action
-            
-            # 获取real_env实例
-            if not hasattr(self._environment, '_env'):
-                logging.error("无法访问real_env，跳过人机协作模式")
-                return
-            
-            real_env = self._environment._env
-            master_bot_left = real_env.master_bot_left
-            master_bot_right = real_env.master_bot_right
-            joint_unwrapper = robot_utils.JointPositionUnwrapper()
-
-            if self._last_action is None:
-                logging.warning("没有上次的action，退出人机协作模式")
-                self._is_waiting_for_task = True
-                self._current_task = None
-                return
-
-            if not self._recent_puppet_actions:
-                self._recent_puppet_actions.append(list(self._last_action))
-
-            rewind_steps = max(1, int(round((self._max_hz if self._max_hz > 0 else 1) * 0.25)))
-            history_actions = list(self._recent_puppet_actions)
-            history_index = len(history_actions) - 1
-            
-            # 步骤1: 将master移动到上次模型输出的位置
-            action = self._last_action
-            self._move_master_to_action(real_env, action, move_time=0.5)
-                
-            logging.info("leader已移动到上次模型输出位置")
-            
-            # 步骤2: 等待按键
-            logging.info("等待按下'b'键开始人机控制...")
-            logging.info(f"（按左方向键每次回退0.25秒，约 {rewind_steps} 个policy step；按'b'键开始）")
-            
-            while True:
-                latest_task = self._take_latest_task(
-                    allowed_task_nums=self._model_task_nums | self._stop_task_nums
-                )
-                if latest_task:
-                    logging.info(
-                        "人工接管准备阶段收到Redis任务 %s，退出人工接管准备并执行对应任务",
-                        latest_task["task_num"],
-                    )
-                    self._handle_task(latest_task)
-                    return
-
-                key = self._poll_single_key(timeout=0.05)
-                if key is None:
-                    continue
-                if key.lower() == 'b':
-                    break
-                if key == "\x1b[D":
-                    target_index = max(0, history_index - rewind_steps)
-                    history_index = self._replay_history_actions(real_env, history_actions, history_index, target_index)
-                    self._last_action = list(history_actions[history_index])
-                    logging.info(
-                        "已回退0.25秒，当前位于最近轨迹第 %d/%d 帧",
-                        history_index + 1,
-                        len(history_actions),
-                    )
-                    continue
-                task_data = self._build_task_from_key(
-                    key,
-                    allowed_task_nums=self._model_task_nums | self._stop_task_nums,
-                    prompt_for_manual_dataset=False,
-                    log_invalid=False,
-                )
-                if task_data is not None:
-                    logging.info("收到输入 %r，退出人工接管准备并执行对应任务", key)
-                    self._handle_task(task_data)
-                    return
-                logging.info("收到输入 %r；按左方向键回退，按'1'/'2'继续模型，按'4'/'5'执行停止任务，按'b'键开始", key)
-            
-            logging.info("收到'b'键，开始人机控制模式")
-            
-            # 步骤3: master torque off，puppet跟随master
-            robot_utils.torque_off(master_bot_left)
-            robot_utils.torque_off(master_bot_right)
-            logging.info("master torque已关闭")
-            
-            # 步骤4: 数据收集循环
-            timesteps = []
-            actions = []
-            timestamps = []
-            actual_dt_history = []
-            
-            logging.info("=" * 60)
-            logging.info("开始数据收集...")
-            logging.info("提示：在当前终端直接按 'b' 键退出并保存数据")
-            logging.info("（后台线程正在等待您的输入）")
-            logging.info("=" * 60)
-
-            if not self._current_task or not self._current_task.get("manual_dataset_subdir"):
-                logging.warning("未找到人工接管数据保存子目录名，取消本次人工接管数据保存。")
-                self._is_waiting_for_task = True
-                self._current_task = None
-                return
-            episode_dataset_dir = os.path.join(
-                self._manual_dataset_dir,
-                self._current_task["manual_dataset_subdir"],
-            )
-            os.makedirs(episode_dataset_dir, exist_ok=True)
-            
-            # 使用线程来监听键盘输入（非阻塞方式）
-            key_pressed = threading.Event()
-            
-            def keyboard_listener():
-                """在后台线程中监听键盘输入"""
-                try:
-                    while not key_pressed.is_set():
-                        # 等待用户按键（用户可以直接在当前终端按键）
-                        key = self._poll_single_key(timeout=0.1)
-                        if key is None:
-                            continue
-                        key = key.lower()
-                        if key == 'b':
-                            key_pressed.set()
-                            print("收到退出信号，准备保存数据...")
-                            logging.info("收到退出信号，准备保存数据...")
-                        else:
-                            logging.info(f"收到输入 '{key}'，但需要输入 'b' 才能退出")
-                except (EOFError, KeyboardInterrupt):
-                    key_pressed.set()
-                    logging.info("收到退出信号")
-                except Exception as e:
-                    logging.warning(f"键盘监听出错: {e}")
-            
-            listener_thread = threading.Thread(target=keyboard_listener, daemon=True)
-            listener_thread.start()
-            
-            # 数据收集循环（只收集原始数据，不填充data_dict）
-            step_count = 0
-            while not key_pressed.is_set():
-                t0 = time.time()
-                action = get_action(
-                    master_bot_left,
-                    master_bot_right,
-                    joint_unwrapper=joint_unwrapper,
-                    use_continuous_joints=True,
-                )
-                t1 = time.time()
-                
-                # 应用action到puppet
-                self._environment.apply_action({"actions": action})
-                ts = self._environment._ts
-                self._publish_runtime_state(qpos=ts.observation.get("qpos"), latest_action=action, mode="human_teleop")
-                t2 = time.time()
-                
-                timesteps.append(ts)
-                actions.append(action)
-                actual_dt_history.append([t0, t1, t2])
-                timestamps.append(t0)
-                
-                # Sleep to maintain the desired frame rate
-                time.sleep(max(0, self._manual_step_time - (time.time() - t0)))
-                
-                step_count += 1
-            
-            logging.info(f"停止数据收集，共收集 {step_count} 步数据")
-            
-            if not timesteps:
-                logging.warning("没有数据可保存，跳过保存。")
-            else:
-                observations = [ts.observation for ts in timesteps]
-                _hdf5_utils.save_hdf5_episode(
-                    observations,
-                    actions,
-                    episode_dataset_dir,
-                    compress_images=True,
-                    is_mobile=False,
-                    fps=self._manual_hz if self._manual_hz > 0 else None,
-                    timestamps=timestamps,
-                )
-            
-            # 设置等待状态
-            self._is_waiting_for_task = True
-            self._current_task = None
-            self._publish_runtime_state(mode="waiting")
-
-        except Exception as e:
-            logging.error(f"人机协作模式出错: {e}", exc_info=True)
-            # 确保恢复master torque
-            try:
-                from examples.aloha_real import robot_utils
-                if hasattr(self._environment, '_env'):
-                    real_env = self._environment._env
-                    robot_utils.torque_on(real_env.master_bot_left)
-                    robot_utils.torque_on(real_env.master_bot_right)
-            except Exception:
-                pass
-            # 设置等待状态
-            self._is_waiting_for_task = True
-            self._current_task = None
-            self._publish_runtime_state(mode="waiting")
-        finally:
-            self._last_action = None
-
     def _handle_leader_follower_demo_mode(self) -> None:
         """Task 6: simple customer-facing leader-follower demo without hdf5 saving."""
         switched_task = False
@@ -1387,7 +982,6 @@ class Runtime:
                 key_task = self._build_task_from_key(
                     self._poll_single_key(timeout=0.02),
                     allowed_task_nums=self._model_task_nums | self._stop_task_nums,
-                    prompt_for_manual_dataset=False,
                     log_invalid=False,
                 )
                 if key_task is not None:
@@ -1433,7 +1027,6 @@ class Runtime:
                 key_task = self._build_task_from_key(
                     key,
                     allowed_task_nums=self._model_task_nums | self._stop_task_nums,
-                    prompt_for_manual_dataset=False,
                     log_invalid=False,
                 )
                 if key_task is not None:

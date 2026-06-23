@@ -71,8 +71,6 @@ const initialRLT: RLTControlState = {
   inference_actor_q_value: null,
   inference_q_advantage: null,
   active_key_region_id: null,
-  human_takeover_active: false,
-  active_takeover_id: null,
   score_deadline: null,
   last_reward: null,
   last_event: null,

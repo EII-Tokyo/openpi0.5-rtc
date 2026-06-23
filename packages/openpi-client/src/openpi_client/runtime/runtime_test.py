@@ -39,14 +39,6 @@ class _Agent:
         pass
 
 
-class _Subscriber:
-    def __init__(self):
-        self.steps = []
-
-    def on_step(self, observation, action):
-        self.steps.append((observation, action))
-
-
 def _runtime():
     return Runtime(_Env(), _Agent(), [], max_hz=0, num_episodes=1, max_episode_steps=1)
 
@@ -320,71 +312,6 @@ def test_update_rlt_actor_status_ignores_stale_context_epoch():
     assert runtime._rlt_state["inference_actor_active"] is False
     assert runtime._rlt_state["inference_delta_norm"] is None
     assert runtime._rlt_state["inference_gate_reason"] == "stale_actor_context"
-
-
-def test_human_takeover_events_toggle_state_and_flush_action_cache():
-    runtime = _runtime()
-    initial_epoch = runtime._build_rlt_context()["rlt_context_epoch"]
-
-    runtime._handle_rlt_control_event({"type": "human_takeover_start", "takeover_id": "take-1"})
-    start_context = runtime._build_rlt_context()
-
-    assert start_context["human_takeover_active"] is True
-    assert start_context["active_takeover_id"] == "take-1"
-    assert start_context["rlt_context_epoch"] == initial_epoch + 1
-    assert runtime._agent.flush_reasons[-1] == "human_takeover_start"
-
-    runtime._handle_rlt_control_event({"type": "human_takeover_end", "takeover_id": "take-1"})
-    end_context = runtime._build_rlt_context()
-
-    assert end_context["human_takeover_active"] is False
-    assert end_context["active_takeover_id"] is None
-    assert end_context["rlt_context_epoch"] == initial_epoch + 2
-    assert runtime._agent.flush_reasons[-1] == "human_takeover_end"
-
-
-def test_step_uses_human_action_during_takeover_but_records_policy_reference():
-    env = _Env()
-    agent = _Agent()
-    subscriber = _Subscriber()
-    runtime = Runtime(env, agent, [subscriber], max_hz=0, num_episodes=1, max_episode_steps=1)
-    runtime._current_task = {"task_name": "Twist off the bottle cap"}
-    runtime._human_takeover_active = True
-    runtime._active_takeover_id = "take-1"
-    runtime._read_human_takeover_action = lambda: [2.0]
-
-    def get_action(obs):
-        agent.obs.append(obs)
-        return {
-            "actions": [10.0],
-            "reference_action": [9.0],
-            "z_rl": [0.1, 0.2],
-            "proprio": [0.3],
-            "rlt_actor_applied": True,
-            "rlt_context_epoch": runtime._build_rlt_context()["rlt_context_epoch"],
-        }
-
-    agent.get_action = get_action
-
-    runtime._step()
-
-    assert agent.obs, "policy must keep running in shadow mode during takeover"
-    assert env.actions == [
-        {
-            "actions": [2.0],
-            "reference_action": [9.0],
-            "z_rl": [0.1, 0.2],
-            "proprio": [0.3],
-            "rlt_actor_applied": True,
-            "rlt_context_epoch": runtime._build_rlt_context()["rlt_context_epoch"],
-            "policy_actions": [10.0],
-            "action_source": "human",
-            "human_takeover_active": True,
-            "takeover_id": "take-1",
-            "intervention_mask": True,
-        }
-    ]
-    assert subscriber.steps[0][1] == env.actions[0]
 
 
 class _StatusAgent(_Agent):

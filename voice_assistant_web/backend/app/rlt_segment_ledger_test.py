@@ -116,6 +116,30 @@ def test_segment_ledger_rescore_updates_reward_and_stats(tmp_path):
     assert ledger.stats()["warmup_failure"] == 1
 
 
+def test_segment_ledger_records_quality_review_without_changing_binary_reward(tmp_path):
+    ledger = RLTSegmentLedger(tmp_path / "segments.sqlite3")
+    ledger.record_committed("seg", reward=0, phase="rl", shard_path="/tmp/a.npz", num_replay_transitions=5)
+
+    ledger.record_quality_review(
+        "seg",
+        quality_score=2,
+        jitter_level="smooth",
+        actor_train_mode="low_weight",
+        quality_final=0.5,
+        source="ui",
+        notes="near miss",
+    )
+
+    segment = ledger.get_segment("seg")
+    assert segment["reward"] == 0
+    assert segment["quality_score"] == 2
+    assert segment["jitter_level"] == "smooth"
+    assert segment["actor_train_mode"] == "low_weight"
+    assert segment["quality_final"] == 0.5
+    assert segment["quality_source"] == "human"
+    assert segment["quality_notes"] == "near miss"
+
+
 def test_segment_ledger_delete_blocks_late_commit_ack(tmp_path):
     ledger = RLTSegmentLedger(tmp_path / "segments.sqlite3")
     ledger.record_started("seg", phase="rl")

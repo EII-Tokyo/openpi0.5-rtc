@@ -2062,7 +2062,90 @@ button {
   color: #8b2c24;
 }
 
+.score-button.quality.active {
+  border-color: #d8c17d;
+  background: #fff3c7;
+  color: #5d4300;
+}
+
+.score-button.quality.q0.active,
+.score-button.quality.q1.active {
+  border-color: #e4b8b4;
+  background: #fae7e4;
+  color: #8b2c24;
+}
+
+.score-button.quality.q4.active {
+  border-color: #b7d8c8;
+  background: #e7f6ed;
+  color: #116b4f;
+}
+
 .score-button:disabled {
   cursor: not-allowed;
   opacity: 0.58;
+}
+
+.key-region-quality-panel {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd7cc;
+  border-radius: 8px;
+  background: #f8f6f0;
+}
+
+.key-region-panel-title.compact {
+  margin: 0;
+}
+
+.quality-score-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.key-region-quality-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.key-region-quality-grid label {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  color: #635b50;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.key-region-quality-grid select,
+.key-region-quality-grid input {
+  min-width: 0;
+  height: 32px;
+  border: 1px solid #d9d2c5;
+  border-radius: 6px;
+  background: #fffefa;
+  color: #221f1a;
+  padding: 0 8px;
+  font-weight: 800;
+}
+
+.quality-notes-field {
+  grid-column: span 1;
+}
+
+.quality-formula {
+  margin: 0;
+  color: #635b50;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+@media (max-width: 860px) {
+  .key-region-quality-grid {
+    grid-template-columns: 1fr;
+  }
 }

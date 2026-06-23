@@ -24,8 +24,6 @@ def _arrays(num_transitions: int, *, reward: float = 1.0) -> dict[str, np.ndarra
         "next_proprio": np.ones((num_transitions, 5), dtype=np.float32) * 3,
         "next_reference_action": action * 0.25,
         "done": done,
-        "intervention_mask": np.zeros((num_transitions, 3), dtype=np.bool_),
-        "action_source": np.zeros((num_transitions, 3), dtype=np.int32),
     }
 
 
@@ -81,28 +79,11 @@ def test_rlt_replay_store_loads_committed_shards_and_samples(tmp_path):
     assert batch.reward_seq.shape == (4, 3)
     assert batch.done.shape == (4,)
     assert batch.episode_success.shape == (4,)
-    assert batch.intervention_mask.shape == (4, 3)
-    assert batch.action_source.shape == (4, 3)
     assert bool(np.any(np.asarray(batch.episode_success)))
     assert bool(np.any(~np.asarray(batch.episode_success)))
-
-
-def test_rlt_replay_store_defaults_missing_intervention_metadata_for_legacy_shards(tmp_path):
-    shards_dir = tmp_path / "shards"
-    shards_dir.mkdir()
-    arrays = _arrays(5, reward=1.0)
-    arrays.pop("intervention_mask")
-    arrays.pop("action_source")
-    np.savez(shards_dir / "legacy.npz", **arrays)
-
-    store = rlt_replay_store.RLTReplayStore(tmp_path)
-    store.scan()
-    batch = store.sample_batch(np.random.default_rng(0), batch_size=2)
-
-    assert batch.intervention_mask.shape == (2, 3)
-    assert not np.any(np.asarray(batch.intervention_mask))
-    assert batch.action_source.shape == (2, 3)
-    assert np.all(np.asarray(batch.action_source) == rlt_replay_store.ACTION_SOURCE_UNKNOWN)
+    assert batch.quality_final.shape == (4,)
+    assert batch.actor_weight.shape == (4,)
+    assert batch.actor_train_mask.shape == (4,)
 
 
 def test_rlt_replay_store_rejects_invalid_shards_and_loads_new_shards(tmp_path):
@@ -125,6 +106,28 @@ def test_rlt_replay_store_rejects_invalid_shards_and_loads_new_shards(tmp_path):
     assert store.stats.replay_size == 4
 
 
+def test_rlt_replay_store_loads_quality_metadata_from_manifest(tmp_path):
+    shards_dir = tmp_path / "shards"
+    shards_dir.mkdir()
+    manifest = {
+        "schema_version": 1,
+        "train_eligible": True,
+        "voided": False,
+        "quality_final": 0.5,
+        "actor_weight": 0.25,
+        "actor_train_mode": "low_weight",
+    }
+    np.savez(shards_dir / "quality.npz", **_arrays(5, reward=0.0), manifest=json.dumps(manifest))
+
+    store = rlt_replay_store.RLTReplayStore(tmp_path)
+    store.scan()
+    batch = store.sample_batch(np.random.default_rng(0), batch_size=3)
+
+    np.testing.assert_allclose(np.asarray(batch.quality_final), np.full((3,), 0.5, dtype=np.float32))
+    np.testing.assert_allclose(np.asarray(batch.actor_weight), np.full((3,), 0.25, dtype=np.float32))
+    np.testing.assert_array_equal(np.asarray(batch.actor_train_mask), np.ones((3,), dtype=np.bool_))
+
+
 def test_rlt_replay_store_samples_train_action_horizon_from_c10_replay(tmp_path):
     shards_dir = tmp_path / "shards"
     shards_dir.mkdir()
@@ -134,8 +137,6 @@ def test_rlt_replay_store_samples_train_action_horizon_from_c10_replay(tmp_path)
     arrays["next_reference_action"] = arrays["action"] * 0.25
     arrays["reward_seq"] = np.zeros((5, 10), dtype=np.float32)
     arrays["reward_seq"][-1, 9] = 1.0
-    arrays["intervention_mask"] = np.zeros((5, 10), dtype=np.bool_)
-    arrays["action_source"] = np.zeros((5, 10), dtype=np.int32)
     np.savez(shards_dir / "c10_horizon.npz", **arrays)
 
     store = rlt_replay_store.RLTReplayStore(tmp_path, sample_action_horizon=10)
@@ -148,8 +149,6 @@ def test_rlt_replay_store_samples_train_action_horizon_from_c10_replay(tmp_path)
     assert batch.reference_action.shape == (3, 10, 2)
     assert batch.next_reference_action.shape == (3, 10, 2)
     assert batch.reward_seq.shape == (3, 10)
-    assert batch.intervention_mask.shape == (3, 10)
-    assert batch.action_source.shape == (3, 10)
 
 
 def test_rlt_replay_store_rejects_sample_horizon_longer_than_replay(tmp_path):

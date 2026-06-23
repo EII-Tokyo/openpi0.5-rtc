@@ -19,9 +19,10 @@ services:
       RLT_STATE_PATH: /app/segment_db/rlt_control_state.json
     volumes:
       - /home/eii/project/openpi0.5-rtc-reward-learning:/app
-      - /home/eii/project/openpi0.5-rtc-reward-learning-local-data/rollouts:/app/rollouts
-      - /home/eii/project/openpi0.5-rtc-reward-learning-local-data/replay:/app/replay
-      - /home/eii/project/openpi0.5-rtc-reward-learning-local-data/segment_db:/app/segment_db
+      - /home/eii/data/openpi0.5-rtc-reward-learning/rollouts:/app/rollouts
+      - /home/eii/data/openpi0.5-rtc-reward-learning/replay:/app/replay
+      - /home/eii/data/openpi0.5-rtc-reward-learning/segment_db:/app/segment_db
+      - /home/eii/data/openpi0.5-rtc-reward-learning:/home/eii/data/openpi0.5-rtc-reward-learning
 
   eii_pilot_frontend:
     command:

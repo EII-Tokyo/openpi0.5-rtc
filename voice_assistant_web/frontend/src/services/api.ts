@@ -74,6 +74,16 @@ export type RLTKeyRegionReviewRecord = {
   incomplete_reason: string | null
   phase: string | null
   reward: number | null
+  quality_score: number | null
+  quality_task: number | null
+  jitter_level: string | null
+  jitter_penalty: number | null
+  quality_final: number | null
+  actor_train_mode: string
+  quality_source: string
+  quality_version: number
+  quality_updated_at: number | null
+  quality_notes: string | null
   shard_path: string | null
   npz_exists: boolean
   video_exists: boolean
@@ -114,6 +124,7 @@ export type RLTKeyRegionReviewSummary = {
   success: number
   failure: number
   replay_samples: number
+  quality_reviewed: number
 }
 
 export type RLTKeyRegionReviewPage = {
@@ -132,6 +143,17 @@ export type RLTKeyRegionReviewQuery = {
   status?: 'all' | 'trainable' | 'needsCrop'
   reward?: 'all' | 'success' | 'failure'
   batch?: string
+}
+
+export type RLTQualityScore = 0 | 1 | 2 | 3 | 4
+export type RLTJitterLevel = 'smooth' | 'mild_jitter' | 'severe_jitter'
+export type RLTActorTrainMode = 'auto' | 'exclude' | 'low_weight' | 'normal' | 'strong'
+
+export type RLTKeyRegionQualityRequest = {
+  quality_score: RLTQualityScore
+  jitter_level: RLTJitterLevel
+  actor_train_mode: RLTActorTrainMode
+  notes?: string
 }
 
 export type RLTKeyRegionCropResponse = {
@@ -196,8 +218,6 @@ export type RLTControlState = {
   inference_actor_q_value: number | null
   inference_q_advantage: number | null
   active_key_region_id: string | null
-  human_takeover_active: boolean
-  active_takeover_id: string | null
   score_deadline: number | null
   last_reward: number | null
   last_event: string | null
@@ -299,10 +319,6 @@ export const fetchRLTKeyRegionDetail = (keyRegionId: string) =>
   getJson<RLTKeyRegionReviewRecord>(`/api/rlt/key-region/${encodeURIComponent(keyRegionId)}`)
 export const startKeyRegion = () => postJson<RLTControlState>('/api/rlt/key-region/start', { source: 'ui' })
 export const endKeyRegion = () => postJson<RLTControlState>('/api/rlt/key-region/end', { source: 'ui' })
-export const startHumanTakeover = () =>
-  postJson<RLTControlState>('/api/rlt/human-takeover/start', { source: 'ui', reason: 'near_failure' })
-export const endHumanTakeover = () =>
-  postJson<RLTControlState>('/api/rlt/human-takeover/end', { source: 'ui', reason: 'operator_released' })
 export const scoreKeyRegion = (reward: 0 | 1) =>
   postJson<RLTControlState>('/api/rlt/key-region/score', { reward, source: 'ui' })
 export const confirmKeyRegion = () =>
@@ -325,6 +341,14 @@ export const rescoreKeyRegion = (keyRegionId: string, reward: 0 | 1) =>
     reward,
     source: 'ui',
     reason: 'operator_rescore',
+  })
+export const reviewKeyRegionQuality = (keyRegionId: string, review: RLTKeyRegionQualityRequest) =>
+  postJson<RLTKeyRegionReviewRecord>(`/api/rlt/key-region/${encodeURIComponent(keyRegionId)}/quality`, {
+    quality_score: review.quality_score,
+    jitter_level: review.jitter_level,
+    actor_train_mode: review.actor_train_mode,
+    notes: review.notes,
+    source: 'ui',
   })
 export const updateRLTConfig = (config: RLTConfigRequest) =>
   postJson<RLTControlState>('/api/rlt/config', config)

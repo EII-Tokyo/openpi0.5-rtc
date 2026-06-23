@@ -28,6 +28,7 @@ from .redis_commands import create_redis_client
 from .rlt_control import RLTControlStore
 from .rlt_key_region_crop import crop_key_region_files
 from .rlt_key_region_crop import rescore_key_region_files
+from .rlt_key_region_crop import update_key_region_quality_files
 from .robot_state_bridge import RobotStateBridge
 from .schemas import HealthResponse
 from .schemas import RealtimePayload
@@ -41,8 +42,8 @@ from .schemas import RLTKeyRegionCropResponse
 from .schemas import RLTKeyRegionReviewPage
 from .schemas import RLTKeyRegionReviewRecord
 from .schemas import RLTKeyRegionReviewSummary
+from .schemas import RLTKeyRegionQualityRequest
 from .schemas import RLTKeyRegionRescoreRequest
-from .schemas import RLTHumanTakeoverRequest
 from .schemas import RLTScoreRequest
 from .schemas import RLTSegmentRecord
 from .schemas import RLTVoidRequest
@@ -74,6 +75,18 @@ ROBOT_TASK_LABELS = {
     "4": "home",
     "5": "sleep",
 }
+QUALITY_REVIEW_FIELDS = (
+    "quality_score",
+    "quality_task",
+    "jitter_level",
+    "jitter_penalty",
+    "quality_final",
+    "actor_train_mode",
+    "quality_source",
+    "quality_version",
+    "quality_updated_at",
+    "quality_notes",
+)
 
 
 @app.on_event("startup")
@@ -113,22 +126,6 @@ def robot_task(request: RobotTaskRequest) -> dict[str, str]:
     }
     redis_client.publish(settings.rlt_control_channel, json.dumps(payload))
     return {"status": "ok", "task_num": request.task_num, "task_name": payload["task_name"]}
-
-
-@app.post("/api/rlt/human-takeover/start", response_model=RLTControlState)
-def start_human_takeover(request: RLTHumanTakeoverRequest) -> RLTControlState:
-    try:
-        return rlt_control.start_human_takeover(RLTControlRequest(source=request.source), reason=request.reason)
-    except ValueError as exc:
-        raise HTTPException(status_code=409, detail=str(exc)) from exc
-
-
-@app.post("/api/rlt/human-takeover/end", response_model=RLTControlState)
-def end_human_takeover(request: RLTHumanTakeoverRequest) -> RLTControlState:
-    try:
-        return rlt_control.end_human_takeover(RLTControlRequest(source=request.source), reason=request.reason)
-    except ValueError as exc:
-        raise HTTPException(status_code=409, detail=str(exc)) from exc
 
 
 @app.get("/api/cameras/{camera_name}/latest.jpg")
@@ -213,6 +210,7 @@ def _manifest_summary(path: Path) -> dict | None:
         "missing_rlt_metadata",
         "voided",
         "shard_path",
+        *QUALITY_REVIEW_FIELDS,
     }
     summary = {key: manifest[key] for key in summary_keys if key in manifest}
 
@@ -618,6 +616,7 @@ def _key_region_review_records() -> list[dict]:
             "shard_path": segment.get("shard_path"),
             "num_replay_transitions": int(segment.get("num_replay_transitions") or 0),
             "updated_at": segment.get("updated_at"),
+            **{field: segment.get(field) for field in QUALITY_REVIEW_FIELDS},
         }
 
     rollout_root = (ROLLOUTS_ROOT / "key_regions").resolve()
@@ -659,6 +658,10 @@ def _key_region_review_records() -> list[dict]:
                     "shard_path": record.get("shard_path") or manifest.get("shard_path"),
                     "reward": record.get("reward") if record.get("reward") is not None else manifest.get("reward"),
                     "num_replay_transitions": record.get("num_replay_transitions") or manifest.get("num_replay_transitions") or 0,
+                    **{
+                        field: record.get(field) if record.get(field) is not None else manifest.get(field)
+                        for field in QUALITY_REVIEW_FIELDS
+                    },
                 }
             )
             if record["video_paths"]:
@@ -683,6 +686,9 @@ def _key_region_review_records() -> list[dict]:
             record["batch"] = record.get("batch") or _batch_from_replay_path(shard_path)
         record["manifest_exists"] = bool(record.get("manifest_exists"))
         record["video_exists"] = bool(record.get("video_exists"))
+        record["actor_train_mode"] = record.get("actor_train_mode") or "auto"
+        record["quality_source"] = record.get("quality_source") or "legacy"
+        record["quality_version"] = int(record.get("quality_version") or 1)
         _reconcile_key_region_record(record)
         record["trainable"] = record.get("status") == "committed" and _record_has_trainable_files(record)
         if not record["trainable"]:
@@ -712,6 +718,7 @@ def _key_region_review_summary(records: list[dict]) -> RLTKeyRegionReviewSummary
         success=sum(1 for record in records if record.get("reward") == 1),
         failure=sum(1 for record in records if record.get("reward") == 0),
         replay_samples=sum(int(record.get("num_replay_transitions") or 0) for record in records),
+        quality_reviewed=sum(1 for record in records if record.get("quality_score") is not None),
     )
 
 
@@ -828,6 +835,55 @@ def rlt_key_region_rescore(key_region_id: str, request: RLTKeyRegionRescoreReque
         source=request.source,
         reason=request.reason,
     )
+
+
+@app.post("/api/rlt/key-region/{key_region_id}/quality", response_model=RLTKeyRegionReviewRecord)
+def rlt_key_region_quality(key_region_id: str, request: RLTKeyRegionQualityRequest) -> RLTKeyRegionReviewRecord:
+    if not re.fullmatch(r"[A-Za-z0-9_.-]+", key_region_id):
+        raise HTTPException(status_code=400, detail=f"Invalid key_region_id: {key_region_id}")
+
+    records = _key_region_review_records()
+    record = next((item for item in records if item.get("key_region_id") == key_region_id), None)
+    if record is None:
+        raise HTTPException(status_code=404, detail=f"Unknown key_region_id: {key_region_id}")
+    rollout_path = record.get("rollout_path")
+    if not rollout_path:
+        raise HTTPException(status_code=409, detail="Key region rollout manifest is missing")
+    rollout_dir = (ROLLOUTS_ROOT / str(rollout_path)).resolve()
+    if not rollout_dir.is_relative_to(ROLLOUTS_ROOT):
+        raise HTTPException(status_code=400, detail="Invalid rollout path")
+    shard_path = _host_path_for_container_path(record.get("shard_path"))
+    if shard_path is None or not shard_path.exists():
+        raise HTTPException(status_code=409, detail="Key region replay shard is missing")
+
+    try:
+        manifest = update_key_region_quality_files(
+            rollout_dir,
+            shard_path,
+            quality_score=request.quality_score,
+            jitter_level=request.jitter_level,
+            actor_train_mode=request.actor_train_mode,
+            notes=request.notes,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    rlt_control.review_key_region_quality(
+        key_region_id,
+        quality_score=int(manifest["quality_score"]),
+        jitter_level=str(manifest["jitter_level"]),
+        actor_train_mode=str(manifest["actor_train_mode"]),
+        quality_final=float(manifest["quality_final"]),
+        source=request.source,
+        notes=request.notes,
+    )
+    updated = next(
+        (item for item in _key_region_review_records() if item.get("key_region_id") == key_region_id),
+        None,
+    )
+    if updated is None:
+        raise HTTPException(status_code=404, detail=f"Unknown key_region_id after quality update: {key_region_id}")
+    return RLTKeyRegionReviewRecord(**updated)
 
 
 @app.post("/api/rlt/key-region/{key_region_id}/crop", response_model=RLTKeyRegionCropResponse)

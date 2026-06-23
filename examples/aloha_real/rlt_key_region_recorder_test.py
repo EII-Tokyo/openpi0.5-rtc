@@ -24,9 +24,6 @@ def _record(step: int, *, include_full: bool = True, include_step_actions: bool 
         z_rl=np.full((8,), step, dtype=np.float32),
         proprio=np.full((4,), step, dtype=np.float32),
         images={},
-        action_source="human" if step in {3, 4, 5} else "actor",
-        human_takeover_active=step in {3, 4, 5},
-        takeover_id="take-1" if step in {3, 4, 5} else None,
     )
 
 
@@ -45,9 +42,6 @@ def _push_runtime_step(store: recorder.KeyRegionReplayRecorder) -> None:
             "reference_action_full": np.zeros((50, 14), dtype=np.float32),
             "z_rl": np.zeros((8,), dtype=np.float32),
             "proprio": np.zeros((4,), dtype=np.float32),
-            "action_source": "human",
-            "human_takeover_active": True,
-            "takeover_id": "take-runtime",
         },
     )
 
@@ -96,44 +90,6 @@ def test_key_region_replay_saves_train_horizon_and_full_horizon(tmp_path):
     assert arrays["next_z_rl"][-1, 0] == 60
     assert arrays["done"].tolist() == [False, False, False, False, False, True]
     assert arrays["reward_seq"][-1, 9] == 1
-
-
-def test_key_region_replay_writes_intervention_metadata_windows(tmp_path):
-    store = recorder.KeyRegionReplayRecorder(
-        replay_root=str(tmp_path / "replay"),
-        rollouts_root=str(tmp_path / "rollouts"),
-        train_horizon=10,
-        full_horizon=50,
-        chunk_stride=10,
-    )
-    try:
-        records = [_record(step) for step in range(25)]
-        arrays, missing = store._build_replay_arrays(records, {"reward": 1})
-    finally:
-        store.close()
-
-    assert missing == []
-    assert arrays is not None
-    assert arrays["intervention_mask"].shape == (2, 10)
-    assert arrays["action_source"].shape == (2, 10)
-    assert arrays["intervention_mask"][0].tolist() == [
-        False,
-        False,
-        False,
-        True,
-        True,
-        True,
-        False,
-        False,
-        False,
-        False,
-    ]
-    assert arrays["action_source"][0, 3:6].tolist() == [
-        recorder.ACTION_SOURCE_TO_ID["human"],
-        recorder.ACTION_SOURCE_TO_ID["human"],
-        recorder.ACTION_SOURCE_TO_ID["human"],
-    ]
-    assert arrays["takeover_id"][0, 3:6].tolist() == ["take-1", "take-1", "take-1"]
 
 
 
@@ -268,7 +224,6 @@ def test_key_region_manifest_includes_replay_schema_metadata(tmp_path):
         store.close()
 
     assert manifest["schema_version"] == 1
-    assert manifest["takeover_windows"] == []
     assert manifest["train_chunk_horizon"] == 10
     assert manifest["policy_horizon"] == 10
     assert manifest["vla_policy_horizon"] == 50
@@ -280,47 +235,6 @@ def test_key_region_manifest_includes_replay_schema_metadata(tmp_path):
     assert manifest["post_roll_seconds"] == 0.0
     assert manifest["key_region_start_sec"] == 0.0
     assert manifest["key_region_end_sec"] == manifest["duration_seconds"]
-
-
-def test_key_region_manifest_summarizes_takeover_windows(tmp_path):
-    store = recorder.KeyRegionReplayRecorder(
-        replay_root=str(tmp_path / "replay"),
-        rollouts_root=str(tmp_path / "rollouts"),
-        train_horizon=10,
-        full_horizon=50,
-        chunk_stride=10,
-        ack_publisher=lambda payload: None,
-    )
-    try:
-        records = [_record(step) for step in range(25)]
-        arrays, missing = store._build_replay_arrays(records, {"reward": 1})
-        segment = recorder.KeyRegionSegment(
-            "kid",
-            "task",
-            "warmup",
-            {"timestamp": 1.0},
-            {"timestamp": 2.0},
-            {"timestamp": 3.0, "reward": 1},
-            records,
-            active_start_step=0,
-            active_end_step=25,
-        )
-        manifest = store._write_manifest(tmp_path / "manifest.json", segment, missing, arrays)
-    finally:
-        store.close()
-
-    assert manifest["takeover_windows"] == [
-        {
-            "takeover_id": "take-1",
-            "source": "human",
-            "start_step": 3,
-            "end_step": 6,
-            "start_time": 3.0,
-            "end_time": 5.0,
-            "num_frames": 3,
-            "success": True,
-        }
-    ]
 
 
 def test_key_region_discard_clears_pending_region(tmp_path):

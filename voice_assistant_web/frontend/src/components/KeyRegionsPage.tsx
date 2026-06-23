@@ -4,10 +4,17 @@ import {
   deleteKeyRegions,
   fetchRLTKeyRegionDetail,
   fetchRLTKeyRegionReview,
+  reviewKeyRegionQuality,
   rescoreKeyRegion,
   rolloutVideoUrl,
 } from '../services/api'
-import type { RLTKeyRegionReviewRecord, RLTKeyRegionReviewSummary } from '../services/api'
+import type {
+  RLTActorTrainMode,
+  RLTJitterLevel,
+  RLTKeyRegionReviewRecord,
+  RLTKeyRegionReviewSummary,
+  RLTQualityScore,
+} from '../services/api'
 
 type CropRange = {
   startSec: number
@@ -19,11 +26,37 @@ type KeyRegionInfoRow = {
   value: string
 }
 
+type QualityDraft = {
+  quality_score: RLTQualityScore
+  jitter_level: RLTJitterLevel
+  actor_train_mode: RLTActorTrainMode
+  notes: string
+}
+
 const KEY_REGION_CAMERA_ORDER = ['cam_high', 'cam_low', 'cam_left_wrist', 'cam_right_wrist']
 const KEY_REGION_PAGE_SIZE = 20
 const DEFAULT_REPLAY_HORIZON = 50
 const DEFAULT_TRAIN_HORIZON = 10
 const DEFAULT_CHUNK_STRIDE = 2
+const QUALITY_SCORE_OPTIONS: Array<{ value: RLTQualityScore; label: string; description: string }> = [
+  { value: 0, label: '0 Bad miss', description: 'Far from the tube or clearly wrong direction; critic negative only.' },
+  { value: 1, label: '1 Failure', description: 'Reached the area, but bottle mouth or angle is clearly wrong.' },
+  { value: 2, label: '2 Near miss', description: 'Failed, but close to insertion with only small position or angle error.' },
+  { value: 3, label: '3 Weak success', description: 'Inserted, but edge contact, tilted bottle, shallow depth, or unstable motion.' },
+  { value: 4, label: '4 Stable success', description: 'Inserted smoothly, aligned well, and stayed stable.' },
+]
+const JITTER_OPTIONS: Array<{ value: RLTJitterLevel; label: string; penalty: string }> = [
+  { value: 'smooth', label: 'Smooth', penalty: '0.0' },
+  { value: 'mild_jitter', label: 'Mild jitter', penalty: '0.3' },
+  { value: 'severe_jitter', label: 'Severe jitter', penalty: '1.0' },
+]
+const ACTOR_TRAIN_MODE_OPTIONS: Array<{ value: RLTActorTrainMode; label: string }> = [
+  { value: 'auto', label: 'Auto' },
+  { value: 'exclude', label: 'Exclude actor' },
+  { value: 'low_weight', label: 'Low weight' },
+  { value: 'normal', label: 'Normal' },
+  { value: 'strong', label: 'Strong' },
+]
 
 const emptySummary: RLTKeyRegionReviewSummary = {
   total: 0,
@@ -32,6 +65,7 @@ const emptySummary: RLTKeyRegionReviewSummary = {
   success: 0,
   failure: 0,
   replay_samples: 0,
+  quality_reviewed: 0,
 }
 
 const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max)
@@ -59,6 +93,38 @@ const formatRewardValue = (reward?: number | null) => {
   if (reward === 0) return 'failure'
   return '-'
 }
+
+const formatQualityValue = (record: RLTKeyRegionReviewRecord) => {
+  if (record.quality_score === null || record.quality_score === undefined) return 'unreviewed'
+  const final = record.quality_final === null || record.quality_final === undefined ? '-' : record.quality_final.toFixed(2)
+  return `Q${record.quality_score} / ${final}`
+}
+
+const qualityTone = (score?: number | null): 'green' | 'blue' | 'amber' | 'red' | 'slate' => {
+  if (score === null || score === undefined) return 'slate'
+  if (score >= 4) return 'green'
+  if (score === 3) return 'blue'
+  if (score === 2) return 'amber'
+  return 'red'
+}
+
+const defaultActorMode = (record: RLTKeyRegionReviewRecord): RLTActorTrainMode => {
+  if (record.actor_train_mode && ACTOR_TRAIN_MODE_OPTIONS.some((option) => option.value === record.actor_train_mode)) {
+    return record.actor_train_mode as RLTActorTrainMode
+  }
+  return 'auto'
+}
+
+const qualityDraftForRecord = (
+  record: RLTKeyRegionReviewRecord,
+  drafts: Record<string, QualityDraft>,
+): QualityDraft =>
+  drafts[record.key_region_id] || {
+    quality_score: ((record.quality_score ?? (record.reward === 1 ? 3 : 1)) as RLTQualityScore),
+    jitter_level: ((record.jitter_level || 'smooth') as RLTJitterLevel),
+    actor_train_mode: defaultActorMode(record),
+    notes: record.quality_notes || '',
+  }
 
 const formatReviewTime = (record: RLTKeyRegionReviewRecord) => {
   const timestamp = record.score_time || record.end_time || record.start_time || record.updated_at
@@ -175,6 +241,10 @@ const keyRegionInfoRows = (record: RLTKeyRegionReviewRecord): KeyRegionInfoRow[]
   { label: 'Status', value: keyRegionStatusLabel(record) },
   { label: 'Batch', value: record.batch || '-' },
   { label: 'Reward', value: formatRewardValue(record.reward) },
+  { label: 'Quality', value: formatQualityValue(record) },
+  { label: 'Jitter', value: record.jitter_level || '-' },
+  { label: 'Actor mode', value: record.actor_train_mode || 'auto' },
+  { label: 'Quality source', value: record.quality_source || 'legacy' },
   { label: 'Phase', value: record.phase || '-' },
   { label: 'Video duration', value: formatDuration(record.duration_seconds) },
   { label: 'Key duration', value: formatDuration(record.key_region_duration_seconds) },
@@ -250,6 +320,7 @@ export function KeyRegionsPage({ title }: { title: string }) {
   const [selectedDetail, setSelectedDetail] = useState<RLTKeyRegionReviewRecord | null>(null)
   const [selectedKeyRegionIds, setSelectedKeyRegionIds] = useState<Set<string>>(new Set())
   const [cropRanges, setCropRanges] = useState<Record<string, CropRange>>({})
+  const [qualityDrafts, setQualityDrafts] = useState<Record<string, QualityDraft>>({})
   const [playingKeyRegionId, setPlayingKeyRegionId] = useState('')
   const [playbackTimes, setPlaybackTimes] = useState<Record<string, number>>({})
   const [actionPending, setActionPending] = useState('')
@@ -522,6 +593,38 @@ export function KeyRegionsPage({ title }: { title: string }) {
     }
   }
 
+  const updateQualityDraft = (record: RLTKeyRegionReviewRecord, patch: Partial<QualityDraft>) => {
+    setQualityDrafts((drafts) => ({
+      ...drafts,
+      [record.key_region_id]: {
+        ...qualityDraftForRecord(record, drafts),
+        ...patch,
+      },
+    }))
+  }
+
+  const saveQualityReview = async (record: RLTKeyRegionReviewRecord) => {
+    const draft = qualityDraftForRecord(record, qualityDrafts)
+    setActionError('')
+    setActionPending(`quality-${record.key_region_id}`)
+    try {
+      const updated = await reviewKeyRegionQuality(record.key_region_id, draft)
+      setQualityDrafts((drafts) => {
+        const next = { ...drafts }
+        delete next[record.key_region_id]
+        return next
+      })
+      await loadPage()
+      if (record.key_region_id === selectedReviewId) {
+        setSelectedDetail(updated)
+      }
+    } catch (exc) {
+      setActionError(exc instanceof Error ? exc.message : 'Quality review failed')
+    } finally {
+      setActionPending('')
+    }
+  }
+
   const toggleKeyRegionSelection = (keyRegionId: string) => {
     setSelectedKeyRegionIds((current) => {
       const next = new Set(current)
@@ -625,6 +728,7 @@ export function KeyRegionsPage({ title }: { title: string }) {
         <div className="key-region-summary-tile"><span>Trainable key regions</span><strong>{summary.trainable}</strong></div>
         <div className="key-region-summary-tile"><span>Confirmed replay samples</span><strong>{summary.replay_samples}</strong></div>
         <div className="key-region-summary-tile"><span>Success / failure</span><strong>{summary.success} / {summary.failure}</strong></div>
+        <div className="key-region-summary-tile"><span>Quality reviewed</span><strong>{summary.quality_reviewed}</strong></div>
         <div className="key-region-summary-tile"><span>Needs crop review</span><strong>{summary.needs_crop}</strong></div>
         <div className="key-region-summary-tile"><span>Selected</span><strong>{selectedCount}</strong></div>
       </div>
@@ -664,6 +768,8 @@ export function KeyRegionsPage({ title }: { title: string }) {
           const cropBlockedReason = cropSaveBlockedReason(renderRecord, cropRange)
           const rescoreZeroPending = actionPending === `rescore-${renderRecord.key_region_id}-0`
           const rescoreOnePending = actionPending === `rescore-${renderRecord.key_region_id}-1`
+          const qualityPending = actionPending === `quality-${renderRecord.key_region_id}`
+          const qualityDraft = qualityDraftForRecord(renderRecord, qualityDrafts)
           const isPlaying = playingKeyRegionId === renderRecord.key_region_id
           const rewardTone = renderRecord.reward === 0 ? 'red' : renderRecord.reward === 1 ? 'green' : 'slate'
           return (
@@ -686,6 +792,15 @@ export function KeyRegionsPage({ title }: { title: string }) {
                   </span>
                   <span className={badgeTone(rewardTone)}>
                     {renderRecord.reward === null ? 'reward -' : `reward ${renderRecord.reward}`}
+                  </span>
+                  <span className={badgeTone(qualityTone(renderRecord.quality_score))}>
+                    {formatQualityValue(renderRecord)}
+                  </span>
+                  <span className={badgeTone(renderRecord.jitter_level === 'severe_jitter' ? 'red' : renderRecord.jitter_level === 'mild_jitter' ? 'amber' : 'slate')}>
+                    {renderRecord.jitter_level || 'jitter -'}
+                  </span>
+                  <span className={badgeTone(renderRecord.actor_train_mode === 'exclude' ? 'red' : renderRecord.actor_train_mode === 'strong' ? 'green' : 'slate')}>
+                    actor {renderRecord.actor_train_mode || 'auto'}
                   </span>
                   <span className={badgeTone('blue')}>{renderRecord.phase || 'phase -'}</span>
                   <span className={badgeTone(renderRecord.trainable ? 'slate' : 'amber')}>{keyRegionStatusLabel(renderRecord)}</span>
@@ -797,6 +912,73 @@ export function KeyRegionsPage({ title }: { title: string }) {
                         {rescoreOnePending ? 'Saving 1' : 'Score 1'}
                       </button>
                     </span>
+                  </div>
+                  <div className="key-region-quality-panel">
+                    <div className="key-region-panel-title compact">
+                      <h3>Quality review</h3>
+                      <span className={badgeTone(qualityTone(qualityDraft.quality_score))}>
+                        Q{qualityDraft.quality_score}
+                      </span>
+                    </div>
+                    <div className="quality-score-actions" aria-label="Quality score">
+                      {QUALITY_SCORE_OPTIONS.map((option) => (
+                        <button
+                          className={`score-button quality q${option.value} ${qualityDraft.quality_score === option.value ? 'active' : ''}`}
+                          key={option.value}
+                          type="button"
+                          title={option.description}
+                          onClick={() => updateQualityDraft(renderRecord, { quality_score: option.value })}
+                        >
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="key-region-quality-grid">
+                      <label>
+                        <span>Jitter penalty</span>
+                        <select
+                          value={qualityDraft.jitter_level}
+                          onChange={(event) => updateQualityDraft(renderRecord, { jitter_level: event.target.value as RLTJitterLevel })}
+                        >
+                          {JITTER_OPTIONS.map((option) => (
+                            <option value={option.value} key={option.value}>
+                              {option.label} ({option.penalty})
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                      <label>
+                        <span>Actor use</span>
+                        <select
+                          value={qualityDraft.actor_train_mode}
+                          onChange={(event) => updateQualityDraft(renderRecord, { actor_train_mode: event.target.value as RLTActorTrainMode })}
+                        >
+                          {ACTOR_TRAIN_MODE_OPTIONS.map((option) => (
+                            <option value={option.value} key={option.value}>{option.label}</option>
+                          ))}
+                        </select>
+                      </label>
+                      <label className="quality-notes-field">
+                        <span>Notes</span>
+                        <input
+                          type="text"
+                          value={qualityDraft.notes}
+                          placeholder="optional review note"
+                          onChange={(event) => updateQualityDraft(renderRecord, { notes: event.target.value })}
+                        />
+                      </label>
+                    </div>
+                    <p className="quality-formula">
+                      quality_final = clip(score / 4 - 0.25 * jitter_penalty, 0, 1). Reward 0/1 is kept for legacy training.
+                    </p>
+                    <button
+                      className="apply-button"
+                      type="button"
+                      disabled={qualityPending}
+                      onClick={() => void saveQualityReview(renderRecord)}
+                    >
+                      {qualityPending ? 'Saving quality' : 'Save quality'}
+                    </button>
                   </div>
                   <div className="key-region-action-group">
                     <button

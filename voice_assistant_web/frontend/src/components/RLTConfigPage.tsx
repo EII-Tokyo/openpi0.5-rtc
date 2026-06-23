@@ -290,6 +290,18 @@ export function RLTConfigPage({ rlt, onState }: Props) {
           </Field>
         </ConfigSection>
 
+        <ConfigSection title="Quality Review">
+          <ReadOnly label="Score 0" value="Bad miss: far from tube or wrong direction; critic negative only" />
+          <ReadOnly label="Score 1" value="Failure: reached the area but position or angle is clearly wrong" />
+          <ReadOnly label="Score 2" value="Near miss: failed, but bottle mouth was close and mostly aligned" />
+          <ReadOnly label="Score 3" value="Weak success: inserted but tilted, edge contact, shallow, or unstable" />
+          <ReadOnly label="Score 4" value="Stable success: aligned, smooth insertion, stable after insertion" />
+          <ReadOnly label="Jitter penalty" value="smooth=0.0, mild_jitter=0.3, severe_jitter=1.0" />
+          <ReadOnly label="Formula" value="quality_final = clip(score / 4 - 0.25 * jitter_penalty, 0, 1)" />
+          <ReadOnly label="Actor use" value="exclude=no BC, low_weight=weak BC, normal=regular BC, strong=emphasized BC" />
+          <ReadOnly label="Compatibility" value="reward 0/1 is preserved; quality is extra metadata for new training modes" />
+        </ConfigSection>
+
         <ConfigSection title="Restart Required">
           <ReadOnly label="Batch Size" value="RLT_BATCH_SIZE=64" />
           <ReadOnly label="Actor LR" value="RLT_ACTOR_LR=1e-4" />
@@ -299,6 +311,10 @@ export function RLTConfigPage({ rlt, onState }: Props) {
           <ReadOnly label="Actor Min Shards" value="RLT_ACTOR_MIN_REPLAY_SHARDS=40" />
           <ReadOnly label="Save Interval" value="RLT_SAVE_INTERVAL=1000" />
           <ReadOnly label="Actor Publish Interval" value="RLT_ACTOR_PUBLISH_INTERVAL=1000" />
+          <ReadOnly label="Quality Actor Weight" value="--quality-actor-weight-enabled" />
+          <ReadOnly label="Quality Baseline" value="--quality-actor-baseline 0.5" />
+          <ReadOnly label="Quality Temperature" value="--quality-actor-temperature 0.2" />
+          <ReadOnly label="Quality Max Weight" value="--quality-actor-max-weight 20" />
           <ReadOnly label="Replay Horizon" value={rlt.replay_action_horizon ?? 'unknown'} />
           <ReadOnly label="Train Horizon" value={rlt.train_action_horizon ?? 'unknown'} />
         </ConfigSection>

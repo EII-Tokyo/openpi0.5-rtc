@@ -71,8 +71,6 @@ class RLTControlStore:
                 raise ValueError(f"Cannot start key region while phase={self._state.phase}")
             self._state.phase = "key_region"
             self._state.active_key_region_id = uuid.uuid4().hex
-            self._state.human_takeover_active = False
-            self._state.active_takeover_id = None
             self._state.score_deadline = None
             self._state.last_reward = None
             self._state.actor_enabled = True
@@ -99,8 +97,6 @@ class RLTControlStore:
                 raise ValueError(f"Cannot end key region while phase={self._state.phase}")
             self._state.phase = "await_score"
             self._state.score_deadline = time.time() + 10.0
-            self._state.human_takeover_active = False
-            self._state.active_takeover_id = None
             if self._state.active_key_region_id:
                 self._segment_ledger.record_ended(self._state.active_key_region_id, phase=self._state.training_phase)
             self._state.actor_enabled = False
@@ -112,74 +108,6 @@ class RLTControlStore:
                 {
                     "source": request.source,
                     "key_region_id": self._state.active_key_region_id,
-                    "actor_enabled": self._state.actor_enabled,
-                    "actor_effective": self._state.actor_effective,
-                    "actor_locked_reason": self._state.actor_locked_reason,
-                },
-            )
-            return self._state.model_copy(deep=True)
-
-    def start_human_takeover(self, request: RLTControlRequest, *, reason: str = "near_failure") -> RLTControlState:
-        with self._lock:
-            self._apply_score_timeout_locked()
-            if self._state.phase not in {"idle", "key_region"}:
-                raise ValueError(f"Cannot start human takeover while phase={self._state.phase}")
-            starts_key_region = self._state.phase == "idle"
-            if starts_key_region:
-                self._state.phase = "key_region"
-                self._state.active_key_region_id = uuid.uuid4().hex
-                self._state.score_deadline = None
-                self._state.last_reward = None
-                self._segment_ledger.record_started(self._state.active_key_region_id, phase=self._state.training_phase)
-            if self._state.active_takeover_id is None:
-                self._state.active_takeover_id = f"takeover-{uuid.uuid4().hex}"
-            self._state.human_takeover_active = True
-            self._state.actor_enabled = True
-            self._add_event_locked("human_takeover_start", reason)
-            self._refresh_derived_locked()
-            self._persist_locked()
-            self._publish_locked(
-                "human_takeover_start",
-                {
-                    "source": request.source,
-                    "reason": reason,
-                    "key_region_id": self._state.active_key_region_id,
-                    "takeover_id": self._state.active_takeover_id,
-                    "starts_key_region": starts_key_region,
-                    "actor_enabled": self._state.actor_enabled,
-                    "actor_effective": self._state.actor_effective,
-                    "actor_locked_reason": self._state.actor_locked_reason,
-                },
-            )
-            return self._state.model_copy(deep=True)
-
-    def end_human_takeover(self, request: RLTControlRequest, *, reason: str = "operator_released") -> RLTControlState:
-        with self._lock:
-            self._apply_score_timeout_locked()
-            if self._state.phase != "key_region":
-                raise ValueError(f"Cannot end human takeover while phase={self._state.phase}")
-            if not self._state.human_takeover_active:
-                raise ValueError("Human takeover is not active")
-            key_region_id = self._state.active_key_region_id
-            takeover_id = self._state.active_takeover_id
-            self._state.phase = "await_score"
-            self._state.score_deadline = time.time() + 10.0
-            self._state.human_takeover_active = False
-            self._state.active_takeover_id = None
-            self._state.actor_enabled = False
-            if key_region_id:
-                self._segment_ledger.record_ended(key_region_id, phase=self._state.training_phase)
-            self._add_event_locked("human_takeover_end", reason)
-            self._refresh_derived_locked()
-            self._persist_locked()
-            self._publish_locked(
-                "human_takeover_end",
-                {
-                    "source": request.source,
-                    "reason": reason,
-                    "key_region_id": key_region_id,
-                    "takeover_id": takeover_id,
-                    "ends_key_region": True,
                     "actor_enabled": self._state.actor_enabled,
                     "actor_effective": self._state.actor_effective,
                     "actor_locked_reason": self._state.actor_locked_reason,
@@ -220,8 +148,6 @@ class RLTControlStore:
                 raise ValueError("No scored key region is pending confirmation")
             self._state.phase = "idle"
             self._state.active_key_region_id = None
-            self._state.human_takeover_active = False
-            self._state.active_takeover_id = None
             self._add_event_locked("confirm", f"reward={reward}")
             self._refresh_derived_locked()
             self._persist_locked()
@@ -240,11 +166,8 @@ class RLTControlStore:
                 self._segment_ledger.record_discarded(key_region_id, phase=self._state.training_phase, reason=reason)
             self._state.phase = "idle"
             self._state.active_key_region_id = None
-            self._state.human_takeover_active = False
-            self._state.active_takeover_id = None
             self._state.score_deadline = None
             self._state.last_reward = None
-            self._state.actor_enabled = False
             self._add_event_locked("discard", reason)
             self._apply_ledger_stats_locked()
             self._refresh_derived_locked()
@@ -376,6 +299,43 @@ class RLTControlStore:
             self._publish_locked(
                 "key_region_rescore",
                 {"source": source, "reason": reason, "key_region_id": key_region_id, "reward": reward},
+            )
+            return self._state.model_copy(deep=True)
+
+    def review_key_region_quality(
+        self,
+        key_region_id: str,
+        *,
+        quality_score: int,
+        jitter_level: str,
+        actor_train_mode: str,
+        quality_final: float,
+        source: str = "ui",
+        notes: str | None = None,
+    ) -> RLTControlState:
+        with self._lock:
+            self._segment_ledger.record_quality_review(
+                key_region_id,
+                quality_score=quality_score,
+                jitter_level=jitter_level,
+                actor_train_mode=actor_train_mode,
+                quality_final=quality_final,
+                source=source,
+                notes=notes,
+            )
+            self._add_event_locked("quality_review", f"{key_region_id}:q={quality_score}:{jitter_level}:{actor_train_mode}")
+            self._refresh_derived_locked()
+            self._persist_locked()
+            self._publish_locked(
+                "key_region_quality_review",
+                {
+                    "source": source,
+                    "key_region_id": key_region_id,
+                    "quality_score": quality_score,
+                    "jitter_level": jitter_level,
+                    "actor_train_mode": actor_train_mode,
+                    "quality_final": quality_final,
+                },
             )
             return self._state.model_copy(deep=True)
 
@@ -659,11 +619,8 @@ class RLTControlStore:
             self._segment_ledger.record_discarded(key_region_id, phase=self._state.training_phase, reason="score_timeout")
         self._state.phase = "idle"
         self._state.active_key_region_id = None
-        self._state.human_takeover_active = False
-        self._state.active_takeover_id = None
         self._state.score_deadline = None
         self._state.last_reward = None
-        self._state.actor_enabled = False
         self._add_event_locked("score_timeout_discard", "score_timeout")
         self._apply_ledger_stats_locked()
         self._refresh_derived_locked()

@@ -79,8 +79,6 @@ class RLTControlState(BaseModel):
     inference_actor_q_value: float | None = None
     inference_q_advantage: float | None = None
     active_key_region_id: str | None = None
-    human_takeover_active: bool = False
-    active_takeover_id: str | None = None
     score_deadline: float | None = None
     last_reward: int | None = None
     last_event: str | None = None
@@ -156,11 +154,6 @@ class RLTControlRequest(BaseModel):
     note: str | None = None
 
 
-class RLTHumanTakeoverRequest(BaseModel):
-    source: str = "ui"
-    reason: str = "near_failure"
-
-
 class RLTDiscardRequest(BaseModel):
     source: str = "ui"
     reason: str = "operator_discard"
@@ -190,6 +183,14 @@ class RLTKeyRegionRescoreRequest(BaseModel):
     reason: str = "operator_rescore"
 
 
+class RLTKeyRegionQualityRequest(BaseModel):
+    quality_score: int = Field(ge=0, le=4)
+    jitter_level: str = Field(pattern="^(smooth|mild_jitter|severe_jitter)$")
+    actor_train_mode: str = Field(pattern="^(auto|exclude|low_weight|normal|strong)$")
+    source: str = "ui"
+    notes: str | None = None
+
+
 class RLTKeyRegionCropResponse(BaseModel):
     key_region_id: str
     status: str = "committed"
@@ -209,6 +210,16 @@ class RLTSegmentRecord(BaseModel):
     status: str
     phase: str
     reward: int | None = None
+    quality_score: int | None = None
+    quality_task: float | None = None
+    jitter_level: str | None = None
+    jitter_penalty: float | None = None
+    quality_final: float | None = None
+    actor_train_mode: str = "auto"
+    quality_source: str = "legacy"
+    quality_version: int = 1
+    quality_updated_at: float | None = None
+    quality_notes: str | None = None
     shard_path: str | None = None
     num_replay_transitions: int = 0
     invalid_reason: str | None = None
@@ -224,6 +235,16 @@ class RLTKeyRegionReviewRecord(BaseModel):
     incomplete_reason: str | None = None
     phase: str | None = None
     reward: int | None = None
+    quality_score: int | None = None
+    quality_task: float | None = None
+    jitter_level: str | None = None
+    jitter_penalty: float | None = None
+    quality_final: float | None = None
+    actor_train_mode: str = "auto"
+    quality_source: str = "legacy"
+    quality_version: int = 1
+    quality_updated_at: float | None = None
+    quality_notes: str | None = None
     shard_path: str | None = None
     npz_exists: bool = False
     video_exists: bool = False
@@ -264,6 +285,7 @@ class RLTKeyRegionReviewSummary(BaseModel):
     success: int = 0
     failure: int = 0
     replay_samples: int = 0
+    quality_reviewed: int = 0
 
 
 class RLTKeyRegionReviewPage(BaseModel):
