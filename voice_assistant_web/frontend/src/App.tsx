@@ -1,9 +1,8 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { CameraGrid } from './components/CameraGrid'
 import { KeyRegionsPage } from './components/KeyRegionsPage'
 import { RLTConfigPage } from './components/RLTConfigPage'
 import { RLTConfigPanel, RLTControlPanel, RLTStatsPanel } from './components/RLTControlPanel'
-import { RolloutBrowser } from './components/RolloutBrowser'
 import { SystemPage } from './components/SystemPage'
 import { AppLanguage, translations } from './i18n'
 import { RLTControlState, sendRobotTask, wsBase } from './services/api'
@@ -131,7 +130,7 @@ export default function App() {
   const [state, setState] = useState<RealtimeState>(initialState)
   const [language, setLanguage] = useState<AppLanguage>('en')
   const [cameraView, setCameraView] = useState<'focus' | 'quad'>('quad')
-  const [page, setPage] = useState<'live' | 'config' | 'system' | 'rollouts' | 'key_regions'>('live')
+  const [page, setPage] = useState<'live' | 'key_regions' | 'config' | 'system'>('live')
   const [wsConnected, setWsConnected] = useState(false)
   const t = translations[language]
   const currentTaskLabel = state.robot.current_task ? truncateLabel(state.robot.current_task) : t.noActiveTask
@@ -175,12 +174,6 @@ export default function App() {
     }
   }, [])
 
-  const freshness = useMemo(() => {
-    if (!state.robot.timestamp) return t.waitingForRobot
-    const age = Date.now() / 1000 - state.robot.timestamp
-    return age < 1 ? t.live : t.stale(age.toFixed(1))
-  }, [state.robot.timestamp, t])
-
   const setRLTState = (rlt: RLTControlState) => {
     setState((current) => ({ ...current, rlt }))
   }
@@ -211,15 +204,6 @@ export default function App() {
             <button className={page === 'live' ? 'active' : ''} type="button" onClick={() => setPage('live')}>
               RLT Control
             </button>
-            <button className={page === 'config' ? 'active' : ''} type="button" onClick={() => setPage('config')}>
-              Config
-            </button>
-            <button className={page === 'system' ? 'active' : ''} type="button" onClick={() => setPage('system')}>
-              System
-            </button>
-            <button className={page === 'rollouts' ? 'active' : ''} type="button" onClick={() => setPage('rollouts')}>
-              Rollouts
-            </button>
             <button
               className={page === 'key_regions' ? 'active' : ''}
               type="button"
@@ -227,12 +211,13 @@ export default function App() {
             >
               Key Regions
             </button>
+            <button className={page === 'config' ? 'active' : ''} type="button" onClick={() => setPage('config')}>
+              Config
+            </button>
+            <button className={page === 'system' ? 'active' : ''} type="button" onClick={() => setPage('system')}>
+              System
+            </button>
           </nav>
-          <span className={`status-pill ${state.robot.timestamp ? 'live' : 'offline'}`}>{freshness}</span>
-          <span className="status-pill mode">{state.robot.mode}</span>
-          <span className="robot-task-badge" title={state.robot.current_task || t.noActiveTask}>
-            {currentTaskLabel}
-          </span>
           <label className="language-switch">
             <span>{t.language}</span>
             <select value={language} onChange={(event) => setLanguage(event.target.value as AppLanguage)}>
@@ -288,7 +273,13 @@ export default function App() {
       ) : page === 'key_regions' ? (
         <KeyRegionsPage title="Key Regions" />
       ) : (
-        <RolloutBrowser title="Collected Files" excludeRootPaths={["key_regions"]} />
+        <SystemPage
+          rlt={state.rlt}
+          onState={setRLTState}
+          wsConnected={wsConnected}
+          cameraStatus={state.camera_status}
+          cameraTimestamps={state.camera_timestamps}
+        />
       )}
     </main>
   )

@@ -1279,14 +1279,14 @@ button {
 }
 
 .key-regions-toolbar {
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .key-region-crop-warning {
   width: 100%;
-  margin: 2px 0 0;
+  margin: 0;
   color: #9f3a11;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 800;
 }
 
@@ -1356,16 +1356,16 @@ button {
 
 .key-region-summary-strip {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 8px;
-  margin-bottom: 10px;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+  margin-bottom: 8px;
 }
 
 .key-region-summary-tile {
   min-width: 0;
-  padding: 7px 10px;
+  padding: 5px 7px;
   border: 1px solid #ddd7cc;
-  border-radius: 8px;
+  border-radius: 6px;
   background: #fffefa;
 }
 
@@ -1373,17 +1373,17 @@ button {
 .key-region-kv span {
   display: block;
   color: #635b50;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 900;
   text-transform: uppercase;
 }
 
 .key-region-summary-tile strong {
   display: block;
-  margin-top: 2px;
+  margin-top: 1px;
   overflow: hidden;
   color: #221f1a;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 900;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1391,7 +1391,7 @@ button {
 
 .key-region-card-stack {
   display: grid;
-  gap: 12px;
+  gap: 10px;
 }
 
 .key-region-card {
@@ -1407,7 +1407,7 @@ button {
 }
 
 .key-region-card-head {
-  padding: 8px 10px;
+  padding: 6px 8px;
   border-bottom: 1px solid #ddd7cc;
 }
 
@@ -1437,14 +1437,14 @@ button {
 }
 
 .key-region-title-button strong {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 900;
 }
 
 .key-region-title-button span {
   margin-top: 2px;
   color: #635b50;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 800;
 }
 
@@ -1486,15 +1486,15 @@ button {
 
 .key-region-card-main {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(330px, 360px);
-  gap: 10px;
-  padding: 10px;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 300px);
+  gap: 8px;
+  padding: 8px;
 }
 
 .key-region-video-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 6px;
+  gap: 4px;
 }
 
 .key-region-video-tile {
@@ -1589,32 +1589,32 @@ button {
 .key-region-info-panel {
   display: grid;
   align-content: start;
-  gap: 7px;
+  gap: 6px;
   min-width: 0;
   border-left: 1px solid #ddd7cc;
-  padding-left: 10px;
+  padding-left: 8px;
 }
 
 .key-region-kv-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 6px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 5px;
 }
 
 .key-region-kv {
   min-width: 0;
-  padding: 5px 7px;
+  padding: 4px 6px;
   border: 1px solid #ddd7cc;
-  border-radius: 8px;
+  border-radius: 6px;
   background: #f7f4ec;
 }
 
 .key-region-kv strong {
   display: block;
-  margin-top: 2px;
+  margin-top: 1px;
   overflow: hidden;
   color: #221f1a;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 900;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1622,14 +1622,14 @@ button {
 
 .key-region-paths {
   display: grid;
-  gap: 6px;
+  gap: 5px;
 }
 
 .key-region-paths div {
   min-width: 0;
-  padding: 6px 7px;
+  padding: 5px 6px;
   border: 1px solid #ddd7cc;
-  border-radius: 8px;
+  border-radius: 6px;
   background: #fffdf8;
 }
 
@@ -1641,15 +1641,15 @@ button {
 
 .key-region-paths span {
   color: #635b50;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 900;
 }
 
 .key-region-paths code {
-  margin-top: 3px;
+  margin-top: 2px;
   overflow: hidden;
   color: #221f1a;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 800;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1658,7 +1658,7 @@ button {
 .key-region-trim-panel {
   border-top: 1px solid #ddd7cc;
   background: #faf8f2;
-  padding: 8px 10px 10px;
+  padding: 6px 8px 8px;
 }
 
 .key-region-trim-head {
@@ -1666,26 +1666,26 @@ button {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 6px;
+  margin-bottom: 5px;
 }
 
 .key-region-trim-head strong {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 900;
 }
 
 .key-region-trim-head span,
 .key-region-range-readout {
   color: #635b50;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 800;
 }
 
 .key-region-timeline {
   position: relative;
-  height: 54px;
+  height: 42px;
   border: 1px solid #ddd7cc;
-  border-radius: 8px;
+  border-radius: 6px;
   background: repeating-linear-gradient(to right, transparent 0, transparent 9.5%, rgba(99, 91, 80, 0.18) 9.5%, rgba(99, 91, 80, 0.18) 10%), #fffefa;
 }
 
@@ -1693,16 +1693,16 @@ button {
   position: absolute;
   left: 16px;
   right: 16px;
-  top: 20px;
-  height: 12px;
+  top: 14px;
+  height: 10px;
   border-radius: 999px;
   background: #ebe8df;
 }
 
 .key-region-clip {
   position: absolute;
-  top: -5px;
-  height: 22px;
+  top: -4px;
+  height: 18px;
   border: 2px solid #2463a6;
   border-radius: 6px;
   background: rgba(36, 99, 166, 0.16);
@@ -1721,10 +1721,10 @@ button {
 
 .key-region-handle {
   position: absolute;
-  top: -10px;
+  top: -9px;
   z-index: 3;
   width: 10px;
-  height: 32px;
+  height: 28px;
   border: 2px solid #fffefa;
   border-radius: 5px;
   background: #2463a6;
@@ -1760,10 +1760,10 @@ button {
 
 .key-region-playhead {
   position: absolute;
-  top: -13px;
+  top: -11px;
   z-index: 2;
   width: 2px;
-  height: 38px;
+  height: 32px;
   background: #221f1a;
   pointer-events: none;
 }
@@ -1790,11 +1790,11 @@ button {
   position: absolute;
   left: 16px;
   right: 16px;
-  bottom: 5px;
+  bottom: 3px;
   display: flex;
   justify-content: space-between;
   color: #635b50;
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 800;
 }
 
@@ -2039,15 +2039,15 @@ button {
 }
 
 .score-button {
-  min-height: 28px;
+  min-height: 26px;
   border: 1px solid #d9d2c5;
   border-radius: 6px;
   background: #fffefa;
   color: #3a332b;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 900;
   cursor: pointer;
-  padding: 0 10px;
+  padding: 0 7px;
 }
 
 .score-button.success.active {
@@ -2088,12 +2088,20 @@ button {
 
 .key-region-quality-panel {
   display: grid;
-  gap: 10px;
+  gap: 6px;
   width: 100%;
-  padding: 10px;
+  padding: 7px;
   border: 1px solid #ddd7cc;
-  border-radius: 8px;
+  border-radius: 6px;
   background: #f8f6f0;
+}
+
+.key-region-trim-actions {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
 }
 
 .key-region-panel-title.compact {
@@ -2101,35 +2109,36 @@ button {
 }
 
 .quality-score-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 5px;
 }
 
 .key-region-quality-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
+  grid-template-columns: 118px 118px minmax(140px, 1fr);
+  gap: 6px;
 }
 
 .key-region-quality-grid label {
   display: grid;
-  gap: 4px;
+  gap: 3px;
   min-width: 0;
   color: #635b50;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 800;
 }
 
 .key-region-quality-grid select,
 .key-region-quality-grid input {
   min-width: 0;
-  height: 32px;
+  height: 28px;
   border: 1px solid #d9d2c5;
   border-radius: 6px;
   background: #fffefa;
   color: #221f1a;
-  padding: 0 8px;
+  padding: 0 7px;
+  font-size: 11px;
   font-weight: 800;
 }
 
@@ -2144,7 +2153,24 @@ button {
   font-weight: 750;
 }
 
+.key-region-action-group {
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.key-region-action-group .ghost-button,
+.key-region-action-group .apply-button,
+.key-region-action-group .crop-play-button {
+  min-height: 30px;
+  padding: 6px 9px;
+  font-size: 11px;
+}
+
 @media (max-width: 860px) {
+  .key-region-trim-actions {
+    grid-template-columns: 1fr;
+  }
+
   .key-region-quality-grid {
     grid-template-columns: 1fr;
   }

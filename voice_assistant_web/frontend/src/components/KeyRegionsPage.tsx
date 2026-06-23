@@ -34,16 +34,13 @@ type QualityDraft = {
 }
 
 const KEY_REGION_CAMERA_ORDER = ['cam_high', 'cam_low', 'cam_left_wrist', 'cam_right_wrist']
-const KEY_REGION_PAGE_SIZE = 20
-const DEFAULT_REPLAY_HORIZON = 50
-const DEFAULT_TRAIN_HORIZON = 10
-const DEFAULT_CHUNK_STRIDE = 2
+const KEY_REGION_PAGE_SIZE = 10
 const QUALITY_SCORE_OPTIONS: Array<{ value: RLTQualityScore; label: string; description: string }> = [
-  { value: 0, label: '0 Bad miss', description: 'Far from the tube or clearly wrong direction; critic negative only.' },
-  { value: 1, label: '1 Failure', description: 'Reached the area, but bottle mouth or angle is clearly wrong.' },
-  { value: 2, label: '2 Near miss', description: 'Failed, but close to insertion with only small position or angle error.' },
-  { value: 3, label: '3 Weak success', description: 'Inserted, but edge contact, tilted bottle, shallow depth, or unstable motion.' },
-  { value: 4, label: '4 Stable success', description: 'Inserted smoothly, aligned well, and stayed stable.' },
+  { value: 0, label: '0 Bad', description: 'Far from the tube or clearly wrong direction; critic negative only.' },
+  { value: 1, label: '1 Fail', description: 'Reached the area, but bottle mouth or angle is clearly wrong.' },
+  { value: 2, label: '2 Near', description: 'Failed, but close to insertion with only small position or angle error.' },
+  { value: 3, label: '3 Weak', description: 'Inserted, but edge contact, tilted bottle, shallow depth, or unstable motion.' },
+  { value: 4, label: '4 Stable', description: 'Inserted smoothly, aligned well, and stayed stable.' },
 ]
 const JITTER_OPTIONS: Array<{ value: RLTJitterLevel; label: string; penalty: string }> = [
   { value: 'smooth', label: 'Smooth', penalty: '0.0' },
@@ -142,6 +139,14 @@ const formatReviewTime = (record: RLTKeyRegionReviewRecord) => {
 const reviewTimestamp = (record: RLTKeyRegionReviewRecord) =>
   record.score_time || record.end_time || record.start_time || record.updated_at || null
 
+const annotationTimestamp = (record: RLTKeyRegionReviewRecord) =>
+  record.quality_updated_at || record.score_time || null
+
+const formatAnnotationTime = (record: RLTKeyRegionReviewRecord) => {
+  const timestamp = annotationTimestamp(record)
+  return timestamp ? formatShortDateTime(timestamp) : 'not annotated'
+}
+
 const reviewTitle = (record: RLTKeyRegionReviewRecord, absoluteIndex: number, total: number) => {
   const time = formatShortDateTime(reviewTimestamp(record)) || record.key_region_id
   const task = record.task || 'key region'
@@ -235,25 +240,15 @@ const frameSummary = (record: RLTKeyRegionReviewRecord, range: CropRange) => {
 }
 
 const badgeTone = (tone: 'green' | 'blue' | 'amber' | 'red' | 'slate') => `key-region-badge ${tone}`
-const artifactBadgeTone = (exists: boolean) => (exists ? 'green' : 'amber')
 
 const keyRegionInfoRows = (record: RLTKeyRegionReviewRecord): KeyRegionInfoRow[] => [
-  { label: 'Status', value: keyRegionStatusLabel(record) },
   { label: 'Batch', value: record.batch || '-' },
-  { label: 'Reward', value: formatRewardValue(record.reward) },
+  { label: 'Last annotation', value: formatAnnotationTime(record) },
+  { label: 'Crop', value: `${formatDuration(record.crop_start_sec)} - ${formatDuration(record.crop_end_sec)}` },
+  { label: 'Samples', value: `${record.num_replay_transitions || 0}` },
+  { label: 'Reward', value: record.reward === null ? '-' : `${record.reward}` },
   { label: 'Quality', value: formatQualityValue(record) },
-  { label: 'Jitter', value: record.jitter_level || '-' },
-  { label: 'Actor mode', value: record.actor_train_mode || 'auto' },
-  { label: 'Quality source', value: record.quality_source || 'legacy' },
-  { label: 'Phase', value: record.phase || '-' },
-  { label: 'Video duration', value: formatDuration(record.duration_seconds) },
-  { label: 'Key duration', value: formatDuration(record.key_region_duration_seconds) },
-  { label: 'Transitions', value: `${record.num_replay_transitions || 0} samples` },
-  { label: 'Full horizon', value: `${DEFAULT_REPLAY_HORIZON} actions` },
-  { label: 'Train horizon', value: `${DEFAULT_TRAIN_HORIZON} actions` },
-  { label: 'Chunk stride', value: `${DEFAULT_CHUNK_STRIDE} frames` },
-  { label: 'Replay status', value: record.replay_status || (record.npz_exists ? 'written' : 'pending crop') },
-  { label: 'Missing metadata', value: record.missing_rlt_metadata?.length ? record.missing_rlt_metadata.join(', ') : '-' },
+  { label: 'Replay', value: record.replay_status || (record.npz_exists ? 'written' : 'pending') },
   { label: 'Eligibility', value: keyRegionEligibility(record) },
 ]
 
@@ -322,6 +317,7 @@ export function KeyRegionsPage({ title }: { title: string }) {
   const [cropRanges, setCropRanges] = useState<Record<string, CropRange>>({})
   const [qualityDrafts, setQualityDrafts] = useState<Record<string, QualityDraft>>({})
   const [playingKeyRegionId, setPlayingKeyRegionId] = useState('')
+  const [pendingPlaybackId, setPendingPlaybackId] = useState('')
   const [playbackTimes, setPlaybackTimes] = useState<Record<string, number>>({})
   const [actionPending, setActionPending] = useState('')
   const [actionError, setActionError] = useState('')
@@ -370,8 +366,8 @@ export function KeyRegionsPage({ title }: { title: string }) {
         const visible = new Set(page.items.map((record) => record.key_region_id))
         return new Set([...current].filter((keyRegionId) => visible.has(keyRegionId)))
       })
-      if (!page.items.some((record) => record.key_region_id === selectedReviewIdRef.current)) {
-        setSelectedReviewId(page.items[0]?.key_region_id || '')
+      if (selectedReviewIdRef.current && !page.items.some((record) => record.key_region_id === selectedReviewIdRef.current)) {
+        setSelectedReviewId('')
       }
     } catch (exc) {
       setActionError(exc instanceof Error ? exc.message : 'Key regions could not be loaded.')
@@ -395,17 +391,17 @@ export function KeyRegionsPage({ title }: { title: string }) {
     setSelectedKeyRegionIds(new Set())
     unloadActiveVideos()
     setPlayingKeyRegionId('')
+    setPendingPlaybackId('')
   }, [batchFilter, rewardFilter, statusFilter, unloadActiveVideos])
 
   useEffect(() => {
     if (!selectedReviewId) {
       setSelectedDetail(null)
       unloadActiveVideos()
+      setPendingPlaybackId('')
       return undefined
     }
     let ignore = false
-    unloadActiveVideos()
-    setPlayingKeyRegionId('')
     void fetchRLTKeyRegionDetail(selectedReviewId)
       .then((record) => {
         if (!ignore) setSelectedDetail(record)
@@ -415,7 +411,6 @@ export function KeyRegionsPage({ title }: { title: string }) {
       })
     return () => {
       ignore = true
-      unloadActiveVideos()
     }
   }, [selectedReviewId, unloadActiveVideos])
 
@@ -434,6 +429,11 @@ export function KeyRegionsPage({ title }: { title: string }) {
 
   const selectReviewRecord = (record: RLTKeyRegionReviewRecord) => {
     setPlaybackError('')
+    if (selectedReviewIdRef.current && selectedReviewIdRef.current !== record.key_region_id) {
+      pauseActiveVideos()
+      unloadActiveVideos()
+      setPlayingKeyRegionId('')
+    }
     setSelectedReviewId(record.key_region_id)
   }
 
@@ -457,20 +457,11 @@ export function KeyRegionsPage({ title }: { title: string }) {
     videoRefs.current.forEach((video) => video?.pause())
   }
 
-  const toggleCropPlayback = async (record: RLTKeyRegionReviewRecord) => {
-    if (selectedReviewId !== record.key_region_id) {
-      selectReviewRecord(record)
-      return
-    }
-    if (playingKeyRegionId === record.key_region_id) {
-      pauseActiveVideos()
-      setPlayingKeyRegionId('')
-      return
-    }
+  const startCropPlayback = async (record: RLTKeyRegionReviewRecord) => {
     const videos = videoRefs.current.filter((video): video is HTMLVideoElement => Boolean(video))
     if (!videos.length) {
       setPlaybackError('Preview is still loading. Try again in a moment.')
-      return
+      return false
     }
     const range = getCropRange(record)
     setPlaybackError('')
@@ -479,10 +470,42 @@ export function KeyRegionsPage({ title }: { title: string }) {
     if (results.every((result) => result.status === 'rejected')) {
       setPlaybackError('Preview playback failed. Try again after video metadata loads.')
       setPlayingKeyRegionId('')
-      return
+      return false
     }
     setPlayingKeyRegionId(record.key_region_id)
+    return true
   }
+
+  const toggleCropPlayback = async (record: RLTKeyRegionReviewRecord) => {
+    if (playingKeyRegionId === record.key_region_id) {
+      pauseActiveVideos()
+      setPlayingKeyRegionId('')
+      setPendingPlaybackId('')
+      return
+    }
+    if (selectedReviewId !== record.key_region_id) {
+      setPendingPlaybackId(record.key_region_id)
+      selectReviewRecord(record)
+      return
+    }
+    setPendingPlaybackId('')
+    await startCropPlayback(record)
+  }
+
+  useEffect(() => {
+    if (!pendingPlaybackId || !activeRecord || activeRecord.key_region_id !== pendingPlaybackId) return undefined
+    let cancelled = false
+    const timer = window.setTimeout(() => {
+      if (cancelled) return
+      void startCropPlayback(activeRecord).finally(() => {
+        if (!cancelled) setPendingPlaybackId('')
+      })
+    }, 0)
+    return () => {
+      cancelled = true
+      window.clearTimeout(timer)
+    }
+  }, [activeRecord, pendingPlaybackId])
 
   useEffect(() => {
     if (!playingKeyRegionId || !activeRecord || activeRecord.key_region_id !== playingKeyRegionId) return undefined
@@ -558,11 +581,23 @@ export function KeyRegionsPage({ title }: { title: string }) {
     window.addEventListener('pointerup', onUp, { once: true })
   }
 
+  const saveQualityDraft = async (record: RLTKeyRegionReviewRecord) => {
+    const draft = qualityDraftForRecord(record, qualityDrafts)
+    const updated = await reviewKeyRegionQuality(record.key_region_id, draft)
+    setQualityDrafts((drafts) => {
+      const next = { ...drafts }
+      delete next[record.key_region_id]
+      return next
+    })
+    return updated
+  }
+
   const saveCropForQ = async (record: RLTKeyRegionReviewRecord) => {
     const range = getCropRange(record)
     setActionError('')
     setActionPending(`crop-${record.key_region_id}`)
     try {
+      await saveQualityDraft(record)
       await cropKeyRegion(record.key_region_id, range.startSec, range.endSec)
       await loadPage()
       if (record.key_region_id === selectedReviewId) {
@@ -601,28 +636,6 @@ export function KeyRegionsPage({ title }: { title: string }) {
         ...patch,
       },
     }))
-  }
-
-  const saveQualityReview = async (record: RLTKeyRegionReviewRecord) => {
-    const draft = qualityDraftForRecord(record, qualityDrafts)
-    setActionError('')
-    setActionPending(`quality-${record.key_region_id}`)
-    try {
-      const updated = await reviewKeyRegionQuality(record.key_region_id, draft)
-      setQualityDrafts((drafts) => {
-        const next = { ...drafts }
-        delete next[record.key_region_id]
-        return next
-      })
-      await loadPage()
-      if (record.key_region_id === selectedReviewId) {
-        setSelectedDetail(updated)
-      }
-    } catch (exc) {
-      setActionError(exc instanceof Error ? exc.message : 'Quality review failed')
-    } finally {
-      setActionPending('')
-    }
   }
 
   const toggleKeyRegionSelection = (keyRegionId: string) => {
@@ -768,10 +781,8 @@ export function KeyRegionsPage({ title }: { title: string }) {
           const cropBlockedReason = cropSaveBlockedReason(renderRecord, cropRange)
           const rescoreZeroPending = actionPending === `rescore-${renderRecord.key_region_id}-0`
           const rescoreOnePending = actionPending === `rescore-${renderRecord.key_region_id}-1`
-          const qualityPending = actionPending === `quality-${renderRecord.key_region_id}`
           const qualityDraft = qualityDraftForRecord(renderRecord, qualityDrafts)
           const isPlaying = playingKeyRegionId === renderRecord.key_region_id
-          const rewardTone = renderRecord.reward === 0 ? 'red' : renderRecord.reward === 1 ? 'green' : 'slate'
           return (
             <article key={record.key_region_id} className={`key-region-card ${activeCard ? 'active' : ''}`}>
               <div className="key-region-card-head">
@@ -784,27 +795,8 @@ export function KeyRegionsPage({ title }: { title: string }) {
                 />
                 <button className="key-region-title-button" type="button" onClick={() => selectReviewRecord(record)}>
                   <strong>{reviewTitle(record, offset + index, total)}</strong>
-                  <span>{formatReviewTime(record)}</span>
+                  <span>{formatReviewTime(record)} · Last annotation: {formatAnnotationTime(record)}</span>
                 </button>
-                <div className="key-region-badges">
-                  <span className={badgeTone(renderRecord.trainable ? 'green' : 'amber')}>
-                    {renderRecord.trainable ? 'trainable' : 'needs crop'}
-                  </span>
-                  <span className={badgeTone(rewardTone)}>
-                    {renderRecord.reward === null ? 'reward -' : `reward ${renderRecord.reward}`}
-                  </span>
-                  <span className={badgeTone(qualityTone(renderRecord.quality_score))}>
-                    {formatQualityValue(renderRecord)}
-                  </span>
-                  <span className={badgeTone(renderRecord.jitter_level === 'severe_jitter' ? 'red' : renderRecord.jitter_level === 'mild_jitter' ? 'amber' : 'slate')}>
-                    {renderRecord.jitter_level || 'jitter -'}
-                  </span>
-                  <span className={badgeTone(renderRecord.actor_train_mode === 'exclude' ? 'red' : renderRecord.actor_train_mode === 'strong' ? 'green' : 'slate')}>
-                    actor {renderRecord.actor_train_mode || 'auto'}
-                  </span>
-                  <span className={badgeTone('blue')}>{renderRecord.phase || 'phase -'}</span>
-                  <span className={badgeTone(renderRecord.trainable ? 'slate' : 'amber')}>{keyRegionStatusLabel(renderRecord)}</span>
-                </div>
               </div>
 
               <div className="key-region-card-main">
@@ -818,9 +810,7 @@ export function KeyRegionsPage({ title }: { title: string }) {
                 <aside className="key-region-info-panel">
                   <div className="key-region-panel-title">
                     <h3>Replay Buffer</h3>
-                    <span className={badgeTone(renderRecord.trainable ? 'green' : 'amber')}>
-                      {renderRecord.trainable ? 'eligible for Q' : 'not eligible yet'}
-                    </span>
+                    <span>{renderRecord.trainable ? 'ready' : keyRegionStatusLabel(renderRecord)}</span>
                   </div>
                   <div className="key-region-kv-grid">
                     {keyRegionInfoRows(renderRecord).map((row) => (
@@ -830,12 +820,9 @@ export function KeyRegionsPage({ title }: { title: string }) {
                       </div>
                     ))}
                   </div>
-                  <div className="key-region-artifacts">
-                    <span className={badgeTone(artifactBadgeTone(renderRecord.video_exists))}>video</span>
-                    <span className={badgeTone(artifactBadgeTone(renderRecord.manifest_exists))}>manifest</span>
-                    <span className={badgeTone(artifactBadgeTone(renderRecord.npz_exists))}>npz</span>
-                    <span className={badgeTone('slate')}>{renderRecord.video_paths.length || 0} cameras</span>
-                  </div>
+                  {renderRecord.missing_rlt_metadata?.length ? (
+                    <p className="key-region-crop-warning">Missing {renderRecord.missing_rlt_metadata.join(', ')}</p>
+                  ) : null}
                   <div className="key-region-paths">
                     <div>
                       <span>Rollout path</span>
@@ -968,17 +955,6 @@ export function KeyRegionsPage({ title }: { title: string }) {
                         />
                       </label>
                     </div>
-                    <p className="quality-formula">
-                      quality_final = clip(score / 4 - 0.25 * jitter_penalty, 0, 1). Reward 0/1 is kept for legacy training.
-                    </p>
-                    <button
-                      className="apply-button"
-                      type="button"
-                      disabled={qualityPending}
-                      onClick={() => void saveQualityReview(renderRecord)}
-                    >
-                      {qualityPending ? 'Saving quality' : 'Save quality'}
-                    </button>
                   </div>
                   <div className="key-region-action-group">
                     <button
@@ -997,10 +973,10 @@ export function KeyRegionsPage({ title }: { title: string }) {
                       className="apply-button"
                       type="button"
                       disabled={cropPending || Boolean(cropBlockedReason)}
-                      title={cropBlockedReason || 'Save the selected replay sample range for Q training'}
+                      title={cropBlockedReason || 'Save quality and selected replay sample range for Q training'}
                       onClick={() => void saveCropForQ(renderRecord)}
                     >
-                      {cropPending ? 'Saving crop' : 'Save crop for Q'}
+                      {cropPending ? 'Saving' : 'Save crop for Q'}
                     </button>
                   </div>
                   {cropBlockedReason ? <p className="key-region-crop-warning">{cropBlockedReason}</p> : null}
