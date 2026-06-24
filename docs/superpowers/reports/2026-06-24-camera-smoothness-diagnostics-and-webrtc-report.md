@@ -368,3 +368,14 @@ gst-launch-1.0 -q videotestsrc num-buffers=5 ! videoconvert ! fakesink
 ```
 
 This proves the media sidecar can be built and can run a bounded GStreamer test pipeline before real ROS camera integration begins.
+
+103 smoke result:
+
+- Pulled commit `2625451` under `/home/eii/openpi0.5-rtc-reward-learning`.
+- `docker compose build eii_pilot_webrtc_media`: passed.
+- Started `eii_pilot_webrtc_media` only for smoke testing.
+- `GET /health`: returned `{"status":"ok"}`.
+- `GET /api/media/gstreamer`: `webrtcbin`, `videotestsrc`, `videoconvert`, and `fakesink` were available.
+- `POST /api/media/smoke/videotestsrc` with `num_buffers=5`: passed with return code `0`.
+- Stopped `eii_pilot_webrtc_media` after smoke testing.
+- Existing robot containers remained running.
