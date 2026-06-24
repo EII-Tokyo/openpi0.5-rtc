@@ -567,3 +567,21 @@ Local verification:
 ```
 
 This is the required precondition for the next step: a `videotestsrc` browser WebRTC page.
+
+103 verification:
+
+- Pulled commit `1e71f38` under `/home/eii/openpi0.5-rtc-reward-learning`.
+- `docker compose build eii_pilot_webrtc_media`: passed after installing `gstreamer1.0-nice`.
+- Started `eii_pilot_webrtc_media` only for smoke testing.
+- `GET /api/media/gstreamer`: returned `available=true` with `webrtcbin`, `nicesrc`, `nicesink`, `videotestsrc`, `videoconvert`, `fakesink`, and Python bindings all available.
+- `GET /api/media/webrtc/runtime`: returned:
+
+```text
+available=true
+ready=true
+sink_request_pad=true
+state=Gst.State.READY
+state_result=Gst.StateChangeReturn.SUCCESS
+```
+
+- Stopped `eii_pilot_webrtc_media` after smoke testing.
