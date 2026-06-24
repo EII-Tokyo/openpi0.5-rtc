@@ -432,3 +432,74 @@ RLT_SEGMENT_DB_PATH=/tmp/rlt_test_segments.sqlite3 .venv/bin/python -m pytest \
 Result: `13 passed`.
 
 This still does not switch live camera display to WebRTC. It only makes the media sidecar build and runtime dependency boundary stable enough for the next phase: attaching real camera sources to a bounded GStreamer/WebRTC pipeline.
+
+## Phase E Real ROS Camera Smoke Result
+
+Phase E starts attaching real camera sources to the media sidecar, but still keeps the test bounded and read-only.
+
+New endpoints:
+
+```text
+GET  /api/media/ros/cameras
+POST /api/media/smoke/ros-camera
+```
+
+`GET /api/media/ros/cameras` reports the ROS camera topic mapping used by the media sidecar:
+
+| Camera | Topic |
+|---|---|
+| `cam_high` | `/cam_high` |
+| `cam_low` | `/cam_low` |
+| `cam_left_wrist` | `/cam_left_wrist` |
+| `cam_right_wrist` | `/cam_right_wrist` |
+
+`POST /api/media/smoke/ros-camera` does a finite one-frame smoke:
+
+1. Validate the camera name.
+2. Subscribe to the selected ROS camera topic.
+3. Wait for one `aloha/RGBGrayscaleImage` message.
+4. Extract `images[0]`.
+5. Convert the image payload to BGR for OpenCV JPEG encoding.
+6. Write a temporary JPEG.
+7. Run a bounded GStreamer pipeline:
+
+```text
+gst-launch-1.0 -q filesrc location=<temporary_frame.jpg> ! jpegdec ! videoconvert ! fakesink
+```
+
+This proves that the media sidecar can consume the real robot camera topic and pass a real frame through GStreamer decoding/conversion without creating a live media pipeline yet.
+
+Safety boundaries:
+
+- It does not send robot commands.
+- It does not read RealSense devices directly.
+- It does not modify `aloha_ros_nodes`.
+- It does not replace the current MJPEG browser display.
+- It unsubscribes after receiving one frame or timing out.
+
+Local verification:
+
+- Unit tests passed:
+
+```text
+RLT_SEGMENT_DB_PATH=/tmp/rlt_test_segments.sqlite3 .venv/bin/python -m pytest \
+  voice_assistant_web/webrtc_media/media_service_test.py \
+  voice_assistant_web/backend/app/camera_capabilities_test.py -q
+```
+
+Result: `17 passed`.
+
+- Docker build reused cached GStreamer and Python dependency layers.
+- Container import/config smoke passed:
+
+```text
+from voice_assistant_web.webrtc_media import media_service
+media_service.get_ros_camera_config()
+media_service.validate_ros_camera_name("cam_high")
+```
+
+Next step after remote smoke passes:
+
+- Add a synthetic browser WebRTC track using `videotestsrc`.
+- Then move from one-frame real camera smoke to one real ROS camera track.
+- Only after one real track is stable should four real camera tracks be enabled.
