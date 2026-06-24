@@ -16,7 +16,7 @@ from pydantic import BaseModel
 from pydantic import Field
 
 
-GST_REQUIRED_PLUGINS = ("webrtcbin", "videotestsrc", "videoconvert", "fakesink")
+GST_REQUIRED_PLUGINS = ("webrtcbin", "nicesrc", "nicesink", "videotestsrc", "videoconvert", "fakesink")
 ROS_CAMERA_TOPICS: Dict[str, str] = {
     "cam_high": "/cam_high",
     "cam_low": "/cam_low",
@@ -98,6 +98,72 @@ def probe_gstreamer() -> Dict[str, Any]:
         "plugins": plugins,
         "python_bindings": python_bindings,
     }
+
+
+def probe_webrtc_runtime() -> Dict[str, Any]:
+    try:
+        return _probe_webrtc_runtime()
+    except Exception as exc:
+        return {
+            "available": False,
+            "ready": False,
+            "sink_request_pad": False,
+            "error": str(exc),
+        }
+
+
+def _probe_webrtc_runtime() -> Dict[str, Any]:
+    import gi
+
+    gi.require_version("Gst", "1.0")
+    from gi.repository import Gst
+
+    Gst.init(None)
+    pipeline = Gst.Pipeline.new("eii-webrtc-runtime-probe")
+    webrtc = Gst.ElementFactory.make("webrtcbin", "webrtc")
+    if webrtc is None:
+        return {
+            "available": False,
+            "ready": False,
+            "sink_request_pad": False,
+            "error": "Could not create webrtcbin",
+        }
+    pipeline.add(webrtc)
+    requested_pad = None
+    try:
+        state_result = pipeline.set_state(Gst.State.READY)
+        ready_result, state, pending = pipeline.get_state(2 * Gst.SECOND)
+        ready = state_result == Gst.StateChangeReturn.SUCCESS and ready_result == Gst.StateChangeReturn.SUCCESS
+        if not ready:
+            bus = pipeline.get_bus()
+            message = bus.timed_pop_filtered(0, Gst.MessageType.ERROR)
+            error = None
+            if message is not None:
+                parsed_error, debug = message.parse_error()
+                error = f"{parsed_error}: {debug}"
+            return {
+                "available": False,
+                "ready": False,
+                "sink_request_pad": False,
+                "state_result": str(state_result),
+                "state": str(state),
+                "pending": str(pending),
+                "error": error or "webrtcbin did not reach READY",
+            }
+        requested_pad = webrtc.get_request_pad("sink_%u")
+        return {
+            "available": requested_pad is not None,
+            "ready": True,
+            "sink_request_pad": requested_pad is not None,
+            "state_result": str(state_result),
+            "state": str(state),
+            "pending": str(pending),
+            "error": None if requested_pad is not None else "Could not request webrtcbin sink pad",
+        }
+    finally:
+        if requested_pad is not None:
+            webrtc.release_request_pad(requested_pad)
+        pipeline.set_state(Gst.State.NULL)
 
 
 def run_videotestsrc_smoke(num_buffers: int = 30) -> Dict[str, Any]:
@@ -288,6 +354,11 @@ def health() -> Dict[str, str]:
 @app.get("/api/media/gstreamer")
 def gstreamer_status() -> Dict[str, Any]:
     return probe_gstreamer()
+
+
+@app.get("/api/media/webrtc/runtime")
+def webrtc_runtime_status() -> Dict[str, Any]:
+    return probe_webrtc_runtime()
 
 
 @app.post("/api/media/smoke/videotestsrc")

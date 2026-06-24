@@ -36,6 +36,7 @@ def test_probe_gstreamer_reports_available_plugins(monkeypatch):
 
     assert status["available"] is True
     assert status["plugins"]["webrtcbin"]["available"] is True
+    assert status["plugins"]["nicesrc"]["available"] is True
     assert status["plugins"]["videotestsrc"]["available"] is True
 
 
@@ -123,3 +124,17 @@ def test_build_real_camera_jpeg_fakesink_command():
         "!",
         "fakesink",
     ]
+
+
+def test_probe_webrtc_runtime_reports_structured_error(monkeypatch):
+    def fake_probe():
+        raise RuntimeError("libnice elements are not available")
+
+    monkeypatch.setattr(media_service, "_probe_webrtc_runtime", fake_probe)
+
+    status = media_service.probe_webrtc_runtime()
+
+    assert status["available"] is False
+    assert status["ready"] is False
+    assert status["sink_request_pad"] is False
+    assert status["error"] == "libnice elements are not available"

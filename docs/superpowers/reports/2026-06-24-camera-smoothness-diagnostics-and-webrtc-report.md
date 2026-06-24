@@ -521,3 +521,49 @@ Next step after remote smoke passes:
 | `cam_right_wrist` | `/cam_right_wrist` | `bgr8` | 640x480 | 93,419 | 0.023 | ok |
 
 The sidecar was stopped after smoke testing. Existing robot containers were not restarted for this phase.
+
+## Phase F WebRTC Runtime Dependency Probe
+
+Before adding browser WebRTC playback, the media sidecar must prove that `webrtcbin` can actually enter `READY` state and allocate a send pad. `gst-inspect-1.0 webrtcbin` alone is not enough.
+
+Important finding:
+
+- The previous image had `webrtcbin`, but `webrtcbin` failed to enter `READY`.
+- The GStreamer bus error was:
+
+```text
+libnice elements are not available
+```
+
+- The image had the `libnice10` runtime library, but it did not have the GStreamer nice plugin package.
+- The Dockerfile now installs `gstreamer1.0-nice`.
+
+Diagnostics added:
+
+```text
+GET /api/media/webrtc/runtime
+```
+
+The runtime probe:
+
+1. Creates a `webrtcbin`.
+2. Sets a temporary pipeline to `READY`.
+3. Requests `sink_%u`.
+4. Releases the pad and tears the pipeline down.
+
+Local verification:
+
+```text
+/api/media/gstreamer:
+  webrtcbin=true
+  nicesrc=true
+  nicesink=true
+  python_bindings=true
+
+/api/media/webrtc/runtime:
+  available=true
+  ready=true
+  sink_request_pad=true
+```
+
+This is the required precondition for the next step: a `videotestsrc` browser WebRTC page.
