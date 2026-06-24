@@ -379,3 +379,45 @@ This proves the media sidecar can be built and can run a bounded GStreamer test 
 - `POST /api/media/smoke/videotestsrc` with `num_buffers=5`: passed with return code `0`.
 - Stopped `eii_pilot_webrtc_media` after smoke testing.
 - Existing robot containers remained running.
+
+## Phase D Build Hardening Result
+
+The media sidecar build was adjusted so future Python-only changes should reuse the expensive GStreamer dependency layers.
+
+Build changes:
+
+- The media sidecar now has its own minimal requirements file instead of installing the full control-backend requirements.
+- The Dockerfile uses BuildKit syntax and a `uv` cache mount for Python package installation.
+- `PYTHONPATH=/app` is set after dependency installation so runtime environment changes do not invalidate the apt/uv layers.
+- The sidecar intentionally runs `/usr/bin/python3`, the system Python from the ROS base image.
+
+Important finding:
+
+- The ROS base image also contains `/usr/local/bin/python3` as Python 3.10.
+- `apt install python3-gi` installs GI bindings for the system Python, which is Python 3.8 in this image.
+- Using `/usr/local/bin/python3` cannot reliably import `gi` because the binary extension ABI does not match.
+- Therefore the media sidecar should keep using `/usr/bin/python3` unless the image is rebuilt with matching Python 3.10 GI bindings.
+
+Local verification after the build hardening:
+
+- `docker compose build eii_pilot_webrtc_media`: passed and reused cached apt/uv layers.
+- Container import smoke passed:
+
+```text
+import gi
+gi.require_version("Gst", "1.0")
+gi.require_version("GstWebRTC", "1.0")
+from gi.repository import Gst, GstWebRTC
+```
+
+- Unit tests passed:
+
+```text
+RLT_SEGMENT_DB_PATH=/tmp/rlt_test_segments.sqlite3 .venv/bin/python -m pytest \
+  voice_assistant_web/webrtc_media/media_service_test.py \
+  voice_assistant_web/backend/app/camera_capabilities_test.py -q
+```
+
+Result: `13 passed`.
+
+This still does not switch live camera display to WebRTC. It only makes the media sidecar build and runtime dependency boundary stable enough for the next phase: attaching real camera sources to a bounded GStreamer/WebRTC pipeline.

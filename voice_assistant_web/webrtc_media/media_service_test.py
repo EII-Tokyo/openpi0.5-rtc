@@ -22,12 +22,31 @@ def test_probe_gstreamer_reports_available_plugins(monkeypatch):
         return media_service.CommandResult(ok=True, stdout=f"{command[-1]} ok", stderr="", returncode=0)
 
     monkeypatch.setattr(media_service, "_run_command", fake_run)
+    monkeypatch.setattr(media_service, "_import_gst_webrtc_bindings", lambda: None)
 
     status = media_service.probe_gstreamer()
 
     assert status["available"] is True
     assert status["plugins"]["webrtcbin"]["available"] is True
     assert status["plugins"]["videotestsrc"]["available"] is True
+
+
+def test_probe_gstreamer_reports_missing_python_bindings(monkeypatch):
+    def fake_import():
+        raise ModuleNotFoundError("No module named 'gi'")
+
+    monkeypatch.setattr(media_service, "_import_gst_webrtc_bindings", fake_import)
+    monkeypatch.setattr(
+        media_service,
+        "_run_command",
+        lambda command, timeout: media_service.CommandResult(ok=True, stdout="ok", stderr="", returncode=0),
+    )
+
+    status = media_service.probe_gstreamer()
+
+    assert status["available"] is False
+    assert status["python_bindings"]["available"] is False
+    assert "No module named 'gi'" in status["python_bindings"]["error"]
 
 
 def test_run_videotestsrc_smoke_uses_finite_pipeline(monkeypatch):

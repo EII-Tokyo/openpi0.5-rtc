@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1.7
+
 FROM lyl472324464/robot:aloha-ros1.0
 
 WORKDIR /app
@@ -9,12 +11,19 @@ RUN apt-get update && \
       gstreamer1.0-plugins-good \
       gstreamer1.0-plugins-bad \
       gstreamer1.0-plugins-ugly \
-      gstreamer1.0-libav && \
+      gstreamer1.0-libav \
+      python3-gi \
+      gir1.2-gstreamer-1.0 \
+      gir1.2-gst-plugins-base-1.0 \
+      gir1.2-gst-plugins-bad-1.0 && \
     rm -rf /var/lib/apt/lists/*
 
-COPY voice_assistant_web/backend/requirements.txt /tmp/eii-pilot-backend-requirements.txt
-RUN uv pip install --python 3.10 --system -r /tmp/eii-pilot-backend-requirements.txt
+COPY voice_assistant_web/webrtc_media/requirements.txt /tmp/eii-pilot-webrtc-media-requirements.txt
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv pip install --python /usr/bin/python3 --system -r /tmp/eii-pilot-webrtc-media-requirements.txt
+
+ENV PYTHONPATH=/app
 
 COPY voice_assistant_web /app/voice_assistant_web
 
-CMD ["python3", "-m", "uvicorn", "voice_assistant_web.webrtc_media.media_service:app", "--host", "0.0.0.0", "--port", "8013"]
+CMD ["/usr/bin/python3", "-m", "uvicorn", "voice_assistant_web.webrtc_media.media_service:app", "--host", "0.0.0.0", "--port", "8013"]

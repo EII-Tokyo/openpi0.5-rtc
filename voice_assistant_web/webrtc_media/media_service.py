@@ -41,6 +41,29 @@ def _run_command(command: list[str], timeout: float) -> CommandResult:
     )
 
 
+def _import_gst_webrtc_bindings() -> None:
+    import gi
+
+    gi.require_version("Gst", "1.0")
+    gi.require_version("GstWebRTC", "1.0")
+    from gi.repository import Gst  # noqa: F401
+    from gi.repository import GstWebRTC  # noqa: F401
+
+
+def probe_python_gstreamer_bindings() -> dict[str, Any]:
+    try:
+        _import_gst_webrtc_bindings()
+    except Exception as exc:
+        return {
+            "available": False,
+            "error": str(exc),
+        }
+    return {
+        "available": True,
+        "error": None,
+    }
+
+
 def probe_gstreamer() -> dict[str, Any]:
     plugins: dict[str, dict[str, Any]] = {}
     for plugin in GST_REQUIRED_PLUGINS:
@@ -50,9 +73,11 @@ def probe_gstreamer() -> dict[str, Any]:
             "error": None if result.ok else (result.stderr or result.stdout),
             "returncode": result.returncode,
         }
+    python_bindings = probe_python_gstreamer_bindings()
     return {
-        "available": all(plugin["available"] for plugin in plugins.values()),
+        "available": all(plugin["available"] for plugin in plugins.values()) and python_bindings["available"],
         "plugins": plugins,
+        "python_bindings": python_bindings,
     }
 
 
