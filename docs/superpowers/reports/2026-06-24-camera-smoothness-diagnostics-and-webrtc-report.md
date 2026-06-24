@@ -503,3 +503,21 @@ Next step after remote smoke passes:
 - Add a synthetic browser WebRTC track using `videotestsrc`.
 - Then move from one-frame real camera smoke to one real ROS camera track.
 - Only after one real track is stable should four real camera tracks be enabled.
+
+103 real camera smoke result:
+
+- Pulled commit `1aba428` under `/home/eii/openpi0.5-rtc-reward-learning`.
+- `docker compose build eii_pilot_webrtc_media`: passed and reused cached apt/uv dependency layers.
+- Started `eii_pilot_webrtc_media` only for smoke testing.
+- `GET /health`: returned `{"status":"ok"}`.
+- `GET /api/media/ros/cameras`: returned all four expected camera topics.
+- `POST /api/media/smoke/ros-camera`: passed for all four cameras.
+
+| Camera | Topic | Encoding | Size | JPEG bytes | Wait seconds | GStreamer result |
+|---|---|---|---|---:|---:|---|
+| `cam_high` | `/cam_high` | `bgr8` | 640x480 | 77,917 | 0.011 | ok |
+| `cam_low` | `/cam_low` | `bgr8` | 640x480 | 77,560 | 0.022 | ok |
+| `cam_left_wrist` | `/cam_left_wrist` | `bgr8` | 640x480 | 86,450 | 0.009 | ok |
+| `cam_right_wrist` | `/cam_right_wrist` | `bgr8` | 640x480 | 93,419 | 0.023 | ok |
+
+The sidecar was stopped after smoke testing. Existing robot containers were not restarted for this phase.
