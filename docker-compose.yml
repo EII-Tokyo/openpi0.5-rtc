@@ -318,6 +318,7 @@ services:
       - webrtc
     restart: unless-stopped
     network_mode: "host"
+    gpus: all
     init: true
     tty: true
     volumes:
@@ -325,5 +326,8 @@ services:
     environment:
       - PYTHONPATH=/app
       - EII_WEBRTC_MEDIA_PORT=8013
+      - EII_WEBRTC_ENCODER=nvenc
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=video,utility
     depends_on:
       - ros_master

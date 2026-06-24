@@ -52,6 +52,27 @@ export const cameraStreamUrl = (cameraName: string, fps?: number) => {
   return `${apiBase}/api/cameras/${encodeURIComponent(cameraName)}/stream.mjpg${query}`
 }
 
+export const browserReachableMediaBase = (mediaServiceUrl?: string | null) => {
+  const fallback = `${browserProtocol}//${browserHost}:8013`
+  if (!mediaServiceUrl) return fallback
+  try {
+    const url = new URL(mediaServiceUrl)
+    if (url.hostname === '127.0.0.1' || url.hostname === 'localhost') {
+      url.hostname = browserHost
+      url.protocol = browserProtocol
+    }
+    return trimSlash(url.toString())
+  } catch {
+    return fallback
+  }
+}
+
+export const cameraWebrtcOfferUrl = (cameraName: string, mediaServiceUrl?: string | null) =>
+  `${browserReachableMediaBase(mediaServiceUrl)}/api/media/aiortc/ros-camera/${encodeURIComponent(cameraName)}/offer`
+
+export const cameraWebrtcSessionUrl = (sessionId: string, mediaServiceUrl?: string | null) =>
+  `${browserReachableMediaBase(mediaServiceUrl)}/api/media/aiortc/sessions/${encodeURIComponent(sessionId)}`
+
 export type CameraTransport = 'webrtc' | 'mjpeg' | 'jpeg_ws'
 
 export type CameraCapabilitiesResponse = {
@@ -114,6 +135,11 @@ export type RLTKeyRegionReviewRecord = {
   start_time: number | null
   end_time: number | null
   score_time: number | null
+  review_datetime: string | null
+  start_datetime: string | null
+  score_datetime: string | null
+  crop_datetime: string | null
+  updated_datetime: string | null
   duration_seconds: number | null
   key_region_duration_seconds: number | null
   key_region_start_sec: number | null
@@ -154,6 +180,7 @@ export type RLTKeyRegionReviewQuery = {
   status?: 'all' | 'trainable' | 'needsCrop'
   reward?: 'all' | 'success' | 'failure'
   batch?: string
+  search?: string
   focusKeyRegionId?: string
 }
 
@@ -342,6 +369,7 @@ export const fetchRLTKeyRegionReview = (query: RLTKeyRegionReviewQuery = {}) => 
   if (query.status && query.status !== 'all') params.set('status', query.status)
   if (query.reward && query.reward !== 'all') params.set('reward', query.reward)
   if (query.batch && query.batch !== 'all') params.set('batch', query.batch)
+  if (query.search?.trim()) params.set('search', query.search.trim())
   if (query.focusKeyRegionId) params.set('focus_key_region_id', query.focusKeyRegionId)
   const suffix = params.toString() ? `?${params.toString()}` : ''
   return getJson<RLTKeyRegionReviewPage>(`/api/rlt/key-regions/review${suffix}`)

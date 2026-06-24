@@ -1,6 +1,6 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { AppLanguage, translations } from '../i18n'
-import { cameraStreamUrl, CameraTransport } from '../services/api'
+import { cameraStreamUrl, cameraWebrtcOfferUrl, cameraWebrtcSessionUrl, CameraTransport } from '../services/api'
 
 const CAMERAS = [
   { key: 'cam_high', labelKey: 'high' },
@@ -12,7 +12,7 @@ const CAMERAS = [
 const MJPEG_FPS = {
   focusPrimary: 30,
   focusSecondary: 10,
-  quad: 15,
+  quad: 30,
 }
 
 type Props = {
@@ -23,7 +23,133 @@ type Props = {
   currentTask: string | null
   cameraView: 'focus' | 'quad'
   onCameraViewChange: (view: 'focus' | 'quad') => void
-  cameraTransport: CameraTransport
+  cameraTransport: CameraTransport | null
+  cameraWebrtcMediaUrl: string | null
+}
+
+type AiortcCameraFeedProps = {
+  cameraKey: string
+  label: string
+  mediaServiceUrl: string | null
+  fps: number
+}
+
+const activeCameraFeedReleases: Record<string, (() => void) | undefined> = {}
+let lifecycleCleanupInstalled = false
+
+function releaseAllCameraFeeds() {
+  Object.values(activeCameraFeedReleases).forEach((release) => release?.())
+}
+
+function installCameraFeedLifecycleCleanup() {
+  if (lifecycleCleanupInstalled || typeof window === 'undefined') return
+  lifecycleCleanupInstalled = true
+  window.addEventListener('pagehide', releaseAllCameraFeeds)
+  window.addEventListener('beforeunload', releaseAllCameraFeeds)
+}
+
+function waitForIceGatheringComplete(peerConnection: RTCPeerConnection) {
+  if (peerConnection.iceGatheringState === 'complete') return Promise.resolve()
+  return new Promise<void>((resolve) => {
+    const checkState = () => {
+      if (peerConnection.iceGatheringState === 'complete') {
+        peerConnection.removeEventListener('icegatheringstatechange', checkState)
+        resolve()
+      }
+    }
+    peerConnection.addEventListener('icegatheringstatechange', checkState)
+  })
+}
+
+function preferH264(transceiver: RTCRtpTransceiver) {
+  const capabilities = RTCRtpSender.getCapabilities('video')
+  const h264Codecs = capabilities?.codecs.filter((codec) => codec.mimeType.toLowerCase() === 'video/h264') || []
+  if (h264Codecs.length > 0) {
+    transceiver.setCodecPreferences(h264Codecs)
+  }
+}
+
+function AiortcCameraFeed({ cameraKey, label, mediaServiceUrl, fps }: AiortcCameraFeedProps) {
+  const videoRef = useRef<HTMLVideoElement | null>(null)
+  const sessionIdRef = useRef<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    installCameraFeedLifecycleCleanup()
+    let isActive = true
+    const pc = new RTCPeerConnection({ iceServers: [] })
+    const release = () => {
+      if (!isActive) return
+      isActive = false
+      if (videoRef.current) {
+        videoRef.current.srcObject = null
+      }
+      pc.close()
+      const sessionId = sessionIdRef.current
+      sessionIdRef.current = null
+      if (sessionId) {
+        void fetch(cameraWebrtcSessionUrl(sessionId, mediaServiceUrl), { method: 'DELETE', keepalive: true })
+      }
+    }
+    activeCameraFeedReleases[cameraKey]?.()
+    activeCameraFeedReleases[cameraKey] = release
+
+    const start = async () => {
+      setError(null)
+      const transceiver = pc.addTransceiver('video', { direction: 'recvonly' })
+      preferH264(transceiver)
+      pc.ontrack = (event) => {
+        if (videoRef.current) {
+          videoRef.current.srcObject = event.streams[0]
+        }
+      }
+      const offer = await pc.createOffer()
+      await pc.setLocalDescription(offer)
+      await waitForIceGatheringComplete(pc)
+      if (!isActive || !pc.localDescription) return
+      const response = await fetch(cameraWebrtcOfferUrl(cameraKey, mediaServiceUrl), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sdp: pc.localDescription.sdp,
+          type: pc.localDescription.type,
+          fps,
+        }),
+      })
+      if (!response.ok) {
+        throw new Error(`WebRTC ${cameraKey} offer failed: ${response.status}`)
+      }
+      const answer = await response.json()
+      sessionIdRef.current = typeof answer.session_id === 'string' ? answer.session_id : null
+      if (!isActive) {
+        if (sessionIdRef.current) {
+          void fetch(cameraWebrtcSessionUrl(sessionIdRef.current, mediaServiceUrl), { method: 'DELETE', keepalive: true })
+        }
+        sessionIdRef.current = null
+        return
+      }
+      await pc.setRemoteDescription(answer)
+    }
+
+    start().catch((cause) => {
+      if (!isActive) return
+      setError(cause instanceof Error ? cause.message : String(cause))
+    })
+
+    return () => {
+      release()
+      if (activeCameraFeedReleases[cameraKey] === release) {
+        delete activeCameraFeedReleases[cameraKey]
+      }
+    }
+  }, [cameraKey, fps, mediaServiceUrl])
+
+  return (
+    <>
+      <video ref={videoRef} className="camera-feed-media" aria-label={label} autoPlay playsInline muted />
+      {error ? <div className="camera-feed-error">{error}</div> : null}
+    </>
+  )
 }
 
 async function drawJpegB64ToCanvas(b64: string, canvas: HTMLCanvasElement | null) {
@@ -63,6 +189,7 @@ export function CameraGrid({
   cameraView,
   onCameraViewChange,
   cameraTransport,
+  cameraWebrtcMediaUrl,
 }: Props) {
   const t = translations[language]
   const canvasRefs = useRef<Record<string, HTMLCanvasElement | null>>({})
@@ -99,7 +226,20 @@ export function CameraGrid({
   }
 
   const renderCameraMedia = (cameraKey: (typeof CAMERAS)[number]['key'], label: string) => {
-    if (cameraTransport === 'mjpeg' || cameraTransport === 'webrtc') {
+    if (!cameraTransport) {
+      return <div className="camera-feed-placeholder">Loading camera transport</div>
+    }
+    if (cameraTransport === 'webrtc') {
+      return (
+        <AiortcCameraFeed
+          cameraKey={cameraKey}
+          label={label}
+          mediaServiceUrl={cameraWebrtcMediaUrl}
+          fps={mjpegFpsFor(cameraKey)}
+        />
+      )
+    }
+    if (cameraTransport === 'mjpeg') {
       return <img className="camera-feed-media" src={cameraStreamUrl(cameraKey, mjpegFpsFor(cameraKey))} alt={label} />
     }
     return <canvas ref={bindCanvas(cameraKey)} className="camera-feed-canvas" aria-label={label} />

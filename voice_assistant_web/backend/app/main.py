@@ -13,6 +13,8 @@ import shutil
 import sqlite3
 import subprocess
 import time
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 from fastapi import FastAPI
 from fastapi import Header
@@ -70,7 +72,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-camera_bridge = CameraBridge()
+camera_bridge = CameraBridge(
+    encode_jpeg=settings.camera_transport != "webrtc" or settings.realtime_include_camera_frames,
+)
 webrtc_sessions = CameraWebRTCSessionStore()
 robot_state_bridge = RobotStateBridge()
 redis_client = create_redis_client()
@@ -80,6 +84,7 @@ REPLAY_ROOT = Path(settings.replay_root).expanduser().resolve()
 VIDEO_CHUNK_SIZE = 1024 * 1024
 VIDEO_CACHE_ROOT = Path(os.getenv("ROLLOUTS_VIDEO_CACHE", "/tmp/eii_rollout_video_cache"))
 DEFAULT_RLT_PRE_ROLL_SECONDS = float(os.getenv("RLT_DEFAULT_PRE_ROLL_SECONDS", "2.0"))
+KEY_REGION_TIMEZONE = ZoneInfo(os.getenv("RLT_KEY_REGION_TIMEZONE", "Asia/Tokyo"))
 PREFERENCE_ROUND_BUDGET = int(os.getenv("RLT_PREFERENCE_ROUND_BUDGET", "800"))
 PREFERENCE_SAMPLE_ROUND = int(os.getenv("RLT_PREFERENCE_SAMPLE_ROUND", "1"))
 ROBOT_RUNTIME_HEARTBEAT_TIMEOUT_SECONDS = float(os.getenv("ROBOT_RUNTIME_HEARTBEAT_TIMEOUT_SECONDS", "3.0"))
@@ -96,6 +101,10 @@ ROBOT_TASK_LABELS = {
 }
 
 
+def should_start_camera_bridge() -> bool:
+    return settings.camera_transport != "webrtc" or settings.realtime_include_camera_frames
+
+
 @app.on_event("startup")
 def on_startup() -> None:
     if settings.enable_ros:
@@ -106,7 +115,10 @@ def on_startup() -> None:
                 rospy.init_node("eii_pilot_backend", anonymous=True, disable_signals=True)
         except Exception:
             logging.exception("ROS node initialization failed")
-        camera_bridge.start()
+        if should_start_camera_bridge():
+            camera_bridge.start()
+        else:
+            logging.info("Camera bridge disabled because WebRTC media sidecar owns camera streaming")
         robot_state_bridge.start()
     else:
         logging.info("ROS bridges disabled by EII_PILOT_ENABLE_ROS=false")
@@ -256,6 +268,18 @@ def _realtime_camera_frames() -> dict[str, str]:
     if not settings.realtime_include_camera_frames:
         return {}
     return camera_bridge.snapshot_jpeg_b64_all()
+
+
+def _camera_status() -> dict[str, bool]:
+    if not should_start_camera_bridge():
+        return {name: True for name in camera_bridge.camera_names}
+    return camera_bridge.get_camera_status()
+
+
+def _camera_timestamps() -> dict[str, float | None]:
+    if not should_start_camera_bridge():
+        return {name: None for name in camera_bridge.camera_names}
+    return camera_bridge.get_camera_timestamps()
 
 
 def _safe_rollout_path(relative_path: str) -> Path:
@@ -608,8 +632,8 @@ async def realtime_socket(websocket: WebSocket) -> None:
                 last_camera_push = now
             payload = RealtimePayload(
                 robot=RuntimeStatePayload(**robot_state_bridge.snapshot()),
-                camera_status=camera_bridge.get_camera_status(),
-                camera_timestamps=camera_bridge.get_camera_timestamps(),
+                camera_status=_camera_status(),
+                camera_timestamps=_camera_timestamps(),
                 camera_jpeg_b64=camera_jpeg_b64,
                 rlt=rlt_control.snapshot_fast(),
             )
@@ -686,13 +710,13 @@ def _batch_from_rollout_path(path: Path) -> str | None:
 
 
 def _batch_from_replay_path(path: Path) -> str | None:
+    if "manual" in path.parts:
+        return "manual"
+    for part in path.parts:
+        if re.fullmatch(r"\d{4}-\d{2}-\d{2}", part):
+            return part
     with contextlib.suppress(ValueError):
         parts = path.resolve().relative_to(REPLAY_ROOT).parts
-        if "manual" in parts:
-            return "manual"
-        for part in parts:
-            if re.fullmatch(r"\d{4}-\d{2}-\d{2}", part):
-                return part
         if len(parts) >= 3 and parts[0] == "rlt_key_regions":
             return parts[2]
     return None
@@ -875,6 +899,7 @@ def _key_region_review_records(*, batch: str = "all") -> list[dict]:
             record["batch"] = record.get("batch") or _batch_from_replay_path(shard_path)
         record["manifest_exists"] = bool(record.get("manifest_exists"))
         record["video_exists"] = bool(record.get("video_exists"))
+        _add_key_region_datetime_fields(record)
         _reconcile_key_region_record(record)
         record["trainable"] = record.get("status") == "committed" and _record_has_trainable_files(record)
         record["needs_crop"] = _record_needs_crop(record)
@@ -897,6 +922,82 @@ def _key_region_review_records(*, batch: str = "all") -> list[dict]:
     return sorted(by_id.values(), key=lambda item: item.get("score_time") or item.get("updated_at") or 0, reverse=True)
 
 
+def _key_region_review_timestamp(record: dict) -> float | None:
+    for key in ("score_time", "end_time", "start_time", "updated_at"):
+        value = record.get(key)
+        with contextlib.suppress(TypeError, ValueError, OSError):
+            return float(value)
+    return None
+
+
+def _format_key_region_datetime(timestamp: float | None) -> str | None:
+    if timestamp is None:
+        return None
+    with contextlib.suppress(TypeError, ValueError, OSError, OverflowError):
+        return datetime.fromtimestamp(float(timestamp), tz=KEY_REGION_TIMEZONE).strftime("%Y-%m-%d %H:%M:%S")
+    return None
+
+
+def _add_key_region_datetime_fields(record: dict) -> None:
+    record["review_datetime"] = _format_key_region_datetime(_key_region_review_timestamp(record))
+    record["start_datetime"] = _format_key_region_datetime(record.get("start_time"))
+    record["score_datetime"] = _format_key_region_datetime(record.get("score_time"))
+    record["updated_datetime"] = _format_key_region_datetime(record.get("updated_at"))
+    record["crop_datetime"] = _format_key_region_datetime(_key_region_crop_timestamp(record))
+
+
+def _key_region_crop_timestamp(record: dict) -> float | None:
+    text = " ".join(
+        str(value)
+        for value in (
+            record.get("key_region_id"),
+            record.get("shard_path"),
+            record.get("local_shard_path"),
+        )
+        if value
+    )
+    match = re.search(r"\.crop_(\d{10,})", text)
+    if not match:
+        return None
+    with contextlib.suppress(TypeError, ValueError, OSError, OverflowError):
+        return int(match.group(1)) / 1000.0
+    return None
+
+
+def _searchable_key_region_text(record: dict) -> str:
+    values = [
+        record.get("key_region_id"),
+        record.get("batch"),
+        record.get("task"),
+        record.get("phase"),
+        record.get("status"),
+        record.get("reward"),
+        record.get("review_datetime"),
+        record.get("start_datetime"),
+        record.get("score_datetime"),
+        record.get("crop_datetime"),
+        record.get("updated_datetime"),
+        record.get("rollout_path"),
+        record.get("local_rollout_path"),
+        record.get("shard_path"),
+        record.get("local_shard_path"),
+        record.get("default_video_path"),
+        *(record.get("video_paths") or []),
+    ]
+    compact_dates = []
+    for value in (
+        record.get("review_datetime"),
+        record.get("start_datetime"),
+        record.get("score_datetime"),
+        record.get("crop_datetime"),
+        record.get("updated_datetime"),
+    ):
+        if value:
+            compact_dates.extend([str(value).replace("-", ""), str(value).replace("-", "").replace(":", "").replace(" ", "")])
+    values.extend(compact_dates)
+    return " ".join(str(value) for value in values if value is not None).lower()
+
+
 def _key_region_review_summary(records: list[dict]) -> RLTKeyRegionReviewSummary:
     return RLTKeyRegionReviewSummary(
         total=len(records),
@@ -914,10 +1015,25 @@ def _filter_key_region_review_records(
     status: str = "all",
     reward: str = "all",
     batch: str = "all",
+    search: str = "",
 ) -> list[dict]:
     filtered = records
     if batch and batch != "all":
         filtered = [record for record in filtered if str(record.get("batch") or "") == batch]
+
+    query = search.strip().lower()
+    if query:
+        normalized_query = query.replace("/", "-")
+        compact_query = normalized_query.replace("-", "").replace(":", "").replace(" ", "")
+        terms = [normalized_query]
+        if compact_query and compact_query != normalized_query:
+            terms.append(compact_query)
+        filtered = [
+            record
+            for record in filtered
+            if all(term in _searchable_key_region_text(record) for term in terms[:1])
+            or (compact_query and compact_query in _searchable_key_region_text(record))
+        ]
 
     if status == "trainable":
         filtered = [record for record in filtered if record.get("trainable")]
@@ -1105,6 +1221,7 @@ def rlt_key_region_review(
     status: str = "all",
     reward: str = "all",
     batch: str = "all",
+    search: str = "",
     focus_key_region_id: str | None = None,
 ) -> RLTKeyRegionReviewPage:
     if focus_key_region_id and not re.fullmatch(r"[A-Za-z0-9_.-]+", focus_key_region_id):
@@ -1112,7 +1229,13 @@ def rlt_key_region_review(
     batches = _key_region_review_batches_from_files()
     resolved_batch = batches[0] if batch == "latest" and batches else batch
     all_records = _key_region_review_records(batch=resolved_batch)
-    filtered = _filter_key_region_review_records(all_records, status=status, reward=reward, batch=resolved_batch)
+    filtered = _filter_key_region_review_records(
+        all_records,
+        status=status,
+        reward=reward,
+        batch=resolved_batch,
+        search=search,
+    )
     safe_limit = min(max(limit, 1), 100)
     safe_offset = min(max(offset, 0), len(filtered))
     if focus_key_region_id:

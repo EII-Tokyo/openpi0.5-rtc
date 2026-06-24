@@ -262,6 +262,27 @@ button {
   object-fit: contain;
 }
 
+.camera-feed-placeholder {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+  color: #d8d1c4;
+  font-size: 13px;
+  background: #151915;
+}
+
+.camera-feed-error {
+  position: absolute;
+  inset: auto 8px 8px 8px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: rgba(38, 20, 20, 0.88);
+  color: #ffd8d1;
+  font-size: 12px;
+  line-height: 1.3;
+}
+
 .camera-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1357,6 +1378,10 @@ button {
   color: #221f1a;
   font-size: 12px;
   font-weight: 800;
+}
+
+.key-region-search-control {
+  width: min(260px, 100%);
 }
 
 .key-region-summary-strip {

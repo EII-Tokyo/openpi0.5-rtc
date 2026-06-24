@@ -60,6 +60,20 @@ def test_camera_capabilities_default_to_mjpeg(monkeypatch):
     assert response.webrtc["media_service_attached"] is False
 
 
+def test_camera_bridge_starts_for_mjpeg_but_not_webrtc_without_realtime_frames(monkeypatch):
+    monkeypatch.setattr(main.settings, "camera_transport", "mjpeg")
+    monkeypatch.setattr(main.settings, "realtime_include_camera_frames", False)
+    assert main.should_start_camera_bridge()
+
+    monkeypatch.setattr(main.settings, "camera_transport", "webrtc")
+    monkeypatch.setattr(main.settings, "realtime_include_camera_frames", False)
+    assert not main.should_start_camera_bridge()
+
+    monkeypatch.setattr(main.settings, "camera_transport", "webrtc")
+    monkeypatch.setattr(main.settings, "realtime_include_camera_frames", True)
+    assert main.should_start_camera_bridge()
+
+
 def test_realtime_camera_frames_disabled_by_default(monkeypatch):
     bridge = _FakeCameraBridge()
     monkeypatch.setattr(main, "camera_bridge", bridge)

@@ -138,7 +138,8 @@ export default function App() {
   const [state, setState] = useState<RealtimeState>(initialState)
   const [language, setLanguage] = useState<AppLanguage>('en')
   const [cameraView, setCameraView] = useState<'focus' | 'quad'>('quad')
-  const [cameraTransport, setCameraTransport] = useState<CameraTransport>('mjpeg')
+  const [cameraTransport, setCameraTransport] = useState<CameraTransport | null>(null)
+  const [cameraWebrtcMediaUrl, setCameraWebrtcMediaUrl] = useState<string | null>(null)
   const [page, setPage] = useState<'live' | 'key_regions' | 'rlhf' | 'config' | 'system'>('live')
   const [keyRegionFocus, setKeyRegionFocus] = useState<KeyRegionFocusTarget | null>(null)
   const [rlhfRefreshToken, setRlhfRefreshToken] = useState(0)
@@ -191,10 +192,14 @@ export default function App() {
       .then((capabilities) => {
         if (!isActive) return
         setCameraTransport(capabilities.preferred_transport || 'mjpeg')
+        setCameraWebrtcMediaUrl(
+          typeof capabilities.webrtc?.media_service_url === 'string' ? capabilities.webrtc.media_service_url : null,
+        )
       })
       .catch(() => {
         if (!isActive) return
         setCameraTransport('mjpeg')
+        setCameraWebrtcMediaUrl(null)
       })
     return () => {
       isActive = false
@@ -286,6 +291,7 @@ export default function App() {
               cameraView={cameraView}
               onCameraViewChange={setCameraView}
               cameraTransport={cameraTransport}
+              cameraWebrtcMediaUrl={cameraWebrtcMediaUrl}
             />
             <aside className="control-rail rlt-rail">
               <RLTControlPanel rlt={state.rlt} onState={setRLTState} />

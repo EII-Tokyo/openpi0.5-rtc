@@ -16,7 +16,8 @@ from .config import settings
 class CameraBridge:
     camera_names = ("cam_high", "cam_low", "cam_left_wrist", "cam_right_wrist")
 
-    def __init__(self) -> None:
+    def __init__(self, encode_jpeg: bool = True) -> None:
+        self._encode_jpeg = encode_jpeg
         self._lock = threading.Lock()
         self._latest_jpegs: dict[str, bytes] = {}
         self._latest_timestamps: dict[str, float] = {}
@@ -71,6 +72,11 @@ class CameraBridge:
                     self._record_source_frame(camera_name, received_at)
                     if not message.images:
                         self._record_drop(camera_name, "RGBGrayscaleImage contains no images")
+                        return
+                    self._record_image_metadata(camera_name, message.images[0])
+                    if not self._encode_jpeg:
+                        with self._lock:
+                            self._latest_timestamps[camera_name] = received_at
                         return
                     encode_start = time.perf_counter()
                     frame = self._image_msg_to_bgr(message.images[0])
@@ -127,7 +133,10 @@ class CameraBridge:
 
     def get_camera_status(self) -> dict[str, bool]:
         with self._lock:
-            return {name: name in self._latest_jpegs for name in self.camera_names}
+            return {
+                name: bool(self._stats.setdefault(name, self._new_camera_stats())["last_frame_wall_time"])
+                for name in self.camera_names
+            }
 
     def get_camera_timestamps(self) -> dict[str, float | None]:
         with self._lock:
@@ -145,8 +154,8 @@ class CameraBridge:
                 stats = self._stats.setdefault(name, self._new_camera_stats())
                 encode_samples = list(stats["encode_ms_recent"])
                 cameras[name] = {
-                    "has_frame": name in self._latest_jpegs,
-                    "frame_age_seconds": self._age_seconds(stats["last_encode_wall_time"], now),
+                    "has_frame": bool(stats["last_frame_wall_time"]),
+                    "frame_age_seconds": self._age_seconds(stats["last_frame_wall_time"], now),
                     "source_fps_recent": self._fps_from_times(stats["source_times_recent"]),
                     "encoded_fps_recent": self._fps_from_times(stats["encoded_times_recent"]),
                     "raw_frames_total": stats["raw_frames_total"],
@@ -174,6 +183,13 @@ class CameraBridge:
             stats["raw_frames_total"] += 1
             stats["last_frame_wall_time"] = timestamp
             stats["source_times_recent"].append(timestamp)
+
+    def _record_image_metadata(self, camera_name: str, image_msg: Any) -> None:
+        with self._lock:
+            stats = self._stats.setdefault(camera_name, self._new_camera_stats())
+            stats["last_encoding"] = getattr(image_msg, "encoding", None)
+            stats["last_width"] = int(getattr(image_msg, "width", 0) or 0)
+            stats["last_height"] = int(getattr(image_msg, "height", 0) or 0)
 
     def _record_drop(self, camera_name: str, reason: str) -> None:
         with self._lock:
