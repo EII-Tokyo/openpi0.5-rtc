@@ -43,6 +43,21 @@ Sampling `/api/cameras/{name}/stream.mjpg` for about 3 seconds:
 
 The backend and ROS camera node are doing substantial image work even though the browser only receives about 10 fps.
 
+### Diagnostics API After Deployment
+
+After deploying this change and restarting `eii_pilot_backend`, `GET /api/cameras/diagnostics` reported:
+
+| Camera | Source fps | Encoded fps | Frame age | JPEG bytes | Mean encode time |
+|---|---:|---:|---:|---:|---:|
+| `cam_high` | 60.0 | 59.9 | about 39 ms | 41,936 | 1.02 ms |
+| `cam_low` | 59.9 | 59.9 | about 37 ms | 40,476 | 0.92 ms |
+| `cam_left_wrist` | 59.9 | 59.9 | about 37 ms | 45,893 | 1.01 ms |
+| `cam_right_wrist` | 59.9 | 59.9 | about 37 ms | 49,570 | 0.94 ms |
+
+All four cameras had `dropped_frames_total=0` and `error_count=0` in that sample.
+
+This confirms the backend is currently encoding close to the full 60 Hz camera source, while the browser MJPEG endpoint only emits about 10 fps. The most direct smoothness limit is therefore the MJPEG stream loop and browser transport choice, not camera capture failure.
+
 ## Root Cause Analysis
 
 ### 1. The UI is capped by the MJPEG loop
@@ -262,4 +277,3 @@ Putting those into the control backend risks making robot control less reliable.
 3. If `encode_ms_mean_recent` is high or backend CPU exceeds one core under browser load, tune JPEG quality/fps and proceed to WebRTC sidecar.
 4. Implement Phase B before Phase D so MJPEG remains a strong fallback.
 5. Begin Phase C/D with `videotestsrc`, not real robot cameras.
-
