@@ -169,6 +169,28 @@ def test_snapshot_fast_does_not_refresh_ledger_stats(monkeypatch):
     assert state.trainable_replay_count == 0
 
 
+def test_trainer_metrics_do_not_refresh_ledger_stats(monkeypatch):
+    store = _store(warmup_target=1)
+
+    def fail_if_called():
+        raise AssertionError("trainer metrics should not refresh replay shard stats")
+
+    monkeypatch.setattr(store, "_apply_ledger_stats_locked", fail_if_called)
+
+    store.update_runtime_metrics(
+        {
+            "type": "rlt_trainer_metrics",
+            "timestamp": 123.0,
+            "critic_loss": 0.25,
+            "actor_ready": True,
+        }
+    )
+
+    state = store.snapshot_fast()
+    assert state.critic_loss == 0.25
+    assert state.actor_ready is True
+
+
 def test_invalid_replay_ack_does_not_increment_warmup_or_unlock_actor():
     store = _store(warmup_target=1)
     store.update_runtime_metrics(

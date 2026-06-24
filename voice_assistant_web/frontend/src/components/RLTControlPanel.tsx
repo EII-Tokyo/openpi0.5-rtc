@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   confirmKeyRegion,
   discardKeyRegion,
@@ -23,36 +23,71 @@ function formatCountdown(deadline: number | null) {
 
 export function RLTControlPanel({ rlt, onState }: Props) {
   const [error, setError] = useState('')
-  const [pending, setPending] = useState('')
+  const [pendingActions, setPendingActions] = useState<string[]>([])
   const [flashKey, setFlashKey] = useState('')
   const [countdown, setCountdown] = useState(formatCountdown(rlt.score_deadline))
+  const [optimisticRlt, setOptimisticRlt] = useState<RLTControlState | null>(null)
+  const queueRef = useRef<Promise<void>>(Promise.resolve())
+  const latestRltRef = useRef(rlt)
+  const pendingCount = pendingActions.length
+  const viewRlt = optimisticRlt ?? rlt
 
   useEffect(() => {
-    const timer = window.setInterval(() => setCountdown(formatCountdown(rlt.score_deadline)), 100)
-    return () => window.clearInterval(timer)
-  }, [rlt.score_deadline])
-
-  const run = async (name: string, fn: () => Promise<RLTControlState>) => {
-    setError('')
-    setPending(name)
-    try {
-      onState(await fn())
-    } catch (exc) {
-      setError(exc instanceof Error ? exc.message : 'Request failed')
-    } finally {
-      setPending('')
+    latestRltRef.current = rlt
+    if (pendingCount === 0) {
+      setOptimisticRlt(null)
     }
+  }, [rlt, pendingCount])
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setCountdown(formatCountdown(viewRlt.score_deadline)), 100)
+    return () => window.clearInterval(timer)
+  }, [viewRlt.score_deadline])
+
+  const queueRLTAction = (
+    name: string,
+    fn: () => Promise<RLTControlState>,
+    optimistic?: (state: RLTControlState) => RLTControlState,
+  ) => {
+    setError('')
+    if (optimistic) {
+      setOptimisticRlt((current) => optimistic(current ?? latestRltRef.current))
+    }
+    setPendingActions((current) => [...current, name])
+    const request = queueRef.current
+      .catch(() => undefined)
+      .then(fn)
+      .then((state) => {
+        latestRltRef.current = state
+        onState(state)
+        if (optimistic) {
+          setOptimisticRlt(state)
+        }
+      })
+      .catch((exc) => {
+        setError(exc instanceof Error ? exc.message : 'Request failed')
+        setOptimisticRlt(null)
+      })
+      .finally(() => {
+        setPendingActions((current) => {
+          const next = [...current]
+          const index = next.indexOf(name)
+          if (index >= 0) next.splice(index, 1)
+          return next
+        })
+      })
+    queueRef.current = request
   }
 
   const runRobotTask = async (name: string, taskNum: '1' | '4' | '5' | '9') => {
     setError('')
-    setPending(name)
+    setPendingActions((current) => [...current, name])
     try {
       await sendRobotTask(taskNum)
     } catch (exc) {
       setError(exc instanceof Error ? exc.message : 'Request failed')
     } finally {
-      setPending('')
+      setPendingActions((current) => current.filter((pendingName, index) => pendingName !== name || index !== 0))
     }
   }
 
@@ -75,6 +110,37 @@ export function RLTControlPanel({ rlt, onState }: Props) {
     return ''
   }
 
+  const optimisticStart = (state: RLTControlState): RLTControlState => ({
+    ...state,
+    phase: 'key_region',
+    actor_enabled: true,
+    last_reward: null,
+    score_deadline: null,
+  })
+
+  const optimisticEnd = (state: RLTControlState): RLTControlState => ({
+    ...state,
+    phase: 'await_score',
+    actor_enabled: false,
+    actor_effective: false,
+    score_deadline: Date.now() / 1000 + 10,
+  })
+
+  const optimisticScore = (reward: 0 | 1) => (state: RLTControlState): RLTControlState => ({
+    ...state,
+    phase: 'pending_replay',
+    last_reward: reward,
+    score_deadline: null,
+  })
+
+  const optimisticIdle = (state: RLTControlState): RLTControlState => ({
+    ...state,
+    phase: 'idle',
+    active_key_region_id: null,
+    last_reward: null,
+    score_deadline: null,
+  })
+
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.metaKey || event.ctrlKey || event.altKey || event.repeat) return
@@ -94,24 +160,23 @@ export function RLTControlPanel({ rlt, onState }: Props) {
       event.stopPropagation()
       flash(hotkey)
 
-      if (pending) return
       if (hotkey === 'start') {
-        if (rlt.phase === 'idle') void run('start', startKeyRegion)
+        if (viewRlt.phase === 'idle') queueRLTAction('start', startKeyRegion, optimisticStart)
       } else if (hotkey === 'end') {
-        if (rlt.phase === 'key_region') void run('end', endKeyRegion)
+        if (viewRlt.phase === 'key_region') queueRLTAction('end', endKeyRegion, optimisticEnd)
       } else if (hotkey === 'score1') {
-        if (rlt.phase === 'await_score') void run('score1', () => scoreKeyRegion(1))
+        if (viewRlt.phase === 'await_score') queueRLTAction('score1', () => scoreKeyRegion(1), optimisticScore(1))
       } else if (hotkey === 'score0') {
-        if (rlt.phase === 'await_score') void run('score0', () => scoreKeyRegion(0))
+        if (viewRlt.phase === 'await_score') queueRLTAction('score0', () => scoreKeyRegion(0), optimisticScore(0))
       } else if (hotkey === 'confirm') {
-        if (rlt.phase === 'pending_replay') void run('confirm', confirmKeyRegion)
+        if (viewRlt.phase === 'pending_replay') queueRLTAction('confirm', confirmKeyRegion, optimisticIdle)
       } else if (hotkey === 'discard') {
-        if (['key_region', 'await_score', 'pending_replay'].includes(rlt.phase)) {
-          void run('discard', () => discardKeyRegion('operator_discard'))
+        if (['key_region', 'await_score', 'pending_replay'].includes(viewRlt.phase)) {
+          queueRLTAction('discard', () => discardKeyRegion('operator_discard'), optimisticIdle)
         }
       } else if (hotkey === 'void') {
-        if (['key_region', 'await_score'].includes(rlt.phase) && rlt.active_key_region_id) {
-          void run('void', () => voidKeyRegion(rlt.active_key_region_id as string, 'operator_void'))
+        if (['key_region', 'await_score'].includes(viewRlt.phase) && viewRlt.active_key_region_id) {
+          queueRLTAction('void', () => voidKeyRegion(viewRlt.active_key_region_id as string, 'operator_void'), optimisticIdle)
         }
       } else if (hotkey === 'twist') {
         void runRobotTask('twist', '1')
@@ -121,14 +186,14 @@ export function RLTControlPanel({ rlt, onState }: Props) {
     }
     window.addEventListener('keydown', onKeyDown, true)
     return () => window.removeEventListener('keydown', onKeyDown, true)
-  }, [rlt.phase, rlt.active_key_region_id, pending])
+  }, [viewRlt.phase, viewRlt.active_key_region_id])
 
   const phaseLabel = useMemo(() => {
-    if (rlt.phase === 'key_region') return 'Recording key region'
-    if (rlt.phase === 'await_score') return `Awaiting score ${countdown}`
-    if (rlt.phase === 'pending_replay') return 'Review scored replay'
+    if (viewRlt.phase === 'key_region') return 'Recording key region'
+    if (viewRlt.phase === 'await_score') return `Awaiting score ${countdown}`
+    if (viewRlt.phase === 'pending_replay') return 'Review scored replay'
     return 'Idle'
-  }, [rlt.phase, countdown])
+  }, [viewRlt.phase, countdown])
 
   return (
     <section className="panel rlt-panel rlt-control-compact">
@@ -137,17 +202,17 @@ export function RLTControlPanel({ rlt, onState }: Props) {
           <p className="eyebrow">Key Region</p>
           <h2>{phaseLabel}</h2>
         </div>
-        <span className={`status-pill ${rlt.phase === 'idle' ? 'mode' : 'live'}`}>{rlt.training_phase}</span>
+        <span className={`status-pill ${viewRlt.phase === 'idle' ? 'mode' : 'live'}`}>{viewRlt.training_phase}</span>
       </div>
 
       <div className="rlt-control-grid">
         <button
           className={`rlt-key-button start ${flashKey === 'start' ? 'key-flash' : ''}`}
           type="button"
-          disabled={rlt.phase !== 'idle' || !!pending}
+          disabled={viewRlt.phase !== 'idle'}
           onClick={() => {
             flash('start')
-            void run('start', startKeyRegion)
+            queueRLTAction('start', startKeyRegion, optimisticStart)
           }}
         >
           <span>←</span>
@@ -156,10 +221,10 @@ export function RLTControlPanel({ rlt, onState }: Props) {
         <button
           className={`rlt-key-button end ${flashKey === 'end' ? 'key-flash' : ''}`}
           type="button"
-          disabled={rlt.phase !== 'key_region' || !!pending}
+          disabled={viewRlt.phase !== 'key_region'}
           onClick={() => {
             flash('end')
-            void run('end', endKeyRegion)
+            queueRLTAction('end', endKeyRegion, optimisticEnd)
           }}
         >
           <span>→</span>
@@ -168,10 +233,10 @@ export function RLTControlPanel({ rlt, onState }: Props) {
         <button
           className={`rlt-key-button success ${flashKey === 'score1' ? 'key-flash' : ''}`}
           type="button"
-          disabled={rlt.phase !== 'await_score' || !!pending}
+          disabled={viewRlt.phase !== 'await_score'}
           onClick={() => {
             flash('score1')
-            void run('score1', () => scoreKeyRegion(1))
+            queueRLTAction('score1', () => scoreKeyRegion(1), optimisticScore(1))
           }}
         >
           <span>↑</span>
@@ -180,10 +245,10 @@ export function RLTControlPanel({ rlt, onState }: Props) {
         <button
           className={`rlt-key-button fail ${flashKey === 'score0' ? 'key-flash' : ''}`}
           type="button"
-          disabled={rlt.phase !== 'await_score' || !!pending}
+          disabled={viewRlt.phase !== 'await_score'}
           onClick={() => {
             flash('score0')
-            void run('score0', () => scoreKeyRegion(0))
+            queueRLTAction('score0', () => scoreKeyRegion(0), optimisticScore(0))
           }}
         >
           <span>↓</span>
@@ -191,15 +256,14 @@ export function RLTControlPanel({ rlt, onState }: Props) {
         </button>
       </div>
 
-      {rlt.phase === 'pending_replay' ? (
+      {viewRlt.phase === 'pending_replay' ? (
         <div className="rlt-review-actions">
           <button
             className={`apply-button ${flashKey === 'confirm' ? 'key-flash' : ''}`}
             type="button"
-            disabled={!!pending}
             onClick={() => {
               flash('confirm')
-              void run('confirm', confirmKeyRegion)
+              queueRLTAction('confirm', confirmKeyRegion, optimisticIdle)
             }}
           >
             Confirm
@@ -207,25 +271,23 @@ export function RLTControlPanel({ rlt, onState }: Props) {
           <button
             className={`apply-button danger ${flashKey === 'discard' ? 'key-flash' : ''}`}
             type="button"
-            disabled={!!pending}
             onClick={() => {
               flash('discard')
-              void run('discard', () => discardKeyRegion('operator_discard'))
+              queueRLTAction('discard', () => discardKeyRegion('operator_discard'), optimisticIdle)
             }}
           >
             Discard
           </button>
         </div>
       ) : null}
-      {['key_region', 'await_score'].includes(rlt.phase) ? (
+      {['key_region', 'await_score'].includes(viewRlt.phase) ? (
         <div className="rlt-review-actions">
           <button
             className={`apply-button danger ${flashKey === 'discard' ? 'key-flash' : ''}`}
             type="button"
-            disabled={!!pending}
             onClick={() => {
               flash('discard')
-              void run('discard', () => discardKeyRegion('operator_discard'))
+              queueRLTAction('discard', () => discardKeyRegion('operator_discard'), optimisticIdle)
             }}
           >
             Discard
@@ -233,21 +295,21 @@ export function RLTControlPanel({ rlt, onState }: Props) {
           <button
             className={`apply-button danger ${flashKey === 'void' ? 'key-flash' : ''}`}
             type="button"
-            disabled={!!pending || !rlt.active_key_region_id}
+            disabled={!viewRlt.active_key_region_id}
             onClick={() => {
-              if (!rlt.active_key_region_id) return
+              if (!viewRlt.active_key_region_id) return
               flash('void')
-              void run('void', () => voidKeyRegion(rlt.active_key_region_id as string, 'operator_void'))
+              queueRLTAction('void', () => voidKeyRegion(viewRlt.active_key_region_id as string, 'operator_void'), optimisticIdle)
             }}
           >
             Void
           </button>
         </div>
       ) : null}
-      {rlt.phase === 'await_score' ? (
+      {viewRlt.phase === 'await_score' ? (
         <p className="rlt-warning">Choose the reward. Enter/C confirms, Backspace/D discards, V voids.</p>
       ) : null}
-      {rlt.phase === 'pending_replay' ? (
+      {viewRlt.phase === 'pending_replay' ? (
         <p className="rlt-warning">Enter/C confirms. Backspace/D discards before replay is committed.</p>
       ) : null}
       {error ? <p className="rlt-error">{error}</p> : null}

@@ -40,6 +40,7 @@ class RLTControlStore:
         self._load()
         if self._state.rl_token_checkpoint_path is None:
             self._state.rl_token_checkpoint_path = settings.rlt_rl_token_checkpoint_path
+        self._last_metrics_persist_at = 0.0
         with self._lock:
             self._apply_ledger_stats_locked()
             self._refresh_derived_locked()
@@ -370,7 +371,12 @@ class RLTControlStore:
                 and float(incoming_timestamp) <= float(self._state.rlt_metrics_timestamp)
             ):
                 return
-            if payload.get("type") in {"rlt_replay_segment_written", "rlt_replay_segment_committed", "rlt_replay_segment_rejected"}:
+            is_replay_ack = payload.get("type") in {
+                "rlt_replay_segment_written",
+                "rlt_replay_segment_committed",
+                "rlt_replay_segment_rejected",
+            }
+            if is_replay_ack:
                 self._record_replay_ack_locked(payload)
             else:
                 metric_keys = (
@@ -438,9 +444,18 @@ class RLTControlStore:
                     self._state.actor_checkpoint_step = int(latest_actor_step)
                 if latest_actor_path and latest_actor_step is not None and int(latest_actor_step) > 0:
                     self._state.actor_ready = True
-            self._apply_ledger_stats_locked()
+            if is_replay_ack:
+                self._apply_ledger_stats_locked()
             self._refresh_derived_locked()
-            self._persist_locked()
+            if is_replay_ack or self._should_persist_runtime_metrics_locked():
+                self._persist_locked()
+
+    def _should_persist_runtime_metrics_locked(self) -> bool:
+        now = time.monotonic()
+        if now - self._last_metrics_persist_at < 2.0:
+            return False
+        self._last_metrics_persist_at = now
+        return True
 
     def _refresh_latest_runtime_metrics(self) -> None:
         try:
