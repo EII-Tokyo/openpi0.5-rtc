@@ -106,6 +106,20 @@ def test_offline_trainer_builds_recursive_replay_store_with_train_horizon(tmp_pa
     assert store._max_replay_samples == 123
 
 
+def test_offline_trainer_builds_manifest_replay_store(tmp_path):
+    manifest_path = tmp_path / "manifest.jsonl"
+    manifest_path.write_text("")
+    args = train_rlt_offline.Args(
+        replay_dir=tmp_path / "replay" / "rlt_key_regions_clean",
+        manifest_path=manifest_path,
+        recursive_scan=True,
+    )
+
+    store = train_rlt_offline._build_replay_store(args)
+
+    assert store._manifest_path == manifest_path
+
+
 def test_offline_trainer_builds_config_with_manual_beta():
     shape = rlt_replay_store.ReplayShape(z_dim=8, proprio_dim=4, action_horizon=10, action_dim=14)
     args = train_rlt_offline.Args(

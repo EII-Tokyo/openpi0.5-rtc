@@ -15,6 +15,7 @@ import tyro
 import wandb
 
 from openpi.models import rlt
+from openpi.training import rlt_eval
 from openpi.training import rlt_replay_store
 from openpi.training import rlt_training
 from scripts import train_rlt_online
@@ -41,6 +42,7 @@ class Args:
     max_replay_samples: int | None = None
     recursive_scan: bool = False
     segment_db_path: pathlib.Path | None = None
+    manifest_path: pathlib.Path | None = None
     policy_delay: int = 2
     actor_publish_interval: int = 500
     actor_lr: float = 1e-4
@@ -58,6 +60,11 @@ class Args:
     wandb_project: str = "openpi-rlt-offline"
     wandb_run_name: str = "rlt_actor_critic_offline"
     overwrite: bool = False
+    eval_holdout_critic: bool = False
+    holdout_ratio: float = 0.2
+    holdout_seed: int = 42
+    eval_holdout_every_steps: int = 1_000
+    holdout_score_batch_size: int = 512
 
 
 def _init_logging() -> None:
@@ -75,6 +82,54 @@ def _build_replay_store(args: Args) -> rlt_replay_store.RLTReplayStore:
         recursive=args.recursive_scan,
         sample_action_horizon=args.train_action_horizon,
         segment_db_path=args.segment_db_path,
+        manifest_path=args.manifest_path,
+    )
+
+
+def _prepare_holdout_split(args: Args) -> tuple[pathlib.Path | None, pathlib.Path | None, dict[str, int]]:
+    if not args.eval_holdout_critic:
+        return None, None, {}
+    shards = rlt_eval.find_replay_shards(
+        args.replay_dir,
+        recursive=args.recursive_scan,
+        segment_db_path=args.segment_db_path,
+        manifest_path=args.manifest_path,
+    )
+    split = rlt_eval.split_shards(shards, holdout_ratio=args.holdout_ratio, seed=args.holdout_seed)
+    split_dir = args.output_dir / "holdout_split"
+    train_manifest = rlt_eval.write_manifest(split.train_paths, split_dir / "train_manifest.jsonl")
+    holdout_manifest = rlt_eval.write_manifest(split.holdout_paths, split_dir / "holdout_manifest.jsonl")
+    summary = {
+        "num_total_shards": len(shards),
+        "num_train_shards": len(split.train_paths),
+        "num_holdout_shards": len(split.holdout_paths),
+    }
+    train_rlt_online._atomic_write_text(
+        split_dir / "summary.json",
+        json.dumps(
+            {
+                **summary,
+                "holdout_ratio": args.holdout_ratio,
+                "holdout_seed": args.holdout_seed,
+                "train_manifest": str(train_manifest),
+                "holdout_manifest": str(holdout_manifest),
+            },
+            indent=2,
+            sort_keys=True,
+        ),
+    )
+    return train_manifest, holdout_manifest, summary
+
+
+def _build_train_store(args: Args, train_manifest: pathlib.Path | None) -> rlt_replay_store.RLTReplayStore:
+    if train_manifest is None:
+        return _build_replay_store(args)
+    return rlt_replay_store.RLTReplayStore(
+        args.replay_dir,
+        max_replay_samples=args.max_replay_samples,
+        recursive=args.recursive_scan,
+        sample_action_horizon=args.train_action_horizon,
+        manifest_path=train_manifest,
     )
 
 
@@ -156,6 +211,7 @@ def _write_summary(
         "latest_actor_path": latest_actor_path,
         "target_sync_step": target_sync_step,
         "args": {key: str(value) if isinstance(value, pathlib.Path) else value for key, value in dataclasses.asdict(args).items()},
+        "manifest_path": None if args.manifest_path is None else str(args.manifest_path),
         "replay_stats": dataclasses.asdict(store.stats),
         "replay_shape": None if store.shape is None else dataclasses.asdict(store.shape),
         "train_shape": None if store.sample_shape is None else dataclasses.asdict(store.sample_shape),
@@ -173,7 +229,8 @@ def main(args: Args) -> None:
         shutil.rmtree(args.output_dir)
     args.output_dir.mkdir(parents=True, exist_ok=True)
 
-    store = _build_replay_store(args)
+    train_manifest, holdout_manifest, holdout_summary = _prepare_holdout_split(args)
+    store = _build_train_store(args, train_manifest)
     _require_ready(args, store)
     replay_shape = store.shape
     train_shape = store.sample_shape
@@ -196,6 +253,13 @@ def main(args: Args) -> None:
         replay_stats=store.stats,
     )
     train_rlt_online._save_training_checkpoint(state, args.output_dir, 0, store)
+    if args.eval_holdout_critic and holdout_manifest is not None:
+        rlt_eval.evaluate_holdout_checkpoints(
+            checkpoint_dirs=[latest_actor_dir],
+            holdout_paths=rlt_eval.find_replay_shards(args.replay_dir, manifest_path=holdout_manifest),
+            output_dir=args.output_dir / "holdout_eval" / f"{0:08d}",
+            score_batch_size=args.holdout_score_batch_size,
+        )
     latest_target_sync_step: int | None = None
     infos: list[dict[str, np.ndarray]] = []
     log_start = time.perf_counter()
@@ -231,9 +295,13 @@ def main(args: Args) -> None:
                     train_shape=train_shape,
                     replay_stats=store.stats,
                 )
+                train_rlt_online._atomic_write_text(
+                    latest_actor_dir / "metrics.json",
+                    json.dumps({"critic_loss": float(info["critic_loss"])}, indent=2, sort_keys=True),
+                )
             if current_step % args.save_interval == 0:
                 train_rlt_online._save_training_checkpoint(state, args.output_dir, current_step, store)
-                train_rlt_online._save_actor_for_inference(
+                snapshot_dir = train_rlt_online._save_actor_for_inference(
                     state,
                     args.output_dir / "snapshots",
                     current_step,
@@ -242,6 +310,22 @@ def main(args: Args) -> None:
                     train_shape=train_shape,
                     replay_stats=store.stats,
                 )
+                train_rlt_online._atomic_write_text(
+                    snapshot_dir / "metrics.json",
+                    json.dumps({"critic_loss": float(info["critic_loss"])}, indent=2, sort_keys=True),
+                )
+                if (
+                    args.eval_holdout_critic
+                    and holdout_manifest is not None
+                    and args.eval_holdout_every_steps > 0
+                    and current_step % args.eval_holdout_every_steps == 0
+                ):
+                    rlt_eval.evaluate_holdout_checkpoints(
+                        checkpoint_dirs=[snapshot_dir],
+                        holdout_paths=rlt_eval.find_replay_shards(args.replay_dir, manifest_path=holdout_manifest),
+                        output_dir=args.output_dir / "holdout_eval" / f"{current_step:08d}",
+                        score_batch_size=args.holdout_score_batch_size,
+                    )
             if current_step % args.log_interval == 0 and infos:
                 reduced = train_rlt_online._reduce_numeric_infos(infos)
                 reduced.update(
@@ -267,6 +351,15 @@ def main(args: Args) -> None:
         latest_actor_path=str(latest_actor_dir),
         target_sync_step=latest_target_sync_step,
     )
+    if args.eval_holdout_critic and holdout_manifest is not None:
+        final_eval = rlt_eval.evaluate_holdout_checkpoints(
+            checkpoint_dirs=rlt_eval.discover_inference_checkpoints(args.output_dir / "snapshots"),
+            holdout_paths=rlt_eval.find_replay_shards(args.replay_dir, manifest_path=holdout_manifest),
+            output_dir=args.output_dir / "holdout_eval",
+            score_batch_size=args.holdout_score_batch_size,
+        )
+        if final_eval.best_metric is not None:
+            logging.info("Best holdout critic: %s", final_eval.best_metric["checkpoint_path"])
 
 
 if __name__ == "__main__":
