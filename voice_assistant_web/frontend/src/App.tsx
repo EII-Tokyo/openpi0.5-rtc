@@ -140,7 +140,7 @@ export default function App() {
   const [cameraView, setCameraView] = useState<'focus' | 'quad'>('quad')
   const [cameraTransport, setCameraTransport] = useState<CameraTransport | null>(null)
   const [cameraWebrtcMediaUrl, setCameraWebrtcMediaUrl] = useState<string | null>(null)
-  const [page, setPage] = useState<'live' | 'key_regions' | 'rlhf' | 'config' | 'system'>('live')
+  const [page, setPage] = useState<'live' | 'key_regions' | 'rlhf' | 'config' | 'system'>('key_regions')
   const [keyRegionFocus, setKeyRegionFocus] = useState<KeyRegionFocusTarget | null>(null)
   const [rlhfRefreshToken, setRlhfRefreshToken] = useState(0)
   const [wsConnected, setWsConnected] = useState(false)
@@ -187,6 +187,7 @@ export default function App() {
   }, [])
 
   useEffect(() => {
+    if (page !== 'live' || cameraTransport) return undefined
     let isActive = true
     fetchCameraCapabilities()
       .then((capabilities) => {
@@ -204,7 +205,7 @@ export default function App() {
     return () => {
       isActive = false
     }
-  }, [])
+  }, [cameraTransport, page])
 
   const setRLTState = (rlt: RLTControlState) => {
     setState((current) => ({ ...current, rlt }))

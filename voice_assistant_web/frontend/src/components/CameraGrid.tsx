@@ -34,6 +34,12 @@ type AiortcCameraFeedProps = {
   fps: number
 }
 
+type MjpegCameraFeedProps = {
+  cameraKey: string
+  label: string
+  fps: number
+}
+
 const activeCameraFeedReleases: Record<string, (() => void) | undefined> = {}
 let lifecycleCleanupInstalled = false
 
@@ -152,6 +158,22 @@ function AiortcCameraFeed({ cameraKey, label, mediaServiceUrl, fps }: AiortcCame
   )
 }
 
+function MjpegCameraFeed({ cameraKey, label, fps }: MjpegCameraFeedProps) {
+  const imageRef = useRef<HTMLImageElement | null>(null)
+
+  useEffect(() => {
+    const image = imageRef.current
+    if (!image) return
+    image.src = cameraStreamUrl(cameraKey, fps)
+    return () => {
+      image.removeAttribute('src')
+      image.src = ''
+    }
+  }, [cameraKey, fps])
+
+  return <img ref={imageRef} className="camera-feed-media" alt={label} />
+}
+
 async function drawJpegB64ToCanvas(b64: string, canvas: HTMLCanvasElement | null) {
   if (!canvas || !b64) return
   try {
@@ -240,7 +262,7 @@ export function CameraGrid({
       )
     }
     if (cameraTransport === 'mjpeg') {
-      return <img className="camera-feed-media" src={cameraStreamUrl(cameraKey, mjpegFpsFor(cameraKey))} alt={label} />
+      return <MjpegCameraFeed cameraKey={cameraKey} label={label} fps={mjpegFpsFor(cameraKey)} />
     }
     return <canvas ref={bindCanvas(cameraKey)} className="camera-feed-canvas" aria-label={label} />
   }
