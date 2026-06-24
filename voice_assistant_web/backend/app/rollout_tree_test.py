@@ -212,6 +212,36 @@ def test_key_region_review_counts_committed_container_clean_manual_shard_as_trai
     assert summary.trainable == 1
 
 
+def test_key_region_review_uses_date_from_absolute_clean_shard_path(tmp_path, monkeypatch):
+    rollout_root = tmp_path / "rollouts"
+    replay_root = tmp_path / "replay"
+    external_root = tmp_path / "external_data"
+    shard_path = external_root / "replay" / "rlt_key_regions_clean" / "task" / "2026-06-19" / "shards" / "key_region_abs.crop_1.npz"
+    shard_path.parent.mkdir(parents=True)
+    np.savez(shard_path, done=np.asarray([True]), reward_seq=np.ones((1, 10)))
+    fake_control = _FakeRLTControl(
+        [
+            {
+                "key_region_id": "abs",
+                "status": "committed",
+                "phase": "warmup",
+                "reward": 1,
+                "shard_path": str(shard_path),
+                "num_replay_transitions": 1,
+                "updated_at": 1781942010.0,
+            }
+        ]
+    )
+
+    monkeypatch.setattr(main, "ROLLOUTS_ROOT", rollout_root)
+    monkeypatch.setattr(main, "REPLAY_ROOT", replay_root)
+    monkeypatch.setattr(main, "rlt_control", fake_control)
+
+    records = main._key_region_review_records()
+
+    assert records[0]["batch"] == "2026-06-19"
+
+
 def test_key_region_review_requires_current_segment_shard_even_when_raw_orphan_exists(tmp_path, monkeypatch):
     rollout_root = tmp_path / "rollouts"
     replay_root = tmp_path / "replay"
@@ -393,6 +423,62 @@ def test_key_region_review_page_can_focus_target_record(tmp_path, monkeypatch):
 
     assert page.offset == 2
     assert [record.key_region_id for record in page.items] == ["old_failure"]
+
+
+def test_key_region_review_page_searches_date_time_and_key_region_id(tmp_path, monkeypatch):
+    rollout_root = tmp_path / "rollouts"
+    replay_root = tmp_path / "replay"
+    _write_review_record(rollout_root, replay_root, key_region_id="early_target", reward=0, score_time=10.0)
+    _write_review_record(rollout_root, replay_root, key_region_id="late_target", reward=1, score_time=20.0)
+
+    monkeypatch.setattr(main, "ROLLOUTS_ROOT", rollout_root)
+    monkeypatch.setattr(main, "REPLAY_ROOT", replay_root)
+    monkeypatch.setattr(main, "rlt_control", _FakeRLTControl([]))
+
+    by_id = main.rlt_key_region_review(limit=20, search="late_target")
+    by_date = main.rlt_key_region_review(limit=20, search="1970-01-01")
+    by_time = main.rlt_key_region_review(limit=20, search="1970-01-01 09:00:20")
+
+    assert [record.key_region_id for record in by_id.items] == ["late_target"]
+    assert [record.key_region_id for record in by_date.items] == ["late_target", "early_target"]
+    assert [record.key_region_id for record in by_time.items] == ["late_target"]
+    assert by_time.items[0].review_datetime == "1970-01-01 09:00:20"
+
+
+def test_key_region_review_page_searches_clean_shard_crop_datetime(tmp_path, monkeypatch):
+    rollout_root = tmp_path / "rollouts"
+    replay_root = tmp_path / "replay"
+    rollout_dir = rollout_root / "key_regions/task/2026-06-01/warmup/key_region_crop_time"
+    shard_path = replay_root / "rlt_key_regions_clean/task/2026-06-01/shards/key_region_crop_time.crop_1781942010812.npz"
+    rollout_dir.mkdir(parents=True)
+    shard_path.parent.mkdir(parents=True, exist_ok=True)
+    (rollout_dir / "cam_right_wrist.mp4").write_bytes(b"mp4")
+    (rollout_dir / "manifest.json").write_text(
+        json.dumps(
+            {
+                "key_region_id": "crop_time",
+                "phase": "warmup",
+                "reward": 0,
+                "start_time": 1000.0,
+                "end_time": 1001.0,
+                "score_time": 1002.0,
+                "num_replay_transitions": 3,
+                "segment_status": "committed",
+                "train_eligible": True,
+                "shard_path": str(shard_path),
+            }
+        )
+    )
+    np.savez(shard_path, done=np.asarray([False, False, True]), reward_seq=np.ones((3, 10)))
+
+    monkeypatch.setattr(main, "ROLLOUTS_ROOT", rollout_root)
+    monkeypatch.setattr(main, "REPLAY_ROOT", replay_root)
+    monkeypatch.setattr(main, "rlt_control", _FakeRLTControl([]))
+
+    page = main.rlt_key_region_review(limit=20, search="2026-06-20 16:53:30")
+
+    assert [record.key_region_id for record in page.items] == ["crop_time"]
+    assert page.items[0].crop_datetime == "2026-06-20 16:53:30"
 
 
 def test_key_region_review_needs_crop_lists_uncropped_trainable_candidates(tmp_path, monkeypatch):

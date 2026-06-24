@@ -285,6 +285,11 @@ class RLTKeyRegionReviewRecord(BaseModel):
     start_time: float | None = None
     end_time: float | None = None
     score_time: float | None = None
+    review_datetime: str | None = None
+    start_datetime: str | None = None
+    score_datetime: str | None = None
+    crop_datetime: str | None = None
+    updated_datetime: str | None = None
     duration_seconds: float | None = None
     key_region_duration_seconds: float | None = None
     key_region_start_sec: float | None = None

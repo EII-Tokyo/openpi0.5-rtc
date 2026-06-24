@@ -14,6 +14,7 @@ import sqlite3
 import subprocess
 import time
 from datetime import datetime
+from functools import lru_cache
 from zoneinfo import ZoneInfo
 
 from fastapi import FastAPI
@@ -83,6 +84,9 @@ ROLLOUTS_ROOT = Path(settings.rollouts_root).expanduser().resolve()
 REPLAY_ROOT = Path(settings.replay_root).expanduser().resolve()
 VIDEO_CHUNK_SIZE = 1024 * 1024
 VIDEO_CACHE_ROOT = Path(os.getenv("ROLLOUTS_VIDEO_CACHE", "/tmp/eii_rollout_video_cache"))
+KEY_REGION_FRAME_CACHE_ROOT = Path(os.getenv("RLT_KEY_REGION_FRAME_CACHE", "/tmp/eii_key_region_frame_cache"))
+KEY_REGION_RECORD_CACHE_TTL_SECONDS = 2.0
+_key_region_record_cache: dict[tuple[str, str, str], tuple[float, dict[str, dict]]] = {}
 DEFAULT_RLT_PRE_ROLL_SECONDS = float(os.getenv("RLT_DEFAULT_PRE_ROLL_SECONDS", "2.0"))
 KEY_REGION_TIMEZONE = ZoneInfo(os.getenv("RLT_KEY_REGION_TIMEZONE", "Asia/Tokyo"))
 PREFERENCE_ROUND_BUDGET = int(os.getenv("RLT_PREFERENCE_ROUND_BUDGET", "800"))
@@ -496,6 +500,78 @@ def _video_codec(path: Path) -> str:
         logging.warning("ffprobe failed for %s: %s", path, exc.stderr)
         return ""
     return proc.stdout.strip().splitlines()[0] if proc.stdout.strip() else ""
+
+
+def _parse_frame_rate(value: str | None) -> float | None:
+    if not value:
+        return None
+    numerator, separator, denominator = value.partition("/")
+    try:
+        if separator:
+            denominator_value = float(denominator)
+            if denominator_value == 0:
+                return None
+            return float(numerator) / denominator_value
+        return float(value)
+    except ValueError:
+        return None
+
+
+def _video_stream_metadata(path: Path) -> dict[str, float | int | None]:
+    stat = path.stat()
+    return _video_stream_metadata_cached(str(path), stat.st_mtime_ns, stat.st_size)
+
+
+@lru_cache(maxsize=2048)
+def _video_stream_metadata_cached(path: str, mtime_ns: int, size: int) -> dict[str, float | int | None]:
+    del mtime_ns, size
+    try:
+        proc = subprocess.run(
+            [
+                "ffprobe",
+                "-v",
+                "error",
+                "-count_frames",
+                "-select_streams",
+                "v:0",
+                "-show_entries",
+                "stream=avg_frame_rate,duration,nb_read_frames,nb_frames,width,height",
+                "-of",
+                "json",
+                path,
+            ],
+            check=True,
+            text=True,
+            capture_output=True,
+        )
+    except subprocess.CalledProcessError as exc:
+        logging.warning("ffprobe metadata failed for %s: %s", path, exc.stderr)
+        return {"fps": None, "frame_count": None, "duration_seconds": None, "width": None, "height": None}
+    try:
+        stream = (json.loads(proc.stdout).get("streams") or [{}])[0]
+    except json.JSONDecodeError:
+        return {"fps": None, "frame_count": None, "duration_seconds": None, "width": None, "height": None}
+
+    frame_count = None
+    with contextlib.suppress(TypeError, ValueError):
+        frame_count = int(stream.get("nb_read_frames") or stream.get("nb_frames"))
+    duration = _float_or_none(stream.get("duration"))
+    fps = _parse_frame_rate(stream.get("avg_frame_rate"))
+    width = None
+    height = None
+    with contextlib.suppress(TypeError, ValueError):
+        width = int(stream.get("width"))
+    with contextlib.suppress(TypeError, ValueError):
+        height = int(stream.get("height"))
+    if duration is None and frame_count is not None and fps:
+        duration = frame_count / fps
+    return {
+        "fps": fps,
+        "frame_count": frame_count,
+        "duration_seconds": duration,
+        "width": width,
+        "height": height,
+    }
 
 
 def _cache_path_for_video(path: Path) -> Path:
@@ -1267,6 +1343,153 @@ def rlt_key_region_detail(key_region_id: str) -> RLTKeyRegionReviewRecord:
     if record is None:
         raise HTTPException(status_code=404, detail=f"Unknown key_region_id: {key_region_id}")
     return RLTKeyRegionReviewRecord(**record)
+
+
+def _camera_name_from_video_path(path: str) -> str:
+    return Path(path).stem
+
+
+def _key_region_review_records_by_id(*, batch: str = "all") -> dict[str, dict]:
+    cache_key = (batch, str(ROLLOUTS_ROOT), str(REPLAY_ROOT))
+    now = time.monotonic()
+    cached = _key_region_record_cache.get(cache_key)
+    if cached is not None:
+        cached_at, records_by_id = cached
+        if now - cached_at < KEY_REGION_RECORD_CACHE_TTL_SECONDS:
+            return records_by_id
+    records_by_id = {str(record.get("key_region_id")): record for record in _key_region_review_records(batch=batch)}
+    _key_region_record_cache[cache_key] = (now, records_by_id)
+    return records_by_id
+
+
+def _key_region_media_record(key_region_id: str) -> dict:
+    record = _key_region_review_records_by_id().get(key_region_id)
+    if record is None:
+        raise HTTPException(status_code=404, detail=f"Unknown key_region_id: {key_region_id}")
+    video_paths = [path for path in record.get("video_paths") or [] if str(path).endswith(".mp4")]
+    if not video_paths:
+        raise HTTPException(status_code=404, detail=f"No key-region videos found for {key_region_id}")
+    return record
+
+
+def _key_region_camera_video(record: dict, camera: str) -> tuple[str, Path]:
+    if not re.fullmatch(r"[A-Za-z0-9_.-]+", camera):
+        raise HTTPException(status_code=400, detail=f"Invalid camera name: {camera}")
+    for video_path in record.get("video_paths") or []:
+        if _camera_name_from_video_path(str(video_path)) != camera:
+            continue
+        path = _safe_rollout_path(str(video_path))
+        if not path.exists() or not path.is_file():
+            raise HTTPException(status_code=404, detail=f"Video not found for camera {camera}")
+        return str(video_path), path
+    raise HTTPException(status_code=404, detail=f"Unknown camera {camera}")
+
+
+def _media_metadata_for_record(record: dict) -> dict:
+    cameras = []
+    first_video_meta = None
+    for video_path in record.get("video_paths") or []:
+        path = _safe_rollout_path(str(video_path))
+        if not path.exists() or not path.is_file():
+            continue
+        metadata = _video_stream_metadata(path)
+        if first_video_meta is None:
+            first_video_meta = metadata
+        camera = _camera_name_from_video_path(str(video_path))
+        cameras.append(
+            {
+                "camera": camera,
+                "video_path": str(video_path),
+                "frame_url": f"/api/rlt/key-region/{record['key_region_id']}/frame?camera={camera}&frame={{frame}}",
+            }
+        )
+
+    frame_count = first_video_meta.get("frame_count") if first_video_meta else None
+    if frame_count is None:
+        with contextlib.suppress(TypeError, ValueError):
+            frame_count = int(record.get("num_frames"))
+    fps = first_video_meta.get("fps") if first_video_meta else None
+    if fps is None:
+        fps = _float_or_none(record.get("fps"))
+    duration = first_video_meta.get("duration_seconds") if first_video_meta else None
+    if duration is None:
+        duration = _float_or_none(record.get("duration_seconds"))
+    if duration is None and frame_count is not None and fps:
+        duration = float(frame_count) / float(fps)
+
+    return {
+        "key_region_id": record["key_region_id"],
+        "fps": fps,
+        "frame_count": frame_count,
+        "duration_seconds": duration,
+        "cameras": cameras,
+    }
+
+
+def _cache_path_for_frame(video_path: Path, frame: int) -> Path:
+    stat = video_path.stat()
+    digest = hashlib.sha256(f"{video_path}:{stat.st_mtime_ns}:{stat.st_size}:{frame}".encode()).hexdigest()
+    return KEY_REGION_FRAME_CACHE_ROOT / f"{digest}.jpg"
+
+
+def _extract_video_frame(video_path: Path, frame: int, cache_path: Path) -> None:
+    KEY_REGION_FRAME_CACHE_ROOT.mkdir(parents=True, exist_ok=True)
+    tmp_path = cache_path.with_suffix(".tmp.jpg")
+    try:
+        subprocess.run(
+            [
+                "ffmpeg",
+                "-hide_banner",
+                "-loglevel",
+                "error",
+                "-y",
+                "-i",
+                str(video_path),
+                "-vf",
+                f"select=eq(n\\,{frame})",
+                "-frames:v",
+                "1",
+                "-q:v",
+                "3",
+                str(tmp_path),
+            ],
+            check=True,
+        )
+        tmp_path.replace(cache_path)
+    except subprocess.CalledProcessError as exc:
+        if tmp_path.exists():
+            tmp_path.unlink()
+        raise HTTPException(status_code=500, detail="Frame extraction failed") from exc
+
+
+@app.get("/api/rlt/key-region/{key_region_id}/media-metadata")
+def rlt_key_region_media_metadata(key_region_id: str) -> dict:
+    if not re.fullmatch(r"[A-Za-z0-9_.-]+", key_region_id):
+        raise HTTPException(status_code=400, detail=f"Invalid key_region_id: {key_region_id}")
+    return _media_metadata_for_record(_key_region_media_record(key_region_id))
+
+
+@app.get("/api/rlt/key-region/{key_region_id}/frame")
+def rlt_key_region_frame(key_region_id: str, camera: str, frame: int) -> Response:
+    if not re.fullmatch(r"[A-Za-z0-9_.-]+", key_region_id):
+        raise HTTPException(status_code=400, detail=f"Invalid key_region_id: {key_region_id}")
+    if frame < 0:
+        raise HTTPException(status_code=400, detail="frame must be non-negative")
+    record = _key_region_media_record(key_region_id)
+    _, video_path = _key_region_camera_video(record, camera)
+    metadata = _video_stream_metadata(video_path)
+    frame_count = metadata.get("frame_count")
+    if frame_count is not None and frame >= int(frame_count):
+        raise HTTPException(status_code=400, detail="frame is outside the video range")
+
+    cache_path = _cache_path_for_frame(video_path, frame)
+    if not cache_path.exists():
+        _extract_video_frame(video_path, frame, cache_path)
+    return Response(
+        content=cache_path.read_bytes(),
+        media_type="image/jpeg",
+        headers={"Cache-Control": "public, max-age=31536000, immutable"},
+    )
 
 
 @app.get("/api/rlt/preferences/next-pair", response_model=RLTPreferencePairResponse)
