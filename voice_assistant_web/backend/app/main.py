@@ -168,20 +168,35 @@ def camera_diagnostics() -> CameraDiagnosticsResponse:
     return CameraDiagnosticsResponse(**camera_bridge.get_diagnostics())
 
 
+def _camera_stream_interval(fps: float | None) -> float:
+    default_fps = settings.camera_mjpeg_default_fps if settings.camera_mjpeg_default_fps > 0 else 10.0
+    max_fps = settings.camera_mjpeg_max_fps if settings.camera_mjpeg_max_fps > 0 else default_fps
+    requested_fps = fps if fps and fps > 0 else default_fps
+    effective_fps = min(requested_fps, max_fps)
+    return 1.0 / effective_fps
+
+
 @app.get("/api/cameras/{camera_name}/stream.mjpg")
-def stream_camera(camera_name: str) -> StreamingResponse:
+def stream_camera(camera_name: str, fps: float | None = None) -> StreamingResponse:
     if camera_name not in camera_bridge.camera_names:
         raise HTTPException(status_code=404, detail=f"Unknown camera {camera_name}")
+    interval = _camera_stream_interval(fps)
 
     async def frame_generator():
+        last_timestamp: float | None = None
         while True:
-            jpeg = camera_bridge.get_latest_jpeg(camera_name)
-            if jpeg is not None:
+            frame = camera_bridge.get_latest_jpeg_with_timestamp(camera_name)
+            if frame is not None:
+                jpeg, timestamp = frame
+                if last_timestamp == timestamp:
+                    await asyncio.sleep(min(interval, 0.01))
+                    continue
+                last_timestamp = timestamp
                 yield (
                     b"--frame\r\n"
                     b"Content-Type: image/jpeg\r\n\r\n" + jpeg + b"\r\n"
                 )
-            await asyncio.sleep(0.1)
+            await asyncio.sleep(interval)
 
     return StreamingResponse(
         frame_generator(),

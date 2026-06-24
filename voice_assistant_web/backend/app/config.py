@@ -24,6 +24,8 @@ class Settings:
     camera_transport: str = os.getenv("EII_CAMERA_TRANSPORT", "mjpeg")
     realtime_include_camera_frames: bool = _env_bool("EII_REALTIME_INCLUDE_CAMERA_FRAMES", "false")
     camera_webrtc_enabled: bool = _env_bool("EII_CAMERA_WEBRTC_ENABLED", "false")
+    camera_mjpeg_default_fps: float = float(os.getenv("EII_CAMERA_MJPEG_DEFAULT_FPS", "20"))
+    camera_mjpeg_max_fps: float = float(os.getenv("EII_CAMERA_MJPEG_MAX_FPS", "30"))
     realtime_hz: float = float(os.getenv("REALTIME_HZ", "10"))
     rollouts_root: str = os.getenv("ROLLOUTS_ROOT", "/app/rollouts")
     replay_root: str = os.getenv("REPLAY_ROOT", "/app/replay")

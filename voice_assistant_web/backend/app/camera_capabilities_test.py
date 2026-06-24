@@ -81,3 +81,19 @@ def test_camera_diagnostics_returns_bridge_metrics(monkeypatch):
     assert response.cameras["cam_high"].has_frame is True
     assert response.cameras["cam_high"].source_fps_recent == 9.5
     assert response.cameras["cam_high"].encode_ms_mean_recent == 3.2
+
+
+def test_camera_stream_interval_uses_default_when_fps_missing(monkeypatch):
+    monkeypatch.setattr(main.settings, "camera_mjpeg_default_fps", 20.0)
+    monkeypatch.setattr(main.settings, "camera_mjpeg_max_fps", 30.0)
+
+    assert main._camera_stream_interval(None) == 0.05
+
+
+def test_camera_stream_interval_clamps_requested_fps(monkeypatch):
+    monkeypatch.setattr(main.settings, "camera_mjpeg_default_fps", 20.0)
+    monkeypatch.setattr(main.settings, "camera_mjpeg_max_fps", 30.0)
+
+    assert main._camera_stream_interval(120.0) == 1.0 / 30.0
+    assert main._camera_stream_interval(0.0) == 0.05
+    assert main._camera_stream_interval(-5.0) == 0.05

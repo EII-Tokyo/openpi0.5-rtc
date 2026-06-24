@@ -117,6 +117,14 @@ class CameraBridge:
         with self._lock:
             return self._latest_jpegs.get(camera_name)
 
+    def get_latest_jpeg_with_timestamp(self, camera_name: str) -> tuple[bytes, float] | None:
+        with self._lock:
+            jpeg = self._latest_jpegs.get(camera_name)
+            timestamp = self._latest_timestamps.get(camera_name)
+            if jpeg is None or timestamp is None:
+                return None
+            return jpeg, timestamp
+
     def get_camera_status(self) -> dict[str, bool]:
         with self._lock:
             return {name: name in self._latest_jpegs for name in self.camera_names}

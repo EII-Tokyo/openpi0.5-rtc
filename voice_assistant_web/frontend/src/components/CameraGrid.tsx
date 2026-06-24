@@ -9,6 +9,12 @@ const CAMERAS = [
   { key: 'cam_right_wrist', labelKey: 'rightWrist' },
 ] as const
 
+const MJPEG_FPS = {
+  focusPrimary: 30,
+  focusSecondary: 10,
+  quad: 15,
+}
+
 type Props = {
   cameraStatus: Record<string, boolean>
   cameraTimestamps: Record<string, number | null>
@@ -87,9 +93,14 @@ export function CameraGrid({
     </div>
   )
 
+  const mjpegFpsFor = (cameraKey: (typeof CAMERAS)[number]['key']) => {
+    if (cameraView === 'quad') return MJPEG_FPS.quad
+    return cameraKey === primaryCamera ? MJPEG_FPS.focusPrimary : MJPEG_FPS.focusSecondary
+  }
+
   const renderCameraMedia = (cameraKey: (typeof CAMERAS)[number]['key'], label: string) => {
     if (cameraTransport === 'mjpeg' || cameraTransport === 'webrtc') {
-      return <img className="camera-feed-media" src={cameraStreamUrl(cameraKey)} alt={label} />
+      return <img className="camera-feed-media" src={cameraStreamUrl(cameraKey, mjpegFpsFor(cameraKey))} alt={label} />
     }
     return <canvas ref={bindCanvas(cameraKey)} className="camera-feed-canvas" aria-label={label} />
   }

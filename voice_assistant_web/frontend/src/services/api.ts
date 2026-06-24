@@ -47,8 +47,10 @@ export const rolloutTreeUrl = (path?: string) => {
 }
 
 export const rolloutVideoUrl = (path: string) => `${apiBase}/api/rollouts/video?path=${encodeURIComponent(path)}`
-export const cameraStreamUrl = (cameraName: string) =>
-  `${apiBase}/api/cameras/${encodeURIComponent(cameraName)}/stream.mjpg`
+export const cameraStreamUrl = (cameraName: string, fps?: number) => {
+  const query = fps ? `?fps=${encodeURIComponent(String(fps))}` : ''
+  return `${apiBase}/api/cameras/${encodeURIComponent(cameraName)}/stream.mjpg${query}`
+}
 
 export type CameraTransport = 'webrtc' | 'mjpeg' | 'jpeg_ws'
 
