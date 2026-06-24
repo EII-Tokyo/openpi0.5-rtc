@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { AppLanguage, translations } from '../i18n'
+import { cameraStreamUrl, CameraTransport } from '../services/api'
 
 const CAMERAS = [
   { key: 'cam_high', labelKey: 'high' },
@@ -16,6 +17,7 @@ type Props = {
   currentTask: string | null
   cameraView: 'focus' | 'quad'
   onCameraViewChange: (view: 'focus' | 'quad') => void
+  cameraTransport: CameraTransport
 }
 
 async function drawJpegB64ToCanvas(b64: string, canvas: HTMLCanvasElement | null) {
@@ -54,6 +56,7 @@ export function CameraGrid({
   currentTask,
   cameraView,
   onCameraViewChange,
+  cameraTransport,
 }: Props) {
   const t = translations[language]
   const canvasRefs = useRef<Record<string, HTMLCanvasElement | null>>({})
@@ -61,10 +64,11 @@ export function CameraGrid({
   const secondaryCameras = CAMERAS.filter((camera) => camera.key !== primaryCamera)
 
   useEffect(() => {
+    if (cameraTransport !== 'jpeg_ws') return
     void Promise.all(
       Object.entries(cameraFrames).map(([name, b64]) => drawJpegB64ToCanvas(b64, canvasRefs.current[name] ?? null)),
     )
-  }, [cameraFrames])
+  }, [cameraFrames, cameraTransport])
 
   const bindCanvas = (name: string) => (element: HTMLCanvasElement | null) => {
     canvasRefs.current[name] = element
@@ -82,6 +86,13 @@ export function CameraGrid({
       </div>
     </div>
   )
+
+  const renderCameraMedia = (cameraKey: (typeof CAMERAS)[number]['key'], label: string) => {
+    if (cameraTransport === 'mjpeg' || cameraTransport === 'webrtc') {
+      return <img className="camera-feed-media" src={cameraStreamUrl(cameraKey)} alt={label} />
+    }
+    return <canvas ref={bindCanvas(cameraKey)} className="camera-feed-canvas" aria-label={label} />
+  }
 
   return (
     <section className={`stage-panel ${cameraView === 'quad' ? 'quad-mode' : 'focus-mode'}`}>
@@ -107,14 +118,14 @@ export function CameraGrid({
 
         {cameraView === 'focus' ? (
           <div className="camera-stage-frame">
-            <canvas ref={bindCanvas(primaryCamera)} className="camera-feed-canvas" aria-label={t.high} />
+            {renderCameraMedia(primaryCamera, t.high)}
             <div className="camera-frame-top">{renderOverlay(primaryCamera, t.high)}</div>
           </div>
         ) : (
           <div className="camera-grid">
             {CAMERAS.map((camera) => (
               <article key={camera.key} className="mini-camera-card quad-camera-card">
-                <canvas ref={bindCanvas(camera.key)} className="camera-feed-canvas" aria-label={t[camera.labelKey]} />
+                {renderCameraMedia(camera.key, t[camera.labelKey])}
                 <div className="camera-frame-top">{renderOverlay(camera.key, t[camera.labelKey])}</div>
               </article>
             ))}
@@ -126,7 +137,7 @@ export function CameraGrid({
         <div className="camera-strip">
           {secondaryCameras.map((camera) => (
             <article key={camera.key} className="mini-camera-card">
-              <canvas ref={bindCanvas(camera.key)} className="camera-feed-canvas" aria-label={t[camera.labelKey]} />
+              {renderCameraMedia(camera.key, t[camera.labelKey])}
               <div className="camera-frame-top">{renderOverlay(camera.key, t[camera.labelKey])}</div>
             </article>
           ))}

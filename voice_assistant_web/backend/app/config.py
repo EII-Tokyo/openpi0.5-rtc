@@ -4,6 +4,10 @@ import os
 from dataclasses import dataclass, field
 
 
+def _env_bool(name: str, default: str = "false") -> bool:
+    return os.getenv(name, default).lower() not in {"0", "false", "no", "off"}
+
+
 @dataclass(slots=True)
 class Settings:
     enable_ros: bool = os.getenv("EII_PILOT_ENABLE_ROS", "true").lower() not in {"0", "false", "no", "off"}
@@ -17,6 +21,9 @@ class Settings:
         default_factory=lambda: os.getenv("RLT_STATE_LATEST_KEY", f"{os.getenv('RLT_STATE_CHANNEL', 'aloha_rlt_state')}:latest")
     )
     camera_jpeg_quality: int = int(os.getenv("CAMERA_JPEG_QUALITY", "70"))
+    camera_transport: str = os.getenv("EII_CAMERA_TRANSPORT", "mjpeg")
+    realtime_include_camera_frames: bool = _env_bool("EII_REALTIME_INCLUDE_CAMERA_FRAMES", "false")
+    camera_webrtc_enabled: bool = _env_bool("EII_CAMERA_WEBRTC_ENABLED", "false")
     realtime_hz: float = float(os.getenv("REALTIME_HZ", "10"))
     rollouts_root: str = os.getenv("ROLLOUTS_ROOT", "/app/rollouts")
     replay_root: str = os.getenv("REPLAY_ROOT", "/app/replay")

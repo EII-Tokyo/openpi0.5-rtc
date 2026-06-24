@@ -6,7 +6,7 @@ import { RLTConfigPage } from './components/RLTConfigPage'
 import { RLTConfigPanel, RLTControlPanel, RLTStatsPanel } from './components/RLTControlPanel'
 import { SystemPage } from './components/SystemPage'
 import { AppLanguage, translations } from './i18n'
-import { RLTControlState, sendRobotTask, wsBase } from './services/api'
+import { CameraTransport, fetchCameraCapabilities, RLTControlState, sendRobotTask, wsBase } from './services/api'
 import { truncateLabel } from './utils/text'
 
 type RealtimeState = {
@@ -138,6 +138,7 @@ export default function App() {
   const [state, setState] = useState<RealtimeState>(initialState)
   const [language, setLanguage] = useState<AppLanguage>('en')
   const [cameraView, setCameraView] = useState<'focus' | 'quad'>('quad')
+  const [cameraTransport, setCameraTransport] = useState<CameraTransport>('mjpeg')
   const [page, setPage] = useState<'live' | 'key_regions' | 'rlhf' | 'config' | 'system'>('live')
   const [keyRegionFocus, setKeyRegionFocus] = useState<KeyRegionFocusTarget | null>(null)
   const [rlhfRefreshToken, setRlhfRefreshToken] = useState(0)
@@ -181,6 +182,22 @@ export default function App() {
         window.clearTimeout(reconnectTimer)
       }
       socket?.close()
+    }
+  }, [])
+
+  useEffect(() => {
+    let isActive = true
+    fetchCameraCapabilities()
+      .then((capabilities) => {
+        if (!isActive) return
+        setCameraTransport(capabilities.preferred_transport || 'mjpeg')
+      })
+      .catch(() => {
+        if (!isActive) return
+        setCameraTransport('mjpeg')
+      })
+    return () => {
+      isActive = false
     }
   }, [])
 
@@ -268,6 +285,7 @@ export default function App() {
               currentTask={state.robot.current_task}
               cameraView={cameraView}
               onCameraViewChange={setCameraView}
+              cameraTransport={cameraTransport}
             />
             <aside className="control-rail rlt-rail">
               <RLTControlPanel rlt={state.rlt} onState={setRLTState} />

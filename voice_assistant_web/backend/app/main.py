@@ -31,6 +31,7 @@ from .rlt_key_region_crop import crop_key_region_files
 from .rlt_key_region_crop import rescore_key_region_files
 from .robot_state_bridge import RobotStateBridge
 from .schemas import HealthResponse
+from .schemas import CameraCapabilitiesResponse
 from .schemas import RealtimePayload
 from .schemas import RLTBatchSegmentRequest
 from .schemas import RLTConfigRequest
@@ -142,6 +143,25 @@ def latest_camera_image(camera_name: str) -> Response:
     return Response(content=jpeg, media_type="image/jpeg")
 
 
+@app.get("/api/cameras/capabilities", response_model=CameraCapabilitiesResponse)
+def camera_capabilities() -> CameraCapabilitiesResponse:
+    transports = ["mjpeg", "jpeg_ws"]
+    if settings.camera_webrtc_enabled:
+        transports.insert(0, "webrtc")
+    preferred_transport = settings.camera_transport if settings.camera_transport in transports else transports[0]
+    return CameraCapabilitiesResponse(
+        preferred_transport=preferred_transport,
+        transports=transports,
+        cameras=list(camera_bridge.camera_names),
+        include_realtime_frames=settings.realtime_include_camera_frames,
+        webrtc={
+            "enabled": settings.camera_webrtc_enabled,
+            "codec": "h264",
+            "ice_servers": [],
+        },
+    )
+
+
 @app.get("/api/cameras/{camera_name}/stream.mjpg")
 def stream_camera(camera_name: str) -> StreamingResponse:
     if camera_name not in camera_bridge.camera_names:
@@ -161,6 +181,12 @@ def stream_camera(camera_name: str) -> StreamingResponse:
         frame_generator(),
         media_type="multipart/x-mixed-replace; boundary=frame",
     )
+
+
+def _realtime_camera_frames() -> dict[str, str]:
+    if not settings.realtime_include_camera_frames:
+        return {}
+    return camera_bridge.snapshot_jpeg_b64_all()
 
 
 def _safe_rollout_path(relative_path: str) -> Path:
@@ -509,14 +535,14 @@ async def realtime_socket(websocket: WebSocket) -> None:
             now = time.time()
             camera_jpeg_b64: dict[str, str] = {}
             if last_camera_push == 0.0 or now - last_camera_push >= 0.1:
-                camera_jpeg_b64 = camera_bridge.snapshot_jpeg_b64_all()
+                camera_jpeg_b64 = _realtime_camera_frames()
                 last_camera_push = now
             payload = RealtimePayload(
                 robot=RuntimeStatePayload(**robot_state_bridge.snapshot()),
                 camera_status=camera_bridge.get_camera_status(),
                 camera_timestamps=camera_bridge.get_camera_timestamps(),
                 camera_jpeg_b64=camera_jpeg_b64,
-                rlt=rlt_control.snapshot(),
+                rlt=rlt_control.snapshot_fast(),
             )
             await websocket.send_json(payload.model_dump())
             await asyncio.sleep(interval)

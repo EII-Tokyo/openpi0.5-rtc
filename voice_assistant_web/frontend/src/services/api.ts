@@ -47,6 +47,25 @@ export const rolloutTreeUrl = (path?: string) => {
 }
 
 export const rolloutVideoUrl = (path: string) => `${apiBase}/api/rollouts/video?path=${encodeURIComponent(path)}`
+export const cameraStreamUrl = (cameraName: string) =>
+  `${apiBase}/api/cameras/${encodeURIComponent(cameraName)}/stream.mjpg`
+
+export type CameraTransport = 'webrtc' | 'mjpeg' | 'jpeg_ws'
+
+export type CameraCapabilitiesResponse = {
+  preferred_transport: CameraTransport
+  transports: CameraTransport[]
+  cameras: string[]
+  include_realtime_frames: boolean
+  webrtc: {
+    enabled?: boolean
+    codec?: string
+    ice_servers?: unknown[]
+    [key: string]: unknown
+  }
+}
+
+export const fetchCameraCapabilities = () => getJson<CameraCapabilitiesResponse>('/api/cameras/capabilities')
 
 export type RLTEvent = {
   timestamp: number

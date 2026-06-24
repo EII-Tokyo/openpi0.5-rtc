@@ -64,6 +64,13 @@ class RLTControlStore:
             self._refresh_derived_locked()
             return self._state.model_copy(deep=True)
 
+    def snapshot_fast(self) -> RLTControlState:
+        self._refresh_latest_runtime_metrics()
+        with self._lock:
+            self._apply_score_timeout_locked()
+            self._refresh_derived_locked()
+            return self._state.model_copy(deep=True)
+
     def start_key_region(self, request: RLTControlRequest) -> RLTControlState:
         with self._lock:
             self._apply_score_timeout_locked()

@@ -25,6 +25,14 @@ class RealtimePayload(BaseModel):
     rlt: RLTControlState
 
 
+class CameraCapabilitiesResponse(BaseModel):
+    preferred_transport: str = "mjpeg"
+    transports: list[str] = Field(default_factory=lambda: ["mjpeg", "jpeg_ws"])
+    cameras: list[str] = Field(default_factory=list)
+    include_realtime_frames: bool = False
+    webrtc: dict[str, object] = Field(default_factory=dict)
+
+
 class RLTEvent(BaseModel):
     timestamp: float
     event: str

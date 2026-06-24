@@ -254,7 +254,8 @@ button {
   border-radius: 8px;
 }
 
-.camera-feed-canvas {
+.camera-feed-canvas,
+.camera-feed-media {
   display: block;
   width: 100%;
   height: 100%;

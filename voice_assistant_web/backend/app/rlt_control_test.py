@@ -155,6 +155,20 @@ def test_valid_replay_ack_increments_warmup_and_unlocks_only_when_actor_ready_an
     assert state.actor_locked_reason is None
 
 
+def test_snapshot_fast_does_not_refresh_ledger_stats(monkeypatch):
+    store = _store(warmup_target=1)
+
+    def fail_if_called():
+        raise AssertionError("ledger stats should not be refreshed in fast realtime snapshots")
+
+    monkeypatch.setattr(store, "_apply_ledger_stats_locked", fail_if_called)
+
+    state = store.snapshot_fast()
+
+    assert state.phase == "idle"
+    assert state.trainable_replay_count == 0
+
+
 def test_invalid_replay_ack_does_not_increment_warmup_or_unlock_actor():
     store = _store(warmup_target=1)
     store.update_runtime_metrics(
