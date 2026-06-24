@@ -75,6 +75,7 @@ VIDEO_CACHE_ROOT = Path(os.getenv("ROLLOUTS_VIDEO_CACHE", "/tmp/eii_rollout_vide
 DEFAULT_RLT_PRE_ROLL_SECONDS = float(os.getenv("RLT_DEFAULT_PRE_ROLL_SECONDS", "2.0"))
 PREFERENCE_ROUND_BUDGET = int(os.getenv("RLT_PREFERENCE_ROUND_BUDGET", "800"))
 PREFERENCE_SAMPLE_ROUND = int(os.getenv("RLT_PREFERENCE_SAMPLE_ROUND", "1"))
+ROBOT_RUNTIME_HEARTBEAT_TIMEOUT_SECONDS = float(os.getenv("ROBOT_RUNTIME_HEARTBEAT_TIMEOUT_SECONDS", "3.0"))
 PREFERENCE_PAIR_TYPE_QUOTAS = {
     "success_success": 0.40,
     "success_failure": 0.30,
@@ -84,6 +85,7 @@ ROBOT_TASK_LABELS = {
     "1": "twist bottle",
     "4": "home",
     "5": "sleep",
+    "9": "shutdown",
 }
 
 
@@ -118,6 +120,9 @@ def health() -> HealthResponse:
 
 @app.post("/api/robot/task")
 def robot_task(request: RobotTaskRequest) -> dict[str, str]:
+    runtime_timestamp = robot_state_bridge.snapshot().get("runtime_timestamp")
+    if runtime_timestamp is None or time.time() - float(runtime_timestamp) > ROBOT_RUNTIME_HEARTBEAT_TIMEOUT_SECONDS:
+        raise HTTPException(status_code=409, detail="runtime is not listening; restart robot runtime before sending tasks")
     payload = {
         "type": "robot_task",
         "task_num": request.task_num,

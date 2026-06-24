@@ -17,6 +17,7 @@ class RobotStateBridge:
         self._lock = threading.Lock()
         self._state: dict[str, Any] = {
             "timestamp": None,
+            "runtime_timestamp": None,
             "mode": "waiting",
             "current_task": None,
             "qpos": [],
@@ -85,10 +86,12 @@ class RobotStateBridge:
                 if not message or message["type"] != "message":
                     continue
                 payload = json.loads(message["data"])
+                runtime_timestamp = payload.get("timestamp", time.time())
                 with self._lock:
                     self._state.update(
                         {
-                            "timestamp": payload.get("timestamp", time.time()),
+                            "timestamp": runtime_timestamp,
+                            "runtime_timestamp": runtime_timestamp,
                             "mode": payload.get("mode", self._state.get("mode", "waiting")),
                             "current_task": payload.get("current_task"),
                             "latest_action": payload.get("latest_action", self._state.get("latest_action", [])),
@@ -102,6 +105,7 @@ class RobotStateBridge:
         with self._lock:
             return {
                 "timestamp": self._state.get("timestamp"),
+                "runtime_timestamp": self._state.get("runtime_timestamp"),
                 "mode": self._state.get("mode", "waiting"),
                 "current_task": self._state.get("current_task"),
                 "qpos": list(self._state.get("qpos", [])),

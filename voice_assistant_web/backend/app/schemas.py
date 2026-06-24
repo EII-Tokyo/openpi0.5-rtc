@@ -10,6 +10,7 @@ class HealthResponse(BaseModel):
 
 class RuntimeStatePayload(BaseModel):
     timestamp: float | None = None
+    runtime_timestamp: float | None = None
     mode: str = "waiting"
     current_task: str | None = None
     qpos: list[float] = Field(default_factory=list)
@@ -316,5 +317,5 @@ class RLTPreferenceRecord(BaseModel):
 
 
 class RobotTaskRequest(BaseModel):
-    task_num: str = Field(pattern="^[145]$")
+    task_num: str = Field(pattern="^[1459]$")
     source: str = "ui"

@@ -101,6 +101,10 @@ button {
   background: #b26a00;
 }
 
+.robot-command.shutdown {
+  background: #8c2f2f;
+}
+
 .page-tabs {
   display: inline-flex;
   padding: 3px;

@@ -114,6 +114,7 @@ class Runtime:
         # 任务状态管理
         self._current_task = None
         self._is_waiting_for_task = False
+        self._standby_mode = "waiting"
         
         # 存储最近的 puppet action，用于遥操作体验模式对齐 leader/follower。
         self._last_action = None
@@ -128,11 +129,12 @@ class Runtime:
             "1": self._TASK_PROMPT_BY_NUM["1"],
             "2": self._TASK_PROMPT_BY_NUM["2"],
             "4": "Return to home position and save hdf5",
-            "5": "Return to sleep position, save hdf5 and quit robot runtime",
+            "5": "Return to sleep position and keep robot runtime standby",
             "6": "Leader follower demo",
+            "9": "Shutdown robot runtime",
         }
         self._model_task_nums = {"1", "2"}
-        self._stop_task_nums = {"4", "5"}
+        self._stop_task_nums = {"4", "5", "9"}
 
     def _setup_redis(self) -> None:
         """设置Redis连接"""
@@ -623,7 +625,9 @@ class Runtime:
         # 初始状态为等待任务
         self._is_waiting_for_task = True
         self._current_task = None
+        self._standby_mode = "waiting"
         self._publish_runtime_state(mode="waiting")
+        last_standby_state_publish = time.time()
         fd = None
         old_settings = None
         if sys.stdin.isatty():
@@ -631,7 +635,7 @@ class Runtime:
             old_settings = termios.tcgetattr(fd)
             tty.setcbreak(fd)
             logging.info(
-                "键盘快捷键已启用：1 拧瓶盖任务，2 冲洗瓶子，4 回 home 并保存，5 回 sleep 并退出，6 遥操作体验"
+                "键盘快捷键已启用：1 拧瓶盖任务，2 冲洗瓶子，4 回 home 并保存，5 回 sleep 待机，6 遥操作体验，9 关闭 runtime"
             )
         else:
             logging.warning("stdin 不是 TTY，主循环中无法监听键盘快捷键")
@@ -643,7 +647,11 @@ class Runtime:
                     self._handle_task(task_data)
                 
                 if self._is_waiting_for_task:
-                    # 等待状态下，短sleep并持续监听键盘/Redis
+                    # 等待状态下持续监听键盘/Redis，并定期发布 runtime 心跳供后端判断监听线程是否活着。
+                    now = time.time()
+                    if now - last_standby_state_publish >= 1.0:
+                        self._publish_runtime_state(mode=self._standby_mode)
+                        last_standby_state_publish = now
                     time.sleep(0.05)
                 else:
                     # 有任务时正常执行step
@@ -764,11 +772,13 @@ class Runtime:
             # 设置当前任务
             self._current_task = task_data
             self._is_waiting_for_task = False 
+            self._standby_mode = "policy"
             self._publish_runtime_state(mode="policy")
         elif task_num == "6":
             logging.info("收到遥操作体验指令，进入leader-follower演示模式")
             self._current_task = task_data
             self._is_waiting_for_task = False
+            self._standby_mode = "leader_follower_prepare"
             self._agent.reset()
             if self._last_action is not None:
                 for subscriber in self._subscribers:
@@ -780,6 +790,7 @@ class Runtime:
             # 设置等待状态
             self._is_waiting_for_task = True
             self._current_task = None
+            self._standby_mode = "waiting"
             # 回到初始位置
             self._environment.stop()
             # 停止agent
@@ -789,12 +800,24 @@ class Runtime:
                 subscriber.on_episode_end()   
             self._publish_runtime_state(mode="waiting")
         elif task_num == "5":
-            logging.info("收到回到sleep位置并退出指令，退出程序")
+            logging.info("收到 sleep 指令，回到sleep位置并保持待机")
+            self._is_waiting_for_task = True
+            self._current_task = None
+            self._standby_mode = "sleep"
             self._environment.sleep_arms()
             self._agent.reset()
             for subscriber in self._subscribers:
                 subscriber.on_episode_end()
             self._publish_runtime_state(mode="sleep")
+        elif task_num == "9":
+            logging.info("收到 shutdown 指令，停止 robot runtime")
+            self._is_waiting_for_task = True
+            self._current_task = None
+            self._standby_mode = "shutdown"
+            self._agent.reset()
+            for subscriber in self._subscribers:
+                subscriber.on_episode_end()
+            self._publish_runtime_state(mode="shutdown")
             self._stop = True
         else:
             logging.warning(f"未知任务编号: {task_num}")

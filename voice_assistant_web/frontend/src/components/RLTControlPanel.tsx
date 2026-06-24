@@ -44,7 +44,7 @@ export function RLTControlPanel({ rlt, onState }: Props) {
     }
   }
 
-  const runRobotTask = async (name: string, taskNum: '1' | '4' | '5') => {
+  const runRobotTask = async (name: string, taskNum: '1' | '4' | '5' | '9') => {
     setError('')
     setPending(name)
     try {

@@ -12,6 +12,7 @@ import { truncateLabel } from './utils/text'
 type RealtimeState = {
   robot: {
     timestamp: number | null
+    runtime_timestamp: number | null
     mode: string
     current_task: string | null
     qpos: number[]
@@ -121,6 +122,7 @@ const initialRLT: RLTControlState = {
 const initialState: RealtimeState = {
   robot: {
     timestamp: null,
+    runtime_timestamp: null,
     mode: 'waiting',
     current_task: null,
     qpos: [],
@@ -186,7 +188,7 @@ export default function App() {
     setState((current) => ({ ...current, rlt }))
   }
 
-  const runRobotTask = async (taskNum: '1' | '4' | '5') => {
+  const runRobotTask = async (taskNum: '1' | '4' | '5' | '9') => {
     await sendRobotTask(taskNum)
   }
 
@@ -206,6 +208,9 @@ export default function App() {
             </button>
             <button className="robot-command sleep" type="button" onClick={() => void runRobotTask('5')}>
               sleep
+            </button>
+            <button className="robot-command shutdown" type="button" onClick={() => void runRobotTask('9')}>
+              shutdown
             </button>
           </div>
           <nav className="page-tabs" aria-label="Primary">

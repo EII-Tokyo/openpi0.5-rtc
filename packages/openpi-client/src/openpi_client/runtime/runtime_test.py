@@ -10,6 +10,8 @@ from openpi_client.runtime.runtime import Runtime
 class _Env:
     def __init__(self):
         self.actions = []
+        self.stop_count = 0
+        self.sleep_count = 0
 
     def get_observation(self):
         return {"origin_observation": {"camera": []}, "qpos": [0.0]}
@@ -17,12 +19,21 @@ class _Env:
     def apply_action(self, action):
         self.actions.append(action)
 
+    def stop(self):
+        self.stop_count += 1
+        return None
+
+    def sleep_arms(self):
+        self.sleep_count += 1
+        return None
+
 
 class _Agent:
     def __init__(self):
         self.obs = []
         self.flush_reasons = []
         self.gate_events = []
+        self.reset_count = 0
 
     def get_action(self, obs):
         self.obs.append(obs)
@@ -36,7 +47,19 @@ class _Agent:
         self.flush_action_cache(reason)
 
     def reset(self):
-        pass
+        self.reset_count += 1
+
+
+class _Subscriber:
+    def __init__(self):
+        self.episode_starts = 0
+        self.episode_ends = 0
+
+    def on_episode_start(self):
+        self.episode_starts += 1
+
+    def on_episode_end(self):
+        self.episode_ends += 1
 
 
 def _runtime():
@@ -194,6 +217,40 @@ def test_step_passes_rlt_context_to_agent():
     assert obs["prompt"] == "Twist off the bottle cap"
     assert obs["rlt_context"]["actor_requested"] is True
     assert obs["rlt_context"]["current_task"] == {"task_name": "Twist off the bottle cap"}
+
+
+def test_sleep_task_moves_to_sleep_and_keeps_runtime_listening():
+    env = _Env()
+    agent = _Agent()
+    subscriber = _Subscriber()
+    runtime = Runtime(env, agent, [subscriber], max_hz=0, num_episodes=1, max_episode_steps=1)
+    runtime._current_task = {"task_num": "1", "task_name": "Twist off the bottle cap"}
+    runtime._is_waiting_for_task = False
+
+    runtime._handle_task({"task_num": "5", "task_name": "sleep"})
+
+    assert env.sleep_count == 1
+    assert env.stop_count == 0
+    assert agent.reset_count == 1
+    assert subscriber.episode_ends == 1
+    assert runtime._current_task is None
+    assert runtime._is_waiting_for_task is True
+    assert runtime._stop is False
+
+
+def test_shutdown_task_stops_runtime_without_reusing_sleep():
+    env = _Env()
+    agent = _Agent()
+    subscriber = _Subscriber()
+    runtime = Runtime(env, agent, [subscriber], max_hz=0, num_episodes=1, max_episode_steps=1)
+
+    runtime._handle_task({"task_num": "9", "task_name": "shutdown"})
+
+    assert env.sleep_count == 0
+    assert agent.reset_count == 1
+    assert subscriber.episode_ends == 1
+    assert runtime._is_waiting_for_task is True
+    assert runtime._stop is True
 
 
 
