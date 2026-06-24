@@ -3,11 +3,13 @@ import {
   cropKeyRegion,
   deleteKeyRegions,
   fetchRLTKeyRegionDetail,
+  fetchRLTKeyRegionMediaMetadata,
   fetchRLTKeyRegionReview,
   rescoreKeyRegion,
   rolloutVideoUrl,
 } from '../services/api'
 import type {
+  RLTKeyRegionMediaMetadata,
   RLTKeyRegionReviewRecord,
   RLTKeyRegionReviewSummary,
 } from '../services/api'
@@ -85,6 +87,7 @@ const annotationTimestamp = (record: RLTKeyRegionReviewRecord) =>
   record.score_time || record.updated_at || null
 
 const formatAnnotationTime = (record: RLTKeyRegionReviewRecord) => {
+  if (record.score_datetime) return record.score_datetime
   const timestamp = annotationTimestamp(record)
   return timestamp ? formatShortDateTime(timestamp) : 'not annotated'
 }
@@ -127,6 +130,38 @@ const orderedCameraPaths = (record: RLTKeyRegionReviewRecord) => {
 
 const durationForRecord = (record: RLTKeyRegionReviewRecord) =>
   Math.max(0, record.duration_seconds || record.crop_end_sec || 0)
+
+const fpsForRecord = (record: RLTKeyRegionReviewRecord, media?: RLTKeyRegionMediaMetadata | null) =>
+  media?.fps || record.fps || 30
+
+const frameCountForRecord = (record: RLTKeyRegionReviewRecord, media?: RLTKeyRegionMediaMetadata | null) => {
+  const frameCount = media?.frame_count || record.num_frames
+  if (frameCount && frameCount > 0) return frameCount
+  const duration = durationForRecord(record)
+  return duration > 0 ? Math.max(1, Math.round(duration * fpsForRecord(record, media))) : 0
+}
+
+const frameFromSeconds = (
+  record: RLTKeyRegionReviewRecord,
+  media: RLTKeyRegionMediaMetadata | null | undefined,
+  seconds: number,
+) => {
+  const frameCount = frameCountForRecord(record, media)
+  if (frameCount <= 0) return 0
+  return clamp(Math.round(seconds * fpsForRecord(record, media)), 0, Math.max(0, frameCount - 1))
+}
+
+const secondsFromFrame = (
+  record: RLTKeyRegionReviewRecord,
+  media: RLTKeyRegionMediaMetadata | null | undefined,
+  frame: number,
+) => frame / fpsForRecord(record, media)
+
+const quantizeSecondsToFrame = (
+  record: RLTKeyRegionReviewRecord,
+  media: RLTKeyRegionMediaMetadata | null | undefined,
+  seconds: number,
+) => secondsFromFrame(record, media, frameFromSeconds(record, media, seconds))
 
 const defaultCropRange = (record: RLTKeyRegionReviewRecord): CropRange => {
   const duration = durationForRecord(record)
@@ -176,10 +211,14 @@ const cropSummary = (record: RLTKeyRegionReviewRecord, range: CropRange) => {
   return `selected ${range.startSec.toFixed(2)}s - ${range.endSec.toFixed(2)}s / ${samples} replay samples`
 }
 
-const frameSummary = (record: RLTKeyRegionReviewRecord, range: CropRange) => {
-  const fps = record.fps || 30
-  const startFrame = Math.round(range.startSec * fps)
-  const endFrame = Math.round(range.endSec * fps)
+const frameSummary = (
+  record: RLTKeyRegionReviewRecord,
+  range: CropRange,
+  media?: RLTKeyRegionMediaMetadata | null,
+) => {
+  const frameCount = frameCountForRecord(record, media)
+  const startFrame = frameFromSeconds(record, media, range.startSec)
+  const endFrame = clamp(Math.round(range.endSec * fpsForRecord(record, media)), startFrame + 1, frameCount || startFrame + 1)
   return { startFrame, endFrame }
 }
 
@@ -187,6 +226,8 @@ const badgeTone = (tone: 'green' | 'blue' | 'amber' | 'red' | 'slate') => `key-r
 
 const keyRegionInfoRows = (record: RLTKeyRegionReviewRecord): KeyRegionInfoRow[] => [
   { label: 'Batch', value: record.batch || '-' },
+  { label: 'Review time', value: record.review_datetime || '-' },
+  { label: 'Crop time', value: record.crop_datetime || '-' },
   { label: 'Last annotation', value: formatAnnotationTime(record) },
   { label: 'Crop', value: `${formatDuration(record.crop_start_sec)} - ${formatDuration(record.crop_end_sec)}` },
   { label: 'Samples', value: `${record.num_replay_transitions || 0}` },
@@ -195,46 +236,106 @@ const keyRegionInfoRows = (record: RLTKeyRegionReviewRecord): KeyRegionInfoRow[]
   { label: 'Eligibility', value: keyRegionEligibility(record) },
 ]
 
-const unloadVideo = (video: HTMLVideoElement) => {
-  video.pause()
-  video.currentTime = 0
-}
-
-const videoReadyForPlayback = (video: HTMLVideoElement | null) => Boolean(video && video.readyState >= 1)
-
-function KeyRegionVideoGrid({
+function KeyRegionVideoPreview({
   record,
   active,
-  registerVideo,
+  cropRange,
+  previewTime,
+  isPlaying,
   onSelect,
+  onTimeChange,
 }: {
   record: RLTKeyRegionReviewRecord
   active: boolean
-  registerVideo: (index: number, element: HTMLVideoElement | null) => void
+  cropRange: CropRange
+  previewTime: number
+  isPlaying: boolean
   onSelect: () => void
+  onTimeChange: (timeSec: number) => void
 }) {
+  const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({})
+  const lastTimePushRef = useRef(0)
   const cameras = orderedCameraPaths(record)
+  const pathsByCamera = new Map(cameras.map((path) => [cameraLabelFromPath(path), path]))
+  const primaryCamera = pathsByCamera.has('cam_low') ? 'cam_low' : KEY_REGION_CAMERA_ORDER[0]
+  const videos = () => Object.values(videoRefs.current).filter((video): video is HTMLVideoElement => Boolean(video))
+  const primaryVideo = () => videoRefs.current[primaryCamera] || videos()[0] || null
+
+  useEffect(() => {
+    if (!active) return undefined
+    for (const video of videos()) {
+      if (Number.isFinite(previewTime) && Math.abs(video.currentTime - previewTime) > 0.08) {
+        video.currentTime = previewTime
+      }
+    }
+    return undefined
+  }, [active, previewTime, record.key_region_id])
+
+  useEffect(() => {
+    if (!active) return undefined
+    if (isPlaying) {
+      for (const video of videos()) {
+        if (video.currentTime < cropRange.startSec || video.currentTime >= cropRange.endSec) {
+          video.currentTime = cropRange.startSec
+        }
+        void video.play().catch(() => undefined)
+      }
+    } else {
+      for (const video of videos()) {
+        video.pause()
+      }
+    }
+    return undefined
+  }, [active, cropRange.endSec, cropRange.startSec, isPlaying])
+
+  const handleTimeUpdate = (camera: string) => {
+    if (camera !== primaryCamera) return
+    const video = primaryVideo()
+    if (!video) return
+    if (video.currentTime >= cropRange.endSec) {
+      for (const item of videos()) {
+        item.currentTime = cropRange.startSec
+        if (isPlaying) void item.play().catch(() => undefined)
+      }
+      onTimeChange(cropRange.startSec)
+      return
+    }
+    const now = performance.now()
+    if (now - lastTimePushRef.current > 80) {
+      lastTimePushRef.current = now
+      for (const item of videos()) {
+        if (item !== video && Math.abs(item.currentTime - video.currentTime) > 0.12) {
+          item.currentTime = video.currentTime
+        }
+      }
+      onTimeChange(video.currentTime)
+    }
+  }
 
   return (
     <div className="key-region-video-grid">
-      {KEY_REGION_CAMERA_ORDER.map((camera, cameraIndex) => {
-        const path = cameras[cameraIndex]
+      {KEY_REGION_CAMERA_ORDER.map((camera) => {
+        const path = pathsByCamera.get(camera)
         return (
           <div className="key-region-video-tile" key={`${record.key_region_id}-${camera}`}>
-            <span className="key-region-camera-label">{path ? cameraLabelFromPath(path) : camera}</span>
-            {path && active ? (
+            <span className="key-region-camera-label">{camera}</span>
+            {active && path ? (
               <video
-                key={path}
-                ref={(element) => registerVideo(cameraIndex, element)}
+                ref={(element) => {
+                  videoRefs.current[camera] = element
+                }}
                 src={rolloutVideoUrl(path)}
-                preload="metadata"
                 muted
                 playsInline
-                tabIndex={-1}
+                preload="metadata"
+                onLoadedMetadata={(event) => {
+                  event.currentTarget.currentTime = previewTime
+                }}
+                onTimeUpdate={() => handleTimeUpdate(camera)}
               />
             ) : path ? (
               <button className="key-region-video-placeholder" type="button" onClick={onSelect}>
-                <span>Load preview</span>
+                <span>Load video</span>
               </button>
             ) : (
               <div className="key-region-video-missing">No video</div>
@@ -263,9 +364,11 @@ export function KeyRegionsPage({
   const [statusFilter, setStatusFilter] = useState<'all' | 'trainable' | 'needsCrop'>('all')
   const [rewardFilter, setRewardFilter] = useState<'all' | 'success' | 'failure'>('all')
   const [batchFilter, setBatchFilter] = useState('all')
+  const [searchQuery, setSearchQuery] = useState('')
   const [batches, setBatches] = useState<string[]>([])
   const [selectedReviewId, setSelectedReviewId] = useState('')
   const [selectedDetail, setSelectedDetail] = useState<RLTKeyRegionReviewRecord | null>(null)
+  const [mediaMetadataById, setMediaMetadataById] = useState<Record<string, RLTKeyRegionMediaMetadata>>({})
   const [pendingFocusTarget, setPendingFocusTarget] = useState<KeyRegionFocusTarget | null>(null)
   const [focusKeyRegionId, setFocusKeyRegionId] = useState('')
   const [selectedKeyRegionIds, setSelectedKeyRegionIds] = useState<Set<string>>(new Set())
@@ -277,28 +380,13 @@ export function KeyRegionsPage({
   const [actionError, setActionError] = useState('')
   const [playbackError, setPlaybackError] = useState('')
   const [loading, setLoading] = useState(false)
-  const videoRefs = useRef<Array<HTMLVideoElement | null>>([])
   const selectedReviewIdRef = useRef('')
+  const playbackTimeRef = useRef<Record<string, number>>({})
 
   const activeRecord = useMemo(
     () => selectedDetail || records.find((record) => record.key_region_id === selectedReviewId) || null,
     [records, selectedDetail, selectedReviewId],
   )
-
-  const unloadActiveVideos = useCallback(() => {
-    videoRefs.current.forEach((video) => {
-      if (video) unloadVideo(video)
-    })
-    videoRefs.current = []
-  }, [])
-
-  const registerVideo = useCallback((index: number, element: HTMLVideoElement | null) => {
-    if (!element) {
-      videoRefs.current[index] = null
-      return
-    }
-    videoRefs.current[index] = element
-  }, [])
 
   const loadPage = useCallback(async () => {
     setLoading(true)
@@ -310,6 +398,7 @@ export function KeyRegionsPage({
         status: statusFilter,
         reward: rewardFilter,
         batch: batchFilter,
+        search: searchQuery,
         focusKeyRegionId: focusKeyRegionId || undefined,
       })
       setRecords(page.items)
@@ -330,7 +419,7 @@ export function KeyRegionsPage({
     } finally {
       setLoading(false)
     }
-  }, [batchFilter, focusKeyRegionId, offset, rewardFilter, statusFilter])
+  }, [batchFilter, focusKeyRegionId, offset, rewardFilter, searchQuery, statusFilter])
 
   useEffect(() => {
     selectedReviewIdRef.current = selectedReviewId
@@ -347,35 +436,38 @@ export function KeyRegionsPage({
     setStatusFilter('all')
     setRewardFilter('all')
     setBatchFilter(focusTarget.batch || 'all')
+    setSearchQuery('')
     setOffset(0)
     setSelectedReviewId('')
     setSelectedDetail(null)
-    unloadActiveVideos()
     setPlayingKeyRegionId('')
     setPendingPlaybackId('')
-  }, [focusTarget, unloadActiveVideos])
+  }, [focusTarget])
 
   useEffect(() => {
     setOffset(0)
     setSelectedReviewId('')
     setSelectedDetail(null)
     setSelectedKeyRegionIds(new Set())
-    unloadActiveVideos()
     setPlayingKeyRegionId('')
     setPendingPlaybackId('')
-  }, [batchFilter, rewardFilter, statusFilter, unloadActiveVideos])
+  }, [batchFilter, rewardFilter, searchQuery, statusFilter])
 
   useEffect(() => {
     if (!selectedReviewId) {
       setSelectedDetail(null)
-      unloadActiveVideos()
       setPendingPlaybackId('')
       return undefined
     }
     let ignore = false
-    void fetchRLTKeyRegionDetail(selectedReviewId)
-      .then((record) => {
-        if (!ignore) setSelectedDetail(record)
+    void Promise.all([
+      fetchRLTKeyRegionDetail(selectedReviewId),
+      fetchRLTKeyRegionMediaMetadata(selectedReviewId),
+    ])
+      .then(([record, media]) => {
+        if (ignore) return
+        setSelectedDetail(record)
+        setMediaMetadataById((items) => ({ ...items, [selectedReviewId]: media }))
       })
       .catch((exc) => {
         if (!ignore) setPlaybackError(exc instanceof Error ? exc.message : 'Preview details could not be loaded.')
@@ -383,13 +475,7 @@ export function KeyRegionsPage({
     return () => {
       ignore = true
     }
-  }, [selectedReviewId, unloadActiveVideos])
-
-  useEffect(() => {
-    return () => {
-      unloadActiveVideos()
-    }
-  }, [unloadActiveVideos])
+  }, [selectedReviewId])
 
   const visibleIds = useMemo(() => new Set(records.map((record) => record.key_region_id)), [records])
   const selectedCount = selectedKeyRegionIds.size
@@ -401,8 +487,6 @@ export function KeyRegionsPage({
   const selectReviewRecord = (record: RLTKeyRegionReviewRecord) => {
     setPlaybackError('')
     if (selectedReviewIdRef.current && selectedReviewIdRef.current !== record.key_region_id) {
-      pauseActiveVideos()
-      unloadActiveVideos()
       setPlayingKeyRegionId('')
     }
     setSelectedReviewId(record.key_region_id)
@@ -422,54 +506,29 @@ export function KeyRegionsPage({
     setFocusKeyRegionId('')
   }, [loading, pendingFocusTarget, records])
 
-  const syncVideos = (record: RLTKeyRegionReviewRecord, timeSec: number) => {
-    videoRefs.current.forEach((video) => {
-      if (!video) return
-      try {
-        if (Number.isFinite(video.duration)) {
-          video.currentTime = clamp(timeSec, 0, Math.max(0, video.duration))
-        } else {
-          video.currentTime = Math.max(0, timeSec)
-        }
-      } catch {
-        // Metadata can still be loading; the next play/drag tick will retry.
-      }
-    })
-    setPlaybackTimes((times) => ({ ...times, [record.key_region_id]: timeSec }))
-  }
-
-  const pauseActiveVideos = () => {
-    videoRefs.current.forEach((video) => video?.pause())
+  const syncFramePreview = (
+    record: RLTKeyRegionReviewRecord,
+    media: RLTKeyRegionMediaMetadata | null | undefined,
+    timeSec: number,
+  ) => {
+    const nextTime = quantizeSecondsToFrame(record, media, timeSec)
+    playbackTimeRef.current[record.key_region_id] = nextTime
+    setPlaybackTimes((times) =>
+      times[record.key_region_id] === nextTime ? times : { ...times, [record.key_region_id]: nextTime },
+    )
   }
 
   const startCropPlayback = async (record: RLTKeyRegionReviewRecord) => {
-    const videos = videoRefs.current.filter((video): video is HTMLVideoElement => Boolean(video))
-    if (!videos.length) {
-      setPlaybackError('')
-      return false
-    }
+    const media = mediaMetadataById[record.key_region_id]
     const range = getCropRange(record)
     setPlaybackError('')
-    syncVideos(record, range.startSec)
-    const results = await Promise.allSettled(
-      videos.map(async (video) => {
-        video.muted = true
-        if (video.readyState === 0) video.load()
-        await video.play()
-      }),
-    )
-    if (results.every((result) => result.status === 'rejected')) {
-      setPlaybackError('Preview playback failed. Try again after video metadata loads.')
-      setPlayingKeyRegionId('')
-      return false
-    }
+    syncFramePreview(record, media, range.startSec)
     setPlayingKeyRegionId(record.key_region_id)
     return true
   }
 
   const toggleCropPlayback = async (record: RLTKeyRegionReviewRecord) => {
     if (playingKeyRegionId === record.key_region_id) {
-      pauseActiveVideos()
       setPlayingKeyRegionId('')
       setPendingPlaybackId('')
       return
@@ -485,59 +544,9 @@ export function KeyRegionsPage({
 
   useEffect(() => {
     if (!pendingPlaybackId || !activeRecord || activeRecord.key_region_id !== pendingPlaybackId) return undefined
-    let cancelled = false
-    const startedAt = Date.now()
-    let timer = 0
-    const attemptPlayback = () => {
-      if (cancelled) return
-      const hasReadyVideo = videoRefs.current.some(videoReadyForPlayback)
-      if (!hasReadyVideo) {
-        if (Date.now() - startedAt > 5000) {
-          setPlaybackError('Preview video could not be loaded. Try opening the card again.')
-          setPendingPlaybackId('')
-          return
-        }
-        timer = window.setTimeout(attemptPlayback, 120)
-        return
-      }
-      void startCropPlayback(activeRecord).then((started) => {
-        if (!cancelled && started) {
-          setPendingPlaybackId('')
-        } else if (!cancelled) {
-          timer = window.setTimeout(attemptPlayback, 160)
-        }
-      })
-    }
-    timer = window.setTimeout(attemptPlayback, 0)
-    return () => {
-      cancelled = true
-      window.clearTimeout(timer)
-    }
-  }, [activeRecord, pendingPlaybackId])
-
-  useEffect(() => {
-    if (!playingKeyRegionId || !activeRecord || activeRecord.key_region_id !== playingKeyRegionId) return undefined
-    let timer = 0
-    const tick = () => {
-      const primaryVideo = videoRefs.current.find(Boolean)
-      if (!primaryVideo) {
-        setPlayingKeyRegionId('')
-        return
-      }
-      const range = cropRangeForRecord(activeRecord, cropRanges)
-      const currentTime = primaryVideo.currentTime
-      setPlaybackTimes((times) => ({ ...times, [playingKeyRegionId]: currentTime }))
-      if (currentTime >= range.endSec) {
-        pauseActiveVideos()
-        syncVideos(activeRecord, range.endSec)
-        setPlayingKeyRegionId('')
-        return
-      }
-      timer = window.setTimeout(tick, 100)
-    }
-    timer = window.setTimeout(tick, 100)
-    return () => window.clearTimeout(timer)
-  }, [activeRecord, cropRanges, playingKeyRegionId])
+    void startCropPlayback(activeRecord).then(() => setPendingPlaybackId(''))
+    return undefined
+  }, [activeRecord, pendingPlaybackId, mediaMetadataById])
 
   const updateCropFromPointer = (
     record: RLTKeyRegionReviewRecord,
@@ -549,7 +558,8 @@ export function KeyRegionsPage({
     if (duration <= 0) return
     const rect = track.getBoundingClientRect()
     const ratio = rect.width > 0 ? clamp((clientX - rect.left) / rect.width, 0, 1) : 0
-    const nextSec = ratio * duration
+    const media = mediaMetadataById[record.key_region_id]
+    const nextSec = quantizeSecondsToFrame(record, media, ratio * duration)
     const current = getCropRange(record)
     const minDuration = minCropDuration(record)
     const nextRange =
@@ -564,7 +574,7 @@ export function KeyRegionsPage({
           }
     setCropRanges((ranges) => ({ ...ranges, [record.key_region_id]: nextRange }))
     if (record.key_region_id === selectedReviewId) {
-      syncVideos(record, edge === 'start' ? nextRange.startSec : nextRange.endSec)
+      syncFramePreview(record, media, edge === 'start' ? nextRange.startSec : nextRange.endSec)
     }
   }
 
@@ -577,7 +587,6 @@ export function KeyRegionsPage({
     event.stopPropagation()
     const track = event.currentTarget.closest('.key-region-timeline-track')
     if (!(track instanceof HTMLElement)) return
-    pauseActiveVideos()
     setPlayingKeyRegionId('')
     updateCropFromPointer(record, edge, track, event.clientX)
     const onMove = (moveEvent: PointerEvent) => updateCropFromPointer(record, edge, track, moveEvent.clientX)
@@ -591,10 +600,16 @@ export function KeyRegionsPage({
 
   const saveCropForQ = async (record: RLTKeyRegionReviewRecord) => {
     const range = getCropRange(record)
+    const media = mediaMetadataById[record.key_region_id]
+    const startSec = quantizeSecondsToFrame(record, media, range.startSec)
+    const endSec = Math.max(
+      startSec + 1 / fpsForRecord(record, media),
+      quantizeSecondsToFrame(record, media, range.endSec),
+    )
     setActionError('')
     setActionPending(`crop-${record.key_region_id}`)
     try {
-      await cropKeyRegion(record.key_region_id, range.startSec, range.endSec)
+      await cropKeyRegion(record.key_region_id, startSec, endSec)
       await loadPage()
       if (record.key_region_id === selectedReviewId) {
         const detail = await fetchRLTKeyRegionDetail(record.key_region_id)
@@ -657,7 +672,6 @@ export function KeyRegionsPage({
   }
 
   const goToOffset = (next: number) => {
-    unloadActiveVideos()
     setPlayingKeyRegionId('')
     setSelectedDetail(null)
     setOffset(Math.max(0, next))
@@ -702,6 +716,14 @@ export function KeyRegionsPage({
               <option value={batch} key={batch}>{batch}</option>
             ))}
           </select>
+          <input
+            className="key-region-control key-region-search-control"
+            type="search"
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+            placeholder="Search date, time, video, id"
+            aria-label="Search key region videos by date, time, path, or id"
+          />
           <button className="ghost-button" type="button" onClick={selectVisibleKeyRegions} disabled={!records.length}>
             Select page
           </button>
@@ -760,10 +782,11 @@ export function KeyRegionsPage({
         {records.map((record, index) => {
           const activeCard = selectedReviewId === record.key_region_id
           const renderRecord = activeCard && activeRecord ? activeRecord : record
+          const media = mediaMetadataById[renderRecord.key_region_id]
           const checked = selectedKeyRegionIds.has(record.key_region_id)
           const cropRange = getCropRange(renderRecord)
           const duration = durationForRecord(renderRecord)
-          const frames = frameSummary(renderRecord, cropRange)
+          const frames = frameSummary(renderRecord, cropRange, media)
           const clipLeft = duration > 0 ? clamp((cropRange.startSec / duration) * 100, 0, 100) : 0
           const clipWidth =
             duration > 0 ? clamp(((cropRange.endSec - cropRange.startSec) / duration) * 100, 0, 100 - clipLeft) : 0
@@ -778,6 +801,7 @@ export function KeyRegionsPage({
           const rescoreOnePending = actionPending === `rescore-${renderRecord.key_region_id}-1`
           const isPlaying = playingKeyRegionId === renderRecord.key_region_id
           const isPlaybackLoading = pendingPlaybackId === renderRecord.key_region_id
+          const previewTime = playbackTimes[renderRecord.key_region_id] ?? cropRange.startSec
           return (
             <article key={record.key_region_id} className={`key-region-card ${activeCard ? 'active' : ''}`}>
               <div className="key-region-card-head">
@@ -795,11 +819,14 @@ export function KeyRegionsPage({
               </div>
 
               <div className="key-region-card-main">
-                <KeyRegionVideoGrid
+                <KeyRegionVideoPreview
                   record={renderRecord}
                   active={activeCard}
-                  registerVideo={activeCard ? registerVideo : () => undefined}
+                  cropRange={cropRange}
+                  previewTime={previewTime}
+                  isPlaying={isPlaying}
                   onSelect={() => selectReviewRecord(record)}
+                  onTimeChange={(timeSec) => syncFramePreview(renderRecord, media, timeSec)}
                 />
 
                 <aside className="key-region-info-panel">
@@ -900,7 +927,11 @@ export function KeyRegionsPage({
                       className={`crop-play-button ${isPlaying ? 'active' : ''}`}
                       type="button"
                       aria-pressed={isPlaying}
-                      onClick={() => void toggleCropPlayback(renderRecord)}
+                      onMouseDown={(event) => event.preventDefault()}
+                      onClick={(event) => {
+                        event.currentTarget.blur()
+                        void toggleCropPlayback(renderRecord)
+                      }}
                     >
                       <span className="crop-play-icon" aria-hidden="true">{isPlaying ? 'II' : isPlaybackLoading ? '...' : '>'}</span>
                       <span>{isPlaying ? 'Pause' : isPlaybackLoading ? 'Loading' : 'Play'}</span>

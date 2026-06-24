@@ -198,6 +198,20 @@ export type RLTKeyRegionCropResponse = {
   manifest_path: string
 }
 
+export type RLTKeyRegionCameraMedia = {
+  camera: string
+  video_path: string
+  frame_url: string
+}
+
+export type RLTKeyRegionMediaMetadata = {
+  key_region_id: string
+  fps: number | null
+  frame_count: number | null
+  duration_seconds: number | null
+  cameras: RLTKeyRegionCameraMedia[]
+}
+
 export type RLTPreferenceStats = {
   total_preferences: number
   left_wins: number
@@ -376,6 +390,10 @@ export const fetchRLTKeyRegionReview = (query: RLTKeyRegionReviewQuery = {}) => 
 }
 export const fetchRLTKeyRegionDetail = (keyRegionId: string) =>
   getJson<RLTKeyRegionReviewRecord>(`/api/rlt/key-region/${encodeURIComponent(keyRegionId)}`)
+export const fetchRLTKeyRegionMediaMetadata = (keyRegionId: string) =>
+  getJson<RLTKeyRegionMediaMetadata>(`/api/rlt/key-region/${encodeURIComponent(keyRegionId)}/media-metadata`)
+export const keyRegionFrameUrl = (keyRegionId: string, camera: string, frame: number) =>
+  `${apiBase}/api/rlt/key-region/${encodeURIComponent(keyRegionId)}/frame?camera=${encodeURIComponent(camera)}&frame=${encodeURIComponent(String(frame))}`
 export const startKeyRegion = () => postJson<RLTControlState>('/api/rlt/key-region/start', { source: 'ui' })
 export const endKeyRegion = () => postJson<RLTControlState>('/api/rlt/key-region/end', { source: 'ui' })
 export const scoreKeyRegion = (reward: 0 | 1) =>
