@@ -272,8 +272,31 @@ Putting those into the control backend risks making robot control less reliable.
 
 ## Immediate Next Recommendations
 
-1. Deploy the diagnostics API to 103 and collect `/api/cameras/diagnostics` while the browser is open.
-2. If `source_fps_recent` is about 60 and `encoded_fps_recent` is about 60, the backend is encoding far more frames than MJPEG displays; add display-side encode throttling.
-3. If `encode_ms_mean_recent` is high or backend CPU exceeds one core under browser load, tune JPEG quality/fps and proceed to WebRTC sidecar.
-4. Implement Phase B before Phase D so MJPEG remains a strong fallback.
-5. Begin Phase C/D with `videotestsrc`, not real robot cameras.
+1. Keep `/api/cameras/diagnostics` visible during robot tests and check source fps, encoded fps, frame age, encode time, and drops.
+2. If `encode_ms_mean_recent` is high or backend CPU exceeds one core under browser load, tune JPEG quality/fps and proceed to WebRTC sidecar.
+3. Begin Phase C/D with `videotestsrc`, not real robot cameras.
+
+## Phase B Deployment Result
+
+After Phase B, `/api/cameras/{name}/stream.mjpg` accepts `?fps=` and clamps it with:
+
+- `EII_CAMERA_MJPEG_DEFAULT_FPS`, default `20`
+- `EII_CAMERA_MJPEG_MAX_FPS`, default `30`
+
+The frontend now requests:
+
+- Quad view: `15fps` per camera.
+- Focus main camera: `30fps`.
+- Focus secondary cameras: `10fps`.
+
+Remote measurements on 103 after deployment:
+
+| Request | Observed fps |
+|---|---:|
+| `cam_high?fps=15` | 14.10 |
+| `cam_high?fps=30` | 28.16 |
+| `cam_low?fps=15` | 14.26 |
+| `cam_left_wrist?fps=15` | 14.29 |
+| `cam_right_wrist?fps=15` | 14.24 |
+
+The diagnostics API still showed all four cameras around 59.8-59.9 source/encoded fps with zero dropped frames. This means the MJPEG fallback now supports visibly smoother focus mode while keeping quad mode below the maximum load of four 30fps streams.
