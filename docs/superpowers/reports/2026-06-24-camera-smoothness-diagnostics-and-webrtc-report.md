@@ -397,6 +397,7 @@ Important finding:
 - `apt install python3-gi` installs GI bindings for the system Python, which is Python 3.8 in this image.
 - Using `/usr/local/bin/python3` cannot reliably import `gi` because the binary extension ABI does not match.
 - Therefore the media sidecar should keep using `/usr/bin/python3` unless the image is rebuilt with matching Python 3.10 GI bindings.
+- Because the sidecar now runs on Python 3.8, FastAPI endpoint annotations must avoid Python 3.9+ built-in generic syntax such as `dict[str, str]`. The media service uses `typing.Dict`, `typing.List`, and `typing.Optional` for runtime compatibility.
 
 Local verification after the build hardening:
 
@@ -409,6 +410,16 @@ gi.require_version("Gst", "1.0")
 gi.require_version("GstWebRTC", "1.0")
 from gi.repository import Gst, GstWebRTC
 ```
+
+- Media service import smoke under `/usr/bin/python3` passed:
+
+```text
+import importlib
+module = importlib.import_module("voice_assistant_web.webrtc_media.media_service")
+module.health()
+```
+
+Result: `{"status": "ok"}`.
 
 - Unit tests passed:
 

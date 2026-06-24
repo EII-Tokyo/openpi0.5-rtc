@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import subprocess
-from typing import Any
+from typing import Any, Dict, List, Optional
 
 from fastapi import FastAPI
 from pydantic import BaseModel
@@ -19,14 +19,14 @@ class CommandResult:
     ok: bool
     stdout: str
     stderr: str
-    returncode: int | None
+    returncode: Optional[int]
 
 
 class VideoTestSrcSmokeRequest(BaseModel):
     num_buffers: int = Field(default=30, ge=1, le=300)
 
 
-def _run_command(command: list[str], timeout: float) -> CommandResult:
+def _run_command(command: List[str], timeout: float) -> CommandResult:
     try:
         completed = subprocess.run(command, capture_output=True, check=False, text=True, timeout=timeout)
     except FileNotFoundError as exc:
@@ -50,7 +50,7 @@ def _import_gst_webrtc_bindings() -> None:
     from gi.repository import GstWebRTC  # noqa: F401
 
 
-def probe_python_gstreamer_bindings() -> dict[str, Any]:
+def probe_python_gstreamer_bindings() -> Dict[str, Any]:
     try:
         _import_gst_webrtc_bindings()
     except Exception as exc:
@@ -64,8 +64,8 @@ def probe_python_gstreamer_bindings() -> dict[str, Any]:
     }
 
 
-def probe_gstreamer() -> dict[str, Any]:
-    plugins: dict[str, dict[str, Any]] = {}
+def probe_gstreamer() -> Dict[str, Any]:
+    plugins: Dict[str, Dict[str, Any]] = {}
     for plugin in GST_REQUIRED_PLUGINS:
         result = _run_command(["gst-inspect-1.0", plugin], timeout=5)
         plugins[plugin] = {
@@ -81,7 +81,7 @@ def probe_gstreamer() -> dict[str, Any]:
     }
 
 
-def run_videotestsrc_smoke(num_buffers: int = 30) -> dict[str, Any]:
+def run_videotestsrc_smoke(num_buffers: int = 30) -> Dict[str, Any]:
     command = [
         "gst-launch-1.0",
         "-q",
@@ -103,15 +103,15 @@ def run_videotestsrc_smoke(num_buffers: int = 30) -> dict[str, Any]:
 
 
 @app.get("/health")
-def health() -> dict[str, str]:
+def health() -> Dict[str, str]:
     return {"status": "ok"}
 
 
 @app.get("/api/media/gstreamer")
-def gstreamer_status() -> dict[str, Any]:
+def gstreamer_status() -> Dict[str, Any]:
     return probe_gstreamer()
 
 
 @app.post("/api/media/smoke/videotestsrc")
-def videotestsrc_smoke(request: VideoTestSrcSmokeRequest) -> dict[str, Any]:
+def videotestsrc_smoke(request: VideoTestSrcSmokeRequest) -> Dict[str, Any]:
     return run_videotestsrc_smoke(num_buffers=request.num_buffers)
