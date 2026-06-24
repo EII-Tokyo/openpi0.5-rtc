@@ -58,6 +58,21 @@ class CameraDiagnosticsResponse(BaseModel):
     cameras: dict[str, CameraDiagnosticsRecord] = Field(default_factory=dict)
 
 
+class CameraWebRTCSessionRequest(BaseModel):
+    cameras: list[str] = Field(min_length=1, max_length=4)
+    codec: str = "h264"
+
+
+class CameraWebRTCSessionResponse(BaseModel):
+    session_id: str
+    status: str = "signaling"
+    cameras: list[str]
+    signaling_url: str
+    expires_at: float
+    fallback_transport: str = "mjpeg"
+    message: str | None = None
+
+
 class RLTEvent(BaseModel):
     timestamp: float
     event: str

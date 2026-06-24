@@ -1,4 +1,8 @@
+import pytest
+from fastapi import HTTPException
+
 from voice_assistant_web.backend.app import main
+from voice_assistant_web.backend.app.schemas import CameraWebRTCSessionRequest
 
 
 class _FakeCameraBridge:
@@ -97,3 +101,44 @@ def test_camera_stream_interval_clamps_requested_fps(monkeypatch):
     assert main._camera_stream_interval(120.0) == 1.0 / 30.0
     assert main._camera_stream_interval(0.0) == 0.05
     assert main._camera_stream_interval(-5.0) == 0.05
+
+
+def test_webrtc_session_creation_is_disabled_by_default(monkeypatch):
+    monkeypatch.setattr(main.settings, "camera_webrtc_enabled", False)
+
+    with pytest.raises(HTTPException) as exc_info:
+        main.create_webrtc_camera_session(CameraWebRTCSessionRequest(cameras=["cam_high"]))
+
+    assert exc_info.value.status_code == 503
+    assert exc_info.value.detail == "WebRTC camera transport is disabled"
+
+
+def test_webrtc_session_rejects_unknown_camera(monkeypatch):
+    monkeypatch.setattr(main.settings, "camera_webrtc_enabled", True)
+    monkeypatch.setattr(main.camera_bridge, "camera_names", ("cam_high", "cam_low"))
+    main.webrtc_sessions.clear()
+
+    with pytest.raises(HTTPException) as exc_info:
+        main.create_webrtc_camera_session(CameraWebRTCSessionRequest(cameras=["cam_missing"]))
+
+    assert exc_info.value.status_code == 404
+    assert exc_info.value.detail == "Unknown camera cam_missing"
+
+
+def test_webrtc_session_lifecycle(monkeypatch):
+    monkeypatch.setattr(main.settings, "camera_webrtc_enabled", True)
+    monkeypatch.setattr(main.settings, "camera_webrtc_session_ttl_seconds", 30.0)
+    monkeypatch.setattr(main.camera_bridge, "camera_names", ("cam_high", "cam_low"))
+    main.webrtc_sessions.clear()
+
+    created = main.create_webrtc_camera_session(CameraWebRTCSessionRequest(cameras=["cam_high", "cam_low"]))
+
+    assert created.session_id
+    assert created.status == "signaling"
+    assert created.cameras == ["cam_high", "cam_low"]
+    assert created.signaling_url.endswith(f"/ws/cameras/webrtc/{created.session_id}")
+    assert created.fallback_transport == "mjpeg"
+
+    deleted = main.delete_webrtc_camera_session(created.session_id)
+
+    assert deleted.status == "closed"

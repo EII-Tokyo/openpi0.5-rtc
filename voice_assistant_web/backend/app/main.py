@@ -24,6 +24,8 @@ from fastapi.responses import Response
 from fastapi.responses import StreamingResponse
 
 from .camera_bridge import CameraBridge
+from .camera_webrtc import CameraWebRTCSession
+from .camera_webrtc import CameraWebRTCSessionStore
 from .config import settings
 from .redis_commands import create_redis_client
 from .rlt_control import RLTControlStore
@@ -33,6 +35,8 @@ from .robot_state_bridge import RobotStateBridge
 from .schemas import HealthResponse
 from .schemas import CameraCapabilitiesResponse
 from .schemas import CameraDiagnosticsResponse
+from .schemas import CameraWebRTCSessionRequest
+from .schemas import CameraWebRTCSessionResponse
 from .schemas import RealtimePayload
 from .schemas import RLTBatchSegmentRequest
 from .schemas import RLTConfigRequest
@@ -67,6 +71,7 @@ app.add_middleware(
 )
 
 camera_bridge = CameraBridge()
+webrtc_sessions = CameraWebRTCSessionStore()
 robot_state_bridge = RobotStateBridge()
 redis_client = create_redis_client()
 rlt_control = RLTControlStore(redis_client)
@@ -158,6 +163,8 @@ def camera_capabilities() -> CameraCapabilitiesResponse:
         webrtc={
             "enabled": settings.camera_webrtc_enabled,
             "codec": "h264",
+            "session_ttl_seconds": settings.camera_webrtc_session_ttl_seconds,
+            "max_sessions": settings.camera_webrtc_max_sessions,
             "ice_servers": [],
         },
     )
@@ -166,6 +173,45 @@ def camera_capabilities() -> CameraCapabilitiesResponse:
 @app.get("/api/cameras/diagnostics", response_model=CameraDiagnosticsResponse)
 def camera_diagnostics() -> CameraDiagnosticsResponse:
     return CameraDiagnosticsResponse(**camera_bridge.get_diagnostics())
+
+
+def _webrtc_session_response(session: CameraWebRTCSession, message: str | None = None) -> CameraWebRTCSessionResponse:
+    return CameraWebRTCSessionResponse(
+        session_id=session.session_id,
+        status=session.status,
+        cameras=session.cameras,
+        signaling_url=f"/ws/cameras/webrtc/{session.session_id}",
+        expires_at=session.expires_at,
+        fallback_transport="mjpeg",
+        message=message,
+    )
+
+
+@app.post("/api/cameras/webrtc/sessions", response_model=CameraWebRTCSessionResponse)
+def create_webrtc_camera_session(request: CameraWebRTCSessionRequest) -> CameraWebRTCSessionResponse:
+    if not settings.camera_webrtc_enabled:
+        raise HTTPException(status_code=503, detail="WebRTC camera transport is disabled")
+    known_cameras = set(camera_bridge.camera_names)
+    for camera_name in request.cameras:
+        if camera_name not in known_cameras:
+            raise HTTPException(status_code=404, detail=f"Unknown camera {camera_name}")
+    session = webrtc_sessions.create(
+        cameras=request.cameras,
+        codec=request.codec,
+        ttl_seconds=settings.camera_webrtc_session_ttl_seconds,
+        max_sessions=settings.camera_webrtc_max_sessions,
+    )
+    if session is None:
+        raise HTTPException(status_code=429, detail="Too many active WebRTC camera sessions")
+    return _webrtc_session_response(session, message="WebRTC media service is not attached yet; use MJPEG fallback")
+
+
+@app.delete("/api/cameras/webrtc/sessions/{session_id}", response_model=CameraWebRTCSessionResponse)
+def delete_webrtc_camera_session(session_id: str) -> CameraWebRTCSessionResponse:
+    session = webrtc_sessions.close(session_id)
+    if session is None:
+        raise HTTPException(status_code=404, detail="WebRTC camera session not found")
+    return _webrtc_session_response(session)
 
 
 def _camera_stream_interval(fps: float | None) -> float:
@@ -567,6 +613,42 @@ async def realtime_socket(websocket: WebSocket) -> None:
             )
             await websocket.send_json(payload.model_dump())
             await asyncio.sleep(interval)
+    except WebSocketDisconnect:
+        return
+
+
+@app.websocket("/ws/cameras/webrtc/{session_id}")
+async def camera_webrtc_signaling_socket(websocket: WebSocket, session_id: str) -> None:
+    if not settings.camera_webrtc_enabled:
+        await websocket.close(code=1013, reason="WebRTC camera transport is disabled")
+        return
+    session = webrtc_sessions.get(session_id)
+    if session is None:
+        await websocket.close(code=1008, reason="WebRTC camera session not found")
+        return
+    await websocket.accept()
+    await websocket.send_json(
+        {
+            "type": "state",
+            "session_id": session.session_id,
+            "status": session.status,
+            "cameras": session.cameras,
+            "fallback_transport": "mjpeg",
+            "message": "WebRTC signaling skeleton is active; media service is not attached yet",
+        }
+    )
+    try:
+        while True:
+            message = await websocket.receive_json()
+            await websocket.send_json(
+                {
+                    "type": "error",
+                    "session_id": session.session_id,
+                    "code": "media_service_not_available",
+                    "received_type": message.get("type") if isinstance(message, dict) else None,
+                    "fallback_transport": "mjpeg",
+                }
+            )
     except WebSocketDisconnect:
         return
 

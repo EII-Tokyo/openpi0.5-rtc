@@ -300,3 +300,31 @@ Remote measurements on 103 after deployment:
 | `cam_right_wrist?fps=15` | 14.24 |
 
 The diagnostics API still showed all four cameras around 59.8-59.9 source/encoded fps with zero dropped frames. This means the MJPEG fallback now supports visibly smoother focus mode while keeping quad mode below the maximum load of four 30fps streams.
+
+## Phase C Signaling Skeleton Result
+
+Phase C adds the WebRTC control-plane skeleton while keeping WebRTC disabled by default.
+
+New settings:
+
+- `EII_CAMERA_WEBRTC_ENABLED`, default `false`
+- `EII_CAMERA_WEBRTC_SESSION_TTL_SECONDS`, default `30`
+- `EII_CAMERA_WEBRTC_MAX_SESSIONS`, default `4`
+
+New endpoints:
+
+```text
+POST   /api/cameras/webrtc/sessions
+DELETE /api/cameras/webrtc/sessions/{session_id}
+WS     /ws/cameras/webrtc/{session_id}
+```
+
+Current behavior:
+
+- When WebRTC is disabled, session creation returns `503` with a clear message.
+- When enabled, session creation validates requested cameras and creates an in-memory signaling session.
+- The signaling WebSocket sends an initial `state` message.
+- Since the media service is not attached yet, offer/ICE messages receive `media_service_not_available` and tell the frontend to use MJPEG fallback.
+- Session delete closes the in-memory session.
+
+This is intentionally not a video implementation yet. It prepares the browser/backend contract for the next phase without touching robot control, ROS image publishing, or policy inference.
