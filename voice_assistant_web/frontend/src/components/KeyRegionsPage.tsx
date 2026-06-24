@@ -197,8 +197,7 @@ const keyRegionInfoRows = (record: RLTKeyRegionReviewRecord): KeyRegionInfoRow[]
 
 const unloadVideo = (video: HTMLVideoElement) => {
   video.pause()
-  video.removeAttribute('src')
-  video.load()
+  video.currentTime = 0
 }
 
 const videoReadyForPlayback = (video: HTMLVideoElement | null) => Boolean(video && video.readyState >= 1)
@@ -225,6 +224,7 @@ function KeyRegionVideoGrid({
             <span className="key-region-camera-label">{path ? cameraLabelFromPath(path) : camera}</span>
             {path && active ? (
               <video
+                key={path}
                 ref={(element) => registerVideo(cameraIndex, element)}
                 src={rolloutVideoUrl(path)}
                 preload="metadata"

@@ -25,6 +25,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from openpi.models import rlt
+from openpi.training import rlt_trainable_manifest
 
 
 def _resolve_actor_dir(path: pathlib.Path) -> pathlib.Path:
@@ -64,7 +65,14 @@ def _load_modules(actor_dir: pathlib.Path) -> tuple[rlt.RLTConfig, rlt.RLTTwinCr
     return config, critic, actor, metadata
 
 
-def _find_shards(replay_dir: pathlib.Path, recursive: bool, segment_db_path: pathlib.Path | None) -> list[pathlib.Path]:
+def _find_shards(
+    replay_dir: pathlib.Path,
+    recursive: bool,
+    segment_db_path: pathlib.Path | None,
+    manifest_path: pathlib.Path | None,
+) -> list[pathlib.Path]:
+    if manifest_path is not None:
+        return rlt_trainable_manifest.read_manifest_paths(manifest_path)
     if segment_db_path is not None:
         with sqlite3.connect(segment_db_path) as conn:
             rows = conn.execute(
@@ -245,6 +253,7 @@ def main() -> None:
     parser.add_argument("--output-dir", required=True, type=pathlib.Path)
     parser.add_argument("--recursive-scan", action="store_true")
     parser.add_argument("--segment-db-path", type=pathlib.Path, default=None)
+    parser.add_argument("--manifest-path", type=pathlib.Path, default=None)
     parser.add_argument("--max-shards", type=int, default=None)
     parser.add_argument("--score-batch-size", type=int, default=512)
     parser.add_argument("--sample-curves-per-class", type=int, default=12)
@@ -276,7 +285,7 @@ def main() -> None:
     proprio_pieces: list[np.ndarray] = []
     action_pieces: list[np.ndarray] = []
     reference_pieces: list[np.ndarray] = []
-    shards = _find_shards(args.replay_dir, args.recursive_scan, args.segment_db_path)
+    shards = _find_shards(args.replay_dir, args.recursive_scan, args.segment_db_path, args.manifest_path)
     if args.max_shards is not None:
         shards = shards[: args.max_shards]
     for shard_path in shards:
@@ -377,6 +386,7 @@ def main() -> None:
         "actor_step": metadata.get("step"),
         "replay_dir": str(args.replay_dir),
         "segment_db_path": None if args.segment_db_path is None else str(args.segment_db_path),
+        "manifest_path": None if args.manifest_path is None else str(args.manifest_path),
         "num_shards_seen": len(shards),
         "num_shards_evaluated": len({row["episode_id"] for row in rows}),
         "num_shards_skipped": len(skipped),

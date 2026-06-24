@@ -552,6 +552,11 @@ def _batch_from_rollout_path(path: Path) -> str | None:
 def _batch_from_replay_path(path: Path) -> str | None:
     with contextlib.suppress(ValueError):
         parts = path.resolve().relative_to(REPLAY_ROOT).parts
+        if "manual" in parts:
+            return "manual"
+        for part in parts:
+            if re.fullmatch(r"\d{4}-\d{2}-\d{2}", part):
+                return part
         if len(parts) >= 3 and parts[0] == "rlt_key_regions":
             return parts[2]
     return None
@@ -570,13 +575,11 @@ def _key_region_video_paths(rollout_dir: Path) -> list[str]:
 
 def _record_has_trainable_files(record: dict) -> bool:
     return (
-        bool(record.get("manifest_exists"))
-        and bool(record.get("video_exists"))
-        and bool(record.get("npz_exists"))
+        bool(record.get("npz_exists"))
         and bool(record.get("shard_path"))
-        and bool(record.get("train_eligible"))
+        and record.get("train_eligible") is not False
         and not bool(record.get("voided"))
-        and str(record.get("segment_status") or "") == "committed"
+        and str(record.get("segment_status") or "committed") == "committed"
         and int(record.get("num_replay_transitions") or 0) > 0
     )
 

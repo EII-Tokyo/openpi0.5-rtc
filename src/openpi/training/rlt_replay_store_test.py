@@ -203,6 +203,26 @@ def test_rlt_replay_store_filters_by_segment_ledger(tmp_path):
     assert store.stats.failure_episodes == 0
 
 
+def test_rlt_replay_store_loads_only_manifest_paths(tmp_path):
+    shards_dir = tmp_path / "shards"
+    shards_dir.mkdir()
+    included = shards_dir / "included.npz"
+    ignored = shards_dir / "ignored.npz"
+    np.savez(included, **_arrays(5, reward=1.0))
+    np.savez(ignored, **_arrays(7, reward=0.0))
+    manifest_path = tmp_path / "manifest.jsonl"
+    manifest_path.write_text(json.dumps({"shard_path": str(included)}) + "\n")
+
+    store = rlt_replay_store.RLTReplayStore(tmp_path, manifest_path=manifest_path)
+    added = store.scan()
+
+    assert [info.path for info in added] == [included.resolve()]
+    assert store.stats.replay_size == 5
+    assert store.stats.num_shards == 1
+    assert store.stats.success_episodes == 1
+    assert store.stats.failure_episodes == 0
+
+
 def test_rlt_replay_store_evicts_loaded_shard_when_ledger_voids_it(tmp_path):
     shards_dir = tmp_path / "shards"
     shards_dir.mkdir()

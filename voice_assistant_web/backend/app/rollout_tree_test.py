@@ -177,6 +177,41 @@ def test_key_region_review_reports_missing_npz_before_train_eligibility(tmp_path
     assert records[0]["incomplete_reason"] == "missing_npz"
 
 
+def test_key_region_review_counts_committed_container_clean_manual_shard_as_trainable(tmp_path, monkeypatch):
+    rollout_root = tmp_path / "rollouts"
+    replay_root = tmp_path / "replay"
+    shard_path = replay_root / "rlt_key_regions_clean" / "manual" / "key_region_manual.crop_1.npz"
+    shard_path.parent.mkdir(parents=True)
+    np.savez(shard_path, done=np.asarray([True]), reward_seq=np.ones((1, 10)))
+    fake_control = _FakeRLTControl(
+        [
+            {
+                "key_region_id": "manual",
+                "status": "committed",
+                "phase": "warmup",
+                "reward": 1,
+                "shard_path": "/app/replay/rlt_key_regions_clean/manual/key_region_manual.crop_1.npz",
+                "num_replay_transitions": 1,
+                "updated_at": 9.0,
+            }
+        ]
+    )
+
+    monkeypatch.setattr(main, "ROLLOUTS_ROOT", rollout_root)
+    monkeypatch.setattr(main, "REPLAY_ROOT", replay_root)
+    monkeypatch.setattr(main, "rlt_control", fake_control)
+
+    records = main._key_region_review_records()
+    summary = main._key_region_review_summary(records)
+
+    assert records[0]["npz_exists"] is True
+    assert records[0]["local_shard_path"] == str(shard_path.resolve())
+    assert records[0]["batch"] == "manual"
+    assert records[0]["trainable"] is True
+    assert records[0].get("incomplete_reason") is None
+    assert summary.trainable == 1
+
+
 def test_key_region_review_requires_current_segment_shard_even_when_raw_orphan_exists(tmp_path, monkeypatch):
     rollout_root = tmp_path / "rollouts"
     replay_root = tmp_path / "replay"

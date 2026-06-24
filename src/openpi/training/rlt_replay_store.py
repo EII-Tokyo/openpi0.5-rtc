@@ -10,6 +10,7 @@ import jax.numpy as jnp
 import numpy as np
 
 from openpi.training import rlt_training
+from openpi.training import rlt_trainable_manifest
 
 REQUIRED_REPLAY_KEYS: tuple[str, ...] = (
     "z_rl",
@@ -71,6 +72,7 @@ class RLTReplayStore:
         recursive: bool = False,
         sample_action_horizon: int | None = None,
         segment_db_path: pathlib.Path | str | None = None,
+        manifest_path: pathlib.Path | str | None = None,
     ):
         if sample_action_horizon is not None and sample_action_horizon <= 0:
             raise ValueError("sample_action_horizon must be positive when provided")
@@ -79,6 +81,7 @@ class RLTReplayStore:
         self._recursive = recursive
         self._sample_action_horizon = sample_action_horizon
         self._segment_db_path = None if segment_db_path is None else pathlib.Path(segment_db_path)
+        self._manifest_path = None if manifest_path is None else pathlib.Path(manifest_path)
         self._shards: list[_LoadedShard] = []
         self._loaded_paths: set[pathlib.Path] = set()
         self._bad_paths: dict[pathlib.Path, str] = {}
@@ -191,6 +194,8 @@ class RLTReplayStore:
         return dict(self._bad_paths)
 
     def _iter_candidate_paths(self) -> list[pathlib.Path]:
+        if self._manifest_path is not None:
+            return self._accepted_shard_paths()
         if self._segment_db_path is not None:
             return self._accepted_shard_paths()
         if not self._replay_dir.exists():
@@ -203,6 +208,11 @@ class RLTReplayStore:
         return sorted(path for path in paths if path.is_file() and path.suffix == ".npz")
 
     def _accepted_shard_paths(self) -> list[pathlib.Path]:
+        if self._manifest_path is not None:
+            if not self._manifest_path.exists():
+                return []
+            paths = rlt_trainable_manifest.read_manifest_paths(self._manifest_path)
+            return sorted(path.resolve() for path in paths if path.exists() and path.suffix == ".npz")
         if self._segment_db_path is None or not self._segment_db_path.exists():
             return []
         with sqlite3.connect(self._segment_db_path) as conn:
@@ -213,7 +223,7 @@ class RLTReplayStore:
         return sorted(path.resolve() for path in paths if path.exists() and path.suffix == ".npz")
 
     def _reconcile_loaded_paths(self) -> None:
-        if self._segment_db_path is None:
+        if self._segment_db_path is None and self._manifest_path is None:
             return
         accepted = set(self._accepted_shard_paths())
         if not accepted:
