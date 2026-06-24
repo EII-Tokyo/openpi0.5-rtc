@@ -515,6 +515,35 @@ def test_key_region_review_reports_batch_and_local_paths(tmp_path, monkeypatch):
     assert all(item.key_region_id != "second_batch" for item in page.items)
 
 
+def test_key_region_review_batch_filter_does_not_scan_other_batch_manifests(tmp_path, monkeypatch):
+    rollout_root = tmp_path / "rollouts"
+    replay_root = tmp_path / "replay"
+    _write_review_record(rollout_root, replay_root, key_region_id="wanted", reward=1, score_time=10.0)
+    other_dir = rollout_root / "key_regions/task/2026-06-02/warmup/key_region_other"
+    other_dir.mkdir(parents=True)
+    (other_dir / "cam_right_wrist.mp4").write_bytes(b"mp4")
+    (other_dir / "manifest.json").write_text("{not-json")
+
+    monkeypatch.setattr(main, "ROLLOUTS_ROOT", rollout_root)
+    monkeypatch.setattr(main, "REPLAY_ROOT", replay_root)
+    monkeypatch.setattr(main, "rlt_control", _FakeRLTControl([]))
+    scanned_batches = []
+    original_manifest_summary = main._manifest_summary
+
+    def tracking_manifest_summary(rollout_dir):
+        scanned_batches.append(main._batch_from_rollout_path(rollout_dir))
+        return original_manifest_summary(rollout_dir)
+
+    monkeypatch.setattr(main, "_manifest_summary", tracking_manifest_summary)
+
+    page = main.rlt_key_region_review(limit=20, batch="2026-06-01")
+
+    assert [record.key_region_id for record in page.items] == ["wanted"]
+    assert page.total == 1
+    assert page.batches == ["2026-06-02", "2026-06-01"]
+    assert scanned_batches == ["2026-06-01"]
+
+
 def test_key_region_detail_returns_single_record(tmp_path, monkeypatch):
     rollout_root = tmp_path / "rollouts"
     replay_root = tmp_path / "replay"

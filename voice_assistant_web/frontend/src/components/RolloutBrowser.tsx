@@ -7,7 +7,12 @@ import {
   rolloutTreeUrl,
   rolloutVideoUrl,
 } from '../services/api'
-import type { RLTKeyRegionReviewRecord, RolloutManifestSummary, RolloutNode } from '../services/api'
+import type {
+  RLTKeyRegionReviewRecord,
+  RLTKeyRegionReviewSummary,
+  RolloutManifestSummary,
+  RolloutNode,
+} from '../services/api'
 
 type RolloutBrowserProps = {
   title: string
@@ -244,6 +249,14 @@ const KEY_REGION_PAGE_SIZE = 20
 const DEFAULT_REPLAY_HORIZON = 50
 const DEFAULT_TRAIN_HORIZON = 10
 const DEFAULT_CHUNK_STRIDE = 2
+const EMPTY_REVIEW_SUMMARY: RLTKeyRegionReviewSummary = {
+  total: 0,
+  trainable: 0,
+  needs_crop: 0,
+  success: 0,
+  failure: 0,
+  replay_samples: 0,
+}
 
 type KeyRegionInfoRow = {
   label: string
@@ -539,7 +552,11 @@ export function RolloutBrowser({
   const [reviewRecords, setReviewRecords] = useState<RLTKeyRegionReviewRecord[]>([])
   const [reviewStatusFilter, setReviewStatusFilter] = useState<'all' | 'trainable' | 'needsCrop'>('all')
   const [reviewRewardFilter, setReviewRewardFilter] = useState<'all' | 'success' | 'failure'>('all')
-  const [reviewRenderLimit, setReviewRenderLimit] = useState(KEY_REGION_PAGE_SIZE)
+  const [reviewBatchFilter, setReviewBatchFilter] = useState('latest')
+  const [reviewBatches, setReviewBatches] = useState<string[]>([])
+  const [reviewNextOffset, setReviewNextOffset] = useState<number | null>(null)
+  const [reviewTotal, setReviewTotal] = useState(0)
+  const [reviewSummary, setReviewSummary] = useState<RLTKeyRegionReviewSummary>(EMPTY_REVIEW_SUMMARY)
   const [activeReviewIndex, setActiveReviewIndex] = useState(1)
   const [selectedReviewId, setSelectedReviewId] = useState('')
   const [selectedKeyRegionIds, setSelectedKeyRegionIds] = useState<Set<string>>(new Set())
@@ -723,16 +740,39 @@ export function RolloutBrowser({
     })
   }
 
-  const loadReviewRecords = async () => {
+  const loadReviewRecords = async ({
+    append = false,
+    offset = 0,
+    status = reviewStatusFilter,
+    reward = reviewRewardFilter,
+    batch = reviewBatchFilter,
+  }: {
+    append?: boolean
+    offset?: number
+    status?: 'all' | 'trainable' | 'needsCrop'
+    reward?: 'all' | 'success' | 'failure'
+    batch?: string
+  } = {}) => {
     if (!enableKeyRegionActions) return
-    const page = await fetchRLTKeyRegionReview({ limit: 100 })
+    const page = await fetchRLTKeyRegionReview({
+      limit: KEY_REGION_PAGE_SIZE,
+      offset,
+      status,
+      reward,
+      batch,
+    })
     const records = page.items.filter(
       (record) => !record.voided && record.status.toLowerCase() !== 'voided',
     )
-    setReviewRecords(records)
-    const selectedStillVisible = records.some((record) => record.key_region_id === selectedReviewId)
+    const nextRecords = append ? [...reviewRecords, ...records] : records
+    setReviewRecords(nextRecords)
+    setReviewBatches(page.batches)
+    setReviewNextOffset(page.next_offset)
+    setReviewTotal(page.total)
+    setReviewSummary(page.summary || EMPTY_REVIEW_SUMMARY)
+    const selectedStillVisible = nextRecords.some((record) => record.key_region_id === selectedReviewId)
     if (!selectedStillVisible) {
-      const next = records[0]
+      const next = nextRecords[0]
       if (next) selectReviewRecord(next)
       else {
         setSelectedReviewId('')
@@ -743,6 +783,12 @@ export function RolloutBrowser({
 
   const loadTree = async () => {
     setError('')
+    if (enableKeyRegionActions) {
+      setTree(null)
+      setExpanded(new Set(['']))
+      await loadReviewRecords()
+      return
+    }
     const response = await fetch(rolloutTreeUrl(rootPath))
     if (!response.ok) throw new Error(`HTTP ${response.status}`)
     const rawPayload = (await response.json()) as RolloutNode
@@ -760,6 +806,12 @@ export function RolloutBrowser({
     const loadCurrentTree = async () => {
       setError('')
       try {
+        if (enableKeyRegionActions) {
+          setTree(null)
+          setExpanded(new Set(['']))
+          await loadReviewRecords()
+          return
+        }
         const response = await fetch(rolloutTreeUrl(rootPath))
         if (!response.ok) throw new Error(`HTTP ${response.status}`)
         const rawPayload = (await response.json()) as RolloutNode
@@ -786,30 +838,14 @@ export function RolloutBrowser({
     () => (tree && selected ? findManifestForPath(tree, selected.path) : undefined),
     [tree, selected],
   )
-  const visibleReviewRecords = useMemo(
-    () =>
-      reviewRecords.filter((record) => {
-        if (reviewStatusFilter === 'trainable' && !record.trainable) return false
-        if (reviewStatusFilter === 'needsCrop' && record.trainable) return false
-        if (reviewRewardFilter === 'success' && record.reward !== 1) return false
-        if (reviewRewardFilter === 'failure' && record.reward !== 0) return false
-        return true
-      }),
-    [reviewRecords, reviewStatusFilter, reviewRewardFilter],
-  )
-  const renderedReviewRecords = useMemo(
-    () => visibleReviewRecords.slice(0, reviewRenderLimit),
-    [reviewRenderLimit, visibleReviewRecords],
-  )
-  const hasMoreReviewRecords = renderedReviewRecords.length < visibleReviewRecords.length
-  const trainableReviewCount = useMemo(() => reviewRecords.filter((record) => record.trainable).length, [reviewRecords])
-  const incompleteReviewCount = reviewRecords.length - trainableReviewCount
-  const successReviewCount = useMemo(() => reviewRecords.filter((record) => record.reward === 1).length, [reviewRecords])
-  const failureReviewCount = useMemo(() => reviewRecords.filter((record) => record.reward === 0).length, [reviewRecords])
-  const replaySampleCount = useMemo(
-    () => reviewRecords.reduce((total, record) => total + (record.num_replay_transitions || 0), 0),
-    [reviewRecords],
-  )
+  const visibleReviewRecords = reviewRecords
+  const renderedReviewRecords = reviewRecords
+  const hasMoreReviewRecords = reviewNextOffset !== null
+  const trainableReviewCount = reviewSummary.trainable
+  const incompleteReviewCount = reviewSummary.needs_crop
+  const successReviewCount = reviewSummary.success
+  const failureReviewCount = reviewSummary.failure
+  const replaySampleCount = reviewSummary.replay_samples
   const selectedCount = selectedKeyRegionIds.size
 
   useEffect(() => {
@@ -830,12 +866,12 @@ export function RolloutBrowser({
   }, [enableKeyRegionActions, renderedReviewRecords, selectedReviewId])
 
   useEffect(() => {
-    setReviewRenderLimit(KEY_REGION_PAGE_SIZE)
     pauseAllKeyRegionVideos()
     setPlayingKeyRegionId('')
     setPendingPlaybackKeyRegionId('')
     keyRegionVideoRefs.current = {}
-  }, [reviewRewardFilter, reviewStatusFilter])
+    if (enableKeyRegionActions) void loadReviewRecords()
+  }, [reviewRewardFilter, reviewStatusFilter, reviewBatchFilter])
 
   useEffect(() => {
     if (!enableKeyRegionActions) return
@@ -1007,7 +1043,7 @@ export function RolloutBrowser({
   }, [enableKeyRegionActions, renderedReviewRecords])
 
   if (enableKeyRegionActions) {
-    const totalVisible = visibleReviewRecords.length
+    const totalVisible = reviewTotal
     return (
       <section className="key-regions-workspace" ref={keyRegionsWorkspaceRef}>
         <div className="key-region-scroll-indicator">Card {totalVisible ? activeReviewIndex : 0} / {totalVisible}</div>
@@ -1017,6 +1053,19 @@ export function RolloutBrowser({
             <h2>{title}</h2>
           </div>
           <div className="key-regions-controls">
+            <select
+              className="key-region-control"
+              value={reviewBatchFilter}
+              onChange={(event) => setReviewBatchFilter(event.target.value)}
+            >
+              <option value="latest">Latest batch</option>
+              <option value="all">All batches</option>
+              {reviewBatches.map((batch) => (
+                <option value={batch} key={batch}>
+                  {batch}
+                </option>
+              ))}
+            </select>
             <select
               className="key-region-control"
               value={reviewStatusFilter}
@@ -1054,7 +1103,7 @@ export function RolloutBrowser({
               type="button"
               onClick={() => {
                 setTree(null)
-                void loadTree().catch(() => setError('Rollouts could not be loaded.'))
+                void loadReviewRecords().catch(() => setError('Key regions could not be loaded.'))
               }}
             >
               Refresh
@@ -1285,14 +1334,12 @@ export function RolloutBrowser({
               <button
                 className="ghost-button"
                 type="button"
-                onClick={() =>
-                  setReviewRenderLimit((limit) =>
-                    Math.min(limit + KEY_REGION_PAGE_SIZE, visibleReviewRecords.length),
-                  )
-                }
+                onClick={() => {
+                  if (reviewNextOffset !== null) void loadReviewRecords({ append: true, offset: reviewNextOffset })
+                }}
               >
-                Load {Math.min(KEY_REGION_PAGE_SIZE, visibleReviewRecords.length - renderedReviewRecords.length)} more
-                ({renderedReviewRecords.length} / {visibleReviewRecords.length})
+                Load {Math.min(KEY_REGION_PAGE_SIZE, Math.max(0, reviewTotal - renderedReviewRecords.length))} more
+                ({renderedReviewRecords.length} / {reviewTotal})
               </button>
             </div>
           ) : null}

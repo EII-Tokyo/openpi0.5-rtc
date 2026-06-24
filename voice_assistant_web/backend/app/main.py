@@ -617,7 +617,37 @@ def _reconcile_key_region_record(record: dict) -> None:
     record["status"] = "committed"
 
 
-def _key_region_review_records() -> list[dict]:
+def _key_region_review_batches_from_files() -> list[str]:
+    batches: set[str] = set()
+    rollout_root = (ROLLOUTS_ROOT / "key_regions").resolve()
+    if rollout_root.exists():
+        for manifest_path in rollout_root.glob("**/key_region_*/manifest.json"):
+            batch = _batch_from_rollout_path(manifest_path.parent)
+            if batch:
+                batches.add(batch)
+    replay_root = (REPLAY_ROOT / "rlt_key_regions").resolve()
+    if replay_root.exists():
+        for shard_path in replay_root.glob("**/shards/key_region_*.npz"):
+            batch = _batch_from_replay_path(shard_path)
+            if batch:
+                batches.add(batch)
+    return sorted(batches, reverse=True)
+
+
+def _segment_batch(segment: dict) -> str | None:
+    shard_path = _host_path_for_container_path(segment.get("shard_path"))
+    if shard_path is not None:
+        batch = _batch_from_replay_path(shard_path)
+        if batch:
+            return batch
+    updated_at = segment.get("updated_at")
+    with contextlib.suppress(TypeError, ValueError, OSError):
+        return time.strftime("%Y-%m-%d", time.localtime(float(updated_at)))
+    return None
+
+
+def _key_region_review_records(*, batch: str = "all") -> list[dict]:
+    batch_filter = None if not batch or batch == "all" else batch
     by_id: dict[str, dict] = {}
     segments = rlt_control.list_segments(limit=100000)
     for segment in segments:
@@ -625,6 +655,9 @@ def _key_region_review_records() -> list[dict]:
         if not key_region_id:
             continue
         if str(segment.get("status") or "") == "deleted":
+            continue
+        segment_batch = _segment_batch(segment)
+        if batch_filter and segment_batch and segment_batch != batch_filter:
             continue
         by_id[key_region_id] = {
             "key_region_id": key_region_id,
@@ -634,18 +667,22 @@ def _key_region_review_records() -> list[dict]:
             "shard_path": segment.get("shard_path"),
             "num_replay_transitions": int(segment.get("num_replay_transitions") or 0),
             "updated_at": segment.get("updated_at"),
+            "batch": segment_batch,
         }
 
     rollout_root = (ROLLOUTS_ROOT / "key_regions").resolve()
     if rollout_root.exists():
         for manifest_path in rollout_root.glob("**/key_region_*/manifest.json"):
             rollout_dir = manifest_path.parent
+            rollout_batch = _batch_from_rollout_path(rollout_dir)
+            if batch_filter and rollout_batch != batch_filter:
+                continue
             key_region_id = rollout_dir.name.removeprefix("key_region_")
             record = by_id.setdefault(key_region_id, {"key_region_id": key_region_id, "status": "untracked"})
             manifest = _manifest_summary(rollout_dir) or {}
             record.update(
                 {
-                    "batch": record.get("batch") or _batch_from_rollout_path(rollout_dir),
+                    "batch": record.get("batch") or rollout_batch,
                     "manifest_exists": True,
                     "video_exists": bool(_key_region_video_paths(rollout_dir)),
                     "rollout_path": str(rollout_dir.resolve().relative_to(ROLLOUTS_ROOT)),
@@ -683,10 +720,13 @@ def _key_region_review_records() -> list[dict]:
     replay_root = (REPLAY_ROOT / "rlt_key_regions").resolve()
     if replay_root.exists():
         for shard_path in replay_root.glob("**/shards/key_region_*.npz"):
+            shard_batch = _batch_from_replay_path(shard_path)
+            if batch_filter and shard_batch != batch_filter:
+                continue
             key_region_id = shard_path.stem.removeprefix("key_region_")
             record = by_id.setdefault(key_region_id, {"key_region_id": key_region_id, "status": "orphan_npz"})
             record["npz_exists"] = True
-            record["batch"] = record.get("batch") or _batch_from_replay_path(shard_path)
+            record["batch"] = record.get("batch") or shard_batch
             if not record.get("shard_path"):
                 record["shard_path"] = str(shard_path)
 
@@ -933,8 +973,10 @@ def rlt_key_region_review(
 ) -> RLTKeyRegionReviewPage:
     if focus_key_region_id and not re.fullmatch(r"[A-Za-z0-9_.-]+", focus_key_region_id):
         raise HTTPException(status_code=400, detail=f"Invalid key_region_id: {focus_key_region_id}")
-    all_records = _key_region_review_records()
-    filtered = _filter_key_region_review_records(all_records, status=status, reward=reward, batch=batch)
+    batches = _key_region_review_batches_from_files()
+    resolved_batch = batches[0] if batch == "latest" and batches else batch
+    all_records = _key_region_review_records(batch=resolved_batch)
+    filtered = _filter_key_region_review_records(all_records, status=status, reward=reward, batch=resolved_batch)
     safe_limit = min(max(limit, 1), 100)
     safe_offset = min(max(offset, 0), len(filtered))
     if focus_key_region_id:
@@ -953,7 +995,7 @@ def rlt_key_region_review(
         offset=safe_offset,
         next_offset=next_offset,
         summary=_key_region_review_summary(all_records),
-        batches=_key_region_review_batches(all_records),
+        batches=batches or _key_region_review_batches(all_records),
     )
 
 
