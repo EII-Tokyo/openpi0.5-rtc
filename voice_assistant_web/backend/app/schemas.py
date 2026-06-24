@@ -33,6 +33,31 @@ class CameraCapabilitiesResponse(BaseModel):
     webrtc: dict[str, object] = Field(default_factory=dict)
 
 
+class CameraDiagnosticsRecord(BaseModel):
+    has_frame: bool = False
+    frame_age_seconds: float | None = None
+    source_fps_recent: float | None = None
+    encoded_fps_recent: float | None = None
+    raw_frames_total: int = 0
+    encoded_frames_total: int = 0
+    dropped_frames_total: int = 0
+    error_count: int = 0
+    last_error: str | None = None
+    last_encoding: str | None = None
+    last_width: int | None = None
+    last_height: int | None = None
+    latest_jpeg_bytes: int = 0
+    encode_ms_mean_recent: float | None = None
+    encode_ms_max_recent: float | None = None
+
+
+class CameraDiagnosticsResponse(BaseModel):
+    bridge_running: bool = False
+    bridge_error: str | None = None
+    jpeg_quality: int = 70
+    cameras: dict[str, CameraDiagnosticsRecord] = Field(default_factory=dict)
+
+
 class RLTEvent(BaseModel):
     timestamp: float
     event: str

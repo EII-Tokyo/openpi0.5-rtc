@@ -32,6 +32,7 @@ from .rlt_key_region_crop import rescore_key_region_files
 from .robot_state_bridge import RobotStateBridge
 from .schemas import HealthResponse
 from .schemas import CameraCapabilitiesResponse
+from .schemas import CameraDiagnosticsResponse
 from .schemas import RealtimePayload
 from .schemas import RLTBatchSegmentRequest
 from .schemas import RLTConfigRequest
@@ -160,6 +161,11 @@ def camera_capabilities() -> CameraCapabilitiesResponse:
             "ice_servers": [],
         },
     )
+
+
+@app.get("/api/cameras/diagnostics", response_model=CameraDiagnosticsResponse)
+def camera_diagnostics() -> CameraDiagnosticsResponse:
+    return CameraDiagnosticsResponse(**camera_bridge.get_diagnostics())
 
 
 @app.get("/api/cameras/{camera_name}/stream.mjpg")

@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import base64
+from collections import deque
 import logging
 import threading
 import time
+from typing import Any
 
 import cv2
 import numpy as np
@@ -18,9 +20,28 @@ class CameraBridge:
         self._lock = threading.Lock()
         self._latest_jpegs: dict[str, bytes] = {}
         self._latest_timestamps: dict[str, float] = {}
+        self._stats: dict[str, dict[str, Any]] = {name: self._new_camera_stats() for name in self.camera_names}
         self._running = False
         self._thread: threading.Thread | None = None
         self._error: str | None = None
+
+    def _new_camera_stats(self) -> dict[str, Any]:
+        return {
+            "raw_frames_total": 0,
+            "encoded_frames_total": 0,
+            "dropped_frames_total": 0,
+            "error_count": 0,
+            "last_error": None,
+            "last_frame_wall_time": None,
+            "last_encode_wall_time": None,
+            "last_encoding": None,
+            "last_width": None,
+            "last_height": None,
+            "latest_jpeg_bytes": 0,
+            "encode_ms_recent": deque(maxlen=120),
+            "source_times_recent": deque(maxlen=120),
+            "encoded_times_recent": deque(maxlen=120),
+        }
 
     def start(self) -> None:
         if self._thread and self._thread.is_alive():
@@ -46,17 +67,35 @@ class CameraBridge:
 
             def image_callback(camera_name: str):
                 def _callback(message: RGBGrayscaleImage) -> None:
+                    received_at = time.time()
+                    self._record_source_frame(camera_name, received_at)
                     if not message.images:
+                        self._record_drop(camera_name, "RGBGrayscaleImage contains no images")
                         return
+                    encode_start = time.perf_counter()
                     frame = self._image_msg_to_bgr(message.images[0])
                     if frame is None:
+                        self._record_drop(camera_name, f"Could not decode image encoding={getattr(message.images[0], 'encoding', None)}")
                         return
                     ok, jpeg = cv2.imencode(".jpg", frame, encode_args)
                     if not ok:
+                        self._record_drop(camera_name, "cv2.imencode returned false")
                         return
+                    encode_ms = (time.perf_counter() - encode_start) * 1000.0
+                    jpeg_bytes = jpeg.tobytes()
                     with self._lock:
-                        self._latest_jpegs[camera_name] = jpeg.tobytes()
-                        self._latest_timestamps[camera_name] = time.time()
+                        stats = self._stats.setdefault(camera_name, self._new_camera_stats())
+                        now = time.time()
+                        stats["encoded_frames_total"] += 1
+                        stats["last_encode_wall_time"] = now
+                        stats["last_encoding"] = getattr(message.images[0], "encoding", None)
+                        stats["last_width"] = int(getattr(message.images[0], "width", 0) or 0)
+                        stats["last_height"] = int(getattr(message.images[0], "height", 0) or 0)
+                        stats["latest_jpeg_bytes"] = len(jpeg_bytes)
+                        stats["encode_ms_recent"].append(encode_ms)
+                        stats["encoded_times_recent"].append(now)
+                        self._latest_jpegs[camera_name] = jpeg_bytes
+                        self._latest_timestamps[camera_name] = now
 
                 return _callback
 
@@ -89,6 +128,72 @@ class CameraBridge:
     def snapshot_jpeg_b64_all(self) -> dict[str, str]:
         with self._lock:
             return {name: base64.b64encode(jpeg).decode("ascii") for name, jpeg in self._latest_jpegs.items()}
+
+    def get_diagnostics(self) -> dict[str, Any]:
+        now = time.time()
+        with self._lock:
+            cameras = {}
+            for name in self.camera_names:
+                stats = self._stats.setdefault(name, self._new_camera_stats())
+                encode_samples = list(stats["encode_ms_recent"])
+                cameras[name] = {
+                    "has_frame": name in self._latest_jpegs,
+                    "frame_age_seconds": self._age_seconds(stats["last_encode_wall_time"], now),
+                    "source_fps_recent": self._fps_from_times(stats["source_times_recent"]),
+                    "encoded_fps_recent": self._fps_from_times(stats["encoded_times_recent"]),
+                    "raw_frames_total": stats["raw_frames_total"],
+                    "encoded_frames_total": stats["encoded_frames_total"],
+                    "dropped_frames_total": stats["dropped_frames_total"],
+                    "error_count": stats["error_count"],
+                    "last_error": stats["last_error"],
+                    "last_encoding": stats["last_encoding"],
+                    "last_width": stats["last_width"],
+                    "last_height": stats["last_height"],
+                    "latest_jpeg_bytes": stats["latest_jpeg_bytes"],
+                    "encode_ms_mean_recent": self._mean(encode_samples),
+                    "encode_ms_max_recent": max(encode_samples) if encode_samples else None,
+                }
+            return {
+                "bridge_running": self._running,
+                "bridge_error": self._error,
+                "jpeg_quality": max(10, min(settings.camera_jpeg_quality, 95)),
+                "cameras": cameras,
+            }
+
+    def _record_source_frame(self, camera_name: str, timestamp: float) -> None:
+        with self._lock:
+            stats = self._stats.setdefault(camera_name, self._new_camera_stats())
+            stats["raw_frames_total"] += 1
+            stats["last_frame_wall_time"] = timestamp
+            stats["source_times_recent"].append(timestamp)
+
+    def _record_drop(self, camera_name: str, reason: str) -> None:
+        with self._lock:
+            stats = self._stats.setdefault(camera_name, self._new_camera_stats())
+            stats["dropped_frames_total"] += 1
+            stats["error_count"] += 1
+            stats["last_error"] = reason
+
+    @staticmethod
+    def _fps_from_times(times: deque[float]) -> float | None:
+        if len(times) < 2:
+            return None
+        duration = times[-1] - times[0]
+        if duration <= 0:
+            return None
+        return (len(times) - 1) / duration
+
+    @staticmethod
+    def _age_seconds(timestamp: float | None, now: float) -> float | None:
+        if timestamp is None:
+            return None
+        return max(0.0, now - timestamp)
+
+    @staticmethod
+    def _mean(values: list[float]) -> float | None:
+        if not values:
+            return None
+        return sum(values) / len(values)
 
     def _image_msg_to_bgr(self, image_msg) -> np.ndarray | None:
         dtype = np.uint8
