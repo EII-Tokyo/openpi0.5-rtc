@@ -308,3 +308,22 @@ services:
       - $PWD/voice_assistant_web/frontend/dist:/usr/share/nginx/html:ro
     depends_on:
       - eii_pilot_backend
+
+  eii_pilot_webrtc_media:
+    image: openpi_reward_learning_eii/eii_pilot_webrtc_media:reward-learning
+    build:
+      context: .
+      dockerfile: voice_assistant_web/webrtc_media/Dockerfile
+    profiles:
+      - webrtc
+    restart: unless-stopped
+    network_mode: "host"
+    init: true
+    tty: true
+    volumes:
+      - $PWD:/app
+    environment:
+      - PYTHONPATH=/app
+      - EII_WEBRTC_MEDIA_PORT=8013
+    depends_on:
+      - ros_master

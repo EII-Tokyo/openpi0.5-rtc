@@ -165,6 +165,8 @@ def camera_capabilities() -> CameraCapabilitiesResponse:
             "codec": "h264",
             "session_ttl_seconds": settings.camera_webrtc_session_ttl_seconds,
             "max_sessions": settings.camera_webrtc_max_sessions,
+            "media_service_url": settings.camera_webrtc_media_url,
+            "media_service_attached": False,
             "ice_servers": [],
         },
     )

@@ -46,6 +46,7 @@ def test_camera_capabilities_default_to_mjpeg(monkeypatch):
     monkeypatch.setattr(main.settings, "camera_transport", "mjpeg")
     monkeypatch.setattr(main.settings, "camera_webrtc_enabled", False)
     monkeypatch.setattr(main.settings, "realtime_include_camera_frames", False)
+    monkeypatch.setattr(main.settings, "camera_webrtc_media_url", "http://127.0.0.1:8013")
     monkeypatch.setattr(main.camera_bridge, "camera_names", ("cam_high", "cam_low"))
 
     response = main.camera_capabilities()
@@ -55,6 +56,8 @@ def test_camera_capabilities_default_to_mjpeg(monkeypatch):
     assert response.cameras == ["cam_high", "cam_low"]
     assert response.include_realtime_frames is False
     assert response.webrtc["enabled"] is False
+    assert response.webrtc["media_service_url"] == "http://127.0.0.1:8013"
+    assert response.webrtc["media_service_attached"] is False
 
 
 def test_realtime_camera_frames_disabled_by_default(monkeypatch):

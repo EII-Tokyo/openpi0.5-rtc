@@ -328,3 +328,43 @@ Current behavior:
 - Session delete closes the in-memory session.
 
 This is intentionally not a video implementation yet. It prepares the browser/backend contract for the next phase without touching robot control, ROS image publishing, or policy inference.
+
+## Phase D Media Sidecar Skeleton Result
+
+Phase D starts the independent media-service path. The sidecar is deliberately separate from the FastAPI control backend and is disabled by default through a compose profile.
+
+New service:
+
+```text
+eii_pilot_webrtc_media
+```
+
+Compose behavior:
+
+- It is behind the `webrtc` profile.
+- It does not start during normal `docker compose up`.
+- It listens on `8013` only when explicitly started.
+- It currently runs health checks, GStreamer plugin probing, and a finite `videotestsrc` smoke pipeline.
+- It does not subscribe to real robot camera topics yet.
+- It does not publish robot commands.
+
+New endpoints:
+
+```text
+GET  /health
+GET  /api/media/gstreamer
+POST /api/media/smoke/videotestsrc
+```
+
+Local smoke result:
+
+- `docker compose build eii_pilot_webrtc_media`: passed.
+- `GET /health`: returned `{"status":"ok"}`.
+- `GET /api/media/gstreamer`: `webrtcbin`, `videotestsrc`, `videoconvert`, and `fakesink` were available.
+- `POST /api/media/smoke/videotestsrc` with `num_buffers=5`: passed using:
+
+```text
+gst-launch-1.0 -q videotestsrc num-buffers=5 ! videoconvert ! fakesink
+```
+
+This proves the media sidecar can be built and can run a bounded GStreamer test pipeline before real ROS camera integration begins.
