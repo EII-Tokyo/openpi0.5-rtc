@@ -39,6 +39,7 @@ class RLTActorRuntime:
         self._config = None
         self._actor_dir: pathlib.Path | None = None
         self._actor_step: int | None = None
+        self._rng_key = None
         self._reason: str | None = "actor_path_not_configured" if self._actor_path is None else None
 
     def status(self) -> dict[str, Any]:
@@ -97,6 +98,9 @@ class RLTActorRuntime:
             import jax
             import jax.numpy as jnp
 
+            if self._rng_key is None:
+                self._rng_key = jax.random.key(time.time_ns() % (2**31 - 1))
+            self._rng_key, actor_rng = jax.random.split(self._rng_key)
             horizon = int(self._config.action_horizon)
             action_end_index = action_start_index + horizon
             prefix = reference[action_start_index:action_end_index]
@@ -108,7 +112,8 @@ class RLTActorRuntime:
             action = self._actor(
                 x,
                 prefix_jax,
-                sample=False,
+                rng=actor_rng,
+                sample=True,
                 intervention_scale=float(context.get("intervention_scale", 1.0)),
             )
             adjusted_prefix = np.asarray(jax.device_get(action[0]), dtype=np.float32)

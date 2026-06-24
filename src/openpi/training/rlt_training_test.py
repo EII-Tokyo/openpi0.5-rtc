@@ -24,6 +24,11 @@ def _make_config() -> rlt_training.RLTTrainingConfig:
     )
 
 
+def _flatten_actor_params(state: rlt_training.RLTTrainState) -> jnp.ndarray:
+    actor_params = rlt_training.actor_params_for_inference(state).flat_state()
+    return jnp.concatenate([jnp.ravel(value.value) for value in actor_params.values()])
+
+
 def _make_awbc_config() -> rlt_training.RLTTrainingConfig:
     return rlt_training.RLTTrainingConfig(
         model=rlt.RLTConfig(
@@ -91,6 +96,42 @@ def test_rlt_train_step_delays_actor_and_publish():
     assert jnp.isfinite(info4["reference_q_value"])
     assert jnp.isfinite(info4["q_advantage"])
     assert jnp.allclose(info4["q_advantage"], info4["actor_q_value"] - info4["reference_q_value"])
+
+
+def test_rlt_train_step_actor_update_samples_policy_actions():
+    config = rlt_training.RLTTrainingConfig(
+        model=rlt.RLTConfig(
+            z_dim=8,
+            proprio_dim=4,
+            action_horizon=5,
+            action_dim=3,
+            hidden_dim=16,
+            num_layers=2,
+            beta=2.0,
+            fixed_std=0.5,
+        ),
+        actor_lr=1e-3,
+        critic_lr=1e-3,
+        policy_delay=1,
+        actor_publish_interval=1,
+        target_actor_noise=False,
+    )
+    state_a = rlt_training.init_train_state(config, jax.random.key(0))
+    state_b = rlt_training.init_train_state(config, jax.random.key(0))
+    batch = _make_batch()
+
+    state_a, info_a = rlt_training.train_step(state_a, batch, jax.random.key(1))
+    state_b, info_b = rlt_training.train_step(state_b, batch, jax.random.key(2))
+
+    assert bool(info_a["actor_updated"])
+    assert bool(info_b["actor_updated"])
+    assert not jnp.allclose(_flatten_actor_params(state_a), _flatten_actor_params(state_b))
+
+
+def test_rlt_training_config_samples_target_actor_by_default():
+    config = rlt_training.RLTTrainingConfig()
+
+    assert config.target_actor_noise is True
 
 
 def test_rlt_train_step_awbc_reports_filter_metrics():

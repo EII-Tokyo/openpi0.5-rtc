@@ -74,6 +74,30 @@ def test_actor_runtime_applies_to_requested_action_window(tmp_path):
     np.testing.assert_allclose(result_delta[20:], np.zeros((5, 3), dtype=np.float32))
 
 
+def test_actor_runtime_samples_actor_actions(tmp_path):
+    _write_actor(tmp_path, action_horizon=10, action_dim=3)
+    runtime = RLTActorRuntime(str(tmp_path / "inference_actor" / "LATEST"), poll_interval_seconds=0.0)
+    reference = np.ones((10, 3), dtype=np.float32)
+    context = {"actor_requested": True, "intervention_scale": 0.25}
+
+    first = runtime.apply(
+        reference_actions=reference,
+        z_rl=np.zeros((8,), dtype=np.float32),
+        proprio=np.zeros((4,), dtype=np.float32),
+        context=context,
+    )
+    second = runtime.apply(
+        reference_actions=reference,
+        z_rl=np.zeros((8,), dtype=np.float32),
+        proprio=np.zeros((4,), dtype=np.float32),
+        context=context,
+    )
+
+    assert first.applied is True
+    assert second.applied is True
+    assert not np.allclose(first.actions, second.actions)
+
+
 def test_actor_runtime_rejects_action_window_that_exceeds_reference(tmp_path):
     _write_actor(tmp_path, action_horizon=10, action_dim=3)
     runtime = RLTActorRuntime(str(tmp_path / "inference_actor" / "LATEST"), poll_interval_seconds=0.0)

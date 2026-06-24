@@ -32,7 +32,7 @@ class RLTTrainingConfig:
     critic_lr: float = 3e-4
     policy_delay: int = 2
     actor_publish_interval: int = 500
-    target_actor_noise: bool = False
+    target_actor_noise: bool = True
     actor_loss_mode: str = "td3"
     awbc_temperature: float = 0.2
     awbc_max_weight: float = 20.0
@@ -201,7 +201,7 @@ def train_step(
     if actor_updated:
 
         def actor_loss_fn(actor: rlt.RLTActor):
-            action = actor(batch.x, batch.reference_action, rng=actor_rng, sample=False)
+            action = actor(batch.x, batch.reference_action, rng=actor_rng, sample=True)
             q1_for_actor = model.critic.q1(batch.x, action)
             q1_for_reference = model.critic.q1(batch.x, batch.reference_action)
             if state.actor_loss_mode == ACTOR_LOSS_MODE_TD3:

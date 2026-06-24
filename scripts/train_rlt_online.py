@@ -58,7 +58,7 @@ class Args:
     actor_publish_interval: int = 500
     actor_lr: float = 1e-4
     critic_lr: float = 3e-4
-    target_actor_noise: bool = False
+    target_actor_noise: bool = True
     actor_loss_mode: str = "td3"
     awbc_temperature: float = 0.2
     awbc_max_weight: float = 20.0
