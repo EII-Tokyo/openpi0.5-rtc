@@ -276,6 +276,18 @@ def test_key_region_limiter_constrains_left_arm_delta_conservatively():
     np.testing.assert_allclose(limited[:, 6:], actions[:, 6:])
 
 
+def test_key_region_limiter_wraps_continuous_joints_to_nearest_equivalent_angle():
+    actions = np.zeros((2, 14), dtype=np.float32)
+    state = np.zeros((14,), dtype=np.float32)
+    state[5] = 3.10
+    actions[:, 5] = -3.10
+
+    limited = _limit_key_region_action_delta(actions, state)
+
+    assert np.all(limited[:, 5] > state[5])
+    assert np.max(np.abs(limited[:, 5] - state[5])) <= 0.0035 + 1e-6
+
+
 def test_key_region_limiter_is_applied_to_actor_actions_but_not_reference():
     class _LargeActor(_Actor):
         def apply(self, *, reference_actions, z_rl, proprio, context, action_start_index=None):
@@ -308,6 +320,51 @@ def test_key_region_limiter_is_applied_to_actor_actions_but_not_reference():
     np.testing.assert_allclose(np.linalg.norm(results["actions"][:, :6], axis=-1), np.full(10, 0.005), rtol=1e-5)
     np.testing.assert_allclose(results["reference_actions"], reference)
     np.testing.assert_allclose(results["rtc_guidance_actions"], results["actions"])
+    assert results["rlt_action_limited"] is True
+
+
+def test_key_region_actor_limits_from_robot_state_and_freezes_right_arm():
+    class _SignFlipActor(_Actor):
+        def apply(self, *, reference_actions, z_rl, proprio, context, action_start_index=None):
+            adjusted = reference_actions.copy()
+            adjusted[:, 1] = 0.208
+            adjusted[:, 2] = -0.592
+            adjusted[:, 7:14] = 1.0
+            return RLTActorApplyResult(
+                adjusted,
+                True,
+                None,
+                "/tmp/actor",
+                5,
+                1.0,
+                1.0,
+                action_start_index=0,
+                action_horizon=10,
+                action_end_index=10,
+            )
+
+    broker = ActionChunkBroker(_Policy(), action_horizon=10, use_rtc=False, rlt_actor_runtime=_SignFlipActor())
+    reference = np.zeros((10, 14), dtype=np.float32)
+    policy_state = np.zeros((14,), dtype=np.float32)
+    policy_state[1] = 0.208
+    policy_state[2] = -0.592
+    robot_state = np.zeros((14,), dtype=np.float32)
+    robot_state[1] = -0.210
+    robot_state[2] = 0.594
+    robot_state[7:14] = np.array([-0.8, 0.02, -0.04, 0.52, 0.51, 0.18, 0.66], dtype=np.float32)
+
+    results = broker._apply_rlt_actor_to_policy_results(
+        {
+            "actions": reference,
+            "z_rl": np.ones((8,), dtype=np.float32),
+            "state": policy_state,
+        },
+        {"state": robot_state, "rlt_context": {"actor_requested": True, "phase": "key_region"}},
+    )
+
+    assert abs(results["actions"][0, 1] - robot_state[1]) <= 0.0035 + 1e-6
+    assert abs(results["actions"][0, 2] - robot_state[2]) <= 0.0035 + 1e-6
+    np.testing.assert_allclose(results["actions"][:, 7:14], np.broadcast_to(robot_state[7:14], (10, 7)))
     assert results["rlt_action_limited"] is True
 
 
