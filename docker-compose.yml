@@ -3,6 +3,8 @@ name: openpi_reward_learning_eii
 services:
   runtime:
     image: lyl472324464/robot:aloha-ros1.0
+    profiles:
+      - legacy
     depends_on:
       - aloha_ros_nodes
       - ros_master
@@ -76,7 +78,7 @@ services:
       --rlt-chunk-stride
       2
       --rlt-actor-path
-      ${RLT_ACTOR_CHECKPOINT_PATH:-/app/rlt_online/run/inference_actor/LATEST}
+      ${RLT_ACTOR_CHECKPOINT_PATH:-/app/local_rlt_runs/rlt_unified_468_td3_burn5000_actor10000/inference_actor/00012000}
       --rlt-actor-poll-interval
       ${RLT_ACTOR_POLL_INTERVAL:-0.0}
       --video-codec
@@ -93,11 +95,10 @@ services:
       - $PWD:/app
       - /data/openpi0.5-rtc-reward-learning/rollouts:/app/rollouts
       - /data/openpi0.5-rtc-reward-learning/replay:/app/replay
-      - /data/openpi0.5-rtc-reward-learning/rlt_online:/app/rlt_online
       - /home/eii/openpi0.5-rtc/checkpoints:/app/checkpoints:ro
     environment:
       - RLT_RL_TOKEN_CHECKPOINT_PATH=/app/checkpoints/eii_rinse_11repo_cam4_fullft_rl_token_small_query/rinse_11repo_rl_token_small_query_512_from_9000_20260615/9999
-      - RLT_ACTOR_CHECKPOINT_PATH=${RLT_ACTOR_CHECKPOINT_PATH:-/app/rlt_online/run/inference_actor/LATEST}
+      - RLT_ACTOR_CHECKPOINT_PATH=${RLT_ACTOR_CHECKPOINT_PATH:-/app/local_rlt_runs/rlt_unified_468_td3_burn5000_actor10000/inference_actor/00012000}
       - RLT_DEFAULT_CRITIC_GATE_ENABLED=${RLT_DEFAULT_CRITIC_GATE_ENABLED:-1}
       - PYTHONPATH=/app:/app/src:/app/packages/openpi-client/src
       - JAX_PLATFORMS=cuda
@@ -112,7 +113,7 @@ services:
       context: .
       dockerfile: scripts/docker/serve_policy.Dockerfile
     profiles:
-      - rlt
+      - train
     depends_on:
       - redis
       - eii_pilot_backend

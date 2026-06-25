@@ -6,9 +6,26 @@
 - Do not use or modify `/home/eii/openpi0.5-rlt` for this user's robot project; that path belongs to another project.
 - Before copying files, restarting containers, or inspecting remote code on `192.168.1.103`, verify the working directory is `/home/eii/openpi0.5-rtc-reward-learning`.
 - If a command on `192.168.1.103` would touch any path outside `/home/eii/openpi0.5-rtc-reward-learning`, stop and ask the user for explicit approval first.
+- `uv` locations on `192.168.1.103`:
+  - Host: `/home/eii/.local/bin/uv` exists but is not on the default non-interactive SSH `PATH`.
+  - `openpi_server` container: `/usr/bin/uv`.
+  - `rlt_warmup_runtime` container: `/usr/bin/uv`.
+  - For compose commands that run `uv run ...`, assume container path `/usr/bin/uv`; do not rediscover this each time.
 - When the user asks to stop all of their robot containers on `192.168.1.103`, do it in one compose command from the verified project directory:
-  - `cd /home/eii/openpi0.5-rtc-reward-learning && docker compose --profile rlt stop`
-  - The compose file sets `name: openpi_reward_learning_eii`, and `rlt_warmup_runtime` is under the `rlt` profile, so include `--profile rlt` to stop the runtime container together with the non-profile services.
+  - `cd /home/eii/openpi0.5-rtc-reward-learning && docker compose --profile rlt --profile legacy --profile train stop`
+  - The compose file sets `name: openpi_reward_learning_eii`. Include all profiles so `rlt_warmup_runtime`, legacy `runtime`, and `rlt_online_trainer` are stopped together with the non-profile services.
+- To start the user's robot for actor testing on `192.168.1.103`, do not run a broad `docker compose --profile rlt up -d`. Start explicit services to avoid accidentally starting legacy runtime or online trainer:
+  - `cd /home/eii/openpi0.5-rtc-reward-learning && docker compose --profile rlt up -d --no-build ros_master redis openpi_server aloha_ros_nodes eii_pilot_backend eii_pilot_frontend eii_pilot_webrtc_media rlt_warmup_runtime`
+  - For fast runtime-only restarts after `openpi_server` is warm: `docker compose --profile rlt up -d --no-build --force-recreate --no-deps rlt_warmup_runtime`.
+- The preferred actor/critic checkpoint for 103 robot tests is project-local and contains both `actor.msgpack` and `critic.msgpack`:
+  - Host path: `/home/eii/openpi0.5-rtc-reward-learning/local_rlt_runs/rlt_unified_468_td3_burn5000_actor10000/inference_actor/00012000`
+  - Container path: `/app/local_rlt_runs/rlt_unified_468_td3_burn5000_actor10000/inference_actor/00012000`
+  - Set `.env`: `RLT_ACTOR_CHECKPOINT_PATH=/app/local_rlt_runs/rlt_unified_468_td3_burn5000_actor10000/inference_actor/00012000`
+  - Do not rely on `/app/rlt_online/run/inference_actor/LATEST` for robot testing unless the user explicitly asks to use online-training output.
+- `rlt_online` root ownership note:
+  - `rlt_warmup_runtime` and `rlt_online_trainer` run as root inside their containers.
+  - The old compose mount `/data/openpi0.5-rtc-reward-learning/rlt_online:/app/rlt_online` means container-created `/app/rlt_online/run` files become root-owned on the host.
+  - Avoid using `/app/rlt_online/run/inference_actor/LATEST` as the default robot actor path; use the project-local `local_rlt_runs/.../00012000` path above.
 
 ## Local key region annotation on machine 101
 - The local machine `101` is for offline key region data annotation only. Do not treat `http://127.0.0.1:3011/` as a robot-control UI, and do not expect local key presses there to control the robot on `192.168.1.103`.
