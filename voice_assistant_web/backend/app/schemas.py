@@ -115,6 +115,18 @@ class RLTControlState(BaseModel):
     auto_beta_reason: str | None = None
     intervention_scale: float = 0.25
     max_delta: float = 0.1
+    rlt_blend_mode: str = "projected_slow_push"
+    rlt_blend_preset: str = "conservative"
+    lambda_push: float = 0.10
+    lambda_vla_align: float = 0.50
+    lambda_actor: float = 0.20
+    push_joint_indices: list[int] = Field(default_factory=lambda: [0, 1, 2, 3, 4, 5])
+    push_axis: list[float] = Field(default_factory=lambda: [-0.53, 0.20, -0.78, 0.23, -0.08, 0.06])
+    push_component_norm: float | None = None
+    vla_align_norm: float | None = None
+    actor_align_norm: float | None = None
+    actor_removed_push_norm: float | None = None
+    final_delta_norm: float | None = None
     critic_gate_enabled: bool = True
     critic_gate_margin: float = 0.0
     critic_gate_temperature: float = 0.05
@@ -192,6 +204,13 @@ class RLTConfigRequest(BaseModel):
     trainer_enabled: bool | None = None
     intervention_scale: float | None = Field(default=None, ge=0, le=1)
     max_delta: float | None = Field(default=None, ge=0, le=10)
+    rlt_blend_mode: str | None = None
+    rlt_blend_preset: str | None = None
+    lambda_push: float | None = Field(default=None, ge=0, le=2)
+    lambda_vla_align: float | None = Field(default=None, ge=0, le=2)
+    lambda_actor: float | None = Field(default=None, ge=0, le=2)
+    push_joint_indices: list[int] | None = Field(default=None, min_length=1, max_length=14)
+    push_axis: list[float] | None = Field(default=None, min_length=1, max_length=14)
     critic_gate_enabled: bool | None = None
     critic_gate_margin: float | None = Field(default=None, ge=-1000, le=1000)
     critic_gate_temperature: float | None = Field(default=None, gt=0, le=1000)

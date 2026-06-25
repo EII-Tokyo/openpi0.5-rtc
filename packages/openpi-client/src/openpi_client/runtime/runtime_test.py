@@ -355,6 +355,33 @@ def test_control_event_passes_critic_gate_config_to_context():
     assert context["critic_gate_temperature"] == 0.2
 
 
+def test_control_event_passes_projected_blend_config_to_context():
+    runtime = _runtime()
+    runtime._handle_rlt_control_event(
+        {
+            "type": "config_update",
+            "state": {
+                "rlt_blend_mode": "projected_slow_push",
+                "rlt_blend_preset": "align",
+                "lambda_push": 0.2,
+                "lambda_vla_align": 0.3,
+                "lambda_actor": 0.5,
+                "push_joint_indices": [0, 1, 2, 3, 4, 5],
+                "push_axis": [-0.53, 0.2, -0.78, 0.23, -0.08, 0.06],
+            },
+        }
+    )
+
+    context = runtime._build_rlt_context()
+    assert context["rlt_blend_mode"] == "projected_slow_push"
+    assert context["rlt_blend_preset"] == "align"
+    assert context["lambda_push"] == 0.2
+    assert context["lambda_vla_align"] == 0.3
+    assert context["lambda_actor"] == 0.5
+    assert context["push_joint_indices"] == [0, 1, 2, 3, 4, 5]
+    assert context["push_axis"] == [-0.53, 0.2, -0.78, 0.23, -0.08, 0.06]
+
+
 def test_update_rlt_actor_status_records_inference_metrics():
     runtime = _runtime()
     epoch = runtime._build_rlt_context()["rlt_context_epoch"]

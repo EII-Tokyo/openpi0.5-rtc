@@ -11,6 +11,16 @@ from openpi_client import base_policy as _base_policy
 from openpi_client.rlt_actor_runtime import RLTActorRuntime
 
 
+_DEFAULT_PUSH_JOINT_INDICES = (0, 1, 2, 3, 4, 5)
+_DEFAULT_PUSH_AXIS = (-0.53, 0.20, -0.78, 0.23, -0.08, 0.06)
+_BLEND_PRESETS = {
+    "conservative": (0.10, 0.50, 0.20),
+    "align": (0.20, 0.30, 0.50),
+    "actor_align": (0.15, 0.10, 0.70),
+    "insert": (0.80, 0.70, 0.10),
+}
+
+
 class ActionChunkBroker(_base_policy.BasePolicy):
     """Wraps a policy to return action chunks one-at-a-time.
 
@@ -314,6 +324,13 @@ class ActionChunkBroker(_base_policy.BasePolicy):
                 "critic_gate_temperature",
                 "actor_ready",
                 "loaded_actor_step",
+                "rlt_blend_mode",
+                "rlt_blend_preset",
+                "lambda_push",
+                "lambda_vla_align",
+                "lambda_actor",
+                "push_joint_indices",
+                "push_axis",
             )
         )
 
@@ -433,8 +450,19 @@ class ActionChunkBroker(_base_policy.BasePolicy):
             )
             return policy_results
 
+        blend_diagnostics = {}
         if result.applied:
-            policy_results["actions"] = np.asarray(result.actions, dtype=np.float32)
+            result_actions = np.asarray(result.actions, dtype=np.float32)
+            blended_actions, blend_diagnostics = self._blend_rlt_actor_actions(
+                reference_actions,
+                result_actions,
+                proprio,
+                context,
+            )
+            policy_results["actions"] = blended_actions
+        action_end_index = result.action_end_index
+        if action_end_index is None and result.action_start_index is not None and result.action_horizon is not None:
+            action_end_index = min(int(result.action_start_index) + int(result.action_horizon), reference_actions.shape[0])
         policy_results.update(
             {
                 "rlt_actor_applied": bool(result.applied),
@@ -450,9 +478,143 @@ class ActionChunkBroker(_base_policy.BasePolicy):
                 "rlt_gate_reason": result.gate_reason,
                 "rlt_critic_ready": result.critic_ready,
                 "rlt_critic_gate_enabled": result.critic_gate_enabled,
+                "rlt_actor_action_start_index": result.action_start_index,
+                "rlt_actor_action_horizon": result.action_horizon,
+                "rlt_actor_action_end_index": action_end_index,
+                **blend_diagnostics,
             }
         )
+        if context.get("phase") == "key_region" or self._explicit_rlt_gate_enabled is not None:
+            tail_preserved = action_end_index is not None and int(action_end_index) < reference_actions.shape[0]
+            logging.info(
+                "RLT actor apply result: applied=%s start_index=%s horizon=%s end_index=%s tail_preserved=%s",
+                result.applied,
+                result.action_start_index,
+                result.action_horizon,
+                action_end_index,
+                tail_preserved,
+            )
         return policy_results
+
+    def _blend_rlt_actor_actions(
+        self,
+        reference_actions: np.ndarray,
+        actor_actions: np.ndarray,
+        proprio: np.ndarray,
+        context: dict,
+    ) -> tuple[np.ndarray, dict]:
+        mode = str(context.get("rlt_blend_mode") or "full")
+        if mode != "projected_slow_push" or context.get("phase") != "key_region":
+            return actor_actions, {
+                "rlt_blend_mode": mode,
+                "rlt_blend_preset": context.get("rlt_blend_preset"),
+                "rlt_lambda_push": None,
+                "rlt_lambda_vla_align": None,
+                "rlt_lambda_actor": None,
+                "rlt_push_component_norm": None,
+                "rlt_vla_align_norm": None,
+                "rlt_actor_align_norm": None,
+                "rlt_actor_removed_push_norm": None,
+                "rlt_final_delta_norm": None,
+            }
+
+        preset_value = context.get("rlt_blend_preset")
+        preset = str(preset_value or "conservative").lower()
+        if preset in _BLEND_PRESETS:
+            default_lambda_push, default_lambda_vla_align, default_lambda_actor = _BLEND_PRESETS[preset]
+        else:
+            preset = "custom"
+            default_lambda_push, default_lambda_vla_align, default_lambda_actor = _BLEND_PRESETS["conservative"]
+        lambda_push = float(context.get("lambda_push", default_lambda_push))
+        lambda_vla_align = float(context.get("lambda_vla_align", default_lambda_vla_align))
+        lambda_actor = float(context.get("lambda_actor", default_lambda_actor))
+        if preset_value is None and any(key in context for key in ("lambda_push", "lambda_vla_align", "lambda_actor")):
+            preset = "custom"
+
+        joint_indices = np.asarray(context.get("push_joint_indices") or _DEFAULT_PUSH_JOINT_INDICES, dtype=np.int64)
+        push_axis = np.asarray(context.get("push_axis") or _DEFAULT_PUSH_AXIS, dtype=np.float32)
+        if joint_indices.ndim != 1 or push_axis.ndim != 1 or joint_indices.shape[0] != push_axis.shape[0]:
+            logging.warning("Invalid RLT blend push axis config; using full actor action")
+            return actor_actions, {
+                "rlt_blend_mode": mode,
+                "rlt_blend_preset": "invalid",
+                "rlt_lambda_push": lambda_push,
+                "rlt_lambda_vla_align": lambda_vla_align,
+                "rlt_lambda_actor": lambda_actor,
+                "rlt_push_component_norm": None,
+                "rlt_vla_align_norm": None,
+                "rlt_actor_align_norm": None,
+                "rlt_actor_removed_push_norm": None,
+                "rlt_final_delta_norm": None,
+            }
+        if np.any(joint_indices < 0) or np.any(joint_indices >= reference_actions.shape[1]):
+            logging.warning("Invalid RLT blend push joint index config; using full actor action")
+            return actor_actions, {
+                "rlt_blend_mode": mode,
+                "rlt_blend_preset": "invalid",
+                "rlt_lambda_push": lambda_push,
+                "rlt_lambda_vla_align": lambda_vla_align,
+                "rlt_lambda_actor": lambda_actor,
+                "rlt_push_component_norm": None,
+                "rlt_vla_align_norm": None,
+                "rlt_actor_align_norm": None,
+                "rlt_actor_removed_push_norm": None,
+                "rlt_final_delta_norm": None,
+            }
+        push_norm = float(np.linalg.norm(push_axis))
+        if push_norm < 1e-6:
+            logging.warning("RLT blend push axis norm is zero; using full actor action")
+            return actor_actions, {
+                "rlt_blend_mode": mode,
+                "rlt_blend_preset": "invalid",
+                "rlt_lambda_push": lambda_push,
+                "rlt_lambda_vla_align": lambda_vla_align,
+                "rlt_lambda_actor": lambda_actor,
+                "rlt_push_component_norm": None,
+                "rlt_vla_align_norm": None,
+                "rlt_actor_align_norm": None,
+                "rlt_actor_removed_push_norm": None,
+                "rlt_final_delta_norm": None,
+            }
+
+        current_qpos = np.asarray(proprio, dtype=np.float32).reshape(-1)[: reference_actions.shape[1]]
+        if current_qpos.shape[0] < reference_actions.shape[1]:
+            logging.warning("RLT blend proprio is too short; using full actor action")
+            return actor_actions, {
+                "rlt_blend_mode": mode,
+                "rlt_blend_preset": "invalid",
+                "rlt_lambda_push": lambda_push,
+                "rlt_lambda_vla_align": lambda_vla_align,
+                "rlt_lambda_actor": lambda_actor,
+                "rlt_push_component_norm": None,
+                "rlt_vla_align_norm": None,
+                "rlt_actor_align_norm": None,
+                "rlt_actor_removed_push_norm": None,
+                "rlt_final_delta_norm": None,
+            }
+
+        blended = np.array(reference_actions, dtype=np.float32, copy=True)
+        p = push_axis / push_norm
+        vla_u = reference_actions[:, joint_indices] - current_qpos[joint_indices]
+        actor_delta = actor_actions[:, joint_indices] - reference_actions[:, joint_indices]
+        vla_push = np.sum(vla_u * p[None, :], axis=1, keepdims=True) * p[None, :]
+        vla_align = vla_u - vla_push
+        actor_push = np.sum(actor_delta * p[None, :], axis=1, keepdims=True) * p[None, :]
+        actor_align = actor_delta - actor_push
+        final_u = lambda_push * vla_push + lambda_vla_align * vla_align + lambda_actor * actor_align
+        blended[:, joint_indices] = current_qpos[joint_indices] + final_u
+        return blended, {
+            "rlt_blend_mode": mode,
+            "rlt_blend_preset": preset,
+            "rlt_lambda_push": lambda_push,
+            "rlt_lambda_vla_align": lambda_vla_align,
+            "rlt_lambda_actor": lambda_actor,
+            "rlt_push_component_norm": float(np.linalg.norm(vla_push)),
+            "rlt_vla_align_norm": float(np.linalg.norm(vla_align)),
+            "rlt_actor_align_norm": float(np.linalg.norm(actor_align)),
+            "rlt_actor_removed_push_norm": float(np.linalg.norm(actor_push)),
+            "rlt_final_delta_norm": float(np.linalg.norm(final_u)),
+        }
 
     def _build_step_result_cache(self, policy_results: Dict[str, np.ndarray]) -> Dict[str, np.ndarray]:
         reference_actions = policy_results.get("reference_actions", policy_results["actions"])
@@ -482,6 +644,19 @@ class ActionChunkBroker(_base_policy.BasePolicy):
             ("rlt_gate_reason", "rlt_gate_reason"),
             ("rlt_critic_ready", "rlt_critic_ready"),
             ("rlt_critic_gate_enabled", "rlt_critic_gate_enabled"),
+            ("rlt_actor_action_start_index", "rlt_actor_action_start_index"),
+            ("rlt_actor_action_horizon", "rlt_actor_action_horizon"),
+            ("rlt_actor_action_end_index", "rlt_actor_action_end_index"),
+            ("rlt_blend_mode", "rlt_blend_mode"),
+            ("rlt_blend_preset", "rlt_blend_preset"),
+            ("rlt_lambda_push", "rlt_lambda_push"),
+            ("rlt_lambda_vla_align", "rlt_lambda_vla_align"),
+            ("rlt_lambda_actor", "rlt_lambda_actor"),
+            ("rlt_push_component_norm", "rlt_push_component_norm"),
+            ("rlt_vla_align_norm", "rlt_vla_align_norm"),
+            ("rlt_actor_align_norm", "rlt_actor_align_norm"),
+            ("rlt_actor_removed_push_norm", "rlt_actor_removed_push_norm"),
+            ("rlt_final_delta_norm", "rlt_final_delta_norm"),
             ("rlt_context_epoch", "rlt_context_epoch"),
         ):
             if source_key in policy_results and target_key not in cached:

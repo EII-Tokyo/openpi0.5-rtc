@@ -276,6 +276,18 @@ export type RLTControlState = {
   auto_beta_reason: string | null
   intervention_scale: number
   max_delta: number
+  rlt_blend_mode: string
+  rlt_blend_preset: string
+  lambda_push: number
+  lambda_vla_align: number
+  lambda_actor: number
+  push_joint_indices: number[]
+  push_axis: number[]
+  push_component_norm: number | null
+  vla_align_norm: number | null
+  actor_align_norm: number | null
+  actor_removed_push_norm: number | null
+  final_delta_norm: number | null
   critic_gate_enabled: boolean
   critic_gate_margin: number
   critic_gate_temperature: number
@@ -347,6 +359,13 @@ export type RLTConfigRequest = {
   trainer_enabled?: boolean
   intervention_scale?: number
   max_delta?: number
+  rlt_blend_mode?: string
+  rlt_blend_preset?: string
+  lambda_push?: number
+  lambda_vla_align?: number
+  lambda_actor?: number
+  push_joint_indices?: number[]
+  push_axis?: number[]
   critic_gate_enabled?: boolean
   critic_gate_margin?: number
   critic_gate_temperature?: number
