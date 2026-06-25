@@ -210,6 +210,10 @@ class ActionChunkBroker(_base_policy.BasePolicy):
                 if not self._refresh_current_results(obs, context_signature):
                     context_signature = self._rlt_context_signature_from_obs(obs)
                     self._refresh_current_results(obs, context_signature)
+            elif self._should_refresh_at_actor_window_boundary(obs):
+                if not self._refresh_current_results(obs, context_signature):
+                    context_signature = self._rlt_context_signature_from_obs(obs)
+                    self._refresh_current_results(obs, context_signature)
 
             results = self._slice_result_cache(self._last_results)
             self._obs = obs
@@ -241,6 +245,10 @@ class ActionChunkBroker(_base_policy.BasePolicy):
             if self._last_results is not None and context_signature != self._last_rlt_context_signature:
                 self._clear_cached_results()
             if self._last_results is None:
+                if not self._refresh_current_results(obs, context_signature):
+                    context_signature = self._rlt_context_signature_from_obs(obs)
+                    self._refresh_current_results(obs, context_signature)
+            elif self._should_refresh_at_actor_window_boundary(obs):
                 if not self._refresh_current_results(obs, context_signature):
                     context_signature = self._rlt_context_signature_from_obs(obs)
                     self._refresh_current_results(obs, context_signature)
@@ -308,6 +316,11 @@ class ActionChunkBroker(_base_policy.BasePolicy):
                 "actor_requested",
                 "manual_actor_requested",
                 "intervention_scale",
+                "intervention_ramp_steps",
+                "actor_execution_mode",
+                "actor_action_horizon",
+                "actor_wait_timeout_sec",
+                "disable_vla_tail_when_actor_active",
                 "max_delta",
                 "critic_gate_enabled",
                 "critic_gate_margin",
@@ -450,6 +463,9 @@ class ActionChunkBroker(_base_policy.BasePolicy):
                 "rlt_gate_reason": result.gate_reason,
                 "rlt_critic_ready": result.critic_ready,
                 "rlt_critic_gate_enabled": result.critic_gate_enabled,
+                "rlt_actor_action_start_index": result.action_start_index,
+                "rlt_actor_action_horizon": result.action_horizon,
+                "rlt_actor_action_end_index": result.action_end_index,
             }
         )
         return policy_results
@@ -482,11 +498,41 @@ class ActionChunkBroker(_base_policy.BasePolicy):
             ("rlt_gate_reason", "rlt_gate_reason"),
             ("rlt_critic_ready", "rlt_critic_ready"),
             ("rlt_critic_gate_enabled", "rlt_critic_gate_enabled"),
+            ("rlt_actor_action_start_index", "rlt_actor_action_start_index"),
+            ("rlt_actor_action_horizon", "rlt_actor_action_horizon"),
+            ("rlt_actor_action_end_index", "rlt_actor_action_end_index"),
             ("rlt_context_epoch", "rlt_context_epoch"),
         ):
             if source_key in policy_results and target_key not in cached:
                 cached[target_key] = policy_results[source_key]
         return cached
+
+    def _should_refresh_at_actor_window_boundary(self, obs: Dict) -> bool:
+        if self._last_results is None:
+            return False
+        context = self._rlt_context_from_obs(obs)
+        if context.get("actor_execution_mode") != "wait_next_chunk" and not bool(
+            context.get("disable_vla_tail_when_actor_active", False)
+        ):
+            return False
+        if not bool(self._last_results.get("rlt_actor_applied", False)):
+            return False
+        valid_end = self._actor_valid_end(self._last_results, context)
+        if valid_end is None:
+            return False
+        return self._cur_step >= valid_end
+
+    def _actor_valid_end(self, results: Dict[str, np.ndarray], context: dict) -> int | None:
+        valid_start = results.get("rlt_actor_action_start_index")
+        valid_end = results.get("rlt_actor_action_end_index")
+        configured_horizon = context.get("actor_action_horizon")
+        if valid_start is None and valid_end is None and configured_horizon is not None:
+            return max(0, int(configured_horizon))
+        if valid_end is None:
+            return None
+        if configured_horizon is None or valid_start is None:
+            return int(valid_end)
+        return min(int(valid_end), int(valid_start) + max(1, int(configured_horizon)))
 
     def _slice_result_cache(self, results: Dict[str, np.ndarray]) -> Dict[str, np.ndarray]:
         sliced = {}

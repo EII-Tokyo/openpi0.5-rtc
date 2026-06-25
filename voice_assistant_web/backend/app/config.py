@@ -38,6 +38,10 @@ class Settings:
     rlt_default_beta: float = float(os.getenv("RLT_DEFAULT_BETA", "10.0"))
     rlt_default_intervention_scale: float = float(os.getenv("RLT_DEFAULT_INTERVENTION_SCALE", "0.25"))
     rlt_default_max_delta: float = float(os.getenv("RLT_DEFAULT_MAX_DELTA", "0.1"))
+    rlt_actor_execution_mode: str = os.getenv("RLT_ACTOR_EXECUTION_MODE", "wait_next_chunk")
+    rlt_actor_action_horizon: int = int(os.getenv("RLT_ACTOR_ACTION_HORIZON", "10"))
+    rlt_actor_wait_timeout_sec: float = float(os.getenv("RLT_ACTOR_WAIT_TIMEOUT_SEC", "0"))
+    rlt_disable_vla_tail_when_actor_active: bool = _env_bool("RLT_DISABLE_VLA_TAIL_WHEN_ACTOR_ACTIVE", "true")
     rlt_rl_token_checkpoint_path: str = os.getenv(
         "RLT_RL_TOKEN_CHECKPOINT_PATH",
         "/app/checkpoints/eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo_rl_token_query/rl_token_2048_enc4_dec4_query_from_19000_20260528/12000",

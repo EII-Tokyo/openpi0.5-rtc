@@ -11,6 +11,23 @@ from openpi_client.rlt_actor_runtime import RLTActorRuntime
 from scripts import train_rlt_online
 
 
+class _FixedConfig:
+    action_horizon = 4
+    action_dim = 2
+    z_dim = 8
+    proprio_dim = 4
+
+
+class _FixedActor:
+    def __init__(self):
+        self.sample_values = []
+
+    def __call__(self, _x, reference_action, *, rng=None, sample=False, intervention_scale=1.0):
+        del rng
+        self.sample_values.append(sample)
+        return reference_action + intervention_scale * np.ones_like(np.asarray(reference_action), dtype=np.float32)
+
+
 def _write_actor(tmp_path, *, action_horizon=10, action_dim=3):
     config = rlt_training.RLTTrainingConfig(
         model=rlt.RLTConfig(
@@ -68,13 +85,16 @@ def test_actor_runtime_applies_to_requested_action_window(tmp_path):
     )
 
     assert result.applied is True
+    assert result.action_start_index == 10
+    assert result.action_horizon == 10
+    assert result.action_end_index == 20
     result_delta = result.actions - reference
     np.testing.assert_allclose(result_delta[:10], np.zeros((10, 3), dtype=np.float32))
     assert np.linalg.norm(result_delta[10:20]) > 0.0
     np.testing.assert_allclose(result_delta[20:], np.zeros((5, 3), dtype=np.float32))
 
 
-def test_actor_runtime_samples_actor_actions(tmp_path):
+def test_actor_runtime_uses_deterministic_actor_actions(tmp_path):
     _write_actor(tmp_path, action_horizon=10, action_dim=3)
     runtime = RLTActorRuntime(str(tmp_path / "inference_actor" / "LATEST"), poll_interval_seconds=0.0)
     reference = np.ones((10, 3), dtype=np.float32)
@@ -95,7 +115,39 @@ def test_actor_runtime_samples_actor_actions(tmp_path):
 
     assert first.applied is True
     assert second.applied is True
-    assert not np.allclose(first.actions, second.actions)
+    np.testing.assert_allclose(first.actions, second.actions)
+
+
+def test_actor_runtime_ramps_intervention_delta():
+    runtime = RLTActorRuntime(None, poll_interval_seconds=0.0)
+    fixed_actor = _FixedActor()
+    runtime._actor = fixed_actor
+    runtime._config = _FixedConfig()
+    reference = np.zeros((4, 2), dtype=np.float32)
+
+    result = runtime.apply(
+        reference_actions=reference,
+        z_rl=np.zeros((8,), dtype=np.float32),
+        proprio=np.zeros((4,), dtype=np.float32),
+        context={
+            "actor_requested": True,
+            "intervention_scale": 1.0,
+            "intervention_ramp_steps": 4,
+        },
+    )
+
+    assert result.applied is True
+    assert fixed_actor.sample_values == [False]
+    expected = np.array(
+        [
+            [0.0, 0.0],
+            [1.0 / 3.0, 1.0 / 3.0],
+            [2.0 / 3.0, 2.0 / 3.0],
+            [1.0, 1.0],
+        ],
+        dtype=np.float32,
+    )
+    np.testing.assert_allclose(result.actions, expected, rtol=1e-6, atol=1e-6)
 
 
 def test_actor_runtime_rejects_action_window_that_exceeds_reference(tmp_path):

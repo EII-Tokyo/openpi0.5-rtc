@@ -25,6 +25,10 @@ type Draft = Required<
     | 'trainer_enabled'
     | 'intervention_scale'
     | 'max_delta'
+    | 'actor_execution_mode'
+    | 'actor_action_horizon'
+    | 'actor_wait_timeout_sec'
+    | 'disable_vla_tail_when_actor_active'
     | 'critic_gate_enabled'
     | 'critic_gate_margin'
     | 'critic_gate_temperature'
@@ -47,6 +51,10 @@ const makeDraft = (rlt: RLTControlState): Draft => ({
   trainer_enabled: rlt.trainer_enabled,
   intervention_scale: rlt.intervention_scale,
   max_delta: rlt.max_delta,
+  actor_execution_mode: rlt.actor_execution_mode === 'mixed_vla_tail' ? 'mixed_vla_tail' : 'wait_next_chunk',
+  actor_action_horizon: rlt.actor_action_horizon,
+  actor_wait_timeout_sec: rlt.actor_wait_timeout_sec,
+  disable_vla_tail_when_actor_active: rlt.disable_vla_tail_when_actor_active,
   critic_gate_enabled: rlt.critic_gate_enabled,
   critic_gate_margin: rlt.critic_gate_margin,
   critic_gate_temperature: rlt.critic_gate_temperature,
@@ -76,6 +84,10 @@ export function RLTConfigPage({ rlt, onState }: Props) {
     rlt.trainer_enabled,
     rlt.intervention_scale,
     rlt.max_delta,
+    rlt.actor_execution_mode,
+    rlt.actor_action_horizon,
+    rlt.actor_wait_timeout_sec,
+    rlt.disable_vla_tail_when_actor_active,
     rlt.critic_gate_enabled,
     rlt.critic_gate_margin,
     rlt.critic_gate_temperature,
@@ -247,6 +259,43 @@ export function RLTConfigPage({ rlt, onState }: Props) {
         </ConfigSection>
 
         <ConfigSection title="Actor Intervention">
+          <Field label="Execution Mode">
+            <select
+              value={draft.actor_execution_mode}
+              onChange={(event) =>
+                setDraft({ ...draft, actor_execution_mode: event.target.value as Draft['actor_execution_mode'] })
+              }
+            >
+              <option value="wait_next_chunk">Wait next actor chunk</option>
+              <option value="mixed_vla_tail">Mixed VLA tail comparison</option>
+            </select>
+          </Field>
+          <Field label="Actor Action Horizon">
+            <input
+              type="number"
+              min={1}
+              max={100}
+              value={draft.actor_action_horizon}
+              onChange={(event) => setDraft({ ...draft, actor_action_horizon: Number(event.target.value) })}
+            />
+          </Field>
+          <Field label="Wait Timeout Seconds">
+            <input
+              type="number"
+              min={0}
+              max={60}
+              step={0.1}
+              value={draft.actor_wait_timeout_sec}
+              onChange={(event) => setDraft({ ...draft, actor_wait_timeout_sec: Number(event.target.value) })}
+            />
+          </Field>
+          <Toggle
+            label="Disable VLA Tail"
+            checked={draft.disable_vla_tail_when_actor_active}
+            onChange={(disable_vla_tail_when_actor_active) =>
+              setDraft({ ...draft, disable_vla_tail_when_actor_active })
+            }
+          />
           <Field label={`Intervention Scale ${draft.intervention_scale.toFixed(2)}`}>
             <input
               type="range"

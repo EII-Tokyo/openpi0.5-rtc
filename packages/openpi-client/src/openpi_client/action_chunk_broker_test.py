@@ -46,6 +46,50 @@ class _Actor:
         return {"actor_ready": self.mode == "apply", "actor_step": 5}
 
 
+class _WindowActor:
+    def __init__(self, *, horizon=2):
+        self.horizon = horizon
+        self.calls = []
+
+    def apply(self, *, reference_actions, z_rl, proprio, context, action_start_index=None):
+        del z_rl, proprio
+        start = int(action_start_index or 0)
+        end = start + self.horizon
+        self.calls.append((reference_actions.copy(), dict(context), start, end))
+        adjusted = reference_actions.copy()
+        adjusted[start:end] += 100
+        return RLTActorApplyResult(
+            adjusted,
+            True,
+            None,
+            "/tmp/actor",
+            5,
+            1.0,
+            0.5,
+            action_start_index=start,
+            action_horizon=self.horizon,
+            action_end_index=end,
+        )
+
+
+class _LongPolicy:
+    def __init__(self):
+        self.calls = 0
+
+    def infer(self, obs, *args):
+        del obs, args
+        base = self.calls * 1000
+        self.calls += 1
+        return {
+            "actions": (base + np.arange(10, dtype=np.float32)).reshape(5, 2),
+            "z_rl": np.ones((8,), dtype=np.float32),
+            "state": np.ones((4,), dtype=np.float32),
+        }
+
+    def reset(self):
+        pass
+
+
 def test_actor_disabled_leaves_actions_unchanged_and_sets_reference_action():
     policy = _Policy()
     actor = _Actor(mode="disabled")
@@ -83,6 +127,29 @@ def test_actor_enabled_replaces_actions_and_preserves_raw_reference():
     assert second["rlt_actor_applied"] is True
     assert len(actor.calls) == 1
     assert actor.calls[0][4] == 0
+
+
+def test_actor_window_mode_refreshes_instead_of_executing_vla_tail():
+    policy = _LongPolicy()
+    actor = _WindowActor(horizon=2)
+    broker = ActionChunkBroker(policy, action_horizon=5, use_rtc=False, rlt_actor_runtime=actor)
+    obs = {
+        "rlt_context": {
+            "actor_requested": True,
+            "actor_execution_mode": "wait_next_chunk",
+            "disable_vla_tail_when_actor_active": True,
+        }
+    }
+
+    first = broker.infer(obs)
+    second = broker.infer(obs)
+    third = broker.infer(obs)
+
+    np.testing.assert_allclose(first["actions"], np.array([100, 101], dtype=np.float32))
+    np.testing.assert_allclose(second["actions"], np.array([102, 103], dtype=np.float32))
+    np.testing.assert_allclose(third["actions"], np.array([1100, 1101], dtype=np.float32))
+    assert policy.calls == 2
+    assert len(actor.calls) == 2
 
 
 def test_actor_gate_on_invalidates_cached_disabled_chunk():

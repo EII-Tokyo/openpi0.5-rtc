@@ -445,6 +445,31 @@ def test_config_update_publishes_critic_gate_settings():
     assert '"critic_burn_in_steps": 1000' in payload
 
 
+def test_config_update_publishes_actor_execution_settings():
+    store = _store(warmup_target=1)
+
+    request = type(
+        "Req",
+        (),
+        {
+            "actor_execution_mode": "wait_next_chunk",
+            "actor_action_horizon": 10,
+            "actor_wait_timeout_sec": 0.0,
+            "disable_vla_tail_when_actor_active": True,
+        },
+    )()
+    state = store.update_config(request)
+
+    assert state.actor_execution_mode == "wait_next_chunk"
+    assert state.actor_action_horizon == 10
+    assert state.actor_wait_timeout_sec == 0.0
+    assert state.disable_vla_tail_when_actor_active is True
+    payload = store._redis.messages[-1][1]
+    assert '"actor_execution_mode": "wait_next_chunk"' in payload
+    assert '"actor_action_horizon": 10' in payload
+    assert '"disable_vla_tail_when_actor_active": true' in payload
+
+
 def test_config_update_publishes_manual_trainer_enabled():
     store = _store(warmup_target=1)
 

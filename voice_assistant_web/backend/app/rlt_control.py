@@ -35,6 +35,10 @@ class RLTControlStore:
             beta=settings.rlt_default_beta,
             intervention_scale=settings.rlt_default_intervention_scale,
             max_delta=settings.rlt_default_max_delta,
+            actor_execution_mode=settings.rlt_actor_execution_mode,
+            actor_action_horizon=settings.rlt_actor_action_horizon,
+            actor_wait_timeout_sec=settings.rlt_actor_wait_timeout_sec,
+            disable_vla_tail_when_actor_active=settings.rlt_disable_vla_tail_when_actor_active,
             rl_token_checkpoint_path=settings.rlt_rl_token_checkpoint_path,
         )
         self._load()
@@ -341,6 +345,10 @@ class RLTControlStore:
                 "force_actor_effective",
                 "intervention_scale",
                 "max_delta",
+                "actor_execution_mode",
+                "actor_action_horizon",
+                "actor_wait_timeout_sec",
+                "disable_vla_tail_when_actor_active",
                 "critic_gate_enabled",
                 "critic_gate_margin",
                 "critic_gate_temperature",
@@ -351,9 +359,10 @@ class RLTControlStore:
                 if value is not None:
                     setattr(self._state, key, value)
                     updates[key] = value
-            if request.actor_enabled is not None:
-                self._state.actor_enabled = request.actor_enabled
-                updates["actor_enabled"] = request.actor_enabled
+            actor_enabled = getattr(request, "actor_enabled", None)
+            if actor_enabled is not None:
+                self._state.actor_enabled = actor_enabled
+                updates["actor_enabled"] = actor_enabled
             if updates:
                 self._add_event_locked("config_update", json.dumps(updates, sort_keys=True))
                 self._apply_ledger_stats_locked()

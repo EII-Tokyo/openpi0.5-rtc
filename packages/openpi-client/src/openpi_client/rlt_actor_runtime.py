@@ -27,6 +27,9 @@ class RLTActorApplyResult:
     gate_reason: str | None = None
     critic_ready: bool = False
     critic_gate_enabled: bool = False
+    action_start_index: int | None = None
+    action_horizon: int | None = None
+    action_end_index: int | None = None
 
 
 class RLTActorRuntime:
@@ -113,12 +116,17 @@ class RLTActorRuntime:
                 x,
                 prefix_jax,
                 rng=actor_rng,
-                sample=True,
+                sample=False,
                 intervention_scale=float(context.get("intervention_scale", 1.0)),
             )
             adjusted_prefix = np.asarray(jax.device_get(action[0]), dtype=np.float32)
             if not np.all(np.isfinite(adjusted_prefix)):
                 return self._fail(reference, "actor_output_non_finite")
+            adjusted_prefix = _ramp_adjusted_action(
+                reference_prefix=prefix,
+                adjusted_prefix=adjusted_prefix,
+                ramp_steps=int(context.get("intervention_ramp_steps", 0) or 0),
+            )
             adjusted = np.array(reference, copy=True)
             adjusted[action_start_index:action_end_index] = adjusted_prefix
             delta = adjusted[action_start_index:action_end_index] - reference[action_start_index:action_end_index]
@@ -152,6 +160,9 @@ class RLTActorRuntime:
                 max_abs_delta=float(np.max(np.abs(delta))) if delta.size else 0.0,
                 gate_reason=gate_reason,
                 critic_gate_enabled=critic_gate_enabled,
+                action_start_index=action_start_index,
+                action_horizon=horizon,
+                action_end_index=action_end_index,
                 **q_metrics,
             )
         except Exception as exc:
@@ -293,3 +304,24 @@ class RLTActorRuntime:
         if np.asarray(proprio).shape != (int(self._config.proprio_dim),):
             return f"proprio shape mismatch: got {np.asarray(proprio).shape}, expected {(int(self._config.proprio_dim),)}"
         return None
+
+
+def _ramp_adjusted_action(
+    *,
+    reference_prefix: np.ndarray,
+    adjusted_prefix: np.ndarray,
+    ramp_steps: int,
+) -> np.ndarray:
+    """Blend actor delta in over the first ramp_steps frames.
+
+    This preserves the actor's target action after the ramp while preventing a
+    hard discontinuity at the RTC chunk handoff boundary.
+    """
+    if ramp_steps <= 1:
+        return adjusted_prefix
+    horizon = adjusted_prefix.shape[0]
+    steps = min(int(ramp_steps), horizon)
+    weights = np.ones((horizon,), dtype=np.float32)
+    weights[:steps] = np.linspace(0.0, 1.0, steps, dtype=np.float32)
+    delta = adjusted_prefix - reference_prefix
+    return reference_prefix + weights[:, None] * delta

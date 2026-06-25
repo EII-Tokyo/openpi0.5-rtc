@@ -276,6 +276,10 @@ export type RLTControlState = {
   auto_beta_reason: string | null
   intervention_scale: number
   max_delta: number
+  actor_execution_mode: 'wait_next_chunk' | 'mixed_vla_tail' | string
+  actor_action_horizon: number
+  actor_wait_timeout_sec: number
+  disable_vla_tail_when_actor_active: boolean
   critic_gate_enabled: boolean
   critic_gate_margin: number
   critic_gate_temperature: number
@@ -347,6 +351,10 @@ export type RLTConfigRequest = {
   trainer_enabled?: boolean
   intervention_scale?: number
   max_delta?: number
+  actor_execution_mode?: 'wait_next_chunk' | 'mixed_vla_tail'
+  actor_action_horizon?: number
+  actor_wait_timeout_sec?: number
+  disable_vla_tail_when_actor_active?: boolean
   critic_gate_enabled?: boolean
   critic_gate_margin?: number
   critic_gate_temperature?: number
