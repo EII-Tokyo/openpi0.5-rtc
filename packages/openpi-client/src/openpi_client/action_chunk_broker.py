@@ -11,6 +11,76 @@ from openpi_client import base_policy as _base_policy
 from openpi_client.rlt_actor_runtime import RLTActorRuntime
 
 
+def _propagate_actor_residual_for_guidance(
+    *,
+    reference_actions: np.ndarray,
+    adjusted_actions: np.ndarray,
+    action_start_index: int,
+    action_end_index: int,
+    guidance_start_index: int,
+    trend_window: int = 5,
+    start_weight: float = 0.7,
+    same_direction_scale: float = 0.35,
+    opposing_direction_scale: float = 1.0,
+) -> np.ndarray:
+    guidance = np.array(adjusted_actions, dtype=np.float32, copy=True)
+    reference = np.asarray(reference_actions, dtype=np.float32)
+    adjusted = np.asarray(adjusted_actions, dtype=np.float32)
+    if reference.shape != adjusted.shape or reference.ndim != 2:
+        return guidance
+
+    action_start_index = max(0, int(action_start_index))
+    action_end_index = min(int(action_end_index), reference.shape[0])
+    if action_end_index <= action_start_index:
+        return guidance
+
+    residual = adjusted[action_start_index:action_end_index] - reference[action_start_index:action_end_index]
+    window = max(1, min(int(trend_window), residual.shape[0]))
+    trend = np.mean(residual[-window:], axis=0)
+
+    tail_start = max(int(guidance_start_index), action_end_index)
+    if tail_start >= reference.shape[0]:
+        return guidance
+
+    anchor = reference[action_end_index - 1]
+    tail_trend = reference[tail_start] - anchor
+    same_direction = np.sign(trend) == np.sign(tail_trend)
+    active_tail = (np.abs(trend) > 1e-6) & (np.abs(tail_trend) > 1e-6)
+    trend_scale = np.where(
+        active_tail & same_direction,
+        float(same_direction_scale),
+        float(opposing_direction_scale),
+    ).astype(np.float32)
+    trend = trend * trend_scale
+
+    weights = np.linspace(float(start_weight), 0.0, reference.shape[0] - tail_start, dtype=np.float32)[:, None]
+    guidance[tail_start:] = reference[tail_start:] + weights * trend
+    return guidance
+
+
+def _limit_key_region_action_delta(
+    actions: np.ndarray,
+    state: np.ndarray,
+    *,
+    joint_indices: tuple[int, ...] = (0, 1, 2, 3, 4, 5),
+    max_step_norm: float = 0.005,
+    max_step_abs: float = 0.0035,
+) -> np.ndarray:
+    limited = np.array(actions, dtype=np.float32, copy=True)
+    state = np.asarray(state, dtype=np.float32)
+    if limited.ndim != 2 or state.ndim != 1 or limited.shape[1] <= max(joint_indices) or state.shape[0] <= max(joint_indices):
+        return limited
+
+    indices = np.asarray(joint_indices, dtype=np.int64)
+    delta = limited[:, indices] - state[indices]
+    delta = np.clip(delta, -float(max_step_abs), float(max_step_abs))
+    norms = np.linalg.norm(delta, axis=-1, keepdims=True)
+    scales = np.minimum(1.0, float(max_step_norm) / (norms + 1e-8))
+    delta = delta * scales
+    limited[:, indices] = state[indices] + delta
+    return limited
+
+
 class ActionChunkBroker(_base_policy.BasePolicy):
     """Wraps a policy to return action chunks one-at-a-time.
 
@@ -36,10 +106,12 @@ class ActionChunkBroker(_base_policy.BasePolicy):
         self._cur_step: int = 0
 
         self._last_results: Dict[str, np.ndarray] | None = None
+        self._last_guidance_actions: np.ndarray | None = None
         self._last_origin_actions: np.ndarray | None = None
         self._last_reference_actions: np.ndarray | None = None
         self._last_rlt_context_signature: tuple | None = None
         self._background_results: Dict[str, np.ndarray] | None = None
+        self._background_guidance_actions: np.ndarray | None = None
         self._background_rlt_context_signature: tuple | None = None
         self._background_running: bool = False
         self._cache_generation: int = 0
@@ -102,6 +174,7 @@ class ActionChunkBroker(_base_policy.BasePolicy):
                     obs = dict(self._obs or {})
                     context_signature = self._rlt_context_signature_from_obs(obs)
                     last_results = self._last_results
+                    last_guidance_actions = self._last_guidance_actions
                     last_origin_actions = self._last_origin_actions
                     if last_results is None or last_origin_actions is None:
                         self._background_running = False
@@ -112,7 +185,8 @@ class ActionChunkBroker(_base_policy.BasePolicy):
                 prep_start = time.monotonic()
                 q01 = np.array(self._norm_stats["actions"]["q01"])[:14]
                 q99 = np.array(self._norm_stats["actions"]["q99"])[:14]
-                scaled = self._joint_signs * (last_results["actions"] - obs["state"][:14])
+                prev_actions = last_guidance_actions if last_guidance_actions is not None else last_results["actions"]
+                scaled = self._joint_signs * (prev_actions - obs["state"][:14])
                 norm_action = (scaled - q01) / (q99 - q01 + 1e-6) * 2.0 - 1.0
                 
                 # get normalized gripper action
@@ -135,6 +209,10 @@ class ActionChunkBroker(_base_policy.BasePolicy):
                 with self._cache_lock:
                     if generation == self._cache_generation:
                         self._background_results = background_results
+                        self._background_guidance_actions = background_results.get(
+                            "rtc_guidance_actions",
+                            background_results["actions"],
+                        )
                         self._background_rlt_context_signature = context_signature
                 rpc_ms = (time.monotonic() - rpc_start) * 1000.0
                 # break
@@ -230,6 +308,11 @@ class ActionChunkBroker(_base_policy.BasePolicy):
                         self._background_results["actions"],
                     )
                     self._last_state = self._background_results["state"]
+                    self._last_guidance_actions = (
+                        self._background_guidance_actions
+                        if self._background_guidance_actions is not None
+                        else self._background_results["actions"]
+                    )
                     self._last_results = self._build_step_result_cache(self._background_results)
                     self._last_rlt_context_signature = self._background_rlt_context_signature
                     self._cur_step -= self._s
@@ -262,10 +345,12 @@ class ActionChunkBroker(_base_policy.BasePolicy):
         with self._cache_lock:
             self._cache_generation += 1
             self._last_results = None
+            self._last_guidance_actions = None
             self._last_origin_actions = None
             self._last_reference_actions = None
             self._last_rlt_context_signature = None
             self._background_results = None
+            self._background_guidance_actions = None
             self._background_rlt_context_signature = None
             self._background_running = False
             self._cur_step = 0
@@ -335,6 +420,7 @@ class ActionChunkBroker(_base_policy.BasePolicy):
                 self._last_origin_actions = policy_results["origin_actions"]
                 self._last_reference_actions = policy_results.get("reference_actions", policy_results["actions"])
                 self._last_state = policy_results["state"]
+                self._last_guidance_actions = policy_results.get("rtc_guidance_actions", policy_results["actions"])
             self._last_results = self._build_step_result_cache(policy_results)
             self._last_rlt_context_signature = context_signature
             self._cur_step = 0
@@ -435,6 +521,27 @@ class ActionChunkBroker(_base_policy.BasePolicy):
 
         if result.applied:
             policy_results["actions"] = np.asarray(result.actions, dtype=np.float32)
+        action_start = result.action_start_index if result.action_start_index is not None else action_start_index
+        action_end = result.action_end_index
+        action_limited = False
+        if context.get("phase") == "key_region" or bool(context.get("actor_requested", False)):
+            before_limit = np.asarray(policy_results["actions"], dtype=np.float32)
+            limited_actions = _limit_key_region_action_delta(
+                before_limit,
+                np.asarray(proprio, dtype=np.float32)[:14],
+            )
+            action_limited = not np.allclose(before_limit[:, :6], limited_actions[:, :6])
+            policy_results["actions"] = limited_actions
+        if result.applied and action_end is not None:
+            policy_results["rtc_guidance_actions"] = _propagate_actor_residual_for_guidance(
+                reference_actions=reference_actions,
+                adjusted_actions=policy_results["actions"],
+                action_start_index=action_start,
+                action_end_index=action_end,
+                guidance_start_index=self._s,
+            )
+        elif action_limited:
+            policy_results["rtc_guidance_actions"] = policy_results["actions"]
         policy_results.update(
             {
                 "rlt_actor_applied": bool(result.applied),
@@ -450,6 +557,7 @@ class ActionChunkBroker(_base_policy.BasePolicy):
                 "rlt_gate_reason": result.gate_reason,
                 "rlt_critic_ready": result.critic_ready,
                 "rlt_critic_gate_enabled": result.critic_gate_enabled,
+                "rlt_action_limited": action_limited,
             }
         )
         return policy_results

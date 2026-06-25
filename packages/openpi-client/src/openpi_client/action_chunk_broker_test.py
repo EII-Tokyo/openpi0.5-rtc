@@ -1,7 +1,11 @@
 
 import numpy as np
 
-from openpi_client.action_chunk_broker import ActionChunkBroker
+from openpi_client.action_chunk_broker import (
+    ActionChunkBroker,
+    _limit_key_region_action_delta,
+    _propagate_actor_residual_for_guidance,
+)
 from openpi_client.rlt_actor_runtime import RLTActorApplyResult
 
 
@@ -179,6 +183,132 @@ def test_broker_passes_delayed_execution_window_to_actor_runtime():
     )
 
     assert actor.calls[0][4] == 10
+
+
+def test_propagates_signed_actor_residual_trend_to_rtc_guidance_tail():
+    reference = np.zeros((50, 2), dtype=np.float32)
+    adjusted = reference.copy()
+    adjusted[:10, 0] = np.array([0.01, 0.03, 0.02, 0.04, 0.03, 0.05, 0.04, 0.05, 0.04, 0.05], dtype=np.float32)
+    adjusted[:10, 1] = np.array([-0.02, -0.03, -0.01, -0.04, -0.03, -0.06, -0.05, -0.06, -0.05, -0.06], dtype=np.float32)
+
+    guidance = _propagate_actor_residual_for_guidance(
+        reference_actions=reference,
+        adjusted_actions=adjusted,
+        action_start_index=0,
+        action_end_index=10,
+        guidance_start_index=25,
+        trend_window=5,
+        start_weight=0.7,
+    )
+
+    np.testing.assert_allclose(guidance[:10], adjusted[:10])
+    np.testing.assert_allclose(guidance[10:25], adjusted[10:25])
+    np.testing.assert_allclose(guidance[25], np.array([0.0322, -0.0392], dtype=np.float32), rtol=1e-5)
+    np.testing.assert_allclose(guidance[49], np.array([0.0, 0.0], dtype=np.float32), atol=1e-6)
+
+
+def test_actor_apply_keeps_execution_tail_and_adds_separate_rtc_guidance_tail():
+    class _SignedActor(_Actor):
+        def apply(self, *, reference_actions, z_rl, proprio, context, action_start_index=None):
+            adjusted = reference_actions.copy()
+            adjusted[:10, 0] += 0.04
+            adjusted[:10, 1] -= 0.06
+            return RLTActorApplyResult(
+                adjusted,
+                True,
+                None,
+                "/tmp/actor",
+                5,
+                1.0,
+                0.06,
+                action_start_index=0,
+                action_horizon=10,
+                action_end_index=10,
+            )
+
+    reference = np.zeros((50, 2), dtype=np.float32)
+    broker = ActionChunkBroker(_Policy(), action_horizon=50, use_rtc=False, rlt_actor_runtime=_SignedActor())
+
+    results = broker._apply_rlt_actor_to_policy_results(
+        {
+            "actions": reference,
+            "z_rl": np.ones((8,), dtype=np.float32),
+            "state": np.ones((4,), dtype=np.float32),
+        },
+        {"rlt_context": {"actor_requested": True}},
+        action_start_index=0,
+    )
+
+    np.testing.assert_allclose(results["actions"][25:], reference[25:])
+    np.testing.assert_allclose(results["rtc_guidance_actions"][25], np.array([0.028, -0.042], dtype=np.float32))
+
+
+def test_tail_trend_gate_weakens_same_direction_and_keeps_opposing_direction():
+    reference = np.zeros((50, 2), dtype=np.float32)
+    reference[25:, 0] = 0.02
+    reference[25:, 1] = 0.02
+    adjusted = reference.copy()
+    adjusted[:10, 0] = 0.04
+    adjusted[:10, 1] = -0.04
+
+    guidance = _propagate_actor_residual_for_guidance(
+        reference_actions=reference,
+        adjusted_actions=adjusted,
+        action_start_index=0,
+        action_end_index=10,
+        guidance_start_index=25,
+        start_weight=0.7,
+    )
+
+    np.testing.assert_allclose(guidance[25, 0], 0.0298, rtol=1e-5)
+    np.testing.assert_allclose(guidance[25, 1], -0.008, rtol=1e-5)
+
+
+def test_key_region_limiter_constrains_left_arm_delta_conservatively():
+    actions = np.zeros((3, 14), dtype=np.float32)
+    actions[:, :6] = 1.0
+    state = np.zeros((14,), dtype=np.float32)
+
+    limited = _limit_key_region_action_delta(actions, state)
+
+    np.testing.assert_allclose(np.linalg.norm(limited[:, :6] - state[:6], axis=-1), np.full(3, 0.005), rtol=1e-5)
+    assert np.max(np.abs(limited[:, :6] - state[:6])) <= 0.0035 + 1e-6
+    np.testing.assert_allclose(limited[:, 6:], actions[:, 6:])
+
+
+def test_key_region_limiter_is_applied_to_actor_actions_but_not_reference():
+    class _LargeActor(_Actor):
+        def apply(self, *, reference_actions, z_rl, proprio, context, action_start_index=None):
+            adjusted = reference_actions.copy()
+            adjusted[:, :6] = 1.0
+            return RLTActorApplyResult(
+                adjusted,
+                True,
+                None,
+                "/tmp/actor",
+                5,
+                1.0,
+                1.0,
+                action_start_index=0,
+                action_horizon=10,
+                action_end_index=10,
+            )
+
+    broker = ActionChunkBroker(_Policy(), action_horizon=10, use_rtc=False, rlt_actor_runtime=_LargeActor())
+    reference = np.zeros((10, 14), dtype=np.float32)
+    results = broker._apply_rlt_actor_to_policy_results(
+        {
+            "actions": reference,
+            "z_rl": np.ones((8,), dtype=np.float32),
+            "state": np.zeros((14,), dtype=np.float32),
+        },
+        {"rlt_context": {"actor_requested": True, "phase": "key_region"}},
+    )
+
+    np.testing.assert_allclose(np.linalg.norm(results["actions"][:, :6], axis=-1), np.full(10, 0.005), rtol=1e-5)
+    np.testing.assert_allclose(results["reference_actions"], reference)
+    np.testing.assert_allclose(results["rtc_guidance_actions"], results["actions"])
+    assert results["rlt_action_limited"] is True
 
 
 def test_actor_failure_leaves_actions_unchanged_and_records_reason():
