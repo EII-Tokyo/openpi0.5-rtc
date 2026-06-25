@@ -3,7 +3,7 @@ import numpy as np
 
 from openpi_client.action_chunk_broker import (
     ActionChunkBroker,
-    _limit_key_region_action_delta,
+    _freeze_right_arm_actions,
     _propagate_actor_residual_for_guidance,
 )
 from openpi_client.rlt_actor_runtime import RLTActorApplyResult
@@ -264,35 +264,23 @@ def test_tail_trend_gate_weakens_same_direction_and_keeps_opposing_direction():
     np.testing.assert_allclose(guidance[25, 1], -0.008, rtol=1e-5)
 
 
-def test_key_region_limiter_constrains_left_arm_delta_conservatively():
-    actions = np.zeros((3, 14), dtype=np.float32)
-    actions[:, :6] = 1.0
+def test_freeze_right_arm_actions_uses_current_robot_state_without_limiting_left_arm():
+    actions = np.ones((3, 14), dtype=np.float32)
     state = np.zeros((14,), dtype=np.float32)
+    state[7:14] = np.array([-0.8, 0.02, -0.04, 0.52, 0.51, 0.18, 0.66], dtype=np.float32)
 
-    limited = _limit_key_region_action_delta(actions, state)
+    frozen = _freeze_right_arm_actions(actions, state)
 
-    np.testing.assert_allclose(np.linalg.norm(limited[:, :6] - state[:6], axis=-1), np.full(3, 0.025), rtol=1e-5)
-    assert np.max(np.abs(limited[:, :6] - state[:6])) <= 0.0125 + 1e-6
-    np.testing.assert_allclose(limited[:, 6:], actions[:, 6:])
-
-
-def test_key_region_limiter_wraps_continuous_joints_to_nearest_equivalent_angle():
-    actions = np.zeros((2, 14), dtype=np.float32)
-    state = np.zeros((14,), dtype=np.float32)
-    state[5] = 3.10
-    actions[:, 5] = -3.10
-
-    limited = _limit_key_region_action_delta(actions, state)
-
-    assert np.all(limited[:, 5] > state[5])
-    assert np.max(np.abs(limited[:, 5] - state[5])) <= 0.0125 + 1e-6
+    np.testing.assert_allclose(frozen[:, :7], actions[:, :7])
+    np.testing.assert_allclose(frozen[:, 7:14], np.broadcast_to(state[7:14], (3, 7)))
 
 
-def test_key_region_limiter_is_applied_to_actor_actions_but_not_reference():
+def test_key_region_actor_freezes_right_arm_but_does_not_limit_left_arm():
     class _LargeActor(_Actor):
         def apply(self, *, reference_actions, z_rl, proprio, context, action_start_index=None):
             adjusted = reference_actions.copy()
             adjusted[:, :6] = 1.0
+            adjusted[:, 7:14] = 2.0
             return RLTActorApplyResult(
                 adjusted,
                 True,
@@ -308,22 +296,26 @@ def test_key_region_limiter_is_applied_to_actor_actions_but_not_reference():
 
     broker = ActionChunkBroker(_Policy(), action_horizon=10, use_rtc=False, rlt_actor_runtime=_LargeActor())
     reference = np.zeros((10, 14), dtype=np.float32)
+    robot_state = np.zeros((14,), dtype=np.float32)
+    robot_state[7:14] = np.array([-0.8, 0.02, -0.04, 0.52, 0.51, 0.18, 0.66], dtype=np.float32)
     results = broker._apply_rlt_actor_to_policy_results(
         {
             "actions": reference,
             "z_rl": np.ones((8,), dtype=np.float32),
             "state": np.zeros((14,), dtype=np.float32),
         },
-        {"rlt_context": {"actor_requested": True, "phase": "key_region"}},
+        {"state": robot_state, "rlt_context": {"actor_requested": True, "phase": "key_region"}},
     )
 
-    np.testing.assert_allclose(np.linalg.norm(results["actions"][:, :6], axis=-1), np.full(10, 0.025), rtol=1e-5)
+    np.testing.assert_allclose(results["actions"][:, :6], np.ones((10, 6), dtype=np.float32))
+    np.testing.assert_allclose(results["actions"][:, 7:14], np.broadcast_to(robot_state[7:14], (10, 7)))
     np.testing.assert_allclose(results["reference_actions"], reference)
     np.testing.assert_allclose(results["rtc_guidance_actions"], results["actions"])
-    assert results["rlt_action_limited"] is True
+    assert results["rlt_action_limited"] is False
+    assert results["rlt_right_arm_frozen"] is True
 
 
-def test_key_region_actor_limits_from_robot_state_and_freezes_right_arm():
+def test_key_region_actor_uses_robot_state_to_freeze_right_arm():
     class _SignFlipActor(_Actor):
         def apply(self, *, reference_actions, z_rl, proprio, context, action_start_index=None):
             adjusted = reference_actions.copy()
@@ -362,10 +354,11 @@ def test_key_region_actor_limits_from_robot_state_and_freezes_right_arm():
         {"state": robot_state, "rlt_context": {"actor_requested": True, "phase": "key_region"}},
     )
 
-    assert abs(results["actions"][0, 1] - robot_state[1]) <= 0.0125 + 1e-6
-    assert abs(results["actions"][0, 2] - robot_state[2]) <= 0.0125 + 1e-6
+    np.testing.assert_allclose(results["actions"][:, 1], np.full((10,), 0.208, dtype=np.float32))
+    np.testing.assert_allclose(results["actions"][:, 2], np.full((10,), -0.592, dtype=np.float32))
     np.testing.assert_allclose(results["actions"][:, 7:14], np.broadcast_to(robot_state[7:14], (10, 7)))
-    assert results["rlt_action_limited"] is True
+    assert results["rlt_action_limited"] is False
+    assert results["rlt_right_arm_frozen"] is True
 
 
 def test_actor_failure_leaves_actions_unchanged_and_records_reason():

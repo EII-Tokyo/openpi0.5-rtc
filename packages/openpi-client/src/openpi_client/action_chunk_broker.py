@@ -11,21 +11,7 @@ from openpi_client import base_policy as _base_policy
 from openpi_client.rlt_actor_runtime import RLTActorRuntime
 
 
-_ARM_JOINT_LIMITS = np.array(
-    [
-        [-np.pi + 1e-5, np.pi - 1e-5],
-        [np.deg2rad(-106.0), np.deg2rad(72.0)],
-        [np.deg2rad(-101.0), np.deg2rad(92.0)],
-        [-np.pi + 1e-5, np.pi - 1e-5],
-        [np.deg2rad(-107.0), np.deg2rad(128.0)],
-        [-np.pi + 1e-5, np.pi - 1e-5],
-    ],
-    dtype=np.float32,
-)
-_LEFT_ARM_JOINT_INDICES = (0, 1, 2, 3, 4, 5)
-_RIGHT_ARM_JOINT_INDICES = (7, 8, 9, 10, 11, 12)
 _RIGHT_ARM_ACTION_INDICES = (7, 8, 9, 10, 11, 12, 13)
-_CONTINUOUS_ACTION_JOINT_INDICES = (3, 5, 10, 12)
 
 
 def _propagate_actor_residual_for_guidance(
@@ -75,50 +61,22 @@ def _propagate_actor_residual_for_guidance(
     return guidance
 
 
-def _nearest_equivalent_angle(target: np.ndarray, current: np.ndarray) -> np.ndarray:
-    return target + 2.0 * np.pi * np.round((current - target) / (2.0 * np.pi))
-
-
-def _limit_key_region_action_delta(
+def _freeze_right_arm_actions(
     actions: np.ndarray,
     state: np.ndarray,
     *,
-    joint_indices: tuple[int, ...] = _LEFT_ARM_JOINT_INDICES,
-    max_step_norm: float = 0.025,
-    max_step_abs: float = 0.0125,
-    freeze_joint_indices: tuple[int, ...] = (),
+    right_arm_indices: tuple[int, ...] = _RIGHT_ARM_ACTION_INDICES,
 ) -> np.ndarray:
-    limited = np.array(actions, dtype=np.float32, copy=True)
+    frozen = np.array(actions, dtype=np.float32, copy=True)
     state = np.asarray(state, dtype=np.float32)
-    checked_indices = tuple(joint_indices) + tuple(freeze_joint_indices)
-    if not checked_indices:
-        return limited
-    if limited.ndim != 2 or state.ndim != 1 or limited.shape[1] <= max(checked_indices) or state.shape[0] <= max(checked_indices):
-        return limited
-
-    for index in freeze_joint_indices:
-        limited[:, index] = state[index]
-
-    groups = (_LEFT_ARM_JOINT_INDICES, _RIGHT_ARM_JOINT_INDICES)
-    active_indices = set(joint_indices)
-    for group in groups:
-        group_indices = tuple(index for index in group if index in active_indices)
-        if not group_indices:
-            continue
-        indices = np.asarray(group_indices, dtype=np.int64)
-        for index in group_indices:
-            if index in _CONTINUOUS_ACTION_JOINT_INDICES:
-                limited[:, index] = _nearest_equivalent_angle(limited[:, index], state[index])
-            else:
-                limit = _ARM_JOINT_LIMITS[index if index < 6 else index - 7]
-                limited[:, index] = np.clip(limited[:, index], limit[0], limit[1])
-        delta = limited[:, indices] - state[indices]
-        delta = np.clip(delta, -float(max_step_abs), float(max_step_abs))
-        norms = np.linalg.norm(delta, axis=-1, keepdims=True)
-        scales = np.minimum(1.0, float(max_step_norm) / (norms + 1e-8))
-        delta = delta * scales
-        limited[:, indices] = state[indices] + delta
-    return limited
+    if not right_arm_indices:
+        return frozen
+    if frozen.ndim != 2 or state.ndim != 1:
+        return frozen
+    if frozen.shape[1] <= max(right_arm_indices) or state.shape[0] <= max(right_arm_indices):
+        return frozen
+    frozen[:, right_arm_indices] = state[list(right_arm_indices)]
+    return frozen
 
 
 class ActionChunkBroker(_base_policy.BasePolicy):
@@ -563,19 +521,19 @@ class ActionChunkBroker(_base_policy.BasePolicy):
             policy_results["actions"] = np.asarray(result.actions, dtype=np.float32)
         action_start = result.action_start_index if result.action_start_index is not None else action_start_index
         action_end = result.action_end_index
-        action_limited = False
+        right_arm_frozen = False
         if context.get("phase") == "key_region" or bool(context.get("actor_requested", False)):
-            before_limit = np.asarray(policy_results["actions"], dtype=np.float32)
             actor_requested = bool(context.get("actor_requested", False))
-            robot_state = np.asarray(obs.get("state", proprio), dtype=np.float32)[:14]
-            limited_actions = _limit_key_region_action_delta(
-                before_limit,
-                robot_state,
-                joint_indices=_LEFT_ARM_JOINT_INDICES,
-                freeze_joint_indices=_RIGHT_ARM_ACTION_INDICES if actor_requested else (),
-            )
-            action_limited = not np.allclose(before_limit, limited_actions)
-            policy_results["actions"] = limited_actions
+            if actor_requested:
+                before_freeze = np.asarray(policy_results["actions"], dtype=np.float32)
+                robot_state = np.asarray(obs.get("state", proprio), dtype=np.float32)[:14]
+                frozen_actions = _freeze_right_arm_actions(before_freeze, robot_state)
+                if before_freeze.ndim == 2 and before_freeze.shape[1] > max(_RIGHT_ARM_ACTION_INDICES):
+                    right_arm_frozen = not np.allclose(
+                        before_freeze[:, _RIGHT_ARM_ACTION_INDICES],
+                        frozen_actions[:, _RIGHT_ARM_ACTION_INDICES],
+                    )
+                policy_results["actions"] = frozen_actions
         if result.applied and action_end is not None:
             policy_results["rtc_guidance_actions"] = _propagate_actor_residual_for_guidance(
                 reference_actions=reference_actions,
@@ -584,7 +542,7 @@ class ActionChunkBroker(_base_policy.BasePolicy):
                 action_end_index=action_end,
                 guidance_start_index=self._s,
             )
-        elif action_limited:
+        elif right_arm_frozen:
             policy_results["rtc_guidance_actions"] = policy_results["actions"]
         policy_results.update(
             {
@@ -601,7 +559,8 @@ class ActionChunkBroker(_base_policy.BasePolicy):
                 "rlt_gate_reason": result.gate_reason,
                 "rlt_critic_ready": result.critic_ready,
                 "rlt_critic_gate_enabled": result.critic_gate_enabled,
-                "rlt_action_limited": action_limited,
+                "rlt_action_limited": False,
+                "rlt_right_arm_frozen": right_arm_frozen,
             }
         )
         return policy_results

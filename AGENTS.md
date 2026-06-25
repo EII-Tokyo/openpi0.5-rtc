@@ -6,6 +6,9 @@
 - Do not use or modify `/home/eii/openpi0.5-rlt` for this user's robot project; that path belongs to another project.
 - Before copying files, restarting containers, or inspecting remote code on `192.168.1.103`, verify the working directory is `/home/eii/openpi0.5-rtc-reward-learning`.
 - If a command on `192.168.1.103` would touch any path outside `/home/eii/openpi0.5-rtc-reward-learning`, stop and ask the user for explicit approval first.
+- When the user asks to stop all of their robot containers on `192.168.1.103`, do it in one compose command from the verified project directory:
+  - `cd /home/eii/openpi0.5-rtc-reward-learning && docker compose --profile rlt stop`
+  - The compose file sets `name: openpi_reward_learning_eii`, and `rlt_warmup_runtime` is under the `rlt` profile, so include `--profile rlt` to stop the runtime container together with the non-profile services.
 
 ## Local key region annotation on machine 101
 - The local machine `101` is for offline key region data annotation only. Do not treat `http://127.0.0.1:3011/` as a robot-control UI, and do not expect local key presses there to control the robot on `192.168.1.103`.
