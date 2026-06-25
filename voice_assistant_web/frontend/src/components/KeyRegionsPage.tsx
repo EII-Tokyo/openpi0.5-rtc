@@ -148,7 +148,7 @@ const frameFromSeconds = (
 ) => {
   const frameCount = frameCountForRecord(record, media)
   if (frameCount <= 0) return 0
-  return clamp(Math.round(seconds * fpsForRecord(record, media)), 0, Math.max(0, frameCount - 1))
+  return clamp(Math.floor(seconds * fpsForRecord(record, media) + 1e-6), 0, Math.max(0, frameCount - 1))
 }
 
 const secondsFromFrame = (
@@ -218,7 +218,7 @@ const frameSummary = (
 ) => {
   const frameCount = frameCountForRecord(record, media)
   const startFrame = frameFromSeconds(record, media, range.startSec)
-  const endFrame = clamp(Math.round(range.endSec * fpsForRecord(record, media)), startFrame + 1, frameCount || startFrame + 1)
+  const endFrame = clamp(frameFromSeconds(record, media, range.endSec), startFrame + 1, frameCount || startFrame + 1)
   return { startFrame, endFrame }
 }
 
@@ -242,6 +242,7 @@ function KeyRegionVideoPreview({
   cropRange,
   previewTime,
   isPlaying,
+  isScrubbing,
   onSelect,
   onTimeChange,
 }: {
@@ -250,6 +251,7 @@ function KeyRegionVideoPreview({
   cropRange: CropRange
   previewTime: number
   isPlaying: boolean
+  isScrubbing: boolean
   onSelect: () => void
   onTimeChange: (timeSec: number) => void
 }) {
@@ -263,17 +265,18 @@ function KeyRegionVideoPreview({
 
   useEffect(() => {
     if (!active) return undefined
+    const seekTolerance = isScrubbing ? 0.001 : 0.08
     for (const video of videos()) {
-      if (Number.isFinite(previewTime) && Math.abs(video.currentTime - previewTime) > 0.08) {
+      if (Number.isFinite(previewTime) && Math.abs(video.currentTime - previewTime) > seekTolerance) {
         video.currentTime = previewTime
       }
     }
     return undefined
-  }, [active, previewTime, record.key_region_id])
+  }, [active, isScrubbing, previewTime, record.key_region_id])
 
   useEffect(() => {
     if (!active) return undefined
-    if (isPlaying) {
+    if (isPlaying && !isScrubbing) {
       for (const video of videos()) {
         if (video.currentTime < cropRange.startSec || video.currentTime >= cropRange.endSec) {
           video.currentTime = cropRange.startSec
@@ -286,9 +289,10 @@ function KeyRegionVideoPreview({
       }
     }
     return undefined
-  }, [active, cropRange.endSec, cropRange.startSec, isPlaying])
+  }, [active, cropRange.endSec, cropRange.startSec, isPlaying, isScrubbing])
 
   const handleTimeUpdate = (camera: string) => {
+    if (isScrubbing) return
     if (camera !== primaryCamera) return
     const video = primaryVideo()
     if (!video) return
@@ -376,6 +380,7 @@ export function KeyRegionsPage({
   const [playingKeyRegionId, setPlayingKeyRegionId] = useState('')
   const [pendingPlaybackId, setPendingPlaybackId] = useState('')
   const [playbackTimes, setPlaybackTimes] = useState<Record<string, number>>({})
+  const [scrubbingKeyRegionId, setScrubbingKeyRegionId] = useState('')
   const [actionPending, setActionPending] = useState('')
   const [actionError, setActionError] = useState('')
   const [playbackError, setPlaybackError] = useState('')
@@ -587,10 +592,12 @@ export function KeyRegionsPage({
     event.stopPropagation()
     const track = event.currentTarget.closest('.key-region-timeline-track')
     if (!(track instanceof HTMLElement)) return
+    setScrubbingKeyRegionId(record.key_region_id)
     setPlayingKeyRegionId('')
     updateCropFromPointer(record, edge, track, event.clientX)
     const onMove = (moveEvent: PointerEvent) => updateCropFromPointer(record, edge, track, moveEvent.clientX)
     const onUp = () => {
+      setScrubbingKeyRegionId('')
       window.removeEventListener('pointermove', onMove)
       window.removeEventListener('pointerup', onUp)
     }
@@ -801,6 +808,7 @@ export function KeyRegionsPage({
           const rescoreOnePending = actionPending === `rescore-${renderRecord.key_region_id}-1`
           const isPlaying = playingKeyRegionId === renderRecord.key_region_id
           const isPlaybackLoading = pendingPlaybackId === renderRecord.key_region_id
+          const isScrubbing = scrubbingKeyRegionId === renderRecord.key_region_id
           const previewTime = playbackTimes[renderRecord.key_region_id] ?? cropRange.startSec
           return (
             <article key={record.key_region_id} className={`key-region-card ${activeCard ? 'active' : ''}`}>
@@ -825,6 +833,7 @@ export function KeyRegionsPage({
                   cropRange={cropRange}
                   previewTime={previewTime}
                   isPlaying={isPlaying}
+                  isScrubbing={isScrubbing}
                   onSelect={() => selectReviewRecord(record)}
                   onTimeChange={(timeSec) => syncFramePreview(renderRecord, media, timeSec)}
                 />
