@@ -271,8 +271,8 @@ def test_key_region_limiter_constrains_left_arm_delta_conservatively():
 
     limited = _limit_key_region_action_delta(actions, state)
 
-    np.testing.assert_allclose(np.linalg.norm(limited[:, :6] - state[:6], axis=-1), np.full(3, 0.005), rtol=1e-5)
-    assert np.max(np.abs(limited[:, :6] - state[:6])) <= 0.0035 + 1e-6
+    np.testing.assert_allclose(np.linalg.norm(limited[:, :6] - state[:6], axis=-1), np.full(3, 0.025), rtol=1e-5)
+    assert np.max(np.abs(limited[:, :6] - state[:6])) <= 0.0125 + 1e-6
     np.testing.assert_allclose(limited[:, 6:], actions[:, 6:])
 
 
@@ -285,7 +285,7 @@ def test_key_region_limiter_wraps_continuous_joints_to_nearest_equivalent_angle(
     limited = _limit_key_region_action_delta(actions, state)
 
     assert np.all(limited[:, 5] > state[5])
-    assert np.max(np.abs(limited[:, 5] - state[5])) <= 0.0035 + 1e-6
+    assert np.max(np.abs(limited[:, 5] - state[5])) <= 0.0125 + 1e-6
 
 
 def test_key_region_limiter_is_applied_to_actor_actions_but_not_reference():
@@ -317,7 +317,7 @@ def test_key_region_limiter_is_applied_to_actor_actions_but_not_reference():
         {"rlt_context": {"actor_requested": True, "phase": "key_region"}},
     )
 
-    np.testing.assert_allclose(np.linalg.norm(results["actions"][:, :6], axis=-1), np.full(10, 0.005), rtol=1e-5)
+    np.testing.assert_allclose(np.linalg.norm(results["actions"][:, :6], axis=-1), np.full(10, 0.025), rtol=1e-5)
     np.testing.assert_allclose(results["reference_actions"], reference)
     np.testing.assert_allclose(results["rtc_guidance_actions"], results["actions"])
     assert results["rlt_action_limited"] is True
@@ -362,8 +362,8 @@ def test_key_region_actor_limits_from_robot_state_and_freezes_right_arm():
         {"state": robot_state, "rlt_context": {"actor_requested": True, "phase": "key_region"}},
     )
 
-    assert abs(results["actions"][0, 1] - robot_state[1]) <= 0.0035 + 1e-6
-    assert abs(results["actions"][0, 2] - robot_state[2]) <= 0.0035 + 1e-6
+    assert abs(results["actions"][0, 1] - robot_state[1]) <= 0.0125 + 1e-6
+    assert abs(results["actions"][0, 2] - robot_state[2]) <= 0.0125 + 1e-6
     np.testing.assert_allclose(results["actions"][:, 7:14], np.broadcast_to(robot_state[7:14], (10, 7)))
     assert results["rlt_action_limited"] is True
 

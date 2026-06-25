@@ -84,8 +84,8 @@ def _limit_key_region_action_delta(
     state: np.ndarray,
     *,
     joint_indices: tuple[int, ...] = _LEFT_ARM_JOINT_INDICES,
-    max_step_norm: float = 0.005,
-    max_step_abs: float = 0.0035,
+    max_step_norm: float = 0.025,
+    max_step_abs: float = 0.0125,
     freeze_joint_indices: tuple[int, ...] = (),
 ) -> np.ndarray:
     limited = np.array(actions, dtype=np.float32, copy=True)
