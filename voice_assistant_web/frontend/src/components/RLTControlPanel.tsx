@@ -16,13 +16,6 @@ type Props = {
   onState: (state: RLTControlState) => void
 }
 
-const blendPresets: Record<string, { lambda_push: number; lambda_vla_align: number; lambda_actor: number }> = {
-  conservative: { lambda_push: 0.1, lambda_vla_align: 0.5, lambda_actor: 0.2 },
-  align: { lambda_push: 0.2, lambda_vla_align: 0.3, lambda_actor: 0.5 },
-  actor_align: { lambda_push: 0.15, lambda_vla_align: 0.1, lambda_actor: 0.7 },
-  insert: { lambda_push: 0.8, lambda_vla_align: 0.7, lambda_actor: 0.1 },
-}
-
 function formatCountdown(deadline: number | null) {
   if (!deadline) return ''
   return `${Math.max(0, deadline - Date.now() / 1000).toFixed(1)}s`
@@ -369,11 +362,6 @@ export function RLTConfigPanel({ rlt, onState }: Props) {
     intervention_scale: rlt.intervention_scale,
     max_delta: rlt.max_delta,
     actor_enabled: rlt.actor_enabled,
-    rlt_blend_mode: rlt.rlt_blend_mode,
-    rlt_blend_preset: rlt.rlt_blend_preset,
-    lambda_push: rlt.lambda_push,
-    lambda_vla_align: rlt.lambda_vla_align,
-    lambda_actor: rlt.lambda_actor,
     critic_gate_enabled: rlt.critic_gate_enabled,
     critic_gate_margin: rlt.critic_gate_margin,
     critic_gate_temperature: rlt.critic_gate_temperature,
@@ -388,11 +376,6 @@ export function RLTConfigPanel({ rlt, onState }: Props) {
       intervention_scale: rlt.intervention_scale,
       max_delta: rlt.max_delta,
       actor_enabled: rlt.actor_enabled,
-      rlt_blend_mode: rlt.rlt_blend_mode,
-      rlt_blend_preset: rlt.rlt_blend_preset,
-      lambda_push: rlt.lambda_push,
-      lambda_vla_align: rlt.lambda_vla_align,
-      lambda_actor: rlt.lambda_actor,
       critic_gate_enabled: rlt.critic_gate_enabled,
       critic_gate_margin: rlt.critic_gate_margin,
       critic_gate_temperature: rlt.critic_gate_temperature,
@@ -402,11 +385,6 @@ export function RLTConfigPanel({ rlt, onState }: Props) {
     rlt.intervention_scale,
     rlt.max_delta,
     rlt.actor_enabled,
-    rlt.rlt_blend_mode,
-    rlt.rlt_blend_preset,
-    rlt.lambda_push,
-    rlt.lambda_vla_align,
-    rlt.lambda_actor,
     rlt.critic_gate_enabled,
     rlt.critic_gate_margin,
     rlt.critic_gate_temperature,
@@ -546,71 +524,6 @@ export function RLTConfigPanel({ rlt, onState }: Props) {
             />
             <span>Enable Actor</span>
           </label>
-          <label className="rlt-field">
-            <span>Experiment Mode</span>
-            <select
-              value={draft.rlt_blend_preset}
-              onChange={(event) => {
-                const preset = event.target.value
-                setDraft({ ...draft, rlt_blend_preset: preset, ...(blendPresets[preset] ?? {}) })
-              }}
-            >
-              <option value="conservative">Conservative</option>
-              <option value="align">Align</option>
-              <option value="actor_align">Actor Align</option>
-              <option value="insert">Insert</option>
-              <option value="custom">Custom</option>
-            </select>
-          </label>
-          <label className="rlt-field">
-            <span>Blend Mode</span>
-            <select
-              value={draft.rlt_blend_mode}
-              onChange={(event) => setDraft({ ...draft, rlt_blend_mode: event.target.value })}
-            >
-              <option value="projected_slow_push">Projected slow push</option>
-              <option value="full">Full actor action</option>
-            </select>
-          </label>
-          <label className="rlt-field">
-            <span>Push Speed {draft.lambda_push.toFixed(2)}</span>
-            <input
-              type="range"
-              min={0}
-              max={1}
-              step={0.01}
-              value={draft.lambda_push}
-              onChange={(event) =>
-                setDraft({ ...draft, rlt_blend_preset: 'custom', lambda_push: Number(event.target.value) })
-              }
-            />
-          </label>
-          <label className="rlt-field">
-            <span>VLA Align {draft.lambda_vla_align.toFixed(2)}</span>
-            <input
-              type="range"
-              min={0}
-              max={1}
-              step={0.01}
-              value={draft.lambda_vla_align}
-              onChange={(event) =>
-                setDraft({ ...draft, rlt_blend_preset: 'custom', lambda_vla_align: Number(event.target.value) })
-              }
-            />
-          </label>
-          <label className="rlt-field">
-            <span>Actor Align {draft.lambda_actor.toFixed(2)}</span>
-            <input
-              type="range"
-              min={0}
-              max={1}
-              step={0.01}
-              value={draft.lambda_actor}
-              onChange={(event) =>
-                setDraft({ ...draft, rlt_blend_preset: 'custom', lambda_actor: Number(event.target.value) })
-              }
-            />
-          </label>
           <label className="rlt-toggle">
             <input
               type="checkbox"
@@ -714,18 +627,11 @@ export function RLTConfigPanel({ rlt, onState }: Props) {
             <Metric label="Inference Gate Reason" value={rlt.inference_gate_reason || '-'} />
             <Metric label="Key Region Probability" value={formatProbability(rlt.key_region_probability)} tone={rlt.key_region_probability !== null && rlt.key_region_probability >= 0.5 ? 'ok' : undefined} />
             <Metric label="Loaded Actor Step" value={formatOptionalInt(rlt.loaded_actor_step)} />
-            <Metric label="Blend Preset" value={rlt.rlt_blend_preset} />
-            <Metric label="Blend Mode" value={rlt.rlt_blend_mode} />
-            <Metric label="Push / VLA / Actor" value={`${rlt.lambda_push.toFixed(2)} / ${rlt.lambda_vla_align.toFixed(2)} / ${rlt.lambda_actor.toFixed(2)}`} />
             <Metric label="Critic Ready" value={formatBool(rlt.critic_ready)} tone={rlt.critic_ready ? 'ok' : 'danger'} />
             <Metric label="Inference Actor Q" value={formatMetric(rlt.inference_actor_q_value)} />
             <Metric label="Inference Reference Q" value={formatMetric(rlt.inference_reference_q_value)} />
             <Metric label="Inference Q Advantage" value={formatMetric(rlt.inference_q_advantage)} tone={rlt.inference_q_advantage !== null && rlt.inference_q_advantage >= rlt.critic_gate_margin ? 'ok' : 'watch'} />
             <Metric label="Critic Gate" value={rlt.critic_gate_enabled ? 'on' : 'off'} tone={rlt.critic_gate_enabled ? 'ok' : undefined} />
-            <Metric label="Push Norm" value={formatMetric(rlt.push_component_norm)} />
-            <Metric label="VLA Align Norm" value={formatMetric(rlt.vla_align_norm)} />
-            <Metric label="Actor Align Norm" value={formatMetric(rlt.actor_align_norm)} />
-            <Metric label="Removed Push Norm" value={formatMetric(rlt.actor_removed_push_norm)} />
           </div>
         </div>
       ) : null}

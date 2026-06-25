@@ -69,27 +69,6 @@ class _PreemptingAgent(_Agent):
         return {"actions": [99.0]}
 
 
-class _RLTTransitioningAgent(_Agent):
-    def __init__(self, runtime):
-        super().__init__()
-        self._runtime = runtime
-
-    def get_action(self, obs):
-        self.obs.append(obs)
-        self._runtime._handle_rlt_control_event(
-            {
-                "type": "key_region_start",
-                "key_region_id": "kr-transition",
-                "state": {
-                    "warmup_target": 1,
-                    "warmup_count": 1,
-                    "actor_ready": True,
-                },
-            }
-        )
-        return {"actions": [77.0], "rlt_context_epoch": obs["rlt_context"]["rlt_context_epoch"]}
-
-
 class _Subscriber:
     def __init__(self):
         self.episode_starts = 0
@@ -277,23 +256,6 @@ def test_stop_task_during_get_action_preempts_policy_action_before_apply():
     assert agent.reset_count == 1
 
 
-def test_rlt_epoch_change_during_get_action_discards_stale_policy_action_before_apply():
-    env = _Env()
-    runtime = Runtime(env, _Agent(), [], max_hz=0, num_episodes=1, max_episode_steps=1)
-    agent = _RLTTransitioningAgent(runtime)
-    runtime._agent = agent
-    runtime._current_task = {"task_num": "1", "task_name": "Twist off the bottle cap"}
-    runtime._is_waiting_for_task = False
-    runtime._rlt_state.update({"warmup_target": 1, "warmup_count": 1, "actor_ready": True})
-
-    runtime._step()
-
-    assert env.actions == []
-    assert runtime._rlt_state["phase"] == "key_region"
-    assert runtime._rlt_state["active_key_region_id"] == "kr-transition"
-    assert agent.flush_reasons == ["key_region_start"]
-
-
 def test_sleep_task_moves_to_sleep_and_keeps_runtime_listening():
     env = _Env()
     agent = _Agent()
@@ -391,33 +353,6 @@ def test_control_event_passes_critic_gate_config_to_context():
     assert context["critic_gate_enabled"] is True
     assert context["critic_gate_margin"] == 0.15
     assert context["critic_gate_temperature"] == 0.2
-
-
-def test_control_event_passes_projected_blend_config_to_context():
-    runtime = _runtime()
-    runtime._handle_rlt_control_event(
-        {
-            "type": "config_update",
-            "state": {
-                "rlt_blend_mode": "projected_slow_push",
-                "rlt_blend_preset": "align",
-                "lambda_push": 0.2,
-                "lambda_vla_align": 0.3,
-                "lambda_actor": 0.5,
-                "push_joint_indices": [0, 1, 2, 3, 4, 5],
-                "push_axis": [-0.53, 0.2, -0.78, 0.23, -0.08, 0.06],
-            },
-        }
-    )
-
-    context = runtime._build_rlt_context()
-    assert context["rlt_blend_mode"] == "projected_slow_push"
-    assert context["rlt_blend_preset"] == "align"
-    assert context["lambda_push"] == 0.2
-    assert context["lambda_vla_align"] == 0.3
-    assert context["lambda_actor"] == 0.5
-    assert context["push_joint_indices"] == [0, 1, 2, 3, 4, 5]
-    assert context["push_axis"] == [-0.53, 0.2, -0.78, 0.23, -0.08, 0.06]
 
 
 def test_update_rlt_actor_status_records_inference_metrics():

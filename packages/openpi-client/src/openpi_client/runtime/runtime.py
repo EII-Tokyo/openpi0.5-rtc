@@ -91,18 +91,6 @@ class Runtime:
             "beta": float(os.getenv("RLT_DEFAULT_BETA", "10.0")),
             "intervention_scale": float(os.getenv("RLT_DEFAULT_INTERVENTION_SCALE", "0.25")),
             "max_delta": float(os.getenv("RLT_DEFAULT_MAX_DELTA", "0.1")),
-            "rlt_blend_mode": os.getenv("RLT_DEFAULT_BLEND_MODE", "projected_slow_push"),
-            "rlt_blend_preset": os.getenv("RLT_DEFAULT_BLEND_PRESET", "conservative"),
-            "lambda_push": float(os.getenv("RLT_DEFAULT_LAMBDA_PUSH", "0.10")),
-            "lambda_vla_align": float(os.getenv("RLT_DEFAULT_LAMBDA_VLA_ALIGN", "0.50")),
-            "lambda_actor": float(os.getenv("RLT_DEFAULT_LAMBDA_ACTOR", "0.20")),
-            "push_joint_indices": [0, 1, 2, 3, 4, 5],
-            "push_axis": [-0.53, 0.20, -0.78, 0.23, -0.08, 0.06],
-            "push_component_norm": None,
-            "vla_align_norm": None,
-            "actor_align_norm": None,
-            "actor_removed_push_norm": None,
-            "final_delta_norm": None,
             "critic_gate_enabled": os.getenv("RLT_DEFAULT_CRITIC_GATE_ENABLED", "1") in {"1", "true", "True"},
             "critic_gate_margin": float(os.getenv("RLT_DEFAULT_CRITIC_GATE_MARGIN", "0.0")),
             "critic_gate_temperature": float(os.getenv("RLT_DEFAULT_CRITIC_GATE_TEMPERATURE", "0.05")),
@@ -365,13 +353,6 @@ class Runtime:
                 "beta",
                 "intervention_scale",
                 "max_delta",
-                "rlt_blend_mode",
-                "rlt_blend_preset",
-                "lambda_push",
-                "lambda_vla_align",
-                "lambda_actor",
-                "push_joint_indices",
-                "push_axis",
                 "critic_gate_enabled",
                 "critic_gate_margin",
                 "critic_gate_temperature",
@@ -425,13 +406,6 @@ class Runtime:
                     "actor_enabled",
                     "intervention_scale",
                     "max_delta",
-                    "rlt_blend_mode",
-                    "rlt_blend_preset",
-                    "lambda_push",
-                    "lambda_vla_align",
-                    "lambda_actor",
-                    "push_joint_indices",
-                    "push_axis",
                     "critic_gate_enabled",
                     "critic_gate_margin",
                     "critic_gate_temperature",
@@ -552,45 +526,11 @@ class Runtime:
             self._rlt_state["inference_reference_q_value"] = action.get("rlt_reference_q")
             self._rlt_state["inference_actor_q_value"] = action.get("rlt_actor_q")
             self._rlt_state["inference_q_advantage"] = action.get("rlt_q_advantage")
-            self._rlt_state["rlt_blend_mode"] = action.get("rlt_blend_mode", self._rlt_state.get("rlt_blend_mode"))
-            self._rlt_state["rlt_blend_preset"] = action.get("rlt_blend_preset", self._rlt_state.get("rlt_blend_preset"))
-            self._rlt_state["lambda_push"] = action.get("rlt_lambda_push", self._rlt_state.get("lambda_push"))
-            self._rlt_state["lambda_vla_align"] = action.get(
-                "rlt_lambda_vla_align", self._rlt_state.get("lambda_vla_align")
-            )
-            self._rlt_state["lambda_actor"] = action.get("rlt_lambda_actor", self._rlt_state.get("lambda_actor"))
-            self._rlt_state["push_component_norm"] = action.get("rlt_push_component_norm")
-            self._rlt_state["vla_align_norm"] = action.get("rlt_vla_align_norm")
-            self._rlt_state["actor_align_norm"] = action.get("rlt_actor_align_norm")
-            self._rlt_state["actor_removed_push_norm"] = action.get("rlt_actor_removed_push_norm")
-            self._rlt_state["final_delta_norm"] = action.get("rlt_final_delta_norm")
             if "rlt_critic_ready" in action:
                 self._rlt_state["critic_ready"] = bool(action.get("rlt_critic_ready"))
             if "rlt_critic_gate_enabled" in action:
                 self._rlt_state["critic_gate_enabled"] = bool(action.get("rlt_critic_gate_enabled"))
             self._sync_manual_actor_gate_locked()
-
-    def _discard_action_if_rlt_context_changed(self, action: dict, action_context: dict) -> bool:
-        expected_epoch = action_context.get("rlt_context_epoch")
-        action_epoch = action.get("rlt_context_epoch") if isinstance(action, dict) else None
-        with self._task_lock:
-            current_epoch = self._rlt_context_epoch
-            stale_context = expected_epoch is not None and int(expected_epoch) != int(current_epoch)
-            stale_action = action_epoch is not None and int(action_epoch) != int(current_epoch)
-            if not stale_context and not stale_action:
-                return False
-            self._rlt_state["inference_actor_active"] = False
-            self._rlt_state["inference_delta_norm"] = None
-            self._rlt_state["inference_gate_reason"] = "stale_rlt_context_before_apply"
-            self._sync_manual_actor_gate_locked()
-        logging.warning(
-            "RLT context changed before apply; discarding policy action: expected_epoch=%s action_epoch=%s current_epoch=%s",
-            expected_epoch,
-            action_epoch,
-            current_epoch,
-        )
-        self._publish_rlt_state()
-        return True
 
     def _notify_key_region_subscribers(self, event_type: str, event: dict) -> None:
         hook_name_by_type = {
@@ -939,8 +879,6 @@ class Runtime:
         if preempt_task is not None:
             logging.warning("策略推理期间收到抢占任务，丢弃本次策略动作: %s", preempt_task.get("task_num"))
             self._handle_task(preempt_task)
-            return
-        if self._discard_action_if_rlt_context_changed(action, observation_with_task["rlt_context"]):
             return
         self._update_rlt_actor_status_from_action(action)
         self._environment.apply_action(action)

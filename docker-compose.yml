@@ -282,14 +282,12 @@ services:
       - /data/openpi0.5-rtc-reward-learning/replay:/app/replay
       - /data/openpi0.5-rtc-reward-learning/segment_db:/app/segment_db
       - /dev:/dev
+    env_file:
+      - ./voice_assistant_web/.env
     environment:
       - REDIS_HOST=${REDIS_HOST:-localhost}
       - REDIS_PORT=${REDIS_PORT:-6379}
       - REDIS_DB=${REDIS_DB:-0}
-      - EII_CAMERA_TRANSPORT=${EII_CAMERA_TRANSPORT:-webrtc}
-      - EII_CAMERA_WEBRTC_ENABLED=${EII_CAMERA_WEBRTC_ENABLED:-1}
-      - EII_CAMERA_WEBRTC_MEDIA_URL=${EII_CAMERA_WEBRTC_MEDIA_URL:-http://127.0.0.1:8013}
-      - EII_REALTIME_INCLUDE_CAMERA_FRAMES=${EII_REALTIME_INCLUDE_CAMERA_FRAMES:-0}
       - ROLLOUTS_ROOT=/app/rollouts
       - REPLAY_ROOT=/app/replay
       - RLT_STATE_PATH=/app/segment_db/rlt_control_state.json

@@ -8,8 +8,6 @@ from voice_assistant_web.backend.app.schemas import RLTControlRequest
 
 from voice_assistant_web.backend.app.schemas import RLTControlState
 
-from voice_assistant_web.backend.app.schemas import RLTConfigRequest
-
 
 class _FakeRedis:
     def __init__(self):
@@ -445,34 +443,6 @@ def test_config_update_publishes_critic_gate_settings():
     payload = store._redis.messages[-1][1]
     assert '"critic_gate_enabled": true' in payload
     assert '"critic_burn_in_steps": 1000' in payload
-
-
-def test_config_update_publishes_projected_blend_settings():
-    store = _store(warmup_target=1)
-
-    request = RLTConfigRequest(
-        rlt_blend_mode="projected_slow_push",
-        rlt_blend_preset="align",
-        lambda_push=0.2,
-        lambda_vla_align=0.3,
-        lambda_actor=0.5,
-        push_joint_indices=[0, 1, 2, 3, 4, 5],
-        push_axis=[-0.53, 0.2, -0.78, 0.23, -0.08, 0.06],
-    )
-    state = store.update_config(request)
-
-    assert state.rlt_blend_mode == "projected_slow_push"
-    assert state.rlt_blend_preset == "align"
-    assert state.lambda_push == 0.2
-    assert state.lambda_vla_align == 0.3
-    assert state.lambda_actor == 0.5
-    assert state.push_joint_indices == [0, 1, 2, 3, 4, 5]
-    assert state.push_axis == [-0.53, 0.2, -0.78, 0.23, -0.08, 0.06]
-    payload = json.loads(store._redis.messages[-1][1])
-    assert payload["rlt_blend_mode"] == "projected_slow_push"
-    assert payload["rlt_blend_preset"] == "align"
-    assert payload["lambda_push"] == 0.2
-    assert payload["state"]["rlt_blend_preset"] == "align"
 
 
 def test_config_update_publishes_manual_trainer_enabled():

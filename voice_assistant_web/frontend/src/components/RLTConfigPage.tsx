@@ -25,31 +25,11 @@ type Draft = Required<
     | 'trainer_enabled'
     | 'intervention_scale'
     | 'max_delta'
-    | 'rlt_blend_mode'
-    | 'rlt_blend_preset'
-    | 'lambda_push'
-    | 'lambda_vla_align'
-    | 'lambda_actor'
-    | 'push_joint_indices'
-    | 'push_axis'
     | 'critic_gate_enabled'
     | 'critic_gate_margin'
     | 'critic_gate_temperature'
   >
 > & { wandb_url: string }
-
-const blendPresets: Record<string, Pick<Draft, 'lambda_push' | 'lambda_vla_align' | 'lambda_actor'>> = {
-  conservative: { lambda_push: 0.1, lambda_vla_align: 0.5, lambda_actor: 0.2 },
-  align: { lambda_push: 0.2, lambda_vla_align: 0.3, lambda_actor: 0.5 },
-  actor_align: { lambda_push: 0.15, lambda_vla_align: 0.1, lambda_actor: 0.7 },
-  insert: { lambda_push: 0.8, lambda_vla_align: 0.7, lambda_actor: 0.1 },
-}
-
-const parseNumberList = (value: string) =>
-  value
-    .split(',')
-    .map((item) => Number(item.trim()))
-    .filter((item) => Number.isFinite(item))
 
 const makeDraft = (rlt: RLTControlState): Draft => ({
   warmup_target: rlt.warmup_target,
@@ -67,13 +47,6 @@ const makeDraft = (rlt: RLTControlState): Draft => ({
   trainer_enabled: rlt.trainer_enabled,
   intervention_scale: rlt.intervention_scale,
   max_delta: rlt.max_delta,
-  rlt_blend_mode: rlt.rlt_blend_mode ?? 'projected_slow_push',
-  rlt_blend_preset: rlt.rlt_blend_preset ?? 'conservative',
-  lambda_push: rlt.lambda_push ?? 0.1,
-  lambda_vla_align: rlt.lambda_vla_align ?? 0.5,
-  lambda_actor: rlt.lambda_actor ?? 0.2,
-  push_joint_indices: rlt.push_joint_indices ?? [0, 1, 2, 3, 4, 5],
-  push_axis: rlt.push_axis ?? [-0.53, 0.2, -0.78, 0.23, -0.08, 0.06],
   critic_gate_enabled: rlt.critic_gate_enabled,
   critic_gate_margin: rlt.critic_gate_margin,
   critic_gate_temperature: rlt.critic_gate_temperature,
@@ -103,13 +76,6 @@ export function RLTConfigPage({ rlt, onState }: Props) {
     rlt.trainer_enabled,
     rlt.intervention_scale,
     rlt.max_delta,
-    rlt.rlt_blend_mode,
-    rlt.rlt_blend_preset,
-    rlt.lambda_push,
-    rlt.lambda_vla_align,
-    rlt.lambda_actor,
-    rlt.push_joint_indices,
-    rlt.push_axis,
     rlt.critic_gate_enabled,
     rlt.critic_gate_margin,
     rlt.critic_gate_temperature,
@@ -320,87 +286,6 @@ export function RLTConfigPage({ rlt, onState }: Props) {
               step={0.001}
               value={draft.critic_gate_temperature}
               onChange={(event) => setDraft({ ...draft, critic_gate_temperature: Number(event.target.value) })}
-            />
-          </Field>
-        </ConfigSection>
-
-        <ConfigSection title="Actor Blend">
-          <Field label="Blend Mode">
-            <select
-              value={draft.rlt_blend_mode}
-              onChange={(event) => setDraft({ ...draft, rlt_blend_mode: event.target.value })}
-            >
-              <option value="projected_slow_push">Projected slow push</option>
-              <option value="full">Full actor action</option>
-            </select>
-          </Field>
-          <Field label="Blend Preset">
-            <select
-              value={draft.rlt_blend_preset}
-              onChange={(event) => {
-                const preset = event.target.value
-                setDraft({ ...draft, rlt_blend_preset: preset, ...(blendPresets[preset] ?? {}) })
-              }}
-            >
-              <option value="conservative">Conservative</option>
-              <option value="align">Align</option>
-              <option value="actor_align">Actor Align</option>
-              <option value="insert">Insert</option>
-              <option value="custom">Custom</option>
-            </select>
-          </Field>
-          <Field label="Lambda Push">
-            <input
-              type="number"
-              min={0}
-              max={2}
-              step={0.01}
-              value={draft.lambda_push}
-              onChange={(event) =>
-                setDraft({ ...draft, rlt_blend_preset: 'custom', lambda_push: Number(event.target.value) })
-              }
-            />
-          </Field>
-          <Field label="Lambda VLA Align">
-            <input
-              type="number"
-              min={0}
-              max={2}
-              step={0.01}
-              value={draft.lambda_vla_align}
-              onChange={(event) =>
-                setDraft({ ...draft, rlt_blend_preset: 'custom', lambda_vla_align: Number(event.target.value) })
-              }
-            />
-          </Field>
-          <Field label="Lambda Actor">
-            <input
-              type="number"
-              min={0}
-              max={2}
-              step={0.01}
-              value={draft.lambda_actor}
-              onChange={(event) =>
-                setDraft({ ...draft, rlt_blend_preset: 'custom', lambda_actor: Number(event.target.value) })
-              }
-            />
-          </Field>
-          <Field label="Push Joint Indices">
-            <input
-              type="text"
-              value={draft.push_joint_indices.join(', ')}
-              onChange={(event) =>
-                setDraft({ ...draft, rlt_blend_preset: 'custom', push_joint_indices: parseNumberList(event.target.value) })
-              }
-            />
-          </Field>
-          <Field label="Push Axis">
-            <input
-              type="text"
-              value={draft.push_axis.join(', ')}
-              onChange={(event) =>
-                setDraft({ ...draft, rlt_blend_preset: 'custom', push_axis: parseNumberList(event.target.value) })
-              }
             />
           </Field>
         </ConfigSection>
