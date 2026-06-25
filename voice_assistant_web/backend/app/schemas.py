@@ -115,10 +115,6 @@ class RLTControlState(BaseModel):
     auto_beta_reason: str | None = None
     intervention_scale: float = 0.25
     max_delta: float = 0.1
-    actor_execution_mode: str = "wait_next_chunk"
-    actor_action_horizon: int = 10
-    actor_wait_timeout_sec: float = 0.0
-    disable_vla_tail_when_actor_active: bool = True
     critic_gate_enabled: bool = True
     critic_gate_margin: float = 0.0
     critic_gate_temperature: float = 0.05
@@ -196,10 +192,6 @@ class RLTConfigRequest(BaseModel):
     trainer_enabled: bool | None = None
     intervention_scale: float | None = Field(default=None, ge=0, le=1)
     max_delta: float | None = Field(default=None, ge=0, le=10)
-    actor_execution_mode: str | None = Field(default=None, pattern="^(wait_next_chunk|mixed_vla_tail)$")
-    actor_action_horizon: int | None = Field(default=None, ge=1, le=100)
-    actor_wait_timeout_sec: float | None = Field(default=None, ge=0, le=60)
-    disable_vla_tail_when_actor_active: bool | None = None
     critic_gate_enabled: bool | None = None
     critic_gate_margin: float | None = Field(default=None, ge=-1000, le=1000)
     critic_gate_temperature: float | None = Field(default=None, gt=0, le=1000)
