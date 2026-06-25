@@ -4,10 +4,11 @@
 
 ```bash
 cd /home/eii/openpi0.5-rtc-reward-learning
-docker compose up -d ros_master aloha_ros_nodes openpi_server redis eii_pilot_backend eii_pilot_frontend
+docker compose up -d ros_master aloha_ros_nodes openpi_server redis eii_pilot_backend eii_pilot_webrtc_media eii_pilot_frontend
 ```
 
 The compose project name and built image tags are scoped to `openpi_reward_learning_eii`, so this branch does not overwrite another checkout that uses the same service names.
+The live camera UI uses WebRTC by default, so `eii_pilot_webrtc_media` is part of the normal robot stack rather than an optional profile service.
 
 ## 2. Start Warmup/Online Runtime
 
