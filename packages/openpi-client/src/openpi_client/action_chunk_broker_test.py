@@ -207,6 +207,27 @@ def test_propagates_signed_actor_residual_trend_to_rtc_guidance_tail():
     np.testing.assert_allclose(guidance[49], np.array([0.0, 0.0], dtype=np.float32), atol=1e-6)
 
 
+def test_actor_residual_guidance_tail_only_changes_left_arm_indices():
+    reference = np.zeros((50, 14), dtype=np.float32)
+    reference[25:, 7:14] = 0.2
+    adjusted = reference.copy()
+    adjusted[:10, :7] = 0.5
+    adjusted[:10, 7:14] = 1.0
+
+    guidance = _propagate_actor_residual_for_guidance(
+        reference_actions=reference,
+        adjusted_actions=adjusted,
+        action_start_index=0,
+        action_end_index=10,
+        guidance_start_index=25,
+        trend_window=5,
+        start_weight=0.7,
+    )
+
+    np.testing.assert_allclose(guidance[25, :7], np.full((7,), 0.35, dtype=np.float32))
+    np.testing.assert_allclose(guidance[25:, 7:14], reference[25:, 7:14])
+
+
 def test_actor_apply_keeps_execution_tail_and_adds_separate_rtc_guidance_tail():
     class _SignedActor(_Actor):
         def apply(self, *, reference_actions, z_rl, proprio, context, action_start_index=None):
@@ -241,6 +262,52 @@ def test_actor_apply_keeps_execution_tail_and_adds_separate_rtc_guidance_tail():
 
     np.testing.assert_allclose(results["actions"][25:], reference[25:])
     np.testing.assert_allclose(results["rtc_guidance_actions"][25], np.array([0.028, -0.042], dtype=np.float32))
+
+
+def test_actor_apply_guidance_tail_keeps_right_arm_reference_actions():
+    class _ActorThatAlsoMovesRightArm(_Actor):
+        def apply(self, *, reference_actions, z_rl, proprio, context, action_start_index=None):
+            adjusted = reference_actions.copy()
+            adjusted[:10, :7] = 0.5
+            adjusted[:10, 7:14] = 1.0
+            return RLTActorApplyResult(
+                adjusted,
+                True,
+                None,
+                "/tmp/actor",
+                5,
+                1.0,
+                1.0,
+                action_start_index=0,
+                action_horizon=10,
+                action_end_index=10,
+            )
+
+    reference = np.zeros((50, 14), dtype=np.float32)
+    reference[25:, 7:14] = 0.2
+    robot_state = np.zeros((14,), dtype=np.float32)
+    robot_state[7:14] = np.array([-0.8, 0.02, -0.04, 0.52, 0.51, 0.18, 0.66], dtype=np.float32)
+    broker = ActionChunkBroker(
+        _Policy(),
+        action_horizon=50,
+        use_rtc=False,
+        rlt_actor_runtime=_ActorThatAlsoMovesRightArm(),
+    )
+
+    results = broker._apply_rlt_actor_to_policy_results(
+        {
+            "actions": reference,
+            "z_rl": np.ones((8,), dtype=np.float32),
+            "state": np.zeros((14,), dtype=np.float32),
+        },
+        {"state": robot_state, "rlt_context": {"actor_requested": True, "phase": "key_region"}},
+        action_start_index=0,
+    )
+
+    np.testing.assert_allclose(results["actions"][:10, :7], np.full((10, 7), 0.5, dtype=np.float32))
+    np.testing.assert_allclose(results["actions"][:10, 7:14], np.broadcast_to(robot_state[7:14], (10, 7)))
+    np.testing.assert_allclose(results["rtc_guidance_actions"][25, :7], np.full((7,), 0.35, dtype=np.float32))
+    np.testing.assert_allclose(results["rtc_guidance_actions"][25:, 7:14], reference[25:, 7:14])
 
 
 def test_tail_trend_gate_weakens_same_direction_and_keeps_opposing_direction():
@@ -310,7 +377,8 @@ def test_key_region_actor_freezes_right_arm_but_does_not_limit_left_arm():
     np.testing.assert_allclose(results["actions"][:, :6], np.ones((10, 6), dtype=np.float32))
     np.testing.assert_allclose(results["actions"][:, 7:14], np.broadcast_to(robot_state[7:14], (10, 7)))
     np.testing.assert_allclose(results["reference_actions"], reference)
-    np.testing.assert_allclose(results["rtc_guidance_actions"], results["actions"])
+    np.testing.assert_allclose(results["rtc_guidance_actions"][:, :7], results["actions"][:, :7])
+    np.testing.assert_allclose(results["rtc_guidance_actions"][:, 7:14], reference[:, 7:14])
     assert results["rlt_action_limited"] is False
     assert results["rlt_right_arm_frozen"] is True
 

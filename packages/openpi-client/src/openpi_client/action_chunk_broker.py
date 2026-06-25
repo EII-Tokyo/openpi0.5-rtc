@@ -11,6 +11,7 @@ from openpi_client import base_policy as _base_policy
 from openpi_client.rlt_actor_runtime import RLTActorRuntime
 
 
+_LEFT_ARM_ACTION_INDICES = (0, 1, 2, 3, 4, 5, 6)
 _RIGHT_ARM_ACTION_INDICES = (7, 8, 9, 10, 11, 12, 13)
 
 
@@ -25,12 +26,18 @@ def _propagate_actor_residual_for_guidance(
     start_weight: float = 0.7,
     same_direction_scale: float = 0.35,
     opposing_direction_scale: float = 1.0,
+    affected_indices: tuple[int, ...] = _LEFT_ARM_ACTION_INDICES,
 ) -> np.ndarray:
-    guidance = np.array(adjusted_actions, dtype=np.float32, copy=True)
     reference = np.asarray(reference_actions, dtype=np.float32)
     adjusted = np.asarray(adjusted_actions, dtype=np.float32)
+    guidance = np.array(adjusted, dtype=np.float32, copy=True)
     if reference.shape != adjusted.shape or reference.ndim != 2:
         return guidance
+    affected_indices = tuple(index for index in affected_indices if 0 <= index < reference.shape[1])
+    guidance = np.array(reference, dtype=np.float32, copy=True)
+    if not affected_indices:
+        return guidance
+    guidance[:, affected_indices] = adjusted[:, affected_indices]
 
     action_start_index = max(0, int(action_start_index))
     action_end_index = min(int(action_end_index), reference.shape[0])
@@ -57,7 +64,9 @@ def _propagate_actor_residual_for_guidance(
     trend = trend * trend_scale
 
     weights = np.linspace(float(start_weight), 0.0, reference.shape[0] - tail_start, dtype=np.float32)[:, None]
-    guidance[tail_start:] = reference[tail_start:] + weights * trend
+    guidance[tail_start:, affected_indices] = (
+        reference[tail_start:, affected_indices] + weights * trend[None, affected_indices]
+    )
     return guidance
 
 
