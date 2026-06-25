@@ -69,6 +69,27 @@ class _PreemptingAgent(_Agent):
         return {"actions": [99.0]}
 
 
+class _RLTTransitioningAgent(_Agent):
+    def __init__(self, runtime):
+        super().__init__()
+        self._runtime = runtime
+
+    def get_action(self, obs):
+        self.obs.append(obs)
+        self._runtime._handle_rlt_control_event(
+            {
+                "type": "key_region_start",
+                "key_region_id": "kr-transition",
+                "state": {
+                    "warmup_target": 1,
+                    "warmup_count": 1,
+                    "actor_ready": True,
+                },
+            }
+        )
+        return {"actions": [77.0], "rlt_context_epoch": obs["rlt_context"]["rlt_context_epoch"]}
+
+
 class _Subscriber:
     def __init__(self):
         self.episode_starts = 0
@@ -254,6 +275,23 @@ def test_stop_task_during_get_action_preempts_policy_action_before_apply():
     assert runtime._is_waiting_for_task is True
     assert agent.flush_reasons == ["preempt_task_4"]
     assert agent.reset_count == 1
+
+
+def test_rlt_epoch_change_during_get_action_discards_stale_policy_action_before_apply():
+    env = _Env()
+    runtime = Runtime(env, _Agent(), [], max_hz=0, num_episodes=1, max_episode_steps=1)
+    agent = _RLTTransitioningAgent(runtime)
+    runtime._agent = agent
+    runtime._current_task = {"task_num": "1", "task_name": "Twist off the bottle cap"}
+    runtime._is_waiting_for_task = False
+    runtime._rlt_state.update({"warmup_target": 1, "warmup_count": 1, "actor_ready": True})
+
+    runtime._step()
+
+    assert env.actions == []
+    assert runtime._rlt_state["phase"] == "key_region"
+    assert runtime._rlt_state["active_key_region_id"] == "kr-transition"
+    assert agent.flush_reasons == ["key_region_start"]
 
 
 def test_sleep_task_moves_to_sleep_and_keeps_runtime_listening():

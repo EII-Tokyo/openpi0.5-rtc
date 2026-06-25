@@ -570,6 +570,28 @@ class Runtime:
                 self._rlt_state["critic_gate_enabled"] = bool(action.get("rlt_critic_gate_enabled"))
             self._sync_manual_actor_gate_locked()
 
+    def _discard_action_if_rlt_context_changed(self, action: dict, action_context: dict) -> bool:
+        expected_epoch = action_context.get("rlt_context_epoch")
+        action_epoch = action.get("rlt_context_epoch") if isinstance(action, dict) else None
+        with self._task_lock:
+            current_epoch = self._rlt_context_epoch
+            stale_context = expected_epoch is not None and int(expected_epoch) != int(current_epoch)
+            stale_action = action_epoch is not None and int(action_epoch) != int(current_epoch)
+            if not stale_context and not stale_action:
+                return False
+            self._rlt_state["inference_actor_active"] = False
+            self._rlt_state["inference_delta_norm"] = None
+            self._rlt_state["inference_gate_reason"] = "stale_rlt_context_before_apply"
+            self._sync_manual_actor_gate_locked()
+        logging.warning(
+            "RLT context changed before apply; discarding policy action: expected_epoch=%s action_epoch=%s current_epoch=%s",
+            expected_epoch,
+            action_epoch,
+            current_epoch,
+        )
+        self._publish_rlt_state()
+        return True
+
     def _notify_key_region_subscribers(self, event_type: str, event: dict) -> None:
         hook_name_by_type = {
             "key_region_start": "on_key_region_start",
@@ -917,6 +939,8 @@ class Runtime:
         if preempt_task is not None:
             logging.warning("策略推理期间收到抢占任务，丢弃本次策略动作: %s", preempt_task.get("task_num"))
             self._handle_task(preempt_task)
+            return
+        if self._discard_action_if_rlt_context_changed(action, observation_with_task["rlt_context"]):
             return
         self._update_rlt_actor_status_from_action(action)
         self._environment.apply_action(action)
