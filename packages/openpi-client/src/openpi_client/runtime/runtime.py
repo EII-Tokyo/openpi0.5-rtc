@@ -79,6 +79,7 @@ class Runtime:
         self._redis_thread = None
         self._redis_running = False
         self._latest_task = None
+        self._preempt_task = None
         self._rlt_state = {
             "phase": "idle",
             "training_phase": "warmup",
@@ -320,8 +321,13 @@ class Runtime:
                     "timestamp": data.get("timestamp", time.time()),
                 }
             )
+            should_preempt = str(task_data["task_num"]) in self._stop_task_nums
             with self._task_lock:
                 self._latest_task = task_data
+                if should_preempt:
+                    self._preempt_task = task_data
+            if should_preempt:
+                self._flush_agent_action_cache(f"preempt_task_{task_data['task_num']}")
             logging.info("收到前端机器人任务: %s - %s", task_data["task_num"], task_data["task_name"])
             return
         should_notify_key_region = event_type in {"key_region_start", "key_region_end", "score", "key_region_discard"}
@@ -557,6 +563,29 @@ class Runtime:
             self._latest_task = None
             return latest_task
 
+    def _take_preempt_task(self):
+        """Consume a pending stop/home/sleep/shutdown task.
+
+        This lets the policy loop drop any just-computed action before it can
+        reach the robot when a stop-class command arrives during inference.
+        """
+        with self._task_lock:
+            if self._preempt_task is None:
+                return None
+            task = self._preempt_task
+            self._preempt_task = None
+            latest_num = str(self._latest_task.get("task_num")) if self._latest_task is not None else None
+            if latest_num == str(task.get("task_num")):
+                self._latest_task = None
+            return task
+
+    def _clear_preempt_task(self, task_num: str | None = None) -> None:
+        with self._task_lock:
+            if self._preempt_task is None:
+                return
+            if task_num is None or str(self._preempt_task.get("task_num")) == str(task_num):
+                self._preempt_task = None
+
     def _normalize_task_data(self, task_data):
         """Canonicalize task prompts before they are shown or sent to the policy."""
         if task_data is None:
@@ -762,6 +791,7 @@ class Runtime:
         """处理来自键盘或 Redis 的任务。"""
         task_num = task_data.get('task_num')
         task_name = task_data.get('task_name', '未知任务')
+        self._clear_preempt_task(str(task_num))
         
         logging.info(f"处理语音任务: {task_num} - {task_name}")
         
@@ -825,8 +855,18 @@ class Runtime:
     def _step(self) -> None:
         """A single step of the runtime loop."""
         self._handle_policy_control_key(self._poll_single_key(timeout=0.0))
+        preempt_task = self._take_preempt_task()
+        if preempt_task is not None:
+            logging.warning("策略 step 开始前收到抢占任务，跳过本次动作: %s", preempt_task.get("task_num"))
+            self._handle_task(preempt_task)
+            return
         observation = self._environment.get_observation()
         assert self._current_task is not None, "_current_task must be set before calling _step()"
+        preempt_task = self._take_preempt_task()
+        if preempt_task is not None:
+            logging.warning("获取 observation 后收到抢占任务，跳过策略推理: %s", preempt_task.get("task_num"))
+            self._handle_task(preempt_task)
+            return
         observation_with_task = {
             **observation,
             'prompt': self._current_task.get('task_name'),
@@ -835,6 +875,11 @@ class Runtime:
         }
 
         action = self._agent.get_action(observation_with_task)
+        preempt_task = self._take_preempt_task()
+        if preempt_task is not None:
+            logging.warning("策略推理期间收到抢占任务，丢弃本次策略动作: %s", preempt_task.get("task_num"))
+            self._handle_task(preempt_task)
+            return
         self._update_rlt_actor_status_from_action(action)
         self._environment.apply_action(action)
         # 存储最近 action，用于 6 号 leader/follower demo 对齐。

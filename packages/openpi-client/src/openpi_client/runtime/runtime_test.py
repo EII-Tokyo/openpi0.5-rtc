@@ -50,6 +50,25 @@ class _Agent:
         self.reset_count += 1
 
 
+class _PreemptingAgent(_Agent):
+    def __init__(self, runtime, task_num="4", task_name="home"):
+        super().__init__()
+        self._runtime = runtime
+        self._task_num = task_num
+        self._task_name = task_name
+
+    def get_action(self, obs):
+        self.obs.append(obs)
+        self._runtime._handle_rlt_control_event(
+            {
+                "type": "robot_task",
+                "task_num": self._task_num,
+                "task_name": self._task_name,
+            }
+        )
+        return {"actions": [99.0]}
+
+
 class _Subscriber:
     def __init__(self):
         self.episode_starts = 0
@@ -217,6 +236,24 @@ def test_step_passes_rlt_context_to_agent():
     assert obs["prompt"] == "Twist off the bottle cap"
     assert obs["rlt_context"]["actor_requested"] is True
     assert obs["rlt_context"]["current_task"] == {"task_name": "Twist off the bottle cap"}
+
+
+def test_stop_task_during_get_action_preempts_policy_action_before_apply():
+    env = _Env()
+    runtime = Runtime(env, _Agent(), [], max_hz=0, num_episodes=1, max_episode_steps=1)
+    agent = _PreemptingAgent(runtime, task_num="4", task_name="home")
+    runtime._agent = agent
+    runtime._current_task = {"task_num": "1", "task_name": "Twist off the bottle cap"}
+    runtime._is_waiting_for_task = False
+
+    runtime._step()
+
+    assert env.actions == []
+    assert env.stop_count == 1
+    assert runtime._current_task is None
+    assert runtime._is_waiting_for_task is True
+    assert agent.flush_reasons == ["preempt_task_4"]
+    assert agent.reset_count == 1
 
 
 def test_sleep_task_moves_to_sleep_and_keeps_runtime_listening():
