@@ -429,6 +429,70 @@ def test_key_region_actor_uses_robot_state_to_freeze_right_arm():
     assert results["rlt_right_arm_frozen"] is True
 
 
+def test_key_region_actor_latches_right_arm_hold_pose_until_gate_released():
+    class _RightArmActor(_Actor):
+        def apply(self, *, reference_actions, z_rl, proprio, context, action_start_index=None):
+            adjusted = reference_actions.copy()
+            adjusted[:, :7] = 0.5
+            adjusted[:, 7:14] = 2.0
+            return RLTActorApplyResult(
+                adjusted,
+                True,
+                None,
+                "/tmp/actor",
+                5,
+                1.0,
+                1.0,
+                action_start_index=0,
+                action_horizon=10,
+                action_end_index=10,
+            )
+
+    broker = ActionChunkBroker(_Policy(), action_horizon=10, use_rtc=False, rlt_actor_runtime=_RightArmActor())
+    reference = np.zeros((10, 14), dtype=np.float32)
+    first_state = np.zeros((14,), dtype=np.float32)
+    first_state[7:14] = np.array([-0.8, 0.02, -0.04, 0.52, 0.51, 0.18, 0.66], dtype=np.float32)
+    drifted_state = np.zeros((14,), dtype=np.float32)
+    drifted_state[7:14] = np.array([-0.7, 0.30, -0.20, 0.40, 0.60, 0.22, 0.70], dtype=np.float32)
+
+    first = broker._apply_rlt_actor_to_policy_results(
+        {
+            "actions": reference,
+            "z_rl": np.ones((8,), dtype=np.float32),
+            "state": np.zeros((14,), dtype=np.float32),
+        },
+        {"state": first_state, "rlt_context": {"actor_requested": True, "phase": "key_region"}},
+    )
+    second = broker._apply_rlt_actor_to_policy_results(
+        {
+            "actions": reference,
+            "z_rl": np.ones((8,), dtype=np.float32),
+            "state": np.zeros((14,), dtype=np.float32),
+        },
+        {"state": drifted_state, "rlt_context": {"actor_requested": True, "phase": "key_region"}},
+    )
+    broker._apply_rlt_actor_to_policy_results(
+        {
+            "actions": reference,
+            "z_rl": np.ones((8,), dtype=np.float32),
+            "state": np.zeros((14,), dtype=np.float32),
+        },
+        {"state": drifted_state, "rlt_context": {"actor_requested": False, "phase": "idle"}},
+    )
+    third = broker._apply_rlt_actor_to_policy_results(
+        {
+            "actions": reference,
+            "z_rl": np.ones((8,), dtype=np.float32),
+            "state": np.zeros((14,), dtype=np.float32),
+        },
+        {"state": drifted_state, "rlt_context": {"actor_requested": True, "phase": "key_region"}},
+    )
+
+    np.testing.assert_allclose(first["actions"][:, 7:14], np.broadcast_to(first_state[7:14], (10, 7)))
+    np.testing.assert_allclose(second["actions"][:, 7:14], np.broadcast_to(first_state[7:14], (10, 7)))
+    np.testing.assert_allclose(third["actions"][:, 7:14], np.broadcast_to(drifted_state[7:14], (10, 7)))
+
+
 def test_actor_failure_leaves_actions_unchanged_and_records_reason():
     actor = _Actor(mode="raise")
     broker = ActionChunkBroker(_Policy(), action_horizon=3, use_rtc=False, rlt_actor_runtime=actor)

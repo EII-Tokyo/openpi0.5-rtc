@@ -120,6 +120,7 @@ class ActionChunkBroker(_base_policy.BasePolicy):
         self._background_results: Dict[str, np.ndarray] | None = None
         self._background_guidance_actions: np.ndarray | None = None
         self._background_rlt_context_signature: tuple | None = None
+        self._right_arm_hold_state: np.ndarray | None = None
         self._background_running: bool = False
         self._cache_generation: int = 0
         self._cache_lock = threading.RLock()
@@ -359,6 +360,7 @@ class ActionChunkBroker(_base_policy.BasePolicy):
             self._background_results = None
             self._background_guidance_actions = None
             self._background_rlt_context_signature = None
+            self._right_arm_hold_state = None
             self._background_running = False
             self._cur_step = 0
 
@@ -536,13 +538,19 @@ class ActionChunkBroker(_base_policy.BasePolicy):
             if actor_requested:
                 before_freeze = np.asarray(policy_results["actions"], dtype=np.float32)
                 robot_state = np.asarray(obs.get("state", proprio), dtype=np.float32)[:14]
-                frozen_actions = _freeze_right_arm_actions(before_freeze, robot_state)
+                if self._right_arm_hold_state is None:
+                    self._right_arm_hold_state = np.array(robot_state, dtype=np.float32, copy=True)
+                frozen_actions = _freeze_right_arm_actions(before_freeze, self._right_arm_hold_state)
                 if before_freeze.ndim == 2 and before_freeze.shape[1] > max(_RIGHT_ARM_ACTION_INDICES):
                     right_arm_frozen = not np.allclose(
                         before_freeze[:, _RIGHT_ARM_ACTION_INDICES],
                         frozen_actions[:, _RIGHT_ARM_ACTION_INDICES],
                     )
                 policy_results["actions"] = frozen_actions
+            else:
+                self._right_arm_hold_state = None
+        else:
+            self._right_arm_hold_state = None
         if result.applied and action_end is not None:
             policy_results["rtc_guidance_actions"] = _propagate_actor_residual_for_guidance(
                 reference_actions=reference_actions,
