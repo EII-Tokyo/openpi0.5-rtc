@@ -66,6 +66,7 @@ const initialRLT: RLTControlState = {
   max_delta: 0.1,
   actor_handoff_steps: 4,
   actor_delta_ema_alpha: 0.35,
+  actor_speed_limit_preset: '80',
   critic_gate_enabled: true,
   critic_gate_margin: 0,
   critic_gate_temperature: 0.05,

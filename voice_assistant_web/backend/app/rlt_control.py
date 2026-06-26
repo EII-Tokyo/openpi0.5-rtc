@@ -37,6 +37,7 @@ class RLTControlStore:
             max_delta=settings.rlt_default_max_delta,
             actor_handoff_steps=settings.rlt_default_actor_handoff_steps,
             actor_delta_ema_alpha=settings.rlt_default_actor_delta_ema_alpha,
+            actor_speed_limit_preset=settings.rlt_default_actor_speed_limit_preset,
             rl_token_checkpoint_path=settings.rlt_rl_token_checkpoint_path,
         )
         self._load()
@@ -345,6 +346,7 @@ class RLTControlStore:
                 "max_delta",
                 "actor_handoff_steps",
                 "actor_delta_ema_alpha",
+                "actor_speed_limit_preset",
                 "critic_gate_enabled",
                 "critic_gate_margin",
                 "critic_gate_temperature",

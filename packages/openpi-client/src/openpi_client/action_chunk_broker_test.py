@@ -4,6 +4,7 @@ import numpy as np
 from openpi_client.action_chunk_broker import (
     ActionChunkBroker,
     _apply_actor_handoff_smoothing,
+    _limit_key_region_action_delta,
     _freeze_right_arm_actions,
     _propagate_actor_residual_for_guidance,
 )
@@ -405,7 +406,7 @@ def test_freeze_right_arm_actions_uses_current_robot_state_without_limiting_left
     np.testing.assert_allclose(frozen[:, 7:14], np.broadcast_to(state[7:14], (3, 7)))
 
 
-def test_key_region_actor_freezes_right_arm_but_does_not_limit_left_arm():
+def test_key_region_actor_freezes_right_arm_and_limits_left_arm_when_configured():
     class _LargeActor(_Actor):
         def apply(self, *, reference_actions, z_rl, proprio, context, action_start_index=None):
             adjusted = reference_actions.copy()
@@ -434,16 +435,73 @@ def test_key_region_actor_freezes_right_arm_but_does_not_limit_left_arm():
             "z_rl": np.ones((8,), dtype=np.float32),
             "state": np.zeros((14,), dtype=np.float32),
         },
-        {"state": robot_state, "rlt_context": {"actor_requested": True, "phase": "key_region"}},
+        {"state": robot_state, "rlt_context": {"actor_requested": True, "phase": "key_region", "actor_speed_limit_preset": "80"}},
     )
 
-    np.testing.assert_allclose(results["actions"][:, :6], np.ones((10, 6), dtype=np.float32))
+    assert np.max(np.abs(results["actions"][:, :6] - robot_state[:6])) <= 0.02 + 1e-6
+    np.testing.assert_allclose(np.max(np.linalg.norm(results["actions"][:, :6] - robot_state[:6], axis=-1)), 0.04, atol=1e-6)
     np.testing.assert_allclose(results["actions"][:, 7:14], np.broadcast_to(robot_state[7:14], (10, 7)))
     np.testing.assert_allclose(results["reference_actions"], reference)
     np.testing.assert_allclose(results["rtc_guidance_actions"][:, :7], results["actions"][:, :7])
     np.testing.assert_allclose(results["rtc_guidance_actions"][:, 7:14], reference[:, 7:14])
-    assert results["rlt_action_limited"] is False
+    assert results["rlt_action_limited"] is True
     assert results["rlt_right_arm_frozen"] is True
+
+
+def test_key_region_actor_speed_limit_off_preserves_left_arm_actor_actions():
+    class _LargeActor(_Actor):
+        def apply(self, *, reference_actions, z_rl, proprio, context, action_start_index=None):
+            adjusted = reference_actions.copy()
+            adjusted[:, :6] = 1.0
+            adjusted[:, 7:14] = 2.0
+            return RLTActorApplyResult(
+                adjusted,
+                True,
+                None,
+                "/tmp/actor",
+                5,
+                1.0,
+                1.0,
+                action_start_index=0,
+                action_horizon=10,
+                action_end_index=10,
+            )
+
+    broker = ActionChunkBroker(_Policy(), action_horizon=10, use_rtc=False, rlt_actor_runtime=_LargeActor())
+    reference = np.zeros((10, 14), dtype=np.float32)
+    robot_state = np.zeros((14,), dtype=np.float32)
+    robot_state[7:14] = np.array([-0.8, 0.02, -0.04, 0.52, 0.51, 0.18, 0.66], dtype=np.float32)
+    results = broker._apply_rlt_actor_to_policy_results(
+        {
+            "actions": reference,
+            "z_rl": np.ones((8,), dtype=np.float32),
+            "state": np.zeros((14,), dtype=np.float32),
+        },
+        {"state": robot_state, "rlt_context": {"actor_requested": True, "phase": "key_region", "actor_speed_limit_preset": "off"}},
+    )
+
+    np.testing.assert_allclose(results["actions"][:, :6], np.ones((10, 6), dtype=np.float32))
+    np.testing.assert_allclose(results["actions"][:, 7:14], np.broadcast_to(robot_state[7:14], (10, 7)))
+    assert results["rlt_action_limited"] is False
+    assert results["rlt_actor_speed_limit_preset"] == "off"
+
+
+def test_key_region_speed_limit_presets_map_to_expected_delta_caps():
+    actions = np.ones((3, 14), dtype=np.float32)
+    state = np.zeros((14,), dtype=np.float32)
+
+    limited_80 = _limit_key_region_action_delta(actions, state, preset="80")
+    limited_50 = _limit_key_region_action_delta(actions, state, preset="50")
+    limited_20 = _limit_key_region_action_delta(actions, state, preset="20")
+    unlimited = _limit_key_region_action_delta(actions, state, preset="off")
+
+    assert np.max(np.abs(limited_80[:, :6])) <= 0.02 + 1e-6
+    np.testing.assert_allclose(np.max(np.linalg.norm(limited_80[:, :6], axis=-1)), 0.04, atol=1e-6)
+    assert np.max(np.abs(limited_50[:, :6])) <= 0.0125 + 1e-6
+    np.testing.assert_allclose(np.max(np.linalg.norm(limited_50[:, :6], axis=-1)), 0.025, atol=1e-6)
+    assert np.max(np.abs(limited_20[:, :6])) <= 0.005 + 1e-6
+    np.testing.assert_allclose(np.max(np.linalg.norm(limited_20[:, :6], axis=-1)), 0.01, atol=1e-6)
+    np.testing.assert_allclose(unlimited[:, :6], actions[:, :6])
 
 
 def test_key_region_actor_uses_robot_state_to_freeze_right_arm():

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Literal
+
 from pydantic import BaseModel
 from pydantic import Field
 
@@ -117,6 +119,7 @@ class RLTControlState(BaseModel):
     max_delta: float = 0.1
     actor_handoff_steps: int = 4
     actor_delta_ema_alpha: float = 0.35
+    actor_speed_limit_preset: Literal["off", "80", "50", "20"] = "80"
     critic_gate_enabled: bool = True
     critic_gate_margin: float = 0.0
     critic_gate_temperature: float = 0.05
@@ -196,6 +199,7 @@ class RLTConfigRequest(BaseModel):
     max_delta: float | None = Field(default=None, ge=0, le=10)
     actor_handoff_steps: int | None = Field(default=None, ge=0, le=50)
     actor_delta_ema_alpha: float | None = Field(default=None, ge=0, le=1)
+    actor_speed_limit_preset: Literal["off", "80", "50", "20"] | None = None
     critic_gate_enabled: bool | None = None
     critic_gate_margin: float | None = Field(default=None, ge=-1000, le=1000)
     critic_gate_temperature: float | None = Field(default=None, gt=0, le=1000)

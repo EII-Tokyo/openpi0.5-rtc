@@ -40,6 +40,7 @@ class Settings:
     rlt_default_max_delta: float = float(os.getenv("RLT_DEFAULT_MAX_DELTA", "0.1"))
     rlt_default_actor_handoff_steps: int = int(os.getenv("RLT_DEFAULT_ACTOR_HANDOFF_STEPS", "4"))
     rlt_default_actor_delta_ema_alpha: float = float(os.getenv("RLT_DEFAULT_ACTOR_DELTA_EMA_ALPHA", "0.35"))
+    rlt_default_actor_speed_limit_preset: str = os.getenv("RLT_DEFAULT_ACTOR_SPEED_LIMIT_PRESET", "80")
     rlt_rl_token_checkpoint_path: str = os.getenv(
         "RLT_RL_TOKEN_CHECKPOINT_PATH",
         "/app/checkpoints/eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo_rl_token_query/rl_token_2048_enc4_dec4_query_from_19000_20260528/12000",
