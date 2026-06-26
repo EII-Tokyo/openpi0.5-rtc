@@ -12,6 +12,7 @@ from openpi_client.rlt_actor_runtime import RLTActorRuntime
 
 
 _LEFT_ARM_ACTION_INDICES = (0, 1, 2, 3, 4, 5, 6)
+_LEFT_ARM_MOTION_ACTION_INDICES = (0, 1, 2, 3, 4, 5)
 _RIGHT_ARM_ACTION_INDICES = (7, 8, 9, 10, 11, 12, 13)
 _LEFT_ARM_JOINT_INDICES = (0, 1, 2, 3, 4, 5)
 _CONTINUOUS_ACTION_JOINT_INDICES = (3, 5, 10, 12)
@@ -55,7 +56,7 @@ def _propagate_actor_residual_for_guidance(
     start_weight: float = 0.7,
     same_direction_scale: float = 0.35,
     opposing_direction_scale: float = 1.0,
-    affected_indices: tuple[int, ...] = _LEFT_ARM_ACTION_INDICES,
+    affected_indices: tuple[int, ...] = _LEFT_ARM_MOTION_ACTION_INDICES,
 ) -> np.ndarray:
     reference = np.asarray(reference_actions, dtype=np.float32)
     adjusted = np.asarray(adjusted_actions, dtype=np.float32)
@@ -169,7 +170,7 @@ def _apply_actor_handoff_smoothing(
     action_start_index: int,
     action_end_index: int,
     handoff_steps: int,
-    affected_indices: tuple[int, ...] = _LEFT_ARM_ACTION_INDICES,
+    affected_indices: tuple[int, ...] = _LEFT_ARM_MOTION_ACTION_INDICES,
 ) -> np.ndarray:
     smoothed = np.array(actions, dtype=np.float32, copy=True)
     affected_indices = _valid_action_indices(smoothed, affected_indices)
@@ -728,7 +729,7 @@ class ActionChunkBroker(_base_policy.BasePolicy):
     ) -> np.ndarray:
         actions = np.array(adjusted_actions, dtype=np.float32, copy=True)
         reference = np.asarray(reference_actions, dtype=np.float32)
-        affected_indices = _valid_action_indices(actions, _LEFT_ARM_ACTION_INDICES)
+        affected_indices = _valid_action_indices(actions, _LEFT_ARM_MOTION_ACTION_INDICES)
         if not affected_indices or reference.shape != actions.shape:
             return actions
 

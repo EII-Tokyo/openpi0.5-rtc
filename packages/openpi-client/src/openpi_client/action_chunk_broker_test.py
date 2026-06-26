@@ -226,14 +226,17 @@ def test_actor_residual_guidance_tail_only_changes_left_arm_indices():
         start_weight=0.7,
     )
 
-    np.testing.assert_allclose(guidance[25, :7], np.full((7,), 0.35, dtype=np.float32))
+    np.testing.assert_allclose(guidance[25, :6], np.full((6,), 0.35, dtype=np.float32))
+    np.testing.assert_allclose(guidance[25:, 6], reference[25:, 6])
     np.testing.assert_allclose(guidance[25:, 7:14], reference[25:, 7:14])
 
 
 def test_actor_handoff_smoothing_blends_left_arm_from_current_state_only():
     actions = np.ones((5, 14), dtype=np.float32)
+    actions[:, 6] = 0.04
     actions[:, 7:14] = 2.0
     current_state = np.zeros((14,), dtype=np.float32)
+    current_state[6] = 0.7
     current_state[7:14] = -3.0
 
     smoothed = _apply_actor_handoff_smoothing(
@@ -246,6 +249,7 @@ def test_actor_handoff_smoothing_blends_left_arm_from_current_state_only():
 
     np.testing.assert_allclose(smoothed[:4, 0], np.array([0.25, 0.5, 0.75, 1.0], dtype=np.float32))
     np.testing.assert_allclose(smoothed[4, 0], 1.0)
+    np.testing.assert_allclose(smoothed[:, 6], actions[:, 6])
     np.testing.assert_allclose(smoothed[:, 7:14], actions[:, 7:14])
 
 
@@ -258,7 +262,8 @@ def test_actor_delta_ema_smooths_left_arm_actor_residual_across_chunks():
         def apply(self, *, reference_actions, z_rl, proprio, context, action_start_index=None):
             delta = self.deltas.pop(0)
             adjusted = reference_actions.copy()
-            adjusted[:, :7] += delta
+            adjusted[:, :6] += delta
+            adjusted[:, 6] += 0.5
             return RLTActorApplyResult(
                 adjusted,
                 True,
@@ -287,8 +292,10 @@ def test_actor_delta_ema_smooths_left_arm_actor_residual_across_chunks():
     first = broker._apply_rlt_actor_to_policy_results(policy_results, obs)
     second = broker._apply_rlt_actor_to_policy_results(policy_results, obs)
 
-    np.testing.assert_allclose(first["actions"][:, :7], np.full((10, 7), 0.2, dtype=np.float32))
-    np.testing.assert_allclose(second["actions"][:, :7], np.full((10, 7), 0.1, dtype=np.float32))
+    np.testing.assert_allclose(first["actions"][:, :6], np.full((10, 6), 0.2, dtype=np.float32))
+    np.testing.assert_allclose(first["actions"][:, 6], np.full((10,), 0.5, dtype=np.float32))
+    np.testing.assert_allclose(second["actions"][:, :6], np.full((10, 6), 0.1, dtype=np.float32))
+    np.testing.assert_allclose(second["actions"][:, 6], np.full((10,), 0.5, dtype=np.float32))
     np.testing.assert_allclose(second["actions"][:, 7:14], np.zeros((10, 7), dtype=np.float32))
 
 
@@ -370,7 +377,8 @@ def test_actor_apply_guidance_tail_keeps_right_arm_reference_actions():
 
     np.testing.assert_allclose(results["actions"][:10, :7], np.full((10, 7), 0.5, dtype=np.float32))
     np.testing.assert_allclose(results["actions"][:10, 7:14], np.broadcast_to(robot_state[7:14], (10, 7)))
-    np.testing.assert_allclose(results["rtc_guidance_actions"][25, :7], np.full((7,), 0.35, dtype=np.float32))
+    np.testing.assert_allclose(results["rtc_guidance_actions"][25, :6], np.full((6,), 0.35, dtype=np.float32))
+    np.testing.assert_allclose(results["rtc_guidance_actions"][25:, 6], reference[25:, 6])
     np.testing.assert_allclose(results["rtc_guidance_actions"][25:, 7:14], reference[25:, 7:14])
 
 
