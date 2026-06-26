@@ -226,6 +226,7 @@ services:
       - -lc
       - >-
         uv run --no-sync scripts/serve_policy.py --no-warmup-subtask
+        --no-warmup-non-rtc
         ${SERVER_ARGS:---video-memory-num-frames 1
         --video-memory-stride-seconds 1.0
         policy:checkpoint
@@ -239,12 +240,17 @@ services:
       - $PWD:/app
       - /home/eii/openpi0.5-rtc/checkpoints:/app/checkpoints:ro
       - ${OPENPI_DATA_HOME:-~/.cache/openpi}:/openpi_assets
+      - ${OPENPI_JAX_CACHE_DIR:-./.jax_cache/openpi_server}:/app/.jax_cache
     environment:
       - GIT_LFS_SKIP_SMUDGE=1
       - XLA_PYTHON_CLIENT_PREALLOCATE=false
       - XLA_PYTHON_CLIENT_MEM_FRACTION=0.4
       - SERVER_ARGS
       - OPENPI_DATA_HOME=/openpi_assets
+      - JAX_COMPILATION_CACHE_DIR=/app/.jax_cache
+      - JAX_PERSISTENT_CACHE_MIN_COMPILE_TIME_SECS=0
+      - JAX_PERSISTENT_CACHE_MIN_ENTRY_SIZE_BYTES=-1
+      - JAX_PERSISTENT_CACHE_ENABLE_XLA_CACHES=xla_gpu_per_fusion_autotune_cache_dir
       - IS_DOCKER=true
       - NVIDIA_VISIBLE_DEVICES=all
       - NVIDIA_DRIVER_CAPABILITIES=all

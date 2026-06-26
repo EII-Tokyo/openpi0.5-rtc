@@ -1,6 +1,7 @@
 import dataclasses
 import enum
 import logging
+import os
 import socket
 import dataclasses as dc
 
@@ -77,6 +78,25 @@ DEFAULT_CHECKPOINT: dict[EnvMode, Checkpoint] = {
 }
 
 
+def configure_jax_persistent_cache_from_env() -> bool:
+    """Apply optional JAX persistent cache settings before first compilation."""
+    cache_dir = os.getenv("JAX_COMPILATION_CACHE_DIR")
+    if not cache_dir:
+        return False
+
+    import jax
+
+    jax.config.update("jax_compilation_cache_dir", cache_dir)
+    if min_compile_time := os.getenv("JAX_PERSISTENT_CACHE_MIN_COMPILE_TIME_SECS"):
+        jax.config.update("jax_persistent_cache_min_compile_time_secs", float(min_compile_time))
+    if min_entry_size := os.getenv("JAX_PERSISTENT_CACHE_MIN_ENTRY_SIZE_BYTES"):
+        jax.config.update("jax_persistent_cache_min_entry_size_bytes", int(min_entry_size))
+    if xla_caches := os.getenv("JAX_PERSISTENT_CACHE_ENABLE_XLA_CACHES"):
+        jax.config.update("jax_persistent_cache_enable_xla_caches", xla_caches)
+    logging.info("Using JAX persistent compilation cache: %s", cache_dir)
+    return True
+
+
 def create_default_policy(
     env: EnvMode,
     *,
@@ -142,6 +162,7 @@ def _make_dummy_obs(num_frames: int) -> dict:
 
 
 def main(args: Args) -> None:
+    configure_jax_persistent_cache_from_env()
     policy = create_policy(args)
     policy_metadata = policy.metadata
     dummy_obs = _make_dummy_obs(args.video_memory_num_frames)
