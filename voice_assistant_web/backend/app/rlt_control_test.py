@@ -426,6 +426,8 @@ def test_config_update_publishes_critic_gate_settings():
             "beta": None,
             "intervention_scale": None,
             "max_delta": None,
+            "actor_handoff_steps": 6,
+            "actor_delta_ema_alpha": 0.4,
             "wandb_url": None,
             "actor_enabled": None,
             "critic_burn_in_steps": 1000,
@@ -438,11 +440,15 @@ def test_config_update_publishes_critic_gate_settings():
 
     assert state.critic_gate_enabled is True
     assert state.critic_burn_in_steps == 1000
+    assert state.actor_handoff_steps == 6
+    assert state.actor_delta_ema_alpha == 0.4
     assert state.critic_gate_margin == 0.15
     assert state.critic_gate_temperature == 0.2
     payload = store._redis.messages[-1][1]
     assert '"critic_gate_enabled": true' in payload
     assert '"critic_burn_in_steps": 1000' in payload
+    assert '"actor_handoff_steps": 6' in payload
+    assert '"actor_delta_ema_alpha": 0.4' in payload
 
 
 def test_config_update_publishes_manual_trainer_enabled():

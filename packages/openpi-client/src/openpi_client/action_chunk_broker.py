@@ -88,6 +88,42 @@ def _freeze_right_arm_actions(
     return frozen
 
 
+def _valid_action_indices(actions: np.ndarray, indices: tuple[int, ...]) -> tuple[int, ...]:
+    if actions.ndim != 2:
+        return ()
+    return tuple(index for index in indices if 0 <= index < actions.shape[1])
+
+
+def _apply_actor_handoff_smoothing(
+    *,
+    actions: np.ndarray,
+    anchor_action: np.ndarray,
+    action_start_index: int,
+    action_end_index: int,
+    handoff_steps: int,
+    affected_indices: tuple[int, ...] = _LEFT_ARM_ACTION_INDICES,
+) -> np.ndarray:
+    smoothed = np.array(actions, dtype=np.float32, copy=True)
+    affected_indices = _valid_action_indices(smoothed, affected_indices)
+    if not affected_indices or handoff_steps <= 1:
+        return smoothed
+    anchor = np.asarray(anchor_action, dtype=np.float32)
+    if anchor.ndim != 1 or anchor.shape[0] <= max(affected_indices):
+        return smoothed
+    start = max(0, int(action_start_index))
+    end = min(int(action_end_index), smoothed.shape[0])
+    if end <= start:
+        return smoothed
+    steps = min(int(handoff_steps), end - start)
+    weights = np.linspace(1.0 / steps, 1.0, steps, dtype=np.float32)
+    anchor_values = anchor[list(affected_indices)]
+    target = smoothed[start : start + steps, affected_indices]
+    smoothed[start : start + steps, affected_indices] = (
+        (1.0 - weights[:, None]) * anchor_values[None, :] + weights[:, None] * target
+    )
+    return smoothed
+
+
 class ActionChunkBroker(_base_policy.BasePolicy):
     """Wraps a policy to return action chunks one-at-a-time.
 
@@ -121,6 +157,7 @@ class ActionChunkBroker(_base_policy.BasePolicy):
         self._background_guidance_actions: np.ndarray | None = None
         self._background_rlt_context_signature: tuple | None = None
         self._right_arm_hold_state: np.ndarray | None = None
+        self._actor_delta_ema: np.ndarray | None = None
         self._background_running: bool = False
         self._cache_generation: int = 0
         self._cache_lock = threading.RLock()
@@ -361,6 +398,7 @@ class ActionChunkBroker(_base_policy.BasePolicy):
             self._background_guidance_actions = None
             self._background_rlt_context_signature = None
             self._right_arm_hold_state = None
+            self._actor_delta_ema = None
             self._background_running = False
             self._cur_step = 0
 
@@ -403,6 +441,8 @@ class ActionChunkBroker(_base_policy.BasePolicy):
                 "manual_actor_requested",
                 "intervention_scale",
                 "max_delta",
+                "actor_handoff_steps",
+                "actor_delta_ema_alpha",
                 "critic_gate_enabled",
                 "critic_gate_margin",
                 "critic_gate_temperature",
@@ -532,6 +572,17 @@ class ActionChunkBroker(_base_policy.BasePolicy):
             policy_results["actions"] = np.asarray(result.actions, dtype=np.float32)
         action_start = result.action_start_index if result.action_start_index is not None else action_start_index
         action_end = result.action_end_index
+        if result.applied and action_end is not None:
+            policy_results["actions"] = self._smooth_left_actor_actions(
+                reference_actions=reference_actions,
+                adjusted_actions=policy_results["actions"],
+                obs=obs,
+                context=context,
+                action_start_index=action_start,
+                action_end_index=action_end,
+            )
+        elif not bool(context.get("actor_requested", False)):
+            self._actor_delta_ema = None
         right_arm_frozen = False
         if context.get("phase") == "key_region" or bool(context.get("actor_requested", False)):
             actor_requested = bool(context.get("actor_requested", False))
@@ -581,6 +632,55 @@ class ActionChunkBroker(_base_policy.BasePolicy):
             }
         )
         return policy_results
+
+    def _smooth_left_actor_actions(
+        self,
+        *,
+        reference_actions: np.ndarray,
+        adjusted_actions: np.ndarray,
+        obs: Dict,
+        context: dict,
+        action_start_index: int,
+        action_end_index: int,
+    ) -> np.ndarray:
+        actions = np.array(adjusted_actions, dtype=np.float32, copy=True)
+        reference = np.asarray(reference_actions, dtype=np.float32)
+        affected_indices = _valid_action_indices(actions, _LEFT_ARM_ACTION_INDICES)
+        if not affected_indices or reference.shape != actions.shape:
+            return actions
+
+        start = max(0, int(action_start_index))
+        end = min(int(action_end_index), actions.shape[0])
+        if end <= start:
+            return actions
+
+        alpha = float(context.get("actor_delta_ema_alpha", 1.0) or 0.0)
+        alpha = float(np.clip(alpha, 0.0, 1.0))
+        if alpha < 1.0:
+            current_delta = actions[start:end, affected_indices] - reference[start:end, affected_indices]
+            if self._actor_delta_ema is None or self._actor_delta_ema.shape != current_delta.shape:
+                smoothed_delta = current_delta
+            elif alpha <= 0.0:
+                smoothed_delta = self._actor_delta_ema
+            else:
+                smoothed_delta = alpha * current_delta + (1.0 - alpha) * self._actor_delta_ema
+            self._actor_delta_ema = np.array(smoothed_delta, dtype=np.float32, copy=True)
+            actions[start:end, affected_indices] = reference[start:end, affected_indices] + smoothed_delta
+        else:
+            self._actor_delta_ema = actions[start:end, affected_indices] - reference[start:end, affected_indices]
+
+        handoff_steps = int(context.get("actor_handoff_steps", 0) or 0)
+        if handoff_steps > 1:
+            robot_state = np.asarray(obs.get("state", obs.get("proprio", np.array([], dtype=np.float32))), dtype=np.float32)
+            actions = _apply_actor_handoff_smoothing(
+                actions=actions,
+                anchor_action=robot_state[: actions.shape[1]],
+                action_start_index=start,
+                action_end_index=end,
+                handoff_steps=handoff_steps,
+                affected_indices=affected_indices,
+            )
+        return actions
 
     def _build_step_result_cache(self, policy_results: Dict[str, np.ndarray]) -> Dict[str, np.ndarray]:
         reference_actions = policy_results.get("reference_actions", policy_results["actions"])

@@ -35,6 +35,8 @@ class RLTControlStore:
             beta=settings.rlt_default_beta,
             intervention_scale=settings.rlt_default_intervention_scale,
             max_delta=settings.rlt_default_max_delta,
+            actor_handoff_steps=settings.rlt_default_actor_handoff_steps,
+            actor_delta_ema_alpha=settings.rlt_default_actor_delta_ema_alpha,
             rl_token_checkpoint_path=settings.rlt_rl_token_checkpoint_path,
         )
         self._load()
@@ -341,6 +343,8 @@ class RLTControlStore:
                 "force_actor_effective",
                 "intervention_scale",
                 "max_delta",
+                "actor_handoff_steps",
+                "actor_delta_ema_alpha",
                 "critic_gate_enabled",
                 "critic_gate_margin",
                 "critic_gate_temperature",

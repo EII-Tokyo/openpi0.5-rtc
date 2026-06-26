@@ -8,6 +8,7 @@ from openpi.models import rlt
 from openpi.training import rlt_replay_store
 from openpi.training import rlt_training
 from openpi_client.rlt_actor_runtime import RLTActorRuntime
+from openpi_client.rlt_actor_runtime import _clip_adjusted_action_delta
 from scripts import train_rlt_online
 
 
@@ -148,6 +149,20 @@ def test_actor_runtime_ramps_intervention_delta():
         dtype=np.float32,
     )
     np.testing.assert_allclose(result.actions, expected, rtol=1e-6, atol=1e-6)
+
+
+def test_actor_runtime_clips_intervention_delta_after_scaling():
+    reference = np.zeros((3, 2), dtype=np.float32)
+    adjusted = np.array([[0.5, -0.3], [0.02, -0.04], [-0.2, 0.2]], dtype=np.float32)
+
+    clipped = _clip_adjusted_action_delta(
+        reference_prefix=reference,
+        adjusted_prefix=adjusted,
+        max_delta=0.1,
+    )
+
+    expected = np.array([[0.1, -0.1], [0.02, -0.04], [-0.1, 0.1]], dtype=np.float32)
+    np.testing.assert_allclose(clipped, expected)
 
 
 def test_actor_runtime_rejects_action_window_that_exceeds_reference(tmp_path):

@@ -64,6 +64,8 @@ const initialRLT: RLTControlState = {
   auto_beta_reason: null,
   intervention_scale: 0.25,
   max_delta: 0.1,
+  actor_handoff_steps: 4,
+  actor_delta_ema_alpha: 0.35,
   critic_gate_enabled: true,
   critic_gate_margin: 0,
   critic_gate_temperature: 0.05,

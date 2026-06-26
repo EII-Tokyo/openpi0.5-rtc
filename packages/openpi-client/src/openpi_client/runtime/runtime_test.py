@@ -355,6 +355,23 @@ def test_control_event_passes_critic_gate_config_to_context():
     assert context["critic_gate_temperature"] == 0.2
 
 
+def test_control_event_passes_actor_smoothing_config_to_context():
+    runtime = _runtime()
+    runtime._handle_rlt_control_event(
+        {
+            "type": "config_update",
+            "state": {
+                "actor_handoff_steps": 6,
+                "actor_delta_ema_alpha": 0.4,
+            },
+        }
+    )
+
+    context = runtime._build_rlt_context()
+    assert context["actor_handoff_steps"] == 6
+    assert context["actor_delta_ema_alpha"] == 0.4
+
+
 def test_update_rlt_actor_status_records_inference_metrics():
     runtime = _runtime()
     epoch = runtime._build_rlt_context()["rlt_context_epoch"]

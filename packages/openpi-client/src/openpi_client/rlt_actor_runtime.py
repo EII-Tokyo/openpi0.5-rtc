@@ -127,6 +127,11 @@ class RLTActorRuntime:
                 adjusted_prefix=adjusted_prefix,
                 ramp_steps=int(context.get("intervention_ramp_steps", 0) or 0),
             )
+            adjusted_prefix = _clip_adjusted_action_delta(
+                reference_prefix=prefix,
+                adjusted_prefix=adjusted_prefix,
+                max_delta=float(context.get("max_delta", 0.0) or 0.0),
+            )
             adjusted = np.array(reference, copy=True)
             adjusted[action_start_index:action_end_index] = adjusted_prefix
             delta = adjusted[action_start_index:action_end_index] - reference[action_start_index:action_end_index]
@@ -325,3 +330,16 @@ def _ramp_adjusted_action(
     weights[:steps] = np.linspace(0.0, 1.0, steps, dtype=np.float32)
     delta = adjusted_prefix - reference_prefix
     return reference_prefix + weights[:, None] * delta
+
+
+def _clip_adjusted_action_delta(
+    *,
+    reference_prefix: np.ndarray,
+    adjusted_prefix: np.ndarray,
+    max_delta: float,
+) -> np.ndarray:
+    if max_delta <= 0:
+        return adjusted_prefix
+    delta = adjusted_prefix - reference_prefix
+    clipped_delta = np.clip(delta, -float(max_delta), float(max_delta))
+    return reference_prefix + clipped_delta

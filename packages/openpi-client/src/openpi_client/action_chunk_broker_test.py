@@ -3,6 +3,7 @@ import numpy as np
 
 from openpi_client.action_chunk_broker import (
     ActionChunkBroker,
+    _apply_actor_handoff_smoothing,
     _freeze_right_arm_actions,
     _propagate_actor_residual_for_guidance,
 )
@@ -226,6 +227,68 @@ def test_actor_residual_guidance_tail_only_changes_left_arm_indices():
 
     np.testing.assert_allclose(guidance[25, :7], np.full((7,), 0.35, dtype=np.float32))
     np.testing.assert_allclose(guidance[25:, 7:14], reference[25:, 7:14])
+
+
+def test_actor_handoff_smoothing_blends_left_arm_from_current_state_only():
+    actions = np.ones((5, 14), dtype=np.float32)
+    actions[:, 7:14] = 2.0
+    current_state = np.zeros((14,), dtype=np.float32)
+    current_state[7:14] = -3.0
+
+    smoothed = _apply_actor_handoff_smoothing(
+        actions=actions,
+        anchor_action=current_state,
+        action_start_index=0,
+        action_end_index=5,
+        handoff_steps=4,
+    )
+
+    np.testing.assert_allclose(smoothed[:4, 0], np.array([0.25, 0.5, 0.75, 1.0], dtype=np.float32))
+    np.testing.assert_allclose(smoothed[4, 0], 1.0)
+    np.testing.assert_allclose(smoothed[:, 7:14], actions[:, 7:14])
+
+
+def test_actor_delta_ema_smooths_left_arm_actor_residual_across_chunks():
+    class _SequenceActor(_Actor):
+        def __init__(self):
+            super().__init__()
+            self.deltas = [0.2, -0.2]
+
+        def apply(self, *, reference_actions, z_rl, proprio, context, action_start_index=None):
+            delta = self.deltas.pop(0)
+            adjusted = reference_actions.copy()
+            adjusted[:, :7] += delta
+            return RLTActorApplyResult(
+                adjusted,
+                True,
+                None,
+                "/tmp/actor",
+                5,
+                abs(delta),
+                abs(delta),
+                action_start_index=0,
+                action_horizon=10,
+                action_end_index=10,
+            )
+
+    broker = ActionChunkBroker(_Policy(), action_horizon=10, use_rtc=False, rlt_actor_runtime=_SequenceActor())
+    reference = np.zeros((10, 14), dtype=np.float32)
+    obs = {
+        "state": np.zeros((14,), dtype=np.float32),
+        "rlt_context": {"actor_requested": True, "actor_delta_ema_alpha": 0.25, "actor_handoff_steps": 0},
+    }
+    policy_results = {
+        "actions": reference,
+        "z_rl": np.ones((8,), dtype=np.float32),
+        "state": np.zeros((14,), dtype=np.float32),
+    }
+
+    first = broker._apply_rlt_actor_to_policy_results(policy_results, obs)
+    second = broker._apply_rlt_actor_to_policy_results(policy_results, obs)
+
+    np.testing.assert_allclose(first["actions"][:, :7], np.full((10, 7), 0.2, dtype=np.float32))
+    np.testing.assert_allclose(second["actions"][:, :7], np.full((10, 7), 0.1, dtype=np.float32))
+    np.testing.assert_allclose(second["actions"][:, 7:14], np.zeros((10, 7), dtype=np.float32))
 
 
 def test_actor_apply_keeps_execution_tail_and_adds_separate_rtc_guidance_tail():

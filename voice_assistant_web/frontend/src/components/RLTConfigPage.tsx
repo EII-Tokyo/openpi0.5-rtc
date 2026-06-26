@@ -25,6 +25,8 @@ type Draft = Required<
     | 'trainer_enabled'
     | 'intervention_scale'
     | 'max_delta'
+    | 'actor_handoff_steps'
+    | 'actor_delta_ema_alpha'
     | 'critic_gate_enabled'
     | 'critic_gate_margin'
     | 'critic_gate_temperature'
@@ -47,6 +49,8 @@ const makeDraft = (rlt: RLTControlState): Draft => ({
   trainer_enabled: rlt.trainer_enabled,
   intervention_scale: rlt.intervention_scale,
   max_delta: rlt.max_delta,
+  actor_handoff_steps: rlt.actor_handoff_steps,
+  actor_delta_ema_alpha: rlt.actor_delta_ema_alpha,
   critic_gate_enabled: rlt.critic_gate_enabled,
   critic_gate_margin: rlt.critic_gate_margin,
   critic_gate_temperature: rlt.critic_gate_temperature,
@@ -76,6 +80,8 @@ export function RLTConfigPage({ rlt, onState }: Props) {
     rlt.trainer_enabled,
     rlt.intervention_scale,
     rlt.max_delta,
+    rlt.actor_handoff_steps,
+    rlt.actor_delta_ema_alpha,
     rlt.critic_gate_enabled,
     rlt.critic_gate_margin,
     rlt.critic_gate_temperature,
@@ -256,6 +262,7 @@ export function RLTConfigPage({ rlt, onState }: Props) {
               value={draft.intervention_scale}
               onChange={(event) => setDraft({ ...draft, intervention_scale: Number(event.target.value) })}
             />
+            <small className="field-hint">Actor 残差整体强度：0 只用 RTC/VLA，1 使用 actor 给出的完整修正。</small>
           </Field>
           <Field label="Max Delta">
             <input
@@ -265,6 +272,29 @@ export function RLTConfigPage({ rlt, onState }: Props) {
               value={draft.max_delta}
               onChange={(event) => setDraft({ ...draft, max_delta: Number(event.target.value) })}
             />
+            <small className="field-hint">单个关节每个 actor chunk 的最大修正幅度；0 表示不裁剪。</small>
+          </Field>
+          <Field label={`Handoff Steps ${draft.actor_handoff_steps}`}>
+            <input
+              type="range"
+              min={0}
+              max={20}
+              step={1}
+              value={draft.actor_handoff_steps}
+              onChange={(event) => setDraft({ ...draft, actor_handoff_steps: Number(event.target.value) })}
+            />
+            <small className="field-hint">新 actor chunk 开头用多少步从当前左臂状态过渡到 actor 动作；0 或 1 表示关闭。</small>
+          </Field>
+          <Field label={`Delta EMA Alpha ${draft.actor_delta_ema_alpha.toFixed(2)}`}>
+            <input
+              type="range"
+              min={0}
+              max={1}
+              step={0.05}
+              value={draft.actor_delta_ema_alpha}
+              onChange={(event) => setDraft({ ...draft, actor_delta_ema_alpha: Number(event.target.value) })}
+            />
+            <small className="field-hint">跨 RTC chunk 的 actor 残差平滑系数；越小越平滑，越大越跟手，1 表示不平滑。</small>
           </Field>
           <Toggle
             label="Critic Gate"

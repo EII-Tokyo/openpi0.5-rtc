@@ -276,6 +276,8 @@ export type RLTControlState = {
   auto_beta_reason: string | null
   intervention_scale: number
   max_delta: number
+  actor_handoff_steps: number
+  actor_delta_ema_alpha: number
   critic_gate_enabled: boolean
   critic_gate_margin: number
   critic_gate_temperature: number
@@ -347,6 +349,8 @@ export type RLTConfigRequest = {
   trainer_enabled?: boolean
   intervention_scale?: number
   max_delta?: number
+  actor_handoff_steps?: number
+  actor_delta_ema_alpha?: number
   critic_gate_enabled?: boolean
   critic_gate_margin?: number
   critic_gate_temperature?: number

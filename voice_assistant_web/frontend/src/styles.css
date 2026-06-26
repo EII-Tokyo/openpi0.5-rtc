@@ -749,6 +749,12 @@ button {
   width: 100%;
 }
 
+.field-hint {
+  color: #756c5f;
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
 .rlt-toggle {
   grid-template-columns: auto 1fr;
   align-items: center;
