@@ -27,6 +27,7 @@ type Draft = Required<
     | 'max_delta'
     | 'actor_handoff_steps'
     | 'actor_delta_ema_alpha'
+    | 'actor_speed_limit_preset'
     | 'critic_gate_enabled'
     | 'critic_gate_margin'
     | 'critic_gate_temperature'
@@ -51,6 +52,7 @@ const makeDraft = (rlt: RLTControlState): Draft => ({
   max_delta: rlt.max_delta,
   actor_handoff_steps: rlt.actor_handoff_steps,
   actor_delta_ema_alpha: rlt.actor_delta_ema_alpha,
+  actor_speed_limit_preset: rlt.actor_speed_limit_preset,
   critic_gate_enabled: rlt.critic_gate_enabled,
   critic_gate_margin: rlt.critic_gate_margin,
   critic_gate_temperature: rlt.critic_gate_temperature,
@@ -82,6 +84,7 @@ export function RLTConfigPage({ rlt, onState }: Props) {
     rlt.max_delta,
     rlt.actor_handoff_steps,
     rlt.actor_delta_ema_alpha,
+    rlt.actor_speed_limit_preset,
     rlt.critic_gate_enabled,
     rlt.critic_gate_margin,
     rlt.critic_gate_temperature,
@@ -295,6 +298,23 @@ export function RLTConfigPage({ rlt, onState }: Props) {
               onChange={(event) => setDraft({ ...draft, actor_delta_ema_alpha: Number(event.target.value) })}
             />
             <small className="field-hint">跨 RTC chunk 的 actor 残差平滑系数；越小越平滑，越大越跟手，1 表示不平滑。</small>
+          </Field>
+          <Field label="Actor Speed Limit">
+            <select
+              value={draft.actor_speed_limit_preset}
+              onChange={(event) =>
+                setDraft({
+                  ...draft,
+                  actor_speed_limit_preset: event.target.value as Draft['actor_speed_limit_preset'],
+                })
+              }
+            >
+              <option value="80">80% limit</option>
+              <option value="50">50% limit</option>
+              <option value="20">20% limit</option>
+              <option value="off">No limit</option>
+            </select>
+            <small className="field-hint">Actor/key region 期间限制左臂关节目标相对当前状态的单步 delta；默认 80%。</small>
           </Field>
           <Toggle
             label="Critic Gate"

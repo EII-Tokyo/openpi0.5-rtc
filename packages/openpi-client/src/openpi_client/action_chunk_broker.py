@@ -13,6 +13,35 @@ from openpi_client.rlt_actor_runtime import RLTActorRuntime
 
 _LEFT_ARM_ACTION_INDICES = (0, 1, 2, 3, 4, 5, 6)
 _RIGHT_ARM_ACTION_INDICES = (7, 8, 9, 10, 11, 12, 13)
+_LEFT_ARM_JOINT_INDICES = (0, 1, 2, 3, 4, 5)
+_CONTINUOUS_ACTION_JOINT_INDICES = (3, 5, 10, 12)
+_ARM_JOINT_LIMITS = np.array(
+    [
+        [-np.pi + 1e-5, np.pi - 1e-5],
+        [np.deg2rad(-106.0), np.deg2rad(72.0)],
+        [np.deg2rad(-101.0), np.deg2rad(92.0)],
+        [-np.pi + 1e-5, np.pi - 1e-5],
+        [np.deg2rad(-107.0), np.deg2rad(128.0)],
+        [-np.pi + 1e-5, np.pi - 1e-5],
+    ],
+    dtype=np.float32,
+)
+_ACTOR_SPEED_LIMIT_PRESETS: dict[str, tuple[float, float]] = {
+    "off": (float("inf"), float("inf")),
+    "80": (0.040, 0.020),
+    "50": (0.025, 0.0125),
+    "20": (0.010, 0.005),
+}
+
+
+def _actor_speed_limit_caps(preset: str | None) -> tuple[str, float, float]:
+    normalized = str(preset or "off").lower()
+    if normalized in {"none", "unlimited", "no_limit", "nolimit"}:
+        normalized = "off"
+    if normalized not in _ACTOR_SPEED_LIMIT_PRESETS:
+        normalized = "off"
+    max_step_norm, max_step_abs = _ACTOR_SPEED_LIMIT_PRESETS[normalized]
+    return normalized, max_step_norm, max_step_abs
 
 
 def _propagate_actor_residual_for_guidance(
@@ -86,6 +115,45 @@ def _freeze_right_arm_actions(
         return frozen
     frozen[:, right_arm_indices] = state[list(right_arm_indices)]
     return frozen
+
+
+def _nearest_equivalent_angle(target: np.ndarray, current: np.ndarray) -> np.ndarray:
+    return target + 2.0 * np.pi * np.round((current - target) / (2.0 * np.pi))
+
+
+def _limit_key_region_action_delta(
+    actions: np.ndarray,
+    state: np.ndarray,
+    *,
+    preset: str | None = None,
+    joint_indices: tuple[int, ...] = _LEFT_ARM_JOINT_INDICES,
+) -> np.ndarray:
+    preset, max_step_norm, max_step_abs = _actor_speed_limit_caps(preset)
+    if preset == "off":
+        return np.array(actions, dtype=np.float32, copy=True)
+
+    limited = np.array(actions, dtype=np.float32, copy=True)
+    state = np.asarray(state, dtype=np.float32)
+    if not joint_indices:
+        return limited
+    if limited.ndim != 2 or state.ndim != 1 or limited.shape[1] <= max(joint_indices) or state.shape[0] <= max(joint_indices):
+        return limited
+
+    indices = np.asarray(joint_indices, dtype=np.int64)
+    for index in joint_indices:
+        if index in _CONTINUOUS_ACTION_JOINT_INDICES:
+            limited[:, index] = _nearest_equivalent_angle(limited[:, index], state[index])
+        else:
+            limit = _ARM_JOINT_LIMITS[index]
+            limited[:, index] = np.clip(limited[:, index], limit[0], limit[1])
+
+    delta = limited[:, indices] - state[indices]
+    delta = np.clip(delta, -float(max_step_abs), float(max_step_abs))
+    norms = np.linalg.norm(delta, axis=-1, keepdims=True)
+    scales = np.minimum(1.0, float(max_step_norm) / (norms + 1e-8))
+    delta = delta * scales
+    limited[:, indices] = state[indices] + delta
+    return limited
 
 
 def _valid_action_indices(actions: np.ndarray, indices: tuple[int, ...]) -> tuple[int, ...]:
@@ -443,6 +511,7 @@ class ActionChunkBroker(_base_policy.BasePolicy):
                 "max_delta",
                 "actor_handoff_steps",
                 "actor_delta_ema_alpha",
+                "actor_speed_limit_preset",
                 "critic_gate_enabled",
                 "critic_gate_margin",
                 "critic_gate_temperature",
@@ -584,6 +653,8 @@ class ActionChunkBroker(_base_policy.BasePolicy):
         elif not bool(context.get("actor_requested", False)):
             self._actor_delta_ema = None
         right_arm_frozen = False
+        action_limited = False
+        actor_speed_limit_preset = None
         if context.get("phase") == "key_region" or bool(context.get("actor_requested", False)):
             actor_requested = bool(context.get("actor_requested", False))
             if actor_requested:
@@ -597,7 +668,18 @@ class ActionChunkBroker(_base_policy.BasePolicy):
                         before_freeze[:, _RIGHT_ARM_ACTION_INDICES],
                         frozen_actions[:, _RIGHT_ARM_ACTION_INDICES],
                     )
-                policy_results["actions"] = frozen_actions
+                actor_speed_limit_preset = _actor_speed_limit_caps(context.get("actor_speed_limit_preset"))[0]
+                limited_actions = _limit_key_region_action_delta(
+                    frozen_actions,
+                    robot_state,
+                    preset=actor_speed_limit_preset,
+                )
+                limit_indices = _valid_action_indices(limited_actions, _LEFT_ARM_JOINT_INDICES)
+                action_limited = bool(
+                    limit_indices
+                    and not np.allclose(limited_actions[:, limit_indices], frozen_actions[:, limit_indices])
+                )
+                policy_results["actions"] = limited_actions
             else:
                 self._right_arm_hold_state = None
         else:
@@ -627,7 +709,8 @@ class ActionChunkBroker(_base_policy.BasePolicy):
                 "rlt_gate_reason": result.gate_reason,
                 "rlt_critic_ready": result.critic_ready,
                 "rlt_critic_gate_enabled": result.critic_gate_enabled,
-                "rlt_action_limited": False,
+                "rlt_action_limited": action_limited,
+                "rlt_actor_speed_limit_preset": actor_speed_limit_preset,
                 "rlt_right_arm_frozen": right_arm_frozen,
             }
         )
@@ -711,6 +794,9 @@ class ActionChunkBroker(_base_policy.BasePolicy):
             ("rlt_critic_ready", "rlt_critic_ready"),
             ("rlt_critic_gate_enabled", "rlt_critic_gate_enabled"),
             ("rlt_context_epoch", "rlt_context_epoch"),
+            ("rlt_action_limited", "rlt_action_limited"),
+            ("rlt_actor_speed_limit_preset", "rlt_actor_speed_limit_preset"),
+            ("rlt_right_arm_frozen", "rlt_right_arm_frozen"),
         ):
             if source_key in policy_results and target_key not in cached:
                 cached[target_key] = policy_results[source_key]

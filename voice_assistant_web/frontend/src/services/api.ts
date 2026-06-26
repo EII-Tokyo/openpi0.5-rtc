@@ -278,6 +278,7 @@ export type RLTControlState = {
   max_delta: number
   actor_handoff_steps: number
   actor_delta_ema_alpha: number
+  actor_speed_limit_preset: 'off' | '80' | '50' | '20'
   critic_gate_enabled: boolean
   critic_gate_margin: number
   critic_gate_temperature: number
@@ -351,6 +352,7 @@ export type RLTConfigRequest = {
   max_delta?: number
   actor_handoff_steps?: number
   actor_delta_ema_alpha?: number
+  actor_speed_limit_preset?: 'off' | '80' | '50' | '20'
   critic_gate_enabled?: boolean
   critic_gate_margin?: number
   critic_gate_temperature?: number

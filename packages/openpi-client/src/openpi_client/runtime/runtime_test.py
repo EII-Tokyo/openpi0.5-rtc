@@ -372,6 +372,21 @@ def test_control_event_passes_actor_smoothing_config_to_context():
     assert context["actor_delta_ema_alpha"] == 0.4
 
 
+def test_control_event_passes_actor_speed_limit_preset_to_context():
+    runtime = _runtime()
+    runtime._handle_rlt_control_event(
+        {
+            "type": "config_update",
+            "state": {
+                "actor_speed_limit_preset": "50",
+            },
+        }
+    )
+
+    context = runtime._build_rlt_context()
+    assert context["actor_speed_limit_preset"] == "50"
+
+
 def test_update_rlt_actor_status_records_inference_metrics():
     runtime = _runtime()
     epoch = runtime._build_rlt_context()["rlt_context_epoch"]
