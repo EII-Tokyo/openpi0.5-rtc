@@ -17,12 +17,14 @@ from datetime import datetime
 from functools import lru_cache
 from zoneinfo import ZoneInfo
 
+import numpy as np
 from fastapi import FastAPI
 from fastapi import Header
 from fastapi import HTTPException
 from fastapi import WebSocket
 from fastapi import WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from fastapi.responses import Response
 from fastapi.responses import StreamingResponse
 
@@ -30,6 +32,9 @@ from .camera_bridge import CameraBridge
 from .camera_webrtc import CameraWebRTCSession
 from .camera_webrtc import CameraWebRTCSessionStore
 from .config import settings
+from .expert_demo_review import crop_expert_demo
+from .expert_demo_review import find_expert_demo_video
+from .expert_demo_review import list_expert_demos
 from .redis_commands import create_redis_client
 from .rlt_control import RLTControlStore
 from .rlt_key_region_crop import crop_key_region_files
@@ -46,6 +51,9 @@ from .schemas import RLTConfigRequest
 from .schemas import RLTControlRequest
 from .schemas import RLTControlState
 from .schemas import RLTDiscardRequest
+from .schemas import RLTExpertDemoCropRequest
+from .schemas import RLTExpertDemoCropResponse
+from .schemas import RLTExpertDemoPage
 from .schemas import RLTKeyRegionCropRequest
 from .schemas import RLTKeyRegionCropResponse
 from .schemas import RLTPreferencePairResponse
@@ -82,10 +90,18 @@ redis_client = create_redis_client()
 rlt_control = RLTControlStore(redis_client)
 ROLLOUTS_ROOT = Path(settings.rollouts_root).expanduser().resolve()
 REPLAY_ROOT = Path(settings.replay_root).expanduser().resolve()
+EXPERT_DEMO_ROOT = Path(os.getenv("EXPERT_DEMO_ROOT", "/home/eii/.cache/huggingface/lerobot/lyl472324464")).expanduser().resolve()
+DISCRIMINATOR_EXPERT_CROP_ROOT = Path(
+    os.getenv(
+        "DISCRIMINATOR_EXPERT_CROP_ROOT",
+        "/home/eii/data/openpi0.5-rtc-reward-learning/replay/discriminator_expert_crops",
+    )
+).expanduser().resolve()
 VIDEO_CHUNK_SIZE = 1024 * 1024
 VIDEO_CACHE_ROOT = Path(os.getenv("ROLLOUTS_VIDEO_CACHE", "/tmp/eii_rollout_video_cache"))
 KEY_REGION_FRAME_CACHE_ROOT = Path(os.getenv("RLT_KEY_REGION_FRAME_CACHE", "/tmp/eii_key_region_frame_cache"))
 KEY_REGION_RECORD_CACHE_TTL_SECONDS = 2.0
+NO_ACTOR_DELTA_P95_THRESHOLD = 1e-6
 _key_region_record_cache: dict[tuple[str, str, str], tuple[float, dict[str, dict]]] = {}
 DEFAULT_RLT_PRE_ROLL_SECONDS = float(os.getenv("RLT_DEFAULT_PRE_ROLL_SECONDS", "2.0"))
 KEY_REGION_TIMEZONE = ZoneInfo(os.getenv("RLT_KEY_REGION_TIMEZONE", "Asia/Tokyo"))
@@ -840,6 +856,59 @@ def _record_needs_crop(record: dict) -> bool:
     )
 
 
+@lru_cache(maxsize=4096)
+def _rlt_action_delta_metrics_cached(path: str, mtime_ns: int, size: int) -> dict:
+    del mtime_ns, size
+    try:
+        with np.load(path, allow_pickle=False) as arrays:
+            keys = set(arrays.files)
+            metrics = {
+                "has_intervention_metadata": "intervention_mask" in keys,
+                "has_action_source": "action_source" in keys,
+                "has_takeover_id": "takeover_id" in keys,
+            }
+            if "action" not in keys or "reference_action" not in keys:
+                return {**metrics, "actor_inference_kind": "unknown"}
+            action = np.asarray(arrays["action"], dtype=np.float32)
+            reference = np.asarray(arrays["reference_action"], dtype=np.float32)
+    except Exception as exc:
+        logging.debug("Could not read RLT action metrics from %s: %s", path, exc)
+        return {"actor_inference_kind": "unknown"}
+
+    if action.size == 0 or reference.size == 0:
+        return {"actor_inference_kind": "unknown"}
+    common_shape = tuple(min(a, b) for a, b in zip(action.shape, reference.shape, strict=False))
+    if not common_shape:
+        return {"actor_inference_kind": "unknown"}
+    slices = tuple(slice(0, length) for length in common_shape)
+    delta = np.abs(action[slices] - reference[slices])
+    if delta.size == 0:
+        return {"actor_inference_kind": "unknown"}
+    p95 = float(np.percentile(delta, 95))
+    return {
+        "actor_inference_kind": "no_actor" if p95 <= NO_ACTOR_DELTA_P95_THRESHOLD else "actor_or_modified",
+        "actor_delta_p95": p95,
+        "actor_delta_max": float(np.max(delta)),
+        "actor_delta_mean": float(np.mean(delta)),
+        **metrics,
+    }
+
+
+def _rlt_action_delta_metrics(shard_path: Path | None) -> dict:
+    if not shard_path or not shard_path.exists():
+        return {"actor_inference_kind": "unknown"}
+    stat = shard_path.stat()
+    return _rlt_action_delta_metrics_cached(str(shard_path), stat.st_mtime_ns, stat.st_size)
+
+
+def _populate_rlt_action_delta_metrics(record: dict) -> None:
+    shard_path = _host_path_for_container_path(record.get("shard_path"))
+    if shard_path and shard_path.exists():
+        record.update(_rlt_action_delta_metrics(shard_path))
+    else:
+        record.update(_rlt_action_delta_metrics(None))
+
+
 def _reconcile_key_region_record(record: dict) -> None:
     if not _record_can_auto_commit(record):
         return
@@ -973,6 +1042,8 @@ def _key_region_review_records(*, batch: str = "all") -> list[dict]:
             record["npz_exists"] = True
             record["local_shard_path"] = str(shard_path.resolve())
             record["batch"] = record.get("batch") or _batch_from_replay_path(shard_path)
+        else:
+            record["actor_inference_kind"] = "unknown"
         record["manifest_exists"] = bool(record.get("manifest_exists"))
         record["video_exists"] = bool(record.get("video_exists"))
         _add_key_region_datetime_fields(record)
@@ -1115,6 +1186,14 @@ def _filter_key_region_review_records(
         filtered = [record for record in filtered if record.get("trainable")]
     elif status in {"needsCrop", "needs_crop"}:
         filtered = [record for record in filtered if record.get("needs_crop")]
+    elif status in {"noActor", "no_actor"}:
+        for record in filtered:
+            _populate_rlt_action_delta_metrics(record)
+        filtered = [record for record in filtered if record.get("actor_inference_kind") == "no_actor"]
+    elif status in {"actorModified", "actor_modified"}:
+        for record in filtered:
+            _populate_rlt_action_delta_metrics(record)
+        filtered = [record for record in filtered if record.get("actor_inference_kind") == "actor_or_modified"]
     elif status != "all":
         filtered = [record for record in filtered if str(record.get("status") or "") == status]
 
@@ -1322,6 +1401,8 @@ def rlt_key_region_review(
         if focus_index is not None:
             safe_offset = focus_index
     page_records = filtered[safe_offset : safe_offset + safe_limit]
+    for record in page_records:
+        _populate_rlt_action_delta_metrics(record)
     next_offset = safe_offset + safe_limit if safe_offset + safe_limit < len(filtered) else None
     return RLTKeyRegionReviewPage(
         items=[RLTKeyRegionReviewRecord(**record) for record in page_records],
@@ -1343,6 +1424,56 @@ def rlt_key_region_detail(key_region_id: str) -> RLTKeyRegionReviewRecord:
     if record is None:
         raise HTTPException(status_code=404, detail=f"Unknown key_region_id: {key_region_id}")
     return RLTKeyRegionReviewRecord(**record)
+
+
+@app.get("/api/rlt/expert-demos/review", response_model=RLTExpertDemoPage)
+def rlt_expert_demo_review(
+    limit: int = 20,
+    offset: int = 0,
+    dataset: str = "all",
+    search: str = "",
+    camera_status: str = "complete",
+) -> RLTExpertDemoPage:
+    if camera_status not in {"complete", "incomplete", "any"}:
+        raise HTTPException(status_code=400, detail="camera_status must be complete, incomplete, or any")
+    return list_expert_demos(
+        EXPERT_DEMO_ROOT,
+        dataset=dataset,
+        search=search,
+        camera_status=camera_status,
+        limit=limit,
+        offset=offset,
+    )
+
+
+@app.get("/api/rlt/expert-demos/video/{dataset_id}")
+def rlt_expert_demo_video(dataset_id: str, camera: str, file_index: int):
+    if not re.fullmatch(r"[A-Za-z0-9_.-]+", dataset_id):
+        raise HTTPException(status_code=400, detail=f"Invalid dataset_id: {dataset_id}")
+    video_path = find_expert_demo_video(EXPERT_DEMO_ROOT, dataset_id, camera, file_index)
+    if video_path is None or not video_path.exists():
+        raise HTTPException(status_code=404, detail="Expert demo video was not found")
+    return FileResponse(video_path, media_type="video/mp4")
+
+
+@app.post("/api/rlt/expert-demos/{dataset_id}/{episode_index}/crop", response_model=RLTExpertDemoCropResponse)
+def rlt_expert_demo_crop(dataset_id: str, episode_index: int, request: RLTExpertDemoCropRequest):
+    if not re.fullmatch(r"[A-Za-z0-9_.-]+", dataset_id):
+        raise HTTPException(status_code=400, detail=f"Invalid dataset_id: {dataset_id}")
+    try:
+        return crop_expert_demo(
+            EXPERT_DEMO_ROOT,
+            DISCRIMINATOR_EXPERT_CROP_ROOT,
+            dataset_id=dataset_id,
+            episode_index=episode_index,
+            start_sec=request.start_sec,
+            end_sec=request.end_sec,
+            reward=request.reward,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
 def _camera_name_from_video_path(path: str) -> str:

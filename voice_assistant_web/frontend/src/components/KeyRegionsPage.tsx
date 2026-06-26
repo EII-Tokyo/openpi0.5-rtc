@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
+  apiBase,
+  cropExpertDemo,
   cropKeyRegion,
   deleteKeyRegions,
+  fetchRLTExpertDemoReview,
   fetchRLTKeyRegionDetail,
   fetchRLTKeyRegionMediaMetadata,
   fetchRLTKeyRegionReview,
@@ -9,6 +12,7 @@ import {
   rolloutVideoUrl,
 } from '../services/api'
 import type {
+  RLTExpertDemoRecord,
   RLTKeyRegionMediaMetadata,
   RLTKeyRegionReviewRecord,
   RLTKeyRegionReviewSummary,
@@ -28,6 +32,10 @@ type KeyRegionFocusTarget = {
   keyRegionId: string
   batch: string | null
 }
+
+type ReviewSourceMode = 'rlt' | 'expert'
+type KeyRegionStatusFilter = 'all' | 'trainable' | 'needsCrop' | 'noActor' | 'actorModified'
+type ExpertCameraStatusFilter = 'complete' | 'incomplete' | 'any'
 
 const KEY_REGION_CAMERA_ORDER = ['cam_high', 'cam_low', 'cam_left_wrist', 'cam_right_wrist']
 const KEY_REGION_PAGE_SIZE = 10
@@ -115,6 +123,13 @@ const keyRegionEligibility = (record: RLTKeyRegionReviewRecord) => {
 const cameraLabelFromPath = (path: string) => {
   const filename = path.split('/').pop()?.replace(/\.mp4$/, '') || 'camera'
   return filename
+}
+
+const expertCameraLabelFromPath = (path: string) => {
+  const query = path.split('?')[1] || ''
+  const params = new URLSearchParams(query)
+  const camera = params.get('camera') || ''
+  return camera.replace('observation.images.', '') || 'camera'
 }
 
 const orderedCameraPaths = (record: RLTKeyRegionReviewRecord) => {
@@ -232,6 +247,9 @@ const keyRegionInfoRows = (record: RLTKeyRegionReviewRecord): KeyRegionInfoRow[]
   { label: 'Crop', value: `${formatDuration(record.crop_start_sec)} - ${formatDuration(record.crop_end_sec)}` },
   { label: 'Samples', value: `${record.num_replay_transitions || 0}` },
   { label: 'Reward', value: record.reward === null ? '-' : `${record.reward}` },
+  { label: 'Actor source', value: record.actor_inference_kind || '-' },
+  { label: 'Actor delta p95', value: record.actor_delta_p95 === null || record.actor_delta_p95 === undefined ? '-' : record.actor_delta_p95.toExponential(2) },
+  { label: 'Takeover meta', value: record.has_takeover_id || record.has_action_source ? 'yes' : 'no' },
   { label: 'Replay', value: record.replay_status || (record.npz_exists ? 'written' : 'pending') },
   { label: 'Eligibility', value: keyRegionEligibility(record) },
 ]
@@ -351,6 +369,116 @@ function KeyRegionVideoPreview({
   )
 }
 
+function ExpertDemoVideoPreview({
+  record,
+  cropRange,
+  previewTime,
+  isPlaying,
+  isScrubbing,
+  onTimeChange,
+}: {
+  record: RLTExpertDemoRecord
+  cropRange: CropRange
+  previewTime: number
+  isPlaying: boolean
+  isScrubbing: boolean
+  onTimeChange: (timeSec: number) => void
+}) {
+  const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({})
+  const lastTimePushRef = useRef(0)
+  const videos = () => Object.values(videoRefs.current).filter((video): video is HTMLVideoElement => Boolean(video))
+  const primaryVideo = () => videos()[0] || null
+  const videoStarts = new Map(record.video_paths.map((path, index) => [path, record.video_start_secs[index] || 0]))
+
+  useEffect(() => {
+    const seekTolerance = isScrubbing ? 0.001 : 0.08
+    for (const video of videos()) {
+      const path = Object.entries(videoRefs.current).find(([, item]) => item === video)?.[0] || ''
+      const targetTime = (videoStarts.get(path) || 0) + previewTime
+      if (Number.isFinite(targetTime) && Math.abs(video.currentTime - targetTime) > seekTolerance) {
+        video.currentTime = targetTime
+      }
+    }
+    return undefined
+  }, [isScrubbing, previewTime, record.episode_key])
+
+  useEffect(() => {
+    if (isPlaying && !isScrubbing) {
+      for (const video of videos()) {
+        const path = Object.entries(videoRefs.current).find(([, item]) => item === video)?.[0] || ''
+        const start = videoStarts.get(path) || 0
+        if (video.currentTime < start + cropRange.startSec || video.currentTime >= start + cropRange.endSec) {
+          video.currentTime = start + cropRange.startSec
+        }
+        void video.play().catch(() => undefined)
+      }
+    } else {
+      for (const video of videos()) video.pause()
+    }
+    return undefined
+  }, [cropRange.endSec, cropRange.startSec, isPlaying, isScrubbing])
+
+  const handleTimeUpdate = (path: string) => {
+    if (isScrubbing) return
+    const video = primaryVideo()
+    if (!video || videoRefs.current[path] !== video) return
+    const primaryStart = videoStarts.get(path) || 0
+    if (video.currentTime >= primaryStart + cropRange.endSec) {
+      for (const item of videos()) {
+        const itemPath = Object.entries(videoRefs.current).find(([, candidate]) => candidate === item)?.[0] || ''
+        item.currentTime = (videoStarts.get(itemPath) || 0) + cropRange.startSec
+        if (isPlaying) void item.play().catch(() => undefined)
+      }
+      onTimeChange(cropRange.startSec)
+      return
+    }
+    const now = performance.now()
+    if (now - lastTimePushRef.current > 80) {
+      lastTimePushRef.current = now
+      for (const item of videos()) {
+        if (item !== video) {
+          const itemPath = Object.entries(videoRefs.current).find(([, candidate]) => candidate === item)?.[0] || ''
+          const localTime = video.currentTime - primaryStart
+          const targetTime = (videoStarts.get(itemPath) || 0) + localTime
+          if (Math.abs(item.currentTime - targetTime) > 0.12) item.currentTime = targetTime
+        }
+      }
+      onTimeChange(Math.max(0, video.currentTime - primaryStart))
+    }
+  }
+
+  const pathsByCamera = new Map(record.video_paths.map((path) => [expertCameraLabelFromPath(path), path]))
+  return (
+    <div className="key-region-video-grid">
+      {KEY_REGION_CAMERA_ORDER.map((camera) => {
+        const path = pathsByCamera.get(camera)
+        return (
+          <div className="key-region-video-tile" key={`${record.episode_key}-${camera}`}>
+            <span className="key-region-camera-label">{camera}</span>
+            {path ? (
+              <video
+                ref={(element) => {
+                  videoRefs.current[path] = element
+                }}
+                src={`${apiBase}${path}`}
+                muted
+                playsInline
+                preload="metadata"
+                onLoadedMetadata={(event) => {
+                  event.currentTarget.currentTime = (videoStarts.get(path) || 0) + previewTime
+                }}
+                onTimeUpdate={() => handleTimeUpdate(path)}
+              />
+            ) : (
+              <div className="key-region-video-missing">Missing</div>
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
 export function KeyRegionsPage({
   title,
   focusTarget = null,
@@ -361,11 +489,23 @@ export function KeyRegionsPage({
   onBackToRLHF?: () => void
 }) {
   const [records, setRecords] = useState<RLTKeyRegionReviewRecord[]>([])
+  const [sourceMode, setSourceMode] = useState<ReviewSourceMode>('rlt')
+  const [expertRecords, setExpertRecords] = useState<RLTExpertDemoRecord[]>([])
+  const [expertDatasets, setExpertDatasets] = useState<string[]>([])
+  const [expertDatasetFilter, setExpertDatasetFilter] = useState('all')
+  const [expertCameraStatusFilter, setExpertCameraStatusFilter] = useState<ExpertCameraStatusFilter>('complete')
+  const [expertTotal, setExpertTotal] = useState(0)
+  const [expertNextOffset, setExpertNextOffset] = useState<number | null>(null)
+  const [expertCropRanges, setExpertCropRanges] = useState<Record<string, CropRange>>({})
+  const [expertRewards, setExpertRewards] = useState<Record<string, 0 | 1>>({})
+  const [expertDurations, setExpertDurations] = useState<Record<string, number>>({})
+  const [playingExpertKey, setPlayingExpertKey] = useState('')
+  const [scrubbingExpertKey, setScrubbingExpertKey] = useState('')
   const [summary, setSummary] = useState<RLTKeyRegionReviewSummary>(emptySummary)
   const [total, setTotal] = useState(0)
   const [offset, setOffset] = useState(0)
   const [nextOffset, setNextOffset] = useState<number | null>(null)
-  const [statusFilter, setStatusFilter] = useState<'all' | 'trainable' | 'needsCrop'>('all')
+  const [statusFilter, setStatusFilter] = useState<KeyRegionStatusFilter>('all')
   const [rewardFilter, setRewardFilter] = useState<'all' | 'success' | 'failure'>('all')
   const [batchFilter, setBatchFilter] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
@@ -394,6 +534,7 @@ export function KeyRegionsPage({
   )
 
   const loadPage = useCallback(async () => {
+    if (sourceMode !== 'rlt') return
     setLoading(true)
     setActionError('')
     try {
@@ -424,7 +565,30 @@ export function KeyRegionsPage({
     } finally {
       setLoading(false)
     }
-  }, [batchFilter, focusKeyRegionId, offset, rewardFilter, searchQuery, statusFilter])
+  }, [batchFilter, focusKeyRegionId, offset, rewardFilter, searchQuery, sourceMode, statusFilter])
+
+  const loadExpertPage = useCallback(async () => {
+    if (sourceMode !== 'expert') return
+    setLoading(true)
+    setActionError('')
+    try {
+      const page = await fetchRLTExpertDemoReview({
+        limit: KEY_REGION_PAGE_SIZE,
+        offset,
+        dataset: expertDatasetFilter,
+        search: searchQuery,
+        cameraStatus: expertCameraStatusFilter,
+      })
+      setExpertRecords(page.items)
+      setExpertTotal(page.total)
+      setExpertNextOffset(page.next_offset)
+      setExpertDatasets(page.datasets)
+    } catch (exc) {
+      setActionError(exc instanceof Error ? exc.message : 'Expert demos could not be loaded.')
+    } finally {
+      setLoading(false)
+    }
+  }, [expertCameraStatusFilter, expertDatasetFilter, offset, searchQuery, sourceMode])
 
   useEffect(() => {
     selectedReviewIdRef.current = selectedReviewId
@@ -433,6 +597,10 @@ export function KeyRegionsPage({
   useEffect(() => {
     void loadPage()
   }, [loadPage])
+
+  useEffect(() => {
+    void loadExpertPage()
+  }, [loadExpertPage])
 
   useEffect(() => {
     if (!focusTarget) return
@@ -456,7 +624,7 @@ export function KeyRegionsPage({
     setSelectedKeyRegionIds(new Set())
     setPlayingKeyRegionId('')
     setPendingPlaybackId('')
-  }, [batchFilter, rewardFilter, searchQuery, statusFilter])
+  }, [batchFilter, expertCameraStatusFilter, expertDatasetFilter, rewardFilter, searchQuery, sourceMode, statusFilter])
 
   useEffect(() => {
     if (!selectedReviewId) {
@@ -484,8 +652,11 @@ export function KeyRegionsPage({
 
   const visibleIds = useMemo(() => new Set(records.map((record) => record.key_region_id)), [records])
   const selectedCount = selectedKeyRegionIds.size
+  const displayedTotal = sourceMode === 'expert' ? expertTotal : total
+  const displayedNextOffset = sourceMode === 'expert' ? expertNextOffset : nextOffset
+  const displayedCount = sourceMode === 'expert' ? expertRecords.length : records.length
   const pageNumber = Math.floor(offset / KEY_REGION_PAGE_SIZE) + 1
-  const pageCount = Math.max(1, Math.ceil(total / KEY_REGION_PAGE_SIZE))
+  const pageCount = Math.max(1, Math.ceil(displayedTotal / KEY_REGION_PAGE_SIZE))
 
   const getCropRange = (record: RLTKeyRegionReviewRecord) => cropRangeForRecord(record, cropRanges)
 
@@ -629,6 +800,74 @@ export function KeyRegionsPage({
     }
   }
 
+  const expertRangeForRecord = (record: RLTExpertDemoRecord) =>
+    expertCropRanges[record.episode_key] || { startSec: 0, endSec: Math.min(2, expertDurations[record.episode_key] || record.duration_seconds || 2) }
+
+  const updateExpertRange = (record: RLTExpertDemoRecord, edge: 'start' | 'end', value: number) => {
+    const current = expertRangeForRecord(record)
+    const duration = expertDurations[record.episode_key] || record.duration_seconds || Math.max(current.endSec, 2)
+    const nextValue = clamp(value, 0, duration)
+    const next =
+      edge === 'start'
+        ? { startSec: clamp(nextValue, 0, Math.max(0, current.endSec - 0.02)), endSec: current.endSec }
+        : { startSec: current.startSec, endSec: clamp(nextValue, current.startSec + 0.02, duration) }
+    setExpertCropRanges((ranges) => ({ ...ranges, [record.episode_key]: next }))
+    setPlaybackTimes((times) => ({ ...times, [record.episode_key]: edge === 'start' ? next.startSec : next.endSec }))
+  }
+
+  const updateExpertFromPointer = (
+    record: RLTExpertDemoRecord,
+    edge: 'start' | 'end',
+    track: HTMLElement,
+    clientX: number,
+  ) => {
+    const duration = expertDurations[record.episode_key] || record.duration_seconds || expertRangeForRecord(record).endSec
+    if (duration <= 0) return
+    const rect = track.getBoundingClientRect()
+    const ratio = rect.width > 0 ? clamp((clientX - rect.left) / rect.width, 0, 1) : 0
+    updateExpertRange(record, edge, ratio * duration)
+  }
+
+  const beginExpertCropDrag = (
+    event: React.PointerEvent<HTMLButtonElement>,
+    record: RLTExpertDemoRecord,
+    edge: 'start' | 'end',
+  ) => {
+    event.preventDefault()
+    event.stopPropagation()
+    const track = event.currentTarget.closest('.key-region-timeline-track')
+    if (!(track instanceof HTMLElement)) return
+    setScrubbingExpertKey(record.episode_key)
+    setPlayingExpertKey('')
+    updateExpertFromPointer(record, edge, track, event.clientX)
+    const onMove = (moveEvent: PointerEvent) => updateExpertFromPointer(record, edge, track, moveEvent.clientX)
+    const onUp = () => {
+      setScrubbingExpertKey('')
+      window.removeEventListener('pointermove', onMove)
+      window.removeEventListener('pointerup', onUp)
+    }
+    window.addEventListener('pointermove', onMove)
+    window.addEventListener('pointerup', onUp, { once: true })
+  }
+
+  const toggleExpertPlayback = (record: RLTExpertDemoRecord) => {
+    setPlayingExpertKey((current) => (current === record.episode_key ? '' : record.episode_key))
+  }
+
+  const saveExpertCrop = async (record: RLTExpertDemoRecord) => {
+    const range = expertRangeForRecord(record)
+    setActionError('')
+    setActionPending(`expert-crop-${record.episode_key}`)
+    try {
+      await cropExpertDemo(record.dataset_id, record.episode_index, range.startSec, range.endSec, expertRewards[record.episode_key] ?? 1)
+      await loadExpertPage()
+    } catch (exc) {
+      setActionError(exc instanceof Error ? exc.message : 'Expert crop save failed')
+    } finally {
+      setActionPending('')
+    }
+  }
+
   const rescoreForQ = async (record: RLTKeyRegionReviewRecord, reward: 0 | 1) => {
     setActionError('')
     setActionPending(`rescore-${record.key_region_id}-${reward}`)
@@ -697,12 +936,27 @@ export function KeyRegionsPage({
         <div className="key-regions-controls">
           <select
             className="key-region-control"
+            value={sourceMode}
+            onChange={(event) => {
+              setSourceMode(event.target.value as ReviewSourceMode)
+              setOffset(0)
+            }}
+          >
+            <option value="rlt">RLT key regions</option>
+            <option value="expert">Expert demos for D</option>
+          </select>
+          {sourceMode === 'rlt' ? (
+            <>
+          <select
+            className="key-region-control"
             value={statusFilter}
-            onChange={(event) => setStatusFilter(event.target.value as 'all' | 'trainable' | 'needsCrop')}
+            onChange={(event) => setStatusFilter(event.target.value as KeyRegionStatusFilter)}
           >
             <option value="all">All statuses</option>
             <option value="trainable">Trainable</option>
             <option value="needsCrop">Needs crop</option>
+            <option value="noActor">No actor / VLA only</option>
+            <option value="actorModified">Actor modified</option>
           </select>
           <select
             className="key-region-control"
@@ -723,6 +977,30 @@ export function KeyRegionsPage({
               <option value={batch} key={batch}>{batch}</option>
             ))}
           </select>
+            </>
+          ) : (
+            <>
+            <select
+              className="key-region-control"
+              value={expertDatasetFilter}
+              onChange={(event) => setExpertDatasetFilter(event.target.value)}
+            >
+              <option value="all">All expert datasets</option>
+              {expertDatasets.map((dataset) => (
+                <option value={dataset} key={dataset}>{dataset}</option>
+              ))}
+            </select>
+            <select
+              className="key-region-control"
+              value={expertCameraStatusFilter}
+              onChange={(event) => setExpertCameraStatusFilter(event.target.value as ExpertCameraStatusFilter)}
+            >
+              <option value="complete">Complete 4 cameras</option>
+              <option value="incomplete">Incomplete cameras</option>
+              <option value="any">Any camera count</option>
+            </select>
+            </>
+          )}
           <input
             className="key-region-control key-region-search-control"
             type="search"
@@ -761,23 +1039,31 @@ export function KeyRegionsPage({
         </div>
       </div>
 
-      <div className="key-region-summary-strip">
-        <div className="key-region-summary-tile"><span>Total key regions</span><strong>{summary.total}</strong></div>
-        <div className="key-region-summary-tile"><span>Trainable key regions</span><strong>{summary.trainable}</strong></div>
-        <div className="key-region-summary-tile"><span>Confirmed replay samples</span><strong>{summary.replay_samples}</strong></div>
-        <div className="key-region-summary-tile"><span>Success / failure</span><strong>{summary.success} / {summary.failure}</strong></div>
-        <div className="key-region-summary-tile"><span>Needs crop review</span><strong>{summary.needs_crop}</strong></div>
-        <div className="key-region-summary-tile"><span>Selected</span><strong>{selectedCount}</strong></div>
-      </div>
+      {sourceMode === 'rlt' ? (
+        <div className="key-region-summary-strip">
+          <div className="key-region-summary-tile"><span>Total key regions</span><strong>{summary.total}</strong></div>
+          <div className="key-region-summary-tile"><span>Trainable key regions</span><strong>{summary.trainable}</strong></div>
+          <div className="key-region-summary-tile"><span>Confirmed replay samples</span><strong>{summary.replay_samples}</strong></div>
+          <div className="key-region-summary-tile"><span>Success / failure</span><strong>{summary.success} / {summary.failure}</strong></div>
+          <div className="key-region-summary-tile"><span>Needs crop review</span><strong>{summary.needs_crop}</strong></div>
+          <div className="key-region-summary-tile"><span>Selected</span><strong>{selectedCount}</strong></div>
+        </div>
+      ) : (
+        <div className="key-region-summary-strip">
+          <div className="key-region-summary-tile"><span>Expert episodes</span><strong>{expertTotal}</strong></div>
+          <div className="key-region-summary-tile"><span>Datasets</span><strong>{expertDatasets.length}</strong></div>
+          <div className="key-region-summary-tile"><span>Label</span><strong>expert</strong></div>
+        </div>
+      )}
 
       <div className="key-region-page-controls">
         <button className="ghost-button" type="button" onClick={() => goToOffset(offset - KEY_REGION_PAGE_SIZE)} disabled={offset <= 0 || loading}>
           Previous
         </button>
         <span>
-          Showing {total ? offset + 1 : 0}-{Math.min(offset + records.length, total)} / {total}
+          Showing {displayedTotal ? offset + 1 : 0}-{Math.min(offset + displayedCount, displayedTotal)} / {displayedTotal}
         </span>
-        <button className="ghost-button" type="button" onClick={() => goToOffset(nextOffset ?? offset)} disabled={nextOffset === null || loading}>
+        <button className="ghost-button" type="button" onClick={() => goToOffset(displayedNextOffset ?? offset)} disabled={displayedNextOffset === null || loading}>
           Next
         </button>
       </div>
@@ -785,6 +1071,140 @@ export function KeyRegionsPage({
       {actionError ? <p className="inline-error">{actionError}</p> : null}
       {playbackError ? <p className="inline-error">{playbackError}</p> : null}
 
+      {sourceMode === 'expert' ? (
+        <div className="key-region-card-stack">
+          {expertRecords.map((record, index) => {
+            const range = expertRangeForRecord(record)
+            const pending = actionPending === `expert-crop-${record.episode_key}`
+            const rangeSummary = `${range.startSec.toFixed(2)}s - ${range.endSec.toFixed(2)}s`
+            const duration = expertDurations[record.episode_key] || record.duration_seconds || Math.max(range.endSec, 2)
+            const clipLeft = duration > 0 ? clamp((range.startSec / duration) * 100, 0, 100) : 0
+            const clipWidth = duration > 0 ? clamp(((range.endSec - range.startSec) / duration) * 100, 0, 100 - clipLeft) : 0
+            const playbackTime = playbackTimes[record.episode_key] ?? range.startSec
+            const playbackProgress =
+              range.endSec > range.startSec
+                ? clamp((playbackTime - range.startSec) / (range.endSec - range.startSec), 0, 1)
+                : 0
+            const isPlaying = playingExpertKey === record.episode_key
+            const isScrubbing = scrubbingExpertKey === record.episode_key
+            const reward = expertRewards[record.episode_key] ?? 1
+            return (
+              <article className="key-region-card" key={record.episode_key}>
+                <div className="key-region-card-head">
+                  <button className="key-region-title-button" type="button">
+                    <strong>Card {offset + index + 1} / {expertTotal} - Expert demo - {record.dataset_id} - episode {record.episode_index}</strong>
+                    <span>{record.fps ? `${record.fps} fps` : 'fps unknown'} · Label expert · Crop for D</span>
+                  </button>
+                </div>
+                <div className="key-region-card-main">
+                  <ExpertDemoVideoPreview
+                    record={record}
+                    cropRange={range}
+                    previewTime={playbackTimes[record.episode_key] ?? range.startSec}
+                    isPlaying={isPlaying}
+                    isScrubbing={isScrubbing}
+                    onTimeChange={(timeSec) => setPlaybackTimes((times) => ({ ...times, [record.episode_key]: timeSec }))}
+                  />
+                  <aside className="key-region-info-panel">
+                    <div className="key-region-panel-title">
+                      <h3>D Expert Data</h3>
+                      <span>human demo</span>
+                    </div>
+                    <div className="key-region-kv-grid">
+                      <div className="key-region-kv"><span>Dataset</span><strong>{record.dataset_id}</strong></div>
+                      <div className="key-region-kv"><span>Episode</span><strong>{record.episode_index}</strong></div>
+                      <div className="key-region-kv"><span>FPS</span><strong>{record.fps || '-'}</strong></div>
+                      <div className="key-region-kv"><span>Videos</span><strong>{record.camera_count} / 4</strong></div>
+                      <div className="key-region-kv"><span>Label</span><strong>{reward}</strong></div>
+                      <div className="key-region-kv"><span>Crop</span><strong>{rangeSummary}</strong></div>
+                    </div>
+                    {record.missing_cameras.length ? (
+                      <p className="key-region-crop-warning">Missing {record.missing_cameras.join(', ')}</p>
+                    ) : null}
+                    <div className="key-region-paths">
+                      <div>
+                        <span>Source dataset</span>
+                        <code title={record.source_dataset_path}>{record.source_dataset_path}</code>
+                      </div>
+                    </div>
+                  </aside>
+                </div>
+                <div className="key-region-trim-panel">
+                  <div className="key-region-trim-head">
+                    <strong>Crop for D training</strong>
+                    <span>{rangeSummary}</span>
+                  </div>
+                  <div className="key-region-timeline">
+                    <div className="key-region-timeline-track">
+                      <div className={`key-region-clip ${reward === 1 ? 'success' : 'fail'}`} style={{ left: `${clipLeft}%`, width: `${clipWidth}%` }}>
+                        <span className="key-region-clip-progress" style={{ width: `${playbackProgress * 100}%` }} />
+                        <button
+                          className="key-region-handle start"
+                          type="button"
+                          aria-label="Set expert crop start"
+                          onPointerDown={(event) => beginExpertCropDrag(event, record, 'start')}
+                        />
+                        <button
+                          className="key-region-handle end"
+                          type="button"
+                          aria-label="Set expert crop end"
+                          onPointerDown={(event) => beginExpertCropDrag(event, record, 'end')}
+                        />
+                        <span className="key-region-playhead" style={{ left: `${playbackProgress * 100}%` }} />
+                      </div>
+                    </div>
+                    <div className="key-region-ticks">
+                      <span>0.0s</span>
+                      <span>{formatDuration(duration * 0.25)}</span>
+                      <span>{formatDuration(duration * 0.5)}</span>
+                      <span>{formatDuration(duration * 0.75)}</span>
+                      <span>{formatDuration(duration)}</span>
+                    </div>
+                  </div>
+                  <div className="key-region-trim-actions">
+                    <div className="key-region-range-readout">
+                      <span>start {range.startSec.toFixed(2)}s</span>
+                      <span>end {range.endSec.toFixed(2)}s</span>
+                      <span>reward {reward}</span>
+                      <span className="key-region-score-actions" aria-label="Score expert demo crop">
+                        <button
+                          className={`score-button fail ${reward === 0 ? 'active' : ''}`}
+                          type="button"
+                          onClick={() => setExpertRewards((items) => ({ ...items, [record.episode_key]: 0 }))}
+                        >
+                          Score 0
+                        </button>
+                        <button
+                          className={`score-button success ${reward === 1 ? 'active' : ''}`}
+                          type="button"
+                          onClick={() => setExpertRewards((items) => ({ ...items, [record.episode_key]: 1 }))}
+                        >
+                          Score 1
+                        </button>
+                      </span>
+                    </div>
+                    <div className="key-region-action-group">
+                      <button
+                        className={`crop-play-button ${isPlaying ? 'active' : ''}`}
+                        type="button"
+                        aria-pressed={isPlaying}
+                        onClick={() => toggleExpertPlayback(record)}
+                      >
+                        <span className="crop-play-icon" aria-hidden="true">{isPlaying ? 'II' : '>'}</span>
+                        <span>{isPlaying ? 'Pause' : 'Play'}</span>
+                      </button>
+                      <button className="apply-button" type="button" disabled={pending} onClick={() => void saveExpertCrop(record)}>
+                        {pending ? 'Saving' : 'Save crop for D'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            )
+          })}
+          {!expertRecords.length && !loading ? <p className="rollout-empty">No expert demos match the current filters.</p> : null}
+        </div>
+      ) : (
       <div className="key-region-card-stack">
         {records.map((record, index) => {
           const activeCard = selectedReviewId === record.key_region_id
@@ -966,6 +1386,7 @@ export function KeyRegionsPage({
         })}
         {!records.length && !loading ? <p className="rollout-empty">No key regions match the current filters.</p> : null}
       </div>
+      )}
     </section>
   )
 }

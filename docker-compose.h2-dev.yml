@@ -24,6 +24,7 @@ services:
       - /home/eii/data/openpi0.5-rtc-reward-learning/replay:/app/replay
       - /home/eii/data/openpi0.5-rtc-reward-learning/segment_db:/app/segment_db
       - /home/eii/data/openpi0.5-rtc-reward-learning:/home/eii/data/openpi0.5-rtc-reward-learning
+      - /home/eii/.cache/huggingface/lerobot/lyl472324464:/home/eii/.cache/huggingface/lerobot/lyl472324464:ro
 
   eii_pilot_frontend:
     command:

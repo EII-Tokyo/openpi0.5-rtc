@@ -2138,6 +2138,18 @@ button {
   white-space: nowrap;
 }
 
+.key-region-range-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.key-region-range-field .key-region-control {
+  width: 86px;
+  min-height: 28px;
+  padding: 4px 6px;
+}
+
 @media (max-width: 860px) {
   .key-region-trim-actions {
     grid-template-columns: 1fr;

@@ -124,6 +124,13 @@ export type RLTKeyRegionReviewRecord = {
   rollout_path: string | null
   local_rollout_path: string | null
   local_shard_path: string | null
+  actor_inference_kind: string | null
+  actor_delta_p95: number | null
+  actor_delta_max: number | null
+  actor_delta_mean: number | null
+  has_intervention_metadata: boolean
+  has_action_source: boolean
+  has_takeover_id: boolean
   segment_status: string | null
   train_eligible: boolean | null
   replay_status: string | null
@@ -177,11 +184,46 @@ export type RLTKeyRegionReviewPage = {
 export type RLTKeyRegionReviewQuery = {
   limit?: number
   offset?: number
-  status?: 'all' | 'trainable' | 'needsCrop'
+  status?: 'all' | 'trainable' | 'needsCrop' | 'noActor' | 'actorModified'
   reward?: 'all' | 'success' | 'failure'
   batch?: string
   search?: string
   focusKeyRegionId?: string
+}
+
+export type RLTExpertDemoRecord = {
+  episode_key: string
+  dataset_id: string
+  episode_index: number
+  fps: number | null
+  num_frames: number | null
+  duration_seconds: number | null
+  video_paths: string[]
+  local_video_paths: string[]
+  video_start_secs: number[]
+  camera_count: number
+  missing_cameras: string[]
+  camera_complete: boolean
+  source_dataset_path: string
+}
+
+export type RLTExpertDemoPage = {
+  items: RLTExpertDemoRecord[]
+  total: number
+  limit: number
+  offset: number
+  next_offset: number | null
+  datasets: string[]
+}
+
+export type RLTExpertDemoCropResponse = {
+  dataset_id: string
+  episode_index: number
+  start_sec: number
+  end_sec: number
+  reward: number
+  label: string
+  metadata_path: string | null
 }
 
 export type RLTKeyRegionCropResponse = {
@@ -396,6 +438,25 @@ export const fetchRLTKeyRegionReview = (query: RLTKeyRegionReviewQuery = {}) => 
 }
 export const fetchRLTKeyRegionDetail = (keyRegionId: string) =>
   getJson<RLTKeyRegionReviewRecord>(`/api/rlt/key-region/${encodeURIComponent(keyRegionId)}`)
+export const fetchRLTExpertDemoReview = (query: { limit?: number; offset?: number; dataset?: string; search?: string; cameraStatus?: string } = {}) => {
+  const params = new URLSearchParams()
+  if (query.limit !== undefined) params.set('limit', String(query.limit))
+  if (query.offset !== undefined) params.set('offset', String(query.offset))
+  if (query.dataset && query.dataset !== 'all') params.set('dataset', query.dataset)
+  if (query.search?.trim()) params.set('search', query.search.trim())
+  if (query.cameraStatus && query.cameraStatus !== 'complete') params.set('camera_status', query.cameraStatus)
+  const suffix = params.toString() ? `?${params.toString()}` : ''
+  return getJson<RLTExpertDemoPage>(`/api/rlt/expert-demos/review${suffix}`)
+}
+export const cropExpertDemo = (datasetId: string, episodeIndex: number, startSec: number, endSec: number, reward = 1) =>
+  postJson<RLTExpertDemoCropResponse>(
+    `/api/rlt/expert-demos/${encodeURIComponent(datasetId)}/${encodeURIComponent(String(episodeIndex))}/crop`,
+    {
+      start_sec: startSec,
+      end_sec: endSec,
+      reward,
+    },
+  )
 export const fetchRLTKeyRegionMediaMetadata = (keyRegionId: string) =>
   getJson<RLTKeyRegionMediaMetadata>(`/api/rlt/key-region/${encodeURIComponent(keyRegionId)}/media-metadata`)
 export const keyRegionFrameUrl = (keyRegionId: string, camera: string, frame: number) =>

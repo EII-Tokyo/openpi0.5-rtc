@@ -282,6 +282,13 @@ class RLTKeyRegionReviewRecord(BaseModel):
     rollout_path: str | None = None
     local_rollout_path: str | None = None
     local_shard_path: str | None = None
+    actor_inference_kind: str | None = None
+    actor_delta_p95: float | None = None
+    actor_delta_max: float | None = None
+    actor_delta_mean: float | None = None
+    has_intervention_metadata: bool = False
+    has_action_source: bool = False
+    has_takeover_id: bool = False
     segment_status: str | None = None
     train_eligible: bool | None = None
     replay_status: str | None = None
@@ -330,6 +337,47 @@ class RLTKeyRegionReviewPage(BaseModel):
     next_offset: int | None = None
     summary: RLTKeyRegionReviewSummary = Field(default_factory=RLTKeyRegionReviewSummary)
     batches: list[str] = Field(default_factory=list)
+
+
+class RLTExpertDemoRecord(BaseModel):
+    episode_key: str
+    dataset_id: str
+    episode_index: int
+    fps: float | None = None
+    num_frames: int | None = None
+    duration_seconds: float | None = None
+    video_paths: list[str] = Field(default_factory=list)
+    local_video_paths: list[str] = Field(default_factory=list)
+    video_start_secs: list[float] = Field(default_factory=list)
+    camera_count: int = 0
+    missing_cameras: list[str] = Field(default_factory=list)
+    camera_complete: bool = False
+    source_dataset_path: str
+
+
+class RLTExpertDemoPage(BaseModel):
+    items: list[RLTExpertDemoRecord] = Field(default_factory=list)
+    total: int = 0
+    limit: int = 20
+    offset: int = 0
+    next_offset: int | None = None
+    datasets: list[str] = Field(default_factory=list)
+
+
+class RLTExpertDemoCropRequest(BaseModel):
+    start_sec: float
+    end_sec: float
+    reward: int = 1
+
+
+class RLTExpertDemoCropResponse(BaseModel):
+    dataset_id: str
+    episode_index: int
+    start_sec: float
+    end_sec: float
+    reward: int = 1
+    label: str = "expert"
+    metadata_path: str | None = None
 
 
 class RLTPreferenceStats(BaseModel):

@@ -387,6 +387,96 @@ def _write_cropped_review_record(rollout_root, replay_root, *, key_region_id, re
     return shard_path
 
 
+def _write_action_review_record(
+    rollout_root,
+    replay_root,
+    *,
+    key_region_id,
+    reward,
+    score_time,
+    action_offset,
+):
+    shard_path = _write_cropped_review_record(
+        rollout_root,
+        replay_root,
+        key_region_id=key_region_id,
+        reward=reward,
+        score_time=score_time,
+    )
+    reference_action = np.zeros((3, 10, 14), dtype=np.float32)
+    action = reference_action + np.float32(action_offset)
+    np.savez(
+        shard_path,
+        done=np.asarray([False, False, True]),
+        reward_seq=np.ones((3, 10), dtype=np.float32),
+        action=action,
+        reference_action=reference_action,
+    )
+    return shard_path
+
+
+def test_key_region_review_filters_no_actor_records(tmp_path, monkeypatch):
+    rollout_root = tmp_path / "rollouts"
+    replay_root = tmp_path / "replay"
+    _write_action_review_record(
+        rollout_root,
+        replay_root,
+        key_region_id="vla_only",
+        reward=1,
+        score_time=20.0,
+        action_offset=0.0,
+    )
+    _write_action_review_record(
+        rollout_root,
+        replay_root,
+        key_region_id="actor_changed",
+        reward=0,
+        score_time=10.0,
+        action_offset=0.01,
+    )
+
+    monkeypatch.setattr(main, "ROLLOUTS_ROOT", rollout_root)
+    monkeypatch.setattr(main, "REPLAY_ROOT", replay_root)
+    monkeypatch.setattr(main, "rlt_control", _FakeRLTControl([]))
+
+    page = main.rlt_key_region_review(limit=20, status="noActor")
+
+    assert [record.key_region_id for record in page.items] == ["vla_only"]
+    assert page.items[0].actor_inference_kind == "no_actor"
+    assert page.items[0].actor_delta_p95 == pytest.approx(0.0)
+
+
+def test_key_region_review_filters_actor_modified_records(tmp_path, monkeypatch):
+    rollout_root = tmp_path / "rollouts"
+    replay_root = tmp_path / "replay"
+    _write_action_review_record(
+        rollout_root,
+        replay_root,
+        key_region_id="vla_only",
+        reward=1,
+        score_time=20.0,
+        action_offset=0.0,
+    )
+    _write_action_review_record(
+        rollout_root,
+        replay_root,
+        key_region_id="actor_changed",
+        reward=0,
+        score_time=10.0,
+        action_offset=0.01,
+    )
+
+    monkeypatch.setattr(main, "ROLLOUTS_ROOT", rollout_root)
+    monkeypatch.setattr(main, "REPLAY_ROOT", replay_root)
+    monkeypatch.setattr(main, "rlt_control", _FakeRLTControl([]))
+
+    page = main.rlt_key_region_review(limit=20, status="actorModified")
+
+    assert [record.key_region_id for record in page.items] == ["actor_changed"]
+    assert page.items[0].actor_inference_kind == "actor_or_modified"
+    assert page.items[0].actor_delta_p95 == pytest.approx(0.01)
+
+
 def test_key_region_review_page_paginates_and_summarizes_records(tmp_path, monkeypatch):
     rollout_root = tmp_path / "rollouts"
     replay_root = tmp_path / "replay"
@@ -406,6 +496,29 @@ def test_key_region_review_page_paginates_and_summarizes_records(tmp_path, monke
     assert page.summary.failure == 2
     assert page.summary.trainable == 3
     assert [record.key_region_id for record in page.items] == ["old_failure"]
+
+
+def test_key_region_review_default_page_only_reads_action_metrics_for_visible_records(tmp_path, monkeypatch):
+    rollout_root = tmp_path / "rollouts"
+    replay_root = tmp_path / "replay"
+    _write_review_record(rollout_root, replay_root, key_region_id="old_failure", reward=0, score_time=10.0)
+    _write_review_record(rollout_root, replay_root, key_region_id="middle_success", reward=1, score_time=20.0)
+    _write_review_record(rollout_root, replay_root, key_region_id="new_failure", reward=0, score_time=30.0)
+    calls = []
+
+    def fake_action_metrics(shard_path):
+        calls.append(shard_path)
+        return {"actor_inference_kind": "unknown"}
+
+    monkeypatch.setattr(main, "ROLLOUTS_ROOT", rollout_root)
+    monkeypatch.setattr(main, "REPLAY_ROOT", replay_root)
+    monkeypatch.setattr(main, "rlt_control", _FakeRLTControl([]))
+    monkeypatch.setattr(main, "_rlt_action_delta_metrics", fake_action_metrics)
+
+    page = main.rlt_key_region_review(limit=1, offset=0)
+
+    assert [record.key_region_id for record in page.items] == ["new_failure"]
+    assert len(calls) == 1
 
 
 def test_key_region_review_page_can_focus_target_record(tmp_path, monkeypatch):
