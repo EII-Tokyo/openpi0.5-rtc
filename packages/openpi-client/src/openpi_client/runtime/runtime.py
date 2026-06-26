@@ -93,7 +93,7 @@ class Runtime:
             "max_delta": float(os.getenv("RLT_DEFAULT_MAX_DELTA", "0.1")),
             "actor_handoff_steps": int(os.getenv("RLT_DEFAULT_ACTOR_HANDOFF_STEPS", "4")),
             "actor_delta_ema_alpha": float(os.getenv("RLT_DEFAULT_ACTOR_DELTA_EMA_ALPHA", "0.35")),
-            "actor_speed_limit_preset": os.getenv("RLT_DEFAULT_ACTOR_SPEED_LIMIT_PRESET", "80"),
+            "actor_speed_limit_preset": os.getenv("RLT_DEFAULT_ACTOR_SPEED_LIMIT_PRESET", "off"),
             "critic_gate_enabled": os.getenv("RLT_DEFAULT_CRITIC_GATE_ENABLED", "1") in {"1", "true", "True"},
             "critic_gate_margin": float(os.getenv("RLT_DEFAULT_CRITIC_GATE_MARGIN", "0.0")),
             "critic_gate_temperature": float(os.getenv("RLT_DEFAULT_CRITIC_GATE_TEMPERATURE", "0.05")),

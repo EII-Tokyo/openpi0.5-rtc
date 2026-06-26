@@ -314,7 +314,7 @@ export function RLTConfigPage({ rlt, onState }: Props) {
               <option value="20">20% limit</option>
               <option value="off">No limit</option>
             </select>
-            <small className="field-hint">Actor/key region 期间限制左臂关节目标相对当前状态的单步 delta；默认 80%。</small>
+            <small className="field-hint">Actor/key region 期间限制左臂关节目标相对当前状态的单步 delta；默认 No limit，不做左臂速度限幅。</small>
           </Field>
           <Toggle
             label="Critic Gate"

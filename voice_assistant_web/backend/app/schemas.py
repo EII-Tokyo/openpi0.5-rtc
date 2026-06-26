@@ -119,7 +119,7 @@ class RLTControlState(BaseModel):
     max_delta: float = 0.1
     actor_handoff_steps: int = 4
     actor_delta_ema_alpha: float = 0.35
-    actor_speed_limit_preset: Literal["off", "80", "50", "20"] = "80"
+    actor_speed_limit_preset: Literal["off", "80", "50", "20"] = "off"
     critic_gate_enabled: bool = True
     critic_gate_margin: float = 0.0
     critic_gate_temperature: float = 0.05
