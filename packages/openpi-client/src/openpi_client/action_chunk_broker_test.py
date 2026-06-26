@@ -253,6 +253,39 @@ def test_actor_handoff_smoothing_blends_left_arm_from_current_state_only():
     np.testing.assert_allclose(smoothed[:, 7:14], actions[:, 7:14])
 
 
+def test_actor_handoff_uses_last_emitted_action_before_robot_state():
+    broker = ActionChunkBroker(_Policy(), action_horizon=10, use_rtc=False, rlt_actor_runtime=_Actor())
+    broker._last_emitted_action = np.zeros((14,), dtype=np.float32)
+    reference = np.ones((10, 14), dtype=np.float32)
+    adjusted = np.ones((10, 14), dtype=np.float32)
+    adjusted[:, :6] = 1.0
+    robot_state = np.zeros((14,), dtype=np.float32)
+    robot_state[:6] = 10.0
+
+    smoothed = broker._smooth_left_actor_actions(
+        reference_actions=reference,
+        adjusted_actions=adjusted,
+        obs={"state": robot_state},
+        context={"actor_handoff_steps": 4, "actor_delta_ema_alpha": 1.0},
+        action_start_index=0,
+        action_end_index=10,
+    )
+
+    np.testing.assert_allclose(smoothed[:4, 0], np.array([0.25, 0.5, 0.75, 1.0], dtype=np.float32))
+    np.testing.assert_allclose(smoothed[:, 6], adjusted[:, 6])
+
+
+def test_infer_records_last_emitted_action_for_next_handoff():
+    broker = ActionChunkBroker(_Policy(), action_horizon=3, use_rtc=False, rlt_actor_runtime=_Actor(mode="disabled"))
+
+    first = broker.infer({"rlt_context": {"actor_requested": False}})
+    second = broker.infer({"rlt_context": {"actor_requested": False}})
+
+    np.testing.assert_allclose(first["actions"], np.array([0, 1], dtype=np.float32))
+    np.testing.assert_allclose(second["actions"], np.array([2, 3], dtype=np.float32))
+    np.testing.assert_allclose(broker._last_emitted_action, np.array([2, 3], dtype=np.float32))
+
+
 def test_actor_delta_ema_smooths_left_arm_actor_residual_across_chunks():
     class _SequenceActor(_Actor):
         def __init__(self):

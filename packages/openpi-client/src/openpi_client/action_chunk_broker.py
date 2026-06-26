@@ -225,6 +225,7 @@ class ActionChunkBroker(_base_policy.BasePolicy):
         self._background_results: Dict[str, np.ndarray] | None = None
         self._background_guidance_actions: np.ndarray | None = None
         self._background_rlt_context_signature: tuple | None = None
+        self._last_emitted_action: np.ndarray | None = None
         self._right_arm_hold_state: np.ndarray | None = None
         self._actor_delta_ema: np.ndarray | None = None
         self._background_running: bool = False
@@ -404,6 +405,7 @@ class ActionChunkBroker(_base_policy.BasePolicy):
                     self._refresh_current_results(obs, context_signature)
 
             results = self._slice_result_cache(self._last_results)
+            self._record_emitted_action(results)
             self._obs = obs
             self._cur_step += 1
 
@@ -443,6 +445,7 @@ class ActionChunkBroker(_base_policy.BasePolicy):
                     self._refresh_current_results(obs, context_signature)
 
             results = self._slice_result_cache(self._last_results)
+            self._record_emitted_action(results)
             self._cur_step += 1
 
             if self._cur_step >= self._action_horizon:
@@ -454,6 +457,7 @@ class ActionChunkBroker(_base_policy.BasePolicy):
     def reset(self) -> None:
         self._policy.reset()
         self._clear_cached_results()
+        self._last_emitted_action = None
 
     def _clear_cached_results(self) -> None:
         with self._cache_lock:
@@ -756,9 +760,10 @@ class ActionChunkBroker(_base_policy.BasePolicy):
         handoff_steps = int(context.get("actor_handoff_steps", 0) or 0)
         if handoff_steps > 1:
             robot_state = np.asarray(obs.get("state", obs.get("proprio", np.array([], dtype=np.float32))), dtype=np.float32)
+            anchor_action = self._last_emitted_action if self._last_emitted_action is not None else robot_state
             actions = _apply_actor_handoff_smoothing(
                 actions=actions,
-                anchor_action=robot_state[: actions.shape[1]],
+                anchor_action=np.asarray(anchor_action, dtype=np.float32)[: actions.shape[1]],
                 action_start_index=start,
                 action_end_index=end,
                 handoff_steps=handoff_steps,
@@ -814,3 +819,11 @@ class ActionChunkBroker(_base_policy.BasePolicy):
             else:
                 sliced[key] = value
         return sliced
+
+    def _record_emitted_action(self, results: Dict[str, np.ndarray]) -> None:
+        action = results.get("actions")
+        if action is None:
+            return
+        action = np.asarray(action, dtype=np.float32)
+        if action.ndim == 1:
+            self._last_emitted_action = np.array(action, dtype=np.float32, copy=True)
