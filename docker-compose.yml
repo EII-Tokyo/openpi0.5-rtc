@@ -15,7 +15,7 @@ services:
     command: >-
       python3 /app/examples/aloha_real/main.py
       --model-dir
-      /app/checkpoints/eii_rinse_11repo_cam4_fullft_rl_token_small_query/rinse_11repo_rl_token_small_query_512_from_9000_20260615/9999
+      /app/checkpoints/eii_rinse_11repo_cam4_fullft/rinse_11repo_insertx5_fullft_bs256_nw64_fsdp8_20260513/9000
       --dataset-dir
       /app/rollouts/old_policy/unscrew_bottle_cap/2026-05-27
       --num-episodes
@@ -41,7 +41,7 @@ services:
       - /data/openpi0.5-rtc-reward-learning/rollouts:/app/rollouts
       - /home/eii/openpi0.5-rtc-reward-learning/checkpoints:/app/checkpoints:ro
     environment:
-      - RLT_RL_TOKEN_CHECKPOINT_PATH=/app/checkpoints/eii_rinse_11repo_cam4_fullft_rl_token_small_query/rinse_11repo_rl_token_small_query_512_from_9000_20260615/9999
+      - RLT_RL_TOKEN_CHECKPOINT_PATH=/app/checkpoints/eii_rinse_11repo_cam4_fullft/rinse_11repo_insertx5_fullft_bs256_nw64_fsdp8_20260513/9000
 
   rlt_warmup_runtime:
     image: openpi_reward_learning_eii/rlt_warmup_runtime:reward-learning
@@ -60,7 +60,7 @@ services:
     command: >-
       python3 /app/examples/aloha_real/main.py
       --model-dir
-      /app/checkpoints/eii_rinse_11repo_cam4_fullft_rl_token_small_query/rinse_11repo_rl_token_small_query_512_from_9000_20260615/9999
+      /app/checkpoints/eii_rinse_11repo_cam4_fullft/rinse_11repo_insertx5_fullft_bs256_nw64_fsdp8_20260513/9000
       --num-episodes
       1
       --max-episode-steps
@@ -77,10 +77,6 @@ services:
       50
       --rlt-chunk-stride
       2
-      --rlt-actor-path
-      ${RLT_ACTOR_CHECKPOINT_PATH:-/app/local_rlt_runs/rlt_unified_468_td3_burn5000_actor10000/inference_actor/00012000}
-      --rlt-actor-poll-interval
-      ${RLT_ACTOR_POLL_INTERVAL:-0.0}
       --video-codec
       h264
       --action-quality
@@ -97,8 +93,7 @@ services:
       - /data/openpi0.5-rtc-reward-learning/replay:/app/replay
       - /home/eii/openpi0.5-rtc-reward-learning/checkpoints:/app/checkpoints:ro
     environment:
-      - RLT_RL_TOKEN_CHECKPOINT_PATH=/app/checkpoints/eii_rinse_11repo_cam4_fullft_rl_token_small_query/rinse_11repo_rl_token_small_query_512_from_9000_20260615/9999
-      - RLT_ACTOR_CHECKPOINT_PATH=${RLT_ACTOR_CHECKPOINT_PATH:-/app/local_rlt_runs/rlt_unified_468_td3_burn5000_actor10000/inference_actor/00012000}
+      - RLT_RL_TOKEN_CHECKPOINT_PATH=/app/checkpoints/eii_rinse_11repo_cam4_fullft/rinse_11repo_insertx5_fullft_bs256_nw64_fsdp8_20260513/9000
       - RLT_DEFAULT_CRITIC_GATE_ENABLED=${RLT_DEFAULT_CRITIC_GATE_ENABLED:-1}
       - PYTHONPATH=/app:/app/src:/app/packages/openpi-client/src
       - JAX_PLATFORMS=cuda
@@ -230,9 +225,9 @@ services:
         ${SERVER_ARGS:---video-memory-num-frames 1
         --video-memory-stride-seconds 1.0
         policy:checkpoint
-        --policy.config eii_rinse_11repo_cam4_fullft_rl_token_small_query
+        --policy.config eii_rinse_11repo_cam4_fullft
         --policy.dir
-        /app/checkpoints/eii_rinse_11repo_cam4_fullft_rl_token_small_query/rinse_11repo_rl_token_small_query_512_from_9000_20260615/9999}
+        /app/checkpoints/eii_rinse_11repo_cam4_fullft/rinse_11repo_insertx5_fullft_bs256_nw64_fsdp8_20260513/9000}
     init: true
     tty: true
     network_mode: host
@@ -259,7 +254,7 @@ services:
       - UV_NO_SYNC=1
       - UV_NO_DEV=1
       - PYTHONPATH=/app/src
-      - RLT_RL_TOKEN_CHECKPOINT_PATH=/app/checkpoints/eii_rinse_11repo_cam4_fullft_rl_token_small_query/rinse_11repo_rl_token_small_query_512_from_9000_20260615/9999
+      - RLT_RL_TOKEN_CHECKPOINT_PATH=/app/checkpoints/eii_rinse_11repo_cam4_fullft/rinse_11repo_insertx5_fullft_bs256_nw64_fsdp8_20260513/9000
     gpus: all
 
   redis:
