@@ -94,6 +94,7 @@ services:
       - /home/eii/openpi0.5-rtc-reward-learning/checkpoints:/app/checkpoints:ro
     environment:
       - RLT_RL_TOKEN_CHECKPOINT_PATH=/app/checkpoints/eii_rinse_11repo_cam4_fullft/rinse_11repo_insertx5_fullft_bs256_nw64_fsdp8_20260513/9000
+      - RLT_ACTOR_CHECKPOINT_PATH=${RLT_ACTOR_CHECKPOINT_PATH:-}
       - RLT_DEFAULT_CRITIC_GATE_ENABLED=${RLT_DEFAULT_CRITIC_GATE_ENABLED:-1}
       - PYTHONPATH=/app:/app/src:/app/packages/openpi-client/src
       - JAX_PLATFORMS=cuda
