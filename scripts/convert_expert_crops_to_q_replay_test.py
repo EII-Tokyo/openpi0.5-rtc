@@ -148,7 +148,17 @@ def test_convert_expert_crop_uses_precomputed_z_cache(tmp_path):
     cache_dir = z_cache_root / dataset_id
     cache_dir.mkdir(parents=True)
     z_rl = np.arange(30 * 8, dtype=np.float32).reshape(30, 8)
-    np.savez(cache_dir / "episode_000000_z_rl.npz", frame_index=np.arange(30, dtype=np.int64), z_rl=z_rl)
+    cache_metadata = {
+        "rl_token_checkpoint_path": "checkpoints/eii_rinse_11repo_cam4_fullft_rl_token_small_query/run/9999",
+        "rl_token_config_name": "eii_rinse_11repo_cam4_fullft_rl_token_small_query",
+        "prompt": "Twist off the bottle cap.",
+    }
+    np.savez(
+        cache_dir / "episode_000000_z_rl.npz",
+        frame_index=np.arange(30, dtype=np.int64),
+        z_rl=z_rl,
+        metadata=np.asarray(json.dumps(cache_metadata, sort_keys=True)),
+    )
 
     summary = convert_expert_crops(
         ConversionArgs(
@@ -171,3 +181,9 @@ def test_convert_expert_crop_uses_precomputed_z_cache(tmp_path):
         np.testing.assert_allclose(data["next_z_rl"][0], z_rl[10])
         manifest = json.loads(str(data["manifest"].item()))
     assert manifest["z_rl_source"] == "precomputed_frame_cache"
+    assert manifest["z_cache_path"].endswith("episode_000000_z_rl.npz")
+    assert manifest["z_cache_root"] == str(z_cache_root.resolve())
+    assert manifest["z_cache_metadata"] == cache_metadata
+    assert manifest["rl_token_checkpoint_path"] == cache_metadata["rl_token_checkpoint_path"]
+    assert manifest["rl_token_config_name"] == cache_metadata["rl_token_config_name"]
+    assert manifest["z_rl_dim"] == 8

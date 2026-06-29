@@ -44,6 +44,13 @@ class _EpisodeData:
     action: np.ndarray
 
 
+@dataclasses.dataclass(frozen=True)
+class _ZCacheData:
+    z_rl: np.ndarray
+    cache_path: Path
+    metadata: dict[str, Any]
+
+
 def convert_expert_crops(args: ConversionArgs) -> ConversionSummary:
     if args.train_horizon <= 0:
         raise ValueError("train_horizon must be positive")
@@ -175,8 +182,10 @@ def _convert_one_crop(
     state = episode.state[indices].astype(np.float32)
     action = episode.action[indices].astype(np.float32)
     frame_index = episode.frame_index[indices].astype(np.int64)
+    z_cache_data: _ZCacheData | None = None
     if args.z_cache_root is not None:
-        z_rl = _load_z_cache(args.z_cache_root, episode.dataset_id, episode.episode_index, frame_index, args.z_dim)
+        z_cache_data = _load_z_cache(args.z_cache_root, episode.dataset_id, episode.episode_index, frame_index, args.z_dim)
+        z_rl = z_cache_data.z_rl
         z_source = "precomputed_frame_cache"
     else:
         z_rl = _dummy_z(episode.dataset_id, episode.episode_index, frame_index, args.z_dim)
@@ -241,6 +250,7 @@ def _convert_one_crop(
         "reference_action_source": "human_action_no_actor",
         "proprio_source": f"observation.state,pad_or_trim_to_{args.proprio_dim}",
         "z_rl_source": z_source,
+        "z_rl_dim": int(z_samples.shape[-1]),
         "action_reference_delta": {
             "all_max_abs": float(np.max(delta)) if delta.size else 0.0,
             "all_p95_abs": float(np.percentile(delta, 95)) if delta.size else 0.0,
@@ -257,6 +267,16 @@ def _convert_one_crop(
             "done": list(done.shape),
         },
     }
+    if z_cache_data is not None:
+        manifest.update(
+            {
+                "z_cache_path": str(z_cache_data.cache_path.resolve()),
+                "z_cache_root": str(args.z_cache_root.resolve()),
+                "z_cache_metadata": z_cache_data.metadata,
+                "rl_token_checkpoint_path": z_cache_data.metadata.get("rl_token_checkpoint_path"),
+                "rl_token_config_name": z_cache_data.metadata.get("rl_token_config_name"),
+            }
+        )
     arrays = {
         "z_rl": z_samples,
         "proprio": proprio_samples,
@@ -313,7 +333,7 @@ def _load_z_cache(
     episode_index: int,
     frame_index: np.ndarray,
     z_dim: int,
-) -> np.ndarray:
+) -> _ZCacheData:
     candidates = (
         z_cache_root / dataset_id / f"episode_{episode_index:06d}_z_rl.npz",
         z_cache_root / f"{dataset_id}_episode_{episode_index:06d}_z_rl.npz",
@@ -326,13 +346,35 @@ def _load_z_cache(
             raise _SkipCrop("invalid_z_cache")
         cached_frames = np.asarray(data["frame_index"], dtype=np.int64)
         cached_z = np.asarray(data["z_rl"], dtype=np.float32)
+        metadata = _load_z_cache_metadata(data)
     if cached_z.ndim != 2 or int(cached_z.shape[-1]) != int(z_dim):
         raise _SkipCrop("z_cache_shape_mismatch")
     by_frame = {int(frame): cached_z[index] for index, frame in enumerate(cached_frames)}
     try:
-        return np.stack([by_frame[int(frame)] for frame in frame_index], axis=0).astype(np.float32)
+        z_rl = np.stack([by_frame[int(frame)] for frame in frame_index], axis=0).astype(np.float32)
     except KeyError as exc:
         raise _SkipCrop("z_cache_missing_frame") from exc
+    return _ZCacheData(z_rl=z_rl, cache_path=cache_path, metadata=metadata)
+
+
+def _load_z_cache_metadata(data: np.lib.npyio.NpzFile) -> dict[str, Any]:
+    if "metadata" not in data:
+        return {}
+    raw = data["metadata"]
+    value = raw.item() if raw.shape == () else raw.reshape(-1)[0]
+    if isinstance(value, bytes):
+        value = value.decode("utf-8")
+    if isinstance(value, str):
+        try:
+            decoded = json.loads(value)
+        except json.JSONDecodeError as exc:
+            raise _SkipCrop("invalid_z_cache_metadata") from exc
+        if not isinstance(decoded, dict):
+            raise _SkipCrop("invalid_z_cache_metadata")
+        return decoded
+    if isinstance(value, dict):
+        return dict(value)
+    raise _SkipCrop("invalid_z_cache_metadata")
 
 
 def _stable_id(path: Path) -> str:
@@ -357,12 +399,12 @@ def _parse_args() -> ConversionArgs:
     parser.add_argument(
         "--output-root",
         type=Path,
-        default=Path("/home/eii/data/openpi0.5-rtc-reward-learning/replay/human_expert_no_actor_q"),
+        default=Path("/home/eii/data/openpi0.5-rtc-reward-learning/replay/human_expert_no_actor_q_cam4_provenance"),
     )
     parser.add_argument(
         "--manifest-path",
         type=Path,
-        default=Path("local_rlt_manifests/human_expert_no_actor_q_20260629.jsonl"),
+        default=Path("local_rlt_manifests/human_expert_no_actor_q_cam4_provenance_20260629.jsonl"),
     )
     parser.add_argument("--train-horizon", type=int, default=10)
     parser.add_argument("--chunk-stride", type=int, default=2)

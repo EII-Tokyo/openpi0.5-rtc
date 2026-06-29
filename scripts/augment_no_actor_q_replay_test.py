@@ -35,6 +35,10 @@ def _write_shard(path: Path, *, reward: int, action_offset: float, rows: int = 6
         "reward_placement": "terminal_last_train_step",
         "source_type": "test",
         "label": "source",
+        "rl_token_checkpoint_path": "checkpoints/eii_rinse_11repo_cam4_fullft_rl_token_small_query/run/9999",
+        "rl_token_config_name": "eii_rinse_11repo_cam4_fullft_rl_token_small_query",
+        "z_cache_path": str(path.with_suffix(".z_cache.npz")),
+        "z_rl_dim": 8,
     }
     np.savez_compressed(
         path,
@@ -91,6 +95,10 @@ def test_augment_success_shard_writes_dense_reward(tmp_path):
     assert manifest_data["reward_placement"] == "terminal_last_train_step"
     assert manifest_data["augmentation"]["dense_reward"] is True
     assert manifest_data["augmentation"]["reward_mode"] == "dense_progress_terminal"
+    assert manifest_data["rl_token_checkpoint_path"] == source_manifest["rl_token_checkpoint_path"]
+    assert manifest_data["rl_token_config_name"] == source_manifest["rl_token_config_name"]
+    assert manifest_data["z_cache_path"] == source_manifest["z_cache_path"]
+    assert manifest_data["z_rl_dim"] == source_manifest["z_rl_dim"]
 
 
 def test_augment_success_shard_adds_hard_negative_with_mismatched_actions(tmp_path):
@@ -129,6 +137,10 @@ def test_augment_success_shard_adds_hard_negative_with_mismatched_actions(tmp_pa
     assert manifest_data["reward"] == 0
     assert manifest_data["source_type"] == "hard_negative"
     assert manifest_data["actor_enabled"] is False
+    assert manifest_data["rl_token_checkpoint_path"] == rows[0]["rl_token_checkpoint_path"]
+    assert manifest_data["rl_token_config_name"] == rows[0]["rl_token_config_name"]
+    assert manifest_data["z_cache_path"] == rows[0]["z_cache_path"]
+    assert manifest_data["z_rl_dim"] == rows[0]["z_rl_dim"]
 
     store = RLTReplayStore(tmp_path / "augmented", manifest_path=output_manifest)
     store.scan()

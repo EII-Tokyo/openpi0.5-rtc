@@ -13,12 +13,12 @@ import numpy as np
 
 DEFAULT_REPLAY_ROOT = Path("/home/eii/data/openpi0.5-rtc-reward-learning/replay/rlt_key_regions_clean")
 DEFAULT_ROLLOUT_ROOT = Path("/home/eii/data/openpi0.5-rtc-reward-learning/rollouts/key_regions")
-DEFAULT_OUTPUT_ROOT = Path("/home/eii/data/openpi0.5-rtc-reward-learning/replay/rlt_key_regions_clean_z2048")
+DEFAULT_OUTPUT_ROOT = Path("/home/eii/data/openpi0.5-rtc-reward-learning/replay/rlt_key_regions_clean_z512_cam4")
 DEFAULT_CHECKPOINT = Path(
-    "checkpoints/eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo_rl_token_query/"
-    "rl_token_2048_enc4_dec4_query_from_19000_20260528/12000"
+    "checkpoints/eii_rinse_11repo_cam4_fullft_rl_token_small_query/"
+    "rinse_11repo_rl_token_small_query_512_from_9000_20260615/9999"
 )
-DEFAULT_CONFIG = "eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo_rl_token_query"
+DEFAULT_CONFIG = "eii_rinse_11repo_cam4_fullft_rl_token_small_query"
 REPLAY_KEYS = (
     "z_rl",
     "proprio",
@@ -447,7 +447,7 @@ def run_probe(args: ReencodeArgs) -> None:
 def _parse_args() -> ReencodeArgs:
     parser = argparse.ArgumentParser(
         description=(
-            "Re-encode clean no-actor RLT replay shards with the 4-layer 2048-dim RL Token checkpoint. "
+            "Re-encode clean no-actor RLT replay shards with the verified cam4 512-dim RL Token checkpoint. "
             "Default mode only prints the plan. Use --probe-only for a one-sample VRAM test, and --execute "
             "only after confirming the probe is safe."
         )

@@ -5,11 +5,22 @@ from pathlib import Path
 
 import numpy as np
 
+from scripts import reencode_clean_no_actor_z_rl
 from scripts.reencode_clean_no_actor_z_rl import compute_replay_frame_indices
 from scripts.reencode_clean_no_actor_z_rl import dedupe_no_actor_shards
 from scripts.reencode_clean_no_actor_z_rl import is_no_actor_shard
 from scripts.reencode_clean_no_actor_z_rl import rewrite_shard_z_rl
 from scripts.reencode_clean_no_actor_z_rl import validate_required_cameras
+
+
+def test_default_rl_token_checkpoint_is_cam4_small_query():
+    assert "cam3" not in str(reencode_clean_no_actor_z_rl.DEFAULT_CHECKPOINT)
+    assert "cam3" not in reencode_clean_no_actor_z_rl.DEFAULT_CONFIG
+    assert "eii_rinse_11repo_cam4_fullft_rl_token_small_query" in str(
+        reencode_clean_no_actor_z_rl.DEFAULT_CHECKPOINT
+    )
+    assert reencode_clean_no_actor_z_rl.DEFAULT_CONFIG == "eii_rinse_11repo_cam4_fullft_rl_token_small_query"
+    assert "z512_cam4" in str(reencode_clean_no_actor_z_rl.DEFAULT_OUTPUT_ROOT)
 
 
 def _write_replay_shard(
