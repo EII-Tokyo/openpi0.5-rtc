@@ -13,6 +13,7 @@ import numpy as np
 import tqdm_loggable.auto as tqdm
 import tyro
 import wandb
+from flax import serialization
 
 from openpi.models import rlt
 from openpi.training import rlt_eval
@@ -39,6 +40,7 @@ class Args:
     actor_min_replay_shards: int = 0
     actor_min_success_episodes: int = 0
     actor_min_failure_episodes: int = 0
+    init_critic_checkpoint: pathlib.Path | None = None
     max_replay_samples: int | None = None
     recursive_scan: bool = False
     segment_db_path: pathlib.Path | None = None
@@ -196,6 +198,16 @@ def _init_wandb(args: Args, store: rlt_replay_store.RLTReplayStore) -> None:
     )
 
 
+def _load_critic_checkpoint(state: rlt_training.RLTTrainState, checkpoint_path: pathlib.Path) -> rlt_training.RLTTrainState:
+    train_state_path = checkpoint_path
+    if checkpoint_path.is_dir():
+        train_state_path = checkpoint_path / "train_state.msgpack"
+    payload = serialization.msgpack_restore(train_state_path.read_bytes())
+    if not isinstance(payload, dict) or "params" not in payload:
+        raise ValueError(f"{train_state_path} is not an RLT training checkpoint")
+    return rlt_training.load_critic_params_from_state_dict(state, payload["params"], reset_step=True)
+
+
 def _write_summary(
     args: Args,
     store: rlt_replay_store.RLTReplayStore,
@@ -240,6 +252,9 @@ def main(args: Args) -> None:
 
     config = _build_training_config(args, train_shape)
     state = rlt_training.init_train_state(config, jax.random.key(args.seed))
+    if args.init_critic_checkpoint is not None:
+        state = _load_critic_checkpoint(state, args.init_critic_checkpoint)
+        logging.info("Initialized critic from %s; actor remains freshly initialized", args.init_critic_checkpoint)
     replay_rng = np.random.default_rng(args.seed)
     _init_wandb(args, store)
 

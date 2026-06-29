@@ -182,3 +182,37 @@ def test_sync_target_params_hard_copies_online_networks():
     target_critic_state = rlt_training.nnx.state(model.target_critic).flat_state()
     for key in critic_state:
         assert jnp.allclose(critic_state[key].value, target_critic_state[key].value)
+
+
+def test_load_critic_params_keeps_fresh_actor():
+    fresh_state = rlt_training.init_train_state(_make_config(), jax.random.key(0))
+    source_state = rlt_training.init_train_state(_make_config(), jax.random.key(1))
+    source_params = rlt_training.nnx.state(
+        rlt_training.nnx.merge(source_state.model_def, source_state.params)
+    ).to_pure_dict()
+
+    loaded_state = rlt_training.load_critic_params_from_state_dict(
+        fresh_state,
+        _stringify_int_keys(source_params),
+        reset_step=True,
+    )
+
+    fresh_model = rlt_training.nnx.merge(fresh_state.model_def, fresh_state.params)
+    source_model = rlt_training.nnx.merge(source_state.model_def, source_state.params)
+    loaded_model = rlt_training.nnx.merge(loaded_state.model_def, loaded_state.params)
+
+    assert int(loaded_state.step) == 0
+    for key, value in rlt_training.nnx.state(loaded_model.actor).flat_state().items():
+        assert jnp.allclose(value.value, rlt_training.nnx.state(fresh_model.actor).flat_state()[key].value)
+    for key, value in rlt_training.nnx.state(loaded_model.critic).flat_state().items():
+        assert jnp.allclose(value.value, rlt_training.nnx.state(source_model.critic).flat_state()[key].value)
+    for key, value in rlt_training.nnx.state(loaded_model.target_critic).flat_state().items():
+        assert jnp.allclose(value.value, rlt_training.nnx.state(source_model.target_critic).flat_state()[key].value)
+
+
+def _stringify_int_keys(value):
+    if isinstance(value, dict):
+        return {str(key) if isinstance(key, int) else key: _stringify_int_keys(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [_stringify_int_keys(item) for item in value]
+    return value

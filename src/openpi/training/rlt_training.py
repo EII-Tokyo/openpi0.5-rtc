@@ -148,6 +148,34 @@ def sync_target_params(state: RLTTrainState) -> RLTTrainState:
     return dataclasses.replace(state, params=nnx.state(model))
 
 
+def load_critic_params_from_state_dict(
+    state: RLTTrainState,
+    params: dict,
+    *,
+    reset_step: bool = True,
+) -> RLTTrainState:
+    """Load only critic networks from a saved RLT train-state params dict."""
+    for key in ("critic", "target_critic"):
+        if key not in params:
+            raise KeyError(f"Missing {key!r} in source RLT params")
+    model = nnx.merge(state.model_def, state.params)
+    nnx.update(model.critic, _restore_nnx_state_keys(params["critic"]))
+    nnx.update(model.target_critic, _restore_nnx_state_keys(params["target_critic"]))
+    step = jnp.asarray(0, dtype=jnp.int32) if reset_step else state.step
+    return dataclasses.replace(state, step=step, params=nnx.state(model))
+
+
+def _restore_nnx_state_keys(value):
+    if isinstance(value, dict):
+        return {
+            int(key) if isinstance(key, str) and key.isdigit() else key: _restore_nnx_state_keys(item)
+            for key, item in value.items()
+        }
+    if isinstance(value, list):
+        return [_restore_nnx_state_keys(item) for item in value]
+    return value
+
+
 def train_step(
     state: RLTTrainState,
     batch: RLTReplayBatch,
