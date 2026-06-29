@@ -34,6 +34,32 @@
   - The old compose mount `/data/openpi0.5-rtc-reward-learning/rlt_online:/app/rlt_online` means container-created `/app/rlt_online/run` files become root-owned on the host.
   - Avoid using `/app/rlt_online/run/inference_actor/LATEST` as the default robot actor path; use the project-local `local_rlt_runs/.../00012000` path above.
 
+## VLA / RLToken checkpoint constraints
+- Strong constraint: for rinse / bottle-mouth insertion work that needs `cam_low`, do not use the `cam3` VLA or any RLToken checkpoint derived from it. The `cam3` checkpoint does not include `cam_low`, so it cannot be treated as a full camera checkpoint for judging bottle-mouth and pipe alignment.
+- Correct full-camera VLA checkpoint with `cam_low`:
+  - Config/checkpoint family: `eii_rinse_11repo_cam4_fullft`
+  - Host path on `192.168.1.103`: `/home/eii/openpi0.5-rtc/checkpoints/eii_rinse_11repo_cam4_fullft/rinse_11repo_insertx5_fullft_bs256_nw64_fsdp8_20260513/9000`
+  - Local copied path when present: `/home/eii/project/openpi0.5-rtc-reward-learning/checkpoints/eii_rinse_11repo_cam4_fullft/rinse_11repo_insertx5_fullft_bs256_nw64_fsdp8_20260513/9000`
+  - Container path: `/app/checkpoints/eii_rinse_11repo_cam4_fullft/rinse_11repo_insertx5_fullft_bs256_nw64_fsdp8_20260513/9000`
+  - Cameras: `cam_high`, `cam_low`, `cam_left_wrist`, `cam_right_wrist`.
+- Correct RLToken checkpoint derived from the cam4 VLA above:
+  - Config: `eii_rinse_11repo_cam4_fullft_rl_token_small_query`
+  - Checkpoint: `rinse_11repo_rl_token_small_query_512_from_9000_20260615/9999`
+  - Container path: `/app/checkpoints/eii_rinse_11repo_cam4_fullft_rl_token_small_query/rinse_11repo_rl_token_small_query_512_from_9000_20260615/9999`
+  - This is the correct 2026-06-15 RLToken checkpoint for cam4 work; it was initialized from `eii_rinse_11repo_cam4_fullft/.../9000/params`.
+- Wrong checkpoint for rinse / bottle-mouth insertion if `cam_low` is required:
+  - VLA family: `eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo`
+  - RLToken config: `eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo_rl_token_query`
+  - RLToken checkpoint: `rl_token_2048_enc4_dec4_query_from_19000_20260528/12000`
+  - Container path: `/app/checkpoints/eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo_rl_token_query/rl_token_2048_enc4_dec4_query_from_19000_20260528/12000`
+  - This checkpoint was derived from the cam3 VLA `no_rinse_cam3_fullft_return_home_29repo_bs256_nw64_fsdp4_20260520/19000`; do not use it to train or evaluate critic/actor for tasks that depend on `cam_low`.
+- Historical audit note:
+  - `2026-05-28`: the cam3-derived RLToken configs were added.
+  - `2026-05-29` through `2026-06-15 09:50 +0900`: RLT defaults used the cam3-derived RLToken path.
+  - `2026-06-15 09:50 +0900`: defaults moved to the cam4 VLA base checkpoint.
+  - `2026-06-15 16:34 +0900`: defaults moved to the correct cam4 RLToken small query checkpoint.
+- Before training critic/actor, re-encoding `z_rl`, or starting `openpi_server`/`rlt_warmup_runtime`, verify the active `--policy.config`, `--policy.dir`, `--model-dir`, and `RLT_RL_TOKEN_CHECKPOINT_PATH` are from the correct cam4 family unless the user explicitly requests a cam3 ablation.
+
 ## Local key region annotation on machine 101
 - The local machine `101` is for offline key region data annotation only. Do not treat `http://127.0.0.1:3011/` as a robot-control UI, and do not expect local key presses there to control the robot on `192.168.1.103`.
 - For local offline key region annotation, the correct data root is:
