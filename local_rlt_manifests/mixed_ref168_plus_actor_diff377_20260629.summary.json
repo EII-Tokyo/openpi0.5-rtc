@@ -1,0 +1,12 @@
+{
+  "action_diff_shards": 377,
+  "failure_shards": 333,
+  "manifest": "local_rlt_manifests/mixed_ref168_plus_actor_diff377_20260629.jsonl",
+  "ref_equal_shards": 168,
+  "success_shards": 212,
+  "total_shards": 545,
+  "transitions": 19759,
+  "z_dim_counts": {
+    "512": 545
+  }
+}

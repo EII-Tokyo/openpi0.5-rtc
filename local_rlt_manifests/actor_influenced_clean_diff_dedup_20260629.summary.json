@@ -1,0 +1,8 @@
+{
+  "dedup_diff_shards": 377,
+  "failure_shards": 254,
+  "manifest": "local_rlt_manifests/actor_influenced_clean_diff_dedup_20260629.jsonl",
+  "raw_diff_shards": 720,
+  "success_shards": 123,
+  "transitions": 12872
+}
