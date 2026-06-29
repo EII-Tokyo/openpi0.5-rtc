@@ -6,6 +6,8 @@
 - Do not use or modify `/home/eii/openpi0.5-rlt` for this user's robot project; that path belongs to another project.
 - Before copying files, restarting containers, or inspecting remote code on `192.168.1.103`, verify the working directory is `/home/eii/openpi0.5-rtc-reward-learning`.
 - If a command on `192.168.1.103` would touch any path outside `/home/eii/openpi0.5-rtc-reward-learning`, stop and ask the user for explicit approval first.
+- Strong checkpoint constraint for `192.168.1.103`: user-trained checkpoints for this project must live under `/home/eii/openpi0.5-rtc-reward-learning/checkpoints` and be mounted into containers as `/app/checkpoints`.
+- Do not load this project's VLA/RLToken checkpoints from `/home/eii/openpi0.5-rtc/checkpoints`; that path belongs outside this project boundary.
 - `uv` locations on `192.168.1.103`:
   - Host: `/home/eii/.local/bin/uv` exists but is not on the default non-interactive SSH `PATH`.
   - `openpi_server` container: `/usr/bin/uv`.
@@ -38,13 +40,14 @@
 - Strong constraint: for rinse / bottle-mouth insertion work that needs `cam_low`, do not use the `cam3` VLA or any RLToken checkpoint derived from it. The `cam3` checkpoint does not include `cam_low`, so it cannot be treated as a full camera checkpoint for judging bottle-mouth and pipe alignment.
 - Correct full-camera VLA checkpoint with `cam_low`:
   - Config/checkpoint family: `eii_rinse_11repo_cam4_fullft`
-  - Host path on `192.168.1.103`: `/home/eii/openpi0.5-rtc/checkpoints/eii_rinse_11repo_cam4_fullft/rinse_11repo_insertx5_fullft_bs256_nw64_fsdp8_20260513/9000`
+  - Host path on `192.168.1.103`: `/home/eii/openpi0.5-rtc-reward-learning/checkpoints/eii_rinse_11repo_cam4_fullft/rinse_11repo_insertx5_fullft_bs256_nw64_fsdp8_20260513/9000`
   - Local copied path when present: `/home/eii/project/openpi0.5-rtc-reward-learning/checkpoints/eii_rinse_11repo_cam4_fullft/rinse_11repo_insertx5_fullft_bs256_nw64_fsdp8_20260513/9000`
   - Container path: `/app/checkpoints/eii_rinse_11repo_cam4_fullft/rinse_11repo_insertx5_fullft_bs256_nw64_fsdp8_20260513/9000`
   - Cameras: `cam_high`, `cam_low`, `cam_left_wrist`, `cam_right_wrist`.
 - Correct RLToken checkpoint derived from the cam4 VLA above:
   - Config: `eii_rinse_11repo_cam4_fullft_rl_token_small_query`
   - Checkpoint: `rinse_11repo_rl_token_small_query_512_from_9000_20260615/9999`
+  - Host path on `192.168.1.103`: `/home/eii/openpi0.5-rtc-reward-learning/checkpoints/eii_rinse_11repo_cam4_fullft_rl_token_small_query/rinse_11repo_rl_token_small_query_512_from_9000_20260615/9999`
   - Container path: `/app/checkpoints/eii_rinse_11repo_cam4_fullft_rl_token_small_query/rinse_11repo_rl_token_small_query_512_from_9000_20260615/9999`
   - This is the correct 2026-06-15 RLToken checkpoint for cam4 work; it was initialized from `eii_rinse_11repo_cam4_fullft/.../9000/params`.
 - Wrong checkpoint for rinse / bottle-mouth insertion if `cam_low` is required:

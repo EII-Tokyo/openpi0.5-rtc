@@ -39,7 +39,7 @@ services:
     volumes:
       - $PWD:/app
       - /data/openpi0.5-rtc-reward-learning/rollouts:/app/rollouts
-      - /home/eii/openpi0.5-rtc/checkpoints:/app/checkpoints:ro
+      - /home/eii/openpi0.5-rtc-reward-learning/checkpoints:/app/checkpoints:ro
     environment:
       - RLT_RL_TOKEN_CHECKPOINT_PATH=/app/checkpoints/eii_rinse_11repo_cam4_fullft_rl_token_small_query/rinse_11repo_rl_token_small_query_512_from_9000_20260615/9999
 
@@ -95,7 +95,7 @@ services:
       - $PWD:/app
       - /data/openpi0.5-rtc-reward-learning/rollouts:/app/rollouts
       - /data/openpi0.5-rtc-reward-learning/replay:/app/replay
-      - /home/eii/openpi0.5-rtc/checkpoints:/app/checkpoints:ro
+      - /home/eii/openpi0.5-rtc-reward-learning/checkpoints:/app/checkpoints:ro
     environment:
       - RLT_RL_TOKEN_CHECKPOINT_PATH=/app/checkpoints/eii_rinse_11repo_cam4_fullft_rl_token_small_query/rinse_11repo_rl_token_small_query_512_from_9000_20260615/9999
       - RLT_ACTOR_CHECKPOINT_PATH=${RLT_ACTOR_CHECKPOINT_PATH:-/app/local_rlt_runs/rlt_unified_468_td3_burn5000_actor10000/inference_actor/00012000}
@@ -238,7 +238,7 @@ services:
     network_mode: host
     volumes:
       - $PWD:/app
-      - /home/eii/openpi0.5-rtc/checkpoints:/app/checkpoints:ro
+      - /home/eii/openpi0.5-rtc-reward-learning/checkpoints:/app/checkpoints:ro
       - ${OPENPI_DATA_HOME:-~/.cache/openpi}:/openpi_assets
       - ${OPENPI_JAX_CACHE_DIR:-./.jax_cache/openpi_server}:/app/.jax_cache
     environment:
