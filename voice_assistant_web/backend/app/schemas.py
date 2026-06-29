@@ -353,6 +353,17 @@ class RLTExpertDemoRecord(BaseModel):
     missing_cameras: list[str] = Field(default_factory=list)
     camera_complete: bool = False
     source_dataset_path: str
+    saved_crop_count: int = 0
+    saved_crop_start_sec: float | None = None
+    saved_crop_end_sec: float | None = None
+    saved_crop_reward: int | None = None
+
+
+class RLTExpertDemoCropSummary(BaseModel):
+    total_episodes: int = 0
+    cropped_episodes: int = 0
+    remaining_episodes: int = 0
+    saved_crops: int = 0
 
 
 class RLTExpertDemoPage(BaseModel):
@@ -362,6 +373,7 @@ class RLTExpertDemoPage(BaseModel):
     offset: int = 0
     next_offset: int | None = None
     datasets: list[str] = Field(default_factory=list)
+    crop_summary: RLTExpertDemoCropSummary = Field(default_factory=RLTExpertDemoCropSummary)
 
 
 class RLTExpertDemoCropRequest(BaseModel):

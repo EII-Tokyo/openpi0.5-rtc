@@ -12,6 +12,7 @@ import re
 import shutil
 import sqlite3
 import subprocess
+import threading
 import time
 from datetime import datetime
 from functools import lru_cache
@@ -125,6 +126,21 @@ def should_start_camera_bridge() -> bool:
     return settings.camera_transport != "webrtc" or settings.realtime_include_camera_frames
 
 
+def _warm_expert_demo_index() -> None:
+    try:
+        start = time.perf_counter()
+        page = list_expert_demos(
+            EXPERT_DEMO_ROOT,
+            crop_root=DISCRIMINATOR_EXPERT_CROP_ROOT,
+            camera_status="any",
+            limit=1,
+            offset=0,
+        )
+        logging.info("Expert demo index warmed: %s episodes in %.2fs", page.total, time.perf_counter() - start)
+    except Exception:
+        logging.exception("Expert demo index warmup failed")
+
+
 @app.on_event("startup")
 def on_startup() -> None:
     if settings.enable_ros:
@@ -143,6 +159,8 @@ def on_startup() -> None:
     else:
         logging.info("ROS bridges disabled by EII_PILOT_ENABLE_ROS=false")
     rlt_control.start()
+    if os.getenv("EXPERT_DEMO_INDEX_WARMUP", "1") != "0":
+        threading.Thread(target=_warm_expert_demo_index, name="expert-demo-index-warmup", daemon=True).start()
 
 
 @app.on_event("shutdown")
@@ -1438,6 +1456,7 @@ def rlt_expert_demo_review(
         raise HTTPException(status_code=400, detail="camera_status must be complete, incomplete, or any")
     return list_expert_demos(
         EXPERT_DEMO_ROOT,
+        crop_root=DISCRIMINATOR_EXPERT_CROP_ROOT,
         dataset=dataset,
         search=search,
         camera_status=camera_status,

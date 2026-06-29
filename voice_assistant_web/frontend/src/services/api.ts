@@ -205,6 +205,10 @@ export type RLTExpertDemoRecord = {
   missing_cameras: string[]
   camera_complete: boolean
   source_dataset_path: string
+  saved_crop_count: number
+  saved_crop_start_sec: number | null
+  saved_crop_end_sec: number | null
+  saved_crop_reward: number | null
 }
 
 export type RLTExpertDemoPage = {
@@ -214,6 +218,12 @@ export type RLTExpertDemoPage = {
   offset: number
   next_offset: number | null
   datasets: string[]
+  crop_summary: {
+    total_episodes: number
+    cropped_episodes: number
+    remaining_episodes: number
+    saved_crops: number
+  }
 }
 
 export type RLTExpertDemoCropResponse = {

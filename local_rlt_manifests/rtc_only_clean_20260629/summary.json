@@ -1,0 +1,130 @@
+{
+  "all_committed_clean": {
+    "by_batch": {
+      "2026-06-17": {
+        "reward_0": 163,
+        "reward_1": 16,
+        "shards": 179,
+        "transitions": 5483
+      },
+      "2026-06-19": {
+        "reward_0": 60,
+        "reward_1": 11,
+        "shards": 71,
+        "transitions": 2562
+      },
+      "2026-06-22": {
+        "reward_0": 13,
+        "reward_1": 6,
+        "shards": 19,
+        "transitions": 976
+      },
+      "2026-06-24": {
+        "reward_0": 10,
+        "reward_1": 7,
+        "shards": 17,
+        "transitions": 339
+      },
+      "manual": {
+        "reward_0": 87,
+        "reward_1": 112,
+        "shards": 199,
+        "transitions": 6751
+      }
+    },
+    "total": {
+      "reward_0": 333,
+      "reward_1": 152,
+      "shards": 485,
+      "transitions": 16111
+    }
+  },
+  "definition": {
+    "rtc_only_no_actor": "max(abs(action-reference_action)) <= 1e-8"
+  },
+  "holdout": {
+    "by_batch": {
+      "2026-06-17": {
+        "reward_0": 14,
+        "reward_1": 1,
+        "shards": 15,
+        "transitions": 542
+      },
+      "manual": {
+        "reward_0": 2,
+        "reward_1": 5,
+        "shards": 7,
+        "transitions": 282
+      }
+    },
+    "total": {
+      "reward_0": 16,
+      "reward_1": 6,
+      "shards": 22,
+      "transitions": 824
+    }
+  },
+  "paths": {
+    "all_committed_clean_audit.jsonl": "local_rlt_manifests/rtc_only_clean_20260629/all_committed_clean_audit.jsonl",
+    "rtc_only_no_actor_audit.jsonl": "local_rlt_manifests/rtc_only_clean_20260629/rtc_only_no_actor_audit.jsonl",
+    "rtc_only_no_actor_holdout.jsonl": "local_rlt_manifests/rtc_only_clean_20260629/rtc_only_no_actor_holdout.jsonl",
+    "rtc_only_no_actor_train.jsonl": "local_rlt_manifests/rtc_only_clean_20260629/rtc_only_no_actor_train.jsonl"
+  },
+  "rtc_only_no_actor": {
+    "by_batch": {
+      "2026-06-17": {
+        "reward_0": 73,
+        "reward_1": 3,
+        "shards": 76,
+        "transitions": 2251
+      },
+      "2026-06-24": {
+        "reward_1": 1,
+        "shards": 1,
+        "transitions": 6
+      },
+      "manual": {
+        "reward_0": 6,
+        "reward_1": 26,
+        "shards": 32,
+        "transitions": 999
+      }
+    },
+    "total": {
+      "reward_0": 79,
+      "reward_1": 30,
+      "shards": 109,
+      "transitions": 3256
+    }
+  },
+  "skipped": {
+    "missing_file": 91
+  },
+  "train": {
+    "by_batch": {
+      "2026-06-17": {
+        "reward_0": 59,
+        "reward_1": 2,
+        "shards": 61,
+        "transitions": 1709
+      },
+      "2026-06-24": {
+        "reward_1": 1,
+        "shards": 1,
+        "transitions": 6
+      },
+      "manual": {
+        "reward_0": 4,
+        "reward_1": 21,
+        "shards": 25,
+        "transitions": 717
+      }
+    },
+    "total": {
+      "reward_0": 63,
+      "reward_1": 24,
+      "shards": 87,
+      "transitions": 2432
+    }
+  }
+}

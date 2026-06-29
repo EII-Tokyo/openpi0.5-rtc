@@ -4,11 +4,13 @@ import json
 from pathlib import Path
 import re
 import subprocess
+from dataclasses import dataclass
 from functools import lru_cache
 
 import pyarrow.parquet as pq
 
 from .schemas import RLTExpertDemoCropResponse
+from .schemas import RLTExpertDemoCropSummary
 from .schemas import RLTExpertDemoPage
 from .schemas import RLTExpertDemoRecord
 
@@ -24,6 +26,15 @@ EXPECTED_CAMERAS = (
     "observation.images.cam_left_wrist",
     "observation.images.cam_right_wrist",
 )
+
+
+@dataclass(frozen=True)
+class _SavedCropInfo:
+    count: int = 0
+    latest_start_sec: float | None = None
+    latest_end_sec: float | None = None
+    latest_reward: int | None = None
+    latest_sort_key: tuple[float, str] = (0.0, "")
 
 
 def _load_info(dataset_dir: Path) -> dict:
@@ -112,6 +123,13 @@ def _video_for_global_frame(dataset_dir: Path, camera: str, global_frame: int) -
 
 
 def _dataset_video_records(dataset_dir: Path) -> list[RLTExpertDemoRecord]:
+    dataset_path = str(dataset_dir.expanduser().resolve())
+    return list(_dataset_video_records_cached(dataset_path))
+
+
+@lru_cache(maxsize=64)
+def _dataset_video_records_cached(dataset_dir: str) -> tuple[RLTExpertDemoRecord, ...]:
+    dataset_dir = Path(dataset_dir)
     info = _load_info(dataset_dir)
     fps = info.get("fps")
     fps_float = None if fps is None else float(fps)
@@ -147,12 +165,13 @@ def _dataset_video_records(dataset_dir: Path) -> list[RLTExpertDemoRecord]:
                 source_dataset_path=str(dataset_dir.resolve()),
             )
         )
-    return records
+    return tuple(records)
 
 
 def list_expert_demos(
     dataset_root: str | Path,
     *,
+    crop_root: str | Path | None = None,
     dataset: str = "all",
     search: str = "",
     camera_status: str = "complete",
@@ -188,6 +207,9 @@ def list_expert_demos(
             or query in str(record.episode_index)
         ]
 
+    saved_crops = _saved_crops_by_episode(crop_root)
+    records = [_with_saved_crop(record, saved_crops.get((record.dataset_id, record.episode_index))) for record in records]
+    crop_summary = _crop_summary(saved_crops, records)
     total = len(records)
     safe_offset = max(0, offset)
     safe_limit = max(1, min(200, limit))
@@ -200,6 +222,70 @@ def list_expert_demos(
         offset=safe_offset,
         next_offset=next_offset,
         datasets=dataset_ids,
+        crop_summary=crop_summary,
+    )
+
+
+def _saved_crops_by_episode(crop_root: str | Path | None) -> dict[tuple[str, int], _SavedCropInfo]:
+    if crop_root is None:
+        return {}
+    root = Path(crop_root).expanduser().resolve()
+    crops: dict[tuple[str, int], _SavedCropInfo] = {}
+    if root.exists():
+        for path in sorted(root.glob("*/*.json")):
+            try:
+                payload = json.loads(path.read_text())
+                dataset_id = str(payload.get("dataset_id") or path.parent.name)
+                episode_index = int(payload.get("episode_index"))
+                start_sec = float(payload.get("start_sec"))
+                end_sec = float(payload.get("end_sec"))
+                reward = int(payload.get("reward", 1))
+            except (OSError, TypeError, ValueError, json.JSONDecodeError):
+                continue
+            key = (dataset_id, episode_index)
+            current = crops.get(key, _SavedCropInfo())
+            sort_key = (path.stat().st_mtime, path.name)
+            if sort_key >= current.latest_sort_key:
+                crops[key] = _SavedCropInfo(
+                    count=current.count + 1,
+                    latest_start_sec=start_sec,
+                    latest_end_sec=end_sec,
+                    latest_reward=reward,
+                    latest_sort_key=sort_key,
+                )
+            else:
+                crops[key] = _SavedCropInfo(
+                    count=current.count + 1,
+                    latest_start_sec=current.latest_start_sec,
+                    latest_end_sec=current.latest_end_sec,
+                    latest_reward=current.latest_reward,
+                    latest_sort_key=current.latest_sort_key,
+                )
+    return crops
+
+
+def _with_saved_crop(record: RLTExpertDemoRecord, crop: _SavedCropInfo | None) -> RLTExpertDemoRecord:
+    if crop is None or crop.count <= 0:
+        return record
+    return record.model_copy(
+        update={
+            "saved_crop_count": crop.count,
+            "saved_crop_start_sec": crop.latest_start_sec,
+            "saved_crop_end_sec": crop.latest_end_sec,
+            "saved_crop_reward": crop.latest_reward,
+        }
+    )
+
+
+def _crop_summary(saved_crops: dict[tuple[str, int], _SavedCropInfo], records: list[RLTExpertDemoRecord]) -> RLTExpertDemoCropSummary:
+    record_keys = {(record.dataset_id, record.episode_index) for record in records}
+    cropped = sum(1 for key in record_keys if saved_crops.get(key, _SavedCropInfo()).count > 0)
+    saved_crop_count = sum(crop.count for key, crop in saved_crops.items() if key in record_keys)
+    return RLTExpertDemoCropSummary(
+        total_episodes=len(records),
+        cropped_episodes=cropped,
+        remaining_episodes=max(0, len(records) - cropped),
+        saved_crops=saved_crop_count,
     )
 
 
@@ -240,6 +326,9 @@ def crop_expert_demo(
         "end_sec": float(end_sec),
         "reward": int(reward),
         "label": "expert",
+        "conversion_status": "pending_q_replay_conversion",
+        "q_replay_ready": False,
+        "intended_q_replay_semantics": "human_action_as_no_actor_reference",
         "source_dataset_path": record.source_dataset_path,
         "local_video_paths": record.local_video_paths,
     }
