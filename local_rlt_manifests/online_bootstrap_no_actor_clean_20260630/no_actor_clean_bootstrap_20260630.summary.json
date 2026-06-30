@@ -1,0 +1,32 @@
+{
+  "by_batch": {
+    "2026-06-17": {
+      "failure_episodes": 73,
+      "num_shards": 76,
+      "num_transitions": 2251,
+      "success_episodes": 3
+    },
+    "2026-06-24": {
+      "failure_episodes": 0,
+      "num_shards": 1,
+      "num_transitions": 6,
+      "success_episodes": 1
+    },
+    "manual": {
+      "failure_episodes": 6,
+      "num_shards": 32,
+      "num_transitions": 999,
+      "success_episodes": 26
+    }
+  },
+  "failure_episodes": 79,
+  "manifest_path": "/home/eii/project/openpi0.5-rtc-reward-learning/local_rlt_manifests/online_bootstrap_no_actor_clean_20260630/no_actor_clean_bootstrap_20260630.jsonl",
+  "num_shards": 109,
+  "num_transitions": 3256,
+  "remote_manifest_path": "/home/eii/project/openpi0.5-rtc-reward-learning/local_rlt_manifests/online_bootstrap_no_actor_clean_20260630/no_actor_clean_bootstrap_20260630.remote.jsonl",
+  "remote_shard_root": "/app/replay/rlt_online_bootstrap/no_actor_clean_20260630/shards",
+  "skipped_by_reason": {},
+  "source_manifest": "/home/eii/project/openpi0.5-rtc-reward-learning/local_rlt_manifests/rtc_only_clean_20260629/rtc_only_no_actor_audit.jsonl",
+  "success_episodes": 30,
+  "summary_path": "/home/eii/project/openpi0.5-rtc-reward-learning/local_rlt_manifests/online_bootstrap_no_actor_clean_20260630/no_actor_clean_bootstrap_20260630.summary.json"
+}

@@ -142,6 +142,65 @@ def test_offline_trainer_builds_config_with_manual_beta():
     assert config.model.action_dim == 14
 
 
+def test_offline_trainer_actor_gate_respects_training_stage():
+    args = train_rlt_offline.Args(replay_dir="/tmp/replay", critic_burn_in_steps=1000)
+    stats = _stats(replay_size=4096, num_shards=40, success_episodes=20, failure_episodes=20, bad_shards=0)
+
+    assert not train_rlt_offline._actor_updates_allowed(
+        dataclasses.replace(args, training_stage="critic_only"),
+        stats=stats,
+        step=5000,
+        critic_gate_open=True,
+    )
+    assert train_rlt_offline._actor_updates_allowed(
+        dataclasses.replace(args, training_stage="actor_only"),
+        stats=stats,
+        step=1,
+        critic_gate_open=True,
+    )
+    assert not train_rlt_offline._actor_updates_allowed(
+        dataclasses.replace(args, training_stage="critic_actor"),
+        stats=stats,
+        step=999,
+        critic_gate_open=True,
+    )
+    assert train_rlt_offline._actor_updates_allowed(
+        dataclasses.replace(args, training_stage="critic_actor"),
+        stats=stats,
+        step=1000,
+        critic_gate_open=True,
+    )
+    assert not train_rlt_offline._actor_updates_allowed(
+        dataclasses.replace(args, training_stage="critic_actor"),
+        stats=stats,
+        step=1000,
+        critic_gate_open=False,
+    )
+
+
+def test_offline_trainer_actor_gate_uses_critic_holdout_threshold():
+    args = train_rlt_offline.Args(
+        replay_dir="/tmp/replay",
+        training_stage="critic_actor",
+        critic_auc_threshold=0.70,
+        require_positive_q_gap=True,
+    )
+
+    assert not train_rlt_offline._critic_gate_allows_actor(args, None)
+    assert not train_rlt_offline._critic_gate_allows_actor(args, {"auc": 0.69, "q_gap": 0.2})
+    assert not train_rlt_offline._critic_gate_allows_actor(args, {"auc": 0.71, "q_gap": 0.0})
+    assert train_rlt_offline._critic_gate_allows_actor(args, {"auc": 0.71, "q_gap": 0.2})
+
+
+def test_offline_actor_only_uses_zero_critic_learning_rate():
+    shape = rlt_replay_store.ReplayShape(z_dim=8, proprio_dim=4, action_horizon=10, action_dim=14)
+    args = train_rlt_offline.Args(replay_dir="/tmp/replay", training_stage="actor_only", critic_lr=3e-4)
+
+    config = train_rlt_offline._build_training_config(args, shape)
+
+    assert config.critic_lr == 0.0
+
+
 def test_build_metrics_payload_is_json_serializable():
     payload = train_rlt_online._build_metrics_payload(
         step=50,

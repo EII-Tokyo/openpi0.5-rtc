@@ -36,6 +36,9 @@ class Args:
     min_success_episodes: int = 1
     min_failure_episodes: int = 1
     critic_burn_in_steps: int = 1_000
+    training_stage: str = "critic_actor"
+    critic_auc_threshold: float | None = None
+    require_positive_q_gap: bool = False
     actor_min_replay_samples: int = 0
     actor_min_replay_shards: int = 0
     actor_min_success_episodes: int = 0
@@ -139,6 +142,7 @@ def _build_training_config(
     args: Args,
     shape: rlt_replay_store.ReplayShape,
 ) -> rlt_training.RLTTrainingConfig:
+    critic_lr = 0.0 if args.training_stage == "actor_only" else args.critic_lr
     return rlt_training.RLTTrainingConfig(
         model=rlt.RLTConfig(
             z_dim=shape.z_dim,
@@ -148,7 +152,7 @@ def _build_training_config(
             beta=args.beta,
         ),
         actor_lr=args.actor_lr,
-        critic_lr=args.critic_lr,
+        critic_lr=critic_lr,
         policy_delay=args.policy_delay,
         actor_publish_interval=args.actor_publish_interval,
         target_actor_noise=args.target_actor_noise,
@@ -157,6 +161,53 @@ def _build_training_config(
         awbc_max_weight=args.awbc_max_weight,
         awbc_min_advantage=args.awbc_min_advantage,
         awbc_max_action_delta_norm=args.awbc_max_action_delta_norm,
+    )
+
+
+def _validate_training_stage(stage: str) -> None:
+    if stage not in {"critic_only", "actor_only", "critic_actor"}:
+        raise ValueError("training_stage must be one of: critic_only, actor_only, critic_actor")
+
+
+def _critic_gate_allows_actor(args: Args, metric: dict | None) -> bool:
+    if args.critic_auc_threshold is None and not args.require_positive_q_gap:
+        return True
+    if metric is None:
+        return False
+    if args.critic_auc_threshold is not None:
+        auc = metric.get("auc")
+        if auc is None or float(auc) < float(args.critic_auc_threshold):
+            return False
+    if args.require_positive_q_gap:
+        q_gap = metric.get("q_gap")
+        if q_gap is None or float(q_gap) <= 0.0:
+            return False
+    return True
+
+
+def _actor_updates_allowed(
+    args: Args,
+    *,
+    stats: rlt_replay_store.ReplayStats,
+    step: int,
+    critic_gate_open: bool,
+) -> bool:
+    _validate_training_stage(args.training_stage)
+    if args.training_stage == "critic_only":
+        return False
+    if not critic_gate_open:
+        return False
+    if args.training_stage == "critic_actor" and step < args.critic_burn_in_steps:
+        return False
+    actor_min_replay = args.actor_min_replay_samples or args.min_replay_samples
+    actor_min_shards = args.actor_min_replay_shards or args.min_replay_shards
+    actor_min_success = args.actor_min_success_episodes or args.min_success_episodes
+    actor_min_failure = args.actor_min_failure_episodes or args.min_failure_episodes
+    return (
+        stats.replay_size >= actor_min_replay
+        and stats.num_shards >= actor_min_shards
+        and stats.success_episodes >= actor_min_success
+        and stats.failure_episodes >= actor_min_failure
     )
 
 
@@ -232,8 +283,23 @@ def _write_summary(
     train_rlt_online._atomic_write_text(args.output_dir / "training_summary.json", json.dumps(summary, indent=2))
 
 
+def _write_used_manifest(output_dir: pathlib.Path, store: rlt_replay_store.RLTReplayStore) -> pathlib.Path:
+    manifest_path = output_dir / "used_manifest.jsonl"
+    rows = [{"shard_path": str(path)} for path in store.loaded_paths]
+    train_rlt_online._atomic_write_text(
+        manifest_path,
+        "".join(json.dumps(row, sort_keys=True) + "\n" for row in rows),
+    )
+    return manifest_path
+
+
+def _write_latest_actor_pointer(output_dir: pathlib.Path, actor_path: pathlib.Path | str) -> None:
+    train_rlt_online._atomic_write_text(output_dir / "latest_actor_path.txt", str(actor_path) + "\n")
+
+
 def main(args: Args) -> None:
     _init_logging()
+    _validate_training_stage(args.training_stage)
     logging.info("Running offline RLT trainer on %s", platform.node())
     if args.output_dir.exists():
         if not args.overwrite:
@@ -244,6 +310,7 @@ def main(args: Args) -> None:
     train_manifest, holdout_manifest, holdout_summary = _prepare_holdout_split(args)
     store = _build_train_store(args, train_manifest)
     _require_ready(args, store)
+    _write_used_manifest(args.output_dir, store)
     replay_shape = store.shape
     train_shape = store.sample_shape
     if replay_shape is None or train_shape is None:
@@ -255,6 +322,9 @@ def main(args: Args) -> None:
     if args.init_critic_checkpoint is not None:
         state = _load_critic_checkpoint(state, args.init_critic_checkpoint)
         logging.info("Initialized critic from %s; actor remains freshly initialized", args.init_critic_checkpoint)
+    if args.training_stage == "actor_only":
+        state = rlt_training.sync_target_params(state)
+        logging.info("Synced target critic before actor_only training")
     replay_rng = np.random.default_rng(args.seed)
     _init_wandb(args, store)
 
@@ -269,12 +339,16 @@ def main(args: Args) -> None:
     )
     train_rlt_online._save_training_checkpoint(state, args.output_dir, 0, store)
     if args.eval_holdout_critic and holdout_manifest is not None:
-        rlt_eval.evaluate_holdout_checkpoints(
+        initial_eval = rlt_eval.evaluate_holdout_checkpoints(
             checkpoint_dirs=[latest_actor_dir],
             holdout_paths=rlt_eval.find_replay_shards(args.replay_dir, manifest_path=holdout_manifest),
             output_dir=args.output_dir / "holdout_eval" / f"{0:08d}",
             score_batch_size=args.holdout_score_batch_size,
         )
+        latest_critic_metric = initial_eval.best_metric
+    else:
+        latest_critic_metric = None
+    _write_latest_actor_pointer(args.output_dir, latest_actor_dir)
     latest_target_sync_step: int | None = None
     infos: list[dict[str, np.ndarray]] = []
     log_start = time.perf_counter()
@@ -282,7 +356,13 @@ def main(args: Args) -> None:
     with tqdm.tqdm(total=args.num_train_steps, dynamic_ncols=True, desc="offline-rlt") as progress:
         while int(state.step) < args.num_train_steps:
             next_step = int(state.step) + 1
-            actor_enabled = train_rlt_online._actor_updates_enabled(args, store, next_step)
+            critic_gate_open = _critic_gate_allows_actor(args, latest_critic_metric)
+            actor_enabled = _actor_updates_allowed(
+                args,
+                stats=store.stats,
+                step=next_step,
+                critic_gate_open=critic_gate_open,
+            )
             if actor_enabled and latest_target_sync_step is None:
                 state = rlt_training.sync_target_params(state)
                 latest_target_sync_step = int(state.step)
@@ -314,6 +394,7 @@ def main(args: Args) -> None:
                     latest_actor_dir / "metrics.json",
                     json.dumps({"critic_loss": float(info["critic_loss"])}, indent=2, sort_keys=True),
                 )
+                _write_latest_actor_pointer(args.output_dir, latest_actor_dir)
             if current_step % args.save_interval == 0:
                 train_rlt_online._save_training_checkpoint(state, args.output_dir, current_step, store)
                 snapshot_dir = train_rlt_online._save_actor_for_inference(
@@ -335,12 +416,13 @@ def main(args: Args) -> None:
                     and args.eval_holdout_every_steps > 0
                     and current_step % args.eval_holdout_every_steps == 0
                 ):
-                    rlt_eval.evaluate_holdout_checkpoints(
+                    eval_result = rlt_eval.evaluate_holdout_checkpoints(
                         checkpoint_dirs=[snapshot_dir],
                         holdout_paths=rlt_eval.find_replay_shards(args.replay_dir, manifest_path=holdout_manifest),
                         output_dir=args.output_dir / "holdout_eval" / f"{current_step:08d}",
                         score_batch_size=args.holdout_score_batch_size,
                     )
+                    latest_critic_metric = eval_result.best_metric
             if current_step % args.log_interval == 0 and infos:
                 reduced = train_rlt_online._reduce_numeric_infos(infos)
                 reduced.update(
@@ -350,6 +432,7 @@ def main(args: Args) -> None:
                         "replay_shards": float(store.stats.num_shards),
                         "success_episodes": float(store.stats.success_episodes),
                         "failure_episodes": float(store.stats.failure_episodes),
+                        "critic_gate_open": float(critic_gate_open),
                         "steps_per_sec": args.log_interval / max(time.perf_counter() - log_start, 1e-6),
                     }
                 )
