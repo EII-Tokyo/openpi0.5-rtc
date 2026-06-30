@@ -122,6 +122,8 @@ services:
         --output-dir /app/rlt_online/run
         --overwrite
         --segment-db-path /app/segment_db/segments.sqlite3
+        ${RLT_ONLINE_TRAIN_MANIFEST:+--manifest-path ${RLT_ONLINE_TRAIN_MANIFEST}}
+        ${RLT_ONLINE_HOLDOUT_MANIFEST:+--holdout-manifest-path ${RLT_ONLINE_HOLDOUT_MANIFEST}}
         --recursive-scan
         --expected-replay-action-horizon ${RLT_EXPECTED_REPLAY_ACTION_HORIZON:-10}
         --train-action-horizon ${RLT_TRAIN_ACTION_HORIZON:-10}

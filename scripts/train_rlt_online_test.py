@@ -120,6 +120,69 @@ def test_offline_trainer_builds_manifest_replay_store(tmp_path):
     assert store._manifest_path == manifest_path
 
 
+def _write_online_manifest(path, shard_paths):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8") as file:
+        for shard_path in shard_paths:
+            file.write(json.dumps({"shard_path": str(shard_path)}, sort_keys=True) + "\n")
+
+
+def test_online_trainer_builds_manifest_replay_store(tmp_path):
+    manifest_path = tmp_path / "train_manifest.jsonl"
+    manifest_path.write_text("")
+    args = train_rlt_online.Args(
+        replay_dir=tmp_path / "replay" / "rlt_key_regions_clean",
+        manifest_path=manifest_path,
+        recursive_scan=True,
+    )
+
+    store = train_rlt_online._build_replay_store(args)
+
+    assert store._manifest_path == manifest_path
+    assert store._recursive is True
+
+
+def test_online_candidate_holdout_paths_use_holdout_manifest_not_training_store(tmp_path):
+    train_shard = tmp_path / "train" / "key_region_train.npz"
+    holdout_shard = tmp_path / "holdout" / "key_region_holdout.npz"
+    train_shard.parent.mkdir()
+    holdout_shard.parent.mkdir()
+    train_shard.write_bytes(b"train")
+    holdout_shard.write_bytes(b"holdout")
+    train_manifest = tmp_path / "train_manifest.jsonl"
+    holdout_manifest = tmp_path / "holdout_manifest.jsonl"
+    _write_online_manifest(train_manifest, [train_shard])
+    _write_online_manifest(holdout_manifest, [holdout_shard])
+    args = train_rlt_online.Args(
+        replay_dir=tmp_path,
+        manifest_path=train_manifest,
+        holdout_manifest_path=holdout_manifest,
+    )
+    store = train_rlt_online._build_replay_store(args)
+
+    assert train_rlt_online._candidate_holdout_paths(args=args, store=store, round_index=7) == [
+        holdout_shard.resolve()
+    ]
+
+
+def test_online_train_holdout_manifest_overlap_is_rejected(tmp_path):
+    shared_shard = tmp_path / "shared" / "key_region_shared.npz"
+    shared_shard.parent.mkdir()
+    shared_shard.write_bytes(b"shared")
+    train_manifest = tmp_path / "train_manifest.jsonl"
+    holdout_manifest = tmp_path / "holdout_manifest.jsonl"
+    _write_online_manifest(train_manifest, [shared_shard])
+    _write_online_manifest(holdout_manifest, [shared_shard])
+    args = train_rlt_online.Args(
+        replay_dir=tmp_path,
+        manifest_path=train_manifest,
+        holdout_manifest_path=holdout_manifest,
+    )
+
+    with pytest.raises(ValueError, match="overlap"):
+        train_rlt_online._validate_train_holdout_disjoint(args)
+
+
 def test_offline_trainer_builds_config_with_manual_beta():
     shape = rlt_replay_store.ReplayShape(z_dim=8, proprio_dim=4, action_horizon=10, action_dim=14)
     args = train_rlt_offline.Args(

@@ -28,6 +28,8 @@ from openpi.training import rlt_training
 class Args:
     replay_dir: pathlib.Path
     segment_db_path: pathlib.Path | None = None
+    manifest_path: pathlib.Path | None = None
+    holdout_manifest_path: pathlib.Path | None = None
     output_dir: pathlib.Path = pathlib.Path("./checkpoints/rlt_actor_critic/online")
     num_train_steps: int = 0
     batch_size: int = 64
@@ -1105,14 +1107,13 @@ def _evaluate_candidate_critic(
     output_dir: pathlib.Path,
     round_index: int,
 ) -> dict | None:
-    paths = list(store.loaded_paths)
-    if len(paths) < 2:
+    paths = _candidate_holdout_paths(args=args, store=store, round_index=round_index)
+    if not paths:
         return None
     try:
-        split = rlt_eval.split_shards(paths, holdout_ratio=0.2, seed=args.seed + round_index)
         result = rlt_eval.evaluate_holdout_checkpoints(
             checkpoint_dirs=[checkpoint_dir],
-            holdout_paths=list(split.holdout_paths),
+            holdout_paths=paths,
             output_dir=output_dir,
             score_batch_size=512,
         )
@@ -1122,17 +1123,53 @@ def _evaluate_candidate_critic(
     return result.best_metric
 
 
-def main(args: Args) -> None:
-    _init_logging()
-    logging.info("Running online RLT trainer on %s", platform.node())
-
-    store = rlt_replay_store.RLTReplayStore(
+def _build_replay_store(args: Args) -> rlt_replay_store.RLTReplayStore:
+    return rlt_replay_store.RLTReplayStore(
         args.replay_dir,
         max_replay_samples=args.max_replay_samples,
         recursive=args.recursive_scan,
         sample_action_horizon=args.train_action_horizon,
         segment_db_path=args.segment_db_path,
+        manifest_path=args.manifest_path,
     )
+
+
+def _candidate_holdout_paths(
+    *,
+    args: Args,
+    store: rlt_replay_store.RLTReplayStore,
+    round_index: int,
+) -> list[pathlib.Path]:
+    if args.holdout_manifest_path is not None:
+        paths = rlt_eval.find_replay_shards(args.replay_dir, manifest_path=args.holdout_manifest_path)
+        return list(paths)
+    paths = list(store.loaded_paths)
+    if len(paths) < 2:
+        return []
+    split = rlt_eval.split_shards(paths, holdout_ratio=0.2, seed=args.seed + round_index)
+    return list(split.holdout_paths)
+
+
+def _validate_train_holdout_disjoint(args: Args) -> None:
+    if args.manifest_path is None or args.holdout_manifest_path is None:
+        return
+    train_paths = set(rlt_eval.find_replay_shards(args.replay_dir, manifest_path=args.manifest_path))
+    holdout_paths = set(rlt_eval.find_replay_shards(args.replay_dir, manifest_path=args.holdout_manifest_path))
+    overlap = sorted(train_paths & holdout_paths)
+    if overlap:
+        examples = ", ".join(str(path) for path in overlap[:3])
+        raise ValueError(
+            f"Online train and holdout manifests overlap on {len(overlap)} shard(s): {examples}. "
+            "Holdout shards must be eval-only and must never participate in training."
+        )
+
+
+def main(args: Args) -> None:
+    _init_logging()
+    logging.info("Running online RLT trainer on %s", platform.node())
+
+    _validate_train_holdout_disjoint(args)
+    store = _build_replay_store(args)
     store.scan()
     _wait_for_replay(args, store)
     if store.shape is None:

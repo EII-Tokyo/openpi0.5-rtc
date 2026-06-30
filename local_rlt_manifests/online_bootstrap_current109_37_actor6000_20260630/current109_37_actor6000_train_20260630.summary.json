@@ -1,0 +1,34 @@
+{
+  "bootstrap_source": "online_bootstrap_train",
+  "by_batch": {
+    "2026-06-17": {
+      "failure_episodes": 59,
+      "num_shards": 62,
+      "num_transitions": 1863,
+      "success_episodes": 3
+    },
+    "2026-06-30": {
+      "failure_episodes": 19,
+      "num_shards": 30,
+      "num_transitions": 1646,
+      "success_episodes": 11
+    },
+    "manual": {
+      "failure_episodes": 3,
+      "num_shards": 25,
+      "num_transitions": 744,
+      "success_episodes": 22
+    }
+  },
+  "failure_episodes": 81,
+  "manifest_path": "/home/eii/project/openpi0.5-rtc-reward-learning/local_rlt_manifests/online_bootstrap_current109_37_actor6000_20260630/current109_37_actor6000_train_20260630.jsonl",
+  "num_shards": 117,
+  "num_transitions": 4253,
+  "remote_manifest_path": "/home/eii/project/openpi0.5-rtc-reward-learning/local_rlt_manifests/online_bootstrap_current109_37_actor6000_20260630/current109_37_actor6000_train_20260630.remote.jsonl",
+  "remote_shard_root": "/app/replay/rlt_online_bootstrap/current109_37_actor6000_20260630/train/shards",
+  "skipped_by_reason": {},
+  "source_manifest": "/home/eii/project/openpi0.5-rtc-reward-learning/local_rlt_runs/current109_37_frozencritic5000_td3_actor6000_20260630/holdout_split/train_manifest.jsonl",
+  "success_episodes": 36,
+  "summary_path": "/home/eii/project/openpi0.5-rtc-reward-learning/local_rlt_manifests/online_bootstrap_current109_37_actor6000_20260630/current109_37_actor6000_train_20260630.summary.json",
+  "training_summary": null
+}

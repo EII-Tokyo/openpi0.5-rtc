@@ -1,5 +1,6 @@
 import json
 
+import numpy as np
 import pytest
 
 from scripts import prepare_rlt_online_bootstrap
@@ -76,7 +77,7 @@ def test_prepare_online_bootstrap_deduplicates_no_actor_rows(tmp_path):
 
 def test_prepare_online_bootstrap_writes_remote_manifest(tmp_path):
     shard = tmp_path / "clean" / "a.npz"
-    shard.parent.mkdir()
+    shard.parent.mkdir(parents=True)
     shard.write_bytes(b"a")
     source = tmp_path / "source.jsonl"
     _write_manifest(
@@ -105,6 +106,38 @@ def test_prepare_online_bootstrap_writes_remote_manifest(tmp_path):
     assert rows[0]["shard_path"] == "/app/replay/rlt_online_bootstrap/no_actor_clean/shards/a.npz"
     assert rows[0]["local_shard_path"] == str(shard.resolve())
     assert result.summary["remote_manifest_path"] == str(remote_manifest.resolve())
+
+
+def test_prepare_online_bootstrap_can_label_holdout_eval_rows(tmp_path):
+    shard = tmp_path / "clean" / "twist_off_the_bottle_cap" / "2026-06-17" / "shards" / "holdout.npz"
+    shard.parent.mkdir(parents=True)
+    np.savez(
+        shard,
+        action=np.zeros((2, 10, 14), dtype=np.float32),
+        done=np.asarray([False, True]),
+        reward_seq=np.asarray([[0.0] * 10, [0.0] * 9 + [1.0]], dtype=np.float32),
+    )
+    source = tmp_path / "holdout_manifest.jsonl"
+    _write_manifest(source, [{"shard_path": str(shard)}])
+
+    result = prepare_rlt_online_bootstrap.prepare_bootstrap(
+        prepare_rlt_online_bootstrap.Args(
+            source_manifest=source,
+            output_dir=tmp_path / "out",
+            output_name="holdout",
+            bootstrap_source="online_holdout_eval_only",
+        )
+    )
+
+    rows = [json.loads(line) for line in result.manifest_path.read_text().splitlines()]
+    assert rows[0]["bootstrap_source"] == "online_holdout_eval_only"
+    assert rows[0]["batch"] == "2026-06-17"
+    assert rows[0]["num_replay_transitions"] == 2
+    assert rows[0]["success_episodes"] == 1
+    assert result.summary["bootstrap_source"] == "online_holdout_eval_only"
+    assert "2026-06-17" in result.summary["by_batch"]
+    assert result.summary["num_transitions"] == 2
+    assert result.summary["success_episodes"] == 1
 
 
 def test_prepare_online_bootstrap_rejects_wrong_expected_count(tmp_path):

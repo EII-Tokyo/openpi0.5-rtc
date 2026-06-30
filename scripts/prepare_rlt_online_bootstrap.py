@@ -17,6 +17,7 @@ class Args:
     training_summary: pathlib.Path | None = None
     expected_count: int | None = None
     output_name: str = "no_actor_clean_bootstrap"
+    bootstrap_source: str | None = None
     remote_shard_root: str | None = None
     remote_manifest_name: str | None = None
 
@@ -52,7 +53,7 @@ def prepare_bootstrap(args: Args) -> BootstrapResult:
                 skipped["duplicate_shard_path"] += 1
             continue
         seen_keys.add(dedup_key)
-        output_rows.append(_bootstrap_row(row, shard_path))
+        output_rows.append(_bootstrap_row(_with_shard_stats(row, shard_path), shard_path, bootstrap_source=args.bootstrap_source))
 
     if args.expected_count is not None and len(output_rows) != args.expected_count:
         raise ValueError(f"Expected {args.expected_count} bootstrap shards, got {len(output_rows)}")
@@ -74,6 +75,7 @@ def prepare_bootstrap(args: Args) -> BootstrapResult:
             "training_summary": None if args.training_summary is None else str(args.training_summary.expanduser().resolve()),
             "manifest_path": str(manifest_path.resolve()),
             "summary_path": str(summary_path.resolve()),
+            "bootstrap_source": args.bootstrap_source,
         }
     )
     if remote_manifest_path is not None:
@@ -152,11 +154,11 @@ def _dedup_key(row: dict[str, Any], shard_path: pathlib.Path) -> str:
     return f"shard_path:{shard_path.resolve()}"
 
 
-def _bootstrap_row(row: dict[str, Any], shard_path: pathlib.Path) -> dict[str, Any]:
+def _bootstrap_row(row: dict[str, Any], shard_path: pathlib.Path, *, bootstrap_source: str | None = None) -> dict[str, Any]:
     result = {
-        "bootstrap_source": row.get("bootstrap_source") or "no_actor_clean",
-        "key_region_id": row.get("key_region_id"),
-        "batch": row.get("batch") or "unknown",
+        "bootstrap_source": bootstrap_source or row.get("bootstrap_source") or "no_actor_clean",
+        "key_region_id": row.get("key_region_id") or _key_region_id_from_path(shard_path),
+        "batch": row.get("batch") or _batch_from_path(shard_path),
         "phase": row.get("phase"),
         "reward": row.get("reward"),
         "shard_path": str(shard_path.resolve()),
@@ -167,6 +169,14 @@ def _bootstrap_row(row: dict[str, Any], shard_path: pathlib.Path) -> dict[str, A
         "selection_reason": _selection_reason(row),
     }
     return {key: value for key, value in result.items() if value is not None}
+
+
+def _with_shard_stats(row: dict[str, Any], shard_path: pathlib.Path) -> dict[str, Any]:
+    required = ("num_replay_transitions", "success_episodes", "failure_episodes")
+    if all(key in row for key in required):
+        return row
+    stats = _inspect_shard(shard_path)
+    return {**stats, **row}
 
 
 def _key_region_id_from_path(path: pathlib.Path) -> str | None:
