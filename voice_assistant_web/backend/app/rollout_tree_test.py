@@ -242,6 +242,73 @@ def test_key_region_review_uses_date_from_absolute_clean_shard_path(tmp_path, mo
     assert records[0]["batch"] == "2026-06-19"
 
 
+def test_key_region_review_batches_skip_deleted_file_records(tmp_path, monkeypatch):
+    rollout_root = tmp_path / "rollouts"
+    replay_root = tmp_path / "replay"
+    _write_review_record(rollout_root, replay_root, key_region_id="visible", reward=1, score_time=20.0)
+    stale_shard = replay_root / "rlt_key_regions/task/2026-06-22/shards/key_region_stale.npz"
+    stale_shard.parent.mkdir(parents=True)
+    np.savez(stale_shard, done=np.asarray([True]), reward_seq=np.ones((1, 10)))
+
+    monkeypatch.setattr(main, "ROLLOUTS_ROOT", rollout_root)
+    monkeypatch.setattr(main, "REPLAY_ROOT", replay_root)
+    monkeypatch.setattr(
+        main,
+        "rlt_control",
+        _FakeRLTControl(
+            [
+                {
+                    "key_region_id": "stale",
+                    "status": "deleted",
+                    "phase": "warmup",
+                    "reward": 0,
+                    "shard_path": str(stale_shard),
+                    "num_replay_transitions": 1,
+                    "updated_at": 9.0,
+                }
+            ]
+        ),
+    )
+
+    page = main.rlt_key_region_review(limit=20)
+
+    assert page.batches == ["2026-06-01"]
+
+
+def test_key_region_review_batches_use_segment_batch_over_stale_raw_shard(tmp_path, monkeypatch):
+    rollout_root = tmp_path / "rollouts"
+    replay_root = tmp_path / "replay"
+    key_region_id = "same_key"
+    stale_shard = replay_root / "rlt_key_regions/task/2026-06-22/shards" / f"key_region_{key_region_id}.npz"
+    clean_shard = replay_root / "rlt_key_regions_clean/manual" / f"key_region_{key_region_id}.crop_1.npz"
+    stale_shard.parent.mkdir(parents=True)
+    clean_shard.parent.mkdir(parents=True)
+    np.savez(stale_shard, done=np.asarray([True]), reward_seq=np.ones((1, 10)))
+    np.savez(clean_shard, done=np.asarray([True]), reward_seq=np.ones((1, 10)))
+
+    monkeypatch.setattr(main, "ROLLOUTS_ROOT", rollout_root)
+    monkeypatch.setattr(main, "REPLAY_ROOT", replay_root)
+    monkeypatch.setattr(
+        main,
+        "rlt_control",
+        _FakeRLTControl(
+            [
+                {
+                    "key_region_id": key_region_id,
+                    "status": "committed",
+                    "phase": "warmup",
+                    "reward": 1,
+                    "shard_path": str(clean_shard),
+                    "num_replay_transitions": 1,
+                    "updated_at": 9.0,
+                }
+            ]
+        ),
+    )
+
+    assert main._key_region_review_batches_from_files() == ["manual"]
+
+
 def test_key_region_review_requires_current_segment_shard_even_when_raw_orphan_exists(tmp_path, monkeypatch):
     rollout_root = tmp_path / "rollouts"
     replay_root = tmp_path / "replay"

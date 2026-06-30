@@ -942,15 +942,35 @@ def _reconcile_key_region_record(record: dict) -> None:
 
 def _key_region_review_batches_from_files() -> list[str]:
     batches: set[str] = set()
+    segments_by_id = {
+        str(segment.get("key_region_id") or ""): segment
+        for segment in rlt_control.list_segments(limit=100000)
+        if str(segment.get("key_region_id") or "")
+    }
+    for segment in segments_by_id.values():
+        if str(segment.get("status") or "") == "deleted":
+            continue
+        if batch := _segment_batch(segment):
+            batches.add(batch)
+
     rollout_root = (ROLLOUTS_ROOT / "key_regions").resolve()
     if rollout_root.exists():
         for manifest_path in rollout_root.glob("**/key_region_*/manifest.json"):
+            key_region_id = manifest_path.parent.name.removeprefix("key_region_")
+            if segment := segments_by_id.get(key_region_id):
+                if str(segment.get("status") or "") == "deleted" or _segment_batch(segment):
+                    continue
             batch = _batch_from_rollout_path(manifest_path.parent)
             if batch:
                 batches.add(batch)
+
     replay_root = (REPLAY_ROOT / "rlt_key_regions").resolve()
     if replay_root.exists():
         for shard_path in replay_root.glob("**/shards/key_region_*.npz"):
+            key_region_id = shard_path.stem.removeprefix("key_region_")
+            if segment := segments_by_id.get(key_region_id):
+                if str(segment.get("status") or "") == "deleted" or _segment_batch(segment):
+                    continue
             batch = _batch_from_replay_path(shard_path)
             if batch:
                 batches.add(batch)
