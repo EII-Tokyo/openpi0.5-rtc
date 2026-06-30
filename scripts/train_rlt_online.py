@@ -97,6 +97,9 @@ class Args:
     redis_db: int = 0
     redis_state_channel: str = "aloha_rlt_state"
     redis_control_channel: str = "aloha_rlt_control"
+    init_inference_actor_checkpoint: pathlib.Path | None = None
+    online_treat_initial_replay_as_committed: bool = True
+    online_initial_committed_shards: int | None = None
     overwrite: bool = False
 
 
@@ -147,6 +150,10 @@ class OnlineSafetyController:
         self.phase = "critic_candidate_training"
         self.last_rejection_reason = None
         return True
+
+    def mark_bootstrap_committed(self, stats: rlt_replay_store.ReplayStats) -> None:
+        self.last_committed_shards = int(stats.num_shards)
+        self.round_start_shards = int(stats.num_shards)
 
     def step_allocation(self) -> dict[str, bool]:
         if self.phase == "critic_candidate_training":
@@ -668,6 +675,70 @@ def _with_runtime_beta(state: rlt_training.RLTTrainState, beta: float) -> rlt_tr
     return dataclasses.replace(state, model_def=nnx.graphdef(model), params=nnx.state(model))
 
 
+def _load_inference_actor_checkpoint(
+    state: rlt_training.RLTTrainState,
+    checkpoint_dir: pathlib.Path,
+) -> tuple[rlt_training.RLTTrainState, dict]:
+    checkpoint_dir = _resolve_inference_checkpoint_dir(checkpoint_dir)
+    metadata_path = checkpoint_dir / "metadata.json"
+    actor_path = checkpoint_dir / "actor.msgpack"
+    critic_path = checkpoint_dir / "critic.msgpack"
+    if not metadata_path.exists():
+        raise FileNotFoundError(f"metadata.json not found in {checkpoint_dir}")
+    if not actor_path.exists():
+        raise FileNotFoundError(f"actor.msgpack not found in {checkpoint_dir}")
+    if not critic_path.exists():
+        raise FileNotFoundError(f"critic.msgpack not found in {checkpoint_dir}")
+    metadata = json.loads(metadata_path.read_text())
+    if metadata.get("type") != "rlt_inference_actor":
+        raise ValueError(f"{checkpoint_dir} is not an RLT inference actor checkpoint")
+    loaded_config = rlt.RLTConfig(**metadata["rlt_config"])
+    model = nnx.merge(state.model_def, state.params)
+    _assert_compatible_rlt_config(model.config, loaded_config, checkpoint_dir)
+
+    actor_state = nnx.state(model.actor)
+    actor_pure = serialization.from_bytes(actor_state.to_pure_dict(), actor_path.read_bytes())
+    actor_state.replace_by_pure_dict(actor_pure)
+    nnx.update(model.actor, actor_state)
+    target_actor_state = nnx.state(model.target_actor)
+    target_actor_state.replace_by_pure_dict(actor_pure)
+    nnx.update(model.target_actor, target_actor_state)
+
+    critic_state = nnx.state(model.critic)
+    critic_pure = serialization.from_bytes(critic_state.to_pure_dict(), critic_path.read_bytes())
+    critic_state.replace_by_pure_dict(critic_pure)
+    nnx.update(model.critic, critic_state)
+    target_critic_state = nnx.state(model.target_critic)
+    target_critic_state.replace_by_pure_dict(critic_pure)
+    nnx.update(model.target_critic, target_critic_state)
+    return dataclasses.replace(
+        state,
+        step=jax.numpy.asarray(0, dtype=jax.numpy.int32),
+        params=nnx.state(model),
+        model_def=nnx.graphdef(model),
+    ), metadata
+
+
+def _resolve_inference_checkpoint_dir(path: pathlib.Path) -> pathlib.Path:
+    path = path.expanduser()
+    if path.name == "LATEST":
+        return pathlib.Path(path.read_text().strip()).expanduser()
+    if path.is_dir() and (path / "LATEST").exists():
+        return pathlib.Path((path / "LATEST").read_text().strip()).expanduser()
+    return path
+
+
+def _assert_compatible_rlt_config(current: rlt.RLTConfig, loaded: rlt.RLTConfig, checkpoint_dir: pathlib.Path) -> None:
+    fields = ("z_dim", "proprio_dim", "action_horizon", "action_dim", "hidden_dim", "num_layers")
+    mismatches = {
+        field: (getattr(current, field), getattr(loaded, field))
+        for field in fields
+        if getattr(current, field) != getattr(loaded, field)
+    }
+    if mismatches:
+        raise ValueError(f"Incompatible RLT checkpoint {checkpoint_dir}: {mismatches}")
+
+
 def _json_float(value):
     if value is None:
         return None
@@ -1103,10 +1174,22 @@ def main(args: Args) -> None:
         awbc_max_action_delta_norm=args.awbc_max_action_delta_norm,
     )
     state = rlt_training.init_train_state(config, jax.random.key(args.seed))
+    init_checkpoint_metadata = None
+    if args.init_inference_actor_checkpoint is not None:
+        state, init_checkpoint_metadata = _load_inference_actor_checkpoint(state, args.init_inference_actor_checkpoint)
+        logging.info(
+            "Initialized online RLT from inference checkpoint step=%s path=%s",
+            init_checkpoint_metadata.get("step"),
+            args.init_inference_actor_checkpoint,
+        )
     online_safety_enabled = bool(args.online_safety_enabled)
     online_controller = _build_online_controller(args)
     accepted_state = state
     if online_safety_enabled:
+        if args.online_initial_committed_shards is not None:
+            online_controller.last_committed_shards = int(args.online_initial_committed_shards)
+        elif args.online_treat_initial_replay_as_committed:
+            online_controller.mark_bootstrap_committed(store.stats)
         state = _with_runtime_beta(state, online_controller.beta)
         accepted_state = state
         config = dataclasses.replace(config, model=dataclasses.replace(config.model, beta=online_controller.beta))

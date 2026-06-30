@@ -132,3 +132,33 @@ def test_prepare_online_bootstrap_rejects_wrong_expected_count(tmp_path):
                 expected_count=2,
             )
         )
+
+
+def test_prepare_online_bootstrap_from_training_summary_loaded_shards(tmp_path):
+    shard_a = tmp_path / "clean" / "a.npz"
+    shard_b = tmp_path / "clean" / "b.npz"
+    shard_a.parent.mkdir()
+    shard_a.write_bytes(b"a")
+    shard_b.write_bytes(b"b")
+    summary = tmp_path / "training_summary.json"
+    summary.write_text(
+        json.dumps(
+            {
+                "loaded_shards": [str(shard_a), str(shard_b)],
+                "replay_stats": {"num_shards": 2, "replay_size": 12, "success_episodes": 1, "failure_episodes": 1},
+            }
+        )
+    )
+
+    result = prepare_rlt_online_bootstrap.prepare_bootstrap(
+        prepare_rlt_online_bootstrap.Args(
+            source_manifest=None,
+            training_summary=summary,
+            output_dir=tmp_path / "out",
+        )
+    )
+
+    rows = [json.loads(line) for line in result.manifest_path.read_text().splitlines()]
+    assert result.summary["num_shards"] == 2
+    assert [row["shard_path"] for row in rows] == [str(shard_a.resolve()), str(shard_b.resolve())]
+    assert rows[0]["bootstrap_source"] == "training_summary_loaded_shards"

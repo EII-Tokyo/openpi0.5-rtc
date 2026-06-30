@@ -174,6 +174,9 @@ services:
         --redis-db ${REDIS_DB:-0}
         --redis-state-channel ${RLT_STATE_CHANNEL:-aloha_rlt_state}
         --redis-control-channel ${RLT_CONTROL_CHANNEL:-aloha_rlt_control}
+        ${RLT_INIT_INFERENCE_ACTOR_CHECKPOINT:+--init-inference-actor-checkpoint ${RLT_INIT_INFERENCE_ACTOR_CHECKPOINT}}
+        --online-treat-initial-replay-as-committed ${RLT_ONLINE_TREAT_INITIAL_REPLAY_AS_COMMITTED:-true}
+        ${RLT_ONLINE_INITIAL_COMMITTED_SHARDS:+--online-initial-committed-shards ${RLT_ONLINE_INITIAL_COMMITTED_SHARDS}}
     init: true
     tty: true
     network_mode: host

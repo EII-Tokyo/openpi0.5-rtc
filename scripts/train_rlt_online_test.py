@@ -704,6 +704,53 @@ def test_runtime_beta_update_changes_train_step_beta():
     assert float(jax.device_get(info["beta"])) == pytest.approx(5.0)
 
 
+def test_load_inference_checkpoint_initializes_actor_and_critic(tmp_path):
+    config = rlt_training.RLTTrainingConfig(
+        model=rlt.RLTConfig(
+            z_dim=8,
+            proprio_dim=4,
+            action_horizon=10,
+            action_dim=3,
+            hidden_dim=16,
+            num_layers=2,
+        )
+    )
+    source_state = rlt_training.init_train_state(config, jax.random.key(1))
+    fresh_state = rlt_training.init_train_state(config, jax.random.key(2))
+    actor_dir = train_rlt_online._save_actor_for_inference(
+        source_state,
+        tmp_path,
+        6000,
+        action_horizon=10,
+        replay_shape=_shape(action_horizon=10),
+        train_shape=_shape(action_horizon=10),
+        replay_stats=_stats(),
+    )
+
+    loaded_state, metadata = train_rlt_online._load_inference_actor_checkpoint(fresh_state, actor_dir)
+
+    source_model = rlt_training.nnx.merge(source_state.model_def, source_state.params)
+    loaded_model = rlt_training.nnx.merge(loaded_state.model_def, loaded_state.params)
+    assert metadata["step"] == 6000
+    assert int(loaded_state.step) == 0
+    for key, value in rlt_training.nnx.state(loaded_model.actor).flat_state().items():
+        assert np.allclose(value.value, rlt_training.nnx.state(source_model.actor).flat_state()[key].value)
+    for key, value in rlt_training.nnx.state(loaded_model.critic).flat_state().items():
+        assert np.allclose(value.value, rlt_training.nnx.state(source_model.critic).flat_state()[key].value)
+    for key, value in rlt_training.nnx.state(loaded_model.target_critic).flat_state().items():
+        assert np.allclose(value.value, rlt_training.nnx.state(source_model.critic).flat_state()[key].value)
+
+
+def test_online_controller_can_treat_existing_replay_as_bootstrap_baseline():
+    controller = train_rlt_online.OnlineSafetyController(min_new_shards_per_round=10)
+
+    controller.mark_bootstrap_committed(_stats(num_shards=117))
+
+    assert controller.last_committed_shards == 117
+    assert not controller.maybe_start_round(_stats(num_shards=126))
+    assert controller.maybe_start_round(_stats(num_shards=127))
+
+
 def test_runtime_control_subscriber_reads_beta_update():
     class _FakePubSub:
         def __init__(self):

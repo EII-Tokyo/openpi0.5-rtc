@@ -6,13 +6,15 @@ import pathlib
 from collections import Counter
 from typing import Any
 
+import numpy as np
 import tyro
 
 
 @dataclasses.dataclass
 class Args:
-    source_manifest: pathlib.Path
     output_dir: pathlib.Path
+    source_manifest: pathlib.Path | None = None
+    training_summary: pathlib.Path | None = None
     expected_count: int | None = None
     output_name: str = "no_actor_clean_bootstrap"
     remote_shard_root: str | None = None
@@ -29,7 +31,7 @@ class BootstrapResult:
 
 
 def prepare_bootstrap(args: Args) -> BootstrapResult:
-    rows = _read_jsonl(args.source_manifest)
+    rows = _source_rows(args)
     output_rows: list[dict[str, Any]] = []
     skipped: Counter[str] = Counter()
     seen_keys: set[str] = set()
@@ -68,7 +70,8 @@ def prepare_bootstrap(args: Args) -> BootstrapResult:
     summary = _summarize(output_rows, skipped)
     summary.update(
         {
-            "source_manifest": str(args.source_manifest.expanduser().resolve()),
+            "source_manifest": None if args.source_manifest is None else str(args.source_manifest.expanduser().resolve()),
+            "training_summary": None if args.training_summary is None else str(args.training_summary.expanduser().resolve()),
             "manifest_path": str(manifest_path.resolve()),
             "summary_path": str(summary_path.resolve()),
         }
@@ -92,6 +95,31 @@ def _read_jsonl(path: pathlib.Path) -> list[dict[str, Any]]:
         for line in file:
             if line.strip():
                 rows.append(json.loads(line))
+    return rows
+
+
+def _source_rows(args: Args) -> list[dict[str, Any]]:
+    if args.source_manifest is None and args.training_summary is None:
+        raise ValueError("Either source_manifest or training_summary must be provided.")
+    if args.source_manifest is not None and args.training_summary is not None:
+        raise ValueError("Use only one of source_manifest or training_summary.")
+    if args.source_manifest is not None:
+        return _read_jsonl(args.source_manifest)
+    assert args.training_summary is not None
+    summary = json.loads(args.training_summary.expanduser().read_text())
+    rows: list[dict[str, Any]] = []
+    for path in summary.get("loaded_shards") or []:
+        shard_path = pathlib.Path(path).expanduser()
+        rows.append(
+            {
+                "bootstrap_source": "training_summary_loaded_shards",
+                "shard_path": str(shard_path),
+                "source_shard_path": str(shard_path),
+                "key_region_id": _key_region_id_from_path(shard_path),
+                "batch": _batch_from_path(shard_path),
+                **_inspect_shard(shard_path),
+            }
+        )
     return rows
 
 
@@ -126,7 +154,7 @@ def _dedup_key(row: dict[str, Any], shard_path: pathlib.Path) -> str:
 
 def _bootstrap_row(row: dict[str, Any], shard_path: pathlib.Path) -> dict[str, Any]:
     result = {
-        "bootstrap_source": "no_actor_clean",
+        "bootstrap_source": row.get("bootstrap_source") or "no_actor_clean",
         "key_region_id": row.get("key_region_id"),
         "batch": row.get("batch") or "unknown",
         "phase": row.get("phase"),
@@ -139,6 +167,43 @@ def _bootstrap_row(row: dict[str, Any], shard_path: pathlib.Path) -> dict[str, A
         "selection_reason": _selection_reason(row),
     }
     return {key: value for key, value in result.items() if value is not None}
+
+
+def _key_region_id_from_path(path: pathlib.Path) -> str | None:
+    name = path.name
+    if name.startswith("key_region_"):
+        return name.removeprefix("key_region_").split(".")[0]
+    return None
+
+
+def _batch_from_path(path: pathlib.Path) -> str:
+    parts = path.parts
+    for part in parts:
+        if part.startswith("2026-"):
+            return part
+    if "manual" in parts:
+        return "manual"
+    return "unknown"
+
+
+def _inspect_shard(path: pathlib.Path) -> dict[str, int]:
+    try:
+        with np.load(path) as data:
+            num_transitions = int(len(data["action"])) if "action" in data else 0
+            if "done" not in data or "reward_seq" not in data:
+                return {"num_replay_transitions": num_transitions, "success_episodes": 0, "failure_episodes": 0}
+            done = np.asarray(data["done"]).astype(np.bool_)
+            reward_seq = np.asarray(data["reward_seq"], dtype=np.float32)
+            terminal_rewards = reward_seq[done].sum(axis=-1) if np.any(done) else np.asarray([], dtype=np.float32)
+            success = int(np.sum(terminal_rewards > 0.0))
+            failure = int(np.sum(done) - success)
+            return {
+                "num_replay_transitions": num_transitions,
+                "success_episodes": success,
+                "failure_episodes": failure,
+            }
+    except Exception:
+        return {"num_replay_transitions": 0, "success_episodes": 0, "failure_episodes": 0}
 
 
 def _selection_reason(row: dict[str, Any]) -> str:
