@@ -519,6 +519,55 @@ def test_config_update_publishes_auto_beta_settings():
     assert payload["state"]["auto_beta_target_delta_norm"] == 0.06
 
 
+def test_config_update_publishes_online_safety_settings():
+    store = _store(warmup_target=1)
+
+    request = type(
+        "Req",
+        (),
+        {
+            "warmup_target": None,
+            "beta": None,
+            "intervention_scale": None,
+            "max_delta": None,
+            "wandb_url": None,
+            "actor_enabled": None,
+            "trainer_enabled": None,
+            "critic_gate_enabled": None,
+            "critic_gate_margin": None,
+            "critic_gate_temperature": None,
+            "online_safety_enabled": True,
+            "online_min_new_shards_per_round": 10,
+            "online_critic_updates_per_round": 500,
+            "online_actor_updates_per_round": 300,
+            "online_critic_auc_min": 0.7,
+            "online_critic_max_auc_drop": 0.02,
+            "online_require_positive_q_gap": True,
+            "online_actor_max_delta_norm": 0.09,
+            "online_actor_min_q_advantage": 0.0,
+            "online_beta_initial": 30.0,
+            "online_beta_min": 5.0,
+            "online_beta_max": 30.0,
+            "online_beta_decay_on_actor_accept": 0.9,
+            "online_beta_increase_on_reject": 1.25,
+            "online_target_delta_initial": 0.04,
+            "online_target_delta_max": 0.1,
+            "online_target_delta_increment": 0.01,
+        },
+    )()
+    state = store.update_config(request)
+
+    assert state.online_safety_enabled is True
+    assert state.online_min_new_shards_per_round == 10
+    assert state.online_critic_updates_per_round == 500
+    assert state.online_beta_initial == 30.0
+    payload = json.loads(store._redis.messages[-1][1])
+    assert payload["online_safety_enabled"] is True
+    assert payload["online_min_new_shards_per_round"] == 10
+    assert payload["online_critic_auc_min"] == 0.7
+    assert payload["online_beta_initial"] == 30.0
+
+
 def test_runtime_metrics_update_inference_gate_diagnostics():
     store = _store(warmup_target=1)
     store._state.phase = "key_region"

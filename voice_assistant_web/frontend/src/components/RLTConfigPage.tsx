@@ -23,6 +23,23 @@ type Draft = Required<
     | 'critic_burn_in_steps'
     | 'actor_enabled'
     | 'trainer_enabled'
+    | 'online_safety_enabled'
+    | 'online_min_new_shards_per_round'
+    | 'online_critic_updates_per_round'
+    | 'online_actor_updates_per_round'
+    | 'online_critic_auc_min'
+    | 'online_critic_max_auc_drop'
+    | 'online_require_positive_q_gap'
+    | 'online_actor_max_delta_norm'
+    | 'online_actor_min_q_advantage'
+    | 'online_beta_initial'
+    | 'online_beta_min'
+    | 'online_beta_max'
+    | 'online_beta_decay_on_actor_accept'
+    | 'online_beta_increase_on_reject'
+    | 'online_target_delta_initial'
+    | 'online_target_delta_max'
+    | 'online_target_delta_increment'
     | 'intervention_scale'
     | 'max_delta'
     | 'actor_handoff_steps'
@@ -48,6 +65,23 @@ const makeDraft = (rlt: RLTControlState): Draft => ({
   critic_burn_in_steps: rlt.critic_burn_in_steps ?? 1000,
   actor_enabled: rlt.actor_enabled,
   trainer_enabled: rlt.trainer_enabled,
+  online_safety_enabled: rlt.online_safety_enabled,
+  online_min_new_shards_per_round: rlt.online_min_new_shards_per_round,
+  online_critic_updates_per_round: rlt.online_critic_updates_per_round,
+  online_actor_updates_per_round: rlt.online_actor_updates_per_round,
+  online_critic_auc_min: rlt.online_critic_auc_min,
+  online_critic_max_auc_drop: rlt.online_critic_max_auc_drop,
+  online_require_positive_q_gap: rlt.online_require_positive_q_gap,
+  online_actor_max_delta_norm: rlt.online_actor_max_delta_norm,
+  online_actor_min_q_advantage: rlt.online_actor_min_q_advantage,
+  online_beta_initial: rlt.online_beta_initial,
+  online_beta_min: rlt.online_beta_min,
+  online_beta_max: rlt.online_beta_max,
+  online_beta_decay_on_actor_accept: rlt.online_beta_decay_on_actor_accept,
+  online_beta_increase_on_reject: rlt.online_beta_increase_on_reject,
+  online_target_delta_initial: rlt.online_target_delta_initial,
+  online_target_delta_max: rlt.online_target_delta_max,
+  online_target_delta_increment: rlt.online_target_delta_increment,
   intervention_scale: rlt.intervention_scale,
   max_delta: rlt.max_delta,
   actor_handoff_steps: rlt.actor_handoff_steps,
@@ -80,6 +114,23 @@ export function RLTConfigPage({ rlt, onState }: Props) {
     rlt.critic_burn_in_steps,
     rlt.actor_enabled,
     rlt.trainer_enabled,
+    rlt.online_safety_enabled,
+    rlt.online_min_new_shards_per_round,
+    rlt.online_critic_updates_per_round,
+    rlt.online_actor_updates_per_round,
+    rlt.online_critic_auc_min,
+    rlt.online_critic_max_auc_drop,
+    rlt.online_require_positive_q_gap,
+    rlt.online_actor_max_delta_norm,
+    rlt.online_actor_min_q_advantage,
+    rlt.online_beta_initial,
+    rlt.online_beta_min,
+    rlt.online_beta_max,
+    rlt.online_beta_decay_on_actor_accept,
+    rlt.online_beta_increase_on_reject,
+    rlt.online_target_delta_initial,
+    rlt.online_target_delta_max,
+    rlt.online_target_delta_increment,
     rlt.intervention_scale,
     rlt.max_delta,
     rlt.actor_handoff_steps,
@@ -167,6 +218,160 @@ export function RLTConfigPage({ rlt, onState }: Props) {
               type="text"
               value={draft.wandb_url}
               onChange={(event) => setDraft({ ...draft, wandb_url: event.target.value })}
+            />
+          </Field>
+        </ConfigSection>
+
+        <ConfigSection title="Online Safety">
+          <Toggle
+            label="Safety Controller"
+            checked={draft.online_safety_enabled}
+            onChange={(online_safety_enabled) => setDraft({ ...draft, online_safety_enabled })}
+          />
+          <ReadOnly label="Current Phase" value={rlt.online_safety_phase || 'unknown'} />
+          <ReadOnly label="Best Critic AUC" value={rlt.online_best_critic_auc?.toFixed(3) ?? '-'} />
+          <ReadOnly label="Last Rejection" value={rlt.online_rejection_reason || '-'} />
+          <Field label="New Shards Per Round">
+            <input
+              type="number"
+              min={1}
+              value={draft.online_min_new_shards_per_round}
+              onChange={(event) => setDraft({ ...draft, online_min_new_shards_per_round: Number(event.target.value) })}
+            />
+            <small className="field-hint">新增多少条 committed replay 后才允许下一轮 critic/actor 训练。</small>
+          </Field>
+          <Field label="Critic Updates Per Round">
+            <input
+              type="number"
+              min={1}
+              value={draft.online_critic_updates_per_round}
+              onChange={(event) => setDraft({ ...draft, online_critic_updates_per_round: Number(event.target.value) })}
+            />
+            <small className="field-hint">每轮 candidate critic 的最大梯度步数，防止无限刷旧 replay。</small>
+          </Field>
+          <Field label="Actor Updates Per Round">
+            <input
+              type="number"
+              min={1}
+              value={draft.online_actor_updates_per_round}
+              onChange={(event) => setDraft({ ...draft, online_actor_updates_per_round: Number(event.target.value) })}
+            />
+            <small className="field-hint">critic 被接受后，每轮 candidate actor 的最大梯度步数。</small>
+          </Field>
+          <Field label="Critic AUC Min">
+            <input
+              type="number"
+              min={0}
+              max={1}
+              step={0.01}
+              value={draft.online_critic_auc_min}
+              onChange={(event) => setDraft({ ...draft, online_critic_auc_min: Number(event.target.value) })}
+            />
+          </Field>
+          <Field label="Max AUC Drop">
+            <input
+              type="number"
+              min={0}
+              max={1}
+              step={0.01}
+              value={draft.online_critic_max_auc_drop}
+              onChange={(event) => setDraft({ ...draft, online_critic_max_auc_drop: Number(event.target.value) })}
+            />
+          </Field>
+          <Toggle
+            label="Require Positive Q Gap"
+            checked={draft.online_require_positive_q_gap}
+            onChange={(online_require_positive_q_gap) => setDraft({ ...draft, online_require_positive_q_gap })}
+          />
+          <Field label="Actor Max Delta Norm">
+            <input
+              type="number"
+              min={0.001}
+              step={0.001}
+              value={draft.online_actor_max_delta_norm}
+              onChange={(event) => setDraft({ ...draft, online_actor_max_delta_norm: Number(event.target.value) })}
+            />
+          </Field>
+          <Field label="Actor Min Q Advantage">
+            <input
+              type="number"
+              step={0.001}
+              value={draft.online_actor_min_q_advantage}
+              onChange={(event) => setDraft({ ...draft, online_actor_min_q_advantage: Number(event.target.value) })}
+            />
+          </Field>
+          <Field label="Beta Initial">
+            <input
+              type="number"
+              min={0.001}
+              step={0.1}
+              value={draft.online_beta_initial}
+              onChange={(event) => setDraft({ ...draft, online_beta_initial: Number(event.target.value) })}
+            />
+          </Field>
+          <Field label="Beta Range">
+            <div className="inline-inputs">
+              <input
+                type="number"
+                min={0.001}
+                step={0.1}
+                value={draft.online_beta_min}
+                onChange={(event) => setDraft({ ...draft, online_beta_min: Number(event.target.value) })}
+              />
+              <input
+                type="number"
+                min={0.001}
+                step={0.1}
+                value={draft.online_beta_max}
+                onChange={(event) => setDraft({ ...draft, online_beta_max: Number(event.target.value) })}
+              />
+            </div>
+          </Field>
+          <Field label="Beta Accept / Reject">
+            <div className="inline-inputs">
+              <input
+                type="number"
+                min={0.001}
+                max={1}
+                step={0.01}
+                value={draft.online_beta_decay_on_actor_accept}
+                onChange={(event) => setDraft({ ...draft, online_beta_decay_on_actor_accept: Number(event.target.value) })}
+              />
+              <input
+                type="number"
+                min={1}
+                step={0.01}
+                value={draft.online_beta_increase_on_reject}
+                onChange={(event) => setDraft({ ...draft, online_beta_increase_on_reject: Number(event.target.value) })}
+              />
+            </div>
+            <small className="field-hint">actor 被接受时 beta 乘左值逐渐放开；被拒绝时 beta 乘右值收紧。</small>
+          </Field>
+          <Field label="Target Delta Range">
+            <div className="inline-inputs">
+              <input
+                type="number"
+                min={0.001}
+                step={0.001}
+                value={draft.online_target_delta_initial}
+                onChange={(event) => setDraft({ ...draft, online_target_delta_initial: Number(event.target.value) })}
+              />
+              <input
+                type="number"
+                min={0.001}
+                step={0.001}
+                value={draft.online_target_delta_max}
+                onChange={(event) => setDraft({ ...draft, online_target_delta_max: Number(event.target.value) })}
+              />
+            </div>
+          </Field>
+          <Field label="Target Delta Increment">
+            <input
+              type="number"
+              min={0}
+              step={0.001}
+              value={draft.online_target_delta_increment}
+              onChange={(event) => setDraft({ ...draft, online_target_delta_increment: Number(event.target.value) })}
             />
           </Field>
         </ConfigSection>

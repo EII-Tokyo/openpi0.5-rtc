@@ -130,6 +130,23 @@ services:
         --min-success-episodes ${RLT_MIN_SUCCESS_EPISODES:-10}
         --min-failure-episodes ${RLT_MIN_FAILURE_EPISODES:-10}
         --critic-burn-in-steps ${RLT_CRITIC_BURN_IN_STEPS:-1000}
+        --online-safety-enabled ${RLT_ONLINE_SAFETY_ENABLED:-true}
+        --online-min-new-shards-per-round ${RLT_ONLINE_MIN_NEW_SHARDS_PER_ROUND:-10}
+        --online-critic-updates-per-round ${RLT_ONLINE_CRITIC_UPDATES_PER_ROUND:-500}
+        --online-actor-updates-per-round ${RLT_ONLINE_ACTOR_UPDATES_PER_ROUND:-300}
+        --online-critic-auc-min ${RLT_ONLINE_CRITIC_AUC_MIN:-0.70}
+        --online-critic-max-auc-drop ${RLT_ONLINE_CRITIC_MAX_AUC_DROP:-0.02}
+        --online-require-positive-q-gap ${RLT_ONLINE_REQUIRE_POSITIVE_Q_GAP:-true}
+        --online-actor-max-delta-norm ${RLT_ONLINE_ACTOR_MAX_DELTA_NORM:-0.09}
+        --online-actor-min-q-advantage ${RLT_ONLINE_ACTOR_MIN_Q_ADVANTAGE:-0.0}
+        --online-beta-initial ${RLT_ONLINE_BETA_INITIAL:-30.0}
+        --online-beta-min ${RLT_ONLINE_BETA_MIN:-5.0}
+        --online-beta-max ${RLT_ONLINE_BETA_MAX:-30.0}
+        --online-beta-decay-on-actor-accept ${RLT_ONLINE_BETA_DECAY_ON_ACTOR_ACCEPT:-0.9}
+        --online-beta-increase-on-reject ${RLT_ONLINE_BETA_INCREASE_ON_REJECT:-1.25}
+        --online-target-delta-initial ${RLT_ONLINE_TARGET_DELTA_INITIAL:-0.04}
+        --online-target-delta-max ${RLT_ONLINE_TARGET_DELTA_MAX:-0.10}
+        --online-target-delta-increment ${RLT_ONLINE_TARGET_DELTA_INCREMENT:-0.01}
         --auto-beta-enabled
         --auto-beta-target-delta-norm ${RLT_AUTO_BETA_TARGET_DELTA_NORM:-0.06}
         --auto-beta-min ${RLT_AUTO_BETA_MIN:-1.0}

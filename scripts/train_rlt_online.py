@@ -19,6 +19,7 @@ import tyro
 import wandb
 
 from openpi.models import rlt
+from openpi.training import rlt_eval
 from openpi.training import rlt_replay_store
 from openpi.training import rlt_training
 
@@ -40,6 +41,23 @@ class Args:
     min_success_episodes: int = 1
     min_failure_episodes: int = 1
     critic_burn_in_steps: int = 1_000
+    online_safety_enabled: bool = True
+    online_min_new_shards_per_round: int = 10
+    online_critic_updates_per_round: int = 500
+    online_actor_updates_per_round: int = 300
+    online_critic_auc_min: float = 0.70
+    online_critic_max_auc_drop: float = 0.02
+    online_require_positive_q_gap: bool = True
+    online_actor_max_delta_norm: float = 0.09
+    online_actor_min_q_advantage: float = 0.0
+    online_beta_initial: float = 30.0
+    online_beta_min: float = 5.0
+    online_beta_max: float = 30.0
+    online_beta_decay_on_actor_accept: float = 0.9
+    online_beta_increase_on_reject: float = 1.25
+    online_target_delta_initial: float = 0.04
+    online_target_delta_max: float = 0.10
+    online_target_delta_increment: float = 0.01
     auto_beta_enabled: bool = False
     auto_beta_target_delta_norm: float = 0.05
     auto_beta_min: float = 1.0
@@ -80,6 +98,158 @@ class Args:
     redis_state_channel: str = "aloha_rlt_state"
     redis_control_channel: str = "aloha_rlt_control"
     overwrite: bool = False
+
+
+@dataclasses.dataclass
+class OnlineSafetyController:
+    min_new_shards_per_round: int = 10
+    critic_updates_per_round: int = 500
+    actor_updates_per_round: int = 300
+    critic_auc_min: float = 0.70
+    critic_max_auc_drop: float = 0.02
+    require_positive_q_gap: bool = True
+    actor_max_delta_norm: float = 0.09
+    actor_min_q_advantage: float = 0.0
+    beta_initial: float = 30.0
+    beta_min: float = 5.0
+    beta_max: float = 30.0
+    beta_decay_on_actor_accept: float = 0.9
+    beta_increase_on_reject: float = 1.25
+    target_delta_initial: float = 0.04
+    target_delta_max: float = 0.10
+    target_delta_increment: float = 0.01
+    phase: str = "idle_wait_new_data"
+    last_committed_shards: int = 0
+    round_start_shards: int = 0
+    round_index: int = 0
+    critic_steps_remaining: int = 0
+    actor_steps_remaining: int = 0
+    best_critic_auc: float | None = None
+    best_critic_q_gap: float | None = None
+    last_rejection_reason: str | None = None
+    beta: float = dataclasses.field(init=False)
+    target_delta_norm: float = dataclasses.field(init=False)
+
+    def __post_init__(self) -> None:
+        self.beta = float(np.clip(self.beta_initial, self.beta_min, self.beta_max))
+        self.target_delta_norm = float(self.target_delta_initial)
+
+    def maybe_start_round(self, stats: rlt_replay_store.ReplayStats) -> bool:
+        if self.phase != "idle_wait_new_data":
+            return False
+        new_shards = int(stats.num_shards) - int(self.last_committed_shards)
+        if new_shards < self.min_new_shards_per_round:
+            return False
+        self.round_index += 1
+        self.round_start_shards = int(stats.num_shards)
+        self.critic_steps_remaining = int(self.critic_updates_per_round)
+        self.actor_steps_remaining = 0
+        self.phase = "critic_candidate_training"
+        self.last_rejection_reason = None
+        return True
+
+    def step_allocation(self) -> dict[str, bool]:
+        if self.phase == "critic_candidate_training":
+            if self.critic_steps_remaining <= 0:
+                self.phase = "critic_eval"
+                return {"trainer_running": False, "actor_enabled": False}
+            self.critic_steps_remaining -= 1
+            if self.critic_steps_remaining == 0:
+                self.phase = "critic_eval"
+            return {"trainer_running": True, "actor_enabled": False}
+        if self.phase == "actor_candidate_training":
+            if self.actor_steps_remaining <= 0:
+                self.phase = "actor_eval"
+                return {"trainer_running": False, "actor_enabled": False}
+            self.actor_steps_remaining -= 1
+            if self.actor_steps_remaining == 0:
+                self.phase = "actor_eval"
+            return {"trainer_running": True, "actor_enabled": True}
+        return {"trainer_running": False, "actor_enabled": False}
+
+    def accept_critic(self, metric: dict | None) -> bool:
+        accepted, reason = self._critic_decision(metric)
+        if accepted:
+            self.best_critic_auc = _finite_float(metric.get("auc")) if metric else None
+            self.best_critic_q_gap = _finite_float(metric.get("q_gap")) if metric else None
+            self.actor_steps_remaining = int(self.actor_updates_per_round)
+            self.phase = "actor_candidate_training"
+            self.last_rejection_reason = None
+            return True
+        self.last_rejection_reason = reason
+        self.phase = "idle_wait_new_data"
+        self.last_committed_shards = int(self.round_start_shards)
+        return False
+
+    def accept_actor(self, metric: dict | None) -> bool:
+        accepted, reason = self._actor_decision(metric)
+        self.last_committed_shards = int(self.round_start_shards)
+        self.phase = "idle_wait_new_data"
+        if accepted:
+            self.on_actor_accepted()
+            self.last_rejection_reason = None
+            return True
+        self.on_actor_rejected()
+        self.last_rejection_reason = reason
+        return False
+
+    def on_actor_accepted(self) -> None:
+        self.beta = float(np.clip(self.beta * self.beta_decay_on_actor_accept, self.beta_min, self.beta_max))
+        self.target_delta_norm = min(
+            float(self.target_delta_max),
+            float(self.target_delta_norm) + float(self.target_delta_increment),
+        )
+
+    def on_actor_rejected(self) -> None:
+        self.beta = float(np.clip(self.beta * self.beta_increase_on_reject, self.beta_min, self.beta_max))
+        self.target_delta_norm = max(
+            float(self.target_delta_initial),
+            float(self.target_delta_norm) - float(self.target_delta_increment),
+        )
+
+    def metrics(self) -> dict[str, float | int | str | bool | None]:
+        return {
+            "online_safety_phase": self.phase,
+            "online_round_index": self.round_index,
+            "online_last_committed_shards": self.last_committed_shards,
+            "online_round_start_shards": self.round_start_shards,
+            "online_critic_steps_remaining": self.critic_steps_remaining,
+            "online_actor_steps_remaining": self.actor_steps_remaining,
+            "online_best_critic_auc": self.best_critic_auc,
+            "online_best_critic_q_gap": self.best_critic_q_gap,
+            "online_rejection_reason": self.last_rejection_reason,
+            "online_target_delta_norm": self.target_delta_norm,
+        }
+
+    def _critic_decision(self, metric: dict | None) -> tuple[bool, str | None]:
+        if metric is None:
+            return False, "missing_critic_metric"
+        auc = _finite_float(metric.get("auc"))
+        q_gap = _finite_float(metric.get("q_gap"))
+        if auc is None:
+            return False, "missing_critic_auc"
+        if auc < self.critic_auc_min:
+            return False, "critic_auc_below_min"
+        if self.best_critic_auc is not None and auc < self.best_critic_auc - self.critic_max_auc_drop:
+            return False, "critic_auc_regressed"
+        if self.require_positive_q_gap and (q_gap is None or q_gap <= 0.0):
+            return False, "critic_q_gap_not_positive"
+        return True, None
+
+    def _actor_decision(self, metric: dict | None) -> tuple[bool, str | None]:
+        if metric is None:
+            return False, "missing_actor_metric"
+        q_advantage = _finite_float(metric.get("q_advantage"))
+        actor_delta_norm = _finite_float(metric.get("actor_delta_norm"))
+        if q_advantage is None or q_advantage <= self.actor_min_q_advantage:
+            return False, "actor_q_advantage_too_low"
+        if actor_delta_norm is not None and actor_delta_norm > self.actor_max_delta_norm:
+            return False, "actor_delta_norm_too_high"
+        failure_adv = _finite_float(metric.get("failure_actor_advantage_mean"))
+        success_adv = _finite_float(metric.get("success_actor_advantage_mean"))
+        if failure_adv is not None and success_adv is not None and failure_adv > success_adv:
+            return False, "failure_actor_advantage_above_success"
+        return True, None
 
 
 def _init_logging() -> None:
@@ -219,6 +389,42 @@ class RedisControlSubscriber:
                         critic_burn_in_steps = -1
                     if critic_burn_in_steps >= 0:
                         latest_update["critic_burn_in_steps"] = critic_burn_in_steps
+                for key in (
+                    "online_min_new_shards_per_round",
+                    "online_critic_updates_per_round",
+                    "online_actor_updates_per_round",
+                ):
+                    if key not in payload:
+                        continue
+                    try:
+                        value = int(payload[key])
+                    except (TypeError, ValueError):
+                        value = 0
+                    if value >= 0:
+                        latest_update[key] = value
+                if "online_safety_enabled" in payload:
+                    latest_update["online_safety_enabled"] = bool(payload["online_safety_enabled"])
+                for key in (
+                    "online_critic_auc_min",
+                    "online_critic_max_auc_drop",
+                    "online_actor_max_delta_norm",
+                    "online_actor_min_q_advantage",
+                    "online_beta_initial",
+                    "online_beta_min",
+                    "online_beta_max",
+                    "online_beta_decay_on_actor_accept",
+                    "online_beta_increase_on_reject",
+                    "online_target_delta_initial",
+                    "online_target_delta_max",
+                    "online_target_delta_increment",
+                ):
+                    if key not in payload:
+                        continue
+                    value = _finite_float(payload[key])
+                    if value is not None:
+                        latest_update[key] = value
+                if "online_require_positive_q_gap" in payload:
+                    latest_update["online_require_positive_q_gap"] = bool(payload["online_require_positive_q_gap"])
                 if "auto_beta_enabled" in payload:
                     latest_update["auto_beta_enabled"] = bool(payload["auto_beta_enabled"])
                 for key in (
@@ -549,6 +755,25 @@ def _build_metrics_payload(
         "replay_action_horizon": 0 if replay_shape is None else int(replay_shape.action_horizon),
         "train_action_horizon": 0 if train_shape is None else int(train_shape.action_horizon),
         "steps_per_sec": _json_float(reduced.get("steps_per_sec")),
+        "online_safety_enabled": _json_bool(reduced.get("online_safety_enabled")),
+        "online_safety_phase": reduced.get("online_safety_phase"),
+        "online_round_index": None if reduced.get("online_round_index") is None else int(reduced.get("online_round_index")),
+        "online_last_committed_shards": None
+        if reduced.get("online_last_committed_shards") is None
+        else int(reduced.get("online_last_committed_shards")),
+        "online_round_start_shards": None
+        if reduced.get("online_round_start_shards") is None
+        else int(reduced.get("online_round_start_shards")),
+        "online_critic_steps_remaining": None
+        if reduced.get("online_critic_steps_remaining") is None
+        else int(reduced.get("online_critic_steps_remaining")),
+        "online_actor_steps_remaining": None
+        if reduced.get("online_actor_steps_remaining") is None
+        else int(reduced.get("online_actor_steps_remaining")),
+        "online_best_critic_auc": _json_float(reduced.get("online_best_critic_auc")),
+        "online_best_critic_q_gap": _json_float(reduced.get("online_best_critic_q_gap")),
+        "online_rejection_reason": reduced.get("online_rejection_reason"),
+        "online_target_delta_norm": _json_float(reduced.get("online_target_delta_norm")),
     }
 
 
@@ -757,6 +982,75 @@ def _state_for_actor_gate(
     )
 
 
+def _build_online_controller(args: Args) -> OnlineSafetyController:
+    return OnlineSafetyController(
+        min_new_shards_per_round=args.online_min_new_shards_per_round,
+        critic_updates_per_round=args.online_critic_updates_per_round,
+        actor_updates_per_round=args.online_actor_updates_per_round,
+        critic_auc_min=args.online_critic_auc_min,
+        critic_max_auc_drop=args.online_critic_max_auc_drop,
+        require_positive_q_gap=args.online_require_positive_q_gap,
+        actor_max_delta_norm=args.online_actor_max_delta_norm,
+        actor_min_q_advantage=args.online_actor_min_q_advantage,
+        beta_initial=args.online_beta_initial,
+        beta_min=args.online_beta_min,
+        beta_max=args.online_beta_max,
+        beta_decay_on_actor_accept=args.online_beta_decay_on_actor_accept,
+        beta_increase_on_reject=args.online_beta_increase_on_reject,
+        target_delta_initial=args.online_target_delta_initial,
+        target_delta_max=args.online_target_delta_max,
+        target_delta_increment=args.online_target_delta_increment,
+    )
+
+
+def _update_online_controller_config(controller: OnlineSafetyController, control_update: dict) -> None:
+    mapping = {
+        "online_min_new_shards_per_round": ("min_new_shards_per_round", int),
+        "online_critic_updates_per_round": ("critic_updates_per_round", int),
+        "online_actor_updates_per_round": ("actor_updates_per_round", int),
+        "online_critic_auc_min": ("critic_auc_min", float),
+        "online_critic_max_auc_drop": ("critic_max_auc_drop", float),
+        "online_actor_max_delta_norm": ("actor_max_delta_norm", float),
+        "online_actor_min_q_advantage": ("actor_min_q_advantage", float),
+        "online_beta_min": ("beta_min", float),
+        "online_beta_max": ("beta_max", float),
+        "online_beta_decay_on_actor_accept": ("beta_decay_on_actor_accept", float),
+        "online_beta_increase_on_reject": ("beta_increase_on_reject", float),
+        "online_target_delta_max": ("target_delta_max", float),
+        "online_target_delta_increment": ("target_delta_increment", float),
+    }
+    for source_key, (target_key, caster) in mapping.items():
+        if source_key in control_update:
+            setattr(controller, target_key, caster(control_update[source_key]))
+    if "online_require_positive_q_gap" in control_update:
+        controller.require_positive_q_gap = bool(control_update["online_require_positive_q_gap"])
+
+
+def _evaluate_candidate_critic(
+    *,
+    args: Args,
+    checkpoint_dir: pathlib.Path,
+    store: rlt_replay_store.RLTReplayStore,
+    output_dir: pathlib.Path,
+    round_index: int,
+) -> dict | None:
+    paths = list(store.loaded_paths)
+    if len(paths) < 2:
+        return None
+    try:
+        split = rlt_eval.split_shards(paths, holdout_ratio=0.2, seed=args.seed + round_index)
+        result = rlt_eval.evaluate_holdout_checkpoints(
+            checkpoint_dirs=[checkpoint_dir],
+            holdout_paths=list(split.holdout_paths),
+            output_dir=output_dir,
+            score_batch_size=512,
+        )
+    except Exception as exc:
+        logging.warning("Online candidate critic eval failed: %s", exc)
+        return None
+    return result.best_metric
+
+
 def main(args: Args) -> None:
     _init_logging()
     logging.info("Running online RLT trainer on %s", platform.node())
@@ -809,6 +1103,13 @@ def main(args: Args) -> None:
         awbc_max_action_delta_norm=args.awbc_max_action_delta_norm,
     )
     state = rlt_training.init_train_state(config, jax.random.key(args.seed))
+    online_safety_enabled = bool(args.online_safety_enabled)
+    online_controller = _build_online_controller(args)
+    accepted_state = state
+    if online_safety_enabled:
+        state = _with_runtime_beta(state, online_controller.beta)
+        accepted_state = state
+        config = dataclasses.replace(config, model=dataclasses.replace(config.model, beta=online_controller.beta))
     replay_rng = np.random.default_rng(args.seed)
     latest_target_sync_step: int | None = None
     _init_wandb(args, store)
@@ -857,7 +1158,12 @@ def main(args: Args) -> None:
     metrics_publisher.publish(
         _build_metrics_payload(
             step=0,
-            reduced={"beta": runtime_beta, **latest_auto_beta_metrics},
+            reduced={
+                "beta": runtime_beta,
+                "online_safety_enabled": online_safety_enabled,
+                **latest_auto_beta_metrics,
+                **online_controller.metrics(),
+            },
             stats=store.stats,
             replay_shape=store.shape,
             train_shape=store.sample_shape,
@@ -890,6 +1196,9 @@ def main(args: Args) -> None:
             control_update = control_subscriber.poll_update()
             if "trainer_enabled" in control_update:
                 trainer_enabled = bool(control_update["trainer_enabled"])
+            if "online_safety_enabled" in control_update:
+                online_safety_enabled = bool(control_update["online_safety_enabled"])
+            _update_online_controller_config(online_controller, control_update)
             if "critic_burn_in_steps" in control_update:
                 args.critic_burn_in_steps = int(control_update["critic_burn_in_steps"])
             auto_beta_config_changed = False
@@ -936,6 +1245,26 @@ def main(args: Args) -> None:
                 runtime_beta = float(beta_update)
                 state = _with_runtime_beta(state, runtime_beta)
                 logging.info("Updated runtime RLT beta to %.4f", runtime_beta)
+            if online_safety_enabled:
+                if auto_beta_controller is not None:
+                    auto_beta_controller.update_config(
+                        target_delta_norm=float(online_controller.target_delta_norm),
+                        beta_min=float(online_controller.beta_min),
+                        beta_max=float(online_controller.beta_max),
+                        lr=float(auto_beta_config["lr"]),
+                        ema_decay=float(auto_beta_config["ema_decay"]),
+                        q_margin=float(auto_beta_config["q_margin"]),
+                        update_interval=int(auto_beta_config["update_interval"]),
+                    )
+                if not math.isclose(runtime_beta, online_controller.beta, rel_tol=0.0, abs_tol=1e-12):
+                    runtime_beta = online_controller.beta
+                    state = _with_runtime_beta(state, runtime_beta)
+                latest_auto_beta_metrics = {
+                    **latest_auto_beta_metrics,
+                    "auto_beta_target_delta_norm": online_controller.target_delta_norm,
+                    "auto_beta_min": online_controller.beta_min,
+                    "auto_beta_max": online_controller.beta_max,
+                }
 
             if not store.ready(
                 min_replay_samples=args.min_replay_samples,
@@ -952,7 +1281,12 @@ def main(args: Args) -> None:
                     metrics_publisher.publish(
                         _build_metrics_payload(
                             step=int(state.step),
-                            reduced={"beta": runtime_beta, **latest_auto_beta_metrics},
+                            reduced={
+                                "beta": runtime_beta,
+                                "online_safety_enabled": online_safety_enabled,
+                                **latest_auto_beta_metrics,
+                                **online_controller.metrics(),
+                            },
                             stats=stats,
                             replay_shape=store.shape,
                             train_shape=store.sample_shape,
@@ -971,8 +1305,118 @@ def main(args: Args) -> None:
                 time.sleep(args.wait_sleep_seconds)
                 continue
 
+            if online_safety_enabled:
+                if online_controller.phase == "idle_wait_new_data":
+                    online_controller.maybe_start_round(store.stats)
+                if online_controller.phase == "critic_eval":
+                    current_step = int(state.step)
+                    candidate_dir = _save_actor_for_inference(
+                        state,
+                        args.output_dir / "candidates" / f"round_{online_controller.round_index:06d}" / "critic",
+                        current_step,
+                        action_horizon=shape.action_horizon,
+                        replay_shape=store.shape,
+                        train_shape=store.sample_shape,
+                        replay_stats=store.stats,
+                    )
+                    metric = _evaluate_candidate_critic(
+                        args=args,
+                        checkpoint_dir=candidate_dir,
+                        store=store,
+                        output_dir=args.output_dir / "candidates" / f"round_{online_controller.round_index:06d}" / "critic_eval",
+                        round_index=online_controller.round_index,
+                    )
+                    if online_controller.accept_critic(metric):
+                        accepted_state = state
+                        _save_actor_for_inference(
+                            accepted_state,
+                            args.output_dir / "best_critic",
+                            current_step,
+                            action_horizon=shape.action_horizon,
+                            replay_shape=store.shape,
+                            train_shape=store.sample_shape,
+                            replay_stats=store.stats,
+                        )
+                        latest_target_sync_step = None
+                        logging.info("Accepted online candidate critic round=%d metric=%s", online_controller.round_index, metric)
+                    else:
+                        state = accepted_state
+                        logging.warning(
+                            "Rejected online candidate critic round=%d reason=%s metric=%s",
+                            online_controller.round_index,
+                            online_controller.last_rejection_reason,
+                            metric,
+                        )
+                    continue
+                if online_controller.phase == "actor_eval":
+                    current_step = int(state.step)
+                    actor_metric = _reduce_numeric_infos(infos) if infos else {}
+                    if online_controller.accept_actor(actor_metric):
+                        accepted_state = state
+                        actor_dir = _save_actor_for_inference(
+                            accepted_state,
+                            args.output_dir / "best_actor",
+                            current_step,
+                            action_horizon=shape.action_horizon,
+                            replay_shape=store.shape,
+                            train_shape=store.sample_shape,
+                            replay_stats=store.stats,
+                        )
+                        latest_actor_path = str(actor_dir)
+                        latest_actor_step = current_step
+                        logging.info("Accepted online candidate actor round=%d metric=%s", online_controller.round_index, actor_metric)
+                    else:
+                        state = accepted_state
+                        logging.warning(
+                            "Rejected online candidate actor round=%d reason=%s metric=%s",
+                            online_controller.round_index,
+                            online_controller.last_rejection_reason,
+                            actor_metric,
+                        )
+                    infos = []
+                    if not math.isclose(runtime_beta, online_controller.beta, rel_tol=0.0, abs_tol=1e-12):
+                        runtime_beta = online_controller.beta
+                        state = _with_runtime_beta(state, runtime_beta)
+                    continue
+                allocation = online_controller.step_allocation()
+                if not allocation["trainer_running"]:
+                    if now - last_idle_metrics_time >= max(float(args.log_interval), 1.0):
+                        metrics_publisher.publish(
+                            _build_metrics_payload(
+                                step=int(state.step),
+                                reduced={
+                                    "beta": runtime_beta,
+                                    "online_safety_enabled": online_safety_enabled,
+                                    **latest_auto_beta_metrics,
+                                    **online_controller.metrics(),
+                                },
+                                stats=store.stats,
+                                replay_shape=store.shape,
+                                train_shape=store.sample_shape,
+                                actor_enabled=False,
+                                trainer_enabled=trainer_enabled,
+                                trainer_running=False,
+                                critic_burn_in_steps=args.critic_burn_in_steps,
+                                target_sync_step=latest_target_sync_step,
+                                latest_actor_path=latest_actor_path,
+                                latest_actor_step=latest_actor_step,
+                                wandb_url=_wandb_url(),
+                            )
+                        )
+                        logging.info("Online RLT safety idle phase=%s replay=%s", online_controller.phase, store.stats)
+                        last_idle_metrics_time = now
+                    time.sleep(args.wait_sleep_seconds)
+                    continue
+                forced_actor_enabled = bool(allocation["actor_enabled"])
+            else:
+                forced_actor_enabled = None
+
             next_step = int(state.step) + 1
-            actor_enabled = _actor_updates_enabled(args, store, next_step)
+            actor_enabled = (
+                forced_actor_enabled
+                if forced_actor_enabled is not None
+                else _actor_updates_enabled(args, store, next_step)
+            )
             if actor_enabled and latest_target_sync_step is None:
                 state = rlt_training.sync_target_params(state)
                 latest_target_sync_step = int(state.step)
@@ -985,7 +1429,7 @@ def main(args: Args) -> None:
                 state,
                 actor_enabled=actor_enabled,
                 policy_delay=args.policy_delay,
-                actor_publish_interval=args.actor_publish_interval,
+                actor_publish_interval=0 if online_safety_enabled else args.actor_publish_interval,
             )
             batch = store.sample_batch(replay_rng, args.batch_size)
             train_rng = jax.random.fold_in(jax.random.key(args.seed), int(state.step))
@@ -1022,7 +1466,12 @@ def main(args: Args) -> None:
                 metrics_publisher.publish(
                     _build_metrics_payload(
                         step=current_step,
-                        reduced={"beta": runtime_beta, **latest_auto_beta_metrics},
+                        reduced={
+                            "beta": runtime_beta,
+                            "online_safety_enabled": online_safety_enabled,
+                            **latest_auto_beta_metrics,
+                            **online_controller.metrics(),
+                        },
                         stats=store.stats,
                         replay_shape=store.shape,
                         train_shape=store.sample_shape,
@@ -1065,6 +1514,12 @@ def main(args: Args) -> None:
                     }
                 )
                 reduced.update(latest_auto_beta_metrics)
+                reduced.update(
+                    {
+                        "online_safety_enabled": online_safety_enabled,
+                        **online_controller.metrics(),
+                    }
+                )
                 metrics_publisher.publish(
                     _build_metrics_payload(
                         step=current_step,

@@ -755,6 +755,12 @@ button {
   line-height: 1.35;
 }
 
+.inline-inputs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
 .rlt-toggle {
   grid-template-columns: auto 1fr;
   align-items: center;

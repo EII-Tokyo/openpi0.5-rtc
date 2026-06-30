@@ -309,6 +309,33 @@ export type RLTControlState = {
   auto_rollout_invalid: number
   trainer_enabled: boolean
   trainer_running: boolean
+  online_safety_enabled: boolean
+  online_safety_phase: string | null
+  online_round_index: number | null
+  online_last_committed_shards: number | null
+  online_round_start_shards: number | null
+  online_critic_steps_remaining: number | null
+  online_actor_steps_remaining: number | null
+  online_best_critic_auc: number | null
+  online_best_critic_q_gap: number | null
+  online_rejection_reason: string | null
+  online_target_delta_norm: number | null
+  online_min_new_shards_per_round: number
+  online_critic_updates_per_round: number
+  online_actor_updates_per_round: number
+  online_critic_auc_min: number
+  online_critic_max_auc_drop: number
+  online_require_positive_q_gap: boolean
+  online_actor_max_delta_norm: number
+  online_actor_min_q_advantage: number
+  online_beta_initial: number
+  online_beta_min: number
+  online_beta_max: number
+  online_beta_decay_on_actor_accept: number
+  online_beta_increase_on_reject: number
+  online_target_delta_initial: number
+  online_target_delta_max: number
+  online_target_delta_increment: number
   actor_enabled: boolean
   actor_effective: boolean
   actor_ready: boolean
@@ -400,6 +427,23 @@ export type RLTConfigRequest = {
   critic_burn_in_steps?: number
   actor_enabled?: boolean
   trainer_enabled?: boolean
+  online_safety_enabled?: boolean
+  online_min_new_shards_per_round?: number
+  online_critic_updates_per_round?: number
+  online_actor_updates_per_round?: number
+  online_critic_auc_min?: number
+  online_critic_max_auc_drop?: number
+  online_require_positive_q_gap?: boolean
+  online_actor_max_delta_norm?: number
+  online_actor_min_q_advantage?: number
+  online_beta_initial?: number
+  online_beta_min?: number
+  online_beta_max?: number
+  online_beta_decay_on_actor_accept?: number
+  online_beta_increase_on_reject?: number
+  online_target_delta_initial?: number
+  online_target_delta_max?: number
+  online_target_delta_increment?: number
   intervention_scale?: number
   max_delta?: number
   actor_handoff_steps?: number

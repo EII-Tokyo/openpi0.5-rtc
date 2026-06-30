@@ -97,6 +97,33 @@ class RLTControlState(BaseModel):
     auto_rollout_invalid: int = 0
     trainer_enabled: bool = False
     trainer_running: bool = False
+    online_safety_enabled: bool = True
+    online_safety_phase: str | None = "idle_wait_new_data"
+    online_round_index: int | None = 0
+    online_last_committed_shards: int | None = 0
+    online_round_start_shards: int | None = 0
+    online_critic_steps_remaining: int | None = 0
+    online_actor_steps_remaining: int | None = 0
+    online_best_critic_auc: float | None = None
+    online_best_critic_q_gap: float | None = None
+    online_rejection_reason: str | None = None
+    online_target_delta_norm: float | None = 0.04
+    online_min_new_shards_per_round: int = 10
+    online_critic_updates_per_round: int = 500
+    online_actor_updates_per_round: int = 300
+    online_critic_auc_min: float = 0.70
+    online_critic_max_auc_drop: float = 0.02
+    online_require_positive_q_gap: bool = True
+    online_actor_max_delta_norm: float = 0.09
+    online_actor_min_q_advantage: float = 0.0
+    online_beta_initial: float = 30.0
+    online_beta_min: float = 5.0
+    online_beta_max: float = 30.0
+    online_beta_decay_on_actor_accept: float = 0.9
+    online_beta_increase_on_reject: float = 1.25
+    online_target_delta_initial: float = 0.04
+    online_target_delta_max: float = 0.10
+    online_target_delta_increment: float = 0.01
     actor_enabled: bool = False
     actor_ready: bool = False
     actor_effective: bool = False
@@ -195,6 +222,23 @@ class RLTConfigRequest(BaseModel):
     actor_enabled: bool | None = None
     force_actor_effective: bool | None = None
     trainer_enabled: bool | None = None
+    online_safety_enabled: bool | None = None
+    online_min_new_shards_per_round: int | None = Field(default=None, ge=1, le=100000)
+    online_critic_updates_per_round: int | None = Field(default=None, ge=1, le=1000000)
+    online_actor_updates_per_round: int | None = Field(default=None, ge=1, le=1000000)
+    online_critic_auc_min: float | None = Field(default=None, ge=0, le=1)
+    online_critic_max_auc_drop: float | None = Field(default=None, ge=0, le=1)
+    online_require_positive_q_gap: bool | None = None
+    online_actor_max_delta_norm: float | None = Field(default=None, gt=0, le=1000)
+    online_actor_min_q_advantage: float | None = Field(default=None, ge=-1000, le=1000)
+    online_beta_initial: float | None = Field(default=None, gt=0, le=1000)
+    online_beta_min: float | None = Field(default=None, gt=0, le=1000)
+    online_beta_max: float | None = Field(default=None, gt=0, le=1000)
+    online_beta_decay_on_actor_accept: float | None = Field(default=None, gt=0, le=1)
+    online_beta_increase_on_reject: float | None = Field(default=None, ge=1, le=100)
+    online_target_delta_initial: float | None = Field(default=None, gt=0, le=1000)
+    online_target_delta_max: float | None = Field(default=None, gt=0, le=1000)
+    online_target_delta_increment: float | None = Field(default=None, ge=0, le=1000)
     intervention_scale: float | None = Field(default=None, ge=0, le=1)
     max_delta: float | None = Field(default=None, ge=0, le=10)
     actor_handoff_steps: int | None = Field(default=None, ge=0, le=50)
