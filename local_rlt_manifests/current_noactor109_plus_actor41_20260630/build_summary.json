@@ -1,0 +1,36 @@
+{
+  "output_path": "local_rlt_manifests/current_noactor109_plus_actor41_20260630/trainable_committed.jsonl",
+  "skipped_by_reason": {},
+  "summary": {
+    "by_batch": {
+      "2026-06-17": {
+        "failure_episodes": 73,
+        "num_shards": 76,
+        "num_transitions": 2251,
+        "success_episodes": 3
+      },
+      "2026-06-24": {
+        "failure_episodes": 0,
+        "num_shards": 1,
+        "num_transitions": 6,
+        "success_episodes": 1
+      },
+      "2026-06-30": {
+        "failure_episodes": 24,
+        "num_shards": 37,
+        "num_transitions": 1969,
+        "success_episodes": 13
+      },
+      "manual": {
+        "failure_episodes": 6,
+        "num_shards": 32,
+        "num_transitions": 999,
+        "success_episodes": 26
+      }
+    },
+    "failure_episodes": 103,
+    "num_shards": 146,
+    "num_transitions": 5225,
+    "success_episodes": 43
+  }
+}

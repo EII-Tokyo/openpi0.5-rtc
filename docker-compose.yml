@@ -41,7 +41,7 @@ services:
       - /data/openpi0.5-rtc-reward-learning/rollouts:/app/rollouts
       - /home/eii/openpi0.5-rtc-reward-learning/checkpoints:/app/checkpoints:ro
     environment:
-      - RLT_RL_TOKEN_CHECKPOINT_PATH=/app/checkpoints/eii_rinse_11repo_cam4_fullft/rinse_11repo_insertx5_fullft_bs256_nw64_fsdp8_20260513/9000
+      - RLT_RL_TOKEN_CHECKPOINT_PATH=${RLT_RL_TOKEN_CHECKPOINT_PATH:-/app/checkpoints/eii_rinse_11repo_cam4_fullft_rl_token_small_query/rinse_11repo_rl_token_small_query_512_from_9000_20260615/9999}
 
   rlt_warmup_runtime:
     image: openpi_reward_learning_eii/rlt_warmup_runtime:reward-learning
@@ -93,7 +93,7 @@ services:
       - /data/openpi0.5-rtc-reward-learning/replay:/app/replay
       - /home/eii/openpi0.5-rtc-reward-learning/checkpoints:/app/checkpoints:ro
     environment:
-      - RLT_RL_TOKEN_CHECKPOINT_PATH=/app/checkpoints/eii_rinse_11repo_cam4_fullft/rinse_11repo_insertx5_fullft_bs256_nw64_fsdp8_20260513/9000
+      - RLT_RL_TOKEN_CHECKPOINT_PATH=${RLT_RL_TOKEN_CHECKPOINT_PATH:-/app/checkpoints/eii_rinse_11repo_cam4_fullft_rl_token_small_query/rinse_11repo_rl_token_small_query_512_from_9000_20260615/9999}
       - RLT_ACTOR_CHECKPOINT_PATH=${RLT_ACTOR_CHECKPOINT_PATH:-}
       - RLT_DEFAULT_CRITIC_GATE_ENABLED=${RLT_DEFAULT_CRITIC_GATE_ENABLED:-1}
       - PYTHONPATH=/app:/app/src:/app/packages/openpi-client/src
@@ -255,7 +255,7 @@ services:
       - UV_NO_SYNC=1
       - UV_NO_DEV=1
       - PYTHONPATH=/app/src
-      - RLT_RL_TOKEN_CHECKPOINT_PATH=/app/checkpoints/eii_rinse_11repo_cam4_fullft/rinse_11repo_insertx5_fullft_bs256_nw64_fsdp8_20260513/9000
+      - RLT_RL_TOKEN_CHECKPOINT_PATH=${RLT_RL_TOKEN_CHECKPOINT_PATH:-/app/checkpoints/eii_rinse_11repo_cam4_fullft_rl_token_small_query/rinse_11repo_rl_token_small_query_512_from_9000_20260615/9999}
     gpus: all
 
   redis:

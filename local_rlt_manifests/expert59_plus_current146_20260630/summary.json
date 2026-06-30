@@ -1,0 +1,24 @@
+{
+  "output": "local_rlt_manifests/expert59_plus_current146_20260630/trainable_committed.jsonl",
+  "inputs": [
+    "local_rlt_manifests/human_expert_no_actor_q_cam4_provenance_20260629.jsonl",
+    "local_rlt_manifests/current_noactor109_plus_actor41_20260630/trainable_committed.jsonl"
+  ],
+  "rows": 205,
+  "duplicates_skipped": 0,
+  "batch": {
+    "human_expert": 59,
+    "2026-06-17": 76,
+    "manual": 32,
+    "2026-06-24": 1,
+    "2026-06-30": 37
+  },
+  "source_type": {
+    "human_expert": 59,
+    "None": 146
+  },
+  "reward": {
+    "1": 102,
+    "0": 103
+  }
+}
