@@ -538,6 +538,8 @@ def test_config_update_publishes_online_safety_settings():
             "critic_gate_temperature": None,
             "online_safety_enabled": True,
             "online_min_new_shards_per_round": 10,
+            "online_min_new_success_per_round": 5,
+            "online_min_new_failure_per_round": 6,
             "online_critic_updates_per_round": 500,
             "online_actor_updates_per_round": 300,
             "online_critic_auc_min": 0.7,
@@ -559,11 +561,15 @@ def test_config_update_publishes_online_safety_settings():
 
     assert state.online_safety_enabled is True
     assert state.online_min_new_shards_per_round == 10
+    assert state.online_min_new_success_per_round == 5
+    assert state.online_min_new_failure_per_round == 6
     assert state.online_critic_updates_per_round == 500
     assert state.online_beta_initial == 30.0
     payload = json.loads(store._redis.messages[-1][1])
     assert payload["online_safety_enabled"] is True
     assert payload["online_min_new_shards_per_round"] == 10
+    assert payload["online_min_new_success_per_round"] == 5
+    assert payload["online_min_new_failure_per_round"] == 6
     assert payload["online_critic_auc_min"] == 0.7
     assert payload["online_beta_initial"] == 30.0
 

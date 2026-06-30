@@ -25,6 +25,8 @@ type Draft = Required<
     | 'trainer_enabled'
     | 'online_safety_enabled'
     | 'online_min_new_shards_per_round'
+    | 'online_min_new_success_per_round'
+    | 'online_min_new_failure_per_round'
     | 'online_critic_updates_per_round'
     | 'online_actor_updates_per_round'
     | 'online_critic_auc_min'
@@ -67,6 +69,8 @@ const makeDraft = (rlt: RLTControlState): Draft => ({
   trainer_enabled: rlt.trainer_enabled,
   online_safety_enabled: rlt.online_safety_enabled,
   online_min_new_shards_per_round: rlt.online_min_new_shards_per_round,
+  online_min_new_success_per_round: rlt.online_min_new_success_per_round,
+  online_min_new_failure_per_round: rlt.online_min_new_failure_per_round,
   online_critic_updates_per_round: rlt.online_critic_updates_per_round,
   online_actor_updates_per_round: rlt.online_actor_updates_per_round,
   online_critic_auc_min: rlt.online_critic_auc_min,
@@ -116,6 +120,8 @@ export function RLTConfigPage({ rlt, onState }: Props) {
     rlt.trainer_enabled,
     rlt.online_safety_enabled,
     rlt.online_min_new_shards_per_round,
+    rlt.online_min_new_success_per_round,
+    rlt.online_min_new_failure_per_round,
     rlt.online_critic_updates_per_round,
     rlt.online_actor_updates_per_round,
     rlt.online_critic_auc_min,
@@ -239,6 +245,24 @@ export function RLTConfigPage({ rlt, onState }: Props) {
               onChange={(event) => setDraft({ ...draft, online_min_new_shards_per_round: Number(event.target.value) })}
             />
             <small className="field-hint">新增多少条 committed replay 后才允许下一轮 critic/actor 训练。</small>
+          </Field>
+          <Field label="New Success Per Round">
+            <input
+              type="number"
+              min={0}
+              value={draft.online_min_new_success_per_round}
+              onChange={(event) => setDraft({ ...draft, online_min_new_success_per_round: Number(event.target.value) })}
+            />
+            <small className="field-hint">新增成功片段数量不足时不训练下一轮，避免只靠失败样本误判 critic。</small>
+          </Field>
+          <Field label="New Failure Per Round">
+            <input
+              type="number"
+              min={0}
+              value={draft.online_min_new_failure_per_round}
+              onChange={(event) => setDraft({ ...draft, online_min_new_failure_per_round: Number(event.target.value) })}
+            />
+            <small className="field-hint">新增失败片段数量不足时不训练下一轮，确保 success/failure 都进入新分布。</small>
           </Field>
           <Field label="Critic Updates Per Round">
             <input

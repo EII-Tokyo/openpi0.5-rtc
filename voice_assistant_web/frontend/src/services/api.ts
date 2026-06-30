@@ -313,7 +313,11 @@ export type RLTControlState = {
   online_safety_phase: string | null
   online_round_index: number | null
   online_last_committed_shards: number | null
+  online_last_committed_success: number | null
+  online_last_committed_failure: number | null
   online_round_start_shards: number | null
+  online_round_start_success: number | null
+  online_round_start_failure: number | null
   online_critic_steps_remaining: number | null
   online_actor_steps_remaining: number | null
   online_best_critic_auc: number | null
@@ -321,6 +325,8 @@ export type RLTControlState = {
   online_rejection_reason: string | null
   online_target_delta_norm: number | null
   online_min_new_shards_per_round: number
+  online_min_new_success_per_round: number
+  online_min_new_failure_per_round: number
   online_critic_updates_per_round: number
   online_actor_updates_per_round: number
   online_critic_auc_min: number
@@ -429,6 +435,8 @@ export type RLTConfigRequest = {
   trainer_enabled?: boolean
   online_safety_enabled?: boolean
   online_min_new_shards_per_round?: number
+  online_min_new_success_per_round?: number
+  online_min_new_failure_per_round?: number
   online_critic_updates_per_round?: number
   online_actor_updates_per_round?: number
   online_critic_auc_min?: number

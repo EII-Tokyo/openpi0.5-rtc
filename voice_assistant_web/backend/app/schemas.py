@@ -101,7 +101,11 @@ class RLTControlState(BaseModel):
     online_safety_phase: str | None = "idle_wait_new_data"
     online_round_index: int | None = 0
     online_last_committed_shards: int | None = 0
+    online_last_committed_success: int | None = 0
+    online_last_committed_failure: int | None = 0
     online_round_start_shards: int | None = 0
+    online_round_start_success: int | None = 0
+    online_round_start_failure: int | None = 0
     online_critic_steps_remaining: int | None = 0
     online_actor_steps_remaining: int | None = 0
     online_best_critic_auc: float | None = None
@@ -109,6 +113,8 @@ class RLTControlState(BaseModel):
     online_rejection_reason: str | None = None
     online_target_delta_norm: float | None = 0.04
     online_min_new_shards_per_round: int = 10
+    online_min_new_success_per_round: int = 5
+    online_min_new_failure_per_round: int = 5
     online_critic_updates_per_round: int = 500
     online_actor_updates_per_round: int = 300
     online_critic_auc_min: float = 0.70
@@ -224,6 +230,8 @@ class RLTConfigRequest(BaseModel):
     trainer_enabled: bool | None = None
     online_safety_enabled: bool | None = None
     online_min_new_shards_per_round: int | None = Field(default=None, ge=1, le=100000)
+    online_min_new_success_per_round: int | None = Field(default=None, ge=0, le=100000)
+    online_min_new_failure_per_round: int | None = Field(default=None, ge=0, le=100000)
     online_critic_updates_per_round: int | None = Field(default=None, ge=1, le=1000000)
     online_actor_updates_per_round: int | None = Field(default=None, ge=1, le=1000000)
     online_critic_auc_min: float | None = Field(default=None, ge=0, le=1)

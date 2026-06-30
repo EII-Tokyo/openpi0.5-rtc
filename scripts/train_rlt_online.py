@@ -45,6 +45,8 @@ class Args:
     critic_burn_in_steps: int = 1_000
     online_safety_enabled: bool = True
     online_min_new_shards_per_round: int = 10
+    online_min_new_success_per_round: int = 5
+    online_min_new_failure_per_round: int = 5
     online_critic_updates_per_round: int = 500
     online_actor_updates_per_round: int = 300
     online_critic_auc_min: float = 0.70
@@ -108,6 +110,8 @@ class Args:
 @dataclasses.dataclass
 class OnlineSafetyController:
     min_new_shards_per_round: int = 10
+    min_new_success_per_round: int = 5
+    min_new_failure_per_round: int = 5
     critic_updates_per_round: int = 500
     actor_updates_per_round: int = 300
     critic_auc_min: float = 0.70
@@ -125,7 +129,11 @@ class OnlineSafetyController:
     target_delta_increment: float = 0.01
     phase: str = "idle_wait_new_data"
     last_committed_shards: int = 0
+    last_committed_success: int = 0
+    last_committed_failure: int = 0
     round_start_shards: int = 0
+    round_start_success: int = 0
+    round_start_failure: int = 0
     round_index: int = 0
     critic_steps_remaining: int = 0
     actor_steps_remaining: int = 0
@@ -144,9 +152,20 @@ class OnlineSafetyController:
             return False
         new_shards = int(stats.num_shards) - int(self.last_committed_shards)
         if new_shards < self.min_new_shards_per_round:
+            self.last_rejection_reason = "waiting_for_new_shards"
+            return False
+        new_success = int(stats.success_episodes) - int(self.last_committed_success)
+        if new_success < self.min_new_success_per_round:
+            self.last_rejection_reason = "waiting_for_new_success"
+            return False
+        new_failure = int(stats.failure_episodes) - int(self.last_committed_failure)
+        if new_failure < self.min_new_failure_per_round:
+            self.last_rejection_reason = "waiting_for_new_failure"
             return False
         self.round_index += 1
         self.round_start_shards = int(stats.num_shards)
+        self.round_start_success = int(stats.success_episodes)
+        self.round_start_failure = int(stats.failure_episodes)
         self.critic_steps_remaining = int(self.critic_updates_per_round)
         self.actor_steps_remaining = 0
         self.phase = "critic_candidate_training"
@@ -155,7 +174,11 @@ class OnlineSafetyController:
 
     def mark_bootstrap_committed(self, stats: rlt_replay_store.ReplayStats) -> None:
         self.last_committed_shards = int(stats.num_shards)
+        self.last_committed_success = int(stats.success_episodes)
+        self.last_committed_failure = int(stats.failure_episodes)
         self.round_start_shards = int(stats.num_shards)
+        self.round_start_success = int(stats.success_episodes)
+        self.round_start_failure = int(stats.failure_episodes)
 
     def step_allocation(self) -> dict[str, bool]:
         if self.phase == "critic_candidate_training":
@@ -188,11 +211,15 @@ class OnlineSafetyController:
         self.last_rejection_reason = reason
         self.phase = "idle_wait_new_data"
         self.last_committed_shards = int(self.round_start_shards)
+        self.last_committed_success = int(self.round_start_success)
+        self.last_committed_failure = int(self.round_start_failure)
         return False
 
     def accept_actor(self, metric: dict | None) -> bool:
         accepted, reason = self._actor_decision(metric)
         self.last_committed_shards = int(self.round_start_shards)
+        self.last_committed_success = int(self.round_start_success)
+        self.last_committed_failure = int(self.round_start_failure)
         self.phase = "idle_wait_new_data"
         if accepted:
             self.on_actor_accepted()
@@ -221,7 +248,13 @@ class OnlineSafetyController:
             "online_safety_phase": self.phase,
             "online_round_index": self.round_index,
             "online_last_committed_shards": self.last_committed_shards,
+            "online_last_committed_success": self.last_committed_success,
+            "online_last_committed_failure": self.last_committed_failure,
             "online_round_start_shards": self.round_start_shards,
+            "online_round_start_success": self.round_start_success,
+            "online_round_start_failure": self.round_start_failure,
+            "online_min_new_success_per_round": self.min_new_success_per_round,
+            "online_min_new_failure_per_round": self.min_new_failure_per_round,
             "online_critic_steps_remaining": self.critic_steps_remaining,
             "online_actor_steps_remaining": self.actor_steps_remaining,
             "online_best_critic_auc": self.best_critic_auc,
@@ -400,6 +433,8 @@ class RedisControlSubscriber:
                         latest_update["critic_burn_in_steps"] = critic_burn_in_steps
                 for key in (
                     "online_min_new_shards_per_round",
+                    "online_min_new_success_per_round",
+                    "online_min_new_failure_per_round",
                     "online_critic_updates_per_round",
                     "online_actor_updates_per_round",
                 ):
@@ -1058,6 +1093,8 @@ def _state_for_actor_gate(
 def _build_online_controller(args: Args) -> OnlineSafetyController:
     return OnlineSafetyController(
         min_new_shards_per_round=args.online_min_new_shards_per_round,
+        min_new_success_per_round=args.online_min_new_success_per_round,
+        min_new_failure_per_round=args.online_min_new_failure_per_round,
         critic_updates_per_round=args.online_critic_updates_per_round,
         actor_updates_per_round=args.online_actor_updates_per_round,
         critic_auc_min=args.online_critic_auc_min,
@@ -1079,6 +1116,8 @@ def _build_online_controller(args: Args) -> OnlineSafetyController:
 def _update_online_controller_config(controller: OnlineSafetyController, control_update: dict) -> None:
     mapping = {
         "online_min_new_shards_per_round": ("min_new_shards_per_round", int),
+        "online_min_new_success_per_round": ("min_new_success_per_round", int),
+        "online_min_new_failure_per_round": ("min_new_failure_per_round", int),
         "online_critic_updates_per_round": ("critic_updates_per_round", int),
         "online_actor_updates_per_round": ("actor_updates_per_round", int),
         "online_critic_auc_min": ("critic_auc_min", float),
@@ -1150,10 +1189,22 @@ def _candidate_holdout_paths(
     return list(split.holdout_paths)
 
 
-def _validate_train_holdout_disjoint(args: Args) -> None:
-    if args.manifest_path is None or args.holdout_manifest_path is None:
+def _validate_online_safety_inputs(args: Args) -> None:
+    if args.online_safety_enabled and args.holdout_manifest_path is None:
+        raise ValueError(
+            "online_safety_enabled requires holdout_manifest_path. "
+            "Do not run online safety training with a holdout split derived from the training store."
+        )
+
+
+def _validate_train_holdout_disjoint(args: Args, *, train_paths: list[pathlib.Path] | tuple[pathlib.Path, ...] | None) -> None:
+    if args.holdout_manifest_path is None:
         return
-    train_paths = set(rlt_eval.find_replay_shards(args.replay_dir, manifest_path=args.manifest_path))
+    if args.manifest_path is not None:
+        train_paths = rlt_eval.find_replay_shards(args.replay_dir, manifest_path=args.manifest_path)
+    if train_paths is None:
+        return
+    train_paths = set(pathlib.Path(path).expanduser().resolve() for path in train_paths)
     holdout_paths = set(rlt_eval.find_replay_shards(args.replay_dir, manifest_path=args.holdout_manifest_path))
     overlap = sorted(train_paths & holdout_paths)
     if overlap:
@@ -1164,11 +1215,17 @@ def _validate_train_holdout_disjoint(args: Args) -> None:
         )
 
 
+def _prepare_output_dir(args: Args) -> None:
+    if args.output_dir.exists() and args.overwrite:
+        shutil.rmtree(args.output_dir)
+    args.output_dir.mkdir(parents=True, exist_ok=True)
+
+
 def main(args: Args) -> None:
     _init_logging()
     logging.info("Running online RLT trainer on %s", platform.node())
 
-    _validate_train_holdout_disjoint(args)
+    _validate_online_safety_inputs(args)
     store = _build_replay_store(args)
     store.scan()
     _wait_for_replay(args, store)
@@ -1184,13 +1241,10 @@ def main(args: Args) -> None:
     shape = store.sample_shape
     if shape is None:
         raise ValueError(f"No valid replay shards found in {args.replay_dir}")
+    _validate_train_holdout_disjoint(args, train_paths=list(store.loaded_paths))
     logging.info("Replay ready: %s, replay_shape=%s, train_shape=%s", store.stats, replay_shape, shape)
 
-    if args.output_dir.exists():
-        if not args.overwrite:
-            raise FileExistsError(f"{args.output_dir} exists. Pass --overwrite to replace it.")
-        shutil.rmtree(args.output_dir)
-    args.output_dir.mkdir(parents=True, exist_ok=True)
+    _prepare_output_dir(args)
 
     config = rlt_training.RLTTrainingConfig(
         model=rlt.RLTConfig(

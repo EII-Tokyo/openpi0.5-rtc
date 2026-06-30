@@ -180,7 +180,29 @@ def test_online_train_holdout_manifest_overlap_is_rejected(tmp_path):
     )
 
     with pytest.raises(ValueError, match="overlap"):
-        train_rlt_online._validate_train_holdout_disjoint(args)
+        train_rlt_online._validate_train_holdout_disjoint(args, train_paths=None)
+
+
+def test_online_segment_db_train_holdout_overlap_is_rejected(tmp_path):
+    shared_shard = tmp_path / "shared" / "key_region_shared.npz"
+    shared_shard.parent.mkdir()
+    shared_shard.write_bytes(b"shared")
+    holdout_manifest = tmp_path / "holdout_manifest.jsonl"
+    _write_online_manifest(holdout_manifest, [shared_shard])
+    args = train_rlt_online.Args(
+        replay_dir=tmp_path,
+        holdout_manifest_path=holdout_manifest,
+    )
+
+    with pytest.raises(ValueError, match="overlap"):
+        train_rlt_online._validate_train_holdout_disjoint(args, train_paths=[shared_shard.resolve()])
+
+
+def test_online_safety_requires_explicit_holdout_manifest(tmp_path):
+    args = train_rlt_online.Args(replay_dir=tmp_path, online_safety_enabled=True)
+
+    with pytest.raises(ValueError, match="holdout_manifest_path"):
+        train_rlt_online._validate_online_safety_inputs(args)
 
 
 def test_offline_trainer_builds_config_with_manual_beta():
@@ -448,6 +470,8 @@ def test_auto_beta_controller_skips_until_update_interval():
 def test_online_round_controller_waits_for_new_shards_and_budgets_steps():
     controller = train_rlt_online.OnlineSafetyController(
         min_new_shards_per_round=10,
+        min_new_success_per_round=0,
+        min_new_failure_per_round=0,
         critic_updates_per_round=3,
         actor_updates_per_round=2,
     )
@@ -470,6 +494,8 @@ def test_online_round_controller_waits_for_new_shards_and_budgets_steps():
 def test_online_round_controller_rejects_unstable_critic_and_keeps_old_best():
     controller = train_rlt_online.OnlineSafetyController(
         min_new_shards_per_round=10,
+        min_new_success_per_round=0,
+        min_new_failure_per_round=0,
         critic_updates_per_round=1,
         actor_updates_per_round=1,
         critic_auc_min=0.70,
@@ -805,13 +831,46 @@ def test_load_inference_checkpoint_initializes_actor_and_critic(tmp_path):
 
 
 def test_online_controller_can_treat_existing_replay_as_bootstrap_baseline():
-    controller = train_rlt_online.OnlineSafetyController(min_new_shards_per_round=10)
+    controller = train_rlt_online.OnlineSafetyController(
+        min_new_shards_per_round=10,
+        min_new_success_per_round=0,
+        min_new_failure_per_round=0,
+    )
 
     controller.mark_bootstrap_committed(_stats(num_shards=117))
 
     assert controller.last_committed_shards == 117
     assert not controller.maybe_start_round(_stats(num_shards=126))
     assert controller.maybe_start_round(_stats(num_shards=127))
+
+
+def test_online_controller_requires_new_success_and_failure_counts():
+    controller = train_rlt_online.OnlineSafetyController(
+        min_new_shards_per_round=10,
+        min_new_success_per_round=5,
+        min_new_failure_per_round=5,
+    )
+    controller.mark_bootstrap_committed(_stats(num_shards=100, success_episodes=20, failure_episodes=20))
+
+    assert not controller.maybe_start_round(_stats(num_shards=110, success_episodes=24, failure_episodes=25))
+    assert controller.last_rejection_reason == "waiting_for_new_success"
+    assert not controller.maybe_start_round(_stats(num_shards=110, success_episodes=25, failure_episodes=24))
+    assert controller.last_rejection_reason == "waiting_for_new_failure"
+    assert controller.maybe_start_round(_stats(num_shards=110, success_episodes=25, failure_episodes=25))
+    assert controller.phase == "critic_candidate_training"
+
+
+def test_prepare_output_dir_preserves_existing_run_without_overwrite(tmp_path):
+    output_dir = tmp_path / "run"
+    output_dir.mkdir()
+    keep = output_dir / "inference_actor" / "00000010" / "actor.msgpack"
+    keep.parent.mkdir(parents=True)
+    keep.write_bytes(b"actor")
+    args = train_rlt_online.Args(replay_dir=tmp_path, output_dir=output_dir, overwrite=False)
+
+    train_rlt_online._prepare_output_dir(args)
+
+    assert keep.read_bytes() == b"actor"
 
 
 def test_runtime_control_subscriber_reads_beta_update():

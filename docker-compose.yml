@@ -120,7 +120,6 @@ services:
         uv run --no-sync scripts/train_rlt_online.py
         --replay-dir /app/replay/rlt_key_regions
         --output-dir /app/rlt_online/run
-        --overwrite
         --segment-db-path /app/segment_db/segments.sqlite3
         ${RLT_ONLINE_TRAIN_MANIFEST:+--manifest-path ${RLT_ONLINE_TRAIN_MANIFEST}}
         ${RLT_ONLINE_HOLDOUT_MANIFEST:+--holdout-manifest-path ${RLT_ONLINE_HOLDOUT_MANIFEST}}
@@ -134,6 +133,8 @@ services:
         --critic-burn-in-steps ${RLT_CRITIC_BURN_IN_STEPS:-1000}
         --online-safety-enabled ${RLT_ONLINE_SAFETY_ENABLED:-true}
         --online-min-new-shards-per-round ${RLT_ONLINE_MIN_NEW_SHARDS_PER_ROUND:-10}
+        --online-min-new-success-per-round ${RLT_ONLINE_MIN_NEW_SUCCESS_PER_ROUND:-5}
+        --online-min-new-failure-per-round ${RLT_ONLINE_MIN_NEW_FAILURE_PER_ROUND:-5}
         --online-critic-updates-per-round ${RLT_ONLINE_CRITIC_UPDATES_PER_ROUND:-500}
         --online-actor-updates-per-round ${RLT_ONLINE_ACTOR_UPDATES_PER_ROUND:-300}
         --online-critic-auc-min ${RLT_ONLINE_CRITIC_AUC_MIN:-0.70}
