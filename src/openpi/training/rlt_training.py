@@ -11,6 +11,9 @@ from openpi.shared import array_typing as at
 
 ACTOR_LOSS_MODE_TD3 = 0
 ACTOR_LOSS_MODE_AWBC = 1
+CRITIC_LOSS_MODE_TD3 = 0
+CRITIC_LOSS_MODE_CQL = 1
+CRITIC_LOSS_MODE_CALQL = 2
 
 
 @struct.dataclass
@@ -23,6 +26,7 @@ class RLTReplayBatch:
     next_reference_action: at.Float[at.Array, "b h a"]
     done: at.Bool[at.Array, " b"]
     episode_success: at.Bool[at.Array, " b"]
+    reference_value: at.Float[at.Array, " b"]
 
 
 @dataclasses.dataclass(frozen=True)
@@ -34,6 +38,8 @@ class RLTTrainingConfig:
     actor_publish_interval: int = 500
     target_actor_noise: bool = True
     actor_loss_mode: str = "td3"
+    critic_loss_mode: str = "td3"
+    conservative_alpha: float = 0.0
     awbc_temperature: float = 0.2
     awbc_max_weight: float = 20.0
     awbc_min_advantage: float = 0.0
@@ -53,6 +59,8 @@ class RLTTrainState:
     actor_publish_interval: int = struct.field(pytree_node=False)
     target_actor_noise: bool = struct.field(pytree_node=False)
     actor_loss_mode: int = struct.field(pytree_node=False)
+    critic_loss_mode: int = struct.field(pytree_node=False)
+    conservative_alpha: float = struct.field(pytree_node=False)
     awbc_temperature: float = struct.field(pytree_node=False)
     awbc_max_weight: float = struct.field(pytree_node=False)
     awbc_min_advantage: float = struct.field(pytree_node=False)
@@ -71,9 +79,13 @@ def make_replay_batch(
     next_reference_action: at.Float[at.Array, "b h a"],
     done: at.Bool[at.Array, " b"],
     episode_success: at.Bool[at.Array, " b"] | None = None,
+    reference_value: at.Float[at.Array, " b"] | None = None,
+    reference_gamma: float = 0.99,
 ) -> RLTReplayBatch:
     if episode_success is None:
         episode_success = jnp.sum(reward_seq, axis=-1) > 0.0
+    if reference_value is None:
+        reference_value = rlt.discount_chunk_rewards(reward_seq, gamma=reference_gamma)
     return RLTReplayBatch(
         x=rlt.make_state(z_rl, proprio),
         action=action,
@@ -83,6 +95,7 @@ def make_replay_batch(
         next_reference_action=next_reference_action,
         done=done,
         episode_success=episode_success,
+        reference_value=reference_value,
     )
 
 
@@ -91,6 +104,7 @@ def init_train_state(config: RLTTrainingConfig, rng: at.KeyArrayLike) -> RLTTrai
     actor_tx = optax.adam(config.actor_lr)
     critic_tx = optax.adam(config.critic_lr)
     actor_loss_mode = _actor_loss_mode_id(config.actor_loss_mode)
+    critic_loss_mode = _critic_loss_mode_id(config.critic_loss_mode)
     return RLTTrainState(
         step=jnp.asarray(0, dtype=jnp.int32),
         params=nnx.state(model),
@@ -103,6 +117,8 @@ def init_train_state(config: RLTTrainingConfig, rng: at.KeyArrayLike) -> RLTTrai
         actor_publish_interval=config.actor_publish_interval,
         target_actor_noise=config.target_actor_noise,
         actor_loss_mode=actor_loss_mode,
+        critic_loss_mode=critic_loss_mode,
+        conservative_alpha=config.conservative_alpha,
         awbc_temperature=config.awbc_temperature,
         awbc_max_weight=config.awbc_max_weight,
         awbc_min_advantage=config.awbc_min_advantage,
@@ -124,6 +140,41 @@ def actor_loss_mode_name(mode: int) -> str:
     if mode == ACTOR_LOSS_MODE_AWBC:
         return "awbc"
     raise ValueError(f"Unsupported actor_loss_mode id={mode!r}")
+
+
+def _critic_loss_mode_id(mode: str) -> int:
+    if mode == "td3":
+        return CRITIC_LOSS_MODE_TD3
+    if mode == "cql":
+        return CRITIC_LOSS_MODE_CQL
+    if mode == "calql":
+        return CRITIC_LOSS_MODE_CALQL
+    raise ValueError(f"Unsupported critic_loss_mode={mode!r}")
+
+
+def critic_loss_mode_name(mode: int) -> str:
+    if mode == CRITIC_LOSS_MODE_TD3:
+        return "td3"
+    if mode == CRITIC_LOSS_MODE_CQL:
+        return "cql"
+    if mode == CRITIC_LOSS_MODE_CALQL:
+        return "calql"
+    raise ValueError(f"Unsupported critic_loss_mode id={mode!r}")
+
+
+def single_action_conservative_penalty(
+    data_q: at.Float[at.Array, " b"],
+    conservative_q: at.Float[at.Array, " b"],
+    *,
+    reference_value: at.Float[at.Array, " b"],
+    critic_loss_mode: int,
+) -> at.Float[at.Array, ""]:
+    conservative_q_for_penalty = jnp.where(
+        critic_loss_mode == CRITIC_LOSS_MODE_CALQL,
+        jnp.maximum(conservative_q, reference_value),
+        conservative_q,
+    )
+    return jnp.mean(jax.nn.softplus(conservative_q_for_penalty - data_q))
 
 
 def should_publish_actor(step: int, *, actor_updated: bool, actor_publish_interval: int) -> bool:
@@ -182,7 +233,7 @@ def train_step(
     rng: at.KeyArrayLike,
 ) -> tuple[RLTTrainState, dict[str, at.Array]]:
     model = nnx.merge(state.model_def, state.params)
-    target_rng, actor_rng = jax.random.split(rng)
+    target_rng, actor_rng, conservative_rng = jax.random.split(rng, 3)
 
     target_q = rlt.rlt_td3_target(
         model,
@@ -193,16 +244,43 @@ def train_step(
         rng=target_rng,
         sample_target_actor=state.target_actor_noise,
     )
+    conservative_action = jax.lax.stop_gradient(model.actor(batch.x, batch.reference_action, rng=conservative_rng, sample=True))
 
     def critic_loss_fn(critic: rlt.RLTTwinCritic):
         q1, q2 = critic(batch.x, batch.action)
-        loss = rlt.critic_loss(q1, q2, target_q)
+        td_loss = rlt.critic_loss(q1, q2, target_q)
+        conservative_q1, conservative_q2 = critic(batch.x, conservative_action)
+        reference_value = jax.lax.stop_gradient(batch.reference_value)
+        conservative_penalty = 0.5 * jnp.mean(
+            single_action_conservative_penalty(
+                q1,
+                conservative_q1,
+                reference_value=reference_value,
+                critic_loss_mode=state.critic_loss_mode,
+            )
+            + single_action_conservative_penalty(
+                q2,
+                conservative_q2,
+                reference_value=reference_value,
+                critic_loss_mode=state.critic_loss_mode,
+            )
+        )
+        conservative_enabled = (state.critic_loss_mode != CRITIC_LOSS_MODE_TD3) & (state.conservative_alpha > 0.0)
+        conservative_weight = jnp.where(conservative_enabled, state.conservative_alpha, 0.0)
+        loss = td_loss + conservative_weight * conservative_penalty
+        reference_q = jnp.minimum(critic.q1(batch.x, batch.reference_action), critic.q2(batch.x, batch.reference_action))
         return loss, {
             "q1_mean": jnp.mean(q1),
             "q2_mean": jnp.mean(q2),
             "target_q_mean": jnp.mean(target_q),
             "q1_loss": jnp.mean(jnp.square(q1 - target_q)),
             "q2_loss": jnp.mean(jnp.square(q2 - target_q)),
+            "td_loss": td_loss,
+            "conservative_penalty": conservative_penalty,
+            "conservative_q_mean": 0.5 * (jnp.mean(conservative_q1) + jnp.mean(conservative_q2)),
+            "data_q_mean": 0.5 * (jnp.mean(q1) + jnp.mean(q2)),
+            "reference_value_mean": jnp.mean(reference_value),
+            "floor_violation_rate": jnp.mean((reference_q < reference_value).astype(jnp.float32)),
         }
 
     (critic_loss_value, critic_info), critic_grads = nnx.value_and_grad(critic_loss_fn, has_aux=True)(model.critic)
@@ -304,6 +382,12 @@ def train_step(
         "critic_loss": critic_loss_value,
         "critic_q1_loss": critic_info["q1_loss"],
         "critic_q2_loss": critic_info["q2_loss"],
+        "critic_td_loss": critic_info["td_loss"],
+        "critic_conservative_penalty": critic_info["conservative_penalty"],
+        "critic_conservative_q_mean": critic_info["conservative_q_mean"],
+        "critic_data_q_mean": critic_info["data_q_mean"],
+        "critic_reference_value_mean": critic_info["reference_value_mean"],
+        "critic_floor_violation_rate": critic_info["floor_violation_rate"],
         "actor_loss": actor_loss_value,
         "actor_updated": jnp.asarray(actor_updated),
         "publish_actor": jnp.asarray(publish_actor),
@@ -316,6 +400,8 @@ def train_step(
         "target_q_mean": critic_info["target_q_mean"],
         "beta": jnp.asarray(model.config.beta, dtype=critic_loss_value.dtype),
         "actor_loss_mode": jnp.asarray(state.actor_loss_mode, dtype=jnp.int32),
+        "critic_loss_mode": jnp.asarray(state.critic_loss_mode, dtype=jnp.int32),
+        "conservative_alpha": jnp.asarray(state.conservative_alpha, dtype=critic_loss_value.dtype),
         "awbc_keep_fraction": awbc_keep_fraction,
         "awbc_weight_mean": awbc_weight_mean,
         "awbc_advantage_mean": awbc_advantage_mean,

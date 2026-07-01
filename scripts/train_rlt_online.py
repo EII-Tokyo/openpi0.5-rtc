@@ -84,6 +84,8 @@ class Args:
     critic_lr: float = 3e-4
     target_actor_noise: bool = True
     actor_loss_mode: str = "td3"
+    critic_loss_mode: str = "td3"
+    conservative_alpha: float = 0.0
     awbc_temperature: float = 0.2
     awbc_max_weight: float = 20.0
     awbc_min_advantage: float = 0.0
@@ -103,6 +105,7 @@ class Args:
     redis_db: int = 0
     redis_state_channel: str = "aloha_rlt_state"
     redis_control_channel: str = "aloha_rlt_control"
+    start_trainer_enabled: bool = False
     init_inference_actor_checkpoint: pathlib.Path | None = None
     online_treat_initial_replay_as_committed: bool = True
     online_initial_committed_shards: int | None = None
@@ -773,6 +776,14 @@ def _build_metrics_payload(
         "critic_loss": _json_float(reduced.get("critic_loss")),
         "critic_q1_loss": _json_float(reduced.get("critic_q1_loss")),
         "critic_q2_loss": _json_float(reduced.get("critic_q2_loss")),
+        "critic_td_loss": _json_float(reduced.get("critic_td_loss")),
+        "critic_conservative_penalty": _json_float(reduced.get("critic_conservative_penalty")),
+        "critic_conservative_q_mean": _json_float(reduced.get("critic_conservative_q_mean")),
+        "critic_data_q_mean": _json_float(reduced.get("critic_data_q_mean")),
+        "critic_reference_value_mean": _json_float(reduced.get("critic_reference_value_mean")),
+        "critic_floor_violation_rate": _json_float(reduced.get("critic_floor_violation_rate")),
+        "critic_loss_mode": None if reduced.get("critic_loss_mode") is None else int(reduced.get("critic_loss_mode")),
+        "conservative_alpha": _json_float(reduced.get("conservative_alpha")),
         "actor_loss": _json_float(reduced.get("actor_loss")),
         "actor_q_value": _json_float(reduced.get("actor_q_value")),
         "reference_q_value": _json_float(reduced.get("reference_q_value")),
@@ -1165,6 +1176,8 @@ def main(args: Args) -> None:
         actor_publish_interval=args.actor_publish_interval,
         target_actor_noise=args.target_actor_noise,
         actor_loss_mode=args.actor_loss_mode,
+        critic_loss_mode=args.critic_loss_mode,
+        conservative_alpha=args.conservative_alpha,
         awbc_temperature=args.awbc_temperature,
         awbc_max_weight=args.awbc_max_weight,
         awbc_min_advantage=args.awbc_min_advantage,
@@ -1208,7 +1221,7 @@ def main(args: Args) -> None:
         db=args.redis_db,
     )
     runtime_beta = float(config.model.beta)
-    trainer_enabled = False
+    trainer_enabled = bool(args.start_trainer_enabled)
     auto_beta_enabled = bool(args.auto_beta_enabled)
     auto_beta_config: dict[str, float | int] = {
         "target_delta_norm": float(args.auto_beta_target_delta_norm),

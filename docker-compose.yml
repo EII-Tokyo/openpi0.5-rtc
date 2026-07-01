@@ -164,6 +164,8 @@ services:
         --actor-min-failure-episodes ${RLT_ACTOR_MIN_FAILURE_EPISODES:-20}
         --batch-size ${RLT_BATCH_SIZE:-64}
         --policy-delay ${RLT_POLICY_DELAY:-2}
+        --critic-loss-mode ${RLT_CRITIC_LOSS_MODE:-td3}
+        --conservative-alpha ${RLT_CONSERVATIVE_ALPHA:-0.0}
         --log-interval ${RLT_LOG_INTERVAL:-50}
         --save-interval ${RLT_SAVE_INTERVAL:-1000}
         --actor-publish-interval ${RLT_ACTOR_PUBLISH_INTERVAL:-1000}

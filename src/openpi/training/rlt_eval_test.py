@@ -1,6 +1,7 @@
 import json
 
 import numpy as np
+import pytest
 
 from openpi.training import rlt_eval
 
@@ -105,3 +106,41 @@ def test_best_actor_metric_prefers_safe_actor_over_high_auc_critic_metric():
     best = rlt_eval.best_actor_metric([unsafe_high_auc, safe_lower_auc])
 
     assert best is safe_lower_auc
+
+
+def test_summarize_checkpoint_reports_calql_calibration_metrics(tmp_path):
+    rows = [
+        {
+            "label": 1,
+            "predicted_q": 0.9,
+            "target_q": 0.8,
+            "bellman_error": 0.01,
+            "actor_q": 0.95,
+            "reference_q": 0.7,
+            "actor_advantage": 0.25,
+            "actor_delta_norm": 0.02,
+            "reference_value": 0.6,
+        },
+        {
+            "label": 0,
+            "predicted_q": 0.2,
+            "target_q": 0.1,
+            "bellman_error": 0.01,
+            "actor_q": 0.25,
+            "reference_q": 0.3,
+            "actor_advantage": -0.05,
+            "actor_delta_norm": 0.01,
+            "reference_value": 0.4,
+        },
+    ]
+
+    metric = rlt_eval.summarize_checkpoint(
+        checkpoint_dir=tmp_path / "00001000",
+        metadata={"step": 1000},
+        rows=rows,
+        train_critic_loss=None,
+    )
+
+    assert metric["reference_value_mean"] == 0.5
+    assert metric["calibration_margin_mean"] == pytest.approx(0.0)
+    assert metric["floor_violation_rate"] == 0.5

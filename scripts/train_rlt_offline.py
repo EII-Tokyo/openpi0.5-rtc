@@ -55,6 +55,8 @@ class Args:
     beta: float = 10.0
     target_actor_noise: bool = True
     actor_loss_mode: str = "td3"
+    critic_loss_mode: str = "td3"
+    conservative_alpha: float = 0.0
     awbc_temperature: float = 0.2
     awbc_max_weight: float = 20.0
     awbc_min_advantage: float = 0.0
@@ -157,6 +159,8 @@ def _build_training_config(
         actor_publish_interval=args.actor_publish_interval,
         target_actor_noise=args.target_actor_noise,
         actor_loss_mode=args.actor_loss_mode,
+        critic_loss_mode=args.critic_loss_mode,
+        conservative_alpha=args.conservative_alpha,
         awbc_temperature=args.awbc_temperature,
         awbc_max_weight=args.awbc_max_weight,
         awbc_min_advantage=args.awbc_min_advantage,

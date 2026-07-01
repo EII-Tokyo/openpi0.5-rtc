@@ -392,12 +392,37 @@ def score_holdout_rows(
         next_q = critic.min_q(next_x, next_action)
         target_q = rlt.td3_target(reward_seq, done, next_q, gamma=critic.q1.config.gamma)
         bellman_error = jnp.square(predicted_q - target_q)
-        return predicted_q, reference_q, actor_q, actor_advantage, actor_delta_norm, target_q, bellman_error
+        reference_value = rlt.discount_chunk_rewards(reward_seq, gamma=critic.q1.config.gamma)
+        calibration_margin = reference_q - reference_value
+        floor_violation = (reference_q < reference_value).astype(jnp.float32)
+        return (
+            predicted_q,
+            reference_q,
+            actor_q,
+            actor_advantage,
+            actor_delta_norm,
+            target_q,
+            bellman_error,
+            reference_value,
+            calibration_margin,
+            floor_violation,
+        )
 
     total = int(arrays["z_rl"].shape[0])
     outputs = {
         key: np.empty(total, dtype=np.float32)
-        for key in ("predicted_q", "reference_q", "actor_q", "actor_advantage", "actor_delta_norm", "target_q", "bellman_error")
+        for key in (
+            "predicted_q",
+            "reference_q",
+            "actor_q",
+            "actor_advantage",
+            "actor_delta_norm",
+            "target_q",
+            "bellman_error",
+            "reference_value",
+            "calibration_margin",
+            "floor_violation",
+        )
     }
     for start in range(0, total, score_batch_size):
         end = min(start + score_batch_size, total)
@@ -425,12 +450,28 @@ def summarize_checkpoint(
     bellman = np.asarray([float(row["bellman_error"]) for row in rows], dtype=np.float64)
     actor_q = np.asarray([float(row["actor_q"]) for row in rows], dtype=np.float64)
     reference_q = np.asarray([float(row["reference_q"]) for row in rows], dtype=np.float64)
+    reference_value = np.asarray([float(row.get("reference_value", math.nan)) for row in rows], dtype=np.float64)
+    calibration_margin = np.asarray(
+        [float(row.get("calibration_margin", float(row["reference_q"]) - float(row.get("reference_value", math.nan)))) for row in rows],
+        dtype=np.float64,
+    )
+    floor_violation = np.asarray(
+        [
+            float(row.get("floor_violation", float(row["reference_q"]) < float(row.get("reference_value", math.nan))))
+            for row in rows
+        ],
+        dtype=np.float64,
+    )
     advantage = np.asarray([float(row["actor_advantage"]) for row in rows], dtype=np.float64)
     actor_delta_norm = np.asarray([float(row["actor_delta_norm"]) for row in rows], dtype=np.float64)
     success_q = predicted_q[labels == 1]
     failure_q = predicted_q[labels == 0]
     success_advantage = advantage[labels == 1]
     failure_advantage = advantage[labels == 0]
+    success_margin = calibration_margin[labels == 1]
+    failure_margin = calibration_margin[labels == 0]
+    success_floor_violation = floor_violation[labels == 1]
+    failure_floor_violation = floor_violation[labels == 0]
     return {
         "step": int(metadata.get("step", _step_from_path(checkpoint_dir))),
         "checkpoint_path": str(checkpoint_dir),
@@ -448,6 +489,13 @@ def summarize_checkpoint(
         "auc": _none_to_nan(auc_rank(labels, predicted_q)),
         "actor_q_mean": _nanmean(actor_q),
         "reference_q_mean": _nanmean(reference_q),
+        "reference_value_mean": _nanmean(reference_value),
+        "calibration_margin_mean": _nanmean(calibration_margin),
+        "success_calibration_margin_mean": _nanmean(success_margin),
+        "failure_calibration_margin_mean": _nanmean(failure_margin),
+        "floor_violation_rate": _nanmean(floor_violation),
+        "success_floor_violation_rate": _nanmean(success_floor_violation),
+        "failure_floor_violation_rate": _nanmean(failure_floor_violation),
         "actor_advantage_mean": _nanmean(advantage),
         "actor_advantage_std": _nanstd(advantage),
         "actor_delta_norm": _nanmean(actor_delta_norm),
@@ -589,6 +637,9 @@ def write_markdown_report(
 - success_q_mean: {best['success_q_mean']:.6f}
 - failure_q_mean: {best['failure_q_mean']:.6f}
 - holdout_bellman_loss: {best['holdout_bellman_loss']:.6f}
+- reference_value_mean: {best['reference_value_mean']:.6f}
+- calibration_margin_mean: {best['calibration_margin_mean']:.6f}
+- floor_violation_rate: {best['floor_violation_rate']:.4f}
 - critic 判断: **{usable}**
 - warning_reason: `{best.get('warning_reason') or ''}`
 
@@ -665,6 +716,23 @@ def write_plots(metrics: list[dict[str, Any]], best_rows: list[dict[str, Any]], 
     plt.ylabel("success_q_mean - failure_q_mean")
     plt.tight_layout()
     plt.savefig(output_dir / "q_gap_over_checkpoints.png", dpi=180)
+    plt.close()
+
+    plt.figure(figsize=(8, 5))
+    plt.plot(steps, [metric["floor_violation_rate"] for metric in metrics], marker="o")
+    plt.xlabel("checkpoint step")
+    plt.ylabel("reference floor violation rate")
+    plt.tight_layout()
+    plt.savefig(output_dir / "floor_violation_over_checkpoints.png", dpi=180)
+    plt.close()
+
+    plt.figure(figsize=(8, 5))
+    plt.plot(steps, [metric["calibration_margin_mean"] for metric in metrics], marker="o")
+    plt.axhline(0.0, color="black", linewidth=1.0, linestyle="--")
+    plt.xlabel("checkpoint step")
+    plt.ylabel("mean reference_q - reference_value")
+    plt.tight_layout()
+    plt.savefig(output_dir / "calibration_margin_over_checkpoints.png", dpi=180)
     plt.close()
 
     success_adv = advantage[labels == 1]

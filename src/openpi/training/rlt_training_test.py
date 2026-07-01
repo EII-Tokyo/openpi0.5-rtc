@@ -1,3 +1,5 @@
+import dataclasses
+
 import jax
 import jax.numpy as jnp
 
@@ -132,6 +134,66 @@ def test_rlt_training_config_samples_target_actor_by_default():
     config = rlt_training.RLTTrainingConfig()
 
     assert config.target_actor_noise is True
+
+
+def test_make_replay_batch_adds_discounted_reference_value():
+    batch = rlt_training.make_replay_batch(
+        z_rl=jnp.ones((2, 8), dtype=jnp.float32),
+        proprio=jnp.ones((2, 4), dtype=jnp.float32),
+        action=jnp.zeros((2, 5, 3), dtype=jnp.float32),
+        reference_action=jnp.zeros((2, 5, 3), dtype=jnp.float32),
+        reward_seq=jnp.array([[0, 0, 1, 0, 0], [0, 0, 0, 0, 1]], dtype=jnp.float32),
+        next_z_rl=jnp.ones((2, 8), dtype=jnp.float32),
+        next_proprio=jnp.ones((2, 4), dtype=jnp.float32),
+        next_reference_action=jnp.zeros((2, 5, 3), dtype=jnp.float32),
+        done=jnp.array([True, True]),
+        reference_gamma=0.5,
+    )
+
+    assert jnp.allclose(batch.reference_value, jnp.array([0.25, 0.0625], dtype=jnp.float32))
+
+
+def test_rlt_train_step_calql_reports_conservative_floor_metrics():
+    config = dataclasses.replace(
+        _make_config(),
+        critic_loss_mode="calql",
+        conservative_alpha=0.2,
+        policy_delay=10_000,
+    )
+    state = rlt_training.init_train_state(config, jax.random.key(0))
+    batch = _make_batch()
+
+    state, info = rlt_training.train_step(state, batch, jax.random.key(1))
+
+    assert int(state.step) == 1
+    assert info["critic_loss_mode"] == rlt_training.CRITIC_LOSS_MODE_CALQL
+    assert jnp.isfinite(info["critic_td_loss"])
+    assert jnp.isfinite(info["critic_conservative_penalty"])
+    assert jnp.isfinite(info["critic_reference_value_mean"])
+    assert 0.0 <= float(info["critic_floor_violation_rate"]) <= 1.0
+
+
+def test_conservative_penalty_is_bounded_below_for_single_action_cql():
+    data_q = jnp.array([0.0, 0.0], dtype=jnp.float32)
+    ood_q = jnp.array([-100.0, 2.0], dtype=jnp.float32)
+    reference_value = jnp.array([0.5, 0.5], dtype=jnp.float32)
+
+    cql_penalty = rlt_training.single_action_conservative_penalty(
+        data_q,
+        ood_q,
+        reference_value=reference_value,
+        critic_loss_mode=rlt_training.CRITIC_LOSS_MODE_CQL,
+    )
+    calql_penalty = rlt_training.single_action_conservative_penalty(
+        data_q,
+        ood_q,
+        reference_value=reference_value,
+        critic_loss_mode=rlt_training.CRITIC_LOSS_MODE_CALQL,
+    )
+
+    assert float(cql_penalty) >= 0.0
+    assert float(calql_penalty) >= 0.0
+    assert float(calql_penalty) > float(cql_penalty)
 
 
 def test_rlt_train_step_awbc_reports_filter_metrics():
