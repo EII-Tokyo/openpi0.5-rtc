@@ -62,6 +62,19 @@ def test_critic_gate_defaults_on():
     assert RLTControlState().critic_gate_enabled is True
 
 
+def test_store_replaces_legacy_cam3_rl_token_checkpoint():
+    store = _store(warmup_target=0)
+
+    store._state.rl_token_checkpoint_path = (
+        "/app/checkpoints/eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo_rl_token_query/"
+        "rl_token_2048_enc4_dec4_query_from_19000_20260528/12000"
+    )
+    store._ensure_rl_token_checkpoint_path()
+
+    assert "eii_rinse_11repo_cam4_fullft_rl_token_small_query" in store._state.rl_token_checkpoint_path
+    assert "cam3" not in store._state.rl_token_checkpoint_path
+
+
 def test_key_region_start_and_end_toggle_actor_and_publish_state():
     store = _store(warmup_target=0)
     store._state.actor_ready = True

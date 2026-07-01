@@ -32,6 +32,7 @@ class Settings:
     realtime_hz: float = float(os.getenv("REALTIME_HZ", "10"))
     rollouts_root: str = os.getenv("ROLLOUTS_ROOT", "/app/rollouts")
     replay_root: str = os.getenv("REPLAY_ROOT", "/app/replay")
+    rlt_online_run_root: str = os.getenv("RLT_ONLINE_RUN_ROOT", "/app/rlt_online/run")
     rlt_state_path: str = os.getenv("RLT_STATE_PATH", "/app/segment_db/rlt_control_state.json")
     rlt_segment_db_path: str = os.getenv("RLT_SEGMENT_DB_PATH", "/app/segment_db/segments.sqlite3")
     rlt_default_warmup_target: int = int(os.getenv("RLT_DEFAULT_WARMUP_TARGET", "100"))
@@ -43,7 +44,7 @@ class Settings:
     rlt_default_actor_speed_limit_preset: str = os.getenv("RLT_DEFAULT_ACTOR_SPEED_LIMIT_PRESET", "off")
     rlt_rl_token_checkpoint_path: str = os.getenv(
         "RLT_RL_TOKEN_CHECKPOINT_PATH",
-        "/app/checkpoints/eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo_rl_token_query/rl_token_2048_enc4_dec4_query_from_19000_20260528/12000",
+        "/app/checkpoints/eii_rinse_11repo_cam4_fullft_rl_token_small_query/rinse_11repo_rl_token_small_query_512_from_9000_20260615/9999",
     )
     allow_origins: list[str] = field(default_factory=lambda: os.getenv("ALLOW_ORIGINS", "*").split(","))
 

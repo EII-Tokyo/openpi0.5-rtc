@@ -41,12 +41,17 @@ class RLTControlStore:
             rl_token_checkpoint_path=settings.rlt_rl_token_checkpoint_path,
         )
         self._load()
-        if self._state.rl_token_checkpoint_path is None:
-            self._state.rl_token_checkpoint_path = settings.rlt_rl_token_checkpoint_path
+        self._ensure_rl_token_checkpoint_path()
         self._last_metrics_persist_at = 0.0
         with self._lock:
             self._apply_ledger_stats_locked()
             self._refresh_derived_locked()
+
+    def _ensure_rl_token_checkpoint_path(self) -> None:
+        path = self._state.rl_token_checkpoint_path or ""
+        legacy_markers = ("cam3", "without_rinse", "rl_token_2048")
+        if not path or any(marker in path for marker in legacy_markers):
+            self._state.rl_token_checkpoint_path = settings.rlt_rl_token_checkpoint_path
 
     def start(self) -> None:
         if self._running:

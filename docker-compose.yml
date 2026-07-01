@@ -211,6 +211,7 @@ services:
       - REDIS_DB=${REDIS_DB:-0}
       - RLT_STATE_CHANNEL=${RLT_STATE_CHANNEL:-aloha_rlt_state}
       - RLT_SEGMENT_DB_PATH=/app/segment_db/segments.sqlite3
+      - RLT_RL_TOKEN_CHECKPOINT_PATH=${RLT_RL_TOKEN_CHECKPOINT_PATH:-/app/checkpoints/eii_rinse_11repo_cam4_fullft_rl_token_small_query/rinse_11repo_rl_token_small_query_512_from_9000_20260615/9999}
     gpus: all
 
   aloha_ros_nodes:
@@ -307,6 +308,7 @@ services:
       - $PWD:/app
       - /data/openpi0.5-rtc-reward-learning/rollouts:/app/rollouts
       - /data/openpi0.5-rtc-reward-learning/replay:/app/replay
+      - /data/openpi0.5-rtc-reward-learning/rlt_online:/app/rlt_online:ro
       - /data/openpi0.5-rtc-reward-learning/segment_db:/app/segment_db
       - /dev:/dev
     env_file:
@@ -317,8 +319,10 @@ services:
       - REDIS_DB=${REDIS_DB:-0}
       - ROLLOUTS_ROOT=/app/rollouts
       - REPLAY_ROOT=/app/replay
+      - RLT_ONLINE_RUN_ROOT=/app/rlt_online/run
       - RLT_STATE_PATH=/app/segment_db/rlt_control_state.json
       - RLT_SEGMENT_DB_PATH=/app/segment_db/segments.sqlite3
+      - RLT_RL_TOKEN_CHECKPOINT_PATH=${RLT_RL_TOKEN_CHECKPOINT_PATH:-/app/checkpoints/eii_rinse_11repo_cam4_fullft_rl_token_small_query/rinse_11repo_rl_token_small_query_512_from_9000_20260615/9999}
     depends_on:
       - redis
 

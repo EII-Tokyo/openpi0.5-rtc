@@ -463,6 +463,24 @@ export type RLTConfigRequest = {
   wandb_url?: string | null
 }
 
+export type RLTCriticReportSummary = {
+  exists: boolean
+  round_id: string | null
+  source_path: string | null
+  report_path: string | null
+  updated_at: number | null
+  step: number | null
+  auc: number | null
+  q_gap: number | null
+  success_q_mean: number | null
+  failure_q_mean: number | null
+  holdout_bellman_loss: number | null
+  success_transitions: number | null
+  failure_transitions: number | null
+  is_critic_usable: boolean | null
+  warning_reason: string | null
+}
+
 const getJson = async <T>(path: string): Promise<T> => {
   const response = await fetch(`${apiBase}${path}`, { cache: 'no-store' })
   if (!response.ok) {
@@ -498,6 +516,7 @@ export const fetchRLTKeyRegionReview = (query: RLTKeyRegionReviewQuery = {}) => 
   const suffix = params.toString() ? `?${params.toString()}` : ''
   return getJson<RLTKeyRegionReviewPage>(`/api/rlt/key-regions/review${suffix}`)
 }
+export const fetchRLTCriticReport = () => getJson<RLTCriticReportSummary>('/api/rlt/critic-report')
 export const fetchRLTKeyRegionDetail = (keyRegionId: string) =>
   getJson<RLTKeyRegionReviewRecord>(`/api/rlt/key-region/${encodeURIComponent(keyRegionId)}`)
 export const fetchRLTExpertDemoReview = (query: { limit?: number; offset?: number; dataset?: string; search?: string; cameraStatus?: string } = {}) => {

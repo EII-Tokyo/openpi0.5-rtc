@@ -208,6 +208,24 @@ class RLTControlState(BaseModel):
     events: list[RLTEvent] = Field(default_factory=list)
 
 
+class RLTCriticReportSummary(BaseModel):
+    exists: bool = False
+    round_id: str | None = None
+    source_path: str | None = None
+    report_path: str | None = None
+    updated_at: float | None = None
+    step: int | None = None
+    auc: float | None = None
+    q_gap: float | None = None
+    success_q_mean: float | None = None
+    failure_q_mean: float | None = None
+    holdout_bellman_loss: float | None = None
+    success_transitions: int | None = None
+    failure_transitions: int | None = None
+    is_critic_usable: bool | None = None
+    warning_reason: str | None = None
+
+
 class RLTScoreRequest(BaseModel):
     reward: int = Field(ge=0, le=1)
     source: str = "ui"

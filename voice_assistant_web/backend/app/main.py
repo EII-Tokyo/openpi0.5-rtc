@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
+import csv
 import hashlib
 import json
 import logging
@@ -51,6 +52,7 @@ from .schemas import RLTBatchSegmentRequest
 from .schemas import RLTConfigRequest
 from .schemas import RLTControlRequest
 from .schemas import RLTControlState
+from .schemas import RLTCriticReportSummary
 from .schemas import RLTDiscardRequest
 from .schemas import RLTExpertDemoCropRequest
 from .schemas import RLTExpertDemoCropResponse
@@ -81,6 +83,66 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+def _optional_float(value: str | None) -> float | None:
+    if value in {None, "", "nan", "None"}:
+        return None
+    try:
+        parsed = float(value)
+    except ValueError:
+        return None
+    return parsed if np.isfinite(parsed) else None
+
+
+def _optional_int(value: str | None) -> int | None:
+    parsed = _optional_float(value)
+    return None if parsed is None else int(parsed)
+
+
+def _optional_bool(value: str | None) -> bool | None:
+    if value is None or value == "":
+        return None
+    return value.lower() in {"1", "true", "yes", "on"}
+
+
+def _latest_critic_report_summary() -> RLTCriticReportSummary:
+    root = Path(settings.rlt_online_run_root)
+    candidates = sorted(
+        root.glob("candidates/round_*/critic_eval/critic_holdout_metrics.csv"),
+        key=lambda path: path.stat().st_mtime if path.exists() else 0.0,
+        reverse=True,
+    )
+    if not candidates:
+        return RLTCriticReportSummary()
+
+    metrics_path = candidates[0]
+    row: dict[str, str] = {}
+    with metrics_path.open("r", encoding="utf-8", newline="") as handle:
+        rows = list(csv.DictReader(handle))
+        if rows:
+            row = rows[-1]
+
+    critic_eval_dir = metrics_path.parent
+    round_id = critic_eval_dir.parent.name
+    report_path = critic_eval_dir / "critic_holdout_report.md"
+    return RLTCriticReportSummary(
+        exists=True,
+        round_id=round_id,
+        source_path=str(metrics_path),
+        report_path=str(report_path) if report_path.exists() else None,
+        updated_at=metrics_path.stat().st_mtime,
+        step=_optional_int(row.get("step")),
+        auc=_optional_float(row.get("auc")),
+        q_gap=_optional_float(row.get("q_gap")),
+        success_q_mean=_optional_float(row.get("success_q_mean")),
+        failure_q_mean=_optional_float(row.get("failure_q_mean")),
+        holdout_bellman_loss=_optional_float(row.get("holdout_bellman_loss")),
+        success_transitions=_optional_int(row.get("success_transitions")),
+        failure_transitions=_optional_int(row.get("failure_transitions")),
+        is_critic_usable=_optional_bool(row.get("is_critic_usable")),
+        warning_reason=row.get("warning_reason") or None,
+    )
 
 camera_bridge = CameraBridge(
     encode_jpeg=settings.camera_transport != "webrtc" or settings.realtime_include_camera_frames,
@@ -1969,3 +2031,8 @@ def rlt_key_regions_delete(request: RLTBatchSegmentRequest) -> RLTControlState:
 @app.post("/api/rlt/config", response_model=RLTControlState)
 def rlt_config(request: RLTConfigRequest) -> RLTControlState:
     return rlt_control.update_config(request)
+
+
+@app.get("/api/rlt/critic-report", response_model=RLTCriticReportSummary)
+def rlt_critic_report() -> RLTCriticReportSummary:
+    return _latest_critic_report_summary()

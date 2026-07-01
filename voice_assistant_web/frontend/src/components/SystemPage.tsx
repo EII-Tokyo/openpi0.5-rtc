@@ -1,4 +1,4 @@
-import { RLTControlState, updateRLTConfig } from '../services/api'
+import { fetchRLTCriticReport, RLTCriticReportSummary, RLTControlState, updateRLTConfig } from '../services/api'
 import type { ReactNode } from 'react'
 import { useEffect, useState } from 'react'
 
@@ -14,6 +14,8 @@ export function SystemPage({ rlt, onState, wsConnected, cameraStatus, cameraTime
   const [burnInDraft, setBurnInDraft] = useState(rlt.critic_burn_in_steps ?? 1000)
   const [burnInError, setBurnInError] = useState('')
   const [burnInPending, setBurnInPending] = useState(false)
+  const [criticReport, setCriticReport] = useState<RLTCriticReportSummary | null>(null)
+  const [criticReportError, setCriticReportError] = useState('')
   const metricsAge = ageSeconds(rlt.rlt_metrics_timestamp)
   const liveCameras = Object.values(cameraStatus).filter(Boolean).length
   const knownCameras = Object.keys(cameraStatus).length
@@ -28,6 +30,23 @@ export function SystemPage({ rlt, onState, wsConnected, cameraStatus, cameraTime
       setBurnInDraft(rlt.critic_burn_in_steps)
     }
   }, [rlt.critic_burn_in_steps])
+
+  useEffect(() => {
+    let cancelled = false
+    fetchRLTCriticReport()
+      .then((report) => {
+        if (!cancelled) {
+          setCriticReport(report)
+          setCriticReportError('')
+        }
+      })
+      .catch((exc) => {
+        if (!cancelled) setCriticReportError(exc instanceof Error ? exc.message : 'Critic report unavailable')
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [rlt.online_round_index, rlt.online_rejection_reason, rlt.online_best_critic_auc])
 
   const applyBurnIn = async () => {
     setBurnInError('')
@@ -113,6 +132,25 @@ export function SystemPage({ rlt, onState, wsConnected, cameraStatus, cameraTime
           <Metric label="Reference Q" value={formatMetric(rlt.reference_q_value)} />
           <Metric label="Actor Q" value={formatMetric(rlt.actor_q_value)} />
           <Metric label="Q Advantage" value={formatMetric(rlt.q_advantage)} tone={rlt.q_advantage !== null && rlt.q_advantage < 0 ? 'watch' : undefined} />
+        </SystemSection>
+
+        <SystemSection title="Critic Report" wide>
+          {criticReport?.exists ? (
+            <>
+              <Metric label="Round" value={criticReport.round_id ?? '-'} />
+              <Metric label="Step" value={formatInt(criticReport.step)} />
+              <Metric label="AUC" value={formatMetric(criticReport.auc)} tone={criticReport.auc !== null && criticReport.auc >= rlt.online_critic_auc_min ? 'ok' : 'watch'} />
+              <Metric label="Q Gap" value={formatMetric(criticReport.q_gap)} tone={criticReport.q_gap !== null && criticReport.q_gap > 0 ? 'ok' : 'watch'} />
+              <Metric label="Usable" value={formatBool(criticReport.is_critic_usable)} tone={criticReport.is_critic_usable ? 'ok' : 'danger'} />
+              <Metric label="Success Q" value={formatMetric(criticReport.success_q_mean)} />
+              <Metric label="Failure Q" value={formatMetric(criticReport.failure_q_mean)} />
+              <Metric label="Bellman Loss" value={formatMetric(criticReport.holdout_bellman_loss)} />
+              <PathRow label="Warning" value={criticReport.warning_reason || '-'} />
+              <PathRow label="Report" value={criticReport.report_path} />
+            </>
+          ) : (
+            <p className="rlt-warning">{criticReportError || 'No critic holdout report found.'}</p>
+          )}
         </SystemSection>
 
         <SystemSection title="Beta">
