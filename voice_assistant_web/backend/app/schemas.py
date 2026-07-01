@@ -130,6 +130,8 @@ class RLTControlState(BaseModel):
     online_target_delta_initial: float = 0.04
     online_target_delta_max: float = 0.10
     online_target_delta_increment: float = 0.01
+    online_auto_train_critic: bool = False
+    online_auto_train_actor: bool = False
     actor_enabled: bool = False
     actor_ready: bool = False
     actor_effective: bool = False
@@ -265,6 +267,8 @@ class RLTConfigRequest(BaseModel):
     online_target_delta_initial: float | None = Field(default=None, gt=0, le=1000)
     online_target_delta_max: float | None = Field(default=None, gt=0, le=1000)
     online_target_delta_increment: float | None = Field(default=None, ge=0, le=1000)
+    online_auto_train_critic: bool | None = None
+    online_auto_train_actor: bool | None = None
     intervention_scale: float | None = Field(default=None, ge=0, le=1)
     max_delta: float | None = Field(default=None, ge=0, le=10)
     actor_handoff_steps: int | None = Field(default=None, ge=0, le=50)

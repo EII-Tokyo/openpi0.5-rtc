@@ -24,6 +24,8 @@ type Draft = Required<
     | 'actor_enabled'
     | 'trainer_enabled'
     | 'online_safety_enabled'
+    | 'online_auto_train_critic'
+    | 'online_auto_train_actor'
     | 'online_min_new_shards_per_round'
     | 'online_min_new_success_per_round'
     | 'online_min_new_failure_per_round'
@@ -68,6 +70,8 @@ const makeDraft = (rlt: RLTControlState): Draft => ({
   actor_enabled: rlt.actor_enabled,
   trainer_enabled: rlt.trainer_enabled,
   online_safety_enabled: rlt.online_safety_enabled,
+  online_auto_train_critic: rlt.online_auto_train_critic,
+  online_auto_train_actor: rlt.online_auto_train_actor,
   online_min_new_shards_per_round: rlt.online_min_new_shards_per_round,
   online_min_new_success_per_round: rlt.online_min_new_success_per_round,
   online_min_new_failure_per_round: rlt.online_min_new_failure_per_round,
@@ -119,6 +123,8 @@ export function RLTConfigPage({ rlt, onState }: Props) {
     rlt.actor_enabled,
     rlt.trainer_enabled,
     rlt.online_safety_enabled,
+    rlt.online_auto_train_critic,
+    rlt.online_auto_train_actor,
     rlt.online_min_new_shards_per_round,
     rlt.online_min_new_success_per_round,
     rlt.online_min_new_failure_per_round,
@@ -233,6 +239,16 @@ export function RLTConfigPage({ rlt, onState }: Props) {
             label="Safety Controller"
             checked={draft.online_safety_enabled}
             onChange={(online_safety_enabled) => setDraft({ ...draft, online_safety_enabled })}
+          />
+          <Toggle
+            label="Auto Train Critic"
+            checked={draft.online_auto_train_critic}
+            onChange={(online_auto_train_critic) => setDraft({ ...draft, online_auto_train_critic })}
+          />
+          <Toggle
+            label="Auto Train Actor"
+            checked={draft.online_auto_train_actor}
+            onChange={(online_auto_train_actor) => setDraft({ ...draft, online_auto_train_actor })}
           />
           <ReadOnly label="Current Phase" value={rlt.online_safety_phase || 'unknown'} />
           <ReadOnly label="Best Critic AUC" value={rlt.online_best_critic_auc?.toFixed(3) ?? '-'} />

@@ -44,6 +44,8 @@ class Args:
     min_failure_episodes: int = 1
     critic_burn_in_steps: int = 1_000
     online_safety_enabled: bool = True
+    online_auto_train_critic: bool = False
+    online_auto_train_actor: bool = False
     online_min_new_shards_per_round: int = 10
     online_min_new_success_per_round: int = 5
     online_min_new_failure_per_round: int = 5
@@ -112,6 +114,8 @@ class OnlineSafetyController:
     min_new_shards_per_round: int = 10
     min_new_success_per_round: int = 5
     min_new_failure_per_round: int = 5
+    auto_train_critic: bool = False
+    auto_train_actor: bool = False
     critic_updates_per_round: int = 500
     actor_updates_per_round: int = 300
     critic_auc_min: float = 0.70
@@ -162,6 +166,9 @@ class OnlineSafetyController:
         if new_failure < self.min_new_failure_per_round:
             self.last_rejection_reason = "waiting_for_new_failure"
             return False
+        if not self.auto_train_critic:
+            self.last_rejection_reason = "critic_auto_train_disabled"
+            return False
         self.round_index += 1
         self.round_start_shards = int(stats.num_shards)
         self.round_start_success = int(stats.success_episodes)
@@ -204,6 +211,14 @@ class OnlineSafetyController:
         if accepted:
             self.best_critic_auc = _finite_float(metric.get("auc")) if metric else None
             self.best_critic_q_gap = _finite_float(metric.get("q_gap")) if metric else None
+            if not self.auto_train_actor:
+                self.actor_steps_remaining = 0
+                self.phase = "idle_wait_new_data"
+                self.last_committed_shards = int(self.round_start_shards)
+                self.last_committed_success = int(self.round_start_success)
+                self.last_committed_failure = int(self.round_start_failure)
+                self.last_rejection_reason = "actor_auto_train_disabled"
+                return True
             self.actor_steps_remaining = int(self.actor_updates_per_round)
             self.phase = "actor_candidate_training"
             self.last_rejection_reason = None
@@ -250,6 +265,8 @@ class OnlineSafetyController:
             "online_last_committed_shards": self.last_committed_shards,
             "online_last_committed_success": self.last_committed_success,
             "online_last_committed_failure": self.last_committed_failure,
+            "online_auto_train_critic": self.auto_train_critic,
+            "online_auto_train_actor": self.auto_train_actor,
             "online_round_start_shards": self.round_start_shards,
             "online_round_start_success": self.round_start_success,
             "online_round_start_failure": self.round_start_failure,
@@ -448,6 +465,10 @@ class RedisControlSubscriber:
                         latest_update[key] = value
                 if "online_safety_enabled" in payload:
                     latest_update["online_safety_enabled"] = bool(payload["online_safety_enabled"])
+                if "online_auto_train_critic" in payload:
+                    latest_update["online_auto_train_critic"] = bool(payload["online_auto_train_critic"])
+                if "online_auto_train_actor" in payload:
+                    latest_update["online_auto_train_actor"] = bool(payload["online_auto_train_actor"])
                 for key in (
                     "online_critic_auc_min",
                     "online_critic_max_auc_drop",
@@ -869,6 +890,8 @@ def _build_metrics_payload(
         "online_last_committed_shards": None
         if reduced.get("online_last_committed_shards") is None
         else int(reduced.get("online_last_committed_shards")),
+        "online_auto_train_critic": _json_bool(reduced.get("online_auto_train_critic")),
+        "online_auto_train_actor": _json_bool(reduced.get("online_auto_train_actor")),
         "online_round_start_shards": None
         if reduced.get("online_round_start_shards") is None
         else int(reduced.get("online_round_start_shards")),
@@ -1095,6 +1118,8 @@ def _build_online_controller(args: Args) -> OnlineSafetyController:
         min_new_shards_per_round=args.online_min_new_shards_per_round,
         min_new_success_per_round=args.online_min_new_success_per_round,
         min_new_failure_per_round=args.online_min_new_failure_per_round,
+        auto_train_critic=args.online_auto_train_critic,
+        auto_train_actor=args.online_auto_train_actor,
         critic_updates_per_round=args.online_critic_updates_per_round,
         actor_updates_per_round=args.online_actor_updates_per_round,
         critic_auc_min=args.online_critic_auc_min,
@@ -1118,6 +1143,8 @@ def _update_online_controller_config(controller: OnlineSafetyController, control
         "online_min_new_shards_per_round": ("min_new_shards_per_round", int),
         "online_min_new_success_per_round": ("min_new_success_per_round", int),
         "online_min_new_failure_per_round": ("min_new_failure_per_round", int),
+        "online_auto_train_critic": ("auto_train_critic", bool),
+        "online_auto_train_actor": ("auto_train_actor", bool),
         "online_critic_updates_per_round": ("critic_updates_per_round", int),
         "online_actor_updates_per_round": ("actor_updates_per_round", int),
         "online_critic_auc_min": ("critic_auc_min", float),

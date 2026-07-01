@@ -376,6 +376,8 @@ class RLTControlStore:
                 "online_target_delta_initial",
                 "online_target_delta_max",
                 "online_target_delta_increment",
+                "online_auto_train_critic",
+                "online_auto_train_actor",
             ):
                 value = getattr(request, key, None)
                 if value is not None:
@@ -459,6 +461,8 @@ class RLTControlStore:
                     "online_round_start_shards",
                     "online_round_start_success",
                     "online_round_start_failure",
+                    "online_auto_train_critic",
+                    "online_auto_train_actor",
                     "online_min_new_success_per_round",
                     "online_min_new_failure_per_round",
                     "online_critic_steps_remaining",

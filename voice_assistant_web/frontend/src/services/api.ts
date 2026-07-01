@@ -342,6 +342,8 @@ export type RLTControlState = {
   online_target_delta_initial: number
   online_target_delta_max: number
   online_target_delta_increment: number
+  online_auto_train_critic: boolean
+  online_auto_train_actor: boolean
   actor_enabled: boolean
   actor_effective: boolean
   actor_ready: boolean
@@ -452,6 +454,8 @@ export type RLTConfigRequest = {
   online_target_delta_initial?: number
   online_target_delta_max?: number
   online_target_delta_increment?: number
+  online_auto_train_critic?: boolean
+  online_auto_train_actor?: boolean
   intervention_scale?: number
   max_delta?: number
   actor_handoff_steps?: number

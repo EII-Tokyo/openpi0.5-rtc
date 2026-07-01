@@ -78,6 +78,8 @@ const initialRLT: RLTControlState = {
   online_target_delta_initial: 0.04,
   online_target_delta_max: 0.1,
   online_target_delta_increment: 0.01,
+  online_auto_train_critic: false,
+  online_auto_train_actor: false,
   actor_enabled: false,
   actor_effective: false,
   actor_ready: false,

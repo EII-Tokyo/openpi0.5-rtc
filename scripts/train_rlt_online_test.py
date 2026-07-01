@@ -472,6 +472,8 @@ def test_online_round_controller_waits_for_new_shards_and_budgets_steps():
         min_new_shards_per_round=10,
         min_new_success_per_round=0,
         min_new_failure_per_round=0,
+        auto_train_critic=True,
+        auto_train_actor=True,
         critic_updates_per_round=3,
         actor_updates_per_round=2,
     )
@@ -491,11 +493,47 @@ def test_online_round_controller_waits_for_new_shards_and_budgets_steps():
     assert controller.last_committed_shards == 10
 
 
+def test_online_round_controller_defaults_to_manual_critic_start():
+    controller = train_rlt_online.OnlineSafetyController(
+        min_new_shards_per_round=10,
+        min_new_success_per_round=0,
+        min_new_failure_per_round=0,
+    )
+
+    assert not controller.maybe_start_round(_stats(num_shards=10))
+    assert controller.phase == "idle_wait_new_data"
+    assert controller.critic_steps_remaining == 0
+    assert controller.last_rejection_reason == "critic_auto_train_disabled"
+
+
+def test_online_round_controller_defaults_to_manual_actor_start_after_critic_accept():
+    controller = train_rlt_online.OnlineSafetyController(
+        min_new_shards_per_round=10,
+        min_new_success_per_round=0,
+        min_new_failure_per_round=0,
+        auto_train_critic=True,
+        auto_train_actor=False,
+        critic_updates_per_round=1,
+        actor_updates_per_round=2,
+    )
+
+    assert controller.maybe_start_round(_stats(num_shards=10))
+    controller.step_allocation()
+
+    assert controller.accept_critic({"auc": 0.75, "q_gap": 0.2})
+    assert controller.phase == "idle_wait_new_data"
+    assert controller.actor_steps_remaining == 0
+    assert controller.last_committed_shards == 10
+    assert controller.last_rejection_reason == "actor_auto_train_disabled"
+
+
 def test_online_round_controller_rejects_unstable_critic_and_keeps_old_best():
     controller = train_rlt_online.OnlineSafetyController(
         min_new_shards_per_round=10,
         min_new_success_per_round=0,
         min_new_failure_per_round=0,
+        auto_train_critic=True,
+        auto_train_actor=True,
         critic_updates_per_round=1,
         actor_updates_per_round=1,
         critic_auc_min=0.70,
@@ -835,6 +873,7 @@ def test_online_controller_can_treat_existing_replay_as_bootstrap_baseline():
         min_new_shards_per_round=10,
         min_new_success_per_round=0,
         min_new_failure_per_round=0,
+        auto_train_critic=True,
     )
 
     controller.mark_bootstrap_committed(_stats(num_shards=117))
@@ -849,6 +888,7 @@ def test_online_controller_requires_new_success_and_failure_counts():
         min_new_shards_per_round=10,
         min_new_success_per_round=5,
         min_new_failure_per_round=5,
+        auto_train_critic=True,
     )
     controller.mark_bootstrap_committed(_stats(num_shards=100, success_episodes=20, failure_episodes=20))
 
