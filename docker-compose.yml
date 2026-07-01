@@ -131,7 +131,7 @@ services:
         --min-success-episodes ${RLT_MIN_SUCCESS_EPISODES:-10}
         --min-failure-episodes ${RLT_MIN_FAILURE_EPISODES:-10}
         --critic-burn-in-steps ${RLT_CRITIC_BURN_IN_STEPS:-1000}
-        --online-safety-enabled ${RLT_ONLINE_SAFETY_ENABLED:-true}
+        --online-safety-enabled
         --online-min-new-shards-per-round ${RLT_ONLINE_MIN_NEW_SHARDS_PER_ROUND:-10}
         --online-min-new-success-per-round ${RLT_ONLINE_MIN_NEW_SUCCESS_PER_ROUND:-5}
         --online-min-new-failure-per-round ${RLT_ONLINE_MIN_NEW_FAILURE_PER_ROUND:-5}
@@ -139,7 +139,7 @@ services:
         --online-actor-updates-per-round ${RLT_ONLINE_ACTOR_UPDATES_PER_ROUND:-300}
         --online-critic-auc-min ${RLT_ONLINE_CRITIC_AUC_MIN:-0.70}
         --online-critic-max-auc-drop ${RLT_ONLINE_CRITIC_MAX_AUC_DROP:-0.02}
-        --online-require-positive-q-gap ${RLT_ONLINE_REQUIRE_POSITIVE_Q_GAP:-true}
+        --online-require-positive-q-gap
         --online-actor-max-delta-norm ${RLT_ONLINE_ACTOR_MAX_DELTA_NORM:-0.09}
         --online-actor-min-q-advantage ${RLT_ONLINE_ACTOR_MIN_Q_ADVANTAGE:-0.0}
         --online-beta-initial ${RLT_ONLINE_BETA_INITIAL:-30.0}
@@ -178,7 +178,7 @@ services:
         --redis-state-channel ${RLT_STATE_CHANNEL:-aloha_rlt_state}
         --redis-control-channel ${RLT_CONTROL_CHANNEL:-aloha_rlt_control}
         ${RLT_INIT_INFERENCE_ACTOR_CHECKPOINT:+--init-inference-actor-checkpoint ${RLT_INIT_INFERENCE_ACTOR_CHECKPOINT}}
-        --online-treat-initial-replay-as-committed ${RLT_ONLINE_TREAT_INITIAL_REPLAY_AS_COMMITTED:-true}
+        --online-treat-initial-replay-as-committed
         ${RLT_ONLINE_INITIAL_COMMITTED_SHARDS:+--online-initial-committed-shards ${RLT_ONLINE_INITIAL_COMMITTED_SHARDS}}
     init: true
     tty: true
