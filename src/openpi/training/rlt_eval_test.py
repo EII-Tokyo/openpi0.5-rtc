@@ -64,3 +64,44 @@ def test_critic_usability_accepts_separated_holdout():
 
     assert decision.is_critic_usable
     assert decision.warning_reason == ""
+
+
+def test_actor_usability_rejects_failure_advantage_above_success():
+    decision = rlt_eval.judge_actor_usability(
+        actor_advantage_mean=0.05,
+        success_actor_advantage_mean=0.02,
+        failure_actor_advantage_mean=0.07,
+        actor_delta_norm=0.03,
+        min_q_advantage=0.0,
+        max_delta_norm=0.09,
+    )
+
+    assert not decision.is_actor_usable
+    assert "failure_actor_advantage>success_actor_advantage" in decision.warning_reason
+
+
+def test_best_actor_metric_prefers_safe_actor_over_high_auc_critic_metric():
+    unsafe_high_auc = {
+        "step": 2000,
+        "auc": 0.90,
+        "q_gap": 0.30,
+        "holdout_bellman_loss": 0.01,
+        "actor_advantage_mean": 0.08,
+        "success_actor_advantage_mean": 0.01,
+        "failure_actor_advantage_mean": 0.09,
+        "actor_delta_norm": 0.03,
+    }
+    safe_lower_auc = {
+        "step": 1000,
+        "auc": 0.72,
+        "q_gap": 0.10,
+        "holdout_bellman_loss": 0.02,
+        "actor_advantage_mean": 0.04,
+        "success_actor_advantage_mean": 0.08,
+        "failure_actor_advantage_mean": 0.01,
+        "actor_delta_norm": 0.02,
+    }
+
+    best = rlt_eval.best_actor_metric([unsafe_high_auc, safe_lower_auc])
+
+    assert best is safe_lower_auc

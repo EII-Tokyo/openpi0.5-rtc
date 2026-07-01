@@ -32,6 +32,12 @@ class CriticUsabilityDecision:
 
 
 @dataclasses.dataclass(frozen=True)
+class ActorUsabilityDecision:
+    is_actor_usable: bool
+    warning_reason: str
+
+
+@dataclasses.dataclass(frozen=True)
 class HoldoutEvalResult:
     metrics: list[dict[str, Any]]
     best_metric: dict[str, Any] | None
@@ -167,6 +173,34 @@ def judge_critic_usability(
     return CriticUsabilityDecision(is_critic_usable=usable, warning_reason=";".join(warnings))
 
 
+def judge_actor_usability(
+    *,
+    actor_advantage_mean: float | None,
+    success_actor_advantage_mean: float | None,
+    failure_actor_advantage_mean: float | None,
+    actor_delta_norm: float | None,
+    min_q_advantage: float,
+    max_delta_norm: float,
+) -> ActorUsabilityDecision:
+    warnings: list[str] = []
+    if actor_advantage_mean is None:
+        warnings.append("missing_actor_advantage")
+    elif actor_advantage_mean <= min_q_advantage:
+        warnings.append("actor_advantage<=min")
+    if actor_delta_norm is None:
+        warnings.append("missing_actor_delta_norm")
+    elif actor_delta_norm > max_delta_norm:
+        warnings.append("actor_delta_norm>max")
+    if (
+        success_actor_advantage_mean is not None
+        and failure_actor_advantage_mean is not None
+        and failure_actor_advantage_mean > success_actor_advantage_mean
+    ):
+        warnings.append("failure_actor_advantage>success_actor_advantage")
+    usable = not warnings
+    return ActorUsabilityDecision(is_actor_usable=usable, warning_reason=";".join(warnings))
+
+
 def discover_inference_checkpoints(checkpoint_dir: pathlib.Path) -> list[pathlib.Path]:
     checkpoint_dir = checkpoint_dir.expanduser().resolve()
     if (checkpoint_dir / "metadata.json").exists() and (checkpoint_dir / "critic.msgpack").exists():
@@ -241,6 +275,16 @@ def evaluate_holdout_checkpoints(
         )
         metric["is_critic_usable"] = decision.is_critic_usable
         metric["warning_reason"] = decision.warning_reason
+        actor_decision = judge_actor_usability(
+            actor_advantage_mean=_as_optional_float(metric["actor_advantage_mean"]),
+            success_actor_advantage_mean=_as_optional_float(metric["success_actor_advantage_mean"]),
+            failure_actor_advantage_mean=_as_optional_float(metric["failure_actor_advantage_mean"]),
+            actor_delta_norm=_as_optional_float(metric["actor_delta_norm"]),
+            min_q_advantage=0.0,
+            max_delta_norm=0.09,
+        )
+        metric["is_actor_usable"] = actor_decision.is_actor_usable
+        metric["actor_warning_reason"] = actor_decision.warning_reason
 
     best = best_checkpoint_metric(metrics)
     if best is not None:
@@ -248,6 +292,7 @@ def evaluate_holdout_checkpoints(
         best_rows = [row for row in all_transition_rows if row["checkpoint_step"] == best_step]
     write_metric_reports(metrics, output_dir)
     write_best_checkpoint(best, output_dir)
+    write_best_actor_checkpoint(best_actor_metric(metrics), output_dir)
     write_markdown_report(metrics, best, output_dir, num_holdout_transitions=len(best_rows), skipped=skipped)
     write_plots(metrics, best_rows, output_dir)
     return HoldoutEvalResult(metrics=metrics, best_metric=best, per_transition_rows=all_transition_rows, skipped=skipped)
@@ -335,19 +380,25 @@ def score_holdout_rows(
             actor_action = reference_action
             actor_q = jnp.full_like(predicted_q, jnp.nan)
             actor_advantage = jnp.full_like(predicted_q, jnp.nan)
+            actor_delta_norm = jnp.full_like(predicted_q, jnp.nan)
             next_action = next_reference_action
         else:
             actor_action = actor(x, reference_action, sample=False)
             actor_q = critic.min_q(x, actor_action)
             actor_advantage = actor_q - reference_q
+            actor_delta = actor_action - reference_action
+            actor_delta_norm = jnp.linalg.norm(actor_delta.reshape(actor_delta.shape[0], -1), axis=-1)
             next_action = actor(next_x, next_reference_action, sample=False)
         next_q = critic.min_q(next_x, next_action)
         target_q = rlt.td3_target(reward_seq, done, next_q, gamma=critic.q1.config.gamma)
         bellman_error = jnp.square(predicted_q - target_q)
-        return predicted_q, reference_q, actor_q, actor_advantage, target_q, bellman_error
+        return predicted_q, reference_q, actor_q, actor_advantage, actor_delta_norm, target_q, bellman_error
 
     total = int(arrays["z_rl"].shape[0])
-    outputs = {key: np.empty(total, dtype=np.float32) for key in ("predicted_q", "reference_q", "actor_q", "actor_advantage", "target_q", "bellman_error")}
+    outputs = {
+        key: np.empty(total, dtype=np.float32)
+        for key in ("predicted_q", "reference_q", "actor_q", "actor_advantage", "actor_delta_norm", "target_q", "bellman_error")
+    }
     for start in range(0, total, score_batch_size):
         end = min(start + score_batch_size, total)
         batch = {key: value[start:end] for key, value in arrays.items()}
@@ -375,6 +426,7 @@ def summarize_checkpoint(
     actor_q = np.asarray([float(row["actor_q"]) for row in rows], dtype=np.float64)
     reference_q = np.asarray([float(row["reference_q"]) for row in rows], dtype=np.float64)
     advantage = np.asarray([float(row["actor_advantage"]) for row in rows], dtype=np.float64)
+    actor_delta_norm = np.asarray([float(row["actor_delta_norm"]) for row in rows], dtype=np.float64)
     success_q = predicted_q[labels == 1]
     failure_q = predicted_q[labels == 0]
     success_advantage = advantage[labels == 1]
@@ -398,6 +450,7 @@ def summarize_checkpoint(
         "reference_q_mean": _nanmean(reference_q),
         "actor_advantage_mean": _nanmean(advantage),
         "actor_advantage_std": _nanstd(advantage),
+        "actor_delta_norm": _nanmean(actor_delta_norm),
         "success_actor_advantage_mean": _nanmean(success_advantage),
         "failure_actor_advantage_mean": _nanmean(failure_advantage),
         "num_holdout_transitions": len(rows),
@@ -420,6 +473,23 @@ def best_checkpoint_metric(metrics: list[dict[str, Any]]) -> dict[str, Any] | No
             metric.get("failure_actor_advantage_mean"), 0.0
         )
         return (auc, q_gap, -loss, advantage_gap)
+
+    return max(metrics, key=key)
+
+
+def best_actor_metric(metrics: list[dict[str, Any]]) -> dict[str, Any] | None:
+    if not metrics:
+        return None
+
+    def key(metric: dict[str, Any]) -> tuple[float, float, float, float, float]:
+        actor_usable = 1.0 if bool(metric.get("is_actor_usable", False)) else 0.0
+        advantage_gap = _finite_or(metric.get("success_actor_advantage_mean"), 0.0) - _finite_or(
+            metric.get("failure_actor_advantage_mean"), 0.0
+        )
+        actor_advantage = _finite_or(metric.get("actor_advantage_mean"), -1e9)
+        actor_delta_norm = _finite_or(metric.get("actor_delta_norm"), 1e9)
+        auc = _finite_or(metric.get("auc"), -1.0)
+        return (actor_usable, advantage_gap, actor_advantage, -actor_delta_norm, auc)
 
     return max(metrics, key=key)
 
@@ -455,6 +525,26 @@ def write_best_checkpoint(best: dict[str, Any] | None, output_dir: pathlib.Path)
     (output_dir / "best_critic_checkpoint.txt").write_text(text, encoding="utf-8")
 
 
+def write_best_actor_checkpoint(best: dict[str, Any] | None, output_dir: pathlib.Path) -> None:
+    if best is None:
+        text = "No checkpoint evaluated.\n"
+    else:
+        text = "\n".join(
+            [
+                f"best actor checkpoint path: {best['checkpoint_path']}",
+                "selection reason: actor usable gate, then success/failure actor advantage gap, then actor advantage, then lower actor delta norm, then AUC",
+                f"actor_advantage_mean: {best['actor_advantage_mean']}",
+                f"success_actor_advantage_mean: {best['success_actor_advantage_mean']}",
+                f"failure_actor_advantage_mean: {best['failure_actor_advantage_mean']}",
+                f"actor_delta_norm: {best['actor_delta_norm']}",
+                f"AUC: {best['auc']}",
+                f"actor_warning_reason: {best.get('actor_warning_reason') or ''}",
+                "",
+            ]
+        )
+    (output_dir / "best_actor_checkpoint.txt").write_text(text, encoding="utf-8")
+
+
 def write_markdown_report(
     metrics: list[dict[str, Any]],
     best: dict[str, Any] | None,
@@ -467,6 +557,19 @@ def write_markdown_report(
         report = "# Critic Holdout Report\n\nNo checkpoint evaluated.\n"
     else:
         usable = "可用" if best["is_critic_usable"] else "不可靠"
+        best_actor = best_actor_metric(metrics)
+        if best_actor is None:
+            actor_section = "No actor checkpoint evaluated."
+        else:
+            actor_usable = "可用" if best_actor.get("is_actor_usable") else "不可靠"
+            actor_section = f"""- path: `{best_actor['checkpoint_path']}`
+- step: {best_actor['step']}
+- actor 判断: **{actor_usable}**
+- actor_advantage_mean: {best_actor['actor_advantage_mean']:.6f}
+- success_actor_advantage_mean: {best_actor['success_actor_advantage_mean']:.6f}
+- failure_actor_advantage_mean: {best_actor['failure_actor_advantage_mean']:.6f}
+- actor_delta_norm: {best_actor['actor_delta_norm']:.6f}
+- actor_warning_reason: `{best_actor.get('actor_warning_reason') or ''}`"""
         report = f"""# Critic Holdout Report
 
 ## 数据概况
@@ -496,6 +599,10 @@ def write_markdown_report(
 - actor_advantage_mean: {best['actor_advantage_mean']:.6f}
 - success_actor_advantage_mean: {best['success_actor_advantage_mean']:.6f}
 - failure_actor_advantage_mean: {best['failure_actor_advantage_mean']:.6f}
+
+## 最佳 actor checkpoint
+
+{actor_section}
 
 ## 解释
 

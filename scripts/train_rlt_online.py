@@ -1,6 +1,5 @@
+import contextlib
 import dataclasses
-import datetime
-import hashlib
 import json
 import logging
 import math
@@ -19,6 +18,7 @@ import tyro
 import wandb
 
 from openpi.models import rlt
+from openpi.training import rlt_checkpoint_io
 from openpi.training import rlt_eval
 from openpi.training import rlt_replay_store
 from openpi.training import rlt_training
@@ -299,6 +299,8 @@ class OnlineSafetyController:
         if metric is None:
             return False, "missing_actor_metric"
         q_advantage = _finite_float(metric.get("q_advantage"))
+        if q_advantage is None:
+            q_advantage = _finite_float(metric.get("actor_advantage_mean"))
         actor_delta_norm = _finite_float(metric.get("actor_delta_norm"))
         if q_advantage is None or q_advantage <= self.actor_min_q_advantage:
             return False, "actor_q_advantage_too_low"
@@ -320,19 +322,15 @@ def _init_logging() -> None:
 
 
 def _atomic_write_bytes(path: pathlib.Path, data: bytes) -> None:
-    tmp_path = path.with_suffix(path.suffix + ".tmp")
-    tmp_path.write_bytes(data)
-    tmp_path.replace(path)
+    rlt_checkpoint_io.atomic_write_bytes(path, data)
 
 
 def _atomic_write_text(path: pathlib.Path, text: str) -> None:
-    tmp_path = path.with_suffix(path.suffix + ".tmp")
-    tmp_path.write_text(text)
-    tmp_path.replace(path)
+    rlt_checkpoint_io.atomic_write_text(path, text)
 
 
 def _sha256_bytes(data: bytes) -> str:
-    return hashlib.sha256(data).hexdigest()
+    return rlt_checkpoint_io.sha256_bytes(data)
 
 
 def _shape_metadata(shape: rlt_replay_store.ReplayShape | None) -> dict[str, int] | None:
@@ -526,10 +524,8 @@ class RedisControlSubscriber:
     def close(self) -> None:
         if self._pubsub is None:
             return
-        try:
+        with contextlib.suppress(Exception):
             self._pubsub.close()
-        except Exception:
-            pass
 
 
 
@@ -718,83 +714,22 @@ def _build_auto_beta_controller(beta: float, config: dict[str, float | int]) -> 
     )
 
 def _with_runtime_beta(state: rlt_training.RLTTrainState, beta: float) -> rlt_training.RLTTrainState:
-    model = nnx.merge(state.model_def, state.params)
-    beta = float(beta)
-    if float(model.config.beta) == beta:
-        return state
-    config = dataclasses.replace(model.config, beta=beta)
-    model.config = config
-    model.actor.config = config
-    model.critic.q1.config = config
-    model.critic.q2.config = config
-    model.target_actor.config = config
-    model.target_critic.q1.config = config
-    model.target_critic.q2.config = config
-    return dataclasses.replace(state, model_def=nnx.graphdef(model), params=nnx.state(model))
+    return rlt_checkpoint_io.with_runtime_beta(state, beta)
 
 
 def _load_inference_actor_checkpoint(
     state: rlt_training.RLTTrainState,
     checkpoint_dir: pathlib.Path,
 ) -> tuple[rlt_training.RLTTrainState, dict]:
-    checkpoint_dir = _resolve_inference_checkpoint_dir(checkpoint_dir)
-    metadata_path = checkpoint_dir / "metadata.json"
-    actor_path = checkpoint_dir / "actor.msgpack"
-    critic_path = checkpoint_dir / "critic.msgpack"
-    if not metadata_path.exists():
-        raise FileNotFoundError(f"metadata.json not found in {checkpoint_dir}")
-    if not actor_path.exists():
-        raise FileNotFoundError(f"actor.msgpack not found in {checkpoint_dir}")
-    if not critic_path.exists():
-        raise FileNotFoundError(f"critic.msgpack not found in {checkpoint_dir}")
-    metadata = json.loads(metadata_path.read_text())
-    if metadata.get("type") != "rlt_inference_actor":
-        raise ValueError(f"{checkpoint_dir} is not an RLT inference actor checkpoint")
-    loaded_config = rlt.RLTConfig(**metadata["rlt_config"])
-    model = nnx.merge(state.model_def, state.params)
-    _assert_compatible_rlt_config(model.config, loaded_config, checkpoint_dir)
-
-    actor_state = nnx.state(model.actor)
-    actor_pure = serialization.from_bytes(actor_state.to_pure_dict(), actor_path.read_bytes())
-    actor_state.replace_by_pure_dict(actor_pure)
-    nnx.update(model.actor, actor_state)
-    target_actor_state = nnx.state(model.target_actor)
-    target_actor_state.replace_by_pure_dict(actor_pure)
-    nnx.update(model.target_actor, target_actor_state)
-
-    critic_state = nnx.state(model.critic)
-    critic_pure = serialization.from_bytes(critic_state.to_pure_dict(), critic_path.read_bytes())
-    critic_state.replace_by_pure_dict(critic_pure)
-    nnx.update(model.critic, critic_state)
-    target_critic_state = nnx.state(model.target_critic)
-    target_critic_state.replace_by_pure_dict(critic_pure)
-    nnx.update(model.target_critic, target_critic_state)
-    return dataclasses.replace(
-        state,
-        step=jax.numpy.asarray(0, dtype=jax.numpy.int32),
-        params=nnx.state(model),
-        model_def=nnx.graphdef(model),
-    ), metadata
+    return rlt_checkpoint_io.load_inference_actor_checkpoint(state, checkpoint_dir)
 
 
 def _resolve_inference_checkpoint_dir(path: pathlib.Path) -> pathlib.Path:
-    path = path.expanduser()
-    if path.name == "LATEST":
-        return pathlib.Path(path.read_text().strip()).expanduser()
-    if path.is_dir() and (path / "LATEST").exists():
-        return pathlib.Path((path / "LATEST").read_text().strip()).expanduser()
-    return path
+    return rlt_checkpoint_io.resolve_inference_checkpoint_dir(path)
 
 
 def _assert_compatible_rlt_config(current: rlt.RLTConfig, loaded: rlt.RLTConfig, checkpoint_dir: pathlib.Path) -> None:
-    fields = ("z_dim", "proprio_dim", "action_horizon", "action_dim", "hidden_dim", "num_layers")
-    mismatches = {
-        field: (getattr(current, field), getattr(loaded, field))
-        for field in fields
-        if getattr(current, field) != getattr(loaded, field)
-    }
-    if mismatches:
-        raise ValueError(f"Incompatible RLT checkpoint {checkpoint_dir}: {mismatches}")
+    rlt_checkpoint_io.assert_compatible_rlt_config(current, loaded, checkpoint_dir)
 
 
 def _json_float(value):
@@ -810,11 +745,7 @@ def _json_bool(value):
 
 
 def _format_log_metric(key: str, value) -> str:
-    if isinstance(value, bool):
-        return f"{key}={int(value)}"
-    if isinstance(value, int | float | np.number):
-        return f"{key}={float(value):.4f}"
-    return f"{key}={value}"
+    return rlt_checkpoint_io.format_log_metric(key, value)
 
 
 def _build_metrics_payload(
@@ -909,18 +840,7 @@ def _build_metrics_payload(
 
 
 def _reduce_numeric_infos(infos: list[dict[str, object]]) -> dict[str, float]:
-    reduced: dict[str, float] = {}
-    if not infos:
-        return reduced
-    for key in infos[0]:
-        values = [item.get(key) for item in infos]
-        if any(value is None for value in values):
-            continue
-        first = np.asarray(values[0])
-        if first.ndim != 0 or first.dtype.kind not in "biuf":
-            continue
-        reduced[key] = float(np.mean([np.asarray(value) for value in values]))
-    return reduced
+    return rlt_checkpoint_io.reduce_numeric_infos(infos)
 
 
 def _wandb_url() -> str | None:
@@ -943,52 +863,15 @@ def _save_actor_for_inference(
     train_shape: rlt_replay_store.ReplayShape | None = None,
     replay_stats: rlt_replay_store.ReplayStats | None = None,
 ) -> pathlib.Path:
-    actor_dir = output_dir / "inference_actor" / f"{step:08d}"
-    actor_dir.mkdir(parents=True, exist_ok=True)
-    actor_params = rlt_training.actor_params_for_inference(state).to_pure_dict()
-    critic_params = rlt_training.critic_params_for_inference(state).to_pure_dict()
-    actor_bytes = serialization.to_bytes(actor_params)
-    critic_bytes = serialization.to_bytes(critic_params)
-    _atomic_write_bytes(actor_dir / "actor.msgpack", actor_bytes)
-    _atomic_write_bytes(actor_dir / "critic.msgpack", critic_bytes)
-    model = nnx.merge(state.model_def, state.params)
-    actor_loss_config = {
-        "actor_loss_mode": rlt_training.actor_loss_mode_name(int(state.actor_loss_mode)),
-        "awbc_temperature": float(state.awbc_temperature),
-        "awbc_max_weight": float(state.awbc_max_weight),
-        "awbc_min_advantage": float(state.awbc_min_advantage),
-        "awbc_max_action_delta_norm": float(state.awbc_max_action_delta_norm),
-    }
-    _atomic_write_text(
-        actor_dir / "metadata.json",
-        json.dumps(
-            {
-                "format_version": 1,
-                "created_at_unix": time.time(),
-                "created_at_iso": datetime.datetime.now(datetime.UTC).isoformat(),
-                "source_script": "scripts/train_rlt_online.py",
-                "host": platform.node(),
-                "step": int(step),
-                "type": "rlt_inference_actor",
-                "note": "Stable actor export. Runtime should switch only at chunk/idle boundary.",
-                "actor_file": "actor.msgpack",
-                "actor_sha256": _sha256_bytes(actor_bytes),
-                "critic_file": "critic.msgpack",
-                "critic_sha256": _sha256_bytes(critic_bytes),
-                "action_horizon": int(action_horizon),
-                "rlt_config": dataclasses.asdict(model.config),
-                "actor_loss_config": actor_loss_config,
-                "replay_shape": _shape_metadata(replay_shape),
-                "train_shape": _shape_metadata(train_shape),
-                "replay_stats": _stats_metadata(replay_stats),
-            },
-            indent=2,
-            sort_keys=True,
-        ),
+    return rlt_checkpoint_io.save_actor_for_inference(
+        state,
+        output_dir,
+        step,
+        action_horizon=action_horizon,
+        replay_shape=replay_shape,
+        train_shape=train_shape,
+        replay_stats=replay_stats,
     )
-    latest_path = output_dir / "inference_actor" / "LATEST"
-    _atomic_write_text(latest_path, str(actor_dir))
-    return actor_dir
 
 
 def _save_training_checkpoint(
@@ -997,30 +880,7 @@ def _save_training_checkpoint(
     step: int,
     store: rlt_replay_store.RLTReplayStore,
 ) -> pathlib.Path:
-    checkpoint_dir = output_dir / "checkpoints" / f"{step:08d}"
-    checkpoint_dir.mkdir(parents=True, exist_ok=True)
-    payload = {
-        "step": int(state.step),
-        "params": _to_msgpackable_state(state.params),
-        "actor_opt_state": _to_msgpackable_state(state.actor_opt_state),
-        "critic_opt_state": _to_msgpackable_state(state.critic_opt_state),
-    }
-    _atomic_write_bytes(checkpoint_dir / "train_state.msgpack", serialization.to_bytes(payload))
-    _atomic_write_text(
-        checkpoint_dir / "metadata.json",
-        json.dumps(
-            {
-                "step": int(state.step),
-                "replay_stats": dataclasses.asdict(store.stats),
-                "replay_shape": None if store.shape is None else dataclasses.asdict(store.shape),
-                "train_shape": None if store.sample_shape is None else dataclasses.asdict(store.sample_shape),
-                "loaded_shards": [str(path) for path in store.loaded_paths],
-            },
-            indent=2,
-        ),
-    )
-    _atomic_write_text(output_dir / "checkpoints" / "LATEST", str(checkpoint_dir))
-    return checkpoint_dir
+    return rlt_checkpoint_io.save_training_checkpoint(state, output_dir, step, store)
 
 
 def _to_msgpackable_state(value):
@@ -1100,16 +960,11 @@ def _state_for_actor_gate(
     policy_delay: int,
     actor_publish_interval: int,
 ) -> rlt_training.RLTTrainState:
-    if actor_enabled:
-        return dataclasses.replace(
-            state,
-            policy_delay=policy_delay,
-            actor_publish_interval=actor_publish_interval,
-        )
-    return dataclasses.replace(
+    return rlt_checkpoint_io.state_for_actor_gate(
         state,
-        policy_delay=1_000_000_000,
-        actor_publish_interval=0,
+        actor_enabled=actor_enabled,
+        policy_delay=policy_delay,
+        actor_publish_interval=actor_publish_interval,
     )
 
 
@@ -1189,6 +1044,30 @@ def _evaluate_candidate_critic(
     return result.best_metric
 
 
+def _evaluate_candidate_actor(
+    *,
+    args: Args,
+    checkpoint_dir: pathlib.Path,
+    store: rlt_replay_store.RLTReplayStore,
+    output_dir: pathlib.Path,
+    round_index: int,
+) -> dict | None:
+    paths = _candidate_holdout_paths(args=args, store=store, round_index=round_index)
+    if not paths:
+        return None
+    try:
+        result = rlt_eval.evaluate_holdout_checkpoints(
+            checkpoint_dirs=[checkpoint_dir],
+            holdout_paths=paths,
+            output_dir=output_dir,
+            score_batch_size=512,
+        )
+    except Exception as exc:
+        logging.warning("Online candidate actor eval failed: %s", exc)
+        return None
+    return rlt_eval.best_actor_metric(result.metrics)
+
+
 def _build_replay_store(args: Args) -> rlt_replay_store.RLTReplayStore:
     return rlt_replay_store.RLTReplayStore(
         args.replay_dir,
@@ -1231,7 +1110,7 @@ def _validate_train_holdout_disjoint(args: Args, *, train_paths: list[pathlib.Pa
         train_paths = rlt_eval.find_replay_shards(args.replay_dir, manifest_path=args.manifest_path)
     if train_paths is None:
         return
-    train_paths = set(pathlib.Path(path).expanduser().resolve() for path in train_paths)
+    train_paths = {pathlib.Path(path).expanduser().resolve() for path in train_paths}
     holdout_paths = set(rlt_eval.find_replay_shards(args.replay_dir, manifest_path=args.holdout_manifest_path))
     overlap = sorted(train_paths & holdout_paths)
     if overlap:
@@ -1551,7 +1430,24 @@ def main(args: Args) -> None:
                     continue
                 if online_controller.phase == "actor_eval":
                     current_step = int(state.step)
-                    actor_metric = _reduce_numeric_infos(infos) if infos else {}
+                    candidate_dir = _save_actor_for_inference(
+                        state,
+                        args.output_dir / "candidates" / f"round_{online_controller.round_index:06d}" / "actor",
+                        current_step,
+                        action_horizon=shape.action_horizon,
+                        replay_shape=store.shape,
+                        train_shape=store.sample_shape,
+                        replay_stats=store.stats,
+                    )
+                    actor_metric = _evaluate_candidate_actor(
+                        args=args,
+                        checkpoint_dir=candidate_dir,
+                        store=store,
+                        output_dir=args.output_dir / "candidates" / f"round_{online_controller.round_index:06d}" / "actor_eval",
+                        round_index=online_controller.round_index,
+                    )
+                    if actor_metric is None:
+                        actor_metric = _reduce_numeric_infos(infos) if infos else {}
                     if online_controller.accept_actor(actor_metric):
                         accepted_state = state
                         actor_dir = _save_actor_for_inference(

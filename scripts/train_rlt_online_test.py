@@ -1,3 +1,5 @@
+# ruff: noqa: SLF001
+
 import dataclasses
 import json
 import os
@@ -556,6 +558,39 @@ def test_online_round_controller_rejects_unstable_critic_and_keeps_old_best():
     assert not controller.accept_critic({"auc": 0.75, "q_gap": 0.3})
     assert controller.best_critic_auc == 0.80
     assert controller.last_rejection_reason == "critic_auc_regressed"
+
+
+def test_online_round_controller_accepts_holdout_actor_metric_keys():
+    controller = train_rlt_online.OnlineSafetyController(
+        actor_min_q_advantage=0.0,
+        actor_max_delta_norm=0.09,
+    )
+
+    assert controller.accept_actor(
+        {
+            "actor_advantage_mean": 0.03,
+            "success_actor_advantage_mean": 0.08,
+            "failure_actor_advantage_mean": 0.01,
+            "actor_delta_norm": 0.04,
+        }
+    )
+
+
+def test_online_round_controller_rejects_holdout_actor_failure_advantage():
+    controller = train_rlt_online.OnlineSafetyController(
+        actor_min_q_advantage=0.0,
+        actor_max_delta_norm=0.09,
+    )
+
+    assert not controller.accept_actor(
+        {
+            "actor_advantage_mean": 0.03,
+            "success_actor_advantage_mean": 0.01,
+            "failure_actor_advantage_mean": 0.08,
+            "actor_delta_norm": 0.04,
+        }
+    )
+    assert controller.last_rejection_reason == "failure_actor_advantage_above_success"
 
 
 def test_online_beta_schedule_starts_conservative_and_opens_after_actor_accept():

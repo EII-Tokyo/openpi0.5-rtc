@@ -8,18 +8,18 @@ import platform
 import shutil
 import time
 
+from flax import serialization
 import jax
 import numpy as np
 import tqdm_loggable.auto as tqdm
 import tyro
 import wandb
-from flax import serialization
 
 from openpi.models import rlt
+from openpi.training import rlt_checkpoint_io
 from openpi.training import rlt_eval
 from openpi.training import rlt_replay_store
 from openpi.training import rlt_training
-from scripts import train_rlt_online
 
 
 @dataclasses.dataclass
@@ -109,7 +109,7 @@ def _prepare_holdout_split(args: Args) -> tuple[pathlib.Path | None, pathlib.Pat
         "num_train_shards": len(split.train_paths),
         "num_holdout_shards": len(split.holdout_paths),
     }
-    train_rlt_online._atomic_write_text(
+    rlt_checkpoint_io.atomic_write_text(
         split_dir / "summary.json",
         json.dumps(
             {
@@ -280,13 +280,13 @@ def _write_summary(
         "train_shape": None if store.sample_shape is None else dataclasses.asdict(store.sample_shape),
         "loaded_shards": [str(path) for path in store.loaded_paths],
     }
-    train_rlt_online._atomic_write_text(args.output_dir / "training_summary.json", json.dumps(summary, indent=2))
+    rlt_checkpoint_io.atomic_write_text(args.output_dir / "training_summary.json", json.dumps(summary, indent=2))
 
 
 def _write_used_manifest(output_dir: pathlib.Path, store: rlt_replay_store.RLTReplayStore) -> pathlib.Path:
     manifest_path = output_dir / "used_manifest.jsonl"
     rows = [{"shard_path": str(path)} for path in store.loaded_paths]
-    train_rlt_online._atomic_write_text(
+    rlt_checkpoint_io.atomic_write_text(
         manifest_path,
         "".join(json.dumps(row, sort_keys=True) + "\n" for row in rows),
     )
@@ -294,7 +294,14 @@ def _write_used_manifest(output_dir: pathlib.Path, store: rlt_replay_store.RLTRe
 
 
 def _write_latest_actor_pointer(output_dir: pathlib.Path, actor_path: pathlib.Path | str) -> None:
-    train_rlt_online._atomic_write_text(output_dir / "latest_actor_path.txt", str(actor_path) + "\n")
+    rlt_checkpoint_io.atomic_write_text(output_dir / "latest_actor_path.txt", str(actor_path) + "\n")
+
+
+def _write_best_actor_pointer(output_dir: pathlib.Path, actor_metric: dict | None) -> None:
+    if actor_metric is None:
+        rlt_checkpoint_io.atomic_write_text(output_dir / "best_actor_path.txt", "No actor checkpoint evaluated.\n")
+        return
+    rlt_checkpoint_io.atomic_write_text(output_dir / "best_actor_path.txt", str(actor_metric["checkpoint_path"]) + "\n")
 
 
 def main(args: Args) -> None:
@@ -328,7 +335,7 @@ def main(args: Args) -> None:
     replay_rng = np.random.default_rng(args.seed)
     _init_wandb(args, store)
 
-    latest_actor_dir = train_rlt_online._save_actor_for_inference(
+    latest_actor_dir = rlt_checkpoint_io.save_actor_for_inference(
         state,
         args.output_dir,
         0,
@@ -336,8 +343,9 @@ def main(args: Args) -> None:
         replay_shape=replay_shape,
         train_shape=train_shape,
         replay_stats=store.stats,
+        source_script="scripts/train_rlt_offline.py",
     )
-    train_rlt_online._save_training_checkpoint(state, args.output_dir, 0, store)
+    rlt_checkpoint_io.save_training_checkpoint(state, args.output_dir, 0, store)
     if args.eval_holdout_critic and holdout_manifest is not None:
         initial_eval = rlt_eval.evaluate_holdout_checkpoints(
             checkpoint_dirs=[latest_actor_dir],
@@ -367,7 +375,7 @@ def main(args: Args) -> None:
                 state = rlt_training.sync_target_params(state)
                 latest_target_sync_step = int(state.step)
                 logging.info("Hard-synced target actor/critic before actor updates at step=%d", latest_target_sync_step)
-            state = train_rlt_online._state_for_actor_gate(
+            state = rlt_checkpoint_io.state_for_actor_gate(
                 state,
                 actor_enabled=actor_enabled,
                 policy_delay=args.policy_delay,
@@ -381,7 +389,7 @@ def main(args: Args) -> None:
             current_step = int(state.step)
 
             if bool(info["publish_actor"]):
-                latest_actor_dir = train_rlt_online._save_actor_for_inference(
+                latest_actor_dir = rlt_checkpoint_io.save_actor_for_inference(
                     state,
                     args.output_dir,
                     current_step,
@@ -389,15 +397,16 @@ def main(args: Args) -> None:
                     replay_shape=replay_shape,
                     train_shape=train_shape,
                     replay_stats=store.stats,
+                    source_script="scripts/train_rlt_offline.py",
                 )
-                train_rlt_online._atomic_write_text(
+                rlt_checkpoint_io.atomic_write_text(
                     latest_actor_dir / "metrics.json",
                     json.dumps({"critic_loss": float(info["critic_loss"])}, indent=2, sort_keys=True),
                 )
                 _write_latest_actor_pointer(args.output_dir, latest_actor_dir)
             if current_step % args.save_interval == 0:
-                train_rlt_online._save_training_checkpoint(state, args.output_dir, current_step, store)
-                snapshot_dir = train_rlt_online._save_actor_for_inference(
+                rlt_checkpoint_io.save_training_checkpoint(state, args.output_dir, current_step, store)
+                snapshot_dir = rlt_checkpoint_io.save_actor_for_inference(
                     state,
                     args.output_dir / "snapshots",
                     current_step,
@@ -405,8 +414,9 @@ def main(args: Args) -> None:
                     replay_shape=replay_shape,
                     train_shape=train_shape,
                     replay_stats=store.stats,
+                    source_script="scripts/train_rlt_offline.py",
                 )
-                train_rlt_online._atomic_write_text(
+                rlt_checkpoint_io.atomic_write_text(
                     snapshot_dir / "metrics.json",
                     json.dumps({"critic_loss": float(info["critic_loss"])}, indent=2, sort_keys=True),
                 )
@@ -424,7 +434,7 @@ def main(args: Args) -> None:
                     )
                     latest_critic_metric = eval_result.best_metric
             if current_step % args.log_interval == 0 and infos:
-                reduced = train_rlt_online._reduce_numeric_infos(infos)
+                reduced = rlt_checkpoint_io.reduce_numeric_infos(infos)
                 reduced.update(
                     {
                         "actor_enabled": float(actor_enabled),
@@ -437,7 +447,7 @@ def main(args: Args) -> None:
                     }
                 )
                 wandb.log({f"rlt/{key}": value for key, value in reduced.items()}, step=current_step)
-                logging.info("step=%d %s", current_step, " ".join(train_rlt_online._format_log_metric(k, v) for k, v in reduced.items()))
+                logging.info("step=%d %s", current_step, " ".join(rlt_checkpoint_io.format_log_metric(k, v) for k, v in reduced.items()))
                 infos = []
                 log_start = time.perf_counter()
             progress.update(1)
@@ -458,6 +468,10 @@ def main(args: Args) -> None:
         )
         if final_eval.best_metric is not None:
             logging.info("Best holdout critic: %s", final_eval.best_metric["checkpoint_path"])
+        best_actor_metric = rlt_eval.best_actor_metric(final_eval.metrics)
+        _write_best_actor_pointer(args.output_dir, best_actor_metric)
+        if best_actor_metric is not None:
+            logging.info("Best holdout actor: %s", best_actor_metric["checkpoint_path"])
 
 
 if __name__ == "__main__":
