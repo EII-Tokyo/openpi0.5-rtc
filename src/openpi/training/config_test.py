@@ -32,6 +32,46 @@ def test_rinse_small_query_rl_token_config_saves_only_final_checkpoint():
     assert _keyword_value(repack_call, "include_subtask") is False
 
 
+def test_lower_right_small_query_rl_token_config_uses_two_effective_cameras():
+    config_path = pathlib.Path(__file__).with_name("config.py")
+    tree = ast.parse(config_path.read_text())
+    call = _find_config_call(tree, "eii_rinse_11repo_cam4_fullft_rl_token_lower_right_small_query")
+
+    assert _keyword_value(call, "camera_keys") == ("cam_low", "cam_right_wrist")
+    assert _keyword_value(call, "output_camera_slots") == (
+        "base_0_rgb",
+        "base_1_rgb",
+        "left_wrist_0_rgb",
+        "right_wrist_0_rgb",
+    )
+    assert _keyword_value(call, "num_train_steps") == 10_000
+    assert _keyword_value(call, "save_interval") == 5_000
+    assert _keyword_value(call, "keep_period") == 5_000
+    assert _keyword_value(call, "decoder_mode") == "query"
+    assert "eii_rinse_11repo_cam4_fullft" in _keyword_value(call, "init_checkpoint")
+    assert "9000/params" in _keyword_value(call, "init_checkpoint")
+
+
+def test_lower_right_4layer_rl_token_config_matches_existing_deep_structure():
+    config_path = pathlib.Path(__file__).with_name("config.py")
+    tree = ast.parse(config_path.read_text())
+    call = _find_config_call(tree, "eii_rinse_11repo_cam4_fullft_rl_token_lower_right_query_4layer")
+
+    assert _keyword_value(call, "camera_keys") == ("cam_low", "cam_right_wrist")
+    assert _keyword_value(call, "output_camera_slots") == (
+        "base_0_rgb",
+        "base_1_rgb",
+        "left_wrist_0_rgb",
+        "right_wrist_0_rgb",
+    )
+    assert _keyword_value(call, "num_train_steps") == 10_000
+    assert _keyword_value(call, "save_interval") == 5_000
+    assert _keyword_value(call, "keep_period") == 5_000
+    assert _keyword_value(call, "decoder_mode") == "query"
+    assert "eii_rinse_11repo_cam4_fullft" in _keyword_value(call, "init_checkpoint")
+    assert "9000/params" in _keyword_value(call, "init_checkpoint")
+
+
 def _find_config_call(tree: ast.AST, config_name: str) -> ast.Call:
     for node in ast.walk(tree):
         if not isinstance(node, ast.Call):

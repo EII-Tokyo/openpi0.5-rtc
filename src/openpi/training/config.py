@@ -520,14 +520,34 @@ def _aloha_lerobot_repack_transforms() -> _transforms.Group:
     )
 
 
-def _aloha_real_repack_transforms(*, include_low: bool, include_prompt: bool, include_subtask: bool) -> _transforms.Group:
-    image_mapping = {
-        "cam_high": "observation.images.cam_high",
-        "cam_left_wrist": "observation.images.cam_left_wrist",
-        "cam_right_wrist": "observation.images.cam_right_wrist",
-    }
-    if include_low:
-        image_mapping["cam_low"] = "observation.images.cam_low"
+_ALOHA_REAL_IMAGE_MAPPING = {
+    "cam_high": "observation.images.cam_high",
+    "cam_left_wrist": "observation.images.cam_left_wrist",
+    "cam_right_wrist": "observation.images.cam_right_wrist",
+    "cam_low": "observation.images.cam_low",
+}
+
+
+def _aloha_real_repack_transforms(
+    *,
+    include_low: bool,
+    include_prompt: bool,
+    include_subtask: bool,
+    camera_keys: tuple[str, ...] | None = None,
+) -> _transforms.Group:
+    if camera_keys is None:
+        image_mapping = {
+            "cam_high": "observation.images.cam_high",
+            "cam_left_wrist": "observation.images.cam_left_wrist",
+            "cam_right_wrist": "observation.images.cam_right_wrist",
+        }
+        if include_low:
+            image_mapping["cam_low"] = "observation.images.cam_low"
+    else:
+        unknown = set(camera_keys) - set(_ALOHA_REAL_IMAGE_MAPPING)
+        if unknown:
+            raise ValueError(f"Unknown Aloha camera keys: {tuple(sorted(unknown))}")
+        image_mapping = {key: _ALOHA_REAL_IMAGE_MAPPING[key] for key in camera_keys}
 
     mapping: dict[str, Any] = {
         "images": image_mapping,
@@ -539,7 +559,6 @@ def _aloha_real_repack_transforms(*, include_low: bool, include_prompt: bool, in
     if include_prompt:
         mapping["prompt"] = "prompt"
     return _transforms.Group(inputs=[_transforms.RepackTransform(mapping)])
-
 
 @dataclasses.dataclass(frozen=True)
 class LeRobotAlohaDataConfig(DataConfigFactory):
@@ -553,11 +572,17 @@ class LeRobotAlohaDataConfig(DataConfigFactory):
         default_factory=_aloha_lerobot_repack_transforms
     )
     action_sequence_keys: Sequence[str] = ("action",)
+    output_camera_slots: tuple[str, ...] | None = None
 
     @override
     def create(self, assets_dirs: pathlib.Path, model_config: _model.BaseModelConfig) -> DataConfig:
         data_transforms = _transforms.Group(
-            inputs=[aloha_policy.AlohaInputs(adapt_to_pi=self.adapt_to_pi)],
+            inputs=[
+                aloha_policy.AlohaInputs(
+                    adapt_to_pi=self.adapt_to_pi,
+                    output_camera_slots=self.output_camera_slots,
+                )
+            ],
             outputs=[aloha_policy.AlohaOutputs(adapt_to_pi=self.adapt_to_pi)],
         )
         if self.use_delta_joint_actions:
@@ -737,12 +762,16 @@ def _make_rl_token_autoencoder_config(
     overwrite: bool = False,
     resume: bool = False,
     num_train_steps: int = 20_000,
+    save_interval: int = 5_000,
+    keep_period: int | None = None,
     decoder_mode: str = "teacher_forced",
     history_mask_ratio: float = 0.0,
     zero_margin_weight: float = 0.0,
     zero_margin: float = 0.5,
     shuffled_margin_weight: float = 0.0,
     shuffled_margin: float = 0.1,
+    camera_keys: tuple[str, ...] | None = None,
+    output_camera_slots: tuple[str, ...] | None = None,
 ) -> TrainConfig:
     model = pi0_config.Pi0Config(
         pi05=True,
@@ -786,7 +815,9 @@ def _make_rl_token_autoencoder_config(
                 include_low=False,
                 include_prompt=True,
                 include_subtask=False,
+                camera_keys=camera_keys,
             ),
+            output_camera_slots=output_camera_slots,
         ),
         weight_loader=weight_loaders.CheckpointWeightLoader(
             init_checkpoint,
@@ -797,7 +828,8 @@ def _make_rl_token_autoencoder_config(
             nnx.Not(nnx_utils.PathRegex(".*rl_token_autoencoder.*")),
         ),
         ema_decay=None,
-        save_interval=5000,
+        save_interval=save_interval,
+        keep_period=save_interval if keep_period is None else keep_period,
         num_train_steps=num_train_steps,
         batch_size=batch_size,
         num_workers=num_workers,
@@ -830,6 +862,8 @@ def _make_small_rl_token_autoencoder_config(
     save_interval: int = 5_000,
     keep_period: int | None = None,
     decoder_mode: str = "teacher_forced",
+    camera_keys: tuple[str, ...] | None = None,
+    output_camera_slots: tuple[str, ...] | None = None,
 ) -> TrainConfig:
     model = pi0_rl_config.Pi0RLConfig(
         pi05=True,
@@ -870,7 +904,9 @@ def _make_small_rl_token_autoencoder_config(
                 include_low=True,
                 include_prompt=True,
                 include_subtask=False,
+                camera_keys=camera_keys,
             ),
+            output_camera_slots=output_camera_slots,
         ),
         weight_loader=weight_loaders.CheckpointWeightLoader(
             init_checkpoint,
@@ -1269,6 +1305,48 @@ _CONFIGS = [
         save_interval=10_000,
         keep_period=10_000,
         decoder_mode="query",
+    ),
+    _make_small_rl_token_autoencoder_config(
+        "eii_rinse_11repo_cam4_fullft_rl_token_lower_right_small_query",
+        repo_ids=_EII_RINSE_11REPO_INSERT_X5_REPO_IDS,
+        init_checkpoint="/workspace/openpi0.5-rtc-reward-learning/checkpoints/eii_rinse_11repo_cam4_fullft/rinse_11repo_insertx5_fullft_bs256_nw64_fsdp8_20260513/9000/params",
+        batch_size=16,
+        num_workers=4,
+        fsdp_devices=1,
+        gradient_accumulation_steps=1,
+        exp_name="rinse_11repo_rl_token_lower_right_small_query_512_from_9000_20260701",
+        assets_base_dir="/workspace/openpi0.5-rtc-reward-learning/assets",
+        checkpoint_base_dir="/workspace/openpi0.5-rtc-reward-learning/checkpoints",
+        wandb_enabled=True,
+        overwrite=False,
+        resume=False,
+        num_train_steps=10_000,
+        save_interval=5_000,
+        keep_period=5_000,
+        decoder_mode="query",
+        camera_keys=("cam_low", "cam_right_wrist"),
+        output_camera_slots=("base_0_rgb", "base_1_rgb", "left_wrist_0_rgb", "right_wrist_0_rgb"),
+    ),
+    _make_rl_token_autoencoder_config(
+        "eii_rinse_11repo_cam4_fullft_rl_token_lower_right_query_4layer",
+        repo_ids=_EII_RINSE_11REPO_INSERT_X5_REPO_IDS,
+        init_checkpoint="/workspace/openpi0.5-rtc-reward-learning/checkpoints/eii_rinse_11repo_cam4_fullft/rinse_11repo_insertx5_fullft_bs256_nw64_fsdp8_20260513/9000/params",
+        batch_size=8,
+        num_workers=4,
+        fsdp_devices=1,
+        gradient_accumulation_steps=2,
+        exp_name="rinse_11repo_rl_token_lower_right_query_2048_enc4_dec4_from_9000_20260701",
+        assets_base_dir="/workspace/openpi0.5-rtc-reward-learning/assets",
+        checkpoint_base_dir="/workspace/openpi0.5-rtc-reward-learning/checkpoints",
+        wandb_enabled=True,
+        overwrite=False,
+        resume=False,
+        num_train_steps=10_000,
+        save_interval=5_000,
+        keep_period=5_000,
+        decoder_mode="query",
+        camera_keys=("cam_low", "cam_right_wrist"),
+        output_camera_slots=("base_0_rgb", "base_1_rgb", "left_wrist_0_rgb", "right_wrist_0_rgb"),
     ),
     _make_twist_train_config(
         "eii_rinse_9repo_cam4_lora_6000",

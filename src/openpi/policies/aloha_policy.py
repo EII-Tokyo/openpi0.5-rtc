@@ -38,6 +38,9 @@ class AlohaInputs(transforms.DataTransformFn):
     # The expected cameras names. All input cameras must be in this set. Missing optional cameras
     # are omitted so the model can run with either 3-camera or 4-camera inputs.
     EXPECTED_CAMERAS: ClassVar[tuple[str, ...]] = ("cam_high", "cam_low", "cam_left_wrist", "cam_right_wrist")
+    # Optional model-facing slots to always emit. This is used for camera ablations that keep the
+    # cam4 checkpoint-compatible slot layout while masking cameras that are intentionally disabled.
+    output_camera_slots: tuple[str, ...] | None = None
 
     def __call__(self, data: dict) -> dict:
         data = _decode_aloha(data, adapt_to_pi=self.adapt_to_pi)
@@ -46,31 +49,46 @@ class AlohaInputs(transforms.DataTransformFn):
         if set(in_images) - set(self.EXPECTED_CAMERAS):
             raise ValueError(f"Expected images to contain {self.EXPECTED_CAMERAS}, got {tuple(in_images)}")
 
-        # Assume that base image always exists.
-        base_image = in_images["cam_high"]
-
         source_image_masks = data.get("image_masks", {})
 
         def _to_scalar_bool(value: object, default: object = np.True_) -> np.ndarray:
             arr = np.asarray(default if value is None else value, dtype=bool)
             return np.asarray(arr.reshape(-1)[0], dtype=bool)
 
-        images = {
-            "base_0_rgb": base_image,
-        }
-        image_masks = {
-            "base_0_rgb": _to_scalar_bool(source_image_masks.get("cam_high", True)),
-        }
-
-        extra_image_names = {
+        slot_to_source = {
+            "base_0_rgb": "cam_high",
             "base_1_rgb": "cam_low",
             "left_wrist_0_rgb": "cam_left_wrist",
             "right_wrist_0_rgb": "cam_right_wrist",
         }
-        for dest, source in extra_image_names.items():
-            if source in in_images:
-                images[dest] = in_images[source]
-                image_masks[dest] = _to_scalar_bool(source_image_masks.get(source, True))
+
+        if self.output_camera_slots is None:
+            # Preserve historical behavior: cam_high is required and optional cameras are omitted.
+            images = {"base_0_rgb": in_images["cam_high"]}
+            image_masks = {"base_0_rgb": _to_scalar_bool(source_image_masks.get("cam_high", True))}
+            for dest, source in slot_to_source.items():
+                if dest == "base_0_rgb":
+                    continue
+                if source in in_images:
+                    images[dest] = in_images[source]
+                    image_masks[dest] = _to_scalar_bool(source_image_masks.get(source, True))
+        else:
+            unknown_slots = set(self.output_camera_slots) - set(slot_to_source)
+            if unknown_slots:
+                raise ValueError(f"Unknown Aloha output camera slots: {tuple(sorted(unknown_slots))}")
+            if not in_images:
+                raise ValueError("At least one source image is required when output_camera_slots is set.")
+            placeholder = np.zeros_like(next(iter(in_images.values())))
+            images = {}
+            image_masks = {}
+            for dest in self.output_camera_slots:
+                source = slot_to_source[dest]
+                if source in in_images:
+                    images[dest] = in_images[source]
+                    image_masks[dest] = _to_scalar_bool(source_image_masks.get(source, True))
+                else:
+                    images[dest] = placeholder
+                    image_masks[dest] = np.zeros((), dtype=bool)
 
         # Drop the original camera dict after remapping into the model-facing image keys.
         # Keeping both `images` and `image` doubles image memory inside DataLoader workers.
