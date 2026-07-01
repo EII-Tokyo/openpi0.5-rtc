@@ -169,6 +169,7 @@ services:
         --actor-publish-interval ${RLT_ACTOR_PUBLISH_INTERVAL:-1000}
         --scan-interval ${RLT_SCAN_INTERVAL:-1.0}
         --wait-sleep-seconds ${RLT_WAIT_SLEEP_SECONDS:-1.0}
+        --no-wandb-enabled
         --wandb-project ${WANDB_PROJECT:-openpi-rlt-online}
         --wandb-run-name ${WANDB_RUN_NAME:-rlt_actor_critic_online}
         --redis-enabled
