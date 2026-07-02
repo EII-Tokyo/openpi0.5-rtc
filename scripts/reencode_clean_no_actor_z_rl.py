@@ -13,12 +13,11 @@ import numpy as np
 
 DEFAULT_REPLAY_ROOT = Path("/home/eii/data/openpi0.5-rtc-reward-learning/replay/rlt_key_regions_clean")
 DEFAULT_ROLLOUT_ROOT = Path("/home/eii/data/openpi0.5-rtc-reward-learning/rollouts/key_regions")
-DEFAULT_OUTPUT_ROOT = Path("/home/eii/data/openpi0.5-rtc-reward-learning/replay/rlt_key_regions_clean_z512_cam4")
+DEFAULT_OUTPUT_ROOT = Path("/home/eii/data/openpi0.5-rtc-reward-learning/replay/rlt_key_regions_clean_z2048_lower_right_4layer")
 DEFAULT_CHECKPOINT = Path(
-    "checkpoints/eii_rinse_11repo_cam4_fullft_rl_token_small_query/"
-    "rinse_11repo_rl_token_small_query_512_from_9000_20260615/9999"
+    "checkpoints/rlt_lower_right_rl_token_ablation_20260701/BEST/checkpoint"
 )
-DEFAULT_CONFIG = "eii_rinse_11repo_cam4_fullft_rl_token_small_query"
+DEFAULT_CONFIG = "eii_rinse_11repo_cam4_fullft_rl_token_lower_right_query_4layer"
 REPLAY_KEYS = (
     "z_rl",
     "proprio",
@@ -47,7 +46,7 @@ class ReencodeArgs:
     convert_bgr_to_rgb: bool = False
     prompt: str = "Twist off the bottle cap."
     dedupe: bool = True
-    require_camera: tuple[str, ...] = ("cam_low",)
+    require_camera: tuple[str, ...] = ("cam_low", "cam_right_wrist")
 
 
 @dataclasses.dataclass(frozen=True)
@@ -131,6 +130,8 @@ def rewrite_shard_z_rl(
     *,
     z_rl: np.ndarray,
     next_z_rl: np.ndarray,
+    proprio: np.ndarray | None = None,
+    next_proprio: np.ndarray | None = None,
     checkpoint_path: Path,
     config_name: str,
 ) -> None:
@@ -145,10 +146,23 @@ def rewrite_shard_z_rl(
         raise ValueError(f"z_rl shape {z_rl.shape} must match next_z_rl shape {next_z_rl.shape}")
     if int(z_rl.shape[0]) != int(arrays["z_rl"].shape[0]):
         raise ValueError(f"new z rows {z_rl.shape[0]} do not match shard rows {arrays['z_rl'].shape[0]}")
+    if (proprio is None) != (next_proprio is None):
+        raise ValueError("proprio and next_proprio must be provided together")
+    if proprio is not None and next_proprio is not None:
+        if proprio.ndim != 2 or next_proprio.ndim != 2:
+            raise ValueError("new proprio and next_proprio must have shape [N, proprio_dim]")
+        if proprio.shape != next_proprio.shape:
+            raise ValueError(f"proprio shape {proprio.shape} must match next_proprio shape {next_proprio.shape}")
+        if int(proprio.shape[0]) != int(arrays["proprio"].shape[0]):
+            raise ValueError(f"new proprio rows {proprio.shape[0]} do not match shard rows {arrays['proprio'].shape[0]}")
 
     previous_shape = list(arrays["z_rl"].shape)
+    previous_proprio_shape = list(arrays["proprio"].shape) if proprio is not None else None
     arrays["z_rl"] = np.asarray(z_rl, dtype=np.float32)
     arrays["next_z_rl"] = np.asarray(next_z_rl, dtype=np.float32)
+    if proprio is not None and next_proprio is not None:
+        arrays["proprio"] = np.asarray(proprio, dtype=np.float32)
+        arrays["next_proprio"] = np.asarray(next_proprio, dtype=np.float32)
     manifest.update(
         {
             "z_rl_source": "rl_token_reencoded",
@@ -158,6 +172,14 @@ def rewrite_shard_z_rl(
             "rl_token_config_name": config_name,
         }
     )
+    if previous_proprio_shape is not None:
+        manifest.update(
+            {
+                "proprio_source": "policy_reencoded",
+                "proprio_dim": int(proprio.shape[-1]),
+                "previous_proprio_shape": previous_proprio_shape,
+            }
+        )
     arrays["manifest"] = np.asarray(json.dumps(manifest, ensure_ascii=False, sort_keys=True))
     output_path.parent.mkdir(parents=True, exist_ok=True)
     tmp_path = output_path.with_suffix(output_path.suffix + ".tmp")
@@ -250,7 +272,11 @@ def reencode_clean_no_actor(args: ReencodeArgs) -> ReencodeSummary:
         try:
             manifest = load_manifest_from_npz(shard_path)
             rollout_dir = find_rollout_dir(args.rollout_root, manifest)
-            current_z, next_z = encoder.encode_shard(rollout_dir, manifest, clean_rows=_shard_rows(shard_path))
+            current_z, current_proprio, next_z, next_proprio = encoder.encode_shard(
+                rollout_dir,
+                manifest,
+                clean_rows=_shard_rows(shard_path),
+            )
             rel = shard_path.relative_to(args.replay_root)
             output_path = args.output_root / rel
             if output_path.exists() and not args.overwrite:
@@ -261,6 +287,8 @@ def reencode_clean_no_actor(args: ReencodeArgs) -> ReencodeSummary:
                 output_path,
                 z_rl=current_z,
                 next_z_rl=next_z,
+                proprio=current_proprio,
+                next_proprio=next_proprio,
                 checkpoint_path=args.checkpoint_path,
                 config_name=args.config_name,
             )
@@ -316,10 +344,16 @@ class RLTokenPolicyEncoder:
         self._policy = policy_config.create_trained_policy(cfg, checkpoint_path, default_prompt=prompt)
 
     def probe_one(self, rollout_dir: Path, manifest: dict[str, Any]) -> np.ndarray:
-        z, _ = self.encode_shard(rollout_dir, manifest, clean_rows=1)
+        z, _, _, _ = self.encode_shard(rollout_dir, manifest, clean_rows=1)
         return z[0]
 
-    def encode_shard(self, rollout_dir: Path, manifest: dict[str, Any], *, clean_rows: int) -> tuple[np.ndarray, np.ndarray]:
+    def encode_shard(
+        self,
+        rollout_dir: Path,
+        manifest: dict[str, Any],
+        *,
+        clean_rows: int,
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         qpos = _load_qpos(rollout_dir / "episode.hdf5")
         current_frames, next_frames = compute_replay_frame_indices(
             manifest,
@@ -327,12 +361,19 @@ class RLTokenPolicyEncoder:
             episode_frames=len(qpos),
         )
         video_reader = _VideoFrameReader(rollout_dir, convert_bgr_to_rgb=self._convert_bgr_to_rgb)
-        current_z = [self._encode_one(video_reader, qpos, int(frame)) for frame in current_frames]
-        next_z = [self._encode_one(video_reader, qpos, int(frame)) for frame in next_frames]
+        current = [self._encode_one(video_reader, qpos, int(frame)) for frame in current_frames]
+        nxt = [self._encode_one(video_reader, qpos, int(frame)) for frame in next_frames]
         video_reader.close()
-        return np.stack(current_z, axis=0).astype(np.float32), np.stack(next_z, axis=0).astype(np.float32)
+        current_z, current_proprio = zip(*current, strict=True)
+        next_z, next_proprio = zip(*nxt, strict=True)
+        return (
+            np.stack(current_z, axis=0).astype(np.float32),
+            np.stack(current_proprio, axis=0).astype(np.float32),
+            np.stack(next_z, axis=0).astype(np.float32),
+            np.stack(next_proprio, axis=0).astype(np.float32),
+        )
 
-    def _encode_one(self, video_reader: "_VideoFrameReader", qpos: np.ndarray, frame_index: int) -> np.ndarray:
+    def _encode_one(self, video_reader: "_VideoFrameReader", qpos: np.ndarray, frame_index: int) -> tuple[np.ndarray, np.ndarray]:
         images = video_reader.read_all(frame_index)
         obs = {
             "images": images,
@@ -342,7 +383,9 @@ class RLTokenPolicyEncoder:
         result = self._policy.infer(obs, use_rtc=False)
         if "z_rl" not in result:
             raise RuntimeError("policy inference did not return z_rl")
-        return np.asarray(result["z_rl"], dtype=np.float32)
+        if "state" not in result:
+            raise RuntimeError("policy inference did not return state/proprio")
+        return np.asarray(result["z_rl"], dtype=np.float32), np.asarray(result["state"], dtype=np.float32)
 
 
 class _VideoFrameReader:
@@ -354,38 +397,36 @@ class _VideoFrameReader:
     }
 
     def __init__(self, rollout_dir: Path, *, convert_bgr_to_rgb: bool) -> None:
-        import cv2
+        import av
 
-        self._cv2 = cv2
+        self._av = av
         self._convert_bgr_to_rgb = convert_bgr_to_rgb
-        self._captures = {}
+        self._paths = {}
         for camera, filename in self.CAMERA_FILES.items():
             path = rollout_dir / filename
             if not path.exists():
                 continue
-            capture = cv2.VideoCapture(str(path))
-            if not capture.isOpened():
-                raise RuntimeError(f"failed to open video {path}")
-            self._captures[camera] = capture
-        if "cam_high" not in self._captures:
+            self._paths[camera] = path
+        if "cam_high" not in self._paths:
             raise FileNotFoundError(f"{rollout_dir} is missing cam_high.mp4")
 
     def read_all(self, frame_index: int) -> dict[str, np.ndarray]:
-        return {camera: self.read(camera, frame_index) for camera in self._captures}
+        return {camera: self.read(camera, frame_index) for camera in self._paths}
 
     def read(self, camera: str, frame_index: int) -> np.ndarray:
-        capture = self._captures[camera]
-        capture.set(self._cv2.CAP_PROP_POS_FRAMES, int(frame_index))
-        ok, frame = capture.read()
-        if not ok:
-            raise RuntimeError(f"failed to read frame {frame_index} from {camera}")
-        if self._convert_bgr_to_rgb:
-            frame = self._cv2.cvtColor(frame, self._cv2.COLOR_BGR2RGB)
-        return np.asarray(frame, dtype=np.uint8)
+        path = self._paths[camera]
+        with self._av.open(str(path)) as container:
+            stream = container.streams.video[0]
+            stream.thread_type = "AUTO"
+            target = int(frame_index)
+            for index, frame in enumerate(container.decode(stream)):
+                if index == target:
+                    fmt = "rgb24" if self._convert_bgr_to_rgb else "bgr24"
+                    return np.asarray(frame.to_ndarray(format=fmt), dtype=np.uint8)
+        raise RuntimeError(f"failed to read frame {frame_index} from {camera}")
 
     def close(self) -> None:
-        for capture in self._captures.values():
-            capture.release()
+        return None
 
 
 def _load_qpos(path: Path) -> np.ndarray:
@@ -447,7 +488,7 @@ def run_probe(args: ReencodeArgs) -> None:
 def _parse_args() -> ReencodeArgs:
     parser = argparse.ArgumentParser(
         description=(
-            "Re-encode clean no-actor RLT replay shards with the verified cam4 512-dim RL Token checkpoint. "
+            "Re-encode clean no-actor RLT replay shards with the verified lower+right 4-layer RL Token checkpoint. "
             "Default mode only prints the plan. Use --probe-only for a one-sample VRAM test, and --execute "
             "only after confirming the probe is safe."
         )
@@ -476,8 +517,11 @@ def _parse_args() -> ReencodeArgs:
     parser.add_argument(
         "--require-camera",
         action="append",
-        default=["cam_low"],
-        help="Camera key that must be present in the policy training input. Repeatable. Default: cam_low.",
+        default=["cam_low", "cam_right_wrist"],
+        help=(
+            "Camera key that must be present in the policy training input. Repeatable. "
+            "Default: cam_low and cam_right_wrist."
+        ),
     )
     parser.add_argument(
         "--allow-missing-cam-low",

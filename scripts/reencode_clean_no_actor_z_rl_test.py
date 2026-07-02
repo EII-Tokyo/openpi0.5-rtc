@@ -13,14 +13,14 @@ from scripts.reencode_clean_no_actor_z_rl import rewrite_shard_z_rl
 from scripts.reencode_clean_no_actor_z_rl import validate_required_cameras
 
 
-def test_default_rl_token_checkpoint_is_cam4_small_query():
+def test_default_rl_token_checkpoint_is_lower_right_4layer():
     assert "cam3" not in str(reencode_clean_no_actor_z_rl.DEFAULT_CHECKPOINT)
     assert "cam3" not in reencode_clean_no_actor_z_rl.DEFAULT_CONFIG
-    assert "eii_rinse_11repo_cam4_fullft_rl_token_small_query" in str(
+    assert "rlt_lower_right_rl_token_ablation_20260701" in str(
         reencode_clean_no_actor_z_rl.DEFAULT_CHECKPOINT
     )
-    assert reencode_clean_no_actor_z_rl.DEFAULT_CONFIG == "eii_rinse_11repo_cam4_fullft_rl_token_small_query"
-    assert "z512_cam4" in str(reencode_clean_no_actor_z_rl.DEFAULT_OUTPUT_ROOT)
+    assert reencode_clean_no_actor_z_rl.DEFAULT_CONFIG == "eii_rinse_11repo_cam4_fullft_rl_token_lower_right_query_4layer"
+    assert "z2048_lower_right_4layer" in str(reencode_clean_no_actor_z_rl.DEFAULT_OUTPUT_ROOT)
 
 
 def _write_replay_shard(
@@ -127,6 +127,37 @@ def test_rewrite_shard_z_rl_replaces_only_token_arrays_and_updates_manifest(tmp_
     assert manifest["previous_z_rl_shape"] == [4, 512]
     assert manifest["rl_token_checkpoint_path"] == "/checkpoint/12000"
     assert manifest["rl_token_config_name"] == "demo_config"
+
+
+def test_rewrite_shard_z_rl_can_replace_matching_proprio_arrays(tmp_path):
+    input_path = tmp_path / "input.npz"
+    output_path = tmp_path / "out" / "input.npz"
+    _write_replay_shard(input_path)
+    new_z = np.zeros((4, 2048), dtype=np.float32)
+    new_next_z = np.ones((4, 2048), dtype=np.float32)
+    new_proprio = np.full((4, 32), 4.0, dtype=np.float32)
+    new_next_proprio = np.full((4, 32), 5.0, dtype=np.float32)
+
+    rewrite_shard_z_rl(
+        input_path,
+        output_path,
+        z_rl=new_z,
+        next_z_rl=new_next_z,
+        proprio=new_proprio,
+        next_proprio=new_next_proprio,
+        checkpoint_path=Path("/checkpoint/12000"),
+        config_name="demo_config",
+    )
+
+    with np.load(output_path, allow_pickle=False) as after:
+        np.testing.assert_allclose(after["z_rl"], new_z)
+        np.testing.assert_allclose(after["next_z_rl"], new_next_z)
+        np.testing.assert_allclose(after["proprio"], new_proprio)
+        np.testing.assert_allclose(after["next_proprio"], new_next_proprio)
+        manifest = json.loads(str(after["manifest"].item()))
+
+    assert manifest["proprio_source"] == "policy_reencoded"
+    assert manifest["previous_proprio_shape"] == [4, 32]
 
 
 def test_dedupe_no_actor_shards_keeps_latest_clean_version_per_source(tmp_path):
