@@ -269,14 +269,14 @@ def test_offline_trainer_actor_gate_uses_critic_holdout_threshold():
     args = train_rlt_offline.Args(
         replay_dir="/tmp/replay",
         training_stage="critic_actor",
-        critic_auc_threshold=0.70,
+        critic_propagation_threshold=0.0,
         require_positive_q_gap=True,
     )
 
     assert not train_rlt_offline._critic_gate_allows_actor(args, None)
-    assert not train_rlt_offline._critic_gate_allows_actor(args, {"auc": 0.69, "q_gap": 0.2})
-    assert not train_rlt_offline._critic_gate_allows_actor(args, {"auc": 0.71, "q_gap": 0.0})
-    assert train_rlt_offline._critic_gate_allows_actor(args, {"auc": 0.71, "q_gap": 0.2})
+    assert not train_rlt_offline._critic_gate_allows_actor(args, {"q_propagation_score": -0.01, "q_gap": 0.2})
+    assert not train_rlt_offline._critic_gate_allows_actor(args, {"q_propagation_score": 0.10, "q_gap": 0.0})
+    assert train_rlt_offline._critic_gate_allows_actor(args, {"q_propagation_score": 0.10, "q_gap": 0.2})
 
 
 def test_offline_actor_only_uses_zero_critic_learning_rate():
@@ -486,7 +486,7 @@ def test_online_round_controller_waits_for_new_shards_and_budgets_steps():
     assert controller.phase == "critic_candidate_training"
     assert [controller.step_allocation()["actor_enabled"] for _ in range(3)] == [False, False, False]
     assert controller.phase == "critic_eval"
-    assert controller.accept_critic({"auc": 0.75, "q_gap": 0.2})
+    assert controller.accept_critic({"q_propagation_score": 0.10, "q_gap": 0.2})
     assert controller.phase == "actor_candidate_training"
     assert [controller.step_allocation()["actor_enabled"] for _ in range(2)] == [True, True]
     assert controller.phase == "actor_eval"
@@ -522,7 +522,7 @@ def test_online_round_controller_defaults_to_manual_actor_start_after_critic_acc
     assert controller.maybe_start_round(_stats(num_shards=10))
     controller.step_allocation()
 
-    assert controller.accept_critic({"auc": 0.75, "q_gap": 0.2})
+    assert controller.accept_critic({"q_propagation_score": 0.10, "q_gap": 0.2})
     assert controller.phase == "idle_wait_new_data"
     assert controller.actor_steps_remaining == 0
     assert controller.last_committed_shards == 10
@@ -538,26 +538,26 @@ def test_online_round_controller_rejects_unstable_critic_and_keeps_old_best():
         auto_train_actor=True,
         critic_updates_per_round=1,
         actor_updates_per_round=1,
-        critic_auc_min=0.70,
-        critic_max_auc_drop=0.02,
+        critic_propagation_min=0.0,
+        critic_max_propagation_drop=0.02,
     )
     assert controller.maybe_start_round(_stats(num_shards=10))
     controller.step_allocation()
 
-    assert not controller.accept_critic({"auc": 0.69, "q_gap": 0.2})
+    assert not controller.accept_critic({"q_propagation_score": -0.01, "q_gap": 0.2})
     assert controller.phase == "idle_wait_new_data"
-    assert controller.best_critic_auc is None
-    assert controller.last_rejection_reason == "critic_auc_below_min"
+    assert controller.best_critic_propagation_score is None
+    assert controller.last_rejection_reason == "critic_propagation_below_min"
 
     assert controller.maybe_start_round(_stats(num_shards=20))
     controller.step_allocation()
-    assert controller.accept_critic({"auc": 0.80, "q_gap": 0.3})
+    assert controller.accept_critic({"q_propagation_score": 0.10, "q_gap": 0.3})
     controller.phase = "idle_wait_new_data"
     assert controller.maybe_start_round(_stats(num_shards=30))
     controller.step_allocation()
-    assert not controller.accept_critic({"auc": 0.75, "q_gap": 0.3})
-    assert controller.best_critic_auc == 0.80
-    assert controller.last_rejection_reason == "critic_auc_regressed"
+    assert not controller.accept_critic({"q_propagation_score": 0.07, "q_gap": 0.3})
+    assert controller.best_critic_propagation_score == 0.10
+    assert controller.last_rejection_reason == "critic_propagation_regressed"
 
 
 def test_online_round_controller_accepts_holdout_actor_metric_keys():
