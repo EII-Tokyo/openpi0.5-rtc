@@ -53,6 +53,8 @@ class Args:
     online_actor_updates_per_round: int = 300
     online_critic_auc_min: float = 0.70
     online_critic_max_auc_drop: float = 0.02
+    online_critic_propagation_min: float = 0.0
+    online_critic_max_propagation_drop: float = 0.02
     online_require_positive_q_gap: bool = True
     online_actor_max_delta_norm: float = 0.09
     online_actor_min_q_advantage: float = 0.0
@@ -123,6 +125,8 @@ class OnlineSafetyController:
     actor_updates_per_round: int = 300
     critic_auc_min: float = 0.70
     critic_max_auc_drop: float = 0.02
+    critic_propagation_min: float = 0.0
+    critic_max_propagation_drop: float = 0.02
     require_positive_q_gap: bool = True
     actor_max_delta_norm: float = 0.09
     actor_min_q_advantage: float = 0.0
@@ -145,6 +149,7 @@ class OnlineSafetyController:
     critic_steps_remaining: int = 0
     actor_steps_remaining: int = 0
     best_critic_auc: float | None = None
+    best_critic_propagation_score: float | None = None
     best_critic_q_gap: float | None = None
     last_rejection_reason: str | None = None
     beta: float = dataclasses.field(init=False)
@@ -213,6 +218,7 @@ class OnlineSafetyController:
         accepted, reason = self._critic_decision(metric)
         if accepted:
             self.best_critic_auc = _finite_float(metric.get("auc")) if metric else None
+            self.best_critic_propagation_score = _finite_float(metric.get("q_propagation_score")) if metric else None
             self.best_critic_q_gap = _finite_float(metric.get("q_gap")) if metric else None
             if not self.auto_train_actor:
                 self.actor_steps_remaining = 0
@@ -278,6 +284,7 @@ class OnlineSafetyController:
             "online_critic_steps_remaining": self.critic_steps_remaining,
             "online_actor_steps_remaining": self.actor_steps_remaining,
             "online_best_critic_auc": self.best_critic_auc,
+            "online_best_critic_propagation_score": self.best_critic_propagation_score,
             "online_best_critic_q_gap": self.best_critic_q_gap,
             "online_rejection_reason": self.last_rejection_reason,
             "online_target_delta_norm": self.target_delta_norm,
@@ -286,14 +293,17 @@ class OnlineSafetyController:
     def _critic_decision(self, metric: dict | None) -> tuple[bool, str | None]:
         if metric is None:
             return False, "missing_critic_metric"
-        auc = _finite_float(metric.get("auc"))
+        propagation = _finite_float(metric.get("q_propagation_score"))
         q_gap = _finite_float(metric.get("q_gap"))
-        if auc is None:
-            return False, "missing_critic_auc"
-        if auc < self.critic_auc_min:
-            return False, "critic_auc_below_min"
-        if self.best_critic_auc is not None and auc < self.best_critic_auc - self.critic_max_auc_drop:
-            return False, "critic_auc_regressed"
+        if propagation is None:
+            return False, "missing_critic_propagation"
+        if propagation < self.critic_propagation_min:
+            return False, "critic_propagation_below_min"
+        if (
+            self.best_critic_propagation_score is not None
+            and propagation < self.best_critic_propagation_score - self.critic_max_propagation_drop
+        ):
+            return False, "critic_propagation_regressed"
         if self.require_positive_q_gap and (q_gap is None or q_gap <= 0.0):
             return False, "critic_q_gap_not_positive"
         return True, None
@@ -473,6 +483,8 @@ class RedisControlSubscriber:
                 for key in (
                     "online_critic_auc_min",
                     "online_critic_max_auc_drop",
+                    "online_critic_propagation_min",
+                    "online_critic_max_propagation_drop",
                     "online_actor_max_delta_norm",
                     "online_actor_min_q_advantage",
                     "online_beta_initial",
@@ -844,6 +856,7 @@ def _build_metrics_payload(
         if reduced.get("online_actor_steps_remaining") is None
         else int(reduced.get("online_actor_steps_remaining")),
         "online_best_critic_auc": _json_float(reduced.get("online_best_critic_auc")),
+        "online_best_critic_propagation_score": _json_float(reduced.get("online_best_critic_propagation_score")),
         "online_best_critic_q_gap": _json_float(reduced.get("online_best_critic_q_gap")),
         "online_rejection_reason": reduced.get("online_rejection_reason"),
         "online_target_delta_norm": _json_float(reduced.get("online_target_delta_norm")),
@@ -990,6 +1003,8 @@ def _build_online_controller(args: Args) -> OnlineSafetyController:
         actor_updates_per_round=args.online_actor_updates_per_round,
         critic_auc_min=args.online_critic_auc_min,
         critic_max_auc_drop=args.online_critic_max_auc_drop,
+        critic_propagation_min=args.online_critic_propagation_min,
+        critic_max_propagation_drop=args.online_critic_max_propagation_drop,
         require_positive_q_gap=args.online_require_positive_q_gap,
         actor_max_delta_norm=args.online_actor_max_delta_norm,
         actor_min_q_advantage=args.online_actor_min_q_advantage,
@@ -1015,6 +1030,8 @@ def _update_online_controller_config(controller: OnlineSafetyController, control
         "online_actor_updates_per_round": ("actor_updates_per_round", int),
         "online_critic_auc_min": ("critic_auc_min", float),
         "online_critic_max_auc_drop": ("critic_max_auc_drop", float),
+        "online_critic_propagation_min": ("critic_propagation_min", float),
+        "online_critic_max_propagation_drop": ("critic_max_propagation_drop", float),
         "online_actor_max_delta_norm": ("actor_max_delta_norm", float),
         "online_actor_min_q_advantage": ("actor_min_q_advantage", float),
         "online_beta_min": ("beta_min", float),

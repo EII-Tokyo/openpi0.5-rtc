@@ -158,6 +158,8 @@ def test_rewrite_shard_z_rl_can_replace_matching_proprio_arrays(tmp_path):
 
     assert manifest["proprio_source"] == "policy_reencoded"
     assert manifest["previous_proprio_shape"] == [4, 32]
+    assert manifest["replay_state_grain"] == "paper_subsampled_anchor"
+    assert manifest["subsampled_transition_semantics"] == "x_i_action_i_to_i_plus_c_next_x_i_plus_c"
 
 
 def test_dedupe_no_actor_shards_keeps_latest_clean_version_per_source(tmp_path):

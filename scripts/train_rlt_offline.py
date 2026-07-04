@@ -38,6 +38,7 @@ class Args:
     critic_burn_in_steps: int = 1_000
     training_stage: str = "critic_actor"
     critic_auc_threshold: float | None = None
+    critic_propagation_threshold: float | None = None
     require_positive_q_gap: bool = False
     actor_min_replay_samples: int = 0
     actor_min_replay_shards: int = 0
@@ -54,6 +55,7 @@ class Args:
     critic_lr: float = 3e-4
     beta: float = 10.0
     target_actor_noise: bool = True
+    critic_target_action_mode: str = "target_actor"
     actor_loss_mode: str = "td3"
     critic_loss_mode: str = "td3"
     conservative_alpha: float = 0.0
@@ -63,6 +65,7 @@ class Args:
     awbc_max_action_delta_norm: float = 2.0
     train_action_horizon: int | None = 10
     expected_replay_action_horizon: int | None = 10
+    normalize_z_rl: bool = False
     wandb_enabled: bool = True
     wandb_project: str = "openpi-rlt-offline"
     wandb_run_name: str = "rlt_actor_critic_offline"
@@ -90,6 +93,7 @@ def _build_replay_store(args: Args) -> rlt_replay_store.RLTReplayStore:
         sample_action_horizon=args.train_action_horizon,
         segment_db_path=args.segment_db_path,
         manifest_path=args.manifest_path,
+        normalize_z_rl=args.normalize_z_rl,
     )
 
 
@@ -137,6 +141,7 @@ def _build_train_store(args: Args, train_manifest: pathlib.Path | None) -> rlt_r
         recursive=args.recursive_scan,
         sample_action_horizon=args.train_action_horizon,
         manifest_path=train_manifest,
+        normalize_z_rl=args.normalize_z_rl,
     )
 
 
@@ -158,6 +163,7 @@ def _build_training_config(
         policy_delay=args.policy_delay,
         actor_publish_interval=args.actor_publish_interval,
         target_actor_noise=args.target_actor_noise,
+        critic_target_action_mode=args.critic_target_action_mode,
         actor_loss_mode=args.actor_loss_mode,
         critic_loss_mode=args.critic_loss_mode,
         conservative_alpha=args.conservative_alpha,
@@ -174,10 +180,14 @@ def _validate_training_stage(stage: str) -> None:
 
 
 def _critic_gate_allows_actor(args: Args, metric: dict | None) -> bool:
-    if args.critic_auc_threshold is None and not args.require_positive_q_gap:
+    if args.critic_auc_threshold is None and args.critic_propagation_threshold is None and not args.require_positive_q_gap:
         return True
     if metric is None:
         return False
+    if args.critic_propagation_threshold is not None:
+        propagation = metric.get("q_propagation_score")
+        if propagation is None or float(propagation) < float(args.critic_propagation_threshold):
+            return False
     if args.critic_auc_threshold is not None:
         auc = metric.get("auc")
         if auc is None or float(auc) < float(args.critic_auc_threshold):
@@ -347,6 +357,7 @@ def main(args: Args) -> None:
         replay_shape=replay_shape,
         train_shape=train_shape,
         replay_stats=store.stats,
+        z_rl_normalization=store.z_rl_normalization,
         source_script="scripts/train_rlt_offline.py",
     )
     rlt_checkpoint_io.save_training_checkpoint(state, args.output_dir, 0, store)
@@ -401,6 +412,7 @@ def main(args: Args) -> None:
                     replay_shape=replay_shape,
                     train_shape=train_shape,
                     replay_stats=store.stats,
+                    z_rl_normalization=store.z_rl_normalization,
                     source_script="scripts/train_rlt_offline.py",
                 )
                 rlt_checkpoint_io.atomic_write_text(
@@ -418,6 +430,7 @@ def main(args: Args) -> None:
                     replay_shape=replay_shape,
                     train_shape=train_shape,
                     replay_stats=store.stats,
+                    z_rl_normalization=store.z_rl_normalization,
                     source_script="scripts/train_rlt_offline.py",
                 )
                 rlt_checkpoint_io.atomic_write_text(

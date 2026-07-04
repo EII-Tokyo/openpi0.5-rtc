@@ -144,6 +144,7 @@ def save_actor_for_inference(
     replay_shape: rlt_replay_store.ReplayShape | None = None,
     train_shape: rlt_replay_store.ReplayShape | None = None,
     replay_stats: rlt_replay_store.ReplayStats | None = None,
+    z_rl_normalization: rlt_replay_store.ZRLNormalization | None = None,
     source_script: str = "scripts/train_rlt_online.py",
 ) -> pathlib.Path:
     actor_dir = output_dir / "inference_actor" / f"{step:08d}"
@@ -184,6 +185,7 @@ def save_actor_for_inference(
                 "replay_shape": _shape_metadata(replay_shape),
                 "train_shape": _shape_metadata(train_shape),
                 "replay_stats": _stats_metadata(replay_stats),
+                "z_rl_normalization": _z_rl_normalization_metadata(z_rl_normalization),
             },
             indent=2,
             sort_keys=True,
@@ -252,6 +254,15 @@ def _shape_metadata(shape: rlt_replay_store.ReplayShape | None) -> dict[str, int
 
 def _stats_metadata(stats: rlt_replay_store.ReplayStats | None) -> dict[str, int] | None:
     return None if stats is None else dataclasses.asdict(stats)
+
+
+def _z_rl_normalization_metadata(stats: rlt_replay_store.ZRLNormalization | None) -> dict[str, list[float]] | None:
+    if stats is None:
+        return None
+    return {
+        "mean": np.asarray(stats.mean, dtype=np.float32).tolist(),
+        "std": np.asarray(stats.std, dtype=np.float32).tolist(),
+    }
 
 
 def _to_msgpackable_state(value):

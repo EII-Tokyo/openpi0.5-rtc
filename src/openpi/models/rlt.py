@@ -151,10 +151,21 @@ class RLTActorCritic(nnx.Module):
 
     def soft_update_targets(self, tau: float | None = None) -> None:
         """Polyak update target networks: target <- tau * online + (1 - tau) * target."""
+        self.soft_update_target_actor(tau)
+        self.soft_update_target_critic(tau)
+
+    def soft_update_target_actor(self, tau: float | None = None) -> None:
+        """Polyak update target actor: target <- tau * online + (1 - tau) * target."""
         tau = self.config.tau if tau is None else tau
         if not 0.0 <= tau <= 1.0:
             raise ValueError("tau must be in [0, 1]")
         nnx.update(self.target_actor, polyak_update_state(nnx.state(self.actor), nnx.state(self.target_actor), tau))
+
+    def soft_update_target_critic(self, tau: float | None = None) -> None:
+        """Polyak update target critic: target <- tau * online + (1 - tau) * target."""
+        tau = self.config.tau if tau is None else tau
+        if not 0.0 <= tau <= 1.0:
+            raise ValueError("tau must be in [0, 1]")
         nnx.update(self.target_critic, polyak_update_state(nnx.state(self.critic), nnx.state(self.target_critic), tau))
 
     def target_action(

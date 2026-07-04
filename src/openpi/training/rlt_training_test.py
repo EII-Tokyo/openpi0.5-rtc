@@ -31,6 +31,18 @@ def _flatten_actor_params(state: rlt_training.RLTTrainState) -> jnp.ndarray:
     return jnp.concatenate([jnp.ravel(value.value) for value in actor_params.values()])
 
 
+def _flatten_critic_params(state: rlt_training.RLTTrainState) -> jnp.ndarray:
+    model = rlt_training.nnx.merge(state.model_def, state.params)
+    critic_params = rlt_training.nnx.state(model.critic).flat_state()
+    return jnp.concatenate([jnp.ravel(value.value) for value in critic_params.values()])
+
+
+def _flatten_target_critic_params(state: rlt_training.RLTTrainState) -> jnp.ndarray:
+    model = rlt_training.nnx.merge(state.model_def, state.params)
+    target_critic_params = rlt_training.nnx.state(model.target_critic).flat_state()
+    return jnp.concatenate([jnp.ravel(value.value) for value in target_critic_params.values()])
+
+
 def _make_awbc_config() -> rlt_training.RLTTrainingConfig:
     return rlt_training.RLTTrainingConfig(
         model=rlt.RLTConfig(
@@ -130,10 +142,44 @@ def test_rlt_train_step_actor_update_samples_policy_actions():
     assert not jnp.allclose(_flatten_actor_params(state_a), _flatten_actor_params(state_b))
 
 
+def test_rlt_train_step_updates_target_critic_without_actor_update():
+    config = dataclasses.replace(_make_config(), policy_delay=10_000)
+    state = rlt_training.init_train_state(config, jax.random.key(0))
+    batch = _make_batch()
+    critic_before = _flatten_critic_params(state)
+    target_critic_before = _flatten_target_critic_params(state)
+
+    state, info = rlt_training.train_step(state, batch, jax.random.key(1))
+
+    assert not bool(info["actor_updated"])
+    assert not jnp.allclose(_flatten_critic_params(state), critic_before)
+    assert not jnp.allclose(_flatten_target_critic_params(state), target_critic_before)
+
+
 def test_rlt_training_config_samples_target_actor_by_default():
     config = rlt_training.RLTTrainingConfig()
 
     assert config.target_actor_noise is True
+    assert config.critic_target_action_mode == "target_actor"
+
+
+def test_rlt_train_step_can_bootstrap_from_reference_action_instead_of_target_actor():
+    config = dataclasses.replace(
+        _make_config(),
+        target_actor_noise=False,
+        critic_target_action_mode="reference_action",
+        policy_delay=10_000,
+    )
+    state = rlt_training.init_train_state(config, jax.random.key(0))
+    batch = _make_batch()
+    model = rlt_training.nnx.merge(state.model_def, state.params)
+    next_q_min = model.target_critic.min_q(batch.next_x, batch.next_reference_action)
+    expected_target = rlt.td3_target(batch.reward_seq, batch.done, next_q_min, gamma=model.config.gamma)
+
+    _, info = rlt_training.train_step(state, batch, jax.random.key(1))
+
+    assert jnp.allclose(info["target_q_mean"], jnp.mean(expected_target))
+    assert info["critic_target_action_mode"] == rlt_training.CRITIC_TARGET_ACTION_MODE_REFERENCE_ACTION
 
 
 def test_make_replay_batch_adds_discounted_reference_value():

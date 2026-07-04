@@ -83,6 +83,32 @@ def test_rlt_replay_store_loads_committed_shards_and_samples(tmp_path):
     assert bool(np.any(~np.asarray(batch.episode_success)))
 
 
+def test_rlt_replay_store_can_standardize_z_rl_without_touching_actions(tmp_path):
+    shards_dir = tmp_path / "shards"
+    shards_dir.mkdir()
+    low = _arrays(4, reward=1.0)
+    high = _arrays(4, reward=0.0)
+    low["z_rl"] = np.ones((4, 4), dtype=np.float32)
+    low["next_z_rl"] = np.ones((4, 4), dtype=np.float32) * 2.0
+    high["z_rl"] = np.ones((4, 4), dtype=np.float32) * 3.0
+    high["next_z_rl"] = np.ones((4, 4), dtype=np.float32) * 4.0
+    np.savez(shards_dir / "low.npz", **low)
+    np.savez(shards_dir / "high.npz", **high)
+
+    store = rlt_replay_store.RLTReplayStore(tmp_path, normalize_z_rl=True)
+    store.scan()
+
+    assert store.z_rl_normalization is not None
+    np.testing.assert_allclose(store.z_rl_normalization.mean, np.full((4,), 2.0, dtype=np.float32))
+    np.testing.assert_allclose(store.z_rl_normalization.std, np.full((4,), 1.0, dtype=np.float32))
+    batch = store.sample_batch(np.random.default_rng(0), batch_size=8)
+    z_part = np.asarray(batch.x)[:, :4]
+    next_z_part = np.asarray(batch.next_x)[:, :4]
+    assert set(np.unique(z_part).round(6).tolist()).issubset({-1.0, 1.0})
+    assert set(np.unique(next_z_part).round(6).tolist()).issubset({0.0, 2.0})
+    np.testing.assert_allclose(np.asarray(batch.action), np.ones((8, 3, 2), dtype=np.float32))
+
+
 def test_rlt_replay_store_rejects_invalid_shards_and_loads_new_shards(tmp_path):
     shards_dir = tmp_path / "shards"
     shards_dir.mkdir()

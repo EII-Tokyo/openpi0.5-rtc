@@ -51,6 +51,12 @@ class ReplayStats:
     bad_shards: int
 
 
+@dataclasses.dataclass(frozen=True)
+class ZRLNormalization:
+    mean: np.ndarray
+    std: np.ndarray
+
+
 @dataclasses.dataclass
 class _LoadedShard:
     info: ReplayShardInfo
@@ -73,6 +79,7 @@ class RLTReplayStore:
         sample_action_horizon: int | None = None,
         segment_db_path: pathlib.Path | str | None = None,
         manifest_path: pathlib.Path | str | None = None,
+        normalize_z_rl: bool = False,
     ):
         if sample_action_horizon is not None and sample_action_horizon <= 0:
             raise ValueError("sample_action_horizon must be positive when provided")
@@ -82,6 +89,8 @@ class RLTReplayStore:
         self._sample_action_horizon = sample_action_horizon
         self._segment_db_path = None if segment_db_path is None else pathlib.Path(segment_db_path)
         self._manifest_path = None if manifest_path is None else pathlib.Path(manifest_path)
+        self._normalize_z_rl = normalize_z_rl
+        self._z_rl_normalization: ZRLNormalization | None = None
         self._shards: list[_LoadedShard] = []
         self._loaded_paths: set[pathlib.Path] = set()
         self._bad_paths: dict[pathlib.Path, str] = {}
@@ -115,6 +124,10 @@ class RLTReplayStore:
     def loaded_paths(self) -> tuple[pathlib.Path, ...]:
         return tuple(shard.info.path for shard in self._shards)
 
+    @property
+    def z_rl_normalization(self) -> ZRLNormalization | None:
+        return self._z_rl_normalization
+
     def scan(self) -> list[ReplayShardInfo]:
         """Discover and load newly committed shards.
 
@@ -137,6 +150,7 @@ class RLTReplayStore:
             self._append_shard(shard)
             added.append(shard.info)
         if added:
+            self._refresh_z_rl_normalization()
             logging.info(
                 "Loaded %d new RLT replay shard(s), replay_size=%d",
                 len(added),
@@ -165,6 +179,7 @@ class RLTReplayStore:
             raise ValueError("Cannot sample from an empty RLT replay store.")
         indices = rng.integers(0, self._replay_size, size=batch_size)
         arrays = self._slice_sample_horizon(self._gather(indices))
+        arrays = self._standardize_z_arrays(arrays)
         return rlt_training.make_replay_batch(
             z_rl=jnp.asarray(arrays["z_rl"]),
             proprio=jnp.asarray(arrays["proprio"]),
@@ -232,6 +247,7 @@ class RLTReplayStore:
                 self._loaded_paths = set()
                 self._replay_size = 0
                 self._shape = None
+                self._refresh_z_rl_normalization()
             return
         if self._loaded_paths.issubset(accepted):
             return
@@ -239,6 +255,7 @@ class RLTReplayStore:
         self._loaded_paths = {shard.info.path for shard in self._shards}
         self._replay_size = sum(shard.info.num_transitions for shard in self._shards)
         self._shape = self._shards[0].arrays and _shape_from_arrays(self._shards[0].arrays) if self._shards else None
+        self._refresh_z_rl_normalization()
 
     def _load_shard(self, path: pathlib.Path) -> _LoadedShard:
         with np.load(path) as data:
@@ -282,9 +299,14 @@ class RLTReplayStore:
     def _trim_oldest_if_needed(self) -> None:
         if self._max_replay_samples is None:
             return
+        removed_any = False
         while self._shards and self._replay_size - self._shards[0].info.num_transitions >= self._max_replay_samples:
             removed = self._shards.pop(0)
             self._replay_size -= removed.info.num_transitions
+            removed_any = True
+        if removed_any:
+            self._loaded_paths = {shard.info.path for shard in self._shards}
+            self._refresh_z_rl_normalization()
 
     def _gather(self, indices: np.ndarray) -> dict[str, np.ndarray]:
         cumulative = np.cumsum([shard.info.num_transitions for shard in self._shards])
@@ -308,6 +330,26 @@ class RLTReplayStore:
         concatenated = {key: np.concatenate(value, axis=0) for key, value in pieces.items()}
         restore_order = np.argsort(np.concatenate(order))
         return {key: value[restore_order] for key, value in concatenated.items()}
+
+    def _refresh_z_rl_normalization(self) -> None:
+        if not self._normalize_z_rl or not self._shards:
+            self._z_rl_normalization = None
+            return
+        z_rl = np.concatenate([shard.arrays["z_rl"] for shard in self._shards], axis=0).astype(np.float32)
+        mean = np.mean(z_rl, axis=0, dtype=np.float64).astype(np.float32)
+        std = np.std(z_rl, axis=0, dtype=np.float64).astype(np.float32)
+        std = np.where(std < 1e-6, 1.0, std).astype(np.float32)
+        self._z_rl_normalization = ZRLNormalization(mean=mean, std=std)
+
+    def _standardize_z_arrays(self, arrays: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
+        if self._z_rl_normalization is None:
+            return arrays
+        normalized = dict(arrays)
+        mean = self._z_rl_normalization.mean
+        std = self._z_rl_normalization.std
+        normalized["z_rl"] = ((arrays["z_rl"].astype(np.float32) - mean) / std).astype(np.float32)
+        normalized["next_z_rl"] = ((arrays["next_z_rl"].astype(np.float32) - mean) / std).astype(np.float32)
+        return normalized
 
 
 def _shape_from_arrays(arrays: dict[str, np.ndarray]) -> ReplayShape:

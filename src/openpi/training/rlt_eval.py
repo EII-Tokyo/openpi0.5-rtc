@@ -244,6 +244,7 @@ def evaluate_holdout_checkpoints(
         skipped.extend(checkpoint_skipped)
         if arrays is None or not rows:
             raise RuntimeError(f"No holdout rows could be evaluated for checkpoint {checkpoint_dir}")
+        arrays = apply_z_rl_normalization(arrays, metadata)
         scored_rows = score_holdout_rows(
             arrays,
             rows,
@@ -263,6 +264,7 @@ def evaluate_holdout_checkpoints(
         if best_checkpoint_metric(metrics) is metric:
             best_rows = scored_rows
 
+    attach_q_propagation_metrics(metrics, all_transition_rows)
     stability_warning = _q_gap_unstable(metrics)
     for metric in metrics:
         decision = judge_critic_usability(
@@ -291,10 +293,11 @@ def evaluate_holdout_checkpoints(
         best_step = best["step"]
         best_rows = [row for row in all_transition_rows if row["checkpoint_step"] == best_step]
     write_metric_reports(metrics, output_dir)
+    write_transition_reports(all_transition_rows, output_dir)
     write_best_checkpoint(best, output_dir)
     write_best_actor_checkpoint(best_actor_metric(metrics), output_dir)
     write_markdown_report(metrics, best, output_dir, num_holdout_transitions=len(best_rows), skipped=skipped)
-    write_plots(metrics, best_rows, output_dir)
+    write_plots(metrics, best_rows, all_transition_rows, output_dir)
     return HoldoutEvalResult(metrics=metrics, best_metric=best, per_transition_rows=all_transition_rows, skipped=skipped)
 
 
@@ -315,6 +318,25 @@ def load_inference_modules(actor_dir: pathlib.Path) -> tuple[rlt.RLTConfig, rlt.
         actor_state.replace_by_pure_dict(pure_actor_state)
         nnx.update(actor, actor_state)
     return config, critic, actor, metadata
+
+
+def apply_z_rl_normalization(arrays: dict[str, np.ndarray], metadata: dict[str, Any]) -> dict[str, np.ndarray]:
+    stats = metadata.get("z_rl_normalization")
+    if not stats:
+        return arrays
+    mean = np.asarray(stats["mean"], dtype=np.float32)
+    std = np.asarray(stats["std"], dtype=np.float32)
+    if mean.ndim != 1 or std.ndim != 1 or mean.shape != std.shape:
+        raise ValueError(f"Invalid z_rl_normalization metadata shapes: mean={mean.shape}, std={std.shape}")
+    if arrays["z_rl"].shape[-1] != mean.shape[0]:
+        raise ValueError(
+            f"z_rl dim {arrays['z_rl'].shape[-1]} does not match normalization dim {mean.shape[0]}"
+        )
+    std = np.where(std < 1e-6, 1.0, std).astype(np.float32)
+    normalized = dict(arrays)
+    normalized["z_rl"] = ((arrays["z_rl"].astype(np.float32) - mean) / std).astype(np.float32)
+    normalized["next_z_rl"] = ((arrays["next_z_rl"].astype(np.float32) - mean) / std).astype(np.float32)
+    return normalized
 
 
 def load_holdout_arrays(
@@ -513,16 +535,65 @@ def best_checkpoint_metric(metrics: list[dict[str, Any]]) -> dict[str, Any] | No
     if not metrics:
         return None
 
-    def key(metric: dict[str, Any]) -> tuple[float, float, float, float]:
+    def key(metric: dict[str, Any]) -> tuple[float, float, float, float, float, float]:
+        raw_propagation = metric.get("q_propagation_score")
+        has_propagation = 1.0 if raw_propagation is not None and np.isfinite(float(raw_propagation)) else 0.0
+        propagation = _finite_or(raw_propagation, -1e9)
         auc = _finite_or(metric.get("auc"), -1.0)
         q_gap = _finite_or(metric.get("q_gap"), -1e9)
         loss = _finite_or(metric.get("holdout_bellman_loss"), 1e9)
         advantage_gap = _finite_or(metric.get("success_actor_advantage_mean"), 0.0) - _finite_or(
             metric.get("failure_actor_advantage_mean"), 0.0
         )
-        return (auc, q_gap, -loss, advantage_gap)
+        return (has_propagation, propagation, q_gap, -loss, advantage_gap, auc)
 
     return max(metrics, key=key)
+
+
+def attach_q_propagation_metrics(metrics: list[dict[str, Any]], rows: list[dict[str, Any]]) -> None:
+    baseline_by_transition: dict[tuple[str, int], float] = {}
+    for row in sorted(rows, key=lambda item: int(item["checkpoint_step"])):
+        key = (str(row["shard_path"]), int(row["transition_index"]))
+        baseline_by_transition.setdefault(key, float(row["predicted_q"]))
+
+    rows_by_step: dict[int, list[dict[str, Any]]] = {}
+    for row in rows:
+        rows_by_step.setdefault(int(row["checkpoint_step"]), []).append(row)
+
+    for metric in metrics:
+        step = int(metric["step"])
+        step_rows = rows_by_step.get(step, [])
+        success_early: list[float] = []
+        success_late: list[float] = []
+        failure_early: list[float] = []
+        failure_late: list[float] = []
+        for row in step_rows:
+            key = (str(row["shard_path"]), int(row["transition_index"]))
+            if key not in baseline_by_transition:
+                continue
+            lift = float(row["predicted_q"]) - baseline_by_transition[key]
+            progress = float(row["progress"])
+            label = int(row["label"])
+            if label == 1 and progress <= 0.5:
+                success_early.append(lift)
+            elif label == 1:
+                success_late.append(lift)
+            elif label == 0 and progress <= 0.5:
+                failure_early.append(lift)
+            elif label == 0:
+                failure_late.append(lift)
+
+        success_early_lift = _nanmean(np.asarray(success_early, dtype=np.float64))
+        success_late_lift = _nanmean(np.asarray(success_late, dtype=np.float64))
+        failure_early_lift = _nanmean(np.asarray(failure_early, dtype=np.float64))
+        failure_late_lift = _nanmean(np.asarray(failure_late, dtype=np.float64))
+        failure_penalty = max(0.0, failure_early_lift) if math.isfinite(failure_early_lift) else 0.0
+        score = success_early_lift - failure_penalty if math.isfinite(success_early_lift) else math.nan
+        metric["q_success_early_lift"] = success_early_lift
+        metric["q_success_late_lift"] = success_late_lift
+        metric["q_failure_early_lift"] = failure_early_lift
+        metric["q_failure_late_lift"] = failure_late_lift
+        metric["q_propagation_score"] = score
 
 
 def best_actor_metric(metrics: list[dict[str, Any]]) -> dict[str, Any] | None:
@@ -553,6 +624,55 @@ def write_metric_reports(metrics: list[dict[str, Any]], output_dir: pathlib.Path
     (output_dir / "critic_holdout_metrics.json").write_text(json.dumps(metrics, indent=2, sort_keys=True), encoding="utf-8")
 
 
+def write_transition_reports(rows: list[dict[str, Any]], output_dir: pathlib.Path) -> None:
+    if not rows:
+        return
+    transition_fieldnames = sorted({key for row in rows for key in row})
+    with (output_dir / "critic_holdout_transitions.csv").open("w", newline="", encoding="utf-8") as file:
+        writer = csv.DictWriter(file, fieldnames=transition_fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
+
+    grouped: dict[tuple[int, str], list[dict[str, Any]]] = {}
+    for row in rows:
+        grouped.setdefault((int(row["checkpoint_step"]), str(row["shard_path"])), []).append(row)
+    shard_rows: list[dict[str, Any]] = []
+    for (checkpoint_step, shard_path), shard_group in sorted(grouped.items()):
+        labels = {int(row["label"]) for row in shard_group}
+        label = labels.pop() if len(labels) == 1 else -1
+        predicted_q = np.asarray([float(row["predicted_q"]) for row in shard_group], dtype=np.float64)
+        target_q = np.asarray([float(row["target_q"]) for row in shard_group], dtype=np.float64)
+        actor_advantage = np.asarray([float(row["actor_advantage"]) for row in shard_group], dtype=np.float64)
+        actor_delta_norm = np.asarray([float(row["actor_delta_norm"]) for row in shard_group], dtype=np.float64)
+        bellman_error = np.asarray([float(row["bellman_error"]) for row in shard_group], dtype=np.float64)
+        floor_violation = np.asarray([float(row["floor_violation"]) for row in shard_group], dtype=np.float64)
+        progress_sorted = sorted(shard_group, key=lambda item: float(item["progress"]))
+        shard_rows.append(
+            {
+                "checkpoint_step": checkpoint_step,
+                "shard_path": shard_path,
+                "episode_id": str(shard_group[0]["episode_id"]),
+                "label": label,
+                "num_transitions": int(shard_group[0]["num_transitions"]),
+                "predicted_q_mean": _nanmean(predicted_q),
+                "predicted_q_min": _nanmin(predicted_q),
+                "predicted_q_max": _nanmax(predicted_q),
+                "target_q_mean": _nanmean(target_q),
+                "actor_advantage_mean": _nanmean(actor_advantage),
+                "actor_delta_norm_mean": _nanmean(actor_delta_norm),
+                "bellman_error_mean": _nanmean(bellman_error),
+                "floor_violation_rate": _nanmean(floor_violation),
+                "first_q": float(progress_sorted[0]["predicted_q"]),
+                "last_q": float(progress_sorted[-1]["predicted_q"]),
+            }
+        )
+    shard_fieldnames = list(shard_rows[0].keys())
+    with (output_dir / "critic_holdout_shards.csv").open("w", newline="", encoding="utf-8") as file:
+        writer = csv.DictWriter(file, fieldnames=shard_fieldnames)
+        writer.writeheader()
+        writer.writerows(shard_rows)
+
+
 def write_best_checkpoint(best: dict[str, Any] | None, output_dir: pathlib.Path) -> None:
     if best is None:
         text = "No checkpoint evaluated.\n"
@@ -560,7 +680,10 @@ def write_best_checkpoint(best: dict[str, Any] | None, output_dir: pathlib.Path)
         text = "\n".join(
             [
                 f"best checkpoint path: {best['checkpoint_path']}",
-                "selection reason: highest holdout AUC, then positive q_gap, then lower holdout Bellman loss, then success/failure actor advantage ordering",
+                "selection reason: q propagation score, then q_gap, then lower holdout Bellman loss, then success/failure actor advantage ordering, then AUC",
+                f"q_propagation_score: {best.get('q_propagation_score')}",
+                f"q_success_early_lift: {best.get('q_success_early_lift')}",
+                f"q_failure_early_lift: {best.get('q_failure_early_lift')}",
                 f"AUC: {best['auc']}",
                 f"q_gap: {best['q_gap']}",
                 f"success_q_mean: {best['success_q_mean']}",
@@ -632,6 +755,9 @@ def write_markdown_report(
 
 - path: `{best['checkpoint_path']}`
 - step: {best['step']}
+- q_propagation_score: {best['q_propagation_score']:.6f}
+- q_success_early_lift: {best['q_success_early_lift']:.6f}
+- q_failure_early_lift: {best['q_failure_early_lift']:.6f}
 - AUC: {best['auc']:.4f}
 - q_gap: {best['q_gap']:.6f}
 - success_q_mean: {best['success_q_mean']:.6f}
@@ -657,9 +783,9 @@ def write_markdown_report(
 
 ## 解释
 
-如果 success Q 均值高于 failure Q, 且 AUC 大于 0.70, 说明 critic 在 holdout 数据上具备基本排序能力。若 failure actor advantage 高于 success, 则说明 critic 可能在错误鼓励失败动作, 本报告会标记为不可靠。
+`AUC` 只表示 holdout transition 上 success/failure 的全局 Q 排序, 不能单独证明 critic 学到了动作价值。更关键的是查看 `critic_holdout_transitions.csv` 以及 `q_over_training_success_examples.png` / `q_over_training_failure_examples.png`: 同一条 replay 轨迹在不同 checkpoint 下的 Q 曲线是否随训练产生合理变化, 成功轨迹是否出现从后往前的 reward 传播。若 failure actor advantage 高于 success, 则说明 critic 可能在错误鼓励失败动作, 本报告会标记为不可靠。
 
-时间曲线使用 replay shard 内的 `transition_index` 和 normalized progress。若原始 replay 没有真实 `episode_id` / `timestep` 字段, 这不是完整 episode 时间, 只是 key region 内部传播检查。
+时间曲线使用 replay shard 内的 `transition_index` 和 normalized progress。若原始 replay 没有真实 `episode_id` / `timestep` 字段, 这不是完整 episode 时间, 只是 key region 内部传播检查。跨 checkpoint 曲线用于检查同一 key region 内 Q 数值是否随训练传播, 不是最终上机效果保证。
 
 ## 下一步建议
 
@@ -668,7 +794,12 @@ def write_markdown_report(
     (output_dir / "critic_holdout_report.md").write_text(report, encoding="utf-8")
 
 
-def write_plots(metrics: list[dict[str, Any]], best_rows: list[dict[str, Any]], output_dir: pathlib.Path) -> None:
+def write_plots(
+    metrics: list[dict[str, Any]],
+    best_rows: list[dict[str, Any]],
+    all_transition_rows: list[dict[str, Any]],
+    output_dir: pathlib.Path,
+) -> None:
     import matplotlib as mpl
 
     mpl.use("Agg")
@@ -747,6 +878,18 @@ def write_plots(metrics: list[dict[str, Any]], best_rows: list[dict[str, Any]], 
     _plot_time_curves(best_rows, output_dir, label=1, filename="q_over_time_success.png")
     _plot_time_curves(best_rows, output_dir, label=0, filename="q_over_time_failure.png")
     _plot_mean_time_curves(best_rows, output_dir / "q_over_time_mean_success_failure.png")
+    _plot_checkpoint_time_curves(
+        all_transition_rows,
+        output_dir,
+        label=1,
+        filename="q_over_training_success_examples.png",
+    )
+    _plot_checkpoint_time_curves(
+        all_transition_rows,
+        output_dir,
+        label=0,
+        filename="q_over_training_failure_examples.png",
+    )
 
 
 def _plot_time_curves(rows: list[dict[str, Any]], output_dir: pathlib.Path, *, label: int, filename: str) -> None:
@@ -785,6 +928,62 @@ def _plot_mean_time_curves(rows: list[dict[str, Any]], out_path: pathlib.Path) -
     plt.tight_layout()
     plt.savefig(out_path, dpi=180)
     plt.close()
+
+
+def _plot_checkpoint_time_curves(
+    rows: list[dict[str, Any]],
+    output_dir: pathlib.Path,
+    *,
+    label: int,
+    filename: str,
+    max_episodes: int = 4,
+) -> None:
+    import matplotlib.pyplot as plt
+
+    by_episode: dict[str, list[dict[str, Any]]] = {}
+    for row in rows:
+        if int(row["label"]) == label:
+            by_episode.setdefault(str(row["episode_id"]), []).append(row)
+    if not by_episode:
+        return
+
+    selected = sorted(
+        by_episode.items(),
+        key=lambda item: (-int(item[1][0]["num_transitions"]), item[0]),
+    )[:max_episodes]
+    steps = sorted({int(row["checkpoint_step"]) for _, episode_rows in selected for row in episode_rows})
+    if not steps:
+        return
+    color_by_step = {step: plt.cm.viridis(index / max(1, len(steps) - 1)) for index, step in enumerate(steps)}
+
+    fig, axes = plt.subplots(len(selected), 1, figsize=(9, max(3, 2.35 * len(selected))), squeeze=False, sharex=True)
+    for axis, (episode_id, episode_rows) in zip(axes[:, 0], selected, strict=False):
+        by_step: dict[int, list[dict[str, Any]]] = {}
+        for row in episode_rows:
+            by_step.setdefault(int(row["checkpoint_step"]), []).append(row)
+        for step in steps:
+            step_rows = sorted(by_step.get(step, []), key=lambda item: int(item["transition_index"]))
+            if not step_rows:
+                continue
+            axis.plot(
+                [float(row["progress"]) for row in step_rows],
+                [float(row["predicted_q"]) for row in step_rows],
+                color=color_by_step[step],
+                alpha=0.75,
+                linewidth=1.4,
+                label=str(step),
+            )
+        axis.set_ylabel("Q")
+        axis.set_title(episode_id, fontsize=9)
+        axis.grid(alpha=0.25)
+    axes[-1, 0].set_xlabel("normalized key-region progress")
+    handles, labels = axes[0, 0].get_legend_handles_labels()
+    if handles:
+        fig.legend(handles, labels, title="checkpoint", loc="center right", fontsize=8)
+        fig.subplots_adjust(right=0.82)
+    fig.tight_layout()
+    plt.savefig(output_dir / filename, dpi=180)
+    plt.close(fig)
 
 
 def _slice_to_config_horizon(arrays: dict[str, np.ndarray], config: rlt.RLTConfig) -> dict[str, np.ndarray]:
@@ -836,6 +1035,20 @@ def _nanstd(values: np.ndarray) -> float:
     if values.size == 0 or not np.any(np.isfinite(values)):
         return math.nan
     return float(np.nanstd(values))
+
+
+def _nanmin(values: np.ndarray) -> float:
+    values = np.asarray(values, dtype=np.float64)
+    if values.size == 0 or not np.any(np.isfinite(values)):
+        return math.nan
+    return float(np.nanmin(values))
+
+
+def _nanmax(values: np.ndarray) -> float:
+    values = np.asarray(values, dtype=np.float64)
+    if values.size == 0 or not np.any(np.isfinite(values)):
+        return math.nan
+    return float(np.nanmax(values))
 
 
 def _finite_or(value: Any, fallback: float) -> float:

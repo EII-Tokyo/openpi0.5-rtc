@@ -178,6 +178,8 @@ def rewrite_shard_z_rl(
                 "proprio_source": "policy_reencoded",
                 "proprio_dim": int(proprio.shape[-1]),
                 "previous_proprio_shape": previous_proprio_shape,
+                "replay_state_grain": "paper_subsampled_anchor",
+                "subsampled_transition_semantics": "x_i_action_i_to_i_plus_c_next_x_i_plus_c",
             }
         )
     arrays["manifest"] = np.asarray(json.dumps(manifest, ensure_ascii=False, sort_keys=True))
@@ -380,7 +382,7 @@ class RLTokenPolicyEncoder:
             "state": np.asarray(qpos[frame_index], dtype=np.float32),
             "prompt": self._prompt,
         }
-        result = self._policy.infer(obs, use_rtc=False)
+        result = self._policy.infer_rl_token(obs)
         if "z_rl" not in result:
             raise RuntimeError("policy inference did not return z_rl")
         if "state" not in result:
@@ -402,6 +404,7 @@ class _VideoFrameReader:
         self._av = av
         self._convert_bgr_to_rgb = convert_bgr_to_rgb
         self._paths = {}
+        self._frames: dict[str, list[np.ndarray]] = {}
         for camera, filename in self.CAMERA_FILES.items():
             path = rollout_dir / filename
             if not path.exists():
@@ -414,18 +417,30 @@ class _VideoFrameReader:
         return {camera: self.read(camera, frame_index) for camera in self._paths}
 
     def read(self, camera: str, frame_index: int) -> np.ndarray:
+        frames = self._frames.get(camera)
+        if frames is None:
+            frames = self._decode_camera(camera)
+            self._frames[camera] = frames
+        target = int(frame_index)
+        if target < 0 or target >= len(frames):
+            raise RuntimeError(f"frame {frame_index} is out of range for {camera}: {len(frames)} frames")
+        return frames[target]
+
+    def _decode_camera(self, camera: str) -> list[np.ndarray]:
         path = self._paths[camera]
+        decoded: list[np.ndarray] = []
+        fmt = "rgb24" if self._convert_bgr_to_rgb else "bgr24"
         with self._av.open(str(path)) as container:
             stream = container.streams.video[0]
             stream.thread_type = "AUTO"
-            target = int(frame_index)
-            for index, frame in enumerate(container.decode(stream)):
-                if index == target:
-                    fmt = "rgb24" if self._convert_bgr_to_rgb else "bgr24"
-                    return np.asarray(frame.to_ndarray(format=fmt), dtype=np.uint8)
-        raise RuntimeError(f"failed to read frame {frame_index} from {camera}")
+            for frame in container.decode(stream):
+                decoded.append(np.asarray(frame.to_ndarray(format=fmt), dtype=np.uint8))
+        if not decoded:
+            raise RuntimeError(f"failed to decode any frames from {camera}: {path}")
+        return decoded
 
     def close(self) -> None:
+        self._frames.clear()
         return None
 
 

@@ -66,10 +66,11 @@ def _best_row(rows: list[dict[str, Any]]) -> dict[str, Any]:
     return max(
         rows,
         key=lambda row: (
-            _finite_or(row.get("auc"), -1.0),
+            _finite_or(row.get("q_propagation_score"), -1e9),
             _finite_or(row.get("q_gap"), -1e9),
             -_finite_or(row.get("floor_violation_rate"), 1e9),
             -_finite_or(row.get("holdout_bellman_loss"), 1e9),
+            _finite_or(row.get("auc"), -1.0),
         ),
     )
 
@@ -83,15 +84,21 @@ def _finite_or(value: Any, fallback: float) -> float:
 
 
 def _write_summary(runs: dict[str, list[dict[str, Any]]], output_dir: pathlib.Path, title: str) -> None:
-    lines = [f"# {title}", "", "| run | best_step | AUC | q_gap | floor_violation | calibration_margin | Bellman loss |", "| --- | ---: | ---: | ---: | ---: | ---: | ---: |"]
+    lines = [
+        f"# {title}",
+        "",
+        "| run | best_step | q_propagation | AUC | q_gap | floor_violation | calibration_margin | Bellman loss |",
+        "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
+    ]
     summary = {}
     for label, rows in runs.items():
         best = _best_row(rows)
         summary[label] = best
         lines.append(
-            "| {label} | {step} | {auc:.4f} | {q_gap:.6f} | {floor:.4f} | {margin:.6f} | {loss:.6f} |".format(
+            "| {label} | {step} | {prop:.6f} | {auc:.4f} | {q_gap:.6f} | {floor:.4f} | {margin:.6f} | {loss:.6f} |".format(
                 label=label,
                 step=int(best["step"]),
+                prop=float(best.get("q_propagation_score", math.nan)),
                 auc=float(best["auc"]),
                 q_gap=float(best["q_gap"]),
                 floor=float(best.get("floor_violation_rate", math.nan)),
@@ -102,7 +109,7 @@ def _write_summary(runs: dict[str, list[dict[str, Any]]], output_dir: pathlib.Pa
     lines.extend(
         [
             "",
-            "Selection uses AUC first, then q_gap, then lower floor violation and lower Bellman loss.",
+            "Selection uses q_propagation_score first, then q_gap, lower floor violation, lower Bellman loss, and AUC only as a final tie-breaker.",
             "",
             "For Cal-QL style comparison, the useful pattern is not only higher AUC. Prefer curves where q_gap stays positive, floor violation decreases, and calibration margin does not collapse below zero.",
             "",

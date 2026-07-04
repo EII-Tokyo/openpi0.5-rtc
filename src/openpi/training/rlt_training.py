@@ -14,6 +14,8 @@ ACTOR_LOSS_MODE_AWBC = 1
 CRITIC_LOSS_MODE_TD3 = 0
 CRITIC_LOSS_MODE_CQL = 1
 CRITIC_LOSS_MODE_CALQL = 2
+CRITIC_TARGET_ACTION_MODE_TARGET_ACTOR = 0
+CRITIC_TARGET_ACTION_MODE_REFERENCE_ACTION = 1
 
 
 @struct.dataclass
@@ -37,6 +39,7 @@ class RLTTrainingConfig:
     policy_delay: int = 2
     actor_publish_interval: int = 500
     target_actor_noise: bool = True
+    critic_target_action_mode: str = "target_actor"
     actor_loss_mode: str = "td3"
     critic_loss_mode: str = "td3"
     conservative_alpha: float = 0.0
@@ -58,6 +61,7 @@ class RLTTrainState:
     policy_delay: int = struct.field(pytree_node=False)
     actor_publish_interval: int = struct.field(pytree_node=False)
     target_actor_noise: bool = struct.field(pytree_node=False)
+    critic_target_action_mode: int = struct.field(pytree_node=False)
     actor_loss_mode: int = struct.field(pytree_node=False)
     critic_loss_mode: int = struct.field(pytree_node=False)
     conservative_alpha: float = struct.field(pytree_node=False)
@@ -105,6 +109,7 @@ def init_train_state(config: RLTTrainingConfig, rng: at.KeyArrayLike) -> RLTTrai
     critic_tx = optax.adam(config.critic_lr)
     actor_loss_mode = _actor_loss_mode_id(config.actor_loss_mode)
     critic_loss_mode = _critic_loss_mode_id(config.critic_loss_mode)
+    critic_target_action_mode = _critic_target_action_mode_id(config.critic_target_action_mode)
     return RLTTrainState(
         step=jnp.asarray(0, dtype=jnp.int32),
         params=nnx.state(model),
@@ -116,6 +121,7 @@ def init_train_state(config: RLTTrainingConfig, rng: at.KeyArrayLike) -> RLTTrai
         policy_delay=config.policy_delay,
         actor_publish_interval=config.actor_publish_interval,
         target_actor_noise=config.target_actor_noise,
+        critic_target_action_mode=critic_target_action_mode,
         actor_loss_mode=actor_loss_mode,
         critic_loss_mode=critic_loss_mode,
         conservative_alpha=config.conservative_alpha,
@@ -160,6 +166,22 @@ def critic_loss_mode_name(mode: int) -> str:
     if mode == CRITIC_LOSS_MODE_CALQL:
         return "calql"
     raise ValueError(f"Unsupported critic_loss_mode id={mode!r}")
+
+
+def _critic_target_action_mode_id(mode: str) -> int:
+    if mode == "target_actor":
+        return CRITIC_TARGET_ACTION_MODE_TARGET_ACTOR
+    if mode == "reference_action":
+        return CRITIC_TARGET_ACTION_MODE_REFERENCE_ACTION
+    raise ValueError(f"Unsupported critic_target_action_mode={mode!r}")
+
+
+def critic_target_action_mode_name(mode: int) -> str:
+    if mode == CRITIC_TARGET_ACTION_MODE_TARGET_ACTOR:
+        return "target_actor"
+    if mode == CRITIC_TARGET_ACTION_MODE_REFERENCE_ACTION:
+        return "reference_action"
+    raise ValueError(f"Unsupported critic_target_action_mode id={mode!r}")
 
 
 def single_action_conservative_penalty(
@@ -235,15 +257,19 @@ def train_step(
     model = nnx.merge(state.model_def, state.params)
     target_rng, actor_rng, conservative_rng = jax.random.split(rng, 3)
 
-    target_q = rlt.rlt_td3_target(
-        model,
-        batch.reward_seq,
-        batch.done,
-        batch.next_x,
-        batch.next_reference_action,
-        rng=target_rng,
-        sample_target_actor=state.target_actor_noise,
-    )
+    if state.critic_target_action_mode == CRITIC_TARGET_ACTION_MODE_REFERENCE_ACTION:
+        next_q_min = model.target_critic.min_q(batch.next_x, batch.next_reference_action)
+        target_q = rlt.td3_target(batch.reward_seq, batch.done, next_q_min, gamma=model.config.gamma)
+    else:
+        target_q = rlt.rlt_td3_target(
+            model,
+            batch.reward_seq,
+            batch.done,
+            batch.next_x,
+            batch.next_reference_action,
+            rng=target_rng,
+            sample_target_actor=state.target_actor_noise,
+        )
     conservative_action = jax.lax.stop_gradient(model.actor(batch.x, batch.reference_action, rng=conservative_rng, sample=True))
 
     def critic_loss_fn(critic: rlt.RLTTwinCritic):
@@ -291,6 +317,7 @@ def train_step(
         critic_params,
     )
     nnx.update(model.critic, optax.apply_updates(critic_params, critic_updates))
+    model.soft_update_target_critic()
 
     next_step = int(state.step) + 1
     actor_updated = next_step % state.policy_delay == 0
@@ -356,7 +383,7 @@ def train_step(
             actor_params,
         )
         nnx.update(model.actor, optax.apply_updates(actor_params, actor_updates))
-        model.soft_update_targets()
+        model.soft_update_target_actor()
         actor_q_value = actor_info["actor_q_value"]
         reference_q_value = actor_info["reference_q_value"]
         q_advantage = actor_info["q_advantage"]
@@ -399,6 +426,7 @@ def train_step(
         "q2_mean": critic_info["q2_mean"],
         "target_q_mean": critic_info["target_q_mean"],
         "beta": jnp.asarray(model.config.beta, dtype=critic_loss_value.dtype),
+        "critic_target_action_mode": jnp.asarray(state.critic_target_action_mode, dtype=jnp.int32),
         "actor_loss_mode": jnp.asarray(state.actor_loss_mode, dtype=jnp.int32),
         "critic_loss_mode": jnp.asarray(state.critic_loss_mode, dtype=jnp.int32),
         "conservative_alpha": jnp.asarray(state.conservative_alpha, dtype=critic_loss_value.dtype),
