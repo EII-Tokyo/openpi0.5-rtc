@@ -23,6 +23,7 @@ class Args:
     num_batches: int = 20
     batch_size: int | None = None
     num_workers: int | None = None
+    assets_base_dir: pathlib.Path | None = None
     output_json: pathlib.Path | None = None
     wandb_project: str | None = None
     wandb_run_name: str | None = None
@@ -77,6 +78,8 @@ def main(args: Args) -> None:
         config = dataclasses.replace(config, batch_size=args.batch_size)
     if args.num_workers is not None:
         config = dataclasses.replace(config, num_workers=args.num_workers)
+    if args.assets_base_dir is not None:
+        config = dataclasses.replace(config, assets_base_dir=str(args.assets_base_dir))
     checkpoint_dir = _checkpoint_step_dir(args.checkpoint_dir)
 
     logging.info("Loading model from %s", checkpoint_dir)

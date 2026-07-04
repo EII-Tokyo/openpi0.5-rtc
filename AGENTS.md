@@ -6,6 +6,15 @@
 - Do not use or modify `/home/eii/openpi0.5-rlt` for this user's robot project; that path belongs to another project.
 - Before copying files, restarting containers, or inspecting remote code on `192.168.1.103`, verify the working directory is `/home/eii/openpi0.5-rtc-reward-learning`.
 - If a command on `192.168.1.103` would touch any path outside `/home/eii/openpi0.5-rtc-reward-learning`, stop and ask the user for explicit approval first.
+- For complex `192.168.1.103` inspections or statistics, do not embed Python/awk/jq/JSON-heavy logic in a nested one-line SSH command. Use a checked-in script, a single-quoted here-doc, or a `just`/Fabric wrapper that first runs `cd /home/eii/openpi0.5-rtc-reward-learning`.
+- Any project `just` recipe, Fabric task, or Ansible playbook targeting `192.168.1.103` must preserve the same project boundary: start from `/home/eii/openpi0.5-rtc-reward-learning`, avoid `/home/eii/openpi0.5-rlt`, and avoid writes outside the project unless the user explicitly approves.
+- Prefer this command shape for ad hoc multi-line 103 work:
+  - `ssh 192.168.1.103 <<'REMOTE'`
+  - `set -euo pipefail`
+  - `cd /home/eii/openpi0.5-rtc-reward-learning`
+  - project commands
+  - `REMOTE`
+- For reusable 103 tasks, prefer adding local scripts under this repository and syncing them to `/home/eii/openpi0.5-rtc-reward-learning` before execution. This avoids shell quoting bugs such as losing literal paths like `/app/replay`.
 - Strong checkpoint constraint for `192.168.1.103`: user-trained checkpoints for this project must live under `/home/eii/openpi0.5-rtc-reward-learning/checkpoints` and be mounted into containers as `/app/checkpoints`.
 - Do not load this project's VLA/RLToken checkpoints from `/home/eii/openpi0.5-rtc/checkpoints`; that path belongs outside this project boundary.
 - `uv` locations on `192.168.1.103`:
@@ -44,12 +53,23 @@
   - Local copied path when present: `/home/eii/project/openpi0.5-rtc-reward-learning/checkpoints/eii_rinse_11repo_cam4_fullft/rinse_11repo_insertx5_fullft_bs256_nw64_fsdp8_20260513/9000`
   - Container path: `/app/checkpoints/eii_rinse_11repo_cam4_fullft/rinse_11repo_insertx5_fullft_bs256_nw64_fsdp8_20260513/9000`
   - Cameras: `cam_high`, `cam_low`, `cam_left_wrist`, `cam_right_wrist`.
-- Correct RLToken checkpoint derived from the cam4 VLA above:
+- Historical cam4 RLToken checkpoint derived from the cam4 VLA above, but no longer the default for new data collection:
   - Config: `eii_rinse_11repo_cam4_fullft_rl_token_small_query`
   - Checkpoint: `rinse_11repo_rl_token_small_query_512_from_9000_20260615/9999`
   - Host path on `192.168.1.103`: `/home/eii/openpi0.5-rtc-reward-learning/checkpoints/eii_rinse_11repo_cam4_fullft_rl_token_small_query/rinse_11repo_rl_token_small_query_512_from_9000_20260615/9999`
   - Container path: `/app/checkpoints/eii_rinse_11repo_cam4_fullft_rl_token_small_query/rinse_11repo_rl_token_small_query_512_from_9000_20260615/9999`
-  - This is the correct 2026-06-15 RLToken checkpoint for cam4 work; it was initialized from `eii_rinse_11repo_cam4_fullft/.../9000/params`.
+  - This is the correct 2026-06-15 cam4 small-query RLToken checkpoint for historical cam4 work; it was initialized from `eii_rinse_11repo_cam4_fullft/.../9000/params`.
+- Active RLToken checkpoint for new RLT data collection, replay re-encoding, critic training, and actor training:
+  - Config: `eii_rinse_11repo_cam4_fullft_rl_token_lower_right_query_4layer`
+  - Checkpoint family: `rlt_lower_right_rl_token_ablation_20260701`
+  - Host path on `192.168.1.103`: `/home/eii/openpi0.5-rtc-reward-learning/checkpoints/rlt_lower_right_rl_token_ablation_20260701/BEST/checkpoint`
+  - Local path when present: `/home/eii/project/openpi0.5-rtc-reward-learning/checkpoints/rlt_lower_right_rl_token_ablation_20260701/BEST/checkpoint`
+  - Container path: `/app/checkpoints/rlt_lower_right_rl_token_ablation_20260701/BEST/checkpoint`
+  - Cameras used for visual information: `cam_low`, `cam_right_wrist`.
+  - Output z dimension: `2048`.
+  - Strong constraint: new key-region data collection on `192.168.1.103` must set `RLT_RL_TOKEN_CHECKPOINT_PATH=/app/checkpoints/rlt_lower_right_rl_token_ablation_20260701/BEST/checkpoint` before starting `openpi_server` or `rlt_warmup_runtime`.
+  - Strong constraint: do not collect new RLT replay with the old 512-dim small-query RLToken unless the user explicitly requests a controlled ablation. Mixing 512-dim and 2048-dim `z_rl` replay in one critic/actor training run is invalid.
+  - If existing 512-dim replay must be reused, re-encode it into a separate lower-right directory such as `/data/openpi0.5-rtc-reward-learning/replay/rlt_key_regions_lower_right_z2048_4layer` or `/data/openpi0.5-rtc-reward-learning/replay/rlt_key_regions_clean_lower_right_z2048_4layer`; never overwrite the original replay shards.
 - Wrong checkpoint for rinse / bottle-mouth insertion if `cam_low` is required:
   - VLA family: `eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo`
   - RLToken config: `eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo_rl_token_query`
@@ -61,7 +81,8 @@
   - `2026-05-29` through `2026-06-15 09:50 +0900`: RLT defaults used the cam3-derived RLToken path.
   - `2026-06-15 09:50 +0900`: defaults moved to the cam4 VLA base checkpoint.
   - `2026-06-15 16:34 +0900`: defaults moved to the correct cam4 RLToken small query checkpoint.
-- Before training critic/actor, re-encoding `z_rl`, or starting `openpi_server`/`rlt_warmup_runtime`, verify the active `--policy.config`, `--policy.dir`, `--model-dir`, and `RLT_RL_TOKEN_CHECKPOINT_PATH` are from the correct cam4 family unless the user explicitly requests a cam3 ablation.
+  - `2026-07-02`: defaults moved to the lower+right 4-layer RLToken checkpoint for new RLT data collection and training.
+- Before training critic/actor, re-encoding `z_rl`, or starting `openpi_server`/`rlt_warmup_runtime`, verify the active `--policy.config`, `--policy.dir`, `--model-dir`, and `RLT_RL_TOKEN_CHECKPOINT_PATH` are from the active lower+right 4-layer RLToken family unless the user explicitly requests a controlled ablation.
 
 ## Local key region annotation on machine 101
 - The local machine `101` is for offline key region data annotation only. Do not treat `http://127.0.0.1:3011/` as a robot-control UI, and do not expect local key presses there to control the robot on `192.168.1.103`.
@@ -80,6 +101,48 @@
 - Do not assume `/home/eii/project/openpi0.5-rtc-reward-learning-local-data` is the active annotation dataset. It previously contained raw 2026-06-22 files but not the cleaned/cropped 2026-06-22 metadata, which made the UI appear to have no annotations.
 - Do not pull, rsync, copy, or overwrite data from `192.168.1.103` unless the user explicitly asks for a data transfer. Before any data movement, first locate and inspect local data under `/home/eii/project/openpi0.5-*` and `/home/eii/data/openpi0.5-rtc-reward-learning`.
 - Previous mistake to avoid: the local service was started against `/home/eii/project/openpi0.5-rtc-reward-learning-local-data`, then data was pulled from `192.168.1.103` before confirming the user's already-cleaned local dataset. The correct fix was only to switch the service mounts to `/home/eii/data/openpi0.5-rtc-reward-learning`.
+
+## Canonical RLT replay data
+- Current canonical RLT replay data uses the lower+right 4-layer RLToken encoder with `z_rl` / `next_z_rl` dimension `2048`.
+- Do not train by scanning mixed legacy replay directories directly. Train from the canonical manifests unless the user explicitly requests an ablation.
+- Legacy 512-dim replay roots such as `rlt_key_regions`, `rlt_key_regions_clean`, and `human_expert_no_actor_q_cam4_provenance_20260629` must not be mixed into a 2048 training run.
+- Strong requirement: formal critic/actor training replay should match the RLT paper's subsampled transition semantics:
+  - each replay row is `x_i, action[i:i+C], x_{i+C}`;
+  - `z_rl/proprio` must be re-encoded from the row's own stride anchor frame `i`, not copied from an RTC/action-cache block;
+  - regenerated shards should mark `replay_state_grain=paper_subsampled_anchor`;
+  - `fixed_segments` / `rl_token_reencoded_aligned_to_proprio_segments` shards are only audit/ablation artifacts and must not be used for formal training manifests.
+- Local canonical root:
+  - Data: `/home/eii/data/openpi0.5-rtc-reward-learning/replay/canonical_2048`
+  - Local-only manifest: `/home/eii/data/openpi0.5-rtc-reward-learning/manifests/canonical_2048`
+  - 103 mirrored manifest with local filesystem paths: `/home/eii/data/openpi0.5-rtc-reward-learning/manifests/canonical_2048_from_103`
+- `192.168.1.103` canonical root:
+  - Data: `/data/openpi0.5-rtc-reward-learning/replay/canonical_2048`
+  - Manifest: `/data/openpi0.5-rtc-reward-learning/manifests/canonical_2048`
+- Historical note: the 2026-07-02 103 canonical manifest contained fixed-segment bootstrap data and is now considered stale for formal training under the paper-aligned replay requirement. Do not reuse it for new formal critic/actor training without rebuilding the bootstrap/clean shards from original rollouts.
+- As of 2026-07-02, that stale 103 canonical manifest contained 384 replay shards and 18,721 transitions:
+  - `bootstrap`: 146 shards (`train`: 117, `holdout`: 29), source `current109_37_actor6000_20260630`
+  - `rlt_raw`: 178 shards, source 103 online/raw actor data
+  - `rlt_clean`: 1 shard, source 103 cleaned data currently available under `/data`
+  - `expert`: 59 shards, source human expert lower+right 4-layer encoding
+- The canonical train and holdout split currently has zero `key_region_id` overlap. Preserve that invariant.
+- If a new 512-dim or old cam4-small-query shard is discovered, re-encode it into a separate lower+right 2048 directory first; never overwrite the original shard.
+- For human expert / Expert-for-D data, do not re-encode by rewriting old Q replay `z_rl` in place. The correct source-of-truth chain is:
+  - Crop JSON: `/home/eii/data/openpi0.5-rtc-reward-learning/replay/discriminator_expert_crops`
+  - Original LeRobot cache: `/home/eii/.cache/huggingface/lerobot/lyl472324464/<dataset_id>`
+  - Encode frame-level z cache from original LeRobot parquet/video using the lower+right 4-layer RLToken checkpoint.
+  - Convert crop JSON + parquet action/state + the new z cache into trainable Q replay.
+- For human expert lower+right conversion, prefer the z-only deterministic code path `Policy.infer_rl_token()` over `Policy.infer()`. `Policy.infer()` may go through action sampling before returning `z_rl`, which is unnecessary for replay re-encoding and makes audits harder.
+- Current fully regenerated human expert output from original LeRobot data:
+  - z cache: `/home/eii/data/openpi0.5-rtc-reward-learning/replay/expert_crop_z_rl_cache_lower_right_4layer_from_raw_zonly_20260703`
+  - Q replay: `/home/eii/data/openpi0.5-rtc-reward-learning/replay/human_expert_no_actor_q_lower_right_4layer_from_raw_zonly_20260703`
+  - manifest: `/home/eii/project/openpi0.5-rtc-reward-learning/local_rlt_manifests/expert_from_raw_20260703/human_expert_no_actor_q_lower_right_4layer_from_raw_zonly_20260703.jsonl`
+  - audit: `/home/eii/project/openpi0.5-rtc-reward-learning/local_rlt_manifests/expert_from_raw_20260703/audit_from_raw_zonly_20260703.json`
+  - verified counts: 59 Q replay shards, 58 episode z-cache files, 2,896 transitions, all `z_rl` / `next_z_rl` dimension 2048, all `action == reference_action`.
+- Training selection rule for human expert data:
+  - Use only the z-only Q replay and manifest above for human expert lower+right 4-layer training.
+  - Do not use deleted legacy / non-z-only expert outputs such as `human_expert_no_actor_q_lower_right_4layer_20260701`, `expert_crop_z_rl_cache_lower_right_4layer_20260701`, or `human_expert_no_actor_q_lower_right_4layer_from_raw_20260703`.
+  - If the z-only output is missing or suspected stale, regenerate it from the crop JSON and original LeRobot parquet/video via `Policy.infer_rl_token()`; do not restore or train from the old `Policy.infer()`-generated expert replay.
+  - Any canonical 2048 manifest that includes human expert data should point to the z-only manifest above, not to an old 20260701 or non-z-only manifest.
 
 ## Image flow (data collection)
 - Active collection code path for `/home/eii/aloha-2.0`:

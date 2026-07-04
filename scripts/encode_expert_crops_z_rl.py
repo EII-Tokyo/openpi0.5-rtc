@@ -19,10 +19,9 @@ from scripts.reencode_clean_no_actor_z_rl import RLTokenPolicyEncoder
 
 
 DEFAULT_CHECKPOINT = Path(
-    "checkpoints/eii_rinse_11repo_cam4_fullft_rl_token_small_query/"
-    "rinse_11repo_rl_token_small_query_512_from_9000_20260615/9999"
+    "checkpoints/rlt_lower_right_rl_token_ablation_20260701/BEST/checkpoint"
 )
-DEFAULT_CONFIG = "eii_rinse_11repo_cam4_fullft_rl_token_small_query"
+DEFAULT_CONFIG = "eii_rinse_11repo_cam4_fullft_rl_token_lower_right_query_4layer"
 CAMERA_PATHS = {
     "cam_high": "observation.images.cam_high",
     "cam_low": "observation.images.cam_low",
@@ -40,7 +39,7 @@ class EncodeExpertArgs:
     config_name: str
     prompt: str = "Twist off the bottle cap."
     convert_bgr_to_rgb: bool = False
-    require_camera: tuple[str, ...] = ("cam_low",)
+    require_camera: tuple[str, ...] = ("cam_low", "cam_right_wrist")
     overwrite: bool = False
     limit_episodes: int | None = None
 
@@ -96,7 +95,7 @@ def encode_expert_crop_z(args: EncodeExpertArgs) -> EncodeExpertSummary:
                     "state": np.asarray(request.state, dtype=np.float32),
                     "prompt": args.prompt,
                 }
-                result = encoder._policy.infer(obs, use_rtc=False)  # noqa: SLF001 - reuse policy wrapper for batch script.
+                result = encoder._policy.infer_rl_token(obs)  # noqa: SLF001 - reuse policy wrapper for batch script.
                 if "z_rl" not in result:
                     raise RuntimeError("policy inference did not return z_rl")
                 z_rows.append(np.asarray(result["z_rl"], dtype=np.float32))
@@ -293,7 +292,7 @@ def _parse_args() -> EncodeExpertArgs:
     parser.add_argument("--convert-bgr-to-rgb", action="store_true")
     parser.add_argument("--overwrite", action="store_true")
     parser.add_argument("--limit-episodes", type=int, default=None)
-    parser.add_argument("--require-camera", action="append", default=["cam_low"])
+    parser.add_argument("--require-camera", action="append", default=["cam_low", "cam_right_wrist"])
     ns = parser.parse_args()
     return EncodeExpertArgs(
         dataset_root=ns.dataset_root,
