@@ -63,10 +63,21 @@ class WebsocketClientPolicy(_base_policy.BasePolicy):
     @override
     def infer(self, obs: Dict, prev_action: np.ndarray | None = None, use_rtc: bool = True) -> Dict:  # noqa: UP006
         data = {
+            "method": "infer",
             "obs": obs,
             "prev_action": prev_action,
             "use_rtc": use_rtc,
         }
+        return self._send_request(data)
+
+    def infer_rl_token(self, obs: Dict) -> Dict:
+        data = {
+            "method": "infer_rl_token",
+            "obs": obs,
+        }
+        return self._send_request(data)
+
+    def _send_request(self, data: Dict) -> Dict:
         data = self._packer.pack(data)
         try:
             self._ws.send(data)

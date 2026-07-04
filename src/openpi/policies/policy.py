@@ -96,6 +96,11 @@ class Policy(BasePolicy):
                 if hasattr(model, "guided_inference_with_rl_token")
                 else None
             )
+            self._embed_prefix_hidden = (
+                nnx_utils.module_jit(model.embed_prefix_hidden)
+                if hasattr(model, "embed_prefix_hidden")
+                else None
+            )
             self._rng = rng or jax.random.key(0)
 
     @override
@@ -215,6 +220,34 @@ class Policy(BasePolicy):
             "infer_ms": model_time * 1000,
         }
         return outputs
+
+    def infer_rl_token(self, obs: dict) -> dict:
+        """Encode only the RL token and transformed state, without action sampling.
+
+        Replay re-encoding needs deterministic visual tokens, not sampled action
+        chunks. `infer()` prefers `sample_actions_with_rl_token()` when available,
+        which advances the policy RNG and can make repeated z-only conversion
+        harder to audit. This path uses the model prefix directly and never calls
+        the diffusion/action sampler.
+        """
+        if self._is_pytorch_model:
+            raise ValueError("RL token-only inference is only supported for JAX policies")
+        if getattr(self._model, "rl_token_autoencoder", None) is None:
+            raise ValueError("policy model does not have rl_token_autoencoder")
+        if self._embed_prefix_hidden is None:
+            raise ValueError("policy model does not expose embed_prefix_hidden")
+
+        inputs = jax.tree.map(lambda x: x, obs)
+        inputs = self._input_transform(inputs)
+        inputs = jax.tree.map(lambda x: jnp.asarray(x)[np.newaxis, ...], inputs)
+        observation = _model.Observation.from_dict(inputs)
+        prefix_hidden = self._embed_prefix_hidden(observation)
+        prefix_out, prefix_mask = _drop_language_from_prefix_hidden(prefix_hidden, observation)
+        z_rl = self._model.rl_token_autoencoder.encode(jax.lax.stop_gradient(prefix_out), prefix_mask)
+        return {
+            "state": np.asarray(inputs["state"][0, ...]),
+            "z_rl": np.asarray(z_rl[0, ...]),
+        }
 
     @property
     def metadata(self) -> dict[str, Any]:

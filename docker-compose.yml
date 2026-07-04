@@ -41,7 +41,7 @@ services:
       - /data/openpi0.5-rtc-reward-learning/rollouts:/app/rollouts
       - /home/eii/openpi0.5-rtc-reward-learning/checkpoints:/app/checkpoints:ro
     environment:
-      - RLT_RL_TOKEN_CHECKPOINT_PATH=${RLT_RL_TOKEN_CHECKPOINT_PATH:-/app/checkpoints/eii_rinse_11repo_cam4_fullft_rl_token_small_query/rinse_11repo_rl_token_small_query_512_from_9000_20260615/9999}
+      - RLT_RL_TOKEN_CHECKPOINT_PATH=${RLT_RL_TOKEN_CHECKPOINT_PATH:-/app/checkpoints/rlt_lower_right_rl_token_ablation_20260701/BEST/checkpoint}
 
   rlt_warmup_runtime:
     image: openpi_reward_learning_eii/rlt_warmup_runtime:reward-learning
@@ -54,6 +54,7 @@ services:
       - aloha_ros_nodes
       - ros_master
       - openpi_server
+      - rlt_token_server
       - redis
       - eii_pilot_backend
       - eii_pilot_frontend
@@ -77,6 +78,8 @@ services:
       50
       --rlt-chunk-stride
       2
+      --rlt-token-port
+      8002
       --video-codec
       h264
       --action-quality
@@ -93,7 +96,7 @@ services:
       - /data/openpi0.5-rtc-reward-learning/replay:/app/replay
       - /home/eii/openpi0.5-rtc-reward-learning/checkpoints:/app/checkpoints:ro
     environment:
-      - RLT_RL_TOKEN_CHECKPOINT_PATH=${RLT_RL_TOKEN_CHECKPOINT_PATH:-/app/checkpoints/eii_rinse_11repo_cam4_fullft_rl_token_small_query/rinse_11repo_rl_token_small_query_512_from_9000_20260615/9999}
+      - RLT_RL_TOKEN_CHECKPOINT_PATH=${RLT_RL_TOKEN_CHECKPOINT_PATH:-/app/checkpoints/rlt_lower_right_rl_token_ablation_20260701/BEST/checkpoint}
       - RLT_ACTOR_CHECKPOINT_PATH=${RLT_ACTOR_CHECKPOINT_PATH:-}
       - RLT_DEFAULT_CRITIC_GATE_ENABLED=${RLT_DEFAULT_CRITIC_GATE_ENABLED:-1}
       - PYTHONPATH=/app:/app/src:/app/packages/openpi-client/src
@@ -213,7 +216,7 @@ services:
       - REDIS_DB=${REDIS_DB:-0}
       - RLT_STATE_CHANNEL=${RLT_STATE_CHANNEL:-aloha_rlt_state}
       - RLT_SEGMENT_DB_PATH=/app/segment_db/segments.sqlite3
-      - RLT_RL_TOKEN_CHECKPOINT_PATH=${RLT_RL_TOKEN_CHECKPOINT_PATH:-/app/checkpoints/eii_rinse_11repo_cam4_fullft_rl_token_small_query/rinse_11repo_rl_token_small_query_512_from_9000_20260615/9999}
+      - RLT_RL_TOKEN_CHECKPOINT_PATH=${RLT_RL_TOKEN_CHECKPOINT_PATH:-/app/checkpoints/rlt_lower_right_rl_token_ablation_20260701/BEST/checkpoint}
     gpus: all
 
   aloha_ros_nodes:
@@ -282,7 +285,56 @@ services:
       - UV_NO_SYNC=1
       - UV_NO_DEV=1
       - PYTHONPATH=/app/src
-      - RLT_RL_TOKEN_CHECKPOINT_PATH=${RLT_RL_TOKEN_CHECKPOINT_PATH:-/app/checkpoints/eii_rinse_11repo_cam4_fullft_rl_token_small_query/rinse_11repo_rl_token_small_query_512_from_9000_20260615/9999}
+      - RLT_RL_TOKEN_CHECKPOINT_PATH=${RLT_RL_TOKEN_CHECKPOINT_PATH:-/app/checkpoints/rlt_lower_right_rl_token_ablation_20260701/BEST/checkpoint}
+    gpus: all
+
+  rlt_token_server:
+    image: openpi_reward_learning_eii/openpi_server:reward-learning
+    build:
+      context: .
+      dockerfile: scripts/docker/serve_policy.Dockerfile
+    profiles:
+      - rlt
+    command:
+      - /bin/bash
+      - -lc
+      - >-
+        uv run --no-sync scripts/serve_policy.py --port 8002
+        --no-warmup-rtc
+        --no-warmup-non-rtc
+        --no-warmup-subtask
+        --video-memory-num-frames 1
+        --video-memory-stride-seconds 1.0
+        policy:checkpoint
+        --policy.config eii_rinse_11repo_cam4_fullft_rl_token_lower_right_query_4layer
+        --policy.dir
+        /app/checkpoints/rlt_lower_right_rl_token_ablation_20260701/BEST/checkpoint
+    init: true
+    tty: true
+    network_mode: host
+    volumes:
+      - $PWD:/app
+      - /home/eii/openpi0.5-rtc-reward-learning/checkpoints:/app/checkpoints:ro
+      - ${OPENPI_DATA_HOME:-~/.cache/openpi}:/openpi_assets
+      - ${RLT_TOKEN_JAX_CACHE_DIR:-./.jax_cache/rlt_token_server}:/app/.jax_cache
+    environment:
+      - GIT_LFS_SKIP_SMUDGE=1
+      - XLA_PYTHON_CLIENT_PREALLOCATE=false
+      - XLA_PYTHON_CLIENT_MEM_FRACTION=0.35
+      - OPENPI_DATA_HOME=/openpi_assets
+      - JAX_COMPILATION_CACHE_DIR=/app/.jax_cache
+      - JAX_PERSISTENT_CACHE_MIN_COMPILE_TIME_SECS=0
+      - JAX_PERSISTENT_CACHE_MIN_ENTRY_SIZE_BYTES=-1
+      - JAX_PERSISTENT_CACHE_ENABLE_XLA_CACHES=xla_gpu_per_fusion_autotune_cache_dir
+      - IS_DOCKER=true
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
+      - UV_PROJECT_ENVIRONMENT=/.venv
+      - VIRTUAL_ENV=/.venv
+      - UV_NO_SYNC=1
+      - UV_NO_DEV=1
+      - PYTHONPATH=/app/src
+      - RLT_RL_TOKEN_CHECKPOINT_PATH=${RLT_RL_TOKEN_CHECKPOINT_PATH:-/app/checkpoints/rlt_lower_right_rl_token_ablation_20260701/BEST/checkpoint}
     gpus: all
 
   redis:
@@ -324,7 +376,7 @@ services:
       - RLT_ONLINE_RUN_ROOT=/app/rlt_online/run
       - RLT_STATE_PATH=/app/segment_db/rlt_control_state.json
       - RLT_SEGMENT_DB_PATH=/app/segment_db/segments.sqlite3
-      - RLT_RL_TOKEN_CHECKPOINT_PATH=${RLT_RL_TOKEN_CHECKPOINT_PATH:-/app/checkpoints/eii_rinse_11repo_cam4_fullft_rl_token_small_query/rinse_11repo_rl_token_small_query_512_from_9000_20260615/9999}
+      - RLT_RL_TOKEN_CHECKPOINT_PATH=${RLT_RL_TOKEN_CHECKPOINT_PATH:-/app/checkpoints/rlt_lower_right_rl_token_ablation_20260701/BEST/checkpoint}
     depends_on:
       - redis
 

@@ -58,10 +58,16 @@ class WebsocketPolicyServer:
                 data = msgpack_numpy.unpackb(await websocket.recv())
 
                 obs = data.get("obs", None)  
-                prev_action = data.get("prev_action", None)     
+                method = data.get("method", "infer")
+                prev_action = data.get("prev_action", None)
                 use_rtc = data.get("use_rtc", False)
                 infer_time = time.monotonic()
-                action = self._policy.infer(obs, prev_action, use_rtc)
+                if method == "infer_rl_token":
+                    action = self._policy.infer_rl_token(obs)
+                elif method == "infer":
+                    action = self._policy.infer(obs, prev_action, use_rtc)
+                else:
+                    raise ValueError(f"Unsupported policy server method: {method}")
                 infer_time = time.monotonic() - infer_time
 
                 action["server_timing"] = {

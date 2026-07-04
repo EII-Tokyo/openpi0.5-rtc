@@ -44,7 +44,7 @@ class Settings:
     rlt_default_actor_speed_limit_preset: str = os.getenv("RLT_DEFAULT_ACTOR_SPEED_LIMIT_PRESET", "off")
     rlt_rl_token_checkpoint_path: str = os.getenv(
         "RLT_RL_TOKEN_CHECKPOINT_PATH",
-        "/app/checkpoints/eii_rinse_11repo_cam4_fullft_rl_token_small_query/rinse_11repo_rl_token_small_query_512_from_9000_20260615/9999",
+        "/app/checkpoints/rlt_lower_right_rl_token_ablation_20260701/BEST/checkpoint",
     )
     allow_origins: list[str] = field(default_factory=lambda: os.getenv("ALLOW_ORIGINS", "*").split(","))
 

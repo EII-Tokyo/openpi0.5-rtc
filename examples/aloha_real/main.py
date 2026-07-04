@@ -74,6 +74,8 @@ class Args:
     rlt_prefer_gpu_video: bool = True
     rlt_actor_path: str | None = None
     rlt_actor_poll_interval: float = 1.0
+    rlt_token_host: str = "127.0.0.1"
+    rlt_token_port: int | None = None
     # Set <= 0 to save the full episode instead of a rolling tail buffer.
     hdf5_max_buffer_seconds: float = 60.0
     # Save one HDF5 rollout each time the robot leaves reset pose and returns.
@@ -102,6 +104,13 @@ def main(args: Args) -> None:
         port=args.port,
     )
     logging.info(f"Server metadata: {ws_client_policy.get_server_metadata()}")
+    rlt_token_policy = None
+    if args.rlt_token_port is not None:
+        rlt_token_policy = _websocket_client_policy.WebsocketClientPolicy(
+            host=args.rlt_token_host,
+            port=args.rlt_token_port,
+        )
+        logging.info("RLT token server metadata: %s", rlt_token_policy.get_server_metadata())
 
     subscribers = []
     if args.save_format in {"video_hdf5", "video_hdf5_and_rlt_key_region"}:
@@ -169,6 +178,7 @@ def main(args: Args) -> None:
                 use_rtc=args.use_rtc,
                 rlt_actor_path=args.rlt_actor_path or os.getenv("RLT_ACTOR_CHECKPOINT_PATH"),
                 rlt_actor_poll_interval=args.rlt_actor_poll_interval,
+                rlt_token_policy=rlt_token_policy,
             )
         ),
         subscribers=subscribers if args.if_save_hdf5 else [],

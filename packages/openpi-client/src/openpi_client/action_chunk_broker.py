@@ -212,8 +212,10 @@ class ActionChunkBroker(_base_policy.BasePolicy):
         rlt_actor_path: str | None = None,
         rlt_actor_poll_interval: float = 1.0,
         rlt_actor_runtime=None,
+        rlt_token_policy: _base_policy.BasePolicy | None = None,
     ):
         self._policy = policy
+        self._rlt_token_policy = rlt_token_policy
         self._action_horizon = action_horizon
         self._cur_step: int = 0
 
@@ -557,6 +559,7 @@ class ActionChunkBroker(_base_policy.BasePolicy):
         action_start_index: int = 0,
     ) -> Dict[str, np.ndarray]:
         policy_results = dict(policy_results)
+        policy_results = self._augment_with_rlt_token(policy_results, obs)
         context = self._rlt_context_from_obs(obs)
         policy_results["rlt_context_epoch"] = context.get("rlt_context_epoch")
         reference_actions = np.array(policy_results["actions"], dtype=np.float32, copy=True)
@@ -720,6 +723,31 @@ class ActionChunkBroker(_base_policy.BasePolicy):
             }
         )
         return policy_results
+
+    def _augment_with_rlt_token(self, policy_results: Dict[str, np.ndarray], obs: Dict) -> Dict[str, np.ndarray]:
+        if self._rlt_token_policy is None:
+            return policy_results
+        if policy_results.get("z_rl", policy_results.get("rl_token")) is not None:
+            return policy_results
+        infer_rl_token = getattr(self._rlt_token_policy, "infer_rl_token", None)
+        if infer_rl_token is None:
+            return policy_results
+        try:
+            token_results = infer_rl_token(self._policy_obs(obs))
+        except Exception:
+            logging.exception("RLT token sidecar failed; actor will use VLA actions only")
+            return policy_results
+        augmented = dict(policy_results)
+        if token_results.get("z_rl") is not None:
+            augmented["z_rl"] = np.asarray(token_results["z_rl"], dtype=np.float32)
+        elif token_results.get("rl_token") is not None:
+            augmented["z_rl"] = np.asarray(token_results["rl_token"], dtype=np.float32)
+        if augmented.get("proprio", augmented.get("state")) is None:
+            if token_results.get("proprio") is not None:
+                augmented["proprio"] = np.asarray(token_results["proprio"], dtype=np.float32)
+            elif token_results.get("state") is not None:
+                augmented["proprio"] = np.asarray(token_results["state"], dtype=np.float32)
+        return augmented
 
     def _smooth_left_actor_actions(
         self,

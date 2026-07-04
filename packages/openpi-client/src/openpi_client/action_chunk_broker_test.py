@@ -27,6 +27,27 @@ class _Policy:
         pass
 
 
+class _PolicyWithoutToken(_Policy):
+    def infer(self, obs, *args):
+        self.obs_seen.append(dict(obs))
+        return {
+            "actions": np.arange(6, dtype=np.float32).reshape(3, 2),
+            "state": np.ones((4,), dtype=np.float32),
+        }
+
+
+class _TokenPolicy:
+    def __init__(self):
+        self.obs_seen = []
+
+    def infer_rl_token(self, obs):
+        self.obs_seen.append(dict(obs))
+        return {
+            "z_rl": np.full((8,), 3.0, dtype=np.float32),
+            "state": np.full((4,), 2.0, dtype=np.float32),
+        }
+
+
 class _Actor:
     def __init__(self, *, mode="apply"):
         self.mode = mode
@@ -89,6 +110,25 @@ def test_actor_enabled_replaces_actions_and_preserves_raw_reference():
     assert second["rlt_actor_applied"] is True
     assert len(actor.calls) == 1
     assert actor.calls[0][4] == 0
+
+
+def test_rlt_token_sidecar_supplies_missing_z_without_changing_reference_actions():
+    actor = _Actor(mode="apply")
+    token_policy = _TokenPolicy()
+    broker = ActionChunkBroker(
+        _PolicyWithoutToken(),
+        action_horizon=3,
+        use_rtc=False,
+        rlt_actor_runtime=actor,
+        rlt_token_policy=token_policy,
+    )
+
+    result = broker.infer({"rlt_context": {"actor_requested": True}, "keep": np.array([1])})
+
+    assert result["rlt_actor_applied"] is True
+    np.testing.assert_allclose(result["reference_action"], np.array([0, 1], dtype=np.float32))
+    np.testing.assert_allclose(actor.calls[0][1], np.full((8,), 3.0, dtype=np.float32))
+    assert "rlt_context" not in token_policy.obs_seen[0]
 
 
 def test_actor_gate_on_invalidates_cached_disabled_chunk():

@@ -102,6 +102,7 @@ def test_infer_reuses_prefix_hidden_for_rl_token():
     policy._guided_inference_with_prefix_hidden = model.guided_inference_with_prefix_hidden
     policy._sample_actions_with_rl_token = None
     policy._guided_inference_with_rl_token = None
+    policy._embed_prefix_hidden = model.embed_prefix_hidden
     policy._rng = jax.random.key(0)
 
     result = policy.infer({
@@ -132,6 +133,7 @@ def test_infer_prefers_direct_sample_actions_with_rl_token():
     policy._guided_inference_with_prefix_hidden = model.guided_inference_with_prefix_hidden
     policy._sample_actions_with_rl_token = model.sample_actions_with_rl_token
     policy._guided_inference_with_rl_token = None
+    policy._embed_prefix_hidden = model.embed_prefix_hidden
     policy._rng = jax.random.key(0)
 
     result = policy.infer({
@@ -145,3 +147,28 @@ def test_infer_prefers_direct_sample_actions_with_rl_token():
     assert model.embed_prefix_hidden_calls == 0
     assert result["actions"].shape == (2, 3)
     assert np.all(result["z_rl"] == 2.0)
+
+
+def test_infer_rl_token_uses_prefix_encoder_without_sampling_actions():
+    model = _FakeRlTokenModel()
+    policy = _policy.Policy.__new__(_policy.Policy)
+    policy._model = model
+    policy._input_transform = lambda x: x
+    policy._output_transform = lambda x: x
+    policy._sample_kwargs = {}
+    policy._metadata = {}
+    policy._is_pytorch_model = False
+    policy._embed_prefix_hidden = model.embed_prefix_hidden
+
+    result = policy.infer_rl_token({
+        "state": np.zeros((3,), dtype=np.float32),
+        "image": {"cam": np.zeros((2, 2, 3), dtype=np.float32)},
+        "image_mask": {"cam": np.array(True)},
+    })
+
+    assert model.sample_actions_calls == 0
+    assert model.sample_actions_with_prefix_hidden_calls == 0
+    assert model.sample_actions_with_rl_token_calls == 0
+    assert model.embed_prefix_hidden_calls == 1
+    np.testing.assert_allclose(result["state"], np.zeros((3,), dtype=np.float32))
+    np.testing.assert_allclose(result["z_rl"], np.zeros((4,), dtype=np.float32))

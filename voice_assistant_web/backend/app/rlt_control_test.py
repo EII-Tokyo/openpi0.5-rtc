@@ -71,7 +71,7 @@ def test_store_replaces_legacy_cam3_rl_token_checkpoint():
     )
     store._ensure_rl_token_checkpoint_path()
 
-    assert "eii_rinse_11repo_cam4_fullft_rl_token_small_query" in store._state.rl_token_checkpoint_path
+    assert "rlt_lower_right_rl_token_ablation_20260701" in store._state.rl_token_checkpoint_path
     assert "cam3" not in store._state.rl_token_checkpoint_path
 
 
