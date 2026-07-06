@@ -134,6 +134,12 @@ export type RLTKeyRegionReviewRecord = {
   segment_status: string | null
   train_eligible: boolean | null
   replay_status: string | null
+  replay_state_grain: string | null
+  requires_offline_reencode: boolean | null
+  formal_replay_state_grain: string | null
+  formal_replay_ready: boolean | null
+  conversion_status: string | null
+  conversion_reason: string | null
   missing_rlt_metadata: string[]
   voided: boolean | null
   default_video_path: string | null
@@ -166,6 +172,9 @@ export type RLTKeyRegionReviewSummary = {
   total: number
   trainable: number
   needs_crop: number
+  formal_replay_ready: number
+  needs_offline_reencode: number
+  legacy_unmarked: number
   success: number
   failure: number
   replay_samples: number

@@ -45,6 +45,9 @@ const emptySummary: RLTKeyRegionReviewSummary = {
   total: 0,
   trainable: 0,
   needs_crop: 0,
+  formal_replay_ready: 0,
+  needs_offline_reencode: 0,
+  legacy_unmarked: 0,
   success: 0,
   failure: 0,
   replay_samples: 0,
@@ -115,6 +118,9 @@ const reviewTitle = (record: RLTKeyRegionReviewRecord, absoluteIndex: number, to
 }
 
 const keyRegionStatusLabel = (record: RLTKeyRegionReviewRecord) => {
+  if (record.conversion_status === 'requires_offline_reencode') return 'needs offline encode'
+  if (record.conversion_status === 'legacy_unmarked_requires_audit') return 'legacy replay'
+  if (record.conversion_status && record.conversion_status !== 'formal_replay_ready') return record.conversion_status.replace(/_/g, ' ')
   if (record.needs_crop) return 'needs crop'
   if (record.trainable) return record.status || 'committed'
   if (record.incomplete_reason) return 'needs crop'
@@ -122,6 +128,8 @@ const keyRegionStatusLabel = (record: RLTKeyRegionReviewRecord) => {
 }
 
 const keyRegionEligibility = (record: RLTKeyRegionReviewRecord) => {
+  if (record.conversion_status === 'requires_offline_reencode') return 'offline encode'
+  if (record.conversion_status === 'legacy_unmarked_requires_audit') return 'audit first'
   if (record.needs_crop) return 'needs crop'
   if (record.trainable) return 'trainable'
   if (record.incomplete_reason) return 'pending'
@@ -1089,6 +1097,9 @@ export function KeyRegionsPage({
         <div className="key-region-summary-strip">
           <div className="key-region-summary-tile"><span>Total key regions</span><strong>{summary.total}</strong></div>
           <div className="key-region-summary-tile"><span>Trainable key regions</span><strong>{summary.trainable}</strong></div>
+          <div className="key-region-summary-tile"><span>Formal ready</span><strong>{summary.formal_replay_ready}</strong></div>
+          <div className="key-region-summary-tile"><span>Offline encode</span><strong>{summary.needs_offline_reencode}</strong></div>
+          <div className="key-region-summary-tile"><span>Legacy audit</span><strong>{summary.legacy_unmarked}</strong></div>
           <div className="key-region-summary-tile"><span>Confirmed replay samples</span><strong>{summary.replay_samples}</strong></div>
           <div className="key-region-summary-tile"><span>Success / failure</span><strong>{summary.success} / {summary.failure}</strong></div>
           <div className="key-region-summary-tile"><span>Needs crop review</span><strong>{summary.needs_crop}</strong></div>

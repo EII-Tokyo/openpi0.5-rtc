@@ -20,6 +20,7 @@ from functools import lru_cache
 from zoneinfo import ZoneInfo
 
 import numpy as np
+from openpi.training import rlt_replay_schema
 from fastapi import FastAPI
 from fastapi import Header
 from fastapi import HTTPException
@@ -432,6 +433,12 @@ def _manifest_summary(path: Path) -> dict | None:
         "segment_status",
         "train_eligible",
         "replay_status",
+        "replay_state_grain",
+        "requires_offline_reencode",
+        "formal_replay_state_grain",
+        "formal_replay_ready",
+        "z_rl_dim",
+        "z_dim",
         "missing_rlt_metadata",
         "voided",
         "shard_path",
@@ -906,10 +913,11 @@ def _key_region_video_paths(rollout_dir: Path) -> list[str]:
 
 
 def _record_has_trainable_files(record: dict) -> bool:
+    conversion = rlt_replay_schema.classify_replay_manifest(record, z_dim=_record_z_dim(record))
     return (
         bool(record.get("npz_exists"))
         and bool(record.get("shard_path"))
-        and record.get("train_eligible") is not False
+        and conversion.trainable
         and not bool(record.get("voided"))
         and str(record.get("segment_status") or "committed") == "committed"
         and int(record.get("num_replay_transitions") or 0) > 0
@@ -931,9 +939,28 @@ def _record_needs_crop(record: dict) -> bool:
     return (
         record.get("crop_start_sec") is None
         or record.get("crop_end_sec") is None
-        or record.get("train_eligible") is not True
+        or record.get("conversion_status") != "formal_replay_ready"
         or str(record.get("segment_status") or "") != "committed"
     )
+
+
+def _record_z_dim(record: dict) -> int | None:
+    for key in ("z_rl_dim", "z_dim"):
+        value = record.get(key)
+        with contextlib.suppress(TypeError, ValueError):
+            return int(value)
+    shape = record.get("replay_array_shapes") or {}
+    z_shape = shape.get("z_rl") if isinstance(shape, dict) else None
+    if isinstance(z_shape, list) and z_shape:
+        with contextlib.suppress(TypeError, ValueError):
+            return int(z_shape[-1])
+    return None
+
+
+def _populate_replay_conversion_status(record: dict) -> None:
+    status = rlt_replay_schema.classify_replay_manifest(record, z_dim=_record_z_dim(record))
+    record["conversion_status"] = status.status
+    record["conversion_reason"] = status.reason
 
 
 @lru_cache(maxsize=4096)
@@ -979,6 +1006,43 @@ def _rlt_action_delta_metrics(shard_path: Path | None) -> dict:
         return {"actor_inference_kind": "unknown"}
     stat = shard_path.stat()
     return _rlt_action_delta_metrics_cached(str(shard_path), stat.st_mtime_ns, stat.st_size)
+
+
+@lru_cache(maxsize=4096)
+def _rlt_npz_manifest_summary_cached(path: str, mtime_ns: int, size: int) -> dict:
+    del mtime_ns, size
+    try:
+        with np.load(path, allow_pickle=False) as arrays:
+            manifest = rlt_replay_schema.load_manifest_from_npz(arrays)
+            if "z_rl" in arrays.files:
+                manifest.setdefault("z_rl_dim", int(np.asarray(arrays["z_rl"]).shape[-1]))
+    except Exception as exc:
+        logging.debug("Could not read RLT npz manifest summary from %s: %s", path, exc)
+        return {}
+    return {
+        key: manifest.get(key)
+        for key in (
+            "train_eligible",
+            "replay_status",
+            "replay_state_grain",
+            "requires_offline_reencode",
+            "formal_replay_state_grain",
+            "formal_replay_ready",
+            "z_rl_dim",
+            "z_dim",
+            "replay_array_shapes",
+        )
+        if key in manifest
+    }
+
+
+def _populate_npz_manifest_summary(record: dict, shard_path: Path | None) -> None:
+    if not shard_path or not shard_path.exists():
+        return
+    stat = shard_path.stat()
+    for key, value in _rlt_npz_manifest_summary_cached(str(shard_path), stat.st_mtime_ns, stat.st_size).items():
+        if record.get(key) is None:
+            record[key] = value
 
 
 def _populate_rlt_action_delta_metrics(record: dict) -> None:
@@ -1112,6 +1176,12 @@ def _key_region_review_records(*, batch: str = "all") -> list[dict]:
                     "segment_status": manifest.get("segment_status"),
                     "train_eligible": manifest.get("train_eligible"),
                     "replay_status": manifest.get("replay_status"),
+                    "replay_state_grain": manifest.get("replay_state_grain"),
+                    "requires_offline_reencode": manifest.get("requires_offline_reencode"),
+                    "formal_replay_state_grain": manifest.get("formal_replay_state_grain"),
+                    "formal_replay_ready": manifest.get("formal_replay_ready"),
+                    "z_rl_dim": manifest.get("z_rl_dim") or manifest.get("z_dim"),
+                    "z_dim": manifest.get("z_dim"),
                     "missing_rlt_metadata": manifest.get("missing_rlt_metadata") or [],
                     "voided": manifest.get("voided"),
                     "shard_path": record.get("shard_path") or manifest.get("shard_path"),
@@ -1142,25 +1212,29 @@ def _key_region_review_records(*, batch: str = "all") -> list[dict]:
             record["npz_exists"] = True
             record["local_shard_path"] = str(shard_path.resolve())
             record["batch"] = record.get("batch") or _batch_from_replay_path(shard_path)
+            _populate_npz_manifest_summary(record, shard_path)
         else:
             record["actor_inference_kind"] = "unknown"
         record["manifest_exists"] = bool(record.get("manifest_exists"))
         record["video_exists"] = bool(record.get("video_exists"))
+        _populate_replay_conversion_status(record)
         _add_key_region_datetime_fields(record)
         _reconcile_key_region_record(record)
         record["trainable"] = record.get("status") == "committed" and _record_has_trainable_files(record)
         record["needs_crop"] = _record_needs_crop(record)
         if not record["trainable"]:
-            if record.get("status") != "committed":
-                reason = f"not_committed:{record.get('status') or 'untracked'}"
-            elif not record.get("shard_path") or not record.get("npz_exists"):
+            if not record.get("shard_path") or not record.get("npz_exists"):
                 reason = "missing_npz"
+            elif record.get("conversion_status") != "formal_replay_ready":
+                reason = str(record.get("conversion_status") or "not_formal_replay")
+            elif record.get("status") != "committed":
+                reason = f"not_committed:{record.get('status') or 'untracked'}"
             elif not record.get("manifest_exists"):
                 reason = "missing_manifest"
             elif not record.get("video_exists"):
                 reason = "missing_video"
-            elif record.get("train_eligible") is not True or record.get("segment_status") != "committed":
-                reason = "not_train_eligible"
+            elif record.get("segment_status") != "committed":
+                reason = "not_committed_manifest"
             elif record.get("voided"):
                 reason = "voided_manifest"
             else:
@@ -1250,6 +1324,9 @@ def _key_region_review_summary(records: list[dict]) -> RLTKeyRegionReviewSummary
         total=len(records),
         trainable=sum(1 for record in records if record.get("trainable")),
         needs_crop=sum(1 for record in records if record.get("needs_crop")),
+        formal_replay_ready=sum(1 for record in records if record.get("conversion_status") == "formal_replay_ready"),
+        needs_offline_reencode=sum(1 for record in records if record.get("conversion_status") == "requires_offline_reencode"),
+        legacy_unmarked=sum(1 for record in records if record.get("conversion_status") == "legacy_unmarked_requires_audit"),
         success=sum(1 for record in records if record.get("reward") == 1),
         failure=sum(1 for record in records if record.get("reward") == 0),
         replay_samples=sum(int(record.get("num_replay_transitions") or 0) for record in records),

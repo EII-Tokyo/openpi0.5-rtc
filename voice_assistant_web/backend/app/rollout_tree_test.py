@@ -88,10 +88,25 @@ def test_key_region_review_reconciles_saved_accepted_sample_as_trainable(tmp_pat
                 "num_replay_transitions": 3,
                 "segment_status": "committed",
                 "train_eligible": True,
+                "replay_state_grain": "paper_subsampled_anchor",
+                "formal_replay_ready": True,
+                "z_rl_dim": 2048,
             }
         )
     )
-    np.savez(shard_path, done=np.asarray([False, False, True]), reward_seq=np.ones((3, 10)))
+    np.savez(
+        shard_path,
+        done=np.asarray([False, False, True]),
+        reward_seq=np.ones((3, 10)),
+        manifest=json.dumps(
+            {
+                "train_eligible": True,
+                "replay_state_grain": "paper_subsampled_anchor",
+                "formal_replay_ready": True,
+                "z_rl_dim": 2048,
+            }
+        ),
+    )
     fake_control = _FakeRLTControl(
         [
             {
@@ -182,7 +197,19 @@ def test_key_region_review_counts_committed_container_clean_manual_shard_as_trai
     replay_root = tmp_path / "replay"
     shard_path = replay_root / "rlt_key_regions_clean" / "manual" / "key_region_manual.crop_1.npz"
     shard_path.parent.mkdir(parents=True)
-    np.savez(shard_path, done=np.asarray([True]), reward_seq=np.ones((1, 10)))
+    np.savez(
+        shard_path,
+        done=np.asarray([True]),
+        reward_seq=np.ones((1, 10)),
+        manifest=json.dumps(
+            {
+                "train_eligible": True,
+                "replay_state_grain": "paper_subsampled_anchor",
+                "formal_replay_ready": True,
+                "z_rl_dim": 2048,
+            }
+        ),
+    )
     fake_control = _FakeRLTControl(
         [
             {
@@ -401,28 +428,33 @@ def test_key_region_review_reports_video_duration_and_region_offsets(tmp_path, m
     assert records[0]["key_region_end_sec"] == pytest.approx(3.214)
 
 
-def _write_review_record(rollout_root, replay_root, *, key_region_id, reward, score_time):
+def _write_review_record(rollout_root, replay_root, *, key_region_id, reward, score_time, formal=True):
     rollout_dir = rollout_root / "key_regions/task/2026-06-01/warmup" / f"key_region_{key_region_id}"
     shard_path = replay_root / "rlt_key_regions/task/2026-06-01/shards" / f"key_region_{key_region_id}.npz"
     rollout_dir.mkdir(parents=True)
     shard_path.parent.mkdir(parents=True, exist_ok=True)
     (rollout_dir / "cam_right_wrist.mp4").write_bytes(b"mp4")
-    (rollout_dir / "manifest.json").write_text(
-        json.dumps(
+    manifest = {
+        "key_region_id": key_region_id,
+        "phase": "warmup",
+        "reward": reward,
+        "start_time": score_time - 2.0,
+        "end_time": score_time - 1.0,
+        "score_time": score_time,
+        "num_replay_transitions": 3,
+        "segment_status": "committed",
+        "train_eligible": True,
+    }
+    if formal:
+        manifest.update(
             {
-                "key_region_id": key_region_id,
-                "phase": "warmup",
-                "reward": reward,
-                "start_time": score_time - 2.0,
-                "end_time": score_time - 1.0,
-                "score_time": score_time,
-                "num_replay_transitions": 3,
-                "segment_status": "committed",
-                "train_eligible": True,
+                "replay_state_grain": "paper_subsampled_anchor",
+                "formal_replay_ready": True,
+                "z_rl_dim": 2048,
             }
         )
-    )
-    np.savez(shard_path, done=np.asarray([False, False, True]), reward_seq=np.ones((3, 10)))
+    (rollout_dir / "manifest.json").write_text(json.dumps(manifest))
+    np.savez(shard_path, done=np.asarray([False, False, True]), reward_seq=np.ones((3, 10)), manifest=json.dumps(manifest))
     return shard_path
 
 
@@ -432,25 +464,25 @@ def _write_cropped_review_record(rollout_root, replay_root, *, key_region_id, re
     rollout_dir.mkdir(parents=True)
     shard_path.parent.mkdir(parents=True, exist_ok=True)
     (rollout_dir / "cam_right_wrist.mp4").write_bytes(b"mp4")
-    (rollout_dir / "manifest.json").write_text(
-        json.dumps(
-            {
-                "key_region_id": key_region_id,
-                "phase": "warmup",
-                "reward": reward,
-                "start_time": score_time - 2.0,
-                "end_time": score_time - 1.0,
-                "score_time": score_time,
-                "num_replay_transitions": 3,
-                "segment_status": "committed",
-                "train_eligible": True,
-                "crop_start_sec": 0.25,
-                "crop_end_sec": 1.25,
-                "shard_path": str(shard_path),
-            }
-        )
-    )
-    np.savez(shard_path, done=np.asarray([False, False, True]), reward_seq=np.ones((3, 10)))
+    manifest = {
+        "key_region_id": key_region_id,
+        "phase": "warmup",
+        "reward": reward,
+        "start_time": score_time - 2.0,
+        "end_time": score_time - 1.0,
+        "score_time": score_time,
+        "num_replay_transitions": 3,
+        "segment_status": "committed",
+        "train_eligible": True,
+        "crop_start_sec": 0.25,
+        "crop_end_sec": 1.25,
+        "shard_path": str(shard_path),
+        "replay_state_grain": "paper_subsampled_anchor",
+        "formal_replay_ready": True,
+        "z_rl_dim": 2048,
+    }
+    (rollout_dir / "manifest.json").write_text(json.dumps(manifest))
+    np.savez(shard_path, done=np.asarray([False, False, True]), reward_seq=np.ones((3, 10)), manifest=json.dumps(manifest))
     return shard_path
 
 
@@ -674,6 +706,22 @@ def test_key_region_review_needs_crop_lists_uncropped_trainable_candidates(tmp_p
 
     assert [record.key_region_id for record in page.items] == ["raw_candidate"]
     assert page.summary.needs_crop == 1
+
+
+def test_key_region_review_marks_legacy_replay_as_not_formal_trainable(tmp_path, monkeypatch):
+    rollout_root = tmp_path / "rollouts"
+    replay_root = tmp_path / "replay"
+    _write_review_record(rollout_root, replay_root, key_region_id="legacy", reward=1, score_time=10.0, formal=False)
+
+    monkeypatch.setattr(main, "ROLLOUTS_ROOT", rollout_root)
+    monkeypatch.setattr(main, "REPLAY_ROOT", replay_root)
+    monkeypatch.setattr(main, "rlt_control", _FakeRLTControl([]))
+
+    page = main.rlt_key_region_review(limit=20)
+
+    assert page.items[0].conversion_status == "legacy_unmarked_requires_audit"
+    assert page.items[0].trainable is False
+    assert page.items[0].incomplete_reason == "legacy_unmarked_requires_audit"
 
 
 def test_preference_candidates_only_use_clean_cropped_records(tmp_path, monkeypatch):

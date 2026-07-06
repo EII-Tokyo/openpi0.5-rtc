@@ -366,6 +366,12 @@ class RLTKeyRegionReviewRecord(BaseModel):
     segment_status: str | None = None
     train_eligible: bool | None = None
     replay_status: str | None = None
+    replay_state_grain: str | None = None
+    requires_offline_reencode: bool | None = None
+    formal_replay_state_grain: str | None = None
+    formal_replay_ready: bool | None = None
+    conversion_status: str | None = None
+    conversion_reason: str | None = None
     missing_rlt_metadata: list[str] = Field(default_factory=list)
     voided: bool | None = None
     default_video_path: str | None = None
@@ -398,6 +404,9 @@ class RLTKeyRegionReviewSummary(BaseModel):
     total: int = 0
     trainable: int = 0
     needs_crop: int = 0
+    formal_replay_ready: int = 0
+    needs_offline_reencode: int = 0
+    legacy_unmarked: int = 0
     success: int = 0
     failure: int = 0
     replay_samples: int = 0
