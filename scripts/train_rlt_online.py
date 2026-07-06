@@ -94,6 +94,8 @@ class Args:
     awbc_max_action_delta_norm: float = 2.0
     train_action_horizon: int | None = 10
     expected_replay_action_horizon: int | None = 10
+    allow_non_formal_replay: bool = False
+    expected_replay_z_dim: int | None = 2048
     wandb_enabled: bool = True
     wandb_project: str = "openpi"
     wandb_run_name: str = "rlt_actor_critic_online"
@@ -1104,6 +1106,8 @@ def _build_replay_store(args: Args) -> rlt_replay_store.RLTReplayStore:
         sample_action_horizon=args.train_action_horizon,
         segment_db_path=args.segment_db_path,
         manifest_path=args.manifest_path,
+        require_formal_replay=not args.allow_non_formal_replay,
+        expected_formal_z_dim=args.expected_replay_z_dim,
     )
 
 

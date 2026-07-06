@@ -291,6 +291,29 @@ def test_rlt_replay_store_rejects_manifest_marked_voided(tmp_path):
     assert store.scan() == []
     assert any("voided" in reason for reason in store.bad_shards().values())
 
+
+def test_rlt_replay_store_can_require_formal_paper_anchor_replay(tmp_path):
+    shards_dir = tmp_path / "shards"
+    shards_dir.mkdir()
+    legacy_manifest = {"schema_version": 1, "train_eligible": True, "voided": False}
+    formal_manifest = {
+        "schema_version": 1,
+        "train_eligible": True,
+        "voided": False,
+        "replay_state_grain": "paper_subsampled_anchor",
+        "formal_replay_ready": True,
+        "z_rl_dim": 4,
+    }
+    np.savez(shards_dir / "legacy.npz", **_arrays(5, reward=1.0), manifest=json.dumps(legacy_manifest))
+    np.savez(shards_dir / "formal.npz", **_arrays(7, reward=0.0), manifest=json.dumps(formal_manifest))
+
+    store = rlt_replay_store.RLTReplayStore(tmp_path, require_formal_replay=True)
+    added = store.scan()
+
+    assert [info.path.name for info in added] == ["formal.npz"]
+    assert store.stats.replay_size == 7
+    assert any("formal replay" in reason for reason in store.bad_shards().values())
+
 def test_rlt_replay_store_ready_can_require_committed_shard_count(tmp_path):
     shards_dir = tmp_path / "shards"
     shards_dir.mkdir()

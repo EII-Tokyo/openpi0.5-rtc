@@ -10,6 +10,7 @@ import jax.numpy as jnp
 import numpy as np
 
 from openpi.training import rlt_training
+from openpi.training import rlt_replay_schema
 from openpi.training import rlt_trainable_manifest
 
 REQUIRED_REPLAY_KEYS: tuple[str, ...] = (
@@ -80,6 +81,8 @@ class RLTReplayStore:
         segment_db_path: pathlib.Path | str | None = None,
         manifest_path: pathlib.Path | str | None = None,
         normalize_z_rl: bool = False,
+        require_formal_replay: bool = False,
+        expected_formal_z_dim: int | None = None,
     ):
         if sample_action_horizon is not None and sample_action_horizon <= 0:
             raise ValueError("sample_action_horizon must be positive when provided")
@@ -90,6 +93,8 @@ class RLTReplayStore:
         self._segment_db_path = None if segment_db_path is None else pathlib.Path(segment_db_path)
         self._manifest_path = None if manifest_path is None else pathlib.Path(manifest_path)
         self._normalize_z_rl = normalize_z_rl
+        self._require_formal_replay = require_formal_replay
+        self._expected_formal_z_dim = expected_formal_z_dim
         self._z_rl_normalization: ZRLNormalization | None = None
         self._shards: list[_LoadedShard] = []
         self._loaded_paths: set[pathlib.Path] = set()
@@ -267,7 +272,12 @@ class RLTReplayStore:
 
         _validate_arrays(path, arrays)
         shape = _shape_from_arrays(arrays)
-        _validate_manifest(manifest, shape)
+        _validate_manifest(
+            manifest,
+            shape,
+            require_formal_replay=self._require_formal_replay,
+            expected_formal_z_dim=self._expected_formal_z_dim,
+        )
         if self._sample_action_horizon is not None and self._sample_action_horizon > shape.action_horizon:
             raise ReplayShardError(
                 f"sample_action_horizon={self._sample_action_horizon} exceeds replay action_horizon={shape.action_horizon}"
@@ -391,20 +401,19 @@ def _validate_arrays(path: pathlib.Path, arrays: dict[str, np.ndarray]) -> None:
 
 
 def _load_manifest(data) -> dict:
-    if "manifest" not in data:
-        return {}
-    raw = data["manifest"]
-    if isinstance(raw, np.ndarray):
-        raw = raw.item()
-    if isinstance(raw, bytes):
-        raw = raw.decode("utf-8")
-    if not raw:
-        return {}
-    return json.loads(str(raw))
+    return rlt_replay_schema.load_manifest_from_npz(data)
 
 
-def _validate_manifest(manifest: dict, shape: ReplayShape) -> None:
+def _validate_manifest(
+    manifest: dict,
+    shape: ReplayShape,
+    *,
+    require_formal_replay: bool = False,
+    expected_formal_z_dim: int | None = None,
+) -> None:
     if not manifest:
+        if require_formal_replay:
+            raise ReplayShardError("not formal replay trainable: missing manifest")
         return
     if manifest.get("voided") is True:
         raise ReplayShardError("manifest marks shard as voided")
@@ -427,3 +436,12 @@ def _validate_manifest(manifest: dict, shape: ReplayShape) -> None:
         raise ReplayShardError(
             f"manifest policy_horizon={policy_horizon} does not match replay action_horizon={shape.action_horizon}"
         )
+    if require_formal_replay:
+        try:
+            rlt_replay_schema.require_formal_trainable_manifest(
+                manifest,
+                z_dim=shape.z_dim,
+                expected_z_dim=expected_formal_z_dim,
+            )
+        except ValueError as exc:
+            raise ReplayShardError(str(exc)) from exc

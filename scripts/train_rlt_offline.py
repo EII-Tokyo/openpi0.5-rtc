@@ -45,6 +45,7 @@ class Args:
     actor_min_success_episodes: int = 0
     actor_min_failure_episodes: int = 0
     init_critic_checkpoint: pathlib.Path | None = None
+    init_inference_actor_checkpoint: pathlib.Path | None = None
     max_replay_samples: int | None = None
     recursive_scan: bool = False
     segment_db_path: pathlib.Path | None = None
@@ -66,6 +67,8 @@ class Args:
     train_action_horizon: int | None = 10
     expected_replay_action_horizon: int | None = 10
     normalize_z_rl: bool = False
+    allow_non_formal_replay: bool = False
+    expected_replay_z_dim: int | None = 2048
     wandb_enabled: bool = True
     wandb_project: str = "openpi-rlt-offline"
     wandb_run_name: str = "rlt_actor_critic_offline"
@@ -94,6 +97,8 @@ def _build_replay_store(args: Args) -> rlt_replay_store.RLTReplayStore:
         segment_db_path=args.segment_db_path,
         manifest_path=args.manifest_path,
         normalize_z_rl=args.normalize_z_rl,
+        require_formal_replay=not args.allow_non_formal_replay,
+        expected_formal_z_dim=args.expected_replay_z_dim,
     )
 
 
@@ -142,6 +147,8 @@ def _build_train_store(args: Args, train_manifest: pathlib.Path | None) -> rlt_r
         sample_action_horizon=args.train_action_horizon,
         manifest_path=train_manifest,
         normalize_z_rl=args.normalize_z_rl,
+        require_formal_replay=not args.allow_non_formal_replay,
+        expected_formal_z_dim=args.expected_replay_z_dim,
     )
 
 
@@ -340,9 +347,20 @@ def main(args: Args) -> None:
 
     config = _build_training_config(args, train_shape)
     state = rlt_training.init_train_state(config, jax.random.key(args.seed))
+    if args.init_inference_actor_checkpoint is not None:
+        state, init_checkpoint_metadata = rlt_checkpoint_io.load_inference_actor_checkpoint(
+            state,
+            args.init_inference_actor_checkpoint,
+        )
+        logging.info(
+            "Initialized actor/critic from inference actor checkpoint %s metadata_step=%s",
+            args.init_inference_actor_checkpoint,
+            init_checkpoint_metadata.get("step"),
+        )
     if args.init_critic_checkpoint is not None:
         state = _load_critic_checkpoint(state, args.init_critic_checkpoint)
-        logging.info("Initialized critic from %s; actor remains freshly initialized", args.init_critic_checkpoint)
+        actor_source = "inference actor checkpoint" if args.init_inference_actor_checkpoint is not None else "fresh initialization"
+        logging.info("Initialized critic from %s; actor remains from %s", args.init_critic_checkpoint, actor_source)
     if args.training_stage == "actor_only":
         state = rlt_training.sync_target_params(state)
         logging.info("Synced target critic before actor_only training")
