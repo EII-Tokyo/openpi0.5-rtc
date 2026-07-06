@@ -118,6 +118,44 @@ def _freeze_right_arm_actions(
     return frozen
 
 
+def _apply_right_arm_hold_transition(
+    *,
+    actions: np.ndarray,
+    hold_state: np.ndarray,
+    last_emitted_action: np.ndarray | None,
+    transition_steps: int,
+    right_arm_indices: tuple[int, ...] = _RIGHT_ARM_ACTION_INDICES,
+) -> np.ndarray:
+    transitioned = _freeze_right_arm_actions(actions, hold_state, right_arm_indices=right_arm_indices)
+    steps = int(transition_steps or 0)
+    if steps <= 1 or last_emitted_action is None or not right_arm_indices:
+        return transitioned
+
+    hold_state = np.asarray(hold_state, dtype=np.float32)
+    last_emitted = np.asarray(last_emitted_action, dtype=np.float32)
+    if (
+        transitioned.ndim != 2
+        or hold_state.ndim != 1
+        or last_emitted.ndim != 1
+        or transitioned.shape[1] <= max(right_arm_indices)
+        or hold_state.shape[0] <= max(right_arm_indices)
+        or last_emitted.shape[0] <= max(right_arm_indices)
+    ):
+        return transitioned
+
+    steps = min(steps, transitioned.shape[0])
+    if steps <= 1:
+        return transitioned
+    weights = np.linspace(0.0, 1.0, steps, dtype=np.float32)
+    indices = list(right_arm_indices)
+    start_values = last_emitted[indices]
+    hold_values = hold_state[indices]
+    transitioned[:steps, right_arm_indices] = (
+        (1.0 - weights[:, None]) * start_values[None, :] + weights[:, None] * hold_values[None, :]
+    )
+    return transitioned
+
+
 def _nearest_equivalent_angle(target: np.ndarray, current: np.ndarray) -> np.ndarray:
     return target + 2.0 * np.pi * np.round((current - target) / (2.0 * np.pi))
 
@@ -668,9 +706,32 @@ class ActionChunkBroker(_base_policy.BasePolicy):
             if actor_requested:
                 before_freeze = np.asarray(policy_results["actions"], dtype=np.float32)
                 robot_state = np.asarray(obs.get("state", proprio), dtype=np.float32)[:14]
+                right_arm_hold_just_latched = self._right_arm_hold_state is None
                 if self._right_arm_hold_state is None:
                     self._right_arm_hold_state = np.array(robot_state, dtype=np.float32, copy=True)
                 frozen_actions = _freeze_right_arm_actions(before_freeze, self._right_arm_hold_state)
+                if right_arm_hold_just_latched:
+                    last_emitted = self._last_emitted_action
+                    if last_emitted is not None:
+                        last_emitted = np.asarray(last_emitted, dtype=np.float32)
+                        if last_emitted.ndim == 1 and last_emitted.shape[0] > max(_RIGHT_ARM_ACTION_INDICES):
+                            hold_delta = np.max(
+                                np.abs(
+                                    last_emitted[list(_RIGHT_ARM_ACTION_INDICES)]
+                                    - self._right_arm_hold_state[list(_RIGHT_ARM_ACTION_INDICES)]
+                                )
+                            )
+                            logging.info(
+                                "RLT right arm hold latched: transition_steps=%s max_delta_from_last_emitted=%.5f",
+                                int(context.get("actor_handoff_steps", 0) or 0),
+                                float(hold_delta),
+                            )
+                    frozen_actions = _apply_right_arm_hold_transition(
+                        actions=frozen_actions,
+                        hold_state=self._right_arm_hold_state,
+                        last_emitted_action=self._last_emitted_action,
+                        transition_steps=int(context.get("actor_handoff_steps", 0) or 0),
+                    )
                 if before_freeze.ndim == 2 and before_freeze.shape[1] > max(_RIGHT_ARM_ACTION_INDICES):
                     right_arm_frozen = not np.allclose(
                         before_freeze[:, _RIGHT_ARM_ACTION_INDICES],

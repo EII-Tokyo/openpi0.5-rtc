@@ -4,6 +4,7 @@ import numpy as np
 from openpi_client.action_chunk_broker import (
     ActionChunkBroker,
     _apply_actor_handoff_smoothing,
+    _apply_right_arm_hold_transition,
     _limit_key_region_action_delta,
     _freeze_right_arm_actions,
     _propagate_actor_residual_for_guidance,
@@ -313,6 +314,62 @@ def test_actor_handoff_uses_last_emitted_action_before_robot_state():
 
     np.testing.assert_allclose(smoothed[:4, 0], np.array([0.25, 0.5, 0.75, 1.0], dtype=np.float32))
     np.testing.assert_allclose(smoothed[:, 6], adjusted[:, 6])
+
+
+def test_right_arm_hold_transition_blends_from_last_emitted_action():
+    actions = np.zeros((5, 14), dtype=np.float32)
+    actions[:, 7:14] = -1.0
+    hold_state = np.zeros((14,), dtype=np.float32)
+    last_emitted = np.zeros((14,), dtype=np.float32)
+    last_emitted[7:14] = 1.0
+
+    transitioned = _apply_right_arm_hold_transition(
+        actions=actions,
+        hold_state=hold_state,
+        last_emitted_action=last_emitted,
+        transition_steps=4,
+    )
+
+    np.testing.assert_allclose(transitioned[:, :7], actions[:, :7])
+    np.testing.assert_allclose(transitioned[:4, 7], np.array([1.0, 2.0 / 3.0, 1.0 / 3.0, 0.0], dtype=np.float32))
+    np.testing.assert_allclose(transitioned[4, 7:14], np.zeros((7,), dtype=np.float32))
+
+
+def test_key_region_right_arm_hold_uses_handoff_steps_to_avoid_first_frame_jump():
+    class _RightArmActor(_Actor):
+        def apply(self, *, reference_actions, z_rl, proprio, context, action_start_index=None):
+            adjusted = reference_actions.copy()
+            adjusted[:, 7:14] = -2.0
+            return RLTActorApplyResult(
+                adjusted,
+                True,
+                None,
+                "/tmp/actor",
+                5,
+                1.0,
+                1.0,
+                action_start_index=0,
+                action_horizon=10,
+                action_end_index=10,
+            )
+
+    broker = ActionChunkBroker(_Policy(), action_horizon=10, use_rtc=False, rlt_actor_runtime=_RightArmActor())
+    broker._last_emitted_action = np.zeros((14,), dtype=np.float32)
+    broker._last_emitted_action[7:14] = 1.0
+    reference = np.zeros((10, 14), dtype=np.float32)
+    robot_state = np.zeros((14,), dtype=np.float32)
+
+    results = broker._apply_rlt_actor_to_policy_results(
+        {
+            "actions": reference,
+            "z_rl": np.ones((8,), dtype=np.float32),
+            "state": np.zeros((14,), dtype=np.float32),
+        },
+        {"state": robot_state, "rlt_context": {"actor_requested": True, "phase": "key_region", "actor_handoff_steps": 4}},
+    )
+
+    np.testing.assert_allclose(results["actions"][:4, 7], np.array([1.0, 2.0 / 3.0, 1.0 / 3.0, 0.0], dtype=np.float32))
+    np.testing.assert_allclose(results["actions"][4:, 7:14], np.zeros((6, 7), dtype=np.float32))
 
 
 def test_infer_records_last_emitted_action_for_next_handoff():
