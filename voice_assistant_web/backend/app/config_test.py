@@ -1,4 +1,14 @@
+import os
+from pathlib import Path
+
 from .config import Settings
+
+
+def test_backend_pytest_uses_isolated_segment_db_path():
+    db_path = Path(os.environ["RLT_SEGMENT_DB_PATH"])
+
+    assert db_path.parent.exists()
+    assert not str(db_path).startswith("/app/")
 
 
 def test_default_rl_token_checkpoint_is_lower_right_4layer_checkpoint(monkeypatch):
