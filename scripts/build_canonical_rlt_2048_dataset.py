@@ -11,6 +11,8 @@ from typing import Any
 
 import numpy as np
 
+from openpi.training import rlt_replay_schema
+
 
 ALLOWED_KINDS = {"rlt_raw", "rlt_clean", "expert", "bootstrap"}
 ALLOWED_SPLITS = {"unsplit", "train", "holdout"}
@@ -111,8 +113,9 @@ def _validate_shard(path: Path) -> tuple[dict[str, Any] | None, str | None]:
             replay_state_grain = manifest.get("replay_state_grain")
             if z_rl_source == "rl_token_reencoded_aligned_to_proprio_segments":
                 return None, "fixed_segments_not_paper_subsampled"
-            if z_rl_source == "rl_token_reencoded" and replay_state_grain != "paper_subsampled_anchor":
-                return None, "missing_paper_subsampled_anchor_grain"
+            status = rlt_replay_schema.classify_replay_manifest(manifest, z_dim=int(z_rl.shape[-1]))
+            if not status.trainable:
+                return None, status.status
             key_region_id = str(
                 manifest.get("key_region_id")
                 or manifest.get("segment_id")

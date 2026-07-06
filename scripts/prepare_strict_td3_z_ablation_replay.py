@@ -268,6 +268,10 @@ def encode_vla_replay(candidates: list[dict[str, Any]], split: dict[str, Any], o
                     "vla_base_checkpoint": str(DEFAULT_CAM4_CHECKPOINT),
                     "rl_token_encoder_checkpoint": str(DEFAULT_SIDECAR_CHECKPOINT),
                     "replay_state_grain": "paper_subsampled_anchor",
+                    "requires_offline_reencode": False,
+                    "formal_replay_state_grain": "paper_subsampled_anchor",
+                    "formal_replay_ready": True,
+                    "train_eligible": True,
                 }
             )
             arrays["manifest"] = np.asarray(json.dumps(manifest, ensure_ascii=False, sort_keys=True))

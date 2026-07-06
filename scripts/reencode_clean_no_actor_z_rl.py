@@ -179,6 +179,10 @@ def rewrite_shard_z_rl(
                 "proprio_dim": int(proprio.shape[-1]),
                 "previous_proprio_shape": previous_proprio_shape,
                 "replay_state_grain": "paper_subsampled_anchor",
+                "requires_offline_reencode": False,
+                "formal_replay_state_grain": "paper_subsampled_anchor",
+                "formal_replay_ready": True,
+                "train_eligible": True,
                 "subsampled_transition_semantics": "x_i_action_i_to_i_plus_c_next_x_i_plus_c",
             }
         )
