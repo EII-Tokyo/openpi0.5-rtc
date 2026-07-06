@@ -377,6 +377,10 @@ services:
       - RLT_STATE_PATH=/app/segment_db/rlt_control_state.json
       - RLT_SEGMENT_DB_PATH=/app/segment_db/segments.sqlite3
       - RLT_RL_TOKEN_CHECKPOINT_PATH=${RLT_RL_TOKEN_CHECKPOINT_PATH:-/app/checkpoints/rlt_lower_right_rl_token_ablation_20260701/BEST/checkpoint}
+      - EII_CAMERA_TRANSPORT=${EII_CAMERA_TRANSPORT:-webrtc}
+      - EII_CAMERA_WEBRTC_ENABLED=${EII_CAMERA_WEBRTC_ENABLED:-true}
+      - EII_REALTIME_INCLUDE_CAMERA_FRAMES=${EII_REALTIME_INCLUDE_CAMERA_FRAMES:-false}
+      - EII_CAMERA_WEBRTC_MEDIA_URL=${EII_CAMERA_WEBRTC_MEDIA_URL:-http://127.0.0.1:8013}
     depends_on:
       - redis
 
