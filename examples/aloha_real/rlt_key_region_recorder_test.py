@@ -158,6 +158,7 @@ def test_key_region_replay_publishes_valid_and_invalid_ack(tmp_path):
             "missing_rlt_metadata": valid_missing,
             "replay_status": recorder._replay_status(valid_missing, valid_arrays),
             "replay_ready": valid_arrays is not None,
+            "train_eligible": False,
         }
         store._publish_replay_ack(valid_manifest, shard_path=tmp_path / "valid.npz")
 
@@ -182,9 +183,9 @@ def test_key_region_replay_publishes_valid_and_invalid_ack(tmp_path):
     assert messages[0]["phase"] == "warmup"
     assert messages[0]["reward"] == 1
     assert messages[0]["replay_ready"] is True
-    assert messages[0]["train_eligible"] is True
+    assert messages[0]["train_eligible"] is False
     assert messages[0]["segment_status"] == "committed"
-    assert messages[0]["replay_status"] == "written"
+    assert messages[0]["replay_status"] == "runtime_cache_block_requires_offline_reencode"
     assert messages[0]["num_replay_transitions"] == 2
     assert messages[0]["shard_path"] == str(tmp_path / "valid.npz")
     assert messages[1]["type"] == "rlt_replay_segment_rejected"
@@ -231,6 +232,10 @@ def test_key_region_manifest_includes_replay_schema_metadata(tmp_path):
     assert manifest["action_space"] == "aloha_exec"
     assert manifest["action_dim"] == 14
     assert manifest["reward_placement"] == "terminal_last_train_step"
+    assert manifest["replay_state_grain"] == "runtime_action_cache_block"
+    assert manifest["requires_offline_reencode"] is True
+    assert manifest["formal_replay_state_grain"] == "paper_subsampled_anchor"
+    assert manifest["formal_replay_ready"] is False
     assert manifest["pre_roll_seconds"] == 0.0
     assert manifest["post_roll_seconds"] == 0.0
     assert manifest["key_region_start_sec"] == 0.0
@@ -319,7 +324,7 @@ def test_key_region_manifest_marks_train_eligibility(tmp_path):
     finally:
         store.close()
 
-    assert manifest["train_eligible"] is True
+    assert manifest["train_eligible"] is False
     assert manifest["segment_status"] == "committed"
     assert manifest["voided"] is False
 

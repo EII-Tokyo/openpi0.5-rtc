@@ -245,6 +245,13 @@ def _extract_action_array(action: dict, *keys: str) -> np.ndarray | None:
     return None
 
 
+def _stack_complete(records: list[StepRecord], attr: str, *, dtype: np.dtype | type = np.float32) -> np.ndarray | None:
+    values = [getattr(record, attr) for record in records]
+    if any(value is None for value in values):
+        return None
+    return np.asarray(values, dtype=dtype)
+
+
 class KeyRegionReplayRecorder(_subscriber.Subscriber):
     """Record manually marked RLT key regions without blocking the policy loop."""
 
@@ -527,6 +534,9 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
             root.attrs["reward"] = segment.score_event.get("reward", 0)
             root.attrs["score_timeout"] = bool(segment.score_event.get("score_timeout", False))
             root.attrs["fps"] = self._fps
+            root.attrs["replay_state_grain"] = "runtime_action_cache_block"
+            root.attrs["requires_offline_reencode"] = True
+            root.attrs["formal_replay_state_grain"] = "paper_subsampled_anchor"
             root.attrs["missing_rlt_metadata"] = np.asarray(missing_metadata, dtype="S")
             root.attrs["camera_names"] = np.asarray(sorted({name for record in records for name in record.images}), dtype="S")
             obs = root.create_group("observations")
@@ -536,6 +546,26 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
             actions = [record.action for record in records if record.action is not None]
             if len(actions) == len(records):
                 root.create_dataset("action", data=np.asarray(actions, dtype=np.float32))
+            reference_action = _stack_complete(records, "reference_action")
+            if reference_action is not None:
+                root.create_dataset("reference_action", data=reference_action)
+            rlt = root.create_group("rlt")
+            rlt.attrs["state_grain"] = "runtime_action_cache_block"
+            rlt.attrs["requires_offline_reencode"] = True
+            rlt.attrs["note"] = (
+                "cached_z_rl/cached_proprio are runtime cache values for audit only; "
+                "formal training replay must re-encode z_rl from each stride anchor frame."
+            )
+            rlt.create_dataset("step_index", data=np.asarray([record.step_index for record in records], dtype=np.int64))
+            for attr, dataset_name in (
+                ("action_full", "action_full"),
+                ("reference_action_full", "reference_action_full"),
+                ("z_rl", "cached_z_rl"),
+                ("proprio", "cached_proprio"),
+            ):
+                values = _stack_complete(records, attr)
+                if values is not None:
+                    rlt.create_dataset(dataset_name, data=values)
             root.create_dataset("timestamps", data=np.asarray([record.timestamp for record in records], dtype=np.float64))
 
     def _write_manifest(
@@ -577,7 +607,7 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
             "replay_status": _replay_status(missing_metadata, replay_arrays),
             "replay_ready": replay_arrays is not None,
             "segment_status": "committed" if replay_arrays is not None else "rejected",
-            "train_eligible": replay_arrays is not None,
+            "train_eligible": False,
             "voided": False,
             "schema_version": 1,
             "train_chunk_horizon": self._train_horizon,
@@ -586,6 +616,10 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
             "action_space": "aloha_exec",
             "action_dim": 0 if replay_arrays is None else int(replay_arrays["action"].shape[-1]),
             "reward_placement": "terminal_last_train_step",
+            "replay_state_grain": "runtime_action_cache_block",
+            "requires_offline_reencode": True,
+            "formal_replay_state_grain": "paper_subsampled_anchor",
+            "formal_replay_ready": False,
             "train_horizon": self._train_horizon,
             "full_horizon": self._full_horizon,
             "replay_array_shapes": {}
@@ -604,7 +638,7 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
     def _publish_replay_ack(self, manifest: dict[str, Any], *, shard_path: pathlib.Path | None) -> None:
         payload = {
             "type": "rlt_replay_segment_committed"
-            if bool(manifest.get("train_eligible", manifest.get("replay_ready", False)))
+            if bool(manifest.get("replay_ready", False))
             else "rlt_replay_segment_rejected",
             "timestamp": time.time(),
             "key_region_id": manifest.get("key_region_id"),
@@ -691,7 +725,7 @@ def _step_window(records: list[StepRecord], start: int, attr: str, horizon: int)
 
 def _replay_status(missing_metadata: list[str], replay_arrays: dict[str, np.ndarray] | None) -> str:
     if replay_arrays is not None:
-        return "written"
+        return "runtime_cache_block_requires_offline_reencode"
     if any(item not in {"not_enough_frames", "no_valid_replay_samples"} for item in missing_metadata):
         return "missing_metadata"
     if "not_enough_frames" in missing_metadata or "no_valid_replay_samples" in missing_metadata:
