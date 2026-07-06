@@ -114,6 +114,14 @@
 - Current canonical RLT replay data uses the lower+right 4-layer RLToken encoder with `z_rl` / `next_z_rl` dimension `2048`.
 - Strong constraint: before any critic or actor training, newly collected or cleaned rollout/key-region data must first be converted offline into formal `paper_subsampled_anchor` replay shards. Do not train directly from online recorder outputs, runtime cache-block replay, cleaned crop NPZs, raw rollouts, or fixed/aligned segment artifacts.
 - Do not train by scanning mixed legacy replay directories directly. Train from the canonical manifests unless the user explicitly requests an ablation.
+- 2026-07-06 online RLT replay rescue:
+  - Treat raw 2026-07-06 replay as source material only; do not train directly from its saved `z_rl/proprio`.
+  - Split it into two source groups before rebuilding:
+    - `base142_legacy_unmarked`: 09:06-10:27, 142 shards, the data used to train the first actor that day.
+    - `actor93_runtime_cache_block`: 13:21-14:40, 93 shards, collected by the actor trained from the first group.
+  - Rebuild each group separately with `scripts/rebuild_online_rollout_paper_anchor_replay.py --collection-group base142|actor93` so outputs are formal `paper_subsampled_anchor` replay with VLA same-forward lower/right RLToken.
+  - Treat `actor93_runtime_cache_block` as high-risk off-policy data. It may help critic boundary learning after rebuild, but it must not be directly treated as high-quality actor imitation data.
+  - Use `scripts/plan_20260706_data_rescue.py` to generate A-only / A+B rescue commands and combined manifests; do not hand-build mixed manifests for this batch.
 - Legacy 512-dim replay roots such as `rlt_key_regions`, `rlt_key_regions_clean`, and `human_expert_no_actor_q_cam4_provenance_20260629` must not be mixed into a 2048 training run.
 - Strong requirement: formal critic/actor training replay should match the RLT paper's subsampled transition semantics:
   - each replay row is `x_i, action[i:i+C], x_{i+C}`;

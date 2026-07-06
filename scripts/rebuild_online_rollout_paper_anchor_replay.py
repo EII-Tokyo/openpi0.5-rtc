@@ -58,6 +58,7 @@ DEFAULT_OUTPUT_ROOT = Path(
 )
 DEFAULT_WORK_DIR = Path("local_rlt_reencoded/paper_anchor_today142_20260706")
 DEFAULT_MANIFEST_DIR = Path("local_rlt_manifests/paper_anchor_today142_plus_original_20260706")
+DEFAULT_DATASET_LABEL = "20260706_all"
 PROMPT = "Twist off the bottle cap."
 REPLAY_KEYS = (
     "z_rl",
@@ -83,6 +84,15 @@ class Candidate:
     train_horizon: int
     chunk_stride: int
     action_max_abs_diff: float
+    collection_group: str
+
+
+COLLECTION_GROUP_ALIASES = {
+    "all": None,
+    "base142": "base142_legacy_unmarked",
+    "actor93": "actor93_runtime_cache_block",
+    "formal": "formal_paper_anchor",
+}
 
 
 def read_jsonl(path: Path) -> list[dict[str, Any]]:
@@ -99,6 +109,37 @@ def write_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:
 def key_region_id_from_shard(path: Path, manifest: dict[str, Any]) -> str:
     raw = str(manifest.get("key_region_id") or path.stem.removeprefix("key_region_"))
     return raw.removeprefix("key_region_")
+
+
+def infer_collection_group(manifest: dict[str, Any] | None) -> str:
+    """Classify the 2026-07-06 online collection source before formal rebuild.
+
+    The morning 142 shards are legacy/unmarked but numerically look like runtime
+    cache blocks. The later 93 shards are explicitly marked as runtime cache
+    blocks. Keeping them separate is important because the 93 were collected by
+    an actor trained from the first, faulty representation.
+    """
+
+    manifest = dict(manifest or {})
+    replay_state_grain = manifest.get("replay_state_grain")
+    if replay_state_grain == "paper_subsampled_anchor":
+        return "formal_paper_anchor"
+    if manifest.get("requires_offline_reencode") is True or replay_state_grain == "runtime_action_cache_block":
+        return "actor93_runtime_cache_block"
+    if not replay_state_grain:
+        return "base142_legacy_unmarked"
+    return f"unsupported_{replay_state_grain}"
+
+
+def filter_candidates_by_collection_group(candidates: list[Candidate], group: str) -> list[Candidate]:
+    expected = COLLECTION_GROUP_ALIASES[group]
+    if expected is None:
+        return list(candidates)
+    return [row for row in candidates if row.collection_group == expected]
+
+
+def paper_anchor_manifest_name(dataset_label: str) -> str:
+    return f"{dataset_label}_paper_anchor_manifest.jsonl"
 
 
 def compute_anchor_starts(num_frames: int, train_horizon: int, chunk_stride: int) -> np.ndarray:
@@ -171,6 +212,7 @@ def discover_candidates(
             if action_diff > action_tolerance:
                 raise ValueError(f"action window mismatch max_abs_diff={action_diff:.6g}")
             reward = int(float(manifest.get("reward", 0)) > 0.0)
+            collection_group = infer_collection_group(manifest)
             candidates.append(
                 Candidate(
                     key_region_id=key_region_id,
@@ -182,6 +224,7 @@ def discover_candidates(
                     train_horizon=train_horizon,
                     chunk_stride=chunk_stride,
                     action_max_abs_diff=action_diff,
+                    collection_group=collection_group,
                 )
             )
             if limit is not None and len(candidates) >= limit:
@@ -207,28 +250,99 @@ class VLAAnchorExtractor:
         self._prompt = prompt
 
     def extract(self, obs: dict[str, Any]) -> dict[str, np.ndarray]:
-        inputs = self._policy._input_transform(jax.tree.map(lambda x: x, obs))  # noqa: SLF001
-        batched = jax.tree.map(lambda x: jnp.asarray(x)[np.newaxis, ...], inputs)
+        return self.extract_batch([obs])[0]
+
+    def extract_batch(self, observations: list[dict[str, Any]]) -> list[dict[str, np.ndarray]]:
+        if not observations:
+            return []
+        transformed = [self._policy._input_transform(jax.tree.map(lambda x: x, obs)) for obs in observations]  # noqa: SLF001
+        batched = jax.tree.map(
+            lambda *xs: jnp.stack([jnp.asarray(x) for x in xs], axis=0),
+            *transformed,
+        )
         observation = self._model_module.Observation.from_dict(batched)
         prefix_hidden = self._policy._embed_prefix_hidden(observation)  # noqa: SLF001
         prefix_out, prefix_mask = self._drop_language_from_prefix_hidden(prefix_hidden, observation)
-        prefix_out_np = np.asarray(jax.device_get(prefix_out[0]), dtype=np.float32)
-        prefix_mask_np = np.asarray(jax.device_get(prefix_mask[0]), dtype=bool)
+        prefix_out_np = np.asarray(jax.device_get(prefix_out), dtype=np.float32)
+        prefix_mask_np = np.asarray(jax.device_get(prefix_mask), dtype=bool)
         slot_names = list(observation.images.keys())
         if "base_1_rgb" not in slot_names or "right_wrist_0_rgb" not in slot_names:
             raise RuntimeError(f"expected cam_low/base_1 and right wrist slots, got {slot_names}")
-        tokens_per_slot = prefix_out_np.shape[0] // len(slot_names)
-        blocks: dict[str, np.ndarray] = {}
-        for slot_idx, slot in enumerate(slot_names):
-            start = slot_idx * tokens_per_slot
-            end = start + tokens_per_slot
-            blocks[slot] = prefix_out_np[start:end][prefix_mask_np[start:end]].astype(np.float32)
-        return {
-            "low_tokens": blocks["base_1_rgb"],
-            "right_tokens": blocks["right_wrist_0_rgb"],
-            "proprio": np.asarray(inputs["state"], dtype=np.float32),
-        }
+        tokens_per_slot = prefix_out_np.shape[1] // len(slot_names)
+        outputs: list[dict[str, np.ndarray]] = []
+        for batch_index in range(prefix_out_np.shape[0]):
+            blocks: dict[str, np.ndarray] = {}
+            for slot_idx, slot in enumerate(slot_names):
+                start = slot_idx * tokens_per_slot
+                end = start + tokens_per_slot
+                blocks[slot] = prefix_out_np[batch_index, start:end][prefix_mask_np[batch_index, start:end]].astype(np.float32)
+            outputs.append(
+                {
+                    "low_tokens": blocks["base_1_rgb"],
+                    "right_tokens": blocks["right_wrist_0_rgb"],
+                    "proprio": np.asarray(transformed[batch_index]["state"], dtype=np.float32),
+                }
+            )
+        return outputs
 
+
+def extract_candidate_token_blocks(
+    *,
+    row: Candidate,
+    extractor: Any,
+    out: Path,
+    overwrite: bool,
+    prompt: str,
+    vla_batch_size: int,
+    reader_factory: Any,
+) -> None:
+    if vla_batch_size <= 0:
+        raise ValueError(f"vla_batch_size must be positive, got {vla_batch_size}")
+    if out.exists() and not overwrite:
+        logging.info("skip existing token blocks %s", out)
+        return
+    starts = compute_anchor_starts(row.num_frames, row.train_horizon, row.chunk_stride)
+    next_frames = starts + row.train_horizon
+    frame_order = sorted(set(int(frame) for frame in np.concatenate([starts, next_frames])))
+    qpos = _load_qpos(row.rollout_dir / "episode.hdf5")
+    reader = reader_factory(row.rollout_dir, convert_bgr_to_rgb=False)
+    by_frame: dict[int, dict[str, np.ndarray]] = {}
+    try:
+        for batch_start in range(0, len(frame_order), vla_batch_size):
+            batch_frames = frame_order[batch_start : batch_start + vla_batch_size]
+            observations = [
+                {
+                    "images": reader.read_all(frame_index),
+                    "state": np.asarray(qpos[frame_index], dtype=np.float32),
+                    "prompt": prompt,
+                }
+                for frame_index in batch_frames
+            ]
+            for frame_index, features in zip(batch_frames, extractor.extract_batch(observations), strict=True):
+                by_frame[int(frame_index)] = features
+    finally:
+        reader.close()
+    np.savez_compressed(
+        out,
+        low_tokens=np.stack([by_frame[int(frame)]["low_tokens"] for frame in starts]).astype(np.float16),
+        right_tokens=np.stack([by_frame[int(frame)]["right_tokens"] for frame in starts]).astype(np.float16),
+        next_low_tokens=np.stack([by_frame[int(frame)]["low_tokens"] for frame in next_frames]).astype(np.float16),
+        next_right_tokens=np.stack([by_frame[int(frame)]["right_tokens"] for frame in next_frames]).astype(np.float16),
+        proprio=np.stack([by_frame[int(frame)]["proprio"] for frame in starts]).astype(np.float32),
+        next_proprio=np.stack([by_frame[int(frame)]["proprio"] for frame in next_frames]).astype(np.float32),
+        current_frames=starts.astype(np.int64),
+        next_frames=next_frames.astype(np.int64),
+        key_region_id=np.asarray(row.key_region_id),
+        source_shard_path=np.asarray(str(row.source_shard_path)),
+        rollout_dir=np.asarray(str(row.rollout_dir)),
+    )
+    logging.info(
+        "extracted token blocks key_region=%s rows=%d unique_frames=%d vla_batch_size=%d",
+        row.key_region_id,
+        row.num_replay_transitions,
+        len(frame_order),
+        vla_batch_size,
+    )
 
 def extract_token_blocks(
     *,
@@ -236,52 +350,31 @@ def extract_token_blocks(
     work_dir: Path,
     overwrite: bool,
     prompt: str,
+    vla_batch_size: int,
 ) -> None:
     token_dir = work_dir / "vla_token_blocks"
     token_dir.mkdir(parents=True, exist_ok=True)
     extractor = VLAAnchorExtractor(config_name=DEFAULT_CAM4_CONFIG, checkpoint=DEFAULT_CAM4_CHECKPOINT, prompt=prompt)
     for index, row in enumerate(candidates, start=1):
         out = token_dir / f"key_region_{row.key_region_id}.npz"
-        if out.exists() and not overwrite:
-            logging.info("skip existing token blocks %s", out)
-            continue
-        starts = compute_anchor_starts(row.num_frames, row.train_horizon, row.chunk_stride)
-        next_frames = starts + row.train_horizon
-        frame_order = sorted(set(int(frame) for frame in np.concatenate([starts, next_frames])))
-        qpos = _load_qpos(row.rollout_dir / "episode.hdf5")
-        reader = _VideoFrameReader(row.rollout_dir, convert_bgr_to_rgb=False)
-        by_frame: dict[int, dict[str, np.ndarray]] = {}
-        try:
-            for frame_index in frame_order:
-                obs = {
-                    "images": reader.read_all(frame_index),
-                    "state": np.asarray(qpos[frame_index], dtype=np.float32),
-                    "prompt": prompt,
-                }
-                by_frame[frame_index] = extractor.extract(obs)
-        finally:
-            reader.close()
-        np.savez_compressed(
-            out,
-            low_tokens=np.stack([by_frame[int(frame)]["low_tokens"] for frame in starts]).astype(np.float16),
-            right_tokens=np.stack([by_frame[int(frame)]["right_tokens"] for frame in starts]).astype(np.float16),
-            next_low_tokens=np.stack([by_frame[int(frame)]["low_tokens"] for frame in next_frames]).astype(np.float16),
-            next_right_tokens=np.stack([by_frame[int(frame)]["right_tokens"] for frame in next_frames]).astype(np.float16),
-            proprio=np.stack([by_frame[int(frame)]["proprio"] for frame in starts]).astype(np.float32),
-            next_proprio=np.stack([by_frame[int(frame)]["proprio"] for frame in next_frames]).astype(np.float32),
-            current_frames=starts.astype(np.int64),
-            next_frames=next_frames.astype(np.int64),
-            key_region_id=np.asarray(row.key_region_id),
-            source_shard_path=np.asarray(str(row.source_shard_path)),
-            rollout_dir=np.asarray(str(row.rollout_dir)),
+        existed = out.exists() and not overwrite
+        extract_candidate_token_blocks(
+            row=row,
+            extractor=extractor,
+            out=out,
+            overwrite=overwrite,
+            prompt=prompt,
+            vla_batch_size=vla_batch_size,
+            reader_factory=_VideoFrameReader,
         )
+        status = "skipped" if existed else "extracted"
         logging.info(
-            "extracted token blocks %d/%d key_region=%s rows=%d unique_frames=%d",
+            "%s token blocks %d/%d key_region=%s rows=%d",
+            status,
             index,
             len(candidates),
             row.key_region_id,
             row.num_replay_transitions,
-            len(frame_order),
         )
 
 
@@ -316,6 +409,7 @@ def write_rebuilt_shards(
     output_root: Path,
     work_dir: Path,
     manifest_dir: Path,
+    dataset_label: str,
     overwrite: bool,
     encode_batch_size: int,
     prompt: str,
@@ -406,8 +500,9 @@ def write_rebuilt_shards(
         manifest_rows.append(
             {
                 "shard_path": str(out.resolve()),
-                "batch": "today142_paper_subsampled_anchor_20260706",
-                "source_group": "today_20260706_142_online_rlt_rebuilt",
+                "batch": f"{dataset_label}_paper_subsampled_anchor",
+                "source_group": f"{row.collection_group}_rebuilt",
+                "collection_group": row.collection_group,
                 "key_region_id": row.key_region_id,
                 "reward": row.reward,
                 "num_transitions": row.num_replay_transitions,
@@ -422,6 +517,7 @@ def write_rebuilt_shards(
             {
                 "key_region_id": row.key_region_id,
                 "reward": row.reward,
+                "collection_group": row.collection_group,
                 "num_transitions": row.num_replay_transitions,
                 "action_max_abs_diff": row.action_max_abs_diff,
                 "z_adjacent_exact_fraction": adjacent_exact_fraction(z_rl),
@@ -436,16 +532,22 @@ def write_rebuilt_shards(
             }
         )
 
-    write_jsonl(manifest_dir / "today142_paper_anchor_manifest.jsonl", manifest_rows)
+    manifest_path = manifest_dir / paper_anchor_manifest_name(dataset_label)
+    write_jsonl(manifest_path, manifest_rows)
     write_jsonl(output_root / "manifest.jsonl", manifest_rows)
     audit = {
         "output_root": str(output_root),
         "work_dir": str(work_dir),
-        "manifest_path": str(manifest_dir / "today142_paper_anchor_manifest.jsonl"),
+        "manifest_path": str(manifest_path),
+        "dataset_label": dataset_label,
         "num_shards": len(manifest_rows),
         "num_transitions": int(sum(row["num_transitions"] for row in manifest_rows)),
         "num_success_shards": int(sum(row["reward"] == 1 for row in manifest_rows)),
         "num_failure_shards": int(sum(row["reward"] == 0 for row in manifest_rows)),
+        "collection_groups": {
+            group: int(sum(row["collection_group"] == group for row in manifest_rows))
+            for group in sorted({row["collection_group"] for row in manifest_rows})
+        },
         "mean_x_adjacent_exact_fraction": float(np.mean([row["x_adjacent_exact_fraction"] for row in audit_rows])) if audit_rows else 0.0,
         "max_x_adjacent_exact_fraction": float(np.max([row["x_adjacent_exact_fraction"] for row in audit_rows])) if audit_rows else 0.0,
         "rows": audit_rows,
@@ -473,6 +575,15 @@ def write_discovery_audit(
         "num_transitions": int(sum(row.num_replay_transitions for row in candidates)),
         "num_success_shards": int(sum(row.reward == 1 for row in candidates)),
         "num_failure_shards": int(sum(row.reward == 0 for row in candidates)),
+        "collection_groups": {
+            group: {
+                "num_shards": int(sum(row.collection_group == group for row in candidates)),
+                "num_transitions": int(sum(row.num_replay_transitions for row in candidates if row.collection_group == group)),
+                "num_success_shards": int(sum(row.collection_group == group and row.reward == 1 for row in candidates)),
+                "num_failure_shards": int(sum(row.collection_group == group and row.reward == 0 for row in candidates)),
+            }
+            for group in sorted({row.collection_group for row in candidates})
+        },
         "skipped": skipped,
         "candidates": [
             {
@@ -485,6 +596,7 @@ def write_discovery_audit(
                 "train_horizon": row.train_horizon,
                 "chunk_stride": row.chunk_stride,
                 "action_max_abs_diff": row.action_max_abs_diff,
+                "collection_group": row.collection_group,
             }
             for row in candidates
         ],
@@ -492,10 +604,16 @@ def write_discovery_audit(
     (output_root / "paper_anchor_discovery_audit.json").write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
-def combine_with_original_train(*, manifest_dir: Path, today_manifest: Path, original_train_manifest: Path) -> Path:
+def combine_with_original_train(
+    *,
+    manifest_dir: Path,
+    today_manifest: Path,
+    original_train_manifest: Path,
+    dataset_label: str,
+) -> Path:
     original_rows = read_jsonl(original_train_manifest)
     today_rows = read_jsonl(today_manifest)
-    combined_path = manifest_dir / "train_original116_plus_today142.jsonl"
+    combined_path = manifest_dir / f"train_original_plus_{dataset_label}.jsonl"
     write_jsonl(combined_path, original_rows + today_rows)
     return combined_path
 
@@ -507,11 +625,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output-root", type=Path, default=DEFAULT_OUTPUT_ROOT)
     parser.add_argument("--work-dir", type=Path, default=DEFAULT_WORK_DIR)
     parser.add_argument("--manifest-dir", type=Path, default=DEFAULT_MANIFEST_DIR)
+    parser.add_argument("--dataset-label", default=DEFAULT_DATASET_LABEL)
+    parser.add_argument("--collection-group", choices=tuple(COLLECTION_GROUP_ALIASES), default="all")
     parser.add_argument("--original-train-manifest", type=Path, default=Path("local_rlt_runs/strict_td3_z_ablation_20260704/replay/vla_token_z/train_manifest.jsonl"))
     parser.add_argument("--phase", choices=("audit", "extract", "encode", "combine", "all"), default="audit")
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument("--overwrite", action="store_true")
     parser.add_argument("--action-tolerance", type=float, default=1e-6)
+    parser.add_argument("--vla-batch-size", type=int, default=1)
     parser.add_argument("--encode-batch-size", type=int, default=1)
     parser.add_argument("--prompt", default=PROMPT)
     return parser.parse_args()
@@ -520,6 +641,10 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     args = parse_args()
+    if args.vla_batch_size <= 0:
+        raise ValueError(f"--vla-batch-size must be positive, got {args.vla_batch_size}")
+    if args.encode_batch_size <= 0:
+        raise ValueError(f"--encode-batch-size must be positive, got {args.encode_batch_size}")
     candidates, skipped = discover_candidates(
         source_replay_root=args.source_replay_root,
         rollout_root=args.rollout_root,
@@ -528,6 +653,9 @@ def main() -> None:
     )
     if not candidates:
         raise RuntimeError(f"No candidates discovered. skipped={skipped}")
+    candidates = filter_candidates_by_collection_group(candidates, args.collection_group)
+    if not candidates:
+        raise RuntimeError(f"No candidates left after --collection-group={args.collection_group}. skipped={skipped}")
     write_discovery_audit(candidates=candidates, skipped=skipped, output_root=args.output_root, work_dir=args.work_dir)
     logging.info(
         "discovered candidates=%d transitions=%d success=%d failure=%d skipped=%s",
@@ -538,13 +666,20 @@ def main() -> None:
         skipped,
     )
     if args.phase in {"extract", "all"}:
-        extract_token_blocks(candidates=candidates, work_dir=args.work_dir, overwrite=args.overwrite, prompt=args.prompt)
+        extract_token_blocks(
+            candidates=candidates,
+            work_dir=args.work_dir,
+            overwrite=args.overwrite,
+            prompt=args.prompt,
+            vla_batch_size=args.vla_batch_size,
+        )
     if args.phase in {"encode", "all"}:
         audit = write_rebuilt_shards(
             candidates=candidates,
             output_root=args.output_root,
             work_dir=args.work_dir,
             manifest_dir=args.manifest_dir,
+            dataset_label=args.dataset_label,
             overwrite=args.overwrite,
             encode_batch_size=args.encode_batch_size,
             prompt=args.prompt,
@@ -559,8 +694,9 @@ def main() -> None:
     if args.phase in {"combine", "all"}:
         combined = combine_with_original_train(
             manifest_dir=args.manifest_dir,
-            today_manifest=args.manifest_dir / "today142_paper_anchor_manifest.jsonl",
+            today_manifest=args.manifest_dir / paper_anchor_manifest_name(args.dataset_label),
             original_train_manifest=args.original_train_manifest,
+            dataset_label=args.dataset_label,
         )
         logging.info("wrote combined manifest %s", combined)
 
