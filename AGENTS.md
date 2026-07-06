@@ -110,6 +110,7 @@
 
 ## Canonical RLT replay data
 - Current canonical RLT replay data uses the lower+right 4-layer RLToken encoder with `z_rl` / `next_z_rl` dimension `2048`.
+- Strong constraint: before any critic or actor training, newly collected or cleaned rollout/key-region data must first be converted offline into formal `paper_subsampled_anchor` replay shards. Do not train directly from online recorder outputs, runtime cache-block replay, cleaned crop NPZs, raw rollouts, or fixed/aligned segment artifacts.
 - Do not train by scanning mixed legacy replay directories directly. Train from the canonical manifests unless the user explicitly requests an ablation.
 - Legacy 512-dim replay roots such as `rlt_key_regions`, `rlt_key_regions_clean`, and `human_expert_no_actor_q_cam4_provenance_20260629` must not be mixed into a 2048 training run.
 - Strong requirement: formal critic/actor training replay should match the RLT paper's subsampled transition semantics:
