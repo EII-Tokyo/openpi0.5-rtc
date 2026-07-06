@@ -11,6 +11,7 @@ import numpy as np
 from openpi.policies import aloha_policy as _aloha_policy
 from openpi.policies import policy as _policy
 from openpi.policies import policy_config as _policy_config
+from openpi.policies import same_forward_rl_token as _same_forward_rl_token
 from openpi.serving import websocket_policy_server
 from openpi.training import config as _config
 
@@ -118,6 +119,7 @@ def create_default_policy(
             ),
             checkpoint.dir,
             default_prompt=default_prompt,
+            same_forward_rl_token_encoder=create_same_forward_rl_token_encoder_from_env(),
         )
     raise ValueError(f"Unsupported environment mode: {env}")
 
@@ -140,6 +142,7 @@ def create_policy(args: Args) -> _policy.Policy:
                 _override_history(_config.get_config(args.policy.config)),
                 args.policy.dir,
                 default_prompt=args.default_prompt,
+                same_forward_rl_token_encoder=create_same_forward_rl_token_encoder_from_env(),
             )
         case Default():
             return create_default_policy(
@@ -148,6 +151,32 @@ def create_policy(args: Args) -> _policy.Policy:
                 video_memory_num_frames=args.video_memory_num_frames,
                 video_memory_stride_seconds=args.video_memory_stride_seconds,
             )
+
+
+def _env_bool(name: str, default: str = "0") -> bool:
+    return os.getenv(name, default).strip().lower() in {"1", "true", "yes", "on"}
+
+
+def create_same_forward_rl_token_encoder_from_env():
+    if not _env_bool("RLT_SAME_FORWARD_RL_TOKEN_ENABLED", "0"):
+        return None
+    config_name = os.getenv(
+        "RLT_SAME_FORWARD_RL_TOKEN_CONFIG",
+        "eii_rinse_11repo_cam4_fullft_rl_token_lower_right_query_4layer",
+    )
+    checkpoint = os.getenv(
+        "RLT_SAME_FORWARD_RL_TOKEN_CHECKPOINT_PATH",
+        os.getenv("RLT_RL_TOKEN_CHECKPOINT_PATH", ""),
+    )
+    if not checkpoint:
+        raise ValueError(
+            "RLT_SAME_FORWARD_RL_TOKEN_ENABLED=1 requires "
+            "RLT_SAME_FORWARD_RL_TOKEN_CHECKPOINT_PATH or RLT_RL_TOKEN_CHECKPOINT_PATH"
+        )
+    return _same_forward_rl_token.load_same_forward_rl_token_encoder(
+        config_name=config_name,
+        checkpoint_dir=checkpoint,
+    )
 
 
 def _make_dummy_obs(num_frames: int) -> dict:

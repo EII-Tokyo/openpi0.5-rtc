@@ -89,6 +89,8 @@
   - `2026-06-15 16:34 +0900`: defaults moved to the correct cam4 RLToken small query checkpoint.
   - `2026-07-02`: defaults moved to the lower+right 4-layer RLToken checkpoint for new RLT data collection and training.
 - Before training critic/actor, re-encoding `z_rl`, or starting `openpi_server`/`rlt_warmup_runtime`, verify the active `--policy.config`, `--policy.dir`, `--model-dir`, and `RLT_RL_TOKEN_CHECKPOINT_PATH` are from the active lower+right 4-layer RLToken family unless the user explicitly requests a controlled ablation.
+- Strong runtime constraint for robot actor tests: the required online `z_rl` path is the B-group VLA same-forward method. Main `openpi_server` must keep the cam4 VLA policy (`eii_rinse_11repo_cam4_fullft`) for action inference and enable `RLT_SAME_FORWARD_RL_TOKEN_ENABLED=1` so `z_rl` is encoded from the same VLA forward pass using the lower+right autoencoder.
+- Hard ban for normal robot actor tests: do not enable the sidecar RLToken path (`rlt_token_server`, `--rlt-token-port 8002`, or any fallback that calls `infer_rl_token()` after `policy.infer()` misses `z_rl`). If actor startup or intervention cannot get `z_rl` from the VLA same-forward path, treat it as a configuration/runtime error and stop to investigate; do not silently fall back to sidecar re-encoding.
 
 ## Local key region annotation on machine 101
 - The local machine `101` is for offline key region data annotation only. Do not treat `http://127.0.0.1:3011/` as a robot-control UI, and do not expect local key presses there to control the robot on `192.168.1.103`.

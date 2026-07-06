@@ -54,7 +54,6 @@ services:
       - aloha_ros_nodes
       - ros_master
       - openpi_server
-      - rlt_token_server
       - redis
       - eii_pilot_backend
       - eii_pilot_frontend
@@ -78,8 +77,6 @@ services:
       50
       --rlt-chunk-stride
       2
-      --rlt-token-port
-      8002
       --video-codec
       h264
       --action-quality
@@ -286,6 +283,9 @@ services:
       - UV_NO_DEV=1
       - PYTHONPATH=/app/src
       - RLT_RL_TOKEN_CHECKPOINT_PATH=${RLT_RL_TOKEN_CHECKPOINT_PATH:-/app/checkpoints/rlt_lower_right_rl_token_ablation_20260701/BEST/checkpoint}
+      - RLT_SAME_FORWARD_RL_TOKEN_ENABLED=${RLT_SAME_FORWARD_RL_TOKEN_ENABLED:-1}
+      - RLT_SAME_FORWARD_RL_TOKEN_CONFIG=${RLT_SAME_FORWARD_RL_TOKEN_CONFIG:-eii_rinse_11repo_cam4_fullft_rl_token_lower_right_query_4layer}
+      - RLT_SAME_FORWARD_RL_TOKEN_CHECKPOINT_PATH=${RLT_SAME_FORWARD_RL_TOKEN_CHECKPOINT_PATH:-/app/checkpoints/rlt_lower_right_rl_token_ablation_20260701/BEST/checkpoint}
     gpus: all
 
   rlt_token_server:

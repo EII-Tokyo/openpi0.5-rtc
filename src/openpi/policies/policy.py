@@ -46,6 +46,7 @@ class Policy(BasePolicy):
         metadata: dict[str, Any] | None = None,
         pytorch_device: str = "cpu",
         is_pytorch: bool = False,
+        same_forward_rl_token_encoder: Any | None = None,
     ):
         """Initialize the Policy.
 
@@ -67,6 +68,7 @@ class Policy(BasePolicy):
         self._metadata = metadata or {}
         self._is_pytorch_model = is_pytorch
         self._pytorch_device = pytorch_device
+        self._same_forward_rl_token_encoder = same_forward_rl_token_encoder
 
         if self._is_pytorch_model:
             self._model = self._model.to(pytorch_device)
@@ -128,9 +130,13 @@ class Policy(BasePolicy):
         guided_kwargs = dict(sample_kwargs)
 
         observation = _model.Observation.from_dict(inputs)
+        model_has_rl_token_autoencoder = getattr(self._model, "rl_token_autoencoder", None) is not None
         needs_rl_token = (
             not self._is_pytorch_model
-            and getattr(self._model, "rl_token_autoencoder", None) is not None
+            and (
+                model_has_rl_token_autoencoder
+                or self._same_forward_rl_token_encoder is not None
+            )
         )
         sample_actions_fn = self._sample_actions
         guided_inference_fn = self._guided_inference
@@ -141,14 +147,14 @@ class Policy(BasePolicy):
             guided_with_rl_token = getattr(self, "_guided_inference_with_rl_token", None)
             sample_with_prefix = getattr(self, "_sample_actions_with_prefix_hidden", None)
             guided_with_prefix = getattr(self, "_guided_inference_with_prefix_hidden", None)
-            if sample_with_rl_token is not None:
+            if model_has_rl_token_autoencoder and sample_with_rl_token is not None:
                 sample_actions_fn = sample_with_rl_token
                 sample_actions_returns_rl_token = True
             elif sample_with_prefix is not None:
                 sample_actions_fn = sample_with_prefix
             else:
                 sample_kwargs["return_prefix_hidden"] = True
-            if guided_with_rl_token is not None:
+            if model_has_rl_token_autoencoder and guided_with_rl_token is not None:
                 guided_inference_fn = guided_with_rl_token
                 guided_inference_returns_rl_token = True
             elif guided_with_prefix is not None:
@@ -202,12 +208,17 @@ class Policy(BasePolicy):
             }
         if needs_rl_token:
             if z_rl is None:
-                if prefix_hidden is None:
-                    prefix_hidden = self._model.embed_prefix_hidden(observation, drop_language=True)
+                if self._same_forward_rl_token_encoder is not None:
+                    if prefix_hidden is None:
+                        prefix_hidden = self._model.embed_prefix_hidden(observation, drop_language=False)
+                    z_rl = self._same_forward_rl_token_encoder.encode(prefix_hidden, observation)
                 else:
-                    prefix_hidden = _drop_language_from_prefix_hidden(prefix_hidden, observation)
-                prefix_out, prefix_mask = prefix_hidden
-                z_rl = self._model.rl_token_autoencoder.encode(jax.lax.stop_gradient(prefix_out), prefix_mask)
+                    if prefix_hidden is None:
+                        prefix_hidden = self._model.embed_prefix_hidden(observation, drop_language=True)
+                    else:
+                        prefix_hidden = _drop_language_from_prefix_hidden(prefix_hidden, observation)
+                    prefix_out, prefix_mask = prefix_hidden
+                    z_rl = self._model.rl_token_autoencoder.encode(jax.lax.stop_gradient(prefix_out), prefix_mask)
             outputs["z_rl"] = z_rl
         model_time = time.monotonic() - start_time
         if self._is_pytorch_model:
