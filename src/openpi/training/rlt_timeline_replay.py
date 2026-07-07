@@ -19,6 +19,10 @@ REPLAY_KEYS = (
     "done",
 )
 
+POLICY_EVENT_ALIGNMENT_EXACT = "exact_event_pairs"
+POLICY_EVENT_ALIGNMENT_TRUNK_SHARED = "trunk_shared"
+DEFAULT_POLICY_EVENT_ALIGNMENT = POLICY_EVENT_ALIGNMENT_TRUNK_SHARED
+
 
 def compute_anchor_starts(num_frames: int, train_horizon: int, chunk_stride: int) -> np.ndarray:
     if train_horizon <= 0:
@@ -39,7 +43,9 @@ def build_paper_replay_from_timeline_hdf5(
     *,
     train_horizon: int,
     chunk_stride: int,
+    policy_event_alignment: str = DEFAULT_POLICY_EVENT_ALIGNMENT,
 ) -> tuple[dict[str, np.ndarray], dict[str, Any]]:
+    _validate_policy_event_alignment(policy_event_alignment)
     path = Path(hdf5_path)
     with h5py.File(path, "r") as root:
         _require_dataset(root, "action")
@@ -82,6 +88,7 @@ def build_paper_replay_from_timeline_hdf5(
         train_horizon=train_horizon,
         chunk_stride=chunk_stride,
         rl_token_checkpoint_path=rl_token_checkpoint_path,
+        policy_event_alignment=policy_event_alignment,
     )
 
 
@@ -182,6 +189,7 @@ def _build_from_policy_forward_events(
     train_horizon: int,
     chunk_stride: int,
     rl_token_checkpoint_path: str,
+    policy_event_alignment: str,
 ) -> tuple[dict[str, np.ndarray], dict[str, Any]]:
     _validate_action_arrays(path=path, action=action, reference_action=reference_action)
     step_index = np.asarray(events["step_index"], dtype=np.int64)
@@ -197,27 +205,30 @@ def _build_from_policy_forward_events(
         z_rl_source=z_rl_source,
     )
 
-    event_by_step = {int(step): idx for idx, step in enumerate(step_index)}
-    candidate_starts = [
-        int(step)
-        for step in sorted(step_index)
-        if int(step) + int(train_horizon) in event_by_step and int(step) + (2 * int(train_horizon)) <= len(action)
-    ]
-    selected_starts: list[int] = []
-    for step in candidate_starts:
-        if not selected_starts or step - selected_starts[-1] >= int(chunk_stride):
-            selected_starts.append(step)
-    candidate_starts = selected_starts
-    if not candidate_starts:
-        raise ValueError(
-            f"{path} has no exact policy-forward event pairs separated by train_horizon={train_horizon}; "
-            "refusing to synthesize or copy z_rl"
+    if policy_event_alignment == POLICY_EVENT_ALIGNMENT_EXACT:
+        starts, next_frames, current_indices, next_indices = _select_exact_policy_event_pairs(
+            path=path,
+            action_len=len(action),
+            step_index=step_index,
+            train_horizon=train_horizon,
+            chunk_stride=chunk_stride,
         )
-
-    starts = np.asarray(candidate_starts, dtype=np.int64)
-    next_frames = starts + int(train_horizon)
-    current_indices = np.asarray([event_by_step[int(step)] for step in starts], dtype=np.int64)
-    next_indices = np.asarray([event_by_step[int(step)] for step in next_frames], dtype=np.int64)
+        z_alignment = "policy_forward_event_exact_step_pairs"
+        replay_state_grain = "paper_subsampled_anchor"
+        subsampled_transition_semantics = "x_i_action_i_to_i_plus_c_next_x_i_plus_c"
+    else:
+        starts, next_frames, current_indices, next_indices = _select_trunk_shared_policy_events(
+            path=path,
+            action_len=len(action),
+            step_index=step_index,
+            train_horizon=train_horizon,
+            chunk_stride=chunk_stride,
+        )
+        z_alignment = "policy_forward_event_trunk_shared"
+        replay_state_grain = "trunk_shared_z_subsampled_anchor"
+        subsampled_transition_semantics = (
+            "x_i_action_i_to_i_plus_c_next_x_i_plus_c_with_real_forward_z_shared_inside_trunk"
+        )
     arrays = _assemble_arrays(
         action=action,
         reference_action=reference_action,
@@ -244,9 +255,68 @@ def _build_from_policy_forward_events(
         train_horizon=train_horizon,
         chunk_stride=chunk_stride,
         rl_token_checkpoint_path=rl_token_checkpoint_path,
-        z_alignment="policy_forward_event_exact_step_pairs",
+        z_alignment=z_alignment,
+        replay_state_grain=replay_state_grain,
+        subsampled_transition_semantics=subsampled_transition_semantics,
     )
     return arrays, manifest
+
+
+def _select_exact_policy_event_pairs(
+    *,
+    path: Path,
+    action_len: int,
+    step_index: np.ndarray,
+    train_horizon: int,
+    chunk_stride: int,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    event_by_step = {int(step): idx for idx, step in enumerate(step_index)}
+    candidate_starts = [
+        int(step)
+        for step in sorted(step_index)
+        if int(step) + int(train_horizon) in event_by_step and int(step) + (2 * int(train_horizon)) <= int(action_len)
+    ]
+    selected_starts: list[int] = []
+    for step in candidate_starts:
+        if not selected_starts or step - selected_starts[-1] >= int(chunk_stride):
+            selected_starts.append(step)
+    if not selected_starts:
+        raise ValueError(
+            f"{path} has no exact policy-forward event pairs separated by train_horizon={train_horizon}; "
+            "refusing to synthesize or copy z_rl"
+        )
+
+    starts = np.asarray(selected_starts, dtype=np.int64)
+    next_frames = starts + int(train_horizon)
+    current_indices = np.asarray([event_by_step[int(step)] for step in starts], dtype=np.int64)
+    next_indices = np.asarray([event_by_step[int(step)] for step in next_frames], dtype=np.int64)
+    return starts, next_frames, current_indices, next_indices
+
+
+def _select_trunk_shared_policy_events(
+    *,
+    path: Path,
+    action_len: int,
+    step_index: np.ndarray,
+    train_horizon: int,
+    chunk_stride: int,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    order = np.argsort(step_index)
+    sorted_steps = np.asarray(step_index[order], dtype=np.int64)
+    candidate_starts = compute_anchor_starts(action_len, train_horizon, chunk_stride)
+    candidate_next_frames = candidate_starts + int(train_horizon)
+    current_indices = np.searchsorted(sorted_steps, candidate_starts, side="right") - 1
+    next_indices = np.searchsorted(sorted_steps, candidate_next_frames, side="right") - 1
+    valid = (current_indices >= 0) & (next_indices >= 0)
+    if not bool(np.any(valid)):
+        raise ValueError(
+            f"{path} has no policy-forward events at or before sampled anchors for train_horizon={train_horizon}"
+        )
+    starts = candidate_starts[valid]
+    next_frames = candidate_next_frames[valid]
+    current_event_indices = order[current_indices[valid]]
+    next_event_indices = order[next_indices[valid]]
+    return starts, next_frames, current_event_indices, next_event_indices
 
 
 def _build_manifest(
@@ -265,17 +335,19 @@ def _build_manifest(
     chunk_stride: int,
     rl_token_checkpoint_path: str,
     z_alignment: str,
+    replay_state_grain: str = "paper_subsampled_anchor",
+    subsampled_transition_semantics: str = "x_i_action_i_to_i_plus_c_next_x_i_plus_c",
 ) -> dict[str, Any]:
     return {
         "key_region_id": key_region_id,
         "reward": reward,
         "source_format": "rlt_timeline_hdf5",
         "source_hdf5_path": str(path.resolve()),
-        "replay_state_grain": "paper_subsampled_anchor",
-        "formal_replay_state_grain": "paper_subsampled_anchor",
+        "replay_state_grain": replay_state_grain,
+        "formal_replay_state_grain": replay_state_grain,
         "formal_replay_ready": True,
         "train_eligible": True,
-        "subsampled_transition_semantics": "x_i_action_i_to_i_plus_c_next_x_i_plus_c",
+        "subsampled_transition_semantics": subsampled_transition_semantics,
         "z_rl_source": z_rl_source,
         "z_alignment": z_alignment,
         "z_rl_dim": int(z_rl_dim),
@@ -296,6 +368,7 @@ def write_paper_replay_shard_from_timeline_hdf5(
     *,
     train_horizon: int,
     chunk_stride: int,
+    policy_event_alignment: str = DEFAULT_POLICY_EVENT_ALIGNMENT,
     overwrite: bool = False,
 ) -> dict[str, Any]:
     out = Path(output_path)
@@ -305,6 +378,7 @@ def write_paper_replay_shard_from_timeline_hdf5(
         hdf5_path,
         train_horizon=train_horizon,
         chunk_stride=chunk_stride,
+        policy_event_alignment=policy_event_alignment,
     )
     out.parent.mkdir(parents=True, exist_ok=True)
     manifest = {**manifest, "shard_path": str(out.resolve())}
@@ -351,6 +425,14 @@ def _read_policy_forward_events(root: h5py.File) -> dict[str, np.ndarray | str]:
         "z_rl_source": z_rl_source,
         "step_index_semantics": "anchor_observation_step_index",
     }
+
+
+def _validate_policy_event_alignment(value: str) -> None:
+    if value not in {POLICY_EVENT_ALIGNMENT_EXACT, POLICY_EVENT_ALIGNMENT_TRUNK_SHARED}:
+        raise ValueError(
+            f"policy_event_alignment must be one of "
+            f"{POLICY_EVENT_ALIGNMENT_EXACT!r}, {POLICY_EVENT_ALIGNMENT_TRUNK_SHARED!r}; got {value!r}"
+        )
 
 
 def _validate_action_arrays(*, path: Path, action: np.ndarray, reference_action: np.ndarray) -> None:

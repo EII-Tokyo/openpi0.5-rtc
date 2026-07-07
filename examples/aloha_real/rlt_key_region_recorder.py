@@ -736,8 +736,8 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
         group.attrs["note"] = (
             "One row per real VLA policy forward that produced z_rl during robot control. "
             "step_index is the observation anchor that produced z_rl; emission_step_index is when the cached "
-            "result reached the recorder. Formal replay may only use exact event step pairs; do not expand these "
-            "rows into fake per-frame z."
+            "result reached the recorder. Formal replay may reuse each real forward token within its short action "
+            "trunk, but must not pretend those reused rows were independently re-encoded per frame."
         )
         group.create_dataset("count", data=np.asarray(len(events), dtype=np.int64))
         if not events:

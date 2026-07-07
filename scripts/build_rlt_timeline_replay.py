@@ -17,6 +17,15 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--manifest", type=Path, default=None, help="Optional JSONL manifest to append.")
     parser.add_argument("--train-horizon", type=int, required=True)
     parser.add_argument("--chunk-stride", type=int, required=True)
+    parser.add_argument(
+        "--policy-event-alignment",
+        choices=(
+            rlt_timeline_replay.POLICY_EVENT_ALIGNMENT_EXACT,
+            rlt_timeline_replay.POLICY_EVENT_ALIGNMENT_TRUNK_SHARED,
+        ),
+        default=rlt_timeline_replay.DEFAULT_POLICY_EVENT_ALIGNMENT,
+        help="How to align sparse same-forward policy events to sampled training anchors.",
+    )
     parser.add_argument("--overwrite", action="store_true")
     return parser.parse_args(argv)
 
@@ -35,6 +44,7 @@ def main(argv: list[str] | None = None) -> None:
         args.output,
         train_horizon=args.train_horizon,
         chunk_stride=args.chunk_stride,
+        policy_event_alignment=args.policy_event_alignment,
         overwrite=args.overwrite,
     )
     if args.manifest is not None:

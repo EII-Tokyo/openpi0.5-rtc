@@ -91,6 +91,7 @@ def test_build_paper_replay_arrays_from_frame_timeline(tmp_path):
         h5_path,
         train_horizon=2,
         chunk_stride=2,
+        policy_event_alignment="exact_event_pairs",
     )
 
     assert arrays["action"].shape == (3, 2, 2)
@@ -108,7 +109,7 @@ def test_build_paper_replay_arrays_from_frame_timeline(tmp_path):
     assert manifest["next_frames"] == [2, 4, 6]
 
 
-def test_build_paper_replay_arrays_from_policy_forward_events(tmp_path):
+def test_build_paper_replay_arrays_from_exact_policy_forward_events(tmp_path):
     h5_path = tmp_path / "episode.hdf5"
     _write_policy_forward_event_hdf5(h5_path, frames=8, event_steps=(0, 2, 4, 6))
 
@@ -116,6 +117,7 @@ def test_build_paper_replay_arrays_from_policy_forward_events(tmp_path):
         h5_path,
         train_horizon=2,
         chunk_stride=2,
+        policy_event_alignment="exact_event_pairs",
     )
 
     assert arrays["action"].shape == (3, 2, 2)
@@ -136,7 +138,30 @@ def test_policy_forward_events_require_exact_next_event(tmp_path):
             h5_path,
             train_horizon=2,
             chunk_stride=1,
+            policy_event_alignment="exact_event_pairs",
         )
+
+
+def test_policy_forward_events_can_share_trunk_tokens_for_short_stride(tmp_path):
+    h5_path = tmp_path / "episode.hdf5"
+    _write_policy_forward_event_hdf5(h5_path, frames=70, event_steps=(0, 25, 50))
+
+    arrays, manifest = rlt_timeline_replay.build_paper_replay_from_timeline_hdf5(
+        h5_path,
+        train_horizon=10,
+        chunk_stride=2,
+        policy_event_alignment="trunk_shared",
+    )
+
+    assert arrays["action"].shape == (26, 10, 2)
+    assert manifest["current_frames"][:4] == [0, 2, 4, 6]
+    assert manifest["next_frames"][:4] == [10, 12, 14, 16]
+    assert manifest["z_alignment"] == "policy_forward_event_trunk_shared"
+    assert manifest["replay_state_grain"] == "trunk_shared_z_subsampled_anchor"
+    np.testing.assert_allclose(arrays["z_rl"][:8, 0], np.full((8,), 1000, dtype=np.float32))
+    np.testing.assert_allclose(arrays["next_z_rl"][:8, 0], np.full((8,), 1000, dtype=np.float32))
+    np.testing.assert_allclose(arrays["next_z_rl"][8:13, 0], np.full((5,), 1003, dtype=np.float32))
+    np.testing.assert_allclose(arrays["action"][1, :, 0], np.arange(4, 24, 2, dtype=np.float32))
 
 
 def test_legacy_policy_forward_events_subtract_emission_lag(tmp_path):
@@ -147,6 +172,7 @@ def test_legacy_policy_forward_events_subtract_emission_lag(tmp_path):
         h5_path,
         train_horizon=25,
         chunk_stride=25,
+        policy_event_alignment="exact_event_pairs",
     )
 
     assert manifest["current_frames"] == [0, 25]
