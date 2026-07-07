@@ -48,6 +48,12 @@ class StepRecord:
     z_rl: np.ndarray | None
     proprio: np.ndarray | None
     images: dict[str, np.ndarray]
+    runtime_z_rl: np.ndarray | None = None
+    runtime_proprio: np.ndarray | None = None
+    z_rl_source: str | None = None
+    actor_applied: bool | None = None
+    reference_q: float | None = None
+    actor_q: float | None = None
 
 
 @dataclasses.dataclass(frozen=True)
@@ -248,11 +254,49 @@ def _extract_action_array(action: dict, *keys: str) -> np.ndarray | None:
     return None
 
 
+def _extract_optional_bool(action: dict, key: str) -> bool | None:
+    if key not in action or action[key] is None:
+        return None
+    return bool(action[key])
+
+
+def _extract_optional_float(action: dict, key: str) -> float | None:
+    if key not in action or action[key] is None:
+        return None
+    try:
+        return float(action[key])
+    except (TypeError, ValueError):
+        return None
+
+
 def _stack_complete(records: list[StepRecord], attr: str, *, dtype: np.dtype | type = np.float32) -> np.ndarray | None:
     values = [getattr(record, attr) for record in records]
     if any(value is None for value in values):
         return None
     return np.asarray(values, dtype=dtype)
+
+
+def _optional_bool_series(records: list[StepRecord], attr: str) -> np.ndarray | None:
+    values = [getattr(record, attr) for record in records]
+    if all(value is None for value in values):
+        return None
+    return np.asarray([False if value is None else bool(value) for value in values], dtype=np.bool_)
+
+
+def _optional_float_series(records: list[StepRecord], attr: str) -> np.ndarray | None:
+    values = [getattr(record, attr) for record in records]
+    if all(value is None for value in values):
+        return None
+    return np.asarray([np.nan if value is None else float(value) for value in values], dtype=np.float32)
+
+
+def _common_z_rl_source(records: list[StepRecord]) -> str | None:
+    sources = {record.z_rl_source for record in records if record.z_rl_source}
+    if len(sources) == 1:
+        return next(iter(sources))
+    if len(sources) > 1:
+        return "mixed"
+    return None
 
 
 class KeyRegionReplayRecorder(_subscriber.Subscriber):
@@ -314,6 +358,10 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
     def on_episode_start(self) -> None:
         pass
 
+    def wants_rlt_frame_token(self) -> bool:
+        with self._lock:
+            return self._active_start_event is not None and self._pending_end_event is None
+
     @override
     def on_step(self, observation: dict, action: dict) -> None:
         images = {}
@@ -327,6 +375,16 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
                 image_array = np.clip(image_array, 0, 255).astype(np.uint8)
             images[name] = np.array(image_array, copy=True)
 
+        frame_z_rl = _extract_action_array(action, "rlt_frame_z_rl")
+        frame_proprio = _extract_action_array(action, "rlt_frame_proprio")
+        runtime_z_rl = _extract_action_array(action, "z_rl", "rl_token")
+        runtime_proprio = _extract_action_array(action, "proprio", "rlt_proprio", "state")
+        if frame_z_rl is not None:
+            z_rl_source = str(action.get("rlt_frame_z_rl_source") or "vla_same_forward")
+        elif runtime_z_rl is not None:
+            z_rl_source = "runtime_action_cache_block"
+        else:
+            z_rl_source = None
         record = StepRecord(
             step_index=self._step_index,
             timestamp=time.time(),
@@ -342,9 +400,15 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
                 "reference_actions_full",
                 "vla_reference_action_full",
             ),
-            z_rl=_extract_action_array(action, "z_rl", "rl_token"),
-            proprio=_extract_action_array(action, "proprio", "rlt_proprio", "state"),
+            z_rl=frame_z_rl if frame_z_rl is not None else runtime_z_rl,
+            proprio=frame_proprio if frame_proprio is not None else runtime_proprio,
+            runtime_z_rl=runtime_z_rl,
+            runtime_proprio=runtime_proprio,
             images=images,
+            z_rl_source=z_rl_source,
+            actor_applied=_extract_optional_bool(action, "rlt_actor_applied"),
+            reference_q=_extract_optional_float(action, "rlt_reference_q"),
+            actor_q=_extract_optional_float(action, "rlt_actor_q"),
         )
         with self._lock:
             self._ring.append(record)
@@ -563,7 +627,7 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
             root.attrs["reward"] = segment.score_event.get("reward", 0)
             root.attrs["score_timeout"] = bool(segment.score_event.get("score_timeout", False))
             root.attrs["fps"] = self._fps
-            root.attrs["replay_state_grain"] = "runtime_action_cache_block"
+            root.attrs["replay_state_grain"] = "raw_frame_timeline"
             root.attrs["requires_offline_reencode"] = True
             root.attrs["formal_replay_state_grain"] = "paper_subsampled_anchor"
             root.attrs["missing_rlt_metadata"] = np.asarray(missing_metadata, dtype="S")
@@ -579,7 +643,7 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
             if reference_action is not None:
                 root.create_dataset("reference_action", data=reference_action)
             rlt = root.create_group("rlt")
-            rlt.attrs["state_grain"] = "runtime_action_cache_block"
+            rlt.attrs["state_grain"] = "runtime_action_cache_block_audit"
             rlt.attrs["requires_offline_reencode"] = True
             rlt.attrs["note"] = (
                 "cached_z_rl/cached_proprio are runtime cache values for audit only; "
@@ -589,12 +653,34 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
             for attr, dataset_name in (
                 ("action_full", "action_full"),
                 ("reference_action_full", "reference_action_full"),
-                ("z_rl", "cached_z_rl"),
-                ("proprio", "cached_proprio"),
+                ("runtime_z_rl", "cached_z_rl"),
+                ("runtime_proprio", "cached_proprio"),
             ):
                 values = _stack_complete(records, attr)
                 if values is not None:
                     rlt.create_dataset(dataset_name, data=values)
+            timeline = root.create_group("rlt_timeline")
+            timeline.attrs["state_grain"] = "raw_frame_timeline"
+            timeline.attrs["z_rl_source"] = _common_z_rl_source(records) or "missing"
+            timeline.attrs["note"] = (
+                "Raw per-step RLT timeline. Formal training shards must be derived offline "
+                "from this timeline into paper_subsampled_anchor replay."
+            )
+            timeline.create_dataset("step_index", data=np.asarray([record.step_index for record in records], dtype=np.int64))
+            timeline.create_dataset("valid", data=np.asarray([record.z_rl is not None and record.proprio is not None for record in records], dtype=np.bool_))
+            z_values = _stack_complete(records, "z_rl")
+            proprio_values = _stack_complete(records, "proprio")
+            if z_values is not None:
+                timeline.create_dataset("z_rl", data=z_values)
+            if proprio_values is not None:
+                timeline.create_dataset("proprio", data=proprio_values)
+            actor_applied = _optional_bool_series(records, "actor_applied")
+            if actor_applied is not None:
+                timeline.create_dataset("actor_applied", data=actor_applied)
+            for attr, dataset_name in (("reference_q", "reference_q"), ("actor_q", "actor_q")):
+                values = _optional_float_series(records, attr)
+                if values is not None:
+                    timeline.create_dataset(dataset_name, data=values)
             root.create_dataset("timestamps", data=np.asarray([record.timestamp for record in records], dtype=np.float64))
 
     def _write_manifest(

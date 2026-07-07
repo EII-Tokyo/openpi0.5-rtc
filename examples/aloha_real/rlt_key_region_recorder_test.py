@@ -24,6 +24,9 @@ def _record(step: int, *, include_full: bool = True, include_step_actions: bool 
         z_rl=np.full((8,), step, dtype=np.float32),
         proprio=np.full((4,), step, dtype=np.float32),
         images={},
+        runtime_z_rl=np.full((8,), step + 100, dtype=np.float32),
+        runtime_proprio=np.full((4,), step + 200, dtype=np.float32),
+        z_rl_source="vla_same_forward_runtime_output",
     )
 
 
@@ -240,6 +243,47 @@ def test_key_region_manifest_includes_replay_schema_metadata(tmp_path):
     assert manifest["post_roll_seconds"] == 0.0
     assert manifest["key_region_start_sec"] == 0.0
     assert manifest["key_region_end_sec"] == manifest["duration_seconds"]
+
+
+def test_write_hdf5_includes_raw_frame_timeline_and_marks_runtime_cache_audit(tmp_path):
+    pytest = __import__("pytest")
+    h5py = pytest.importorskip("h5py")
+    store = recorder.KeyRegionReplayRecorder(
+        replay_root=str(tmp_path / "replay"),
+        rollouts_root=str(tmp_path / "rollouts"),
+        train_horizon=2,
+        full_horizon=4,
+        chunk_stride=1,
+        ack_publisher=lambda payload: None,
+    )
+    path = tmp_path / "episode.hdf5"
+    segment = recorder.KeyRegionSegment(
+        "kid",
+        "task",
+        "warmup",
+        {"timestamp": 1.0},
+        {"timestamp": 2.0},
+        {"timestamp": 3.0, "reward": 1},
+        [_record(step) for step in range(5)],
+        active_start_step=0,
+        active_end_step=5,
+    )
+    try:
+        store._write_hdf5(path, segment, missing_metadata=[])
+    finally:
+        store.close()
+
+    with h5py.File(path, "r") as root:
+        assert root.attrs["replay_state_grain"] == "raw_frame_timeline"
+        assert root["rlt"].attrs["state_grain"] == "runtime_action_cache_block_audit"
+        assert root["rlt_timeline"].attrs["state_grain"] == "raw_frame_timeline"
+        assert root["rlt_timeline"].attrs["z_rl_source"] == "vla_same_forward_runtime_output"
+        np.testing.assert_allclose(root["rlt_timeline/z_rl"][:, 0], np.arange(5, dtype=np.float32))
+        np.testing.assert_allclose(root["rlt_timeline/proprio"][:, 0], np.arange(5, dtype=np.float32))
+        np.testing.assert_allclose(root["rlt/cached_z_rl"][:, 0], np.arange(5, dtype=np.float32) + 100)
+        np.testing.assert_allclose(root["rlt/cached_proprio"][:, 0], np.arange(5, dtype=np.float32) + 200)
+        np.testing.assert_allclose(root["action"][:, 0], np.arange(5, dtype=np.float32))
+        np.testing.assert_allclose(root["reference_action"][:, 0], np.arange(5, dtype=np.float32) + 0.5)
 
 
 def test_key_region_discard_clears_pending_region(tmp_path):

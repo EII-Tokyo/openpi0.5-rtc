@@ -14,6 +14,12 @@ class PolicyAgent(_agent.Agent):
     def get_action(self, observation: dict) -> dict:
         return self._policy.infer(observation)
 
+    def get_rlt_frame_token(self, observation: dict) -> dict | None:
+        infer_rl_token = getattr(self._policy, "infer_rl_token", None)
+        if infer_rl_token is None:
+            return None
+        return infer_rl_token(observation)
+
     def rlt_actor_status(self) -> dict | None:
         status = getattr(self._policy, "rlt_actor_status", None)
         if status is None:

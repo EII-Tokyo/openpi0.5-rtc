@@ -147,14 +147,15 @@ class Policy(BasePolicy):
             guided_with_rl_token = getattr(self, "_guided_inference_with_rl_token", None)
             sample_with_prefix = getattr(self, "_sample_actions_with_prefix_hidden", None)
             guided_with_prefix = getattr(self, "_guided_inference_with_prefix_hidden", None)
-            if model_has_rl_token_autoencoder and sample_with_rl_token is not None:
+            prefer_same_forward = self._same_forward_rl_token_encoder is not None
+            if model_has_rl_token_autoencoder and sample_with_rl_token is not None and not prefer_same_forward:
                 sample_actions_fn = sample_with_rl_token
                 sample_actions_returns_rl_token = True
             elif sample_with_prefix is not None:
                 sample_actions_fn = sample_with_prefix
             else:
                 sample_kwargs["return_prefix_hidden"] = True
-            if model_has_rl_token_autoencoder and guided_with_rl_token is not None:
+            if model_has_rl_token_autoencoder and guided_with_rl_token is not None and not prefer_same_forward:
                 guided_inference_fn = guided_with_rl_token
                 guided_inference_returns_rl_token = True
             elif guided_with_prefix is not None:
@@ -243,8 +244,6 @@ class Policy(BasePolicy):
         """
         if self._is_pytorch_model:
             raise ValueError("RL token-only inference is only supported for JAX policies")
-        if getattr(self._model, "rl_token_autoencoder", None) is None:
-            raise ValueError("policy model does not have rl_token_autoencoder")
         if self._embed_prefix_hidden is None:
             raise ValueError("policy model does not expose embed_prefix_hidden")
 
@@ -252,12 +251,20 @@ class Policy(BasePolicy):
         inputs = self._input_transform(inputs)
         inputs = jax.tree.map(lambda x: jnp.asarray(x)[np.newaxis, ...], inputs)
         observation = _model.Observation.from_dict(inputs)
-        prefix_hidden = self._embed_prefix_hidden(observation)
-        prefix_out, prefix_mask = _drop_language_from_prefix_hidden(prefix_hidden, observation)
-        z_rl = self._model.rl_token_autoencoder.encode(jax.lax.stop_gradient(prefix_out), prefix_mask)
+        prefix_hidden = self._embed_prefix_hidden(observation, drop_language=False)
+        if self._same_forward_rl_token_encoder is not None:
+            z_rl = self._same_forward_rl_token_encoder.encode(prefix_hidden, observation)
+            z_rl_source = "vla_same_forward"
+        else:
+            if getattr(self._model, "rl_token_autoencoder", None) is None:
+                raise ValueError("policy model does not have rl_token_autoencoder")
+            prefix_out, prefix_mask = _drop_language_from_prefix_hidden(prefix_hidden, observation)
+            z_rl = self._model.rl_token_autoencoder.encode(jax.lax.stop_gradient(prefix_out), prefix_mask)
+            z_rl_source = "model_rl_token_autoencoder"
         return {
             "state": np.asarray(inputs["state"][0, ...]),
             "z_rl": np.asarray(z_rl[0, ...]),
+            "z_rl_source": z_rl_source,
         }
 
     @property
