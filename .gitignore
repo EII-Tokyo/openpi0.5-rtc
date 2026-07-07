@@ -44,6 +44,14 @@ data/
 evals/
 local_rlt_data/
 local_rlt_runs/
+local_rlt_reencoded/
+local_rlt_reports/
+local_eval_assets/
+rlt_online_reports/
+outputs/
+local_rlt_manifests/
+inbox/
+docs/superpowers/plans/
 rollouts
 rollouts.backup-*/
 wandb/
