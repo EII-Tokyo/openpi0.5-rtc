@@ -61,6 +61,28 @@ def _write_policy_forward_event_hdf5(path, *, frames: int = 8, event_steps: tupl
         )
 
 
+def _write_legacy_emission_event_hdf5(path, *, frames: int = 90) -> None:
+    emission_steps = (10, 35, 60)
+    action_start = (10, 10, 10)
+    with h5py.File(path, "w") as root:
+        root.attrs["key_region_id"] = "legacy-event-demo"
+        root.attrs["reward"] = 1
+        root.create_dataset("action", data=np.arange(frames * 2, dtype=np.float32).reshape(frames, 2))
+        root.create_dataset("reference_action", data=100 + np.arange(frames * 2, dtype=np.float32).reshape(frames, 2))
+        timeline = root.create_group("rlt_timeline")
+        timeline.attrs["state_grain"] = "raw_frame_timeline"
+        timeline.attrs["z_rl_source"] = "policy_forward_events"
+        timeline.create_dataset("step_index", data=np.arange(frames, dtype=np.int64))
+        timeline.create_dataset("valid", data=np.ones((frames,), dtype=np.bool_))
+        events = root.create_group("rlt_policy_forward_events")
+        events.attrs["state_grain"] = "vla_same_forward_policy_forward"
+        events.attrs["z_rl_source"] = "vla_same_forward_runtime_output"
+        events.create_dataset("step_index", data=np.asarray(emission_steps, dtype=np.int64))
+        events.create_dataset("action_start_index", data=np.asarray(action_start, dtype=np.int64))
+        events.create_dataset("z_rl", data=1000 + np.arange(9, dtype=np.float32).reshape(3, 3))
+        events.create_dataset("proprio", data=2000 + np.arange(15, dtype=np.float32).reshape(3, 5))
+
+
 def test_build_paper_replay_arrays_from_frame_timeline(tmp_path):
     h5_path = tmp_path / "episode.hdf5"
     _write_timeline_hdf5(h5_path, frames=8)
@@ -115,6 +137,23 @@ def test_policy_forward_events_require_exact_next_event(tmp_path):
             train_horizon=2,
             chunk_stride=1,
         )
+
+
+def test_legacy_policy_forward_events_subtract_emission_lag(tmp_path):
+    h5_path = tmp_path / "episode.hdf5"
+    _write_legacy_emission_event_hdf5(h5_path)
+
+    arrays, manifest = rlt_timeline_replay.build_paper_replay_from_timeline_hdf5(
+        h5_path,
+        train_horizon=25,
+        chunk_stride=25,
+    )
+
+    assert manifest["current_frames"] == [0, 25]
+    assert manifest["next_frames"] == [25, 50]
+    np.testing.assert_allclose(arrays["z_rl"][0], [1000, 1001, 1002])
+    np.testing.assert_allclose(arrays["next_z_rl"][0], [1003, 1004, 1005])
+    np.testing.assert_allclose(arrays["action"][0, :, 0], np.arange(0, 50, 2, dtype=np.float32))
 
 
 def test_build_paper_replay_rejects_runtime_cache_block_z(tmp_path):

@@ -716,47 +716,64 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
             root.create_dataset("timestamps", data=np.asarray([record.timestamp for record in records], dtype=np.float64))
 
     def _write_policy_forward_events(self, root: h5py.File, records: list[StepRecord]) -> None:
-        events = [
-            (local_index, record)
-            for local_index, record in enumerate(records)
-            if record.policy_forward_z_rl is not None
-            and record.policy_forward_proprio is not None
-            and record.policy_forward_id is not None
-        ]
+        events = []
+        for emission_local_index, record in enumerate(records):
+            if (
+                record.policy_forward_z_rl is None
+                or record.policy_forward_proprio is None
+                or record.policy_forward_id is None
+            ):
+                continue
+            action_start_index = int(record.policy_forward_action_start_index or 0)
+            anchor_local_index = emission_local_index - action_start_index
+            if anchor_local_index < 0:
+                continue
+            events.append((anchor_local_index, emission_local_index, record))
         group = root.create_group("rlt_policy_forward_events")
         group.attrs["state_grain"] = "vla_same_forward_policy_forward"
-        group.attrs["z_rl_source"] = _common_policy_forward_z_rl_source([record for _, record in events]) or "missing"
+        group.attrs["step_index_semantics"] = "anchor_observation_step_index"
+        group.attrs["z_rl_source"] = _common_policy_forward_z_rl_source([record for _, _, record in events]) or "missing"
         group.attrs["note"] = (
             "One row per real VLA policy forward that produced z_rl during robot control. "
-            "Formal replay may only use exact event step pairs; do not expand these rows into fake per-frame z."
+            "step_index is the observation anchor that produced z_rl; emission_step_index is when the cached "
+            "result reached the recorder. Formal replay may only use exact event step pairs; do not expand these "
+            "rows into fake per-frame z."
         )
         group.create_dataset("count", data=np.asarray(len(events), dtype=np.int64))
         if not events:
             return
-        group.create_dataset("step_index", data=np.asarray([local_index for local_index, _ in events], dtype=np.int64))
+        group.create_dataset("step_index", data=np.asarray([anchor for anchor, _, _ in events], dtype=np.int64))
+        group.create_dataset("emission_step_index", data=np.asarray([emission for _, emission, _ in events], dtype=np.int64))
         group.create_dataset(
             "global_step_index",
-            data=np.asarray([record.step_index for _, record in events], dtype=np.int64),
+            data=np.asarray(
+                [record.step_index - int(record.policy_forward_action_start_index or 0) for _, _, record in events],
+                dtype=np.int64,
+            ),
+        )
+        group.create_dataset(
+            "emission_global_step_index",
+            data=np.asarray([record.step_index for _, _, record in events], dtype=np.int64),
         )
         group.create_dataset(
             "policy_forward_id",
-            data=np.asarray([record.policy_forward_id for _, record in events], dtype=np.int64),
+            data=np.asarray([record.policy_forward_id for _, _, record in events], dtype=np.int64),
         )
         group.create_dataset(
             "action_start_index",
-            data=np.asarray([record.policy_forward_action_start_index or 0 for _, record in events], dtype=np.int64),
+            data=np.asarray([record.policy_forward_action_start_index or 0 for _, _, record in events], dtype=np.int64),
         )
         group.create_dataset(
             "z_rl",
-            data=np.asarray([record.policy_forward_z_rl for _, record in events], dtype=np.float32),
+            data=np.asarray([record.policy_forward_z_rl for _, _, record in events], dtype=np.float32),
         )
         group.create_dataset(
             "proprio",
-            data=np.asarray([record.policy_forward_proprio for _, record in events], dtype=np.float32),
+            data=np.asarray([record.policy_forward_proprio for _, _, record in events], dtype=np.float32),
         )
         group.create_dataset(
             "z_rl_source",
-            data=np.asarray([record.policy_forward_z_rl_source or "missing" for _, record in events], dtype="S"),
+            data=np.asarray([record.policy_forward_z_rl_source or "missing" for _, _, record in events], dtype="S"),
         )
 
     def _write_manifest(

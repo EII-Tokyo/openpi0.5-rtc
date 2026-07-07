@@ -340,11 +340,16 @@ def _read_policy_forward_events(root: h5py.File) -> dict[str, np.ndarray | str]:
         decoded = {_h5_attr_str(value) for value in raw_sources.tolist()}
         decoded.discard("missing")
         z_rl_source = next(iter(decoded)) if len(decoded) == 1 else "mixed"
+    step_index = np.asarray(group["step_index"], dtype=np.int64)
+    step_index_semantics = _h5_attr_str(group.attrs.get("step_index_semantics", ""))
+    if step_index_semantics != "anchor_observation_step_index" and "action_start_index" in group:
+        step_index = step_index - np.asarray(group["action_start_index"], dtype=np.int64)
     return {
-        "step_index": np.asarray(group["step_index"], dtype=np.int64),
+        "step_index": step_index,
         "z_rl": np.asarray(group["z_rl"], dtype=np.float32),
         "proprio": np.asarray(group["proprio"], dtype=np.float32),
         "z_rl_source": z_rl_source,
+        "step_index_semantics": "anchor_observation_step_index",
     }
 
 

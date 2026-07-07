@@ -1,3 +1,4 @@
+import dataclasses
 import sys
 import types
 import importlib
@@ -39,6 +40,11 @@ def _record(step: int, *, include_full: bool = True, include_step_actions: bool 
         policy_forward_proprio=np.full((4,), step, dtype=np.float32),
         policy_forward_z_rl_source="vla_same_forward_runtime_output",
     )
+
+
+def _delayed_forward_record(step: int, *, action_start_index: int) -> recorder.StepRecord:
+    record = _record(step)
+    return dataclasses.replace(record, policy_forward_action_start_index=action_start_index)
 
 
 def _push_runtime_step(store: recorder.KeyRegionReplayRecorder) -> None:
@@ -310,6 +316,49 @@ def test_write_hdf5_includes_raw_frame_timeline_and_marks_runtime_cache_audit(tm
         np.testing.assert_allclose(root["rlt/cached_proprio"][:, 0], np.arange(10, 15, dtype=np.float32) + 200)
         np.testing.assert_allclose(root["action"][:, 0], np.arange(10, 15, dtype=np.float32))
         np.testing.assert_allclose(root["reference_action"][:, 0], np.arange(10, 15, dtype=np.float32) + 0.5)
+
+
+def test_write_hdf5_policy_forward_events_store_anchor_and_emission_steps(tmp_path):
+    pytest = __import__("pytest")
+    h5py = pytest.importorskip("h5py")
+    recorder.h5py = importlib.import_module("h5py")
+    store = recorder.KeyRegionReplayRecorder(
+        replay_root=str(tmp_path / "replay"),
+        rollouts_root=str(tmp_path / "rollouts"),
+        train_horizon=2,
+        full_horizon=4,
+        chunk_stride=1,
+        ack_publisher=lambda payload: None,
+    )
+    path = tmp_path / "episode.hdf5"
+    records = [
+        dataclasses.replace(_record(20), policy_forward_id=None, policy_forward_z_rl=None, policy_forward_proprio=None),
+        dataclasses.replace(_record(21), policy_forward_id=None, policy_forward_z_rl=None, policy_forward_proprio=None),
+        _delayed_forward_record(22, action_start_index=2),
+    ]
+    segment = recorder.KeyRegionSegment(
+        "kid",
+        "task",
+        "warmup",
+        {"timestamp": 1.0},
+        {"timestamp": 2.0},
+        {"timestamp": 3.0, "reward": 1},
+        records,
+        active_start_step=20,
+        active_end_step=23,
+    )
+    try:
+        store._write_hdf5(path, segment, missing_metadata=[])
+    finally:
+        store.close()
+
+    with h5py.File(path, "r") as root:
+        events = root["rlt_policy_forward_events"]
+        assert events.attrs["step_index_semantics"] == "anchor_observation_step_index"
+        np.testing.assert_allclose(events["step_index"][:], [0])
+        np.testing.assert_allclose(events["emission_step_index"][:], [2])
+        np.testing.assert_allclose(events["global_step_index"][:], [20])
+        np.testing.assert_allclose(events["emission_global_step_index"][:], [22])
 
 
 def test_key_region_discard_clears_pending_region(tmp_path):
