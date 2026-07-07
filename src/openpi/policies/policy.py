@@ -99,7 +99,7 @@ class Policy(BasePolicy):
                 else None
             )
             self._embed_prefix_hidden = (
-                nnx_utils.module_jit(model.embed_prefix_hidden)
+                nnx_utils.module_jit(model.embed_prefix_hidden, static_argnames=("drop_language",))
                 if hasattr(model, "embed_prefix_hidden")
                 else None
             )
