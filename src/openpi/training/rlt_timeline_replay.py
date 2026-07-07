@@ -22,6 +22,8 @@ REPLAY_KEYS = (
 POLICY_EVENT_ALIGNMENT_EXACT = "exact_event_pairs"
 POLICY_EVENT_ALIGNMENT_TRUNK_SHARED = "trunk_shared"
 DEFAULT_POLICY_EVENT_ALIGNMENT = POLICY_EVENT_ALIGNMENT_TRUNK_SHARED
+ALOHA_JOINT_FLIP_MASK = np.asarray([1, -1, -1, 1, 1, 1, 1, 1, -1, -1, 1, 1, 1, 1], dtype=np.float32)
+DEFAULT_POLICY_PROPRIO_DIM = 32
 
 
 def compute_anchor_starts(num_frames: int, train_horizon: int, chunk_stride: int) -> np.ndarray:
@@ -77,12 +79,15 @@ def build_paper_replay_from_timeline_hdf5(
             )
             return arrays, manifest
         events = _read_policy_forward_events(root)
+        frame_policy_proprio, frame_policy_proprio_alignment = _read_frame_policy_proprio(root)
 
     return _build_from_policy_forward_events(
         path=path,
         action=action,
         reference_action=reference_action,
         events=events,
+        frame_policy_proprio=frame_policy_proprio,
+        frame_policy_proprio_alignment=frame_policy_proprio_alignment,
         reward=reward,
         key_region_id=key_region_id,
         train_horizon=train_horizon,
@@ -145,6 +150,7 @@ def _build_from_complete_frame_timeline(
         chunk_stride=chunk_stride,
         rl_token_checkpoint_path=rl_token_checkpoint_path,
         z_alignment="complete_frame_timeline",
+        proprio_alignment="complete_frame_timeline",
     )
     return arrays, manifest
 
@@ -184,6 +190,8 @@ def _build_from_policy_forward_events(
     action: np.ndarray,
     reference_action: np.ndarray,
     events: dict[str, np.ndarray | str],
+    frame_policy_proprio: np.ndarray | None,
+    frame_policy_proprio_alignment: str | None,
     reward: float,
     key_region_id: str,
     train_horizon: int,
@@ -214,9 +222,17 @@ def _build_from_policy_forward_events(
             chunk_stride=chunk_stride,
         )
         z_alignment = "policy_forward_event_exact_step_pairs"
+        current_proprio = proprio[current_indices]
+        next_proprio = proprio[next_indices]
+        proprio_alignment = "policy_forward_event_exact_step_pairs"
         replay_state_grain = "paper_subsampled_anchor"
         subsampled_transition_semantics = "x_i_action_i_to_i_plus_c_next_x_i_plus_c"
     else:
+        if frame_policy_proprio is None:
+            raise ValueError(
+                f"{path} is missing per-frame policy-space proprio; trunk_shared replay requires "
+                "rlt_timeline/policy_proprio or observations/qpos and must not reuse policy-forward event proprio"
+            )
         starts, next_frames, current_indices, next_indices = _select_trunk_shared_policy_events(
             path=path,
             action_len=len(action),
@@ -225,6 +241,9 @@ def _build_from_policy_forward_events(
             chunk_stride=chunk_stride,
         )
         z_alignment = "policy_forward_event_trunk_shared"
+        current_proprio = frame_policy_proprio[starts]
+        next_proprio = frame_policy_proprio[next_frames]
+        proprio_alignment = str(frame_policy_proprio_alignment)
         replay_state_grain = "trunk_shared_z_subsampled_anchor"
         subsampled_transition_semantics = (
             "x_i_action_i_to_i_plus_c_next_x_i_plus_c_with_real_forward_z_shared_inside_trunk"
@@ -233,9 +252,9 @@ def _build_from_policy_forward_events(
         action=action,
         reference_action=reference_action,
         current_z_rl=z_rl[current_indices],
-        current_proprio=proprio[current_indices],
+        current_proprio=current_proprio,
         next_z_rl=z_rl[next_indices],
-        next_proprio=proprio[next_indices],
+        next_proprio=next_proprio,
         starts=starts,
         next_frames=next_frames,
         train_horizon=train_horizon,
@@ -256,6 +275,7 @@ def _build_from_policy_forward_events(
         chunk_stride=chunk_stride,
         rl_token_checkpoint_path=rl_token_checkpoint_path,
         z_alignment=z_alignment,
+        proprio_alignment=proprio_alignment,
         replay_state_grain=replay_state_grain,
         subsampled_transition_semantics=subsampled_transition_semantics,
     )
@@ -335,6 +355,7 @@ def _build_manifest(
     chunk_stride: int,
     rl_token_checkpoint_path: str,
     z_alignment: str,
+    proprio_alignment: str,
     replay_state_grain: str = "paper_subsampled_anchor",
     subsampled_transition_semantics: str = "x_i_action_i_to_i_plus_c_next_x_i_plus_c",
 ) -> dict[str, Any]:
@@ -350,6 +371,7 @@ def _build_manifest(
         "subsampled_transition_semantics": subsampled_transition_semantics,
         "z_rl_source": z_rl_source,
         "z_alignment": z_alignment,
+        "proprio_alignment": proprio_alignment,
         "z_rl_dim": int(z_rl_dim),
         "proprio_dim": int(proprio_dim),
         "action_dim": int(action_dim),
@@ -425,6 +447,33 @@ def _read_policy_forward_events(root: h5py.File) -> dict[str, np.ndarray | str]:
         "z_rl_source": z_rl_source,
         "step_index_semantics": "anchor_observation_step_index",
     }
+
+
+def _read_frame_policy_proprio(root: h5py.File) -> tuple[np.ndarray | None, str | None]:
+    if "rlt_timeline/policy_proprio" in root:
+        proprio = np.asarray(root["rlt_timeline/policy_proprio"], dtype=np.float32)
+        alignment = "rlt_timeline_policy_proprio"
+    elif "observations/qpos" in root:
+        qpos = np.asarray(root["observations/qpos"], dtype=np.float32)
+        if qpos.ndim != 2 or qpos.shape[-1] < len(ALOHA_JOINT_FLIP_MASK):
+            raise ValueError(f"{root.filename} observations/qpos must have shape [T, >=14], got {qpos.shape}")
+        policy_qpos = qpos[:, : len(ALOHA_JOINT_FLIP_MASK)] * ALOHA_JOINT_FLIP_MASK[None, :]
+        pad_width = DEFAULT_POLICY_PROPRIO_DIM - policy_qpos.shape[-1]
+        if pad_width < 0:
+            raise ValueError(f"policy qpos dim {policy_qpos.shape[-1]} exceeds {DEFAULT_POLICY_PROPRIO_DIM}")
+        proprio = np.pad(policy_qpos, ((0, 0), (0, pad_width))).astype(np.float32)
+        alignment = "derived_from_observations_qpos_sign_flip_pad32"
+    else:
+        return None, None
+    if proprio.ndim != 2:
+        raise ValueError(f"{root.filename} policy proprio must be rank-2, got {proprio.shape}")
+    if "action" in root and len(proprio) != len(root["action"]):
+        raise ValueError(
+            f"{root.filename} policy proprio length {len(proprio)} != action length {len(root['action'])}"
+        )
+    if not np.isfinite(proprio).all():
+        raise ValueError(f"{root.filename} policy proprio contains non-finite values")
+    return proprio, alignment
 
 
 def _validate_policy_event_alignment(value: str) -> None:

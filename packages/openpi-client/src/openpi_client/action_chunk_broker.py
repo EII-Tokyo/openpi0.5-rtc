@@ -448,6 +448,7 @@ class ActionChunkBroker(_base_policy.BasePolicy):
                     self._refresh_current_results(obs, context_signature)
 
             results = self._slice_result_cache(self._last_results)
+            self._attach_current_policy_proprio(results, obs)
             self._record_emitted_action(results)
             self._obs = obs
             self._cur_step += 1
@@ -488,6 +489,7 @@ class ActionChunkBroker(_base_policy.BasePolicy):
                     self._refresh_current_results(obs, context_signature)
 
             results = self._slice_result_cache(self._last_results)
+            self._attach_current_policy_proprio(results, obs)
             self._record_emitted_action(results)
             self._cur_step += 1
 
@@ -531,6 +533,26 @@ class ActionChunkBroker(_base_policy.BasePolicy):
 
     def _policy_obs(self, obs: Dict) -> Dict:
         return {key: value for key, value in obs.items() if key != "rlt_context"}
+
+    def _attach_current_policy_proprio(self, results: Dict[str, np.ndarray], obs: Dict) -> None:
+        proprio = self._policy_space_proprio_from_obs(obs)
+        if proprio is not None:
+            results["rlt_policy_proprio"] = proprio
+
+    def _policy_space_proprio_from_obs(self, obs: Dict) -> np.ndarray | None:
+        raw_state = obs.get("state", obs.get("proprio"))
+        if raw_state is None:
+            return None
+        state = np.asarray(raw_state, dtype=np.float32).reshape(-1)
+        if state.size == 0:
+            return None
+        state_dim = min(14, state.shape[0])
+        policy_state = np.array(state[:state_dim], dtype=np.float32, copy=True)
+        policy_state = self._joint_signs[:state_dim].astype(np.float32) * policy_state
+        target_dim = 32
+        if policy_state.shape[0] < target_dim:
+            policy_state = np.pad(policy_state, (0, target_dim - policy_state.shape[0]))
+        return policy_state.astype(np.float32, copy=False)
 
     def infer_rl_token(self, obs: Dict) -> Dict:
         infer_rl_token = getattr(self._policy, "infer_rl_token", None)

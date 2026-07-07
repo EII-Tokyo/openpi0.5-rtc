@@ -50,6 +50,7 @@ class StepRecord:
     images: dict[str, np.ndarray]
     runtime_z_rl: np.ndarray | None = None
     runtime_proprio: np.ndarray | None = None
+    policy_proprio: np.ndarray | None = None
     z_rl_source: str | None = None
     policy_forward_id: int | None = None
     policy_forward_action_start_index: int | None = None
@@ -400,6 +401,7 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
 
         runtime_z_rl = _extract_action_array(action, "z_rl", "rl_token")
         runtime_proprio = _extract_action_array(action, "proprio", "rlt_proprio", "state")
+        policy_proprio = _extract_action_array(action, "rlt_policy_proprio")
         policy_forward_z_rl = _extract_action_array(action, "rlt_policy_forward_z_rl")
         policy_forward_proprio = _extract_action_array(action, "rlt_policy_forward_proprio")
         policy_forward_id = _extract_optional_int(action, "rlt_policy_forward_id")
@@ -433,6 +435,7 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
             proprio=policy_forward_proprio,
             runtime_z_rl=runtime_z_rl,
             runtime_proprio=runtime_proprio,
+            policy_proprio=policy_proprio,
             images=images,
             z_rl_source=z_rl_source,
             policy_forward_id=policy_forward_id,
@@ -681,7 +684,8 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
             rlt.attrs["requires_offline_reencode"] = True
             rlt.attrs["note"] = (
                 "cached_z_rl/cached_proprio are runtime cache values for audit only; "
-                "formal training replay must re-encode z_rl from each stride anchor frame."
+                "formal training replay must use real policy-forward z_rl events and per-frame "
+                "rlt_timeline/policy_proprio."
             )
             local_step_index = np.arange(len(records), dtype=np.int64)
             rlt.create_dataset("step_index", data=local_step_index)
@@ -699,12 +703,17 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
             timeline.attrs["state_grain"] = "raw_frame_timeline"
             timeline.attrs["z_rl_source"] = "policy_forward_events"
             timeline.attrs["note"] = (
-                "Raw per-step robot timeline. Per-forward same-forward z_rl values are stored "
-                "under /rlt_policy_forward_events; cached runtime z values under /rlt are audit only."
+                "Raw per-step robot timeline. Per-frame policy_proprio is the formal critic/actor proprio source. "
+                "Per-forward same-forward z_rl values are stored under /rlt_policy_forward_events; cached runtime "
+                "z/proprio values under /rlt are audit only."
             )
             timeline.create_dataset("step_index", data=local_step_index)
             timeline.create_dataset("global_step_index", data=np.asarray([record.step_index for record in records], dtype=np.int64))
             timeline.create_dataset("valid", data=np.ones((len(records),), dtype=np.bool_))
+            policy_proprio = _stack_complete(records, "policy_proprio")
+            if policy_proprio is not None:
+                timeline.create_dataset("policy_proprio", data=policy_proprio.astype(np.float32))
+                timeline["policy_proprio"].attrs["source"] = "rlt_policy_proprio_current_observation"
             self._write_policy_forward_events(root, records)
             actor_applied = _optional_bool_series(records, "actor_applied")
             if actor_applied is not None:

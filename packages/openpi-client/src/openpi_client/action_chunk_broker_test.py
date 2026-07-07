@@ -102,6 +102,31 @@ def test_policy_forward_event_is_emitted_once_per_cached_chunk():
     assert "rlt_policy_forward_z_rl" not in second
 
 
+def test_emitted_policy_proprio_uses_current_observation_not_cached_forward_state():
+    broker = ActionChunkBroker(_Policy(), action_horizon=3, use_rtc=False)
+
+    first = broker.infer({"state": np.array([1, 2, 3, 4], dtype=np.float32)})
+    second = broker.infer({"state": np.array([5, 6, 7, 8], dtype=np.float32)})
+
+    assert first["rlt_policy_proprio"].shape == (32,)
+    assert second["rlt_policy_proprio"].shape == (32,)
+    np.testing.assert_allclose(first["rlt_policy_proprio"][:4], [1, 2, 3, 4])
+    np.testing.assert_allclose(second["rlt_policy_proprio"][:4], [5, 6, 7, 8])
+    np.testing.assert_allclose(second["rlt_policy_proprio"][4:], np.zeros((28,), dtype=np.float32))
+    np.testing.assert_allclose(second["proprio"], np.ones((4,), dtype=np.float32))
+
+
+def test_emitted_policy_proprio_matches_policy_space_sign_flip_and_padding():
+    broker = ActionChunkBroker(_Policy(), action_horizon=3, use_rtc=False)
+    broker._joint_signs = np.array([1, -1, -1, 1, 1, 1, 1, 1, -1, -1, 1, 1, 1, 1], dtype=np.float32)
+
+    result = broker.infer({"state": np.arange(14, dtype=np.float32)})
+
+    expected14 = broker._joint_signs * np.arange(14, dtype=np.float32)
+    np.testing.assert_allclose(result["rlt_policy_proprio"][:14], expected14)
+    np.testing.assert_allclose(result["rlt_policy_proprio"][14:], np.zeros((18,), dtype=np.float32))
+
+
 def test_infer_rl_token_uses_inner_policy():
     policy = _Policy()
     broker = ActionChunkBroker(policy, action_horizon=3, use_rtc=False)

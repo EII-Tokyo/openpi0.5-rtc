@@ -29,11 +29,21 @@ def _write_timeline_hdf5(path, *, frames: int = 8) -> None:
         root.create_dataset("timestamps", data=np.arange(frames, dtype=np.float64))
 
 
-def _write_policy_forward_event_hdf5(path, *, frames: int = 8, event_steps: tuple[int, ...] = (0, 2, 4, 6)) -> None:
+def _write_policy_forward_event_hdf5(
+    path,
+    *,
+    frames: int = 8,
+    event_steps: tuple[int, ...] = (0, 2, 4, 6),
+    include_policy_proprio: bool = False,
+    include_qpos: bool = False,
+) -> None:
     with h5py.File(path, "w") as root:
         root.attrs["key_region_id"] = "event-demo"
         root.attrs["reward"] = 1
         root.attrs["replay_state_grain"] = "raw_frame_timeline"
+        if include_qpos:
+            obs = root.create_group("observations")
+            obs.create_dataset("qpos", data=np.arange(frames * 14, dtype=np.float32).reshape(frames, 14))
         root.create_dataset("action", data=np.arange(frames * 2, dtype=np.float32).reshape(frames, 2))
         root.create_dataset("reference_action", data=100 + np.arange(frames * 2, dtype=np.float32).reshape(frames, 2))
         timeline = root.create_group("rlt_timeline")
@@ -41,6 +51,11 @@ def _write_policy_forward_event_hdf5(path, *, frames: int = 8, event_steps: tupl
         timeline.attrs["z_rl_source"] = "policy_forward_events"
         timeline.create_dataset("step_index", data=np.arange(frames, dtype=np.int64))
         timeline.create_dataset("valid", data=np.ones((frames,), dtype=np.bool_))
+        if include_policy_proprio:
+            timeline.create_dataset(
+                "policy_proprio",
+                data=3000 + np.arange(frames * 5, dtype=np.float32).reshape(frames, 5),
+            )
         events = root.create_group("rlt_policy_forward_events")
         events.attrs["state_grain"] = "vla_same_forward_policy_forward"
         events.attrs["z_rl_source"] = "vla_same_forward_runtime_output"
@@ -144,7 +159,12 @@ def test_policy_forward_events_require_exact_next_event(tmp_path):
 
 def test_policy_forward_events_can_share_trunk_tokens_for_short_stride(tmp_path):
     h5_path = tmp_path / "episode.hdf5"
-    _write_policy_forward_event_hdf5(h5_path, frames=70, event_steps=(0, 25, 50))
+    _write_policy_forward_event_hdf5(
+        h5_path,
+        frames=70,
+        event_steps=(0, 25, 50),
+        include_policy_proprio=True,
+    )
 
     arrays, manifest = rlt_timeline_replay.build_paper_replay_from_timeline_hdf5(
         h5_path,
@@ -157,11 +177,49 @@ def test_policy_forward_events_can_share_trunk_tokens_for_short_stride(tmp_path)
     assert manifest["current_frames"][:4] == [0, 2, 4, 6]
     assert manifest["next_frames"][:4] == [10, 12, 14, 16]
     assert manifest["z_alignment"] == "policy_forward_event_trunk_shared"
+    assert manifest["proprio_alignment"] == "rlt_timeline_policy_proprio"
     assert manifest["replay_state_grain"] == "trunk_shared_z_subsampled_anchor"
     np.testing.assert_allclose(arrays["z_rl"][:8, 0], np.full((8,), 1000, dtype=np.float32))
     np.testing.assert_allclose(arrays["next_z_rl"][:8, 0], np.full((8,), 1000, dtype=np.float32))
     np.testing.assert_allclose(arrays["next_z_rl"][8:13, 0], np.full((5,), 1003, dtype=np.float32))
+    np.testing.assert_allclose(arrays["proprio"][:4, 0], [3000, 3010, 3020, 3030])
+    np.testing.assert_allclose(arrays["next_proprio"][:4, 0], [3050, 3060, 3070, 3080])
     np.testing.assert_allclose(arrays["action"][1, :, 0], np.arange(4, 24, 2, dtype=np.float32))
+
+
+def test_trunk_shared_policy_forward_events_require_frame_policy_proprio(tmp_path):
+    h5_path = tmp_path / "episode.hdf5"
+    _write_policy_forward_event_hdf5(h5_path, frames=70, event_steps=(0, 25, 50))
+
+    with pytest.raises(ValueError, match="policy-space proprio"):
+        rlt_timeline_replay.build_paper_replay_from_timeline_hdf5(
+            h5_path,
+            train_horizon=10,
+            chunk_stride=2,
+            policy_event_alignment="trunk_shared",
+        )
+
+
+def test_trunk_shared_policy_forward_events_can_derive_policy_proprio_from_qpos(tmp_path):
+    h5_path = tmp_path / "episode.hdf5"
+    _write_policy_forward_event_hdf5(h5_path, frames=70, event_steps=(0, 25, 50), include_qpos=True)
+
+    arrays, manifest = rlt_timeline_replay.build_paper_replay_from_timeline_hdf5(
+        h5_path,
+        train_horizon=10,
+        chunk_stride=2,
+        policy_event_alignment="trunk_shared",
+    )
+
+    signs = rlt_timeline_replay.ALOHA_JOINT_FLIP_MASK
+    expected_start_2 = np.arange(2 * 14, 3 * 14, dtype=np.float32) * signs
+    expected_next_12 = np.arange(12 * 14, 13 * 14, dtype=np.float32) * signs
+    assert manifest["proprio_alignment"] == "derived_from_observations_qpos_sign_flip_pad32"
+    assert arrays["proprio"].shape == (26, 32)
+    np.testing.assert_allclose(arrays["proprio"][1, :14], expected_start_2)
+    np.testing.assert_allclose(arrays["proprio"][1, 14:], np.zeros((18,), dtype=np.float32))
+    np.testing.assert_allclose(arrays["next_proprio"][1, :14], expected_next_12)
+    np.testing.assert_allclose(arrays["next_proprio"][1, 14:], np.zeros((18,), dtype=np.float32))
 
 
 def test_legacy_policy_forward_events_subtract_emission_lag(tmp_path):
