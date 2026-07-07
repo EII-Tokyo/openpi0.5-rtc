@@ -112,34 +112,26 @@
 
 ## Canonical RLT replay data
 - Current canonical RLT replay data uses the lower+right 4-layer RLToken encoder with `z_rl` / `next_z_rl` dimension `2048`.
-- Strong constraint: before any critic or actor training, newly collected or cleaned rollout/key-region data must first be converted offline into formal `paper_subsampled_anchor` replay shards. Do not train directly from online recorder outputs, runtime cache-block replay, cleaned crop NPZs, raw rollouts, or fixed/aligned segment artifacts.
-- Fixed async-anchor workflow for new 103 collection:
-  - `192.168.1.103` is the data-collection machine. During collection, it should save raw rollout, runtime cache-block replay, and `rlt_anchor_token_jobs/pending` job files only.
-  - Do not run the async anchor token worker on `192.168.1.103` by default, and do not let it auto-start as a compose service during robot testing. VLA/RLToken token extraction can consume GPU/VRAM and must not compete with `openpi_server` or real-time robot control.
-  - After a collection batch finishes and the user asks to pull data back, copy all required source material from 103 to the local data root `/home/eii/data/openpi0.5-rtc-reward-learning`: raw rollouts, runtime cache-block replay shards, `rlt_anchor_token_jobs`, and any related manifests/audit files.
-  - Formal trainable replay assembly should run locally by explicit command, normally via `scripts/rlt_anchor_token_worker.py run-pending --limit ...` first, then without `--limit` after the first sample is verified.
-  - The local worker output should go under local canonical/paper-anchor replay roots and local manifests. Training should consume only those formal manifests, never the 103 runtime cache-block shards directly.
-  - If the user explicitly asks to run the worker on 103 for a special case, first confirm robot control is idle and use an explicit one-shot command, not an always-on service.
+- Strong constraint: for the active same-forward runtime, formal critic/actor training replay must use `z_rl` that was recorded at real robot `Policy.infer()` events under HDF5 `/rlt_policy_forward_events`. Do not treat `z_rl` recomputed later from saved mp4/video frames as runtime-equivalent training data.
+- Strong constraint: saved mp4/video based re-encoding is ablation/audit data only. Sources such as `rl_token_reencoded`, `precomputed_frame_cache`, `vla_same_forward_low_right_tokens_then_lower_right_rl_token_encoder`, `async_anchor_token_cache_vla_same_forward`, and `dummy_*` must not be used as formal actor/critic training replay unless the user explicitly asks for a controlled ablation.
+- Strong constraint: `paper_subsampled_anchor` by itself is not sufficient to be trainable. A formal replay shard must also prove runtime-event lineage, normally with `z_rl_source=vla_same_forward_runtime_output`, `z_alignment=policy_forward_event_*`, and source HDF5 `/rlt_policy_forward_events` metadata. Legacy or missing `z_rl_source` is not trainable by default.
+- Fixed collection workflow for new 103 data:
+  - `192.168.1.103` is the data-collection machine. During collection, it must save raw rollout material plus real `/rlt_policy_forward_events` from the running same-forward policy.
+  - The older async-anchor token worker and mp4/video re-encoding workflow is no longer formal training data for the active same-forward runtime. It may be used only for ablation/audit, and its outputs must be clearly labeled non-formal.
+  - After a collection batch finishes and the user asks to pull data back, copy all required source material from 103 to the local data root `/home/eii/data/openpi0.5-rtc-reward-learning`: raw rollouts, HDF5 `/rlt_policy_forward_events`, runtime cache-block audit data, and any related manifests/audit files.
+  - Formal trainable replay assembly should consume the recorded policy-forward events, not recompute `z_rl` from mp4. If a rollout lacks `/rlt_policy_forward_events`, classify it as legacy/offline/ablation by default.
 - Do not train by scanning mixed legacy replay directories directly. Train from the canonical manifests unless the user explicitly requests an ablation.
-- 2026-07-06 online RLT replay rescue:
-  - Treat raw 2026-07-06 replay as source material only; do not train directly from its saved `z_rl/proprio`.
-  - Split it into two source groups before rebuilding:
-    - `base142_legacy_unmarked`: 09:06-10:27, 142 shards, the data used to train the first actor that day.
-    - `actor93_runtime_cache_block`: 13:21-14:40, 93 shards, collected by the actor trained from the first group.
-  - Rebuild each group separately with `scripts/rebuild_online_rollout_paper_anchor_replay.py --collection-group base142|actor93` so outputs are formal `paper_subsampled_anchor` replay with VLA same-forward lower/right RLToken.
-  - Treat `actor93_runtime_cache_block` as high-risk off-policy data. It may help critic boundary learning after rebuild, but it must not be directly treated as high-quality actor imitation data.
-  - Use `scripts/plan_20260706_data_rescue.py` to generate A-only / A+B rescue commands and combined manifests; do not hand-build mixed manifests for this batch.
-- 2026-07-06 same-forward iterative actor training entry:
-  - Full procedure document: `/home/eii/Documents/Notes/openpi0.5-rtc-reward-learning/70_Experiments/2026-07-06_same_forward_iterative_actor2_actor3/迭代训练流程.md`
-  - Stage A trains critic on `original116_actor1_train + base142_20260706_morning_same_forward`, then trains actor-2 from actor-1.
-  - Stage B trains critic on `original116_actor1_train + base142_20260706_morning_same_forward + actor93_20260706_afternoon_same_forward`, then trains actor-3 from actor-2.
-  - Use only the manifests under `local_rlt_manifests/iterative_same_forward_20260706/` for this process. Do not directly scan raw replay or runtime cache-block replay.
+- 2026-07-06 online RLT replay rescue is now reclassified after the 2026-07-07 runtime-vs-offline z audit:
+  - Treat raw 2026-07-06 replay as source material or ablation only; most of it lacks `/rlt_policy_forward_events`.
+  - The previously rebuilt `base142` / `actor93` same-forward paper-anchor data was generated from saved video/offline token extraction, so it is not runtime-equivalent formal replay for the active same-forward actor.
+  - The 2026-07-06 iterative actor training manifests under `local_rlt_manifests/iterative_same_forward_20260706/` and `local_rlt_manifests/unified_same_forward_20260706/` are historical ablation artifacts unless they are rebuilt from real `/rlt_policy_forward_events`.
+  - Do not use those manifests for new formal actor/critic training without an explicit ablation request.
 - Legacy 512-dim replay roots such as `rlt_key_regions`, `rlt_key_regions_clean`, and `human_expert_no_actor_q_cam4_provenance_20260629` must not be mixed into a 2048 training run.
-- Strong requirement: formal critic/actor training replay should match the RLT paper's subsampled transition semantics:
-  - each replay row is `x_i, action[i:i+C], x_{i+C}`;
-  - `z_rl/proprio` must be re-encoded from the row's own stride anchor frame `i`, not copied from an RTC/action-cache block;
-  - regenerated shards should mark `replay_state_grain=paper_subsampled_anchor`;
-  - `fixed_segments` / `rl_token_reencoded_aligned_to_proprio_segments` shards are only audit/ablation artifacts and must not be used for formal training manifests.
+- Strong requirement: formal critic/actor training replay for the active same-forward runtime should match the actor's actual state distribution:
+  - each replay row should use `z_rl/proprio` from a real policy-forward event recorded during robot control;
+  - action chunks should be aligned to that event's true action trunk/window;
+  - do not synthesize a new `z_rl` for arbitrary stride-anchor frames by decoding saved mp4 and running VLA/RLToken again;
+  - `fixed_segments`, `rl_token_reencoded_aligned_to_proprio_segments`, video-reencoded paper anchors, async-anchor token caches, and precomputed frame caches are audit/ablation artifacts unless explicitly approved for a controlled ablation.
 - Local canonical root:
   - Data: `/home/eii/data/openpi0.5-rtc-reward-learning/replay/canonical_2048`
   - Local-only manifest: `/home/eii/data/openpi0.5-rtc-reward-learning/manifests/canonical_2048`
