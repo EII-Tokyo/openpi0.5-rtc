@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections import deque
+from collections.abc import Callable
 import dataclasses
 import json
 import logging
@@ -11,12 +12,14 @@ import shutil
 import subprocess
 import threading
 import time
-from typing import Any, Callable
+from typing import Any
 
 import h5py
 import numpy as np
 from openpi_client.runtime import subscriber as _subscriber
 from typing_extensions import override
+
+from openpi.training import rlt_anchor_token_cache
 
 _REPLAY_KEYS = (
     "z_rl",
@@ -273,6 +276,7 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
         chunk_stride: int = 2,
         prefer_gpu_video: bool = True,
         ack_publisher: Callable[[dict[str, Any]], None] | None = None,
+        anchor_job_root: str | None = None,
     ) -> None:
         del action_horizon  # Kept for older call sites; RLT training horizon is explicit.
         train_horizon = chunk_horizon if train_horizon is None else train_horizon
@@ -291,6 +295,8 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
         self._chunk_stride = chunk_stride
         self._prefer_gpu_video = prefer_gpu_video
         self._ack_publisher = ack_publisher if ack_publisher is not None else _RedisReplayAckPublisher()
+        anchor_job_root = anchor_job_root or os.getenv("RLT_ANCHOR_TOKEN_JOB_ROOT")
+        self._anchor_job_root = pathlib.Path(anchor_job_root) if anchor_job_root else self._replay_root.parent / "rlt_anchor_token_jobs"
         self._step_index = 0
         self._active_start_event: dict[str, Any] | None = None
         self._active_start_step: int | None = None
@@ -493,8 +499,31 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
             os.replace(shard_tmp, shard_path)
             with (replay_dir.parent / "manifest.jsonl").open("a", encoding="utf-8") as file:
                 file.write(json.dumps({**manifest, "shard_path": str(shard_path)}, ensure_ascii=False) + "\n")
+            self._write_anchor_token_job(manifest, rollout_dir=rollout_dir, shard_path=shard_path)
         self._publish_replay_ack(manifest, shard_path=shard_path)
         logging.info("Saved RLT key region to %s", rollout_dir)
+
+    def _write_anchor_token_job(
+        self,
+        manifest: dict[str, Any],
+        *,
+        rollout_dir: pathlib.Path,
+        shard_path: pathlib.Path,
+    ) -> None:
+        try:
+            job = rlt_anchor_token_cache.write_pending_job(
+                job_root=self._anchor_job_root,
+                manifest={
+                    **manifest,
+                    "chunk_stride": self._chunk_stride,
+                    "train_horizon": self._train_horizon,
+                },
+                rollout_dir=rollout_dir,
+                source_shard_path=shard_path,
+            )
+            logging.info("Queued async anchor-token job %s", job.path)
+        except Exception:
+            logging.exception("Failed to queue async anchor-token job for key region %s", manifest.get("key_region_id"))
 
     def _write_videos(self, rollout_dir: pathlib.Path, records: list[StepRecord]) -> None:
         if not records:

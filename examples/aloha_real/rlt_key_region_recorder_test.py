@@ -329,6 +329,43 @@ def test_key_region_manifest_marks_train_eligibility(tmp_path):
     assert manifest["voided"] is False
 
 
+def test_key_region_write_segment_enqueues_anchor_token_job(tmp_path):
+    store = recorder.KeyRegionReplayRecorder(
+        replay_root=str(tmp_path / "replay"),
+        rollouts_root=str(tmp_path / "rollouts"),
+        train_horizon=10,
+        full_horizon=50,
+        chunk_stride=10,
+        ack_publisher=lambda payload: None,
+        anchor_job_root=str(tmp_path / "anchor_jobs"),
+    )
+    store._write_videos = lambda rollout_dir, records: None
+    store._write_hdf5 = lambda path, segment, missing_metadata: path.write_bytes(b"hdf5")
+    segment = recorder.KeyRegionSegment(
+        "kid",
+        "task",
+        "warmup",
+        {"timestamp": 1.0},
+        {"timestamp": 2.0},
+        {"timestamp": 3.0, "reward": 1},
+        [_record(step) for step in range(25)],
+        active_start_step=0,
+        active_end_step=25,
+    )
+    try:
+        store._write_segment(segment)
+    finally:
+        store.close()
+
+    job_path = tmp_path / "anchor_jobs" / "pending" / "key_region_kid.json"
+    assert job_path.exists()
+    payload = recorder.json.loads(job_path.read_text(encoding="utf-8"))
+    assert payload["key_region_id"] == "kid"
+    assert payload["status"] == "pending"
+    assert payload["formal_replay_state_grain"] == "paper_subsampled_anchor"
+    assert payload["source_runtime_cache_block_shard_path"].endswith("key_region_kid.npz")
+
+
 class _FakeStdin:
     def __init__(self):
         self.closed = False

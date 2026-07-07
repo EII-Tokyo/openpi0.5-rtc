@@ -113,6 +113,13 @@
 ## Canonical RLT replay data
 - Current canonical RLT replay data uses the lower+right 4-layer RLToken encoder with `z_rl` / `next_z_rl` dimension `2048`.
 - Strong constraint: before any critic or actor training, newly collected or cleaned rollout/key-region data must first be converted offline into formal `paper_subsampled_anchor` replay shards. Do not train directly from online recorder outputs, runtime cache-block replay, cleaned crop NPZs, raw rollouts, or fixed/aligned segment artifacts.
+- Fixed async-anchor workflow for new 103 collection:
+  - `192.168.1.103` is the data-collection machine. During collection, it should save raw rollout, runtime cache-block replay, and `rlt_anchor_token_jobs/pending` job files only.
+  - Do not run the async anchor token worker on `192.168.1.103` by default, and do not let it auto-start as a compose service during robot testing. VLA/RLToken token extraction can consume GPU/VRAM and must not compete with `openpi_server` or real-time robot control.
+  - After a collection batch finishes and the user asks to pull data back, copy all required source material from 103 to the local data root `/home/eii/data/openpi0.5-rtc-reward-learning`: raw rollouts, runtime cache-block replay shards, `rlt_anchor_token_jobs`, and any related manifests/audit files.
+  - Formal trainable replay assembly should run locally by explicit command, normally via `scripts/rlt_anchor_token_worker.py run-pending --limit ...` first, then without `--limit` after the first sample is verified.
+  - The local worker output should go under local canonical/paper-anchor replay roots and local manifests. Training should consume only those formal manifests, never the 103 runtime cache-block shards directly.
+  - If the user explicitly asks to run the worker on 103 for a special case, first confirm robot control is idle and use an explicit one-shot command, not an always-on service.
 - Do not train by scanning mixed legacy replay directories directly. Train from the canonical manifests unless the user explicitly requests an ablation.
 - 2026-07-06 online RLT replay rescue:
   - Treat raw 2026-07-06 replay as source material only; do not train directly from its saved `z_rl/proprio`.
