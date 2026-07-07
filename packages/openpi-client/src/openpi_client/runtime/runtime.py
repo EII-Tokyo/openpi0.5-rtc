@@ -884,7 +884,6 @@ class Runtime:
         }
 
         action = self._agent.get_action(observation_with_task)
-        self._attach_rlt_frame_token_if_needed(observation_with_task, action)
         preempt_task = self._take_preempt_task()
         if preempt_task is not None:
             logging.warning("策略推理期间收到抢占任务，丢弃本次策略动作: %s", preempt_task.get("task_num"))
@@ -900,42 +899,6 @@ class Runtime:
 
         for subscriber in self._subscribers:
             subscriber.on_step(observation["origin_observation"], action)
-
-    def _attach_rlt_frame_token_if_needed(self, observation: dict, action: dict) -> None:
-        if not isinstance(action, dict) or not self._subscribers_want_rlt_frame_token():
-            return
-        get_rlt_frame_token = getattr(self._agent, "get_rlt_frame_token", None)
-        if get_rlt_frame_token is None:
-            return
-        try:
-            token_result = get_rlt_frame_token(observation)
-        except Exception:
-            logging.exception("Failed to compute per-frame RLT feature for timeline recording")
-            return
-        if not token_result:
-            return
-        if token_result.get("z_rl") is not None:
-            action["rlt_frame_z_rl"] = token_result["z_rl"]
-        if token_result.get("proprio") is not None:
-            action["rlt_frame_proprio"] = token_result["proprio"]
-        elif token_result.get("state") is not None:
-            action["rlt_frame_proprio"] = token_result["state"]
-        if token_result.get("z_rl_source") is not None:
-            action["rlt_frame_z_rl_source"] = token_result["z_rl_source"]
-
-    def _subscribers_want_rlt_frame_token(self) -> bool:
-        for subscriber in self._subscribers:
-            wants = getattr(subscriber, "wants_rlt_frame_token", None)
-            if wants is None:
-                if bool(getattr(subscriber, "needs_rlt_frame_token", False)):
-                    return True
-                continue
-            try:
-                if bool(wants()):
-                    return True
-            except Exception:
-                logging.exception("Subscriber failed while checking RLT frame token need")
-        return False
 
     def _move_robots_to_action(self, real_env, action, step_sleep: float = 0.0) -> None:
         """将puppet和master同步到单个action。"""

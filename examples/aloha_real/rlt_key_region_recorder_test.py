@@ -1,9 +1,15 @@
 import sys
 import types
+import importlib
 
 import numpy as np
 
-sys.modules.setdefault("h5py", types.SimpleNamespace(File=None))
+if getattr(sys.modules.get("h5py"), "File", object()) is None:
+    sys.modules.pop("h5py", None)
+try:
+    import h5py  # noqa: F401
+except ImportError:
+    sys.modules.setdefault("h5py", types.SimpleNamespace(File=None))
 
 from examples.aloha_real import rlt_key_region_recorder as recorder
 
@@ -248,6 +254,7 @@ def test_key_region_manifest_includes_replay_schema_metadata(tmp_path):
 def test_write_hdf5_includes_raw_frame_timeline_and_marks_runtime_cache_audit(tmp_path):
     pytest = __import__("pytest")
     h5py = pytest.importorskip("h5py")
+    recorder.h5py = importlib.import_module("h5py")
     store = recorder.KeyRegionReplayRecorder(
         replay_root=str(tmp_path / "replay"),
         rollouts_root=str(tmp_path / "rollouts"),
