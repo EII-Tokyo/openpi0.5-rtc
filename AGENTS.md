@@ -122,6 +122,11 @@
   - Rebuild each group separately with `scripts/rebuild_online_rollout_paper_anchor_replay.py --collection-group base142|actor93` so outputs are formal `paper_subsampled_anchor` replay with VLA same-forward lower/right RLToken.
   - Treat `actor93_runtime_cache_block` as high-risk off-policy data. It may help critic boundary learning after rebuild, but it must not be directly treated as high-quality actor imitation data.
   - Use `scripts/plan_20260706_data_rescue.py` to generate A-only / A+B rescue commands and combined manifests; do not hand-build mixed manifests for this batch.
+- 2026-07-06 same-forward iterative actor training entry:
+  - Full procedure document: `/home/eii/Documents/Notes/openpi0.5-rtc-reward-learning/70_Experiments/2026-07-06_same_forward_iterative_actor2_actor3/迭代训练流程.md`
+  - Stage A trains critic on `original116_actor1_train + base142_20260706_morning_same_forward`, then trains actor-2 from actor-1.
+  - Stage B trains critic on `original116_actor1_train + base142_20260706_morning_same_forward + actor93_20260706_afternoon_same_forward`, then trains actor-3 from actor-2.
+  - Use only the manifests under `local_rlt_manifests/iterative_same_forward_20260706/` for this process. Do not directly scan raw replay or runtime cache-block replay.
 - Legacy 512-dim replay roots such as `rlt_key_regions`, `rlt_key_regions_clean`, and `human_expert_no_actor_q_cam4_provenance_20260629` must not be mixed into a 2048 training run.
 - Strong requirement: formal critic/actor training replay should match the RLT paper's subsampled transition semantics:
   - each replay row is `x_i, action[i:i+C], x_{i+C}`;
