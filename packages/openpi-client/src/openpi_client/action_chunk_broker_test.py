@@ -22,6 +22,7 @@ class _Policy:
         return {
             "actions": np.arange(6, dtype=np.float32).reshape(3, 2),
             "z_rl": np.ones((8,), dtype=np.float32),
+            "z_rl_source": "vla_same_forward",
             "state": np.ones((4,), dtype=np.float32),
         }
 
@@ -83,6 +84,22 @@ def test_actor_disabled_leaves_actions_unchanged_and_sets_reference_action():
     assert result["rlt_actor_applied"] is False
     assert result["rlt_actor_reason"] == "actor_not_requested"
     assert "rlt_context" not in policy.obs_seen[0]
+
+
+def test_policy_forward_event_is_emitted_once_per_cached_chunk():
+    broker = ActionChunkBroker(_Policy(), action_horizon=3, use_rtc=False)
+
+    first = broker.infer({})
+    second = broker.infer({})
+
+    assert first["rlt_policy_forward_event"] is True
+    assert first["rlt_policy_forward_id"] == 0
+    assert first["rlt_policy_forward_action_start_index"] == 0
+    assert first["rlt_policy_forward_z_rl_source"] == "vla_same_forward_runtime_output"
+    np.testing.assert_allclose(first["rlt_policy_forward_z_rl"], np.ones((8,), dtype=np.float32))
+    np.testing.assert_allclose(first["rlt_policy_forward_proprio"], np.ones((4,), dtype=np.float32))
+    assert "rlt_policy_forward_event" not in second
+    assert "rlt_policy_forward_z_rl" not in second
 
 
 def test_infer_rl_token_uses_inner_policy():

@@ -268,6 +268,7 @@ class ActionChunkBroker(_base_policy.BasePolicy):
         self._actor_delta_ema: np.ndarray | None = None
         self._background_running: bool = False
         self._cache_generation: int = 0
+        self._policy_forward_counter: int = 0
         self._cache_lock = threading.RLock()
         self._explicit_rlt_gate_enabled: bool | None = None
         self._explicit_rlt_gate_epoch: int | None = None
@@ -357,6 +358,10 @@ class ActionChunkBroker(_base_policy.BasePolicy):
                 background_results = self._apply_rlt_actor_to_policy_results(
                     self._background_results,
                     obs,
+                    action_start_index=self._d,
+                )
+                background_results = self._attach_policy_forward_event(
+                    background_results,
                     action_start_index=self._d,
                 )
                 with self._cache_lock:
@@ -580,6 +585,7 @@ class ActionChunkBroker(_base_policy.BasePolicy):
         else:
             policy_results = self._policy.infer(self._policy_obs(obs))
             policy_results = self._apply_rlt_actor_to_policy_results(policy_results, obs, action_start_index=0)
+        policy_results = self._attach_policy_forward_event(policy_results, action_start_index=0)
         with self._cache_lock:
             if generation != self._cache_generation:
                 return False
@@ -870,6 +876,12 @@ class ActionChunkBroker(_base_policy.BasePolicy):
             ("rlt_action_limited", "rlt_action_limited"),
             ("rlt_actor_speed_limit_preset", "rlt_actor_speed_limit_preset"),
             ("rlt_right_arm_frozen", "rlt_right_arm_frozen"),
+            ("rlt_policy_forward_event", "rlt_policy_forward_event"),
+            ("rlt_policy_forward_id", "rlt_policy_forward_id"),
+            ("rlt_policy_forward_action_start_index", "rlt_policy_forward_action_start_index"),
+            ("rlt_policy_forward_z_rl", "rlt_policy_forward_z_rl"),
+            ("rlt_policy_forward_proprio", "rlt_policy_forward_proprio"),
+            ("rlt_policy_forward_z_rl_source", "rlt_policy_forward_z_rl_source"),
         ):
             if source_key in policy_results and target_key not in cached:
                 cached[target_key] = policy_results[source_key]
@@ -878,14 +890,51 @@ class ActionChunkBroker(_base_policy.BasePolicy):
     def _slice_result_cache(self, results: Dict[str, np.ndarray]) -> Dict[str, np.ndarray]:
         sliced = {}
         action_horizon = results["actions"].shape[0]
+        event_start_index = int(results.get("rlt_policy_forward_action_start_index", 0) or 0)
+        emit_forward_event = self._cur_step == event_start_index
         for key, value in results.items():
-            if key.endswith("_full"):
+            if key.startswith("rlt_policy_forward_") and not emit_forward_event:
+                continue
+            if key == "rlt_policy_forward_event":
+                if emit_forward_event:
+                    sliced[key] = value
+            elif key.endswith("_full"):
                 sliced[key] = value
             elif isinstance(value, np.ndarray) and value.ndim > 0 and value.shape[0] == action_horizon:
                 sliced[key] = value[self._cur_step, ...]
             else:
                 sliced[key] = value
         return sliced
+
+    def _attach_policy_forward_event(
+        self,
+        policy_results: Dict[str, np.ndarray],
+        *,
+        action_start_index: int,
+    ) -> Dict[str, np.ndarray]:
+        z_rl = policy_results.get("z_rl", policy_results.get("rl_token"))
+        proprio = policy_results.get("proprio", policy_results.get("state"))
+        if z_rl is None or proprio is None:
+            return policy_results
+
+        policy_results = dict(policy_results)
+        z_source = str(policy_results.get("z_rl_source") or "unknown")
+        if z_source == "vla_same_forward":
+            z_source = "vla_same_forward_runtime_output"
+        with self._cache_lock:
+            forward_id = self._policy_forward_counter
+            self._policy_forward_counter += 1
+        policy_results.update(
+            {
+                "rlt_policy_forward_event": True,
+                "rlt_policy_forward_id": forward_id,
+                "rlt_policy_forward_action_start_index": int(action_start_index),
+                "rlt_policy_forward_z_rl": np.asarray(z_rl, dtype=np.float32),
+                "rlt_policy_forward_proprio": np.asarray(proprio, dtype=np.float32),
+                "rlt_policy_forward_z_rl_source": z_source,
+            }
+        )
+        return policy_results
 
     def _record_emitted_action(self, results: Dict[str, np.ndarray]) -> None:
         action = results.get("actions")

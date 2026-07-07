@@ -29,6 +29,38 @@ def _write_timeline_hdf5(path, *, frames: int = 8) -> None:
         root.create_dataset("timestamps", data=np.arange(frames, dtype=np.float64))
 
 
+def _write_policy_forward_event_hdf5(path, *, frames: int = 8, event_steps: tuple[int, ...] = (0, 2, 4, 6)) -> None:
+    with h5py.File(path, "w") as root:
+        root.attrs["key_region_id"] = "event-demo"
+        root.attrs["reward"] = 1
+        root.attrs["replay_state_grain"] = "raw_frame_timeline"
+        root.create_dataset("action", data=np.arange(frames * 2, dtype=np.float32).reshape(frames, 2))
+        root.create_dataset("reference_action", data=100 + np.arange(frames * 2, dtype=np.float32).reshape(frames, 2))
+        timeline = root.create_group("rlt_timeline")
+        timeline.attrs["state_grain"] = "raw_frame_timeline"
+        timeline.attrs["z_rl_source"] = "policy_forward_events"
+        timeline.create_dataset("step_index", data=np.arange(frames, dtype=np.int64))
+        timeline.create_dataset("valid", data=np.ones((frames,), dtype=np.bool_))
+        events = root.create_group("rlt_policy_forward_events")
+        events.attrs["state_grain"] = "vla_same_forward_policy_forward"
+        events.attrs["z_rl_source"] = "vla_same_forward_runtime_output"
+        events.create_dataset("step_index", data=np.asarray(event_steps, dtype=np.int64))
+        events.create_dataset("policy_forward_id", data=np.arange(len(event_steps), dtype=np.int64))
+        events.create_dataset("action_start_index", data=np.zeros((len(event_steps),), dtype=np.int64))
+        events.create_dataset(
+            "z_rl",
+            data=1000 + np.arange(len(event_steps) * 3, dtype=np.float32).reshape(len(event_steps), 3),
+        )
+        events.create_dataset(
+            "proprio",
+            data=2000 + np.arange(len(event_steps) * 5, dtype=np.float32).reshape(len(event_steps), 5),
+        )
+        events.create_dataset(
+            "z_rl_source",
+            data=np.asarray(["vla_same_forward_runtime_output"] * len(event_steps), dtype="S"),
+        )
+
+
 def test_build_paper_replay_arrays_from_frame_timeline(tmp_path):
     h5_path = tmp_path / "episode.hdf5"
     _write_timeline_hdf5(h5_path, frames=8)
@@ -52,6 +84,37 @@ def test_build_paper_replay_arrays_from_frame_timeline(tmp_path):
     assert manifest["source_format"] == "rlt_timeline_hdf5"
     assert manifest["current_frames"] == [0, 2, 4]
     assert manifest["next_frames"] == [2, 4, 6]
+
+
+def test_build_paper_replay_arrays_from_policy_forward_events(tmp_path):
+    h5_path = tmp_path / "episode.hdf5"
+    _write_policy_forward_event_hdf5(h5_path, frames=8, event_steps=(0, 2, 4, 6))
+
+    arrays, manifest = rlt_timeline_replay.build_paper_replay_from_timeline_hdf5(
+        h5_path,
+        train_horizon=2,
+        chunk_stride=2,
+    )
+
+    assert arrays["action"].shape == (3, 2, 2)
+    np.testing.assert_allclose(arrays["z_rl"][:, 0], [1000, 1003, 1006])
+    np.testing.assert_allclose(arrays["next_z_rl"][:, 0], [1003, 1006, 1009])
+    np.testing.assert_allclose(arrays["action"][1, :, 0], [4, 6])
+    assert manifest["z_alignment"] == "policy_forward_event_exact_step_pairs"
+    assert manifest["current_frames"] == [0, 2, 4]
+    assert manifest["next_frames"] == [2, 4, 6]
+
+
+def test_policy_forward_events_require_exact_next_event(tmp_path):
+    h5_path = tmp_path / "episode.hdf5"
+    _write_policy_forward_event_hdf5(h5_path, frames=8, event_steps=(0, 3, 6))
+
+    with pytest.raises(ValueError, match="no exact policy-forward event pairs"):
+        rlt_timeline_replay.build_paper_replay_from_timeline_hdf5(
+            h5_path,
+            train_horizon=2,
+            chunk_stride=1,
+        )
 
 
 def test_build_paper_replay_rejects_runtime_cache_block_z(tmp_path):

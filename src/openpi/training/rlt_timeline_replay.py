@@ -44,18 +44,62 @@ def build_paper_replay_from_timeline_hdf5(
     with h5py.File(path, "r") as root:
         _require_dataset(root, "action")
         _require_dataset(root, "reference_action")
-        _require_dataset(root, "rlt_timeline/z_rl")
-        _require_dataset(root, "rlt_timeline/proprio")
         action = np.asarray(root["action"], dtype=np.float32)
         reference_action = np.asarray(root["reference_action"], dtype=np.float32)
-        z_rl = np.asarray(root["rlt_timeline/z_rl"], dtype=np.float32)
-        proprio = np.asarray(root["rlt_timeline/proprio"], dtype=np.float32)
-        valid = np.asarray(root["rlt_timeline/valid"], dtype=np.bool_) if "rlt_timeline/valid" in root else None
         reward = float(root.attrs.get("reward", 0.0))
         key_region_id = _h5_attr_str(root.attrs.get("key_region_id", path.stem))
-        z_rl_source = _h5_attr_str(root["rlt_timeline"].attrs.get("z_rl_source", ""))
-        rl_token_checkpoint_path = _h5_attr_str(root["rlt_timeline"].attrs.get("rl_token_checkpoint_path", ""))
+        rl_token_checkpoint_path = ""
+        if "rlt_timeline/z_rl" in root and "rlt_timeline/proprio" in root:
+            z_rl = np.asarray(root["rlt_timeline/z_rl"], dtype=np.float32)
+            proprio = np.asarray(root["rlt_timeline/proprio"], dtype=np.float32)
+            valid = np.asarray(root["rlt_timeline/valid"], dtype=np.bool_) if "rlt_timeline/valid" in root else None
+            z_rl_source = _h5_attr_str(root["rlt_timeline"].attrs.get("z_rl_source", ""))
+            rl_token_checkpoint_path = _h5_attr_str(root["rlt_timeline"].attrs.get("rl_token_checkpoint_path", ""))
+            arrays, manifest = _build_from_complete_frame_timeline(
+                path=path,
+                action=action,
+                reference_action=reference_action,
+                z_rl=z_rl,
+                proprio=proprio,
+                valid=valid,
+                z_rl_source=z_rl_source,
+                reward=reward,
+                key_region_id=key_region_id,
+                train_horizon=train_horizon,
+                chunk_stride=chunk_stride,
+                rl_token_checkpoint_path=rl_token_checkpoint_path,
+            )
+            return arrays, manifest
+        events = _read_policy_forward_events(root)
 
+    return _build_from_policy_forward_events(
+        path=path,
+        action=action,
+        reference_action=reference_action,
+        events=events,
+        reward=reward,
+        key_region_id=key_region_id,
+        train_horizon=train_horizon,
+        chunk_stride=chunk_stride,
+        rl_token_checkpoint_path=rl_token_checkpoint_path,
+    )
+
+
+def _build_from_complete_frame_timeline(
+    *,
+    path: Path,
+    action: np.ndarray,
+    reference_action: np.ndarray,
+    z_rl: np.ndarray,
+    proprio: np.ndarray,
+    valid: np.ndarray | None,
+    z_rl_source: str,
+    reward: float,
+    key_region_id: str,
+    train_horizon: int,
+    chunk_stride: int,
+    rl_token_checkpoint_path: str,
+) -> tuple[dict[str, np.ndarray], dict[str, Any]]:
     _validate_timeline_arrays(
         path=path,
         action=action,
@@ -67,20 +111,162 @@ def build_paper_replay_from_timeline_hdf5(
     )
     starts = compute_anchor_starts(len(action), train_horizon, chunk_stride)
     next_frames = starts + int(train_horizon)
+    arrays = _assemble_arrays(
+        action=action,
+        reference_action=reference_action,
+        current_z_rl=z_rl[starts],
+        current_proprio=proprio[starts],
+        next_z_rl=z_rl[next_frames],
+        next_proprio=proprio[next_frames],
+        starts=starts,
+        next_frames=next_frames,
+        train_horizon=train_horizon,
+        reward=reward,
+    )
+    manifest = _build_manifest(
+        path=path,
+        arrays=arrays,
+        starts=starts,
+        next_frames=next_frames,
+        key_region_id=key_region_id,
+        reward=reward,
+        z_rl_source=z_rl_source,
+        z_rl_dim=int(z_rl.shape[-1]),
+        proprio_dim=int(proprio.shape[-1]),
+        action_dim=int(action.shape[-1]),
+        train_horizon=train_horizon,
+        chunk_stride=chunk_stride,
+        rl_token_checkpoint_path=rl_token_checkpoint_path,
+        z_alignment="complete_frame_timeline",
+    )
+    return arrays, manifest
+
+
+def _assemble_arrays(
+    *,
+    action: np.ndarray,
+    reference_action: np.ndarray,
+    current_z_rl: np.ndarray,
+    current_proprio: np.ndarray,
+    next_z_rl: np.ndarray,
+    next_proprio: np.ndarray,
+    starts: np.ndarray,
+    next_frames: np.ndarray,
+    train_horizon: int,
+    reward: float,
+) -> dict[str, np.ndarray]:
     arrays = {
-        "z_rl": z_rl[starts].astype(np.float32),
-        "proprio": proprio[starts].astype(np.float32),
+        "z_rl": current_z_rl.astype(np.float32),
+        "proprio": current_proprio.astype(np.float32),
         "action": _windows(action, starts, train_horizon),
         "reference_action": _windows(reference_action, starts, train_horizon),
         "reward_seq": np.zeros((len(starts), int(train_horizon)), dtype=np.float32),
-        "next_z_rl": z_rl[next_frames].astype(np.float32),
-        "next_proprio": proprio[next_frames].astype(np.float32),
+        "next_z_rl": next_z_rl.astype(np.float32),
+        "next_proprio": next_proprio.astype(np.float32),
         "next_reference_action": _windows(reference_action, next_frames, train_horizon),
         "done": np.zeros((len(starts),), dtype=np.bool_),
     }
     arrays["done"][-1] = True
     arrays["reward_seq"][-1, int(train_horizon) - 1] = reward
-    manifest = {
+    return arrays
+
+
+def _build_from_policy_forward_events(
+    *,
+    path: Path,
+    action: np.ndarray,
+    reference_action: np.ndarray,
+    events: dict[str, np.ndarray | str],
+    reward: float,
+    key_region_id: str,
+    train_horizon: int,
+    chunk_stride: int,
+    rl_token_checkpoint_path: str,
+) -> tuple[dict[str, np.ndarray], dict[str, Any]]:
+    _validate_action_arrays(path=path, action=action, reference_action=reference_action)
+    step_index = np.asarray(events["step_index"], dtype=np.int64)
+    z_rl = np.asarray(events["z_rl"], dtype=np.float32)
+    proprio = np.asarray(events["proprio"], dtype=np.float32)
+    z_rl_source = str(events["z_rl_source"])
+    _validate_policy_forward_events(
+        path=path,
+        action_len=len(action),
+        step_index=step_index,
+        z_rl=z_rl,
+        proprio=proprio,
+        z_rl_source=z_rl_source,
+    )
+
+    event_by_step = {int(step): idx for idx, step in enumerate(step_index)}
+    candidate_starts = [
+        int(step)
+        for step in sorted(step_index)
+        if int(step) + int(train_horizon) in event_by_step and int(step) + (2 * int(train_horizon)) <= len(action)
+    ]
+    selected_starts: list[int] = []
+    for step in candidate_starts:
+        if not selected_starts or step - selected_starts[-1] >= int(chunk_stride):
+            selected_starts.append(step)
+    candidate_starts = selected_starts
+    if not candidate_starts:
+        raise ValueError(
+            f"{path} has no exact policy-forward event pairs separated by train_horizon={train_horizon}; "
+            "refusing to synthesize or copy z_rl"
+        )
+
+    starts = np.asarray(candidate_starts, dtype=np.int64)
+    next_frames = starts + int(train_horizon)
+    current_indices = np.asarray([event_by_step[int(step)] for step in starts], dtype=np.int64)
+    next_indices = np.asarray([event_by_step[int(step)] for step in next_frames], dtype=np.int64)
+    arrays = _assemble_arrays(
+        action=action,
+        reference_action=reference_action,
+        current_z_rl=z_rl[current_indices],
+        current_proprio=proprio[current_indices],
+        next_z_rl=z_rl[next_indices],
+        next_proprio=proprio[next_indices],
+        starts=starts,
+        next_frames=next_frames,
+        train_horizon=train_horizon,
+        reward=reward,
+    )
+    manifest = _build_manifest(
+        path=path,
+        arrays=arrays,
+        starts=starts,
+        next_frames=next_frames,
+        key_region_id=key_region_id,
+        reward=reward,
+        z_rl_source=z_rl_source,
+        z_rl_dim=int(z_rl.shape[-1]),
+        proprio_dim=int(proprio.shape[-1]),
+        action_dim=int(action.shape[-1]),
+        train_horizon=train_horizon,
+        chunk_stride=chunk_stride,
+        rl_token_checkpoint_path=rl_token_checkpoint_path,
+        z_alignment="policy_forward_event_exact_step_pairs",
+    )
+    return arrays, manifest
+
+
+def _build_manifest(
+    *,
+    path: Path,
+    arrays: dict[str, np.ndarray],
+    starts: np.ndarray,
+    next_frames: np.ndarray,
+    key_region_id: str,
+    reward: float,
+    z_rl_source: str,
+    z_rl_dim: int,
+    proprio_dim: int,
+    action_dim: int,
+    train_horizon: int,
+    chunk_stride: int,
+    rl_token_checkpoint_path: str,
+    z_alignment: str,
+) -> dict[str, Any]:
+    return {
         "key_region_id": key_region_id,
         "reward": reward,
         "source_format": "rlt_timeline_hdf5",
@@ -91,9 +277,10 @@ def build_paper_replay_from_timeline_hdf5(
         "train_eligible": True,
         "subsampled_transition_semantics": "x_i_action_i_to_i_plus_c_next_x_i_plus_c",
         "z_rl_source": z_rl_source,
-        "z_rl_dim": int(z_rl.shape[-1]),
-        "proprio_dim": int(proprio.shape[-1]),
-        "action_dim": int(action.shape[-1]),
+        "z_alignment": z_alignment,
+        "z_rl_dim": int(z_rl_dim),
+        "proprio_dim": int(proprio_dim),
+        "action_dim": int(action_dim),
         "train_horizon": int(train_horizon),
         "chunk_stride": int(chunk_stride),
         "current_frames": [int(frame) for frame in starts],
@@ -101,7 +288,6 @@ def build_paper_replay_from_timeline_hdf5(
         "rl_token_checkpoint_path": rl_token_checkpoint_path,
         "replay_array_shapes": {key: list(value.shape) for key, value in arrays.items()},
     }
-    return arrays, manifest
 
 
 def write_paper_replay_shard_from_timeline_hdf5(
@@ -139,6 +325,69 @@ def _require_dataset(root: h5py.File, name: str) -> None:
         raise KeyError(f"{root.filename} is missing required dataset {name}")
 
 
+def _read_policy_forward_events(root: h5py.File) -> dict[str, np.ndarray | str]:
+    if "rlt_policy_forward_events" not in root:
+        raise KeyError(
+            f"{root.filename} has neither complete /rlt_timeline z_rl/proprio nor /rlt_policy_forward_events"
+        )
+    group = root["rlt_policy_forward_events"]
+    for name in ("step_index", "z_rl", "proprio"):
+        if name not in group:
+            raise KeyError(f"{root.filename} is missing rlt_policy_forward_events/{name}")
+    z_rl_source = _h5_attr_str(group.attrs.get("z_rl_source", ""))
+    if (not z_rl_source or z_rl_source == "missing") and "z_rl_source" in group:
+        raw_sources = np.asarray(group["z_rl_source"])
+        decoded = {_h5_attr_str(value) for value in raw_sources.tolist()}
+        decoded.discard("missing")
+        z_rl_source = next(iter(decoded)) if len(decoded) == 1 else "mixed"
+    return {
+        "step_index": np.asarray(group["step_index"], dtype=np.int64),
+        "z_rl": np.asarray(group["z_rl"], dtype=np.float32),
+        "proprio": np.asarray(group["proprio"], dtype=np.float32),
+        "z_rl_source": z_rl_source,
+    }
+
+
+def _validate_action_arrays(*, path: Path, action: np.ndarray, reference_action: np.ndarray) -> None:
+    if action.ndim != 2:
+        raise ValueError(f"{path} action must have shape [T, action_dim], got {action.shape}")
+    if reference_action.shape != action.shape:
+        raise ValueError(f"{path} reference_action shape {reference_action.shape} != action shape {action.shape}")
+    for name, array in (("action", action), ("reference_action", reference_action)):
+        if not np.isfinite(array).all():
+            raise ValueError(f"{path} {name} contains non-finite values")
+
+
+def _validate_policy_forward_events(
+    *,
+    path: Path,
+    action_len: int,
+    step_index: np.ndarray,
+    z_rl: np.ndarray,
+    proprio: np.ndarray,
+    z_rl_source: str,
+) -> None:
+    if step_index.ndim != 1:
+        raise ValueError(f"{path} policy forward step_index must be rank-1, got {step_index.shape}")
+    if z_rl.ndim != 2 or proprio.ndim != 2:
+        raise ValueError(f"{path} policy forward z_rl and proprio must be rank-2 arrays")
+    if len(step_index) == 0:
+        raise ValueError(f"{path} has no policy-forward events")
+    if len({len(step_index), len(z_rl), len(proprio)}) != 1:
+        raise ValueError(
+            f"{path} policy-forward length mismatch: step_index={len(step_index)} z_rl={len(z_rl)} proprio={len(proprio)}"
+        )
+    if np.any(step_index < 0) or np.any(step_index >= int(action_len)):
+        raise ValueError(f"{path} policy-forward step_index is outside action timeline length {action_len}")
+    if len(np.unique(step_index)) != len(step_index):
+        raise ValueError(f"{path} policy-forward step_index contains duplicates")
+    if not z_rl_source.startswith("vla_same_forward"):
+        raise ValueError(f"{path} policy-forward z_rl_source={z_rl_source!r} is not a vla_same_forward source")
+    for name, array in (("policy_forward_z_rl", z_rl), ("policy_forward_proprio", proprio)):
+        if not np.isfinite(array).all():
+            raise ValueError(f"{path} {name} contains non-finite values")
+
+
 def _validate_timeline_arrays(
     *,
     path: Path,
@@ -149,10 +398,7 @@ def _validate_timeline_arrays(
     valid: np.ndarray | None,
     z_rl_source: str,
 ) -> None:
-    if action.ndim != 2:
-        raise ValueError(f"{path} action must have shape [T, action_dim], got {action.shape}")
-    if reference_action.shape != action.shape:
-        raise ValueError(f"{path} reference_action shape {reference_action.shape} != action shape {action.shape}")
+    _validate_action_arrays(path=path, action=action, reference_action=reference_action)
     if z_rl.ndim != 2 or proprio.ndim != 2:
         raise ValueError(f"{path} z_rl and proprio must be rank-2 arrays")
     lengths = {len(action), len(reference_action), len(z_rl), len(proprio)}
@@ -168,7 +414,7 @@ def _validate_timeline_arrays(
             raise ValueError(f"{path} contains invalid rlt_timeline rows")
     if not z_rl_source.startswith("vla_same_forward"):
         raise ValueError(f"{path} z_rl_source={z_rl_source!r} is not a vla_same_forward source")
-    for name, array in (("action", action), ("reference_action", reference_action), ("z_rl", z_rl), ("proprio", proprio)):
+    for name, array in (("z_rl", z_rl), ("proprio", proprio)):
         if not np.isfinite(array).all():
             raise ValueError(f"{path} {name} contains non-finite values")
 

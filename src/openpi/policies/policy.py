@@ -166,6 +166,7 @@ class Policy(BasePolicy):
         start_time = time.monotonic()
         prefix_hidden = None
         z_rl = None
+        z_rl_source = None
         if use_rtc:
             if prev_action is None:
                 origin_actions, token_result = _split_actions_and_prefix_hidden(
@@ -213,6 +214,7 @@ class Policy(BasePolicy):
                     if prefix_hidden is None:
                         prefix_hidden = self._model.embed_prefix_hidden(observation, drop_language=False)
                     z_rl = self._same_forward_rl_token_encoder.encode(prefix_hidden, observation)
+                    z_rl_source = "vla_same_forward"
                 else:
                     if prefix_hidden is None:
                         prefix_hidden = self._model.embed_prefix_hidden(observation, drop_language=True)
@@ -220,6 +222,11 @@ class Policy(BasePolicy):
                         prefix_hidden = _drop_language_from_prefix_hidden(prefix_hidden, observation)
                     prefix_out, prefix_mask = prefix_hidden
                     z_rl = self._model.rl_token_autoencoder.encode(jax.lax.stop_gradient(prefix_out), prefix_mask)
+                    z_rl_source = "model_rl_token_autoencoder"
+            elif self._same_forward_rl_token_encoder is not None:
+                z_rl_source = "vla_same_forward"
+            else:
+                z_rl_source = "model_rl_token_autoencoder"
             outputs["z_rl"] = z_rl
         model_time = time.monotonic() - start_time
         if self._is_pytorch_model:
@@ -228,6 +235,8 @@ class Policy(BasePolicy):
             outputs = jax.tree.map(lambda x: np.asarray(x[0, ...]), outputs)
 
         outputs = self._output_transform(outputs)
+        if z_rl_source is not None:
+            outputs["z_rl_source"] = z_rl_source
         outputs["policy_timing"] = {
             "infer_ms": model_time * 1000,
         }

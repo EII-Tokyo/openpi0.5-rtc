@@ -33,6 +33,11 @@ def _record(step: int, *, include_full: bool = True, include_step_actions: bool 
         runtime_z_rl=np.full((8,), step + 100, dtype=np.float32),
         runtime_proprio=np.full((4,), step + 200, dtype=np.float32),
         z_rl_source="vla_same_forward_runtime_output",
+        policy_forward_id=step,
+        policy_forward_action_start_index=0,
+        policy_forward_z_rl=np.full((8,), step, dtype=np.float32),
+        policy_forward_proprio=np.full((4,), step, dtype=np.float32),
+        policy_forward_z_rl_source="vla_same_forward_runtime_output",
     )
 
 
@@ -50,7 +55,14 @@ def _push_runtime_step(store: recorder.KeyRegionReplayRecorder) -> None:
             "action_full": np.zeros((50, 14), dtype=np.float32),
             "reference_action_full": np.zeros((50, 14), dtype=np.float32),
             "z_rl": np.zeros((8,), dtype=np.float32),
+            "z_rl_source": "vla_same_forward",
             "proprio": np.zeros((4,), dtype=np.float32),
+            "rlt_policy_forward_event": True,
+            "rlt_policy_forward_id": 0,
+            "rlt_policy_forward_action_start_index": 0,
+            "rlt_policy_forward_z_rl": np.zeros((8,), dtype=np.float32),
+            "rlt_policy_forward_proprio": np.zeros((4,), dtype=np.float32),
+            "rlt_policy_forward_z_rl_source": "vla_same_forward_runtime_output",
         },
     )
 
@@ -193,15 +205,15 @@ def test_key_region_replay_publishes_valid_and_invalid_ack(tmp_path):
     assert messages[0]["reward"] == 1
     assert messages[0]["replay_ready"] is True
     assert messages[0]["train_eligible"] is False
-    assert messages[0]["segment_status"] == "committed"
+    assert messages[0]["segment_status"] == "raw_timeline_committed"
     assert messages[0]["replay_status"] == "runtime_cache_block_requires_offline_reencode"
     assert messages[0]["num_replay_transitions"] == 2
     assert messages[0]["shard_path"] == str(tmp_path / "valid.npz")
-    assert messages[1]["type"] == "rlt_replay_segment_rejected"
+    assert messages[1]["type"] == "rlt_replay_segment_committed"
     assert messages[1]["key_region_id"] == "invalid"
     assert messages[1]["replay_ready"] is False
     assert messages[1]["train_eligible"] is False
-    assert messages[1]["segment_status"] == "rejected"
+    assert messages[1]["segment_status"] == "raw_timeline_committed"
     assert messages[1]["replay_status"] == "too_short"
     assert messages[1]["shard_path"] is None
 
@@ -271,9 +283,9 @@ def test_write_hdf5_includes_raw_frame_timeline_and_marks_runtime_cache_audit(tm
         {"timestamp": 1.0},
         {"timestamp": 2.0},
         {"timestamp": 3.0, "reward": 1},
-        [_record(step) for step in range(5)],
-        active_start_step=0,
-        active_end_step=5,
+        [_record(step + 10) for step in range(5)],
+        active_start_step=10,
+        active_end_step=15,
     )
     try:
         store._write_hdf5(path, segment, missing_metadata=[])
@@ -284,13 +296,20 @@ def test_write_hdf5_includes_raw_frame_timeline_and_marks_runtime_cache_audit(tm
         assert root.attrs["replay_state_grain"] == "raw_frame_timeline"
         assert root["rlt"].attrs["state_grain"] == "runtime_action_cache_block_audit"
         assert root["rlt_timeline"].attrs["state_grain"] == "raw_frame_timeline"
-        assert root["rlt_timeline"].attrs["z_rl_source"] == "vla_same_forward_runtime_output"
-        np.testing.assert_allclose(root["rlt_timeline/z_rl"][:, 0], np.arange(5, dtype=np.float32))
-        np.testing.assert_allclose(root["rlt_timeline/proprio"][:, 0], np.arange(5, dtype=np.float32))
-        np.testing.assert_allclose(root["rlt/cached_z_rl"][:, 0], np.arange(5, dtype=np.float32) + 100)
-        np.testing.assert_allclose(root["rlt/cached_proprio"][:, 0], np.arange(5, dtype=np.float32) + 200)
-        np.testing.assert_allclose(root["action"][:, 0], np.arange(5, dtype=np.float32))
-        np.testing.assert_allclose(root["reference_action"][:, 0], np.arange(5, dtype=np.float32) + 0.5)
+        assert root["rlt_timeline"].attrs["z_rl_source"] == "policy_forward_events"
+        assert "z_rl" not in root["rlt_timeline"]
+        assert "proprio" not in root["rlt_timeline"]
+        assert root["rlt_policy_forward_events"].attrs["z_rl_source"] == "vla_same_forward_runtime_output"
+        np.testing.assert_allclose(root["rlt_timeline/step_index"][:], np.arange(5, dtype=np.int64))
+        np.testing.assert_allclose(root["rlt_timeline/global_step_index"][:], np.arange(10, 15, dtype=np.int64))
+        np.testing.assert_allclose(root["rlt_policy_forward_events/z_rl"][:, 0], np.arange(10, 15, dtype=np.float32))
+        np.testing.assert_allclose(root["rlt_policy_forward_events/proprio"][:, 0], np.arange(10, 15, dtype=np.float32))
+        np.testing.assert_allclose(root["rlt_policy_forward_events/step_index"][:], np.arange(5, dtype=np.int64))
+        np.testing.assert_allclose(root["rlt_policy_forward_events/global_step_index"][:], np.arange(10, 15, dtype=np.int64))
+        np.testing.assert_allclose(root["rlt/cached_z_rl"][:, 0], np.arange(10, 15, dtype=np.float32) + 100)
+        np.testing.assert_allclose(root["rlt/cached_proprio"][:, 0], np.arange(10, 15, dtype=np.float32) + 200)
+        np.testing.assert_allclose(root["action"][:, 0], np.arange(10, 15, dtype=np.float32))
+        np.testing.assert_allclose(root["reference_action"][:, 0], np.arange(10, 15, dtype=np.float32) + 0.5)
 
 
 def test_key_region_discard_clears_pending_region(tmp_path):
@@ -376,7 +395,7 @@ def test_key_region_manifest_marks_train_eligibility(tmp_path):
         store.close()
 
     assert manifest["train_eligible"] is False
-    assert manifest["segment_status"] == "committed"
+    assert manifest["segment_status"] == "raw_timeline_committed"
     assert manifest["voided"] is False
 
 

@@ -51,6 +51,11 @@ class StepRecord:
     runtime_z_rl: np.ndarray | None = None
     runtime_proprio: np.ndarray | None = None
     z_rl_source: str | None = None
+    policy_forward_id: int | None = None
+    policy_forward_action_start_index: int | None = None
+    policy_forward_z_rl: np.ndarray | None = None
+    policy_forward_proprio: np.ndarray | None = None
+    policy_forward_z_rl_source: str | None = None
     actor_applied: bool | None = None
     reference_q: float | None = None
     actor_q: float | None = None
@@ -269,6 +274,15 @@ def _extract_optional_float(action: dict, key: str) -> float | None:
         return None
 
 
+def _extract_optional_int(action: dict, key: str) -> int | None:
+    if key not in action or action[key] is None:
+        return None
+    try:
+        return int(action[key])
+    except (TypeError, ValueError):
+        return None
+
+
 def _stack_complete(records: list[StepRecord], attr: str, *, dtype: np.dtype | type = np.float32) -> np.ndarray | None:
     values = [getattr(record, attr) for record in records]
     if any(value is None for value in values):
@@ -292,6 +306,15 @@ def _optional_float_series(records: list[StepRecord], attr: str) -> np.ndarray |
 
 def _common_z_rl_source(records: list[StepRecord]) -> str | None:
     sources = {record.z_rl_source for record in records if record.z_rl_source}
+    if len(sources) == 1:
+        return next(iter(sources))
+    if len(sources) > 1:
+        return "mixed"
+    return None
+
+
+def _common_policy_forward_z_rl_source(records: list[StepRecord]) -> str | None:
+    sources = {record.policy_forward_z_rl_source for record in records if record.policy_forward_z_rl_source}
     if len(sources) == 1:
         return next(iter(sources))
     if len(sources) > 1:
@@ -375,12 +398,18 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
                 image_array = np.clip(image_array, 0, 255).astype(np.uint8)
             images[name] = np.array(image_array, copy=True)
 
-        frame_z_rl = _extract_action_array(action, "rlt_frame_z_rl")
-        frame_proprio = _extract_action_array(action, "rlt_frame_proprio")
         runtime_z_rl = _extract_action_array(action, "z_rl", "rl_token")
         runtime_proprio = _extract_action_array(action, "proprio", "rlt_proprio", "state")
-        if frame_z_rl is not None:
-            z_rl_source = str(action.get("rlt_frame_z_rl_source") or "vla_same_forward")
+        policy_forward_z_rl = _extract_action_array(action, "rlt_policy_forward_z_rl")
+        policy_forward_proprio = _extract_action_array(action, "rlt_policy_forward_proprio")
+        policy_forward_id = _extract_optional_int(action, "rlt_policy_forward_id")
+        policy_forward_action_start_index = _extract_optional_int(action, "rlt_policy_forward_action_start_index")
+        policy_forward_z_rl_source = None
+        if policy_forward_z_rl is not None:
+            policy_forward_z_rl_source = str(
+                action.get("rlt_policy_forward_z_rl_source") or "vla_same_forward_runtime_output"
+            )
+            z_rl_source = policy_forward_z_rl_source
         elif runtime_z_rl is not None:
             z_rl_source = "runtime_action_cache_block"
         else:
@@ -400,12 +429,17 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
                 "reference_actions_full",
                 "vla_reference_action_full",
             ),
-            z_rl=frame_z_rl if frame_z_rl is not None else runtime_z_rl,
-            proprio=frame_proprio if frame_proprio is not None else runtime_proprio,
+            z_rl=policy_forward_z_rl,
+            proprio=policy_forward_proprio,
             runtime_z_rl=runtime_z_rl,
             runtime_proprio=runtime_proprio,
             images=images,
             z_rl_source=z_rl_source,
+            policy_forward_id=policy_forward_id,
+            policy_forward_action_start_index=policy_forward_action_start_index,
+            policy_forward_z_rl=policy_forward_z_rl,
+            policy_forward_proprio=policy_forward_proprio,
+            policy_forward_z_rl_source=policy_forward_z_rl_source,
             actor_applied=_extract_optional_bool(action, "rlt_actor_applied"),
             reference_q=_extract_optional_float(action, "rlt_reference_q"),
             actor_q=_extract_optional_float(action, "rlt_actor_q"),
@@ -649,7 +683,9 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
                 "cached_z_rl/cached_proprio are runtime cache values for audit only; "
                 "formal training replay must re-encode z_rl from each stride anchor frame."
             )
-            rlt.create_dataset("step_index", data=np.asarray([record.step_index for record in records], dtype=np.int64))
+            local_step_index = np.arange(len(records), dtype=np.int64)
+            rlt.create_dataset("step_index", data=local_step_index)
+            rlt.create_dataset("global_step_index", data=np.asarray([record.step_index for record in records], dtype=np.int64))
             for attr, dataset_name in (
                 ("action_full", "action_full"),
                 ("reference_action_full", "reference_action_full"),
@@ -661,19 +697,15 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
                     rlt.create_dataset(dataset_name, data=values)
             timeline = root.create_group("rlt_timeline")
             timeline.attrs["state_grain"] = "raw_frame_timeline"
-            timeline.attrs["z_rl_source"] = _common_z_rl_source(records) or "missing"
+            timeline.attrs["z_rl_source"] = "policy_forward_events"
             timeline.attrs["note"] = (
-                "Raw per-step RLT timeline. Formal training shards must be derived offline "
-                "from this timeline into paper_subsampled_anchor replay."
+                "Raw per-step robot timeline. Per-forward same-forward z_rl values are stored "
+                "under /rlt_policy_forward_events; cached runtime z values under /rlt are audit only."
             )
-            timeline.create_dataset("step_index", data=np.asarray([record.step_index for record in records], dtype=np.int64))
-            timeline.create_dataset("valid", data=np.asarray([record.z_rl is not None and record.proprio is not None for record in records], dtype=np.bool_))
-            z_values = _stack_complete(records, "z_rl")
-            proprio_values = _stack_complete(records, "proprio")
-            if z_values is not None:
-                timeline.create_dataset("z_rl", data=z_values)
-            if proprio_values is not None:
-                timeline.create_dataset("proprio", data=proprio_values)
+            timeline.create_dataset("step_index", data=local_step_index)
+            timeline.create_dataset("global_step_index", data=np.asarray([record.step_index for record in records], dtype=np.int64))
+            timeline.create_dataset("valid", data=np.ones((len(records),), dtype=np.bool_))
+            self._write_policy_forward_events(root, records)
             actor_applied = _optional_bool_series(records, "actor_applied")
             if actor_applied is not None:
                 timeline.create_dataset("actor_applied", data=actor_applied)
@@ -682,6 +714,50 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
                 if values is not None:
                     timeline.create_dataset(dataset_name, data=values)
             root.create_dataset("timestamps", data=np.asarray([record.timestamp for record in records], dtype=np.float64))
+
+    def _write_policy_forward_events(self, root: h5py.File, records: list[StepRecord]) -> None:
+        events = [
+            (local_index, record)
+            for local_index, record in enumerate(records)
+            if record.policy_forward_z_rl is not None
+            and record.policy_forward_proprio is not None
+            and record.policy_forward_id is not None
+        ]
+        group = root.create_group("rlt_policy_forward_events")
+        group.attrs["state_grain"] = "vla_same_forward_policy_forward"
+        group.attrs["z_rl_source"] = _common_policy_forward_z_rl_source([record for _, record in events]) or "missing"
+        group.attrs["note"] = (
+            "One row per real VLA policy forward that produced z_rl during robot control. "
+            "Formal replay may only use exact event step pairs; do not expand these rows into fake per-frame z."
+        )
+        group.create_dataset("count", data=np.asarray(len(events), dtype=np.int64))
+        if not events:
+            return
+        group.create_dataset("step_index", data=np.asarray([local_index for local_index, _ in events], dtype=np.int64))
+        group.create_dataset(
+            "global_step_index",
+            data=np.asarray([record.step_index for _, record in events], dtype=np.int64),
+        )
+        group.create_dataset(
+            "policy_forward_id",
+            data=np.asarray([record.policy_forward_id for _, record in events], dtype=np.int64),
+        )
+        group.create_dataset(
+            "action_start_index",
+            data=np.asarray([record.policy_forward_action_start_index or 0 for _, record in events], dtype=np.int64),
+        )
+        group.create_dataset(
+            "z_rl",
+            data=np.asarray([record.policy_forward_z_rl for _, record in events], dtype=np.float32),
+        )
+        group.create_dataset(
+            "proprio",
+            data=np.asarray([record.policy_forward_proprio for _, record in events], dtype=np.float32),
+        )
+        group.create_dataset(
+            "z_rl_source",
+            data=np.asarray([record.policy_forward_z_rl_source or "missing" for _, record in events], dtype="S"),
+        )
 
     def _write_manifest(
         self,
@@ -721,7 +797,8 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
             "missing_rlt_metadata": missing_metadata,
             "replay_status": _replay_status(missing_metadata, replay_arrays),
             "replay_ready": replay_arrays is not None,
-            "segment_status": "committed" if replay_arrays is not None else "rejected",
+            "raw_timeline_ready": True,
+            "segment_status": "raw_timeline_committed",
             "train_eligible": False,
             "voided": False,
             "schema_version": 1,
@@ -752,9 +829,7 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
 
     def _publish_replay_ack(self, manifest: dict[str, Any], *, shard_path: pathlib.Path | None) -> None:
         payload = {
-            "type": "rlt_replay_segment_committed"
-            if bool(manifest.get("replay_ready", False))
-            else "rlt_replay_segment_rejected",
+            "type": "rlt_replay_segment_committed",
             "timestamp": time.time(),
             "key_region_id": manifest.get("key_region_id"),
             "task": manifest.get("task"),
@@ -762,9 +837,10 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
             "reward": manifest.get("reward"),
             "score_timeout": bool(manifest.get("score_timeout", False)),
             "replay_ready": bool(manifest.get("replay_ready", False)),
+            "raw_timeline_ready": bool(manifest.get("raw_timeline_ready", False)),
             "train_eligible": bool(manifest.get("train_eligible", manifest.get("replay_ready", False))),
             "segment_status": manifest.get("segment_status")
-            or ("committed" if bool(manifest.get("replay_ready", False)) else "rejected"),
+            or "raw_timeline_committed",
             "replay_status": manifest.get("replay_status"),
             "num_replay_transitions": int(manifest.get("num_replay_transitions") or 0),
             "missing_rlt_metadata": list(manifest.get("missing_rlt_metadata") or []),
@@ -841,6 +917,8 @@ def _step_window(records: list[StepRecord], start: int, attr: str, horizon: int)
 def _replay_status(missing_metadata: list[str], replay_arrays: dict[str, np.ndarray] | None) -> str:
     if replay_arrays is not None:
         return "runtime_cache_block_requires_offline_reencode"
+    if any(item in {"z_rl", "proprio"} for item in missing_metadata):
+        return "raw_timeline_committed_formal_replay_pending"
     if any(item not in {"not_enough_frames", "no_valid_replay_samples"} for item in missing_metadata):
         return "missing_metadata"
     if "not_enough_frames" in missing_metadata or "no_valid_replay_samples" in missing_metadata:
