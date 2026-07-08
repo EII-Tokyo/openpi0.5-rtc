@@ -16,6 +16,7 @@ _LEFT_ARM_ACTION_INDICES = (0, 1, 2, 3, 4, 5, 6)
 _LEFT_ARM_MOTION_ACTION_INDICES = (0, 1, 2, 3, 4, 5)
 _RIGHT_ARM_ACTION_INDICES = (7, 8, 9, 10, 11, 12, 13)
 _LEFT_ARM_JOINT_INDICES = (0, 1, 2, 3, 4, 5)
+_GRIPPER_ACTION_INDICES = (6, 13)
 _CONTINUOUS_ACTION_JOINT_INDICES = (3, 5, 10, 12)
 _ARM_JOINT_LIMITS = np.array(
     [
@@ -118,6 +119,22 @@ def _freeze_right_arm_actions(
         return frozen
     frozen[:, right_arm_indices] = state[list(right_arm_indices)]
     return frozen
+
+
+def _preserve_gripper_actions(
+    actions: np.ndarray,
+    reference_actions: np.ndarray,
+    *,
+    gripper_indices: tuple[int, ...] = _GRIPPER_ACTION_INDICES,
+) -> np.ndarray:
+    preserved = np.array(actions, dtype=np.float32, copy=True)
+    reference = np.asarray(reference_actions, dtype=np.float32)
+    if preserved.ndim != 2 or reference.shape != preserved.shape:
+        return preserved
+    valid_indices = tuple(index for index in gripper_indices if 0 <= index < preserved.shape[1])
+    if valid_indices:
+        preserved[:, valid_indices] = reference[:, valid_indices]
+    return preserved
 
 
 def _apply_right_arm_hold_transition(
@@ -742,6 +759,7 @@ class ActionChunkBroker(_base_policy.BasePolicy):
 
         if result.applied:
             policy_results["actions"] = np.asarray(result.actions, dtype=np.float32)
+            policy_results["actions"] = _preserve_gripper_actions(policy_results["actions"], reference_actions)
         action_start = result.action_start_index if result.action_start_index is not None else action_start_index
         action_end = result.action_end_index
         if result.applied and action_end is not None:
@@ -805,7 +823,7 @@ class ActionChunkBroker(_base_policy.BasePolicy):
                     limit_indices
                     and not np.allclose(limited_actions[:, limit_indices], frozen_actions[:, limit_indices])
                 )
-                policy_results["actions"] = limited_actions
+                policy_results["actions"] = _preserve_gripper_actions(limited_actions, reference_actions)
             else:
                 self._right_arm_hold_state = None
         else:

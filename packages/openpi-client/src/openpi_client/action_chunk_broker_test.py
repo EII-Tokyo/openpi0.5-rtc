@@ -312,6 +312,30 @@ def test_broker_passes_delayed_execution_window_to_actor_runtime():
     assert actor.calls[0][4] == 10
 
 
+def test_actor_adjustment_preserves_gripper_actions():
+    actor = _Actor(mode="apply")
+    broker = ActionChunkBroker(_Policy(), action_horizon=10, use_rtc=False, rlt_actor_runtime=actor)
+    reference = np.zeros((10, 14), dtype=np.float32)
+    reference[:, 6] = 0.23
+    reference[:, 13] = 0.77
+    policy_results = {
+        "actions": reference,
+        "z_rl": np.ones((8,), dtype=np.float32),
+        "state": np.zeros((14,), dtype=np.float32),
+    }
+
+    result = broker._apply_rlt_actor_to_policy_results(
+        policy_results,
+        {"rlt_context": {"actor_requested": True, "actor_handoff_steps": 0, "actor_speed_limit_preset": "off"}},
+        action_start_index=0,
+    )
+
+    assert result["rlt_actor_applied"] is True
+    np.testing.assert_allclose(result["actions"][:, 6], np.full((10,), 0.23, dtype=np.float32))
+    np.testing.assert_allclose(result["actions"][:, 13], np.full((10,), 0.77, dtype=np.float32))
+    assert np.max(np.abs(result["actions"][:, :6] - reference[:, :6])) > 0.0
+
+
 def test_propagates_signed_actor_residual_trend_to_rtc_guidance_tail():
     reference = np.zeros((50, 2), dtype=np.float32)
     adjusted = reference.copy()
@@ -507,9 +531,9 @@ def test_actor_delta_ema_smooths_left_arm_actor_residual_across_chunks():
     second = broker._apply_rlt_actor_to_policy_results(policy_results, obs)
 
     np.testing.assert_allclose(first["actions"][:, :6], np.full((10, 6), 0.2, dtype=np.float32))
-    np.testing.assert_allclose(first["actions"][:, 6], np.full((10,), 0.5, dtype=np.float32))
+    np.testing.assert_allclose(first["actions"][:, 6], reference[:, 6])
     np.testing.assert_allclose(second["actions"][:, :6], np.full((10, 6), 0.1, dtype=np.float32))
-    np.testing.assert_allclose(second["actions"][:, 6], np.full((10,), 0.5, dtype=np.float32))
+    np.testing.assert_allclose(second["actions"][:, 6], reference[:, 6])
     np.testing.assert_allclose(second["actions"][:, 7:14], np.zeros((10, 7), dtype=np.float32))
 
 
@@ -589,8 +613,10 @@ def test_actor_apply_guidance_tail_keeps_right_arm_reference_actions():
         action_start_index=0,
     )
 
-    np.testing.assert_allclose(results["actions"][:10, :7], np.full((10, 7), 0.5, dtype=np.float32))
-    np.testing.assert_allclose(results["actions"][:10, 7:14], np.broadcast_to(robot_state[7:14], (10, 7)))
+    np.testing.assert_allclose(results["actions"][:10, :6], np.full((10, 6), 0.5, dtype=np.float32))
+    np.testing.assert_allclose(results["actions"][:10, 6], reference[:10, 6])
+    np.testing.assert_allclose(results["actions"][:10, 7:13], np.broadcast_to(robot_state[7:13], (10, 6)))
+    np.testing.assert_allclose(results["actions"][:10, 13], reference[:10, 13])
     np.testing.assert_allclose(results["rtc_guidance_actions"][25, :6], np.full((6,), 0.35, dtype=np.float32))
     np.testing.assert_allclose(results["rtc_guidance_actions"][25:, 6], reference[25:, 6])
     np.testing.assert_allclose(results["rtc_guidance_actions"][25:, 7:14], reference[25:, 7:14])
@@ -662,7 +688,8 @@ def test_key_region_actor_freezes_right_arm_and_limits_left_arm_when_configured(
 
     assert np.max(np.abs(results["actions"][:, :6] - robot_state[:6])) <= 0.02 + 1e-6
     np.testing.assert_allclose(np.max(np.linalg.norm(results["actions"][:, :6] - robot_state[:6], axis=-1)), 0.04, atol=1e-6)
-    np.testing.assert_allclose(results["actions"][:, 7:14], np.broadcast_to(robot_state[7:14], (10, 7)))
+    np.testing.assert_allclose(results["actions"][:, 7:13], np.broadcast_to(robot_state[7:13], (10, 6)))
+    np.testing.assert_allclose(results["actions"][:, 13], reference[:, 13])
     np.testing.assert_allclose(results["reference_actions"], reference)
     np.testing.assert_allclose(results["rtc_guidance_actions"][:, :7], results["actions"][:, :7])
     np.testing.assert_allclose(results["rtc_guidance_actions"][:, 7:14], reference[:, 7:14])
@@ -703,7 +730,8 @@ def test_key_region_actor_speed_limit_off_preserves_left_arm_actor_actions():
     )
 
     np.testing.assert_allclose(results["actions"][:, :6], np.ones((10, 6), dtype=np.float32))
-    np.testing.assert_allclose(results["actions"][:, 7:14], np.broadcast_to(robot_state[7:14], (10, 7)))
+    np.testing.assert_allclose(results["actions"][:, 7:13], np.broadcast_to(robot_state[7:13], (10, 6)))
+    np.testing.assert_allclose(results["actions"][:, 13], reference[:, 13])
     assert results["rlt_action_limited"] is False
     assert results["rlt_actor_speed_limit_preset"] == "off"
 
@@ -767,7 +795,8 @@ def test_key_region_actor_uses_robot_state_to_freeze_right_arm():
 
     np.testing.assert_allclose(results["actions"][:, 1], np.full((10,), 0.208, dtype=np.float32))
     np.testing.assert_allclose(results["actions"][:, 2], np.full((10,), -0.592, dtype=np.float32))
-    np.testing.assert_allclose(results["actions"][:, 7:14], np.broadcast_to(robot_state[7:14], (10, 7)))
+    np.testing.assert_allclose(results["actions"][:, 7:13], np.broadcast_to(robot_state[7:13], (10, 6)))
+    np.testing.assert_allclose(results["actions"][:, 13], reference[:, 13])
     assert results["rlt_action_limited"] is False
     assert results["rlt_right_arm_frozen"] is True
 
@@ -831,9 +860,12 @@ def test_key_region_actor_latches_right_arm_hold_pose_until_gate_released():
         {"state": drifted_state, "rlt_context": {"actor_requested": True, "phase": "key_region"}},
     )
 
-    np.testing.assert_allclose(first["actions"][:, 7:14], np.broadcast_to(first_state[7:14], (10, 7)))
-    np.testing.assert_allclose(second["actions"][:, 7:14], np.broadcast_to(first_state[7:14], (10, 7)))
-    np.testing.assert_allclose(third["actions"][:, 7:14], np.broadcast_to(drifted_state[7:14], (10, 7)))
+    np.testing.assert_allclose(first["actions"][:, 7:13], np.broadcast_to(first_state[7:13], (10, 6)))
+    np.testing.assert_allclose(first["actions"][:, 13], reference[:, 13])
+    np.testing.assert_allclose(second["actions"][:, 7:13], np.broadcast_to(first_state[7:13], (10, 6)))
+    np.testing.assert_allclose(second["actions"][:, 13], reference[:, 13])
+    np.testing.assert_allclose(third["actions"][:, 7:13], np.broadcast_to(drifted_state[7:13], (10, 6)))
+    np.testing.assert_allclose(third["actions"][:, 13], reference[:, 13])
 
 
 def test_actor_failure_leaves_actions_unchanged_and_records_reason():
