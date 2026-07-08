@@ -6,10 +6,11 @@ from typing import Any
 
 import numpy as np
 
-
 FORMAL_REPLAY_STATE_GRAIN = "paper_subsampled_anchor"
+TRUNK_SHARED_FORMAL_REPLAY_STATE_GRAIN = "trunk_shared_z_subsampled_anchor"
 RUNTIME_REPLAY_STATE_GRAIN = "runtime_action_cache_block"
 EXPECTED_FORMAL_Z_DIM = 2048
+FORMAL_REPLAY_STATE_GRAINS = {FORMAL_REPLAY_STATE_GRAIN, TRUNK_SHARED_FORMAL_REPLAY_STATE_GRAIN}
 
 
 @dataclasses.dataclass(frozen=True)
@@ -43,21 +44,41 @@ def classify_replay_manifest(
 ) -> ReplayConversionStatus:
     manifest = dict(manifest or {})
     if manifest.get("voided") is True:
-        return ReplayConversionStatus("voided", False, "manifest voided")
+        return ReplayConversionStatus(status="voided", trainable=False, reason="manifest voided")
     if manifest.get("train_eligible") is False:
         if manifest.get("requires_offline_reencode") is True or manifest.get("replay_state_grain") == RUNTIME_REPLAY_STATE_GRAIN:
-            return ReplayConversionStatus("requires_offline_reencode", False, RUNTIME_REPLAY_STATE_GRAIN)
-        return ReplayConversionStatus("not_train_eligible", False, "train_eligible is false")
+            return ReplayConversionStatus(
+                status="requires_offline_reencode",
+                trainable=False,
+                reason=RUNTIME_REPLAY_STATE_GRAIN,
+            )
+        return ReplayConversionStatus(status="not_train_eligible", trainable=False, reason="train_eligible is false")
 
     replay_state_grain = manifest.get("replay_state_grain")
     if manifest.get("requires_offline_reencode") is True or replay_state_grain == RUNTIME_REPLAY_STATE_GRAIN:
-        return ReplayConversionStatus("requires_offline_reencode", False, RUNTIME_REPLAY_STATE_GRAIN)
+        return ReplayConversionStatus(
+            status="requires_offline_reencode",
+            trainable=False,
+            reason=RUNTIME_REPLAY_STATE_GRAIN,
+        )
     if not replay_state_grain:
-        return ReplayConversionStatus("legacy_unmarked_requires_audit", False, "missing replay_state_grain")
-    if replay_state_grain != FORMAL_REPLAY_STATE_GRAIN:
-        return ReplayConversionStatus("unsupported_replay_state_grain", False, f"unsupported replay_state_grain={replay_state_grain}")
+        return ReplayConversionStatus(
+            status="legacy_unmarked_requires_audit",
+            trainable=False,
+            reason="missing replay_state_grain",
+        )
+    if replay_state_grain not in FORMAL_REPLAY_STATE_GRAINS:
+        return ReplayConversionStatus(
+            status="unsupported_replay_state_grain",
+            trainable=False,
+            reason=f"unsupported replay_state_grain={replay_state_grain}",
+        )
     if manifest.get("formal_replay_ready") is False:
-        return ReplayConversionStatus("formal_replay_not_ready", False, "formal_replay_ready is false")
+        return ReplayConversionStatus(
+            status="formal_replay_not_ready",
+            trainable=False,
+            reason="formal_replay_ready is false",
+        )
 
     manifest_z_dim = _optional_int(
         manifest.get("z_rl_dim")
@@ -66,8 +87,23 @@ def classify_replay_manifest(
     )
     actual_z_dim = z_dim if z_dim is not None else manifest_z_dim
     if expected_z_dim is not None and actual_z_dim is not None and int(actual_z_dim) != int(expected_z_dim):
-        return ReplayConversionStatus("z_dim_mismatch", False, f"z_dim={actual_z_dim}, expected {expected_z_dim}")
-    return ReplayConversionStatus("formal_replay_ready", True, FORMAL_REPLAY_STATE_GRAIN)
+        return ReplayConversionStatus(
+            status="z_dim_mismatch",
+            trainable=False,
+            reason=f"z_dim={actual_z_dim}, expected {expected_z_dim}",
+        )
+    provenance_error = _timeline_provenance_error(manifest)
+    if provenance_error is not None:
+        return ReplayConversionStatus(
+            status="missing_replay_provenance",
+            trainable=False,
+            reason=provenance_error,
+        )
+    return ReplayConversionStatus(
+        status="formal_replay_ready",
+        trainable=True,
+        reason=str(replay_state_grain),
+    )
 
 
 def require_formal_trainable_manifest(
@@ -86,5 +122,40 @@ def _optional_int(value: Any) -> int | None:
         return None
     try:
         return int(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _timeline_provenance_error(manifest: dict[str, Any]) -> str | None:
+    if manifest.get("source_format") != "rlt_timeline_hdf5":
+        return None
+    required = [
+        "z_rl_source",
+        "proprio_alignment",
+        "behavior_policy",
+        "action_source",
+        "reference_action_source",
+        "rl_token_checkpoint_path",
+    ]
+    missing = [key for key in required if not manifest.get(key)]
+    behavior_policy = str(manifest.get("behavior_policy") or "")
+    actor_applied_ratio = _optional_float(manifest.get("actor_applied_ratio"))
+    if behavior_policy in {"rlt_actor", "mixed"} or (actor_applied_ratio is not None and actor_applied_ratio > 0.0):
+        missing.extend(
+            key for key in ("actor_checkpoint_path", "actor_checkpoint_step") if manifest.get(key) in (None, "")
+        )
+    z_rl_source = str(manifest.get("z_rl_source") or "")
+    if z_rl_source and not z_rl_source.startswith("vla_same_forward"):
+        return f"z_rl_source={z_rl_source!r} is not a vla_same_forward source"
+    if missing:
+        return f"missing required timeline replay provenance fields: {sorted(set(missing))}"
+    return None
+
+
+def _optional_float(value: Any) -> float | None:
+    if value is None:
+        return None
+    try:
+        return float(value)
     except (TypeError, ValueError):
         return None

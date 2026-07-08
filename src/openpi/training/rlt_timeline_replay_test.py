@@ -12,6 +12,11 @@ def _write_timeline_hdf5(path, *, frames: int = 8) -> None:
         root.attrs["key_region_id"] = "demo"
         root.attrs["reward"] = 1
         root.attrs["replay_state_grain"] = "raw_frame_timeline"
+        root.attrs["behavior_policy"] = "rlt_actor"
+        root.attrs["action_source"] = "rlt_actor_adjusted_action"
+        root.attrs["reference_action_source"] = "vla_same_forward_reference_action"
+        root.attrs["actor_checkpoint_path"] = "/app/local_rlt_runs/demo_actor/00004500"
+        root.attrs["actor_checkpoint_step"] = 4500
         obs = root.create_group("observations")
         obs.create_dataset("qpos", data=np.arange(frames * 4, dtype=np.float32).reshape(frames, 4))
         obs.create_dataset("qvel", data=np.zeros((frames, 4), dtype=np.float32))
@@ -22,6 +27,11 @@ def _write_timeline_hdf5(path, *, frames: int = 8) -> None:
         timeline.attrs["state_grain"] = "raw_frame_timeline"
         timeline.attrs["z_rl_source"] = "vla_same_forward"
         timeline.attrs["rl_token_checkpoint_path"] = "/app/checkpoints/rlt_lower_right_rl_token_ablation_20260701/BEST/checkpoint"
+        timeline.attrs["behavior_policy"] = "rlt_actor"
+        timeline.attrs["action_source"] = "rlt_actor_adjusted_action"
+        timeline.attrs["reference_action_source"] = "vla_same_forward_reference_action"
+        timeline.attrs["actor_checkpoint_path"] = "/app/local_rlt_runs/demo_actor/00004500"
+        timeline.attrs["actor_checkpoint_step"] = 4500
         timeline.create_dataset("z_rl", data=1000 + np.arange(frames * 3, dtype=np.float32).reshape(frames, 3))
         timeline.create_dataset("proprio", data=2000 + np.arange(frames * 5, dtype=np.float32).reshape(frames, 5))
         timeline.create_dataset("step_index", data=np.arange(frames, dtype=np.int64))
@@ -41,6 +51,12 @@ def _write_policy_forward_event_hdf5(
         root.attrs["key_region_id"] = "event-demo"
         root.attrs["reward"] = 1
         root.attrs["replay_state_grain"] = "raw_frame_timeline"
+        root.attrs["behavior_policy"] = "rlt_actor"
+        root.attrs["action_source"] = "rlt_actor_adjusted_action"
+        root.attrs["reference_action_source"] = "vla_same_forward_reference_action"
+        root.attrs["actor_checkpoint_path"] = "/app/local_rlt_runs/demo_actor/00004500"
+        root.attrs["actor_checkpoint_step"] = 4500
+        root.attrs["rl_token_checkpoint_path"] = "/app/checkpoints/rlt_lower_right_rl_token_ablation_20260701/BEST/checkpoint"
         if include_qpos:
             obs = root.create_group("observations")
             obs.create_dataset("qpos", data=np.arange(frames * 14, dtype=np.float32).reshape(frames, 14))
@@ -49,6 +65,12 @@ def _write_policy_forward_event_hdf5(
         timeline = root.create_group("rlt_timeline")
         timeline.attrs["state_grain"] = "raw_frame_timeline"
         timeline.attrs["z_rl_source"] = "policy_forward_events"
+        timeline.attrs["behavior_policy"] = "rlt_actor"
+        timeline.attrs["action_source"] = "rlt_actor_adjusted_action"
+        timeline.attrs["reference_action_source"] = "vla_same_forward_reference_action"
+        timeline.attrs["actor_checkpoint_path"] = "/app/local_rlt_runs/demo_actor/00004500"
+        timeline.attrs["actor_checkpoint_step"] = 4500
+        timeline.attrs["rl_token_checkpoint_path"] = "/app/checkpoints/rlt_lower_right_rl_token_ablation_20260701/BEST/checkpoint"
         timeline.create_dataset("step_index", data=np.arange(frames, dtype=np.int64))
         timeline.create_dataset("valid", data=np.ones((frames,), dtype=np.bool_))
         if include_policy_proprio:
@@ -59,6 +81,7 @@ def _write_policy_forward_event_hdf5(
         events = root.create_group("rlt_policy_forward_events")
         events.attrs["state_grain"] = "vla_same_forward_policy_forward"
         events.attrs["z_rl_source"] = "vla_same_forward_runtime_output"
+        events.attrs["rl_token_checkpoint_path"] = "/app/checkpoints/rlt_lower_right_rl_token_ablation_20260701/BEST/checkpoint"
         events.create_dataset("step_index", data=np.asarray(event_steps, dtype=np.int64))
         events.create_dataset("policy_forward_id", data=np.arange(len(event_steps), dtype=np.int64))
         events.create_dataset("action_start_index", data=np.zeros((len(event_steps),), dtype=np.int64))
@@ -120,6 +143,12 @@ def test_build_paper_replay_arrays_from_frame_timeline(tmp_path):
     assert arrays["reward_seq"].tolist() == [[0.0, 0.0], [0.0, 0.0], [0.0, 1.0]]
     assert manifest["replay_state_grain"] == "paper_subsampled_anchor"
     assert manifest["source_format"] == "rlt_timeline_hdf5"
+    assert manifest["behavior_policy"] == "rlt_actor"
+    assert manifest["action_source"] == "rlt_actor_adjusted_action"
+    assert manifest["reference_action_source"] == "vla_same_forward_reference_action"
+    assert manifest["actor_checkpoint_path"] == "/app/local_rlt_runs/demo_actor/00004500"
+    assert manifest["actor_checkpoint_step"] == 4500
+    assert manifest["rl_token_checkpoint_path"] == "/app/checkpoints/rlt_lower_right_rl_token_ablation_20260701/BEST/checkpoint"
     assert manifest["current_frames"] == [0, 2, 4]
     assert manifest["next_frames"] == [2, 4, 6]
 

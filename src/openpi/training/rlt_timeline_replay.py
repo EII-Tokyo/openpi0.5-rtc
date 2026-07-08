@@ -56,13 +56,16 @@ def build_paper_replay_from_timeline_hdf5(
         reference_action = np.asarray(root["reference_action"], dtype=np.float32)
         reward = float(root.attrs.get("reward", 0.0))
         key_region_id = _h5_attr_str(root.attrs.get("key_region_id", path.stem))
-        rl_token_checkpoint_path = ""
+        provenance = _read_hdf5_provenance(root)
+        rl_token_checkpoint_path = str(provenance.get("rl_token_checkpoint_path") or "")
         if "rlt_timeline/z_rl" in root and "rlt_timeline/proprio" in root:
             z_rl = np.asarray(root["rlt_timeline/z_rl"], dtype=np.float32)
             proprio = np.asarray(root["rlt_timeline/proprio"], dtype=np.float32)
             valid = np.asarray(root["rlt_timeline/valid"], dtype=np.bool_) if "rlt_timeline/valid" in root else None
             z_rl_source = _h5_attr_str(root["rlt_timeline"].attrs.get("z_rl_source", ""))
             rl_token_checkpoint_path = _h5_attr_str(root["rlt_timeline"].attrs.get("rl_token_checkpoint_path", ""))
+            if rl_token_checkpoint_path:
+                provenance["rl_token_checkpoint_path"] = rl_token_checkpoint_path
             arrays, manifest = _build_from_complete_frame_timeline(
                 path=path,
                 action=action,
@@ -76,9 +79,12 @@ def build_paper_replay_from_timeline_hdf5(
                 train_horizon=train_horizon,
                 chunk_stride=chunk_stride,
                 rl_token_checkpoint_path=rl_token_checkpoint_path,
+                provenance=provenance,
             )
             return arrays, manifest
         events = _read_policy_forward_events(root)
+        if events.get("rl_token_checkpoint_path"):
+            provenance["rl_token_checkpoint_path"] = str(events["rl_token_checkpoint_path"])
         frame_policy_proprio, frame_policy_proprio_alignment = _read_frame_policy_proprio(root)
 
     return _build_from_policy_forward_events(
@@ -93,6 +99,7 @@ def build_paper_replay_from_timeline_hdf5(
         train_horizon=train_horizon,
         chunk_stride=chunk_stride,
         rl_token_checkpoint_path=rl_token_checkpoint_path,
+        provenance=provenance,
         policy_event_alignment=policy_event_alignment,
     )
 
@@ -111,6 +118,7 @@ def _build_from_complete_frame_timeline(
     train_horizon: int,
     chunk_stride: int,
     rl_token_checkpoint_path: str,
+    provenance: dict[str, Any],
 ) -> tuple[dict[str, np.ndarray], dict[str, Any]]:
     _validate_timeline_arrays(
         path=path,
@@ -149,6 +157,7 @@ def _build_from_complete_frame_timeline(
         train_horizon=train_horizon,
         chunk_stride=chunk_stride,
         rl_token_checkpoint_path=rl_token_checkpoint_path,
+        provenance=provenance,
         z_alignment="complete_frame_timeline",
         proprio_alignment="complete_frame_timeline",
     )
@@ -197,6 +206,7 @@ def _build_from_policy_forward_events(
     train_horizon: int,
     chunk_stride: int,
     rl_token_checkpoint_path: str,
+    provenance: dict[str, Any],
     policy_event_alignment: str,
 ) -> tuple[dict[str, np.ndarray], dict[str, Any]]:
     _validate_action_arrays(path=path, action=action, reference_action=reference_action)
@@ -274,6 +284,7 @@ def _build_from_policy_forward_events(
         train_horizon=train_horizon,
         chunk_stride=chunk_stride,
         rl_token_checkpoint_path=rl_token_checkpoint_path,
+        provenance=provenance,
         z_alignment=z_alignment,
         proprio_alignment=proprio_alignment,
         replay_state_grain=replay_state_grain,
@@ -354,12 +365,13 @@ def _build_manifest(
     train_horizon: int,
     chunk_stride: int,
     rl_token_checkpoint_path: str,
+    provenance: dict[str, Any],
     z_alignment: str,
     proprio_alignment: str,
     replay_state_grain: str = "paper_subsampled_anchor",
     subsampled_transition_semantics: str = "x_i_action_i_to_i_plus_c_next_x_i_plus_c",
 ) -> dict[str, Any]:
-    return {
+    manifest = {
         "key_region_id": key_region_id,
         "reward": reward,
         "source_format": "rlt_timeline_hdf5",
@@ -382,6 +394,10 @@ def _build_manifest(
         "rl_token_checkpoint_path": rl_token_checkpoint_path,
         "replay_array_shapes": {key: list(value.shape) for key, value in arrays.items()},
     }
+    manifest.update({key: value for key, value in provenance.items() if value not in (None, "")})
+    if rl_token_checkpoint_path:
+        manifest["rl_token_checkpoint_path"] = rl_token_checkpoint_path
+    return manifest
 
 
 def write_paper_replay_shard_from_timeline_hdf5(
@@ -446,7 +462,39 @@ def _read_policy_forward_events(root: h5py.File) -> dict[str, np.ndarray | str]:
         "proprio": np.asarray(group["proprio"], dtype=np.float32),
         "z_rl_source": z_rl_source,
         "step_index_semantics": "anchor_observation_step_index",
+        "rl_token_checkpoint_path": _h5_attr_str(group.attrs.get("rl_token_checkpoint_path", "")),
     }
+
+
+def _read_hdf5_provenance(root: h5py.File) -> dict[str, Any]:
+    provenance: dict[str, Any] = {}
+    sources = [root]
+    if "rlt_timeline" in root:
+        sources.insert(0, root["rlt_timeline"])
+    if "rlt_policy_forward_events" in root:
+        sources.insert(0, root["rlt_policy_forward_events"])
+    for key in (
+        "behavior_policy",
+        "action_source",
+        "reference_action_source",
+        "actor_checkpoint_path",
+        "rl_token_checkpoint_path",
+    ):
+        for source in sources:
+            value = _h5_attr_str(source.attrs.get(key, ""))
+            if value:
+                provenance[key] = value
+                break
+    for key in ("actor_checkpoint_step", "actor_applied_ratio"):
+        for source in sources:
+            if key in source.attrs:
+                value = source.attrs.get(key)
+                if key == "actor_checkpoint_step":
+                    provenance[key] = int(value)
+                else:
+                    provenance[key] = float(value)
+                break
+    return provenance
 
 
 def _read_frame_policy_proprio(root: h5py.File) -> tuple[np.ndarray | None, str | None]:
