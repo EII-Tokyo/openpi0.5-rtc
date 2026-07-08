@@ -38,6 +38,14 @@ def with_runtime_beta(state: rlt_training.RLTTrainState, beta: float) -> rlt_tra
     if float(model.config.beta) == beta:
         return state
     config = dataclasses.replace(model.config, beta=beta)
+    return _with_model_config(state, model, config)
+
+
+def _with_model_config(
+    state: rlt_training.RLTTrainState,
+    model: rlt.RLTActorCritic,
+    config: rlt.RLTConfig,
+) -> rlt_training.RLTTrainState:
     model.config = config
     model.actor.config = config
     model.critic.q1.config = config
@@ -68,6 +76,13 @@ def load_inference_actor_checkpoint(
     loaded_config = rlt.RLTConfig(**metadata["rlt_config"])
     model = nnx.merge(state.model_def, state.params)
     assert_compatible_rlt_config(model.config, loaded_config, checkpoint_dir)
+    model.config = loaded_config
+    model.actor.config = loaded_config
+    model.critic.q1.config = loaded_config
+    model.critic.q2.config = loaded_config
+    model.target_actor.config = loaded_config
+    model.target_critic.q1.config = loaded_config
+    model.target_critic.q2.config = loaded_config
 
     actor_state = nnx.state(model.actor)
     actor_pure = serialization.from_bytes(actor_state.to_pure_dict(), actor_path.read_bytes())

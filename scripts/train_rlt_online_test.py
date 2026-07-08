@@ -875,10 +875,12 @@ def test_load_inference_checkpoint_initializes_actor_and_critic(tmp_path):
             action_dim=3,
             hidden_dim=16,
             num_layers=2,
+            actor_output_mode=rlt.ACTOR_OUTPUT_MODE_DIRECT_MEAN,
         )
     )
     source_state = rlt_training.init_train_state(config, jax.random.key(1))
-    fresh_state = rlt_training.init_train_state(config, jax.random.key(2))
+    fresh_config = dataclasses.replace(config, model=dataclasses.replace(config.model, actor_output_mode=rlt.ACTOR_OUTPUT_MODE_RESIDUAL_CLIPPED))
+    fresh_state = rlt_training.init_train_state(fresh_config, jax.random.key(2))
     actor_dir = train_rlt_online._save_actor_for_inference(
         source_state,
         tmp_path,
@@ -895,6 +897,7 @@ def test_load_inference_checkpoint_initializes_actor_and_critic(tmp_path):
     loaded_model = rlt_training.nnx.merge(loaded_state.model_def, loaded_state.params)
     assert metadata["step"] == 6000
     assert int(loaded_state.step) == 0
+    assert rlt_training.nnx.merge(loaded_state.model_def, loaded_state.params).config.actor_output_mode == rlt.ACTOR_OUTPUT_MODE_DIRECT_MEAN
     for key, value in rlt_training.nnx.state(loaded_model.actor).flat_state().items():
         assert np.allclose(value.value, rlt_training.nnx.state(source_model.actor).flat_state()[key].value)
     for key, value in rlt_training.nnx.state(loaded_model.critic).flat_state().items():

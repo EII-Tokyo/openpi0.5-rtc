@@ -29,7 +29,13 @@ class _FixedActor:
         return reference_action + intervention_scale * np.ones_like(np.asarray(reference_action), dtype=np.float32)
 
 
-def _write_actor(tmp_path, *, action_horizon=10, action_dim=3):
+def _write_actor(
+    tmp_path,
+    *,
+    action_horizon=10,
+    action_dim=3,
+    actor_output_mode=rlt.ACTOR_OUTPUT_MODE_RESIDUAL_CLIPPED,
+):
     config = rlt_training.RLTTrainingConfig(
         model=rlt.RLTConfig(
             z_dim=8,
@@ -38,6 +44,7 @@ def _write_actor(tmp_path, *, action_horizon=10, action_dim=3):
             action_dim=action_dim,
             hidden_dim=16,
             num_layers=2,
+            actor_output_mode=actor_output_mode,
         )
     )
     state = rlt_training.init_train_state(config, jax.random.key(0))
@@ -70,6 +77,15 @@ def test_actor_runtime_loads_latest_and_preserves_suffix(tmp_path):
     assert result.actions.shape == (12, 3)
     np.testing.assert_allclose(result.actions[10:], np.ones((2, 3), dtype=np.float32))
     assert runtime.status()["actor_ready"] is True
+
+
+def test_actor_runtime_status_reports_actor_output_mode(tmp_path):
+    _write_actor(tmp_path, action_horizon=10, action_dim=3, actor_output_mode=rlt.ACTOR_OUTPUT_MODE_DIRECT_MEAN)
+    runtime = RLTActorRuntime(str(tmp_path / "inference_actor" / "LATEST"), poll_interval_seconds=0.0)
+
+    runtime.maybe_reload(force=True)
+
+    assert runtime.status()["actor_output_mode"] == rlt.ACTOR_OUTPUT_MODE_DIRECT_MEAN
 
 
 def test_actor_runtime_applies_to_requested_action_window(tmp_path):

@@ -7,6 +7,11 @@ import jax.numpy as jnp
 from openpi.shared import array_typing as at
 
 
+ACTOR_OUTPUT_MODE_RESIDUAL_CLIPPED = "residual_clipped"
+ACTOR_OUTPUT_MODE_DIRECT_MEAN = "direct_mean"
+ACTOR_OUTPUT_MODES = (ACTOR_OUTPUT_MODE_RESIDUAL_CLIPPED, ACTOR_OUTPUT_MODE_DIRECT_MEAN)
+
+
 @dataclasses.dataclass(frozen=True)
 class RLTConfig:
     z_dim: int = 2048
@@ -21,6 +26,7 @@ class RLTConfig:
     tau: float = 0.005
     reference_dropout: float = 0.3
     max_delta: float = 0.1
+    actor_output_mode: str = ACTOR_OUTPUT_MODE_RESIDUAL_CLIPPED
 
     @property
     def state_dim(self) -> int:
@@ -71,14 +77,21 @@ class RLTActor(nnx.Module):
         in_dim = config.state_dim + config.flat_action_dim
         self.net = MLP(in_dim, config.flat_action_dim, config.hidden_dim, config.num_layers, rngs=rngs)
 
-    def mean_delta(
+    def mean_action(
         self,
         x: at.Float[at.Array, "b d"],
         reference_action: at.Float[at.Array, "b h a"],
     ) -> at.Float[at.Array, "b h a"]:
         actor_input = jnp.concatenate([x, flatten_actions(reference_action)], axis=-1)
-        delta = self.net(actor_input)
-        delta = unflatten_actions(delta, action_horizon=self.config.action_horizon, action_dim=self.config.action_dim)
+        action = self.net(actor_input)
+        return unflatten_actions(action, action_horizon=self.config.action_horizon, action_dim=self.config.action_dim)
+
+    def mean_delta(
+        self,
+        x: at.Float[at.Array, "b d"],
+        reference_action: at.Float[at.Array, "b h a"],
+    ) -> at.Float[at.Array, "b h a"]:
+        delta = self.mean_action(x, reference_action)
         return jnp.clip(delta, -self.config.max_delta, self.config.max_delta)
 
     def __call__(
@@ -93,13 +106,23 @@ class RLTActor(nnx.Module):
     ) -> at.Float[at.Array, "b h a"]:
         if conditioning_reference_action is None:
             conditioning_reference_action = reference_action
-        delta = self.mean_delta(x, conditioning_reference_action)
-        if sample:
-            if rng is None:
-                raise ValueError("rng is required when sample=True")
-            noise = jax.random.normal(rng, delta.shape, dtype=delta.dtype) * self.config.fixed_std
-            delta = jnp.clip(delta + noise, -self.config.max_delta, self.config.max_delta)
-        return reference_action + intervention_scale * delta
+        if self.config.actor_output_mode == ACTOR_OUTPUT_MODE_RESIDUAL_CLIPPED:
+            delta = self.mean_delta(x, conditioning_reference_action)
+            if sample:
+                if rng is None:
+                    raise ValueError("rng is required when sample=True")
+                noise = jax.random.normal(rng, delta.shape, dtype=delta.dtype) * self.config.fixed_std
+                delta = jnp.clip(delta + noise, -self.config.max_delta, self.config.max_delta)
+            return reference_action + intervention_scale * delta
+        if self.config.actor_output_mode == ACTOR_OUTPUT_MODE_DIRECT_MEAN:
+            action = self.mean_action(x, conditioning_reference_action)
+            if sample:
+                if rng is None:
+                    raise ValueError("rng is required when sample=True")
+                noise = jax.random.normal(rng, action.shape, dtype=action.dtype) * self.config.fixed_std
+                action = action + noise
+            return reference_action + intervention_scale * (action - reference_action)
+        raise ValueError(f"Unsupported actor_output_mode={self.config.actor_output_mode!r}")
 
 
 class RLTCritic(nnx.Module):

@@ -85,6 +85,7 @@ class Args:
     actor_lr: float = 1e-4
     critic_lr: float = 3e-4
     reference_dropout: float = 0.3
+    actor_output_mode: str = rlt.ACTOR_OUTPUT_MODE_RESIDUAL_CLIPPED
     target_actor_noise: bool = True
     actor_loss_mode: str = "td3"
     critic_loss_mode: str = "td3"
@@ -1192,6 +1193,7 @@ def main(args: Args) -> None:
             action_horizon=shape.action_horizon,
             action_dim=shape.action_dim,
             reference_dropout=args.reference_dropout,
+            actor_output_mode=args.actor_output_mode,
         ),
         actor_lr=args.actor_lr,
         critic_lr=args.critic_lr,

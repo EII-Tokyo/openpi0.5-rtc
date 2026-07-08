@@ -52,6 +52,7 @@ class RLTActorRuntime:
             "actor_dir": None if self._actor_dir is None else str(self._actor_dir),
             "actor_step": self._actor_step,
             "actor_load_error": self._reason,
+            "actor_output_mode": None if self._config is None else getattr(self._config, "actor_output_mode", None),
         }
 
     def maybe_reload(self, *, force: bool = False) -> None:
@@ -279,10 +280,11 @@ class RLTActorRuntime:
         self._actor_step = None if metadata.get("step") is None else int(metadata["step"])
         self._reason = None
         logging.info(
-            "Loaded RLT actor runtime: step=%s path=%s critic_ready=%s",
+            "Loaded RLT actor runtime: step=%s path=%s critic_ready=%s actor_output_mode=%s",
             self._actor_step,
             actor_dir,
             critic is not None,
+            config.actor_output_mode,
         )
 
     def _validate_shapes(

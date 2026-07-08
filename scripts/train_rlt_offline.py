@@ -56,6 +56,7 @@ class Args:
     critic_lr: float = 3e-4
     beta: float = 10.0
     reference_dropout: float = 0.3
+    actor_output_mode: str = rlt.ACTOR_OUTPUT_MODE_RESIDUAL_CLIPPED
     target_actor_noise: bool = True
     critic_target_action_mode: str = "target_actor"
     actor_loss_mode: str = "td3"
@@ -166,6 +167,7 @@ def _build_training_config(
             action_dim=shape.action_dim,
             beta=args.beta,
             reference_dropout=args.reference_dropout,
+            actor_output_mode=args.actor_output_mode,
         ),
         actor_lr=args.actor_lr,
         critic_lr=critic_lr,

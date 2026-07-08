@@ -58,6 +58,57 @@ def test_actor_reference_conditioning_can_be_dropped_without_changing_residual_b
     assert not jnp.allclose(action, dropped_conditioning + expected_delta)
 
 
+def test_direct_mean_actor_outputs_network_mean_with_reference_interpolation():
+    config = rlt.RLTConfig(
+        z_dim=8,
+        proprio_dim=4,
+        action_horizon=5,
+        action_dim=3,
+        hidden_dim=16,
+        num_layers=2,
+        max_delta=0.0,
+        actor_output_mode="direct_mean",
+    )
+    actor = rlt.RLTActor(config, rngs=nnx.Rngs(0))
+    x = jnp.ones((2, 12), dtype=jnp.float32)
+    reference_action = jnp.ones((2, 5, 3), dtype=jnp.float32) * 0.5
+    conditioning_reference_action = jnp.zeros_like(reference_action)
+
+    mean_action = actor.mean_action(x, conditioning_reference_action)
+    action = actor(
+        x,
+        reference_action,
+        conditioning_reference_action=conditioning_reference_action,
+        sample=False,
+        intervention_scale=0.25,
+    )
+
+    assert jnp.allclose(action, reference_action + 0.25 * (mean_action - reference_action))
+    assert not jnp.allclose(action, reference_action)
+
+
+def test_direct_mean_actor_rejects_unknown_output_mode():
+    config = rlt.RLTConfig(
+        z_dim=8,
+        proprio_dim=4,
+        action_horizon=5,
+        action_dim=3,
+        hidden_dim=16,
+        num_layers=2,
+        actor_output_mode="unknown",
+    )
+    actor = rlt.RLTActor(config, rngs=nnx.Rngs(0))
+    x = jnp.ones((2, 12), dtype=jnp.float32)
+    reference_action = jnp.ones((2, 5, 3), dtype=jnp.float32) * 0.5
+
+    try:
+        actor(x, reference_action, sample=False)
+    except ValueError as exc:
+        assert "actor_output_mode" in str(exc)
+    else:
+        raise AssertionError("unknown actor_output_mode should raise ValueError")
+
+
 def test_target_networks_start_as_online_copies():
     config = rlt.RLTConfig(
         z_dim=8,
