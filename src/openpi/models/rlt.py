@@ -19,7 +19,7 @@ class RLTConfig:
     beta: float = 10.0
     gamma: float = 0.99
     tau: float = 0.005
-    reference_dropout: float = 0.5
+    reference_dropout: float = 0.3
     max_delta: float = 0.1
 
     @property
@@ -86,11 +86,14 @@ class RLTActor(nnx.Module):
         x: at.Float[at.Array, "b d"],
         reference_action: at.Float[at.Array, "b h a"],
         *,
+        conditioning_reference_action: at.Float[at.Array, "b h a"] | None = None,
         rng: at.KeyArrayLike | None = None,
         sample: bool = False,
         intervention_scale: float = 1.0,
     ) -> at.Float[at.Array, "b h a"]:
-        delta = self.mean_delta(x, reference_action)
+        if conditioning_reference_action is None:
+            conditioning_reference_action = reference_action
+        delta = self.mean_delta(x, conditioning_reference_action)
         if sample:
             if rng is None:
                 raise ValueError("rng is required when sample=True")

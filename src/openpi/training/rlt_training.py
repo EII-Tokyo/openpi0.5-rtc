@@ -205,6 +205,24 @@ def should_publish_actor(step: int, *, actor_updated: bool, actor_publish_interv
     return step % actor_publish_interval == 0
 
 
+def dropout_reference_action_for_actor(
+    reference_action: at.Float[at.Array, "b h a"],
+    *,
+    dropout: float,
+    rng: at.KeyArrayLike,
+) -> tuple[at.Float[at.Array, "b h a"], at.Float[at.Array, ""]]:
+    """Drop whole reference chunks for actor conditioning, without changing the residual base action."""
+    dropout_rate = jnp.asarray(jnp.clip(dropout, 0.0, 1.0), dtype=reference_action.dtype)
+    keep = jax.random.bernoulli(
+        rng,
+        p=1.0 - dropout_rate,
+        shape=(reference_action.shape[0], 1, 1),
+    )
+    conditioning_reference_action = jnp.where(keep, reference_action, jnp.zeros_like(reference_action))
+    dropped_fraction = 1.0 - jnp.mean(keep.astype(reference_action.dtype))
+    return conditioning_reference_action, dropped_fraction
+
+
 def actor_params_for_inference(state: RLTTrainState) -> nnx.State:
     model = nnx.merge(state.model_def, state.params)
     return nnx.state(model.actor)
@@ -255,7 +273,7 @@ def train_step(
     rng: at.KeyArrayLike,
 ) -> tuple[RLTTrainState, dict[str, at.Array]]:
     model = nnx.merge(state.model_def, state.params)
-    target_rng, actor_rng, conservative_rng = jax.random.split(rng, 3)
+    target_rng, actor_rng, conservative_rng, reference_dropout_rng = jax.random.split(rng, 4)
 
     if state.critic_target_action_mode == CRITIC_TARGET_ACTION_MODE_REFERENCE_ACTION:
         next_q_min = model.target_critic.min_q(batch.next_x, batch.next_reference_action)
@@ -330,11 +348,23 @@ def train_step(
     awbc_weight_mean = jnp.asarray(0.0, dtype=critic_loss_value.dtype)
     awbc_advantage_mean = jnp.asarray(0.0, dtype=critic_loss_value.dtype)
     awbc_data_delta_norm_mean = jnp.asarray(0.0, dtype=critic_loss_value.dtype)
+    reference_dropout_fraction = jnp.asarray(0.0, dtype=critic_loss_value.dtype)
     actor_opt_state = state.actor_opt_state
     if actor_updated:
+        conditioning_reference_action, reference_dropout_fraction = dropout_reference_action_for_actor(
+            batch.reference_action,
+            dropout=model.config.reference_dropout,
+            rng=reference_dropout_rng,
+        )
 
         def actor_loss_fn(actor: rlt.RLTActor):
-            action = actor(batch.x, batch.reference_action, rng=actor_rng, sample=True)
+            action = actor(
+                batch.x,
+                batch.reference_action,
+                conditioning_reference_action=conditioning_reference_action,
+                rng=actor_rng,
+                sample=True,
+            )
             q1_for_actor = model.critic.q1(batch.x, action)
             q1_for_reference = model.critic.q1(batch.x, batch.reference_action)
             if state.actor_loss_mode == ACTOR_LOSS_MODE_TD3:
@@ -426,6 +456,8 @@ def train_step(
         "q2_mean": critic_info["q2_mean"],
         "target_q_mean": critic_info["target_q_mean"],
         "beta": jnp.asarray(model.config.beta, dtype=critic_loss_value.dtype),
+        "reference_dropout_rate": jnp.asarray(model.config.reference_dropout, dtype=critic_loss_value.dtype),
+        "reference_dropout_fraction": reference_dropout_fraction,
         "critic_target_action_mode": jnp.asarray(state.critic_target_action_mode, dtype=jnp.int32),
         "actor_loss_mode": jnp.asarray(state.actor_loss_mode, dtype=jnp.int32),
         "critic_loss_mode": jnp.asarray(state.critic_loss_mode, dtype=jnp.int32),

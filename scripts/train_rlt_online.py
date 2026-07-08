@@ -84,6 +84,7 @@ class Args:
     actor_publish_interval: int = 500
     actor_lr: float = 1e-4
     critic_lr: float = 3e-4
+    reference_dropout: float = 0.3
     target_actor_noise: bool = True
     actor_loss_mode: str = "td3"
     critic_loss_mode: str = "td3"
@@ -1190,6 +1191,7 @@ def main(args: Args) -> None:
             proprio_dim=shape.proprio_dim,
             action_horizon=shape.action_horizon,
             action_dim=shape.action_dim,
+            reference_dropout=args.reference_dropout,
         ),
         actor_lr=args.actor_lr,
         critic_lr=args.critic_lr,
