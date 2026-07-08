@@ -34,6 +34,7 @@ _ACTOR_SPEED_LIMIT_PRESETS: dict[str, tuple[float, float]] = {
     "50": (0.025, 0.0125),
     "20": (0.010, 0.005),
 }
+_BACKGROUND_INFER_WAIT_TIMEOUT_SECONDS = 0.5
 
 
 def _actor_speed_limit_caps(preset: str | None) -> tuple[str, float, float]:
@@ -457,8 +458,7 @@ class ActionChunkBroker(_base_policy.BasePolicy):
 
             # if current step equals s+d, wait for background inference to complete
             if self._cur_step == self._s + self._d:
-                while self._background_running:
-                    time.sleep(0.01)
+                self._wait_for_background_infer()
                 current_signature = self._rlt_context_signature_from_obs(obs)
                 if (
                     self._background_results is not None
@@ -531,7 +531,28 @@ class ActionChunkBroker(_base_policy.BasePolicy):
         with self._cache_lock:
             self._explicit_rlt_gate_enabled = bool(enabled)
             self._explicit_rlt_gate_epoch = int(epoch)
-            self._clear_cached_results()
+            self._cache_generation += 1
+
+    def _wait_for_background_infer(self, *, timeout_seconds: float = _BACKGROUND_INFER_WAIT_TIMEOUT_SECONDS) -> bool:
+        start = time.monotonic()
+        while True:
+            with self._cache_lock:
+                if not self._background_running:
+                    return True
+            if time.monotonic() - start >= float(timeout_seconds):
+                with self._cache_lock:
+                    if self._background_running:
+                        self._background_running = False
+                        self._background_results = None
+                        self._background_guidance_actions = None
+                        self._background_rlt_context_signature = None
+                        self._cache_generation += 1
+                logging.warning(
+                    "Timed out waiting for RTC background inference after %.3fs; discarding background result",
+                    float(timeout_seconds),
+                )
+                return False
+            time.sleep(0.01)
 
     def _policy_obs(self, obs: Dict) -> Dict:
         return {key: value for key, value in obs.items() if key != "rlt_context"}

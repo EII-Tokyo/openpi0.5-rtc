@@ -1,4 +1,7 @@
 
+import threading
+import time
+
 import numpy as np
 
 from openpi_client.action_chunk_broker import (
@@ -240,6 +243,39 @@ def test_explicit_rlt_gate_overrides_observation_context():
     assert actor.calls[0][3]["rlt_context_epoch"] == 7
     assert actor.calls[1][3]["actor_requested"] is False
     assert actor.calls[1][3]["rlt_context_epoch"] == 8
+
+
+def test_set_rlt_gate_defers_cache_clear_to_infer_thread():
+    broker = ActionChunkBroker(_Policy(), action_horizon=3, use_rtc=False, rlt_actor_runtime=_Actor())
+    first = broker.infer({"rlt_context": {"actor_requested": False, "rlt_context_epoch": 1}})
+
+    cached_results = broker._last_results
+    current_step = broker._cur_step
+    broker.set_rlt_gate(enabled=True, epoch=2, reason="key_region_start")
+
+    assert broker._last_results is cached_results
+    assert broker._cur_step == current_step
+
+    second = broker.infer({"rlt_context": {"actor_requested": False, "rlt_context_epoch": 1}})
+
+    np.testing.assert_allclose(first["actions"], np.array([0, 1], dtype=np.float32))
+    np.testing.assert_allclose(second["actions"], np.array([10, 11], dtype=np.float32))
+    assert second["rlt_context_epoch"] == 2
+
+
+def test_background_infer_wait_has_timeout():
+    broker = object.__new__(ActionChunkBroker)
+    broker._background_running = True
+    broker._cache_generation = 1
+    broker._cache_lock = threading.RLock()
+
+    start = time.monotonic()
+    completed = broker._wait_for_background_infer(timeout_seconds=0.02)
+
+    assert completed is False
+    assert time.monotonic() - start < 0.2
+    assert broker._background_running is False
+    assert broker._cache_generation == 2
 
 
 def test_foreground_actor_result_is_discarded_when_gate_changes_mid_inference():
