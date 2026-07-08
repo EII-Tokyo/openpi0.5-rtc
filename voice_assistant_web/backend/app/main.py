@@ -165,6 +165,7 @@ VIDEO_CHUNK_SIZE = 1024 * 1024
 VIDEO_CACHE_ROOT = Path(os.getenv("ROLLOUTS_VIDEO_CACHE", "/tmp/eii_rollout_video_cache"))
 KEY_REGION_FRAME_CACHE_ROOT = Path(os.getenv("RLT_KEY_REGION_FRAME_CACHE", "/tmp/eii_key_region_frame_cache"))
 KEY_REGION_RECORD_CACHE_TTL_SECONDS = 2.0
+HIDDEN_KEY_REGION_STATUSES = {"deleted", "archived"}
 NO_ACTOR_DELTA_P95_THRESHOLD = 1e-6
 _key_region_record_cache: dict[tuple[str, str, str], tuple[float, dict[str, dict]]] = {}
 DEFAULT_RLT_PRE_ROLL_SECONDS = float(os.getenv("RLT_DEFAULT_PRE_ROLL_SECONDS", "2.0"))
@@ -1074,7 +1075,7 @@ def _key_region_review_batches_from_files() -> list[str]:
         if str(segment.get("key_region_id") or "")
     }
     for segment in segments_by_id.values():
-        if str(segment.get("status") or "") == "deleted":
+        if str(segment.get("status") or "") in HIDDEN_KEY_REGION_STATUSES:
             continue
         if batch := _segment_batch(segment):
             batches.add(batch)
@@ -1084,7 +1085,7 @@ def _key_region_review_batches_from_files() -> list[str]:
         for manifest_path in rollout_root.glob("**/key_region_*/manifest.json"):
             key_region_id = manifest_path.parent.name.removeprefix("key_region_")
             if segment := segments_by_id.get(key_region_id):
-                if str(segment.get("status") or "") == "deleted" or _segment_batch(segment):
+                if str(segment.get("status") or "") in HIDDEN_KEY_REGION_STATUSES or _segment_batch(segment):
                     continue
             batch = _batch_from_rollout_path(manifest_path.parent)
             if batch:
@@ -1095,7 +1096,7 @@ def _key_region_review_batches_from_files() -> list[str]:
         for shard_path in replay_root.glob("**/shards/key_region_*.npz"):
             key_region_id = shard_path.stem.removeprefix("key_region_")
             if segment := segments_by_id.get(key_region_id):
-                if str(segment.get("status") or "") == "deleted" or _segment_batch(segment):
+                if str(segment.get("status") or "") in HIDDEN_KEY_REGION_STATUSES or _segment_batch(segment):
                     continue
             batch = _batch_from_replay_path(shard_path)
             if batch:
@@ -1123,7 +1124,7 @@ def _key_region_review_records(*, batch: str = "all") -> list[dict]:
         key_region_id = str(segment.get("key_region_id") or "")
         if not key_region_id:
             continue
-        if str(segment.get("status") or "") == "deleted":
+        if str(segment.get("status") or "") in HIDDEN_KEY_REGION_STATUSES:
             continue
         segment_batch = _segment_batch(segment)
         if batch_filter and segment_batch and segment_batch != batch_filter:
@@ -1552,7 +1553,7 @@ def rlt_key_region_review(
     offset: int = 0,
     status: str = "all",
     reward: str = "all",
-    batch: str = "all",
+    batch: str = "latest",
     search: str = "",
     focus_key_region_id: str | None = None,
 ) -> RLTKeyRegionReviewPage:

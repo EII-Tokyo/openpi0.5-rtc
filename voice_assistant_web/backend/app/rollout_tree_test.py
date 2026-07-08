@@ -165,6 +165,31 @@ def test_key_region_review_hides_deleted_tombstones(tmp_path, monkeypatch):
     assert main._key_region_review_records() == []
 
 
+def test_key_region_review_hides_archived_tombstones(tmp_path, monkeypatch):
+    rollout_root = tmp_path / "rollouts"
+    replay_root = tmp_path / "replay"
+    fake_control = _FakeRLTControl(
+        [
+            {
+                "key_region_id": "archived",
+                "status": "archived",
+                "phase": "rl",
+                "reward": 1,
+                "shard_path": "/app/replay/rlt_key_regions/task/2026-07-07/shards/key_region_archived.npz",
+                "num_replay_transitions": 3,
+                "updated_at": 1783400000.0,
+            }
+        ]
+    )
+
+    monkeypatch.setattr(main, "ROLLOUTS_ROOT", rollout_root)
+    monkeypatch.setattr(main, "REPLAY_ROOT", replay_root)
+    monkeypatch.setattr(main, "rlt_control", fake_control)
+
+    assert main._key_region_review_records() == []
+    assert main._key_region_review_batches_from_files() == []
+
+
 def test_key_region_review_reports_missing_npz_before_train_eligibility(tmp_path, monkeypatch):
     rollout_root = tmp_path / "rollouts"
     replay_root = tmp_path / "replay"
@@ -856,6 +881,43 @@ def test_key_region_review_batch_filter_does_not_scan_other_batch_manifests(tmp_
     assert page.total == 1
     assert page.batches == ["2026-06-02", "2026-06-01"]
     assert scanned_batches == ["2026-06-01"]
+
+
+def test_key_region_review_defaults_to_latest_batch(tmp_path, monkeypatch):
+    rollout_root = tmp_path / "rollouts"
+    replay_root = tmp_path / "replay"
+    _write_review_record(rollout_root, replay_root, key_region_id="old", reward=1, score_time=10.0)
+    latest_dir = rollout_root / "key_regions/task/2026-06-02/warmup/key_region_latest"
+    latest_shard = replay_root / "rlt_key_regions/task/2026-06-02/shards/key_region_latest.npz"
+    latest_dir.mkdir(parents=True)
+    latest_shard.parent.mkdir(parents=True, exist_ok=True)
+    (latest_dir / "cam_right_wrist.mp4").write_bytes(b"mp4")
+    (latest_dir / "manifest.json").write_text(
+        json.dumps(
+            {
+                "key_region_id": "latest",
+                "phase": "warmup",
+                "reward": 0,
+                "start_time": 18.0,
+                "end_time": 19.0,
+                "score_time": 20.0,
+                "num_replay_transitions": 3,
+                "segment_status": "committed",
+                "train_eligible": True,
+            }
+        )
+    )
+    np.savez(latest_shard, done=np.asarray([False, False, True]), reward_seq=np.ones((3, 10)))
+
+    monkeypatch.setattr(main, "ROLLOUTS_ROOT", rollout_root)
+    monkeypatch.setattr(main, "REPLAY_ROOT", replay_root)
+    monkeypatch.setattr(main, "rlt_control", _FakeRLTControl([]))
+
+    page = main.rlt_key_region_review(limit=20)
+
+    assert page.batches == ["2026-06-02", "2026-06-01"]
+    assert [record.key_region_id for record in page.items] == ["latest"]
+    assert page.summary.total == 1
 
 
 def test_key_region_detail_returns_single_record(tmp_path, monkeypatch):

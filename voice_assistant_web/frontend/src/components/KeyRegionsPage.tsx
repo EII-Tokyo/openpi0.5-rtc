@@ -40,6 +40,7 @@ type ExpertCameraStatusFilter = 'complete' | 'incomplete' | 'any'
 
 const KEY_REGION_CAMERA_ORDER = ['cam_high', 'cam_low', 'cam_left_wrist', 'cam_right_wrist']
 const KEY_REGION_PAGE_SIZE = 10
+const KEY_REGION_AUTO_REFRESH_MS = 3000
 
 const emptySummary: RLTKeyRegionReviewSummary = {
   total: 0,
@@ -533,7 +534,7 @@ export function KeyRegionsPage({
   const [nextOffset, setNextOffset] = useState<number | null>(null)
   const [statusFilter, setStatusFilter] = useState<KeyRegionStatusFilter>('all')
   const [rewardFilter, setRewardFilter] = useState<'all' | 'success' | 'failure'>('all')
-  const [batchFilter, setBatchFilter] = useState('all')
+  const [batchFilter, setBatchFilter] = useState('latest')
   const [searchQuery, setSearchQuery] = useState('')
   const [batches, setBatches] = useState<string[]>([])
   const [selectedReviewId, setSelectedReviewId] = useState('')
@@ -559,9 +560,10 @@ export function KeyRegionsPage({
     [records, selectedDetail, selectedReviewId],
   )
 
-  const loadPage = useCallback(async () => {
+  const loadPage = useCallback(async (options: { showSpinner?: boolean } = {}) => {
     if (sourceMode !== 'rlt') return
-    setLoading(true)
+    const showSpinner = options.showSpinner ?? true
+    if (showSpinner) setLoading(true)
     setActionError('')
     try {
       const page = await fetchRLTKeyRegionReview({
@@ -589,7 +591,7 @@ export function KeyRegionsPage({
     } catch (exc) {
       setActionError(exc instanceof Error ? exc.message : 'Key regions could not be loaded.')
     } finally {
-      setLoading(false)
+      if (showSpinner) setLoading(false)
     }
   }, [batchFilter, focusKeyRegionId, offset, rewardFilter, searchQuery, sourceMode, statusFilter])
 
@@ -649,6 +651,14 @@ export function KeyRegionsPage({
   useEffect(() => {
     void loadPage()
   }, [loadPage])
+
+  useEffect(() => {
+    if (sourceMode !== 'rlt') return undefined
+    const intervalId = window.setInterval(() => {
+      void loadPage({ showSpinner: false })
+    }, KEY_REGION_AUTO_REFRESH_MS)
+    return () => window.clearInterval(intervalId)
+  }, [loadPage, sourceMode])
 
   useEffect(() => {
     void loadExpertPage()
@@ -1026,6 +1036,7 @@ export function KeyRegionsPage({
             value={batchFilter}
             onChange={(event) => setBatchFilter(event.target.value)}
           >
+            <option value="latest">Latest day</option>
             <option value="all">All batches</option>
             {batches.map((batch) => (
               <option value={batch} key={batch}>{batch}</option>
