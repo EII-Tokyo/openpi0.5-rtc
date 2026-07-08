@@ -39,6 +39,12 @@ def _record(step: int, *, include_full: bool = True, include_step_actions: bool 
         policy_forward_z_rl=np.full((8,), step, dtype=np.float32),
         policy_forward_proprio=np.full((4,), step, dtype=np.float32),
         policy_forward_z_rl_source="vla_same_forward_runtime_output",
+        behavior_policy="rlt_actor",
+        action_source="rlt_actor_adjusted_action",
+        reference_action_source="vla_same_forward_reference_action",
+        actor_checkpoint_path="/app/local_rlt_runs/demo_actor/00004500",
+        actor_checkpoint_step=4500,
+        rl_token_checkpoint_path="/app/checkpoints/rlt_lower_right_rl_token_ablation_20260701/BEST/checkpoint",
     )
 
 
@@ -69,6 +75,12 @@ def _push_runtime_step(store: recorder.KeyRegionReplayRecorder) -> None:
             "rlt_policy_forward_z_rl": np.zeros((8,), dtype=np.float32),
             "rlt_policy_forward_proprio": np.zeros((4,), dtype=np.float32),
             "rlt_policy_forward_z_rl_source": "vla_same_forward_runtime_output",
+            "behavior_policy": "rlt_actor",
+            "action_source": "rlt_actor_adjusted_action",
+            "reference_action_source": "vla_same_forward_reference_action",
+            "rlt_actor_checkpoint_path": "/app/local_rlt_runs/demo_actor/00004500",
+            "rlt_actor_checkpoint_step": 4500,
+            "rlt_rl_token_checkpoint_path": "/app/checkpoints/rlt_lower_right_rl_token_ablation_20260701/BEST/checkpoint",
         },
     )
 
@@ -243,7 +255,7 @@ def test_key_region_manifest_includes_replay_schema_metadata(tmp_path):
             {"timestamp": 1.0},
             {"timestamp": 2.0},
             {"timestamp": 3.0, "reward": 1},
-            [],
+            [_record(step) for step in range(25)],
             active_start_step=0,
             active_end_step=50,
         )
@@ -263,6 +275,12 @@ def test_key_region_manifest_includes_replay_schema_metadata(tmp_path):
     assert manifest["requires_offline_reencode"] is True
     assert manifest["formal_replay_state_grain"] == "paper_subsampled_anchor"
     assert manifest["formal_replay_ready"] is False
+    assert manifest["behavior_policy"] == "rlt_actor"
+    assert manifest["action_source"] == "rlt_actor_adjusted_action"
+    assert manifest["reference_action_source"] == "vla_same_forward_reference_action"
+    assert manifest["actor_checkpoint_path"] == "/app/local_rlt_runs/demo_actor/00004500"
+    assert manifest["actor_checkpoint_step"] == 4500
+    assert manifest["rl_token_checkpoint_path"] == "/app/checkpoints/rlt_lower_right_rl_token_ablation_20260701/BEST/checkpoint"
     assert manifest["pre_roll_seconds"] == 0.0
     assert manifest["post_roll_seconds"] == 0.0
     assert manifest["key_region_start_sec"] == 0.0
@@ -303,6 +321,13 @@ def test_write_hdf5_includes_raw_frame_timeline_and_marks_runtime_cache_audit(tm
         assert root["rlt"].attrs["state_grain"] == "runtime_action_cache_block_audit"
         assert root["rlt_timeline"].attrs["state_grain"] == "raw_frame_timeline"
         assert root["rlt_timeline"].attrs["z_rl_source"] == "policy_forward_events"
+        assert root["rlt_timeline"].attrs["behavior_policy"] == "rlt_actor"
+        assert root["rlt_timeline"].attrs["action_source"] == "rlt_actor_adjusted_action"
+        assert root["rlt_timeline"].attrs["reference_action_source"] == "vla_same_forward_reference_action"
+        assert root["rlt_timeline"].attrs["actor_checkpoint_path"] == "/app/local_rlt_runs/demo_actor/00004500"
+        assert root["rlt_timeline"].attrs["actor_checkpoint_step"] == 4500
+        assert root["rlt_timeline"].attrs["rl_token_checkpoint_path"] == "/app/checkpoints/rlt_lower_right_rl_token_ablation_20260701/BEST/checkpoint"
+        assert root["rlt_policy_forward_events"].attrs["rl_token_checkpoint_path"] == "/app/checkpoints/rlt_lower_right_rl_token_ablation_20260701/BEST/checkpoint"
         assert "z_rl" not in root["rlt_timeline"]
         assert "proprio" not in root["rlt_timeline"]
         assert root["rlt_policy_forward_events"].attrs["z_rl_source"] == "vla_same_forward_runtime_output"

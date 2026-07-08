@@ -83,6 +83,9 @@ def test_actor_disabled_leaves_actions_unchanged_and_sets_reference_action():
     np.testing.assert_allclose(result["reference_action"], np.array([0, 1], dtype=np.float32))
     assert result["rlt_actor_applied"] is False
     assert result["rlt_actor_reason"] == "actor_not_requested"
+    assert result["behavior_policy"] == "vla_reference"
+    assert result["action_source"] == "vla_reference_action"
+    assert result["reference_action_source"] == "vla_same_forward_reference_action"
     assert "rlt_context" not in policy.obs_seen[0]
 
 
@@ -158,9 +161,23 @@ def test_actor_enabled_replaces_actions_and_preserves_raw_reference():
     assert first["rlt_gate_reason"] == "critic_gate_actor_active"
     assert first["rlt_critic_ready"] is True
     assert first["rlt_critic_gate_enabled"] is True
+    assert first["behavior_policy"] == "rlt_actor"
+    assert first["action_source"] == "rlt_actor_adjusted_action"
+    assert first["reference_action_source"] == "vla_same_forward_reference_action"
+    assert first["rlt_actor_checkpoint_path"] == "/tmp/actor"
+    assert first["rlt_actor_checkpoint_step"] == 5
     assert second["rlt_actor_applied"] is True
     assert len(actor.calls) == 1
     assert actor.calls[0][4] == 0
+
+
+def test_broker_attaches_rl_token_checkpoint_path_from_environment(monkeypatch):
+    monkeypatch.setenv("RLT_RL_TOKEN_CHECKPOINT_PATH", "/app/checkpoints/lower_right/BEST/checkpoint")
+    broker = ActionChunkBroker(_Policy(), action_horizon=3, use_rtc=False)
+
+    result = broker.infer({})
+
+    assert result["rlt_rl_token_checkpoint_path"] == "/app/checkpoints/lower_right/BEST/checkpoint"
 
 
 def test_actor_gate_on_invalidates_cached_disabled_chunk():

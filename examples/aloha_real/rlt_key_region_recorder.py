@@ -60,6 +60,12 @@ class StepRecord:
     actor_applied: bool | None = None
     reference_q: float | None = None
     actor_q: float | None = None
+    behavior_policy: str | None = None
+    action_source: str | None = None
+    reference_action_source: str | None = None
+    actor_checkpoint_path: str | None = None
+    actor_checkpoint_step: int | None = None
+    rl_token_checkpoint_path: str | None = None
 
 
 @dataclasses.dataclass(frozen=True)
@@ -284,6 +290,14 @@ def _extract_optional_int(action: dict, key: str) -> int | None:
         return None
 
 
+def _extract_optional_str(action: dict, key: str) -> str | None:
+    value = action.get(key)
+    if value is None:
+        return None
+    value = str(value)
+    return value if value else None
+
+
 def _stack_complete(records: list[StepRecord], attr: str, *, dtype: np.dtype | type = np.float32) -> np.ndarray | None:
     values = [getattr(record, attr) for record in records]
     if any(value is None for value in values):
@@ -303,6 +317,47 @@ def _optional_float_series(records: list[StepRecord], attr: str) -> np.ndarray |
     if all(value is None for value in values):
         return None
     return np.asarray([np.nan if value is None else float(value) for value in values], dtype=np.float32)
+
+
+def _common_optional_str(records: list[StepRecord], attr: str) -> str | None:
+    values = {str(value) for value in (getattr(record, attr) for record in records) if value}
+    if len(values) == 1:
+        return next(iter(values))
+    if len(values) > 1:
+        return "mixed"
+    return None
+
+
+def _common_optional_int(records: list[StepRecord], attr: str) -> int | None:
+    values = {int(value) for value in (getattr(record, attr) for record in records) if value is not None}
+    if len(values) == 1:
+        return next(iter(values))
+    return None
+
+
+def _write_optional_attr(attrs: h5py.AttributeManager, key: str, value: str | int | float | bool | None) -> None:
+    if value is not None:
+        attrs[key] = value
+
+
+def _segment_provenance(records: list[StepRecord]) -> dict[str, Any]:
+    actor_applied = _optional_bool_series(records, "actor_applied")
+    actor_applied_ratio = None if actor_applied is None or len(actor_applied) == 0 else float(np.mean(actor_applied))
+    behavior_policy = _common_optional_str(records, "behavior_policy")
+    if behavior_policy is None and actor_applied_ratio is not None:
+        behavior_policy = "rlt_actor" if actor_applied_ratio > 0.0 else "vla_reference"
+    action_source = _common_optional_str(records, "action_source")
+    if action_source is None and behavior_policy is not None:
+        action_source = "rlt_actor_adjusted_action" if behavior_policy == "rlt_actor" else "vla_reference_action"
+    return {
+        "behavior_policy": behavior_policy,
+        "action_source": action_source,
+        "reference_action_source": _common_optional_str(records, "reference_action_source"),
+        "actor_checkpoint_path": _common_optional_str(records, "actor_checkpoint_path"),
+        "actor_checkpoint_step": _common_optional_int(records, "actor_checkpoint_step"),
+        "rl_token_checkpoint_path": _common_optional_str(records, "rl_token_checkpoint_path"),
+        "actor_applied_ratio": actor_applied_ratio,
+    }
 
 
 def _common_z_rl_source(records: list[StepRecord]) -> str | None:
@@ -446,6 +501,12 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
             actor_applied=_extract_optional_bool(action, "rlt_actor_applied"),
             reference_q=_extract_optional_float(action, "rlt_reference_q"),
             actor_q=_extract_optional_float(action, "rlt_actor_q"),
+            behavior_policy=_extract_optional_str(action, "behavior_policy"),
+            action_source=_extract_optional_str(action, "action_source"),
+            reference_action_source=_extract_optional_str(action, "reference_action_source"),
+            actor_checkpoint_path=_extract_optional_str(action, "rlt_actor_checkpoint_path"),
+            actor_checkpoint_step=_extract_optional_int(action, "rlt_actor_checkpoint_step"),
+            rl_token_checkpoint_path=_extract_optional_str(action, "rlt_rl_token_checkpoint_path"),
         )
         with self._lock:
             self._ring.append(record)
@@ -652,6 +713,7 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
 
     def _write_hdf5(self, path: pathlib.Path, segment: KeyRegionSegment, *, missing_metadata: list[str]) -> None:
         records = segment.records
+        provenance = _segment_provenance(records)
         with h5py.File(path, "w") as root:
             root.attrs["sim"] = False
             root.attrs["compress"] = False
@@ -669,6 +731,16 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
             root.attrs["formal_replay_state_grain"] = "paper_subsampled_anchor"
             root.attrs["missing_rlt_metadata"] = np.asarray(missing_metadata, dtype="S")
             root.attrs["camera_names"] = np.asarray(sorted({name for record in records for name in record.images}), dtype="S")
+            for key in (
+                "behavior_policy",
+                "action_source",
+                "reference_action_source",
+                "actor_checkpoint_path",
+                "actor_checkpoint_step",
+                "rl_token_checkpoint_path",
+                "actor_applied_ratio",
+            ):
+                _write_optional_attr(root.attrs, key, provenance.get(key))
             obs = root.create_group("observations")
             obs.create_dataset("qpos", data=np.asarray([record.qpos for record in records], dtype=np.float32))
             obs.create_dataset("qvel", data=np.asarray([record.qvel for record in records], dtype=np.float32))
@@ -702,6 +774,16 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
             timeline = root.create_group("rlt_timeline")
             timeline.attrs["state_grain"] = "raw_frame_timeline"
             timeline.attrs["z_rl_source"] = "policy_forward_events"
+            for key in (
+                "behavior_policy",
+                "action_source",
+                "reference_action_source",
+                "actor_checkpoint_path",
+                "actor_checkpoint_step",
+                "rl_token_checkpoint_path",
+                "actor_applied_ratio",
+            ):
+                _write_optional_attr(timeline.attrs, key, provenance.get(key))
             timeline.attrs["note"] = (
                 "Raw per-step robot timeline. Per-frame policy_proprio is the formal critic/actor proprio source. "
                 "Per-forward same-forward z_rl values are stored under /rlt_policy_forward_events; cached runtime "
@@ -714,7 +796,7 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
             if policy_proprio is not None:
                 timeline.create_dataset("policy_proprio", data=policy_proprio.astype(np.float32))
                 timeline["policy_proprio"].attrs["source"] = "rlt_policy_proprio_current_observation"
-            self._write_policy_forward_events(root, records)
+            self._write_policy_forward_events(root, records, provenance=provenance)
             actor_applied = _optional_bool_series(records, "actor_applied")
             if actor_applied is not None:
                 timeline.create_dataset("actor_applied", data=actor_applied)
@@ -724,7 +806,14 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
                     timeline.create_dataset(dataset_name, data=values)
             root.create_dataset("timestamps", data=np.asarray([record.timestamp for record in records], dtype=np.float64))
 
-    def _write_policy_forward_events(self, root: h5py.File, records: list[StepRecord]) -> None:
+    def _write_policy_forward_events(
+        self,
+        root: h5py.File,
+        records: list[StepRecord],
+        *,
+        provenance: dict[str, Any] | None = None,
+    ) -> None:
+        provenance = dict(provenance or {})
         events = []
         for emission_local_index, record in enumerate(records):
             if (
@@ -742,6 +831,16 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
         group.attrs["state_grain"] = "vla_same_forward_policy_forward"
         group.attrs["step_index_semantics"] = "anchor_observation_step_index"
         group.attrs["z_rl_source"] = _common_policy_forward_z_rl_source([record for _, _, record in events]) or "missing"
+        for key in (
+            "behavior_policy",
+            "action_source",
+            "reference_action_source",
+            "actor_checkpoint_path",
+            "actor_checkpoint_step",
+            "rl_token_checkpoint_path",
+            "actor_applied_ratio",
+        ):
+            _write_optional_attr(group.attrs, key, provenance.get(key))
         group.attrs["note"] = (
             "One row per real VLA policy forward that produced z_rl during robot control. "
             "step_index is the observation anchor that produced z_rl; emission_step_index is when the cached "
@@ -792,6 +891,7 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
         missing_metadata: list[str],
         replay_arrays: dict[str, np.ndarray] | None,
     ) -> dict[str, Any]:
+        provenance = _segment_provenance(segment.records)
         duration_seconds = len(segment.records) / self._fps
         key_region_start_sec = 0.0
         key_region_end_sec = duration_seconds
@@ -844,6 +944,7 @@ class KeyRegionReplayRecorder(_subscriber.Subscriber):
             if replay_arrays is None
             else {key: list(value.shape) for key, value in replay_arrays.items()},
         }
+        manifest.update({key: value for key, value in provenance.items() if value is not None})
         tmp_path = path.with_suffix(path.suffix + ".tmp")
         with tmp_path.open("w", encoding="utf-8") as file:
             file.write(json.dumps(manifest, indent=2, ensure_ascii=False))

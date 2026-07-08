@@ -1,6 +1,7 @@
 from typing import Dict
 import json
 import logging
+import os
 import pathlib
 import time
 import threading
@@ -269,6 +270,7 @@ class ActionChunkBroker(_base_policy.BasePolicy):
         self._background_running: bool = False
         self._cache_generation: int = 0
         self._policy_forward_counter: int = 0
+        self._rl_token_checkpoint_path = os.getenv("RLT_RL_TOKEN_CHECKPOINT_PATH") or None
         self._cache_lock = threading.RLock()
         self._explicit_rlt_gate_enabled: bool | None = None
         self._explicit_rlt_gate_epoch: int | None = None
@@ -651,6 +653,7 @@ class ActionChunkBroker(_base_policy.BasePolicy):
                     "rlt_critic_gate_enabled": False,
                 }
             )
+            self._attach_action_provenance(policy_results, actor_applied=False)
             return policy_results
 
         z_rl = policy_results.get("z_rl", policy_results.get("rl_token"))
@@ -673,6 +676,7 @@ class ActionChunkBroker(_base_policy.BasePolicy):
                     "rlt_critic_gate_enabled": False,
                 }
             )
+            self._attach_action_provenance(policy_results, actor_applied=False)
             return policy_results
 
         try:
@@ -712,6 +716,7 @@ class ActionChunkBroker(_base_policy.BasePolicy):
                     "rlt_critic_gate_enabled": False,
                 }
             )
+            self._attach_action_provenance(policy_results, actor_applied=False)
             return policy_results
 
         if result.applied:
@@ -800,6 +805,8 @@ class ActionChunkBroker(_base_policy.BasePolicy):
                 "rlt_actor_reason": result.reason,
                 "rlt_actor_step": result.actor_step,
                 "rlt_actor_dir": result.actor_dir,
+                "rlt_actor_checkpoint_path": result.actor_dir,
+                "rlt_actor_checkpoint_step": result.actor_step,
                 "rlt_actor_delta_norm": result.delta_norm,
                 "rlt_actor_max_abs_delta": result.max_abs_delta,
                 "rlt_reference_q": result.reference_q_value,
@@ -814,7 +821,34 @@ class ActionChunkBroker(_base_policy.BasePolicy):
                 "rlt_right_arm_frozen": right_arm_frozen,
             }
         )
+        self._attach_action_provenance(policy_results, actor_applied=bool(result.applied))
         return policy_results
+
+    def _attach_action_provenance(self, policy_results: Dict, *, actor_applied: bool) -> None:
+        z_source = str(policy_results.get("z_rl_source") or "")
+        reference_source = (
+            "vla_same_forward_reference_action"
+            if z_source.startswith("vla_same_forward")
+            else "vla_reference_action"
+        )
+        if actor_applied:
+            policy_results["behavior_policy"] = "rlt_actor"
+            policy_results["action_source"] = "rlt_actor_adjusted_action"
+        else:
+            policy_results["behavior_policy"] = "vla_reference"
+            policy_results["action_source"] = "vla_reference_action"
+        policy_results["reference_action_source"] = reference_source
+        if "rlt_actor_checkpoint_path" not in policy_results:
+            policy_results["rlt_actor_checkpoint_path"] = policy_results.get("rlt_actor_dir")
+        if "rlt_actor_checkpoint_step" not in policy_results:
+            policy_results["rlt_actor_checkpoint_step"] = policy_results.get("rlt_actor_step")
+        rl_token_checkpoint_path = (
+            policy_results.get("rlt_rl_token_checkpoint_path")
+            or policy_results.get("rl_token_checkpoint_path")
+            or self._rl_token_checkpoint_path
+        )
+        if rl_token_checkpoint_path:
+            policy_results["rlt_rl_token_checkpoint_path"] = str(rl_token_checkpoint_path)
 
     def _smooth_left_actor_actions(
         self,
@@ -885,6 +919,8 @@ class ActionChunkBroker(_base_policy.BasePolicy):
             ("rlt_actor_reason", "rlt_actor_reason"),
             ("rlt_actor_step", "rlt_actor_step"),
             ("rlt_actor_dir", "rlt_actor_dir"),
+            ("rlt_actor_checkpoint_path", "rlt_actor_checkpoint_path"),
+            ("rlt_actor_checkpoint_step", "rlt_actor_checkpoint_step"),
             ("rlt_actor_delta_norm", "rlt_actor_delta_norm"),
             ("rlt_actor_max_abs_delta", "rlt_actor_max_abs_delta"),
             ("rlt_reference_q", "rlt_reference_q"),
@@ -898,6 +934,10 @@ class ActionChunkBroker(_base_policy.BasePolicy):
             ("rlt_action_limited", "rlt_action_limited"),
             ("rlt_actor_speed_limit_preset", "rlt_actor_speed_limit_preset"),
             ("rlt_right_arm_frozen", "rlt_right_arm_frozen"),
+            ("behavior_policy", "behavior_policy"),
+            ("action_source", "action_source"),
+            ("reference_action_source", "reference_action_source"),
+            ("rlt_rl_token_checkpoint_path", "rlt_rl_token_checkpoint_path"),
             ("rlt_policy_forward_event", "rlt_policy_forward_event"),
             ("rlt_policy_forward_id", "rlt_policy_forward_id"),
             ("rlt_policy_forward_action_start_index", "rlt_policy_forward_action_start_index"),
