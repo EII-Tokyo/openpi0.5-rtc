@@ -31,6 +31,33 @@ def test_rlt_actor_critic_shapes():
     assert jnp.max(jnp.abs(action - reference_action)) <= config.max_delta * 0.5 + 1e-6
 
 
+def test_actor_reference_conditioning_can_be_dropped_without_changing_residual_base():
+    config = rlt.RLTConfig(
+        z_dim=8,
+        proprio_dim=4,
+        action_horizon=5,
+        action_dim=3,
+        hidden_dim=16,
+        num_layers=2,
+        max_delta=0.2,
+    )
+    actor = rlt.RLTActor(config, rngs=nnx.Rngs(0))
+    x = jnp.ones((2, 12), dtype=jnp.float32)
+    reference_action = jnp.ones((2, 5, 3), dtype=jnp.float32) * 0.5
+    dropped_conditioning = jnp.zeros_like(reference_action)
+
+    action = actor(
+        x,
+        reference_action,
+        conditioning_reference_action=dropped_conditioning,
+        sample=False,
+    )
+    expected_delta = actor.mean_delta(x, dropped_conditioning)
+
+    assert jnp.allclose(action, reference_action + expected_delta)
+    assert not jnp.allclose(action, dropped_conditioning + expected_delta)
+
+
 def test_target_networks_start_as_online_copies():
     config = rlt.RLTConfig(
         z_dim=8,

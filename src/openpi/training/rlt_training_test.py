@@ -26,6 +26,27 @@ def _make_config() -> rlt_training.RLTTrainingConfig:
     )
 
 
+def _make_reference_dropout_config(dropout: float) -> rlt_training.RLTTrainingConfig:
+    return rlt_training.RLTTrainingConfig(
+        model=rlt.RLTConfig(
+            z_dim=8,
+            proprio_dim=4,
+            action_horizon=5,
+            action_dim=3,
+            hidden_dim=16,
+            num_layers=2,
+            beta=2.0,
+            tau=0.1,
+            reference_dropout=dropout,
+        ),
+        actor_lr=1e-3,
+        critic_lr=1e-3,
+        policy_delay=1,
+        actor_publish_interval=1,
+        target_actor_noise=False,
+    )
+
+
 def _flatten_actor_params(state: rlt_training.RLTTrainState) -> jnp.ndarray:
     actor_params = rlt_training.actor_params_for_inference(state).flat_state()
     return jnp.concatenate([jnp.ravel(value.value) for value in actor_params.values()])
@@ -140,6 +161,30 @@ def test_rlt_train_step_actor_update_samples_policy_actions():
     assert bool(info_a["actor_updated"])
     assert bool(info_b["actor_updated"])
     assert not jnp.allclose(_flatten_actor_params(state_a), _flatten_actor_params(state_b))
+
+
+def test_rlt_train_step_reports_reference_action_dropout_fraction():
+    state = rlt_training.init_train_state(_make_reference_dropout_config(1.0), jax.random.key(0))
+    batch = _make_batch()
+
+    state, info = rlt_training.train_step(state, batch, jax.random.key(1))
+
+    assert int(state.step) == 1
+    assert bool(info["actor_updated"])
+    assert jnp.allclose(info["reference_dropout_rate"], 1.0)
+    assert jnp.allclose(info["reference_dropout_fraction"], 1.0)
+
+
+def test_rlt_train_step_disables_reference_action_dropout_when_rate_zero():
+    state = rlt_training.init_train_state(_make_reference_dropout_config(0.0), jax.random.key(0))
+    batch = _make_batch()
+
+    state, info = rlt_training.train_step(state, batch, jax.random.key(1))
+
+    assert int(state.step) == 1
+    assert bool(info["actor_updated"])
+    assert jnp.allclose(info["reference_dropout_rate"], 0.0)
+    assert jnp.allclose(info["reference_dropout_fraction"], 0.0)
 
 
 def test_rlt_train_step_updates_target_critic_without_actor_update():
