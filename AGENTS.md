@@ -1,5 +1,18 @@
 # AGENTS
 
+## RLT documentation notation
+- In Obsidian notes, reports, ADRs, and project documentation about RLT, do not mix the paper abstraction `s_t`, VLA internal tokens, RLToken output, and actor/critic state.
+- Use this notation consistently:
+  - `$s_t$`: the paper's abstract environment state only. Do not use it as the name of an engineering array, runtime observation, VLA token, or critic input.
+  - `$o_t$`: raw robot observation at time `t`, such as camera frames, robot state, and runtime context before OpenPI preprocessing.
+  - `$T(o_t)$`: the preprocessed VLA input after camera-key mapping, resizing, normalization, masks, prompt/history handling, and other OpenPI transforms.
+  - `$h_t^{\mathrm{vla}}$`: VLA internal hidden/token representation produced by the frozen VLA forward pass.
+  - `$z_t^{\mathrm{rl}}$`: RLToken output produced from `$h_t^{\mathrm{vla}}$`; use code literal `z_rl` only when referring to the exact saved/runtime field name.
+  - `$p_t$`: policy-space proprio used by RLT.
+  - `$x_t=(z_t^{\mathrm{rl}},p_t)$`: the RLT actor/critic state, not the raw observation and not the VLA token itself.
+- In formulas, prefer MathJax-safe forms such as `$\pi_{\mathrm{vla}}$`, `$f_{\theta_{\mathrm{vla}}}$`, and `$z_t^{\mathrm{rl}}$`. Avoid bare prose symbols like `pi_vla`, `theta_vla`, `z_rl`, or `x_t` in headings and explanatory text unless they are exact code identifiers.
+- When updating RLT notes, scan the entire note and associated TikZ/SVG figures for notation consistency before finishing; do not fix only the instance the user pointed out.
+
 ## Remote project paths
 - On `192.168.1.103`, the user's robot project is `~/openpi0.5-rtc-reward-learning` (`/home/eii/openpi0.5-rtc-reward-learning`).
 - Strong constraint for `192.168.1.103`: do not modify code outside `/home/eii/openpi0.5-rtc-reward-learning` for this user's robot project. This includes editing files, applying patches, copying files, rsyncing, running formatters, running git commands that change files, or running project scripts with a working directory outside `/home/eii/openpi0.5-rtc-reward-learning`.
@@ -73,6 +86,9 @@
   - Container path: `/app/checkpoints/rlt_lower_right_rl_token_ablation_20260701/BEST/checkpoint`
   - Cameras used for visual information: `cam_low`, `cam_right_wrist`.
   - Output z dimension: `2048`.
+  - Historical training fact: this 4-layer lower+right RLToken was trained as an offline `rl_token_only=True` autoencoder on the 11-repo LeRobot rinse dataset, initialized from the frozen cam4 VLA checkpoint `eii_rinse_11repo_cam4_fullft/.../9000/params`. It was not trained from robot runtime `/rlt_policy_forward_events` and must not be described as "trained from same-forward runtime tokens".
+  - Evidence: `scripts/vast_train_lower_right_rl_token.sh` ran `uv run scripts/train.py eii_rinse_11repo_cam4_fullft_rl_token_lower_right_query_4layer`; the config uses `_make_rl_token_autoencoder_config`, `decoder_mode="query"`, `camera_keys=("cam_low", "cam_right_wrist")`, `output_camera_slots=("base_0_rgb", "base_1_rgb", "left_wrist_0_rgb", "right_wrist_0_rgb")`; model training uses `Pi0.compute_loss(... rl_token_only=True)` and `embed_prefix_hidden(observation, drop_language=True)`.
+  - Runtime same-forward is a later inference/data-collection mechanism that applies this trained RLToken encoder to hidden states from the running VLA forward pass. Do not conflate the RLToken checkpoint's training source with the actor/critic replay `z_rl` source.
   - Strong constraint: new key-region data collection on `192.168.1.103` must set `RLT_RL_TOKEN_CHECKPOINT_PATH=/app/checkpoints/rlt_lower_right_rl_token_ablation_20260701/BEST/checkpoint` before starting `openpi_server` or `rlt_warmup_runtime`.
   - Strong constraint: do not collect new RLT replay with the old 512-dim small-query RLToken unless the user explicitly requests a controlled ablation. Mixing 512-dim and 2048-dim `z_rl` replay in one critic/actor training run is invalid.
   - If existing 512-dim replay must be reused, re-encode it into a separate lower-right directory such as `/data/openpi0.5-rtc-reward-learning/replay/rlt_key_regions_lower_right_z2048_4layer` or `/data/openpi0.5-rtc-reward-learning/replay/rlt_key_regions_clean_lower_right_z2048_4layer`; never overwrite the original replay shards.
