@@ -70,7 +70,8 @@ services:
         --rlt-token-checkpoint
         /app/rlt_runs/rlt_token_rinse_9000_bs64_nw4_warmup2000_10000_abs/9999
         --rlt-actor-checkpoint
-        /app/rlt_runs/rlt_actor_rinse_196eps_success_only_smooth100_bcwarmup4000_hidden512_tpn0_c30_ad14_bc100_actor2_critic3e4_bs256_4000_seed1/step_004000/rlt_actor_critic
+        /app/rlt_runs/rlt_direct_actor_td_actorboot_278eps_endminus60_c25_h512_refdev047_penalty100_1000/step_001000/rlt_actor_critic
+        --rlt-actor-inference-reference-clip 0.02
         --denoising-steps 10}
     init: true
     tty: true

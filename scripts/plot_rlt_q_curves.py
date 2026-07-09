@@ -39,6 +39,35 @@ COLORS = {
 }
 
 
+def _metadata_total_reward(path: str | Path) -> float | None:
+    try:
+        with np.load(path, allow_pickle=False) as data:
+            if "metadata_json" not in data.files:
+                return None
+            meta = json.loads(str(data["metadata_json"]))
+    except Exception:
+        return None
+    if "total_reward" in meta:
+        return float(meta["total_reward"])
+    frame_rewards = meta.get("frame_rewards", {})
+    if isinstance(frame_rewards, dict):
+        return float(sum(float(value) for value in frame_rewards.values()))
+    return None
+
+
+def _episode_total_rewards(dataset: replay.ReplayDataset) -> dict[int, float]:
+    totals: dict[int, float] = {}
+    for episode_id, source_file in enumerate(getattr(dataset, "source_files", [])):
+        total = _metadata_total_reward(source_file)
+        if total is not None:
+            totals[int(episode_id)] = total
+    return totals
+
+
+def _is_success_total_reward(total_reward: float) -> bool:
+    return total_reward >= 2.0
+
+
 def _load_config(path: Path) -> actor_critic.RLTActorCriticConfig:
     data = json.loads(path.read_text())
     allowed = actor_critic.RLTActorCriticConfig.__dataclass_fields__.keys()
@@ -46,11 +75,14 @@ def _load_config(path: Path) -> actor_critic.RLTActorCriticConfig:
 
 
 def _episode_label(dataset: replay.ReplayDataset, episode_id: int) -> str:
+    total_reward = _episode_total_rewards(dataset).get(int(episode_id))
+    if total_reward is not None:
+        return "success" if _is_success_total_reward(total_reward) else "failure"
     mask = dataset.split_episode_id == episode_id
     done = np.asarray(dataset.data["done"])[mask].astype(bool)
-    reward = np.asarray(dataset.data["reward"])[mask]
-    terminal_reward = reward[done]
-    if terminal_reward.size and float(terminal_reward[-1]) > 0.5:
+    td_reward = np.asarray(dataset.data["td_reward"])[mask]
+    terminal_td_reward = td_reward[done]
+    if terminal_td_reward.size and float(terminal_td_reward[-1]) > 0.5:
         return "success"
     return "failure"
 
@@ -87,20 +119,20 @@ def _score_batch(params, batch: replay.ReplayBatch, config: actor_critic.RLTActo
     actor_action = actor_critic.actor_apply(
         params["actor"],
         batch.rlt_token,
-        batch.state,
-        batch.reference_action_chunk,
+        batch.normalized_state,
+        batch.normalized_reference_action_chunk,
         config,
     )
     executed_q1 = actor_critic.critic_apply(
-        params["critic1"], batch.rlt_token, batch.state, batch.executed_action_chunk, config
+        params["critic1"], batch.rlt_token, batch.normalized_state, batch.normalized_executed_action_chunk, config
     )
     executed_q2 = actor_critic.critic_apply(
-        params["critic2"], batch.rlt_token, batch.state, batch.executed_action_chunk, config
+        params["critic2"], batch.rlt_token, batch.normalized_state, batch.normalized_executed_action_chunk, config
     )
-    actor_q1 = actor_critic.critic_apply(params["critic1"], batch.rlt_token, batch.state, actor_action, config)
-    actor_q2 = actor_critic.critic_apply(params["critic2"], batch.rlt_token, batch.state, actor_action, config)
+    actor_q1 = actor_critic.critic_apply(params["critic1"], batch.rlt_token, batch.normalized_state, actor_action, config)
+    actor_q2 = actor_critic.critic_apply(params["critic2"], batch.rlt_token, batch.normalized_state, actor_action, config)
     actor_mae = jnp.mean(
-        jnp.abs(actor_action - batch.executed_action_chunk[:, : config.rlt_chunk_horizon, : config.action_dim]),
+        jnp.abs(actor_action - batch.normalized_executed_action_chunk[:, : config.rlt_chunk_horizon, : config.action_dim]),
         axis=(1, 2),
     )
     return {
@@ -160,7 +192,7 @@ def _plot(df: np.ndarray, *, title: str, subtitle: str, path: Path) -> None:
 
 def _write_csv(df: np.ndarray, path: Path) -> None:
     header = ",".join(df.dtype.names)
-    np.savetxt(path, df, delimiter=",", header=header, comments="", fmt=["%d", "%.8f", "%.8f", "%.8f", "%.8f", "%.8f", "%d"])
+    np.savetxt(path, df, delimiter=",", header=header, comments="", fmt=["%d", "%.8f", "%.8f", "%.8f", "%.8f", "%.8f", "%.8f", "%d"])
 
 
 def main() -> None:
@@ -190,7 +222,7 @@ def main() -> None:
         batch = _batch_from_indices(dataset, indices)
         scores = jax.tree.map(np.asarray, _score_batch(params, batch, config))
         step_index = np.asarray(dataset.data["step_index"])[indices].astype(np.int32)
-        reward = np.asarray(dataset.data["reward"])[indices].astype(np.float32)
+        td_reward = np.asarray(dataset.data["td_reward"])[indices].astype(np.float32)
         done = np.asarray(dataset.data["done"])[indices].astype(np.int32)
         df = np.zeros(
             indices.shape[0],
@@ -200,14 +232,14 @@ def main() -> None:
                 ("actor_q", "f4"),
                 ("actor_minus_executed_q", "f4"),
                 ("actor_mae", "f4"),
-                ("reward", "f4"),
+                ("td_reward", "f4"),
                 ("done", "i4"),
             ],
         )
         df["step_index"] = step_index
         for key in ("executed_q", "actor_q", "actor_minus_executed_q", "actor_mae"):
             df[key] = scores[key]
-        df["reward"] = reward
+        df["td_reward"] = td_reward
         df["done"] = done
         csv_path = output_dir / f"val_{label}_episode_{episode_id:03d}_q_curve.csv"
         png_path = output_dir / f"val_{label}_episode_{episode_id:03d}_q_curve.png"
@@ -230,7 +262,7 @@ def main() -> None:
             "executed_q_mean": float(df["executed_q"].mean()),
             "actor_q_mean": float(df["actor_q"].mean()),
             "actor_mae_mean": float(df["actor_mae"].mean()),
-            "terminal_reward": float(df["reward"][-1]),
+            "last_td_reward": float(df["td_reward"][-1]),
         }
 
     summary_path = output_dir / "summary.json"

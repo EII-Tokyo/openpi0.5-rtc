@@ -61,7 +61,7 @@ def _summarize_value(name: str, value: np.ndarray, *, show_values: bool, stats: 
     else:
         flat = value.reshape(-1)
         print("  first_values:")
-        print(flat[: min(10, flat.shape[0])])
+        print(flat[: min(100, flat.shape[0])])
 
 
 def main() -> None:

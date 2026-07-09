@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 import logging
 from pathlib import Path
+import shutil
+import subprocess
 import time
 from typing import Any
 
@@ -25,6 +27,97 @@ def _stack_images_or_empty(values: list[np.ndarray]) -> np.ndarray:
     shape = valid_shapes[0]
     normalized = [value if value.shape == shape else np.zeros(shape, dtype=np.uint8) for value in values]
     return np.asarray(normalized, dtype=np.uint8)
+
+
+class _FfmpegRgbMp4Writer:
+    def __init__(self, path: Path, *, fps: float, width: int, height: int) -> None:
+        self._path = path
+        self._process = subprocess.Popen(
+            [
+                "ffmpeg",
+                "-hide_banner",
+                "-loglevel",
+                "error",
+                "-y",
+                "-f",
+                "rawvideo",
+                "-pix_fmt",
+                "rgb24",
+                "-s",
+                f"{width}x{height}",
+                "-r",
+                str(float(max(1, int(round(fps))))),
+                "-i",
+                "-",
+                "-an",
+                "-c:v",
+                "libx264",
+                "-preset",
+                "veryfast",
+                "-crf",
+                "23",
+                "-pix_fmt",
+                "yuv420p",
+                str(path),
+            ],
+            stdin=subprocess.PIPE,
+        )
+
+    def write(self, frame_rgb: np.ndarray) -> None:
+        if self._process.stdin is None:
+            raise RuntimeError(f"ffmpeg stdin is closed for {self._path}")
+        self._process.stdin.write(np.ascontiguousarray(frame_rgb).tobytes())
+
+    def close(self) -> None:
+        if self._process.stdin is not None:
+            self._process.stdin.close()
+        returncode = self._process.wait()
+        if returncode != 0:
+            raise RuntimeError(f"ffmpeg exited with code {returncode} for {self._path}")
+
+
+def _write_camera_videos(
+    output_path: Path,
+    image_keys: tuple[str, ...],
+    images: dict[str, list[np.ndarray]],
+    image_masks: dict[str, list[bool]],
+    *,
+    fps: float,
+) -> dict[str, str]:
+    if shutil.which("ffmpeg") is None:
+        raise RuntimeError("ffmpeg is required to save RLT replay videos")
+
+    video_files: dict[str, str] = {}
+    for key in image_keys:
+        valid_frames = [frame for frame, mask in zip(images[key], image_masks[key], strict=False) if mask and frame.size]
+        if not valid_frames:
+            continue
+        first = valid_frames[0]
+        height, width = int(first.shape[0]), int(first.shape[1])
+        video_path = output_path.with_suffix(f".{key}.mp4")
+        tmp_video_path = video_path.with_name(f".{video_path.name}.tmp.mp4")
+        writer = _FfmpegRgbMp4Writer(tmp_video_path, fps=fps, width=width, height=height)
+        try:
+            last_valid = first
+            for frame, mask in zip(images[key], image_masks[key], strict=False):
+                if mask and frame.size:
+                    if frame.shape[:2] != (height, width):
+                        raise RuntimeError(
+                            f"camera {key} resolution changed from {(height, width)} to {frame.shape[:2]}"
+                        )
+                    last_valid = frame
+                writer.write(last_valid)
+            writer.close()
+            tmp_video_path.replace(video_path)
+        except Exception:
+            try:
+                writer.close()
+            except Exception:
+                pass
+            tmp_video_path.unlink(missing_ok=True)
+            raise
+        video_files[key] = video_path.name
+    return video_files
 
 
 def _raw_robot_state(observation: dict[str, Any]) -> np.ndarray:
@@ -116,8 +209,6 @@ class RLTOnlineReplayRecorder:
         self._tasks: list[str] = []
         self._subtasks: list[str] = []
         self._chunk_indices: list[int] = []
-        self._chunk_step_indices: list[int] = []
-        self._is_chunk_start: list[bool] = []
 
         self._chunk_start_steps: list[int] = []
         self._chunk_ids: list[int] = []
@@ -126,6 +217,7 @@ class RLTOnlineReplayRecorder:
         self._tokens: list[np.ndarray] = []
         self._embeddings: list[np.ndarray] = []
         self._masks: list[np.ndarray] = []
+        self._noises: list[np.ndarray] = []
         self._norm_states: list[np.ndarray] = []
         self._reference_chunks: list[np.ndarray] = []
         self._policy_chunks: list[np.ndarray] = []
@@ -172,11 +264,7 @@ class RLTOnlineReplayRecorder:
             self._record_images(observation)
 
         chunk_index = int(replay.get("chunk_index", -1)) if replay else -1
-        chunk_step_index = int(replay.get("chunk_step_index", -1)) if replay else -1
-        is_chunk_start = bool(replay.get("is_chunk_start", False)) if replay else False
         self._chunk_indices.append(chunk_index)
-        self._chunk_step_indices.append(chunk_step_index)
-        self._is_chunk_start.append(is_chunk_start)
 
         if replay is None or chunk_index in self._seen_chunk_ids:
             return
@@ -184,6 +272,7 @@ class RLTOnlineReplayRecorder:
         rlt_token = replay.get("rlt_token")
         embeddings = replay.get("rlt_embeddings")
         mask = replay.get("rlt_mask")
+        noise = replay.get("rlt_noise")
         self._seen_chunk_ids.add(chunk_index)
         self._chunk_start_steps.append(len(self._timestamps) - 1)
         self._chunk_ids.append(chunk_index)
@@ -195,6 +284,8 @@ class RLTOnlineReplayRecorder:
             self._embeddings.append(np.asarray(embeddings, dtype=np.float32))
         if mask is not None:
             self._masks.append(np.asarray(mask, dtype=np.bool_))
+        if noise is not None:
+            self._noises.append(np.asarray(noise, dtype=np.float32))
         self._norm_states.append(np.asarray(replay["rlt_state"], dtype=np.float32))
         self._reference_chunks.append(np.asarray(replay["rlt_reference_action_chunk"], dtype=np.float32))
         self._policy_chunks.append(np.asarray(replay["rlt_policy_action_chunk"], dtype=np.float32))
@@ -244,6 +335,7 @@ class RLTOnlineReplayRecorder:
         token_dim = int(self._tokens[0].shape[-1]) if self._tokens else 0
         embedding_shape = self._embeddings[0].shape if self._embeddings else (0, 0)
         mask_shape = self._masks[0].shape if self._masks else (0,)
+        noise_shape = self._noises[0].shape if self._noises else (0, 0)
         norm_state_dim = int(self._norm_states[0].shape[-1]) if self._norm_states else 0
         reference_shape = self._reference_chunks[0].shape if self._reference_chunks else (0, 0)
 
@@ -258,6 +350,13 @@ class RLTOnlineReplayRecorder:
             "created_at": time.time(),
             "policy_metadata": self._policy_metadata,
         }
+        fps = 50.0
+        try:
+            runtime_metadata = self._policy_metadata.get("runtime", {})
+            if isinstance(runtime_metadata, dict):
+                fps = float(runtime_metadata.get("policy_hz", fps) or fps)
+        except Exception:
+            fps = 50.0
 
         payload = {
             "metadata_json": np.asarray(json.dumps(metadata, ensure_ascii=False)),
@@ -267,8 +366,6 @@ class RLTOnlineReplayRecorder:
             "raw_state": _array_or_empty(self._raw_states, shape_tail=(raw_state_dim,)),
             "executed_action": _array_or_empty(self._executed_actions, shape_tail=(action_dim,)),
             "step_chunk_index": np.asarray(self._chunk_indices, dtype=np.int32),
-            "step_chunk_step_index": np.asarray(self._chunk_step_indices, dtype=np.int32),
-            "step_is_chunk_start": np.asarray(self._is_chunk_start, dtype=np.bool_),
             "chunk_id": np.asarray(self._chunk_ids, dtype=np.int32),
             "chunk_start_step": np.asarray(self._chunk_start_steps, dtype=np.int32),
             "chunk_task": np.asarray(self._chunk_tasks),
@@ -276,6 +373,7 @@ class RLTOnlineReplayRecorder:
             "rlt_token": _array_or_empty(self._tokens, shape_tail=(token_dim,)),
             "rlt_embeddings": _array_or_empty(self._embeddings, shape_tail=embedding_shape),
             "rlt_mask": _array_or_empty(self._masks, shape_tail=mask_shape, dtype=np.bool_),
+            "rlt_noise": _array_or_empty(self._noises, shape_tail=noise_shape),
             "norm_state": _array_or_empty(self._norm_states, shape_tail=(norm_state_dim,)),
             "reference_action_chunk": _array_or_empty(self._reference_chunks, shape_tail=reference_shape),
             "policy_action_chunk": _array_or_empty(self._policy_chunks, shape_tail=reference_shape),
@@ -291,13 +389,18 @@ class RLTOnlineReplayRecorder:
             "actor_chunk_q2": np.asarray(self._actor_chunk_q2, dtype=np.float32),
         }
         if self._save_images:
-            metadata["image_storage"] = "npz_uint8_raw_camera_frame_uncompressed"
-            metadata["image_keys"] = list(self._image_keys)
+            video_files = _write_camera_videos(
+                output_path,
+                self._image_keys,
+                self._images,
+                self._image_masks,
+                fps=fps,
+            )
+            metadata["image_storage"] = "mp4_sidecar"
+            metadata["image_keys"] = list(video_files)
+            metadata["video_files"] = video_files
+            metadata["video_fps"] = fps
             payload["metadata_json"] = np.asarray(json.dumps(metadata, ensure_ascii=False))
-            for key in self._image_keys:
-                safe_key = key.replace("/", "_")
-                payload[f"image_{safe_key}"] = _stack_images_or_empty(self._images[key])
-                payload[f"image_mask_{safe_key}"] = np.asarray(self._image_masks[key], dtype=np.bool_)
 
         tmp_path = output_path.with_name(f".{output_path.name}.tmp")
         try:

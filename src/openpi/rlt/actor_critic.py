@@ -10,6 +10,8 @@ import numpy as np
 
 Params = dict[str, Any]
 
+ALOHA_GRIPPER_ACTION_INDICES = (6, 13)
+
 
 @dataclasses.dataclass(frozen=True)
 class RLTActorCriticConfig:
@@ -18,23 +20,25 @@ class RLTActorCriticConfig:
     action_dim: int = 14
     action_horizon: int = 30
     rlt_chunk_horizon: int = 30
+    action_start_index: int = 10
     hidden_dim: int = 512
     actor_hidden_layers: int = 2
     critic_hidden_layers: int = 2
     gamma: float = 0.99
     tau: float = 0.005
-    reference_dropout: float = 0.5
+    target_bootstrap_steps: int = 0
     rl_loss_coef: float = 1.0
-    bc_coef: float = 1.0
-    action_smooth_coef: float = 0.0
-    action_accel_coef: float = 0.0
     critic_loss_coef: float = 1.0
-    bc_warmup_steps: int = 200
     actor_update_period: int = 2
     actor_lr: float = 3e-4
     critic_lr: float = 3e-4
+    actor_clip_gradient_norm: float = 0.0
+    critic_clip_gradient_norm: float = 0.0
     target_policy_noise: float = 0.0
     target_policy_noise_clip: float = 0.15
+    reference_deviation_threshold: float = 0.047
+    reference_deviation_penalty_coef: float = 1000.0
+    reference_action_dropout: float = 0.5
 
     def __post_init__(self) -> None:
         if self.rlt_chunk_horizon != self.action_horizon:
@@ -42,22 +46,38 @@ class RLTActorCriticConfig:
                 f"RLT actor currently expects full C-step chunks: "
                 f"rlt_chunk_horizon={self.rlt_chunk_horizon}, action_horizon={self.action_horizon}"
             )
-        if self.bc_warmup_steps < 0:
-            raise ValueError(f"bc_warmup_steps must be non-negative, got {self.bc_warmup_steps}")
+        if self.action_start_index < 0:
+            raise ValueError(f"action_start_index must be non-negative, got {self.action_start_index}")
+        if self.target_bootstrap_steps < 0:
+            raise ValueError(f"target_bootstrap_steps must be non-negative, got {self.target_bootstrap_steps}")
         if self.rl_loss_coef < 0:
             raise ValueError(f"rl_loss_coef must be non-negative, got {self.rl_loss_coef}")
+        if self.actor_clip_gradient_norm < 0:
+            raise ValueError(f"actor_clip_gradient_norm must be non-negative, got {self.actor_clip_gradient_norm}")
+        if self.critic_clip_gradient_norm < 0:
+            raise ValueError(f"critic_clip_gradient_norm must be non-negative, got {self.critic_clip_gradient_norm}")
         if self.critic_loss_coef <= 0:
             raise ValueError(f"critic_loss_coef must be positive, got {self.critic_loss_coef}")
-        if self.action_smooth_coef < 0:
-            raise ValueError(f"action_smooth_coef must be non-negative, got {self.action_smooth_coef}")
-        if self.action_accel_coef < 0:
-            raise ValueError(f"action_accel_coef must be non-negative, got {self.action_accel_coef}")
         if self.actor_update_period <= 0:
             raise ValueError(f"actor_update_period must be positive, got {self.actor_update_period}")
         if self.actor_hidden_layers < 0:
             raise ValueError(f"actor_hidden_layers must be non-negative, got {self.actor_hidden_layers}")
         if self.critic_hidden_layers < 0:
             raise ValueError(f"critic_hidden_layers must be non-negative, got {self.critic_hidden_layers}")
+        if self.reference_deviation_threshold < 0:
+            raise ValueError(
+                f"reference_deviation_threshold must be non-negative, got {self.reference_deviation_threshold}"
+            )
+        if self.reference_deviation_penalty_coef < 0:
+            raise ValueError(
+                f"reference_deviation_penalty_coef must be non-negative, got {self.reference_deviation_penalty_coef}"
+            )
+        if self.reference_deviation_threshold <= 0:
+            raise ValueError("reference_deviation_threshold must be positive")
+        if not 0.0 <= self.reference_action_dropout < 1.0:
+            raise ValueError(
+                f"reference_action_dropout must be in [0, 1), got {self.reference_action_dropout}"
+            )
 
     @property
     def action_size(self) -> int:
@@ -98,6 +118,39 @@ def layernorm_rlt_token(rlt_token: jax.Array) -> jax.Array:
     return jax.nn.standardize(rlt_token, axis=-1, epsilon=1e-6)
 
 
+def gripper_action_mask(config: RLTActorCriticConfig) -> jax.Array:
+    mask = jnp.ones((config.action_dim,), dtype=jnp.float32)
+    for index in ALOHA_GRIPPER_ACTION_INDICES:
+        if index < config.action_dim:
+            mask = mask.at[index].set(0.0)
+    return mask
+
+
+def action_window(action_chunk: jax.Array, config: RLTActorCriticConfig) -> jax.Array:
+    """Return the C-step action window controlled by RLT.
+
+    In inference-time RTC, a newly sampled chunk starts executing only after
+    the handoff delay. With the current robot settings, the actor/critic window
+    is therefore 10:35 inside the VLA 50-step chunk. Replay shards may already
+    store only this C-step window; in that case return the leading C steps.
+    """
+    horizon = config.rlt_chunk_horizon
+    start = config.action_start_index
+    if action_chunk.shape[1] >= start + horizon:
+        return action_chunk[:, start : start + horizon, : config.action_dim]
+    return action_chunk[:, :horizon, : config.action_dim]
+
+
+def preserve_gripper_actions(action_chunk: jax.Array, reference_action_chunk: jax.Array, config: RLTActorCriticConfig) -> jax.Array:
+    """Keep ALOHA gripper dimensions equal to the reference/VLA action window."""
+    reference = action_window(reference_action_chunk, config)
+    action = action_chunk[:, : config.rlt_chunk_horizon, : config.action_dim]
+    for index in ALOHA_GRIPPER_ACTION_INDICES:
+        if index < config.action_dim:
+            action = action.at[:, :, index].set(reference[:, :, index])
+    return action
+
+
 def init_actor_critic_params(rng: jax.Array, config: RLTActorCriticConfig) -> Params:
     actor_rng, q1_rng, q2_rng = jax.random.split(rng, 3)
     actor_dims = [config.obs_size, *([config.hidden_dim] * config.actor_hidden_layers), config.action_size]
@@ -107,21 +160,44 @@ def init_actor_critic_params(rng: jax.Array, config: RLTActorCriticConfig) -> Pa
 
 def make_actor_input(rlt_token: jax.Array, state: jax.Array, reference_action_chunk: jax.Array, config: RLTActorCriticConfig) -> jax.Array:
     rlt_token = layernorm_rlt_token(rlt_token)
-    ref = reference_action_chunk[:, : config.rlt_chunk_horizon, : config.action_dim].reshape(reference_action_chunk.shape[0], -1)
+    ref = action_window(reference_action_chunk, config).reshape(reference_action_chunk.shape[0], -1)
     state = state[:, : config.state_dim]
     return jnp.concatenate([rlt_token, state, ref], axis=-1)
 
 
-def actor_apply(actor_params: list[Params], rlt_token: jax.Array, state: jax.Array, reference_action_chunk: jax.Array, config: RLTActorCriticConfig) -> jax.Array:
-    x = make_actor_input(rlt_token, state, reference_action_chunk, config)
-    action = _mlp(actor_params, x)
-    return action.reshape((-1, config.rlt_chunk_horizon, config.action_dim))
+def actor_apply(
+    actor_params: list[Params],
+    rlt_token: jax.Array,
+    state: jax.Array,
+    reference_action_chunk: jax.Array,
+    config: RLTActorCriticConfig,
+    *,
+    reference_action_input: jax.Array | None = None,
+) -> jax.Array:
+    if reference_action_input is None:
+        reference_action_input = reference_action_chunk
+    x = make_actor_input(rlt_token, state, reference_action_input, config)
+    action = _mlp(actor_params, x).reshape((-1, config.rlt_chunk_horizon, config.action_dim))
+    return preserve_gripper_actions(action, reference_action_chunk, config)
+
+
+def maybe_drop_reference_action_input(
+    reference_action_chunk: jax.Array, config: RLTActorCriticConfig, rng: jax.Array
+) -> jax.Array:
+    if config.reference_action_dropout <= 0.0:
+        return reference_action_chunk
+    keep = jax.random.bernoulli(
+        rng,
+        1.0 - config.reference_action_dropout,
+        (reference_action_chunk.shape[0], 1, 1),
+    )
+    return jnp.where(keep, reference_action_chunk, jnp.zeros_like(reference_action_chunk))
 
 
 def make_critic_input(rlt_token: jax.Array, state: jax.Array, action_chunk: jax.Array, config: RLTActorCriticConfig) -> jax.Array:
     rlt_token = layernorm_rlt_token(rlt_token)
     state = state[:, : config.state_dim]
-    action = action_chunk[:, : config.rlt_chunk_horizon, : config.action_dim].reshape(action_chunk.shape[0], -1)
+    action = action_window(action_chunk, config).reshape(action_chunk.shape[0], -1)
     return jnp.concatenate([rlt_token, state, action], axis=-1)
 
 
@@ -131,24 +207,28 @@ def critic_apply(critic_params: list[Params], rlt_token: jax.Array, state: jax.A
     return q[:, 0]
 
 
-def _drop_reference(rng: jax.Array, reference_action_chunk: jax.Array, dropout: float) -> jax.Array:
-    keep = jax.random.bernoulli(rng, 1.0 - dropout, (reference_action_chunk.shape[0], 1, 1))
-    return jnp.where(keep, reference_action_chunk, 0.0)
-
-
 def critic_loss(params: Params, target_params: Params, batch, config: RLTActorCriticConfig, rng: jax.Array) -> tuple[jax.Array, dict[str, jax.Array]]:
-    next_ref = batch.next_reference_action_chunk
-    next_action = actor_apply(params["actor"], batch.next_rlt_token, batch.next_state, next_ref, config)
+    next_ref = batch.normalized_next_reference_action_chunk
+    next_ref_input = maybe_drop_reference_action_input(next_ref, config, rng)
+    next_action = actor_apply(
+        params["actor"],
+        batch.next_rlt_token,
+        batch.normalized_next_state,
+        next_ref,
+        config,
+        reference_action_input=next_ref_input,
+    )
     if config.target_policy_noise > 0.0:
         noise = jax.random.normal(rng, next_action.shape, dtype=next_action.dtype) * config.target_policy_noise
         noise = jnp.clip(noise, -config.target_policy_noise_clip, config.target_policy_noise_clip)
-        next_action = next_action + noise
-    target_q1 = critic_apply(target_params["critic1"], batch.next_rlt_token, batch.next_state, next_action, config)
-    target_q2 = critic_apply(target_params["critic2"], batch.next_rlt_token, batch.next_state, next_action, config)
-    bootstrap_discount = config.gamma**config.rlt_chunk_horizon
-    target_q = batch.reward + bootstrap_discount * (1.0 - batch.done.astype(jnp.float32)) * jnp.minimum(target_q1, target_q2)
-    q1 = critic_apply(params["critic1"], batch.rlt_token, batch.state, batch.executed_action_chunk, config)
-    q2 = critic_apply(params["critic2"], batch.rlt_token, batch.state, batch.executed_action_chunk, config)
+        next_action = preserve_gripper_actions(next_action + noise, next_ref, config)
+    target_q1 = critic_apply(target_params["critic1"], batch.next_rlt_token, batch.normalized_next_state, next_action, config)
+    target_q2 = critic_apply(target_params["critic2"], batch.next_rlt_token, batch.normalized_next_state, next_action, config)
+    bootstrap_steps = config.target_bootstrap_steps or config.rlt_chunk_horizon
+    bootstrap_discount = config.gamma**bootstrap_steps
+    target_q = batch.td_reward + bootstrap_discount * (1.0 - batch.done.astype(jnp.float32)) * jnp.minimum(target_q1, target_q2)
+    q1 = critic_apply(params["critic1"], batch.rlt_token, batch.normalized_state, batch.normalized_executed_action_chunk, config)
+    q2 = critic_apply(params["critic2"], batch.rlt_token, batch.normalized_state, batch.normalized_executed_action_chunk, config)
     unweighted_loss = jnp.mean(jnp.square(q1 - target_q)) + jnp.mean(jnp.square(q2 - target_q))
     loss = config.critic_loss_coef * unweighted_loss
     return loss, {
@@ -164,52 +244,49 @@ def actor_loss(
     batch,
     config: RLTActorCriticConfig,
     rng: jax.Array,
-    step_idx: jax.Array,
 ) -> tuple[jax.Array, dict[str, jax.Array]]:
-    ref = _drop_reference(rng, batch.reference_action_chunk, config.reference_dropout)
-    action = actor_apply(params["actor"], batch.rlt_token, batch.state, ref, config)
-    q1 = critic_apply(params["critic1"], batch.rlt_token, batch.state, action, config)
-    q2 = critic_apply(params["critic2"], batch.rlt_token, batch.state, action, config)
+    ref = batch.normalized_reference_action_chunk
+    ref_input = maybe_drop_reference_action_input(ref, config, rng)
+    action = actor_apply(
+        params["actor"],
+        batch.rlt_token,
+        batch.normalized_state,
+        ref,
+        config,
+        reference_action_input=ref_input,
+    )
+    q1 = critic_apply(params["critic1"], batch.rlt_token, batch.normalized_state, action, config)
+    q2 = critic_apply(params["critic2"], batch.rlt_token, batch.normalized_state, action, config)
     q = jnp.minimum(q1, q2)
-    bc_target = batch.executed_action_chunk[:, : config.rlt_chunk_horizon, : config.action_dim]
-    bc_mask = batch.executed_action_mask[:, : config.rlt_chunk_horizon].astype(jnp.float32)[..., None]
-    bc_loss = jnp.sum(jnp.square(action - bc_target) * bc_mask) / jnp.maximum(jnp.sum(bc_mask) * config.action_dim, 1.0)
-    action_delta = action[:, 1:] - action[:, :-1]
-    target_delta = bc_target[:, 1:] - bc_target[:, :-1]
-    smooth_mask = bc_mask[:, 1:] * bc_mask[:, :-1]
-    smooth_loss = jnp.sum(jnp.square(action_delta - target_delta) * smooth_mask) / jnp.maximum(
-        jnp.sum(smooth_mask) * config.action_dim, 1.0
-    )
-    action_accel = action[:, 2:] - 2.0 * action[:, 1:-1] + action[:, :-2]
-    target_accel = bc_target[:, 2:] - 2.0 * bc_target[:, 1:-1] + bc_target[:, :-2]
-    accel_mask = bc_mask[:, 2:] * bc_mask[:, 1:-1] * bc_mask[:, :-2]
-    accel_loss = jnp.sum(jnp.square(action_accel - target_accel) * accel_mask) / jnp.maximum(
-        jnp.sum(accel_mask) * config.action_dim, 1.0
-    )
+    non_gripper_mask = gripper_action_mask(config)[None, None, :]
     rl_loss = -jnp.mean(q)
-    rl_active = (step_idx >= config.bc_warmup_steps).astype(jnp.float32)
-    rl_loss_weighted = rl_active * config.rl_loss_coef * rl_loss
-    bc_loss_weighted = config.bc_coef * bc_loss
-    smooth_loss_weighted = config.action_smooth_coef * smooth_loss
-    accel_loss_weighted = config.action_accel_coef * accel_loss
-    loss = rl_loss_weighted + bc_loss_weighted + smooth_loss_weighted + accel_loss_weighted
+    rl_loss_weighted = config.rl_loss_coef * rl_loss
+    loss = rl_loss_weighted
+    action_reference = action_window(batch.normalized_reference_action_chunk, config)
+    reference_deviation_abs = jnp.abs(action - action_reference) * non_gripper_mask
+    reference_deviation_abs_max = jnp.max(reference_deviation_abs)
+    reference_deviation_abs_mean = jnp.sum(reference_deviation_abs) / jnp.maximum(
+        jnp.sum(jnp.ones_like(reference_deviation_abs) * non_gripper_mask), 1.0
+    )
+    reference_deviation_excess = jnp.maximum(
+        reference_deviation_abs - config.reference_deviation_threshold, 0.0
+    ) * non_gripper_mask
+    reference_deviation_penalty = jnp.sum(jnp.square(reference_deviation_excess)) / jnp.maximum(
+        jnp.sum(jnp.ones_like(reference_deviation_excess) * non_gripper_mask), 1.0
+    )
+    reference_deviation_penalty_weighted = config.reference_deviation_penalty_coef * reference_deviation_penalty
+    loss = loss + reference_deviation_penalty_weighted
     return loss, {
         "actor_loss": loss,
         "actor_rl_loss": rl_loss,
-        "actor_rl_active": rl_active,
         "actor_rl_loss_weighted": rl_loss_weighted,
-        "bc_loss_weighted": bc_loss_weighted,
-        "smooth_loss_weighted": smooth_loss_weighted,
-        "accel_loss_weighted": accel_loss_weighted,
         "actor_q": jnp.mean(q),
         "actor_q1": jnp.mean(q1),
         "actor_q2": jnp.mean(q2),
-        "bc_loss": bc_loss,
-        "smooth_loss": smooth_loss,
-        "accel_loss": accel_loss,
-        "smooth_valid_steps": jnp.sum(smooth_mask),
-        "accel_valid_steps": jnp.sum(accel_mask),
-        "bc_valid_steps": jnp.sum(bc_mask),
+        "reference_deviation_abs_max": reference_deviation_abs_max,
+        "reference_deviation_abs_mean": reference_deviation_abs_mean,
+        "reference_deviation_penalty": reference_deviation_penalty,
+        "reference_deviation_penalty_weighted": reference_deviation_penalty_weighted,
     }
 
 

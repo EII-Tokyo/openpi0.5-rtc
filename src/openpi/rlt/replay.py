@@ -14,16 +14,17 @@ from torch.utils import data as torch_data
 class ReplayBatch:
     rlt_token: jax.Array
     next_rlt_token: jax.Array
-    state: jax.Array
-    next_state: jax.Array
-    reference_action_chunk: jax.Array
-    next_reference_action_chunk: jax.Array
-    executed_action_chunk: jax.Array
+    normalized_state: jax.Array
+    normalized_next_state: jax.Array
+    normalized_reference_action_chunk: jax.Array
+    normalized_next_reference_action_chunk: jax.Array
+    normalized_executed_action_chunk: jax.Array
     executed_action_mask: jax.Array
-    reward: jax.Array
+    td_reward: jax.Array
     done: jax.Array
     episode_id: jax.Array
     step_index: jax.Array
+    sample_index: jax.Array
     is_intervention: jax.Array
 
 
@@ -37,10 +38,19 @@ class ReplayDataset(torch_data.Dataset):
         if not files:
             raise FileNotFoundError(f"No replay .npz files found under {self.path}")
         arrays = [np.load(file) for file in files]
-        missing = [key for key in REPLAY_BATCH_FIELDS if key not in arrays[0].files]
+        optional_defaults = {"sample_index": lambda arr: np.zeros((arr[REPLAY_BATCH_FIELDS[0]].shape[0],), dtype=np.int32)}
+        missing = [key for key in REPLAY_BATCH_FIELDS if key not in arrays[0].files and key not in optional_defaults]
         if missing:
-            raise KeyError(f"Replay shard {files[0]} missing required fields: {tuple(missing)}")
-        self.data = {key: np.concatenate([arr[key] for arr in arrays], axis=0) for key in REPLAY_BATCH_FIELDS}
+            raise KeyError("Replay shard " + str(files[0]) + " missing required fields: " + str(tuple(missing)))
+
+        def _field_array(arr, key: str) -> np.ndarray:
+            if key in arr.files:
+                return arr[key]
+            if key in optional_defaults:
+                return optional_defaults[key](arr)
+            raise KeyError(key)
+
+        self.data = {key: np.concatenate([_field_array(arr, key) for arr in arrays], axis=0) for key in REPLAY_BATCH_FIELDS}
         self.source_files = [str(file) for file in files]
         self.split_episode_id = np.concatenate(
             [np.full((arr[REPLAY_BATCH_FIELDS[0]].shape[0],), file_idx, dtype=np.int32) for file_idx, arr in enumerate(arrays)],

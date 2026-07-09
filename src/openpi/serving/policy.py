@@ -48,6 +48,8 @@ class Policy(BasePolicy):
         self._observation_transform = observation_transform or (lambda observation: observation)
         self._sample_kwargs = sample_kwargs or {}
         self._metadata = metadata or {}
+        self._action_horizon = int(model.action_horizon)
+        self._action_dim = int(model.action_dim)
         if not hasattr(model, "sample_action_chunk_with_rlt_context"):
             raise NotImplementedError("Policy requires sample_action_chunk_with_rlt_context().")
         if not hasattr(model, "sample_action_chunk_with_inference_time_rtc_context"):
@@ -89,7 +91,9 @@ class Policy(BasePolicy):
             noise = jnp.asarray(noise)
             if noise.ndim == 2:
                 noise = noise[None, ...]
-            sample_kwargs["noise"] = noise
+        else:
+            noise = jax.random.normal(sample_rng, (1, self._action_horizon, self._action_dim))
+        sample_kwargs["noise"] = noise
 
         if chunking_mode is None:
             chunking_mode = "inference_time"
@@ -136,6 +140,7 @@ class Policy(BasePolicy):
         transformed_outputs = self._output_transform(model_outputs)
         transformed_outputs["model_actions"] = model_outputs["actions"]
         transformed_outputs["model_state"] = model_outputs["state"]
+        transformed_outputs["model_noise"] = np.asarray(noise[0, ...])
         if return_rlt_state:
             transformed_outputs.update(jax.tree.map(lambda x: np.asarray(x[0, ...]), rlt_outputs))
         transformed_outputs["policy_timing"] = {

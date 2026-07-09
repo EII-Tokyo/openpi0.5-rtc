@@ -412,12 +412,14 @@ class Pi0(_model.BaseModel):
         replan_start_step: int = 25,
         handoff_delay_steps: int = 10,
         guidance_scale: float = 8.0,
+        noise: at.Float[at.Array, "b ah ad"] | None = None,
     ) -> tuple[_model.Actions, at.Array, at.Array]:
         # note that we use the convention more common in diffusion literature, where t=1 is noise and t=0 is the target
         # distribution. yes, this is the opposite of the pi0 paper, and I'm sorry.
         dt = -1.0 / denoising_steps
         batch_size = observation.state.shape[0]
-        noise = jax.random.normal(rng, (batch_size, self.action_horizon, self.action_dim))
+        if noise is None:
+            noise = jax.random.normal(rng, (batch_size, self.action_horizon, self.action_dim))
 
         guidance_indices = jnp.arange(self.action_horizon) + replan_start_step
         guidance_mask = guidance_indices < self.action_horizon
@@ -502,6 +504,7 @@ class Pi0(_model.BaseModel):
         replan_start_step: int = 25,
         handoff_delay_steps: int = 10,
         guidance_scale: float = 8.0,
+        noise: at.Float[at.Array, "b ah ad"] | None = None,
     ) -> _model.Actions:
         x_0, _, _ = self._sample_action_chunk_with_inference_time_rtc_and_context(
             rng,
@@ -511,6 +514,7 @@ class Pi0(_model.BaseModel):
             replan_start_step=replan_start_step,
             handoff_delay_steps=handoff_delay_steps,
             guidance_scale=guidance_scale,
+            noise=noise,
         )
         return x_0
 
@@ -524,6 +528,7 @@ class Pi0(_model.BaseModel):
         replan_start_step: int = 25,
         handoff_delay_steps: int = 10,
         guidance_scale: float = 8.0,
+        noise: at.Float[at.Array, "b ah ad"] | None = None,
     ) -> dict[str, at.Array]:
         x_0, prefix_out, prefix_mask = self._sample_action_chunk_with_inference_time_rtc_and_context(
             rng,
@@ -533,6 +538,7 @@ class Pi0(_model.BaseModel):
             replan_start_step=replan_start_step,
             handoff_delay_steps=handoff_delay_steps,
             guidance_scale=guidance_scale,
+            noise=noise,
         )
         return {
             "actions": x_0,

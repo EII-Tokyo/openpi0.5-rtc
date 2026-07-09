@@ -22,6 +22,7 @@ class RLTPolicy(_base_policy.BasePolicy):
         token_config: token_model.RLTTokenConfig,
         actor_params=None,
         actor_config: actor_critic.RLTActorCriticConfig | None = None,
+        actor_inference_reference_clip: float | None = None,
         enabled: bool = True,
         metadata: dict[str, Any] | None = None,
     ):
@@ -32,6 +33,7 @@ class RLTPolicy(_base_policy.BasePolicy):
         self._actor_params = actor_params
         self._token_config = token_config
         self._actor_config = actor_config
+        self._actor_inference_reference_clip = actor_inference_reference_clip
         base_metadata = getattr(base_policy, "metadata", {})
         self._metadata = {**base_metadata, **(metadata or {})}
         self._actor_enabled = (
@@ -50,13 +52,24 @@ class RLTPolicy(_base_policy.BasePolicy):
         self._apply_actor = None
         if self._actor_enabled:
             actor_config = self._actor_config
+            inference_reference_clip = (
+                actor_config.reference_deviation_threshold
+                if self._actor_inference_reference_clip is None
+                else float(self._actor_inference_reference_clip)
+            )
 
             @jax.jit
             def apply_actor(actor_params, rlt_token, state, reference):
                 actor_network_params = actor_params["actor"] if isinstance(actor_params, dict) and "actor" in actor_params else actor_params
                 refined = actor_critic.actor_apply(actor_network_params, rlt_token, state, reference, actor_config)
+                action_start = actor_config.action_start_index
+                action_end = action_start + actor_config.rlt_chunk_horizon
+                reference_window = actor_critic.action_window(reference, actor_config)
+                max_reference_deviation = inference_reference_clip
+                refined = reference_window + jnp.clip(refined - reference_window, -max_reference_deviation, max_reference_deviation)
+                refined = actor_critic.preserve_gripper_actions(refined, reference, actor_config)
                 full_actions = jnp.asarray(reference).at[
-                    :, : actor_config.rlt_chunk_horizon, : actor_config.action_dim
+                    :, action_start:action_end, : actor_config.action_dim
                 ].set(refined)
                 q1 = actor_critic.critic_apply(actor_params["critic1"], rlt_token, state, full_actions, actor_config)
                 q2 = actor_critic.critic_apply(actor_params["critic2"], rlt_token, state, full_actions, actor_config)
@@ -87,6 +100,7 @@ class RLTPolicy(_base_policy.BasePolicy):
         reference: jax.Array,
         policy_actions: jax.Array,
         actor_enabled: bool,
+        noise: np.ndarray | None = None,
         q1: jax.Array | None = None,
         q2: jax.Array | None = None,
         vla_q1: jax.Array | None = None,
@@ -103,6 +117,8 @@ class RLTPolicy(_base_policy.BasePolicy):
         out["rlt_reference_action_chunk"] = np.asarray(reference[0])
         out["rlt_policy_action_chunk"] = np.asarray(policy_actions[0])
         out["rlt_actor_enabled"] = actor_enabled
+        if noise is not None:
+            out["rlt_noise"] = np.asarray(noise, dtype=np.float32)
         if q1 is not None and q2 is not None:
             q1_value = float(np.asarray(q1[0]))
             q2_value = float(np.asarray(q2[0]))
@@ -138,6 +154,7 @@ class RLTPolicy(_base_policy.BasePolicy):
         if "noise" in kwargs:
             base_kwargs["noise"] = kwargs["noise"]
         base = self._base_policy.infer(obs, **base_kwargs)
+        model_noise = base.get("model_noise")
         model_state = base.get("model_state", base["state"])
         state = jnp.asarray(model_state)[None, ...] if np.asarray(model_state).ndim == 1 else jnp.asarray(model_state)
         model_actions = base["model_actions"]
@@ -172,6 +189,7 @@ class RLTPolicy(_base_policy.BasePolicy):
                 reference=reference,
                 policy_actions=reference,
                 actor_enabled=False,
+                noise=model_noise,
                 q1=vla_q1,
                 q2=vla_q2,
                 vla_q1=vla_q1,
@@ -196,6 +214,7 @@ class RLTPolicy(_base_policy.BasePolicy):
             reference=reference,
             policy_actions=full_actions,
             actor_enabled=True,
+            noise=model_noise,
             q1=actor_q1,
             q2=actor_q2,
             vla_q1=vla_q1,

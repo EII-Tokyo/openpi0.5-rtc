@@ -57,6 +57,20 @@ def _maybe_init_wandb(
         "repeat_success_train_episodes": args.repeat_success_train_episodes,
         "near_terminal_window": args.near_terminal_window,
         "near_terminal_sample_weight": args.near_terminal_sample_weight,
+        "td_reward_positive_sample_weight": args.td_reward_positive_sample_weight,
+        "recent_episode_min_id": args.recent_episode_min_id,
+        "recent_episode_sample_weight": args.recent_episode_sample_weight,
+        "actor_clip_gradient_norm": args.actor_clip_gradient_norm,
+        "critic_clip_gradient_norm": args.critic_clip_gradient_norm,
+        "gamma": args.gamma,
+        "target_bootstrap_steps": args.target_bootstrap_steps,
+        "actor_lr_schedule": args.actor_lr_schedule,
+        "critic_lr_schedule": args.critic_lr_schedule,
+        "actor_lr_warmup_steps": args.actor_lr_warmup_steps,
+        "critic_lr_warmup_steps": args.critic_lr_warmup_steps,
+        "actor_lr_decay_steps": args.actor_lr_decay_steps,
+        "critic_lr_decay_steps": args.critic_lr_decay_steps,
+        "reference_action_dropout": args.reference_action_dropout,
     }
     return wandb.init(
         project=args.wandb_project,
@@ -69,6 +83,47 @@ def _maybe_init_wandb(
 
 def _to_float(value: Any) -> float:
     return float(np.asarray(value))
+
+
+def _make_lr_schedule(kind: str, peak_lr: float, *, warmup_steps: int, total_steps: int) -> optax.Schedule:
+    if kind == "constant":
+        return optax.constant_schedule(peak_lr)
+    if kind == "warmup_cosine":
+        if total_steps <= 0:
+            raise ValueError(f"total_steps must be positive for warmup_cosine, got {total_steps}")
+        warmup_steps = max(0, int(warmup_steps))
+        total_steps = max(int(total_steps), warmup_steps + 1)
+        init_value = peak_lr / float(warmup_steps + 1) if warmup_steps > 0 else peak_lr
+        return optax.warmup_cosine_decay_schedule(
+            init_value=init_value,
+            peak_value=peak_lr,
+            warmup_steps=warmup_steps,
+            decay_steps=total_steps,
+            end_value=0.0,
+        )
+    raise ValueError(f"Unsupported lr schedule: {kind}")
+
+
+def _action_magnitude_stats(
+    dataset: replay.ReplayDataset,
+    indices: np.ndarray,
+    *,
+    action_horizon: int,
+    action_dim: int,
+) -> dict[str, float]:
+    if indices.size == 0:
+        return {"max_abs": 0.0, "mean_abs": 0.0, "p95_abs": 0.0, "p99_abs": 0.0}
+    actions = np.asarray(dataset.data["normalized_executed_action_chunk"])[indices, :action_horizon, :action_dim]
+    mask = np.asarray(dataset.data["executed_action_mask"])[indices, :action_horizon].astype(bool)
+    valid = np.abs(actions[mask])
+    if valid.size == 0:
+        return {"max_abs": 0.0, "mean_abs": 0.0, "p95_abs": 0.0, "p99_abs": 0.0}
+    return {
+        "max_abs": float(np.max(valid)),
+        "mean_abs": float(np.mean(valid)),
+        "p95_abs": float(np.percentile(valid, 95)),
+        "p99_abs": float(np.percentile(valid, 99)),
+    }
 
 
 def _tree_diff_summary(params, target_params, prefix: str) -> dict[str, float]:
@@ -115,16 +170,19 @@ def _json_safe(value: Any) -> Any:
 
 
 def _training_args_summary(args: argparse.Namespace, config_overrides: dict[str, Any]) -> dict[str, Any]:
+    args_dict = vars(args).copy()
+    args_dict.pop("reward_positive_sample_weight", None)
     return {
         "argv": sys.argv,
-        "args": _json_safe(vars(args)),
+        "args": _json_safe(args_dict),
         "config_overrides": _json_safe(config_overrides),
         "effective_runtime": {
             "shuffle": not args.no_shuffle,
-            "val_episode_policy": "fixed_1_success_5_failure",
+            "val_episode_policy": "explicit_source_episode_ids" if args.val_episode_ids else "fixed_1_success_5_failure",
+            "val_episode_ids": _parse_episode_ids(args.val_episode_ids),
             "split_by_episode": True,
             "rlt_token_layernorm": "model",
-        },
+            },
     }
 
 
@@ -143,6 +201,7 @@ def _split_summary(
     success_oversample_stats: dict[str, Any],
     success_repeat_stats: dict[str, Any],
     near_terminal_stats: dict[str, Any],
+    recent_episode_stats: dict[str, Any],
     step: int | None = None,
 ) -> dict[str, Any]:
     summary = {
@@ -160,25 +219,83 @@ def _split_summary(
         "oversample_success_train_episodes": success_oversample_stats,
         "repeat_success_train_episodes": success_repeat_stats,
         "near_terminal_sampling": near_terminal_stats,
+        "recent_episode_sampling": recent_episode_stats,
         "source_files": getattr(dataset, "source_files", []),
         "seed": int(args.seed),
-        "val_episode_policy": "fixed_1_success_5_failure",
+        "val_episode_policy": "explicit_source_episode_ids" if args.val_episode_ids else "fixed_1_success_5_failure",
+        "val_episode_ids": _parse_episode_ids(args.val_episode_ids),
     }
     if step is not None:
         summary["step"] = int(step)
     return summary
 
 
-def _split_indices_by_episode(dataset: replay.ReplayDataset, *, seed: int) -> tuple[np.ndarray, np.ndarray]:
+def _parse_episode_ids(value: str | None) -> list[int]:
+    if value is None or not str(value).strip():
+        return []
+    return [int(item.strip()) for item in str(value).split(",") if item.strip()]
+
+
+def _metadata_total_reward(path: str | Path) -> float | None:
+    try:
+        with np.load(path, allow_pickle=False) as data:
+            if "metadata_json" not in data.files:
+                return None
+            meta = json.loads(str(data["metadata_json"]))
+    except Exception:
+        return None
+    if "total_reward" in meta:
+        return float(meta["total_reward"])
+    frame_rewards = meta.get("frame_rewards", {})
+    if isinstance(frame_rewards, dict):
+        return float(sum(float(value) for value in frame_rewards.values()))
+    return None
+
+
+def _episode_total_rewards(dataset: replay.ReplayDataset) -> dict[int, float]:
+    totals: dict[int, float] = {}
+    for episode_id, source_file in enumerate(getattr(dataset, "source_files", [])):
+        total = _metadata_total_reward(source_file)
+        if total is not None:
+            totals[int(episode_id)] = total
+    return totals
+
+
+def _is_success_total_reward(total_reward: float) -> bool:
+    return total_reward >= 2.0
+
+
+def _split_indices_by_episode(
+    dataset: replay.ReplayDataset,
+    *,
+    seed: int,
+    val_episode_ids: list[int] | None = None,
+) -> tuple[np.ndarray, np.ndarray]:
     episode_ids = np.asarray(getattr(dataset, "split_episode_id", dataset.data["episode_id"]))
     unique_episodes = np.unique(episode_ids)
-    rewards = np.asarray(dataset.data["reward"])
-    done = np.asarray(dataset.data["done"]).astype(bool)
+    all_indices = np.arange(len(dataset), dtype=np.int64)
+
+    if val_episode_ids:
+        source_episode_ids = _source_episode_ids(dataset)
+        requested = np.asarray(val_episode_ids, dtype=np.int32)
+        present = set(int(x) for x in np.unique(source_episode_ids).tolist())
+        missing = [int(x) for x in requested.tolist() if int(x) not in present]
+        if missing:
+            raise ValueError(f"Requested --val-episode-ids not present in replay dataset: {missing}")
+        val_mask = np.isin(source_episode_ids, requested)
+        if not bool(np.any(val_mask)):
+            raise ValueError(f"Requested --val-episode-ids produced empty validation split: {val_episode_ids}")
+        return all_indices[~val_mask], all_indices[val_mask]
+
+    td_rewards = np.asarray(dataset.data["td_reward"])
+    total_rewards = _episode_total_rewards(dataset)
 
     def is_success_episode(episode) -> bool:
+        total_reward = total_rewards.get(int(episode))
+        if total_reward is not None:
+            return _is_success_total_reward(total_reward)
         episode_mask = episode_ids == episode
-        terminal_rewards = rewards[episode_mask & done]
-        return bool(terminal_rewards.size and float(terminal_rewards[-1]) > 0.5)
+        return bool(float(np.sum(td_rewards[episode_mask])) > 0.5)
 
     success_episodes = np.asarray([episode for episode in unique_episodes if is_success_episode(episode)], dtype=unique_episodes.dtype)
     failure_episodes = np.asarray([episode for episode in unique_episodes if not is_success_episode(episode)], dtype=unique_episodes.dtype)
@@ -193,8 +310,8 @@ def _split_indices_by_episode(dataset: replay.ReplayDataset, *, seed: int) -> tu
     val_failure = rng.choice(failure_episodes, size=5, replace=False)
     val_episodes = set(np.concatenate([val_success, val_failure]).tolist())
     val_mask = np.asarray([episode in val_episodes for episode in episode_ids], dtype=bool)
-    all_indices = np.arange(len(dataset), dtype=np.int64)
     return all_indices[~val_mask], all_indices[val_mask]
+
 
 
 def _episode_label_map(dataset: replay.ReplayDataset, episodes: np.ndarray) -> dict[int, str]:
@@ -342,13 +459,65 @@ def _near_terminal_weights(
     return weights
 
 
+def _source_episode_ids(dataset: replay.ReplayDataset) -> np.ndarray:
+    source_files = getattr(dataset, "source_files", [])
+    if not source_files:
+        return np.asarray(dataset.data["episode_id"], dtype=np.int32)
+    file_episode_ids = []
+    for source_file in source_files:
+        stem = Path(source_file).name.split(".replay_stride", 1)[0]
+        try:
+            file_episode_ids.append(int(stem.split("_")[-1]))
+        except ValueError as exc:
+            raise ValueError(f"Cannot parse episode id from replay source file: {source_file}") from exc
+    file_episode_ids = np.asarray(file_episode_ids, dtype=np.int32)
+    split_episode_id = np.asarray(getattr(dataset, "split_episode_id", dataset.data["episode_id"]), dtype=np.int32)
+    if split_episode_id.size != len(dataset):
+        raise ValueError(
+            f"split_episode_id length mismatch: got {split_episode_id.size}, expected dataset size {len(dataset)}"
+        )
+    if split_episode_id.size and (split_episode_id.min() < 0 or split_episode_id.max() >= file_episode_ids.size):
+        raise ValueError(
+            f"split_episode_id outside source file range: min={split_episode_id.min()} max={split_episode_id.max()} "
+            f"source_files={file_episode_ids.size}"
+        )
+    return file_episode_ids[split_episode_id]
+
+
+def _recent_episode_weights(
+    dataset: replay.ReplayDataset,
+    indices: np.ndarray,
+    *,
+    min_episode_id: int | None,
+    sample_weight: float,
+) -> tuple[np.ndarray | None, dict[str, Any]]:
+    stats = {
+        "enabled": min_episode_id is not None and sample_weight > 1.0,
+        "min_episode_id": None if min_episode_id is None else int(min_episode_id),
+        "sample_weight": float(sample_weight),
+        "weighted_samples": 0,
+        "weighted_episodes": [],
+    }
+    if min_episode_id is None or sample_weight <= 1.0:
+        return None, stats
+    source_episode_ids = _source_episode_ids(dataset)
+    selected_episode_ids = source_episode_ids[indices]
+    mask = selected_episode_ids >= int(min_episode_id)
+    weights = np.ones((indices.shape[0],), dtype=np.float64)
+    weights[mask] = float(sample_weight)
+    stats["weighted_samples"] = int(np.count_nonzero(mask))
+    stats["weighted_episodes"] = [int(x) for x in np.unique(selected_episode_ids[mask]).tolist()]
+    return weights, stats
+
+
 def _episode_label(dataset: replay.ReplayDataset, episode_id: int) -> str:
+    total_reward = _episode_total_rewards(dataset).get(int(episode_id))
+    if total_reward is not None:
+        return "success" if _is_success_total_reward(total_reward) else "failure"
     episode_ids = np.asarray(getattr(dataset, "split_episode_id", dataset.data["episode_id"]))
     mask = episode_ids == episode_id
-    done = np.asarray(dataset.data["done"])[mask].astype(bool)
-    rewards = np.asarray(dataset.data["reward"])[mask]
-    terminal_rewards = rewards[done]
-    if terminal_rewards.size and float(terminal_rewards[-1]) > 0.5:
+    rewards = np.asarray(dataset.data["td_reward"])[mask]
+    if float(np.sum(rewards)) > 0.5:
         return "success"
     return "failure"
 
@@ -368,7 +537,13 @@ def _batch_from_indices(dataset: replay.ReplayDataset, indices: np.ndarray) -> r
     return replay.ReplayBatch(**{key: np.asarray(value[indices]) for key, value in dataset.data.items()})
 
 
-def _write_curve_csv(path: Path, step_index: np.ndarray, scores: dict[str, np.ndarray], reward: np.ndarray, done: np.ndarray) -> None:
+def _write_curve_csv(
+    path: Path,
+    step_index: np.ndarray,
+    scores: dict[str, np.ndarray],
+    td_reward: np.ndarray,
+    done: np.ndarray,
+) -> None:
     rows = np.zeros(
         step_index.shape[0],
         dtype=[
@@ -377,7 +552,7 @@ def _write_curve_csv(path: Path, step_index: np.ndarray, scores: dict[str, np.nd
             ("actor_q", "f4"),
             ("actor_minus_executed_q", "f4"),
             ("actor_mae", "f4"),
-            ("reward", "f4"),
+            ("td_reward", "f4"),
             ("done", "i4"),
         ],
     )
@@ -386,7 +561,7 @@ def _write_curve_csv(path: Path, step_index: np.ndarray, scores: dict[str, np.nd
     rows["actor_q"] = scores["actor_q"]
     rows["actor_minus_executed_q"] = scores["actor_q"] - scores["executed_q"]
     rows["actor_mae"] = scores["actor_mae"]
-    rows["reward"] = reward.astype(np.float32)
+    rows["td_reward"] = td_reward.astype(np.float32)
     rows["done"] = done.astype(np.int32)
     np.savetxt(
         path,
@@ -396,7 +571,6 @@ def _write_curve_csv(path: Path, step_index: np.ndarray, scores: dict[str, np.nd
         comments="",
         fmt=["%d", "%.8f", "%.8f", "%.8f", "%.8f", "%.8f", "%d"],
     )
-
 
 def _plot_q_curve(path: Path, *, title: str, step_index: np.ndarray, scores: dict[str, np.ndarray]) -> None:
     import matplotlib
@@ -501,39 +675,73 @@ def main():
     parser.add_argument("--num-workers", type=int, default=0)
     parser.add_argument("--no-shuffle", action="store_true")
     parser.add_argument("--drop-last", action="store_true")
-    parser.add_argument("--bc-warmup-steps", type=int, default=None)
     parser.add_argument("--rl-loss-coef", type=float, default=None)
-    parser.add_argument("--bc-coef", type=float, default=None)
-    parser.add_argument("--action-smooth-coef", type=float, default=None)
-    parser.add_argument("--action-accel-coef", type=float, default=None)
     parser.add_argument("--critic-loss-coef", type=float, default=None)
     parser.add_argument("--actor-update-period", type=int, default=None)
     parser.add_argument("--actor-lr", type=float, default=None)
     parser.add_argument("--critic-lr", type=float, default=None)
+    parser.add_argument("--gamma", type=float, default=None)
+    parser.add_argument("--target-bootstrap-steps", type=int, default=None)
+    parser.add_argument("--actor-lr-schedule", choices=("constant", "warmup_cosine"), default="warmup_cosine")
+    parser.add_argument("--critic-lr-schedule", choices=("constant", "warmup_cosine"), default="warmup_cosine")
+    parser.add_argument("--actor-lr-warmup-steps", type=int, default=200)
+    parser.add_argument("--critic-lr-warmup-steps", type=int, default=200)
+    parser.add_argument("--actor-lr-decay-steps", type=int, default=None)
+    parser.add_argument("--critic-lr-decay-steps", type=int, default=None)
+    parser.add_argument("--actor-clip-gradient-norm", type=float, default=None)
+    parser.add_argument("--critic-clip-gradient-norm", type=float, default=None)
+    parser.add_argument("--token-dim", type=int, default=None)
+    parser.add_argument("--state-dim", type=int, default=None)
+    parser.add_argument("--action-dim", type=int, default=None)
+    parser.add_argument("--action-horizon", type=int, default=None)
+    parser.add_argument("--rlt-chunk-horizon", type=int, default=None)
+    parser.add_argument("--action-start-index", type=int, default=None)
     parser.add_argument("--hidden-dim", type=int, default=None)
     parser.add_argument("--actor-hidden-layers", type=int, default=None)
     parser.add_argument("--critic-hidden-layers", type=int, default=None)
     parser.add_argument("--target-policy-noise", type=float, default=None)
+    parser.add_argument("--reference-deviation-threshold", type=float, default=0.047)
+    parser.add_argument("--reference-deviation-penalty-coef", type=float, default=1000.0)
+    parser.add_argument(
+        "--reference-action-dropout",
+        type=float,
+        default=0.5,
+        help="Probability of zeroing the reference action chunk before passing it to the actor during training.",
+    )
     parser.add_argument("--train-episode-label-filter", choices=("all", "success", "failure"), default="all")
     parser.add_argument("--balance-train-episode-labels", action="store_true")
     parser.add_argument("--oversample-success-train-episodes", action="store_true")
     parser.add_argument("--repeat-success-train-episodes", type=int, default=1)
     parser.add_argument("--near-terminal-window", type=int, default=0)
     parser.add_argument("--near-terminal-sample-weight", type=float, default=1.0)
+    parser.add_argument("--td-reward-positive-sample-weight", type=float, default=1.0)
+    parser.add_argument("--recent-episode-min-id", type=int, default=None)
+    parser.add_argument("--recent-episode-sample-weight", type=float, default=1.0)
+    parser.add_argument("--reward-positive-sample-weight", type=float, default=None, help=argparse.SUPPRESS)
+    parser.add_argument("--val-episode-ids", default=None, help="Comma-separated source episode ids to hold out as the fixed validation split.")
     parser.add_argument("--val-every", type=int, default=100)
     parser.add_argument("--val-max-batches", type=int, default=16)
     parser.add_argument("--checkpoint-every", type=int, default=0)
     parser.add_argument("--init-actor-critic-checkpoint", default=None)
+    parser.add_argument(
+        "--reset-optimizer-state",
+        action="store_true",
+        help="Load actor/critic weights from --init-actor-critic-checkpoint but reinitialize optimizer state.",
+    )
     parser.add_argument("--q-curve-every", type=int, default=500)
     parser.add_argument("--wandb-project", default=None)
     parser.add_argument("--wandb-entity", default=None)
     parser.add_argument("--wandb-name", default=None)
     parser.add_argument("--wandb-tag", action="append", default=[])
     args = parser.parse_args()
+    if args.reward_positive_sample_weight is not None:
+        args.td_reward_positive_sample_weight = args.reward_positive_sample_weight
 
     replay_dir = Path(args.replay_dir)
     dataset = replay.ReplayDataset(replay_dir)
-    train_indices, val_indices = _split_indices_by_episode(dataset, seed=args.seed)
+    train_indices, val_indices = _split_indices_by_episode(
+        dataset, seed=args.seed, val_episode_ids=_parse_episode_ids(args.val_episode_ids)
+    )
     initial_train_label_counts = _episode_label_counts(dataset, train_indices)
     val_label_counts = _episode_label_counts(dataset, val_indices)
     success_oversample_stats = {"enabled": False}
@@ -573,11 +781,32 @@ def main():
         window=args.near_terminal_window,
         sample_weight=args.near_terminal_sample_weight,
     )
+    if args.td_reward_positive_sample_weight > 1.0:
+        td_reward_weights = np.ones((train_indices.shape[0],), dtype=np.float64)
+        train_td_rewards = np.asarray(dataset.data["td_reward"])[train_indices]
+        td_reward_weights[train_td_rewards > 0.0] = float(args.td_reward_positive_sample_weight)
+        train_sample_weights = td_reward_weights if train_sample_weights is None else train_sample_weights * td_reward_weights
+    recent_episode_weights, recent_episode_stats = _recent_episode_weights(
+        dataset,
+        train_indices,
+        min_episode_id=args.recent_episode_min_id,
+        sample_weight=args.recent_episode_sample_weight,
+    )
+    if recent_episode_weights is not None:
+        train_sample_weights = (
+            recent_episode_weights if train_sample_weights is None else train_sample_weights * recent_episode_weights
+        )
     near_terminal_stats = {
         "enabled": train_sample_weights is not None,
         "window": int(args.near_terminal_window),
         "sample_weight": float(args.near_terminal_sample_weight),
         "weighted_samples": int(np.count_nonzero(train_sample_weights > 1.0)) if train_sample_weights is not None else 0,
+        "td_reward_positive_sample_weight": float(args.td_reward_positive_sample_weight),
+        "td_reward_positive_weighted_samples": int(np.count_nonzero(np.asarray(dataset.data["td_reward"])[train_indices] > 0.0))
+        if args.td_reward_positive_sample_weight > 1.0
+        else 0,
+        "combined_weighted_samples": int(np.count_nonzero(train_sample_weights > 1.0)) if train_sample_weights is not None else 0,
+        "combined_max_weight": float(np.max(train_sample_weights)) if train_sample_weights is not None else 1.0,
     }
     if train_indices.size == 0:
         raise ValueError(f"Empty train split: dataset_size={len(dataset)}")
@@ -615,6 +844,28 @@ def main():
     train_episodes = np.unique(split_episode_id[train_indices])
     val_episodes = np.unique(split_episode_id[val_indices]) if val_indices.size else np.asarray([], dtype=np.int32)
     curve_indices = _find_curve_episodes(dataset, val_indices if val_indices.size else train_indices)
+    target_values = np.asarray(dataset.data["td_reward"], dtype=np.float32)
+    critic_target_stats = {
+        "mode": "td_actor_bootstrap",
+        "reward_field": "td_reward",
+        "reward_min": float(np.min(target_values)) if target_values.size else 0.0,
+        "reward_max": float(np.max(target_values)) if target_values.size else 0.0,
+        "reward_mean": float(np.mean(target_values)) if target_values.size else 0.0,
+        "positive_rewards": int(np.count_nonzero(target_values > 0.0)),
+    }
+    sample_indices = np.asarray(dataset.data.get("sample_index", np.zeros((len(dataset),), dtype=np.int32)), dtype=np.int32)
+    sample_index_values = np.unique(sample_indices).astype(np.int32)
+    samples_per_step_observed = int(sample_index_values.size) if sample_index_values.size else 1
+    print(
+        "replay_sample_indices="
+        + json.dumps(
+            {
+                "values": sample_index_values.tolist(),
+                "observed_samples_per_step": samples_per_step_observed,
+            },
+            sort_keys=True,
+        )
+    )
     print(
         f"dataset_size={len(dataset)} train_size={train_indices.size} val_size={val_indices.size} "
         f"train_episodes={train_episodes.tolist()} val_episodes={val_episodes.tolist()}"
@@ -631,6 +882,7 @@ def main():
                 "oversample_success_train_episodes": success_oversample_stats,
                 "repeat_success_train_episodes": success_repeat_stats,
                 "near_terminal_sampling": near_terminal_stats,
+                "critic_target": critic_target_stats,
             },
             sort_keys=True,
         )
@@ -644,16 +896,8 @@ def main():
     if val_loader is not None and len(val_loader) == 0:
         val_loader = None
     config_overrides = {}
-    if args.bc_coef is not None:
-        config_overrides["bc_coef"] = args.bc_coef
-    if args.action_smooth_coef is not None:
-        config_overrides["action_smooth_coef"] = args.action_smooth_coef
-    if args.action_accel_coef is not None:
-        config_overrides["action_accel_coef"] = args.action_accel_coef
     if args.critic_loss_coef is not None:
         config_overrides["critic_loss_coef"] = args.critic_loss_coef
-    if args.bc_warmup_steps is not None:
-        config_overrides["bc_warmup_steps"] = args.bc_warmup_steps
     if args.rl_loss_coef is not None:
         config_overrides["rl_loss_coef"] = args.rl_loss_coef
     if args.actor_update_period is not None:
@@ -662,6 +906,26 @@ def main():
         config_overrides["actor_lr"] = args.actor_lr
     if args.critic_lr is not None:
         config_overrides["critic_lr"] = args.critic_lr
+    if args.gamma is not None:
+        config_overrides["gamma"] = args.gamma
+    if args.target_bootstrap_steps is not None:
+        config_overrides["target_bootstrap_steps"] = args.target_bootstrap_steps
+    if args.actor_clip_gradient_norm is not None:
+        config_overrides["actor_clip_gradient_norm"] = args.actor_clip_gradient_norm
+    if args.critic_clip_gradient_norm is not None:
+        config_overrides["critic_clip_gradient_norm"] = args.critic_clip_gradient_norm
+    if args.token_dim is not None:
+        config_overrides["token_dim"] = args.token_dim
+    if args.state_dim is not None:
+        config_overrides["state_dim"] = args.state_dim
+    if args.action_dim is not None:
+        config_overrides["action_dim"] = args.action_dim
+    if args.action_horizon is not None:
+        config_overrides["action_horizon"] = args.action_horizon
+    if args.rlt_chunk_horizon is not None:
+        config_overrides["rlt_chunk_horizon"] = args.rlt_chunk_horizon
+    if args.action_start_index is not None:
+        config_overrides["action_start_index"] = args.action_start_index
     if args.hidden_dim is not None:
         config_overrides["hidden_dim"] = args.hidden_dim
     if args.actor_hidden_layers is not None:
@@ -670,6 +934,29 @@ def main():
         config_overrides["critic_hidden_layers"] = args.critic_hidden_layers
     if args.target_policy_noise is not None:
         config_overrides["target_policy_noise"] = args.target_policy_noise
+    action_stats = _action_magnitude_stats(
+        dataset,
+        train_indices,
+        action_horizon=args.rlt_chunk_horizon or args.action_horizon or actor_critic.RLTActorCriticConfig().rlt_chunk_horizon,
+        action_dim=args.action_dim or actor_critic.RLTActorCriticConfig().action_dim,
+    )
+    if args.reference_deviation_threshold <= 0:
+        raise ValueError(f"reference_deviation_threshold must be positive, got {args.reference_deviation_threshold}")
+    config_overrides["reference_deviation_threshold"] = float(args.reference_deviation_threshold)
+    config_overrides["reference_deviation_penalty_coef"] = float(args.reference_deviation_penalty_coef)
+    config_overrides["reference_action_dropout"] = float(args.reference_action_dropout)
+    print(
+        "action_magnitude_stats="
+        + json.dumps(
+            {
+                **action_stats,
+                "reference_deviation_threshold": float(config_overrides.get("reference_deviation_threshold", 0.0)),
+                "reference_deviation_penalty_coef": float(config_overrides.get("reference_deviation_penalty_coef", 0.0)),
+                "reference_action_dropout": float(config_overrides.get("reference_action_dropout", 0.0)),
+            },
+            sort_keys=True,
+        )
+    )
     config = dataclasses.replace(actor_critic.RLTActorCriticConfig(), **config_overrides)
     training_args = _training_args_summary(args, config_overrides)
     wandb_run = _maybe_init_wandb(args, config, dataset, train_size=int(train_indices.size), val_size=int(val_indices.size))
@@ -689,15 +976,35 @@ def main():
         else:
             target_params = jax.tree.map(lambda x: x.copy(), params)
         optimizer_path = init_checkpoint / "optimizer_state.pkl"
-        if optimizer_path.exists():
+        if args.reset_optimizer_state:
+            print(f"reset_optimizer_state=true; skipped_optimizer_state_from={optimizer_path}")
+        elif optimizer_path.exists():
             with optimizer_path.open("rb") as f:
                 restored_optimizer_state = pickle.load(f)
             print(f"restored_optimizer_state_from={optimizer_path}")
         else:
             print(f"optimizer_state_missing={optimizer_path}")
         print(f"initialized_actor_critic_from={init_checkpoint}")
-    actor_tx = optax.adam(config.actor_lr)
-    critic_tx = optax.adam(config.critic_lr)
+    actor_lr_decay_steps = args.actor_lr_decay_steps or args.max_steps
+    critic_lr_decay_steps = args.critic_lr_decay_steps or args.max_steps
+    actor_lr_schedule = _make_lr_schedule(
+        args.actor_lr_schedule,
+        config.actor_lr,
+        warmup_steps=args.actor_lr_warmup_steps,
+        total_steps=actor_lr_decay_steps,
+    )
+    critic_lr_schedule = _make_lr_schedule(
+        args.critic_lr_schedule,
+        config.critic_lr,
+        warmup_steps=args.critic_lr_warmup_steps,
+        total_steps=critic_lr_decay_steps,
+    )
+    actor_tx = optax.adam(actor_lr_schedule)
+    if config.actor_clip_gradient_norm > 0:
+        actor_tx = optax.chain(optax.clip_by_global_norm(config.actor_clip_gradient_norm), actor_tx)
+    critic_tx = optax.adam(critic_lr_schedule)
+    if config.critic_clip_gradient_norm > 0:
+        critic_tx = optax.chain(optax.clip_by_global_norm(config.critic_clip_gradient_norm), critic_tx)
     critic_opt = critic_tx.init({"critic1": params["critic1"], "critic2": params["critic2"]})
     if restored_optimizer_state is not None:
         critic_opt = restored_optimizer_state["critic"]
@@ -712,6 +1019,8 @@ def main():
 
         critic_params = {"critic1": params["critic1"], "critic2": params["critic2"]}
         (loss, metrics), grads = jax.value_and_grad(loss_for_critics, has_aux=True)(critic_params)
+        metrics = dict(metrics)
+        metrics["critic_grad_norm"] = optax.global_norm(grads)
         updates, opt_state = critic_tx.update(grads, opt_state, critic_params)
         critic_params = optax.apply_updates(critic_params, updates)
         params = dict(params)
@@ -724,13 +1033,15 @@ def main():
         actor_opt = restored_optimizer_state["actor"]
 
     @jax.jit
-    def actor_step(params, target_params, opt_state, batch, rng, step_idx):
+    def actor_step(params, target_params, opt_state, batch, rng):
         def loss_for_actor(actor_params):
             actor_only_params = dict(params)
             actor_only_params["actor"] = actor_params
-            return actor_critic.actor_loss(actor_only_params, batch, config, rng, step_idx)
+            return actor_critic.actor_loss(actor_only_params, batch, config, rng)
 
         (loss, metrics), grads = jax.value_and_grad(loss_for_actor, has_aux=True)(params["actor"])
+        metrics = dict(metrics)
+        metrics["actor_grad_norm"] = optax.global_norm(grads)
         updates, opt_state = actor_tx.update(grads, opt_state, params["actor"])
         new_actor = optax.apply_updates(params["actor"], updates)
         params = dict(params)
@@ -749,19 +1060,19 @@ def main():
         action = actor_critic.actor_apply(
             params["actor"],
             batch.rlt_token,
-            batch.state,
-            batch.reference_action_chunk,
+            batch.normalized_state,
+            batch.normalized_reference_action_chunk,
             config,
         )
-        target = batch.executed_action_chunk[:, : config.rlt_chunk_horizon, : config.action_dim]
+        target = actor_critic.action_window(batch.normalized_executed_action_chunk, config)
         mask = batch.executed_action_mask[:, : config.rlt_chunk_horizon].astype(jnp.float32)[..., None]
         denom = jnp.maximum(jnp.sum(mask) * config.action_dim, 1.0)
         mse = jnp.sum(jnp.square(action - target) * mask) / denom
         mae = jnp.sum(jnp.abs(action - target) * mask) / denom
-        actor_q1 = actor_critic.critic_apply(params["critic1"], batch.rlt_token, batch.state, action, config)
-        actor_q2 = actor_critic.critic_apply(params["critic2"], batch.rlt_token, batch.state, action, config)
-        executed_q1 = actor_critic.critic_apply(params["critic1"], batch.rlt_token, batch.state, target, config)
-        executed_q2 = actor_critic.critic_apply(params["critic2"], batch.rlt_token, batch.state, target, config)
+        actor_q1 = actor_critic.critic_apply(params["critic1"], batch.rlt_token, batch.normalized_state, action, config)
+        actor_q2 = actor_critic.critic_apply(params["critic2"], batch.rlt_token, batch.normalized_state, action, config)
+        executed_q1 = actor_critic.critic_apply(params["critic1"], batch.rlt_token, batch.normalized_state, target, config)
+        executed_q2 = actor_critic.critic_apply(params["critic2"], batch.rlt_token, batch.normalized_state, target, config)
         return {
             "critic_loss": critic_loss,
             "critic_loss_unweighted": critic_metrics["critic_loss_unweighted"],
@@ -771,7 +1082,7 @@ def main():
             "actor_mae": mae,
             "actor_q": jnp.mean(jnp.minimum(actor_q1, actor_q2)),
             "executed_q": jnp.mean(jnp.minimum(executed_q1, executed_q2)),
-            "reward_mean": jnp.mean(batch.reward),
+            "td_reward_mean": jnp.mean(batch.td_reward),
             "done_mean": jnp.mean(batch.done.astype(jnp.float32)),
         }
 
@@ -780,15 +1091,15 @@ def main():
         action = actor_critic.actor_apply(
             params["actor"],
             batch.rlt_token,
-            batch.state,
-            batch.reference_action_chunk,
+            batch.normalized_state,
+            batch.normalized_reference_action_chunk,
             config,
         )
-        executed_target = batch.executed_action_chunk[:, : config.rlt_chunk_horizon, : config.action_dim]
-        executed_q1 = actor_critic.critic_apply(params["critic1"], batch.rlt_token, batch.state, executed_target, config)
-        executed_q2 = actor_critic.critic_apply(params["critic2"], batch.rlt_token, batch.state, executed_target, config)
-        actor_q1 = actor_critic.critic_apply(params["critic1"], batch.rlt_token, batch.state, action, config)
-        actor_q2 = actor_critic.critic_apply(params["critic2"], batch.rlt_token, batch.state, action, config)
+        executed_target = actor_critic.action_window(batch.normalized_executed_action_chunk, config)
+        executed_q1 = actor_critic.critic_apply(params["critic1"], batch.rlt_token, batch.normalized_state, executed_target, config)
+        executed_q2 = actor_critic.critic_apply(params["critic2"], batch.rlt_token, batch.normalized_state, executed_target, config)
+        actor_q1 = actor_critic.critic_apply(params["critic1"], batch.rlt_token, batch.normalized_state, action, config)
+        actor_q2 = actor_critic.critic_apply(params["critic2"], batch.rlt_token, batch.normalized_state, action, config)
         actor_mae = jnp.mean(jnp.abs(action - executed_target), axis=(1, 2))
         return {
             "executed_q": jnp.minimum(executed_q1, executed_q2),
@@ -828,11 +1139,11 @@ def main():
             batch = replay.batch_to_jax(batch_np)
             scores = jax.tree.map(np.asarray, q_curve_step(params, batch))
             step_index = np.asarray(dataset.data["step_index"])[indices]
-            reward = np.asarray(dataset.data["reward"])[indices]
+            td_reward = np.asarray(dataset.data["td_reward"])[indices]
             done = np.asarray(dataset.data["done"])[indices]
             csv_path = curve_dir / f"val_{label}_episode_{episode_id:03d}_q_curve.csv"
             png_path = curve_dir / f"val_{label}_episode_{episode_id:03d}_q_curve.png"
-            _write_curve_csv(csv_path, step_index, scores, reward, done)
+            _write_curve_csv(csv_path, step_index, scores, td_reward, done)
             _plot_q_curve(
                 png_path,
                 title=f"step {step_idx}: validation {label} episode {episode_id}",
@@ -842,7 +1153,7 @@ def main():
             metrics[f"q_curve/{label}/executed_q_mean"] = float(np.mean(scores["executed_q"]))
             metrics[f"q_curve/{label}/actor_q_mean"] = float(np.mean(scores["actor_q"]))
             metrics[f"q_curve/{label}/actor_mae_mean"] = float(np.mean(scores["actor_mae"]))
-            metrics[f"q_curve/{label}/terminal_reward"] = float(reward[-1]) if reward.size else 0.0
+            metrics[f"q_curve/{label}/last_td_reward"] = float(td_reward[-1]) if td_reward.size else 0.0
             if wandb_run is not None:
                 import wandb
 
@@ -883,11 +1194,12 @@ def main():
                 actor_opt,
                 batch,
                 actor_rng,
-                jnp.asarray(global_step, dtype=jnp.int32),
             )
             target_params = actor_critic.soft_update(params, target_params, config.tau)
             target_params = dict(target_params)
             target_params["actor"] = params["actor"]
+            actor_grad_norm_value = float(actor_metrics["actor_grad_norm"])
+            critic_grad_norm_value = float(critic_metrics["critic_grad_norm"])
             print(
                 f"step={global_step} local_step={step_idx} epoch={loader_info['epoch']} "
                 f"batch_in_epoch={loader_info['batch_in_epoch']} "
@@ -896,39 +1208,36 @@ def main():
                 f"critic_loss_unweighted={float(critic_metrics['critic_loss_unweighted']):.6f} "
                 f"rl_loss={float(actor_metrics['actor_rl_loss']):.6f} "
                 f"rl_loss_w={float(actor_metrics['actor_rl_loss_weighted']):.6f} "
-                f"bc_loss={float(actor_metrics['bc_loss']):.6f} "
-                f"bc_loss_w={float(actor_metrics['bc_loss_weighted']):.6f} "
-                f"smooth_loss={float(actor_metrics['smooth_loss']):.6f} "
-                f"smooth_loss_w={float(actor_metrics['smooth_loss_weighted']):.6f} "
-                f"accel_loss={float(actor_metrics['accel_loss']):.6f} "
-                f"accel_loss_w={float(actor_metrics['accel_loss_weighted']):.6f}"
+                f"reference_deviation_abs_mean={float(actor_metrics['reference_deviation_abs_mean']):.6f} "
+                f"reference_deviation_abs_max={float(actor_metrics['reference_deviation_abs_max']):.6f} "
+                f"reference_deviation_penalty={float(actor_metrics['reference_deviation_penalty']):.6f} "
+                f"reference_deviation_penalty_w={float(actor_metrics['reference_deviation_penalty_weighted']):.6f} "
+                f"critic_grad_norm={critic_grad_norm_value:.6f} "
+                f"actor_grad_norm={actor_grad_norm_value:.6f}"
             )
             log_data = {
                 "train/critic_loss": _to_float(critic_loss),
                 "train/critic_loss_unweighted": _to_float(critic_metrics["critic_loss_unweighted"]),
                 "train/actor_loss": _to_float(actor_loss),
+                "train/actor_grad_norm": _to_float(actor_metrics["actor_grad_norm"]),
+                "train/critic_grad_norm": _to_float(critic_metrics["critic_grad_norm"]),
                 "train/actor_rl_loss": _to_float(actor_metrics["actor_rl_loss"]),
-                "train/actor_rl_active": _to_float(actor_metrics["actor_rl_active"]),
                 "train/actor_rl_loss_weighted": _to_float(actor_metrics["actor_rl_loss_weighted"]),
                 "train/rl_loss_coef": config.rl_loss_coef,
-                "train/bc_loss": _to_float(actor_metrics["bc_loss"]),
-                "train/bc_loss_weighted": _to_float(actor_metrics["bc_loss_weighted"]),
-                "train/smooth_loss": _to_float(actor_metrics["smooth_loss"]),
-                "train/smooth_loss_weighted": _to_float(actor_metrics["smooth_loss_weighted"]),
-                "train/action_smooth_coef": config.action_smooth_coef,
-                "train/accel_loss": _to_float(actor_metrics["accel_loss"]),
-                "train/accel_loss_weighted": _to_float(actor_metrics["accel_loss_weighted"]),
-                "train/action_accel_coef": config.action_accel_coef,
+                "train/reference_deviation_abs_mean": _to_float(actor_metrics["reference_deviation_abs_mean"]),
+                "train/reference_deviation_abs_max": _to_float(actor_metrics["reference_deviation_abs_max"]),
+                "train/reference_deviation_penalty": _to_float(actor_metrics["reference_deviation_penalty"]),
+                "train/reference_deviation_penalty_weighted": _to_float(actor_metrics["reference_deviation_penalty_weighted"]),
+                "train/reference_deviation_threshold": config.reference_deviation_threshold,
+                "train/reference_deviation_penalty_coef": config.reference_deviation_penalty_coef,
+                "train/reference_action_dropout": config.reference_action_dropout,
                 "train/actor_q": _to_float(actor_metrics["actor_q"]),
                 "train/actor_q1": _to_float(actor_metrics["actor_q1"]),
                 "train/actor_q2": _to_float(actor_metrics["actor_q2"]),
-                "train/bc_valid_steps": _to_float(actor_metrics["bc_valid_steps"]),
-                "train/smooth_valid_steps": _to_float(actor_metrics["smooth_valid_steps"]),
-                "train/accel_valid_steps": _to_float(actor_metrics["accel_valid_steps"]),
                 "train/q1": _to_float(critic_metrics["q1"]),
                 "train/target_q": _to_float(critic_metrics["target_q"]),
-                "train/actor_lr": config.actor_lr,
-                "train/critic_lr": config.critic_lr,
+                "train/actor_lr": _to_float(actor_lr_schedule(step_idx)),
+                "train/critic_lr": _to_float(critic_lr_schedule(step_idx)),
                 "data/epoch": loader_info["epoch"],
                 "data/batch_in_epoch": loader_info["batch_in_epoch"],
                 "data/batch_size": loader_info["batch_size"],
@@ -947,7 +1256,8 @@ def main():
                 "train/critic_loss_unweighted": _to_float(critic_metrics["critic_loss_unweighted"]),
                 "train/q1": _to_float(critic_metrics["q1"]),
                 "train/target_q": _to_float(critic_metrics["target_q"]),
-                "train/critic_lr": config.critic_lr,
+                "train/critic_grad_norm": _to_float(critic_metrics["critic_grad_norm"]),
+                "train/critic_lr": _to_float(critic_lr_schedule(step_idx)),
                 "data/epoch": loader_info["epoch"],
                 "data/batch_in_epoch": loader_info["batch_in_epoch"],
                 "data/batch_size": loader_info["batch_size"],
@@ -964,7 +1274,7 @@ def main():
                     f"val_executed_q={log_data.get('eval/val/executed_q', float('nan')):.6f} "
                     f"val_actor_q={log_data.get('eval/val/actor_q', float('nan')):.6f} "
                     f"val_target_q={log_data.get('eval/val/target_q', float('nan')):.6f} "
-                    f"val_reward_mean={log_data.get('eval/val/reward_mean', float('nan')):.6f} "
+                    f"val_td_reward_mean={log_data.get('eval/val/td_reward_mean', float('nan')):.6f} "
                     f"val_done_mean={log_data.get('eval/val/done_mean', float('nan')):.6f}"
                 )
         if args.q_curve_every > 0 and (global_step % args.q_curve_every == 0 or step_idx == args.max_steps - 1):
@@ -999,6 +1309,7 @@ def main():
                         success_oversample_stats=success_oversample_stats,
                         success_repeat_stats=success_repeat_stats,
                         near_terminal_stats=near_terminal_stats,
+                        recent_episode_stats=recent_episode_stats,
                         step=completed_step,
                     ),
                     indent=2,
@@ -1040,6 +1351,7 @@ def main():
         success_oversample_stats=success_oversample_stats,
         success_repeat_stats=success_repeat_stats,
         near_terminal_stats=near_terminal_stats,
+        recent_episode_stats=recent_episode_stats,
     )
     (out / "split.json").write_text(json.dumps(split_summary, indent=2, sort_keys=True) + "\n")
     print(f"saved_actor_critic={out}")

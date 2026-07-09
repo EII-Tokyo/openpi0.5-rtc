@@ -24,6 +24,7 @@ class ChunkedPolicy(_base_policy.BasePolicy):
         "rlt_token",
         "rlt_embeddings",
         "rlt_mask",
+        "rlt_noise",
         "rlt_state",
         "rlt_state_is_normalized",
         "rlt_state_normalization",
@@ -183,14 +184,10 @@ class ChunkedPolicy(_base_policy.BasePolicy):
         return replay
 
     @staticmethod
-    def _attach_rlt_replay_step(results: Dict, replay_chunk: dict | None, chunk_step_index: int) -> None:  # noqa: UP006
+    def _attach_rlt_replay_step(results: Dict, replay_chunk: dict | None) -> None:  # noqa: UP006
         if replay_chunk is None:
             return
-        results["rlt_replay"] = {
-            **replay_chunk,
-            "chunk_step_index": chunk_step_index,
-            "is_chunk_start": chunk_step_index == 0,
-        }
+        results["rlt_replay"] = replay_chunk
 
     def set_rlt_actor_enabled(self, enabled: bool) -> None:
         enabled = bool(enabled)
@@ -218,7 +215,6 @@ class ChunkedPolicy(_base_policy.BasePolicy):
             self._last_results = {"actions": full_results["actions"]}
             self._cur_step = 0
 
-        chunk_step_index = self._cur_step
         replay_chunk = self._last_rlt_replay_chunk
         results = tree.map_structure(lambda x: x[self._cur_step, ...], self._last_results)
         self._obs = obs
@@ -233,7 +229,7 @@ class ChunkedPolicy(_base_policy.BasePolicy):
             self._last_state = self._background_results["state"]
             self._last_results = {"actions": self._background_results["actions"]}
             self._cur_step -= self._rtc_replan_start_step
-        self._attach_rlt_replay_step(results, replay_chunk, chunk_step_index)
+        self._attach_rlt_replay_step(results, replay_chunk)
         return results
 
     @override

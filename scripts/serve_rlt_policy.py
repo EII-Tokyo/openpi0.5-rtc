@@ -106,6 +106,7 @@ def main():
     parser.add_argument("--port", type=int, default=8000)
     parser.add_argument("--denoising-steps", type=int, default=10)
     parser.add_argument("--warmup-steps", type=int, default=2)
+    parser.add_argument("--rlt-actor-inference-reference-clip", type=float, default=None)
     args = parser.parse_args()
 
     train_config = _config.get_config(args.base_config)
@@ -139,6 +140,7 @@ def main():
         actor_params=actor_params,
         token_config=token_config,
         actor_config=actor_config,
+        actor_inference_reference_clip=args.rlt_actor_inference_reference_clip,
         metadata={
             "rlt": {
                 "base_config": args.base_config,
@@ -147,6 +149,7 @@ def main():
                 "rlt_token_checkpoint": args.rlt_token_checkpoint,
                 "rlt_actor_checkpoint": args.rlt_actor_checkpoint,
                 "actor_enabled": actor_params is not None and actor_config is not None,
+                "actor_inference_reference_clip": args.rlt_actor_inference_reference_clip,
                 "denoising_steps": args.denoising_steps,
             },
             "code": {
