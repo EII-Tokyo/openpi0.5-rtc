@@ -93,6 +93,41 @@ def _build_pose_control_window(controller: AlohaPoseController):
     return window, status
 
 
+def _assert_articulation_pose(articulation: Any, expected_pose: tuple[float, ...], label: str, tolerance: float = 1e-3) -> None:
+    import numpy as np
+
+    actual = np.asarray(articulation.get_joint_positions(), dtype=float)
+    expected = np.asarray(expected_pose, dtype=float)
+    if actual.shape != expected.shape:
+        raise RuntimeError(f"{label}: joint shape mismatch actual={actual.shape} expected={expected.shape}")
+    max_error = float(np.max(np.abs(actual - expected)))
+    print(f"{label}: max_abs_error={max_error:.6g} actual={actual.tolist()}")
+    if max_error > tolerance:
+        raise RuntimeError(f"{label}: pose error {max_error:.6g} exceeds tolerance {tolerance}")
+
+
+def _run_pose_self_test(world: Any, left: Any, right: Any) -> None:
+    controller = AlohaPoseController(left, right)
+    home_left, home_right = split_real_start_pose_for_isaac_articulations(REAL_RUNTIME_RESET_POSE)
+    sleep_left, sleep_right = split_real_start_pose_for_isaac_articulations(REAL_RUNTIME_SLEEP_POSE)
+
+    controller.apply_home()
+    world.step(render=False)
+    _assert_articulation_pose(left, home_left, "home_left")
+    _assert_articulation_pose(right, home_right, "home_right")
+
+    controller.apply_sleep()
+    world.step(render=False)
+    _assert_articulation_pose(left, sleep_left, "sleep_left")
+    _assert_articulation_pose(right, sleep_right, "sleep_right")
+
+    controller.apply_home()
+    world.step(render=False)
+    _assert_articulation_pose(left, home_left, "home_left_after_toggle")
+    _assert_articulation_pose(right, home_right, "home_right_after_toggle")
+    print("ALOHA pose self-test passed.")
+
+
 def _apply_real_start_pose_to_articulations() -> tuple[object, object, object]:
     from isaacsim.core.api import World
     from isaacsim.core.prims import SingleArticulation
@@ -118,6 +153,12 @@ def _apply_real_start_pose_to_articulations() -> tuple[object, object, object]:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Open the generated ALOHA Isaac workcell USD in Isaac Sim GUI.")
     parser.add_argument("--usd", type=Path, default=DEFAULT_USD)
+    parser.add_argument("--headless", action="store_true", help="Run Isaac without opening the GUI window.")
+    parser.add_argument(
+        "--self-test-poses",
+        action="store_true",
+        help="Initialize ALOHA, apply home/sleep/home, read articulation joints, and exit.",
+    )
     parser.add_argument(
         "--no-real-start-pose",
         action="store_true",
@@ -131,7 +172,7 @@ def main() -> None:
 
     from isaacsim import SimulationApp
 
-    app = SimulationApp({"headless": False, "window_title": "Isaac Sim - ALOHA Workcell"})
+    app = SimulationApp({"headless": bool(args.headless), "window_title": "Isaac Sim - ALOHA Workcell"})
     try:
         import omni.kit.app
         import omni.usd
@@ -148,6 +189,10 @@ def main() -> None:
             articulations = _apply_real_start_pose_to_articulations()
             _, left, right = articulations
             pose_controller = AlohaPoseController(left, right)
+            if args.self_test_poses:
+                world, _, _ = articulations
+                _run_pose_self_test(world, left, right)
+                return
             pose_controls = _build_pose_control_window(pose_controller)
             print("Applied real home pose to ALOHA articulations.")
 
