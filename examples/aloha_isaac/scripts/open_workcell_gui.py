@@ -23,6 +23,16 @@ DEFAULT_USD = (
 )
 DEFAULT_LEFT_ARTICULATION_ROOT = "/scene/left_base_link/left_base_link"
 DEFAULT_RIGHT_ARTICULATION_ROOT = "/scene/right_base_link/right_base_link"
+STARTUP_VIEW_CAMERA_PATH = "/scene/StartupViewCamera"
+# This pose matches the manually adjusted startup view captured on 2026-07-15:
+# close perspective, both arms visible, table filling the viewport.
+STARTUP_VIEW_CAMERA_POSITION = (-1.15, 2.75, 1.35)
+STARTUP_VIEW_CAMERA_TARGET = (0.0, 0.0, 0.20)
+STARTUP_VIEW_CAMERA_FOCAL_LENGTH = 32.0
+STARTUP_VIEW_CAMERA_CLIPPING_RANGE = (0.01, 100.0)
+STARTUP_WINDOW_SIZE = (1980, 1120)
+POSE_CONTROL_WINDOW_POSITION = (1135, 760)
+POSE_CONTROL_WINDOW_SIZE = (154, 190)
 POSES = {
     "home": REAL_RUNTIME_RESET_POSE,
     "sleep": REAL_RUNTIME_SLEEP_POSE,
@@ -238,10 +248,21 @@ def _apply_pose_to_articulation(articulation: Any, pose: tuple[float, ...] | np.
         articulation.apply_action(ArticulationAction(joint_positions=pose_array, joint_velocities=zero_array))
 
 
+def _pose_control_window_kwargs() -> dict[str, float | bool]:
+    return {
+        "width": POSE_CONTROL_WINDOW_SIZE[0],
+        "height": POSE_CONTROL_WINDOW_SIZE[1],
+        "position_x": POSE_CONTROL_WINDOW_POSITION[0],
+        "position_y": POSE_CONTROL_WINDOW_POSITION[1],
+        "visible": True,
+        "auto_resize": False,
+    }
+
+
 def _build_pose_control_window(controller: AlohaPoseController):
     import omni.ui as ui
 
-    window = ui.Window("ALOHA Pose Controls", width=420, height=150, visible=True, auto_resize=True)
+    window = ui.Window("ALOHA Pose Controls", **_pose_control_window_kwargs())
     with window.frame:
         with ui.VStack(spacing=6, height=0):
             ui.Label("Simulation-only pose controls", word_wrap=True)
@@ -267,6 +288,47 @@ def _build_pose_control_window(controller: AlohaPoseController):
                 ui.Button("Sleep", clicked_fn=lambda: apply_and_update("sleep"), tooltip="Apply the real runtime sleep pose.")
             ui.Button("Toggle Home / Sleep", clicked_fn=toggle_and_update, height=32)
     return window, status
+
+
+def _configure_startup_view_camera() -> str | None:
+    import omni.usd
+    from pxr import Gf, Sdf, UsdGeom
+
+    stage = omni.usd.get_context().get_stage()
+    if stage is None:
+        return None
+
+    camera_path = Sdf.Path(STARTUP_VIEW_CAMERA_PATH)
+    camera = UsdGeom.Camera.Define(stage, camera_path)
+    camera.CreateFocalLengthAttr().Set(float(STARTUP_VIEW_CAMERA_FOCAL_LENGTH))
+    camera.CreateClippingRangeAttr().Set(Gf.Vec2f(*STARTUP_VIEW_CAMERA_CLIPPING_RANGE))
+
+    eye = Gf.Vec3d(*STARTUP_VIEW_CAMERA_POSITION)
+    target = Gf.Vec3d(*STARTUP_VIEW_CAMERA_TARGET)
+    up = Gf.Vec3d(0.0, 0.0, 1.0)
+    camera_to_world = Gf.Matrix4d().SetLookAt(eye, target, up).GetInverse()
+
+    xformable = UsdGeom.Xformable(camera.GetPrim())
+    xformable.ClearXformOpOrder()
+    xformable.AddTransformOp().Set(camera_to_world)
+    return str(camera_path)
+
+
+def _set_active_viewport_camera(camera_path: str | None) -> bool:
+    if not camera_path:
+        return False
+    try:
+        from pxr import Sdf
+        from omni.kit.viewport.utility import get_active_viewport
+
+        viewport = get_active_viewport()
+        if viewport is None:
+            return False
+        viewport.camera_path = Sdf.Path(camera_path)
+        return True
+    except Exception as exc:
+        print(f"Failed to set startup viewport camera {camera_path}: {exc}", flush=True)
+        return False
 
 
 def _assert_articulation_pose(articulation: Any, expected_pose: tuple[float, ...], label: str, tolerance: float = 1e-3) -> None:
@@ -372,7 +434,14 @@ def main() -> None:
 
     from isaacsim import SimulationApp
 
-    app = SimulationApp({"headless": bool(args.headless), "window_title": "Isaac Sim - ALOHA Workcell"})
+    app = SimulationApp(
+        {
+            "headless": bool(args.headless),
+            "window_title": "Isaac Sim - ALOHA Workcell",
+            "window_width": STARTUP_WINDOW_SIZE[0],
+            "window_height": STARTUP_WINDOW_SIZE[1],
+        }
+    )
     try:
         import omni.kit.app
         import omni.usd
@@ -382,6 +451,7 @@ def main() -> None:
             raise RuntimeError(f"Isaac failed to open stage: {usd_path}")
         for _ in range(5):
             app.update()
+        startup_camera_path = _configure_startup_view_camera()
 
         articulations = None
         pose_controls = None
@@ -394,6 +464,10 @@ def main() -> None:
                 return
             pose_controls = _build_pose_control_window(pose_controller)
             print("Applied real home pose to ALOHA articulations.")
+        if _set_active_viewport_camera(startup_camera_path):
+            print(f"Configured startup viewport camera: {startup_camera_path}", flush=True)
+        for _ in range(5):
+            app.update()
 
         import omni.timeline
 

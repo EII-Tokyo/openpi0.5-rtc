@@ -181,6 +181,17 @@ def test_set_real_start_pose_applies_when_both_handles_initialized() -> None:
     assert right.default_states[0][0] == pytest.approx(right.positions[0])
 
 
+def test_pose_control_window_uses_pinned_startup_position() -> None:
+    from examples.aloha_isaac.scripts.open_workcell_gui import _pose_control_window_kwargs
+
+    kwargs = _pose_control_window_kwargs()
+
+    assert kwargs["position_x"] == pytest.approx(1135)
+    assert kwargs["position_y"] == pytest.approx(760)
+    assert kwargs["width"] == pytest.approx(154)
+    assert kwargs["height"] == pytest.approx(190)
+
+
 def test_pose_controller_applies_home_sleep_and_toggle() -> None:
     from examples.aloha_isaac.scripts.open_workcell_gui import AlohaPoseController
 
