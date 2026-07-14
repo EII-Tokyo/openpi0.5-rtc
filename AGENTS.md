@@ -24,6 +24,9 @@ cd /home/eii/Documents/Notes/openpi0.5-rtc-reward-learning && npm run check:math
   - Also read `docs/agents/remote_103_operations.md` if the action happens on `192.168.1.103`.
 - Isaac Sim, Isaac Lab, Claude Code MCP, Codex MCP, or the local MCP installation on machine `101`:
   - Read `docs/agents/isaac_mcp_toolchain.md`.
+- ROS MCP, `robotmcp/ros-mcp-server`, rosbridge, rosapi, or MCP-based ROS inspection/control:
+  - Read `docs/agents/ros_mcp.md`.
+  - Also read `docs/agents/remote_103_operations.md` for any `192.168.1.103` work and `docs/agents/aloha_hardware_debug.md` before any action that can affect the real ALOHA robot.
 - Backend pytest, local test environment variables, segment DB test paths, or container-vs-host path assumptions:
   - Read `docs/agents/backend_test_environment.md`.
 - VLA/RLToken checkpoint selection, `z_rl` dimensions, same-forward runtime, sidecar RLToken bans, actor/critic startup, or re-encoding decisions:
@@ -44,7 +47,7 @@ cd /home/eii/Documents/Notes/openpi0.5-rtc-reward-learning && npm run check:math
 - Do not use cam3-derived VLA/RLToken checkpoints for rinse or bottle-mouth insertion tasks that require `cam_low`.
 - Do not treat saved-video/mp4 re-encoded `z_rl` as formal same-forward training replay unless the user explicitly requests an ablation.
 - Do not enable RLToken sidecar fallback for normal robot actor tests; same-forward `z_rl` is required.
-- Do not add or enable ROS MCP by default. ROS MCP was intentionally skipped in the local Isaac MCP setup.
+- ROS MCP is configured locally through `uvx`, but it requires robot-side rosbridge/rosapi before it can inspect `192.168.1.103`. Use it read-only by default unless the user explicitly asks for a real robot action.
 
 ## Maintenance Rule
 - When adding new long-lived operational facts, put them in the appropriate `docs/agents/*.md` file and add only a short routing bullet here.
