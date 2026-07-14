@@ -9,6 +9,8 @@ from examples.aloha_isaac.scripts.apply_aloha_initial_pose import (
     REAL_START_ARM_POSE,
     REAL_RUNTIME_RESET_QPOS14,
     REAL_RUNTIME_RESET_POSE,
+    REAL_RUNTIME_SLEEP_POSE,
+    REAL_RUNTIME_SLEEP_QPOS14,
     build_pose_records,
     pose_to_usd_joint_positions,
     puppet_gripper_joint_to_isaac_finger_position,
@@ -27,7 +29,9 @@ from examples.aloha_real.constants import (
 def test_real_start_pose_has_one_value_per_usd_joint() -> None:
     assert len(REAL_START_ARM_POSE) == len(ALOHA_USD_JOINTS)
     assert len(REAL_RUNTIME_RESET_QPOS14) == 14
+    assert len(REAL_RUNTIME_SLEEP_QPOS14) == 14
     assert len(REAL_RUNTIME_RESET_POSE) == len(ALOHA_USD_JOINTS)
+    assert len(REAL_RUNTIME_SLEEP_POSE) == len(ALOHA_USD_JOINTS)
     assert FINGER_PRISMATIC_LOWER_LIMIT == pytest.approx(0.01844)
     assert FINGER_PRISMATIC_UPPER_LIMIT == pytest.approx(0.058)
 
@@ -118,6 +122,13 @@ def test_runtime_reset_pose_for_isaac_articulations_matches_real_robot_reset() -
     assert right == pytest.approx((0.0, -0.96, 1.16, 0.0, 0.0, 0.0, 0.058, 0.058))
 
 
+def test_runtime_sleep_pose_for_isaac_articulations_matches_real_sleep_arms() -> None:
+    left, right = split_real_start_pose_for_isaac_articulations(REAL_RUNTIME_SLEEP_POSE)
+
+    assert left == pytest.approx((0.0, -1.84, 1.60, 0.0, -1.60, 0.0, 0.058, 0.058))
+    assert right == pytest.approx((0.0, -1.84, 1.60, 0.0, -1.60, 0.0, 0.058, 0.058))
+
+
 def test_root_joint_world_anchor_matches_body_translation_for_world_root_joint() -> None:
     local_pos0, local_pos1 = root_joint_world_anchor_from_body_translation((-0.469, -0.019, 0.02))
 
@@ -159,3 +170,24 @@ def test_set_real_start_pose_applies_when_both_handles_initialized() -> None:
     assert right.positions[0] == pytest.approx((0.0, -0.96, 1.16, 0.0, 0.0, 0.0, 0.058, 0.058))
     assert left.velocities == [(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)]
     assert right.velocities == [(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)]
+
+
+def test_pose_controller_applies_home_sleep_and_toggle() -> None:
+    from examples.aloha_isaac.scripts.open_workcell_gui import AlohaPoseController
+
+    left = _FakeArticulation(initialized=True)
+    right = _FakeArticulation(initialized=True)
+    controller = AlohaPoseController(left, right)
+
+    assert controller.apply_home() is True
+    assert controller.current_pose_name == "home"
+    assert left.positions[-1] == pytest.approx((0.0, -0.96, 1.16, 1.57, 0.0, -1.57, 0.058, 0.058))
+
+    assert controller.apply_sleep() is True
+    assert controller.current_pose_name == "sleep"
+    assert left.positions[-1] == pytest.approx((0.0, -1.84, 1.60, 0.0, -1.60, 0.0, 0.058, 0.058))
+    assert right.positions[-1] == pytest.approx((0.0, -1.84, 1.60, 0.0, -1.60, 0.0, 0.058, 0.058))
+
+    assert controller.toggle() is True
+    assert controller.current_pose_name == "home"
+    assert left.positions[-1] == pytest.approx((0.0, -0.96, 1.16, 1.57, 0.0, -1.57, 0.058, 0.058))

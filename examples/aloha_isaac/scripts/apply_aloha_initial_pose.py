@@ -44,6 +44,22 @@ REAL_RUNTIME_RESET_QPOS14 = (
     0.0,
     PUPPET_GRIPPER_JOINT_OPEN,
 )
+REAL_RUNTIME_SLEEP_QPOS14 = (
+    0.0,
+    -1.8399999952316284,
+    1.600000023841858,
+    0.0,
+    -1.600000023841858,
+    0.0,
+    PUPPET_GRIPPER_JOINT_OPEN,
+    0.0,
+    -1.8399999952316284,
+    1.600000023841858,
+    0.0,
+    -1.600000023841858,
+    0.0,
+    PUPPET_GRIPPER_JOINT_OPEN,
+)
 
 ALOHA_USD_JOINTS = (
     ("/scene/joints/left_waist", "angular"),
@@ -165,6 +181,7 @@ def qpos14_to_isaac_joint_pose(qpos: tuple[float, ...]) -> tuple[float, ...]:
 
 
 REAL_RUNTIME_RESET_POSE = qpos14_to_isaac_joint_pose(REAL_RUNTIME_RESET_QPOS14)
+REAL_RUNTIME_SLEEP_POSE = qpos14_to_isaac_joint_pose(REAL_RUNTIME_SLEEP_QPOS14)
 
 
 def _to_isaac_finger_position(value: float, index: int) -> float:
