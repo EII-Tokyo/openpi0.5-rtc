@@ -253,11 +253,10 @@ def main() -> None:
             pose_controls = _build_pose_control_window(pose_controller)
             print("Applied real home pose to ALOHA articulations.")
 
-        kit_app = omni.kit.app.get_app()
         import omni.timeline
 
         timeline = omni.timeline.get_timeline_interface()
-        while kit_app.is_running():
+        while app.is_running():
             app.update()
             if articulations is not None and not timeline.is_playing():
                 pose_controller.reapply_current_pose()
