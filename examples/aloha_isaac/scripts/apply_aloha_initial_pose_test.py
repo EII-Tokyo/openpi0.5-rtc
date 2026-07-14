@@ -140,12 +140,16 @@ class _FakeArticulation:
         self.handles_initialized = initialized
         self.positions = []
         self.velocities = []
+        self.default_states = []
 
     def set_joint_positions(self, positions):
         self.positions.append(tuple(positions))
 
     def set_joint_velocities(self, velocities):
         self.velocities.append(tuple(velocities))
+
+    def set_joints_default_state(self, positions, velocities):
+        self.default_states.append((tuple(positions), tuple(velocities)))
 
 
 def test_set_real_start_pose_requires_initialized_handles() -> None:
@@ -170,6 +174,8 @@ def test_set_real_start_pose_applies_when_both_handles_initialized() -> None:
     assert right.positions[0] == pytest.approx((0.0, -0.96, 1.16, 0.0, 0.0, 0.0, 0.058, 0.058))
     assert left.velocities == [(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)]
     assert right.velocities == [(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)]
+    assert left.default_states[0][0] == pytest.approx(left.positions[0])
+    assert right.default_states[0][0] == pytest.approx(right.positions[0])
 
 
 def test_pose_controller_applies_home_sleep_and_toggle() -> None:

@@ -5,6 +5,8 @@ import os
 from pathlib import Path
 from typing import Any
 
+import numpy as np
+
 from examples.aloha_isaac.scripts.apply_aloha_initial_pose import (
     REAL_RUNTIME_RESET_POSE,
     REAL_RUNTIME_SLEEP_POSE,
@@ -61,12 +63,25 @@ def _set_pose_on_initialized_articulations(left: Any, right: Any, pose: tuple[fl
         return False
 
     left_pose, right_pose = split_real_start_pose_for_isaac_articulations(pose)
-    zeros = [0.0] * len(left_pose)
-    left.set_joint_positions(left_pose)
-    right.set_joint_positions(right_pose)
-    left.set_joint_velocities(zeros)
-    right.set_joint_velocities(zeros)
+    _apply_pose_to_articulation(left, left_pose)
+    _apply_pose_to_articulation(right, right_pose)
     return True
+
+
+def _apply_pose_to_articulation(articulation: Any, pose: tuple[float, ...]) -> None:
+    """Apply a pose both as current state and as the physics drive target."""
+    pose_array = np.asarray(pose, dtype=np.float32)
+    zero_array = np.zeros_like(pose_array)
+
+    if hasattr(articulation, "set_joints_default_state"):
+        articulation.set_joints_default_state(positions=pose_array, velocities=zero_array)
+    articulation.set_joint_positions(pose_array)
+    articulation.set_joint_velocities(zero_array)
+
+    if hasattr(articulation, "apply_action"):
+        from isaacsim.core.utils.types import ArticulationAction
+
+        articulation.apply_action(ArticulationAction(joint_positions=pose_array, joint_velocities=zero_array))
 
 
 def _build_pose_control_window(controller: AlohaPoseController):
@@ -125,6 +140,20 @@ def _run_pose_self_test(world: Any, left: Any, right: Any) -> None:
     world.step(render=False)
     _assert_articulation_pose(left, home_left, "home_left_after_toggle")
     _assert_articulation_pose(right, home_right, "home_right_after_toggle")
+
+    world.play()
+    controller.apply_sleep()
+    for _ in range(5):
+        world.step(render=False)
+    _assert_articulation_pose(left, sleep_left, "sleep_left_during_playback")
+    _assert_articulation_pose(right, sleep_right, "sleep_right_during_playback")
+
+    controller.apply_home()
+    for _ in range(5):
+        world.step(render=False)
+    _assert_articulation_pose(left, home_left, "home_left_after_playback_toggle")
+    _assert_articulation_pose(right, home_right, "home_right_after_playback_toggle")
+    world.pause()
     print("ALOHA pose self-test passed.")
 
 

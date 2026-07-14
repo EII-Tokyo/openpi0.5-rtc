@@ -44,8 +44,14 @@ Read this before using, changing, debugging, or reinstalling Isaac Sim / Isaac L
 - Scratch workspace: `/home/eii/isaac_mcp_setup/aloha_project`
 - This is only a scratch workspace. The project source of truth remains `/home/eii/project/openpi0.5-rtc-reward-learning`, especially `examples/aloha_isaac`.
 
-## Preferred MCP Order
-- First query `isaac-sim-mcp` / official NVIDIA docs.
-- Then use `isaaclab` read-only probes.
+## Hard NVIDIA MCP Requirement
+- For any Isaac Sim, Isaac Lab, Isaac MCP, ALOHA simulation, USD conversion, physics setup, or Isaac GUI task, first use the NVIDIA official Isaac MCP: `isaac-sim-mcp` / `mcp__isaac_sim_mcp`.
+- This is mandatory, not a preference. Do not start with shell-only inspection, community MCPs, web/forum searches, or local code changes for Isaac-related work.
+- If the NVIDIA official Isaac MCP is unavailable, fails, or cannot answer the required Isaac-specific point, stop and report that the hard prerequisite is unavailable before continuing. Do not silently substitute another MCP or community source.
+- After the NVIDIA official Isaac MCP has been used for the task, `isaaclab`, `isaacsim-control`, and `isaacsim-python` may be used only as secondary implementation or inspection tools.
+- `isaacsim-control` and `isaacsim-python` remain local simulation tools only; never use them to affect the real ALOHA robot.
+
+## Secondary MCP Order
+- After the mandatory NVIDIA official MCP step, use `isaaclab` read-only probes when Isaac Lab state or APIs are needed.
 - Use `isaacsim-control` only after confirming the Isaac Sim extension socket is local and the task is simulation-only.
 - Use `isaacsim-python` only when direct Python execution inside Isaac Sim is necessary.
