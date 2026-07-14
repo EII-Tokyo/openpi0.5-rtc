@@ -1,0 +1,82 @@
+stage:
+  units: meters
+  up_axis: Z
+  output_usd: local_eval_assets/aloha_isaac_user_measured/aloha_workcell_user_measured.usda
+
+assets:
+  # Legacy ALOHA Stationary / ALOHA 2.0-style dual ViperX follower-arm asset.
+  # This matches the 103 robot evidence better than the newer Trossen
+  # Stationary AI USD: 103 uses follower/puppet aloha_vx300s arms and
+  # leader/master aloha_wx250s arms.
+  # Isaac's MJCF converter exports only the first movable root from the
+  # bimanual MJCF, so reference the converted single-follower arm twice using
+  # the original MJCF left/right base transforms.
+  aloha_usd: local_eval_assets/aloha_isaac_assets/aloha_viperx.usd
+  load_aloha_if_exists: true
+  instance_single_arm_usd_twice: true
+
+table:
+  prim_path: /World/Table
+  # User measurement, 2026-07-14: w = 110 cm, h = 60 cm.
+  # Isaac coordinate convention in this first measured stage:
+  #   x: left edge -> right edge, y: front/lower edge -> back/w1 edge, z: up.
+  # The table center is the stage origin and the table top is approximately z=0.
+  size: [1.10, 0.60, 0.04]
+  pose:
+    translation: [0.0, 0.0, -0.02]
+    rotation_rpy_deg: [0.0, 0.0, 0.0]
+  color: [0.18, 0.18, 0.18]
+
+table_frame:
+  prim_path: /World/TableFrameT
+  pose:
+    translation: [-0.55, -0.30, 0.025]
+    rotation_rpy_deg: [0.0, 0.0, 0.0]
+  axis_length: 0.25
+  axis_radius: 0.006
+
+robot_layout: {}
+
+robot_instances:
+  left_follower:
+    prim_path: /World/Aloha/LeftFollowerVx300s
+    # Original Gym ALOHA MJCF left body: pos="-0.469 0.5 0".
+    # Apply the same global y=-0.5 alignment used for the user-measured table.
+    translation: [-0.469, 0.0, 0.0]
+    rotation_rpy_deg: [0.0, 0.0, 0.0]
+  right_follower:
+    prim_path: /World/Aloha/RightFollowerVx300s
+    # Original Gym ALOHA MJCF right body: pos="0.469 0.5 0" euler yaw=pi.
+    translation: [0.469, 0.0, 0.0]
+    rotation_rpy_deg: [0.0, 0.0, 180.0]
+
+pipe_placeholder:
+  prim_path: /World/PipePlaceholder
+  # User measurement:
+  #   A is on the w1 table edge, 58 cm from the left edge.
+  #   The pipe base center is outside w1 by 9.5 cm on the perpendicular through A.
+  # Derived with table center as origin:
+  #   left edge x=-0.55, w1 edge y=0.30, A=(0.03,0.30).
+  # Earlier hand sketch measurement reused here: pipe length 22.5 cm,
+  # mount height 7 cm, side-view tilt 44 deg, pipe diameter 0.5 cm.
+  start: [0.03, 0.395, 0.07]
+  end: [0.03, 0.233, 0.226]
+  radius: 0.0025
+  color: [1.0, 0.05, 0.05]
+
+cameras:
+  cam_low:
+    prim_path: /World/Cameras/cam_low
+    translation: [0.0, -0.28, 0.55]
+    target: [0.03, 0.30, 0.12]
+    focal_length: 18.0
+  cam_right_wrist:
+    prim_path: /World/Cameras/cam_right_wrist_hint
+    translation: [0.48, -0.05, 0.34]
+    target: [0.03, 0.30, 0.12]
+    focal_length: 18.0
+
+replay:
+  default_hdf5: /home/eii/data/openpi0.5-rtc-reward-learning/rollouts/key_regions/twist_off_the_bottle_cap/2026-07-08/warmup/key_region_00d1891748c74b5d8556a9ab153c8ec6/episode.hdf5
+  qpos_dataset: observations/qpos
+  qpos_order: [left_arm_6, left_gripper, right_arm_6, right_gripper]
