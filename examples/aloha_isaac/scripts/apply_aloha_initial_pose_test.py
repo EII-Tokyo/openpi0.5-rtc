@@ -151,6 +151,9 @@ class _FakeArticulation:
     def set_joints_default_state(self, positions, velocities):
         self.default_states.append((tuple(positions), tuple(velocities)))
 
+    def get_joint_positions(self):
+        return self.positions[-1]
+
 
 def test_set_real_start_pose_requires_initialized_handles() -> None:
     from examples.aloha_isaac.scripts.open_workcell_gui import _set_real_start_pose_on_initialized_articulations
@@ -185,15 +188,65 @@ def test_pose_controller_applies_home_sleep_and_toggle() -> None:
     right = _FakeArticulation(initialized=True)
     controller = AlohaPoseController(left, right)
 
-    assert controller.apply_home() is True
+    assert controller.apply_home(animate=False) is True
     assert controller.current_pose_name == "home"
     assert left.positions[-1] == pytest.approx((0.0, -0.96, 1.16, 1.57, 0.0, -1.57, 0.058, 0.058))
 
-    assert controller.apply_sleep() is True
+    assert controller.apply_sleep(animate=False) is True
     assert controller.current_pose_name == "sleep"
     assert left.positions[-1] == pytest.approx((0.0, -1.84, 1.60, 0.0, -1.60, 0.0, 0.058, 0.058))
     assert right.positions[-1] == pytest.approx((0.0, -1.84, 1.60, 0.0, -1.60, 0.0, 0.058, 0.058))
 
-    assert controller.toggle() is True
+    assert controller.apply_home(animate=False) is True
+    assert controller.current_pose_name == "home"
+    assert left.positions[-1] == pytest.approx((0.0, -0.96, 1.16, 1.57, 0.0, -1.57, 0.058, 0.058))
+
+
+def test_pose_controller_animates_home_to_sleep_before_finishing() -> None:
+    from examples.aloha_isaac.scripts.open_workcell_gui import AlohaPoseController
+
+    left = _FakeArticulation(initialized=True)
+    right = _FakeArticulation(initialized=True)
+    controller = AlohaPoseController(left, right, transition_duration_s=2.0)
+
+    assert controller.apply_home(animate=False) is True
+    home_left = left.positions[-1]
+
+    assert controller.apply_sleep() is True
+    assert controller.is_transitioning is True
+    assert left.positions[-1] == pytest.approx(home_left)
+
+    assert controller.update_transition(1.0) is True
+    assert controller.is_transitioning is True
+    assert left.positions[-1][1] == pytest.approx((-0.96 + -1.84) / 2.0)
+    assert left.positions[-1][2] == pytest.approx((1.16 + 1.60) / 2.0)
+    assert left.positions[-1] != pytest.approx(home_left)
+
+    assert controller.update_transition(1.0) is True
+    assert controller.is_transitioning is False
+    assert controller.current_pose_name == "sleep"
+    assert left.positions[-1] == pytest.approx((0.0, -1.84, 1.60, 0.0, -1.60, 0.0, 0.058, 0.058))
+    assert right.positions[-1] == pytest.approx((0.0, -1.84, 1.60, 0.0, -1.60, 0.0, 0.058, 0.058))
+
+
+def test_pose_controller_restart_transition_from_current_intermediate_pose() -> None:
+    from examples.aloha_isaac.scripts.open_workcell_gui import AlohaPoseController
+
+    left = _FakeArticulation(initialized=True)
+    right = _FakeArticulation(initialized=True)
+    controller = AlohaPoseController(left, right, transition_duration_s=2.0)
+
+    assert controller.apply_home(animate=False) is True
+    assert controller.apply_sleep() is True
+    assert controller.update_transition(1.0) is True
+    midway_left = left.positions[-1]
+
+    assert controller.apply_home() is True
+    assert controller.is_transitioning is True
+    assert left.positions[-1] == pytest.approx(midway_left)
+
+    assert controller.update_transition(1.0) is True
+    assert left.positions[-1][1] == pytest.approx((midway_left[1] + -0.96) / 2.0)
+    assert controller.update_transition(1.0) is True
     assert controller.current_pose_name == "home"
     assert left.positions[-1] == pytest.approx((0.0, -0.96, 1.16, 1.57, 0.0, -1.57, 0.058, 0.058))
