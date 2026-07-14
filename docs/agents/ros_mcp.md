@@ -49,8 +49,15 @@ args = ["--from", "ros-mcp", "ros-mcp", "--transport=stdio"]
 
 ## Rosbridge Requirement
 - `robotmcp/ros-mcp-server` connects to the robot through rosbridge WebSocket, normally port `9090`.
-- On 2026-07-15, the user project at `/home/eii/openpi0.5-rtc-reward-learning` had no checked-in `rosbridge` / `rosapi` / `9090` configuration.
-- The active ROS container checked that day also did not show `rosbridge_server`, `rosapi`, or a `9090` listener.
+- Initial 2026-07-15 investigation found no `rosbridge` / `rosapi` / `9090` configuration.
+- The project now has a dedicated `rosbridge` compose service backed by `scripts/docker/rosbridge.Dockerfile`.
+- The service should be started with the normal robot service set, or directly with:
+
+```bash
+cd /home/eii/openpi0.5-rtc-reward-learning && docker compose up -d --no-build rosbridge
+```
+
+- The active ROS containers checked before adding this service did not show `rosbridge_server`, `rosapi`, or a `9090` listener.
 - For ROS1 Noetic on `192.168.1.103`, the upstream package/launch pattern is:
 
 ```bash
@@ -58,7 +65,7 @@ sudo apt install ros-noetic-rosbridge-server
 roslaunch rosbridge_server rosbridge_websocket.launch
 ```
 
-- Do not run `sudo apt install` on `192.168.1.103` without explicit user approval because that modifies the host system outside the project directory. For this project, prefer a project-local compose service or image layer that contains `ros-noetic-rosbridge-server`.
+- Do not run `sudo apt install` on `192.168.1.103` without explicit user approval because that modifies the host system outside the project directory. For this project, use the project-local `rosbridge` compose service/image layer.
 - `rosapi` must be present. Verify from the robot-side ROS environment:
 
 ```bash
@@ -67,6 +74,41 @@ curl -I http://localhost:9090
 ```
 
 - Do not launch only a bare `rosrun` rosbridge process if it does not bring up `rosapi`; MCP introspection tools need rosapi services.
+
+## Resolved 103 Status
+- As of 2026-07-15, `192.168.1.103` has the project-local `rosbridge` service built and running in the `openpi_reward_learning_eii` compose project.
+- Verified running container:
+  - `openpi_reward_learning_eii-rosbridge-1`
+- Verified rosbridge log line:
+  - `Rosbridge WebSocket server started at ws://0.0.0.0:9090`
+- Verified 103 host listener:
+  - `0.0.0.0:9090`
+- Verified `rosapi` services exist on the same ROS graph:
+  - `/rosapi/topics`
+  - `/rosapi/services`
+  - `/rosapi/nodes`
+  - `/rosapi/topic_type`
+- Verified from the local machine that `ws://192.168.1.103:9090` accepts WebSocket calls to `/rosapi/topics`.
+- Verified topics returned through rosbridge include:
+  - `/cam_high`
+  - `/cam_low`
+  - `/puppet_left/joint_states`
+  - `/puppet_right/joint_states`
+- Therefore, ROS MCP can now inspect the 103 ROS graph through rosbridge after Codex loads the local `ros-mcp` MCP server.
+
+## Rosbridge Python Pitfall
+- The robot base image has two relevant Python installations:
+  - `/usr/local/bin/python3` is Python 3.10 and may be first on `PATH`.
+  - `/usr/bin/python3` is the ROS Noetic system Python, where apt-installed ROS Python packages live.
+- `ros-noetic-rosbridge-server` installs ROS Python modules into the system Python environment.
+- If `rosbridge` starts with `/usr/local/bin/python3`, `rosbridge_websocket` can fail with:
+
+```text
+ModuleNotFoundError: No module named 'twisted'
+```
+
+- The project compose service fixes this by putting `/usr/bin` before `/usr/local/bin` in `PATH` before sourcing ROS and launching rosbridge.
+- Do not remove that `PATH` override unless you have verified `rosbridge_websocket` still imports `twisted` and starts listening on `9090`.
 
 ## 103 Safety Constraints
 - If setting up rosbridge on `192.168.1.103`, first read `docs/agents/remote_103_operations.md`.

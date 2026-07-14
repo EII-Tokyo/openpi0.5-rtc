@@ -239,6 +239,30 @@ services:
     command:
       - roscore
 
+  rosbridge:
+    image: openpi_reward_learning_eii/rosbridge:reward-learning
+    build:
+      context: .
+      dockerfile: scripts/docker/rosbridge.Dockerfile
+    depends_on:
+      - ros_master
+    init: true
+    tty: true
+    network_mode: host
+    restart: unless-stopped
+    command:
+      - /bin/bash
+      - -lc
+      - >-
+        export PATH=/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/sbin:/usr/local/bin;
+        source /opt/ros/noetic/setup.bash;
+        if [ -f /root/interbotix_ws/devel/setup.bash ]; then
+          source /root/interbotix_ws/devel/setup.bash;
+        fi;
+        roslaunch --wait rosbridge_server rosbridge_websocket.launch
+        address:=0.0.0.0
+        port:=9090
+
   openpi_server:
     image: openpi_reward_learning_eii/openpi_server:reward-learning
     build:
