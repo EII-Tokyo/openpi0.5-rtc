@@ -48,3 +48,15 @@ def test_legacy_aloha2_references_as_single_dual_arm_asset():
             "rotation_rpy_deg": [0.0, 0.0, 180.0],
         },
     ]
+
+
+def test_user_measured_pipe_is_derived_from_table_edge_measurements():
+    mod = _load_script()
+    cfg = yaml.safe_load(CONFIG_PATH.read_text())
+
+    pipe_cfg = mod._resolve_pipe_placeholder(cfg)
+
+    assert pipe_cfg["start"] == [0.03, 0.395, 0.07]
+    assert pipe_cfg["end"] == [0.03, 0.233, 0.226]
+    assert pipe_cfg["radius"] == 0.0025
+    assert pipe_cfg["measurement_a_point"] == [0.03, 0.3, 0.0]

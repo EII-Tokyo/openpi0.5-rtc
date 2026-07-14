@@ -59,9 +59,15 @@ pipe_placeholder:
   #   left edge x=-0.55, w1 edge y=0.30, A=(0.03,0.30).
   # Earlier hand sketch measurement reused here: pipe length 22.5 cm,
   # mount height 7 cm, side-view tilt 44 deg, pipe diameter 0.5 cm.
-  start: [0.03, 0.395, 0.07]
-  end: [0.03, 0.233, 0.226]
-  radius: 0.0025
+  measurement:
+    table_edge: w1
+    a_distance_from_left_edge_m: 0.58
+    base_offset_outside_table_m: 0.095
+    mount_height_m: 0.07
+    pipe_length_m: 0.225
+    pipe_diameter_m: 0.005
+    side_tilt_deg: 44.0
+    points_toward_table: true
   color: [1.0, 0.05, 0.05]
 
 cameras:

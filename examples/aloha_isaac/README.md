@@ -15,6 +15,8 @@ real calibration and Isaac Lab task logic step by step.
   installed for legacy experiments.
 - Keep all measured real-world parameters in one YAML file so table origin,
   robot base pose, pipe pose, and camera hints can be iterated safely.
+- Derive the user-measured pipe placeholder from explicit table-edge
+  measurements instead of opaque `start` / `end` coordinates.
 
 This is not yet a trusted physics training environment. It is the stage-0
 visual and asset-integration skeleton.
@@ -68,6 +70,23 @@ Open that USD in Isaac Sim to inspect:
 - `/World/Cameras/cam_low`
 - `/World/Cameras/cam_right_wrist_hint`
 - `/World/Aloha/StationaryAI` if Trossen's official `stationary_ai.usd` exists
+
+The user-measured pipe in `workcell_user_measured.yaml` is intentionally
+defined from measurement facts:
+
+- table size `1.10 m x 0.60 m`
+- `w1` edge at `y = 0.30 m` when the table center is the world origin
+- A point `0.58 m` from the left table edge, so `A = (0.03, 0.30, 0.0)`
+- pipe base center `0.095 m` outside the `w1` edge
+- pipe length `0.225 m`, diameter `0.005 m`, mount height `0.07 m`, side tilt `44 deg`
+
+The stage generator derives the visible pipe axis and also adds:
+
+- `/World/PipePlaceholder/measurement_A_on_w1_edge`
+- `/World/PipePlaceholder/measurement_9p5cm_base_offset`
+
+Use these blue markers in Isaac Sim to verify that the 9.5 cm table-edge
+constraint is visually correct before using the pipe for any reward logic.
 
 If no ALOHA USD exists yet, the script places simple base-hint boxes only when
 the config provides robot layout hints. The user-measured config intentionally

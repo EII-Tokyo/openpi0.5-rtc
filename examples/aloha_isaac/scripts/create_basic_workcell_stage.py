@@ -150,6 +150,49 @@ def _set_custom_data_json(prim, key: str, value: Any) -> None:
     prim.SetCustomDataByKey(key, value)
 
 
+def _round_vec(values: list[float], digits: int = 3) -> list[float]:
+    return [round(float(v), digits) for v in values]
+
+
+def _resolve_pipe_placeholder(cfg: dict[str, Any]) -> dict[str, Any]:
+    pipe_cfg = dict(cfg["pipe_placeholder"])
+    measurement = pipe_cfg.get("measurement")
+    if not measurement:
+        return pipe_cfg
+
+    if measurement.get("table_edge") != "w1":
+        raise ValueError(f"unsupported pipe table edge: {measurement.get('table_edge')!r}")
+
+    table_size = cfg["table"]["size"]
+    table_translation = cfg["table"]["pose"]["translation"]
+    left_edge_x = float(table_translation[0]) - float(table_size[0]) / 2.0
+    w1_edge_y = float(table_translation[1]) + float(table_size[1]) / 2.0
+
+    a_point = [
+        left_edge_x + float(measurement["a_distance_from_left_edge_m"]),
+        w1_edge_y,
+        0.0,
+    ]
+    outside_sign = 1.0
+    base_y = a_point[1] + outside_sign * float(measurement["base_offset_outside_table_m"])
+    start = [a_point[0], base_y, float(measurement["mount_height_m"])]
+
+    length = float(measurement["pipe_length_m"])
+    tilt_rad = math.radians(float(measurement["side_tilt_deg"]))
+    horizontal = length * math.cos(tilt_rad)
+    vertical = length * math.sin(tilt_rad)
+    toward_table_sign = -1.0 if measurement.get("points_toward_table", True) else 1.0
+    end = [start[0], start[1] + toward_table_sign * horizontal, start[2] + vertical]
+
+    pipe_cfg["start"] = _round_vec(start)
+    pipe_cfg["end"] = _round_vec(end)
+    pipe_cfg["radius"] = round(float(measurement["pipe_diameter_m"]) / 2.0, 6)
+    pipe_cfg["measurement_a_point"] = _round_vec(a_point)
+    pipe_cfg["measurement_base_offset_line_start"] = _round_vec(a_point)
+    pipe_cfg["measurement_base_offset_line_end"] = _round_vec([start[0], start[1], 0.0])
+    return pipe_cfg
+
+
 def _add_workspace_areas(stage, cfg: dict[str, Any], site_model: dict[str, Any] | None) -> None:
     area_cfg = cfg.get("workspace_areas", {})
     if not area_cfg.get("enabled", False) or site_model is None:
@@ -214,7 +257,7 @@ def _add_legacy_rinse_device(stage, cfg: dict[str, Any], site_model: dict[str, A
 
 
 def _add_pipe_support_and_axis(stage, cfg: dict[str, Any], site_model: dict[str, Any] | None) -> None:
-    pipe_cfg = cfg["pipe_placeholder"]
+    pipe_cfg = _resolve_pipe_placeholder(cfg)
     _add_cylinder_between(
         stage,
         f"{pipe_cfg['prim_path']}/axis",
@@ -236,6 +279,23 @@ def _add_pipe_support_and_axis(stage, cfg: dict[str, Any], site_model: dict[str,
         [0.85, 0.85, 0.82],
         collision=True,
     )
+
+    if "measurement_a_point" in pipe_cfg:
+        _add_sphere(
+            stage,
+            f"{pipe_cfg['prim_path']}/measurement_A_on_w1_edge",
+            pipe_cfg["measurement_a_point"],
+            0.01,
+            [0.1, 0.45, 1.0],
+        )
+        _add_cylinder_between(
+            stage,
+            f"{pipe_cfg['prim_path']}/measurement_9p5cm_base_offset",
+            pipe_cfg["measurement_base_offset_line_start"],
+            pipe_cfg["measurement_base_offset_line_end"],
+            0.004,
+            [0.1, 0.45, 1.0],
+        )
 
     if site_model is not None:
         axis_prim = stage.GetPrimAtPath(f"{pipe_cfg['prim_path']}/axis")
