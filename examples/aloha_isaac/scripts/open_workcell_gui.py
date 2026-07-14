@@ -54,6 +54,28 @@ class AlohaPoseController:
         return self.apply(self.current_pose_name)
 
 
+def _max_pose_error(articulation: Any, expected_pose: tuple[float, ...]) -> float | None:
+    if not hasattr(articulation, "get_joint_positions"):
+        return None
+    actual = np.asarray(articulation.get_joint_positions(), dtype=float)
+    expected = np.asarray(expected_pose, dtype=float)
+    if actual.shape != expected.shape:
+        return None
+    return float(np.max(np.abs(actual - expected)))
+
+
+def _pose_status_message(controller: AlohaPoseController, pose_name: str, ok: bool) -> str:
+    if not ok:
+        return "Articulation not ready"
+    pose = POSES[pose_name]
+    left_pose, right_pose = split_real_start_pose_for_isaac_articulations(pose)
+    left_error = _max_pose_error(controller.left, left_pose)
+    right_error = _max_pose_error(controller.right, right_pose)
+    if left_error is None or right_error is None:
+        return f"Current pose: {controller.current_pose_name}"
+    return f"Current pose: {controller.current_pose_name} | max error L={left_error:.4g} R={right_error:.4g}"
+
+
 def _set_real_start_pose_on_initialized_articulations(left: Any, right: Any) -> bool:
     return _set_pose_on_initialized_articulations(left, right, REAL_RUNTIME_RESET_POSE)
 
@@ -87,19 +109,25 @@ def _apply_pose_to_articulation(articulation: Any, pose: tuple[float, ...]) -> N
 def _build_pose_control_window(controller: AlohaPoseController):
     import omni.ui as ui
 
-    window = ui.Window("ALOHA Pose Controls", width=320, height=0, visible=True)
+    window = ui.Window("ALOHA Pose Controls", width=420, height=150, visible=True, auto_resize=True)
     with window.frame:
         with ui.VStack(spacing=6, height=0):
             ui.Label("Simulation-only pose controls", word_wrap=True)
-            status = ui.Label(f"Current pose: {controller.current_pose_name}", height=24)
+            status = ui.Label(f"Current pose: {controller.current_pose_name}", height=40, word_wrap=True)
 
             def apply_and_update(pose_name: str) -> None:
                 ok = controller.apply(pose_name)
-                status.text = f"Current pose: {controller.current_pose_name}" if ok else "Articulation not ready"
+                status.text = _pose_status_message(controller, pose_name, ok)
+                print(f"[ALOHA Pose Controls] button={pose_name} ok={ok} {status.text}", flush=True)
 
             def toggle_and_update() -> None:
+                previous_pose = controller.current_pose_name
                 ok = controller.toggle()
-                status.text = f"Current pose: {controller.current_pose_name}" if ok else "Articulation not ready"
+                status.text = _pose_status_message(controller, controller.current_pose_name, ok)
+                print(
+                    f"[ALOHA Pose Controls] button=toggle from={previous_pose} ok={ok} {status.text}",
+                    flush=True,
+                )
 
             with ui.HStack(spacing=6, height=32):
                 ui.Button("Home", clicked_fn=lambda: apply_and_update("home"), tooltip="Apply the real runtime home pose.")
