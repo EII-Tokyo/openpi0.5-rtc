@@ -29,16 +29,20 @@ POSES = {
 
 
 class AlohaPoseController:
-    def __init__(self, left: Any, right: Any, initial_pose_name: str = "home") -> None:
+    def __init__(self, left: Any, right: Any, initial_pose_name: str = "home", world: Any | None = None) -> None:
         self.left = left
         self.right = right
         self.current_pose_name = initial_pose_name
+        self.world = world
+        self._viewport_refresh_pending = False
 
-    def apply(self, pose_name: str) -> bool:
+    def apply(self, pose_name: str, refresh: bool = True) -> bool:
         pose = POSES[pose_name]
         if not _set_pose_on_initialized_articulations(self.left, self.right, pose):
             return False
         self.current_pose_name = pose_name
+        if refresh:
+            self.request_viewport_refresh()
         return True
 
     def apply_home(self) -> bool:
@@ -51,7 +55,34 @@ class AlohaPoseController:
         return self.apply_sleep() if self.current_pose_name == "home" else self.apply_home()
 
     def reapply_current_pose(self) -> bool:
-        return self.apply(self.current_pose_name)
+        return self.apply(self.current_pose_name, refresh=False)
+
+    def request_viewport_refresh(self) -> None:
+        self._viewport_refresh_pending = True
+
+    def consume_viewport_refresh_request(self) -> bool:
+        if not self._viewport_refresh_pending:
+            return False
+        self._viewport_refresh_pending = False
+        return True
+
+    def refresh_viewport(self) -> None:
+        if self.world is None:
+            return
+        # Updating articulation state while the timeline is paused changes the
+        # physics view, but the visible link transforms may remain stale. Step a
+        # few rendered frames while the timeline is playing, then pause again so
+        # the control buttons still behave like discrete pose commands.
+        import omni.timeline
+
+        timeline = omni.timeline.get_timeline_interface()
+        was_playing = timeline.is_playing()
+        if not was_playing:
+            self.world.play()
+        for _ in range(3):
+            self.world.step(render=True)
+        if not was_playing:
+            self.world.pause()
 
 
 def _max_pose_error(articulation: Any, expected_pose: tuple[float, ...]) -> float | None:
@@ -150,7 +181,7 @@ def _assert_articulation_pose(articulation: Any, expected_pose: tuple[float, ...
 
 
 def _run_pose_self_test(world: Any, left: Any, right: Any) -> None:
-    controller = AlohaPoseController(left, right)
+    controller = AlohaPoseController(left, right, world=world)
     home_left, home_right = split_real_start_pose_for_isaac_articulations(REAL_RUNTIME_RESET_POSE)
     sleep_left, sleep_right = split_real_start_pose_for_isaac_articulations(REAL_RUNTIME_SLEEP_POSE)
 
@@ -244,10 +275,9 @@ def main() -> None:
         pose_controls = None
         if not args.no_real_start_pose:
             articulations = _apply_real_start_pose_to_articulations()
-            _, left, right = articulations
-            pose_controller = AlohaPoseController(left, right)
+            world, left, right = articulations
+            pose_controller = AlohaPoseController(left, right, world=world)
             if args.self_test_poses:
-                world, _, _ = articulations
                 _run_pose_self_test(world, left, right)
                 return
             pose_controls = _build_pose_control_window(pose_controller)
@@ -260,6 +290,8 @@ def main() -> None:
             app.update()
             if articulations is not None and not timeline.is_playing():
                 pose_controller.reapply_current_pose()
+                if pose_controller.consume_viewport_refresh_request():
+                    pose_controller.refresh_viewport()
                 if pose_controls is not None:
                     _, status = pose_controls
                     status.text = f"Current pose: {pose_controller.current_pose_name}"
