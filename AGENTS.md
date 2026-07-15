@@ -24,7 +24,7 @@ cd /home/eii/Documents/Notes/openpi0.5-rtc-reward-learning && npm run check:math
   - Also read `docs/agents/remote_103_operations.md` if the action happens on `192.168.1.103`.
 - Isaac Sim, Isaac Lab, Claude Code MCP, Codex MCP, or the local MCP installation on machine `101`:
   - Read `docs/agents/isaac_mcp_toolchain.md`.
-  - NVIDIA official Isaac MCP is mandatory first for every Isaac-related task; do not silently fall back to other Isaac tools.
+  - NVIDIA official Isaac MCP is mandatory before modifying Isaac Sim code, USD stages, scene-generation scripts, physics setup, GUI controls, or Isaac runtime behavior. Read-only investigation does not require starting Isaac MCP unless the answer depends on official Isaac API behavior.
 - ROS MCP, `robotmcp/ros-mcp-server`, rosbridge, rosapi, or MCP-based ROS inspection/control:
   - Read `docs/agents/ros_mcp.md`.
   - Also read `docs/agents/remote_103_operations.md` for any `192.168.1.103` work and `docs/agents/aloha_hardware_debug.md` before any action that can affect the real ALOHA robot.

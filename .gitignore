@@ -72,6 +72,7 @@ build/
 develop-eggs/
 dist/
 downloads/
+external/
 eggs/
 .eggs/
 lib/

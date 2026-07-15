@@ -44,11 +44,25 @@ Read this before using, changing, debugging, or reinstalling Isaac Sim / Isaac L
 - Scratch workspace: `/home/eii/isaac_mcp_setup/aloha_project`
 - This is only a scratch workspace. The project source of truth remains `/home/eii/project/openpi0.5-rtc-reward-learning`, especially `examples/aloha_isaac`.
 
-## Hard NVIDIA MCP Requirement
-- For any Isaac Sim, Isaac Lab, Isaac MCP, ALOHA simulation, USD conversion, physics setup, or Isaac GUI task, first use the NVIDIA official Isaac MCP: `isaac-sim-mcp` / `mcp__isaac_sim_mcp`.
-- This is mandatory, not a preference. Do not start with shell-only inspection, community MCPs, web/forum searches, or local code changes for Isaac-related work.
-- If the NVIDIA official Isaac MCP is unavailable, fails, or cannot answer the required Isaac-specific point, stop and report that the hard prerequisite is unavailable before continuing. Do not silently substitute another MCP or community source.
-- After the NVIDIA official Isaac MCP has been used for the task, `isaaclab`, `isaacsim-control`, and `isaacsim-python` may be used only as secondary implementation or inspection tools.
+## Confirmed ALOHA Isaac Startup Stage
+- As of 2026-07-15, the only user-confirmed ALOHA Isaac startup stage is:
+  - Directory: `/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/`
+  - USD: `/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd`
+- `examples/aloha_isaac/scripts/open_workcell_gui.py` defaults to this USD when launched without `--usd`; that default is intentional for the confirmed ALOHA scene.
+- Normal startup should not pass `--usd`; use the script default so stale scratch stages cannot be loaded by accident.
+- `open_workcell_gui.py` rejects noncanonical USD paths by default. Use `--allow-noncanonical-usd` only for an explicit experiment or conversion debug session.
+- On this desktop, normal non-headless Isaac startup must move the main Isaac Sim window to user-facing workspace 2. This keeps the current workspace usable for the user while agents inspect or screenshot Isaac on the second workspace. The launcher does this by default with `xdotool`; use `--no-move-to-startup-workspace` only when the user explicitly wants Isaac on the current workspace.
+- When taking Isaac screenshots or doing visual inspection, do not move Isaac back to the user's active workspace. Prefer window-id based screenshots or operate on workspace 2 so the user's desktop remains usable.
+- Do not substitute `examples/aloha_isaac/config/workcell_user_measured.yaml` for normal ALOHA Isaac startup. That measured workcell path was rejected by the user because it loads the wrong ALOHA configuration.
+- The directory also contains `config.yaml`, but that file records MJCF conversion metadata. For GUI startup, the effective startup target is the USD above, not the YAML file name.
+- Other `local_eval_assets/aloha_isaac*` directories are intermediate or scratch assets, not startup targets. Do not clean them by deletion unless the generator chain has been checked, because some are source layers for the confirmed stage.
+
+## NVIDIA MCP Requirement
+- For read-only Isaac investigation, first read this document and inspect local project state. Use the NVIDIA official Isaac MCP only when the answer depends on official Isaac API behavior, USD semantics, physics behavior, GUI behavior, or Isaac runtime state.
+- Before modifying Isaac Sim code, USD stages, scene-generation scripts, physics setup, GUI controls, or Isaac runtime behavior, first use the NVIDIA official Isaac MCP: `isaac-sim-mcp` / `mcp__isaac_sim_mcp`.
+- This modification-time requirement is mandatory, not a preference. Do not make Isaac implementation changes based only on shell inspection, community MCPs, web/forum searches, or local guesses.
+- If the NVIDIA official Isaac MCP is unavailable, fails, or cannot answer the required Isaac-specific point for a planned modification, stop and report that the hard prerequisite is unavailable before changing Isaac implementation code. Do not silently substitute another MCP or community source for that modification.
+- After the NVIDIA official Isaac MCP has been used for the modification, `isaaclab`, `isaacsim-control`, and `isaacsim-python` may be used only as secondary implementation or inspection tools.
 - `isaacsim-control` and `isaacsim-python` remain local simulation tools only; never use them to affect the real ALOHA robot.
 
 ## Secondary MCP Order
