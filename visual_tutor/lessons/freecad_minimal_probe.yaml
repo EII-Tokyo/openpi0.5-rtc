@@ -1,0 +1,21 @@
+schema_version: visual-tutor-lesson/v1
+id: freecad-minimal-probe
+version: "0.1"
+mode: demonstrate
+goal: Probe FreeCAD readiness without launching or modifying user CAD.
+max_steps: 1
+steps:
+  - id: probe-freecad
+    app: FreeCAD
+    description: Check whether FreeCAD is installed and ready for visible teaching.
+    action_kind: probe
+    semantic_target: FreeCAD application availability
+    visual_fallback: application launcher icon
+    expected_state:
+      app_available: true
+    timeout_seconds: 5
+    retry_limit: 1
+    checkpoint: true
+    undo_strategy: none
+    pause_duration_seconds: 0.8
+    safety_class: simulation_only

@@ -1,0 +1,31 @@
+schema_version: visual-tutor-profile/v1
+id: ubuntu-x11-isaac51-freecad-missing
+created_from: visual_tutor/audit/environment_audit.json
+host:
+  hostname: ubuntu
+  display: ":1"
+  wayland_display: null
+  session_type: x11
+  gpu: NVIDIA GeForce RTX 3090 Ti
+  driver: "575.57.08"
+freecad:
+  available: false
+  control_route:
+    - Dogtail / AT-SPI
+    - visual template fallback
+    - window-relative coordinates
+  calibrated: false
+isaac:
+  python_env: .venv_issac
+  extension: my.isaac.visual_tutor
+  extension_path: visual_tutor/isaac_extensions/my.isaac.visual_tutor
+  control_route:
+    - omni.kit.ui_test widget/menu query
+    - internal UI action
+    - screenshot visual fallback
+    - viewport-relative fallback
+  simulation_only: true
+  timeline_starts_paused: true
+streaming:
+  configured: false
+  note: "No WebRTC streaming setup was changed in this phase."

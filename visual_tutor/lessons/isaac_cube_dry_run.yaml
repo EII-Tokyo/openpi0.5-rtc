@@ -1,0 +1,23 @@
+schema_version: visual-tutor-lesson/v1
+id: isaac-cube-dry-run
+version: "0.1"
+mode: demonstrate
+goal: Validate Isaac Visual Tutor safety flow on a dry-run cube lesson.
+max_steps: 1
+steps:
+  - id: create-cube-dry-run
+    app: Isaac Sim
+    description: Dry-run the create-cube lesson step without touching a real robot.
+    action_kind: create_prim_cube
+    semantic_target: Create menu > Mesh > Cube
+    visual_fallback: Isaac viewport center
+    expected_state:
+      prim_type: Cube
+      selection: Cube
+      timeline: paused
+    timeout_seconds: 10
+    retry_limit: 1
+    checkpoint: true
+    undo_strategy: delete_created_prim
+    pause_duration_seconds: 0.8
+    safety_class: simulation_only

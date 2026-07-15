@@ -1,0 +1,16 @@
+[package]
+version = "0.1.0"
+category = "Teaching"
+title = "My Isaac Visual Tutor"
+description = "Simulation-only visual tutor overlay and status panel for Isaac Sim lessons."
+authors = ["eii"]
+
+[dependencies]
+"omni.ui" = {}
+"omni.usd" = {}
+"omni.kit.commands" = {}
+"omni.kit.viewport.window" = {}
+"omni.timeline" = {}
+
+[[python.module]]
+name = "my.isaac.visual_tutor"

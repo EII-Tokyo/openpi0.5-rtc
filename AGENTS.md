@@ -28,6 +28,9 @@ cd /home/eii/Documents/Notes/openpi0.5-rtc-reward-learning && npm run check:math
 - Photo-to-Isaac scene reconstruction, camera rack CAD, pipe/table spatial models, generated USD layers, or `scene_reconstruction/` assets:
   - Read `docs/agents/scene_reconstruction.md`.
   - Use the local `photo-to-isaac-cad` skill when available.
+- Visual Tutor, visible GUI teaching, FreeCAD/Isaac step-by-step lessons, `my-gui-teacher`, `my-visual-tutor`, or `visual_tutor/`:
+  - Read `docs/agents/visual_tutor.md`.
+  - Use the local `my-visual-tutor` skill when available.
 - ROS MCP, `robotmcp/ros-mcp-server`, rosbridge, rosapi, or MCP-based ROS inspection/control:
   - Read `docs/agents/ros_mcp.md`.
   - Also read `docs/agents/remote_103_operations.md` for any `192.168.1.103` work and `docs/agents/aloha_hardware_debug.md` before any action that can affect the real ALOHA robot.
