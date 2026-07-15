@@ -72,7 +72,7 @@ services:
       --rlt-replay-root
       /app/replay
       --rlt-train-horizon
-      10
+      ${RLT_TRAIN_ACTION_HORIZON:-25}
       --rlt-full-horizon
       50
       --rlt-chunk-stride

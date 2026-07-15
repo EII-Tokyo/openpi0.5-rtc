@@ -24,6 +24,7 @@ POLICY_EVENT_ALIGNMENT_TRUNK_SHARED = "trunk_shared"
 DEFAULT_POLICY_EVENT_ALIGNMENT = POLICY_EVENT_ALIGNMENT_TRUNK_SHARED
 ALOHA_JOINT_FLIP_MASK = np.asarray([1, -1, -1, 1, 1, 1, 1, 1, -1, -1, 1, 1, 1, 1], dtype=np.float32)
 DEFAULT_POLICY_PROPRIO_DIM = 32
+DEFAULT_LOWER_RIGHT_RL_TOKEN_CHECKPOINT = "/app/checkpoints/rlt_lower_right_rl_token_ablation_20260701/BEST/checkpoint"
 
 
 def compute_anchor_starts(num_frames: int, train_horizon: int, chunk_stride: int) -> np.ndarray:
@@ -494,7 +495,23 @@ def _read_hdf5_provenance(root: h5py.File) -> dict[str, Any]:
                 else:
                     provenance[key] = float(value)
                 break
+    _fill_conservative_provenance_defaults(root, provenance)
     return provenance
+
+
+def _fill_conservative_provenance_defaults(root: h5py.File, provenance: dict[str, Any]) -> None:
+    """Fill audit fields that older runtime HDF5 files did not persist.
+
+    Existing explicit provenance always wins. The defaults avoid claiming a
+    specific actor checkpoint when the HDF5 did not save one.
+    """
+
+    provenance.setdefault("behavior_policy", "runtime_unknown")
+    provenance.setdefault("action_source", "runtime_executed_action")
+    if "reference_action" in root:
+        provenance.setdefault("reference_action_source", "vla_same_forward_reference_action")
+    if "rlt_policy_forward_events/z_rl" in root or "rlt_timeline/z_rl" in root:
+        provenance.setdefault("rl_token_checkpoint_path", DEFAULT_LOWER_RIGHT_RL_TOKEN_CHECKPOINT)
 
 
 def _read_frame_policy_proprio(root: h5py.File) -> tuple[np.ndarray | None, str | None]:

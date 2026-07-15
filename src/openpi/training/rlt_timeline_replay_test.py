@@ -216,6 +216,45 @@ def test_policy_forward_events_can_share_trunk_tokens_for_short_stride(tmp_path)
     np.testing.assert_allclose(arrays["action"][1, :, 0], np.arange(4, 24, 2, dtype=np.float32))
 
 
+def test_policy_forward_events_fill_conservative_provenance_defaults(tmp_path):
+    h5_path = tmp_path / "episode.hdf5"
+    _write_policy_forward_event_hdf5(
+        h5_path,
+        frames=70,
+        event_steps=(0, 25, 50),
+        include_policy_proprio=True,
+    )
+    with h5py.File(h5_path, "a") as root:
+        for key in (
+            "behavior_policy",
+            "action_source",
+            "reference_action_source",
+            "rl_token_checkpoint_path",
+            "actor_checkpoint_path",
+            "actor_checkpoint_step",
+        ):
+            root.attrs.pop(key, None)
+            root["rlt_timeline"].attrs.pop(key, None)
+            root["rlt_policy_forward_events"].attrs.pop(key, None)
+
+    _, manifest = rlt_timeline_replay.build_paper_replay_from_timeline_hdf5(
+        h5_path,
+        train_horizon=10,
+        chunk_stride=2,
+        policy_event_alignment="trunk_shared",
+    )
+
+    assert manifest["behavior_policy"] == "runtime_unknown"
+    assert manifest["action_source"] == "runtime_executed_action"
+    assert manifest["reference_action_source"] == "vla_same_forward_reference_action"
+    assert (
+        manifest["rl_token_checkpoint_path"]
+        == "/app/checkpoints/rlt_lower_right_rl_token_ablation_20260701/BEST/checkpoint"
+    )
+    assert "actor_checkpoint_path" not in manifest
+    assert "actor_checkpoint_step" not in manifest
+
+
 def test_trunk_shared_policy_forward_events_require_frame_policy_proprio(tmp_path):
     h5_path = tmp_path / "episode.hdf5"
     _write_policy_forward_event_hdf5(h5_path, frames=70, event_steps=(0, 25, 50))
