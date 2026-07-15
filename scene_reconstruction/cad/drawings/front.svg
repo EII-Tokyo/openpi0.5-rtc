@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="700" viewBox="0 0 1000 700">
+<rect width="100%" height="100%" fill="#f7f5ef"/>
+<style>text{font-family:Arial,sans-serif;font-size:18px;fill:#222} .dim{font-size:14px;fill:#555}</style>
+<text x='40' y='45'>Front view: rack height and pipe tilt</text>
+<line x1="192.0" y1="560.0" x2="808.0" y2="560.0" stroke="#8a6d2f" stroke-width="5"/>
+<line x1="158.4" y1="560.0" x2="158.4" y2="78.4" stroke="#111" stroke-width="8"/>
+<line x1="841.6" y1="560.0" x2="841.6" y2="78.4" stroke="#111" stroke-width="8"/>
+<line x1="158.4" y1="78.4" x2="841.6" y2="78.4" stroke="#111" stroke-width="8"/>
+<line x1="516.8" y1="520.8" x2="426.1" y2="433.4" stroke="#d7191c" stroke-width="6"/>
+<text x='40' y='665' class='dim'>Pipe length and tilt use user measurement; rack height is estimated.</text>
+</svg>

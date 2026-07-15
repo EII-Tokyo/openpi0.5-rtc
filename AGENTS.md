@@ -25,6 +25,9 @@ cd /home/eii/Documents/Notes/openpi0.5-rtc-reward-learning && npm run check:math
 - Isaac Sim, Isaac Lab, Claude Code MCP, Codex MCP, or the local MCP installation on machine `101`:
   - Read `docs/agents/isaac_mcp_toolchain.md`.
   - NVIDIA official Isaac MCP is mandatory before modifying Isaac Sim code, USD stages, scene-generation scripts, physics setup, GUI controls, or Isaac runtime behavior. Read-only investigation does not require starting Isaac MCP unless the answer depends on official Isaac API behavior.
+- Photo-to-Isaac scene reconstruction, camera rack CAD, pipe/table spatial models, generated USD layers, or `scene_reconstruction/` assets:
+  - Read `docs/agents/scene_reconstruction.md`.
+  - Use the local `photo-to-isaac-cad` skill when available.
 - ROS MCP, `robotmcp/ros-mcp-server`, rosbridge, rosapi, or MCP-based ROS inspection/control:
   - Read `docs/agents/ros_mcp.md`.
   - Also read `docs/agents/remote_103_operations.md` for any `192.168.1.103` work and `docs/agents/aloha_hardware_debug.md` before any action that can affect the real ALOHA robot.

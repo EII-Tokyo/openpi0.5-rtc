@@ -1,0 +1,11 @@
+#usda 1.0
+(
+    metersPerUnit = 1
+    upAxis = "Z"
+    subLayers = [
+        @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@,
+        @camera_rack.usda@,
+        @pipe.usda@,
+        @real_layout_override.usda@
+    ]
+)

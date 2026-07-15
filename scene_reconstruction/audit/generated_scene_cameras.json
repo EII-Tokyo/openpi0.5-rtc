@@ -1,0 +1,44 @@
+{
+  "/World/ReconstructionCameras/cam_low_proxy": {
+    "translation": [
+      0.0,
+      -0.28,
+      0.55
+    ],
+    "quaternion_wxyz": [
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "focal_length": 18.0,
+    "horizontal_aperture": 20.955,
+    "vertical_aperture": 15.2908,
+    "clipping_range": [
+      0.01,
+      100.0
+    ],
+    "note": "USD Camera Prim, not GUI viewport."
+  },
+  "/World/ReconstructionCameras/cam_right_wrist_hint_proxy": {
+    "translation": [
+      0.48,
+      -0.05,
+      0.34
+    ],
+    "quaternion_wxyz": [
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "focal_length": 18.0,
+    "horizontal_aperture": 20.955,
+    "vertical_aperture": 15.2908,
+    "clipping_range": [
+      0.01,
+      100.0
+    ],
+    "note": "USD Camera Prim, not GUI viewport."
+  }
+}

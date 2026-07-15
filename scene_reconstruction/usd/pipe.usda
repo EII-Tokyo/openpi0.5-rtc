@@ -1,0 +1,44 @@
+#usda 1.0
+(
+    metersPerUnit = 1
+    upAxis = "Z"
+)
+
+def Xform "World" {
+  def Xform "PipeAssembly" {
+    def Cube "table_reference" {
+        color3f[] primvars:displayColor = [(0.8, 0.7, 0.42)]
+        double size = 1
+        double3 xformOp:translate = (0, 0, -0.02)
+        double3 xformOp:scale = (1.1, 0.6, 0.04)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+    }
+    def Cube "pipe_base_estimated" {
+        color3f[] primvars:displayColor = [(0.28, 0.28, 0.28)]
+        double size = 1
+        double3 xformOp:translate = (0.03, 0.395, 0.025)
+        double3 xformOp:scale = (0.12, 0.08, 0.05)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+    }
+    def Cylinder "pipe_axis" {
+        color3f[] primvars:displayColor = [(0.8, 0.8, 0.78)]
+        double height = 0.22489998
+        double radius = 0.00250000
+        matrix4d xformOp:transform = ((0.69364169, -0.00000000, 0.72032021, 0.00000000),
+            (0.00000000, 1.00000000, 0.00000000, 0.00000000),
+            (-0.72032021, 0.00000000, 0.69364169, 0.00000000),
+            (-0.05100000, 0.39500000, 0.14800000, 1.00000000))
+        uniform token[] xformOpOrder = ["xformOp:transform"]
+    }
+    def Cylinder "pipe_centerline_red" {
+        color3f[] primvars:displayColor = [(1.0, 0.05, 0.05)]
+        double height = 0.22489998
+        double radius = 0.00120000
+        matrix4d xformOp:transform = ((0.69364169, -0.00000000, 0.72032021, 0.00000000),
+            (0.00000000, 1.00000000, 0.00000000, 0.00000000),
+            (-0.72032021, 0.00000000, 0.69364169, 0.00000000),
+            (-0.05100000, 0.39500000, 0.14800000, 1.00000000))
+        uniform token[] xformOpOrder = ["xformOp:transform"]
+    }
+  }
+}

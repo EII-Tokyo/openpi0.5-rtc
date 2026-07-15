@@ -1,0 +1,276 @@
+metadata:
+  project: openpi0.5-rtc-reward-learning
+  created_at: "2026-07-15"
+  units: m
+  coordinate_convention:
+    world: "Isaac/USD right-handed, Z up, meters"
+    table_frame: "origin at table center; x along table width/long edge, y from robot side toward pipe side, z up"
+  source_policy:
+    measured: "Direct user measurement or measurement sketch."
+    read_from_usd: "Read from existing USD stage audit."
+    derived: "Computed from measured/read_from_usd values."
+    estimated: "Estimated from real photos; not a measured dimension."
+    unknown: "Not available yet."
+
+parameters:
+  table.size:
+    value: [1.10, 0.60, 0.04]
+    unit: m
+    source: user_measurement
+    confidence: high
+    status: measured
+    evidence:
+      - user_text: "table w=110cm, h=60cm"
+    notes: "The third value is proxy tabletop thickness for visualization, not measured."
+
+  table.pose:
+    value:
+      translation: [0.0, 0.0, -0.02]
+      quaternion_wxyz: [1.0, 0.0, 0.0, 0.0]
+    unit: m
+    source: derived
+    confidence: medium
+    status: derived
+    evidence:
+      - scene_reconstruction/audit/overlay_transforms.json:/World/Table
+    notes: "Table center aligned with world origin for the parametric scene."
+
+  aloha.left_base_pose:
+    value:
+      translation: [0.0, 0.0, 0.0]
+      quaternion_wxyz: [1.0, 0.0, 0.0, 0.0]
+    unit: m
+    source: existing_usd
+    confidence: medium
+    status: read_from_usd
+    evidence:
+      - scene_reconstruction/audit/original_aloha_transforms.json:/scene/left_base_link
+    notes: "Existing USD places both ALOHA root xforms at identity; mesh extents distinguish left/right arms."
+
+  aloha.right_base_pose:
+    value:
+      translation: [0.0, 0.0, 0.0]
+      quaternion_wxyz: [1.0, 0.0, 0.0, 0.0]
+    unit: m
+    source: existing_usd
+    confidence: medium
+    status: read_from_usd
+    evidence:
+      - scene_reconstruction/audit/original_aloha_transforms.json:/scene/right_base_link
+    notes: "Existing USD places both ALOHA root xforms at identity; mesh extents distinguish left/right arms."
+
+  pipe.diameter:
+    value: 0.005
+    unit: m
+    source: user_measurement
+    confidence: high
+    status: measured
+    evidence:
+      - user_text: "水管直径0.5cm"
+    notes: ""
+
+  pipe.radius:
+    value: 0.0025
+    unit: m
+    source: derived
+    confidence: high
+    status: derived
+    evidence:
+      - parameters.pipe.diameter
+    notes: ""
+
+  pipe.length:
+    value: 0.225
+    unit: m
+    source: user_measurement
+    confidence: medium
+    status: measured
+    evidence:
+      - user_photo: /home/eii/Downloads/iphone/IMG_5334.JPG
+    notes: "Measured from hand sketch; confirm with caliper/tape later."
+
+  pipe.mount_height:
+    value: 0.07
+    unit: m
+    source: user_measurement
+    confidence: medium
+    status: measured
+    evidence:
+      - user_photo: /home/eii/Downloads/iphone/IMG_5334.JPG
+    notes: "Height at pipe/base mounting point above table plane."
+
+  pipe.side_tilt_deg:
+    value: 44.0
+    unit: deg
+    source: user_measurement
+    confidence: medium
+    status: measured
+    evidence:
+      - user_photo: /home/eii/Downloads/iphone/IMG_5334.JPG
+    notes: "Side view tilt from table plane."
+
+  pipe.base_offset_outside_w1:
+    value: 0.095
+    unit: m
+    source: user_measurement
+    confidence: high
+    status: measured
+    evidence:
+      - user_text: "水管底座距离w1是9.5cm"
+    notes: "Outside the table edge on the pipe side."
+
+  pipe.edge_projection_a_distance_from_left:
+    value: 0.58
+    unit: m
+    source: user_measurement
+    confidence: high
+    status: measured
+    evidence:
+      - user_text: "A点距离左边是58cm"
+    notes: "Projection of pipe base center onto table w1 edge."
+
+  pipe.axis_start:
+    value: [0.03, 0.395, 0.07]
+    unit: m
+    source: derived
+    confidence: medium
+    status: derived
+    evidence:
+      - parameters.table.size
+      - parameters.pipe.base_offset_outside_w1
+      - parameters.pipe.edge_projection_a_distance_from_left
+    notes: "Table left edge is x=-0.55, so x=-0.55+0.58=0.03; y=0.30+0.095=0.395."
+
+  pipe.axis_end:
+    value: [-0.132, 0.395, 0.226]
+    unit: m
+    source: derived
+    confidence: medium
+    status: derived
+    evidence:
+      - parameters.pipe.axis_start
+      - parameters.pipe.length
+      - parameters.pipe.side_tilt_deg
+    notes: "Axis is modeled parallel to the table edge and pointing toward the left arm."
+
+  rack.profile_section:
+    value: [0.025, 0.025]
+    unit: m
+    source: photo_estimate
+    confidence: low
+    status: estimated
+    evidence:
+      - /home/eii/Downloads/iphone/IMG_5339.JPG
+      - /home/eii/Downloads/iphone/IMG_5340.JPG
+    notes: "Black aluminum extrusion appears around 25mm square; measure directly."
+
+  rack.outer_size:
+    value: [1.22, 0.72, 0.86]
+    unit: m
+    source: photo_estimate
+    confidence: low
+    status: estimated
+    evidence:
+      - /home/eii/Downloads/iphone/IMG_5335.JPG
+      - /home/eii/Downloads/iphone/IMG_5339.JPG
+    notes: "Frame slightly larger than 1.10m x 0.60m table; height estimated from camera posts."
+
+  rack.post_positions:
+    value:
+      - [-0.61, -0.36, 0.43]
+      - [0.61, -0.36, 0.43]
+      - [-0.61, 0.36, 0.43]
+      - [0.61, 0.36, 0.43]
+    unit: m
+    source: derived_from_estimated_outer_size
+    confidence: low
+    status: estimated
+    evidence:
+      - parameters.rack.outer_size
+    notes: "Centers of four vertical post proxy boxes."
+
+  rack.crossbeam_height:
+    value: 0.86
+    unit: m
+    source: photo_estimate
+    confidence: low
+    status: estimated
+    evidence:
+      - /home/eii/Downloads/iphone/IMG_5339.JPG
+    notes: "Needs tape measurement."
+
+  camera.cam_low.pose:
+    value:
+      translation: [0.0, -0.28, 0.55]
+      quaternion_wxyz: [0.8930412531, 0.4493740765, -0.0232434870, 0.0]
+    unit: m
+    source: existing_usd
+    confidence: medium
+    status: read_from_usd
+    evidence:
+      - scene_reconstruction/audit/overlay_cameras.json:/World/Cameras/cam_low
+    notes: "This is an existing proxy Camera Prim, not guaranteed calibrated to the real camera."
+
+  camera.cam_right_wrist_hint.pose:
+    value:
+      translation: [0.48, -0.05, 0.34]
+      quaternion_wxyz: [0.8246294260, 0.3472898257, 0.4465154944, 0.0]
+    unit: m
+    source: existing_usd
+    confidence: medium
+    status: read_from_usd
+    evidence:
+      - scene_reconstruction/audit/overlay_cameras.json:/World/Cameras/cam_right_wrist_hint
+    notes: "This is an existing proxy Camera Prim, not guaranteed calibrated to the real wrist camera."
+
+  camera.focal_length:
+    value: 18.0
+    unit: mm
+    source: existing_usd
+    confidence: low
+    status: read_from_usd
+    evidence:
+      - scene_reconstruction/audit/overlay_cameras.json
+    notes: "USD proxy camera value; not physical calibration."
+
+  camera.real_intrinsics:
+    value: null
+    unit: null
+    source: none
+    confidence: none
+    status: unknown
+    evidence: []
+    notes: "Need camera model, calibration target, or ROS camera_info."
+
+transforms:
+  T_world_table:
+    status: derived
+    matrix:
+      - [1.0, 0.0, 0.0, 0.0]
+      - [0.0, 1.0, 0.0, 0.0]
+      - [0.0, 0.0, 1.0, -0.02]
+      - [0.0, 0.0, 0.0, 1.0]
+  T_table_pipe:
+    status: derived
+    translation: [0.03, 0.395, 0.07]
+    axis_start: [0.03, 0.395, 0.07]
+    axis_end: [-0.132, 0.395, 0.226]
+  T_table_rack:
+    status: estimated
+    translation: [0.0, 0.0, 0.0]
+  T_table_camera:
+    status: read_from_usd
+    cameras:
+      cam_low: [0.0, -0.28, 0.55]
+      cam_right_wrist_hint: [0.48, -0.05, 0.34]
+  T_camera_pipe:
+    status: estimated
+    notes: "Requires real camera extrinsics; proxy relation can be computed from current estimated camera poses and derived pipe axis."
+
+low_confidence_parameters:
+  - rack.profile_section
+  - rack.outer_size
+  - rack.post_positions
+  - rack.crossbeam_height
+  - camera.focal_length
+  - camera.real_intrinsics

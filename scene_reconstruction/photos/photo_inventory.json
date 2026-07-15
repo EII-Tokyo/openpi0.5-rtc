@@ -1,0 +1,158 @@
+[
+  {
+    "id": 1,
+    "path": "/home/eii/Downloads/iphone/IMG_5334.JPG",
+    "filename": "IMG_5334.JPG",
+    "suffix": ".jpg",
+    "width": 4032,
+    "height": 3024,
+    "exif": {
+      "make": "Apple",
+      "model": "iPhone 11",
+      "datetime": "2026:07:15 09:10:13"
+    },
+    "datetime": "2026:07:15 09:10:13",
+    "lens_or_focal_length": "",
+    "visible_objects": [
+      "needs_visual_review",
+      "pipe_measurement_sketch",
+      "table_edge_measurements"
+    ],
+    "scale_reference": "unknown",
+    "viewpoint": "unknown_until_visual_review",
+    "suitable_for_camera_pose": "unknown_until_visual_review",
+    "suitable_for_pipe_axis": "unknown_until_visual_review"
+  },
+  {
+    "id": 2,
+    "path": "/home/eii/Downloads/iphone/IMG_5335.JPG",
+    "filename": "IMG_5335.JPG",
+    "suffix": ".jpg",
+    "width": 4032,
+    "height": 3024,
+    "exif": {
+      "make": "Apple",
+      "model": "iPhone 11",
+      "datetime": "2026:07:15 09:11:05"
+    },
+    "datetime": "2026:07:15 09:11:05",
+    "lens_or_focal_length": "",
+    "visible_objects": [
+      "needs_visual_review"
+    ],
+    "scale_reference": "unknown",
+    "viewpoint": "unknown_until_visual_review",
+    "suitable_for_camera_pose": "unknown_until_visual_review",
+    "suitable_for_pipe_axis": "unknown_until_visual_review"
+  },
+  {
+    "id": 3,
+    "path": "/home/eii/Downloads/iphone/IMG_5336.JPG",
+    "filename": "IMG_5336.JPG",
+    "suffix": ".jpg",
+    "width": 4032,
+    "height": 3024,
+    "exif": {
+      "make": "Apple",
+      "model": "iPhone 11",
+      "datetime": "2026:07:15 09:11:09"
+    },
+    "datetime": "2026:07:15 09:11:09",
+    "lens_or_focal_length": "",
+    "visible_objects": [
+      "needs_visual_review"
+    ],
+    "scale_reference": "unknown",
+    "viewpoint": "unknown_until_visual_review",
+    "suitable_for_camera_pose": "unknown_until_visual_review",
+    "suitable_for_pipe_axis": "unknown_until_visual_review"
+  },
+  {
+    "id": 4,
+    "path": "/home/eii/Downloads/iphone/IMG_5337.JPG",
+    "filename": "IMG_5337.JPG",
+    "suffix": ".jpg",
+    "width": 4032,
+    "height": 3024,
+    "exif": {
+      "make": "Apple",
+      "model": "iPhone 11",
+      "datetime": "2026:07:15 09:11:25"
+    },
+    "datetime": "2026:07:15 09:11:25",
+    "lens_or_focal_length": "",
+    "visible_objects": [
+      "needs_visual_review"
+    ],
+    "scale_reference": "unknown",
+    "viewpoint": "unknown_until_visual_review",
+    "suitable_for_camera_pose": "unknown_until_visual_review",
+    "suitable_for_pipe_axis": "unknown_until_visual_review"
+  },
+  {
+    "id": 5,
+    "path": "/home/eii/Downloads/iphone/IMG_5338.JPG",
+    "filename": "IMG_5338.JPG",
+    "suffix": ".jpg",
+    "width": 4032,
+    "height": 3024,
+    "exif": {
+      "make": "Apple",
+      "model": "iPhone 11",
+      "datetime": "2026:07:15 09:11:30"
+    },
+    "datetime": "2026:07:15 09:11:30",
+    "lens_or_focal_length": "",
+    "visible_objects": [
+      "needs_visual_review"
+    ],
+    "scale_reference": "unknown",
+    "viewpoint": "unknown_until_visual_review",
+    "suitable_for_camera_pose": "unknown_until_visual_review",
+    "suitable_for_pipe_axis": "unknown_until_visual_review"
+  },
+  {
+    "id": 6,
+    "path": "/home/eii/Downloads/iphone/IMG_5339.JPG",
+    "filename": "IMG_5339.JPG",
+    "suffix": ".jpg",
+    "width": 4032,
+    "height": 3024,
+    "exif": {
+      "make": "Apple",
+      "model": "iPhone 11",
+      "datetime": "2026:07:15 09:11:39"
+    },
+    "datetime": "2026:07:15 09:11:39",
+    "lens_or_focal_length": "",
+    "visible_objects": [
+      "needs_visual_review"
+    ],
+    "scale_reference": "unknown",
+    "viewpoint": "unknown_until_visual_review",
+    "suitable_for_camera_pose": "unknown_until_visual_review",
+    "suitable_for_pipe_axis": "unknown_until_visual_review"
+  },
+  {
+    "id": 7,
+    "path": "/home/eii/Downloads/iphone/IMG_5340.JPG",
+    "filename": "IMG_5340.JPG",
+    "suffix": ".jpg",
+    "width": 4032,
+    "height": 3024,
+    "exif": {
+      "make": "Apple",
+      "model": "iPhone 11",
+      "datetime": "2026:07:15 09:11:48"
+    },
+    "datetime": "2026:07:15 09:11:48",
+    "lens_or_focal_length": "",
+    "visible_objects": [
+      "needs_visual_review"
+    ],
+    "scale_reference": "unknown",
+    "viewpoint": "unknown_until_visual_review",
+    "suitable_for_camera_pose": "unknown_until_visual_review",
+    "suitable_for_pipe_axis": "unknown_until_visual_review"
+  }
+]

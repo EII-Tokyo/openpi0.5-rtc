@@ -1,0 +1,28 @@
+#usda 1.0
+(
+    metersPerUnit = 1
+    upAxis = "Z"
+)
+
+def Xform "World" {
+  def Xform "ReconstructionCameras" {
+    def Camera "cam_low_proxy" {
+        double focalLength = 18.0
+        double horizontalAperture = 20.955
+        double verticalAperture = 15.2908
+        double2 clippingRange = (0.01, 100.0)
+        double3 xformOp:translate = (0.0, -0.28, 0.55)
+        uniform token[] xformOpOrder = ["xformOp:translate"]
+        custom string source_status = "proxy_from_scene_parameters"
+    }
+    def Camera "cam_right_wrist_hint_proxy" {
+        double focalLength = 18.0
+        double horizontalAperture = 20.955
+        double verticalAperture = 15.2908
+        double2 clippingRange = (0.01, 100.0)
+        double3 xformOp:translate = (0.48, -0.05, 0.34)
+        uniform token[] xformOpOrder = ["xformOp:translate"]
+        custom string source_status = "proxy_from_scene_parameters"
+    }
+  }
+}

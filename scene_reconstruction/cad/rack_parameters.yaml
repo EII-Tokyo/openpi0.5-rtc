@@ -1,0 +1,7 @@
+route: OpenUSD proxy geometry
+freecad_available: false
+source: scene_reconstruction/config/scene_parameters.yaml
+outputs:
+  camera_rack_usd: scene_reconstruction/usd/camera_rack.usda
+  pipe_usd: scene_reconstruction/usd/pipe.usda
+  scene_usd: scene_reconstruction/usd/aloha_real_scene.usda

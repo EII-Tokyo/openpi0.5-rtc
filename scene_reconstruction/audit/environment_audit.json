@@ -1,0 +1,501 @@
+{
+  "adaptive_contract": {
+    "cache": {
+      "generated_at": 1784085378,
+      "workspace_mtime": 1784043795.3318732
+    },
+    "capability_matrix": {
+      "environments": {
+        "config_allows_system_package_install": false,
+        "project_venv": {
+          "exists": false,
+          "path": null
+        }
+      },
+      "missing_tools": [],
+      "tools": [
+        {
+          "available": true,
+          "command": "nvidia-smi",
+          "path": "/usr/bin/nvidia-smi",
+          "version": "NVIDIA-SMI version  : 575.57.08"
+        },
+        {
+          "available": true,
+          "command": "python3",
+          "path": "/usr/bin/python3",
+          "version": "Python 3.12.3"
+        }
+      ],
+      "workspace": "/home/eii/isaac_mcp_setup/aloha_project"
+    },
+    "directory_plan": {
+      "output_root": "/home/eii/isaac_mcp_setup/aloha_project/assets",
+      "policy": "use existing relevant directories; otherwise use one centralized adaptive_tasks directory"
+    },
+    "external_inputs": [
+      "/home/eii/project/openpi0.5-rtc-reward-learning",
+      "/home/eii/Downloads/iphone"
+    ],
+    "goal": "当前工作目录是 Git 仓库 /home/eii/project/openpi0.5-rtc-reward-learning。本任务输出必须集中在该仓库根目录 scene_reconstruction/，不要使用 /home/eii/isaac_mcp_setup/aloha_project 作为输出目录。目标：基于真实照片 /home/eii/Downloads/iphone 和当前机器已有 Isaac Sim ALOHA 场景，建立摄像头架子、水管、桌面、摄像头与 ALO",
+    "installation_plan": [
+      "Use existing project environment when safe.",
+      "Create isolated task/project environment for missing helper tools.",
+      "Do not upgrade Isaac, CUDA, ROS, drivers, or system Python.",
+      "Verify library/MCP compatibility with Context7 or official docs before installing."
+    ],
+    "missing_capabilities": [],
+    "reusable_assets": {
+      "direct_reuse": [
+        {
+          "evidence": [
+            "prompt relevant"
+          ],
+          "path": "/home/eii/isaac_mcp_setup/aloha_project/assets",
+          "type": "directory"
+        },
+        {
+          "evidence": [
+            "prompt relevant"
+          ],
+          "path": "/home/eii/isaac_mcp_setup/aloha_project/scripts",
+          "type": "directory"
+        },
+        {
+          "evidence": [
+            "prompt relevant"
+          ],
+          "path": "/home/eii/isaac_mcp_setup/aloha_project/extensions",
+          "type": "directory"
+        },
+        {
+          "evidence": [
+            "prompt relevant"
+          ],
+          "path": "/home/eii/isaac_mcp_setup/aloha_project/config",
+          "type": "directory"
+        }
+      ],
+      "extendable": [],
+      "possible_conflicts": [],
+      "suggested_new": [
+        {
+          "path": "/home/eii/isaac_mcp_setup/aloha_project/cad",
+          "reason": "needed by task and no existing directory"
+        },
+        {
+          "path": "/home/eii/isaac_mcp_setup/aloha_project/usd",
+          "reason": "needed by task and no existing directory"
+        }
+      ],
+      "workspace": "/home/eii/isaac_mcp_setup/aloha_project"
+    },
+    "risks": [
+      "Prompt paths and versions are candidates until verified.",
+      "System-level installs require explicit user approval."
+    ],
+    "selected_workspace": {
+      "confidence": "high",
+      "path": "/home/eii/isaac_mcp_setup/aloha_project",
+      "reason": "highest evidence score",
+      "score": 90
+    },
+    "validation_plan": [
+      "Verify new files remain under selected workspace or allowed output root.",
+      "Verify external inputs are read-only and not used as output roots.",
+      "Verify reusable assets were extended instead of duplicated.",
+      "Inspect Git diff against task goal."
+    ]
+  },
+  "system": {
+    "hostname": {
+      "cmd": [
+        "hostname"
+      ],
+      "returncode": 0,
+      "stdout": "ubuntu",
+      "stderr": ""
+    },
+    "whoami": {
+      "cmd": [
+        "whoami"
+      ],
+      "returncode": 0,
+      "stdout": "eii",
+      "stderr": ""
+    },
+    "pwd": {
+      "cmd": [
+        "pwd"
+      ],
+      "returncode": 0,
+      "stdout": "/home/eii/project/openpi0.5-rtc-reward-learning",
+      "stderr": ""
+    },
+    "git_root": {
+      "cmd": [
+        "git",
+        "rev-parse",
+        "--show-toplevel"
+      ],
+      "returncode": 0,
+      "stdout": "/home/eii/project/openpi0.5-rtc-reward-learning",
+      "stderr": ""
+    },
+    "git_status": {
+      "cmd": [
+        "git",
+        "status",
+        "--short"
+      ],
+      "returncode": 0,
+      "stdout": "?? scene_reconstruction/",
+      "stderr": ""
+    },
+    "os_release": "PRETTY_NAME=\"Ubuntu 24.04.2 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"24.04\"\nVERSION=\"24.04.2 LTS (Noble Numbat)\"\nVERSION_CODENAME=noble\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=noble\nLOGO=ubuntu-logo\n",
+    "uname": {
+      "cmd": [
+        "uname",
+        "-a"
+      ],
+      "returncode": 0,
+      "stdout": "Linux ubuntu 6.14.0-37-generic #37~24.04.1-Ubuntu SMP PREEMPT_DYNAMIC Thu Nov 20 10:25:38 UTC 2 x86_64 x86_64 x86_64 GNU/Linux",
+      "stderr": ""
+    },
+    "machine": "x86_64",
+    "python3": {
+      "cmd": [
+        "python3",
+        "--version"
+      ],
+      "returncode": 0,
+      "stdout": "Python 3.12.3",
+      "stderr": ""
+    },
+    "nvidia_smi": {
+      "cmd": [
+        "nvidia-smi",
+        "--query-gpu=name,driver_version,memory.total",
+        "--format=csv,noheader"
+      ],
+      "returncode": 0,
+      "stdout": "NVIDIA GeForce RTX 3090 Ti, 575.57.08, 24564 MiB",
+      "stderr": ""
+    },
+    "sudo_noninteractive": {
+      "cmd": [
+        "sudo",
+        "-n",
+        "true"
+      ],
+      "returncode": 1,
+      "stdout": "",
+      "stderr": "sudo: a password is required"
+    }
+  },
+  "commands": {
+    "codex": {
+      "command": "codex",
+      "path": "/home/eii/.local/bin/codex",
+      "available": true,
+      "version_probe": {
+        "cmd": [
+          "codex",
+          "--version"
+        ],
+        "returncode": 0,
+        "stdout": "codex-cli 0.144.4",
+        "stderr": ""
+      }
+    },
+    "magick": {
+      "command": "magick",
+      "path": null,
+      "available": false
+    },
+    "convert": {
+      "command": "convert",
+      "path": "/usr/bin/convert",
+      "available": true,
+      "version_probe": {
+        "cmd": [
+          "convert",
+          "--version"
+        ],
+        "returncode": 0,
+        "stdout": "Version: ImageMagick 6.9.12-98 Q16 x86_64 18038 https://legacy.imagemagick.org\nCopyright: (C) 1999 ImageMagick Studio LLC\nLicense: https://imagemagick.org/script/license.php\nFeatures: Cipher DPC Modules OpenMP(4.5) \nDelegates (built-in): bzlib djvu fftw fontconfig freetype heic jbig jng jp2 jpeg lcms lqr ltdl lzma openexr pangocairo png raw tiff webp wmf x xml zlib",
+        "stderr": ""
+      }
+    },
+    "heif-convert": {
+      "command": "heif-convert",
+      "path": null,
+      "available": false
+    },
+    "exiftool": {
+      "command": "exiftool",
+      "path": null,
+      "available": false
+    },
+    "ffmpeg": {
+      "command": "ffmpeg",
+      "path": "/usr/bin/ffmpeg",
+      "available": true,
+      "version_probe": {
+        "cmd": [
+          "ffmpeg",
+          "-version"
+        ],
+        "returncode": 0,
+        "stdout": "ffmpeg version 6.1.1-3ubuntu5+esm10 Copyright (c) 2000-2023 the FFmpeg developers\nbuilt with gcc 13 (Ubuntu 13.3.0-6ubuntu2~24.04.1)\nconfiguration: --prefix=/usr --extra-version=3ubuntu5+esm10 --toolchain=hardened --libdir=/usr/lib/x86_64-linux-gnu --incdir=/usr/include/x86_64-linux-gnu --arch=amd64 --enable-gpl --disable-stripping --disable-omx --enable-gnutls --enable-libaom --enable-libass --enable-libbs2b --enable-libcaca --enable-libcdio --enable-libcodec2 --enable-libdav1d --enable-libflite --enable-libfontconfig --enable-libfreetype --enable-libfribidi --enable-libglslang --enable-libgme --enable-libgsm --enable-libharfbuzz --enable-libmp3lame --enable-libmysofa --enable-libopenjpeg --enable-libopenmpt --enable-libopus --enable-librubberband --enable-libshine --enable-libsnappy --enable-libsoxr --enable-libspeex --enable-libtheora --enable-libtwolame --enable-libvidstab --enable-libvorbis --enable-libvpx --enable-libwebp --enable-libx265 --enable-libxml2 --enable-libxvid --enable-libzimg --enable-openal --enable-opencl --enable-opengl --disable-sndio --enable-libvpl --disable-libmfx --enable-libdc1394 --enable-libdrm --enable-libiec61883 --enable-chromaprint --enable-frei0r --enable-ladspa --enable-libbluray --enable-libjack --enable-libpulse --enable-librabbitmq --enable-librist --enable-libsrt --enable-libssh --enable-libsvtav1 --enable-libx264 --enable-libzmq --enable-libzvbi --enable-lv2 --enable-sdl2 --enable-libplacebo --enable-librav1e --enable-pocketsphinx --enable-librsvg --enable-libjxl --enable-shared\nlibavutil      58. 29.100 / 58. 29.100\nlibavcodec     60. 31.102 / 60. 31.102\nlibavformat    60. 16.100 / 60. 16.100\nlibavdevice    60.  3.100 / 60.  3.100\nlibavfilter     9. 12.100 /  9. 12.100\nlibswscale      7.  5.100 /  7.  5.100\nlibswresample   4. 12.100 /  4. 12.100\nlibpostproc    57.  3.100 / 57.  3.100",
+        "stderr": ""
+      }
+    },
+    "isaac-sim.sh": {
+      "command": "isaac-sim.sh",
+      "path": null,
+      "available": false
+    },
+    "isaaclab.sh": {
+      "command": "isaaclab.sh",
+      "path": null,
+      "available": false
+    },
+    "usdcat": {
+      "command": "usdcat",
+      "path": null,
+      "available": false
+    },
+    "usdview": {
+      "command": "usdview",
+      "path": null,
+      "available": false
+    },
+    "FreeCAD": {
+      "command": "FreeCAD",
+      "path": null,
+      "available": false
+    },
+    "freecadcmd": {
+      "command": "freecadcmd",
+      "path": null,
+      "available": false
+    },
+    "FreeCADCmd": {
+      "command": "FreeCADCmd",
+      "path": null,
+      "available": false
+    },
+    "blender": {
+      "command": "blender",
+      "path": null,
+      "available": false
+    },
+    "openscad": {
+      "command": "openscad",
+      "path": null,
+      "available": false
+    },
+    "colmap": {
+      "command": "colmap",
+      "path": null,
+      "available": false
+    },
+    "meshlabserver": {
+      "command": "meshlabserver",
+      "path": null,
+      "available": false
+    },
+    "cloudcompare": {
+      "command": "cloudcompare",
+      "path": null,
+      "available": false
+    },
+    "uv": {
+      "command": "uv",
+      "path": "/home/eii/.local/bin/uv",
+      "available": true,
+      "version_probe": {
+        "cmd": [
+          "uv",
+          "--version"
+        ],
+        "returncode": 0,
+        "stdout": "uv 0.6.14",
+        "stderr": ""
+      }
+    },
+    "codex_mcp_list": {
+      "cmd": [
+        "codex",
+        "mcp",
+        "list"
+      ],
+      "returncode": 0,
+      "stdout": "Name                 Command                                                                        Args                                                                                                                 Env                                      Cwd  Status   Auth       \nchrome-devtools      npx                                                                            -y chrome-devtools-mcp@latest                                                                                        -                                        -    enabled  Unsupported\ncontext7             npx                                                                            -y @upstash/context7-mcp --api-key ctx7sk-350a602e-4bf6-4d1e-9971-83c07ea569bc                                       -                                        -    enabled  Unsupported\nfigma                npx                                                                            -y figma-developer-mcp@^0.6.3 --stdio                                                                                FIGMA_API_KEY=*****                      -    enabled  Unsupported\nflowbite             npx                                                                            -y flowbite-mcp                                                                                                      -                                        -    enabled  Unsupported\ngithub               npx                                                                            -y @modelcontextprotocol/server-github                                                                               GITHUB_PERSONAL_ACCESS_TOKEN=*****       -    enabled  Unsupported\nisaaclab             /home/eii/isaac_mcp_setup/repos/isaaclab-mcp-local/run_isaaclab_mcp.sh         -                                                                                                                    -                                        -    enabled  Unsupported\nisaacsim-control     /home/eii/isaac_mcp_setup/repos/isaacsim-mcp-server/scripts/run_mcp_server.sh  -                                                                                                                    ISAAC_MCP_PORT=*****                     -    enabled  Unsupported\nisaacsim-python      /home/eii/isaac_mcp_setup/repos/isaacsim-mcp/.venv/bin/isaac-mcp-server        -                                                                                                                    -                                        -    enabled  Unsupported\nqdrant               uvx                                                                            mcp-server-qdrant                                                                                                    COLLECTION_NAME=*****, QDRANT_URL=*****  -    enabled  Unsupported\nros-mcp              /home/eii/.local/bin/uvx                                                       --from ros-mcp ros-mcp --transport=stdio                                                                             -                                        -    enabled  Unsupported\nsentry               npx                                                                            -y @sentry/mcp-server@latest --access-token=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  -                                        -    enabled  Unsupported\nsequential-thinking  npx                                                                            -y @modelcontextprotocol/server-sequential-thinking                                                                  -                                        -    enabled  Unsupported\n\nName           Url                        Bearer Token Env Var  Status   Auth       \nisaac-sim-mcp  http://localhost:9904/mcp  -                     enabled  Unsupported",
+      "stderr": ""
+    },
+    "codex_mcp_help": {
+      "cmd": [
+        "codex",
+        "mcp",
+        "--help"
+      ],
+      "returncode": 0,
+      "stdout": "Manage external MCP servers for Codex\n\nUsage: codex mcp [OPTIONS] <COMMAND>\n\nCommands:\n  list    \n  get     \n  add     \n  remove  \n  login   \n  logout  \n  help    Print this message or the help of the given subcommand(s)\n\nOptions:\n  -c, --config <key=value>\n          Override a configuration value that would otherwise be loaded from `~/.codex/config.toml`.\n          Use a dotted path (`foo.bar.baz`) to override nested values. The `value` portion is parsed\n          as TOML. If it fails to parse as TOML, the raw string is used as a literal.\n          \n          Examples: - `-c model=\"o3\"` - `-c 'sandbox_permissions=[\"disk-full-read-access\"]'` - `-c\n          shell_environment_policy.inherit=all`\n\n      --enable <FEATURE>\n          Enable a feature (repeatable). Equivalent to `-c features.<name>=true`\n\n      --disable <FEATURE>\n          Disable a feature (repeatable). Equivalent to `-c features.<name>=false`\n\n  -h, --help\n          Print help (see a summary with '-h')",
+      "stderr": ""
+    }
+  },
+  "python_modules": {
+    "system_python3": {
+      "FreeCAD": "MISSING (ModuleNotFoundError: No module named 'FreeCAD')",
+      "Part": "MISSING (ModuleNotFoundError: No module named 'Part')",
+      "numpy": "OK 2.2.4",
+      "PIL": "OK 10.2.0",
+      "cv2": "MISSING (ImportError: numpy.core.multiarray failed to import)",
+      "yaml": "OK 6.0.1",
+      "pxr": "MISSING (ModuleNotFoundError: No module named 'pxr')",
+      "isaacsim": "MISSING (ModuleNotFoundError: No module named 'isaacsim')"
+    },
+    "project_venv": {
+      "FreeCAD": "MISSING (ModuleNotFoundError: No module named 'FreeCAD')",
+      "Part": "MISSING (ModuleNotFoundError: No module named 'Part')",
+      "numpy": "OK 2.4.0",
+      "PIL": "OK 11.2.1",
+      "cv2": "OK 4.11.0",
+      "yaml": "OK 6.0.2",
+      "pxr": "MISSING (ModuleNotFoundError: No module named 'pxr')",
+      "isaacsim": "MISSING (ModuleNotFoundError: No module named 'isaacsim')"
+    },
+    "isaac_venv": {
+      "FreeCAD": "MISSING (ModuleNotFoundError: No module named 'FreeCAD')",
+      "Part": "MISSING (ModuleNotFoundError: No module named 'Part')",
+      "numpy": "OK 1.26.4",
+      "PIL": "OK 11.3.0",
+      "cv2": "OK 4.11.0",
+      "yaml": "OK 6.0.2",
+      "pxr": "MISSING (ModuleNotFoundError: No module named 'pxr')",
+      "in https": "//docs.omniverse.nvidia.com/platform/latest/common/NVIDIA_Omniverse_License_Agreement.html",
+      "Do you accept the EULA? (Yes/No)": ""
+    }
+  },
+  "photos": {
+    "path": "/home/eii/Downloads/iphone",
+    "exists": true,
+    "counts": {
+      ".jpg": 7
+    },
+    "sample_files": [
+      "/home/eii/Downloads/iphone/IMG_5334.JPG",
+      "/home/eii/Downloads/iphone/IMG_5335.JPG",
+      "/home/eii/Downloads/iphone/IMG_5336.JPG",
+      "/home/eii/Downloads/iphone/IMG_5337.JPG",
+      "/home/eii/Downloads/iphone/IMG_5338.JPG",
+      "/home/eii/Downloads/iphone/IMG_5339.JPG",
+      "/home/eii/Downloads/iphone/IMG_5340.JPG"
+    ],
+    "file_count": 7
+  },
+  "bounded_searches": {
+    "roots": [
+      "/home/eii/project/openpi0.5-rtc-reward-learning",
+      "/home/eii/IsaacLab",
+      "/home/eii/isaacsim",
+      "/home/eii/Documents",
+      "/home/eii/Projects",
+      "/home/eii/workspace"
+    ],
+    "usd_files": [
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/warp/tests/assets/spiky.usd",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/warp/tests/assets/torus.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/warp/examples/assets/bunny.usd",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/warp/examples/assets/cube.usd",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/warp/examples/assets/rocks.usd",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/warp/examples/assets/bear.usd",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/warp/examples/assets/square_cloth.usd",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/warp/examples/assets/sphere.usd",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/warp/examples/assets/nonuniform.usd",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.core.nodes/isaacsim/core/nodes/ogn/tests/usd/OgnIsaacScaleToFromStageUnitTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.core.nodes/isaacsim/core/nodes/ogn/tests/usd/OgnIsaacJointNameResolverTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.core.nodes/isaacsim/core/nodes/ogn/tests/usd/OgnIsaacReadCameraInfoTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.core.nodes/isaacsim/core/nodes/ogn/tests/usd/OgnIsaacGenerateRGBATemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.core.nodes/isaacsim/core/nodes/ogn/tests/usd/OgnIsaacReadSystemTimeTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.core.nodes/isaacsim/core/nodes/ogn/tests/usd/OgnIsaacRunOneSimulationFrameTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.core.nodes/isaacsim/core/nodes/ogn/tests/usd/OgnIsaacGenerate32FC1Template.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.core.nodes/isaacsim/core/nodes/ogn/tests/usd/OgnIsaacReadEnvVarTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.core.nodes/isaacsim/core/nodes/ogn/tests/usd/OgnIsaacCreateViewportTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.core.nodes/isaacsim/core/nodes/ogn/tests/usd/OgnIsaacReadSimulationTimeTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.core.nodes/isaacsim/core/nodes/ogn/tests/usd/OgnIsaacCreateRenderProductTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.core.nodes/isaacsim/core/nodes/ogn/tests/usd/OgnIsaacReadSystemTimeAnnotatorTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.core.nodes/isaacsim/core/nodes/ogn/tests/usd/OgnIsaacConvertRGBAToRGBTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.core.nodes/isaacsim/core/nodes/ogn/tests/usd/OgnIsaacReadWorldPoseTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.core.nodes/isaacsim/core/nodes/ogn/tests/usd/OgnIsaacPassthroughImagePtrTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.core.nodes/isaacsim/core/nodes/ogn/tests/usd/OgnIsaacArticulationControllerTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.core.nodes/isaacsim/core/nodes/ogn/tests/usd/OgnIsaacConvertDepthToPointCloudTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.core.nodes/isaacsim/core/nodes/ogn/tests/usd/OgnIsaacRealTimeFactorTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.core.nodes/isaacsim/core/nodes/ogn/tests/usd/OgnIsaacTestNodeTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.core.nodes/isaacsim/core/nodes/ogn/tests/usd/OgnIsaacReadSimulationTimeAnnotatorTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.core.nodes/isaacsim/core/nodes/ogn/tests/usd/OgnIsaacArticulationStateTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.core.nodes/isaacsim/core/nodes/ogn/tests/usd/OgnIsaacSetCameraOnRenderProductTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.core.nodes/isaacsim/core/nodes/ogn/tests/usd/OgnIsaacTimeSplitterTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.core.nodes/isaacsim/core/nodes/ogn/tests/usd/OgnIsaacReadFilePathTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.core.nodes/isaacsim/core/nodes/ogn/tests/usd/OgnOnPhysicsStepTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.core.nodes/isaacsim/core/nodes/ogn/tests/usd/OgnIsaacSimulationGateTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.core.nodes/isaacsim/core/nodes/ogn/tests/usd/OgnIsaacGetViewportRenderProductTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.core.nodes/isaacsim/core/nodes/ogn/tests/usd/OgnIsaacSetViewportResolutionTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.core.nodes/isaacsim/core/nodes/ogn/tests/usd/OgnIsaacComputeOdometryTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.replicator.examples/isaacsim/replicator/examples/ogn/tests/usd/OgnSampleOnSphereTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.replicator.examples/isaacsim/replicator/examples/ogn/tests/usd/OgnSampleInSphereTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.replicator.examples/isaacsim/replicator/examples/ogn/tests/usd/OgnSampleBetweenSpheresTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.gen.conveyor/isaacsim/asset/gen/conveyor/ogn/tests/usd/OgnIsaacConveyorTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.core.cloner/isaacsim/core/cloner/tests/data/quatf_d.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.robot.manipulators/isaacsim/robot/manipulators/ogn/tests/usd/OgnIsaacGripperControllerTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.test.collection/data/tests/articulation_drives_opposite.usd",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.ros2.bridge/isaacsim/ros2/bridge/ogn/tests/usd/OgnROS2PublishBbox2DTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.ros2.bridge/isaacsim/ros2/bridge/ogn/tests/usd/OgnROS2PublishOdometryTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.ros2.bridge/isaacsim/ros2/bridge/ogn/tests/usd/OgnROS2CameraHelperTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.ros2.bridge/isaacsim/ros2/bridge/ogn/tests/usd/OgnROS2SubscribeJointStateTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.ros2.bridge/isaacsim/ros2/bridge/ogn/tests/usd/OgnROS2PublishRawTransformTreeTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.ros2.bridge/isaacsim/ros2/bridge/ogn/tests/usd/OgnROS2RtxLidarHelperTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.ros2.bridge/isaacsim/ros2/bridge/ogn/tests/usd/OgnROS2SubscribeAckermannTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.ros2.bridge/isaacsim/ros2/bridge/ogn/tests/usd/OgnROS2CameraInfoHelperTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.ros2.bridge/isaacsim/ros2/bridge/ogn/tests/usd/OgnROS2PublishImageTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.ros2.bridge/isaacsim/ros2/bridge/ogn/tests/usd/OgnROS2ContextTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.ros2.bridge/isaacsim/ros2/bridge/ogn/tests/usd/OgnROS2SubscribeTwistTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.ros2.bridge/isaacsim/ros2/bridge/ogn/tests/usd/OgnROS2PublishJointStateTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.ros2.bridge/isaacsim/ros2/bridge/ogn/tests/usd/OgnROS2PublishSemanticLabelsTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.ros2.bridge/isaacsim/ros2/bridge/ogn/tests/usd/OgnROS2PublishCameraInfoTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.ros2.bridge/isaacsim/ros2/bridge/ogn/tests/usd/OgnROS2PublishLaserScanTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.ros2.bridge/isaacsim/ros2/bridge/ogn/tests/usd/OgnROS2PublishImuTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.ros2.bridge/isaacsim/ros2/bridge/ogn/tests/usd/OgnROS2PublishBbox3DTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.ros2.bridge/isaacsim/ros2/bridge/ogn/tests/usd/OgnROS2PublishPointCloudTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.ros2.bridge/isaacsim/ros2/bridge/ogn/tests/usd/OgnROS2ServicePrimTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.ros2.bridge/isaacsim/ros2/bridge/ogn/tests/usd/OgnROS2ServiceClientTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.ros2.bridge/isaacsim/ros2/bridge/ogn/tests/usd/OgnROS2PublishAckermannTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.ros2.bridge/isaacsim/ros2/bridge/ogn/tests/usd/OgnROS2PublisherTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.ros2.bridge/isaacsim/ros2/bridge/ogn/tests/usd/OgnROS2QoSProfileTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.ros2.bridge/isaacsim/ros2/bridge/ogn/tests/usd/OgnROS2SubscriberTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.ros2.bridge/isaacsim/ros2/bridge/ogn/tests/usd/OgnROS2ServiceServerResponseTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.ros2.bridge/isaacsim/ros2/bridge/ogn/tests/usd/OgnROS2SubscribeTransformTreeTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.ros2.bridge/isaacsim/ros2/bridge/ogn/tests/usd/OgnROS2PublishTransformTreeTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.ros2.bridge/isaacsim/ros2/bridge/ogn/tests/usd/OgnROS2ServiceServerRequestTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.ros2.bridge/isaacsim/ros2/bridge/ogn/tests/usd/OgnROS2SubscribeClockTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.ros2.bridge/isaacsim/ros2/bridge/ogn/tests/usd/OgnROS2PublishClockTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.sensors.rtx/isaacsim/sensors/rtx/ogn/tests/usd/OgnIsaacComputeRTXLidarFlatScanTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.sensors.rtx/isaacsim/sensors/rtx/ogn/tests/usd/OgnIsaacCreateRTXLidarScanBufferTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.robot.wheeled_robots/isaacsim/robot/wheeled_robots/ogn/tests/usd/OgnCheckGoal2DTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.robot.wheeled_robots/isaacsim/robot/wheeled_robots/ogn/tests/usd/OgnHolonomicControllerTemplate.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.robot.wheeled_robots/isaacsim/robot/wheeled_robots/ogn/tests/usd/OgnDifferentialControllerTemplate.usda"
+    ],
+    "camera_related_python": [],
+    "isaac_readmes": [
+      "/home/eii/Documents/Notes/openpi0.5-rtc-reward-learning/80_Lessons/2026-07-14_aloha_simulation_env/ALOHA Isaac Sim 与开源仿真实现调研_2026-07-14.md",
+      "/home/eii/Documents/Notes/openpi0.5-rtc-reward-learning/80_Lessons/2026-07-14_aloha_simulation_env/Isaac Sim 入门教学路线：双臂 ALOHA 到瓶口插水管_2026-07-14.md",
+      "/home/eii/Documents/Notes/openpi0.5-rtc-reward-learning/80_Lessons/2026-07-14_aloha_simulation_env/ALOHA 模拟训练环境方案：NVIDIA Isaac Sim 与 Isaac Lab 路线_2026-07-14.md"
+    ]
+  },
+  "route_decision": {
+    "selected_workspace": "/home/eii/project/openpi0.5-rtc-reward-learning/scene_reconstruction",
+    "reason": "The adaptive script preferred the Isaac MCP scratch workspace, but the user explicitly required the current repository scene_reconstruction directory and project docs mark this repository as source of truth."
+  }
+}

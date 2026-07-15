@@ -1,0 +1,10 @@
+{
+  "root_identifier": "/home/eii/project/openpi0.5-rtc-reward-learning/scene_reconstruction/usd/aloha_real_scene.usda",
+  "root_real_path": "/home/eii/project/openpi0.5-rtc-reward-learning/scene_reconstruction/usd/aloha_real_scene.usda",
+  "root_sub_layers": [
+    "../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd",
+    "camera_rack.usda",
+    "pipe.usda",
+    "real_layout_override.usda"
+  ]
+}
