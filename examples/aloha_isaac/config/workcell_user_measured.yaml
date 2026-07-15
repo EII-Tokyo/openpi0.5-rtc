@@ -4,13 +4,9 @@ stage:
   output_usd: local_eval_assets/aloha_isaac_user_measured/aloha_workcell_user_measured.usda
 
 assets:
-  # Legacy ALOHA Stationary / ALOHA 2.0-style dual ViperX follower-arm asset.
-  # This matches the 103 robot evidence better than the newer Trossen
-  # Stationary AI USD: 103 uses follower/puppet aloha_vx300s arms and
-  # leader/master aloha_wx250s arms.
-  # Isaac's MJCF converter exports only the first movable root from the
-  # bimanual MJCF, so reference the converted single-follower arm twice using
-  # the original MJCF left/right base transforms.
+  # Show ALOHA as visual context while keeping calibration status explicit.
+  # The table and pipe are user-measured; the real left/right ALOHA base poses
+  # are still approximate in this first-pass stage.
   aloha_usd: local_eval_assets/aloha_isaac_assets/aloha_viperx.usd
   load_aloha_if_exists: true
   instance_single_arm_usd_twice: true
@@ -67,7 +63,7 @@ pipe_placeholder:
     pipe_length_m: 0.225
     pipe_diameter_m: 0.005
     side_tilt_deg: 44.0
-    points_toward_table: true
+    plan_direction: parallel_to_table_edge_toward_left_arm
   color: [1.0, 0.05, 0.05]
 
 cameras:

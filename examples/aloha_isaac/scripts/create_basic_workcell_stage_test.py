@@ -20,7 +20,7 @@ def _load_script():
     return module
 
 
-def test_user_measured_config_uses_legacy_aloha2_asset():
+def test_user_measured_config_loads_aloha_as_visual_context():
     cfg = yaml.safe_load(CONFIG_PATH.read_text())
 
     assert cfg["assets"]["load_aloha_if_exists"] is True
@@ -57,6 +57,8 @@ def test_user_measured_pipe_is_derived_from_table_edge_measurements():
     pipe_cfg = mod._resolve_pipe_placeholder(cfg)
 
     assert pipe_cfg["start"] == [0.03, 0.395, 0.07]
-    assert pipe_cfg["end"] == [0.03, 0.233, 0.226]
+    assert pipe_cfg["end"] == [-0.132, 0.395, 0.226]
     assert pipe_cfg["radius"] == 0.0025
     assert pipe_cfg["measurement_a_point"] == [0.03, 0.3, 0.0]
+    assert pipe_cfg["start"][1] == pipe_cfg["end"][1]
+    assert pipe_cfg["end"][0] < pipe_cfg["start"][0]

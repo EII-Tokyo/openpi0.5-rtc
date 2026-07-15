@@ -160,20 +160,23 @@ def _resolve_pipe_placeholder(cfg: dict[str, Any]) -> dict[str, Any]:
     if not measurement:
         return pipe_cfg
 
-    if measurement.get("table_edge") != "w1":
-        raise ValueError(f"unsupported pipe table edge: {measurement.get('table_edge')!r}")
+    table_edge = measurement.get("table_edge")
+    if table_edge not in {"w0", "w1"}:
+        raise ValueError(f"unsupported pipe table edge: {table_edge!r}")
 
     table_size = cfg["table"]["size"]
     table_translation = cfg["table"]["pose"]["translation"]
     left_edge_x = float(table_translation[0]) - float(table_size[0]) / 2.0
-    w1_edge_y = float(table_translation[1]) + float(table_size[1]) / 2.0
+    edge_y = float(table_translation[1]) + (
+        float(table_size[1]) / 2.0 if table_edge == "w1" else -float(table_size[1]) / 2.0
+    )
 
     a_point = [
         left_edge_x + float(measurement["a_distance_from_left_edge_m"]),
-        w1_edge_y,
+        edge_y,
         0.0,
     ]
-    outside_sign = 1.0
+    outside_sign = 1.0 if table_edge == "w1" else -1.0
     base_y = a_point[1] + outside_sign * float(measurement["base_offset_outside_table_m"])
     start = [a_point[0], base_y, float(measurement["mount_height_m"])]
 
@@ -181,8 +184,14 @@ def _resolve_pipe_placeholder(cfg: dict[str, Any]) -> dict[str, Any]:
     tilt_rad = math.radians(float(measurement["side_tilt_deg"]))
     horizontal = length * math.cos(tilt_rad)
     vertical = length * math.sin(tilt_rad)
-    toward_table_sign = -1.0 if measurement.get("points_toward_table", True) else 1.0
-    end = [start[0], start[1] + toward_table_sign * horizontal, start[2] + vertical]
+    plan_direction = measurement.get("plan_direction", "toward_table")
+    if plan_direction == "parallel_to_table_edge_toward_left_arm":
+        end = [start[0] - horizontal, start[1], start[2] + vertical]
+    elif plan_direction == "toward_table":
+        toward_table_sign = -1.0 if table_edge == "w1" else 1.0
+        end = [start[0], start[1] + toward_table_sign * horizontal, start[2] + vertical]
+    else:
+        raise ValueError(f"unsupported pipe plan direction: {plan_direction!r}")
 
     pipe_cfg["start"] = _round_vec(start)
     pipe_cfg["end"] = _round_vec(end)

@@ -1,4 +1,5 @@
 import math
+from types import SimpleNamespace
 
 import pytest
 
@@ -190,6 +191,64 @@ def test_pose_control_window_uses_pinned_startup_position() -> None:
     assert kwargs["position_y"] == pytest.approx(760)
     assert kwargs["width"] == pytest.approx(154)
     assert kwargs["height"] == pytest.approx(190)
+
+
+def test_open_workcell_gui_uses_only_confirmed_startup_usd_by_default(tmp_path) -> None:
+    from examples.aloha_isaac.scripts.open_workcell_gui import DEFAULT_USD, _resolve_startup_usd_path
+
+    assert _resolve_startup_usd_path(DEFAULT_USD) == DEFAULT_USD.resolve()
+
+    stale_usd = tmp_path / "aloha_isaac_minimal" / "aloha_workcell.usd"
+    stale_usd.parent.mkdir()
+    stale_usd.touch()
+
+    with pytest.raises(ValueError, match="only user-confirmed ALOHA Isaac startup USD"):
+        _resolve_startup_usd_path(stale_usd)
+
+    assert _resolve_startup_usd_path(stale_usd, allow_noncanonical=True) == stale_usd.resolve()
+
+
+def test_startup_workspace_uses_user_facing_one_based_numbering() -> None:
+    from examples.aloha_isaac.scripts.open_workcell_gui import (
+        DEFAULT_STARTUP_WORKSPACE_NUMBER,
+        _workspace_index_from_number,
+    )
+
+    assert DEFAULT_STARTUP_WORKSPACE_NUMBER == 2
+    assert _workspace_index_from_number(2) == 1
+    assert _workspace_index_from_number(1) == 0
+    with pytest.raises(ValueError, match="workspace number"):
+        _workspace_index_from_number(0)
+
+
+def test_move_current_process_window_to_workspace_uses_xdotool_pid_search(monkeypatch) -> None:
+    from examples.aloha_isaac.scripts import open_workcell_gui
+
+    calls = []
+
+    def fake_run(cmd, **kwargs):
+        calls.append((cmd, kwargs))
+        if cmd == ["xdotool", "get_num_desktops"]:
+            return SimpleNamespace(stdout="2\n")
+        if cmd == ["xdotool", "search", "--pid", "1234"]:
+            return SimpleNamespace(stdout="111\n222\n")
+        if cmd == ["xdotool", "get_desktop_for_window", "222"]:
+            return SimpleNamespace(stdout="1\n")
+        return SimpleNamespace(stdout="")
+
+    monkeypatch.setattr(open_workcell_gui.shutil, "which", lambda name: "/usr/bin/xdotool" if name == "xdotool" else None)
+
+    moved = open_workcell_gui._move_current_process_window_to_workspace(
+        workspace_number=2,
+        pid=1234,
+        attempts=1,
+        runner=fake_run,
+        sleep_fn=lambda _: None,
+    )
+
+    assert moved is True
+    command_args = [call[0] for call in calls]
+    assert ["xdotool", "set_desktop_for_window", "222", "1"] in command_args
 
 
 def test_pose_controller_applies_home_sleep_and_toggle() -> None:

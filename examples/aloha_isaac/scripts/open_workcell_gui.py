@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import argparse
 import os
+import shutil
+import subprocess
 import time
 from pathlib import Path
 from typing import Any
@@ -33,12 +35,96 @@ STARTUP_VIEW_CAMERA_CLIPPING_RANGE = (0.01, 100.0)
 STARTUP_WINDOW_SIZE = (1980, 1120)
 POSE_CONTROL_WINDOW_POSITION = (1135, 760)
 POSE_CONTROL_WINDOW_SIZE = (154, 190)
+DEFAULT_STARTUP_WORKSPACE_NUMBER = 2
 POSES = {
     "home": REAL_RUNTIME_RESET_POSE,
     "sleep": REAL_RUNTIME_SLEEP_POSE,
 }
 POSE_CONTROL_HZ = 50.0
 POSE_CONTROL_DT_S = 1.0 / POSE_CONTROL_HZ
+
+
+def _resolve_startup_usd_path(usd_path: Path, allow_noncanonical: bool = False) -> Path:
+    """Resolve the startup USD while preventing accidental launch of stale ALOHA variants."""
+    resolved = usd_path.resolve()
+    canonical = DEFAULT_USD.resolve()
+    if resolved != canonical and not allow_noncanonical:
+        raise ValueError(
+            "Refusing to open noncanonical ALOHA Isaac USD. "
+            f"The only user-confirmed ALOHA Isaac startup USD is {canonical}. "
+            "Pass --allow-noncanonical-usd only for an explicit experiment."
+        )
+    return resolved
+
+
+def _workspace_index_from_number(workspace_number: int) -> int:
+    if workspace_number < 1:
+        raise ValueError(f"workspace number must be >= 1, got {workspace_number}")
+    return workspace_number - 1
+
+
+def _parse_xdotool_window_ids(stdout: str) -> list[str]:
+    return [line.strip() for line in stdout.splitlines() if line.strip()]
+
+
+def _move_current_process_window_to_workspace(
+    workspace_number: int = DEFAULT_STARTUP_WORKSPACE_NUMBER,
+    pid: int | None = None,
+    attempts: int = 40,
+    sleep_s: float = 0.25,
+    runner=subprocess.run,
+    sleep_fn=time.sleep,
+) -> bool:
+    """Move this Isaac GUI process window to a non-current workspace when X11 supports it."""
+    if "DISPLAY" not in os.environ:
+        print("Skipping Isaac workspace move: DISPLAY is not set.", flush=True)
+        return False
+    if shutil.which("xdotool") is None:
+        print("Skipping Isaac workspace move: xdotool is not installed.", flush=True)
+        return False
+
+    target_index = _workspace_index_from_number(workspace_number)
+    process_id = str(pid if pid is not None else os.getpid())
+
+    try:
+        desktops = runner(["xdotool", "get_num_desktops"], check=True, capture_output=True, text=True)
+        desktop_count = int(desktops.stdout.strip())
+        if desktop_count <= target_index:
+            runner(["xdotool", "set_num_desktops", str(workspace_number)], check=True)
+    except Exception as exc:
+        print(f"Skipping Isaac workspace move: failed to inspect desktops: {exc}", flush=True)
+        return False
+
+    window_id = None
+    for _ in range(max(1, attempts)):
+        result = runner(["xdotool", "search", "--pid", process_id], check=False, capture_output=True, text=True)
+        window_ids = _parse_xdotool_window_ids(result.stdout)
+        if window_ids:
+            window_id = window_ids[-1]
+            break
+        sleep_fn(sleep_s)
+
+    if window_id is None:
+        print(f"Skipping Isaac workspace move: no X11 window found for pid={process_id}.", flush=True)
+        return False
+
+    runner(["xdotool", "set_desktop_for_window", window_id, str(target_index)], check=True)
+    actual_index = "unknown"
+    for _ in range(20):
+        try:
+            actual = runner(["xdotool", "get_desktop_for_window", window_id], check=False, capture_output=True, text=True)
+            actual_index = actual.stdout.strip()
+        except Exception:
+            actual_index = "unknown"
+        if actual_index == str(target_index):
+            break
+        sleep_fn(0.1)
+    print(
+        f"Moved Isaac Sim window {window_id} for pid={process_id} to workspace {workspace_number} "
+        f"(X11 desktop index {actual_index}).",
+        flush=True,
+    )
+    return actual_index == str(target_index)
 
 
 class AlohaPoseController:
@@ -414,8 +500,27 @@ def _apply_real_start_pose_to_articulations() -> tuple[object, object, object]:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Open the generated ALOHA Isaac workcell USD in Isaac Sim GUI.")
-    parser.add_argument("--usd", type=Path, default=DEFAULT_USD)
+    parser.add_argument("--usd", type=Path, default=DEFAULT_USD, help=f"USD stage to open. Default: {DEFAULT_USD}")
+    parser.add_argument(
+        "--allow-noncanonical-usd",
+        action="store_true",
+        help="Allow loading a USD other than the user-confirmed ALOHA startup stage. Use only for explicit experiments.",
+    )
     parser.add_argument("--headless", action="store_true", help="Run Isaac without opening the GUI window.")
+    parser.add_argument(
+        "--startup-workspace",
+        type=int,
+        default=DEFAULT_STARTUP_WORKSPACE_NUMBER,
+        help=(
+            "Move the Isaac GUI window to this 1-based desktop/workspace after launch. "
+            f"Default: {DEFAULT_STARTUP_WORKSPACE_NUMBER}."
+        ),
+    )
+    parser.add_argument(
+        "--no-move-to-startup-workspace",
+        action="store_true",
+        help="Keep the Isaac GUI window on the current desktop/workspace.",
+    )
     parser.add_argument(
         "--self-test-poses",
         action="store_true",
@@ -428,7 +533,7 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    usd_path = args.usd.resolve()
+    usd_path = _resolve_startup_usd_path(args.usd, allow_noncanonical=args.allow_noncanonical_usd)
     if not usd_path.exists():
         raise FileNotFoundError(f"USD stage does not exist: {usd_path}")
 
@@ -442,6 +547,8 @@ def main() -> None:
             "window_height": STARTUP_WINDOW_SIZE[1],
         }
     )
+    if not args.headless and not args.no_move_to_startup_workspace:
+        _move_current_process_window_to_workspace(args.startup_workspace)
     try:
         import omni.kit.app
         import omni.usd

@@ -1,16 +1,47 @@
-# ALOHA Isaac Sim / Isaac Lab Minimal Workcell
+# ALOHA Isaac Sim / Isaac Lab Workcell
 
 This folder is the first Isaac route scaffold for the bottle-mouth insertion
 simulation work. It is intentionally small: first create a visible workcell with
 table frame, pipe axis, cameras, and an optional ALOHA USD reference; then add
 real calibration and Isaac Lab task logic step by step.
 
+## Confirmed GUI Startup
+
+For normal GUI startup, use the confirmed ALOHA scene through the default entry
+point. Do not pass `--usd`:
+
+```bash
+OMNI_KIT_ACCEPT_EULA=YES .venv_issac/bin/python \
+  examples/aloha_isaac/scripts/open_workcell_gui.py
+```
+
+This opens:
+
+```text
+local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd
+```
+
+Other `local_eval_assets/aloha_isaac*` stages are intermediate or scratch
+assets. The GUI launcher rejects them by default; pass
+`--allow-noncanonical-usd` only for an explicit experiment.
+
+On this workstation the launcher also moves the Isaac Sim window to workspace 2
+by default so it does not cover the user's active desktop. Override only when
+needed:
+
+```bash
+OMNI_KIT_ACCEPT_EULA=YES .venv_issac/bin/python \
+  examples/aloha_isaac/scripts/open_workcell_gui.py \
+  --no-move-to-startup-workspace
+```
+
 ## Current Scope
 
 - Check whether the active Python environment can import Isaac Sim / Isaac Lab.
 - Create a minimal USD workcell stage from `config/workcell_minimal.yaml`.
-- Use Trossen's official Stationary AI dual-arm USD for the user-measured
-  workcell when `external/trossen_ai_isaac` is available.
+- Keep the user-measured workcell explicit about calibration status: table,
+  pipe, measurement markers, and camera hints come from the user's measurements;
+  ALOHA is loaded as visual context, but its base placement is still approximate.
 - Optionally convert the local Gym ALOHA MJCF model to USD when Isaac Lab is
   installed for legacy experiments.
 - Keep all measured real-world parameters in one YAML file so table origin,
@@ -33,7 +64,10 @@ The current repository Python environment is allowed to fail this check. Isaac
 Sim is a separate heavy runtime and should normally live in its own Python 3.11
 environment.
 
-## Build the Minimal Stage
+## Build Scratch Stages
+
+The following commands are for scratch stage generation and inspection. They are
+not the normal GUI startup path.
 
 After Isaac Sim is installed:
 
@@ -48,10 +82,9 @@ Expected output:
 usd=/abs/path/local_eval_assets/aloha_isaac_minimal/aloha_workcell.usd
 ```
 
-To build the current user-measured first-pass workcell, use:
+To build the current user-measured first-pass table/pipe workcell, use:
 
 ```bash
-git clone --depth 1 https://github.com/TrossenRobotics/trossen_ai_isaac.git external/trossen_ai_isaac
 python3 examples/aloha_isaac/scripts/create_basic_workcell_stage.py \
   --config examples/aloha_isaac/config/workcell_user_measured.yaml
 ```
@@ -69,16 +102,20 @@ Open that USD in Isaac Sim to inspect:
 - `/World/PipePlaceholder`
 - `/World/Cameras/cam_low`
 - `/World/Cameras/cam_right_wrist_hint`
-- `/World/Aloha/StationaryAI` if Trossen's official `stationary_ai.usd` exists
+- `/World/Aloha/LeftFollowerVx300s`
+- `/World/Aloha/RightFollowerVx300s`
 
 The user-measured pipe in `workcell_user_measured.yaml` is intentionally
 defined from measurement facts:
 
 - table size `1.10 m x 0.60 m`
-- `w1` edge at `y = 0.30 m` when the table center is the world origin
+- current water-pipe component is on the `w1` side, at `y = 0.30 m` when
+  the table center is the world origin
 - A point `0.58 m` from the left table edge, so `A = (0.03, 0.30, 0.0)`
 - pipe base center `0.095 m` outside the `w1` edge
 - pipe length `0.225 m`, diameter `0.005 m`, mount height `0.07 m`, side tilt `44 deg`
+- in top view, the pipe axis is parallel to the table edge and points toward
+  the left arm, so its x coordinate decreases while y stays fixed
 
 The stage generator derives the visible pipe axis and also adds:
 
@@ -88,9 +125,10 @@ The stage generator derives the visible pipe axis and also adds:
 Use these blue markers in Isaac Sim to verify that the 9.5 cm table-edge
 constraint is visually correct before using the pipe for any reward logic.
 
-If no ALOHA USD exists yet, the script places simple base-hint boxes only when
-the config provides robot layout hints. The user-measured config intentionally
-uses the official Stationary AI asset rather than hand-placing left/right arms.
+The user-measured config loads ALOHA arms as visual context. The current trusted
+measurements define the table and pipe; the real left/right ALOHA base poses
+still need measurement before this scene can be used for reward or collision
+judgment.
 
 ## Convert the Local ALOHA MJCF to USD
 
@@ -123,7 +161,7 @@ the user-measured Stationary AI scene; use Trossen's official
 2. The table frame `T` is visible and not hidden under the table.
 3. `cam_low` points at the bottle-mouth / pipe placeholder region.
 4. `cam_right_wrist_hint` points at the same region.
-5. The official Stationary AI asset loads under `/World/Aloha/StationaryAI`.
+5. ALOHA appears as visual context, but its base pose is treated as approximate.
 6. Joint names, joint order, and limits are checked before any replay or RL.
 
 Do not start reward training from this skeleton until real table, base, camera,
