@@ -58,3 +58,8 @@ cd /home/eii/Documents/Notes/openpi0.5-rtc-reward-learning && npm run check:math
 
 ## Maintenance Rule
 - When adding new long-lived operational facts, put them in the appropriate `docs/agents/*.md` file and add only a short routing bullet here.
+
+<!-- codex-optimization-project-evidence -->
+## Evidence And Task State
+- High-output diagnostics for training logs, Docker logs, Isaac/ROS logs, tests, MCP, or extensions should use the `my-evidence-first-debugging` skill or `codex-evidence`; keep full output in `.codex/artifacts/` and summarize only bounded evidence in conversation.
+- Use `.codex/TASK_STATE.md` for dynamic long-task handoff state. Do not put temporary task state into this `AGENTS.md` or `docs/agents/*.md`.
