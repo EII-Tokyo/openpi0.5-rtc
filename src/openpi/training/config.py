@@ -1133,18 +1133,13 @@ _CONFIGS = [
             paligemma_variant="gemma_2b_lora",
             action_expert_variant="gemma_300m_lora",
         ),
-        data=CanonicalLeRobotDROIDDataConfig(
+        # clm1/2/3 use the minimal ("legacy") LeRobot schema (exterior_image_1_left,
+        # joint_position, gripper_position, actions, task) — NOT the canonical schema
+        # (observation.state.*, action.source_joint_velocity_gripper). Use the legacy
+        # data config, which maps those keys directly and reads actions from "actions".
+        data=LeRobotDROIDDataConfig(
             repo_ids=[
-                "michios/droid_xxjd_canonical",
-                "michios/droid_xxjd_2_canonical",
-                "michios/droid_xxjd_3_canonical",
-                "michios/droid_xxjd_4_canonical",
-                "michios/droid_xxjd_5_canonical",
-                "michios/droid_xxjd_6_canonical",
-                "michios/droid_xxjd_7_canonical",
-                "michios/droid_xxjd_8_2_canonical",
-                "michios/droid_xxjd_20260202"
-                #TODO: bottle dataset
+                "michios/clm1"
             ],
             base_config=DataConfig(prompt_from_task=True),
             assets=AssetsConfig(
