@@ -1,0 +1,81 @@
+{
+  "REF_SCENE_frame_wormseye_mount_30": {
+    "type": "Mesh::Feature",
+    "center": [
+      30.000001907348633,
+      323.856201171875,
+      17.429039001464844
+    ],
+    "size": [
+      80.66115951538086,
+      30.25860595703125,
+      74.85807800292969
+    ]
+  },
+  "NEW_LOWER_CAMERA_POSITION_GREEN": null,
+  "MEASURED_TOP_STEEL_RAIL_DARK_REFERENCE": {
+    "type": "Part::Box",
+    "center": [
+      0.0,
+      323.856201171875,
+      10.0
+    ],
+    "size": [
+      1220.0,
+      20.0,
+      20.0
+    ]
+  },
+  "MEASURED_CAMERA_SUPPORT_PIPE_260MM_1": {
+    "type": "Part::Box",
+    "center": [
+      -604.9586791992188,
+      193.856201171875,
+      10.0
+    ],
+    "size": [
+      20.0,
+      260.0,
+      20.0
+    ]
+  },
+  "MEASURED_CAMERA_SUPPORT_PIPE_260MM_2": {
+    "type": "Part::Box",
+    "center": [
+      -433.5537109375,
+      193.856201171875,
+      10.0
+    ],
+    "size": [
+      20.0,
+      260.0,
+      20.0
+    ]
+  },
+  "MEASURED_CAMERA_SUPPORT_PIPE_260MM_3": {
+    "type": "Part::Box",
+    "center": [
+      433.5537109375,
+      193.856201171875,
+      10.0
+    ],
+    "size": [
+      20.0,
+      260.0,
+      20.0
+    ]
+  },
+  "MEASURED_CAMERA_SUPPORT_PIPE_260MM_4": {
+    "type": "Part::Box",
+    "center": [
+      604.9586791992188,
+      193.856201171875,
+      10.0
+    ],
+    "size": [
+      20.0,
+      260.0,
+      20.0
+    ]
+  }
+}

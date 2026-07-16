@@ -1,0 +1,40 @@
+{
+  "iteration": "iter_002_measured_aloha_y_offset",
+  "units": "mm",
+  "source_iteration": "scene_reconstruction/cad/aloha_incremental/iterations/iter_001_measured_table_rack/iter_001_measured_table_rack.FCStd",
+  "output_freecad_file": "scene_reconstruction/cad/aloha_incremental/iterations/iter_002_measured_aloha_y_offset/iter_002_measured_aloha_y_offset.FCStd",
+  "measured_margins": {
+    "top_margin_mm": 180.0,
+    "bottom_margin_mm": 235.0,
+    "source": "user physical measurement from annotated screenshot on 2026-07-15",
+    "status": "measured"
+  },
+  "table_y_range_mm": [
+    -312.5,
+    312.5
+  ],
+  "right_base_bbox_before_mm": {
+    "y_min": -121.0,
+    "y_max": 83.0,
+    "y_length": 204.0,
+    "center_y": -19.0
+  },
+  "right_base_bbox_after_mm": {
+    "y_min": -74.5,
+    "y_max": 129.5,
+    "y_length": 204.0,
+    "center_y": 27.5
+  },
+  "translation": {
+    "dx_mm": 0.0,
+    "dy_mm": 46.5,
+    "dz_mm": 0.0,
+    "affected_prefix": "REF_ALOHA_"
+  },
+  "actual_margins_after_translation": {
+    "top_margin_mm": 183.0,
+    "bottom_margin_mm": 238.0,
+    "note": "The CAD robot base mesh is 204 mm wide in Y, while the measured margins imply 210 mm. The model keeps the robot mesh unscaled, so both margins are off by about 3 mm rather than scaling the robot."
+  },
+  "moved_robot_mesh_count": 24
+}

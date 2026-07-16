@@ -1,0 +1,2427 @@
+{
+  "source_fcstd": "/home/eii/project/openpi0.5-rtc-reward-learning/scene_reconstruction/cad/aloha_incremental/iterations/iter_003_lower_camera_top_position/iter_003_lower_camera_top_position.FCStd",
+  "output_fcstd": "/home/eii/project/openpi0.5-rtc-reward-learning/scene_reconstruction/cad/aloha_incremental/iterations/iter_004_mesh_repaired_lower_camera_top_position/iter_004_mesh_repaired_lower_camera_top_position.FCStd",
+  "strategy": "copy mesh, conservative mesh repair, reassign, save as new FCStd",
+  "mesh_objects": [
+    {
+      "name": "REF_ALOHA_left_base_link_vx300s_1_base_0",
+      "label": "REF_ALOHA_left_base_link_vx300s_1_base_0",
+      "applied_methods": [
+        "fixIndices",
+        "removeDuplicatedPoints",
+        "removeDuplicatedFacets",
+        "fixDegenerations",
+        "harmonizeNormals"
+      ],
+      "before": {
+        "name": "REF_ALOHA_left_base_link_vx300s_1_base_0",
+        "label": "REF_ALOHA_left_base_link_vx300s_1_base_0",
+        "count_points": 1001,
+        "count_facets": 1998,
+        "count_edges": 2997,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "after": {
+        "name": "REF_ALOHA_left_base_link_vx300s_1_base_0",
+        "label": "REF_ALOHA_left_base_link_vx300s_1_base_0",
+        "count_points": 1001,
+        "count_facets": 1998,
+        "count_edges": 2997,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "changed_counts": {
+        "points": false,
+        "facets": false,
+        "edges": false
+      }
+    },
+    {
+      "name": "REF_ALOHA_left_base_link_left_shoulder_link_vx300s_2_shoulder_0",
+      "label": "REF_ALOHA_left_base_link_left_shoulder_link_vx300s_2_shoulder_0",
+      "applied_methods": [
+        "fixIndices",
+        "removeDuplicatedPoints",
+        "removeDuplicatedFacets",
+        "fixDegenerations",
+        "harmonizeNormals"
+      ],
+      "before": {
+        "name": "REF_ALOHA_left_base_link_left_shoulder_link_vx300s_2_shoulder_0",
+        "label": "REF_ALOHA_left_base_link_left_shoulder_link_vx300s_2_shoulder_0",
+        "count_points": 640,
+        "count_facets": 1276,
+        "count_edges": 1914,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "after": {
+        "name": "REF_ALOHA_left_base_link_left_shoulder_link_vx300s_2_shoulder_0",
+        "label": "REF_ALOHA_left_base_link_left_shoulder_link_vx300s_2_shoulder_0",
+        "count_points": 640,
+        "count_facets": 1276,
+        "count_edges": 1914,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "changed_counts": {
+        "points": false,
+        "facets": false,
+        "edges": false
+      }
+    },
+    {
+      "name": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_vx300s_3_upper_arm_0",
+      "label": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_vx300s_3_upper_arm_0",
+      "applied_methods": [
+        "fixIndices",
+        "removeDuplicatedPoints",
+        "removeDuplicatedFacets",
+        "fixDegenerations",
+        "harmonizeNormals"
+      ],
+      "before": {
+        "name": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_vx300s_3_upper_arm_0",
+        "label": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_vx300s_3_upper_arm_0",
+        "count_points": 1035,
+        "count_facets": 2058,
+        "count_edges": 3095,
+        "is_solid": false,
+        "has_non_manifolds": true,
+        "has_self_intersections": true,
+        "has_non_uniform_oriented_facets": true,
+        "count_non_uniform_oriented_facets": 2,
+        "count_components": 6,
+        "count_segments": 0
+      },
+      "after": {
+        "name": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_vx300s_3_upper_arm_0",
+        "label": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_vx300s_3_upper_arm_0",
+        "count_points": 1035,
+        "count_facets": 2054,
+        "count_edges": 3081,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": true,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 4,
+        "count_segments": 0
+      },
+      "changed_counts": {
+        "points": false,
+        "facets": true,
+        "edges": true
+      }
+    },
+    {
+      "name": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_vx300s_4_upper_forearm_0",
+      "label": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_vx300s_4_upper_forearm_0",
+      "applied_methods": [
+        "fixIndices",
+        "removeDuplicatedPoints",
+        "removeDuplicatedFacets",
+        "fixDegenerations",
+        "harmonizeNormals"
+      ],
+      "before": {
+        "name": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_vx300s_4_upper_forearm_0",
+        "label": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_vx300s_4_upper_forearm_0",
+        "count_points": 497,
+        "count_facets": 990,
+        "count_edges": 1485,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "after": {
+        "name": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_vx300s_4_upper_forearm_0",
+        "label": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_vx300s_4_upper_forearm_0",
+        "count_points": 497,
+        "count_facets": 990,
+        "count_edges": 1485,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "changed_counts": {
+        "points": false,
+        "facets": false,
+        "edges": false
+      }
+    },
+    {
+      "name": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_vx300s_5_lower_for",
+      "label": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_vx300s_5_lower_for",
+      "applied_methods": [
+        "fixIndices",
+        "removeDuplicatedPoints",
+        "removeDuplicatedFacets",
+        "fixDegenerations",
+        "harmonizeNormals"
+      ],
+      "before": {
+        "name": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_vx300s_5_lower_for",
+        "label": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_vx300s_5_lower_for",
+        "count_points": 1006,
+        "count_facets": 1996,
+        "count_edges": 2994,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": true,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 5,
+        "count_segments": 0
+      },
+      "after": {
+        "name": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_vx300s_5_lower_for",
+        "label": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_vx300s_5_lower_for",
+        "count_points": 1006,
+        "count_facets": 1996,
+        "count_edges": 2994,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": true,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 5,
+        "count_segments": 0
+      },
+      "changed_counts": {
+        "points": false,
+        "facets": false,
+        "edges": false
+      }
+    },
+    {
+      "name": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_vx",
+      "label": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_vx",
+      "applied_methods": [
+        "fixIndices",
+        "removeDuplicatedPoints",
+        "removeDuplicatedFacets",
+        "fixDegenerations",
+        "harmonizeNormals"
+      ],
+      "before": {
+        "name": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_vx",
+        "label": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_vx",
+        "count_points": 711,
+        "count_facets": 1414,
+        "count_edges": 2125,
+        "is_solid": false,
+        "has_non_manifolds": false,
+        "has_self_intersections": true,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 3,
+        "count_segments": 0
+      },
+      "after": {
+        "name": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_vx",
+        "label": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_vx",
+        "count_points": 709,
+        "count_facets": 1414,
+        "count_edges": 2121,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 3,
+        "count_segments": 0
+      },
+      "changed_counts": {
+        "points": true,
+        "facets": false,
+        "edges": true
+      }
+    },
+    {
+      "name": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le",
+      "label": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le",
+      "applied_methods": [
+        "fixIndices",
+        "removeDuplicatedPoints",
+        "removeDuplicatedFacets",
+        "fixDegenerations",
+        "harmonizeNormals"
+      ],
+      "before": {
+        "name": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le",
+        "label": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le",
+        "count_points": 4467,
+        "count_facets": 9132,
+        "count_edges": 14130,
+        "is_solid": false,
+        "has_non_manifolds": true,
+        "has_self_intersections": true,
+        "has_non_uniform_oriented_facets": true,
+        "count_non_uniform_oriented_facets": 78,
+        "count_components": 135,
+        "count_segments": 0
+      },
+      "after": {
+        "name": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le",
+        "label": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le",
+        "count_points": 4467,
+        "count_facets": 9122,
+        "count_edges": 14089,
+        "is_solid": false,
+        "has_non_manifolds": true,
+        "has_self_intersections": true,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 114,
+        "count_segments": 0
+      },
+      "changed_counts": {
+        "points": false,
+        "facets": true,
+        "edges": true
+      }
+    },
+    {
+      "name": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le001",
+      "label": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le001",
+      "applied_methods": [
+        "fixIndices",
+        "removeDuplicatedPoints",
+        "removeDuplicatedFacets",
+        "fixDegenerations",
+        "harmonizeNormals"
+      ],
+      "before": {
+        "name": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le001",
+        "label": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le001",
+        "count_points": 6639,
+        "count_facets": 14466,
+        "count_edges": 22627,
+        "is_solid": false,
+        "has_non_manifolds": true,
+        "has_self_intersections": true,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 6,
+        "count_segments": 0
+      },
+      "after": {
+        "name": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le001",
+        "label": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le001",
+        "count_points": 6629,
+        "count_facets": 14466,
+        "count_edges": 22627,
+        "is_solid": false,
+        "has_non_manifolds": true,
+        "has_self_intersections": true,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 6,
+        "count_segments": 0
+      },
+      "changed_counts": {
+        "points": true,
+        "facets": false,
+        "edges": false
+      }
+    },
+    {
+      "name": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le002",
+      "label": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le002",
+      "applied_methods": [
+        "fixIndices",
+        "removeDuplicatedPoints",
+        "removeDuplicatedFacets",
+        "fixDegenerations",
+        "harmonizeNormals"
+      ],
+      "before": {
+        "name": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le002",
+        "label": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le002",
+        "count_points": 23124,
+        "count_facets": 46288,
+        "count_edges": 69432,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "after": {
+        "name": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le002",
+        "label": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le002",
+        "count_points": 23124,
+        "count_facets": 46288,
+        "count_edges": 69432,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "changed_counts": {
+        "points": false,
+        "facets": false,
+        "edges": false
+      }
+    },
+    {
+      "name": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le003",
+      "label": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le003",
+      "applied_methods": [
+        "fixIndices",
+        "removeDuplicatedPoints",
+        "removeDuplicatedFacets",
+        "fixDegenerations",
+        "harmonizeNormals"
+      ],
+      "before": {
+        "name": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le003",
+        "label": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le003",
+        "count_points": 12424,
+        "count_facets": 24844,
+        "count_edges": 37266,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": true,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "after": {
+        "name": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le003",
+        "label": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le003",
+        "count_points": 12424,
+        "count_facets": 24844,
+        "count_edges": 37266,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": true,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "changed_counts": {
+        "points": false,
+        "facets": false,
+        "edges": false
+      }
+    },
+    {
+      "name": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le004",
+      "label": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le004",
+      "applied_methods": [
+        "fixIndices",
+        "removeDuplicatedPoints",
+        "removeDuplicatedFacets",
+        "fixDegenerations",
+        "harmonizeNormals"
+      ],
+      "before": {
+        "name": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le004",
+        "label": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le004",
+        "count_points": 15215,
+        "count_facets": 30626,
+        "count_edges": 46083,
+        "is_solid": false,
+        "has_non_manifolds": true,
+        "has_self_intersections": true,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 5,
+        "count_segments": 0
+      },
+      "after": {
+        "name": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le004",
+        "label": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le004",
+        "count_points": 15215,
+        "count_facets": 30626,
+        "count_edges": 46083,
+        "is_solid": false,
+        "has_non_manifolds": true,
+        "has_self_intersections": true,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 5,
+        "count_segments": 0
+      },
+      "changed_counts": {
+        "points": false,
+        "facets": false,
+        "edges": false
+      }
+    },
+    {
+      "name": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le005",
+      "label": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le005",
+      "applied_methods": [
+        "fixIndices",
+        "removeDuplicatedPoints",
+        "removeDuplicatedFacets",
+        "fixDegenerations",
+        "harmonizeNormals"
+      ],
+      "before": {
+        "name": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le005",
+        "label": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le005",
+        "count_points": 15278,
+        "count_facets": 30608,
+        "count_edges": 45912,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": true,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 4,
+        "count_segments": 0
+      },
+      "after": {
+        "name": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le005",
+        "label": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le005",
+        "count_points": 15278,
+        "count_facets": 30608,
+        "count_edges": 45912,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": true,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 4,
+        "count_segments": 0
+      },
+      "changed_counts": {
+        "points": false,
+        "facets": false,
+        "edges": false
+      }
+    },
+    {
+      "name": "REF_ALOHA_right_base_link_vx300s_1_base_0",
+      "label": "REF_ALOHA_right_base_link_vx300s_1_base_0",
+      "applied_methods": [
+        "fixIndices",
+        "removeDuplicatedPoints",
+        "removeDuplicatedFacets",
+        "fixDegenerations",
+        "harmonizeNormals"
+      ],
+      "before": {
+        "name": "REF_ALOHA_right_base_link_vx300s_1_base_0",
+        "label": "REF_ALOHA_right_base_link_vx300s_1_base_0",
+        "count_points": 1001,
+        "count_facets": 1998,
+        "count_edges": 2997,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "after": {
+        "name": "REF_ALOHA_right_base_link_vx300s_1_base_0",
+        "label": "REF_ALOHA_right_base_link_vx300s_1_base_0",
+        "count_points": 1001,
+        "count_facets": 1998,
+        "count_edges": 2997,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "changed_counts": {
+        "points": false,
+        "facets": false,
+        "edges": false
+      }
+    },
+    {
+      "name": "REF_ALOHA_right_base_link_right_shoulder_link_vx300s_2_shoulder_0",
+      "label": "REF_ALOHA_right_base_link_right_shoulder_link_vx300s_2_shoulder_0",
+      "applied_methods": [
+        "fixIndices",
+        "removeDuplicatedPoints",
+        "removeDuplicatedFacets",
+        "fixDegenerations",
+        "harmonizeNormals"
+      ],
+      "before": {
+        "name": "REF_ALOHA_right_base_link_right_shoulder_link_vx300s_2_shoulder_0",
+        "label": "REF_ALOHA_right_base_link_right_shoulder_link_vx300s_2_shoulder_0",
+        "count_points": 640,
+        "count_facets": 1276,
+        "count_edges": 1914,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "after": {
+        "name": "REF_ALOHA_right_base_link_right_shoulder_link_vx300s_2_shoulder_0",
+        "label": "REF_ALOHA_right_base_link_right_shoulder_link_vx300s_2_shoulder_0",
+        "count_points": 640,
+        "count_facets": 1276,
+        "count_edges": 1914,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "changed_counts": {
+        "points": false,
+        "facets": false,
+        "edges": false
+      }
+    },
+    {
+      "name": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_vx300s_3_upper_arm_0",
+      "label": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_vx300s_3_upper_arm_0",
+      "applied_methods": [
+        "fixIndices",
+        "removeDuplicatedPoints",
+        "removeDuplicatedFacets",
+        "fixDegenerations",
+        "harmonizeNormals"
+      ],
+      "before": {
+        "name": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_vx300s_3_upper_arm_0",
+        "label": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_vx300s_3_upper_arm_0",
+        "count_points": 1035,
+        "count_facets": 2058,
+        "count_edges": 3095,
+        "is_solid": false,
+        "has_non_manifolds": true,
+        "has_self_intersections": true,
+        "has_non_uniform_oriented_facets": true,
+        "count_non_uniform_oriented_facets": 2,
+        "count_components": 6,
+        "count_segments": 0
+      },
+      "after": {
+        "name": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_vx300s_3_upper_arm_0",
+        "label": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_vx300s_3_upper_arm_0",
+        "count_points": 1035,
+        "count_facets": 2054,
+        "count_edges": 3081,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": true,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 4,
+        "count_segments": 0
+      },
+      "changed_counts": {
+        "points": false,
+        "facets": true,
+        "edges": true
+      }
+    },
+    {
+      "name": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_vx300s_4_upper_forearm_0",
+      "label": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_vx300s_4_upper_forearm_0",
+      "applied_methods": [
+        "fixIndices",
+        "removeDuplicatedPoints",
+        "removeDuplicatedFacets",
+        "fixDegenerations",
+        "harmonizeNormals"
+      ],
+      "before": {
+        "name": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_vx300s_4_upper_forearm_0",
+        "label": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_vx300s_4_upper_forearm_0",
+        "count_points": 497,
+        "count_facets": 990,
+        "count_edges": 1485,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "after": {
+        "name": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_vx300s_4_upper_forearm_0",
+        "label": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_vx300s_4_upper_forearm_0",
+        "count_points": 497,
+        "count_facets": 990,
+        "count_edges": 1485,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "changed_counts": {
+        "points": false,
+        "facets": false,
+        "edges": false
+      }
+    },
+    {
+      "name": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_vx300s_5_lowe",
+      "label": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_vx300s_5_lowe",
+      "applied_methods": [
+        "fixIndices",
+        "removeDuplicatedPoints",
+        "removeDuplicatedFacets",
+        "fixDegenerations",
+        "harmonizeNormals"
+      ],
+      "before": {
+        "name": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_vx300s_5_lowe",
+        "label": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_vx300s_5_lowe",
+        "count_points": 1006,
+        "count_facets": 1996,
+        "count_edges": 2994,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": true,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 5,
+        "count_segments": 0
+      },
+      "after": {
+        "name": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_vx300s_5_lowe",
+        "label": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_vx300s_5_lowe",
+        "count_points": 1006,
+        "count_facets": 1996,
+        "count_edges": 2994,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": true,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 5,
+        "count_segments": 0
+      },
+      "changed_counts": {
+        "points": false,
+        "facets": false,
+        "edges": false
+      }
+    },
+    {
+      "name": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l",
+      "label": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l",
+      "applied_methods": [
+        "fixIndices",
+        "removeDuplicatedPoints",
+        "removeDuplicatedFacets",
+        "fixDegenerations",
+        "harmonizeNormals"
+      ],
+      "before": {
+        "name": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l",
+        "label": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l",
+        "count_points": 711,
+        "count_facets": 1414,
+        "count_edges": 2125,
+        "is_solid": false,
+        "has_non_manifolds": false,
+        "has_self_intersections": true,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 3,
+        "count_segments": 0
+      },
+      "after": {
+        "name": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l",
+        "label": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l",
+        "count_points": 709,
+        "count_facets": 1414,
+        "count_edges": 2121,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 3,
+        "count_segments": 0
+      },
+      "changed_counts": {
+        "points": true,
+        "facets": false,
+        "edges": true
+      }
+    },
+    {
+      "name": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l001",
+      "label": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l001",
+      "applied_methods": [
+        "fixIndices",
+        "removeDuplicatedPoints",
+        "removeDuplicatedFacets",
+        "fixDegenerations",
+        "harmonizeNormals"
+      ],
+      "before": {
+        "name": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l001",
+        "label": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l001",
+        "count_points": 4467,
+        "count_facets": 9132,
+        "count_edges": 14130,
+        "is_solid": false,
+        "has_non_manifolds": true,
+        "has_self_intersections": true,
+        "has_non_uniform_oriented_facets": true,
+        "count_non_uniform_oriented_facets": 78,
+        "count_components": 135,
+        "count_segments": 0
+      },
+      "after": {
+        "name": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l001",
+        "label": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l001",
+        "count_points": 4467,
+        "count_facets": 9122,
+        "count_edges": 14089,
+        "is_solid": false,
+        "has_non_manifolds": true,
+        "has_self_intersections": true,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 114,
+        "count_segments": 0
+      },
+      "changed_counts": {
+        "points": false,
+        "facets": true,
+        "edges": true
+      }
+    },
+    {
+      "name": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l002",
+      "label": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l002",
+      "applied_methods": [
+        "fixIndices",
+        "removeDuplicatedPoints",
+        "removeDuplicatedFacets",
+        "fixDegenerations",
+        "harmonizeNormals"
+      ],
+      "before": {
+        "name": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l002",
+        "label": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l002",
+        "count_points": 6639,
+        "count_facets": 14466,
+        "count_edges": 22627,
+        "is_solid": false,
+        "has_non_manifolds": true,
+        "has_self_intersections": true,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 6,
+        "count_segments": 0
+      },
+      "after": {
+        "name": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l002",
+        "label": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l002",
+        "count_points": 6629,
+        "count_facets": 14466,
+        "count_edges": 22627,
+        "is_solid": false,
+        "has_non_manifolds": true,
+        "has_self_intersections": true,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 6,
+        "count_segments": 0
+      },
+      "changed_counts": {
+        "points": true,
+        "facets": false,
+        "edges": false
+      }
+    },
+    {
+      "name": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l003",
+      "label": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l003",
+      "applied_methods": [
+        "fixIndices",
+        "removeDuplicatedPoints",
+        "removeDuplicatedFacets",
+        "fixDegenerations",
+        "harmonizeNormals"
+      ],
+      "before": {
+        "name": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l003",
+        "label": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l003",
+        "count_points": 23124,
+        "count_facets": 46288,
+        "count_edges": 69432,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "after": {
+        "name": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l003",
+        "label": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l003",
+        "count_points": 23124,
+        "count_facets": 46288,
+        "count_edges": 69432,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "changed_counts": {
+        "points": false,
+        "facets": false,
+        "edges": false
+      }
+    },
+    {
+      "name": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l004",
+      "label": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l004",
+      "applied_methods": [
+        "fixIndices",
+        "removeDuplicatedPoints",
+        "removeDuplicatedFacets",
+        "fixDegenerations",
+        "harmonizeNormals"
+      ],
+      "before": {
+        "name": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l004",
+        "label": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l004",
+        "count_points": 12424,
+        "count_facets": 24844,
+        "count_edges": 37266,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": true,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "after": {
+        "name": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l004",
+        "label": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l004",
+        "count_points": 12424,
+        "count_facets": 24844,
+        "count_edges": 37266,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": true,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "changed_counts": {
+        "points": false,
+        "facets": false,
+        "edges": false
+      }
+    },
+    {
+      "name": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l005",
+      "label": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l005",
+      "applied_methods": [
+        "fixIndices",
+        "removeDuplicatedPoints",
+        "removeDuplicatedFacets",
+        "fixDegenerations",
+        "harmonizeNormals"
+      ],
+      "before": {
+        "name": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l005",
+        "label": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l005",
+        "count_points": 15215,
+        "count_facets": 30626,
+        "count_edges": 46083,
+        "is_solid": false,
+        "has_non_manifolds": true,
+        "has_self_intersections": true,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 5,
+        "count_segments": 0
+      },
+      "after": {
+        "name": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l005",
+        "label": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l005",
+        "count_points": 15215,
+        "count_facets": 30626,
+        "count_edges": 46083,
+        "is_solid": false,
+        "has_non_manifolds": true,
+        "has_self_intersections": true,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 5,
+        "count_segments": 0
+      },
+      "changed_counts": {
+        "points": false,
+        "facets": false,
+        "edges": false
+      }
+    },
+    {
+      "name": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l006",
+      "label": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l006",
+      "applied_methods": [
+        "fixIndices",
+        "removeDuplicatedPoints",
+        "removeDuplicatedFacets",
+        "fixDegenerations",
+        "harmonizeNormals"
+      ],
+      "before": {
+        "name": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l006",
+        "label": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l006",
+        "count_points": 15278,
+        "count_facets": 30608,
+        "count_edges": 45912,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": true,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 4,
+        "count_segments": 0
+      },
+      "after": {
+        "name": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l006",
+        "label": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l006",
+        "count_points": 15278,
+        "count_facets": 30608,
+        "count_edges": 45912,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": true,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 4,
+        "count_segments": 0
+      },
+      "changed_counts": {
+        "points": false,
+        "facets": false,
+        "edges": false
+      }
+    },
+    {
+      "name": "REF_SCENE_table_tabletop_0",
+      "label": "REF_SCENE_table_tabletop_0",
+      "applied_methods": [
+        "fixIndices",
+        "removeDuplicatedPoints",
+        "removeDuplicatedFacets",
+        "fixDegenerations",
+        "harmonizeNormals"
+      ],
+      "before": {
+        "name": "REF_SCENE_table_tabletop_0",
+        "label": "REF_SCENE_table_tabletop_0",
+        "count_points": 48,
+        "count_facets": 92,
+        "count_edges": 138,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "after": {
+        "name": "REF_SCENE_table_tabletop_0",
+        "label": "REF_SCENE_table_tabletop_0",
+        "count_points": 48,
+        "count_facets": 92,
+        "count_edges": 138,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "changed_counts": {
+        "points": false,
+        "facets": false,
+        "edges": false
+      }
+    },
+    {
+      "name": "REF_SCENE_table_tablelegs_1",
+      "label": "REF_SCENE_table_tablelegs_1",
+      "applied_methods": [
+        "fixIndices",
+        "removeDuplicatedPoints",
+        "removeDuplicatedFacets",
+        "fixDegenerations",
+        "harmonizeNormals"
+      ],
+      "before": {
+        "name": "REF_SCENE_table_tablelegs_1",
+        "label": "REF_SCENE_table_tablelegs_1",
+        "count_points": 72,
+        "count_facets": 128,
+        "count_edges": 192,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 4,
+        "count_segments": 0
+      },
+      "after": {
+        "name": "REF_SCENE_table_tablelegs_1",
+        "label": "REF_SCENE_table_tablelegs_1",
+        "count_points": 72,
+        "count_facets": 128,
+        "count_edges": 192,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 4,
+        "count_segments": 0
+      },
+      "changed_counts": {
+        "points": false,
+        "facets": false,
+        "edges": false
+      }
+    },
+    {
+      "name": "REF_SCENE_frame_extrusion_2040_880_2",
+      "label": "REF_SCENE_frame_extrusion_2040_880_2",
+      "applied_methods": [
+        "fixIndices",
+        "removeDuplicatedPoints",
+        "removeDuplicatedFacets",
+        "fixDegenerations",
+        "harmonizeNormals"
+      ],
+      "before": {
+        "name": "REF_SCENE_frame_extrusion_2040_880_2",
+        "label": "REF_SCENE_frame_extrusion_2040_880_2",
+        "count_points": 836,
+        "count_facets": 1680,
+        "count_edges": 2520,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "after": {
+        "name": "REF_SCENE_frame_extrusion_2040_880_2",
+        "label": "REF_SCENE_frame_extrusion_2040_880_2",
+        "count_points": 836,
+        "count_facets": 1680,
+        "count_edges": 2520,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "changed_counts": {
+        "points": false,
+        "facets": false,
+        "edges": false
+      }
+    },
+    {
+      "name": "REF_SCENE_frame_extrusion_150_3",
+      "label": "REF_SCENE_frame_extrusion_150_3",
+      "applied_methods": [
+        "fixIndices",
+        "removeDuplicatedPoints",
+        "removeDuplicatedFacets",
+        "fixDegenerations",
+        "harmonizeNormals"
+      ],
+      "before": {
+        "name": "REF_SCENE_frame_extrusion_150_3",
+        "label": "REF_SCENE_frame_extrusion_150_3",
+        "count_points": 400,
+        "count_facets": 800,
+        "count_edges": 1200,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "after": {
+        "name": "REF_SCENE_frame_extrusion_150_3",
+        "label": "REF_SCENE_frame_extrusion_150_3",
+        "count_points": 400,
+        "count_facets": 800,
+        "count_edges": 1200,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "changed_counts": {
+        "points": false,
+        "facets": false,
+        "edges": false
+      }
+    },
+    {
+      "name": "REF_SCENE_frame_corner_bracket_4",
+      "label": "REF_SCENE_frame_corner_bracket_4",
+      "applied_methods": [
+        "fixIndices",
+        "removeDuplicatedPoints",
+        "removeDuplicatedFacets",
+        "fixDegenerations",
+        "harmonizeNormals"
+      ],
+      "before": {
+        "name": "REF_SCENE_frame_corner_bracket_4",
+        "label": "REF_SCENE_frame_corner_bracket_4",
+        "count_points": 2334,
+        "count_facets": 4684,
+        "count_edges": 7026,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "after": {
+        "name": "REF_SCENE_frame_corner_bracket_4",
+        "label": "REF_SCENE_frame_corner_bracket_4",
+        "count_points": 2334,
+        "count_facets": 4684,
+        "count_edges": 7026,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "changed_counts": {
+        "points": false,
+        "facets": false,
+        "edges": false
+      }
+    },
+    {
+      "name": "REF_SCENE_frame_extrusion_1220_5",
+      "label": "REF_SCENE_frame_extrusion_1220_5",
+      "applied_methods": [
+        "fixIndices",
+        "removeDuplicatedPoints",
+        "removeDuplicatedFacets",
+        "fixDegenerations",
+        "harmonizeNormals"
+      ],
+      "before": {
+        "name": "REF_SCENE_frame_extrusion_1220_5",
+        "label": "REF_SCENE_frame_extrusion_1220_5",
+        "count_points": 400,
+        "count_facets": 800,
+        "count_edges": 1200,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "after": {
+        "name": "REF_SCENE_frame_extrusion_1220_5",
+        "label": "REF_SCENE_frame_extrusion_1220_5",
+        "count_points": 400,
+        "count_facets": 800,
+        "count_edges": 1200,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "changed_counts": {
+        "points": false,
+        "facets": false,
+        "edges": false
+      }
+    },
+    {
+      "name": "REF_SCENE_frame_extrusion_150_6",
+      "label": "REF_SCENE_frame_extrusion_150_6",
+      "applied_methods": [
+        "fixIndices",
+        "removeDuplicatedPoints",
+        "removeDuplicatedFacets",
+        "fixDegenerations",
+        "harmonizeNormals"
+      ],
+      "before": {
+        "name": "REF_SCENE_frame_extrusion_150_6",
+        "label": "REF_SCENE_frame_extrusion_150_6",
+        "count_points": 400,
+        "count_facets": 800,
+        "count_edges": 1200,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "after": {
+        "name": "REF_SCENE_frame_extrusion_150_6",
+        "label": "REF_SCENE_frame_extrusion_150_6",
+        "count_points": 400,
+        "count_facets": 800,
+        "count_edges": 1200,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "changed_counts": {
+        "points": false,
+        "facets": false,
+        "edges": false
+      }
+    },
+    {
+      "name": "REF_SCENE_frame_corner_bracket_7",
+      "label": "REF_SCENE_frame_corner_bracket_7",
+      "applied_methods": [
+        "fixIndices",
+        "removeDuplicatedPoints",
+        "removeDuplicatedFacets",
+        "fixDegenerations",
+        "harmonizeNormals"
+      ],
+      "before": {
+        "name": "REF_SCENE_frame_corner_bracket_7",
+        "label": "REF_SCENE_frame_corner_bracket_7",
+        "count_points": 2334,
+        "count_facets": 4684,
+        "count_edges": 7026,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "after": {
+        "name": "REF_SCENE_frame_corner_bracket_7",
+        "label": "REF_SCENE_frame_corner_bracket_7",
+        "count_points": 2334,
+        "count_facets": 4684,
+        "count_edges": 7026,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "changed_counts": {
+        "points": false,
+        "facets": false,
+        "edges": false
+      }
+    },
+    {
+      "name": "REF_SCENE_frame_corner_bracket_8",
+      "label": "REF_SCENE_frame_corner_bracket_8",
+      "applied_methods": [
+        "fixIndices",
+        "removeDuplicatedPoints",
+        "removeDuplicatedFacets",
+        "fixDegenerations",
+        "harmonizeNormals"
+      ],
+      "before": {
+        "name": "REF_SCENE_frame_corner_bracket_8",
+        "label": "REF_SCENE_frame_corner_bracket_8",
+        "count_points": 2334,
+        "count_facets": 4684,
+        "count_edges": 7026,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "after": {
+        "name": "REF_SCENE_frame_corner_bracket_8",
+        "label": "REF_SCENE_frame_corner_bracket_8",
+        "count_points": 2334,
+        "count_facets": 4684,
+        "count_edges": 7026,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "changed_counts": {
+        "points": false,
+        "facets": false,
+        "edges": false
+      }
+    },
+    {
+      "name": "REF_SCENE_frame_extrusion_2040_1000_9",
+      "label": "REF_SCENE_frame_extrusion_2040_1000_9",
+      "applied_methods": [
+        "fixIndices",
+        "removeDuplicatedPoints",
+        "removeDuplicatedFacets",
+        "fixDegenerations",
+        "harmonizeNormals"
+      ],
+      "before": {
+        "name": "REF_SCENE_frame_extrusion_2040_1000_9",
+        "label": "REF_SCENE_frame_extrusion_2040_1000_9",
+        "count_points": 836,
+        "count_facets": 1680,
+        "count_edges": 2520,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "after": {
+        "name": "REF_SCENE_frame_extrusion_2040_1000_9",
+        "label": "REF_SCENE_frame_extrusion_2040_1000_9",
+        "count_points": 836,
+        "count_facets": 1680,
+        "count_edges": 2520,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "changed_counts": {
+        "points": false,
+        "facets": false,
+        "edges": false
+      }
+    },
+    {
+      "name": "REF_SCENE_frame_corner_bracket_10",
+      "label": "REF_SCENE_frame_corner_bracket_10",
+      "applied_methods": [
+        "fixIndices",
+        "removeDuplicatedPoints",
+        "removeDuplicatedFacets",
+        "fixDegenerations",
+        "harmonizeNormals"
+      ],
+      "before": {
+        "name": "REF_SCENE_frame_corner_bracket_10",
+        "label": "REF_SCENE_frame_corner_bracket_10",
+        "count_points": 2334,
+        "count_facets": 4684,
+        "count_edges": 7026,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "after": {
+        "name": "REF_SCENE_frame_corner_bracket_10",
+        "label": "REF_SCENE_frame_corner_bracket_10",
+        "count_points": 2334,
+        "count_facets": 4684,
+        "count_edges": 7026,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "changed_counts": {
+        "points": false,
+        "facets": false,
+        "edges": false
+      }
+    },
+    {
+      "name": "REF_SCENE_frame_angled_extrusion_11",
+      "label": "REF_SCENE_frame_angled_extrusion_11",
+      "applied_methods": [
+        "fixIndices",
+        "removeDuplicatedPoints",
+        "removeDuplicatedFacets",
+        "fixDegenerations",
+        "harmonizeNormals"
+      ],
+      "before": {
+        "name": "REF_SCENE_frame_angled_extrusion_11",
+        "label": "REF_SCENE_frame_angled_extrusion_11",
+        "count_points": 4469,
+        "count_facets": 8962,
+        "count_edges": 13443,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "after": {
+        "name": "REF_SCENE_frame_angled_extrusion_11",
+        "label": "REF_SCENE_frame_angled_extrusion_11",
+        "count_points": 4469,
+        "count_facets": 8962,
+        "count_edges": 13443,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "changed_counts": {
+        "points": false,
+        "facets": false,
+        "edges": false
+      }
+    },
+    {
+      "name": "REF_SCENE_frame_extrusion_150_12",
+      "label": "REF_SCENE_frame_extrusion_150_12",
+      "applied_methods": [
+        "fixIndices",
+        "removeDuplicatedPoints",
+        "removeDuplicatedFacets",
+        "fixDegenerations",
+        "harmonizeNormals"
+      ],
+      "before": {
+        "name": "REF_SCENE_frame_extrusion_150_12",
+        "label": "REF_SCENE_frame_extrusion_150_12",
+        "count_points": 400,
+        "count_facets": 800,
+        "count_edges": 1200,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "after": {
+        "name": "REF_SCENE_frame_extrusion_150_12",
+        "label": "REF_SCENE_frame_extrusion_150_12",
+        "count_points": 400,
+        "count_facets": 800,
+        "count_edges": 1200,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "changed_counts": {
+        "points": false,
+        "facets": false,
+        "edges": false
+      }
+    },
+    {
+      "name": "REF_SCENE_frame_extrusion_600_13",
+      "label": "REF_SCENE_frame_extrusion_600_13",
+      "applied_methods": [
+        "fixIndices",
+        "removeDuplicatedPoints",
+        "removeDuplicatedFacets",
+        "fixDegenerations",
+        "harmonizeNormals"
+      ],
+      "before": {
+        "name": "REF_SCENE_frame_extrusion_600_13",
+        "label": "REF_SCENE_frame_extrusion_600_13",
+        "count_points": 400,
+        "count_facets": 800,
+        "count_edges": 1200,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "after": {
+        "name": "REF_SCENE_frame_extrusion_600_13",
+        "label": "REF_SCENE_frame_extrusion_600_13",
+        "count_points": 400,
+        "count_facets": 800,
+        "count_edges": 1200,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "changed_counts": {
+        "points": false,
+        "facets": false,
+        "edges": false
+      }
+    },
+    {
+      "name": "REF_SCENE_frame_extrusion_150_14",
+      "label": "REF_SCENE_frame_extrusion_150_14",
+      "applied_methods": [
+        "fixIndices",
+        "removeDuplicatedPoints",
+        "removeDuplicatedFacets",
+        "fixDegenerations",
+        "harmonizeNormals"
+      ],
+      "before": {
+        "name": "REF_SCENE_frame_extrusion_150_14",
+        "label": "REF_SCENE_frame_extrusion_150_14",
+        "count_points": 400,
+        "count_facets": 800,
+        "count_edges": 1200,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "after": {
+        "name": "REF_SCENE_frame_extrusion_150_14",
+        "label": "REF_SCENE_frame_extrusion_150_14",
+        "count_points": 400,
+        "count_facets": 800,
+        "count_edges": 1200,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "changed_counts": {
+        "points": false,
+        "facets": false,
+        "edges": false
+      }
+    },
+    {
+      "name": "REF_SCENE_frame_overhead_mount_15",
+      "label": "REF_SCENE_frame_overhead_mount_15",
+      "applied_methods": [
+        "fixIndices",
+        "removeDuplicatedPoints",
+        "removeDuplicatedFacets",
+        "fixDegenerations",
+        "harmonizeNormals"
+      ],
+      "before": {
+        "name": "REF_SCENE_frame_overhead_mount_15",
+        "label": "REF_SCENE_frame_overhead_mount_15",
+        "count_points": 18982,
+        "count_facets": 37984,
+        "count_edges": 56976,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": true,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "after": {
+        "name": "REF_SCENE_frame_overhead_mount_15",
+        "label": "REF_SCENE_frame_overhead_mount_15",
+        "count_points": 18982,
+        "count_facets": 37984,
+        "count_edges": 56976,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": true,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "changed_counts": {
+        "points": false,
+        "facets": false,
+        "edges": false
+      }
+    },
+    {
+      "name": "REF_SCENE_frame_extrusion_1000_16",
+      "label": "REF_SCENE_frame_extrusion_1000_16",
+      "applied_methods": [
+        "fixIndices",
+        "removeDuplicatedPoints",
+        "removeDuplicatedFacets",
+        "fixDegenerations",
+        "harmonizeNormals"
+      ],
+      "before": {
+        "name": "REF_SCENE_frame_extrusion_1000_16",
+        "label": "REF_SCENE_frame_extrusion_1000_16",
+        "count_points": 400,
+        "count_facets": 800,
+        "count_edges": 1200,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "after": {
+        "name": "REF_SCENE_frame_extrusion_1000_16",
+        "label": "REF_SCENE_frame_extrusion_1000_16",
+        "count_points": 400,
+        "count_facets": 800,
+        "count_edges": 1200,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "changed_counts": {
+        "points": false,
+        "facets": false,
+        "edges": false
+      }
+    },
+    {
+      "name": "REF_SCENE_frame_angled_extrusion_17",
+      "label": "REF_SCENE_frame_angled_extrusion_17",
+      "applied_methods": [
+        "fixIndices",
+        "removeDuplicatedPoints",
+        "removeDuplicatedFacets",
+        "fixDegenerations",
+        "harmonizeNormals"
+      ],
+      "before": {
+        "name": "REF_SCENE_frame_angled_extrusion_17",
+        "label": "REF_SCENE_frame_angled_extrusion_17",
+        "count_points": 4469,
+        "count_facets": 8962,
+        "count_edges": 13443,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "after": {
+        "name": "REF_SCENE_frame_angled_extrusion_17",
+        "label": "REF_SCENE_frame_angled_extrusion_17",
+        "count_points": 4469,
+        "count_facets": 8962,
+        "count_edges": 13443,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "changed_counts": {
+        "points": false,
+        "facets": false,
+        "edges": false
+      }
+    },
+    {
+      "name": "REF_SCENE_frame_extrusion_150_18",
+      "label": "REF_SCENE_frame_extrusion_150_18",
+      "applied_methods": [
+        "fixIndices",
+        "removeDuplicatedPoints",
+        "removeDuplicatedFacets",
+        "fixDegenerations",
+        "harmonizeNormals"
+      ],
+      "before": {
+        "name": "REF_SCENE_frame_extrusion_150_18",
+        "label": "REF_SCENE_frame_extrusion_150_18",
+        "count_points": 400,
+        "count_facets": 800,
+        "count_edges": 1200,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "after": {
+        "name": "REF_SCENE_frame_extrusion_150_18",
+        "label": "REF_SCENE_frame_extrusion_150_18",
+        "count_points": 400,
+        "count_facets": 800,
+        "count_edges": 1200,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "changed_counts": {
+        "points": false,
+        "facets": false,
+        "edges": false
+      }
+    },
+    {
+      "name": "REF_SCENE_frame_corner_bracket_19",
+      "label": "REF_SCENE_frame_corner_bracket_19",
+      "applied_methods": [
+        "fixIndices",
+        "removeDuplicatedPoints",
+        "removeDuplicatedFacets",
+        "fixDegenerations",
+        "harmonizeNormals"
+      ],
+      "before": {
+        "name": "REF_SCENE_frame_corner_bracket_19",
+        "label": "REF_SCENE_frame_corner_bracket_19",
+        "count_points": 2334,
+        "count_facets": 4684,
+        "count_edges": 7026,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "after": {
+        "name": "REF_SCENE_frame_corner_bracket_19",
+        "label": "REF_SCENE_frame_corner_bracket_19",
+        "count_points": 2334,
+        "count_facets": 4684,
+        "count_edges": 7026,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "changed_counts": {
+        "points": false,
+        "facets": false,
+        "edges": false
+      }
+    },
+    {
+      "name": "REF_SCENE_frame_extrusion_1220_20",
+      "label": "REF_SCENE_frame_extrusion_1220_20",
+      "applied_methods": [
+        "fixIndices",
+        "removeDuplicatedPoints",
+        "removeDuplicatedFacets",
+        "fixDegenerations",
+        "harmonizeNormals"
+      ],
+      "before": {
+        "name": "REF_SCENE_frame_extrusion_1220_20",
+        "label": "REF_SCENE_frame_extrusion_1220_20",
+        "count_points": 400,
+        "count_facets": 800,
+        "count_edges": 1200,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "after": {
+        "name": "REF_SCENE_frame_extrusion_1220_20",
+        "label": "REF_SCENE_frame_extrusion_1220_20",
+        "count_points": 400,
+        "count_facets": 800,
+        "count_edges": 1200,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "changed_counts": {
+        "points": false,
+        "facets": false,
+        "edges": false
+      }
+    },
+    {
+      "name": "REF_SCENE_frame_extrusion_1000_21",
+      "label": "REF_SCENE_frame_extrusion_1000_21",
+      "applied_methods": [
+        "fixIndices",
+        "removeDuplicatedPoints",
+        "removeDuplicatedFacets",
+        "fixDegenerations",
+        "harmonizeNormals"
+      ],
+      "before": {
+        "name": "REF_SCENE_frame_extrusion_1000_21",
+        "label": "REF_SCENE_frame_extrusion_1000_21",
+        "count_points": 400,
+        "count_facets": 800,
+        "count_edges": 1200,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "after": {
+        "name": "REF_SCENE_frame_extrusion_1000_21",
+        "label": "REF_SCENE_frame_extrusion_1000_21",
+        "count_points": 400,
+        "count_facets": 800,
+        "count_edges": 1200,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "changed_counts": {
+        "points": false,
+        "facets": false,
+        "edges": false
+      }
+    },
+    {
+      "name": "REF_SCENE_frame_extrusion_1000_22",
+      "label": "REF_SCENE_frame_extrusion_1000_22",
+      "applied_methods": [
+        "fixIndices",
+        "removeDuplicatedPoints",
+        "removeDuplicatedFacets",
+        "fixDegenerations",
+        "harmonizeNormals"
+      ],
+      "before": {
+        "name": "REF_SCENE_frame_extrusion_1000_22",
+        "label": "REF_SCENE_frame_extrusion_1000_22",
+        "count_points": 400,
+        "count_facets": 800,
+        "count_edges": 1200,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "after": {
+        "name": "REF_SCENE_frame_extrusion_1000_22",
+        "label": "REF_SCENE_frame_extrusion_1000_22",
+        "count_points": 400,
+        "count_facets": 800,
+        "count_edges": 1200,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "changed_counts": {
+        "points": false,
+        "facets": false,
+        "edges": false
+      }
+    },
+    {
+      "name": "REF_SCENE_frame_extrusion_150_23",
+      "label": "REF_SCENE_frame_extrusion_150_23",
+      "applied_methods": [
+        "fixIndices",
+        "removeDuplicatedPoints",
+        "removeDuplicatedFacets",
+        "fixDegenerations",
+        "harmonizeNormals"
+      ],
+      "before": {
+        "name": "REF_SCENE_frame_extrusion_150_23",
+        "label": "REF_SCENE_frame_extrusion_150_23",
+        "count_points": 400,
+        "count_facets": 800,
+        "count_edges": 1200,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "after": {
+        "name": "REF_SCENE_frame_extrusion_150_23",
+        "label": "REF_SCENE_frame_extrusion_150_23",
+        "count_points": 400,
+        "count_facets": 800,
+        "count_edges": 1200,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "changed_counts": {
+        "points": false,
+        "facets": false,
+        "edges": false
+      }
+    },
+    {
+      "name": "REF_SCENE_frame_corner_bracket_24",
+      "label": "REF_SCENE_frame_corner_bracket_24",
+      "applied_methods": [
+        "fixIndices",
+        "removeDuplicatedPoints",
+        "removeDuplicatedFacets",
+        "fixDegenerations",
+        "harmonizeNormals"
+      ],
+      "before": {
+        "name": "REF_SCENE_frame_corner_bracket_24",
+        "label": "REF_SCENE_frame_corner_bracket_24",
+        "count_points": 2334,
+        "count_facets": 4684,
+        "count_edges": 7026,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "after": {
+        "name": "REF_SCENE_frame_corner_bracket_24",
+        "label": "REF_SCENE_frame_corner_bracket_24",
+        "count_points": 2334,
+        "count_facets": 4684,
+        "count_edges": 7026,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "changed_counts": {
+        "points": false,
+        "facets": false,
+        "edges": false
+      }
+    },
+    {
+      "name": "REF_SCENE_frame_extrusion_1000_25",
+      "label": "REF_SCENE_frame_extrusion_1000_25",
+      "applied_methods": [
+        "fixIndices",
+        "removeDuplicatedPoints",
+        "removeDuplicatedFacets",
+        "fixDegenerations",
+        "harmonizeNormals"
+      ],
+      "before": {
+        "name": "REF_SCENE_frame_extrusion_1000_25",
+        "label": "REF_SCENE_frame_extrusion_1000_25",
+        "count_points": 400,
+        "count_facets": 800,
+        "count_edges": 1200,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "after": {
+        "name": "REF_SCENE_frame_extrusion_1000_25",
+        "label": "REF_SCENE_frame_extrusion_1000_25",
+        "count_points": 400,
+        "count_facets": 800,
+        "count_edges": 1200,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "changed_counts": {
+        "points": false,
+        "facets": false,
+        "edges": false
+      }
+    },
+    {
+      "name": "REF_SCENE_frame_extrusion_600_26",
+      "label": "REF_SCENE_frame_extrusion_600_26",
+      "applied_methods": [
+        "fixIndices",
+        "removeDuplicatedPoints",
+        "removeDuplicatedFacets",
+        "fixDegenerations",
+        "harmonizeNormals"
+      ],
+      "before": {
+        "name": "REF_SCENE_frame_extrusion_600_26",
+        "label": "REF_SCENE_frame_extrusion_600_26",
+        "count_points": 400,
+        "count_facets": 800,
+        "count_edges": 1200,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "after": {
+        "name": "REF_SCENE_frame_extrusion_600_26",
+        "label": "REF_SCENE_frame_extrusion_600_26",
+        "count_points": 400,
+        "count_facets": 800,
+        "count_edges": 1200,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "changed_counts": {
+        "points": false,
+        "facets": false,
+        "edges": false
+      }
+    },
+    {
+      "name": "REF_SCENE_frame_angled_extrusion_27",
+      "label": "REF_SCENE_frame_angled_extrusion_27",
+      "applied_methods": [
+        "fixIndices",
+        "removeDuplicatedPoints",
+        "removeDuplicatedFacets",
+        "fixDegenerations",
+        "harmonizeNormals"
+      ],
+      "before": {
+        "name": "REF_SCENE_frame_angled_extrusion_27",
+        "label": "REF_SCENE_frame_angled_extrusion_27",
+        "count_points": 4469,
+        "count_facets": 8962,
+        "count_edges": 13443,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "after": {
+        "name": "REF_SCENE_frame_angled_extrusion_27",
+        "label": "REF_SCENE_frame_angled_extrusion_27",
+        "count_points": 4469,
+        "count_facets": 8962,
+        "count_edges": 13443,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "changed_counts": {
+        "points": false,
+        "facets": false,
+        "edges": false
+      }
+    },
+    {
+      "name": "REF_SCENE_frame_angled_extrusion_28",
+      "label": "REF_SCENE_frame_angled_extrusion_28",
+      "applied_methods": [
+        "fixIndices",
+        "removeDuplicatedPoints",
+        "removeDuplicatedFacets",
+        "fixDegenerations",
+        "harmonizeNormals"
+      ],
+      "before": {
+        "name": "REF_SCENE_frame_angled_extrusion_28",
+        "label": "REF_SCENE_frame_angled_extrusion_28",
+        "count_points": 4469,
+        "count_facets": 8962,
+        "count_edges": 13443,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "after": {
+        "name": "REF_SCENE_frame_angled_extrusion_28",
+        "label": "REF_SCENE_frame_angled_extrusion_28",
+        "count_points": 4469,
+        "count_facets": 8962,
+        "count_edges": 13443,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "changed_counts": {
+        "points": false,
+        "facets": false,
+        "edges": false
+      }
+    },
+    {
+      "name": "REF_SCENE_frame_extrusion_2040_1000_29",
+      "label": "REF_SCENE_frame_extrusion_2040_1000_29",
+      "applied_methods": [
+        "fixIndices",
+        "removeDuplicatedPoints",
+        "removeDuplicatedFacets",
+        "fixDegenerations",
+        "harmonizeNormals"
+      ],
+      "before": {
+        "name": "REF_SCENE_frame_extrusion_2040_1000_29",
+        "label": "REF_SCENE_frame_extrusion_2040_1000_29",
+        "count_points": 836,
+        "count_facets": 1680,
+        "count_edges": 2520,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "after": {
+        "name": "REF_SCENE_frame_extrusion_2040_1000_29",
+        "label": "REF_SCENE_frame_extrusion_2040_1000_29",
+        "count_points": 836,
+        "count_facets": 1680,
+        "count_edges": 2520,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": false,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "changed_counts": {
+        "points": false,
+        "facets": false,
+        "edges": false
+      }
+    },
+    {
+      "name": "REF_SCENE_frame_wormseye_mount_30",
+      "label": "REF_SCENE_frame_wormseye_mount_30",
+      "applied_methods": [
+        "fixIndices",
+        "removeDuplicatedPoints",
+        "removeDuplicatedFacets",
+        "fixDegenerations",
+        "harmonizeNormals"
+      ],
+      "before": {
+        "name": "REF_SCENE_frame_wormseye_mount_30",
+        "label": "REF_SCENE_frame_wormseye_mount_30",
+        "count_points": 19546,
+        "count_facets": 39112,
+        "count_edges": 58668,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": true,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "after": {
+        "name": "REF_SCENE_frame_wormseye_mount_30",
+        "label": "REF_SCENE_frame_wormseye_mount_30",
+        "count_points": 19546,
+        "count_facets": 39112,
+        "count_edges": 58668,
+        "is_solid": true,
+        "has_non_manifolds": false,
+        "has_self_intersections": true,
+        "has_non_uniform_oriented_facets": false,
+        "count_non_uniform_oriented_facets": 0,
+        "count_components": 1,
+        "count_segments": 0
+      },
+      "changed_counts": {
+        "points": false,
+        "facets": false,
+        "edges": false
+      }
+    }
+  ]
+}

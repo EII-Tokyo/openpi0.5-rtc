@@ -1,0 +1,144 @@
+{
+  "iteration": "iter_003_lower_camera_top_position",
+  "units": "mm",
+  "source_iteration": "scene_reconstruction/cad/aloha_incremental/iterations/iter_002_measured_aloha_y_offset/iter_002_measured_aloha_y_offset.FCStd",
+  "output_freecad_file": "scene_reconstruction/cad/aloha_incremental/iterations/iter_003_lower_camera_top_position/iter_003_lower_camera_top_position.FCStd",
+  "user_measurements": {
+    "left_outer_distance_to_camera_center_mm": 640.0,
+    "right_outer_distance_to_camera_center_mm": 580.0,
+    "support_pipe_y_extension_mm": 260.0,
+    "steel_profile_assumed_mm": 20.0,
+    "note": "640 and 580 are X-direction outer distances. 260 is a Y-direction support-pipe extension, not a Z height. The blue rail in the sketch is only a visual annotation, not the real CAD color."
+  },
+  "reference_edges": {
+    "x_outer_edges_mm": [
+      -610.0,
+      610.0
+    ],
+    "y_outer_edges_mm": [
+      -312.5,
+      312.5
+    ],
+    "outer_width_mm": 1220.0,
+    "table_top_z_mm": 0.0
+  },
+  "new_camera_position": {
+    "center_mm": [
+      30.0,
+      323.856,
+      17.429
+    ],
+    "x_from_left_outer_mm": 640.0,
+    "x_from_right_outer_mm": 580.0,
+    "z_policy": "kept from original lower camera; 260 mm is not used as Z",
+    "faces": "-Y after 180 deg Z rotation"
+  },
+  "moved_mount": {
+    "object": "REF_SCENE_frame_wormseye_mount_30",
+    "center_before_mm": [
+      0.0,
+      -323.856,
+      17.429
+    ],
+    "center_after_mm": [
+      30.0,
+      323.856,
+      17.429
+    ],
+    "delta_center_mm": [
+      30.0,
+      647.712,
+      0.0
+    ],
+    "rotation_about_z_deg": 180.0,
+    "direction_after_move": "camera/mount is rotated 180 deg about Z so it faces negative Y from the positive-Y side",
+    "bbox_after_mm": [
+      -10.331,
+      70.331,
+      308.727,
+      338.986,
+      -20.0,
+      54.858
+    ]
+  },
+  "top_steel_rail_proxy": {
+    "object": "MEASURED_TOP_STEEL_RAIL_DARK_REFERENCE",
+    "center_mm": [
+      0.0,
+      323.856,
+      10.0
+    ],
+    "size_mm": [
+      1220.0,
+      20.0,
+      20.0
+    ],
+    "color": "dark gray, not sketch blue"
+  },
+  "support_pipes_260mm": [
+    {
+      "object": "MEASURED_CAMERA_SUPPORT_PIPE_260MM_1",
+      "center_mm": [
+        -604.959,
+        193.856,
+        610.0
+      ],
+      "size_mm": [
+        20.0,
+        260.0,
+        20.0
+      ],
+      "axis": "+Y",
+      "length_mm": 260.0,
+      "z_source": "aligned to existing upper camera-frame rails"
+    },
+    {
+      "object": "MEASURED_CAMERA_SUPPORT_PIPE_260MM_2",
+      "center_mm": [
+        -433.554,
+        193.856,
+        610.0
+      ],
+      "size_mm": [
+        20.0,
+        260.0,
+        20.0
+      ],
+      "axis": "+Y",
+      "length_mm": 260.0,
+      "z_source": "aligned to existing upper camera-frame rails"
+    },
+    {
+      "object": "MEASURED_CAMERA_SUPPORT_PIPE_260MM_3",
+      "center_mm": [
+        433.554,
+        193.856,
+        610.0
+      ],
+      "size_mm": [
+        20.0,
+        260.0,
+        20.0
+      ],
+      "axis": "+Y",
+      "length_mm": 260.0,
+      "z_source": "aligned to existing upper camera-frame rails"
+    },
+    {
+      "object": "MEASURED_CAMERA_SUPPORT_PIPE_260MM_4",
+      "center_mm": [
+        604.959,
+        193.856,
+        610.0
+      ],
+      "size_mm": [
+        20.0,
+        260.0,
+        20.0
+      ],
+      "axis": "+Y",
+      "length_mm": 260.0,
+      "z_source": "aligned to existing upper camera-frame rails"
+    }
+  ]
+}

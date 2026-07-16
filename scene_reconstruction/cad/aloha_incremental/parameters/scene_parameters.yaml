@@ -1,0 +1,97 @@
+schema_version: 1
+units:
+  length: mm
+  angle: rad
+workflow:
+  current_iteration: iter_003_lower_camera_top_position
+  principle: "Use the currently loaded Isaac ALOHA scene as read-only geometry; add editable workcell objects incrementally."
+frames:
+  world:
+    value:
+      origin_mm: [0.0, 0.0, 0.0]
+      axes: {x: "right", y: "forward", z: "up"}
+    unit: mm
+    status: from_cad
+    source: external/mujoco_menagerie/aloha/scene.xml worldbody
+    notes: "MuJoCo/Isaac reference frame; tabletop upper surface is treated as z ~= 0 for Iteration 000."
+current_isaac_reference:
+  stage:
+    value: local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd
+    unit: path
+    status: from_cad
+    source: docs/agents/isaac_mcp_toolchain.md and local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/config.yaml
+    notes: "This is the current startup reference that the user visually confirmed matches the physical ALOHA table/frame/dual-arm setup. The file is read-only for this CAD workflow."
+  source_mjcf:
+    value: external/mujoco_menagerie/aloha/scene.xml
+    unit: path
+    status: from_cad
+    source: local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/config.yaml
+    notes: "Used to reconstruct a FreeCAD read-only reference from original scene meshes rather than reverse-engineering the USD."
+table:
+  dimensions:
+    value: {length: 1210.0, width: 760.0, height: 750.0}
+    unit: mm
+    status: from_cad
+    source: "external/mujoco_menagerie/aloha/scene.xml comment: Table dimensions (length x width x height in meters): 1.21x0.76x0.75"
+    notes: "Iteration 000 uses a transparent desktop reference plane, not a reconstructed table CAD."
+  measured_desktop_2026_07_15:
+    value: {length: 1220.0, width: 625.0}
+    unit: mm
+    status: measured
+    source: "User physical measurement reported in Codex session on 2026-07-15."
+    notes: "Used by iter_001_measured_table_rack. The rack follows the tabletop X/Y correction; ALOHA robot meshes are not scaled."
+  desktop_plane:
+    value: {center_mm: [0.0, 0.0, -9.0], size_mm: [1210.0, 760.0, 18.0]}
+    unit: mm
+    status: derived
+    source: "Derived from MuJoCo table dimensions and collision tabletop near z=0."
+    notes: "Plane is only a reference surface for visual alignment."
+pipe:
+  value: null
+  unit: mm
+  status: unknown
+  source: null
+  notes: "Not modeled in Iteration 000."
+rack:
+  value: null
+  unit: mm
+  status: unknown
+  source: null
+  notes: "Not modeled in Iteration 000."
+camera:
+  value: null
+  unit: mm
+  status: unknown
+  source: null
+  notes: "No new external camera or rack is modeled in Iteration 000. Existing camera meshes from the current Isaac reference are imported as read-only reference geometry."
+aloha_reference:
+  model:
+    value: "Current Isaac ALOHA dual-arm table/frame reference"
+    unit: text
+    status: from_cad
+    source: local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/config.yaml and external/mujoco_menagerie/aloha/scene.xml
+    notes: "Selected because this is the Isaac scene the user visually confirmed against the physical robot. Do not substitute the separate ALOHA2 workcell_v2 STL as the primary reference."
+  left_base_pos:
+    value: [-469.0, -19.0, 20.0]
+    unit: mm
+    status: from_cad
+    source: external/mujoco_menagerie/aloha/aloha.xml left/base_link pos
+    notes: ""
+  right_base_pos:
+    value: [469.0, -19.0, 20.0]
+    unit: mm
+    status: from_cad
+    source: external/mujoco_menagerie/aloha/aloha.xml right/base_link pos
+    notes: ""
+  measured_base_margins_2026_07_15:
+    value: {top_margin: 180.0, bottom_margin: 235.0, table_width: 625.0}
+    unit: mm
+    status: measured
+    source: "User physical measurement from annotated screenshot in Codex session on 2026-07-15."
+    notes: "Used by iter_002_measured_aloha_y_offset to translate all REF_ALOHA_* meshes in Y while keeping robot mesh scale unchanged."
+  reach:
+    value: 750.0
+    unit: mm
+    status: from_cad
+    source: https://docs.trossenrobotics.com/interbotix_xsarms_docs/specifications/avx300s.html
+    notes: "Official Trossen ALOHA ViperX-300 6DOF page."

@@ -1,0 +1,22 @@
+{
+  "iteration": "iter_001_measured_table_rack",
+  "freecad_file": "scene_reconstruction/cad/aloha_incremental/iterations/iter_001_measured_table_rack/iter_001_measured_table_rack.FCStd",
+  "desktop_plane": {
+    "length_mm": 1220.0,
+    "width_mm": 625.0,
+    "height_mm": 18.0,
+    "base_mm": [
+      -610.0,
+      -312.5,
+      -18.0
+    ]
+  },
+  "expected_desktop_plane": {
+    "length_mm": 1220.0,
+    "width_mm": 625.0,
+    "height_mm": 18.0
+  },
+  "adjusted_table_rack_camera_mesh_count": 31,
+  "robot_mesh_count_not_scaled": 24,
+  "ok": true
+}

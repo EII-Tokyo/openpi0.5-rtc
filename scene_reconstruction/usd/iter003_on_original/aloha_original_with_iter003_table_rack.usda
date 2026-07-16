@@ -1,0 +1,143 @@
+#usda 1.0
+(
+    metersPerUnit = 1
+    subLayers = [
+        @../../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@
+    ]
+    upAxis = "Z"
+)
+
+def "World"
+{
+    def Xform "Iter003FreeCADOverlay" (
+        customData = {
+            string base_usd = "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd"
+            string intent = "FreeCAD iter_003 proxy geometry over original ALOHA only; lighting overlay untouched"
+            string source_iteration = "iter_003_lower_camera_top_position"
+            string source_json = "/home/eii/project/openpi0.5-rtc-reward-learning/scene_reconstruction/cad/aloha_incremental/iterations/iter_003_lower_camera_top_position/bbox_and_dimensions.json"
+        }
+    )
+    {
+        def Cube "table_footprint_from_iter003"
+        {
+            color3f[] primvars:displayColor = [(0.78, 0.65, 0.42)]
+            float[] primvars:displayOpacity = [0.58]
+            double size = 1
+            float3 xformOp:scale = (1.22, 0.625, 0.006)
+            double3 xformOp:translate = (0, 0, 0.006)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+        }
+
+        def Cube "MEASURED_TOP_STEEL_RAIL_DARK_REFERENCE"
+        {
+            color3f[] primvars:displayColor = [(0.16, 0.16, 0.16)]
+            double size = 1
+            float3 xformOp:scale = (1.22, 0.02, 0.02)
+            double3 xformOp:translate = (0, 0.323856, 0.01)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+        }
+
+        def Cube "MEASURED_CAMERA_SUPPORT_PIPE_260MM_1"
+        {
+            color3f[] primvars:displayColor = [(0.18, 0.18, 0.18)]
+            double size = 1
+            float3 xformOp:scale = (0.02, 0.26, 0.02)
+            double3 xformOp:translate = (-0.6049589999999999, 0.193856, 0.61)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+        }
+
+        def Cube "MEASURED_CAMERA_SUPPORT_PIPE_260MM_2"
+        {
+            color3f[] primvars:displayColor = [(0.18, 0.18, 0.18)]
+            double size = 1
+            float3 xformOp:scale = (0.02, 0.26, 0.02)
+            double3 xformOp:translate = (-0.433554, 0.193856, 0.61)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+        }
+
+        def Cube "MEASURED_CAMERA_SUPPORT_PIPE_260MM_3"
+        {
+            color3f[] primvars:displayColor = [(0.18, 0.18, 0.18)]
+            double size = 1
+            float3 xformOp:scale = (0.02, 0.26, 0.02)
+            double3 xformOp:translate = (0.433554, 0.193856, 0.61)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+        }
+
+        def Cube "MEASURED_CAMERA_SUPPORT_PIPE_260MM_4"
+        {
+            color3f[] primvars:displayColor = [(0.18, 0.18, 0.18)]
+            double size = 1
+            float3 xformOp:scale = (0.02, 0.26, 0.02)
+            double3 xformOp:translate = (0.6049589999999999, 0.193856, 0.61)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+        }
+
+        def Cube "MOVED_LOWER_CAMERA_MOUNT_BBOX"
+        {
+            color3f[] primvars:displayColor = [(0, 0.86, 0.1)]
+            float[] primvars:displayOpacity = [0.86]
+            double size = 1
+            float3 xformOp:scale = (0.080662, 0.030259, 0.074858)
+            double3 xformOp:translate = (0.03, 0.3238565, 0.017429)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+        }
+
+        def Cube "LOWER_CAMERA_TARGET_CENTER"
+        {
+            color3f[] primvars:displayColor = [(0, 1, 0)]
+            double size = 1
+            float3 xformOp:scale = (0.035, 0.035, 0.035)
+            double3 xformOp:translate = (0.03, 0.323856, 0.017429)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+        }
+
+        def Cylinder "LOWER_CAMERA_NEGATIVE_Y_DIRECTION"
+        {
+            uniform token axis = "Z"
+            double height = 0.16
+            color3f[] primvars:displayColor = [(0, 0.85, 0)]
+            double radius = 0.006
+            quatf xformOp:orient = (0.70710677, 0.70710677, 0, -0)
+            double3 xformOp:translate = (0.03, 0.24385599999999996, 0.017429)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient"]
+        }
+
+        def Cube "outer_left_edge_marker"
+        {
+            color3f[] primvars:displayColor = [(0.1, 0.35, 1)]
+            double size = 1
+            float3 xformOp:scale = (0.018, 0.018, 0.05)
+            double3 xformOp:translate = (-0.61, 0, 0.035)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+        }
+
+        def Cube "outer_right_edge_marker"
+        {
+            color3f[] primvars:displayColor = [(0.1, 0.35, 1)]
+            double size = 1
+            float3 xformOp:scale = (0.018, 0.018, 0.05)
+            double3 xformOp:translate = (0.61, 0, 0.035)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+        }
+
+        def Cube "outer_front_edge_marker"
+        {
+            color3f[] primvars:displayColor = [(0.1, 0.35, 1)]
+            double size = 1
+            float3 xformOp:scale = (0.018, 0.018, 0.05)
+            double3 xformOp:translate = (0, -0.3125, 0.035)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+        }
+
+        def Cube "outer_back_edge_marker"
+        {
+            color3f[] primvars:displayColor = [(0.1, 0.35, 1)]
+            double size = 1
+            float3 xformOp:scale = (0.018, 0.018, 0.05)
+            double3 xformOp:translate = (0, 0.3125, 0.035)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+        }
+    }
+}
+

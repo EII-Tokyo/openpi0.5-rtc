@@ -1,0 +1,49 @@
+{
+  "iteration": "iter_000_reference",
+  "units": "mm",
+  "source_assets_read_only": [
+    "external/mujoco_menagerie/aloha/aloha.xml",
+    "external/mujoco_menagerie/aloha/scene.xml",
+    "local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd"
+  ],
+  "mesh_object_count": 55,
+  "known_dimensions": {
+    "model": "Current Isaac ALOHA dual-arm table/frame reference",
+    "current_isaac_stage": "local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd",
+    "source_mjcf": "external/mujoco_menagerie/aloha/aloha.xml",
+    "source_scene": "external/mujoco_menagerie/aloha/scene.xml",
+    "table_length_width_height_mm": [
+      1210.0,
+      760.0,
+      750.0
+    ],
+    "left_base_pos_mm": [
+      -469.0,
+      -19.0,
+      20.0
+    ],
+    "right_base_pos_mm": [
+      469.0,
+      -19.0,
+      20.0
+    ],
+    "official_reach_mm": 750.0
+  },
+  "freecad_file": "scene_reconstruction/cad/aloha_incremental/iterations/iter_000_reference/iter_000_reference.FCStd",
+  "document_bbox_mm": {
+    "xmin": -666.4630126953125,
+    "xmax": 666.4630126953125,
+    "ymin": -641.0,
+    "ymax": 381.0,
+    "zmin": -749.2130126953125,
+    "zmax": 1059.162841796875,
+    "x_length": 1332.926025390625,
+    "y_length": 1022.0,
+    "z_length": 1808.3758544921875
+  },
+  "notes": [
+    "Current Isaac ALOHA source mesh objects are imported as read-only reference meshes, not converted into guessed parametric CAD.",
+    "No separate ALOHA2 workcell_v2 STL is used as the primary reference.",
+    "The desktop plane is an orientation aid; imported scene mesh contains the table/frame visual reference."
+  ]
+}

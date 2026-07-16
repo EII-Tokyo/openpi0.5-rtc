@@ -1,0 +1,1359 @@
+[
+  {
+    "name": "REF_ALOHA_left_base_link_vx300s_1_base_0",
+    "label": "REF_ALOHA_left_base_link_vx300s_1_base_0",
+    "type": "Mesh::Feature",
+    "bbox": [
+      -666.4630126953125,
+      -367.0,
+      -74.5,
+      129.5,
+      20.0,
+      98.703857421875
+    ],
+    "center": [
+      -516.7315063476562,
+      27.5,
+      59.3519287109375
+    ],
+    "size": [
+      299.4630126953125,
+      204.0,
+      78.703857421875
+    ]
+  },
+  {
+    "name": "REF_ALOHA_left_base_link_left_shoulder_link_vx300s_2_shoulder_0",
+    "label": "REF_ALOHA_left_base_link_left_shoulder_link_vx300s_2_shoulder_0",
+    "type": "Mesh::Feature",
+    "bbox": [
+      -529.8494873046875,
+      -406.8853759765625,
+      -33.928184509277344,
+      89.0,
+      96.0,
+      160.5
+    ],
+    "center": [
+      -468.367431640625,
+      27.535907745361328,
+      128.25
+    ],
+    "size": [
+      122.964111328125,
+      122.92818450927734,
+      64.5
+    ]
+  },
+  {
+    "name": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_vx300s_3_upper_arm_0",
+    "label": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_vx300s_3_upper_arm_0",
+    "type": "Mesh::Feature",
+    "bbox": [
+      -484.75,
+      -395.70001220703125,
+      -24.399993896484375,
+      79.4000015258789,
+      143.1750030517578,
+      468.0
+    ],
+    "center": [
+      -440.2250061035156,
+      27.500003814697266,
+      305.5875015258789
+    ],
+    "size": [
+      89.04998779296875,
+      103.79999542236328,
+      324.8249969482422
+    ]
+  },
+  {
+    "name": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_vx300s_4_upper_forearm_0",
+    "label": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_vx300s_4_upper_forearm_0",
+    "type": "Mesh::Feature",
+    "bbox": [
+      -413.32501220703125,
+      -209.4499969482422,
+      -23.100006103515625,
+      78.10000610351562,
+      427.601318359375,
+      466.5450134277344
+    ],
+    "center": [
+      -311.3875045776367,
+      27.5,
+      447.0731658935547
+    ],
+    "size": [
+      203.87501525878906,
+      101.20001220703125,
+      38.943695068359375
+    ]
+  },
+  {
+    "name": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_vx300s_5_lower_for",
+    "label": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_vx300s_5_lower_for",
+    "type": "Mesh::Feature",
+    "bbox": [
+      -214.75,
+      -95.69999694824219,
+      -2.299999237060547,
+      72.25,
+      424.04998779296875,
+      470.01019287109375
+    ],
+    "center": [
+      -155.2249984741211,
+      34.97500038146973,
+      447.03009033203125
+    ],
+    "size": [
+      119.05000305175781,
+      74.54999923706055,
+      45.960205078125
+    ]
+  },
+  {
+    "name": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_vx",
+    "label": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_vx",
+    "type": "Mesh::Feature",
+    "bbox": [
+      -114.72926330566406,
+      -39.705692291259766,
+      -0.16056442260742188,
+      54.83943557739258,
+      426.889404296875,
+      482.139404296875
+    ],
+    "center": [
+      -77.21747779846191,
+      27.339435577392578,
+      454.514404296875
+    ],
+    "size": [
+      75.0235710144043,
+      55.0,
+      55.25
+    ]
+  },
+  {
+    "name": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le",
+    "label": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le",
+    "type": "Mesh::Feature",
+    "bbox": [
+      -43.41359329223633,
+      -7.616775989532471,
+      13.221824645996094,
+      41.757362365722656,
+      435.7613525390625,
+      482.49200439453125
+    ],
+    "center": [
+      -25.5151846408844,
+      27.489593505859375,
+      459.1266784667969
+    ],
+    "size": [
+      35.79681730270386,
+      28.535537719726562,
+      46.73065185546875
+    ]
+  },
+  {
+    "name": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le001",
+    "label": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le001",
+    "type": "Mesh::Feature",
+    "bbox": [
+      -7.771136283874512,
+      17.048593521118164,
+      -47.515220642089844,
+      102.51172637939453,
+      416.4134826660156,
+      482.314208984375
+    ],
+    "center": [
+      4.638728618621826,
+      27.498252868652344,
+      449.3638458251953
+    ],
+    "size": [
+      24.819729804992676,
+      150.02694702148438,
+      65.90072631835938
+    ]
+  },
+  {
+    "name": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le002",
+    "label": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le002",
+    "type": "Mesh::Feature",
+    "bbox": [
+      -46.61930465698242,
+      -4.781135082244873,
+      3.9165115356445312,
+      50.943721771240234,
+      482.2590637207031,
+      561.0528564453125
+    ],
+    "center": [
+      -25.700219869613647,
+      27.430116653442383,
+      521.6559600830078
+    ],
+    "size": [
+      41.83816957473755,
+      47.0272102355957,
+      78.79379272460938
+    ]
+  },
+  {
+    "name": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le003",
+    "label": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le003",
+    "type": "Mesh::Feature",
+    "bbox": [
+      -43.09420394897461,
+      -5.540180683135986,
+      6.331233978271484,
+      48.44366455078125,
+      510.5000915527344,
+      557.2849731445312
+    ],
+    "center": [
+      -24.317192316055298,
+      27.387449264526367,
+      533.8925323486328
+    ],
+    "size": [
+      37.55402326583862,
+      42.112430572509766,
+      46.784881591796875
+    ]
+  },
+  {
+    "name": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le004",
+    "label": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le004",
+    "type": "Mesh::Feature",
+    "bbox": [
+      7.090022087097168,
+      106.44115447998047,
+      8.35983657836914,
+      35.417762756347656,
+      419.53814697265625,
+      473.6534729003906
+    ],
+    "center": [
+      56.76558828353882,
+      21.8887996673584,
+      446.59580993652344
+    ],
+    "size": [
+      99.3511323928833,
+      27.057926177978516,
+      54.115325927734375
+    ]
+  },
+  {
+    "name": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le005",
+    "label": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le005",
+    "type": "Mesh::Feature",
+    "bbox": [
+      7.090008735656738,
+      106.4412841796875,
+      19.719778060913086,
+      46.96207046508789,
+      419.4577941894531,
+      473.76409912109375
+    ],
+    "center": [
+      56.76564645767212,
+      33.34092426300049,
+      446.61094665527344
+    ],
+    "size": [
+      99.35127544403076,
+      27.242292404174805,
+      54.306304931640625
+    ]
+  },
+  {
+    "name": "REF_ALOHA_right_base_link_vx300s_1_base_0",
+    "label": "REF_ALOHA_right_base_link_vx300s_1_base_0",
+    "type": "Mesh::Feature",
+    "bbox": [
+      367.0,
+      666.4630126953125,
+      -74.5,
+      129.5,
+      20.0,
+      98.703857421875
+    ],
+    "center": [
+      516.7315063476562,
+      27.5,
+      59.3519287109375
+    ],
+    "size": [
+      299.4630126953125,
+      204.0,
+      78.703857421875
+    ]
+  },
+  {
+    "name": "REF_ALOHA_right_base_link_right_shoulder_link_vx300s_2_shoulder_0",
+    "label": "REF_ALOHA_right_base_link_right_shoulder_link_vx300s_2_shoulder_0",
+    "type": "Mesh::Feature",
+    "bbox": [
+      406.8853759765625,
+      529.8494873046875,
+      -34.0,
+      88.92818450927734,
+      96.0,
+      160.5
+    ],
+    "center": [
+      468.367431640625,
+      27.464092254638672,
+      128.25
+    ],
+    "size": [
+      122.964111328125,
+      122.92818450927734,
+      64.5
+    ]
+  },
+  {
+    "name": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_vx300s_3_upper_arm_0",
+    "label": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_vx300s_3_upper_arm_0",
+    "type": "Mesh::Feature",
+    "bbox": [
+      395.70001220703125,
+      484.75,
+      -24.400001525878906,
+      79.39999389648438,
+      143.1750030517578,
+      468.0
+    ],
+    "center": [
+      440.2250061035156,
+      27.499996185302734,
+      305.5875015258789
+    ],
+    "size": [
+      89.04998779296875,
+      103.79999542236328,
+      324.8249969482422
+    ]
+  },
+  {
+    "name": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_vx300s_4_upper_forearm_0",
+    "label": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_vx300s_4_upper_forearm_0",
+    "type": "Mesh::Feature",
+    "bbox": [
+      209.4499969482422,
+      413.32501220703125,
+      -23.100006103515625,
+      78.10000610351562,
+      427.601318359375,
+      466.5450134277344
+    ],
+    "center": [
+      311.3875045776367,
+      27.5,
+      447.0731658935547
+    ],
+    "size": [
+      203.87501525878906,
+      101.20001220703125,
+      38.943695068359375
+    ]
+  },
+  {
+    "name": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_vx300s_5_lowe",
+    "label": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_vx300s_5_lowe",
+    "type": "Mesh::Feature",
+    "bbox": [
+      95.69999694824219,
+      214.75,
+      -17.25,
+      57.29999923706055,
+      424.04998779296875,
+      470.01019287109375
+    ],
+    "center": [
+      155.2249984741211,
+      20.024999618530273,
+      447.03009033203125
+    ],
+    "size": [
+      119.05000305175781,
+      74.54999923706055,
+      45.960205078125
+    ]
+  },
+  {
+    "name": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l",
+    "label": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l",
+    "type": "Mesh::Feature",
+    "bbox": [
+      39.705692291259766,
+      114.72926330566406,
+      0.16056442260742188,
+      55.16056442260742,
+      426.889404296875,
+      482.139404296875
+    ],
+    "center": [
+      77.21747779846191,
+      27.660564422607422,
+      454.514404296875
+    ],
+    "size": [
+      75.0235710144043,
+      55.0,
+      55.25
+    ]
+  },
+  {
+    "name": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l001",
+    "label": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l001",
+    "type": "Mesh::Feature",
+    "bbox": [
+      7.616775989532471,
+      43.41359329223633,
+      13.242637634277344,
+      41.778175354003906,
+      435.7613525390625,
+      482.49200439453125
+    ],
+    "center": [
+      25.5151846408844,
+      27.510406494140625,
+      459.1266784667969
+    ],
+    "size": [
+      35.79681730270386,
+      28.535537719726562,
+      46.73065185546875
+    ]
+  },
+  {
+    "name": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l002",
+    "label": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l002",
+    "type": "Mesh::Feature",
+    "bbox": [
+      -17.048593521118164,
+      7.771136283874512,
+      -47.51172637939453,
+      102.51522827148438,
+      416.4134826660156,
+      482.314208984375
+    ],
+    "center": [
+      -4.638728618621826,
+      27.501750946044922,
+      449.3638458251953
+    ],
+    "size": [
+      24.819729804992676,
+      150.0269546508789,
+      65.90072631835938
+    ]
+  },
+  {
+    "name": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l003",
+    "label": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l003",
+    "type": "Mesh::Feature",
+    "bbox": [
+      4.781135082244873,
+      46.61930465698242,
+      4.056278228759766,
+      51.08348846435547,
+      482.2590637207031,
+      561.0528564453125
+    ],
+    "center": [
+      25.700219869613647,
+      27.569883346557617,
+      521.6559600830078
+    ],
+    "size": [
+      41.83816957473755,
+      47.0272102355957,
+      78.79379272460938
+    ]
+  },
+  {
+    "name": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l004",
+    "label": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l004",
+    "type": "Mesh::Feature",
+    "bbox": [
+      5.540180683135986,
+      43.09420394897461,
+      6.55633544921875,
+      48.668766021728516,
+      510.5000915527344,
+      557.2849731445312
+    ],
+    "center": [
+      24.317192316055298,
+      27.612550735473633,
+      533.8925323486328
+    ],
+    "size": [
+      37.55402326583862,
+      42.112430572509766,
+      46.784881591796875
+    ]
+  },
+  {
+    "name": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l005",
+    "label": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l005",
+    "type": "Mesh::Feature",
+    "bbox": [
+      -106.44115447998047,
+      -7.090022087097168,
+      19.582237243652344,
+      46.64016342163086,
+      419.53814697265625,
+      473.6534729003906
+    ],
+    "center": [
+      -56.76558828353882,
+      33.1112003326416,
+      446.59580993652344
+    ],
+    "size": [
+      99.3511323928833,
+      27.057926177978516,
+      54.115325927734375
+    ]
+  },
+  {
+    "name": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l006",
+    "label": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l006",
+    "type": "Mesh::Feature",
+    "bbox": [
+      -106.4412841796875,
+      -7.090008735656738,
+      8.03792953491211,
+      35.28022003173828,
+      419.4577941894531,
+      473.76409912109375
+    ],
+    "center": [
+      -56.76564645767212,
+      21.659074783325195,
+      446.61094665527344
+    ],
+    "size": [
+      99.35127544403076,
+      27.242290496826172,
+      54.306304931640625
+    ]
+  },
+  {
+    "name": "REF_SCENE_table_tabletop_0",
+    "label": "REF_SCENE_table_tabletop_0",
+    "type": "Mesh::Feature",
+    "bbox": [
+      -614.4081420898438,
+      614.867919921875,
+      -313.3223571777344,
+      313.3223571777344,
+      -15.169024467468262,
+      0.7870197296142578
+    ],
+    "center": [
+      0.229888916015625,
+      0.0,
+      -7.191002368927002
+    ],
+    "size": [
+      1229.2760620117188,
+      626.6447143554688,
+      15.95604419708252
+    ]
+  },
+  {
+    "name": "REF_SCENE_table_tablelegs_1",
+    "label": "REF_SCENE_table_tablelegs_1",
+    "type": "Mesh::Feature",
+    "bbox": [
+      -527.033935546875,
+      527.4947509765625,
+      -267.23602294921875,
+      267.23602294921875,
+      -749.2130126953125,
+      -12.35598373413086
+    ],
+    "center": [
+      0.23040771484375,
+      0.0,
+      -380.7844982147217
+    ],
+    "size": [
+      1054.5286865234375,
+      534.4720458984375,
+      736.8570289611816
+    ]
+  },
+  {
+    "name": "REF_SCENE_frame_extrusion_2040_880_2",
+    "label": "REF_SCENE_frame_extrusion_2040_880_2",
+    "type": "Mesh::Feature",
+    "bbox": [
+      -443.6363525390625,
+      443.6363525390625,
+      -313.3223571777344,
+      -280.4276428222656,
+      1020.0,
+      1040.0
+    ],
+    "center": [
+      0.0,
+      -296.875,
+      1030.0
+    ],
+    "size": [
+      887.272705078125,
+      32.89471435546875,
+      20.0
+    ]
+  },
+  {
+    "name": "REF_SCENE_frame_extrusion_150_3",
+    "label": "REF_SCENE_frame_extrusion_150_3",
+    "type": "Mesh::Feature",
+    "bbox": [
+      443.6363525390625,
+      594.8760375976562,
+      -313.3223571777344,
+      -296.875,
+      600.0,
+      620.0
+    ],
+    "center": [
+      519.2561950683594,
+      -305.0986785888672,
+      610.0
+    ],
+    "size": [
+      151.23968505859375,
+      16.447357177734375,
+      20.0
+    ]
+  },
+  {
+    "name": "REF_SCENE_frame_corner_bracket_4",
+    "label": "REF_SCENE_frame_corner_bracket_4",
+    "type": "Mesh::Feature",
+    "bbox": [
+      384.1487731933594,
+      443.6363525390625,
+      -316.6118469238281,
+      -313.3223571777344,
+      981.0,
+      1040.0
+    ],
+    "center": [
+      413.89256286621094,
+      -314.96710205078125,
+      1010.5
+    ],
+    "size": [
+      59.487579345703125,
+      3.28948974609375,
+      59.0
+    ]
+  },
+  {
+    "name": "REF_SCENE_frame_extrusion_1220_5",
+    "label": "REF_SCENE_frame_extrusion_1220_5",
+    "type": "Mesh::Feature",
+    "bbox": [
+      -615.0413208007812,
+      615.0413208007812,
+      -329.7697448730469,
+      -313.3223571777344,
+      -20.0,
+      -2.2351741790771484e-07
+    ],
+    "center": [
+      0.0,
+      -321.5460510253906,
+      -10.000000111758709
+    ],
+    "size": [
+      1230.0826416015625,
+      16.4473876953125,
+      19.999999776482582
+    ]
+  },
+  {
+    "name": "REF_SCENE_frame_extrusion_150_6",
+    "label": "REF_SCENE_frame_extrusion_150_6",
+    "type": "Mesh::Feature",
+    "bbox": [
+      -594.8760375976562,
+      -443.6363525390625,
+      -313.3223571777344,
+      -296.875,
+      600.0,
+      620.0
+    ],
+    "center": [
+      -519.2561950683594,
+      -305.0986785888672,
+      610.0
+    ],
+    "size": [
+      151.23968505859375,
+      16.447357177734375,
+      20.0
+    ]
+  },
+  {
+    "name": "REF_SCENE_frame_corner_bracket_7",
+    "label": "REF_SCENE_frame_corner_bracket_7",
+    "type": "Mesh::Feature",
+    "bbox": [
+      423.4710693359375,
+      482.95867919921875,
+      -316.6118469238281,
+      -313.3223571777344,
+      561.0,
+      620.0
+    ],
+    "center": [
+      453.2148742675781,
+      -314.96710205078125,
+      590.5
+    ],
+    "size": [
+      59.48760986328125,
+      3.28948974609375,
+      59.0
+    ]
+  },
+  {
+    "name": "REF_SCENE_frame_corner_bracket_8",
+    "label": "REF_SCENE_frame_corner_bracket_8",
+    "type": "Mesh::Feature",
+    "bbox": [
+      555.5537109375,
+      615.0413208007812,
+      -316.6118469238281,
+      -313.3223571777344,
+      561.0,
+      620.0
+    ],
+    "center": [
+      585.2975158691406,
+      -314.96710205078125,
+      590.5
+    ],
+    "size": [
+      59.48760986328125,
+      3.28948974609375,
+      59.0
+    ]
+  },
+  {
+    "name": "REF_SCENE_frame_extrusion_2040_1000_9",
+    "label": "REF_SCENE_frame_extrusion_2040_1000_9",
+    "type": "Mesh::Feature",
+    "bbox": [
+      -443.6363525390625,
+      -423.4710693359375,
+      -313.3223571777344,
+      -280.4276428222656,
+      20.0,
+      1020.0
+    ],
+    "center": [
+      -433.5537109375,
+      -296.875,
+      520.0
+    ],
+    "size": [
+      20.165283203125,
+      32.89471435546875,
+      1000.0
+    ]
+  },
+  {
+    "name": "REF_SCENE_frame_corner_bracket_10",
+    "label": "REF_SCENE_frame_corner_bracket_10",
+    "type": "Mesh::Feature",
+    "bbox": [
+      -615.0413208007812,
+      -555.5537109375,
+      -316.6118469238281,
+      -313.3223571777344,
+      561.0,
+      620.0
+    ],
+    "center": [
+      -585.2975158691406,
+      -314.96710205078125,
+      590.5
+    ],
+    "size": [
+      59.48760986328125,
+      3.28948974609375,
+      59.0
+    ]
+  },
+  {
+    "name": "REF_SCENE_frame_angled_extrusion_11",
+    "label": "REF_SCENE_frame_angled_extrusion_11",
+    "type": "Mesh::Feature",
+    "bbox": [
+      -443.6312255859375,
+      -423.4762268066406,
+      -280.1352844238281,
+      -102.98430633544922,
+      19.236618041992188,
+      234.88995361328125
+    ],
+    "center": [
+      -433.55372619628906,
+      -191.55979537963867,
+      127.06328582763672
+    ],
+    "size": [
+      20.154998779296875,
+      177.1509780883789,
+      215.65333557128906
+    ]
+  },
+  {
+    "name": "REF_SCENE_frame_extrusion_150_12",
+    "label": "REF_SCENE_frame_extrusion_150_12",
+    "type": "Mesh::Feature",
+    "bbox": [
+      -594.8760375976562,
+      -443.6363525390625,
+      -62.5,
+      -46.05263137817383,
+      2.2351738948600541e-07,
+      20.0
+    ],
+    "center": [
+      -519.2561950683594,
+      -54.276315689086914,
+      10.000000111758695
+    ],
+    "size": [
+      151.23968505859375,
+      16.447368621826172,
+      19.99999977648261
+    ]
+  },
+  {
+    "name": "REF_SCENE_frame_extrusion_600_13",
+    "label": "REF_SCENE_frame_extrusion_600_13",
+    "type": "Mesh::Feature",
+    "bbox": [
+      -615.0413208007812,
+      -594.8760375976562,
+      -313.3223571777344,
+      -296.875,
+      19.999977111816406,
+      620.0
+    ],
+    "center": [
+      -604.9586791992188,
+      -305.0986785888672,
+      319.9999885559082
+    ],
+    "size": [
+      20.165283203125,
+      16.447357177734375,
+      600.0000228881836
+    ]
+  },
+  {
+    "name": "REF_SCENE_frame_extrusion_150_14",
+    "label": "REF_SCENE_frame_extrusion_150_14",
+    "type": "Mesh::Feature",
+    "bbox": [
+      443.6363525390625,
+      594.8760375976562,
+      -527.13818359375,
+      -510.6907958984375,
+      2.2351738948600541e-07,
+      20.0
+    ],
+    "center": [
+      519.2561950683594,
+      -518.9144897460938,
+      10.000000111758695
+    ],
+    "size": [
+      151.23968505859375,
+      16.4473876953125,
+      19.99999977648261
+    ]
+  },
+  {
+    "name": "REF_SCENE_frame_overhead_mount_15",
+    "label": "REF_SCENE_frame_overhead_mount_15",
+    "type": "Mesh::Feature",
+    "bbox": [
+      -40.3305778503418,
+      40.3305778503418,
+      -296.875,
+      -232.760009765625,
+      1015.7628173828125,
+      1059.162841796875
+    ],
+    "center": [
+      0.0,
+      -264.8175048828125,
+      1037.4628295898438
+    ],
+    "size": [
+      80.6611557006836,
+      64.114990234375,
+      43.4000244140625
+    ]
+  },
+  {
+    "name": "REF_SCENE_frame_extrusion_1000_16",
+    "label": "REF_SCENE_frame_extrusion_1000_16",
+    "type": "Mesh::Feature",
+    "bbox": [
+      -443.6363525390625,
+      -423.4710693359375,
+      -527.13818359375,
+      295.2302551269531,
+      2.2351741790771484e-07,
+      20.0
+    ],
+    "center": [
+      -433.5537109375,
+      -115.95396423339844,
+      10.000000111758709
+    ],
+    "size": [
+      20.165283203125,
+      822.3684387207031,
+      19.999999776482582
+    ]
+  },
+  {
+    "name": "REF_SCENE_frame_angled_extrusion_17",
+    "label": "REF_SCENE_frame_angled_extrusion_17",
+    "type": "Mesh::Feature",
+    "bbox": [
+      594.8812255859375,
+      615.0361328125,
+      -296.5826416015625,
+      -119.43168640136719,
+      19.236618041992188,
+      234.88995361328125
+    ],
+    "center": [
+      604.9586791992188,
+      -208.00716400146484,
+      127.06328582763672
+    ],
+    "size": [
+      20.1549072265625,
+      177.1509552001953,
+      215.65333557128906
+    ]
+  },
+  {
+    "name": "REF_SCENE_frame_extrusion_150_18",
+    "label": "REF_SCENE_frame_extrusion_150_18",
+    "type": "Mesh::Feature",
+    "bbox": [
+      443.6363525390625,
+      594.8760375976562,
+      -62.5,
+      -46.05263137817383,
+      2.2351738948600541e-07,
+      20.0
+    ],
+    "center": [
+      519.2561950683594,
+      -54.276315689086914,
+      10.000000111758695
+    ],
+    "size": [
+      151.23968505859375,
+      16.447368621826172,
+      19.99999977648261
+    ]
+  },
+  {
+    "name": "REF_SCENE_frame_corner_bracket_19",
+    "label": "REF_SCENE_frame_corner_bracket_19",
+    "type": "Mesh::Feature",
+    "bbox": [
+      -443.6363525390625,
+      -384.1487731933594,
+      -316.6118469238281,
+      -313.3223571777344,
+      981.0,
+      1040.0
+    ],
+    "center": [
+      -413.89256286621094,
+      -314.96710205078125,
+      1010.5
+    ],
+    "size": [
+      59.487579345703125,
+      3.28948974609375,
+      59.0
+    ]
+  },
+  {
+    "name": "REF_SCENE_frame_extrusion_1220_20",
+    "label": "REF_SCENE_frame_extrusion_1220_20",
+    "type": "Mesh::Feature",
+    "bbox": [
+      -615.0413208007812,
+      615.0413208007812,
+      295.2302551269531,
+      311.6776428222656,
+      2.2351714790147525e-07,
+      20.0
+    ],
+    "center": [
+      0.0,
+      303.4539489746094,
+      10.000000111758574
+    ],
+    "size": [
+      1230.0826416015625,
+      16.4473876953125,
+      19.999999776482852
+    ]
+  },
+  {
+    "name": "REF_SCENE_frame_extrusion_1000_21",
+    "label": "REF_SCENE_frame_extrusion_1000_21",
+    "type": "Mesh::Feature",
+    "bbox": [
+      423.4710693359375,
+      443.6363525390625,
+      -527.13818359375,
+      295.2302551269531,
+      2.235171905340394e-07,
+      20.0
+    ],
+    "center": [
+      433.5537109375,
+      -115.95396423339844,
+      10.000000111758595
+    ],
+    "size": [
+      20.165283203125,
+      822.3684387207031,
+      19.99999977648281
+    ]
+  },
+  {
+    "name": "REF_SCENE_frame_extrusion_1000_22",
+    "label": "REF_SCENE_frame_extrusion_1000_22",
+    "type": "Mesh::Feature",
+    "bbox": [
+      594.8760375976562,
+      615.0413208007812,
+      -527.13818359375,
+      295.2302551269531,
+      2.235171905340394e-07,
+      20.0
+    ],
+    "center": [
+      604.9586791992188,
+      -115.95396423339844,
+      10.000000111758595
+    ],
+    "size": [
+      20.165283203125,
+      822.3684387207031,
+      19.99999977648281
+    ]
+  },
+  {
+    "name": "REF_SCENE_frame_extrusion_150_23",
+    "label": "REF_SCENE_frame_extrusion_150_23",
+    "type": "Mesh::Feature",
+    "bbox": [
+      -594.8760375976562,
+      -443.6363525390625,
+      -527.13818359375,
+      -510.6907958984375,
+      2.2351738948600541e-07,
+      20.0
+    ],
+    "center": [
+      -519.2561950683594,
+      -518.9144897460938,
+      10.000000111758695
+    ],
+    "size": [
+      151.23968505859375,
+      16.4473876953125,
+      19.99999977648261
+    ]
+  },
+  {
+    "name": "REF_SCENE_frame_corner_bracket_24",
+    "label": "REF_SCENE_frame_corner_bracket_24",
+    "type": "Mesh::Feature",
+    "bbox": [
+      -482.95867919921875,
+      -423.4710693359375,
+      -316.6118469238281,
+      -313.3223571777344,
+      561.0,
+      620.0
+    ],
+    "center": [
+      -453.2148742675781,
+      -314.96710205078125,
+      590.5
+    ],
+    "size": [
+      59.48760986328125,
+      3.28948974609375,
+      59.0
+    ]
+  },
+  {
+    "name": "REF_SCENE_frame_extrusion_1000_25",
+    "label": "REF_SCENE_frame_extrusion_1000_25",
+    "type": "Mesh::Feature",
+    "bbox": [
+      -615.0413208007812,
+      -594.8760375976562,
+      -527.13818359375,
+      295.2302551269531,
+      2.235171905340394e-07,
+      20.0
+    ],
+    "center": [
+      -604.9586791992188,
+      -115.95396423339844,
+      10.000000111758595
+    ],
+    "size": [
+      20.165283203125,
+      822.3684387207031,
+      19.99999977648281
+    ]
+  },
+  {
+    "name": "REF_SCENE_frame_extrusion_600_26",
+    "label": "REF_SCENE_frame_extrusion_600_26",
+    "type": "Mesh::Feature",
+    "bbox": [
+      594.8760375976562,
+      615.0413208007812,
+      -313.3223571777344,
+      -296.875,
+      19.999977111816406,
+      620.0
+    ],
+    "center": [
+      604.9586791992188,
+      -305.0986785888672,
+      319.9999885559082
+    ],
+    "size": [
+      20.165283203125,
+      16.447357177734375,
+      600.0000228881836
+    ]
+  },
+  {
+    "name": "REF_SCENE_frame_angled_extrusion_27",
+    "label": "REF_SCENE_frame_angled_extrusion_27",
+    "type": "Mesh::Feature",
+    "bbox": [
+      423.4762268066406,
+      443.6312255859375,
+      -280.1352844238281,
+      -102.98430633544922,
+      19.236618041992188,
+      234.88995361328125
+    ],
+    "center": [
+      433.55372619628906,
+      -191.55979537963867,
+      127.06328582763672
+    ],
+    "size": [
+      20.154998779296875,
+      177.1509780883789,
+      215.65333557128906
+    ]
+  },
+  {
+    "name": "REF_SCENE_frame_angled_extrusion_28",
+    "label": "REF_SCENE_frame_angled_extrusion_28",
+    "type": "Mesh::Feature",
+    "bbox": [
+      -615.0361328125,
+      -594.8812255859375,
+      -296.5826416015625,
+      -119.43168640136719,
+      19.236618041992188,
+      234.88995361328125
+    ],
+    "center": [
+      -604.9586791992188,
+      -208.00716400146484,
+      127.06328582763672
+    ],
+    "size": [
+      20.1549072265625,
+      177.1509552001953,
+      215.65333557128906
+    ]
+  },
+  {
+    "name": "REF_SCENE_frame_extrusion_2040_1000_29",
+    "label": "REF_SCENE_frame_extrusion_2040_1000_29",
+    "type": "Mesh::Feature",
+    "bbox": [
+      423.4710693359375,
+      443.6363525390625,
+      -313.3223571777344,
+      -280.4276428222656,
+      20.0,
+      1020.0
+    ],
+    "center": [
+      433.5537109375,
+      -296.875,
+      520.0
+    ],
+    "size": [
+      20.165283203125,
+      32.89471435546875,
+      1000.0
+    ]
+  },
+  {
+    "name": "REF_SCENE_frame_wormseye_mount_30",
+    "label": "REF_SCENE_frame_wormseye_mount_30",
+    "type": "Mesh::Feature",
+    "bbox": [
+      -40.3305778503418,
+      40.3305778503418,
+      -338.9855041503906,
+      -308.7268981933594,
+      -20.0,
+      54.85807800292969
+    ],
+    "center": [
+      0.0,
+      -323.856201171875,
+      17.429039001464844
+    ],
+    "size": [
+      80.6611557006836,
+      30.25860595703125,
+      74.85807800292969
+    ]
+  },
+  {
+    "name": "REF_TABLE_DESKTOP_PLANE",
+    "label": "REF_TABLE_DESKTOP_PLANE",
+    "type": "Part::Box",
+    "bbox": [
+      -610.0,
+      610.0,
+      -312.5,
+      312.5,
+      -18.0,
+      0.0
+    ],
+    "center": [
+      0.0,
+      0.0,
+      -9.0
+    ],
+    "size": [
+      1220.0,
+      625.0,
+      18.0
+    ]
+  },
+  {
+    "name": "REF_AXIS_X_RED",
+    "label": "REF_AXIS_X_RED",
+    "type": "Part::Box",
+    "bbox": [
+      0.0,
+      250.0,
+      -3.0,
+      3.0,
+      4.0,
+      10.0
+    ],
+    "center": [
+      125.0,
+      0.0,
+      7.0
+    ],
+    "size": [
+      250.0,
+      6.0,
+      6.0
+    ]
+  },
+  {
+    "name": "REF_AXIS_Y_GREEN",
+    "label": "REF_AXIS_Y_GREEN",
+    "type": "Part::Box",
+    "bbox": [
+      -3.0,
+      3.0,
+      0.0,
+      250.0,
+      4.0,
+      10.0
+    ],
+    "center": [
+      0.0,
+      125.0,
+      7.0
+    ],
+    "size": [
+      6.0,
+      250.0,
+      6.0
+    ]
+  },
+  {
+    "name": "REF_AXIS_Z_BLUE",
+    "label": "REF_AXIS_Z_BLUE",
+    "type": "Part::Box",
+    "bbox": [
+      -3.0,
+      3.0,
+      -3.0,
+      3.0,
+      0.0,
+      250.0
+    ],
+    "center": [
+      0.0,
+      0.0,
+      125.0
+    ],
+    "size": [
+      6.0,
+      6.0,
+      250.0
+    ]
+  }
+]

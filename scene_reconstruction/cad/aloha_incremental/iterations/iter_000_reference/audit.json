@@ -1,0 +1,54 @@
+{
+  "iteration": "iter_000_reference",
+  "required_files": [
+    {
+      "path": "scene_reconstruction/cad/aloha_incremental/iterations/iter_000_reference/iter_000_reference.FCStd",
+      "exists": true,
+      "bytes": 6634327
+    },
+    {
+      "path": "scene_reconstruction/cad/aloha_incremental/iterations/iter_000_reference/bbox_and_dimensions.json",
+      "exists": true,
+      "bytes": 1723
+    },
+    {
+      "path": "scene_reconstruction/cad/aloha_incremental/iterations/iter_000_reference/front.png",
+      "exists": true,
+      "bytes": 24367
+    },
+    {
+      "path": "scene_reconstruction/cad/aloha_incremental/iterations/iter_000_reference/top.png",
+      "exists": true,
+      "bytes": 44891
+    },
+    {
+      "path": "scene_reconstruction/cad/aloha_incremental/iterations/iter_000_reference/right.png",
+      "exists": true,
+      "bytes": 21177
+    },
+    {
+      "path": "scene_reconstruction/cad/aloha_incremental/iterations/iter_000_reference/isometric.png",
+      "exists": true,
+      "bytes": 65257
+    },
+    {
+      "path": "scene_reconstruction/cad/aloha_incremental/iterations/iter_000_reference/changes.md",
+      "exists": true,
+      "bytes": 845
+    },
+    {
+      "path": "scene_reconstruction/cad/aloha_incremental/parameters/scene_parameters.yaml",
+      "exists": true,
+      "bytes": 3465
+    }
+  ],
+  "no_iter_001_created": true,
+  "original_assets_touched": false,
+  "freecad_snap": "/snap/bin/freecad.cmd",
+  "notes": [
+    "Original assets are referenced from external/ and local_eval_assets/ only.",
+    "The current Isaac ALOHA reference remains mesh reference geometry; no reverse-engineered parametric CAD was generated.",
+    "The separate ALOHA2 workcell_v2 STL is not used as the primary reference."
+  ],
+  "ok": true
+}

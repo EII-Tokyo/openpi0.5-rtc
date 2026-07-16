@@ -1,0 +1,79 @@
+{
+  "iteration": "iter_001_measured_table_rack",
+  "units": "mm",
+  "source_iteration": "scene_reconstruction/cad/aloha_incremental/iterations/iter_000_reference/iter_000_reference.FCStd",
+  "output_freecad_file": "scene_reconstruction/cad/aloha_incremental/iterations/iter_001_measured_table_rack/iter_001_measured_table_rack.FCStd",
+  "measured_table": {
+    "length_mm": 1220.0,
+    "width_mm": 625.0,
+    "source": "user physical measurement",
+    "status": "measured"
+  },
+  "original_reference_table": {
+    "length_mm": 1210.0,
+    "width_mm": 760.0,
+    "source": "external/mujoco_menagerie/aloha/scene.xml",
+    "status": "from_cad"
+  },
+  "transform": {
+    "center": "world origin / tabletop center",
+    "scale_x": 1.0082644628099173,
+    "scale_y": 0.8223684210526315,
+    "scale_z": 1.0,
+    "affected_prefixes": [
+      "REF_SCENE_table_",
+      "REF_SCENE_frame_",
+      "REF_SCENE_camera_"
+    ],
+    "not_scaled_prefixes": [
+      "REF_ALOHA_",
+      "REF_AXIS_"
+    ]
+  },
+  "changed_mesh_count": 31,
+  "changed_meshes": [
+    "REF_SCENE_table_tabletop_0",
+    "REF_SCENE_table_tablelegs_1",
+    "REF_SCENE_frame_extrusion_2040_880_2",
+    "REF_SCENE_frame_extrusion_150_3",
+    "REF_SCENE_frame_corner_bracket_4",
+    "REF_SCENE_frame_extrusion_1220_5",
+    "REF_SCENE_frame_extrusion_150_6",
+    "REF_SCENE_frame_corner_bracket_7",
+    "REF_SCENE_frame_corner_bracket_8",
+    "REF_SCENE_frame_extrusion_2040_1000_9",
+    "REF_SCENE_frame_corner_bracket_10",
+    "REF_SCENE_frame_angled_extrusion_11",
+    "REF_SCENE_frame_extrusion_150_12",
+    "REF_SCENE_frame_extrusion_600_13",
+    "REF_SCENE_frame_extrusion_150_14",
+    "REF_SCENE_frame_overhead_mount_15",
+    "REF_SCENE_frame_extrusion_1000_16",
+    "REF_SCENE_frame_angled_extrusion_17",
+    "REF_SCENE_frame_extrusion_150_18",
+    "REF_SCENE_frame_corner_bracket_19",
+    "REF_SCENE_frame_extrusion_1220_20",
+    "REF_SCENE_frame_extrusion_1000_21",
+    "REF_SCENE_frame_extrusion_1000_22",
+    "REF_SCENE_frame_extrusion_150_23",
+    "REF_SCENE_frame_corner_bracket_24",
+    "REF_SCENE_frame_extrusion_1000_25",
+    "REF_SCENE_frame_extrusion_600_26",
+    "REF_SCENE_frame_angled_extrusion_27",
+    "REF_SCENE_frame_angled_extrusion_28",
+    "REF_SCENE_frame_extrusion_2040_1000_29",
+    "REF_SCENE_frame_wormseye_mount_30"
+  ],
+  "skipped_robot_mesh_count": 24,
+  "document_bbox_mm": {
+    "xmin": -666.4630126953125,
+    "xmax": 666.4630126953125,
+    "ymin": -527.13818359375,
+    "ymax": 313.3223571777344,
+    "zmin": -749.2130126953125,
+    "zmax": 1059.162841796875,
+    "x_length": 1332.926025390625,
+    "y_length": 840.4605407714844,
+    "z_length": 1808.3758544921875
+  }
+}

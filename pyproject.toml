@@ -132,5 +132,9 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.pytest.ini_options]
-markers = ["manual: should be run manually."]
+markers = [
+    "manual: should be run manually.",
+    "isaac_runtime: requires launching Isaac Sim runtime.",
+    "requires_runtime_artifacts: requires previously generated Isaac runtime audit artifacts.",
+]
 testpaths = ["src", "scripts", "packages"]

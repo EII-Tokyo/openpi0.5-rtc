@@ -1,0 +1,2697 @@
+[
+  {
+    "name": "REF_ALOHA_left_base_link_vx300s_1_base_0",
+    "label": "REF_ALOHA_left_base_link_vx300s_1_base_0",
+    "source_asset": "external/mujoco_menagerie/aloha/assets/vx300s_1_base.stl",
+    "CountFacets": 1998,
+    "CountPoints": 1001,
+    "CountEdges": 2997,
+    "checks": {
+      "isSolid": true,
+      "hasNonManifolds": false,
+      "hasSelfIntersections": false,
+      "hasNonUniformOrientedFacets": false,
+      "countNonUniformOrientedFacets": 0,
+      "countComponents": 1,
+      "countSegments": 0
+    },
+    "repair_dry_run": {
+      "before_points_facets": [
+        1001,
+        1998
+      ],
+      "after_points_facets": [
+        1001,
+        1998
+      ],
+      "steps": [
+        [
+          "fixIndices",
+          "None"
+        ],
+        [
+          "removeDuplicatedPoints",
+          "None"
+        ],
+        [
+          "removeDuplicatedFacets",
+          "None"
+        ],
+        [
+          "fixDegenerations",
+          "None"
+        ],
+        [
+          "harmonizeNormals",
+          "None"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "REF_ALOHA_left_base_link_left_shoulder_link_vx300s_2_shoulder_0",
+    "label": "REF_ALOHA_left_base_link_left_shoulder_link_vx300s_2_shoulder_0",
+    "source_asset": "external/mujoco_menagerie/aloha/assets/vx300s_2_shoulder.stl",
+    "CountFacets": 1276,
+    "CountPoints": 640,
+    "CountEdges": 1914,
+    "checks": {
+      "isSolid": true,
+      "hasNonManifolds": false,
+      "hasSelfIntersections": false,
+      "hasNonUniformOrientedFacets": false,
+      "countNonUniformOrientedFacets": 0,
+      "countComponents": 1,
+      "countSegments": 0
+    },
+    "repair_dry_run": {
+      "before_points_facets": [
+        640,
+        1276
+      ],
+      "after_points_facets": [
+        640,
+        1276
+      ],
+      "steps": [
+        [
+          "fixIndices",
+          "None"
+        ],
+        [
+          "removeDuplicatedPoints",
+          "None"
+        ],
+        [
+          "removeDuplicatedFacets",
+          "None"
+        ],
+        [
+          "fixDegenerations",
+          "None"
+        ],
+        [
+          "harmonizeNormals",
+          "None"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_vx300s_3_upper_arm_0",
+    "label": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_vx300s_3_upper_arm_0",
+    "source_asset": "external/mujoco_menagerie/aloha/assets/vx300s_3_upper_arm.stl",
+    "CountFacets": 2058,
+    "CountPoints": 1035,
+    "CountEdges": 3095,
+    "checks": {
+      "isSolid": false,
+      "hasNonManifolds": true,
+      "hasSelfIntersections": true,
+      "hasNonUniformOrientedFacets": true,
+      "countNonUniformOrientedFacets": 2,
+      "countComponents": 6,
+      "countSegments": 0
+    },
+    "repair_dry_run": {
+      "before_points_facets": [
+        1035,
+        2058
+      ],
+      "after_points_facets": [
+        1035,
+        2054
+      ],
+      "steps": [
+        [
+          "fixIndices",
+          "None"
+        ],
+        [
+          "removeDuplicatedPoints",
+          "None"
+        ],
+        [
+          "removeDuplicatedFacets",
+          "None"
+        ],
+        [
+          "fixDegenerations",
+          "None"
+        ],
+        [
+          "harmonizeNormals",
+          "None"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_vx300s_4_upper_forearm_0",
+    "label": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_vx300s_4_upper_forearm_0",
+    "source_asset": "external/mujoco_menagerie/aloha/assets/vx300s_4_upper_forearm.stl",
+    "CountFacets": 990,
+    "CountPoints": 497,
+    "CountEdges": 1485,
+    "checks": {
+      "isSolid": true,
+      "hasNonManifolds": false,
+      "hasSelfIntersections": false,
+      "hasNonUniformOrientedFacets": false,
+      "countNonUniformOrientedFacets": 0,
+      "countComponents": 1,
+      "countSegments": 0
+    },
+    "repair_dry_run": {
+      "before_points_facets": [
+        497,
+        990
+      ],
+      "after_points_facets": [
+        497,
+        990
+      ],
+      "steps": [
+        [
+          "fixIndices",
+          "None"
+        ],
+        [
+          "removeDuplicatedPoints",
+          "None"
+        ],
+        [
+          "removeDuplicatedFacets",
+          "None"
+        ],
+        [
+          "fixDegenerations",
+          "None"
+        ],
+        [
+          "harmonizeNormals",
+          "None"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_vx300s_5_lower_for",
+    "label": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_vx300s_5_lower_for",
+    "source_asset": "external/mujoco_menagerie/aloha/assets/vx300s_5_lower_forearm.stl",
+    "CountFacets": 1996,
+    "CountPoints": 1006,
+    "CountEdges": 2994,
+    "checks": {
+      "isSolid": true,
+      "hasNonManifolds": false,
+      "hasSelfIntersections": true,
+      "hasNonUniformOrientedFacets": false,
+      "countNonUniformOrientedFacets": 0,
+      "countComponents": 5,
+      "countSegments": 0
+    },
+    "repair_dry_run": {
+      "before_points_facets": [
+        1006,
+        1996
+      ],
+      "after_points_facets": [
+        1006,
+        1996
+      ],
+      "steps": [
+        [
+          "fixIndices",
+          "None"
+        ],
+        [
+          "removeDuplicatedPoints",
+          "None"
+        ],
+        [
+          "removeDuplicatedFacets",
+          "None"
+        ],
+        [
+          "fixDegenerations",
+          "None"
+        ],
+        [
+          "harmonizeNormals",
+          "None"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_vx",
+    "label": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_vx",
+    "source_asset": "external/mujoco_menagerie/aloha/assets/vx300s_6_wrist.stl",
+    "CountFacets": 1414,
+    "CountPoints": 711,
+    "CountEdges": 2125,
+    "checks": {
+      "isSolid": false,
+      "hasNonManifolds": false,
+      "hasSelfIntersections": true,
+      "hasNonUniformOrientedFacets": false,
+      "countNonUniformOrientedFacets": 0,
+      "countComponents": 3,
+      "countSegments": 0
+    },
+    "repair_dry_run": {
+      "before_points_facets": [
+        711,
+        1414
+      ],
+      "after_points_facets": [
+        709,
+        1414
+      ],
+      "steps": [
+        [
+          "fixIndices",
+          "None"
+        ],
+        [
+          "removeDuplicatedPoints",
+          "None"
+        ],
+        [
+          "removeDuplicatedFacets",
+          "None"
+        ],
+        [
+          "fixDegenerations",
+          "None"
+        ],
+        [
+          "harmonizeNormals",
+          "None"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le",
+    "label": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le",
+    "source_asset": "external/mujoco_menagerie/aloha/assets/vx300s_7_gripper_prop.stl",
+    "CountFacets": 9132,
+    "CountPoints": 4467,
+    "CountEdges": 14130,
+    "checks": {
+      "isSolid": false,
+      "hasNonManifolds": true,
+      "hasSelfIntersections": true,
+      "hasNonUniformOrientedFacets": true,
+      "countNonUniformOrientedFacets": 78,
+      "countComponents": 135,
+      "countSegments": 0
+    },
+    "repair_dry_run": {
+      "before_points_facets": [
+        4467,
+        9132
+      ],
+      "after_points_facets": [
+        4467,
+        9122
+      ],
+      "steps": [
+        [
+          "fixIndices",
+          "None"
+        ],
+        [
+          "removeDuplicatedPoints",
+          "None"
+        ],
+        [
+          "removeDuplicatedFacets",
+          "None"
+        ],
+        [
+          "fixDegenerations",
+          "None"
+        ],
+        [
+          "harmonizeNormals",
+          "None"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le001",
+    "label": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le001",
+    "source_asset": "external/mujoco_menagerie/aloha/assets/vx300s_7_gripper_bar.stl",
+    "CountFacets": 14466,
+    "CountPoints": 6639,
+    "CountEdges": 22627,
+    "checks": {
+      "isSolid": false,
+      "hasNonManifolds": true,
+      "hasSelfIntersections": true,
+      "hasNonUniformOrientedFacets": false,
+      "countNonUniformOrientedFacets": 0,
+      "countComponents": 6,
+      "countSegments": 0
+    },
+    "repair_dry_run": {
+      "before_points_facets": [
+        6639,
+        14466
+      ],
+      "after_points_facets": [
+        6629,
+        14466
+      ],
+      "steps": [
+        [
+          "fixIndices",
+          "None"
+        ],
+        [
+          "removeDuplicatedPoints",
+          "None"
+        ],
+        [
+          "removeDuplicatedFacets",
+          "None"
+        ],
+        [
+          "fixDegenerations",
+          "None"
+        ],
+        [
+          "harmonizeNormals",
+          "None"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le002",
+    "label": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le002",
+    "source_asset": "external/mujoco_menagerie/aloha/assets/vx300s_7_gripper_wrist_mount.stl",
+    "CountFacets": 46288,
+    "CountPoints": 23124,
+    "CountEdges": 69432,
+    "checks": {
+      "isSolid": true,
+      "hasNonManifolds": false,
+      "hasSelfIntersections": false,
+      "hasNonUniformOrientedFacets": false,
+      "countNonUniformOrientedFacets": 0,
+      "countComponents": 1,
+      "countSegments": 0
+    },
+    "repair_dry_run": {
+      "before_points_facets": [
+        23124,
+        46288
+      ],
+      "after_points_facets": [
+        23124,
+        46288
+      ],
+      "steps": [
+        [
+          "fixIndices",
+          "None"
+        ],
+        [
+          "removeDuplicatedPoints",
+          "None"
+        ],
+        [
+          "removeDuplicatedFacets",
+          "None"
+        ],
+        [
+          "fixDegenerations",
+          "None"
+        ],
+        [
+          "harmonizeNormals",
+          "None"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le003",
+    "label": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le003",
+    "source_asset": "external/mujoco_menagerie/aloha/assets/d405_solid.stl",
+    "CountFacets": 24844,
+    "CountPoints": 12424,
+    "CountEdges": 37266,
+    "checks": {
+      "isSolid": true,
+      "hasNonManifolds": false,
+      "hasSelfIntersections": true,
+      "hasNonUniformOrientedFacets": false,
+      "countNonUniformOrientedFacets": 0,
+      "countComponents": 1,
+      "countSegments": 0
+    },
+    "repair_dry_run": {
+      "before_points_facets": [
+        12424,
+        24844
+      ],
+      "after_points_facets": [
+        12424,
+        24844
+      ],
+      "steps": [
+        [
+          "fixIndices",
+          "None"
+        ],
+        [
+          "removeDuplicatedPoints",
+          "None"
+        ],
+        [
+          "removeDuplicatedFacets",
+          "None"
+        ],
+        [
+          "fixDegenerations",
+          "None"
+        ],
+        [
+          "harmonizeNormals",
+          "None"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le004",
+    "label": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le004",
+    "source_asset": "external/mujoco_menagerie/aloha/assets/vx300s_8_custom_finger_left.stl",
+    "CountFacets": 30626,
+    "CountPoints": 15215,
+    "CountEdges": 46083,
+    "checks": {
+      "isSolid": false,
+      "hasNonManifolds": true,
+      "hasSelfIntersections": true,
+      "hasNonUniformOrientedFacets": false,
+      "countNonUniformOrientedFacets": 0,
+      "countComponents": 5,
+      "countSegments": 0
+    },
+    "repair_dry_run": {
+      "before_points_facets": [
+        15215,
+        30626
+      ],
+      "after_points_facets": [
+        15215,
+        30626
+      ],
+      "steps": [
+        [
+          "fixIndices",
+          "None"
+        ],
+        [
+          "removeDuplicatedPoints",
+          "None"
+        ],
+        [
+          "removeDuplicatedFacets",
+          "None"
+        ],
+        [
+          "fixDegenerations",
+          "None"
+        ],
+        [
+          "harmonizeNormals",
+          "None"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le005",
+    "label": "REF_ALOHA_left_base_link_left_shoulder_link_left_upper_arm_link_left_upper_forearm_link_left_lower_forearm_link_left_wrist_link_le005",
+    "source_asset": "external/mujoco_menagerie/aloha/assets/vx300s_8_custom_finger_right.stl",
+    "CountFacets": 30608,
+    "CountPoints": 15278,
+    "CountEdges": 45912,
+    "checks": {
+      "isSolid": true,
+      "hasNonManifolds": false,
+      "hasSelfIntersections": true,
+      "hasNonUniformOrientedFacets": false,
+      "countNonUniformOrientedFacets": 0,
+      "countComponents": 4,
+      "countSegments": 0
+    },
+    "repair_dry_run": {
+      "before_points_facets": [
+        15278,
+        30608
+      ],
+      "after_points_facets": [
+        15278,
+        30608
+      ],
+      "steps": [
+        [
+          "fixIndices",
+          "None"
+        ],
+        [
+          "removeDuplicatedPoints",
+          "None"
+        ],
+        [
+          "removeDuplicatedFacets",
+          "None"
+        ],
+        [
+          "fixDegenerations",
+          "None"
+        ],
+        [
+          "harmonizeNormals",
+          "None"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "REF_ALOHA_right_base_link_vx300s_1_base_0",
+    "label": "REF_ALOHA_right_base_link_vx300s_1_base_0",
+    "source_asset": "external/mujoco_menagerie/aloha/assets/vx300s_1_base.stl",
+    "CountFacets": 1998,
+    "CountPoints": 1001,
+    "CountEdges": 2997,
+    "checks": {
+      "isSolid": true,
+      "hasNonManifolds": false,
+      "hasSelfIntersections": false,
+      "hasNonUniformOrientedFacets": false,
+      "countNonUniformOrientedFacets": 0,
+      "countComponents": 1,
+      "countSegments": 0
+    },
+    "repair_dry_run": {
+      "before_points_facets": [
+        1001,
+        1998
+      ],
+      "after_points_facets": [
+        1001,
+        1998
+      ],
+      "steps": [
+        [
+          "fixIndices",
+          "None"
+        ],
+        [
+          "removeDuplicatedPoints",
+          "None"
+        ],
+        [
+          "removeDuplicatedFacets",
+          "None"
+        ],
+        [
+          "fixDegenerations",
+          "None"
+        ],
+        [
+          "harmonizeNormals",
+          "None"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "REF_ALOHA_right_base_link_right_shoulder_link_vx300s_2_shoulder_0",
+    "label": "REF_ALOHA_right_base_link_right_shoulder_link_vx300s_2_shoulder_0",
+    "source_asset": "external/mujoco_menagerie/aloha/assets/vx300s_2_shoulder.stl",
+    "CountFacets": 1276,
+    "CountPoints": 640,
+    "CountEdges": 1914,
+    "checks": {
+      "isSolid": true,
+      "hasNonManifolds": false,
+      "hasSelfIntersections": false,
+      "hasNonUniformOrientedFacets": false,
+      "countNonUniformOrientedFacets": 0,
+      "countComponents": 1,
+      "countSegments": 0
+    },
+    "repair_dry_run": {
+      "before_points_facets": [
+        640,
+        1276
+      ],
+      "after_points_facets": [
+        640,
+        1276
+      ],
+      "steps": [
+        [
+          "fixIndices",
+          "None"
+        ],
+        [
+          "removeDuplicatedPoints",
+          "None"
+        ],
+        [
+          "removeDuplicatedFacets",
+          "None"
+        ],
+        [
+          "fixDegenerations",
+          "None"
+        ],
+        [
+          "harmonizeNormals",
+          "None"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_vx300s_3_upper_arm_0",
+    "label": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_vx300s_3_upper_arm_0",
+    "source_asset": "external/mujoco_menagerie/aloha/assets/vx300s_3_upper_arm.stl",
+    "CountFacets": 2058,
+    "CountPoints": 1035,
+    "CountEdges": 3095,
+    "checks": {
+      "isSolid": false,
+      "hasNonManifolds": true,
+      "hasSelfIntersections": true,
+      "hasNonUniformOrientedFacets": true,
+      "countNonUniformOrientedFacets": 2,
+      "countComponents": 6,
+      "countSegments": 0
+    },
+    "repair_dry_run": {
+      "before_points_facets": [
+        1035,
+        2058
+      ],
+      "after_points_facets": [
+        1035,
+        2054
+      ],
+      "steps": [
+        [
+          "fixIndices",
+          "None"
+        ],
+        [
+          "removeDuplicatedPoints",
+          "None"
+        ],
+        [
+          "removeDuplicatedFacets",
+          "None"
+        ],
+        [
+          "fixDegenerations",
+          "None"
+        ],
+        [
+          "harmonizeNormals",
+          "None"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_vx300s_4_upper_forearm_0",
+    "label": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_vx300s_4_upper_forearm_0",
+    "source_asset": "external/mujoco_menagerie/aloha/assets/vx300s_4_upper_forearm.stl",
+    "CountFacets": 990,
+    "CountPoints": 497,
+    "CountEdges": 1485,
+    "checks": {
+      "isSolid": true,
+      "hasNonManifolds": false,
+      "hasSelfIntersections": false,
+      "hasNonUniformOrientedFacets": false,
+      "countNonUniformOrientedFacets": 0,
+      "countComponents": 1,
+      "countSegments": 0
+    },
+    "repair_dry_run": {
+      "before_points_facets": [
+        497,
+        990
+      ],
+      "after_points_facets": [
+        497,
+        990
+      ],
+      "steps": [
+        [
+          "fixIndices",
+          "None"
+        ],
+        [
+          "removeDuplicatedPoints",
+          "None"
+        ],
+        [
+          "removeDuplicatedFacets",
+          "None"
+        ],
+        [
+          "fixDegenerations",
+          "None"
+        ],
+        [
+          "harmonizeNormals",
+          "None"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_vx300s_5_lowe",
+    "label": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_vx300s_5_lowe",
+    "source_asset": "external/mujoco_menagerie/aloha/assets/vx300s_5_lower_forearm.stl",
+    "CountFacets": 1996,
+    "CountPoints": 1006,
+    "CountEdges": 2994,
+    "checks": {
+      "isSolid": true,
+      "hasNonManifolds": false,
+      "hasSelfIntersections": true,
+      "hasNonUniformOrientedFacets": false,
+      "countNonUniformOrientedFacets": 0,
+      "countComponents": 5,
+      "countSegments": 0
+    },
+    "repair_dry_run": {
+      "before_points_facets": [
+        1006,
+        1996
+      ],
+      "after_points_facets": [
+        1006,
+        1996
+      ],
+      "steps": [
+        [
+          "fixIndices",
+          "None"
+        ],
+        [
+          "removeDuplicatedPoints",
+          "None"
+        ],
+        [
+          "removeDuplicatedFacets",
+          "None"
+        ],
+        [
+          "fixDegenerations",
+          "None"
+        ],
+        [
+          "harmonizeNormals",
+          "None"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l",
+    "label": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l",
+    "source_asset": "external/mujoco_menagerie/aloha/assets/vx300s_6_wrist.stl",
+    "CountFacets": 1414,
+    "CountPoints": 711,
+    "CountEdges": 2125,
+    "checks": {
+      "isSolid": false,
+      "hasNonManifolds": false,
+      "hasSelfIntersections": true,
+      "hasNonUniformOrientedFacets": false,
+      "countNonUniformOrientedFacets": 0,
+      "countComponents": 3,
+      "countSegments": 0
+    },
+    "repair_dry_run": {
+      "before_points_facets": [
+        711,
+        1414
+      ],
+      "after_points_facets": [
+        709,
+        1414
+      ],
+      "steps": [
+        [
+          "fixIndices",
+          "None"
+        ],
+        [
+          "removeDuplicatedPoints",
+          "None"
+        ],
+        [
+          "removeDuplicatedFacets",
+          "None"
+        ],
+        [
+          "fixDegenerations",
+          "None"
+        ],
+        [
+          "harmonizeNormals",
+          "None"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l001",
+    "label": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l001",
+    "source_asset": "external/mujoco_menagerie/aloha/assets/vx300s_7_gripper_prop.stl",
+    "CountFacets": 9132,
+    "CountPoints": 4467,
+    "CountEdges": 14130,
+    "checks": {
+      "isSolid": false,
+      "hasNonManifolds": true,
+      "hasSelfIntersections": true,
+      "hasNonUniformOrientedFacets": true,
+      "countNonUniformOrientedFacets": 78,
+      "countComponents": 135,
+      "countSegments": 0
+    },
+    "repair_dry_run": {
+      "before_points_facets": [
+        4467,
+        9132
+      ],
+      "after_points_facets": [
+        4467,
+        9122
+      ],
+      "steps": [
+        [
+          "fixIndices",
+          "None"
+        ],
+        [
+          "removeDuplicatedPoints",
+          "None"
+        ],
+        [
+          "removeDuplicatedFacets",
+          "None"
+        ],
+        [
+          "fixDegenerations",
+          "None"
+        ],
+        [
+          "harmonizeNormals",
+          "None"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l002",
+    "label": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l002",
+    "source_asset": "external/mujoco_menagerie/aloha/assets/vx300s_7_gripper_bar.stl",
+    "CountFacets": 14466,
+    "CountPoints": 6639,
+    "CountEdges": 22627,
+    "checks": {
+      "isSolid": false,
+      "hasNonManifolds": true,
+      "hasSelfIntersections": true,
+      "hasNonUniformOrientedFacets": false,
+      "countNonUniformOrientedFacets": 0,
+      "countComponents": 6,
+      "countSegments": 0
+    },
+    "repair_dry_run": {
+      "before_points_facets": [
+        6639,
+        14466
+      ],
+      "after_points_facets": [
+        6629,
+        14466
+      ],
+      "steps": [
+        [
+          "fixIndices",
+          "None"
+        ],
+        [
+          "removeDuplicatedPoints",
+          "None"
+        ],
+        [
+          "removeDuplicatedFacets",
+          "None"
+        ],
+        [
+          "fixDegenerations",
+          "None"
+        ],
+        [
+          "harmonizeNormals",
+          "None"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l003",
+    "label": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l003",
+    "source_asset": "external/mujoco_menagerie/aloha/assets/vx300s_7_gripper_wrist_mount.stl",
+    "CountFacets": 46288,
+    "CountPoints": 23124,
+    "CountEdges": 69432,
+    "checks": {
+      "isSolid": true,
+      "hasNonManifolds": false,
+      "hasSelfIntersections": false,
+      "hasNonUniformOrientedFacets": false,
+      "countNonUniformOrientedFacets": 0,
+      "countComponents": 1,
+      "countSegments": 0
+    },
+    "repair_dry_run": {
+      "before_points_facets": [
+        23124,
+        46288
+      ],
+      "after_points_facets": [
+        23124,
+        46288
+      ],
+      "steps": [
+        [
+          "fixIndices",
+          "None"
+        ],
+        [
+          "removeDuplicatedPoints",
+          "None"
+        ],
+        [
+          "removeDuplicatedFacets",
+          "None"
+        ],
+        [
+          "fixDegenerations",
+          "None"
+        ],
+        [
+          "harmonizeNormals",
+          "None"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l004",
+    "label": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l004",
+    "source_asset": "external/mujoco_menagerie/aloha/assets/d405_solid.stl",
+    "CountFacets": 24844,
+    "CountPoints": 12424,
+    "CountEdges": 37266,
+    "checks": {
+      "isSolid": true,
+      "hasNonManifolds": false,
+      "hasSelfIntersections": true,
+      "hasNonUniformOrientedFacets": false,
+      "countNonUniformOrientedFacets": 0,
+      "countComponents": 1,
+      "countSegments": 0
+    },
+    "repair_dry_run": {
+      "before_points_facets": [
+        12424,
+        24844
+      ],
+      "after_points_facets": [
+        12424,
+        24844
+      ],
+      "steps": [
+        [
+          "fixIndices",
+          "None"
+        ],
+        [
+          "removeDuplicatedPoints",
+          "None"
+        ],
+        [
+          "removeDuplicatedFacets",
+          "None"
+        ],
+        [
+          "fixDegenerations",
+          "None"
+        ],
+        [
+          "harmonizeNormals",
+          "None"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l005",
+    "label": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l005",
+    "source_asset": "external/mujoco_menagerie/aloha/assets/vx300s_8_custom_finger_left.stl",
+    "CountFacets": 30626,
+    "CountPoints": 15215,
+    "CountEdges": 46083,
+    "checks": {
+      "isSolid": false,
+      "hasNonManifolds": true,
+      "hasSelfIntersections": true,
+      "hasNonUniformOrientedFacets": false,
+      "countNonUniformOrientedFacets": 0,
+      "countComponents": 5,
+      "countSegments": 0
+    },
+    "repair_dry_run": {
+      "before_points_facets": [
+        15215,
+        30626
+      ],
+      "after_points_facets": [
+        15215,
+        30626
+      ],
+      "steps": [
+        [
+          "fixIndices",
+          "None"
+        ],
+        [
+          "removeDuplicatedPoints",
+          "None"
+        ],
+        [
+          "removeDuplicatedFacets",
+          "None"
+        ],
+        [
+          "fixDegenerations",
+          "None"
+        ],
+        [
+          "harmonizeNormals",
+          "None"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l006",
+    "label": "REF_ALOHA_right_base_link_right_shoulder_link_right_upper_arm_link_right_upper_forearm_link_right_lower_forearm_link_right_wrist_l006",
+    "source_asset": "external/mujoco_menagerie/aloha/assets/vx300s_8_custom_finger_right.stl",
+    "CountFacets": 30608,
+    "CountPoints": 15278,
+    "CountEdges": 45912,
+    "checks": {
+      "isSolid": true,
+      "hasNonManifolds": false,
+      "hasSelfIntersections": true,
+      "hasNonUniformOrientedFacets": false,
+      "countNonUniformOrientedFacets": 0,
+      "countComponents": 4,
+      "countSegments": 0
+    },
+    "repair_dry_run": {
+      "before_points_facets": [
+        15278,
+        30608
+      ],
+      "after_points_facets": [
+        15278,
+        30608
+      ],
+      "steps": [
+        [
+          "fixIndices",
+          "None"
+        ],
+        [
+          "removeDuplicatedPoints",
+          "None"
+        ],
+        [
+          "removeDuplicatedFacets",
+          "None"
+        ],
+        [
+          "fixDegenerations",
+          "None"
+        ],
+        [
+          "harmonizeNormals",
+          "None"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "REF_SCENE_table_tabletop_0",
+    "label": "REF_SCENE_table_tabletop_0",
+    "source_asset": "external/mujoco_menagerie/aloha/assets/tabletop.obj",
+    "CountFacets": 92,
+    "CountPoints": 48,
+    "CountEdges": 138,
+    "checks": {
+      "isSolid": true,
+      "hasNonManifolds": false,
+      "hasSelfIntersections": false,
+      "hasNonUniformOrientedFacets": false,
+      "countNonUniformOrientedFacets": 0,
+      "countComponents": 1,
+      "countSegments": 0
+    },
+    "repair_dry_run": {
+      "before_points_facets": [
+        48,
+        92
+      ],
+      "after_points_facets": [
+        48,
+        92
+      ],
+      "steps": [
+        [
+          "fixIndices",
+          "None"
+        ],
+        [
+          "removeDuplicatedPoints",
+          "None"
+        ],
+        [
+          "removeDuplicatedFacets",
+          "None"
+        ],
+        [
+          "fixDegenerations",
+          "None"
+        ],
+        [
+          "harmonizeNormals",
+          "None"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "REF_SCENE_table_tablelegs_1",
+    "label": "REF_SCENE_table_tablelegs_1",
+    "source_asset": "external/mujoco_menagerie/aloha/assets/tablelegs.obj",
+    "CountFacets": 128,
+    "CountPoints": 72,
+    "CountEdges": 192,
+    "checks": {
+      "isSolid": true,
+      "hasNonManifolds": false,
+      "hasSelfIntersections": false,
+      "hasNonUniformOrientedFacets": false,
+      "countNonUniformOrientedFacets": 0,
+      "countComponents": 4,
+      "countSegments": 0
+    },
+    "repair_dry_run": {
+      "before_points_facets": [
+        72,
+        128
+      ],
+      "after_points_facets": [
+        72,
+        128
+      ],
+      "steps": [
+        [
+          "fixIndices",
+          "None"
+        ],
+        [
+          "removeDuplicatedPoints",
+          "None"
+        ],
+        [
+          "removeDuplicatedFacets",
+          "None"
+        ],
+        [
+          "fixDegenerations",
+          "None"
+        ],
+        [
+          "harmonizeNormals",
+          "None"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "REF_SCENE_frame_extrusion_2040_880_2",
+    "label": "REF_SCENE_frame_extrusion_2040_880_2",
+    "source_asset": "external/mujoco_menagerie/aloha/assets/extrusion_2040_880.stl",
+    "CountFacets": 1680,
+    "CountPoints": 836,
+    "CountEdges": 2520,
+    "checks": {
+      "isSolid": true,
+      "hasNonManifolds": false,
+      "hasSelfIntersections": false,
+      "hasNonUniformOrientedFacets": false,
+      "countNonUniformOrientedFacets": 0,
+      "countComponents": 1,
+      "countSegments": 0
+    },
+    "repair_dry_run": {
+      "before_points_facets": [
+        836,
+        1680
+      ],
+      "after_points_facets": [
+        836,
+        1680
+      ],
+      "steps": [
+        [
+          "fixIndices",
+          "None"
+        ],
+        [
+          "removeDuplicatedPoints",
+          "None"
+        ],
+        [
+          "removeDuplicatedFacets",
+          "None"
+        ],
+        [
+          "fixDegenerations",
+          "None"
+        ],
+        [
+          "harmonizeNormals",
+          "None"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "REF_SCENE_frame_extrusion_150_3",
+    "label": "REF_SCENE_frame_extrusion_150_3",
+    "source_asset": "external/mujoco_menagerie/aloha/assets/extrusion_150.stl",
+    "CountFacets": 800,
+    "CountPoints": 400,
+    "CountEdges": 1200,
+    "checks": {
+      "isSolid": true,
+      "hasNonManifolds": false,
+      "hasSelfIntersections": false,
+      "hasNonUniformOrientedFacets": false,
+      "countNonUniformOrientedFacets": 0,
+      "countComponents": 1,
+      "countSegments": 0
+    },
+    "repair_dry_run": {
+      "before_points_facets": [
+        400,
+        800
+      ],
+      "after_points_facets": [
+        400,
+        800
+      ],
+      "steps": [
+        [
+          "fixIndices",
+          "None"
+        ],
+        [
+          "removeDuplicatedPoints",
+          "None"
+        ],
+        [
+          "removeDuplicatedFacets",
+          "None"
+        ],
+        [
+          "fixDegenerations",
+          "None"
+        ],
+        [
+          "harmonizeNormals",
+          "None"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "REF_SCENE_frame_corner_bracket_4",
+    "label": "REF_SCENE_frame_corner_bracket_4",
+    "source_asset": "external/mujoco_menagerie/aloha/assets/corner_bracket.stl",
+    "CountFacets": 4684,
+    "CountPoints": 2334,
+    "CountEdges": 7026,
+    "checks": {
+      "isSolid": true,
+      "hasNonManifolds": false,
+      "hasSelfIntersections": false,
+      "hasNonUniformOrientedFacets": false,
+      "countNonUniformOrientedFacets": 0,
+      "countComponents": 1,
+      "countSegments": 0
+    },
+    "repair_dry_run": {
+      "before_points_facets": [
+        2334,
+        4684
+      ],
+      "after_points_facets": [
+        2334,
+        4684
+      ],
+      "steps": [
+        [
+          "fixIndices",
+          "None"
+        ],
+        [
+          "removeDuplicatedPoints",
+          "None"
+        ],
+        [
+          "removeDuplicatedFacets",
+          "None"
+        ],
+        [
+          "fixDegenerations",
+          "None"
+        ],
+        [
+          "harmonizeNormals",
+          "None"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "REF_SCENE_frame_extrusion_1220_5",
+    "label": "REF_SCENE_frame_extrusion_1220_5",
+    "source_asset": "external/mujoco_menagerie/aloha/assets/extrusion_1220.stl",
+    "CountFacets": 800,
+    "CountPoints": 400,
+    "CountEdges": 1200,
+    "checks": {
+      "isSolid": true,
+      "hasNonManifolds": false,
+      "hasSelfIntersections": false,
+      "hasNonUniformOrientedFacets": false,
+      "countNonUniformOrientedFacets": 0,
+      "countComponents": 1,
+      "countSegments": 0
+    },
+    "repair_dry_run": {
+      "before_points_facets": [
+        400,
+        800
+      ],
+      "after_points_facets": [
+        400,
+        800
+      ],
+      "steps": [
+        [
+          "fixIndices",
+          "None"
+        ],
+        [
+          "removeDuplicatedPoints",
+          "None"
+        ],
+        [
+          "removeDuplicatedFacets",
+          "None"
+        ],
+        [
+          "fixDegenerations",
+          "None"
+        ],
+        [
+          "harmonizeNormals",
+          "None"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "REF_SCENE_frame_extrusion_150_6",
+    "label": "REF_SCENE_frame_extrusion_150_6",
+    "source_asset": "external/mujoco_menagerie/aloha/assets/extrusion_150.stl",
+    "CountFacets": 800,
+    "CountPoints": 400,
+    "CountEdges": 1200,
+    "checks": {
+      "isSolid": true,
+      "hasNonManifolds": false,
+      "hasSelfIntersections": false,
+      "hasNonUniformOrientedFacets": false,
+      "countNonUniformOrientedFacets": 0,
+      "countComponents": 1,
+      "countSegments": 0
+    },
+    "repair_dry_run": {
+      "before_points_facets": [
+        400,
+        800
+      ],
+      "after_points_facets": [
+        400,
+        800
+      ],
+      "steps": [
+        [
+          "fixIndices",
+          "None"
+        ],
+        [
+          "removeDuplicatedPoints",
+          "None"
+        ],
+        [
+          "removeDuplicatedFacets",
+          "None"
+        ],
+        [
+          "fixDegenerations",
+          "None"
+        ],
+        [
+          "harmonizeNormals",
+          "None"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "REF_SCENE_frame_corner_bracket_7",
+    "label": "REF_SCENE_frame_corner_bracket_7",
+    "source_asset": "external/mujoco_menagerie/aloha/assets/corner_bracket.stl",
+    "CountFacets": 4684,
+    "CountPoints": 2334,
+    "CountEdges": 7026,
+    "checks": {
+      "isSolid": true,
+      "hasNonManifolds": false,
+      "hasSelfIntersections": false,
+      "hasNonUniformOrientedFacets": false,
+      "countNonUniformOrientedFacets": 0,
+      "countComponents": 1,
+      "countSegments": 0
+    },
+    "repair_dry_run": {
+      "before_points_facets": [
+        2334,
+        4684
+      ],
+      "after_points_facets": [
+        2334,
+        4684
+      ],
+      "steps": [
+        [
+          "fixIndices",
+          "None"
+        ],
+        [
+          "removeDuplicatedPoints",
+          "None"
+        ],
+        [
+          "removeDuplicatedFacets",
+          "None"
+        ],
+        [
+          "fixDegenerations",
+          "None"
+        ],
+        [
+          "harmonizeNormals",
+          "None"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "REF_SCENE_frame_corner_bracket_8",
+    "label": "REF_SCENE_frame_corner_bracket_8",
+    "source_asset": "external/mujoco_menagerie/aloha/assets/corner_bracket.stl",
+    "CountFacets": 4684,
+    "CountPoints": 2334,
+    "CountEdges": 7026,
+    "checks": {
+      "isSolid": true,
+      "hasNonManifolds": false,
+      "hasSelfIntersections": false,
+      "hasNonUniformOrientedFacets": false,
+      "countNonUniformOrientedFacets": 0,
+      "countComponents": 1,
+      "countSegments": 0
+    },
+    "repair_dry_run": {
+      "before_points_facets": [
+        2334,
+        4684
+      ],
+      "after_points_facets": [
+        2334,
+        4684
+      ],
+      "steps": [
+        [
+          "fixIndices",
+          "None"
+        ],
+        [
+          "removeDuplicatedPoints",
+          "None"
+        ],
+        [
+          "removeDuplicatedFacets",
+          "None"
+        ],
+        [
+          "fixDegenerations",
+          "None"
+        ],
+        [
+          "harmonizeNormals",
+          "None"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "REF_SCENE_frame_extrusion_2040_1000_9",
+    "label": "REF_SCENE_frame_extrusion_2040_1000_9",
+    "source_asset": "external/mujoco_menagerie/aloha/assets/extrusion_2040_1000.stl",
+    "CountFacets": 1680,
+    "CountPoints": 836,
+    "CountEdges": 2520,
+    "checks": {
+      "isSolid": true,
+      "hasNonManifolds": false,
+      "hasSelfIntersections": false,
+      "hasNonUniformOrientedFacets": false,
+      "countNonUniformOrientedFacets": 0,
+      "countComponents": 1,
+      "countSegments": 0
+    },
+    "repair_dry_run": {
+      "before_points_facets": [
+        836,
+        1680
+      ],
+      "after_points_facets": [
+        836,
+        1680
+      ],
+      "steps": [
+        [
+          "fixIndices",
+          "None"
+        ],
+        [
+          "removeDuplicatedPoints",
+          "None"
+        ],
+        [
+          "removeDuplicatedFacets",
+          "None"
+        ],
+        [
+          "fixDegenerations",
+          "None"
+        ],
+        [
+          "harmonizeNormals",
+          "None"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "REF_SCENE_frame_corner_bracket_10",
+    "label": "REF_SCENE_frame_corner_bracket_10",
+    "source_asset": "external/mujoco_menagerie/aloha/assets/corner_bracket.stl",
+    "CountFacets": 4684,
+    "CountPoints": 2334,
+    "CountEdges": 7026,
+    "checks": {
+      "isSolid": true,
+      "hasNonManifolds": false,
+      "hasSelfIntersections": false,
+      "hasNonUniformOrientedFacets": false,
+      "countNonUniformOrientedFacets": 0,
+      "countComponents": 1,
+      "countSegments": 0
+    },
+    "repair_dry_run": {
+      "before_points_facets": [
+        2334,
+        4684
+      ],
+      "after_points_facets": [
+        2334,
+        4684
+      ],
+      "steps": [
+        [
+          "fixIndices",
+          "None"
+        ],
+        [
+          "removeDuplicatedPoints",
+          "None"
+        ],
+        [
+          "removeDuplicatedFacets",
+          "None"
+        ],
+        [
+          "fixDegenerations",
+          "None"
+        ],
+        [
+          "harmonizeNormals",
+          "None"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "REF_SCENE_frame_angled_extrusion_11",
+    "label": "REF_SCENE_frame_angled_extrusion_11",
+    "source_asset": "external/mujoco_menagerie/aloha/assets/angled_extrusion.stl",
+    "CountFacets": 8962,
+    "CountPoints": 4469,
+    "CountEdges": 13443,
+    "checks": {
+      "isSolid": true,
+      "hasNonManifolds": false,
+      "hasSelfIntersections": false,
+      "hasNonUniformOrientedFacets": false,
+      "countNonUniformOrientedFacets": 0,
+      "countComponents": 1,
+      "countSegments": 0
+    },
+    "repair_dry_run": {
+      "before_points_facets": [
+        4469,
+        8962
+      ],
+      "after_points_facets": [
+        4469,
+        8962
+      ],
+      "steps": [
+        [
+          "fixIndices",
+          "None"
+        ],
+        [
+          "removeDuplicatedPoints",
+          "None"
+        ],
+        [
+          "removeDuplicatedFacets",
+          "None"
+        ],
+        [
+          "fixDegenerations",
+          "None"
+        ],
+        [
+          "harmonizeNormals",
+          "None"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "REF_SCENE_frame_extrusion_150_12",
+    "label": "REF_SCENE_frame_extrusion_150_12",
+    "source_asset": "external/mujoco_menagerie/aloha/assets/extrusion_150.stl",
+    "CountFacets": 800,
+    "CountPoints": 400,
+    "CountEdges": 1200,
+    "checks": {
+      "isSolid": true,
+      "hasNonManifolds": false,
+      "hasSelfIntersections": false,
+      "hasNonUniformOrientedFacets": false,
+      "countNonUniformOrientedFacets": 0,
+      "countComponents": 1,
+      "countSegments": 0
+    },
+    "repair_dry_run": {
+      "before_points_facets": [
+        400,
+        800
+      ],
+      "after_points_facets": [
+        400,
+        800
+      ],
+      "steps": [
+        [
+          "fixIndices",
+          "None"
+        ],
+        [
+          "removeDuplicatedPoints",
+          "None"
+        ],
+        [
+          "removeDuplicatedFacets",
+          "None"
+        ],
+        [
+          "fixDegenerations",
+          "None"
+        ],
+        [
+          "harmonizeNormals",
+          "None"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "REF_SCENE_frame_extrusion_600_13",
+    "label": "REF_SCENE_frame_extrusion_600_13",
+    "source_asset": "external/mujoco_menagerie/aloha/assets/extrusion_600.stl",
+    "CountFacets": 800,
+    "CountPoints": 400,
+    "CountEdges": 1200,
+    "checks": {
+      "isSolid": true,
+      "hasNonManifolds": false,
+      "hasSelfIntersections": false,
+      "hasNonUniformOrientedFacets": false,
+      "countNonUniformOrientedFacets": 0,
+      "countComponents": 1,
+      "countSegments": 0
+    },
+    "repair_dry_run": {
+      "before_points_facets": [
+        400,
+        800
+      ],
+      "after_points_facets": [
+        400,
+        800
+      ],
+      "steps": [
+        [
+          "fixIndices",
+          "None"
+        ],
+        [
+          "removeDuplicatedPoints",
+          "None"
+        ],
+        [
+          "removeDuplicatedFacets",
+          "None"
+        ],
+        [
+          "fixDegenerations",
+          "None"
+        ],
+        [
+          "harmonizeNormals",
+          "None"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "REF_SCENE_frame_extrusion_150_14",
+    "label": "REF_SCENE_frame_extrusion_150_14",
+    "source_asset": "external/mujoco_menagerie/aloha/assets/extrusion_150.stl",
+    "CountFacets": 800,
+    "CountPoints": 400,
+    "CountEdges": 1200,
+    "checks": {
+      "isSolid": true,
+      "hasNonManifolds": false,
+      "hasSelfIntersections": false,
+      "hasNonUniformOrientedFacets": false,
+      "countNonUniformOrientedFacets": 0,
+      "countComponents": 1,
+      "countSegments": 0
+    },
+    "repair_dry_run": {
+      "before_points_facets": [
+        400,
+        800
+      ],
+      "after_points_facets": [
+        400,
+        800
+      ],
+      "steps": [
+        [
+          "fixIndices",
+          "None"
+        ],
+        [
+          "removeDuplicatedPoints",
+          "None"
+        ],
+        [
+          "removeDuplicatedFacets",
+          "None"
+        ],
+        [
+          "fixDegenerations",
+          "None"
+        ],
+        [
+          "harmonizeNormals",
+          "None"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "REF_SCENE_frame_overhead_mount_15",
+    "label": "REF_SCENE_frame_overhead_mount_15",
+    "source_asset": "external/mujoco_menagerie/aloha/assets/overhead_mount.stl",
+    "CountFacets": 37984,
+    "CountPoints": 18982,
+    "CountEdges": 56976,
+    "checks": {
+      "isSolid": true,
+      "hasNonManifolds": false,
+      "hasSelfIntersections": true,
+      "hasNonUniformOrientedFacets": false,
+      "countNonUniformOrientedFacets": 0,
+      "countComponents": 1,
+      "countSegments": 0
+    },
+    "repair_dry_run": {
+      "before_points_facets": [
+        18982,
+        37984
+      ],
+      "after_points_facets": [
+        18982,
+        37984
+      ],
+      "steps": [
+        [
+          "fixIndices",
+          "None"
+        ],
+        [
+          "removeDuplicatedPoints",
+          "None"
+        ],
+        [
+          "removeDuplicatedFacets",
+          "None"
+        ],
+        [
+          "fixDegenerations",
+          "None"
+        ],
+        [
+          "harmonizeNormals",
+          "None"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "REF_SCENE_frame_extrusion_1000_16",
+    "label": "REF_SCENE_frame_extrusion_1000_16",
+    "source_asset": "external/mujoco_menagerie/aloha/assets/extrusion_1000.stl",
+    "CountFacets": 800,
+    "CountPoints": 400,
+    "CountEdges": 1200,
+    "checks": {
+      "isSolid": true,
+      "hasNonManifolds": false,
+      "hasSelfIntersections": false,
+      "hasNonUniformOrientedFacets": false,
+      "countNonUniformOrientedFacets": 0,
+      "countComponents": 1,
+      "countSegments": 0
+    },
+    "repair_dry_run": {
+      "before_points_facets": [
+        400,
+        800
+      ],
+      "after_points_facets": [
+        400,
+        800
+      ],
+      "steps": [
+        [
+          "fixIndices",
+          "None"
+        ],
+        [
+          "removeDuplicatedPoints",
+          "None"
+        ],
+        [
+          "removeDuplicatedFacets",
+          "None"
+        ],
+        [
+          "fixDegenerations",
+          "None"
+        ],
+        [
+          "harmonizeNormals",
+          "None"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "REF_SCENE_frame_angled_extrusion_17",
+    "label": "REF_SCENE_frame_angled_extrusion_17",
+    "source_asset": "external/mujoco_menagerie/aloha/assets/angled_extrusion.stl",
+    "CountFacets": 8962,
+    "CountPoints": 4469,
+    "CountEdges": 13443,
+    "checks": {
+      "isSolid": true,
+      "hasNonManifolds": false,
+      "hasSelfIntersections": false,
+      "hasNonUniformOrientedFacets": false,
+      "countNonUniformOrientedFacets": 0,
+      "countComponents": 1,
+      "countSegments": 0
+    },
+    "repair_dry_run": {
+      "before_points_facets": [
+        4469,
+        8962
+      ],
+      "after_points_facets": [
+        4469,
+        8962
+      ],
+      "steps": [
+        [
+          "fixIndices",
+          "None"
+        ],
+        [
+          "removeDuplicatedPoints",
+          "None"
+        ],
+        [
+          "removeDuplicatedFacets",
+          "None"
+        ],
+        [
+          "fixDegenerations",
+          "None"
+        ],
+        [
+          "harmonizeNormals",
+          "None"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "REF_SCENE_frame_extrusion_150_18",
+    "label": "REF_SCENE_frame_extrusion_150_18",
+    "source_asset": "external/mujoco_menagerie/aloha/assets/extrusion_150.stl",
+    "CountFacets": 800,
+    "CountPoints": 400,
+    "CountEdges": 1200,
+    "checks": {
+      "isSolid": true,
+      "hasNonManifolds": false,
+      "hasSelfIntersections": false,
+      "hasNonUniformOrientedFacets": false,
+      "countNonUniformOrientedFacets": 0,
+      "countComponents": 1,
+      "countSegments": 0
+    },
+    "repair_dry_run": {
+      "before_points_facets": [
+        400,
+        800
+      ],
+      "after_points_facets": [
+        400,
+        800
+      ],
+      "steps": [
+        [
+          "fixIndices",
+          "None"
+        ],
+        [
+          "removeDuplicatedPoints",
+          "None"
+        ],
+        [
+          "removeDuplicatedFacets",
+          "None"
+        ],
+        [
+          "fixDegenerations",
+          "None"
+        ],
+        [
+          "harmonizeNormals",
+          "None"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "REF_SCENE_frame_corner_bracket_19",
+    "label": "REF_SCENE_frame_corner_bracket_19",
+    "source_asset": "external/mujoco_menagerie/aloha/assets/corner_bracket.stl",
+    "CountFacets": 4684,
+    "CountPoints": 2334,
+    "CountEdges": 7026,
+    "checks": {
+      "isSolid": true,
+      "hasNonManifolds": false,
+      "hasSelfIntersections": false,
+      "hasNonUniformOrientedFacets": false,
+      "countNonUniformOrientedFacets": 0,
+      "countComponents": 1,
+      "countSegments": 0
+    },
+    "repair_dry_run": {
+      "before_points_facets": [
+        2334,
+        4684
+      ],
+      "after_points_facets": [
+        2334,
+        4684
+      ],
+      "steps": [
+        [
+          "fixIndices",
+          "None"
+        ],
+        [
+          "removeDuplicatedPoints",
+          "None"
+        ],
+        [
+          "removeDuplicatedFacets",
+          "None"
+        ],
+        [
+          "fixDegenerations",
+          "None"
+        ],
+        [
+          "harmonizeNormals",
+          "None"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "REF_SCENE_frame_extrusion_1220_20",
+    "label": "REF_SCENE_frame_extrusion_1220_20",
+    "source_asset": "external/mujoco_menagerie/aloha/assets/extrusion_1220.stl",
+    "CountFacets": 800,
+    "CountPoints": 400,
+    "CountEdges": 1200,
+    "checks": {
+      "isSolid": true,
+      "hasNonManifolds": false,
+      "hasSelfIntersections": false,
+      "hasNonUniformOrientedFacets": false,
+      "countNonUniformOrientedFacets": 0,
+      "countComponents": 1,
+      "countSegments": 0
+    },
+    "repair_dry_run": {
+      "before_points_facets": [
+        400,
+        800
+      ],
+      "after_points_facets": [
+        400,
+        800
+      ],
+      "steps": [
+        [
+          "fixIndices",
+          "None"
+        ],
+        [
+          "removeDuplicatedPoints",
+          "None"
+        ],
+        [
+          "removeDuplicatedFacets",
+          "None"
+        ],
+        [
+          "fixDegenerations",
+          "None"
+        ],
+        [
+          "harmonizeNormals",
+          "None"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "REF_SCENE_frame_extrusion_1000_21",
+    "label": "REF_SCENE_frame_extrusion_1000_21",
+    "source_asset": "external/mujoco_menagerie/aloha/assets/extrusion_1000.stl",
+    "CountFacets": 800,
+    "CountPoints": 400,
+    "CountEdges": 1200,
+    "checks": {
+      "isSolid": true,
+      "hasNonManifolds": false,
+      "hasSelfIntersections": false,
+      "hasNonUniformOrientedFacets": false,
+      "countNonUniformOrientedFacets": 0,
+      "countComponents": 1,
+      "countSegments": 0
+    },
+    "repair_dry_run": {
+      "before_points_facets": [
+        400,
+        800
+      ],
+      "after_points_facets": [
+        400,
+        800
+      ],
+      "steps": [
+        [
+          "fixIndices",
+          "None"
+        ],
+        [
+          "removeDuplicatedPoints",
+          "None"
+        ],
+        [
+          "removeDuplicatedFacets",
+          "None"
+        ],
+        [
+          "fixDegenerations",
+          "None"
+        ],
+        [
+          "harmonizeNormals",
+          "None"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "REF_SCENE_frame_extrusion_1000_22",
+    "label": "REF_SCENE_frame_extrusion_1000_22",
+    "source_asset": "external/mujoco_menagerie/aloha/assets/extrusion_1000.stl",
+    "CountFacets": 800,
+    "CountPoints": 400,
+    "CountEdges": 1200,
+    "checks": {
+      "isSolid": true,
+      "hasNonManifolds": false,
+      "hasSelfIntersections": false,
+      "hasNonUniformOrientedFacets": false,
+      "countNonUniformOrientedFacets": 0,
+      "countComponents": 1,
+      "countSegments": 0
+    },
+    "repair_dry_run": {
+      "before_points_facets": [
+        400,
+        800
+      ],
+      "after_points_facets": [
+        400,
+        800
+      ],
+      "steps": [
+        [
+          "fixIndices",
+          "None"
+        ],
+        [
+          "removeDuplicatedPoints",
+          "None"
+        ],
+        [
+          "removeDuplicatedFacets",
+          "None"
+        ],
+        [
+          "fixDegenerations",
+          "None"
+        ],
+        [
+          "harmonizeNormals",
+          "None"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "REF_SCENE_frame_extrusion_150_23",
+    "label": "REF_SCENE_frame_extrusion_150_23",
+    "source_asset": "external/mujoco_menagerie/aloha/assets/extrusion_150.stl",
+    "CountFacets": 800,
+    "CountPoints": 400,
+    "CountEdges": 1200,
+    "checks": {
+      "isSolid": true,
+      "hasNonManifolds": false,
+      "hasSelfIntersections": false,
+      "hasNonUniformOrientedFacets": false,
+      "countNonUniformOrientedFacets": 0,
+      "countComponents": 1,
+      "countSegments": 0
+    },
+    "repair_dry_run": {
+      "before_points_facets": [
+        400,
+        800
+      ],
+      "after_points_facets": [
+        400,
+        800
+      ],
+      "steps": [
+        [
+          "fixIndices",
+          "None"
+        ],
+        [
+          "removeDuplicatedPoints",
+          "None"
+        ],
+        [
+          "removeDuplicatedFacets",
+          "None"
+        ],
+        [
+          "fixDegenerations",
+          "None"
+        ],
+        [
+          "harmonizeNormals",
+          "None"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "REF_SCENE_frame_corner_bracket_24",
+    "label": "REF_SCENE_frame_corner_bracket_24",
+    "source_asset": "external/mujoco_menagerie/aloha/assets/corner_bracket.stl",
+    "CountFacets": 4684,
+    "CountPoints": 2334,
+    "CountEdges": 7026,
+    "checks": {
+      "isSolid": true,
+      "hasNonManifolds": false,
+      "hasSelfIntersections": false,
+      "hasNonUniformOrientedFacets": false,
+      "countNonUniformOrientedFacets": 0,
+      "countComponents": 1,
+      "countSegments": 0
+    },
+    "repair_dry_run": {
+      "before_points_facets": [
+        2334,
+        4684
+      ],
+      "after_points_facets": [
+        2334,
+        4684
+      ],
+      "steps": [
+        [
+          "fixIndices",
+          "None"
+        ],
+        [
+          "removeDuplicatedPoints",
+          "None"
+        ],
+        [
+          "removeDuplicatedFacets",
+          "None"
+        ],
+        [
+          "fixDegenerations",
+          "None"
+        ],
+        [
+          "harmonizeNormals",
+          "None"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "REF_SCENE_frame_extrusion_1000_25",
+    "label": "REF_SCENE_frame_extrusion_1000_25",
+    "source_asset": "external/mujoco_menagerie/aloha/assets/extrusion_1000.stl",
+    "CountFacets": 800,
+    "CountPoints": 400,
+    "CountEdges": 1200,
+    "checks": {
+      "isSolid": true,
+      "hasNonManifolds": false,
+      "hasSelfIntersections": false,
+      "hasNonUniformOrientedFacets": false,
+      "countNonUniformOrientedFacets": 0,
+      "countComponents": 1,
+      "countSegments": 0
+    },
+    "repair_dry_run": {
+      "before_points_facets": [
+        400,
+        800
+      ],
+      "after_points_facets": [
+        400,
+        800
+      ],
+      "steps": [
+        [
+          "fixIndices",
+          "None"
+        ],
+        [
+          "removeDuplicatedPoints",
+          "None"
+        ],
+        [
+          "removeDuplicatedFacets",
+          "None"
+        ],
+        [
+          "fixDegenerations",
+          "None"
+        ],
+        [
+          "harmonizeNormals",
+          "None"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "REF_SCENE_frame_extrusion_600_26",
+    "label": "REF_SCENE_frame_extrusion_600_26",
+    "source_asset": "external/mujoco_menagerie/aloha/assets/extrusion_600.stl",
+    "CountFacets": 800,
+    "CountPoints": 400,
+    "CountEdges": 1200,
+    "checks": {
+      "isSolid": true,
+      "hasNonManifolds": false,
+      "hasSelfIntersections": false,
+      "hasNonUniformOrientedFacets": false,
+      "countNonUniformOrientedFacets": 0,
+      "countComponents": 1,
+      "countSegments": 0
+    },
+    "repair_dry_run": {
+      "before_points_facets": [
+        400,
+        800
+      ],
+      "after_points_facets": [
+        400,
+        800
+      ],
+      "steps": [
+        [
+          "fixIndices",
+          "None"
+        ],
+        [
+          "removeDuplicatedPoints",
+          "None"
+        ],
+        [
+          "removeDuplicatedFacets",
+          "None"
+        ],
+        [
+          "fixDegenerations",
+          "None"
+        ],
+        [
+          "harmonizeNormals",
+          "None"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "REF_SCENE_frame_angled_extrusion_27",
+    "label": "REF_SCENE_frame_angled_extrusion_27",
+    "source_asset": "external/mujoco_menagerie/aloha/assets/angled_extrusion.stl",
+    "CountFacets": 8962,
+    "CountPoints": 4469,
+    "CountEdges": 13443,
+    "checks": {
+      "isSolid": true,
+      "hasNonManifolds": false,
+      "hasSelfIntersections": false,
+      "hasNonUniformOrientedFacets": false,
+      "countNonUniformOrientedFacets": 0,
+      "countComponents": 1,
+      "countSegments": 0
+    },
+    "repair_dry_run": {
+      "before_points_facets": [
+        4469,
+        8962
+      ],
+      "after_points_facets": [
+        4469,
+        8962
+      ],
+      "steps": [
+        [
+          "fixIndices",
+          "None"
+        ],
+        [
+          "removeDuplicatedPoints",
+          "None"
+        ],
+        [
+          "removeDuplicatedFacets",
+          "None"
+        ],
+        [
+          "fixDegenerations",
+          "None"
+        ],
+        [
+          "harmonizeNormals",
+          "None"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "REF_SCENE_frame_angled_extrusion_28",
+    "label": "REF_SCENE_frame_angled_extrusion_28",
+    "source_asset": "external/mujoco_menagerie/aloha/assets/angled_extrusion.stl",
+    "CountFacets": 8962,
+    "CountPoints": 4469,
+    "CountEdges": 13443,
+    "checks": {
+      "isSolid": true,
+      "hasNonManifolds": false,
+      "hasSelfIntersections": false,
+      "hasNonUniformOrientedFacets": false,
+      "countNonUniformOrientedFacets": 0,
+      "countComponents": 1,
+      "countSegments": 0
+    },
+    "repair_dry_run": {
+      "before_points_facets": [
+        4469,
+        8962
+      ],
+      "after_points_facets": [
+        4469,
+        8962
+      ],
+      "steps": [
+        [
+          "fixIndices",
+          "None"
+        ],
+        [
+          "removeDuplicatedPoints",
+          "None"
+        ],
+        [
+          "removeDuplicatedFacets",
+          "None"
+        ],
+        [
+          "fixDegenerations",
+          "None"
+        ],
+        [
+          "harmonizeNormals",
+          "None"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "REF_SCENE_frame_extrusion_2040_1000_29",
+    "label": "REF_SCENE_frame_extrusion_2040_1000_29",
+    "source_asset": "external/mujoco_menagerie/aloha/assets/extrusion_2040_1000.stl",
+    "CountFacets": 1680,
+    "CountPoints": 836,
+    "CountEdges": 2520,
+    "checks": {
+      "isSolid": true,
+      "hasNonManifolds": false,
+      "hasSelfIntersections": false,
+      "hasNonUniformOrientedFacets": false,
+      "countNonUniformOrientedFacets": 0,
+      "countComponents": 1,
+      "countSegments": 0
+    },
+    "repair_dry_run": {
+      "before_points_facets": [
+        836,
+        1680
+      ],
+      "after_points_facets": [
+        836,
+        1680
+      ],
+      "steps": [
+        [
+          "fixIndices",
+          "None"
+        ],
+        [
+          "removeDuplicatedPoints",
+          "None"
+        ],
+        [
+          "removeDuplicatedFacets",
+          "None"
+        ],
+        [
+          "fixDegenerations",
+          "None"
+        ],
+        [
+          "harmonizeNormals",
+          "None"
+        ]
+      ]
+    }
+  },
+  {
+    "name": "REF_SCENE_frame_wormseye_mount_30",
+    "label": "REF_SCENE_frame_wormseye_mount_30",
+    "source_asset": "external/mujoco_menagerie/aloha/assets/wormseye_mount.stl",
+    "CountFacets": 39112,
+    "CountPoints": 19546,
+    "CountEdges": 58668,
+    "checks": {
+      "isSolid": true,
+      "hasNonManifolds": false,
+      "hasSelfIntersections": true,
+      "hasNonUniformOrientedFacets": false,
+      "countNonUniformOrientedFacets": 0,
+      "countComponents": 1,
+      "countSegments": 0
+    },
+    "repair_dry_run": {
+      "before_points_facets": [
+        19546,
+        39112
+      ],
+      "after_points_facets": [
+        19546,
+        39112
+      ],
+      "steps": [
+        [
+          "fixIndices",
+          "None"
+        ],
+        [
+          "removeDuplicatedPoints",
+          "None"
+        ],
+        [
+          "removeDuplicatedFacets",
+          "None"
+        ],
+        [
+          "fixDegenerations",
+          "None"
+        ],
+        [
+          "harmonizeNormals",
+          "None"
+        ]
+      ]
+    }
+  }
+]

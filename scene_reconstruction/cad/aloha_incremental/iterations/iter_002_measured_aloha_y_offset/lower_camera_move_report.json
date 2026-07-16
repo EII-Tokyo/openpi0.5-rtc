@@ -1,0 +1,24 @@
+{
+  "object": "REF_SCENE_frame_wormseye_mount_30",
+  "semantic_target": "lower camera / worms_eye_cam mount",
+  "operation": "mirror across table centerline Y=0 to the opposite side",
+  "center_before_mm": [
+    0.0,
+    -323.856,
+    17.429
+  ],
+  "center_after_mm": [
+    0.0,
+    323.856,
+    17.429
+  ],
+  "dy_mm": 647.712,
+  "bbox_after_mm": [
+    -40.331,
+    40.331,
+    308.727,
+    338.986,
+    -20.0,
+    54.858
+  ]
+}
