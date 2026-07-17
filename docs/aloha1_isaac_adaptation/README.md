@@ -25,6 +25,7 @@ The main conclusion is conservative:
 - [13 Phase 7 Trossen FK candidate check](13_phase7_trossen_fk_candidate_check_2026-07-17.md)
 - [14 Phase 8 FK mapping search](14_phase8_fk_mapping_search_2026-07-17.md)
 - [15 Phase 9 FK mapping holdout](15_phase9_fk_mapping_holdout_2026-07-17.md)
+- [16 Phase 10 full-dataset mapping limits](16_phase10_full_dataset_mapping_limits_2026-07-18.md)
 
 ## Operating Rule
 
