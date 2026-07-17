@@ -46,6 +46,7 @@ The main conclusion is conservative:
 - [33 Phase 27 runtime collision composition](33_phase27_runtime_collision_composition_2026-07-18.md)
 - [34 Phase 28 physics property comparison](34_phase28_physics_property_comparison_2026-07-18.md)
 - [35 Phase 29 defaultPrim composition trap](35_phase29_default_prim_composition_trap_2026-07-18.md)
+- [36 Phase 30 sublayer runtime composition](36_phase30_sublayer_runtime_composition_2026-07-18.md)
 
 ## Operating Rule
 
