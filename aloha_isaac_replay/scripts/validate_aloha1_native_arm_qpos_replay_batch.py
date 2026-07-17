@@ -86,6 +86,8 @@ def _write_markdown(path: Path, payload: dict[str, Any]) -> None:
         "",
         f"- hdf5 root: `{payload['inputs']['hdf5_root']}`",
         f"- mapping: `{payload['inputs']['mapping']}`",
+        f"- stage USD: `{payload['inputs']['stage_usd']}`",
+        f"- stage units in meters: `{payload['inputs']['stage_units_in_meters']}`",
         f"- left USD: `{payload['inputs']['left_usd']}`",
         f"- right USD: `{payload['inputs']['right_usd']}`",
         f"- left prim path: `{payload['inputs']['left_prim_path']}`",
@@ -119,12 +121,21 @@ def main() -> int:
     parser.add_argument("--episode-limit", type=int, default=6)
     parser.add_argument("--max-frames-per-episode", type=int, default=80)
     parser.add_argument("--mapping", default=str(DEFAULT_MAPPING))
+    parser.add_argument("--stage-usd", default=None)
+    parser.add_argument("--stage-units-in-meters", type=float, default=None)
     parser.add_argument("--left-usd", default=str(DEFAULT_LEFT_USD))
     parser.add_argument("--right-usd", default=str(DEFAULT_RIGHT_USD))
     parser.add_argument("--left-prim-path", default="/World/left/root_joint")
     parser.add_argument("--right-prim-path", default="/World/right/root_joint")
     parser.add_argument("--output-dir", default=str(DEFAULT_OUTPUT_DIR))
     args = parser.parse_args()
+    if args.stage_usd:
+        if args.left_prim_path == "/World/left/root_joint":
+            args.left_prim_path = "/puppet_left_vx300s/root_joint"
+        if args.right_prim_path == "/World/right/root_joint":
+            args.right_prim_path = "/puppet_right_vx300s/root_joint"
+    if args.stage_units_in_meters is None:
+        args.stage_units_in_meters = 0.01 if args.stage_usd else 1.0
 
     output_dir = Path(args.output_dir)
     json_path = output_dir / "batch_replay_metrics.json"
@@ -139,6 +150,8 @@ def main() -> int:
             "episode_limit": args.episode_limit,
             "max_frames_per_episode": args.max_frames_per_episode,
             "mapping": _rel(args.mapping),
+            "stage_usd": _rel(args.stage_usd) if args.stage_usd else None,
+            "stage_units_in_meters": args.stage_units_in_meters,
             "left_usd": _rel(args.left_usd),
             "right_usd": _rel(args.right_usd),
             "left_prim_path": args.left_prim_path,
@@ -161,10 +174,14 @@ def main() -> int:
         from isaacsim.core.prims import SingleArticulation
 
         World.clear_instance()
-        stage_utils.create_new_stage()
-        world = World(stage_units_in_meters=1.0, backend="numpy", device="cpu")
-        stage_utils.add_reference_to_stage(usd_path=str(Path(args.left_usd).resolve()), prim_path="/World/left")
-        stage_utils.add_reference_to_stage(usd_path=str(Path(args.right_usd).resolve()), prim_path="/World/right")
+        if args.stage_usd:
+            stage_utils.open_stage(str(Path(args.stage_usd).resolve()))
+        else:
+            stage_utils.create_new_stage()
+        world = World(stage_units_in_meters=args.stage_units_in_meters, backend="numpy", device="cpu")
+        if not args.stage_usd:
+            stage_utils.add_reference_to_stage(usd_path=str(Path(args.left_usd).resolve()), prim_path="/World/left")
+            stage_utils.add_reference_to_stage(usd_path=str(Path(args.right_usd).resolve()), prim_path="/World/right")
         left = world.scene.add(SingleArticulation(prim_path=args.left_prim_path, name="left_vx300s"))
         right = world.scene.add(SingleArticulation(prim_path=args.right_prim_path, name="right_vx300s"))
         world.reset()
