@@ -52,6 +52,7 @@ The main conclusion is conservative:
 - [39 Phase 34 clean stage qpos replay](39_phase34_clean_stage_qpos_replay_2026-07-18.md)
 - [40 Phase 35 clean stage single-joint response](40_phase35_clean_stage_single_joint_response_2026-07-18.md)
 - [41 Phase 36 collision isolation single-joint response](41_phase36_collision_isolation_single_joint_response_2026-07-18.md)
+- [42 Phase 37 clean collision prim audit](42_phase37_clean_collision_prim_audit_2026-07-18.md)
 
 ## Operating Rule
 
