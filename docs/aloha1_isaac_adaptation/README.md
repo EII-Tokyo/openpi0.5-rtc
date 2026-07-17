@@ -64,6 +64,8 @@ The main conclusion is conservative:
 - [51 Phase 45 fingertip-pad proxy](51_phase45_fingertip_pad_proxy_2026-07-18.md)
 - [52 Phase 46 USD-authored proxy offsets](52_phase46_usd_authored_proxy_offsets_2026-07-18.md)
 - [53 Phase 47 closure and object-size isolation](53_phase47_closure_and_object_size_isolation_2026-07-18.md)
+- [54 Phase 48 first contact pair trace](54_phase48_first_contact_pair_trace_2026-07-18.md)
+- [55 Phase 49 raw USD contact stability](55_phase49_raw_usd_contact_stability_2026-07-18.md)
 
 ## Operating Rule
 

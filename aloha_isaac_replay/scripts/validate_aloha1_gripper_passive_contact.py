@@ -53,6 +53,16 @@ def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
         "left_finger_qpos",
         "right_finger_qpos",
         "finger_center_distance",
+        "left_axis_min",
+        "left_axis_max",
+        "left_axis_center",
+        "right_axis_min",
+        "right_axis_max",
+        "right_axis_center",
+        "object_axis_min",
+        "object_axis_max",
+        "object_axis_center",
+        "target_finger_object_surface_gap",
     ]
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", newline="") as f:
@@ -62,21 +72,42 @@ def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
 
 
 def _write_markdown(path: Path, payload: dict[str, Any]) -> None:
+    unique_pairs = payload.get("unique_contact_pairs") or []
+    pair_lines = [f"- `{pair}`" for pair in unique_pairs[:12]]
+    if len(unique_pairs) > 12:
+        pair_lines.append(f"- ... {len(unique_pairs) - 12} more unique pairs")
     lines = [
-        "# Phase 43 Gripper Passive Contact Smoke",
+        "# Gripper Passive Contact Smoke",
         "",
         f"- status: `{payload['status']}`",
+        f"- contact trace status: `{payload.get('contact_trace_status')}`",
         f"- stage: `{payload['inputs']['stage_usd']}`",
         f"- control mode: `{payload['inputs']['control_mode']}`",
+        f"- moving fingers: `{payload['inputs'].get('moving_fingers')}`",
         f"- object side length: `{payload.get('object_side_length_stage_units')}` stage units",
-        f"- object displacement: `{payload.get('object_displacement')}` stage units",
+        f"- object settle displacement: `{payload.get('object_settle_displacement')}` stage units",
+        f"- object close displacement: `{payload.get('object_displacement')}` stage units",
+        f"- object total displacement: `{payload.get('total_object_displacement')}` stage units",
+        f"- max object displacement: `{payload.get('max_object_displacement')}` stage units",
         f"- finite object motion: `{payload.get('object_motion_finite')}`",
         f"- contact motion lower bound ok: `{payload.get('contact_motion_ok')}`",
         f"- no explosion upper bound ok: `{payload.get('no_explosion_ok')}`",
+        f"- contact pair trace enabled: `{payload.get('contact_pair_trace_enabled')}`",
+        f"- contact pair count: `{payload.get('contact_pair_count')}`",
+        f"- target contact pair found: `{payload.get('target_contact_pair_found')}`",
+        f"- first contact pair: `{payload.get('first_contact_pair')}`",
+        f"- first target contact pair: `{payload.get('first_target_contact_pair')}`",
+        f"- first target contact step: `{payload.get('first_target_contact_step')}`",
+        f"- target contact persistence steps: `{payload.get('target_contact_persistence_steps')}`",
+        "",
+        "## Unique Contact Pairs",
+        "",
+        *(pair_lines or ["- none"]),
         "",
         "## Interpretation",
         "",
         "This is a local contact smoke test. It only checks whether a small passive cube between the gripper proxies remains numerically stable and moves within a bounded range during finger closure.",
+        "A non-zero contact count is not a success condition. The trace must show that the target fingertip proxy contacts the target object collider, and object motion must remain bounded.",
         "It does not validate grasp success, bottle geometry, friction realism, or full-arm task behavior.",
     ]
     path.write_text("\n".join(lines) + "\n")
@@ -114,6 +145,36 @@ def _surface_gap(left_box: dict[str, Any], right_box: dict[str, Any], axis: int)
     if right_max <= left_min:
         return left_min - right_max
     return 0.0
+
+
+def _axis_probe_row(
+    *,
+    axis: int,
+    left_box: dict[str, Any],
+    right_box: dict[str, Any],
+    object_box: dict[str, Any],
+    target_finger_box: dict[str, Any],
+) -> dict[str, float | None]:
+    def pick(box: dict[str, Any], key: str) -> float | None:
+        values = box.get(key)
+        if values is None:
+            return None
+        return float(values[axis])
+
+    return {
+        "left_axis_min": pick(left_box, "min"),
+        "left_axis_max": pick(left_box, "max"),
+        "left_axis_center": pick(left_box, "center"),
+        "right_axis_min": pick(right_box, "min"),
+        "right_axis_max": pick(right_box, "max"),
+        "right_axis_center": pick(right_box, "center"),
+        "object_axis_min": pick(object_box, "min"),
+        "object_axis_max": pick(object_box, "max"),
+        "object_axis_center": pick(object_box, "center"),
+        "target_finger_object_surface_gap": _surface_gap(target_finger_box, object_box, axis)
+        if target_finger_box.get("bbox_valid") and object_box.get("bbox_valid")
+        else None,
+    }
 
 
 def _create_passive_cube(
@@ -178,6 +239,137 @@ def _set_collision_offsets(stage: Any, prim_path: str, contact_offset: float | N
     }
 
 
+def _begin_contact_pair_trace(stage: Any, *, disable_usd_updates: bool) -> dict[str, Any]:
+    import carb
+    import usdrt
+    from omni.physx import get_physx_simulation_interface
+    from omni.physx.bindings._physx import SETTING_UPDATE_TO_USD
+    from pxr import PhysxSchema, Sdf, Usd, UsdUtils
+
+    session_sub_layer = Sdf.Layer.CreateAnonymous()
+    stage.GetSessionLayer().subLayerPaths.append(session_sub_layer.identifier)
+    old_layer = stage.GetEditTarget().GetLayer()
+    stage.SetEditTarget(Usd.EditTarget(session_sub_layer))
+
+    stage_cache = UsdUtils.StageCache.Get()
+    stage_cache.Insert(stage)
+    stage_id = stage_cache.GetId(stage).ToLongInt()
+    usdrt_stage = usdrt.Usd.Stage.Attach(stage_id)
+    rigid_body_paths = [str(path) for path in usdrt_stage.GetPrimsWithAppliedAPIName("PhysicsRigidBodyAPI")]
+    for prim_path in rigid_body_paths:
+        prim = stage.GetPrimAtPath(prim_path)
+        if prim:
+            contact_report_api = PhysxSchema.PhysxContactReportAPI.Apply(prim)
+            contact_report_api.CreateThresholdAttr().Set(0)
+
+    settings = carb.settings.get_settings()
+    write_usd = settings.get_as_bool(SETTING_UPDATE_TO_USD)
+    write_fabric = settings.get_as_bool("/physics/fabricEnabled")
+    if disable_usd_updates:
+        settings.set(SETTING_UPDATE_TO_USD, False)
+        settings.set("/physics/fabricEnabled", False)
+    return {
+        "enabled": True,
+        "stage_id": stage_id,
+        "session_sub_layer": session_sub_layer,
+        "old_layer": old_layer,
+        "settings": settings,
+        "write_usd": write_usd,
+        "write_fabric": write_fabric,
+        "disable_usd_updates": disable_usd_updates,
+        "rigid_body_paths": rigid_body_paths,
+        "physx_interface": get_physx_simulation_interface(),
+    }
+
+
+def _finish_contact_pair_trace(stage: Any, trace_state: dict[str, Any] | None) -> None:
+    if not trace_state:
+        return
+    from omni.physx.bindings._physx import SETTING_UPDATE_TO_USD
+
+    settings = trace_state["settings"]
+    if trace_state.get("disable_usd_updates"):
+        settings.set(SETTING_UPDATE_TO_USD, trace_state["write_usd"])
+        settings.set("/physics/fabricEnabled", trace_state["write_fabric"])
+    stage.SetEditTarget(trace_state["old_layer"])
+    layer_id = trace_state["session_sub_layer"].identifier
+    if layer_id in stage.GetSessionLayer().subLayerPaths:
+        stage.GetSessionLayer().subLayerPaths.remove(layer_id)
+
+
+def _read_contact_pairs(trace_state: dict[str, Any] | None) -> list[dict[str, Any]]:
+    if not trace_state:
+        return []
+    from omni.physx.bindings._physx import ContactEventType
+    from pxr import PhysicsSchemaTools
+
+    contact_headers, _contact_data = trace_state["physx_interface"].get_contact_report()
+    rows: list[dict[str, Any]] = []
+    for contact_header in contact_headers:
+        collider0 = str(PhysicsSchemaTools.intToSdfPath(contact_header.collider0))
+        collider1 = str(PhysicsSchemaTools.intToSdfPath(contact_header.collider1))
+        rows.append(
+            {
+                "type": int(contact_header.type),
+                "type_name": "CONTACT_FOUND" if contact_header.type == ContactEventType.CONTACT_FOUND else str(contact_header.type),
+                "collider0": collider0,
+                "collider1": collider1,
+                "sorted_pair": sorted([collider0, collider1]),
+            }
+        )
+    return rows
+
+
+def _path_matches(path: str, target: str) -> bool:
+    return path == target or path.startswith(f"{target}/")
+
+
+def _pair_touches_targets(pair: dict[str, Any], object_path: str, finger_paths: list[str]) -> bool:
+    collider0 = str(pair["collider0"])
+    collider1 = str(pair["collider1"])
+    touches_object = _path_matches(collider0, object_path) or _path_matches(collider1, object_path)
+    touches_finger = any(_path_matches(collider0, finger_path) or _path_matches(collider1, finger_path) for finger_path in finger_paths)
+    return bool(touches_object and touches_finger)
+
+
+def _summarize_contact_pairs(
+    *,
+    contact_pair_rows: list[dict[str, Any]],
+    object_path: str,
+    expected_finger_paths: list[str],
+    sample_limit: int = 80,
+) -> dict[str, Any]:
+    unique_pairs = sorted({tuple(row["sorted_pair"]) for row in contact_pair_rows})
+    target_rows = [
+        row
+        for row in contact_pair_rows
+        if _pair_touches_targets(row, object_path, expected_finger_paths)
+    ]
+    wrong_rows = [
+        row
+        for row in contact_pair_rows
+        if not _pair_touches_targets(row, object_path, expected_finger_paths)
+    ]
+    target_found_rows = [row for row in target_rows if row.get("type_name") == "CONTACT_FOUND"]
+    target_steps = sorted({int(row["step"]) for row in target_rows})
+    wrong_pairs = sorted({tuple(row["sorted_pair"]) for row in wrong_rows})
+    return {
+        "contact_pair_count": len(contact_pair_rows),
+        "unique_contact_pairs": [list(pair) for pair in unique_pairs],
+        "contact_pairs_sample": contact_pair_rows[:sample_limit],
+        "expected_contact_object": object_path,
+        "expected_contact_fingers": expected_finger_paths,
+        "target_contact_pair_found": bool(target_rows),
+        "target_contact_found_event": bool(target_found_rows),
+        "first_target_contact_pair": target_rows[0] if target_rows else None,
+        "first_target_contact_found_pair": target_found_rows[0] if target_found_rows else None,
+        "first_target_contact_step": target_steps[0] if target_steps else None,
+        "target_contact_steps": target_steps,
+        "target_contact_persistence_steps": len(target_steps),
+        "wrong_contact_pairs": [list(pair) for pair in wrong_pairs],
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Run a local passive-object contact smoke test for ALOHA1 gripper proxies.")
     parser.add_argument("--stage-usd", default=str(DEFAULT_STAGE))
@@ -191,13 +383,22 @@ def main() -> int:
     parser.add_argument("--gravity", type=float, default=0.0)
     parser.add_argument("--limit-margin", type=float, default=0.001)
     parser.add_argument("--object-fill-fraction", type=float, default=0.6)
-    parser.add_argument("--object-creation", choices=("dynamic_cuboid", "raw_usd"), default="dynamic_cuboid")
+    parser.add_argument("--object-placement", choices=("gap_center", "moving_finger_surface"), default="gap_center")
+    parser.add_argument("--object-clearance", type=float, default=0.001)
+    parser.add_argument("--object-creation", choices=("dynamic_cuboid", "raw_usd"), default="raw_usd")
     parser.add_argument("--object-mass", type=float, default=0.01)
     parser.add_argument("--object-contact-offset", type=float, default=None)
     parser.add_argument("--object-rest-offset", type=float, default=None)
     parser.add_argument("--proxy-contact-offset", type=float, default=None)
     parser.add_argument("--proxy-rest-offset", type=float, default=None)
     parser.add_argument("--closure-profile", choices=("abrupt", "linear"), default="abrupt")
+    parser.add_argument("--moving-fingers", choices=("both", "left", "right"), default="both")
+    parser.add_argument("--trace-contact-pairs", action="store_true")
+    parser.add_argument(
+        "--trace-disable-usd-updates",
+        action="store_true",
+        help="Match Isaac asset-validator style contact probing. Off by default because this script needs live USD bbox readback.",
+    )
     parser.add_argument("--min-contact-motion", type=float, default=1e-5)
     parser.add_argument("--max-object-displacement", type=float, default=0.25)
     args = parser.parse_args()
@@ -222,12 +423,18 @@ def main() -> int:
             "physics_dt": args.physics_dt,
             "gravity": args.gravity,
             "object_fill_fraction": args.object_fill_fraction,
+            "object_placement": args.object_placement,
+            "object_clearance": args.object_clearance,
             "object_creation": args.object_creation,
             "object_contact_offset": args.object_contact_offset,
             "object_rest_offset": args.object_rest_offset,
             "proxy_contact_offset": args.proxy_contact_offset,
             "proxy_rest_offset": args.proxy_rest_offset,
             "closure_profile": args.closure_profile,
+            "moving_fingers": args.moving_fingers,
+            "trace_contact_pairs": args.trace_contact_pairs,
+            "trace_disable_usd_updates": args.trace_disable_usd_updates,
+            "reset_after_object_creation": False,
             "min_contact_motion": args.min_contact_motion,
             "max_object_displacement": args.max_object_displacement,
         },
@@ -260,10 +467,14 @@ def main() -> int:
         open_target, open_values = _finger_targets(art, args.open_offset, args.limit_margin)
         _set_full_state(art, open_target)
         _set_full_target(art, open_target)
-        _set_finger_target_and_step(world, art, open_target, args.settle_steps)
+        pre_object_update_steps = max(args.settle_steps, 1)
+        payload["inputs"]["pre_object_update_steps"] = pre_object_update_steps
+        _set_finger_target_and_step(world, art, open_target, pre_object_update_steps)
 
         left_box = _bbox_row(stage, paths["left_finger"])
         right_box = _bbox_row(stage, paths["right_finger"])
+        placement_left_box = dict(left_box)
+        placement_right_box = dict(right_box)
         gap = _gap_metrics(left_box, right_box)
         if not gap.get("bbox_pair_valid"):
             raise RuntimeError("Finger proxy bbox pair is invalid; cannot place contact object.")
@@ -272,6 +483,32 @@ def main() -> int:
         center = (np.asarray(left_box["center"], dtype=np.float64) + np.asarray(right_box["center"], dtype=np.float64)) * 0.5
         surface_gap = _surface_gap(left_box, right_box, axis)
         side_length = max(surface_gap * args.object_fill_fraction, 1e-4)
+        object_placement_row: dict[str, Any] = {
+            "mode": args.object_placement,
+            "axis": axis_name,
+            "clearance": args.object_clearance,
+            "base_center": center.tolist(),
+        }
+        if args.object_placement == "moving_finger_surface" and args.moving_fingers != "both":
+            moving_box = left_box if args.moving_fingers == "left" else right_box
+            other_box = right_box if args.moving_fingers == "left" else left_box
+            moving_center = np.asarray(moving_box["center"], dtype=np.float64)
+            other_center = np.asarray(other_box["center"], dtype=np.float64)
+            direction = 1.0 if other_center[axis] >= moving_center[axis] else -1.0
+            moving_surface = float(moving_box["max"][axis] if direction > 0 else moving_box["min"][axis])
+            center = np.asarray(moving_box["center"], dtype=np.float64)
+            center[axis] = moving_surface + direction * (side_length * 0.5 + args.object_clearance)
+            object_placement_row.update(
+                {
+                    "moving_finger": args.moving_fingers,
+                    "other_finger": "right" if args.moving_fingers == "left" else "left",
+                    "direction_toward_other_finger": direction,
+                    "moving_surface": moving_surface,
+                    "placed_center": center.tolist(),
+                }
+            )
+        elif args.object_placement == "moving_finger_surface":
+            object_placement_row["warning"] = "moving_finger_surface requires --moving-fingers left or right; used gap_center."
         object_path = "/World/phase43_passive_contact_cube"
         proxy_offset_rows = [
             _set_collision_offsets(stage, paths["left_finger"], args.proxy_contact_offset, args.proxy_rest_offset),
@@ -287,74 +524,208 @@ def main() -> int:
             creation_mode=args.object_creation,
         )
         object_offset_row = _set_collision_offsets(stage, object_path, args.object_contact_offset, args.object_rest_offset)
-        world.reset()
-        _apply_gravity(world, args.gravity)
-        _set_full_state(art, open_target)
-        _set_full_target(art, open_target)
-        _set_finger_target_and_step(world, art, open_target, args.settle_steps)
-
-        object_initial_box = _bbox_row(stage, object_path)
-        object_initial_center = np.asarray(object_initial_box["center"], dtype=np.float64)
-        close_target, close_values = _finger_targets(art, args.close_offset, args.limit_margin)
-        rows: list[dict[str, Any]] = []
-        max_displacement = 0.0
-        finite_motion = True
-        for step in range(args.close_steps):
-            if args.closure_profile == "linear":
-                alpha = float(step + 1) / float(max(args.close_steps, 1))
-                step_target = open_target + alpha * (close_target - open_target)
-            else:
-                step_target = close_target
-            _set_full_target(art, step_target)
-            world.step(render=False)
-            qpos = np.asarray(art.get_joint_positions(), dtype=np.float64).reshape(-1)
+        trace_state = None
+        first_contact_row: dict[str, Any] | None = None
+        contact_pair_rows: list[dict[str, Any]] = []
+        try:
+            if args.trace_contact_pairs:
+                trace_state = _begin_contact_pair_trace(stage, disable_usd_updates=args.trace_disable_usd_updates)
+            # Do not reset after object creation: object placement is computed from
+            # the current open-pose fingertip bboxes, and a later reset can move
+            # the articulation back under the already-placed object.
+            _apply_gravity(world, args.gravity)
+            _set_full_state(art, open_target)
+            _set_full_target(art, open_target)
             dof_names = list(art.dof_names)
-            left_box = _bbox_row(stage, paths["left_finger"])
-            right_box = _bbox_row(stage, paths["right_finger"])
-            object_box = _bbox_row(stage, object_path)
-            object_center = np.asarray(object_box.get("center", [np.nan, np.nan, np.nan]), dtype=np.float64)
-            displacement = float(np.linalg.norm(object_center - object_initial_center))
-            finite_motion = bool(finite_motion and np.all(np.isfinite(object_center)) and np.isfinite(displacement))
-            max_displacement = max(max_displacement, displacement if np.isfinite(displacement) else float("inf"))
-            rows.append(
-                {
-                    "phase": "close",
-                    "step": step,
-                    "object_center_x": float(object_center[0]),
-                    "object_center_y": float(object_center[1]),
-                    "object_center_z": float(object_center[2]),
-                    "object_displacement": displacement,
-                    "left_finger_qpos": float(qpos[dof_names.index("left_finger")]),
-                    "right_finger_qpos": float(qpos[dof_names.index("right_finger")]),
-                    "finger_center_distance": _gap_metrics(left_box, right_box).get("center_distance"),
-                }
-            )
+            object_reset_box = _bbox_row(stage, object_path)
+            object_reset_center = np.asarray(object_reset_box["center"], dtype=np.float64)
+            rows: list[dict[str, Any]] = []
+            max_displacement = 0.0
+            finite_motion = True
+            for step in range(args.settle_steps):
+                _set_full_target(art, open_target)
+                world.step(render=False)
+                qpos = np.asarray(art.get_joint_positions(), dtype=np.float64).reshape(-1)
+                left_box = _bbox_row(stage, paths["left_finger"])
+                right_box = _bbox_row(stage, paths["right_finger"])
+                object_box = _bbox_row(stage, object_path)
+                object_center = np.asarray(object_box.get("center", [np.nan, np.nan, np.nan]), dtype=np.float64)
+                displacement_from_reset = float(np.linalg.norm(object_center - object_reset_center))
+                finite_motion = bool(
+                    finite_motion and np.all(np.isfinite(object_center)) and np.isfinite(displacement_from_reset)
+                )
+                max_displacement = max(
+                    max_displacement,
+                    displacement_from_reset if np.isfinite(displacement_from_reset) else float("inf"),
+                )
+                step_contact_pairs = _read_contact_pairs(trace_state)
+                if step_contact_pairs:
+                    for pair in step_contact_pairs:
+                        contact_row = {"phase": "settle", "step": step, **pair}
+                        contact_pair_rows.append(contact_row)
+                    if first_contact_row is None:
+                        first_contact_row = dict(contact_pair_rows[-len(step_contact_pairs)])
+                rows.append(
+                    {
+                        "phase": "settle",
+                        "step": step,
+                        "object_center_x": float(object_center[0]),
+                        "object_center_y": float(object_center[1]),
+                        "object_center_z": float(object_center[2]),
+                        "object_displacement": displacement_from_reset,
+                        "left_finger_qpos": float(qpos[dof_names.index("left_finger")]),
+                        "right_finger_qpos": float(qpos[dof_names.index("right_finger")]),
+                        "finger_center_distance": _gap_metrics(left_box, right_box).get("center_distance"),
+                        **_axis_probe_row(
+                            axis=axis,
+                            left_box=left_box,
+                            right_box=right_box,
+                            object_box=object_box,
+                            target_finger_box=left_box if args.moving_fingers != "right" else right_box,
+                        ),
+                    }
+                )
 
-        object_final_box = _bbox_row(stage, object_path)
-        object_final_center = np.asarray(object_final_box["center"], dtype=np.float64)
+            object_initial_box = _bbox_row(stage, object_path)
+            object_initial_center = np.asarray(object_initial_box["center"], dtype=np.float64)
+            object_latest_box = dict(object_initial_box)
+            object_latest_center = object_initial_center.copy()
+            object_settle_displacement = float(np.linalg.norm(object_initial_center - object_reset_center))
+            close_target, close_values = _finger_targets(art, args.close_offset, args.limit_margin)
+            if args.moving_fingers != "both":
+                isolated_target = open_target.copy()
+                isolated_target[dof_names.index(f"{args.moving_fingers}_finger")] = close_target[
+                    dof_names.index(f"{args.moving_fingers}_finger")
+                ]
+                close_target = isolated_target
+                close_values = {
+                    "left_finger": float(close_target[dof_names.index("left_finger")]),
+                    "right_finger": float(close_target[dof_names.index("right_finger")]),
+                }
+            for step in range(args.close_steps):
+                if args.closure_profile == "linear":
+                    alpha = float(step + 1) / float(max(args.close_steps, 1))
+                    step_target = open_target + alpha * (close_target - open_target)
+                else:
+                    step_target = close_target
+                _set_full_target(art, step_target)
+                world.step(render=False)
+                qpos = np.asarray(art.get_joint_positions(), dtype=np.float64).reshape(-1)
+                left_box = _bbox_row(stage, paths["left_finger"])
+                right_box = _bbox_row(stage, paths["right_finger"])
+                object_box = _bbox_row(stage, object_path)
+                object_center = np.asarray(object_box.get("center", [np.nan, np.nan, np.nan]), dtype=np.float64)
+                object_latest_box = dict(object_box)
+                object_latest_center = object_center.copy()
+                displacement = float(np.linalg.norm(object_center - object_initial_center))
+                displacement_from_reset = float(np.linalg.norm(object_center - object_reset_center))
+                finite_motion = bool(
+                    finite_motion
+                    and np.all(np.isfinite(object_center))
+                    and np.isfinite(displacement)
+                    and np.isfinite(displacement_from_reset)
+                )
+                max_displacement = max(
+                    max_displacement,
+                    displacement_from_reset if np.isfinite(displacement_from_reset) else float("inf"),
+                )
+                step_contact_pairs = _read_contact_pairs(trace_state)
+                if step_contact_pairs:
+                    for pair in step_contact_pairs:
+                        contact_row = {"phase": "close", "step": step, **pair}
+                        contact_pair_rows.append(contact_row)
+                    if first_contact_row is None:
+                        first_contact_row = dict(contact_pair_rows[-len(step_contact_pairs)])
+                rows.append(
+                    {
+                        "phase": "close",
+                        "step": step,
+                        "object_center_x": float(object_center[0]),
+                        "object_center_y": float(object_center[1]),
+                        "object_center_z": float(object_center[2]),
+                        "object_displacement": displacement,
+                        "left_finger_qpos": float(qpos[dof_names.index("left_finger")]),
+                        "right_finger_qpos": float(qpos[dof_names.index("right_finger")]),
+                        "finger_center_distance": _gap_metrics(left_box, right_box).get("center_distance"),
+                        **_axis_probe_row(
+                            axis=axis,
+                            left_box=left_box,
+                            right_box=right_box,
+                            object_box=object_box,
+                            target_finger_box=left_box if args.moving_fingers != "right" else right_box,
+                        ),
+                    }
+                )
+        finally:
+            _finish_contact_pair_trace(stage, trace_state)
+
+        object_final_box = object_latest_box
+        object_final_center = object_latest_center
         object_displacement = float(np.linalg.norm(object_final_center - object_initial_center))
+        total_object_displacement = float(np.linalg.norm(object_final_center - object_reset_center))
         contact_motion_ok = bool(object_displacement >= args.min_contact_motion)
         no_explosion_ok = bool(finite_motion and max_displacement <= args.max_object_displacement)
         overall_pass = bool(contact_motion_ok and no_explosion_ok)
+        if args.moving_fingers == "both":
+            expected_finger_paths = [paths["left_finger"], paths["right_finger"]]
+        else:
+            expected_finger_paths = [paths[f"{args.moving_fingers}_finger"]]
+        contact_summary = _summarize_contact_pairs(
+            contact_pair_rows=contact_pair_rows,
+            object_path=object_path,
+            expected_finger_paths=expected_finger_paths,
+        )
+        trace_pair_ok = bool((not args.trace_contact_pairs) or contact_summary["target_contact_pair_found"])
+        overall_pass = bool(overall_pass and trace_pair_ok)
+        if args.trace_contact_pairs:
+            if not contact_summary["target_contact_pair_found"]:
+                contact_trace_status = "FAIL_NO_TARGET_CONTACT"
+            elif not no_explosion_ok:
+                contact_trace_status = "FAIL_OBJECT_EJECTION"
+            else:
+                contact_trace_status = (
+                    "PASS_SINGLE_FINGER_CONTACT_ISOLATION"
+                    if args.moving_fingers != "both"
+                    else "PASS_BILATERAL_CONTACT_CANDIDATE"
+                )
+        else:
+            contact_trace_status = "NOT_TRACED"
         payload.update(
             {
                 "status": "PASS" if overall_pass else "FAILED_GATE",
                 "overall_pass": overall_pass,
+                "contact_trace_status": contact_trace_status,
                 "open_target_values": open_values,
                 "close_target_values": close_values,
                 "finger_gap_axis": axis_name,
                 "finger_surface_gap_open": surface_gap,
+                "left_finger_placement_box": placement_left_box,
+                "right_finger_placement_box": placement_right_box,
+                "left_finger_final_box": left_box,
+                "right_finger_final_box": right_box,
                 "object_path": object_path,
+                "object_placement": object_placement_row,
                 "object_side_length_stage_units": side_length,
                 "proxy_collision_offsets": proxy_offset_rows,
                 "object_collision_offsets": object_offset_row,
+                "object_reset_box": object_reset_box,
+                "object_initial_box": object_initial_box,
+                "object_final_box": object_final_box,
+                "object_reset_center": object_reset_center.tolist(),
                 "object_initial_center": object_initial_center.tolist(),
                 "object_final_center": object_final_center.tolist(),
+                "object_settle_displacement": object_settle_displacement,
                 "object_displacement": object_displacement,
+                "total_object_displacement": total_object_displacement,
                 "max_object_displacement": max_displacement,
                 "object_motion_finite": finite_motion,
                 "contact_motion_ok": contact_motion_ok,
                 "no_explosion_ok": no_explosion_ok,
+                "contact_pair_trace_enabled": bool(args.trace_contact_pairs),
+                "contact_trace_disable_usd_updates": bool(args.trace_disable_usd_updates),
+                "contact_trace_rigid_body_paths": trace_state["rigid_body_paths"] if trace_state else [],
+                "first_contact_pair": first_contact_row,
+                **contact_summary,
                 "csv": _rel(csv_path),
                 "markdown": _rel(md_path),
                 "next_gate": "gripper_contact_with_task_shape" if overall_pass else "inspect_contact_geometry_or_finger_control",
