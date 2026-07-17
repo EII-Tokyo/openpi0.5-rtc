@@ -16,24 +16,35 @@ This is still not a grasp test. It only checks the local contact plumbing.
   `.codex/artifacts/20260718-041829_phase43-gripper-passive-contact`
 - Oversize object run artifact:
   `.codex/artifacts/20260718-041906_phase43-gripper-passive-contact-oversize`
+- DynamicCuboid run artifact:
+  `.codex/artifacts/20260718-042059_phase43-gripper-passive-contact-dynamic-cuboid`
+- Smaller/softer DynamicCuboid run artifact:
+  `.codex/artifacts/20260718-042135_phase43-gripper-passive-contact-soft`
 
 ## Results
 
-| run | status | open surface gap | object side length | object displacement | interpretation |
-| --- | --- | ---: | ---: | ---: | --- |
-| default object | `FAILED_GATE` | 0.071133 stage units | 0.042680 stage units | 0.0 | Object stayed finite but did not move. |
-| oversize object | `FAILED_GATE` | 0.071133 stage units | 0.092472 stage units | 0.0 | Even an oversized object did not move. |
+| run | object creation | status | open surface gap | object side length | object displacement | interpretation |
+| --- | --- | --- | ---: | ---: | ---: | --- |
+| default object | raw USD physics schemas | `FAILED_GATE` | 0.071133 stage units | 0.042680 stage units | 0.0 | Object stayed finite but did not move. |
+| oversize object | raw USD physics schemas | `FAILED_GATE` | 0.071133 stage units | 0.092472 stage units | 0.0 | Even an oversized object did not move. |
+| default object | Isaac `DynamicCuboid` | `FAILED_GATE` | 0.071133 stage units | 0.042680 stage units | 1.049855 | Dynamic contact happened, but the object was ejected too far. |
+| smaller/softer object | Isaac `DynamicCuboid` | `FAILED_GATE` | 0.071133 stage units | 0.017783 stage units | 0.581294 | Reducing object size and closure amount improved but did not stabilize contact. |
 
 ## Interpretation
 
-This is a useful failure. It is not a numerical explosion, and it is not just a too-small object. Both runs produced exactly zero object displacement.
+This is a useful failure, and it has two different modes.
 
-The likely issue is that the passive cube or the gripper proxy colliders are not participating in dynamic contact as expected. Candidate causes:
+The raw USD-created cube produced exactly zero displacement, even when oversized. That suggests the raw schema path did not enter active runtime contact in the way needed for this gate.
 
-1. The runtime-added cube is not being registered into the active PhysX scene as a dynamic rigid body.
-2. The bbox proxy colliders exist in USD but are not active colliders in the articulation runtime.
-3. A collision filter or collision group prevents the cube from contacting the finger proxies.
-4. The proxy geometry is visually/kinematically attached but not in the solver's contact pair set.
+The Isaac `DynamicCuboid` path did enter dynamic contact, but the object was ejected too far. That suggests the gripper proxy contact is active but not yet stable enough for grasp or bottle contact.
+
+Candidate causes:
+
+1. The raw USD-created cube is not being registered into the active PhysX scene as a dynamic rigid body.
+2. The bbox proxy colliders are too coarse, creating a strong penetration correction when the object touches the gripper.
+3. Contact offset/rest offset/material settings are too aggressive for this tiny gripper-scale contact.
+4. Finger closure is still too abrupt for the current contact geometry.
+5. Stage-unit scaling may make apparently small numbers physically harsher than expected.
 
 ## Next Gate
 
@@ -46,5 +57,4 @@ The next diagnostic should inspect PhysX runtime state for:
 - the finger proxy collision enabled status;
 - contact pair generation between cube and finger proxies;
 - whether adding the cube before the first `world.reset()` changes the result;
-- whether using Isaac core `DynamicCuboid` instead of raw USD schemas changes the result.
-
+- whether smaller finger proxy shapes, contact/rest offset tuning, and physics materials reduce the DynamicCuboid ejection.

@@ -116,9 +116,35 @@ def _surface_gap(left_box: dict[str, Any], right_box: dict[str, Any], axis: int)
     return 0.0
 
 
-def _create_passive_cube(stage: Any, path: str, center: np.ndarray, side_length: float, mass: float) -> None:
+def _create_passive_cube(
+    *,
+    world: Any,
+    stage: Any,
+    path: str,
+    center: np.ndarray,
+    side_length: float,
+    mass: float,
+    creation_mode: str,
+) -> None:
     from pxr import Gf, UsdGeom, UsdPhysics
 
+    if creation_mode == "dynamic_cuboid":
+        from isaacsim.core.api.objects import DynamicCuboid
+
+        world.scene.add(
+            DynamicCuboid(
+                prim_path=path,
+                name="phase43_passive_contact_cube",
+                position=np.asarray(center, dtype=np.float64),
+                scale=np.asarray([side_length, side_length, side_length], dtype=np.float64),
+                size=1.0,
+                mass=float(mass),
+                color=np.asarray([0.9, 0.2, 0.1], dtype=np.float64),
+            )
+        )
+        return
+    if creation_mode != "raw_usd":
+        raise ValueError(f"Unsupported object creation mode: {creation_mode}")
     cube = UsdGeom.Cube.Define(stage, path)
     cube.CreateSizeAttr(1.0)
     cube.CreateDisplayColorAttr([Gf.Vec3f(0.9, 0.2, 0.1)])
@@ -144,6 +170,7 @@ def main() -> int:
     parser.add_argument("--gravity", type=float, default=0.0)
     parser.add_argument("--limit-margin", type=float, default=0.001)
     parser.add_argument("--object-fill-fraction", type=float, default=0.6)
+    parser.add_argument("--object-creation", choices=("dynamic_cuboid", "raw_usd"), default="dynamic_cuboid")
     parser.add_argument("--object-mass", type=float, default=0.01)
     parser.add_argument("--min-contact-motion", type=float, default=1e-5)
     parser.add_argument("--max-object-displacement", type=float, default=0.25)
@@ -169,6 +196,7 @@ def main() -> int:
             "physics_dt": args.physics_dt,
             "gravity": args.gravity,
             "object_fill_fraction": args.object_fill_fraction,
+            "object_creation": args.object_creation,
             "min_contact_motion": args.min_contact_motion,
             "max_object_displacement": args.max_object_displacement,
         },
@@ -214,7 +242,15 @@ def main() -> int:
         surface_gap = _surface_gap(left_box, right_box, axis)
         side_length = max(surface_gap * args.object_fill_fraction, 1e-4)
         object_path = "/World/phase43_passive_contact_cube"
-        _create_passive_cube(stage, object_path, center, side_length, args.object_mass)
+        _create_passive_cube(
+            world=world,
+            stage=stage,
+            path=object_path,
+            center=center,
+            side_length=side_length,
+            mass=args.object_mass,
+            creation_mode=args.object_creation,
+        )
         world.reset()
         _apply_gravity(world, args.gravity)
         _set_full_state(art, open_target)
