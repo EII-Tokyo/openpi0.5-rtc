@@ -57,6 +57,8 @@ The main conclusion is conservative:
 - [44 Phase 39 link visual proxy candidate audit](44_phase39_link_visual_proxy_candidate_audit_2026-07-18.md)
 - [45 Phase 40 bbox proxy runtime stage](45_phase40_bbox_proxy_runtime_stage_2026-07-18.md)
 - [46 Phase 41 gripper DOF smoke](46_phase41_gripper_dof_smoke_2026-07-18.md)
+- [47 Phase 42 gripper proxy gap](47_phase42_gripper_proxy_gap_2026-07-18.md)
+- [48 Collision repair research](48_collision_repair_research_2026-07-18.md)
 
 ## Operating Rule
 
