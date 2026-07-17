@@ -219,6 +219,22 @@ def _update_bottle_pose(translate_op, orient_op, Gf, left, local_offset: np.ndar
     return bottle_pos.tolist(), quat_xyzw.tolist()
 
 
+def _try_update_bottle_pose(
+    translate_op,
+    orient_op,
+    Gf,
+    left,
+    local_offset: np.ndarray,
+    fallback_pos: list[float],
+    fallback_quat: list[float],
+) -> tuple[list[float], list[float], str | None]:
+    try:
+        pos, quat = _update_bottle_pose(translate_op, orient_op, Gf, left, local_offset)
+    except (AttributeError, RuntimeError, ValueError) as exc:
+        return fallback_pos, fallback_quat, f"{type(exc).__name__}: {exc}"
+    return pos, quat, None
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Loop a full workcell Original ALOHA qpos replay with a bottle proxy on the left EE.")
     parser.add_argument("--episode", default=DEFAULT_EPISODE)
@@ -306,7 +322,15 @@ def main() -> int:
 
         _set_articulation_qpos(left, right, left_indices, right_indices, qpos[0])
         app.update()
-        initial_bottle_pos, initial_bottle_quat = _update_bottle_pose(bottle_translate_op, bottle_orient_op, Gf, left, local_offset)
+        initial_bottle_pos, initial_bottle_quat, initial_bottle_error = _try_update_bottle_pose(
+            bottle_translate_op,
+            bottle_orient_op,
+            Gf,
+            left,
+            local_offset,
+            [0.0, 0.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0],
+        )
         active_camera = _set_active_viewport_camera(camera_path) if not args.headless else False
         window_move = _move_window_to_workspace(args.workspace) if not args.headless else {"attempted": False, "reason": "headless"}
 
@@ -329,6 +353,7 @@ def main() -> int:
             "bottle_local_offset": local_offset.tolist(),
             "initial_bottle_position": initial_bottle_pos,
             "initial_bottle_quat_xyzw": initial_bottle_quat,
+            "initial_bottle_pose_error": initial_bottle_error,
             "window_move": window_move,
             "hidden_prims": hidden_prims,
             "active_viewport_camera": active_camera,
@@ -342,13 +367,23 @@ def main() -> int:
         max_left_finger_error = 0.0
         max_right_finger_error = 0.0
         last_bottle_pos = initial_bottle_pos
+        last_bottle_quat = initial_bottle_quat
+        last_bottle_pose_error = initial_bottle_error
         frame_sleep = 1.0 / float(args.fps)
         try:
             while True:
                 for frame_index, qpos_frame in enumerate(qpos):
                     expected_left, expected_right = _set_articulation_qpos(left, right, left_indices, right_indices, qpos_frame)
                     app.update()
-                    last_bottle_pos, _ = _update_bottle_pose(bottle_translate_op, bottle_orient_op, Gf, left, local_offset)
+                    last_bottle_pos, last_bottle_quat, last_bottle_pose_error = _try_update_bottle_pose(
+                        bottle_translate_op,
+                        bottle_orient_op,
+                        Gf,
+                        left,
+                        local_offset,
+                        last_bottle_pos,
+                        last_bottle_quat,
+                    )
                     app.update()
                     actual_left = np.asarray(left.get_joint_positions(joint_indices=left_indices), dtype=np.float64)
                     actual_right = np.asarray(right.get_joint_positions(joint_indices=right_indices), dtype=np.float64)
@@ -368,6 +403,7 @@ def main() -> int:
                                 "max_left_finger_readback_error": max_left_finger_error,
                                 "max_right_finger_readback_error": max_right_finger_error,
                                 "last_bottle_position": last_bottle_pos,
+                                "last_bottle_pose_error": last_bottle_pose_error,
                             }
                         )
                         output.write_text(json.dumps(status, ensure_ascii=False, indent=2) + "\n")
@@ -381,6 +417,7 @@ def main() -> int:
                         "max_left_finger_readback_error": max_left_finger_error,
                         "max_right_finger_readback_error": max_right_finger_error,
                         "last_bottle_position": last_bottle_pos,
+                        "last_bottle_pose_error": last_bottle_pose_error,
                         "completed_frames": int(len(qpos)),
                     }
                 )

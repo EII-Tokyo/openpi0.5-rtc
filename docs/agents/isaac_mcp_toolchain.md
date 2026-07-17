@@ -57,6 +57,12 @@ Read this before using, changing, debugging, or reinstalling Isaac Sim / Isaac L
 - The directory also contains `config.yaml`, but that file records MJCF conversion metadata. For GUI startup, the effective startup target is the USD above, not the YAML file name.
 - Other `local_eval_assets/aloha_isaac*` directories are intermediate or scratch assets, not startup targets. Do not clean them by deletion unless the generator chain has been checked, because some are source layers for the confirmed stage.
 
+## USD Reference Safety
+- When referencing a USD asset into another Isaac stage, do not assume the source file's `defaultPrim` is the desired asset root.
+- If the desired asset root is known, pass the explicit prim path in the reference, for example `AddReference(asset_path, "/Bottle500")` or USDA syntax `@asset.usd@</Bottle500>`.
+- After authoring a reference, validate in Isaac runtime that expected child prims actually compose into the destination stage. For Bottle500, `/World/Bottle500/Visuals/VIS_Bottle` and `/World/Bottle500/Collisions` must exist; an empty `/World/Bottle500` with only debug axes is a failed reference, not a valid bottle.
+- Debug axes or Grasp Editor frames must not be used as evidence that the referenced object loaded. Confirm at least one real Mesh under the referenced object root and check its world bounding box.
+
 ## NVIDIA MCP Requirement
 - For read-only Isaac investigation, first read this document and inspect local project state. Use the NVIDIA official Isaac MCP only when the answer depends on official Isaac API behavior, USD semantics, physics behavior, GUI behavior, or Isaac runtime state.
 - Before modifying Isaac Sim code, USD stages, scene-generation scripts, physics setup, GUI controls, or Isaac runtime behavior, first use the NVIDIA official Isaac MCP: `isaac-sim-mcp` / `mcp__isaac_sim_mcp`.
