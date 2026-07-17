@@ -44,6 +44,7 @@ The main conclusion is conservative:
 - [31 Phase 25 native single-joint dynamic response](31_phase25_native_single_joint_response_2026-07-18.md)
 - [32 Phase 26 minimal drive and native failure isolation](32_phase26_minimal_drive_and_native_failure_isolation_2026-07-18.md)
 - [33 Phase 27 runtime collision composition](33_phase27_runtime_collision_composition_2026-07-18.md)
+- [34 Phase 28 physics property comparison](34_phase28_physics_property_comparison_2026-07-18.md)
 
 ## Operating Rule
 
