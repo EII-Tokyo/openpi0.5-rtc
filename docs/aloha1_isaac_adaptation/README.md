@@ -55,6 +55,7 @@ The main conclusion is conservative:
 - [42 Phase 37 clean collision prim audit](42_phase37_clean_collision_prim_audit_2026-07-18.md)
 - [43 Phase 38 controller runtime stage](43_phase38_controller_runtime_stage_2026-07-18.md)
 - [44 Phase 39 link visual proxy candidate audit](44_phase39_link_visual_proxy_candidate_audit_2026-07-18.md)
+- [45 Phase 40 bbox proxy runtime stage](45_phase40_bbox_proxy_runtime_stage_2026-07-18.md)
 
 ## Operating Rule
 
