@@ -25,6 +25,17 @@ Read this before tasks that build or modify `scene_reconstruction/`, camera rack
 ## FreeCAD Launch Rule
 
 - On this machine, FreeCAD is the snap build at `/snap/bin/freecad` / `/snap/bin/freecad.cmd`.
+- Known local issue: normal FreeCAD startup can load the `AICopilot` addon and emit PySide/shiboken errors such as `Unable to import shiboken2 ... AICopilot`. When this happens, a valid CAD file may open to a blank viewport even though the geometry exists.
+- Do not conclude a CAD file is empty or broken from a blank FreeCAD viewport alone. First inspect the file contents and shape bounds with command-line FreeCAD or archive checks.
+- For snap FreeCAD command-line checks, put helper scripts inside the repository and run them through `freecad.cmd -c "exec(open('/abs/path/to/script.py').read())"`. Snap FreeCAD may not be able to read temporary scripts from `/tmp`.
+- If a normal FreeCAD GUI view is blank, retry visual inspection with safe mode and the exported STEP:
+
+```bash
+/snap/bin/freecad --safe-mode <model.step>
+```
+
+- The 2026-07-17 bottle asset check confirmed this pattern: `assets/bottle_500ml/cad/bottle_500ml.FCStd` contained valid `OuterRevolution`, `InnerRevolution`, and `BottleMaster` shapes with a `68 mm x 68 mm x 206 mm` bounding box, but normal GUI opening showed a blank viewport; `--safe-mode` opening of `assets/bottle_500ml/cad/bottle_500ml.step` displayed correctly.
+- Prefer opening the exported STEP for quick visual review when an FCStd view provider does not restore correctly. Do not regenerate or overwrite CAD geometry merely because the normal FreeCAD GUI opened to a blank viewport.
 - For ALOHA incremental CAD iterations, open models through the checked-in opener scripts under `scene_reconstruction/cad/aloha_incremental/scripts/open_iter*.py`.
 - Do not rely on direct `.FCStd` opening or `--safe-mode` for normal review; snap FreeCAD has shown cases where direct file opening starts but the expected model view is not reliably visible.
 - Example:
@@ -33,7 +44,6 @@ Read this before tasks that build or modify `scene_reconstruction/`, camera rack
 /snap/bin/freecad scene_reconstruction/cad/aloha_incremental/scripts/open_iter003_lower_camera_top_position.py
 ```
 
-- For command-line generation or verification, put helper scripts inside the repository, then run them through `freecad.cmd -c`. Snap FreeCAD may not be able to read temporary scripts from `/tmp`.
 - Known issue: imported ALOHA mesh payloads can emit `The mesh data structure has some defects` during FreeCAD load. Treat this as a mesh-asset warning unless a visual or geometry check fails. Do not repair original imported assets in place; create a new iteration and preserve before/after diagnostics.
 
 ## Validation Commands
