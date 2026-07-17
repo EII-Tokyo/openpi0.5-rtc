@@ -324,10 +324,21 @@ def main() -> int:
         _apply_gravity(world, args.gravity)
         _apply_arm_gains(left, args.arm_kp, args.arm_kd)
         _apply_arm_gains(right, args.arm_kp, args.arm_kd)
+        baseline = {
+            "left": np.asarray(left.get_joint_positions(), dtype=np.float64).reshape(-1).copy(),
+            "right": np.asarray(right.get_joint_positions(), dtype=np.float64).reshape(-1).copy(),
+        }
 
         joint_results: list[dict[str, Any]] = []
         all_rows: list[dict[str, Any]] = []
         for side, joint in joint_specs:
+            # Each joint gate must start from the same baseline. Otherwise a
+            # failed earlier probe can contaminate later joints and hide which
+            # DOF is actually unstable.
+            _set_full_state(left, baseline["left"])
+            _set_full_state(right, baseline["right"])
+            _set_full_target(left, baseline["left"])
+            _set_full_target(right, baseline["right"])
             art = left if side == "left" else right
             result, rows = _run_joint_response(
                 world=world,

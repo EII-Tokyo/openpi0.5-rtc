@@ -88,6 +88,36 @@ step 2: qpos -0.4743 rad, qvel  +9.0551 rad/s
 step 3: qpos -1.4662 rad, qvel -21.8282 rad/s
 ```
 
+## Independent four-joint zero-hold retest
+
+The first version of the multi-joint diagnostic reused the same running world state across joint probes. That meant a failed earlier probe could contaminate later probes. The validator was updated so each selected joint starts from the same baseline state.
+
+Command:
+
+```bash
+codex-evidence --name phase25-waist-shoulder-zero-hold-four-joints-v2 -- \
+  .venv_issac/bin/python aloha_isaac_replay/scripts/validate_aloha1_native_single_joint_response.py \
+  --output-dir reports/aloha1_isaac_adaptation/phase25_waist_shoulder_zero_hold_four_joints_v2_20260718 \
+  --joint left:waist \
+  --joint right:waist \
+  --joint left:shoulder \
+  --joint right:shoulder \
+  --phase-offset 0 \
+  --phase-steps 20 \
+  --settle-steps 0
+```
+
+Result:
+
+| side | joint | status | final qpos | max final abs error | max qvel |
+| --- | --- | --- | ---: | ---: | ---: |
+| left | waist | FAIL | -2.0092 rad | 2.0092 rad | 25.4301 rad/s |
+| right | waist | FAIL | -1.1593 rad | 1.1593 rad | 115.5633 rad/s |
+| left | shoulder | PASS | 0.0569 rad | 0.0569 rad | 21.8397 rad/s |
+| right | shoulder | FAIL | -0.2846 rad | 0.2846 rad | 45.8823 rad/s |
+
+This changes the interpretation: the problem is not only `left:waist`. Both waist joints fail to hold a zero target, and right shoulder also fails under the current tolerance.
+
 ## Micro Test: left waist hold target 0 with damping override
 
 Command:
@@ -175,7 +205,7 @@ The inspection also found 11 collision prims in the composed source stage, but t
 
 This is a lower-level failure than action replay semantics.
 
-The native wrapper currently cannot reliably hold `left:waist` at a zero target under dynamic stepping. Since the target is zero, gravity is disabled, and no full arm trajectory is involved, the failure should be investigated before any grasp or task-level simulation.
+The native wrapper currently cannot reliably hold the waist joints at a zero target under dynamic stepping. Since the target is zero, gravity is disabled, and no full arm trajectory is involved, the failure should be investigated before any grasp or task-level simulation.
 
 The evidence points to one or more of:
 
@@ -206,12 +236,15 @@ Next gate:
 - `reports/aloha1_isaac_adaptation/phase25_native_single_joint_response_smoke_20260718/single_joint_response_timeseries.csv`
 - `reports/aloha1_isaac_adaptation/phase25_left_waist_zero_hold_micro_v2_20260718/single_joint_response_metrics.json`
 - `reports/aloha1_isaac_adaptation/phase25_left_waist_zero_hold_micro_v2_20260718/single_joint_response_timeseries.csv`
+- `reports/aloha1_isaac_adaptation/phase25_waist_shoulder_zero_hold_four_joints_v2_20260718/single_joint_response_metrics.json`
+- `reports/aloha1_isaac_adaptation/phase25_waist_shoulder_zero_hold_four_joints_v2_20260718/single_joint_response_timeseries.csv`
 - `reports/aloha1_isaac_adaptation/phase25_left_waist_zero_hold_kd100_20260718/single_joint_response_metrics.json`
 - `reports/aloha1_isaac_adaptation/phase25_left_waist_zero_hold_kd100_20260718/single_joint_response_timeseries.csv`
 - `reports/aloha1_isaac_adaptation/phase25_left_waist_zero_hold_collisions_off_20260718/single_joint_response_metrics.json`
 - `reports/aloha1_isaac_adaptation/phase25_left_waist_zero_hold_collisions_off_20260718/single_joint_response_timeseries.csv`
 - `.codex/artifacts/20260718-010346_phase25-native-single-joint-response-smoke`
 - `.codex/artifacts/20260718-010504_phase25-left-waist-zero-hold-micro-v2`
+- `.codex/artifacts/20260718-011255_phase25-waist-shoulder-zero-hold-four-joints-v2`
 - `.codex/artifacts/20260718-010536_phase25-left-waist-zero-hold-kd100`
 - `.codex/artifacts/20260718-010825_phase25-left-waist-zero-hold-collisions-off`
 - `.codex/artifacts/20260718-011059_phase25-root-joint-body-relations-flush`
