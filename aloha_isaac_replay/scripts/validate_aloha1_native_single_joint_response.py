@@ -18,6 +18,7 @@ from aloha_isaac_replay.scripts.right_shoulder_runtime_audit import _apply_side_
 from aloha_isaac_replay.scripts.right_shoulder_runtime_audit import _get_gains
 from aloha_isaac_replay.scripts.right_shoulder_runtime_audit import _get_limits
 from aloha_isaac_replay.scripts.right_shoulder_runtime_audit import _json_safe
+from aloha_isaac_replay.scripts.right_shoulder_runtime_audit import _set_robot_collisions_enabled
 from aloha_isaac_replay.scripts.right_shoulder_runtime_audit import _set_full_state
 from aloha_isaac_replay.scripts.right_shoulder_runtime_audit import _set_full_target
 
@@ -254,6 +255,7 @@ def main() -> int:
     parser.add_argument("--gravity", type=float, default=0.0)
     parser.add_argument("--arm-kp", type=float, default=None)
     parser.add_argument("--arm-kd", type=float, default=None)
+    parser.add_argument("--disable-robot-collisions", action="store_true")
     parser.add_argument("--base-separation", type=float, default=0.0)
     parser.add_argument("--base-separation-axis", choices=("X", "Y"), default="Y")
     parser.add_argument("--final-error-tolerance", type=float, default=0.075)
@@ -285,6 +287,7 @@ def main() -> int:
             "gravity": args.gravity,
             "arm_kp": args.arm_kp,
             "arm_kd": args.arm_kd,
+            "disable_robot_collisions": bool(args.disable_robot_collisions),
             "base_separation": args.base_separation,
             "base_separation_axis": args.base_separation_axis,
             "final_error_tolerance": args.final_error_tolerance,
@@ -314,6 +317,7 @@ def main() -> int:
         stage_utils.add_reference_to_stage(usd_path=str(Path(args.right_usd).resolve()), prim_path="/World/right")
         stage = omni.usd.get_context().get_stage()
         base_offsets = _apply_side_base_offsets(stage, args.base_separation_axis, args.base_separation)
+        disabled_collision_prims = _set_robot_collisions_enabled(stage, False) if args.disable_robot_collisions else 0
         left = world.scene.add(SingleArticulation(prim_path=args.left_prim_path, name="left_vx300s"))
         right = world.scene.add(SingleArticulation(prim_path=args.right_prim_path, name="right_vx300s"))
         world.reset()
@@ -346,6 +350,7 @@ def main() -> int:
                 "status": "PASS" if overall_pass else "FAILED_GATE",
                 "overall_pass": overall_pass,
                 "base_offsets": base_offsets,
+                "disabled_collision_prims": disabled_collision_prims,
                 "left_dof_names": list(left.dof_names),
                 "right_dof_names": list(right.dof_names),
                 "joint_results": joint_results,
