@@ -7,6 +7,7 @@ The main conclusion is conservative:
 - Trossen AI Isaac is a strong engineering starting point for Isaac Sim 5.1, USD organization, controllers, and Isaac Lab task structure.
 - Google DeepMind MuJoCo Menagerie ALOHA is a strong reference for ALOHA2/MJCF modeling choices.
 - Neither source is automatically the user's ALOHA1 truth. ALOHA1 joint semantics, gripper semantics, camera extrinsics, controller signals, and real workcell geometry must be validated explicitly.
+- Phase 14 shows that the current Trossen-backed scaffold should not be forced into an ALOHA1 controller target by scalar sign/offset fitting. Rebuild around trusted ALOHA1 kinematics and reuse Trossen's framework patterns selectively.
 
 ## Documents
 
@@ -29,6 +30,7 @@ The main conclusion is conservative:
 - [17 Phase 11 orientation consistency](17_phase11_orientation_consistency_2026-07-18.md)
 - [18 Phase 12 Trossen terminal body scan](18_phase12_trossen_terminal_body_scan_2026-07-18.md)
 - [19 Phase 13 joint schema comparison](19_phase13_joint_schema_comparison_2026-07-18.md)
+- [20 Phase 14 orientation-aware mapping](20_phase14_orientation_aware_mapping_2026-07-18.md)
 
 ## Operating Rule
 
