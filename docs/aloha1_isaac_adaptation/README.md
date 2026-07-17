@@ -42,6 +42,7 @@ The main conclusion is conservative:
 - [29 Phase 23 native dynamic tracking smoke](29_phase23_native_dynamic_tracking_smoke_2026-07-18.md)
 - [30 Phase 24 native qpos-next target tracking](30_phase24_native_qpos_target_tracking_2026-07-18.md)
 - [31 Phase 25 native single-joint dynamic response](31_phase25_native_single_joint_response_2026-07-18.md)
+- [32 Phase 26 minimal drive and native failure isolation](32_phase26_minimal_drive_and_native_failure_isolation_2026-07-18.md)
 
 ## Operating Rule
 
