@@ -26,14 +26,16 @@ The bbox distances below are reported in USD stage units from `UsdGeom.BBoxCache
 | control mode | status | maximum DOF delta | maximum proxy center-distance delta | interpretation |
 | --- | --- | ---: | ---: | --- |
 | `gripper` | `FAILED_GATE` | 0.0060 | 0.000253 stage units | The aggregate gripper DOF tracks, but does not create enough proxy gap motion for a contact gate. |
-| `opposed_fingers` | `PASS` | 0.0221 | 0.001828 stage units | The finger proxies are kinematically attached to moving finger links. |
-| `same_fingers` | `PASS` | 0.0221 | 0.001828 stage units | Direct finger DOF control also produces measurable proxy motion. |
+| `opposed_fingers` | `PASS` | 0.0061 | 0.012703 stage units | The finger proxies are kinematically attached to moving finger links. |
+| `same_fingers` | `PASS` | 0.0061 | 0.012703 stage units | Direct finger DOF control also produces measurable proxy motion. |
 
 ## Interpretation
 
 The gripper-only bbox proxies are not inert or detached. They can move when the actual finger DOFs are driven.
 
 The failed `gripper` mode is important: it means the aggregate `gripper` DOF should not be used as the only evidence that the collision geometry is opening or closing. For the next contact smoke test, the control signal should explicitly command the finger DOFs or first establish a verified mimic/gear relation from the aggregate gripper command to the finger joints.
+
+The first version of this gate used the current qpos as target origin. That was misleading because `left_finger/right_finger` started outside or near their modeled limits, so target clipping collapsed multiple offsets to the same limit value. The script now defaults to `target_origin=limit_midpoint`, which gives a real open/close sweep around the modeled joint-limit midpoint.
 
 ## Next Gate
 

@@ -166,6 +166,7 @@ def _run_gap_gate(
     art: Any,
     side: str,
     control_mode: str,
+    target_origin: str,
     phase_offsets: list[float],
     phase_steps: int,
     settle_steps: int,
@@ -185,9 +186,18 @@ def _run_gap_gate(
     if missing:
         raise ValueError(f"{side}:{missing} not found in runtime DOFs: {dof_names}")
     control_indices = [(name, dof_names.index(name), sign) for name, sign in control_specs]
-    home = np.asarray(art.get_joint_positions(), dtype=np.float64).reshape(-1)
-    _set_full_state(art, home)
-    _set_full_target(art, home)
+    initial = np.asarray(art.get_joint_positions(), dtype=np.float64).reshape(-1)
+    origin = initial.copy()
+    for _name, idx, _sign in control_indices:
+        lower, upper = [float(x) for x in limits[idx]]
+        if target_origin == "limit_midpoint" and np.isfinite(lower) and np.isfinite(upper):
+            origin[idx] = (lower + upper) * 0.5
+        elif target_origin == "current":
+            origin[idx] = initial[idx]
+        else:
+            raise ValueError(f"Unsupported target origin: {target_origin}")
+    _set_full_state(art, origin)
+    _set_full_target(art, origin)
     for _ in range(settle_steps):
         world.step(render=False)
 
@@ -201,12 +211,12 @@ def _run_gap_gate(
     max_center_distance_delta = 0.0
 
     for offset in phase_offsets:
-        target = home.copy()
+        target = origin.copy()
         target_values: dict[str, float] = {}
         clipped_flags: dict[str, bool] = {}
         for name, idx, sign in control_indices:
             lower, upper = [float(x) for x in limits[idx]]
-            target_value, clipped = _safe_target(float(home[idx]), float(offset) * sign, lower, upper, limit_margin)
+            target_value, clipped = _safe_target(float(origin[idx]), float(offset) * sign, lower, upper, limit_margin)
             target[idx] = target_value
             target_values[name] = target_value
             clipped_flags[name] = clipped
@@ -220,7 +230,7 @@ def _run_gap_gate(
             left_box = _bbox_row(stage, paths["left_finger"])
             right_box = _bbox_row(stage, paths["right_finger"])
             gap = _gap_metrics(left_box, right_box)
-            qpos_deltas = {name: float(qpos[idx] - home[idx]) for name, idx, _sign in control_indices}
+            qpos_deltas = {name: float(qpos[idx] - origin[idx]) for name, idx, _sign in control_indices}
             target_errors = {name: float(qpos[idx] - target_values[name]) for name, idx, _sign in control_indices}
             row = {
                 "phase": phase_name,
@@ -248,7 +258,7 @@ def _run_gap_gate(
         home_center_distance = float(home_gap.get("center_distance", float("nan")))
         delta = abs(final_center_distance - home_center_distance) if np.isfinite(home_center_distance) else float("nan")
         final_qpos = json.loads(final["qpos"])
-        final_qpos_delta = {name: float(final_qpos[name]) - float(home[idx]) for name, idx, _sign in control_indices}
+        final_qpos_delta = {name: float(final_qpos[name]) - float(origin[idx]) for name, idx, _sign in control_indices}
         max_qpos_delta = max(max_qpos_delta, max(abs(value) for value in final_qpos_delta.values()))
         if np.isfinite(delta):
             max_center_distance_delta = max(max_center_distance_delta, delta)
@@ -277,7 +287,8 @@ def _run_gap_gate(
                     "sign": sign,
                     "runtime_lower": float(limits[idx][0]),
                     "runtime_upper": float(limits[idx][1]),
-                    "home_qpos": float(home[idx]),
+                    "initial_qpos": float(initial[idx]),
+                    "origin_qpos": float(origin[idx]),
                 }
                 for name, idx, sign in control_indices
             ],
@@ -298,6 +309,7 @@ def main() -> int:
     parser.add_argument("--output-dir", default=str(DEFAULT_OUTPUT_DIR))
     parser.add_argument("--side", choices=("left", "right"), default="left")
     parser.add_argument("--control-mode", choices=("gripper", "same_fingers", "opposed_fingers"), default="gripper")
+    parser.add_argument("--target-origin", choices=("current", "limit_midpoint"), default="limit_midpoint")
     parser.add_argument("--phase-offset", action="append", type=float, default=None)
     parser.add_argument("--phase-steps", type=int, default=160)
     parser.add_argument("--settle-steps", type=int, default=30)
@@ -324,6 +336,7 @@ def main() -> int:
             "stage_usd": _rel(args.stage_usd),
             "side": args.side,
             "control_mode": args.control_mode,
+            "target_origin": args.target_origin,
             "phase_offsets": phase_offsets,
             "phase_steps": args.phase_steps,
             "settle_steps": args.settle_steps,
@@ -365,6 +378,7 @@ def main() -> int:
             art=art,
             side=args.side,
             control_mode=args.control_mode,
+            target_origin=args.target_origin,
             phase_offsets=phase_offsets,
             phase_steps=args.phase_steps,
             settle_steps=args.settle_steps,

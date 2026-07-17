@@ -59,6 +59,7 @@ The main conclusion is conservative:
 - [46 Phase 41 gripper DOF smoke](46_phase41_gripper_dof_smoke_2026-07-18.md)
 - [47 Phase 42 gripper proxy gap](47_phase42_gripper_proxy_gap_2026-07-18.md)
 - [48 Collision repair research](48_collision_repair_research_2026-07-18.md)
+- [49 Phase 43 gripper passive contact](49_phase43_gripper_passive_contact_2026-07-18.md)
 
 ## Operating Rule
 
