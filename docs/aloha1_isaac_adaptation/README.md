@@ -39,6 +39,7 @@ The main conclusion is conservative:
 - [26 Phase 20 DOF / drive / limit validation](26_phase20_dof_drive_limits_2026-07-18.md)
 - [27 Phase 21 native wrapper arm-only qpos replay](27_phase21_arm_qpos_replay_2026-07-18.md)
 - [28 Phase 22 native wrapper arm-only qpos replay batch](28_phase22_arm_qpos_replay_batch_2026-07-18.md)
+- [29 Phase 23 native dynamic tracking smoke](29_phase23_native_dynamic_tracking_smoke_2026-07-18.md)
 
 ## Operating Rule
 
