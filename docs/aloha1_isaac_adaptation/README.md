@@ -60,6 +60,8 @@ The main conclusion is conservative:
 - [47 Phase 42 gripper proxy gap](47_phase42_gripper_proxy_gap_2026-07-18.md)
 - [48 Collision repair research](48_collision_repair_research_2026-07-18.md)
 - [49 Phase 43 gripper passive contact](49_phase43_gripper_passive_contact_2026-07-18.md)
+- [50 Phase 44 gripper contact runtime inspection](50_phase44_gripper_contact_runtime_inspection_2026-07-18.md)
+- [51 Phase 45 fingertip-pad proxy](51_phase45_fingertip_pad_proxy_2026-07-18.md)
 
 ## Operating Rule
 

@@ -157,6 +157,27 @@ def _create_passive_cube(
     UsdPhysics.MassAPI.Apply(cube.GetPrim()).CreateMassAttr(float(mass))
 
 
+def _set_collision_offsets(stage: Any, prim_path: str, contact_offset: float | None, rest_offset: float | None) -> dict[str, Any]:
+    from pxr import PhysxSchema
+
+    prim = stage.GetPrimAtPath(prim_path)
+    if not prim:
+        return {"path": prim_path, "exists": False, "applied": False}
+    author_offsets = contact_offset is not None or rest_offset is not None
+    api = PhysxSchema.PhysxCollisionAPI.Apply(prim) if author_offsets else PhysxSchema.PhysxCollisionAPI(prim)
+    if contact_offset is not None:
+        api.CreateContactOffsetAttr(float(contact_offset)).Set(float(contact_offset))
+    if rest_offset is not None:
+        api.CreateRestOffsetAttr(float(rest_offset)).Set(float(rest_offset))
+    return {
+        "path": prim_path,
+        "exists": True,
+        "applied": author_offsets,
+        "contact_offset": api.GetContactOffsetAttr().Get() if api.GetContactOffsetAttr() else None,
+        "rest_offset": api.GetRestOffsetAttr().Get() if api.GetRestOffsetAttr() else None,
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Run a local passive-object contact smoke test for ALOHA1 gripper proxies.")
     parser.add_argument("--stage-usd", default=str(DEFAULT_STAGE))
@@ -172,6 +193,10 @@ def main() -> int:
     parser.add_argument("--object-fill-fraction", type=float, default=0.6)
     parser.add_argument("--object-creation", choices=("dynamic_cuboid", "raw_usd"), default="dynamic_cuboid")
     parser.add_argument("--object-mass", type=float, default=0.01)
+    parser.add_argument("--object-contact-offset", type=float, default=None)
+    parser.add_argument("--object-rest-offset", type=float, default=None)
+    parser.add_argument("--proxy-contact-offset", type=float, default=None)
+    parser.add_argument("--proxy-rest-offset", type=float, default=None)
     parser.add_argument("--min-contact-motion", type=float, default=1e-5)
     parser.add_argument("--max-object-displacement", type=float, default=0.25)
     args = parser.parse_args()
@@ -197,6 +222,10 @@ def main() -> int:
             "gravity": args.gravity,
             "object_fill_fraction": args.object_fill_fraction,
             "object_creation": args.object_creation,
+            "object_contact_offset": args.object_contact_offset,
+            "object_rest_offset": args.object_rest_offset,
+            "proxy_contact_offset": args.proxy_contact_offset,
+            "proxy_rest_offset": args.proxy_rest_offset,
             "min_contact_motion": args.min_contact_motion,
             "max_object_displacement": args.max_object_displacement,
         },
@@ -242,6 +271,10 @@ def main() -> int:
         surface_gap = _surface_gap(left_box, right_box, axis)
         side_length = max(surface_gap * args.object_fill_fraction, 1e-4)
         object_path = "/World/phase43_passive_contact_cube"
+        proxy_offset_rows = [
+            _set_collision_offsets(stage, paths["left_finger"], args.proxy_contact_offset, args.proxy_rest_offset),
+            _set_collision_offsets(stage, paths["right_finger"], args.proxy_contact_offset, args.proxy_rest_offset),
+        ]
         _create_passive_cube(
             world=world,
             stage=stage,
@@ -251,6 +284,7 @@ def main() -> int:
             mass=args.object_mass,
             creation_mode=args.object_creation,
         )
+        object_offset_row = _set_collision_offsets(stage, object_path, args.object_contact_offset, args.object_rest_offset)
         world.reset()
         _apply_gravity(world, args.gravity)
         _set_full_state(art, open_target)
@@ -305,6 +339,8 @@ def main() -> int:
                 "finger_surface_gap_open": surface_gap,
                 "object_path": object_path,
                 "object_side_length_stage_units": side_length,
+                "proxy_collision_offsets": proxy_offset_rows,
+                "object_collision_offsets": object_offset_row,
                 "object_initial_center": object_initial_center.tolist(),
                 "object_final_center": object_final_center.tolist(),
                 "object_displacement": object_displacement,

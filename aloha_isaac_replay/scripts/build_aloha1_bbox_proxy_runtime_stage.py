@@ -68,7 +68,7 @@ def _robot_root_from_side(side: str) -> str | None:
     return None
 
 
-def _box_row(box: Any, bbox_scale: float, min_extent: float) -> dict[str, Any]:
+def _box_row(box: Any, bbox_scale: float, axis_scale: list[float] | None, min_extent: float) -> dict[str, Any]:
     if box.IsEmpty():
         return {"bbox_valid": False, "bbox_min": None, "bbox_max": None, "center": None, "size": None, "scaled_size": None}
     min_pt = box.GetMin()
@@ -84,7 +84,8 @@ def _box_row(box: Any, bbox_scale: float, min_extent: float) -> dict[str, Any]:
             "scaled_size": None,
         }
     center = [float((max_pt[i] + min_pt[i]) * 0.5) for i in range(3)]
-    scaled_size = [max(float(item) * bbox_scale, min_extent) for item in size]
+    scale = axis_scale if axis_scale is not None else [bbox_scale, bbox_scale, bbox_scale]
+    scaled_size = [max(float(item) * float(scale[index]), min_extent) for index, item in enumerate(size)]
     return {
         "bbox_valid": True,
         "bbox_min": [float(min_pt[i]) for i in range(3)],
@@ -104,6 +105,7 @@ def _matches_filters(path: str, include_regex: list[str], exclude_regex: list[st
 def _collect_candidates(
     stage: Any,
     bbox_scale: float,
+    axis_scale: list[float] | None,
     min_extent: float,
     include_regex: list[str],
     exclude_regex: list[str],
@@ -138,7 +140,7 @@ def _collect_candidates(
             "applied_schemas": _applied(prim),
             "proxy_path": f"{path}/bbox_collision_proxy",
         }
-        row.update(_box_row(local_box, bbox_scale=bbox_scale, min_extent=min_extent))
+        row.update(_box_row(local_box, bbox_scale=bbox_scale, axis_scale=axis_scale, min_extent=min_extent))
         row["selected"] = bool(under_robot_root and row["bbox_valid"] and row["filter_match"])
         rows.append(row)
     return rows, disabled_root_collisions
@@ -233,6 +235,14 @@ def main() -> int:
     parser.add_argument("--output-usd", default=str(DEFAULT_OUTPUT_STAGE))
     parser.add_argument("--output-dir", default=str(DEFAULT_OUTPUT_DIR))
     parser.add_argument("--bbox-scale", type=float, default=0.6)
+    parser.add_argument(
+        "--axis-scale",
+        type=float,
+        nargs=3,
+        default=None,
+        metavar=("X", "Y", "Z"),
+        help="Optional per-axis bbox scale. If omitted, --bbox-scale is used for all axes.",
+    )
     parser.add_argument("--min-extent", type=float, default=0.005)
     parser.add_argument("--include-regex", action="append", default=[])
     parser.add_argument("--exclude-regex", action="append", default=[])
@@ -247,6 +257,7 @@ def main() -> int:
         "inputs": {
             "stage_usd": _rel(args.stage_usd),
             "bbox_scale": args.bbox_scale,
+            "axis_scale": args.axis_scale,
             "min_extent": args.min_extent,
             "include_regex": args.include_regex,
             "exclude_regex": args.exclude_regex,
@@ -270,6 +281,7 @@ def main() -> int:
         candidates, disabled_root_collisions = _collect_candidates(
             stage,
             bbox_scale=args.bbox_scale,
+            axis_scale=args.axis_scale,
             min_extent=args.min_extent,
             include_regex=args.include_regex,
             exclude_regex=args.exclude_regex,
