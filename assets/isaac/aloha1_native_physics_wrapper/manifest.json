@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "asset_status": "candidate",
+  "source_root": "assets/isaac/original_stationary_aloha",
+  "source_layers": {
+    "left_physics": "assets/isaac/original_stationary_aloha/generated/configuration/vx300s_left_physics.usd",
+    "right_physics": "assets/isaac/original_stationary_aloha/generated/configuration/vx300s_right_physics.usd"
+  },
+  "principles": [
+    "source importer output remains read-only",
+    "wrapper sublayers are relative paths",
+    "runtime articulation validation is required before controller use"
+  ],
+  "left": {
+    "path": "assets/isaac/aloha1_native_physics_wrapper/aloha1_left.usda",
+    "source_layer": "assets/isaac/original_stationary_aloha/generated/configuration/vx300s_left_physics.usd",
+    "sublayer": "../original_stationary_aloha/generated/configuration/vx300s_left_physics.usd",
+    "default_prim_name": "puppet_left_vx300s",
+    "authoring_gate": {
+      "source_layer_exists": true,
+      "wrapper_written": true,
+      "uses_relative_sublayer": true
+    }
+  },
+  "right": {
+    "path": "assets/isaac/aloha1_native_physics_wrapper/aloha1_right.usda",
+    "source_layer": "assets/isaac/original_stationary_aloha/generated/configuration/vx300s_right_physics.usd",
+    "sublayer": "../original_stationary_aloha/generated/configuration/vx300s_right_physics.usd",
+    "default_prim_name": "puppet_right_vx300s",
+    "authoring_gate": {
+      "source_layer_exists": true,
+      "wrapper_written": true,
+      "uses_relative_sublayer": true
+    }
+  },
+  "overall_authoring_gate": true
+}

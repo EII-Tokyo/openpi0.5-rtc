@@ -1,0 +1,7 @@
+#usda 1.0
+(
+    defaultPrim = "puppet_left_vx300s"
+    subLayers = [
+        @../original_stationary_aloha/generated/configuration/vx300s_left_physics.usd@
+    ]
+)
