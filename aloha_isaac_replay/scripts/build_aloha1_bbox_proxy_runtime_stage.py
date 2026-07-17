@@ -151,8 +151,13 @@ def _create_proxy_stage(
     output_stage_path: Path,
     candidates: list[dict[str, Any]],
     disabled_root_collisions: list[str],
+    proxy_contact_offset: float | None,
+    proxy_rest_offset: float | None,
+    proxy_static_friction: float | None,
+    proxy_dynamic_friction: float | None,
+    proxy_restitution: float | None,
 ) -> None:
-    from pxr import Gf, Usd, UsdGeom, UsdPhysics
+    from pxr import Gf, PhysxSchema, Usd, UsdGeom, UsdPhysics, UsdShade
 
     output_stage_path.parent.mkdir(parents=True, exist_ok=True)
     stage = Usd.Stage.CreateNew(str(output_stage_path))
@@ -170,6 +175,17 @@ def _create_proxy_stage(
         collision = UsdPhysics.CollisionAPI.Apply(prim)
         collision.CreateCollisionEnabledAttr().Set(False)
 
+    material = None
+    if proxy_static_friction is not None or proxy_dynamic_friction is not None or proxy_restitution is not None:
+        material = UsdShade.Material.Define(stage, "/World/PhysicsMaterials/FingertipProxyMaterial")
+        material_api = UsdPhysics.MaterialAPI.Apply(material.GetPrim())
+        if proxy_static_friction is not None:
+            material_api.CreateStaticFrictionAttr(float(proxy_static_friction))
+        if proxy_dynamic_friction is not None:
+            material_api.CreateDynamicFrictionAttr(float(proxy_dynamic_friction))
+        if proxy_restitution is not None:
+            material_api.CreateRestitutionAttr(float(proxy_restitution))
+
     for row in candidates:
         if not row["selected"]:
             continue
@@ -185,6 +201,14 @@ def _create_proxy_stage(
         scale.Set(Gf.Vec3d(*row["scaled_size"]))
         collision = UsdPhysics.CollisionAPI.Apply(proxy.GetPrim())
         collision.CreateCollisionEnabledAttr().Set(True)
+        if proxy_contact_offset is not None or proxy_rest_offset is not None:
+            physx_collision = PhysxSchema.PhysxCollisionAPI.Apply(proxy.GetPrim())
+            if proxy_contact_offset is not None:
+                physx_collision.CreateContactOffsetAttr(float(proxy_contact_offset))
+            if proxy_rest_offset is not None:
+                physx_collision.CreateRestOffsetAttr(float(proxy_rest_offset))
+        if material is not None:
+            UsdShade.MaterialBindingAPI.Apply(proxy.GetPrim()).Bind(material)
 
     stage.Save()
 
@@ -244,6 +268,11 @@ def main() -> int:
         help="Optional per-axis bbox scale. If omitted, --bbox-scale is used for all axes.",
     )
     parser.add_argument("--min-extent", type=float, default=0.005)
+    parser.add_argument("--proxy-contact-offset", type=float, default=None)
+    parser.add_argument("--proxy-rest-offset", type=float, default=None)
+    parser.add_argument("--proxy-static-friction", type=float, default=None)
+    parser.add_argument("--proxy-dynamic-friction", type=float, default=None)
+    parser.add_argument("--proxy-restitution", type=float, default=None)
     parser.add_argument("--include-regex", action="append", default=[])
     parser.add_argument("--exclude-regex", action="append", default=[])
     args = parser.parse_args()
@@ -259,6 +288,11 @@ def main() -> int:
             "bbox_scale": args.bbox_scale,
             "axis_scale": args.axis_scale,
             "min_extent": args.min_extent,
+            "proxy_contact_offset": args.proxy_contact_offset,
+            "proxy_rest_offset": args.proxy_rest_offset,
+            "proxy_static_friction": args.proxy_static_friction,
+            "proxy_dynamic_friction": args.proxy_dynamic_friction,
+            "proxy_restitution": args.proxy_restitution,
             "include_regex": args.include_regex,
             "exclude_regex": args.exclude_regex,
         },
@@ -291,6 +325,11 @@ def main() -> int:
             output_stage_path=output_stage_path,
             candidates=candidates,
             disabled_root_collisions=disabled_root_collisions,
+            proxy_contact_offset=args.proxy_contact_offset,
+            proxy_rest_offset=args.proxy_rest_offset,
+            proxy_static_friction=args.proxy_static_friction,
+            proxy_dynamic_friction=args.proxy_dynamic_friction,
+            proxy_restitution=args.proxy_restitution,
         )
         summary = {
             "rigid_body_count": len(candidates),
