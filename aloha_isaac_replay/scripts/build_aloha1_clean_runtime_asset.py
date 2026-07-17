@@ -196,6 +196,30 @@ def _create_runtime_stage(path: Path, side_wrappers: dict[str, Path]) -> None:
     stage.Save()
 
 
+def _collision_paths(stage: Any) -> list[str]:
+    return [str(prim.GetPath()) for prim in stage.Traverse() if "PhysicsCollisionAPI" in _applied(prim)]
+
+
+def _create_controller_stage(path: Path, side_wrappers: dict[str, Path], disabled_collision_paths: list[str]) -> None:
+    from pxr import Usd, UsdGeom, UsdPhysics
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    stage = Usd.Stage.CreateNew(str(path))
+    UsdGeom.SetStageMetersPerUnit(stage, 0.01)
+    UsdGeom.SetStageUpAxis(stage, UsdGeom.Tokens.y)
+    root = stage.GetRootLayer()
+    root.subLayerPaths.append(str(side_wrappers["left"].resolve()))
+    root.subLayerPaths.append(str(side_wrappers["right"].resolve()))
+    world = UsdGeom.Xform.Define(stage, "/World")
+    stage.SetDefaultPrim(world.GetPrim())
+    UsdPhysics.Scene.Define(stage, "/World/physicsScene")
+    for prim_path in disabled_collision_paths:
+        prim = stage.OverridePrim(prim_path)
+        collision = UsdPhysics.CollisionAPI.Apply(prim)
+        collision.CreateCollisionEnabledAttr().Set(False)
+    stage.Save()
+
+
 def _inspect_articulation(world: Any, prim_path: str, name: str) -> dict[str, Any]:
     from isaacsim.core.prims import SingleArticulation
 
@@ -219,6 +243,8 @@ def _render_markdown(payload: dict[str, Any]) -> str:
         f"- status: `{payload['status']}`",
         f"- output dir: `{payload['output_dir']}`",
         f"- runtime stage: `{payload['runtime_stage']}`",
+        f"- controller stage: `{payload.get('controller_stage')}`",
+        f"- controller-disabled collision prims: `{len(payload.get('controller_disabled_collision_paths', []))}`",
         f"- missing local reference targets: `{len(payload['missing_local_reference_targets'])}`",
         f"- collision count: `{payload['static_counts']['collision_count']}`",
         f"- rigid body count: `{payload['static_counts']['rigid_body_count']}`",
@@ -276,6 +302,13 @@ def main() -> int:
 
         runtime_stage = output_dir / "aloha1_dual_clean_runtime.usda"
         _create_runtime_stage(runtime_stage, side_wrappers)
+        base_runtime_stage = Usd.Stage.Open(str(runtime_stage.resolve()))
+        if base_runtime_stage is None:
+            raise RuntimeError(f"Failed to open generated runtime stage: {runtime_stage}")
+        collision_paths = _collision_paths(base_runtime_stage)
+        base_runtime_stage = None
+        controller_stage = output_dir / "aloha1_dual_controller_runtime.usda"
+        _create_controller_stage(controller_stage, side_wrappers, collision_paths)
 
         json_path = output_dir / "clean_runtime_asset_report.json"
         md_path = output_dir / "clean_runtime_asset_report.md"
@@ -286,7 +319,9 @@ def main() -> int:
             "configuration_dir": _rel(configuration_dir),
             "side_wrappers": {side: _rel(path) for side, path in side_wrappers.items()},
             "runtime_stage": _rel(runtime_stage),
+            "controller_stage": _rel(controller_stage),
             "base_layer_patches": base_layer_patches,
+            "controller_disabled_collision_paths": collision_paths,
             "outputs": {"json": _rel(json_path), "markdown": _rel(md_path)},
         }
         _write_json(json_path, payload)
@@ -332,6 +367,7 @@ def main() -> int:
         interpretation.append("Copied importer configuration into a separate local clean-runtime package; original importer assets were not modified.")
         interpretation.append("Removed only the six known broken visual reference arcs from copied base layers." if patch_ok else "At least one broken visual reference arc was not removed from the copied base layers.")
         interpretation.append("Collision, rigid body, and mass composition are present." if collision_count > 0 else "Collision composition is missing.")
+        interpretation.append("Generated a separate controller runtime stage that disables the current root-level collision prims; use it for controller/replay gates until collision geometry is repaired.")
         interpretation.append("Both ALOHA1 runtime articulations initialize." if all(item["status"] == "PASS" for item in runtime.values()) else "At least one runtime articulation failed to initialize.")
         interpretation.append("Runtime USD log cleanliness must still be checked from the codex-evidence stdout.")
 
