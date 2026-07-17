@@ -242,6 +242,8 @@ def _run_joint_response(
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Validate native ALOHA1 wrapper single-joint dynamic response.")
+    parser.add_argument("--stage-usd", default=None)
+    parser.add_argument("--stage-units-in-meters", type=float, default=None)
     parser.add_argument("--left-usd", default=str(DEFAULT_LEFT_USD))
     parser.add_argument("--right-usd", default=str(DEFAULT_RIGHT_USD))
     parser.add_argument("--left-prim-path", default="/World/left/root_joint")
@@ -262,6 +264,15 @@ def main() -> int:
     parser.add_argument("--limit-margin", type=float, default=0.02)
     parser.add_argument("--limit-tolerance", type=float, default=1e-5)
     args = parser.parse_args()
+    if args.stage_usd:
+        if args.left_prim_path == "/World/left/root_joint":
+            args.left_prim_path = "/puppet_left_vx300s/root_joint"
+        if args.right_prim_path == "/World/right/root_joint":
+            args.right_prim_path = "/puppet_right_vx300s/root_joint"
+    if args.stage_units_in_meters is None:
+        args.stage_units_in_meters = 0.01 if args.stage_usd else 1.0
+    if args.stage_usd and args.base_separation > 0:
+        raise ValueError("--base-separation is only supported when loading left/right USD references directly.")
 
     output_dir = Path(args.output_dir)
     json_path = output_dir / "single_joint_response_metrics.json"
@@ -275,6 +286,8 @@ def main() -> int:
         "real_robot_touched": False,
         "stage_saved": False,
         "inputs": {
+            "stage_usd": _rel(args.stage_usd) if args.stage_usd else None,
+            "stage_units_in_meters": args.stage_units_in_meters,
             "left_usd": _rel(args.left_usd),
             "right_usd": _rel(args.right_usd),
             "left_prim_path": args.left_prim_path,
@@ -310,11 +323,15 @@ def main() -> int:
         import omni.usd
 
         World.clear_instance()
-        stage_utils.create_new_stage()
-        world = World(stage_units_in_meters=1.0, backend="numpy", device="cpu")
+        if args.stage_usd:
+            stage_utils.open_stage(str(Path(args.stage_usd).resolve()))
+        else:
+            stage_utils.create_new_stage()
+        world = World(stage_units_in_meters=args.stage_units_in_meters, backend="numpy", device="cpu")
         world.set_simulation_dt(physics_dt=args.physics_dt, rendering_dt=args.physics_dt)
-        stage_utils.add_reference_to_stage(usd_path=str(Path(args.left_usd).resolve()), prim_path="/World/left")
-        stage_utils.add_reference_to_stage(usd_path=str(Path(args.right_usd).resolve()), prim_path="/World/right")
+        if not args.stage_usd:
+            stage_utils.add_reference_to_stage(usd_path=str(Path(args.left_usd).resolve()), prim_path="/World/left")
+            stage_utils.add_reference_to_stage(usd_path=str(Path(args.right_usd).resolve()), prim_path="/World/right")
         stage = omni.usd.get_context().get_stage()
         base_offsets = _apply_side_base_offsets(stage, args.base_separation_axis, args.base_separation)
         disabled_collision_prims = _set_robot_collisions_enabled(stage, False) if args.disable_robot_collisions else 0
