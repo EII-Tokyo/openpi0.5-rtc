@@ -197,6 +197,7 @@ def main() -> int:
     parser.add_argument("--object-rest-offset", type=float, default=None)
     parser.add_argument("--proxy-contact-offset", type=float, default=None)
     parser.add_argument("--proxy-rest-offset", type=float, default=None)
+    parser.add_argument("--closure-profile", choices=("abrupt", "linear"), default="abrupt")
     parser.add_argument("--min-contact-motion", type=float, default=1e-5)
     parser.add_argument("--max-object-displacement", type=float, default=0.25)
     args = parser.parse_args()
@@ -226,6 +227,7 @@ def main() -> int:
             "object_rest_offset": args.object_rest_offset,
             "proxy_contact_offset": args.proxy_contact_offset,
             "proxy_rest_offset": args.proxy_rest_offset,
+            "closure_profile": args.closure_profile,
             "min_contact_motion": args.min_contact_motion,
             "max_object_displacement": args.max_object_displacement,
         },
@@ -298,7 +300,12 @@ def main() -> int:
         max_displacement = 0.0
         finite_motion = True
         for step in range(args.close_steps):
-            _set_full_target(art, close_target)
+            if args.closure_profile == "linear":
+                alpha = float(step + 1) / float(max(args.close_steps, 1))
+                step_target = open_target + alpha * (close_target - open_target)
+            else:
+                step_target = close_target
+            _set_full_target(art, step_target)
             world.step(render=False)
             qpos = np.asarray(art.get_joint_positions(), dtype=np.float64).reshape(-1)
             dof_names = list(art.dof_names)

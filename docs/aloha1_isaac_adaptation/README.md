@@ -63,6 +63,7 @@ The main conclusion is conservative:
 - [50 Phase 44 gripper contact runtime inspection](50_phase44_gripper_contact_runtime_inspection_2026-07-18.md)
 - [51 Phase 45 fingertip-pad proxy](51_phase45_fingertip_pad_proxy_2026-07-18.md)
 - [52 Phase 46 USD-authored proxy offsets](52_phase46_usd_authored_proxy_offsets_2026-07-18.md)
+- [53 Phase 47 closure and object-size isolation](53_phase47_closure_and_object_size_isolation_2026-07-18.md)
 
 ## Operating Rule
 
