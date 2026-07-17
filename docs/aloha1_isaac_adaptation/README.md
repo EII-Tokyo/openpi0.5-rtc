@@ -40,6 +40,7 @@ The main conclusion is conservative:
 - [27 Phase 21 native wrapper arm-only qpos replay](27_phase21_arm_qpos_replay_2026-07-18.md)
 - [28 Phase 22 native wrapper arm-only qpos replay batch](28_phase22_arm_qpos_replay_batch_2026-07-18.md)
 - [29 Phase 23 native dynamic tracking smoke](29_phase23_native_dynamic_tracking_smoke_2026-07-18.md)
+- [30 Phase 24 native qpos-next target tracking](30_phase24_native_qpos_target_tracking_2026-07-18.md)
 
 ## Operating Rule
 

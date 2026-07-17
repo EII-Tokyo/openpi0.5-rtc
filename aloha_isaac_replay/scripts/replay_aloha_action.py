@@ -201,6 +201,7 @@ def main() -> int:
     parser.add_argument("--arm-kd", type=float, default=None)
     parser.add_argument("--base-separation", type=float, default=0.5)
     parser.add_argument("--base-separation-axis", choices=("X", "Y"), default="Y")
+    parser.add_argument("--target-source", choices=("action", "qpos-next"), default="action")
     args = parser.parse_args()
 
     from isaacsim import SimulationApp
@@ -262,8 +263,9 @@ def main() -> int:
         limit_violations: list[dict[str, object]] = []
 
         for step_idx, action_frame in enumerate(action):
-            left_target, _ = _arm_values(action_frame, mapping, "left")
-            right_target, _ = _arm_values(action_frame, mapping, "right")
+            target_frame = qpos[step_idx + 1] if args.target_source == "qpos-next" else action_frame
+            left_target, _ = _arm_values(target_frame, mapping, "left")
+            right_target, _ = _arm_values(target_frame, mapping, "right")
             raw_target_arm = np.concatenate([left_target, right_target]).astype(np.float64)
             real_pre_arm = np.concatenate([qpos[step_idx, :6], qpos[step_idx, 7:13]]).astype(np.float64)
             left_pre = left.get_joint_positions(joint_indices=left_idx_array)
@@ -329,12 +331,13 @@ def main() -> int:
             "frames_qpos": int(qpos.shape[0]),
             "steps_replayed": int(action.shape[0]),
             "mode": "corrected_arm_absolute_position_targets_only",
-            "hdf5_action_space": "standard_aloha_like_raw_runtime_command",
+            "target_source": args.target_source,
+            "hdf5_action_space": "standard_aloha_like_raw_runtime_command" if args.target_source == "action" else "observations/qpos next-frame target",
             "additional_openpi_transform_applied": False,
-            "action_type": "absolute_follower_joint_target",
+            "action_type": "absolute_follower_joint_target" if args.target_source == "action" else "recorded_next_qpos_target",
             "continuous_nearest_equivalent": "forearm_roll and wrist_rotate only, relative to current Isaac qpos",
             "uses_controller": True,
-            "uses_action": True,
+            "uses_action": args.target_source == "action",
             "uses_gripper_action": False,
             "compare_to": f"HDF5 observations/qpos[t+{best_lag}] arm dimensions after delay scan 0..{args.max_lag_steps}",
             "physics_dt": args.physics_dt,
