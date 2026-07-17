@@ -27,6 +27,7 @@ The main conclusion is conservative:
 - [15 Phase 9 FK mapping holdout](15_phase9_fk_mapping_holdout_2026-07-17.md)
 - [16 Phase 10 full-dataset mapping limits](16_phase10_full_dataset_mapping_limits_2026-07-18.md)
 - [17 Phase 11 orientation consistency](17_phase11_orientation_consistency_2026-07-18.md)
+- [18 Phase 12 Trossen terminal body scan](18_phase12_trossen_terminal_body_scan_2026-07-18.md)
 
 ## Operating Rule
 
