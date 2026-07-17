@@ -63,6 +63,22 @@ def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
         writer.writerows(rows)
 
 
+def _set_all_collisions_enabled(stage: Any, enabled: bool) -> int:
+    from pxr import UsdPhysics
+
+    count = 0
+    for prim in stage.Traverse():
+        collision = UsdPhysics.CollisionAPI(prim)
+        if not collision:
+            continue
+        attr = collision.GetCollisionEnabledAttr()
+        if not attr:
+            attr = collision.CreateCollisionEnabledAttr()
+        attr.Set(bool(enabled))
+        count += 1
+    return count
+
+
 def _write_markdown(path: Path, payload: dict[str, Any]) -> None:
     lines = [
         "# Phase 25 Native Single-Joint Dynamic Response",
@@ -334,7 +350,10 @@ def main() -> int:
             stage_utils.add_reference_to_stage(usd_path=str(Path(args.right_usd).resolve()), prim_path="/World/right")
         stage = omni.usd.get_context().get_stage()
         base_offsets = _apply_side_base_offsets(stage, args.base_separation_axis, args.base_separation)
-        disabled_collision_prims = _set_robot_collisions_enabled(stage, False) if args.disable_robot_collisions else 0
+        if args.disable_robot_collisions:
+            disabled_collision_prims = _set_all_collisions_enabled(stage, False) if args.stage_usd else _set_robot_collisions_enabled(stage, False)
+        else:
+            disabled_collision_prims = 0
         left = world.scene.add(SingleArticulation(prim_path=args.left_prim_path, name="left_vx300s"))
         right = world.scene.add(SingleArticulation(prim_path=args.right_prim_path, name="right_vx300s"))
         world.reset()
