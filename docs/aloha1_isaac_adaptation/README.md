@@ -33,6 +33,7 @@ The main conclusion is conservative:
 - [20 Phase 14 orientation-aware mapping](20_phase14_orientation_aware_mapping_2026-07-18.md)
 - [21 Phase 15 ALOHA1 native source audit](21_phase15_aloha1_native_source_audit_2026-07-18.md)
 - [22 Phase 16 URDF importer mesh probe](22_phase16_urdf_importer_mesh_probe_2026-07-18.md)
+- [23 Phase 17 physics layer wrapper](23_phase17_physics_layer_wrapper_2026-07-18.md)
 
 ## Operating Rule
 
