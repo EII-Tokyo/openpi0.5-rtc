@@ -28,6 +28,7 @@ The main conclusion is conservative:
 - [16 Phase 10 full-dataset mapping limits](16_phase10_full_dataset_mapping_limits_2026-07-18.md)
 - [17 Phase 11 orientation consistency](17_phase11_orientation_consistency_2026-07-18.md)
 - [18 Phase 12 Trossen terminal body scan](18_phase12_trossen_terminal_body_scan_2026-07-18.md)
+- [19 Phase 13 joint schema comparison](19_phase13_joint_schema_comparison_2026-07-18.md)
 
 ## Operating Rule
 
