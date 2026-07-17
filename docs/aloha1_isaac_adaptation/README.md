@@ -48,6 +48,7 @@ The main conclusion is conservative:
 - [35 Phase 29 defaultPrim composition trap](35_phase29_default_prim_composition_trap_2026-07-18.md)
 - [36 Phase 30 sublayer runtime composition](36_phase30_sublayer_runtime_composition_2026-07-18.md)
 - [37 Phase 31/32 visual reference repair attempts](37_phase31_32_visual_reference_repair_attempts_2026-07-18.md)
+- [38 Phase 33 clean runtime asset](38_phase33_clean_runtime_asset_2026-07-18.md)
 
 ## Operating Rule
 
