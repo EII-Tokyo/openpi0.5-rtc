@@ -86,6 +86,8 @@ def _run_isaac_replay(
     output: Path,
     left_usd: Path,
     right_usd: Path,
+    left_prim_path: str,
+    right_prim_path: str,
     max_frames: int | None,
     include_gripper: bool,
 ) -> int:
@@ -112,8 +114,8 @@ def _run_isaac_replay(
         print("ARM_ONLY_REPLAY_STAGE=adding_references", flush=True)
         stage_utils.add_reference_to_stage(usd_path=str(left_usd.resolve()), prim_path="/World/left")
         stage_utils.add_reference_to_stage(usd_path=str(right_usd.resolve()), prim_path="/World/right")
-        left = world.scene.add(SingleArticulation(prim_path="/World/left/root_joint/root_joint", name="left_vx300s"))
-        right = world.scene.add(SingleArticulation(prim_path="/World/right/root_joint/root_joint", name="right_vx300s"))
+        left = world.scene.add(SingleArticulation(prim_path=left_prim_path, name="left_vx300s"))
+        right = world.scene.add(SingleArticulation(prim_path=right_prim_path, name="right_vx300s"))
         print("ARM_ONLY_REPLAY_STAGE=world_reset", flush=True)
         world.reset()
         omni.kit.app.get_app().update()
@@ -252,6 +254,8 @@ def main() -> int:
     parser.add_argument("--python", default=".venv_issac/bin/python")
     parser.add_argument("--left-usd", default="assets/isaac/original_stationary_aloha/generated/vx300s_left.usd")
     parser.add_argument("--right-usd", default="assets/isaac/original_stationary_aloha/generated/vx300s_right.usd")
+    parser.add_argument("--left-prim-path", default="/World/left/root_joint")
+    parser.add_argument("--right-prim-path", default="/World/right/root_joint")
     parser.add_argument("--max-frames", type=int, default=None)
     parser.add_argument("--include-gripper", action="store_true")
     parser.add_argument("--probe-runtime", action="store_true")
@@ -286,6 +290,8 @@ def main() -> int:
         output=output,
         left_usd=Path(args.left_usd),
         right_usd=Path(args.right_usd),
+        left_prim_path=args.left_prim_path,
+        right_prim_path=args.right_prim_path,
         max_frames=args.max_frames,
         include_gripper=args.include_gripper,
     )
