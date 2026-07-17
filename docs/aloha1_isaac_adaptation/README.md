@@ -36,6 +36,7 @@ The main conclusion is conservative:
 - [23 Phase 17 physics layer wrapper](23_phase17_physics_layer_wrapper_2026-07-18.md)
 - [24 Phase 18 runtime articulation validation](24_phase18_runtime_articulation_validation_2026-07-18.md)
 - [25 Phase 19 native asset candidate](25_phase19_native_asset_candidate_2026-07-18.md)
+- [26 Phase 20 DOF / drive / limit validation](26_phase20_dof_drive_limits_2026-07-18.md)
 
 ## Operating Rule
 
