@@ -38,6 +38,7 @@ The main conclusion is conservative:
 - [25 Phase 19 native asset candidate](25_phase19_native_asset_candidate_2026-07-18.md)
 - [26 Phase 20 DOF / drive / limit validation](26_phase20_dof_drive_limits_2026-07-18.md)
 - [27 Phase 21 native wrapper arm-only qpos replay](27_phase21_arm_qpos_replay_2026-07-18.md)
+- [28 Phase 22 native wrapper arm-only qpos replay batch](28_phase22_arm_qpos_replay_batch_2026-07-18.md)
 
 ## Operating Rule
 
