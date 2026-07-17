@@ -78,6 +78,8 @@ This is different from saying "ALOHA1 source is unusable." The better conclusion
 3. The current generated USD output is not acceptable and must be regenerated or repaired.
 4. Trossen should be reused for engineering patterns, not as joint-chain truth.
 
+Phase 16 refines this conclusion: generated `configuration/*_base.usd` and `configuration/*_physics.usd` layers do contain Mesh prims, and the physics layer contains CollisionAPI prims. The blocker is that the composed wrapper USD does not compose those visual/collision prims correctly. Therefore the next repair target is USD layer/reference composition, not the original STL mesh package.
+
 ## Decision
 
 Do not continue controller work on the current generated ALOHA1 USDs.
