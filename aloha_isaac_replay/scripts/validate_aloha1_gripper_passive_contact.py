@@ -27,6 +27,7 @@ from aloha_isaac_replay.scripts.validate_aloha1_native_single_joint_response imp
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_STAGE = REPO_ROOT / "local_eval_assets/aloha1_clean_runtime_20260718/aloha1_dual_bbox_proxy_runtime.usda"
 DEFAULT_OUTPUT_DIR = REPO_ROOT / "reports/aloha1_isaac_adaptation/phase43_gripper_passive_contact_20260718"
+DEFAULT_BOTTLE_USD = REPO_ROOT / "assets/bottle_500ml/isaac/bottle_500ml_sim.usd"
 
 
 def _rel(path: str | Path) -> str:
@@ -186,6 +187,25 @@ def _axis_probe_row(
     }
 
 
+def _axis_rotation_xyz(axis: str) -> tuple[float, float, float]:
+    """Rotate Bottle500 local +Z long axis onto the requested world axis."""
+    normalized_axis = axis.upper()
+    if normalized_axis == "X":
+        return (0.0, 90.0, 0.0)
+    if normalized_axis == "Y":
+        return (-90.0, 0.0, 0.0)
+    if normalized_axis == "Z":
+        return (0.0, 0.0, 0.0)
+    raise ValueError(f"Unsupported object axis: {axis}")
+
+
+def _bbox_center(stage: Any, path: str) -> np.ndarray:
+    box = _bbox_row(stage, path)
+    if not box.get("bbox_valid"):
+        raise RuntimeError(f"Cannot compute bbox center for {path}")
+    return np.asarray(box["center"], dtype=np.float64)
+
+
 def _create_passive_cube(
     *,
     world: Any,
@@ -198,6 +218,8 @@ def _create_passive_cube(
     shape: str = "cube",
     axis: str = "X",
     length_multiplier: float = 4.0,
+    usd_path: str | Path | None = None,
+    usd_prim_path: str = "/Bottle500",
 ) -> None:
     from pxr import Gf, UsdGeom, UsdPhysics
 
@@ -281,6 +303,31 @@ def _create_passive_cube(
 
         for child in (body.GetPrim(), neck.GetPrim(), mouth.GetPrim()):
             UsdPhysics.CollisionAPI.Apply(child).CreateCollisionEnabledAttr().Set(True)
+        UsdPhysics.RigidBodyAPI.Apply(root.GetPrim())
+        UsdPhysics.MassAPI.Apply(root.GetPrim()).CreateMassAttr(float(mass))
+        return
+    elif shape == "bottle_usd":
+        if usd_path is None:
+            raise ValueError("bottle_usd requires a USD asset path")
+        asset_path = Path(usd_path).expanduser().resolve()
+        if not asset_path.exists():
+            raise FileNotFoundError(f"bottle_usd asset does not exist: {asset_path}")
+        root = UsdGeom.Xform.Define(stage, path)
+        root.GetPrim().GetReferences().AddReference(str(asset_path), usd_prim_path)
+        root_xform = UsdGeom.Xformable(root.GetPrim())
+        root_xform.ClearXformOpOrder()
+        translate_op = root_xform.AddTranslateOp(precision=UsdGeom.XformOp.PrecisionDouble)
+        rotate_op = root_xform.AddRotateXYZOp(precision=UsdGeom.XformOp.PrecisionDouble)
+        translate_op.Set(Gf.Vec3d(*[float(x) for x in center]))
+        rotate_op.Set(Gf.Vec3d(*_axis_rotation_xyz(normalized_axis)))
+
+        # The referenced asset origin is semantic, not necessarily its collision
+        # bbox center. Move once more after composition so the actual object used
+        # by PhysX is centered between the fingertips.
+        composed_center = _bbox_center(stage, path)
+        correction = np.asarray(center, dtype=np.float64) - composed_center
+        translate_op.Set(Gf.Vec3d(*[float(x) for x in np.asarray(center, dtype=np.float64) + correction]))
+
         UsdPhysics.RigidBodyAPI.Apply(root.GetPrim())
         UsdPhysics.MassAPI.Apply(root.GetPrim()).CreateMassAttr(float(mass))
         return
@@ -553,9 +600,11 @@ def main() -> int:
     parser.add_argument("--object-placement", choices=("gap_center", "moving_finger_surface"), default="gap_center")
     parser.add_argument("--object-clearance", type=float, default=0.001)
     parser.add_argument("--object-creation", choices=("dynamic_cuboid", "raw_usd"), default="raw_usd")
-    parser.add_argument("--object-shape", choices=("cube", "cylinder", "capsule", "bottle_proxy"), default="cube")
+    parser.add_argument("--object-shape", choices=("cube", "cylinder", "capsule", "bottle_proxy", "bottle_usd"), default="cube")
     parser.add_argument("--object-axis", choices=("X", "Y", "Z"), default="X")
     parser.add_argument("--object-length-multiplier", type=float, default=4.0)
+    parser.add_argument("--object-usd", default=str(DEFAULT_BOTTLE_USD))
+    parser.add_argument("--object-usd-prim-path", default="/Bottle500")
     parser.add_argument("--object-mass", type=float, default=0.01)
     parser.add_argument("--object-contact-offset", type=float, default=None)
     parser.add_argument("--object-rest-offset", type=float, default=None)
@@ -599,6 +648,8 @@ def main() -> int:
             "object_shape": args.object_shape,
             "object_axis": args.object_axis,
             "object_length_multiplier": args.object_length_multiplier,
+            "object_usd": _rel(args.object_usd),
+            "object_usd_prim_path": args.object_usd_prim_path,
             "object_contact_offset": args.object_contact_offset,
             "object_rest_offset": args.object_rest_offset,
             "proxy_contact_offset": args.proxy_contact_offset,
@@ -699,6 +750,8 @@ def main() -> int:
             shape=args.object_shape,
             axis=args.object_axis,
             length_multiplier=args.object_length_multiplier,
+            usd_path=args.object_usd,
+            usd_prim_path=args.object_usd_prim_path,
         )
         object_offset_row = _set_object_collision_offsets(stage, object_path, args.object_contact_offset, args.object_rest_offset)
         trace_state = None
@@ -897,6 +950,8 @@ def main() -> int:
                 "object_shape": args.object_shape,
                 "object_axis": args.object_axis,
                 "object_length_multiplier": args.object_length_multiplier,
+                "object_usd": _rel(args.object_usd),
+                "object_usd_prim_path": args.object_usd_prim_path,
                 "object_placement": object_placement_row,
                 "object_side_length_stage_units": side_length,
                 "proxy_collision_offsets": proxy_offset_rows,
