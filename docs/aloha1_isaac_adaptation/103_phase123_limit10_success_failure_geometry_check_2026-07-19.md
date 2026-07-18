@@ -28,6 +28,7 @@ Geometry comparison:
 
 ```text
 reports/aloha1_isaac_adaptation/phase122_success_failure_geometry_metrics_20260719_limit10/success_failure_geometry_metrics.json
+reports/aloha1_isaac_adaptation/phase122_success_failure_geometry_metrics_20260719_limit10/success_failure_geometry_metric_separation.csv
 ```
 
 Full command logs:
@@ -36,6 +37,7 @@ Full command logs:
 .codex/artifacts/20260719-020052_aloha-phase120-success-cluster-limit10
 .codex/artifacts/20260719-020227_aloha-phase121-failure-cluster-limit10
 .codex/artifacts/20260719-020520_aloha-phase122-geometry-metrics-limit10
+.codex/artifacts/20260719-020858_aloha-phase122-geometry-metrics-limit10-with-separation
 ```
 
 ## Cluster Result
@@ -58,10 +60,35 @@ This confirms the Phase121 warning: final bottle-mouth pose alone is not a relia
 | `tail_lateral_mean_m` | `0.0130 m` | `0.0235 m` | success smaller |
 | `tail_progress_m` | `0.0135 m` | `0.0138 m` | nearly tied |
 
+## Label-Separation Result
+
+AUC here means:
+
+```text
+If we randomly sample one success and one failure, how often does this metric rank the success clip in the expected direction?
+```
+
+| Metric | Expected success direction | AUC | Interpretation |
+| --- | --- | ---: | --- |
+| `path_length_m` | higher | `0.84` | useful |
+| `net_displacement_m` | higher | `0.85` | useful |
+| `tail_lateral_mean_m` | lower | `0.73` | moderately useful |
+| `tail_progress_m` | higher | `0.45` | not useful |
+| `tail_lateral_max_m` | lower | `0.50` | not useful |
+
+The useful metrics are not terminal-pose metrics. They describe the whole mouth trajectory or the final-tail average alignment.
+
+The failed metrics are important too:
+
+- progress alone does not separate success and failure;
+- maximum lateral error is too noisy;
+- a clip can move forward but still fail if it is laterally wrong or unstable.
+
 The most stable differences are:
 
 1. Successful segments move the bottle mouth farther overall.
 2. Successful segments have lower final-tail lateral error relative to the empirical success axis.
+3. `path_length_m` and `net_displacement_m` rank success over failure with AUC above `0.80` on the current ten-versus-ten sample.
 
 The weak difference is:
 
@@ -127,4 +154,3 @@ The immediate next implementation task should not be full RL. It should be a str
 ```text
 HDF5 -> bottle mouth trajectory -> geometric metrics -> label correlation report
 ```
-

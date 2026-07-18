@@ -82,6 +82,69 @@ def _group_stats(rows: list[dict[str, Any]]) -> dict[str, Any]:
     return grouped
 
 
+def _auc_from_scores(success_scores: np.ndarray, failure_scores: np.ndarray) -> float:
+    wins = 0.0
+    total = 0
+    for success_score in success_scores:
+        wins += float(np.sum(success_score > failure_scores))
+        wins += 0.5 * float(np.sum(success_score == failure_scores))
+        total += int(failure_scores.size)
+    if total == 0:
+        return float("nan")
+    return wins / float(total)
+
+
+def _separation_stats(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    metric_directions = {
+        "path_length_m": "higher",
+        "net_displacement_m": "higher",
+        "tail_progress_m": "higher",
+        "tail_lateral_mean_m": "lower",
+        "tail_lateral_max_m": "lower",
+    }
+    success_rows = [row for row in rows if row["label"] == "success"]
+    failure_rows = [row for row in rows if row["label"] == "failure"]
+    stats: dict[str, Any] = {}
+    for metric, direction in metric_directions.items():
+        success_values = np.asarray([float(row[metric]) for row in success_rows], dtype=np.float64)
+        failure_values = np.asarray([float(row[metric]) for row in failure_rows], dtype=np.float64)
+        if direction == "higher":
+            success_scores = success_values
+            failure_scores = failure_values
+        else:
+            success_scores = -success_values
+            failure_scores = -failure_values
+        success_mean = float(np.mean(success_values)) if success_values.size else float("nan")
+        failure_mean = float(np.mean(failure_values)) if failure_values.size else float("nan")
+        stats[metric] = {
+            "success_direction": direction,
+            "success_mean": success_mean,
+            "failure_mean": failure_mean,
+            "mean_gap_success_minus_failure_m": success_mean - failure_mean,
+            "auc": float(_auc_from_scores(success_scores, failure_scores)),
+        }
+    return stats
+
+
+def _write_separation_csv(separation_stats: dict[str, Any], output_csv: Path) -> None:
+    output_csv.parent.mkdir(parents=True, exist_ok=True)
+    with output_csv.open("w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(
+            f,
+            fieldnames=[
+                "metric",
+                "success_direction",
+                "success_mean",
+                "failure_mean",
+                "mean_gap_success_minus_failure_m",
+                "auc",
+            ],
+        )
+        writer.writeheader()
+        for metric, stats in separation_stats.items():
+            writer.writerow({"metric": metric, **stats})
+
+
 def _plot(rows: list[dict[str, Any]], output_png: Path) -> None:
     metrics = [
         ("path_length_m", "Path length (m)"),
@@ -128,12 +191,14 @@ def main() -> int:
             "axis_unit": reference_axis.tolist(),
         },
         "group_stats": _group_stats(rows),
+        "separation_stats": _separation_stats(rows),
         "rows": rows,
     }
     args.output_dir.mkdir(parents=True, exist_ok=True)
     (args.output_dir / "success_failure_geometry_metrics.json").write_text(json.dumps(output, indent=2), encoding="utf-8")
+    _write_separation_csv(output["separation_stats"], args.output_dir / "success_failure_geometry_metric_separation.csv")
     _plot(rows, args.output_dir / "success_failure_geometry_metrics.png")
-    print(json.dumps(output["group_stats"], indent=2))
+    print(json.dumps({"group_stats": output["group_stats"], "separation_stats": output["separation_stats"]}, indent=2))
     return 0
 
 
