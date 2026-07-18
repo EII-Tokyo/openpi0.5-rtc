@@ -1135,6 +1135,17 @@ def _create_passive_cube(
         UsdPhysics.MassAPI.Apply(geom.GetPrim()).CreateMassAttr(float(mass))
 
 
+def _parse_vec3(values: list[float] | tuple[float, ...] | None, *, name: str) -> np.ndarray:
+    if values is None:
+        return np.zeros(3, dtype=np.float64)
+    if len(values) != 3:
+        raise ValueError(f"{name} requires exactly three values")
+    result = np.asarray([float(v) for v in values], dtype=np.float64)
+    if not np.isfinite(result).all():
+        raise ValueError(f"{name} contains NaN/Inf: {values}")
+    return result
+
+
 def _create_static_support_box(
     *,
     stage: Any,
@@ -1630,6 +1641,18 @@ def main() -> int:
         "--object-shape", choices=("cube", "cylinder", "capsule", "bottle_proxy", "bottle_usd"), default="cube"
     )
     parser.add_argument("--object-axis", choices=("X", "Y", "Z"), default="X")
+    parser.add_argument(
+        "--object-center-offset",
+        type=float,
+        nargs=3,
+        default=[0.0, 0.0, 0.0],
+        metavar=("DX", "DY", "DZ"),
+        help=(
+            "World-frame offset added to the nominal object center after gap/grasp placement. "
+            "Use this when the fingertip contact point is not the whole-object bbox center, "
+            "for example when grasping one section of a long bottle."
+        ),
+    )
     parser.add_argument("--object-length-multiplier", type=float, default=4.0)
     parser.add_argument("--object-usd", default=str(DEFAULT_BOTTLE_USD))
     parser.add_argument("--object-usd-prim-path", default="/Bottle500")
@@ -1803,6 +1826,7 @@ def main() -> int:
             "object_rigid_body": not args.disable_object_rigid_body,
             "object_shape": args.object_shape,
             "object_axis": args.object_axis,
+            "object_center_offset": args.object_center_offset,
             "object_length_multiplier": args.object_length_multiplier,
             "object_usd": _rel(args.object_usd),
             "object_usd_prim_path": args.object_usd_prim_path,
@@ -1970,6 +1994,7 @@ def main() -> int:
             "clearance": args.object_clearance,
             "base_center": center.tolist(),
         }
+        object_center_offset = _parse_vec3(args.object_center_offset, name="--object-center-offset")
         if not geometry_sanity["pass"]:
             if trace_state is not None:
                 _finish_contact_pair_trace(stage, trace_state)
@@ -2053,6 +2078,14 @@ def main() -> int:
                 "t_object_gripper": t_o_g.tolist(),
             }
             object_placement_row.update(grasp_placement)
+        if np.any(np.abs(object_center_offset) > 0.0):
+            center = np.asarray(center, dtype=np.float64) + object_center_offset
+        object_placement_row.update(
+            {
+                "center_offset_world": object_center_offset.tolist(),
+                "placed_center_after_offset": np.asarray(center, dtype=np.float64).tolist(),
+            }
+        )
         object_path = "/World/phase43_passive_contact_cube"
         proxy_offset_rows = [
             _set_collision_offsets(stage, paths["left_finger"], args.proxy_contact_offset, args.proxy_rest_offset),

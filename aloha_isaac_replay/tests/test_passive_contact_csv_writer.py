@@ -16,6 +16,7 @@ from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _finger_targets
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _load_grasp_transform
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _passive_contact_geometry_sanity
+from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _parse_vec3
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _apply_replay_target_and_step
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _controller_tracking_gate
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _load_support_plane_config
@@ -102,6 +103,15 @@ def test_load_grasp_transform_reads_scalar_first_quaternion(tmp_path: Path) -> N
     assert info["gripper_frame"] == "/scene/left_base_link/left_gripper_link"
     np.testing.assert_allclose(info["t_object_gripper"][:3, 3], [0.0, 0.052, 0.105])
     np.testing.assert_allclose(info["t_object_gripper"][:3, :3], np.eye(3))
+
+
+def test_parse_vec3_accepts_center_offset_and_rejects_bad_values() -> None:
+    np.testing.assert_allclose(_parse_vec3([0.1, -0.2, 0.0], name="offset"), [0.1, -0.2, 0.0])
+    np.testing.assert_allclose(_parse_vec3(None, name="offset"), [0.0, 0.0, 0.0])
+    with pytest.raises(ValueError, match="exactly three"):
+        _parse_vec3([1.0, 2.0], name="offset")
+    with pytest.raises(ValueError, match="NaN/Inf"):
+        _parse_vec3([1.0, float("nan"), 0.0], name="offset")
 
 
 def test_passive_contact_csv_writer_preserves_late_diagnostic_columns(tmp_path) -> None:

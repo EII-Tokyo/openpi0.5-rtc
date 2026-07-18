@@ -157,3 +157,10 @@ The current two-finger active-contact proxy smoke test can be rerun with:
 codex-evidence --name aloha-phase103-two-finger-active-proxy-smoke -- \
   .venv/bin/python aloha_isaac_replay/scripts/run_phase103_two_finger_active_proxy_smoke.py
 ```
+
+The current full-scene Bottle500 already-grasped gate can be rerun with:
+
+```bash
+codex-evidence --name aloha-phase106-bottleusd-already-grasped-runner -- \
+  .venv/bin/python aloha_isaac_replay/scripts/run_phase106_bottleusd_already_grasped_gate.py
+```
