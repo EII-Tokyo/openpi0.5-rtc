@@ -105,6 +105,52 @@ def test_contact_summary_accepts_collision_descendants_under_finger_link() -> No
     assert summary["target_contact_finger_hits"][finger_link] is True
 
 
+def test_contact_summary_classifies_non_target_object_contacts() -> None:
+    object_path = "/World/object"
+    finger_link = "/scene/left_base_link/left_left_finger_link"
+    support_path = "/World/support_plane"
+
+    summary = _summarize_contact_pairs(
+        contact_pair_rows=[
+            {
+                "phase": "settle",
+                "step": 0,
+                "type_name": "CONTACT_FOUND",
+                "collider0": f"{finger_link}/collisions/left_left_g0/left_left_g0",
+                "collider1": object_path,
+                "sorted_pair": [object_path, f"{finger_link}/collisions/left_left_g0/left_left_g0"],
+            },
+            {
+                "phase": "settle",
+                "step": 0,
+                "type_name": "CONTACT_FOUND",
+                "collider0": "/scene/left_base_link/left_wrist_link/collisions/wrist",
+                "collider1": object_path,
+                "sorted_pair": [object_path, "/scene/left_base_link/left_wrist_link/collisions/wrist"],
+            },
+            {
+                "phase": "settle",
+                "step": 0,
+                "type_name": "CONTACT_FOUND",
+                "collider0": support_path,
+                "collider1": object_path,
+                "sorted_pair": [object_path, support_path],
+            },
+        ],
+        object_path=object_path,
+        expected_finger_paths=[finger_link],
+        diagnostic_contact_paths=[support_path],
+        same_side_robot_root="/scene/left_base_link",
+        other_side_robot_root="/scene/right_base_link",
+    )
+
+    assert summary["object_contact_categories"]["target_finger"]["contact_pair_count"] == 1
+    assert summary["object_contact_categories"]["same_side_robot_non_target"]["contact_pair_count"] == 1
+    assert summary["object_contact_categories"]["diagnostic_support"]["contact_pair_count"] == 1
+    assert summary["non_target_object_contact_found"] is True
+    assert summary["non_target_object_contact_pair_count"] == 2
+
+
 def test_phase63_fixed_table_candidate_config_is_explicit_and_diagnostic() -> None:
     cfg = _load_support_plane_config(REPO_ROOT / "examples/aloha_isaac/config/phase63_fixed_table_candidate.yaml")
 

@@ -31,6 +31,7 @@ from aloha_isaac_replay.validation.contact_proxy_profiles import contact_proxy_p
 from aloha_isaac_replay.validation.contact_proxy_profiles import finger_dof_names_for_side
 from aloha_isaac_replay.validation.contact_proxy_profiles import resolve_contact_proxy_paths
 from aloha_isaac_replay.validation.contact_proxy_profiles import resolve_contact_target_paths
+from aloha_isaac_replay.validation.contact_proxy_profiles import robot_root_for_side
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_STAGE = REPO_ROOT / "local_eval_assets/aloha1_clean_runtime_20260718/aloha1_dual_bbox_proxy_runtime.usda"
@@ -910,14 +911,59 @@ def _unique_pairs(rows: list[dict[str, Any]]) -> list[list[str]]:
     return [list(pair) for pair in sorted({tuple(row["sorted_pair"]) for row in rows})]
 
 
+def _other_collider_for_object_pair(row: dict[str, Any], object_path: str) -> str | None:
+    collider0 = str(row["collider0"])
+    collider1 = str(row["collider1"])
+    collider0_is_object = _path_matches(collider0, object_path)
+    collider1_is_object = _path_matches(collider1, object_path)
+    if collider0_is_object and not collider1_is_object:
+        return collider1
+    if collider1_is_object and not collider0_is_object:
+        return collider0
+    return None
+
+
+def _classify_object_contact(
+    row: dict[str, Any],
+    *,
+    object_path: str,
+    expected_finger_paths: list[str],
+    same_side_robot_root: str | None,
+    other_side_robot_root: str | None,
+    diagnostic_contact_paths: list[str],
+) -> str | None:
+    other_path = _other_collider_for_object_pair(row, object_path)
+    if other_path is None:
+        return None
+    if any(_path_matches(other_path, finger_path) for finger_path in expected_finger_paths):
+        return "target_finger"
+    if any(_path_matches(other_path, path) for path in diagnostic_contact_paths):
+        return "diagnostic_support"
+    if same_side_robot_root and _path_matches(other_path, same_side_robot_root):
+        return "same_side_robot_non_target"
+    if other_side_robot_root and _path_matches(other_path, other_side_robot_root):
+        return "other_side_robot"
+    if (
+        other_path.startswith("/scene/worldBody/")
+        or other_path == "/scene/worldBody"
+        or other_path.startswith("/colliders/")
+        or other_path.startswith("/World/")
+    ):
+        return "workcell_or_environment"
+    return "unknown"
+
+
 def _summarize_contact_pairs(
     *,
     contact_pair_rows: list[dict[str, Any]],
     object_path: str,
     expected_finger_paths: list[str],
     diagnostic_contact_paths: list[str] | None = None,
+    same_side_robot_root: str | None = None,
+    other_side_robot_root: str | None = None,
     sample_limit: int = 80,
 ) -> dict[str, Any]:
+    diagnostic_paths = diagnostic_contact_paths or []
     unique_pairs = sorted({tuple(row["sorted_pair"]) for row in contact_pair_rows})
     target_rows = [row for row in contact_pair_rows if _pair_touches_targets(row, object_path, expected_finger_paths)]
     wrong_rows = [
@@ -935,7 +981,7 @@ def _summarize_contact_pairs(
         for finger_path, rows in finger_target_rows.items()
     }
     diagnostic_summaries: dict[str, Any] = {}
-    for path in diagnostic_contact_paths or []:
+    for path in diagnostic_paths:
         path_rows = [row for row in contact_pair_rows if _pair_touches_path(row, path)]
         object_rows = [row for row in path_rows if _pair_touches_path(row, object_path)]
         finger_rows = [
@@ -959,6 +1005,32 @@ def _summarize_contact_pairs(
             "other_contact_pair_count": len(other_rows),
             "other_contact_pairs": _unique_pairs(other_rows),
         }
+    object_contact_rows = [
+        row for row in contact_pair_rows if _other_collider_for_object_pair(row, object_path) is not None
+    ]
+    category_rows: dict[str, list[dict[str, Any]]] = {}
+    for row in object_contact_rows:
+        category = _classify_object_contact(
+            row,
+            object_path=object_path,
+            expected_finger_paths=expected_finger_paths,
+            same_side_robot_root=same_side_robot_root,
+            other_side_robot_root=other_side_robot_root,
+            diagnostic_contact_paths=diagnostic_paths,
+        )
+        if category is None:
+            continue
+        category_rows.setdefault(category, []).append(row)
+    non_target_categories = {category: rows for category, rows in category_rows.items() if category != "target_finger"}
+    object_contact_categories = {
+        category: {
+            "contact_pair_count": len(rows),
+            "unique_contact_pair_count": len(_unique_pairs(rows)),
+            "unique_contact_pairs": _unique_pairs(rows),
+            "first_contact_pair": rows[0] if rows else None,
+        }
+        for category, rows in sorted(category_rows.items())
+    }
     return {
         "contact_pair_count": len(contact_pair_rows),
         "unique_contact_pairs": [list(pair) for pair in unique_pairs],
@@ -984,6 +1056,11 @@ def _summarize_contact_pairs(
         "target_contact_persistence_steps": len(target_steps),
         "wrong_contact_pairs": [list(pair) for pair in wrong_pairs],
         "diagnostic_contact_summaries": diagnostic_summaries,
+        "object_contact_pair_count": len(object_contact_rows),
+        "object_contact_categories": object_contact_categories,
+        "non_target_object_contact_pair_count": sum(len(rows) for rows in non_target_categories.values()),
+        "non_target_object_contact_categories": sorted(non_target_categories),
+        "non_target_object_contact_found": bool(non_target_categories),
     }
 
 
@@ -1104,6 +1181,14 @@ def main() -> int:
     parser.add_argument("--hdf5-gripper-end-frame", type=int, default=None)
     parser.add_argument("--hdf5-gripper-max-frames", type=int, default=None)
     parser.add_argument("--trace-contact-pairs", action="store_true")
+    parser.add_argument(
+        "--fail-on-non-target-object-contact",
+        action="store_true",
+        help=(
+            "When contact tracing is enabled, fail if the object contacts anything other than the expected "
+            "finger target roots. Use for final contact-quality gates, not for broad diagnostic smoke tests."
+        ),
+    )
     parser.add_argument(
         "--trace-disable-usd-updates",
         action="store_true",
@@ -1529,6 +1614,10 @@ def main() -> int:
             object_path=object_path,
             expected_finger_paths=expected_finger_paths,
             diagnostic_contact_paths=[support_plane_row["path"]] if support_plane_row else None,
+            same_side_robot_root=robot_root_for_side(args.contact_proxy_profile, args.side),
+            other_side_robot_root=robot_root_for_side(
+                args.contact_proxy_profile, "right" if args.side == "left" else "left"
+            ),
         )
         if args.moving_fingers == "both":
             target_contact_ok = bool(contact_summary["all_expected_fingers_target_contact_pair_found"])
@@ -1540,12 +1629,20 @@ def main() -> int:
         trace_pair_ok = bool(
             (not args.trace_contact_pairs) or (target_contact_ok and not cross_side_overlap_blocks_gate)
         )
+        non_target_object_contact_ok = bool(
+            (not args.trace_contact_pairs)
+            or (not args.fail_on_non_target_object_contact)
+            or (not contact_summary["non_target_object_contact_found"])
+        )
+        trace_pair_ok = bool(trace_pair_ok and non_target_object_contact_ok)
         overall_pass = bool(overall_pass and trace_pair_ok)
         if args.trace_contact_pairs:
             if cross_side_overlap_blocks_gate:
                 contact_trace_status = "FAIL_CROSS_SIDE_PROXY_OVERLAP"
             elif not target_contact_ok:
                 contact_trace_status = "FAIL_NO_TARGET_CONTACT"
+            elif not non_target_object_contact_ok:
+                contact_trace_status = "FAIL_NON_TARGET_OBJECT_CONTACT"
             elif not no_explosion_ok:
                 contact_trace_status = "FAIL_OBJECT_EJECTION"
             else:
@@ -1600,6 +1697,8 @@ def main() -> int:
                 "no_explosion_ok": no_explosion_ok,
                 "contact_pair_trace_enabled": bool(args.trace_contact_pairs),
                 "contact_trace_disable_usd_updates": bool(args.trace_disable_usd_updates),
+                "fail_on_non_target_object_contact": bool(args.fail_on_non_target_object_contact),
+                "non_target_object_contact_ok": non_target_object_contact_ok,
                 "contact_trace_rigid_body_paths": trace_state["rigid_body_paths"] if trace_state else [],
                 "first_contact_pair": first_contact_row,
                 **contact_summary,
