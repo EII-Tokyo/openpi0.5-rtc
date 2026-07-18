@@ -86,6 +86,7 @@ The main conclusion is conservative:
 - [73 Phase 67 replay requires calibrated table gate](73_phase67_replay_requires_calibrated_table_gate_2026-07-18.md)
 - [74 Phase 68 measurement worksheet evidence gate](74_phase68_measurement_worksheet_evidence_gate_2026-07-18.md)
 - [75 Phase 69 calibrated overlay manifest](75_phase69_calibrated_overlay_manifest_2026-07-18.md)
+- [76 Phase 71 table calibration readiness](76_phase71_table_calibration_readiness_2026-07-18.md)
 
 ## Operating Rule
 
