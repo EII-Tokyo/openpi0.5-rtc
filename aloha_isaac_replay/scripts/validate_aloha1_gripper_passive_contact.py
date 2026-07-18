@@ -1066,6 +1066,28 @@ def _set_xform_matrix(UsdGeom: Any, Gf: Any, prim: Any, matrix: np.ndarray) -> N
     xform.AddTransformOp().Set(gf_matrix)
 
 
+def _set_object_from_gripper_relative_transform(
+    *,
+    stage: Any,
+    UsdGeom: Any,
+    Gf: Any,
+    object_path: str,
+    object_gripper_frame: str,
+    t_gripper_object: np.ndarray,
+) -> dict[str, Any]:
+    object_prim = stage.GetPrimAtPath(object_path)
+    if not object_prim or not object_prim.IsValid():
+        raise RuntimeError(f"Cannot update held object; missing prim: {object_path}")
+    t_world_gripper = _world_matrix(UsdGeom, stage, object_gripper_frame)
+    t_world_object = t_world_gripper @ np.asarray(t_gripper_object, dtype=np.float64)
+    _set_xform_matrix(UsdGeom, Gf, object_prim, t_world_object)
+    return {
+        "object_path": object_path,
+        "object_gripper_frame": object_gripper_frame,
+        "object_world_position": t_world_object[:3, 3].tolist(),
+    }
+
+
 def _load_grasp_transform(grasp_yaml: str | Path, grasp_name: str) -> dict[str, Any]:
     grasp_path = Path(grasp_yaml).expanduser().resolve()
     data = yaml.safe_load(grasp_path.read_text())
@@ -1761,6 +1783,16 @@ def main() -> int:
     )
     parser.add_argument("--object-grasp-name", default="grasp_mid")
     parser.add_argument("--object-gripper-frame", default="/scene/left_base_link/left_gripper_link")
+    parser.add_argument(
+        "--diagnostic-held-object-mode",
+        choices=("none", "follow_gripper"),
+        default="none",
+        help=(
+            "Diagnostic only. When follow_gripper is selected, the object pose is updated from the current "
+            "gripper frame and the initial object-to-gripper relative transform at every replay step. This "
+            "validates carried-object trajectory semantics; it is not a dynamic grasp proof."
+        ),
+    )
     parser.add_argument("--object-mass", type=float, default=0.01)
     parser.add_argument("--object-contact-offset", type=float, default=None)
     parser.add_argument("--object-rest-offset", type=float, default=None)
@@ -1940,6 +1972,7 @@ def main() -> int:
             "object_grasp_yaml": _rel(args.object_grasp_yaml),
             "object_grasp_name": args.object_grasp_name,
             "object_gripper_frame": args.object_gripper_frame,
+            "diagnostic_held_object_mode": args.diagnostic_held_object_mode,
             "object_contact_offset": args.object_contact_offset,
             "object_rest_offset": args.object_rest_offset,
             "support_plane_config": support_options["config"],
@@ -2223,6 +2256,21 @@ def main() -> int:
         object_offset_row = _set_object_collision_offsets(
             stage, object_path, args.object_contact_offset, args.object_rest_offset
         )
+        diagnostic_held_object_row: dict[str, Any] | None = None
+        diagnostic_t_gripper_object: np.ndarray | None = None
+        if args.diagnostic_held_object_mode == "follow_gripper":
+            from pxr import UsdGeom
+
+            t_world_object = _world_matrix(UsdGeom, stage, object_path)
+            t_world_gripper = _world_matrix(UsdGeom, stage, args.object_gripper_frame)
+            diagnostic_t_gripper_object = np.linalg.inv(t_world_gripper) @ t_world_object
+            diagnostic_held_object_row = {
+                "mode": "follow_gripper",
+                "status": "DIAGNOSTIC_NOT_DYNAMIC_GRASP_PROOF",
+                "object_path": object_path,
+                "object_gripper_frame": args.object_gripper_frame,
+                "t_gripper_object_initial": diagnostic_t_gripper_object.tolist(),
+            }
         support_plane_row: dict[str, Any] | None = None
         if support_options["mode"] != "none":
             object_support_box = _bbox_row(stage, object_path)
@@ -2286,6 +2334,18 @@ def main() -> int:
                     actuation_mode=args.hdf5_replay_actuation_mode,
                     target_hold_steps=args.hdf5_replay_target_hold_steps,
                 )
+                if diagnostic_t_gripper_object is not None:
+                    from pxr import Gf
+                    from pxr import UsdGeom
+
+                    _set_object_from_gripper_relative_transform(
+                        stage=stage,
+                        UsdGeom=UsdGeom,
+                        Gf=Gf,
+                        object_path=object_path,
+                        object_gripper_frame=args.object_gripper_frame,
+                        t_gripper_object=diagnostic_t_gripper_object,
+                    )
                 qpos = np.asarray(art.get_joint_positions(), dtype=np.float64).reshape(-1)
                 pre_step_tracking = _tracking_step_errors(target=open_target, actual=pre_step_qpos, groups=tracking_groups)
                 step_tracking = _tracking_step_errors(target=open_target, actual=qpos, groups=tracking_groups)
@@ -2396,6 +2456,18 @@ def main() -> int:
                     actuation_mode=args.hdf5_replay_actuation_mode,
                     target_hold_steps=args.hdf5_replay_target_hold_steps,
                 )
+                if diagnostic_t_gripper_object is not None:
+                    from pxr import Gf
+                    from pxr import UsdGeom
+
+                    _set_object_from_gripper_relative_transform(
+                        stage=stage,
+                        UsdGeom=UsdGeom,
+                        Gf=Gf,
+                        object_path=object_path,
+                        object_gripper_frame=args.object_gripper_frame,
+                        t_gripper_object=diagnostic_t_gripper_object,
+                    )
                 qpos = np.asarray(art.get_joint_positions(), dtype=np.float64).reshape(-1)
                 pre_step_tracking = _tracking_step_errors(target=step_target, actual=pre_step_qpos, groups=tracking_groups)
                 step_tracking = _tracking_step_errors(target=step_target, actual=qpos, groups=tracking_groups)
@@ -2622,6 +2694,7 @@ def main() -> int:
                 "support_plane": support_plane_row,
                 "proxy_collision_offsets": proxy_offset_rows,
                 "object_collision_offsets": object_offset_row,
+                "diagnostic_held_object": diagnostic_held_object_row,
                 "object_reset_box": object_reset_box,
                 "object_initial_box": object_initial_box,
                 "object_final_box": object_final_box,

@@ -107,6 +107,7 @@ The main conclusion is conservative:
 - [94 Phase 111 table/pipe overlay runtime rebuild](94_phase111_table_pipe_overlay_runtime_rebuild_2026-07-19.md)
 - [95 Phase 112-115 measured workcell contact gate](95_phase112_115_measured_workcell_contact_gate_2026-07-19.md)
 - [96 Phase 116 HDF5 start-frame probe](96_phase116_hdf5_start_frame_probe_2026-07-19.md)
+- [97 Phase 117 diagnostic held-bottle replay](97_phase117_diagnostic_held_bottle_replay_2026-07-19.md)
 
 ## Operating Rule
 
@@ -221,3 +222,12 @@ codex-evidence --name aloha-phase116-hdf5-start-frame-probe -- \
 ```
 
 Phase116 shows that earlier start frames fail because the bottle is not yet modeled as a held object, while controller tracking still passes. Do not fix this by broad collision deletion; add a held-object diagnostic gate first.
+
+The current diagnostic held-bottle replay can be rerun with:
+
+```bash
+codex-evidence --name aloha-phase117-diagnostic-held-bottle-replay -- \
+  .venv/bin/python aloha_isaac_replay/scripts/run_phase117_diagnostic_held_bottle_replay.py
+```
+
+Phase117 is not a dynamic grasp proof. It is a carried-object trajectory diagnostic: the bottle follows the left gripper using a fixed relative transform so the longer HDF5 replay can be inspected before dynamic grasp/contact tuning.
