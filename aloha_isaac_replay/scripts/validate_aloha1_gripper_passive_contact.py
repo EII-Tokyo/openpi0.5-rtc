@@ -91,6 +91,7 @@ def _write_markdown(path: Path, payload: dict[str, Any]) -> None:
     finger_hits = payload.get("target_contact_finger_hits") or {}
     finger_hit_lines = [f"- `{path}`: `{hit}`" for path, hit in finger_hits.items()]
     cross_overlap = payload.get("cross_side_proxy_overlap") or {}
+    support_plane = payload.get("support_plane") or {}
     lines = [
         "# Gripper Passive Contact Smoke",
         "",
@@ -116,6 +117,10 @@ def _write_markdown(path: Path, payload: dict[str, Any]) -> None:
         f"- first target contact pair: `{payload.get('first_target_contact_pair')}`",
         f"- first target contact step: `{payload.get('first_target_contact_step')}`",
         f"- target contact persistence steps: `{payload.get('target_contact_persistence_steps')}`",
+        f"- support plane path: `{support_plane.get('path')}`",
+        f"- support plane center: `{support_plane.get('center')}`",
+        f"- support plane size xy: `{support_plane.get('size_xy')}`",
+        f"- support plane thickness: `{support_plane.get('thickness')}`",
         "",
         "## Expected Finger Coverage",
         "",
@@ -515,6 +520,34 @@ def _create_passive_cube(
     UsdPhysics.MassAPI.Apply(geom.GetPrim()).CreateMassAttr(float(mass))
 
 
+def _create_static_support_box(
+    *,
+    stage: Any,
+    path: str,
+    center: np.ndarray,
+    size_xy: float,
+    thickness: float,
+) -> dict[str, Any]:
+    from pxr import Gf, UsdGeom, UsdPhysics
+
+    geom = UsdGeom.Cube.Define(stage, path)
+    geom.CreateSizeAttr(1.0)
+    geom.CreateDisplayColorAttr([Gf.Vec3f(0.45, 0.45, 0.45)])
+    xform = UsdGeom.Xformable(geom.GetPrim())
+    xform.ClearXformOpOrder()
+    xform.AddTranslateOp(precision=UsdGeom.XformOp.PrecisionDouble).Set(Gf.Vec3d(*[float(x) for x in center]))
+    xform.AddScaleOp(precision=UsdGeom.XformOp.PrecisionDouble).Set(
+        Gf.Vec3d(float(size_xy), float(size_xy), float(thickness))
+    )
+    UsdPhysics.CollisionAPI.Apply(geom.GetPrim()).CreateCollisionEnabledAttr().Set(True)
+    return {
+        "path": path,
+        "center": [float(x) for x in center],
+        "size_xy": float(size_xy),
+        "thickness": float(thickness),
+    }
+
+
 def _set_collision_offsets(stage: Any, prim_path: str, contact_offset: float | None, rest_offset: float | None) -> dict[str, Any]:
     from pxr import PhysxSchema
 
@@ -780,6 +813,10 @@ def main() -> int:
     parser.add_argument("--object-mass", type=float, default=0.01)
     parser.add_argument("--object-contact-offset", type=float, default=None)
     parser.add_argument("--object-rest-offset", type=float, default=None)
+    parser.add_argument("--support-plane-mode", choices=("none", "object_bottom"), default="none")
+    parser.add_argument("--support-plane-size", type=float, default=2.0)
+    parser.add_argument("--support-plane-thickness", type=float, default=0.02)
+    parser.add_argument("--support-plane-clearance", type=float, default=0.0)
     parser.add_argument("--proxy-contact-offset", type=float, default=None)
     parser.add_argument("--proxy-rest-offset", type=float, default=None)
     parser.add_argument("--closure-profile", choices=("abrupt", "linear"), default="abrupt")
@@ -830,6 +867,10 @@ def main() -> int:
             "object_usd_prim_path": args.object_usd_prim_path,
             "object_contact_offset": args.object_contact_offset,
             "object_rest_offset": args.object_rest_offset,
+            "support_plane_mode": args.support_plane_mode,
+            "support_plane_size": args.support_plane_size,
+            "support_plane_thickness": args.support_plane_thickness,
+            "support_plane_clearance": args.support_plane_clearance,
             "proxy_contact_offset": args.proxy_contact_offset,
             "proxy_rest_offset": args.proxy_rest_offset,
             "closure_profile": args.closure_profile,
@@ -960,6 +1001,26 @@ def main() -> int:
             usd_prim_path=args.object_usd_prim_path,
         )
         object_offset_row = _set_object_collision_offsets(stage, object_path, args.object_contact_offset, args.object_rest_offset)
+        support_plane_row: dict[str, Any] | None = None
+        if args.support_plane_mode == "object_bottom":
+            object_support_box = _bbox_row(stage, object_path)
+            if not object_support_box.get("bbox_valid"):
+                raise RuntimeError("Cannot place support plane because object bbox is invalid.")
+            object_support_center = np.asarray(object_support_box["center"], dtype=np.float64)
+            support_center = object_support_center.copy()
+            support_center[2] = (
+                float(object_support_box["min"][2])
+                - float(args.support_plane_clearance)
+                - float(args.support_plane_thickness) * 0.5
+            )
+            support_plane_row = _create_static_support_box(
+                stage=stage,
+                path="/World/phase58_static_support_plane",
+                center=support_center,
+                size_xy=args.support_plane_size,
+                thickness=args.support_plane_thickness,
+            )
+            support_plane_row["placement_object_box"] = object_support_box
         trace_state = None
         first_contact_row: dict[str, Any] | None = None
         contact_pair_rows: list[dict[str, Any]] = []
@@ -1194,6 +1255,7 @@ def main() -> int:
                 "object_usd_prim_path": args.object_usd_prim_path,
                 "object_placement": object_placement_row,
                 "object_side_length_stage_units": side_length,
+                "support_plane": support_plane_row,
                 "proxy_collision_offsets": proxy_offset_rows,
                 "object_collision_offsets": object_offset_row,
                 "object_reset_box": object_reset_box,

@@ -74,6 +74,7 @@ The main conclusion is conservative:
 - [61 Phase 55 HDF5 replay tracking error](61_phase55_hdf5_replay_tracking_error_2026-07-18.md)
 - [62 Phase 56 gravity replay failure](62_phase56_gravity_replay_failure_2026-07-18.md)
 - [63 Phase 57 gravity already-grasped replay](63_phase57_gravity_already_grasped_replay_2026-07-18.md)
+- [64 Phase 58 support-plane gravity replay](64_phase58_support_plane_gravity_replay_2026-07-18.md)
 
 ## Operating Rule
 
