@@ -85,6 +85,7 @@ def _phase97_args(output_dir: Path) -> list[str]:
         "--fail-on-non-target-object-contact",
         "--allowed-non-target-object-contact-category",
         "workcell_or_environment",
+        "--already-in-contact-setup",
         "--min-contact-motion",
         "1e-05",
         "--max-object-displacement",

@@ -10,6 +10,7 @@ import yaml
 from aloha_isaac_replay.scripts.create_table_to_base_calibration import build_calibration_config
 from aloha_isaac_replay.scripts.create_table_to_base_calibration import build_evidence_record
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _audit_required_table_frame
+from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _active_target_contact_gate
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _guard_final_contact_stage_namespace
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _guard_support_plane_calibration_mode
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _passive_contact_geometry_sanity
@@ -451,6 +452,52 @@ def test_contact_summary_accepts_collision_descendants_under_finger_link() -> No
     assert summary["target_contact_pair_found"] is True
     assert summary["target_contact_found_event"] is True
     assert summary["target_contact_finger_hits"][finger_link] is True
+    assert summary["first_target_contact_found_phase"] == "settle"
+
+
+def test_active_target_contact_gate_requires_close_contact_found_event() -> None:
+    gate = _active_target_contact_gate(
+        contact_summary={
+            "target_contact_found_phases": ["settle"],
+            "first_target_contact_phase": "settle",
+            "first_target_contact_found_phase": "settle",
+        },
+        require_active_target_contact=True,
+        already_in_contact_setup=False,
+    )
+
+    assert gate["pass"] is False
+    assert gate["status"] == "FAIL_NO_ACTIVE_TARGET_CONTACT_DURING_CLOSE"
+
+
+def test_active_target_contact_gate_passes_close_contact_found_event() -> None:
+    gate = _active_target_contact_gate(
+        contact_summary={
+            "target_contact_found_phases": ["close"],
+            "first_target_contact_phase": "close",
+            "first_target_contact_found_phase": "close",
+        },
+        require_active_target_contact=True,
+        already_in_contact_setup=False,
+    )
+
+    assert gate["pass"] is True
+    assert gate["status"] == "PASS_ACTIVE_TARGET_CONTACT_FOUND_DURING_CLOSE"
+
+
+def test_active_target_contact_gate_documents_already_contacting_setup() -> None:
+    gate = _active_target_contact_gate(
+        contact_summary={
+            "target_contact_found_phases": ["settle"],
+            "first_target_contact_phase": "settle",
+            "first_target_contact_found_phase": "settle",
+        },
+        require_active_target_contact=False,
+        already_in_contact_setup=True,
+    )
+
+    assert gate["pass"] is True
+    assert gate["status"] == "SKIPPED_ALREADY_IN_CONTACT_SETUP"
 
 
 def test_contact_summary_classifies_non_target_object_contacts() -> None:

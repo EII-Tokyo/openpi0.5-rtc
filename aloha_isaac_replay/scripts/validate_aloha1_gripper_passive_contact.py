@@ -310,6 +310,7 @@ def _write_markdown(path: Path, payload: dict[str, Any]) -> None:
     support_size = support_plane.get("size")
     tracking_gate = payload.get("controller_tracking_gate") or {}
     non_target_gate = payload.get("non_target_contact_gate") or {}
+    active_target_gate = payload.get("active_target_contact_gate") or {}
     failure_reasons = payload.get("failure_reasons") or []
     lines = [
         "# Gripper Passive Contact Smoke",
@@ -344,6 +345,10 @@ def _write_markdown(path: Path, payload: dict[str, Any]) -> None:
         f"- allowed non-target object contact categories: `{payload.get('allowed_non_target_object_contact_categories')}`",
         f"- non-target contact gate: `{non_target_gate}`",
         f"- strict non-target object contact gate ok: `{payload.get('non_target_object_contact_ok')}`",
+        f"- require active target contact: `{payload.get('require_active_target_contact')}`",
+        f"- already-in-contact setup: `{payload.get('already_in_contact_setup')}`",
+        f"- active target contact gate: `{active_target_gate}`",
+        f"- active target contact gate ok: `{payload.get('active_target_contact_ok')}`",
         f"- cross-side proxy overlap detected: `{cross_overlap.get('overlap_detected')}`",
         f"- first contact pair: `{payload.get('first_contact_pair')}`",
         f"- first target contact pair: `{payload.get('first_target_contact_pair')}`",
@@ -762,6 +767,34 @@ def _non_target_contact_gate(
         "observed_categories": categories,
         "blocking_categories": [],
     }
+
+
+def _active_target_contact_gate(
+    *,
+    contact_summary: dict[str, Any],
+    require_active_target_contact: bool,
+    already_in_contact_setup: bool,
+) -> dict[str, Any]:
+    found_phases = list(contact_summary.get("target_contact_found_phases") or [])
+    row: dict[str, Any] = {
+        "required": bool(require_active_target_contact),
+        "already_in_contact_setup": bool(already_in_contact_setup),
+        "active_phases": ["close"],
+        "observed_target_contact_found_phases": found_phases,
+        "first_target_contact_phase": contact_summary.get("first_target_contact_phase"),
+        "first_target_contact_found_phase": contact_summary.get("first_target_contact_found_phase"),
+    }
+    if already_in_contact_setup:
+        row.update({"pass": True, "status": "SKIPPED_ALREADY_IN_CONTACT_SETUP"})
+        return row
+    if not require_active_target_contact:
+        row.update({"pass": True, "status": "SKIPPED_ACTIVE_TARGET_CONTACT_GATE"})
+        return row
+    if "close" in found_phases:
+        row.update({"pass": True, "status": "PASS_ACTIVE_TARGET_CONTACT_FOUND_DURING_CLOSE"})
+    else:
+        row.update({"pass": False, "status": "FAIL_NO_ACTIVE_TARGET_CONTACT_DURING_CLOSE"})
+    return row
 
 
 def _set_finger_target_and_step(world: Any, art: Any, target: np.ndarray, steps: int) -> None:
@@ -1354,6 +1387,7 @@ def _summarize_contact_pairs(
         "first_target_contact_pair": target_rows[0] if target_rows else None,
         "first_target_contact_found_pair": target_found_rows[0] if target_found_rows else None,
         "first_target_contact_phase": target_rows[0].get("phase") if target_rows else None,
+        "first_target_contact_found_phase": target_found_rows[0].get("phase") if target_found_rows else None,
         "first_target_contact_step": target_steps[0] if target_steps else None,
         "target_contact_found_phases": target_found_phases,
         "target_contact_found_during_settle": "settle" in target_found_phases,
@@ -1564,6 +1598,22 @@ def main() -> int:
         ),
     )
     parser.add_argument(
+        "--require-active-target-contact",
+        action="store_true",
+        help=(
+            "When contact tracing is enabled, fail unless a target finger/object CONTACT_FOUND event first appears "
+            "during the close phase. Use for active-grasp claims, not for already-contacting replay references."
+        ),
+    )
+    parser.add_argument(
+        "--already-in-contact-setup",
+        action="store_true",
+        help=(
+            "Mark this run as an already-contacting contact-candidate setup. This documents replay references like "
+            "Phase97 and intentionally skips the active-contact phase gate."
+        ),
+    )
+    parser.add_argument(
         "--trace-disable-usd-updates",
         action="store_true",
         help="Match Isaac asset-validator style contact probing. Off by default because this script needs live USD bbox readback.",
@@ -1592,6 +1642,8 @@ def main() -> int:
     )
     args = parser.parse_args()
     try:
+        if args.require_active_target_contact and args.already_in_contact_setup:
+            raise ValueError("--require-active-target-contact cannot combine with --already-in-contact-setup")
         support_options = _resolve_support_plane_options(args)
         _guard_support_plane_calibration_mode(args)
         table_frame_audit = _audit_required_table_frame(args)
@@ -1660,6 +1712,8 @@ def main() -> int:
             "trace_contact_pairs": args.trace_contact_pairs,
             "fail_on_non_target_object_contact": args.fail_on_non_target_object_contact,
             "allowed_non_target_object_contact_categories": args.allowed_non_target_object_contact_category,
+            "require_active_target_contact": args.require_active_target_contact,
+            "already_in_contact_setup": args.already_in_contact_setup,
             "trace_disable_usd_updates": args.trace_disable_usd_updates,
             "disable_workcell_environment_collisions_for_diagnostic_replay": (
                 args.disable_workcell_environment_collisions_for_diagnostic_replay
@@ -2170,7 +2224,13 @@ def main() -> int:
             allowed_categories=list(args.allowed_non_target_object_contact_category),
         )
         non_target_object_contact_ok = bool(non_target_contact_gate["pass"])
-        trace_pair_ok = bool(trace_pair_ok and non_target_object_contact_ok)
+        active_target_contact_gate = _active_target_contact_gate(
+            contact_summary=contact_summary,
+            require_active_target_contact=bool(args.trace_contact_pairs and args.require_active_target_contact),
+            already_in_contact_setup=bool(args.already_in_contact_setup),
+        )
+        active_target_contact_ok = bool(active_target_contact_gate["pass"])
+        trace_pair_ok = bool(trace_pair_ok and non_target_object_contact_ok and active_target_contact_ok)
         overall_pass = bool(overall_pass and trace_pair_ok)
         failure_reasons = []
         if not contact_motion_ok:
@@ -2179,6 +2239,8 @@ def main() -> int:
             failure_reasons.append("object_motion_exceeded_limit")
         if not trace_pair_ok:
             failure_reasons.append("contact_trace_gate_failed")
+        if not active_target_contact_ok:
+            failure_reasons.append("active_target_contact_gate_failed")
         if not target_limit_ok:
             failure_reasons.append("target_outside_runtime_limits")
         if not controller_tracking_ok:
@@ -2190,6 +2252,8 @@ def main() -> int:
                 contact_trace_status = "FAIL_NO_TARGET_CONTACT"
             elif not non_target_object_contact_ok:
                 contact_trace_status = str(non_target_contact_gate["status"])
+            elif not active_target_contact_ok:
+                contact_trace_status = str(active_target_contact_gate["status"])
             elif not no_explosion_ok:
                 contact_trace_status = "FAIL_OBJECT_EJECTION"
             else:
@@ -2220,6 +2284,7 @@ def main() -> int:
                 "pre_step_tracking_summary": pre_step_tracking_summary,
                 "tracking_summary": tracking_summary,
                 "controller_tracking_gate": controller_tracking_gate,
+                "active_target_contact_gate": active_target_contact_gate,
                 "target_limit_summary": target_limit_summary,
                 "target_limit_gate_ok": target_limit_ok,
                 "failure_reasons": failure_reasons,
@@ -2265,6 +2330,10 @@ def main() -> int:
                 "allowed_non_target_object_contact_categories": list(args.allowed_non_target_object_contact_category),
                 "non_target_contact_gate": non_target_contact_gate,
                 "non_target_object_contact_ok": non_target_object_contact_ok,
+                "require_active_target_contact": bool(args.require_active_target_contact),
+                "already_in_contact_setup": bool(args.already_in_contact_setup),
+                "active_target_contact_gate": active_target_contact_gate,
+                "active_target_contact_ok": active_target_contact_ok,
                 "contact_trace_rigid_body_paths": trace_state["rigid_body_paths"] if trace_state else [],
                 "first_contact_pair": first_contact_row,
                 **contact_summary,

@@ -26,6 +26,8 @@ Artifact:
 - Strict non-target gate:
   - `--fail-on-non-target-object-contact`
   - `--allowed-non-target-object-contact-category workcell_or_environment`
+- Contact phase semantics:
+  - `--already-in-contact-setup`
 
 ## Gate Evidence
 
@@ -39,6 +41,7 @@ Artifact:
 | max error DOF | `left_shoulder` |
 | contact trace status | `PASS_BILATERAL_CONTACT_CANDIDATE` |
 | non-target contact gate | `PASS_NON_TARGET_CONTACTS_ALLOWED` |
+| active target contact gate | `SKIPPED_ALREADY_IN_CONTACT_SETUP` |
 | max object displacement | `0.11387294474651785` |
 
 ## Scope Boundaries
