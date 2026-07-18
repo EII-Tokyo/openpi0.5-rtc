@@ -28,6 +28,7 @@ from aloha_isaac_replay.scripts.validate_aloha1_gripper_proxy_gap import _gap_me
 from aloha_isaac_replay.scripts.validate_aloha1_native_single_joint_response import _safe_target
 from aloha_isaac_replay.validation.contact_proxy_profiles import contact_proxy_namespace_roots
 from aloha_isaac_replay.validation.contact_proxy_profiles import contact_proxy_profile_names
+from aloha_isaac_replay.validation.contact_proxy_profiles import finger_qpos_limits_for_side
 from aloha_isaac_replay.validation.contact_proxy_profiles import finger_dof_names_for_side
 from aloha_isaac_replay.validation.contact_proxy_profiles import resolve_contact_proxy_paths
 from aloha_isaac_replay.validation.contact_proxy_profiles import resolve_contact_target_paths
@@ -306,11 +307,14 @@ def _write_markdown(path: Path, payload: dict[str, Any]) -> None:
     support_plane = payload.get("support_plane") or {}
     diagnostic_contacts = payload.get("diagnostic_contact_summaries") or {}
     support_size = support_plane.get("size")
+    tracking_gate = payload.get("controller_tracking_gate") or {}
+    failure_reasons = payload.get("failure_reasons") or []
     lines = [
         "# Gripper Passive Contact Smoke",
         "",
         f"- status: `{payload['status']}`",
         f"- contact trace status: `{payload.get('contact_trace_status')}`",
+        f"- failure reasons: `{failure_reasons}`",
         f"- stage: `{payload['inputs']['stage_usd']}`",
         f"- control mode: `{payload['inputs']['control_mode']}`",
         f"- moving fingers: `{payload['inputs'].get('moving_fingers')}`",
@@ -344,6 +348,11 @@ def _write_markdown(path: Path, payload: dict[str, Any]) -> None:
         f"- first non-target object contact pair: `{payload.get('first_non_target_object_contact_pair')}`",
         f"- first non-target object contact phase: `{payload.get('first_non_target_object_contact_phase')}`",
         f"- target contact persistence steps: `{payload.get('target_contact_persistence_steps')}`",
+        f"- target runtime-limit summary: `{payload.get('target_limit_summary')}`",
+        f"- target runtime-limit gate ok: `{payload.get('target_limit_gate_ok')}`",
+        f"- controller tracking gate: `{tracking_gate}`",
+        f"- pre-step tracking summary: `{payload.get('pre_step_tracking_summary')}`",
+        f"- post-step tracking summary: `{payload.get('tracking_summary')}`",
         f"- support plane path: `{support_plane.get('path')}`",
         f"- support plane center: `{support_plane.get('center')}`",
         f"- support plane size: `{support_size}`",
@@ -415,6 +424,7 @@ def _target_from_standard_qpos(
     mapping: dict[str, Any] | None,
     replay_mode: str,
     finger_dof_names: dict[str, str],
+    finger_qpos_limits: Any,
 ) -> np.ndarray:
     dof_names = list(art.dof_names)
     target = np.asarray(art.get_joint_positions(), dtype=np.float64).reshape(-1).copy()
@@ -428,7 +438,7 @@ def _target_from_standard_qpos(
             dof_name = arm_target.isaac_dof_name[len(side_prefix) :]
             target[dof_names.index(dof_name)] = float(arm_target.value)
     channel = 6 if side == "left" else 13
-    fingers = standard_gripper_qpos_to_isaac_fingers(float(qpos_frame[channel]), side=side)
+    fingers = standard_gripper_qpos_to_isaac_fingers(float(qpos_frame[channel]), side=side, limits=finger_qpos_limits)
     target[dof_names.index(finger_dof_names["left_finger"])] = float(fingers[f"{side}/left_finger"])
     target[dof_names.index(finger_dof_names["right_finger"])] = float(fingers[f"{side}/right_finger"])
     return target
@@ -442,6 +452,7 @@ def _targets_from_hdf5_qpos(
     mapping: dict[str, Any] | None,
     replay_mode: str,
     finger_dof_names: dict[str, str],
+    finger_qpos_limits: Any,
 ) -> tuple[list[np.ndarray], dict[str, Any]]:
     dof_names = list(art.dof_names)
     left_idx = dof_names.index(finger_dof_names["left_finger"])
@@ -458,6 +469,7 @@ def _targets_from_hdf5_qpos(
                 mapping=mapping,
                 replay_mode=replay_mode,
                 finger_dof_names=finger_dof_names,
+                finger_qpos_limits=finger_qpos_limits,
             )
         )
     arm_delta = None
@@ -567,11 +579,89 @@ def _tracking_step_errors(
             row[name] = {"max_abs_error": float("nan"), "rms_error": float("nan")}
             continue
         group_error = error[np.asarray(indices, dtype=np.int64)]
+        local_max_index = int(np.argmax(np.abs(group_error)))
         row[name] = {
             "max_abs_error": float(np.max(np.abs(group_error))),
+            "max_abs_error_dof_index": int(indices[local_max_index]),
+            "max_abs_error_signed": float(group_error[local_max_index]),
             "rms_error": float(np.sqrt(np.mean(np.square(group_error)))),
         }
     return row
+
+
+def _target_limit_step_violations(
+    *,
+    target: np.ndarray,
+    limits: np.ndarray,
+    groups: dict[str, list[int]],
+) -> dict[str, dict[str, float]]:
+    row: dict[str, dict[str, float]] = {}
+    target_arr = np.asarray(target, dtype=np.float64)
+    limits_arr = np.asarray(limits, dtype=np.float64)
+    lower = limits_arr[:, 0]
+    upper = limits_arr[:, 1]
+    lower_violation = np.maximum(lower - target_arr, 0.0)
+    upper_violation = np.maximum(target_arr - upper, 0.0)
+    max_violation_by_dof = np.maximum(lower_violation, upper_violation)
+    signed_violation_by_dof = np.where(upper_violation > 0.0, upper_violation, -lower_violation)
+    for name, indices in groups.items():
+        if not indices:
+            row[name] = {"max_violation": float("nan")}
+            continue
+        group_indices = np.asarray(indices, dtype=np.int64)
+        group_violation = max_violation_by_dof[group_indices]
+        local_max_index = int(np.argmax(group_violation))
+        dof_index = int(indices[local_max_index])
+        row[name] = {
+            "max_violation": float(group_violation[local_max_index]),
+            "max_violation_dof_index": dof_index,
+            "max_violation_signed": float(signed_violation_by_dof[dof_index]),
+            "target": float(target_arr[dof_index]),
+            "lower": float(lower[dof_index]),
+            "upper": float(upper[dof_index]),
+        }
+    return row
+
+
+def _summarize_target_limit_violations(
+    rows: list[dict[str, Any]],
+    groups: dict[str, list[int]],
+    dof_names: list[str],
+) -> dict[str, Any]:
+    summary: dict[str, Any] = {
+        "sample_count": len(rows),
+        "groups": {},
+        "controller_ready": True,
+        "status": "PASS_TARGETS_WITHIN_RUNTIME_LIMITS",
+    }
+    for name, indices in groups.items():
+        group_rows = [row["groups"][name] for row in rows if name in row["groups"]]
+        dof_group_names = [dof_names[i] for i in indices]
+        if not group_rows:
+            summary["groups"][name] = {"dof_names": dof_group_names, "sample_count": 0}
+            continue
+        violations = np.asarray([row["max_violation"] for row in group_rows], dtype=np.float64)
+        max_row_index = int(np.nanargmax(violations))
+        max_row = group_rows[max_row_index]
+        source_row = [row for row in rows if name in row["groups"]][max_row_index]
+        max_dof_index = int(max_row["max_violation_dof_index"])
+        group_summary = {
+            "dof_names": dof_group_names,
+            "sample_count": int(len(group_rows)),
+            "max_violation": float(np.nanmax(violations)),
+            "max_violation_dof_name": dof_names[max_dof_index],
+            "max_violation_signed": float(max_row["max_violation_signed"]),
+            "max_violation_phase": source_row.get("phase"),
+            "max_violation_step": source_row.get("step"),
+            "target_at_max_violation": float(max_row["target"]),
+            "lower_at_max_violation": float(max_row["lower"]),
+            "upper_at_max_violation": float(max_row["upper"]),
+        }
+        if group_summary["max_violation"] > 0.0:
+            summary["controller_ready"] = False
+            summary["status"] = "FAIL_TARGET_OUTSIDE_RUNTIME_LIMITS"
+        summary["groups"][name] = group_summary
+    return summary
 
 
 def _summarize_tracking_errors(
@@ -588,10 +678,18 @@ def _summarize_tracking_errors(
             continue
         max_abs = np.asarray([row["max_abs_error"] for row in group_rows], dtype=np.float64)
         rms = np.asarray([row["rms_error"] for row in group_rows], dtype=np.float64)
+        max_row_index = int(np.nanargmax(max_abs))
+        max_row = group_rows[max_row_index]
+        source_row = [row for row in tracking_rows if name in row["groups"]][max_row_index]
+        max_dof_index = int(max_row["max_abs_error_dof_index"])
         summary["groups"][name] = {
             "dof_names": dof_group_names,
             "sample_count": int(len(group_rows)),
             "max_abs_error": float(np.nanmax(max_abs)),
+            "max_abs_error_dof_name": dof_names[max_dof_index],
+            "max_abs_error_signed": float(max_row["max_abs_error_signed"]),
+            "max_abs_error_phase": source_row.get("phase"),
+            "max_abs_error_step": source_row.get("step"),
             "mean_max_abs_error": float(np.nanmean(max_abs)),
             "final_max_abs_error": float(max_abs[-1]),
             "max_rms_error": float(np.nanmax(rms)),
@@ -601,10 +699,52 @@ def _summarize_tracking_errors(
     return summary
 
 
+def _controller_tracking_gate(
+    *,
+    tracking_summary: dict[str, Any],
+    max_controlled_error: float | None,
+) -> dict[str, Any]:
+    controlled = (tracking_summary.get("groups") or {}).get("controlled") or {}
+    max_error = controlled.get("max_abs_error")
+    row: dict[str, Any] = {
+        "threshold": max_controlled_error,
+        "max_controlled_error": max_error,
+        "max_controlled_error_dof_name": controlled.get("max_abs_error_dof_name"),
+        "max_controlled_error_phase": controlled.get("max_abs_error_phase"),
+        "max_controlled_error_step": controlled.get("max_abs_error_step"),
+    }
+    if max_controlled_error is None:
+        row.update({"pass": True, "status": "SKIPPED_NO_TRACKING_THRESHOLD"})
+        return row
+    if max_error is None or not np.isfinite(float(max_error)):
+        row.update({"pass": False, "status": "FAIL_TRACKING_ERROR_NOT_FINITE"})
+        return row
+    if float(max_error) <= float(max_controlled_error):
+        row.update({"pass": True, "status": "PASS_POST_STEP_TRACKING_WITHIN_THRESHOLD"})
+    else:
+        row.update({"pass": False, "status": "FAIL_POST_STEP_TRACKING_EXCEEDS_THRESHOLD"})
+    return row
+
+
 def _set_finger_target_and_step(world: Any, art: Any, target: np.ndarray, steps: int) -> None:
     for _ in range(steps):
         _set_full_target(art, target)
         world.step(render=False)
+
+
+def _apply_replay_target_and_step(world: Any, art: Any, target: np.ndarray, *, actuation_mode: str) -> np.ndarray:
+    """Step a replay target and return qpos after applying the command but before physics advances."""
+
+    if actuation_mode == "drive_target":
+        _set_full_target(art, target)
+    elif actuation_mode == "state_teleport":
+        _set_full_state(art, target)
+        _set_full_target(art, target)
+    else:
+        raise ValueError(f"unknown HDF5 replay actuation mode: {actuation_mode!r}")
+    pre_step_qpos = np.asarray(art.get_joint_positions(), dtype=np.float64).reshape(-1).copy()
+    world.step(render=False)
+    return pre_step_qpos
 
 
 def _surface_gap(left_box: dict[str, Any], right_box: dict[str, Any], axis: int) -> float:
@@ -1288,6 +1428,26 @@ def main() -> int:
     parser.add_argument("--moving-fingers", choices=("both", "left", "right"), default="both")
     parser.add_argument("--hdf5-gripper-episode", default=None)
     parser.add_argument("--hdf5-replay-mode", choices=("gripper_only", "left_arm_and_gripper"), default="gripper_only")
+    parser.add_argument(
+        "--hdf5-replay-actuation-mode",
+        choices=("drive_target", "state_teleport"),
+        default="drive_target",
+        help=(
+            "How to apply HDF5 replay targets. drive_target uses normal articulation drives. "
+            "state_teleport is diagnostic-only and sets joint state before each step to isolate mapping/geometry "
+            "from drive tracking error."
+        ),
+    )
+    parser.add_argument(
+        "--max-post-step-controlled-tracking-error",
+        type=float,
+        default=None,
+        help=(
+            "Maximum allowed post-physics-step absolute joint tracking error for controlled DOFs. "
+            "If omitted, HDF5 replay uses a conservative 0.02 rad/m default; non-HDF5 contact smoke tests skip "
+            "this gate."
+        ),
+    )
     parser.add_argument("--mapping", default=str(DEFAULT_MAPPING))
     parser.add_argument("--hdf5-gripper-start-frame", type=int, default=None)
     parser.add_argument("--hdf5-gripper-end-frame", type=int, default=None)
@@ -1389,13 +1549,17 @@ def main() -> int:
             "moving_fingers": args.moving_fingers,
             "hdf5_gripper_episode": _rel(args.hdf5_gripper_episode) if args.hdf5_gripper_episode else None,
             "hdf5_replay_mode": args.hdf5_replay_mode,
+            "hdf5_replay_actuation_mode": args.hdf5_replay_actuation_mode,
+            "max_post_step_controlled_tracking_error": args.max_post_step_controlled_tracking_error,
             "mapping": _rel(args.mapping),
             "hdf5_gripper_start_frame": args.hdf5_gripper_start_frame,
             "hdf5_gripper_end_frame": args.hdf5_gripper_end_frame,
             "hdf5_gripper_max_frames": args.hdf5_gripper_max_frames,
             "trace_contact_pairs": args.trace_contact_pairs,
             "trace_disable_usd_updates": args.trace_disable_usd_updates,
-            "disable_workcell_environment_collisions_for_diagnostic_replay": args.disable_workcell_environment_collisions_for_diagnostic_replay,
+            "disable_workcell_environment_collisions_for_diagnostic_replay": (
+                args.disable_workcell_environment_collisions_for_diagnostic_replay
+            ),
             "reset_after_object_creation": False,
             "min_contact_motion": args.min_contact_motion,
             "max_object_displacement": args.max_object_displacement,
@@ -1436,6 +1600,14 @@ def main() -> int:
         paths = paths_by_side[args.side]
         contact_targets = resolve_contact_target_paths(args.contact_proxy_profile)[args.side]
         finger_dof_names = finger_dof_names_for_side(args.contact_proxy_profile, args.side)
+        finger_qpos_limits = finger_qpos_limits_for_side(args.contact_proxy_profile, args.side)
+        payload["inputs"]["finger_qpos_limits"] = {
+            "left_close": float(finger_qpos_limits.left_close),
+            "left_open": float(finger_qpos_limits.left_open),
+            "right_close": float(finger_qpos_limits.right_close),
+            "right_open": float(finger_qpos_limits.right_open),
+        }
+        _write_json(json_path, payload)
         trace_state = None
         if args.trace_contact_pairs:
             # ContactReportAPI authoring changes physics schemas. Do this before
@@ -1464,6 +1636,7 @@ def main() -> int:
                 mapping=mapping,
                 replay_mode=args.hdf5_replay_mode,
                 finger_dof_names=finger_dof_names,
+                finger_qpos_limits=finger_qpos_limits,
             )
             open_target = hdf5_target_sequence[0]
             open_values = hdf5_gripper_summary["first_target_values"]
@@ -1637,18 +1810,31 @@ def main() -> int:
             tracking_groups = _tracking_groups(
                 dof_names, replay_mode=replay_mode_for_tracking, finger_dof_names=finger_dof_names, side=args.side
             )
+            runtime_limits = _get_limits(art)
             tracking_rows: list[dict[str, Any]] = []
+            pre_step_tracking_rows: list[dict[str, Any]] = []
+            target_limit_rows: list[dict[str, Any]] = []
             object_reset_box = _bbox_row(stage, object_path)
             object_reset_center = np.asarray(object_reset_box["center"], dtype=np.float64)
             rows: list[dict[str, Any]] = []
             max_displacement = 0.0
             finite_motion = True
             for step in range(args.settle_steps):
-                _set_full_target(art, open_target)
-                world.step(render=False)
+                pre_step_qpos = _apply_replay_target_and_step(
+                    world,
+                    art,
+                    open_target,
+                    actuation_mode=args.hdf5_replay_actuation_mode,
+                )
                 qpos = np.asarray(art.get_joint_positions(), dtype=np.float64).reshape(-1)
+                pre_step_tracking = _tracking_step_errors(target=open_target, actual=pre_step_qpos, groups=tracking_groups)
                 step_tracking = _tracking_step_errors(target=open_target, actual=qpos, groups=tracking_groups)
+                target_limit = _target_limit_step_violations(
+                    target=open_target, limits=runtime_limits, groups=tracking_groups
+                )
+                pre_step_tracking_rows.append({"phase": "settle", "step": step, "groups": pre_step_tracking})
                 tracking_rows.append({"phase": "settle", "step": step, "groups": step_tracking})
+                target_limit_rows.append({"phase": "settle", "step": step, "groups": target_limit})
                 left_box = _bbox_row(stage, paths["left_finger"])
                 right_box = _bbox_row(stage, paths["right_finger"])
                 object_box = _bbox_row(stage, object_path)
@@ -1679,10 +1865,21 @@ def main() -> int:
                         **_finger_qpos_values(qpos, dof_names, finger_dof_names),
                         "tracking_controlled_max_abs_error": step_tracking["controlled"]["max_abs_error"],
                         "tracking_controlled_rms_error": step_tracking["controlled"]["rms_error"],
+                        "target_limit_controlled_max_violation": target_limit["controlled"]["max_violation"],
+                        "pre_step_tracking_controlled_max_abs_error": pre_step_tracking["controlled"]["max_abs_error"],
+                        "pre_step_tracking_controlled_rms_error": pre_step_tracking["controlled"]["rms_error"],
                         "tracking_gripper_max_abs_error": step_tracking["gripper"]["max_abs_error"],
                         "tracking_gripper_rms_error": step_tracking["gripper"]["rms_error"],
+                        "target_limit_gripper_max_violation": target_limit["gripper"]["max_violation"],
+                        "pre_step_tracking_gripper_max_abs_error": pre_step_tracking["gripper"]["max_abs_error"],
+                        "pre_step_tracking_gripper_rms_error": pre_step_tracking["gripper"]["rms_error"],
                         "tracking_left_arm_max_abs_error": step_tracking.get("left_arm", {}).get("max_abs_error"),
                         "tracking_left_arm_rms_error": step_tracking.get("left_arm", {}).get("rms_error"),
+                        "target_limit_left_arm_max_violation": target_limit.get("left_arm", {}).get("max_violation"),
+                        "pre_step_tracking_left_arm_max_abs_error": pre_step_tracking.get("left_arm", {}).get(
+                            "max_abs_error"
+                        ),
+                        "pre_step_tracking_left_arm_rms_error": pre_step_tracking.get("left_arm", {}).get("rms_error"),
                         "finger_center_distance": _gap_metrics(left_box, right_box).get("center_distance"),
                         **_axis_probe_row(
                             axis=axis,
@@ -1728,11 +1925,21 @@ def main() -> int:
                     step_target = open_target + alpha * (close_target - open_target)
                 else:
                     step_target = close_target
-                _set_full_target(art, step_target)
-                world.step(render=False)
+                pre_step_qpos = _apply_replay_target_and_step(
+                    world,
+                    art,
+                    step_target,
+                    actuation_mode=args.hdf5_replay_actuation_mode,
+                )
                 qpos = np.asarray(art.get_joint_positions(), dtype=np.float64).reshape(-1)
+                pre_step_tracking = _tracking_step_errors(target=step_target, actual=pre_step_qpos, groups=tracking_groups)
                 step_tracking = _tracking_step_errors(target=step_target, actual=qpos, groups=tracking_groups)
+                target_limit = _target_limit_step_violations(
+                    target=step_target, limits=runtime_limits, groups=tracking_groups
+                )
+                pre_step_tracking_rows.append({"phase": "close", "step": step, "groups": pre_step_tracking})
                 tracking_rows.append({"phase": "close", "step": step, "groups": step_tracking})
+                target_limit_rows.append({"phase": "close", "step": step, "groups": target_limit})
                 left_box = _bbox_row(stage, paths["left_finger"])
                 right_box = _bbox_row(stage, paths["right_finger"])
                 object_box = _bbox_row(stage, object_path)
@@ -1769,10 +1976,21 @@ def main() -> int:
                         **_finger_qpos_values(qpos, dof_names, finger_dof_names),
                         "tracking_controlled_max_abs_error": step_tracking["controlled"]["max_abs_error"],
                         "tracking_controlled_rms_error": step_tracking["controlled"]["rms_error"],
+                        "target_limit_controlled_max_violation": target_limit["controlled"]["max_violation"],
+                        "pre_step_tracking_controlled_max_abs_error": pre_step_tracking["controlled"]["max_abs_error"],
+                        "pre_step_tracking_controlled_rms_error": pre_step_tracking["controlled"]["rms_error"],
                         "tracking_gripper_max_abs_error": step_tracking["gripper"]["max_abs_error"],
                         "tracking_gripper_rms_error": step_tracking["gripper"]["rms_error"],
+                        "target_limit_gripper_max_violation": target_limit["gripper"]["max_violation"],
+                        "pre_step_tracking_gripper_max_abs_error": pre_step_tracking["gripper"]["max_abs_error"],
+                        "pre_step_tracking_gripper_rms_error": pre_step_tracking["gripper"]["rms_error"],
                         "tracking_left_arm_max_abs_error": step_tracking.get("left_arm", {}).get("max_abs_error"),
                         "tracking_left_arm_rms_error": step_tracking.get("left_arm", {}).get("rms_error"),
+                        "target_limit_left_arm_max_violation": target_limit.get("left_arm", {}).get("max_violation"),
+                        "pre_step_tracking_left_arm_max_abs_error": pre_step_tracking.get("left_arm", {}).get(
+                            "max_abs_error"
+                        ),
+                        "pre_step_tracking_left_arm_rms_error": pre_step_tracking.get("left_arm", {}).get("rms_error"),
                         "finger_center_distance": _gap_metrics(left_box, right_box).get("center_distance"),
                         **_axis_probe_row(
                             axis=axis,
@@ -1789,6 +2007,17 @@ def main() -> int:
         object_final_box = object_latest_box
         object_final_center = object_latest_center
         tracking_summary = _summarize_tracking_errors(tracking_rows, tracking_groups, dof_names)
+        pre_step_tracking_summary = _summarize_tracking_errors(pre_step_tracking_rows, tracking_groups, dof_names)
+        target_limit_summary = _summarize_target_limit_violations(target_limit_rows, tracking_groups, dof_names)
+        target_limit_ok = bool(target_limit_summary.get("controller_ready", True))
+        effective_max_tracking_error = args.max_post_step_controlled_tracking_error
+        if effective_max_tracking_error is None and hdf5_target_sequence is not None:
+            effective_max_tracking_error = 0.02
+        controller_tracking_gate = _controller_tracking_gate(
+            tracking_summary=tracking_summary,
+            max_controlled_error=effective_max_tracking_error,
+        )
+        controller_tracking_ok = bool(controller_tracking_gate["pass"])
         object_displacement = float(np.linalg.norm(object_final_center - object_initial_center))
         total_object_displacement = float(np.linalg.norm(object_final_center - object_reset_center))
         contact_motion_policy = (
@@ -1798,7 +2027,7 @@ def main() -> int:
         )
         contact_motion_ok = bool(args.moving_fingers == "both" or object_displacement >= args.min_contact_motion)
         no_explosion_ok = bool(finite_motion and max_displacement <= args.max_object_displacement)
-        overall_pass = bool(contact_motion_ok and no_explosion_ok)
+        overall_pass = bool(contact_motion_ok and no_explosion_ok and target_limit_ok and controller_tracking_ok)
         if args.moving_fingers == "both":
             expected_finger_paths = [contact_targets["left_finger"], contact_targets["right_finger"]]
         else:
@@ -1830,6 +2059,17 @@ def main() -> int:
         )
         trace_pair_ok = bool(trace_pair_ok and non_target_object_contact_ok)
         overall_pass = bool(overall_pass and trace_pair_ok)
+        failure_reasons = []
+        if not contact_motion_ok:
+            failure_reasons.append("contact_motion_below_threshold")
+        if not no_explosion_ok:
+            failure_reasons.append("object_motion_exceeded_limit")
+        if not trace_pair_ok:
+            failure_reasons.append("contact_trace_gate_failed")
+        if not target_limit_ok:
+            failure_reasons.append("target_outside_runtime_limits")
+        if not controller_tracking_ok:
+            failure_reasons.append("post_step_controller_tracking_exceeded_threshold")
         if args.trace_contact_pairs:
             if cross_side_overlap_blocks_gate:
                 contact_trace_status = "FAIL_CROSS_SIDE_PROXY_OVERLAP"
@@ -1856,7 +2096,12 @@ def main() -> int:
                 "close_target_values": close_values,
                 "hdf5_gripper_summary": hdf5_gripper_summary,
                 "hdf5_gripper_replay_steps": len(close_sequence) if hdf5_target_sequence is not None else None,
+                "pre_step_tracking_summary": pre_step_tracking_summary,
                 "tracking_summary": tracking_summary,
+                "controller_tracking_gate": controller_tracking_gate,
+                "target_limit_summary": target_limit_summary,
+                "target_limit_gate_ok": target_limit_ok,
+                "failure_reasons": failure_reasons,
                 "finger_gap_axis": axis_name,
                 "finger_surface_gap_open": surface_gap,
                 "finger_surface_gap_open_meters": geometry_sanity["finger_surface_gap_open_meters"],

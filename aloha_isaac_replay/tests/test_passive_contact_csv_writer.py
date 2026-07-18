@@ -3,6 +3,7 @@ from __future__ import annotations
 import csv
 from pathlib import Path
 
+import numpy as np
 import pytest
 import yaml
 
@@ -12,14 +13,47 @@ from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _guard_final_contact_stage_namespace
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _guard_support_plane_calibration_mode
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _passive_contact_geometry_sanity
+from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _apply_replay_target_and_step
+from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _controller_tracking_gate
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _load_support_plane_config
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _resolve_support_plane_options
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _should_disable_workcell_environment_collision
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _summarize_contact_pairs
+from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _summarize_target_limit_violations
+from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _summarize_tracking_errors
+from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _target_from_standard_qpos
+from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _target_limit_step_violations
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _tracking_groups
+from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _tracking_step_errors
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _write_csv
+from aloha_isaac_replay.validation.contact_proxy_profiles import finger_dof_names_for_side
+from aloha_isaac_replay.validation.contact_proxy_profiles import finger_qpos_limits_for_side
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+
+
+class _FakeWorld:
+    def __init__(self) -> None:
+        self.step_calls = 0
+
+    def step(self, *, render: bool) -> None:
+        assert render is False
+        self.step_calls += 1
+
+
+class _FakeArticulation:
+    def __init__(self) -> None:
+        self.qpos = np.asarray([0.25, -0.5], dtype=np.float64)
+
+    def get_joint_positions(self) -> np.ndarray:
+        return self.qpos.copy()
+
+
+class _FakeSceneBaseLeftArticulation:
+    dof_names = ["left_waist", "left_left_finger", "left_right_finger"]
+
+    def get_joint_positions(self) -> np.ndarray:
+        return np.zeros(3, dtype=np.float64)
 
 
 def test_passive_contact_csv_writer_preserves_late_diagnostic_columns(tmp_path) -> None:
@@ -37,6 +71,64 @@ def test_passive_contact_csv_writer_preserves_late_diagnostic_columns(tmp_path) 
 
     assert "tracking_controlled_max_abs_error" in rows[0]
     assert rows[1]["tracking_controlled_max_abs_error"] == "0.12"
+
+
+def test_replay_actuation_mode_drive_target_steps_with_joint_target(monkeypatch) -> None:
+    calls: list[str] = []
+
+    def fake_set_target(art, target) -> None:
+        calls.append("target")
+
+    def fake_set_state(art, target) -> None:
+        calls.append("state")
+
+    monkeypatch.setattr(
+        "aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact._set_full_target",
+        fake_set_target,
+    )
+    monkeypatch.setattr(
+        "aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact._set_full_state",
+        fake_set_state,
+    )
+
+    world = _FakeWorld()
+    pre_step_qpos = _apply_replay_target_and_step(world, _FakeArticulation(), np.zeros(2), actuation_mode="drive_target")
+
+    assert calls == ["target"]
+    np.testing.assert_allclose(pre_step_qpos, [0.25, -0.5])
+    assert world.step_calls == 1
+
+
+def test_replay_actuation_mode_state_teleport_sets_state_then_target(monkeypatch) -> None:
+    calls: list[str] = []
+
+    def fake_set_target(art, target) -> None:
+        calls.append("target")
+
+    def fake_set_state(art, target) -> None:
+        calls.append("state")
+        art.qpos = np.asarray(target, dtype=np.float64)
+
+    monkeypatch.setattr(
+        "aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact._set_full_target",
+        fake_set_target,
+    )
+    monkeypatch.setattr(
+        "aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact._set_full_state",
+        fake_set_state,
+    )
+
+    world = _FakeWorld()
+    pre_step_qpos = _apply_replay_target_and_step(
+        world,
+        _FakeArticulation(),
+        np.asarray([1.0, 2.0], dtype=np.float64),
+        actuation_mode="state_teleport",
+    )
+
+    assert calls == ["state", "target"]
+    np.testing.assert_allclose(pre_step_qpos, [1.0, 2.0])
+    assert world.step_calls == 1
 
 
 def test_tracking_groups_accept_scene_base_link_prefixed_left_arm_dofs() -> None:
@@ -58,6 +150,125 @@ def test_tracking_groups_accept_scene_base_link_prefixed_left_arm_dofs() -> None
 
     assert groups["left_arm"] == [0, 1, 2, 3, 4, 5]
     assert groups["controlled"] == [0, 1, 2, 3, 4, 5, 6, 7]
+
+
+def test_tracking_summary_records_max_error_dof_name_and_step() -> None:
+    groups = {"left_arm": [0, 1, 2]}
+    dof_names = ["left_waist", "left_shoulder", "left_elbow"]
+    rows = [
+        {
+            "phase": "settle",
+            "step": 0,
+            "groups": _tracking_step_errors(
+                target=np.asarray([0.0, 0.0, 0.0]),
+                actual=np.asarray([0.1, -0.2, 0.05]),
+                groups=groups,
+            ),
+        },
+        {
+            "phase": "close",
+            "step": 3,
+            "groups": _tracking_step_errors(
+                target=np.asarray([0.0, 0.0, 0.0]),
+                actual=np.asarray([0.1, 0.05, -0.7]),
+                groups=groups,
+            ),
+        },
+    ]
+
+    summary = _summarize_tracking_errors(rows, groups, dof_names)
+
+    assert summary["groups"]["left_arm"]["max_abs_error"] == 0.7
+    assert summary["groups"]["left_arm"]["max_abs_error_dof_name"] == "left_elbow"
+    assert summary["groups"]["left_arm"]["max_abs_error_signed"] == -0.7
+    assert summary["groups"]["left_arm"]["max_abs_error_phase"] == "close"
+    assert summary["groups"]["left_arm"]["max_abs_error_step"] == 3
+
+
+def test_controller_tracking_gate_fails_when_post_step_error_exceeds_threshold() -> None:
+    tracking_summary = {
+        "groups": {
+            "controlled": {
+                "max_abs_error": 1.49,
+                "max_abs_error_dof_name": "left_wrist_rotate",
+                "max_abs_error_phase": "close",
+                "max_abs_error_step": 62,
+            }
+        }
+    }
+
+    gate = _controller_tracking_gate(tracking_summary=tracking_summary, max_controlled_error=0.02)
+
+    assert gate["pass"] is False
+    assert gate["status"] == "FAIL_POST_STEP_TRACKING_EXCEEDS_THRESHOLD"
+    assert gate["max_controlled_error"] == pytest.approx(1.49)
+    assert gate["max_controlled_error_dof_name"] == "left_wrist_rotate"
+
+
+def test_controller_tracking_gate_passes_when_post_step_error_is_small() -> None:
+    tracking_summary = {"groups": {"controlled": {"max_abs_error": 0.00043}}}
+
+    gate = _controller_tracking_gate(tracking_summary=tracking_summary, max_controlled_error=0.02)
+
+    assert gate["pass"] is True
+    assert gate["status"] == "PASS_POST_STEP_TRACKING_WITHIN_THRESHOLD"
+
+
+def test_target_limit_summary_records_clamped_dof_name_and_step() -> None:
+    groups = {"left_arm": [0, 1, 2], "controlled": [0, 1, 2]}
+    dof_names = ["left_waist", "left_shoulder", "left_elbow"]
+    limits = np.asarray([[-1.0, 1.0], [0.0, 1.25], [-2.0, 2.0]], dtype=np.float64)
+    rows = [
+        {
+            "phase": "settle",
+            "step": 0,
+            "groups": _target_limit_step_violations(
+                target=np.asarray([0.0, 1.0, 0.0]),
+                limits=limits,
+                groups=groups,
+            ),
+        },
+        {
+            "phase": "close",
+            "step": 4,
+            "groups": _target_limit_step_violations(
+                target=np.asarray([0.0, 2.13, 0.0]),
+                limits=limits,
+                groups=groups,
+            ),
+        },
+    ]
+
+    summary = _summarize_target_limit_violations(rows, groups, dof_names)
+
+    assert summary["status"] == "FAIL_TARGET_OUTSIDE_RUNTIME_LIMITS"
+    assert summary["controller_ready"] is False
+    assert summary["groups"]["left_arm"]["max_violation"] == pytest.approx(0.88)
+    assert summary["groups"]["left_arm"]["max_violation_dof_name"] == "left_shoulder"
+    assert summary["groups"]["left_arm"]["max_violation_signed"] == pytest.approx(0.88)
+    assert summary["groups"]["left_arm"]["max_violation_phase"] == "close"
+    assert summary["groups"]["left_arm"]["max_violation_step"] == 4
+    assert summary["groups"]["left_arm"]["target_at_max_violation"] == pytest.approx(2.13)
+    assert summary["groups"]["left_arm"]["upper_at_max_violation"] == pytest.approx(1.25)
+
+
+def test_scene_base_link_hdf5_gripper_qpos_maps_both_fingers_positive() -> None:
+    qpos = np.zeros(14, dtype=np.float64)
+    qpos[6] = 0.5
+
+    target = _target_from_standard_qpos(
+        art=_FakeSceneBaseLeftArticulation(),
+        side="left",
+        qpos_frame=qpos,
+        mapping=None,
+        replay_mode="gripper_only",
+        finger_dof_names=finger_dof_names_for_side("scene_base_link", "left"),
+        finger_qpos_limits=finger_qpos_limits_for_side("scene_base_link", "left"),
+    )
+
+    assert target[1] == pytest.approx(0.039)
+    assert target[2] == pytest.approx(0.039)
+    assert target[2] > 0.0
 
 
 def test_workcell_environment_collision_filter_is_diagnostic_and_does_not_match_robot_or_target_paths() -> None:

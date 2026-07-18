@@ -1,0 +1,84 @@
+schema_version: 1
+robot: Trossen Stationary ALOHA scene_base_link adapted for ALOHA1
+dataset_convention: standard_aloha_14d
+scope: left_arm_only_hdf5_replay_controller_ready
+notes:
+  - This mapping is for the Menagerie/Trossen /scene articulation, not the legacy /puppet_left_vx300s stage.
+  - Right arm entries are intentionally omitted; callers must request side=left.
+  - This is a controller-ready qpos replay mapping: it preserves the recorded ALOHA1 joint values and only renames DOFs.
+  - It intentionally does not include Phase 9 FK rigid-alignment offsets, because those offsets can push /scene runtime joints outside PhysX articulation limits.
+  - End-effector geometric alignment remains a separate calibration gate.
+source_reports:
+  - reports/aloha1_isaac_adaptation/phase20_dof_drive_limits_20260718/dof_drive_limits.md
+  - reports/aloha1_isaac_adaptation/phase24_native_qpos_target_tracking_smoke_20260718/action_replay_metrics.json
+  - reports/aloha1_isaac_adaptation/phase77_scene_proxy_hdf5_replay_target_limit_summary_20260718/gripper_passive_contact_metrics.json
+controller_readiness:
+  intended_gate: HDF5 target values must stay inside current /scene runtime DOF limits before controller tracking is evaluated.
+  warning: This is not a complete world-frame or end-effector calibration.
+dof_mapping:
+  - canonical_name: left_waist
+    dataset_index: 0
+    openpi_index: 0
+    isaac_dof_name: left/left_waist
+    isaac_dof_index: null
+    sign: 1.0
+    offset: 0.0
+    scale: 1.0
+    unit: rad
+    source: controller-ready identity qpos mapping for Trossen /scene DOF name
+    confidence: 0.75
+  - canonical_name: left_shoulder
+    dataset_index: 1
+    openpi_index: 1
+    isaac_dof_name: left/left_shoulder
+    isaac_dof_index: null
+    sign: 1.0
+    offset: 0.0
+    scale: 1.0
+    unit: rad
+    source: controller-ready identity qpos mapping for Trossen /scene DOF name
+    confidence: 0.75
+  - canonical_name: left_elbow
+    dataset_index: 2
+    openpi_index: 2
+    isaac_dof_name: left/left_elbow
+    isaac_dof_index: null
+    sign: 1.0
+    offset: 0.0
+    scale: 1.0
+    unit: rad
+    source: controller-ready identity qpos mapping for Trossen /scene DOF name
+    confidence: 0.75
+  - canonical_name: left_forearm_roll
+    dataset_index: 3
+    openpi_index: 3
+    isaac_dof_name: left/left_forearm_roll
+    isaac_dof_index: null
+    sign: 1.0
+    offset: 0.0
+    scale: 1.0
+    unit: rad
+    source: controller-ready identity qpos mapping for Trossen /scene DOF name
+    confidence: 0.75
+  - canonical_name: left_wrist_angle
+    dataset_index: 4
+    openpi_index: 4
+    isaac_dof_name: left/left_wrist_angle
+    isaac_dof_index: null
+    sign: 1.0
+    offset: 0.0
+    scale: 1.0
+    unit: rad
+    source: controller-ready identity qpos mapping for Trossen /scene DOF name
+    confidence: 0.75
+  - canonical_name: left_wrist_rotate
+    dataset_index: 5
+    openpi_index: 5
+    isaac_dof_name: left/left_wrist_rotate
+    isaac_dof_index: null
+    sign: 1.0
+    offset: 0.0
+    scale: 1.0
+    unit: rad
+    source: controller-ready identity qpos mapping for Trossen /scene DOF name
+    confidence: 0.75

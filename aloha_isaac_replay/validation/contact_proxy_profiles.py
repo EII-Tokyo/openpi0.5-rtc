@@ -3,6 +3,8 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import Any
 
+from aloha_isaac_replay.adapters.gripper_mapping import FingerLimits
+
 CONTACT_PROXY_PROFILES: dict[str, dict[str, Any]] = {
     "legacy_puppet": {
         "description": "Legacy ALOHA1 proxy paths authored under /puppet_* runtime roots.",
@@ -15,6 +17,10 @@ CONTACT_PROXY_PROFILES: dict[str, dict[str, Any]] = {
         "finger_dof_names": {
             "left": {"left_finger": "left_finger", "right_finger": "right_finger"},
             "right": {"left_finger": "left_finger", "right_finger": "right_finger"},
+        },
+        "finger_qpos_limits": {
+            "left": {"left_close": 0.021, "left_open": 0.057, "right_close": -0.021, "right_open": -0.057},
+            "right": {"left_close": 0.021, "left_open": 0.057, "right_close": -0.021, "right_open": -0.057},
         },
         "finger_proxy_paths": {
             "left": {
@@ -50,6 +56,10 @@ CONTACT_PROXY_PROFILES: dict[str, dict[str, Any]] = {
         "finger_dof_names": {
             "left": {"left_finger": "left_left_finger", "right_finger": "left_right_finger"},
             "right": {"left_finger": "right_left_finger", "right_finger": "right_right_finger"},
+        },
+        "finger_qpos_limits": {
+            "left": {"left_close": 0.021, "left_open": 0.057, "right_close": 0.021, "right_open": 0.057},
+            "right": {"left_close": 0.021, "left_open": 0.057, "right_close": 0.021, "right_open": 0.057},
         },
         "finger_proxy_paths": {
             "left": {
@@ -102,6 +112,19 @@ def finger_dof_names_for_side(profile_name: str, side: str) -> dict[str, str]:
         return deepcopy(_profile(profile_name)["finger_dof_names"][side])
     except KeyError as exc:
         raise ValueError(f"contact proxy profile {profile_name!r} has no side {side!r}") from exc
+
+
+def finger_qpos_limits_for_side(profile_name: str, side: str) -> FingerLimits:
+    try:
+        raw = _profile(profile_name)["finger_qpos_limits"][side]
+    except KeyError as exc:
+        raise ValueError(f"contact proxy profile {profile_name!r} has no finger qpos limits for side {side!r}") from exc
+    return FingerLimits(
+        left_close=float(raw["left_close"]),
+        left_open=float(raw["left_open"]),
+        right_close=float(raw["right_close"]),
+        right_open=float(raw["right_open"]),
+    )
 
 
 def robot_root_for_side(profile_name: str, side: str) -> str | None:
