@@ -30,6 +30,7 @@ from aloha_isaac_replay.validation.contact_proxy_profiles import contact_proxy_n
 from aloha_isaac_replay.validation.contact_proxy_profiles import contact_proxy_profile_names
 from aloha_isaac_replay.validation.contact_proxy_profiles import finger_dof_names_for_side
 from aloha_isaac_replay.validation.contact_proxy_profiles import resolve_contact_proxy_paths
+from aloha_isaac_replay.validation.contact_proxy_profiles import resolve_contact_target_paths
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_STAGE = REPO_ROOT / "local_eval_assets/aloha1_clean_runtime_20260718/aloha1_dual_bbox_proxy_runtime.usda"
@@ -1203,7 +1204,14 @@ def main() -> int:
         stage = omni.usd.get_context().get_stage()
         paths_by_side = _finger_proxy_paths_for_args(args)
         paths = paths_by_side[args.side]
+        contact_targets = resolve_contact_target_paths(args.contact_proxy_profile)[args.side]
         finger_dof_names = finger_dof_names_for_side(args.contact_proxy_profile, args.side)
+        trace_state = None
+        if args.trace_contact_pairs:
+            # ContactReportAPI authoring changes physics schemas. Do this before
+            # SingleArticulation/world.reset creates tensor views, or PhysX can
+            # invalidate the articulation backend during the first state write.
+            trace_state = _begin_contact_pair_trace(stage, disable_usd_updates=args.trace_disable_usd_updates)
         art = world.scene.add(SingleArticulation(prim_path=paths["articulation"], name=f"{args.side}_vx300s"))
         world.reset()
         _apply_gravity(world, args.gravity)
@@ -1336,12 +1344,9 @@ def main() -> int:
             support_plane_row["config"] = support_options["config"]
             support_plane_row["config_provenance"] = support_options["config_provenance"]
             support_plane_row["table_frame"] = support_options["table_frame"]
-        trace_state = None
         first_contact_row: dict[str, Any] | None = None
         contact_pair_rows: list[dict[str, Any]] = []
         try:
-            if args.trace_contact_pairs:
-                trace_state = _begin_contact_pair_trace(stage, disable_usd_updates=args.trace_disable_usd_updates)
             # Do not reset after object creation: object placement is computed from
             # the current open-pose fingertip bboxes, and a later reset can move
             # the articulation back under the already-placed object.
@@ -1516,9 +1521,9 @@ def main() -> int:
         no_explosion_ok = bool(finite_motion and max_displacement <= args.max_object_displacement)
         overall_pass = bool(contact_motion_ok and no_explosion_ok)
         if args.moving_fingers == "both":
-            expected_finger_paths = [paths["left_finger"], paths["right_finger"]]
+            expected_finger_paths = [contact_targets["left_finger"], contact_targets["right_finger"]]
         else:
-            expected_finger_paths = [paths[f"{args.moving_fingers}_finger"]]
+            expected_finger_paths = [contact_targets[f"{args.moving_fingers}_finger"]]
         contact_summary = _summarize_contact_pairs(
             contact_pair_rows=contact_pair_rows,
             object_path=object_path,

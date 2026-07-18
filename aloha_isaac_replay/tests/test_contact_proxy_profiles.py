@@ -7,6 +7,7 @@ from aloha_isaac_replay.validation.contact_proxy_profiles import contact_proxy_p
 from aloha_isaac_replay.validation.contact_proxy_profiles import finger_dof_names_for_side
 from aloha_isaac_replay.validation.contact_proxy_profiles import proxy_path_for_rigid_body
 from aloha_isaac_replay.validation.contact_proxy_profiles import resolve_contact_proxy_paths
+from aloha_isaac_replay.validation.contact_proxy_profiles import resolve_contact_target_paths
 from aloha_isaac_replay.validation.contact_proxy_profiles import side_from_rigid_body_path
 from aloha_isaac_replay.validation.contact_proxy_profiles import stage_units_in_meters_for_profile
 from aloha_isaac_replay.validation.contact_proxy_profiles import stage_up_axis_for_profile
@@ -32,6 +33,9 @@ def test_scene_base_link_profile_uses_scene_articulation_roots_and_fingertip_pro
         "left_finger": "right_left_finger",
         "right_finger": "right_right_finger",
     }
+    contact_targets = resolve_contact_target_paths("scene_base_link")
+    assert contact_targets["left"]["left_finger"] == "/scene/left_base_link/left_left_finger_link"
+    assert contact_targets["left"]["right_finger"] == "/scene/left_base_link/left_right_finger_link"
 
 
 def test_scene_base_link_profile_maps_rigid_body_paths_to_selected_side_and_proxy_path() -> None:

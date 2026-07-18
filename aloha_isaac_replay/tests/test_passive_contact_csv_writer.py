@@ -81,6 +81,30 @@ def test_contact_summary_classifies_diagnostic_support_contacts() -> None:
     assert support_summary["other_contact_pair_count"] == 0
 
 
+def test_contact_summary_accepts_collision_descendants_under_finger_link() -> None:
+    object_path = "/World/object"
+    finger_link = "/scene/left_base_link/left_left_finger_link"
+
+    summary = _summarize_contact_pairs(
+        contact_pair_rows=[
+            {
+                "phase": "settle",
+                "step": 0,
+                "type_name": "CONTACT_FOUND",
+                "collider0": f"{finger_link}/collisions/left_left_g0/left_left_g0",
+                "collider1": object_path,
+                "sorted_pair": [object_path, f"{finger_link}/collisions/left_left_g0/left_left_g0"],
+            }
+        ],
+        object_path=object_path,
+        expected_finger_paths=[finger_link],
+    )
+
+    assert summary["target_contact_pair_found"] is True
+    assert summary["target_contact_found_event"] is True
+    assert summary["target_contact_finger_hits"][finger_link] is True
+
+
 def test_phase63_fixed_table_candidate_config_is_explicit_and_diagnostic() -> None:
     cfg = _load_support_plane_config(REPO_ROOT / "examples/aloha_isaac/config/phase63_fixed_table_candidate.yaml")
 

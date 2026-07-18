@@ -28,6 +28,16 @@ CONTACT_PROXY_PROFILES: dict[str, dict[str, Any]] = {
                 "articulation": "/puppet_right_vx300s/root_joint",
             },
         },
+        "finger_contact_paths": {
+            "left": {
+                "left_finger": "/puppet_left_vx300s/puppet_left_left_finger_link",
+                "right_finger": "/puppet_left_vx300s/puppet_left_right_finger_link",
+            },
+            "right": {
+                "left_finger": "/puppet_right_vx300s/puppet_right_left_finger_link",
+                "right_finger": "/puppet_right_vx300s/puppet_right_right_finger_link",
+            },
+        },
     },
     "scene_base_link": {
         "description": "Trossen/Menagerie scene paths where each arm lives under /scene/<side>_base_link.",
@@ -53,6 +63,16 @@ CONTACT_PROXY_PROFILES: dict[str, dict[str, Any]] = {
                 "articulation": "/scene/right_base_link/right_base_link",
             },
         },
+        "finger_contact_paths": {
+            "left": {
+                "left_finger": "/scene/left_base_link/left_left_finger_link",
+                "right_finger": "/scene/left_base_link/left_right_finger_link",
+            },
+            "right": {
+                "left_finger": "/scene/right_base_link/right_left_finger_link",
+                "right_finger": "/scene/right_base_link/right_right_finger_link",
+            },
+        },
     },
 }
 
@@ -71,6 +91,10 @@ def _profile(profile_name: str) -> dict[str, Any]:
 
 def resolve_contact_proxy_paths(profile_name: str) -> dict[str, dict[str, str]]:
     return deepcopy(_profile(profile_name)["finger_proxy_paths"])
+
+
+def resolve_contact_target_paths(profile_name: str) -> dict[str, dict[str, str]]:
+    return deepcopy(_profile(profile_name).get("finger_contact_paths", _profile(profile_name)["finger_proxy_paths"]))
 
 
 def finger_dof_names_for_side(profile_name: str, side: str) -> dict[str, str]:

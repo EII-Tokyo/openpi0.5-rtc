@@ -91,6 +91,7 @@ The main conclusion is conservative:
 - [78 Phase 73 robot-state source guard](78_phase73_robot_state_source_guard_2026-07-18.md)
 - [79 Phase 74 final contact namespace gate](79_phase74_final_contact_namespace_gate_2026-07-18.md)
 - [80 Phase 75 scene contact proxy profile](80_phase75_scene_contact_proxy_profile_2026-07-18.md)
+- [81 Phase 76 contact trace target roots](81_phase76_contact_trace_target_roots_2026-07-18.md)
 
 ## Operating Rule
 
@@ -117,3 +118,5 @@ Robot state sources such as `hdf5_qpos`, `joint_states`, `dynamixel_registers`, 
 Final calibrated contact validation must use one coherent stage namespace. A `/scene` calibrated overlay must not be validated with legacy `/puppet_*` fingertip proxy paths.
 
 For the user-confirmed Trossen/Menagerie startup stage, use `--contact-proxy-profile scene_base_link`. The older `legacy_puppet` profile is only for the earlier clean-runtime `/puppet_*` stages.
+
+For contact-pair gates, do not use the authored `bbox_collision_proxy` prim as the only expected contact target. PhysX reports the actual collider children under the finger links. The validator must distinguish bbox/proxy paths used for placement from contact target roots used for contact-report matching.
