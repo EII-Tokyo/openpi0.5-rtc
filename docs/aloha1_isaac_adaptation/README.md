@@ -77,6 +77,7 @@ The main conclusion is conservative:
 - [64 Phase 58 support-plane gravity replay](64_phase58_support_plane_gravity_replay_2026-07-18.md)
 - [65 Phase 59 already-grasped replay with support](65_phase59_already_grasped_support_replay_2026-07-18.md)
 - [66 Phase 60 measured table candidate](66_phase60_measured_table_candidate_2026-07-18.md)
+- [67 Phase 61 user-measured workcell regeneration](67_phase61_user_measured_workcell_regeneration_2026-07-18.md)
 
 ## Operating Rule
 
