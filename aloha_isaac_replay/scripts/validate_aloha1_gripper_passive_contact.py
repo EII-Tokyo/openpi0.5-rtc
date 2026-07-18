@@ -12,7 +12,9 @@ from typing import Any
 import numpy as np
 
 from aloha_isaac_replay.runtime.isaac_light_app import LIGHTWEIGHT_SIMULATION_APP_CONFIG
+from aloha_isaac_replay.adapters.isaac_dof_adapter import load_mapping
 from aloha_isaac_replay.adapters.gripper_mapping import standard_gripper_qpos_to_isaac_fingers
+from aloha_isaac_replay.replay.arm_only_mapping import arm_only_targets_from_standard_qpos
 from aloha_isaac_replay.scripts.right_shoulder_runtime_audit import _apply_arm_gains
 from aloha_isaac_replay.scripts.right_shoulder_runtime_audit import _apply_gravity
 from aloha_isaac_replay.scripts.right_shoulder_runtime_audit import _get_limits
@@ -29,6 +31,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_STAGE = REPO_ROOT / "local_eval_assets/aloha1_clean_runtime_20260718/aloha1_dual_bbox_proxy_runtime.usda"
 DEFAULT_OUTPUT_DIR = REPO_ROOT / "reports/aloha1_isaac_adaptation/phase43_gripper_passive_contact_20260718"
 DEFAULT_BOTTLE_USD = REPO_ROOT / "assets/bottle_500ml/isaac/bottle_500ml_sim.usd"
+DEFAULT_MAPPING = REPO_ROOT / "configs/aloha/original_stationary_aloha_mapping.yaml"
 
 
 def _rel(path: str | Path) -> str:
@@ -140,7 +143,7 @@ def _finger_targets(art: Any, offset: float, limit_margin: float) -> tuple[np.nd
     return target, target_values
 
 
-def _load_hdf5_gripper_qpos(path: str | Path, *, side: str, start: int | None, end: int | None, max_frames: int | None) -> np.ndarray:
+def _load_hdf5_qpos(path: str | Path, *, start: int | None, end: int | None, max_frames: int | None) -> np.ndarray:
     import h5py
 
     episode = Path(path)
@@ -148,40 +151,80 @@ def _load_hdf5_gripper_qpos(path: str | Path, *, side: str, start: int | None, e
         qpos = np.asarray(h5["observations/qpos"][:], dtype=np.float64)
     if qpos.ndim != 2 or qpos.shape[1] < 14:
         raise ValueError(f"Expected observations/qpos shape (T, >=14), got {qpos.shape} in {episode}")
-    channel = 6 if side == "left" else 13
-    seq = qpos[:, channel]
     lo = 0 if start is None else int(start)
-    hi = len(seq) if end is None else int(end)
-    seq = seq[lo:hi]
+    hi = len(qpos) if end is None else int(end)
+    seq = qpos[lo:hi]
     if max_frames is not None:
         seq = seq[: int(max_frames)]
-    if seq.size < 2:
-        raise ValueError(f"Need at least two HDF5 gripper qpos samples, got {seq.size} from {episode}")
+    if seq.shape[0] < 2:
+        raise ValueError(f"Need at least two HDF5 qpos samples, got {seq.shape[0]} from {episode}")
     if not np.isfinite(seq).all():
-        raise ValueError(f"HDF5 gripper qpos contains NaN/Inf: {episode}")
+        raise ValueError(f"HDF5 qpos contains NaN/Inf: {episode}")
     return np.asarray(seq, dtype=np.float64)
 
 
-def _targets_from_hdf5_gripper_qpos(
+def _target_from_standard_qpos(
     *,
     art: Any,
     side: str,
-    gripper_qpos: np.ndarray,
+    qpos_frame: np.ndarray,
+    mapping: dict[str, Any] | None,
+    replay_mode: str,
+) -> np.ndarray:
+    dof_names = list(art.dof_names)
+    target = np.asarray(art.get_joint_positions(), dtype=np.float64).reshape(-1).copy()
+    if replay_mode == "left_arm_and_gripper":
+        if mapping is None:
+            raise ValueError("left_arm_and_gripper replay requires a mapping")
+        side_prefix = f"{side}/"
+        for arm_target in arm_only_targets_from_standard_qpos(qpos_frame, mapping):
+            if not arm_target.isaac_dof_name.startswith(side_prefix):
+                continue
+            dof_name = arm_target.isaac_dof_name[len(side_prefix):]
+            target[dof_names.index(dof_name)] = float(arm_target.value)
+    channel = 6 if side == "left" else 13
+    fingers = standard_gripper_qpos_to_isaac_fingers(float(qpos_frame[channel]), side=side)
+    target[dof_names.index("left_finger")] = float(fingers[f"{side}/left_finger"])
+    target[dof_names.index("right_finger")] = float(fingers[f"{side}/right_finger"])
+    return target
+
+
+def _targets_from_hdf5_qpos(
+    *,
+    art: Any,
+    side: str,
+    qpos: np.ndarray,
+    mapping: dict[str, Any] | None,
+    replay_mode: str,
 ) -> tuple[list[np.ndarray], dict[str, Any]]:
     dof_names = list(art.dof_names)
     left_idx = dof_names.index("left_finger")
     right_idx = dof_names.index("right_finger")
-    base = np.asarray(art.get_joint_positions(), dtype=np.float64).reshape(-1)
+    channel = 6 if side == "left" else 13
+    gripper_qpos = np.asarray(qpos[:, channel], dtype=np.float64)
     targets: list[np.ndarray] = []
-    for value in gripper_qpos:
-        fingers = standard_gripper_qpos_to_isaac_fingers(float(value), side=side)
-        target = base.copy()
-        target[left_idx] = float(fingers[f"{side}/left_finger"])
-        target[right_idx] = float(fingers[f"{side}/right_finger"])
-        targets.append(target)
+    for frame in qpos:
+        targets.append(
+            _target_from_standard_qpos(
+                art=art,
+                side=side,
+                qpos_frame=frame,
+                mapping=mapping,
+                replay_mode=replay_mode,
+            )
+        )
+    arm_delta = None
+    if replay_mode == "left_arm_and_gripper":
+        indices = slice(0, 6) if side == "left" else slice(7, 13)
+        arm_qpos = np.asarray(qpos[:, indices], dtype=np.float64)
+        arm_delta = {
+            "max_abs_frame_delta": float(np.max(np.abs(np.diff(arm_qpos, axis=0)))) if len(arm_qpos) > 1 else 0.0,
+            "max_abs_net_delta": float(np.max(np.abs(arm_qpos[-1] - arm_qpos[0]))),
+        }
     return targets, {
         "source": "observations/qpos",
         "side": side,
+        "replay_mode": replay_mode,
         "sample_count": int(gripper_qpos.size),
         "raw_start": float(gripper_qpos[0]),
         "raw_end": float(gripper_qpos[-1]),
@@ -197,6 +240,7 @@ def _targets_from_hdf5_gripper_qpos(
             "left_finger": float(targets[-1][left_idx]),
             "right_finger": float(targets[-1][right_idx]),
         },
+        "arm_qpos_delta": arm_delta,
     }
 
 
@@ -674,6 +718,8 @@ def main() -> int:
     parser.add_argument("--closure-profile", choices=("abrupt", "linear"), default="abrupt")
     parser.add_argument("--moving-fingers", choices=("both", "left", "right"), default="both")
     parser.add_argument("--hdf5-gripper-episode", default=None)
+    parser.add_argument("--hdf5-replay-mode", choices=("gripper_only", "left_arm_and_gripper"), default="gripper_only")
+    parser.add_argument("--mapping", default=str(DEFAULT_MAPPING))
     parser.add_argument("--hdf5-gripper-start-frame", type=int, default=None)
     parser.add_argument("--hdf5-gripper-end-frame", type=int, default=None)
     parser.add_argument("--hdf5-gripper-max-frames", type=int, default=None)
@@ -722,6 +768,8 @@ def main() -> int:
             "closure_profile": args.closure_profile,
             "moving_fingers": args.moving_fingers,
             "hdf5_gripper_episode": _rel(args.hdf5_gripper_episode) if args.hdf5_gripper_episode else None,
+            "hdf5_replay_mode": args.hdf5_replay_mode,
+            "mapping": _rel(args.mapping),
             "hdf5_gripper_start_frame": args.hdf5_gripper_start_frame,
             "hdf5_gripper_end_frame": args.hdf5_gripper_end_frame,
             "hdf5_gripper_max_frames": args.hdf5_gripper_max_frames,
@@ -760,21 +808,23 @@ def main() -> int:
         hdf5_target_sequence: list[np.ndarray] | None = None
         hdf5_gripper_summary: dict[str, Any] | None = None
         if args.hdf5_gripper_episode:
-            gripper_qpos = _load_hdf5_gripper_qpos(
+            qpos = _load_hdf5_qpos(
                 args.hdf5_gripper_episode,
-                side=args.side,
                 start=args.hdf5_gripper_start_frame,
                 end=args.hdf5_gripper_end_frame,
                 max_frames=args.hdf5_gripper_max_frames,
             )
-            hdf5_target_sequence, hdf5_gripper_summary = _targets_from_hdf5_gripper_qpos(
+            mapping = load_mapping(args.mapping) if args.hdf5_replay_mode == "left_arm_and_gripper" else None
+            hdf5_target_sequence, hdf5_gripper_summary = _targets_from_hdf5_qpos(
                 art=art,
                 side=args.side,
-                gripper_qpos=gripper_qpos,
+                qpos=qpos,
+                mapping=mapping,
+                replay_mode=args.hdf5_replay_mode,
             )
             open_target = hdf5_target_sequence[0]
             open_values = hdf5_gripper_summary["first_target_values"]
-            payload["inputs"]["control_mode"] = "hdf5_gripper_qpos_replay"
+            payload["inputs"]["control_mode"] = f"hdf5_{args.hdf5_replay_mode}_qpos_replay"
             payload["inputs"]["hdf5_gripper_summary"] = hdf5_gripper_summary
         else:
             open_target, open_values = _finger_targets(art, args.open_offset, args.limit_margin)
