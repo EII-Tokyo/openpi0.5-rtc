@@ -56,9 +56,9 @@ def test_user_measured_pipe_is_derived_from_table_edge_measurements():
 
     pipe_cfg = mod._resolve_pipe_placeholder(cfg)
 
-    assert pipe_cfg["start"] == [0.03, 0.395, 0.07]
-    assert pipe_cfg["end"] == [-0.132, 0.395, 0.226]
+    assert pipe_cfg["start"] == [-0.03, 0.4075, 0.07]
+    assert pipe_cfg["end"] == [-0.1919, 0.4075, 0.2263]
     assert pipe_cfg["radius"] == 0.0025
-    assert pipe_cfg["measurement_a_point"] == [0.03, 0.3, 0.0]
+    assert pipe_cfg["measurement_a_point"] == [-0.03, 0.3125, 0.0]
     assert pipe_cfg["start"][1] == pipe_cfg["end"][1]
     assert pipe_cfg["end"][0] < pipe_cfg["start"][0]

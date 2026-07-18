@@ -150,7 +150,7 @@ def _set_custom_data_json(prim, key: str, value: Any) -> None:
     prim.SetCustomDataByKey(key, value)
 
 
-def _round_vec(values: list[float], digits: int = 3) -> list[float]:
+def _round_vec(values: list[float], digits: int = 4) -> list[float]:
     return [round(float(v), digits) for v in values]
 
 

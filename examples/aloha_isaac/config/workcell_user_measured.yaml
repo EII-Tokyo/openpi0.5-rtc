@@ -13,11 +13,11 @@ assets:
 
 table:
   prim_path: /World/Table
-  # User measurement, 2026-07-14: w = 110 cm, h = 60 cm.
+  # User measurement, 2026-07-15: length = 122 cm, width = 62.5 cm.
   # Isaac coordinate convention in this first measured stage:
   #   x: left edge -> right edge, y: front/lower edge -> back/w1 edge, z: up.
   # The table center is the stage origin and the table top is approximately z=0.
-  size: [1.10, 0.60, 0.04]
+  size: [1.22, 0.625, 0.04]
   pose:
     translation: [0.0, 0.0, -0.02]
     rotation_rpy_deg: [0.0, 0.0, 0.0]
@@ -52,7 +52,7 @@ pipe_placeholder:
   #   A is on the w1 table edge, 58 cm from the left edge.
   #   The pipe base center is outside w1 by 9.5 cm on the perpendicular through A.
   # Derived with table center as origin:
-  #   left edge x=-0.55, w1 edge y=0.30, A=(0.03,0.30).
+  #   left edge x=-0.61, w1 edge y=0.3125, A=(-0.03,0.3125).
   # Earlier hand sketch measurement reused here: pipe length 22.5 cm,
   # mount height 7 cm, side-view tilt 44 deg, pipe diameter 0.5 cm.
   measurement:

@@ -108,10 +108,10 @@ Open that USD in Isaac Sim to inspect:
 The user-measured pipe in `workcell_user_measured.yaml` is intentionally
 defined from measurement facts:
 
-- table size `1.10 m x 0.60 m`
-- current water-pipe component is on the `w1` side, at `y = 0.30 m` when
+- table size `1.22 m x 0.625 m`
+- current water-pipe component is on the `w1` side, at `y = 0.3125 m` when
   the table center is the world origin
-- A point `0.58 m` from the left table edge, so `A = (0.03, 0.30, 0.0)`
+- A point `0.58 m` from the left table edge, so `A = (-0.03, 0.3125, 0.0)`
 - pipe base center `0.095 m` outside the `w1` edge
 - pipe length `0.225 m`, diameter `0.005 m`, mount height `0.07 m`, side tilt `44 deg`
 - in top view, the pipe axis is parallel to the table edge and points toward
