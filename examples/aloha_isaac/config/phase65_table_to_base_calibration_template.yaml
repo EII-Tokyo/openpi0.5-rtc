@@ -1,0 +1,56 @@
+stage:
+  units: meters
+  up_axis: Z
+
+support_plane:
+  mode: fixed_box
+  prim_path: /World/phase65_static_table
+  # Center of the table collision box in Isaac world coordinates.
+  # If T_world_table.translation is the table top center, then:
+  # support_plane.center.z = T_world_table.translation.z - support_plane.size.z / 2.
+  center: [0.0, 0.0, -0.02]
+  size: [1.22, 0.625, 0.04]
+  provenance:
+    table_size:
+      source: user_measured
+      date: "2026-07-15"
+      note: "Length and width measured from the real table. Thickness must be confirmed."
+    center:
+      source: placeholder
+      warning: "Replace with a measured or trusted table pose before replay validation."
+
+table_frame:
+  # Translation is the table top center in Isaac world coordinates.
+  # Quaternion order follows Isaac Sim/USD: [qw, qx, qy, qz].
+  T_world_table:
+    source: placeholder
+    translation: [0.0, 0.0, 0.0]
+    rotation_quat_wxyz: [1.0, 0.0, 0.0, 0.0]
+    convention: "Isaac world frame, +Z up, translation at table top center."
+    status: not_calibrated
+
+  # Translation is left_base origin expressed in the table frame.
+  # Quaternion order follows Isaac Sim/USD: [qw, qx, qy, qz].
+  T_table_left_base:
+    source: placeholder
+    translation: [0.0, 0.0, 0.0]
+    rotation_quat_wxyz: [1.0, 0.0, 0.0, 0.0]
+    convention: "Table frame to left ALOHA base frame, +Z up."
+    status: not_calibrated
+
+  # Translation is right_base origin expressed in the table frame.
+  # Quaternion order follows Isaac Sim/USD: [qw, qx, qy, qz].
+  T_table_right_base:
+    source: placeholder
+    translation: [0.0, 0.0, 0.0]
+    rotation_quat_wxyz: [1.0, 0.0, 0.0, 0.0]
+    convention: "Table frame to right ALOHA base frame, +Z up."
+    status: not_calibrated
+
+validation:
+  next_replay_gate: aloha_isaac_replay/scripts/validate_aloha1_gripper_passive_contact.py
+  required_before_replay:
+    T_world_table: measured_or_trusted
+    T_table_left_base: measured_or_trusted
+    T_table_right_base: measured_or_trusted
+    quaternion_norm_tolerance: 0.001

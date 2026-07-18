@@ -81,6 +81,7 @@ The main conclusion is conservative:
 - [68 Phase 62 fixed table pose scan](68_phase62_fixed_table_pose_scan_2026-07-18.md)
 - [69 Phase 63 configured table-frame candidate](69_phase63_configured_table_frame_candidate_2026-07-18.md)
 - [70 Phase 64 table frame static audit](70_phase64_table_frame_static_audit_2026-07-18.md)
+- [71 Phase 65 table-to-base calibration gate](71_phase65_table_to_base_calibration_gate_2026-07-18.md)
 
 ## Operating Rule
 
