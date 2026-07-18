@@ -12,6 +12,7 @@ from typing import Any
 import numpy as np
 
 from aloha_isaac_replay.runtime.isaac_light_app import LIGHTWEIGHT_SIMULATION_APP_CONFIG
+from aloha_isaac_replay.adapters.gripper_mapping import standard_gripper_qpos_to_isaac_fingers
 from aloha_isaac_replay.scripts.right_shoulder_runtime_audit import _apply_arm_gains
 from aloha_isaac_replay.scripts.right_shoulder_runtime_audit import _apply_gravity
 from aloha_isaac_replay.scripts.right_shoulder_runtime_audit import _get_limits
@@ -137,6 +138,66 @@ def _finger_targets(art: Any, offset: float, limit_margin: float) -> tuple[np.nd
         target[idx] = target_value
         target_values[name] = target_value
     return target, target_values
+
+
+def _load_hdf5_gripper_qpos(path: str | Path, *, side: str, start: int | None, end: int | None, max_frames: int | None) -> np.ndarray:
+    import h5py
+
+    episode = Path(path)
+    with h5py.File(episode, "r") as h5:
+        qpos = np.asarray(h5["observations/qpos"][:], dtype=np.float64)
+    if qpos.ndim != 2 or qpos.shape[1] < 14:
+        raise ValueError(f"Expected observations/qpos shape (T, >=14), got {qpos.shape} in {episode}")
+    channel = 6 if side == "left" else 13
+    seq = qpos[:, channel]
+    lo = 0 if start is None else int(start)
+    hi = len(seq) if end is None else int(end)
+    seq = seq[lo:hi]
+    if max_frames is not None:
+        seq = seq[: int(max_frames)]
+    if seq.size < 2:
+        raise ValueError(f"Need at least two HDF5 gripper qpos samples, got {seq.size} from {episode}")
+    if not np.isfinite(seq).all():
+        raise ValueError(f"HDF5 gripper qpos contains NaN/Inf: {episode}")
+    return np.asarray(seq, dtype=np.float64)
+
+
+def _targets_from_hdf5_gripper_qpos(
+    *,
+    art: Any,
+    side: str,
+    gripper_qpos: np.ndarray,
+) -> tuple[list[np.ndarray], dict[str, Any]]:
+    dof_names = list(art.dof_names)
+    left_idx = dof_names.index("left_finger")
+    right_idx = dof_names.index("right_finger")
+    base = np.asarray(art.get_joint_positions(), dtype=np.float64).reshape(-1)
+    targets: list[np.ndarray] = []
+    for value in gripper_qpos:
+        fingers = standard_gripper_qpos_to_isaac_fingers(float(value), side=side)
+        target = base.copy()
+        target[left_idx] = float(fingers[f"{side}/left_finger"])
+        target[right_idx] = float(fingers[f"{side}/right_finger"])
+        targets.append(target)
+    return targets, {
+        "source": "observations/qpos",
+        "side": side,
+        "sample_count": int(gripper_qpos.size),
+        "raw_start": float(gripper_qpos[0]),
+        "raw_end": float(gripper_qpos[-1]),
+        "raw_min": float(np.min(gripper_qpos)),
+        "raw_max": float(np.max(gripper_qpos)),
+        "raw_range": float(np.max(gripper_qpos) - np.min(gripper_qpos)),
+        "raw_net": float(gripper_qpos[-1] - gripper_qpos[0]),
+        "first_target_values": {
+            "left_finger": float(targets[0][left_idx]),
+            "right_finger": float(targets[0][right_idx]),
+        },
+        "last_target_values": {
+            "left_finger": float(targets[-1][left_idx]),
+            "right_finger": float(targets[-1][right_idx]),
+        },
+    }
 
 
 def _set_finger_target_and_step(world: Any, art: Any, target: np.ndarray, steps: int) -> None:
@@ -612,6 +673,10 @@ def main() -> int:
     parser.add_argument("--proxy-rest-offset", type=float, default=None)
     parser.add_argument("--closure-profile", choices=("abrupt", "linear"), default="abrupt")
     parser.add_argument("--moving-fingers", choices=("both", "left", "right"), default="both")
+    parser.add_argument("--hdf5-gripper-episode", default=None)
+    parser.add_argument("--hdf5-gripper-start-frame", type=int, default=None)
+    parser.add_argument("--hdf5-gripper-end-frame", type=int, default=None)
+    parser.add_argument("--hdf5-gripper-max-frames", type=int, default=None)
     parser.add_argument("--trace-contact-pairs", action="store_true")
     parser.add_argument(
         "--trace-disable-usd-updates",
@@ -656,6 +721,10 @@ def main() -> int:
             "proxy_rest_offset": args.proxy_rest_offset,
             "closure_profile": args.closure_profile,
             "moving_fingers": args.moving_fingers,
+            "hdf5_gripper_episode": _rel(args.hdf5_gripper_episode) if args.hdf5_gripper_episode else None,
+            "hdf5_gripper_start_frame": args.hdf5_gripper_start_frame,
+            "hdf5_gripper_end_frame": args.hdf5_gripper_end_frame,
+            "hdf5_gripper_max_frames": args.hdf5_gripper_max_frames,
             "trace_contact_pairs": args.trace_contact_pairs,
             "trace_disable_usd_updates": args.trace_disable_usd_updates,
             "reset_after_object_creation": False,
@@ -688,7 +757,27 @@ def main() -> int:
         _apply_gravity(world, args.gravity)
         _apply_arm_gains(art, None, None)
 
-        open_target, open_values = _finger_targets(art, args.open_offset, args.limit_margin)
+        hdf5_target_sequence: list[np.ndarray] | None = None
+        hdf5_gripper_summary: dict[str, Any] | None = None
+        if args.hdf5_gripper_episode:
+            gripper_qpos = _load_hdf5_gripper_qpos(
+                args.hdf5_gripper_episode,
+                side=args.side,
+                start=args.hdf5_gripper_start_frame,
+                end=args.hdf5_gripper_end_frame,
+                max_frames=args.hdf5_gripper_max_frames,
+            )
+            hdf5_target_sequence, hdf5_gripper_summary = _targets_from_hdf5_gripper_qpos(
+                art=art,
+                side=args.side,
+                gripper_qpos=gripper_qpos,
+            )
+            open_target = hdf5_target_sequence[0]
+            open_values = hdf5_gripper_summary["first_target_values"]
+            payload["inputs"]["control_mode"] = "hdf5_gripper_qpos_replay"
+            payload["inputs"]["hdf5_gripper_summary"] = hdf5_gripper_summary
+        else:
+            open_target, open_values = _finger_targets(art, args.open_offset, args.limit_margin)
         _set_full_state(art, open_target)
         _set_full_target(art, open_target)
         pre_object_update_steps = max(args.settle_steps, 1)
@@ -821,8 +910,16 @@ def main() -> int:
             object_latest_box = dict(object_initial_box)
             object_latest_center = object_initial_center.copy()
             object_settle_displacement = float(np.linalg.norm(object_initial_center - object_reset_center))
-            close_target, close_values = _finger_targets(art, args.close_offset, args.limit_margin)
-            if args.moving_fingers != "both":
+            if hdf5_target_sequence is not None:
+                close_target = hdf5_target_sequence[-1]
+                close_values = hdf5_gripper_summary["last_target_values"] if hdf5_gripper_summary else {}
+                close_sequence = hdf5_target_sequence[1:]
+                if args.close_steps is not None:
+                    close_sequence = close_sequence[: args.close_steps]
+            else:
+                close_target, close_values = _finger_targets(art, args.close_offset, args.limit_margin)
+                close_sequence = []
+            if args.moving_fingers != "both" and hdf5_target_sequence is None:
                 isolated_target = open_target.copy()
                 isolated_target[dof_names.index(f"{args.moving_fingers}_finger")] = close_target[
                     dof_names.index(f"{args.moving_fingers}_finger")
@@ -832,8 +929,11 @@ def main() -> int:
                     "left_finger": float(close_target[dof_names.index("left_finger")]),
                     "right_finger": float(close_target[dof_names.index("right_finger")]),
                 }
-            for step in range(args.close_steps):
-                if args.closure_profile == "linear":
+            close_step_count = len(close_sequence) if hdf5_target_sequence is not None else args.close_steps
+            for step in range(close_step_count):
+                if hdf5_target_sequence is not None:
+                    step_target = close_sequence[step]
+                elif args.closure_profile == "linear":
                     alpha = float(step + 1) / float(max(args.close_steps, 1))
                     step_target = open_target + alpha * (close_target - open_target)
                 else:
@@ -939,6 +1039,8 @@ def main() -> int:
                 "contact_trace_status": contact_trace_status,
                 "open_target_values": open_values,
                 "close_target_values": close_values,
+                "hdf5_gripper_summary": hdf5_gripper_summary,
+                "hdf5_gripper_replay_steps": len(close_sequence) if hdf5_target_sequence is not None else None,
                 "finger_gap_axis": axis_name,
                 "finger_surface_gap_open": surface_gap,
                 "left_finger_placement_box": placement_left_box,

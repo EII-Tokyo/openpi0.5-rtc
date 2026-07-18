@@ -69,6 +69,7 @@ The main conclusion is conservative:
 - [56 Phase 50 task-shape proxy contact](56_phase50_task_shape_proxy_contact_2026-07-18.md)
 - [57 Phase 51 bottle-proxy contact gate](57_phase51_bottle_proxy_contact_2026-07-18.md)
 - [58 Phase 52 Bottle500 USD contact gate](58_phase52_bottle500_usd_contact_2026-07-18.md)
+- [59 Phase 53 HDF5 gripper-replay contact gate](59_phase53_hdf5_gripper_replay_contact_2026-07-18.md)
 
 ## Operating Rule
 
