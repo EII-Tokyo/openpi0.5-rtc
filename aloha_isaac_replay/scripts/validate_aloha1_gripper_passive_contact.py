@@ -1088,6 +1088,33 @@ def _set_object_from_gripper_relative_transform(
     }
 
 
+def _diagnostic_object_frame_features(UsdGeom: Any, stage: Any, object_path: str) -> dict[str, float | bool]:
+    features: dict[str, float | bool] = {}
+    frame_specs = [
+        ("object_origin", object_path),
+        ("object_mouth", f"{object_path}/Frames/MouthFrame"),
+    ]
+    for label, frame_path in frame_specs:
+        prim = stage.GetPrimAtPath(frame_path)
+        exists = bool(prim and prim.IsValid())
+        features[f"{label}_frame_exists"] = exists
+        if not exists:
+            continue
+        transform = _world_matrix(UsdGeom, stage, frame_path)
+        features[f"{label}_x"] = float(transform[0, 3])
+        features[f"{label}_y"] = float(transform[1, 3])
+        features[f"{label}_z"] = float(transform[2, 3])
+        if label == "object_mouth":
+            axis = np.asarray(transform[:3, 2], dtype=np.float64)
+            norm = float(np.linalg.norm(axis))
+            if norm > 1e-12:
+                axis = axis / norm
+            features["object_mouth_axis_x"] = float(axis[0])
+            features["object_mouth_axis_y"] = float(axis[1])
+            features["object_mouth_axis_z"] = float(axis[2])
+    return features
+
+
 def _load_grasp_transform(grasp_yaml: str | Path, grasp_name: str) -> dict[str, Any]:
     grasp_path = Path(grasp_yaml).expanduser().resolve()
     data = yaml.safe_load(grasp_path.read_text())
@@ -2269,6 +2296,7 @@ def main() -> int:
                 "status": "DIAGNOSTIC_NOT_DYNAMIC_GRASP_PROOF",
                 "object_path": object_path,
                 "object_gripper_frame": args.object_gripper_frame,
+                "frame_features_at_initial_pose": _diagnostic_object_frame_features(UsdGeom, stage, object_path),
                 "t_gripper_object_initial": diagnostic_t_gripper_object.tolist(),
             }
         support_plane_row: dict[str, Any] | None = None
@@ -2358,6 +2386,11 @@ def main() -> int:
                 left_box = _bbox_row(stage, paths["left_finger"])
                 right_box = _bbox_row(stage, paths["right_finger"])
                 object_box = _bbox_row(stage, object_path)
+                diagnostic_frame_features = (
+                    _diagnostic_object_frame_features(UsdGeom, stage, object_path)
+                    if diagnostic_t_gripper_object is not None
+                    else {}
+                )
                 object_center = np.asarray(object_box.get("center", [np.nan, np.nan, np.nan]), dtype=np.float64)
                 displacement_from_reset = float(np.linalg.norm(object_center - object_reset_center))
                 finite_motion = bool(
@@ -2381,6 +2414,7 @@ def main() -> int:
                         "object_center_x": float(object_center[0]),
                         "object_center_y": float(object_center[1]),
                         "object_center_z": float(object_center[2]),
+                        **diagnostic_frame_features,
                         "object_displacement": displacement_from_reset,
                         **_finger_qpos_values(qpos, dof_names, finger_dof_names),
                         "tracking_controlled_max_abs_error": step_tracking["controlled"]["max_abs_error"],
@@ -2480,6 +2514,11 @@ def main() -> int:
                 left_box = _bbox_row(stage, paths["left_finger"])
                 right_box = _bbox_row(stage, paths["right_finger"])
                 object_box = _bbox_row(stage, object_path)
+                diagnostic_frame_features = (
+                    _diagnostic_object_frame_features(UsdGeom, stage, object_path)
+                    if diagnostic_t_gripper_object is not None
+                    else {}
+                )
                 object_center = np.asarray(object_box.get("center", [np.nan, np.nan, np.nan]), dtype=np.float64)
                 object_latest_box = dict(object_box)
                 object_latest_center = object_center.copy()
@@ -2509,6 +2548,7 @@ def main() -> int:
                         "object_center_x": float(object_center[0]),
                         "object_center_y": float(object_center[1]),
                         "object_center_z": float(object_center[2]),
+                        **diagnostic_frame_features,
                         "object_displacement": displacement,
                         **_finger_qpos_values(qpos, dof_names, finger_dof_names),
                         "tracking_controlled_max_abs_error": step_tracking["controlled"]["max_abs_error"],
