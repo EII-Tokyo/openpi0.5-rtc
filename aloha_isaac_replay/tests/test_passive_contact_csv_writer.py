@@ -1,9 +1,15 @@
 from __future__ import annotations
 
 import csv
+from pathlib import Path
 
+from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _load_support_plane_config
+from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _resolve_support_plane_options
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _summarize_contact_pairs
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _write_csv
+
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
 def test_passive_contact_csv_writer_preserves_late_diagnostic_columns(tmp_path) -> None:
@@ -66,3 +72,60 @@ def test_contact_summary_classifies_diagnostic_support_contacts() -> None:
     assert support_summary["object_contact_pair_count"] == 1
     assert support_summary["expected_finger_contact_pair_count"] == 1
     assert support_summary["other_contact_pair_count"] == 0
+
+
+def test_phase63_fixed_table_candidate_config_is_explicit_and_diagnostic() -> None:
+    cfg = _load_support_plane_config(REPO_ROOT / "examples/aloha_isaac/config/phase63_fixed_table_candidate.yaml")
+
+    assert cfg["mode"] == "fixed_box"
+    assert cfg["center"] == [0.593227851197621, 0.7853100288947757, -0.3171450733686908]
+    assert cfg["size"] == [1.22, 0.625, 0.04]
+    assert cfg["provenance"]["table_size"]["source"] == "user_measured"
+    assert cfg["provenance"]["center_xy"]["source"] == "phase60_diagnostic_object_bottom"
+    assert cfg["table_frame"]["T_table_left_base"]["status"] == "not_calibrated"
+    assert cfg["table_frame"]["T_table_right_base"]["status"] == "not_calibrated"
+
+
+def test_support_plane_config_resolves_fixed_box_options() -> None:
+    import argparse
+
+    args = argparse.Namespace(
+        support_plane_config=str(REPO_ROOT / "examples/aloha_isaac/config/phase63_fixed_table_candidate.yaml"),
+        support_plane_mode="none",
+        support_plane_center=None,
+        support_plane_size=2.0,
+        support_plane_size_x=None,
+        support_plane_size_y=None,
+        support_plane_thickness=0.02,
+    )
+
+    resolved = _resolve_support_plane_options(args)
+
+    assert resolved["mode"] == "fixed_box"
+    assert resolved["center"] == [0.593227851197621, 0.7853100288947757, -0.3171450733686908]
+    assert resolved["size_x"] == 1.22
+    assert resolved["size_y"] == 0.625
+    assert resolved["thickness"] == 0.04
+    assert resolved["config"] == "examples/aloha_isaac/config/phase63_fixed_table_candidate.yaml"
+    assert resolved["table_frame"]["T_world_table"]["status"] == "diagnostic_candidate"
+
+
+def test_support_plane_config_rejects_object_bottom_mix() -> None:
+    import argparse
+
+    args = argparse.Namespace(
+        support_plane_config=str(REPO_ROOT / "examples/aloha_isaac/config/phase63_fixed_table_candidate.yaml"),
+        support_plane_mode="object_bottom",
+        support_plane_center=None,
+        support_plane_size=2.0,
+        support_plane_size_x=None,
+        support_plane_size_y=None,
+        support_plane_thickness=0.02,
+    )
+
+    try:
+        _resolve_support_plane_options(args)
+    except ValueError as exc:
+        assert "object_bottom" in str(exc)
+    else:
+        raise AssertionError("expected object_bottom/config combination to be rejected")

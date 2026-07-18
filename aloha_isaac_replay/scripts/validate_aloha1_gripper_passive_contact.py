@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
+import yaml
 
 from aloha_isaac_replay.runtime.isaac_light_app import LIGHTWEIGHT_SIMULATION_APP_CONFIG
 from aloha_isaac_replay.adapters.isaac_dof_adapter import load_mapping
@@ -45,6 +46,65 @@ def _rel(path: str | Path) -> str:
 def _write_json(path: Path, payload: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(_json_safe(payload), ensure_ascii=False, indent=2) + "\n")
+
+
+def _load_support_plane_config(path: str | Path) -> dict[str, Any]:
+    config_path = Path(path)
+    with config_path.open("r", encoding="utf-8") as f:
+        cfg = yaml.safe_load(f) or {}
+    support = cfg.get("support_plane")
+    if not isinstance(support, dict):
+        raise ValueError(f"{config_path} must contain a support_plane mapping")
+    center = support.get("center")
+    size = support.get("size")
+    if not (isinstance(center, list) and len(center) == 3):
+        raise ValueError(f"{config_path} support_plane.center must be a 3-value list")
+    if not (isinstance(size, list) and len(size) == 3):
+        raise ValueError(f"{config_path} support_plane.size must be a 3-value list")
+    return {
+        "path": str(config_path),
+        "raw": cfg,
+        "mode": str(support.get("mode", "fixed_box")),
+        "center": [float(v) for v in center],
+        "size": [float(v) for v in size],
+        "provenance": support.get("provenance"),
+        "table_frame": cfg.get("table_frame"),
+    }
+
+
+def _resolve_support_plane_options(args: argparse.Namespace) -> dict[str, Any]:
+    resolved: dict[str, Any] = {
+        "mode": args.support_plane_mode,
+        "center": args.support_plane_center,
+        "size_x": args.support_plane_size_x if args.support_plane_size_x is not None else args.support_plane_size,
+        "size_y": args.support_plane_size_y if args.support_plane_size_y is not None else args.support_plane_size,
+        "thickness": args.support_plane_thickness,
+        "config": None,
+        "config_provenance": None,
+        "table_frame": None,
+    }
+    if args.support_plane_config is None:
+        return resolved
+
+    cfg = _load_support_plane_config(args.support_plane_config)
+    if cfg["mode"] != "fixed_box":
+        raise ValueError("support_plane_config currently supports only mode: fixed_box")
+    if args.support_plane_mode not in {"none", "fixed_box"}:
+        raise ValueError("--support-plane-config cannot be combined with --support-plane-mode object_bottom")
+    size = cfg["size"]
+    resolved.update(
+        {
+            "mode": "fixed_box",
+            "center": cfg["center"] if args.support_plane_center is None else args.support_plane_center,
+            "size_x": args.support_plane_size_x if args.support_plane_size_x is not None else size[0],
+            "size_y": args.support_plane_size_y if args.support_plane_size_y is not None else size[1],
+            "thickness": args.support_plane_thickness if args.support_plane_thickness != 0.02 else size[2],
+            "config": _rel(cfg["path"]),
+            "config_provenance": cfg.get("provenance"),
+            "table_frame": cfg.get("table_frame"),
+        }
+    )
+    return resolved
 
 
 def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
@@ -858,6 +918,7 @@ def main() -> int:
     parser.add_argument("--object-mass", type=float, default=0.01)
     parser.add_argument("--object-contact-offset", type=float, default=None)
     parser.add_argument("--object-rest-offset", type=float, default=None)
+    parser.add_argument("--support-plane-config", default=None)
     parser.add_argument("--support-plane-mode", choices=("none", "object_bottom", "fixed_box"), default="none")
     parser.add_argument("--support-plane-center", type=float, nargs=3, default=None)
     parser.add_argument("--support-plane-size", type=float, default=2.0)
@@ -884,6 +945,7 @@ def main() -> int:
     parser.add_argument("--min-contact-motion", type=float, default=1e-5)
     parser.add_argument("--max-object-displacement", type=float, default=0.25)
     args = parser.parse_args()
+    support_options = _resolve_support_plane_options(args)
 
     output_dir = Path(args.output_dir)
     json_path = output_dir / "gripper_passive_contact_metrics.json"
@@ -915,12 +977,15 @@ def main() -> int:
             "object_usd_prim_path": args.object_usd_prim_path,
             "object_contact_offset": args.object_contact_offset,
             "object_rest_offset": args.object_rest_offset,
-            "support_plane_mode": args.support_plane_mode,
-            "support_plane_center": args.support_plane_center,
+            "support_plane_config": support_options["config"],
+            "support_plane_config_provenance": support_options["config_provenance"],
+            "support_plane_table_frame": support_options["table_frame"],
+            "support_plane_mode": support_options["mode"],
+            "support_plane_center": support_options["center"],
             "support_plane_size": args.support_plane_size,
-            "support_plane_size_x": args.support_plane_size_x,
-            "support_plane_size_y": args.support_plane_size_y,
-            "support_plane_thickness": args.support_plane_thickness,
+            "support_plane_size_x": support_options["size_x"],
+            "support_plane_size_y": support_options["size_y"],
+            "support_plane_thickness": support_options["thickness"],
             "support_plane_clearance": args.support_plane_clearance,
             "proxy_contact_offset": args.proxy_contact_offset,
             "proxy_rest_offset": args.proxy_rest_offset,
@@ -1053,32 +1118,35 @@ def main() -> int:
         )
         object_offset_row = _set_object_collision_offsets(stage, object_path, args.object_contact_offset, args.object_rest_offset)
         support_plane_row: dict[str, Any] | None = None
-        if args.support_plane_mode != "none":
+        if support_options["mode"] != "none":
             object_support_box = _bbox_row(stage, object_path)
             if not object_support_box.get("bbox_valid"):
                 raise RuntimeError("Cannot place support plane because object bbox is invalid.")
-            if args.support_plane_mode == "object_bottom":
+            if support_options["mode"] == "object_bottom":
                 object_support_center = np.asarray(object_support_box["center"], dtype=np.float64)
                 support_center = object_support_center.copy()
                 support_center[2] = (
                     float(object_support_box["min"][2])
                     - float(args.support_plane_clearance)
-                    - float(args.support_plane_thickness) * 0.5
+                    - float(support_options["thickness"]) * 0.5
                 )
             else:
-                if args.support_plane_center is None:
-                    raise ValueError("--support-plane-mode fixed_box requires --support-plane-center X Y Z")
-                support_center = np.asarray(args.support_plane_center, dtype=np.float64)
+                if support_options["center"] is None:
+                    raise ValueError("--support-plane-mode fixed_box requires --support-plane-center X Y Z or --support-plane-config")
+                support_center = np.asarray(support_options["center"], dtype=np.float64)
             support_plane_row = _create_static_support_box(
                 stage=stage,
                 path="/World/phase58_static_support_plane",
                 center=support_center,
-                size_x=args.support_plane_size_x if args.support_plane_size_x is not None else args.support_plane_size,
-                size_y=args.support_plane_size_y if args.support_plane_size_y is not None else args.support_plane_size,
-                thickness=args.support_plane_thickness,
+                size_x=support_options["size_x"],
+                size_y=support_options["size_y"],
+                thickness=support_options["thickness"],
             )
             support_plane_row["placement_object_box"] = object_support_box
-            support_plane_row["mode"] = args.support_plane_mode
+            support_plane_row["mode"] = support_options["mode"]
+            support_plane_row["config"] = support_options["config"]
+            support_plane_row["config_provenance"] = support_options["config_provenance"]
+            support_plane_row["table_frame"] = support_options["table_frame"]
         trace_state = None
         first_contact_row: dict[str, Any] | None = None
         contact_pair_rows: list[dict[str, Any]] = []

@@ -1,0 +1,42 @@
+stage:
+  units: meters
+  up_axis: Z
+
+support_plane:
+  mode: fixed_box
+  prim_path: /World/phase58_static_support_plane
+  center: [0.593227851197621, 0.7853100288947757, -0.3171450733686908]
+  size: [1.22, 0.625, 0.04]
+  provenance:
+    table_size:
+      source: user_measured
+      date: "2026-07-15"
+      note: "Physical table length and width measured by user; thickness remains diagnostic."
+    center_xy:
+      source: phase60_diagnostic_object_bottom
+      warning: "Borrowed from bottle-relative diagnostic placement; not a calibrated real table pose."
+    center_z:
+      source: phase62_height_scan
+      note: "Highest scanned z with zero table-finger proxy contact in already-grasped HDF5 replay."
+
+table_frame:
+  # Diagnostic frame for Phase63. This is not yet a calibrated physical transform.
+  T_world_table:
+    source: diagnostic_support_plane_center
+    translation: [0.593227851197621, 0.7853100288947757, -0.2971450733686908]
+    rotation_quat_wxyz: [1.0, 0.0, 0.0, 0.0]
+    convention: "Isaac world frame, +Z up, translation at table top center."
+    status: diagnostic_candidate
+  T_table_left_base:
+    source: unknown
+    status: not_calibrated
+  T_table_right_base:
+    source: unknown
+    status: not_calibrated
+
+validation:
+  baseline_report: reports/aloha1_isaac_adaptation/phase62d_fixed_measured_table_minus6cm_20260718/gripper_passive_contact_metrics.json
+  required:
+    status: PASS
+    table_finger_rows: 0
+    table_other_rows: 0

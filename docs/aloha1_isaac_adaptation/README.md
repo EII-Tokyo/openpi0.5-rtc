@@ -79,6 +79,8 @@ The main conclusion is conservative:
 - [66 Phase 60 measured table candidate](66_phase60_measured_table_candidate_2026-07-18.md)
 - [67 Phase 61 user-measured workcell regeneration](67_phase61_user_measured_workcell_regeneration_2026-07-18.md)
 - [68 Phase 62 fixed table pose scan](68_phase62_fixed_table_pose_scan_2026-07-18.md)
+- [69 Phase 63 configured table-frame candidate](69_phase63_configured_table_frame_candidate_2026-07-18.md)
+- [70 Phase 64 table frame static audit](70_phase64_table_frame_static_audit_2026-07-18.md)
 
 ## Operating Rule
 
