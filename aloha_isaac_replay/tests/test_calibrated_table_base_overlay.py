@@ -99,3 +99,4 @@ def test_calibrated_overlay_uses_audited_world_base_transforms(tmp_path: Path) -
     assert manifest_payload["world_base_transforms"]["T_world_left_base"]["translation"] == [0.7, 2.1, 0.5]
     assert "--stage-units-in-meters 1.0" in manifest_payload["contact_validation_command"]
     assert "--require-calibrated-table-frame" in manifest_payload["contact_validation_command"]
+    assert "--contact-proxy-profile scene_base_link" in manifest_payload["contact_validation_command"]

@@ -306,10 +306,39 @@ def test_final_contact_validation_rejects_scene_overlay_with_legacy_puppet_proxy
             ]
         )
     )
-    args = argparse.Namespace(require_calibrated_table_frame=True, stage_usd=str(stage))
+    args = argparse.Namespace(
+        require_calibrated_table_frame=True, stage_usd=str(stage), contact_proxy_profile="legacy_puppet"
+    )
 
     with pytest.raises(ValueError, match="contact validator uses legacy /puppet_"):
         _guard_final_contact_stage_namespace(args)
+
+
+def test_final_contact_validation_allows_scene_overlay_with_scene_proxy_profile(tmp_path: Path) -> None:
+    import argparse
+
+    stage = tmp_path / "scene_overlay.usda"
+    stage.write_text(
+        "\n".join(
+            [
+                "#usda 1.0",
+                'over "scene"',
+                "{",
+                '    over "left_base_link" {}',
+                '    over "right_base_link" {}',
+                '    def Cube "bbox_collision_proxy" {}',
+                "}",
+            ]
+        )
+    )
+    args = argparse.Namespace(
+        require_calibrated_table_frame=True, stage_usd=str(stage), contact_proxy_profile="scene_base_link"
+    )
+
+    summary = _guard_final_contact_stage_namespace(args)
+
+    assert summary["stage_namespace_hints"]["uses_scene_namespace"] is True
+    assert summary["finger_proxy_namespace_roots"] == ["scene"]
 
 
 def test_final_contact_validation_allows_legacy_puppet_runtime_stage_namespace(tmp_path: Path) -> None:
@@ -326,7 +355,9 @@ def test_final_contact_validation_allows_legacy_puppet_runtime_stage_namespace(t
             ]
         )
     )
-    args = argparse.Namespace(require_calibrated_table_frame=True, stage_usd=str(stage))
+    args = argparse.Namespace(
+        require_calibrated_table_frame=True, stage_usd=str(stage), contact_proxy_profile="legacy_puppet"
+    )
 
     summary = _guard_final_contact_stage_namespace(args)
 

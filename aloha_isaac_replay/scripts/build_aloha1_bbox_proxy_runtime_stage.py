@@ -3,14 +3,19 @@ from __future__ import annotations
 import argparse
 import json
 import os
+from pathlib import Path
 import re
 import sys
 import traceback
-from pathlib import Path
 from typing import Any
 
 from aloha_isaac_replay.runtime.isaac_light_app import LIGHTWEIGHT_SIMULATION_APP_CONFIG
-
+from aloha_isaac_replay.validation.contact_proxy_profiles import contact_proxy_profile_names
+from aloha_isaac_replay.validation.contact_proxy_profiles import proxy_path_for_rigid_body
+from aloha_isaac_replay.validation.contact_proxy_profiles import robot_root_for_side
+from aloha_isaac_replay.validation.contact_proxy_profiles import side_from_rigid_body_path
+from aloha_isaac_replay.validation.contact_proxy_profiles import stage_units_in_meters_for_profile
+from aloha_isaac_replay.validation.contact_proxy_profiles import stage_up_axis_for_profile
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_INPUT_STAGE = REPO_ROOT / "local_eval_assets/aloha1_clean_runtime_20260718/aloha1_dual_clean_runtime.usda"
@@ -52,25 +57,24 @@ def _has_schema(prim: Any, schema_name: str) -> bool:
     return schema_name in _applied(prim)
 
 
-def _side_from_path(path: str) -> str:
-    if "puppet_left" in path:
-        return "left"
-    if "puppet_right" in path:
-        return "right"
-    return "unknown"
+def _side_from_path(path: str, contact_proxy_profile: str = "legacy_puppet") -> str:
+    return side_from_rigid_body_path(contact_proxy_profile, path)
 
 
-def _robot_root_from_side(side: str) -> str | None:
-    if side == "left":
-        return "/puppet_left_vx300s"
-    if side == "right":
-        return "/puppet_right_vx300s"
-    return None
+def _robot_root_from_side(side: str, contact_proxy_profile: str = "legacy_puppet") -> str | None:
+    return robot_root_for_side(contact_proxy_profile, side)
 
 
 def _box_row(box: Any, bbox_scale: float, axis_scale: list[float] | None, min_extent: float) -> dict[str, Any]:
     if box.IsEmpty():
-        return {"bbox_valid": False, "bbox_min": None, "bbox_max": None, "center": None, "size": None, "scaled_size": None}
+        return {
+            "bbox_valid": False,
+            "bbox_min": None,
+            "bbox_max": None,
+            "center": None,
+            "size": None,
+            "scaled_size": None,
+        }
     min_pt = box.GetMin()
     max_pt = box.GetMax()
     size = [float(max_pt[i] - min_pt[i]) for i in range(3)]
@@ -109,8 +113,10 @@ def _collect_candidates(
     min_extent: float,
     include_regex: list[str],
     exclude_regex: list[str],
+    contact_proxy_profile: str,
 ) -> tuple[list[dict[str, Any]], list[str]]:
-    from pxr import Usd, UsdGeom
+    from pxr import Usd
+    from pxr import UsdGeom
 
     bbox_cache = UsdGeom.BBoxCache(
         Usd.TimeCode.Default(),
@@ -127,8 +133,8 @@ def _collect_candidates(
         if not _has_schema(prim, "PhysicsRigidBodyAPI"):
             continue
         path = str(prim.GetPath())
-        side = _side_from_path(path)
-        robot_root = _robot_root_from_side(side)
+        side = _side_from_path(path, contact_proxy_profile)
+        robot_root = _robot_root_from_side(side, contact_proxy_profile)
         under_robot_root = bool(robot_root and (path.startswith(robot_root + "/") or path == robot_root))
         local_box = bbox_cache.ComputeLocalBound(prim).GetBox()
         row: dict[str, Any] = {
@@ -138,7 +144,7 @@ def _collect_candidates(
             "under_robot_root": under_robot_root,
             "filter_match": _matches_filters(path, include_regex=include_regex, exclude_regex=exclude_regex),
             "applied_schemas": _applied(prim),
-            "proxy_path": f"{path}/bbox_collision_proxy",
+            "proxy_path": proxy_path_for_rigid_body(contact_proxy_profile, path),
         }
         row.update(_box_row(local_box, bbox_scale=bbox_scale, axis_scale=axis_scale, min_extent=min_extent))
         row["selected"] = bool(under_robot_root and row["bbox_valid"] and row["filter_match"])
@@ -156,15 +162,22 @@ def _create_proxy_stage(
     proxy_static_friction: float | None,
     proxy_dynamic_friction: float | None,
     proxy_restitution: float | None,
+    contact_proxy_profile: str,
 ) -> None:
-    from pxr import Gf, PhysxSchema, Usd, UsdGeom, UsdPhysics, UsdShade
+    from pxr import Gf
+    from pxr import PhysxSchema
+    from pxr import Usd
+    from pxr import UsdGeom
+    from pxr import UsdPhysics
+    from pxr import UsdShade
 
     output_stage_path.parent.mkdir(parents=True, exist_ok=True)
     stage = Usd.Stage.CreateNew(str(output_stage_path))
     root = stage.GetRootLayer()
     root.subLayerPaths.append(str(input_stage_path.resolve()))
-    UsdGeom.SetStageMetersPerUnit(stage, 0.01)
-    UsdGeom.SetStageUpAxis(stage, UsdGeom.Tokens.y)
+    UsdGeom.SetStageMetersPerUnit(stage, stage_units_in_meters_for_profile(contact_proxy_profile))
+    up_axis = stage_up_axis_for_profile(contact_proxy_profile)
+    UsdGeom.SetStageUpAxis(stage, UsdGeom.Tokens.z if up_axis == "Z" else UsdGeom.Tokens.y)
     world = stage.GetPrimAtPath("/World")
     if not world:
         world = UsdGeom.Xform.Define(stage, "/World").GetPrim()
@@ -254,7 +267,9 @@ def _render_markdown(payload: dict[str, Any]) -> str:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Build an experimental ALOHA1 runtime stage with link-owned bbox collision proxies.")
+    parser = argparse.ArgumentParser(
+        description="Build an experimental ALOHA1 runtime stage with link-owned bbox collision proxies."
+    )
     parser.add_argument("--stage-usd", default=str(DEFAULT_INPUT_STAGE))
     parser.add_argument("--output-usd", default=str(DEFAULT_OUTPUT_STAGE))
     parser.add_argument("--output-dir", default=str(DEFAULT_OUTPUT_DIR))
@@ -273,6 +288,15 @@ def main() -> int:
     parser.add_argument("--proxy-static-friction", type=float, default=None)
     parser.add_argument("--proxy-dynamic-friction", type=float, default=None)
     parser.add_argument("--proxy-restitution", type=float, default=None)
+    parser.add_argument(
+        "--contact-proxy-profile",
+        choices=contact_proxy_profile_names(),
+        default="legacy_puppet",
+        help=(
+            "Namespace profile used to select robot rigid bodies and author bbox_collision_proxy paths. "
+            "Use scene_base_link with Trossen/Menagerie /scene stages."
+        ),
+    )
     parser.add_argument("--include-regex", action="append", default=[])
     parser.add_argument("--exclude-regex", action="append", default=[])
     args = parser.parse_args()
@@ -293,6 +317,9 @@ def main() -> int:
             "proxy_static_friction": args.proxy_static_friction,
             "proxy_dynamic_friction": args.proxy_dynamic_friction,
             "proxy_restitution": args.proxy_restitution,
+            "contact_proxy_profile": args.contact_proxy_profile,
+            "stage_units_in_meters": stage_units_in_meters_for_profile(args.contact_proxy_profile),
+            "stage_up_axis": stage_up_axis_for_profile(args.contact_proxy_profile),
             "include_regex": args.include_regex,
             "exclude_regex": args.exclude_regex,
         },
@@ -319,6 +346,7 @@ def main() -> int:
             min_extent=args.min_extent,
             include_regex=args.include_regex,
             exclude_regex=args.exclude_regex,
+            contact_proxy_profile=args.contact_proxy_profile,
         )
         _create_proxy_stage(
             input_stage_path=input_stage_path,
@@ -330,6 +358,7 @@ def main() -> int:
             proxy_static_friction=args.proxy_static_friction,
             proxy_dynamic_friction=args.proxy_dynamic_friction,
             proxy_restitution=args.proxy_restitution,
+            contact_proxy_profile=args.contact_proxy_profile,
         )
         summary = {
             "rigid_body_count": len(candidates),
@@ -340,7 +369,19 @@ def main() -> int:
         payload.update({"status": "PASS", "summary": summary, "candidate_rows": candidates})
         _write_json(json_path, payload)
         md_path.write_text(_render_markdown(_json_safe(payload)))
-        print(json.dumps({"status": "PASS", "json": _rel(json_path), "markdown": _rel(md_path), "stage": _rel(output_stage_path), "summary": summary}, ensure_ascii=False), flush=True)
+        print(
+            json.dumps(
+                {
+                    "status": "PASS",
+                    "json": _rel(json_path),
+                    "markdown": _rel(md_path),
+                    "stage": _rel(output_stage_path),
+                    "summary": summary,
+                },
+                ensure_ascii=False,
+            ),
+            flush=True,
+        )
         sys.stdout.flush()
         sys.stderr.flush()
         os._exit(0)
@@ -353,7 +394,12 @@ def main() -> int:
             }
         )
         _write_json(json_path, payload)
-        print(json.dumps({"status": "EXCEPTION", "json": _rel(json_path), "exception": payload["exception"]}, ensure_ascii=False), flush=True)
+        print(
+            json.dumps(
+                {"status": "EXCEPTION", "json": _rel(json_path), "exception": payload["exception"]}, ensure_ascii=False
+            ),
+            flush=True,
+        )
         sys.stdout.flush()
         sys.stderr.flush()
         os._exit(1)

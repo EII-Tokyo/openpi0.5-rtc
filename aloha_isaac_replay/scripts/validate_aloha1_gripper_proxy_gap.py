@@ -4,9 +4,9 @@ import argparse
 import csv
 import json
 import os
+from pathlib import Path
 import sys
 import traceback
-from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -19,24 +19,13 @@ from aloha_isaac_replay.scripts.right_shoulder_runtime_audit import _json_safe
 from aloha_isaac_replay.scripts.right_shoulder_runtime_audit import _set_full_state
 from aloha_isaac_replay.scripts.right_shoulder_runtime_audit import _set_full_target
 from aloha_isaac_replay.scripts.validate_aloha1_native_single_joint_response import _safe_target
-
+from aloha_isaac_replay.validation.contact_proxy_profiles import resolve_contact_proxy_paths
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_STAGE = REPO_ROOT / "local_eval_assets/aloha1_clean_runtime_20260718/aloha1_dual_bbox_proxy_runtime.usda"
 DEFAULT_OUTPUT_DIR = REPO_ROOT / "reports/aloha1_isaac_adaptation/phase42_gripper_proxy_gap_20260718"
 
-FINGER_PROXY_PATHS = {
-    "left": {
-        "left_finger": "/puppet_left_vx300s/puppet_left_left_finger_link/bbox_collision_proxy",
-        "right_finger": "/puppet_left_vx300s/puppet_left_right_finger_link/bbox_collision_proxy",
-        "articulation": "/puppet_left_vx300s/root_joint",
-    },
-    "right": {
-        "left_finger": "/puppet_right_vx300s/puppet_right_left_finger_link/bbox_collision_proxy",
-        "right_finger": "/puppet_right_vx300s/puppet_right_right_finger_link/bbox_collision_proxy",
-        "articulation": "/puppet_right_vx300s/root_joint",
-    },
-}
+FINGER_PROXY_PATHS = resolve_contact_proxy_paths("legacy_puppet")
 
 
 def _rel(path: str | Path) -> str:
@@ -53,7 +42,8 @@ def _write_json(path: Path, payload: dict[str, Any]) -> None:
 
 
 def _bbox_row(stage: Any, prim_path: str) -> dict[str, Any]:
-    from pxr import Usd, UsdGeom
+    from pxr import Usd
+    from pxr import UsdGeom
 
     prim = stage.GetPrimAtPath(prim_path)
     if not prim:
@@ -254,7 +244,9 @@ def _run_gap_gate(
             rows.append(row)
             phase_rows.append(row)
         final = phase_rows[-1]
-        final_center_distance = float(final["center_distance"]) if final["center_distance"] is not None else float("nan")
+        final_center_distance = (
+            float(final["center_distance"]) if final["center_distance"] is not None else float("nan")
+        )
         home_center_distance = float(home_gap.get("center_distance", float("nan")))
         delta = abs(final_center_distance - home_center_distance) if np.isfinite(home_center_distance) else float("nan")
         final_qpos = json.loads(final["qpos"])
@@ -304,7 +296,9 @@ def _run_gap_gate(
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Validate whether gripper-only bbox proxies move with the gripper DOF.")
+    parser = argparse.ArgumentParser(
+        description="Validate whether gripper-only bbox proxies move with the gripper DOF."
+    )
     parser.add_argument("--stage-usd", default=str(DEFAULT_STAGE))
     parser.add_argument("--output-dir", default=str(DEFAULT_OUTPUT_DIR))
     parser.add_argument("--side", choices=("left", "right"), default="left")
@@ -356,9 +350,9 @@ def main() -> int:
         app_config = dict(LIGHTWEIGHT_SIMULATION_APP_CONFIG)
         app_config["fast_shutdown"] = False
         _app = SimulationApp(app_config)
-        import isaacsim.core.utils.stage as stage_utils
         from isaacsim.core.api import World
         from isaacsim.core.prims import SingleArticulation
+        import isaacsim.core.utils.stage as stage_utils
         import omni.usd
 
         stage_utils.open_stage(str(Path(args.stage_usd).resolve()))
@@ -398,13 +392,20 @@ def main() -> int:
                 "bbox_pair_ok": bbox_ok,
                 "csv": _rel(csv_path),
                 "markdown": _rel(md_path),
-                "next_gate": "passive_object_contact_smoke" if overall_pass else "inspect_gripper_proxy_attachment_or_mimic_joint",
+                "next_gate": "passive_object_contact_smoke"
+                if overall_pass
+                else "inspect_gripper_proxy_attachment_or_mimic_joint",
             }
         )
         _write_csv(csv_path, rows)
         _write_json(json_path, payload)
         _write_markdown(md_path, _json_safe(payload))
-        print(json.dumps({"status": payload["status"], "json": _rel(json_path), "markdown": _rel(md_path)}, ensure_ascii=False), flush=True)
+        print(
+            json.dumps(
+                {"status": payload["status"], "json": _rel(json_path), "markdown": _rel(md_path)}, ensure_ascii=False
+            ),
+            flush=True,
+        )
         sys.stdout.flush()
         sys.stderr.flush()
         os._exit(0 if overall_pass else 3)
@@ -417,7 +418,13 @@ def main() -> int:
             }
         )
         _write_json(json_path, payload)
-        print(json.dumps({"status": payload["status"], "json": _rel(json_path), "exception": payload["exception"]}, ensure_ascii=False), flush=True)
+        print(
+            json.dumps(
+                {"status": payload["status"], "json": _rel(json_path), "exception": payload["exception"]},
+                ensure_ascii=False,
+            ),
+            flush=True,
+        )
         sys.stdout.flush()
         sys.stderr.flush()
         os._exit(1)

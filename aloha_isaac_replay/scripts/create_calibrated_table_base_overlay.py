@@ -7,7 +7,6 @@ from typing import Any
 
 from aloha_isaac_replay.scripts.audit_table_frame_candidate import audit_table_frame
 
-
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_BASE_USD = (
     REPO_ROOT
@@ -48,6 +47,12 @@ def _quote_usd_asset(path: Path) -> str:
 
 def _quote_usd_string(value: str) -> str:
     return value.replace("\\", "\\\\").replace('"', '\\"')
+
+
+def _contact_proxy_profile_for_targets(left_target_prim: str, right_target_prim: str) -> str:
+    if left_target_prim.startswith("/scene/") and right_target_prim.startswith("/scene/"):
+        return "scene_base_link"
+    return "legacy_puppet"
 
 
 def _prim_over_block(prim_path: str, transform: dict[str, Any], side: str) -> str:
@@ -103,13 +108,13 @@ def _render_overlay_usda(
             "#usda 1.0",
             "(",
             "    metersPerUnit = 1",
-            "    upAxis = \"Z\"",
+            '    upAxis = "Z"',
             "    subLayers = [",
             f"        @{_quote_usd_asset(base_usd)}@",
             "    ]",
             ")",
             "",
-            "def Xform \"World\" (",
+            'def Xform "World" (',
             "    customData = {",
             f'        string overlay_scope = "phase69_calibrated_table_base_overlay"',
             f'        string overlay_base_usd = "{_quote_usd_string(str(base_usd.resolve()))}"',
@@ -217,11 +222,13 @@ def build_overlay(
         "examples/aloha_isaac/scripts/open_workcell_gui.py "
         f"--usd {overlay_path} --allow-noncanonical-usd"
     )
+    contact_proxy_profile = _contact_proxy_profile_for_targets(left_target_prim, right_target_prim)
     contact_validation_command = (
         "OMNI_KIT_ACCEPT_EULA=YES .venv_issac/bin/python "
         "aloha_isaac_replay/scripts/validate_aloha1_gripper_passive_contact.py "
         f"--stage-usd {overlay_path} "
         "--stage-units-in-meters 1.0 "
+        f"--contact-proxy-profile {contact_proxy_profile} "
         f"--support-plane-config {calibration_path} "
         "--require-calibrated-table-frame"
     )
@@ -232,6 +239,7 @@ def build_overlay(
         "base_usd": _rel(base_usd),
         "calibration": _rel(calibration_path),
         "target_prims": {"left": left_target_prim, "right": right_target_prim},
+        "contact_proxy_profile": contact_proxy_profile,
         "world_base_transforms": audit["world_base_transforms"],
         "calibration_evidence": audit.get("calibration_evidence"),
         "open_command": open_command,

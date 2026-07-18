@@ -23,10 +23,13 @@ from aloha_isaac_replay.scripts.right_shoulder_runtime_audit import _get_limits
 from aloha_isaac_replay.scripts.right_shoulder_runtime_audit import _json_safe
 from aloha_isaac_replay.scripts.right_shoulder_runtime_audit import _set_full_state
 from aloha_isaac_replay.scripts.right_shoulder_runtime_audit import _set_full_target
-from aloha_isaac_replay.scripts.validate_aloha1_gripper_proxy_gap import FINGER_PROXY_PATHS
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_proxy_gap import _bbox_row
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_proxy_gap import _gap_metrics
 from aloha_isaac_replay.scripts.validate_aloha1_native_single_joint_response import _safe_target
+from aloha_isaac_replay.validation.contact_proxy_profiles import contact_proxy_namespace_roots
+from aloha_isaac_replay.validation.contact_proxy_profiles import contact_proxy_profile_names
+from aloha_isaac_replay.validation.contact_proxy_profiles import finger_dof_names_for_side
+from aloha_isaac_replay.validation.contact_proxy_profiles import resolve_contact_proxy_paths
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_STAGE = REPO_ROOT / "local_eval_assets/aloha1_clean_runtime_20260718/aloha1_dual_bbox_proxy_runtime.usda"
@@ -149,14 +152,9 @@ def _guard_support_plane_calibration_mode(args: argparse.Namespace) -> None:
     )
 
 
-def _finger_proxy_namespace_roots() -> list[str]:
-    roots: set[str] = set()
-    for side_paths in FINGER_PROXY_PATHS.values():
-        for prim_path in side_paths.values():
-            parts = [part for part in str(prim_path).split("/") if part]
-            if parts:
-                roots.add(parts[0])
-    return sorted(roots)
+def _finger_proxy_paths_for_args(args: argparse.Namespace) -> dict[str, dict[str, str]]:
+    profile = getattr(args, "contact_proxy_profile", "legacy_puppet")
+    return resolve_contact_proxy_paths(profile)
 
 
 def _stage_namespace_hints(stage_usd: str | Path) -> dict[str, Any]:
@@ -182,9 +180,13 @@ def _stage_namespace_hints(stage_usd: str | Path) -> dict[str, Any]:
 def _guard_final_contact_stage_namespace(args: argparse.Namespace) -> dict[str, Any] | None:
     if not getattr(args, "require_calibrated_table_frame", False):
         return None
-    proxy_roots = _finger_proxy_namespace_roots()
+    proxy_roots = contact_proxy_namespace_roots(_finger_proxy_paths_for_args(args))
     hints = _stage_namespace_hints(args.stage_usd)
-    summary = {"stage_namespace_hints": hints, "finger_proxy_namespace_roots": proxy_roots}
+    summary = {
+        "stage_namespace_hints": hints,
+        "finger_proxy_namespace_roots": proxy_roots,
+        "contact_proxy_profile": getattr(args, "contact_proxy_profile", "legacy_puppet"),
+    }
     uses_legacy_proxy_paths = any(root.startswith("puppet_") for root in proxy_roots)
     if hints["uses_scene_namespace"] and uses_legacy_proxy_paths:
         raise ValueError(
@@ -312,19 +314,22 @@ def _write_markdown(path: Path, payload: dict[str, Any]) -> None:
     path.write_text("\n".join(lines) + "\n")
 
 
-def _finger_targets(art: Any, offset: float, limit_margin: float) -> tuple[np.ndarray, dict[str, float]]:
+def _finger_targets(
+    art: Any, offset: float, limit_margin: float, finger_dof_names: dict[str, str]
+) -> tuple[np.ndarray, dict[str, float]]:
     dof_names = list(art.dof_names)
     limits = _get_limits(art)
     qpos = np.asarray(art.get_joint_positions(), dtype=np.float64).reshape(-1)
     target = qpos.copy()
     target_values: dict[str, float] = {}
-    for name, sign in [("left_finger", 1.0), ("right_finger", -1.0)]:
-        idx = dof_names.index(name)
+    for logical_name, sign in [("left_finger", 1.0), ("right_finger", -1.0)]:
+        dof_name = finger_dof_names[logical_name]
+        idx = dof_names.index(dof_name)
         lower, upper = [float(x) for x in limits[idx]]
         origin = (lower + upper) * 0.5
         target_value, _clipped = _safe_target(origin, offset * sign, lower, upper, limit_margin)
         target[idx] = target_value
-        target_values[name] = target_value
+        target_values[logical_name] = target_value
     return target, target_values
 
 
@@ -355,6 +360,7 @@ def _target_from_standard_qpos(
     qpos_frame: np.ndarray,
     mapping: dict[str, Any] | None,
     replay_mode: str,
+    finger_dof_names: dict[str, str],
 ) -> np.ndarray:
     dof_names = list(art.dof_names)
     target = np.asarray(art.get_joint_positions(), dtype=np.float64).reshape(-1).copy()
@@ -369,8 +375,8 @@ def _target_from_standard_qpos(
             target[dof_names.index(dof_name)] = float(arm_target.value)
     channel = 6 if side == "left" else 13
     fingers = standard_gripper_qpos_to_isaac_fingers(float(qpos_frame[channel]), side=side)
-    target[dof_names.index("left_finger")] = float(fingers[f"{side}/left_finger"])
-    target[dof_names.index("right_finger")] = float(fingers[f"{side}/right_finger"])
+    target[dof_names.index(finger_dof_names["left_finger"])] = float(fingers[f"{side}/left_finger"])
+    target[dof_names.index(finger_dof_names["right_finger"])] = float(fingers[f"{side}/right_finger"])
     return target
 
 
@@ -381,10 +387,11 @@ def _targets_from_hdf5_qpos(
     qpos: np.ndarray,
     mapping: dict[str, Any] | None,
     replay_mode: str,
+    finger_dof_names: dict[str, str],
 ) -> tuple[list[np.ndarray], dict[str, Any]]:
     dof_names = list(art.dof_names)
-    left_idx = dof_names.index("left_finger")
-    right_idx = dof_names.index("right_finger")
+    left_idx = dof_names.index(finger_dof_names["left_finger"])
+    right_idx = dof_names.index(finger_dof_names["right_finger"])
     channel = 6 if side == "left" else 13
     gripper_qpos = np.asarray(qpos[:, channel], dtype=np.float64)
     targets: list[np.ndarray] = []
@@ -396,6 +403,7 @@ def _targets_from_hdf5_qpos(
                 qpos_frame=frame,
                 mapping=mapping,
                 replay_mode=replay_mode,
+                finger_dof_names=finger_dof_names,
             )
         )
     arm_delta = None
@@ -429,8 +437,13 @@ def _targets_from_hdf5_qpos(
     }
 
 
-def _tracking_groups(dof_names: list[str], *, replay_mode: str) -> dict[str, list[int]]:
-    finger_indices = [dof_names.index("left_finger"), dof_names.index("right_finger")]
+def _tracking_groups(
+    dof_names: list[str], *, replay_mode: str, finger_dof_names: dict[str, str]
+) -> dict[str, list[int]]:
+    finger_indices = [
+        dof_names.index(finger_dof_names["left_finger"]),
+        dof_names.index(finger_dof_names["right_finger"]),
+    ]
     groups: dict[str, list[int]] = {"gripper": finger_indices}
     if replay_mode == "left_arm_and_gripper":
         arm_names = ("waist", "shoulder", "elbow", "forearm_roll", "wrist_angle", "wrist_rotate")
@@ -440,6 +453,13 @@ def _tracking_groups(dof_names: list[str], *, replay_mode: str) -> dict[str, lis
     else:
         groups["controlled"] = finger_indices
     return groups
+
+
+def _finger_qpos_values(qpos: np.ndarray, dof_names: list[str], finger_dof_names: dict[str, str]) -> dict[str, float]:
+    return {
+        "left_finger_qpos": float(qpos[dof_names.index(finger_dof_names["left_finger"])]),
+        "right_finger_qpos": float(qpos[dof_names.index(finger_dof_names["right_finger"])]),
+    }
 
 
 def _tracking_step_errors(
@@ -966,12 +986,14 @@ def _summarize_contact_pairs(
     }
 
 
-def _cross_side_proxy_overlap_summary(stage: Any, side: str, tolerance: float = 1e-8) -> dict[str, Any]:
+def _cross_side_proxy_overlap_summary(
+    stage: Any, paths_by_side: dict[str, dict[str, str]], side: str, tolerance: float = 1e-8
+) -> dict[str, Any]:
     other_side = "right" if side == "left" else "left"
     rows: list[dict[str, Any]] = []
     for finger_name in ("left_finger", "right_finger"):
-        current_path = FINGER_PROXY_PATHS[side][finger_name]
-        other_path = FINGER_PROXY_PATHS[other_side][finger_name]
+        current_path = paths_by_side[side][finger_name]
+        other_path = paths_by_side[other_side][finger_name]
         current_box = _bbox_row(stage, current_path)
         other_box = _bbox_row(stage, other_path)
         center_distance = None
@@ -1022,6 +1044,15 @@ def main() -> int:
     )
     parser.add_argument("--output-dir", default=str(DEFAULT_OUTPUT_DIR))
     parser.add_argument("--side", choices=("left", "right"), default="left")
+    parser.add_argument(
+        "--contact-proxy-profile",
+        choices=contact_proxy_profile_names(),
+        default="legacy_puppet",
+        help=(
+            "Namespace profile for articulation roots and fingertip bbox proxies. Use scene_base_link with "
+            "Trossen/Menagerie /scene stages."
+        ),
+    )
     parser.add_argument("--open-offset", type=float, default=0.006)
     parser.add_argument("--close-offset", type=float, default=-0.006)
     parser.add_argument("--settle-steps", type=int, default=60)
@@ -1101,6 +1132,7 @@ def main() -> int:
             "stage_usd": _rel(args.stage_usd),
             "stage_units_in_meters": args.stage_units_in_meters,
             "side": args.side,
+            "contact_proxy_profile": args.contact_proxy_profile,
             "control_mode": "opposed_fingers",
             "open_offset": args.open_offset,
             "close_offset": args.close_offset,
@@ -1169,7 +1201,9 @@ def main() -> int:
         world = World(stage_units_in_meters=args.stage_units_in_meters, backend="numpy", device="cpu")
         world.set_simulation_dt(physics_dt=args.physics_dt, rendering_dt=args.physics_dt)
         stage = omni.usd.get_context().get_stage()
-        paths = FINGER_PROXY_PATHS[args.side]
+        paths_by_side = _finger_proxy_paths_for_args(args)
+        paths = paths_by_side[args.side]
+        finger_dof_names = finger_dof_names_for_side(args.contact_proxy_profile, args.side)
         art = world.scene.add(SingleArticulation(prim_path=paths["articulation"], name=f"{args.side}_vx300s"))
         world.reset()
         _apply_gravity(world, args.gravity)
@@ -1191,13 +1225,14 @@ def main() -> int:
                 qpos=qpos,
                 mapping=mapping,
                 replay_mode=args.hdf5_replay_mode,
+                finger_dof_names=finger_dof_names,
             )
             open_target = hdf5_target_sequence[0]
             open_values = hdf5_gripper_summary["first_target_values"]
             payload["inputs"]["control_mode"] = f"hdf5_{args.hdf5_replay_mode}_qpos_replay"
             payload["inputs"]["hdf5_gripper_summary"] = hdf5_gripper_summary
         else:
-            open_target, open_values = _finger_targets(art, args.open_offset, args.limit_margin)
+            open_target, open_values = _finger_targets(art, args.open_offset, args.limit_margin, finger_dof_names)
         _set_full_state(art, open_target)
         _set_full_target(art, open_target)
         pre_object_update_steps = max(args.settle_steps, 1)
@@ -1208,7 +1243,7 @@ def main() -> int:
         right_box = _bbox_row(stage, paths["right_finger"])
         placement_left_box = dict(left_box)
         placement_right_box = dict(right_box)
-        cross_side_proxy_overlap = _cross_side_proxy_overlap_summary(stage, args.side)
+        cross_side_proxy_overlap = _cross_side_proxy_overlap_summary(stage, paths_by_side, args.side)
         gap = _gap_metrics(left_box, right_box)
         if not gap.get("bbox_pair_valid"):
             raise RuntimeError("Finger proxy bbox pair is invalid; cannot place contact object.")
@@ -1315,7 +1350,9 @@ def main() -> int:
             _set_full_target(art, open_target)
             dof_names = list(art.dof_names)
             replay_mode_for_tracking = args.hdf5_replay_mode if hdf5_target_sequence is not None else "gripper_only"
-            tracking_groups = _tracking_groups(dof_names, replay_mode=replay_mode_for_tracking)
+            tracking_groups = _tracking_groups(
+                dof_names, replay_mode=replay_mode_for_tracking, finger_dof_names=finger_dof_names
+            )
             tracking_rows: list[dict[str, Any]] = []
             object_reset_box = _bbox_row(stage, object_path)
             object_reset_center = np.asarray(object_reset_box["center"], dtype=np.float64)
@@ -1355,8 +1392,7 @@ def main() -> int:
                         "object_center_y": float(object_center[1]),
                         "object_center_z": float(object_center[2]),
                         "object_displacement": displacement_from_reset,
-                        "left_finger_qpos": float(qpos[dof_names.index("left_finger")]),
-                        "right_finger_qpos": float(qpos[dof_names.index("right_finger")]),
+                        **_finger_qpos_values(qpos, dof_names, finger_dof_names),
                         "tracking_controlled_max_abs_error": step_tracking["controlled"]["max_abs_error"],
                         "tracking_controlled_rms_error": step_tracking["controlled"]["rms_error"],
                         "tracking_gripper_max_abs_error": step_tracking["gripper"]["max_abs_error"],
@@ -1386,17 +1422,18 @@ def main() -> int:
                 if args.close_steps is not None:
                     close_sequence = close_sequence[: args.close_steps]
             else:
-                close_target, close_values = _finger_targets(art, args.close_offset, args.limit_margin)
+                close_target, close_values = _finger_targets(
+                    art, args.close_offset, args.limit_margin, finger_dof_names
+                )
                 close_sequence = []
             if args.moving_fingers != "both" and hdf5_target_sequence is None:
                 isolated_target = open_target.copy()
-                isolated_target[dof_names.index(f"{args.moving_fingers}_finger")] = close_target[
-                    dof_names.index(f"{args.moving_fingers}_finger")
-                ]
+                moving_finger_dof = finger_dof_names[f"{args.moving_fingers}_finger"]
+                isolated_target[dof_names.index(moving_finger_dof)] = close_target[dof_names.index(moving_finger_dof)]
                 close_target = isolated_target
                 close_values = {
-                    "left_finger": float(close_target[dof_names.index("left_finger")]),
-                    "right_finger": float(close_target[dof_names.index("right_finger")]),
+                    "left_finger": float(close_target[dof_names.index(finger_dof_names["left_finger"])]),
+                    "right_finger": float(close_target[dof_names.index(finger_dof_names["right_finger"])]),
                 }
             close_step_count = len(close_sequence) if hdf5_target_sequence is not None else args.close_steps
             for step in range(close_step_count):
@@ -1445,8 +1482,7 @@ def main() -> int:
                         "object_center_y": float(object_center[1]),
                         "object_center_z": float(object_center[2]),
                         "object_displacement": displacement,
-                        "left_finger_qpos": float(qpos[dof_names.index("left_finger")]),
-                        "right_finger_qpos": float(qpos[dof_names.index("right_finger")]),
+                        **_finger_qpos_values(qpos, dof_names, finger_dof_names),
                         "tracking_controlled_max_abs_error": step_tracking["controlled"]["max_abs_error"],
                         "tracking_controlled_rms_error": step_tracking["controlled"]["rms_error"],
                         "tracking_gripper_max_abs_error": step_tracking["gripper"]["max_abs_error"],
