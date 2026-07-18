@@ -88,6 +88,7 @@ The main conclusion is conservative:
 - [75 Phase 69 calibrated overlay manifest](75_phase69_calibrated_overlay_manifest_2026-07-18.md)
 - [76 Phase 71 table calibration readiness](76_phase71_table_calibration_readiness_2026-07-18.md)
 - [77 Phase 72 support-plane config guard](77_phase72_support_plane_config_guard_2026-07-18.md)
+- [78 Phase 73 robot-state source guard](78_phase73_robot_state_source_guard_2026-07-18.md)
 
 ## Operating Rule
 
@@ -108,3 +109,5 @@ When using `--support-plane-config`, choose the mode explicitly:
 - Diagnostic replay must pass `--allow-diagnostic-support-plane-config`.
 - Final replay must pass `--require-calibrated-table-frame`.
 - Final replay must not pass support-plane CLI geometry overrides.
+
+Robot state sources such as `hdf5_qpos`, `joint_states`, `dynamixel_registers`, and `ros_static_transform_default` are not table/base geometry calibration sources. They can validate joint or controller behavior, but they must not satisfy the final calibrated table-frame gate.
