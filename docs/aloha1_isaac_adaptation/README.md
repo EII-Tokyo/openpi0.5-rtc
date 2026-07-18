@@ -93,6 +93,7 @@ The main conclusion is conservative:
 - [80 Phase 75 scene contact proxy profile](80_phase75_scene_contact_proxy_profile_2026-07-18.md)
 - [81 Phase 76 contact trace target roots](81_phase76_contact_trace_target_roots_2026-07-18.md)
 - [82 Phase 77 non-target contact quality gate](82_phase77_non_target_contact_quality_gate_2026-07-18.md)
+- [83 Phase 97 drive-target controller gain reference](83_phase97_drive_target_controller_gain_reference_2026-07-18.md)
 
 ## Operating Rule
 
@@ -123,3 +124,10 @@ For the user-confirmed Trossen/Menagerie startup stage, use `--contact-proxy-pro
 For contact-pair gates, do not use the authored `bbox_collision_proxy` prim as the only expected contact target. PhysX reports the actual collider children under the finger links. The validator must distinguish bbox/proxy paths used for placement from contact target roots used for contact-report matching.
 
 For final-quality contact validation, target finger contact is not enough. Also inspect `non_target_object_contact_found` and use `--fail-on-non-target-object-contact` when unrealistic object contacts with the wrist, gripper base, opposite arm, or workcell should fail the gate.
+
+The current drive-target replay reference can be rerun with:
+
+```bash
+codex-evidence --name aloha-phase97-drive-target-reference -- \
+  .venv/bin/python aloha_isaac_replay/scripts/run_phase97_drive_target_reference.py
+```
