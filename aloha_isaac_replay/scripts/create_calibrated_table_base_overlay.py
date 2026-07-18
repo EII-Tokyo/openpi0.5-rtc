@@ -152,12 +152,20 @@ def _render_markdown(payload: dict[str, Any]) -> str:
     lines.extend(
         [
             "",
-            "## Replay Command",
+            "## Open Command",
             "",
             "The command manifest is intentionally separate from execution. Review it before opening Isaac.",
             "",
             "```bash",
             payload.get("open_command", ""),
+            "```",
+            "",
+            "## Contact Validation Command",
+            "",
+            "This command is also recorded only; it is not executed by the overlay generator.",
+            "",
+            "```bash",
+            payload.get("contact_validation_command", ""),
             "```",
         ]
     )
@@ -209,6 +217,14 @@ def build_overlay(
         "examples/aloha_isaac/scripts/open_workcell_gui.py "
         f"--usd {overlay_path} --allow-noncanonical-usd"
     )
+    contact_validation_command = (
+        "OMNI_KIT_ACCEPT_EULA=YES .venv_issac/bin/python "
+        "aloha_isaac_replay/scripts/validate_aloha1_gripper_passive_contact.py "
+        f"--stage-usd {overlay_path} "
+        "--stage-units-in-meters 1.0 "
+        f"--support-plane-config {calibration_path} "
+        "--require-calibrated-table-frame"
+    )
     manifest = {
         "schema": "aloha1_phase69_calibrated_table_base_overlay.v1",
         "status": "READY_FOR_REVIEW_NOT_EXECUTED",
@@ -219,6 +235,7 @@ def build_overlay(
         "world_base_transforms": audit["world_base_transforms"],
         "calibration_evidence": audit.get("calibration_evidence"),
         "open_command": open_command,
+        "contact_validation_command": contact_validation_command,
         "safety": {
             "simulation_only": True,
             "real_robot_touched": False,
@@ -234,6 +251,7 @@ def build_overlay(
             "overlay_usd": _rel(overlay_path),
             "command_manifest": _rel(manifest_path),
             "open_command": open_command,
+            "contact_validation_command": contact_validation_command,
             "blocking_reasons": [],
         }
     )

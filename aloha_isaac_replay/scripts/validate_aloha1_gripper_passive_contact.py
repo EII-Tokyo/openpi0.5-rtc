@@ -34,6 +34,7 @@ DEFAULT_STAGE = REPO_ROOT / "local_eval_assets/aloha1_clean_runtime_20260718/alo
 DEFAULT_OUTPUT_DIR = REPO_ROOT / "reports/aloha1_isaac_adaptation/phase43_gripper_passive_contact_20260718"
 DEFAULT_BOTTLE_USD = REPO_ROOT / "assets/bottle_500ml/isaac/bottle_500ml_sim.usd"
 DEFAULT_MAPPING = REPO_ROOT / "configs/aloha/original_stationary_aloha_mapping.yaml"
+DEFAULT_STAGE_UNITS_IN_METERS = 0.01
 
 
 def _rel(path: str | Path) -> str:
@@ -113,6 +114,11 @@ def _audit_required_table_frame(args: argparse.Namespace) -> dict[str, Any] | No
         return None
     if args.support_plane_config is None:
         raise ValueError("--require-calibrated-table-frame requires --support-plane-config")
+    if abs(float(args.stage_units_in_meters) - 1.0) > 1e-9:
+        raise ValueError(
+            "--require-calibrated-table-frame requires --stage-units-in-meters 1.0 "
+            "because Phase68/69 calibration YAML is authored in Isaac meters, +Z up."
+        )
     audit = audit_table_frame(Path(args.support_plane_config))
     if audit["status"] != "PASS_TABLE_TO_BASE_CALIBRATION_READY":
         raise ValueError(
@@ -912,6 +918,15 @@ def _cross_side_proxy_overlap_summary(stage: Any, side: str, tolerance: float = 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Run a local passive-object contact smoke test for ALOHA1 gripper proxies.")
     parser.add_argument("--stage-usd", default=str(DEFAULT_STAGE))
+    parser.add_argument(
+        "--stage-units-in-meters",
+        type=float,
+        default=DEFAULT_STAGE_UNITS_IN_METERS,
+        help=(
+            "World(stage_units_in_meters=...). Legacy clean-runtime stages use 0.01; "
+            "Phase69 calibrated overlays must use 1.0."
+        ),
+    )
     parser.add_argument("--output-dir", default=str(DEFAULT_OUTPUT_DIR))
     parser.add_argument("--side", choices=("left", "right"), default="left")
     parser.add_argument("--open-offset", type=float, default=0.006)
@@ -982,6 +997,7 @@ def main() -> int:
         "stage_saved": False,
         "inputs": {
             "stage_usd": _rel(args.stage_usd),
+            "stage_units_in_meters": args.stage_units_in_meters,
             "side": args.side,
             "control_mode": "opposed_fingers",
             "open_offset": args.open_offset,
@@ -1046,7 +1062,7 @@ def main() -> int:
 
         stage_utils.open_stage(str(Path(args.stage_usd).resolve()))
         World.clear_instance()
-        world = World(stage_units_in_meters=0.01, backend="numpy", device="cpu")
+        world = World(stage_units_in_meters=args.stage_units_in_meters, backend="numpy", device="cpu")
         world.set_simulation_dt(physics_dt=args.physics_dt, rendering_dt=args.physics_dt)
         stage = omni.usd.get_context().get_stage()
         paths = FINGER_PROXY_PATHS[args.side]

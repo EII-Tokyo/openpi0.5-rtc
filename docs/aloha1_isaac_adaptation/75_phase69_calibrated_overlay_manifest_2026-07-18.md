@@ -69,6 +69,7 @@ The manifest records:
 - audited world-base transforms;
 - calibration evidence hash;
 - open command;
+- contact validation command;
 - simulation-only safety flags.
 
 The command is intentionally recorded but not executed automatically.
@@ -84,3 +85,20 @@ Phase 69 is a review boundary. The expected workflow is:
 5. only then run replay/contact validation.
 
 This prevents a failed or incomplete measurement worksheet from silently changing the ALOHA scene used for replay.
+
+## Unit requirement for contact validation
+
+The overlay is authored in Isaac meters:
+
+```text
+metersPerUnit = 1
+upAxis = Z
+```
+
+Therefore the generated contact validation command must include:
+
+```bash
+--stage-units-in-meters 1.0
+```
+
+The older clean-runtime validation path used `0.01` because it came from a centimeter/Y-up asset chain. That value must not be used with this calibrated overlay.
