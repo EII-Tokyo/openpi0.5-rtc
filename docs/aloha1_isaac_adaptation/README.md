@@ -164,3 +164,10 @@ The current full-scene Bottle500 already-grasped gate can be rerun with:
 codex-evidence --name aloha-phase106-bottleusd-already-grasped-runner -- \
   .venv/bin/python aloha_isaac_replay/scripts/run_phase106_bottleusd_already_grasped_gate.py
 ```
+
+The current full-scene Bottle500 HDF5 drive-target replay gate can be rerun with:
+
+```bash
+codex-evidence --name aloha-phase107-bottleusd-hdf5-drive-target-runner -- \
+  .venv/bin/python aloha_isaac_replay/scripts/run_phase107_bottleusd_hdf5_drive_target_gate.py
+```
