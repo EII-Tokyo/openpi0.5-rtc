@@ -86,6 +86,28 @@ def _should_disable_selected_source_collision(*, selected_root: str, proxy_path:
     return collision_path.startswith(selected_root + "/")
 
 
+def _collect_collision_paths_under_prefixes(stage: Any, prefixes: list[str]) -> list[str]:
+    from pxr import Usd
+
+    if not prefixes:
+        return []
+    paths: set[str] = set()
+    normalized_prefixes = [item.rstrip("/") for item in prefixes if item.rstrip("/")]
+    for prefix in normalized_prefixes:
+        root = stage.GetPrimAtPath(prefix)
+        if not root:
+            continue
+        for prim in Usd.PrimRange(root):
+            prim_path = str(prim.GetPath())
+            if _has_schema(prim, "PhysicsCollisionAPI") or "/collisions/" in prim_path:
+                paths.add(prim_path)
+    return sorted(paths)
+
+
+def _normalized_paths(paths: list[str]) -> list[str]:
+    return sorted({item.rstrip("/") for item in paths if item.rstrip("/")})
+
+
 def _known_scene_base_link_finger_collision_paths(selected_root: str) -> list[str]:
     """Return legacy imported finger collision prims hidden under a selected Trossen finger link.
 
@@ -240,6 +262,8 @@ def _create_proxy_stage(
     proxy_dynamic_friction: float | None,
     proxy_restitution: float | None,
     contact_proxy_profile: str,
+    disable_collision_paths: list[str],
+    disable_collision_path_prefixes: list[str],
 ) -> dict[str, list[str]]:
     from pxr import Gf
     from pxr import PhysxSchema
@@ -261,8 +285,22 @@ def _create_proxy_stage(
     stage.SetDefaultPrim(world)
 
     disabled_collision_approximation_paths: list[str] = []
+    deinstanced_source_paths: set[str] = set()
+
+    def deinstance_ancestors_for_path(prim_path: str) -> None:
+        parts = [part for part in prim_path.strip("/").split("/") if part]
+        for index in range(1, len(parts)):
+            ancestor_path = "/" + "/".join(parts[:index])
+            ancestor = stage.GetPrimAtPath(ancestor_path)
+            if not ancestor:
+                continue
+            if not (ancestor.IsInstance() or ancestor.IsInstanceable()):
+                continue
+            stage.OverridePrim(ancestor_path).SetInstanceable(False)
+            deinstanced_source_paths.add(ancestor_path)
 
     def disable_source_collision_prim(prim_path: str) -> None:
+        deinstance_ancestors_for_path(prim_path)
         prim = stage.OverridePrim(prim_path)
         collision = UsdPhysics.CollisionAPI.Apply(prim)
         collision.CreateCollisionEnabledAttr().Set(False)
@@ -274,6 +312,14 @@ def _create_proxy_stage(
         disabled_collision_approximation_paths.append(prim_path)
 
     for prim_path in disabled_root_collisions:
+        disable_source_collision_prim(prim_path)
+
+    disabled_explicit_collisions = _normalized_paths(disable_collision_paths)
+    for prim_path in disabled_explicit_collisions:
+        disable_source_collision_prim(prim_path)
+
+    disabled_prefix_collisions = _collect_collision_paths_under_prefixes(stage, disable_collision_path_prefixes)
+    for prim_path in disabled_prefix_collisions:
         disable_source_collision_prim(prim_path)
 
     disabled_selected_source_collisions: list[str] = []
@@ -351,6 +397,9 @@ def _create_proxy_stage(
     return {
         "disabled_selected_source_collisions": disabled_selected_source_collisions,
         "disabled_collision_approximation_paths": disabled_collision_approximation_paths,
+        "disabled_explicit_collisions": disabled_explicit_collisions,
+        "disabled_prefix_collisions": disabled_prefix_collisions,
+        "deinstanced_source_paths": sorted(deinstanced_source_paths),
     }
 
 
@@ -367,8 +416,11 @@ def _render_markdown(payload: dict[str, Any]) -> str:
         f"- include regex: `{payload['inputs']['include_regex']}`",
         f"- exclude regex: `{payload['inputs']['exclude_regex']}`",
         f"- disabled root collision prims: `{summary['disabled_root_collision_count']}`",
+        f"- disabled explicit collision prims: `{summary.get('disabled_explicit_collision_count')}`",
+        f"- disabled explicit prefix collision prims: `{summary.get('disabled_prefix_collision_count')}`",
         f"- disabled selected source collision prims: `{summary.get('disabled_selected_source_collision_count')}`",
         f"- disabled collision convexHull approximation prims: `{summary.get('disabled_collision_approximation_count')}`",
+        f"- de-instanced source prims: `{summary.get('deinstanced_source_path_count')}`",
         f"- selected bbox proxies: `{summary['selected_proxy_count']}`",
         f"- skipped rigid bodies: `{summary['skipped_rigid_body_count']}`",
         "",
@@ -429,6 +481,24 @@ def main() -> int:
     )
     parser.add_argument("--include-regex", action="append", default=[])
     parser.add_argument("--exclude-regex", action="append", default=[])
+    parser.add_argument(
+        "--disable-collision-path",
+        action="append",
+        default=[],
+        help=(
+            "Disable one exact PhysicsCollisionAPI prim path in the generated runtime stage. Use this for "
+            "known composed leaf collider paths where parent collisionEnabled does not propagate."
+        ),
+    )
+    parser.add_argument(
+        "--disable-collision-path-prefix",
+        action="append",
+        default=[],
+        help=(
+            "Disable PhysicsCollisionAPI under an explicit source-stage path prefix in the generated runtime "
+            "stage. Use for controlled workcell experiments, not broad robot link collision removal."
+        ),
+    )
     args = parser.parse_args()
 
     output_dir = Path(args.output_dir)
@@ -452,6 +522,8 @@ def main() -> int:
             "stage_up_axis": stage_up_axis_for_profile(args.contact_proxy_profile),
             "include_regex": args.include_regex,
             "exclude_regex": args.exclude_regex,
+            "disable_collision_paths": args.disable_collision_path,
+            "disable_collision_path_prefixes": args.disable_collision_path_prefix,
         },
         "outputs": {"stage_usd": _rel(args.output_usd), "json": _rel(json_path), "markdown": _rel(md_path)},
     }
@@ -489,22 +561,33 @@ def main() -> int:
             proxy_dynamic_friction=args.proxy_dynamic_friction,
             proxy_restitution=args.proxy_restitution,
             contact_proxy_profile=args.contact_proxy_profile,
+            disable_collision_paths=args.disable_collision_path,
+            disable_collision_path_prefixes=args.disable_collision_path_prefix,
         )
         disabled_selected_source_collisions = proxy_stage_outputs["disabled_selected_source_collisions"]
         disabled_collision_approximation_paths = proxy_stage_outputs["disabled_collision_approximation_paths"]
+        disabled_explicit_collisions = proxy_stage_outputs["disabled_explicit_collisions"]
+        disabled_prefix_collisions = proxy_stage_outputs["disabled_prefix_collisions"]
+        deinstanced_source_paths = proxy_stage_outputs["deinstanced_source_paths"]
         summary = {
             "rigid_body_count": len(candidates),
             "selected_proxy_count": sum(1 for row in candidates if row["selected"]),
             "skipped_rigid_body_count": sum(1 for row in candidates if not row["selected"]),
             "disabled_root_collision_count": len(disabled_root_collisions),
+            "disabled_explicit_collision_count": len(disabled_explicit_collisions),
+            "disabled_prefix_collision_count": len(disabled_prefix_collisions),
             "disabled_selected_source_collision_count": len(disabled_selected_source_collisions),
             "disabled_collision_approximation_count": len(disabled_collision_approximation_paths),
+            "deinstanced_source_path_count": len(deinstanced_source_paths),
         }
         payload.update(
             {
                 "status": "PASS",
                 "summary": summary,
                 "candidate_rows": candidates,
+                "disabled_explicit_collisions": disabled_explicit_collisions,
+                "disabled_prefix_collisions": disabled_prefix_collisions,
+                "deinstanced_source_paths": deinstanced_source_paths,
                 "disabled_selected_source_collisions": disabled_selected_source_collisions,
                 "disabled_collision_approximation_paths": disabled_collision_approximation_paths,
             }

@@ -7,6 +7,7 @@ from aloha_isaac_replay.scripts.build_aloha1_bbox_proxy_runtime_stage import (
 )
 from aloha_isaac_replay.scripts.build_aloha1_bbox_proxy_runtime_stage import _should_disable_selected_source_collision
 from aloha_isaac_replay.scripts.build_aloha1_bbox_proxy_runtime_stage import _side_from_path
+from aloha_isaac_replay.scripts.build_aloha1_bbox_proxy_runtime_stage import _normalized_paths
 from aloha_isaac_replay.scripts.build_aloha1_bbox_proxy_runtime_stage import _source_bbox_path_for_rigid_body
 
 
@@ -118,3 +119,19 @@ def test_scene_base_link_known_finger_collision_instance_root_only_for_known_fin
         == "/scene/left_base_link/left_right_finger_link/collisions"
     )
     assert _known_scene_base_link_finger_collision_instance_root("/scene/left_base_link/left_wrist_link") is None
+
+
+def test_explicit_collision_paths_are_normalized_and_deduplicated() -> None:
+    paths = _normalized_paths(
+        [
+            "/scene/worldBody/table/collisions/table/table/table/",
+            "/scene/worldBody/table/collisions/table/table/table",
+            "",
+            "/scene/worldBody/__22/collisions/__22/__22/extrusion_1220/",
+        ]
+    )
+
+    assert paths == [
+        "/scene/worldBody/__22/collisions/__22/__22/extrusion_1220",
+        "/scene/worldBody/table/collisions/table/table/table",
+    ]

@@ -104,6 +104,8 @@ The main conclusion is conservative:
 - [91 Phase 108 diagnostic table contact gate](91_phase108_diagnostic_table_contact_gate_2026-07-19.md)
 - [92 Phase 109 workcell semantic audit](92_phase109_workcell_semantic_audit_2026-07-19.md)
 - [93 Phase 110 workcell contact policy negative gate](93_phase110_workcell_contact_policy_negative_gate_2026-07-19.md)
+- [94 Phase 111 table/pipe overlay runtime rebuild](94_phase111_table_pipe_overlay_runtime_rebuild_2026-07-19.md)
+- [95 Phase 112-115 measured workcell contact gate](95_phase112_115_measured_workcell_contact_gate_2026-07-19.md)
 
 ## Operating Rule
 
@@ -200,3 +202,12 @@ The current workcell contact-policy negative gate can be rerun with:
 codex-evidence --name aloha-phase110-workcell-contact-policy-negative-gate -- \
   .venv/bin/python aloha_isaac_replay/scripts/run_phase110_workcell_contact_policy_negative_gate.py
 ```
+
+The current strict measured-workcell BottleUSD contact gate can be rerun with:
+
+```bash
+codex-evidence --name aloha-phase115-strict-measured-workcell-no-support-plane -- \
+  .venv/bin/python aloha_isaac_replay/scripts/run_phase115_strict_measured_workcell_no_support_plane_gate.py
+```
+
+Phase115 is the current stable prerequisite gate for ALOHA1 Isaac adaptation. It uses the measured `/World/Table` runtime stage, keeps `support_plane_mode=none`, and passes only when object contact is restricted to the target fingers under the workcell contact policy.

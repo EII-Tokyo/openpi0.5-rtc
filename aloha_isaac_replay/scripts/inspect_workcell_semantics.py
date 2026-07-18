@@ -57,7 +57,10 @@ def _applied(prim: Any) -> list[str]:
 
 
 def _bbox_row(cache: Any, prim: Any) -> dict[str, Any]:
-    box = cache.ComputeWorldBound(prim).GetBox()
+    # ComputeWorldBound returns an oriented GfBBox3d. GetBox() alone can expose
+    # the unaligned local range for scaled/rotated prims, so use the aligned
+    # world range for semantic geometry classification.
+    box = cache.ComputeWorldBound(prim).ComputeAlignedBox()
     if box.IsEmpty():
         return {
             "bbox_valid": False,

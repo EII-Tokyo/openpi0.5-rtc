@@ -54,8 +54,23 @@ def _has_schema(prim: Any, schema_name: str) -> bool:
     return schema_name in _applied(prim)
 
 
+def _collision_enabled(prim: Any) -> bool | None:
+    if not _has_schema(prim, "PhysicsCollisionAPI"):
+        return None
+    from pxr import UsdPhysics
+
+    attr = UsdPhysics.CollisionAPI(prim).GetCollisionEnabledAttr()
+    if not attr:
+        return None
+    value = attr.Get()
+    return None if value is None else bool(value)
+
+
 def _bbox_row(cache: Any, prim: Any) -> dict[str, Any]:
-    box = cache.ComputeWorldBound(prim).GetBox()
+    # ComputeWorldBound returns an oriented GfBBox3d. GetBox() alone can expose
+    # the unaligned local range for scaled/rotated Cube/Cylinder prims. Use the
+    # aligned world range for geometry audits and contact policy decisions.
+    box = cache.ComputeWorldBound(prim).ComputeAlignedBox()
     if box.IsEmpty():
         return {
             "bbox_valid": False,
@@ -87,6 +102,7 @@ def _prim_row(stage: Any, cache: Any, path: str) -> dict[str, Any]:
             "is_instanceable": bool(prim.IsInstanceable()),
             "applied_schemas": _applied(prim),
             "has_collision_api": _has_schema(prim, "PhysicsCollisionAPI"),
+            "collision_enabled": _collision_enabled(prim),
             "has_rigid_body_api": _has_schema(prim, "PhysicsRigidBodyAPI"),
         }
     )
@@ -106,12 +122,15 @@ def _render_markdown(payload: dict[str, Any]) -> str:
         "| --- | --- | --- | --- | --- | --- | --- |",
     ]
     for row in payload.get("rows", []):
+        collision_state = row.get("has_collision_api", "")
+        if row.get("collision_enabled") is not None:
+            collision_state = f"{collision_state} / enabled={row.get('collision_enabled')}"
         lines.append(
             "| "
             f"`{row['path']}` | "
             f"{row.get('exists')} | "
             f"`{row.get('type_name', '')}` | "
-            f"{row.get('has_collision_api', '')} | "
+            f"{collision_state} | "
             f"{row.get('has_rigid_body_api', '')} | "
             f"`{row.get('bbox_center')}` | "
             f"`{row.get('bbox_size')}` |"
