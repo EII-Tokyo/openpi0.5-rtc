@@ -2,7 +2,9 @@
 
 ## Result
 
-Phase97 is the current first full-gate PASS for native `/scene` ALOHA1 HDF5 replay in `drive_target` mode.
+Phase97 is the current controller/reference PASS for native `/scene` ALOHA1 HDF5 replay in `drive_target` mode under the current validator gates.
+
+This is an important milestone, but its scope is deliberately narrow. It proves that Isaac articulation drives can follow the selected HDF5 target sequence with bounded tracking error while preserving the current bilateral contact candidate and strict object non-target contact gate. It does not prove full bottle grasp success, calibrated table/base geometry, realistic bottle friction, or complete task-level bottle manipulation.
 
 Report:
 
@@ -39,6 +41,16 @@ Artifact:
 | non-target contact gate | `PASS_NON_TARGET_CONTACTS_ALLOWED` |
 | max object displacement | `0.11387294474651785` |
 
+## Scope Boundaries
+
+Phase97 should not be used as a broad "ALOHA1 grasp solved" claim.
+
+- Target contact starts in the settle window. This means Phase97 validates an already-contacting or contact-candidate replay setup, not active approach-and-grasp from free space.
+- The support-plane calibration gate is not active in this run. `support_plane_mode` is `none`, so the pass does not validate the real table frame or real workcell calibration.
+- The strict non-target gate checks object contacts by category. It does not yet evaluate contact force, penetration depth, friction realism, or gripper mesh fidelity.
+- PhysX still emits mesh-collision fallback warnings in the artifact logs. The pass remains valid for this validator, but collision-shape fidelity is still a residual risk.
+- `wrong_contact_pairs` can contain non-object workcell or proxy contacts. Those are not the same as object-to-wrist, object-to-gripper-base, or object-to-opposite-arm failures.
+
 ## Why This Matters
 
 Earlier state-teleport runs proved geometry and mapping could be made consistent, but they did not prove the Isaac articulation drives could actually follow the HDF5 trajectory. Phase97 uses `drive_target`, so the controller must follow the same target sequence through PhysX.
@@ -54,7 +66,7 @@ The pass did not come from slowing the replay down. `hdf5_replay_target_hold_ste
 | 94 | arm `kp=2400`, arm `kd=200`, finger `kp=200`, finger `kd=50` | tracking passed, strict contact failed | higher stiffness can force the object into same-side gripper-base contact |
 | 95 | arm `kp=2000`, arm `kd=200`, finger `kp=200`, finger `kd=50` | tracking and strict contact both failed | still too stiff for contact while not enough tracking margin |
 | 96 | arm `kp=1800`, arm `kd=200`, finger `kp=200`, finger `kd=50` | tracking and strict contact both failed | the contact failure starts below `kp=2000` |
-| 97 | arm `kp=1600`, arm `kd=100`, finger `kp=200`, finger `kd=50` | PASS | lowering arm damping resolved lag without causing non-target contact |
+| 97 | arm `kp=1600`, arm `kd=100`, finger `kp=200`, finger `kd=50` | PASS | `kp=1600` kept the contact setup stable, and lower arm damping gave enough tracking margin |
 
 ## Current Interpretation
 
@@ -64,8 +76,10 @@ The root cause was not FK mapping or bottle contact geometry. The remaining fail
 - after fixing prefixed DOF matching, arm tracking improved;
 - finger DOFs needed a separate gain override;
 - too much arm stiffness passed tracking but introduced bad object-to-gripper-base contact;
-- reducing arm damping from `200` to `100` gave tracking margin without corrupting contact.
+- at `kp=1600`, reducing arm damping from `200` to `100` gave tracking margin without corrupting contact.
 
 ## Next Gate
 
-Use Phase97 as the current drive-target reference before trying full bottle manipulation or policy replay. Do not advance to a harder grasp/replay task unless all Phase97 gates remain passing after any stage or controller change.
+Use Phase97 as the current drive-target controller reference before trying full bottle manipulation or policy replay. Do not advance to a harder grasp/replay task unless all Phase97 gates remain passing after any stage or controller change.
+
+The next milestone must separate contact-candidate replay from real grasp success. If a future report claims active grasp, it should require target contact to first appear during the close or grasp phase, or it should explicitly mark the setup as `already_in_contact_setup=true`.
