@@ -22,6 +22,7 @@ from aloha_isaac_replay.scripts.right_shoulder_runtime_audit import _get_limits
 from aloha_isaac_replay.scripts.right_shoulder_runtime_audit import _json_safe
 from aloha_isaac_replay.scripts.right_shoulder_runtime_audit import _set_full_state
 from aloha_isaac_replay.scripts.right_shoulder_runtime_audit import _set_full_target
+from aloha_isaac_replay.scripts.audit_table_frame_candidate import audit_table_frame
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_proxy_gap import FINGER_PROXY_PATHS
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_proxy_gap import _bbox_row
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_proxy_gap import _gap_metrics
@@ -105,6 +106,20 @@ def _resolve_support_plane_options(args: argparse.Namespace) -> dict[str, Any]:
         }
     )
     return resolved
+
+
+def _audit_required_table_frame(args: argparse.Namespace) -> dict[str, Any] | None:
+    if not args.require_calibrated_table_frame:
+        return None
+    if args.support_plane_config is None:
+        raise ValueError("--require-calibrated-table-frame requires --support-plane-config")
+    audit = audit_table_frame(Path(args.support_plane_config))
+    if audit["status"] != "PASS_TABLE_TO_BASE_CALIBRATION_READY":
+        raise ValueError(
+            "--require-calibrated-table-frame failed: "
+            f"{audit['status']} ({'; '.join(audit.get('blocking_reasons', []))})"
+        )
+    return audit
 
 
 def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
@@ -919,6 +934,11 @@ def main() -> int:
     parser.add_argument("--object-contact-offset", type=float, default=None)
     parser.add_argument("--object-rest-offset", type=float, default=None)
     parser.add_argument("--support-plane-config", default=None)
+    parser.add_argument(
+        "--require-calibrated-table-frame",
+        action="store_true",
+        help="Reject diagnostic/not-calibrated support-plane configs before starting Isaac.",
+    )
     parser.add_argument("--support-plane-mode", choices=("none", "object_bottom", "fixed_box"), default="none")
     parser.add_argument("--support-plane-center", type=float, nargs=3, default=None)
     parser.add_argument("--support-plane-size", type=float, default=2.0)
@@ -945,7 +965,11 @@ def main() -> int:
     parser.add_argument("--min-contact-motion", type=float, default=1e-5)
     parser.add_argument("--max-object-displacement", type=float, default=0.25)
     args = parser.parse_args()
-    support_options = _resolve_support_plane_options(args)
+    try:
+        support_options = _resolve_support_plane_options(args)
+        table_frame_audit = _audit_required_table_frame(args)
+    except ValueError as exc:
+        parser.error(str(exc))
 
     output_dir = Path(args.output_dir)
     json_path = output_dir / "gripper_passive_contact_metrics.json"
@@ -980,6 +1004,8 @@ def main() -> int:
             "support_plane_config": support_options["config"],
             "support_plane_config_provenance": support_options["config_provenance"],
             "support_plane_table_frame": support_options["table_frame"],
+            "require_calibrated_table_frame": args.require_calibrated_table_frame,
+            "table_frame_audit": table_frame_audit,
             "support_plane_mode": support_options["mode"],
             "support_plane_center": support_options["center"],
             "support_plane_size": args.support_plane_size,

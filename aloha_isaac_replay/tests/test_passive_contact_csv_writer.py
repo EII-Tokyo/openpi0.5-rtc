@@ -3,6 +3,11 @@ from __future__ import annotations
 import csv
 from pathlib import Path
 
+import yaml
+import pytest
+
+from aloha_isaac_replay.scripts.create_table_to_base_calibration import build_calibration_config
+from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _audit_required_table_frame
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _load_support_plane_config
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _resolve_support_plane_options
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _summarize_contact_pairs
@@ -129,3 +134,48 @@ def test_support_plane_config_rejects_object_bottom_mix() -> None:
         assert "object_bottom" in str(exc)
     else:
         raise AssertionError("expected object_bottom/config combination to be rejected")
+
+
+def test_require_calibrated_table_frame_requires_config() -> None:
+    import argparse
+
+    args = argparse.Namespace(require_calibrated_table_frame=True, support_plane_config=None)
+
+    with pytest.raises(ValueError, match="requires --support-plane-config"):
+        _audit_required_table_frame(args)
+
+
+def test_require_calibrated_table_frame_rejects_diagnostic_config() -> None:
+    import argparse
+
+    args = argparse.Namespace(
+        require_calibrated_table_frame=True,
+        support_plane_config=str(REPO_ROOT / "examples/aloha_isaac/config/phase63_fixed_table_candidate.yaml"),
+    )
+
+    with pytest.raises(ValueError, match="BLOCKED_REQUIRES_MEASURED_TABLE_TO_BASE_TRANSFORM"):
+        _audit_required_table_frame(args)
+
+
+def test_require_calibrated_table_frame_accepts_measured_config(tmp_path: Path) -> None:
+    import argparse
+
+    cfg = build_calibration_config(
+        table_top_center=[1.0, 2.0, 0.5],
+        table_size=[1.22, 0.625, 0.04],
+        table_yaw_deg=0.0,
+        left_base_in_table=[-0.3, 0.1, 0.0],
+        left_yaw_deg=0.0,
+        right_base_in_table=[0.3, 0.1, 0.0],
+        right_yaw_deg=180.0,
+        source="user_measured",
+        status="measured",
+    )
+    path = tmp_path / "measured.yaml"
+    path.write_text(yaml.safe_dump(cfg, sort_keys=False))
+    args = argparse.Namespace(require_calibrated_table_frame=True, support_plane_config=str(path))
+
+    audit = _audit_required_table_frame(args)
+
+    assert audit is not None
+    assert audit["status"] == "PASS_TABLE_TO_BASE_CALIBRATION_READY"
