@@ -89,6 +89,7 @@ The main conclusion is conservative:
 - [76 Phase 71 table calibration readiness](76_phase71_table_calibration_readiness_2026-07-18.md)
 - [77 Phase 72 support-plane config guard](77_phase72_support_plane_config_guard_2026-07-18.md)
 - [78 Phase 73 robot-state source guard](78_phase73_robot_state_source_guard_2026-07-18.md)
+- [79 Phase 74 final contact namespace gate](79_phase74_final_contact_namespace_gate_2026-07-18.md)
 
 ## Operating Rule
 
@@ -111,3 +112,5 @@ When using `--support-plane-config`, choose the mode explicitly:
 - Final replay must not pass support-plane CLI geometry overrides.
 
 Robot state sources such as `hdf5_qpos`, `joint_states`, `dynamixel_registers`, and `ros_static_transform_default` are not table/base geometry calibration sources. They can validate joint or controller behavior, but they must not satisfy the final calibrated table-frame gate.
+
+Final calibrated contact validation must use one coherent stage namespace. A `/scene` calibrated overlay must not be validated with legacy `/puppet_*` fingertip proxy paths.

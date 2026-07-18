@@ -149,6 +149,52 @@ def _guard_support_plane_calibration_mode(args: argparse.Namespace) -> None:
     )
 
 
+def _finger_proxy_namespace_roots() -> list[str]:
+    roots: set[str] = set()
+    for side_paths in FINGER_PROXY_PATHS.values():
+        for prim_path in side_paths.values():
+            parts = [part for part in str(prim_path).split("/") if part]
+            if parts:
+                roots.add(parts[0])
+    return sorted(roots)
+
+
+def _stage_namespace_hints(stage_usd: str | Path) -> dict[str, Any]:
+    path = Path(stage_usd)
+    if not path.exists():
+        return {
+            "stage_usd": _rel(path),
+            "exists": False,
+            "uses_scene_namespace": False,
+            "uses_legacy_puppet_namespace": False,
+            "mentions_bbox_collision_proxy": False,
+        }
+    text = path.read_text(encoding="utf-8", errors="ignore")
+    return {
+        "stage_usd": _rel(path),
+        "exists": True,
+        "uses_scene_namespace": any(marker in text for marker in ('over "scene"', 'def Xform "scene"', "/scene/")),
+        "uses_legacy_puppet_namespace": any(marker in text for marker in ("puppet_left_vx300s", "puppet_right_vx300s")),
+        "mentions_bbox_collision_proxy": "bbox_collision_proxy" in text,
+    }
+
+
+def _guard_final_contact_stage_namespace(args: argparse.Namespace) -> dict[str, Any] | None:
+    if not getattr(args, "require_calibrated_table_frame", False):
+        return None
+    proxy_roots = _finger_proxy_namespace_roots()
+    hints = _stage_namespace_hints(args.stage_usd)
+    summary = {"stage_namespace_hints": hints, "finger_proxy_namespace_roots": proxy_roots}
+    uses_legacy_proxy_paths = any(root.startswith("puppet_") for root in proxy_roots)
+    if hints["uses_scene_namespace"] and uses_legacy_proxy_paths:
+        raise ValueError(
+            "--require-calibrated-table-frame selected a /scene calibrated overlay, but this contact validator uses "
+            "legacy /puppet_* FINGER_PROXY_PATHS. Final contact validation requires a contact-capable stage/profile "
+            "whose articulation roots, fingertip proxies, and calibrated table collider share the same namespace."
+        )
+    return summary
+
+
 def _support_plane_cli_overrides(args: argparse.Namespace) -> list[str]:
     overrides: list[str] = []
     if getattr(args, "support_plane_center", None) is not None:
@@ -1038,6 +1084,7 @@ def main() -> int:
         support_options = _resolve_support_plane_options(args)
         _guard_support_plane_calibration_mode(args)
         table_frame_audit = _audit_required_table_frame(args)
+        contact_stage_namespace = _guard_final_contact_stage_namespace(args)
     except ValueError as exc:
         parser.error(str(exc))
 
@@ -1078,6 +1125,7 @@ def main() -> int:
             "require_calibrated_table_frame": args.require_calibrated_table_frame,
             "allow_diagnostic_support_plane_config": args.allow_diagnostic_support_plane_config,
             "table_frame_audit": table_frame_audit,
+            "contact_stage_namespace": contact_stage_namespace,
             "support_plane_mode": support_options["mode"],
             "support_plane_center": support_options["center"],
             "support_plane_size": args.support_plane_size,

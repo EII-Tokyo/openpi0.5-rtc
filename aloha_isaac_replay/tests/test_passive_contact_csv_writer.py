@@ -9,6 +9,7 @@ import yaml
 from aloha_isaac_replay.scripts.create_table_to_base_calibration import build_calibration_config
 from aloha_isaac_replay.scripts.create_table_to_base_calibration import build_evidence_record
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _audit_required_table_frame
+from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _guard_final_contact_stage_namespace
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _guard_support_plane_calibration_mode
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _load_support_plane_config
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _resolve_support_plane_options
@@ -287,3 +288,46 @@ def test_require_calibrated_table_frame_rejects_legacy_centimeter_world_units(tm
 
     with pytest.raises(ValueError, match="requires --stage-units-in-meters 1.0"):
         _audit_required_table_frame(args)
+
+
+def test_final_contact_validation_rejects_scene_overlay_with_legacy_puppet_proxy_paths(tmp_path: Path) -> None:
+    import argparse
+
+    stage = tmp_path / "scene_overlay.usda"
+    stage.write_text(
+        "\n".join(
+            [
+                "#usda 1.0",
+                'over "scene"',
+                "{",
+                '    over "left_base_link" {}',
+                '    over "right_base_link" {}',
+                "}",
+            ]
+        )
+    )
+    args = argparse.Namespace(require_calibrated_table_frame=True, stage_usd=str(stage))
+
+    with pytest.raises(ValueError, match="contact validator uses legacy /puppet_"):
+        _guard_final_contact_stage_namespace(args)
+
+
+def test_final_contact_validation_allows_legacy_puppet_runtime_stage_namespace(tmp_path: Path) -> None:
+    import argparse
+
+    stage = tmp_path / "legacy_puppet_runtime.usda"
+    stage.write_text(
+        "\n".join(
+            [
+                "#usda 1.0",
+                'over "puppet_left_vx300s" {}',
+                'over "puppet_right_vx300s" {}',
+                'def Cube "bbox_collision_proxy" {}',
+            ]
+        )
+    )
+    args = argparse.Namespace(require_calibrated_table_frame=True, stage_usd=str(stage))
+
+    summary = _guard_final_contact_stage_namespace(args)
+
+    assert summary["stage_namespace_hints"]["uses_legacy_puppet_namespace"] is True
