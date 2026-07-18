@@ -28,15 +28,16 @@ def _replace_arg(command: list[str], flag: str, values: list[str]) -> None:
     command[index + 1 : stop] = values
 
 
-def _select_success_hdf5(segment_db: Path, rollout_root: Path, limit: int, date: str | None) -> list[dict[str, str]]:
+def _select_hdf5_by_reward(segment_db: Path, rollout_root: Path, reward: int, limit: int, date: str | None) -> list[dict[str, str]]:
     con = sqlite3.connect(segment_db)
     rows = con.execute(
         """
         select key_region_id, updated_at
         from segments
-        where reward=1 and status!='deleted'
+        where reward=? and status!='deleted'
         order by updated_at desc
-        """
+        """,
+        (reward,),
     ).fetchall()
     con.close()
     selected: list[dict[str, str]] = []
@@ -51,6 +52,7 @@ def _select_success_hdf5(segment_db: Path, rollout_root: Path, limit: int, date:
             {
                 "key_region_id": key_region_id,
                 "updated_at": str(updated_at),
+                "reward": str(reward),
                 "date": path.parts[-4],
                 "hdf5": str(path),
             }
@@ -145,7 +147,7 @@ def _aggregate(results: list[dict[str, Any]]) -> dict[str, Any]:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Run a bounded Phase120 cluster probe over reward=1 HDF5 key regions.")
+    parser = argparse.ArgumentParser(description="Run a bounded Phase120 cluster probe over annotated HDF5 key regions.")
     parser.add_argument("--segment-db", type=Path, default=DEFAULT_SEGMENT_DB)
     parser.add_argument("--rollout-root", type=Path, default=DEFAULT_ROLLOUT_ROOT)
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
@@ -153,10 +155,11 @@ def main() -> int:
     parser.add_argument("--isaac-python", default=str(REPO_ROOT / ".venv_issac/bin/python"))
     parser.add_argument("--limit", type=int, default=3)
     parser.add_argument("--date", default="2026-07-08")
+    parser.add_argument("--reward", type=int, choices=(0, 1), default=1)
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
 
-    selected = _select_success_hdf5(args.segment_db, args.rollout_root, args.limit, args.date)
+    selected = _select_hdf5_by_reward(args.segment_db, args.rollout_root, args.reward, args.limit, args.date)
     args.output_dir.mkdir(parents=True, exist_ok=True)
     (args.output_dir / "selected_hdf5.json").write_text(json.dumps(selected, indent=2), encoding="utf-8")
     if args.dry_run:
