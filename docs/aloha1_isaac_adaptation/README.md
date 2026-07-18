@@ -98,6 +98,7 @@ The main conclusion is conservative:
 - [85 Phase 101 active-grasp negative control](85_phase101_active_grasp_negative_control_2026-07-19.md)
 - [86 Phase 102 active-contact proxy smoke test](86_phase102_active_grasp_proxy_smoke_2026-07-19.md)
 - [87 Phase 103 two-finger active-contact proxy smoke test](87_phase103_two_finger_active_proxy_smoke_2026-07-19.md)
+- [88 Phase 104 Grasp-YAML BottleUSD contact failure](88_phase104_grasp_yaml_bottleusd_contact_failure_2026-07-19.md)
 
 ## Operating Rule
 

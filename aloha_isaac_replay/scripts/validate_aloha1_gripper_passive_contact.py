@@ -904,6 +904,90 @@ def _bbox_center(stage: Any, path: str) -> np.ndarray:
     return np.asarray(box["center"], dtype=np.float64)
 
 
+def _matrix_to_numpy(matrix: Any) -> np.ndarray:
+    raw = np.array([[float(matrix[i][j]) for j in range(4)] for i in range(4)], dtype=np.float64)
+    result = np.eye(4, dtype=np.float64)
+    result[:3, :3] = raw[:3, :3].T
+    result[:3, 3] = raw[3, :3]
+    return result
+
+
+def _world_matrix(UsdGeom: Any, stage: Any, prim_path: str) -> np.ndarray:
+    prim = stage.GetPrimAtPath(prim_path)
+    if not prim or not prim.IsValid():
+        raise RuntimeError(f"Cannot compute world transform for missing prim: {prim_path}")
+    return _matrix_to_numpy(UsdGeom.XformCache().GetLocalToWorldTransform(prim))
+
+
+def _quat_wxyz_to_matrix(quat: np.ndarray) -> np.ndarray:
+    w, x, y, z = [float(v) for v in quat]
+    norm = float(np.linalg.norm([w, x, y, z]))
+    if norm < 1e-12:
+        return np.eye(3, dtype=np.float64)
+    w, x, y, z = w / norm, x / norm, y / norm, z / norm
+    return np.asarray(
+        [
+            [1 - 2 * (y * y + z * z), 2 * (x * y - z * w), 2 * (x * z + y * w)],
+            [2 * (x * y + z * w), 1 - 2 * (x * x + z * z), 2 * (y * z - x * w)],
+            [2 * (x * z - y * w), 2 * (y * z + x * w), 1 - 2 * (x * x + y * y)],
+        ],
+        dtype=np.float64,
+    )
+
+
+def _transform_from_pose(position: np.ndarray, quat_wxyz: np.ndarray) -> np.ndarray:
+    transform = np.eye(4, dtype=np.float64)
+    transform[:3, :3] = _quat_wxyz_to_matrix(quat_wxyz)
+    transform[:3, 3] = np.asarray(position, dtype=np.float64)
+    return transform
+
+
+def _set_xform_matrix(UsdGeom: Any, Gf: Any, prim: Any, matrix: np.ndarray) -> None:
+    # Gf.Matrix4d uses row-vector convention; translation lives in row 3.
+    m = np.asarray(matrix, dtype=np.float64)
+    gf_matrix = Gf.Matrix4d(
+        float(m[0, 0]),
+        float(m[1, 0]),
+        float(m[2, 0]),
+        0.0,
+        float(m[0, 1]),
+        float(m[1, 1]),
+        float(m[2, 1]),
+        0.0,
+        float(m[0, 2]),
+        float(m[1, 2]),
+        float(m[2, 2]),
+        0.0,
+        float(m[0, 3]),
+        float(m[1, 3]),
+        float(m[2, 3]),
+        1.0,
+    )
+    xform = UsdGeom.Xformable(prim)
+    xform.ClearXformOpOrder()
+    xform.AddTransformOp().Set(gf_matrix)
+
+
+def _load_grasp_transform(grasp_yaml: str | Path, grasp_name: str) -> dict[str, Any]:
+    grasp_path = Path(grasp_yaml).expanduser().resolve()
+    data = yaml.safe_load(grasp_path.read_text())
+    grasps = data.get("grasps") or {}
+    grasp = grasps.get(grasp_name) if isinstance(grasps, dict) else None
+    if grasp is None:
+        raise ValueError(f"Cannot find grasp {grasp_name!r} in {grasp_path}")
+    quat = np.asarray([grasp["orientation"]["w"], *grasp["orientation"]["xyz"]], dtype=np.float64)
+    position = np.asarray(grasp["position"], dtype=np.float64)
+    return {
+        "path": str(grasp_path),
+        "name": grasp_name,
+        "object_frame": data.get("object_frame"),
+        "gripper_frame": data.get("gripper_frame"),
+        "t_object_gripper": _transform_from_pose(position, quat),
+        "position": position.tolist(),
+        "quat_wxyz": quat.tolist(),
+    }
+
+
 def _create_passive_cube(
     *,
     world: Any,
@@ -1527,7 +1611,11 @@ def main() -> int:
     )
     parser.add_argument("--limit-margin", type=float, default=0.001)
     parser.add_argument("--object-fill-fraction", type=float, default=0.6)
-    parser.add_argument("--object-placement", choices=("gap_center", "moving_finger_surface"), default="gap_center")
+    parser.add_argument(
+        "--object-placement",
+        choices=("gap_center", "moving_finger_surface", "grasp_yaml"),
+        default="gap_center",
+    )
     parser.add_argument("--object-clearance", type=float, default=0.001)
     parser.add_argument("--object-creation", choices=("dynamic_cuboid", "raw_usd"), default="raw_usd")
     parser.add_argument(
@@ -1545,6 +1633,13 @@ def main() -> int:
     parser.add_argument("--object-length-multiplier", type=float, default=4.0)
     parser.add_argument("--object-usd", default=str(DEFAULT_BOTTLE_USD))
     parser.add_argument("--object-usd-prim-path", default="/Bottle500")
+    parser.add_argument(
+        "--object-grasp-yaml",
+        default="assets/bottle_500ml/grasp/bottle_aloha_left_grasps.yaml",
+        help="GraspSpec-style YAML used when --object-placement grasp_yaml is selected.",
+    )
+    parser.add_argument("--object-grasp-name", default="grasp_mid")
+    parser.add_argument("--object-gripper-frame", default="/scene/left_base_link/left_gripper_link")
     parser.add_argument("--object-mass", type=float, default=0.01)
     parser.add_argument("--object-contact-offset", type=float, default=None)
     parser.add_argument("--object-rest-offset", type=float, default=None)
@@ -1711,6 +1806,9 @@ def main() -> int:
             "object_length_multiplier": args.object_length_multiplier,
             "object_usd": _rel(args.object_usd),
             "object_usd_prim_path": args.object_usd_prim_path,
+            "object_grasp_yaml": _rel(args.object_grasp_yaml),
+            "object_grasp_name": args.object_grasp_name,
+            "object_gripper_frame": args.object_gripper_frame,
             "object_contact_offset": args.object_contact_offset,
             "object_rest_offset": args.object_rest_offset,
             "support_plane_config": support_options["config"],
@@ -1936,6 +2034,25 @@ def main() -> int:
             object_placement_row["warning"] = (
                 "moving_finger_surface requires --moving-fingers left or right; used gap_center."
             )
+        grasp_placement: dict[str, Any] | None = None
+        if args.object_placement == "grasp_yaml":
+            from pxr import UsdGeom
+
+            grasp_info = _load_grasp_transform(args.object_grasp_yaml, args.object_grasp_name)
+            t_w_g = _world_matrix(UsdGeom, stage, args.object_gripper_frame)
+            t_o_g = np.asarray(grasp_info["t_object_gripper"], dtype=np.float64)
+            t_w_o = t_w_g @ np.linalg.inv(t_o_g)
+            center = np.asarray(t_w_o[:3, 3], dtype=np.float64)
+            grasp_placement = {
+                "grasp_yaml": _rel(grasp_info["path"]),
+                "grasp_name": grasp_info["name"],
+                "yaml_object_frame": grasp_info["object_frame"],
+                "yaml_gripper_frame": grasp_info["gripper_frame"],
+                "runtime_gripper_frame": args.object_gripper_frame,
+                "t_world_object": t_w_o.tolist(),
+                "t_object_gripper": t_o_g.tolist(),
+            }
+            object_placement_row.update(grasp_placement)
         object_path = "/World/phase43_passive_contact_cube"
         proxy_offset_rows = [
             _set_collision_offsets(stage, paths["left_finger"], args.proxy_contact_offset, args.proxy_rest_offset),
@@ -1956,6 +2073,12 @@ def main() -> int:
             usd_prim_path=args.object_usd_prim_path,
             rigid_body=not args.disable_object_rigid_body,
         )
+        if grasp_placement is not None:
+            from pxr import Gf
+            from pxr import UsdGeom
+
+            object_prim = stage.GetPrimAtPath(object_path)
+            _set_xform_matrix(UsdGeom, Gf, object_prim, np.asarray(grasp_placement["t_world_object"]))
         object_offset_row = _set_object_collision_offsets(
             stage, object_path, args.object_contact_offset, args.object_rest_offset
         )

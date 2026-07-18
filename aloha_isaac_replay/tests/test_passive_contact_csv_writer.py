@@ -14,6 +14,7 @@ from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _guard_final_contact_stage_namespace
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _guard_support_plane_calibration_mode
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _finger_targets
+from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _load_grasp_transform
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _passive_contact_geometry_sanity
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _apply_replay_target_and_step
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _controller_tracking_gate
@@ -76,6 +77,31 @@ def test_finger_targets_can_use_same_sign_right_close(monkeypatch) -> None:
     assert legacy_values["right_finger"] > 0.04
     assert spatial_values["right_finger"] < 0.04
     assert legacy_target[2] != spatial_target[2]
+
+
+def test_load_grasp_transform_reads_scalar_first_quaternion(tmp_path: Path) -> None:
+    path = tmp_path / "grasps.yaml"
+    path.write_text(
+        "\n".join(
+            [
+                "format: isaac_grasp",
+                "object_frame: /World/Bottle500",
+                "gripper_frame: /scene/left_base_link/left_gripper_link",
+                "grasps:",
+                "  grasp_mid:",
+                "    position: [0.0, 0.052, 0.105]",
+                "    orientation: {w: 1.0, xyz: [0.0, 0.0, 0.0]}",
+            ]
+        )
+        + "\n"
+    )
+
+    info = _load_grasp_transform(path, "grasp_mid")
+
+    assert info["object_frame"] == "/World/Bottle500"
+    assert info["gripper_frame"] == "/scene/left_base_link/left_gripper_link"
+    np.testing.assert_allclose(info["t_object_gripper"][:3, 3], [0.0, 0.052, 0.105])
+    np.testing.assert_allclose(info["t_object_gripper"][:3, :3], np.eye(3))
 
 
 def test_passive_contact_csv_writer_preserves_late_diagnostic_columns(tmp_path) -> None:
