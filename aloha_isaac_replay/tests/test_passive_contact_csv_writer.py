@@ -16,6 +16,7 @@ from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _apply_replay_target_and_step
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _controller_tracking_gate
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _load_support_plane_config
+from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _non_target_contact_gate
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _resolve_support_plane_options
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _should_disable_workcell_environment_collision
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _summarize_contact_pairs
@@ -427,6 +428,39 @@ def test_contact_summary_classifies_non_target_object_contacts() -> None:
     assert summary["object_contact_categories"]["diagnostic_support"]["contact_pair_count"] == 1
     assert summary["non_target_object_contact_found"] is True
     assert summary["non_target_object_contact_pair_count"] == 2
+
+
+def test_non_target_contact_gate_allows_declared_workcell_support_category() -> None:
+    summary = {"non_target_object_contact_categories": ["workcell_or_environment"]}
+
+    gate = _non_target_contact_gate(
+        contact_summary=summary,
+        fail_on_non_target=True,
+        allowed_categories=["workcell_or_environment"],
+    )
+
+    assert gate["pass"] is True
+    assert gate["status"] == "PASS_NON_TARGET_CONTACTS_ALLOWED"
+    assert gate["blocking_categories"] == []
+
+
+def test_non_target_contact_gate_rejects_undeclared_robot_body_category() -> None:
+    summary = {
+        "non_target_object_contact_categories": [
+            "same_side_robot_non_target",
+            "workcell_or_environment",
+        ]
+    }
+
+    gate = _non_target_contact_gate(
+        contact_summary=summary,
+        fail_on_non_target=True,
+        allowed_categories=["workcell_or_environment"],
+    )
+
+    assert gate["pass"] is False
+    assert gate["status"] == "FAIL_NON_TARGET_OBJECT_CONTACT"
+    assert gate["blocking_categories"] == ["same_side_robot_non_target"]
 
 
 def test_phase63_fixed_table_candidate_config_is_explicit_and_diagnostic() -> None:

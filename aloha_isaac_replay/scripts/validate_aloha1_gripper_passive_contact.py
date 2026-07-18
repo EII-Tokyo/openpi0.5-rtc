@@ -308,6 +308,7 @@ def _write_markdown(path: Path, payload: dict[str, Any]) -> None:
     diagnostic_contacts = payload.get("diagnostic_contact_summaries") or {}
     support_size = support_plane.get("size")
     tracking_gate = payload.get("controller_tracking_gate") or {}
+    non_target_gate = payload.get("non_target_contact_gate") or {}
     failure_reasons = payload.get("failure_reasons") or []
     lines = [
         "# Gripper Passive Contact Smoke",
@@ -339,6 +340,8 @@ def _write_markdown(path: Path, payload: dict[str, Any]) -> None:
         f"- non-target object contact found: `{payload.get('non_target_object_contact_found')}`",
         f"- non-target object contact pair count: `{payload.get('non_target_object_contact_pair_count')}`",
         f"- non-target object contact categories: `{payload.get('non_target_object_contact_categories')}`",
+        f"- allowed non-target object contact categories: `{payload.get('allowed_non_target_object_contact_categories')}`",
+        f"- non-target contact gate: `{non_target_gate}`",
         f"- strict non-target object contact gate ok: `{payload.get('non_target_object_contact_ok')}`",
         f"- cross-side proxy overlap detected: `{cross_overlap.get('overlap_detected')}`",
         f"- first contact pair: `{payload.get('first_contact_pair')}`",
@@ -724,6 +727,40 @@ def _controller_tracking_gate(
     else:
         row.update({"pass": False, "status": "FAIL_POST_STEP_TRACKING_EXCEEDS_THRESHOLD"})
     return row
+
+
+def _non_target_contact_gate(
+    *,
+    contact_summary: dict[str, Any],
+    fail_on_non_target: bool,
+    allowed_categories: list[str],
+) -> dict[str, Any]:
+    categories = list(contact_summary.get("non_target_object_contact_categories") or [])
+    allowed = set(allowed_categories)
+    blocking = sorted(category for category in categories if category not in allowed)
+    if not fail_on_non_target:
+        return {
+            "pass": True,
+            "status": "SKIPPED_NON_TARGET_CONTACT_GATE",
+            "allowed_categories": sorted(allowed),
+            "observed_categories": categories,
+            "blocking_categories": blocking,
+        }
+    if blocking:
+        return {
+            "pass": False,
+            "status": "FAIL_NON_TARGET_OBJECT_CONTACT",
+            "allowed_categories": sorted(allowed),
+            "observed_categories": categories,
+            "blocking_categories": blocking,
+        }
+    return {
+        "pass": True,
+        "status": "PASS_NON_TARGET_CONTACTS_ALLOWED",
+        "allowed_categories": sorted(allowed),
+        "observed_categories": categories,
+        "blocking_categories": [],
+    }
 
 
 def _set_finger_target_and_step(world: Any, art: Any, target: np.ndarray, steps: int) -> None:
@@ -1462,6 +1499,16 @@ def main() -> int:
         ),
     )
     parser.add_argument(
+        "--allowed-non-target-object-contact-category",
+        action="append",
+        default=[],
+        choices=("diagnostic_support", "workcell_or_environment", "same_side_robot_non_target", "other_side_robot", "unknown"),
+        help=(
+            "When --fail-on-non-target-object-contact is enabled, allow this non-target object-contact category. "
+            "Use this to distinguish intentional table/workcell support from robot-body or unknown collisions."
+        ),
+    )
+    parser.add_argument(
         "--trace-disable-usd-updates",
         action="store_true",
         help="Match Isaac asset-validator style contact probing. Off by default because this script needs live USD bbox readback.",
@@ -1556,6 +1603,8 @@ def main() -> int:
             "hdf5_gripper_end_frame": args.hdf5_gripper_end_frame,
             "hdf5_gripper_max_frames": args.hdf5_gripper_max_frames,
             "trace_contact_pairs": args.trace_contact_pairs,
+            "fail_on_non_target_object_contact": args.fail_on_non_target_object_contact,
+            "allowed_non_target_object_contact_categories": args.allowed_non_target_object_contact_category,
             "trace_disable_usd_updates": args.trace_disable_usd_updates,
             "disable_workcell_environment_collisions_for_diagnostic_replay": (
                 args.disable_workcell_environment_collisions_for_diagnostic_replay
@@ -2052,11 +2101,12 @@ def main() -> int:
         trace_pair_ok = bool(
             (not args.trace_contact_pairs) or (target_contact_ok and not cross_side_overlap_blocks_gate)
         )
-        non_target_object_contact_ok = bool(
-            (not args.trace_contact_pairs)
-            or (not args.fail_on_non_target_object_contact)
-            or (not contact_summary["non_target_object_contact_found"])
+        non_target_contact_gate = _non_target_contact_gate(
+            contact_summary=contact_summary,
+            fail_on_non_target=bool(args.trace_contact_pairs and args.fail_on_non_target_object_contact),
+            allowed_categories=list(args.allowed_non_target_object_contact_category),
         )
+        non_target_object_contact_ok = bool(non_target_contact_gate["pass"])
         trace_pair_ok = bool(trace_pair_ok and non_target_object_contact_ok)
         overall_pass = bool(overall_pass and trace_pair_ok)
         failure_reasons = []
@@ -2076,7 +2126,7 @@ def main() -> int:
             elif not target_contact_ok:
                 contact_trace_status = "FAIL_NO_TARGET_CONTACT"
             elif not non_target_object_contact_ok:
-                contact_trace_status = "FAIL_NON_TARGET_OBJECT_CONTACT"
+                contact_trace_status = str(non_target_contact_gate["status"])
             elif not no_explosion_ok:
                 contact_trace_status = "FAIL_OBJECT_EJECTION"
             else:
@@ -2141,6 +2191,8 @@ def main() -> int:
                 "contact_pair_trace_enabled": bool(args.trace_contact_pairs),
                 "contact_trace_disable_usd_updates": bool(args.trace_disable_usd_updates),
                 "fail_on_non_target_object_contact": bool(args.fail_on_non_target_object_contact),
+                "allowed_non_target_object_contact_categories": list(args.allowed_non_target_object_contact_category),
+                "non_target_contact_gate": non_target_contact_gate,
                 "non_target_object_contact_ok": non_target_object_contact_ok,
                 "contact_trace_rigid_body_paths": trace_state["rigid_body_paths"] if trace_state else [],
                 "first_contact_pair": first_contact_row,
