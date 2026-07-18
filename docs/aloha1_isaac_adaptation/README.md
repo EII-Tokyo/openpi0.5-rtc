@@ -72,6 +72,8 @@ The main conclusion is conservative:
 - [59 Phase 53 HDF5 gripper-replay contact gate](59_phase53_hdf5_gripper_replay_contact_2026-07-18.md)
 - [60 Phase 54 HDF5 left-arm + gripper replay contact gate](60_phase54_hdf5_left_arm_gripper_replay_contact_2026-07-18.md)
 - [61 Phase 55 HDF5 replay tracking error](61_phase55_hdf5_replay_tracking_error_2026-07-18.md)
+- [62 Phase 56 gravity replay failure](62_phase56_gravity_replay_failure_2026-07-18.md)
+- [63 Phase 57 gravity already-grasped replay](63_phase57_gravity_already_grasped_replay_2026-07-18.md)
 
 ## Operating Rule
 
