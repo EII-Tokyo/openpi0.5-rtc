@@ -57,6 +57,24 @@ Read this before using, changing, debugging, or reinstalling Isaac Sim / Isaac L
 - The directory also contains `config.yaml`, but that file records MJCF conversion metadata. For GUI startup, the effective startup target is the USD above, not the YAML file name.
 - Other `local_eval_assets/aloha_isaac*` directories are intermediate or scratch assets, not startup targets. Do not clean them by deletion unless the generator chain has been checked, because some are source layers for the confirmed stage.
 
+## ALOHA1 Replay Validation Gate
+- For Menagerie/Trossen `/scene` HDF5 left-arm replay, use the controller-ready mapping:
+  - `configs/aloha/trossen_scene_base_link_aloha1_left_controller_mapping.yaml`
+- This mapping preserves recorded ALOHA1 joint values and only renames left-arm DOFs into the `/scene` articulation. It intentionally does not apply FK rigid-alignment offsets, because those offsets can push runtime DOF targets outside PhysX limits.
+- A successful replay validation must report all of these gates:
+  - `target_limit_gate_ok: true`
+  - `controller_tracking_gate.pass: true`
+  - `contact_trace_status: PASS_BILATERAL_CONTACT_CANDIDATE` or the task-specific accepted contact status
+  - `failure_reasons: []`
+- Do not use `--disable-workcell-environment-collisions-for-diagnostic-replay` for final replay/contact validation. Phase80/82 on 2026-07-18 showed that native `/scene/worldBody` collisions are needed for stable HDF5 replay; disabling them can make the object fall and misdiagnose the controller.
+- If strict non-target contact checking is needed while keeping normal table/workcell support, use:
+  - `--fail-on-non-target-object-contact`
+  - `--allowed-non-target-object-contact-category workcell_or_environment`
+- `--support-plane-mode object_bottom` is diagnostic only. Phase81 on 2026-07-18 showed it can make contact look stable while corrupting post-step arm tracking, so it is not a final validation substitute.
+- Current reference run:
+  - Report: `reports/aloha1_isaac_adaptation/phase83_scene_proxy_hdf5_replay_native_workcell_allowed_support_20260718/gripper_passive_contact_metrics.json`
+  - Artifact: `.codex/artifacts/20260718-232540_aloha-phase83-native-workcell-allowed-support-strict-gate`
+
 ## USD Reference Safety
 - When referencing a USD asset into another Isaac stage, do not assume the source file's `defaultPrim` is the desired asset root.
 - If the desired asset root is known, pass the explicit prim path in the reference, for example `AddReference(asset_path, "/Bottle500")` or USDA syntax `@asset.usd@</Bottle500>`.
