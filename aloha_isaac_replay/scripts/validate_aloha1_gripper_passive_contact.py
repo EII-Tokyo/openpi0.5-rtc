@@ -186,9 +186,14 @@ def _create_passive_cube(
     side_length: float,
     mass: float,
     creation_mode: str,
+    shape: str = "cube",
+    axis: str = "X",
+    length_multiplier: float = 4.0,
 ) -> None:
     from pxr import Gf, UsdGeom, UsdPhysics
 
+    if shape != "cube" and creation_mode != "raw_usd":
+        raise ValueError(f"{shape} object shape requires raw_usd creation; got {creation_mode}")
     if creation_mode == "dynamic_cuboid":
         from isaacsim.core.api.objects import DynamicCuboid
 
@@ -206,16 +211,35 @@ def _create_passive_cube(
         return
     if creation_mode != "raw_usd":
         raise ValueError(f"Unsupported object creation mode: {creation_mode}")
-    cube = UsdGeom.Cube.Define(stage, path)
-    cube.CreateSizeAttr(1.0)
-    cube.CreateDisplayColorAttr([Gf.Vec3f(0.9, 0.2, 0.1)])
-    xform = UsdGeom.Xformable(cube.GetPrim())
+    normalized_axis = axis.upper()
+    if normalized_axis not in {"X", "Y", "Z"}:
+        raise ValueError(f"Unsupported object axis: {axis}")
+    if shape == "cube":
+        geom = UsdGeom.Cube.Define(stage, path)
+        geom.CreateSizeAttr(1.0)
+        scale = Gf.Vec3d(side_length, side_length, side_length)
+    elif shape == "cylinder":
+        geom = UsdGeom.Cylinder.Define(stage, path)
+        geom.CreateAxisAttr(normalized_axis)
+        geom.CreateRadiusAttr(side_length * 0.5)
+        geom.CreateHeightAttr(side_length * length_multiplier)
+        scale = Gf.Vec3d(1.0, 1.0, 1.0)
+    elif shape == "capsule":
+        geom = UsdGeom.Capsule.Define(stage, path)
+        geom.CreateAxisAttr(normalized_axis)
+        geom.CreateRadiusAttr(side_length * 0.5)
+        geom.CreateHeightAttr(side_length * length_multiplier)
+        scale = Gf.Vec3d(1.0, 1.0, 1.0)
+    else:
+        raise ValueError(f"Unsupported object shape: {shape}")
+    geom.CreateDisplayColorAttr([Gf.Vec3f(0.9, 0.2, 0.1)])
+    xform = UsdGeom.Xformable(geom.GetPrim())
     xform.ClearXformOpOrder()
     xform.AddTranslateOp(precision=UsdGeom.XformOp.PrecisionDouble).Set(Gf.Vec3d(*[float(x) for x in center]))
-    xform.AddScaleOp(precision=UsdGeom.XformOp.PrecisionDouble).Set(Gf.Vec3d(side_length, side_length, side_length))
-    UsdPhysics.CollisionAPI.Apply(cube.GetPrim()).CreateCollisionEnabledAttr().Set(True)
-    UsdPhysics.RigidBodyAPI.Apply(cube.GetPrim())
-    UsdPhysics.MassAPI.Apply(cube.GetPrim()).CreateMassAttr(float(mass))
+    xform.AddScaleOp(precision=UsdGeom.XformOp.PrecisionDouble).Set(scale)
+    UsdPhysics.CollisionAPI.Apply(geom.GetPrim()).CreateCollisionEnabledAttr().Set(True)
+    UsdPhysics.RigidBodyAPI.Apply(geom.GetPrim())
+    UsdPhysics.MassAPI.Apply(geom.GetPrim()).CreateMassAttr(float(mass))
 
 
 def _set_collision_offsets(stage: Any, prim_path: str, contact_offset: float | None, rest_offset: float | None) -> dict[str, Any]:
@@ -386,6 +410,9 @@ def main() -> int:
     parser.add_argument("--object-placement", choices=("gap_center", "moving_finger_surface"), default="gap_center")
     parser.add_argument("--object-clearance", type=float, default=0.001)
     parser.add_argument("--object-creation", choices=("dynamic_cuboid", "raw_usd"), default="raw_usd")
+    parser.add_argument("--object-shape", choices=("cube", "cylinder", "capsule"), default="cube")
+    parser.add_argument("--object-axis", choices=("X", "Y", "Z"), default="X")
+    parser.add_argument("--object-length-multiplier", type=float, default=4.0)
     parser.add_argument("--object-mass", type=float, default=0.01)
     parser.add_argument("--object-contact-offset", type=float, default=None)
     parser.add_argument("--object-rest-offset", type=float, default=None)
@@ -426,6 +453,9 @@ def main() -> int:
             "object_placement": args.object_placement,
             "object_clearance": args.object_clearance,
             "object_creation": args.object_creation,
+            "object_shape": args.object_shape,
+            "object_axis": args.object_axis,
+            "object_length_multiplier": args.object_length_multiplier,
             "object_contact_offset": args.object_contact_offset,
             "object_rest_offset": args.object_rest_offset,
             "proxy_contact_offset": args.proxy_contact_offset,
@@ -522,6 +552,9 @@ def main() -> int:
             side_length=side_length,
             mass=args.object_mass,
             creation_mode=args.object_creation,
+            shape=args.object_shape,
+            axis=args.object_axis,
+            length_multiplier=args.object_length_multiplier,
         )
         object_offset_row = _set_collision_offsets(stage, object_path, args.object_contact_offset, args.object_rest_offset)
         trace_state = None

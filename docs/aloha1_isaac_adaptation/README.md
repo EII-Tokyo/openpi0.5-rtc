@@ -66,6 +66,7 @@ The main conclusion is conservative:
 - [53 Phase 47 closure and object-size isolation](53_phase47_closure_and_object_size_isolation_2026-07-18.md)
 - [54 Phase 48 first contact pair trace](54_phase48_first_contact_pair_trace_2026-07-18.md)
 - [55 Phase 49 raw USD contact stability](55_phase49_raw_usd_contact_stability_2026-07-18.md)
+- [56 Phase 50 task-shape proxy contact](56_phase50_task_shape_proxy_contact_2026-07-18.md)
 
 ## Operating Rule
 
