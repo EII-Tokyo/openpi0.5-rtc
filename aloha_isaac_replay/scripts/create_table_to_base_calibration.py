@@ -1,16 +1,42 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import math
 from pathlib import Path
 from typing import Any
 
 import yaml
 
+from aloha_isaac_replay.scripts.audit_table_frame_candidate import CALIBRATED_STATUSES
 from aloha_isaac_replay.scripts.audit_table_frame_candidate import audit_table_frame
 
 
 DEFAULT_TABLE_SIZE = [1.22, 0.625, 0.04]
+
+
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as f:
+        for chunk in iter(lambda: f.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def build_evidence_record(
+    evidence_path: Path,
+    *,
+    evidence_type: str,
+    real_robot_touched: bool,
+    remote_103_touched: bool | str,
+) -> dict[str, Any]:
+    return {
+        "type": evidence_type,
+        "path": str(evidence_path),
+        "sha256": _sha256(evidence_path),
+        "real_robot_touched": real_robot_touched,
+        "remote_103_touched": remote_103_touched,
+    }
 
 
 def _parse_float_list(value: str, *, name: str, length: int) -> list[float]:
@@ -60,11 +86,12 @@ def build_calibration_config(
     right_yaw_deg: float,
     source: str,
     status: str,
+    calibration_evidence: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     table_quat = _yaw_quat_wxyz(table_yaw_deg)
     half_thickness_world = _quat_rotate_vector(table_quat, [0.0, 0.0, table_size[2] * 0.5])
     support_center = [table_top_center[i] - half_thickness_world[i] for i in range(3)]
-    return {
+    config: dict[str, Any] = {
         "stage": {"units": "meters", "up_axis": "Z"},
         "support_plane": {
             "mode": "fixed_box",
@@ -104,6 +131,9 @@ def build_calibration_config(
             "next_replay_gate": "aloha_isaac_replay/scripts/validate_aloha1_gripper_passive_contact.py",
         },
     }
+    if calibration_evidence is not None:
+        config["calibration_evidence"] = calibration_evidence
+    return config
 
 
 def main() -> int:
@@ -120,9 +150,23 @@ def main() -> int:
     parser.add_argument("--left-yaw-deg", type=float, default=0.0)
     parser.add_argument("--right-base", required=True, help="x,y,z right base origin in table frame meters")
     parser.add_argument("--right-yaw-deg", type=float, default=180.0)
+    parser.add_argument("--measurement-evidence", default=None, help="Path to a worksheet/transcript that proves the measured values.")
+    parser.add_argument("--measurement-evidence-type", default="manual_measurement_record")
+    parser.add_argument("--remote-103-touched", choices=("false", "readonly", "read_only"), default="false")
     args = parser.parse_args()
 
     output = Path(args.output)
+    evidence = None
+    if args.status in CALIBRATED_STATUSES:
+        if args.measurement_evidence is None:
+            parser.error(f"--status {args.status} requires --measurement-evidence")
+        remote_103_touched: bool | str = False if args.remote_103_touched == "false" else args.remote_103_touched
+        evidence = build_evidence_record(
+            Path(args.measurement_evidence),
+            evidence_type=args.measurement_evidence_type,
+            real_robot_touched=False,
+            remote_103_touched=remote_103_touched,
+        )
     cfg = build_calibration_config(
         table_top_center=_parse_float_list(args.table_top_center, name="--table-top-center", length=3),
         table_size=_parse_float_list(args.table_size, name="--table-size", length=3),
@@ -133,6 +177,7 @@ def main() -> int:
         right_yaw_deg=args.right_yaw_deg,
         source=args.source,
         status=args.status,
+        calibration_evidence=evidence,
     )
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(yaml.safe_dump(cfg, sort_keys=False), encoding="utf-8")

@@ -5,6 +5,7 @@ from pathlib import Path
 import yaml
 import pytest
 
+from aloha_isaac_replay.scripts.create_table_to_base_calibration import build_evidence_record
 from aloha_isaac_replay.scripts.audit_table_frame_candidate import audit_table_frame
 
 
@@ -49,6 +50,14 @@ def test_phase65_template_blocks_until_measured_transforms_exist() -> None:
 
 def test_measured_table_to_base_config_passes_and_composes_world_transforms(tmp_path: Path) -> None:
     cfg = yaml.safe_load(TEMPLATE.read_text())
+    evidence_path = tmp_path / "measurement_evidence.yaml"
+    evidence_path.write_text("measurement: synthetic\n")
+    cfg["calibration_evidence"] = build_evidence_record(
+        evidence_path,
+        evidence_type="unit_test",
+        real_robot_touched=False,
+        remote_103_touched=False,
+    )
     cfg["support_plane"]["center"] = [1.0, 2.0, 0.48]
     cfg["support_plane"]["size"] = [1.22, 0.625, 0.04]
     cfg["table_frame"]["T_world_table"].update({

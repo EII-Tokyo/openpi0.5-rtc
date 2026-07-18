@@ -1,0 +1,35 @@
+measurement:
+  source: user_measured
+  status: measured
+  measured_at: null
+  measured_by: null
+  units: meters
+  coordinate_frame: "Isaac world +Z up; table frame origin and axes must be stated in notes."
+  tool: null
+  uncertainty_m: null
+  real_robot_touched: false
+  remote_103_touched: false
+  notes: "Fill every null field before generating a calibrated table-to-base config."
+
+table:
+  # Table top center in Isaac world coordinates, meters.
+  top_center_world_m: null
+  # User measured table length, width, and current diagnostic thickness.
+  size_m: [1.22, 0.625, 0.04]
+  # Table yaw around Isaac +Z, degrees. Fill explicitly, even if the value is 0.
+  yaw_deg: null
+
+left_base:
+  # Left ALOHA base origin expressed in table coordinates, meters.
+  translation_table_m: null
+  # Left ALOHA base yaw around table +Z, degrees.
+  yaw_deg: null
+
+right_base:
+  # Right ALOHA base origin expressed in table coordinates, meters.
+  translation_table_m: null
+  # Right ALOHA base yaw around table +Z, degrees.
+  yaw_deg: null
+
+output:
+  calibration_path: local_eval_assets/aloha1_calibration/table_to_base_calibration.yaml

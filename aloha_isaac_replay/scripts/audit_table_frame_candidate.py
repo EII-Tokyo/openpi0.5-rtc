@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import math
 from pathlib import Path
@@ -81,6 +82,65 @@ def _load_yaml(path: Path) -> dict[str, Any]:
     if not isinstance(data, dict):
         raise ValueError(f"{path} must contain a YAML mapping")
     return data
+
+
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as f:
+        for chunk in iter(lambda: f.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _resolve_evidence_path(config_path: Path, evidence_path: str) -> Path:
+    path = Path(evidence_path)
+    if path.is_absolute():
+        return path
+    candidates = [config_path.parent / path, REPO_ROOT / path]
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
+    return candidates[-1]
+
+
+def _validate_calibration_evidence(
+    cfg: dict[str, Any],
+    config_path: Path,
+    *,
+    require_evidence: bool,
+    issues: list[str],
+) -> dict[str, Any] | None:
+    evidence = cfg.get("calibration_evidence")
+    if not isinstance(evidence, dict):
+        if require_evidence:
+            issues.append("calibration_evidence missing")
+        return None
+    summary: dict[str, Any] = {
+        "type": evidence.get("type"),
+        "path": evidence.get("path"),
+        "sha256": evidence.get("sha256"),
+        "real_robot_touched": evidence.get("real_robot_touched"),
+        "remote_103_touched": evidence.get("remote_103_touched"),
+    }
+    for key in ("type", "path", "sha256", "real_robot_touched", "remote_103_touched"):
+        if key not in evidence:
+            issues.append(f"calibration_evidence.{key} missing")
+    sha = str(evidence.get("sha256", ""))
+    if len(sha) != 64 or any(ch not in "0123456789abcdef" for ch in sha.lower()):
+        issues.append("calibration_evidence.sha256 must be a 64-character hex digest")
+    evidence_path_value = evidence.get("path")
+    if isinstance(evidence_path_value, str) and evidence_path_value:
+        evidence_path = _resolve_evidence_path(config_path, evidence_path_value)
+        summary["resolved_path"] = _rel(evidence_path)
+        if not evidence_path.exists():
+            issues.append(f"calibration_evidence.path does not exist: {evidence_path_value}")
+        elif len(sha) == 64 and _sha256(evidence_path) != sha.lower():
+            issues.append("calibration_evidence.sha256 does not match calibration_evidence.path")
+    if evidence.get("real_robot_touched") is not False:
+        issues.append("calibration_evidence.real_robot_touched must be false for this simulation-only gate")
+    if evidence.get("remote_103_touched") not in {False, "readonly", "read_only"}:
+        issues.append("calibration_evidence.remote_103_touched must be false or readonly")
+    return summary
 
 
 def _as_float3(value: Any, *, name: str) -> list[float]:
@@ -207,6 +267,7 @@ def audit_table_frame(config_path: Path) -> dict[str, Any]:
     blocking_reasons: list[str] = []
     missing_base_transform = any(frame_status[key] in BLOCKING_STATUSES for key in ("T_table_left_base", "T_table_right_base"))
     diagnostic_world_table = frame_status["T_world_table"] in BLOCKING_STATUSES
+    candidate_calibrated = all(status in CALIBRATED_STATUSES for status in frame_status.values())
 
     world_table = _validate_transform(
         "T_world_table",
@@ -238,6 +299,12 @@ def audit_table_frame(config_path: Path) -> dict[str, Any]:
             blocking_reasons.append(
                 f"T_world_table.translation does not match support_plane top center; max mismatch {mismatch:.6g} m"
             )
+    evidence_summary = _validate_calibration_evidence(
+        cfg,
+        config_path,
+        require_evidence=candidate_calibrated,
+        issues=blocking_reasons,
+    )
 
     calibration_ready = not blocking_reasons
     status = (
@@ -275,6 +342,7 @@ def audit_table_frame(config_path: Path) -> dict[str, Any]:
             "T_table_left_base": left_base,
             "T_table_right_base": right_base,
         },
+        "calibration_evidence": evidence_summary,
         "table_frame": table_frame,
         "world_base_transforms": world_base_transforms,
         "table_geometry": {

@@ -7,6 +7,7 @@ import yaml
 import pytest
 
 from aloha_isaac_replay.scripts.create_table_to_base_calibration import build_calibration_config
+from aloha_isaac_replay.scripts.create_table_to_base_calibration import build_evidence_record
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _audit_required_table_frame
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _load_support_plane_config
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _resolve_support_plane_options
@@ -160,6 +161,8 @@ def test_require_calibrated_table_frame_rejects_diagnostic_config() -> None:
 def test_require_calibrated_table_frame_accepts_measured_config(tmp_path: Path) -> None:
     import argparse
 
+    evidence_path = tmp_path / "measurement_evidence.yaml"
+    evidence_path.write_text("measurement: synthetic\n")
     cfg = build_calibration_config(
         table_top_center=[1.0, 2.0, 0.5],
         table_size=[1.22, 0.625, 0.04],
@@ -170,6 +173,12 @@ def test_require_calibrated_table_frame_accepts_measured_config(tmp_path: Path) 
         right_yaw_deg=180.0,
         source="user_measured",
         status="measured",
+        calibration_evidence=build_evidence_record(
+            evidence_path,
+            evidence_type="unit_test",
+            real_robot_touched=False,
+            remote_103_touched=False,
+        ),
     )
     path = tmp_path / "measured.yaml"
     path.write_text(yaml.safe_dump(cfg, sort_keys=False))
