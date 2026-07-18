@@ -75,6 +75,39 @@ One pair includes the right fingertip proxy:
 
 Therefore the support plane still cannot be treated as a final real table model.
 
+## Phase 59b Contact Classification
+
+The validator was then extended to classify diagnostic contacts for support or table prims. This does not change the pass/fail rule; it only makes the extra contacts interpretable.
+
+Command artifact:
+
+```text
+.codex/artifacts/20260718-144155_phase59b-contact-classification-start143-low-support
+```
+
+Structured report:
+
+```text
+reports/aloha1_isaac_adaptation/phase59b_contact_classification_start143_low_support_20260718/gripper_passive_contact_metrics.json
+```
+
+Result:
+
+| Field | Value |
+| --- | ---: |
+| status | `PASS` |
+| contact trace status | `PASS_BILATERAL_CONTACT_CANDIDATE` |
+| left-arm max abs error | `0.0213327` |
+| wrong contact pair count | `12` |
+| support contact row count | `800` |
+| support-object contact row count | `770` |
+| support-expected-finger contact row count | `30` |
+| support-other contact row count | `0` |
+
+This confirms that the local support plane is not touching arbitrary unrelated geometry. The remaining artificial contact is specific: support-object contact dominates, with some support-finger contact.
+
+That is better evidence than the old undifferentiated `wrong_contact_pairs` list.
+
 ## Conclusion
 
 Phase 59 strengthens the current interpretation:
@@ -108,4 +141,3 @@ The gate should verify:
 3. the bottle remains bounded under gravity;
 4. the left-arm tracking error stays near the Phase 57 range;
 5. all extra contact pairs are explicitly classified as table-object, table-gripper, or unexpected.
-

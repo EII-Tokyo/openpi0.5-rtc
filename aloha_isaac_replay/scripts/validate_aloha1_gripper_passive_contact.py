@@ -92,6 +92,7 @@ def _write_markdown(path: Path, payload: dict[str, Any]) -> None:
     finger_hit_lines = [f"- `{path}`: `{hit}`" for path, hit in finger_hits.items()]
     cross_overlap = payload.get("cross_side_proxy_overlap") or {}
     support_plane = payload.get("support_plane") or {}
+    diagnostic_contacts = payload.get("diagnostic_contact_summaries") or {}
     lines = [
         "# Gripper Passive Contact Smoke",
         "",
@@ -121,6 +122,7 @@ def _write_markdown(path: Path, payload: dict[str, Any]) -> None:
         f"- support plane center: `{support_plane.get('center')}`",
         f"- support plane size xy: `{support_plane.get('size_xy')}`",
         f"- support plane thickness: `{support_plane.get('thickness')}`",
+        f"- diagnostic contact summaries: `{diagnostic_contacts}`",
         "",
         "## Expected Finger Coverage",
         "",
@@ -689,11 +691,22 @@ def _pair_touches_finger(pair: dict[str, Any], object_path: str, finger_path: st
     return _pair_touches_targets(pair, object_path, [finger_path])
 
 
+def _pair_touches_path(pair: dict[str, Any], path: str) -> bool:
+    collider0 = str(pair["collider0"])
+    collider1 = str(pair["collider1"])
+    return bool(_path_matches(collider0, path) or _path_matches(collider1, path))
+
+
+def _unique_pairs(rows: list[dict[str, Any]]) -> list[list[str]]:
+    return [list(pair) for pair in sorted({tuple(row["sorted_pair"]) for row in rows})]
+
+
 def _summarize_contact_pairs(
     *,
     contact_pair_rows: list[dict[str, Any]],
     object_path: str,
     expected_finger_paths: list[str],
+    diagnostic_contact_paths: list[str] | None = None,
     sample_limit: int = 80,
 ) -> dict[str, Any]:
     unique_pairs = sorted({tuple(row["sorted_pair"]) for row in contact_pair_rows})
@@ -718,6 +731,31 @@ def _summarize_contact_pairs(
         finger_path: [row for row in rows if row.get("type_name") == "CONTACT_FOUND"]
         for finger_path, rows in finger_target_rows.items()
     }
+    diagnostic_summaries: dict[str, Any] = {}
+    for path in diagnostic_contact_paths or []:
+        path_rows = [row for row in contact_pair_rows if _pair_touches_path(row, path)]
+        object_rows = [row for row in path_rows if _pair_touches_path(row, object_path)]
+        finger_rows = [
+            row
+            for row in path_rows
+            if any(_pair_touches_path(row, finger_path) for finger_path in expected_finger_paths)
+        ]
+        other_rows = [
+            row
+            for row in path_rows
+            if not _pair_touches_path(row, object_path)
+            and not any(_pair_touches_path(row, finger_path) for finger_path in expected_finger_paths)
+        ]
+        diagnostic_summaries[path] = {
+            "contact_pair_count": len(path_rows),
+            "unique_contact_pairs": _unique_pairs(path_rows),
+            "object_contact_pair_count": len(object_rows),
+            "object_contact_pairs": _unique_pairs(object_rows),
+            "expected_finger_contact_pair_count": len(finger_rows),
+            "expected_finger_contact_pairs": _unique_pairs(finger_rows),
+            "other_contact_pair_count": len(other_rows),
+            "other_contact_pairs": _unique_pairs(other_rows),
+        }
     return {
         "contact_pair_count": len(contact_pair_rows),
         "unique_contact_pairs": [list(pair) for pair in unique_pairs],
@@ -746,6 +784,7 @@ def _summarize_contact_pairs(
         "target_contact_steps": target_steps,
         "target_contact_persistence_steps": len(target_steps),
         "wrong_contact_pairs": [list(pair) for pair in wrong_pairs],
+        "diagnostic_contact_summaries": diagnostic_summaries,
     }
 
 
@@ -1207,6 +1246,7 @@ def main() -> int:
             contact_pair_rows=contact_pair_rows,
             object_path=object_path,
             expected_finger_paths=expected_finger_paths,
+            diagnostic_contact_paths=[support_plane_row["path"]] if support_plane_row else None,
         )
         if args.moving_fingers == "both":
             target_contact_ok = bool(contact_summary["all_expected_fingers_target_contact_pair_found"])
