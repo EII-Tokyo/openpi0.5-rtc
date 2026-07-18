@@ -94,6 +94,7 @@ The main conclusion is conservative:
 - [81 Phase 76 contact trace target roots](81_phase76_contact_trace_target_roots_2026-07-18.md)
 - [82 Phase 77 non-target contact quality gate](82_phase77_non_target_contact_quality_gate_2026-07-18.md)
 - [83 Phase 97 drive-target controller gain reference](83_phase97_drive_target_controller_gain_reference_2026-07-18.md)
+- [84 Phase 99 convex legacy collision cleanup](84_phase99_convex_legacy_collision_cleanup_2026-07-19.md)
 
 ## Operating Rule
 

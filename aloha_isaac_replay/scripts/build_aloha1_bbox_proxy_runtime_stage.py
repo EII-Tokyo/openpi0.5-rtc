@@ -240,7 +240,7 @@ def _create_proxy_stage(
     proxy_dynamic_friction: float | None,
     proxy_restitution: float | None,
     contact_proxy_profile: str,
-) -> list[str]:
+) -> dict[str, list[str]]:
     from pxr import Gf
     from pxr import PhysxSchema
     from pxr import Usd
@@ -260,10 +260,21 @@ def _create_proxy_stage(
         world = UsdGeom.Xform.Define(stage, "/World").GetPrim()
     stage.SetDefaultPrim(world)
 
-    for prim_path in disabled_root_collisions:
+    disabled_collision_approximation_paths: list[str] = []
+
+    def disable_source_collision_prim(prim_path: str) -> None:
         prim = stage.OverridePrim(prim_path)
         collision = UsdPhysics.CollisionAPI.Apply(prim)
         collision.CreateCollisionEnabledAttr().Set(False)
+        # PhysX still parses dynamic-body MeshCollisionAPI prims even when the
+        # collision is disabled. Author a supported approximation explicitly so
+        # disabled legacy finger meshes do not rely on PhysX fallback behavior.
+        mesh_collision = UsdPhysics.MeshCollisionAPI.Apply(prim)
+        mesh_collision.CreateApproximationAttr().Set(UsdPhysics.Tokens.convexHull)
+        disabled_collision_approximation_paths.append(prim_path)
+
+    for prim_path in disabled_root_collisions:
+        disable_source_collision_prim(prim_path)
 
     disabled_selected_source_collisions: list[str] = []
     for row in candidates:
@@ -298,8 +309,7 @@ def _create_proxy_stage(
                     selected_collision_paths.add(prim_path)
 
         for prim_path in sorted(selected_collision_paths):
-            collision = UsdPhysics.CollisionAPI.Apply(stage.OverridePrim(prim_path))
-            collision.CreateCollisionEnabledAttr().Set(False)
+            disable_source_collision_prim(prim_path)
             disabled_selected_source_collisions.append(prim_path)
 
     material = None
@@ -338,7 +348,10 @@ def _create_proxy_stage(
             UsdShade.MaterialBindingAPI.Apply(proxy.GetPrim()).Bind(material)
 
     stage.Save()
-    return disabled_selected_source_collisions
+    return {
+        "disabled_selected_source_collisions": disabled_selected_source_collisions,
+        "disabled_collision_approximation_paths": disabled_collision_approximation_paths,
+    }
 
 
 def _render_markdown(payload: dict[str, Any]) -> str:
@@ -355,6 +368,7 @@ def _render_markdown(payload: dict[str, Any]) -> str:
         f"- exclude regex: `{payload['inputs']['exclude_regex']}`",
         f"- disabled root collision prims: `{summary['disabled_root_collision_count']}`",
         f"- disabled selected source collision prims: `{summary.get('disabled_selected_source_collision_count')}`",
+        f"- disabled collision convexHull approximation prims: `{summary.get('disabled_collision_approximation_count')}`",
         f"- selected bbox proxies: `{summary['selected_proxy_count']}`",
         f"- skipped rigid bodies: `{summary['skipped_rigid_body_count']}`",
         "",
@@ -464,7 +478,7 @@ def main() -> int:
             exclude_regex=args.exclude_regex,
             contact_proxy_profile=args.contact_proxy_profile,
         )
-        disabled_selected_source_collisions = _create_proxy_stage(
+        proxy_stage_outputs = _create_proxy_stage(
             input_stage_path=input_stage_path,
             output_stage_path=output_stage_path,
             candidates=candidates,
@@ -476,12 +490,15 @@ def main() -> int:
             proxy_restitution=args.proxy_restitution,
             contact_proxy_profile=args.contact_proxy_profile,
         )
+        disabled_selected_source_collisions = proxy_stage_outputs["disabled_selected_source_collisions"]
+        disabled_collision_approximation_paths = proxy_stage_outputs["disabled_collision_approximation_paths"]
         summary = {
             "rigid_body_count": len(candidates),
             "selected_proxy_count": sum(1 for row in candidates if row["selected"]),
             "skipped_rigid_body_count": sum(1 for row in candidates if not row["selected"]),
             "disabled_root_collision_count": len(disabled_root_collisions),
             "disabled_selected_source_collision_count": len(disabled_selected_source_collisions),
+            "disabled_collision_approximation_count": len(disabled_collision_approximation_paths),
         }
         payload.update(
             {
@@ -489,6 +506,7 @@ def main() -> int:
                 "summary": summary,
                 "candidate_rows": candidates,
                 "disabled_selected_source_collisions": disabled_selected_source_collisions,
+                "disabled_collision_approximation_paths": disabled_collision_approximation_paths,
             }
         )
         _write_json(json_path, payload)
