@@ -387,14 +387,19 @@ def _write_markdown(path: Path, payload: dict[str, Any]) -> None:
 
 
 def _finger_targets(
-    art: Any, offset: float, limit_margin: float, finger_dof_names: dict[str, str]
+    art: Any,
+    offset: float,
+    limit_margin: float,
+    finger_dof_names: dict[str, str],
+    *,
+    right_finger_sign: float = -1.0,
 ) -> tuple[np.ndarray, dict[str, float]]:
     dof_names = list(art.dof_names)
     limits = _get_limits(art)
     qpos = np.asarray(art.get_joint_positions(), dtype=np.float64).reshape(-1)
     target = qpos.copy()
     target_values: dict[str, float] = {}
-    for logical_name, sign in [("left_finger", 1.0), ("right_finger", -1.0)]:
+    for logical_name, sign in [("left_finger", 1.0), ("right_finger", float(right_finger_sign))]:
         dof_name = finger_dof_names[logical_name]
         idx = dof_names.index(dof_name)
         lower, upper = [float(x) for x in limits[idx]]
@@ -913,6 +918,7 @@ def _create_passive_cube(
     length_multiplier: float = 4.0,
     usd_path: str | Path | None = None,
     usd_prim_path: str = "/Bottle500",
+    rigid_body: bool = True,
 ) -> None:
     from pxr import Gf
     from pxr import UsdGeom
@@ -1002,8 +1008,9 @@ def _create_passive_cube(
 
         for child in (body.GetPrim(), neck.GetPrim(), mouth.GetPrim()):
             UsdPhysics.CollisionAPI.Apply(child).CreateCollisionEnabledAttr().Set(True)
-        UsdPhysics.RigidBodyAPI.Apply(root.GetPrim())
-        UsdPhysics.MassAPI.Apply(root.GetPrim()).CreateMassAttr(float(mass))
+        if rigid_body:
+            UsdPhysics.RigidBodyAPI.Apply(root.GetPrim())
+            UsdPhysics.MassAPI.Apply(root.GetPrim()).CreateMassAttr(float(mass))
         return
     elif shape == "bottle_usd":
         if usd_path is None:
@@ -1027,8 +1034,9 @@ def _create_passive_cube(
         correction = np.asarray(center, dtype=np.float64) - composed_center
         translate_op.Set(Gf.Vec3d(*[float(x) for x in np.asarray(center, dtype=np.float64) + correction]))
 
-        UsdPhysics.RigidBodyAPI.Apply(root.GetPrim())
-        UsdPhysics.MassAPI.Apply(root.GetPrim()).CreateMassAttr(float(mass))
+        if rigid_body:
+            UsdPhysics.RigidBodyAPI.Apply(root.GetPrim())
+            UsdPhysics.MassAPI.Apply(root.GetPrim()).CreateMassAttr(float(mass))
         return
     else:
         raise ValueError(f"Unsupported object shape: {shape}")
@@ -1038,8 +1046,9 @@ def _create_passive_cube(
     xform.AddTranslateOp(precision=UsdGeom.XformOp.PrecisionDouble).Set(Gf.Vec3d(*[float(x) for x in center]))
     xform.AddScaleOp(precision=UsdGeom.XformOp.PrecisionDouble).Set(scale)
     UsdPhysics.CollisionAPI.Apply(geom.GetPrim()).CreateCollisionEnabledAttr().Set(True)
-    UsdPhysics.RigidBodyAPI.Apply(geom.GetPrim())
-    UsdPhysics.MassAPI.Apply(geom.GetPrim()).CreateMassAttr(float(mass))
+    if rigid_body:
+        UsdPhysics.RigidBodyAPI.Apply(geom.GetPrim())
+        UsdPhysics.MassAPI.Apply(geom.GetPrim()).CreateMassAttr(float(mass))
 
 
 def _create_static_support_box(
@@ -1477,6 +1486,17 @@ def main() -> int:
     )
     parser.add_argument("--open-offset", type=float, default=0.006)
     parser.add_argument("--close-offset", type=float, default=-0.006)
+    parser.add_argument(
+        "--right-finger-close-sign",
+        type=float,
+        choices=(-1.0, 1.0),
+        default=-1.0,
+        help=(
+            "Right-finger sign used only for synthetic close targets. Keep -1 for the legacy opposed-sign "
+            "target convention; use +1 when validating ALOHA1 scene-base proxies that close spatially with "
+            "both finger DOFs decreasing."
+        ),
+    )
     parser.add_argument("--settle-steps", type=int, default=60)
     parser.add_argument("--close-steps", type=int, default=180)
     parser.add_argument("--physics-dt", type=float, default=1.0 / 50.0)
@@ -1510,6 +1530,14 @@ def main() -> int:
     parser.add_argument("--object-placement", choices=("gap_center", "moving_finger_surface"), default="gap_center")
     parser.add_argument("--object-clearance", type=float, default=0.001)
     parser.add_argument("--object-creation", choices=("dynamic_cuboid", "raw_usd"), default="raw_usd")
+    parser.add_argument(
+        "--disable-object-rigid-body",
+        action="store_true",
+        help=(
+            "Create the raw USD contact object as a fixed collision body. This is for active-contact gate "
+            "smoke tests; dynamic object grasp validation should leave the rigid body enabled."
+        ),
+    )
     parser.add_argument(
         "--object-shape", choices=("cube", "cylinder", "capsule", "bottle_proxy", "bottle_usd"), default="cube"
     )
@@ -1668,6 +1696,7 @@ def main() -> int:
             "control_mode": "opposed_fingers",
             "open_offset": args.open_offset,
             "close_offset": args.close_offset,
+            "right_finger_close_sign": args.right_finger_close_sign,
             "settle_steps": args.settle_steps,
             "close_steps": args.close_steps,
             "physics_dt": args.physics_dt,
@@ -1676,6 +1705,7 @@ def main() -> int:
             "object_placement": args.object_placement,
             "object_clearance": args.object_clearance,
             "object_creation": args.object_creation,
+            "object_rigid_body": not args.disable_object_rigid_body,
             "object_shape": args.object_shape,
             "object_axis": args.object_axis,
             "object_length_multiplier": args.object_length_multiplier,
@@ -1924,6 +1954,7 @@ def main() -> int:
             length_multiplier=args.object_length_multiplier,
             usd_path=args.object_usd,
             usd_prim_path=args.object_usd_prim_path,
+            rigid_body=not args.disable_object_rigid_body,
         )
         object_offset_row = _set_object_collision_offsets(
             stage, object_path, args.object_contact_offset, args.object_rest_offset
@@ -2069,7 +2100,11 @@ def main() -> int:
                     close_sequence = close_sequence[: args.close_steps]
             else:
                 close_target, close_values = _finger_targets(
-                    art, args.close_offset, args.limit_margin, finger_dof_names
+                    art,
+                    args.close_offset,
+                    args.limit_margin,
+                    finger_dof_names,
+                    right_finger_sign=args.right_finger_close_sign,
                 )
                 close_sequence = []
             if args.moving_fingers != "both" and hdf5_target_sequence is None:

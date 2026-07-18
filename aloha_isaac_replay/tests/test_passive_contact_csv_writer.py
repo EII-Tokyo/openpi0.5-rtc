@@ -13,6 +13,7 @@ from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _active_target_contact_gate
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _guard_final_contact_stage_namespace
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _guard_support_plane_calibration_mode
+from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _finger_targets
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _passive_contact_geometry_sanity
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _apply_replay_target_and_step
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _controller_tracking_gate
@@ -56,6 +57,25 @@ class _FakeSceneBaseLeftArticulation:
 
     def get_joint_positions(self) -> np.ndarray:
         return np.zeros(3, dtype=np.float64)
+
+
+def test_finger_targets_can_use_same_sign_right_close(monkeypatch) -> None:
+    art = _FakeSceneBaseLeftArticulation()
+    monkeypatch.setattr(
+        "aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact._get_limits",
+        lambda _art: np.asarray([[-1.0, 1.0], [0.0, 0.08], [0.0, 0.08]], dtype=np.float64),
+    )
+    finger_dofs = {"left_finger": "left_left_finger", "right_finger": "left_right_finger"}
+
+    legacy_target, legacy_values = _finger_targets(art, -0.014, 0.001, finger_dofs)
+    spatial_target, spatial_values = _finger_targets(
+        art, -0.014, 0.001, finger_dofs, right_finger_sign=1.0
+    )
+
+    assert legacy_values["left_finger"] == spatial_values["left_finger"]
+    assert legacy_values["right_finger"] > 0.04
+    assert spatial_values["right_finger"] < 0.04
+    assert legacy_target[2] != spatial_target[2]
 
 
 def test_passive_contact_csv_writer_preserves_late_diagnostic_columns(tmp_path) -> None:

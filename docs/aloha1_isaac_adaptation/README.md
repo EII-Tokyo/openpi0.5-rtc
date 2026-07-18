@@ -97,6 +97,7 @@ The main conclusion is conservative:
 - [84 Phase 99 convex legacy collision cleanup](84_phase99_convex_legacy_collision_cleanup_2026-07-19.md)
 - [85 Phase 101 active-grasp negative control](85_phase101_active_grasp_negative_control_2026-07-19.md)
 - [86 Phase 102 active-contact proxy smoke test](86_phase102_active_grasp_proxy_smoke_2026-07-19.md)
+- [87 Phase 103 two-finger active-contact proxy smoke test](87_phase103_two_finger_active_proxy_smoke_2026-07-19.md)
 
 ## Operating Rule
 
@@ -147,4 +148,11 @@ The current positive active-contact smoke test can be rerun with:
 ```bash
 codex-evidence --name aloha-phase102-active-grasp-proxy-smoke -- \
   .venv/bin/python aloha_isaac_replay/scripts/run_phase102_active_grasp_proxy_smoke.py
+```
+
+The current two-finger active-contact proxy smoke test can be rerun with:
+
+```bash
+codex-evidence --name aloha-phase103-two-finger-active-proxy-smoke -- \
+  .venv/bin/python aloha_isaac_replay/scripts/run_phase103_two_finger_active_proxy_smoke.py
 ```
