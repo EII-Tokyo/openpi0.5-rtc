@@ -99,6 +99,9 @@ The main conclusion is conservative:
 - [86 Phase 102 active-contact proxy smoke test](86_phase102_active_grasp_proxy_smoke_2026-07-19.md)
 - [87 Phase 103 two-finger active-contact proxy smoke test](87_phase103_two_finger_active_proxy_smoke_2026-07-19.md)
 - [88 Phase 104 Grasp-YAML BottleUSD contact failure](88_phase104_grasp_yaml_bottleusd_contact_failure_2026-07-19.md)
+- [89 Phase 106 BottleUSD already-grasped gate](89_phase106_bottleusd_already_grasped_gate_2026-07-19.md)
+- [90 Phase 107 BottleUSD HDF5 drive-target gate](90_phase107_bottleusd_hdf5_drive_target_gate_2026-07-19.md)
+- [91 Phase 108 diagnostic table contact gate](91_phase108_diagnostic_table_contact_gate_2026-07-19.md)
 
 ## Operating Rule
 
@@ -170,4 +173,11 @@ The current full-scene Bottle500 HDF5 drive-target replay gate can be rerun with
 ```bash
 codex-evidence --name aloha-phase107-bottleusd-hdf5-drive-target-runner -- \
   .venv/bin/python aloha_isaac_replay/scripts/run_phase107_bottleusd_hdf5_drive_target_gate.py
+```
+
+The current diagnostic fixed-table replay gate can be rerun with:
+
+```bash
+codex-evidence --name aloha-phase108-bottleusd-hdf5-diagnostic-table-runner -- \
+  .venv/bin/python aloha_isaac_replay/scripts/run_phase108_bottleusd_hdf5_diagnostic_table_gate.py
 ```
