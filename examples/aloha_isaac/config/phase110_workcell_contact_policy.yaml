@@ -17,6 +17,15 @@ rules:
       it does not prove successful insertion without calibrated pose and
       trajectory/contact validation.
 
+  - path_prefix: /World/Table
+    semantic_class: measured_table_contact_not_yet_task_valid
+    decision: deny
+    notes: >
+      The measured table overlay is real workcell geometry, but table contact
+      is not task-valid for the current already-grasped bottle-in-pipe gates.
+      Keep it denied until a separate calibrated pregrasp/table-support phase
+      distinguishes normal support from bottle drop or drag failure.
+
   - path_prefix: /scene/worldBody/__22
     semantic_class: denied_frame_rail_collision
     decision: deny

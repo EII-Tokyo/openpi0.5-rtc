@@ -31,6 +31,18 @@ It still denies the old stale workcell leaves:
 /scene/worldBody/table
 ```
 
+It also explicitly denies the measured table overlay:
+
+```text
+/World/Table
+```
+
+with semantic class:
+
+```text
+measured_table_contact_not_yet_task_valid
+```
+
 The policy still uses:
 
 ```text
@@ -39,7 +51,7 @@ default_decision: deny
 
 ## Why Table Is Not Allowed Yet
 
-`/World/Table` is not globally allowed in this phase.
+`/World/Table` is not globally allowed in this phase. It is explicitly denied, not just left to the default unknown collision rule.
 
 Reason:
 
@@ -60,7 +72,7 @@ Unit test:
 Result:
 
 ```text
-3 passed
+4 passed
 ```
 
 Strict measured-workcell regression:
@@ -97,4 +109,3 @@ It does not prove:
 - the trajectory was stable.
 
 Those must be validated by later contact and trajectory gates.
-

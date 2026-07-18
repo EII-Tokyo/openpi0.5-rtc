@@ -86,3 +86,30 @@ def test_workcell_contact_policy_allows_measured_pipe_placeholder_contact() -> N
     assert gate["status"] == "PASS_WORKCELL_CONTACT_POLICY"
     assert gate["rows"][0]["semantic_class"] == "candidate_measured_pipe_contact"
     assert gate["rows"][0]["decision"] == "allow"
+
+
+def test_workcell_contact_policy_explicitly_denies_measured_table_contact() -> None:
+    policy = _load_workcell_contact_policy(POLICY)
+    object_path = "/World/Bottle500"
+    contact_summary = {
+        "object_contact_categories": {
+            "workcell_or_environment": {
+                "unique_contact_pairs": [
+                    [
+                        f"{object_path}/Collisions/body",
+                        "/World/Table/collision",
+                    ]
+                ]
+            }
+        }
+    }
+
+    gate = _workcell_contact_policy_gate(
+        contact_summary=contact_summary,
+        object_path=object_path,
+        policy=policy,
+    )
+
+    assert gate["pass"] is False
+    assert gate["status"] == "FAIL_WORKCELL_CONTACT_POLICY"
+    assert gate["denied_semantic_classes"] == ["measured_table_contact_not_yet_task_valid"]
