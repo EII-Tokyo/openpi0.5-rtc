@@ -81,7 +81,7 @@ Validated locally:
 Result:
 
 ```text
-21 passed
+23 passed
 ```
 
 No real robot, `192.168.1.103`, or Isaac runtime action was used.
