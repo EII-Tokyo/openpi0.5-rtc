@@ -790,7 +790,7 @@ def _active_target_contact_gate(
     if not require_active_target_contact:
         row.update({"pass": True, "status": "SKIPPED_ACTIVE_TARGET_CONTACT_GATE"})
         return row
-    if "close" in found_phases:
+    if contact_summary.get("first_target_contact_found_phase") == "close":
         row.update({"pass": True, "status": "PASS_ACTIVE_TARGET_CONTACT_FOUND_DURING_CLOSE"})
     else:
         row.update({"pass": False, "status": "FAIL_NO_ACTIVE_TARGET_CONTACT_DURING_CLOSE"})

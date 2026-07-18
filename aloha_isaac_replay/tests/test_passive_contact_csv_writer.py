@@ -470,6 +470,21 @@ def test_active_target_contact_gate_requires_close_contact_found_event() -> None
     assert gate["status"] == "FAIL_NO_ACTIVE_TARGET_CONTACT_DURING_CLOSE"
 
 
+def test_active_target_contact_gate_rejects_settle_first_even_if_close_later() -> None:
+    gate = _active_target_contact_gate(
+        contact_summary={
+            "target_contact_found_phases": ["close", "settle"],
+            "first_target_contact_phase": "settle",
+            "first_target_contact_found_phase": "settle",
+        },
+        require_active_target_contact=True,
+        already_in_contact_setup=False,
+    )
+
+    assert gate["pass"] is False
+    assert gate["status"] == "FAIL_NO_ACTIVE_TARGET_CONTACT_DURING_CLOSE"
+
+
 def test_active_target_contact_gate_passes_close_contact_found_event() -> None:
     gate = _active_target_contact_gate(
         contact_summary={
