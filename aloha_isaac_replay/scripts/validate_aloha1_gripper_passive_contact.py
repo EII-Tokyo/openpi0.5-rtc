@@ -76,6 +76,9 @@ def _write_markdown(path: Path, payload: dict[str, Any]) -> None:
     pair_lines = [f"- `{pair}`" for pair in unique_pairs[:12]]
     if len(unique_pairs) > 12:
         pair_lines.append(f"- ... {len(unique_pairs) - 12} more unique pairs")
+    finger_hits = payload.get("target_contact_finger_hits") or {}
+    finger_hit_lines = [f"- `{path}`: `{hit}`" for path, hit in finger_hits.items()]
+    cross_overlap = payload.get("cross_side_proxy_overlap") or {}
     lines = [
         "# Gripper Passive Contact Smoke",
         "",
@@ -95,10 +98,16 @@ def _write_markdown(path: Path, payload: dict[str, Any]) -> None:
         f"- contact pair trace enabled: `{payload.get('contact_pair_trace_enabled')}`",
         f"- contact pair count: `{payload.get('contact_pair_count')}`",
         f"- target contact pair found: `{payload.get('target_contact_pair_found')}`",
+        f"- all expected fingers contacted object: `{payload.get('all_expected_fingers_target_contact_pair_found')}`",
+        f"- cross-side proxy overlap detected: `{cross_overlap.get('overlap_detected')}`",
         f"- first contact pair: `{payload.get('first_contact_pair')}`",
         f"- first target contact pair: `{payload.get('first_target_contact_pair')}`",
         f"- first target contact step: `{payload.get('first_target_contact_step')}`",
         f"- target contact persistence steps: `{payload.get('target_contact_persistence_steps')}`",
+        "",
+        "## Expected Finger Coverage",
+        "",
+        *(finger_hit_lines or ["- none"]),
         "",
         "## Unique Contact Pairs",
         "",
@@ -230,6 +239,51 @@ def _create_passive_cube(
         geom.CreateRadiusAttr(side_length * 0.5)
         geom.CreateHeightAttr(side_length * length_multiplier)
         scale = Gf.Vec3d(1.0, 1.0, 1.0)
+    elif shape == "bottle_proxy":
+        root = UsdGeom.Xform.Define(stage, path)
+        root_xform = UsdGeom.Xformable(root.GetPrim())
+        root_xform.ClearXformOpOrder()
+        root_xform.AddTranslateOp(precision=UsdGeom.XformOp.PrecisionDouble).Set(Gf.Vec3d(*[float(x) for x in center]))
+
+        body_length = side_length * length_multiplier
+        neck_length = side_length * max(length_multiplier * 0.35, 1.0)
+        body_radius = side_length * 0.5
+        neck_radius = side_length * 0.18
+        mouth_radius = side_length * 0.22
+
+        body = UsdGeom.Cylinder.Define(stage, f"{path}/body")
+        body.CreateAxisAttr(normalized_axis)
+        body.CreateRadiusAttr(body_radius)
+        body.CreateHeightAttr(body_length)
+        body.CreateDisplayColorAttr([Gf.Vec3f(0.15, 0.35, 0.95)])
+
+        neck = UsdGeom.Cylinder.Define(stage, f"{path}/neck")
+        neck.CreateAxisAttr(normalized_axis)
+        neck.CreateRadiusAttr(neck_radius)
+        neck.CreateHeightAttr(neck_length)
+        neck.CreateDisplayColorAttr([Gf.Vec3f(0.75, 0.9, 1.0)])
+
+        mouth = UsdGeom.Sphere.Define(stage, f"{path}/mouth")
+        mouth.CreateRadiusAttr(mouth_radius)
+        mouth.CreateDisplayColorAttr([Gf.Vec3f(0.02, 0.04, 0.1)])
+
+        axis_index = {"X": 0, "Y": 1, "Z": 2}[normalized_axis]
+
+        def offset_vec(distance: float) -> Gf.Vec3d:
+            values = [0.0, 0.0, 0.0]
+            values[axis_index] = distance
+            return Gf.Vec3d(*values)
+
+        neck_distance = body_length * 0.5 + neck_length * 0.5
+        mouth_distance = body_length * 0.5 + neck_length + mouth_radius
+        UsdGeom.Xformable(neck.GetPrim()).AddTranslateOp(precision=UsdGeom.XformOp.PrecisionDouble).Set(offset_vec(neck_distance))
+        UsdGeom.Xformable(mouth.GetPrim()).AddTranslateOp(precision=UsdGeom.XformOp.PrecisionDouble).Set(offset_vec(mouth_distance))
+
+        for child in (body.GetPrim(), neck.GetPrim(), mouth.GetPrim()):
+            UsdPhysics.CollisionAPI.Apply(child).CreateCollisionEnabledAttr().Set(True)
+        UsdPhysics.RigidBodyAPI.Apply(root.GetPrim())
+        UsdPhysics.MassAPI.Apply(root.GetPrim()).CreateMassAttr(float(mass))
+        return
     else:
         raise ValueError(f"Unsupported object shape: {shape}")
     geom.CreateDisplayColorAttr([Gf.Vec3f(0.9, 0.2, 0.1)])
@@ -260,6 +314,29 @@ def _set_collision_offsets(stage: Any, prim_path: str, contact_offset: float | N
         "applied": author_offsets,
         "contact_offset": api.GetContactOffsetAttr().Get() if api.GetContactOffsetAttr() else None,
         "rest_offset": api.GetRestOffsetAttr().Get() if api.GetRestOffsetAttr() else None,
+    }
+
+
+def _set_object_collision_offsets(stage: Any, prim_path: str, contact_offset: float | None, rest_offset: float | None) -> dict[str, Any]:
+    from pxr import Usd, UsdPhysics
+
+    root = stage.GetPrimAtPath(prim_path)
+    if not root:
+        return {"path": prim_path, "exists": False, "targets": []}
+    targets = [
+        str(prim.GetPath())
+        for prim in Usd.PrimRange(root)
+        if prim and prim.HasAPI(UsdPhysics.CollisionAPI)
+    ]
+    if not targets:
+        targets = [prim_path]
+    return {
+        "path": prim_path,
+        "exists": True,
+        "targets": [
+            _set_collision_offsets(stage, target, contact_offset, rest_offset)
+            for target in targets
+        ],
     }
 
 
@@ -356,6 +433,10 @@ def _pair_touches_targets(pair: dict[str, Any], object_path: str, finger_paths: 
     return bool(touches_object and touches_finger)
 
 
+def _pair_touches_finger(pair: dict[str, Any], object_path: str, finger_path: str) -> bool:
+    return _pair_touches_targets(pair, object_path, [finger_path])
+
+
 def _summarize_contact_pairs(
     *,
     contact_pair_rows: list[dict[str, Any]],
@@ -377,6 +458,14 @@ def _summarize_contact_pairs(
     target_found_rows = [row for row in target_rows if row.get("type_name") == "CONTACT_FOUND"]
     target_steps = sorted({int(row["step"]) for row in target_rows})
     wrong_pairs = sorted({tuple(row["sorted_pair"]) for row in wrong_rows})
+    finger_target_rows = {
+        finger_path: [row for row in contact_pair_rows if _pair_touches_finger(row, object_path, finger_path)]
+        for finger_path in expected_finger_paths
+    }
+    finger_target_found_rows = {
+        finger_path: [row for row in rows if row.get("type_name") == "CONTACT_FOUND"]
+        for finger_path, rows in finger_target_rows.items()
+    }
     return {
         "contact_pair_count": len(contact_pair_rows),
         "unique_contact_pairs": [list(pair) for pair in unique_pairs],
@@ -385,12 +474,66 @@ def _summarize_contact_pairs(
         "expected_contact_fingers": expected_finger_paths,
         "target_contact_pair_found": bool(target_rows),
         "target_contact_found_event": bool(target_found_rows),
+        "target_contact_finger_hits": {
+            finger_path: bool(rows)
+            for finger_path, rows in finger_target_rows.items()
+        },
+        "target_contact_found_finger_hits": {
+            finger_path: bool(rows)
+            for finger_path, rows in finger_target_found_rows.items()
+        },
+        "all_expected_fingers_target_contact_pair_found": all(bool(rows) for rows in finger_target_rows.values())
+        if expected_finger_paths
+        else False,
+        "all_expected_fingers_target_contact_found_event": all(bool(rows) for rows in finger_target_found_rows.values())
+        if expected_finger_paths
+        else False,
         "first_target_contact_pair": target_rows[0] if target_rows else None,
         "first_target_contact_found_pair": target_found_rows[0] if target_found_rows else None,
         "first_target_contact_step": target_steps[0] if target_steps else None,
         "target_contact_steps": target_steps,
         "target_contact_persistence_steps": len(target_steps),
         "wrong_contact_pairs": [list(pair) for pair in wrong_pairs],
+    }
+
+
+def _cross_side_proxy_overlap_summary(stage: Any, side: str, tolerance: float = 1e-8) -> dict[str, Any]:
+    other_side = "right" if side == "left" else "left"
+    rows: list[dict[str, Any]] = []
+    for finger_name in ("left_finger", "right_finger"):
+        current_path = FINGER_PROXY_PATHS[side][finger_name]
+        other_path = FINGER_PROXY_PATHS[other_side][finger_name]
+        current_box = _bbox_row(stage, current_path)
+        other_box = _bbox_row(stage, other_path)
+        center_distance = None
+        size_delta = None
+        overlaps = False
+        if current_box.get("bbox_valid") and other_box.get("bbox_valid"):
+            current_center = np.asarray(current_box["center"], dtype=np.float64)
+            other_center = np.asarray(other_box["center"], dtype=np.float64)
+            current_size = np.asarray(current_box["size"], dtype=np.float64)
+            other_size = np.asarray(other_box["size"], dtype=np.float64)
+            center_distance = float(np.linalg.norm(current_center - other_center))
+            size_delta = float(np.linalg.norm(current_size - other_size))
+            overlaps = bool(center_distance <= tolerance and size_delta <= tolerance)
+        rows.append(
+            {
+                "finger": finger_name,
+                "current_path": current_path,
+                "other_path": other_path,
+                "current_bbox_valid": bool(current_box.get("bbox_valid")),
+                "other_bbox_valid": bool(other_box.get("bbox_valid")),
+                "center_distance": center_distance,
+                "size_delta": size_delta,
+                "overlaps_with_other_side": overlaps,
+            }
+        )
+    return {
+        "side": side,
+        "other_side": other_side,
+        "tolerance": tolerance,
+        "overlap_detected": any(row["overlaps_with_other_side"] for row in rows),
+        "rows": rows,
     }
 
 
@@ -410,7 +553,7 @@ def main() -> int:
     parser.add_argument("--object-placement", choices=("gap_center", "moving_finger_surface"), default="gap_center")
     parser.add_argument("--object-clearance", type=float, default=0.001)
     parser.add_argument("--object-creation", choices=("dynamic_cuboid", "raw_usd"), default="raw_usd")
-    parser.add_argument("--object-shape", choices=("cube", "cylinder", "capsule"), default="cube")
+    parser.add_argument("--object-shape", choices=("cube", "cylinder", "capsule", "bottle_proxy"), default="cube")
     parser.add_argument("--object-axis", choices=("X", "Y", "Z"), default="X")
     parser.add_argument("--object-length-multiplier", type=float, default=4.0)
     parser.add_argument("--object-mass", type=float, default=0.01)
@@ -505,6 +648,7 @@ def main() -> int:
         right_box = _bbox_row(stage, paths["right_finger"])
         placement_left_box = dict(left_box)
         placement_right_box = dict(right_box)
+        cross_side_proxy_overlap = _cross_side_proxy_overlap_summary(stage, args.side)
         gap = _gap_metrics(left_box, right_box)
         if not gap.get("bbox_pair_valid"):
             raise RuntimeError("Finger proxy bbox pair is invalid; cannot place contact object.")
@@ -556,7 +700,7 @@ def main() -> int:
             axis=args.object_axis,
             length_multiplier=args.object_length_multiplier,
         )
-        object_offset_row = _set_collision_offsets(stage, object_path, args.object_contact_offset, args.object_rest_offset)
+        object_offset_row = _set_object_collision_offsets(stage, object_path, args.object_contact_offset, args.object_rest_offset)
         trace_state = None
         first_contact_row: dict[str, Any] | None = None
         contact_pair_rows: list[dict[str, Any]] = []
@@ -696,7 +840,12 @@ def main() -> int:
         object_final_center = object_latest_center
         object_displacement = float(np.linalg.norm(object_final_center - object_initial_center))
         total_object_displacement = float(np.linalg.norm(object_final_center - object_reset_center))
-        contact_motion_ok = bool(object_displacement >= args.min_contact_motion)
+        contact_motion_policy = (
+            "not_required_for_bilateral_closure"
+            if args.moving_fingers == "both"
+            else "single_finger_push_requires_minimum_motion"
+        )
+        contact_motion_ok = bool(args.moving_fingers == "both" or object_displacement >= args.min_contact_motion)
         no_explosion_ok = bool(finite_motion and max_displacement <= args.max_object_displacement)
         overall_pass = bool(contact_motion_ok and no_explosion_ok)
         if args.moving_fingers == "both":
@@ -708,10 +857,17 @@ def main() -> int:
             object_path=object_path,
             expected_finger_paths=expected_finger_paths,
         )
-        trace_pair_ok = bool((not args.trace_contact_pairs) or contact_summary["target_contact_pair_found"])
+        if args.moving_fingers == "both":
+            target_contact_ok = bool(contact_summary["all_expected_fingers_target_contact_pair_found"])
+        else:
+            target_contact_ok = bool(contact_summary["target_contact_pair_found"])
+        cross_side_overlap_blocks_gate = bool(args.moving_fingers == "both" and cross_side_proxy_overlap["overlap_detected"])
+        trace_pair_ok = bool((not args.trace_contact_pairs) or (target_contact_ok and not cross_side_overlap_blocks_gate))
         overall_pass = bool(overall_pass and trace_pair_ok)
         if args.trace_contact_pairs:
-            if not contact_summary["target_contact_pair_found"]:
+            if cross_side_overlap_blocks_gate:
+                contact_trace_status = "FAIL_CROSS_SIDE_PROXY_OVERLAP"
+            elif not target_contact_ok:
                 contact_trace_status = "FAIL_NO_TARGET_CONTACT"
             elif not no_explosion_ok:
                 contact_trace_status = "FAIL_OBJECT_EJECTION"
@@ -734,9 +890,13 @@ def main() -> int:
                 "finger_surface_gap_open": surface_gap,
                 "left_finger_placement_box": placement_left_box,
                 "right_finger_placement_box": placement_right_box,
+                "cross_side_proxy_overlap": cross_side_proxy_overlap,
                 "left_finger_final_box": left_box,
                 "right_finger_final_box": right_box,
                 "object_path": object_path,
+                "object_shape": args.object_shape,
+                "object_axis": args.object_axis,
+                "object_length_multiplier": args.object_length_multiplier,
                 "object_placement": object_placement_row,
                 "object_side_length_stage_units": side_length,
                 "proxy_collision_offsets": proxy_offset_rows,
@@ -752,6 +912,7 @@ def main() -> int:
                 "total_object_displacement": total_object_displacement,
                 "max_object_displacement": max_displacement,
                 "object_motion_finite": finite_motion,
+                "contact_motion_policy": contact_motion_policy,
                 "contact_motion_ok": contact_motion_ok,
                 "no_explosion_ok": no_explosion_ok,
                 "contact_pair_trace_enabled": bool(args.trace_contact_pairs),
