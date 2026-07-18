@@ -858,7 +858,8 @@ def main() -> int:
     parser.add_argument("--object-mass", type=float, default=0.01)
     parser.add_argument("--object-contact-offset", type=float, default=None)
     parser.add_argument("--object-rest-offset", type=float, default=None)
-    parser.add_argument("--support-plane-mode", choices=("none", "object_bottom"), default="none")
+    parser.add_argument("--support-plane-mode", choices=("none", "object_bottom", "fixed_box"), default="none")
+    parser.add_argument("--support-plane-center", type=float, nargs=3, default=None)
     parser.add_argument("--support-plane-size", type=float, default=2.0)
     parser.add_argument("--support-plane-size-x", type=float, default=None)
     parser.add_argument("--support-plane-size-y", type=float, default=None)
@@ -915,6 +916,7 @@ def main() -> int:
             "object_contact_offset": args.object_contact_offset,
             "object_rest_offset": args.object_rest_offset,
             "support_plane_mode": args.support_plane_mode,
+            "support_plane_center": args.support_plane_center,
             "support_plane_size": args.support_plane_size,
             "support_plane_size_x": args.support_plane_size_x,
             "support_plane_size_y": args.support_plane_size_y,
@@ -1051,17 +1053,22 @@ def main() -> int:
         )
         object_offset_row = _set_object_collision_offsets(stage, object_path, args.object_contact_offset, args.object_rest_offset)
         support_plane_row: dict[str, Any] | None = None
-        if args.support_plane_mode == "object_bottom":
+        if args.support_plane_mode != "none":
             object_support_box = _bbox_row(stage, object_path)
             if not object_support_box.get("bbox_valid"):
                 raise RuntimeError("Cannot place support plane because object bbox is invalid.")
-            object_support_center = np.asarray(object_support_box["center"], dtype=np.float64)
-            support_center = object_support_center.copy()
-            support_center[2] = (
-                float(object_support_box["min"][2])
-                - float(args.support_plane_clearance)
-                - float(args.support_plane_thickness) * 0.5
-            )
+            if args.support_plane_mode == "object_bottom":
+                object_support_center = np.asarray(object_support_box["center"], dtype=np.float64)
+                support_center = object_support_center.copy()
+                support_center[2] = (
+                    float(object_support_box["min"][2])
+                    - float(args.support_plane_clearance)
+                    - float(args.support_plane_thickness) * 0.5
+                )
+            else:
+                if args.support_plane_center is None:
+                    raise ValueError("--support-plane-mode fixed_box requires --support-plane-center X Y Z")
+                support_center = np.asarray(args.support_plane_center, dtype=np.float64)
             support_plane_row = _create_static_support_box(
                 stage=stage,
                 path="/World/phase58_static_support_plane",
@@ -1071,6 +1078,7 @@ def main() -> int:
                 thickness=args.support_plane_thickness,
             )
             support_plane_row["placement_object_box"] = object_support_box
+            support_plane_row["mode"] = args.support_plane_mode
         trace_state = None
         first_contact_row: dict[str, Any] | None = None
         contact_pair_rows: list[dict[str, Any]] = []
