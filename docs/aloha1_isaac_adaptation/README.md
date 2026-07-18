@@ -87,6 +87,7 @@ The main conclusion is conservative:
 - [74 Phase 68 measurement worksheet evidence gate](74_phase68_measurement_worksheet_evidence_gate_2026-07-18.md)
 - [75 Phase 69 calibrated overlay manifest](75_phase69_calibrated_overlay_manifest_2026-07-18.md)
 - [76 Phase 71 table calibration readiness](76_phase71_table_calibration_readiness_2026-07-18.md)
+- [77 Phase 72 support-plane config guard](77_phase72_support_plane_config_guard_2026-07-18.md)
 
 ## Operating Rule
 
@@ -101,3 +102,9 @@ Do not proceed from visual similarity alone. A visible robot mesh is not enough.
 5. Collision, mass, drive, damping, and contact material semantics.
 6. Camera intrinsics/extrinsics and image encoding.
 7. Replay or controller validation against real ALOHA1 data.
+
+When using `--support-plane-config`, choose the mode explicitly:
+
+- Diagnostic replay must pass `--allow-diagnostic-support-plane-config`.
+- Final replay must pass `--require-calibrated-table-frame`.
+- Final replay must not pass support-plane CLI geometry overrides.

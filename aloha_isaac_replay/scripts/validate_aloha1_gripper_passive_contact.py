@@ -4,30 +4,29 @@ import argparse
 import csv
 import json
 import os
+from pathlib import Path
 import sys
 import traceback
-from pathlib import Path
 from typing import Any
 
 import numpy as np
 import yaml
 
-from aloha_isaac_replay.runtime.isaac_light_app import LIGHTWEIGHT_SIMULATION_APP_CONFIG
-from aloha_isaac_replay.adapters.isaac_dof_adapter import load_mapping
 from aloha_isaac_replay.adapters.gripper_mapping import standard_gripper_qpos_to_isaac_fingers
+from aloha_isaac_replay.adapters.isaac_dof_adapter import load_mapping
 from aloha_isaac_replay.replay.arm_only_mapping import arm_only_targets_from_standard_qpos
+from aloha_isaac_replay.runtime.isaac_light_app import LIGHTWEIGHT_SIMULATION_APP_CONFIG
+from aloha_isaac_replay.scripts.audit_table_frame_candidate import audit_table_frame
 from aloha_isaac_replay.scripts.right_shoulder_runtime_audit import _apply_arm_gains
 from aloha_isaac_replay.scripts.right_shoulder_runtime_audit import _apply_gravity
 from aloha_isaac_replay.scripts.right_shoulder_runtime_audit import _get_limits
 from aloha_isaac_replay.scripts.right_shoulder_runtime_audit import _json_safe
 from aloha_isaac_replay.scripts.right_shoulder_runtime_audit import _set_full_state
 from aloha_isaac_replay.scripts.right_shoulder_runtime_audit import _set_full_target
-from aloha_isaac_replay.scripts.audit_table_frame_candidate import audit_table_frame
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_proxy_gap import FINGER_PROXY_PATHS
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_proxy_gap import _bbox_row
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_proxy_gap import _gap_metrics
 from aloha_isaac_replay.scripts.validate_aloha1_native_single_joint_response import _safe_target
-
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_STAGE = REPO_ROOT / "local_eval_assets/aloha1_clean_runtime_20260718/aloha1_dual_bbox_proxy_runtime.usda"
@@ -35,6 +34,8 @@ DEFAULT_OUTPUT_DIR = REPO_ROOT / "reports/aloha1_isaac_adaptation/phase43_grippe
 DEFAULT_BOTTLE_USD = REPO_ROOT / "assets/bottle_500ml/isaac/bottle_500ml_sim.usd"
 DEFAULT_MAPPING = REPO_ROOT / "configs/aloha/original_stationary_aloha_mapping.yaml"
 DEFAULT_STAGE_UNITS_IN_METERS = 0.01
+DEFAULT_SUPPORT_PLANE_SIZE = 2.0
+DEFAULT_SUPPORT_PLANE_THICKNESS = 0.02
 
 
 def _rel(path: str | Path) -> str:
@@ -114,6 +115,12 @@ def _audit_required_table_frame(args: argparse.Namespace) -> dict[str, Any] | No
         return None
     if args.support_plane_config is None:
         raise ValueError("--require-calibrated-table-frame requires --support-plane-config")
+    overrides = _support_plane_cli_overrides(args)
+    if overrides:
+        raise ValueError(
+            "--require-calibrated-table-frame cannot combine --support-plane-config with support-plane CLI overrides: "
+            + ", ".join(overrides)
+        )
     if abs(float(args.stage_units_in_meters) - 1.0) > 1e-9:
         raise ValueError(
             "--require-calibrated-table-frame requires --stage-units-in-meters 1.0 "
@@ -126,6 +133,41 @@ def _audit_required_table_frame(args: argparse.Namespace) -> dict[str, Any] | No
             f"{audit['status']} ({'; '.join(audit.get('blocking_reasons', []))})"
         )
     return audit
+
+
+def _guard_support_plane_calibration_mode(args: argparse.Namespace) -> None:
+    if args.support_plane_config is None:
+        return
+    if args.require_calibrated_table_frame:
+        return
+    if getattr(args, "allow_diagnostic_support_plane_config", False):
+        return
+    raise ValueError(
+        "--support-plane-config can load diagnostic table candidates. Final replay/contact validation must use "
+        "--require-calibrated-table-frame, or explicitly pass --allow-diagnostic-support-plane-config for a "
+        "non-final diagnostic run."
+    )
+
+
+def _support_plane_cli_overrides(args: argparse.Namespace) -> list[str]:
+    overrides: list[str] = []
+    if getattr(args, "support_plane_center", None) is not None:
+        overrides.append("--support-plane-center")
+    if getattr(args, "support_plane_size_x", None) is not None:
+        overrides.append("--support-plane-size-x")
+    if getattr(args, "support_plane_size_y", None) is not None:
+        overrides.append("--support-plane-size-y")
+    if abs(float(getattr(args, "support_plane_size", DEFAULT_SUPPORT_PLANE_SIZE)) - DEFAULT_SUPPORT_PLANE_SIZE) > 1e-12:
+        overrides.append("--support-plane-size")
+    if (
+        abs(
+            float(getattr(args, "support_plane_thickness", DEFAULT_SUPPORT_PLANE_THICKNESS))
+            - DEFAULT_SUPPORT_PLANE_THICKNESS
+        )
+        > 1e-12
+    ):
+        overrides.append("--support-plane-thickness")
+    return overrides
 
 
 def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
@@ -277,7 +319,7 @@ def _target_from_standard_qpos(
         for arm_target in arm_only_targets_from_standard_qpos(qpos_frame, mapping):
             if not arm_target.isaac_dof_name.startswith(side_prefix):
                 continue
-            dof_name = arm_target.isaac_dof_name[len(side_prefix):]
+            dof_name = arm_target.isaac_dof_name[len(side_prefix) :]
             target[dof_names.index(dof_name)] = float(arm_target.value)
     channel = 6 if side == "left" else 13
     fingers = standard_gripper_qpos_to_isaac_fingers(float(qpos_frame[channel]), side=side)
@@ -483,7 +525,9 @@ def _create_passive_cube(
     usd_path: str | Path | None = None,
     usd_prim_path: str = "/Bottle500",
 ) -> None:
-    from pxr import Gf, UsdGeom, UsdPhysics
+    from pxr import Gf
+    from pxr import UsdGeom
+    from pxr import UsdPhysics
 
     if shape != "cube" and creation_mode != "raw_usd":
         raise ValueError(f"{shape} object shape requires raw_usd creation; got {creation_mode}")
@@ -560,8 +604,12 @@ def _create_passive_cube(
 
         neck_distance = body_length * 0.5 + neck_length * 0.5
         mouth_distance = body_length * 0.5 + neck_length + mouth_radius
-        UsdGeom.Xformable(neck.GetPrim()).AddTranslateOp(precision=UsdGeom.XformOp.PrecisionDouble).Set(offset_vec(neck_distance))
-        UsdGeom.Xformable(mouth.GetPrim()).AddTranslateOp(precision=UsdGeom.XformOp.PrecisionDouble).Set(offset_vec(mouth_distance))
+        UsdGeom.Xformable(neck.GetPrim()).AddTranslateOp(precision=UsdGeom.XformOp.PrecisionDouble).Set(
+            offset_vec(neck_distance)
+        )
+        UsdGeom.Xformable(mouth.GetPrim()).AddTranslateOp(precision=UsdGeom.XformOp.PrecisionDouble).Set(
+            offset_vec(mouth_distance)
+        )
 
         for child in (body.GetPrim(), neck.GetPrim(), mouth.GetPrim()):
             UsdPhysics.CollisionAPI.Apply(child).CreateCollisionEnabledAttr().Set(True)
@@ -614,7 +662,9 @@ def _create_static_support_box(
     size_y: float,
     thickness: float,
 ) -> dict[str, Any]:
-    from pxr import Gf, UsdGeom, UsdPhysics
+    from pxr import Gf
+    from pxr import UsdGeom
+    from pxr import UsdPhysics
 
     geom = UsdGeom.Cube.Define(stage, path)
     geom.CreateSizeAttr(1.0)
@@ -637,7 +687,9 @@ def _create_static_support_box(
     }
 
 
-def _set_collision_offsets(stage: Any, prim_path: str, contact_offset: float | None, rest_offset: float | None) -> dict[str, Any]:
+def _set_collision_offsets(
+    stage: Any, prim_path: str, contact_offset: float | None, rest_offset: float | None
+) -> dict[str, Any]:
     from pxr import PhysxSchema
 
     prim = stage.GetPrimAtPath(prim_path)
@@ -658,35 +710,34 @@ def _set_collision_offsets(stage: Any, prim_path: str, contact_offset: float | N
     }
 
 
-def _set_object_collision_offsets(stage: Any, prim_path: str, contact_offset: float | None, rest_offset: float | None) -> dict[str, Any]:
-    from pxr import Usd, UsdPhysics
+def _set_object_collision_offsets(
+    stage: Any, prim_path: str, contact_offset: float | None, rest_offset: float | None
+) -> dict[str, Any]:
+    from pxr import Usd
+    from pxr import UsdPhysics
 
     root = stage.GetPrimAtPath(prim_path)
     if not root:
         return {"path": prim_path, "exists": False, "targets": []}
-    targets = [
-        str(prim.GetPath())
-        for prim in Usd.PrimRange(root)
-        if prim and prim.HasAPI(UsdPhysics.CollisionAPI)
-    ]
+    targets = [str(prim.GetPath()) for prim in Usd.PrimRange(root) if prim and prim.HasAPI(UsdPhysics.CollisionAPI)]
     if not targets:
         targets = [prim_path]
     return {
         "path": prim_path,
         "exists": True,
-        "targets": [
-            _set_collision_offsets(stage, target, contact_offset, rest_offset)
-            for target in targets
-        ],
+        "targets": [_set_collision_offsets(stage, target, contact_offset, rest_offset) for target in targets],
     }
 
 
 def _begin_contact_pair_trace(stage: Any, *, disable_usd_updates: bool) -> dict[str, Any]:
     import carb
-    import usdrt
     from omni.physx import get_physx_simulation_interface
     from omni.physx.bindings._physx import SETTING_UPDATE_TO_USD
-    from pxr import PhysxSchema, Sdf, Usd, UsdUtils
+    from pxr import PhysxSchema
+    from pxr import Sdf
+    from pxr import Usd
+    from pxr import UsdUtils
+    import usdrt
 
     session_sub_layer = Sdf.Layer.CreateAnonymous()
     stage.GetSessionLayer().subLayerPaths.append(session_sub_layer.identifier)
@@ -753,7 +804,9 @@ def _read_contact_pairs(trace_state: dict[str, Any] | None) -> list[dict[str, An
         rows.append(
             {
                 "type": int(contact_header.type),
-                "type_name": "CONTACT_FOUND" if contact_header.type == ContactEventType.CONTACT_FOUND else str(contact_header.type),
+                "type_name": "CONTACT_FOUND"
+                if contact_header.type == ContactEventType.CONTACT_FOUND
+                else str(contact_header.type),
                 "collider0": collider0,
                 "collider1": collider1,
                 "sorted_pair": sorted([collider0, collider1]),
@@ -770,7 +823,9 @@ def _pair_touches_targets(pair: dict[str, Any], object_path: str, finger_paths: 
     collider0 = str(pair["collider0"])
     collider1 = str(pair["collider1"])
     touches_object = _path_matches(collider0, object_path) or _path_matches(collider1, object_path)
-    touches_finger = any(_path_matches(collider0, finger_path) or _path_matches(collider1, finger_path) for finger_path in finger_paths)
+    touches_finger = any(
+        _path_matches(collider0, finger_path) or _path_matches(collider1, finger_path) for finger_path in finger_paths
+    )
     return bool(touches_object and touches_finger)
 
 
@@ -797,15 +852,9 @@ def _summarize_contact_pairs(
     sample_limit: int = 80,
 ) -> dict[str, Any]:
     unique_pairs = sorted({tuple(row["sorted_pair"]) for row in contact_pair_rows})
-    target_rows = [
-        row
-        for row in contact_pair_rows
-        if _pair_touches_targets(row, object_path, expected_finger_paths)
-    ]
+    target_rows = [row for row in contact_pair_rows if _pair_touches_targets(row, object_path, expected_finger_paths)]
     wrong_rows = [
-        row
-        for row in contact_pair_rows
-        if not _pair_touches_targets(row, object_path, expected_finger_paths)
+        row for row in contact_pair_rows if not _pair_touches_targets(row, object_path, expected_finger_paths)
     ]
     target_found_rows = [row for row in target_rows if row.get("type_name") == "CONTACT_FOUND"]
     target_steps = sorted({int(row["step"]) for row in target_rows})
@@ -851,13 +900,9 @@ def _summarize_contact_pairs(
         "expected_contact_fingers": expected_finger_paths,
         "target_contact_pair_found": bool(target_rows),
         "target_contact_found_event": bool(target_found_rows),
-        "target_contact_finger_hits": {
-            finger_path: bool(rows)
-            for finger_path, rows in finger_target_rows.items()
-        },
+        "target_contact_finger_hits": {finger_path: bool(rows) for finger_path, rows in finger_target_rows.items()},
         "target_contact_found_finger_hits": {
-            finger_path: bool(rows)
-            for finger_path, rows in finger_target_found_rows.items()
+            finger_path: bool(rows) for finger_path, rows in finger_target_found_rows.items()
         },
         "all_expected_fingers_target_contact_pair_found": all(bool(rows) for rows in finger_target_rows.values())
         if expected_finger_paths
@@ -916,7 +961,9 @@ def _cross_side_proxy_overlap_summary(stage: Any, side: str, tolerance: float = 
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Run a local passive-object contact smoke test for ALOHA1 gripper proxies.")
+    parser = argparse.ArgumentParser(
+        description="Run a local passive-object contact smoke test for ALOHA1 gripper proxies."
+    )
     parser.add_argument("--stage-usd", default=str(DEFAULT_STAGE))
     parser.add_argument(
         "--stage-units-in-meters",
@@ -940,7 +987,9 @@ def main() -> int:
     parser.add_argument("--object-placement", choices=("gap_center", "moving_finger_surface"), default="gap_center")
     parser.add_argument("--object-clearance", type=float, default=0.001)
     parser.add_argument("--object-creation", choices=("dynamic_cuboid", "raw_usd"), default="raw_usd")
-    parser.add_argument("--object-shape", choices=("cube", "cylinder", "capsule", "bottle_proxy", "bottle_usd"), default="cube")
+    parser.add_argument(
+        "--object-shape", choices=("cube", "cylinder", "capsule", "bottle_proxy", "bottle_usd"), default="cube"
+    )
     parser.add_argument("--object-axis", choices=("X", "Y", "Z"), default="X")
     parser.add_argument("--object-length-multiplier", type=float, default=4.0)
     parser.add_argument("--object-usd", default=str(DEFAULT_BOTTLE_USD))
@@ -954,12 +1003,17 @@ def main() -> int:
         action="store_true",
         help="Reject diagnostic/not-calibrated support-plane configs before starting Isaac.",
     )
+    parser.add_argument(
+        "--allow-diagnostic-support-plane-config",
+        action="store_true",
+        help="Explicitly allow diagnostic support-plane configs. Do not use for final replay/contact validation.",
+    )
     parser.add_argument("--support-plane-mode", choices=("none", "object_bottom", "fixed_box"), default="none")
     parser.add_argument("--support-plane-center", type=float, nargs=3, default=None)
-    parser.add_argument("--support-plane-size", type=float, default=2.0)
+    parser.add_argument("--support-plane-size", type=float, default=DEFAULT_SUPPORT_PLANE_SIZE)
     parser.add_argument("--support-plane-size-x", type=float, default=None)
     parser.add_argument("--support-plane-size-y", type=float, default=None)
-    parser.add_argument("--support-plane-thickness", type=float, default=0.02)
+    parser.add_argument("--support-plane-thickness", type=float, default=DEFAULT_SUPPORT_PLANE_THICKNESS)
     parser.add_argument("--support-plane-clearance", type=float, default=0.0)
     parser.add_argument("--proxy-contact-offset", type=float, default=None)
     parser.add_argument("--proxy-rest-offset", type=float, default=None)
@@ -982,6 +1036,7 @@ def main() -> int:
     args = parser.parse_args()
     try:
         support_options = _resolve_support_plane_options(args)
+        _guard_support_plane_calibration_mode(args)
         table_frame_audit = _audit_required_table_frame(args)
     except ValueError as exc:
         parser.error(str(exc))
@@ -1021,6 +1076,7 @@ def main() -> int:
             "support_plane_config_provenance": support_options["config_provenance"],
             "support_plane_table_frame": support_options["table_frame"],
             "require_calibrated_table_frame": args.require_calibrated_table_frame,
+            "allow_diagnostic_support_plane_config": args.allow_diagnostic_support_plane_config,
             "table_frame_audit": table_frame_audit,
             "support_plane_mode": support_options["mode"],
             "support_plane_center": support_options["center"],
@@ -1055,9 +1111,9 @@ def main() -> int:
         app_config = dict(LIGHTWEIGHT_SIMULATION_APP_CONFIG)
         app_config["fast_shutdown"] = False
         _app = SimulationApp(app_config)
-        import isaacsim.core.utils.stage as stage_utils
         from isaacsim.core.api import World
         from isaacsim.core.prims import SingleArticulation
+        import isaacsim.core.utils.stage as stage_utils
         import omni.usd
 
         stage_utils.open_stage(str(Path(args.stage_usd).resolve()))
@@ -1110,7 +1166,9 @@ def main() -> int:
             raise RuntimeError("Finger proxy bbox pair is invalid; cannot place contact object.")
         axis_name = str(gap["dominant_axis"])
         axis = {"x": 0, "y": 1, "z": 2}[axis_name]
-        center = (np.asarray(left_box["center"], dtype=np.float64) + np.asarray(right_box["center"], dtype=np.float64)) * 0.5
+        center = (
+            np.asarray(left_box["center"], dtype=np.float64) + np.asarray(right_box["center"], dtype=np.float64)
+        ) * 0.5
         surface_gap = _surface_gap(left_box, right_box, axis)
         side_length = max(surface_gap * args.object_fill_fraction, 1e-4)
         object_placement_row: dict[str, Any] = {
@@ -1138,7 +1196,9 @@ def main() -> int:
                 }
             )
         elif args.object_placement == "moving_finger_surface":
-            object_placement_row["warning"] = "moving_finger_surface requires --moving-fingers left or right; used gap_center."
+            object_placement_row["warning"] = (
+                "moving_finger_surface requires --moving-fingers left or right; used gap_center."
+            )
         object_path = "/World/phase43_passive_contact_cube"
         proxy_offset_rows = [
             _set_collision_offsets(stage, paths["left_finger"], args.proxy_contact_offset, args.proxy_rest_offset),
@@ -1158,7 +1218,9 @@ def main() -> int:
             usd_path=args.object_usd,
             usd_prim_path=args.object_usd_prim_path,
         )
-        object_offset_row = _set_object_collision_offsets(stage, object_path, args.object_contact_offset, args.object_rest_offset)
+        object_offset_row = _set_object_collision_offsets(
+            stage, object_path, args.object_contact_offset, args.object_rest_offset
+        )
         support_plane_row: dict[str, Any] | None = None
         if support_options["mode"] != "none":
             object_support_box = _bbox_row(stage, object_path)
@@ -1174,7 +1236,9 @@ def main() -> int:
                 )
             else:
                 if support_options["center"] is None:
-                    raise ValueError("--support-plane-mode fixed_box requires --support-plane-center X Y Z or --support-plane-config")
+                    raise ValueError(
+                        "--support-plane-mode fixed_box requires --support-plane-center X Y Z or --support-plane-config"
+                    )
                 support_center = np.asarray(support_options["center"], dtype=np.float64)
             support_plane_row = _create_static_support_box(
                 stage=stage,
@@ -1381,8 +1445,12 @@ def main() -> int:
             target_contact_ok = bool(contact_summary["all_expected_fingers_target_contact_pair_found"])
         else:
             target_contact_ok = bool(contact_summary["target_contact_pair_found"])
-        cross_side_overlap_blocks_gate = bool(args.moving_fingers == "both" and cross_side_proxy_overlap["overlap_detected"])
-        trace_pair_ok = bool((not args.trace_contact_pairs) or (target_contact_ok and not cross_side_overlap_blocks_gate))
+        cross_side_overlap_blocks_gate = bool(
+            args.moving_fingers == "both" and cross_side_proxy_overlap["overlap_detected"]
+        )
+        trace_pair_ok = bool(
+            (not args.trace_contact_pairs) or (target_contact_ok and not cross_side_overlap_blocks_gate)
+        )
         overall_pass = bool(overall_pass and trace_pair_ok)
         if args.trace_contact_pairs:
             if cross_side_overlap_blocks_gate:
@@ -1448,13 +1516,20 @@ def main() -> int:
                 **contact_summary,
                 "csv": _rel(csv_path),
                 "markdown": _rel(md_path),
-                "next_gate": "gripper_contact_with_task_shape" if overall_pass else "inspect_contact_geometry_or_finger_control",
+                "next_gate": "gripper_contact_with_task_shape"
+                if overall_pass
+                else "inspect_contact_geometry_or_finger_control",
             }
         )
         _write_csv(csv_path, rows)
         _write_json(json_path, payload)
         _write_markdown(md_path, _json_safe(payload))
-        print(json.dumps({"status": payload["status"], "json": _rel(json_path), "markdown": _rel(md_path)}, ensure_ascii=False), flush=True)
+        print(
+            json.dumps(
+                {"status": payload["status"], "json": _rel(json_path), "markdown": _rel(md_path)}, ensure_ascii=False
+            ),
+            flush=True,
+        )
         sys.stdout.flush()
         sys.stderr.flush()
         os._exit(0 if overall_pass else 3)
@@ -1467,7 +1542,13 @@ def main() -> int:
             }
         )
         _write_json(json_path, payload)
-        print(json.dumps({"status": payload["status"], "json": _rel(json_path), "exception": payload["exception"]}, ensure_ascii=False), flush=True)
+        print(
+            json.dumps(
+                {"status": payload["status"], "json": _rel(json_path), "exception": payload["exception"]},
+                ensure_ascii=False,
+            ),
+            flush=True,
+        )
         sys.stdout.flush()
         sys.stderr.flush()
         os._exit(1)

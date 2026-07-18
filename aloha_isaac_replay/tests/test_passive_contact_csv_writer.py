@@ -3,17 +3,17 @@ from __future__ import annotations
 import csv
 from pathlib import Path
 
-import yaml
 import pytest
+import yaml
 
 from aloha_isaac_replay.scripts.create_table_to_base_calibration import build_calibration_config
 from aloha_isaac_replay.scripts.create_table_to_base_calibration import build_evidence_record
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _audit_required_table_frame
+from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _guard_support_plane_calibration_mode
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _load_support_plane_config
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _resolve_support_plane_options
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _summarize_contact_pairs
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _write_csv
-
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
@@ -146,6 +146,31 @@ def test_require_calibrated_table_frame_requires_config() -> None:
         _audit_required_table_frame(args)
 
 
+def test_support_plane_config_requires_calibrated_gate_or_explicit_diagnostic_opt_in() -> None:
+    import argparse
+
+    args = argparse.Namespace(
+        support_plane_config=str(REPO_ROOT / "examples/aloha_isaac/config/phase63_fixed_table_candidate.yaml"),
+        require_calibrated_table_frame=False,
+        allow_diagnostic_support_plane_config=False,
+    )
+
+    with pytest.raises(ValueError, match="--allow-diagnostic-support-plane-config"):
+        _guard_support_plane_calibration_mode(args)
+
+
+def test_support_plane_config_allows_explicit_diagnostic_opt_in() -> None:
+    import argparse
+
+    args = argparse.Namespace(
+        support_plane_config=str(REPO_ROOT / "examples/aloha_isaac/config/phase63_fixed_table_candidate.yaml"),
+        require_calibrated_table_frame=False,
+        allow_diagnostic_support_plane_config=True,
+    )
+
+    _guard_support_plane_calibration_mode(args)
+
+
 def test_require_calibrated_table_frame_rejects_diagnostic_config() -> None:
     import argparse
 
@@ -183,12 +208,53 @@ def test_require_calibrated_table_frame_accepts_measured_config(tmp_path: Path) 
     )
     path = tmp_path / "measured.yaml"
     path.write_text(yaml.safe_dump(cfg, sort_keys=False))
-    args = argparse.Namespace(require_calibrated_table_frame=True, support_plane_config=str(path), stage_units_in_meters=1.0)
+    args = argparse.Namespace(
+        require_calibrated_table_frame=True, support_plane_config=str(path), stage_units_in_meters=1.0
+    )
 
     audit = _audit_required_table_frame(args)
 
     assert audit is not None
     assert audit["status"] == "PASS_TABLE_TO_BASE_CALIBRATION_READY"
+
+
+def test_require_calibrated_table_frame_rejects_support_plane_cli_overrides(tmp_path: Path) -> None:
+    import argparse
+
+    evidence_path = tmp_path / "measurement_evidence.yaml"
+    evidence_path.write_text("measurement: synthetic\n")
+    cfg = build_calibration_config(
+        table_top_center=[1.0, 2.0, 0.5],
+        table_size=[1.22, 0.625, 0.04],
+        table_yaw_deg=0.0,
+        left_base_in_table=[-0.3, 0.1, 0.0],
+        left_yaw_deg=0.0,
+        right_base_in_table=[0.3, 0.1, 0.0],
+        right_yaw_deg=180.0,
+        source="user_measured",
+        status="measured",
+        calibration_evidence=build_evidence_record(
+            evidence_path,
+            evidence_type="unit_test",
+            real_robot_touched=False,
+            remote_103_touched=False,
+        ),
+    )
+    path = tmp_path / "measured.yaml"
+    path.write_text(yaml.safe_dump(cfg, sort_keys=False))
+    args = argparse.Namespace(
+        require_calibrated_table_frame=True,
+        support_plane_config=str(path),
+        stage_units_in_meters=1.0,
+        support_plane_center=[0.593227851197621, 0.7853100288947757, -0.3171450733686908],
+        support_plane_size=2.0,
+        support_plane_size_x=None,
+        support_plane_size_y=None,
+        support_plane_thickness=0.02,
+    )
+
+    with pytest.raises(ValueError, match="cannot combine --support-plane-config with support-plane CLI overrides"):
+        _audit_required_table_frame(args)
 
 
 def test_require_calibrated_table_frame_rejects_legacy_centimeter_world_units(tmp_path: Path) -> None:
@@ -215,7 +281,9 @@ def test_require_calibrated_table_frame_rejects_legacy_centimeter_world_units(tm
     )
     path = tmp_path / "measured.yaml"
     path.write_text(yaml.safe_dump(cfg, sort_keys=False))
-    args = argparse.Namespace(require_calibrated_table_frame=True, support_plane_config=str(path), stage_units_in_meters=0.01)
+    args = argparse.Namespace(
+        require_calibrated_table_frame=True, support_plane_config=str(path), stage_units_in_meters=0.01
+    )
 
     with pytest.raises(ValueError, match="requires --stage-units-in-meters 1.0"):
         _audit_required_table_frame(args)
