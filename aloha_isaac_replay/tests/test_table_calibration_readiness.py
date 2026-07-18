@@ -58,6 +58,15 @@ def test_readiness_reports_missing_fields_without_generating_calibration(tmp_pat
     assert payload["status"] == "BLOCKED_REQUIRES_TABLE_BASE_MEASUREMENT"
     assert payload["worksheet"]["status"] == "BLOCKED_REQUIRES_MEASUREMENT_FIELDS"
     assert "table.top_center_world_m" in payload["worksheet"]["missing_fields"]
+    assert payload["worksheet"]["missing_field_details"]["table.top_center_world_m"]["unit"] == "m"
+    assert (
+        "table top center" in payload["worksheet"]["missing_field_details"]["table.top_center_world_m"]["description"]
+    )
+    assert payload["worksheet"]["missing_field_details"]["left_base.translation_table_m"]["shape"] == "[x, y, z]"
+    assert (
+        "left ALOHA base"
+        in payload["worksheet"]["missing_field_details"]["left_base.translation_table_m"]["how_to_measure"]
+    )
     assert not calibration.exists()
 
 
