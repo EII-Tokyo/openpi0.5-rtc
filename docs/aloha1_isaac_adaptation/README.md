@@ -95,6 +95,7 @@ The main conclusion is conservative:
 - [82 Phase 77 non-target contact quality gate](82_phase77_non_target_contact_quality_gate_2026-07-18.md)
 - [83 Phase 97 drive-target controller gain reference](83_phase97_drive_target_controller_gain_reference_2026-07-18.md)
 - [84 Phase 99 convex legacy collision cleanup](84_phase99_convex_legacy_collision_cleanup_2026-07-19.md)
+- [85 Phase 101 active-grasp negative control](85_phase101_active_grasp_negative_control_2026-07-19.md)
 
 ## Operating Rule
 
@@ -131,4 +132,11 @@ The current drive-target replay reference can be rerun with:
 ```bash
 codex-evidence --name aloha-phase97-drive-target-reference -- \
   .venv/bin/python aloha_isaac_replay/scripts/run_phase97_drive_target_reference.py
+```
+
+The current negative control that proves Phase97 is not an active-grasp pass can be rerun with:
+
+```bash
+codex-evidence --name aloha-phase101-active-grasp-negative-control -- \
+  .venv/bin/python aloha_isaac_replay/scripts/run_phase101_active_grasp_negative_control.py
 ```
