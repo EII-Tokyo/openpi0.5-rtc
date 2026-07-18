@@ -65,12 +65,12 @@ CONTACT_PROXY_PROFILES: dict[str, dict[str, Any]] = {
         },
         "finger_contact_paths": {
             "left": {
-                "left_finger": "/scene/left_base_link/left_left_finger_link",
-                "right_finger": "/scene/left_base_link/left_right_finger_link",
+                "left_finger": "/scene/left_base_link/left_left_finger_link/bbox_collision_proxy",
+                "right_finger": "/scene/left_base_link/left_right_finger_link/bbox_collision_proxy",
             },
             "right": {
-                "left_finger": "/scene/right_base_link/right_left_finger_link",
-                "right_finger": "/scene/right_base_link/right_right_finger_link",
+                "left_finger": "/scene/right_base_link/right_left_finger_link/bbox_collision_proxy",
+                "right_finger": "/scene/right_base_link/right_right_finger_link/bbox_collision_proxy",
             },
         },
     },

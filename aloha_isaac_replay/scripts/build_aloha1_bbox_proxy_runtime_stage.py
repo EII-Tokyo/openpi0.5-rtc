@@ -65,6 +65,77 @@ def _robot_root_from_side(side: str, contact_proxy_profile: str = "legacy_puppet
     return robot_root_for_side(contact_proxy_profile, side)
 
 
+def _source_bbox_path_for_rigid_body(contact_proxy_profile: str, rigid_body_path: str) -> str:
+    if contact_proxy_profile != "scene_base_link":
+        return rigid_body_path
+    site_names = {
+        "/scene/left_base_link/left_left_finger_link": "left_left_finger",
+        "/scene/left_base_link/left_right_finger_link": "left_right_finger",
+        "/scene/right_base_link/right_left_finger_link": "right_left_finger",
+        "/scene/right_base_link/right_right_finger_link": "right_right_finger",
+    }
+    site_name = site_names.get(rigid_body_path)
+    if site_name is None:
+        return rigid_body_path
+    return f"{rigid_body_path}/sites/{site_name}"
+
+
+def _should_disable_selected_source_collision(*, selected_root: str, proxy_path: str, collision_path: str) -> bool:
+    if collision_path == proxy_path or collision_path.startswith(proxy_path + "/"):
+        return False
+    return collision_path.startswith(selected_root + "/")
+
+
+def _known_scene_base_link_finger_collision_paths(selected_root: str) -> list[str]:
+    """Return legacy imported finger collision prims hidden under a selected Trossen finger link.
+
+    The Menagerie/Trossen ALOHA USD can surface these collision meshes to PhysX even when plain
+    USD traversal of the composed stage does not enumerate them under the selected link. We author
+    explicit overrides for both collision group prims and leaf mesh prims so the new fingertip
+    proxy is the only active contact target for this link.
+    """
+    collision_names_by_link = {
+        "left_left_finger_link": [
+            "left_left_g0",
+            "left_left_g1",
+            "left_left_g2",
+            "vx300s_8_custom_finger_left",
+        ],
+        "left_right_finger_link": [
+            "left_right_g0",
+            "left_right_g1",
+            "left_right_g2",
+            "vx300s_8_custom_finger_right",
+        ],
+        "right_left_finger_link": [
+            "right_left_g0",
+            "right_left_g1",
+            "right_left_g2",
+            "vx300s_8_custom_finger_left",
+        ],
+        "right_right_finger_link": [
+            "right_right_g0",
+            "right_right_g1",
+            "right_right_g2",
+            "vx300s_8_custom_finger_right",
+        ],
+    }
+    link_name = selected_root.rstrip("/").split("/")[-1]
+    collision_names = collision_names_by_link.get(link_name, [])
+    paths: list[str] = []
+    for collision_name in collision_names:
+        collision_root = f"{selected_root}/collisions/{collision_name}"
+        paths.append(collision_root)
+        paths.append(f"{collision_root}/{collision_name}")
+    return paths
+
+
+def _known_scene_base_link_finger_collision_instance_root(selected_root: str) -> str | None:
+    if _known_scene_base_link_finger_collision_paths(selected_root):
+        return f"{selected_root}/collisions"
+    return None
+
+
 def _box_row(box: Any, bbox_scale: float, axis_scale: list[float] | None, min_extent: float) -> dict[str, Any]:
     if box.IsEmpty():
         return {
@@ -133,10 +204,14 @@ def _collect_candidates(
         if not _has_schema(prim, "PhysicsRigidBodyAPI"):
             continue
         path = str(prim.GetPath())
+        bbox_source_path = _source_bbox_path_for_rigid_body(contact_proxy_profile, path)
+        bbox_source_prim = stage.GetPrimAtPath(bbox_source_path)
+        bbox_source_exists = bool(bbox_source_prim)
+        bbox_prim = bbox_source_prim if bbox_source_exists else prim
         side = _side_from_path(path, contact_proxy_profile)
         robot_root = _robot_root_from_side(side, contact_proxy_profile)
         under_robot_root = bool(robot_root and (path.startswith(robot_root + "/") or path == robot_root))
-        local_box = bbox_cache.ComputeLocalBound(prim).GetBox()
+        local_box = bbox_cache.ComputeLocalBound(bbox_prim).ComputeAlignedBox()
         row: dict[str, Any] = {
             "path": path,
             "side": side,
@@ -145,6 +220,8 @@ def _collect_candidates(
             "filter_match": _matches_filters(path, include_regex=include_regex, exclude_regex=exclude_regex),
             "applied_schemas": _applied(prim),
             "proxy_path": proxy_path_for_rigid_body(contact_proxy_profile, path),
+            "bbox_source_path": bbox_source_path,
+            "bbox_source_exists": bbox_source_exists,
         }
         row.update(_box_row(local_box, bbox_scale=bbox_scale, axis_scale=axis_scale, min_extent=min_extent))
         row["selected"] = bool(under_robot_root and row["bbox_valid"] and row["filter_match"])
@@ -163,7 +240,7 @@ def _create_proxy_stage(
     proxy_dynamic_friction: float | None,
     proxy_restitution: float | None,
     contact_proxy_profile: str,
-) -> None:
+) -> list[str]:
     from pxr import Gf
     from pxr import PhysxSchema
     from pxr import Usd
@@ -187,6 +264,43 @@ def _create_proxy_stage(
         prim = stage.OverridePrim(prim_path)
         collision = UsdPhysics.CollisionAPI.Apply(prim)
         collision.CreateCollisionEnabledAttr().Set(False)
+
+    disabled_selected_source_collisions: list[str] = []
+    for row in candidates:
+        if not row["selected"]:
+            continue
+        selected_root = str(row["path"])
+        proxy_path = str(row["proxy_path"])
+        selected_collision_paths: set[str] = set()
+        root_prim = stage.GetPrimAtPath(selected_root)
+        if root_prim:
+            for prim in Usd.PrimRange(root_prim):
+                prim_path = str(prim.GetPath())
+                if not (_has_schema(prim, "PhysicsCollisionAPI") or "/collisions/" in prim_path):
+                    continue
+                if not _should_disable_selected_source_collision(
+                    selected_root=selected_root, proxy_path=proxy_path, collision_path=prim_path
+                ):
+                    continue
+                selected_collision_paths.add(prim_path)
+        if contact_proxy_profile == "scene_base_link":
+            collision_instance_root = _known_scene_base_link_finger_collision_instance_root(selected_root)
+            if collision_instance_root is not None:
+                instance_root_prim = stage.OverridePrim(collision_instance_root)
+                instance_root_prim.SetInstanceable(False)
+                collision = UsdPhysics.CollisionAPI.Apply(instance_root_prim)
+                collision.CreateCollisionEnabledAttr().Set(False)
+                selected_collision_paths.add(collision_instance_root)
+            for prim_path in _known_scene_base_link_finger_collision_paths(selected_root):
+                if _should_disable_selected_source_collision(
+                    selected_root=selected_root, proxy_path=proxy_path, collision_path=prim_path
+                ):
+                    selected_collision_paths.add(prim_path)
+
+        for prim_path in sorted(selected_collision_paths):
+            collision = UsdPhysics.CollisionAPI.Apply(stage.OverridePrim(prim_path))
+            collision.CreateCollisionEnabledAttr().Set(False)
+            disabled_selected_source_collisions.append(prim_path)
 
     material = None
     if proxy_static_friction is not None or proxy_dynamic_friction is not None or proxy_restitution is not None:
@@ -224,6 +338,7 @@ def _create_proxy_stage(
             UsdShade.MaterialBindingAPI.Apply(proxy.GetPrim()).Bind(material)
 
     stage.Save()
+    return disabled_selected_source_collisions
 
 
 def _render_markdown(payload: dict[str, Any]) -> str:
@@ -239,6 +354,7 @@ def _render_markdown(payload: dict[str, Any]) -> str:
         f"- include regex: `{payload['inputs']['include_regex']}`",
         f"- exclude regex: `{payload['inputs']['exclude_regex']}`",
         f"- disabled root collision prims: `{summary['disabled_root_collision_count']}`",
+        f"- disabled selected source collision prims: `{summary.get('disabled_selected_source_collision_count')}`",
         f"- selected bbox proxies: `{summary['selected_proxy_count']}`",
         f"- skipped rigid bodies: `{summary['skipped_rigid_body_count']}`",
         "",
@@ -348,7 +464,7 @@ def main() -> int:
             exclude_regex=args.exclude_regex,
             contact_proxy_profile=args.contact_proxy_profile,
         )
-        _create_proxy_stage(
+        disabled_selected_source_collisions = _create_proxy_stage(
             input_stage_path=input_stage_path,
             output_stage_path=output_stage_path,
             candidates=candidates,
@@ -365,8 +481,16 @@ def main() -> int:
             "selected_proxy_count": sum(1 for row in candidates if row["selected"]),
             "skipped_rigid_body_count": sum(1 for row in candidates if not row["selected"]),
             "disabled_root_collision_count": len(disabled_root_collisions),
+            "disabled_selected_source_collision_count": len(disabled_selected_source_collisions),
         }
-        payload.update({"status": "PASS", "summary": summary, "candidate_rows": candidates})
+        payload.update(
+            {
+                "status": "PASS",
+                "summary": summary,
+                "candidate_rows": candidates,
+                "disabled_selected_source_collisions": disabled_selected_source_collisions,
+            }
+        )
         _write_json(json_path, payload)
         md_path.write_text(_render_markdown(_json_safe(payload)))
         print(

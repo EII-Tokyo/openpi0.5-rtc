@@ -34,8 +34,8 @@ def test_scene_base_link_profile_uses_scene_articulation_roots_and_fingertip_pro
         "right_finger": "right_right_finger",
     }
     contact_targets = resolve_contact_target_paths("scene_base_link")
-    assert contact_targets["left"]["left_finger"] == "/scene/left_base_link/left_left_finger_link"
-    assert contact_targets["left"]["right_finger"] == "/scene/left_base_link/left_right_finger_link"
+    assert contact_targets["left"]["left_finger"] == "/scene/left_base_link/left_left_finger_link/bbox_collision_proxy"
+    assert contact_targets["left"]["right_finger"] == "/scene/left_base_link/left_right_finger_link/bbox_collision_proxy"
 
 
 def test_scene_base_link_profile_maps_rigid_body_paths_to_selected_side_and_proxy_path() -> None:
