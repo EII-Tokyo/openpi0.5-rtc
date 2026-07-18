@@ -96,6 +96,7 @@ The main conclusion is conservative:
 - [83 Phase 97 drive-target controller gain reference](83_phase97_drive_target_controller_gain_reference_2026-07-18.md)
 - [84 Phase 99 convex legacy collision cleanup](84_phase99_convex_legacy_collision_cleanup_2026-07-19.md)
 - [85 Phase 101 active-grasp negative control](85_phase101_active_grasp_negative_control_2026-07-19.md)
+- [86 Phase 102 active-contact proxy smoke test](86_phase102_active_grasp_proxy_smoke_2026-07-19.md)
 
 ## Operating Rule
 
@@ -139,4 +140,11 @@ The current negative control that proves Phase97 is not an active-grasp pass can
 ```bash
 codex-evidence --name aloha-phase101-active-grasp-negative-control -- \
   .venv/bin/python aloha_isaac_replay/scripts/run_phase101_active_grasp_negative_control.py
+```
+
+The current positive active-contact smoke test can be rerun with:
+
+```bash
+codex-evidence --name aloha-phase102-active-grasp-proxy-smoke -- \
+  .venv/bin/python aloha_isaac_replay/scripts/run_phase102_active_grasp_proxy_smoke.py
 ```
