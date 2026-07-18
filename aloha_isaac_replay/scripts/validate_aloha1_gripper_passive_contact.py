@@ -48,7 +48,7 @@ def _write_json(path: Path, payload: dict[str, Any]) -> None:
 
 
 def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
-    fieldnames = [
+    base_fieldnames = [
         "phase",
         "step",
         "object_center_x",
@@ -69,6 +69,13 @@ def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
         "object_axis_center",
         "target_finger_object_surface_gap",
     ]
+    fieldnames = list(base_fieldnames)
+    seen = set(fieldnames)
+    for row in rows:
+        for key in row:
+            if key not in seen:
+                fieldnames.append(key)
+                seen.add(key)
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
@@ -242,6 +249,66 @@ def _targets_from_hdf5_qpos(
         },
         "arm_qpos_delta": arm_delta,
     }
+
+
+def _tracking_groups(dof_names: list[str], *, replay_mode: str) -> dict[str, list[int]]:
+    finger_indices = [dof_names.index("left_finger"), dof_names.index("right_finger")]
+    groups: dict[str, list[int]] = {"gripper": finger_indices}
+    if replay_mode == "left_arm_and_gripper":
+        arm_names = ("waist", "shoulder", "elbow", "forearm_roll", "wrist_angle", "wrist_rotate")
+        arm_indices = [dof_names.index(name) for name in arm_names if name in dof_names]
+        groups["left_arm"] = arm_indices
+        groups["controlled"] = arm_indices + finger_indices
+    else:
+        groups["controlled"] = finger_indices
+    return groups
+
+
+def _tracking_step_errors(
+    *,
+    target: np.ndarray,
+    actual: np.ndarray,
+    groups: dict[str, list[int]],
+) -> dict[str, dict[str, float]]:
+    row: dict[str, dict[str, float]] = {}
+    error = np.asarray(actual, dtype=np.float64) - np.asarray(target, dtype=np.float64)
+    for name, indices in groups.items():
+        if not indices:
+            row[name] = {"max_abs_error": float("nan"), "rms_error": float("nan")}
+            continue
+        group_error = error[np.asarray(indices, dtype=np.int64)]
+        row[name] = {
+            "max_abs_error": float(np.max(np.abs(group_error))),
+            "rms_error": float(np.sqrt(np.mean(np.square(group_error)))),
+        }
+    return row
+
+
+def _summarize_tracking_errors(
+    tracking_rows: list[dict[str, Any]],
+    groups: dict[str, list[int]],
+    dof_names: list[str],
+) -> dict[str, Any]:
+    summary: dict[str, Any] = {"sample_count": len(tracking_rows), "groups": {}}
+    for name, indices in groups.items():
+        group_rows = [row["groups"][name] for row in tracking_rows if name in row["groups"]]
+        dof_group_names = [dof_names[i] for i in indices]
+        if not group_rows:
+            summary["groups"][name] = {"dof_names": dof_group_names, "sample_count": 0}
+            continue
+        max_abs = np.asarray([row["max_abs_error"] for row in group_rows], dtype=np.float64)
+        rms = np.asarray([row["rms_error"] for row in group_rows], dtype=np.float64)
+        summary["groups"][name] = {
+            "dof_names": dof_group_names,
+            "sample_count": int(len(group_rows)),
+            "max_abs_error": float(np.nanmax(max_abs)),
+            "mean_max_abs_error": float(np.nanmean(max_abs)),
+            "final_max_abs_error": float(max_abs[-1]),
+            "max_rms_error": float(np.nanmax(rms)),
+            "mean_rms_error": float(np.nanmean(rms)),
+            "final_rms_error": float(rms[-1]),
+        }
+    return summary
 
 
 def _set_finger_target_and_step(world: Any, art: Any, target: np.ndarray, steps: int) -> None:
@@ -906,6 +973,9 @@ def main() -> int:
             _set_full_state(art, open_target)
             _set_full_target(art, open_target)
             dof_names = list(art.dof_names)
+            replay_mode_for_tracking = args.hdf5_replay_mode if hdf5_target_sequence is not None else "gripper_only"
+            tracking_groups = _tracking_groups(dof_names, replay_mode=replay_mode_for_tracking)
+            tracking_rows: list[dict[str, Any]] = []
             object_reset_box = _bbox_row(stage, object_path)
             object_reset_center = np.asarray(object_reset_box["center"], dtype=np.float64)
             rows: list[dict[str, Any]] = []
@@ -915,6 +985,8 @@ def main() -> int:
                 _set_full_target(art, open_target)
                 world.step(render=False)
                 qpos = np.asarray(art.get_joint_positions(), dtype=np.float64).reshape(-1)
+                step_tracking = _tracking_step_errors(target=open_target, actual=qpos, groups=tracking_groups)
+                tracking_rows.append({"phase": "settle", "step": step, "groups": step_tracking})
                 left_box = _bbox_row(stage, paths["left_finger"])
                 right_box = _bbox_row(stage, paths["right_finger"])
                 object_box = _bbox_row(stage, object_path)
@@ -944,6 +1016,12 @@ def main() -> int:
                         "object_displacement": displacement_from_reset,
                         "left_finger_qpos": float(qpos[dof_names.index("left_finger")]),
                         "right_finger_qpos": float(qpos[dof_names.index("right_finger")]),
+                        "tracking_controlled_max_abs_error": step_tracking["controlled"]["max_abs_error"],
+                        "tracking_controlled_rms_error": step_tracking["controlled"]["rms_error"],
+                        "tracking_gripper_max_abs_error": step_tracking["gripper"]["max_abs_error"],
+                        "tracking_gripper_rms_error": step_tracking["gripper"]["rms_error"],
+                        "tracking_left_arm_max_abs_error": step_tracking.get("left_arm", {}).get("max_abs_error"),
+                        "tracking_left_arm_rms_error": step_tracking.get("left_arm", {}).get("rms_error"),
                         "finger_center_distance": _gap_metrics(left_box, right_box).get("center_distance"),
                         **_axis_probe_row(
                             axis=axis,
@@ -991,6 +1069,8 @@ def main() -> int:
                 _set_full_target(art, step_target)
                 world.step(render=False)
                 qpos = np.asarray(art.get_joint_positions(), dtype=np.float64).reshape(-1)
+                step_tracking = _tracking_step_errors(target=step_target, actual=qpos, groups=tracking_groups)
+                tracking_rows.append({"phase": "close", "step": step, "groups": step_tracking})
                 left_box = _bbox_row(stage, paths["left_finger"])
                 right_box = _bbox_row(stage, paths["right_finger"])
                 object_box = _bbox_row(stage, object_path)
@@ -1026,6 +1106,12 @@ def main() -> int:
                         "object_displacement": displacement,
                         "left_finger_qpos": float(qpos[dof_names.index("left_finger")]),
                         "right_finger_qpos": float(qpos[dof_names.index("right_finger")]),
+                        "tracking_controlled_max_abs_error": step_tracking["controlled"]["max_abs_error"],
+                        "tracking_controlled_rms_error": step_tracking["controlled"]["rms_error"],
+                        "tracking_gripper_max_abs_error": step_tracking["gripper"]["max_abs_error"],
+                        "tracking_gripper_rms_error": step_tracking["gripper"]["rms_error"],
+                        "tracking_left_arm_max_abs_error": step_tracking.get("left_arm", {}).get("max_abs_error"),
+                        "tracking_left_arm_rms_error": step_tracking.get("left_arm", {}).get("rms_error"),
                         "finger_center_distance": _gap_metrics(left_box, right_box).get("center_distance"),
                         **_axis_probe_row(
                             axis=axis,
@@ -1041,6 +1127,7 @@ def main() -> int:
 
         object_final_box = object_latest_box
         object_final_center = object_latest_center
+        tracking_summary = _summarize_tracking_errors(tracking_rows, tracking_groups, dof_names)
         object_displacement = float(np.linalg.norm(object_final_center - object_initial_center))
         total_object_displacement = float(np.linalg.norm(object_final_center - object_reset_center))
         contact_motion_policy = (
@@ -1091,6 +1178,7 @@ def main() -> int:
                 "close_target_values": close_values,
                 "hdf5_gripper_summary": hdf5_gripper_summary,
                 "hdf5_gripper_replay_steps": len(close_sequence) if hdf5_target_sequence is not None else None,
+                "tracking_summary": tracking_summary,
                 "finger_gap_axis": axis_name,
                 "finger_surface_gap_open": surface_gap,
                 "left_finger_placement_box": placement_left_box,

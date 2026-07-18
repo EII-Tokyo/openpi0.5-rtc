@@ -71,6 +71,7 @@ The main conclusion is conservative:
 - [58 Phase 52 Bottle500 USD contact gate](58_phase52_bottle500_usd_contact_2026-07-18.md)
 - [59 Phase 53 HDF5 gripper-replay contact gate](59_phase53_hdf5_gripper_replay_contact_2026-07-18.md)
 - [60 Phase 54 HDF5 left-arm + gripper replay contact gate](60_phase54_hdf5_left_arm_gripper_replay_contact_2026-07-18.md)
+- [61 Phase 55 HDF5 replay tracking error](61_phase55_hdf5_replay_tracking_error_2026-07-18.md)
 
 ## Operating Rule
 
