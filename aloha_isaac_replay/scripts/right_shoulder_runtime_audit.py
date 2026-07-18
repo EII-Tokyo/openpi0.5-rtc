@@ -410,7 +410,26 @@ def _apply_arm_gains(art, kp: float | None, kd: float | None) -> None:
     if kp is None and kd is None:
         return
     dof_names = list(art.dof_names)
-    indices = [dof_names.index(name) for name in ARM_DOF_NAMES if name in dof_names]
+    indices = [
+        idx
+        for idx, name in enumerate(dof_names)
+        if name in ARM_DOF_NAMES or any(name.endswith(f"_{arm_name}") for arm_name in ARM_DOF_NAMES)
+    ]
+    if not indices:
+        return
+    joint_indices = np.asarray(indices, dtype=np.int64)
+    kps = None if kp is None else np.asarray([kp] * len(indices), dtype=np.float64)
+    kds = None if kd is None else np.asarray([kd] * len(indices), dtype=np.float64)
+    art._articulation_view.set_gains(kps=kps, kds=kds, joint_indices=joint_indices, save_to_usd=False)
+
+
+def _apply_named_dof_gains(art, dof_names_to_tune: list[str], kp: float | None, kd: float | None) -> None:
+    if kp is None and kd is None:
+        return
+    available_dof_names = list(art.dof_names)
+    indices = [available_dof_names.index(name) for name in dof_names_to_tune if name in available_dof_names]
+    if not indices:
+        return
     joint_indices = np.asarray(indices, dtype=np.int64)
     kps = None if kp is None else np.asarray([kp] * len(indices), dtype=np.float64)
     kds = None if kd is None else np.asarray([kd] * len(indices), dtype=np.float64)

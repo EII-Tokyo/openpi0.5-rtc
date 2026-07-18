@@ -100,6 +100,31 @@ def test_replay_actuation_mode_drive_target_steps_with_joint_target(monkeypatch)
     assert world.step_calls == 1
 
 
+def test_replay_actuation_mode_drive_target_can_hold_target(monkeypatch) -> None:
+    calls: list[str] = []
+
+    def fake_set_target(art, target) -> None:
+        calls.append("target")
+
+    monkeypatch.setattr(
+        "aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact._set_full_target",
+        fake_set_target,
+    )
+
+    world = _FakeWorld()
+    pre_step_qpos = _apply_replay_target_and_step(
+        world,
+        _FakeArticulation(),
+        np.zeros(2),
+        actuation_mode="drive_target",
+        target_hold_steps=3,
+    )
+
+    assert calls == ["target", "target", "target"]
+    np.testing.assert_allclose(pre_step_qpos, [0.25, -0.5])
+    assert world.step_calls == 3
+
+
 def test_replay_actuation_mode_state_teleport_sets_state_then_target(monkeypatch) -> None:
     calls: list[str] = []
 
@@ -130,6 +155,50 @@ def test_replay_actuation_mode_state_teleport_sets_state_then_target(monkeypatch
     assert calls == ["state", "target"]
     np.testing.assert_allclose(pre_step_qpos, [1.0, 2.0])
     assert world.step_calls == 1
+
+
+def test_replay_actuation_mode_state_teleport_reapplies_state_during_hold(monkeypatch) -> None:
+    calls: list[str] = []
+
+    def fake_set_target(art, target) -> None:
+        calls.append("target")
+
+    def fake_set_state(art, target) -> None:
+        calls.append("state")
+        art.qpos = np.asarray(target, dtype=np.float64)
+
+    monkeypatch.setattr(
+        "aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact._set_full_target",
+        fake_set_target,
+    )
+    monkeypatch.setattr(
+        "aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact._set_full_state",
+        fake_set_state,
+    )
+
+    world = _FakeWorld()
+    pre_step_qpos = _apply_replay_target_and_step(
+        world,
+        _FakeArticulation(),
+        np.asarray([1.0, 2.0], dtype=np.float64),
+        actuation_mode="state_teleport",
+        target_hold_steps=2,
+    )
+
+    assert calls == ["state", "target", "state", "target"]
+    np.testing.assert_allclose(pre_step_qpos, [1.0, 2.0])
+    assert world.step_calls == 2
+
+
+def test_replay_actuation_mode_rejects_non_positive_hold_steps() -> None:
+    with pytest.raises(ValueError, match="target_hold_steps must be positive"):
+        _apply_replay_target_and_step(
+            _FakeWorld(),
+            _FakeArticulation(),
+            np.zeros(2),
+            actuation_mode="drive_target",
+            target_hold_steps=0,
+        )
 
 
 def test_tracking_groups_accept_scene_base_link_prefixed_left_arm_dofs() -> None:

@@ -71,9 +71,16 @@ Read this before using, changing, debugging, or reinstalling Isaac Sim / Isaac L
   - `--fail-on-non-target-object-contact`
   - `--allowed-non-target-object-contact-category workcell_or_environment`
 - `--support-plane-mode object_bottom` is diagnostic only. Phase81 on 2026-07-18 showed it can make contact look stable while corrupting post-step arm tracking, so it is not a final validation substitute.
-- Current reference run:
+- Current geometry-isolation reference run:
   - Report: `reports/aloha1_isaac_adaptation/phase83_scene_proxy_hdf5_replay_native_workcell_allowed_support_20260718/gripper_passive_contact_metrics.json`
   - Artifact: `.codex/artifacts/20260718-232540_aloha-phase83-native-workcell-allowed-support-strict-gate`
+- Current drive-target reference run:
+  - Report: `reports/aloha1_isaac_adaptation/phase97_scene_proxy_hdf5_replay_drive_target_arm1600_kd100_finger200_native_workcell_20260718/gripper_passive_contact_metrics.json`
+  - Artifact: `.codex/artifacts/20260718-234743_aloha-phase97-native-workcell-drive-target-arm1600-kd100-finger200`
+  - Required runtime tuning for this run: `--arm-kp 1600 --arm-kd 100 --finger-kp 200 --finger-kd 50`.
+  - This run keeps `--hdf5-replay-target-hold-steps 1`, so it preserves the 50 Hz HDF5 replay target cadence.
+  - PASS metrics: `target_limit_gate_ok: true`, `controller_tracking_gate.pass: true`, `max_controlled_error: 0.012857437133789062`, `contact_trace_status: PASS_BILATERAL_CONTACT_CANDIDATE`, `failure_reasons: []`.
+- Do not treat higher arm stiffness as automatically better. Phase94 (`--arm-kp 2400 --arm-kd 200 --finger-kp 200 --finger-kd 50`) passed tracking but failed the strict non-target contact gate because the object touched the same-side gripper base.
 
 ## USD Reference Safety
 - When referencing a USD asset into another Isaac stage, do not assume the source file's `defaultPrim` is the desired asset root.

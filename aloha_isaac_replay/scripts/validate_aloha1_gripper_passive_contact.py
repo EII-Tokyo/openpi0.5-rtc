@@ -19,6 +19,7 @@ from aloha_isaac_replay.runtime.isaac_light_app import LIGHTWEIGHT_SIMULATION_AP
 from aloha_isaac_replay.scripts.audit_table_frame_candidate import audit_table_frame
 from aloha_isaac_replay.scripts.right_shoulder_runtime_audit import _apply_arm_gains
 from aloha_isaac_replay.scripts.right_shoulder_runtime_audit import _apply_gravity
+from aloha_isaac_replay.scripts.right_shoulder_runtime_audit import _apply_named_dof_gains
 from aloha_isaac_replay.scripts.right_shoulder_runtime_audit import _get_limits
 from aloha_isaac_replay.scripts.right_shoulder_runtime_audit import _json_safe
 from aloha_isaac_replay.scripts.right_shoulder_runtime_audit import _set_full_state
@@ -769,18 +770,38 @@ def _set_finger_target_and_step(world: Any, art: Any, target: np.ndarray, steps:
         world.step(render=False)
 
 
-def _apply_replay_target_and_step(world: Any, art: Any, target: np.ndarray, *, actuation_mode: str) -> np.ndarray:
-    """Step a replay target and return qpos after applying the command but before physics advances."""
+def _apply_replay_target_and_step(
+    world: Any,
+    art: Any,
+    target: np.ndarray,
+    *,
+    actuation_mode: str,
+    target_hold_steps: int = 1,
+) -> np.ndarray:
+    """Apply one replay target for one or more physics steps.
 
-    if actuation_mode == "drive_target":
-        _set_full_target(art, target)
-    elif actuation_mode == "state_teleport":
-        _set_full_state(art, target)
-        _set_full_target(art, target)
-    else:
-        raise ValueError(f"unknown HDF5 replay actuation mode: {actuation_mode!r}")
-    pre_step_qpos = np.asarray(art.get_joint_positions(), dtype=np.float64).reshape(-1).copy()
-    world.step(render=False)
+    HDF5 actions are recorded at 50 Hz, but Isaac articulation drives may need
+    several physics steps to settle near a new target.  The returned qpos is the
+    state immediately before the first physics step, which preserves the old
+    pre-step tracking diagnostic when ``target_hold_steps == 1``.
+    """
+
+    if target_hold_steps <= 0:
+        raise ValueError(f"target_hold_steps must be positive, got {target_hold_steps}")
+
+    pre_step_qpos: np.ndarray | None = None
+    for _ in range(target_hold_steps):
+        if actuation_mode == "drive_target":
+            _set_full_target(art, target)
+        elif actuation_mode == "state_teleport":
+            _set_full_state(art, target)
+            _set_full_target(art, target)
+        else:
+            raise ValueError(f"unknown HDF5 replay actuation mode: {actuation_mode!r}")
+        if pre_step_qpos is None:
+            pre_step_qpos = np.asarray(art.get_joint_positions(), dtype=np.float64).reshape(-1).copy()
+        world.step(render=False)
+    assert pre_step_qpos is not None
     return pre_step_qpos
 
 
@@ -1426,6 +1447,30 @@ def main() -> int:
     parser.add_argument("--close-steps", type=int, default=180)
     parser.add_argument("--physics-dt", type=float, default=1.0 / 50.0)
     parser.add_argument("--gravity", type=float, default=0.0)
+    parser.add_argument(
+        "--arm-kp",
+        type=float,
+        default=None,
+        help="Optional runtime position-drive stiffness override for arm DOFs only. Defaults to the asset values.",
+    )
+    parser.add_argument(
+        "--arm-kd",
+        type=float,
+        default=None,
+        help="Optional runtime position-drive damping override for arm DOFs only. Defaults to the asset values.",
+    )
+    parser.add_argument(
+        "--finger-kp",
+        type=float,
+        default=None,
+        help="Optional runtime position-drive stiffness override for the selected side's controlled finger DOFs only.",
+    )
+    parser.add_argument(
+        "--finger-kd",
+        type=float,
+        default=None,
+        help="Optional runtime position-drive damping override for the selected side's controlled finger DOFs only.",
+    )
     parser.add_argument("--limit-margin", type=float, default=0.001)
     parser.add_argument("--object-fill-fraction", type=float, default=0.6)
     parser.add_argument("--object-placement", choices=("gap_center", "moving_finger_surface"), default="gap_center")
@@ -1473,6 +1518,16 @@ def main() -> int:
             "How to apply HDF5 replay targets. drive_target uses normal articulation drives. "
             "state_teleport is diagnostic-only and sets joint state before each step to isolate mapping/geometry "
             "from drive tracking error."
+        ),
+    )
+    parser.add_argument(
+        "--hdf5-replay-target-hold-steps",
+        type=int,
+        default=1,
+        help=(
+            "Number of physics steps to hold each HDF5 replay target before advancing to the next 50 Hz target. "
+            "Use values greater than 1 to test whether articulation-drive tracking is limited by target update rate. "
+            "Default 1 preserves one recorded frame per physics step."
         ),
     )
     parser.add_argument(
@@ -1666,7 +1721,13 @@ def main() -> int:
         art = world.scene.add(SingleArticulation(prim_path=paths["articulation"], name=f"{args.side}_vx300s"))
         world.reset()
         _apply_gravity(world, args.gravity)
-        _apply_arm_gains(art, None, None)
+        _apply_arm_gains(art, args.arm_kp, args.arm_kd)
+        _apply_named_dof_gains(
+            art,
+            [finger_dof_names["left_finger"], finger_dof_names["right_finger"]],
+            args.finger_kp,
+            args.finger_kd,
+        )
 
         hdf5_target_sequence: list[np.ndarray] | None = None
         hdf5_gripper_summary: dict[str, Any] | None = None
@@ -1874,6 +1935,7 @@ def main() -> int:
                     art,
                     open_target,
                     actuation_mode=args.hdf5_replay_actuation_mode,
+                    target_hold_steps=args.hdf5_replay_target_hold_steps,
                 )
                 qpos = np.asarray(art.get_joint_positions(), dtype=np.float64).reshape(-1)
                 pre_step_tracking = _tracking_step_errors(target=open_target, actual=pre_step_qpos, groups=tracking_groups)
@@ -1979,6 +2041,7 @@ def main() -> int:
                     art,
                     step_target,
                     actuation_mode=args.hdf5_replay_actuation_mode,
+                    target_hold_steps=args.hdf5_replay_target_hold_steps,
                 )
                 qpos = np.asarray(art.get_joint_positions(), dtype=np.float64).reshape(-1)
                 pre_step_tracking = _tracking_step_errors(target=step_target, actual=pre_step_qpos, groups=tracking_groups)
@@ -2146,6 +2209,14 @@ def main() -> int:
                 "close_target_values": close_values,
                 "hdf5_gripper_summary": hdf5_gripper_summary,
                 "hdf5_gripper_replay_steps": len(close_sequence) if hdf5_target_sequence is not None else None,
+                "hdf5_replay_target_hold_steps": int(args.hdf5_replay_target_hold_steps),
+                "hdf5_replay_physics_steps": (
+                    (args.settle_steps + len(close_sequence)) * int(args.hdf5_replay_target_hold_steps)
+                    if hdf5_target_sequence is not None
+                    else None
+                ),
+                "runtime_arm_gain_override": {"kp": args.arm_kp, "kd": args.arm_kd},
+                "runtime_finger_gain_override": {"kp": args.finger_kp, "kd": args.finger_kd},
                 "pre_step_tracking_summary": pre_step_tracking_summary,
                 "tracking_summary": tracking_summary,
                 "controller_tracking_gate": controller_tracking_gate,
