@@ -1,0 +1,24 @@
+version: 1
+scope: phase110_negative_control
+default_decision: deny
+notes: >
+  Conservative workcell contact policy for ALOHA1 BottleUSD replay gates.
+  This policy is intentionally strict: broad workcell_or_environment contacts
+  must be mapped to explicit task semantics before they can pass a final gate.
+
+rules:
+  - path_prefix: /scene/worldBody/__22
+    semantic_class: denied_frame_rail_collision
+    decision: deny
+    notes: >
+      Phase109 identified this as a 1.22 m long, 2 cm thick frame/rail
+      collider. Bottle contact with this rail is not equivalent to calibrated
+      tabletop support.
+
+  - path_prefix: /scene/worldBody/table
+    semantic_class: candidate_table_prim_not_full_measured_table
+    decision: deny
+    notes: >
+      The named table prim exists, but Phase109 measured its bbox at about
+      0.744 m x 0.274 m x 0.02 m, not the full measured table. Keep denied
+      until table-to-base calibration and tabletop semantics are completed.

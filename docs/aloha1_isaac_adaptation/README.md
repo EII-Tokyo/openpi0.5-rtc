@@ -102,6 +102,8 @@ The main conclusion is conservative:
 - [89 Phase 106 BottleUSD already-grasped gate](89_phase106_bottleusd_already_grasped_gate_2026-07-19.md)
 - [90 Phase 107 BottleUSD HDF5 drive-target gate](90_phase107_bottleusd_hdf5_drive_target_gate_2026-07-19.md)
 - [91 Phase 108 diagnostic table contact gate](91_phase108_diagnostic_table_contact_gate_2026-07-19.md)
+- [92 Phase 109 workcell semantic audit](92_phase109_workcell_semantic_audit_2026-07-19.md)
+- [93 Phase 110 workcell contact policy negative gate](93_phase110_workcell_contact_policy_negative_gate_2026-07-19.md)
 
 ## Operating Rule
 
@@ -180,4 +182,21 @@ The current diagnostic fixed-table replay gate can be rerun with:
 ```bash
 codex-evidence --name aloha-phase108-bottleusd-hdf5-diagnostic-table-runner -- \
   .venv/bin/python aloha_isaac_replay/scripts/run_phase108_bottleusd_hdf5_diagnostic_table_gate.py
+```
+
+The current workcell semantic audit can be rerun with:
+
+```bash
+codex-evidence --name aloha-phase109-workcell-semantic-audit -- \
+  .venv_issac/bin/python aloha_isaac_replay/scripts/inspect_workcell_semantics.py \
+  --stage-usd local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose_proxy_runtime.usda \
+  --contact-report reports/aloha1_isaac_adaptation/phase108_bottleusd_hdf5_diagnostic_table_gate_20260719/gripper_passive_contact_metrics.json \
+  --output-dir reports/aloha1_isaac_adaptation/phase109_workcell_semantic_audit_20260719
+```
+
+The current workcell contact-policy negative gate can be rerun with:
+
+```bash
+codex-evidence --name aloha-phase110-workcell-contact-policy-negative-gate -- \
+  .venv/bin/python aloha_isaac_replay/scripts/run_phase110_workcell_contact_policy_negative_gate.py
 ```

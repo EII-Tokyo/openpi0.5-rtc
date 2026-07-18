@@ -774,6 +774,104 @@ def _non_target_contact_gate(
     }
 
 
+def _load_workcell_contact_policy(path: str | Path | None) -> dict[str, Any] | None:
+    if path is None:
+        return None
+    policy_path = Path(path)
+    data = yaml.safe_load(policy_path.read_text(encoding="utf-8")) or {}
+    rules = data.get("rules") or []
+    if not isinstance(rules, list):
+        raise ValueError("workcell contact policy must contain a list field named rules")
+    normalized_rules: list[dict[str, Any]] = []
+    for index, rule in enumerate(rules):
+        if not isinstance(rule, dict):
+            raise ValueError(f"workcell contact policy rule {index} must be a mapping")
+        prefix = str(rule.get("path_prefix") or "")
+        if not prefix.startswith("/"):
+            raise ValueError(f"workcell contact policy rule {index} path_prefix must be an absolute prim path")
+        decision = str(rule.get("decision") or "deny")
+        if decision not in {"allow", "deny"}:
+            raise ValueError(f"workcell contact policy rule {index} decision must be allow or deny")
+        normalized_rules.append(
+            {
+                "path_prefix": prefix.rstrip("/") or "/",
+                "semantic_class": str(rule.get("semantic_class") or "unknown_workcell_collision"),
+                "decision": decision,
+                "notes": str(rule.get("notes") or ""),
+            }
+        )
+    return {
+        "path": _rel(policy_path),
+        "default_decision": str(data.get("default_decision") or "deny"),
+        "rules": sorted(normalized_rules, key=lambda item: len(item["path_prefix"]), reverse=True),
+    }
+
+
+def _other_path_from_unique_object_pair(pair: list[str], object_path: str) -> str | None:
+    if len(pair) != 2:
+        return None
+    left, right = str(pair[0]), str(pair[1])
+    left_is_object = _path_matches(left, object_path)
+    right_is_object = _path_matches(right, object_path)
+    if left_is_object and not right_is_object:
+        return right
+    if right_is_object and not left_is_object:
+        return left
+    return None
+
+
+def _match_workcell_contact_rule(other_path: str, policy: dict[str, Any]) -> dict[str, Any]:
+    for rule in policy.get("rules") or []:
+        prefix = str(rule["path_prefix"])
+        if other_path == prefix or other_path.startswith(prefix + "/"):
+            return dict(rule)
+    return {
+        "path_prefix": None,
+        "semantic_class": "unknown_workcell_collision",
+        "decision": str(policy.get("default_decision") or "deny"),
+        "notes": "No explicit workcell contact policy rule matched this path.",
+    }
+
+
+def _workcell_contact_policy_gate(
+    *,
+    contact_summary: dict[str, Any],
+    object_path: str,
+    policy: dict[str, Any] | None,
+) -> dict[str, Any]:
+    if policy is None:
+        return {"pass": True, "status": "SKIPPED_NO_WORKCELL_CONTACT_POLICY", "policy": None, "rows": []}
+    rows: list[dict[str, Any]] = []
+    categories = contact_summary.get("object_contact_categories") or {}
+    for category, payload in sorted(categories.items()):
+        if category == "target_finger":
+            continue
+        for pair in payload.get("unique_contact_pairs") or []:
+            other_path = _other_path_from_unique_object_pair(pair, object_path)
+            if other_path is None:
+                continue
+            rule = _match_workcell_contact_rule(other_path, policy)
+            rows.append(
+                {
+                    "category": category,
+                    "other_path": other_path,
+                    "semantic_class": rule["semantic_class"],
+                    "decision": rule["decision"],
+                    "matched_path_prefix": rule["path_prefix"],
+                    "notes": rule.get("notes", ""),
+                }
+            )
+    denied_rows = [row for row in rows if row["decision"] == "deny"]
+    return {
+        "pass": not denied_rows,
+        "status": "PASS_WORKCELL_CONTACT_POLICY" if not denied_rows else "FAIL_WORKCELL_CONTACT_POLICY",
+        "policy": {"path": policy.get("path"), "default_decision": policy.get("default_decision")},
+        "rows": rows,
+        "denied_rows": denied_rows,
+        "denied_semantic_classes": sorted({row["semantic_class"] for row in denied_rows}),
+    }
+
+
 def _active_target_contact_gate(
     *,
     contact_summary: dict[str, Any],
@@ -1744,6 +1842,14 @@ def main() -> int:
         ),
     )
     parser.add_argument(
+        "--workcell-contact-policy",
+        default=None,
+        help=(
+            "Optional YAML path-prefix policy for non-target object contacts. Use it to split broad "
+            "workcell_or_environment contacts into allowed tabletop/pipe contacts and denied frame/rail contacts."
+        ),
+    )
+    parser.add_argument(
         "--require-active-target-contact",
         action="store_true",
         help=(
@@ -1791,6 +1897,7 @@ def main() -> int:
         if args.require_active_target_contact and args.already_in_contact_setup:
             raise ValueError("--require-active-target-contact cannot combine with --already-in-contact-setup")
         support_options = _resolve_support_plane_options(args)
+        workcell_contact_policy = _load_workcell_contact_policy(args.workcell_contact_policy)
         _guard_support_plane_calibration_mode(args)
         table_frame_audit = _audit_required_table_frame(args)
         contact_stage_namespace = _guard_final_contact_stage_namespace(args)
@@ -1864,6 +1971,7 @@ def main() -> int:
             "trace_contact_pairs": args.trace_contact_pairs,
             "fail_on_non_target_object_contact": args.fail_on_non_target_object_contact,
             "allowed_non_target_object_contact_categories": args.allowed_non_target_object_contact_category,
+            "workcell_contact_policy": workcell_contact_policy,
             "require_active_target_contact": args.require_active_target_contact,
             "already_in_contact_setup": args.already_in_contact_setup,
             "trace_disable_usd_updates": args.trace_disable_usd_updates,
@@ -2415,13 +2523,21 @@ def main() -> int:
             allowed_categories=list(args.allowed_non_target_object_contact_category),
         )
         non_target_object_contact_ok = bool(non_target_contact_gate["pass"])
+        workcell_contact_policy_gate = _workcell_contact_policy_gate(
+            contact_summary=contact_summary,
+            object_path=object_path,
+            policy=workcell_contact_policy,
+        )
+        workcell_contact_policy_ok = bool(workcell_contact_policy_gate["pass"])
         active_target_contact_gate = _active_target_contact_gate(
             contact_summary=contact_summary,
             require_active_target_contact=bool(args.trace_contact_pairs and args.require_active_target_contact),
             already_in_contact_setup=bool(args.already_in_contact_setup),
         )
         active_target_contact_ok = bool(active_target_contact_gate["pass"])
-        trace_pair_ok = bool(trace_pair_ok and non_target_object_contact_ok and active_target_contact_ok)
+        trace_pair_ok = bool(
+            trace_pair_ok and non_target_object_contact_ok and workcell_contact_policy_ok and active_target_contact_ok
+        )
         overall_pass = bool(overall_pass and trace_pair_ok)
         failure_reasons = []
         if not contact_motion_ok:
@@ -2432,6 +2548,8 @@ def main() -> int:
             failure_reasons.append("contact_trace_gate_failed")
         if not active_target_contact_ok:
             failure_reasons.append("active_target_contact_gate_failed")
+        if not workcell_contact_policy_ok:
+            failure_reasons.append("workcell_contact_policy_gate_failed")
         if not target_limit_ok:
             failure_reasons.append("target_outside_runtime_limits")
         if not controller_tracking_ok:
@@ -2443,6 +2561,8 @@ def main() -> int:
                 contact_trace_status = "FAIL_NO_TARGET_CONTACT"
             elif not non_target_object_contact_ok:
                 contact_trace_status = str(non_target_contact_gate["status"])
+            elif not workcell_contact_policy_ok:
+                contact_trace_status = str(workcell_contact_policy_gate["status"])
             elif not active_target_contact_ok:
                 contact_trace_status = str(active_target_contact_gate["status"])
             elif not no_explosion_ok:
@@ -2476,6 +2596,7 @@ def main() -> int:
                 "tracking_summary": tracking_summary,
                 "controller_tracking_gate": controller_tracking_gate,
                 "active_target_contact_gate": active_target_contact_gate,
+                "workcell_contact_policy_gate": workcell_contact_policy_gate,
                 "target_limit_summary": target_limit_summary,
                 "target_limit_gate_ok": target_limit_ok,
                 "failure_reasons": failure_reasons,
