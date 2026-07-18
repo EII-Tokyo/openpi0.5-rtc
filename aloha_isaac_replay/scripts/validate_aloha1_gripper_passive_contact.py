@@ -287,10 +287,19 @@ def _write_markdown(path: Path, payload: dict[str, Any]) -> None:
         f"- contact pair count: `{payload.get('contact_pair_count')}`",
         f"- target contact pair found: `{payload.get('target_contact_pair_found')}`",
         f"- all expected fingers contacted object: `{payload.get('all_expected_fingers_target_contact_pair_found')}`",
+        f"- target contact found during settle: `{payload.get('target_contact_found_during_settle')}`",
+        f"- target contact found during close: `{payload.get('target_contact_found_during_close')}`",
+        f"- non-target object contact found: `{payload.get('non_target_object_contact_found')}`",
+        f"- non-target object contact pair count: `{payload.get('non_target_object_contact_pair_count')}`",
+        f"- non-target object contact categories: `{payload.get('non_target_object_contact_categories')}`",
+        f"- strict non-target object contact gate ok: `{payload.get('non_target_object_contact_ok')}`",
         f"- cross-side proxy overlap detected: `{cross_overlap.get('overlap_detected')}`",
         f"- first contact pair: `{payload.get('first_contact_pair')}`",
         f"- first target contact pair: `{payload.get('first_target_contact_pair')}`",
+        f"- first target contact phase: `{payload.get('first_target_contact_phase')}`",
         f"- first target contact step: `{payload.get('first_target_contact_step')}`",
+        f"- first non-target object contact pair: `{payload.get('first_non_target_object_contact_pair')}`",
+        f"- first non-target object contact phase: `{payload.get('first_non_target_object_contact_phase')}`",
         f"- target contact persistence steps: `{payload.get('target_contact_persistence_steps')}`",
         f"- support plane path: `{support_plane.get('path')}`",
         f"- support plane center: `{support_plane.get('center')}`",
@@ -911,6 +920,14 @@ def _unique_pairs(rows: list[dict[str, Any]]) -> list[list[str]]:
     return [list(pair) for pair in sorted({tuple(row["sorted_pair"]) for row in rows})]
 
 
+def _phase_counts(rows: list[dict[str, Any]]) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for row in rows:
+        phase = str(row.get("phase", "unknown"))
+        counts[phase] = counts.get(phase, 0) + 1
+    return counts
+
+
 def _other_collider_for_object_pair(row: dict[str, Any], object_path: str) -> str | None:
     collider0 = str(row["collider0"])
     collider1 = str(row["collider1"])
@@ -971,6 +988,7 @@ def _summarize_contact_pairs(
     ]
     target_found_rows = [row for row in target_rows if row.get("type_name") == "CONTACT_FOUND"]
     target_steps = sorted({int(row["step"]) for row in target_rows})
+    target_found_phases = sorted({str(row.get("phase", "unknown")) for row in target_found_rows})
     wrong_pairs = sorted({tuple(row["sorted_pair"]) for row in wrong_rows})
     finger_target_rows = {
         finger_path: [row for row in contact_pair_rows if _pair_touches_finger(row, object_path, finger_path)]
@@ -1022,11 +1040,16 @@ def _summarize_contact_pairs(
             continue
         category_rows.setdefault(category, []).append(row)
     non_target_categories = {category: rows for category, rows in category_rows.items() if category != "target_finger"}
+    non_target_object_rows = [
+        row for category, rows in category_rows.items() if category != "target_finger" for row in rows
+    ]
+    non_target_object_rows.sort(key=lambda row: (str(row.get("phase", "")), int(row.get("step", 0))))
     object_contact_categories = {
         category: {
             "contact_pair_count": len(rows),
             "unique_contact_pair_count": len(_unique_pairs(rows)),
             "unique_contact_pairs": _unique_pairs(rows),
+            "phase_counts": _phase_counts(rows),
             "first_contact_pair": rows[0] if rows else None,
         }
         for category, rows in sorted(category_rows.items())
@@ -1051,7 +1074,11 @@ def _summarize_contact_pairs(
         else False,
         "first_target_contact_pair": target_rows[0] if target_rows else None,
         "first_target_contact_found_pair": target_found_rows[0] if target_found_rows else None,
+        "first_target_contact_phase": target_rows[0].get("phase") if target_rows else None,
         "first_target_contact_step": target_steps[0] if target_steps else None,
+        "target_contact_found_phases": target_found_phases,
+        "target_contact_found_during_settle": "settle" in target_found_phases,
+        "target_contact_found_during_close": "close" in target_found_phases,
         "target_contact_steps": target_steps,
         "target_contact_persistence_steps": len(target_steps),
         "wrong_contact_pairs": [list(pair) for pair in wrong_pairs],
@@ -1061,6 +1088,10 @@ def _summarize_contact_pairs(
         "non_target_object_contact_pair_count": sum(len(rows) for rows in non_target_categories.values()),
         "non_target_object_contact_categories": sorted(non_target_categories),
         "non_target_object_contact_found": bool(non_target_categories),
+        "first_non_target_object_contact_pair": non_target_object_rows[0] if non_target_object_rows else None,
+        "first_non_target_object_contact_phase": non_target_object_rows[0].get("phase")
+        if non_target_object_rows
+        else None,
     }
 
 

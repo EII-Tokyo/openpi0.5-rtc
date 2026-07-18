@@ -35,6 +35,11 @@ It also writes:
 ```text
 object_contact_pair_count
 object_contact_categories
+first_target_contact_phase
+target_contact_found_during_settle
+target_contact_found_during_close
+first_non_target_object_contact_pair
+first_non_target_object_contact_phase
 non_target_object_contact_found
 non_target_object_contact_pair_count
 non_target_object_contact_categories
@@ -55,6 +60,8 @@ For final-quality gates, use:
 ```
 
 Then any object contact outside the expected finger target roots fails the trace gate.
+
+The calibrated overlay manifest now includes this flag by default in its generated contact validation command. Diagnostic smoke tests may omit it, but final calibrated contact validation must not.
 
 ## Runtime Evidence
 

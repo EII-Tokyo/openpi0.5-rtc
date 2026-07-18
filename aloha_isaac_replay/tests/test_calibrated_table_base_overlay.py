@@ -100,3 +100,4 @@ def test_calibrated_overlay_uses_audited_world_base_transforms(tmp_path: Path) -
     assert "--stage-units-in-meters 1.0" in manifest_payload["contact_validation_command"]
     assert "--require-calibrated-table-frame" in manifest_payload["contact_validation_command"]
     assert "--contact-proxy-profile scene_base_link" in manifest_payload["contact_validation_command"]
+    assert "--fail-on-non-target-object-contact" in manifest_payload["contact_validation_command"]

@@ -230,7 +230,8 @@ def build_overlay(
         "--stage-units-in-meters 1.0 "
         f"--contact-proxy-profile {contact_proxy_profile} "
         f"--support-plane-config {calibration_path} "
-        "--require-calibrated-table-frame"
+        "--require-calibrated-table-frame "
+        "--fail-on-non-target-object-contact"
     )
     manifest = {
         "schema": "aloha1_phase69_calibrated_table_base_overlay.v1",
