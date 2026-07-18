@@ -14,7 +14,9 @@ from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _passive_contact_geometry_sanity
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _load_support_plane_config
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _resolve_support_plane_options
+from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _should_disable_workcell_environment_collision
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _summarize_contact_pairs
+from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _tracking_groups
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _write_csv
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -35,6 +37,42 @@ def test_passive_contact_csv_writer_preserves_late_diagnostic_columns(tmp_path) 
 
     assert "tracking_controlled_max_abs_error" in rows[0]
     assert rows[1]["tracking_controlled_max_abs_error"] == "0.12"
+
+
+def test_tracking_groups_accept_scene_base_link_prefixed_left_arm_dofs() -> None:
+    groups = _tracking_groups(
+        [
+            "left_waist",
+            "left_shoulder",
+            "left_elbow",
+            "left_forearm_roll",
+            "left_wrist_angle",
+            "left_wrist_rotate",
+            "left_left_finger",
+            "left_right_finger",
+        ],
+        replay_mode="left_arm_and_gripper",
+        finger_dof_names={"left_finger": "left_left_finger", "right_finger": "left_right_finger"},
+        side="left",
+    )
+
+    assert groups["left_arm"] == [0, 1, 2, 3, 4, 5]
+    assert groups["controlled"] == [0, 1, 2, 3, 4, 5, 6, 7]
+
+
+def test_workcell_environment_collision_filter_is_diagnostic_and_does_not_match_robot_or_target_paths() -> None:
+    assert _should_disable_workcell_environment_collision("/scene/worldBody/table/collisions/table/table/table")
+    assert _should_disable_workcell_environment_collision("/scene/worldBody/__27/collisions/__27/__27/extrusion_1000")
+    assert _should_disable_workcell_environment_collision("/World/Table/collisions/table")
+
+    assert not _should_disable_workcell_environment_collision("/scene/left_base_link/left_wrist_link/collisions/wrist")
+    assert not _should_disable_workcell_environment_collision(
+        "/scene/left_base_link/left_left_finger_link/bbox_collision_proxy"
+    )
+    assert not _should_disable_workcell_environment_collision(
+        "/World/phase43_passive_contact_cube/Collisions/COL_Body_14/COL_Body_14Mesh"
+    )
+    assert not _should_disable_workcell_environment_collision("/World/phase58_static_support_plane/Collision")
 
 
 def test_passive_contact_geometry_sanity_rejects_implausible_open_gap() -> None:

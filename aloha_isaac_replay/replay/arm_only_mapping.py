@@ -36,11 +36,19 @@ class ArmOnlyTarget:
     scale: float
 
 
-def arm_only_targets_from_standard_qpos(qpos_14d: np.ndarray, mapping: dict[str, Any]) -> list[ArmOnlyTarget]:
+def arm_only_targets_from_standard_qpos(
+    qpos_14d: np.ndarray,
+    mapping: dict[str, Any],
+    *,
+    side: str | None = None,
+) -> list[ArmOnlyTarget]:
     qpos = require_aloha_14d(qpos_14d, name="qpos_14d")
+    if side not in (None, "left", "right"):
+        raise ValueError(f"side must be one of None, 'left', or 'right'; got {side!r}")
+    names = ARM_ONLY_NAMES if side is None else tuple(name for name in ARM_ONLY_NAMES if name.startswith(f"{side}_"))
     entries = {entry["canonical_name"]: entry for entry in mapping.get("dof_mapping", [])}
     targets: list[ArmOnlyTarget] = []
-    for name in ARM_ONLY_NAMES:
+    for name in names:
         if name not in entries:
             raise ValueError(f"missing mapping entry for {name}")
         entry = entries[name]
@@ -66,4 +74,3 @@ def arm_only_targets_from_standard_qpos(qpos_14d: np.ndarray, mapping: dict[str,
     if len(dof_names) != len(set(dof_names)):
         raise ValueError(f"duplicate Isaac DOF names in arm-only mapping: {dof_names}")
     return targets
-

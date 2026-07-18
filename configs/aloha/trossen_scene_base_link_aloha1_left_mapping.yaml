@@ -1,0 +1,76 @@
+schema_version: 1
+robot: Trossen Stationary ALOHA scene_base_link adapted for ALOHA1
+dataset_convention: standard_aloha_14d
+scope: left_arm_only_hdf5_replay
+notes:
+  - This mapping is for the Menagerie/Trossen /scene articulation, not the legacy /puppet_left_vx300s stage.
+  - Right arm entries are intentionally omitted; callers must request side=left.
+  - Values come from phase9 FK holdout and are not yet a full controller calibration.
+source_report: reports/aloha1_isaac_adaptation/phase9_fk_mapping_holdout_20260717/fk_mapping_holdout.md
+dof_mapping:
+  - canonical_name: left_waist
+    dataset_index: 0
+    openpi_index: 0
+    isaac_dof_name: left/left_waist
+    isaac_dof_index: null
+    sign: -1.0
+    offset: 0.0
+    scale: 1.0
+    unit: rad
+    source: phase9_fk_mapping_holdout phase6_minus
+    confidence: 0.65
+  - canonical_name: left_shoulder
+    dataset_index: 1
+    openpi_index: 1
+    isaac_dof_name: left/left_shoulder
+    isaac_dof_index: null
+    sign: 1.0
+    offset: 1.850000023841858
+    scale: 1.0
+    unit: rad
+    source: phase9_fk_mapping_holdout phase6_selected
+    confidence: 0.65
+  - canonical_name: left_elbow
+    dataset_index: 2
+    openpi_index: 2
+    isaac_dof_name: left/left_elbow
+    isaac_dof_index: null
+    sign: -1.0
+    offset: 1.5499999523162842
+    scale: 1.0
+    unit: rad
+    source: phase9_fk_mapping_holdout phase6_selected
+    confidence: 0.65
+  - canonical_name: left_forearm_roll
+    dataset_index: 3
+    openpi_index: 3
+    isaac_dof_name: left/left_forearm_roll
+    isaac_dof_index: null
+    sign: 1.0
+    offset: -1.4986992478370667
+    scale: 1.0
+    unit: rad
+    source: phase9_fk_mapping_holdout limit_interval_from_current_episode
+    confidence: 0.65
+  - canonical_name: left_wrist_angle
+    dataset_index: 4
+    openpi_index: 4
+    isaac_dof_name: left/left_wrist_angle
+    isaac_dof_index: null
+    sign: 1.0
+    offset: -0.800000011920929
+    scale: 1.0
+    unit: rad
+    source: phase9_fk_mapping_holdout phase6_plus
+    confidence: 0.65
+  - canonical_name: left_wrist_rotate
+    dataset_index: 5
+    openpi_index: 5
+    isaac_dof_name: left/left_wrist_rotate
+    isaac_dof_index: null
+    sign: 1.0
+    offset: 0.0
+    scale: 1.0
+    unit: rad
+    source: phase9_fk_mapping_holdout phase6_plus
+    confidence: 0.65

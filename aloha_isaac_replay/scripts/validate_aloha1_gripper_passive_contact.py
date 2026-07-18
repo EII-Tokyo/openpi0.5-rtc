@@ -422,7 +422,7 @@ def _target_from_standard_qpos(
         if mapping is None:
             raise ValueError("left_arm_and_gripper replay requires a mapping")
         side_prefix = f"{side}/"
-        for arm_target in arm_only_targets_from_standard_qpos(qpos_frame, mapping):
+        for arm_target in arm_only_targets_from_standard_qpos(qpos_frame, mapping, side=side):
             if not arm_target.isaac_dof_name.startswith(side_prefix):
                 continue
             dof_name = arm_target.isaac_dof_name[len(side_prefix) :]
@@ -492,7 +492,7 @@ def _targets_from_hdf5_qpos(
 
 
 def _tracking_groups(
-    dof_names: list[str], *, replay_mode: str, finger_dof_names: dict[str, str]
+    dof_names: list[str], *, replay_mode: str, finger_dof_names: dict[str, str], side: str = "left"
 ) -> dict[str, list[int]]:
     finger_indices = [
         dof_names.index(finger_dof_names["left_finger"]),
@@ -500,13 +500,51 @@ def _tracking_groups(
     ]
     groups: dict[str, list[int]] = {"gripper": finger_indices}
     if replay_mode == "left_arm_and_gripper":
-        arm_names = ("waist", "shoulder", "elbow", "forearm_roll", "wrist_angle", "wrist_rotate")
+        base_arm_names = ("waist", "shoulder", "elbow", "forearm_roll", "wrist_angle", "wrist_rotate")
+        side_arm_names = tuple(f"{side}_{name}" for name in base_arm_names)
+        arm_names = side_arm_names if all(name in dof_names for name in side_arm_names) else base_arm_names
         arm_indices = [dof_names.index(name) for name in arm_names if name in dof_names]
         groups["left_arm"] = arm_indices
         groups["controlled"] = arm_indices + finger_indices
     else:
         groups["controlled"] = finger_indices
     return groups
+
+
+def _should_disable_workcell_environment_collision(path: str) -> bool:
+    """Return True for uncalibrated workcell/table collision prims used only in diagnostic replay isolation."""
+
+    normalized = str(path)
+    return (
+        normalized == "/World/Table"
+        or normalized.startswith("/World/Table/")
+        or normalized == "/scene/worldBody"
+        or normalized.startswith("/scene/worldBody/")
+    )
+
+
+def _disable_workcell_environment_collisions_for_diagnostic_replay(stage: Any) -> list[str]:
+    from pxr import UsdPhysics
+
+    for prim in stage.Traverse():
+        path = str(prim.GetPath())
+        if _should_disable_workcell_environment_collision(path) and prim.IsInstanceable():
+            prim.SetInstanceable(False)
+
+    disabled: list[str] = []
+    for prim in stage.Traverse():
+        path = str(prim.GetPath())
+        if not _should_disable_workcell_environment_collision(path):
+            continue
+        collision = UsdPhysics.CollisionAPI(prim)
+        if not collision:
+            continue
+        attr = collision.GetCollisionEnabledAttr()
+        if not attr:
+            attr = collision.CreateCollisionEnabledAttr()
+        attr.Set(False)
+        disabled.append(path)
+    return disabled
 
 
 def _finger_qpos_values(qpos: np.ndarray, dof_names: list[str], finger_dof_names: dict[str, str]) -> dict[str, float]:
@@ -1268,6 +1306,14 @@ def main() -> int:
         action="store_true",
         help="Match Isaac asset-validator style contact probing. Off by default because this script needs live USD bbox readback.",
     )
+    parser.add_argument(
+        "--disable-workcell-environment-collisions-for-diagnostic-replay",
+        action="store_true",
+        help=(
+            "Diagnostic only: disable uncalibrated /scene/worldBody and /World/Table collisions so HDF5 arm replay "
+            "can be isolated from table/base calibration errors. Do not use for final contact validation."
+        ),
+    )
     parser.add_argument("--min-contact-motion", type=float, default=1e-5)
     parser.add_argument("--max-object-displacement", type=float, default=0.25)
     parser.add_argument(
@@ -1349,6 +1395,7 @@ def main() -> int:
             "hdf5_gripper_max_frames": args.hdf5_gripper_max_frames,
             "trace_contact_pairs": args.trace_contact_pairs,
             "trace_disable_usd_updates": args.trace_disable_usd_updates,
+            "disable_workcell_environment_collisions_for_diagnostic_replay": args.disable_workcell_environment_collisions_for_diagnostic_replay,
             "reset_after_object_creation": False,
             "min_contact_motion": args.min_contact_motion,
             "max_object_displacement": args.max_object_displacement,
@@ -1375,6 +1422,16 @@ def main() -> int:
         world = World(stage_units_in_meters=args.stage_units_in_meters, backend="numpy", device="cpu")
         world.set_simulation_dt(physics_dt=args.physics_dt, rendering_dt=args.physics_dt)
         stage = omni.usd.get_context().get_stage()
+        disabled_workcell_environment_collision_paths: list[str] = []
+        if args.disable_workcell_environment_collisions_for_diagnostic_replay:
+            disabled_workcell_environment_collision_paths = _disable_workcell_environment_collisions_for_diagnostic_replay(stage)
+            payload["inputs"]["disabled_workcell_environment_collision_count"] = len(
+                disabled_workcell_environment_collision_paths
+            )
+            payload["inputs"]["disabled_workcell_environment_collision_sample"] = disabled_workcell_environment_collision_paths[
+                :20
+            ]
+            _write_json(json_path, payload)
         paths_by_side = _finger_proxy_paths_for_args(args)
         paths = paths_by_side[args.side]
         contact_targets = resolve_contact_target_paths(args.contact_proxy_profile)[args.side]
@@ -1578,7 +1635,7 @@ def main() -> int:
             dof_names = list(art.dof_names)
             replay_mode_for_tracking = args.hdf5_replay_mode if hdf5_target_sequence is not None else "gripper_only"
             tracking_groups = _tracking_groups(
-                dof_names, replay_mode=replay_mode_for_tracking, finger_dof_names=finger_dof_names
+                dof_names, replay_mode=replay_mode_for_tracking, finger_dof_names=finger_dof_names, side=args.side
             )
             tracking_rows: list[dict[str, Any]] = []
             object_reset_box = _bbox_row(stage, object_path)
