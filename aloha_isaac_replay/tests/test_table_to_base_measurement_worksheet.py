@@ -27,6 +27,9 @@ def test_incomplete_measurement_worksheet_reports_missing_fields(tmp_path: Path)
     assert "table.top_center_world_m" in payload["missing_fields"]
     assert "left_base.translation_table_m" in payload["missing_fields"]
     assert "right_base.translation_table_m" in payload["missing_fields"]
+    assert payload["missing_field_details"]["table.top_center_world_m"]["unit"] == "m"
+    assert payload["missing_field_details"]["left_base.translation_table_m"]["shape"] == "[x, y, z]"
+    assert "right ALOHA base" in payload["missing_field_details"]["right_base.translation_table_m"]["how_to_measure"]
 
 
 def test_complete_measurement_worksheet_generates_calibration_and_passes_audit(tmp_path: Path) -> None:

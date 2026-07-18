@@ -7,10 +7,10 @@ from typing import Any
 
 import yaml
 
+from aloha_isaac_replay.calibration.table_measurement_guidance import missing_field_details
 from aloha_isaac_replay.scripts.audit_table_frame_candidate import audit_table_frame
-from aloha_isaac_replay.scripts.create_table_to_base_calibration import build_evidence_record
 from aloha_isaac_replay.scripts.create_table_to_base_calibration import build_calibration_config
-
+from aloha_isaac_replay.scripts.create_table_to_base_calibration import build_evidence_record
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_WORKSHEET = REPO_ROOT / "examples/aloha_isaac/config/phase68_table_to_base_measurement_worksheet.yaml"
@@ -97,6 +97,25 @@ def _write_report(path: Path, payload: dict[str, Any]) -> None:
 
 def _write_markdown(path: Path, payload: dict[str, Any]) -> None:
     missing_lines = [f"- `{item}`" for item in payload["missing_fields"]] or ["- none"]
+    detail_lines: list[str] = []
+    for item in payload["missing_fields"]:
+        detail = payload.get("missing_field_details", {}).get(item)
+        if not detail:
+            continue
+        detail_lines.extend(
+            [
+                f"### `{item}`",
+                "",
+                f"- description: {detail.get('description', 'n/a')}",
+                f"- unit: `{detail.get('unit', 'n/a')}`",
+                f"- shape: `{detail.get('shape', 'n/a')}`",
+                f"- example: `{detail.get('example', 'n/a')}`",
+                f"- how to measure: {detail.get('how_to_measure', 'n/a')}",
+                "",
+            ]
+        )
+    if not detail_lines:
+        detail_lines = ["- none", ""]
     lines = [
         "# Table-To-Base Measurement Worksheet Audit",
         "",
@@ -108,6 +127,9 @@ def _write_markdown(path: Path, payload: dict[str, Any]) -> None:
         "",
         *missing_lines,
         "",
+        "## Measurement Guidance",
+        "",
+        *detail_lines,
         "## Interpretation",
         "",
         payload["interpretation"],
@@ -151,6 +173,7 @@ def build_from_worksheet(
             "worksheet": _rel(worksheet_path),
             "calibration_output": _rel(calibration_output) if calibration_output else None,
             "missing_fields": missing,
+            "missing_field_details": missing_field_details(missing),
             "interpretation": "The worksheet is only a template or incomplete measurement record. Fill all required fields first.",
         }
     if calibration_output is None:
@@ -159,6 +182,7 @@ def build_from_worksheet(
             "worksheet": _rel(worksheet_path),
             "calibration_output": None,
             "missing_fields": ["output.calibration_path"],
+            "missing_field_details": missing_field_details(["output.calibration_path"]),
             "interpretation": "No calibration output path was provided.",
         }
 
@@ -188,6 +212,7 @@ def build_from_worksheet(
         "worksheet": _rel(worksheet_path),
         "calibration_output": _rel(calibration_output),
         "missing_fields": [],
+        "missing_field_details": {},
         "calibration_audit": audit,
         "interpretation": "The worksheet is complete and generated a calibrated table-to-base config.",
     }
