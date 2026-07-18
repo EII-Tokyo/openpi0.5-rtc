@@ -93,6 +93,7 @@ def _write_markdown(path: Path, payload: dict[str, Any]) -> None:
     cross_overlap = payload.get("cross_side_proxy_overlap") or {}
     support_plane = payload.get("support_plane") or {}
     diagnostic_contacts = payload.get("diagnostic_contact_summaries") or {}
+    support_size = support_plane.get("size")
     lines = [
         "# Gripper Passive Contact Smoke",
         "",
@@ -120,6 +121,7 @@ def _write_markdown(path: Path, payload: dict[str, Any]) -> None:
         f"- target contact persistence steps: `{payload.get('target_contact_persistence_steps')}`",
         f"- support plane path: `{support_plane.get('path')}`",
         f"- support plane center: `{support_plane.get('center')}`",
+        f"- support plane size: `{support_size}`",
         f"- support plane size xy: `{support_plane.get('size_xy')}`",
         f"- support plane thickness: `{support_plane.get('thickness')}`",
         f"- diagnostic contact summaries: `{diagnostic_contacts}`",
@@ -527,7 +529,8 @@ def _create_static_support_box(
     stage: Any,
     path: str,
     center: np.ndarray,
-    size_xy: float,
+    size_x: float,
+    size_y: float,
     thickness: float,
 ) -> dict[str, Any]:
     from pxr import Gf, UsdGeom, UsdPhysics
@@ -539,13 +542,16 @@ def _create_static_support_box(
     xform.ClearXformOpOrder()
     xform.AddTranslateOp(precision=UsdGeom.XformOp.PrecisionDouble).Set(Gf.Vec3d(*[float(x) for x in center]))
     xform.AddScaleOp(precision=UsdGeom.XformOp.PrecisionDouble).Set(
-        Gf.Vec3d(float(size_xy), float(size_xy), float(thickness))
+        Gf.Vec3d(float(size_x), float(size_y), float(thickness))
     )
     UsdPhysics.CollisionAPI.Apply(geom.GetPrim()).CreateCollisionEnabledAttr().Set(True)
     return {
         "path": path,
         "center": [float(x) for x in center],
-        "size_xy": float(size_xy),
+        "size": [float(size_x), float(size_y), float(thickness)],
+        "size_x": float(size_x),
+        "size_y": float(size_y),
+        "size_xy": float(size_x) if float(size_x) == float(size_y) else None,
         "thickness": float(thickness),
     }
 
@@ -854,6 +860,8 @@ def main() -> int:
     parser.add_argument("--object-rest-offset", type=float, default=None)
     parser.add_argument("--support-plane-mode", choices=("none", "object_bottom"), default="none")
     parser.add_argument("--support-plane-size", type=float, default=2.0)
+    parser.add_argument("--support-plane-size-x", type=float, default=None)
+    parser.add_argument("--support-plane-size-y", type=float, default=None)
     parser.add_argument("--support-plane-thickness", type=float, default=0.02)
     parser.add_argument("--support-plane-clearance", type=float, default=0.0)
     parser.add_argument("--proxy-contact-offset", type=float, default=None)
@@ -908,6 +916,8 @@ def main() -> int:
             "object_rest_offset": args.object_rest_offset,
             "support_plane_mode": args.support_plane_mode,
             "support_plane_size": args.support_plane_size,
+            "support_plane_size_x": args.support_plane_size_x,
+            "support_plane_size_y": args.support_plane_size_y,
             "support_plane_thickness": args.support_plane_thickness,
             "support_plane_clearance": args.support_plane_clearance,
             "proxy_contact_offset": args.proxy_contact_offset,
@@ -1056,7 +1066,8 @@ def main() -> int:
                 stage=stage,
                 path="/World/phase58_static_support_plane",
                 center=support_center,
-                size_xy=args.support_plane_size,
+                size_x=args.support_plane_size_x if args.support_plane_size_x is not None else args.support_plane_size,
+                size_y=args.support_plane_size_y if args.support_plane_size_y is not None else args.support_plane_size,
                 thickness=args.support_plane_thickness,
             )
             support_plane_row["placement_object_box"] = object_support_box

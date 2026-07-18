@@ -76,6 +76,7 @@ The main conclusion is conservative:
 - [63 Phase 57 gravity already-grasped replay](63_phase57_gravity_already_grasped_replay_2026-07-18.md)
 - [64 Phase 58 support-plane gravity replay](64_phase58_support_plane_gravity_replay_2026-07-18.md)
 - [65 Phase 59 already-grasped replay with support](65_phase59_already_grasped_support_replay_2026-07-18.md)
+- [66 Phase 60 measured table candidate](66_phase60_measured_table_candidate_2026-07-18.md)
 
 ## Operating Rule
 
