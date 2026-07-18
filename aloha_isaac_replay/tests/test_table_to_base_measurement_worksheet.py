@@ -147,3 +147,41 @@ def test_read_from_103_worksheet_requires_readonly_remote_marker(tmp_path: Path)
 
     assert payload["status"] == "BLOCKED_REQUIRES_MEASUREMENT_FIELDS"
     assert "measurement.remote_103_touched must be readonly when source is read_from_103" in payload["missing_fields"]
+
+
+def test_robot_state_source_cannot_claim_table_to_base_calibration(tmp_path: Path) -> None:
+    calibration = tmp_path / "calibration.yaml"
+    worksheet = tmp_path / "worksheet.yaml"
+    worksheet.write_text(
+        yaml.safe_dump(
+            {
+                "measurement": {
+                    "source": "hdf5_qpos",
+                    "status": "measured",
+                    "measured_at": "2026-07-18T00:00:00+09:00",
+                    "measured_by": "unit_test",
+                    "units": "meters",
+                    "coordinate_frame": "Isaac world +Z up",
+                    "tool": "synthetic",
+                    "uncertainty_m": 0.001,
+                    "real_robot_touched": False,
+                    "remote_103_touched": False,
+                },
+                "table": {
+                    "top_center_world_m": [1.0, 2.0, 0.5],
+                    "size_m": [1.22, 0.625, 0.04],
+                    "yaw_deg": 0.0,
+                },
+                "left_base": {"translation_table_m": [-0.3, 0.1, 0.0], "yaw_deg": 0.0},
+                "right_base": {"translation_table_m": [0.3, 0.1, 0.0], "yaw_deg": 180.0},
+                "output": {"calibration_path": str(calibration)},
+            },
+            sort_keys=False,
+        )
+    )
+
+    payload = build_from_worksheet(worksheet)
+
+    assert payload["status"] == "BLOCKED_REQUIRES_MEASUREMENT_FIELDS"
+    assert any("hdf5_qpos cannot provide table-to-base geometry" in item for item in payload["missing_fields"])
+    assert not calibration.exists()

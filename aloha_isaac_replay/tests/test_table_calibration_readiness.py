@@ -82,6 +82,23 @@ def test_readiness_complete_worksheet_stays_read_only_without_try_generate(tmp_p
     assert not calibration.exists()
 
 
+def test_readiness_rejects_robot_state_source_for_table_base_geometry(tmp_path: Path) -> None:
+    worksheet = tmp_path / "worksheet.yaml"
+    calibration = tmp_path / "calibration.yaml"
+    _complete_worksheet(worksheet, calibration)
+    data = yaml.safe_load(worksheet.read_text())
+    data["measurement"]["source"] = "joint_states"
+    worksheet.write_text(yaml.safe_dump(data, sort_keys=False), encoding="utf-8")
+
+    payload = summarize_readiness(worksheet=worksheet, calibration=calibration, output_dir=tmp_path / "out")
+
+    assert payload["status"] == "BLOCKED_REQUIRES_TABLE_BASE_MEASUREMENT"
+    assert any(
+        "joint_states cannot provide table-to-base geometry" in item for item in payload["worksheet"]["missing_fields"]
+    )
+    assert not calibration.exists()
+
+
 def test_readiness_can_generate_calibration_when_explicitly_requested(tmp_path: Path) -> None:
     worksheet = tmp_path / "worksheet.yaml"
     calibration = tmp_path / "calibration.yaml"

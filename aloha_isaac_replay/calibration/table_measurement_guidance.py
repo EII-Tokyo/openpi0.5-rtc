@@ -21,6 +21,13 @@ REQUIRED_WORKSHEET_FIELDS = [
     "output.calibration_path",
 ]
 
+FORBIDDEN_TABLE_BASE_SOURCES = {
+    "hdf5_qpos": "HDF5 qpos records robot joint state, not table-to-base geometry.",
+    "joint_states": "ROS joint states record robot joint state, not table-to-base geometry.",
+    "dynamixel_registers": "DYNAMIXEL registers record actuator state/configuration, not table-to-base geometry.",
+    "ros_static_transform_default": "Default ROS static transforms are not measured table-to-base calibration.",
+}
+
 WORKSHEET_FIELD_GUIDANCE: dict[str, dict[str, str]] = {
     "measurement.source": {
         "description": "Where this calibration measurement came from.",
@@ -186,6 +193,15 @@ def field_guidance(field: str) -> dict[str, str]:
 
 def missing_field_details(missing: list[str]) -> dict[str, dict[str, str]]:
     return {field: field_guidance(field) for field in missing}
+
+
+def forbidden_table_base_source_reason(source: str | None) -> str | None:
+    if source is None:
+        return None
+    normalized = str(source).strip()
+    if normalized not in FORBIDDEN_TABLE_BASE_SOURCES:
+        return None
+    return f"{normalized} cannot provide table-to-base geometry: {FORBIDDEN_TABLE_BASE_SOURCES[normalized]}"
 
 
 def _unknown_field_guidance(field: str) -> dict[str, str]:

@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any
 
 from aloha_isaac_replay.calibration.table_measurement_guidance import REQUIRED_WORKSHEET_FIELDS
+from aloha_isaac_replay.calibration.table_measurement_guidance import forbidden_table_base_source_reason
 from aloha_isaac_replay.calibration.table_measurement_guidance import missing_field_details
 from aloha_isaac_replay.scripts.audit_table_frame_candidate import audit_table_frame
 from aloha_isaac_replay.scripts.create_calibrated_table_base_overlay import DEFAULT_BASE_USD
@@ -99,6 +100,9 @@ def _static_worksheet_status(worksheet: Path) -> dict[str, Any]:
     source = _get_nested(data, "measurement.source")
     remote = _get_nested(data, "measurement.remote_103_touched")
     real_robot = _get_nested(data, "measurement.real_robot_touched")
+    source_reason = forbidden_table_base_source_reason(source)
+    if source_reason:
+        missing.append(source_reason)
     if source == "read_from_103" and remote not in {"readonly", "read_only"}:
         missing.append("measurement.remote_103_touched must be readonly when source is read_from_103")
     if real_robot is not False:

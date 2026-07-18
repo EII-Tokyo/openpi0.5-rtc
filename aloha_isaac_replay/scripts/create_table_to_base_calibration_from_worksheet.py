@@ -7,6 +7,7 @@ from typing import Any
 
 import yaml
 
+from aloha_isaac_replay.calibration.table_measurement_guidance import forbidden_table_base_source_reason
 from aloha_isaac_replay.calibration.table_measurement_guidance import missing_field_details
 from aloha_isaac_replay.scripts.audit_table_frame_candidate import audit_table_frame
 from aloha_isaac_replay.scripts.create_table_to_base_calibration import build_calibration_config
@@ -164,6 +165,9 @@ def build_from_worksheet(
     right_yaw = _require_float(data, "right_base.yaw_deg", missing)
     output_from_sheet = _get_nested(data, "output.calibration_path")
     calibration_output = output_calibration or (REPO_ROOT / str(output_from_sheet) if output_from_sheet else None)
+    source_reason = forbidden_table_base_source_reason(source)
+    if source_reason:
+        missing.append(source_reason)
     if source == "read_from_103" and remote_103_touched not in {"readonly", "read_only"}:
         missing.append("measurement.remote_103_touched must be readonly when source is read_from_103")
 
