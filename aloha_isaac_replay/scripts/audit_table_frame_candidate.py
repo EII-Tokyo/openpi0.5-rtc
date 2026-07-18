@@ -9,6 +9,7 @@ from typing import Any
 
 import yaml
 
+from aloha_isaac_replay.calibration.table_measurement_guidance import forbidden_table_base_source_reason
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_CONFIG = REPO_ROOT / "examples/aloha_isaac/config/phase63_fixed_table_candidate.yaml"
@@ -122,9 +123,11 @@ def _validate_calibration_evidence(
         "real_robot_touched": evidence.get("real_robot_touched"),
         "remote_103_touched": evidence.get("remote_103_touched"),
     }
-    for key in ("type", "path", "sha256", "real_robot_touched", "remote_103_touched"):
-        if key not in evidence:
-            issues.append(f"calibration_evidence.{key} missing")
+    issues.extend(
+        f"calibration_evidence.{key} missing"
+        for key in ("type", "path", "sha256", "real_robot_touched", "remote_103_touched")
+        if key not in evidence
+    )
     sha = str(evidence.get("sha256", ""))
     if len(sha) != 64 or any(ch not in "0123456789abcdef" for ch in sha.lower()):
         issues.append("calibration_evidence.sha256 must be a 64-character hex digest")
@@ -214,6 +217,9 @@ def _validate_transform(
     source = str(transform.get("source", "unknown"))
     if require_calibrated and source == "unknown":
         issues.append(f"{name} source is unknown")
+    source_reason = forbidden_table_base_source_reason(source)
+    if require_calibrated and source_reason:
+        issues.append(f"{name} source {source_reason}")
     try:
         translation = _as_float3(transform.get("translation"), name=f"{name}.translation")
         quat = _as_float4(transform.get("rotation_quat_wxyz"), name=f"{name}.rotation_quat_wxyz")
@@ -265,7 +271,9 @@ def audit_table_frame(config_path: Path) -> dict[str, Any]:
         "T_table_right_base": _transform_status(t_right),
     }
     blocking_reasons: list[str] = []
-    missing_base_transform = any(frame_status[key] in BLOCKING_STATUSES for key in ("T_table_left_base", "T_table_right_base"))
+    missing_base_transform = any(
+        frame_status[key] in BLOCKING_STATUSES for key in ("T_table_left_base", "T_table_right_base")
+    )
     diagnostic_world_table = frame_status["T_world_table"] in BLOCKING_STATUSES
     candidate_calibrated = all(status in CALIBRATED_STATUSES for status in frame_status.values())
 

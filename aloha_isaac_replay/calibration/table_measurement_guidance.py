@@ -27,6 +27,9 @@ FORBIDDEN_TABLE_BASE_SOURCES = {
     "dynamixel_registers": "DYNAMIXEL registers record actuator state/configuration, not table-to-base geometry.",
     "ros_static_transform_default": "Default ROS static transforms are not measured table-to-base calibration.",
 }
+FORBIDDEN_TABLE_BASE_SOURCE_ALIASES = {
+    "ros_joint_states": "joint_states",
+}
 
 WORKSHEET_FIELD_GUIDANCE: dict[str, dict[str, str]] = {
     "measurement.source": {
@@ -198,10 +201,18 @@ def missing_field_details(missing: list[str]) -> dict[str, dict[str, str]]:
 def forbidden_table_base_source_reason(source: str | None) -> str | None:
     if source is None:
         return None
-    normalized = str(source).strip()
-    if normalized not in FORBIDDEN_TABLE_BASE_SOURCES:
+    original = str(source).strip()
+    normalized = original.lower()
+    forbidden_key = FORBIDDEN_TABLE_BASE_SOURCE_ALIASES.get(normalized, normalized)
+    path_parts = [part for part in normalized.split("/") if part]
+    if path_parts and path_parts[-1] == "joint_states":
+        forbidden_key = "joint_states"
+    if forbidden_key not in FORBIDDEN_TABLE_BASE_SOURCES:
         return None
-    return f"{normalized} cannot provide table-to-base geometry: {FORBIDDEN_TABLE_BASE_SOURCES[normalized]}"
+    reason = FORBIDDEN_TABLE_BASE_SOURCES[forbidden_key]
+    if original == forbidden_key:
+        return f"{forbidden_key} cannot provide table-to-base geometry: {reason}"
+    return f"{original} resolves to {forbidden_key}, which cannot provide table-to-base geometry: {reason}"
 
 
 def _unknown_field_guidance(field: str) -> dict[str, str]:
