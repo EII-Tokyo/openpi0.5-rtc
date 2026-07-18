@@ -106,6 +106,7 @@ The main conclusion is conservative:
 - [93 Phase 110 workcell contact policy negative gate](93_phase110_workcell_contact_policy_negative_gate_2026-07-19.md)
 - [94 Phase 111 table/pipe overlay runtime rebuild](94_phase111_table_pipe_overlay_runtime_rebuild_2026-07-19.md)
 - [95 Phase 112-115 measured workcell contact gate](95_phase112_115_measured_workcell_contact_gate_2026-07-19.md)
+- [96 Phase 116 HDF5 start-frame probe](96_phase116_hdf5_start_frame_probe_2026-07-19.md)
 
 ## Operating Rule
 
@@ -211,3 +212,12 @@ codex-evidence --name aloha-phase115-strict-measured-workcell-no-support-plane -
 ```
 
 Phase115 is the current stable prerequisite gate for ALOHA1 Isaac adaptation. It uses the measured `/World/Table` runtime stage, keeps `support_plane_mode=none`, and passes only when object contact is restricted to the target fingers under the workcell contact policy.
+
+The current HDF5 start-frame probe can be rerun with:
+
+```bash
+codex-evidence --name aloha-phase116-hdf5-start-frame-probe -- \
+  .venv/bin/python aloha_isaac_replay/scripts/run_phase116_hdf5_start_frame_probe.py
+```
+
+Phase116 shows that earlier start frames fail because the bottle is not yet modeled as a held object, while controller tracking still passes. Do not fix this by broad collision deletion; add a held-object diagnostic gate first.
