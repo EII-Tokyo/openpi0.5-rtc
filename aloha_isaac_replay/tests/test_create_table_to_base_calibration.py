@@ -88,6 +88,50 @@ def test_build_calibration_config_cannot_pass_audit_with_robot_state_source(tmp_
     assert any("hdf5_qpos cannot provide table-to-base geometry" in reason for reason in payload["blocking_reasons"])
 
 
+@pytest.mark.parametrize(
+    "source",
+    [
+        "gym_mjcf_layout",
+        "workcell_minimal_rough_layout",
+        "workcell_user_measured_robot_instances",
+        "trossen_stationary_ai_layout",
+        "phase63_diagnostic_candidate",
+        "support_plane_cli_override",
+        "camera_topic_or_video",
+        "urdf_root_or_imported_usd_root",
+        "fk_or_controller_fit",
+        "rlt_or_policy_metadata",
+    ],
+)
+def test_build_calibration_config_cannot_pass_audit_with_diagnostic_source_labels(tmp_path, source: str) -> None:
+    evidence_path = tmp_path / f"{source}.yaml"
+    evidence_path.write_text("measurement: synthetic\n")
+    cfg = build_calibration_config(
+        table_top_center=[1.0, 2.0, 0.5],
+        table_size=[1.22, 0.625, 0.04],
+        table_yaw_deg=0.0,
+        left_base_in_table=[-0.3, 0.1, 0.0],
+        left_yaw_deg=0.0,
+        right_base_in_table=[0.3, 0.1, 0.0],
+        right_yaw_deg=180.0,
+        source=source,
+        status="measured",
+        calibration_evidence=build_evidence_record(
+            evidence_path,
+            evidence_type="unit_test",
+            real_robot_touched=False,
+            remote_103_touched=False,
+        ),
+    )
+    path = tmp_path / f"{source}.calibration.yaml"
+    path.write_text(yaml.safe_dump(cfg, sort_keys=False))
+
+    payload = audit_table_frame(path)
+
+    assert payload["status"] == "BLOCKED_REQUIRES_MEASURED_TABLE_TO_BASE_TRANSFORM"
+    assert any("cannot provide table-to-base geometry" in reason for reason in payload["blocking_reasons"])
+
+
 def test_build_calibration_config_rotates_support_center_with_table_yaw(tmp_path) -> None:
     evidence_path = tmp_path / "worksheet_yaw.yaml"
     evidence_path.write_text("measurement: synthetic yaw\n")
