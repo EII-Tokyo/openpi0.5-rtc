@@ -38,6 +38,30 @@ Why:
 
 These signals can still be used for other checks, such as replay tracking, joint-order validation, gripper state validation, or controller debugging. They cannot be promoted into final calibrated table/base geometry.
 
+After ALOHA1 expert review, the same final audit guard also rejects diagnostic or template layout labels:
+
+```text
+gym_mjcf_layout
+workcell_minimal_rough_layout
+workcell_user_measured_robot_instances
+trossen_stationary_ai_layout
+phase62_support_scan
+phase63_diagnostic_candidate
+object_bottom_support
+support_plane_cli_override
+camera_hint
+camera_topic_or_video
+pipe_placeholder
+bottle_contact_trace
+urdf_root_or_imported_usd_root
+isaac_articulation_root
+fk_or_controller_fit
+home_sleep_pose
+rlt_or_policy_metadata
+```
+
+These labels may be useful for diagnostic replay, rough visualization, controller checks, FK checks, or workcell scaffolding. They are not sufficient evidence for final table/base calibration.
+
 ## Implementation
 
 Shared source validation lives in:
@@ -51,12 +75,14 @@ The guard is consumed by:
 ```text
 aloha_isaac_replay/scripts/create_table_to_base_calibration_from_worksheet.py
 aloha_isaac_replay/scripts/summarize_table_calibration_readiness.py
+aloha_isaac_replay/scripts/audit_table_frame_candidate.py
 ```
 
-This means both paths now agree:
+This means all table/base calibration gates now agree:
 
 1. Building a calibration file from a worksheet rejects forbidden robot-state sources.
 2. Readiness reporting also marks the worksheet blocked before generation.
+3. Final table-frame audit rejects forbidden transform sources even if a calibration YAML was generated directly and has valid evidence fields.
 
 ## Validation
 
@@ -73,7 +99,7 @@ Result:
 
 ```text
 All checks passed
-20 passed
+32 passed
 ```
 
 No real robot, `192.168.1.103`, or Isaac runtime action was used.
