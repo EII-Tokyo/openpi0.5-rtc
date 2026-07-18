@@ -7,6 +7,16 @@ notes: >
   must be mapped to explicit task semantics before they can pass a final gate.
 
 rules:
+  - path_prefix: /World/PipePlaceholder
+    semantic_class: candidate_measured_pipe_contact
+    decision: allow
+    notes: >
+      The measured-workcell pipe placeholder is the intended insertion target.
+      Contacts with this namespace should not be rejected as generic
+      workcell/environment collisions. This is still a candidate semantic rule:
+      it does not prove successful insertion without calibrated pose and
+      trajectory/contact validation.
+
   - path_prefix: /scene/worldBody/__22
     semantic_class: denied_frame_rail_collision
     decision: deny

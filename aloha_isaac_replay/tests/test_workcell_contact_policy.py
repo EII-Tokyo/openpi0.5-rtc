@@ -58,3 +58,31 @@ def test_workcell_contact_policy_skips_when_not_configured() -> None:
 
     assert gate["pass"] is True
     assert gate["status"] == "SKIPPED_NO_WORKCELL_CONTACT_POLICY"
+
+
+def test_workcell_contact_policy_allows_measured_pipe_placeholder_contact() -> None:
+    policy = _load_workcell_contact_policy(POLICY)
+    object_path = "/World/Bottle500"
+    contact_summary = {
+        "object_contact_categories": {
+            "workcell_or_environment": {
+                "unique_contact_pairs": [
+                    [
+                        f"{object_path}/Collisions/mouth",
+                        "/World/PipePlaceholder/axis/collision",
+                    ]
+                ]
+            }
+        }
+    }
+
+    gate = _workcell_contact_policy_gate(
+        contact_summary=contact_summary,
+        object_path=object_path,
+        policy=policy,
+    )
+
+    assert gate["pass"] is True
+    assert gate["status"] == "PASS_WORKCELL_CONTACT_POLICY"
+    assert gate["rows"][0]["semantic_class"] == "candidate_measured_pipe_contact"
+    assert gate["rows"][0]["decision"] == "allow"
