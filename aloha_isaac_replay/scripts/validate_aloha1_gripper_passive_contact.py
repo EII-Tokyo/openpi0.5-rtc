@@ -41,6 +41,8 @@ DEFAULT_MAPPING = REPO_ROOT / "configs/aloha/original_stationary_aloha_mapping.y
 DEFAULT_STAGE_UNITS_IN_METERS = 0.01
 DEFAULT_SUPPORT_PLANE_SIZE = 2.0
 DEFAULT_SUPPORT_PLANE_THICKNESS = 0.02
+DEFAULT_MAX_FINGER_SURFACE_GAP_METERS = 0.12
+DEFAULT_MAX_GENERATED_OBJECT_SIDE_METERS = 0.08
 
 
 def _rel(path: str | Path) -> str:
@@ -54,6 +56,43 @@ def _rel(path: str | Path) -> str:
 def _write_json(path: Path, payload: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(_json_safe(payload), ensure_ascii=False, indent=2) + "\n")
+
+
+def _passive_contact_geometry_sanity(
+    *,
+    finger_surface_gap_stage_units: float,
+    object_side_length_stage_units: float,
+    stage_units_in_meters: float,
+    max_finger_surface_gap_meters: float,
+    max_generated_object_side_meters: float,
+) -> dict[str, Any]:
+    """Reject obviously implausible setup geometry before creating a physics object."""
+
+    gap_stage = float(finger_surface_gap_stage_units)
+    side_stage = float(object_side_length_stage_units)
+    unit_scale = float(stage_units_in_meters)
+    gap_m = gap_stage * unit_scale
+    side_m = side_stage * unit_scale
+    row: dict[str, Any] = {
+        "pass": True,
+        "status": "PASS",
+        "finger_surface_gap_open": gap_stage,
+        "finger_surface_gap_open_meters": gap_m,
+        "max_finger_surface_gap_meters": float(max_finger_surface_gap_meters),
+        "object_side_length_stage_units": side_stage,
+        "object_side_length_meters": side_m,
+        "max_generated_object_side_meters": float(max_generated_object_side_meters),
+        "stage_units_in_meters": unit_scale,
+    }
+    if not all(np.isfinite(v) for v in [gap_stage, side_stage, unit_scale, gap_m, side_m]):
+        row.update({"pass": False, "status": "FAIL_NONFINITE_CONTACT_SETUP_GEOMETRY"})
+    elif gap_stage < 0.0 or side_stage <= 0.0 or unit_scale <= 0.0:
+        row.update({"pass": False, "status": "FAIL_INVALID_CONTACT_SETUP_GEOMETRY"})
+    elif gap_m > max_finger_surface_gap_meters:
+        row.update({"pass": False, "status": "FAIL_IMPLAUSIBLE_FINGER_GAP"})
+    elif side_m > max_generated_object_side_meters:
+        row.update({"pass": False, "status": "FAIL_IMPLAUSIBLE_OBJECT_SIZE"})
+    return row
 
 
 def _load_support_plane_config(path: str | Path) -> dict[str, Any]:
@@ -276,6 +315,10 @@ def _write_markdown(path: Path, payload: dict[str, Any]) -> None:
         f"- control mode: `{payload['inputs']['control_mode']}`",
         f"- moving fingers: `{payload['inputs'].get('moving_fingers')}`",
         f"- object side length: `{payload.get('object_side_length_stage_units')}` stage units",
+        f"- object side length: `{payload.get('object_side_length_meters')}` m",
+        f"- finger surface gap open: `{payload.get('finger_surface_gap_open')}` stage units",
+        f"- finger surface gap open: `{payload.get('finger_surface_gap_open_meters')}` m",
+        f"- contact setup geometry sanity: `{payload.get('contact_setup_geometry_sanity_status')}`",
         f"- object settle displacement: `{payload.get('object_settle_displacement')}` stage units",
         f"- object close displacement: `{payload.get('object_displacement')}` stage units",
         f"- object total displacement: `{payload.get('total_object_displacement')}` stage units",
@@ -1227,6 +1270,18 @@ def main() -> int:
     )
     parser.add_argument("--min-contact-motion", type=float, default=1e-5)
     parser.add_argument("--max-object-displacement", type=float, default=0.25)
+    parser.add_argument(
+        "--max-finger-surface-gap-meters",
+        type=float,
+        default=DEFAULT_MAX_FINGER_SURFACE_GAP_METERS,
+        help="Reject passive-contact setup if the open fingertip surface gap exceeds this physical distance.",
+    )
+    parser.add_argument(
+        "--max-generated-object-side-meters",
+        type=float,
+        default=DEFAULT_MAX_GENERATED_OBJECT_SIDE_METERS,
+        help="Reject passive-contact setup if the generated diagnostic object side exceeds this physical size.",
+    )
     args = parser.parse_args()
     try:
         support_options = _resolve_support_plane_options(args)
@@ -1297,6 +1352,8 @@ def main() -> int:
             "reset_after_object_creation": False,
             "min_contact_motion": args.min_contact_motion,
             "max_object_displacement": args.max_object_displacement,
+            "max_finger_surface_gap_meters": args.max_finger_surface_gap_meters,
+            "max_generated_object_side_meters": args.max_generated_object_side_meters,
         },
         "outputs": {"json": _rel(json_path), "csv": _rel(csv_path), "markdown": _rel(md_path)},
     }
@@ -1378,12 +1435,61 @@ def main() -> int:
         ) * 0.5
         surface_gap = _surface_gap(left_box, right_box, axis)
         side_length = max(surface_gap * args.object_fill_fraction, 1e-4)
+        geometry_sanity = _passive_contact_geometry_sanity(
+            finger_surface_gap_stage_units=surface_gap,
+            object_side_length_stage_units=side_length,
+            stage_units_in_meters=args.stage_units_in_meters,
+            max_finger_surface_gap_meters=args.max_finger_surface_gap_meters,
+            max_generated_object_side_meters=args.max_generated_object_side_meters,
+        )
         object_placement_row: dict[str, Any] = {
             "mode": args.object_placement,
             "axis": axis_name,
             "clearance": args.object_clearance,
             "base_center": center.tolist(),
         }
+        if not geometry_sanity["pass"]:
+            if trace_state is not None:
+                _finish_contact_pair_trace(stage, trace_state)
+            payload.update(
+                {
+                    "status": "FAILED_GATE",
+                    "overall_pass": False,
+                    "contact_trace_status": geometry_sanity["status"],
+                    "open_target_values": open_values,
+                    "hdf5_gripper_summary": hdf5_gripper_summary,
+                    "tracking_summary": None,
+                    "finger_gap_axis": axis_name,
+                    "finger_surface_gap_open": surface_gap,
+                    "finger_surface_gap_open_meters": geometry_sanity["finger_surface_gap_open_meters"],
+                    "left_finger_placement_box": placement_left_box,
+                    "right_finger_placement_box": placement_right_box,
+                    "cross_side_proxy_overlap": cross_side_proxy_overlap,
+                    "object_placement": object_placement_row,
+                    "object_side_length_stage_units": side_length,
+                    "object_side_length_meters": geometry_sanity["object_side_length_meters"],
+                    "contact_setup_geometry_sanity": geometry_sanity,
+                    "contact_setup_geometry_sanity_status": geometry_sanity["status"],
+                    "contact_pair_trace_enabled": bool(args.trace_contact_pairs),
+                    "contact_trace_disable_usd_updates": bool(args.trace_disable_usd_updates),
+                    "csv": _rel(csv_path),
+                    "markdown": _rel(md_path),
+                    "next_gate": "fix_finger_proxy_bbox_frame_before_contact_validation",
+                }
+            )
+            _write_csv(csv_path, [])
+            _write_json(json_path, payload)
+            _write_markdown(md_path, _json_safe(payload))
+            print(
+                json.dumps(
+                    {"status": payload["status"], "json": _rel(json_path), "markdown": _rel(md_path)},
+                    ensure_ascii=False,
+                ),
+                flush=True,
+            )
+            sys.stdout.flush()
+            sys.stderr.flush()
+            os._exit(3)
         if args.object_placement == "moving_finger_surface" and args.moving_fingers != "both":
             moving_box = left_box if args.moving_fingers == "left" else right_box
             other_box = right_box if args.moving_fingers == "left" else left_box
@@ -1696,6 +1802,7 @@ def main() -> int:
                 "tracking_summary": tracking_summary,
                 "finger_gap_axis": axis_name,
                 "finger_surface_gap_open": surface_gap,
+                "finger_surface_gap_open_meters": geometry_sanity["finger_surface_gap_open_meters"],
                 "left_finger_placement_box": placement_left_box,
                 "right_finger_placement_box": placement_right_box,
                 "cross_side_proxy_overlap": cross_side_proxy_overlap,
@@ -1709,6 +1816,9 @@ def main() -> int:
                 "object_usd_prim_path": args.object_usd_prim_path,
                 "object_placement": object_placement_row,
                 "object_side_length_stage_units": side_length,
+                "object_side_length_meters": geometry_sanity["object_side_length_meters"],
+                "contact_setup_geometry_sanity": geometry_sanity,
+                "contact_setup_geometry_sanity_status": geometry_sanity["status"],
                 "support_plane": support_plane_row,
                 "proxy_collision_offsets": proxy_offset_rows,
                 "object_collision_offsets": object_offset_row,

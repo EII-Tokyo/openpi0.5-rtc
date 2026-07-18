@@ -11,6 +11,7 @@ from aloha_isaac_replay.scripts.create_table_to_base_calibration import build_ev
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _audit_required_table_frame
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _guard_final_contact_stage_namespace
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _guard_support_plane_calibration_mode
+from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _passive_contact_geometry_sanity
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _load_support_plane_config
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _resolve_support_plane_options
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _summarize_contact_pairs
@@ -34,6 +35,34 @@ def test_passive_contact_csv_writer_preserves_late_diagnostic_columns(tmp_path) 
 
     assert "tracking_controlled_max_abs_error" in rows[0]
     assert rows[1]["tracking_controlled_max_abs_error"] == "0.12"
+
+
+def test_passive_contact_geometry_sanity_rejects_implausible_open_gap() -> None:
+    sanity = _passive_contact_geometry_sanity(
+        finger_surface_gap_stage_units=0.745959177295105,
+        object_side_length_stage_units=0.44757550637706295,
+        stage_units_in_meters=1.0,
+        max_finger_surface_gap_meters=0.12,
+        max_generated_object_side_meters=0.08,
+    )
+
+    assert sanity["status"] == "FAIL_IMPLAUSIBLE_FINGER_GAP"
+    assert sanity["pass"] is False
+    assert sanity["finger_surface_gap_open_meters"] == pytest.approx(0.745959177295105)
+
+
+def test_passive_contact_geometry_sanity_rejects_implausible_object_size() -> None:
+    sanity = _passive_contact_geometry_sanity(
+        finger_surface_gap_stage_units=0.09,
+        object_side_length_stage_units=0.081,
+        stage_units_in_meters=1.0,
+        max_finger_surface_gap_meters=0.12,
+        max_generated_object_side_meters=0.08,
+    )
+
+    assert sanity["status"] == "FAIL_IMPLAUSIBLE_OBJECT_SIZE"
+    assert sanity["pass"] is False
+    assert sanity["object_side_length_meters"] == pytest.approx(0.081)
 
 
 def test_contact_summary_classifies_diagnostic_support_contacts() -> None:
