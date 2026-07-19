@@ -34,6 +34,10 @@ from aloha_isaac_replay.validation.contact_proxy_profiles import finger_dof_name
 from aloha_isaac_replay.validation.contact_proxy_profiles import resolve_contact_proxy_paths
 from aloha_isaac_replay.validation.contact_proxy_profiles import resolve_contact_target_paths
 from aloha_isaac_replay.validation.contact_proxy_profiles import robot_root_for_side
+from aloha_isaac_replay.validation.bottle_grasp_semantics import BOTTLE_LENGTH_M
+from aloha_isaac_replay.validation.bottle_grasp_semantics import BOTTLE_RADIUS_M
+from aloha_isaac_replay.validation.bottle_grasp_semantics import evaluate_axis_aligned_finger_rear_quarter
+from aloha_isaac_replay.validation.bottle_grasp_semantics import evaluate_grasp_file
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_STAGE = REPO_ROOT / "local_eval_assets/aloha1_clean_runtime_20260718/aloha1_dual_bbox_proxy_runtime.usda"
@@ -306,11 +310,15 @@ def _write_markdown(path: Path, payload: dict[str, Any]) -> None:
     finger_hit_lines = [f"- `{path}`: `{hit}`" for path, hit in finger_hits.items()]
     cross_overlap = payload.get("cross_side_proxy_overlap") or {}
     support_plane = payload.get("support_plane") or {}
+    debug_stage = payload.get("debug_stage_after_object_placement") or {}
     diagnostic_contacts = payload.get("diagnostic_contact_summaries") or {}
     support_size = support_plane.get("size")
     tracking_gate = payload.get("controller_tracking_gate") or {}
     non_target_gate = payload.get("non_target_contact_gate") or {}
     active_target_gate = payload.get("active_target_contact_gate") or {}
+    active_grasp_geometry = payload.get("active_grasp_geometry_precondition") or {}
+    bottle_gate = payload.get("bottle_runtime_composition_gate") or {}
+    grasp_gate = payload.get("bottle_grasp_semantics_gate") or {}
     failure_reasons = payload.get("failure_reasons") or []
     lines = [
         "# Gripper Passive Contact Smoke",
@@ -321,6 +329,16 @@ def _write_markdown(path: Path, payload: dict[str, Any]) -> None:
         f"- stage: `{payload['inputs']['stage_usd']}`",
         f"- control mode: `{payload['inputs']['control_mode']}`",
         f"- moving fingers: `{payload['inputs'].get('moving_fingers')}`",
+        f"- visible bottle runtime path: `{payload.get('visible_bottle_runtime_path')}`",
+        f"- bottle runtime composition gate: `{bottle_gate.get('status')}`",
+        f"- bottle visual mesh count: `{bottle_gate.get('visual_mesh_count')}`",
+        f"- bottle collision prim count: `{bottle_gate.get('collision_prim_count')}`",
+        f"- bottle grasp semantics gate: `{grasp_gate.get('status')}`",
+        f"- selected grasp: `{grasp_gate.get('selected_grasp')}`",
+        f"- finger rear-quarter fraction: `{grasp_gate.get('fraction_from_axis_min')}`",
+        f"- finger rear-quarter target: `{grasp_gate.get('rear_fraction_target')}`",
+        f"- closing axis dot bottle long axis: `{grasp_gate.get('closing_long_axis_dot_abs')}`",
+        f"- debug stage after object placement: `{debug_stage.get('path')}` saved=`{debug_stage.get('saved')}`",
         f"- object side length: `{payload.get('object_side_length_stage_units')}` stage units",
         f"- object side length: `{payload.get('object_side_length_meters')}` m",
         f"- finger surface gap open: `{payload.get('finger_surface_gap_open')}` stage units",
@@ -347,6 +365,12 @@ def _write_markdown(path: Path, payload: dict[str, Any]) -> None:
         f"- strict non-target object contact gate ok: `{payload.get('non_target_object_contact_ok')}`",
         f"- require active target contact: `{payload.get('require_active_target_contact')}`",
         f"- already-in-contact setup: `{payload.get('already_in_contact_setup')}`",
+        f"- active grasp geometry precondition: `{active_grasp_geometry.get('status')}`",
+        f"- active grasp open center gap: `{active_grasp_geometry.get('open_finger_center_gap_m')}` m",
+        f"- active grasp open gap: `{active_grasp_geometry.get('open_finger_surface_gap_m')}` m",
+        f"- active grasp surface gap diagnostic only: `{active_grasp_geometry.get('surface_gap_is_diagnostic_only')}`",
+        f"- active grasp object width along gap: `{active_grasp_geometry.get('object_width_along_gap_axis_m')}` m",
+        f"- active grasp free-space shortfall: `{active_grasp_geometry.get('shortfall_m')}` m",
         f"- active target contact gate: `{active_target_gate}`",
         f"- active target contact gate ok: `{payload.get('active_target_contact_ok')}`",
         f"- cross-side proxy overlap detected: `{cross_overlap.get('overlap_detected')}`",
@@ -379,9 +403,9 @@ def _write_markdown(path: Path, payload: dict[str, Any]) -> None:
         "",
         "## Interpretation",
         "",
-        "This is a local contact smoke test. It only checks whether a small passive cube between the gripper proxies remains numerically stable and moves within a bounded range during finger closure.",
-        "A non-zero contact count is not a success condition. The trace must show that the target fingertip proxy contacts the target object collider, and object motion must remain bounded.",
-        "It does not validate grasp success, bottle geometry, friction realism, or full-arm task behavior.",
+        "This is a local contact smoke test for the configured target object collider. The target may be a simple primitive, a BottleUSD asset, or a BottleUSD visual asset paired with a simplified physics proxy.",
+        "A non-zero contact count is not a success condition. The trace must show that the expected fingertip proxy contacts the target object collider in the required phase, and object motion must remain bounded.",
+        "It does not by itself validate final grasp success, friction realism, lift stability, or full-arm task behavior.",
     ]
     path.write_text("\n".join(lines) + "\n")
 
@@ -893,10 +917,84 @@ def _active_target_contact_gate(
     if not require_active_target_contact:
         row.update({"pass": True, "status": "SKIPPED_ACTIVE_TARGET_CONTACT_GATE"})
         return row
-    if contact_summary.get("first_target_contact_found_phase") == "close":
+    first_found_phase = contact_summary.get("first_target_contact_found_phase")
+    found_during_close = bool(contact_summary.get("target_contact_found_during_close"))
+    if first_found_phase == "close":
         row.update({"pass": True, "status": "PASS_ACTIVE_TARGET_CONTACT_FOUND_DURING_CLOSE"})
+    elif found_during_close:
+        row.update({"pass": False, "status": "FAIL_TARGET_ALREADY_CONTACTING_BEFORE_CLOSE"})
     else:
         row.update({"pass": False, "status": "FAIL_NO_ACTIVE_TARGET_CONTACT_DURING_CLOSE"})
+    return row
+
+
+def _active_grasp_geometry_precondition(
+    *,
+    require_active_target_contact: bool,
+    already_in_contact_setup: bool,
+    open_left_box: dict[str, Any],
+    open_right_box: dict[str, Any],
+    object_box: dict[str, Any],
+    gap_axis: int,
+    clearance: float,
+) -> dict[str, Any]:
+    """Check whether a no-contact-at-start active grasp is geometrically possible.
+
+    This is intentionally a narrow precondition for the free-space active-contact
+    gate. It applies when the object is initially placed inside the future finger
+    gap. The scene_base_link ALOHA proxies are small fingertip reference proxies,
+    but their axis-aligned bboxes can include enough geometry to make an AABB
+    surface-gap test overly conservative.  Use the two proxy centers as the
+    active grasp line, and keep the AABB surface gap as a diagnostic only.
+    """
+
+    row: dict[str, Any] = {
+        "required": bool(require_active_target_contact),
+        "already_in_contact_setup": bool(already_in_contact_setup),
+        "mode": "in_gap_free_space_first_contact",
+        "pass": True,
+        "status": "SKIPPED_ACTIVE_GRASP_GEOMETRY_PRECONDITION",
+    }
+    if already_in_contact_setup or not require_active_target_contact:
+        return row
+    if not (
+        open_left_box.get("bbox_valid")
+        and open_right_box.get("bbox_valid")
+        and object_box.get("bbox_valid")
+        and object_box.get("size")
+    ):
+        row.update({"pass": False, "status": "FAIL_ACTIVE_GRASP_GEOMETRY_BBOX_INVALID"})
+        return row
+
+    left_center = np.asarray(open_left_box["center"], dtype=np.float64)
+    right_center = np.asarray(open_right_box["center"], dtype=np.float64)
+    center_delta = left_center - right_center
+    open_center_gap = float(np.linalg.norm(center_delta))
+    open_surface_gap = _surface_gap(open_left_box, open_right_box, gap_axis)
+    object_size = np.asarray(object_box["size"], dtype=np.float64).reshape(-1)
+    object_width_along_gap_axis = float(object_size[gap_axis])
+    object_width_centerline = float(np.median(object_size))
+    required_open_center_gap = object_width_centerline + float(clearance)
+    pass_gate = bool(open_center_gap >= required_open_center_gap)
+    row.update(
+        {
+            "pass": pass_gate,
+            "status": "PASS_ACTIVE_GRASP_GEOMETRY_PRECONDITION"
+            if pass_gate
+            else "FAIL_ACTIVE_FREE_SPACE_GEOMETRY_PRECONDITION",
+            "mode": "proxy_centerline_free_space_first_contact",
+            "gap_axis_index": int(gap_axis),
+            "open_finger_center_gap_m": float(open_center_gap),
+            "open_finger_surface_gap_m": float(open_surface_gap),
+            "surface_gap_is_diagnostic_only": True,
+            "finger_center_delta_world_m": center_delta.tolist(),
+            "object_width_along_gap_axis_m": object_width_along_gap_axis,
+            "object_width_centerline_m": object_width_centerline,
+            "required_open_center_gap_m": float(required_open_center_gap),
+            "clearance_m": float(clearance),
+            "shortfall_m": float(max(required_open_center_gap - open_center_gap, 0.0)),
+        }
+    )
     return row
 
 
@@ -995,11 +1093,138 @@ def _axis_rotation_xyz(axis: str) -> tuple[float, float, float]:
     raise ValueError(f"Unsupported object axis: {axis}")
 
 
+def _axis_unit_vector(axis: str) -> np.ndarray:
+    normalized_axis = axis.upper()
+    if normalized_axis == "X":
+        return np.asarray([1.0, 0.0, 0.0], dtype=np.float64)
+    if normalized_axis == "Y":
+        return np.asarray([0.0, 1.0, 0.0], dtype=np.float64)
+    if normalized_axis == "Z":
+        return np.asarray([0.0, 0.0, 1.0], dtype=np.float64)
+    raise ValueError(f"Unsupported object axis: {axis}")
+
+
+def _nominal_object_axis_length_stage_units(args: argparse.Namespace, side_length: float) -> float:
+    if args.object_shape in {"bottle_usd", "bottle_usd_cylinder_proxy"}:
+        return float(BOTTLE_LENGTH_M) / float(args.stage_units_in_meters)
+    if args.object_shape in {"cylinder", "capsule", "bottle_proxy"}:
+        return float(side_length) * float(args.object_length_multiplier)
+    return float(side_length)
+
+
 def _bbox_center(stage: Any, path: str) -> np.ndarray:
     box = _bbox_row(stage, path)
     if not box.get("bbox_valid"):
         raise RuntimeError(f"Cannot compute bbox center for {path}")
     return np.asarray(box["center"], dtype=np.float64)
+
+
+def _tabletop_z_shift_from_bboxes(
+    *,
+    table_box: dict[str, Any],
+    object_box: dict[str, Any],
+    clearance: float,
+) -> dict[str, Any]:
+    if not table_box.get("bbox_valid"):
+        return {"pass": False, "status": "FAIL_TABLETOP_REFERENCE_BBOX_INVALID"}
+    if not object_box.get("bbox_valid"):
+        return {"pass": False, "status": "FAIL_TABLETOP_OBJECT_BBOX_INVALID"}
+    table_top_z = float(table_box["max"][2])
+    object_bottom_z = float(object_box["min"][2])
+    target_bottom_z = table_top_z + float(clearance)
+    z_shift = target_bottom_z - object_bottom_z
+    return {
+        "pass": True,
+        "status": "PASS_TABLETOP_Z_SHIFT_COMPUTED",
+        "table_top_z_m": table_top_z,
+        "object_bottom_z_before_m": object_bottom_z,
+        "target_object_bottom_z_m": target_bottom_z,
+        "tabletop_clearance_m": float(clearance),
+        "z_shift_m": float(z_shift),
+    }
+
+
+def _tabletop_z_shift_from_top_z(
+    *,
+    table_top_z: float,
+    object_box: dict[str, Any],
+    clearance: float,
+) -> dict[str, Any]:
+    if not object_box.get("bbox_valid"):
+        return {"pass": False, "status": "FAIL_TABLETOP_OBJECT_BBOX_INVALID"}
+    object_bottom_z = float(object_box["min"][2])
+    target_bottom_z = float(table_top_z) + float(clearance)
+    z_shift = target_bottom_z - object_bottom_z
+    return {
+        "pass": True,
+        "status": "PASS_TABLETOP_Z_SHIFT_COMPUTED",
+        "table_top_z_m": float(table_top_z),
+        "object_bottom_z_before_m": object_bottom_z,
+        "target_object_bottom_z_m": target_bottom_z,
+        "tabletop_clearance_m": float(clearance),
+        "z_shift_m": float(z_shift),
+    }
+
+
+def _shift_prim_world_translation(stage: Any, prim_path: str, delta_world: np.ndarray) -> None:
+    from pxr import Gf
+    from pxr import UsdGeom
+
+    prim = stage.GetPrimAtPath(prim_path)
+    if not prim or not prim.IsValid():
+        raise RuntimeError(f"Cannot shift missing prim: {prim_path}")
+    transform = _world_matrix(UsdGeom, stage, prim_path)
+    transform[:3, 3] = transform[:3, 3] + np.asarray(delta_world, dtype=np.float64)
+    _set_xform_matrix(UsdGeom, Gf, prim, transform)
+
+
+def _place_object_on_tabletop(
+    *,
+    stage: Any,
+    object_path: str,
+    table_path: str,
+    clearance: float,
+    table_top_z: float | None = None,
+) -> dict[str, Any]:
+    object_box_before = _bbox_row(stage, object_path)
+    if table_top_z is None:
+        table_box = _bbox_row(stage, table_path)
+        row = _tabletop_z_shift_from_bboxes(table_box=table_box, object_box=object_box_before, clearance=clearance)
+    else:
+        table_box = {
+            "path": table_path,
+            "bbox_valid": None,
+            "status": "SKIPPED_EXPLICIT_TABLETOP_TOP_Z",
+        }
+        row = _tabletop_z_shift_from_top_z(
+            table_top_z=float(table_top_z),
+            object_box=object_box_before,
+            clearance=clearance,
+        )
+    row.update(
+        {
+            "mode": "object_bottom_to_tabletop",
+            "table_path": table_path,
+            "table_top_z_source": "explicit_arg" if table_top_z is not None else "reference_prim_bbox",
+            "object_path": object_path,
+            "table_bbox": table_box,
+            "object_bbox_before": object_box_before,
+        }
+    )
+    if not row["pass"]:
+        return row
+    delta = np.asarray([0.0, 0.0, float(row["z_shift_m"])], dtype=np.float64)
+    _shift_prim_world_translation(stage, object_path, delta)
+    object_box_after = _bbox_row(stage, object_path)
+    row["object_bbox_after"] = object_box_after
+    if object_box_after.get("bbox_valid"):
+        row["object_bottom_z_after_m"] = float(object_box_after["min"][2])
+        row["tabletop_gap_after_m"] = float(object_box_after["min"][2]) - float(row["table_top_z_m"])
+        row["status"] = "PASS_TABLETOP_OBJECT_PLACED"
+    else:
+        row["pass"] = False
+        row["status"] = "FAIL_TABLETOP_OBJECT_BBOX_AFTER_SHIFT_INVALID"
+    return row
 
 
 def _matrix_to_numpy(matrix: Any) -> np.ndarray:
@@ -1115,6 +1340,86 @@ def _diagnostic_object_frame_features(UsdGeom: Any, stage: Any, object_path: str
     return features
 
 
+def _bottle_usd_runtime_composition_gate(stage: Any, object_path: str) -> dict[str, Any]:
+    """Validate that the runtime object is a visible Bottle500 composition.
+
+    Contact gates alone can pass while a GUI user cannot find a visible bottle,
+    because the runtime path is not the source asset path. This gate records the
+    real prim path created for the replay run and checks visual, collision, frame,
+    and bbox evidence under that path.
+    """
+
+    from pxr import UsdGeom
+    from pxr import UsdPhysics
+
+    root = stage.GetPrimAtPath(object_path)
+    row: dict[str, Any] = {
+        "runtime_object_path": object_path,
+        "pass": False,
+        "status": "FAIL_MISSING_RUNTIME_OBJECT",
+        "notes": (
+            "The source Bottle500 asset may be referenced under a runtime path. "
+            "Inspect runtime_object_path, not only /World/Bottle500."
+        ),
+    }
+    if not root or not root.IsValid():
+        return row
+
+    visual_meshes: list[str] = []
+    collision_prims: list[str] = []
+    enabled_collision_prims: list[str] = []
+    mouth_frame_path: str | None = None
+    inner_bottom_frame_path: str | None = None
+    for prim in stage.Traverse():
+        path = str(prim.GetPath())
+        if not _path_matches(path, object_path):
+            continue
+        if prim.IsA(UsdGeom.Mesh) and "/Visuals/" in path:
+            visual_meshes.append(path)
+        if prim.HasAPI(UsdPhysics.CollisionAPI):
+            collision_prims.append(path)
+            collision = UsdPhysics.CollisionAPI(prim)
+            attr = collision.GetCollisionEnabledAttr()
+            if attr is None or attr.Get() is not False:
+                enabled_collision_prims.append(path)
+        if path.endswith("/Frames/MouthFrame"):
+            mouth_frame_path = path
+        if path.endswith("/Frames/InnerBottomFrame"):
+            inner_bottom_frame_path = path
+
+    bbox = _bbox_row(stage, object_path)
+    bbox_size = [float(v) for v in bbox.get("size") or []]
+    bbox_valid = bool(bbox.get("bbox_valid") and len(bbox_size) == 3 and all(np.isfinite(v) for v in bbox_size))
+    longest_axis = max(bbox_size) if bbox_valid else float("nan")
+    positive_extents = sum(1 for value in bbox_size if value > 0.025) if bbox_valid else 0
+    bottle_sized = bool(bbox_valid and 0.16 <= longest_axis <= 0.24 and positive_extents >= 3)
+    visual_ok = bool(visual_meshes)
+    collision_ok = bool(enabled_collision_prims)
+    mouth_frame_ok = bool(mouth_frame_path and stage.GetPrimAtPath(mouth_frame_path))
+    inner_bottom_frame_ok = bool(inner_bottom_frame_path and stage.GetPrimAtPath(inner_bottom_frame_path))
+    pass_gate = bool(visual_ok and collision_ok and mouth_frame_ok and inner_bottom_frame_ok and bottle_sized)
+    row.update(
+        {
+            "pass": pass_gate,
+            "status": "PASS_BOTTLE_USD_RUNTIME_COMPOSITION" if pass_gate else "FAIL_BOTTLE_USD_RUNTIME_COMPOSITION",
+            "visual_mesh_count": len(visual_meshes),
+            "visual_mesh_sample": visual_meshes[:8],
+            "collision_prim_count": len(collision_prims),
+            "collision_prim_sample": collision_prims[:8],
+            "enabled_collision_prim_count": len(enabled_collision_prims),
+            "enabled_collision_prim_sample": enabled_collision_prims[:8],
+            "mouth_frame_path": mouth_frame_path,
+            "mouth_frame_exists": mouth_frame_ok,
+            "inner_bottom_frame_path": inner_bottom_frame_path,
+            "inner_bottom_frame_exists": inner_bottom_frame_ok,
+            "bbox": bbox,
+            "bbox_longest_axis_m": longest_axis,
+            "bbox_bottle_sized": bottle_sized,
+        }
+    )
+    return row
+
+
 def _load_grasp_transform(grasp_yaml: str | Path, grasp_name: str) -> dict[str, Any]:
     grasp_path = Path(grasp_yaml).expanduser().resolve()
     data = yaml.safe_load(grasp_path.read_text())
@@ -1152,11 +1457,34 @@ def _create_passive_cube(
     rigid_body: bool = True,
 ) -> None:
     from pxr import Gf
+    from pxr import Usd
     from pxr import UsdGeom
     from pxr import UsdPhysics
 
     if shape != "cube" and creation_mode != "raw_usd":
         raise ValueError(f"{shape} object shape requires raw_usd creation; got {creation_mode}")
+
+    def strip_visual_physics(prim: Any) -> None:
+        for child in Usd.PrimRange(prim):
+            if not child:
+                continue
+            if child.HasAPI(UsdPhysics.RigidBodyAPI):
+                try:
+                    child.RemoveAPI(UsdPhysics.RigidBodyAPI)
+                except Exception:
+                    pass
+            if child.HasAPI(UsdPhysics.MassAPI):
+                try:
+                    child.RemoveAPI(UsdPhysics.MassAPI)
+                except Exception:
+                    pass
+            if child.HasAPI(UsdPhysics.CollisionAPI):
+                collision = UsdPhysics.CollisionAPI(child)
+                attr = collision.GetCollisionEnabledAttr()
+                if not attr:
+                    attr = collision.CreateCollisionEnabledAttr()
+                attr.Set(False)
+
     if creation_mode == "dynamic_cuboid":
         from isaacsim.core.api.objects import DynamicCuboid
 
@@ -1269,6 +1597,52 @@ def _create_passive_cube(
             UsdPhysics.RigidBodyAPI.Apply(root.GetPrim())
             UsdPhysics.MassAPI.Apply(root.GetPrim()).CreateMassAttr(float(mass))
         return
+    elif shape == "bottle_usd_cylinder_proxy":
+        if usd_path is None:
+            raise ValueError("bottle_usd_cylinder_proxy requires a USD asset path")
+        asset_path = Path(usd_path).expanduser().resolve()
+        if not asset_path.exists():
+            raise FileNotFoundError(f"bottle_usd asset does not exist: {asset_path}")
+        root = UsdGeom.Xform.Define(stage, path)
+        root_xform = UsdGeom.Xformable(root.GetPrim())
+        root_xform.ClearXformOpOrder()
+        root_xform.AddTranslateOp(precision=UsdGeom.XformOp.PrecisionDouble).Set(
+            Gf.Vec3d(*[float(x) for x in center])
+        )
+
+        visual_path = f"{path}/visual_bottle"
+        visual = UsdGeom.Xform.Define(stage, visual_path)
+        visual.GetPrim().GetReferences().AddReference(str(asset_path), usd_prim_path)
+        visual_xform = UsdGeom.Xformable(visual.GetPrim())
+        visual_xform.ClearXformOpOrder()
+        visual_translate = visual_xform.AddTranslateOp(precision=UsdGeom.XformOp.PrecisionDouble)
+        visual_rotate = visual_xform.AddRotateXYZOp(precision=UsdGeom.XformOp.PrecisionDouble)
+        visual_translate.Set(Gf.Vec3d(0.0, 0.0, 0.0))
+        visual_rotate.Set(Gf.Vec3d(*_axis_rotation_xyz(normalized_axis)))
+
+        proxy_path = f"{path}/physics_proxy"
+        proxy = UsdGeom.Cylinder.Define(stage, proxy_path)
+        proxy.CreateAxisAttr(normalized_axis)
+        proxy.CreateRadiusAttr(side_length * 0.5)
+        proxy.CreateHeightAttr(side_length * length_multiplier)
+        proxy.CreateDisplayColorAttr([Gf.Vec3f(0.9, 0.2, 0.1)])
+        UsdPhysics.CollisionAPI.Apply(proxy.GetPrim()).CreateCollisionEnabledAttr().Set(True)
+
+        visual_center_target = np.asarray(center, dtype=np.float64).copy()
+        axis_index = {"X": 0, "Y": 1, "Z": 2}[normalized_axis]
+        if axis_index != 2:
+            # Keep the visible bottle bottom aligned with the smaller physics
+            # proxy bottom on the tabletop. The root/proxy center remains the
+            # physical contact center used by the replay gate.
+            visual_center_target[2] += max(float(BOTTLE_RADIUS_M) - float(side_length) * 0.5, 0.0)
+        visual_center = _bbox_center(stage, visual_path)
+        visual_translate.Set(Gf.Vec3d(*[float(x) for x in visual_center_target - visual_center]))
+
+        strip_visual_physics(visual.GetPrim())
+        if rigid_body:
+            UsdPhysics.RigidBodyAPI.Apply(root.GetPrim())
+            UsdPhysics.MassAPI.Apply(root.GetPrim()).CreateMassAttr(float(mass))
+        return
     else:
         raise ValueError(f"Unsupported object shape: {shape}")
     geom.CreateDisplayColorAttr([Gf.Vec3f(0.9, 0.2, 0.1)])
@@ -1367,6 +1741,15 @@ def _set_object_collision_offsets(
         "exists": True,
         "targets": [_set_collision_offsets(stage, target, contact_offset, rest_offset) for target in targets],
     }
+
+
+def _export_debug_stage(stage: Any, path: Path) -> dict[str, Any]:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        ok = bool(stage.Export(str(path)))
+    except BaseException as exc:
+        return {"path": _rel(path), "saved": False, "error": f"{type(exc).__name__}: {exc}"}
+    return {"path": _rel(path), "saved": ok, "error": None}
 
 
 def _begin_contact_pair_trace(stage: Any, *, disable_usd_updates: bool) -> dict[str, Any]:
@@ -1771,7 +2154,16 @@ def main() -> int:
     parser.add_argument("--object-fill-fraction", type=float, default=0.6)
     parser.add_argument(
         "--object-placement",
-        choices=("gap_center", "moving_finger_surface", "grasp_yaml"),
+        choices=(
+            "gap_center",
+            "moving_finger_surface",
+            "finger_rear_quarter",
+            "hdf5_open_finger_rear_quarter",
+            "hdf5_open_finger_rear_quarter_tabletop",
+            "hdf5_close_finger_rear_quarter",
+            "hdf5_close_finger_rear_quarter_tabletop",
+            "grasp_yaml",
+        ),
         default="gap_center",
     )
     parser.add_argument("--object-clearance", type=float, default=0.001)
@@ -1785,7 +2177,9 @@ def main() -> int:
         ),
     )
     parser.add_argument(
-        "--object-shape", choices=("cube", "cylinder", "capsule", "bottle_proxy", "bottle_usd"), default="cube"
+        "--object-shape",
+        choices=("cube", "cylinder", "capsule", "bottle_proxy", "bottle_usd", "bottle_usd_cylinder_proxy"),
+        default="cube",
     )
     parser.add_argument("--object-axis", choices=("X", "Y", "Z"), default="X")
     parser.add_argument(
@@ -1804,12 +2198,57 @@ def main() -> int:
     parser.add_argument("--object-usd", default=str(DEFAULT_BOTTLE_USD))
     parser.add_argument("--object-usd-prim-path", default="/Bottle500")
     parser.add_argument(
+        "--object-tabletop-reference-path",
+        default="/scene/worldBody/table",
+        help=(
+            "Reference tabletop prim used by hdf5_*_finger_rear_quarter_tabletop. "
+            "The object bbox bottom is shifted to this prim's bbox top plus --object-tabletop-clearance."
+        ),
+    )
+    parser.add_argument(
+        "--object-tabletop-top-z",
+        type=float,
+        default=None,
+        help=(
+            "Explicit world Z for the tabletop top surface used by "
+            "hdf5_*_finger_rear_quarter_tabletop. When set, this overrides the reference prim bbox. "
+            "Use for diagnostic table-to-robot alignment experiments."
+        ),
+    )
+    parser.add_argument("--object-tabletop-clearance", type=float, default=0.001)
+    parser.add_argument(
         "--object-grasp-yaml",
         default="assets/bottle_500ml/grasp/bottle_aloha_left_grasps.yaml",
         help="GraspSpec-style YAML used when --object-placement grasp_yaml is selected.",
     )
-    parser.add_argument("--object-grasp-name", default="grasp_mid")
+    parser.add_argument("--object-grasp-name", default="grasp_rear_quarter")
     parser.add_argument("--object-gripper-frame", default="/scene/left_base_link/left_gripper_link")
+    parser.add_argument(
+        "--object-rear-quarter-fraction",
+        type=float,
+        default=0.25,
+        help=(
+            "For --object-placement finger_rear_quarter or hdf5_*_finger_rear_quarter, place the fingertip "
+            "gap center at this fraction from the object-axis minimum. 0.25 means the rear quarter of the "
+            "bottle body."
+        ),
+    )
+    parser.add_argument(
+        "--object-rear-quarter-tolerance",
+        type=float,
+        default=0.07,
+        help="Allowed fraction error for the finger_rear_quarter semantic gate.",
+    )
+    parser.add_argument(
+        "--max-closing-long-axis-dot",
+        type=float,
+        default=0.20,
+        help=(
+            "Maximum absolute dot product between the gripper closing/gap axis and the bottle long axis for "
+            "rear-quarter grasp semantics. 0.20 requires an almost perpendicular grasp; larger values are "
+            "useful for real replay tolerance studies and are recorded in the metrics."
+        ),
+    )
     parser.add_argument(
         "--diagnostic-held-object-mode",
         choices=("none", "follow_gripper"),
@@ -1823,6 +2262,14 @@ def main() -> int:
     parser.add_argument("--object-mass", type=float, default=0.01)
     parser.add_argument("--object-contact-offset", type=float, default=None)
     parser.add_argument("--object-rest-offset", type=float, default=None)
+    parser.add_argument(
+        "--save-debug-stage",
+        action="store_true",
+        help=(
+            "Export a copy of the composed runtime stage after object placement. "
+            "This writes only into --output-dir and never saves over the source stage."
+        ),
+    )
     parser.add_argument("--support-plane-config", default=None)
     parser.add_argument(
         "--require-calibrated-table-frame",
@@ -1996,9 +2443,16 @@ def main() -> int:
             "object_length_multiplier": args.object_length_multiplier,
             "object_usd": _rel(args.object_usd),
             "object_usd_prim_path": args.object_usd_prim_path,
+            "object_tabletop_reference_path": args.object_tabletop_reference_path,
+            "object_tabletop_top_z": args.object_tabletop_top_z,
+            "object_tabletop_clearance": args.object_tabletop_clearance,
             "object_grasp_yaml": _rel(args.object_grasp_yaml),
             "object_grasp_name": args.object_grasp_name,
             "object_gripper_frame": args.object_gripper_frame,
+            "object_rear_quarter_fraction": args.object_rear_quarter_fraction,
+            "object_rear_quarter_tolerance": args.object_rear_quarter_tolerance,
+            "max_closing_long_axis_dot": args.max_closing_long_axis_dot,
+            "save_debug_stage": bool(args.save_debug_stage),
             "diagnostic_held_object_mode": args.diagnostic_held_object_mode,
             "object_contact_offset": args.object_contact_offset,
             "object_rest_offset": args.object_rest_offset,
@@ -2136,6 +2590,71 @@ def main() -> int:
 
         left_box = _bbox_row(stage, paths["left_finger"])
         right_box = _bbox_row(stage, paths["right_finger"])
+        replay_start_left_box = dict(left_box)
+        replay_start_right_box = dict(right_box)
+        placement_basis: dict[str, Any] = {
+            "target": "open_target",
+            "description": "Object placement was computed from the replay start/open fingertip bboxes.",
+        }
+        hdf5_close_rear_quarter_modes = {
+            "hdf5_close_finger_rear_quarter",
+            "hdf5_close_finger_rear_quarter_tabletop",
+        }
+        hdf5_open_rear_quarter_modes = {
+            "hdf5_open_finger_rear_quarter",
+            "hdf5_open_finger_rear_quarter_tabletop",
+        }
+        hdf5_tabletop_rear_quarter_modes = {
+            "hdf5_open_finger_rear_quarter_tabletop",
+            "hdf5_close_finger_rear_quarter_tabletop",
+        }
+        rear_quarter_modes = {"finger_rear_quarter", *hdf5_open_rear_quarter_modes, *hdf5_close_rear_quarter_modes}
+        if args.object_placement in hdf5_open_rear_quarter_modes:
+            if hdf5_target_sequence is None:
+                raise ValueError(
+                    f"--object-placement {args.object_placement} requires --hdf5-gripper-episode"
+                )
+            placement_basis = {
+                "target": "hdf5_open_target",
+                "description": (
+                    "Object placement was computed from the first HDF5 replay target/open fingertip bboxes. "
+                    "This is the active tabletop grasp placement: a PASS requires target contact to first "
+                    "appear during the close phase."
+                ),
+                "target_values": {
+                    "left_finger": float(open_target[list(art.dof_names).index(finger_dof_names["left_finger"])]),
+                    "right_finger": float(open_target[list(art.dof_names).index(finger_dof_names["right_finger"])]),
+                },
+            }
+        tabletop_object_placement_row: dict[str, Any] | None = None
+        if args.object_placement in hdf5_close_rear_quarter_modes:
+            if hdf5_target_sequence is None:
+                raise ValueError(
+                    f"--object-placement {args.object_placement} requires --hdf5-gripper-episode"
+                )
+            close_placement_target = hdf5_target_sequence[-1]
+            _set_full_state(art, close_placement_target)
+            _set_full_target(art, close_placement_target)
+            _set_finger_target_and_step(world, art, close_placement_target, pre_object_update_steps)
+            left_box = _bbox_row(stage, paths["left_finger"])
+            right_box = _bbox_row(stage, paths["right_finger"])
+            placement_basis = {
+                "target": "hdf5_close_target",
+                "description": (
+                    "Object placement was computed from the final HDF5 close target, then the articulation was "
+                    "restored to the replay start target before object creation. This is the active-grasp probe "
+                    "placement: a PASS requires target contact to first appear during the close phase."
+                ),
+                "target_values": {
+                    "left_finger": float(close_placement_target[list(art.dof_names).index(finger_dof_names["left_finger"])]),
+                    "right_finger": float(close_placement_target[list(art.dof_names).index(finger_dof_names["right_finger"])]),
+                },
+            }
+            _set_full_state(art, open_target)
+            _set_full_target(art, open_target)
+            _set_finger_target_and_step(world, art, open_target, pre_object_update_steps)
+            replay_start_left_box = _bbox_row(stage, paths["left_finger"])
+            replay_start_right_box = _bbox_row(stage, paths["right_finger"])
         placement_left_box = dict(left_box)
         placement_right_box = dict(right_box)
         cross_side_proxy_overlap = _cross_side_proxy_overlap_summary(stage, paths_by_side, args.side)
@@ -2161,6 +2680,7 @@ def main() -> int:
             "axis": axis_name,
             "clearance": args.object_clearance,
             "base_center": center.tolist(),
+            "placement_basis": placement_basis,
         }
         object_center_offset = _parse_vec3(args.object_center_offset, name="--object-center-offset")
         if not geometry_sanity["pass"]:
@@ -2227,11 +2747,45 @@ def main() -> int:
             object_placement_row["warning"] = (
                 "moving_finger_surface requires --moving-fingers left or right; used gap_center."
             )
+        elif args.object_placement in rear_quarter_modes:
+            object_axis_unit = _axis_unit_vector(args.object_axis)
+            object_axis_length = _nominal_object_axis_length_stage_units(args, side_length)
+            auto_offset = object_axis_unit * (
+                (0.5 - float(args.object_rear_quarter_fraction)) * float(object_axis_length)
+            )
+            center = np.asarray(center, dtype=np.float64) + auto_offset
+            object_placement_row.update(
+                {
+                    "placement_semantics": "finger_gap_center_on_bottle_rear_quarter",
+                    "object_axis": args.object_axis,
+                    "object_axis_unit_world": object_axis_unit.tolist(),
+                    "nominal_object_axis_length_stage_units": float(object_axis_length),
+                    "rear_fraction_target": float(args.object_rear_quarter_fraction),
+                    "rear_fraction_tolerance": float(args.object_rear_quarter_tolerance),
+                    "auto_center_offset_world": auto_offset.tolist(),
+                    "auto_placed_center": np.asarray(center, dtype=np.float64).tolist(),
+                }
+            )
         grasp_placement: dict[str, Any] | None = None
+        bottle_grasp_semantics_gate: dict[str, Any] = {
+            "pass": True,
+            "status": "SKIPPED_NOT_GRASP_YAML_BOTTLE_PLACEMENT",
+        }
         if args.object_placement == "grasp_yaml":
             from pxr import UsdGeom
 
             grasp_info = _load_grasp_transform(args.object_grasp_yaml, args.object_grasp_name)
+            semantics = evaluate_grasp_file(args.object_grasp_yaml, selected_grasp=args.object_grasp_name)
+            bottle_grasp_semantics_gate = {
+                "pass": bool(semantics["pass"]),
+                "status": "PASS_BOTTLE_GRASP_SEMANTICS"
+                if semantics["pass"]
+                else "FAIL_BOTTLE_GRASP_SEMANTICS",
+                "selected_grasp": args.object_grasp_name,
+                "selected_grasp_pass": semantics.get("selected_grasp_pass"),
+                "bottle_semantics": semantics.get("bottle_semantics"),
+                "all_grasps": semantics.get("all_grasps"),
+            }
             t_w_g = _world_matrix(UsdGeom, stage, args.object_gripper_frame)
             t_o_g = np.asarray(grasp_info["t_object_gripper"], dtype=np.float64)
             t_w_o = t_w_g @ np.linalg.inv(t_o_g)
@@ -2282,6 +2836,31 @@ def main() -> int:
             _set_xform_matrix(UsdGeom, Gf, object_prim, np.asarray(grasp_placement["t_world_object"]))
         object_offset_row = _set_object_collision_offsets(
             stage, object_path, args.object_contact_offset, args.object_rest_offset
+        )
+        if args.object_placement in hdf5_tabletop_rear_quarter_modes:
+            tabletop_object_placement_row = _place_object_on_tabletop(
+                stage=stage,
+                object_path=object_path,
+                table_path=args.object_tabletop_reference_path,
+                clearance=float(args.object_tabletop_clearance),
+                table_top_z=args.object_tabletop_top_z,
+            )
+            object_placement_row["tabletop_adjustment"] = tabletop_object_placement_row
+            if not tabletop_object_placement_row["pass"]:
+                raise RuntimeError(f"tabletop placement failed: {tabletop_object_placement_row['status']}")
+        debug_stage_after_object_placement = (
+            _export_debug_stage(stage, output_dir / "debug_stage_after_object_placement.usda")
+            if args.save_debug_stage
+            else {"saved": False, "path": None, "error": None}
+        )
+        bottle_runtime_composition_gate = (
+            _bottle_usd_runtime_composition_gate(stage, object_path)
+            if args.object_shape in {"bottle_usd", "bottle_usd_cylinder_proxy"}
+            else {
+                "pass": True,
+                "status": "SKIPPED_NOT_BOTTLE_USD",
+                "runtime_object_path": object_path,
+            }
         )
         diagnostic_held_object_row: dict[str, Any] | None = None
         diagnostic_t_gripper_object: np.ndarray | None = None
@@ -2350,6 +2929,33 @@ def main() -> int:
             pre_step_tracking_rows: list[dict[str, Any]] = []
             target_limit_rows: list[dict[str, Any]] = []
             object_reset_box = _bbox_row(stage, object_path)
+            active_grasp_geometry_precondition = _active_grasp_geometry_precondition(
+                require_active_target_contact=bool(args.trace_contact_pairs and args.require_active_target_contact),
+                already_in_contact_setup=bool(args.already_in_contact_setup),
+                open_left_box=replay_start_left_box,
+                open_right_box=replay_start_right_box,
+                object_box=object_reset_box,
+                gap_axis=axis,
+                clearance=float(args.object_clearance),
+            )
+            if args.object_placement in rear_quarter_modes:
+                placement_gap_vector = np.asarray(placement_left_box["center"], dtype=np.float64) - np.asarray(
+                    placement_right_box["center"], dtype=np.float64
+                )
+                placement_gap_norm = float(np.linalg.norm(placement_gap_vector))
+                semantics = evaluate_axis_aligned_finger_rear_quarter(
+                    finger_contact_center_world=object_placement_row["base_center"],
+                    object_bbox=object_reset_box,
+                    object_axis=args.object_axis,
+                    finger_gap_axis=axis_name,
+                    finger_gap_axis_vector_world=(
+                        placement_gap_vector / placement_gap_norm if placement_gap_norm > 1e-12 else None
+                    ),
+                    rear_fraction_target=float(args.object_rear_quarter_fraction),
+                    rear_fraction_tolerance=float(args.object_rear_quarter_tolerance),
+                    max_closing_long_axis_dot=float(args.max_closing_long_axis_dot),
+                )
+                bottle_grasp_semantics_gate = dict(semantics)
             object_reset_center = np.asarray(object_reset_box["center"], dtype=np.float64)
             rows: list[dict[str, Any]] = []
             max_displacement = 0.0
@@ -2604,7 +3210,16 @@ def main() -> int:
         )
         contact_motion_ok = bool(args.moving_fingers == "both" or object_displacement >= args.min_contact_motion)
         no_explosion_ok = bool(finite_motion and max_displacement <= args.max_object_displacement)
-        overall_pass = bool(contact_motion_ok and no_explosion_ok and target_limit_ok and controller_tracking_ok)
+        bottle_runtime_composition_ok = bool(bottle_runtime_composition_gate["pass"])
+        bottle_grasp_semantics_ok = bool(bottle_grasp_semantics_gate["pass"])
+        overall_pass = bool(
+            bottle_runtime_composition_ok
+            and bottle_grasp_semantics_ok
+            and contact_motion_ok
+            and no_explosion_ok
+            and target_limit_ok
+            and controller_tracking_ok
+        )
         if args.moving_fingers == "both":
             expected_finger_paths = [contact_targets["left_finger"], contact_targets["right_finger"]]
         else:
@@ -2647,19 +3262,27 @@ def main() -> int:
             already_in_contact_setup=bool(args.already_in_contact_setup),
         )
         active_target_contact_ok = bool(active_target_contact_gate["pass"])
+        active_grasp_geometry_precondition_ok = bool(active_grasp_geometry_precondition["pass"])
         trace_pair_ok = bool(
             trace_pair_ok and non_target_object_contact_ok and workcell_contact_policy_ok and active_target_contact_ok
+            and active_grasp_geometry_precondition_ok
         )
         overall_pass = bool(overall_pass and trace_pair_ok)
         failure_reasons = []
         if not contact_motion_ok:
             failure_reasons.append("contact_motion_below_threshold")
+        if not bottle_runtime_composition_ok:
+            failure_reasons.append("bottle_usd_runtime_composition_gate_failed")
+        if not bottle_grasp_semantics_ok:
+            failure_reasons.append("bottle_grasp_semantics_gate_failed")
         if not no_explosion_ok:
             failure_reasons.append("object_motion_exceeded_limit")
         if not trace_pair_ok:
             failure_reasons.append("contact_trace_gate_failed")
         if not active_target_contact_ok:
             failure_reasons.append("active_target_contact_gate_failed")
+        if not active_grasp_geometry_precondition_ok:
+            failure_reasons.append("active_grasp_geometry_precondition_failed")
         if not workcell_contact_policy_ok:
             failure_reasons.append("workcell_contact_policy_gate_failed")
         if not target_limit_ok:
@@ -2675,6 +3298,8 @@ def main() -> int:
                 contact_trace_status = str(non_target_contact_gate["status"])
             elif not workcell_contact_policy_ok:
                 contact_trace_status = str(workcell_contact_policy_gate["status"])
+            elif not active_grasp_geometry_precondition_ok:
+                contact_trace_status = str(active_grasp_geometry_precondition["status"])
             elif not active_target_contact_ok:
                 contact_trace_status = str(active_target_contact_gate["status"])
             elif not no_explosion_ok:
@@ -2717,11 +3342,20 @@ def main() -> int:
                 "finger_surface_gap_open_meters": geometry_sanity["finger_surface_gap_open_meters"],
                 "left_finger_placement_box": placement_left_box,
                 "right_finger_placement_box": placement_right_box,
+                "left_finger_replay_start_box": replay_start_left_box,
+                "right_finger_replay_start_box": replay_start_right_box,
                 "cross_side_proxy_overlap": cross_side_proxy_overlap,
                 "left_finger_final_box": left_box,
                 "right_finger_final_box": right_box,
                 "object_path": object_path,
                 "object_shape": args.object_shape,
+                "bottle_runtime_composition_gate": bottle_runtime_composition_gate,
+                "bottle_grasp_semantics_gate": bottle_grasp_semantics_gate,
+                "visible_bottle_runtime_path": (
+                    bottle_runtime_composition_gate.get("runtime_object_path")
+                    if args.object_shape in {"bottle_usd", "bottle_usd_cylinder_proxy"}
+                    else None
+                ),
                 "object_axis": args.object_axis,
                 "object_length_multiplier": args.object_length_multiplier,
                 "object_usd": _rel(args.object_usd),
@@ -2734,6 +3368,7 @@ def main() -> int:
                 "support_plane": support_plane_row,
                 "proxy_collision_offsets": proxy_offset_rows,
                 "object_collision_offsets": object_offset_row,
+                "debug_stage_after_object_placement": debug_stage_after_object_placement,
                 "diagnostic_held_object": diagnostic_held_object_row,
                 "object_reset_box": object_reset_box,
                 "object_initial_box": object_initial_box,
@@ -2759,6 +3394,8 @@ def main() -> int:
                 "already_in_contact_setup": bool(args.already_in_contact_setup),
                 "active_target_contact_gate": active_target_contact_gate,
                 "active_target_contact_ok": active_target_contact_ok,
+                "active_grasp_geometry_precondition": active_grasp_geometry_precondition,
+                "active_grasp_geometry_precondition_ok": active_grasp_geometry_precondition_ok,
                 "contact_trace_rigid_body_paths": trace_state["rigid_body_paths"] if trace_state else [],
                 "first_contact_pair": first_contact_row,
                 **contact_summary,

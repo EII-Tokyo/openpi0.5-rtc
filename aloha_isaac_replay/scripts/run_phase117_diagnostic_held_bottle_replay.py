@@ -31,6 +31,7 @@ def _phase117_args(output_dir: Path, policy: Path, start_frame: int) -> list[str
     command = _phase115_args(output_dir, policy)
     _replace_arg(command, "--hdf5-gripper-start-frame", [str(start_frame)])
     _replace_arg(command, "--object-placement", ["grasp_yaml"])
+    _replace_arg(command, "--object-grasp-name", ["grasp_rear_quarter"])
     _replace_arg(command, "--max-object-displacement", ["2.0"])
     _remove_flag(command, "--trace-contact-pairs")
     _remove_flag(command, "--fail-on-non-target-object-contact")

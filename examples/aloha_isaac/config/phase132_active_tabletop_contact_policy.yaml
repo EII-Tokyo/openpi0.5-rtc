@@ -1,0 +1,32 @@
+version: 1
+scope: phase132_active_tabletop_bottle_grasp
+default_decision: deny
+notes: >
+  Workcell contact policy for the active tabletop BottleUSD visual +
+  cylinder physics proxy grasp gate. This gate allows tabletop support for
+  the bottle proxy, but keeps frame, rail, pipe, robot body, and unknown
+  workcell contacts denied unless a later task-specific policy explicitly
+  promotes them.
+
+rules:
+  - path_prefix: /scene/worldBody/table
+    semantic_class: active_tabletop_support
+    decision: allow
+    notes: >
+      Phase134 showed the bottle physics proxy resting on this table collider
+      while the left gripper closed onto the bottle body. This is allowed only
+      for the active tabletop pregrasp/grasp gate.
+
+  - path_prefix: /scene/worldBody/__22
+    semantic_class: denied_frame_rail_collision
+    decision: deny
+    notes: >
+      Phase109 identified this path family as frame/rail geometry. Bottle
+      contact here must not count as tabletop support.
+
+  - path_prefix: /World/PipePlaceholder
+    semantic_class: denied_pipe_contact_for_pregrasp_gate
+    decision: deny
+    notes: >
+      Pipe contact is not part of this active tabletop bottle-body grasp gate.
+      It belongs to a later insertion task gate.
