@@ -9,6 +9,7 @@ from aloha_isaac_replay.scripts.build_aloha1_bbox_proxy_runtime_stage import _sh
 from aloha_isaac_replay.scripts.build_aloha1_bbox_proxy_runtime_stage import _side_from_path
 from aloha_isaac_replay.scripts.build_aloha1_bbox_proxy_runtime_stage import _normalized_paths
 from aloha_isaac_replay.scripts.build_aloha1_bbox_proxy_runtime_stage import _source_bbox_path_for_rigid_body
+from aloha_isaac_replay.validation.contact_proxy_profiles import proxy_size_override_for_rigid_body
 
 
 def test_bbox_proxy_builder_can_select_scene_base_link_rigid_bodies() -> None:
@@ -44,10 +45,57 @@ def test_scene_base_link_finger_proxies_use_local_site_bbox_sources() -> None:
     )
 
 
+def test_scene_base_link_finger_mesh_profile_uses_custom_finger_collision_sources() -> None:
+    assert (
+        _source_bbox_path_for_rigid_body(
+            "scene_base_link_finger_mesh",
+            "/scene/left_base_link/left_left_finger_link",
+        )
+        == "/scene/left_base_link/left_left_finger_link/collisions/vx300s_8_custom_finger_left/vx300s_8_custom_finger_left"
+    )
+    assert (
+        _source_bbox_path_for_rigid_body(
+            "scene_base_link_finger_mesh",
+            "/scene/left_base_link/left_right_finger_link",
+        )
+        == "/scene/left_base_link/left_right_finger_link/collisions/vx300s_8_custom_finger_right/vx300s_8_custom_finger_right"
+    )
+    assert (
+        _source_bbox_path_for_rigid_body(
+            "scene_base_link_finger_mesh",
+            "/scene/right_base_link/right_left_finger_link",
+        )
+        == "/scene/right_base_link/right_left_finger_link/collisions/vx300s_8_custom_finger_left/vx300s_8_custom_finger_left"
+    )
+    assert (
+        _source_bbox_path_for_rigid_body(
+            "scene_base_link_finger_mesh",
+            "/scene/right_base_link/right_right_finger_link",
+        )
+        == "/scene/right_base_link/right_right_finger_link/collisions/vx300s_8_custom_finger_right/vx300s_8_custom_finger_right"
+    )
+
+
+def test_scene_base_link_inner_pad_profile_uses_site_center_with_explicit_pad_size() -> None:
+    rigid_body_path = "/scene/left_base_link/left_left_finger_link"
+
+    assert (
+        _source_bbox_path_for_rigid_body("scene_base_link_inner_pad", rigid_body_path)
+        == "/scene/left_base_link/left_left_finger_link/sites/left_left_finger"
+    )
+    assert proxy_size_override_for_rigid_body("scene_base_link_inner_pad", rigid_body_path) == [
+        0.012,
+        0.028,
+        0.035,
+    ]
+
+
 def test_scene_base_link_non_finger_proxy_source_defaults_to_rigid_body_path() -> None:
     path = "/scene/left_base_link/left_wrist_link"
 
     assert _source_bbox_path_for_rigid_body("scene_base_link", path) == path
+    assert _source_bbox_path_for_rigid_body("scene_base_link_finger_mesh", path) == path
+    assert _source_bbox_path_for_rigid_body("scene_base_link_inner_pad", path) == path
 
 
 def test_selected_source_collision_disable_rule_keeps_proxy_but_disables_old_descendant_collision() -> None:

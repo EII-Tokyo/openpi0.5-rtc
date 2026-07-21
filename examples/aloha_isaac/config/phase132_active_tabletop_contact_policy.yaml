@@ -9,6 +9,30 @@ notes: >
   promotes them.
 
 rules:
+  - path_prefix: /World/phase58_local_object_support_patch
+    semantic_class: diagnostic_local_object_support_patch
+    decision: allow
+    notes: >
+      Diagnostic-only local support patch under the bottle. It isolates bottle
+      grasp closure from global table/base collision calibration and must not
+      be treated as final full-workcell table validation.
+
+  - path_prefix: /World/phase58_contact_geometry_support_patch
+    semantic_class: diagnostic_contact_geometry_support_patch
+    decision: allow
+    notes: >
+      Diagnostic-only local support patch sized from the physical contact
+      geometry rather than the full visual bottle bbox. It must not be treated
+      as final full-workcell table validation.
+
+  - path_prefix: /World/Table
+    semantic_class: active_tabletop_support
+    decision: allow
+    notes: >
+      User-measured table collider in the confirmed ALOHA workcell overlay.
+      Active tabletop bottle-body grasp gates should use this table as the
+      object support surface instead of a phase-local hard-coded support plane.
+
   - path_prefix: /scene/worldBody/table
     semantic_class: active_tabletop_support
     decision: allow

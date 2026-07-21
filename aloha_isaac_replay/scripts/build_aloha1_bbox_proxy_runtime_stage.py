@@ -12,6 +12,7 @@ from typing import Any
 from aloha_isaac_replay.runtime.isaac_light_app import LIGHTWEIGHT_SIMULATION_APP_CONFIG
 from aloha_isaac_replay.validation.contact_proxy_profiles import contact_proxy_profile_names
 from aloha_isaac_replay.validation.contact_proxy_profiles import proxy_path_for_rigid_body
+from aloha_isaac_replay.validation.contact_proxy_profiles import proxy_size_override_for_rigid_body
 from aloha_isaac_replay.validation.contact_proxy_profiles import robot_root_for_side
 from aloha_isaac_replay.validation.contact_proxy_profiles import side_from_rigid_body_path
 from aloha_isaac_replay.validation.contact_proxy_profiles import stage_units_in_meters_for_profile
@@ -66,8 +67,30 @@ def _robot_root_from_side(side: str, contact_proxy_profile: str = "legacy_puppet
 
 
 def _source_bbox_path_for_rigid_body(contact_proxy_profile: str, rigid_body_path: str) -> str:
-    if contact_proxy_profile != "scene_base_link":
+    if contact_proxy_profile not in {"scene_base_link", "scene_base_link_finger_mesh", "scene_base_link_inner_pad"}:
         return rigid_body_path
+    if contact_proxy_profile == "scene_base_link_finger_mesh":
+        custom_finger_meshes = {
+            "/scene/left_base_link/left_left_finger_link": (
+                "/scene/left_base_link/left_left_finger_link/collisions/"
+                "vx300s_8_custom_finger_left/vx300s_8_custom_finger_left"
+            ),
+            "/scene/left_base_link/left_right_finger_link": (
+                "/scene/left_base_link/left_right_finger_link/collisions/"
+                "vx300s_8_custom_finger_right/vx300s_8_custom_finger_right"
+            ),
+            "/scene/right_base_link/right_left_finger_link": (
+                "/scene/right_base_link/right_left_finger_link/collisions/"
+                "vx300s_8_custom_finger_left/vx300s_8_custom_finger_left"
+            ),
+            "/scene/right_base_link/right_right_finger_link": (
+                "/scene/right_base_link/right_right_finger_link/collisions/"
+                "vx300s_8_custom_finger_right/vx300s_8_custom_finger_right"
+            ),
+        }
+        custom_source = custom_finger_meshes.get(rigid_body_path)
+        if custom_source is not None:
+            return custom_source
     site_names = {
         "/scene/left_base_link/left_left_finger_link": "left_left_finger",
         "/scene/left_base_link/left_right_finger_link": "left_right_finger",
@@ -246,6 +269,12 @@ def _collect_candidates(
             "bbox_source_exists": bbox_source_exists,
         }
         row.update(_box_row(local_box, bbox_scale=bbox_scale, axis_scale=axis_scale, min_extent=min_extent))
+        size_override = proxy_size_override_for_rigid_body(contact_proxy_profile, path)
+        if row["bbox_valid"] and size_override is not None:
+            row["scaled_size"] = size_override
+            row["proxy_size_source"] = "profile_explicit_size_override"
+        else:
+            row["proxy_size_source"] = "bbox_scaled_size"
         row["selected"] = bool(under_robot_root and row["bbox_valid"] and row["filter_match"])
         rows.append(row)
     return rows, disabled_root_collisions
@@ -340,7 +369,7 @@ def _create_proxy_stage(
                 ):
                     continue
                 selected_collision_paths.add(prim_path)
-        if contact_proxy_profile == "scene_base_link":
+        if contact_proxy_profile in {"scene_base_link", "scene_base_link_finger_mesh", "scene_base_link_inner_pad"}:
             collision_instance_root = _known_scene_base_link_finger_collision_instance_root(selected_root)
             if collision_instance_root is not None:
                 instance_root_prim = stage.OverridePrim(collision_instance_root)

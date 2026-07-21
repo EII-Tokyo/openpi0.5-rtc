@@ -41,6 +41,14 @@ def _write_json(path: Path, payload: dict[str, Any]) -> None:
     path.write_text(json.dumps(_json_safe(payload), ensure_ascii=False, indent=2) + "\n")
 
 
+def _matrix_to_numpy(matrix: Any) -> np.ndarray:
+    raw = np.array([[float(matrix[i][j]) for j in range(4)] for i in range(4)], dtype=np.float64)
+    result = np.eye(4, dtype=np.float64)
+    result[:3, :3] = raw[:3, :3].T
+    result[:3, 3] = raw[3, :3]
+    return result
+
+
 def _bbox_row(stage: Any, prim_path: str) -> dict[str, Any]:
     from pxr import Usd
     from pxr import UsdGeom
@@ -53,14 +61,15 @@ def _bbox_row(stage: Any, prim_path: str) -> dict[str, Any]:
         [UsdGeom.Tokens.default_, UsdGeom.Tokens.render, UsdGeom.Tokens.proxy],
         useExtentsHint=False,
     )
-    box = bbox_cache.ComputeWorldBound(prim).ComputeAlignedBox()
+    world_bound = bbox_cache.ComputeWorldBound(prim)
+    box = world_bound.ComputeAlignedBox()
     if box.IsEmpty():
         return {"path": prim_path, "exists": True, "bbox_valid": False}
     min_pt = box.GetMin()
     max_pt = box.GetMax()
     center = [(float(min_pt[i]) + float(max_pt[i])) * 0.5 for i in range(3)]
     size = [float(max_pt[i]) - float(min_pt[i]) for i in range(3)]
-    return {
+    row = {
         "path": prim_path,
         "exists": True,
         "bbox_valid": bool(all(item > 0 for item in size)),
@@ -69,6 +78,22 @@ def _bbox_row(stage: Any, prim_path: str) -> dict[str, Any]:
         "center": center,
         "size": size,
     }
+    try:
+        oriented_box = world_bound.GetBox()
+        oriented_min = oriented_box.GetMin()
+        oriented_max = oriented_box.GetMax()
+        oriented_size = [float(oriented_max[i]) - float(oriented_min[i]) for i in range(3)]
+        row["oriented_min"] = [float(oriented_min[i]) for i in range(3)]
+        row["oriented_max"] = [float(oriented_max[i]) for i in range(3)]
+        row["oriented_size"] = oriented_size
+        row["oriented_world_matrix"] = _matrix_to_numpy(world_bound.GetMatrix()).tolist()
+    except Exception as exc:  # pragma: no cover - defensive Isaac runtime metadata
+        row["oriented_bbox_error"] = f"{type(exc).__name__}: {exc}"
+    try:
+        row["prim_world_matrix"] = _matrix_to_numpy(UsdGeom.XformCache().GetLocalToWorldTransform(prim)).tolist()
+    except Exception as exc:  # pragma: no cover - defensive Isaac runtime metadata
+        row["prim_world_matrix_error"] = f"{type(exc).__name__}: {exc}"
+    return row
 
 
 def _gap_metrics(left_box: dict[str, Any], right_box: dict[str, Any]) -> dict[str, Any]:

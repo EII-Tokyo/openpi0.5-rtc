@@ -84,6 +84,98 @@ CONTACT_PROXY_PROFILES: dict[str, dict[str, Any]] = {
             },
         },
     },
+    "scene_base_link_finger_mesh": {
+        "description": (
+            "Trossen/Menagerie /scene profile whose finger contact proxies are sized from the imported "
+            "custom finger collision meshes instead of the tiny site markers. Use for bottle-body grasp "
+            "formation tests where a point-like site proxy is too small to represent the finger pad/body."
+        ),
+        "stage_units_in_meters": 1.0,
+        "stage_up_axis": "Z",
+        "robot_roots": {
+            "left": "/scene/left_base_link",
+            "right": "/scene/right_base_link",
+        },
+        "finger_dof_names": {
+            "left": {"left_finger": "left_left_finger", "right_finger": "left_right_finger"},
+            "right": {"left_finger": "right_left_finger", "right_finger": "right_right_finger"},
+        },
+        "finger_qpos_limits": {
+            "left": {"left_close": 0.021, "left_open": 0.057, "right_close": 0.021, "right_open": 0.057},
+            "right": {"left_close": 0.021, "left_open": 0.057, "right_close": 0.021, "right_open": 0.057},
+        },
+        "finger_proxy_paths": {
+            "left": {
+                "left_finger": "/scene/left_base_link/left_left_finger_link/bbox_collision_proxy",
+                "right_finger": "/scene/left_base_link/left_right_finger_link/bbox_collision_proxy",
+                "articulation": "/scene/left_base_link/left_base_link",
+            },
+            "right": {
+                "left_finger": "/scene/right_base_link/right_left_finger_link/bbox_collision_proxy",
+                "right_finger": "/scene/right_base_link/right_right_finger_link/bbox_collision_proxy",
+                "articulation": "/scene/right_base_link/right_base_link",
+            },
+        },
+        "finger_contact_paths": {
+            "left": {
+                "left_finger": "/scene/left_base_link/left_left_finger_link/bbox_collision_proxy",
+                "right_finger": "/scene/left_base_link/left_right_finger_link/bbox_collision_proxy",
+            },
+            "right": {
+                "left_finger": "/scene/right_base_link/right_left_finger_link/bbox_collision_proxy",
+                "right_finger": "/scene/right_base_link/right_right_finger_link/bbox_collision_proxy",
+            },
+        },
+    },
+    "scene_base_link_inner_pad": {
+        "description": (
+            "Trossen/Menagerie /scene profile for active bottle-body grasp tests. The proxy center comes from "
+            "the finger Site prim, but the proxy size is an explicit small inner-pad box rather than the "
+            "point-like site bbox or the oversized whole custom-finger mesh bbox."
+        ),
+        "stage_units_in_meters": 1.0,
+        "stage_up_axis": "Z",
+        "robot_roots": {
+            "left": "/scene/left_base_link",
+            "right": "/scene/right_base_link",
+        },
+        "finger_dof_names": {
+            "left": {"left_finger": "left_left_finger", "right_finger": "left_right_finger"},
+            "right": {"left_finger": "right_left_finger", "right_finger": "right_right_finger"},
+        },
+        "finger_qpos_limits": {
+            "left": {"left_close": 0.021, "left_open": 0.057, "right_close": 0.021, "right_open": 0.057},
+            "right": {"left_close": 0.021, "left_open": 0.057, "right_close": 0.021, "right_open": 0.057},
+        },
+        "finger_proxy_paths": {
+            "left": {
+                "left_finger": "/scene/left_base_link/left_left_finger_link/bbox_collision_proxy",
+                "right_finger": "/scene/left_base_link/left_right_finger_link/bbox_collision_proxy",
+                "articulation": "/scene/left_base_link/left_base_link",
+            },
+            "right": {
+                "left_finger": "/scene/right_base_link/right_left_finger_link/bbox_collision_proxy",
+                "right_finger": "/scene/right_base_link/right_right_finger_link/bbox_collision_proxy",
+                "articulation": "/scene/right_base_link/right_base_link",
+            },
+        },
+        "finger_contact_paths": {
+            "left": {
+                "left_finger": "/scene/left_base_link/left_left_finger_link/bbox_collision_proxy",
+                "right_finger": "/scene/left_base_link/left_right_finger_link/bbox_collision_proxy",
+            },
+            "right": {
+                "left_finger": "/scene/right_base_link/right_left_finger_link/bbox_collision_proxy",
+                "right_finger": "/scene/right_base_link/right_right_finger_link/bbox_collision_proxy",
+            },
+        },
+        "proxy_size_overrides": {
+            "/scene/left_base_link/left_left_finger_link": [0.012, 0.028, 0.035],
+            "/scene/left_base_link/left_right_finger_link": [0.012, 0.028, 0.035],
+            "/scene/right_base_link/right_left_finger_link": [0.012, 0.028, 0.035],
+            "/scene/right_base_link/right_right_finger_link": [0.012, 0.028, 0.035],
+        },
+    },
 }
 
 
@@ -143,6 +235,13 @@ def side_from_rigid_body_path(profile_name: str, rigid_body_path: str) -> str:
 def proxy_path_for_rigid_body(profile_name: str, rigid_body_path: str) -> str:
     _profile(profile_name)
     return f"{rigid_body_path}/bbox_collision_proxy"
+
+
+def proxy_size_override_for_rigid_body(profile_name: str, rigid_body_path: str) -> list[float] | None:
+    raw = _profile(profile_name).get("proxy_size_overrides", {}).get(rigid_body_path)
+    if raw is None:
+        return None
+    return [float(item) for item in raw]
 
 
 def contact_proxy_namespace_roots(paths: dict[str, dict[str, str]]) -> list[str]:

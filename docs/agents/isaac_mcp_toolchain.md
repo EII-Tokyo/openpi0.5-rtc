@@ -60,6 +60,10 @@ Read this before using, changing, debugging, or reinstalling Isaac Sim / Isaac L
 ## ALOHA1 Replay Validation Gate
 - For Menagerie/Trossen `/scene` HDF5 left-arm replay, use the controller-ready mapping:
   - `configs/aloha/trossen_scene_base_link_aloha1_left_controller_mapping.yaml`
+- When the user asks for the historical long "episode 19" replay, use this exact local HDF5 path:
+  - `/home/eii/project/bottles_data/episode_19.hdf5`
+  - It has 3642 frames at 50 Hz, about 72.84 seconds.
+  - Do not substitute short key-region HDF5 files or 103-synced candidates unless the user explicitly asks for a different replay.
 - This mapping preserves recorded ALOHA1 joint values and only renames left-arm DOFs into the `/scene` articulation. It intentionally does not apply FK rigid-alignment offsets, because those offsets can push runtime DOF targets outside PhysX limits.
 - A successful replay validation must report all of these gates:
   - `target_limit_gate_ok: true`
@@ -95,6 +99,14 @@ Read this before using, changing, debugging, or reinstalling Isaac Sim / Isaac L
 - If the NVIDIA official Isaac MCP is unavailable, fails, or cannot answer the required Isaac-specific point for a planned modification, stop and report that the hard prerequisite is unavailable before changing Isaac implementation code. Do not silently substitute another MCP or community source for that modification.
 - After the NVIDIA official Isaac MCP has been used for the modification, `isaaclab`, `isaacsim-control`, and `isaacsim-python` may be used only as secondary implementation or inspection tools.
 - `isaacsim-control` and `isaacsim-python` remain local simulation tools only; never use them to affect the real ALOHA robot.
+
+## Isaac Code Change Expert Gate
+- Before each Isaac code, USD, physics, contact policy, replay validation, or simulation behavior change, first consult both standing expert threads when available:
+  - Isaac/physics expert: must provide official Isaac documentation, USD/PhysX semantics, math/physics rationale, and concrete acceptance criteria.
+  - Robotics examples expert: must provide relevant Isaac examples or robot manipulation patterns, and concrete regression criteria.
+- Do not proceed with blind parameter sweeps as the basis for code changes. Experiments are allowed only after a documented hypothesis and acceptance criteria are established from official docs/examples or measured ALOHA facts.
+- Do not relax contact policy gates to make a run pass unless the experts and the evidence show that the collider is semantically correct to allow. Prefer fixing geometry, placement, phase classification, or collision proxy semantics first.
+- Record the expert-backed rationale in the worklog or report for the change. Keep bounded evidence paths instead of copying long logs.
 
 ## Secondary MCP Order
 - After the mandatory NVIDIA official MCP step, use `isaaclab` read-only probes when Isaac Lab state or APIs are needed.

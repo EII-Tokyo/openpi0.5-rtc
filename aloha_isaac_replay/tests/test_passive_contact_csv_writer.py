@@ -22,12 +22,14 @@ from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _load_support_plane_config
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _non_target_contact_gate
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _resolve_support_plane_options
+from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _resolve_side_arm_dof_name
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _should_disable_workcell_environment_collision
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _summarize_contact_pairs
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _summarize_target_limit_violations
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _summarize_tracking_errors
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _target_from_standard_qpos
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _target_limit_step_violations
+from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _targets_from_hdf5_qpos
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _tracking_groups
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _tracking_step_errors
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _write_csv
@@ -59,6 +61,22 @@ class _FakeSceneBaseLeftArticulation:
 
     def get_joint_positions(self) -> np.ndarray:
         return np.zeros(3, dtype=np.float64)
+
+
+class _FakeSceneBaseLeftArmArticulation:
+    dof_names = [
+        "left_waist",
+        "left_shoulder",
+        "left_elbow",
+        "left_forearm_roll",
+        "left_wrist_angle",
+        "left_wrist_rotate",
+        "left_left_finger",
+        "left_right_finger",
+    ]
+
+    def get_joint_positions(self) -> np.ndarray:
+        return np.zeros(len(self.dof_names), dtype=np.float64)
 
 
 def test_finger_targets_can_use_same_sign_right_close(monkeypatch) -> None:
@@ -279,6 +297,19 @@ def test_tracking_groups_accept_scene_base_link_prefixed_left_arm_dofs() -> None
     assert groups["controlled"] == [0, 1, 2, 3, 4, 5, 6, 7]
 
 
+def test_tracking_groups_include_arm_for_hdf5_arm_start_then_gripper_only() -> None:
+    groups = _tracking_groups(
+        _FakeSceneBaseLeftArmArticulation.dof_names,
+        replay_mode="hdf5_arm_start_then_gripper_only",
+        finger_dof_names={"left_finger": "left_left_finger", "right_finger": "left_right_finger"},
+        side="left",
+    )
+
+    assert groups["left_arm"] == [0, 1, 2, 3, 4, 5]
+    assert groups["gripper"] == [6, 7]
+    assert groups["controlled"] == [0, 1, 2, 3, 4, 5, 6, 7]
+
+
 def test_tracking_summary_records_max_error_dof_name_and_step() -> None:
     groups = {"left_arm": [0, 1, 2]}
     dof_names = ["left_waist", "left_shoulder", "left_elbow"]
@@ -396,6 +427,115 @@ def test_scene_base_link_hdf5_gripper_qpos_maps_both_fingers_positive() -> None:
     assert target[1] == pytest.approx(0.039)
     assert target[2] == pytest.approx(0.039)
     assert target[2] > 0.0
+
+
+def test_hdf5_arm_start_then_gripper_only_holds_start_arm_and_replays_gripper(monkeypatch) -> None:
+    class _ArmTarget:
+        def __init__(self, name: str, value: float) -> None:
+            self.isaac_dof_name = name
+            self.value = value
+
+    def fake_arm_targets(frame: np.ndarray, _mapping: dict[str, object], *, side: str) -> list[_ArmTarget]:
+        assert side == "left"
+        return [
+            _ArmTarget("left/waist", float(frame[0])),
+            _ArmTarget("left/shoulder", float(frame[1])),
+            _ArmTarget("left/elbow", float(frame[2])),
+            _ArmTarget("left/forearm_roll", float(frame[3])),
+            _ArmTarget("left/wrist_angle", float(frame[4])),
+            _ArmTarget("left/wrist_rotate", float(frame[5])),
+        ]
+
+    monkeypatch.setattr(
+        "aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact.arm_only_targets_from_standard_qpos",
+        fake_arm_targets,
+    )
+    qpos = np.zeros((2, 14), dtype=np.float64)
+    qpos[0, :6] = [0.11, 0.22, 0.33, 0.44, 0.55, 0.66]
+    qpos[1, :6] = [9.0, 9.0, 9.0, 9.0, 9.0, 9.0]
+    qpos[0, 6] = 1.0
+    qpos[1, 6] = 0.0
+
+    targets, summary = _targets_from_hdf5_qpos(
+        art=_FakeSceneBaseLeftArmArticulation(),
+        side="left",
+        qpos=qpos,
+        mapping={"dummy": True},
+        replay_mode="hdf5_arm_start_then_gripper_only",
+        finger_dof_names=finger_dof_names_for_side("scene_base_link", "left"),
+        finger_qpos_limits=finger_qpos_limits_for_side("scene_base_link", "left"),
+    )
+
+    np.testing.assert_allclose(targets[0][:6], qpos[0, :6])
+    np.testing.assert_allclose(targets[1][:6], qpos[0, :6])
+    assert targets[0][6] > targets[1][6]
+    assert targets[0][7] > targets[1][7]
+    assert summary["formal_full_hdf5_replay"] is False
+    assert summary["arm_initialized_from_hdf5"] is True
+    assert summary["hdf5_arm_targets_after_start_used"] is False
+    assert summary["arm_target_behavior"] == "constant_hdf5_start_frame_hold"
+    assert summary["arm_qpos_delta"]["max_abs_net_delta"] == pytest.approx(8.89)
+
+
+def test_hdf5_arm_start_then_gripper_only_can_use_action_gripper_source(monkeypatch) -> None:
+    class _ArmTarget:
+        def __init__(self, name: str, value: float) -> None:
+            self.isaac_dof_name = name
+            self.value = value
+
+    def fake_arm_targets(frame: np.ndarray, _mapping: dict[str, object], *, side: str) -> list[_ArmTarget]:
+        assert side == "left"
+        return [
+            _ArmTarget("left/waist", float(frame[0])),
+            _ArmTarget("left/shoulder", float(frame[1])),
+            _ArmTarget("left/elbow", float(frame[2])),
+            _ArmTarget("left/forearm_roll", float(frame[3])),
+            _ArmTarget("left/wrist_angle", float(frame[4])),
+            _ArmTarget("left/wrist_rotate", float(frame[5])),
+        ]
+
+    monkeypatch.setattr(
+        "aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact.arm_only_targets_from_standard_qpos",
+        fake_arm_targets,
+    )
+    qpos = np.zeros((2, 14), dtype=np.float64)
+    qpos[0, :6] = [0.11, 0.22, 0.33, 0.44, 0.55, 0.66]
+    qpos[1, :6] = [9.0, 9.0, 9.0, 9.0, 9.0, 9.0]
+    qpos[:, 6] = 1.0
+    action = qpos.copy()
+    action[0, 6] = 1.0
+    action[1, 6] = 0.0
+
+    targets, summary = _targets_from_hdf5_qpos(
+        art=_FakeSceneBaseLeftArmArticulation(),
+        side="left",
+        qpos=qpos,
+        gripper_sequence=action,
+        gripper_source="action",
+        mapping={"dummy": True},
+        replay_mode="hdf5_arm_start_then_gripper_only",
+        finger_dof_names=finger_dof_names_for_side("scene_base_link", "left"),
+        finger_qpos_limits=finger_qpos_limits_for_side("scene_base_link", "left"),
+    )
+
+    np.testing.assert_allclose(targets[0][:6], qpos[0, :6])
+    np.testing.assert_allclose(targets[1][:6], qpos[0, :6])
+    assert targets[0][6] > targets[1][6]
+    assert targets[0][7] > targets[1][7]
+    assert summary["source"] == "action"
+    assert summary["arm_source"] == "observations/qpos"
+    assert summary["raw_start"] == pytest.approx(1.0)
+    assert summary["raw_end"] == pytest.approx(0.0)
+
+
+def test_resolve_side_arm_dof_name_rejects_missing_precisely() -> None:
+    with pytest.raises(ValueError, match="Could not resolve mapped DOF"):
+        _resolve_side_arm_dof_name(
+            "shoulder",
+            dof_names=["left_waist", "left_elbow"],
+            side="left",
+            source_name="left/shoulder",
+        )
 
 
 def test_workcell_environment_collision_filter_is_diagnostic_and_does_not_match_robot_or_target_paths() -> None:
@@ -673,6 +813,7 @@ def test_support_plane_config_resolves_fixed_box_options() -> None:
         support_plane_size_x=None,
         support_plane_size_y=None,
         support_plane_thickness=0.02,
+        support_plane_patch_margin=0.04,
     )
 
     resolved = _resolve_support_plane_options(args)
@@ -697,6 +838,7 @@ def test_support_plane_config_rejects_object_bottom_mix() -> None:
         support_plane_size_x=None,
         support_plane_size_y=None,
         support_plane_thickness=0.02,
+        support_plane_patch_margin=0.04,
     )
 
     try:
