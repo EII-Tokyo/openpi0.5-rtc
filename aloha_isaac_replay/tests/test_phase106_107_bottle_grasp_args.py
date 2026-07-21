@@ -12,6 +12,7 @@ from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import (
     _closing_axis_gap_centering_solver,
     _contact_projection_model_for_args,
     _derived_tabletop_top_z_from_open_finger,
+    _loaded_gripper_soft_bottle_calibration_diagnostic,
     _nominal_object_axis_length_stage_units,
     _object_width_stop_target,
     _oriented_cylinder_projection_model,
@@ -620,6 +621,66 @@ def test_object_width_stop_target_can_use_oriented_finger_box_gap() -> None:
         "finger_inner_gap_m"
     ]
     assert guarded_obb.tolist() == target.tolist()
+
+
+def test_loaded_gripper_soft_bottle_calibration_reports_qpos_residual_without_pass_gate() -> None:
+    diagnostic = _loaded_gripper_soft_bottle_calibration_diagnostic(
+        final_alignment={
+            "closing_axis_projected_inner_gap": {
+                "valid": True,
+                "object_gap_to_lower_finger_m": 0.00349,
+                "object_gap_to_upper_finger_m": 0.01846,
+                "object_interval_m": [0.1569, 0.2095],
+            },
+            "object_projection_model": {
+                "valid": True,
+                "projected_width_m": 0.0526,
+            },
+        },
+        hdf5_gripper_summary={
+            "source": "observations/qpos",
+            "raw_start": 0.947,
+            "raw_end": 0.570,
+            "raw_range": 0.377,
+            "sample_count": 37,
+        },
+        reachability_audit={"status": "FAIL_NO_GEOMETRIC_REACH_TO_TARGET_COLLIDER"},
+        contact_distance_m=0.002,
+        object_effective_contact_width_m=0.052,
+        visual_bottle_outer_diameter_m=0.068,
+        moving_fingers="both",
+        controller_tracking_gate={"pass": True},
+        positive_control_gate={"status": "PASS_FORCED_OVERLAP_CONTACT_PIPELINE_REPORTED"},
+    )
+
+    assert diagnostic["status"] == "COMPUTED_FORMAL_QPOS_LOADED_CONTACT_RESIDUAL"
+    assert diagnostic["formal_gate_result_preserved"] is True
+    assert diagnostic["may_set_overall_pass"] is False
+    assert diagnostic["qpos_source_is_loaded_gap_calibrated"] is False
+    assert diagnostic["requires_raw_finger_or_spacer_calibration"] is True
+    assert diagnostic["nearest_surface_gap_m"] == pytest.approx(0.00349)
+    assert diagnostic["missing_to_contact_distance_m"] == pytest.approx(0.00149)
+    assert diagnostic["per_finger_loaded_closure_deficit_to_zero_gap_m"] == pytest.approx(0.001745)
+    assert diagnostic["per_finger_loaded_closure_deficit_to_contact_distance_m"] == pytest.approx(0.000745)
+    assert diagnostic["implied_effective_contact_widths_if_explained_as_soft_deformation"][
+        "nearest_touch_m"
+    ] == pytest.approx(0.05958)
+
+
+def test_loaded_gripper_soft_bottle_calibration_refuses_invalid_gap() -> None:
+    diagnostic = _loaded_gripper_soft_bottle_calibration_diagnostic(
+        final_alignment={"closing_axis_projected_inner_gap": {"valid": False}},
+        hdf5_gripper_summary={"source": "observations/qpos"},
+        reachability_audit={},
+        contact_distance_m=0.002,
+        object_effective_contact_width_m=0.052,
+        visual_bottle_outer_diameter_m=0.068,
+        moving_fingers="both",
+    )
+
+    assert diagnostic["status"] == "NOT_COMPUTED_INVALID_FINAL_PROJECTED_GAP"
+    assert diagnostic["formal_gate_result_preserved"] is True
+    assert diagnostic["may_set_overall_pass"] is False
 
 
 def test_open_finger_object_height_alignment_rejects_airborne_open_gripper() -> None:

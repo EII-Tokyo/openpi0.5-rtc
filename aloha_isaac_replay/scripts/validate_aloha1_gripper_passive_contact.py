@@ -345,6 +345,7 @@ def _write_markdown(path: Path, payload: dict[str, Any]) -> None:
     active_grasp_geometry = payload.get("active_grasp_geometry_precondition") or {}
     object_lift_gate = payload.get("object_lift_gate") or {}
     soft_contact_model = payload.get("soft_bottle_contact_model") or {}
+    loaded_calibration = payload.get("loaded_gripper_soft_bottle_calibration_diagnostic") or {}
     bottle_gate = payload.get("bottle_runtime_composition_gate") or {}
     grasp_gate = payload.get("bottle_grasp_semantics_gate") or {}
     failure_reasons = payload.get("failure_reasons") or []
@@ -375,6 +376,11 @@ def _write_markdown(path: Path, payload: dict[str, Any]) -> None:
         f"- soft bottle contact model: `{soft_contact_model.get('enabled')}`",
         f"- soft effective contact width: `{soft_contact_model.get('effective_contact_width_m')}` m",
         f"- visible external diameter: `{soft_contact_model.get('visual_external_diameter_m')}` m",
+        f"- loaded gripper calibration diagnostic: `{loaded_calibration.get('status')}`",
+        f"- loaded calibration preserves formal gate: `{loaded_calibration.get('formal_gate_result_preserved')}`",
+        f"- nearest qpos replay surface gap: `{loaded_calibration.get('nearest_surface_gap_m')}` m",
+        f"- missing to contact distance: `{loaded_calibration.get('missing_to_contact_distance_m')}` m",
+        f"- per-finger loaded closure residual: `{loaded_calibration.get('per_finger_loaded_closure_deficit_to_zero_gap_m')}` m",
         f"- finger surface gap open: `{payload.get('finger_surface_gap_open')}` stage units",
         f"- finger surface gap open: `{payload.get('finger_surface_gap_open_meters')}` m",
         f"- contact setup geometry sanity: `{payload.get('contact_setup_geometry_sanity_status')}`",
@@ -2277,6 +2283,148 @@ def _summarize_target_reachability(rows: list[dict[str, Any]]) -> dict[str, Any]
             "accepted as evidence of PhysX contact."
         ),
     }
+
+
+def _loaded_gripper_soft_bottle_calibration_diagnostic(
+    *,
+    final_alignment: dict[str, Any],
+    hdf5_gripper_summary: dict[str, Any] | None,
+    reachability_audit: dict[str, Any],
+    contact_distance_m: float,
+    object_effective_contact_width_m: float | None,
+    visual_bottle_outer_diameter_m: float | None,
+    moving_fingers: str,
+    controller_tracking_gate: dict[str, Any] | None = None,
+    positive_control_gate: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Quantify qpos replay residual without relaxing the formal contact gate.
+
+    Real mineral-water bottles deform under ALOHA finger pressure, and ALOHA
+    gripper qpos is a normalized observed gripper-joint signal rather than a
+    direct measurement of loaded finger-pad surface separation.  This diagnostic
+    reports the residual between the formal qpos replay geometry and the target
+    contact proxy.  It must not change `overall_pass` or contact gates.
+    """
+
+    result: dict[str, Any] = {
+        "enabled": True,
+        "formal_gate_result_preserved": True,
+        "may_set_overall_pass": False,
+        "may_set_physical_grasp_gate": False,
+        "status": "NOT_COMPUTED",
+        "source": (hdf5_gripper_summary or {}).get("source"),
+        "moving_fingers": str(moving_fingers),
+        "contact_distance_m": float(contact_distance_m),
+        "object_effective_contact_width_m": object_effective_contact_width_m,
+        "visual_bottle_outer_diameter_m": visual_bottle_outer_diameter_m,
+        "reachability_status": reachability_audit.get("status"),
+        "controller_tracking_pass": None if controller_tracking_gate is None else controller_tracking_gate.get("pass"),
+        "positive_control_status": None if positive_control_gate is None else positive_control_gate.get("status"),
+        "notes": (
+            "Diagnostic only: this quantifies unmodeled loaded gripper compliance and soft-bottle deformation. "
+            "It must not convert a missing PhysX target contact into a formal pass."
+        ),
+    }
+
+    gap = final_alignment.get("closing_axis_projected_inner_gap") or {}
+    object_projection_model = final_alignment.get("object_projection_model") or {}
+    if not gap.get("valid"):
+        result["status"] = "NOT_COMPUTED_INVALID_FINAL_PROJECTED_GAP"
+        return result
+
+    lower_gap = gap.get("object_gap_to_lower_finger_m")
+    upper_gap = gap.get("object_gap_to_upper_finger_m")
+    if lower_gap is None or upper_gap is None:
+        result["status"] = "NOT_COMPUTED_MISSING_FINGER_OBJECT_GAPS"
+        return result
+    try:
+        lower_gap_f = float(lower_gap)
+        upper_gap_f = float(upper_gap)
+    except Exception:
+        result["status"] = "NOT_COMPUTED_NON_NUMERIC_FINGER_OBJECT_GAPS"
+        return result
+    if not (np.isfinite(lower_gap_f) and np.isfinite(upper_gap_f)):
+        result["status"] = "NOT_COMPUTED_NON_FINITE_FINGER_OBJECT_GAPS"
+        return result
+
+    min_gap = min(lower_gap_f, upper_gap_f)
+    max_gap = max(lower_gap_f, upper_gap_f)
+    nearest_side = "lower" if lower_gap_f <= upper_gap_f else "upper"
+    contact_distance = max(0.0, float(contact_distance_m))
+    missing_nearest_to_zero = max(0.0, min_gap)
+    missing_nearest_to_contact = max(0.0, min_gap - contact_distance)
+    missing_bilateral_to_zero = max(0.0, max_gap)
+    missing_bilateral_to_contact = max(0.0, max_gap - contact_distance)
+    symmetric_divisor = 2.0 if str(moving_fingers) == "both" else 1.0
+
+    object_width = None
+    if object_projection_model.get("projected_width_m") is not None:
+        object_width = float(object_projection_model["projected_width_m"])
+    elif gap.get("object_interval_m") is not None:
+        interval = [float(v) for v in gap["object_interval_m"]]
+        object_width = interval[1] - interval[0]
+    elif object_effective_contact_width_m is not None:
+        object_width = float(object_effective_contact_width_m)
+
+    implied_widths: dict[str, float | None] = {
+        "nearest_touch_m": None,
+        "nearest_contact_distance_m": None,
+        "bilateral_touch_m": None,
+        "bilateral_contact_distance_m": None,
+    }
+    if object_width is not None and np.isfinite(object_width):
+        implied_widths = {
+            "nearest_touch_m": float(object_width + 2.0 * missing_nearest_to_zero),
+            "nearest_contact_distance_m": float(object_width + 2.0 * missing_nearest_to_contact),
+            "bilateral_touch_m": float(object_width + 2.0 * missing_bilateral_to_zero),
+            "bilateral_contact_distance_m": float(object_width + 2.0 * missing_bilateral_to_contact),
+        }
+
+    result.update(
+        {
+            "status": "COMPUTED_FORMAL_QPOS_LOADED_CONTACT_RESIDUAL",
+            "qpos_source_is_loaded_gap_calibrated": False,
+            "requires_raw_finger_or_spacer_calibration": True,
+            "nearest_side": nearest_side,
+            "lower_surface_gap_m": lower_gap_f,
+            "upper_surface_gap_m": upper_gap_f,
+            "nearest_surface_gap_m": float(min_gap),
+            "bilateral_surface_gap_m": float(max_gap),
+            "missing_to_zero_gap_m": float(missing_nearest_to_zero),
+            "missing_to_contact_distance_m": float(missing_nearest_to_contact),
+            "bilateral_missing_to_zero_gap_m": float(missing_bilateral_to_zero),
+            "bilateral_missing_to_contact_distance_m": float(missing_bilateral_to_contact),
+            "per_finger_loaded_closure_deficit_to_zero_gap_m": float(
+                missing_nearest_to_zero / symmetric_divisor
+            ),
+            "per_finger_loaded_closure_deficit_to_contact_distance_m": float(
+                missing_nearest_to_contact / symmetric_divisor
+            ),
+            "per_finger_bilateral_loaded_closure_deficit_to_zero_gap_m": float(
+                missing_bilateral_to_zero / symmetric_divisor
+            ),
+            "per_finger_bilateral_loaded_closure_deficit_to_contact_distance_m": float(
+                missing_bilateral_to_contact / symmetric_divisor
+            ),
+            "projected_object_contact_width_m": None if object_width is None else float(object_width),
+            "implied_effective_contact_widths_if_explained_as_soft_deformation": implied_widths,
+            "hdf5_gripper_raw_start": (hdf5_gripper_summary or {}).get("raw_start"),
+            "hdf5_gripper_raw_end": (hdf5_gripper_summary or {}).get("raw_end"),
+            "hdf5_gripper_raw_range": (hdf5_gripper_summary or {}).get("raw_range"),
+            "hdf5_gripper_sample_count": (hdf5_gripper_summary or {}).get("sample_count"),
+        }
+    )
+    if visual_bottle_outer_diameter_m is not None and object_width is not None:
+        result["visual_minus_projected_contact_width_m"] = float(visual_bottle_outer_diameter_m - object_width)
+        result["nearest_touch_width_exceeds_visual_outer_diameter"] = bool(
+            implied_widths["nearest_touch_m"] is not None
+            and implied_widths["nearest_touch_m"] > float(visual_bottle_outer_diameter_m)
+        )
+        result["bilateral_touch_width_exceeds_visual_outer_diameter"] = bool(
+            implied_widths["bilateral_touch_m"] is not None
+            and implied_widths["bilateral_touch_m"] > float(visual_bottle_outer_diameter_m)
+        )
+    return result
 
 
 def _axis_suffix(axis_name: str) -> str:
@@ -7506,6 +7654,18 @@ def main() -> int:
                     "object_displacement_m": object_displacement,
                 }
             )
+        loaded_gripper_soft_bottle_calibration = _loaded_gripper_soft_bottle_calibration_diagnostic(
+            final_alignment=final_finger_object_alignment,
+            hdf5_gripper_summary=hdf5_gripper_summary,
+            reachability_audit=target_contact_reachability_audit,
+            contact_distance_m=float(args.object_contact_offset or 0.0) + float(args.proxy_contact_offset or 0.0),
+            object_effective_contact_width_m=soft_contact_model.get("effective_contact_width_m"),
+            visual_bottle_outer_diameter_m=soft_contact_model.get("visual_external_diameter_m")
+            or geometry_sanity.get("object_side_length_meters"),
+            moving_fingers=str(args.moving_fingers),
+            controller_tracking_gate=controller_tracking_gate,
+            positive_control_gate=diagnostic_force_target_overlap_contact_pipeline_gate,
+        )
         payload.update(
             {
                 "status": "PASS" if overall_pass else "FAILED_GATE",
@@ -7595,6 +7755,9 @@ def main() -> int:
                 "diagnostic_force_target_overlap": diagnostic_force_target_overlap_row,
                 "diagnostic_force_target_overlap_contact_pipeline_gate": (
                     diagnostic_force_target_overlap_contact_pipeline_gate
+                ),
+                "loaded_gripper_soft_bottle_calibration_diagnostic": (
+                    loaded_gripper_soft_bottle_calibration
                 ),
                 "object_side_length_stage_units": side_length,
                 "object_side_length_meters": geometry_sanity["object_side_length_meters"],
