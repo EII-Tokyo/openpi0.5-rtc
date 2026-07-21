@@ -6,7 +6,10 @@ import h5py
 import numpy as np
 
 from aloha_isaac_replay.data.grasp_candidate_scan import inspect_grasp_candidate
-from aloha_isaac_replay.scripts.scan_isaac_hdf5_tabletop_grasp_candidates import _open_then_close_frame_indices
+from aloha_isaac_replay.scripts.scan_isaac_hdf5_tabletop_grasp_candidates import (
+    _classify_tabletop_candidate,
+    _open_then_close_frame_indices,
+)
 
 
 def _write_episode(path: Path, qpos: np.ndarray) -> None:
@@ -73,3 +76,35 @@ def test_open_then_close_frame_indices_select_pregrasp_not_release() -> None:
     assert all(gripper[index] >= 0.65 for index in frames)
     assert all(np.min(gripper[index + 1 : index + 81]) <= 0.35 for index in frames)
     assert all(index >= 40 for index in frames)
+
+
+def test_tabletop_candidate_classification_keeps_bad_frames_with_reasons() -> None:
+    row = {
+        "bbox_valid": True,
+        "raw_gripper": 0.2,
+        "midpoint_tabletop_height_error_m": 0.15,
+        "closing_dot_object_x_abs": 0.7,
+    }
+
+    result = _classify_tabletop_candidate(row, open_threshold=0.65, close_threshold=0.35)
+
+    assert result["candidate_class"] == "NOT_TABLETOP_GRASP_CANDIDATE"
+    assert result["candidate_reasons"] == [
+        "already_closed",
+        "finger_midpoint_far_from_tabletop_bottle_height",
+        "closing_axis_not_perpendicular_to_bottle_axis",
+    ]
+
+
+def test_tabletop_candidate_classification_accepts_open_aligned_tabletop_frame() -> None:
+    row = {
+        "bbox_valid": True,
+        "raw_gripper": 0.9,
+        "midpoint_tabletop_height_error_m": 0.01,
+        "closing_dot_object_x_abs": 0.1,
+    }
+
+    result = _classify_tabletop_candidate(row, open_threshold=0.65, close_threshold=0.35)
+
+    assert result["candidate_class"] == "TABLETOP_GRASP_CANDIDATE"
+    assert result["candidate_reasons"] == []

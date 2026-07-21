@@ -116,6 +116,54 @@ def _open_then_close_frame_indices(
     return sorted(selected)
 
 
+def _classify_tabletop_candidate(
+    row: dict[str, Any],
+    *,
+    open_threshold: float,
+    close_threshold: float,
+    max_tabletop_height_error: float = 0.08,
+    max_closing_dot: float = 0.35,
+) -> dict[str, Any]:
+    """Classify a candidate without hiding it from the report.
+
+    Bad frames are evidence.  Do not filter out closed, airborne, or
+    misaligned frames; label them so a replay report shows why a trajectory
+    does or does not match the "bottle starts on tabletop and gets grasped"
+    assumption.
+    """
+
+    reasons: list[str] = []
+    raw_gripper = float(row.get("raw_gripper", float("nan")))
+    height_error = float(row.get("midpoint_tabletop_height_error_m", float("nan")))
+    closing_dot = float(row.get("closing_dot_object_x_abs", float("nan")))
+
+    if not bool(row.get("bbox_valid")):
+        reasons.append("finger_bbox_invalid")
+    if np.isfinite(raw_gripper):
+        if raw_gripper < close_threshold:
+            reasons.append("already_closed")
+        elif raw_gripper < open_threshold:
+            reasons.append("not_open_enough_for_tabletop_grasp_start")
+    else:
+        reasons.append("raw_gripper_missing")
+    if not np.isfinite(height_error) or height_error > max_tabletop_height_error:
+        reasons.append("finger_midpoint_far_from_tabletop_bottle_height")
+    if not np.isfinite(closing_dot) or closing_dot > max_closing_dot:
+        reasons.append("closing_axis_not_perpendicular_to_bottle_axis")
+
+    status = "TABLETOP_GRASP_CANDIDATE" if not reasons else "NOT_TABLETOP_GRASP_CANDIDATE"
+    return {
+        "candidate_class": status,
+        "candidate_reasons": reasons,
+        "classification_thresholds": {
+            "open_threshold": float(open_threshold),
+            "close_threshold": float(close_threshold),
+            "max_tabletop_height_error_m": float(max_tabletop_height_error),
+            "max_closing_dot": float(max_closing_dot),
+        },
+    }
+
+
 def _row_for_frame(
     *,
     world: Any,
@@ -160,7 +208,7 @@ def _row_for_frame(
         + max(float(raw_gripper) - 0.25, 0.0)
         - float(source_score) * 0.02
     )
-    return {
+    row = {
         "path": str(file_path),
         "frame": int(frame),
         "raw_gripper": float(raw_gripper),
@@ -179,6 +227,14 @@ def _row_for_frame(
         "right_finger_box": right_box,
         "rank_score": float(score),
     }
+    row.update(
+        _classify_tabletop_candidate(
+            row,
+            open_threshold=0.65,
+            close_threshold=0.35,
+        )
+    )
+    return row
 
 
 def _write_outputs(output_dir: Path, rows: list[dict[str, Any]], roots: list[Path], stage_usd: Path) -> None:
