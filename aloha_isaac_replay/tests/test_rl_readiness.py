@@ -8,7 +8,9 @@ def test_drive_gate_pass_does_not_make_rl_training_ready() -> None:
     assert report["status"] == "NOT_READY_FOR_RL_TRAINING"
     assert report["overall_rl_training_ready"] is False
     assert report["privileged_state_rl_training_ready"] is False
-    assert report["gates"][0]["status"] == "PASS"
+    assert report["gates"][0]["status"] == "PARTIAL"
+    assert report["gates"][0]["next_action"] == "calibrate_loaded_gripper_qpos_to_contact_surface_gap"
+    assert report["control_interface_subgates"]["loaded_gripper_qpos_to_contact_surface_calibration"]["pass"] is False
     assert {gate["status"] for gate in report["gates"][1:]} == {"NOT_EVALUATED"}
     assert "Fixed-initial-state replay is a calibration gate" in report["replay_scope"]
 
@@ -17,6 +19,8 @@ def test_fixed_pose_and_randomized_true_state_make_privileged_state_rl_ready() -
     report = build_rl_readiness_report(
         drive_gate_pass=True,
         drive_gate_evidence="tracking pass",
+        loaded_gripper_calibration_pass=True,
+        loaded_gripper_calibration_evidence="spacer calibration pass",
         fixed_pose_minimal_task_pass=True,
         fixed_pose_minimal_task_evidence="scripted fixed bottle grasp and lift pass",
         randomized_true_state_task_pass=True,
@@ -32,6 +36,8 @@ def test_camera_gate_required_for_overall_camera_based_rl_ready() -> None:
     report = build_rl_readiness_report(
         drive_gate_pass=True,
         drive_gate_evidence="tracking pass",
+        loaded_gripper_calibration_pass=True,
+        loaded_gripper_calibration_evidence="spacer calibration pass",
         fixed_pose_minimal_task_pass=True,
         randomized_true_state_task_pass=True,
         camera_perception_task_pass=True,

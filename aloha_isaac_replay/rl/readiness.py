@@ -8,6 +8,7 @@ CONTROL_INTERFACE_GATE = "level_1_control_interface"
 FIXED_POSE_TASK_GATE = "level_2_fixed_pose_minimal_grasp"
 RANDOMIZED_TRUE_STATE_GATE = "level_3_randomized_pose_true_state_task"
 CAMERA_PERCEPTION_GATE = "level_4_camera_perception_task"
+LOADED_GRIPPER_CALIBRATION_SUBGATE = "loaded_gripper_qpos_to_contact_surface_calibration"
 
 
 @dataclasses.dataclass(frozen=True)
@@ -24,6 +25,8 @@ def build_rl_readiness_report(
     *,
     drive_gate_pass: bool,
     drive_gate_evidence: str,
+    loaded_gripper_calibration_pass: bool = False,
+    loaded_gripper_calibration_evidence: str = "not evaluated; qpos is not yet calibrated to loaded finger-pad gap",
     fixed_pose_minimal_task_pass: bool = False,
     fixed_pose_minimal_task_evidence: str = "not evaluated by drive-target replay smoke",
     randomized_true_state_task_pass: bool = False,
@@ -46,18 +49,30 @@ def build_rl_readiness_report(
     later level-4 milestone.
     """
 
+    if not drive_gate_pass:
+        control_status = "FAIL"
+        control_next_action = "fix_dof_mapping_limits_reset_and_tracking"
+    elif not loaded_gripper_calibration_pass:
+        control_status = "PARTIAL"
+        control_next_action = "calibrate_loaded_gripper_qpos_to_contact_surface_gap"
+    else:
+        control_status = "PASS"
+        control_next_action = "build_fixed_pose_approach_close_lift_task"
+
     gates = [
         ReadinessGate(
             level=1,
             name=CONTROL_INTERFACE_GATE,
-            status="PASS" if drive_gate_pass else "FAIL",
-            evidence=drive_gate_evidence,
-            next_action=(
-                "build_fixed_pose_approach_close_lift_task" if drive_gate_pass else "fix_dof_mapping_limits_reset_and_tracking"
+            status=control_status,
+            evidence=(
+                f"drive: {drive_gate_evidence}; "
+                f"loaded gripper calibration: {loaded_gripper_calibration_evidence}"
             ),
+            next_action=control_next_action,
             acceptance=(
                 "same initial state, correct DOF order/signs/limits, stable gripper open-close, "
-                "stable reset, and repeatable motion for the same action input"
+                "stable reset, repeatable motion for the same action input, and a loaded gripper qpos-to-contact "
+                "surface calibration for soft bottle grasping"
             ),
         ),
         ReadinessGate(
@@ -131,6 +146,17 @@ def build_rl_readiness_report(
             "note": (
                 "These legacy booleans are diagnostic only. The four readiness levels above are the canonical gates."
             ),
+        },
+        "control_interface_subgates": {
+            "drive_gate_pass": bool(drive_gate_pass),
+            LOADED_GRIPPER_CALIBRATION_SUBGATE: {
+                "pass": bool(loaded_gripper_calibration_pass),
+                "evidence": loaded_gripper_calibration_evidence,
+                "note": (
+                    "For soft bottle tasks, observed gripper qpos is not accepted as a direct finger-pad gap "
+                    "measurement until loaded calibration or spacer evidence exists."
+                ),
+            },
         },
         "gates": [dataclasses.asdict(gate) for gate in gates],
     }

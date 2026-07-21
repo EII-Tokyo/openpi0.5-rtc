@@ -35,10 +35,17 @@ Acceptance:
 - Joint target and readback correspond.
 - DOF order, signs, and limits are correct.
 - Gripper opens and closes stably.
+- For bottle tasks, loaded gripper qpos is calibrated against the actual finger-pad contact surface or spacer measurements.
 - Reset does not cause jumps, explosions, or abnormal velocities.
 - Same action input from the same initial state gives repeatable motion.
 
-Current status: mostly passed for arm-only qpos replay and drive target readback. This does not imply grasping task readiness.
+Current status: partial. Arm-only qpos replay and drive target readback mostly pass, but episode 18 shows a loaded close plateau: the action command closes hard, observed gripper qpos remains around a plateau, and gripper effort is high. Therefore `observations/qpos[6]` is not yet a calibrated measurement of the loaded finger-pad gap.
+
+The current diagnostic output is:
+
+- `reports/aloha1_isaac_adaptation/episode18_loaded_gripper_calibration_208_245_20260721/loaded_gripper_calibration.json`
+
+For frame 236-244 in episode 18, the diagnostic detected a loaded close plateau with mean qpos near `0.571`, mean action near `0.029`, and mean absolute effort near `808`. This supports treating the current qpos-to-Isaac-finger-gap mapping as uncalibrated under soft-bottle load.
 
 ### Gate 2: Fixed-Pose Minimal Grasp
 
@@ -128,10 +135,11 @@ Important status semantics:
 
 Continue the current replay work only as Gate 2 calibration:
 
-1. Fix the bottle initial pose hypothesis for the manual grasp window.
-2. Replace oversized or semantically wrong gripper colliders with true inner finger pad contact proxies.
-3. Confirm that the first target contact is finger-pad-to-bottle, not gripper-bar-to-bottle.
-4. Add a deterministic fixed-pose approach-close-lift script.
+1. Calibrate loaded gripper qpos to the real finger-pad contact surface using raw finger joint data or known-width spacers.
+2. Fix the bottle initial pose hypothesis for the manual grasp window.
+3. Replace oversized or semantically wrong gripper colliders with true inner finger pad contact proxies.
+4. Confirm that the first target contact is finger-pad-to-bottle, not gripper-bar-to-bottle.
+5. Add a deterministic fixed-pose approach-close-lift script.
 
 After Gate 2 passes, build a minimal Gate 3 task with small random bottle pose reset and privileged truth observation.
 
