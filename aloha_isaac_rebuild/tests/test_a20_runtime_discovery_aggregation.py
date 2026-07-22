@@ -109,6 +109,41 @@ def test_runtime_mismatch_or_unsafe_run_fails(mutation, error_code: str) -> None
     assert any(error["code"] == error_code for error in result["errors"])
 
 
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("returncode", False),
+        ("returncode", 0.0),
+        ("returncode", "0"),
+        ("returncode", None),
+        ("articulation_count", True),
+        ("articulation_count", 1.0),
+        ("articulation_count", "1"),
+        ("articulation_count", None),
+        ("dof_count", True),
+        ("dof_count", 16.0),
+        ("dof_count", "16"),
+        ("dof_count", None),
+    ],
+)
+def test_runtime_integer_fields_reject_bool_float_string_and_none(
+    field: str, value: object
+) -> None:
+    runs = _runs()
+    runs[1][field] = value
+
+    result = aggregate_runtime_runs(_layer1(), runs)
+
+    assert result["status"] == "FAIL_A20_RUNTIME_ARTICULATION_DISCOVERY"
+    assert {
+        "code": "invalid_field_type",
+        "run_index": 1,
+        "field": field,
+        "expected": "int",
+        "observed_type": type(value).__name__,
+    } in result["errors"]
+
+
 def test_structurally_valid_blocked_run_has_blocked_status() -> None:
     runs = _runs()
     runs[1].update(

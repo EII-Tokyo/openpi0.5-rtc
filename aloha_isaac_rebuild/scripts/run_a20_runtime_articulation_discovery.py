@@ -126,13 +126,25 @@ def _run_errors(
         for field in ("timed_out", "valid_handle", "requires_unapproved_initialization")
         if field in run and not isinstance(run[field], bool)
     )
+    errors.extend(
+        {
+            "code": "invalid_field_type",
+            "run_index": run_index,
+            "field": field,
+            "expected": "int",
+            "observed_type": type(run[field]).__name__,
+        }
+        for field in ("returncode", "articulation_count", "dof_count")
+        if field in run and type(run[field]) is not int
+    )
 
     safety = validate_safety_flags(run)
     errors.extend({"run_index": run_index, **error} for error in safety["errors"])
 
     process_ok = (
         run.get("process_status") == "completed"
-        and run.get("returncode") == 0
+        and type(run.get("returncode")) is int
+        and run["returncode"] == 0
         and run.get("timed_out") is False
     )
     if not process_ok:
@@ -152,9 +164,9 @@ def _run_errors(
 
     if run.get("articulation_root") != "/aloha/root_joint":
         errors.append({"code": "invalid_articulation_root", "run_index": run_index})
-    if run.get("articulation_count") != 1:
+    if type(run.get("articulation_count")) is int and run["articulation_count"] != 1:
         errors.append({"code": "invalid_articulation_count", "run_index": run_index})
-    if run.get("dof_count") != 16:
+    if type(run.get("dof_count")) is int and run["dof_count"] != 16:
         errors.append({"code": "invalid_dof_count", "run_index": run_index})
     if not blocked and run.get("valid_handle") is not True:
         errors.append({"code": "invalid_handle", "run_index": run_index})
