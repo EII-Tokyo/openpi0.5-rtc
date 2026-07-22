@@ -73,7 +73,11 @@ def _absolute_existing_file(path: Path, label: str) -> Path:
     return resolved
 
 
-def _sha256(path: Path) -> str:
+def _sha256(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
+
+
+def _sha256_file(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as stream:
         for chunk in iter(lambda: stream.read(1024 * 1024), b""):
@@ -81,11 +85,14 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def _input_record(path: Path) -> dict[str, str]:
-    digest = _sha256(path)
+def _validate_digest(path: Path, digest: str) -> str:
     if len(digest) != 64 or any(character not in "0123456789abcdef" for character in digest):
         raise ValueError(f"invalid SHA-256 for {path}: {digest!r}")
-    return {"path": str(path), "sha256": digest}
+    return digest
+
+
+def _bytes_input_record(path: Path, data: bytes) -> dict[str, str]:
+    return {"path": str(path), "sha256": _validate_digest(path, _sha256(data))}
 
 
 def _single_target(joint: UsdPhysics.Joint, relationship_name: str) -> list[str]:
@@ -244,19 +251,23 @@ def evaluate_metadata(
     return {"ok": not mismatches and not errors, "mismatches": mismatches, "errors": errors}
 
 
-def _collect(config_path: Path) -> dict[str, Any]:
-    config_path = _absolute_existing_file(config_path, "config_path")
-    config = yaml.safe_load(config_path.read_text(encoding="utf-8"))
-    outputs = config.get("outputs", {})
+def _collect(
+    config_path: Path, config_bytes: bytes, config: dict[str, Any]
+) -> dict[str, Any]:
+    outputs = config.get("outputs")
+    if not isinstance(outputs, dict):
+        raise ValueError("config outputs must be a mapping")
     stage_path = _absolute_existing_file(
         Path(outputs["a19_clean_articulation_candidate"]), "stage_path"
     )
     mapping_path = _absolute_existing_file(
         Path(outputs["a17_clean_articulation_mapping_plan_json"]), "mapping_path"
     )
-    mapping = json.loads(mapping_path.read_text(encoding="utf-8"))
+    mapping_bytes = mapping_path.read_bytes()
+    mapping = json.loads(mapping_bytes.decode("utf-8"))
     expected = expected_dof_records(mapping)
 
+    stage_pre_sha256 = _validate_digest(stage_path, _sha256_file(stage_path))
     stage = Usd.Stage.Open(str(stage_path), load=Usd.Stage.LoadAll)
     if stage is None:
         raise ValueError(f"could not open USD stage: {stage_path}")
@@ -276,6 +287,7 @@ def _collect(config_path: Path) -> dict[str, Any]:
         for index, path in enumerate(expected_paths)
         if path in observed_by_path
     ]
+    stage_post_sha256 = _validate_digest(stage_path, _sha256_file(stage_path))
     evaluation = evaluate_metadata(
         default_prim_path,
         articulation_root_paths,
@@ -284,14 +296,29 @@ def _collect(config_path: Path) -> dict[str, Any]:
         observed_dof_paths=observed_dof_paths,
         unsupported_joints=inventory["unsupported_joints"],
     )
+    if stage_pre_sha256 != stage_post_sha256:
+        evaluation["errors"].append(
+            {
+                "code": "input_changed_during_audit",
+                "input": "stage",
+                "pre_sha256": stage_pre_sha256,
+                "post_sha256": stage_post_sha256,
+            }
+        )
+        evaluation["ok"] = False
     ok = evaluation["ok"]
     return {
         "status": "PASS_A20_USD_DOF_METADATA" if ok else "FAIL_A20_USD_DOF_METADATA",
         "ok": ok,
         "inputs": {
-            "config": _input_record(config_path),
-            "mapping": _input_record(mapping_path),
-            "stage": _input_record(stage_path),
+            "config": _bytes_input_record(config_path, config_bytes),
+            "mapping": _bytes_input_record(mapping_path, mapping_bytes),
+            "stage": {
+                "path": str(stage_path),
+                "pre_sha256": stage_pre_sha256,
+                "post_sha256": stage_post_sha256,
+                "consistent_during_audit": stage_pre_sha256 == stage_post_sha256,
+            },
         },
         "default_prim": default_prim_path,
         "articulation_root_paths": articulation_root_paths,
@@ -306,13 +333,30 @@ def _collect(config_path: Path) -> dict[str, Any]:
 
 def collect_usd_dof_metadata(config_path: Path | str) -> dict[str, Any]:
     """Collect Layer 1 metadata and convert all input failures to gate failures."""
+    path = Path(config_path).expanduser().resolve()
+    config_bytes: bytes | None = None
+    config: Any = None
+    json_output_path: str | None = None
     try:
-        return _collect(Path(config_path))
+        config_path = _absolute_existing_file(path, "config_path")
+        config_bytes = config_path.read_bytes()
+        config = yaml.safe_load(config_bytes.decode("utf-8"))
+        if not isinstance(config, dict):
+            raise ValueError("config must be a mapping")
+        outputs = config.get("outputs")
+        if isinstance(outputs, dict):
+            configured_output = outputs.get("a20_usd_dof_metadata_json")
+            if isinstance(configured_output, str) and configured_output:
+                json_output_path = str(Path(configured_output).expanduser().resolve())
+        result = _collect(config_path, config_bytes, config)
+        result["json_output_path"] = json_output_path
+        return result
     except Exception as exc:  # fail closed at the public/CLI boundary
         return {
             "status": "FAIL_A20_USD_DOF_METADATA",
             "ok": False,
             "inputs": {"config": {"path": str(Path(config_path).resolve())}},
+            "json_output_path": json_output_path,
             "default_prim": None,
             "articulation_root_paths": [],
             "unsupported_joints": [],
@@ -346,11 +390,9 @@ def main() -> int:
     parser.add_argument("--json-output", type=Path)
     args = parser.parse_args()
     result = collect_usd_dof_metadata(args.config)
-    output = args.json_output
-    if output is None:
-        config = yaml.safe_load(args.config.read_text(encoding="utf-8"))
-        output = Path(config["outputs"]["a20_usd_dof_metadata_json"])
-    _atomic_write_json(output, result)
+    output = args.json_output or result.get("json_output_path")
+    if output is not None:
+        _atomic_write_json(Path(output), result)
     print(json.dumps(result, indent=2, sort_keys=True))
     return 0 if result["status"] == "PASS_A20_USD_DOF_METADATA" else 1
 

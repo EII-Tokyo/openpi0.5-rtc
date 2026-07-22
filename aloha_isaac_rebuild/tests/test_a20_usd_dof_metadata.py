@@ -1,7 +1,11 @@
 from __future__ import annotations
 
 import ast
+import json
 from pathlib import Path
+import sys
+
+import pytest
 
 import aloha_isaac_rebuild.scripts.audit_a20_usd_dof_metadata as audit_module
 from aloha_isaac_rebuild.scripts.audit_a20_usd_dof_metadata import collect_joint_inventory
@@ -23,10 +27,14 @@ def test_collect_real_a17_a19_metadata_matches_exactly() -> None:
     assert result["observed"] == result["expected"]
     assert result["mismatches"] == []
     assert result["errors"] == []
-    for input_record in result["inputs"].values():
+    for input_record in (result["inputs"]["config"], result["inputs"]["mapping"]):
         assert Path(input_record["path"]).is_absolute()
         assert len(input_record["sha256"]) == 64
         int(input_record["sha256"], 16)
+    stage_input = result["inputs"]["stage"]
+    assert Path(stage_input["path"]).is_absolute()
+    assert stage_input["pre_sha256"] == stage_input["post_sha256"]
+    assert stage_input["consistent_during_audit"] is True
     assert result["physics_stepped"] is False
     assert result["actions_applied"] is False
     assert result["targets_written"] is False
@@ -178,3 +186,94 @@ def test_joint_inventory_hard_fails_unsupported_spherical_joint() -> None:
             "type": "PhysicsSphericalJoint",
         }
     ]
+
+
+@pytest.mark.parametrize(
+    "config_text",
+    [
+        None,
+        "outputs: [unterminated\n",
+        "- wrong\n- shape\n",
+        "root_prim: /aloha\n",
+        "outputs:\n  some_other_key: nowhere.json\n",
+    ],
+    ids=["missing", "malformed", "wrong-shaped", "missing-outputs", "missing-key"],
+)
+@pytest.mark.parametrize("output_mode", ["default", "explicit"])
+def test_main_config_failures_are_structured_without_traceback(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+    config_text: str | None,
+    output_mode: str,
+) -> None:
+    config_path = tmp_path / "bad.yaml"
+    if config_text is not None:
+        config_path.write_text(config_text, encoding="utf-8")
+    output_path = tmp_path / "explicit.json"
+    arguments = ["audit_a20_usd_dof_metadata.py", "--config", str(config_path)]
+    if output_mode == "explicit":
+        arguments.extend(["--json-output", str(output_path)])
+    monkeypatch.setattr(sys, "argv", arguments)
+
+    exit_code = audit_module.main()
+    captured = capsys.readouterr()
+    payload = json.loads(captured.out)
+
+    assert exit_code == 1
+    assert payload["status"] == "FAIL_A20_USD_DOF_METADATA"
+    assert payload["ok"] is False
+    assert "Traceback" not in captured.out
+    assert "Traceback" not in captured.err
+    if output_mode == "explicit":
+        assert json.loads(output_path.read_text(encoding="utf-8")) == payload
+    else:
+        assert not output_path.exists()
+
+
+def test_main_writes_fail_to_parseable_default_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    output_path = tmp_path / "default.json"
+    config_path = tmp_path / "valid-output-only.yaml"
+    config_path.write_text(
+        "outputs:\n"
+        "  a20_usd_dof_metadata_json: "
+        f"{output_path}\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(
+        sys, "argv", ["audit_a20_usd_dof_metadata.py", "--config", str(config_path)]
+    )
+
+    assert audit_module.main() == 1
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["status"] == "FAIL_A20_USD_DOF_METADATA"
+    assert json.loads(output_path.read_text(encoding="utf-8")) == payload
+
+
+def test_stage_hash_change_during_audit_is_fail_closed(monkeypatch) -> None:
+    original = audit_module._sha256_file  # noqa: SLF001 - deterministic TOCTOU seam
+    stage_hash_calls = 0
+
+    def changing_stage_hash(path: Path) -> str:
+        nonlocal stage_hash_calls
+        digest = original(path)
+        if path.name == "a19_clean_articulation_candidate.usda":
+            stage_hash_calls += 1
+            if stage_hash_calls == 2:
+                return "0" * 64 if digest != "0" * 64 else "1" * 64
+        return digest
+
+    monkeypatch.setattr(audit_module, "_sha256_file", changing_stage_hash)
+    result = collect_usd_dof_metadata(CONFIG)
+
+    assert result["status"] == "FAIL_A20_USD_DOF_METADATA"
+    assert result["ok"] is False
+    assert result["inputs"]["stage"]["pre_sha256"] != result["inputs"]["stage"]["post_sha256"]
+    assert result["errors"][-1] == {
+        "code": "input_changed_during_audit",
+        "input": "stage",
+        "pre_sha256": result["inputs"]["stage"]["pre_sha256"],
+        "post_sha256": result["inputs"]["stage"]["post_sha256"],
+    }
