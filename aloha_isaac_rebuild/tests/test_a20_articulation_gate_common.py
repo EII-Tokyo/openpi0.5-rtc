@@ -247,3 +247,124 @@ def test_validate_safety_flags_rejects_prohibited_true_flag(prohibited_flag: str
             }
         ],
     }
+
+
+def test_validate_dof_records_rejects_missing_required_field() -> None:
+    record = _record(0, "waist")
+    del record["axis"]
+
+    result = common.validate_dof_records([record])
+
+    assert result["errors"][0] == {
+        "code": "missing_field",
+        "index": 0,
+        "field": "axis",
+    }
+
+
+@pytest.mark.parametrize(("field", "value"), [("path", ""), ("name", "  ")])
+def test_validate_dof_records_rejects_empty_identity(field: str, value: str) -> None:
+    record = _record(0, "waist")
+    record[field] = value
+
+    result = common.validate_dof_records([record])
+
+    assert result["errors"][0] == {
+        "code": "invalid_field_type",
+        "index": 0,
+        "field": field,
+        "expected": "non-empty string",
+        "observed_type": "str",
+    }
+
+
+@pytest.mark.parametrize(("field", "value"), [("path", []), ("name", {})])
+def test_validate_dof_records_rejects_unhashable_identity(
+    field: str, value: object
+) -> None:
+    record = _record(0, "waist")
+    record[field] = value
+
+    result = common.validate_dof_records([record])
+
+    assert result["errors"][0] == {
+        "code": "invalid_field_type",
+        "index": 0,
+        "field": field,
+        "expected": "non-empty string",
+        "observed_type": type(value).__name__,
+    }
+
+
+@pytest.mark.parametrize("field", ["lower_limit", "upper_limit"])
+def test_validate_dof_records_rejects_bool_limit(field: str) -> None:
+    record = _record(0, "waist")
+    record[field] = True
+
+    result = common.validate_dof_records([record])
+
+    assert result["errors"][0] == {
+        "code": "invalid_field_type",
+        "index": 0,
+        "field": field,
+        "expected": "finite int or float",
+        "observed_type": "bool",
+    }
+
+
+def test_compare_dof_records_rejects_matching_malformed_records() -> None:
+    malformed = _record(0, "waist")
+    del malformed["axis"]
+
+    result = compare_dof_records([malformed], [deepcopy(malformed)])
+
+    assert result["ok"] is False
+    assert result["validation_errors"] == [
+        {
+            "side": "expected",
+            "code": "missing_field",
+            "index": 0,
+            "field": "axis",
+        },
+        {
+            "side": "observed",
+            "code": "missing_field",
+            "index": 0,
+            "field": "axis",
+        },
+    ]
+
+
+def test_validate_safety_flags_rejects_missing_flag() -> None:
+    payload = {
+        "physics_stepped": False,
+        "actions_applied": False,
+        "targets_written": False,
+    }
+
+    result = common.validate_safety_flags(payload)
+
+    assert result["errors"] == [
+        {"code": "missing_field", "field": "stage_saved"}
+    ]
+
+
+@pytest.mark.parametrize("value", [0, 1, "false", None])
+def test_validate_safety_flags_rejects_non_bool_flag(value: object) -> None:
+    payload = {
+        "physics_stepped": value,
+        "actions_applied": False,
+        "targets_written": False,
+        "stage_saved": False,
+    }
+
+    result = common.validate_safety_flags(payload)
+
+    assert result["errors"] == [
+        {
+            "code": "invalid_field_type",
+            "field": "physics_stepped",
+            "expected": "bool",
+            "observed_type": type(value).__name__,
+        }
+    ]

@@ -27,6 +27,11 @@ def compare_dof_records(
     expected: list[dict[str, Any]], observed: list[dict[str, Any]]
 ) -> dict[str, Any]:
     """Compare ordered DOF records exactly and return stable mismatches."""
+    validation_errors = [
+        {"side": side, **error}
+        for side, records in (("expected", expected), ("observed", observed))
+        for error in validate_dof_records(records)["errors"]
+    ]
     mismatches: list[dict[str, Any]] = []
     if len(expected) != len(observed):
         mismatches.append(
@@ -75,22 +80,48 @@ def compare_dof_records(
         if path not in expected_paths
     )
 
-    return {
-        "ok": not mismatches,
+    result = {
+        "ok": not mismatches and not validation_errors,
         "expected_count": len(expected),
         "observed_count": len(observed),
         "mismatches": mismatches,
     }
+    if validation_errors:
+        result["validation_errors"] = validation_errors
+    return result
 
 
 def validate_dof_records(records: list[dict[str, Any]]) -> dict[str, Any]:
     """Validate DOF identity uniqueness and finite, increasing limits."""
     errors: list[dict[str, Any]] = []
 
+    for index, record in enumerate(records):
+        errors.extend(
+            {"code": "missing_field", "index": index, "field": field}
+            for field in _DOF_FIELDS
+            if field not in record
+        )
+        errors.extend(
+            {
+                "code": "invalid_field_type",
+                "index": index,
+                "field": field,
+                "expected": "non-empty string",
+                "observed_type": type(record[field]).__name__,
+            }
+            for field in ("path", "name")
+            if field in record
+            and (
+                not isinstance(record[field], str) or not record[field].strip()
+            )
+        )
+
     for field in ("path", "name"):
-        indices_by_value: dict[Any, list[int]] = {}
+        indices_by_value: dict[str, list[int]] = {}
         for index, record in enumerate(records):
-            indices_by_value.setdefault(record.get(field), []).append(index)
+            value = record.get(field)
+            if isinstance(value, str) and value.strip():
+                indices_by_value.setdefault(value, []).append(index)
         for value, indices in indices_by_value.items():
             if len(indices) > 1:
                 errors.append(
@@ -107,7 +138,20 @@ def validate_dof_records(records: list[dict[str, Any]]) -> dict[str, Any]:
         upper = record.get("upper_limit")
         limits_are_finite = True
         for field, value in (("lower_limit", lower), ("upper_limit", upper)):
-            if not isinstance(value, int | float) or not math.isfinite(value):
+            if field not in record:
+                limits_are_finite = False
+            elif isinstance(value, bool) or not isinstance(value, int | float):
+                limits_are_finite = False
+                errors.append(
+                    {
+                        "code": "invalid_field_type",
+                        "index": index,
+                        "field": field,
+                        "expected": "finite int or float",
+                        "observed_type": type(value).__name__,
+                    }
+                )
+            elif not math.isfinite(value):
                 limits_are_finite = False
                 errors.append(
                     {
@@ -132,13 +176,25 @@ def validate_dof_records(records: list[dict[str, Any]]) -> dict[str, Any]:
 
 def validate_safety_flags(payload: dict[str, Any]) -> dict[str, Any]:
     """Reject evidence that reports any prohibited runtime or write action."""
-    errors = [
-        {
-            "code": "prohibited_safety_flag",
-            "field": field,
-            "observed": True,
-        }
-        for field in _PROHIBITED_SAFETY_FLAGS
-        if payload.get(field) is True
-    ]
+    errors: list[dict[str, Any]] = []
+    for field in _PROHIBITED_SAFETY_FLAGS:
+        if field not in payload:
+            errors.append({"code": "missing_field", "field": field})
+        elif not isinstance(payload[field], bool):
+            errors.append(
+                {
+                    "code": "invalid_field_type",
+                    "field": field,
+                    "expected": "bool",
+                    "observed_type": type(payload[field]).__name__,
+                }
+            )
+        elif payload[field]:
+            errors.append(
+                {
+                    "code": "prohibited_safety_flag",
+                    "field": field,
+                    "observed": True,
+                }
+            )
     return {"ok": not errors, "errors": errors}
