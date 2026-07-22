@@ -7,15 +7,23 @@
 
 def Xform "aloha" (
     customData = {
-        string aloha1_rebuild_stage = "A5_support_frame_components_visual"
+        string a9_layout_measurement_status = "MIXED_MEASURED_AND_MISSING"
+        string a9_layout_parameter_source = "MEASURED:user_measured_support_frame_and_base_y_edges"
+        string a9_scope = "non_camera_physical_layout_visual_checkpoint"
+        string aloha1_rebuild_stage = "A9_physical_layout_preview"
         bool base_x_extent_ready = 0
         string base_y_edges_source = "MEASURED:user_measured_base_y_edges"
         bool camera_calibration_ready = 0
+        bool camera_default_pose_preview_only = 1
+        string camera_default_pose_source = "TUNED:default_placeholder_until_measured"
         bool camera_marker_positions_are_extrinsics = 0
         string camera_markers_source = "TUNED:manual_visual_layout_only"
         bool camera_render_ready = 0
         string camera_semantic_source = "CANONICAL_ALOHA_OPENPI_NAMES"
+        bool camera_work_deferred = 1
         bool openpi_observation_ready = 0
+        bool physical_layout_collision_ready = 0
+        bool physical_layout_physics_ready = 0
         bool render_products_created = 0
         bool rl_ready = 0
         bool rlt_replay_ready = 0
@@ -26,6 +34,7 @@ def Xform "aloha" (
         string support_frame_measurement_status = "MEASURED"
         bool support_frame_physics_ready = 0
         bool training_eligible = 0
+        string trossen_table_reference_visibility = "hidden"
     }
 )
 {
@@ -344,14 +353,20 @@ def Xform "aloha" (
         {
             def Camera "cam_high" (
                 customData = {
+                    string default_pose_warning = "cam_high default pose is a placeholder, not measured extrinsics."
                     string mount_visual_note = "D405/mount visual meshes must remain separate from this sensor prim."
                     string sensor_semantic_note = "UsdGeom.Camera exists; intrinsics and extrinsics are not calibrated."
                 }
             )
             {
                 custom string aloha:calibrationStatus = "MISSING"
-                custom string aloha:extrinsicsStatus = "MISSING"
+                custom double3 aloha:defaultDirectionWorld = (0, 1, 0)
+                custom double3 aloha:defaultOpticalCenterWorld = (0, -0.36, 0.1)
+                custom bool aloha:defaultPosePreviewOnly = 1
+                custom string aloha:defaultPoseSource = "TUNED:default_placeholder_until_measured"
+                custom string aloha:extrinsicsStatus = "DEFAULT_PLACEHOLDER_NOT_MEASURED"
                 custom string aloha:intrinsicsStatus = "MISSING"
+                custom bool aloha:measuredPose = 0
                 custom bool aloha:openpiCaptureEligible = 0
                 custom string aloha:openpiObsKey = "cam_high"
                 custom bool aloha:renderEligible = 0
@@ -371,14 +386,20 @@ def Xform "aloha" (
         {
             def Camera "cam_low" (
                 customData = {
+                    string default_pose_warning = "cam_low default pose is a placeholder, not measured extrinsics."
                     string mount_visual_note = "D405/mount visual meshes must remain separate from this sensor prim."
                     string sensor_semantic_note = "UsdGeom.Camera exists; intrinsics and extrinsics are not calibrated."
                 }
             )
             {
                 custom string aloha:calibrationStatus = "MISSING"
-                custom string aloha:extrinsicsStatus = "MISSING"
+                custom double3 aloha:defaultDirectionWorld = (0, -1, 0)
+                custom double3 aloha:defaultOpticalCenterWorld = (0.03, 0.5825, 0.12)
+                custom bool aloha:defaultPosePreviewOnly = 1
+                custom string aloha:defaultPoseSource = "TUNED:default_placeholder_until_measured"
+                custom string aloha:extrinsicsStatus = "DEFAULT_PLACEHOLDER_NOT_MEASURED"
                 custom string aloha:intrinsicsStatus = "MISSING"
+                custom bool aloha:measuredPose = 0
                 custom bool aloha:openpiCaptureEligible = 0
                 custom string aloha:openpiObsKey = "cam_low"
                 custom bool aloha:renderEligible = 0
@@ -406,14 +427,20 @@ def Xform "aloha" (
         {
             def Camera "cam_left_wrist" (
                 customData = {
+                    string default_pose_warning = "cam_left_wrist default pose is a placeholder, not measured extrinsics."
                     string mount_visual_note = "D405/mount visual meshes must remain separate from this sensor prim."
                     string sensor_semantic_note = "UsdGeom.Camera exists; intrinsics and extrinsics are not calibrated."
                 }
             )
             {
                 custom string aloha:calibrationStatus = "MISSING"
-                custom string aloha:extrinsicsStatus = "MISSING"
+                custom double3 aloha:defaultDirectionWorld = (1, 0, 0)
+                custom double3 aloha:defaultOpticalCenterWorld = (-0.36, 0, 0.1)
+                custom bool aloha:defaultPosePreviewOnly = 1
+                custom string aloha:defaultPoseSource = "TUNED:default_placeholder_until_measured"
+                custom string aloha:extrinsicsStatus = "DEFAULT_PLACEHOLDER_NOT_MEASURED"
                 custom string aloha:intrinsicsStatus = "MISSING"
+                custom bool aloha:measuredPose = 0
                 custom bool aloha:openpiCaptureEligible = 0
                 custom string aloha:openpiObsKey = "cam_left_wrist"
                 custom bool aloha:renderEligible = 0
@@ -433,14 +460,20 @@ def Xform "aloha" (
         {
             def Camera "cam_right_wrist" (
                 customData = {
+                    string default_pose_warning = "cam_right_wrist default pose is a placeholder, not measured extrinsics."
                     string mount_visual_note = "D405/mount visual meshes must remain separate from this sensor prim."
                     string sensor_semantic_note = "UsdGeom.Camera exists; intrinsics and extrinsics are not calibrated."
                 }
             )
             {
                 custom string aloha:calibrationStatus = "MISSING"
-                custom string aloha:extrinsicsStatus = "MISSING"
+                custom double3 aloha:defaultDirectionWorld = (-1, 0, 0)
+                custom double3 aloha:defaultOpticalCenterWorld = (0.36, 0, 0.1)
+                custom bool aloha:defaultPosePreviewOnly = 1
+                custom string aloha:defaultPoseSource = "TUNED:default_placeholder_until_measured"
+                custom string aloha:extrinsicsStatus = "DEFAULT_PLACEHOLDER_NOT_MEASURED"
                 custom string aloha:intrinsicsStatus = "MISSING"
+                custom bool aloha:measuredPose = 0
                 custom bool aloha:openpiCaptureEligible = 0
                 custom string aloha:openpiObsKey = "cam_right_wrist"
                 custom bool aloha:renderEligible = 0
@@ -742,6 +775,528 @@ def Xform "aloha" (
                 }
             }
         }
+
+        def Scope "camera_default_pose_preview"
+        {
+            custom bool aloha:measuredPose = 0
+            custom bool aloha:renderEligible = 0
+            custom string aloha:sourceKind = "default_placeholder_until_measured"
+            custom string aloha:sourceType = "TUNED"
+            custom bool aloha:trainingEligible = 0
+            custom bool aloha:visualPreviewOnly = 1
+
+            def Cube "cam_high_default_optical_center" (
+                customData = {
+                    string warning = "Default camera pose preview only; replace with measured extrinsics before rendering/training."
+                }
+            )
+            {
+                custom string aloha:calibrationStatus = "DEFAULT_PLACEHOLDER_NOT_MEASURED"
+                custom string aloha:cameraName = "cam_high"
+                custom bool aloha:collisionEligible = 0
+                custom string aloha:extrinsicsStatus = "DEFAULT_PLACEHOLDER_NOT_MEASURED"
+                custom string aloha:linkedSensorPrim = "/aloha/cam_high_link/cam_high_color_frame/cam_high"
+                custom bool aloha:measuredPose = 0
+                custom bool aloha:openpiCaptureEligible = 0
+                custom bool aloha:physicsEligible = 0
+                custom bool aloha:renderEligible = 0
+                custom bool aloha:rosBridgeEligible = 0
+                custom string aloha:sourceKind = "default_placeholder_until_measured"
+                custom string aloha:sourceType = "TUNED"
+                custom string aloha:stageRole = "A7_default_optical_center_marker"
+                custom bool aloha:trainingEligible = 0
+                custom bool aloha:visualPreviewOnly = 1
+                color3f[] primvars:displayColor = [(0.15, 0.35, 1)]
+                double size = 1
+                float3 xformOp:scale = (0.035, 0.035, 0.035)
+                double3 xformOp:translate = (0, -0.36, 0.1)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+
+                def Cube "default_direction_hint" (
+                    customData = {
+                        string warning = "Default camera pose preview only; replace with measured extrinsics before rendering/training."
+                    }
+                )
+                {
+                    custom string aloha:calibrationStatus = "DEFAULT_PLACEHOLDER_NOT_MEASURED"
+                    custom string aloha:cameraName = "cam_high"
+                    custom bool aloha:collisionEligible = 0
+                    custom double3 aloha:defaultDirectionWorld = (0, 1, 0)
+                    custom string aloha:extrinsicsStatus = "DEFAULT_PLACEHOLDER_NOT_MEASURED"
+                    custom string aloha:linkedSensorPrim = "/aloha/cam_high_link/cam_high_color_frame/cam_high"
+                    custom bool aloha:measuredPose = 0
+                    custom bool aloha:openpiCaptureEligible = 0
+                    custom bool aloha:physicsEligible = 0
+                    custom bool aloha:renderEligible = 0
+                    custom bool aloha:rosBridgeEligible = 0
+                    custom string aloha:sourceKind = "default_placeholder_until_measured"
+                    custom string aloha:sourceType = "TUNED"
+                    custom string aloha:stageRole = "A7_default_direction_hint"
+                    custom bool aloha:trainingEligible = 0
+                    custom bool aloha:visualPreviewOnly = 1
+                    color3f[] primvars:displayColor = [(0.15, 0.35, 1)]
+                    double size = 1
+                    float3 xformOp:scale = (0.01, 0.14, 0.01)
+                    double3 xformOp:translate = (0, -0.29, 0.1)
+                    uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+                }
+            }
+
+            def Cube "cam_low_default_optical_center" (
+                customData = {
+                    string warning = "Default camera pose preview only; replace with measured extrinsics before rendering/training."
+                }
+            )
+            {
+                custom string aloha:calibrationStatus = "DEFAULT_PLACEHOLDER_NOT_MEASURED"
+                custom string aloha:cameraName = "cam_low"
+                custom bool aloha:collisionEligible = 0
+                custom string aloha:extrinsicsStatus = "DEFAULT_PLACEHOLDER_NOT_MEASURED"
+                custom string aloha:linkedSensorPrim = "/aloha/cam_low_link/cam_low_color_frame/cam_low"
+                custom bool aloha:measuredPose = 0
+                custom bool aloha:openpiCaptureEligible = 0
+                custom bool aloha:physicsEligible = 0
+                custom bool aloha:renderEligible = 0
+                custom bool aloha:rosBridgeEligible = 0
+                custom string aloha:sourceKind = "default_placeholder_until_measured"
+                custom string aloha:sourceType = "TUNED"
+                custom string aloha:stageRole = "A7_default_optical_center_marker"
+                custom bool aloha:trainingEligible = 0
+                custom bool aloha:visualPreviewOnly = 1
+                color3f[] primvars:displayColor = [(0, 0.8, 0.25)]
+                double size = 1
+                float3 xformOp:scale = (0.035, 0.035, 0.035)
+                double3 xformOp:translate = (0.03, 0.5825, 0.12)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+
+                def Cube "default_direction_hint" (
+                    customData = {
+                        string warning = "Default camera pose preview only; replace with measured extrinsics before rendering/training."
+                    }
+                )
+                {
+                    custom string aloha:calibrationStatus = "DEFAULT_PLACEHOLDER_NOT_MEASURED"
+                    custom string aloha:cameraName = "cam_low"
+                    custom bool aloha:collisionEligible = 0
+                    custom double3 aloha:defaultDirectionWorld = (0, -1, 0)
+                    custom string aloha:extrinsicsStatus = "DEFAULT_PLACEHOLDER_NOT_MEASURED"
+                    custom string aloha:linkedSensorPrim = "/aloha/cam_low_link/cam_low_color_frame/cam_low"
+                    custom bool aloha:measuredPose = 0
+                    custom bool aloha:openpiCaptureEligible = 0
+                    custom bool aloha:physicsEligible = 0
+                    custom bool aloha:renderEligible = 0
+                    custom bool aloha:rosBridgeEligible = 0
+                    custom string aloha:sourceKind = "default_placeholder_until_measured"
+                    custom string aloha:sourceType = "TUNED"
+                    custom string aloha:stageRole = "A7_default_direction_hint"
+                    custom bool aloha:trainingEligible = 0
+                    custom bool aloha:visualPreviewOnly = 1
+                    color3f[] primvars:displayColor = [(0, 0.8, 0.25)]
+                    double size = 1
+                    float3 xformOp:scale = (0.01, 0.14, 0.01)
+                    double3 xformOp:translate = (0.03, 0.5125, 0.12)
+                    uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+                }
+            }
+
+            def Cube "cam_left_wrist_default_optical_center" (
+                customData = {
+                    string warning = "Default camera pose preview only; replace with measured extrinsics before rendering/training."
+                }
+            )
+            {
+                custom string aloha:calibrationStatus = "DEFAULT_PLACEHOLDER_NOT_MEASURED"
+                custom string aloha:cameraName = "cam_left_wrist"
+                custom bool aloha:collisionEligible = 0
+                custom string aloha:extrinsicsStatus = "DEFAULT_PLACEHOLDER_NOT_MEASURED"
+                custom string aloha:linkedSensorPrim = "/aloha/left_camera_link/cam_left_wrist_color_frame/cam_left_wrist"
+                custom bool aloha:measuredPose = 0
+                custom bool aloha:openpiCaptureEligible = 0
+                custom bool aloha:physicsEligible = 0
+                custom bool aloha:renderEligible = 0
+                custom bool aloha:rosBridgeEligible = 0
+                custom string aloha:sourceKind = "default_placeholder_until_measured"
+                custom string aloha:sourceType = "TUNED"
+                custom string aloha:stageRole = "A7_default_optical_center_marker"
+                custom bool aloha:trainingEligible = 0
+                custom bool aloha:visualPreviewOnly = 1
+                color3f[] primvars:displayColor = [(1, 0.55, 0.05)]
+                double size = 1
+                float3 xformOp:scale = (0.035, 0.035, 0.035)
+                double3 xformOp:translate = (-0.36, 0, 0.1)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+
+                def Cube "default_direction_hint" (
+                    customData = {
+                        string warning = "Default camera pose preview only; replace with measured extrinsics before rendering/training."
+                    }
+                )
+                {
+                    custom string aloha:calibrationStatus = "DEFAULT_PLACEHOLDER_NOT_MEASURED"
+                    custom string aloha:cameraName = "cam_left_wrist"
+                    custom bool aloha:collisionEligible = 0
+                    custom double3 aloha:defaultDirectionWorld = (1, 0, 0)
+                    custom string aloha:extrinsicsStatus = "DEFAULT_PLACEHOLDER_NOT_MEASURED"
+                    custom string aloha:linkedSensorPrim = "/aloha/left_camera_link/cam_left_wrist_color_frame/cam_left_wrist"
+                    custom bool aloha:measuredPose = 0
+                    custom bool aloha:openpiCaptureEligible = 0
+                    custom bool aloha:physicsEligible = 0
+                    custom bool aloha:renderEligible = 0
+                    custom bool aloha:rosBridgeEligible = 0
+                    custom string aloha:sourceKind = "default_placeholder_until_measured"
+                    custom string aloha:sourceType = "TUNED"
+                    custom string aloha:stageRole = "A7_default_direction_hint"
+                    custom bool aloha:trainingEligible = 0
+                    custom bool aloha:visualPreviewOnly = 1
+                    color3f[] primvars:displayColor = [(1, 0.55, 0.05)]
+                    double size = 1
+                    float3 xformOp:scale = (0.14, 0.01, 0.01)
+                    double3 xformOp:translate = (-0.29, 0, 0.1)
+                    uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+                }
+            }
+
+            def Cube "cam_right_wrist_default_optical_center" (
+                customData = {
+                    string warning = "Default camera pose preview only; replace with measured extrinsics before rendering/training."
+                }
+            )
+            {
+                custom string aloha:calibrationStatus = "DEFAULT_PLACEHOLDER_NOT_MEASURED"
+                custom string aloha:cameraName = "cam_right_wrist"
+                custom bool aloha:collisionEligible = 0
+                custom string aloha:extrinsicsStatus = "DEFAULT_PLACEHOLDER_NOT_MEASURED"
+                custom string aloha:linkedSensorPrim = "/aloha/right_camera_link/cam_right_wrist_color_frame/cam_right_wrist"
+                custom bool aloha:measuredPose = 0
+                custom bool aloha:openpiCaptureEligible = 0
+                custom bool aloha:physicsEligible = 0
+                custom bool aloha:renderEligible = 0
+                custom bool aloha:rosBridgeEligible = 0
+                custom string aloha:sourceKind = "default_placeholder_until_measured"
+                custom string aloha:sourceType = "TUNED"
+                custom string aloha:stageRole = "A7_default_optical_center_marker"
+                custom bool aloha:trainingEligible = 0
+                custom bool aloha:visualPreviewOnly = 1
+                color3f[] primvars:displayColor = [(0.8, 0.15, 1)]
+                double size = 1
+                float3 xformOp:scale = (0.035, 0.035, 0.035)
+                double3 xformOp:translate = (0.36, 0, 0.1)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+
+                def Cube "default_direction_hint" (
+                    customData = {
+                        string warning = "Default camera pose preview only; replace with measured extrinsics before rendering/training."
+                    }
+                )
+                {
+                    custom string aloha:calibrationStatus = "DEFAULT_PLACEHOLDER_NOT_MEASURED"
+                    custom string aloha:cameraName = "cam_right_wrist"
+                    custom bool aloha:collisionEligible = 0
+                    custom double3 aloha:defaultDirectionWorld = (-1, 0, 0)
+                    custom string aloha:extrinsicsStatus = "DEFAULT_PLACEHOLDER_NOT_MEASURED"
+                    custom string aloha:linkedSensorPrim = "/aloha/right_camera_link/cam_right_wrist_color_frame/cam_right_wrist"
+                    custom bool aloha:measuredPose = 0
+                    custom bool aloha:openpiCaptureEligible = 0
+                    custom bool aloha:physicsEligible = 0
+                    custom bool aloha:renderEligible = 0
+                    custom bool aloha:rosBridgeEligible = 0
+                    custom string aloha:sourceKind = "default_placeholder_until_measured"
+                    custom string aloha:sourceType = "TUNED"
+                    custom string aloha:stageRole = "A7_default_direction_hint"
+                    custom bool aloha:trainingEligible = 0
+                    custom bool aloha:visualPreviewOnly = 1
+                    color3f[] primvars:displayColor = [(0.8, 0.15, 1)]
+                    double size = 1
+                    float3 xformOp:scale = (0.14, 0.01, 0.01)
+                    double3 xformOp:translate = (0.29, 0, 0.1)
+                    uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+                }
+            }
+        }
+    }
+
+    def Xform "physical_layout"
+    {
+        custom bool aloha:cameraWorkDeferred = 1
+        custom bool aloha:collisionEligible = 0
+        custom string aloha:layoutParameterSource = "MEASURED:user_measured_support_frame_and_base_y_edges"
+        custom string aloha:measurementStatus = "MIXED_MEASURED_AND_MISSING"
+        custom bool aloha:physicsEligible = 0
+        custom bool aloha:renderEligible = 0
+        custom string aloha:stageRole = "A9_non_camera_physical_layout_checkpoint"
+        custom bool aloha:trainingEligible = 0
+        custom bool aloha:visualOnly = 1
+
+        def Scope "visuals"
+        {
+            def Scope "table_reference_outline"
+            {
+                def Cube "x_min_edge" (
+                    customData = {
+                        string warning = "A9 visual-only physical-layout reference; not physics, collision, replay, or training geometry."
+                    }
+                )
+                {
+                    custom bool aloha:collisionEligible = 0
+                    custom bool aloha:mainFrameMeasurement = 0
+                    custom bool aloha:physicsEligible = 0
+                    custom bool aloha:referenceOnly = 1
+                    custom bool aloha:renderEligible = 0
+                    custom string aloha:sourceKind = "trossen_stationary_ai_reference"
+                    custom string aloha:sourceType = "MANUFACTURER"
+                    custom string aloha:stageRole = "A9_table_reference_outline"
+                    custom bool aloha:supportFrameMeasurement = 0
+                    custom bool aloha:trainingEligible = 0
+                    custom bool aloha:visualOnly = 1
+                    color3f[] primvars:displayColor = [(0.38, 0.38, 0.34)]
+                    float[] primvars:displayOpacity = [0.18]
+                    double size = 1
+                    token visibility = "invisible"
+                    float3 xformOp:scale = (0.012, 0.749, 0.012)
+                    double3 xformOp:translate = (-0.6036, 0, 0.024)
+                    uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+                }
+
+                def Cube "x_max_edge" (
+                    customData = {
+                        string warning = "A9 visual-only physical-layout reference; not physics, collision, replay, or training geometry."
+                    }
+                )
+                {
+                    custom bool aloha:collisionEligible = 0
+                    custom bool aloha:mainFrameMeasurement = 0
+                    custom bool aloha:physicsEligible = 0
+                    custom bool aloha:referenceOnly = 1
+                    custom bool aloha:renderEligible = 0
+                    custom string aloha:sourceKind = "trossen_stationary_ai_reference"
+                    custom string aloha:sourceType = "MANUFACTURER"
+                    custom string aloha:stageRole = "A9_table_reference_outline"
+                    custom bool aloha:supportFrameMeasurement = 0
+                    custom bool aloha:trainingEligible = 0
+                    custom bool aloha:visualOnly = 1
+                    color3f[] primvars:displayColor = [(0.38, 0.38, 0.34)]
+                    float[] primvars:displayOpacity = [0.18]
+                    double size = 1
+                    token visibility = "invisible"
+                    float3 xformOp:scale = (0.012, 0.749, 0.012)
+                    double3 xformOp:translate = (0.6036, 0, 0.024)
+                    uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+                }
+
+                def Cube "y_min_edge" (
+                    customData = {
+                        string warning = "A9 visual-only physical-layout reference; not physics, collision, replay, or training geometry."
+                    }
+                )
+                {
+                    custom bool aloha:collisionEligible = 0
+                    custom bool aloha:mainFrameMeasurement = 0
+                    custom bool aloha:physicsEligible = 0
+                    custom bool aloha:referenceOnly = 1
+                    custom bool aloha:renderEligible = 0
+                    custom string aloha:sourceKind = "trossen_stationary_ai_reference"
+                    custom string aloha:sourceType = "MANUFACTURER"
+                    custom string aloha:stageRole = "A9_table_reference_outline"
+                    custom bool aloha:supportFrameMeasurement = 0
+                    custom bool aloha:trainingEligible = 0
+                    custom bool aloha:visualOnly = 1
+                    color3f[] primvars:displayColor = [(0.38, 0.38, 0.34)]
+                    float[] primvars:displayOpacity = [0.18]
+                    double size = 1
+                    token visibility = "invisible"
+                    float3 xformOp:scale = (1.2192, 0.012, 0.012)
+                    double3 xformOp:translate = (0, -0.3685, 0.024)
+                    uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+                }
+
+                def Cube "y_max_edge" (
+                    customData = {
+                        string warning = "A9 visual-only physical-layout reference; not physics, collision, replay, or training geometry."
+                    }
+                )
+                {
+                    custom bool aloha:collisionEligible = 0
+                    custom bool aloha:mainFrameMeasurement = 0
+                    custom bool aloha:physicsEligible = 0
+                    custom bool aloha:referenceOnly = 1
+                    custom bool aloha:renderEligible = 0
+                    custom string aloha:sourceKind = "trossen_stationary_ai_reference"
+                    custom string aloha:sourceType = "MANUFACTURER"
+                    custom string aloha:stageRole = "A9_table_reference_outline"
+                    custom bool aloha:supportFrameMeasurement = 0
+                    custom bool aloha:trainingEligible = 0
+                    custom bool aloha:visualOnly = 1
+                    color3f[] primvars:displayColor = [(0.38, 0.38, 0.34)]
+                    float[] primvars:displayOpacity = [0.18]
+                    double size = 1
+                    token visibility = "invisible"
+                    float3 xformOp:scale = (1.2192, 0.012, 0.012)
+                    double3 xformOp:translate = (0, 0.3685, 0.024)
+                    uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+                }
+            }
+
+            def Scope "world_frame_reference"
+            {
+                def Cube "origin" (
+                    customData = {
+                        string warning = "A9 visual-only physical-layout reference; not physics, collision, replay, or training geometry."
+                    }
+                )
+                {
+                    custom bool aloha:collisionEligible = 0
+                    custom bool aloha:physicsEligible = 0
+                    custom bool aloha:renderEligible = 0
+                    custom string aloha:sourceKind = "visual_axis_reference"
+                    custom string aloha:sourceType = "TUNED"
+                    custom string aloha:stageRole = "A9_world_frame_origin"
+                    custom bool aloha:trainingEligible = 0
+                    custom bool aloha:visualOnly = 1
+                    color3f[] primvars:displayColor = [(0.95, 0.95, 0.95)]
+                    double size = 1
+                    float3 xformOp:scale = (0.0216, 0.0216, 0.0216)
+                    double3 xformOp:translate = (0, 0, 0.035)
+                    uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+                }
+
+                def Cube "positive_x_axis" (
+                    customData = {
+                        string warning = "A9 visual-only physical-layout reference; not physics, collision, replay, or training geometry."
+                    }
+                )
+                {
+                    custom string aloha:axisMeaning = "support_frame_outer_length_direction"
+                    custom bool aloha:collisionEligible = 0
+                    custom bool aloha:physicsEligible = 0
+                    custom bool aloha:renderEligible = 0
+                    custom string aloha:sourceKind = "visual_axis_reference"
+                    custom string aloha:sourceType = "TUNED"
+                    custom string aloha:stageRole = "A9_world_frame_axis"
+                    custom bool aloha:trainingEligible = 0
+                    custom bool aloha:visualOnly = 1
+                    color3f[] primvars:displayColor = [(0.9, 0.1, 0.1)]
+                    double size = 1
+                    float3 xformOp:scale = (0.25, 0.012, 0.012)
+                    double3 xformOp:translate = (0.125, 0, 0.035)
+                    uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+                }
+
+                def Cube "positive_y_axis" (
+                    customData = {
+                        string warning = "A9 visual-only physical-layout reference; not physics, collision, replay, or training geometry."
+                    }
+                )
+                {
+                    custom string aloha:axisMeaning = "toward_cam_low_extension"
+                    custom bool aloha:collisionEligible = 0
+                    custom bool aloha:physicsEligible = 0
+                    custom bool aloha:renderEligible = 0
+                    custom string aloha:sourceKind = "visual_axis_reference"
+                    custom string aloha:sourceType = "TUNED"
+                    custom string aloha:stageRole = "A9_world_frame_axis"
+                    custom bool aloha:trainingEligible = 0
+                    custom bool aloha:visualOnly = 1
+                    color3f[] primvars:displayColor = [(0.05, 0.7, 0.18)]
+                    double size = 1
+                    float3 xformOp:scale = (0.012, 0.25, 0.012)
+                    double3 xformOp:translate = (0, 0.125, 0.035)
+                    uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+                }
+
+                def Cube "positive_z_axis" (
+                    customData = {
+                        string warning = "A9 visual-only physical-layout reference; not physics, collision, replay, or training geometry."
+                    }
+                )
+                {
+                    custom string aloha:axisMeaning = "up"
+                    custom bool aloha:collisionEligible = 0
+                    custom bool aloha:physicsEligible = 0
+                    custom bool aloha:renderEligible = 0
+                    custom string aloha:sourceKind = "visual_axis_reference"
+                    custom string aloha:sourceType = "TUNED"
+                    custom string aloha:stageRole = "A9_world_frame_axis"
+                    custom bool aloha:trainingEligible = 0
+                    custom bool aloha:visualOnly = 1
+                    color3f[] primvars:displayColor = [(0.1, 0.35, 0.95)]
+                    double size = 1
+                    float3 xformOp:scale = (0.012, 0.012, 0.25)
+                    double3 xformOp:translate = (0, 0, 0.16)
+                    uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+                }
+            }
+
+            def Scope "base_y_reference"
+            {
+                def Cube "near_cam_low_y_edge" (
+                    customData = {
+                        string warning = "A9 visual-only physical-layout reference; not physics, collision, replay, or training geometry."
+                    }
+                )
+                {
+                    custom bool aloha:collisionEligible = 0
+                    custom string aloha:description = "User-measured base edge nearer cam_low side; Y reference only."
+                    custom bool aloha:fullBaseFootprint = 0
+                    custom bool aloha:physicsEligible = 0
+                    custom bool aloha:renderEligible = 0
+                    custom string aloha:sourceKind = "user_measured_base_y_edges"
+                    custom string aloha:sourceType = "MEASURED"
+                    custom string aloha:stageRole = "A9_base_y_reference_guide"
+                    custom bool aloha:trainingEligible = 0
+                    custom bool aloha:visualOnly = 1
+                    custom bool aloha:xExtentMeasured = 0
+                    color3f[] primvars:displayColor = [(1, 0.58, 0.05)]
+                    double size = 1
+                    float3 xformOp:scale = (1.22, 0.012, 0.012)
+                    double3 xformOp:translate = (0, 0.1325, 0.032)
+                    uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+                }
+
+                def Cube "near_cam_high_y_edge" (
+                    customData = {
+                        string warning = "A9 visual-only physical-layout reference; not physics, collision, replay, or training geometry."
+                    }
+                )
+                {
+                    custom bool aloha:collisionEligible = 0
+                    custom string aloha:description = "User-measured base edge nearer cam_high side; Y reference only."
+                    custom bool aloha:fullBaseFootprint = 0
+                    custom bool aloha:physicsEligible = 0
+                    custom bool aloha:renderEligible = 0
+                    custom string aloha:sourceKind = "user_measured_base_y_edges"
+                    custom string aloha:sourceType = "MEASURED"
+                    custom string aloha:stageRole = "A9_base_y_reference_guide"
+                    custom bool aloha:trainingEligible = 0
+                    custom bool aloha:visualOnly = 1
+                    custom bool aloha:xExtentMeasured = 0
+                    color3f[] primvars:displayColor = [(1, 0.58, 0.05)]
+                    double size = 1
+                    float3 xformOp:scale = (1.22, 0.012, 0.012)
+                    double3 xformOp:translate = (0, -0.0775, 0.032)
+                    uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+                }
+            }
+        }
+
+        def Scope "future_measurements"
+        {
+            custom bool aloha:allFutureMeasurementValuesMissing = 1
+            custom bool aloha:visualOnly = 1
+
+            def Scope "pipe_pose"
+            {
+                custom bool aloha:readyForScenePlacement = 0
+                custom string aloha:status = "MISSING"
+                custom bool aloha:visualOnly = 1
+            }
+
+            def Scope "bottle_initial_pose"
+            {
+                custom bool aloha:readyForScenePlacement = 0
+                custom string aloha:status = "MISSING"
+                custom bool aloha:visualOnly = 1
+            }
+        }
     }
 }
 
@@ -760,4 +1315,3 @@ def Scope "visuals"
 def Scope "colliders"
 {
 }
-

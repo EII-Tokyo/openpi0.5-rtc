@@ -1,7 +1,7 @@
 schema_version: 1
-stage: A5_support_frame_components_visual
+stage: A5_support_frame_y_extension_layout_visual
 purpose: >
-  Visual-only support-frame component layer for the clean ALOHA1 Isaac rebuild.
+  Visual-only support-frame Y-extension layout layer for the clean ALOHA1 Isaac rebuild.
   This layer transcribes the user's iter_003 FreeCAD/sketch intent into simple
   USD Cube primitives so the support frame can be visually inspected before any
   physics, collision, CAD, or camera extrinsic calibration is attempted.
@@ -18,23 +18,31 @@ global_policy:
   training_ready: false
   notes:
     - The outer footprint 1220 mm x 625 mm is user-measured.
-    - The cam_low-side extension is a full-width 1220 mm rectangular frame extending about 260 mm outward.
+    - The support-frame steel tube is a user-measured 20 mm x 20 mm square tube.
+    - The cam_low-side extension has a 260 mm inner gap between opposing square tubes; from the original cam_low-side outer edge to the extension outermost edge this is 280 mm.
+    - A 100 mm vertical square-tube support is mounted on the outer cam_low-side tube before the cam_low base is mounted.
     - The cam_low visual mount point is on the extension outer rail, 640 mm from the left edge and 580 mm from the right edge.
-    - The top rail, extension rail, and 260 mm support pipes are a first ALOHA1 visual-layout proxy.
+    - The horizontal original rail, extension rail, and 260 mm cross members extend in the original support-frame XY plane along the +Y direction.
+    - Only the 100 mm cam_low mount post rises along +Z.
+    - The two end 260 mm cross members are centered at X=-0.600 m and X=+0.600 m so their 20 mm square-tube outer faces align with the 1220 mm rail outer edges at X=-0.610 m and X=+0.610 m.
     - These components are visual proxies only; do not use them as collision geometry or final CAD.
-    - The Z height values and camera mount positions are not accepted as final measurements until the user confirms them.
+    - On 2026-07-22, the user confirmed the current visual layout positions are correct enough to proceed to the next measurement stage.
+    - The cam_low marker position remains a visual-layout placeholder only; it is not a camera optical-center extrinsic.
+  user_visual_layout_confirmed: true
+  user_visual_layout_confirmation_date: 2026-07-22
+  measurement_status: MEASURED
 
 source_json: scene_reconstruction/cad/aloha_incremental/iterations/iter_003_lower_camera_top_position/bbox_and_dimensions.json
 
 components:
-  top_steel_rail_proxy:
-    prim: /aloha/support_frame/visuals/components/top_steel_rail_proxy
-    center_m: [0.0, 0.3125, 0.610]
+  original_cam_low_side_rail:
+    prim: /aloha/support_frame/visuals/y_extension_layout/original_cam_low_side_rail
+    center_m: [0.0, 0.3025, 0.010]
     size_m: [1.220, 0.020, 0.020]
     axis: x
-    source_type: TUNED
-    source_kind: aloha1_visual_layout_v0
-    status: APPLIED_VISUAL_ONLY
+    source_type: MEASURED
+    source_kind: user_measured_20mm_square_tube
+    status: VERIFIED_VISUAL_LAYOUT_ONLY
     allowed_use:
       - viewport_stage_tree_inspection
       - visual_layout_review
@@ -45,57 +53,78 @@ components:
       - final_cad
       - training
 
-  extension_outer_camera_rail_proxy:
-    prim: /aloha/support_frame/visuals/components/extension_outer_camera_rail_proxy
-    center_m: [0.0, 0.5725, 0.610]
+  extension_outer_camera_rail:
+    prim: /aloha/support_frame/visuals/y_extension_layout/extension_outer_camera_rail
+    center_m: [0.0, 0.5825, 0.010]
     size_m: [1.220, 0.020, 0.020]
     axis: x
-    source_type: TUNED
-    source_kind: aloha1_visual_layout_v0
-    status: APPLIED_VISUAL_ONLY
+    source_type: MEASURED
+    source_kind: user_measured_20mm_square_tube_and_260mm_inner_gap
+    status: VERIFIED_VISUAL_LAYOUT_ONLY
     notes:
       - cam_low is mounted on this outer extension rail.
-      - cam_low schematic mount point is [0.030, 0.5725, 0.610] m before real extrinsics are measured.
+      - The outer rail is horizontal in the original support-frame plane; its 20 mm square-tube center is Z=0.010 m.
+      - The 100 mm cam_low mount post is centered at [0.030, 0.5825, 0.070] m and reaches Z=0.120 m before real extrinsics are measured.
     forbidden_use: [physics, collision, camera_extrinsics, final_cad, training]
 
-  support_pipe_260mm_1:
-    prim: /aloha/support_frame/visuals/components/support_pipe_260mm_1
-    center_m: [-0.604959, 0.4425, 0.610]
+  y_extension_cross_member_260mm_1:
+    prim: /aloha/support_frame/visuals/y_extension_layout/y_extension_cross_member_260mm_1
+    center_m: [-0.600, 0.4425, 0.010]
     size_m: [0.020, 0.260, 0.020]
     axis: y
-    source_type: TUNED
-    source_kind: aloha1_visual_layout_v0
-    status: APPLIED_VISUAL_ONLY
+    source_type: DERIVED
+    source_kind: derived_flush_with_1220mm_outer_rail_and_20mm_square_tube
+    status: VERIFIED_VISUAL_LAYOUT_ONLY
+    notes:
+      - X center is derived so the 20 mm square-tube outer face aligns with the 1220 mm rail outer edge at X=-0.610 m.
+      - The 260 mm Y length and 20 mm tube width come from user-measured support-frame dimensions.
     forbidden_use: [physics, collision, camera_extrinsics, final_cad, training]
 
-  support_pipe_260mm_2:
-    prim: /aloha/support_frame/visuals/components/support_pipe_260mm_2
-    center_m: [-0.433554, 0.4425, 0.610]
+  y_extension_cross_member_260mm_2:
+    prim: /aloha/support_frame/visuals/y_extension_layout/y_extension_cross_member_260mm_2
+    center_m: [-0.433554, 0.4425, 0.010]
     size_m: [0.020, 0.260, 0.020]
     axis: y
-    source_type: TUNED
-    source_kind: aloha1_visual_layout_v0
-    status: APPLIED_VISUAL_ONLY
+    source_type: MEASURED
+    source_kind: user_measured_20mm_square_tube_and_260mm_inner_gap
+    status: VERIFIED_VISUAL_LAYOUT_ONLY
     forbidden_use: [physics, collision, camera_extrinsics, final_cad, training]
 
-  support_pipe_260mm_3:
-    prim: /aloha/support_frame/visuals/components/support_pipe_260mm_3
-    center_m: [0.433554, 0.4425, 0.610]
+  y_extension_cross_member_260mm_3:
+    prim: /aloha/support_frame/visuals/y_extension_layout/y_extension_cross_member_260mm_3
+    center_m: [0.433554, 0.4425, 0.010]
     size_m: [0.020, 0.260, 0.020]
     axis: y
-    source_type: TUNED
-    source_kind: aloha1_visual_layout_v0
-    status: APPLIED_VISUAL_ONLY
+    source_type: MEASURED
+    source_kind: user_measured_20mm_square_tube_and_260mm_inner_gap
+    status: VERIFIED_VISUAL_LAYOUT_ONLY
     forbidden_use: [physics, collision, camera_extrinsics, final_cad, training]
 
-  support_pipe_260mm_4:
-    prim: /aloha/support_frame/visuals/components/support_pipe_260mm_4
-    center_m: [0.604959, 0.4425, 0.610]
+  y_extension_cross_member_260mm_4:
+    prim: /aloha/support_frame/visuals/y_extension_layout/y_extension_cross_member_260mm_4
+    center_m: [0.600, 0.4425, 0.010]
     size_m: [0.020, 0.260, 0.020]
     axis: y
-    source_type: TUNED
-    source_kind: aloha1_visual_layout_v0
-    status: APPLIED_VISUAL_ONLY
+    source_type: DERIVED
+    source_kind: derived_flush_with_1220mm_outer_rail_and_20mm_square_tube
+    status: VERIFIED_VISUAL_LAYOUT_ONLY
+    notes:
+      - X center is derived so the 20 mm square-tube outer face aligns with the 1220 mm rail outer edge at X=+0.610 m.
+      - The 260 mm Y length and 20 mm tube width come from user-measured support-frame dimensions.
+    forbidden_use: [physics, collision, camera_extrinsics, final_cad, training]
+
+  cam_low_vertical_mount_post_100mm:
+    prim: /aloha/support_frame/visuals/y_extension_layout/cam_low_vertical_mount_post_100mm
+    center_m: [0.030, 0.5825, 0.070]
+    size_m: [0.020, 0.020, 0.100]
+    axis: z
+    source_type: MEASURED
+    source_kind: user_measured_20mm_square_tube_and_100mm_vertical_support
+    status: VERIFIED_VISUAL_LAYOUT_ONLY
+    notes:
+      - This is the 100 mm vertical support on top of the cam_low-side outer tube.
+      - It starts from the horizontal 20 mm outer rail and reaches Z=0.120 m.
+      - It marks the low camera base support only; it is not a measured optical extrinsic.
     forbidden_use: [physics, collision, camera_extrinsics, final_cad, training]
 
 measurement_requests:
@@ -103,13 +132,13 @@ measurement_requests:
     AB: support frame outer length, left outer edge to right outer edge
     BC: support frame outer width, front outer edge to back outer edge
     EF: cam_low-side extension attachment width along X
-    FG: cam_low-side extension depth along +Y, currently about 260 mm
+    FG: cam_low-side outer-to-outer extension depth along +Y, currently 280 mm because the 260 mm value is the inner gap and the outer tube is 20 mm wide
     HG: cam_low-side extension outer width along X
     IJ: cam_low center to cam_high center distance along Y
     KL: cam_low center offset from left outer edge along X, currently 640 mm
     cam_low_right_offset: cam_low center offset from right outer edge along X, currently 580 mm
-    PQ: steel profile width or tube outside width
-    RS: ALOHA base Y-depth between measured front/back outer edges, currently 210 mm
+    PQ: steel square tube outside width, currently 20 mm
+    RS: ALOHA base Y-depth between the two measured base outer-edge guide lines, currently 210 mm
     base_edge_near_cam_low_y: base outer edge nearer cam_low, 180 mm inward from original cam_low-side frame edge
     base_edge_near_cam_high_y: base outer edge nearer cam_high, 235 mm inward from original cam_high-side frame edge
   front_view:
@@ -117,26 +146,26 @@ measurement_requests:
     OP: left support-pipe vertical offset or bracket height if present
     QR: right support-pipe vertical offset or bracket height if present
   side_view:
-    ST: 260 mm support pipe actual length along Y
-    UV: top rail center offset from back outer frame edge
-    WX: camera mount height below or above top rail
+    ST: original support-frame outer width
+    UV: 260 mm inner gap between the original cam_low-side tube and the extension outer tube
+    WCL: 100 mm vertical cam_low support height above the outer tube
 
 base_y_alignment_guides:
   base_edge_near_cam_low_y_guide:
-    prim: /aloha/support_frame/visuals/alignment_guides/base_edge_near_cam_low_y_guide
+    prim: /aloha/support_frame/visuals/base_alignment_guides/base_edge_near_cam_low_y_guide
     value_m: 0.1325
     unit: m
     source_type: MEASURED
     source_kind: user_measured_base_y_edges
-    source_description: Original cam_low-side frame edge is Y=+0.3125 m; base outer edge is 180 mm inward, so Y=+0.1325 m.
+    source_description: Original cam_low-side frame edge is Y=+0.3125 m; base outer edge is measured 180 mm inward, so Y=+0.1325 m.
     status: APPLIED_VISUAL_ONLY
     forbidden_use: [full_base_geometry, physics, collision, training]
   base_edge_near_cam_high_y_guide:
-    prim: /aloha/support_frame/visuals/alignment_guides/base_edge_near_cam_high_y_guide
+    prim: /aloha/support_frame/visuals/base_alignment_guides/base_edge_near_cam_high_y_guide
     value_m: -0.0775
     unit: m
     source_type: MEASURED
     source_kind: user_measured_base_y_edges
-    source_description: Original cam_high-side frame edge is Y=-0.3125 m; base outer edge is 235 mm inward, so Y=-0.0775 m.
+    source_description: Original cam_high-side frame edge is Y=-0.3125 m; base outer edge is measured 235 mm inward, so Y=-0.0775 m.
     status: APPLIED_VISUAL_ONLY
     forbidden_use: [full_base_geometry, physics, collision, training]

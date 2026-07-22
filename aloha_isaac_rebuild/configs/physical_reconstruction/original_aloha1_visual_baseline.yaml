@@ -1,0 +1,58 @@
+schema_version: 1
+stage: A13_original_aloha1_visual_baseline
+purpose: >
+  Rebuild a clean visual baseline by referencing only the original ALOHA1 USD
+  visual subtrees. Do not copy meshes and do not import joints, collisions,
+  physics, controllers, cameras, replay, or training logic.
+
+source_aloha1_usd: local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd
+output_stage: aloha_isaac_rebuild/scenes/aloha_original_visual_baseline.usda
+
+root_prim: /aloha
+
+semantic_roots:
+  support_frame: /aloha/support_frame
+  frame: /aloha/frame_link
+  tabletop: /aloha/tabletop_link
+  materials_and_lights: /aloha/Looks
+  source_manifest: /aloha/source_manifest
+
+source_roots:
+  support_frame: /scene/worldBody
+  left_robot: /scene/left_base_link
+  right_robot: /scene/right_base_link
+  looks: /scene/Looks
+
+global_policy:
+  visual_only: true
+  reference_original_visuals: true
+  copy_meshes: false
+  import_joints: false
+  import_collisions: false
+  import_physics: false
+  import_controllers: false
+  camera_work_deferred: true
+  training_eligible: false
+
+trusted_baseline:
+  source_type: USER_CONFIRMED
+  source_kind: original_aloha1_usd_visual_geometry
+  status: TRUSTED_FOR_VISUAL_LAYOUT
+  notes:
+    - User clarified that original ALOHA1 support-frame and base visuals are correct.
+    - Base height, base width, base visual footprint, and robot visual placement should be reused from the original ALOHA1 USD.
+    - The remaining measurement gap is only the X-direction relative distance between the two physical bases.
+
+component_policy:
+  support_frame:
+    source_children_with_visuals: auto_from_source
+    table_destination: /aloha/tabletop_link
+    floor_destination: /aloha/floor_reference_link
+    destination_root: /aloha/frame_link/visuals
+    preserve_source_names_in_metadata: true
+  robot:
+    source_children_with_visuals: auto_from_source
+    destination_left_root: /aloha
+    destination_right_root: /aloha
+    naming_style: trossen_stationary_ai_follower_links
+    preserve_source_names_in_metadata: true

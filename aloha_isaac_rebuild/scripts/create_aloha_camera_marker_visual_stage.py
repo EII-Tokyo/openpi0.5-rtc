@@ -29,8 +29,8 @@ MARKERS = {
         "hint": "positive_y",
     },
     "cam_low": {
-        "position": (0.0, 0.360, 0.100),
-        "direction_position": (0.0, 0.300, 0.100),
+        "position": (0.030, 0.5825, 0.120),
+        "direction_position": (0.030, 0.5275, 0.120),
         "direction_scale": DIRECTION_BAR_SIZE_M,
         "color": (0.0, 0.80, 0.25),
         "hint": "negative_y",

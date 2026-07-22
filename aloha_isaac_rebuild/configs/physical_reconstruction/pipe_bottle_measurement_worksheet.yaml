@@ -1,0 +1,114 @@
+schema_version: 1
+stage: A12_pipe_bottle_measurement_worksheet
+purpose: >
+  Measurement worksheet for the water-pipe and bottle geometry used by the
+  ALOHA1 bottle-mouth insertion task. This is a documentation/measurement
+  guide only and does not create simulation geometry.
+
+global_policy:
+  visual_only: true
+  writes_usd: false
+  physics_ready: false
+  collision_ready: false
+  camera_work_deferred: true
+  training_eligible: false
+  notes:
+    - Existing pipe values are historical sketch/candidate values and need on-site reconfirmation.
+    - Existing bottle values are asset validation values; real bottle mass and deformability still need measurement.
+    - Do not use this worksheet as collision or reward geometry.
+
+pipe_candidate_values:
+  length_m:
+    value: 0.225
+    source_type: TUNED
+    source_kind: historical_user_sketch_and_scene_reconstruction_pipe_usda
+    status: NEEDS_RECONFIRMATION
+  outer_diameter_m:
+    value: 0.005
+    source_type: TUNED
+    source_kind: historical_user_correction_0p5cm
+    status: NEEDS_RECONFIRMATION
+  mounting_height_m:
+    value: 0.070
+    source_type: TUNED
+    source_kind: historical_user_sketch
+    status: NEEDS_RECONFIRMATION
+  angle_deg:
+    value: 44.0
+    source_type: TUNED
+    source_kind: historical_user_sketch
+    status: NEEDS_RECONFIRMATION
+  base_offset_from_frame_edge_m:
+    value: 0.095
+    source_type: TUNED
+    source_kind: historical_user_sketch
+    status: NEEDS_RECONFIRMATION
+
+bottle_candidate_values:
+  asset_height_m:
+    value: 0.206
+    source_type: DERIVED
+    source_kind: assets_bottle_500ml_validation_report
+    status: ASSET_VALUE_NEEDS_REAL_BOTTLE_CONFIRMATION
+  asset_max_diameter_m:
+    value: 0.068
+    source_type: DERIVED
+    source_kind: assets_bottle_500ml_validation_report
+    status: ASSET_VALUE_NEEDS_REAL_BOTTLE_CONFIRMATION
+  asset_mouth_inner_diameter_m:
+    value: 0.025
+    source_type: DERIVED
+    source_kind: assets_bottle_500ml_validation_report
+    status: ASSET_VALUE_NEEDS_REAL_BOTTLE_CONFIRMATION
+  asset_mass_kg:
+    value: 0.025
+    source_type: TUNED
+    source_kind: assets_bottle_500ml_initial_mass
+    status: NEEDS_REAL_BOTTLE_MEASUREMENT
+
+measurement_items:
+  pipe_outer_diameter:
+    prompt: Measure pipe outside diameter with caliper.
+    unit: mm
+    reply_format: pipe_outer_diameter_mm=...
+    status: MISSING
+  pipe_inner_diameter:
+    prompt: Measure pipe inside diameter or provide wall thickness.
+    unit: mm
+    reply_format: pipe_inner_diameter_mm=...
+    status: MISSING
+  pipe_length:
+    prompt: Measure exposed effective pipe length along pipe axis.
+    unit: cm
+    reply_format: pipe_length_cm=...
+    status: MISSING
+  pipe_entry_center:
+    prompt: Measure pipe entry center in the physical layout frame.
+    unit: cm
+    reply_format: pipe_entry_x_from_left_edge_cm=..., pipe_entry_y_from_cam_high_edge_cm=..., pipe_entry_z_above_table_cm=...
+    status: MISSING
+  pipe_axis_angle:
+    prompt: Measure pipe axis angle and direction.
+    unit: deg
+    reply_format: pipe_angle_deg=..., pipe_points_toward=...
+    status: MISSING
+  bottle_mass:
+    prompt: Weigh the empty bottle in the same cap/no-cap state used by robot experiments.
+    unit: g
+    reply_format: bottle_empty_mass_g=...
+    status: MISSING
+  bottle_body_diameter:
+    prompt: Measure max body diameter and the diameter where the gripper usually contacts.
+    unit: mm
+    reply_format: bottle_max_diameter_mm=..., bottle_grasp_diameter_mm=...
+    status: MISSING
+  bottle_mouth:
+    prompt: Measure bottle mouth outer and inner diameter.
+    unit: mm
+    reply_format: bottle_mouth_outer_diameter_mm=..., bottle_mouth_inner_diameter_mm=...
+    status: MISSING
+  bottle_grasp_offset:
+    prompt: Measure from bottle bottom to the typical gripper contact center.
+    unit: cm
+    reply_format: bottle_bottom_to_grasp_center_cm=...
+    status: MISSING

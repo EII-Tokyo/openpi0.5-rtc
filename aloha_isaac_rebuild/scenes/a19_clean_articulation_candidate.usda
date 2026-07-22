@@ -1,0 +1,873 @@
+#usda 1.0
+(
+    defaultPrim = "aloha"
+    subLayers = [
+        @a16_aloha_home_pose_collider_preview.usda@
+    ]
+)
+
+over "aloha" (
+    customData = {
+        string base_visual_collider_preview = "/home/eii/project/openpi0.5-rtc-reward-learning/aloha_isaac_rebuild/scenes/a16_aloha_home_pose_collider_preview.usda"
+        string source_kinematic_tree_preflight = "/home/eii/project/openpi0.5-rtc-reward-learning/aloha_isaac_rebuild/artifacts/validation/a18_clean_kinematic_tree_preflight.json"
+        string source_mapping_plan = "/home/eii/project/openpi0.5-rtc-reward-learning/aloha_isaac_rebuild/artifacts/validation/a17_clean_articulation_mapping_plan.json"
+    }
+)
+{
+    custom string aloha:articulationPolicy = "two_independent_follower_articulation_candidates"
+    custom bool aloha:candidateOnly = 1
+    custom bool aloha:collisionReady = 0
+    custom bool aloha:controlReady = 0
+    custom bool aloha:physicsReady = 0
+    custom bool aloha:replayReady = 0
+    custom bool aloha:trainingEligible = 0
+
+    over "follower_left_base_link" (
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI", "PhysicsArticulationRootAPI"]
+    )
+    {
+        custom bool aloha:candidateOnly = 1
+        custom bool aloha:controlReady = 0
+        custom string aloha:sourceRigidBodyPrim = "/scene/left_base_link/left_base_link"
+        point3f physics:centerOfMass = (-0.0534774, -0.000562575, 0.0205961)
+        float3 physics:diagonalInertia = (0.0071633, 0.00602451, 0.00169819)
+        float physics:mass = 0.969034
+        quatf physics:principalAxes = (-0.0029232386, 0.71251667, 0.0048038675, 0.7016326)
+        custom bool physxArticulation:enabledSelfCollisions = 0
+    }
+
+    over "follower_left_gripper_base" (
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+    )
+    {
+        custom bool aloha:candidateOnly = 1
+        custom bool aloha:controlReady = 0
+        custom string aloha:sourceRigidBodyPrim = "/scene/left_base_link/left_gripper_base"
+        point3f physics:centerOfMass = (0.000182154, -0.0341589, -0.0106026)
+        float3 physics:diagonalInertia = (0.00110438, 0.000790537, 0.000469727)
+        float physics:mass = 0.42158
+        quatf physics:principalAxes = (0.43528605, 0.55707407, -0.55153906, 0.44271806)
+    }
+
+    over "follower_left_gripper_left" (
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+    )
+    {
+        custom bool aloha:candidateOnly = 1
+        custom bool aloha:controlReady = 0
+        custom string aloha:sourceRigidBodyPrim = "/scene/left_base_link/left_left_finger_link"
+        point3f physics:centerOfMass = (0.0143478, -0.0284791, 0.0122897)
+        float3 physics:diagonalInertia = (0.0000586848, 0.0000446887, 0.000018397)
+        float physics:mass = 0.0862937
+        quatf physics:principalAxes = (0.5354861, 0.45876613, -0.45040712, 0.5476511)
+    }
+
+    over "follower_left_gripper_right" (
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+    )
+    {
+        custom bool aloha:candidateOnly = 1
+        custom bool aloha:controlReady = 0
+        custom string aloha:sourceRigidBodyPrim = "/scene/left_base_link/left_right_finger_link"
+        point3f physics:centerOfMass = (0.0143711, 0.0284792, 0.0121421)
+        float3 physics:diagonalInertia = (0.0000586828, 0.0000446887, 0.0000183949)
+        float physics:mass = 0.0862932
+        quatf physics:principalAxes = (0.4613174, 0.5376155, -0.54547846, 0.4478944)
+    }
+
+    over "follower_left_link_1" (
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+    )
+    {
+        custom bool aloha:candidateOnly = 1
+        custom bool aloha:controlReady = 0
+        custom string aloha:sourceRigidBodyPrim = "/scene/left_base_link/left_shoulder_link"
+        point3f physics:centerOfMass = (0.000259233, -0.0000033552, 0.0116129)
+        float3 physics:diagonalInertia = (0.00120156, 0.00113744, 0.0009388)
+        float physics:mass = 0.798614
+        quatf physics:principalAxes = (-0.47611883, 0.47608283, 0.52278984, 0.52282584)
+    }
+
+    over "follower_left_link_2" (
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+    )
+    {
+        custom bool aloha:candidateOnly = 1
+        custom bool aloha:controlReady = 0
+        custom string aloha:sourceRigidBodyPrim = "/scene/left_base_link/left_upper_arm_link"
+        point3f physics:centerOfMass = (0.0206949, 4e-10, 0.226459)
+        float3 physics:diagonalInertia = (0.00911338, 0.008925, 0.000759317)
+        float physics:mass = 0.792592
+        quatf physics:principalAxes = (0, 0.07284582, 0, 0.99734324)
+    }
+
+    over "follower_left_link_3" (
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+    )
+    {
+        custom bool aloha:candidateOnly = 1
+        custom bool aloha:controlReady = 0
+        custom string aloha:sourceRigidBodyPrim = "/scene/left_base_link/left_upper_forearm_link"
+        point3f physics:centerOfMass = (0.105723, 0, 0)
+        float3 physics:diagonalInertia = (0.00144107, 0.00134228, 0.000152047)
+        float physics:mass = 0.322228
+        quatf physics:principalAxes = (-0.00062163104, 0.7047241, 0.010529201, 0.70940304)
+    }
+
+    over "follower_left_link_4" (
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+    )
+    {
+        custom bool aloha:candidateOnly = 1
+        custom bool aloha:controlReady = 0
+        custom string aloha:sourceRigidBodyPrim = "/scene/left_base_link/left_lower_forearm_link"
+        point3f physics:centerOfMass = (0.0513477, 0.00680462, 0)
+        float3 physics:diagonalInertia = (0.0005911, 0.000546493, 0.000155707)
+        float physics:mass = 0.414823
+        quatf physics:principalAxes = (-0.702604, -0.0796724, -0.702604, 0.0796724)
+    }
+
+    over "follower_left_link_5" (
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+    )
+    {
+        custom bool aloha:candidateOnly = 1
+        custom bool aloha:controlReady = 0
+        custom string aloha:sourceRigidBodyPrim = "/scene/left_base_link/left_wrist_link"
+        point3f physics:centerOfMass = (0.046743, -0.0000076652, 0.010565)
+        float3 physics:diagonalInertia = (0.0000545707, 0.0000463101, 0.0000432692)
+        float physics:mass = 0.115395
+        quatf physics:principalAxes = (-0.0010019102, 0.5445861, 0.0026583008, 0.8387002)
+    }
+
+    over "follower_left_link_6" (
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+    )
+    {
+        custom bool aloha:candidateOnly = 1
+        custom bool aloha:controlReady = 0
+        custom string aloha:sourceRigidBodyPrim = "/scene/left_base_link/left_gripper_link"
+        point3f physics:centerOfMass = (0.0395662, -2.56311e-7, 0.00400649)
+        float3 physics:diagonalInertia = (0.000689546, 0.000650316, 0.000468142)
+        float physics:mass = 0.251652
+        quatf physics:principalAxes = (0.62033, 0.619916, -0.339682, 0.339869)
+    }
+
+    over "follower_right_base_link" (
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI", "PhysicsArticulationRootAPI"]
+    )
+    {
+        custom bool aloha:candidateOnly = 1
+        custom bool aloha:controlReady = 0
+        custom string aloha:sourceRigidBodyPrim = "/scene/right_base_link/right_base_link"
+        point3f physics:centerOfMass = (-0.0534774, -0.000562575, 0.0205961)
+        float3 physics:diagonalInertia = (0.0071633, 0.00602451, 0.00169819)
+        float physics:mass = 0.969034
+        quatf physics:principalAxes = (-0.0029232386, 0.71251667, 0.0048038675, 0.7016326)
+        custom bool physxArticulation:enabledSelfCollisions = 0
+    }
+
+    over "follower_right_gripper_base" (
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+    )
+    {
+        custom bool aloha:candidateOnly = 1
+        custom bool aloha:controlReady = 0
+        custom string aloha:sourceRigidBodyPrim = "/scene/right_base_link/right_gripper_base"
+        point3f physics:centerOfMass = (0.000182154, -0.0341589, -0.0106026)
+        float3 physics:diagonalInertia = (0.00110438, 0.000790537, 0.000469727)
+        float physics:mass = 0.42158
+        quatf physics:principalAxes = (0.43528605, 0.55707407, -0.55153906, 0.44271806)
+    }
+
+    over "follower_right_gripper_left" (
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+    )
+    {
+        custom bool aloha:candidateOnly = 1
+        custom bool aloha:controlReady = 0
+        custom string aloha:sourceRigidBodyPrim = "/scene/right_base_link/right_left_finger_link"
+        point3f physics:centerOfMass = (0.0143478, -0.0284791, 0.0122897)
+        float3 physics:diagonalInertia = (0.0000586848, 0.0000446887, 0.000018397)
+        float physics:mass = 0.0862937
+        quatf physics:principalAxes = (0.5354861, 0.45876613, -0.45040712, 0.5476511)
+    }
+
+    over "follower_right_gripper_right" (
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+    )
+    {
+        custom bool aloha:candidateOnly = 1
+        custom bool aloha:controlReady = 0
+        custom string aloha:sourceRigidBodyPrim = "/scene/right_base_link/right_right_finger_link"
+        point3f physics:centerOfMass = (0.0143711, 0.0284792, 0.0121421)
+        float3 physics:diagonalInertia = (0.0000586828, 0.0000446887, 0.0000183949)
+        float physics:mass = 0.0862932
+        quatf physics:principalAxes = (0.4613174, 0.5376155, -0.54547846, 0.4478944)
+    }
+
+    over "follower_right_link_1" (
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+    )
+    {
+        custom bool aloha:candidateOnly = 1
+        custom bool aloha:controlReady = 0
+        custom string aloha:sourceRigidBodyPrim = "/scene/right_base_link/right_shoulder_link"
+        point3f physics:centerOfMass = (0.000259233, -0.0000033552, 0.0116129)
+        float3 physics:diagonalInertia = (0.00120156, 0.00113744, 0.0009388)
+        float physics:mass = 0.798614
+        quatf physics:principalAxes = (-0.47611883, 0.47608283, 0.52278984, 0.52282584)
+    }
+
+    over "follower_right_link_2" (
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+    )
+    {
+        custom bool aloha:candidateOnly = 1
+        custom bool aloha:controlReady = 0
+        custom string aloha:sourceRigidBodyPrim = "/scene/right_base_link/right_upper_arm_link"
+        point3f physics:centerOfMass = (0.0206949, 4e-10, 0.226459)
+        float3 physics:diagonalInertia = (0.00911338, 0.008925, 0.000759317)
+        float physics:mass = 0.792592
+        quatf physics:principalAxes = (0, 0.07284582, 0, 0.99734324)
+    }
+
+    over "follower_right_link_3" (
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+    )
+    {
+        custom bool aloha:candidateOnly = 1
+        custom bool aloha:controlReady = 0
+        custom string aloha:sourceRigidBodyPrim = "/scene/right_base_link/right_upper_forearm_link"
+        point3f physics:centerOfMass = (0.105723, 0, 0)
+        float3 physics:diagonalInertia = (0.00144107, 0.00134228, 0.000152047)
+        float physics:mass = 0.322228
+        quatf physics:principalAxes = (-0.00062163104, 0.7047241, 0.010529201, 0.70940304)
+    }
+
+    over "follower_right_link_4" (
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+    )
+    {
+        custom bool aloha:candidateOnly = 1
+        custom bool aloha:controlReady = 0
+        custom string aloha:sourceRigidBodyPrim = "/scene/right_base_link/right_lower_forearm_link"
+        point3f physics:centerOfMass = (0.0513477, 0.00680462, 0)
+        float3 physics:diagonalInertia = (0.0005911, 0.000546493, 0.000155707)
+        float physics:mass = 0.414823
+        quatf physics:principalAxes = (-0.702604, -0.0796724, -0.702604, 0.0796724)
+    }
+
+    over "follower_right_link_5" (
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+    )
+    {
+        custom bool aloha:candidateOnly = 1
+        custom bool aloha:controlReady = 0
+        custom string aloha:sourceRigidBodyPrim = "/scene/right_base_link/right_wrist_link"
+        point3f physics:centerOfMass = (0.046743, -0.0000076652, 0.010565)
+        float3 physics:diagonalInertia = (0.0000545707, 0.0000463101, 0.0000432692)
+        float physics:mass = 0.115395
+        quatf physics:principalAxes = (-0.0010019102, 0.5445861, 0.0026583008, 0.8387002)
+    }
+
+    over "follower_right_link_6" (
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+    )
+    {
+        custom bool aloha:candidateOnly = 1
+        custom bool aloha:controlReady = 0
+        custom string aloha:sourceRigidBodyPrim = "/scene/right_base_link/right_gripper_link"
+        point3f physics:centerOfMass = (0.0395662, -2.56311e-7, 0.00400649)
+        float3 physics:diagonalInertia = (0.000689546, 0.000650316, 0.000468142)
+        float physics:mass = 0.251652
+        quatf physics:principalAxes = (0.62033, 0.619916, -0.339682, 0.339869)
+    }
+
+    def "joints"
+    {
+        custom bool aloha:candidateOnly = 1
+
+        def PhysicsFixedJoint "left_gripper_base"
+        {
+            custom bool aloha:candidateOnly = 1
+            custom bool aloha:controlReady = 0
+            custom string aloha:sourceJointName = "left_gripper_base"
+            custom string aloha:sourceJointPrim = "/scene/joints/left_gripper_base"
+            rel physics:body0 = </aloha/follower_left_link_6>
+            rel physics:body1 = </aloha/follower_left_gripper_base>
+            float physics:breakForce = 3.4028235e38
+            float physics:breakTorque = 3.4028235e38
+            point3f physics:localPos0 = (0.035, 0, 0)
+            point3f physics:localPos1 = (0, 0, 0)
+            quatf physics:localRot0 = (0.5003981, -0.49960187, 0.49999982, -0.49999982)
+            quatf physics:localRot1 = (1, 0, 0, 0)
+        }
+
+        def PhysicsFixedJoint "right_gripper_base"
+        {
+            custom bool aloha:candidateOnly = 1
+            custom bool aloha:controlReady = 0
+            custom string aloha:sourceJointName = "right_gripper_base"
+            custom string aloha:sourceJointPrim = "/scene/joints/right_gripper_base"
+            rel physics:body0 = </aloha/follower_right_link_6>
+            rel physics:body1 = </aloha/follower_right_gripper_base>
+            float physics:breakForce = 3.4028235e38
+            float physics:breakTorque = 3.4028235e38
+            point3f physics:localPos0 = (0.035, 0, 0)
+            point3f physics:localPos1 = (0, 0, 0)
+            quatf physics:localRot0 = (0.5003981, -0.49960187, 0.49999982, -0.49999982)
+            quatf physics:localRot1 = (1, 0, 0, 0)
+        }
+
+        def PhysicsFixedJoint "rootJoint_left_base_link"
+        {
+            custom bool aloha:candidateOnly = 1
+            custom bool aloha:controlReady = 0
+            custom string aloha:sourceJointName = "rootJoint_left_base_link"
+            custom string aloha:sourceJointPrim = "/scene/joints/rootJoint_left_base_link"
+            rel physics:body1 = </aloha/follower_left_base_link>
+            point3f physics:localPos0 = (-0.469, -0.019, 0.02)
+            quatf physics:localRot0 = (1, 0, 0, 0)
+        }
+
+        def PhysicsRevoluteJoint "left_waist" (
+            prepend apiSchemas = ["PhysicsDriveAPI:angular"]
+        )
+        {
+            custom bool aloha:candidateOnly = 1
+            custom string aloha:canonicalDofName = "left_waist"
+            custom bool aloha:controlReady = 0
+            custom string aloha:sourceJointName = "left_waist"
+            custom string aloha:sourceJointPrim = "/scene/joints/left_waist"
+            float drive:angular:physics:damping = 5.76
+            float drive:angular:physics:maxForce = 35
+            float drive:angular:physics:stiffness = 0
+            float drive:angular:physics:targetPosition = 0
+            float drive:angular:physics:targetVelocity = 0
+            token drive:angular:physics:type = "force"
+            uniform token physics:axis = "X"
+            rel physics:body0 = </aloha/follower_left_base_link>
+            rel physics:body1 = </aloha/follower_left_link_1>
+            float physics:breakForce = 3.4028235e38
+            float physics:breakTorque = 3.4028235e38
+            point3f physics:localPos0 = (0, 0, 0.07900001)
+            point3f physics:localPos1 = (0, 0, 0)
+            quatf physics:localRot0 = (0.7071068, 0, -0.7071068, 0)
+            quatf physics:localRot1 = (0.7071068, 0, -0.7071068, 0)
+            float physics:lowerLimit = -179.99928
+            float physics:upperLimit = 179.99928
+            float physxJoint:armature = 0
+            float physxLimit:X:damping = 5.76
+            float physxLimit:X:stiffness = 0
+            float state:angular:physics:position = 0
+            float state:angular:physics:velocity = 0
+        }
+
+        def PhysicsRevoluteJoint "left_shoulder" (
+            prepend apiSchemas = ["PhysicsDriveAPI:angular"]
+        )
+        {
+            custom bool aloha:candidateOnly = 1
+            custom string aloha:canonicalDofName = "left_shoulder"
+            custom bool aloha:controlReady = 0
+            custom string aloha:sourceJointName = "left_shoulder"
+            custom string aloha:sourceJointPrim = "/scene/joints/left_shoulder"
+            float drive:angular:physics:damping = 20
+            float drive:angular:physics:maxForce = 144
+            float drive:angular:physics:stiffness = 0
+            float drive:angular:physics:targetPosition = -55.00395
+            float drive:angular:physics:targetVelocity = 0
+            token drive:angular:physics:type = "force"
+            uniform token physics:axis = "X"
+            rel physics:body0 = </aloha/follower_left_link_1>
+            rel physics:body1 = </aloha/follower_left_link_2>
+            float physics:breakForce = 3.4028235e38
+            float physics:breakTorque = 3.4028235e38
+            point3f physics:localPos0 = (0, 0, 0.04805)
+            point3f physics:localPos1 = (0, 0, 0)
+            quatf physics:localRot0 = (0.7071068, 0, 0, 0.7071068)
+            quatf physics:localRot1 = (0.7071068, 0, 0, 0.7071068)
+            float physics:lowerLimit = -106.00005
+            float physics:upperLimit = 72.00016
+            float physxJoint:armature = 0.395
+            float physxLimit:X:damping = 20
+            float physxLimit:X:stiffness = 0
+            float state:angular:physics:position = -55.00395
+            float state:angular:physics:velocity = 0
+        }
+
+        def PhysicsRevoluteJoint "left_elbow" (
+            prepend apiSchemas = ["PhysicsDriveAPI:angular"]
+        )
+        {
+            custom bool aloha:candidateOnly = 1
+            custom string aloha:canonicalDofName = "left_elbow"
+            custom bool aloha:controlReady = 0
+            custom string aloha:sourceJointName = "left_elbow"
+            custom string aloha:sourceJointPrim = "/scene/joints/left_elbow"
+            float drive:angular:physics:damping = 18.49
+            float drive:angular:physics:maxForce = 59
+            float drive:angular:physics:stiffness = 0
+            float drive:angular:physics:targetPosition = 66.463104
+            float drive:angular:physics:targetVelocity = 0
+            token drive:angular:physics:type = "force"
+            uniform token physics:axis = "X"
+            rel physics:body0 = </aloha/follower_left_link_2>
+            rel physics:body1 = </aloha/follower_left_link_3>
+            float physics:breakForce = 3.4028235e38
+            float physics:breakTorque = 3.4028235e38
+            point3f physics:localPos0 = (0.059549987, 0, 0.3)
+            point3f physics:localPos1 = (0, 0, 0)
+            quatf physics:localRot0 = (0.7071068, 0, 0, 0.7071068)
+            quatf physics:localRot1 = (0.7071068, 0, 0, 0.7071068)
+            float physics:lowerLimit = -100.99985
+            float physics:upperLimit = 91.99983
+            float physxJoint:armature = 0.383
+            float physxLimit:X:damping = 18.49
+            float physxLimit:X:stiffness = 0
+            float state:angular:physics:position = 66.463104
+            float state:angular:physics:velocity = 0
+        }
+
+        def PhysicsRevoluteJoint "left_forearm_roll" (
+            prepend apiSchemas = ["PhysicsDriveAPI:angular"]
+        )
+        {
+            custom bool aloha:candidateOnly = 1
+            custom string aloha:canonicalDofName = "left_forearm_roll"
+            custom bool aloha:controlReady = 0
+            custom string aloha:sourceJointName = "left_forearm_roll"
+            custom string aloha:sourceJointPrim = "/scene/joints/left_forearm_roll"
+            float drive:angular:physics:damping = 6.78
+            float drive:angular:physics:maxForce = 22
+            float drive:angular:physics:stiffness = 0
+            float drive:angular:physics:targetPosition = 89.95438
+            float drive:angular:physics:targetVelocity = 0
+            token drive:angular:physics:type = "force"
+            uniform token physics:axis = "X"
+            rel physics:body0 = </aloha/follower_left_link_3>
+            rel physics:body1 = </aloha/follower_left_link_4>
+            float physics:breakForce = 3.4028235e38
+            float physics:breakTorque = 3.4028235e38
+            point3f physics:localPos0 = (0.2, 0, 0)
+            point3f physics:localPos1 = (0, 0, 0)
+            quatf physics:localRot0 = (1, 0, 0, 0)
+            quatf physics:localRot1 = (1, 0, 0, 0)
+            float physics:lowerLimit = -179.99928
+            float physics:upperLimit = 179.99928
+            float physxJoint:armature = 0.14
+            float physxLimit:X:damping = 6.78
+            float physxLimit:X:stiffness = 0
+            float state:angular:physics:position = 89.95438
+            float state:angular:physics:velocity = 0
+        }
+
+        def PhysicsRevoluteJoint "left_wrist_angle" (
+            prepend apiSchemas = ["PhysicsDriveAPI:angular"]
+        )
+        {
+            custom bool aloha:candidateOnly = 1
+            custom string aloha:canonicalDofName = "left_wrist_angle"
+            custom bool aloha:controlReady = 0
+            custom string aloha:sourceJointName = "left_wrist_angle"
+            custom string aloha:sourceJointPrim = "/scene/joints/left_wrist_angle"
+            float drive:angular:physics:damping = 6.28
+            float drive:angular:physics:maxForce = 35
+            float drive:angular:physics:stiffness = 0
+            float drive:angular:physics:targetPosition = 0
+            float drive:angular:physics:targetVelocity = 0
+            token drive:angular:physics:type = "force"
+            uniform token physics:axis = "X"
+            rel physics:body0 = </aloha/follower_left_link_4>
+            rel physics:body1 = </aloha/follower_left_link_5>
+            float physics:breakForce = 3.4028235e38
+            float physics:breakTorque = 3.4028235e38
+            point3f physics:localPos0 = (0.1, 0, 0)
+            point3f physics:localPos1 = (0, 0, 0)
+            quatf physics:localRot0 = (0.7071068, 0, 0, 0.7071068)
+            quatf physics:localRot1 = (0.7071068, 0, 0, 0.7071068)
+            float physics:lowerLimit = -106.99986
+            float physics:upperLimit = 127.999916
+            float physxJoint:armature = 0.008
+            float physxLimit:X:damping = 6.28
+            float physxLimit:X:stiffness = 0
+            float state:angular:physics:position = 0
+            float state:angular:physics:velocity = 0
+        }
+
+        def PhysicsRevoluteJoint "left_wrist_rotate" (
+            prepend apiSchemas = ["PhysicsDriveAPI:angular"]
+        )
+        {
+            custom bool aloha:candidateOnly = 1
+            custom string aloha:canonicalDofName = "left_wrist_rotate"
+            custom bool aloha:controlReady = 0
+            custom string aloha:sourceJointName = "left_wrist_rotate"
+            custom string aloha:sourceJointPrim = "/scene/joints/left_wrist_rotate"
+            float drive:angular:physics:damping = 1.2
+            float drive:angular:physics:maxForce = 35
+            float drive:angular:physics:stiffness = 0
+            float drive:angular:physics:targetPosition = -89.95438
+            float drive:angular:physics:targetVelocity = 0
+            token drive:angular:physics:type = "force"
+            uniform token physics:axis = "X"
+            rel physics:body0 = </aloha/follower_left_link_5>
+            rel physics:body1 = </aloha/follower_left_link_6>
+            float physics:breakForce = 3.4028235e38
+            float physics:breakTorque = 3.4028235e38
+            point3f physics:localPos0 = (0.069744, 0, 0)
+            point3f physics:localPos1 = (0, 0, 0)
+            quatf physics:localRot0 = (1, 0, 0, 0)
+            quatf physics:localRot1 = (1, 0, 0, 0)
+            float physics:lowerLimit = -179.99928
+            float physics:upperLimit = 179.99928
+            float physxJoint:armature = 0
+            float physxLimit:X:damping = 1.2
+            float physxLimit:X:stiffness = 0
+            float state:angular:physics:position = -89.95438
+            float state:angular:physics:velocity = 0
+        }
+
+        def PhysicsPrismaticJoint "left_left_finger" (
+            prepend apiSchemas = ["PhysicsDriveAPI:linear"]
+        )
+        {
+            custom bool aloha:candidateOnly = 1
+            custom string aloha:canonicalDofName = "left_gripper_left_finger"
+            custom bool aloha:controlReady = 0
+            custom string aloha:sourceJointName = "left_left_finger"
+            custom string aloha:sourceJointPrim = "/scene/joints/left_left_finger"
+            float drive:linear:physics:damping = 40
+            float drive:linear:physics:maxForce = 35
+            float drive:linear:physics:stiffness = 0
+            float drive:linear:physics:targetPosition = 0.058
+            float drive:linear:physics:targetVelocity = 0
+            token drive:linear:physics:type = "force"
+            uniform token physics:axis = "X"
+            rel physics:body0 = </aloha/follower_left_gripper_base>
+            rel physics:body1 = </aloha/follower_left_gripper_left>
+            float physics:breakForce = 3.4028235e38
+            float physics:breakTorque = 3.4028235e38
+            point3f physics:localPos0 = (0.01910001, -0.014163673, 0.021172687)
+            point3f physics:localPos1 = (0, 0, 0)
+            quatf physics:localRot0 = (0.7071068, -0.7071068, 4.4691618e-8, -2.9802322e-8)
+            quatf physics:localRot1 = (0.7071068, -2.9802322e-8, 0.70710677, 0)
+            float physics:lowerLimit = 0.01844
+            float physics:upperLimit = 0.058
+            float physxJoint:armature = 0.243
+            float physxLimit:X:damping = 40
+            float physxLimit:X:stiffness = 0
+            float state:linear:physics:position = 0.058
+            float state:linear:physics:velocity = 0
+        }
+
+        def PhysicsPrismaticJoint "left_right_finger" (
+            prepend apiSchemas = ["PhysicsDriveAPI:linear"]
+        )
+        {
+            custom bool aloha:candidateOnly = 1
+            custom string aloha:canonicalDofName = "left_gripper_right_finger"
+            custom bool aloha:controlReady = 0
+            custom string aloha:sourceJointName = "left_right_finger"
+            custom string aloha:sourceJointPrim = "/scene/joints/left_right_finger"
+            float drive:linear:physics:damping = 40
+            float drive:linear:physics:maxForce = 35
+            float drive:linear:physics:stiffness = 0
+            float drive:linear:physics:targetPosition = 0.058
+            float drive:linear:physics:targetVelocity = 0
+            token drive:linear:physics:type = "force"
+            uniform token physics:axis = "X"
+            rel physics:body0 = </aloha/follower_left_gripper_base>
+            rel physics:body1 = </aloha/follower_left_gripper_right>
+            float physics:breakForce = 3.4028235e38
+            float physics:breakTorque = 3.4028235e38
+            point3f physics:localPos0 = (-0.01909998, -0.014163643, 0.021172687)
+            point3f physics:localPos1 = (0, 0, 0)
+            quatf physics:localRot0 = (1.4988473e-8, 2.9802322e-8, 0.7071068, 0.7071068)
+            quatf physics:localRot1 = (0.70710677, 0, 0.7071068, 0)
+            float physics:lowerLimit = 0.01844
+            float physics:upperLimit = 0.058
+            float physxJoint:armature = 0.243
+            float physxLimit:X:damping = 40
+            float physxLimit:X:stiffness = 0
+            float state:linear:physics:position = 0.058
+            float state:linear:physics:velocity = 0
+        }
+
+        def PhysicsFixedJoint "rootJoint_right_base_link"
+        {
+            custom bool aloha:candidateOnly = 1
+            custom bool aloha:controlReady = 0
+            custom string aloha:sourceJointName = "rootJoint_right_base_link"
+            custom string aloha:sourceJointPrim = "/scene/joints/rootJoint_right_base_link"
+            rel physics:body1 = </aloha/follower_right_base_link>
+            point3f physics:localPos0 = (0.469, -0.019, 0.02)
+            quatf physics:localRot0 = (6.123234e-17, 0, 0, 1)
+        }
+
+        def PhysicsRevoluteJoint "right_waist" (
+            prepend apiSchemas = ["PhysicsDriveAPI:angular"]
+        )
+        {
+            custom bool aloha:candidateOnly = 1
+            custom string aloha:canonicalDofName = "right_waist"
+            custom bool aloha:controlReady = 0
+            custom string aloha:sourceJointName = "right_waist"
+            custom string aloha:sourceJointPrim = "/scene/joints/right_waist"
+            float drive:angular:physics:damping = 5.76
+            float drive:angular:physics:maxForce = 35
+            float drive:angular:physics:stiffness = 0
+            float drive:angular:physics:targetPosition = 0
+            float drive:angular:physics:targetVelocity = 0
+            token drive:angular:physics:type = "force"
+            uniform token physics:axis = "X"
+            rel physics:body0 = </aloha/follower_right_base_link>
+            rel physics:body1 = </aloha/follower_right_link_1>
+            float physics:breakForce = 3.4028235e38
+            float physics:breakTorque = 3.4028235e38
+            point3f physics:localPos0 = (0, 0, 0.07900001)
+            point3f physics:localPos1 = (0, 0, 0)
+            quatf physics:localRot0 = (0.7071068, 0, -0.7071068, 0)
+            quatf physics:localRot1 = (0.7071068, 0, -0.7071068, 0)
+            float physics:lowerLimit = -179.99928
+            float physics:upperLimit = 179.99928
+            float physxJoint:armature = 0
+            float physxLimit:X:damping = 5.76
+            float physxLimit:X:stiffness = 0
+            float state:angular:physics:position = 0
+            float state:angular:physics:velocity = 0
+        }
+
+        def PhysicsRevoluteJoint "right_shoulder" (
+            prepend apiSchemas = ["PhysicsDriveAPI:angular"]
+        )
+        {
+            custom bool aloha:candidateOnly = 1
+            custom string aloha:canonicalDofName = "right_shoulder"
+            custom bool aloha:controlReady = 0
+            custom string aloha:sourceJointName = "right_shoulder"
+            custom string aloha:sourceJointPrim = "/scene/joints/right_shoulder"
+            float drive:angular:physics:damping = 20
+            float drive:angular:physics:maxForce = 144
+            float drive:angular:physics:stiffness = 0
+            float drive:angular:physics:targetPosition = -55.00395
+            float drive:angular:physics:targetVelocity = 0
+            token drive:angular:physics:type = "force"
+            uniform token physics:axis = "X"
+            rel physics:body0 = </aloha/follower_right_link_1>
+            rel physics:body1 = </aloha/follower_right_link_2>
+            float physics:breakForce = 3.4028235e38
+            float physics:breakTorque = 3.4028235e38
+            point3f physics:localPos0 = (0, 0, 0.04805)
+            point3f physics:localPos1 = (0, 0, 0)
+            quatf physics:localRot0 = (0.7071068, 0, 0, 0.7071068)
+            quatf physics:localRot1 = (0.7071068, 0, 0, 0.7071068)
+            float physics:lowerLimit = -106.00005
+            float physics:upperLimit = 72.00016
+            float physxJoint:armature = 0.395
+            float physxLimit:X:damping = 20
+            float physxLimit:X:stiffness = 0
+            float state:angular:physics:position = -55.00395
+            float state:angular:physics:velocity = 0
+        }
+
+        def PhysicsRevoluteJoint "right_elbow" (
+            prepend apiSchemas = ["PhysicsDriveAPI:angular"]
+        )
+        {
+            custom bool aloha:candidateOnly = 1
+            custom string aloha:canonicalDofName = "right_elbow"
+            custom bool aloha:controlReady = 0
+            custom string aloha:sourceJointName = "right_elbow"
+            custom string aloha:sourceJointPrim = "/scene/joints/right_elbow"
+            float drive:angular:physics:damping = 18.49
+            float drive:angular:physics:maxForce = 59
+            float drive:angular:physics:stiffness = 0
+            float drive:angular:physics:targetPosition = 66.463104
+            float drive:angular:physics:targetVelocity = 0
+            token drive:angular:physics:type = "force"
+            uniform token physics:axis = "X"
+            rel physics:body0 = </aloha/follower_right_link_2>
+            rel physics:body1 = </aloha/follower_right_link_3>
+            float physics:breakForce = 3.4028235e38
+            float physics:breakTorque = 3.4028235e38
+            point3f physics:localPos0 = (0.059549987, 0, 0.3)
+            point3f physics:localPos1 = (0, 0, 0)
+            quatf physics:localRot0 = (0.7071068, 0, 0, 0.7071068)
+            quatf physics:localRot1 = (0.7071068, 0, 0, 0.7071068)
+            float physics:lowerLimit = -100.99985
+            float physics:upperLimit = 91.99983
+            float physxJoint:armature = 0.383
+            float physxLimit:X:damping = 18.49
+            float physxLimit:X:stiffness = 0
+            float state:angular:physics:position = 66.463104
+            float state:angular:physics:velocity = 0
+        }
+
+        def PhysicsRevoluteJoint "right_forearm_roll" (
+            prepend apiSchemas = ["PhysicsDriveAPI:angular"]
+        )
+        {
+            custom bool aloha:candidateOnly = 1
+            custom string aloha:canonicalDofName = "right_forearm_roll"
+            custom bool aloha:controlReady = 0
+            custom string aloha:sourceJointName = "right_forearm_roll"
+            custom string aloha:sourceJointPrim = "/scene/joints/right_forearm_roll"
+            float drive:angular:physics:damping = 6.78
+            float drive:angular:physics:maxForce = 22
+            float drive:angular:physics:stiffness = 0
+            float drive:angular:physics:targetPosition = 0
+            float drive:angular:physics:targetVelocity = 0
+            token drive:angular:physics:type = "force"
+            uniform token physics:axis = "X"
+            rel physics:body0 = </aloha/follower_right_link_3>
+            rel physics:body1 = </aloha/follower_right_link_4>
+            float physics:breakForce = 3.4028235e38
+            float physics:breakTorque = 3.4028235e38
+            point3f physics:localPos0 = (0.2, 0, 0)
+            point3f physics:localPos1 = (0, 0, 0)
+            quatf physics:localRot0 = (1, 0, 0, 0)
+            quatf physics:localRot1 = (1, 0, 0, 0)
+            float physics:lowerLimit = -179.99928
+            float physics:upperLimit = 179.99928
+            float physxJoint:armature = 0.14
+            float physxLimit:X:damping = 6.78
+            float physxLimit:X:stiffness = 0
+            float state:angular:physics:position = 0
+            float state:angular:physics:velocity = 0
+        }
+
+        def PhysicsRevoluteJoint "right_wrist_angle" (
+            prepend apiSchemas = ["PhysicsDriveAPI:angular"]
+        )
+        {
+            custom bool aloha:candidateOnly = 1
+            custom string aloha:canonicalDofName = "right_wrist_angle"
+            custom bool aloha:controlReady = 0
+            custom string aloha:sourceJointName = "right_wrist_angle"
+            custom string aloha:sourceJointPrim = "/scene/joints/right_wrist_angle"
+            float drive:angular:physics:damping = 6.28
+            float drive:angular:physics:maxForce = 35
+            float drive:angular:physics:stiffness = 0
+            float drive:angular:physics:targetPosition = 0
+            float drive:angular:physics:targetVelocity = 0
+            token drive:angular:physics:type = "force"
+            uniform token physics:axis = "X"
+            rel physics:body0 = </aloha/follower_right_link_4>
+            rel physics:body1 = </aloha/follower_right_link_5>
+            float physics:breakForce = 3.4028235e38
+            float physics:breakTorque = 3.4028235e38
+            point3f physics:localPos0 = (0.1, 0, 0)
+            point3f physics:localPos1 = (0, 0, 0)
+            quatf physics:localRot0 = (0.7071068, 0, 0, 0.7071068)
+            quatf physics:localRot1 = (0.7071068, 0, 0, 0.7071068)
+            float physics:lowerLimit = -106.99986
+            float physics:upperLimit = 127.999916
+            float physxJoint:armature = 0.008
+            float physxLimit:X:damping = 6.28
+            float physxLimit:X:stiffness = 0
+            float state:angular:physics:position = 0
+            float state:angular:physics:velocity = 0
+        }
+
+        def PhysicsRevoluteJoint "right_wrist_rotate" (
+            prepend apiSchemas = ["PhysicsDriveAPI:angular"]
+        )
+        {
+            custom bool aloha:candidateOnly = 1
+            custom string aloha:canonicalDofName = "right_wrist_rotate"
+            custom bool aloha:controlReady = 0
+            custom string aloha:sourceJointName = "right_wrist_rotate"
+            custom string aloha:sourceJointPrim = "/scene/joints/right_wrist_rotate"
+            float drive:angular:physics:damping = 1.2
+            float drive:angular:physics:maxForce = 35
+            float drive:angular:physics:stiffness = 0
+            float drive:angular:physics:targetPosition = 0
+            float drive:angular:physics:targetVelocity = 0
+            token drive:angular:physics:type = "force"
+            uniform token physics:axis = "X"
+            rel physics:body0 = </aloha/follower_right_link_5>
+            rel physics:body1 = </aloha/follower_right_link_6>
+            float physics:breakForce = 3.4028235e38
+            float physics:breakTorque = 3.4028235e38
+            point3f physics:localPos0 = (0.069744, 0, 0)
+            point3f physics:localPos1 = (0, 0, 0)
+            quatf physics:localRot0 = (1, 0, 0, 0)
+            quatf physics:localRot1 = (1, 0, 0, 0)
+            float physics:lowerLimit = -179.99928
+            float physics:upperLimit = 179.99928
+            float physxJoint:armature = 0
+            float physxLimit:X:damping = 1.2
+            float physxLimit:X:stiffness = 0
+            float state:angular:physics:position = 0
+            float state:angular:physics:velocity = 0
+        }
+
+        def PhysicsPrismaticJoint "right_left_finger" (
+            prepend apiSchemas = ["PhysicsDriveAPI:linear"]
+        )
+        {
+            custom bool aloha:candidateOnly = 1
+            custom string aloha:canonicalDofName = "right_gripper_left_finger"
+            custom bool aloha:controlReady = 0
+            custom string aloha:sourceJointName = "right_left_finger"
+            custom string aloha:sourceJointPrim = "/scene/joints/right_left_finger"
+            float drive:linear:physics:damping = 40
+            float drive:linear:physics:maxForce = 35
+            float drive:linear:physics:stiffness = 0
+            float drive:linear:physics:targetPosition = 0.058
+            float drive:linear:physics:targetVelocity = 0
+            token drive:linear:physics:type = "force"
+            uniform token physics:axis = "X"
+            rel physics:body0 = </aloha/follower_right_gripper_base>
+            rel physics:body1 = </aloha/follower_right_gripper_left>
+            float physics:breakForce = 3.4028235e38
+            float physics:breakTorque = 3.4028235e38
+            point3f physics:localPos0 = (0.01909998, -0.014163703, 0.021172717)
+            point3f physics:localPos1 = (0, 0, 0)
+            quatf physics:localRot0 = (0.7071068, -0.7071068, 1.4988473e-8, 0)
+            quatf physics:localRot1 = (0.70710677, 0, 0.70710677, 0)
+            float physics:lowerLimit = 0.01844
+            float physics:upperLimit = 0.058
+            float physxJoint:armature = 0.243
+            float physxLimit:X:damping = 40
+            float physxLimit:X:stiffness = 0
+            float state:linear:physics:position = 0.058
+            float state:linear:physics:velocity = 0
+        }
+
+        def PhysicsPrismaticJoint "right_right_finger" (
+            prepend apiSchemas = ["PhysicsDriveAPI:linear"]
+        )
+        {
+            custom bool aloha:candidateOnly = 1
+            custom string aloha:canonicalDofName = "right_gripper_right_finger"
+            custom bool aloha:controlReady = 0
+            custom string aloha:sourceJointName = "right_right_finger"
+            custom string aloha:sourceJointPrim = "/scene/joints/right_right_finger"
+            float drive:linear:physics:damping = 40
+            float drive:linear:physics:maxForce = 35
+            float drive:linear:physics:stiffness = 0
+            float drive:linear:physics:targetPosition = 0.058
+            float drive:linear:physics:targetVelocity = 0
+            token drive:linear:physics:type = "force"
+            uniform token physics:axis = "X"
+            rel physics:body0 = </aloha/follower_right_gripper_base>
+            rel physics:body1 = </aloha/follower_right_gripper_right>
+            float physics:breakForce = 3.4028235e38
+            float physics:breakTorque = 3.4028235e38
+            point3f physics:localPos0 = (-0.019100025, -0.014163673, 0.021172702)
+            point3f physics:localPos1 = (0, 0, 0)
+            quatf physics:localRot0 = (2.9802322e-8, 2.9802322e-8, 0.7071068, 0.7071068)
+            quatf physics:localRot1 = (0.7071068, 0, 0.7071068, 2.9802322e-8)
+            float physics:lowerLimit = 0.01844
+            float physics:upperLimit = 0.058
+            float physxJoint:armature = 0.243
+            float physxLimit:X:damping = 40
+            float physxLimit:X:stiffness = 0
+            float state:linear:physics:position = 0.058
+            float state:linear:physics:velocity = 0
+        }
+    }
+}

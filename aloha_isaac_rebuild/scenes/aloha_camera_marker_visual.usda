@@ -317,7 +317,7 @@ def Xform "aloha" (
                 color3f[] primvars:displayColor = [(0, 0.8, 0.25)]
                 double size = 1
                 float3 xformOp:scale = (0.045, 0.045, 0.045)
-                double3 xformOp:translate = (0, 0.36, 0.1)
+                double3 xformOp:translate = (0.03, 0.5825, 0.12)
                 uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
 
                 def Cube "view_direction_hint" (
@@ -350,7 +350,7 @@ def Xform "aloha" (
                     color3f[] primvars:displayColor = [(0, 0.8, 0.25)]
                     double size = 1
                     float3 xformOp:scale = (0.012, 0.11, 0.012)
-                    double3 xformOp:translate = (0, 0.3, 0.1)
+                    double3 xformOp:translate = (0.03, 0.5275, 0.12)
                     uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
                 }
             }

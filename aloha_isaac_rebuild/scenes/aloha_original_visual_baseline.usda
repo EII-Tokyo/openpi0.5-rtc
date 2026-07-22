@@ -1,0 +1,994 @@
+#usda 1.0
+(
+    defaultPrim = "aloha"
+    metersPerUnit = 1
+    upAxis = "Z"
+)
+
+def Xform "aloha" (
+    customData = {
+        string known_missing_measurement = "inter_base_anchor_x_distance_cm"
+        string source_aloha1_usd = "local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd"
+        string visual_baseline_policy = "reference original ALOHA1 visuals only; no mesh copying"
+    }
+)
+{
+    custom bool aloha:articulationCompatible = 0
+    custom bool aloha:cameraCalibrationReady = 0
+    custom bool aloha:collisionEligible = 0
+    custom bool aloha:controllerEligible = 0
+    custom bool aloha:physicsEligible = 0
+    custom string aloha:sourceKind = "original_aloha1_usd_visual_baseline"
+    custom string aloha:sourceRoot = "/scene/right_base_link"
+    custom string aloha:sourceType = "USER_CONFIRMED"
+    custom string aloha:stageRole = "A13_original_aloha1_visual_baseline"
+    custom bool aloha:stationaryAiRuntimeCompatible = 0
+    custom bool aloha:trainingEligible = 0
+    custom bool aloha:visualOnly = 1
+    uniform token[] xformOpOrder = []
+
+    def Scope "support_frame" (
+        customData = {
+            string primary_frame_link = "/aloha/frame_link"
+        }
+    )
+    {
+        custom bool aloha:collisionEligible = 0
+        custom bool aloha:physicsEligible = 0
+        custom string aloha:sourceRoot = "/scene/worldBody"
+        custom string aloha:stageRole = "A13_support_frame_semantic_alias"
+        custom bool aloha:trainingEligible = 0
+        custom bool aloha:visualOnly = 1
+    }
+
+    def Scope "frame_link"
+    {
+        custom bool aloha:collisionEligible = 0
+        custom bool aloha:physicsEligible = 0
+        custom string aloha:sourceRoot = "/scene/worldBody"
+        custom string aloha:stageRole = "A13_frame_link_visual_baseline"
+        custom bool aloha:trainingEligible = 0
+        custom bool aloha:visualOnly = 1
+
+        def Xform "visuals"
+        {
+            custom bool aloha:collisionEligible = 0
+            custom bool aloha:physicsEligible = 0
+            custom string aloha:sourceRoot = "/scene/worldBody"
+            custom bool aloha:visualOnly = 1
+            uniform token[] xformOpOrder = []
+
+            def Xform "source_worldbody_part_01_underscore" (
+                delete apiSchemas = ["PhysicsRigidBodyAPI"]
+                prepend references = @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene/worldBody/_>
+            )
+            {
+                custom bool aloha:collisionEligible = 0
+                custom bool aloha:physicsEligible = 0
+                custom bool aloha:referenceOriginalComponentRoot = 1
+                custom string aloha:sourcePrim = "/scene/worldBody/_"
+                custom string aloha:stageRole = "A13_support_frame_component"
+                custom string aloha:stationaryAiStyleName = "source_worldbody_part_01_underscore"
+                custom bool aloha:trainingEligible = 0
+                custom bool aloha:visualOnly = 1
+            }
+
+            def Xform "source_worldbody_part_02_1" (
+                delete apiSchemas = ["PhysicsRigidBodyAPI"]
+                prepend references = @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene/worldBody/__1>
+            )
+            {
+                custom bool aloha:collisionEligible = 0
+                custom bool aloha:physicsEligible = 0
+                custom bool aloha:referenceOriginalComponentRoot = 1
+                custom string aloha:sourcePrim = "/scene/worldBody/__1"
+                custom string aloha:stageRole = "A13_support_frame_component"
+                custom string aloha:stationaryAiStyleName = "source_worldbody_part_02_1"
+                custom bool aloha:trainingEligible = 0
+                custom bool aloha:visualOnly = 1
+            }
+
+            def Xform "source_worldbody_part_04_2" (
+                delete apiSchemas = ["PhysicsRigidBodyAPI"]
+                prepend references = @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene/worldBody/__2>
+            )
+            {
+                custom bool aloha:collisionEligible = 0
+                custom bool aloha:physicsEligible = 0
+                custom bool aloha:referenceOriginalComponentRoot = 1
+                custom string aloha:sourcePrim = "/scene/worldBody/__2"
+                custom string aloha:stageRole = "A13_support_frame_component"
+                custom string aloha:stationaryAiStyleName = "source_worldbody_part_04_2"
+                custom bool aloha:trainingEligible = 0
+                custom bool aloha:visualOnly = 1
+            }
+
+            def Xform "source_worldbody_part_05_3" (
+                delete apiSchemas = ["PhysicsRigidBodyAPI"]
+                prepend references = @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene/worldBody/__3>
+            )
+            {
+                custom bool aloha:collisionEligible = 0
+                custom bool aloha:physicsEligible = 0
+                custom bool aloha:referenceOriginalComponentRoot = 1
+                custom string aloha:sourcePrim = "/scene/worldBody/__3"
+                custom string aloha:stageRole = "A13_support_frame_component"
+                custom string aloha:stationaryAiStyleName = "source_worldbody_part_05_3"
+                custom bool aloha:trainingEligible = 0
+                custom bool aloha:visualOnly = 1
+            }
+
+            def Xform "source_worldbody_part_06_4" (
+                delete apiSchemas = ["PhysicsRigidBodyAPI"]
+                prepend references = @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene/worldBody/__4>
+            )
+            {
+                custom bool aloha:collisionEligible = 0
+                custom bool aloha:physicsEligible = 0
+                custom bool aloha:referenceOriginalComponentRoot = 1
+                custom string aloha:sourcePrim = "/scene/worldBody/__4"
+                custom string aloha:stageRole = "A13_support_frame_component"
+                custom string aloha:stationaryAiStyleName = "source_worldbody_part_06_4"
+                custom bool aloha:trainingEligible = 0
+                custom bool aloha:visualOnly = 1
+            }
+
+            def Xform "source_worldbody_part_07_5" (
+                delete apiSchemas = ["PhysicsRigidBodyAPI"]
+                prepend references = @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene/worldBody/__5>
+            )
+            {
+                custom bool aloha:collisionEligible = 0
+                custom bool aloha:physicsEligible = 0
+                custom bool aloha:referenceOriginalComponentRoot = 1
+                custom string aloha:sourcePrim = "/scene/worldBody/__5"
+                custom string aloha:stageRole = "A13_support_frame_component"
+                custom string aloha:stationaryAiStyleName = "source_worldbody_part_07_5"
+                custom bool aloha:trainingEligible = 0
+                custom bool aloha:visualOnly = 1
+            }
+
+            def Xform "source_worldbody_part_08_6" (
+                delete apiSchemas = ["PhysicsRigidBodyAPI"]
+                prepend references = @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene/worldBody/__6>
+            )
+            {
+                custom bool aloha:collisionEligible = 0
+                custom bool aloha:physicsEligible = 0
+                custom bool aloha:referenceOriginalComponentRoot = 1
+                custom string aloha:sourcePrim = "/scene/worldBody/__6"
+                custom string aloha:stageRole = "A13_support_frame_component"
+                custom string aloha:stationaryAiStyleName = "source_worldbody_part_08_6"
+                custom bool aloha:trainingEligible = 0
+                custom bool aloha:visualOnly = 1
+            }
+
+            def Xform "source_worldbody_part_09_7" (
+                delete apiSchemas = ["PhysicsRigidBodyAPI"]
+                prepend references = @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene/worldBody/__7>
+            )
+            {
+                custom bool aloha:collisionEligible = 0
+                custom bool aloha:physicsEligible = 0
+                custom bool aloha:referenceOriginalComponentRoot = 1
+                custom string aloha:sourcePrim = "/scene/worldBody/__7"
+                custom string aloha:stageRole = "A13_support_frame_component"
+                custom string aloha:stationaryAiStyleName = "source_worldbody_part_09_7"
+                custom bool aloha:trainingEligible = 0
+                custom bool aloha:visualOnly = 1
+            }
+
+            def Xform "source_worldbody_part_10_8" (
+                delete apiSchemas = ["PhysicsRigidBodyAPI"]
+                prepend references = @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene/worldBody/__8>
+            )
+            {
+                custom bool aloha:collisionEligible = 0
+                custom bool aloha:physicsEligible = 0
+                custom bool aloha:referenceOriginalComponentRoot = 1
+                custom string aloha:sourcePrim = "/scene/worldBody/__8"
+                custom string aloha:stageRole = "A13_support_frame_component"
+                custom string aloha:stationaryAiStyleName = "source_worldbody_part_10_8"
+                custom bool aloha:trainingEligible = 0
+                custom bool aloha:visualOnly = 1
+            }
+
+            def Xform "source_worldbody_part_11_9" (
+                delete apiSchemas = ["PhysicsRigidBodyAPI"]
+                prepend references = @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene/worldBody/__9>
+            )
+            {
+                custom bool aloha:collisionEligible = 0
+                custom bool aloha:physicsEligible = 0
+                custom bool aloha:referenceOriginalComponentRoot = 1
+                custom string aloha:sourcePrim = "/scene/worldBody/__9"
+                custom string aloha:stageRole = "A13_support_frame_component"
+                custom string aloha:stationaryAiStyleName = "source_worldbody_part_11_9"
+                custom bool aloha:trainingEligible = 0
+                custom bool aloha:visualOnly = 1
+            }
+
+            def Xform "source_worldbody_part_12_10" (
+                delete apiSchemas = ["PhysicsRigidBodyAPI"]
+                prepend references = @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene/worldBody/__10>
+            )
+            {
+                custom bool aloha:collisionEligible = 0
+                custom bool aloha:physicsEligible = 0
+                custom bool aloha:referenceOriginalComponentRoot = 1
+                custom string aloha:sourcePrim = "/scene/worldBody/__10"
+                custom string aloha:stageRole = "A13_support_frame_component"
+                custom string aloha:stationaryAiStyleName = "source_worldbody_part_12_10"
+                custom bool aloha:trainingEligible = 0
+                custom bool aloha:visualOnly = 1
+            }
+
+            def Xform "source_worldbody_part_13_11" (
+                delete apiSchemas = ["PhysicsRigidBodyAPI"]
+                prepend references = @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene/worldBody/__11>
+            )
+            {
+                custom bool aloha:collisionEligible = 0
+                custom bool aloha:physicsEligible = 0
+                custom bool aloha:referenceOriginalComponentRoot = 1
+                custom string aloha:sourcePrim = "/scene/worldBody/__11"
+                custom string aloha:stageRole = "A13_support_frame_component"
+                custom string aloha:stationaryAiStyleName = "source_worldbody_part_13_11"
+                custom bool aloha:trainingEligible = 0
+                custom bool aloha:visualOnly = 1
+            }
+
+            def Xform "source_worldbody_part_14_12" (
+                delete apiSchemas = ["PhysicsRigidBodyAPI"]
+                prepend references = @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene/worldBody/__12>
+            )
+            {
+                custom bool aloha:collisionEligible = 0
+                custom bool aloha:physicsEligible = 0
+                custom bool aloha:referenceOriginalComponentRoot = 1
+                custom string aloha:sourcePrim = "/scene/worldBody/__12"
+                custom string aloha:stageRole = "A13_support_frame_component"
+                custom string aloha:stationaryAiStyleName = "source_worldbody_part_14_12"
+                custom bool aloha:trainingEligible = 0
+                custom bool aloha:visualOnly = 1
+            }
+
+            def Xform "source_worldbody_part_15_13" (
+                delete apiSchemas = ["PhysicsRigidBodyAPI"]
+                prepend references = @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene/worldBody/__13>
+            )
+            {
+                custom bool aloha:collisionEligible = 0
+                custom bool aloha:physicsEligible = 0
+                custom bool aloha:referenceOriginalComponentRoot = 1
+                custom string aloha:sourcePrim = "/scene/worldBody/__13"
+                custom string aloha:stageRole = "A13_support_frame_component"
+                custom string aloha:stationaryAiStyleName = "source_worldbody_part_15_13"
+                custom bool aloha:trainingEligible = 0
+                custom bool aloha:visualOnly = 1
+            }
+
+            def Xform "source_worldbody_part_16_14" (
+                delete apiSchemas = ["PhysicsRigidBodyAPI"]
+                prepend references = @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene/worldBody/__14>
+            )
+            {
+                custom bool aloha:collisionEligible = 0
+                custom bool aloha:physicsEligible = 0
+                custom bool aloha:referenceOriginalComponentRoot = 1
+                custom string aloha:sourcePrim = "/scene/worldBody/__14"
+                custom string aloha:stageRole = "A13_support_frame_component"
+                custom string aloha:stationaryAiStyleName = "source_worldbody_part_16_14"
+                custom bool aloha:trainingEligible = 0
+                custom bool aloha:visualOnly = 1
+            }
+
+            def Xform "source_worldbody_part_17_15" (
+                delete apiSchemas = ["PhysicsRigidBodyAPI"]
+                prepend references = @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene/worldBody/__15>
+            )
+            {
+                custom bool aloha:collisionEligible = 0
+                custom bool aloha:physicsEligible = 0
+                custom bool aloha:referenceOriginalComponentRoot = 1
+                custom string aloha:sourcePrim = "/scene/worldBody/__15"
+                custom string aloha:stageRole = "A13_support_frame_component"
+                custom string aloha:stationaryAiStyleName = "source_worldbody_part_17_15"
+                custom bool aloha:trainingEligible = 0
+                custom bool aloha:visualOnly = 1
+            }
+
+            def Xform "source_worldbody_part_18_16" (
+                delete apiSchemas = ["PhysicsRigidBodyAPI"]
+                prepend references = @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene/worldBody/__16>
+            )
+            {
+                custom bool aloha:collisionEligible = 0
+                custom bool aloha:physicsEligible = 0
+                custom bool aloha:referenceOriginalComponentRoot = 1
+                custom string aloha:sourcePrim = "/scene/worldBody/__16"
+                custom string aloha:stageRole = "A13_support_frame_component"
+                custom string aloha:stationaryAiStyleName = "source_worldbody_part_18_16"
+                custom bool aloha:trainingEligible = 0
+                custom bool aloha:visualOnly = 1
+            }
+
+            def Xform "source_worldbody_part_19_17" (
+                delete apiSchemas = ["PhysicsRigidBodyAPI"]
+                prepend references = @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene/worldBody/__17>
+            )
+            {
+                custom bool aloha:collisionEligible = 0
+                custom bool aloha:physicsEligible = 0
+                custom bool aloha:referenceOriginalComponentRoot = 1
+                custom string aloha:sourcePrim = "/scene/worldBody/__17"
+                custom string aloha:stageRole = "A13_support_frame_component"
+                custom string aloha:stationaryAiStyleName = "source_worldbody_part_19_17"
+                custom bool aloha:trainingEligible = 0
+                custom bool aloha:visualOnly = 1
+            }
+
+            def Xform "source_worldbody_part_20_18" (
+                delete apiSchemas = ["PhysicsRigidBodyAPI"]
+                prepend references = @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene/worldBody/__18>
+            )
+            {
+                custom bool aloha:collisionEligible = 0
+                custom bool aloha:physicsEligible = 0
+                custom bool aloha:referenceOriginalComponentRoot = 1
+                custom string aloha:sourcePrim = "/scene/worldBody/__18"
+                custom string aloha:stageRole = "A13_support_frame_component"
+                custom string aloha:stationaryAiStyleName = "source_worldbody_part_20_18"
+                custom bool aloha:trainingEligible = 0
+                custom bool aloha:visualOnly = 1
+            }
+
+            def Xform "source_worldbody_part_21_19" (
+                delete apiSchemas = ["PhysicsRigidBodyAPI"]
+                prepend references = @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene/worldBody/__19>
+            )
+            {
+                custom bool aloha:collisionEligible = 0
+                custom bool aloha:physicsEligible = 0
+                custom bool aloha:referenceOriginalComponentRoot = 1
+                custom string aloha:sourcePrim = "/scene/worldBody/__19"
+                custom string aloha:stageRole = "A13_support_frame_component"
+                custom string aloha:stationaryAiStyleName = "source_worldbody_part_21_19"
+                custom bool aloha:trainingEligible = 0
+                custom bool aloha:visualOnly = 1
+            }
+
+            def Xform "source_worldbody_part_22_20" (
+                delete apiSchemas = ["PhysicsRigidBodyAPI"]
+                prepend references = @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene/worldBody/__20>
+            )
+            {
+                custom bool aloha:collisionEligible = 0
+                custom bool aloha:physicsEligible = 0
+                custom bool aloha:referenceOriginalComponentRoot = 1
+                custom string aloha:sourcePrim = "/scene/worldBody/__20"
+                custom string aloha:stageRole = "A13_support_frame_component"
+                custom string aloha:stationaryAiStyleName = "source_worldbody_part_22_20"
+                custom bool aloha:trainingEligible = 0
+                custom bool aloha:visualOnly = 1
+            }
+
+            def Xform "source_worldbody_part_23_21" (
+                delete apiSchemas = ["PhysicsRigidBodyAPI"]
+                prepend references = @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene/worldBody/__21>
+            )
+            {
+                custom bool aloha:collisionEligible = 0
+                custom bool aloha:physicsEligible = 0
+                custom bool aloha:referenceOriginalComponentRoot = 1
+                custom string aloha:sourcePrim = "/scene/worldBody/__21"
+                custom string aloha:stageRole = "A13_support_frame_component"
+                custom string aloha:stationaryAiStyleName = "source_worldbody_part_23_21"
+                custom bool aloha:trainingEligible = 0
+                custom bool aloha:visualOnly = 1
+            }
+
+            def Xform "source_worldbody_part_24_22" (
+                delete apiSchemas = ["PhysicsRigidBodyAPI"]
+                prepend references = @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene/worldBody/__22>
+            )
+            {
+                custom bool aloha:collisionEligible = 0
+                custom bool aloha:physicsEligible = 0
+                custom bool aloha:referenceOriginalComponentRoot = 1
+                custom string aloha:sourcePrim = "/scene/worldBody/__22"
+                custom string aloha:stageRole = "A13_support_frame_component"
+                custom string aloha:stationaryAiStyleName = "source_worldbody_part_24_22"
+                custom bool aloha:trainingEligible = 0
+                custom bool aloha:visualOnly = 1
+            }
+
+            def Xform "source_worldbody_part_25_23" (
+                delete apiSchemas = ["PhysicsRigidBodyAPI"]
+                prepend references = @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene/worldBody/__23>
+            )
+            {
+                custom bool aloha:collisionEligible = 0
+                custom bool aloha:physicsEligible = 0
+                custom bool aloha:referenceOriginalComponentRoot = 1
+                custom string aloha:sourcePrim = "/scene/worldBody/__23"
+                custom string aloha:stageRole = "A13_support_frame_component"
+                custom string aloha:stationaryAiStyleName = "source_worldbody_part_25_23"
+                custom bool aloha:trainingEligible = 0
+                custom bool aloha:visualOnly = 1
+            }
+
+            def Xform "source_worldbody_part_26_24" (
+                delete apiSchemas = ["PhysicsRigidBodyAPI"]
+                prepend references = @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene/worldBody/__24>
+            )
+            {
+                custom bool aloha:collisionEligible = 0
+                custom bool aloha:physicsEligible = 0
+                custom bool aloha:referenceOriginalComponentRoot = 1
+                custom string aloha:sourcePrim = "/scene/worldBody/__24"
+                custom string aloha:stageRole = "A13_support_frame_component"
+                custom string aloha:stationaryAiStyleName = "source_worldbody_part_26_24"
+                custom bool aloha:trainingEligible = 0
+                custom bool aloha:visualOnly = 1
+            }
+
+            def Xform "source_worldbody_part_27_25" (
+                delete apiSchemas = ["PhysicsRigidBodyAPI"]
+                prepend references = @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene/worldBody/__25>
+            )
+            {
+                custom bool aloha:collisionEligible = 0
+                custom bool aloha:physicsEligible = 0
+                custom bool aloha:referenceOriginalComponentRoot = 1
+                custom string aloha:sourcePrim = "/scene/worldBody/__25"
+                custom string aloha:stageRole = "A13_support_frame_component"
+                custom string aloha:stationaryAiStyleName = "source_worldbody_part_27_25"
+                custom bool aloha:trainingEligible = 0
+                custom bool aloha:visualOnly = 1
+            }
+
+            def Xform "source_worldbody_part_28_26" (
+                delete apiSchemas = ["PhysicsRigidBodyAPI"]
+                prepend references = @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene/worldBody/__26>
+            )
+            {
+                custom bool aloha:collisionEligible = 0
+                custom bool aloha:physicsEligible = 0
+                custom bool aloha:referenceOriginalComponentRoot = 1
+                custom string aloha:sourcePrim = "/scene/worldBody/__26"
+                custom string aloha:stageRole = "A13_support_frame_component"
+                custom string aloha:stationaryAiStyleName = "source_worldbody_part_28_26"
+                custom bool aloha:trainingEligible = 0
+                custom bool aloha:visualOnly = 1
+            }
+
+            def Xform "source_worldbody_part_29_27" (
+                delete apiSchemas = ["PhysicsRigidBodyAPI"]
+                prepend references = @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene/worldBody/__27>
+            )
+            {
+                custom bool aloha:collisionEligible = 0
+                custom bool aloha:physicsEligible = 0
+                custom bool aloha:referenceOriginalComponentRoot = 1
+                custom string aloha:sourcePrim = "/scene/worldBody/__27"
+                custom string aloha:stageRole = "A13_support_frame_component"
+                custom string aloha:stationaryAiStyleName = "source_worldbody_part_29_27"
+                custom bool aloha:trainingEligible = 0
+                custom bool aloha:visualOnly = 1
+            }
+
+            def Xform "source_worldbody_part_30_28" (
+                delete apiSchemas = ["PhysicsRigidBodyAPI"]
+                prepend references = @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene/worldBody/__28>
+            )
+            {
+                custom bool aloha:collisionEligible = 0
+                custom bool aloha:physicsEligible = 0
+                custom bool aloha:referenceOriginalComponentRoot = 1
+                custom string aloha:sourcePrim = "/scene/worldBody/__28"
+                custom string aloha:stageRole = "A13_support_frame_component"
+                custom string aloha:stationaryAiStyleName = "source_worldbody_part_30_28"
+                custom bool aloha:trainingEligible = 0
+                custom bool aloha:visualOnly = 1
+            }
+
+            def Xform "source_worldbody_part_31_29" (
+                delete apiSchemas = ["PhysicsRigidBodyAPI"]
+                prepend references = @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene/worldBody/__29>
+            )
+            {
+                custom bool aloha:collisionEligible = 0
+                custom bool aloha:physicsEligible = 0
+                custom bool aloha:referenceOriginalComponentRoot = 1
+                custom string aloha:sourcePrim = "/scene/worldBody/__29"
+                custom string aloha:stageRole = "A13_support_frame_component"
+                custom string aloha:stationaryAiStyleName = "source_worldbody_part_31_29"
+                custom bool aloha:trainingEligible = 0
+                custom bool aloha:visualOnly = 1
+            }
+
+            def Xform "source_worldbody_part_32_30" (
+                delete apiSchemas = ["PhysicsRigidBodyAPI"]
+                prepend references = @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene/worldBody/__30>
+            )
+            {
+                custom bool aloha:collisionEligible = 0
+                custom bool aloha:physicsEligible = 0
+                custom bool aloha:referenceOriginalComponentRoot = 1
+                custom string aloha:sourcePrim = "/scene/worldBody/__30"
+                custom string aloha:stageRole = "A13_support_frame_component"
+                custom string aloha:stationaryAiStyleName = "source_worldbody_part_32_30"
+                custom bool aloha:trainingEligible = 0
+                custom bool aloha:visualOnly = 1
+            }
+
+            def Xform "source_worldbody_part_33_31" (
+                delete apiSchemas = ["PhysicsRigidBodyAPI"]
+                prepend references = @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene/worldBody/__31>
+            )
+            {
+                custom bool aloha:collisionEligible = 0
+                custom bool aloha:physicsEligible = 0
+                custom bool aloha:referenceOriginalComponentRoot = 1
+                custom string aloha:sourcePrim = "/scene/worldBody/__31"
+                custom string aloha:stageRole = "A13_support_frame_component"
+                custom string aloha:stationaryAiStyleName = "source_worldbody_part_33_31"
+                custom bool aloha:trainingEligible = 0
+                custom bool aloha:visualOnly = 1
+            }
+
+            def Xform "source_worldbody_part_34_32" (
+                delete apiSchemas = ["PhysicsRigidBodyAPI"]
+                prepend references = @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene/worldBody/__32>
+            )
+            {
+                custom bool aloha:collisionEligible = 0
+                custom bool aloha:physicsEligible = 0
+                custom bool aloha:referenceOriginalComponentRoot = 1
+                custom string aloha:sourcePrim = "/scene/worldBody/__32"
+                custom string aloha:stageRole = "A13_support_frame_component"
+                custom string aloha:stationaryAiStyleName = "source_worldbody_part_34_32"
+                custom bool aloha:trainingEligible = 0
+                custom bool aloha:visualOnly = 1
+            }
+        }
+    }
+
+    def Scope "source_manifest" (
+        customData = {
+            string left_robot_paths_text = """/aloha/follower_left_base_link
+/aloha/follower_left_link_1
+/aloha/follower_left_link_2
+/aloha/follower_left_link_3
+/aloha/follower_left_link_4
+/aloha/follower_left_link_5
+/aloha/follower_left_link_6
+/aloha/follower_left_gripper_base
+/aloha/follower_left_gripper_left
+/aloha/follower_left_gripper_right"""
+            int left_robot_visual_link_count = 10
+            string naming_policy = "Align top-level link names with Trossen stationary_ai style while preserving original ALOHA1 sourcePrim metadata."
+            dictionary policy = {
+                bool camera_work_deferred = 1
+                bool copy_meshes = 0
+                bool import_collisions = 0
+                bool import_controllers = 0
+                bool import_joints = 0
+                bool import_physics = 0
+                bool reference_original_visuals = 1
+                bool training_eligible = 0
+                bool visual_only = 1
+            }
+            string right_robot_paths_text = """/aloha/follower_right_base_link
+/aloha/follower_right_link_1
+/aloha/follower_right_link_2
+/aloha/follower_right_link_3
+/aloha/follower_right_link_4
+/aloha/follower_right_link_5
+/aloha/follower_right_link_6
+/aloha/follower_right_gripper_base
+/aloha/follower_right_gripper_left
+/aloha/follower_right_gripper_right"""
+            int right_robot_visual_link_count = 10
+            string source_aloha1_usd = "local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd"
+            string source_reference_path = "../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd"
+            int support_frame_auxiliary_visual_component_count = 33
+            string support_frame_paths_text = """/aloha/frame_link/visuals/source_worldbody_part_01_underscore
+/aloha/frame_link/visuals/source_worldbody_part_02_1
+/aloha/frame_link/visuals/source_worldbody_part_04_2
+/aloha/frame_link/visuals/source_worldbody_part_05_3
+/aloha/frame_link/visuals/source_worldbody_part_06_4
+/aloha/frame_link/visuals/source_worldbody_part_07_5
+/aloha/frame_link/visuals/source_worldbody_part_08_6
+/aloha/frame_link/visuals/source_worldbody_part_09_7
+/aloha/frame_link/visuals/source_worldbody_part_10_8
+/aloha/frame_link/visuals/source_worldbody_part_11_9
+/aloha/frame_link/visuals/source_worldbody_part_12_10
+/aloha/frame_link/visuals/source_worldbody_part_13_11
+/aloha/frame_link/visuals/source_worldbody_part_14_12
+/aloha/frame_link/visuals/source_worldbody_part_15_13
+/aloha/frame_link/visuals/source_worldbody_part_16_14
+/aloha/frame_link/visuals/source_worldbody_part_17_15
+/aloha/frame_link/visuals/source_worldbody_part_18_16
+/aloha/frame_link/visuals/source_worldbody_part_19_17
+/aloha/frame_link/visuals/source_worldbody_part_20_18
+/aloha/frame_link/visuals/source_worldbody_part_21_19
+/aloha/frame_link/visuals/source_worldbody_part_22_20
+/aloha/frame_link/visuals/source_worldbody_part_23_21
+/aloha/frame_link/visuals/source_worldbody_part_24_22
+/aloha/frame_link/visuals/source_worldbody_part_25_23
+/aloha/frame_link/visuals/source_worldbody_part_26_24
+/aloha/frame_link/visuals/source_worldbody_part_27_25
+/aloha/frame_link/visuals/source_worldbody_part_28_26
+/aloha/frame_link/visuals/source_worldbody_part_29_27
+/aloha/frame_link/visuals/source_worldbody_part_30_28
+/aloha/frame_link/visuals/source_worldbody_part_31_29
+/aloha/frame_link/visuals/source_worldbody_part_32_30
+/aloha/frame_link/visuals/source_worldbody_part_33_31
+/aloha/frame_link/visuals/source_worldbody_part_34_32"""
+            int support_frame_visual_component_count = 35
+            dictionary trusted_baseline = {
+                string[] notes = ["User clarified that original ALOHA1 support-frame and base visuals are correct.", "Base height, base width, base visual footprint, and robot visual placement should be reused from the original ALOHA1 USD.", "The remaining measurement gap is only the X-direction relative distance between the two physical bases."]
+                string source_kind = "original_aloha1_usd_visual_geometry"
+                string source_type = "USER_CONFIRMED"
+                string status = "TRUSTED_FOR_VISUAL_LAYOUT"
+            }
+        }
+    )
+    {
+        custom bool aloha:collisionEligible = 0
+        custom bool aloha:physicsEligible = 0
+        custom string aloha:sourceRoot = "local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd"
+        custom string aloha:stageRole = "A13_source_manifest"
+        custom bool aloha:trainingEligible = 0
+        custom bool aloha:visualOnly = 1
+    }
+
+    def Xform "Looks" (
+        prepend references = @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene/Looks>
+    )
+    {
+        custom string aloha:stageRole = "A13_original_materials_and_lights_reference"
+        custom bool aloha:visualOnly = 1
+    }
+
+    def Xform "tabletop_link" (
+        delete apiSchemas = ["PhysicsRigidBodyAPI"]
+        prepend references = @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene/worldBody/table>
+    )
+    {
+        custom bool aloha:collisionEligible = 0
+        custom bool aloha:physicsEligible = 0
+        custom bool aloha:referenceOriginalComponentRoot = 1
+        custom string aloha:sourcePrim = "/scene/worldBody/table"
+        custom string aloha:stageRole = "A13_tabletop_link_visual_baseline"
+        custom string aloha:stationaryAiStyleName = "tabletop_link"
+        custom bool aloha:trainingEligible = 0
+        custom bool aloha:visualOnly = 1
+    }
+
+    def Xform "floor_reference_link" (
+        delete apiSchemas = ["PhysicsRigidBodyAPI"]
+        prepend references = @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene/worldBody/floor>
+    )
+    {
+        custom bool aloha:collisionEligible = 0
+        custom bool aloha:physicsEligible = 0
+        custom bool aloha:referenceOriginalComponentRoot = 1
+        custom string aloha:sourcePrim = "/scene/worldBody/floor"
+        custom string aloha:stageRole = "A13_floor_reference_visual_baseline"
+        custom string aloha:stationaryAiStyleName = "floor_reference_link"
+        custom bool aloha:trainingEligible = 0
+        custom bool aloha:visualOnly = 1
+
+        over "collisions"
+        {
+            over "CollisionPlane" (
+                delete apiSchemas = ["PhysicsCollisionAPI"]
+            )
+            {
+            }
+        }
+    }
+
+    def Xform "follower_left_base_link" (
+        delete apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI", "PhysicsArticulationRootAPI", "PhysicsFilteredPairsAPI"]
+        prepend references = @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene/left_base_link/left_base_link>
+    )
+    {
+        custom bool aloha:collisionEligible = 0
+        custom bool aloha:physicsEligible = 0
+        custom bool aloha:referenceOriginalComponentRoot = 1
+        custom string aloha:sourcePrim = "/scene/left_base_link/left_base_link"
+        custom string aloha:stageRole = "A13_left_robot_link"
+        custom string aloha:stationaryAiStyleName = "follower_left_base_link"
+        custom bool aloha:trainingEligible = 0
+        custom bool aloha:visualOnly = 1
+    }
+
+    def Xform "follower_left_link_1" (
+        delete apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI", "PhysicsFilteredPairsAPI"]
+        prepend references = @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene/left_base_link/left_shoulder_link>
+    )
+    {
+        custom bool aloha:collisionEligible = 0
+        custom bool aloha:physicsEligible = 0
+        custom bool aloha:referenceOriginalComponentRoot = 1
+        custom string aloha:sourcePrim = "/scene/left_base_link/left_shoulder_link"
+        custom string aloha:stageRole = "A13_left_robot_link"
+        custom string aloha:stationaryAiStyleName = "follower_left_link_1"
+        custom bool aloha:trainingEligible = 0
+        custom bool aloha:visualOnly = 1
+    }
+
+    def Xform "follower_left_link_2" (
+        delete apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI", "PhysicsFilteredPairsAPI"]
+        prepend references = @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene/left_base_link/left_upper_arm_link>
+    )
+    {
+        custom bool aloha:collisionEligible = 0
+        custom bool aloha:physicsEligible = 0
+        custom bool aloha:referenceOriginalComponentRoot = 1
+        custom string aloha:sourcePrim = "/scene/left_base_link/left_upper_arm_link"
+        custom string aloha:stageRole = "A13_left_robot_link"
+        custom string aloha:stationaryAiStyleName = "follower_left_link_2"
+        custom bool aloha:trainingEligible = 0
+        custom bool aloha:visualOnly = 1
+    }
+
+    def Xform "follower_left_link_3" (
+        delete apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI", "PhysicsFilteredPairsAPI"]
+        prepend references = @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene/left_base_link/left_upper_forearm_link>
+    )
+    {
+        custom bool aloha:collisionEligible = 0
+        custom bool aloha:physicsEligible = 0
+        custom bool aloha:referenceOriginalComponentRoot = 1
+        custom string aloha:sourcePrim = "/scene/left_base_link/left_upper_forearm_link"
+        custom string aloha:stageRole = "A13_left_robot_link"
+        custom string aloha:stationaryAiStyleName = "follower_left_link_3"
+        custom bool aloha:trainingEligible = 0
+        custom bool aloha:visualOnly = 1
+    }
+
+    def Xform "follower_left_link_4" (
+        delete apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI", "PhysicsFilteredPairsAPI"]
+        prepend references = @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene/left_base_link/left_lower_forearm_link>
+    )
+    {
+        custom bool aloha:collisionEligible = 0
+        custom bool aloha:physicsEligible = 0
+        custom bool aloha:referenceOriginalComponentRoot = 1
+        custom string aloha:sourcePrim = "/scene/left_base_link/left_lower_forearm_link"
+        custom string aloha:stageRole = "A13_left_robot_link"
+        custom string aloha:stationaryAiStyleName = "follower_left_link_4"
+        custom bool aloha:trainingEligible = 0
+        custom bool aloha:visualOnly = 1
+    }
+
+    def Xform "follower_left_link_5" (
+        delete apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI", "PhysicsFilteredPairsAPI"]
+        prepend references = @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene/left_base_link/left_wrist_link>
+    )
+    {
+        custom bool aloha:collisionEligible = 0
+        custom bool aloha:physicsEligible = 0
+        custom bool aloha:referenceOriginalComponentRoot = 1
+        custom string aloha:sourcePrim = "/scene/left_base_link/left_wrist_link"
+        custom string aloha:stageRole = "A13_left_robot_link"
+        custom string aloha:stationaryAiStyleName = "follower_left_link_5"
+        custom bool aloha:trainingEligible = 0
+        custom bool aloha:visualOnly = 1
+    }
+
+    def Xform "follower_left_link_6" (
+        delete apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+        prepend references = @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene/left_base_link/left_gripper_link>
+    )
+    {
+        custom bool aloha:collisionEligible = 0
+        custom bool aloha:physicsEligible = 0
+        custom bool aloha:referenceOriginalComponentRoot = 1
+        custom string aloha:sourcePrim = "/scene/left_base_link/left_gripper_link"
+        custom string aloha:stageRole = "A13_left_robot_link"
+        custom string aloha:stationaryAiStyleName = "follower_left_link_6"
+        custom bool aloha:trainingEligible = 0
+        custom bool aloha:visualOnly = 1
+    }
+
+    def Xform "follower_left_gripper_base" (
+        delete apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI", "PhysicsFilteredPairsAPI"]
+        prepend references = @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene/left_base_link/left_gripper_base>
+    )
+    {
+        custom bool aloha:collisionEligible = 0
+        custom bool aloha:physicsEligible = 0
+        custom bool aloha:referenceOriginalComponentRoot = 1
+        custom string aloha:sourcePrim = "/scene/left_base_link/left_gripper_base"
+        custom string aloha:stageRole = "A13_left_robot_link"
+        custom string aloha:stationaryAiStyleName = "follower_left_gripper_base"
+        custom bool aloha:trainingEligible = 0
+        custom bool aloha:visualOnly = 1
+    }
+
+    def Xform "follower_left_gripper_left" (
+        delete apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI", "PhysicsFilteredPairsAPI"]
+        prepend references = @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene/left_base_link/left_left_finger_link>
+    )
+    {
+        custom bool aloha:collisionEligible = 0
+        custom bool aloha:physicsEligible = 0
+        custom bool aloha:referenceOriginalComponentRoot = 1
+        custom string aloha:sourcePrim = "/scene/left_base_link/left_left_finger_link"
+        custom string aloha:stageRole = "A13_left_robot_link"
+        custom string aloha:stationaryAiStyleName = "follower_left_gripper_left"
+        custom bool aloha:trainingEligible = 0
+        custom bool aloha:visualOnly = 1
+    }
+
+    def Xform "follower_left_gripper_right" (
+        delete apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI", "PhysicsFilteredPairsAPI"]
+        prepend references = @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene/left_base_link/left_right_finger_link>
+    )
+    {
+        custom bool aloha:collisionEligible = 0
+        custom bool aloha:physicsEligible = 0
+        custom bool aloha:referenceOriginalComponentRoot = 1
+        custom string aloha:sourcePrim = "/scene/left_base_link/left_right_finger_link"
+        custom string aloha:stageRole = "A13_left_robot_link"
+        custom string aloha:stationaryAiStyleName = "follower_left_gripper_right"
+        custom bool aloha:trainingEligible = 0
+        custom bool aloha:visualOnly = 1
+    }
+
+    def Xform "follower_right_base_link" (
+        delete apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI", "PhysicsArticulationRootAPI", "PhysicsFilteredPairsAPI"]
+        prepend references = @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene/right_base_link/right_base_link>
+    )
+    {
+        custom bool aloha:collisionEligible = 0
+        custom bool aloha:physicsEligible = 0
+        custom bool aloha:referenceOriginalComponentRoot = 1
+        custom string aloha:sourcePrim = "/scene/right_base_link/right_base_link"
+        custom string aloha:stageRole = "A13_right_robot_link"
+        custom string aloha:stationaryAiStyleName = "follower_right_base_link"
+        custom bool aloha:trainingEligible = 0
+        custom bool aloha:visualOnly = 1
+    }
+
+    def Xform "follower_right_link_1" (
+        delete apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI", "PhysicsFilteredPairsAPI"]
+        prepend references = @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene/right_base_link/right_shoulder_link>
+    )
+    {
+        custom bool aloha:collisionEligible = 0
+        custom bool aloha:physicsEligible = 0
+        custom bool aloha:referenceOriginalComponentRoot = 1
+        custom string aloha:sourcePrim = "/scene/right_base_link/right_shoulder_link"
+        custom string aloha:stageRole = "A13_right_robot_link"
+        custom string aloha:stationaryAiStyleName = "follower_right_link_1"
+        custom bool aloha:trainingEligible = 0
+        custom bool aloha:visualOnly = 1
+    }
+
+    def Xform "follower_right_link_2" (
+        delete apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI", "PhysicsFilteredPairsAPI"]
+        prepend references = @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene/right_base_link/right_upper_arm_link>
+    )
+    {
+        custom bool aloha:collisionEligible = 0
+        custom bool aloha:physicsEligible = 0
+        custom bool aloha:referenceOriginalComponentRoot = 1
+        custom string aloha:sourcePrim = "/scene/right_base_link/right_upper_arm_link"
+        custom string aloha:stageRole = "A13_right_robot_link"
+        custom string aloha:stationaryAiStyleName = "follower_right_link_2"
+        custom bool aloha:trainingEligible = 0
+        custom bool aloha:visualOnly = 1
+    }
+
+    def Xform "follower_right_link_3" (
+        delete apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI", "PhysicsFilteredPairsAPI"]
+        prepend references = @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene/right_base_link/right_upper_forearm_link>
+    )
+    {
+        custom bool aloha:collisionEligible = 0
+        custom bool aloha:physicsEligible = 0
+        custom bool aloha:referenceOriginalComponentRoot = 1
+        custom string aloha:sourcePrim = "/scene/right_base_link/right_upper_forearm_link"
+        custom string aloha:stageRole = "A13_right_robot_link"
+        custom string aloha:stationaryAiStyleName = "follower_right_link_3"
+        custom bool aloha:trainingEligible = 0
+        custom bool aloha:visualOnly = 1
+    }
+
+    def Xform "follower_right_link_4" (
+        delete apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI", "PhysicsFilteredPairsAPI"]
+        prepend references = @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene/right_base_link/right_lower_forearm_link>
+    )
+    {
+        custom bool aloha:collisionEligible = 0
+        custom bool aloha:physicsEligible = 0
+        custom bool aloha:referenceOriginalComponentRoot = 1
+        custom string aloha:sourcePrim = "/scene/right_base_link/right_lower_forearm_link"
+        custom string aloha:stageRole = "A13_right_robot_link"
+        custom string aloha:stationaryAiStyleName = "follower_right_link_4"
+        custom bool aloha:trainingEligible = 0
+        custom bool aloha:visualOnly = 1
+    }
+
+    def Xform "follower_right_link_5" (
+        delete apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI", "PhysicsFilteredPairsAPI"]
+        prepend references = @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene/right_base_link/right_wrist_link>
+    )
+    {
+        custom bool aloha:collisionEligible = 0
+        custom bool aloha:physicsEligible = 0
+        custom bool aloha:referenceOriginalComponentRoot = 1
+        custom string aloha:sourcePrim = "/scene/right_base_link/right_wrist_link"
+        custom string aloha:stageRole = "A13_right_robot_link"
+        custom string aloha:stationaryAiStyleName = "follower_right_link_5"
+        custom bool aloha:trainingEligible = 0
+        custom bool aloha:visualOnly = 1
+    }
+
+    def Xform "follower_right_link_6" (
+        delete apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+        prepend references = @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene/right_base_link/right_gripper_link>
+    )
+    {
+        custom bool aloha:collisionEligible = 0
+        custom bool aloha:physicsEligible = 0
+        custom bool aloha:referenceOriginalComponentRoot = 1
+        custom string aloha:sourcePrim = "/scene/right_base_link/right_gripper_link"
+        custom string aloha:stageRole = "A13_right_robot_link"
+        custom string aloha:stationaryAiStyleName = "follower_right_link_6"
+        custom bool aloha:trainingEligible = 0
+        custom bool aloha:visualOnly = 1
+    }
+
+    def Xform "follower_right_gripper_base" (
+        delete apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI", "PhysicsFilteredPairsAPI"]
+        prepend references = @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene/right_base_link/right_gripper_base>
+    )
+    {
+        custom bool aloha:collisionEligible = 0
+        custom bool aloha:physicsEligible = 0
+        custom bool aloha:referenceOriginalComponentRoot = 1
+        custom string aloha:sourcePrim = "/scene/right_base_link/right_gripper_base"
+        custom string aloha:stageRole = "A13_right_robot_link"
+        custom string aloha:stationaryAiStyleName = "follower_right_gripper_base"
+        custom bool aloha:trainingEligible = 0
+        custom bool aloha:visualOnly = 1
+    }
+
+    def Xform "follower_right_gripper_left" (
+        delete apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI", "PhysicsFilteredPairsAPI"]
+        prepend references = @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene/right_base_link/right_left_finger_link>
+    )
+    {
+        custom bool aloha:collisionEligible = 0
+        custom bool aloha:physicsEligible = 0
+        custom bool aloha:referenceOriginalComponentRoot = 1
+        custom string aloha:sourcePrim = "/scene/right_base_link/right_left_finger_link"
+        custom string aloha:stageRole = "A13_right_robot_link"
+        custom string aloha:stationaryAiStyleName = "follower_right_gripper_left"
+        custom bool aloha:trainingEligible = 0
+        custom bool aloha:visualOnly = 1
+    }
+
+    def Xform "follower_right_gripper_right" (
+        delete apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI", "PhysicsFilteredPairsAPI"]
+        prepend references = @../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene/right_base_link/right_right_finger_link>
+    )
+    {
+        custom bool aloha:collisionEligible = 0
+        custom bool aloha:physicsEligible = 0
+        custom bool aloha:referenceOriginalComponentRoot = 1
+        custom string aloha:sourcePrim = "/scene/right_base_link/right_right_finger_link"
+        custom string aloha:stageRole = "A13_right_robot_link"
+        custom string aloha:stationaryAiStyleName = "follower_right_gripper_right"
+        custom bool aloha:trainingEligible = 0
+        custom bool aloha:visualOnly = 1
+    }
+}

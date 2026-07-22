@@ -1,0 +1,39 @@
+schema_version: 1
+stage_group: A14_A18_stationary_ai_style_rebuild
+
+source_aloha1_usd: local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd
+trossen_reference_usd: external/trossen_ai_isaac/assets/robots/stationary_ai/stationary_ai.usd
+
+outputs:
+  a14_resource_decomposition: aloha_isaac_rebuild/scenes/a14_aloha_resource_decomposition.usda
+  a15_visual_assembly: aloha_isaac_rebuild/scenes/a15_aloha_visual_assembly.usda
+  a15_home_pose_preview: aloha_isaac_rebuild/scenes/a15_aloha_home_pose_preview.usda
+  a16_collider_structure: aloha_isaac_rebuild/scenes/a16_aloha_collider_structure.usda
+  a16_home_pose_collider_preview: aloha_isaac_rebuild/scenes/a16_aloha_home_pose_collider_preview.usda
+  a17_joint_audit_json: aloha_isaac_rebuild/artifacts/validation/a17_aloha_joint_articulation_source_audit.json
+  a17_clean_articulation_mapping_plan_json: aloha_isaac_rebuild/artifacts/validation/a17_clean_articulation_mapping_plan.json
+  a18_clean_kinematic_tree_preflight_json: aloha_isaac_rebuild/artifacts/validation/a18_clean_kinematic_tree_preflight.json
+  a18_clean_kinematic_tree_preflight_md: aloha_isaac_rebuild/reports/a18_clean_kinematic_tree_preflight.md
+  a18_camera_status_json: aloha_isaac_rebuild/artifacts/validation/a18_aloha_camera_sensor_status.json
+  a19_clean_articulation_candidate: aloha_isaac_rebuild/scenes/a19_clean_articulation_candidate.usda
+  a19_clean_articulation_candidate_audit_json: aloha_isaac_rebuild/artifacts/validation/a19_clean_articulation_candidate_audit.json
+  a19_clean_articulation_candidate_md: aloha_isaac_rebuild/reports/a19_clean_articulation_candidate.md
+
+root_prim: /aloha
+
+policy:
+  source_aloha1_read_only: true
+  copy_meshes: false
+  use_references: true
+  meters_per_unit: 1.0
+  up_axis: Z
+  a14_physics_ready: false
+  a15_physics_ready: false
+  a16_physics_ready: false
+  a17_author_articulation: false
+  a18_author_calibrated_cameras: false
+
+semantic_notes:
+  - A14-A16 align asset organization toward Trossen stationary_ai.usd.
+  - They do not claim Trossen runtime compatibility.
+  - A17 and A18 are blocked gates until ALOHA1-specific joint/camera evidence is complete.

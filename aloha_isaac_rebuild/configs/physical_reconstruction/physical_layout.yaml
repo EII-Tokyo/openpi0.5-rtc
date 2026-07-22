@@ -1,0 +1,101 @@
+schema_version: 1
+stage: A9_physical_layout_preview
+purpose: >
+  Visual-only non-camera physical-layout checkpoint for the clean ALOHA1 Isaac
+  rebuild. This stage freezes table/support-frame/base-reference geometry
+  communication anchors while camera calibration is intentionally deferred.
+
+global_policy:
+  source_type: MIXED
+  source_kind: reference_and_pending_measurement_visual_layout
+  visual_preview_only: true
+  camera_work_deferred: true
+  measured_camera_extrinsics: false
+  physics_ready: false
+  collision_ready: false
+  render_eligible: false
+  training_eligible: false
+  replay_eligible: false
+  notes:
+    - A9 must not modify camera prims, camera preview markers, or camera metadata.
+    - A9 must not create PhysicsScene, collider, rigid body, articulation, render product, replay, or training hooks.
+    - The table reference still uses the Trossen Stationary AI tabletop visual bbox as a hidden reference proxy, not a user-measured table.
+    - Base reference geometry is limited to user-measured Y-edge guides; base X extent and full CAD are still missing.
+
+physical_layout_root: /aloha/physical_layout
+visuals_root: /aloha/physical_layout/visuals
+
+table_reference:
+  source_type: MANUFACTURER
+  source_kind: trossen_stationary_ai_reference
+  outer_size_m: [1.2192, 0.7490, 0.0200]
+  center_m: [0.0, 0.0, -0.0100]
+  outline_z_m: 0.024
+  outline_width_m: 0.012
+  status: HIDDEN_REFERENCE_ONLY
+  visibility: hidden
+  notes:
+    - This is a hidden Trossen Stationary AI table reference overlay.
+    - It is not the ALOHA1 support-frame width and must not be used as a main-frame measurement.
+  allowed_use:
+    - viewport_stage_tree_inspection
+    - physical_layout_checkpoint
+  forbidden_use:
+    - support_plane_truth
+    - collision
+    - physics
+    - contact_validation
+    - training
+
+world_frame_visual:
+  origin_m: [0.0, 0.0, 0.035]
+  axis_length_m: 0.250
+  axis_width_m: 0.012
+  status: APPLIED_VISUAL_ONLY
+  x_axis_meaning: support_frame_outer_length_direction
+  y_axis_meaning: toward_cam_low_extension
+  z_axis_meaning: up
+  forbidden_use:
+    - robot_base_transform_truth
+    - camera_extrinsics
+    - physics
+    - training
+
+base_y_reference:
+  source_type: MEASURED
+  source_kind: user_measured_base_y_edges
+  near_cam_low_y_m: 0.1325
+  near_cam_high_y_m: -0.0775
+  guide_size_m: [1.220, 0.012, 0.012]
+  guide_z_m: 0.032
+  status: VERIFIED_Y_EDGES_ONLY
+  measurement_status: MEASURED
+  missing:
+    - left_base_x_extent
+    - right_base_x_extent
+    - base_mesh_or_cad
+    - base_to_support_frame_full_transform
+  forbidden_use:
+    - full_base_footprint
+    - collision
+    - physics
+    - articulation_base_transform
+    - training
+
+future_measurements:
+  pipe_pose:
+    status: MISSING
+    required_before_pipe_visual_model: true
+    required_values:
+      - pipe_entry_center_in_physical_layout_frame_m
+      - pipe_axis_direction_in_physical_layout_frame
+      - pipe_outer_diameter_m
+      - pipe_inner_diameter_m
+      - effective_insertion_depth_m
+  bottle_initial_pose:
+    status: MISSING
+    required_before_bottle_scene_placement: true
+    required_values:
+      - bottle_axis_direction_at_reset
+      - bottle_center_or_bottom_reference_in_physical_layout_frame_m
+      - grasp_center_reference_from_bottle_bottom_m

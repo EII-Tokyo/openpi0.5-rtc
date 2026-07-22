@@ -1,0 +1,69 @@
+schema_version: 1
+stage: A7_camera_default_pose_preview
+purpose: >
+  Default placeholder camera pose preview for continuing the clean ALOHA1 Isaac
+  rebuild while real camera measurements are unavailable. These values are not
+  measured extrinsics and must not be used for training, OpenPI capture, ROS
+  publishing, or camera calibration claims.
+
+global_policy:
+  source_type: TUNED
+  source_kind: default_placeholder_until_measured
+  visual_preview_only: true
+  measured_pose: false
+  calibration_status: DEFAULT_PLACEHOLDER_NOT_MEASURED
+  render_eligible: false
+  training_eligible: false
+  ros_bridge_eligible: false
+  openpi_capture_eligible: false
+  notes:
+    - The user is away from the physical workcell and cannot measure real camera poses now.
+    - The defaults preserve the A5 visual layout and create an explicit placeholder layer.
+    - Replace these values with measured optical-center and orientation values before calibration, rendering, or training.
+    - On 2026-07-22, the user visually confirmed this default preview is correct enough to proceed to the next rebuild stage.
+  user_visual_layout_confirmed: true
+  user_visual_layout_confirmation_date: 2026-07-22
+  user_confirmation_scope: visual_layout_only_not_measured_extrinsics
+
+preview_marker_size_m: [0.035, 0.035, 0.035]
+preview_direction_bar_size_m: [0.010, 0.140, 0.010]
+
+cameras:
+  cam_high:
+    sensor_prim: /aloha/cam_high_link/cam_high_color_frame/cam_high
+    default_optical_center_m: [0.0, -0.360, 0.100]
+    default_direction_hint: positive_y
+    default_direction_vector_world: [0.0, 1.0, 0.0]
+    source_type: TUNED
+    source_kind: default_placeholder_until_measured
+    status: APPLIED_PREVIEW_ONLY
+
+  cam_low:
+    sensor_prim: /aloha/cam_low_link/cam_low_color_frame/cam_low
+    default_optical_center_m: [0.030, 0.5825, 0.120]
+    default_direction_hint: negative_y
+    default_direction_vector_world: [0.0, -1.0, 0.0]
+    source_type: TUNED
+    source_kind: default_placeholder_until_measured
+    status: APPLIED_PREVIEW_ONLY
+    notes:
+      - This uses the top of the 100 mm cam_low vertical support as a temporary optical-center placeholder.
+      - The real optical center may be offset from the camera base and must be measured later.
+
+  cam_left_wrist:
+    sensor_prim: /aloha/left_camera_link/cam_left_wrist_color_frame/cam_left_wrist
+    default_optical_center_m: [-0.360, 0.0, 0.100]
+    default_direction_hint: toward_center
+    default_direction_vector_world: [1.0, 0.0, 0.0]
+    source_type: TUNED
+    source_kind: default_placeholder_until_measured
+    status: APPLIED_PREVIEW_ONLY
+
+  cam_right_wrist:
+    sensor_prim: /aloha/right_camera_link/cam_right_wrist_color_frame/cam_right_wrist
+    default_optical_center_m: [0.360, 0.0, 0.100]
+    default_direction_hint: toward_center
+    default_direction_vector_world: [-1.0, 0.0, 0.0]
+    source_type: TUNED
+    source_kind: default_placeholder_until_measured
+    status: APPLIED_PREVIEW_ONLY

@@ -31,19 +31,61 @@ support_frame:
     unit: m
     source_type: MEASURED
     source_kind: user_measured
-    source_description: User clarified this is the outer-to-outer length of the upper steel support frame/rack footprint, not the table length.
+    source_description: User clarified this is an actual measured outer-to-outer length of the upper steel support frame/rack footprint, not the table length.
     measurement_date: 2026-07-22
     confidence: high
-    status: PROVIDED
+    status: VERIFIED
+    measurement_status: MEASURED
+    allowed_use: [support_frame_visual_layout, viewport_stage_tree_inspection]
+    forbidden_use: [physics, collision, camera_extrinsics, replay, training]
   outer_width_m:
     value: 0.625
     unit: m
     source_type: MEASURED
     source_kind: user_measured
-    source_description: User clarified this is the outer-to-outer width of the upper steel support frame/rack footprint, not the table width.
+    source_description: User clarified this is an actual measured outer-to-outer width of the upper steel support frame/rack footprint, not the table width.
     measurement_date: 2026-07-22
     confidence: high
-    status: PROVIDED
+    status: VERIFIED
+    measurement_status: MEASURED
+    allowed_use: [support_frame_visual_layout, viewport_stage_tree_inspection]
+    forbidden_use: [physics, collision, camera_extrinsics, replay, training]
+  steel_square_tube_width_m:
+    value: 0.020
+    unit: m
+    source_type: MEASURED
+    source_kind: user_measured
+    source_description: User clarified this is the actual measured ALOHA1 support-frame square-tube outside width.
+    measurement_date: 2026-07-22
+    confidence: high
+    status: VERIFIED
+    measurement_status: MEASURED
+    allowed_use: [support_frame_visual_layout, viewport_stage_tree_inspection]
+    forbidden_use: [physics, collision, camera_extrinsics, replay, training]
+  cam_low_extension_inner_gap_m:
+    value: 0.260
+    unit: m
+    source_type: MEASURED
+    source_kind: user_measured
+    source_description: User clarified this is an actual measured inner gap between two opposing square tubes, not outer-to-outer extension depth.
+    measurement_date: 2026-07-22
+    confidence: high
+    status: VERIFIED
+    measurement_status: MEASURED
+    allowed_use: [support_frame_visual_layout, viewport_stage_tree_inspection]
+    forbidden_use: [physics, collision, camera_extrinsics, replay, training]
+  cam_low_vertical_support_height_m:
+    value: 0.100
+    unit: m
+    source_type: MEASURED
+    source_kind: user_measured
+    source_description: User clarified this is the actual measured vertical square-tube support height on the outer cam_low-side tube.
+    measurement_date: 2026-07-22
+    confidence: high
+    status: VERIFIED
+    measurement_status: MEASURED
+    allowed_use: [support_frame_visual_layout, viewport_stage_tree_inspection]
+    forbidden_use: [physics, collision, camera_extrinsics, replay, training]
   visual_marker_width_m:
     value: 0.010
     unit: m

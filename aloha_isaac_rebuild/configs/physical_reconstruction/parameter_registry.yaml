@@ -42,26 +42,176 @@ support_frame.outer_length_m:
   unit: m
   source_type: MEASURED
   source_kind: user_measured
-  source_description: User clarified this is the outer-to-outer length of the upper steel support frame/rack footprint, not the table length.
+  source_description: User clarified this is an actual measured outer-to-outer length of the upper steel support frame/rack footprint, not the table length.
   measurement_date: 2026-07-22
   confidence: high
   used_in_files:
     - aloha_isaac_rebuild/configs/physical_reconstruction/support_frame.yaml
     - aloha_isaac_rebuild/scenes/aloha_support_frame_visual.usda
-  status: APPLIED
+  status: VERIFIED
+  measurement_status: MEASURED
+  allowed_use:
+    - support_frame_visual_layout
+    - viewport_stage_tree_inspection
+  forbidden_use:
+    - physics
+    - collision
+    - camera_extrinsics
+    - replay
+    - training
 
 support_frame.outer_width_m:
   value: 0.625
   unit: m
   source_type: MEASURED
   source_kind: user_measured
-  source_description: User clarified this is the outer-to-outer width of the upper steel support frame/rack footprint, not the table width.
+  source_description: User clarified this is an actual measured outer-to-outer width of the upper steel support frame/rack footprint, not the table width.
   measurement_date: 2026-07-22
   confidence: high
   used_in_files:
     - aloha_isaac_rebuild/configs/physical_reconstruction/support_frame.yaml
     - aloha_isaac_rebuild/scenes/aloha_support_frame_visual.usda
-  status: APPLIED
+  status: VERIFIED
+  measurement_status: MEASURED
+  allowed_use:
+    - support_frame_visual_layout
+    - viewport_stage_tree_inspection
+  forbidden_use:
+    - physics
+    - collision
+    - camera_extrinsics
+    - replay
+    - training
+
+support_frame.steel_square_tube_width_m:
+  value: 0.020
+  unit: m
+  source_type: MEASURED
+  source_kind: user_measured
+  source_description: User clarified this is the actual measured ALOHA1 support-frame square-tube outside width.
+  measurement_date: 2026-07-22
+  confidence: high
+  used_in_files:
+    - aloha_isaac_rebuild/configs/physical_reconstruction/support_frame.yaml
+    - aloha_isaac_rebuild/configs/physical_reconstruction/support_frame_components.yaml
+    - aloha_isaac_rebuild/scenes/aloha_support_frame_components_visual.usda
+  status: VERIFIED
+  measurement_status: MEASURED
+  allowed_use:
+    - support_frame_visual_layout
+    - viewport_stage_tree_inspection
+  forbidden_use:
+    - physics
+    - collision
+    - camera_extrinsics
+    - replay
+    - training
+
+support_frame.cam_low_extension_inner_gap_m:
+  value: 0.260
+  unit: m
+  source_type: MEASURED
+  source_kind: user_measured
+  source_description: User clarified this is an actual measured inner gap between two opposing square tubes, not outer-to-outer extension depth.
+  measurement_date: 2026-07-22
+  confidence: high
+  used_in_files:
+    - aloha_isaac_rebuild/configs/physical_reconstruction/support_frame.yaml
+    - aloha_isaac_rebuild/configs/physical_reconstruction/support_frame_components.yaml
+    - aloha_isaac_rebuild/scenes/aloha_support_frame_components_visual.usda
+  status: VERIFIED
+  measurement_status: MEASURED
+  allowed_use:
+    - support_frame_visual_layout
+    - viewport_stage_tree_inspection
+  forbidden_use:
+    - physics
+    - collision
+    - camera_extrinsics
+    - replay
+    - training
+
+support_frame.cam_low_vertical_support_height_m:
+  value: 0.100
+  unit: m
+  source_type: MEASURED
+  source_kind: user_measured
+  source_description: User clarified this is the actual measured vertical square-tube support height on the outer cam_low-side tube.
+  measurement_date: 2026-07-22
+  confidence: high
+  used_in_files:
+    - aloha_isaac_rebuild/configs/physical_reconstruction/support_frame.yaml
+    - aloha_isaac_rebuild/configs/physical_reconstruction/support_frame_components.yaml
+    - aloha_isaac_rebuild/scenes/aloha_support_frame_components_visual.usda
+  status: VERIFIED
+  measurement_status: MEASURED
+  allowed_use:
+    - support_frame_visual_layout
+    - viewport_stage_tree_inspection
+  forbidden_use:
+    - physics
+    - collision
+    - camera_extrinsics
+    - replay
+    - training
+
+support_frame.base_edge_near_cam_low_offset_m:
+  value: 0.180
+  unit: m
+  source_type: MEASURED
+  source_kind: user_measured_base_y_edges
+  source_description: Actual measured inward offset from the original cam_low-side support-frame outer edge to the ALOHA base outer edge nearer cam_low.
+  measurement_date: 2026-07-22
+  confidence: high
+  used_in_files:
+    - aloha_isaac_rebuild/configs/physical_reconstruction/support_frame_components.yaml
+    - aloha_isaac_rebuild/configs/physical_reconstruction/physical_layout.yaml
+    - aloha_isaac_rebuild/scenes/aloha_support_frame_components_visual.usda
+    - aloha_isaac_rebuild/scenes/aloha_physical_layout_preview.usda
+  status: VERIFIED
+  measurement_status: MEASURED
+  derived_value_m: 0.1325
+  derived_value_description: Original cam_low-side frame edge is Y=+0.3125 m; base edge is 0.180 m inward, so Y=+0.1325 m.
+  allowed_use:
+    - support_frame_visual_layout
+    - viewport_stage_tree_inspection
+  forbidden_use:
+    - full_base_footprint
+    - articulation_base_transform
+    - physics
+    - collision
+    - camera_extrinsics
+    - replay
+    - training
+
+support_frame.base_edge_near_cam_high_offset_m:
+  value: 0.235
+  unit: m
+  source_type: MEASURED
+  source_kind: user_measured_base_y_edges
+  source_description: Actual measured inward offset from the original cam_high-side support-frame outer edge to the ALOHA base outer edge nearer cam_high.
+  measurement_date: 2026-07-22
+  confidence: high
+  used_in_files:
+    - aloha_isaac_rebuild/configs/physical_reconstruction/support_frame_components.yaml
+    - aloha_isaac_rebuild/configs/physical_reconstruction/physical_layout.yaml
+    - aloha_isaac_rebuild/scenes/aloha_support_frame_components_visual.usda
+    - aloha_isaac_rebuild/scenes/aloha_physical_layout_preview.usda
+  status: VERIFIED
+  measurement_status: MEASURED
+  derived_value_m: -0.0775
+  derived_value_description: Original cam_high-side frame edge is Y=-0.3125 m; base edge is 0.235 m inward, so Y=-0.0775 m.
+  allowed_use:
+    - support_frame_visual_layout
+    - viewport_stage_tree_inspection
+  forbidden_use:
+    - full_base_footprint
+    - articulation_base_transform
+    - physics
+    - collision
+    - camera_extrinsics
+    - replay
+    - training
 
 support_frame.visual_marker_width_m:
   value: 0.010
@@ -257,17 +407,17 @@ camera_markers.cam_high.schematic_position_m:
     - calibration_claim
 
 camera_markers.cam_low.schematic_position_m:
-  value: [0.0, 0.360, 0.100]
+  value: [0.030, 0.5825, 0.120]
   unit: m
   source_type: TUNED
   source_kind: manual_visual_layout_only
-  source_description: Schematic marker position for viewport readability only. Real cam_low extrinsics remain MISSING.
+  source_description: Schematic marker position at the top of the cam_low-side 100 mm vertical support area. This is still only a viewport layout marker; real cam_low optical-center extrinsics remain MISSING.
   measurement_date: 2026-07-22
   confidence: low
   used_in_files:
     - aloha_isaac_rebuild/configs/physical_reconstruction/camera_markers.yaml
     - aloha_isaac_rebuild/scenes/aloha_camera_marker_visual.usda
-  status: APPLIED
+  status: VERIFIED
   allowed_use:
     - viewport_stage_tree_inspection
     - visual_debug_only
@@ -315,3 +465,362 @@ camera_markers.cam_right_wrist.schematic_position_m:
     - camera_extrinsics
     - training
     - calibration_claim
+
+camera_default_pose_preview.cam_high.default_optical_center_m:
+  value: [0.0, -0.360, 0.100]
+  unit: m
+  source_type: TUNED
+  source_kind: default_placeholder_until_measured
+  source_description: User visually confirmed the A7 default preview is correct enough to proceed. This is not a measured optical center or calibrated extrinsic.
+  measurement_date: 2026-07-22
+  confidence: low
+  used_in_files:
+    - aloha_isaac_rebuild/configs/physical_reconstruction/camera_default_pose_preview.yaml
+    - aloha_isaac_rebuild/scenes/aloha_camera_default_pose_preview.usda
+  status: VERIFIED_VISUAL_PREVIEW_ONLY
+  allowed_use:
+    - viewport_stage_tree_inspection
+    - visual_layout_checkpoint
+  forbidden_use:
+    - camera_extrinsics
+    - render_product
+    - training
+    - openpi_runtime_capture
+    - ros_bridge_publish
+    - calibration_claim
+    - physics
+    - collision
+
+camera_default_pose_preview.cam_low.default_optical_center_m:
+  value: [0.030, 0.5825, 0.120]
+  unit: m
+  source_type: TUNED
+  source_kind: default_placeholder_until_measured
+  source_description: User visually confirmed the A7 cam_low preview sits on the low-camera extension support and points toward negative Y. This is not a measured optical center or calibrated extrinsic.
+  measurement_date: 2026-07-22
+  confidence: low
+  used_in_files:
+    - aloha_isaac_rebuild/configs/physical_reconstruction/camera_default_pose_preview.yaml
+    - aloha_isaac_rebuild/scenes/aloha_camera_default_pose_preview.usda
+  status: VERIFIED_VISUAL_PREVIEW_ONLY
+  allowed_use:
+    - viewport_stage_tree_inspection
+    - visual_layout_checkpoint
+  forbidden_use:
+    - camera_extrinsics
+    - render_product
+    - training
+    - openpi_runtime_capture
+    - ros_bridge_publish
+    - calibration_claim
+    - physics
+    - collision
+
+camera_default_pose_preview.cam_left_wrist.default_optical_center_m:
+  value: [-0.360, 0.0, 0.100]
+  unit: m
+  source_type: TUNED
+  source_kind: default_placeholder_until_measured
+  source_description: User visually confirmed the A7 default preview is correct enough to proceed. This is not a measured optical center or calibrated extrinsic.
+  measurement_date: 2026-07-22
+  confidence: low
+  used_in_files:
+    - aloha_isaac_rebuild/configs/physical_reconstruction/camera_default_pose_preview.yaml
+    - aloha_isaac_rebuild/scenes/aloha_camera_default_pose_preview.usda
+  status: VERIFIED_VISUAL_PREVIEW_ONLY
+  allowed_use:
+    - viewport_stage_tree_inspection
+    - visual_layout_checkpoint
+  forbidden_use:
+    - camera_extrinsics
+    - render_product
+    - training
+    - openpi_runtime_capture
+    - ros_bridge_publish
+    - calibration_claim
+    - physics
+    - collision
+
+camera_default_pose_preview.cam_right_wrist.default_optical_center_m:
+  value: [0.360, 0.0, 0.100]
+  unit: m
+  source_type: TUNED
+  source_kind: default_placeholder_until_measured
+  source_description: User visually confirmed the A7 default preview is correct enough to proceed. This is not a measured optical center or calibrated extrinsic.
+  measurement_date: 2026-07-22
+  confidence: low
+  used_in_files:
+    - aloha_isaac_rebuild/configs/physical_reconstruction/camera_default_pose_preview.yaml
+    - aloha_isaac_rebuild/scenes/aloha_camera_default_pose_preview.usda
+  status: VERIFIED_VISUAL_PREVIEW_ONLY
+  allowed_use:
+    - viewport_stage_tree_inspection
+    - visual_layout_checkpoint
+  forbidden_use:
+    - camera_extrinsics
+    - render_product
+    - training
+    - openpi_runtime_capture
+    - ros_bridge_publish
+    - calibration_claim
+    - physics
+    - collision
+
+base_anchor.inter_base_anchor_x_distance_cm:
+  value: null
+  unit: cm
+  source_type: MISSING
+  source_kind: pending_user_measurement
+  source_description: Primary A11 worksheet field for measuring the X-direction distance between the left and right base reference centers. Original ALOHA1 USD base height, width, and visual footprint are reused.
+  measurement_date: null
+  confidence: none
+  used_in_files:
+    - aloha_isaac_rebuild/configs/physical_reconstruction/base_anchor_measurement_worksheet.yaml
+    - aloha_isaac_rebuild/artifacts/screenshots/a11_base_anchor_measurement_top.svg
+  status: MISSING
+  allowed_use:
+    - measurement_planning
+    - future_base_reference_alignment_after_user_measurement
+  forbidden_use:
+    - full_base_footprint
+    - physics
+    - collision
+    - replay
+    - training
+
+base_anchor.inter_base_inner_edge_gap_x_cm:
+  value: null
+  unit: cm
+  source_type: MISSING
+  source_kind: pending_user_measurement
+  source_description: Optional fallback A11 worksheet field for measuring the X-direction gap between the two facing inner base outer edges if the base centers cannot be marked directly.
+  measurement_date: null
+  confidence: none
+  used_in_files:
+    - aloha_isaac_rebuild/configs/physical_reconstruction/base_anchor_measurement_worksheet.yaml
+    - aloha_isaac_rebuild/artifacts/screenshots/a11_base_anchor_measurement_top.svg
+  status: MISSING
+  allowed_use:
+    - measurement_planning
+    - fallback_measurement_only
+  forbidden_use:
+    - full_base_footprint
+    - physics
+    - collision
+    - replay
+    - training
+
+base_anchor.inter_base_outer_span_x_cm:
+  value: null
+  unit: cm
+  source_type: MISSING
+  source_kind: pending_user_measurement
+  source_description: Optional fallback A11 worksheet field for measuring the far-left to far-right X-direction base outer span if base centers cannot be marked directly.
+  measurement_date: null
+  confidence: none
+  used_in_files:
+    - aloha_isaac_rebuild/configs/physical_reconstruction/base_anchor_measurement_worksheet.yaml
+    - aloha_isaac_rebuild/artifacts/screenshots/a11_base_anchor_measurement_top.svg
+  status: MISSING
+  allowed_use:
+    - measurement_planning
+    - fallback_measurement_only
+  forbidden_use:
+    - full_base_footprint
+    - physics
+    - collision
+    - replay
+    - training
+
+base_anchor.original_aloha1_usd_base_visuals:
+  value: reuse
+  unit: policy
+  source_type: USER_CONFIRMED
+  source_kind: original_aloha1_usd_visual_geometry
+  source_description: User clarified that the original ALOHA1 USD support frame and base visuals are correct for visual layout, including base height and width; only the X-direction distance between the two bases remains to be measured.
+  measurement_date: 2026-07-22
+  confidence: high
+  used_in_files:
+    - aloha_isaac_rebuild/configs/physical_reconstruction/base_anchor_measurement_worksheet.yaml
+    - aloha_isaac_rebuild/reports/a11_base_anchor_measurement_worksheet_20260722.md
+  status: VERIFIED
+  allowed_use:
+    - base_visual_layout
+    - support_frame_visual_layout
+    - viewport_stage_tree_inspection
+  forbidden_use:
+    - physics
+    - collision
+    - replay
+    - training
+
+pipe.length_m.candidate:
+  value: 0.225
+  unit: m
+  source_type: TUNED
+  source_kind: historical_user_sketch_candidate
+  source_description: Historical pipe length candidate used only for A12 communication drawings; it must be re-confirmed before collision or insertion geometry is authored.
+  measurement_date: 2026-07-22
+  confidence: low
+  used_in_files:
+    - aloha_isaac_rebuild/configs/physical_reconstruction/pipe_bottle_measurement_worksheet.yaml
+    - aloha_isaac_rebuild/artifacts/screenshots/a12_pipe_measurement.svg
+  status: MISSING
+  allowed_use:
+    - measurement_planning
+    - visual_worksheet
+  forbidden_use:
+    - pipe_collision_geometry
+    - insertion_reward
+    - physics
+    - replay
+    - training
+
+pipe.outer_diameter_m.candidate:
+  value: 0.005
+  unit: m
+  source_type: TUNED
+  source_kind: historical_user_correction_candidate
+  source_description: Historical pipe outside diameter candidate of 0.5 cm; must be re-confirmed with calipers before authoring pipe collision or insertion clearance.
+  measurement_date: 2026-07-22
+  confidence: low
+  used_in_files:
+    - aloha_isaac_rebuild/configs/physical_reconstruction/pipe_bottle_measurement_worksheet.yaml
+    - aloha_isaac_rebuild/artifacts/screenshots/a12_pipe_measurement.svg
+  status: MISSING
+  allowed_use:
+    - measurement_planning
+    - visual_worksheet
+  forbidden_use:
+    - pipe_collision_geometry
+    - insertion_clearance_claim
+    - physics
+    - replay
+    - training
+
+pipe.inner_diameter_m:
+  value: null
+  unit: m
+  source_type: MISSING
+  source_kind: pending_user_measurement
+  source_description: Pipe inside diameter is required before checking whether the bottle mouth can physically accept the pipe.
+  measurement_date: null
+  confidence: none
+  used_in_files:
+    - aloha_isaac_rebuild/configs/physical_reconstruction/pipe_bottle_measurement_worksheet.yaml
+  status: MISSING
+  allowed_use:
+    - measurement_planning
+  forbidden_use:
+    - pipe_collision_geometry
+    - insertion_clearance_claim
+    - insertion_reward
+    - physics
+    - replay
+    - training
+
+pipe.entry_center_in_support_frame:
+  value: null
+  unit: cm
+  source_type: MISSING
+  source_kind: pending_user_measurement
+  source_description: A12 worksheet field for pipe entry center position relative to the support-frame measurement convention.
+  measurement_date: null
+  confidence: none
+  used_in_files:
+    - aloha_isaac_rebuild/configs/physical_reconstruction/pipe_bottle_measurement_worksheet.yaml
+    - aloha_isaac_rebuild/artifacts/screenshots/a12_pipe_measurement.svg
+  status: MISSING
+  allowed_use:
+    - measurement_planning
+  forbidden_use:
+    - pipe_collision_geometry
+    - insertion_reward
+    - physics
+    - replay
+    - training
+
+bottle.empty_mass_g:
+  value: null
+  unit: g
+  source_type: MISSING
+  source_kind: pending_user_measurement
+  source_description: Real empty bottle mass in the same cap/no-cap state used by robot experiments.
+  measurement_date: null
+  confidence: none
+  used_in_files:
+    - aloha_isaac_rebuild/configs/physical_reconstruction/pipe_bottle_measurement_worksheet.yaml
+    - aloha_isaac_rebuild/artifacts/screenshots/a12_bottle_measurement.svg
+  status: MISSING
+  allowed_use:
+    - measurement_planning
+  forbidden_use:
+    - rigid_body_mass
+    - inertia
+    - physics
+    - replay
+    - training
+
+bottle.grasp_diameter_mm:
+  value: null
+  unit: mm
+  source_type: MISSING
+  source_kind: pending_user_measurement
+  source_description: Effective bottle diameter at the gripper contact region after light clamping; PET deformation means this can differ from the free-state maximum diameter.
+  measurement_date: null
+  confidence: none
+  used_in_files:
+    - aloha_isaac_rebuild/configs/physical_reconstruction/pipe_bottle_measurement_worksheet.yaml
+    - aloha_isaac_rebuild/artifacts/screenshots/a12_bottle_measurement.svg
+  status: MISSING
+  allowed_use:
+    - measurement_planning
+  forbidden_use:
+    - gripper_contact_geometry
+    - bottle_collision_geometry
+    - physics
+    - replay
+    - training
+
+bottle.mouth_outer_diameter_mm:
+  value: null
+  unit: mm
+  source_type: MISSING
+  source_kind: pending_user_measurement
+  source_description: Real bottle mouth outside diameter, needed for bottle-pipe clearance and collision planning.
+  measurement_date: null
+  confidence: none
+  used_in_files:
+    - aloha_isaac_rebuild/configs/physical_reconstruction/pipe_bottle_measurement_worksheet.yaml
+    - aloha_isaac_rebuild/artifacts/screenshots/a12_bottle_measurement.svg
+  status: MISSING
+  allowed_use:
+    - measurement_planning
+  forbidden_use:
+    - insertion_clearance_claim
+    - bottle_collision_geometry
+    - physics
+    - replay
+    - training
+
+bottle.mouth_inner_diameter_mm:
+  value: null
+  unit: mm
+  source_type: MISSING
+  source_kind: pending_user_measurement
+  source_description: Real bottle mouth inside diameter, needed to decide whether the water pipe can enter the bottle mouth and to set insertion success geometry.
+  measurement_date: null
+  confidence: none
+  used_in_files:
+    - aloha_isaac_rebuild/configs/physical_reconstruction/pipe_bottle_measurement_worksheet.yaml
+    - aloha_isaac_rebuild/artifacts/screenshots/a12_bottle_measurement.svg
+  status: MISSING
+  allowed_use:
+    - measurement_planning
+  forbidden_use:
+    - insertion_clearance_claim
+    - bottle_collision_geometry
+    - insertion_reward
+    - physics
+    - replay
+    - training

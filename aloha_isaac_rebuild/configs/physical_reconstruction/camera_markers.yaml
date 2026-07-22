@@ -58,7 +58,7 @@ markers:
     sensor_prim: /aloha/cam_low_link/cam_low_color_frame/cam_low
     marker_prim: /aloha/visuals/camera_markers/cam_low_marker
     direction_prim: /aloha/visuals/camera_markers/cam_low_marker/view_direction_hint
-    schematic_position_m: [0.0, 0.360, 0.100]
+    schematic_position_m: [0.030, 0.5825, 0.120]
     schematic_direction_hint: negative_y
     pose_source: MANUAL_SCHEMATIC
     not_measured_camera_pose: true
@@ -67,6 +67,9 @@ markers:
     allowed_use:
       - viewport_stage_tree_inspection
       - visual_debug_only
+    notes:
+      - Moved to the cam_low-side outer square tube and the top of the 100 mm vertical support area for visual inspection only.
+      - This is not a measured camera optical center or calibrated extrinsic.
     forbidden_use:
       - camera_extrinsics
       - training

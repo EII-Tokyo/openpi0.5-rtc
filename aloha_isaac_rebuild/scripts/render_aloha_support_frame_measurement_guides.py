@@ -16,12 +16,14 @@ OUTER_LENGTH_M = 1.220
 OUTER_WIDTH_M = 0.625
 PROFILE_WIDTH_M = 0.020
 PIPE_LENGTH_M = 0.260
+CAM_LOW_VERTICAL_SUPPORT_HEIGHT_M = 0.100
 RAIL_Y_M = 0.323856
-RAIL_Z_M = 0.610
-CAM_LOW = (0.030, OUTER_WIDTH_M / 2 + 0.260)
-CAM_HIGH = (0.0, -0.360)
+RAIL_Z_M = PROFILE_WIDTH_M / 2
 EXTENSION_HALF_WIDTH_M = OUTER_LENGTH_M / 2
-EXTENSION_DEPTH_M = 0.260
+EXTENSION_INNER_GAP_M = 0.260
+EXTENSION_DEPTH_M = EXTENSION_INNER_GAP_M + PROFILE_WIDTH_M
+CAM_LOW = (0.030, OUTER_WIDTH_M / 2 + EXTENSION_INNER_GAP_M + PROFILE_WIDTH_M / 2)
+CAM_HIGH = (0.0, -0.360)
 BASE_EDGE_NEAR_CAM_LOW_Y_M = OUTER_WIDTH_M / 2 - 0.180
 BASE_EDGE_NEAR_CAM_HIGH_Y_M = -OUTER_WIDTH_M / 2 + 0.235
 
@@ -125,8 +127,8 @@ def render_top(output: Path) -> None:
         _note(parts, x1 + 14, yy - 8, label)
 
     for label, (x, y), color, dx, dy in [
-        ("低位相机", CAM_LOW, "#00b83a", 18, 5),
-        ("高位相机", CAM_HIGH, "#2857ff", 18, -22),
+        ("低位相机", CAM_LOW, "#00b83a", 18, -22),
+        ("高位相机", CAM_HIGH, "#2857ff", 18, -30),
     ]:
         px, py = _map_top(x, y, width, height)
         parts.append(f'<rect x="{px-13:.1f}" y="{py-13:.1f}" width="26" height="26" rx="4" fill="{color}"/>')
@@ -171,7 +173,7 @@ def render_top(output: Path) -> None:
     _dimension(parts, ax, ay + 32, bx, by + 32, "AB 原框长 122cm", (ax + bx) / 2 - 70, ay + 58)
     _dimension(parts, cx + 34, cy, bx + 34, by, "BC 原框宽 62.5cm", cx - 142, (cy + by) / 2)
     _dimension(parts, ex, ey - 28, fx, fy - 28, "EF 接口宽 122cm", (ex + fx) / 2 - 70, ey - 42)
-    _dimension(parts, fx + 42, fy, gx + 42, gy, "FG 外扩 26cm", fx - 92, (fy + gy) / 2 + 8)
+    _dimension(parts, fx + 42, fy, gx + 42, gy, "FG 外深 28cm", fx - 116, (fy + gy) / 2 - 8)
     _dimension(parts, hx, hy - 74, gx, gy - 74, "HG 外边长 122cm", (hx + gx) / 2 - 78, hy - 88)
     _dimension(parts, ix + 72, iy, jx + 72, jy, "IJ 相机距待测", ix + 82, (iy + jy) / 2)
     _dimension(parts, kx, iy + 34, ix, iy + 34, "KL 左边到低位相机 64cm", (kx + ix) / 2 - 100, iy + 56)
@@ -185,7 +187,7 @@ def render_top(output: Path) -> None:
     _note(parts, ox + 96, oy + 5, "+X")
     _note(parts, ox + 7, oy - 96, "+Y 到低位相机扩展区")
 
-    _note(parts, 26, height - 30, "反馈例子：AB=122cm, BC=62.5cm, EF=122cm, FG=26cm, HG=122cm, IJ=..., KL=64cm, 右边到低位相机=58cm, PQ=2cm, RS=21cm。")
+    _note(parts, 26, height - 30, "反馈例子：AB=122cm, BC=62.5cm, FG外深=28cm。注意：26cm 是两根方管之间的内空，PQ=2cm方管。")
     _finish(parts, output)
 
 
@@ -212,7 +214,7 @@ def render_front(output: Path) -> None:
     parts.append(f'<rect x="{rail_left:.1f}" y="{rail_y - PROFILE_WIDTH_M * SCALE / 2:.1f}" width="{rail_right - rail_left:.1f}" height="{PROFILE_WIDTH_M * SCALE:.1f}" fill="#3d444d" fill-opacity="0.88"/>')
     parts.append(f'<text x="{rail_left + 10:.1f}" y="{rail_y - 16:.1f}" class="label">顶部横梁投影，长 1220mm</text>')
 
-    for idx, x in enumerate([-0.604959, -0.433554, 0.433554, 0.604959], start=1):
+    for idx, x in enumerate([-0.600, -0.433554, 0.433554, 0.600], start=1):
         px, py = map_front(x, rail_z)
         parts.append(f'<rect x="{px - PROFILE_WIDTH_M * SCALE / 2:.1f}" y="{py - 74:.1f}" width="{PROFILE_WIDTH_M * SCALE:.1f}" height="74" fill="#5c6670" fill-opacity="0.84"/>')
         parts.append(f'<text x="{px - 10:.1f}" y="{py - 84:.1f}" class="small">P{idx}</text>')
@@ -231,79 +233,85 @@ def render_front(output: Path) -> None:
     px, py = map_front(*points["P"])
     _dimension(parts, mx - 42, my, nx - 42, ny, "MN 横梁离桌面高度？", mx + 20, (my + ny) / 2)
     _dimension(parts, ox, oy - 40, px, py - 40, "OP 横梁长 122cm", (ox + px) / 2 - 70, oy - 58)
-    _note(parts, 26, height - 60, "注意：这个视图看不出低位相机方向 26cm 外扩深度。")
+    _note(parts, 26, height - 60, "注意：这个视图看不出低位相机方向的内空和外边方管。")
     _note(parts, 26, height - 30, "反馈例子：MN=61cm, OP=122cm。若高度不同，反馈 MN=...cm。")
     _finish(parts, output)
 
 
 def render_side(output: Path) -> None:
-    width = (OUTER_WIDTH_M + EXTENSION_DEPTH_M) * SCALE + MARGIN * 2 + 90.0
-    height = RAIL_Z_M * SCALE + MARGIN * 2
+    local_scale = 1800.0
+    local_margin = 130.0
+    width = (PROFILE_WIDTH_M + EXTENSION_INNER_GAP_M + PROFILE_WIDTH_M) * local_scale + local_margin * 2 + 170.0
+    height = (PROFILE_WIDTH_M + CAM_LOW_VERTICAL_SUPPORT_HEIGHT_M + 0.055) * local_scale + local_margin * 2 + 90.0
     parts = _svg_header(
         width,
         height,
-        "A5 侧视图：只看前后和高度",
-        "这是 Y-Z 切片：左边是高位相机侧，右边是低位相机扩展侧；左右位置不显示。",
+        "A5 侧视图：低位相机支架 L 形",
+        "从桌子侧面平看：水平外伸 26cm 内空，外边方管上立起 10cm 支撑。",
     )
 
     def map_side(y_m: float, z_m: float) -> tuple[float, float]:
-        return MARGIN + (y_m + OUTER_WIDTH_M / 2) * SCALE, height - MARGIN - z_m * SCALE
+        return local_margin + (y_m + PROFILE_WIDTH_M) * local_scale, height - local_margin - z_m * local_scale
 
-    ground_y = height - MARGIN
-    orig_y0 = -OUTER_WIDTH_M / 2
-    orig_y1 = OUTER_WIDTH_M / 2
-    ext_y1 = OUTER_WIDTH_M / 2 + EXTENSION_DEPTH_M
-    orig_x0, _ = map_side(orig_y0, 0.0)
-    orig_x1, _ = map_side(orig_y1, 0.0)
-    ext_x1, _ = map_side(ext_y1, 0.0)
-    rail_z = RAIL_Z_M
-    rail_y_px = map_side(0.0, rail_z)[1]
+    # Local Y origin is the outward face of the original cam_low-side tube.
+    orig_tube_y0 = -PROFILE_WIDTH_M
+    orig_tube_y1 = 0.0
+    gap_y0 = 0.0
+    gap_y1 = EXTENSION_INNER_GAP_M
+    outer_tube_y0 = gap_y1
+    outer_tube_y1 = gap_y1 + PROFILE_WIDTH_M
+    support_center_y = outer_tube_y0 + PROFILE_WIDTH_M / 2
+    tube_z0 = 0.0
+    tube_z1 = PROFILE_WIDTH_M
+    support_z0 = tube_z1
+    support_z1 = tube_z1 + CAM_LOW_VERTICAL_SUPPORT_HEIGHT_M
 
-    parts.append(f'<line x1="{orig_x0:.1f}" y1="{ground_y:.1f}" x2="{ext_x1:.1f}" y2="{ground_y:.1f}" stroke="#a39271" stroke-width="3"/>')
-    parts.append(f'<rect x="{orig_x0:.1f}" y="{ground_y - 38:.1f}" width="{orig_x1 - orig_x0:.1f}" height="38" fill="#d8c9a8" fill-opacity="0.28" stroke="#1a9b45" stroke-width="2"/>')
-    parts.append(f'<rect x="{orig_x1:.1f}" y="{ground_y - 38:.1f}" width="{ext_x1 - orig_x1:.1f}" height="38" fill="#00b83a" fill-opacity="0.18" stroke="#00a34a" stroke-width="2" stroke-dasharray="10 8"/>')
-    _note(parts, orig_x0 + 8, ground_y - 48, "原始框宽")
-    _note(parts, orig_x1 + 8, ground_y - 48, "低位相机扩展区")
+    ox0, oz1 = map_side(orig_tube_y0, tube_z1)
+    ox1, oz0 = map_side(orig_tube_y1, tube_z0)
+    gx0, _ = map_side(gap_y0, tube_z0)
+    gx1, _ = map_side(gap_y1, tube_z0)
+    tx0, _ = map_side(outer_tube_y0, tube_z0)
+    tx1, _ = map_side(outer_tube_y1, tube_z0)
 
-    # Side-view projection of rails.
-    for y_m, label, color in [
-        (orig_y0, "高位相机侧边", "#2857ff"),
-        (orig_y1, "原始低位相机侧边", "#3d444d"),
-        (ext_y1, "扩展外边", "#00a34a"),
-    ]:
-        x, _ = map_side(y_m, rail_z)
-        parts.append(f'<line x1="{x:.1f}" y1="{ground_y:.1f}" x2="{x:.1f}" y2="{rail_y_px:.1f}" stroke="{color}" stroke-width="4"/>')
-        _note(parts, x - 58, rail_y_px - 12, label)
+    parts.append(f'<rect x="{ox0:.1f}" y="{oz1:.1f}" width="{ox1 - ox0:.1f}" height="{oz0 - oz1:.1f}" fill="#3d444d" fill-opacity="0.88"/>')
+    parts.append(f'<rect x="{gx0:.1f}" y="{oz1:.1f}" width="{gx1 - gx0:.1f}" height="{oz0 - oz1:.1f}" fill="#5c6670" fill-opacity="0.70"/>')
+    parts.append(f'<rect x="{tx0:.1f}" y="{oz1:.1f}" width="{tx1 - tx0:.1f}" height="{oz0 - oz1:.1f}" fill="#00a34a" fill-opacity="0.82"/>')
+    _note(parts, ox0 - 44, oz0 + 24, "原始方管")
+    _note(parts, tx1 + 8, oz0 + 24, "外边方管")
+    _note(parts, (gx0 + gx1) / 2 - 42, oz1 - 12, "水平外伸管")
 
-    x0, rz = map_side(orig_y1, rail_z)
-    x1, _ = map_side(ext_y1, rail_z)
-    parts.append(f'<rect x="{x0:.1f}" y="{rz - PROFILE_WIDTH_M * SCALE / 2:.1f}" width="{x1 - x0:.1f}" height="{PROFILE_WIDTH_M * SCALE:.1f}" fill="#5c6670" fill-opacity="0.84"/>')
-
-    cam_x, cam_y = map_side(CAM_LOW[1], rail_z - 0.055)
-    parts.append(f'<rect x="{cam_x-13:.1f}" y="{cam_y-13:.1f}" width="26" height="26" rx="4" fill="#00b83a"/>')
-    parts.append(f'<text x="{cam_x+18:.1f}" y="{cam_y+22:.1f}" class="label">低位相机在外边</text>')
+    support_x, support_top_y = map_side(support_center_y, support_z1)
+    _, support_bottom_y = map_side(support_center_y, support_z0)
+    support_w = PROFILE_WIDTH_M * local_scale
+    parts.append(
+        f'<rect x="{support_x - support_w / 2:.1f}" y="{support_top_y:.1f}" '
+        f'width="{support_w:.1f}" height="{support_bottom_y - support_top_y:.1f}" '
+        'fill="#00a34a" fill-opacity="0.82" stroke="#087f3f" stroke-width="2"/>'
+    )
+    parts.append(f'<rect x="{support_x-18:.1f}" y="{support_top_y-26:.1f}" width="36" height="20" rx="3" fill="#00b83a"/>')
+    parts.append(f'<text x="{support_x+24:.1f}" y="{support_top_y-11:.1f}" class="label">低位相机底座</text>')
 
     points = {
-        "S": (orig_y0, 0.0),
-        "T": (orig_y1, 0.0),
-        "U": (orig_y1, rail_z),
-        "V": (ext_y1, rail_z),
-        "W": (ext_y1, rail_z),
-        "CL": (CAM_LOW[1], rail_z - 0.055),
+        "A": (orig_tube_y0, tube_z0),
+        "B": (orig_tube_y1, tube_z0),
+        "U": (gap_y0, tube_z1),
+        "V": (gap_y1, tube_z1),
+        "W": (outer_tube_y1, support_z0),
+        "CL": (outer_tube_y1, support_z1),
     }
     for name, yz in points.items():
         _point(parts, *map_side(*yz), name)
-    sx, sy = map_side(*points["S"])
-    tx, ty = map_side(*points["T"])
+    ax, ay = map_side(*points["A"])
+    bx, by = map_side(*points["B"])
     ux, uy = map_side(*points["U"])
     vx, vy = map_side(*points["V"])
     wx, wy = map_side(*points["W"])
     clx, cly = map_side(*points["CL"])
-    _dimension(parts, sx, sy + 34, tx, ty + 34, "ST 原始宽 62.5cm", (sx + tx) / 2 - 76, sy + 58)
-    _dimension(parts, ux, uy - 44, vx, vy - 44, "UV 外扩 26cm", (ux + vx) / 2 - 62, uy - 60)
-    _dimension(parts, wx + 42, wy, clx + 42, cly, "W-CL 相机高度待测", wx + 62, (wy + cly) / 2 + 34)
-    _note(parts, 26, height - 60, "这是一张 Y-Z 切片图，不显示左右 X 位置。")
-    _note(parts, 26, height - 30, "反馈例子：ST=62.5cm, UV=26cm, W-CL=...cm。W-CL 需要你测量低位相机垂直高度。")
+    _note(parts, ax - 8, ay + 34, "方管 2cm")
+    _dimension(parts, ux, uy - 44, vx, vy - 44, "UV 内空 26cm", (ux + vx) / 2 - 62, uy - 60)
+    _dimension(parts, wx + 62, wy, clx + 62, cly, "W-CL 支撑高 10cm", wx + 84, (wy + cly) / 2 + 4)
+    _note(parts, 26, height - 60, "这是一张局部侧视图，只画低位相机扩展区，不画整个原始框宽。")
+    _note(parts, 26, height - 30, "反馈例子：AB=2cm, UV内空=26cm, 外边方管=2cm, W-CL=10cm。若相机离支撑顶还有高度，请补充。")
     _finish(parts, output)
 
 

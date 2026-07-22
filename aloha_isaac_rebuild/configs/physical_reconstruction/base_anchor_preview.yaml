@@ -1,0 +1,68 @@
+schema_version: 1
+stage: A10_robot_base_anchor_preview
+purpose: >
+  Visual-only robot/base-anchor measurement checkpoint for the clean ALOHA1
+  Isaac rebuild. This layer shows the user-measured shared base Y band and
+  explicitly marks left/right base X extents as still missing.
+
+global_policy:
+  source_type: MIXED
+  source_kind: user_measured_base_y_edges_and_pending_base_x_measurements
+  visual_only: true
+  base_y_edges_measured: true
+  full_base_footprint_ready: false
+  base_cad_ready: false
+  physics_ready: false
+  collision_ready: false
+  camera_work_deferred: true
+  render_eligible: false
+  training_eligible: false
+  notes:
+    - The 180 mm and 235 mm values are user-measured offsets from support-frame outer edges to the ALOHA base outer Y edges.
+    - This checkpoint does not know left/right base X extents or exact base CAD.
+    - The left/right X zones are measurement zones only, not real base footprints.
+    - Do not use this layer for articulation placement, collision, physics, camera extrinsics, or training.
+
+base_anchor_root: /aloha/base_anchor
+visuals_root: /aloha/base_anchor/visuals
+
+measured_base_y_band:
+  source_type: MEASURED
+  source_kind: user_measured_base_y_edges
+  near_cam_low_y_m: 0.1325
+  near_cam_high_y_m: -0.0775
+  center_y_m: 0.0275
+  depth_y_m: 0.2100
+  support_frame_outer_length_m: 1.220
+  z_m: 0.056
+  edge_guide_z_m: 0.068
+  status: VERIFIED_Y_BAND_ONLY
+  missing:
+    - left_base_x_min_m
+    - left_base_x_max_m
+    - right_base_x_min_m
+    - right_base_x_max_m
+    - exact_left_base_anchor_frame
+    - exact_right_base_anchor_frame
+    - base_yaw_or_skew
+    - base_height_relative_to_table
+
+measurement_zones:
+  source_type: TUNED
+  source_kind: visual_half_frame_zone_for_future_measurement
+  status: PENDING_MEASUREMENT
+  z_m: 0.074
+  left_zone_center_m: [-0.305, 0.0275, 0.074]
+  right_zone_center_m: [0.305, 0.0275, 0.074]
+  zone_size_m: [0.590, 0.190, 0.004]
+  notes:
+    - These translucent zones only tell the user where to measure the left and right base X extents.
+    - Their X centers are schematic halves of the measured 1220 mm support-frame length.
+
+direction_hints:
+  status: APPLIED_VISUAL_ONLY
+  center_m: [0.0, 0.0275, 0.090]
+  x_axis_size_m: [1.000, 0.010, 0.010]
+  y_axis_size_m: [0.010, 0.180, 0.010]
+  x_axis_meaning: support_frame_outer_length_direction
+  y_axis_meaning: measured_base_depth_direction

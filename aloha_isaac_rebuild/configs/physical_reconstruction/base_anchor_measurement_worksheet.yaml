@@ -1,0 +1,83 @@
+schema_version: 1
+stage: A11_base_anchor_measurement_worksheet
+purpose: >
+  Measurement worksheet for completing only the ALOHA1 left/right base X
+  separation. The original ALOHA1 USD visual frame and base geometry are
+  treated as the trusted visual baseline.
+
+global_policy:
+  visual_only: true
+  writes_usd: false
+  physics_ready: false
+  collision_ready: false
+  camera_work_deferred: true
+  training_eligible: false
+  reuse_original_aloha1_usd_base_visuals: true
+  do_not_remeasure_base_height_width_or_visual_footprint: true
+
+known_measured_values:
+  support_frame_outer_length_m:
+    value: 1.220
+    source_type: MEASURED
+    source_kind: user_measured_support_frame
+  support_frame_outer_width_m:
+    value: 0.625
+    source_type: MEASURED
+    source_kind: user_measured_support_frame
+  steel_square_tube_width_m:
+    value: 0.020
+    source_type: MEASURED
+    source_kind: user_measured_support_frame
+  base_edge_near_cam_low_y_m:
+    value: 0.1325
+    source_type: DERIVED
+    source_kind: derived_from_user_measured_180mm_offset
+  base_edge_near_cam_high_y_m:
+    value: -0.0775
+    source_type: DERIVED
+    source_kind: derived_from_user_measured_235mm_offset
+
+trusted_usd_baseline:
+  source_type: USER_CONFIRMED
+  source_kind: original_aloha1_usd_visual_geometry
+  status: TRUSTED_FOR_VISUAL_LAYOUT
+  notes:
+    - User clarified that the original ALOHA1 USD rack and base visuals are already acceptable.
+    - Base height, base width, base footprint shape, and visual alignment should be reused from the original ALOHA1 USD.
+    - The current missing physical measurement is mainly the X-direction distance between the two bases.
+
+coordinate_convention:
+  origin: center of original support-frame outer rectangle
+  x_positive: from left side to right side along the 1220 mm support-frame length
+  y_positive: from cam_high side toward cam_low extension
+  z_positive: upward
+
+measurement_items:
+  inter_base_anchor_x_distance:
+    prompt: Measure the X-direction distance between the left and right base reference points or rotation centers.
+    unit: cm
+    reply_format: inter_base_anchor_x_distance_cm=...
+    status: MISSING
+    priority: primary
+  inter_base_inner_edge_gap_x:
+    prompt: Optional fallback if base centers are hard to mark; measure the X-direction gap between the two facing inner base outer edges.
+    unit: cm
+    reply_format: inter_base_inner_edge_gap_x_cm=...
+    status: MISSING
+    priority: fallback
+  inter_base_outer_span_x:
+    prompt: Optional fallback; measure the X-direction span from the far left base outer edge to the far right base outer edge.
+    unit: cm
+    reply_format: inter_base_outer_span_x_cm=...
+    status: MISSING
+    priority: fallback
+
+not_required_for_current_rebuild:
+  base_height:
+    reason: Reuse original ALOHA1 USD visual base geometry.
+  base_width:
+    reason: Reuse original ALOHA1 USD visual base geometry.
+  base_footprint_shape:
+    reason: Reuse original ALOHA1 USD visual base geometry.
+  base_yaw_or_skew:
+    reason: Original ALOHA1 USD visual alignment is user-confirmed acceptable unless later evidence contradicts it.
