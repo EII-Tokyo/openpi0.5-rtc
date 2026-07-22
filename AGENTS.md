@@ -26,6 +26,7 @@ cd /home/eii/Documents/Notes/openpi0.5-rtc-reward-learning && npm run check:math
   - Read `docs/agents/isaac_mcp_toolchain.md`.
   - NVIDIA official Isaac MCP is mandatory before modifying Isaac Sim code, USD stages, scene-generation scripts, physics setup, GUI controls, or Isaac runtime behavior. Read-only investigation does not require starting Isaac MCP unless the answer depends on official Isaac API behavior.
   - Historical long "episode 19" replay HDF5: `/home/eii/project/bottles_data/episode_19.hdf5`. It is the default long replay target when the user asks for episode 19 or the historical long replay.
+  - User-confirmed bottle grasp window: `/home/eii/project/bottles_data/episode_18.hdf5`, frames `208-244` inclusive. Use this for the open-gripper -> clamp-bottle -> lift-onset calibration task; do not substitute episode 19.
 - Photo-to-Isaac scene reconstruction, camera rack CAD, pipe/table spatial models, generated USD layers, or `scene_reconstruction/` assets:
   - Read `docs/agents/scene_reconstruction.md`.
   - Use the local `photo-to-isaac-cad` skill when available.

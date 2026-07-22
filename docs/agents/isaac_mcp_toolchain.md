@@ -51,6 +51,45 @@ Read this before using, changing, debugging, or reinstalling Isaac Sim / Isaac L
 - `examples/aloha_isaac/scripts/open_workcell_gui.py` defaults to this USD when launched without `--usd`; that default is intentional for the confirmed ALOHA scene.
 - Normal startup should not pass `--usd`; use the script default so stale scratch stages cannot be loaded by accident.
 - `open_workcell_gui.py` rejects noncanonical USD paths by default. Use `--allow-noncanonical-usd` only for an explicit experiment or conversion debug session.
+- To inspect the official Trossen Stationary AI USD, do not use the normal canonical ALOHA1 startup semantics. Launch it with `--allow-noncanonical-usd --no-real-start-pose` so the ALOHA1 home/sleep pose controller is not applied to the different Trossen articulation structure:
+
+```bash
+cd /home/eii/project/openpi0.5-rtc-reward-learning
+env PYTHONPATH=$PWD OMNI_KIT_ACCEPT_EULA=YES .venv_issac/bin/python \
+  examples/aloha_isaac/scripts/open_workcell_gui.py \
+  --usd external/trossen_ai_isaac/assets/robots/stationary_ai/stationary_ai.usd \
+  --allow-noncanonical-usd \
+  --no-real-start-pose
+```
+
+- When the user is comparing the original ALOHA1 Isaac scene against the original Trossen Stationary AI scene, do not proactively close either Isaac Sim window. These two GUI sessions are comparison references:
+  - Original ALOHA1: launch `examples/aloha_isaac/scripts/open_workcell_gui.py` with its default canonical USD.
+  - Original Trossen Stationary AI: launch the explicit `stationary_ai.usd` command above with `--allow-noncanonical-usd --no-real-start-pose`.
+  - Only close these windows when the user explicitly asks to close them.
+
+## Clean Rebuild USD Viewer Notes
+- For the clean rebuild work under `aloha_isaac_rebuild/`, do not treat a GUI startup failure as evidence that the generated USD is invalid. First run the stage-specific static audit script and inspect its JSON report.
+- On 2026-07-22, repeated attempts to open `aloha_isaac_rebuild/scenes/aloha_camera_semantic_skeleton.usda` with `aloha_isaac_rebuild/scripts/open_skeleton_gui.py` all reached Isaac `app ready`, moved the window, and printed `Opened skeleton stage`, but the Python process then exited with empty `stderr`. The same stage also exited when opened through `open_workcell_gui.py --allow-noncanonical-usd --no-real-start-pose`. Treat this as a viewer/process-lifetime issue, not an A3 camera semantic USD failure, unless the static audit also fails.
+- Do not keep retrying the same A3 viewer command after this symptom. It creates noisy logs and does not add new evidence.
+- For visual inspection of generated clean rebuild stages while this viewer issue is unresolved, use one of these approaches:
+  - Preferred validation: keep the original ALOHA1 and original Trossen Stationary AI windows open as reference, and validate the generated clean stage with its stage-specific audit script plus USDA/Stage tree inspection.
+  - Preferred scripted viewer: use `aloha_isaac_rebuild/scripts/open_skeleton_gui.py` for A3 and other clean rebuild skeleton stages. Before relaunching, verify that no previous A3/skeleton viewer process is still active.
+  - Treat `Opened skeleton stage` in the viewer log as the stage-load signal, and separately verify viewport/window visibility because workspace moves and stale Isaac windows can be misleading.
+  - If GUI inspection is still ambiguous, open the generated USD manually from an already-running Isaac Sim GUI with `File > Open` or `File > Open Recent`, so the viewer is not responsible for the application lifetime.
+  - If a scripted GUI launcher is required later, fix and verify the launcher separately before using it as evidence for USD correctness.
+- Do not use `examples/aloha_isaac/scripts/open_workcell_gui.py` as the normal viewer for A3 semantic skeleton stages. That script is for canonical `/scene` workcell startup; using it on `/aloha` skeleton stages requires `--allow-noncanonical-usd --no-real-start-pose` and can introduce `/scene/StartupViewCamera` assumptions into a clean `/aloha` inspection.
+- Current A3 camera semantic skeleton audit command:
+
+```bash
+cd /home/eii/project/openpi0.5-rtc-reward-learning
+PYLIB=$(dirname $(find /home/eii/.local/share/uv/python -name 'libpython3.11.so.1.0' -print | head -n 1))
+USD_ROOT=.venv_issac/lib/python3.11/site-packages/isaacsim/extscache/omni.usd.libs-1.0.1+69cbf6ad.lx64.r.cp311
+PYTHONPATH="$USD_ROOT" LD_LIBRARY_PATH="$USD_ROOT/bin:$PYLIB${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" \
+  .venv_issac/bin/python aloha_isaac_rebuild/scripts/audit_aloha_camera_semantic_stage.py \
+  aloha_isaac_rebuild/scenes/aloha_camera_semantic_skeleton.usda \
+  --json-output aloha_isaac_rebuild/artifacts/validation/a3_camera_semantic_skeleton_audit.json
+```
+
 - On this desktop, normal non-headless Isaac startup must move the main Isaac Sim window to user-facing workspace 2. This keeps the current workspace usable for the user while agents inspect or screenshot Isaac on the second workspace. The launcher does this by default with `xdotool`; use `--no-move-to-startup-workspace` only when the user explicitly wants Isaac on the current workspace.
 - When taking Isaac screenshots or doing visual inspection, do not move Isaac back to the user's active workspace. Prefer window-id based screenshots or operate on workspace 2 so the user's desktop remains usable.
 - Do not substitute `examples/aloha_isaac/config/workcell_user_measured.yaml` for normal ALOHA Isaac startup. That measured workcell path was rejected by the user because it loads the wrong ALOHA configuration.
@@ -64,6 +103,14 @@ Read this before using, changing, debugging, or reinstalling Isaac Sim / Isaac L
   - `/home/eii/project/bottles_data/episode_19.hdf5`
   - It has 3642 frames at 50 Hz, about 72.84 seconds.
   - Do not substitute short key-region HDF5 files or 103-synced candidates unless the user explicitly asks for a different replay.
+- When the user asks for the user-confirmed bottle grasp window, use `episode_18`, not `episode_19`:
+  - `/home/eii/project/bottles_data/episode_18.hdf5`
+  - User-confirmed window: frame `208` through `244` inclusive. Use end-frame `245` for exclusive-end scripts.
+  - Semantics: open gripper -> clamp bottle -> lift onset. Do not substitute episode 19 for this grasp-window calibration task.
+- Phase132 tabletop modes have different meanings:
+  - `--tabletop-mode diagnostic_shift_to_open_finger` is a diagnostic-only contact-proxy mode. It moves `/World/Table` to match the replay open-finger height and must not be treated as an RL-ready fixed-workcell pass.
+  - `--tabletop-mode fixed_reference` keeps `/World/Table` fixed and places the bottle on the table collider. This is the RL-ready semantics for tabletop replay validation.
+  - As of 2026-07-22, fixed-reference episode_18 close-frame replay reports a height residual between the loaded clamp anchor and the fixed table object center. Treat that as a table/base calibration problem, not a friction, CCD, or contactOffset problem.
 - This mapping preserves recorded ALOHA1 joint values and only renames left-arm DOFs into the `/scene` articulation. It intentionally does not apply FK rigid-alignment offsets, because those offsets can push runtime DOF targets outside PhysX limits.
 - A successful replay validation must report all of these gates:
   - `target_limit_gate_ok: true`

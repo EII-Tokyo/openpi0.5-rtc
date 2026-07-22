@@ -96,6 +96,7 @@ MANIFEST
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
 *.spec
+*.pid
 
 # Installer logs
 pip-log.txt
@@ -126,6 +127,14 @@ cover/
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
+
+# Local Isaac/CAD/RL validation runtime artifacts.
+aloha_isaac_rebuild/artifacts/
+aloha_physical_reconstruction/artifacts/
+aloha_rl_real_validation/artifacts/
+aloha_rl_real_validation/logs/
+aloha_rl_real_validation/checkpoints_meta/**/.cache/
+scenes/aloha_fixed_bottle_grasp_test.usd
 
 # Flask stuff:
 instance/
