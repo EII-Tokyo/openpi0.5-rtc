@@ -42,12 +42,107 @@ def test_compare_dof_records_reports_order_change_stably() -> None:
     result = compare_dof_records(expected, observed)
 
     assert result["ok"] is False
+    assert result["mismatches"] == [
+        {
+            "field": "path",
+            "index": 0,
+            "expected": "/aloha/joints/waist",
+            "observed": "/aloha/joints/shoulder",
+        },
+        {
+            "field": "name",
+            "index": 0,
+            "expected": "waist",
+            "observed": "shoulder",
+        },
+        {
+            "field": "body1",
+            "index": 0,
+            "expected": "/aloha/links/waist",
+            "observed": "/aloha/links/shoulder",
+        },
+        {
+            "field": "path",
+            "index": 1,
+            "expected": "/aloha/joints/shoulder",
+            "observed": "/aloha/joints/waist",
+        },
+        {
+            "field": "name",
+            "index": 1,
+            "expected": "shoulder",
+            "observed": "waist",
+        },
+        {
+            "field": "body1",
+            "index": 1,
+            "expected": "/aloha/links/shoulder",
+            "observed": "/aloha/links/waist",
+        },
+    ]
+
+
+def test_compare_dof_records_reports_count_mismatch_explicitly() -> None:
+    result = compare_dof_records([_record(0, "waist")], [])
+
     assert result["mismatches"][0] == {
-        "field": "path",
-        "index": 0,
-        "expected": "/aloha/joints/waist",
-        "observed": "/aloha/joints/shoulder",
+        "field": "count",
+        "index": None,
+        "expected": 1,
+        "observed": 0,
     }
+
+
+def test_compare_dof_records_orders_all_mismatch_categories_stably() -> None:
+    expected = [_record(0, "waist"), _record(1, "shoulder")]
+    observed = [_record(0, "elbow")]
+
+    result = compare_dof_records(expected, observed)
+
+    assert result["mismatches"] == [
+        {
+            "field": "count",
+            "index": None,
+            "expected": 2,
+            "observed": 1,
+        },
+        {
+            "field": "path",
+            "index": 0,
+            "expected": "/aloha/joints/waist",
+            "observed": "/aloha/joints/elbow",
+        },
+        {
+            "field": "name",
+            "index": 0,
+            "expected": "waist",
+            "observed": "elbow",
+        },
+        {
+            "field": "body1",
+            "index": 0,
+            "expected": "/aloha/links/waist",
+            "observed": "/aloha/links/elbow",
+        },
+        {
+            "field": "missing",
+            "index": None,
+            "expected": "/aloha/joints/waist",
+            "observed": None,
+        },
+        {
+            "field": "missing",
+            "index": None,
+            "expected": "/aloha/joints/shoulder",
+            "observed": None,
+        },
+        {
+            "field": "unexpected",
+            "index": None,
+            "expected": None,
+            "observed": "/aloha/joints/elbow",
+        },
+    ]
 
 
 def test_compare_dof_records_reports_missing_and_unexpected_paths() -> None:
@@ -89,10 +184,15 @@ def test_validate_dof_records_rejects_duplicates(field: str, error_code: str) ->
     }
 
 
-def test_validate_dof_records_rejects_non_increasing_limits() -> None:
+@pytest.mark.parametrize(
+    ("lower_limit", "upper_limit"), [(1.0, 1.0), (2.0, 1.0)]
+)
+def test_validate_dof_records_rejects_non_increasing_limits(
+    lower_limit: float, upper_limit: float
+) -> None:
     record = _record(0, "waist")
-    record["lower_limit"] = 1.0
-    record["upper_limit"] = 1.0
+    record["lower_limit"] = lower_limit
+    record["upper_limit"] = upper_limit
 
     result = common.validate_dof_records([record])
 
@@ -100,22 +200,25 @@ def test_validate_dof_records_rejects_non_increasing_limits() -> None:
         {
             "code": "invalid_limit_order",
             "index": 0,
-            "lower_limit": 1.0,
-            "upper_limit": 1.0,
+            "lower_limit": lower_limit,
+            "upper_limit": upper_limit,
         }
     ]
 
 
+@pytest.mark.parametrize("field", ["lower_limit", "upper_limit"])
 @pytest.mark.parametrize("value", [float("nan"), float("inf"), float("-inf")])
-def test_validate_dof_records_rejects_non_finite_limits(value: float) -> None:
+def test_validate_dof_records_rejects_non_finite_limits(
+    field: str, value: float
+) -> None:
     record = _record(0, "waist")
-    record["lower_limit"] = value
+    record[field] = value
 
     result = common.validate_dof_records([record])
 
     assert result["ok"] is False
     assert result["errors"][0]["code"] == "non_finite_limit"
-    assert result["errors"][0]["field"] == "lower_limit"
+    assert result["errors"][0]["field"] == field
     assert result["errors"][0]["index"] == 0
 
 
