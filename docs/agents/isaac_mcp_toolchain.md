@@ -43,6 +43,8 @@ Read this before using, changing, debugging, or reinstalling Isaac Sim / Isaac L
 ## ALOHA Isaac Scratch Workspace
 - Scratch workspace: `/home/eii/isaac_mcp_setup/aloha_project`
 - This is only a scratch workspace. The project source of truth remains `/home/eii/project/openpi0.5-rtc-reward-learning`, especially `examples/aloha_isaac`.
+- Do not use `/home/eii/isaac_mcp_setup/aloha_project` as the selected workspace, output root, source root, or project root for this repository. It is MCP scratch only.
+- For Isaac/ALOHA/USD work started from `/home/eii/project/openpi0.5-rtc-reward-learning`, the workspace root is the repository root unless the user explicitly provides a different existing project path. Do not let domain-named subdirectories such as `aloha_isaac_replay/` replace the repository root as the workspace root.
 
 ## Confirmed ALOHA Isaac Startup Stage
 - As of 2026-07-15, the only user-confirmed ALOHA Isaac startup stage is:
