@@ -1,0 +1,142 @@
+schema_version: 1
+stage: A5_support_frame_components_visual
+purpose: >
+  Visual-only support-frame component layer for the clean ALOHA1 Isaac rebuild.
+  This layer transcribes the user's iter_003 FreeCAD/sketch intent into simple
+  USD Cube primitives so the support frame can be visually inspected before any
+  physics, collision, CAD, or camera extrinsic calibration is attempted.
+
+global_policy:
+  source_type: TUNED
+  source_kind: aloha1_visual_layout_v0
+  visual_only: true
+  measured_cad_ready: false
+  physics_ready: false
+  collision_ready: false
+  camera_mount_ready: false
+  camera_extrinsics_ready: false
+  training_ready: false
+  notes:
+    - The outer footprint 1220 mm x 625 mm is user-measured.
+    - The cam_low-side extension is a full-width 1220 mm rectangular frame extending about 260 mm outward.
+    - The cam_low visual mount point is on the extension outer rail, 640 mm from the left edge and 580 mm from the right edge.
+    - The top rail, extension rail, and 260 mm support pipes are a first ALOHA1 visual-layout proxy.
+    - These components are visual proxies only; do not use them as collision geometry or final CAD.
+    - The Z height values and camera mount positions are not accepted as final measurements until the user confirms them.
+
+source_json: scene_reconstruction/cad/aloha_incremental/iterations/iter_003_lower_camera_top_position/bbox_and_dimensions.json
+
+components:
+  top_steel_rail_proxy:
+    prim: /aloha/support_frame/visuals/components/top_steel_rail_proxy
+    center_m: [0.0, 0.3125, 0.610]
+    size_m: [1.220, 0.020, 0.020]
+    axis: x
+    source_type: TUNED
+    source_kind: aloha1_visual_layout_v0
+    status: APPLIED_VISUAL_ONLY
+    allowed_use:
+      - viewport_stage_tree_inspection
+      - visual_layout_review
+    forbidden_use:
+      - physics
+      - collision
+      - camera_extrinsics
+      - final_cad
+      - training
+
+  extension_outer_camera_rail_proxy:
+    prim: /aloha/support_frame/visuals/components/extension_outer_camera_rail_proxy
+    center_m: [0.0, 0.5725, 0.610]
+    size_m: [1.220, 0.020, 0.020]
+    axis: x
+    source_type: TUNED
+    source_kind: aloha1_visual_layout_v0
+    status: APPLIED_VISUAL_ONLY
+    notes:
+      - cam_low is mounted on this outer extension rail.
+      - cam_low schematic mount point is [0.030, 0.5725, 0.610] m before real extrinsics are measured.
+    forbidden_use: [physics, collision, camera_extrinsics, final_cad, training]
+
+  support_pipe_260mm_1:
+    prim: /aloha/support_frame/visuals/components/support_pipe_260mm_1
+    center_m: [-0.604959, 0.4425, 0.610]
+    size_m: [0.020, 0.260, 0.020]
+    axis: y
+    source_type: TUNED
+    source_kind: aloha1_visual_layout_v0
+    status: APPLIED_VISUAL_ONLY
+    forbidden_use: [physics, collision, camera_extrinsics, final_cad, training]
+
+  support_pipe_260mm_2:
+    prim: /aloha/support_frame/visuals/components/support_pipe_260mm_2
+    center_m: [-0.433554, 0.4425, 0.610]
+    size_m: [0.020, 0.260, 0.020]
+    axis: y
+    source_type: TUNED
+    source_kind: aloha1_visual_layout_v0
+    status: APPLIED_VISUAL_ONLY
+    forbidden_use: [physics, collision, camera_extrinsics, final_cad, training]
+
+  support_pipe_260mm_3:
+    prim: /aloha/support_frame/visuals/components/support_pipe_260mm_3
+    center_m: [0.433554, 0.4425, 0.610]
+    size_m: [0.020, 0.260, 0.020]
+    axis: y
+    source_type: TUNED
+    source_kind: aloha1_visual_layout_v0
+    status: APPLIED_VISUAL_ONLY
+    forbidden_use: [physics, collision, camera_extrinsics, final_cad, training]
+
+  support_pipe_260mm_4:
+    prim: /aloha/support_frame/visuals/components/support_pipe_260mm_4
+    center_m: [0.604959, 0.4425, 0.610]
+    size_m: [0.020, 0.260, 0.020]
+    axis: y
+    source_type: TUNED
+    source_kind: aloha1_visual_layout_v0
+    status: APPLIED_VISUAL_ONLY
+    forbidden_use: [physics, collision, camera_extrinsics, final_cad, training]
+
+measurement_requests:
+  top_view:
+    AB: support frame outer length, left outer edge to right outer edge
+    BC: support frame outer width, front outer edge to back outer edge
+    EF: cam_low-side extension attachment width along X
+    FG: cam_low-side extension depth along +Y, currently about 260 mm
+    HG: cam_low-side extension outer width along X
+    IJ: cam_low center to cam_high center distance along Y
+    KL: cam_low center offset from left outer edge along X, currently 640 mm
+    cam_low_right_offset: cam_low center offset from right outer edge along X, currently 580 mm
+    PQ: steel profile width or tube outside width
+    RS: ALOHA base Y-depth between measured front/back outer edges, currently 210 mm
+    base_edge_near_cam_low_y: base outer edge nearer cam_low, 180 mm inward from original cam_low-side frame edge
+    base_edge_near_cam_high_y: base outer edge nearer cam_high, 235 mm inward from original cam_high-side frame edge
+  front_view:
+    MN: top rail height above tabletop
+    OP: left support-pipe vertical offset or bracket height if present
+    QR: right support-pipe vertical offset or bracket height if present
+  side_view:
+    ST: 260 mm support pipe actual length along Y
+    UV: top rail center offset from back outer frame edge
+    WX: camera mount height below or above top rail
+
+base_y_alignment_guides:
+  base_edge_near_cam_low_y_guide:
+    prim: /aloha/support_frame/visuals/alignment_guides/base_edge_near_cam_low_y_guide
+    value_m: 0.1325
+    unit: m
+    source_type: MEASURED
+    source_kind: user_measured_base_y_edges
+    source_description: Original cam_low-side frame edge is Y=+0.3125 m; base outer edge is 180 mm inward, so Y=+0.1325 m.
+    status: APPLIED_VISUAL_ONLY
+    forbidden_use: [full_base_geometry, physics, collision, training]
+  base_edge_near_cam_high_y_guide:
+    prim: /aloha/support_frame/visuals/alignment_guides/base_edge_near_cam_high_y_guide
+    value_m: -0.0775
+    unit: m
+    source_type: MEASURED
+    source_kind: user_measured_base_y_edges
+    source_description: Original cam_high-side frame edge is Y=-0.3125 m; base outer edge is 235 mm inward, so Y=-0.0775 m.
+    status: APPLIED_VISUAL_ONLY
+    forbidden_use: [full_base_geometry, physics, collision, training]

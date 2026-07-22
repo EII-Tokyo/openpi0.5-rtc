@@ -1,0 +1,121 @@
+schema_version: 1
+stage: A4_camera_marker_visual
+purpose: >
+  Visual-only camera markers for inspecting the four canonical ALOHA1 camera
+  sensor identities in Isaac Sim. These markers are schematic debug aids only.
+  They are not measured camera extrinsics, not render products, and not usable
+  for OpenPI, ROS, training, calibration, physics, or collision.
+
+global_policy:
+  source_type: TUNED
+  source_kind: manual_visual_layout_only
+  visual_marker_only: true
+  calibration_status: MISSING
+  extrinsics_status: MISSING
+  forbidden_as_extrinsics: true
+  camera_render_ready: false
+  camera_calibration_ready: false
+  openpi_observation_ready: false
+  rlt_replay_ready: false
+  training_ready: false
+  rl_ready: false
+  render_eligible: false
+  training_eligible: false
+  ros_bridge_eligible: false
+  openpi_capture_eligible: false
+  notes:
+    - Marker positions are deliberately separated for viewport readability.
+    - Marker positions must not be copied into camera extrinsics.
+    - Sensor truth remains the UsdGeom.Camera prim path defined in cameras.yaml.
+
+marker_size_m: [0.045, 0.045, 0.045]
+direction_bar_size_m: [0.012, 0.110, 0.012]
+
+markers:
+  cam_high:
+    sensor_prim: /aloha/cam_high_link/cam_high_color_frame/cam_high
+    marker_prim: /aloha/visuals/camera_markers/cam_high_marker
+    direction_prim: /aloha/visuals/camera_markers/cam_high_marker/view_direction_hint
+    schematic_position_m: [0.0, -0.360, 0.100]
+    schematic_direction_hint: positive_y
+    pose_source: MANUAL_SCHEMATIC
+    not_measured_camera_pose: true
+    forbidden_as_extrinsics: true
+    display_color_rgb: [0.15, 0.35, 1.0]
+    allowed_use:
+      - viewport_stage_tree_inspection
+      - visual_debug_only
+    forbidden_use:
+      - camera_extrinsics
+      - training
+      - openpi_runtime_capture
+      - ros_bridge_publish
+      - calibration_claim
+      - physics
+      - collision
+
+  cam_low:
+    sensor_prim: /aloha/cam_low_link/cam_low_color_frame/cam_low
+    marker_prim: /aloha/visuals/camera_markers/cam_low_marker
+    direction_prim: /aloha/visuals/camera_markers/cam_low_marker/view_direction_hint
+    schematic_position_m: [0.0, 0.360, 0.100]
+    schematic_direction_hint: negative_y
+    pose_source: MANUAL_SCHEMATIC
+    not_measured_camera_pose: true
+    forbidden_as_extrinsics: true
+    display_color_rgb: [0.0, 0.80, 0.25]
+    allowed_use:
+      - viewport_stage_tree_inspection
+      - visual_debug_only
+    forbidden_use:
+      - camera_extrinsics
+      - training
+      - openpi_runtime_capture
+      - ros_bridge_publish
+      - calibration_claim
+      - physics
+      - collision
+
+  cam_left_wrist:
+    sensor_prim: /aloha/left_camera_link/cam_left_wrist_color_frame/cam_left_wrist
+    marker_prim: /aloha/visuals/camera_markers/cam_left_wrist_marker
+    direction_prim: /aloha/visuals/camera_markers/cam_left_wrist_marker/view_direction_hint
+    schematic_position_m: [-0.360, 0.0, 0.100]
+    schematic_direction_hint: toward_center
+    pose_source: MANUAL_SCHEMATIC
+    not_measured_camera_pose: true
+    forbidden_as_extrinsics: true
+    display_color_rgb: [1.0, 0.55, 0.05]
+    allowed_use:
+      - viewport_stage_tree_inspection
+      - visual_debug_only
+    forbidden_use:
+      - camera_extrinsics
+      - training
+      - openpi_runtime_capture
+      - ros_bridge_publish
+      - calibration_claim
+      - physics
+      - collision
+
+  cam_right_wrist:
+    sensor_prim: /aloha/right_camera_link/cam_right_wrist_color_frame/cam_right_wrist
+    marker_prim: /aloha/visuals/camera_markers/cam_right_wrist_marker
+    direction_prim: /aloha/visuals/camera_markers/cam_right_wrist_marker/view_direction_hint
+    schematic_position_m: [0.360, 0.0, 0.100]
+    schematic_direction_hint: toward_center
+    pose_source: MANUAL_SCHEMATIC
+    not_measured_camera_pose: true
+    forbidden_as_extrinsics: true
+    display_color_rgb: [0.80, 0.15, 1.0]
+    allowed_use:
+      - viewport_stage_tree_inspection
+      - visual_debug_only
+    forbidden_use:
+      - camera_extrinsics
+      - training
+      - openpi_runtime_capture
+      - ros_bridge_publish
+      - calibration_claim
+      - physics
+      - collision

@@ -1,0 +1,85 @@
+support_frame:
+  table_reference_length_m:
+    value: 1.2192
+    unit: m
+    source_type: MANUFACTURER
+    source_kind: trossen_stationary_ai_reference
+    source_description: Read from Trossen Stationary AI tabletop visual bbox Y dimension and mapped to local X length convention.
+    measurement_date: 2026-07-22
+    confidence: medium
+    status: PROVIDED
+  table_reference_width_m:
+    value: 0.7490
+    unit: m
+    source_type: MANUFACTURER
+    source_kind: trossen_stationary_ai_reference
+    source_description: Read from Trossen Stationary AI tabletop visual bbox X dimension and mapped to local Y width convention.
+    measurement_date: 2026-07-22
+    confidence: medium
+    status: PROVIDED
+  table_reference_thickness_m:
+    value: 0.0200
+    unit: m
+    source_type: MANUFACTURER
+    source_kind: trossen_stationary_ai_reference
+    source_description: Read from Trossen Stationary AI tabletop visual bbox Z dimension.
+    measurement_date: 2026-07-22
+    confidence: medium
+    status: PROVIDED
+  outer_length_m:
+    value: 1.220
+    unit: m
+    source_type: MEASURED
+    source_kind: user_measured
+    source_description: User clarified this is the outer-to-outer length of the upper steel support frame/rack footprint, not the table length.
+    measurement_date: 2026-07-22
+    confidence: high
+    status: PROVIDED
+  outer_width_m:
+    value: 0.625
+    unit: m
+    source_type: MEASURED
+    source_kind: user_measured
+    source_description: User clarified this is the outer-to-outer width of the upper steel support frame/rack footprint, not the table width.
+    measurement_date: 2026-07-22
+    confidence: high
+    status: PROVIDED
+  visual_marker_width_m:
+    value: 0.010
+    unit: m
+    source_type: TUNED
+    source_kind: estimated_visual_only
+    source_description: Thin visual guide width for drawing the support frame footprint outline; not the real steel profile width.
+    measurement_date: 2026-07-22
+    confidence: low
+    status: PROVIDED
+    allowed_use:
+      - visual_proxy_only
+    forbidden_use:
+      - physics
+      - collision
+      - support_plane
+      - contact_validation
+      - steel_profile_dimension
+  visual_marker_height_m:
+    value: 0.010
+    unit: m
+    source_type: TUNED
+    source_kind: estimated_visual_only
+    source_description: Thin visual guide height for drawing the support frame footprint outline.
+    measurement_date: 2026-07-22
+    confidence: low
+    status: PROVIDED
+    allowed_use:
+      - visual_proxy_only
+    forbidden_use:
+      - physics
+      - collision
+      - support_plane
+      - contact_validation
+  coordinate_convention:
+    x_axis: support frame outer length
+    y_axis: support frame outer width
+    z_axis: up
+    support_frame_center: /aloha/support_frame origin
+    footprint_marker_z_m: 0.0

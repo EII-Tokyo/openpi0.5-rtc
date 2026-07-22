@@ -1,0 +1,317 @@
+table.reference_length_m:
+  value: 1.2192
+  unit: m
+  source_type: MANUFACTURER
+  source_kind: trossen_stationary_ai_reference
+  source_description: Read from Trossen Stationary AI tabletop visual bbox Y dimension and mapped to local X length convention.
+  measurement_date: 2026-07-22
+  confidence: medium
+  used_in_files:
+    - aloha_isaac_rebuild/configs/physical_reconstruction/support_frame.yaml
+    - aloha_isaac_rebuild/scenes/aloha_support_frame_visual.usda
+  status: APPLIED
+
+table.reference_width_m:
+  value: 0.7490
+  unit: m
+  source_type: MANUFACTURER
+  source_kind: trossen_stationary_ai_reference
+  source_description: Read from Trossen Stationary AI tabletop visual bbox X dimension and mapped to local Y width convention.
+  measurement_date: 2026-07-22
+  confidence: medium
+  used_in_files:
+    - aloha_isaac_rebuild/configs/physical_reconstruction/support_frame.yaml
+    - aloha_isaac_rebuild/scenes/aloha_support_frame_visual.usda
+  status: APPLIED
+
+table.reference_thickness_m:
+  value: 0.0200
+  unit: m
+  source_type: MANUFACTURER
+  source_kind: trossen_stationary_ai_reference
+  source_description: Read from Trossen Stationary AI tabletop visual bbox Z dimension.
+  measurement_date: 2026-07-22
+  confidence: medium
+  used_in_files:
+    - aloha_isaac_rebuild/configs/physical_reconstruction/support_frame.yaml
+    - aloha_isaac_rebuild/scenes/aloha_support_frame_visual.usda
+  status: APPLIED
+
+support_frame.outer_length_m:
+  value: 1.220
+  unit: m
+  source_type: MEASURED
+  source_kind: user_measured
+  source_description: User clarified this is the outer-to-outer length of the upper steel support frame/rack footprint, not the table length.
+  measurement_date: 2026-07-22
+  confidence: high
+  used_in_files:
+    - aloha_isaac_rebuild/configs/physical_reconstruction/support_frame.yaml
+    - aloha_isaac_rebuild/scenes/aloha_support_frame_visual.usda
+  status: APPLIED
+
+support_frame.outer_width_m:
+  value: 0.625
+  unit: m
+  source_type: MEASURED
+  source_kind: user_measured
+  source_description: User clarified this is the outer-to-outer width of the upper steel support frame/rack footprint, not the table width.
+  measurement_date: 2026-07-22
+  confidence: high
+  used_in_files:
+    - aloha_isaac_rebuild/configs/physical_reconstruction/support_frame.yaml
+    - aloha_isaac_rebuild/scenes/aloha_support_frame_visual.usda
+  status: APPLIED
+
+support_frame.visual_marker_width_m:
+  value: 0.010
+  unit: m
+  source_type: TUNED
+  source_kind: estimated_visual_only
+  source_description: Thin visual guide width for drawing the support frame footprint outline; not the real steel profile width.
+  measurement_date: 2026-07-22
+  confidence: low
+  used_in_files:
+    - aloha_isaac_rebuild/configs/physical_reconstruction/support_frame.yaml
+    - aloha_isaac_rebuild/scenes/aloha_support_frame_visual.usda
+  status: APPLIED
+  allowed_use:
+    - visual_proxy_only
+  forbidden_use:
+    - physics
+    - collision
+    - support_plane
+    - contact_validation
+    - steel_profile_dimension
+
+support_frame.visual_marker_height_m:
+  value: 0.010
+  unit: m
+  source_type: TUNED
+  source_kind: estimated_visual_only
+  source_description: Thin visual guide height for drawing the support frame footprint outline.
+  measurement_date: 2026-07-22
+  confidence: low
+  used_in_files:
+    - aloha_isaac_rebuild/configs/physical_reconstruction/support_frame.yaml
+    - aloha_isaac_rebuild/scenes/aloha_support_frame_visual.usda
+  status: APPLIED
+  allowed_use:
+    - visual_proxy_only
+  forbidden_use:
+    - physics
+    - collision
+    - support_plane
+    - contact_validation
+
+camera.cam_high.sensor_prim:
+  value: /aloha/cam_high_link/cam_high_color_frame/cam_high
+  unit: usd_prim_path
+  source_type: MISSING
+  source_kind: canonical_semantic_name_only
+  source_description: Canonical high third-person camera identity. Intrinsics and extrinsics are not measured or applied.
+  measurement_date: 2026-07-22
+  confidence: low
+  used_in_files:
+    - aloha_isaac_rebuild/configs/physical_reconstruction/cameras.yaml
+    - aloha_isaac_rebuild/scenes/aloha_camera_semantic_skeleton.usda
+  status: APPLIED
+  allowed_use:
+    - semantic_identity
+    - viewport_stage_tree_inspection
+  forbidden_use:
+    - training
+    - openpi_runtime_capture
+    - ros_bridge_publish
+    - calibration_claim
+
+camera.cam_low.sensor_prim:
+  value: /aloha/cam_low_link/cam_low_color_frame/cam_low
+  unit: usd_prim_path
+  source_type: MISSING
+  source_kind: canonical_semantic_name_only
+  source_description: Canonical low third-person camera identity. Intrinsics and extrinsics are not measured or applied.
+  measurement_date: 2026-07-22
+  confidence: low
+  used_in_files:
+    - aloha_isaac_rebuild/configs/physical_reconstruction/cameras.yaml
+    - aloha_isaac_rebuild/scenes/aloha_camera_semantic_skeleton.usda
+  status: APPLIED
+  allowed_use:
+    - semantic_identity
+    - viewport_stage_tree_inspection
+  forbidden_use:
+    - training
+    - openpi_runtime_capture
+    - ros_bridge_publish
+    - calibration_claim
+
+camera.cam_left_wrist.sensor_prim:
+  value: /aloha/left_camera_link/cam_left_wrist_color_frame/cam_left_wrist
+  unit: usd_prim_path
+  source_type: MISSING
+  source_kind: canonical_semantic_name_only
+  source_description: Canonical left wrist camera identity. Intrinsics and extrinsics are not measured or applied.
+  measurement_date: 2026-07-22
+  confidence: low
+  used_in_files:
+    - aloha_isaac_rebuild/configs/physical_reconstruction/cameras.yaml
+    - aloha_isaac_rebuild/scenes/aloha_camera_semantic_skeleton.usda
+  status: APPLIED
+  allowed_use:
+    - semantic_identity
+    - viewport_stage_tree_inspection
+  forbidden_use:
+    - training
+    - openpi_runtime_capture
+    - ros_bridge_publish
+    - calibration_claim
+
+camera.cam_right_wrist.sensor_prim:
+  value: /aloha/right_camera_link/cam_right_wrist_color_frame/cam_right_wrist
+  unit: usd_prim_path
+  source_type: MISSING
+  source_kind: canonical_semantic_name_only
+  source_description: Canonical right wrist camera identity. Intrinsics and extrinsics are not measured or applied.
+  measurement_date: 2026-07-22
+  confidence: low
+  used_in_files:
+    - aloha_isaac_rebuild/configs/physical_reconstruction/cameras.yaml
+    - aloha_isaac_rebuild/scenes/aloha_camera_semantic_skeleton.usda
+  status: APPLIED
+  allowed_use:
+    - semantic_identity
+    - viewport_stage_tree_inspection
+  forbidden_use:
+    - training
+    - openpi_runtime_capture
+    - ros_bridge_publish
+    - calibration_claim
+
+camera_markers.marker_size_m:
+  value: [0.045, 0.045, 0.045]
+  unit: m
+  source_type: TUNED
+  source_kind: manual_visual_layout_only
+  source_description: Visual-only marker cube size for distinguishing camera semantic slots in the viewport. It is not a measured camera body size.
+  measurement_date: 2026-07-22
+  confidence: low
+  used_in_files:
+    - aloha_isaac_rebuild/configs/physical_reconstruction/camera_markers.yaml
+    - aloha_isaac_rebuild/scenes/aloha_camera_marker_visual.usda
+  status: APPLIED
+  allowed_use:
+    - viewport_stage_tree_inspection
+    - visual_debug_only
+  forbidden_use:
+    - camera_extrinsics
+    - training
+    - openpi_runtime_capture
+    - ros_bridge_publish
+    - calibration_claim
+    - physics
+    - collision
+
+camera_markers.direction_bar_size_m:
+  value: [0.012, 0.110, 0.012]
+  unit: m
+  source_type: TUNED
+  source_kind: manual_visual_layout_only
+  source_description: Visual-only direction hint bar size for distinguishing schematic camera directions. It is not measured optical-axis geometry.
+  measurement_date: 2026-07-22
+  confidence: low
+  used_in_files:
+    - aloha_isaac_rebuild/configs/physical_reconstruction/camera_markers.yaml
+    - aloha_isaac_rebuild/scenes/aloha_camera_marker_visual.usda
+  status: APPLIED
+  allowed_use:
+    - viewport_stage_tree_inspection
+    - visual_debug_only
+  forbidden_use:
+    - camera_extrinsics
+    - training
+    - openpi_runtime_capture
+    - ros_bridge_publish
+    - calibration_claim
+    - physics
+    - collision
+
+camera_markers.cam_high.schematic_position_m:
+  value: [0.0, -0.360, 0.100]
+  unit: m
+  source_type: TUNED
+  source_kind: manual_visual_layout_only
+  source_description: Schematic marker position for viewport readability only. Real cam_high extrinsics remain MISSING.
+  measurement_date: 2026-07-22
+  confidence: low
+  used_in_files:
+    - aloha_isaac_rebuild/configs/physical_reconstruction/camera_markers.yaml
+    - aloha_isaac_rebuild/scenes/aloha_camera_marker_visual.usda
+  status: APPLIED
+  allowed_use:
+    - viewport_stage_tree_inspection
+    - visual_debug_only
+  forbidden_use:
+    - camera_extrinsics
+    - training
+    - calibration_claim
+
+camera_markers.cam_low.schematic_position_m:
+  value: [0.0, 0.360, 0.100]
+  unit: m
+  source_type: TUNED
+  source_kind: manual_visual_layout_only
+  source_description: Schematic marker position for viewport readability only. Real cam_low extrinsics remain MISSING.
+  measurement_date: 2026-07-22
+  confidence: low
+  used_in_files:
+    - aloha_isaac_rebuild/configs/physical_reconstruction/camera_markers.yaml
+    - aloha_isaac_rebuild/scenes/aloha_camera_marker_visual.usda
+  status: APPLIED
+  allowed_use:
+    - viewport_stage_tree_inspection
+    - visual_debug_only
+  forbidden_use:
+    - camera_extrinsics
+    - training
+    - calibration_claim
+
+camera_markers.cam_left_wrist.schematic_position_m:
+  value: [-0.360, 0.0, 0.100]
+  unit: m
+  source_type: TUNED
+  source_kind: manual_visual_layout_only
+  source_description: Schematic marker position for viewport readability only. Real left wrist camera extrinsics remain MISSING.
+  measurement_date: 2026-07-22
+  confidence: low
+  used_in_files:
+    - aloha_isaac_rebuild/configs/physical_reconstruction/camera_markers.yaml
+    - aloha_isaac_rebuild/scenes/aloha_camera_marker_visual.usda
+  status: APPLIED
+  allowed_use:
+    - viewport_stage_tree_inspection
+    - visual_debug_only
+  forbidden_use:
+    - camera_extrinsics
+    - training
+    - calibration_claim
+
+camera_markers.cam_right_wrist.schematic_position_m:
+  value: [0.360, 0.0, 0.100]
+  unit: m
+  source_type: TUNED
+  source_kind: manual_visual_layout_only
+  source_description: Schematic marker position for viewport readability only. Real right wrist camera extrinsics remain MISSING.
+  measurement_date: 2026-07-22
+  confidence: low
+  used_in_files:
+    - aloha_isaac_rebuild/configs/physical_reconstruction/camera_markers.yaml
+    - aloha_isaac_rebuild/scenes/aloha_camera_marker_visual.usda
+  status: APPLIED
+  allowed_use:
+    - viewport_stage_tree_inspection
+    - visual_debug_only
+  forbidden_use:
+    - camera_extrinsics
+    - training
+    - calibration_claim
