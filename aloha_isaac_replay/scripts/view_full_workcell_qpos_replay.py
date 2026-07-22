@@ -205,6 +205,29 @@ def _set_articulation_qpos(left, right, left_indices, right_indices, qpos_frame:
     return left_values, right_values
 
 
+def _safe_joint_readback(articulation, joint_indices: np.ndarray, expected_len: int) -> tuple[np.ndarray | None, str | None]:
+    """Return joint readback only when Isaac has a valid physics view.
+
+    The GUI viewer is for qualitative replay inspection. Isaac can briefly
+    report no physics simulation view for articulation readback, especially
+    around startup/teardown. That should not close the visual replay window,
+    but it also must not be treated as controller validation.
+    """
+
+    try:
+        values = articulation.get_joint_positions(joint_indices=joint_indices)
+    except Exception as exc:  # pragma: no cover - Isaac runtime only.
+        return None, f"{type(exc).__name__}: {exc}"
+    if values is None:
+        return None, "joint_positions_unavailable"
+    arr = np.asarray(values, dtype=np.float64)
+    if arr.ndim != 1 or arr.shape[0] != int(expected_len):
+        return None, f"invalid_joint_positions_shape:{arr.shape}"
+    if not np.all(np.isfinite(arr)):
+        return None, "nonfinite_joint_positions"
+    return arr, None
+
+
 def _move_window_to_workspace(workspace: int, timeout_sec: float = 8.0) -> dict[str, object]:
     if workspace < 0:
         return {"attempted": False, "reason": "disabled"}
@@ -845,6 +868,8 @@ def main() -> int:
         max_right_arm_error = 0.0
         max_left_finger_error = 0.0
         max_right_finger_error = 0.0
+        readback_available = True
+        readback_warning: str | None = None
         last_bottle_pos = initial_bottle_pos
         last_bottle_quat = initial_bottle_quat
         last_bottle_pose_error = initial_bottle_error
@@ -877,12 +902,27 @@ def main() -> int:
                     else:
                         last_bottle_pose_error = None
                     app.update()
-                    actual_left = np.asarray(left.get_joint_positions(joint_indices=left_indices), dtype=np.float64)
-                    actual_right = np.asarray(right.get_joint_positions(joint_indices=right_indices), dtype=np.float64)
-                    max_left_arm_error = max(max_left_arm_error, float(np.max(np.abs(actual_left[:6] - expected_left[:6]))))
-                    max_right_arm_error = max(max_right_arm_error, float(np.max(np.abs(actual_right[:6] - expected_right[:6]))))
-                    max_left_finger_error = max(max_left_finger_error, float(np.max(np.abs(actual_left[6:] - expected_left[6:]))))
-                    max_right_finger_error = max(max_right_finger_error, float(np.max(np.abs(actual_right[6:] - expected_right[6:]))))
+                    actual_left, left_readback_error = _safe_joint_readback(left, left_indices, len(expected_left))
+                    actual_right, right_readback_error = _safe_joint_readback(right, right_indices, len(expected_right))
+                    readback_errors = [err for err in (left_readback_error, right_readback_error) if err]
+                    if readback_errors:
+                        readback_available = False
+                        readback_warning = "; ".join(readback_errors)
+                    else:
+                        readback_available = True
+                        readback_warning = None
+                        max_left_arm_error = max(
+                            max_left_arm_error, float(np.max(np.abs(actual_left[:6] - expected_left[:6])))
+                        )
+                        max_right_arm_error = max(
+                            max_right_arm_error, float(np.max(np.abs(actual_right[:6] - expected_right[:6])))
+                        )
+                        max_left_finger_error = max(
+                            max_left_finger_error, float(np.max(np.abs(actual_left[6:] - expected_left[6:])))
+                        )
+                        max_right_finger_error = max(
+                            max_right_finger_error, float(np.max(np.abs(actual_right[6:] - expected_right[6:])))
+                        )
                     if not args.headless:
                         time.sleep(frame_sleep)
                     if frame_index % 100 == 0:
@@ -894,6 +934,12 @@ def main() -> int:
                                 "max_right_arm_readback_error": max_right_arm_error,
                                 "max_left_finger_readback_error": max_left_finger_error,
                                 "max_right_finger_readback_error": max_right_finger_error,
+                                "readback_available": readback_available,
+                                "readback_warning": readback_warning,
+                                "validation_scope": (
+                                    "VISUAL_PREVIEW_ONLY: controller tracking, contact, lift, and RL-readiness "
+                                    "gates are not evaluated by this GUI viewer."
+                                ),
                                 "last_bottle_position": last_bottle_pos,
                                 "last_bottle_pose_error": last_bottle_pose_error,
                             }
@@ -908,6 +954,12 @@ def main() -> int:
                         "max_right_arm_readback_error": max_right_arm_error,
                         "max_left_finger_readback_error": max_left_finger_error,
                         "max_right_finger_readback_error": max_right_finger_error,
+                        "readback_available": readback_available,
+                        "readback_warning": readback_warning,
+                        "validation_scope": (
+                            "VISUAL_PREVIEW_ONLY: controller tracking, contact, lift, and RL-readiness "
+                            "gates are not evaluated by this GUI viewer."
+                        ),
                         "last_bottle_position": last_bottle_pos,
                         "last_bottle_pose_error": last_bottle_pose_error,
                         "completed_frames": int(len(qpos)),

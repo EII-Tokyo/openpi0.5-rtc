@@ -11,6 +11,7 @@ from aloha_isaac_replay.scripts.create_table_to_base_calibration import build_ca
 from aloha_isaac_replay.scripts.create_table_to_base_calibration import build_evidence_record
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _audit_required_table_frame
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _active_target_contact_gate
+from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _active_grasp_geometry_precondition
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _guard_final_contact_stage_namespace
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _guard_support_plane_calibration_mode
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _finger_targets
@@ -19,11 +20,14 @@ from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _parse_vec3
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _apply_replay_target_and_step
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _controller_tracking_gate
+from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _early_geometric_escape_gate
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _load_support_plane_config
+from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _live_target_reachability_row
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _non_target_contact_gate
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _resolve_support_plane_options
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _resolve_side_arm_dof_name
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _should_disable_workcell_environment_collision
+from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _summarize_target_reachability
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _summarize_contact_pairs
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _summarize_target_limit_violations
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _summarize_tracking_errors
@@ -33,6 +37,7 @@ from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _tracking_groups
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _tracking_step_errors
 from aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact import _write_csv
+from aloha_isaac_replay.adapters.gripper_mapping import gripper_qpos_calibration_from_loaded_contact
 from aloha_isaac_replay.validation.contact_proxy_profiles import finger_dof_names_for_side
 from aloha_isaac_replay.validation.contact_proxy_profiles import finger_qpos_limits_for_side
 
@@ -130,6 +135,23 @@ def test_parse_vec3_accepts_center_offset_and_rejects_bad_values() -> None:
         _parse_vec3([1.0, 2.0], name="offset")
     with pytest.raises(ValueError, match="NaN/Inf"):
         _parse_vec3([1.0, float("nan"), 0.0], name="offset")
+
+
+def test_active_grasp_geometry_precondition_skips_loaded_contact_placement() -> None:
+    gate = _active_grasp_geometry_precondition(
+        require_active_target_contact=True,
+        already_in_contact_setup=False,
+        loaded_contact_placement=True,
+        open_left_box={},
+        open_right_box={},
+        object_box={},
+        gap_axis=1,
+        clearance=0.003,
+    )
+
+    assert gate["pass"] is True
+    assert gate["status"] == "SKIPPED_LOADED_CONTACT_PLACEMENT"
+    assert gate["mode"] == "loaded_contact_placement"
 
 
 def test_passive_contact_csv_writer_preserves_late_diagnostic_columns(tmp_path) -> None:
@@ -230,6 +252,192 @@ def test_replay_actuation_mode_state_teleport_sets_state_then_target(monkeypatch
     assert calls == ["state", "target"]
     np.testing.assert_allclose(pre_step_qpos, [1.0, 2.0])
     assert world.step_calls == 1
+
+
+def _capture_row(step: int, lower_gap: float, upper_gap: float) -> dict:
+    return {
+        "phase": "close",
+        "step": step,
+        "active": False,
+        "status": "OBSERVED_FINGER_GAP_ABOVE_OBJECT_WIDTH",
+        "current_center_gap_m": 0.1,
+        "projected_inner_gap": {
+            "valid": True,
+            "finger_inner_gap_m": 0.07,
+            "object_gap_to_lower_finger_m": lower_gap,
+            "object_gap_to_upper_finger_m": upper_gap,
+            "object_interval_m": [0.1, 0.16],
+            "lower_inner_surface_m": 0.09,
+            "upper_inner_surface_m": 0.17,
+        },
+    }
+
+
+def _bilateral_gate_stub(*, bilateral_steps=None) -> dict:
+    return {
+        "required": True,
+        "finger_rows": [
+            {
+                "finger_path": "/scene/left_base_link/left_left_finger_link/bbox_collision_proxy",
+                "first_step": 12,
+            },
+            {
+                "finger_path": "/scene/left_base_link/left_right_finger_link/bbox_collision_proxy",
+                "first_step": 15,
+            },
+        ],
+        "bilateral_contact_steps": [] if bilateral_steps is None else bilateral_steps,
+    }
+
+
+def _bbox(center, size=(0.02, 0.02, 0.02)) -> dict:
+    center_arr = np.asarray(center, dtype=np.float64)
+    size_arr = np.asarray(size, dtype=np.float64)
+    return {
+        "bbox_valid": True,
+        "center": center_arr.tolist(),
+        "size": size_arr.tolist(),
+        "min": (center_arr - size_arr * 0.5).tolist(),
+        "max": (center_arr + size_arr * 0.5).tolist(),
+    }
+
+
+def test_live_target_reachability_keeps_cross_axis_offset_for_projection_only_contact() -> None:
+    row = _live_target_reachability_row(
+        phase="close",
+        step=7,
+        left_box=_bbox([0.0, 0.04, 0.0]),
+        right_box=_bbox([0.0, -0.04, 0.0]),
+        object_contact_box=_bbox([0.012, 0.0, 0.018]),
+        object_projection_model={
+            "valid": True,
+            "object_interval_m": [-0.006, 0.006],
+            "projected_radius_m": 0.006,
+        },
+        contact_rows=[],
+        object_path="/World/Bottle500",
+        expected_finger_paths=["/scene/left_base_link/left_left_finger_link/bbox_collision_proxy"],
+        table_path=None,
+        contact_distance=0.03,
+        use_oriented_finger_boxes=False,
+    )
+
+    assert row["status"] == "FAIL_PROXIMITY_WITHOUT_CONTACT_REPORT"
+    assert row["projected_reaches_contact_distance"] is True
+    assert row["target_contact_rows_at_step"] == 0
+    assert row["object_offset_along_closing_axis_m"] == pytest.approx(0.0)
+    assert row["object_cross_closing_axis_offset_x_m"] == pytest.approx(0.012)
+    assert row["object_cross_closing_axis_offset_z_m"] == pytest.approx(0.018)
+    assert row["object_cross_closing_axis_offset_norm_m"] == pytest.approx((0.012**2 + 0.018**2) ** 0.5)
+
+
+def test_live_target_reachability_classifies_1d_projection_false_positive() -> None:
+    row = _live_target_reachability_row(
+        phase="close",
+        step=11,
+        left_box=_bbox([0.0, 0.04, 0.0]),
+        right_box=_bbox([0.0, -0.04, 0.0]),
+        object_contact_box=_bbox([0.08, 0.0, 0.08]),
+        object_projection_model={
+            "valid": True,
+            "object_interval_m": [-0.006, 0.006],
+            "projected_radius_m": 0.006,
+        },
+        contact_rows=[],
+        object_path="/World/Bottle500",
+        expected_finger_paths=[
+            "/scene/left_base_link/left_left_finger_link/bbox_collision_proxy",
+            "/scene/left_base_link/left_right_finger_link/bbox_collision_proxy",
+        ],
+        table_path=None,
+        contact_distance=0.03,
+        use_oriented_finger_boxes=False,
+    )
+
+    assert row["projected_reaches_contact_distance"] is True
+    assert row["status"] == "FAIL_1D_PROJECTION_OVERLAP_BUT_3D_AABB_SEPARATION"
+    overlap = row["finger_object_world_aabb_overlap_diagnostic"]
+    assert overlap["all_fingers_within_aabb_contact_distance"] is False
+    assert overlap["finger_rows"]["left_finger"]["max_axis_gap_m"] > 0.03
+
+
+def test_target_reachability_summary_preserves_min_gap_row_for_3d_diagnosis() -> None:
+    rows = [
+        {
+            "phase": "close",
+            "step": 3,
+            "valid": True,
+            "target_contact_rows_at_step": 0,
+            "table_finger_contact_rows_at_step": 0,
+            "projected_reaches_contact_distance": False,
+            "min_projected_surface_gap_m": 0.03,
+            "object_cross_closing_axis_offset_norm_m": 0.002,
+        },
+        {
+            "phase": "close",
+            "step": 9,
+            "valid": True,
+            "target_contact_rows_at_step": 0,
+            "table_finger_contact_rows_at_step": 0,
+            "projected_reaches_contact_distance": True,
+            "min_projected_surface_gap_m": -0.004,
+            "object_cross_closing_axis_offset_norm_m": 0.021,
+        },
+    ]
+
+    summary = _summarize_target_reachability(rows)
+
+    assert summary["status"] == "FAIL_PROXIMITY_WITHOUT_CONTACT_REPORT"
+    assert summary["first_projection_reach_step"] == 9
+    assert summary["min_projected_surface_gap_m"] == pytest.approx(-0.004)
+    assert summary["min_projected_surface_gap_row"]["step"] == 9
+    assert summary["max_object_cross_closing_axis_offset_norm_m"] == pytest.approx(0.021)
+    assert summary["proximity_without_contact_rows_sample"][0]["step"] == 9
+
+
+def test_early_geometric_escape_gate_detects_unilateral_exit_before_bilateral_contact() -> None:
+    gate = _early_geometric_escape_gate(
+        object_width_stop_rows=[
+            _capture_row(0, 0.004, 0.004),
+            _capture_row(4, 0.011, -0.001),
+        ],
+        bilateral_grasp_formation_gate=_bilateral_gate_stub(),
+    )
+
+    assert gate["pass"] is False
+    assert gate["status"] == "FAIL_OBJECT_ESCAPES_CAPTURE_REGION_BEFORE_BILATERAL_CONTACT"
+    assert gate["first_escape_step"] == 4
+    assert gate["first_unilateral_escape_row"]["upper_crossed"] is True
+    assert gate["first_unilateral_escape_row"]["lower_crossed"] is False
+
+
+def test_early_geometric_escape_gate_does_not_treat_centered_overclosure_as_escape() -> None:
+    gate = _early_geometric_escape_gate(
+        object_width_stop_rows=[
+            _capture_row(0, 0.004, 0.004),
+            _capture_row(30, -0.003, -0.004),
+        ],
+        bilateral_grasp_formation_gate=_bilateral_gate_stub(),
+    )
+
+    assert gate["pass"] is True
+    assert gate["status"] == "PASS_OBJECT_STAYS_IN_CAPTURE_REGION_UNTIL_BILATERAL_CONTACT"
+    assert gate["first_escape_step"] is None
+
+
+def test_early_geometric_escape_gate_ignores_rows_after_bilateral_contact() -> None:
+    gate = _early_geometric_escape_gate(
+        object_width_stop_rows=[
+            _capture_row(0, 0.004, 0.004),
+            _capture_row(9, 0.002, 0.001),
+            _capture_row(12, 0.010, -0.003),
+        ],
+        bilateral_grasp_formation_gate=_bilateral_gate_stub(bilateral_steps=[10, 11]),
+    )
+
+    assert gate["pass"] is True
+    assert gate["first_bilateral_contact_step"] == 10
+    assert gate["first_escape_step"] is None
 
 
 def test_replay_actuation_mode_state_teleport_reapplies_state_during_hold(monkeypatch) -> None:
@@ -477,6 +685,51 @@ def test_hdf5_arm_start_then_gripper_only_holds_start_arm_and_replays_gripper(mo
     assert summary["arm_qpos_delta"]["max_abs_net_delta"] == pytest.approx(8.89)
 
 
+def test_hdf5_arm_start_then_gripper_only_can_hold_loaded_arm_frame(monkeypatch) -> None:
+    class _ArmTarget:
+        def __init__(self, name: str, value: float) -> None:
+            self.isaac_dof_name = name
+            self.value = value
+
+    def fake_arm_targets(frame: np.ndarray, _mapping: dict[str, object], *, side: str) -> list[_ArmTarget]:
+        assert side == "left"
+        return [
+            _ArmTarget("left/waist", float(frame[0])),
+            _ArmTarget("left/shoulder", float(frame[1])),
+            _ArmTarget("left/elbow", float(frame[2])),
+            _ArmTarget("left/forearm_roll", float(frame[3])),
+            _ArmTarget("left/wrist_angle", float(frame[4])),
+            _ArmTarget("left/wrist_rotate", float(frame[5])),
+        ]
+
+    monkeypatch.setattr(
+        "aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact.arm_only_targets_from_standard_qpos",
+        fake_arm_targets,
+    )
+    qpos = np.zeros((3, 14), dtype=np.float64)
+    qpos[0, :6] = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6]
+    qpos[1, :6] = [1.1, 1.2, 1.3, 1.4, 1.5, 1.6]
+    qpos[2, :6] = [9.1, 9.2, 9.3, 9.4, 9.5, 9.6]
+    qpos[:, 6] = [1.0, 0.7, 0.0]
+
+    targets, summary = _targets_from_hdf5_qpos(
+        art=_FakeSceneBaseLeftArmArticulation(),
+        side="left",
+        qpos=qpos,
+        mapping={"dummy": True},
+        replay_mode="hdf5_arm_start_then_gripper_only",
+        finger_dof_names=finger_dof_names_for_side("scene_base_link", "left"),
+        finger_qpos_limits=finger_qpos_limits_for_side("scene_base_link", "left"),
+        arm_hold_frame_offset=1,
+    )
+
+    np.testing.assert_allclose(targets[0][:6], qpos[1, :6])
+    np.testing.assert_allclose(targets[2][:6], qpos[1, :6])
+    assert targets[0][6] > targets[-1][6]
+    assert summary["arm_hold_frame_offset"] == 1
+    assert summary["arm_target_behavior"] == "constant_hdf5_selected_frame_hold"
+
+
 def test_hdf5_arm_start_then_gripper_only_can_use_action_gripper_source(monkeypatch) -> None:
     class _ArmTarget:
         def __init__(self, name: str, value: float) -> None:
@@ -526,6 +779,59 @@ def test_hdf5_arm_start_then_gripper_only_can_use_action_gripper_source(monkeypa
     assert summary["arm_source"] == "observations/qpos"
     assert summary["raw_start"] == pytest.approx(1.0)
     assert summary["raw_end"] == pytest.approx(0.0)
+
+
+def test_hdf5_targets_record_loaded_qpos_calibration_without_dropping_frames(monkeypatch) -> None:
+    class _ArmTarget:
+        def __init__(self, name: str, value: float) -> None:
+            self.isaac_dof_name = name
+            self.value = value
+
+    def fake_arm_targets(frame: np.ndarray, _mapping: dict[str, object], *, side: str) -> list[_ArmTarget]:
+        assert side == "left"
+        return [
+            _ArmTarget("left/waist", float(frame[0])),
+            _ArmTarget("left/shoulder", float(frame[1])),
+            _ArmTarget("left/elbow", float(frame[2])),
+            _ArmTarget("left/forearm_roll", float(frame[3])),
+            _ArmTarget("left/wrist_angle", float(frame[4])),
+            _ArmTarget("left/wrist_rotate", float(frame[5])),
+        ]
+
+    monkeypatch.setattr(
+        "aloha_isaac_replay.scripts.validate_aloha1_gripper_passive_contact.arm_only_targets_from_standard_qpos",
+        fake_arm_targets,
+    )
+    qpos = np.zeros((3, 14), dtype=np.float64)
+    qpos[:, :6] = [0.11, 0.22, 0.33, 0.44, 0.55, 0.66]
+    qpos[:, 6] = [0.9473305344581604, 0.7, 0.5712134838104248]
+    limits = finger_qpos_limits_for_side("scene_base_link", "left")
+    calibration = gripper_qpos_calibration_from_loaded_contact(
+        raw_open_value=0.9473305344581604,
+        raw_contact_value=0.5712134838104248,
+        effective_contact_width=0.052,
+        limits=limits,
+        source="episode18_loaded_plateau_test",
+    )
+
+    targets, summary = _targets_from_hdf5_qpos(
+        art=_FakeSceneBaseLeftArmArticulation(),
+        side="left",
+        qpos=qpos,
+        mapping={"dummy": True},
+        replay_mode="hdf5_arm_start_then_gripper_only",
+        finger_dof_names=finger_dof_names_for_side("scene_base_link", "left"),
+        finger_qpos_limits=limits,
+        gripper_qpos_calibration=calibration,
+    )
+
+    assert len(targets) == 3
+    assert summary["qpos_source_is_loaded_gap_calibrated"] is True
+    assert summary["qpos_calibration"]["source"] == "episode18_loaded_plateau_test"
+    assert summary["raw_start"] == pytest.approx(0.9473305344581604)
+    assert summary["raw_end"] == pytest.approx(0.5712134838104248)
+    assert summary["last_target_values"]["left_finger"] == pytest.approx(0.026)
+    assert summary["last_target_values"]["right_finger"] == pytest.approx(0.026)
 
 
 def test_resolve_side_arm_dof_name_rejects_missing_precisely() -> None:
@@ -663,7 +969,7 @@ def test_active_target_contact_gate_requires_close_contact_found_event() -> None
     )
 
     assert gate["pass"] is False
-    assert gate["status"] == "FAIL_NO_ACTIVE_TARGET_CONTACT_DURING_CLOSE"
+    assert gate["status"] == "FAIL_NO_ACTIVE_TARGET_CONTACT_DURING_CLOSE_OR_POST_CLOSE_HOLD"
 
 
 def test_active_target_contact_gate_rejects_settle_first_even_if_close_later() -> None:
@@ -678,7 +984,7 @@ def test_active_target_contact_gate_rejects_settle_first_even_if_close_later() -
     )
 
     assert gate["pass"] is False
-    assert gate["status"] == "FAIL_NO_ACTIVE_TARGET_CONTACT_DURING_CLOSE"
+    assert gate["status"] == "FAIL_NO_ACTIVE_TARGET_CONTACT_DURING_CLOSE_OR_POST_CLOSE_HOLD"
 
 
 def test_active_target_contact_gate_passes_close_contact_found_event() -> None:
@@ -693,7 +999,23 @@ def test_active_target_contact_gate_passes_close_contact_found_event() -> None:
     )
 
     assert gate["pass"] is True
-    assert gate["status"] == "PASS_ACTIVE_TARGET_CONTACT_FOUND_DURING_CLOSE"
+    assert gate["status"] == "PASS_ACTIVE_TARGET_CONTACT_FOUND_DURING_CLOSE_OR_POST_CLOSE_HOLD"
+
+
+def test_active_target_contact_gate_passes_post_close_hold_contact_found_event() -> None:
+    gate = _active_target_contact_gate(
+        contact_summary={
+            "target_contact_found_phases": ["post_close_hold"],
+            "first_target_contact_phase": "post_close_hold",
+            "first_target_contact_found_phase": "post_close_hold",
+            "target_contact_found_during_post_close_hold": True,
+        },
+        require_active_target_contact=True,
+        already_in_contact_setup=False,
+    )
+
+    assert gate["pass"] is True
+    assert gate["status"] == "PASS_ACTIVE_TARGET_CONTACT_FOUND_DURING_CLOSE_OR_POST_CLOSE_HOLD"
 
 
 def test_active_target_contact_gate_documents_already_contacting_setup() -> None:

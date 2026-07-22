@@ -2,16 +2,21 @@ from __future__ import annotations
 
 import argparse
 import csv
+import dataclasses
 import json
 import os
 from pathlib import Path
 import sys
+import time
 import traceback
 from typing import Any
 
 import numpy as np
 import yaml
 
+from aloha_isaac_replay.adapters.gripper_mapping import DEFAULT_GRIPPER_QPOS_CALIBRATION
+from aloha_isaac_replay.adapters.gripper_mapping import GripperQposCalibration
+from aloha_isaac_replay.adapters.gripper_mapping import gripper_qpos_calibration_from_loaded_contact
 from aloha_isaac_replay.adapters.gripper_mapping import standard_gripper_qpos_to_isaac_fingers
 from aloha_isaac_replay.adapters.isaac_dof_adapter import load_mapping
 from aloha_isaac_replay.replay.arm_only_mapping import arm_only_targets_from_standard_qpos
@@ -70,6 +75,26 @@ def _rel(path: str | Path) -> str:
 def _write_json(path: Path, payload: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(_json_safe(payload), ensure_ascii=False, indent=2) + "\n")
+
+
+def _open_stage_and_wait(stage_utils: Any, omni_usd: Any, app: Any, stage_path: str, timeout_s: float = 10.0) -> Any:
+    """Open a USD stage and wait until Kit exposes the composed stage instance."""
+
+    stage_utils.open_stage(stage_path)
+    deadline = time.monotonic() + float(timeout_s)
+    last_stage = None
+    while time.monotonic() < deadline:
+        last_stage = omni_usd.get_context().get_stage()
+        if last_stage is not None:
+            return last_stage
+        try:
+            app.update()
+        except Exception:
+            pass
+        time.sleep(0.05)
+    raise AssertionError(
+        f"Expected a USD stage instance after opening {stage_path!r}, got: {type(last_stage)}"
+    )
 
 
 def _passive_contact_geometry_sanity(
@@ -329,6 +354,9 @@ def _write_markdown(path: Path, payload: dict[str, Any]) -> None:
     physical_grasp_gate = payload.get("physical_grasp_gate") or {}
     tabletop_grasp_gate = payload.get("tabletop_grasp_contact_gate") or {}
     lift_transport_gate = payload.get("lift_transport_gate") or {}
+    prelift_static_gate = payload.get("prelift_static_grasp_gate") or {}
+    post_close_hold_gate = payload.get("post_close_hold_diagnostic_gate") or {}
+    post_close_lift_gate = payload.get("post_close_lift_diagnostic_gate") or {}
     controller_replay_gate = payload.get("controller_replay_fidelity_gate") or {}
     command_smoothness = payload.get("command_smoothness_gate") or {}
     formal_replay_gate = payload.get("formal_replay_feasibility_gate") or {}
@@ -358,6 +386,12 @@ def _write_markdown(path: Path, payload: dict[str, Any]) -> None:
         f"- tabletop grasp contact gate: `{tabletop_grasp_gate.get('status')}` pass=`{tabletop_grasp_gate.get('pass')}`",
         f"- lift transport gate: `{lift_transport_gate.get('status')}` pass=`{lift_transport_gate.get('pass')}`",
         f"- lift follow ratio: `{lift_transport_gate.get('object_follow_ratio')}`",
+        f"- post-close hold diagnostic: `{post_close_hold_gate.get('status')}` pass=`{post_close_hold_gate.get('pass')}`",
+        f"- pre-lift static grasp diagnostic: `{prelift_static_gate.get('status')}` pass=`{prelift_static_gate.get('pass')}`",
+        f"- pre-lift tail bilateral contact steps: `{prelift_static_gate.get('tail_bilateral_contact_steps')}`",
+        f"- pre-lift object XY sweep: `{prelift_static_gate.get('object_xy_sweep_m')}` m",
+        f"- pre-lift object Z delta: `{prelift_static_gate.get('object_z_delta_m')}` m",
+        f"- post-close lift diagnostic: `{post_close_lift_gate.get('status')}` pass=`{post_close_lift_gate.get('pass')}`",
         f"- stage: `{payload['inputs']['stage_usd']}`",
         f"- control mode: `{payload['inputs']['control_mode']}`",
         f"- moving fingers: `{payload['inputs'].get('moving_fingers')}`",
@@ -549,6 +583,7 @@ def _target_from_standard_qpos(
     replay_mode: str,
     finger_dof_names: dict[str, str],
     finger_qpos_limits: Any,
+    gripper_qpos_calibration: GripperQposCalibration = DEFAULT_GRIPPER_QPOS_CALIBRATION,
 ) -> np.ndarray:
     dof_names = list(art.dof_names)
     target = np.asarray(art.get_joint_positions(), dtype=np.float64).reshape(-1).copy()
@@ -568,7 +603,12 @@ def _target_from_standard_qpos(
             )
             target[dof_names.index(resolved_dof_name)] = float(arm_target.value)
     channel = 6 if side == "left" else 13
-    fingers = standard_gripper_qpos_to_isaac_fingers(float(qpos_frame[channel]), side=side, limits=finger_qpos_limits)
+    fingers = standard_gripper_qpos_to_isaac_fingers(
+        float(qpos_frame[channel]),
+        side=side,
+        calibration=gripper_qpos_calibration,
+        limits=finger_qpos_limits,
+    )
     target[dof_names.index(finger_dof_names["left_finger"])] = float(fingers[f"{side}/left_finger"])
     target[dof_names.index(finger_dof_names["right_finger"])] = float(fingers[f"{side}/right_finger"])
     return target
@@ -607,6 +647,8 @@ def _targets_from_hdf5_qpos(
     replay_mode: str,
     finger_dof_names: dict[str, str],
     finger_qpos_limits: Any,
+    gripper_qpos_calibration: GripperQposCalibration = DEFAULT_GRIPPER_QPOS_CALIBRATION,
+    arm_hold_frame_offset: int = 0,
 ) -> tuple[list[np.ndarray], dict[str, Any]]:
     dof_names = list(art.dof_names)
     left_idx = dof_names.index(finger_dof_names["left_finger"])
@@ -623,19 +665,29 @@ def _targets_from_hdf5_qpos(
     if replay_mode == HDF5_ARM_START_THEN_GRIPPER_ONLY_MODE:
         if mapping is None:
             raise ValueError(f"{HDF5_ARM_START_THEN_GRIPPER_ONLY_MODE} replay requires a mapping")
+        hold_offset = int(arm_hold_frame_offset)
+        if hold_offset < 0 or hold_offset >= int(qpos.shape[0]):
+            raise ValueError(
+                f"arm_hold_frame_offset must be within the selected HDF5 qpos window [0, {qpos.shape[0] - 1}], "
+                f"got {hold_offset}"
+            )
         arm_hold_target = _target_from_standard_qpos(
             art=art,
             side=side,
-            qpos_frame=qpos[0],
+            qpos_frame=qpos[hold_offset],
             mapping=mapping,
             replay_mode="left_arm_and_gripper",
             finger_dof_names=finger_dof_names,
             finger_qpos_limits=finger_qpos_limits,
+            gripper_qpos_calibration=gripper_qpos_calibration,
         )
         for frame, gripper_frame in zip(qpos, gripper_signal_array, strict=True):
             target = np.asarray(arm_hold_target, dtype=np.float64).copy()
             fingers = standard_gripper_qpos_to_isaac_fingers(
-                float(gripper_frame[channel]), side=side, limits=finger_qpos_limits
+                float(gripper_frame[channel]),
+                side=side,
+                calibration=gripper_qpos_calibration,
+                limits=finger_qpos_limits,
             )
             target[left_idx] = float(fingers[f"{side}/left_finger"])
             target[right_idx] = float(fingers[f"{side}/right_finger"])
@@ -650,10 +702,14 @@ def _targets_from_hdf5_qpos(
                 replay_mode=replay_mode,
                 finger_dof_names=finger_dof_names,
                 finger_qpos_limits=finger_qpos_limits,
+                gripper_qpos_calibration=gripper_qpos_calibration,
             )
             if gripper_source != "observations/qpos":
                 fingers = standard_gripper_qpos_to_isaac_fingers(
-                    float(gripper_frame[channel]), side=side, limits=finger_qpos_limits
+                    float(gripper_frame[channel]),
+                    side=side,
+                    calibration=gripper_qpos_calibration,
+                    limits=finger_qpos_limits,
                 )
                 target[left_idx] = float(fingers[f"{side}/left_finger"])
                 target[right_idx] = float(fingers[f"{side}/right_finger"])
@@ -667,11 +723,14 @@ def _targets_from_hdf5_qpos(
             "max_abs_frame_delta": float(np.max(np.abs(np.diff(arm_qpos, axis=0)))) if len(arm_qpos) > 1 else 0.0,
             "max_abs_net_delta": float(np.max(np.abs(arm_qpos[-1] - arm_qpos[0]))),
         }
-        arm_target_behavior = (
-            "constant_hdf5_start_frame_hold"
-            if replay_mode == HDF5_ARM_START_THEN_GRIPPER_ONLY_MODE
-            else "hdf5_frame_by_frame_targets"
-        )
+        if replay_mode == HDF5_ARM_START_THEN_GRIPPER_ONLY_MODE:
+            arm_target_behavior = (
+                "constant_hdf5_start_frame_hold"
+                if int(arm_hold_frame_offset) == 0
+                else "constant_hdf5_selected_frame_hold"
+            )
+        else:
+            arm_target_behavior = "hdf5_frame_by_frame_targets"
     return targets, {
         "source": gripper_source,
         "arm_source": "observations/qpos",
@@ -681,6 +740,7 @@ def _targets_from_hdf5_qpos(
         "arm_initialized_from_hdf5": bool(_replay_mode_controls_arm(replay_mode)),
         "hdf5_arm_targets_after_start_used": bool(replay_mode == "left_arm_and_gripper"),
         "arm_target_behavior": arm_target_behavior,
+        "arm_hold_frame_offset": int(arm_hold_frame_offset) if replay_mode == HDF5_ARM_START_THEN_GRIPPER_ONLY_MODE else None,
         "sample_count": int(gripper_signal.size),
         "raw_start": float(gripper_signal[0]),
         "raw_end": float(gripper_signal[-1]),
@@ -696,8 +756,98 @@ def _targets_from_hdf5_qpos(
             "left_finger": float(targets[-1][left_idx]),
             "right_finger": float(targets[-1][right_idx]),
         },
+        "qpos_calibration": dataclasses.asdict(gripper_qpos_calibration),
+        "qpos_source_is_loaded_gap_calibrated": bool(
+            gripper_qpos_calibration != DEFAULT_GRIPPER_QPOS_CALIBRATION
+        ),
         "arm_qpos_delta": arm_delta,
     }
+
+
+def _apply_diagnostic_loaded_clamp_squeeze(
+    *,
+    enabled: bool,
+    target: np.ndarray,
+    dof_names: list[str],
+    finger_dof_names: dict[str, str],
+    runtime_limits: np.ndarray,
+    limit_margin: float,
+    squeeze_depth: float,
+    phase: str,
+    moving_fingers: str,
+    reference_target: np.ndarray,
+    reference_target_source: str = "reference_target",
+) -> tuple[np.ndarray, dict[str, Any]]:
+    """Apply a diagnostic-only post-close over-close target.
+
+    The HDF5 close sequence remains untouched.  This only modifies appended
+    post-close hold/lift diagnostics to test whether a small loaded soft-bottle
+    compression can create enough normal force to carry the object.
+    """
+
+    row: dict[str, Any] = {
+        "enabled": bool(enabled),
+        "active": False,
+        "status": "DISABLED",
+        "phase": phase,
+        "squeeze_depth_m": float(squeeze_depth),
+        "per_finger_target_delta_m": 0.0,
+        "reference_target_source": str(reference_target_source),
+        "diagnostic_only": True,
+        "formal_hdf5_close_sequence_modified": False,
+        "notes": (
+            "Diagnostic post-close target over-close for soft-bottle load-bearing tests. "
+            "It must not be treated as original HDF5 replay success."
+        ),
+    }
+    if not enabled:
+        return target, row
+    if phase not in {"post_close_hold", "post_close_lift", "post_close_lift_hold"}:
+        row.update({"status": "SKIPPED_FORMAL_CLOSE_PHASE"})
+        return target, row
+    if moving_fingers != "both":
+        row.update({"status": "SKIPPED_REQUIRES_BOTH_FINGERS"})
+        return target, row
+    depth = float(squeeze_depth)
+    if not np.isfinite(depth) or depth <= 0.0:
+        row.update({"status": "SKIPPED_NONPOSITIVE_SQUEEZE_DEPTH"})
+        return target, row
+
+    squeezed = np.asarray(target, dtype=np.float64).reshape(-1).copy()
+    reference = np.asarray(reference_target, dtype=np.float64).reshape(-1)
+    per_finger_delta = depth * 0.5
+    updates: dict[str, Any] = {}
+    any_clipped = False
+    for logical_name in ("left_finger", "right_finger"):
+        dof_name = finger_dof_names[logical_name]
+        idx = dof_names.index(dof_name)
+        lower, upper = [float(x) for x in runtime_limits[idx]]
+        requested = float(reference[idx]) - per_finger_delta
+        safe_value, clipped = _safe_target(float(reference[idx]), -per_finger_delta, lower, upper, limit_margin)
+        squeezed[idx] = float(safe_value)
+        any_clipped = bool(any_clipped or clipped)
+        updates[logical_name] = {
+            "dof_name": dof_name,
+            "dof_index": int(idx),
+            "reference_target": float(reference[idx]),
+            "requested_target": requested,
+            "applied_target": float(safe_value),
+            "actual_delta_from_reference": float(safe_value - float(reference[idx])),
+            "lower_limit": lower,
+            "upper_limit": upper,
+            "clipped": bool(clipped),
+        }
+    row.update(
+        {
+            "active": True,
+            "status": "APPLIED_DIAGNOSTIC_LOADED_CLAMP_SQUEEZE",
+            "per_finger_target_delta_m": -per_finger_delta,
+            "target_inner_gap_reduction_m": float(2.0 * per_finger_delta),
+            "clipped": bool(any_clipped),
+            "finger_targets": updates,
+        }
+    )
+    return squeezed, row
 
 
 def _tracking_groups(
@@ -1513,7 +1663,7 @@ def _active_target_contact_gate(
     row: dict[str, Any] = {
         "required": bool(require_active_target_contact),
         "already_in_contact_setup": bool(already_in_contact_setup),
-        "active_phases": ["close"],
+        "active_phases": ["close", "post_close_hold"],
         "observed_target_contact_found_phases": found_phases,
         "first_target_contact_phase": contact_summary.get("first_target_contact_phase"),
         "first_target_contact_found_phase": contact_summary.get("first_target_contact_found_phase"),
@@ -1526,12 +1676,20 @@ def _active_target_contact_gate(
         return row
     first_found_phase = contact_summary.get("first_target_contact_found_phase")
     found_during_close = bool(contact_summary.get("target_contact_found_during_close"))
-    if first_found_phase == "close":
-        row.update({"pass": True, "status": "PASS_ACTIVE_TARGET_CONTACT_FOUND_DURING_CLOSE"})
+    found_during_post_close_hold = bool(contact_summary.get("target_contact_found_during_post_close_hold"))
+    if first_found_phase in {"close", "post_close_hold"}:
+        row.update(
+            {
+                "pass": True,
+                "status": "PASS_ACTIVE_TARGET_CONTACT_FOUND_DURING_CLOSE_OR_POST_CLOSE_HOLD",
+            }
+        )
     elif found_during_close:
         row.update({"pass": False, "status": "FAIL_TARGET_ALREADY_CONTACTING_BEFORE_CLOSE"})
+    elif found_during_post_close_hold:
+        row.update({"pass": False, "status": "FAIL_TARGET_ALREADY_CONTACTING_BEFORE_POST_CLOSE_HOLD"})
     else:
-        row.update({"pass": False, "status": "FAIL_NO_ACTIVE_TARGET_CONTACT_DURING_CLOSE"})
+        row.update({"pass": False, "status": "FAIL_NO_ACTIVE_TARGET_CONTACT_DURING_CLOSE_OR_POST_CLOSE_HOLD"})
     return row
 
 
@@ -1748,6 +1906,51 @@ def _oriented_cylinder_projection_model(
     return row
 
 
+def _oriented_box_projection_model(
+    *,
+    object_box: dict[str, Any],
+    projection_unit_world: list[float] | tuple[float, float, float] | np.ndarray,
+    source: str,
+) -> dict[str, Any]:
+    """Project a cuboid contact coupon using its authored oriented box support."""
+
+    row: dict[str, Any] = {
+        "valid": False,
+        "source": source,
+        "shape_model": "oriented_box_support",
+    }
+    unit = np.asarray(projection_unit_world, dtype=np.float64).reshape(3)
+    unit_norm = float(np.linalg.norm(unit))
+    if unit_norm <= 1e-12 or not np.isfinite(unit_norm):
+        row["status"] = "FAIL_INVALID_PROJECTION_UNIT"
+        return row
+    unit = unit / unit_norm
+    interval = _box_oriented_projection_interval(object_box, unit)
+    if interval is None:
+        row["status"] = "FAIL_ORIENTED_BOX_INTERVAL_INVALID"
+        return row
+    center = np.asarray(object_box["center"], dtype=np.float64).reshape(3)
+    projected_center = (float(interval[0]) + float(interval[1])) * 0.5
+    projected_radius = (float(interval[1]) - float(interval[0])) * 0.5
+    row.update(
+        {
+            "valid": True,
+            "status": "PASS_ORIENTED_BOX_PROJECTION_MODEL",
+            "center_world_m": center.tolist(),
+            "projection_unit_world": unit.tolist(),
+            "projected_radius_m": float(projected_radius),
+            "projected_width_m": float(projected_radius * 2.0),
+            "center_projection_m": float(projected_center),
+            "object_interval_m": [float(interval[0]), float(interval[1])],
+            "notes": (
+                "This interval is for a local cuboid grasp coupon. It uses the authored oriented box support "
+                "instead of the rotated world AABB."
+            ),
+        }
+    )
+    return row
+
+
 def _closing_axis_gap_centering_solver(
     *,
     lower_box: dict[str, Any],
@@ -1856,6 +2059,7 @@ def _diagnostic_force_target_overlap_shift(
     projection_unit_world: list[float] | tuple[float, float, float] | np.ndarray,
     overlap_m: float,
     use_oriented_finger_boxes: bool = False,
+    named_finger_boxes: dict[str, dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Diagnostic-only positive control for the contact-report pipeline.
 
@@ -1899,7 +2103,25 @@ def _diagnostic_force_target_overlap_shift(
         return row
     lower_gap = float(gap["object_gap_to_lower_finger_m"])
     upper_gap = float(gap["object_gap_to_upper_finger_m"])
-    if mode == "nearest":
+    interval_fn = _box_oriented_projection_interval if use_oriented_finger_boxes else _box_projection_interval
+    forced_finger = None
+    if mode in {"left_finger", "right_finger"}:
+        if not named_finger_boxes or mode not in named_finger_boxes:
+            row["status"] = "FAIL_NAMED_FINGER_BOX_UNAVAILABLE"
+            return row
+        other_mode = "right_finger" if mode == "left_finger" else "left_finger"
+        selected_interval = interval_fn(named_finger_boxes[mode], unit)
+        other_interval = interval_fn(named_finger_boxes.get(other_mode, {}), unit)
+        if selected_interval is None or other_interval is None:
+            row["status"] = "FAIL_NAMED_FINGER_PROJECTION_INVALID"
+            return row
+        selected_center = (float(selected_interval[0]) + float(selected_interval[1])) * 0.5
+        other_center = (float(other_interval[0]) + float(other_interval[1])) * 0.5
+        side = "lower" if selected_center <= other_center else "upper"
+        forced_finger = mode
+        row["selected_finger_interval_m"] = [float(selected_interval[0]), float(selected_interval[1])]
+        row["other_finger_interval_m"] = [float(other_interval[0]), float(other_interval[1])]
+    elif mode == "nearest":
         side = "lower" if lower_gap <= upper_gap else "upper"
     else:
         side = mode
@@ -1931,6 +2153,7 @@ def _diagnostic_force_target_overlap_shift(
             "pass": True,
             "applied": True,
             "forced_side": side,
+            "forced_finger": forced_finger,
             "target_center_projection_m": float(target_center_projection),
             "current_center_projection_m": float(current_center_projection),
             "delta_projection_m": float(delta_projection),
@@ -2111,6 +2334,60 @@ def _finger_object_alignment_diagnostic(
     return row
 
 
+def _translated_reference_contact_center(
+    *,
+    reference_contact_center_world: list[float] | tuple[float, float, float] | np.ndarray | None,
+    reset_object_box: dict[str, Any],
+    final_object_box: dict[str, Any],
+) -> dict[str, Any]:
+    """Move the reference grasp point with the contact proxy center.
+
+    The fixed-reference lift gate compares a bottle-local grasp point against the
+    two-finger midplane after the bottle is lifted.  Reusing the initial world
+    point would falsely report a midplane error as soon as the object moves.
+    This first correction is translation-only; if future runs show large object
+    rotation, the gate should be upgraded to a full rigid transform.
+    """
+
+    if reference_contact_center_world is None:
+        return {
+            "valid": False,
+            "status": "SKIPPED_NO_REFERENCE_CONTACT_CENTER",
+            "reference_contact_center_world_m": None,
+        }
+    reference = np.asarray(reference_contact_center_world, dtype=np.float64).reshape(3)
+    if not (
+        reset_object_box.get("bbox_valid")
+        and final_object_box.get("bbox_valid")
+        and reset_object_box.get("center") is not None
+        and final_object_box.get("center") is not None
+    ):
+        return {
+            "valid": False,
+            "status": "INVALID_OBJECT_BOX_FOR_TRANSLATED_REFERENCE",
+            "reference_contact_center_world_m": reference.astype(float).tolist(),
+        }
+    reset_center = np.asarray(reset_object_box["center"], dtype=np.float64).reshape(3)
+    final_center = np.asarray(final_object_box["center"], dtype=np.float64).reshape(3)
+    local_offset_world = reference - reset_center
+    translated = final_center + local_offset_world
+    return {
+        "valid": True,
+        "status": "PASS_TRANSLATED_REFERENCE_CONTACT_CENTER",
+        "method": "contact_proxy_center_translation_only",
+        "reference_contact_center_world_m": translated.astype(float).tolist(),
+        "initial_reference_contact_center_world_m": reference.astype(float).tolist(),
+        "reset_object_contact_center_world_m": reset_center.astype(float).tolist(),
+        "final_object_contact_center_world_m": final_center.astype(float).tolist(),
+        "object_contact_center_delta_world_m": (final_center - reset_center).astype(float).tolist(),
+        "reference_local_offset_world_m": local_offset_world.astype(float).tolist(),
+        "notes": (
+            "The reference grasp point is moved with the contact proxy center for lift-phase validation. "
+            "This avoids comparing a final gripper pose against a stale initial world-space point."
+        ),
+    }
+
+
 def _closing_unit_from_finger_boxes(left_box: dict[str, Any], right_box: dict[str, Any]) -> np.ndarray | None:
     if not (
         left_box.get("bbox_valid")
@@ -2126,6 +2403,140 @@ def _closing_unit_from_finger_boxes(left_box: dict[str, Any], right_box: dict[st
     if norm <= 1e-12 or not np.isfinite(norm):
         return None
     return delta / norm
+
+
+def _finger_object_center_offset_row(
+    *,
+    left_center: np.ndarray,
+    right_center: np.ndarray,
+    object_center: np.ndarray | None,
+    closing_unit: np.ndarray,
+) -> dict[str, Any]:
+    """Decompose object/finger midpoint offset into closing and cross-axis parts."""
+
+    midpoint = (left_center + right_center) * 0.5
+    row: dict[str, Any] = {
+        "finger_midpoint_world_m": midpoint.tolist(),
+        "object_center_world_m": None,
+        "object_offset_from_finger_midpoint_world_m": None,
+        "object_offset_along_closing_axis_m": None,
+        "object_cross_closing_axis_offset_world_m": None,
+        "object_cross_closing_axis_offset_norm_m": None,
+        "object_cross_closing_axis_offset_x_m": None,
+        "object_cross_closing_axis_offset_y_m": None,
+        "object_cross_closing_axis_offset_z_m": None,
+    }
+    if object_center is None:
+        return row
+    offset = object_center - midpoint
+    along = float(np.dot(offset, closing_unit))
+    cross = offset - along * closing_unit
+    row.update(
+        {
+            "object_center_world_m": object_center.tolist(),
+            "object_offset_from_finger_midpoint_world_m": offset.tolist(),
+            "object_offset_along_closing_axis_m": along,
+            "object_cross_closing_axis_offset_world_m": cross.tolist(),
+            "object_cross_closing_axis_offset_norm_m": float(np.linalg.norm(cross)),
+            "object_cross_closing_axis_offset_x_m": float(cross[0]),
+            "object_cross_closing_axis_offset_y_m": float(cross[1]),
+            "object_cross_closing_axis_offset_z_m": float(cross[2]),
+        }
+    )
+    return row
+
+
+def _finger_object_aabb_overlap_diagnostic(
+    *,
+    left_box: dict[str, Any],
+    right_box: dict[str, Any],
+    object_box: dict[str, Any],
+    contact_distance: float,
+) -> dict[str, Any]:
+    """Report world-AABB overlap/separation for each finger proxy vs target.
+
+    This is a conservative diagnostic, not a true signed-distance query.  If the
+    enclosing AABBs are separated beyond the allowed contact distance on any
+    world axis, a 1-D closing-axis projection is not sufficient evidence that
+    PhysX should have produced a contact pair.
+    """
+
+    result: dict[str, Any] = {
+        "valid": False,
+        "contact_distance_m": float(contact_distance),
+        "finger_rows": {},
+        "all_fingers_within_aabb_contact_distance": False,
+        "all_fingers_world_aabb_overlap_xyz": False,
+    }
+    if not (
+        object_box.get("bbox_valid")
+        and object_box.get("min") is not None
+        and object_box.get("max") is not None
+    ):
+        result["status"] = "INVALID_OBJECT_BBOX"
+        return result
+
+    object_min = np.asarray(object_box["min"], dtype=np.float64).reshape(3)
+    object_max = np.asarray(object_box["max"], dtype=np.float64).reshape(3)
+    object_center = np.asarray(object_box.get("center", (object_min + object_max) * 0.5), dtype=np.float64).reshape(3)
+    contact_distance_f = float(contact_distance)
+    finger_rows: dict[str, Any] = {}
+    for name, box in (("left_finger", left_box), ("right_finger", right_box)):
+        row: dict[str, Any] = {"valid": False, "finger": name}
+        if not (box.get("bbox_valid") and box.get("min") is not None and box.get("max") is not None):
+            row["status"] = "INVALID_FINGER_BBOX"
+            finger_rows[name] = row
+            continue
+        finger_min = np.asarray(box["min"], dtype=np.float64).reshape(3)
+        finger_max = np.asarray(box["max"], dtype=np.float64).reshape(3)
+        finger_center = np.asarray(box.get("center", (finger_min + finger_max) * 0.5), dtype=np.float64).reshape(3)
+        overlap = np.minimum(finger_max, object_max) - np.maximum(finger_min, object_min)
+        axis_gap = np.maximum(-overlap, 0.0)
+        axis_overlap = np.maximum(overlap, 0.0)
+        overlap_xyz = bool(np.all(overlap >= 0.0))
+        within_contact_distance = bool(np.all(axis_gap <= contact_distance_f))
+        row.update(
+            {
+                "valid": True,
+                "status": (
+                    "PASS_WORLD_AABB_OVERLAPS_OBJECT"
+                    if overlap_xyz
+                    else (
+                        "PASS_WORLD_AABB_WITHIN_CONTACT_DISTANCE"
+                        if within_contact_distance
+                        else "FAIL_WORLD_AABB_SEPARATED_BEYOND_CONTACT_DISTANCE"
+                    )
+                ),
+                "finger_center_world_m": finger_center.tolist(),
+                "object_center_world_m": object_center.tolist(),
+                "center_delta_world_m": (object_center - finger_center).tolist(),
+                "axis_overlap_m": axis_overlap.tolist(),
+                "axis_gap_m": axis_gap.tolist(),
+                "max_axis_gap_m": float(np.max(axis_gap)),
+                "world_aabb_overlap_xyz": overlap_xyz,
+                "world_aabb_overlap_volume_m3": float(np.prod(axis_overlap)) if overlap_xyz else 0.0,
+                "within_contact_distance_all_axes": within_contact_distance,
+            }
+        )
+        finger_rows[name] = row
+
+    valid_rows = [row for row in finger_rows.values() if row.get("valid")]
+    result.update(
+        {
+            "valid": bool(len(valid_rows) == 2),
+            "status": (
+                "PASS_ALL_FINGER_AABBS_WITHIN_CONTACT_DISTANCE"
+                if valid_rows and all(row["within_contact_distance_all_axes"] for row in valid_rows)
+                else "FAIL_AT_LEAST_ONE_FINGER_AABB_SEPARATED_BEYOND_CONTACT_DISTANCE"
+            ),
+            "finger_rows": finger_rows,
+            "all_fingers_within_aabb_contact_distance": bool(
+                valid_rows and all(row["within_contact_distance_all_axes"] for row in valid_rows)
+            ),
+            "all_fingers_world_aabb_overlap_xyz": bool(valid_rows and all(row["world_aabb_overlap_xyz"] for row in valid_rows)),
+        }
+    )
+    return result
 
 
 def _live_target_reachability_row(
@@ -2183,13 +2594,18 @@ def _live_target_reachability_row(
         if object_contact_box.get("bbox_valid") and object_contact_box.get("center") is not None
         else None
     )
-    midpoint = (left_center + right_center) * 0.5
-    cross_offset_norm = None
-    if object_center is not None:
-        offset = object_center - midpoint
-        along = float(np.dot(offset, closing_unit))
-        cross = offset - along * closing_unit
-        cross_offset_norm = float(np.linalg.norm(cross))
+    offset_row = _finger_object_center_offset_row(
+        left_center=left_center,
+        right_center=right_center,
+        object_center=object_center,
+        closing_unit=closing_unit,
+    )
+    aabb_overlap = _finger_object_aabb_overlap_diagnostic(
+        left_box=left_box,
+        right_box=right_box,
+        object_box=object_contact_box,
+        contact_distance=float(contact_distance),
+    )
     target_rows = [contact for contact in contact_rows if _pair_touches_targets(contact, object_path, expected_finger_paths)]
     table_finger_rows: list[dict[str, Any]] = []
     if table_path:
@@ -2213,6 +2629,8 @@ def _live_target_reachability_row(
         status = "PASS_GEOMETRIC_CONTACT_REPORTED"
     elif table_finger_rows:
         status = "FAIL_FINGER_TABLE_CONTACT_BLOCKS_TARGET_REACH"
+    elif projected_reaches_contact_distance and not aabb_overlap.get("all_fingers_within_aabb_contact_distance"):
+        status = "FAIL_1D_PROJECTION_OVERLAP_BUT_3D_AABB_SEPARATION"
     elif projected_reaches_contact_distance:
         status = "FAIL_PROXIMITY_WITHOUT_CONTACT_REPORT"
     elif gap.get("valid"):
@@ -2224,7 +2642,8 @@ def _live_target_reachability_row(
             "closing_axis_unit_world": closing_unit.tolist(),
             "projected_inner_gap": gap,
             "object_contact_box": object_contact_box,
-            "object_cross_closing_axis_offset_norm_m": cross_offset_norm,
+            **offset_row,
+            "finger_object_world_aabb_overlap_diagnostic": aabb_overlap,
             "min_projected_surface_gap_m": min_projected_surface_gap,
             "projected_reaches_contact_distance": projected_reaches_contact_distance,
             "target_contact_rows_at_step": len(target_rows),
@@ -2242,6 +2661,9 @@ def _summarize_target_reachability(rows: list[dict[str, Any]]) -> dict[str, Any]
     target_rows = [row for row in rows if row.get("target_contact_rows_at_step", 0) > 0]
     table_block_rows = [row for row in rows if row.get("table_finger_contact_rows_at_step", 0) > 0]
     proximity_rows = [row for row in rows if row.get("projected_reaches_contact_distance")]
+    projection_aabb_separation_rows = [
+        row for row in rows if row.get("status") == "FAIL_1D_PROJECTION_OVERLAP_BUT_3D_AABB_SEPARATION"
+    ]
     valid_rows = [row for row in rows if row.get("valid")]
     min_gap_values = [
         float(row["min_projected_surface_gap_m"])
@@ -2253,10 +2675,17 @@ def _summarize_target_reachability(rows: list[dict[str, Any]]) -> dict[str, Any]
         for row in rows
         if row.get("object_cross_closing_axis_offset_norm_m") is not None
     ]
+    min_gap_row = None
+    rows_with_min_gap = [row for row in rows if row.get("min_projected_surface_gap_m") is not None]
+    if rows_with_min_gap:
+        min_gap_row = min(rows_with_min_gap, key=lambda row: float(row["min_projected_surface_gap_m"]))
+    proximity_rows_sample = proximity_rows[:5]
     if target_rows:
         status = "PASS_GEOMETRIC_CONTACT_REPORTED"
     elif table_block_rows:
         status = "FAIL_FINGER_TABLE_CONTACT_BLOCKS_TARGET_REACH"
+    elif projection_aabb_separation_rows:
+        status = "FAIL_1D_PROJECTION_OVERLAP_BUT_3D_AABB_SEPARATION"
     elif proximity_rows:
         status = "FAIL_PROXIMITY_WITHOUT_CONTACT_REPORT"
     elif valid_rows:
@@ -2274,13 +2703,21 @@ def _summarize_target_reachability(rows: list[dict[str, Any]]) -> dict[str, Any]
         "first_table_finger_contact_step": table_block_rows[0]["step"] if table_block_rows else None,
         "projection_reach_step_count": len(proximity_rows),
         "first_projection_reach_step": proximity_rows[0]["step"] if proximity_rows else None,
+        "projection_aabb_separation_step_count": len(projection_aabb_separation_rows),
+        "first_projection_aabb_separation_step": (
+            projection_aabb_separation_rows[0]["step"] if projection_aabb_separation_rows else None
+        ),
         "min_projected_surface_gap_m": min(min_gap_values) if min_gap_values else None,
+        "min_projected_surface_gap_row": min_gap_row,
         "max_object_cross_closing_axis_offset_norm_m": max(cross_values) if cross_values else None,
+        "projection_aabb_separation_rows_sample": projection_aabb_separation_rows[:5],
+        "proximity_without_contact_rows_sample": proximity_rows_sample,
         "rows_sample": rows[:5],
         "last_row": rows[-1],
         "notes": (
             "Uses the live contact proxy projection for each close step. A world-AABB-only final gap is not "
-            "accepted as evidence of PhysX contact."
+            "accepted as evidence of PhysX contact. A small closing-axis gap with a large cross-axis object "
+            "offset means the gripper and object are not aligned in the full 3-D contact volume."
         ),
     }
 
@@ -2380,11 +2817,19 @@ def _loaded_gripper_soft_bottle_calibration_diagnostic(
             "bilateral_contact_distance_m": float(object_width + 2.0 * missing_bilateral_to_contact),
         }
 
+    qpos_source_is_loaded_gap_calibrated = bool(
+        (hdf5_gripper_summary or {}).get("qpos_source_is_loaded_gap_calibrated")
+    )
     result.update(
         {
-            "status": "COMPUTED_FORMAL_QPOS_LOADED_CONTACT_RESIDUAL",
-            "qpos_source_is_loaded_gap_calibrated": False,
-            "requires_raw_finger_or_spacer_calibration": True,
+            "status": (
+                "COMPUTED_LOADED_QPOS_CALIBRATED_CONTACT_RESIDUAL"
+                if qpos_source_is_loaded_gap_calibrated
+                else "COMPUTED_FORMAL_QPOS_LOADED_CONTACT_RESIDUAL"
+            ),
+            "qpos_source_is_loaded_gap_calibrated": qpos_source_is_loaded_gap_calibrated,
+            "qpos_calibration": (hdf5_gripper_summary or {}).get("qpos_calibration"),
+            "requires_raw_finger_or_spacer_calibration": not qpos_source_is_loaded_gap_calibrated,
             "nearest_side": nearest_side,
             "lower_surface_gap_m": lower_gap_f,
             "upper_surface_gap_m": upper_gap_f,
@@ -2506,7 +2951,7 @@ def _bilateral_grasp_formation_gate(
         impulse_ratio = float(max(positive_impulses) / max(min(positive_impulses), 1e-12))
         impulse_balance_ok = bool(impulse_ratio <= float(max_impulse_ratio))
 
-    close_rows = [item for item in rows if item.get("phase") == "close"]
+    close_rows = [item for item in rows if item.get("phase") == "close"] or list(rows)
     axis = _axis_suffix(gap_axis_name)
     prelift_rows: list[dict[str, Any]] = []
     object_axis_values: list[float] = []
@@ -2573,6 +3018,349 @@ def _bilateral_grasp_formation_gate(
     return result
 
 
+def _consecutive_tail_count(steps: list[int], *, final_step: int) -> int:
+    """Count consecutive contact steps ending at final_step."""
+
+    step_set = {int(step) for step in steps}
+    count = 0
+    cursor = int(final_step)
+    while cursor in step_set:
+        count += 1
+        cursor -= 1
+    return count
+
+
+def _prelift_static_grasp_gate(
+    *,
+    hold_rows: list[dict[str, Any]],
+    hold_bilateral_gate: dict[str, Any] | None,
+    hold_tracking_gate: dict[str, Any] | None,
+    min_hold_steps: int,
+    min_tail_bilateral_steps: int,
+    min_each_finger_nonzero_impulse_steps: int,
+    max_object_xy_sweep: float,
+    max_object_z_delta: float,
+) -> dict[str, Any]:
+    """Diagnose whether the object is already stably grasped before lift.
+
+    This gate is intentionally diagnostic-only. It evaluates an appended
+    post-close hold phase and must not convert the raw HDF5 close window into a
+    formal replay pass.
+    """
+
+    hold_bilateral_gate = hold_bilateral_gate or {}
+    hold_tracking_gate = hold_tracking_gate or {}
+    result: dict[str, Any] = {
+        "required": bool(min_hold_steps > 0),
+        "diagnostic_only": True,
+        "formal_replay_targets_modified": False,
+        "formal_close_replay_success": False,
+        "pass": True,
+        "status": "SKIPPED_NO_PRELIFT_HOLD",
+        "hold_step_count": int(len(hold_rows)),
+        "min_hold_steps": int(min_hold_steps),
+        "min_tail_bilateral_steps": int(min_tail_bilateral_steps),
+        "min_each_finger_nonzero_impulse_steps": int(min_each_finger_nonzero_impulse_steps),
+        "max_object_xy_sweep_m": float(max_object_xy_sweep),
+        "max_object_z_delta_m": float(max_object_z_delta),
+    }
+    if min_hold_steps <= 0:
+        return result
+
+    bilateral_steps = [int(step) for step in (hold_bilateral_gate.get("bilateral_contact_steps") or [])]
+    final_step = max((int(row.get("step", -1)) for row in hold_rows), default=-1)
+    tail_bilateral_steps = _consecutive_tail_count(bilateral_steps, final_step=final_step) if final_step >= 0 else 0
+    finger_rows = hold_bilateral_gate.get("finger_rows") or []
+    each_finger_nonzero_ok = bool(
+        finger_rows
+        and all(
+            int(row.get("nonzero_impulse_step_count") or 0)
+            >= int(min_each_finger_nonzero_impulse_steps)
+            for row in finger_rows
+        )
+    )
+
+    object_x_values: list[float] = []
+    object_y_values: list[float] = []
+    object_z_values: list[float] = []
+    for row in hold_rows:
+        for key, target in (
+            ("object_center_x", object_x_values),
+            ("object_center_y", object_y_values),
+            ("object_center_z", object_z_values),
+        ):
+            value = row.get(key)
+            try:
+                target.append(float(value))
+            except Exception:
+                pass
+
+    object_x_sweep = float(max(object_x_values) - min(object_x_values)) if object_x_values else None
+    object_y_sweep = float(max(object_y_values) - min(object_y_values)) if object_y_values else None
+    object_xy_sweep = (
+        None
+        if object_x_sweep is None or object_y_sweep is None
+        else float(np.hypot(object_x_sweep, object_y_sweep))
+    )
+    object_z_delta = (
+        None
+        if len(object_z_values) < 2
+        else float(abs(object_z_values[-1] - object_z_values[0]))
+    )
+    object_z_range = float(max(object_z_values) - min(object_z_values)) if object_z_values else None
+
+    hold_length_ok = len(hold_rows) >= int(min_hold_steps)
+    bilateral_ok = bool(hold_bilateral_gate.get("pass"))
+    tracking_ok = bool(hold_tracking_gate.get("pass"))
+    tail_ok = tail_bilateral_steps >= int(min_tail_bilateral_steps)
+    object_xy_ok = bool(object_xy_sweep is not None and object_xy_sweep <= float(max_object_xy_sweep))
+    object_z_ok = bool(object_z_delta is not None and object_z_delta <= float(max_object_z_delta))
+    pass_gate = bool(
+        hold_length_ok
+        and bilateral_ok
+        and tracking_ok
+        and tail_ok
+        and each_finger_nonzero_ok
+        and object_xy_ok
+        and object_z_ok
+    )
+    failed_checks = []
+    if not hold_length_ok:
+        failed_checks.append("hold_step_count_too_short")
+    if not bilateral_ok:
+        failed_checks.append("hold_bilateral_gate_failed")
+    if not tracking_ok:
+        failed_checks.append("hold_tracking_gate_failed")
+    if not tail_ok:
+        failed_checks.append("tail_bilateral_contact_not_sustained")
+    if not each_finger_nonzero_ok:
+        failed_checks.append("each_finger_nonzero_impulse_not_sustained")
+    if not object_xy_ok:
+        failed_checks.append("object_xy_sweep_too_large")
+    if not object_z_ok:
+        failed_checks.append("object_z_delta_too_large")
+
+    result.update(
+        {
+            "pass": pass_gate,
+            "status": "PASS_PRELIFT_STATIC_GRASP_DIAGNOSTIC"
+            if pass_gate
+            else "FAIL_PRELIFT_STATIC_GRASP_DIAGNOSTIC",
+            "failed_checks": failed_checks,
+            "hold_bilateral_status": hold_bilateral_gate.get("status"),
+            "hold_tracking_status": hold_tracking_gate.get("status"),
+            "tail_bilateral_contact_steps": int(tail_bilateral_steps),
+            "bilateral_contact_step_count": int(hold_bilateral_gate.get("bilateral_contact_step_count") or 0),
+            "finger_rows": finger_rows,
+            "object_x_sweep_m": object_x_sweep,
+            "object_y_sweep_m": object_y_sweep,
+            "object_xy_sweep_m": object_xy_sweep,
+            "object_z_delta_m": object_z_delta,
+            "object_z_range_m": object_z_range,
+            "notes": (
+                "Diagnostic only. A pass means the appended pre-lift hold has a stable two-finger clamp "
+                "before transport begins. It does not make the raw HDF5 close window a formal replay pass."
+            ),
+        }
+    )
+    return result
+
+
+def _early_geometric_escape_gate(
+    *,
+    object_width_stop_rows: list[dict[str, Any]],
+    bilateral_grasp_formation_gate: dict[str, Any],
+    tolerance_m: float = 1e-4,
+) -> dict[str, Any]:
+    """Classify whether the object leaves the two-finger capture region early.
+
+    This gate is diagnostic.  It is intentionally based on live geometric
+    reachability rows, not contact reports.  A negative gap on exactly one side
+    means the bottle interval has crossed one finger's inner surface while the
+    opposite side still has clearance.  That is different from centered
+    over-closure, where both sides can be negative and PhysX contact reporting is
+    the primary failure signal.
+    """
+
+    result: dict[str, Any] = {
+        "required": bool(bilateral_grasp_formation_gate.get("required")),
+        "pass": True,
+        "status": "SKIPPED_NOT_BILATERAL_GRASP",
+        "tolerance_m": float(tolerance_m),
+        "first_escape_step": None,
+        "first_unilateral_escape_row": None,
+        "first_left_contact_step": None,
+        "first_right_contact_step": None,
+        "first_bilateral_contact_step": None,
+        "notes": (
+            "This is a geometry classifier only. It reports when the bottle leaves the live "
+            "closing-axis capture region before both fingers form target contact; it does not "
+            "turn geometric overlap into contact success."
+        ),
+    }
+    if not result["required"]:
+        return result
+
+    finger_rows = bilateral_grasp_formation_gate.get("finger_rows") or []
+    bilateral_steps = [int(step) for step in (bilateral_grasp_formation_gate.get("bilateral_contact_steps") or [])]
+    first_bilateral_step = min(bilateral_steps) if bilateral_steps else None
+    result["first_bilateral_contact_step"] = first_bilateral_step
+
+    for item in finger_rows:
+        path = str(item.get("finger_path") or "")
+        first_step = item.get("first_step")
+        if first_step is None:
+            continue
+        try:
+            first_step_int = int(first_step)
+        except Exception:
+            continue
+        if "left_left_finger" in path:
+            result["first_left_contact_step"] = first_step_int
+        elif "left_right_finger" in path:
+            result["first_right_contact_step"] = first_step_int
+
+    for row in object_width_stop_rows:
+        projected_gap = row.get("projected_inner_gap") or {}
+        if not projected_gap.get("valid"):
+            continue
+        step_value = row.get("step")
+        try:
+            step = int(step_value)
+        except Exception:
+            continue
+        if first_bilateral_step is not None and step >= first_bilateral_step:
+            continue
+        lower_gap = projected_gap.get("object_gap_to_lower_finger_m")
+        upper_gap = projected_gap.get("object_gap_to_upper_finger_m")
+        try:
+            lower_gap_f = float(lower_gap)
+            upper_gap_f = float(upper_gap)
+        except Exception:
+            continue
+        if not (np.isfinite(lower_gap_f) and np.isfinite(upper_gap_f)):
+            continue
+        lower_crossed = lower_gap_f < -float(tolerance_m)
+        upper_crossed = upper_gap_f < -float(tolerance_m)
+        unilateral_escape = bool(lower_crossed ^ upper_crossed)
+        if not unilateral_escape:
+            continue
+        result.update(
+            {
+                "pass": False,
+                "status": "FAIL_OBJECT_ESCAPES_CAPTURE_REGION_BEFORE_BILATERAL_CONTACT",
+                "first_escape_step": step,
+                "first_unilateral_escape_row": {
+                    "phase": row.get("phase"),
+                    "step": step,
+                    "active": bool(row.get("active")),
+                    "status": row.get("status"),
+                    "current_center_gap_m": row.get("current_center_gap_m"),
+                    "projected_inner_gap_m": projected_gap.get("finger_inner_gap_m"),
+                    "object_gap_to_lower_finger_m": lower_gap_f,
+                    "object_gap_to_upper_finger_m": upper_gap_f,
+                    "lower_crossed": lower_crossed,
+                    "upper_crossed": upper_crossed,
+                    "object_interval_m": projected_gap.get("object_interval_m"),
+                    "lower_inner_surface_m": projected_gap.get("lower_inner_surface_m"),
+                    "upper_inner_surface_m": projected_gap.get("upper_inner_surface_m"),
+                },
+            }
+        )
+        return result
+
+    result["status"] = "PASS_OBJECT_STAYS_IN_CAPTURE_REGION_UNTIL_BILATERAL_CONTACT"
+    return result
+
+
+def _bilateral_grasp_failure_diagnostic(
+    *,
+    bilateral_grasp_formation_gate: dict[str, Any],
+    contact_summary: dict[str, Any],
+    start_alignment: dict[str, Any],
+    final_alignment: dict[str, Any],
+) -> dict[str, Any]:
+    """Explain one-sided grasp failures without changing the formal gate."""
+
+    if bool(bilateral_grasp_formation_gate.get("pass")):
+        return {
+            "required": True,
+            "status": "PASS_BILATERAL_GRASP_FORMED",
+            "notes": "Both expected finger proxies formed target contact under the existing bilateral gate.",
+        }
+
+    quality_by_finger = contact_summary.get("target_contact_quality_by_finger") or {}
+    finger_rows: list[dict[str, Any]] = []
+    contacted_fingers: list[str] = []
+    missing_fingers: list[str] = []
+    for finger_path, quality in sorted(quality_by_finger.items()):
+        row = {
+            "finger_path": finger_path,
+            "contact_step_count": int(quality.get("contact_step_count") or 0),
+            "nonzero_impulse_step_count": int(quality.get("nonzero_impulse_step_count") or 0),
+            "first_step": quality.get("first_step"),
+            "last_step": quality.get("last_step"),
+            "max_impulse_norm": quality.get("max_impulse_norm"),
+        }
+        finger_rows.append(row)
+        if row["contact_step_count"] > 0:
+            contacted_fingers.append(finger_path)
+        else:
+            missing_fingers.append(finger_path)
+
+    start_gap = start_alignment.get("closing_axis_projected_inner_gap") or {}
+    final_gap = final_alignment.get("closing_axis_projected_inner_gap") or {}
+    final_along = final_alignment.get("object_offset_along_closing_axis_m")
+    final_cross = final_alignment.get("object_cross_closing_axis_offset_norm_m")
+    suggested_shift = None
+    try:
+        suggested_shift = -float(final_along)
+    except Exception:
+        pass
+
+    gap_values = []
+    for value in (final_gap.get("object_gap_to_lower_finger_m"), final_gap.get("object_gap_to_upper_finger_m")):
+        try:
+            gap_values.append(float(value))
+        except Exception:
+            pass
+
+    if len(contacted_fingers) == 1 and len(missing_fingers) == 1:
+        if gap_values and max(gap_values) > 0.005 and min(gap_values) < 0.0:
+            status = "FAIL_SINGLE_SIDE_GEOMETRIC_MISS"
+            notes = (
+                "One target finger contacted the bottle while the final closing-axis interval remained biased "
+                "toward one side. Diagnose bottle reset pose, yaw, and contact-band alignment before changing "
+                "friction, CCD, or contact reporting."
+            )
+        else:
+            status = "FAIL_SINGLE_SIDE_CONTACT_MISSING_UNCLASSIFIED"
+            notes = (
+                "One target finger contacted but the final projected gap does not conclusively classify the miss. "
+                "Inspect per-side closest gap/contact rows before modifying colliders."
+            )
+    elif not contacted_fingers:
+        status = "FAIL_NO_TARGET_FINGER_CONTACT"
+        notes = "No expected target finger contacted the object; this is not yet a bilateral grasp formation issue."
+    else:
+        status = str(bilateral_grasp_formation_gate.get("status") or "FAIL_BILATERAL_GRASP_FORMATION")
+        notes = "Bilateral contact did not satisfy contact count, nonzero impulse, impulse balance, or prelift sweep."
+
+    return {
+        "required": True,
+        "status": status,
+        "contacted_fingers": contacted_fingers,
+        "missing_fingers": missing_fingers,
+        "finger_rows": finger_rows,
+        "start_closing_axis_projected_inner_gap": start_gap,
+        "final_closing_axis_projected_inner_gap": final_gap,
+        "final_object_offset_along_closing_axis_m": final_along,
+        "final_object_cross_closing_axis_offset_norm_m": final_cross,
+        "suggested_centering_shift_along_closing_axis_m": suggested_shift,
+        "notes": notes,
+    }
+
+
 def _object_lift_gate(*, object_lift: float, min_object_lift: float) -> dict[str, Any]:
     """Gate lift only when the caller explicitly requests a positive lift.
 
@@ -2617,7 +3405,10 @@ def _lift_transport_gate(
     min_contact_steps: int = 10,
 ) -> dict[str, Any]:
     required = bool(float(min_object_lift) > 0.0)
+    lift_rows = [row for row in rows if row.get("phase") == "post_close_lift"]
     close_rows = [row for row in rows if row.get("phase") == "close"]
+    eval_rows = lift_rows or close_rows
+    eval_phase = "post_close_lift" if lift_rows else "close"
     if not required:
         return {
             "required": False,
@@ -2627,7 +3418,7 @@ def _lift_transport_gate(
             "object_attachment": "none" if diagnostic_held_object_mode == "none" else diagnostic_held_object_mode,
             "notes": "Lift/transport is skipped because --min-object-lift is <= 0.",
         }
-    if not close_rows:
+    if not eval_rows:
         return {
             "required": True,
             "pass": False,
@@ -2635,8 +3426,8 @@ def _lift_transport_gate(
             "lift_mode": "recorded_hdf5_zero_order_hold",
         }
 
-    first = close_rows[0]
-    last = close_rows[-1]
+    first = eval_rows[0]
+    last = eval_rows[-1]
     object_height_delta = float(last["object_center_z"] - first["object_center_z"])
     gripper_start = first.get("finger_mid_center_z")
     gripper_end = last.get("finger_mid_center_z")
@@ -2649,37 +3440,78 @@ def _lift_transport_gate(
         else float(object_height_delta / gripper_height_delta)
     )
     target_contact_steps = list(contact_summary.get("target_contact_steps") or [])
+    phase_target_contact_steps = [
+        step
+        for step in target_contact_steps
+        if isinstance(step, dict) and step.get("phase") == eval_phase
+    ]
+    if not phase_target_contact_steps:
+        phase_target_contact_steps = [
+            row.get("step")
+            for row in rows
+            if row.get("phase") == eval_phase and row.get("target_contact_pair_found")
+        ]
     categories = contact_summary.get("object_contact_categories") or {}
     table_like = categories.get("workcell_or_environment") or {}
     table_phase_counts = table_like.get("phase_counts") or {}
     object_attachment = "none" if diagnostic_held_object_mode == "none" else diagnostic_held_object_mode
     no_attachment = object_attachment == "none"
-    contact_persist_ok = len(target_contact_steps) >= int(min_contact_steps)
+    contact_persist_ok = len(phase_target_contact_steps or target_contact_steps) >= int(min_contact_steps)
     gripper_lift_ok = bool(gripper_height_delta is not None and gripper_height_delta >= float(min_object_lift))
     follow_ok = bool(object_follow_ratio is not None and object_follow_ratio >= float(min_follow_ratio))
+    strict_lift_clearance_gate = {
+        "pass": bool(object_lift_gate["pass"]),
+        "status": object_lift_gate["status"],
+        "min_object_lift_m": float(min_object_lift),
+        "object_lift_gate": object_lift_gate,
+    }
+    transport_follow_gate = {
+        "pass": bool(object_height_delta > 0.0 and follow_ok and contact_persist_ok),
+        "status": "PASS_TRANSPORT_FOLLOW_RATIO"
+        if bool(object_height_delta > 0.0 and follow_ok and contact_persist_ok)
+        else "FAIL_TRANSPORT_FOLLOW_RATIO",
+        "object_height_delta_m": object_height_delta,
+        "gripper_height_delta_m": gripper_height_delta,
+        "object_follow_ratio": object_follow_ratio,
+        "min_follow_ratio": float(min_follow_ratio),
+        "contact_persist_ok": contact_persist_ok,
+        "target_contact_persistence_steps": len(phase_target_contact_steps or target_contact_steps),
+        "min_contact_steps": int(min_contact_steps),
+    }
+    table_load_bearing_contact_gate = _table_load_bearing_contact_gate(
+        contact_summary=contact_summary,
+        eval_phase=eval_phase,
+    )
     pass_gate = bool(
         no_attachment
         and object_lift_gate["pass"]
         and gripper_lift_ok
         and follow_ok
         and contact_persist_ok
+        and table_load_bearing_contact_gate["pass"]
     )
     if not no_attachment:
         status = "FAIL_OBJECT_ATTACHMENT_ENABLED"
     elif not gripper_lift_ok:
         status = "FAIL_GRIPPER_DID_NOT_LIFT"
-    elif not object_lift_gate["pass"] or not follow_ok:
+    elif not follow_ok:
         status = "FAIL_OBJECT_DID_NOT_FOLLOW_GRIPPER"
     elif not contact_persist_ok:
         status = "FAIL_FINGER_CONTACT_NOT_PERSISTENT_DURING_LIFT"
+    elif not table_load_bearing_contact_gate["pass"]:
+        status = "FAIL_TABLE_STILL_LOAD_BEARING"
+    elif not object_lift_gate["pass"]:
+        status = "FAIL_STRICT_OBJECT_LIFT_CLEARANCE"
     else:
         status = "PASS_LIFT_TRANSPORT"
     return {
         "required": True,
         "pass": pass_gate,
         "status": status,
-        "lift_mode": "recorded_hdf5_zero_order_hold",
-        "formal_replay": True,
+        "lift_mode": "post_close_lift_diagnostic" if eval_phase == "post_close_lift" else "recorded_hdf5_zero_order_hold",
+        "eval_phase": eval_phase,
+        "formal_replay": bool(eval_phase == "close"),
+        "diagnostic_only": bool(eval_phase == "post_close_lift"),
         "object_attachment": object_attachment,
         "object_height_initial_m": float(first["object_center_z"]),
         "object_height_final_m": float(last["object_center_z"]),
@@ -2690,9 +3522,13 @@ def _lift_transport_gate(
         "object_follow_ratio": object_follow_ratio,
         "min_object_lift_m": float(min_object_lift),
         "min_follow_ratio": float(min_follow_ratio),
-        "target_contact_persistence_steps": len(target_contact_steps),
+        "target_contact_persistence_steps": len(phase_target_contact_steps or target_contact_steps),
+        "target_contact_persistence_steps_all_phases": len(target_contact_steps),
         "min_contact_steps": int(min_contact_steps),
         "table_contact_phase_counts": table_phase_counts,
+        "strict_lift_clearance_gate": strict_lift_clearance_gate,
+        "transport_follow_gate": transport_follow_gate,
+        "table_load_bearing_contact_gate": table_load_bearing_contact_gate,
         "object_lift_gate_status": object_lift_gate["status"],
         "notes": (
             "This gate validates whether the recorded post-grasp HDF5 motion naturally lifts the dynamic object. "
@@ -2705,6 +3541,7 @@ def _active_grasp_geometry_precondition(
     *,
     require_active_target_contact: bool,
     already_in_contact_setup: bool,
+    loaded_contact_placement: bool,
     open_left_box: dict[str, Any],
     open_right_box: dict[str, Any],
     object_box: dict[str, Any],
@@ -2727,11 +3564,31 @@ def _active_grasp_geometry_precondition(
     row: dict[str, Any] = {
         "required": bool(require_active_target_contact),
         "already_in_contact_setup": bool(already_in_contact_setup),
+        "loaded_contact_placement": bool(loaded_contact_placement),
+        "applies": bool(require_active_target_contact and not already_in_contact_setup),
         "mode": "in_gap_free_space_first_contact",
         "pass": True,
         "status": "SKIPPED_ACTIVE_GRASP_GEOMETRY_PRECONDITION",
     }
     if already_in_contact_setup or not require_active_target_contact:
+        row["applies"] = False
+        row["pass"] = None
+        return row
+    if loaded_contact_placement:
+        row.update(
+            {
+                "applies": False,
+                "pass": True,
+                "status": "SKIPPED_LOADED_CONTACT_PLACEMENT",
+                "mode": "loaded_contact_placement",
+                "notes": (
+                    "The free-space closing-axis gap precondition applies to open-frame object placement. "
+                    "For hdf5_close_* loaded-contact placement, the close-frame gap may intentionally be "
+                    "smaller than the soft-bottle effective contact width, so contact formation must be "
+                    "judged by the phase-specific contact, tracking, and fixed-reference geometry gates."
+                ),
+            }
+        )
         return row
     if not (
         open_left_box.get("bbox_valid")
@@ -2947,6 +3804,7 @@ def _tabletop_collision_audit(stage: Any, table_path: str | None, max_rows: int 
 def _tabletop_reference_contract(
     *,
     required: bool,
+    require_open_height_alignment: bool,
     tabletop_adjustment: dict[str, Any] | None,
     table_collision_audit: dict[str, Any] | None,
     open_left_box: dict[str, Any],
@@ -2958,13 +3816,15 @@ def _tabletop_reference_contract(
     """Formal tabletop/reference gate for fixed-pose tabletop grasp validation.
 
     A table is calibrated enough for Gate2 only if it is a valid collidable
-    tabletop and the replay's open-finger height is physically compatible with
-    a bottle resting on that tabletop. This catches table/robot frame mismatch
-    before contact failure is misdiagnosed as a friction or collider problem.
+    tabletop and the bottle is resting on that tabletop.  Open-frame height is
+    a hard check only for open-frame placement.  For loaded/close-frame
+    placement the open frame is an approach pose, so height is reported as a
+    diagnostic and the contact-frame/bilateral gates carry the formal burden.
     """
 
     row: dict[str, Any] = {
         "required": bool(required),
+        "open_height_alignment_required": bool(require_open_height_alignment),
         "pass": True,
         "status": "SKIPPED_TABLETOP_REFERENCE_CONTRACT",
     }
@@ -3042,10 +3902,16 @@ def _tabletop_reference_contract(
     finger_midpoint = (left_center + right_center) / 2.0
     height_error = float(abs(finger_midpoint[2] - object_center[2]))
     height_ok = bool(height_error <= float(max_finger_object_center_height_error))
-    status = "PASS_CALIBRATED_TABLETOP_REFERENCE" if height_ok else "FAIL_TABLE_ROBOT_FRAME_MISMATCH"
+    pass_gate = bool(height_ok or not require_open_height_alignment)
+    if height_ok:
+        status = "PASS_CALIBRATED_TABLETOP_REFERENCE"
+    elif require_open_height_alignment:
+        status = "FAIL_TABLE_ROBOT_FRAME_MISMATCH"
+    else:
+        status = "PASS_TABLETOP_REFERENCE_OPEN_HEIGHT_DIAGNOSTIC_ONLY"
     row.update(
         {
-            "pass": height_ok,
+            "pass": pass_gate,
             "status": status,
             "table_path": tabletop_adjustment.get("table_path"),
             "table_top_z_m": tabletop_adjustment.get("table_top_z_m"),
@@ -3060,9 +3926,9 @@ def _tabletop_reference_contract(
             "max_finger_object_center_height_error_m": float(max_finger_object_center_height_error),
             "table_collision_audit": table_collision_audit,
             "notes": (
-                "Gate2 requires a real collidable tabletop whose world height is compatible with the "
-                "open-frame finger pads and the bottle resting on the table. Diagnostic support patches "
-                "do not satisfy this formal tabletop contract."
+                "Gate2 requires a real collidable tabletop and a bottle resting on that table. For "
+                "open-frame placement this also requires open finger height compatibility. For close-frame "
+                "placement the open frame is an approach pose, so the height mismatch is diagnostic only."
             ),
         }
     )
@@ -3080,6 +3946,7 @@ def _object_width_stop_target(
     right_box: dict[str, Any],
     object_box: dict[str, Any],
     clearance: float,
+    predictive_margin: float = 0.0,
     object_projected_interval: tuple[float, float] | None = None,
     use_oriented_finger_boxes: bool = False,
 ) -> tuple[np.ndarray, dict[str, Any]]:
@@ -3118,6 +3985,7 @@ def _object_width_stop_target(
     object_size = np.asarray(object_box["size"], dtype=np.float64).reshape(-1)
     object_width_centerline = float(np.median(object_size))
     object_width_along_gap_axis = float(object_size[gap_axis])
+    early_margin = max(0.0, float(predictive_margin))
     stop_center_gap = object_width_centerline + float(clearance)
     stop_surface_gap = object_width_along_gap_axis + float(clearance)
     projected_stop_gap: dict[str, Any] = {"valid": False}
@@ -3155,15 +4023,19 @@ def _object_width_stop_target(
             "stop_center_gap_m": stop_center_gap,
             "stop_surface_gap_m": stop_surface_gap,
             "projected_inner_gap": projected_stop_gap,
+            "predictive_margin_m": early_margin,
             "projected_stop_gap_m": None
             if projected_stop_threshold is None
             else float(projected_stop_threshold),
+            "projected_effective_stop_gap_m": None
+            if projected_stop_threshold is None
+            else float(projected_stop_threshold + early_margin),
         }
     )
     if projected_stop_gap.get("valid"):
-        if float(projected_stop_gap["finger_inner_gap_m"]) > float(projected_stop_threshold):
+        if float(projected_stop_gap["finger_inner_gap_m"]) > float(projected_stop_threshold + early_margin):
             return target, row
-    elif current_center_gap > stop_center_gap and current_surface_gap > stop_surface_gap:
+    elif current_center_gap > stop_center_gap + early_margin and current_surface_gap > stop_surface_gap + early_margin:
         return target, row
 
     guarded = np.asarray(target, dtype=np.float64).copy()
@@ -3192,7 +4064,7 @@ def _contact_geometry_bbox_path(object_shape: str, object_path: str) -> str:
 
     if object_shape == "bottle_usd_cylinder_proxy":
         return f"{object_path}/physics_proxy"
-    if object_shape in {"bottle_usd_segmented_proxy", "bottle_usd_grasp_band_proxy"}:
+    if object_shape in {"bottle_usd_segmented_proxy", "bottle_usd_grasp_band_proxy", "bottle_usd_grasp_box_proxy"}:
         return f"{object_path}/physics_proxy/body"
     return object_path
 
@@ -3372,6 +4244,193 @@ def _finger_center_row(left_box: dict[str, Any], right_box: dict[str, Any]) -> d
             }
         )
     return row
+
+
+def _finger_mid_center_from_boxes(left_box: dict[str, Any], right_box: dict[str, Any]) -> np.ndarray:
+    row = _finger_center_row(left_box, right_box)
+    values = [row.get("finger_mid_center_x"), row.get("finger_mid_center_y"), row.get("finger_mid_center_z")]
+    if any(value is None for value in values):
+        return np.asarray([np.nan, np.nan, np.nan], dtype=np.float64)
+    return np.asarray(values, dtype=np.float64)
+
+
+def _arm_indices_for_tracking_group(tracking_groups: dict[str, list[int]], dof_names: list[str], side: str) -> list[int]:
+    indices = list(tracking_groups.get("left_arm") or [])
+    if indices:
+        return [int(index) for index in indices]
+    base_arm_names = ("waist", "shoulder", "elbow", "forearm_roll", "wrist_angle", "wrist_rotate")
+    side_arm_names = tuple(f"{side}_{name}" for name in base_arm_names)
+    candidate_names = side_arm_names if all(name in dof_names for name in side_arm_names) else base_arm_names
+    return [dof_names.index(name) for name in candidate_names if name in dof_names]
+
+
+def _finite_difference_finger_mid_z_jacobian(
+    *,
+    stage: Any,
+    art: Any,
+    paths: dict[str, str],
+    base_qpos: np.ndarray,
+    arm_indices: list[int],
+    epsilon: float,
+    body_name: str | None = None,
+) -> dict[str, Any]:
+    """Estimate local gripper height sensitivity without stepping physics."""
+
+    if epsilon <= 0:
+        raise ValueError(f"epsilon must be positive, got {epsilon}")
+
+    def measure_position() -> tuple[np.ndarray, str]:
+        if body_name:
+            view = getattr(art, "_articulation_view", None)
+            body_names = list(getattr(view, "body_names", []) or [])
+            if body_name in body_names:
+                body_idx = body_names.index(body_name)
+                raw = np.asarray(view._physics_view.get_link_transforms(), dtype=np.float64)
+                raw = raw.reshape((-1, 7))
+                return raw[body_idx, :3].copy(), f"articulation_body:{body_name}"
+        return (
+            _finger_mid_center_from_boxes(
+                _bbox_row(stage, paths["left_finger"]),
+                _bbox_row(stage, paths["right_finger"]),
+            ),
+            "finger_proxy_bbox_midpoint",
+        )
+
+    base_qpos = np.asarray(base_qpos, dtype=np.float64).reshape(-1)
+    _set_full_state(art, base_qpos)
+    _set_full_target(art, base_qpos)
+    base_mid, measurement_source = measure_position()
+    jacobian: list[float] = []
+    perturb_rows: list[dict[str, Any]] = []
+    dof_names = list(art.dof_names)
+    for index in arm_indices:
+        probe = base_qpos.copy()
+        probe[int(index)] += float(epsilon)
+        _set_full_state(art, probe)
+        _set_full_target(art, probe)
+        mid, _source = measure_position()
+        dz = float(mid[2] - base_mid[2]) if np.isfinite(mid[2]) and np.isfinite(base_mid[2]) else float("nan")
+        value = float(dz / float(epsilon)) if np.isfinite(dz) else float("nan")
+        jacobian.append(value)
+        perturb_rows.append(
+            {
+                "dof_index": int(index),
+                "dof_name": dof_names[int(index)],
+                "epsilon_rad": float(epsilon),
+                "finger_mid_z_delta_m": dz,
+                "finger_mid_z_jacobian_m_per_rad": value,
+            }
+        )
+    _set_full_state(art, base_qpos)
+    _set_full_target(art, base_qpos)
+    jac = np.asarray(jacobian, dtype=np.float64)
+    finite = bool(np.all(np.isfinite(jac)) and np.isfinite(base_mid).all())
+    norm = float(np.linalg.norm(jac)) if finite else float("nan")
+    return {
+        "status": "PASS_JACOBIAN_ESTIMATED" if finite and norm > 0 else "FAIL_INVALID_OR_ZERO_JACOBIAN",
+        "pass": bool(finite and norm > 0),
+        "measurement_source": measurement_source,
+        "body_name": body_name,
+        "base_gripper_measurement_m": base_mid.tolist(),
+        "arm_indices": [int(index) for index in arm_indices],
+        "jacobian_m_per_rad": jac.tolist(),
+        "jacobian_norm_m_per_rad": norm,
+        "perturbations": perturb_rows,
+        "notes": (
+            "Finite-difference diagnostic for a small vertical lift. It sets articulation state directly, "
+            "does not step physics, and does not move or attach the bottle."
+        ),
+    }
+
+
+def _build_jacobian_vertical_lift_sequence(
+    *,
+    stage: Any,
+    art: Any,
+    paths: dict[str, str],
+    base_qpos: np.ndarray,
+    close_target: np.ndarray,
+    tracking_groups: dict[str, list[int]],
+    side: str,
+    lift_height: float,
+    lift_steps: int,
+    epsilon: float,
+    damping: float,
+    max_joint_delta: float,
+    body_name: str | None = None,
+) -> tuple[list[np.ndarray], dict[str, Any]]:
+    if lift_height <= 0:
+        raise ValueError(f"lift_height must be positive, got {lift_height}")
+    if lift_steps <= 0:
+        raise ValueError(f"lift_steps must be positive, got {lift_steps}")
+    if damping < 0:
+        raise ValueError(f"damping must be non-negative, got {damping}")
+    if max_joint_delta <= 0:
+        raise ValueError(f"max_joint_delta must be positive, got {max_joint_delta}")
+    dof_names = list(art.dof_names)
+    arm_indices = _arm_indices_for_tracking_group(tracking_groups, dof_names, side)
+    base_qpos = np.asarray(base_qpos, dtype=np.float64).reshape(-1)
+    close_target = np.asarray(close_target, dtype=np.float64).reshape(-1)
+    jacobian_report = _finite_difference_finger_mid_z_jacobian(
+        stage=stage,
+        art=art,
+        paths=paths,
+        base_qpos=base_qpos,
+        arm_indices=arm_indices,
+        epsilon=epsilon,
+        body_name=body_name,
+    )
+    jac = np.asarray(jacobian_report.get("jacobian_m_per_rad") or [], dtype=np.float64)
+    denom = float(np.dot(jac, jac) + float(damping))
+    if not jacobian_report.get("pass") or not np.isfinite(denom) or denom <= 0:
+        sequence = [close_target.copy() for _ in range(int(lift_steps))]
+        return sequence, {
+            "source": "jacobian_vertical",
+            "status": "FAIL_JACOBIAN_VERTICAL_SEQUENCE_NOT_GENERATED",
+            "pass": False,
+            "requested_lift_height_m": float(lift_height),
+            "step_count": int(lift_steps),
+            "jacobian": jacobian_report,
+            "notes": "Jacobian was invalid; generated a hold sequence so the diagnostic fails safely.",
+        }
+    delta_arm = jac * (float(lift_height) / denom)
+    max_abs = float(np.max(np.abs(delta_arm))) if delta_arm.size else 0.0
+    scale = 1.0
+    clipped = False
+    if max_abs > float(max_joint_delta):
+        scale = float(max_joint_delta) / max_abs
+        delta_arm = delta_arm * scale
+        clipped = True
+    achieved_lift_estimate = float(np.dot(jac, delta_arm))
+    sequence: list[np.ndarray] = []
+    for step in range(int(lift_steps)):
+        alpha = 0.5 - 0.5 * np.cos(np.pi * float(step + 1) / float(lift_steps))
+        target = close_target.copy()
+        for local_idx, dof_index in enumerate(arm_indices):
+            target[int(dof_index)] = float(base_qpos[int(dof_index)] + alpha * delta_arm[local_idx])
+        sequence.append(target)
+    return sequence, {
+        "source": "jacobian_vertical",
+        "status": "PASS_JACOBIAN_VERTICAL_SEQUENCE_GENERATED",
+        "pass": True,
+        "requested_lift_height_m": float(lift_height),
+        "estimated_lift_height_m": achieved_lift_estimate,
+        "step_count": int(lift_steps),
+        "epsilon_rad": float(epsilon),
+        "damping": float(damping),
+        "max_joint_delta_rad": float(max_joint_delta),
+        "delta_clipped": bool(clipped),
+        "delta_scale": float(scale),
+        "arm_delta_by_dof": [
+            {"dof_index": int(index), "dof_name": dof_names[int(index)], "delta_rad": float(delta)}
+            for index, delta in zip(arm_indices, delta_arm, strict=True)
+        ],
+        "jacobian": jacobian_report,
+        "notes": (
+            "Diagnostic-only local Jacobian lift from the post-close hold state. It tests whether the current "
+            "contact model can transport the bottle under a small smooth upward gripper motion."
+        ),
+    }
 
 
 def _timeseries_gripper_object_alignment_samples(
@@ -3567,11 +4626,19 @@ def _nominal_object_axis_length_stage_units(args: argparse.Namespace, side_lengt
         "bottle_usd_cylinder_proxy",
         "bottle_usd_segmented_proxy",
         "bottle_usd_grasp_band_proxy",
+        "bottle_usd_grasp_box_proxy",
     }:
         return float(BOTTLE_LENGTH_M) / float(args.stage_units_in_meters)
     if args.object_shape in {"cylinder", "capsule", "bottle_proxy"}:
         return float(side_length) * float(args.object_length_multiplier)
     return float(side_length)
+
+
+def _grasp_band_proxy_axis_length_stage_units(side_length: float, object_length_multiplier: float) -> float:
+    """Return the short local collision band length used for rear-quarter grasp proofs."""
+
+    total_length = float(side_length) * float(object_length_multiplier)
+    return min(max(float(side_length) * 0.90, total_length * 0.20), total_length * 0.34)
 
 
 def _contact_projection_model_for_args(
@@ -3582,9 +4649,19 @@ def _contact_projection_model_for_args(
     projection_unit_world: list[float] | tuple[float, float, float] | np.ndarray,
     side_length: float,
 ) -> dict[str, Any]:
+    if args.object_shape == "bottle_usd_grasp_box_proxy":
+        return _oriented_box_projection_model(
+            object_box=object_box,
+            projection_unit_world=projection_unit_world,
+            source="bottle_usd_grasp_box_proxy_oriented_contact_coupon",
+        )
     if args.object_shape in {"cylinder", "capsule", "bottle_usd_cylinder_proxy", "bottle_usd_grasp_band_proxy"}:
         radius = float(side_length) * 0.5
-        half_length = _nominal_object_axis_length_stage_units(args, side_length) * 0.5
+        if args.object_shape == "bottle_usd_grasp_band_proxy":
+            axis_length = _grasp_band_proxy_axis_length_stage_units(side_length, args.object_length_multiplier)
+        else:
+            axis_length = _nominal_object_axis_length_stage_units(args, side_length)
+        half_length = float(axis_length) * 0.5
         return _oriented_cylinder_projection_model(
             object_box=object_box,
             object_axis_unit_world=object_axis_unit_world,
@@ -4144,6 +5221,7 @@ def _create_passive_cube(
     length_multiplier: float = 4.0,
     usd_path: str | Path | None = None,
     usd_prim_path: str = "/Bottle500",
+    grasp_band_local_axis_offset: float = 0.0,
     rigid_body: bool = True,
 ) -> None:
     from pxr import Gf
@@ -4287,7 +5365,12 @@ def _create_passive_cube(
             UsdPhysics.RigidBodyAPI.Apply(root.GetPrim())
             UsdPhysics.MassAPI.Apply(root.GetPrim()).CreateMassAttr(float(mass))
         return
-    elif shape in {"bottle_usd_cylinder_proxy", "bottle_usd_segmented_proxy", "bottle_usd_grasp_band_proxy"}:
+    elif shape in {
+        "bottle_usd_cylinder_proxy",
+        "bottle_usd_segmented_proxy",
+        "bottle_usd_grasp_band_proxy",
+        "bottle_usd_grasp_box_proxy",
+    }:
         if usd_path is None:
             raise ValueError(f"{shape} requires a USD asset path")
         asset_path = Path(usd_path).expanduser().resolve()
@@ -4318,24 +5401,58 @@ def _create_passive_cube(
             proxy.CreateHeightAttr(float(BOTTLE_LENGTH_M))
             proxy.CreateDisplayColorAttr([Gf.Vec3f(0.9, 0.2, 0.1)])
             UsdPhysics.CollisionAPI.Apply(proxy.GetPrim()).CreateCollisionEnabledAttr().Set(True)
+        elif shape == "bottle_usd_grasp_box_proxy":
+            from pxr import Sdf
+
+            proxy_root = UsdGeom.Xform.Define(stage, proxy_path)
+            band_length = _grasp_band_proxy_axis_length_stage_units(side_length, length_multiplier)
+            axis_index = {"X": 0, "Y": 1, "Z": 2}[normalized_axis]
+            scale_values = [float(side_length), float(side_length), float(side_length)]
+            scale_values[axis_index] = float(band_length)
+            offset_values = [0.0, 0.0, 0.0]
+            offset_values[axis_index] = float(grasp_band_local_axis_offset)
+
+            body = UsdGeom.Cube.Define(stage, f"{proxy_path}/body")
+            body.CreateSizeAttr(1.0)
+            body.CreateDisplayColorAttr([Gf.Vec3f(0.9, 0.2, 0.1)])
+            body_xform = UsdGeom.Xformable(body.GetPrim())
+            body_xform.ClearXformOpOrder()
+            body_xform.AddTranslateOp(precision=UsdGeom.XformOp.PrecisionDouble).Set(Gf.Vec3d(*offset_values))
+            body_xform.AddScaleOp(precision=UsdGeom.XformOp.PrecisionDouble).Set(Gf.Vec3d(*scale_values))
+            UsdPhysics.CollisionAPI.Apply(body.GetPrim()).CreateCollisionEnabledAttr().Set(True)
+            proxy_root.GetPrim().CreateAttribute("aloha:proxyType", Sdf.ValueTypeNames.String).Set(
+                "local_grasp_box_coupon"
+            )
+            proxy_root.GetPrim().CreateAttribute("aloha:graspBandLocalAxisOffset", Sdf.ValueTypeNames.Double).Set(
+                float(grasp_band_local_axis_offset)
+            )
         elif shape == "bottle_usd_grasp_band_proxy":
             from pxr import Sdf
 
             proxy_root = UsdGeom.Xform.Define(stage, proxy_path)
             total_length = float(side_length) * float(length_multiplier)
-            band_length = min(max(float(side_length) * 0.90, total_length * 0.20), total_length * 0.34)
-            # The validator places the object so the finger midpoint is already
-            # at the configured rear-quarter world location. Keep the physical
-            # band centered at the runtime root so the local contact patch,
-            # rather than the whole bottle body, is what the two fingers close on.
+            band_length = _grasp_band_proxy_axis_length_stage_units(side_length, length_multiplier)
+            axis_index = {"X": 0, "Y": 1, "Z": 2}[normalized_axis]
+            offset_values = [0.0, 0.0, 0.0]
+            offset_values[axis_index] = float(grasp_band_local_axis_offset)
+            # Rear-quarter placement keeps the runtime root at the full bottle
+            # center so the visual BottleUSD stays semantically correct.  The
+            # local contact band must therefore be shifted back along the bottle
+            # axis to the actual gripper contact section.
             body = UsdGeom.Cylinder.Define(stage, f"{proxy_path}/body")
             body.CreateAxisAttr(normalized_axis)
             body.CreateRadiusAttr(float(side_length) * 0.5)
             body.CreateHeightAttr(band_length)
             body.CreateDisplayColorAttr([Gf.Vec3f(0.9, 0.2, 0.1)])
+            UsdGeom.Xformable(body.GetPrim()).AddTranslateOp(precision=UsdGeom.XformOp.PrecisionDouble).Set(
+                Gf.Vec3d(*offset_values)
+            )
             UsdPhysics.CollisionAPI.Apply(body.GetPrim()).CreateCollisionEnabledAttr().Set(True)
             proxy_root.GetPrim().CreateAttribute("aloha:proxyType", Sdf.ValueTypeNames.String).Set(
                 "local_grasp_band_only"
+            )
+            proxy_root.GetPrim().CreateAttribute("aloha:graspBandLocalAxisOffset", Sdf.ValueTypeNames.Double).Set(
+                float(grasp_band_local_axis_offset)
             )
         else:
             from pxr import Sdf
@@ -4802,6 +5919,11 @@ def _unique_pair_summaries(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return summaries
 
 
+def _contact_quality_by_phase(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    phases = sorted({str(row.get("phase", "unknown")) for row in rows})
+    return {phase: _contact_quality_summary([row for row in rows if str(row.get("phase", "unknown")) == phase]) for phase in phases}
+
+
 def _contact_quality_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
     """Summarize contact quality across all rows, not only the first event.
 
@@ -4866,6 +5988,528 @@ def _contact_quality_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "first_nonzero_impulse_step": min(nonzero_impulse_steps) if nonzero_impulse_steps else None,
         "last_nonzero_impulse_step": max(nonzero_impulse_steps) if nonzero_impulse_steps else None,
         "nonzero_impulse_eps": nonzero_impulse_eps,
+    }
+
+
+def _first_vector_field(sample: dict[str, Any], candidate_names: tuple[str, ...]) -> list[float] | None:
+    normalized = {str(name).lower(): value for name, value in sample.items()}
+    value = None
+    for name in candidate_names:
+        if name in normalized:
+            value = normalized[name]
+            break
+    if value is None:
+        for key, candidate in normalized.items():
+            if any(name in key for name in candidate_names):
+                value = candidate
+                break
+    if value is None:
+        return None
+    try:
+        arr = np.asarray(value, dtype=np.float64).reshape(-1)
+    except Exception:
+        return None
+    if arr.size < 3 or not np.all(np.isfinite(arr[:3])):
+        return None
+    return [float(arr[0]), float(arr[1]), float(arr[2])]
+
+
+def _first_scalar_field(sample: dict[str, Any], candidate_names: tuple[str, ...]) -> float | None:
+    normalized = {str(name).lower(): value for name, value in sample.items()}
+    value = None
+    for name in candidate_names:
+        if name in normalized:
+            value = normalized[name]
+            break
+    if value is None:
+        for key, candidate in normalized.items():
+            if any(name in key for name in candidate_names):
+                value = candidate
+                break
+    if value is None:
+        return None
+    try:
+        number = float(np.asarray(value, dtype=np.float64).reshape(-1)[0])
+    except Exception:
+        return None
+    return number if np.isfinite(number) else None
+
+
+def _sum_vectors(vectors: list[np.ndarray]) -> np.ndarray:
+    if not vectors:
+        return np.zeros(3, dtype=np.float64)
+    return np.sum(np.stack(vectors, axis=0), axis=0)
+
+
+def _mean_vector(vectors: list[np.ndarray]) -> list[float] | None:
+    if not vectors:
+        return None
+    return np.mean(np.stack(vectors, axis=0), axis=0).astype(float).tolist()
+
+
+def _finger_label_for_path(path: str, index: int) -> str:
+    lowered = path.lower()
+    if "right_finger" in lowered or "_right_finger" in lowered or "/right_" in lowered:
+        return "right_finger"
+    if "left_finger" in lowered or "_left_finger" in lowered or "/left_" in lowered:
+        return "left_finger"
+    if "right" in lowered:
+        return "right_finger"
+    if "left" in lowered:
+        return "left_finger"
+    return f"finger_{index}"
+
+
+def _lift_contact_wrench_patch_audit(
+    *,
+    rows: list[dict[str, Any]],
+    contact_pair_rows: list[dict[str, Any]],
+    object_path: str,
+    expected_finger_paths: list[str],
+    eval_phase: str = "post_close_lift",
+) -> dict[str, Any]:
+    """Diagnostic-only finger/object contact wrench and patch summary.
+
+    PhysX reports contact impulses for a discrete solver step.  This helper
+    preserves them as diagnostic vectors and relative statistics; it does not
+    treat them as calibrated force measurements or change any pass/fail gate.
+    """
+
+    center_by_step: dict[int, np.ndarray] = {}
+    phase_rows = [row for row in rows if row.get("phase") == eval_phase]
+    for row in phase_rows:
+        try:
+            step = int(row.get("step"))
+            center = np.asarray(
+                [row.get("object_center_x"), row.get("object_center_y"), row.get("object_center_z")],
+                dtype=np.float64,
+            )
+        except Exception:
+            continue
+        if np.all(np.isfinite(center)):
+            center_by_step[step] = center
+
+    finger_paths = list(expected_finger_paths)
+    finger_labels = {
+        path: _finger_label_for_path(path, index)
+        for index, path in enumerate(finger_paths)
+    }
+    by_finger: dict[str, dict[str, Any]] = {
+        label: {
+            "finger_path": path,
+            "sample_count": 0,
+            "step_count": 0,
+            "steps": set(),
+            "_positions": [],
+            "_relative_positions": [],
+            "_normals": [],
+            "_impulses": [],
+            "_torques": [],
+            "_separations": [],
+        }
+        for path, label in finger_labels.items()
+    }
+
+    target_contact_rows = [
+        row
+        for row in contact_pair_rows
+        if row.get("phase") == eval_phase and _pair_touches_targets(row, object_path, finger_paths)
+    ]
+    usable_sample_count = 0
+    missing_vector_sample_count = 0
+    for row in target_contact_rows:
+        try:
+            step = int(row.get("step"))
+        except Exception:
+            continue
+        object_center = center_by_step.get(step)
+        touched_finger_path = next(
+            (path for path in finger_paths if _pair_touches_finger(row, object_path, path)),
+            None,
+        )
+        if touched_finger_path is None:
+            continue
+        label = finger_labels[touched_finger_path]
+        finger_row = by_finger[label]
+        for sample in list(row.get("contact_data_sample") or []):
+            position = _first_vector_field(sample, ("position", "point"))
+            normal = _first_vector_field(sample, ("normal",))
+            impulse = _first_vector_field(sample, ("impulse", "force"))
+            separation = _first_scalar_field(sample, ("separation", "distance"))
+            if position is None or impulse is None:
+                missing_vector_sample_count += 1
+                continue
+            pos = np.asarray(position, dtype=np.float64)
+            imp = np.asarray(impulse, dtype=np.float64)
+            rel = pos - object_center if object_center is not None else np.full(3, np.nan, dtype=np.float64)
+            torque = np.cross(rel, imp) if np.all(np.isfinite(rel)) else np.full(3, np.nan, dtype=np.float64)
+            finger_row["sample_count"] += 1
+            finger_row["steps"].add(step)
+            finger_row["_positions"].append(pos)
+            finger_row["_relative_positions"].append(rel)
+            if normal is not None:
+                finger_row["_normals"].append(np.asarray(normal, dtype=np.float64))
+            finger_row["_impulses"].append(imp)
+            if np.all(np.isfinite(torque)):
+                finger_row["_torques"].append(torque)
+            if separation is not None:
+                finger_row["_separations"].append(float(separation))
+            usable_sample_count += 1
+
+    net_impulse = np.zeros(3, dtype=np.float64)
+    net_torque = np.zeros(3, dtype=np.float64)
+    total_impulse_norm_by_finger: dict[str, float] = {}
+    finalized_by_finger: dict[str, dict[str, Any]] = {}
+    for label, data in by_finger.items():
+        impulses = list(data.pop("_impulses"))
+        positions = list(data.pop("_positions"))
+        relative_positions = list(data.pop("_relative_positions"))
+        normals = list(data.pop("_normals"))
+        torques = list(data.pop("_torques"))
+        separations = list(data.pop("_separations"))
+        impulse_sum = _sum_vectors(impulses)
+        torque_sum = _sum_vectors(torques)
+        impulse_norms = np.asarray([float(np.linalg.norm(v)) for v in impulses], dtype=np.float64)
+        position_spread = None
+        if positions:
+            pos_arr = np.stack(positions, axis=0)
+            position_spread = float(np.max(np.linalg.norm(pos_arr - np.mean(pos_arr, axis=0), axis=1)))
+        net_impulse += impulse_sum
+        net_torque += torque_sum
+        total_norm = float(np.sum(impulse_norms)) if impulse_norms.size else 0.0
+        total_impulse_norm_by_finger[label] = total_norm
+        finalized = {
+            "finger_path": data["finger_path"],
+            "sample_count": int(data["sample_count"]),
+            "step_count": len(data["steps"]),
+            "steps": sorted(data["steps"]),
+            "total_impulse_world": impulse_sum.astype(float).tolist(),
+            "total_impulse_norm_sum": total_norm,
+            "vertical_impulse_z_sum": float(impulse_sum[2]),
+            "lateral_impulse_xy_norm": float(np.linalg.norm(impulse_sum[:2])),
+            "lateral_impulse_y_sum": float(impulse_sum[1]),
+            "mean_normal_world": _mean_vector(normals),
+            "mean_contact_position_world": _mean_vector(positions),
+            "mean_contact_position_relative_to_object_center": _mean_vector(relative_positions),
+            "total_torque_about_object_center_world": torque_sum.astype(float).tolist(),
+            "contact_patch_spread_m": position_spread,
+            "separation": _percentile_summary(np.asarray(separations, dtype=np.float64)),
+        }
+        finalized_by_finger[label] = finalized
+
+    object_start = phase_rows[0] if phase_rows else None
+    object_end = phase_rows[-1] if phase_rows else None
+    object_delta = None
+    if object_start is not None and object_end is not None:
+        try:
+            object_delta = [
+                float(object_end["object_center_x"] - object_start["object_center_x"]),
+                float(object_end["object_center_y"] - object_start["object_center_y"]),
+                float(object_end["object_center_z"] - object_start["object_center_z"]),
+            ]
+        except Exception:
+            object_delta = None
+
+    positive_norms = [value for value in total_impulse_norm_by_finger.values() if value > 1e-12]
+    impulse_balance_ratio = None
+    if len(positive_norms) >= 2:
+        impulse_balance_ratio = float(max(positive_norms) / min(positive_norms))
+    y_drift = None if object_delta is None else float(object_delta[1])
+    z_lift = None if object_delta is None else float(object_delta[2])
+    lateral_drift_threshold_m = 0.003
+    status = "PASS_CONTACT_WRENCH_AUDIT_REPORTED"
+    if usable_sample_count <= 0:
+        status = "INSUFFICIENT_TARGET_CONTACT_VECTOR_SAMPLES"
+    elif y_drift is not None and abs(y_drift) >= lateral_drift_threshold_m and (z_lift is None or z_lift < 0.001):
+        status = "DIAGNOSTIC_LATERAL_DRIFT_WITH_LOW_LIFT"
+
+    return {
+        "enabled": True,
+        "diagnostic_only": True,
+        "eval_phase": eval_phase,
+        "status": status,
+        "object_path": object_path,
+        "expected_finger_paths": finger_paths,
+        "target_contact_row_count": len(target_contact_rows),
+        "usable_vector_sample_count": int(usable_sample_count),
+        "missing_vector_sample_count": int(missing_vector_sample_count),
+        "object_delta_world": object_delta,
+        "net_finger_impulse_world": net_impulse.astype(float).tolist(),
+        "net_vertical_impulse_z": float(net_impulse[2]),
+        "net_lateral_impulse_xy_norm": float(np.linalg.norm(net_impulse[:2])),
+        "net_lateral_impulse_y": float(net_impulse[1]),
+        "net_torque_about_object_center_world": net_torque.astype(float).tolist(),
+        "finger_total_impulse_norm_balance_ratio": impulse_balance_ratio,
+        "lateral_drift_threshold_m": lateral_drift_threshold_m,
+        "by_finger": finalized_by_finger,
+        "interpretation_notes": (
+            "Contact impulse is a PhysX per-step diagnostic impulse, not a calibrated continuous force. "
+            "Use signs, relative magnitudes, contact patch offsets, and run-to-run comparisons to diagnose "
+            "whether the fingers lift the bottle or push it laterally."
+        ),
+    }
+
+
+def _box_min_z(box: dict[str, Any] | None) -> float | None:
+    if not isinstance(box, dict):
+        return None
+    values = box.get("min")
+    if not isinstance(values, list | tuple) or len(values) < 3:
+        return None
+    try:
+        value = float(values[2])
+    except Exception:
+        return None
+    return value if np.isfinite(value) else None
+
+
+def _nested_number(row: dict[str, Any] | None, *keys: str) -> float | None:
+    value: Any = row
+    for key in keys:
+        if not isinstance(value, dict):
+            return None
+        value = value.get(key)
+    try:
+        number = float(value)
+    except Exception:
+        return None
+    return number if np.isfinite(number) else None
+
+
+def _fixed_reference_grasp_geometry_gate(
+    *,
+    tabletop_reference_contract: dict[str, Any],
+    object_contact_reset_box: dict[str, Any],
+    object_final_contact_box: dict[str, Any],
+    start_alignment: dict[str, Any],
+    final_alignment: dict[str, Any],
+    lift_contact_wrench_patch_audit: dict[str, Any],
+    fixed_reference_required: bool,
+    lift_required: bool,
+    max_reset_table_gap_m: float = 0.002,
+    max_final_table_penetration_m: float = 0.002,
+    max_reference_contact_cross_offset_m: float = 0.005,
+    max_reference_midplane_correction_m: float = 0.003,
+    max_lateral_to_vertical_impulse_ratio: float = 0.15,
+) -> dict[str, Any]:
+    """Check whether fixed-table grasp geometry is suitable for lift claims.
+
+    This gate is intentionally about geometry and contact direction, not about
+    drive strength.  It catches cases where a finger/object contact trace exists
+    but the bottle contact proxy has already penetrated the table or the grasp
+    band has drifted away from the two-finger midplane.
+    """
+
+    required = bool(fixed_reference_required and lift_required)
+    table_top_z = _nested_number(tabletop_reference_contract, "table_top_z_m")
+    reset_min_z = _box_min_z(object_contact_reset_box)
+    final_min_z = _box_min_z(object_final_contact_box)
+    reset_table_gap = None if table_top_z is None or reset_min_z is None else float(reset_min_z - table_top_z)
+    final_table_penetration = (
+        None if table_top_z is None or final_min_z is None else float(max(0.0, table_top_z - final_min_z))
+    )
+    start_reference_cross_offset = _nested_number(
+        start_alignment, "reference_contact_center", "cross_closing_axis_offset_norm_m"
+    )
+    final_reference_cross_offset = _nested_number(
+        final_alignment, "reference_contact_center", "cross_closing_axis_offset_norm_m"
+    )
+    start_midplane_correction = _nested_number(
+        start_alignment, "reference_contact_center", "correction_to_midplane_norm_m"
+    )
+    final_midplane_correction = _nested_number(
+        final_alignment, "reference_contact_center", "correction_to_midplane_norm_m"
+    )
+    vertical_impulse = _nested_number(lift_contact_wrench_patch_audit, "net_vertical_impulse_z")
+    lateral_impulse = _nested_number(lift_contact_wrench_patch_audit, "net_lateral_impulse_xy_norm")
+    lateral_to_vertical_ratio = (
+        None
+        if vertical_impulse is None or abs(vertical_impulse) < 1e-12 or lateral_impulse is None
+        else float(lateral_impulse / abs(vertical_impulse))
+    )
+
+    checks = {
+        "reset_contact_bottom_near_table": bool(
+            reset_table_gap is not None
+            and abs(reset_table_gap) <= float(max_reset_table_gap_m)
+        ),
+        "final_contact_not_deeply_inside_table": bool(
+            final_table_penetration is not None
+            and final_table_penetration <= float(max_final_table_penetration_m)
+        ),
+        "final_reference_contact_near_two_finger_midplane": bool(
+            final_reference_cross_offset is not None
+            and final_reference_cross_offset <= float(max_reference_contact_cross_offset_m)
+        ),
+        "final_reference_contact_midplane_correction_small": bool(
+            final_midplane_correction is not None
+            and final_midplane_correction <= float(max_reference_midplane_correction_m)
+        ),
+        "net_lateral_impulse_not_dominant": bool(
+            lateral_to_vertical_ratio is not None
+            and lateral_to_vertical_ratio <= float(max_lateral_to_vertical_impulse_ratio)
+        ),
+    }
+    if not required:
+        return {
+            "required": False,
+            "pass": True,
+            "status": "SKIPPED_NOT_FIXED_REFERENCE_LIFT",
+            "checks": checks,
+            "notes": (
+                "This geometry gate is only required for fixed-reference dynamic lift validation. "
+                "Contact-only or diagnostic table-shift runs keep it as metadata."
+            ),
+        }
+
+    failed = [name for name, ok in checks.items() if not ok]
+    status = "PASS_FIXED_REFERENCE_GRASP_GEOMETRY"
+    if failed:
+        if "final_contact_not_deeply_inside_table" in failed:
+            status = "FAIL_FIXED_REFERENCE_CONTACT_PROXY_TABLE_PENETRATION"
+        elif any(name.startswith("final_reference_contact") for name in failed):
+            status = "FAIL_FIXED_REFERENCE_GRASP_BAND_LEFT_FINGER_MIDPLANE"
+        elif "net_lateral_impulse_not_dominant" in failed:
+            status = "FAIL_FIXED_REFERENCE_LATERAL_CONTACT_IMPULSE_DOMINANT"
+        else:
+            status = "FAIL_FIXED_REFERENCE_GRASP_GEOMETRY"
+    return {
+        "required": True,
+        "pass": not failed,
+        "status": status,
+        "failed_checks": failed,
+        "checks": checks,
+        "table_top_z_m": table_top_z,
+        "reset_contact_bottom_z_m": reset_min_z,
+        "final_contact_bottom_z_m": final_min_z,
+        "reset_contact_bottom_table_gap_m": reset_table_gap,
+        "final_contact_table_penetration_m": final_table_penetration,
+        "start_reference_contact_cross_offset_m": start_reference_cross_offset,
+        "final_reference_contact_cross_offset_m": final_reference_cross_offset,
+        "start_reference_midplane_correction_m": start_midplane_correction,
+        "final_reference_midplane_correction_m": final_midplane_correction,
+        "net_vertical_impulse_z": vertical_impulse,
+        "net_lateral_impulse_xy_norm": lateral_impulse,
+        "net_lateral_to_vertical_impulse_ratio": lateral_to_vertical_ratio,
+        "thresholds": {
+            "max_reset_table_gap_m": float(max_reset_table_gap_m),
+            "max_final_table_penetration_m": float(max_final_table_penetration_m),
+            "max_reference_contact_cross_offset_m": float(max_reference_contact_cross_offset_m),
+            "max_reference_midplane_correction_m": float(max_reference_midplane_correction_m),
+            "max_lateral_to_vertical_impulse_ratio": float(max_lateral_to_vertical_impulse_ratio),
+        },
+        "notes": (
+            "Fixed-reference replay must first prove the physical bottle contact proxy sits on the real "
+            "table and the intended rear-quarter grasp band stays near the two-finger midplane. Larger "
+            "finger stiffness can increase impulse while still pushing the bottle laterally if this gate fails."
+        ),
+    }
+
+
+def _summary_stat(summary: dict[str, Any] | None, key: str) -> float | None:
+    if not isinstance(summary, dict):
+        return None
+    value = summary.get(key)
+    if value is None:
+        return None
+    try:
+        number = float(value)
+    except Exception:
+        return None
+    return number if np.isfinite(number) else None
+
+
+def _category_phase_quality(
+    contact_summary: dict[str, Any],
+    *,
+    category: str,
+    phase: str,
+) -> dict[str, Any]:
+    category_row = (contact_summary.get("object_contact_categories") or {}).get(category) or {}
+    phase_quality = (category_row.get("phase_quality") or {}).get(phase)
+    if isinstance(phase_quality, dict):
+        return phase_quality
+    quality = category_row.get("contact_quality")
+    return quality if isinstance(quality, dict) else {}
+
+
+def _table_load_bearing_contact_gate(
+    *,
+    contact_summary: dict[str, Any],
+    eval_phase: str,
+    table_category: str = "workcell_or_environment",
+    target_category: str = "target_finger",
+    max_table_to_finger_impulse_mean_ratio: float = 0.10,
+    max_table_nonzero_impulse_steps: int = 2,
+) -> dict[str, Any]:
+    """Classify table/workcell contact by load transfer, not row count alone."""
+
+    table_quality = _category_phase_quality(contact_summary, category=table_category, phase=eval_phase)
+    target_quality = _category_phase_quality(contact_summary, category=target_category, phase=eval_phase)
+    table_steps = int(table_quality.get("contact_step_count") or 0)
+    if table_steps <= 0:
+        return {
+            "pass": True,
+            "status": "PASS_NO_TABLE_CONTACT_ROWS",
+            "eval_phase": eval_phase,
+            "table_category": table_category,
+            "target_category": target_category,
+            "table_contact_step_count": 0,
+            "notes": "No table/workcell contact rows were reported in the evaluated lift phase.",
+        }
+
+    table_impulse = table_quality.get("impulse_norm") or {}
+    table_separation = table_quality.get("separation") or {}
+    target_impulse = target_quality.get("impulse_norm") or {}
+    table_impulse_mean = _summary_stat(table_impulse, "mean")
+    table_impulse_p50 = _summary_stat(table_impulse, "p50")
+    table_impulse_max = _summary_stat(table_impulse, "max")
+    table_separation_p50 = _summary_stat(table_separation, "p50")
+    table_separation_p95 = _summary_stat(table_separation, "p95")
+    target_impulse_mean = _summary_stat(target_impulse, "mean")
+    table_nonzero_steps = int(table_quality.get("nonzero_impulse_step_count") or 0)
+    ratio = (
+        None
+        if target_impulse_mean is None or abs(target_impulse_mean) < 1e-12 or table_impulse_mean is None
+        else float(table_impulse_mean / target_impulse_mean)
+    )
+    median_zero_and_separated = bool(
+        table_impulse_p50 is not None
+        and abs(table_impulse_p50) <= 1e-12
+        and table_separation_p50 is not None
+        and table_separation_p50 > 0.0
+    )
+    sparse_impulse = table_nonzero_steps <= int(max_table_nonzero_impulse_steps)
+    weak_relative_impulse = bool(ratio is not None and ratio < float(max_table_to_finger_impulse_mean_ratio))
+    not_load_bearing = bool(median_zero_and_separated or sparse_impulse or weak_relative_impulse)
+    return {
+        "pass": not_load_bearing,
+        "status": "PASS_TABLE_NEAR_CONTACT_NON_LOAD_BEARING"
+        if not_load_bearing
+        else "FAIL_TABLE_LOAD_BEARING_CONTACT",
+        "eval_phase": eval_phase,
+        "table_category": table_category,
+        "target_category": target_category,
+        "table_contact_step_count": table_steps,
+        "table_nonzero_impulse_step_count": table_nonzero_steps,
+        "table_impulse_p50": table_impulse_p50,
+        "table_impulse_mean": table_impulse_mean,
+        "table_impulse_max": table_impulse_max,
+        "table_separation_p50": table_separation_p50,
+        "table_separation_p95": table_separation_p95,
+        "target_finger_impulse_mean": target_impulse_mean,
+        "table_to_finger_impulse_mean_ratio": ratio,
+        "max_table_to_finger_impulse_mean_ratio": float(max_table_to_finger_impulse_mean_ratio),
+        "max_table_nonzero_impulse_steps": int(max_table_nonzero_impulse_steps),
+        "classification_inputs": {
+            "median_zero_and_separated": median_zero_and_separated,
+            "sparse_impulse": sparse_impulse,
+            "weak_relative_impulse": weak_relative_impulse,
+        },
+        "notes": (
+            "PhysX contact rows can include near-contact inside contactOffset. This gate uses impulse and "
+            "separation to distinguish table support from non-load-bearing proximity."
+        ),
     }
 
 
@@ -4995,6 +6639,8 @@ def _summarize_contact_pairs(
             "unique_contact_pairs": _unique_pairs(rows),
             "unique_contact_pair_summaries": _unique_pair_summaries(rows),
             "phase_counts": _phase_counts(rows),
+            "contact_quality": _contact_quality_summary(rows),
+            "phase_quality": _contact_quality_by_phase(rows),
             "first_contact_pair": rows[0] if rows else None,
         }
         for category, rows in sorted(category_rows.items())
@@ -5027,6 +6673,8 @@ def _summarize_contact_pairs(
         "target_contact_found_phases": target_found_phases,
         "target_contact_found_during_settle": "settle" in target_found_phases,
         "target_contact_found_during_close": "close" in target_found_phases,
+        "target_contact_found_during_post_close_hold": "post_close_hold" in target_found_phases,
+        "target_contact_found_during_post_close_lift": "post_close_lift" in target_found_phases,
         "target_contact_steps": target_steps,
         "target_contact_persistence_steps": len(target_steps),
         "wrong_contact_pairs": [list(pair) for pair in wrong_pairs],
@@ -5227,6 +6875,28 @@ def main() -> int:
         default="gap_center",
     )
     parser.add_argument("--object-clearance", type=float, default=0.001)
+    parser.add_argument(
+        "--closing-axis-gap-solver-basis",
+        choices=("open", "placement"),
+        default="open",
+        help=(
+            "Finger boxes used by the closing-axis gap centering solver. "
+            "open preserves historical behavior. placement uses the current "
+            "placement frame, so hdf5_close_* placement centers the contact "
+            "proxy in the loaded close-frame gap instead of the open gap."
+        ),
+    )
+    parser.add_argument(
+        "--object-width-stop-predictive-margin",
+        type=float,
+        default=0.0,
+        help=(
+            "Extra early-stop margin in meters for --enforce-object-width-finger-stop. "
+            "This holds finger targets before the observed gap crosses the physical "
+            "object-width threshold, preventing one-step hard over-close in zero-order "
+            "hold replay."
+        ),
+    )
     parser.add_argument("--object-creation", choices=("dynamic_cuboid", "raw_usd"), default="raw_usd")
     parser.add_argument(
         "--disable-object-rigid-body",
@@ -5247,6 +6917,7 @@ def main() -> int:
             "bottle_usd_cylinder_proxy",
             "bottle_usd_segmented_proxy",
             "bottle_usd_grasp_band_proxy",
+            "bottle_usd_grasp_box_proxy",
         ),
         default="cube",
     )
@@ -5456,6 +7127,16 @@ def main() -> int:
         default="gripper_only",
     )
     parser.add_argument(
+        "--hdf5-arm-hold-frame-offset",
+        type=int,
+        default=0,
+        help=(
+            "For hdf5_arm_start_then_gripper_only only: selected-window frame offset whose arm qpos is held "
+            "constant while the gripper sequence is replayed. Default 0 preserves the historical start-frame "
+            "contact-isolation diagnostic; use 28 with episode_18 frames 208:245 to hold frame 236."
+        ),
+    )
+    parser.add_argument(
         "--hdf5-replay-actuation-mode",
         choices=("drive_target", "state_teleport"),
         default="drive_target",
@@ -5483,6 +7164,104 @@ def main() -> int:
             "Number of physics steps to hold each HDF5 replay target before advancing to the next 50 Hz target. "
             "Use values greater than 1 to test whether articulation-drive tracking is limited by target update rate. "
             "Default 1 preserves one recorded frame per physics step."
+        ),
+    )
+    parser.add_argument(
+        "--post-close-hold-steps",
+        type=int,
+        default=0,
+        help=(
+            "Extra physics steps to hold the final close target after all recorded HDF5 close frames. "
+            "Default 0 preserves the raw replay window; positive values are a clamp-persistence diagnostic "
+            "and are reported separately as post_close_hold, without deleting or smoothing recorded frames."
+        ),
+    )
+    parser.add_argument(
+        "--post-close-lift-source",
+        choices=("none", "hdf5_continuation", "jacobian_vertical"),
+        default="none",
+        help=(
+            "Diagnostic only. After the raw close window and optional post-close hold, append a lift phase. "
+            "hdf5_continuation uses subsequent HDF5 arm qpos targets while holding the final close gripper "
+            "target by default. jacobian_vertical generates a small local joint-space upward lift from the "
+            "post-close hold state. Neither mode is formal close replay success."
+        ),
+    )
+    parser.add_argument(
+        "--post-close-lift-hdf5-start-frame",
+        type=int,
+        default=None,
+        help=(
+            "Optional HDF5 frame used as the anchor before the first post-close lift target. If omitted, "
+            "defaults to hdf5_gripper_end_frame - 1. For loaded-arm diagnostics, set this to the held arm "
+            "frame so the continuation does not begin with a hidden arm-target jump."
+        ),
+    )
+    parser.add_argument(
+        "--post-close-lift-hdf5-end-frame",
+        type=int,
+        default=None,
+        help=(
+            "Exclusive HDF5 end frame for --post-close-lift-source hdf5_continuation. The continuation starts "
+            "from hdf5_gripper_end_frame - 1, so the first applied lift target corresponds to the next HDF5 frame."
+        ),
+    )
+    parser.add_argument(
+        "--post-close-lift-gripper-mode",
+        choices=("hold_final_close", "hdf5_qpos"),
+        default="hold_final_close",
+        help=(
+            "Gripper target semantics during post-close lift. hold_final_close isolates the arm lift path by "
+            "holding the final clamp target; hdf5_qpos is a separate ablation."
+        ),
+    )
+    parser.add_argument(
+        "--post-close-lift-height",
+        type=float,
+        default=0.01,
+        help="Diagnostic jacobian_vertical lift height in meters. Default 10mm.",
+    )
+    parser.add_argument(
+        "--post-close-lift-steps",
+        type=int,
+        default=40,
+        help="Diagnostic jacobian_vertical lift duration in target frames.",
+    )
+    parser.add_argument(
+        "--post-close-lift-hold-steps",
+        type=int,
+        default=0,
+        help=(
+            "Extra diagnostic target frames to hold the final post-close lift target after the lift finishes. "
+            "Use this to test whether the bottle remains grasped during a stationary hold."
+        ),
+    )
+    parser.add_argument(
+        "--post-close-lift-jacobian-eps",
+        type=float,
+        default=0.002,
+        help="Finite-difference joint perturbation in radians for jacobian_vertical.",
+    )
+    parser.add_argument(
+        "--post-close-lift-jacobian-damping",
+        type=float,
+        default=1e-6,
+        help="Damping term for the one-row least-norm jacobian_vertical solve.",
+    )
+    parser.add_argument(
+        "--post-close-lift-max-joint-delta",
+        type=float,
+        default=0.08,
+        help="Maximum absolute joint delta in radians for jacobian_vertical diagnostic lift.",
+    )
+    parser.add_argument(
+        "--diagnostic-loaded-clamp-squeeze-depth",
+        type=float,
+        default=0.0,
+        help=(
+            "Diagnostic-only total extra closing distance in meters, applied across both finger targets during "
+            "post-close hold/lift. Each finger closes half this amount from the final HDF5 close target. "
+            "The original HDF5 close sequence is not modified."
         ),
     )
     parser.add_argument(
@@ -5519,6 +7298,45 @@ def main() -> int:
     parser.add_argument("--hdf5-gripper-start-frame", type=int, default=None)
     parser.add_argument("--hdf5-gripper-end-frame", type=int, default=None)
     parser.add_argument("--hdf5-gripper-max-frames", type=int, default=None)
+    parser.add_argument(
+        "--loaded-gripper-qpos-calibration-mode",
+        choices=("none", "affine_open_to_contact"),
+        default="none",
+        help=(
+            "Diagnostic replay interpretation only. affine_open_to_contact maps an observed open qpos anchor "
+            "and a loaded soft-bottle contact qpos anchor into Isaac finger targets. It preserves the raw HDF5 "
+            "sequence and must not be treated as a generic ALOHA gripper calibration."
+        ),
+    )
+    parser.add_argument(
+        "--loaded-gripper-open-qpos",
+        type=float,
+        default=None,
+        help="Observed qpos anchor for the open gripper state, usually max/p95 over a stable open window.",
+    )
+    parser.add_argument(
+        "--loaded-gripper-contact-qpos",
+        type=float,
+        default=None,
+        help="Observed qpos anchor for the loaded soft-bottle contact plateau.",
+    )
+    parser.add_argument(
+        "--loaded-gripper-effective-contact-width",
+        type=float,
+        default=None,
+        help="Effective soft-bottle contact width in stage units used for loaded-qpos contact interpretation.",
+    )
+    parser.add_argument(
+        "--loaded-gripper-open-standard",
+        type=float,
+        default=1.0,
+        help="Normalized standard value assigned to the open qpos anchor. Default 1.0 means fully open.",
+    )
+    parser.add_argument(
+        "--loaded-gripper-qpos-calibration-source",
+        default="",
+        help="Short provenance string for the loaded gripper calibration, stored in the output report.",
+    )
     parser.add_argument("--trace-contact-pairs", action="store_true")
     parser.add_argument(
         "--fail-on-non-target-object-contact",
@@ -5569,7 +7387,7 @@ def main() -> int:
     )
     parser.add_argument(
         "--diagnostic-force-target-overlap",
-        choices=("none", "nearest", "lower", "upper"),
+        choices=("none", "nearest", "lower", "upper", "left_finger", "right_finger"),
         default="none",
         help=(
             "Diagnostic positive control only: shift the object contact proxy into one finger along the live "
@@ -5625,6 +7443,42 @@ def main() -> int:
     )
     args = parser.parse_args()
     hdf5_target_hold_steps = int(args.hdf5_replay_target_hold_steps)
+    post_close_hold_steps = int(args.post_close_hold_steps)
+    if post_close_hold_steps < 0:
+        raise ValueError(f"post_close_hold_steps must be non-negative, got {post_close_hold_steps}")
+    post_close_lift_hold_steps = int(args.post_close_lift_hold_steps)
+    if post_close_lift_hold_steps < 0:
+        raise ValueError(f"post_close_lift_hold_steps must be non-negative, got {post_close_lift_hold_steps}")
+    if float(args.diagnostic_loaded_clamp_squeeze_depth) < 0.0:
+        raise ValueError(
+            "--diagnostic-loaded-clamp-squeeze-depth must be non-negative, "
+            f"got {args.diagnostic_loaded_clamp_squeeze_depth}"
+        )
+    if float(args.diagnostic_loaded_clamp_squeeze_depth) > 0.0 and args.moving_fingers != "both":
+        raise ValueError("--diagnostic-loaded-clamp-squeeze-depth requires --moving-fingers both")
+    if args.post_close_lift_source == "hdf5_continuation":
+        if args.post_close_lift_hdf5_end_frame is None:
+            raise ValueError("--post-close-lift-hdf5-end-frame is required for post-close lift diagnostics")
+        if args.hdf5_gripper_end_frame is None:
+            raise ValueError("--hdf5-gripper-end-frame is required for post-close lift diagnostics")
+        if int(args.post_close_lift_hdf5_end_frame) <= int(args.hdf5_gripper_end_frame):
+            raise ValueError(
+                "--post-close-lift-hdf5-end-frame must be greater than --hdf5-gripper-end-frame "
+                f"({args.post_close_lift_hdf5_end_frame} <= {args.hdf5_gripper_end_frame})"
+            )
+    elif args.post_close_lift_source == "jacobian_vertical":
+        if args.hdf5_gripper_end_frame is None:
+            raise ValueError("--hdf5-gripper-end-frame is required for jacobian_vertical lift diagnostics")
+        if float(args.post_close_lift_height) <= 0:
+            raise ValueError("--post-close-lift-height must be positive for jacobian_vertical")
+        if int(args.post_close_lift_steps) <= 0:
+            raise ValueError("--post-close-lift-steps must be positive for jacobian_vertical")
+        if float(args.post_close_lift_jacobian_eps) <= 0:
+            raise ValueError("--post-close-lift-jacobian-eps must be positive for jacobian_vertical")
+        if float(args.post_close_lift_jacobian_damping) < 0:
+            raise ValueError("--post-close-lift-jacobian-damping must be non-negative for jacobian_vertical")
+        if float(args.post_close_lift_max_joint_delta) <= 0:
+            raise ValueError("--post-close-lift-max-joint-delta must be positive for jacobian_vertical")
     effective_control_dt = float(args.physics_dt) * float(hdf5_target_hold_steps)
     requested_hdf5_dt = 1.0 / float(args.hdf5_replay_rate_hz)
     hdf5_timing_alignment = {
@@ -5700,9 +7554,11 @@ def main() -> int:
             "object_placement": args.object_placement,
             "object_clearance": args.object_clearance,
             "enforce_object_width_finger_stop": bool(args.enforce_object_width_finger_stop),
+            "object_width_stop_predictive_margin": args.object_width_stop_predictive_margin,
             "object_creation": args.object_creation,
             "object_rigid_body": not args.disable_object_rigid_body,
             "object_shape": args.object_shape,
+            "closing_axis_gap_solver_basis": args.closing_axis_gap_solver_basis,
             "object_axis": args.object_axis,
             "object_center_offset": args.object_center_offset,
             "object_length_multiplier": args.object_length_multiplier,
@@ -5761,6 +7617,11 @@ def main() -> int:
             "hdf5_gripper_start_frame": args.hdf5_gripper_start_frame,
             "hdf5_gripper_end_frame": args.hdf5_gripper_end_frame,
             "hdf5_gripper_max_frames": args.hdf5_gripper_max_frames,
+            "diagnostic_loaded_clamp_squeeze_depth": args.diagnostic_loaded_clamp_squeeze_depth,
+            "diagnostic_loaded_clamp_squeeze_semantics": (
+                "post_close_hold_and_lift_only_total_gap_reduction_m; "
+                "each_finger_closes_half; formal_hdf5_close_sequence_unchanged"
+            ),
             "hdf5_effective_control_dt": hdf5_timing_alignment["effective_control_dt"],
             "hdf5_effective_control_rate_hz": hdf5_timing_alignment["effective_control_rate_hz"],
             "hdf5_timing_alignment": hdf5_timing_alignment,
@@ -5796,11 +7657,11 @@ def main() -> int:
         import isaacsim.core.utils.stage as stage_utils
         import omni.usd
 
-        stage_utils.open_stage(str(Path(args.stage_usd).resolve()))
+        stage = _open_stage_and_wait(stage_utils, omni.usd, _app, str(Path(args.stage_usd).resolve()))
         World.clear_instance()
         world = World(stage_units_in_meters=args.stage_units_in_meters, backend="numpy", device="cpu")
         world.set_simulation_dt(physics_dt=args.physics_dt, rendering_dt=args.physics_dt)
-        stage = omni.usd.get_context().get_stage()
+        stage = omni.usd.get_context().get_stage() or stage
         stage_time_codes_per_second_before = float(stage.GetTimeCodesPerSecond())
         stage_frames_per_second_before = float(stage.GetFramesPerSecond())
         if args.stage_time_codes_per_second is not None:
@@ -5854,6 +7715,33 @@ def main() -> int:
 
         hdf5_target_sequence: list[np.ndarray] | None = None
         hdf5_gripper_summary: dict[str, Any] | None = None
+        gripper_qpos_calibration = DEFAULT_GRIPPER_QPOS_CALIBRATION
+        if args.loaded_gripper_qpos_calibration_mode == "affine_open_to_contact":
+            missing = [
+                name
+                for name, value in (
+                    ("--loaded-gripper-open-qpos", args.loaded_gripper_open_qpos),
+                    ("--loaded-gripper-contact-qpos", args.loaded_gripper_contact_qpos),
+                    ("--loaded-gripper-effective-contact-width", args.loaded_gripper_effective_contact_width),
+                )
+                if value is None
+            ]
+            if missing:
+                raise ValueError(
+                    "--loaded-gripper-qpos-calibration-mode affine_open_to_contact requires "
+                    + ", ".join(missing)
+                )
+            gripper_qpos_calibration = gripper_qpos_calibration_from_loaded_contact(
+                raw_open_value=float(args.loaded_gripper_open_qpos),
+                raw_contact_value=float(args.loaded_gripper_contact_qpos),
+                effective_contact_width=float(args.loaded_gripper_effective_contact_width),
+                limits=finger_qpos_limits,
+                standard_open_value=float(args.loaded_gripper_open_standard),
+                source=(
+                    args.loaded_gripper_qpos_calibration_source
+                    or "loaded_gripper_qpos_affine_open_to_contact_cli"
+                ),
+            )
         if args.hdf5_gripper_episode:
             qpos = _load_hdf5_qpos(
                 args.hdf5_gripper_episode,
@@ -5887,6 +7775,8 @@ def main() -> int:
                 replay_mode=args.hdf5_replay_mode,
                 finger_dof_names=finger_dof_names,
                 finger_qpos_limits=finger_qpos_limits,
+                gripper_qpos_calibration=gripper_qpos_calibration,
+                arm_hold_frame_offset=int(args.hdf5_arm_hold_frame_offset),
             )
             open_target = hdf5_target_sequence[0]
             open_values = hdf5_gripper_summary["first_target_values"]
@@ -6063,6 +7953,7 @@ def main() -> int:
                 raise RuntimeError(f"tabletop calibration failed: {tabletop_shift['status']}")
             object_placement_row["tabletop_reset_calibration"] = tabletop_reset_calibration
         object_center_offset = _parse_vec3(args.object_center_offset, name="--object-center-offset")
+        grasp_band_local_axis_offset = 0.0
         object_axis_source_row: dict[str, Any] = {
             "source": args.object_axis_source,
             "object_axis_unit_world": _axis_unit_vector(args.object_axis).tolist(),
@@ -6147,6 +8038,9 @@ def main() -> int:
             auto_offset = object_axis_unit * (
                 (0.5 - float(args.object_rear_quarter_fraction)) * float(object_axis_length)
             )
+            grasp_band_local_axis_offset = -(
+                (0.5 - float(args.object_rear_quarter_fraction)) * float(object_axis_length)
+            )
             center = np.asarray(center, dtype=np.float64) + auto_offset
             object_placement_row.update(
                 {
@@ -6159,6 +8053,7 @@ def main() -> int:
                     "rear_fraction_tolerance": float(args.object_rear_quarter_tolerance),
                     "auto_center_offset_world": auto_offset.tolist(),
                     "auto_placed_center": np.asarray(center, dtype=np.float64).tolist(),
+                    "grasp_band_local_axis_offset": float(grasp_band_local_axis_offset),
                 }
             )
         grasp_placement: dict[str, Any] | None = None
@@ -6240,6 +8135,7 @@ def main() -> int:
             length_multiplier=args.object_length_multiplier,
             usd_path=args.object_usd,
             usd_prim_path=args.object_usd_prim_path,
+            grasp_band_local_axis_offset=grasp_band_local_axis_offset,
             rigid_body=not args.disable_object_rigid_body,
         )
         object_placement_row["object_creation_axis"] = object_creation_axis
@@ -6290,26 +8186,59 @@ def main() -> int:
             object_placement_row["tabletop_adjustment"] = tabletop_object_placement_row
             if not tabletop_object_placement_row["pass"]:
                 raise RuntimeError(f"tabletop placement failed: {tabletop_object_placement_row['status']}")
+            if not args.derive_tabletop_top_z_from_open_finger_height:
+                object_box_after_tabletop = tabletop_object_placement_row.get("object_bbox_after") or {}
+                if object_box_after_tabletop.get("bbox_valid"):
+                    anchor_left_center = np.asarray(placement_left_box["center"], dtype=np.float64)
+                    anchor_right_center = np.asarray(placement_right_box["center"], dtype=np.float64)
+                    anchor_midpoint = (anchor_left_center + anchor_right_center) * 0.5
+                    object_center_after_tabletop = np.asarray(
+                        object_box_after_tabletop["center"], dtype=np.float64
+                    )
+                    object_placement_row["fixed_table_anchor_height_residual"] = {
+                        "status": "COMPUTED_FIXED_TABLE_ANCHOR_HEIGHT_RESIDUAL",
+                        "table_shift_applied": False,
+                        "table_top_z_source": tabletop_object_placement_row.get("table_top_z_source"),
+                        "anchor_source": placement_basis.get("target"),
+                        "anchor_finger_midpoint_world_m": anchor_midpoint.tolist(),
+                        "object_center_world_m": object_center_after_tabletop.tolist(),
+                        "height_residual_m": float(anchor_midpoint[2] - object_center_after_tabletop[2]),
+                        "notes": (
+                            "Fixed-table replay diagnostic: z is constrained by the tabletop and object radius. "
+                            "This residual must be reported instead of moving the table or floating the bottle "
+                            "to match the replay finger midpoint."
+                        ),
+                    }
             if args.object_axis_source == "open_finger_horizontal_perpendicular":
-                finger_delta = np.asarray(replay_start_left_box["center"], dtype=np.float64) - np.asarray(
-                    replay_start_right_box["center"], dtype=np.float64
+                if args.closing_axis_gap_solver_basis == "placement":
+                    solver_left_box = placement_left_box
+                    solver_right_box = placement_right_box
+                    solver_basis_target = placement_basis.get("target")
+                else:
+                    solver_left_box = replay_start_left_box
+                    solver_right_box = replay_start_right_box
+                    solver_basis_target = "hdf5_open_target"
+                finger_delta = np.asarray(solver_left_box["center"], dtype=np.float64) - np.asarray(
+                    solver_right_box["center"], dtype=np.float64
                 )
                 finger_distance = float(np.linalg.norm(finger_delta))
                 solver_row: dict[str, Any] = {
                     "enabled": True,
                     "status": "SKIPPED_INVALID_OPEN_FINGER_CLOSING_AXIS",
                     "applied": False,
+                    "basis": args.closing_axis_gap_solver_basis,
+                    "basis_target": solver_basis_target,
                 }
                 if finger_distance > 1e-12 and np.isfinite(finger_distance):
                     closing_unit = finger_delta / finger_distance
-                    left_proj = float(np.dot(np.asarray(replay_start_left_box["center"], dtype=np.float64), closing_unit))
+                    left_proj = float(np.dot(np.asarray(solver_left_box["center"], dtype=np.float64), closing_unit))
                     right_proj = float(
-                        np.dot(np.asarray(replay_start_right_box["center"], dtype=np.float64), closing_unit)
+                        np.dot(np.asarray(solver_right_box["center"], dtype=np.float64), closing_unit)
                     )
                     lower_box, upper_box = (
-                        (replay_start_right_box, replay_start_left_box)
+                        (solver_right_box, solver_left_box)
                         if right_proj <= left_proj
-                        else (replay_start_left_box, replay_start_right_box)
+                        else (solver_left_box, solver_right_box)
                     )
                     projection_model = _contact_projection_model_for_args(
                         args=args,
@@ -6326,6 +8255,8 @@ def main() -> int:
                         clearance=float(args.object_clearance),
                         use_oriented_finger_boxes=args.finger_gap_projection_model == "oriented_box",
                     )
+                    solver_row["basis"] = args.closing_axis_gap_solver_basis
+                    solver_row["basis_target"] = solver_basis_target
                     solver_row["object_projection_model_before_shift"] = projection_model
                     if solver_row["pass"]:
                         _shift_prim_world_translation(stage, object_path, np.asarray(solver_row["delta_world_m"]))
@@ -6372,6 +8303,7 @@ def main() -> int:
                     projection_unit_world=force_closing_unit,
                     overlap_m=float(args.diagnostic_force_target_overlap_m),
                     use_oriented_finger_boxes=args.finger_gap_projection_model == "oriented_box",
+                    named_finger_boxes={"left_finger": force_left_box, "right_finger": force_right_box},
                 )
                 if diagnostic_force_target_overlap_row.get("applied"):
                     diagnostic_force_target_overlap_row["object_contact_bbox_after_shift"] = _bbox_row(
@@ -6392,7 +8324,13 @@ def main() -> int:
         bottle_runtime_composition_gate = (
             _bottle_usd_runtime_composition_gate(stage, object_path)
             if args.object_shape
-            in {"bottle_usd", "bottle_usd_cylinder_proxy", "bottle_usd_segmented_proxy", "bottle_usd_grasp_band_proxy"}
+            in {
+                "bottle_usd",
+                "bottle_usd_cylinder_proxy",
+                "bottle_usd_segmented_proxy",
+                "bottle_usd_grasp_band_proxy",
+                "bottle_usd_grasp_box_proxy",
+            }
             else {
                 "pass": True,
                 "status": "SKIPPED_NOT_BOTTLE_USD",
@@ -6678,6 +8616,7 @@ def main() -> int:
             active_grasp_geometry_precondition = _active_grasp_geometry_precondition(
                 require_active_target_contact=bool(args.trace_contact_pairs and args.require_active_target_contact),
                 already_in_contact_setup=bool(args.already_in_contact_setup),
+                loaded_contact_placement=bool(args.object_placement in hdf5_close_rear_quarter_modes),
                 open_left_box=replay_start_left_box,
                 open_right_box=replay_start_right_box,
                 object_box=object_contact_reset_box,
@@ -6687,8 +8626,13 @@ def main() -> int:
                 object_projection_model=object_contact_projection_model,
                 use_oriented_finger_boxes=args.finger_gap_projection_model == "oriented_box",
             )
+            open_frame_height_required = bool(args.object_placement in hdf5_open_rear_quarter_modes)
             open_finger_object_height_alignment = _open_finger_object_height_alignment(
-                require_active_target_contact=bool(args.trace_contact_pairs and args.require_active_target_contact),
+                require_active_target_contact=bool(
+                    args.trace_contact_pairs
+                    and args.require_active_target_contact
+                    and open_frame_height_required
+                ),
                 already_in_contact_setup=bool(args.already_in_contact_setup),
                 open_left_box=replay_start_left_box,
                 open_right_box=replay_start_right_box,
@@ -6697,6 +8641,7 @@ def main() -> int:
             )
             tabletop_reference_contract = _tabletop_reference_contract(
                 required=bool(tabletop_object_placement_row is not None),
+                require_open_height_alignment=open_frame_height_required,
                 tabletop_adjustment=tabletop_object_placement_row,
                 table_collision_audit=tabletop_collision_audit,
                 open_left_box=replay_start_left_box,
@@ -6750,6 +8695,7 @@ def main() -> int:
             object_reset_center = np.asarray(object_reset_box["center"], dtype=np.float64)
             rows: list[dict[str, Any]] = []
             object_width_stop_rows: list[dict[str, Any]] = []
+            diagnostic_loaded_clamp_squeeze_rows: list[dict[str, Any]] = []
             target_contact_reachability_rows: list[dict[str, Any]] = []
             max_displacement = 0.0
             finite_motion = True
@@ -6899,6 +8845,118 @@ def main() -> int:
                 }
             synthetic_close_steps = int(args.close_steps) if args.close_steps is not None else 180
             close_step_count = len(close_sequence) if hdf5_target_sequence is not None else synthetic_close_steps
+            close_replay_step_count = int(close_step_count)
+            post_close_lift_sequence: list[np.ndarray] = []
+            post_close_lift_summary: dict[str, Any] = {
+                "enabled": bool(args.post_close_lift_source != "none"),
+                "source": args.post_close_lift_source,
+                "diagnostic_only": True,
+                "formal_close_replay_success": False,
+                "hdf5_close_sequence_preserved": True,
+                "gripper_mode": args.post_close_lift_gripper_mode,
+                "step_count": 0,
+                "notes": (
+                    "Post-close lift is a diagnostic phase appended after the selected HDF5 close window. "
+                    "It must not be used to convert the original close replay into a formal pass."
+                ),
+            }
+            if args.post_close_lift_source == "hdf5_continuation":
+                if hdf5_target_sequence is None or not args.hdf5_gripper_episode:
+                    raise ValueError("post-close HDF5 lift diagnostics require --hdf5-gripper-episode")
+                lift_start_frame = int(args.hdf5_gripper_end_frame) - 1
+                if args.post_close_lift_hdf5_start_frame is not None:
+                    lift_start_frame = int(args.post_close_lift_hdf5_start_frame)
+                lift_end_frame = int(args.post_close_lift_hdf5_end_frame)
+                if lift_start_frame < 0:
+                    raise ValueError(f"post-close lift start frame must be non-negative, got {lift_start_frame}")
+                if lift_end_frame <= lift_start_frame + 1:
+                    raise ValueError(
+                        "post-close lift HDF5 range must include an anchor plus at least one applied target, "
+                        f"got start={lift_start_frame}, end={lift_end_frame}"
+                    )
+                lift_qpos = _load_hdf5_qpos(
+                    args.hdf5_gripper_episode,
+                    start=lift_start_frame,
+                    end=lift_end_frame,
+                    max_frames=None,
+                )
+                lift_mapping = mapping if _replay_mode_controls_arm("left_arm_and_gripper") else None
+                if lift_mapping is None:
+                    lift_mapping = load_mapping(args.mapping)
+                lift_targets, lift_hdf5_summary = _targets_from_hdf5_qpos(
+                    art=art,
+                    side=args.side,
+                    qpos=lift_qpos,
+                    gripper_sequence=None,
+                    gripper_source="observations/qpos",
+                    mapping=lift_mapping,
+                    replay_mode="left_arm_and_gripper",
+                    finger_dof_names=finger_dof_names,
+                    finger_qpos_limits=finger_qpos_limits,
+                    gripper_qpos_calibration=gripper_qpos_calibration,
+                    arm_hold_frame_offset=0,
+                )
+                post_close_lift_sequence = [np.asarray(target, dtype=np.float64).copy() for target in lift_targets[1:]]
+                if args.post_close_lift_gripper_mode == "hold_final_close":
+                    left_idx = dof_names.index(finger_dof_names["left_finger"])
+                    right_idx = dof_names.index(finger_dof_names["right_finger"])
+                    for target in post_close_lift_sequence:
+                        target[left_idx] = float(close_target[left_idx])
+                        target[right_idx] = float(close_target[right_idx])
+                post_close_lift_summary.update(
+                    {
+                        "hdf5_start_frame": lift_start_frame,
+                        "hdf5_first_applied_frame": lift_start_frame + 1,
+                        "hdf5_end_frame": lift_end_frame,
+                        "step_count": len(post_close_lift_sequence),
+                        "target_hold_steps": int(args.hdf5_replay_target_hold_steps),
+                        "hdf5_summary": lift_hdf5_summary,
+                        "arm_target_source": "observations/qpos",
+                        "gripper_target_source": (
+                            "final_hdf5_close_target"
+                            if args.post_close_lift_gripper_mode == "hold_final_close"
+                            else "observations/qpos"
+                        ),
+                    }
+                )
+            elif args.post_close_lift_source == "jacobian_vertical":
+                post_close_lift_sequence = [close_target.copy() for _ in range(int(args.post_close_lift_steps))]
+                post_close_lift_summary.update(
+                    {
+                        "source": "jacobian_vertical",
+                        "runtime_generated": True,
+                        "status": "PENDING_RUNTIME_JACOBIAN_SEQUENCE",
+                        "requested_lift_height_m": float(args.post_close_lift_height),
+                        "step_count": int(args.post_close_lift_steps),
+                        "target_hold_steps": int(args.hdf5_replay_target_hold_steps),
+                        "arm_target_source": "runtime_finite_difference_jacobian",
+                        "gripper_target_source": "final_hdf5_close_target",
+                    }
+                )
+            post_close_lift_step_count = int(len(post_close_lift_sequence))
+            post_close_lift_hold_step_count = (
+                int(post_close_lift_hold_steps) if post_close_lift_step_count > 0 else 0
+            )
+            close_sequence = list(close_sequence)
+            if hdf5_target_sequence is not None:
+                if post_close_hold_steps > 0:
+                    close_sequence.extend([close_target] * post_close_hold_steps)
+                if post_close_lift_sequence:
+                    close_sequence.extend(post_close_lift_sequence)
+                if post_close_lift_hold_step_count > 0:
+                    final_lift_target = (
+                        post_close_lift_sequence[-1].copy() if post_close_lift_sequence else close_target.copy()
+                    )
+                    close_sequence.extend([final_lift_target] * post_close_lift_hold_step_count)
+            post_close_hold_start_step = int(close_replay_step_count)
+            post_close_lift_start_step = int(close_replay_step_count + post_close_hold_steps)
+            post_close_lift_hold_start_step = int(post_close_lift_start_step + post_close_lift_step_count)
+            close_step_count = int(
+                close_replay_step_count
+                + post_close_hold_steps
+                + post_close_lift_step_count
+                + post_close_lift_hold_step_count
+            )
             for step in range(close_step_count):
                 if hdf5_target_sequence is not None:
                     step_target = close_sequence[step]
@@ -6913,6 +8971,56 @@ def main() -> int:
                 else:
                     previous_target = open_target
                     next_target = close_target
+                if step < close_replay_step_count:
+                    phase = "close"
+                    phase_step = int(step)
+                elif step < post_close_lift_start_step:
+                    phase = "post_close_hold"
+                    phase_step = int(step - post_close_hold_start_step)
+                elif step < post_close_lift_hold_start_step:
+                    phase = "post_close_lift"
+                    phase_step = int(step - post_close_lift_start_step)
+                else:
+                    phase = "post_close_lift_hold"
+                    phase_step = int(step - post_close_lift_hold_start_step)
+                if phase == "post_close_lift" and args.post_close_lift_source == "jacobian_vertical":
+                    if post_close_lift_summary.get("status") == "PENDING_RUNTIME_JACOBIAN_SEQUENCE":
+                        lift_base_qpos = np.asarray(art.get_joint_positions(), dtype=np.float64).reshape(-1).copy()
+                        post_close_lift_sequence, jacobian_lift_summary = _build_jacobian_vertical_lift_sequence(
+                            stage=stage,
+                            art=art,
+                            paths=paths,
+                            base_qpos=lift_base_qpos,
+                            close_target=close_target,
+                            tracking_groups=tracking_groups,
+                            side=args.side,
+                            lift_height=float(args.post_close_lift_height),
+                            lift_steps=int(args.post_close_lift_steps),
+                            epsilon=float(args.post_close_lift_jacobian_eps),
+                            damping=float(args.post_close_lift_jacobian_damping),
+                            max_joint_delta=float(args.post_close_lift_max_joint_delta),
+                            body_name=Path(str(args.object_gripper_frame)).name,
+                        )
+                        post_close_lift_summary.update(jacobian_lift_summary)
+                        if len(post_close_lift_sequence) != post_close_lift_step_count:
+                            raise RuntimeError(
+                                "jacobian_vertical generated an unexpected sequence length: "
+                                f"{len(post_close_lift_sequence)} != {post_close_lift_step_count}"
+                            )
+                        close_sequence[
+                            post_close_lift_start_step:post_close_lift_hold_start_step
+                        ] = post_close_lift_sequence
+                        if post_close_lift_hold_step_count > 0:
+                            close_sequence[
+                                post_close_lift_hold_start_step:close_step_count
+                            ] = [post_close_lift_sequence[-1].copy()] * post_close_lift_hold_step_count
+                    step_target = post_close_lift_sequence[phase_step]
+                    previous_target = close_target if phase_step == 0 else post_close_lift_sequence[phase_step - 1]
+                    next_target = (
+                        post_close_lift_sequence[phase_step + 1]
+                        if phase_step + 1 < len(post_close_lift_sequence)
+                        else step_target
+                    )
                 current_qpos_for_guard = np.asarray(art.get_joint_positions(), dtype=np.float64).reshape(-1)
                 guard_left_box = _bbox_row(stage, paths["left_finger"])
                 guard_right_box = _bbox_row(stage, paths["right_finger"])
@@ -6944,17 +9052,39 @@ def main() -> int:
                     right_box=guard_right_box,
                     object_box=guard_object_box,
                     clearance=float(args.object_clearance),
+                    predictive_margin=float(args.object_width_stop_predictive_margin),
                     object_projected_interval=guard_projected_interval,
                     use_oriented_finger_boxes=args.finger_gap_projection_model == "oriented_box",
                 )
                 width_stop_row.update(
                     {
-                        "phase": "close",
-                        "step": int(step),
+                        "phase": phase,
+                        "step": phase_step,
+                        "global_close_step": int(step),
                         "live_object_projection_model": guard_projection_model,
                     }
                 )
                 object_width_stop_rows.append(width_stop_row)
+                step_target, loaded_clamp_squeeze_row = _apply_diagnostic_loaded_clamp_squeeze(
+                    enabled=bool(float(args.diagnostic_loaded_clamp_squeeze_depth) > 0.0),
+                    target=step_target,
+                    dof_names=dof_names,
+                    finger_dof_names=finger_dof_names,
+                    runtime_limits=runtime_limits,
+                    limit_margin=float(args.limit_margin),
+                    squeeze_depth=float(args.diagnostic_loaded_clamp_squeeze_depth),
+                    phase=phase,
+                    moving_fingers=str(args.moving_fingers),
+                    reference_target=step_target,
+                    reference_target_source="width_guarded_step_target",
+                )
+                loaded_clamp_squeeze_row.update(
+                    {
+                        "step": phase_step,
+                        "global_close_step": int(step),
+                    }
+                )
+                diagnostic_loaded_clamp_squeeze_rows.append(loaded_clamp_squeeze_row)
                 pre_step_qpos = _apply_replay_target_and_step(
                     world,
                     art,
@@ -6983,11 +9113,12 @@ def main() -> int:
                 target_limit = _target_limit_step_violations(
                     target=step_target, limits=runtime_limits, groups=tracking_groups
                 )
-                pre_step_tracking_rows.append({"phase": "close", "step": step, "groups": pre_step_tracking})
+                pre_step_tracking_rows.append({"phase": phase, "step": phase_step, "groups": pre_step_tracking})
                 tracking_rows.append(
                     {
-                        "phase": "close",
-                        "step": step,
+                        "phase": phase,
+                        "step": phase_step,
+                        "global_close_step": int(step),
                         "groups": step_tracking,
                         "target": step_target.tolist(),
                         "previous_target": previous_target.tolist(),
@@ -6997,7 +9128,7 @@ def main() -> int:
                         "qvel": qvel,
                     }
                 )
-                target_limit_rows.append({"phase": "close", "step": step, "groups": target_limit})
+                target_limit_rows.append({"phase": phase, "step": phase_step, "groups": target_limit})
                 left_box = _bbox_row(stage, paths["left_finger"])
                 right_box = _bbox_row(stage, paths["right_finger"])
                 object_box = _bbox_row(stage, object_path)
@@ -7027,14 +9158,14 @@ def main() -> int:
                 step_contact_rows = []
                 if step_contact_pairs:
                     for pair in step_contact_pairs:
-                        contact_row = {"phase": "close", "step": step, **pair}
+                        contact_row = {"phase": phase, "step": phase_step, "global_close_step": int(step), **pair}
                         contact_pair_rows.append(contact_row)
                         step_contact_rows.append(contact_row)
                     if first_contact_row is None:
                         first_contact_row = dict(contact_pair_rows[-len(step_contact_pairs)])
                 _append_denied_workcell_geometry_audit(
-                    phase="close",
-                    step=step,
+                    phase=phase,
+                    step=phase_step,
                     step_contact_rows=step_contact_rows,
                 )
                 step_closing_unit = _closing_unit_from_finger_boxes(left_box, right_box)
@@ -7049,14 +9180,27 @@ def main() -> int:
                     if step_closing_unit is not None
                     else {"valid": False, "status": "FAIL_INVALID_STEP_CLOSING_AXIS"}
                 )
+                step_center_offset_row: dict[str, Any] = {}
+                if step_closing_unit is not None and left_box.get("center") is not None and right_box.get("center") is not None:
+                    step_object_center = (
+                        np.asarray(object_contact_box["center"], dtype=np.float64).reshape(3)
+                        if object_contact_box.get("bbox_valid") and object_contact_box.get("center") is not None
+                        else None
+                    )
+                    step_center_offset_row = _finger_object_center_offset_row(
+                        left_center=np.asarray(left_box["center"], dtype=np.float64).reshape(3),
+                        right_center=np.asarray(right_box["center"], dtype=np.float64).reshape(3),
+                        object_center=step_object_center,
+                        closing_unit=step_closing_unit,
+                    )
                 if args.moving_fingers == "both":
                     reachability_expected_fingers = [contact_targets["left_finger"], contact_targets["right_finger"]]
                 else:
                     reachability_expected_fingers = [contact_targets[f"{args.moving_fingers}_finger"]]
                 target_contact_reachability_rows.append(
                     _live_target_reachability_row(
-                        phase="close",
-                        step=step,
+                        phase=phase,
+                        step=phase_step,
                         left_box=left_box,
                         right_box=right_box,
                         object_contact_box=object_contact_box,
@@ -7112,8 +9256,9 @@ def main() -> int:
                         )
                 rows.append(
                     {
-                        "phase": "close",
-                        "step": step,
+                        "phase": phase,
+                        "step": phase_step,
+                        "global_close_step": int(step),
                         "object_center_x": float(object_center[0]),
                         "object_center_y": float(object_center[1]),
                         "object_center_z": float(object_center[2]),
@@ -7146,8 +9291,30 @@ def main() -> int:
                             width_stop_row.get("projected_inner_gap", {}) or {}
                         ).get("finger_inner_gap_m"),
                         "object_width_stop_projected_threshold_m": width_stop_row.get("projected_stop_gap_m"),
+                        "diagnostic_loaded_clamp_squeeze_active": bool(loaded_clamp_squeeze_row.get("active")),
+                        "diagnostic_loaded_clamp_squeeze_status": loaded_clamp_squeeze_row.get("status"),
+                        "diagnostic_loaded_clamp_squeeze_depth_m": loaded_clamp_squeeze_row.get("squeeze_depth_m"),
+                        "diagnostic_loaded_clamp_squeeze_per_finger_delta_m": loaded_clamp_squeeze_row.get(
+                            "per_finger_target_delta_m"
+                        ),
+                        "diagnostic_loaded_clamp_squeeze_clipped": loaded_clamp_squeeze_row.get("clipped"),
                         "finger_center_distance": _gap_metrics(left_box, right_box).get("center_distance"),
                         **_finger_center_row(left_box, right_box),
+                        "object_offset_along_closing_axis_m": step_center_offset_row.get(
+                            "object_offset_along_closing_axis_m"
+                        ),
+                        "object_cross_closing_axis_offset_norm_m": step_center_offset_row.get(
+                            "object_cross_closing_axis_offset_norm_m"
+                        ),
+                        "object_cross_closing_axis_offset_x_m": step_center_offset_row.get(
+                            "object_cross_closing_axis_offset_x_m"
+                        ),
+                        "object_cross_closing_axis_offset_y_m": step_center_offset_row.get(
+                            "object_cross_closing_axis_offset_y_m"
+                        ),
+                        "object_cross_closing_axis_offset_z_m": step_center_offset_row.get(
+                            "object_cross_closing_axis_offset_z_m"
+                        ),
                         **_axis_probe_row(
                             axis=axis,
                             left_box=left_box,
@@ -7176,6 +9343,11 @@ def main() -> int:
             object_projection_model=object_contact_projection_model,
             use_oriented_finger_boxes=args.finger_gap_projection_model == "oriented_box",
         )
+        final_reference_contact_center = _translated_reference_contact_center(
+            reference_contact_center_world=object_placement_row.get("base_center"),
+            reset_object_box=object_contact_reset_box,
+            final_object_box=object_final_contact_box,
+        )
         final_closing_unit = _closing_unit_from_finger_boxes(left_box, right_box)
         final_contact_projection_model = (
             _contact_projection_model_for_args(
@@ -7200,13 +9372,22 @@ def main() -> int:
             object_box=object_final_contact_box,
             gap_axis=axis,
             gap_axis_name=axis_name,
-            reference_contact_center_world=object_placement_row.get("base_center"),
+            reference_contact_center_world=final_reference_contact_center.get("reference_contact_center_world_m"),
             object_long_axis_world=object_axis_source_row.get("object_axis_unit_world"),
             object_projected_interval=final_contact_projected_interval,
             object_projection_model=final_contact_projection_model,
             use_oriented_finger_boxes=args.finger_gap_projection_model == "oriented_box",
         )
         tracking_summary = _summarize_tracking_errors(tracking_rows, tracking_groups, dof_names)
+        diagnostic_phase_names = ("close", "post_close_hold", "post_close_lift", "post_close_lift_hold")
+        tracking_summary_by_phase = {
+            phase: _summarize_tracking_errors(
+                [row for row in tracking_rows if row.get("phase") == phase],
+                tracking_groups,
+                dof_names,
+            )
+            for phase in diagnostic_phase_names
+        }
         pre_step_tracking_summary = _summarize_tracking_errors(pre_step_tracking_rows, tracking_groups, dof_names)
         command_smoothness_gate = _command_delta_distribution(
             tracking_rows=tracking_rows,
@@ -7225,6 +9406,13 @@ def main() -> int:
             tracking_summary=tracking_summary,
             max_controlled_error=effective_max_tracking_error,
         )
+        controller_tracking_gate_by_phase = {
+            phase: _controller_tracking_gate(
+                tracking_summary=summary,
+                max_controlled_error=effective_max_tracking_error,
+            )
+            for phase, summary in tracking_summary_by_phase.items()
+        }
         controller_tracking_ok = bool(controller_tracking_gate["pass"])
         object_displacement = float(np.linalg.norm(object_final_center - object_initial_center))
         total_object_displacement = float(np.linalg.norm(object_final_center - object_reset_center))
@@ -7241,7 +9429,33 @@ def main() -> int:
             "active_steps": int(object_width_stop_active_steps),
             "first_active_step": object_width_stop_first_active_step,
         }
+        diagnostic_loaded_clamp_squeeze_active_steps = sum(
+            1 for row in diagnostic_loaded_clamp_squeeze_rows if row.get("active")
+        )
+        diagnostic_loaded_clamp_squeeze_summary = {
+            "enabled": bool(float(args.diagnostic_loaded_clamp_squeeze_depth) > 0.0),
+            "diagnostic_only": True,
+            "formal_hdf5_close_sequence_modified": False,
+            "squeeze_depth_m": float(args.diagnostic_loaded_clamp_squeeze_depth),
+            "row_count": len(diagnostic_loaded_clamp_squeeze_rows),
+            "active_steps": int(diagnostic_loaded_clamp_squeeze_active_steps),
+            "first_active_global_step": next(
+                (
+                    row.get("global_close_step")
+                    for row in diagnostic_loaded_clamp_squeeze_rows
+                    if row.get("active")
+                ),
+                None,
+            ),
+            "any_clipped": any(bool(row.get("clipped")) for row in diagnostic_loaded_clamp_squeeze_rows),
+            "rows": diagnostic_loaded_clamp_squeeze_rows,
+            "notes": (
+                "Diagnostic post-close loaded clamp squeeze. It changes only appended post-close hold/lift "
+                "targets and keeps the original HDF5 close replay unchanged."
+            ),
+        }
         target_contact_reachability_audit = _summarize_target_reachability(target_contact_reachability_rows)
+        target_contact_reachability_ok = bool(target_contact_reachability_audit["pass"])
         contact_motion_policy = (
             "not_required_for_bilateral_closure"
             if args.moving_fingers == "both"
@@ -7280,6 +9494,19 @@ def main() -> int:
                 args.contact_proxy_profile, "right" if args.side == "left" else "left"
             ),
         )
+        phase_contact_summaries = {
+            phase: _summarize_contact_pairs(
+                contact_pair_rows=[row for row in contact_pair_rows if row.get("phase") == phase],
+                object_path=object_path,
+                expected_finger_paths=expected_finger_paths,
+                diagnostic_contact_paths=[support_plane_row["path"]] if support_plane_row else None,
+                same_side_robot_root=robot_root_for_side(args.contact_proxy_profile, args.side),
+                other_side_robot_root=robot_root_for_side(
+                    args.contact_proxy_profile, "right" if args.side == "left" else "left"
+                ),
+            )
+            for phase in diagnostic_phase_names
+        }
         if args.moving_fingers == "both":
             target_contact_ok = bool(contact_summary["all_expected_fingers_target_contact_pair_found"])
         else:
@@ -7345,6 +9572,86 @@ def main() -> int:
             max_prelift_lateral_sweep=float(args.bilateral_grasp_max_prelift_lateral_sweep),
             prelift_gripper_z_delta=float(args.bilateral_grasp_prelift_z_delta),
         )
+        bilateral_grasp_formation_gate_by_phase = {
+            phase: _bilateral_grasp_formation_gate(
+                rows=[row for row in rows if row.get("phase") == phase],
+                contact_summary=summary,
+                moving_fingers=str(args.moving_fingers),
+                gap_axis_name=axis_name,
+                min_contact_steps=int(args.bilateral_grasp_min_contact_steps),
+                min_nonzero_impulse_steps=int(args.bilateral_grasp_min_nonzero_impulse_steps),
+                max_impulse_ratio=float(args.bilateral_grasp_max_impulse_ratio),
+                max_prelift_lateral_sweep=float(args.bilateral_grasp_max_prelift_lateral_sweep),
+                prelift_gripper_z_delta=float(args.bilateral_grasp_prelift_z_delta),
+            )
+            for phase, summary in phase_contact_summaries.items()
+        }
+        post_close_hold_diagnostic_gate = {
+            "enabled": bool(post_close_hold_steps > 0),
+            "phase": "post_close_hold",
+            "formal_replay_targets_modified": False,
+            "hdf5_close_sequence_preserved": True,
+            "held_target_source": "final_hdf5_close_target" if hdf5_target_sequence is not None else "synthetic_close_target",
+            "hold_steps": int(post_close_hold_steps),
+            "hold_physics_steps": int(post_close_hold_steps) * int(args.hdf5_replay_target_hold_steps),
+            "bilateral_gate": bilateral_grasp_formation_gate_by_phase.get("post_close_hold"),
+            "controller_tracking_gate": controller_tracking_gate_by_phase.get("post_close_hold"),
+            "non_target_contact_ok": non_target_object_contact_ok,
+            "workcell_contact_policy_ok": workcell_contact_policy_ok,
+            "no_explosion_ok": no_explosion_ok,
+            "pass": False,
+            "status": "SKIPPED_NO_POST_CLOSE_HOLD",
+            "notes": (
+                "Diagnostic only. A pass means the final close target can maintain quasi-static bilateral "
+                "contact after the recorded HDF5 window; it does not convert the original HDF5 close window "
+                "into a formal replay pass."
+            ),
+        }
+        if post_close_hold_steps > 0:
+            post_bilateral_ok = bool(
+                (post_close_hold_diagnostic_gate.get("bilateral_gate") or {}).get("pass")
+            )
+            post_tracking_ok = bool(
+                (post_close_hold_diagnostic_gate.get("controller_tracking_gate") or {}).get("pass")
+            )
+            post_pass = bool(
+                post_bilateral_ok
+                and post_tracking_ok
+                and non_target_object_contact_ok
+                and workcell_contact_policy_ok
+                and no_explosion_ok
+            )
+            post_close_hold_diagnostic_gate.update(
+                {
+                    "pass": post_pass,
+                    "status": "PASS_QUASI_STATIC_CLAMP_HOLD_DIAGNOSTIC"
+                    if post_pass
+                    else "FAIL_QUASI_STATIC_CLAMP_HOLD_DIAGNOSTIC",
+                    "post_bilateral_ok": post_bilateral_ok,
+                    "post_tracking_ok": post_tracking_ok,
+                }
+            )
+        prelift_static_grasp_gate = _prelift_static_grasp_gate(
+            hold_rows=[row for row in rows if row.get("phase") == "post_close_hold"],
+            hold_bilateral_gate=bilateral_grasp_formation_gate_by_phase.get("post_close_hold"),
+            hold_tracking_gate=controller_tracking_gate_by_phase.get("post_close_hold"),
+            min_hold_steps=int(post_close_hold_steps),
+            min_tail_bilateral_steps=int(args.bilateral_grasp_min_contact_steps),
+            min_each_finger_nonzero_impulse_steps=int(args.bilateral_grasp_min_nonzero_impulse_steps),
+            max_object_xy_sweep=float(args.bilateral_grasp_max_prelift_lateral_sweep),
+            max_object_z_delta=float(args.bilateral_grasp_prelift_z_delta),
+        )
+        post_close_hold_diagnostic_gate["prelift_static_grasp_gate"] = prelift_static_grasp_gate
+        early_geometric_escape_gate = _early_geometric_escape_gate(
+            object_width_stop_rows=object_width_stop_rows,
+            bilateral_grasp_formation_gate=bilateral_grasp_formation_gate,
+        )
+        bilateral_grasp_failure_diagnostic = _bilateral_grasp_failure_diagnostic(
+            bilateral_grasp_formation_gate=bilateral_grasp_formation_gate,
+            contact_summary=contact_summary,
+            start_alignment=start_finger_object_alignment,
+            final_alignment=final_finger_object_alignment,
+        )
         contact_landmark_alignment = _timeseries_gripper_object_alignment_samples(
             rows=rows,
             contact_summary=contact_summary,
@@ -7353,20 +9660,123 @@ def main() -> int:
         lift_transport_gate = _lift_transport_gate(
             rows=rows,
             object_lift_gate=object_lift_gate,
-            contact_summary=contact_summary,
+            contact_summary=(
+                phase_contact_summaries.get("post_close_lift")
+                if post_close_lift_step_count > 0
+                else contact_summary
+            )
+            or contact_summary,
             min_object_lift=float(args.min_object_lift),
             diagnostic_held_object_mode=str(args.diagnostic_held_object_mode),
         )
+        lift_contact_wrench_patch_audit = _lift_contact_wrench_patch_audit(
+            rows=rows,
+            contact_pair_rows=contact_pair_rows,
+            object_path=object_path,
+            expected_finger_paths=expected_finger_paths,
+            eval_phase="post_close_lift" if post_close_lift_step_count > 0 else "close",
+        )
+        fixed_reference_grasp_geometry_gate = _fixed_reference_grasp_geometry_gate(
+            tabletop_reference_contract=tabletop_reference_contract,
+            object_contact_reset_box=object_contact_reset_box,
+            object_final_contact_box=object_final_contact_box,
+            start_alignment=start_finger_object_alignment,
+            final_alignment=final_finger_object_alignment,
+            lift_contact_wrench_patch_audit=lift_contact_wrench_patch_audit,
+            fixed_reference_required=bool(args.object_tabletop_reference_path),
+            lift_required=bool(float(args.min_object_lift) > 0.0 and post_close_lift_step_count > 0),
+        )
+        post_close_lift_diagnostic_gate = {
+            "enabled": bool(post_close_lift_step_count > 0),
+            "phase": "post_close_lift",
+            "source": args.post_close_lift_source,
+            "diagnostic_only": True,
+            "formal_close_replay_success": False,
+            "hdf5_close_sequence_preserved": True,
+            "lift_summary": post_close_lift_summary,
+            "pre_lift_hold_gate": post_close_hold_diagnostic_gate,
+            "prelift_static_grasp_gate": prelift_static_grasp_gate,
+            "bilateral_gate": bilateral_grasp_formation_gate_by_phase.get("post_close_lift"),
+            "controller_tracking_gate": controller_tracking_gate_by_phase.get("post_close_lift"),
+            "lift_transport_gate": lift_transport_gate,
+            "fixed_reference_grasp_geometry_gate": fixed_reference_grasp_geometry_gate,
+            "object_lift_gate": object_lift_gate,
+            "non_target_contact_ok": non_target_object_contact_ok,
+            "workcell_contact_policy_ok": workcell_contact_policy_ok,
+            "no_explosion_ok": no_explosion_ok,
+            "pass": False,
+            "status": "SKIPPED_NO_POST_CLOSE_LIFT",
+            "notes": (
+                "Diagnostic only. A pass means the already-held final clamp can transport the bottle through "
+                "the appended lift phase. It does not convert the original HDF5 close window into a formal pass."
+            ),
+        }
+        if post_close_lift_step_count > 0:
+            lift_bilateral_ok = bool(
+                (post_close_lift_diagnostic_gate.get("bilateral_gate") or {}).get("pass")
+            )
+            lift_tracking_ok = bool(
+                (post_close_lift_diagnostic_gate.get("controller_tracking_gate") or {}).get("pass")
+            )
+            lift_transport_ok = bool(lift_transport_gate.get("pass"))
+            pre_lift_hold_ok = bool(post_close_hold_diagnostic_gate.get("pass"))
+            fixed_reference_geometry_ok = bool(fixed_reference_grasp_geometry_gate.get("pass"))
+            lift_pass = bool(
+                pre_lift_hold_ok
+                and lift_bilateral_ok
+                and lift_tracking_ok
+                and lift_transport_ok
+                and fixed_reference_geometry_ok
+                and object_lift_ok
+                and non_target_object_contact_ok
+                and workcell_contact_policy_ok
+                and no_explosion_ok
+            )
+            if not pre_lift_hold_ok:
+                lift_status = "FAIL_LIFT_HOLD_DID_NOT_PASS"
+            elif not lift_bilateral_ok:
+                lift_status = "FAIL_LIFT_BILATERAL_CONTACT_NOT_PERSISTENT"
+            elif str(lift_transport_gate.get("status")) == "FAIL_STRICT_OBJECT_LIFT_CLEARANCE" or not object_lift_ok:
+                lift_status = "FAIL_LIFT_STRICT_OBJECT_CLEARANCE"
+            elif str(lift_transport_gate.get("status")) == "FAIL_TABLE_STILL_LOAD_BEARING":
+                lift_status = "FAIL_LIFT_TABLE_STILL_LOAD_BEARING"
+            elif not lift_transport_ok:
+                lift_status = "FAIL_LIFT_OBJECT_DID_NOT_FOLLOW_GRIPPER"
+            elif not fixed_reference_geometry_ok:
+                lift_status = str(fixed_reference_grasp_geometry_gate.get("status"))
+            elif not lift_tracking_ok:
+                lift_status = "FAIL_LIFT_CONTROLLER_TRACKING"
+            elif not non_target_object_contact_ok or not workcell_contact_policy_ok:
+                lift_status = "FAIL_LIFT_FORBIDDEN_NON_TARGET_CONTACT"
+            elif not no_explosion_ok:
+                lift_status = "FAIL_LIFT_OBJECT_MOTION_NOT_FINITE_OR_TOO_LARGE"
+            else:
+                lift_status = "PASS_LIFT_FROM_STABLE_CLAMP_DIAGNOSTIC"
+            post_close_lift_diagnostic_gate.update(
+                {
+                    "pass": lift_pass,
+                    "status": lift_status,
+                    "pre_lift_hold_ok": pre_lift_hold_ok,
+                    "lift_bilateral_ok": lift_bilateral_ok,
+                    "lift_tracking_ok": lift_tracking_ok,
+                    "lift_transport_ok": lift_transport_ok,
+                    "fixed_reference_geometry_ok": fixed_reference_geometry_ok,
+                    "object_lift_ok": object_lift_ok,
+                }
+            )
         active_target_contact_ok = bool(active_target_contact_gate["pass"])
         bilateral_grasp_formation_ok = bool(bilateral_grasp_formation_gate["pass"])
+        early_geometric_escape_ok = bool(early_geometric_escape_gate["pass"])
         active_grasp_geometry_precondition_ok = bool(active_grasp_geometry_precondition["pass"])
         open_finger_object_height_alignment_ok = bool(open_finger_object_height_alignment["pass"])
         tabletop_reference_contract_ok = bool(tabletop_reference_contract["pass"])
+        fixed_reference_grasp_geometry_ok = bool(fixed_reference_grasp_geometry_gate.get("pass"))
         trace_pair_ok = bool(
             trace_pair_ok and non_target_object_contact_ok and workcell_contact_policy_ok and active_target_contact_ok
             and bilateral_grasp_formation_ok
             and active_grasp_geometry_precondition_ok and open_finger_object_height_alignment_ok
             and tabletop_reference_contract_ok
+            and fixed_reference_grasp_geometry_ok
         )
         tracking_spike_packet = _tracking_spike_packet(
             tracking_rows=tracking_rows,
@@ -7416,6 +9826,7 @@ def main() -> int:
                 and active_grasp_geometry_precondition_ok
                 and open_finger_object_height_alignment_ok
                 and tabletop_reference_contract_ok
+                and fixed_reference_grasp_geometry_ok
             ) else "FAIL_PHYSICAL_GRASP_SEMANTICS",
             "notes": (
                 "This gate intentionally excludes controller replay fidelity. It answers whether the "
@@ -7431,11 +9842,13 @@ def main() -> int:
             "active_target_contact_ok": active_target_contact_ok,
             "bilateral_grasp_formation_ok": bilateral_grasp_formation_ok,
             "bilateral_grasp_formation_gate": bilateral_grasp_formation_gate,
+            "bilateral_grasp_formation_gate_by_phase": bilateral_grasp_formation_gate_by_phase,
             "bottle_runtime_composition_ok": bottle_runtime_composition_ok,
             "bottle_grasp_semantics_ok": bottle_grasp_semantics_ok,
             "active_grasp_geometry_precondition_ok": active_grasp_geometry_precondition_ok,
             "open_finger_object_height_alignment_ok": open_finger_object_height_alignment_ok,
             "tabletop_reference_contract_ok": tabletop_reference_contract_ok,
+            "fixed_reference_grasp_geometry_ok": fixed_reference_grasp_geometry_ok,
         }
         tabletop_grasp_contact_gate = {
             "pass": bool(
@@ -7452,6 +9865,7 @@ def main() -> int:
                 and active_grasp_geometry_precondition_ok
                 and open_finger_object_height_alignment_ok
                 and tabletop_reference_contract_ok
+                and fixed_reference_grasp_geometry_ok
             ),
             "status": "PASS_TABLETOP_GRASP_CONTACT" if (
                 bottle_runtime_composition_ok
@@ -7467,6 +9881,7 @@ def main() -> int:
                 and active_grasp_geometry_precondition_ok
                 and open_finger_object_height_alignment_ok
                 and tabletop_reference_contract_ok
+                and fixed_reference_grasp_geometry_ok
             ) else "FAIL_TABLETOP_GRASP_CONTACT",
             "lift_required": bool(object_lift_gate["required"]),
             "lift_gate_status": object_lift_gate["status"],
@@ -7482,12 +9897,14 @@ def main() -> int:
             "workcell_contact_policy_ok": workcell_contact_policy_ok,
             "active_target_contact_ok": active_target_contact_ok,
             "bilateral_grasp_formation_ok": bilateral_grasp_formation_ok,
-            "bilateral_grasp_formation_gate": bilateral_grasp_formation_gate,
-            "bottle_runtime_composition_ok": bottle_runtime_composition_ok,
+                "bilateral_grasp_formation_gate": bilateral_grasp_formation_gate,
+                "bilateral_grasp_formation_gate_by_phase": bilateral_grasp_formation_gate_by_phase,
+                "bottle_runtime_composition_ok": bottle_runtime_composition_ok,
             "bottle_grasp_semantics_ok": bottle_grasp_semantics_ok,
             "active_grasp_geometry_precondition_ok": active_grasp_geometry_precondition_ok,
             "open_finger_object_height_alignment_ok": open_finger_object_height_alignment_ok,
             "tabletop_reference_contract_ok": tabletop_reference_contract_ok,
+            "fixed_reference_grasp_geometry_ok": fixed_reference_grasp_geometry_ok,
         }
         controller_replay_fidelity_gate = {
             **controller_tracking_gate,
@@ -7554,11 +9971,21 @@ def main() -> int:
         if not trace_pair_ok:
             failure_reasons.append("contact_trace_gate_failed")
             if args.trace_contact_pairs and not target_contact_ok:
-                failure_reasons.append("target_contact_reachability_audit_failed")
+                if target_contact_reachability_ok:
+                    failure_reasons.append("expected_finger_target_contact_incomplete")
+                else:
+                    failure_reasons.append("target_contact_reachability_audit_failed")
+                    if (
+                        target_contact_reachability_audit.get("status")
+                        == "FAIL_1D_PROJECTION_OVERLAP_BUT_3D_AABB_SEPARATION"
+                    ):
+                        failure_reasons.append("closing_axis_projection_false_positive_3d_aabb_separation")
         if not active_target_contact_ok:
             failure_reasons.append("active_target_contact_gate_failed")
         if not bilateral_grasp_formation_ok:
             failure_reasons.append("bilateral_grasp_formation_failed")
+        if not early_geometric_escape_ok:
+            failure_reasons.append("object_escaped_capture_region_before_bilateral_contact")
         if not active_grasp_geometry_precondition_ok:
             failure_reasons.append("active_grasp_geometry_precondition_failed")
             if (
@@ -7570,6 +9997,8 @@ def main() -> int:
             failure_reasons.append("open_finger_object_height_alignment_failed")
         if not tabletop_reference_contract_ok:
             failure_reasons.append("tabletop_reference_contract_failed")
+        if not fixed_reference_grasp_geometry_gate.get("pass") and fixed_reference_grasp_geometry_gate.get("required"):
+            failure_reasons.append("fixed_reference_grasp_geometry_failed")
         if not workcell_contact_policy_ok:
             failure_reasons.append("workcell_contact_policy_gate_failed")
         if not target_limit_ok:
@@ -7583,12 +10012,18 @@ def main() -> int:
                 contact_trace_status = "FAIL_CROSS_SIDE_PROXY_OVERLAP"
             elif not tabletop_reference_contract_ok:
                 contact_trace_status = str(tabletop_reference_contract["status"])
+            elif not fixed_reference_grasp_geometry_ok:
+                contact_trace_status = str(fixed_reference_grasp_geometry_gate["status"])
             elif (
                 args.moving_fingers == "both"
                 and contact_summary.get("target_contact_pair_found")
                 and not bilateral_grasp_formation_ok
             ):
-                contact_trace_status = str(bilateral_grasp_formation_gate["status"])
+                contact_trace_status = str(
+                    early_geometric_escape_gate["status"]
+                    if not early_geometric_escape_ok
+                    else bilateral_grasp_formation_gate["status"]
+                )
             elif not target_contact_ok:
                 contact_trace_status = str(target_contact_reachability_audit["status"])
             elif not non_target_object_contact_ok:
@@ -7674,7 +10109,19 @@ def main() -> int:
                 "open_target_values": open_values,
                 "close_target_values": close_values,
                 "hdf5_gripper_summary": hdf5_gripper_summary,
-                "hdf5_gripper_replay_steps": len(close_sequence) if hdf5_target_sequence is not None else None,
+                "hdf5_gripper_replay_steps": close_replay_step_count if hdf5_target_sequence is not None else None,
+                "post_close_hold_steps": int(post_close_hold_steps),
+                "post_close_hold_phase": "post_close_hold" if post_close_hold_steps > 0 else None,
+                "post_close_lift_source": args.post_close_lift_source,
+                "post_close_lift_steps": int(post_close_lift_step_count),
+                "post_close_lift_phase": "post_close_lift" if post_close_lift_step_count > 0 else None,
+                "post_close_lift_hold_steps": int(post_close_lift_hold_step_count),
+                "post_close_lift_hold_phase": (
+                    "post_close_lift_hold" if post_close_lift_hold_step_count > 0 else None
+                ),
+                "post_close_lift_summary": post_close_lift_summary,
+                "total_close_and_hold_steps": int(close_replay_step_count + post_close_hold_steps),
+                "total_close_hold_lift_steps": int(close_step_count),
                 "hdf5_replay_target_hold_steps": int(args.hdf5_replay_target_hold_steps),
                 "hdf5_replay_rate_hz": float(args.hdf5_replay_rate_hz),
                 "physics_dt": float(args.physics_dt),
@@ -7685,23 +10132,33 @@ def main() -> int:
                 "hdf5_effective_control_rate_hz": hdf5_timing_alignment["effective_control_rate_hz"],
                 "hdf5_timing_alignment": hdf5_timing_alignment,
                 "hdf5_replay_target_physics_steps": (
-                    len(close_sequence) * int(args.hdf5_replay_target_hold_steps)
+                    close_replay_step_count * int(args.hdf5_replay_target_hold_steps)
                     if hdf5_target_sequence is not None
                     else None
                 ),
+                "post_close_hold_physics_steps": int(post_close_hold_steps)
+                * int(args.hdf5_replay_target_hold_steps),
+                "post_close_lift_physics_steps": int(post_close_lift_step_count)
+                * int(args.hdf5_replay_target_hold_steps),
+                "post_close_lift_hold_physics_steps": int(post_close_lift_hold_step_count)
+                * int(args.hdf5_replay_target_hold_steps),
                 "hdf5_replay_physics_steps": (
-                    args.settle_steps + len(close_sequence) * int(args.hdf5_replay_target_hold_steps)
+                    args.settle_steps + close_step_count * int(args.hdf5_replay_target_hold_steps)
                     if hdf5_target_sequence is not None
                     else None
                 ),
                 "hdf5_replay_segment_duration_s": (
-                    len(close_sequence) / float(args.hdf5_replay_rate_hz) if hdf5_target_sequence is not None else None
+                    close_replay_step_count / float(args.hdf5_replay_rate_hz)
+                    if hdf5_target_sequence is not None
+                    else None
                 ),
                 "runtime_arm_gain_override": {"kp": args.arm_kp, "kd": args.arm_kd},
                 "runtime_finger_gain_override": {"kp": args.finger_kp, "kd": args.finger_kd},
                 "pre_step_tracking_summary": pre_step_tracking_summary,
                 "tracking_summary": tracking_summary,
+                "tracking_summary_by_phase": tracking_summary_by_phase,
                 "controller_tracking_gate": controller_tracking_gate,
+                "controller_tracking_gate_by_phase": controller_tracking_gate_by_phase,
                 "controller_replay_fidelity_gate": controller_replay_fidelity_gate,
                 "command_smoothness_gate": command_smoothness_gate,
                 "formal_replay_feasibility_gate": formal_replay_feasibility_gate,
@@ -7710,8 +10167,14 @@ def main() -> int:
                 "tracking_spike_packet": tracking_spike_packet,
                 "physical_grasp_gate": physical_grasp_gate,
                 "tabletop_grasp_contact_gate": tabletop_grasp_contact_gate,
+                "post_close_hold_diagnostic_gate": post_close_hold_diagnostic_gate,
+                "prelift_static_grasp_gate": prelift_static_grasp_gate,
+                "post_close_lift_diagnostic_gate": post_close_lift_diagnostic_gate,
                 "lift_transport_gate": lift_transport_gate,
+                "lift_contact_wrench_patch_audit": lift_contact_wrench_patch_audit,
+                "fixed_reference_grasp_geometry_gate": fixed_reference_grasp_geometry_gate,
                 "active_target_contact_gate": active_target_contact_gate,
+                "early_geometric_escape_gate": early_geometric_escape_gate,
                 "tabletop_reference_contract": tabletop_reference_contract,
                 "workcell_contact_policy_gate": workcell_contact_policy_gate,
                 "initial_grasp_geometry_audit": initial_grasp_geometry_audit,
@@ -7728,6 +10191,7 @@ def main() -> int:
                 "right_finger_replay_start_box": replay_start_right_box,
                 "start_finger_object_alignment": start_finger_object_alignment,
                 "final_finger_object_alignment": final_finger_object_alignment,
+                "final_reference_contact_center_transport": final_reference_contact_center,
                 "cross_side_proxy_overlap": cross_side_proxy_overlap,
                 "left_finger_final_box": left_box,
                 "right_finger_final_box": right_box,
@@ -7744,6 +10208,7 @@ def main() -> int:
                         "bottle_usd_cylinder_proxy",
                         "bottle_usd_segmented_proxy",
                         "bottle_usd_grasp_band_proxy",
+                        "bottle_usd_grasp_box_proxy",
                     }
                     else None
                 ),
@@ -7787,6 +10252,7 @@ def main() -> int:
                 "object_lift_ok": object_lift_ok,
                 "object_lift_gate": object_lift_gate,
                 "object_width_stop_summary": object_width_stop_summary,
+                "diagnostic_loaded_clamp_squeeze_summary": diagnostic_loaded_clamp_squeeze_summary,
                 "target_contact_reachability_audit": target_contact_reachability_audit,
                 "total_object_displacement": total_object_displacement,
                 "max_object_displacement": max_displacement,
@@ -7805,7 +10271,11 @@ def main() -> int:
                 "active_target_contact_gate": active_target_contact_gate,
                 "active_target_contact_ok": active_target_contact_ok,
                 "bilateral_grasp_formation_gate": bilateral_grasp_formation_gate,
+                "bilateral_grasp_formation_gate_by_phase": bilateral_grasp_formation_gate_by_phase,
+                "bilateral_grasp_failure_diagnostic": bilateral_grasp_failure_diagnostic,
                 "bilateral_grasp_formation_ok": bilateral_grasp_formation_ok,
+                "contact_summary_by_phase": phase_contact_summaries,
+                "early_geometric_escape_ok": early_geometric_escape_ok,
                 "contact_landmark_alignment": contact_landmark_alignment,
                 "active_grasp_geometry_precondition": active_grasp_geometry_precondition,
                 "active_grasp_geometry_precondition_ok": active_grasp_geometry_precondition_ok,

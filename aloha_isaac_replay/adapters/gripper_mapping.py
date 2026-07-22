@@ -18,10 +18,19 @@ DEFAULT_VX300S_FINGER_LIMITS = FingerLimits()
 
 @dataclasses.dataclass(frozen=True)
 class GripperQposCalibration:
-    """Dataset-side observed qpos convention for one ALOHA gripper scalar."""
+    """Dataset-side observed qpos convention for one ALOHA gripper scalar.
+
+    The default calibration maps raw closed/open qpos anchors to the normalized
+    ALOHA convention 0=closed and 1=open.  A loaded soft-bottle replay may use a
+    lower raw anchor that is not physically closed; in that case
+    ``standard_closed_value`` records the effective contact-width interpretation
+    while keeping the original HDF5 qpos untouched.
+    """
 
     closed_value: float = 0.0
     open_value: float = 1.0
+    standard_closed_value: float = 0.0
+    standard_open_value: float = 1.0
     source: str = "standard ALOHA normalized gripper qpos; do not substitute action gripper values"
 
 
@@ -48,6 +57,52 @@ def standard_gripper_to_isaac(value: np.ndarray | float, limits: FingerLimits = 
     return {"left_finger": left, "right_finger": right}
 
 
+def standard_gripper_value_for_symmetric_finger_gap(
+    finger_gap: float,
+    limits: FingerLimits = DEFAULT_VX300S_FINGER_LIMITS,
+) -> float:
+    """Return the normalized command whose opposed finger distance is ``finger_gap``.
+
+    This helper is for explicit calibration reports.  It does not infer object
+    size from qpos; callers must provide a measured or clearly labelled effective
+    contact width.
+    """
+
+    left_target = float(finger_gap) / 2.0
+    span = limits.left_open - limits.left_close
+    if abs(span) < 1e-12:
+        raise ValueError("left finger limits must differ")
+    return float(np.clip((left_target - limits.left_close) / span, 0.0, 1.0))
+
+
+def gripper_qpos_calibration_from_loaded_contact(
+    *,
+    raw_open_value: float,
+    raw_contact_value: float,
+    effective_contact_width: float,
+    limits: FingerLimits = DEFAULT_VX300S_FINGER_LIMITS,
+    standard_open_value: float = 1.0,
+    source: str = "loaded soft-bottle qpos calibration",
+) -> GripperQposCalibration:
+    """Build an explicit affine qpos calibration from open and loaded anchors.
+
+    ``raw_contact_value`` is a loaded-contact qpos plateau, not a closed-air
+    gripper value.  The returned calibration must therefore be treated as a
+    diagnostic/contact-proxy interpretation layer for the named replay window.
+    """
+
+    standard_contact_value = standard_gripper_value_for_symmetric_finger_gap(effective_contact_width, limits)
+    if abs(raw_open_value - raw_contact_value) < 1e-12:
+        raise ValueError("loaded gripper open and contact qpos anchors must differ")
+    return GripperQposCalibration(
+        closed_value=float(raw_contact_value),
+        open_value=float(raw_open_value),
+        standard_closed_value=float(standard_contact_value),
+        standard_open_value=float(standard_open_value),
+        source=source,
+    )
+
+
 def standard_gripper_qpos_to_isaac_fingers(
     value: np.ndarray | float,
     side: str,
@@ -66,8 +121,11 @@ def standard_gripper_qpos_to_isaac_fingers(
     span = calibration.open_value - calibration.closed_value
     if abs(span) < 1e-12:
         raise ValueError("gripper qpos calibration open_value and closed_value must differ")
-    normalized = (raw - calibration.closed_value) / span
-    fingers = standard_gripper_to_isaac(normalized, limits)
+    normalized_raw = (raw - calibration.closed_value) / span
+    standard_value = calibration.standard_closed_value + normalized_raw * (
+        calibration.standard_open_value - calibration.standard_closed_value
+    )
+    fingers = standard_gripper_to_isaac(standard_value, limits)
     return {
         f"{side}/left_finger": fingers["left_finger"],
         f"{side}/right_finger": fingers["right_finger"],

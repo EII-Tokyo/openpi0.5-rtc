@@ -294,13 +294,15 @@ def main() -> int:
             "bottle_usd_cylinder_proxy",
             "bottle_usd_segmented_proxy",
             "bottle_usd_grasp_band_proxy",
+            "bottle_usd_grasp_box_proxy",
         ),
         default="bottle_usd_cylinder_proxy",
         help=(
             "Runtime Bottle500 collision representation. bottle_usd uses the asset's own collision prims; "
             "bottle_usd_cylinder_proxy uses one explicit cylindrical physics proxy; "
             "bottle_usd_segmented_proxy uses separate body, neck, and mouth proxy colliders; "
-            "bottle_usd_grasp_band_proxy uses a local bottle-body contact band for diagnostic grasp isolation."
+            "bottle_usd_grasp_band_proxy uses a local bottle-body contact band for diagnostic grasp isolation; "
+            "bottle_usd_grasp_box_proxy uses a local box coupon for soft-bottle grasp stability tests."
         ),
     )
     parser.add_argument(
