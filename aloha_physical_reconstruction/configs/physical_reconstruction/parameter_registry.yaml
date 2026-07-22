@@ -1,0 +1,83 @@
+metadata:
+  project: ALOHA bottle-to-pipe physical reconstruction
+  created_for_step: 0
+  note: >
+    Step 0 is a read-only baseline audit. Real bottle, gripper, table, and pipe
+    physical parameters remain MISSING until the user provides measured values.
+
+stage.main_scene_usd:
+  value: local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd
+  unit: path
+  source_type: DERIVED
+  source_description: Project AGENTS routing and local file existence check.
+  measurement_date: 2026-07-22
+  confidence: high
+  used_in_files:
+    - aloha_physical_reconstruction/scripts/step_00_baseline_audit.py
+    - aloha_physical_reconstruction/reports/step_00_baseline_audit.md
+  status: VERIFIED
+
+stage.existing_bottle_usd:
+  value: assets/bottle_500ml/isaac/bottle_500ml_sim.usd
+  unit: path
+  source_type: DERIVED
+  source_description: Local existing bottle asset discovered during Step 0 audit.
+  measurement_date: 2026-07-22
+  confidence: high
+  used_in_files:
+    - aloha_physical_reconstruction/scripts/step_00_baseline_audit.py
+    - aloha_physical_reconstruction/reports/step_00_baseline_audit.md
+  status: VERIFIED
+
+stage.up_axis:
+  value: Z
+  unit: axis
+  source_type: DERIVED
+  source_description: Read from existing main scene USD stage metadata.
+  measurement_date: 2026-07-22
+  confidence: high
+  used_in_files:
+    - aloha_physical_reconstruction/reports/step_00_baseline_audit.md
+  status: VERIFIED
+
+stage.meters_per_unit:
+  value: 1.0
+  unit: m/unit
+  source_type: DERIVED
+  source_description: Read from existing main scene USD stage metadata.
+  measurement_date: 2026-07-22
+  confidence: high
+  used_in_files:
+    - aloha_physical_reconstruction/reports/step_00_baseline_audit.md
+  status: VERIFIED
+
+stage.kilograms_per_unit:
+  value: 1.0
+  unit: kg/unit
+  source_type: DERIVED
+  source_description: Read from existing main scene USD physics metadata.
+  measurement_date: 2026-07-22
+  confidence: high
+  used_in_files:
+    - aloha_physical_reconstruction/reports/step_00_baseline_audit.md
+  status: VERIFIED
+
+bottle.real_mass:
+  value: null
+  unit: kg
+  source_type: MEASURED
+  source_description: User measurement required in Step 1.
+  measurement_date: null
+  confidence: missing
+  used_in_files: []
+  status: MISSING
+
+pipe.outer_diameter:
+  value: null
+  unit: m
+  source_type: MEASURED
+  source_description: User measurement required in Step 8.
+  measurement_date: null
+  confidence: missing
+  used_in_files: []
+  status: MISSING
