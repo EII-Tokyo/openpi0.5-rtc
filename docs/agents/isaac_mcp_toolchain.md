@@ -39,6 +39,7 @@ Read this before using, changing, debugging, or reinstalling Isaac Sim / Isaac L
 - Treat `isaacsim-python` and `isaacsim-control` as high-privilege because they can execute Python or scene operations inside Isaac Sim.
 - Do not connect MCP tools to the real ALOHA robot by default.
 - Do not start or restart `aloha_ros_nodes`, `runtime`, `rlt_warmup_runtime`, or other real robot control containers as part of MCP work unless the user explicitly approves.
+- If a Codex terminal becomes unresponsive, check for repeated MCP server sets before retrying `resume`. A healthy Codex process should normally own one copy of each enabled stdio MCP server. Multiple complete copies of `context7`, `github`, `qdrant`, `ros-mcp`, `freecad`, `blender`, `isaaclab`, `isaacsim-control`, or `isaacsim-python` under the same Codex PID indicate stale MCP subprocess leakage; terminate only that offending Codex process tree after a dry-run, and do not kill Isaac Sim or unrelated user processes.
 
 ## ALOHA Isaac Scratch Workspace
 - Scratch workspace: `/home/eii/isaac_mcp_setup/aloha_project`
