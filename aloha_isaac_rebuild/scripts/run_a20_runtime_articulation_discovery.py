@@ -2,8 +2,19 @@
 
 from __future__ import annotations
 
+import argparse
+from itertools import pairwise
+import json
+import os
+from pathlib import Path
 import re
+import subprocess
+import sys
+import tempfile
 from typing import Any
+import uuid
+
+import yaml
 
 from aloha_isaac_rebuild.scripts.a20_articulation_gate_common import compare_dof_records
 from aloha_isaac_rebuild.scripts.a20_articulation_gate_common import validate_dof_records
@@ -89,11 +100,7 @@ def _layer1_errors(layer1: object) -> list[dict[str, Any]]:
     if not safety["ok"]:
         details.append("safety_flags")
 
-    return (
-        [{"code": "invalid_layer1_evidence", "details": details}]
-        if details
-        else []
-    )
+    return [{"code": "invalid_layer1_evidence", "details": details}] if details else []
 
 
 def _run_errors(
@@ -105,10 +112,7 @@ def _run_errors(
         return ([{"code": "invalid_run_shape", "run_index": run_index}], [], False)
 
     missing = [field for field in _REQUIRED_RUN_FIELDS if field not in run]
-    errors.extend(
-        {"code": "missing_field", "run_index": run_index, "field": field}
-        for field in missing
-    )
+    errors.extend({"code": "missing_field", "run_index": run_index, "field": field} for field in missing)
 
     errors.extend(
         {
@@ -167,18 +171,13 @@ def _run_errors(
         errors.append({"code": "invalid_handle", "run_index": run_index})
 
     records = run.get("records")
-    if not (
-        isinstance(records, list) and all(isinstance(record, dict) for record in records)
-    ):
+    if not (isinstance(records, list) and all(isinstance(record, dict) for record in records)):
         errors.append({"code": "invalid_records_shape", "run_index": run_index})
     else:
         comparison = compare_dof_records(expected, records)
         if not comparison["ok"]:
             errors.append({"code": "runtime_records_mismatch", "run_index": run_index})
-            mismatches.extend(
-                {"run_index": run_index, **mismatch}
-                for mismatch in comparison["mismatches"]
-            )
+            mismatches.extend({"run_index": run_index, **mismatch} for mismatch in comparison["mismatches"])
             mismatches.extend(
                 {"run_index": run_index, "validation_error": validation_error}
                 for validation_error in comparison.get("validation_errors", [])
@@ -187,25 +186,19 @@ def _run_errors(
     return errors, mismatches, blocked
 
 
-def aggregate_runtime_runs(
-    layer1: object, runs: object
-) -> dict[str, Any]:
+def aggregate_runtime_runs(layer1: object, runs: object) -> dict[str, Any]:
     """Aggregate exactly three saved runtime run dictionaries, fail-closed."""
     errors = _layer1_errors(layer1)
     mismatches: list[dict[str, Any]] = []
     run_count = len(runs) if isinstance(runs, list) else None
     if run_count != 3:
-        errors.append(
-            {"code": "invalid_run_count", "expected": 3, "observed": run_count}
-        )
+        errors.append({"code": "invalid_run_count", "expected": 3, "observed": run_count})
 
     blocked_runs: list[int] = []
     if not errors and isinstance(layer1, dict) and isinstance(runs, list):
         expected = layer1["expected"]
         for run_index, run in enumerate(runs):
-            run_errors, run_mismatches, blocked = _run_errors(
-                run, run_index, expected
-            )
+            run_errors, run_mismatches, blocked = _run_errors(run, run_index, expected)
             errors.extend(run_errors)
             mismatches.extend(run_mismatches)
             if blocked and not run_errors:
@@ -225,3 +218,147 @@ def aggregate_runtime_runs(
         "errors": errors,
         "mismatches": mismatches,
     }
+
+
+MARKER = "A20_RUNTIME_DISCOVERY_JSON="
+DEFAULT_CONFIG = Path("aloha_isaac_rebuild/configs/physical_reconstruction/stationary_style_rebuild.yaml")
+
+
+def _summary(value: object, limit: int = 4000) -> str:
+    text = "" if value is None else str(value)
+    return text[-limit:]
+
+
+def run_three_probes(
+    layer1: dict[str, Any],
+    repo_root: Path,
+    interpreter: Path,
+    probe_path: Path,
+    timeout_seconds: float,
+    run_command=subprocess.run,
+    invocation_ids: list[str] | None = None,
+) -> dict[str, Any]:
+    ids = invocation_ids or [str(uuid.uuid4()) for _ in range(3)]
+    errors: list[dict[str, Any]] = []
+    if len(ids) != 3 or len(set(ids)) != 3:
+        return {
+            "status": _FAIL,
+            "ok": False,
+            "runs": [],
+            "errors": [{"code": "invalid_invocation_ids"}],
+            "mismatches": [],
+        }
+    runs: list[dict[str, Any]] = []
+    for index, invocation_id in enumerate(ids):
+        argv = [str(interpreter), "-u", str(probe_path), "--invocation-id", invocation_id]
+        try:
+            completed = run_command(
+                argv, cwd=repo_root, timeout=timeout_seconds, capture_output=True, text=True, check=False
+            )
+            stdout, stderr = completed.stdout or "", completed.stderr or ""
+            markers = [line[len(MARKER) :] for line in stdout.splitlines() if line.startswith(MARKER)]
+            if len(markers) != 1:
+                raise ValueError(f"marker_count:{len(markers)}")
+            payload = json.loads(markers[0])
+            if not isinstance(payload, dict):
+                raise ValueError("payload_not_object")
+            payload.update(
+                process_status="completed" if completed.returncode == 0 else "failed",
+                returncode=completed.returncode,
+                timed_out=False,
+                stdout_summary=_summary(stdout),
+                stderr_summary=_summary(stderr),
+            )
+            if payload.get("invocation_id") != invocation_id:
+                errors.append({"code": "invocation_mismatch", "run_index": index})
+            runs.append(payload)
+        except subprocess.TimeoutExpired as exc:
+            runs.append(
+                {
+                    "status": _FAIL,
+                    "process_status": "timeout",
+                    "returncode": -1,
+                    "timed_out": True,
+                    "invocation_id": invocation_id,
+                    "stdout_summary": _summary(exc.output),
+                    "stderr_summary": _summary(exc.stderr),
+                }
+            )
+            errors.append({"code": "subprocess_timeout", "run_index": index})
+        except Exception as exc:
+            runs.append(
+                {
+                    "status": _FAIL,
+                    "process_status": "protocol_error",
+                    "returncode": -1,
+                    "timed_out": False,
+                    "invocation_id": invocation_id,
+                }
+            )
+            errors.append({"code": "probe_protocol_error", "run_index": index, "message": str(exc)})
+    valid = [run for run in runs if "pid" in run]
+    if len({run.get("pid") for run in valid}) != len(valid):
+        errors.append({"code": "duplicate_pid"})
+    if len({run.get("invocation_id") for run in valid}) != len(valid):
+        errors.append({"code": "duplicate_invocation"})
+    if valid:
+        versions = {run.get("isaac_sim_version") for run in valid}
+        fingerprints = {json.dumps(run.get("inputs"), sort_keys=True) for run in valid}
+        if len(versions) != 1:
+            errors.append({"code": "isaac_version_mismatch"})
+        if len(fingerprints) != 1:
+            errors.append({"code": "input_hash_mismatch"})
+        layer_stage = layer1.get("inputs", {}).get("stage", {}).get("post_sha256")
+        if any(run.get("inputs", {}).get("stage", {}).get("sha256") != layer_stage for run in valid):
+            errors.append({"code": "layer1_stage_hash_mismatch"})
+        for previous, current in pairwise(valid):
+            if str(previous.get("finished_at")) > str(current.get("started_at")):
+                errors.append({"code": "run_timestamp_overlap"})
+    aggregate = aggregate_runtime_runs(layer1, runs)
+    aggregate["runs"] = runs
+    aggregate["invocation_ids"] = ids
+    if errors:
+        aggregate["status"], aggregate["ok"] = _FAIL, False
+        aggregate["errors"] = errors + aggregate["errors"]
+    return aggregate
+
+
+def _atomic_write(path: Path, payload: dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, temp = tempfile.mkstemp(dir=path.parent, prefix=f".{path.name}.")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as stream:
+            json.dump(payload, stream, indent=2, sort_keys=True)
+            stream.write("\n")
+        os.replace(temp, path)
+    except BaseException:
+        Path(temp).unlink(missing_ok=True)
+        raise
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
+    parser.add_argument("--interpreter", type=Path, default=Path(sys.executable))
+    parser.add_argument("--timeout", type=float, default=180.0)
+    args = parser.parse_args()
+    repo = Path.cwd().resolve()
+    config_path = args.config.resolve()
+    config = yaml.safe_load(config_path.read_text())
+    outputs = config["outputs"]
+    layer1 = json.loads((repo / outputs["a20_usd_dof_metadata_json"]).read_text())
+    output = (repo / outputs["a20_runtime_articulation_discovery_json"]).resolve()
+    result = run_three_probes(
+        layer1,
+        repo,
+        args.interpreter,
+        repo / "aloha_isaac_rebuild/scripts/probe_a20_runtime_articulation_once.py",
+        args.timeout,
+    )
+    _atomic_write(output, result)
+    print(json.dumps(result, indent=2, sort_keys=True))
+    return 0 if result["status"] in (_PASS, _BLOCKED) else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

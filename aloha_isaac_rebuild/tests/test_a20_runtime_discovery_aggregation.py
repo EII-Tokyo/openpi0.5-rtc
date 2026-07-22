@@ -2,14 +2,19 @@ from __future__ import annotations
 
 import ast
 from copy import deepcopy
+import json
 from pathlib import Path
+import subprocess
 
 import pytest
 
 from aloha_isaac_rebuild.scripts.run_a20_runtime_articulation_discovery import aggregate_runtime_runs
+from aloha_isaac_rebuild.scripts.run_a20_runtime_articulation_discovery import run_three_probes
 
 ROOT = Path(__file__).resolve().parents[2]
 MODULE = ROOT / "aloha_isaac_rebuild/scripts/run_a20_runtime_articulation_discovery.py"
+PROBE = ROOT / "aloha_isaac_rebuild/scripts/probe_a20_runtime_articulation_once.py"
+MARKER = "A20_RUNTIME_DISCOVERY_JSON="
 
 
 def _record(index: int) -> dict[str, object]:
@@ -76,9 +81,7 @@ def _runs() -> list[dict[str, object]]:
     return [deepcopy(_run()) for _ in range(3)]
 
 
-def _set_layer1_hash(
-    layer1: dict[str, object], location: str, invalid_hash: str
-) -> None:
+def _set_layer1_hash(layer1: dict[str, object], location: str, invalid_hash: str) -> None:
     inputs = layer1["inputs"]
     if location == "stage":
         inputs["stage"]["pre_sha256"] = invalid_hash
@@ -137,9 +140,7 @@ def test_runtime_mismatch_or_unsafe_run_fails(mutation, error_code: str) -> None
         ("dof_count", None),
     ],
 )
-def test_runtime_integer_fields_reject_bool_float_string_and_none(
-    field: str, value: object
-) -> None:
+def test_runtime_integer_fields_reject_bool_float_string_and_none(field: str, value: object) -> None:
     runs = _runs()
     runs[1][field] = value
 
@@ -223,9 +224,7 @@ def test_invalid_blocked_run_is_not_reported_as_blocked(mutation) -> None:
     ],
     ids=["plus", "minus", "whitespace", "uppercase", "nonhex", "wrong_length"],
 )
-def test_layer1_hashes_require_exact_lowercase_sha256(
-    location: str, invalid_hash: str
-) -> None:
+def test_layer1_hashes_require_exact_lowercase_sha256(location: str, invalid_hash: str) -> None:
     layer1 = _layer1()
     _set_layer1_hash(layer1, location, invalid_hash)
 
@@ -306,18 +305,135 @@ def test_blocked_status_requires_explicit_initialization_marker() -> None:
     assert result["status"] == "FAIL_A20_RUNTIME_ARTICULATION_DISCOVERY"
 
 
-def test_module_is_pure_and_has_no_runtime_or_subprocess_imports() -> None:
+def test_module_has_no_isaac_runtime_imports() -> None:
     tree = ast.parse(MODULE.read_text(encoding="utf-8"))
-    imports = {
-        alias.name
-        for node in ast.walk(tree)
-        if isinstance(node, ast.Import)
-        for alias in node.names
-    } | {
-        node.module or ""
-        for node in ast.walk(tree)
-        if isinstance(node, ast.ImportFrom)
+    imports = {alias.name for node in ast.walk(tree) if isinstance(node, ast.Import) for alias in node.names} | {
+        node.module or "" for node in ast.walk(tree) if isinstance(node, ast.ImportFrom)
     }
 
-    prohibited = ("isaacsim", "omni", "pxr", "subprocess")
+    prohibited = ("isaacsim", "omni", "pxr")
     assert not any(name == prefix or name.startswith(f"{prefix}.") for name in imports for prefix in prohibited)
+
+
+def test_probe_source_has_static_safety_boundary_and_four_flags() -> None:
+    tree = ast.parse(PROBE.read_text(encoding="utf-8"))
+    forbidden = {
+        "play",
+        "step",
+        "reset",
+        "initialize_simulation_context_async",
+        "set_joint_positions",
+        "set_joint_velocities",
+        "set_joint_efforts",
+        "apply_action",
+        "save",
+        "Save",
+        "Export",
+        "Flatten",
+    }
+    attrs = {node.attr for node in ast.walk(tree) if isinstance(node, ast.Attribute)}
+    calls = {node.func.id for node in ast.walk(tree) if isinstance(node, ast.Call) and isinstance(node.func, ast.Name)}
+    imports = "\n".join(
+        [n.module or "" for n in ast.walk(tree) if isinstance(n, ast.ImportFrom)]
+        + [a.name for n in ast.walk(tree) if isinstance(n, ast.Import) for a in n.names]
+    ).lower()
+    assert not (forbidden & (attrs | calls))
+    assert "controller" not in imports
+    assert "action" not in imports
+    source = PROBE.read_text(encoding="utf-8")
+    for flag in ("physics_stepped", "actions_applied", "targets_written", "stage_saved"):
+        assert flag in source
+
+
+def _probe_payload(invocation: str, pid: int, start: str, end: str) -> dict[str, object]:
+    run = _run()
+    run.update(
+        invocation_id=invocation,
+        pid=pid,
+        started_at=start,
+        finished_at=end,
+        isaac_sim_version="5.1.0",
+        inputs={"stage": {"sha256": "a" * 64}, "mapping": {"sha256": "b" * 64}, "config": {"sha256": "c" * 64}},
+    )
+    return run
+
+
+def test_coordinator_runs_three_fresh_sequential_processes_with_strict_argv() -> None:
+    calls = []
+    payloads = [
+        _probe_payload("i0", 101, "2026-01-01T00:00:00Z", "2026-01-01T00:00:01Z"),
+        _probe_payload("i1", 102, "2026-01-01T00:00:02Z", "2026-01-01T00:00:03Z"),
+        _probe_payload("i2", 103, "2026-01-01T00:00:04Z", "2026-01-01T00:00:05Z"),
+    ]
+
+    def fake_run(argv, **kwargs):
+        calls.append((argv, kwargs))
+        invocation = argv[argv.index("--invocation-id") + 1]
+        payload = payloads[len(calls) - 1]
+        payload["invocation_id"] = invocation
+        return subprocess.CompletedProcess(argv, 0, MARKER + json.dumps(payload) + "\n", "")
+
+    result = run_three_probes(
+        layer1=_layer1(),
+        repo_root=ROOT,
+        interpreter=Path("/isaac/python"),
+        probe_path=PROBE,
+        timeout_seconds=9,
+        run_command=fake_run,
+        invocation_ids=["i0", "i1", "i2"],
+    )
+    assert result["status"] == "PASS_A20_RUNTIME_ARTICULATION_DISCOVERY_NO_STEP"
+    assert len(calls) == 3
+    for argv, kwargs in calls:
+        assert isinstance(argv, list)
+        assert argv[0] == "/isaac/python"
+        assert kwargs == {"cwd": ROOT, "timeout": 9, "capture_output": True, "text": True, "check": False}
+    assert [run["pid"] for run in result["runs"]] == [101, 102, 103]
+
+
+@pytest.mark.parametrize("mode", ["timeout", "nonzero", "missing", "multiple", "malformed", "mismatch"])
+def test_coordinator_protocol_failures_are_structured(mode: str) -> None:
+    def fake_run(argv, **kwargs):
+        invocation = argv[argv.index("--invocation-id") + 1]
+        payload = _probe_payload(invocation, 100 + len(invocation), "2026-01-01T00:00:00Z", "2026-01-01T00:00:01Z")
+        if mode == "timeout":
+            raise subprocess.TimeoutExpired(argv, 9, output="partial", stderr="late")
+        if mode == "nonzero":
+            return subprocess.CompletedProcess(argv, 7, MARKER + json.dumps(payload), "bad")
+        if mode == "missing":
+            return subprocess.CompletedProcess(argv, 0, "none", "")
+        if mode == "multiple":
+            return subprocess.CompletedProcess(argv, 0, (MARKER + json.dumps(payload) + "\n") * 2, "")
+        if mode == "malformed":
+            return subprocess.CompletedProcess(argv, 0, MARKER + "{", "")
+        payload["invocation_id"] = "wrong"
+        return subprocess.CompletedProcess(argv, 0, MARKER + json.dumps(payload), "")
+
+    result = run_three_probes(_layer1(), ROOT, Path("/isaac/python"), PROBE, 9, fake_run, ["a", "bb", "ccc"])
+    assert result["status"] == "FAIL_A20_RUNTIME_ARTICULATION_DISCOVERY"
+    assert result["errors"]
+
+
+@pytest.mark.parametrize("mutation", ["pid", "version", "hash", "time"])
+def test_cross_run_identity_version_hash_and_time_must_match(mutation: str) -> None:
+    count = 0
+
+    def fake_run(argv, **kwargs):
+        nonlocal count
+        invocation = argv[argv.index("--invocation-id") + 1]
+        payload = _probe_payload(
+            invocation, 200 + count, f"2026-01-01T00:00:0{count * 2}Z", f"2026-01-01T00:00:0{count * 2 + 1}Z"
+        )
+        if count == 1 and mutation == "pid":
+            payload["pid"] = 200
+        if count == 1 and mutation == "version":
+            payload["isaac_sim_version"] = "5.0.0"
+        if count == 1 and mutation == "hash":
+            payload["inputs"]["stage"]["sha256"] = "d" * 64
+        if count == 1 and mutation == "time":
+            payload["started_at"] = "2025-01-01T00:00:00Z"
+        count += 1
+        return subprocess.CompletedProcess(argv, 0, MARKER + json.dumps(payload), "")
+
+    result = run_three_probes(_layer1(), ROOT, Path("/isaac/python"), PROBE, 9, fake_run, ["a", "b", "c"])
+    assert result["status"] == "FAIL_A20_RUNTIME_ARTICULATION_DISCOVERY"
