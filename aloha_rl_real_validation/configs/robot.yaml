@@ -1,0 +1,24 @@
+robot: Trossen ALOHA-1 Original Stationary
+state_order:
+  - left_waist
+  - left_shoulder
+  - left_elbow
+  - left_forearm_roll
+  - left_wrist_angle
+  - left_wrist_rotate
+  - left_gripper
+  - right_waist
+  - right_shoulder
+  - right_elbow
+  - right_forearm_roll
+  - right_wrist_angle
+  - right_wrist_rotate
+  - right_gripper
+state_order_status: from_existing_audit_and_openpi_source__runtime_recheck_required
+camera_names:
+  local_openpi_runtime: [cam_high, cam_low, cam_left_wrist, cam_right_wrist]
+  rlinf_robotwin_pi05: [cam_high, cam_left_wrist, cam_right_wrist]
+action_semantics:
+  rlinf_robotwin_pi05: arm_delta_gripper_absolute_after_output_transform
+  local_aloha_runtime_step: canonical_aloha_14d_target_expected_by_env_step
+  status: BLOCKED_adapter_required_before_motion

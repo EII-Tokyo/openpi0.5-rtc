@@ -1,0 +1,10 @@
+repo_id: RLinf/RLinf-Pi05-RoboTwin-SFT-adjust_bottle
+revision: fa8df6ed103db0f5549c122f3a17c00ba6426c98
+config_json:
+  action_dim: 32
+  action_horizon: 10
+rlinf_config_name: pi05_aloha_robotwin
+required_norm_stats_candidates:
+  - assets/trossen/norm_stats.json
+  - physical-intelligence/robotwin/norm_stats.json
+status: metadata_downloaded_full_weights_pending

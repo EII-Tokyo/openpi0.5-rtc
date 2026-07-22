@@ -1,0 +1,11 @@
+allow_real_actuation: false
+require_enable_real_motion_arg: true
+require_terminal_confirmation: true
+max_policy_latency_ms: null
+max_image_age_ms: null
+max_joint_state_age_ms: null
+joint_limits_source: BLOCKED_runtime_or_official_config_required
+velocity_limits_source: BLOCKED_runtime_or_official_config_required
+acceleration_limits_source: BLOCKED_runtime_or_official_config_required
+first_action_max_delta_rad: null
+continuous_exception_limit: 1
