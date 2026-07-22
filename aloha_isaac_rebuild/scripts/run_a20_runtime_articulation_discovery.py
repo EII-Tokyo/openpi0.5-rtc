@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+from datetime import datetime
 from itertools import pairwise
 import json
 import os
@@ -35,11 +36,27 @@ _REQUIRED_RUN_FIELDS = (
     "valid_handle",
     "records",
     "requires_unapproved_initialization",
+    "invocation_id",
+    "pid",
+    "isaac_sim_version",
+    "started_at",
+    "finished_at",
+    "inputs",
 )
 
 
 def _valid_sha256(value: object) -> bool:
     return isinstance(value, str) and re.fullmatch(r"[0-9a-f]{64}", value) is not None
+
+
+def _timestamp(value: object) -> datetime | None:
+    if not isinstance(value, str) or not value.strip():
+        return None
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    return parsed if parsed.tzinfo is not None and parsed.utcoffset() is not None else None
 
 
 def _layer1_errors(layer1: object) -> list[dict[str, Any]]:
@@ -140,6 +157,31 @@ def _run_errors(
     safety = validate_safety_flags(run)
     errors.extend({"run_index": run_index, **error} for error in safety["errors"])
 
+    pid = run.get("pid")
+    if "pid" in run and (type(pid) is not int or pid <= 0):
+        errors.append({"code": "invalid_pid", "run_index": run_index})
+    version = run.get("isaac_sim_version")
+    if "isaac_sim_version" in run and not (isinstance(version, str) and bool(version.strip())):
+        errors.append({"code": "invalid_isaac_sim_version", "run_index": run_index})
+    invocation = run.get("invocation_id")
+    if "invocation_id" in run and not (isinstance(invocation, str) and bool(invocation.strip())):
+        errors.append({"code": "invalid_invocation_id", "run_index": run_index})
+    inputs = run.get("inputs")
+    if "inputs" in run:
+        if not isinstance(inputs, dict):
+            errors.append({"code": "invalid_inputs", "run_index": run_index})
+        else:
+            for name in ("stage", "mapping", "config"):
+                item = inputs.get(name)
+                if not isinstance(item, dict) or not _valid_sha256(item.get("sha256")):
+                    errors.append({"code": "invalid_input_hash", "run_index": run_index, "input": name})
+    parsed_times = {field: _timestamp(run.get(field)) for field in ("started_at", "finished_at")}
+    for field, parsed in parsed_times.items():
+        if field in run and parsed is None:
+            errors.append({"code": "invalid_timestamp", "run_index": run_index, "field": field})
+    if all(parsed_times.values()) and parsed_times["finished_at"] < parsed_times["started_at"]:
+        errors.append({"code": "reversed_timestamps", "run_index": run_index})
+
     process_ok = (
         run.get("process_status") == "completed"
         and type(run.get("returncode")) is int
@@ -203,6 +245,36 @@ def aggregate_runtime_runs(layer1: object, runs: object) -> dict[str, Any]:
             mismatches.extend(run_mismatches)
             if blocked and not run_errors:
                 blocked_runs.append(run_index)
+
+        valid_runs = [run for run in runs if isinstance(run, dict)]
+        pids = [run.get("pid") for run in valid_runs]
+        invocations = [run.get("invocation_id") for run in valid_runs]
+        versions = [run.get("isaac_sim_version") for run in valid_runs]
+        if all(type(pid) is int for pid in pids) and len(set(pids)) != len(pids):
+            errors.append({"code": "duplicate_pid"})
+        if all(isinstance(value, str) for value in invocations) and len(set(invocations)) != len(invocations):
+            errors.append({"code": "duplicate_invocation"})
+        if all(isinstance(value, str) for value in versions) and len(set(versions)) != 1:
+            errors.append({"code": "isaac_version_mismatch"})
+        fingerprints = [json.dumps(run.get("inputs"), sort_keys=True, default=repr) for run in valid_runs]
+        if len(set(fingerprints)) != 1:
+            errors.append({"code": "input_hash_mismatch"})
+        layer_stage = layer1["inputs"]["stage"]["post_sha256"]
+        if any(
+            not isinstance(run.get("inputs"), dict)
+            or not isinstance(run["inputs"].get("stage"), dict)
+            or run["inputs"]["stage"].get("sha256") != layer_stage
+            for run in valid_runs
+        ):
+            errors.append({"code": "layer1_stage_hash_mismatch"})
+        for previous, current in pairwise(valid_runs):
+            previous_start = _timestamp(previous.get("started_at"))
+            previous_finish = _timestamp(previous.get("finished_at"))
+            current_start = _timestamp(current.get("started_at"))
+            if previous_start and current_start and current_start < previous_start:
+                errors.append({"code": "nonmonotonic_start_timestamp"})
+            if previous_finish and current_start and current_start < previous_finish:
+                errors.append({"code": "run_timestamp_overlap"})
 
     if errors:
         status = _FAIL

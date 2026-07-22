@@ -74,11 +74,25 @@ def _run() -> dict[str, object]:
         "actions_applied": False,
         "targets_written": False,
         "stage_saved": False,
+        "invocation_id": "placeholder",
+        "pid": 1,
+        "isaac_sim_version": "5.1.0.0",
+        "started_at": "2026-01-01T00:00:00+00:00",
+        "finished_at": "2026-01-01T00:00:01+00:00",
+        "inputs": {"stage": {"sha256": "a" * 64}, "mapping": {"sha256": "b" * 64}, "config": {"sha256": "c" * 64}},
     }
 
 
 def _runs() -> list[dict[str, object]]:
-    return [deepcopy(_run()) for _ in range(3)]
+    runs = [deepcopy(_run()) for _ in range(3)]
+    for index, run in enumerate(runs):
+        run.update(
+            invocation_id=f"run-{index}",
+            pid=index + 1,
+            started_at=f"2026-01-01T00:00:0{index * 2}+00:00",
+            finished_at=f"2026-01-01T00:00:0{index * 2 + 1}+00:00",
+        )
+    return runs
 
 
 def _set_layer1_hash(layer1: dict[str, object], location: str, invalid_hash: str) -> None:
@@ -436,4 +450,100 @@ def test_cross_run_identity_version_hash_and_time_must_match(mutation: str) -> N
         return subprocess.CompletedProcess(argv, 0, MARKER + json.dumps(payload), "")
 
     result = run_three_probes(_layer1(), ROOT, Path("/isaac/python"), PROBE, 9, fake_run, ["a", "b", "c"])
+    assert result["status"] == "FAIL_A20_RUNTIME_ARTICULATION_DISCOVERY"
+
+
+def test_all_runs_missing_process_provenance_fields_fail_with_missing_fields() -> None:
+    runs = _runs()
+    for run in runs:
+        for field in ("pid", "isaac_sim_version", "started_at", "finished_at"):
+            run.pop(field, None)
+    result = aggregate_runtime_runs(_layer1(), runs)
+    assert result["status"] == "FAIL_A20_RUNTIME_ARTICULATION_DISCOVERY"
+    missing = {
+        (error.get("run_index"), error.get("field")) for error in result["errors"] if error["code"] == "missing_field"
+    }
+    assert missing == {
+        (index, field) for index in range(3) for field in ("pid", "isaac_sim_version", "started_at", "finished_at")
+    }
+
+
+@pytest.mark.parametrize("field", ["pid", "isaac_sim_version", "started_at", "finished_at"])
+def test_each_process_provenance_field_is_required(field: str) -> None:
+    runs = _runs_with_provenance()
+    runs[1].pop(field)
+    result = aggregate_runtime_runs(_layer1(), runs)
+    assert {"code": "missing_field", "run_index": 1, "field": field} in result["errors"]
+
+
+def _runs_with_provenance() -> list[dict[str, object]]:
+    runs = _runs()
+    for index, run in enumerate(runs):
+        run.update(
+            invocation_id=f"run-{index}",
+            pid=300 + index,
+            isaac_sim_version="5.1.0.0",
+            started_at=f"2026-01-01T00:00:0{index * 2}+00:00",
+            finished_at=f"2026-01-01T00:00:0{index * 2 + 1}+00:00",
+            inputs={"stage": {"sha256": "a" * 64}, "mapping": {"sha256": "b" * 64}, "config": {"sha256": "c" * 64}},
+        )
+    return runs
+
+
+@pytest.mark.parametrize("pid", [True, 1.0, "1", None, 0, -1])
+def test_pid_requires_exact_positive_integer(pid: object) -> None:
+    runs = _runs_with_provenance()
+    runs[1]["pid"] = pid
+    result = aggregate_runtime_runs(_layer1(), runs)
+    assert result["status"] == "FAIL_A20_RUNTIME_ARTICULATION_DISCOVERY"
+    assert any(error["code"] == "invalid_pid" for error in result["errors"])
+
+
+@pytest.mark.parametrize("version", [None, 5.1, "", "   "])
+def test_version_requires_nonempty_string(version: object) -> None:
+    runs = _runs_with_provenance()
+    runs[1]["isaac_sim_version"] = version
+    result = aggregate_runtime_runs(_layer1(), runs)
+    assert any(error["code"] == "invalid_isaac_sim_version" for error in result["errors"])
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("started_at", "not-a-time"),
+        ("finished_at", ""),
+        ("started_at", "2026-01-01T00:00:00"),
+        ("finished_at", 123),
+    ],
+)
+def test_timestamps_must_be_parseable_timezone_aware_strings(field: str, value: object) -> None:
+    runs = _runs_with_provenance()
+    runs[1][field] = value
+    result = aggregate_runtime_runs(_layer1(), runs)
+    assert any(error["code"] == "invalid_timestamp" for error in result["errors"])
+
+
+def test_finished_timestamp_cannot_precede_started_timestamp() -> None:
+    runs = _runs_with_provenance()
+    runs[1]["finished_at"] = "2025-01-01T00:00:00+00:00"
+    result = aggregate_runtime_runs(_layer1(), runs)
+    assert any(error["code"] == "reversed_timestamps" for error in result["errors"])
+
+
+@pytest.mark.parametrize(
+    "mutation", ["duplicate_pid", "duplicate_invocation", "version_mismatch", "started_nonmonotonic", "overlap"]
+)
+def test_three_run_process_provenance_is_cross_validated(mutation: str) -> None:
+    runs = _runs_with_provenance()
+    if mutation == "duplicate_pid":
+        runs[1]["pid"] = runs[0]["pid"]
+    elif mutation == "duplicate_invocation":
+        runs[1]["invocation_id"] = runs[0]["invocation_id"]
+    elif mutation == "version_mismatch":
+        runs[1]["isaac_sim_version"] = "5.0.0"
+    elif mutation == "started_nonmonotonic":
+        runs[1]["started_at"] = "2025-01-01T00:00:00+00:00"
+    else:
+        runs[1]["started_at"] = runs[0]["started_at"]
+    result = aggregate_runtime_runs(_layer1(), runs)
     assert result["status"] == "FAIL_A20_RUNTIME_ARTICULATION_DISCOVERY"
