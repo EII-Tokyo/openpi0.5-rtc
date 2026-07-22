@@ -80,6 +80,7 @@ def _run() -> dict[str, object]:
         "started_at": "2026-01-01T00:00:00+00:00",
         "finished_at": "2026-01-01T00:00:01+00:00",
         "inputs": {"stage": {"sha256": "a" * 64}, "mapping": {"sha256": "b" * 64}, "config": {"sha256": "c" * 64}},
+        "initialization_operations": [],
     }
 
 
@@ -176,6 +177,7 @@ def test_structurally_valid_blocked_run_has_blocked_status() -> None:
         status="BLOCKED_RUNTIME_HANDLE_REQUIRES_UNAPPROVED_INITIALIZATION",
         valid_handle=False,
         requires_unapproved_initialization=True,
+        initialization_operations=["timeline Play"],
     )
 
     result = aggregate_runtime_runs(_layer1(), runs)
@@ -191,6 +193,7 @@ def test_malformed_blocked_run_fails_instead_of_masking_error() -> None:
         status="BLOCKED_RUNTIME_HANDLE_REQUIRES_UNAPPROVED_INITIALIZATION",
         valid_handle=False,
         requires_unapproved_initialization=True,
+        initialization_operations=["timeline Play"],
         physics_stepped=True,
     )
 
@@ -216,6 +219,7 @@ def test_invalid_blocked_run_is_not_reported_as_blocked(mutation) -> None:
         status="BLOCKED_RUNTIME_HANDLE_REQUIRES_UNAPPROVED_INITIALIZATION",
         valid_handle=False,
         requires_unapproved_initialization=True,
+        initialization_operations=["timeline Play"],
     )
     mutation(runs[1])
 
@@ -547,3 +551,47 @@ def test_three_run_process_provenance_is_cross_validated(mutation: str) -> None:
         runs[1]["started_at"] = runs[0]["started_at"]
     result = aggregate_runtime_runs(_layer1(), runs)
     assert result["status"] == "FAIL_A20_RUNTIME_ARTICULATION_DISCOVERY"
+
+
+def test_all_runs_missing_initialization_operations_fail_as_missing_fields() -> None:
+    runs = _runs()
+    for run in runs:
+        run.pop("initialization_operations")
+    result = aggregate_runtime_runs(_layer1(), runs)
+    assert [error for error in result["errors"] if error["code"] == "missing_field"] == [
+        {"code": "missing_field", "run_index": index, "field": "initialization_operations"} for index in range(3)
+    ]
+
+
+def test_single_missing_initialization_operations_fails() -> None:
+    runs = _runs()
+    runs[1].pop("initialization_operations")
+    result = aggregate_runtime_runs(_layer1(), runs)
+    assert {"code": "missing_field", "run_index": 1, "field": "initialization_operations"} in result["errors"]
+
+
+@pytest.mark.parametrize("value", [None, "play", 1, {}, [""], ["  "], [1], ["play", None]])
+def test_initialization_operations_requires_exact_list_of_nonempty_strings(value: object) -> None:
+    runs = _runs()
+    runs[1]["initialization_operations"] = value
+    result = aggregate_runtime_runs(_layer1(), runs)
+    assert any(error["code"] == "invalid_initialization_operations" for error in result["errors"])
+
+
+def test_blocked_requires_nonempty_initialization_operations() -> None:
+    runs = _runs()
+    runs[1].update(
+        status="BLOCKED_RUNTIME_HANDLE_REQUIRES_UNAPPROVED_INITIALIZATION",
+        valid_handle=False,
+        requires_unapproved_initialization=True,
+        initialization_operations=[],
+    )
+    result = aggregate_runtime_runs(_layer1(), runs)
+    assert any(error["code"] == "missing_required_initialization_operations" for error in result["errors"])
+
+
+def test_pass_requires_empty_initialization_operations() -> None:
+    runs = _runs()
+    runs[1]["initialization_operations"] = ["timeline Play"]
+    result = aggregate_runtime_runs(_layer1(), runs)
+    assert any(error["code"] == "unexpected_initialization_operations" for error in result["errors"])

@@ -42,6 +42,7 @@ _REQUIRED_RUN_FIELDS = (
     "started_at",
     "finished_at",
     "inputs",
+    "initialization_operations",
 )
 
 
@@ -181,6 +182,18 @@ def _run_errors(
             errors.append({"code": "invalid_timestamp", "run_index": run_index, "field": field})
     if all(parsed_times.values()) and parsed_times["finished_at"] < parsed_times["started_at"]:
         errors.append({"code": "reversed_timestamps", "run_index": run_index})
+
+    operations = run.get("initialization_operations")
+    operations_valid = isinstance(operations, list) and all(
+        isinstance(item, str) and bool(item.strip()) for item in operations
+    )
+    if "initialization_operations" in run and not operations_valid:
+        errors.append({"code": "invalid_initialization_operations", "run_index": run_index})
+    elif operations_valid:
+        if run.get("requires_unapproved_initialization") is True and not operations:
+            errors.append({"code": "missing_required_initialization_operations", "run_index": run_index})
+        if run.get("requires_unapproved_initialization") is False and operations:
+            errors.append({"code": "unexpected_initialization_operations", "run_index": run_index})
 
     process_ok = (
         run.get("process_status") == "completed"
