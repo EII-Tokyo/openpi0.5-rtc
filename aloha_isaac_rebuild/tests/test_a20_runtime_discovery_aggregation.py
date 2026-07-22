@@ -76,6 +76,17 @@ def _runs() -> list[dict[str, object]]:
     return [deepcopy(_run()) for _ in range(3)]
 
 
+def _set_layer1_hash(
+    layer1: dict[str, object], location: str, invalid_hash: str
+) -> None:
+    inputs = layer1["inputs"]
+    if location == "stage":
+        inputs["stage"]["pre_sha256"] = invalid_hash
+        inputs["stage"]["post_sha256"] = invalid_hash
+    else:
+        inputs[location]["sha256"] = invalid_hash
+
+
 def test_three_exact_saved_runs_pass() -> None:
     result = aggregate_runtime_runs(_layer1(), _runs())
 
@@ -172,6 +183,56 @@ def test_malformed_blocked_run_fails_instead_of_masking_error() -> None:
 
     assert result["status"] == "FAIL_A20_RUNTIME_ARTICULATION_DISCOVERY"
     assert any(error["code"] == "prohibited_safety_flag" for error in result["errors"])
+    assert result["blocked_run_indices"] == []
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        lambda run: run.pop("records"),
+        lambda run: run.update(process_status="failed", returncode=1),
+        lambda run: run.update(actions_applied=True),
+        lambda run: run["records"].reverse(),
+    ],
+)
+def test_invalid_blocked_run_is_not_reported_as_blocked(mutation) -> None:
+    runs = _runs()
+    runs[1].update(
+        status="BLOCKED_RUNTIME_HANDLE_REQUIRES_UNAPPROVED_INITIALIZATION",
+        valid_handle=False,
+        requires_unapproved_initialization=True,
+    )
+    mutation(runs[1])
+
+    result = aggregate_runtime_runs(_layer1(), runs)
+
+    assert result["status"] == "FAIL_A20_RUNTIME_ARTICULATION_DISCOVERY"
+    assert result["blocked_run_indices"] == []
+
+
+@pytest.mark.parametrize("location", ["config", "mapping", "stage"])
+@pytest.mark.parametrize(
+    "invalid_hash",
+    [
+        "+" + "a" * 63,
+        "-" + "a" * 63,
+        " " + "a" * 63,
+        "A" * 64,
+        "g" * 64,
+        "a" * 63,
+    ],
+    ids=["plus", "minus", "whitespace", "uppercase", "nonhex", "wrong_length"],
+)
+def test_layer1_hashes_require_exact_lowercase_sha256(
+    location: str, invalid_hash: str
+) -> None:
+    layer1 = _layer1()
+    _set_layer1_hash(layer1, location, invalid_hash)
+
+    result = aggregate_runtime_runs(layer1, _runs())
+
+    assert result["status"] == "FAIL_A20_RUNTIME_ARTICULATION_DISCOVERY"
+    assert any(error["code"] == "invalid_layer1_evidence" for error in result["errors"])
 
 
 @pytest.mark.parametrize("run_count", [0, 1, 2, 4])

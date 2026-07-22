@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from typing import Any
 
 from aloha_isaac_rebuild.scripts.a20_articulation_gate_common import compare_dof_records
@@ -27,13 +28,7 @@ _REQUIRED_RUN_FIELDS = (
 
 
 def _valid_sha256(value: object) -> bool:
-    if not isinstance(value, str) or len(value) != 64:
-        return False
-    try:
-        int(value, 16)
-    except ValueError:
-        return False
-    return True
+    return isinstance(value, str) and re.fullmatch(r"[0-9a-f]{64}", value) is not None
 
 
 def _layer1_errors(layer1: object) -> list[dict[str, Any]]:
@@ -213,7 +208,7 @@ def aggregate_runtime_runs(
             )
             errors.extend(run_errors)
             mismatches.extend(run_mismatches)
-            if blocked:
+            if blocked and not run_errors:
                 blocked_runs.append(run_index)
 
     if errors:
