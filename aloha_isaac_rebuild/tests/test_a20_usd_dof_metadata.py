@@ -4,6 +4,7 @@ import ast
 from pathlib import Path
 
 import aloha_isaac_rebuild.scripts.audit_a20_usd_dof_metadata as audit_module
+from aloha_isaac_rebuild.scripts.audit_a20_usd_dof_metadata import collect_joint_inventory
 from aloha_isaac_rebuild.scripts.audit_a20_usd_dof_metadata import collect_usd_dof_metadata
 from aloha_isaac_rebuild.scripts.audit_a20_usd_dof_metadata import evaluate_metadata
 
@@ -108,3 +109,72 @@ def test_collect_rejects_invalid_computed_hash(monkeypatch) -> None:
     assert result["status"] == "FAIL_A20_USD_DOF_METADATA"
     assert result["errors"][0]["code"] == "collection_error"
     assert "SHA-256" in result["errors"][0]["message"]
+
+
+def test_evaluate_metadata_rejects_equal_fifteen_record_inventories() -> None:
+    records = [_record(index) for index in range(15)]
+    result = evaluate_metadata(
+        "/aloha",
+        ["/aloha/root_joint"],
+        records,
+        records,
+        observed_dof_paths=[record["path"] for record in records],
+    )
+
+    assert result["ok"] is False
+    assert result["mismatches"] == [
+        {"field": "expected_count", "expected": 16, "observed": 15},
+        {"field": "observed_count", "expected": 16, "observed": 15},
+        {"field": "observed_dof_path_count", "expected": 16, "observed": 15},
+    ]
+    assert result["errors"] == [
+        {"code": "invalid_expected_dof_count", "expected": 16, "observed": 15},
+        {"code": "invalid_observed_dof_count", "expected": 16, "observed": 15},
+        {
+            "code": "invalid_observed_dof_path_count",
+            "expected": 16,
+            "observed": 15,
+        },
+    ]
+
+
+def test_joint_inventory_hard_fails_unsupported_spherical_joint() -> None:
+    stage = audit_module.Usd.Stage.CreateInMemory()
+    audit_module.UsdPhysics.SphericalJoint.Define(
+        stage, "/aloha/joints/unexpected_spherical"
+    )
+
+    inventory = collect_joint_inventory(stage)
+
+    assert inventory["dof_joint_paths"] == []
+    assert inventory["fixed_joint_paths"] == []
+    assert inventory["unsupported_joints"] == [
+        {
+            "path": "/aloha/joints/unexpected_spherical",
+            "type": "PhysicsSphericalJoint",
+        }
+    ]
+    expected = [_record(index) for index in range(16)]
+    result = evaluate_metadata(
+        "/aloha",
+        ["/aloha/root_joint"],
+        expected,
+        expected,
+        observed_dof_paths=[record["path"] for record in expected],
+        unsupported_joints=inventory["unsupported_joints"],
+    )
+    assert result["ok"] is False
+    assert result["mismatches"] == [
+        {
+            "field": "unsupported_joints",
+            "expected": [],
+            "observed": inventory["unsupported_joints"],
+        }
+    ]
+    assert result["errors"] == [
+        {
+            "code": "unsupported_joint_schema",
+            "path": "/aloha/joints/unexpected_spherical",
+            "type": "PhysicsSphericalJoint",
+        }
+    ]

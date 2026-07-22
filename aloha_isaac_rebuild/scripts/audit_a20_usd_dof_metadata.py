@@ -153,6 +153,29 @@ def _observed_record(stage: Usd.Stage, path: str, index: int) -> dict[str, Any]:
     }
 
 
+def collect_joint_inventory(stage: Usd.Stage) -> dict[str, list[Any]]:
+    """Inventory every USD Physics joint below the clean joint namespace."""
+    dof_joint_paths: list[str] = []
+    fixed_joint_paths: list[str] = []
+    unsupported_joints: list[dict[str, str]] = []
+    for prim in stage.Traverse():
+        path = str(prim.GetPath())
+        if not path.startswith("/aloha/joints/") or not prim.IsA(UsdPhysics.Joint):
+            continue
+        prim_type = prim.GetTypeName()
+        if prim_type in _DOF_TYPES:
+            dof_joint_paths.append(path)
+        elif prim.IsA(UsdPhysics.FixedJoint):
+            fixed_joint_paths.append(path)
+        else:
+            unsupported_joints.append({"path": path, "type": prim_type})
+    return {
+        "dof_joint_paths": dof_joint_paths,
+        "fixed_joint_paths": fixed_joint_paths,
+        "unsupported_joints": unsupported_joints,
+    }
+
+
 def evaluate_metadata(
     default_prim: str | None,
     articulation_root_paths: list[str],
@@ -160,6 +183,7 @@ def evaluate_metadata(
     observed: list[dict[str, Any]],
     *,
     observed_dof_paths: list[str] | None = None,
+    unsupported_joints: list[dict[str, str]] | None = None,
 ) -> dict[str, Any]:
     """Evaluate collected metadata with shared fail-closed validators."""
     comparison = compare_dof_records(expected, observed)
@@ -183,9 +207,37 @@ def evaluate_metadata(
         if observed_dof_paths is not None
         else [record.get("path") for record in observed]
     )
+    count_checks = (
+        ("expected_count", "invalid_expected_dof_count", len(expected)),
+        ("observed_count", "invalid_observed_dof_count", len(observed)),
+        (
+            "observed_dof_path_count",
+            "invalid_observed_dof_path_count",
+            len(actual_paths),
+        ),
+    )
+    for field, code, count in count_checks:
+        if count != 16:
+            mismatches.append({"field": field, "expected": 16, "observed": count})
+            errors.append(
+                {"code": code, "expected": 16, "observed": count}
+            )
     if actual_paths != expected_paths:
         mismatches.append(
             {"field": "dof_paths", "expected": expected_paths, "observed": actual_paths}
+        )
+    unsupported_joints = unsupported_joints or []
+    if unsupported_joints:
+        mismatches.append(
+            {
+                "field": "unsupported_joints",
+                "expected": [],
+                "observed": unsupported_joints,
+            }
+        )
+        errors.extend(
+            {"code": "unsupported_joint_schema", **joint}
+            for joint in unsupported_joints
         )
     safety = validate_safety_flags(_SAFETY_FLAGS)
     errors.extend(safety["errors"])
@@ -215,12 +267,8 @@ def _collect(config_path: Path) -> dict[str, Any]:
         for prim in stage.Traverse()
         if prim.HasAPI(UsdPhysics.ArticulationRootAPI)
     )
-    observed_dof_paths = [
-        str(prim.GetPath())
-        for prim in stage.Traverse()
-        if str(prim.GetPath()).startswith("/aloha/joints/")
-        and prim.GetTypeName() in _DOF_TYPES
-    ]
+    inventory = collect_joint_inventory(stage)
+    observed_dof_paths = inventory["dof_joint_paths"]
     expected_paths = [record["path"] for record in expected]
     observed_by_path = set(observed_dof_paths)
     observed = [
@@ -234,6 +282,7 @@ def _collect(config_path: Path) -> dict[str, Any]:
         expected,
         observed,
         observed_dof_paths=observed_dof_paths,
+        unsupported_joints=inventory["unsupported_joints"],
     )
     ok = evaluation["ok"]
     return {
@@ -246,6 +295,7 @@ def _collect(config_path: Path) -> dict[str, Any]:
         },
         "default_prim": default_prim_path,
         "articulation_root_paths": articulation_root_paths,
+        "unsupported_joints": inventory["unsupported_joints"],
         "expected": expected,
         "observed": observed,
         "mismatches": evaluation["mismatches"],
@@ -265,6 +315,7 @@ def collect_usd_dof_metadata(config_path: Path | str) -> dict[str, Any]:
             "inputs": {"config": {"path": str(Path(config_path).resolve())}},
             "default_prim": None,
             "articulation_root_paths": [],
+            "unsupported_joints": [],
             "expected": [],
             "observed": [],
             "mismatches": [],
