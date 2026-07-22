@@ -14,16 +14,61 @@ over "aloha" (
     }
 )
 {
-    custom string aloha:articulationPolicy = "two_independent_follower_articulation_candidates"
+    custom string aloha:articulationPolicy = "stationary_ai_style_single_root_joint_candidate"
     custom bool aloha:candidateOnly = 1
     custom bool aloha:collisionReady = 0
     custom bool aloha:controlReady = 0
     custom bool aloha:physicsReady = 0
     custom bool aloha:replayReady = 0
     custom bool aloha:trainingEligible = 0
+    custom rel isaac:physics:robotJoints = [
+        </aloha/joints/left_gripper_base>,
+        </aloha/joints/right_gripper_base>,
+        </aloha/joints/rootJoint_left_base_link>,
+        </aloha/joints/left_waist>,
+        </aloha/joints/left_shoulder>,
+        </aloha/joints/left_elbow>,
+        </aloha/joints/left_forearm_roll>,
+        </aloha/joints/left_wrist_angle>,
+        </aloha/joints/left_wrist_rotate>,
+        </aloha/joints/left_left_finger>,
+        </aloha/joints/left_right_finger>,
+        </aloha/joints/rootJoint_right_base_link>,
+        </aloha/joints/right_waist>,
+        </aloha/joints/right_shoulder>,
+        </aloha/joints/right_elbow>,
+        </aloha/joints/right_forearm_roll>,
+        </aloha/joints/right_wrist_angle>,
+        </aloha/joints/right_wrist_rotate>,
+        </aloha/joints/right_left_finger>,
+        </aloha/joints/right_right_finger>,
+    ]
+    custom rel isaac:physics:robotLinks = [
+        </aloha/follower_left_base_link>,
+        </aloha/follower_left_gripper_base>,
+        </aloha/follower_left_gripper_left>,
+        </aloha/follower_left_gripper_right>,
+        </aloha/follower_left_link_1>,
+        </aloha/follower_left_link_2>,
+        </aloha/follower_left_link_3>,
+        </aloha/follower_left_link_4>,
+        </aloha/follower_left_link_5>,
+        </aloha/follower_left_link_6>,
+        </aloha/follower_right_base_link>,
+        </aloha/follower_right_gripper_base>,
+        </aloha/follower_right_gripper_left>,
+        </aloha/follower_right_gripper_right>,
+        </aloha/follower_right_link_1>,
+        </aloha/follower_right_link_2>,
+        </aloha/follower_right_link_3>,
+        </aloha/follower_right_link_4>,
+        </aloha/follower_right_link_5>,
+        </aloha/follower_right_link_6>,
+        </aloha/tabletop_link>,
+    ]
 
     over "follower_left_base_link" (
-        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI", "PhysicsArticulationRootAPI"]
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
     )
     {
         custom bool aloha:candidateOnly = 1
@@ -33,7 +78,6 @@ over "aloha" (
         float3 physics:diagonalInertia = (0.0071633, 0.00602451, 0.00169819)
         float physics:mass = 0.969034
         quatf physics:principalAxes = (-0.0029232386, 0.71251667, 0.0048038675, 0.7016326)
-        custom bool physxArticulation:enabledSelfCollisions = 0
     }
 
     over "follower_left_gripper_base" (
@@ -154,7 +198,7 @@ over "aloha" (
     }
 
     over "follower_right_base_link" (
-        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI", "PhysicsArticulationRootAPI"]
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
     )
     {
         custom bool aloha:candidateOnly = 1
@@ -164,7 +208,6 @@ over "aloha" (
         float3 physics:diagonalInertia = (0.0071633, 0.00602451, 0.00169819)
         float physics:mass = 0.969034
         quatf physics:principalAxes = (-0.0029232386, 0.71251667, 0.0048038675, 0.7016326)
-        custom bool physxArticulation:enabledSelfCollisions = 0
     }
 
     over "follower_right_gripper_base" (
@@ -284,6 +327,36 @@ over "aloha" (
         quatf physics:principalAxes = (0.62033, 0.619916, -0.339682, 0.339869)
     }
 
+    over "tabletop_link" (
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+    )
+    {
+        custom bool aloha:candidateOnly = 1
+        custom bool aloha:controlReady = 0
+        custom string aloha:massSource = "trossen_stationary_ai_tabletop_candidate"
+        custom string aloha:sourceRigidBodyPrim = "/scene/worldBody/table"
+        point3f physics:centerOfMass = (0, 0, 0)
+        float3 physics:diagonalInertia = (0.1, 0.1, 0.1)
+        bool physics:kinematicEnabled = 1
+        float physics:mass = 10
+        quatf physics:principalAxes = (1, 0, 0, 0)
+    }
+
+    def PhysicsFixedJoint "root_joint" (
+        prepend apiSchemas = ["PhysicsArticulationRootAPI"]
+    )
+    {
+        custom bool aloha:candidateOnly = 1
+        custom bool aloha:controlReady = 0
+        custom string aloha:sourcePatternPrim = "/stationary_ai/root_joint"
+        rel physics:body1 = </aloha/tabletop_link>
+        point3f physics:localPos1 = (0, 0, 0)
+        quatf physics:localRot1 = (1, 0, 0, 0)
+        bool physxArticulation:enabledSelfCollisions = 1
+        int physxArticulation:solverPositionIterationCount = 32
+        int physxArticulation:solverVelocityIterationCount = 1
+    }
+
     def "joints"
     {
         custom bool aloha:candidateOnly = 1
@@ -323,9 +396,13 @@ over "aloha" (
         def PhysicsFixedJoint "rootJoint_left_base_link"
         {
             custom bool aloha:candidateOnly = 1
+            custom string aloha:cleanBody0ReparentedTo = "/aloha/tabletop_link"
             custom bool aloha:controlReady = 0
+            custom bool aloha:intentionalStationaryAiStyleReparenting = 1
+            custom string aloha:sourceBody0Was = "world_or_empty"
             custom string aloha:sourceJointName = "rootJoint_left_base_link"
             custom string aloha:sourceJointPrim = "/scene/joints/rootJoint_left_base_link"
+            rel physics:body0 = </aloha/tabletop_link>
             rel physics:body1 = </aloha/follower_left_base_link>
             point3f physics:localPos0 = (-0.469, -0.019, 0.02)
             quatf physics:localRot0 = (1, 0, 0, 0)
@@ -598,9 +675,13 @@ over "aloha" (
         def PhysicsFixedJoint "rootJoint_right_base_link"
         {
             custom bool aloha:candidateOnly = 1
+            custom string aloha:cleanBody0ReparentedTo = "/aloha/tabletop_link"
             custom bool aloha:controlReady = 0
+            custom bool aloha:intentionalStationaryAiStyleReparenting = 1
+            custom string aloha:sourceBody0Was = "world_or_empty"
             custom string aloha:sourceJointName = "rootJoint_right_base_link"
             custom string aloha:sourceJointPrim = "/scene/joints/rootJoint_right_base_link"
+            rel physics:body0 = </aloha/tabletop_link>
             rel physics:body1 = </aloha/follower_right_base_link>
             point3f physics:localPos0 = (0.469, -0.019, 0.02)
             quatf physics:localRot0 = (6.123234e-17, 0, 0, 1)
