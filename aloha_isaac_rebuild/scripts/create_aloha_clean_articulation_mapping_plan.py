@@ -9,22 +9,20 @@ stage.
 from __future__ import annotations
 
 import argparse
+from copy import deepcopy
 import json
-import sys
+import math
 from pathlib import Path
+import sys
 
-import yaml
 from pxr import Usd
-
+import yaml
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from aloha_isaac_rebuild.scripts.create_aloha_stationary_style_rebuild_stages import (  # noqa: E402
-    _source_components,
-)
-
+from aloha_isaac_rebuild.scripts.create_aloha_stationary_style_rebuild_stages import _source_components  # noqa: E402
 
 DEFAULT_CONFIG = Path("aloha_isaac_rebuild/configs/physical_reconstruction/stationary_style_rebuild.yaml")
 DEFAULT_OUTPUT = Path("aloha_isaac_rebuild/artifacts/validation/a17_clean_articulation_mapping_plan.json")
@@ -33,8 +31,7 @@ DEFAULT_OUTPUT = Path("aloha_isaac_rebuild/artifacts/validation/a17_clean_articu
 def _load_mapping_config(path: Path) -> dict:
     if not path.exists():
         return {"joint_mappings": []}
-    data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
-    return data
+    return yaml.safe_load(path.read_text(encoding="utf-8")) or {}
 
 
 def _source_to_clean_link_map(stage: Usd.Stage) -> dict[str, str]:
@@ -54,13 +51,107 @@ def _canonical_joint_map(mapping_yaml: Path) -> dict[str, dict]:
         if canonical_name:
             result[canonical_name] = item
         isaac_name = str(item.get("isaac_dof_name", ""))
-        source_joint = isaac_name.split("/")[-1] if isaac_name else str(item.get("canonical_name", ""))
+        source_joint = isaac_name.rsplit("/", maxsplit=1)[-1] if isaac_name else str(item.get("canonical_name", ""))
         if source_joint:
             result[source_joint] = item
-        side = isaac_name.split("/")[0] if "/" in isaac_name else ""
+        side = isaac_name.split("/", maxsplit=1)[0] if "/" in isaac_name else ""
         if side and source_joint in {"left_finger", "right_finger"}:
             result[f"{side}_{source_joint}"] = item
     return result
+
+
+def _finite_override_number(override: dict, field: str) -> float:
+    value = override[field]
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise ValueError(f"clean runtime mapping override requires finite numeric {field}")
+    result = float(value)
+    if not math.isfinite(result):
+        raise ValueError(f"clean runtime mapping override requires finite numeric {field}")
+    return result
+
+
+def apply_clean_runtime_mapping_override(record: dict, overrides: dict[str, dict]) -> dict:
+    """Apply a validated clean-coordinate mapping while retaining source provenance."""
+    canonical_mapping = record.get("canonical_mapping")
+    if canonical_mapping is None:
+        return record
+    if not isinstance(canonical_mapping, dict):
+        raise ValueError("canonical_mapping must be a mapping when present")
+
+    result = deepcopy(record)
+    source_mapping = deepcopy(canonical_mapping)
+    result["source_canonical_mapping"] = source_mapping
+    result["clean_runtime_mapping_override"] = None
+
+    path = result.get("proposed_clean_joint_path")
+    override = overrides.get(path)
+    if override is None:
+        return result
+    if not isinstance(override, dict):
+        raise ValueError(f"clean runtime mapping override for {path} must be a mapping")
+
+    required_fields = ("sign", "offset", "scale", "unit", "rationale", "source")
+    for field in required_fields:
+        if field not in override:
+            raise ValueError(f"clean runtime mapping override for {path} requires {field}")
+    for field in ("rationale", "source"):
+        value = override[field]
+        if not isinstance(value, str) or not value.strip():
+            raise ValueError(f"clean runtime mapping override for {path} requires nonempty {field}")
+
+    sign = _finite_override_number(override, "sign")
+    offset = _finite_override_number(override, "offset")
+    scale = _finite_override_number(override, "scale")
+    if scale <= 0.0:
+        raise ValueError(f"clean runtime mapping override for {path} requires positive scale")
+    if override["unit"] != source_mapping.get("unit"):
+        raise ValueError(f"clean runtime mapping override unit mismatch for {path}")
+
+    try:
+        lower_limit = float(result["lower_limit"])
+        upper_limit = float(result["upper_limit"])
+    except (KeyError, TypeError, ValueError) as error:
+        raise ValueError(f"clean runtime mapping override for {path} requires numeric joint limits") from error
+    if not math.isfinite(lower_limit) or not math.isfinite(upper_limit):
+        raise ValueError(f"clean runtime mapping override for {path} requires finite joint limits")
+    endpoints = (offset, offset + scale)
+    tolerance = 1e-9
+    if any(endpoint < lower_limit - tolerance or endpoint > upper_limit + tolerance for endpoint in endpoints):
+        raise ValueError(f"clean runtime mapping override endpoints outside clean joint limits for {path}")
+
+    result["canonical_mapping"] = {
+        **source_mapping,
+        "sign": sign,
+        "offset": offset,
+        "scale": scale,
+        "unit": override["unit"],
+        "source": override["source"],
+    }
+    result["clean_runtime_mapping_override"] = deepcopy(override)
+    return result
+
+
+def validate_clean_runtime_mapping_override_paths(
+    records: list[dict], overrides: dict[str, dict]
+) -> list[dict]:
+    """Apply overrides and reject configured paths that do not match exactly one mapping record."""
+    if not isinstance(overrides, dict):
+        raise ValueError("clean_runtime_mapping_overrides must be a mapping")
+    consumption_counts = dict.fromkeys(overrides, 0)
+    transformed_records = []
+    for record in records:
+        path = record.get("proposed_clean_joint_path")
+        transformed = apply_clean_runtime_mapping_override(record, overrides)
+        if path in consumption_counts and transformed.get("clean_runtime_mapping_override") is not None:
+            consumption_counts[path] += 1
+        transformed_records.append(transformed)
+    invalid_paths = [path for path, count in consumption_counts.items() if count != 1]
+    if invalid_paths:
+        raise ValueError(
+            "clean runtime mapping overrides were not consumed exactly once: "
+            + ", ".join(sorted(invalid_paths))
+        )
+    return transformed_records
 
 
 def _joint_record(prim: Usd.Prim, source_to_clean: dict[str, str], canonical: dict[str, dict]) -> dict:
@@ -74,10 +165,7 @@ def _joint_record(prim: Usd.Prim, source_to_clean: dict[str, str], canonical: di
     for attr in prim.GetAuthoredAttributes():
         name = attr.GetName()
         if (
-            name.startswith("physics:")
-            or name.startswith("drive:")
-            or name.startswith("physxLimit:")
-            or name.startswith("isaac:physics:")
+            name.startswith(("physics:", "drive:", "physxLimit:", "isaac:physics:"))
             or "limit" in name.lower()
             or "axis" in name.lower()
         ):
@@ -127,6 +215,7 @@ def _joint_record(prim: Usd.Prim, source_to_clean: dict[str, str], canonical: di
 
 def create_mapping_plan(config_path: Path, output_path: Path) -> dict:
     config = yaml.safe_load(config_path.read_text(encoding="utf-8"))
+    clean_runtime_mapping_overrides = config.get("clean_runtime_mapping_overrides", {})
     source_usd = REPO_ROOT / config["source_aloha1_usd"]
     source_stage = Usd.Stage.Open(str(source_usd), load=Usd.Stage.LoadAll)
     if source_stage is None:
@@ -141,6 +230,9 @@ def create_mapping_plan(config_path: Path, output_path: Path) -> dict:
         if type_name not in {"PhysicsFixedJoint", "PhysicsRevoluteJoint", "PhysicsPrismaticJoint"}:
             continue
         joint_records.append(_joint_record(prim, source_to_clean, canonical))
+    joint_records = validate_clean_runtime_mapping_override_paths(
+        joint_records, clean_runtime_mapping_overrides
+    )
 
     dof_records = [record for record in joint_records if record["is_dof_joint"]]
     unmapped_records = [

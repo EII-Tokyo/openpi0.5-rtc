@@ -23,8 +23,27 @@ outputs:
   a20_usd_dof_metadata_json: aloha_isaac_rebuild/artifacts/validation/a20_usd_dof_metadata_gate.json
   a20_runtime_articulation_discovery_json: aloha_isaac_rebuild/artifacts/validation/a20_runtime_articulation_discovery_gate.json
   a20_two_layer_articulation_discovery_md: aloha_isaac_rebuild/reports/a20_two_layer_articulation_discovery.md
+  a21_policy_target_limit_preflight_json: aloha_isaac_rebuild/artifacts/validation/a21_policy_target_limit_preflight.json
+  a21_runtime_target_readback_json: aloha_isaac_rebuild/artifacts/validation/a21_runtime_target_readback.json
+  a21_target_limit_and_readback_md: aloha_isaac_rebuild/reports/a21_target_limit_and_readback.md
 
 root_prim: /aloha
+
+clean_runtime_mapping_overrides:
+  /aloha/joints/left_right_finger:
+    sign: 1.0
+    offset: 0.021
+    scale: 0.036
+    unit: m
+    rationale: clean Isaac DOF coordinate already mirrors through its joint frame
+    source: A19 authored and A20 runtime positive prismatic limits
+  /aloha/joints/right_right_finger:
+    sign: 1.0
+    offset: 0.021
+    scale: 0.036
+    unit: m
+    rationale: clean Isaac DOF coordinate already mirrors through its joint frame
+    source: A19 authored and A20 runtime positive prismatic limits
 
 policy:
   source_aloha1_read_only: true
