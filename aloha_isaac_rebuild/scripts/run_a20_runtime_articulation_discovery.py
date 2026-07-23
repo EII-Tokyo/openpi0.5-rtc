@@ -495,7 +495,7 @@ def _report_runtime_semantics(layer1: object, layer2: object) -> tuple[str, str]
         return "FAIL", "FAIL"
 
     runtime_fields = (
-        "status", "process_status", "returncode", "timed_out", "cleanup_verified",
+        "status", "process_status", "returncode", "probe_returncode", "timed_out", "cleanup_verified",
         "requires_unapproved_initialization", "initialization_operations",
         "isaac_sim_version", "inputs", "articulation_root", "articulation_count",
         "dof_count", "valid_handle", "handle_validity_method", "records",
@@ -503,6 +503,7 @@ def _report_runtime_semantics(layer1: object, layer2: object) -> tuple[str, str]
     )
     provenance_fields = (
         "schema_version", "probe_sha256", "coordinator_sha256", "safety_checker_sha256",
+        "git_head", "git_dirty",
     )
     fingerprints = []
     for run in runs:

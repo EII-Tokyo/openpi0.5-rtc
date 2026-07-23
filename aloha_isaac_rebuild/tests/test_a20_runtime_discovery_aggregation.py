@@ -1325,6 +1325,36 @@ def test_report_determinism_includes_run_integrity_fields(field: str, value: obj
     assert "Three-run determinism: FAIL" in report
 
 
+@pytest.mark.parametrize(
+    ("location", "field", "value"),
+    [
+        ("run", "probe_returncode", 1),
+        ("provenance", "git_head", "different-head"),
+        ("provenance", "git_dirty", True),
+        ("provenance", "safety_checker_sha256", "different-checker-hash"),
+    ],
+)
+def test_report_determinism_includes_probe_and_code_provenance(
+    location: str, field: str, value: object
+) -> None:
+    runs = _runs()
+    for run in runs:
+        run["probe_returncode"] = 0
+        run["provenance"].update(
+            git_head="same-head",
+            git_dirty=False,
+            safety_checker_sha256="same-checker-hash",
+        )
+    target = runs[1] if location == "run" else runs[1]["provenance"]
+    target[field] = value
+    layer2 = aggregate_runtime_runs(_layer1(), runs)
+    layer2["runs"] = runs
+
+    report = format_two_layer_report(_asset_validator(), _layer1(), layer2)
+
+    assert "Three-run determinism: FAIL" in report
+
+
 @pytest.mark.parametrize("bad", [None, [], "bad", {}, {"status": "PASS_A20_USD_DOF_METADATA"}])
 def test_two_layer_report_fails_closed_for_missing_or_malformed_artifacts(bad: object) -> None:
     report = format_two_layer_report(bad, bad, bad)
