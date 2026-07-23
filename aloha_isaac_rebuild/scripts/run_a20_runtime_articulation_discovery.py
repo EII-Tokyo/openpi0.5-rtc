@@ -311,10 +311,12 @@ def aggregate_runtime_runs(layer1: object, runs: object) -> dict[str, Any]:
     }
 
 
-def is_exact_runtime_pass(payload: object) -> bool:
+def is_exact_runtime_pass(payload: object, trusted_layer1: object = None) -> bool:
     """Allow automation to continue only on the complete, no-step A20 pass contract."""
     if not (
-        isinstance(payload, dict)
+        not _layer1_errors(trusted_layer1)
+        and isinstance(trusted_layer1, dict)
+        and isinstance(payload, dict)
         and payload.get("status") == _PASS
         and payload.get("ok") is True
         and payload.get("errors") == []
@@ -329,10 +331,22 @@ def is_exact_runtime_pass(payload: object) -> bool:
         and all(payload.get(flag) is False for flag in ("physics_stepped", "actions_applied", "targets_written", "stage_saved"))
     ):
         return False
+    trusted_expected = trusted_layer1["expected"]
+    if not compare_dof_records(trusted_expected, payload["expected"])["ok"]:
+        return False
+    reaggregated = aggregate_runtime_runs(trusted_layer1, payload["runs"])
+    if reaggregated["status"] != _PASS or reaggregated["errors"] or reaggregated["mismatches"]:
+        return False
+    trusted_inputs = trusted_layer1["inputs"]
+    trusted_hashes = {
+        "stage": trusted_inputs["stage"]["post_sha256"],
+        "mapping": trusted_inputs["mapping"]["sha256"],
+        "config": trusted_inputs["config"]["sha256"],
+    }
     for index, run in enumerate(payload["runs"]):
         if not isinstance(run, dict):
             return False
-        run_errors, run_mismatches, blocked = _run_errors(run, index, payload["expected"])
+        run_errors, run_mismatches, blocked = _run_errors(run, index, trusted_expected)
         provenance = run.get("provenance")
         if (
             run_errors
@@ -343,6 +357,7 @@ def is_exact_runtime_pass(payload: object) -> bool:
             or provenance.get("schema_version") != SCHEMA_VERSION
             or not isinstance(provenance.get("safety_checker"), dict)
             or provenance["safety_checker"].get("ok") is not True
+            or any(run.get("inputs", {}).get(name, {}).get("sha256") != digest for name, digest in trusted_hashes.items())
         ):
             return False
     return True
@@ -397,7 +412,7 @@ def format_two_layer_report(asset_validator: object, layer1: object, layer2: obj
     asset_status = _artifact_status(asset_validator)
     layer1_status = _artifact_status(layer1)
     layer2_status = _artifact_status(layer2)
-    overall = "READY" if _valid_asset_validator(asset_validator) and not _layer1_errors(layer1) and is_exact_runtime_pass(layer2) else "NOT_READY"
+    overall = "READY" if _valid_asset_validator(asset_validator) and not _layer1_errors(layer1) and is_exact_runtime_pass(layer2, layer1) else "NOT_READY"
 
     issues = asset_validator.get("issues") if isinstance(asset_validator, dict) else None
     bounded_issues = issues[:MAX_REPORT_ISSUES] if isinstance(issues, list) else []
@@ -429,7 +444,7 @@ def format_two_layer_report(asset_validator: object, layer1: object, layer2: obj
     ) if isinstance(layer2_runs, list) else []
     provenance = layer2.get("provenance", {}) if isinstance(layer2, dict) and isinstance(layer2.get("provenance"), dict) else {}
     blocked = layer2_status == _BLOCKED
-    determinism = "PASS" if is_exact_runtime_pass(layer2) else ("BLOCKED" if blocked else "FAIL")
+    determinism = "PASS" if is_exact_runtime_pass(layer2, layer1) else ("BLOCKED" if blocked else "FAIL")
     next_action = (
         "The runtime handle requires timeline Play and a physics simulation step; these operations were not approved."
         if blocked
@@ -946,7 +961,7 @@ def main() -> int:
             runs = result.get("runs", [])
             result[flag] = not (len(runs) == 3 and all(run.get(flag) is False for run in runs))
         _atomic_write(output, result)
-    if result.get("status") == _PASS and not is_exact_runtime_pass(result):
+    if result.get("status") == _PASS and not is_exact_runtime_pass(result, layer1):
         result["status"], result["ok"] = _FAIL, False
         errors = result.get("errors") if isinstance(result.get("errors"), list) else []
         errors.append({"code": "exact_runtime_pass_contract_failed"})

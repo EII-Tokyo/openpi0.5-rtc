@@ -925,7 +925,7 @@ def test_is_exact_runtime_pass_accepts_only_complete_safe_pass() -> None:
     exact.update(
         runs=_runs(), physics_stepped=False, actions_applied=False, targets_written=False, stage_saved=False
     )
-    assert is_exact_runtime_pass(exact) is True
+    assert is_exact_runtime_pass(exact, _layer1()) is True
     mutations = [
         lambda value: value.update(status="BLOCKED_RUNTIME_HANDLE_REQUIRES_UNAPPROVED_INITIALIZATION"),
         lambda value: value.update(ok=False),
@@ -937,7 +937,7 @@ def test_is_exact_runtime_pass_accepts_only_complete_safe_pass() -> None:
     for mutation in mutations:
         candidate = deepcopy(exact)
         mutation(candidate)
-        assert is_exact_runtime_pass(candidate) is False
+        assert is_exact_runtime_pass(candidate, _layer1()) is False
     assert is_exact_runtime_pass(None) is False
 
 
@@ -1054,7 +1054,7 @@ def test_online_main_writes_false_safety_flags_and_exits_zero_only_for_exact_pas
 
     assert coordinator.main() == 0
     written = json.loads(runtime_path.read_text(encoding="utf-8"))
-    assert is_exact_runtime_pass(written) is True
+    assert is_exact_runtime_pass(written, _layer1()) is True
     for flag in ("physics_stepped", "actions_applied", "targets_written", "stage_saved"):
         assert written[flag] is False
 
@@ -1089,7 +1089,7 @@ def test_exact_runtime_pass_revalidates_every_saved_run_fail_closed(mutation) ->
         run["cleanup_verified"] = True
         run["provenance"] = {"schema_version": "a20-runtime-discovery-v2", "safety_checker": {"ok": True}}
     mutation(payload)
-    assert is_exact_runtime_pass(payload) is False
+    assert is_exact_runtime_pass(payload, _layer1()) is False
 
 
 def test_exact_runtime_pass_rejects_top_level_run_contradiction() -> None:
@@ -1105,7 +1105,7 @@ def test_exact_runtime_pass_rejects_top_level_run_contradiction() -> None:
         run["cleanup_verified"] = True
         run["provenance"] = {"schema_version": "a20-runtime-discovery-v2", "safety_checker": {"ok": True}}
     payload["runs"][0]["records"][0]["axis"] = "Z"
-    assert is_exact_runtime_pass(payload) is False
+    assert is_exact_runtime_pass(payload, _layer1()) is False
 
 
 def test_report_bounds_and_single_lines_untrusted_asset_validator_issues() -> None:
@@ -1128,3 +1128,56 @@ def test_report_bounds_and_single_lines_untrusted_asset_validator_issues() -> No
     assert "80 additional issues omitted" in report
     assert "\n# injected" not in report
     assert "\nnext line" not in report
+
+
+def test_exact_runtime_pass_binds_records_to_independent_trusted_layer1() -> None:
+    trusted = _layer1()
+    payload = aggregate_runtime_runs(trusted, _runs())
+    payload.update(
+        runs=_runs(),
+        physics_stepped=False,
+        actions_applied=False,
+        targets_written=False,
+        stage_saved=False,
+    )
+    assert is_exact_runtime_pass(payload, trusted) is True
+    forged = deepcopy(payload["expected"])
+    forged[0].update(axis="Z", name="forged_name", path="/aloha/joints/forged", lower_limit=-9.0)
+    payload["expected"] = forged
+    for run in payload["runs"]:
+        run["records"] = deepcopy(forged)
+    assert is_exact_runtime_pass(payload, trusted) is False
+
+
+def test_exact_runtime_pass_requires_valid_trusted_layer1() -> None:
+    trusted = _layer1()
+    payload = aggregate_runtime_runs(trusted, _runs())
+    payload.update(
+        runs=_runs(),
+        physics_stepped=False,
+        actions_applied=False,
+        targets_written=False,
+        stage_saved=False,
+    )
+    assert is_exact_runtime_pass(payload) is False
+    assert is_exact_runtime_pass(payload, None) is False
+    assert is_exact_runtime_pass(payload, {"status": "PASS_FAKE", "ok": True}) is False
+    malformed = _layer1()
+    malformed["inputs"]["stage"]["post_sha256"] = "0" * 64
+    assert is_exact_runtime_pass(payload, malformed) is False
+
+
+def test_exact_runtime_pass_binds_all_run_input_hashes_to_trusted_layer1() -> None:
+    trusted = _layer1()
+    payload = aggregate_runtime_runs(trusted, _runs())
+    payload.update(
+        runs=_runs(),
+        physics_stepped=False,
+        actions_applied=False,
+        targets_written=False,
+        stage_saved=False,
+    )
+    assert is_exact_runtime_pass(payload, trusted) is True
+    for run in payload["runs"]:
+        run["inputs"]["mapping"]["sha256"] = "d" * 64
+    assert is_exact_runtime_pass(payload, trusted) is False
