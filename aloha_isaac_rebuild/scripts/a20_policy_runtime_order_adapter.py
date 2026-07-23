@@ -82,7 +82,15 @@ def build_policy_contract(mapping: dict[str, object]) -> dict[str, object]:
         raw_mapping = source.get("canonical_mapping")
         if not isinstance(raw_mapping, dict):
             raise ValueError(f"missing canonical mapping for {path}")
-        source_mapping = source.get("source_canonical_mapping", raw_mapping)
+        override = source.get("clean_runtime_mapping_override")
+        if override is not None and not isinstance(override, dict):
+            raise ValueError(f"invalid clean runtime mapping override for {path}")
+        if override is not None:
+            if "source_canonical_mapping" not in source:
+                raise ValueError(f"missing source mapping for overridden DOF: {path}")
+            source_mapping = source.get("source_canonical_mapping")
+        else:
+            source_mapping = source.get("source_canonical_mapping", raw_mapping)
         if not isinstance(source_mapping, dict):
             raise ValueError(f"invalid source canonical mapping for {path}")
 
@@ -137,14 +145,11 @@ def build_policy_contract(mapping: dict[str, object]) -> dict[str, object]:
             source_transform["offset"],
             source_transform["scale"],
         )
-        override = source.get("clean_runtime_mapping_override")
         if override is None:
             if source_transform_values != effective_transform:
                 raise ValueError(
                     f"unoverridden source/effective transform mismatch for {path}"
                 )
-        elif not isinstance(override, dict):
-            raise ValueError(f"invalid clean runtime mapping override for {path}")
         else:
             override_transform = {
                 "sign": _finite_float(

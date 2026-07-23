@@ -263,6 +263,22 @@ def test_contract_rejects_unoverridden_source_effective_transform_mismatch() -> 
         build_policy_contract(mapping)
 
 
+def test_contract_requires_source_mapping_for_overridden_dof() -> None:
+    mapping = deepcopy(_mapping())
+    record = next(
+        record
+        for record in mapping["joint_records"]
+        if record.get("proposed_clean_joint_path")
+        == "/aloha/joints/left_right_finger"
+    )
+    record.pop("source_canonical_mapping")
+
+    with pytest.raises(
+        ValueError, match="missing source mapping for overridden DOF"
+    ):
+        build_policy_contract(mapping)
+
+
 @pytest.mark.parametrize(
     ("field", "value"),
     [("sign", -1.0), ("offset", -0.021), ("scale", -0.036)],
