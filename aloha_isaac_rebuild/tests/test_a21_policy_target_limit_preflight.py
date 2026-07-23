@@ -68,6 +68,16 @@ def _transform(path: str, *, corrected: bool) -> dict[str, object]:
     return {"path": path, "sign": 1.0, "offset": 0.021, "scale": 0.036}
 
 
+def _round_trip_check() -> dict[str, object]:
+    return {
+        "status": "PASS",
+        "sample_count": 3,
+        "gripper_values": [0.0, 0.5, 1.0],
+        "max_abs_error": 2.220446049250313e-16,
+        "error": None,
+    }
+
+
 def _adapter(*, corrected: bool = True) -> dict[str, object]:
     runtime_index_by_path = {path: runtime_index for runtime_index, path in enumerate(RUNTIME_PATHS)}
     entries = []
@@ -91,6 +101,7 @@ def _adapter(*, corrected: bool = True) -> dict[str, object]:
         "runtime_to_canonical_indices": [CANONICAL_PATHS.index(path) for path in RUNTIME_PATHS],
         "policy_to_runtime": entries,
         "mapping_complete": True,
+        "round_trip_check": _round_trip_check(),
     }
 
 
@@ -124,6 +135,11 @@ def _canonical_dofs(*, corrected: bool = True) -> list[dict[str, object]]:
                 "canonical_index": canonical_index,
                 "path": path,
                 "openpi_index": next(
+                    policy_index
+                    for policy_index, indices in enumerate(POLICY_CANONICAL_GROUPS)
+                    if canonical_index in indices
+                ),
+                "dataset_index": next(
                     policy_index
                     for policy_index, indices in enumerate(POLICY_CANONICAL_GROUPS)
                     if canonical_index in indices
@@ -504,6 +520,51 @@ def test_adapter_transform_path_must_match_its_raw_runtime_record() -> None:
     assert any(error["code"] == "invalid_right_finger_override_provenance" for error in result["errors"])
 
 
+def test_adapter_fixture_matches_complete_a20_producer_shape() -> None:
+    adapter = _adapter()
+
+    assert "canonical_dofs" not in adapter
+    assert adapter["mapping_complete"] is True
+    assert adapter["canonical_to_runtime_indices"] == [RUNTIME_PATHS.index(path) for path in CANONICAL_PATHS]
+    assert adapter["runtime_to_canonical_indices"] == [CANONICAL_PATHS.index(path) for path in RUNTIME_PATHS]
+    assert adapter["round_trip_check"] == _round_trip_check()
+    assert all(record["dataset_index"] == record["openpi_index"] for record in _canonical_dofs())
+
+
+def _set_bool_canonical_to_runtime_index(adapter: dict[str, object]) -> None:
+    adapter["canonical_to_runtime_indices"][0] = True
+
+
+def _set_bool_recorded_gripper_value(adapter: dict[str, object]) -> None:
+    adapter["round_trip_check"]["gripper_values"][0] = False
+
+
+@pytest.mark.parametrize(
+    "mutate",
+    [
+        _set_bool_canonical_to_runtime_index,
+        lambda adapter: adapter["canonical_to_runtime_indices"].reverse(),
+        lambda adapter: adapter["runtime_to_canonical_indices"].reverse(),
+        lambda adapter: adapter["runtime_to_canonical_indices"].pop(),
+        lambda adapter: adapter.update(mapping_complete=False),
+        lambda adapter: adapter.pop("round_trip_check"),
+        lambda adapter: adapter["round_trip_check"].update(status="FAIL"),
+        lambda adapter: adapter["round_trip_check"].update(sample_count=True),
+        _set_bool_recorded_gripper_value,
+        lambda adapter: adapter["round_trip_check"].update(max_abs_error=float("inf")),
+        lambda adapter: adapter["round_trip_check"].update(error="stale"),
+    ],
+)
+def test_evaluation_rejects_malformed_recorded_adapter_proof(mutate) -> None:
+    adapter = _adapter()
+    mutate(adapter)
+
+    result = _evaluate(adapter=adapter)
+
+    assert result["ok"] is False
+    assert result["errors"][0]["code"] == "invalid_preflight_input"
+
+
 def _set_bool_adapter_runtime_index(adapter: dict[str, object]) -> None:
     adapter["policy_to_runtime"][0]["runtime_indices"][0] = True
 
@@ -652,6 +713,8 @@ def test_preflight_reads_canonical_provenance_from_layer1_policy_contract() -> N
         lambda layer: layer["policy_contract"]["canonical_dofs"].pop(),
         lambda layer: layer["policy_contract"]["canonical_dofs"][0].update(canonical_index=True),
         lambda layer: layer["policy_contract"]["canonical_dofs"][0].update(openpi_index=True),
+        lambda layer: layer["policy_contract"]["canonical_dofs"][0].update(dataset_index=True),
+        lambda layer: layer["policy_contract"]["canonical_dofs"][0].update(dataset_index=1),
         lambda layer: layer["policy_contract"]["canonical_dofs"][13].update(openpi_index=11),
     ],
 )

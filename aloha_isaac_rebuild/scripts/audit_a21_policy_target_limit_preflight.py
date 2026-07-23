@@ -107,7 +107,61 @@ def _validate_adapter_shape(adapter: object) -> list[dict[str, Any]]:
         raise ValueError("invalid A20 adapter policy entry count")
     if not all(isinstance(entry, dict) for entry in entries):
         raise ValueError("invalid A20 adapter policy entry")
+    if adapter.get("mapping_complete") is not True:
+        raise ValueError("A20 adapter mapping_complete must be exactly true")
+    canonical_to_runtime = _adapter_index_vector(adapter, "canonical_to_runtime_indices")
+    runtime_to_canonical = _adapter_index_vector(adapter, "runtime_to_canonical_indices")
+    for canonical_index, runtime_index in enumerate(canonical_to_runtime):
+        if runtime_to_canonical[runtime_index] != canonical_index:
+            raise ValueError("A20 adapter index vectors must be mutual inverses")
+    _validate_recorded_round_trip(adapter.get("round_trip_check"))
     return entries
+
+
+def _adapter_index_vector(adapter: dict[str, object], field: str) -> list[int]:
+    values = adapter.get(field)
+    if not isinstance(values, list) or len(values) != _RUNTIME_DIMENSION:
+        raise ValueError(f"invalid A20 adapter {field}")
+    if any(isinstance(value, bool) or not isinstance(value, int) for value in values):
+        raise ValueError(f"invalid A20 adapter {field} integer")
+    if sorted(values) != list(range(_RUNTIME_DIMENSION)):
+        raise ValueError(f"A20 adapter {field} inventory must be exactly 0..15")
+    return values
+
+
+def _validate_recorded_round_trip(proof: object) -> None:
+    expected_fields = {
+        "status",
+        "sample_count",
+        "gripper_values",
+        "max_abs_error",
+        "error",
+    }
+    if not isinstance(proof, dict) or set(proof) != expected_fields:
+        raise ValueError("invalid A20 adapter round_trip_check shape")
+    sample_count = proof.get("sample_count")
+    if (
+        proof.get("status") != "PASS"
+        or isinstance(sample_count, bool)
+        or not isinstance(sample_count, int)
+        or sample_count != 3
+        or proof.get("error") is not None
+    ):
+        raise ValueError("A20 adapter round_trip_check is not an exact PASS")
+    gripper_values = proof.get("gripper_values")
+    if (
+        not isinstance(gripper_values, list)
+        or len(gripper_values) != 3
+        or any(
+            isinstance(value, bool) or not isinstance(value, int | float) or not math.isfinite(float(value))
+            for value in gripper_values
+        )
+        or [float(value) for value in gripper_values] != [0.0, 0.5, 1.0]
+    ):
+        raise ValueError("invalid A20 adapter round_trip_check gripper_values")
+    max_abs_error = _finite_float(proof.get("max_abs_error"), field="round_trip_check max_abs_error")
+    if not 0.0 <= max_abs_error <= _ROUND_TRIP_TOLERANCE:
+        raise ValueError("A20 adapter round_trip_check error exceeds tolerance")
 
 
 def _validate_runtime_records(
@@ -171,6 +225,9 @@ def _validate_right_finger_provenance(
             or not 0 <= openpi_index < _POLICY_DIMENSION
         ):
             raise ValueError(f"invalid canonical openpi_index for {path}")
+        dataset_index = record.get("dataset_index")
+        if isinstance(dataset_index, bool) or not isinstance(dataset_index, int) or dataset_index != openpi_index:
+            raise ValueError(f"invalid canonical dataset_index for {path}")
         policy_counts[openpi_index] += 1
         by_path[path] = record
     expected_policy_counts = {index: 2 if index in GRIPPER_POLICY_INDICES else 1 for index in range(_POLICY_DIMENSION)}
@@ -184,6 +241,14 @@ def _validate_right_finger_provenance(
     runtime_paths = [record["path"] for record in runtime_records]
     if runtime_order != runtime_paths:
         raise ValueError("adapter runtime_order does not match runtime records")
+    expected_canonical_to_runtime = [runtime_paths.index(path) for path in canonical_order]
+    if adapter.get("canonical_to_runtime_indices") != expected_canonical_to_runtime:
+        raise ValueError("adapter canonical_to_runtime_indices do not match path join")
+    expected_runtime_to_canonical = [0] * _RUNTIME_DIMENSION
+    for canonical_index, runtime_index in enumerate(expected_canonical_to_runtime):
+        expected_runtime_to_canonical[runtime_index] = canonical_index
+    if adapter.get("runtime_to_canonical_indices") != expected_runtime_to_canonical:
+        raise ValueError("adapter runtime_to_canonical_indices do not match path join")
 
     transform_paths: list[str] = []
     runtime_indices_seen: set[int] = set()
@@ -570,6 +635,14 @@ def _layer1_canonical_dofs(layer1: dict[str, object]) -> list[dict[str, object]]
             or not 0 <= openpi_index < _POLICY_DIMENSION
         ):
             raise ValueError(f"invalid Layer1 openpi_index for {path}")
+        dataset_index = record.get("dataset_index")
+        if (
+            isinstance(dataset_index, bool)
+            or not isinstance(dataset_index, int)
+            or not 0 <= dataset_index < _POLICY_DIMENSION
+            or dataset_index != openpi_index
+        ):
+            raise ValueError(f"invalid Layer1 dataset_index for {path}")
         unit = record.get("unit")
         if not isinstance(unit, str) or not unit:
             raise ValueError(f"invalid Layer1 canonical unit for {path}")
