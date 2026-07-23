@@ -235,7 +235,11 @@ def test_corrected_effective_mapping_passes_all_reviewed_samples() -> None:
     assert result["max_arm_delta_rad"] == ARM_DELTA_RAD == math.radians(0.25)
 
 
-def _input_bindings(input_root: Path | None = None) -> dict[str, object]:
+def _input_bindings(
+    input_root: Path | None = None,
+    *,
+    config_path: Path | None = None,
+) -> dict[str, object]:
     if input_root is None:
         paths = dict.fromkeys(("config", "mapping", "stage"), MODULE)
     else:
@@ -243,8 +247,9 @@ def _input_bindings(input_root: Path | None = None) -> dict[str, object]:
         directory.mkdir(parents=True, exist_ok=True)
         paths = {}
         for name in ("config", "mapping", "stage"):
-            path = directory / f"{name}.bin"
-            path.write_bytes(f"{name}-content".encode())
+            path = config_path if name == "config" and config_path is not None else directory / f"{name}.bin"
+            if path != config_path:
+                path.write_bytes(f"{name}-content".encode())
             paths[name] = path
     digests = {name: hashlib.sha256(path.read_bytes()).hexdigest() for name, path in paths.items()}
     return {
@@ -265,7 +270,12 @@ def _input_bindings(input_root: Path | None = None) -> dict[str, object]:
     }
 
 
-def _layer1(input_root: Path | None = None, *, corrected: bool = True) -> dict[str, object]:
+def _layer1(
+    input_root: Path | None = None,
+    *,
+    corrected: bool = True,
+    config_path: Path | None = None,
+) -> dict[str, object]:
     expected = _canonical_records()
     return {
         "status": "PASS_A20_USD_DOF_METADATA",
@@ -275,7 +285,7 @@ def _layer1(input_root: Path | None = None, *, corrected: bool = True) -> dict[s
         "observed": deepcopy(expected),
         "mismatches": [],
         "errors": [],
-        "inputs": _input_bindings(input_root),
+        "inputs": _input_bindings(input_root, config_path=config_path),
         "physics_stepped": False,
         "actions_applied": False,
         "targets_written": False,
@@ -720,11 +730,13 @@ def test_evaluation_does_not_mutate_inputs() -> None:
 
 
 def test_preflight_pass_has_exact_structured_contract() -> None:
+    layer1 = _layer1()
     inputs = {
+        "config": deepcopy(layer1["inputs"]["config"]),
         "layer1": {"path": "/evidence/layer1.json", "sha256": "a" * 64},
         "layer2": {"path": "/evidence/layer2.json", "sha256": "b" * 64},
     }
-    result = evaluate_preflight(_layer1(), _layer2(), inputs=inputs)
+    result = evaluate_preflight(layer1, _layer2(layer1), inputs=inputs)
 
     assert set(result) == {
         "schema_version",
@@ -763,12 +775,108 @@ def test_preflight_reads_canonical_provenance_from_layer1_policy_contract() -> N
     layer2 = _layer2()
     adapter = layer2["order_adapter"]
 
-    result = evaluate_preflight(layer1, layer2)
+    result = evaluate_preflight(
+        layer1,
+        layer2,
+        inputs={"config": deepcopy(layer1["inputs"]["config"])},
+    )
 
     assert "canonical_dofs" not in adapter
     assert result["status"] == PASS_STATUS
     assert result["ok"] is True
     assert result["errors"] == []
+
+
+def test_preflight_requires_explicit_current_config_binding() -> None:
+    layer1 = _layer1()
+
+    result = evaluate_preflight(layer1, _layer2(layer1))
+
+    assert result["status"] == FAIL_STATUS
+    assert any(error["code"] == "invalid_config_binding" for error in result["errors"])
+
+
+def test_preflight_rejects_different_config_path_with_identical_content(
+    tmp_path: Path,
+) -> None:
+    expected_path = tmp_path / "expected.yaml"
+    current_path = tmp_path / "current.yaml"
+    expected_path.write_bytes(b"same-config")
+    current_path.write_bytes(expected_path.read_bytes())
+    layer1 = _layer1(tmp_path, config_path=expected_path)
+    current_binding = {
+        "path": str(current_path.resolve()),
+        "sha256": hashlib.sha256(current_path.read_bytes()).hexdigest(),
+    }
+
+    result = evaluate_preflight(
+        layer1,
+        _layer2(layer1),
+        inputs={"config": current_binding},
+    )
+
+    assert result["status"] == FAIL_STATUS
+    assert any(error["code"] == "invalid_config_binding" for error in result["errors"])
+
+
+def test_preflight_rejects_same_config_path_after_content_change(
+    tmp_path: Path,
+) -> None:
+    config_path = tmp_path / "config.yaml"
+    config_path.write_bytes(b"reviewed-config")
+    layer1 = _layer1(tmp_path, config_path=config_path)
+    config_path.write_bytes(b"changed-config")
+    current_binding = {
+        "path": str(config_path.resolve()),
+        "sha256": hashlib.sha256(config_path.read_bytes()).hexdigest(),
+    }
+
+    result = evaluate_preflight(
+        layer1,
+        _layer2(layer1),
+        inputs={"config": current_binding},
+    )
+
+    assert result["status"] == FAIL_STATUS
+    assert result["ok"] is False
+
+
+def test_preflight_rejects_config_binding_hash_mismatch() -> None:
+    layer1 = _layer1()
+    current_binding = deepcopy(layer1["inputs"]["config"])
+    current_binding["sha256"] = "d" * 64
+
+    result = evaluate_preflight(
+        layer1,
+        _layer2(layer1),
+        inputs={"config": current_binding},
+    )
+
+    assert result["status"] == FAIL_STATUS
+    assert any(error["code"] == "invalid_config_binding" for error in result["errors"])
+
+
+def test_preflight_rejects_noncanonical_config_binding_path(
+    tmp_path: Path,
+) -> None:
+    config_path = tmp_path / "config.yaml"
+    config_path.write_bytes(b"reviewed-config")
+    symlink_path = tmp_path / "config-link.yaml"
+    symlink_path.symlink_to(config_path)
+    layer1 = _layer1(tmp_path, config_path=config_path)
+    current_binding = {
+        "path": str(symlink_path.absolute()),
+        "sha256": hashlib.sha256(config_path.read_bytes()).hexdigest(),
+    }
+
+    result = evaluate_preflight(
+        layer1,
+        _layer2(layer1),
+        inputs={"config": current_binding},
+    )
+
+    assert result["status"] == FAIL_STATUS
+    assert any(error["code"] == "invalid_config_binding" for error in result["errors"])
 
 
 @pytest.mark.parametrize(
@@ -1058,10 +1166,6 @@ def _write_cli_fixture(tmp_path: Path) -> tuple[Path, Path, Path, Path]:
     output_path = tmp_path / "out/a21.json"
     config_path = tmp_path / "config.yaml"
     layer1_path.parent.mkdir()
-    layer1 = _layer1(tmp_path)
-    layer2 = _layer2(layer1)
-    layer1_path.write_text(json.dumps(layer1), encoding="utf-8")
-    layer2_path.write_text(json.dumps(layer2), encoding="utf-8")
     config_path.write_text(
         yaml.safe_dump(
             {
@@ -1074,6 +1178,10 @@ def _write_cli_fixture(tmp_path: Path) -> tuple[Path, Path, Path, Path]:
         ),
         encoding="utf-8",
     )
+    layer1 = _layer1(tmp_path, config_path=config_path)
+    layer2 = _layer2(layer1)
+    layer1_path.write_text(json.dumps(layer1), encoding="utf-8")
+    layer2_path.write_text(json.dumps(layer2), encoding="utf-8")
     return config_path, layer1_path, layer2_path, output_path
 
 
@@ -1100,6 +1208,28 @@ def test_cli_hashes_absolute_inputs_writes_pass_and_exits_zero(
             "path": str(path.resolve()),
             "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
         }
+
+
+def test_cli_rejects_symlink_config_argument(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    config_path, _layer1_path, _layer2_path, output_path = _write_cli_fixture(tmp_path)
+    symlink_path = tmp_path / "config-link.yaml"
+    symlink_path.symlink_to(config_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [str(MODULE), "--config", str(symlink_path)],
+    )
+
+    assert audit.main() == 1
+    printed = json.loads(capsys.readouterr().out)
+    assert printed["status"] == FAIL_STATUS
+    if output_path.exists():
+        assert json.loads(output_path.read_text(encoding="utf-8"))["status"] == (FAIL_STATUS)
 
 
 def test_cli_artifact_hashes_do_not_replace_a20_cross_layer_provenance(
@@ -1159,7 +1289,16 @@ def test_cli_resolves_output_and_fails_when_input_keys_are_missing(
 
 @pytest.mark.parametrize(
     "failure_stage",
-    ["temp_file_fsync", "replace", "directory_open", "directory_fsync"],
+    [
+        "mkdir",
+        "read_old",
+        "mkstemp",
+        "temp_file_fsync",
+        "replace",
+        "directory_open",
+        "directory_fsync",
+        "post_replace_unlink",
+    ],
 )
 @pytest.mark.parametrize("existing_status", [None, PASS_STATUS, FAIL_STATUS])
 def test_cli_never_leaves_pass_json_after_atomic_write_failure(
@@ -1183,13 +1322,17 @@ def test_cli_never_leaves_pass_json_after_atomic_write_failure(
         )
     original_fsync = audit.os.fsync
     original_open = audit.os.open
+    original_exists = audit.Path.exists
+    original_mkdir = audit.Path.mkdir
+    original_read_bytes = audit.Path.read_bytes
+    original_unlink = audit.Path.unlink
     fsync_calls = 0
 
     def injected_fsync(descriptor: int) -> None:
         nonlocal fsync_calls
         fsync_calls += 1
         if (failure_stage == "temp_file_fsync" and fsync_calls == 1) or (
-            failure_stage == "directory_fsync" and fsync_calls == 2
+            failure_stage in {"directory_fsync", "post_replace_unlink"} and fsync_calls == 2
         ):
             raise OSError(f"injected {failure_stage}")
         original_fsync(descriptor)
@@ -1202,8 +1345,44 @@ def test_cli_never_leaves_pass_json_after_atomic_write_failure(
             raise OSError("injected directory open")
         return original_open(path, flags, *args)
 
-    if failure_stage in {"temp_file_fsync", "directory_fsync"}:
+    def injected_mkdir(path: Path, *args: object, **kwargs: object) -> None:
+        if path == output_path.parent:
+            raise OSError("injected mkdir")
+        original_mkdir(path, *args, **kwargs)
+
+    def injected_exists(path: Path) -> bool:
+        if path == output_path and existing_status is None:
+            raise OSError("injected old output inspection")
+        return original_exists(path)
+
+    def injected_read_bytes(path: Path) -> bytes:
+        if path == output_path:
+            raise OSError("injected old output read")
+        return original_read_bytes(path)
+
+    def injected_mkstemp(*args: object, **kwargs: object) -> tuple[int, str]:
+        raise OSError("injected mkstemp")
+
+    def injected_unlink(path: Path, *args: object, **kwargs: object) -> None:
+        if path == output_path:
+            raise OSError("injected output unlink")
+        original_unlink(path, *args, **kwargs)
+
+    if failure_stage == "mkdir":
+        monkeypatch.setattr(audit.Path, "mkdir", injected_mkdir)
+    elif failure_stage == "read_old":
+        monkeypatch.setattr(audit.Path, "exists", injected_exists)
+        monkeypatch.setattr(audit.Path, "read_bytes", injected_read_bytes)
+    elif failure_stage == "mkstemp":
+        monkeypatch.setattr(audit.tempfile, "mkstemp", injected_mkstemp)
+    elif failure_stage in {
+        "temp_file_fsync",
+        "directory_fsync",
+        "post_replace_unlink",
+    }:
         monkeypatch.setattr(audit.os, "fsync", injected_fsync)
+        if failure_stage == "post_replace_unlink":
+            monkeypatch.setattr(audit.Path, "unlink", injected_unlink)
     elif failure_stage == "replace":
         monkeypatch.setattr(audit.os, "replace", injected_replace)
     else:
@@ -1214,8 +1393,11 @@ def test_cli_never_leaves_pass_json_after_atomic_write_failure(
     assert audit.main() == 1
     printed = json.loads(capsys.readouterr().out)
     assert printed["status"] == FAIL_STATUS
-    if output_path.exists():
+    try:
         written = json.loads(output_path.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        pass
+    else:
         assert written["status"] == FAIL_STATUS
 
 

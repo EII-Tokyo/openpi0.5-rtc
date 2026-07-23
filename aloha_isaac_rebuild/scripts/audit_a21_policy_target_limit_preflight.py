@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+from contextlib import suppress
 from copy import deepcopy
 import hashlib
 import json
@@ -506,8 +507,13 @@ def evaluate_preflight(
     canonical_dofs: list[dict[str, object]] | None = None
     trusted_a20_inputs: dict[str, object] | None = None
     layer1_object: dict[str, object] | None = None
+    current_config: dict[str, object] | None = None
     if inputs is not None and not isinstance(inputs, dict):
         errors.append(_error("invalid_inputs", "inputs must be an object"))
+    try:
+        current_config = _current_config_binding(inputs)
+    except (TypeError, ValueError) as exc:
+        errors.append(_error("invalid_config_binding", str(exc)))
     try:
         layer1_object = _validate_a20_layer(
             layer1,
@@ -518,6 +524,17 @@ def evaluate_preflight(
         trusted_a20_inputs = _layer1_inputs(layer1_object)
     except (TypeError, ValueError) as exc:
         errors.append(_error("invalid_layer1_evidence", str(exc)))
+    if (
+        current_config is not None
+        and trusted_a20_inputs is not None
+        and current_config != trusted_a20_inputs.get("config")
+    ):
+        errors.append(
+            _error(
+                "invalid_config_binding",
+                "current config binding does not exactly match Layer1",
+            )
+        )
 
     runtime_records: list[dict[str, object]] | None = None
     adapter: dict[str, object] | None = None
@@ -723,6 +740,29 @@ def _layer1_inputs(layer1: dict[str, object]) -> dict[str, object]:
     return trusted
 
 
+def _current_config_binding(
+    inputs: dict[str, object] | None,
+) -> dict[str, object]:
+    if not isinstance(inputs, dict):
+        raise ValueError("inputs must contain an explicit config binding")
+    binding = inputs.get("config")
+    if not isinstance(binding, dict):
+        raise ValueError("inputs.config must be an object")
+    raw_path = _absolute_path(
+        binding.get("path"),
+        field="current config path",
+    )
+    if str(Path(raw_path).resolve()) != raw_path:
+        raise ValueError("current config path must be canonical")
+    return {
+        "path": raw_path,
+        "sha256": _sha256(
+            binding.get("sha256"),
+            field="current config sha256",
+        ),
+    }
+
+
 def _preflight_result(
     *,
     inputs: dict[str, object],
@@ -772,14 +812,33 @@ def _load_json_with_binding(path: Path, *, input_name: str, inputs: dict[str, ob
 
 def _atomic_write(path: Path, payload: dict[str, object]) -> None:
     path = path.resolve()
-    path.parent.mkdir(parents=True, exist_ok=True)
-    previous_content = path.read_bytes() if path.exists() else None
-    previous_failure = (
-        previous_content if previous_content is not None and _is_serialized_failure(previous_content) else None
-    )
-    descriptor, temporary = tempfile.mkstemp(prefix=f".{path.name}.", suffix=".tmp", dir=path.parent)
+    temporary: str | None = None
     replaced = False
+    previous_was_failure = False
     try:
+        try:
+            output_exists = path.exists()
+        except BaseException:
+            _neutralize_output(path)
+            raise
+        if output_exists:
+            try:
+                previous_content = path.read_bytes()
+            except BaseException:
+                _neutralize_output(path)
+                _sync_directory(path.parent)
+                raise
+            previous_was_failure = _is_serialized_failure(previous_content)
+            if not previous_was_failure:
+                _neutralize_output(path)
+                _sync_directory(path.parent)
+
+        path.parent.mkdir(parents=True, exist_ok=True)
+        descriptor, temporary = tempfile.mkstemp(
+            prefix=f".{path.name}.",
+            suffix=".tmp",
+            dir=path.parent,
+        )
         with os.fdopen(descriptor, "w", encoding="utf-8") as stream:
             json.dump(payload, stream, indent=2, sort_keys=True)
             stream.write("\n")
@@ -787,17 +846,13 @@ def _atomic_write(path: Path, payload: dict[str, object]) -> None:
             os.fsync(stream.fileno())
         os.replace(temporary, path)
         replaced = True
-        directory_descriptor = os.open(path.parent, os.O_RDONLY)
-        try:
-            os.fsync(directory_descriptor)
-        finally:
-            os.close(directory_descriptor)
+        temporary = None
+        _sync_directory(path.parent)
     except BaseException:
-        Path(temporary).unlink(missing_ok=True)
-        if replaced:
-            _restore_failure_or_remove(path, previous_failure)
-        elif previous_content is not None and previous_failure is None:
-            path.unlink(missing_ok=True)
+        if temporary is not None:
+            _discard_temporary(Path(temporary))
+        if replaced or not previous_was_failure:
+            _neutralize_output(path)
         raise
 
 
@@ -809,37 +864,75 @@ def _is_serialized_failure(content: bytes) -> bool:
     return isinstance(payload, dict) and payload.get("status") == FAIL_STATUS and payload.get("ok") is False
 
 
-def _restore_failure_or_remove(path: Path, previous_failure: bytes | None) -> None:
-    path.unlink(missing_ok=True)
-    if previous_failure is None:
-        return
-
-    descriptor: int | None = None
-    temporary: str | None = None
+def _sync_directory(path: Path) -> None:
+    descriptor = os.open(path, os.O_RDONLY)
     try:
-        descriptor, temporary = tempfile.mkstemp(
-            prefix=f".{path.name}.rollback.",
-            suffix=".tmp",
-            dir=path.parent,
-        )
-        with os.fdopen(descriptor, "wb") as stream:
-            descriptor = None
-            stream.write(previous_failure)
-            stream.flush()
-            os.fsync(stream.fileno())
-        os.replace(temporary, path)
-        temporary = None
-        directory_descriptor = os.open(path.parent, os.O_RDONLY)
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
+
+
+def _neutralize_output(path: Path) -> None:
+    try:
+        path.unlink()
+        return
+    except FileNotFoundError:
+        return
+    except OSError:
         try:
-            os.fsync(directory_descriptor)
-        finally:
-            os.close(directory_descriptor)
-    except BaseException:
-        if descriptor is not None:
-            os.close(descriptor)
-        if temporary is not None:
-            Path(temporary).unlink(missing_ok=True)
-        path.unlink(missing_ok=True)
+            _overwrite_with_failure(path)
+            return
+        except BaseException:
+            tombstone = path.with_name(f".{path.name}.failed-write")
+            try:
+                os.replace(path, tombstone)
+                return
+            except FileNotFoundError:
+                return
+            except BaseException as rename_error:
+                raise RuntimeError("could not neutralize PASS-capable output") from rename_error
+
+
+def _overwrite_with_failure(path: Path) -> None:
+    content = (
+        json.dumps(
+            {
+                "schema_version": SCHEMA_VERSION,
+                "ok": False,
+                "status": FAIL_STATUS,
+                "errors": [
+                    {
+                        "code": "incomplete_atomic_write",
+                        "message": "output was neutralized after a write failure",
+                    }
+                ],
+            },
+            sort_keys=True,
+        ).encode("utf-8")
+        + b"\n"
+    )
+    descriptor = os.open(path, os.O_WRONLY | os.O_TRUNC)
+    try:
+        offset = 0
+        while offset < len(content):
+            written = os.write(descriptor, content[offset:])
+            if written <= 0:
+                raise OSError("short write while neutralizing output")
+            offset += written
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
+
+
+def _discard_temporary(path: Path) -> None:
+    try:
+        path.unlink()
+    except FileNotFoundError:
+        return
+    except OSError:
+        tombstone = path.with_name(f".{path.name}.discarded")
+        with suppress(OSError):
+            os.replace(path, tombstone)
 
 
 def _exact_pass(result: object) -> bool:
@@ -879,10 +972,14 @@ def main() -> int:
     args = parser.parse_args()
 
     repo = Path.cwd().resolve()
-    config_path = args.config.expanduser().resolve()
+    requested_config = args.config.expanduser()
+    config_candidate = requested_config if requested_config.is_absolute() else repo / requested_config
+    config_path = config_candidate.resolve()
     inputs: dict[str, object] = {"config": {"path": str(config_path), "sha256": None}}
     output_path: Path | None = None
     try:
+        if config_candidate != config_path:
+            raise ValueError("config path must be canonical and not a symlink")
         config_bytes = config_path.read_bytes()
         inputs["config"] = {
             "path": str(config_path),
