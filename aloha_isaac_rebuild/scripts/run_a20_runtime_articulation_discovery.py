@@ -624,7 +624,7 @@ def check_probe_source(source: str) -> dict[str, Any]:
         "get", "get_context", "get_dof_limits", "get_physx_interface", "get_stage_id", "getpid",
         "hasattr", "hexdigest", "int", "isinstance", "isoformat", "len", "list", "loads", "main",
         "now", "open", "open_stage", "operation", "parse_args", "printer", "read_text", "replace",
-        "resolve", "safe_load", "serializer", "set_subspace_roots", "start_simulation", "str", "strftime", "super",
+        "resolve", "safe_load", "serializer", "set", "set_subspace_roots", "sorted", "start_simulation", "str", "strftime", "super",
         "tolist", "version", "zip",
     }
 

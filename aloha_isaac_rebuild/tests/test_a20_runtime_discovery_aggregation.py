@@ -257,6 +257,84 @@ def test_runtime_discovery_failure_names_the_exact_failed_api() -> None:
     assert "USD load refused" in str(raised.value)
 
 
+def test_runtime_path_binding_preserves_raw_order_but_joins_layer1_fields_by_path() -> None:
+    namespace = runpy.run_path(str(PROBE), run_name="probe_path_join_test")
+    expected = [_record(0), _record(1)]
+
+    class Metadata:
+        def __init__(self):
+            self.dof_names = ["joint_01", "joint_00"]
+            self.dof_types = [types.SimpleNamespace(name="Rotation"), types.SimpleNamespace(name="Rotation")]
+
+    class Articulation:
+        def __init__(self):
+            self.count, self.max_dofs = 1, 2
+            self.prim_paths = ["/aloha/root_joint"]
+            self.dof_paths = [[expected[1]["path"], expected[0]["path"]]]
+            self.shared_metatype = Metadata()
+        def get_dof_limits(self): return [[[-1.0, 1.0], [-1.0, 1.0]]]
+
+    class View:
+        def set_subspace_roots(self, root): return None
+        def create_articulation_view(self, paths): return Articulation()
+
+    class Tensors:
+        @staticmethod
+        def create_simulation_view(backend, *, stage_id): return View()
+
+    class Context:
+        def open_stage(self, path): return True
+        def get_stage_id(self): return 1
+
+    class Physics:
+        def force_load_physics_from_usd(self): return None
+        def start_simulation(self): return None
+
+    records, _ = namespace["_discover_runtime_records"]("x", expected, Context(), Physics(), Tensors)
+    assert [record["path"] for record in records] == [expected[1]["path"], expected[0]["path"]]
+    assert records[0]["body0"] == expected[1]["body0"]
+    assert records[1]["body0"] == expected[0]["body0"]
+    assert [record["index"] for record in records] == [0, 1]
+
+
+@pytest.mark.parametrize("failure", ["duplicate_expected", "duplicate_runtime", "missing_unexpected"])
+def test_runtime_path_binding_fail_closed(failure: str) -> None:
+    namespace = runpy.run_path(str(PROBE), run_name=f"probe_path_failure_{failure}")
+    expected = [_record(0), _record(1)]
+    runtime_paths = [expected[0]["path"], expected[1]["path"]]
+    if failure == "duplicate_expected":
+        expected[1]["path"] = expected[0]["path"]
+    elif failure == "duplicate_runtime":
+        runtime_paths[1] = runtime_paths[0]
+    else:
+        runtime_paths[1] = "/aloha/joints/unexpected"
+
+    class Metadata:
+        def __init__(self):
+            self.dof_names = ["joint_00", "joint_01"]
+            self.dof_types = [types.SimpleNamespace(name="Rotation"), types.SimpleNamespace(name="Rotation")]
+    class Articulation:
+        def __init__(self):
+            self.count, self.max_dofs = 1, 2
+            self.prim_paths, self.dof_paths = ["/aloha/root_joint"], [runtime_paths]
+            self.shared_metatype = Metadata()
+        def get_dof_limits(self): return [[[-1.0, 1.0], [-1.0, 1.0]]]
+    class View:
+        def set_subspace_roots(self, root): return None
+        def create_articulation_view(self, paths): return Articulation()
+    class Tensors:
+        @staticmethod
+        def create_simulation_view(backend, *, stage_id): return View()
+    class Context:
+        def open_stage(self, path): return True
+        def get_stage_id(self): return 1
+    class Physics:
+        def force_load_physics_from_usd(self): return None
+        def start_simulation(self): return None
+    with pytest.raises(namespace["RuntimeDiscoveryError"], match="runtime_record_path_binding"):
+        namespace["_discover_runtime_records"]("x", expected, Context(), Physics(), Tensors)
+
+
 def test_false_force_load_and_none_articulation_are_honest_failures() -> None:
     namespace = runpy.run_path(str(PROBE), run_name="probe_return_contract_test")
 

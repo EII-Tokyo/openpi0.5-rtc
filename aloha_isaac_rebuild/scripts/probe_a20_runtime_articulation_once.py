@@ -114,10 +114,36 @@ def _discover_runtime_records(
             f"paths={len(paths)} limits={len(limits)} max_dofs={dof_count}",
         )
 
+    expected_by_path: dict[str, dict[str, object]] = {}
+    for template in expected:
+        try:
+            expected_path = template["path"]
+        except KeyError:
+            expected_path = None
+        if not isinstance(expected_path, str) or not expected_path:
+            raise RuntimeDiscoveryError(
+                "runtime_record_path_binding", f"invalid expected path: {expected_path}"
+            )
+        if expected_path in expected_by_path:
+            raise RuntimeDiscoveryError(
+                "runtime_record_path_binding", f"duplicate expected path: {expected_path}"
+            )
+        expected_by_path[expected_path] = template
+    runtime_paths = [str(path) for path in paths]
+    if len(set(runtime_paths)) != len(runtime_paths):
+        raise RuntimeDiscoveryError("runtime_record_path_binding", "duplicate runtime path")
+    missing = sorted(set(expected_by_path) - set(runtime_paths))
+    unexpected = sorted(set(runtime_paths) - set(expected_by_path))
+    if missing or unexpected:
+        raise RuntimeDiscoveryError(
+            "runtime_record_path_binding", f"missing={missing} unexpected={unexpected}"
+        )
+
     records: list[dict[str, object]] = []
-    for index, (template, name, path, dof_type, limit) in enumerate(
-        zip(expected, names, paths, types, limits, strict=True)
+    for index, (name, path, dof_type, limit) in enumerate(
+        zip(names, runtime_paths, types, limits, strict=True)
     ):
+        template = expected_by_path[path]
         type_name = dof_type.name
         joint_type = (
             "PhysicsRevoluteJoint"
@@ -139,7 +165,7 @@ def _discover_runtime_records(
             )
         record = {
             **template,
-            "path": str(path),
+            "path": path,
             "name": str(name),
             "joint_type": joint_type,
             "lower_limit": math.degrees(float(bounds[0]))
