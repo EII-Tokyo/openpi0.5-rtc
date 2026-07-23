@@ -125,6 +125,24 @@ def test_probe_checker_allows_only_the_reviewed_no_step_runtime_discovery_calls(
         "(foo / bar).resolve()\n",
     ):
         assert check_probe_source(provenance_spoof)["ok"] is False
+    for app_binding_spoof in (
+        "app: object = None\n",
+        "(app := None)\n",
+        "app += 1\n",
+        "app, other = values\n",
+        "[app, other] = values\n",
+        "def f(app): pass\n",
+        "for app in values: pass\n",
+        "with manager() as app: pass\n",
+        "try:\n raise RuntimeError\nexcept RuntimeError as app:\n pass\n",
+        "[app for app in values]\n",
+        "def f():\n global app\n",
+        "def f():\n nonlocal app\n",
+        "app = SimulationApp({})\n",
+        "app = SimulationApp({'headless': False})\n",
+        "app = SimulationApp({'headless': True}, extra=True)\n",
+    ):
+        assert check_probe_source(app_binding_spoof)["ok"] is False
 
 
 def test_runtime_discovery_builds_records_from_real_tensor_view() -> None:

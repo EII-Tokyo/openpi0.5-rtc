@@ -681,6 +681,48 @@ def check_probe_source(source: str) -> dict[str, Any]:
         "tensors.create_simulation_view", "context.get_stage_id", "view.set_subspace_roots",
         "view.create_articulation_view", "articulation.get_dof_limits",
     }
+    allowed_app_store_nodes: set[int] = set()
+    for candidate in ast.walk(tree):
+        if not (
+            isinstance(candidate, ast.Assign)
+            and len(candidate.targets) == 1
+            and isinstance(candidate.targets[0], ast.Name)
+            and candidate.targets[0].id == "app"
+        ):
+            continue
+        none_assignment = isinstance(candidate.value, ast.Constant) and candidate.value.value is None
+        simulation_assignment = (
+            isinstance(candidate.value, ast.Call)
+            and isinstance(candidate.value.func, ast.Name)
+            and candidate.value.func.id == "SimulationApp"
+            and len(candidate.value.args) == 1
+            and not candidate.value.keywords
+            and isinstance(candidate.value.args[0], ast.Dict)
+            and len(candidate.value.args[0].keys) == 1
+            and isinstance(candidate.value.args[0].keys[0], ast.Constant)
+            and candidate.value.args[0].keys[0].value == "headless"
+            and isinstance(candidate.value.args[0].values[0], ast.Constant)
+            and candidate.value.args[0].values[0].value is True
+        )
+        if none_assignment or simulation_assignment:
+            allowed_app_store_nodes.add(id(candidate.targets[0]))
+
+    for candidate in ast.walk(tree):
+        if (
+            isinstance(candidate, ast.Name)
+            and candidate.id == "app"
+            and isinstance(candidate.ctx, ast.Store)
+            and id(candidate) not in allowed_app_store_nodes
+        ):
+            errors.append("app_binding_not_allowed:name_store")
+        elif isinstance(candidate, ast.arg) and candidate.arg == "app":
+            errors.append("app_binding_not_allowed:argument")
+        elif isinstance(candidate, ast.ExceptHandler) and candidate.name == "app":
+            errors.append("app_binding_not_allowed:except")
+        elif isinstance(candidate, ast.Global | ast.Nonlocal) and "app" in candidate.names:
+            errors.append("app_binding_not_allowed:scope_declaration")
+        elif isinstance(candidate, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef) and candidate.name == "app":
+            errors.append("app_binding_not_allowed:definition")
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
             for alias in node.names:
@@ -774,18 +816,6 @@ def check_probe_source(source: str) -> dict[str, Any]:
             and is_forbidden(node.value.attr)
         ):
             errors.append(f"attribute_alias_not_allowed:{node.value.attr}")
-        if isinstance(node, ast.Assign) and any(
-            isinstance(target, ast.Name) and target.id == "app" for target in node.targets
-        ):
-            valid_app_assignment = (
-                isinstance(node.value, ast.Constant) and node.value.value is None
-            ) or (
-                isinstance(node.value, ast.Call)
-                and isinstance(node.value.func, ast.Name)
-                and node.value.func.id == "SimulationApp"
-            )
-            if not valid_app_assignment:
-                errors.append("app_assignment_not_allowed")
         elif isinstance(node, ast.Assign) and isinstance(node.value, ast.Name) and is_forbidden(node.value.id):
             errors.append(f"name_alias_not_allowed:{node.value.id}")
         elif (
