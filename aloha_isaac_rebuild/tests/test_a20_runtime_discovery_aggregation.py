@@ -110,6 +110,13 @@ def test_probe_checker_allows_only_the_reviewed_no_step_runtime_discovery_calls(
         "from os import remove as start_simulation\n",
     ):
         assert check_probe_source(spoof)["ok"] is False
+    for attribute_spoof in (
+        "import os\nos.replace('a', 'b')\n",
+        "from pathlib import Path\nPath('a').replace('b')\n",
+        "import os\nos.close(1)\n",
+        "other.close()\n",
+    ):
+        assert check_probe_source(attribute_spoof)["ok"] is False
 
 
 def test_runtime_discovery_builds_records_from_real_tensor_view() -> None:

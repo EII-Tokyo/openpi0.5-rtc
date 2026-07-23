@@ -624,7 +624,7 @@ def check_probe_source(source: str) -> dict[str, Any]:
         "get", "get_context", "get_dof_limits", "get_physx_interface", "get_stage_id", "getpid",
         "hasattr", "hexdigest", "int", "isinstance", "isoformat", "len", "list", "loads", "main",
         "now", "open", "open_stage", "operation", "parse_args", "printer", "read_text", "replace",
-        "resolve", "safe_load", "serializer", "set_subspace_roots", "start_simulation", "str", "super",
+        "resolve", "safe_load", "serializer", "set_subspace_roots", "start_simulation", "str", "strftime", "super",
         "tolist", "version", "zip",
     }
 
@@ -671,6 +671,16 @@ def check_probe_source(source: str) -> dict[str, Any]:
         "simulation_view.create_articulation_view",
         "articulation_view.get_dof_limits",
     }
+    reviewed_attribute_calls = {
+        "argparse.ArgumentParser", "parser.add_argument", "parser.parse_args", "value.tolist",
+        "records.append", "path.open", "importlib.metadata.version", "os.getpid", "yaml.safe_load",
+        "json.loads", "json.dumps", "config_path.read_text", "mapping_path.read_text",
+        "omni.usd.get_context", "math.degrees", "hashlib.file_digest", "Path.cwd", "datetime.now",
+        "app.close",
+        "context.open_stage", "interface.force_load_physics_from_usd", "interface.start_simulation",
+        "tensors.create_simulation_view", "context.get_stage_id", "view.set_subspace_roots",
+        "view.create_articulation_view", "articulation.get_dof_limits",
+    }
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
             for alias in node.names:
@@ -706,6 +716,34 @@ def check_probe_source(source: str) -> dict[str, Any]:
                 mode = node.args[0].value if node.args and isinstance(node.args[0], ast.Constant) else None
                 if receiver != "path" or mode != "rb":
                     errors.append(f"open_not_allowed:{receiver}:{mode}")
+            if isinstance(node.func, ast.Attribute):
+                target = qualified_name(node.func)
+                receiver_node = node.func.value
+                nested_ok = (
+                    node.func.attr == "strftime"
+                    and isinstance(receiver_node, ast.Call)
+                    and qualified_name(receiver_node.func) == "datetime.now"
+                ) or (
+                    node.func.attr == "__init__"
+                    and isinstance(receiver_node, ast.Call)
+                    and isinstance(receiver_node.func, ast.Name)
+                    and receiver_node.func.id == "super"
+                ) or (
+                    node.func.attr == "resolve"
+                    and (
+                        isinstance(receiver_node, ast.BinOp)
+                        or (
+                            isinstance(receiver_node, ast.Call)
+                            and qualified_name(receiver_node.func) == "Path.cwd"
+                        )
+                    )
+                ) or (
+                    node.func.attr == "hexdigest"
+                    and isinstance(receiver_node, ast.Call)
+                    and qualified_name(receiver_node.func) == "hashlib.file_digest"
+                )
+                if target not in reviewed_attribute_calls and not nested_ok:
+                    errors.append(f"attribute_call_not_allowed:{target or node.func.attr}")
             if isinstance(node.func, ast.Name) and node.func.id in aliases:
                 target = aliases[node.func.id].rsplit(".", 1)[-1]
                 if is_forbidden(target):

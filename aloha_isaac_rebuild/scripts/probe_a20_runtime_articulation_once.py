@@ -119,10 +119,13 @@ def _discover_runtime_records(
         zip(expected, names, paths, types, limits, strict=True)
     ):
         type_name = dof_type.name
-        joint_type = {
-            "Rotation": "PhysicsRevoluteJoint",
-            "Translation": "PhysicsPrismaticJoint",
-        }.get(type_name)
+        joint_type = (
+            "PhysicsRevoluteJoint"
+            if type_name == "Rotation"
+            else "PhysicsPrismaticJoint"
+            if type_name == "Translation"
+            else None
+        )
         if joint_type is None:
             raise RuntimeDiscoveryError(
                 "omni.physics.tensors.ArticulationView.shared_metatype.dof_types",
@@ -176,7 +179,7 @@ def _digest(path: Path) -> str:
 
 
 def _now() -> str:
-    return datetime.now(UTC).isoformat().replace("+00:00", "Z")
+    return datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
 
 def _safe_version(distribution: str) -> str:
