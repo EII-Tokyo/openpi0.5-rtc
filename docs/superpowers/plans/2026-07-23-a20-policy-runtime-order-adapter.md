@@ -56,15 +56,15 @@ git commit -m "fix: bind A20 determinism to probe provenance"
 Create tests that load `a17_clean_articulation_mapping_plan.json`, build a raw runtime record list in this path order:
 
 ```python
-INTERLEAVED_PATHS = [
+OBSERVED_RUNTIME_PATHS = [
     "/aloha/joints/left_waist", "/aloha/joints/right_waist",
     "/aloha/joints/left_shoulder", "/aloha/joints/right_shoulder",
     "/aloha/joints/left_elbow", "/aloha/joints/right_elbow",
     "/aloha/joints/left_forearm_roll", "/aloha/joints/right_forearm_roll",
     "/aloha/joints/left_wrist_angle", "/aloha/joints/right_wrist_angle",
     "/aloha/joints/left_wrist_rotate", "/aloha/joints/right_wrist_rotate",
-    "/aloha/joints/left_left_finger", "/aloha/joints/right_left_finger",
-    "/aloha/joints/left_right_finger", "/aloha/joints/right_right_finger",
+    "/aloha/joints/left_left_finger", "/aloha/joints/left_right_finger",
+    "/aloha/joints/right_left_finger", "/aloha/joints/right_right_finger",
 ]
 ```
 
@@ -72,11 +72,11 @@ Assert that `build_order_adapter(build_policy_contract(mapping), runtime_records
 
 ```python
 assert adapter["schema_version"] == "a20-policy-runtime-order-v1"
-assert adapter["runtime_order"] == INTERLEAVED_PATHS
-assert adapter["canonical_to_runtime_indices"] == [0, 2, 4, 6, 8, 10, 12, 14, 1, 3, 5, 7, 9, 11, 13, 15]
+assert adapter["runtime_order"] == OBSERVED_RUNTIME_PATHS
+assert adapter["canonical_to_runtime_indices"] == [0, 2, 4, 6, 8, 10, 12, 13, 1, 3, 5, 7, 9, 11, 14, 15]
 assert len(adapter["policy_to_runtime"]) == 14
-assert adapter["policy_to_runtime"][6]["runtime_indices"] == [12, 14]
-assert adapter["policy_to_runtime"][13]["runtime_indices"] == [13, 15]
+assert adapter["policy_to_runtime"][6]["runtime_indices"] == [12, 13]
+assert adapter["policy_to_runtime"][13]["runtime_indices"] == [14, 15]
 ```
 
 - [ ] **Step 2: Run the new tests and verify RED**

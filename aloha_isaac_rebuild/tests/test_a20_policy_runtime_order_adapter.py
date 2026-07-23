@@ -17,7 +17,7 @@ MAPPING = (
     ROOT
     / "aloha_isaac_rebuild/artifacts/validation/a17_clean_articulation_mapping_plan.json"
 )
-INTERLEAVED_PATHS = [
+OBSERVED_RUNTIME_PATHS = [
     "/aloha/joints/left_waist",
     "/aloha/joints/right_waist",
     "/aloha/joints/left_shoulder",
@@ -31,8 +31,8 @@ INTERLEAVED_PATHS = [
     "/aloha/joints/left_wrist_rotate",
     "/aloha/joints/right_wrist_rotate",
     "/aloha/joints/left_left_finger",
-    "/aloha/joints/right_left_finger",
     "/aloha/joints/left_right_finger",
+    "/aloha/joints/right_left_finger",
     "/aloha/joints/right_right_finger",
 ]
 
@@ -44,7 +44,7 @@ def _mapping() -> dict[str, object]:
 def _runtime_records() -> list[dict[str, object]]:
     return [
         {"index": index, "path": path, "name": path.rsplit("/", 1)[-1]}
-        for index, path in enumerate(INTERLEAVED_PATHS)
+        for index, path in enumerate(OBSERVED_RUNTIME_PATHS)
     ]
 
 
@@ -63,12 +63,12 @@ def test_build_policy_contract_from_real_a17_mapping() -> None:
     )
 
 
-def test_build_order_adapter_preserves_interleaved_runtime_order() -> None:
+def test_build_order_adapter_preserves_observed_runtime_order() -> None:
     contract = build_policy_contract(_mapping())
     adapter = build_order_adapter(contract, _runtime_records())
 
     assert adapter["schema_version"] == "a20-policy-runtime-order-v1"
-    assert adapter["runtime_order"] == INTERLEAVED_PATHS
+    assert adapter["runtime_order"] == OBSERVED_RUNTIME_PATHS
     assert adapter["canonical_to_runtime_indices"] == [
         0,
         2,
@@ -77,19 +77,19 @@ def test_build_order_adapter_preserves_interleaved_runtime_order() -> None:
         8,
         10,
         12,
-        14,
+        13,
         1,
         3,
         5,
         7,
         9,
         11,
-        13,
+        14,
         15,
     ]
     assert len(adapter["policy_to_runtime"]) == 14
-    assert adapter["policy_to_runtime"][6]["runtime_indices"] == [12, 14]
-    assert adapter["policy_to_runtime"][13]["runtime_indices"] == [13, 15]
+    assert adapter["policy_to_runtime"][6]["runtime_indices"] == [12, 13]
+    assert adapter["policy_to_runtime"][13]["runtime_indices"] == [14, 15]
     assert adapter["mapping_complete"] is True
 
 
@@ -181,8 +181,8 @@ def test_policy_to_runtime_expands_both_grippers(gripper_value: float) -> None:
 
     assert len(runtime) == 16
     assert runtime[12] == pytest.approx(0.021 + 0.036 * gripper_value)
-    assert runtime[14] == pytest.approx(-0.021 - 0.036 * gripper_value)
-    assert runtime[13] == pytest.approx(0.021 + 0.036 * gripper_value)
+    assert runtime[13] == pytest.approx(-0.021 - 0.036 * gripper_value)
+    assert runtime[14] == pytest.approx(0.021 + 0.036 * gripper_value)
     assert runtime[15] == pytest.approx(-0.021 - 0.036 * gripper_value)
     assert runtime[0] == pytest.approx(policy[0])
     assert runtime[1] == pytest.approx(policy[7])
@@ -223,7 +223,7 @@ def test_runtime_to_policy_round_trips_arms_and_grippers() -> None:
 def test_runtime_to_policy_rejects_inconsistent_gripper_readback() -> None:
     adapter = _adapter()
     runtime = policy_to_runtime([0.0] * 14, adapter)
-    runtime[14] -= 0.001
+    runtime[13] -= 0.001
 
     with pytest.raises(ValueError, match="inconsistent gripper readback"):
         runtime_to_policy(runtime, adapter)

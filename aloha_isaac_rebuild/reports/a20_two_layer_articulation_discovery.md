@@ -16,22 +16,26 @@ Overall: NOT_READY
 - Observed DOFs: 16
 - Mismatches: 0
 - Stage: /home/eii/project/openpi0.5-rtc-reward-learning/aloha_isaac_rebuild/scenes/a19_clean_articulation_candidate.usda
-- Stage SHA-256: 6c2fecb9819b
+- Stage SHA-256: 09b55972d7ba
 
 ## Layer 2
 
-- Status: FAIL_A20_RUNTIME_ARTICULATION_DISCOVERY
+- Status: PASS_A20_RUNTIME_ARTICULATION_DISCOVERY_NO_STEP
 - Runs: 3
-- Three-run determinism: FAIL
-- Errors: 3
+- Three-run raw runtime determinism: PASS
+- Runtime joint semantic match: PASS
+- Policy-to-runtime mapping: PASS
+- Policy/runtime round trip: PASS
+- Raw order equals canonical order: no (informational)
+- Errors: 0
 - Mismatches: 0
 - Exit contract: BLOCKED=2, PASS=0, FAIL=1
-- Git revision: 78d989bc97ed
-- Probe SHA-256: aefc2d72c1ea
-- Coordinator SHA-256: 5a72502458e4
-- Report generation ID: ff52d6f1-172c-4ad4-aa70-bb35c3b0b642
-- Runtime evidence SHA-256: 0b9d2eadf159
-- Next action: Required operations: physics simulation step, timeline Play; these operations were not approved.
+- Git revision: e48514325bfe
+- Probe SHA-256: 655a91b9be74
+- Coordinator SHA-256: d814e05d6895
+- Report generation ID: 16aa7a53-b831-4a3d-937c-2e24daa2c4e2
+- Runtime evidence SHA-256: bb1313309414
+- Next action: No blocked-runtime action is authorized by this report.
 
 ## Safety and readiness
 

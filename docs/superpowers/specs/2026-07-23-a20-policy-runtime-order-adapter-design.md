@@ -3,9 +3,10 @@
 ## Goal
 
 Allow the A19 dual-arm ALOHA articulation to keep Isaac/PhysX's deterministic
-left/right-interleaved 16-DOF runtime order while preserving the established
-ALOHA/OpenPI 14D policy and dataset order: six left-arm joints, one left
-gripper scalar, six right-arm joints, and one right gripper scalar.
+arm-left/right-interleaved, paired-finger-grouped 16-DOF runtime order while
+preserving the established ALOHA/OpenPI 14D policy and dataset order: six
+left-arm joints, one left gripper scalar, six right-arm joints, and one right
+gripper scalar.
 
 This design replaces A20's invalid requirement that raw PhysX order must equal
 the A17 canonical semantic order. It does not weaken joint identity, metadata,
@@ -183,7 +184,7 @@ Implementation follows test-driven development.
 
 Pure unit tests cover:
 
-- the current deterministic interleaved 16-DOF runtime order;
+- the current deterministic arm-interleaved, paired-finger-grouped 16-DOF runtime order;
 - a different but internally deterministic raw order;
 - complete 16D canonical/runtime bijection;
 - all 14 policy indices and both two-finger gripper expansions;

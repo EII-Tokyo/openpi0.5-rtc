@@ -47,7 +47,7 @@ Collect and validate:
 - runtime DOF types and limits are finite and consistent with Layer 1 after applying documented Isaac runtime units;
 - repeated discovery facts and provenance are deterministic across three fresh process runs.
 
-This amendment follows the approved [A20 policy-to-runtime order adapter design](2026-07-23-a20-policy-runtime-order-adapter-design.md). A deterministic left/right-interleaved PhysX order is valid evidence; changing USD authoring merely to imitate that traversal order is out of scope.
+This amendment follows the approved [A20 policy-to-runtime order adapter design](2026-07-23-a20-policy-runtime-order-adapter-design.md). The observed deterministic PhysX order alternates the twelve arm joints left/right, then groups the two left fingers followed by the two right fingers. This noncanonical raw order is valid evidence; changing USD authoring merely to imitate that traversal order is out of scope.
 
 The implementation must record whether a physics scene or handle initialization was required. It must always report `physics_stepped=false`, `actions_applied=false`, `targets_written=false`, and `stage_saved=false`.
 
