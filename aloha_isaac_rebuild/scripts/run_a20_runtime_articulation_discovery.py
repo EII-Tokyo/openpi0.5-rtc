@@ -220,6 +220,19 @@ def _run_errors(
         and run.get("requires_unapproved_initialization") is True
         and run.get("valid_handle") is False
     )
+    reported_failures = run.get("errors")
+    runtime_api_blocked = (
+        blocked
+        and isinstance(reported_failures, list)
+        and len(reported_failures) == 1
+        and isinstance(reported_failures[0], dict)
+        and reported_failures[0].get("code") == "runtime_api_failure"
+        and isinstance(reported_failures[0].get("api"), str)
+        and bool(reported_failures[0]["api"].strip())
+        and isinstance(reported_failures[0].get("message"), str)
+        and bool(reported_failures[0]["message"].strip())
+        and operations == [reported_failures[0]["api"]]
+    )
     if run.get("status") not in (_RUN_PASS, _BLOCKED):
         errors.append({"code": "invalid_run_status", "run_index": run_index})
     elif run.get("status") == _BLOCKED and not blocked:
@@ -227,11 +240,11 @@ def _run_errors(
     elif run.get("status") == _RUN_PASS and run.get("requires_unapproved_initialization") is not False:
         errors.append({"code": "unexpected_initialization_requirement", "run_index": run_index})
 
-    if run.get("articulation_root") != "/aloha/root_joint":
+    if not runtime_api_blocked and run.get("articulation_root") != "/aloha/root_joint":
         errors.append({"code": "invalid_articulation_root", "run_index": run_index})
-    if type(run.get("articulation_count")) is int and run["articulation_count"] != 1:
+    if not runtime_api_blocked and type(run.get("articulation_count")) is int and run["articulation_count"] != 1:
         errors.append({"code": "invalid_articulation_count", "run_index": run_index})
-    if type(run.get("dof_count")) is int and run["dof_count"] != 16:
+    if not runtime_api_blocked and type(run.get("dof_count")) is int and run["dof_count"] != 16:
         errors.append({"code": "invalid_dof_count", "run_index": run_index})
     if not blocked and run.get("valid_handle") is not True:
         errors.append({"code": "invalid_handle", "run_index": run_index})
@@ -239,7 +252,7 @@ def _run_errors(
     records = run.get("records")
     if not (isinstance(records, list) and all(isinstance(record, dict) for record in records)):
         errors.append({"code": "invalid_records_shape", "run_index": run_index})
-    else:
+    elif not runtime_api_blocked:
         comparison = compare_dof_records(expected, records)
         if not comparison["ok"]:
             errors.append({"code": "runtime_records_mismatch", "run_index": run_index})
@@ -560,7 +573,7 @@ def check_probe_source(source: str) -> dict[str, Any]:
     forbidden_calls = {
         "play", "step", "reset", "initialize", "initialize_async", "set_joint_positions", "set_joint_velocities",
         "set_joint_efforts", "apply_action", "save", "Save", "Export", "Flatten",
-        "getattr", "setattr", "__import__", "exec", "eval", "import_module", "update",
+        "getattr", "setattr", "__import__", "exec", "eval", "import_module", "update", "update_simulation",
     }
 
     def is_forbidden(name: str) -> bool:
@@ -568,7 +581,7 @@ def check_probe_source(source: str) -> dict[str, Any]:
 
     allowed_import_roots = {
         "__future__", "argparse", "datetime", "hashlib", "importlib", "json", "os",
-        "pathlib", "isaacsim", "pxr", "yaml", "aloha_isaac_rebuild",
+        "pathlib", "isaacsim", "math", "omni", "pxr", "yaml", "aloha_isaac_rebuild",
     }
     aliases: dict[str, str] = {}
     for node in ast.walk(tree):

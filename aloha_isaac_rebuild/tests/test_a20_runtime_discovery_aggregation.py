@@ -4,6 +4,7 @@ import ast
 from copy import deepcopy
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import runpy
@@ -73,6 +74,112 @@ def test_strict_probe_checker_rejects_dynamic_and_alias_bypasses() -> None:
 def test_strict_probe_checker_rejects_every_direct_forbidden_call(call: str) -> None:
     result = check_probe_source(f"runtime.{call}()\n")
     assert result["ok"] is False
+
+
+def test_probe_checker_allows_only_the_reviewed_no_step_runtime_discovery_calls() -> None:
+    source = (
+        "import omni.usd\n"
+        "from omni.physics import tensors\n"
+        "from omni.physx import get_physx_interface\n"
+        "context = omni.usd.get_context()\n"
+        "context.open_stage('candidate.usda')\n"
+        "interface = get_physx_interface()\n"
+        "interface.force_load_physics_from_usd()\n"
+        "interface.start_simulation()\n"
+        "view = tensors.create_simulation_view('numpy', stage_id=context.get_stage_id())\n"
+        "view.set_subspace_roots('/')\n"
+        "articulation = view.create_articulation_view(['/aloha/root_joint'])\n"
+        "articulation.get_dof_limits()\n"
+    )
+    assert check_probe_source(source)["ok"] is True
+    assert check_probe_source(source + "interface.update_simulation(0.0, 0.0)\n")["ok"] is False
+
+
+def test_runtime_discovery_builds_records_from_real_tensor_view() -> None:
+    namespace = runpy.run_path(str(PROBE), run_name="probe_runtime_records_test")
+    calls: list[object] = []
+
+    class FakeMetadata:
+        def __init__(self):
+            self.dof_names = ["joint_00", "joint_01"]
+            self.dof_types = [types.SimpleNamespace(name="Rotation"), types.SimpleNamespace(name="Translation")]
+
+    class FakeArticulationView:
+        def __init__(self):
+            self.count = 1
+            self.max_dofs = 2
+            self.prim_paths = ["/aloha/root_joint"]
+            self.dof_paths = [["/aloha/joints/joint_00", "/aloha/joints/joint_01"]]
+            self.shared_metatype = FakeMetadata()
+
+        def get_dof_limits(self):
+            calls.append("get_dof_limits")
+            return [[[-1.25, 1.5], [0.01, 0.04]]]
+
+    class FakeSimulationView:
+        def set_subspace_roots(self, root):
+            calls.append(("set_subspace_roots", root))
+
+        def create_articulation_view(self, paths):
+            calls.append(("create_articulation_view", paths))
+            return FakeArticulationView()
+
+    class FakeTensors:
+        @staticmethod
+        def create_simulation_view(backend, *, stage_id):
+            calls.append(("create_simulation_view", backend, stage_id))
+            return FakeSimulationView()
+
+    class FakePhysics:
+        def force_load_physics_from_usd(self):
+            calls.append("force_load_physics_from_usd")
+
+        def start_simulation(self):
+            calls.append("start_simulation")
+
+    class FakeContext:
+        def open_stage(self, path):
+            calls.append(("open_stage", path))
+            return True
+
+        def get_stage_id(self):
+            return 42
+
+    expected = [_record(0), _record(1)]
+    records, facts = namespace["_discover_runtime_records"](
+        "/tmp/candidate.usda", expected, FakeContext(), FakePhysics(), FakeTensors
+    )
+
+    assert calls == [
+        ("open_stage", "/tmp/candidate.usda"),
+        "force_load_physics_from_usd",
+        "start_simulation",
+        ("create_simulation_view", "numpy", 42),
+        ("set_subspace_roots", "/"),
+        ("create_articulation_view", ["/aloha/root_joint"]),
+        "get_dof_limits",
+    ]
+    assert facts == {"articulation_root": "/aloha/root_joint", "articulation_count": 1, "dof_count": 2}
+    assert [record["name"] for record in records] == ["joint_00", "joint_01"]
+    assert [record["path"] for record in records] == ["/aloha/joints/joint_00", "/aloha/joints/joint_01"]
+    assert [record["joint_type"] for record in records] == ["PhysicsRevoluteJoint", "PhysicsPrismaticJoint"]
+    assert [(record["lower_limit"], record["upper_limit"]) for record in records] == [
+        (math.degrees(-1.25), math.degrees(1.5)),
+        (0.01, 0.04),
+    ]
+
+
+def test_runtime_discovery_failure_names_the_exact_failed_api() -> None:
+    namespace = runpy.run_path(str(PROBE), run_name="probe_runtime_failure_test")
+
+    class BrokenContext:
+        def open_stage(self, path):
+            raise RuntimeError("USD load refused")
+
+    with pytest.raises(namespace["RuntimeDiscoveryError"]) as raised:
+        namespace["_discover_runtime_records"]("candidate.usda", [], BrokenContext(), object(), object())
+    assert raised.value.api == "omni.usd.get_context().open_stage"
+    assert "USD load refused" in str(raised.value)
 
 
 def test_execute_probe_caps_output_with_structured_failure(tmp_path: Path) -> None:
@@ -417,6 +524,33 @@ def test_structurally_valid_blocked_run_has_blocked_status() -> None:
     assert result["status"] == "BLOCKED_RUNTIME_HANDLE_REQUIRES_UNAPPROVED_INITIALIZATION"
     assert result["ok"] is False
     assert result["errors"] == []
+
+
+def test_runtime_api_failure_can_block_without_claiming_discovered_records() -> None:
+    runs = _runs()
+    runs[1].update(
+        status="BLOCKED_RUNTIME_HANDLE_REQUIRES_UNAPPROVED_INITIALIZATION",
+        valid_handle=False,
+        requires_unapproved_initialization=True,
+        initialization_operations=["omni.physx.IPhysx.start_simulation"],
+        articulation_root=None,
+        articulation_count=0,
+        dof_count=0,
+        records=[],
+        errors=[
+            {
+                "code": "runtime_api_failure",
+                "api": "omni.physx.IPhysx.start_simulation",
+                "message": "start_simulation: unavailable",
+            }
+        ],
+    )
+
+    result = aggregate_runtime_runs(_layer1(), runs)
+
+    assert result["status"] == "BLOCKED_RUNTIME_HANDLE_REQUIRES_UNAPPROVED_INITIALIZATION"
+    assert result["errors"] == []
+    assert result["blocked_run_indices"] == [1]
 
 
 def test_malformed_blocked_run_fails_instead_of_masking_error() -> None:
