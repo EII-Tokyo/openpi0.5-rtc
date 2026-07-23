@@ -143,6 +143,14 @@ def test_probe_checker_allows_only_the_reviewed_no_step_runtime_discovery_calls(
         "app = SimulationApp({'headless': True}, extra=True)\n",
     ):
         assert check_probe_source(app_binding_spoof)["ok"] is False
+    for pattern_binding_spoof in (
+        "match value:\n case app:\n  pass\n",
+        "match value:\n case [head, *app]:\n  pass\n",
+        "match value:\n case {'key': item, **app}:\n  pass\n",
+        "match value:\n case {'outer': [head, *app]}:\n  pass\n",
+    ):
+        compile(pattern_binding_spoof, "<app-pattern-repro>", "exec")
+        assert check_probe_source(pattern_binding_spoof)["ok"] is False
 
 
 def test_runtime_discovery_builds_records_from_real_tensor_view() -> None:

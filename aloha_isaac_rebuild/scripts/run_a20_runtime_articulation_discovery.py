@@ -719,6 +719,12 @@ def check_probe_source(source: str) -> dict[str, Any]:
             errors.append("app_binding_not_allowed:argument")
         elif isinstance(candidate, ast.ExceptHandler) and candidate.name == "app":
             errors.append("app_binding_not_allowed:except")
+        elif isinstance(candidate, ast.MatchAs) and candidate.name == "app":
+            errors.append("app_binding_not_allowed:match_as")
+        elif isinstance(candidate, ast.MatchStar) and candidate.name == "app":
+            errors.append("app_binding_not_allowed:match_star")
+        elif isinstance(candidate, ast.MatchMapping) and candidate.rest == "app":
+            errors.append("app_binding_not_allowed:match_mapping_rest")
         elif isinstance(candidate, ast.Global | ast.Nonlocal) and "app" in candidate.names:
             errors.append("app_binding_not_allowed:scope_declaration")
         elif isinstance(candidate, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef) and candidate.name == "app":
