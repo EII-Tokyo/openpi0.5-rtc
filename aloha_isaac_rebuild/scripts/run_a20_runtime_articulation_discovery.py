@@ -69,11 +69,49 @@ _FLOAT32_PRISMATIC_ABS_TOL = 1e-7
 
 
 def _compare_runtime_records(expected, observed):
-    normalized = [dict(record) for record in observed]
+    expected_paths = [record.get("path") for record in expected]
+    observed_paths = [record.get("path") for record in observed]
+    expected_path_set = set(expected_paths)
+    observed_path_set = set(observed_paths)
+    validation_errors = [
+        {"side": side, **error}
+        for side, records in (("expected", expected), ("runtime", observed))
+        for error in validate_dof_records(records)["errors"]
+    ]
+    missing = sorted(expected_path_set - observed_path_set, key=repr)
+    unexpected = sorted(observed_path_set - expected_path_set, key=repr)
+    if missing or unexpected or validation_errors:
+        mismatches = [
+            {
+                "field": "runtime_path_inventory",
+                "index": None,
+                "expected": expected_paths,
+                "observed": observed_paths,
+            }
+        ]
+        return {
+            "ok": False,
+            "mismatches": mismatches,
+            "validation_errors": validation_errors,
+            "failure_code": "runtime_inventory_mismatch",
+        }
+
+    runtime_by_path = {record["path"]: record for record in observed}
+    normalized = []
     source_errors = []
-    for index, (authored, runtime) in enumerate(zip(expected, normalized, strict=False)):
+    for canonical_index, authored in enumerate(expected):
+        raw_runtime = runtime_by_path[authored["path"]]
+        runtime = dict(raw_runtime)
+        runtime["index"] = canonical_index
+        normalized.append(runtime)
         if runtime.get("field_sources") != _RUNTIME_FIELD_SOURCES:
-            source_errors.append({"code": "invalid_field_sources", "index": index})
+            source_errors.append(
+                {
+                    "code": "invalid_field_sources",
+                    "runtime_index": raw_runtime.get("index"),
+                    "path": raw_runtime.get("path"),
+                }
+            )
         for field in ("lower_limit", "upper_limit"):
             left, right = authored.get(field), runtime.get(field)
             tolerance = (
@@ -93,6 +131,8 @@ def _compare_runtime_records(expected, observed):
     if source_errors:
         comparison["ok"] = False
         comparison.setdefault("validation_errors", []).extend(source_errors)
+    if not comparison["ok"]:
+        comparison["failure_code"] = "runtime_semantic_metadata_mismatch"
     return comparison
 
 
@@ -306,7 +346,14 @@ def _run_errors(
     elif not runtime_api_blocked:
         comparison = _compare_runtime_records(expected, records)
         if not comparison["ok"]:
-            errors.append({"code": "runtime_records_mismatch", "run_index": run_index})
+            errors.append(
+                {
+                    "code": comparison.get(
+                        "failure_code", "runtime_semantic_metadata_mismatch"
+                    ),
+                    "run_index": run_index,
+                }
+            )
             mismatches.extend({"run_index": run_index, **mismatch} for mismatch in comparison["mismatches"])
             mismatches.extend(
                 {"run_index": run_index, "validation_error": validation_error}
@@ -325,6 +372,8 @@ def aggregate_runtime_runs(layer1: object, runs: object) -> dict[str, Any]:
         errors.append({"code": "invalid_run_count", "expected": 3, "observed": run_count})
 
     blocked_runs: list[int] = []
+    order_adapter: dict[str, Any] | None = None
+    raw_order_matches_canonical: bool | None = None
     if not errors and isinstance(layer1, dict) and isinstance(runs, list):
         expected = layer1["expected"]
         for run_index, run in enumerate(runs):
@@ -344,6 +393,32 @@ def aggregate_runtime_runs(layer1: object, runs: object) -> dict[str, Any]:
         fingerprints = [json.dumps(run.get("inputs"), sort_keys=True, default=repr) for run in valid_runs]
         if len(set(fingerprints)) != 1:
             errors.append({"code": "input_hash_mismatch"})
+        runtime_order_fingerprints = [
+            json.dumps(
+                [record.get("path") for record in run.get("records", [])],
+                default=repr,
+            )
+            if isinstance(run.get("records"), list)
+            else "invalid"
+            for run in valid_runs
+        ]
+        if len(set(runtime_order_fingerprints)) != 1:
+            errors.append({"code": "runtime_order_nondeterministic"})
+        if valid_runs and isinstance(valid_runs[0].get("records"), list):
+            try:
+                order_adapter = build_order_adapter(
+                    layer1["policy_contract"], valid_runs[0]["records"]
+                )
+                order_adapter["round_trip_check"] = round_trip_check(order_adapter)
+                if order_adapter["round_trip_check"].get("status") != "PASS":
+                    errors.append({"code": "order_adapter_round_trip_failed"})
+                raw_order_matches_canonical = order_adapter.get(
+                    "runtime_order"
+                ) == [record.get("path") for record in expected]
+            except (KeyError, TypeError, ValueError) as exc:
+                errors.append(
+                    {"code": "order_adapter_validation_failed", "message": str(exc)}
+                )
         layer_stage = layer1["inputs"]["stage"]["post_sha256"]
         if any(
             not isinstance(run.get("inputs"), dict)
@@ -362,6 +437,7 @@ def aggregate_runtime_runs(layer1: object, runs: object) -> dict[str, Any]:
                 errors.append({"code": "run_timestamp_overlap"})
 
     if errors:
+        blocked_runs = []
         status = _FAIL
     elif blocked_runs:
         status = _BLOCKED
@@ -375,6 +451,8 @@ def aggregate_runtime_runs(layer1: object, runs: object) -> dict[str, Any]:
         "errors": errors,
         "mismatches": mismatches,
         "expected": layer1.get("expected") if isinstance(layer1, dict) else None,
+        "order_adapter": order_adapter,
+        "raw_order_matches_canonical": raw_order_matches_canonical,
     }
 
 
@@ -406,6 +484,12 @@ def is_exact_runtime_pass(payload: object, trusted_layer1: object = None) -> boo
         return False
     reaggregated = aggregate_runtime_runs(trusted_layer1, payload["runs"])
     if reaggregated["status"] != _PASS or reaggregated["errors"] or reaggregated["mismatches"]:
+        return False
+    if (
+        payload.get("order_adapter") != reaggregated.get("order_adapter")
+        or payload.get("raw_order_matches_canonical")
+        is not reaggregated.get("raw_order_matches_canonical")
+    ):
         return False
     trusted_inputs = trusted_layer1["inputs"]
     trusted_hashes = {
@@ -523,12 +607,20 @@ def _report_runtime_semantics(layer1: object, layer2: object) -> tuple[str, str]
         facts["provenance"] = {field: provenance.get(field) for field in provenance_fields}
         fingerprints.append(json.dumps(facts, sort_keys=True, default=repr))
     determinism = "PASS" if len(set(fingerprints)) == 1 else "FAIL"
-    canonical = "PASS" if all(
+    records_semantically_match = all(
         _compare_runtime_records(expected, run["records"])["ok"]
         for run in runs
         if isinstance(run.get("records"), list)
-    ) and all(isinstance(run.get("records"), list) for run in runs) else "FAIL"
-    return determinism, canonical
+    ) and all(isinstance(run.get("records"), list) for run in runs)
+    adapter = layer2.get("order_adapter") if isinstance(layer2, dict) else None
+    adapter_is_valid = (
+        isinstance(adapter, dict)
+        and adapter.get("mapping_complete") is True
+        and isinstance(adapter.get("round_trip_check"), dict)
+        and adapter["round_trip_check"].get("status") == "PASS"
+    )
+    semantic_mapping = "PASS" if records_semantically_match and adapter_is_valid else "FAIL"
+    return determinism, semantic_mapping
 
 
 def format_two_layer_report(asset_validator: object, layer1: object, layer2: object) -> str:
@@ -569,7 +661,17 @@ def format_two_layer_report(asset_validator: object, layer1: object, layer2: obj
     operations = all_operations[:MAX_REPORT_OPERATIONS]
     provenance = layer2.get("provenance", {}) if isinstance(layer2, dict) and isinstance(layer2.get("provenance"), dict) else {}
     blocked = layer2_status == _BLOCKED
-    determinism, canonical_order = _report_runtime_semantics(layer1, layer2)
+    determinism, semantic_mapping = _report_runtime_semantics(layer1, layer2)
+    raw_order_matches_canonical = (
+        layer2.get("raw_order_matches_canonical")
+        if isinstance(layer2, dict) and not blocked
+        else None
+    )
+    raw_order_summary = (
+        str(raw_order_matches_canonical).lower()
+        if isinstance(raw_order_matches_canonical, bool)
+        else "unknown"
+    )
     next_action = (
         "The runtime handle requires timeline Play and a physics simulation step; these operations were not approved."
         if blocked
@@ -608,7 +710,8 @@ def format_two_layer_report(asset_validator: object, layer1: object, layer2: obj
             f"- Status: {_bounded_field(layer2_status, 120)}",
             f"- Runs: {layer2.get('run_count', 'unknown') if isinstance(layer2, dict) else 'unknown'}",
             f"- Three-run determinism: {determinism}",
-            f"- Canonical ordered-record match: {canonical_order}",
+            f"- Semantic policy/runtime mapping: {semantic_mapping}",
+            f"- Raw order matches canonical: {raw_order_summary} (informational)",
             f"- Errors: {_count(layer2, 'errors')}",
             f"- Mismatches: {_count(layer2, 'mismatches')}",
             "- Exit contract: BLOCKED=2, PASS=0, FAIL=1",

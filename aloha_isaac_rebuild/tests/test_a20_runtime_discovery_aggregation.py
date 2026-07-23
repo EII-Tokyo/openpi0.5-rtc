@@ -697,10 +697,62 @@ def test_three_exact_saved_runs_pass() -> None:
     assert result["run_count"] == 3
 
 
+def test_three_deterministic_interleaved_runs_pass_via_explicit_adapter() -> None:
+    runs = _runs()
+    interleaved_canonical_indices = [
+        0,
+        8,
+        1,
+        9,
+        2,
+        10,
+        3,
+        11,
+        4,
+        12,
+        5,
+        13,
+        6,
+        14,
+        7,
+        15,
+    ]
+    for run in runs:
+        reordered = [run["records"][index] for index in interleaved_canonical_indices]
+        for runtime_index, record in enumerate(reordered):
+            record["index"] = runtime_index
+        run["records"] = reordered
+
+    result = aggregate_runtime_runs(_layer1(), runs)
+
+    assert result["status"] == "PASS_A20_RUNTIME_ARTICULATION_DISCOVERY_NO_STEP"
+    assert result["order_adapter"]["mapping_complete"] is True
+    assert result["order_adapter"]["round_trip_check"]["status"] == "PASS"
+    assert result["raw_order_matches_canonical"] is False
+    assert result["order_adapter"]["canonical_to_runtime_indices"] == [
+        0,
+        2,
+        4,
+        6,
+        8,
+        10,
+        12,
+        14,
+        1,
+        3,
+        5,
+        7,
+        9,
+        11,
+        13,
+        15,
+    ]
+
+
 @pytest.mark.parametrize(
     ("mutation", "error_code"),
     [
-        (lambda runs: runs[1]["records"].reverse(), "runtime_records_mismatch"),
+        (lambda runs: runs[1]["records"].reverse(), "runtime_order_nondeterministic"),
         (lambda runs: runs[1].update(valid_handle=False), "invalid_handle"),
         (lambda runs: runs[1].update(articulation_count=2), "invalid_articulation_count"),
         (lambda runs: runs[1].update(dof_count=15), "invalid_dof_count"),
@@ -718,6 +770,42 @@ def test_runtime_mismatch_or_unsafe_run_fails(mutation, error_code: str) -> None
     assert result["status"] == "FAIL_A20_RUNTIME_ARTICULATION_DISCOVERY"
     assert result["ok"] is False
     assert any(error["code"] == error_code for error in result["errors"])
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("joint_type", "PhysicsPrismaticJoint"),
+        ("lower_limit", -2.0),
+        ("body0", ["/aloha/wrong_body"]),
+        ("field_sources", {"path": "runtime"}),
+    ],
+)
+def test_path_aligned_runtime_semantics_still_fail_closed(
+    field: str, value: object
+) -> None:
+    runs = _runs()
+    runs[1]["records"][3][field] = value
+
+    result = aggregate_runtime_runs(_layer1(), runs)
+
+    assert result["status"] == "FAIL_A20_RUNTIME_ARTICULATION_DISCOVERY"
+    assert any(
+        error["code"] == "runtime_semantic_metadata_mismatch"
+        for error in result["errors"]
+    )
+
+
+def test_runtime_path_inventory_rejects_duplicates() -> None:
+    runs = _runs()
+    runs[1]["records"][3]["path"] = runs[1]["records"][2]["path"]
+
+    result = aggregate_runtime_runs(_layer1(), runs)
+
+    assert result["status"] == "FAIL_A20_RUNTIME_ARTICULATION_DISCOVERY"
+    assert any(
+        error["code"] == "runtime_inventory_mismatch" for error in result["errors"]
+    )
 
 
 @pytest.mark.parametrize(
@@ -1322,7 +1410,8 @@ def test_two_layer_report_keeps_independent_gates_and_readiness_false() -> None:
     assert "Observed DOFs: 16" in report
     assert "Mismatches: 0" in report
     assert "Three-run determinism: BLOCKED" in report
-    assert "Canonical ordered-record match: BLOCKED" in report
+    assert "Semantic policy/runtime mapping: BLOCKED" in report
+    assert "Raw order matches canonical: unknown (informational)" in report
     assert "Exit contract: BLOCKED=2, PASS=0, FAIL=1" in report
     for statement in (
         "Physics stepped: false",
@@ -1342,10 +1431,12 @@ def test_two_layer_report_keeps_independent_gates_and_readiness_false() -> None:
     assert "not approved" in report
 
 
-def test_report_separates_determinism_from_canonical_order_match() -> None:
+def test_report_treats_deterministic_noncanonical_order_as_informational() -> None:
     runs = _runs()
     for run in runs:
         run["records"].reverse()
+        for runtime_index, record in enumerate(run["records"]):
+            record["index"] = runtime_index
     layer2 = aggregate_runtime_runs(_layer1(), runs)
     layer2.update(
         runs=runs,
@@ -1359,7 +1450,8 @@ def test_report_separates_determinism_from_canonical_order_match() -> None:
 
     assert "Overall: NOT_READY" in report
     assert "Three-run determinism: PASS" in report
-    assert "Canonical ordered-record match: FAIL" in report
+    assert "Semantic policy/runtime mapping: PASS" in report
+    assert "Raw order matches canonical: false (informational)" in report
 
 
 @pytest.mark.parametrize(
@@ -1449,6 +1541,8 @@ def test_is_exact_runtime_pass_accepts_only_complete_safe_pass() -> None:
         lambda value: value["mismatches"].append({"field": "x"}),
         lambda value: value.update(physics_stepped=True),
         lambda value: value.pop("actions_applied"),
+        lambda value: value["order_adapter"]["canonical_to_runtime_indices"].reverse(),
+        lambda value: value.update(raw_order_matches_canonical=None),
     ]
     for mutation in mutations:
         candidate = deepcopy(exact)
