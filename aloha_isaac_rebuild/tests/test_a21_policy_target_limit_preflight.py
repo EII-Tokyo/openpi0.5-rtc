@@ -5,6 +5,7 @@ from copy import deepcopy
 import hashlib
 import json
 import math
+import os
 from pathlib import Path
 import sys
 
@@ -16,6 +17,8 @@ from aloha_isaac_rebuild.scripts.audit_a21_policy_target_limit_preflight import 
 from aloha_isaac_rebuild.scripts.audit_a21_policy_target_limit_preflight import FAIL_STATUS
 from aloha_isaac_rebuild.scripts.audit_a21_policy_target_limit_preflight import PASS_STATUS
 from aloha_isaac_rebuild.scripts.audit_a21_policy_target_limit_preflight import SCHEMA_VERSION
+from aloha_isaac_rebuild.scripts.audit_a21_policy_target_limit_preflight import _atomic_write as atomic_write
+from aloha_isaac_rebuild.scripts.audit_a21_policy_target_limit_preflight import _sync_directory as sync_directory
 from aloha_isaac_rebuild.scripts.audit_a21_policy_target_limit_preflight import build_reviewed_policy_samples
 from aloha_isaac_rebuild.scripts.audit_a21_policy_target_limit_preflight import evaluate_policy_samples
 from aloha_isaac_rebuild.scripts.audit_a21_policy_target_limit_preflight import evaluate_preflight
@@ -1232,6 +1235,30 @@ def test_cli_rejects_symlink_config_argument(
         assert json.loads(output_path.read_text(encoding="utf-8"))["status"] == (FAIL_STATUS)
 
 
+def test_cli_rejects_symlink_output_without_touching_target(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    config_path, _layer1_path, _layer2_path, output_path = _write_cli_fixture(tmp_path)
+    target = tmp_path / "existing-output-target.json"
+    target.write_bytes(b"keep-cli-symlink-target")
+    output_path.parent.mkdir(parents=True)
+    output_path.symlink_to(target)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [str(MODULE), "--config", str(config_path)],
+    )
+
+    assert audit.main() == 1
+    assert json.loads(capsys.readouterr().out)["status"] == FAIL_STATUS
+    assert output_path.is_symlink()
+    assert target.read_bytes() == b"keep-cli-symlink-target"
+    assert not (output_path.parent / ".a21.json.failed-write").exists()
+
+
 def test_cli_artifact_hashes_do_not_replace_a20_cross_layer_provenance(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -1321,72 +1348,95 @@ def test_cli_never_leaves_pass_json_after_atomic_write_failure(
             encoding="utf-8",
         )
     original_fsync = audit.os.fsync
-    original_open = audit.os.open
-    original_exists = audit.Path.exists
+    original_lstat = audit.os.lstat
     original_mkdir = audit.Path.mkdir
-    original_read_bytes = audit.Path.read_bytes
-    original_unlink = audit.Path.unlink
-    fsync_calls = 0
+    original_replace = audit.os.replace
+    original_sync_directory = sync_directory
+    original_unlink = audit.os.unlink
+    events: set[str] = set()
+    replace_succeeded = False
 
     def injected_fsync(descriptor: int) -> None:
-        nonlocal fsync_calls
-        fsync_calls += 1
-        if (failure_stage == "temp_file_fsync" and fsync_calls == 1) or (
-            failure_stage in {"directory_fsync", "post_replace_unlink"} and fsync_calls == 2
+        descriptor_path = Path(os.readlink(f"/proc/self/fd/{descriptor}"))
+        if (
+            failure_stage == "temp_file_fsync"
+            and descriptor_path.parent == output_path.parent
+            and descriptor_path.name.startswith(f".{output_path.name}.")
         ):
-            raise OSError(f"injected {failure_stage}")
+            events.add("temp_file_fsync")
+            raise OSError("injected temp file fsync")
         original_fsync(descriptor)
 
-    def injected_replace(_source: object, _destination: object) -> None:
-        raise OSError("injected replace")
-
-    def injected_open(path: object, flags: int, *args: object) -> int:
-        if failure_stage == "directory_open" and Path(path) == output_path.parent:
-            raise OSError("injected directory open")
-        return original_open(path, flags, *args)
+    def injected_replace(source: object, destination: object) -> None:
+        nonlocal replace_succeeded
+        if Path(destination) == output_path:
+            if failure_stage == "replace":
+                events.add("replace")
+                raise OSError("injected replace")
+            original_replace(source, destination)
+            replace_succeeded = True
+            events.add("replace_succeeded")
+            return
+        original_replace(source, destination)
 
     def injected_mkdir(path: Path, *args: object, **kwargs: object) -> None:
         if path == output_path.parent:
+            events.add("mkdir")
             raise OSError("injected mkdir")
         original_mkdir(path, *args, **kwargs)
 
-    def injected_exists(path: Path) -> bool:
-        if path == output_path and existing_status is None:
+    def injected_lstat(path: object, *args: object, **kwargs: object):
+        if Path(path) == output_path and existing_status is None:
+            events.add("read_old")
             raise OSError("injected old output inspection")
-        return original_exists(path)
+        return original_lstat(path, *args, **kwargs)
 
-    def injected_read_bytes(path: Path) -> bytes:
-        if path == output_path:
-            raise OSError("injected old output read")
-        return original_read_bytes(path)
+    def injected_read(descriptor: int, length: int) -> bytes:
+        events.add("read_old")
+        raise OSError("injected old output read")
 
     def injected_mkstemp(*args: object, **kwargs: object) -> tuple[int, str]:
+        events.add("mkstemp")
         raise OSError("injected mkstemp")
 
-    def injected_unlink(path: Path, *args: object, **kwargs: object) -> None:
-        if path == output_path:
+    def injected_unlink(path: object, *args: object, **kwargs: object) -> None:
+        if failure_stage == "post_replace_unlink" and replace_succeeded and Path(path) == output_path:
+            events.add("post_replace_unlink")
             raise OSError("injected output unlink")
         original_unlink(path, *args, **kwargs)
+
+    def injected_sync_directory(path: Path) -> None:
+        if replace_succeeded and failure_stage in {
+            "directory_open",
+            "directory_fsync",
+            "post_replace_unlink",
+        }:
+            events.add("post_replace_sync")
+            raise OSError(f"injected {failure_stage}")
+        original_sync_directory(path)
 
     if failure_stage == "mkdir":
         monkeypatch.setattr(audit.Path, "mkdir", injected_mkdir)
     elif failure_stage == "read_old":
-        monkeypatch.setattr(audit.Path, "exists", injected_exists)
-        monkeypatch.setattr(audit.Path, "read_bytes", injected_read_bytes)
+        if existing_status is None:
+            monkeypatch.setattr(audit.os, "lstat", injected_lstat)
+        else:
+            monkeypatch.setattr(audit.os, "read", injected_read)
     elif failure_stage == "mkstemp":
         monkeypatch.setattr(audit.tempfile, "mkstemp", injected_mkstemp)
     elif failure_stage in {
-        "temp_file_fsync",
+        "directory_open",
         "directory_fsync",
         "post_replace_unlink",
     }:
-        monkeypatch.setattr(audit.os, "fsync", injected_fsync)
+        monkeypatch.setattr(audit.os, "replace", injected_replace)
+        monkeypatch.setattr(audit, "_sync_directory", injected_sync_directory)
         if failure_stage == "post_replace_unlink":
-            monkeypatch.setattr(audit.Path, "unlink", injected_unlink)
+            monkeypatch.setattr(audit.os, "unlink", injected_unlink)
+    elif failure_stage == "temp_file_fsync":
+        monkeypatch.setattr(audit.os, "fsync", injected_fsync)
     elif failure_stage == "replace":
         monkeypatch.setattr(audit.os, "replace", injected_replace)
-    else:
-        monkeypatch.setattr(audit.os, "open", injected_open)
     monkeypatch.chdir(tmp_path)
     monkeypatch.setattr(sys, "argv", [str(MODULE), "--config", str(config_path)])
 
@@ -1399,6 +1449,76 @@ def test_cli_never_leaves_pass_json_after_atomic_write_failure(
         pass
     else:
         assert written["status"] == FAIL_STATUS
+    if failure_stage == "post_replace_unlink":
+        assert {"post_replace_sync", "post_replace_unlink"} <= events
+    elif failure_stage in {"directory_open", "directory_fsync"}:
+        assert {"replace_succeeded", "post_replace_sync"} <= events
+    else:
+        assert failure_stage in events
+
+
+def test_atomic_write_rejects_directory_without_moving_or_mutating_it(
+    tmp_path: Path,
+) -> None:
+    output_path = tmp_path / "a21.json"
+    output_path.mkdir()
+    sentinel = output_path / "sentinel.txt"
+    sentinel.write_bytes(b"keep-directory-content")
+
+    for helper_name in ("_neutralize_output", "_overwrite_with_failure"):
+        with pytest.raises(ValueError, match="regular file"):
+            getattr(audit, helper_name)(output_path)
+    with pytest.raises(ValueError, match="regular file"):
+        atomic_write(
+            output_path,
+            {"status": PASS_STATUS, "ok": True},
+        )
+
+    assert output_path.is_dir()
+    assert sentinel.read_bytes() == b"keep-directory-content"
+    assert not (tmp_path / ".a21.json.failed-write").exists()
+
+
+def test_atomic_write_rejects_symlink_without_touching_link_or_target(
+    tmp_path: Path,
+) -> None:
+    target = tmp_path / "real-a21.json"
+    target.write_bytes(b"keep-symlink-target")
+    output_path = tmp_path / "a21.json"
+    output_path.symlink_to(target)
+
+    for helper_name in ("_neutralize_output", "_overwrite_with_failure"):
+        with pytest.raises(ValueError, match="regular file"):
+            getattr(audit, helper_name)(output_path)
+    with pytest.raises(ValueError, match="regular file"):
+        atomic_write(
+            output_path,
+            {"status": PASS_STATUS, "ok": True},
+        )
+
+    assert output_path.is_symlink()
+    assert output_path.readlink() == target
+    assert target.read_bytes() == b"keep-symlink-target"
+    assert not (tmp_path / ".a21.json.failed-write").exists()
+
+
+def test_atomic_write_rejects_fifo_without_reading_or_moving_it(
+    tmp_path: Path,
+) -> None:
+    output_path = tmp_path / "a21.json"
+    os.mkfifo(output_path)
+
+    for helper_name in ("_neutralize_output", "_overwrite_with_failure"):
+        with pytest.raises(ValueError, match="regular file"):
+            getattr(audit, helper_name)(output_path)
+    with pytest.raises(ValueError, match="regular file"):
+        atomic_write(
+            output_path,
+            {"status": PASS_STATUS, "ok": True},
+        )
+
+    assert output_path.is_fifo()
+    assert not (tmp_path / ".a21.json.failed-write").exists()
 
 
 def test_module_is_pure_and_has_only_atomic_artifact_writes() -> None:

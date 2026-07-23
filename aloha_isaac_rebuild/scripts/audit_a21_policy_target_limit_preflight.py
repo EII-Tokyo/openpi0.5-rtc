@@ -11,6 +11,7 @@ import math
 import os
 from pathlib import Path
 import re
+import stat
 import tempfile
 from typing import Any
 
@@ -793,11 +794,20 @@ def _sha256_bytes(content: bytes) -> str:
     return hashlib.sha256(content).hexdigest()
 
 
-def _configured_path(repo: Path, value: object, *, field: str) -> Path:
+def _configured_path(
+    repo: Path,
+    value: object,
+    *,
+    field: str,
+    follow_leaf: bool = True,
+) -> Path:
     if not isinstance(value, str) or not value:
         raise ValueError(f"missing or invalid configured output {field}")
     path = Path(value).expanduser()
-    return (path if path.is_absolute() else repo / path).resolve()
+    absolute = path if path.is_absolute() else repo / path
+    if follow_leaf:
+        return absolute.resolve()
+    return absolute.parent.resolve() / absolute.name
 
 
 def _load_json_with_binding(path: Path, *, input_name: str, inputs: dict[str, object]) -> object:
@@ -811,19 +821,18 @@ def _load_json_with_binding(path: Path, *, input_name: str, inputs: dict[str, ob
 
 
 def _atomic_write(path: Path, payload: dict[str, object]) -> None:
-    path = path.resolve()
+    path = Path(os.path.abspath(path))
     temporary: str | None = None
     replaced = False
     previous_was_failure = False
+    target_type_checked = False
+    initial_state: os.stat_result | None = None
     try:
-        try:
-            output_exists = path.exists()
-        except BaseException:
-            _neutralize_output(path)
-            raise
-        if output_exists:
+        initial_state = _lstat_regular_or_absent(path)
+        target_type_checked = True
+        if initial_state is not None:
             try:
-                previous_content = path.read_bytes()
+                previous_content = _read_regular_output(path, initial_state)
             except BaseException:
                 _neutralize_output(path)
                 _sync_directory(path.parent)
@@ -844,6 +853,10 @@ def _atomic_write(path: Path, payload: dict[str, object]) -> None:
             stream.write("\n")
             stream.flush()
             os.fsync(stream.fileno())
+        _require_expected_output_state(
+            path,
+            initial_state if previous_was_failure else None,
+        )
         os.replace(temporary, path)
         replaced = True
         temporary = None
@@ -851,7 +864,7 @@ def _atomic_write(path: Path, payload: dict[str, object]) -> None:
     except BaseException:
         if temporary is not None:
             _discard_temporary(Path(temporary))
-        if replaced or not previous_was_failure:
+        if target_type_checked and (replaced or not previous_was_failure):
             _neutralize_output(path)
         raise
 
@@ -872,9 +885,64 @@ def _sync_directory(path: Path) -> None:
         os.close(descriptor)
 
 
-def _neutralize_output(path: Path) -> None:
+def _lstat_regular_or_absent(path: Path) -> os.stat_result | None:
     try:
-        path.unlink()
+        result = os.lstat(path)
+    except FileNotFoundError:
+        return None
+    if not stat.S_ISREG(result.st_mode):
+        raise ValueError(f"output target must be absent or a regular file: {path}")
+    return result
+
+
+def _same_file(
+    left: os.stat_result,
+    right: os.stat_result,
+) -> bool:
+    return (left.st_dev, left.st_ino) == (right.st_dev, right.st_ino)
+
+
+def _require_expected_output_state(
+    path: Path,
+    expected: os.stat_result | None,
+) -> None:
+    current = _lstat_regular_or_absent(path)
+    if expected is None:
+        if current is not None:
+            raise RuntimeError("output target appeared during atomic write")
+        return
+    if current is None or not _same_file(current, expected):
+        raise RuntimeError("output target changed during atomic write")
+
+
+def _read_regular_output(
+    path: Path,
+    expected: os.stat_result,
+) -> bytes:
+    flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLOCK", 0)
+    descriptor = os.open(path, flags)
+    try:
+        opened = os.fstat(descriptor)
+        if not stat.S_ISREG(opened.st_mode) or not _same_file(opened, expected):
+            raise RuntimeError("output target changed before read")
+        _require_expected_output_state(path, expected)
+        chunks: list[bytes] = []
+        while True:
+            chunk = os.read(descriptor, 1024 * 1024)
+            if not chunk:
+                return b"".join(chunks)
+            chunks.append(chunk)
+    finally:
+        os.close(descriptor)
+
+
+def _neutralize_output(path: Path) -> None:
+    expected = _lstat_regular_or_absent(path)
+    if expected is None:
+        return
+    _require_expected_output_state(path, expected)
+    try:
+        os.unlink(path)
         return
     except FileNotFoundError:
         return
@@ -882,8 +950,15 @@ def _neutralize_output(path: Path) -> None:
         try:
             _overwrite_with_failure(path)
             return
-        except BaseException:
+        except BaseException as overwrite_error:
+            current = _lstat_regular_or_absent(path)
+            if current is None:
+                return
+            if not _same_file(current, expected):
+                raise RuntimeError("output target changed during neutralization") from overwrite_error
             tombstone = path.with_name(f".{path.name}.failed-write")
+            _lstat_regular_or_absent(tombstone)
+            _require_expected_output_state(path, expected)
             try:
                 os.replace(path, tombstone)
                 return
@@ -911,8 +986,20 @@ def _overwrite_with_failure(path: Path) -> None:
         ).encode("utf-8")
         + b"\n"
     )
-    descriptor = os.open(path, os.O_WRONLY | os.O_TRUNC)
+    expected = _lstat_regular_or_absent(path)
+    if expected is None:
+        return
+    flags = os.O_WRONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLOCK", 0)
+    descriptor = os.open(path, flags)
     try:
+        opened = os.fstat(descriptor)
+        if not stat.S_ISREG(opened.st_mode) or not _same_file(
+            opened,
+            expected,
+        ):
+            raise RuntimeError("output target changed before overwrite")
+        _require_expected_output_state(path, expected)
+        os.ftruncate(descriptor, 0)
         offset = 0
         while offset < len(content):
             written = os.write(descriptor, content[offset:])
@@ -925,12 +1012,23 @@ def _overwrite_with_failure(path: Path) -> None:
 
 
 def _discard_temporary(path: Path) -> None:
+    state = _lstat_regular_or_absent(path)
+    if state is None:
+        return
+    _require_expected_output_state(path, state)
     try:
-        path.unlink()
+        os.unlink(path)
     except FileNotFoundError:
         return
-    except OSError:
+    except OSError as unlink_error:
+        current = _lstat_regular_or_absent(path)
+        if current is None:
+            return
+        if not _same_file(current, state):
+            raise RuntimeError("temporary output changed during cleanup") from unlink_error
         tombstone = path.with_name(f".{path.name}.discarded")
+        _lstat_regular_or_absent(tombstone)
+        _require_expected_output_state(path, state)
         with suppress(OSError):
             os.replace(path, tombstone)
 
@@ -995,6 +1093,7 @@ def main() -> int:
             repo,
             outputs.get("a21_policy_target_limit_preflight_json"),
             field="a21_policy_target_limit_preflight_json",
+            follow_leaf=False,
         )
         layer1_path = _configured_path(
             repo,
