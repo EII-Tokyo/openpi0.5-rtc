@@ -40,7 +40,16 @@ Read this before using, changing, debugging, or reinstalling Isaac Sim / Isaac L
 - Do not connect MCP tools to the real ALOHA robot by default.
 - Do not start or restart `aloha_ros_nodes`, `runtime`, `rlt_warmup_runtime`, or other real robot control containers as part of MCP work unless the user explicitly approves.
 - If a Codex terminal becomes unresponsive, check for repeated MCP server sets before retrying `resume`. A healthy Codex process should normally own one copy of each enabled stdio MCP server. Multiple complete copies of `context7`, `github`, `qdrant`, `ros-mcp`, `freecad`, `blender`, `isaaclab`, `isaacsim-control`, or `isaacsim-python` under the same Codex PID indicate stale MCP subprocess leakage; terminate only that offending Codex process tree after a dry-run, and do not kill Isaac Sim or unrelated user processes.
-- User-level launcher `/home/eii/.local/bin/codex-full` runs `/home/eii/.codex/hooks/mcp_duplicate_guard.py` before launching Codex. If it blocks on duplicated MCP servers, inspect and clean the offending Codex process tree first. Temporary manual bypass is `CODEX_FULL_SKIP_MCP_GUARD=1 codex-full ...`, but do not use the bypass as the normal workflow.
+- Repeated MCP is not automatically bad across different Codex sessions. It is normal for two independent Codex terminals to each own one MCP set. The dangerous pattern is one Codex PID directly owning several copies of the same MCP service set, usually after repeated `resume` or long-lived subagent starts.
+- Automatic MCP-count blocking is disabled so Codex remains usable even when several MCP-heavy tasks are active. `/home/eii/.codex/hooks/mcp_duplicate_guard.py` is kept as a manual diagnostic tool. To opt into launch-time checking for a single session, start Codex with `CODEX_FULL_MCP_GUARD=1 codex-full ...`. Do not treat MCP count alone as a failure; first confirm that one Codex PID owns repeated copies of the same MCP service set.
+- Avoid asking Codex to "start all expert subagents" from a full-MCP profile. Subtasks currently inherit the parent's MCP configuration, so several long-lived expert threads can multiply MCP stdio servers quickly. Prefer one specialist at a time, a minimal MCP profile such as `codex-full-isaac`, or artifact-based reports instead of persistent expert sessions.
+- Use MCP on demand by starting the smallest matching profile instead of inheriting all MCP servers:
+  - `codex-full-none`: no MCP servers; use for writing, planning, code review, and expert reasoning that only needs existing prompt/context.
+  - `codex-full-isaac-docs`: `context7` + official NVIDIA Isaac docs/search MCP; use for Isaac API/documentation research before code changes.
+  - `codex-full-isaac-runtime`: `isaacsim-control` + `isaacsim-python`; use only when a running Isaac Sim stage must be inspected or manipulated.
+  - `codex-full-isaac-lab`: `context7` + `isaaclab`; use for Isaac Lab task/API inspection.
+  - `codex-full-isaac`: broader Isaac bundle for tasks that truly need docs, Isaac Lab, and runtime tools in the same session.
+  - `codex-full-all-mcp`: all MCP servers; avoid it for sessions that will launch subagents.
 
 ## ALOHA Isaac Scratch Workspace
 - Scratch workspace: `/home/eii/isaac_mcp_setup/aloha_project`
