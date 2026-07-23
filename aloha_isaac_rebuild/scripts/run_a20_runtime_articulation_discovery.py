@@ -575,10 +575,12 @@ def _render_bool(payload: object, field: str) -> str:
     return "unknown"
 
 
-def _report_runtime_semantics(layer1: object, layer2: object) -> tuple[str, str]:
+def _report_runtime_semantics(
+    layer1: object, layer2: object
+) -> tuple[str, str, str, str]:
     status = layer2.get("status") if isinstance(layer2, dict) else None
     if status == _BLOCKED:
-        return "BLOCKED", "BLOCKED"
+        return "BLOCKED", "BLOCKED", "BLOCKED", "BLOCKED"
     runs = layer2.get("runs") if isinstance(layer2, dict) else None
     expected = layer1.get("expected") if isinstance(layer1, dict) else None
     if not (
@@ -587,7 +589,7 @@ def _report_runtime_semantics(layer1: object, layer2: object) -> tuple[str, str]
         and all(isinstance(run, dict) for run in runs)
         and isinstance(expected, list)
     ):
-        return "FAIL", "FAIL"
+        return "FAIL", "FAIL", "FAIL", "FAIL"
 
     runtime_fields = (
         "status", "process_status", "returncode", "probe_returncode", "timed_out", "cleanup_verified",
@@ -613,14 +615,20 @@ def _report_runtime_semantics(layer1: object, layer2: object) -> tuple[str, str]
         if isinstance(run.get("records"), list)
     ) and all(isinstance(run.get("records"), list) for run in runs)
     adapter = layer2.get("order_adapter") if isinstance(layer2, dict) else None
-    adapter_is_valid = (
-        isinstance(adapter, dict)
-        and adapter.get("mapping_complete") is True
+    mapping_status = (
+        "PASS"
+        if isinstance(adapter, dict) and adapter.get("mapping_complete") is True
+        else "FAIL"
+    )
+    round_trip_status = (
+        "PASS"
+        if isinstance(adapter, dict)
         and isinstance(adapter.get("round_trip_check"), dict)
         and adapter["round_trip_check"].get("status") == "PASS"
+        else "FAIL"
     )
-    semantic_mapping = "PASS" if records_semantically_match and adapter_is_valid else "FAIL"
-    return determinism, semantic_mapping
+    semantic_status = "PASS" if records_semantically_match else "FAIL"
+    return determinism, semantic_status, mapping_status, round_trip_status
 
 
 def format_two_layer_report(asset_validator: object, layer1: object, layer2: object) -> str:
@@ -661,15 +669,19 @@ def format_two_layer_report(asset_validator: object, layer1: object, layer2: obj
     operations = all_operations[:MAX_REPORT_OPERATIONS]
     provenance = layer2.get("provenance", {}) if isinstance(layer2, dict) and isinstance(layer2.get("provenance"), dict) else {}
     blocked = layer2_status == _BLOCKED
-    determinism, semantic_mapping = _report_runtime_semantics(layer1, layer2)
+    determinism, semantic_match, mapping_status, round_trip_status = (
+        _report_runtime_semantics(layer1, layer2)
+    )
     raw_order_matches_canonical = (
         layer2.get("raw_order_matches_canonical")
         if isinstance(layer2, dict) and not blocked
         else None
     )
     raw_order_summary = (
-        str(raw_order_matches_canonical).lower()
-        if isinstance(raw_order_matches_canonical, bool)
+        "yes"
+        if raw_order_matches_canonical is True
+        else "no"
+        if raw_order_matches_canonical is False
         else "unknown"
     )
     next_action = (
@@ -709,9 +721,11 @@ def format_two_layer_report(asset_validator: object, layer1: object, layer2: obj
             "",
             f"- Status: {_bounded_field(layer2_status, 120)}",
             f"- Runs: {layer2.get('run_count', 'unknown') if isinstance(layer2, dict) else 'unknown'}",
-            f"- Three-run determinism: {determinism}",
-            f"- Semantic policy/runtime mapping: {semantic_mapping}",
-            f"- Raw order matches canonical: {raw_order_summary} (informational)",
+            f"- Three-run raw runtime determinism: {determinism}",
+            f"- Runtime joint semantic match: {semantic_match}",
+            f"- Policy-to-runtime mapping: {mapping_status}",
+            f"- Policy/runtime round trip: {round_trip_status}",
+            f"- Raw order equals canonical order: {raw_order_summary} (informational)",
             f"- Errors: {_count(layer2, 'errors')}",
             f"- Mismatches: {_count(layer2, 'mismatches')}",
             "- Exit contract: BLOCKED=2, PASS=0, FAIL=1",

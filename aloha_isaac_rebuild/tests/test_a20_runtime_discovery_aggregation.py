@@ -1409,9 +1409,11 @@ def test_two_layer_report_keeps_independent_gates_and_readiness_false() -> None:
     assert "Expected DOFs: 16" in report
     assert "Observed DOFs: 16" in report
     assert "Mismatches: 0" in report
-    assert "Three-run determinism: BLOCKED" in report
-    assert "Semantic policy/runtime mapping: BLOCKED" in report
-    assert "Raw order matches canonical: unknown (informational)" in report
+    assert "Three-run raw runtime determinism: BLOCKED" in report
+    assert "Runtime joint semantic match: BLOCKED" in report
+    assert "Policy-to-runtime mapping: BLOCKED" in report
+    assert "Policy/runtime round trip: BLOCKED" in report
+    assert "Raw order equals canonical order: unknown (informational)" in report
     assert "Exit contract: BLOCKED=2, PASS=0, FAIL=1" in report
     for statement in (
         "Physics stepped: false",
@@ -1449,9 +1451,11 @@ def test_report_treats_deterministic_noncanonical_order_as_informational() -> No
     report = format_two_layer_report(_asset_validator(), _layer1(), layer2)
 
     assert "Overall: NOT_READY" in report
-    assert "Three-run determinism: PASS" in report
-    assert "Semantic policy/runtime mapping: PASS" in report
-    assert "Raw order matches canonical: false (informational)" in report
+    assert "Three-run raw runtime determinism: PASS" in report
+    assert "Runtime joint semantic match: PASS" in report
+    assert "Policy-to-runtime mapping: PASS" in report
+    assert "Policy/runtime round trip: PASS" in report
+    assert "Raw order equals canonical order: no (informational)" in report
 
 
 @pytest.mark.parametrize(
@@ -1473,7 +1477,7 @@ def test_report_determinism_includes_run_integrity_fields(field: str, value: obj
 
     report = format_two_layer_report(_asset_validator(), _layer1(), layer2)
 
-    assert "Three-run determinism: FAIL" in report
+    assert "Three-run raw runtime determinism: FAIL" in report
 
 
 @pytest.mark.parametrize(
@@ -1503,7 +1507,7 @@ def test_report_determinism_includes_probe_and_code_provenance(
 
     report = format_two_layer_report(_asset_validator(), _layer1(), layer2)
 
-    assert "Three-run determinism: FAIL" in report
+    assert "Three-run raw runtime determinism: FAIL" in report
 
 
 @pytest.mark.parametrize("bad", [None, [], "bad", {}, {"status": "PASS_A20_USD_DOF_METADATA"}])
