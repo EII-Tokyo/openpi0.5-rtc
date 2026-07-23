@@ -33,6 +33,30 @@ _EXPECTED_RUNTIME_INDICES = {
     "left": [0, 2, 4, 6, 8, 10, 12, 13],
     "right": [1, 3, 5, 7, 9, 11, 14, 15],
 }
+_EXPECTED_CANONICAL_PATHS = (
+    "/aloha/joints/left_waist",
+    "/aloha/joints/left_shoulder",
+    "/aloha/joints/left_elbow",
+    "/aloha/joints/left_forearm_roll",
+    "/aloha/joints/left_wrist_angle",
+    "/aloha/joints/left_wrist_rotate",
+    "/aloha/joints/left_left_finger",
+    "/aloha/joints/left_right_finger",
+    "/aloha/joints/right_waist",
+    "/aloha/joints/right_shoulder",
+    "/aloha/joints/right_elbow",
+    "/aloha/joints/right_forearm_roll",
+    "/aloha/joints/right_wrist_angle",
+    "/aloha/joints/right_wrist_rotate",
+    "/aloha/joints/right_left_finger",
+    "/aloha/joints/right_right_finger",
+)
+_EXPECTED_RUNTIME_PATHS = tuple(
+    _EXPECTED_CANONICAL_PATHS[index] for index in (0, 8, 1, 9, 2, 10, 3, 11, 4, 12, 5, 13, 6, 7, 14, 15)
+)
+_EXPECTED_RUNTIME_JOINT_TYPES = tuple(
+    "PhysicsPrismaticJoint" if "finger" in path else "PhysicsRevoluteJoint" for path in _EXPECTED_RUNTIME_PATHS
+)
 
 
 def _now() -> str:
@@ -93,7 +117,7 @@ def choose_interior_delta(
         raise ValueError("magnitude must be positive")
     preferred = size if index % 2 == 0 else -size
     for candidate in (preferred, -preferred):
-        if lower < base + candidate < upper:
+        if lower <= base + candidate <= upper:
             return candidate
     raise ValueError("no strictly interior target is available for requested delta")
 
@@ -143,9 +167,8 @@ def _validate_target_contract(
         or len(canonical_order) != _RUNTIME_DIMENSION
         or len(runtime_order) != _RUNTIME_DIMENSION
         or any(not isinstance(path, str) or not path for path in canonical_order + runtime_order)
-        or len(set(canonical_order)) != _RUNTIME_DIMENSION
-        or len(set(runtime_order)) != _RUNTIME_DIMENSION
-        or set(canonical_order) != set(runtime_order)
+        or canonical_order != list(_EXPECTED_CANONICAL_PATHS)
+        or runtime_order != list(_EXPECTED_RUNTIME_PATHS)
     ):
         raise ValueError("invalid A20 adapter canonical/runtime path inventories")
     canonical_to_runtime = _validate_vector(
@@ -180,7 +203,9 @@ def _validate_target_contract(
             raise ValueError(f"invalid runtime path at index {index}")
         if path in paths:
             raise ValueError(f"duplicate runtime path: {path}")
-        _runtime_bounds(record)
+        _, _, joint_type = _runtime_bounds(record)
+        if joint_type != _EXPECTED_RUNTIME_JOINT_TYPES[index]:
+            raise ValueError(f"runtime joint_type does not match trusted A20 contract at index {index}")
         by_index[index] = record
         paths.add(path)
     if sorted(by_index) != list(range(_RUNTIME_DIMENSION)) or paths != set(runtime_order):
@@ -224,6 +249,22 @@ def _validate_target_contract(
         seen_runtime.extend(parsed)
     if sorted(seen_runtime) != list(range(_RUNTIME_DIMENSION)):
         raise ValueError("A20 policy transforms must cover raw runtime inventory exactly once")
+    proof = adapter.get("round_trip_check")
+    if not isinstance(proof, dict) or set(proof) != {
+        "status",
+        "sample_count",
+        "gripper_values",
+        "max_abs_error",
+        "error",
+    }:
+        raise ValueError("invalid A20 adapter round_trip_check")
+    if proof.get("status") != "PASS" or proof.get("sample_count") != 3 or proof.get("error") is not None:
+        raise ValueError("A20 adapter round_trip_check is not an exact PASS")
+    if (
+        proof.get("gripper_values") != [0.0, 0.5, 1.0]
+        or not 0.0 <= _finite_float(proof.get("max_abs_error"), field="round_trip_check max_abs_error") <= 1e-12
+    ):
+        raise ValueError("invalid A20 adapter round_trip_check proof")
     for finger_policy, prefix in ((6, "/aloha/joints/left_"), (13, "/aloha/joints/right_")):
         finger_paths = [by_index[index]["path"] for index in expanded_by_policy[finger_policy]]
         if set(finger_paths) != {prefix + "left_finger", prefix + "right_finger"}:
@@ -237,19 +278,26 @@ def _validate_target_contract(
 def _target_array(value: object, *, field: str) -> np.ndarray:
     if not isinstance(value, np.ndarray) or value.shape != (1, _RUNTIME_DIMENSION):
         raise ValueError(f"{field} must be a numeric ndarray with shape (1, 16)")
-    if not np.issubdtype(value.dtype, np.number) or np.issubdtype(value.dtype, np.bool_):
+    if not (np.issubdtype(value.dtype, np.floating) or np.issubdtype(value.dtype, np.integer)):
         raise ValueError(f"{field} must be a numeric ndarray with shape (1, 16)")
     if not np.all(np.isfinite(value)):
         raise ValueError(f"{field} must contain only finite values")
     return value
 
 
-def _safety(*, targets_written: bool, targets_restored: bool) -> dict[str, bool]:
+def _safety(
+    *,
+    targets_write_attempted: bool,
+    targets_written: bool,
+    targets_restored: bool,
+) -> dict[str, bool]:
     return {
         "physics_stepped": False,
         "positions_written": False,
         "velocities_written": False,
         "efforts_written": False,
+        "targets_write_attempted": targets_write_attempted,
+        "targets_written_or_may_have_written": targets_write_attempted,
         "targets_written": targets_written,
         "targets_restored": targets_restored,
         "target_only_no_step": True,
@@ -268,7 +316,7 @@ def exercise_target_batch(view: object, adapter: object, runtime_records: object
         "readback": None,
         "restoration": {"attempted": False, "readback": None, "ok": False},
         "errors": [],
-        "safety": _safety(targets_written=False, targets_restored=False),
+        "safety": _safety(targets_write_attempted=False, targets_written=False, targets_restored=False),
     }
     errors: list[dict[str, object]] = result["errors"]  # type: ignore[assignment]
     baseline: np.ndarray | None = None
@@ -333,7 +381,11 @@ def exercise_target_batch(view: object, adapter: object, runtime_records: object
                 targets_restored = True
             except Exception as exc:
                 errors.append(_error("target_restoration_error", exc))
-    result["safety"] = _safety(targets_written=targets_written, targets_restored=targets_restored)
+    result["safety"] = _safety(
+        targets_write_attempted=write_phase_started,
+        targets_written=targets_written,
+        targets_restored=targets_restored,
+    )
     result["ok"] = not errors and targets_written and targets_restored
     return result
 
@@ -358,6 +410,38 @@ def _bound_input_path(repo: Path, supplied: Path | None, configured: Path, *, fi
     return resolved
 
 
+def _require_exact_a20_evidence(evidence: object, trusted_layer1: object) -> dict[str, object]:
+    if not isinstance(evidence, dict) or not isinstance(trusted_layer1, dict):
+        raise ValueError("A20 Layer1 and Layer2 evidence must be objects")
+    if not is_exact_runtime_pass(evidence, trusted_layer1):
+        raise ValueError("A20 runtime evidence is not an exact no-step pass bound to Layer1")
+    return evidence
+
+
+def _require_current_layer1_inputs(
+    layer1: object,
+    *,
+    config_path: Path,
+    mapping_path: Path,
+    stage_path: Path,
+) -> dict[str, object]:
+    if not isinstance(layer1, dict) or not isinstance(layer1.get("inputs"), dict):
+        raise ValueError("A20 Layer1 inputs must be an object")
+    expected = {"config": config_path, "mapping": mapping_path, "stage": stage_path}
+    for name, path in expected.items():
+        item = layer1["inputs"].get(name)
+        expected_hash = (
+            item.get("post_sha256")
+            if name == "stage" and isinstance(item, dict)
+            else item.get("sha256")
+            if isinstance(item, dict)
+            else None
+        )
+        if not isinstance(item, dict) or item.get("path") != str(path) or expected_hash != _digest(path):
+            raise ValueError(f"A20 Layer1 {name} input is not bound to current configured input")
+    return layer1
+
+
 def _emit_marker(payload: dict[str, object]) -> None:
     try:
         encoded = json.dumps(payload, sort_keys=True, separators=(",", ":"), allow_nan=False)
@@ -379,8 +463,27 @@ def main() -> int:
     parser.add_argument("--stage", type=Path)
     parser.add_argument("--mapping", type=Path)
     parser.add_argument("--a20-evidence", type=Path)
-    args = parser.parse_args()
     started = _now()
+    try:
+        args = parser.parse_args()
+    except SystemExit:
+        payload = {
+            "status": FAIL_STATUS,
+            "invocation_id": None,
+            "batch": None,
+            "pid": os.getpid(),
+            "started_at": started,
+            "finished_at": _now(),
+            "inputs": {},
+            "adapter_provenance": None,
+            "record_provenance": None,
+            "result": None,
+            "errors": [_error("invalid_cli_arguments", "argument parsing failed")],
+            "safety": _safety(targets_write_attempted=False, targets_written=False, targets_restored=False),
+            "declaration": "target-only/no-step; no position, velocity, or effort writes",
+        }
+        _emit_marker(payload)
+        return 1
     payload: dict[str, object] = {
         "status": FAIL_STATUS,
         "invocation_id": args.invocation_id,
@@ -393,7 +496,7 @@ def main() -> int:
         "record_provenance": None,
         "result": None,
         "errors": [],
-        "safety": _safety(targets_written=False, targets_restored=False),
+        "safety": _safety(targets_write_attempted=False, targets_written=False, targets_restored=False),
         "declaration": "target-only/no-step; no position, velocity, or effort writes",
     }
     app = None
@@ -435,12 +538,21 @@ def main() -> int:
             ),
             field="a20-evidence",
         )
+        layer1_path = _configured_path(
+            repo,
+            outputs.get("a20_usd_dof_metadata_json"),
+            field="a20_usd_dof_metadata_json",
+        )
         mapping = json.loads(mapping_path.read_text(encoding="utf-8"))
         if not isinstance(mapping, dict):
             raise ValueError("mapping must be an object")
-        evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
-        if not is_exact_runtime_pass(evidence):
-            raise ValueError("A20 runtime evidence is not an exact no-step pass")
+        layer1 = _require_current_layer1_inputs(
+            json.loads(layer1_path.read_text(encoding="utf-8")),
+            config_path=config_path,
+            mapping_path=mapping_path,
+            stage_path=stage_path,
+        )
+        evidence = _require_exact_a20_evidence(json.loads(evidence_path.read_text(encoding="utf-8")), layer1)
         adapter = evidence.get("order_adapter")
         runs = evidence.get("runs")
         if not isinstance(runs, list) or not runs or not isinstance(runs[0], dict):
@@ -451,6 +563,7 @@ def main() -> int:
             "stage": {"path": str(stage_path), "sha256": _digest(stage_path)},
             "mapping": {"path": str(mapping_path), "sha256": _digest(mapping_path)},
             "a20_evidence": {"path": str(evidence_path), "sha256": _digest(evidence_path)},
+            "a20_layer1": {"path": str(layer1_path), "sha256": _digest(layer1_path)},
         }
         payload["inputs"] = inputs
         payload["adapter_provenance"] = {

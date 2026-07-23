@@ -2,8 +2,11 @@ from __future__ import annotations
 
 import ast
 from copy import deepcopy
+import json
 import math
 from pathlib import Path
+import subprocess
+import sys
 
 import numpy as np
 import pytest
@@ -46,6 +49,7 @@ class FakeArticulationView:
         self.write_history: list[tuple[np.ndarray, list[int]]] = []
         self.get_calls = 0
         self.raise_on_set_calls: set[int] = set()
+        self.raise_after_write_on_set_calls: set[int] = set()
         self.ignore_set_calls: set[int] = set()
         self.mutate_other_on_set_calls: set[int] = set()
         self.nan_on_get_calls: set[int] = set()
@@ -67,6 +71,8 @@ class FakeArticulationView:
             raise RuntimeError(f"fake setter failure {call}")
         if call not in self.ignore_set_calls:
             self.targets[indices, :] = copied
+        if call in self.raise_after_write_on_set_calls:
+            raise RuntimeError(f"fake setter post-write failure {call}")
         if call in self.mutate_other_on_set_calls:
             self.targets[0, 15] += 0.001
 
@@ -128,6 +134,16 @@ def _runtime_records() -> list[dict[str, object]]:
     return records
 
 
+def _spoof_arm_path(adapter: dict[str, object], records: list[dict[str, object]]) -> None:
+    original = RUNTIME_PATHS[0]
+    replacement = "/untrusted/joints/left_waist"
+    adapter["canonical_order"][0] = replacement
+    adapter["runtime_order"][0] = replacement
+    adapter["policy_to_runtime"][0]["transforms"][0]["path"] = replacement
+    records[0]["path"] = replacement
+    assert original not in adapter["canonical_order"]
+
+
 def _set_bool_adapter_runtime_index(
     adapter: dict[str, object], records: list[dict[str, object]], view: FakeArticulationView
 ) -> None:
@@ -154,6 +170,11 @@ def test_choose_interior_delta_prefers_parity_and_switches_at_each_limit() -> No
         probe.choose_interior_delta(0, 0.0, -0.05, 0.05, 0.1)
 
 
+def test_choose_interior_delta_accepts_exact_limit_room() -> None:
+    assert probe.choose_interior_delta(0, 0.9, -1.0, 1.0, 0.1) == pytest.approx(0.1)
+    assert probe.choose_interior_delta(1, -0.9, -1.0, 1.0, 0.1) == pytest.approx(-0.1)
+
+
 @pytest.mark.parametrize(
     ("side", "expected_indices"),
     [("left", [0, 2, 4, 6, 8, 10, 12, 13]), ("right", [1, 3, 5, 7, 9, 11, 14, 15])],
@@ -177,6 +198,8 @@ def test_exercise_writes_only_selected_targets_and_restores_full_baseline(
         "positions_written": False,
         "velocities_written": False,
         "efforts_written": False,
+        "targets_write_attempted": True,
+        "targets_written_or_may_have_written": True,
         "targets_written": True,
         "targets_restored": True,
         "target_only_no_step": True,
@@ -218,6 +241,27 @@ def test_exercise_fails_closed_for_invalid_adapter_or_record_contract(mutate) ->
     assert view.write_history == []
 
 
+@pytest.mark.parametrize(
+    "mutate",
+    [
+        lambda adapter, records: _spoof_arm_path(adapter, records),
+        lambda adapter, records: records[0].update(joint_type="PhysicsPrismaticJoint"),
+        lambda adapter, records: adapter["round_trip_check"].update(status="FAIL"),
+    ],
+)
+def test_exercise_fails_closed_for_spoofed_a20_contract(mutate) -> None:
+    view = FakeArticulationView()
+    adapter = _adapter()
+    records = _runtime_records()
+    mutate(adapter, records)
+
+    result = probe.exercise_target_batch(view, adapter, records, side="left")
+
+    assert result["ok"] is False
+    assert result["errors"]
+    assert view.write_history == []
+
+
 @pytest.mark.parametrize("targets", [np.zeros((16,)), np.full((1, 16), math.nan)])
 def test_exercise_rejects_wrong_or_nonfinite_baseline(targets: object) -> None:
     view = FakeArticulationView(targets)
@@ -232,6 +276,25 @@ def test_exercise_rejects_wrong_or_nonfinite_baseline(targets: object) -> None:
 def test_exercise_rejects_non_ndarray_baseline() -> None:
     view = FakeArticulationView()
     view.get_dof_position_targets = lambda: [[0.0] * 16]  # type: ignore[method-assign]
+
+    result = probe.exercise_target_batch(view, _adapter(), _runtime_records(), side="left")
+
+    assert result["ok"] is False
+    assert result["errors"]
+    assert view.write_history == []
+
+
+@pytest.mark.parametrize(
+    "targets",
+    [
+        np.full((1, 16), 1 + 2j, dtype=complex),
+        np.full((1, 16), "not-a-number", dtype=object),
+        np.zeros((1, 16), dtype=bool),
+    ],
+)
+def test_exercise_rejects_nonreal_numeric_baseline_arrays(targets: np.ndarray) -> None:
+    view = FakeArticulationView()
+    view.get_dof_position_targets = lambda: targets.copy()  # type: ignore[method-assign]
 
     result = probe.exercise_target_batch(view, _adapter(), _runtime_records(), side="left")
 
@@ -283,6 +346,60 @@ def test_exercise_reports_restoration_readback_mismatch() -> None:
     assert result["safety"]["targets_written"] is True
     assert result["safety"]["targets_restored"] is False
     assert len(view.write_history) == 2
+
+
+@pytest.mark.parametrize("failure", ["write_then_raise", "nan_readback"])
+def test_exercise_restores_baseline_after_write_or_readback_failure(failure: str) -> None:
+    view = FakeArticulationView()
+    baseline = view.targets.copy()
+    if failure == "write_then_raise":
+        view.raise_after_write_on_set_calls.add(1)
+    else:
+        view.nan_on_get_calls.add(2)
+
+    result = probe.exercise_target_batch(view, _adapter(), _runtime_records(), side="right")
+
+    assert result["ok"] is False
+    assert result["errors"]
+    assert result["safety"]["targets_write_attempted"] is True
+    assert result["safety"]["targets_written_or_may_have_written"] is True
+    assert result["safety"]["targets_restored"] is True
+    assert len(view.write_history) == 2
+    assert np.array_equal(view.write_history[1][0], baseline)
+    assert view.write_history[1][1] == [0]
+    assert np.array_equal(view.targets, baseline)
+
+
+def test_exact_a20_evidence_gate_requires_layer1_argument(monkeypatch: pytest.MonkeyPatch) -> None:
+    calls: list[tuple[object, object]] = []
+    evidence = {"layer": 2}
+    layer1 = {"layer": 1}
+
+    def exact(payload: object, trusted: object) -> bool:
+        calls.append((payload, trusted))
+        return True
+
+    monkeypatch.setattr(probe, "is_exact_runtime_pass", exact)
+
+    assert probe._require_exact_a20_evidence(evidence, layer1) is evidence  # noqa: SLF001
+    assert calls == [(evidence, layer1)]
+
+
+@pytest.mark.parametrize("arguments", [[], ["--invocation-id", "test", "--batch", "invalid"]])
+def test_invalid_cli_arguments_emit_one_fail_marker(arguments: list[str]) -> None:
+    completed = subprocess.run(
+        [sys.executable, str(MODULE), *arguments],
+        cwd=ROOT,
+        env={"PYTHONPATH": str(ROOT)},
+        capture_output=True,
+        check=False,
+        text=True,
+    )
+
+    markers = [line for line in completed.stdout.splitlines() if line.startswith(probe.MARKER)]
+    assert completed.returncode == 1
+    assert len(markers) == 1
+    assert json.loads(markers[0][len(probe.MARKER) :])["status"] == probe.FAIL_STATUS
 
 
 def test_runtime_script_source_has_one_marker_and_no_advance_or_position_apis() -> None:
