@@ -119,14 +119,17 @@ def apply_clean_runtime_mapping_override(record: dict, overrides: dict[str, dict
     if any(endpoint < lower_limit - tolerance or endpoint > upper_limit + tolerance for endpoint in endpoints):
         raise ValueError(f"clean runtime mapping override endpoints outside clean joint limits for {path}")
 
-    result["canonical_mapping"] = {
-        **source_mapping,
-        "sign": sign,
-        "offset": offset,
-        "scale": scale,
-        "unit": override["unit"],
-        "source": override["source"],
-    }
+    effective_mapping = deepcopy(source_mapping)
+    effective_mapping.update(
+        {
+            "sign": sign,
+            "offset": offset,
+            "scale": scale,
+            "unit": override["unit"],
+            "source": override["source"],
+        }
+    )
+    result["canonical_mapping"] = effective_mapping
     result["clean_runtime_mapping_override"] = deepcopy(override)
     return result
 
@@ -137,19 +140,33 @@ def validate_clean_runtime_mapping_override_paths(
     """Apply overrides and reject configured paths that do not match exactly one mapping record."""
     if not isinstance(overrides, dict):
         raise ValueError("clean_runtime_mapping_overrides must be a mapping")
-    consumption_counts = dict.fromkeys(overrides, 0)
+    raw_match_counts = dict.fromkeys(overrides, 0)
+    applied_override_counts = dict.fromkeys(overrides, 0)
     transformed_records = []
     for record in records:
         path = record.get("proposed_clean_joint_path")
+        if path in raw_match_counts:
+            raw_match_counts[path] += 1
         transformed = apply_clean_runtime_mapping_override(record, overrides)
-        if path in consumption_counts and transformed.get("clean_runtime_mapping_override") is not None:
-            consumption_counts[path] += 1
+        if path in applied_override_counts and transformed.get("clean_runtime_mapping_override") is not None:
+            applied_override_counts[path] += 1
         transformed_records.append(transformed)
-    invalid_paths = [path for path, count in consumption_counts.items() if count != 1]
-    if invalid_paths:
+    invalid_counts = [
+        (
+            path,
+            raw_match_counts[path],
+            applied_override_counts[path],
+        )
+        for path in overrides
+        if raw_match_counts[path] != 1 or applied_override_counts[path] != 1
+    ]
+    if invalid_counts:
+        details = ", ".join(
+            f"{path} (raw match count={raw_count}, applied override count={applied_count})"
+            for path, raw_count, applied_count in sorted(invalid_counts)
+        )
         raise ValueError(
-            "clean runtime mapping overrides were not consumed exactly once: "
-            + ", ".join(sorted(invalid_paths))
+            "clean runtime mapping overrides were not consumed exactly once; " + details
         )
     return transformed_records
 

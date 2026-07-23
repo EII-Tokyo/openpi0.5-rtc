@@ -76,6 +76,7 @@ def _override(**changes: object) -> dict:
 
 def test_override_preserves_source_mapping_and_replaces_effective_mapping() -> None:
     record = _source_record()
+    record["canonical_mapping"]["metadata"] = {"nested": {"coordinate": "source"}}
     override = _override()
     result = apply_clean_runtime_mapping_override(
         record,
@@ -95,6 +96,9 @@ def test_override_preserves_source_mapping_and_replaces_effective_mapping() -> N
     assert result["clean_runtime_mapping_override"] == override
     assert result["clean_runtime_mapping_override"] is not override
     assert record["canonical_mapping"]["scale"] == -0.036
+    result["canonical_mapping"]["metadata"]["nested"]["coordinate"] = "effective"
+    assert record["canonical_mapping"]["metadata"]["nested"]["coordinate"] == "source"
+    assert result["source_canonical_mapping"]["metadata"]["nested"]["coordinate"] == "source"
 
 
 def test_no_override_preserves_source_and_effective_mapping() -> None:
@@ -157,6 +161,30 @@ def test_unknown_configured_override_path_is_rejected() -> None:
         validate_clean_runtime_mapping_override_paths(
             [_source_record()],
             {"/aloha/joints/not_a_real_joint": _override()},
+        )
+
+
+@pytest.mark.parametrize(
+    "records",
+    [
+        [_source_record(), _source_record()],
+        [
+            _source_record(),
+            {
+                "proposed_clean_joint_path": RIGHT_FINGER_PATHS[0],
+                "canonical_mapping": None,
+            },
+        ],
+    ],
+    ids=["two-mapped-duplicates", "mapped-and-unmapped-duplicates"],
+)
+def test_configured_override_requires_one_raw_path_match_and_one_application(
+    records: list[dict],
+) -> None:
+    with pytest.raises(ValueError, match="raw match count"):
+        validate_clean_runtime_mapping_override_paths(
+            records,
+            {RIGHT_FINGER_PATHS[0]: _override()},
         )
 
 

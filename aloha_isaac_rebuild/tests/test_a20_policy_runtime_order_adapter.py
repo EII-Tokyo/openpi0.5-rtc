@@ -178,14 +178,16 @@ def test_policy_to_runtime_expands_both_grippers(gripper_value: float) -> None:
     policy[13] = gripper_value
 
     runtime = policy_to_runtime(policy, _adapter())
+    expected_gripper_position = 0.021 + 0.036 * gripper_value
 
     assert len(runtime) == 16
-    assert runtime[12] == pytest.approx(0.021 + 0.036 * gripper_value)
-    assert runtime[13] == pytest.approx(-0.021 - 0.036 * gripper_value)
-    assert runtime[14] == pytest.approx(0.021 + 0.036 * gripper_value)
-    assert runtime[15] == pytest.approx(-0.021 - 0.036 * gripper_value)
+    assert runtime[12] == pytest.approx(expected_gripper_position)
+    assert runtime[13] == pytest.approx(expected_gripper_position)
+    assert runtime[14] == pytest.approx(expected_gripper_position)
+    assert runtime[15] == pytest.approx(expected_gripper_position)
     assert runtime[0] == pytest.approx(policy[0])
     assert runtime[1] == pytest.approx(policy[7])
+    assert runtime_to_policy(runtime, _adapter()) == pytest.approx(policy)
 
 
 def test_policy_to_runtime_rejects_wrong_length_and_non_finite_values() -> None:
