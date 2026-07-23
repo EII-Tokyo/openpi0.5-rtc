@@ -103,6 +103,13 @@ def test_probe_checker_allows_only_the_reviewed_no_step_runtime_discovery_calls(
     assert check_probe_source(
         "_call_runtime_api('x', physics_interface.simulate)\n"
     )["ok"] is False
+    assert check_probe_source("open('x', 'rb')\n")["ok"] is False
+    for spoof in (
+        "import os\nfrom pathlib import Path as SimulationApp\n",
+        "from os import system as get_context\n",
+        "from os import remove as start_simulation\n",
+    ):
+        assert check_probe_source(spoof)["ok"] is False
 
 
 def test_runtime_discovery_builds_records_from_real_tensor_view() -> None:
@@ -209,7 +216,7 @@ def test_runtime_discovery_failure_names_the_exact_failed_api() -> None:
     assert "USD load refused" in str(raised.value)
 
 
-def test_false_force_load_is_fail_and_none_articulation_is_proven_blocked() -> None:
+def test_false_force_load_and_none_articulation_are_honest_failures() -> None:
     namespace = runpy.run_path(str(PROBE), run_name="probe_return_contract_test")
 
     class Context:
@@ -235,10 +242,10 @@ def test_false_force_load_is_fail_and_none_articulation_is_proven_blocked() -> N
         @staticmethod
         def create_simulation_view(backend, *, stage_id): return View()
 
-    with pytest.raises(namespace["ForbiddenInitializationRequiredError"]) as raised:
+    with pytest.raises(namespace["RuntimeDiscoveryError"]) as raised:
         namespace["_discover_runtime_records"]("candidate.usda", [], Context(), Physics(), Tensors)
-    assert raised.value.source_api.endswith("create_articulation_view")
-    assert raised.value.required_operation == "physics.update_simulation"
+    assert raised.value.api.endswith("create_articulation_view")
+    assert "returned none" in str(raised.value)
 
 
 def test_execute_probe_caps_output_with_structured_failure(tmp_path: Path) -> None:
@@ -639,19 +646,39 @@ def test_float32_runtime_limits_are_semantically_equal_but_real_mismatch_fails()
 def test_all_16_a17_style_limits_survive_float32_tensor_roundtrip() -> None:
     import struct
 
+    mapping_path = ROOT / "aloha_isaac_rebuild/artifacts/validation/a17_clean_articulation_mapping_plan.json"
+    mapping = json.loads(mapping_path.read_text(encoding="utf-8"))
+    by_path = {
+        record["proposed_clean_joint_path"]: record
+        for record in mapping["joint_records"]
+        if record.get("is_dof_joint") is True
+    }
+    real_records = []
+    for index, order_record in enumerate(mapping["proposed_canonical_dof_order"]):
+        path = order_record["clean_joint_path"]
+        source = by_path[path]
+        real_records.append({
+            "index": index, "path": path, "name": source["source_joint_name"],
+            "joint_type": source["joint_type"], "axis": source["axis"],
+            "lower_limit": float(source["lower_limit"]), "upper_limit": float(source["upper_limit"]),
+            "body0": source["clean_body0"], "body1": source["clean_body1"],
+        })
+    assert len(real_records) == 16
+    assert [index for index, record in enumerate(real_records) if record["joint_type"] == "PhysicsPrismaticJoint"] == [6, 7, 14, 15]
     layer1 = _layer1()
+    layer1["expected"] = deepcopy(real_records)
+    layer1["observed"] = deepcopy(real_records)
     runs = _runs()
-    for index in range(16):
-        if index >= 14:
-            layer1["expected"][index]["joint_type"] = "PhysicsPrismaticJoint"
-            layer1["observed"][index]["joint_type"] = "PhysicsPrismaticJoint"
+    for index, real_record in enumerate(real_records):
         for run in runs:
-            run["records"][index]["joint_type"] = layer1["expected"][index]["joint_type"]
+            sources = run["records"][index]["field_sources"]
+            run["records"][index] = {**deepcopy(real_record), "field_sources": sources}
             for field in ("lower_limit", "upper_limit"):
-                value = layer1["expected"][index][field]
-                tensor_value = math.radians(value) if index < 14 else value
+                value = real_record[field]
+                revolute = real_record["joint_type"] == "PhysicsRevoluteJoint"
+                tensor_value = math.radians(value) if revolute else value
                 float32 = struct.unpack("f", struct.pack("f", tensor_value))[0]
-                run["records"][index][field] = math.degrees(float32) if index < 14 else float32
+                run["records"][index][field] = math.degrees(float32) if revolute else float32
     assert aggregate_runtime_runs(layer1, runs)["status"] == "PASS_A20_RUNTIME_ARTICULATION_DISCOVERY_NO_STEP"
 
 

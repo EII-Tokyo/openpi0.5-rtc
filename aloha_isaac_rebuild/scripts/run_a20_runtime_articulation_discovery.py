@@ -613,10 +613,10 @@ def check_probe_source(source: str) -> dict[str, Any]:
     forbidden_calls = {
         "play", "step", "reset", "initialize", "initialize_async", "set_joint_positions", "set_joint_velocities",
         "set_joint_efforts", "apply_action", "save", "Save", "Export", "Flatten",
-        "getattr", "setattr", "__import__", "exec", "eval", "import_module", "update", "update_simulation",
+        "getattr", "setattr", "__import__", "exec", "eval", "import_module", "open", "update", "update_simulation",
     }
     reviewed_calls = {
-        "ArgumentParser", "ForbiddenInitializationRequiredError", "Path", "RuntimeDiscoveryError", "SimulationApp", "SystemExit",
+        "ArgumentParser", "Path", "RuntimeDiscoveryError", "SimulationApp", "SystemExit",
         "__init__", "_as_list", "_call_runtime_api", "_digest", "_discover_runtime_records",
         "_emit_marker", "_now", "_safe_version", "add_argument", "append", "bool", "close",
         "create_articulation_view", "create_simulation_view", "cwd", "degrees", "dumps",
@@ -631,9 +631,23 @@ def check_probe_source(source: str) -> dict[str, Any]:
     def is_forbidden(name: str) -> bool:
         return name in forbidden_calls or name.startswith("set_joint")
 
-    allowed_import_roots = {
-        "__future__", "argparse", "datetime", "hashlib", "importlib", "json", "os",
-        "pathlib", "isaacsim", "math", "omni", "pxr", "yaml", "aloha_isaac_rebuild",
+    reviewed_imports = {
+        ("importfrom", "__future__", "annotations", None),
+        ("import", "argparse", None, None),
+        ("importfrom", "datetime", "UTC", None),
+        ("importfrom", "datetime", "datetime", None),
+        ("import", "hashlib", None, None),
+        ("import", "importlib.metadata", None, None),
+        ("import", "json", None, None),
+        ("import", "math", None, None),
+        ("import", "os", None, None),
+        ("importfrom", "pathlib", "Path", None),
+        ("import", "yaml", None, None),
+        ("importfrom", "isaacsim", "SimulationApp", None),
+        ("importfrom", "omni.physics", "tensors", None),
+        ("importfrom", "omni.physx", "get_physx_interface", None),
+        ("import", "omni.usd", None, None),
+        ("importfrom", "aloha_isaac_rebuild.scripts.audit_a20_usd_dof_metadata", "expected_dof_records", None),
     }
     aliases: dict[str, str] = {}
 
@@ -660,19 +674,26 @@ def check_probe_source(source: str) -> dict[str, Any]:
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
             for alias in node.names:
-                root = alias.name.split(".")[0]
-                if root not in allowed_import_roots:
+                if ("import", alias.name, None, alias.asname) not in reviewed_imports:
                     errors.append(f"import_not_allowed:{alias.name}")
-                aliases[alias.asname or root] = alias.name
+                aliases[alias.asname or alias.name.split(".")[0]] = alias.name
         elif isinstance(node, ast.ImportFrom):
             module = node.module or ""
-            if module.split(".")[0] not in allowed_import_roots:
-                errors.append(f"import_not_allowed:{module}")
             for alias in node.names:
+                if ("importfrom", module, alias.name, alias.asname) not in reviewed_imports:
+                    errors.append(f"import_not_allowed:{module}.{alias.name}")
                 aliases[alias.asname or alias.name] = f"{module}.{alias.name}"
         elif isinstance(node, ast.Call):
             name = node.func.id if isinstance(node.func, ast.Name) else node.func.attr if isinstance(node.func, ast.Attribute) else "dynamic"
-            if is_forbidden(name) or name == "dynamic":
+            reviewed_path_open = (
+                isinstance(node.func, ast.Attribute)
+                and node.func.attr == "open"
+                and qualified_name(node.func.value) == "path"
+                and bool(node.args)
+                and isinstance(node.args[0], ast.Constant)
+                and node.args[0].value == "rb"
+            )
+            if (is_forbidden(name) and not reviewed_path_open) or name == "dynamic":
                 errors.append(f"call_not_allowed:{name}")
             elif name not in reviewed_calls:
                 errors.append(f"unreviewed_call:{name}")

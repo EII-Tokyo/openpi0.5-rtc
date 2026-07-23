@@ -33,13 +33,6 @@ class RuntimeDiscoveryError(RuntimeError):
         super().__init__(f"{api}: {cause}")
 
 
-class ForbiddenInitializationRequiredError(RuntimeError):
-    def __init__(self, source_api: str, required_operation: str):
-        self.source_api = source_api
-        self.required_operation = required_operation
-        super().__init__(f"{source_api} requires {required_operation}")
-
-
 def _call_runtime_api(api: str, operation, *args, **kwargs):
     try:
         return operation(*args, **kwargs)
@@ -95,9 +88,8 @@ def _discover_runtime_records(
         ["/aloha/root_joint"],
     )
     if articulation_view is None:
-        raise ForbiddenInitializationRequiredError(
-            "omni.physics.tensors.SimulationView.create_articulation_view",
-            "physics.update_simulation",
+        raise RuntimeDiscoveryError(
+            "omni.physics.tensors.SimulationView.create_articulation_view", "returned none"
         )
 
     metadata = articulation_view.shared_metatype
@@ -292,20 +284,6 @@ def main() -> int:
         }:
             payload["status"] = "FAIL_A20_RUNTIME_ARTICULATION_DISCOVERY"
             payload["valid_handle"] = False
-    except ForbiddenInitializationRequiredError as exc:
-        payload = {
-            **payload,
-            "status": "BLOCKED_RUNTIME_HANDLE_REQUIRES_UNAPPROVED_INITIALIZATION",
-            "probe_returncode": 0,
-            "finished_at": _now(),
-            "requires_unapproved_initialization": True,
-            "initialization_operations": [exc.required_operation],
-            "errors": [{
-                "code": "forbidden_initialization_required",
-                "required_operation": exc.required_operation,
-                "source_api": exc.source_api,
-            }],
-        }
     except RuntimeDiscoveryError as exc:
         payload = {
             **payload,
