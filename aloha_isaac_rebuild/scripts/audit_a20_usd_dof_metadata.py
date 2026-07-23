@@ -19,6 +19,7 @@ import yaml
 from aloha_isaac_rebuild.scripts.a20_articulation_gate_common import compare_dof_records
 from aloha_isaac_rebuild.scripts.a20_articulation_gate_common import validate_dof_records
 from aloha_isaac_rebuild.scripts.a20_articulation_gate_common import validate_safety_flags
+from aloha_isaac_rebuild.scripts.a20_policy_runtime_order_adapter import build_policy_contract
 
 
 def _bootstrap_bundled_openusd() -> None:
@@ -266,6 +267,7 @@ def _collect(
     mapping_bytes = mapping_path.read_bytes()
     mapping = json.loads(mapping_bytes.decode("utf-8"))
     expected = expected_dof_records(mapping)
+    policy_contract = build_policy_contract(mapping)
 
     stage_pre_sha256 = _validate_digest(stage_path, _sha256_file(stage_path))
     stage = Usd.Stage.Open(str(stage_path), load=Usd.Stage.LoadAll)
@@ -323,6 +325,7 @@ def _collect(
         "default_prim": default_prim_path,
         "articulation_root_paths": articulation_root_paths,
         "unsupported_joints": inventory["unsupported_joints"],
+        "policy_contract": policy_contract,
         "expected": expected,
         "observed": observed,
         "mismatches": evaluation["mismatches"],
@@ -360,6 +363,7 @@ def collect_usd_dof_metadata(config_path: Path | str) -> dict[str, Any]:
             "default_prim": None,
             "articulation_root_paths": [],
             "unsupported_joints": [],
+            "policy_contract": {},
             "expected": [],
             "observed": [],
             "mismatches": [],

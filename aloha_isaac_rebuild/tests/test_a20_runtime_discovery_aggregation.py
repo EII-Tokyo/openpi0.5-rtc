@@ -551,11 +551,61 @@ def _record(index: int) -> dict[str, object]:
     }
 
 
+def _policy_contract(records: list[dict[str, object]]) -> dict[str, object]:
+    policy_groups = [[index] for index in range(6)]
+    policy_groups += [[6, 7]]
+    policy_groups += [[index] for index in range(8, 14)]
+    policy_groups += [[14, 15]]
+    canonical_dofs = []
+    policy_entries = []
+    for policy_index, canonical_indices in enumerate(policy_groups):
+        paths = [records[index]["path"] for index in canonical_indices]
+        transforms = [
+            {"path": path, "sign": 1.0, "offset": 0.0, "scale": 1.0}
+            for path in paths
+        ]
+        for canonical_index, path in zip(canonical_indices, paths, strict=True):
+            canonical_dofs.append(
+                {
+                    "canonical_index": canonical_index,
+                    "path": path,
+                    "canonical_name": records[canonical_index]["name"],
+                    "openpi_index": policy_index,
+                    "dataset_index": policy_index,
+                    "sign": 1.0,
+                    "offset": 0.0,
+                    "scale": 1.0,
+                    "unit": "rad",
+                    "source": "test",
+                    "isaac_dof_name": records[canonical_index]["name"],
+                }
+            )
+        policy_entries.append(
+            {
+                "openpi_index": policy_index,
+                "dataset_index": policy_index,
+                "canonical_indices": canonical_indices,
+                "canonical_paths": paths,
+                "transforms": transforms,
+            }
+        )
+    canonical_dofs.sort(key=lambda record: record["canonical_index"])
+    return {
+        "schema_version": "a20-policy-runtime-order-v1",
+        "policy_dimension": 14,
+        "runtime_dimension": 16,
+        "canonical_order": [record["path"] for record in records],
+        "canonical_dofs": canonical_dofs,
+        "policy_entries": policy_entries,
+    }
+
+
 def _layer1() -> dict[str, object]:
     records = [_record(index) for index in range(16)]
     return {
         "status": "PASS_A20_USD_DOF_METADATA",
         "ok": True,
+        "policy_contract": _policy_contract(records),
         "expected": records,
         "observed": deepcopy(records),
         "mismatches": [],
@@ -787,6 +837,7 @@ def test_all_16_a17_style_limits_survive_float32_tensor_roundtrip() -> None:
     layer1 = _layer1()
     layer1["expected"] = deepcopy(real_records)
     layer1["observed"] = deepcopy(real_records)
+    layer1["policy_contract"] = _policy_contract(real_records)
     runs = _runs()
     for index, real_record in enumerate(real_records):
         for run in runs:
@@ -885,6 +936,14 @@ def test_requires_exactly_three_runs(run_count: int) -> None:
     [
         lambda layer1: layer1.update(status="FAIL_A20_USD_DOF_METADATA"),
         lambda layer1: layer1.update(ok=False),
+        lambda layer1: layer1.pop("policy_contract"),
+        lambda layer1: layer1["policy_contract"].update(schema_version="wrong"),
+        lambda layer1: layer1["policy_contract"]["canonical_dofs"][0].update(
+            path="/aloha/joints/wrong"
+        ),
+        lambda layer1: layer1["policy_contract"]["policy_entries"][6]["transforms"][
+            0
+        ].update(scale=float("nan")),
         lambda layer1: layer1["expected"].pop(),
         lambda layer1: layer1["observed"].reverse(),
         lambda layer1: layer1["mismatches"].append({"field": "path"}),

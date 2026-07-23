@@ -27,6 +27,13 @@ def test_collect_real_a17_a19_metadata_matches_exactly() -> None:
     assert result["observed"] == result["expected"]
     assert result["mismatches"] == []
     assert result["errors"] == []
+    contract = result["policy_contract"]
+    assert contract["schema_version"] == "a20-policy-runtime-order-v1"
+    assert contract["policy_dimension"] == 14
+    assert contract["runtime_dimension"] == 16
+    assert [entry["openpi_index"] for entry in contract["policy_entries"]] == list(
+        range(14)
+    )
     for input_record in (result["inputs"]["config"], result["inputs"]["mapping"]):
         assert Path(input_record["path"]).is_absolute()
         assert len(input_record["sha256"]) == 64

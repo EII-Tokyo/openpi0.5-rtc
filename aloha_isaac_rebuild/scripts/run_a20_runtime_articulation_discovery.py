@@ -29,6 +29,8 @@ import yaml
 from aloha_isaac_rebuild.scripts.a20_articulation_gate_common import compare_dof_records
 from aloha_isaac_rebuild.scripts.a20_articulation_gate_common import validate_dof_records
 from aloha_isaac_rebuild.scripts.a20_articulation_gate_common import validate_safety_flags
+from aloha_isaac_rebuild.scripts.a20_policy_runtime_order_adapter import build_order_adapter
+from aloha_isaac_rebuild.scripts.a20_policy_runtime_order_adapter import round_trip_check
 
 _PASS = "PASS_A20_RUNTIME_ARTICULATION_DISCOVERY_NO_STEP"
 _FAIL = "FAIL_A20_RUNTIME_ARTICULATION_DISCOVERY"
@@ -136,6 +138,15 @@ def _layer1_errors(layer1: object) -> list[dict[str, Any]]:
         comparison = compare_dof_records(expected, observed)
         if not comparison["ok"]:
             details.append("expected_observed_consistency")
+        try:
+            adapter = build_order_adapter(layer1.get("policy_contract"), expected)
+        except (KeyError, TypeError, ValueError):
+            details.append("policy_contract")
+        else:
+            if adapter.get("canonical_order") != [record.get("path") for record in expected]:
+                details.append("policy_contract_paths")
+            if round_trip_check(adapter).get("status") != "PASS":
+                details.append("policy_contract_round_trip")
 
     inputs = layer1.get("inputs")
     if not isinstance(inputs, dict):
