@@ -719,6 +719,24 @@ def check_probe_source(source: str) -> dict[str, Any]:
             if isinstance(node.func, ast.Attribute):
                 target = qualified_name(node.func)
                 receiver_node = node.func.value
+                repo_path_resolve = (
+                    node.func.attr == "resolve"
+                    and isinstance(receiver_node, ast.BinOp)
+                    and isinstance(receiver_node.op, ast.Div)
+                    and isinstance(receiver_node.left, ast.Name)
+                    and receiver_node.left.id == "repo"
+                    and (
+                        (
+                            isinstance(receiver_node.right, ast.Name)
+                            and receiver_node.right.id == "CONFIG"
+                        )
+                        or (
+                            isinstance(receiver_node.right, ast.Subscript)
+                            and isinstance(receiver_node.right.value, ast.Name)
+                            and receiver_node.right.value.id == "outputs"
+                        )
+                    )
+                )
                 nested_ok = (
                     node.func.attr == "strftime"
                     and isinstance(receiver_node, ast.Call)
@@ -729,14 +747,14 @@ def check_probe_source(source: str) -> dict[str, Any]:
                     and isinstance(receiver_node.func, ast.Name)
                     and receiver_node.func.id == "super"
                 ) or (
-                    node.func.attr == "resolve"
+                    repo_path_resolve
                     and (
                         isinstance(receiver_node, ast.BinOp)
-                        or (
-                            isinstance(receiver_node, ast.Call)
-                            and qualified_name(receiver_node.func) == "Path.cwd"
-                        )
                     )
+                ) or (
+                    node.func.attr == "resolve"
+                    and isinstance(receiver_node, ast.Call)
+                    and qualified_name(receiver_node.func) == "Path.cwd"
                 ) or (
                     node.func.attr == "hexdigest"
                     and isinstance(receiver_node, ast.Call)
@@ -744,6 +762,8 @@ def check_probe_source(source: str) -> dict[str, Any]:
                 )
                 if target not in reviewed_attribute_calls and not nested_ok:
                     errors.append(f"attribute_call_not_allowed:{target or node.func.attr}")
+                if target == "app.close" and (node.args or node.keywords):
+                    errors.append("app_close_arguments_not_allowed")
             if isinstance(node.func, ast.Name) and node.func.id in aliases:
                 target = aliases[node.func.id].rsplit(".", 1)[-1]
                 if is_forbidden(target):
@@ -754,6 +774,18 @@ def check_probe_source(source: str) -> dict[str, Any]:
             and is_forbidden(node.value.attr)
         ):
             errors.append(f"attribute_alias_not_allowed:{node.value.attr}")
+        if isinstance(node, ast.Assign) and any(
+            isinstance(target, ast.Name) and target.id == "app" for target in node.targets
+        ):
+            valid_app_assignment = (
+                isinstance(node.value, ast.Constant) and node.value.value is None
+            ) or (
+                isinstance(node.value, ast.Call)
+                and isinstance(node.value.func, ast.Name)
+                and node.value.func.id == "SimulationApp"
+            )
+            if not valid_app_assignment:
+                errors.append("app_assignment_not_allowed")
         elif isinstance(node, ast.Assign) and isinstance(node.value, ast.Name) and is_forbidden(node.value.id):
             errors.append(f"name_alias_not_allowed:{node.value.id}")
         elif (

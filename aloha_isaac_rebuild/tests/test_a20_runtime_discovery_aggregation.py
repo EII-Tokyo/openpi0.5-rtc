@@ -117,6 +117,14 @@ def test_probe_checker_allows_only_the_reviewed_no_step_runtime_discovery_calls(
         "other.close()\n",
     ):
         assert check_probe_source(attribute_spoof)["ok"] is False
+    for provenance_spoof in (
+        "app = attacker\napp.close()\n",
+        "app = None\napp = Path('x')\napp.close()\n",
+        "app = SimulationApp({})\napp.close(force=True)\n",
+        "(foo + bar).resolve()\n",
+        "(foo / bar).resolve()\n",
+    ):
+        assert check_probe_source(provenance_spoof)["ok"] is False
 
 
 def test_runtime_discovery_builds_records_from_real_tensor_view() -> None:
