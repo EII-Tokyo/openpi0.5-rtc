@@ -62,7 +62,7 @@ def _canonical_joint_map(mapping_yaml: Path) -> dict[str, dict]:
 
 def _finite_override_number(override: dict, field: str) -> float:
     value = override[field]
-    if isinstance(value, bool) or not isinstance(value, (int, float)):
+    if isinstance(value, bool) or not isinstance(value, int | float):
         raise ValueError(f"clean runtime mapping override requires finite numeric {field}")
     result = float(value)
     if not math.isfinite(result):
