@@ -110,6 +110,15 @@ PYTHONPATH="$USD_ROOT" LD_LIBRARY_PATH="$USD_ROOT/bin:$PYLIB${LD_LIBRARY_PATH:+:
 - Other `local_eval_assets/aloha_isaac*` directories are intermediate or scratch assets, not startup targets. Do not clean them by deletion unless the generator chain has been checked, because some are source layers for the confirmed stage.
 
 ## ALOHA1 Replay Validation Gate
+- Before A22 or any later ALOHA drive-gain, stiffness, damping, max-force, or
+  hold change, read
+  `docs/aloha1_isaac_adaptation/107_a22_real_aloha_drive_gain_evidence_chain_2026-07-23.md`.
+  It records the real 103 Phase 4 register scope, Tony/ROBOTIS/Interbotix
+  controller evidence, the Phase 97 same-lineage Isaac reference, and the
+  unresolved need for a complete per-motor read-only register snapshot.
+- Never describe A19 `stiffness=0` as the real ALOHA hardware configuration.
+  Never numerically copy DYNAMIXEL `Position_P_Gain=800` into PhysX
+  `stiffness=800`; the controller domains and units differ.
 - For Menagerie/Trossen `/scene` HDF5 left-arm replay, use the controller-ready mapping:
   - `configs/aloha/trossen_scene_base_link_aloha1_left_controller_mapping.yaml`
 - When the user asks for the historical long "episode 19" replay, use this exact local HDF5 path:

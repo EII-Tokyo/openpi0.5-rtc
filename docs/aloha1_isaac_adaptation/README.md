@@ -108,10 +108,19 @@ The main conclusion is conservative:
 - [95 Phase 112-115 measured workcell contact gate](95_phase112_115_measured_workcell_contact_gate_2026-07-19.md)
 - [96 Phase 116 HDF5 start-frame probe](96_phase116_hdf5_start_frame_probe_2026-07-19.md)
 - [97 Phase 117 diagnostic held-bottle replay](97_phase117_diagnostic_held_bottle_replay_2026-07-19.md)
+- [107 A22 real ALOHA drive-gain evidence chain](107_a22_real_aloha_drive_gain_evidence_chain_2026-07-23.md)
 
 ## Operating Rule
 
 Any future implementation step for ALOHA1 Isaac adaptation should cite one of these documents or add a new dated investigation document first.
+
+Before changing ALOHA/Isaac drive stiffness, damping, max force, controller
+gains, or hold behavior, read
+`107_a22_real_aloha_drive_gain_evidence_chain_2026-07-23.md`. Do not infer
+real-hardware gains from an imported USD, do not treat a DYNAMIXEL register
+number as a PhysX gain with the same numeric units, and do not use Stationary
+AI as the only gain source when the same-lineage Phase 97 Isaac evidence is
+available.
 
 Do not proceed from visual similarity alone. A visible robot mesh is not enough. The minimum gates are:
 
