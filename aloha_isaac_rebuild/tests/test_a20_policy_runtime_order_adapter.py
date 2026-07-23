@@ -247,6 +247,127 @@ def test_build_policy_contract_rejects_invalid_source_canonical_mapping(
         build_policy_contract(mapping)
 
 
+def test_contract_rejects_unoverridden_source_effective_transform_mismatch() -> None:
+    mapping = deepcopy(_mapping())
+    record = next(
+        record
+        for record in mapping["joint_records"]
+        if record.get("proposed_clean_joint_path")
+        == "/aloha/joints/left_right_finger"
+    )
+    record["clean_runtime_mapping_override"] = None
+
+    with pytest.raises(
+        ValueError, match="unoverridden source/effective transform mismatch"
+    ):
+        build_policy_contract(mapping)
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [("sign", -1.0), ("offset", -0.021), ("scale", -0.036)],
+)
+def test_contract_rejects_override_effective_transform_mismatch(
+    field: str, value: float
+) -> None:
+    mapping = deepcopy(_mapping())
+    record = next(
+        record
+        for record in mapping["joint_records"]
+        if record.get("proposed_clean_joint_path")
+        == "/aloha/joints/left_right_finger"
+    )
+    record["clean_runtime_mapping_override"][field] = value
+
+    with pytest.raises(ValueError, match="override/effective transform mismatch"):
+        build_policy_contract(mapping)
+
+
+@pytest.mark.parametrize("override", [[], "invalid"])
+def test_contract_rejects_invalid_clean_runtime_mapping_override_type(
+    override: object,
+) -> None:
+    mapping = deepcopy(_mapping())
+    record = next(
+        record
+        for record in mapping["joint_records"]
+        if record.get("proposed_clean_joint_path")
+        == "/aloha/joints/left_right_finger"
+    )
+    record["clean_runtime_mapping_override"] = override
+
+    with pytest.raises(ValueError, match="invalid clean runtime mapping override"):
+        build_policy_contract(mapping)
+
+
+@pytest.mark.parametrize(
+    ("field", "value", "error"),
+    [
+        ("rationale", None, "invalid override rationale"),
+        ("rationale", "", "invalid override rationale"),
+        ("source", None, "invalid override source"),
+        ("source", "", "invalid override source"),
+    ],
+)
+def test_contract_rejects_missing_or_empty_override_provenance(
+    field: str, value: object, error: str
+) -> None:
+    mapping = deepcopy(_mapping())
+    record = next(
+        record
+        for record in mapping["joint_records"]
+        if record.get("proposed_clean_joint_path")
+        == "/aloha/joints/left_right_finger"
+    )
+    if value is None:
+        record["clean_runtime_mapping_override"].pop(field)
+    else:
+        record["clean_runtime_mapping_override"][field] = value
+
+    with pytest.raises(ValueError, match=error):
+        build_policy_contract(mapping)
+
+
+def test_contract_rejects_override_unit_mismatch() -> None:
+    mapping = deepcopy(_mapping())
+    record = next(
+        record
+        for record in mapping["joint_records"]
+        if record.get("proposed_clean_joint_path")
+        == "/aloha/joints/left_right_finger"
+    )
+    record["clean_runtime_mapping_override"]["unit"] = "rad"
+
+    with pytest.raises(ValueError, match="override unit mismatch"):
+        build_policy_contract(mapping)
+
+
+@pytest.mark.parametrize(
+    ("field", "value", "error"),
+    [
+        ("sign", float("nan"), "non-finite override sign"),
+        ("offset", float("inf"), "non-finite override offset"),
+        ("scale", float("nan"), "non-finite override scale"),
+        ("scale", 0.0, "zero override scale"),
+        ("sign", "1.0", "invalid override sign"),
+    ],
+)
+def test_contract_rejects_invalid_override_affine_values(
+    field: str, value: object, error: str
+) -> None:
+    mapping = deepcopy(_mapping())
+    record = next(
+        record
+        for record in mapping["joint_records"]
+        if record.get("proposed_clean_joint_path")
+        == "/aloha/joints/left_right_finger"
+    )
+    record["clean_runtime_mapping_override"][field] = value
+
+    with pytest.raises(ValueError, match=error):
+        build_policy_contract(mapping)
+
+
 def test_contract_uses_equal_fallback_transforms_for_unoverridden_records() -> None:
     mapping = deepcopy(_mapping())
     arm_path = "/aloha/joints/left_waist"

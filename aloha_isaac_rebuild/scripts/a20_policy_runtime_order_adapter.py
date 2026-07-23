@@ -127,6 +127,54 @@ def build_policy_contract(mapping: dict[str, object]) -> dict[str, object]:
         canonical_name = raw_mapping.get("canonical_name")
         if not isinstance(canonical_name, str) or not canonical_name:
             raise ValueError(f"invalid canonical_name for {path}")
+        effective_transform = (
+            transform["sign"],
+            transform["offset"],
+            transform["scale"],
+        )
+        source_transform_values = (
+            source_transform["sign"],
+            source_transform["offset"],
+            source_transform["scale"],
+        )
+        override = source.get("clean_runtime_mapping_override")
+        if override is None:
+            if source_transform_values != effective_transform:
+                raise ValueError(
+                    f"unoverridden source/effective transform mismatch for {path}"
+                )
+        elif not isinstance(override, dict):
+            raise ValueError(f"invalid clean runtime mapping override for {path}")
+        else:
+            override_transform = {
+                "sign": _finite_float(
+                    override.get("sign"), field="override sign", path=path
+                ),
+                "offset": _finite_float(
+                    override.get("offset"), field="override offset", path=path
+                ),
+                "scale": _finite_float(
+                    override.get("scale"), field="override scale", path=path
+                ),
+            }
+            if override_transform["scale"] == 0.0:
+                raise ValueError(f"zero override scale for {path}")
+            if (
+                override_transform["sign"],
+                override_transform["offset"],
+                override_transform["scale"],
+            ) != effective_transform:
+                raise ValueError(f"override/effective transform mismatch for {path}")
+            for field in ("rationale", "source"):
+                provenance = override.get(field)
+                if not isinstance(provenance, str) or not provenance.strip():
+                    raise ValueError(f"invalid override {field} for {path}")
+            if (
+                "unit" not in override
+                or override.get("unit") != raw_mapping.get("unit")
+            ):
+                raise ValueError(f"override unit mismatch for {path}")
+        override_provenance = deepcopy(override)
         canonical_dofs.append(
             {
                 "canonical_index": canonical_index,
@@ -141,9 +189,7 @@ def build_policy_contract(mapping: dict[str, object]) -> dict[str, object]:
                     "offset": transform["offset"],
                     "scale": transform["scale"],
                 },
-                "clean_runtime_mapping_override": deepcopy(
-                    source.get("clean_runtime_mapping_override")
-                ),
+                "clean_runtime_mapping_override": override_provenance,
                 "unit": raw_mapping.get("unit"),
                 "source": raw_mapping.get("source"),
                 "isaac_dof_name": raw_mapping.get("isaac_dof_name"),
