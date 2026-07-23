@@ -20,6 +20,7 @@ from aloha_isaac_rebuild.scripts.audit_a21_policy_target_limit_preflight import 
 from aloha_isaac_rebuild.scripts.audit_a21_policy_target_limit_preflight import evaluate_policy_samples
 from aloha_isaac_rebuild.scripts.audit_a21_policy_target_limit_preflight import evaluate_preflight
 from aloha_isaac_rebuild.scripts.audit_a21_policy_target_limit_preflight import runtime_bounds
+from aloha_isaac_rebuild.scripts.run_a20_runtime_articulation_discovery import aggregate_runtime_runs
 
 ROOT = Path(__file__).resolve().parents[2]
 MODULE = ROOT / "aloha_isaac_rebuild/scripts/audit_a21_policy_target_limit_preflight.py"
@@ -47,16 +48,6 @@ POLICY_CANONICAL_GROUPS = [[index] for index in range(6)] + [[6, 7]] + [[index] 
 MIRRORED_FINGER_PATHS = {
     "/aloha/joints/left_right_finger",
     "/aloha/joints/right_right_finger",
-}
-LAYER_INPUTS = {
-    "config": {"path": "/evidence/config.yaml", "sha256": "a" * 64},
-    "mapping": {"path": "/evidence/mapping.json", "sha256": "b" * 64},
-    "stage": {
-        "path": "/evidence/stage.usda",
-        "pre_sha256": "c" * 64,
-        "post_sha256": "c" * 64,
-        "consistent_during_audit": True,
-    },
 }
 
 
@@ -177,21 +168,28 @@ def _policy_contract(*, corrected: bool = True) -> dict[str, object]:
     }
 
 
+def _record(index: int, path: str) -> dict[str, object]:
+    is_finger = "finger" in path
+    semantic_index = CANONICAL_PATHS.index(path)
+    return {
+        "index": index,
+        "path": path,
+        "name": path.rsplit("/", 1)[-1],
+        "joint_type": ("PhysicsPrismaticJoint" if is_finger else "PhysicsRevoluteJoint"),
+        "axis": "X",
+        "lower_limit": 0.018 if is_finger else -180.0,
+        "upper_limit": 0.058 if is_finger else 180.0,
+        "body0": [f"/aloha/link_{semantic_index:02d}"],
+        "body1": [f"/aloha/link_{semantic_index + 1:02d}"],
+    }
+
+
 def _runtime_records() -> list[dict[str, object]]:
-    records = []
-    for index, path in enumerate(RUNTIME_PATHS):
-        is_finger = "finger" in path
-        records.append(
-            {
-                "index": index,
-                "path": path,
-                "name": path.rsplit("/", 1)[-1],
-                "joint_type": ("PhysicsPrismaticJoint" if is_finger else "PhysicsRevoluteJoint"),
-                "lower_limit": 0.018 if is_finger else -180.0,
-                "upper_limit": 0.058 if is_finger else 180.0,
-            }
-        )
-    return records
+    return [_record(index, path) for index, path in enumerate(RUNTIME_PATHS)]
+
+
+def _canonical_records() -> list[dict[str, object]]:
+    return [_record(index, path) for index, path in enumerate(CANONICAL_PATHS)]
 
 
 def _evaluate(
@@ -237,14 +235,47 @@ def test_corrected_effective_mapping_passes_all_reviewed_samples() -> None:
     assert result["max_arm_delta_rad"] == ARM_DELTA_RAD == math.radians(0.25)
 
 
-def _layer1(*, corrected: bool = True) -> dict[str, object]:
+def _input_bindings(input_root: Path | None = None) -> dict[str, object]:
+    if input_root is None:
+        paths = dict.fromkeys(("config", "mapping", "stage"), MODULE)
+    else:
+        directory = input_root / "live_inputs"
+        directory.mkdir(parents=True, exist_ok=True)
+        paths = {}
+        for name in ("config", "mapping", "stage"):
+            path = directory / f"{name}.bin"
+            path.write_bytes(f"{name}-content".encode())
+            paths[name] = path
+    digests = {name: hashlib.sha256(path.read_bytes()).hexdigest() for name, path in paths.items()}
+    return {
+        "config": {
+            "path": str(paths["config"].resolve()),
+            "sha256": digests["config"],
+        },
+        "mapping": {
+            "path": str(paths["mapping"].resolve()),
+            "sha256": digests["mapping"],
+        },
+        "stage": {
+            "path": str(paths["stage"].resolve()),
+            "pre_sha256": digests["stage"],
+            "post_sha256": digests["stage"],
+            "consistent_during_audit": True,
+        },
+    }
+
+
+def _layer1(input_root: Path | None = None, *, corrected: bool = True) -> dict[str, object]:
+    expected = _canonical_records()
     return {
         "status": "PASS_A20_USD_DOF_METADATA",
         "ok": True,
         "policy_contract": _policy_contract(corrected=corrected),
+        "expected": expected,
+        "observed": deepcopy(expected),
         "mismatches": [],
         "errors": [],
-        "inputs": deepcopy(LAYER_INPUTS),
+        "inputs": _input_bindings(input_root),
         "physics_stepped": False,
         "actions_applied": False,
         "targets_written": False,
@@ -252,40 +283,78 @@ def _layer1(*, corrected: bool = True) -> dict[str, object]:
     }
 
 
-def _layer2() -> dict[str, object]:
+def _run(layer1: dict[str, object], index: int) -> dict[str, object]:
     records = _runtime_records()
-    runs = [
-        {
-            "invocation_id": f"run-{index}",
-            "records": deepcopy(records),
-            "physics_stepped": False,
-            "actions_applied": False,
-            "targets_written": False,
-            "stage_saved": False,
-            "inputs": {
-                "config": deepcopy(LAYER_INPUTS["config"]),
-                "mapping": deepcopy(LAYER_INPUTS["mapping"]),
-                "stage": {
-                    "path": LAYER_INPUTS["stage"]["path"],
-                    "sha256": LAYER_INPUTS["stage"]["pre_sha256"],
-                },
-            },
+    for record in records:
+        record["field_sources"] = {
+            "path": "runtime",
+            "name": "runtime",
+            "joint_type": "runtime",
+            "lower_limit": "runtime",
+            "upper_limit": "runtime",
+            "index": "runtime",
+            "axis": "layer1",
+            "body0": "layer1",
+            "body1": "layer1",
         }
-        for index in range(3)
-    ]
+    inputs = layer1["inputs"]
     return {
-        "status": "PASS_A20_RUNTIME_ARTICULATION_DISCOVERY_NO_STEP",
-        "ok": True,
-        "mismatches": [],
-        "errors": [],
+        "status": "PASS_RUNTIME_PROBE",
+        "process_status": "completed",
+        "returncode": 0,
+        "probe_returncode": 0,
+        "timed_out": False,
+        "cleanup_verified": True,
+        "articulation_root": "/aloha/root_joint",
+        "articulation_count": 1,
+        "dof_count": 16,
+        "valid_handle": True,
+        "handle_validity_method": "tensor_view_structural_proof_v1",
+        "records": records,
+        "requires_unapproved_initialization": False,
+        "initialization_operations": [],
+        "invocation_id": f"run-{index}",
+        "pid": index + 1,
+        "isaac_sim_version": "5.1.0.0",
+        "started_at": f"2026-01-01T00:00:0{index * 2}+00:00",
+        "finished_at": f"2026-01-01T00:00:0{index * 2 + 1}+00:00",
+        "inputs": {
+            "config": {
+                "path": inputs["config"]["path"],
+                "sha256": inputs["config"]["sha256"],
+            },
+            "mapping": {
+                "path": inputs["mapping"]["path"],
+                "sha256": inputs["mapping"]["sha256"],
+            },
+            "stage": {
+                "path": inputs["stage"]["path"],
+                "sha256": inputs["stage"]["post_sha256"],
+            },
+        },
         "physics_stepped": False,
         "actions_applied": False,
         "targets_written": False,
         "stage_saved": False,
-        "run_count": 3,
-        "runs": runs,
-        "order_adapter": _adapter(),
+        "provenance": {
+            "schema_version": "a20-runtime-discovery-v2",
+            "safety_checker": {"ok": True},
+        },
     }
+
+
+def _layer2(layer1: dict[str, object] | None = None) -> dict[str, object]:
+    trusted_layer1 = layer1 if layer1 is not None else _layer1()
+    runs = [_run(trusted_layer1, index) for index in range(3)]
+    result = aggregate_runtime_runs(trusted_layer1, runs)
+    result["runs"] = runs
+    result.update(
+        physics_stepped=False,
+        actions_applied=False,
+        targets_written=False,
+        stage_saved=False,
+    )
+    return result
 
 
 def test_reviewed_samples_are_exact_and_fresh() -> None:
@@ -496,18 +565,16 @@ def test_missing_malformed_or_inconsistent_right_finger_provenance_fails(
     assert any(error["code"] == "invalid_right_finger_override_provenance" for error in result["errors"])
 
 
-def test_direct_api_keeps_legacy_embedded_provenance_compatibility() -> None:
+def test_direct_api_requires_explicit_canonical_provenance() -> None:
     adapter = _adapter()
     adapter["canonical_dofs"] = _canonical_dofs()
 
-    result = evaluate_policy_samples(
-        adapter,
-        _runtime_records(),
-        build_reviewed_policy_samples(),
-    )
-
-    assert result["ok"] is True
-    assert result["errors"] == []
+    with pytest.raises(TypeError, match="canonical_dofs"):
+        evaluate_policy_samples(
+            adapter,
+            _runtime_records(),
+            build_reviewed_policy_samples(),
+        )
 
 
 def test_adapter_transform_path_must_match_its_raw_runtime_record() -> None:
@@ -883,6 +950,97 @@ def test_preflight_requires_three_deterministic_no_step_runtime_runs(mutate) -> 
     assert result["errors"]
 
 
+@pytest.mark.parametrize(
+    "mutate",
+    [
+        lambda layer: layer["runs"][0].update(status="FAIL_RUNTIME_PROBE"),
+        lambda layer: layer["runs"][0].update(process_status="failed"),
+        lambda layer: layer["runs"][0].update(returncode=9),
+        lambda layer: layer["runs"][0].update(timed_out=True),
+        lambda layer: layer["runs"][0].update(cleanup_verified=False),
+        lambda layer: layer["runs"][0].update(valid_handle=False),
+        lambda layer: layer["runs"][0].update(handle_validity_method="stale"),
+        lambda layer: layer["runs"][0].update(pid=0),
+        lambda layer: layer["runs"][0].update(started_at="not-a-timestamp"),
+        lambda layer: layer["runs"][0].update(provenance={}),
+        lambda layer: layer["runs"][0]["provenance"]["safety_checker"].update(ok=False),
+        lambda layer: layer["runs"][1].update(invocation_id=layer["runs"][0]["invocation_id"]),
+    ],
+)
+def test_preflight_rejects_each_corrupt_a20_runtime_run_contract(mutate) -> None:
+    layer1 = _layer1()
+    layer2 = _layer2(layer1)
+    mutate(layer2)
+
+    result = evaluate_preflight(layer1, layer2)
+
+    assert result["status"] == FAIL_STATUS
+    assert result["ok"] is False
+    assert result["errors"]
+
+
+def test_preflight_rejects_old_compact_run_fixture() -> None:
+    layer1 = _layer1()
+    layer2 = _layer2(layer1)
+    compact_fields = {
+        "records",
+        "inputs",
+        "physics_stepped",
+        "actions_applied",
+        "targets_written",
+        "stage_saved",
+    }
+    layer2["runs"] = [{key: value for key, value in run.items() if key in compact_fields} for run in layer2["runs"]]
+
+    result = evaluate_preflight(layer1, layer2)
+
+    assert result["status"] == FAIL_STATUS
+    assert result["ok"] is False
+
+
+def test_preflight_rejects_missing_live_a20_input(tmp_path: Path) -> None:
+    layer1 = _layer1(tmp_path)
+    layer2 = _layer2(layer1)
+    Path(layer1["inputs"]["mapping"]["path"]).unlink()
+
+    result = evaluate_preflight(layer1, layer2)
+
+    assert result["status"] == FAIL_STATUS
+    assert result["ok"] is False
+
+
+def test_preflight_rejects_consistent_but_forged_input_hashes(
+    tmp_path: Path,
+) -> None:
+    layer1 = _layer1(tmp_path)
+    layer2 = _layer2(layer1)
+    forged = "d" * 64
+    layer1["inputs"]["config"]["sha256"] = forged
+    layer1["inputs"]["mapping"]["sha256"] = forged
+    layer1["inputs"]["stage"]["pre_sha256"] = forged
+    layer1["inputs"]["stage"]["post_sha256"] = forged
+    for run in layer2["runs"]:
+        for name in ("config", "mapping", "stage"):
+            run["inputs"][name]["sha256"] = forged
+
+    result = evaluate_preflight(layer1, layer2)
+
+    assert result["status"] == FAIL_STATUS
+    assert result["ok"] is False
+
+
+def test_preflight_rejects_live_input_content_tampering(tmp_path: Path) -> None:
+    layer1 = _layer1(tmp_path)
+    layer2 = _layer2(layer1)
+    mapping_path = Path(layer1["inputs"]["mapping"]["path"])
+    mapping_path.write_bytes(b"tampered-after-a20")
+
+    result = evaluate_preflight(layer1, layer2)
+
+    assert result["status"] == FAIL_STATUS
+    assert result["ok"] is False
+
+
 def test_preflight_does_not_mutate_layers_or_inputs() -> None:
     layer1 = _layer1()
     layer2 = _layer2()
@@ -900,8 +1058,10 @@ def _write_cli_fixture(tmp_path: Path) -> tuple[Path, Path, Path, Path]:
     output_path = tmp_path / "out/a21.json"
     config_path = tmp_path / "config.yaml"
     layer1_path.parent.mkdir()
-    layer1_path.write_text(json.dumps(_layer1()), encoding="utf-8")
-    layer2_path.write_text(json.dumps(_layer2()), encoding="utf-8")
+    layer1 = _layer1(tmp_path)
+    layer2 = _layer2(layer1)
+    layer1_path.write_text(json.dumps(layer1), encoding="utf-8")
+    layer2_path.write_text(json.dumps(layer2), encoding="utf-8")
     config_path.write_text(
         yaml.safe_dump(
             {
@@ -995,6 +1155,68 @@ def test_cli_resolves_output_and_fails_when_input_keys_are_missing(
     written = json.loads(output_path.read_text(encoding="utf-8"))
     assert written["status"] == FAIL_STATUS
     assert written["ok"] is False
+
+
+@pytest.mark.parametrize(
+    "failure_stage",
+    ["temp_file_fsync", "replace", "directory_open", "directory_fsync"],
+)
+@pytest.mark.parametrize("existing_status", [None, PASS_STATUS, FAIL_STATUS])
+def test_cli_never_leaves_pass_json_after_atomic_write_failure(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    failure_stage: str,
+    existing_status: str | None,
+) -> None:
+    config_path, _layer1_path, _layer2_path, output_path = _write_cli_fixture(tmp_path)
+    if existing_status is not None:
+        output_path.parent.mkdir(parents=True)
+        output_path.write_text(
+            json.dumps(
+                {
+                    "status": existing_status,
+                    "ok": existing_status == PASS_STATUS,
+                }
+            ),
+            encoding="utf-8",
+        )
+    original_fsync = audit.os.fsync
+    original_open = audit.os.open
+    fsync_calls = 0
+
+    def injected_fsync(descriptor: int) -> None:
+        nonlocal fsync_calls
+        fsync_calls += 1
+        if (failure_stage == "temp_file_fsync" and fsync_calls == 1) or (
+            failure_stage == "directory_fsync" and fsync_calls == 2
+        ):
+            raise OSError(f"injected {failure_stage}")
+        original_fsync(descriptor)
+
+    def injected_replace(_source: object, _destination: object) -> None:
+        raise OSError("injected replace")
+
+    def injected_open(path: object, flags: int, *args: object) -> int:
+        if failure_stage == "directory_open" and Path(path) == output_path.parent:
+            raise OSError("injected directory open")
+        return original_open(path, flags, *args)
+
+    if failure_stage in {"temp_file_fsync", "directory_fsync"}:
+        monkeypatch.setattr(audit.os, "fsync", injected_fsync)
+    elif failure_stage == "replace":
+        monkeypatch.setattr(audit.os, "replace", injected_replace)
+    else:
+        monkeypatch.setattr(audit.os, "open", injected_open)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(sys, "argv", [str(MODULE), "--config", str(config_path)])
+
+    assert audit.main() == 1
+    printed = json.loads(capsys.readouterr().out)
+    assert printed["status"] == FAIL_STATUS
+    if output_path.exists():
+        written = json.loads(output_path.read_text(encoding="utf-8"))
+        assert written["status"] == FAIL_STATUS
 
 
 def test_module_is_pure_and_has_only_atomic_artifact_writes() -> None:

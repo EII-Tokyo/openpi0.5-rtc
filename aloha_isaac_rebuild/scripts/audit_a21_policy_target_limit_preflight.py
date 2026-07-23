@@ -18,6 +18,7 @@ import yaml
 from aloha_isaac_rebuild.scripts.a20_policy_runtime_order_adapter import SCHEMA_VERSION as A20_SCHEMA_VERSION
 from aloha_isaac_rebuild.scripts.a20_policy_runtime_order_adapter import policy_to_runtime
 from aloha_isaac_rebuild.scripts.a20_policy_runtime_order_adapter import runtime_to_policy
+from aloha_isaac_rebuild.scripts.run_a20_runtime_articulation_discovery import is_exact_runtime_pass
 
 SCHEMA_VERSION = "a21-policy-target-limit-v1"
 PASS_STATUS = "PASS_A21_POLICY_TARGET_LIMIT_PREFLIGHT"
@@ -399,7 +400,7 @@ def evaluate_policy_samples(
     runtime_records: list[dict[str, object]],
     samples: list[dict[str, object]],
     *,
-    canonical_dofs: list[dict[str, object]] | None = None,
+    canonical_dofs: list[dict[str, object]],
 ) -> dict[str, object]:
     """Expand policy samples, validate live-unit limits, and invert the mapping."""
     sample_snapshot = deepcopy(samples) if isinstance(samples, list) else []
@@ -428,8 +429,12 @@ def evaluate_policy_samples(
         }
 
     try:
-        provenance = canonical_dofs if canonical_dofs is not None else adapter.get("canonical_dofs")
-        _validate_right_finger_provenance(adapter, entries, ordered_records, provenance)
+        _validate_right_finger_provenance(
+            adapter,
+            entries,
+            ordered_records,
+            canonical_dofs,
+        )
     except (TypeError, ValueError) as exc:
         errors.append(_error("invalid_right_finger_override_provenance", str(exc)))
 
@@ -500,6 +505,7 @@ def evaluate_preflight(
     errors: list[dict[str, object]] = []
     canonical_dofs: list[dict[str, object]] | None = None
     trusted_a20_inputs: dict[str, object] | None = None
+    layer1_object: dict[str, object] | None = None
     if inputs is not None and not isinstance(inputs, dict):
         errors.append(_error("invalid_inputs", "inputs must be an object"))
     try:
@@ -521,6 +527,11 @@ def evaluate_preflight(
             expected_status=("PASS_A20_RUNTIME_ARTICULATION_DISCOVERY_NO_STEP"),
             layer_name="layer2",
         )
+        if layer1_object is None or not is_exact_runtime_pass(
+            layer2_object,
+            layer1_object,
+        ):
+            raise ValueError("layer2 is not a complete exact A20 runtime pass")
         adapter_value = layer2_object.get("order_adapter")
         if not isinstance(adapter_value, dict):
             raise ValueError("layer2 order_adapter must be an object")
@@ -762,7 +773,12 @@ def _load_json_with_binding(path: Path, *, input_name: str, inputs: dict[str, ob
 def _atomic_write(path: Path, payload: dict[str, object]) -> None:
     path = path.resolve()
     path.parent.mkdir(parents=True, exist_ok=True)
+    previous_content = path.read_bytes() if path.exists() else None
+    previous_failure = (
+        previous_content if previous_content is not None and _is_serialized_failure(previous_content) else None
+    )
     descriptor, temporary = tempfile.mkstemp(prefix=f".{path.name}.", suffix=".tmp", dir=path.parent)
+    replaced = False
     try:
         with os.fdopen(descriptor, "w", encoding="utf-8") as stream:
             json.dump(payload, stream, indent=2, sort_keys=True)
@@ -770,6 +786,7 @@ def _atomic_write(path: Path, payload: dict[str, object]) -> None:
             stream.flush()
             os.fsync(stream.fileno())
         os.replace(temporary, path)
+        replaced = True
         directory_descriptor = os.open(path.parent, os.O_RDONLY)
         try:
             os.fsync(directory_descriptor)
@@ -777,7 +794,52 @@ def _atomic_write(path: Path, payload: dict[str, object]) -> None:
             os.close(directory_descriptor)
     except BaseException:
         Path(temporary).unlink(missing_ok=True)
+        if replaced:
+            _restore_failure_or_remove(path, previous_failure)
+        elif previous_content is not None and previous_failure is None:
+            path.unlink(missing_ok=True)
         raise
+
+
+def _is_serialized_failure(content: bytes) -> bool:
+    try:
+        payload = json.loads(content.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        return False
+    return isinstance(payload, dict) and payload.get("status") == FAIL_STATUS and payload.get("ok") is False
+
+
+def _restore_failure_or_remove(path: Path, previous_failure: bytes | None) -> None:
+    path.unlink(missing_ok=True)
+    if previous_failure is None:
+        return
+
+    descriptor: int | None = None
+    temporary: str | None = None
+    try:
+        descriptor, temporary = tempfile.mkstemp(
+            prefix=f".{path.name}.rollback.",
+            suffix=".tmp",
+            dir=path.parent,
+        )
+        with os.fdopen(descriptor, "wb") as stream:
+            descriptor = None
+            stream.write(previous_failure)
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary, path)
+        temporary = None
+        directory_descriptor = os.open(path.parent, os.O_RDONLY)
+        try:
+            os.fsync(directory_descriptor)
+        finally:
+            os.close(directory_descriptor)
+    except BaseException:
+        if descriptor is not None:
+            os.close(descriptor)
+        if temporary is not None:
+            Path(temporary).unlink(missing_ok=True)
+        path.unlink(missing_ok=True)
 
 
 def _exact_pass(result: object) -> bool:
