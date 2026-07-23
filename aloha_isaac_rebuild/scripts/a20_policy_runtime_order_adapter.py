@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections import Counter
+from copy import deepcopy
 import math
 from typing import Any
 
@@ -81,6 +82,9 @@ def build_policy_contract(mapping: dict[str, object]) -> dict[str, object]:
         raw_mapping = source.get("canonical_mapping")
         if not isinstance(raw_mapping, dict):
             raise ValueError(f"missing canonical mapping for {path}")
+        source_mapping = source.get("source_canonical_mapping", raw_mapping)
+        if not isinstance(source_mapping, dict):
+            raise ValueError(f"invalid source canonical mapping for {path}")
 
         openpi_index = raw_mapping.get("openpi_index")
         dataset_index = raw_mapping.get("dataset_index")
@@ -107,6 +111,19 @@ def build_policy_contract(mapping: dict[str, object]) -> dict[str, object]:
         }
         if transform["scale"] == 0.0:
             raise ValueError(f"zero scale for {path}")
+        source_transform = {
+            "sign": _finite_float(
+                source_mapping.get("sign"), field="source sign", path=path
+            ),
+            "offset": _finite_float(
+                source_mapping.get("offset"), field="source offset", path=path
+            ),
+            "scale": _finite_float(
+                source_mapping.get("scale"), field="source scale", path=path
+            ),
+        }
+        if source_transform["scale"] == 0.0:
+            raise ValueError(f"zero source scale for {path}")
         canonical_name = raw_mapping.get("canonical_name")
         if not isinstance(canonical_name, str) or not canonical_name:
             raise ValueError(f"invalid canonical_name for {path}")
@@ -118,6 +135,15 @@ def build_policy_contract(mapping: dict[str, object]) -> dict[str, object]:
                 "openpi_index": openpi_index,
                 "dataset_index": dataset_index,
                 **transform,
+                "source_transform": source_transform,
+                "effective_transform": {
+                    "sign": transform["sign"],
+                    "offset": transform["offset"],
+                    "scale": transform["scale"],
+                },
+                "clean_runtime_mapping_override": deepcopy(
+                    source.get("clean_runtime_mapping_override")
+                ),
                 "unit": raw_mapping.get("unit"),
                 "source": raw_mapping.get("source"),
                 "isaac_dof_name": raw_mapping.get("isaac_dof_name"),

@@ -63,6 +63,43 @@ def test_build_policy_contract_from_real_a17_mapping() -> None:
     )
 
 
+def test_contract_preserves_source_and_effective_right_finger_transforms() -> None:
+    contract = build_policy_contract(_mapping())
+    right_finger_paths = (
+        "/aloha/joints/left_right_finger",
+        "/aloha/joints/right_right_finger",
+    )
+    dofs_by_path = {
+        dof["path"]: dof
+        for dof in contract["canonical_dofs"]
+        if dof["path"] in right_finger_paths
+    }
+
+    assert set(dofs_by_path) == set(right_finger_paths)
+    for path in right_finger_paths:
+        dof = dofs_by_path[path]
+        assert dof["source_transform"] == {
+            "sign": -1.0,
+            "offset": -0.021,
+            "scale": -0.036,
+        }
+        assert dof["effective_transform"] == {
+            "sign": 1.0,
+            "offset": 0.021,
+            "scale": 0.036,
+        }
+        assert dof["clean_runtime_mapping_override"] == {
+            "sign": 1.0,
+            "offset": 0.021,
+            "scale": 0.036,
+            "unit": "m",
+            "rationale": "clean Isaac DOF coordinate already mirrors through its joint frame",
+            "source": "A19 authored and A20 runtime positive prismatic limits",
+        }
+        assert dof["clean_runtime_mapping_override"]["rationale"]
+        assert (dof["sign"], dof["offset"], dof["scale"]) == (1.0, 0.021, 0.036)
+
+
 def test_build_order_adapter_preserves_observed_runtime_order() -> None:
     contract = build_policy_contract(_mapping())
     adapter = build_order_adapter(contract, _runtime_records())
@@ -169,6 +206,95 @@ def test_build_policy_contract_rejects_non_finite_affine_values(field: str) -> N
 
     with pytest.raises(ValueError, match=f"non-finite {field}"):
         build_policy_contract(mapping)
+
+
+@pytest.mark.parametrize(
+    ("source_mapping", "error"),
+    [
+        (None, "invalid source canonical mapping"),
+        ([], "invalid source canonical mapping"),
+        (
+            {"sign": float("nan"), "offset": -0.021, "scale": -0.036},
+            "non-finite source sign",
+        ),
+        (
+            {"sign": -1.0, "offset": float("inf"), "scale": -0.036},
+            "non-finite source offset",
+        ),
+        (
+            {"sign": -1.0, "offset": -0.021, "scale": float("nan")},
+            "non-finite source scale",
+        ),
+        (
+            {"sign": -1.0, "offset": -0.021, "scale": 0.0},
+            "zero source scale",
+        ),
+    ],
+)
+def test_build_policy_contract_rejects_invalid_source_canonical_mapping(
+    source_mapping: object, error: str
+) -> None:
+    mapping = deepcopy(_mapping())
+    record = next(
+        record
+        for record in mapping["joint_records"]
+        if record.get("proposed_clean_joint_path")
+        == "/aloha/joints/left_right_finger"
+    )
+    record["source_canonical_mapping"] = source_mapping
+
+    with pytest.raises(ValueError, match=error):
+        build_policy_contract(mapping)
+
+
+def test_contract_uses_equal_fallback_transforms_for_unoverridden_records() -> None:
+    mapping = deepcopy(_mapping())
+    arm_path = "/aloha/joints/left_waist"
+    left_finger_path = "/aloha/joints/left_left_finger"
+    arm_record = next(
+        record
+        for record in mapping["joint_records"]
+        if record.get("proposed_clean_joint_path") == arm_path
+    )
+    arm_record.pop("source_canonical_mapping")
+
+    contract = build_policy_contract(mapping)
+    dofs_by_path = {dof["path"]: dof for dof in contract["canonical_dofs"]}
+
+    for path in (arm_path, left_finger_path):
+        dof = dofs_by_path[path]
+        assert dof["source_transform"] == dof["effective_transform"]
+        assert dof["clean_runtime_mapping_override"] is None
+
+
+def test_contract_deep_copies_clean_runtime_mapping_override_provenance() -> None:
+    mapping = _mapping()
+    source_record = next(
+        record
+        for record in mapping["joint_records"]
+        if record.get("proposed_clean_joint_path")
+        == "/aloha/joints/left_right_finger"
+    )
+    source_record["clean_runtime_mapping_override"]["metadata"] = {
+        "nested": {"coordinate": "source"}
+    }
+    contract = build_policy_contract(mapping)
+    dof = next(
+        dof
+        for dof in contract["canonical_dofs"]
+        if dof["path"] == "/aloha/joints/left_right_finger"
+    )
+
+    dof["clean_runtime_mapping_override"]["metadata"]["nested"]["coordinate"] = (
+        "mutated contract provenance"
+    )
+
+    assert (
+        source_record["clean_runtime_mapping_override"]["metadata"]["nested"][
+            "coordinate"
+        ]
+        == "source"
+    )
 
 
 @pytest.mark.parametrize("gripper_value", [0.0, 0.5, 1.0])
