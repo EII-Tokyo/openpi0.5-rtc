@@ -11,6 +11,7 @@ import html
 import inspect
 from itertools import pairwise
 import json
+import math
 import os
 from pathlib import Path
 import re
@@ -55,6 +56,41 @@ _REQUIRED_RUN_FIELDS = (
     "inputs",
     "initialization_operations",
 )
+_RUNTIME_FIELD_SOURCES = {
+    "path": "runtime", "name": "runtime", "joint_type": "runtime",
+    "lower_limit": "runtime", "upper_limit": "runtime", "index": "runtime",
+    "axis": "layer1", "body0": "layer1", "body1": "layer1",
+}
+_FLOAT32_REVOLUTE_DEGREES_ABS_TOL = 1e-5
+_FLOAT32_PRISMATIC_ABS_TOL = 1e-7
+
+
+def _compare_runtime_records(expected, observed):
+    normalized = [dict(record) for record in observed]
+    source_errors = []
+    for index, (authored, runtime) in enumerate(zip(expected, normalized, strict=False)):
+        if runtime.get("field_sources") != _RUNTIME_FIELD_SOURCES:
+            source_errors.append({"code": "invalid_field_sources", "index": index})
+        for field in ("lower_limit", "upper_limit"):
+            left, right = authored.get(field), runtime.get(field)
+            tolerance = (
+                _FLOAT32_REVOLUTE_DEGREES_ABS_TOL
+                if authored.get("joint_type") == "PhysicsRevoluteJoint"
+                else _FLOAT32_PRISMATIC_ABS_TOL
+            )
+            if (
+                isinstance(left, int | float)
+                and not isinstance(left, bool)
+                and isinstance(right, int | float)
+                and not isinstance(right, bool)
+                and math.isclose(float(left), float(right), rel_tol=0.0, abs_tol=tolerance)
+            ):
+                runtime[field] = left
+    comparison = compare_dof_records(expected, normalized)
+    if source_errors:
+        comparison["ok"] = False
+        comparison.setdefault("validation_errors", []).extend(source_errors)
+    return comparison
 
 
 def _valid_sha256(value: object) -> bool:
@@ -226,12 +262,13 @@ def _run_errors(
         and isinstance(reported_failures, list)
         and len(reported_failures) == 1
         and isinstance(reported_failures[0], dict)
-        and reported_failures[0].get("code") == "runtime_api_failure"
-        and isinstance(reported_failures[0].get("api"), str)
-        and bool(reported_failures[0]["api"].strip())
-        and isinstance(reported_failures[0].get("message"), str)
-        and bool(reported_failures[0]["message"].strip())
-        and operations == [reported_failures[0]["api"]]
+        and reported_failures[0].get("code") == "forbidden_initialization_required"
+        and reported_failures[0].get("required_operation") in {
+            "timeline.play", "physics.step", "physics.update_simulation"
+        }
+        and isinstance(reported_failures[0].get("source_api"), str)
+        and bool(reported_failures[0]["source_api"].strip())
+        and operations == [reported_failures[0]["required_operation"]]
     )
     if run.get("status") not in (_RUN_PASS, _BLOCKED):
         errors.append({"code": "invalid_run_status", "run_index": run_index})
@@ -253,7 +290,7 @@ def _run_errors(
     if not (isinstance(records, list) and all(isinstance(record, dict) for record in records)):
         errors.append({"code": "invalid_records_shape", "run_index": run_index})
     elif not runtime_api_blocked:
-        comparison = compare_dof_records(expected, records)
+        comparison = _compare_runtime_records(expected, records)
         if not comparison["ok"]:
             errors.append({"code": "runtime_records_mismatch", "run_index": run_index})
             mismatches.extend({"run_index": run_index, **mismatch} for mismatch in comparison["mismatches"])
@@ -575,6 +612,18 @@ def check_probe_source(source: str) -> dict[str, Any]:
         "set_joint_efforts", "apply_action", "save", "Save", "Export", "Flatten",
         "getattr", "setattr", "__import__", "exec", "eval", "import_module", "update", "update_simulation",
     }
+    reviewed_calls = {
+        "ArgumentParser", "Path", "RuntimeDiscoveryError", "SimulationApp", "SystemExit",
+        "__init__", "_as_list", "_call_runtime_api", "_digest", "_discover_runtime_records",
+        "_emit_marker", "_now", "_safe_version", "add_argument", "append", "bool", "close",
+        "create_articulation_view", "create_simulation_view", "cwd", "degrees", "dumps",
+        "enumerate", "expected_dof_records", "file_digest", "float", "force_load_physics_from_usd",
+        "get", "get_context", "get_dof_limits", "get_physx_interface", "get_stage_id", "getpid",
+        "hasattr", "hexdigest", "int", "isinstance", "isoformat", "len", "list", "loads", "main",
+        "now", "open", "open_stage", "operation", "parse_args", "printer", "read_text", "replace",
+        "resolve", "safe_load", "serializer", "set_subspace_roots", "start_simulation", "str", "super",
+        "tolist", "version", "zip",
+    }
 
     def is_forbidden(name: str) -> bool:
         return name in forbidden_calls or name.startswith("set_joint")
@@ -601,6 +650,8 @@ def check_probe_source(source: str) -> dict[str, Any]:
             name = node.func.id if isinstance(node.func, ast.Name) else node.func.attr if isinstance(node.func, ast.Attribute) else "dynamic"
             if is_forbidden(name) or name == "dynamic":
                 errors.append(f"call_not_allowed:{name}")
+            elif name not in reviewed_calls:
+                errors.append(f"unreviewed_call:{name}")
             if isinstance(node.func, ast.Name) and node.func.id in aliases:
                 target = aliases[node.func.id].rsplit(".", 1)[-1]
                 if is_forbidden(target):

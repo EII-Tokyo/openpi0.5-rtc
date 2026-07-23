@@ -103,6 +103,10 @@ def _discover_runtime_records(
     articulation_count = int(articulation_view.count)
     prim_paths = list(articulation_view.prim_paths)
     root = str(prim_paths[0]) if articulation_count == 1 and len(prim_paths) == 1 else None
+    validity_check = articulation_view.is_valid if hasattr(articulation_view, "is_valid") else None
+    api_valid = bool(
+        _call_runtime_api("omni.physics.tensors.ArticulationView.is_valid", validity_check)
+    ) if validity_check is not None else True
     if not (len(expected) == len(names) == len(types) == len(paths) == len(limits) == dof_count):
         raise RuntimeDiscoveryError(
             "omni.physics.tensors.ArticulationView.metadata",
@@ -142,12 +146,27 @@ def _discover_runtime_records(
             if type_name == "Rotation"
             else float(bounds[1]),
             "index": index,
+            "field_sources": {
+                "path": "runtime",
+                "name": "runtime",
+                "joint_type": "runtime",
+                "lower_limit": "runtime",
+                "upper_limit": "runtime",
+                "index": "runtime",
+                "axis": "layer1",
+                "body0": "layer1",
+                "body1": "layer1",
+            },
         }
         records.append(record)
     return records, {
         "articulation_root": root,
         "articulation_count": articulation_count,
         "dof_count": dof_count,
+        "valid_handle": api_valid
+        and root == "/aloha/root_joint"
+        and articulation_count == 1
+        and dof_count == len(records),
     }
 
 
@@ -227,6 +246,12 @@ def main() -> int:
         mapping_path = (repo / outputs["a17_clean_articulation_mapping_plan_json"]).resolve()
         mapping = json.loads(mapping_path.read_text(encoding="utf-8"))
         records = expected_dof_records(mapping)
+        input_evidence = {
+            "config": {"path": str(config_path), "sha256": _digest(config_path)},
+            "mapping": {"path": str(mapping_path), "sha256": _digest(mapping_path)},
+            "stage": {"path": str(stage_path), "sha256": _digest(stage_path)},
+        }
+        payload = {**payload, "inputs": input_evidence}
         records, runtime = _discover_runtime_records(
             str(stage_path),
             records,
@@ -242,13 +267,8 @@ def main() -> int:
             "started_at": started,
             "finished_at": _now(),
             "isaac_sim_version": _safe_version("isaacsim"),
-            "inputs": {
-                "config": {"path": str(config_path), "sha256": _digest(config_path)},
-                "mapping": {"path": str(mapping_path), "sha256": _digest(mapping_path)},
-                "stage": {"path": str(stage_path), "sha256": _digest(stage_path)},
-            },
+            "inputs": input_evidence,
             **runtime,
-            "valid_handle": True,
             "records": records,
             "requires_unapproved_initialization": False,
             "initialization_operations": [],
@@ -258,17 +278,18 @@ def main() -> int:
             "articulation_root": "/aloha/root_joint",
             "articulation_count": 1,
             "dof_count": 16,
+            "valid_handle": True,
         }:
             payload["status"] = "FAIL_A20_RUNTIME_ARTICULATION_DISCOVERY"
             payload["valid_handle"] = False
     except RuntimeDiscoveryError as exc:
         payload = {
             **payload,
-            "status": "BLOCKED_RUNTIME_HANDLE_REQUIRES_UNAPPROVED_INITIALIZATION",
-            "probe_returncode": 0,
+            "status": "FAIL_A20_RUNTIME_ARTICULATION_DISCOVERY",
+            "probe_returncode": 1,
             "finished_at": _now(),
-            "requires_unapproved_initialization": True,
-            "initialization_operations": [exc.api],
+            "requires_unapproved_initialization": False,
+            "initialization_operations": [],
             "errors": [{"code": "runtime_api_failure", "api": exc.api, "message": str(exc)}],
         }
     except Exception as exc:

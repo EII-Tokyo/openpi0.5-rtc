@@ -93,6 +93,13 @@ def test_probe_checker_allows_only_the_reviewed_no_step_runtime_discovery_calls(
     )
     assert check_probe_source(source)["ok"] is True
     assert check_probe_source(source + "interface.update_simulation(0.0, 0.0)\n")["ok"] is False
+    for unsafe in (
+        "interface.simulate(0.0, 0.0)\n",
+        "interface.release_physics_objects()\n",
+        "timeline.set_current_time(1.0)\n",
+        "interface.unknown_runtime_call()\n",
+    ):
+        assert check_probe_source(source + unsafe)["ok"] is False
 
 
 def test_runtime_discovery_builds_records_from_real_tensor_view() -> None:
@@ -111,6 +118,9 @@ def test_runtime_discovery_builds_records_from_real_tensor_view() -> None:
             self.prim_paths = ["/aloha/root_joint"]
             self.dof_paths = [["/aloha/joints/joint_00", "/aloha/joints/joint_01"]]
             self.shared_metatype = FakeMetadata()
+
+        def is_valid(self):
+            return True
 
         def get_dof_limits(self):
             calls.append("get_dof_limits")
@@ -159,7 +169,12 @@ def test_runtime_discovery_builds_records_from_real_tensor_view() -> None:
         ("create_articulation_view", ["/aloha/root_joint"]),
         "get_dof_limits",
     ]
-    assert facts == {"articulation_root": "/aloha/root_joint", "articulation_count": 1, "dof_count": 2}
+    assert facts == {
+        "articulation_root": "/aloha/root_joint",
+        "articulation_count": 1,
+        "dof_count": 2,
+        "valid_handle": True,
+    }
     assert [record["name"] for record in records] == ["joint_00", "joint_01"]
     assert [record["path"] for record in records] == ["/aloha/joints/joint_00", "/aloha/joints/joint_01"]
     assert [record["joint_type"] for record in records] == ["PhysicsRevoluteJoint", "PhysicsPrismaticJoint"]
@@ -167,6 +182,17 @@ def test_runtime_discovery_builds_records_from_real_tensor_view() -> None:
         (math.degrees(-1.25), math.degrees(1.5)),
         (0.01, 0.04),
     ]
+    assert records[0]["field_sources"] == {
+        "path": "runtime",
+        "name": "runtime",
+        "joint_type": "runtime",
+        "lower_limit": "runtime",
+        "upper_limit": "runtime",
+        "index": "runtime",
+        "axis": "layer1",
+        "body0": "layer1",
+        "body1": "layer1",
+    }
 
 
 def test_runtime_discovery_failure_names_the_exact_failed_api() -> None:
@@ -393,6 +419,13 @@ def _layer1() -> dict[str, object]:
 
 
 def _run() -> dict[str, object]:
+    runtime_records = [_record(index) for index in range(16)]
+    for record in runtime_records:
+        record["field_sources"] = {
+            "path": "runtime", "name": "runtime", "joint_type": "runtime",
+            "lower_limit": "runtime", "upper_limit": "runtime", "index": "runtime",
+            "axis": "layer1", "body0": "layer1", "body1": "layer1",
+        }
     return {
         "status": "PASS_RUNTIME_PROBE",
         "process_status": "completed",
@@ -402,7 +435,7 @@ def _run() -> dict[str, object]:
         "articulation_count": 1,
         "dof_count": 16,
         "valid_handle": True,
-        "records": [_record(index) for index in range(16)],
+        "records": runtime_records,
         "requires_unapproved_initialization": False,
         "physics_stepped": False,
         "actions_applied": False,
@@ -516,7 +549,12 @@ def test_structurally_valid_blocked_run_has_blocked_status() -> None:
         status="BLOCKED_RUNTIME_HANDLE_REQUIRES_UNAPPROVED_INITIALIZATION",
         valid_handle=False,
         requires_unapproved_initialization=True,
-        initialization_operations=["timeline Play"],
+        initialization_operations=["timeline.play"],
+        errors=[{
+            "code": "forbidden_initialization_required",
+            "required_operation": "timeline.play",
+            "source_api": "omni.physics.tensors.create_simulation_view",
+        }],
     )
 
     result = aggregate_runtime_runs(_layer1(), runs)
@@ -526,7 +564,7 @@ def test_structurally_valid_blocked_run_has_blocked_status() -> None:
     assert result["errors"] == []
 
 
-def test_runtime_api_failure_can_block_without_claiming_discovered_records() -> None:
+def test_generic_runtime_api_failure_cannot_be_misclassified_as_blocked() -> None:
     runs = _runs()
     runs[1].update(
         status="BLOCKED_RUNTIME_HANDLE_REQUIRES_UNAPPROVED_INITIALIZATION",
@@ -548,9 +586,20 @@ def test_runtime_api_failure_can_block_without_claiming_discovered_records() -> 
 
     result = aggregate_runtime_runs(_layer1(), runs)
 
-    assert result["status"] == "BLOCKED_RUNTIME_HANDLE_REQUIRES_UNAPPROVED_INITIALIZATION"
-    assert result["errors"] == []
-    assert result["blocked_run_indices"] == [1]
+    assert result["status"] == "FAIL_A20_RUNTIME_ARTICULATION_DISCOVERY"
+    assert result["blocked_run_indices"] == []
+
+
+def test_float32_runtime_limits_are_semantically_equal_but_real_mismatch_fails() -> None:
+    import struct
+
+    runs = _runs()
+    expected = runs[1]["records"][0]["lower_limit"]
+    radians32 = struct.unpack("f", struct.pack("f", math.radians(expected)))[0]
+    runs[1]["records"][0]["lower_limit"] = math.degrees(radians32)
+    assert aggregate_runtime_runs(_layer1(), runs)["status"] == "PASS_A20_RUNTIME_ARTICULATION_DISCOVERY_NO_STEP"
+    runs[1]["records"][0]["lower_limit"] += 0.01
+    assert aggregate_runtime_runs(_layer1(), runs)["status"] == "FAIL_A20_RUNTIME_ARTICULATION_DISCOVERY"
 
 
 def test_malformed_blocked_run_fails_instead_of_masking_error() -> None:
