@@ -6,7 +6,7 @@ Overall: NOT_READY
 
 - Status: FAIL_A20_ASSET_VALIDATOR_BLOCKING_ISSUES
 - Blocking issue count: 1
-- Blocking issue: [FAILURE] JointStateChecker: Joint State for "/aloha/root_joint" is not coherent with transforms of rigid bodies belonging to the articulation (suggestion: Change XForms to match Joint State)
+- Blocking issue: [FAILURE] JointStateChecker at PrimId(stage_id=StageId(root_layer=LayerId(identifier='/home/eii/project/openpi0.5-rtc-reward-learning/aloha_isaac_rebuild/scenes/a19_clean_articulation_candida [truncated]: Joint State for "/aloha/root_joint" is not coherent with transforms of rigid bodies belonging to the articulation (suggestion: Change XForms to match Joint State)
 - Independence: A two-layer PASS does not mean Asset Validator is clean; this gate remains separate.
 
 ## Layer 1

@@ -306,6 +306,11 @@ def _run() -> dict[str, object]:
         "finished_at": "2026-01-01T00:00:01+00:00",
         "inputs": {"stage": {"sha256": "a" * 64}, "mapping": {"sha256": "b" * 64}, "config": {"sha256": "c" * 64}},
         "initialization_operations": [],
+        "cleanup_verified": True,
+        "provenance": {
+            "schema_version": "a20-runtime-discovery-v2",
+            "safety_checker": {"ok": True},
+        },
     }
 
 
@@ -1052,3 +1057,74 @@ def test_online_main_writes_false_safety_flags_and_exits_zero_only_for_exact_pas
     assert is_exact_runtime_pass(written) is True
     for flag in ("physics_stepped", "actions_applied", "targets_written", "stage_saved"):
         assert written[flag] is False
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        lambda payload: payload.update(runs=[{}, {}, {}]),
+        lambda payload: payload["runs"][1].update(physics_stepped=True),
+        lambda payload: payload["runs"][1].update(status="BLOCKED_RUNTIME_HANDLE_REQUIRES_UNAPPROVED_INITIALIZATION"),
+        lambda payload: payload["runs"][1].update(valid_handle=False),
+        lambda payload: payload["runs"][1].update(requires_unapproved_initialization=True),
+        lambda payload: payload["runs"][1].update(initialization_operations=["timeline Play"]),
+        lambda payload: payload["runs"][1].pop("cleanup_verified"),
+        lambda payload: payload["runs"][1].pop("provenance"),
+        lambda payload: payload["runs"][1].pop("records"),
+        lambda payload: payload["runs"][1]["records"].pop(),
+        lambda payload: payload["errors"].append({"code": "bad"}),
+        lambda payload: payload["mismatches"].append({"field": "path"}),
+    ],
+)
+def test_exact_runtime_pass_revalidates_every_saved_run_fail_closed(mutation) -> None:
+    payload = aggregate_runtime_runs(_layer1(), _runs())
+    payload.update(
+        runs=_runs(),
+        physics_stepped=False,
+        actions_applied=False,
+        targets_written=False,
+        stage_saved=False,
+    )
+    for run in payload["runs"]:
+        run["cleanup_verified"] = True
+        run["provenance"] = {"schema_version": "a20-runtime-discovery-v2", "safety_checker": {"ok": True}}
+    mutation(payload)
+    assert is_exact_runtime_pass(payload) is False
+
+
+def test_exact_runtime_pass_rejects_top_level_run_contradiction() -> None:
+    payload = aggregate_runtime_runs(_layer1(), _runs())
+    payload.update(
+        runs=_runs(),
+        physics_stepped=False,
+        actions_applied=False,
+        targets_written=False,
+        stage_saved=False,
+    )
+    for run in payload["runs"]:
+        run["cleanup_verified"] = True
+        run["provenance"] = {"schema_version": "a20-runtime-discovery-v2", "safety_checker": {"ok": True}}
+    payload["runs"][0]["records"][0]["axis"] = "Z"
+    assert is_exact_runtime_pass(payload) is False
+
+
+def test_report_bounds_and_single_lines_untrusted_asset_validator_issues() -> None:
+    asset = _asset_validator()
+    asset["blocking_issue_count"] = 100
+    asset["issues"] = [
+        {
+            "rule": f"rule-{index}-" + "r" * 1000,
+            "severity": "FAILURE\nforged heading",
+            "at": "/aloha/root_joint\n# injected" + "a" * 1000,
+            "message": "message\nnext line " + "m" * 5000,
+            "suggestion": "suggestion\r\nnext line " + "s" * 5000,
+        }
+        for index in range(100)
+    ]
+    report = format_two_layer_report(asset, _layer1(), _blocked_layer2())
+    assert len(report) < 20_000
+    assert report.count("- Blocking issue: [") == 20
+    assert "[truncated]" in report
+    assert "80 additional issues omitted" in report
+    assert "\n# injected" not in report
+    assert "\nnext line" not in report

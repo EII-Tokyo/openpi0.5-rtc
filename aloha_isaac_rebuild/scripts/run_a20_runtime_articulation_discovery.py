@@ -32,6 +32,7 @@ _PASS = "PASS_A20_RUNTIME_ARTICULATION_DISCOVERY_NO_STEP"
 _FAIL = "FAIL_A20_RUNTIME_ARTICULATION_DISCOVERY"
 _BLOCKED = "BLOCKED_RUNTIME_HANDLE_REQUIRES_UNAPPROVED_INITIALIZATION"
 _RUN_PASS = "PASS_RUNTIME_PROBE"
+MAX_REPORT_ISSUES = 20
 _REQUIRED_RUN_FIELDS = (
     "status",
     "process_status",
@@ -306,12 +307,13 @@ def aggregate_runtime_runs(layer1: object, runs: object) -> dict[str, Any]:
         "blocked_run_indices": blocked_runs,
         "errors": errors,
         "mismatches": mismatches,
+        "expected": layer1.get("expected") if isinstance(layer1, dict) else None,
     }
 
 
 def is_exact_runtime_pass(payload: object) -> bool:
     """Allow automation to continue only on the complete, no-step A20 pass contract."""
-    return bool(
+    if not (
         isinstance(payload, dict)
         and payload.get("status") == _PASS
         and payload.get("ok") is True
@@ -321,9 +323,29 @@ def is_exact_runtime_pass(payload: object) -> bool:
         and payload.get("blocked_run_indices") == []
         and isinstance(payload.get("runs"), list)
         and len(payload["runs"]) == 3
-        and all(isinstance(run, dict) for run in payload["runs"])
+        and isinstance(payload.get("expected"), list)
+        and len(payload["expected"]) == 16
+        and validate_dof_records(payload["expected"])["ok"]
         and all(payload.get(flag) is False for flag in ("physics_stepped", "actions_applied", "targets_written", "stage_saved"))
-    )
+    ):
+        return False
+    for index, run in enumerate(payload["runs"]):
+        if not isinstance(run, dict):
+            return False
+        run_errors, run_mismatches, blocked = _run_errors(run, index, payload["expected"])
+        provenance = run.get("provenance")
+        if (
+            run_errors
+            or run_mismatches
+            or blocked
+            or run.get("cleanup_verified") is not True
+            or not isinstance(provenance, dict)
+            or provenance.get("schema_version") != SCHEMA_VERSION
+            or not isinstance(provenance.get("safety_checker"), dict)
+            or provenance["safety_checker"].get("ok") is not True
+        ):
+            return False
+    return True
 
 
 def _artifact_status(payload: object) -> str:
@@ -339,6 +361,13 @@ def _count(payload: object, field: str) -> str:
 
 def _short(value: object) -> str:
     return value[:12] if isinstance(value, str) and value else "unknown"
+
+
+def _bounded_field(value: object, limit: int) -> str:
+    single_line = " ".join(str(value if value is not None else "unknown").split())
+    if len(single_line) <= limit:
+        return single_line
+    return f"{single_line[:limit]} [truncated]"
 
 
 def _valid_asset_validator(payload: object) -> bool:
@@ -371,12 +400,17 @@ def format_two_layer_report(asset_validator: object, layer1: object, layer2: obj
     overall = "READY" if _valid_asset_validator(asset_validator) and not _layer1_errors(layer1) and is_exact_runtime_pass(layer2) else "NOT_READY"
 
     issues = asset_validator.get("issues") if isinstance(asset_validator, dict) else None
+    bounded_issues = issues[:MAX_REPORT_ISSUES] if isinstance(issues, list) else []
     issue_lines = [
-        f"- Blocking issue: [{issue.get('severity', 'unknown')}] {issue.get('rule', 'unknown')}: "
-        f"{issue.get('message', 'unknown')} (suggestion: {issue.get('suggestion', 'unknown')})"
-        for issue in issues or []
+        f"- Blocking issue: [{_bounded_field(issue.get('severity'), 40)}] "
+        f"{_bounded_field(issue.get('rule'), 80)} at {_bounded_field(issue.get('at'), 160)}: "
+        f"{_bounded_field(issue.get('message'), 280)} "
+        f"(suggestion: {_bounded_field(issue.get('suggestion'), 200)})"
+        for issue in bounded_issues
         if isinstance(issue, dict)
-    ] if isinstance(issues, list) else []
+    ]
+    if isinstance(issues, list) and len(issues) > MAX_REPORT_ISSUES:
+        issue_lines.append(f"- [truncated] {len(issues) - MAX_REPORT_ISSUES} additional issues omitted.")
     if not issue_lines:
         issue_lines.append("- Blocking issue: none recorded (artifact is malformed/missing unless status is clean).")
 
