@@ -30,11 +30,11 @@ Overall: READY
 - Errors: 0
 - Mismatches: 0
 - Exit contract: BLOCKED=2, PASS=0, FAIL=1
-- Git revision: 099823d3a0d0
+- Git revision: 3d8c7c3c7ff3
 - Probe SHA-256: 655a91b9be74
 - Coordinator SHA-256: d814e05d6895
-- Report generation ID: 4ee744ea-22cc-4005-b9a3-16ee09c031fd
-- Runtime evidence SHA-256: 2a9a41c2e852
+- Report generation ID: 82f935cc-7e7d-461f-bb0b-a29c2b2833e6
+- Runtime evidence SHA-256: 18a135333db9
 - Next action: No blocked-runtime action is authorized by this report.
 
 ## Safety and readiness
