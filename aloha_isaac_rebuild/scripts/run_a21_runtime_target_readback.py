@@ -18,6 +18,7 @@ import json
 import os
 from pathlib import Path
 import selectors
+import stat
 import subprocess
 import sys
 import time
@@ -688,6 +689,21 @@ def _canonical_file(repo: Path, value: Path, *, label: str) -> Path:
     return resolved
 
 
+def _lexical_executable(value: Path) -> Path:
+    """Validate an absolute launcher without resolving its symlink leaf."""
+    candidate = value.expanduser()
+    if not candidate.is_absolute() or ".." in candidate.parts:
+        raise ValueError("interpreter must be an absolute path without traversal")
+    launcher = Path(os.path.abspath(candidate))
+    try:
+        mode = launcher.stat().st_mode
+    except OSError as exc:
+        raise ValueError("interpreter must exist") from exc
+    if not stat.S_ISREG(mode) or not os.access(launcher, os.X_OK):
+        raise ValueError("interpreter must be an executable regular file")
+    return launcher
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
@@ -726,6 +742,7 @@ def main() -> int:
             repo, args.preflight or Path(outputs["a21_policy_target_limit_preflight_json"]), label="preflight"
         )
         probe_path = _canonical_file(repo, args.probe, label="probe")
+        interpreter = _lexical_executable(args.interpreter)
         output = (args.output or repo / outputs["a21_runtime_target_readback_json"]).resolve()
         report = (args.report or repo / outputs["a21_target_limit_and_readback_md"]).resolve()
         provenance = _code_provenance(repo, probe_path, Path(__file__).resolve())
@@ -755,9 +772,7 @@ def main() -> int:
             ]
             result = aggregate_batches(
                 preflight,
-                run_two_batches(
-                    repo, args.interpreter.resolve(), probe_path, args.timeout, extra_args=extra, provenance=provenance
-                ),
+                run_two_batches(repo, interpreter, probe_path, args.timeout, extra_args=extra, provenance=provenance),
             )
         result["inputs"] = {
             "config": {"path": str(config_path), "sha256": _digest(config_path)},

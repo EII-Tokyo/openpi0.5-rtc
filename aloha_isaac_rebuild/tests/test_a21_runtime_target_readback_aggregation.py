@@ -328,3 +328,30 @@ def test_cli_report_write_failure_removes_stale_ready_report(tmp_path: Path, mon
     result = json.loads((tmp_path / "output.json").read_text(encoding="utf-8"))
     assert result["status"] == coordinator.FAIL_STATUS
     assert any(error["code"] == "report_write_failed" for error in result["errors"])
+
+
+def test_cli_preserves_absolute_venv_launcher_symlink_for_batch_runner(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    config, _stage, _report = _write_cli_paths(tmp_path)
+    launcher = tmp_path / "venv" / "bin" / "python"
+    launcher.parent.mkdir(parents=True)
+    launcher.symlink_to(Path(sys.executable))
+    captured: dict[str, Path] = {}
+
+    def run_two_batches(_repo: Path, interpreter: Path, *_args: object, **_kwargs: object) -> list[dict[str, object]]:
+        captured["interpreter"] = interpreter
+        return []
+
+    monkeypatch.setattr(
+        coordinator, "_code_provenance", lambda *_args: {"git_dirty": False, "safety_checker": {"ok": True}}
+    )
+    monkeypatch.setattr(coordinator, "is_exact_runtime_pass", lambda *_args: True)
+    monkeypatch.setattr(coordinator, "_exact_preflight", lambda *_args: True)
+    monkeypatch.setattr(coordinator, "run_two_batches", run_two_batches)
+    monkeypatch.setattr(sys, "argv", ["coordinator", "--config", str(config), "--interpreter", str(launcher)])
+
+    assert coordinator.main() == 1
+
+    assert captured["interpreter"] == launcher.absolute()
+    assert captured["interpreter"] != launcher.resolve()
