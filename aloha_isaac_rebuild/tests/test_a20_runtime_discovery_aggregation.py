@@ -30,6 +30,8 @@ ROOT = Path(__file__).resolve().parents[2]
 MODULE = ROOT / "aloha_isaac_rebuild/scripts/run_a20_runtime_articulation_discovery.py"
 PROBE = ROOT / "aloha_isaac_rebuild/scripts/probe_a20_runtime_articulation_once.py"
 MARKER = "A20_RUNTIME_DISCOVERY_JSON="
+LIVE_STAGE_HASH = hashlib.sha256(MODULE.read_bytes()).hexdigest()
+LIVE_MAPPING_HASH = hashlib.sha256(PROBE.read_bytes()).hexdigest()
 
 
 def test_strict_probe_checker_rejects_dynamic_and_alias_bypasses() -> None:
@@ -268,13 +270,13 @@ def _layer1() -> dict[str, object]:
         "errors": [],
         "inputs": {
             "stage": {
-                "path": "/workspace/a19_clean_articulation_candidate.usda",
-                "pre_sha256": "a" * 64,
-                "post_sha256": "a" * 64,
+                "path": str(MODULE),
+                "pre_sha256": LIVE_STAGE_HASH,
+                "post_sha256": LIVE_STAGE_HASH,
                 "consistent_during_audit": True,
             },
-            "mapping": {"path": "/workspace/a17.json", "sha256": "b" * 64},
-            "config": {"path": "/workspace/config.yaml", "sha256": "c" * 64},
+            "mapping": {"path": str(PROBE), "sha256": LIVE_MAPPING_HASH},
+            "config": {"path": str(PROBE), "sha256": LIVE_MAPPING_HASH},
         },
         "physics_stepped": False,
         "actions_applied": False,
@@ -304,7 +306,7 @@ def _run() -> dict[str, object]:
         "isaac_sim_version": "5.1.0.0",
         "started_at": "2026-01-01T00:00:00+00:00",
         "finished_at": "2026-01-01T00:00:01+00:00",
-        "inputs": {"stage": {"sha256": "a" * 64}, "mapping": {"sha256": "b" * 64}, "config": {"sha256": "c" * 64}},
+        "inputs": {"stage": {"sha256": LIVE_STAGE_HASH}, "mapping": {"sha256": LIVE_MAPPING_HASH}, "config": {"sha256": LIVE_MAPPING_HASH}},
         "initialization_operations": [],
         "cleanup_verified": True,
         "provenance": {
@@ -601,7 +603,7 @@ def _probe_payload(invocation: str, pid: int, start: str, end: str) -> dict[str,
         started_at=start,
         finished_at=end,
         isaac_sim_version="5.1.0",
-        inputs={"stage": {"sha256": "a" * 64}, "mapping": {"sha256": "b" * 64}, "config": {"sha256": "c" * 64}},
+        inputs={"stage": {"sha256": LIVE_STAGE_HASH}, "mapping": {"sha256": LIVE_MAPPING_HASH}, "config": {"sha256": LIVE_MAPPING_HASH}},
     )
     return run
 
@@ -717,7 +719,7 @@ def _runs_with_provenance() -> list[dict[str, object]]:
             isaac_sim_version="5.1.0.0",
             started_at=f"2026-01-01T00:00:0{index * 2}+00:00",
             finished_at=f"2026-01-01T00:00:0{index * 2 + 1}+00:00",
-            inputs={"stage": {"sha256": "a" * 64}, "mapping": {"sha256": "b" * 64}, "config": {"sha256": "c" * 64}},
+            inputs={"stage": {"sha256": LIVE_STAGE_HASH}, "mapping": {"sha256": LIVE_MAPPING_HASH}, "config": {"sha256": LIVE_MAPPING_HASH}},
         )
     return runs
 
@@ -873,7 +875,7 @@ def test_two_layer_report_keeps_independent_gates_and_readiness_false() -> None:
     assert "Overall: NOT_READY" in report
     assert "FAIL_A20_ASSET_VALIDATOR_BLOCKING_ISSUES" in report
     assert "JointStateChecker" in report
-    assert 'Joint State for "/aloha/root_joint" is not coherent with transforms' in report
+    assert "Joint State for &quot;/aloha/root_joint&quot; is not coherent with transforms" in report
     assert "PASS_A20_USD_DOF_METADATA" in report
     assert "Expected DOFs: 16" in report
     assert "Observed DOFs: 16" in report
@@ -916,7 +918,7 @@ def test_two_layer_report_summarizes_provenance_without_embedding_logs() -> None
     report = format_two_layer_report(_asset_validator(), _layer1(), layer2)
     assert "aaaaaaaaaaaa" in report
     assert "bbbbbbbbbbbb" in report
-    assert "/workspace/a19_clean_articulation_candidate.usda" in report
+    assert str(MODULE) in report
     assert "FULL ISAAC LOG MUST NOT APPEAR" not in report
 
 
@@ -1181,3 +1183,135 @@ def test_exact_runtime_pass_binds_all_run_input_hashes_to_trusted_layer1() -> No
     for run in payload["runs"]:
         run["inputs"]["mapping"]["sha256"] = "d" * 64
     assert is_exact_runtime_pass(payload, trusted) is False
+
+
+def test_asset_validator_failure_keeps_overall_not_ready_with_exact_layers() -> None:
+    layer1 = _layer1()
+    layer2 = aggregate_runtime_runs(layer1, _runs())
+    layer2.update(
+        runs=_runs(), physics_stepped=False, actions_applied=False, targets_written=False, stage_saved=False
+    )
+    report = format_two_layer_report(_asset_validator(), layer1, layer2)
+    assert "Overall: NOT_READY" in report
+
+
+@pytest.mark.parametrize("scalar", [None, [], "READY", 7, True])
+def test_offline_scalar_artifact_removes_stale_ready_and_returns_structured_fail(
+    scalar: object, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    artifacts = tmp_path / "artifacts"
+    reports = tmp_path / "reports"
+    artifacts.mkdir()
+    reports.mkdir()
+    layer1_path = artifacts / "layer1.json"
+    runtime_path = artifacts / "runtime.json"
+    asset_path = artifacts / "asset.json"
+    report_path = reports / "report.md"
+    config_path = tmp_path / "config.yaml"
+    layer1_path.write_text(json.dumps(scalar), encoding="utf-8")
+    runtime_path.write_text(json.dumps(scalar), encoding="utf-8")
+    asset_path.write_text(json.dumps(scalar), encoding="utf-8")
+    report_path.write_text("Overall: READY\nSTALE READY", encoding="utf-8")
+    config_path.write_text(
+        yaml.safe_dump(
+            {
+                "outputs": {
+                    "a20_usd_dof_metadata_json": str(layer1_path.relative_to(tmp_path)),
+                    "a20_runtime_articulation_discovery_json": str(runtime_path.relative_to(tmp_path)),
+                    "a20_asset_validator_json": str(asset_path.relative_to(tmp_path)),
+                    "a20_two_layer_articulation_discovery_md": str(report_path.relative_to(tmp_path)),
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(sys, "argv", [str(MODULE), "--config", str(config_path), "--report-from-existing"])
+    assert coordinator.main() == 1
+    assert "Overall: READY" not in report_path.read_text(encoding="utf-8")
+    assert "Overall: NOT_READY" in report_path.read_text(encoding="utf-8")
+    rewritten = json.loads(runtime_path.read_text(encoding="utf-8"))
+    assert rewritten["status"] == "FAIL_A20_RUNTIME_ARTICULATION_DISCOVERY"
+    assert rewritten["errors"]
+
+
+def test_report_globally_bounds_and_escapes_all_untrusted_fields() -> None:
+    asset = _asset_validator()
+    asset["status"] = "FAIL\n# forged <script>alert(1)</script> [x](javascript:x) `tick`"
+    asset["blocking_issue_count"] = "1\n# forged"
+    asset["issues"] = [
+        {
+            "rule": "<img src=x onerror=alert(1)> [rule](javascript:x) `r`",
+            "severity": "FAILURE",
+            "at": "/stage\n# heading",
+            "message": "<script>alert(1)</script>\n# heading",
+            "suggestion": "[click](javascript:x) `code`",
+        }
+    ]
+    layer1 = _layer1()
+    layer1["inputs"]["stage"]["path"] = "/stage\n# injected <img src=x> [x](y) `z`" + "p" * 5000
+    layer2 = _blocked_layer2()
+    layer2["runs"][0]["initialization_operations"] = [
+        f"op-{index}\n# injected <script>x</script> [x](y) `z`" + "q" * 1000 for index in range(1000)
+    ]
+    report = format_two_layer_report(asset, layer1, layer2)
+    assert len(report.encode("utf-8")) <= 32_768
+    assert "<script>" not in report
+    assert "<img" not in report
+    assert "javascript:" not in report
+    assert "\n# injected" not in report
+    assert "[truncated]" in report
+    assert "additional operations omitted" in report
+
+
+def test_offline_self_consistent_forged_three_jsons_cannot_exit_ready(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    layer1 = _layer1()
+    runtime = aggregate_runtime_runs(layer1, _runs())
+    runtime.update(
+        runs=_runs(), physics_stepped=False, actions_applied=False, targets_written=False, stage_saved=False
+    )
+    forged_hashes = {"stage": "a" * 64, "mapping": "b" * 64, "config": "c" * 64}
+    for name, digest in forged_hashes.items():
+        forged_path = str((tmp_path / f"nonexistent-{name}").resolve())
+        if name == "stage":
+            layer1["inputs"][name].update(path=forged_path, pre_sha256=digest, post_sha256=digest)
+        else:
+            layer1["inputs"][name].update(path=forged_path, sha256=digest)
+        for run in runtime["runs"]:
+            run["inputs"][name]["sha256"] = digest
+    asset = _asset_validator()
+    asset.update(
+        status="PASS_A20_ASSET_VALIDATOR_READ_ONLY_NO_BLOCKING_ISSUES",
+        ok=True,
+        blocking_issue_count=0,
+        issues=[],
+    )
+    layer1_path = tmp_path / "layer1.json"
+    runtime_path = tmp_path / "runtime.json"
+    asset_path = tmp_path / "asset.json"
+    report_path = tmp_path / "report.md"
+    config_path = tmp_path / "config.yaml"
+    layer1_path.write_text(json.dumps(layer1), encoding="utf-8")
+    runtime_path.write_text(json.dumps(runtime), encoding="utf-8")
+    asset_path.write_text(json.dumps(asset), encoding="utf-8")
+    report_path.write_text("Overall: READY\nSTALE", encoding="utf-8")
+    config_path.write_text(
+        yaml.safe_dump(
+            {
+                "outputs": {
+                    "a20_usd_dof_metadata_json": layer1_path.name,
+                    "a20_runtime_articulation_discovery_json": runtime_path.name,
+                    "a20_asset_validator_json": asset_path.name,
+                    "a20_two_layer_articulation_discovery_md": report_path.name,
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(sys, "argv", [str(MODULE), "--config", str(config_path), "--report-from-existing"])
+    assert coordinator.main() == 1
+    assert "Overall: READY" not in report_path.read_text(encoding="utf-8")
+    assert json.loads(runtime_path.read_text(encoding="utf-8"))["status"] == "FAIL_A20_RUNTIME_ARTICULATION_DISCOVERY"

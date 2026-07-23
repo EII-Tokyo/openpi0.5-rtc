@@ -7,6 +7,7 @@ import ast
 from contextlib import suppress
 from datetime import datetime
 import hashlib
+import html
 import inspect
 from itertools import pairwise
 import json
@@ -33,6 +34,8 @@ _FAIL = "FAIL_A20_RUNTIME_ARTICULATION_DISCOVERY"
 _BLOCKED = "BLOCKED_RUNTIME_HANDLE_REQUIRES_UNAPPROVED_INITIALIZATION"
 _RUN_PASS = "PASS_RUNTIME_PROBE"
 MAX_REPORT_ISSUES = 20
+MAX_REPORT_OPERATIONS = 20
+MAX_REPORT_BYTES = 32_768
 _REQUIRED_RUN_FIELDS = (
     "status",
     "process_status",
@@ -331,6 +334,9 @@ def is_exact_runtime_pass(payload: object, trusted_layer1: object = None) -> boo
         and all(payload.get(flag) is False for flag in ("physics_stepped", "actions_applied", "targets_written", "stage_saved"))
     ):
         return False
+    _, live_errors = _trusted_layer1_inputs(trusted_layer1)
+    if live_errors:
+        return False
     trusted_expected = trusted_layer1["expected"]
     if not compare_dof_records(trusted_expected, payload["expected"])["ok"]:
         return False
@@ -380,6 +386,9 @@ def _short(value: object) -> str:
 
 def _bounded_field(value: object, limit: int) -> str:
     single_line = " ".join(str(value if value is not None else "unknown").split())
+    single_line = re.sub(r"javascript:", "javascript&#58;", single_line, flags=re.IGNORECASE)
+    single_line = html.escape(single_line, quote=True)
+    single_line = re.sub(r"([`\[\]()])", r"\\\1", single_line)
     if len(single_line) <= limit:
         return single_line
     return f"{single_line[:limit]} [truncated]"
@@ -397,6 +406,17 @@ def _valid_asset_validator(payload: object) -> bool:
     return False
 
 
+def _asset_validator_clean(payload: object) -> bool:
+    return bool(
+        _valid_asset_validator(payload)
+        and isinstance(payload, dict)
+        and payload.get("status") == "PASS_A20_ASSET_VALIDATOR_READ_ONLY_NO_BLOCKING_ISSUES"
+        and payload.get("ok") is True
+        and payload.get("blocking_issue_count") == 0
+        and payload.get("issues") == []
+    )
+
+
 def _render_bool(payload: object, field: str) -> str:
     value = payload.get(field) if isinstance(payload, dict) else None
     if isinstance(value, bool):
@@ -412,7 +432,7 @@ def format_two_layer_report(asset_validator: object, layer1: object, layer2: obj
     asset_status = _artifact_status(asset_validator)
     layer1_status = _artifact_status(layer1)
     layer2_status = _artifact_status(layer2)
-    overall = "READY" if _valid_asset_validator(asset_validator) and not _layer1_errors(layer1) and is_exact_runtime_pass(layer2, layer1) else "NOT_READY"
+    overall = "READY" if _asset_validator_clean(asset_validator) and not _layer1_errors(layer1) and is_exact_runtime_pass(layer2, layer1) else "NOT_READY"
 
     issues = asset_validator.get("issues") if isinstance(asset_validator, dict) else None
     bounded_issues = issues[:MAX_REPORT_ISSUES] if isinstance(issues, list) else []
@@ -433,7 +453,7 @@ def format_two_layer_report(asset_validator: object, layer1: object, layer2: obj
     observed = layer1.get("observed") if isinstance(layer1, dict) else None
     layer1_stage = layer1.get("inputs", {}).get("stage", {}) if isinstance(layer1, dict) and isinstance(layer1.get("inputs"), dict) else {}
     layer2_runs = layer2.get("runs") if isinstance(layer2, dict) else None
-    operations = sorted(
+    all_operations = sorted(
         {
             operation
             for run in layer2_runs or []
@@ -442,6 +462,7 @@ def format_two_layer_report(asset_validator: object, layer1: object, layer2: obj
             if isinstance(operation, str)
         }
     ) if isinstance(layer2_runs, list) else []
+    operations = all_operations[:MAX_REPORT_OPERATIONS]
     provenance = layer2.get("provenance", {}) if isinstance(layer2, dict) and isinstance(layer2.get("provenance"), dict) else {}
     blocked = layer2_status == _BLOCKED
     determinism = "PASS" if is_exact_runtime_pass(layer2, layer1) else ("BLOCKED" if blocked else "FAIL")
@@ -451,41 +472,46 @@ def format_two_layer_report(asset_validator: object, layer1: object, layer2: obj
         else "No blocked-runtime action is authorized by this report."
     )
     if operations:
-        next_action = f"Required operations: {', '.join(operations)}; these operations were not approved."
+        rendered_operations = ", ".join(_bounded_field(operation, 160) for operation in operations)
+        omitted = len(all_operations) - len(operations)
+        omitted_note = f" [truncated] {omitted} additional operations omitted;" if omitted else ""
+        next_action = f"Required operations: {rendered_operations};{omitted_note} these operations were not approved."
 
-    return "\n".join(
+    report = "\n".join(
         [
             "# A20 two-layer articulation discovery gate",
             "",
-            f"Overall: {overall}",
+            f"Overall: {_bounded_field(overall, 40)}",
             "",
             "## Asset Validator",
             "",
-            f"- Status: {asset_status}",
-            f"- Blocking issue count: {asset_validator.get('blocking_issue_count', 'unknown') if isinstance(asset_validator, dict) else 'unknown'}",
+            f"- Status: {_bounded_field(asset_status, 120)}",
+            f"- Blocking issue count: {_bounded_field(asset_validator.get('blocking_issue_count', 'unknown') if isinstance(asset_validator, dict) else 'unknown', 40)}",
             *issue_lines,
             "- Independence: A two-layer PASS does not mean Asset Validator is clean; this gate remains separate.",
             "",
             "## Layer 1",
             "",
-            f"- Status: {layer1_status}",
+            f"- Status: {_bounded_field(layer1_status, 120)}",
             f"- Expected DOFs: {len(expected) if isinstance(expected, list) else 'unknown'}",
             f"- Observed DOFs: {len(observed) if isinstance(observed, list) else 'unknown'}",
             f"- Mismatches: {_count(layer1, 'mismatches')}",
-            f"- Stage: {layer1_stage.get('path', 'unknown') if isinstance(layer1_stage, dict) else 'unknown'}",
-            f"- Stage SHA-256: {_short(layer1_stage.get('post_sha256') if isinstance(layer1_stage, dict) else None)}",
+            f"- Stage: {_bounded_field(layer1_stage.get('path', 'unknown') if isinstance(layer1_stage, dict) else 'unknown', 240)}",
+            f"- Stage SHA-256: {_bounded_field(_short(layer1_stage.get('post_sha256') if isinstance(layer1_stage, dict) else None), 20)}",
             "",
             "## Layer 2",
             "",
-            f"- Status: {layer2_status}",
+            f"- Status: {_bounded_field(layer2_status, 120)}",
             f"- Runs: {layer2.get('run_count', 'unknown') if isinstance(layer2, dict) else 'unknown'}",
             f"- Three-run determinism: {determinism}",
             f"- Errors: {_count(layer2, 'errors')}",
             f"- Mismatches: {_count(layer2, 'mismatches')}",
             "- Exit contract: BLOCKED=2, PASS=0, FAIL=1",
-            f"- Git revision: {_short(provenance.get('git_head'))}",
-            f"- Probe SHA-256: {_short(provenance.get('probe_sha256'))}",
-            f"- Coordinator SHA-256: {_short(provenance.get('coordinator_sha256'))}",
+            f"- Git revision: {_bounded_field(_short(provenance.get('git_head')), 20)}",
+            f"- Probe SHA-256: {_bounded_field(_short(provenance.get('probe_sha256')), 20)}",
+            f"- Coordinator SHA-256: {_bounded_field(_short(provenance.get('coordinator_sha256')), 20)}",
+            f"- Report generation ID: {_bounded_field(layer2.get('report_generation_id') if isinstance(layer2, dict) else None, 80)}",
+            f"- Runtime evidence SHA-256: {_short(hashlib.sha256(json.dumps(layer2, sort_keys=True, default=repr).encode()).hexdigest())}",
             f"- Next action: {next_action}",
             "",
             "## Safety and readiness",
@@ -504,6 +530,9 @@ def format_two_layer_report(asset_validator: object, layer1: object, layer2: obj
             "",
         ]
     )
+    if len(report.encode("utf-8")) > MAX_REPORT_BYTES:
+        return "# A20 two-layer articulation discovery gate\n\nOverall: NOT_READY\n\n- Status: FAIL_REPORT_SIZE_LIMIT\n- [truncated] Report exceeded bounded UTF-8 size.\n"
+    return report
 
 
 MARKER = "A20_RUNTIME_DISCOVERY_JSON="
@@ -926,9 +955,22 @@ def _atomic_write_text(path: Path, content: str) -> None:
 
 def _load_json_fail_closed(path: Path) -> object:
     try:
-        return json.loads(path.read_text(encoding="utf-8"))
+        payload = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, UnicodeError, json.JSONDecodeError):
         return {"status": "MALFORMED_OR_MISSING", "ok": False, "artifact_path": str(path)}
+    if not isinstance(payload, dict):
+        return {"status": "MALFORMED_OR_MISSING", "ok": False, "artifact_path": str(path)}
+    return payload
+
+
+def _fail_result(result: object, code: str) -> dict[str, Any]:
+    payload = dict(result) if isinstance(result, dict) else {}
+    payload["status"], payload["ok"] = _FAIL, False
+    errors = payload.get("errors") if isinstance(payload.get("errors"), list) else []
+    errors.append({"code": code})
+    payload["errors"] = errors
+    payload["mismatches"] = payload.get("mismatches") if isinstance(payload.get("mismatches"), list) else []
+    return payload
 
 
 def main() -> int:
@@ -945,6 +987,11 @@ def main() -> int:
     layer1_path = repo / outputs["a20_usd_dof_metadata_json"]
     asset_path = repo / outputs["a20_asset_validator_json"]
     report_path = (repo / outputs["a20_two_layer_articulation_discovery_md"]).resolve()
+    sentinel = "# A20 two-layer articulation discovery gate\n\nOverall: NOT_READY\n\n- Status: REPORT_GENERATION_IN_PROGRESS\n"
+    try:
+        _atomic_write_text(report_path, sentinel)
+    except Exception:
+        report_path.unlink(missing_ok=True)
     layer1 = _load_json_fail_closed(layer1_path)
     output = (repo / outputs["a20_runtime_articulation_discovery_json"]).resolve()
     if args.report_from_existing:
@@ -961,15 +1008,27 @@ def main() -> int:
             runs = result.get("runs", [])
             result[flag] = not (len(runs) == 3 and all(run.get(flag) is False for run in runs))
         _atomic_write(output, result)
-    if result.get("status") == _PASS and not is_exact_runtime_pass(result, layer1):
-        result["status"], result["ok"] = _FAIL, False
-        errors = result.get("errors") if isinstance(result.get("errors"), list) else []
-        errors.append({"code": "exact_runtime_pass_contract_failed"})
-        result["errors"] = errors
+    live_inputs_before, live_errors_before = _trusted_layer1_inputs(layer1)
+    if live_errors_before or (result.get("status") == _PASS and not is_exact_runtime_pass(result, layer1)):
+        result = _fail_result(result, "trusted_layer1_live_validation_failed" if live_errors_before else "exact_runtime_pass_contract_failed")
         _atomic_write(output, result)
     asset_validator = _load_json_fail_closed(asset_path)
+    if any(payload.get("status") == "MALFORMED_OR_MISSING" for payload in (layer1, result, asset_validator)):
+        result = _fail_result(result, "malformed_or_missing_artifact")
+    result["report_generation_id"] = str(uuid.uuid4())
+    report = format_two_layer_report(asset_validator, layer1, result)
+    live_inputs_after, live_errors_after = _trusted_layer1_inputs(layer1)
+    if live_errors_after or live_inputs_after != live_inputs_before:
+        result = _fail_result(result, "trusted_layer1_changed_during_report")
+        report = format_two_layer_report(asset_validator, layer1, result)
+    _atomic_write(output, result)
     try:
-        _atomic_write_text(report_path, format_two_layer_report(asset_validator, layer1, result))
+        _atomic_write_text(report_path, report)
+        live_inputs_final, live_errors_final = _trusted_layer1_inputs(layer1)
+        if live_errors_final or live_inputs_final != live_inputs_before:
+            result = _fail_result(result, "trusted_layer1_changed_after_report")
+            _atomic_write(output, result)
+            _atomic_write_text(report_path, format_two_layer_report(asset_validator, layer1, result))
     except Exception as exc:
         report_path.unlink(missing_ok=True)
         if not isinstance(result, dict):
