@@ -8,6 +8,9 @@ import pytest
 
 from aloha_isaac_rebuild.scripts.a20_policy_runtime_order_adapter import build_order_adapter
 from aloha_isaac_rebuild.scripts.a20_policy_runtime_order_adapter import build_policy_contract
+from aloha_isaac_rebuild.scripts.a20_policy_runtime_order_adapter import policy_to_runtime
+from aloha_isaac_rebuild.scripts.a20_policy_runtime_order_adapter import round_trip_check
+from aloha_isaac_rebuild.scripts.a20_policy_runtime_order_adapter import runtime_to_policy
 
 ROOT = Path(__file__).resolve().parents[2]
 MAPPING = (
@@ -43,6 +46,10 @@ def _runtime_records() -> list[dict[str, object]]:
         {"index": index, "path": path, "name": path.rsplit("/", 1)[-1]}
         for index, path in enumerate(INTERLEAVED_PATHS)
     ]
+
+
+def _adapter() -> dict[str, object]:
+    return build_order_adapter(build_policy_contract(_mapping()), _runtime_records())
 
 
 def test_build_policy_contract_from_real_a17_mapping() -> None:
@@ -162,3 +169,79 @@ def test_build_policy_contract_rejects_non_finite_affine_values(field: str) -> N
 
     with pytest.raises(ValueError, match=f"non-finite {field}"):
         build_policy_contract(mapping)
+
+
+@pytest.mark.parametrize("gripper_value", [0.0, 0.5, 1.0])
+def test_policy_to_runtime_expands_both_grippers(gripper_value: float) -> None:
+    policy = [float(index) / 10.0 for index in range(14)]
+    policy[6] = gripper_value
+    policy[13] = gripper_value
+
+    runtime = policy_to_runtime(policy, _adapter())
+
+    assert len(runtime) == 16
+    assert runtime[12] == pytest.approx(0.021 + 0.036 * gripper_value)
+    assert runtime[14] == pytest.approx(-0.021 - 0.036 * gripper_value)
+    assert runtime[13] == pytest.approx(0.021 + 0.036 * gripper_value)
+    assert runtime[15] == pytest.approx(-0.021 - 0.036 * gripper_value)
+    assert runtime[0] == pytest.approx(policy[0])
+    assert runtime[1] == pytest.approx(policy[7])
+
+
+def test_policy_to_runtime_rejects_wrong_length_and_non_finite_values() -> None:
+    with pytest.raises(ValueError, match="policy vector length"):
+        policy_to_runtime([0.0] * 13, _adapter())
+    policy = [0.0] * 14
+    policy[3] = float("inf")
+    with pytest.raises(ValueError, match="non-finite policy value"):
+        policy_to_runtime(policy, _adapter())
+
+
+def test_runtime_to_policy_round_trips_arms_and_grippers() -> None:
+    policy = [
+        -0.6,
+        -0.4,
+        -0.2,
+        0.0,
+        0.2,
+        0.4,
+        0.25,
+        0.6,
+        0.4,
+        0.2,
+        0.0,
+        -0.2,
+        -0.4,
+        0.75,
+    ]
+
+    recovered = runtime_to_policy(policy_to_runtime(policy, _adapter()), _adapter())
+
+    assert recovered == pytest.approx(policy)
+
+
+def test_runtime_to_policy_rejects_inconsistent_gripper_readback() -> None:
+    adapter = _adapter()
+    runtime = policy_to_runtime([0.0] * 14, adapter)
+    runtime[14] -= 0.001
+
+    with pytest.raises(ValueError, match="inconsistent gripper readback"):
+        runtime_to_policy(runtime, adapter)
+
+
+def test_runtime_to_policy_rejects_wrong_length_and_non_finite_values() -> None:
+    with pytest.raises(ValueError, match="runtime vector length"):
+        runtime_to_policy([0.0] * 15, _adapter())
+    runtime = [0.0] * 16
+    runtime[2] = float("nan")
+    with pytest.raises(ValueError, match="non-finite runtime value"):
+        runtime_to_policy(runtime, _adapter())
+
+
+def test_round_trip_check_covers_gripper_calibration_range() -> None:
+    result = round_trip_check(_adapter())
+
+    assert result["status"] == "PASS"
+    assert result["sample_count"] == 3
+    assert result["gripper_values"] == [0.0, 0.5, 1.0]
+    assert result["max_abs_error"] <= 1e-12

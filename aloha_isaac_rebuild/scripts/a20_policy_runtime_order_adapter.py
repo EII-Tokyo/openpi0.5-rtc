@@ -256,3 +256,171 @@ def build_order_adapter(
         "policy_to_runtime": policy_to_runtime,
         "mapping_complete": True,
     }
+
+
+def _adapter_policy_entries(adapter: dict[str, object]) -> list[Any]:
+    if not isinstance(adapter, dict) or adapter.get("schema_version") != SCHEMA_VERSION:
+        raise ValueError("invalid order adapter schema_version")
+    if adapter.get("policy_dimension") != POLICY_DIMENSION:
+        raise ValueError("invalid order adapter policy_dimension")
+    if adapter.get("runtime_dimension") != RUNTIME_DIMENSION:
+        raise ValueError("invalid order adapter runtime_dimension")
+    entries = _required_list(adapter, "policy_to_runtime")
+    if len(entries) != POLICY_DIMENSION:
+        raise ValueError("invalid order adapter policy entry count")
+    return entries
+
+
+def policy_to_runtime(
+    policy_values: list[float], adapter: dict[str, object]
+) -> list[float]:
+    """Expand one 14D ALOHA/OpenPI vector into the adapter's raw 16-DOF order."""
+    if not isinstance(policy_values, list) or len(policy_values) != POLICY_DIMENSION:
+        observed = len(policy_values) if isinstance(policy_values, list) else None
+        raise ValueError(
+            f"invalid policy vector length: expected {POLICY_DIMENSION}, got {observed}"
+        )
+    entries = _adapter_policy_entries(adapter)
+    runtime_values = [0.0] * RUNTIME_DIMENSION
+    assigned = [False] * RUNTIME_DIMENSION
+    for openpi_index, raw_value in enumerate(policy_values):
+        policy_value = _finite_float(
+            raw_value, field="policy value", path=f"OpenPI index {openpi_index}"
+        )
+        entry = entries[openpi_index]
+        if not isinstance(entry, dict) or entry.get("openpi_index") != openpi_index:
+            raise ValueError(f"invalid adapter policy entry at index {openpi_index}")
+        runtime_indices = _required_list(entry, "runtime_indices")
+        transforms = _required_list(entry, "transforms")
+        if len(runtime_indices) != len(transforms):
+            raise ValueError(f"adapter transform count mismatch at index {openpi_index}")
+        expected_cardinality = 2 if openpi_index in GRIPPER_POLICY_INDICES else 1
+        if len(runtime_indices) != expected_cardinality:
+            raise ValueError(
+                f"invalid adapter policy index {openpi_index} cardinality: "
+                f"expected {expected_cardinality}, got {len(runtime_indices)}"
+            )
+        for runtime_index, transform in zip(runtime_indices, transforms, strict=True):
+            if (
+                isinstance(runtime_index, bool)
+                or not isinstance(runtime_index, int)
+                or not 0 <= runtime_index < RUNTIME_DIMENSION
+            ):
+                raise ValueError(f"invalid runtime index: {runtime_index!r}")
+            if assigned[runtime_index]:
+                raise ValueError(f"duplicate adapter runtime index: {runtime_index}")
+            if not isinstance(transform, dict):
+                raise ValueError(f"invalid transform at runtime index {runtime_index}")
+            offset = _finite_float(
+                transform.get("offset"),
+                field="offset",
+                path=f"runtime index {runtime_index}",
+            )
+            scale = _finite_float(
+                transform.get("scale"),
+                field="scale",
+                path=f"runtime index {runtime_index}",
+            )
+            if scale == 0.0:
+                raise ValueError(f"zero scale at runtime index {runtime_index}")
+            runtime_values[runtime_index] = offset + scale * policy_value
+            assigned[runtime_index] = True
+    if not all(assigned):
+        missing = [index for index, is_assigned in enumerate(assigned) if not is_assigned]
+        raise ValueError(f"incomplete adapter runtime indices: {missing}")
+    return runtime_values
+
+
+def runtime_to_policy(
+    runtime_values: list[float],
+    adapter: dict[str, object],
+    *,
+    tolerance: float = 1e-6,
+) -> list[float]:
+    """Collapse raw 16-DOF values into 14D, checking paired-finger agreement."""
+    if not isinstance(runtime_values, list) or len(runtime_values) != RUNTIME_DIMENSION:
+        observed = len(runtime_values) if isinstance(runtime_values, list) else None
+        raise ValueError(
+            f"invalid runtime vector length: expected {RUNTIME_DIMENSION}, got {observed}"
+        )
+    tolerance = _finite_float(tolerance, field="tolerance", path="runtime_to_policy")
+    if tolerance < 0.0:
+        raise ValueError(f"negative tolerance: {tolerance}")
+    finite_runtime = [
+        _finite_float(value, field="runtime value", path=f"runtime index {index}")
+        for index, value in enumerate(runtime_values)
+    ]
+    entries = _adapter_policy_entries(adapter)
+    policy_values: list[float] = []
+    for openpi_index, entry in enumerate(entries):
+        if not isinstance(entry, dict) or entry.get("openpi_index") != openpi_index:
+            raise ValueError(f"invalid adapter policy entry at index {openpi_index}")
+        runtime_indices = _required_list(entry, "runtime_indices")
+        transforms = _required_list(entry, "transforms")
+        if len(runtime_indices) != len(transforms) or not runtime_indices:
+            raise ValueError(f"adapter transform count mismatch at index {openpi_index}")
+        candidates: list[float] = []
+        for runtime_index, transform in zip(runtime_indices, transforms, strict=True):
+            if (
+                isinstance(runtime_index, bool)
+                or not isinstance(runtime_index, int)
+                or not 0 <= runtime_index < RUNTIME_DIMENSION
+            ):
+                raise ValueError(f"invalid runtime index: {runtime_index!r}")
+            if not isinstance(transform, dict):
+                raise ValueError(f"invalid transform at runtime index {runtime_index}")
+            offset = _finite_float(
+                transform.get("offset"),
+                field="offset",
+                path=f"runtime index {runtime_index}",
+            )
+            scale = _finite_float(
+                transform.get("scale"),
+                field="scale",
+                path=f"runtime index {runtime_index}",
+            )
+            if scale == 0.0:
+                raise ValueError(f"zero scale at runtime index {runtime_index}")
+            candidates.append((finite_runtime[runtime_index] - offset) / scale)
+        spread = max(candidates) - min(candidates)
+        if spread > tolerance:
+            label = (
+                "inconsistent gripper readback"
+                if openpi_index in GRIPPER_POLICY_INDICES
+                else "inconsistent policy readback"
+            )
+            raise ValueError(
+                f"{label} at OpenPI index {openpi_index}: "
+                f"candidates={candidates}, tolerance={tolerance}"
+            )
+        policy_values.append(sum(candidates) / len(candidates))
+    return policy_values
+
+
+def round_trip_check(adapter: dict[str, object]) -> dict[str, object]:
+    """Exercise both gripper calibrations and all arm slots without Isaac runtime."""
+    gripper_values = [0.0, 0.5, 1.0]
+    max_abs_error = 0.0
+    try:
+        for gripper_value in gripper_values:
+            sample = [((index % 7) - 3) / 5.0 for index in range(POLICY_DIMENSION)]
+            sample[6] = gripper_value
+            sample[13] = gripper_value
+            recovered = runtime_to_policy(policy_to_runtime(sample, adapter), adapter)
+            for expected, observed in zip(sample, recovered, strict=True):
+                max_abs_error = max(max_abs_error, abs(expected - observed))
+    except (TypeError, ValueError) as exc:
+        return {
+            "status": "FAIL",
+            "sample_count": len(gripper_values),
+            "gripper_values": gripper_values,
+            "max_abs_error": None,
+            "error": str(exc),
+        }
+    return {
+        "status": "PASS",
+        "sample_count": len(gripper_values),
+        "gripper_values": gripper_values,
+        "max_abs_error": max_abs_error,
+        "error": None,
+    }
