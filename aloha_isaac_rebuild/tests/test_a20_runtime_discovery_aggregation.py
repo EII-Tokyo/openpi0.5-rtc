@@ -35,6 +35,9 @@ def test_strict_probe_checker_rejects_dynamic_and_alias_bypasses() -> None:
         "__import__('omni.timeline')\n",
         "from importlib import import_module\nimport_module('omni')\n",
         "runner = app.update\nrunner()\n",
+        "app.update()\n",
+        "runner: object = app.update\nrunner()\n",
+        "(runner := app.update)()\n",
         "runner = eval\nrunner('1 + 1')\n",
         "from external_helper import inspect_stage\ninspect_stage()\n",
     ):
@@ -188,6 +191,24 @@ def test_timeout_kills_spawned_descendant_process_group(tmp_path: Path) -> None:
     assert result["cleanup_verified"] is True
     child_pid = int(pid_file.read_text())
     stat_path = Path(f"/proc/{child_pid}/stat")
+    assert not stat_path.exists() or stat_path.read_text().split()[2] == "Z"
+
+
+def test_normal_parent_exit_cleans_detached_stdio_descendant_in_same_group(tmp_path: Path) -> None:
+    pid_file = tmp_path / "descendant.pid"
+    helper = tmp_path / "normal_parent_with_descendant.py"
+    helper.write_text(
+        "import os, pathlib, subprocess, sys\n"
+        "with open(os.devnull, 'wb') as sink:\n"
+        " child=subprocess.Popen([sys.executable, '-c', 'import time; time.sleep(60)'], stdout=sink, stderr=sink, stdin=subprocess.DEVNULL)\n"
+        "pathlib.Path(sys.argv[1]).write_text(str(child.pid))\n",
+        encoding="utf-8",
+    )
+    result = _execute_probe([sys.executable, str(helper), str(pid_file)], tmp_path, 5)
+    assert result["returncode"] == 0
+    assert result["cleanup_verified"] is True
+    descendant_pid = int(pid_file.read_text())
+    stat_path = Path(f"/proc/{descendant_pid}/stat")
     assert not stat_path.exists() or stat_path.read_text().split()[2] == "Z"
 
 

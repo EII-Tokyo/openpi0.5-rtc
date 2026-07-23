@@ -25,11 +25,8 @@ SAFETY = {
 
 
 def _digest(path: Path) -> str:
-    value = hashlib.sha256()
     with path.open("rb") as stream:
-        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
-            value.update(chunk)
-    return value.hexdigest()
+        return hashlib.file_digest(stream, "sha256").hexdigest()
 
 
 def _now() -> str:

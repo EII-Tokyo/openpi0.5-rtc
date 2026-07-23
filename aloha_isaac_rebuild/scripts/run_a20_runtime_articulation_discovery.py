@@ -360,7 +360,7 @@ def check_probe_source(source: str) -> dict[str, Any]:
                 aliases[alias.asname or alias.name] = f"{module}.{alias.name}"
         elif isinstance(node, ast.Call):
             name = node.func.id if isinstance(node.func, ast.Name) else node.func.attr if isinstance(node.func, ast.Attribute) else "dynamic"
-            if (is_forbidden(name) and name != "update") or name == "dynamic":
+            if is_forbidden(name) or name == "dynamic":
                 errors.append(f"call_not_allowed:{name}")
             if isinstance(node.func, ast.Name) and node.func.id in aliases:
                 target = aliases[node.func.id].rsplit(".", 1)[-1]
@@ -373,6 +373,18 @@ def check_probe_source(source: str) -> dict[str, Any]:
         ):
             errors.append(f"attribute_alias_not_allowed:{node.value.attr}")
         elif isinstance(node, ast.Assign) and isinstance(node.value, ast.Name) and is_forbidden(node.value.id):
+            errors.append(f"name_alias_not_allowed:{node.value.id}")
+        elif (
+            isinstance(node, ast.AnnAssign | ast.NamedExpr)
+            and isinstance(node.value, ast.Attribute)
+            and is_forbidden(node.value.attr)
+        ):
+            errors.append(f"attribute_alias_not_allowed:{node.value.attr}")
+        elif (
+            isinstance(node, ast.AnnAssign | ast.NamedExpr)
+            and isinstance(node.value, ast.Name)
+            and is_forbidden(node.value.id)
+        ):
             errors.append(f"name_alias_not_allowed:{node.value.id}")
     return {"ok": not errors, "errors": sorted(set(errors))}
 
@@ -446,9 +458,10 @@ def _terminate_process_group(process: subprocess.Popen[bytes], grace: float = 1.
                 continue
         return False
 
-    if process.poll() is None:
+    if group_active():
         with suppress(ProcessLookupError):
             os.killpg(process.pid, signal.SIGTERM)
+    if process.poll() is None:
         with suppress(subprocess.TimeoutExpired):
             process.wait(timeout=grace)
     deadline = time.monotonic() + grace
@@ -512,7 +525,7 @@ def _execute_probe(
         timed_out = True
     finally:
         selector.close()
-    cleanup_verified = _terminate_process_group(process) if timed_out or exceeded else process.poll() is not None
+    cleanup_verified = _terminate_process_group(process)
     stdout = buffers["stdout"].decode("utf-8", "replace")
     stderr = buffers["stderr"].decode("utf-8", "replace")
     marker_bytes = sum(len(line.encode()) for line in stdout.splitlines() if line.startswith(MARKER))
