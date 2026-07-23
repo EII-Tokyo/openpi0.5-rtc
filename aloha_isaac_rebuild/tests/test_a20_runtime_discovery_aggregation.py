@@ -100,6 +100,9 @@ def test_probe_checker_allows_only_the_reviewed_no_step_runtime_discovery_calls(
         "interface.unknown_runtime_call()\n",
     ):
         assert check_probe_source(source + unsafe)["ok"] is False
+    assert check_probe_source(
+        "_call_runtime_api('x', physics_interface.simulate)\n"
+    )["ok"] is False
 
 
 def test_runtime_discovery_builds_records_from_real_tensor_view() -> None:
@@ -118,9 +121,6 @@ def test_runtime_discovery_builds_records_from_real_tensor_view() -> None:
             self.prim_paths = ["/aloha/root_joint"]
             self.dof_paths = [["/aloha/joints/joint_00", "/aloha/joints/joint_01"]]
             self.shared_metatype = FakeMetadata()
-
-        def is_valid(self):
-            return True
 
         def get_dof_limits(self):
             calls.append("get_dof_limits")
@@ -174,6 +174,7 @@ def test_runtime_discovery_builds_records_from_real_tensor_view() -> None:
         "articulation_count": 1,
         "dof_count": 2,
         "valid_handle": True,
+        "handle_validity_method": "tensor_view_structural_proof_v1",
     }
     assert [record["name"] for record in records] == ["joint_00", "joint_01"]
     assert [record["path"] for record in records] == ["/aloha/joints/joint_00", "/aloha/joints/joint_01"]
@@ -206,6 +207,38 @@ def test_runtime_discovery_failure_names_the_exact_failed_api() -> None:
         namespace["_discover_runtime_records"]("candidate.usda", [], BrokenContext(), object(), object())
     assert raised.value.api == "omni.usd.get_context().open_stage"
     assert "USD load refused" in str(raised.value)
+
+
+def test_false_force_load_is_fail_and_none_articulation_is_proven_blocked() -> None:
+    namespace = runpy.run_path(str(PROBE), run_name="probe_return_contract_test")
+
+    class Context:
+        def open_stage(self, path): return True
+        def get_stage_id(self): return 7
+
+    class FalsePhysics:
+        def force_load_physics_from_usd(self): return False
+        def start_simulation(self): return None
+
+    with pytest.raises(namespace["RuntimeDiscoveryError"], match="force_load_physics_from_usd.*false"):
+        namespace["_discover_runtime_records"]("candidate.usda", [], Context(), FalsePhysics(), object())
+
+    class Physics:
+        def force_load_physics_from_usd(self): return None
+        def start_simulation(self): return None
+
+    class View:
+        def set_subspace_roots(self, root): return None
+        def create_articulation_view(self, paths): return None
+
+    class Tensors:
+        @staticmethod
+        def create_simulation_view(backend, *, stage_id): return View()
+
+    with pytest.raises(namespace["ForbiddenInitializationRequiredError"]) as raised:
+        namespace["_discover_runtime_records"]("candidate.usda", [], Context(), Physics(), Tensors)
+    assert raised.value.source_api.endswith("create_articulation_view")
+    assert raised.value.required_operation == "physics.update_simulation"
 
 
 def test_execute_probe_caps_output_with_structured_failure(tmp_path: Path) -> None:
@@ -448,6 +481,7 @@ def _run() -> dict[str, object]:
         "finished_at": "2026-01-01T00:00:01+00:00",
         "inputs": {"stage": {"sha256": LIVE_STAGE_HASH}, "mapping": {"sha256": LIVE_MAPPING_HASH}, "config": {"sha256": LIVE_MAPPING_HASH}},
         "initialization_operations": [],
+        "handle_validity_method": "tensor_view_structural_proof_v1",
         "cleanup_verified": True,
         "provenance": {
             "schema_version": "a20-runtime-discovery-v2",
@@ -600,6 +634,25 @@ def test_float32_runtime_limits_are_semantically_equal_but_real_mismatch_fails()
     assert aggregate_runtime_runs(_layer1(), runs)["status"] == "PASS_A20_RUNTIME_ARTICULATION_DISCOVERY_NO_STEP"
     runs[1]["records"][0]["lower_limit"] += 0.01
     assert aggregate_runtime_runs(_layer1(), runs)["status"] == "FAIL_A20_RUNTIME_ARTICULATION_DISCOVERY"
+
+
+def test_all_16_a17_style_limits_survive_float32_tensor_roundtrip() -> None:
+    import struct
+
+    layer1 = _layer1()
+    runs = _runs()
+    for index in range(16):
+        if index >= 14:
+            layer1["expected"][index]["joint_type"] = "PhysicsPrismaticJoint"
+            layer1["observed"][index]["joint_type"] = "PhysicsPrismaticJoint"
+        for run in runs:
+            run["records"][index]["joint_type"] = layer1["expected"][index]["joint_type"]
+            for field in ("lower_limit", "upper_limit"):
+                value = layer1["expected"][index][field]
+                tensor_value = math.radians(value) if index < 14 else value
+                float32 = struct.unpack("f", struct.pack("f", tensor_value))[0]
+                run["records"][index][field] = math.degrees(float32) if index < 14 else float32
+    assert aggregate_runtime_runs(layer1, runs)["status"] == "PASS_A20_RUNTIME_ARTICULATION_DISCOVERY_NO_STEP"
 
 
 def test_malformed_blocked_run_fails_instead_of_masking_error() -> None:

@@ -55,6 +55,7 @@ _REQUIRED_RUN_FIELDS = (
     "finished_at",
     "inputs",
     "initialization_operations",
+    "handle_validity_method",
 )
 _RUNTIME_FIELD_SOURCES = {
     "path": "runtime", "name": "runtime", "joint_type": "runtime",
@@ -285,6 +286,8 @@ def _run_errors(
         errors.append({"code": "invalid_dof_count", "run_index": run_index})
     if not blocked and run.get("valid_handle") is not True:
         errors.append({"code": "invalid_handle", "run_index": run_index})
+    if not blocked and run.get("handle_validity_method") != "tensor_view_structural_proof_v1":
+        errors.append({"code": "invalid_handle_validity_method", "run_index": run_index})
 
     records = run.get("records")
     if not (isinstance(records, list) and all(isinstance(record, dict) for record in records)):
@@ -613,7 +616,7 @@ def check_probe_source(source: str) -> dict[str, Any]:
         "getattr", "setattr", "__import__", "exec", "eval", "import_module", "update", "update_simulation",
     }
     reviewed_calls = {
-        "ArgumentParser", "Path", "RuntimeDiscoveryError", "SimulationApp", "SystemExit",
+        "ArgumentParser", "ForbiddenInitializationRequiredError", "Path", "RuntimeDiscoveryError", "SimulationApp", "SystemExit",
         "__init__", "_as_list", "_call_runtime_api", "_digest", "_discover_runtime_records",
         "_emit_marker", "_now", "_safe_version", "add_argument", "append", "bool", "close",
         "create_articulation_view", "create_simulation_view", "cwd", "degrees", "dumps",
@@ -633,6 +636,27 @@ def check_probe_source(source: str) -> dict[str, Any]:
         "pathlib", "isaacsim", "math", "omni", "pxr", "yaml", "aloha_isaac_rebuild",
     }
     aliases: dict[str, str] = {}
+
+    def qualified_name(node: ast.AST) -> str | None:
+        parts: list[str] = []
+        while isinstance(node, ast.Attribute):
+            parts.append(node.attr)
+            node = node.value
+        if isinstance(node, ast.Name):
+            parts.append(node.id)
+            return ".".join(reversed(parts))
+        return None
+
+    reviewed_runtime_callables = {
+        "usd_context.open_stage",
+        "physics_interface.force_load_physics_from_usd",
+        "physics_interface.start_simulation",
+        "usd_context.get_stage_id",
+        "tensors_module.create_simulation_view",
+        "simulation_view.set_subspace_roots",
+        "simulation_view.create_articulation_view",
+        "articulation_view.get_dof_limits",
+    }
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
             for alias in node.names:
@@ -652,6 +676,15 @@ def check_probe_source(source: str) -> dict[str, Any]:
                 errors.append(f"call_not_allowed:{name}")
             elif name not in reviewed_calls:
                 errors.append(f"unreviewed_call:{name}")
+            if isinstance(node.func, ast.Name) and node.func.id == "_call_runtime_api":
+                callable_name = qualified_name(node.args[1]) if len(node.args) >= 2 else None
+                if callable_name not in reviewed_runtime_callables:
+                    errors.append(f"runtime_callable_not_allowed:{callable_name}")
+            if isinstance(node.func, ast.Attribute) and node.func.attr == "open":
+                receiver = qualified_name(node.func.value)
+                mode = node.args[0].value if node.args and isinstance(node.args[0], ast.Constant) else None
+                if receiver != "path" or mode != "rb":
+                    errors.append(f"open_not_allowed:{receiver}:{mode}")
             if isinstance(node.func, ast.Name) and node.func.id in aliases:
                 target = aliases[node.func.id].rsplit(".", 1)[-1]
                 if is_forbidden(target):
