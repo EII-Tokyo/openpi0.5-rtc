@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import ast
+import importlib
 from pathlib import Path
 
 import pytest
@@ -28,6 +30,9 @@ GENERATOR = (
 AUDIT = (
     ROOT
     / "aloha_isaac_rebuild/scripts/audit_aloha_clean_articulation_candidate_stage.py"
+)
+ASSET_VALIDATOR_AUDIT = (
+    ROOT / "aloha_isaac_rebuild/scripts/audit_aloha_asset_validator_candidate.py"
 )
 
 
@@ -220,3 +225,95 @@ def test_stage_audit_fails_closed_then_passes_after_repair() -> None:
     assert after["ok"] is True
     assert after["joint_count"] == 1
     assert after["errors"] == []
+
+
+def _function(tree: ast.AST, name: str) -> ast.FunctionDef:
+    return next(
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.FunctionDef) and node.name == name
+    )
+
+
+def _call_lines(function: ast.FunctionDef) -> dict[str, int]:
+    lines: dict[str, int] = {}
+    for node in ast.walk(function):
+        if not isinstance(node, ast.Call):
+            continue
+        if isinstance(node.func, ast.Name):
+            name = node.func.id
+        elif isinstance(node.func, ast.Attribute):
+            name = node.func.attr
+        else:
+            continue
+        lines[name] = min(lines.get(name, node.lineno), node.lineno)
+    return lines
+
+
+def test_generator_repairs_each_joint_before_saving() -> None:
+    tree = ast.parse(GENERATOR.read_text(encoding="utf-8"))
+    define_joint = _function(tree, "_define_joint")
+    create_candidate = _function(tree, "create_candidate")
+    define_calls = _call_lines(define_joint)
+    create_calls = _call_lines(create_candidate)
+
+    assert "repair_body1_local_frame" in define_calls
+    assert define_calls["_copy_attrs_with_prefixes"] < define_calls[
+        "repair_body1_local_frame"
+    ]
+    assert "joint_state_coherence_repairs" in GENERATOR.read_text(encoding="utf-8")
+    assert create_calls["_define_joint"] < create_calls["Save"]
+
+
+def test_generator_applies_physx_joint_state_api_before_repair() -> None:
+    source = GENERATOR.read_text(encoding="utf-8")
+    tree = ast.parse(source)
+    define_joint = _function(tree, "_define_joint")
+    calls = _call_lines(define_joint)
+
+    assert '.AddAppliedSchema("PhysicsJointStateAPI:angular")' in source
+    assert '.AddAppliedSchema("PhysicsJointStateAPI:linear")' in source
+    assert calls["AddAppliedSchema"] < calls["repair_body1_local_frame"]
+
+
+def test_static_audit_requires_joint_state_coherence() -> None:
+    source = AUDIT.read_text(encoding="utf-8")
+    tree = ast.parse(source)
+    audit_function = _function(tree, "audit")
+    audit_calls = _call_lines(audit_function)
+
+    assert "audit_stage_joint_state_coherence" in audit_calls
+    assert '"joint_state_coherence": joint_state_coherence' in source
+    assert 'joint_state_coherence["ok"]' in source
+    assert '"PhysicsJointStateAPI:angular"' in source
+    assert '"PhysicsJointStateAPI:linear"' in source
+    assert "missing_joint_state_api_paths" in source
+
+
+def test_asset_validator_uses_unsaved_session_physics_scene() -> None:
+    source = ASSET_VALIDATOR_AUDIT.read_text(encoding="utf-8")
+
+    assert "from pxr import PhysxSchema" in source
+    assert '"joint_state_schema_registered"' in source
+    assert "stage.GetSessionLayer()" in source
+    assert "UsdPhysics.Scene.Define" in source
+    assert "session_layer.Clear()" in source
+    assert '"temporary_validation_physics_scene_authored"' in source
+    assert '"stage_saved": False' in source
+    assert ".Save(" not in source
+
+
+def test_asset_validator_status_is_bound_to_complete_ok_contract() -> None:
+    module = importlib.import_module(
+        "aloha_isaac_rebuild.scripts.audit_aloha_asset_validator_candidate"
+    )
+    status_for_ok = getattr(module, "_asset_validator_status", None)
+
+    assert callable(status_for_ok), "Asset Validator status helper is missing"
+    assert status_for_ok(True) == (
+        "PASS_A20_ASSET_VALIDATOR_READ_ONLY_NO_BLOCKING_ISSUES"
+    )
+    assert status_for_ok(False) == "FAIL_A20_ASSET_VALIDATOR_BLOCKING_ISSUES"
+
+    source = ASSET_VALIDATOR_AUDIT.read_text(encoding="utf-8")
+    assert '"status": _asset_validator_status(ok)' in source

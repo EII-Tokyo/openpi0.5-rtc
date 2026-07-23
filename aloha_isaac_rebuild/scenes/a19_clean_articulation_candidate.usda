@@ -337,9 +337,11 @@ over "aloha" (
         custom string aloha:sourceRigidBodyPrim = "/scene/worldBody/table"
         point3f physics:centerOfMass = (0, 0, 0)
         float3 physics:diagonalInertia = (0.1, 0.1, 0.1)
-        bool physics:kinematicEnabled = 1
+        bool physics:kinematicEnabled = 0
         float physics:mass = 10
         quatf physics:principalAxes = (1, 0, 0, 0)
+        bool physics:rigidBodyEnabled = 1
+        uniform bool physics:startsAsleep = 0
     }
 
     def PhysicsFixedJoint "root_joint" (
@@ -372,9 +374,9 @@ over "aloha" (
             float physics:breakForce = 3.4028235e38
             float physics:breakTorque = 3.4028235e38
             point3f physics:localPos0 = (0.035, 0, 0)
-            point3f physics:localPos1 = (0, 0, 0)
+            point3f physics:localPos1 = (-6.9942403e-9, 3.972172e-9, -1.9447167e-8)
             quatf physics:localRot0 = (0.5003981, -0.49960187, 0.49999982, -0.49999982)
-            quatf physics:localRot1 = (1, 0, 0, 0)
+            quatf physics:localRot1 = (1, 6.283332e-8, -4.0115403e-8, 1.5083254e-9)
         }
 
         def PhysicsFixedJoint "right_gripper_base"
@@ -388,9 +390,9 @@ over "aloha" (
             float physics:breakForce = 3.4028235e38
             float physics:breakTorque = 3.4028235e38
             point3f physics:localPos0 = (0.035, 0, 0)
-            point3f physics:localPos1 = (0, 0, 0)
+            point3f physics:localPos1 = (2.9317633e-9, -9.445309e-9, -1.313869e-9)
             quatf physics:localRot0 = (0.5003981, -0.49960187, 0.49999982, -0.49999982)
-            quatf physics:localRot1 = (1, 0, 0, 0)
+            quatf physics:localRot1 = (1, 1.0853995e-7, 1.00360936e-7, -1.05057104e-7)
         }
 
         def PhysicsFixedJoint "rootJoint_left_base_link"
@@ -405,11 +407,13 @@ over "aloha" (
             rel physics:body0 = </aloha/tabletop_link>
             rel physics:body1 = </aloha/follower_left_base_link>
             point3f physics:localPos0 = (-0.469, -0.019, 0.02)
+            point3f physics:localPos1 = (-0.000011065019, 0.000015265481, -0.00008442773)
             quatf physics:localRot0 = (1, 0, 0, 0)
+            quatf physics:localRot1 = (0.99999994, 0.00027874304, 0.000054389246, -0.000027138278)
         }
 
         def PhysicsRevoluteJoint "left_waist" (
-            prepend apiSchemas = ["PhysicsDriveAPI:angular"]
+            prepend apiSchemas = ["PhysicsJointStateAPI:angular", "PhysicsDriveAPI:angular"]
         )
         {
             custom bool aloha:candidateOnly = 1
@@ -429,9 +433,9 @@ over "aloha" (
             float physics:breakForce = 3.4028235e38
             float physics:breakTorque = 3.4028235e38
             point3f physics:localPos0 = (0, 0, 0.07900001)
-            point3f physics:localPos1 = (0, 0, 0)
+            point3f physics:localPos1 = (-4.1433644e-8, -8.509843e-9, -2.3919739e-8)
             quatf physics:localRot0 = (0.7071068, 0, -0.7071068, 0)
-            quatf physics:localRot1 = (0.7071068, 0, -0.7071068, 0)
+            quatf physics:localRot1 = (0.70710677, -7.8932163e-7, -0.70710677, -7.0226656e-7)
             float physics:lowerLimit = -179.99928
             float physics:upperLimit = 179.99928
             float physxJoint:armature = 0
@@ -442,7 +446,7 @@ over "aloha" (
         }
 
         def PhysicsRevoluteJoint "left_shoulder" (
-            prepend apiSchemas = ["PhysicsDriveAPI:angular"]
+            prepend apiSchemas = ["PhysicsJointStateAPI:angular", "PhysicsDriveAPI:angular"]
         )
         {
             custom bool aloha:candidateOnly = 1
@@ -462,9 +466,9 @@ over "aloha" (
             float physics:breakForce = 3.4028235e38
             float physics:breakTorque = 3.4028235e38
             point3f physics:localPos0 = (0, 0, 0.04805)
-            point3f physics:localPos1 = (0, 0, 0)
+            point3f physics:localPos1 = (6.610309e-9, -1.8067623e-9, -8.7921464e-8)
             quatf physics:localRot0 = (0.7071068, 0, 0, 0.7071068)
-            quatf physics:localRot1 = (0.7071068, 0, 0, 0.7071068)
+            quatf physics:localRot1 = (0.70710677, -0.0000021529368, -0.000002037758, 0.7071068)
             float physics:lowerLimit = -106.00005
             float physics:upperLimit = 72.00016
             float physxJoint:armature = 0.395
@@ -475,7 +479,7 @@ over "aloha" (
         }
 
         def PhysicsRevoluteJoint "left_elbow" (
-            prepend apiSchemas = ["PhysicsDriveAPI:angular"]
+            prepend apiSchemas = ["PhysicsJointStateAPI:angular", "PhysicsDriveAPI:angular"]
         )
         {
             custom bool aloha:candidateOnly = 1
@@ -495,9 +499,9 @@ over "aloha" (
             float physics:breakForce = 3.4028235e38
             float physics:breakTorque = 3.4028235e38
             point3f physics:localPos0 = (0.059549987, 0, 0.3)
-            point3f physics:localPos1 = (0, 0, 0)
+            point3f physics:localPos1 = (6.8606663e-9, -1.2403402e-9, -2.505146e-8)
             quatf physics:localRot0 = (0.7071068, 0, 0, 0.7071068)
-            quatf physics:localRot1 = (0.7071068, 0, 0, 0.7071068)
+            quatf physics:localRot1 = (0.7071068, -0.000028649842, -0.00002868013, 0.7071067)
             float physics:lowerLimit = -100.99985
             float physics:upperLimit = 91.99983
             float physxJoint:armature = 0.383
@@ -508,7 +512,7 @@ over "aloha" (
         }
 
         def PhysicsRevoluteJoint "left_forearm_roll" (
-            prepend apiSchemas = ["PhysicsDriveAPI:angular"]
+            prepend apiSchemas = ["PhysicsJointStateAPI:angular", "PhysicsDriveAPI:angular"]
         )
         {
             custom bool aloha:candidateOnly = 1
@@ -528,9 +532,9 @@ over "aloha" (
             float physics:breakForce = 3.4028235e38
             float physics:breakTorque = 3.4028235e38
             point3f physics:localPos0 = (0.2, 0, 0)
-            point3f physics:localPos1 = (0, 0, 0)
+            point3f physics:localPos1 = (-3.4717154e-8, -3.22502e-8, 1.21294415e-8)
             quatf physics:localRot0 = (1, 0, 0, 0)
-            quatf physics:localRot1 = (1, 0, 0, 0)
+            quatf physics:localRot1 = (1, -1.2075373e-7, 5.9495906e-9, 2.4342398e-8)
             float physics:lowerLimit = -179.99928
             float physics:upperLimit = 179.99928
             float physxJoint:armature = 0.14
@@ -541,7 +545,7 @@ over "aloha" (
         }
 
         def PhysicsRevoluteJoint "left_wrist_angle" (
-            prepend apiSchemas = ["PhysicsDriveAPI:angular"]
+            prepend apiSchemas = ["PhysicsJointStateAPI:angular", "PhysicsDriveAPI:angular"]
         )
         {
             custom bool aloha:candidateOnly = 1
@@ -561,9 +565,9 @@ over "aloha" (
             float physics:breakForce = 3.4028235e38
             float physics:breakTorque = 3.4028235e38
             point3f physics:localPos0 = (0.1, 0, 0)
-            point3f physics:localPos1 = (0, 0, 0)
+            point3f physics:localPos1 = (-4.3606477e-8, -4.1528e-8, 1.467889e-8)
             quatf physics:localRot0 = (0.7071068, 0, 0, 0.7071068)
-            quatf physics:localRot1 = (0.7071068, 0, 0, 0.7071068)
+            quatf physics:localRot1 = (0.7071068, -1.8153787e-7, 3.280478e-8, 0.7071067)
             float physics:lowerLimit = -106.99986
             float physics:upperLimit = 127.999916
             float physxJoint:armature = 0.008
@@ -574,7 +578,7 @@ over "aloha" (
         }
 
         def PhysicsRevoluteJoint "left_wrist_rotate" (
-            prepend apiSchemas = ["PhysicsDriveAPI:angular"]
+            prepend apiSchemas = ["PhysicsJointStateAPI:angular", "PhysicsDriveAPI:angular"]
         )
         {
             custom bool aloha:candidateOnly = 1
@@ -594,9 +598,9 @@ over "aloha" (
             float physics:breakForce = 3.4028235e38
             float physics:breakTorque = 3.4028235e38
             point3f physics:localPos0 = (0.069744, 0, 0)
-            point3f physics:localPos1 = (0, 0, 0)
+            point3f physics:localPos1 = (2.281953e-8, 1.7953154e-8, 1.23827135e-8)
             quatf physics:localRot0 = (1, 0, 0, 0)
-            quatf physics:localRot1 = (1, 0, 0, 0)
+            quatf physics:localRot1 = (1, 2.1790868e-7, 2.7656395e-8, 2.0810143e-8)
             float physics:lowerLimit = -179.99928
             float physics:upperLimit = 179.99928
             float physxJoint:armature = 0
@@ -607,7 +611,7 @@ over "aloha" (
         }
 
         def PhysicsPrismaticJoint "left_left_finger" (
-            prepend apiSchemas = ["PhysicsDriveAPI:linear"]
+            prepend apiSchemas = ["PhysicsJointStateAPI:linear", "PhysicsDriveAPI:linear"]
         )
         {
             custom bool aloha:candidateOnly = 1
@@ -627,9 +631,9 @@ over "aloha" (
             float physics:breakForce = 3.4028235e38
             float physics:breakTorque = 3.4028235e38
             point3f physics:localPos0 = (0.01910001, -0.014163673, 0.021172687)
-            point3f physics:localPos1 = (0, 0, 0)
+            point3f physics:localPos1 = (-1.4670376e-8, -1.2716637e-8, -0.0000016871884)
             quatf physics:localRot0 = (0.7071068, -0.7071068, 4.4691618e-8, -2.9802322e-8)
-            quatf physics:localRot1 = (0.7071068, -2.9802322e-8, 0.70710677, 0)
+            quatf physics:localRot1 = (0.7071069, 1.2239087e-7, 0.70710665, 6.202776e-8)
             float physics:lowerLimit = 0.01844
             float physics:upperLimit = 0.058
             float physxJoint:armature = 0.243
@@ -640,7 +644,7 @@ over "aloha" (
         }
 
         def PhysicsPrismaticJoint "left_right_finger" (
-            prepend apiSchemas = ["PhysicsDriveAPI:linear"]
+            prepend apiSchemas = ["PhysicsJointStateAPI:linear", "PhysicsDriveAPI:linear"]
         )
         {
             custom bool aloha:candidateOnly = 1
@@ -660,9 +664,9 @@ over "aloha" (
             float physics:breakForce = 3.4028235e38
             float physics:breakTorque = 3.4028235e38
             point3f physics:localPos0 = (-0.01909998, -0.014163643, 0.021172687)
-            point3f physics:localPos1 = (0, 0, 0)
+            point3f physics:localPos1 = (3.406627e-8, -9.136915e-9, -0.000006593221)
             quatf physics:localRot0 = (1.4988473e-8, 2.9802322e-8, 0.7071068, 0.7071068)
-            quatf physics:localRot1 = (0.70710677, 0, 0.7071068, 0)
+            quatf physics:localRot1 = (0.7071068, 6.4025876e-8, 0.7071067, -1.0158468e-8)
             float physics:lowerLimit = 0.01844
             float physics:upperLimit = 0.058
             float physxJoint:armature = 0.243
@@ -684,11 +688,13 @@ over "aloha" (
             rel physics:body0 = </aloha/tabletop_link>
             rel physics:body1 = </aloha/follower_right_base_link>
             point3f physics:localPos0 = (0.469, -0.019, 0.02)
+            point3f physics:localPos1 = (-2.9802333e-8, -1.4901144e-8, -3.352761e-8)
             quatf physics:localRot0 = (6.123234e-17, 0, 0, 1)
+            quatf physics:localRot1 = (1, 2.402812e-7, 1.7363617e-7, -1.3271342e-8)
         }
 
         def PhysicsRevoluteJoint "right_waist" (
-            prepend apiSchemas = ["PhysicsDriveAPI:angular"]
+            prepend apiSchemas = ["PhysicsJointStateAPI:angular", "PhysicsDriveAPI:angular"]
         )
         {
             custom bool aloha:candidateOnly = 1
@@ -708,9 +714,9 @@ over "aloha" (
             float physics:breakForce = 3.4028235e38
             float physics:breakTorque = 3.4028235e38
             point3f physics:localPos0 = (0, 0, 0.07900001)
-            point3f physics:localPos1 = (0, 0, 0)
+            point3f physics:localPos1 = (-2.7434533e-8, 1.0024743e-8, -2.2351744e-8)
             quatf physics:localRot0 = (0.7071068, 0, -0.7071068, 0)
-            quatf physics:localRot1 = (0.7071068, 0, -0.7071068, 0)
+            quatf physics:localRot1 = (-0.70710677, -3.2416847e-7, 0.7071068, -3.2680254e-7)
             float physics:lowerLimit = -179.99928
             float physics:upperLimit = 179.99928
             float physxJoint:armature = 0
@@ -721,7 +727,7 @@ over "aloha" (
         }
 
         def PhysicsRevoluteJoint "right_shoulder" (
-            prepend apiSchemas = ["PhysicsDriveAPI:angular"]
+            prepend apiSchemas = ["PhysicsJointStateAPI:angular", "PhysicsDriveAPI:angular"]
         )
         {
             custom bool aloha:candidateOnly = 1
@@ -741,9 +747,9 @@ over "aloha" (
             float physics:breakForce = 3.4028235e38
             float physics:breakTorque = 3.4028235e38
             point3f physics:localPos0 = (0, 0, 0.04805)
-            point3f physics:localPos1 = (0, 0, 0)
+            point3f physics:localPos1 = (-2.4484073e-8, -3.1650365e-9, 3.497133e-8)
             quatf physics:localRot0 = (0.7071068, 0, 0, 0.7071068)
-            quatf physics:localRot1 = (0.7071068, 0, 0, 0.7071068)
+            quatf physics:localRot1 = (0.70710677, -0.0000033186925, -0.000003187432, 0.7071068)
             float physics:lowerLimit = -106.00005
             float physics:upperLimit = 72.00016
             float physxJoint:armature = 0.395
@@ -754,7 +760,7 @@ over "aloha" (
         }
 
         def PhysicsRevoluteJoint "right_elbow" (
-            prepend apiSchemas = ["PhysicsDriveAPI:angular"]
+            prepend apiSchemas = ["PhysicsJointStateAPI:angular", "PhysicsDriveAPI:angular"]
         )
         {
             custom bool aloha:candidateOnly = 1
@@ -774,9 +780,9 @@ over "aloha" (
             float physics:breakForce = 3.4028235e38
             float physics:breakTorque = 3.4028235e38
             point3f physics:localPos0 = (0.059549987, 0, 0.3)
-            point3f physics:localPos1 = (0, 0, 0)
+            point3f physics:localPos1 = (2.5245669e-8, -1.81447e-10, -2.1615381e-8)
             quatf physics:localRot0 = (0.7071068, 0, 0, 0.7071068)
-            quatf physics:localRot1 = (0.7071068, 0, 0, 0.7071068)
+            quatf physics:localRot1 = (0.7071068, -0.00003698865, -0.00003701941, 0.7071067)
             float physics:lowerLimit = -100.99985
             float physics:upperLimit = 91.99983
             float physxJoint:armature = 0.383
@@ -787,7 +793,7 @@ over "aloha" (
         }
 
         def PhysicsRevoluteJoint "right_forearm_roll" (
-            prepend apiSchemas = ["PhysicsDriveAPI:angular"]
+            prepend apiSchemas = ["PhysicsJointStateAPI:angular", "PhysicsDriveAPI:angular"]
         )
         {
             custom bool aloha:candidateOnly = 1
@@ -807,9 +813,9 @@ over "aloha" (
             float physics:breakForce = 3.4028235e38
             float physics:breakTorque = 3.4028235e38
             point3f physics:localPos0 = (0.2, 0, 0)
-            point3f physics:localPos1 = (0, 0, 0)
+            point3f physics:localPos1 = (4.8106625e-9, -1.8052017e-9, -1.334678e-8)
             quatf physics:localRot0 = (1, 0, 0, 0)
-            quatf physics:localRot1 = (1, 0, 0, 0)
+            quatf physics:localRot1 = (1, 4.008587e-7, -5.3352483e-8, -7.142239e-9)
             float physics:lowerLimit = -179.99928
             float physics:upperLimit = 179.99928
             float physxJoint:armature = 0.14
@@ -820,7 +826,7 @@ over "aloha" (
         }
 
         def PhysicsRevoluteJoint "right_wrist_angle" (
-            prepend apiSchemas = ["PhysicsDriveAPI:angular"]
+            prepend apiSchemas = ["PhysicsJointStateAPI:angular", "PhysicsDriveAPI:angular"]
         )
         {
             custom bool aloha:candidateOnly = 1
@@ -840,9 +846,9 @@ over "aloha" (
             float physics:breakForce = 3.4028235e38
             float physics:breakTorque = 3.4028235e38
             point3f physics:localPos0 = (0.1, 0, 0)
-            point3f physics:localPos1 = (0, 0, 0)
+            point3f physics:localPos1 = (-3.2726653e-8, 2.3884503e-9, 5.9380847e-9)
             quatf physics:localRot0 = (0.7071068, 0, 0, 0.7071068)
-            quatf physics:localRot1 = (0.7071068, 0, 0, 0.7071068)
+            quatf physics:localRot1 = (0.70710677, -0.000016103346, -0.000016075468, 0.70710677)
             float physics:lowerLimit = -106.99986
             float physics:upperLimit = 127.999916
             float physxJoint:armature = 0.008
@@ -853,7 +859,7 @@ over "aloha" (
         }
 
         def PhysicsRevoluteJoint "right_wrist_rotate" (
-            prepend apiSchemas = ["PhysicsDriveAPI:angular"]
+            prepend apiSchemas = ["PhysicsJointStateAPI:angular", "PhysicsDriveAPI:angular"]
         )
         {
             custom bool aloha:candidateOnly = 1
@@ -873,9 +879,9 @@ over "aloha" (
             float physics:breakForce = 3.4028235e38
             float physics:breakTorque = 3.4028235e38
             point3f physics:localPos0 = (0.069744, 0, 0)
-            point3f physics:localPos1 = (0, 0, 0)
+            point3f physics:localPos1 = (-1.0789722e-8, -2.674405e-9, -6.781501e-9)
             quatf physics:localRot0 = (1, 0, 0, 0)
-            quatf physics:localRot1 = (1, 0, 0, 0)
+            quatf physics:localRot1 = (1, -4.47965e-8, -6.5261695e-8, 6.16072e-8)
             float physics:lowerLimit = -179.99928
             float physics:upperLimit = 179.99928
             float physxJoint:armature = 0
@@ -886,7 +892,7 @@ over "aloha" (
         }
 
         def PhysicsPrismaticJoint "right_left_finger" (
-            prepend apiSchemas = ["PhysicsDriveAPI:linear"]
+            prepend apiSchemas = ["PhysicsJointStateAPI:linear", "PhysicsDriveAPI:linear"]
         )
         {
             custom bool aloha:candidateOnly = 1
@@ -906,9 +912,9 @@ over "aloha" (
             float physics:breakForce = 3.4028235e38
             float physics:breakTorque = 3.4028235e38
             point3f physics:localPos0 = (0.01909998, -0.014163703, 0.021172717)
-            point3f physics:localPos1 = (0, 0, 0)
+            point3f physics:localPos1 = (5.105179e-8, -2.8355396e-10, -1.7222146e-9)
             quatf physics:localRot0 = (0.7071068, -0.7071068, 1.4988473e-8, 0)
-            quatf physics:localRot1 = (0.70710677, 0, 0.70710677, 0)
+            quatf physics:localRot1 = (0.7071069, -1.2691675e-7, 0.7071067, -2.906014e-8)
             float physics:lowerLimit = 0.01844
             float physics:upperLimit = 0.058
             float physxJoint:armature = 0.243
@@ -919,7 +925,7 @@ over "aloha" (
         }
 
         def PhysicsPrismaticJoint "right_right_finger" (
-            prepend apiSchemas = ["PhysicsDriveAPI:linear"]
+            prepend apiSchemas = ["PhysicsJointStateAPI:linear", "PhysicsDriveAPI:linear"]
         )
         {
             custom bool aloha:candidateOnly = 1
@@ -939,9 +945,9 @@ over "aloha" (
             float physics:breakForce = 3.4028235e38
             float physics:breakTorque = 3.4028235e38
             point3f physics:localPos0 = (-0.019100025, -0.014163673, 0.021172702)
-            point3f physics:localPos1 = (0, 0, 0)
+            point3f physics:localPos1 = (1.535361e-8, 4.975852e-9, -8.659571e-7)
             quatf physics:localRot0 = (2.9802322e-8, 2.9802322e-8, 0.7071068, 0.7071068)
-            quatf physics:localRot1 = (0.7071068, 0, 0.7071068, 2.9802322e-8)
+            quatf physics:localRot1 = (0.70710677, -8.660201e-9, 0.70710677, -9.509348e-9)
             float physics:lowerLimit = 0.01844
             float physics:upperLimit = 0.058
             float physxJoint:armature = 0.243

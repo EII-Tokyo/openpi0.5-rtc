@@ -1,5 +1,5 @@
 schema_version: 1
-stage_group: A14_A18_stationary_ai_style_rebuild
+stage_group: A14_A20_stationary_ai_style_rebuild
 
 source_aloha1_usd: local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd
 trossen_reference_usd: external/trossen_ai_isaac/assets/robots/stationary_ai/stationary_ai.usd
@@ -18,6 +18,11 @@ outputs:
   a19_clean_articulation_candidate: aloha_isaac_rebuild/scenes/a19_clean_articulation_candidate.usda
   a19_clean_articulation_candidate_audit_json: aloha_isaac_rebuild/artifacts/validation/a19_clean_articulation_candidate_audit.json
   a19_clean_articulation_candidate_md: aloha_isaac_rebuild/reports/a19_clean_articulation_candidate.md
+  a20_asset_validator_json: aloha_isaac_rebuild/artifacts/validation/a20_asset_validator_audit.json
+  a20_asset_validator_md: aloha_isaac_rebuild/reports/a20_asset_validator_audit.md
+  a20_usd_dof_metadata_json: aloha_isaac_rebuild/artifacts/validation/a20_usd_dof_metadata_gate.json
+  a20_runtime_articulation_discovery_json: aloha_isaac_rebuild/artifacts/validation/a20_runtime_articulation_discovery_gate.json
+  a20_two_layer_articulation_discovery_md: aloha_isaac_rebuild/reports/a20_two_layer_articulation_discovery.md
 
 root_prim: /aloha
 
@@ -32,6 +37,8 @@ policy:
   a16_physics_ready: false
   a17_author_articulation: false
   a18_author_calibrated_cameras: false
+  a19_author_articulation_candidate: true
+  a20_run_asset_validator_read_only: true
 
 semantic_notes:
   - A14-A16 align asset organization toward Trossen stationary_ai.usd.

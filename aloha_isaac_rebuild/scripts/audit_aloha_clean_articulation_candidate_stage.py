@@ -7,11 +7,16 @@ import argparse
 import json
 from pathlib import Path
 
-import yaml
 from pxr import Usd
+import yaml
 
+from aloha_isaac_rebuild.scripts.a19_joint_state_coherence import audit_stage_joint_state_coherence
 
 DEFAULT_CONFIG = Path("aloha_isaac_rebuild/configs/physical_reconstruction/stationary_style_rebuild.yaml")
+JOINT_STATE_SCHEMAS = {
+    "PhysicsRevoluteJoint": ("angular", "PhysicsJointStateAPI:angular"),
+    "PhysicsPrismaticJoint": ("linear", "PhysicsJointStateAPI:linear"),
+}
 
 
 def _load_json(path: Path) -> dict:
@@ -36,6 +41,8 @@ def audit(config_path: Path) -> dict:
     visual_or_collider_relationship_targets = []
     joint_paths = []
     dof_joint_paths = []
+    joint_state_api_paths = {"angular": [], "linear": []}
+    missing_joint_state_api_paths = []
     collision_api_paths = []
     physics_scene_paths = []
     articulation_root_paths = []
@@ -46,7 +53,10 @@ def audit(config_path: Path) -> dict:
         path = str(prim.GetPath())
         prim_type = prim.GetTypeName() or "Typeless"
         type_counts[prim_type] = type_counts.get(prim_type, 0) + 1
-        schemas = list(prim.GetAppliedSchemas())
+        schemas = set(prim.GetAppliedSchemas())
+        authored_schemas = prim.GetMetadata("apiSchemas")
+        if authored_schemas is not None:
+            schemas.update(authored_schemas.GetAppliedItems())
         for schema in schemas:
             api_counts[schema] = api_counts.get(schema, 0) + 1
         if "PhysicsCollisionAPI" in schemas:
@@ -63,6 +73,11 @@ def audit(config_path: Path) -> dict:
             joint_paths.append(path)
             if prim_type in {"PhysicsRevoluteJoint", "PhysicsPrismaticJoint"}:
                 dof_joint_paths.append(path)
+                instance, schema = JOINT_STATE_SCHEMAS[prim_type]
+                if schema in schemas:
+                    joint_state_api_paths[instance].append(path)
+                else:
+                    missing_joint_state_api_paths.append(path)
             for rel_name in ("physics:body0", "physics:body1"):
                 rel = prim.GetRelationship(rel_name)
                 if not rel.IsValid():
@@ -88,6 +103,9 @@ def audit(config_path: Path) -> dict:
         if path.startswith("/aloha") and candidate_attr.IsValid() and candidate_attr.Get() is False:
             candidate_false_paths.append(path)
 
+    joint_state_coherence = audit_stage_joint_state_coherence(
+        stage, joint_paths=joint_paths
+    )
     source_joint_paths = sorted(record["proposed_clean_joint_path"] for record in mapping["joint_records"])
     expected_joints = sorted(["/aloha/root_joint", *source_joint_paths])
     missing_joints = [path for path in expected_joints if not stage.GetPrimAtPath(path).IsValid()]
@@ -104,6 +122,11 @@ def audit(config_path: Path) -> dict:
         if root_joint_prim.IsValid() and root_joint_prim.GetRelationship("physics:body1").IsValid()
         else []
     )
+    tabletop_prim = stage.GetPrimAtPath("/aloha/tabletop_link")
+    tabletop_kinematic_attr = tabletop_prim.GetAttribute("physics:kinematicEnabled")
+    tabletop_kinematic_enabled = tabletop_kinematic_attr.Get() if tabletop_kinematic_attr.IsValid() else None
+    tabletop_rigid_attr = tabletop_prim.GetAttribute("physics:rigidBodyEnabled")
+    tabletop_rigid_body_enabled = tabletop_rigid_attr.Get() if tabletop_rigid_attr.IsValid() else None
     base_articulation_root_leaks = [
         path
         for path in ("/aloha/follower_left_base_link", "/aloha/follower_right_base_link")
@@ -174,6 +197,9 @@ def audit(config_path: Path) -> dict:
         and str(stage.GetDefaultPrim().GetPath()) == "/aloha"
         and len(joint_paths) == 21
         and len(dof_joint_paths) == 16
+        and len(joint_state_api_paths["angular"]) == 12
+        and len(joint_state_api_paths["linear"]) == 4
+        and not missing_joint_state_api_paths
         and not missing_joints
         and not extra_joints
         and len(rigid_body_paths) == 21
@@ -182,6 +208,8 @@ def audit(config_path: Path) -> dict:
         and root_joint_prim.GetTypeName() == "PhysicsFixedJoint"
         and root_joint_body0 == []
         and root_joint_body1 == ["/aloha/tabletop_link"]
+        and tabletop_kinematic_enabled is False
+        and tabletop_rigid_body_enabled is True
         and not base_articulation_root_leaks
         and sorted(robot_link_targets) == expected_link_targets
         and sorted(robot_joint_targets) == source_joint_paths
@@ -197,6 +225,7 @@ def audit(config_path: Path) -> dict:
         and not duplicate_child_parents
         and not unreachable_links
         and len(graph_edges) == len(expected_link_targets) - 1
+        and joint_state_coherence["ok"]
     )
     result = {
         "ok": bool(ok),
@@ -215,6 +244,8 @@ def audit(config_path: Path) -> dict:
         "api_counts": api_counts,
         "joint_count": len(joint_paths),
         "dof_joint_count": len(dof_joint_paths),
+        "joint_state_api_paths": joint_state_api_paths,
+        "missing_joint_state_api_paths": missing_joint_state_api_paths,
         "rigid_body_count": len(rigid_body_paths),
         "mass_api_count": len(mass_api_paths),
         "articulation_root_paths": sorted(articulation_root_paths),
@@ -222,6 +253,8 @@ def audit(config_path: Path) -> dict:
         "root_joint_type": root_joint_prim.GetTypeName() if root_joint_prim.IsValid() else None,
         "root_joint_body0": root_joint_body0,
         "root_joint_body1": root_joint_body1,
+        "tabletop_kinematic_enabled": tabletop_kinematic_enabled,
+        "tabletop_rigid_body_enabled": tabletop_rigid_body_enabled,
         "base_articulation_root_leaks": base_articulation_root_leaks,
         "robot_link_target_count": len(robot_link_targets),
         "robot_joint_target_count": len(robot_joint_targets),
@@ -239,6 +272,13 @@ def audit(config_path: Path) -> dict:
         "extra_joints": extra_joints,
         "invalid_relationship_targets": invalid_relationship_targets,
         "candidate_false_paths": candidate_false_paths,
+        "joint_state_coherence": joint_state_coherence,
+        "max_joint_position_residual_m": joint_state_coherence[
+            "max_position_residual_m"
+        ],
+        "max_joint_orientation_residual_deg": joint_state_coherence[
+            "max_orientation_residual_deg"
+        ],
         "next_required_gates": [
             "Isaac runtime open-stage smoke",
             "Asset Validator RobotRules/PhysicsRules",

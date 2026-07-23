@@ -12,17 +12,21 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import sys
 from pathlib import Path
+import sys
 
+from pxr import Gf
+from pxr import Sdf
+from pxr import Usd
+from pxr import UsdGeom
+from pxr import UsdPhysics
 import yaml
-from pxr import Gf, Sdf, Usd, UsdGeom, UsdPhysics
-
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
+from aloha_isaac_rebuild.scripts.a19_joint_state_coherence import repair_body1_local_frame  # noqa: E402
 
 DEFAULT_CONFIG = Path("aloha_isaac_rebuild/configs/physical_reconstruction/stationary_style_rebuild.yaml")
 
@@ -62,7 +66,7 @@ def _define_joint(
     record: dict,
     *,
     table_world_to_local: Gf.Matrix4d,
-) -> Usd.Prim:
+) -> tuple[Usd.Prim, dict[str, object]]:
     joint_path = record["proposed_clean_joint_path"]
     joint_type = record["joint_type"]
     joint_prim = stage.DefinePrim(joint_path, joint_type)
@@ -102,8 +106,10 @@ def _define_joint(
         _set_string(joint_prim, "aloha:sourceBody0Was", "world_or_empty")
         _set_string(joint_prim, "aloha:cleanBody0ReparentedTo", "/aloha/tabletop_link")
     if joint_type == "PhysicsRevoluteJoint":
+        joint_prim.AddAppliedSchema("PhysicsJointStateAPI:angular")
         UsdPhysics.DriveAPI.Apply(joint_prim, "angular")
     elif joint_type == "PhysicsPrismaticJoint":
+        joint_prim.AddAppliedSchema("PhysicsJointStateAPI:linear")
         UsdPhysics.DriveAPI.Apply(joint_prim, "linear")
 
     _set_bool(joint_prim, "aloha:candidateOnly", True)
@@ -112,7 +118,8 @@ def _define_joint(
     _set_string(joint_prim, "aloha:sourceJointName", record["source_joint_name"])
     if record.get("canonical_dof_name"):
         _set_string(joint_prim, "aloha:canonicalDofName", record["canonical_dof_name"])
-    return joint_prim
+    coherence_repair = repair_body1_local_frame(stage, joint_prim)
+    return joint_prim, coherence_repair
 
 
 def create_candidate(config_path: Path) -> dict:
@@ -184,6 +191,13 @@ def create_candidate(config_path: Path) -> dict:
         if clean_path == "/aloha/tabletop_link":
             trossen_table = trossen_stage.GetPrimAtPath("/stationary_ai/tabletop_link")
             _copy_attrs_with_prefixes(trossen_table, clean_prim, ("physics:",))
+            # Match Trossen Stationary AI's fixed-base articulation pattern:
+            # tabletop_link is a dynamic articulation root link, fixed to world
+            # by root_joint. If left kinematic, PhysX treats the root joint as a
+            # static-static joint and Asset Validator rejects the articulation.
+            _set_bool(clean_prim, "physics:kinematicEnabled", False)
+            _set_bool(clean_prim, "physics:rigidBodyEnabled", True)
+            _set_bool(clean_prim, "physics:startsAsleep", False)
             _set_string(clean_prim, "aloha:massSource", "trossen_stationary_ai_tabletop_candidate")
         _set_bool(clean_prim, "aloha:candidateOnly", True)
         _set_bool(clean_prim, "aloha:controlReady", False)
@@ -203,10 +217,23 @@ def create_candidate(config_path: Path) -> dict:
     _set_bool(joints_root, "aloha:candidateOnly", True)
     table_world = UsdGeom.XformCache().GetLocalToWorldTransform(stage.GetPrimAtPath("/aloha/tabletop_link"))
     table_world_to_local = table_world.GetInverse()
-    joint_records = [
+    defined_joints = [
         _define_joint(stage, source_stage, record, table_world_to_local=table_world_to_local)
         for record in mapping["joint_records"]
     ]
+    joint_prims = [joint_prim for joint_prim, _repair in defined_joints]
+    joint_state_coherence_repairs = [repair for _joint_prim, repair in defined_joints]
+    if not (
+        len(joint_state_coherence_repairs) == len(mapping["joint_records"])
+        and all(
+            isinstance(repair.get("after"), dict)
+            and repair["after"].get("ok") is True
+            for repair in joint_state_coherence_repairs
+        )
+    ):
+        raise RuntimeError(
+            "joint-state coherence repair did not pass for every mapped joint"
+        )
 
     robot_link_targets = [Sdf.Path(path) for path in joint_body_paths]
     robot_joint_targets = [Sdf.Path(record["proposed_clean_joint_path"]) for record in mapping["joint_records"]]
@@ -230,8 +257,9 @@ def create_candidate(config_path: Path) -> dict:
         "training_eligible": False,
         "articulation_policy": "stationary_ai_style_single_root_joint_candidate",
         "body_count": len(body_records),
-        "joint_count": len(joint_records) + 1,
+        "joint_count": len(joint_prims) + 1,
         "dof_joint_count": sum(1 for record in mapping["joint_records"] if record["is_dof_joint"]),
+        "joint_state_coherence_repairs": joint_state_coherence_repairs,
         "root_articulation_prim_paths": ["/aloha/root_joint"],
         "root_joint_path": "/aloha/root_joint",
         "intentional_stationary_ai_style_reparented_joints": [
