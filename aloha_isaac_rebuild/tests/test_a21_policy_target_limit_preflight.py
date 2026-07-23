@@ -48,6 +48,16 @@ MIRRORED_FINGER_PATHS = {
     "/aloha/joints/left_right_finger",
     "/aloha/joints/right_right_finger",
 }
+LAYER_INPUTS = {
+    "config": {"path": "/evidence/config.yaml", "sha256": "a" * 64},
+    "mapping": {"path": "/evidence/mapping.json", "sha256": "b" * 64},
+    "stage": {
+        "path": "/evidence/stage.usda",
+        "pre_sha256": "c" * 64,
+        "post_sha256": "c" * 64,
+        "consistent_during_audit": True,
+    },
+}
 
 
 def _transform(path: str, *, corrected: bool) -> dict[str, object]:
@@ -71,6 +81,20 @@ def _adapter(*, corrected: bool = True) -> dict[str, object]:
             }
         )
 
+    return {
+        "schema_version": "a20-policy-runtime-order-v1",
+        "policy_dimension": 14,
+        "runtime_dimension": 16,
+        "canonical_order": deepcopy(CANONICAL_PATHS),
+        "runtime_order": deepcopy(RUNTIME_PATHS),
+        "canonical_to_runtime_indices": [runtime_index_by_path[path] for path in CANONICAL_PATHS],
+        "runtime_to_canonical_indices": [CANONICAL_PATHS.index(path) for path in RUNTIME_PATHS],
+        "policy_to_runtime": entries,
+        "mapping_complete": True,
+    }
+
+
+def _canonical_dofs(*, corrected: bool = True) -> list[dict[str, object]]:
     canonical_dofs = []
     for canonical_index, path in enumerate(CANONICAL_PATHS):
         effective = _transform(path, corrected=corrected)
@@ -107,6 +131,24 @@ def _adapter(*, corrected: bool = True) -> dict[str, object]:
                 "source_transform": source,
                 "effective_transform": {field: effective[field] for field in ("sign", "offset", "scale")},
                 "clean_runtime_mapping_override": override,
+                "unit": "m" if "finger" in path else "rad",
+            }
+        )
+    return canonical_dofs
+
+
+def _policy_contract(*, corrected: bool = True) -> dict[str, object]:
+    canonical_dofs = _canonical_dofs(corrected=corrected)
+    policy_entries = []
+    for policy_index, canonical_indices in enumerate(POLICY_CANONICAL_GROUPS):
+        paths = [CANONICAL_PATHS[index] for index in canonical_indices]
+        policy_entries.append(
+            {
+                "openpi_index": policy_index,
+                "dataset_index": policy_index,
+                "canonical_indices": deepcopy(canonical_indices),
+                "canonical_paths": paths,
+                "transforms": [_transform(path, corrected=corrected) for path in paths],
             }
         )
     return {
@@ -115,11 +157,7 @@ def _adapter(*, corrected: bool = True) -> dict[str, object]:
         "runtime_dimension": 16,
         "canonical_order": deepcopy(CANONICAL_PATHS),
         "canonical_dofs": canonical_dofs,
-        "runtime_order": deepcopy(RUNTIME_PATHS),
-        "canonical_to_runtime_indices": [runtime_index_by_path[path] for path in CANONICAL_PATHS],
-        "runtime_to_canonical_indices": [CANONICAL_PATHS.index(path) for path in RUNTIME_PATHS],
-        "policy_to_runtime": entries,
-        "mapping_complete": True,
+        "policy_entries": policy_entries,
     }
 
 
@@ -140,11 +178,26 @@ def _runtime_records() -> list[dict[str, object]]:
     return records
 
 
+def _evaluate(
+    adapter: dict[str, object] | None = None,
+    records: list[dict[str, object]] | None = None,
+    samples: list[dict[str, object]] | None = None,
+    canonical_dofs: list[dict[str, object]] | None = None,
+) -> dict[str, object]:
+    return evaluate_policy_samples(
+        adapter if adapter is not None else _adapter(),
+        records if records is not None else _runtime_records(),
+        samples if samples is not None else build_reviewed_policy_samples(),
+        canonical_dofs=(canonical_dofs if canonical_dofs is not None else _canonical_dofs()),
+    )
+
+
 def test_negative_right_finger_expansion_fails_positive_runtime_limits() -> None:
     result = evaluate_policy_samples(
         _adapter(corrected=False),
         _runtime_records(),
         build_reviewed_policy_samples(),
+        canonical_dofs=_canonical_dofs(corrected=False),
     )
 
     expected_indices = {RUNTIME_PATHS.index(path) for path in MIRRORED_FINGER_PATHS}
@@ -158,6 +211,7 @@ def test_corrected_effective_mapping_passes_all_reviewed_samples() -> None:
         _adapter(),
         _runtime_records(),
         build_reviewed_policy_samples(),
+        canonical_dofs=_canonical_dofs(),
     )
 
     assert result["ok"] is True
@@ -167,12 +221,14 @@ def test_corrected_effective_mapping_passes_all_reviewed_samples() -> None:
     assert result["max_arm_delta_rad"] == ARM_DELTA_RAD == math.radians(0.25)
 
 
-def _layer1() -> dict[str, object]:
+def _layer1(*, corrected: bool = True) -> dict[str, object]:
     return {
         "status": "PASS_A20_USD_DOF_METADATA",
         "ok": True,
+        "policy_contract": _policy_contract(corrected=corrected),
         "mismatches": [],
         "errors": [],
+        "inputs": deepcopy(LAYER_INPUTS),
         "physics_stepped": False,
         "actions_applied": False,
         "targets_written": False,
@@ -190,6 +246,14 @@ def _layer2() -> dict[str, object]:
             "actions_applied": False,
             "targets_written": False,
             "stage_saved": False,
+            "inputs": {
+                "config": deepcopy(LAYER_INPUTS["config"]),
+                "mapping": deepcopy(LAYER_INPUTS["mapping"]),
+                "stage": {
+                    "path": LAYER_INPUTS["stage"]["path"],
+                    "sha256": LAYER_INPUTS["stage"]["pre_sha256"],
+                },
+            },
         }
         for index in range(3)
     ]
@@ -299,7 +363,7 @@ def test_evaluation_rejects_wrong_adapter_contract(mutate) -> None:
     adapter = _adapter()
     mutate(adapter)
 
-    result = evaluate_policy_samples(adapter, _runtime_records(), build_reviewed_policy_samples())
+    result = _evaluate(adapter=adapter)
 
     assert result["ok"] is False
     assert result["errors"][0]["code"] == "invalid_preflight_input"
@@ -319,7 +383,7 @@ def test_evaluation_rejects_bad_runtime_index_or_path_inventory(mutate) -> None:
     records = _runtime_records()
     mutate(records)
 
-    result = evaluate_policy_samples(_adapter(), records, build_reviewed_policy_samples())
+    result = _evaluate(records=records)
 
     assert result["ok"] is False
     assert result["errors"][0]["code"] == "invalid_preflight_input"
@@ -332,7 +396,7 @@ def test_evaluation_rejects_bool_or_non_finite_policy_input(
     samples = build_reviewed_policy_samples()
     samples[0]["policy_values"][0] = bad_value
 
-    result = evaluate_policy_samples(_adapter(), _runtime_records(), samples)
+    result = _evaluate(samples=samples)
 
     assert result["ok"] is False
     assert result["errors"][0]["code"] == "invalid_preflight_input"
@@ -342,7 +406,7 @@ def test_evaluation_rejects_duplicate_sample_labels() -> None:
     samples = build_reviewed_policy_samples()
     samples[1]["label"] = samples[0]["label"]
 
-    result = evaluate_policy_samples(_adapter(), _runtime_records(), samples)
+    result = _evaluate(samples=samples)
 
     assert result["ok"] is False
     assert "duplicate sample label" in result["errors"][0]["message"]
@@ -357,7 +421,7 @@ def test_non_finite_expanded_target_is_a_deterministic_error(
         lambda *_: [float("nan")] + [0.0] * 15,
     )
 
-    result = evaluate_policy_samples(_adapter(), _runtime_records(), build_reviewed_policy_samples())
+    result = _evaluate()
 
     assert result["ok"] is False
     assert result["mismatches"] == []
@@ -371,7 +435,7 @@ def test_conversion_exceptions_are_errors_not_crashes(
         raise ValueError("synthetic conversion failure")
 
     monkeypatch.setattr(audit, "policy_to_runtime", fail_conversion)
-    result = evaluate_policy_samples(_adapter(), _runtime_records(), build_reviewed_policy_samples())
+    result = _evaluate()
 
     assert result["ok"] is False
     assert len(result["errors"]) == 4
@@ -387,7 +451,7 @@ def test_inverse_round_trip_disagreement_is_rejected(
         lambda *_args, **_kwargs: [0.0] * 14,
     )
 
-    result = evaluate_policy_samples(_adapter(), _runtime_records(), build_reviewed_policy_samples())
+    result = _evaluate()
 
     assert result["ok"] is False
     assert any(error["code"] == "round_trip_error" for error in result["errors"])
@@ -397,21 +461,86 @@ def test_inverse_round_trip_disagreement_is_rejected(
 @pytest.mark.parametrize(
     "mutate",
     [
-        lambda adapter: adapter.pop("canonical_dofs"),
-        lambda adapter: adapter["canonical_dofs"][7].update(clean_runtime_mapping_override=None),
-        lambda adapter: adapter["canonical_dofs"][7]["effective_transform"].update(scale=-0.036),
-        lambda adapter: adapter["canonical_dofs"][7]["clean_runtime_mapping_override"].update(scale=0.04),
-        lambda adapter: adapter["canonical_dofs"][7]["source_transform"].update(scale=0.036),
-        lambda adapter: adapter["canonical_dofs"][7]["clean_runtime_mapping_override"].update(rationale=""),
+        lambda dofs: dofs[7].update(clean_runtime_mapping_override=None),
+        lambda dofs: dofs[7]["effective_transform"].update(scale=-0.036),
+        lambda dofs: dofs[7]["clean_runtime_mapping_override"].update(scale=0.04),
+        lambda dofs: dofs[7]["source_transform"].update(scale=0.036),
+        lambda dofs: dofs[7]["clean_runtime_mapping_override"].update(rationale=""),
     ],
 )
 def test_missing_malformed_or_inconsistent_right_finger_provenance_fails(
     mutate,
 ) -> None:
+    canonical_dofs = _canonical_dofs()
+    mutate(canonical_dofs)
+
+    result = _evaluate(canonical_dofs=canonical_dofs)
+
+    assert result["ok"] is False
+    assert any(error["code"] == "invalid_right_finger_override_provenance" for error in result["errors"])
+
+
+def test_direct_api_keeps_legacy_embedded_provenance_compatibility() -> None:
+    adapter = _adapter()
+    adapter["canonical_dofs"] = _canonical_dofs()
+
+    result = evaluate_policy_samples(
+        adapter,
+        _runtime_records(),
+        build_reviewed_policy_samples(),
+    )
+
+    assert result["ok"] is True
+    assert result["errors"] == []
+
+
+def test_adapter_transform_path_must_match_its_raw_runtime_record() -> None:
+    adapter = _adapter()
+    adapter["policy_to_runtime"][0]["transforms"][0]["path"] = CANONICAL_PATHS[8]
+
+    result = _evaluate(adapter=adapter)
+
+    assert result["ok"] is False
+    assert any(error["code"] == "invalid_right_finger_override_provenance" for error in result["errors"])
+
+
+def _set_bool_adapter_runtime_index(adapter: dict[str, object]) -> None:
+    adapter["policy_to_runtime"][0]["runtime_indices"][0] = True
+
+
+@pytest.mark.parametrize(
+    "mutate",
+    [
+        lambda adapter: adapter["policy_to_runtime"][0].update(openpi_index=True),
+        _set_bool_adapter_runtime_index,
+        lambda adapter: adapter["policy_to_runtime"][1]["runtime_indices"].__setitem__(
+            0, adapter["policy_to_runtime"][0]["runtime_indices"][0]
+        ),
+    ],
+)
+def test_direct_api_rejects_bool_or_duplicate_adapter_indices(mutate) -> None:
     adapter = _adapter()
     mutate(adapter)
 
-    result = evaluate_policy_samples(adapter, _runtime_records(), build_reviewed_policy_samples())
+    result = _evaluate(adapter=adapter)
+
+    assert result["ok"] is False
+    assert any(error["code"] == "invalid_right_finger_override_provenance" for error in result["errors"])
+
+
+@pytest.mark.parametrize(
+    "mutate",
+    [
+        lambda dofs: dofs[0].update(canonical_index=True),
+        lambda dofs: dofs[1].update(openpi_index=True),
+        lambda dofs: dofs[15].update(openpi_index=12),
+    ],
+)
+def test_direct_api_rejects_bool_or_incomplete_canonical_indices(mutate) -> None:
+    canonical_dofs = _canonical_dofs()
+    mutate(canonical_dofs)
+
+    result = _evaluate(canonical_dofs=canonical_dofs)
 
     assert result["ok"] is False
     assert any(error["code"] == "invalid_right_finger_override_provenance" for error in result["errors"])
@@ -423,7 +552,7 @@ def test_exact_runtime_limit_is_accepted() -> None:
         if record["joint_type"] == "PhysicsPrismaticJoint":
             record["upper_limit"] = 0.057
 
-    result = evaluate_policy_samples(_adapter(), records, build_reviewed_policy_samples())
+    result = _evaluate(records=records)
 
     assert result["ok"] is True
     assert result["mismatches"] == []
@@ -435,7 +564,7 @@ def test_target_beyond_explicit_limit_tolerance_is_rejected() -> None:
     target_record = next(record for record in records if record["path"] == target_path)
     target_record["upper_limit"] = 0.057 - 1.1e-9
 
-    result = evaluate_policy_samples(_adapter(), records, build_reviewed_policy_samples())
+    result = _evaluate(records=records)
 
     mismatch = next(
         item for item in result["mismatches"] if item["path"] == target_path and item["label"] == "grippers_open"
@@ -449,11 +578,17 @@ def test_evaluation_does_not_mutate_inputs() -> None:
     adapter = _adapter()
     records = _runtime_records()
     samples = build_reviewed_policy_samples()
-    before = deepcopy((adapter, records, samples))
+    canonical_dofs = _canonical_dofs()
+    before = deepcopy((adapter, records, samples, canonical_dofs))
 
-    evaluate_policy_samples(adapter, records, samples)
+    evaluate_policy_samples(
+        adapter,
+        records,
+        samples,
+        canonical_dofs=canonical_dofs,
+    )
 
-    assert (adapter, records, samples) == before
+    assert (adapter, records, samples, canonical_dofs) == before
 
 
 def test_preflight_pass_has_exact_structured_contract() -> None:
@@ -493,6 +628,129 @@ def test_preflight_pass_has_exact_structured_contract() -> None:
         "stage_saved",
     ):
         assert result[flag] is False
+
+
+def test_preflight_reads_canonical_provenance_from_layer1_policy_contract() -> None:
+    layer1 = _layer1()
+    layer2 = _layer2()
+    adapter = layer2["order_adapter"]
+
+    result = evaluate_preflight(layer1, layer2)
+
+    assert "canonical_dofs" not in adapter
+    assert result["status"] == PASS_STATUS
+    assert result["ok"] is True
+    assert result["errors"] == []
+
+
+@pytest.mark.parametrize(
+    "mutate",
+    [
+        lambda layer: layer.pop("policy_contract"),
+        lambda layer: layer.update(policy_contract=[]),
+        lambda layer: layer["policy_contract"].pop("canonical_dofs"),
+        lambda layer: layer["policy_contract"]["canonical_dofs"].pop(),
+        lambda layer: layer["policy_contract"]["canonical_dofs"][0].update(canonical_index=True),
+        lambda layer: layer["policy_contract"]["canonical_dofs"][0].update(openpi_index=True),
+        lambda layer: layer["policy_contract"]["canonical_dofs"][13].update(openpi_index=11),
+    ],
+)
+def test_preflight_rejects_missing_or_malformed_layer1_canonical_contract(
+    mutate,
+) -> None:
+    layer1 = _layer1()
+    mutate(layer1)
+
+    result = evaluate_preflight(layer1, _layer2())
+
+    assert result["status"] == FAIL_STATUS
+    assert result["ok"] is False
+    assert any(error["code"] == "invalid_layer1_evidence" for error in result["errors"])
+
+
+@pytest.mark.parametrize(
+    "mutate",
+    [
+        lambda layer: layer["policy_contract"]["canonical_dofs"][0].update(unit="cm"),
+        lambda layer: layer["policy_contract"]["canonical_dofs"][7]["clean_runtime_mapping_override"].update(unit="cm"),
+    ],
+)
+def test_preflight_rejects_wrong_canonical_or_override_units(mutate) -> None:
+    layer1 = _layer1()
+    mutate(layer1)
+
+    result = evaluate_preflight(layer1, _layer2())
+
+    assert result["status"] == FAIL_STATUS
+    assert result["ok"] is False
+
+
+def test_right_finger_override_provenance_cannot_be_swapped_to_left_finger() -> None:
+    layer1 = _layer1()
+    records = layer1["policy_contract"]["canonical_dofs"]
+    left = next(record for record in records if record["path"] == "/aloha/joints/left_left_finger")
+    right = next(record for record in records if record["path"] == "/aloha/joints/left_right_finger")
+    for field in (
+        "source_transform",
+        "effective_transform",
+        "clean_runtime_mapping_override",
+    ):
+        left[field], right[field] = right[field], left[field]
+
+    result = evaluate_preflight(layer1, _layer2())
+
+    assert result["status"] == FAIL_STATUS
+    assert result["ok"] is False
+
+
+@pytest.mark.parametrize(
+    ("target", "mutate"),
+    [
+        ("layer1", lambda layer: layer.pop("inputs")),
+        (
+            "layer1",
+            lambda layer: layer["inputs"]["config"].update(path="relative.yaml"),
+        ),
+        (
+            "layer1",
+            lambda layer: layer["inputs"]["mapping"].update(sha256="BAD"),
+        ),
+        (
+            "layer1",
+            lambda layer: layer["inputs"]["stage"].update(post_sha256="d" * 64),
+        ),
+        (
+            "layer1",
+            lambda layer: layer["inputs"]["stage"].update(consistent_during_audit=False),
+        ),
+        ("layer2", lambda layer: layer["runs"][0].pop("inputs")),
+        (
+            "layer2",
+            lambda layer: layer["runs"][1]["inputs"]["config"].update(sha256="d" * 64),
+        ),
+        (
+            "layer2",
+            lambda layer: layer["runs"][2]["inputs"]["stage"].update(path="/evidence/other.usda"),
+        ),
+        (
+            "layer2",
+            lambda layer: layer["runs"][2]["inputs"].update(mapping=[]),
+        ),
+    ],
+)
+def test_preflight_binds_all_run_inputs_to_layer1_provenance(
+    target: str,
+    mutate,
+) -> None:
+    layer1 = _layer1()
+    layer2 = _layer2()
+    mutate(layer1 if target == "layer1" else layer2)
+
+    result = evaluate_preflight(layer1, layer2)
+
+    assert result["status"] == FAIL_STATUS
+    assert result["ok"] is False
+    assert result["errors"]
 
 
 @pytest.mark.parametrize(
@@ -619,6 +877,24 @@ def test_cli_hashes_absolute_inputs_writes_pass_and_exits_zero(
             "path": str(path.resolve()),
             "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
         }
+
+
+def test_cli_artifact_hashes_do_not_replace_a20_cross_layer_provenance(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    config_path, layer1_path, _layer2_path, output_path = _write_cli_fixture(tmp_path)
+    layer1 = json.loads(layer1_path.read_text(encoding="utf-8"))
+    layer1.pop("inputs")
+    layer1_path.write_text(json.dumps(layer1), encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(sys, "argv", [str(MODULE), "--config", str(config_path)])
+
+    assert audit.main() == 1
+    written = json.loads(output_path.read_text(encoding="utf-8"))
+    assert written["inputs"]["layer1"]["sha256"] == hashlib.sha256(layer1_path.read_bytes()).hexdigest()
+    assert written["status"] == FAIL_STATUS
+    assert any(error["code"] == "invalid_layer1_evidence" for error in written["errors"])
 
 
 def test_cli_writes_parseable_fail_for_missing_or_malformed_evidence(

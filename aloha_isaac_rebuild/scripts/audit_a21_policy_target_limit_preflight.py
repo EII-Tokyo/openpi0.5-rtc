@@ -9,6 +9,7 @@ import json
 import math
 import os
 from pathlib import Path
+import re
 import tempfile
 from typing import Any
 
@@ -29,6 +30,11 @@ _POLICY_DIMENSION = 14
 _RUNTIME_DIMENSION = 16
 _LIMIT_TOLERANCE = 1e-9
 _ROUND_TRIP_TOLERANCE = 1e-12
+_SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
+_RIGHT_FINGER_OVERRIDE_PATHS = (
+    "/aloha/joints/left_right_finger",
+    "/aloha/joints/right_right_finger",
+)
 _SAFETY_FLAGS = {
     "physics_stepped": False,
     "actions_applied": False,
@@ -135,46 +141,129 @@ def _validate_runtime_records(
     return ordered, policy_by_runtime
 
 
-def _validate_right_finger_provenance(adapter: dict[str, object], entries: list[dict[str, Any]]) -> None:
-    canonical_dofs = adapter.get("canonical_dofs")
+def _validate_right_finger_provenance(
+    adapter: dict[str, object],
+    entries: list[dict[str, Any]],
+    runtime_records: list[dict[str, Any]],
+    canonical_dofs: object,
+) -> None:
     if not isinstance(canonical_dofs, list) or len(canonical_dofs) != _RUNTIME_DIMENSION:
-        raise ValueError("missing adapter canonical_dofs provenance")
+        raise ValueError("missing canonical_dofs provenance")
     if not all(isinstance(record, dict) for record in canonical_dofs):
-        raise ValueError("invalid adapter canonical_dofs provenance")
+        raise ValueError("invalid canonical_dofs provenance")
     by_path: dict[str, dict[str, Any]] = {}
-    for record in canonical_dofs:
+    policy_counts = dict.fromkeys(range(_POLICY_DIMENSION), 0)
+    for expected_canonical_index, record in enumerate(canonical_dofs):
+        canonical_index = record.get("canonical_index")
+        if (
+            isinstance(canonical_index, bool)
+            or not isinstance(canonical_index, int)
+            or canonical_index != expected_canonical_index
+        ):
+            raise ValueError("canonical index inventory must be exactly 0..15")
         path = record.get("path")
         if not isinstance(path, str) or not path or path in by_path:
-            raise ValueError("invalid adapter canonical_dofs path inventory")
+            raise ValueError("invalid canonical_dofs path inventory")
+        openpi_index = record.get("openpi_index")
+        if (
+            isinstance(openpi_index, bool)
+            or not isinstance(openpi_index, int)
+            or not 0 <= openpi_index < _POLICY_DIMENSION
+        ):
+            raise ValueError(f"invalid canonical openpi_index for {path}")
+        policy_counts[openpi_index] += 1
         by_path[path] = record
+    expected_policy_counts = {index: 2 if index in GRIPPER_POLICY_INDICES else 1 for index in range(_POLICY_DIMENSION)}
+    if policy_counts != expected_policy_counts:
+        raise ValueError("canonical policy index inventory must be exactly 0..13")
 
-    candidates: list[tuple[str, dict[str, Any], dict[str, Any]]] = []
-    for policy_index in sorted(GRIPPER_POLICY_INDICES):
-        entry = entries[policy_index]
+    canonical_order = adapter.get("canonical_order")
+    if canonical_order != [record["path"] for record in canonical_dofs]:
+        raise ValueError("adapter canonical_order does not match Layer1 provenance")
+    runtime_order = adapter.get("runtime_order")
+    runtime_paths = [record["path"] for record in runtime_records]
+    if runtime_order != runtime_paths:
+        raise ValueError("adapter runtime_order does not match runtime records")
+
+    transform_paths: list[str] = []
+    runtime_indices_seen: set[int] = set()
+    transforms_by_path: dict[str, dict[str, Any]] = {}
+    for policy_index, entry in enumerate(entries):
+        entry_index = entry.get("openpi_index")
+        if isinstance(entry_index, bool) or not isinstance(entry_index, int) or entry_index != policy_index:
+            raise ValueError(f"invalid adapter openpi_index at policy index {policy_index}")
+        runtime_indices = entry.get("runtime_indices")
         transforms = entry.get("transforms")
-        if not isinstance(transforms, list):
-            raise ValueError(f"invalid gripper transforms at policy index {policy_index}")
-        for transform in transforms:
+        if not isinstance(runtime_indices, list) or not isinstance(transforms, list):
+            raise ValueError(f"invalid transforms at policy index {policy_index}")
+        expected_cardinality = 2 if policy_index in GRIPPER_POLICY_INDICES else 1
+        if len(runtime_indices) != expected_cardinality or len(transforms) != expected_cardinality:
+            raise ValueError(f"invalid adapter cardinality at policy index {policy_index}")
+        for runtime_index, transform in zip(runtime_indices, transforms, strict=True):
+            if (
+                isinstance(runtime_index, bool)
+                or not isinstance(runtime_index, int)
+                or not 0 <= runtime_index < _RUNTIME_DIMENSION
+                or runtime_index in runtime_indices_seen
+            ):
+                raise ValueError(f"invalid or duplicate runtime index at policy index {policy_index}")
             if not isinstance(transform, dict):
-                raise ValueError(f"invalid gripper transform at policy index {policy_index}")
+                raise ValueError(f"invalid transform at policy index {policy_index}")
             path = transform.get("path")
             record = by_path.get(path) if isinstance(path, str) else None
             if record is None:
                 raise ValueError(f"missing canonical provenance for path {path!r}")
-            source = record.get("source_transform")
-            if not isinstance(source, dict):
-                raise ValueError(f"missing source transform provenance for {path}")
-            source_scale = _finite_float(source.get("scale"), field=f"source scale for {path}")
-            if source_scale < 0.0:
-                candidates.append((path, transform, record))
+            runtime_record = runtime_records[runtime_index]
+            if path != runtime_record.get("path"):
+                raise ValueError(f"adapter transform path does not match runtime index {runtime_index}")
+            if record.get("openpi_index") != policy_index:
+                raise ValueError(f"Layer1 canonical policy index mismatch for path {path}")
+            expected_unit = {
+                "PhysicsRevoluteJoint": "rad",
+                "PhysicsPrismaticJoint": "m",
+            }.get(runtime_record.get("joint_type"))
+            if expected_unit is None or record.get("unit") != expected_unit:
+                raise ValueError(f"canonical unit does not match runtime joint type for {path}")
+            effective = record.get("effective_transform")
+            if not isinstance(effective, dict):
+                raise ValueError(f"missing effective transform provenance for {path}")
+            transform_values = tuple(
+                _finite_float(transform.get(field), field=f"adapter {field} for {path}")
+                for field in ("sign", "offset", "scale")
+            )
+            effective_values = tuple(
+                _finite_float(effective.get(field), field=f"effective {field} for {path}")
+                for field in ("sign", "offset", "scale")
+            )
+            if transform_values != effective_values:
+                raise ValueError(f"adapter/effective transform mismatch for {path}")
+            runtime_indices_seen.add(runtime_index)
+            transform_paths.append(path)
+            transforms_by_path[path] = transform
 
-    if len(candidates) != 2:
-        raise ValueError("right-finger provenance must identify exactly two negative source transforms")
-    for path, transform, record in candidates:
-        source = record["source_transform"]
+    if runtime_indices_seen != set(range(_RUNTIME_DIMENSION)):
+        raise ValueError("adapter runtime index inventory must be exactly 0..15")
+    if (
+        len(transform_paths) != _RUNTIME_DIMENSION
+        or len(set(transform_paths)) != _RUNTIME_DIMENSION
+        or set(transform_paths) != set(by_path)
+    ):
+        raise ValueError("adapter transform paths do not match Layer1 canonical_dofs")
+
+    for path in _RIGHT_FINGER_OVERRIDE_PATHS:
+        record = by_path.get(path)
+        transform = transforms_by_path.get(path)
+        if record is None or transform is None:
+            raise ValueError(f"missing reviewed right-finger identity: {path}")
+        source = record.get("source_transform")
         effective = record.get("effective_transform")
         override = record.get("clean_runtime_mapping_override")
-        if not isinstance(effective, dict) or not isinstance(override, dict) or not override:
+        if (
+            not isinstance(source, dict)
+            or not isinstance(effective, dict)
+            or not isinstance(override, dict)
+            or not override
+        ):
             raise ValueError(f"missing effective override provenance for {path}")
         source_values = tuple(
             _finite_float(source.get(field), field=f"source {field} for {path}")
@@ -198,10 +287,17 @@ def _validate_right_finger_provenance(adapter: dict[str, object], entries: list[
             raise ValueError(f"effective transform is not positive for {path}")
         if override_values != effective_values or transform_values != effective_values:
             raise ValueError(f"override/effective adapter mismatch for {path}")
+        if record.get("unit") != "m" or override.get("unit") != record.get("unit"):
+            raise ValueError(f"override unit mismatch for {path}")
         for field in ("rationale", "source"):
             value = override.get(field)
             if not isinstance(value, str) or not value.strip():
                 raise ValueError(f"missing override {field} provenance for {path}")
+    for path, record in by_path.items():
+        if path in _RIGHT_FINGER_OVERRIDE_PATHS or record.get("openpi_index") not in GRIPPER_POLICY_INDICES:
+            continue
+        if record.get("clean_runtime_mapping_override") is not None:
+            raise ValueError(f"unexpected gripper override identity for {path}")
 
 
 def _validated_samples(samples: object) -> list[tuple[str, list[float]]]:
@@ -237,6 +333,8 @@ def evaluate_policy_samples(
     adapter: dict[str, object],
     runtime_records: list[dict[str, object]],
     samples: list[dict[str, object]],
+    *,
+    canonical_dofs: list[dict[str, object]] | None = None,
 ) -> dict[str, object]:
     """Expand policy samples, validate live-unit limits, and invert the mapping."""
     sample_snapshot = deepcopy(samples) if isinstance(samples, list) else []
@@ -265,7 +363,8 @@ def evaluate_policy_samples(
         }
 
     try:
-        _validate_right_finger_provenance(adapter, entries)
+        provenance = canonical_dofs if canonical_dofs is not None else adapter.get("canonical_dofs")
+        _validate_right_finger_provenance(adapter, entries, ordered_records, provenance)
     except (TypeError, ValueError) as exc:
         errors.append(_error("invalid_right_finger_override_provenance", str(exc)))
 
@@ -334,14 +433,18 @@ def evaluate_preflight(
     """Validate exact A20 evidence, then run the pure policy-limit checks."""
     bound_inputs = deepcopy(inputs) if isinstance(inputs, dict) else {}
     errors: list[dict[str, object]] = []
+    canonical_dofs: list[dict[str, object]] | None = None
+    trusted_a20_inputs: dict[str, object] | None = None
     if inputs is not None and not isinstance(inputs, dict):
         errors.append(_error("invalid_inputs", "inputs must be an object"))
     try:
-        _validate_a20_layer(
+        layer1_object = _validate_a20_layer(
             layer1,
             expected_status="PASS_A20_USD_DOF_METADATA",
             layer_name="layer1",
         )
+        canonical_dofs = _layer1_canonical_dofs(layer1_object)
+        trusted_a20_inputs = _layer1_inputs(layer1_object)
     except (TypeError, ValueError) as exc:
         errors.append(_error("invalid_layer1_evidence", str(exc)))
 
@@ -370,6 +473,8 @@ def evaluate_preflight(
             records = run.get("records")
             if not isinstance(records, list) or not all(isinstance(record, dict) for record in records):
                 raise ValueError(f"layer2 run {run_index} records must be a list of objects")
+            if trusted_a20_inputs is None or run.get("inputs") != trusted_a20_inputs:
+                raise ValueError(f"layer2 run {run_index} inputs do not match Layer1 provenance")
             record_sets.append(records)
         if any(records != record_sets[0] for records in record_sets[1:]):
             raise ValueError("layer2 runtime record sets are not deterministic")
@@ -377,7 +482,7 @@ def evaluate_preflight(
     except (TypeError, ValueError) as exc:
         errors.append(_error("invalid_layer2_evidence", str(exc)))
 
-    if errors or adapter is None or runtime_records is None:
+    if errors or adapter is None or runtime_records is None or canonical_dofs is None:
         return _preflight_result(
             inputs=bound_inputs,
             samples=[],
@@ -389,6 +494,7 @@ def evaluate_preflight(
         adapter,
         runtime_records,
         build_reviewed_policy_samples(),
+        canonical_dofs=canonical_dofs,
     )
     return _preflight_result(
         inputs=bound_inputs,
@@ -422,6 +528,115 @@ def _validate_a20_layer(layer: object, *, expected_status: str, layer_name: str)
         raise ValueError(f"{layer_name} mismatches must be an empty list")
     _require_false_safety_flags(layer, label=layer_name)
     return layer
+
+
+def _layer1_canonical_dofs(layer1: dict[str, object]) -> list[dict[str, object]]:
+    contract = layer1.get("policy_contract")
+    if not isinstance(contract, dict):
+        raise ValueError("layer1 policy_contract must be an object")
+    if contract.get("schema_version") != A20_SCHEMA_VERSION:
+        raise ValueError("invalid layer1 policy_contract schema_version")
+    if contract.get("policy_dimension") != _POLICY_DIMENSION:
+        raise ValueError("invalid layer1 policy_contract policy_dimension")
+    if contract.get("runtime_dimension") != _RUNTIME_DIMENSION:
+        raise ValueError("invalid layer1 policy_contract runtime_dimension")
+    canonical_order = contract.get("canonical_order")
+    if (
+        not isinstance(canonical_order, list)
+        or len(canonical_order) != _RUNTIME_DIMENSION
+        or not all(isinstance(path, str) and path for path in canonical_order)
+        or len(set(canonical_order)) != _RUNTIME_DIMENSION
+    ):
+        raise ValueError("invalid layer1 policy_contract canonical_order")
+    canonical_dofs = contract.get("canonical_dofs")
+    if not isinstance(canonical_dofs, list) or len(canonical_dofs) != _RUNTIME_DIMENSION:
+        raise ValueError("invalid layer1 policy_contract canonical_dofs")
+    if not all(isinstance(record, dict) for record in canonical_dofs):
+        raise ValueError("invalid layer1 canonical_dofs record")
+    observed_indices: list[int] = []
+    observed_paths: list[str] = []
+    policy_counts = dict.fromkeys(range(_POLICY_DIMENSION), 0)
+    for record in canonical_dofs:
+        canonical_index = record.get("canonical_index")
+        if isinstance(canonical_index, bool) or not isinstance(canonical_index, int):
+            raise ValueError("invalid Layer1 canonical_index")
+        path = record.get("path")
+        if not isinstance(path, str) or not path:
+            raise ValueError("invalid Layer1 canonical path")
+        openpi_index = record.get("openpi_index")
+        if (
+            isinstance(openpi_index, bool)
+            or not isinstance(openpi_index, int)
+            or not 0 <= openpi_index < _POLICY_DIMENSION
+        ):
+            raise ValueError(f"invalid Layer1 openpi_index for {path}")
+        unit = record.get("unit")
+        if not isinstance(unit, str) or not unit:
+            raise ValueError(f"invalid Layer1 canonical unit for {path}")
+        for transform_name in ("source_transform", "effective_transform"):
+            transform = record.get(transform_name)
+            if not isinstance(transform, dict):
+                raise ValueError(f"missing Layer1 {transform_name} for {path}")
+            for field in ("sign", "offset", "scale"):
+                _finite_float(
+                    transform.get(field),
+                    field=f"Layer1 {transform_name} {field} for {path}",
+                )
+            if transform.get("scale") == 0.0:
+                raise ValueError(f"zero Layer1 {transform_name} scale for {path}")
+        override = record.get("clean_runtime_mapping_override")
+        if override is not None and not isinstance(override, dict):
+            raise ValueError(f"invalid Layer1 override provenance for {path}")
+        if isinstance(override, dict) and override.get("unit") != unit:
+            raise ValueError(f"Layer1 override unit mismatch for {path}")
+        observed_indices.append(canonical_index)
+        observed_paths.append(path)
+        policy_counts[openpi_index] += 1
+    if observed_indices != list(range(_RUNTIME_DIMENSION)):
+        raise ValueError("invalid Layer1 canonical index inventory")
+    if observed_paths != canonical_order:
+        raise ValueError("Layer1 canonical_dofs do not match canonical_order")
+    expected_counts = {index: 2 if index in GRIPPER_POLICY_INDICES else 1 for index in range(_POLICY_DIMENSION)}
+    if policy_counts != expected_counts:
+        raise ValueError("invalid Layer1 OpenPI policy index inventory")
+    return canonical_dofs
+
+
+def _absolute_path(value: object, *, field: str) -> str:
+    if not isinstance(value, str) or not value or not Path(value).is_absolute():
+        raise ValueError(f"{field} must be an absolute path")
+    return value
+
+
+def _sha256(value: object, *, field: str) -> str:
+    if not isinstance(value, str) or _SHA256_PATTERN.fullmatch(value) is None:
+        raise ValueError(f"{field} must be a lowercase SHA256")
+    return value
+
+
+def _layer1_inputs(layer1: dict[str, object]) -> dict[str, object]:
+    inputs = layer1.get("inputs")
+    if not isinstance(inputs, dict):
+        raise ValueError("layer1 inputs must be an object")
+    trusted: dict[str, object] = {}
+    for name in ("config", "mapping"):
+        binding = inputs.get(name)
+        if not isinstance(binding, dict):
+            raise ValueError(f"layer1 {name} input must be an object")
+        trusted[name] = {
+            "path": _absolute_path(binding.get("path"), field=f"layer1 {name} input path"),
+            "sha256": _sha256(binding.get("sha256"), field=f"layer1 {name} input sha256"),
+        }
+    stage = inputs.get("stage")
+    if not isinstance(stage, dict):
+        raise ValueError("layer1 stage input must be an object")
+    stage_path = _absolute_path(stage.get("path"), field="layer1 stage input path")
+    pre_hash = _sha256(stage.get("pre_sha256"), field="layer1 stage pre_sha256")
+    post_hash = _sha256(stage.get("post_sha256"), field="layer1 stage post_sha256")
+    if pre_hash != post_hash or stage.get("consistent_during_audit") is not True:
+        raise ValueError("layer1 stage hashes must be consistent during audit")
+    trusted["stage"] = {"path": stage_path, "sha256": pre_hash}
+    return trusted
 
 
 def _preflight_result(
