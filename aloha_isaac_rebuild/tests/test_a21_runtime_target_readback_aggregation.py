@@ -247,6 +247,52 @@ def test_missing_marker_is_a_fail_closed_protocol_error() -> None:
     assert run["marker_count"] == 0
 
 
+def test_batch_payload_promotes_task5_result_indices_without_aliasing() -> None:
+    marker = _run("left", 123)
+    marker.pop("runtime_indices")
+    run = coordinator._batch_payload(  # noqa: SLF001 - validates raw Task5 marker normalization.
+        {
+            "process_status": "completed",
+            "returncode": 0,
+            "timed_out": False,
+            "output_limit_exceeded": False,
+            "cleanup_verified": True,
+            "observed_pid": 123,
+            "stdout": coordinator.MARKER + json.dumps(marker) + "\n",
+            "stderr": "",
+        },
+        "left-invocation",
+        "left",
+    )
+
+    assert run["runtime_indices"] == LEFT
+    assert run["runtime_indices"] is not run["result"]["runtime_indices"]  # type: ignore[index]
+    report = coordinator.format_report({"status": coordinator.PASS_STATUS, "ok": True, "runs": [run]})
+    assert f"indices: {LEFT}" in report
+
+
+def test_batch_payload_rejects_conflicting_top_level_and_task5_result_indices() -> None:
+    marker = _run("left", 123)
+    marker["runtime_indices"] = list(RIGHT)
+    run = coordinator._batch_payload(  # noqa: SLF001 - validates raw Task5 marker normalization.
+        {
+            "process_status": "completed",
+            "returncode": 0,
+            "timed_out": False,
+            "output_limit_exceeded": False,
+            "cleanup_verified": True,
+            "observed_pid": 123,
+            "stdout": coordinator.MARKER + json.dumps(marker) + "\n",
+            "stderr": "",
+        },
+        "left-invocation",
+        "left",
+    )
+
+    assert run["status"] == probe.FAIL_STATUS
+    assert any(error["code"] == "runtime_indices_protocol_mismatch" for error in run["errors"])
+
+
 def test_code_provenance_rejects_dirty_probe_or_coordinator(monkeypatch: pytest.MonkeyPatch) -> None:
     responses = iter(("deadbeef\n", " M probe.py\n"))
     monkeypatch.setattr(coordinator.subprocess, "check_output", lambda *args, **kwargs: next(responses))

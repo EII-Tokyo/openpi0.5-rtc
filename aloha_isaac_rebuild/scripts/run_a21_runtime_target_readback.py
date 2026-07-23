@@ -547,6 +547,23 @@ def _batch_payload(execution: dict[str, object], invocation_id: str, side: str) 
     except (ValueError, json.JSONDecodeError) as exc:
         payload = {"status": probe_contract.FAIL_STATUS, "errors": [_error("marker_protocol_error", message=str(exc))]}
     payload = deepcopy(payload)
+
+    def fail_protocol(code: str) -> None:
+        errors = payload.get("errors")
+        if not isinstance(errors, list):
+            errors = []
+            payload["errors"] = errors
+        errors.append(_error(code))
+        payload["status"] = probe_contract.FAIL_STATUS
+
+    expected_indices = LEFT_INDICES if side == "left" else RIGHT_INDICES
+    result = payload.get("result")
+    result_indices = result.get("runtime_indices") if isinstance(result, dict) else None
+    top_level_indices = payload.get("runtime_indices")
+    if result_indices != expected_indices or (top_level_indices is not None and top_level_indices != result_indices):
+        fail_protocol("runtime_indices_protocol_mismatch")
+    else:
+        payload["runtime_indices"] = deepcopy(result_indices)
     payload.update(
         batch=side,
         marker_count=len(markers),
