@@ -1263,7 +1263,7 @@ def test_two_layer_report_keeps_independent_gates_and_readiness_false() -> None:
     assert "Observed DOFs: 16" in report
     assert "Mismatches: 0" in report
     assert "Three-run determinism: BLOCKED" in report
-    assert "Canonical order match: BLOCKED" in report
+    assert "Canonical ordered-record match: BLOCKED" in report
     assert "Exit contract: BLOCKED=2, PASS=0, FAIL=1" in report
     for statement in (
         "Physics stepped: false",
@@ -1300,7 +1300,29 @@ def test_report_separates_determinism_from_canonical_order_match() -> None:
 
     assert "Overall: NOT_READY" in report
     assert "Three-run determinism: PASS" in report
-    assert "Canonical order match: FAIL" in report
+    assert "Canonical ordered-record match: FAIL" in report
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("requires_unapproved_initialization", True),
+        ("initialization_operations", ["physics.update_simulation"]),
+        ("process_status", "failed"),
+        ("timed_out", True),
+        ("cleanup_verified", False),
+        ("returncode", 1),
+    ],
+)
+def test_report_determinism_includes_run_integrity_fields(field: str, value: object) -> None:
+    runs = _runs()
+    runs[1][field] = value
+    layer2 = aggregate_runtime_runs(_layer1(), runs)
+    layer2["runs"] = runs
+
+    report = format_two_layer_report(_asset_validator(), _layer1(), layer2)
+
+    assert "Three-run determinism: FAIL" in report
 
 
 @pytest.mark.parametrize("bad", [None, [], "bad", {}, {"status": "PASS_A20_USD_DOF_METADATA"}])

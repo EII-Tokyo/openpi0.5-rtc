@@ -495,7 +495,9 @@ def _report_runtime_semantics(layer1: object, layer2: object) -> tuple[str, str]
         return "FAIL", "FAIL"
 
     runtime_fields = (
-        "status", "isaac_sim_version", "inputs", "articulation_root", "articulation_count",
+        "status", "process_status", "returncode", "timed_out", "cleanup_verified",
+        "requires_unapproved_initialization", "initialization_operations",
+        "isaac_sim_version", "inputs", "articulation_root", "articulation_count",
         "dof_count", "valid_handle", "handle_validity_method", "records",
         "physics_stepped", "actions_applied", "targets_written", "stage_saved",
     )
@@ -594,7 +596,7 @@ def format_two_layer_report(asset_validator: object, layer1: object, layer2: obj
             f"- Status: {_bounded_field(layer2_status, 120)}",
             f"- Runs: {layer2.get('run_count', 'unknown') if isinstance(layer2, dict) else 'unknown'}",
             f"- Three-run determinism: {determinism}",
-            f"- Canonical order match: {canonical_order}",
+            f"- Canonical ordered-record match: {canonical_order}",
             f"- Errors: {_count(layer2, 'errors')}",
             f"- Mismatches: {_count(layer2, 'mismatches')}",
             "- Exit contract: BLOCKED=2, PASS=0, FAIL=1",
