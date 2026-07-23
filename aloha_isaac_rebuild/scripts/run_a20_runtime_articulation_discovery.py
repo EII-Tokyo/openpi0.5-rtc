@@ -309,6 +309,154 @@ def aggregate_runtime_runs(layer1: object, runs: object) -> dict[str, Any]:
     }
 
 
+def is_exact_runtime_pass(payload: object) -> bool:
+    """Allow automation to continue only on the complete, no-step A20 pass contract."""
+    return bool(
+        isinstance(payload, dict)
+        and payload.get("status") == _PASS
+        and payload.get("ok") is True
+        and payload.get("errors") == []
+        and payload.get("mismatches") == []
+        and payload.get("run_count") == 3
+        and payload.get("blocked_run_indices") == []
+        and isinstance(payload.get("runs"), list)
+        and len(payload["runs"]) == 3
+        and all(isinstance(run, dict) for run in payload["runs"])
+        and all(payload.get(flag) is False for flag in ("physics_stepped", "actions_applied", "targets_written", "stage_saved"))
+    )
+
+
+def _artifact_status(payload: object) -> str:
+    if not isinstance(payload, dict) or not isinstance(payload.get("status"), str) or not isinstance(payload.get("ok"), bool):
+        return "MALFORMED_OR_MISSING"
+    return payload["status"]
+
+
+def _count(payload: object, field: str) -> str:
+    value = payload.get(field) if isinstance(payload, dict) else None
+    return str(len(value)) if isinstance(value, list) else "unknown"
+
+
+def _short(value: object) -> str:
+    return value[:12] if isinstance(value, str) and value else "unknown"
+
+
+def _valid_asset_validator(payload: object) -> bool:
+    if not isinstance(payload, dict):
+        return False
+    status = payload.get("status")
+    if status == "PASS_A20_ASSET_VALIDATOR_READ_ONLY_NO_BLOCKING_ISSUES":
+        return payload.get("ok") is True and payload.get("blocking_issue_count") == 0 and payload.get("issues") == []
+    if status == "FAIL_A20_ASSET_VALIDATOR_BLOCKING_ISSUES":
+        issues = payload.get("issues")
+        return payload.get("ok") is False and isinstance(issues, list) and bool(issues)
+    return False
+
+
+def _render_bool(payload: object, field: str) -> str:
+    value = payload.get(field) if isinstance(payload, dict) else None
+    if isinstance(value, bool):
+        return str(value).lower()
+    runs = payload.get("runs") if isinstance(payload, dict) else None
+    if isinstance(runs, list) and len(runs) == 3 and all(isinstance(run, dict) and isinstance(run.get(field), bool) for run in runs):
+        return str(any(run[field] for run in runs)).lower()
+    return "unknown"
+
+
+def format_two_layer_report(asset_validator: object, layer1: object, layer2: object) -> str:
+    """Render bounded, fail-closed A20 evidence without embedding Isaac logs."""
+    asset_status = _artifact_status(asset_validator)
+    layer1_status = _artifact_status(layer1)
+    layer2_status = _artifact_status(layer2)
+    overall = "READY" if _valid_asset_validator(asset_validator) and not _layer1_errors(layer1) and is_exact_runtime_pass(layer2) else "NOT_READY"
+
+    issues = asset_validator.get("issues") if isinstance(asset_validator, dict) else None
+    issue_lines = [
+        f"- Blocking issue: [{issue.get('severity', 'unknown')}] {issue.get('rule', 'unknown')}: "
+        f"{issue.get('message', 'unknown')} (suggestion: {issue.get('suggestion', 'unknown')})"
+        for issue in issues or []
+        if isinstance(issue, dict)
+    ] if isinstance(issues, list) else []
+    if not issue_lines:
+        issue_lines.append("- Blocking issue: none recorded (artifact is malformed/missing unless status is clean).")
+
+    expected = layer1.get("expected") if isinstance(layer1, dict) else None
+    observed = layer1.get("observed") if isinstance(layer1, dict) else None
+    layer1_stage = layer1.get("inputs", {}).get("stage", {}) if isinstance(layer1, dict) and isinstance(layer1.get("inputs"), dict) else {}
+    layer2_runs = layer2.get("runs") if isinstance(layer2, dict) else None
+    operations = sorted(
+        {
+            operation
+            for run in layer2_runs or []
+            if isinstance(run, dict)
+            for operation in run.get("initialization_operations", [])
+            if isinstance(operation, str)
+        }
+    ) if isinstance(layer2_runs, list) else []
+    provenance = layer2.get("provenance", {}) if isinstance(layer2, dict) and isinstance(layer2.get("provenance"), dict) else {}
+    blocked = layer2_status == _BLOCKED
+    determinism = "PASS" if is_exact_runtime_pass(layer2) else ("BLOCKED" if blocked else "FAIL")
+    next_action = (
+        "The runtime handle requires timeline Play and a physics simulation step; these operations were not approved."
+        if blocked
+        else "No blocked-runtime action is authorized by this report."
+    )
+    if operations:
+        next_action = f"Required operations: {', '.join(operations)}; these operations were not approved."
+
+    return "\n".join(
+        [
+            "# A20 two-layer articulation discovery gate",
+            "",
+            f"Overall: {overall}",
+            "",
+            "## Asset Validator",
+            "",
+            f"- Status: {asset_status}",
+            f"- Blocking issue count: {asset_validator.get('blocking_issue_count', 'unknown') if isinstance(asset_validator, dict) else 'unknown'}",
+            *issue_lines,
+            "- Independence: A two-layer PASS does not mean Asset Validator is clean; this gate remains separate.",
+            "",
+            "## Layer 1",
+            "",
+            f"- Status: {layer1_status}",
+            f"- Expected DOFs: {len(expected) if isinstance(expected, list) else 'unknown'}",
+            f"- Observed DOFs: {len(observed) if isinstance(observed, list) else 'unknown'}",
+            f"- Mismatches: {_count(layer1, 'mismatches')}",
+            f"- Stage: {layer1_stage.get('path', 'unknown') if isinstance(layer1_stage, dict) else 'unknown'}",
+            f"- Stage SHA-256: {_short(layer1_stage.get('post_sha256') if isinstance(layer1_stage, dict) else None)}",
+            "",
+            "## Layer 2",
+            "",
+            f"- Status: {layer2_status}",
+            f"- Runs: {layer2.get('run_count', 'unknown') if isinstance(layer2, dict) else 'unknown'}",
+            f"- Three-run determinism: {determinism}",
+            f"- Errors: {_count(layer2, 'errors')}",
+            f"- Mismatches: {_count(layer2, 'mismatches')}",
+            "- Exit contract: BLOCKED=2, PASS=0, FAIL=1",
+            f"- Git revision: {_short(provenance.get('git_head'))}",
+            f"- Probe SHA-256: {_short(provenance.get('probe_sha256'))}",
+            f"- Coordinator SHA-256: {_short(provenance.get('coordinator_sha256'))}",
+            f"- Next action: {next_action}",
+            "",
+            "## Safety and readiness",
+            "",
+            f"- Physics stepped: {_render_bool(layer2, 'physics_stepped')}",
+            f"- Actions applied: {_render_bool(layer2, 'actions_applied')}",
+            f"- Targets written: {_render_bool(layer2, 'targets_written')}",
+            f"- Stage saved: {_render_bool(layer2, 'stage_saved')}",
+            "- Collision ready: false",
+            "- Control ready: false",
+            "- Replay ready: false",
+            "- Contact ready: false",
+            "- Training ready: false",
+            "",
+            "This report is a bounded summary. Consult the local JSON artifacts for complete structured evidence.",
+            "",
+        ]
+    )
+
+
 MARKER = "A20_RUNTIME_DISCOVERY_JSON="
 DEFAULT_CONFIG = Path("aloha_isaac_rebuild/configs/physical_reconstruction/stationary_style_rebuild.yaml")
 SCHEMA_VERSION = "a20-runtime-discovery-v2"
@@ -708,28 +856,82 @@ def _atomic_write(path: Path, payload: dict[str, Any]) -> None:
         raise
 
 
+def _atomic_write_text(path: Path, content: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, temp = tempfile.mkstemp(dir=path.parent, prefix=f".{path.name}.")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as stream:
+            stream.write(content)
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temp, path)
+        directory_fd = os.open(path.parent, os.O_RDONLY)
+        try:
+            os.fsync(directory_fd)
+        finally:
+            os.close(directory_fd)
+    except BaseException:
+        Path(temp).unlink(missing_ok=True)
+        raise
+
+
+def _load_json_fail_closed(path: Path) -> object:
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError):
+        return {"status": "MALFORMED_OR_MISSING", "ok": False, "artifact_path": str(path)}
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
     parser.add_argument("--interpreter", type=Path, default=Path(sys.executable))
     parser.add_argument("--timeout", type=float, default=180.0)
+    parser.add_argument("--report-from-existing", action="store_true")
     args = parser.parse_args()
     repo = Path.cwd().resolve()
     config_path = args.config.resolve()
     config = yaml.safe_load(config_path.read_text())
     outputs = config["outputs"]
-    layer1 = json.loads((repo / outputs["a20_usd_dof_metadata_json"]).read_text())
+    layer1_path = repo / outputs["a20_usd_dof_metadata_json"]
+    asset_path = repo / outputs["a20_asset_validator_json"]
+    report_path = (repo / outputs["a20_two_layer_articulation_discovery_md"]).resolve()
+    layer1 = _load_json_fail_closed(layer1_path)
     output = (repo / outputs["a20_runtime_articulation_discovery_json"]).resolve()
-    result = run_three_probes(
-        layer1,
-        repo,
-        args.interpreter,
-        repo / "aloha_isaac_rebuild/scripts/probe_a20_runtime_articulation_once.py",
-        args.timeout,
-    )
-    _atomic_write(output, result)
+    if args.report_from_existing:
+        result = _load_json_fail_closed(output)
+    else:
+        result = run_three_probes(
+            layer1,
+            repo,
+            args.interpreter,
+            repo / "aloha_isaac_rebuild/scripts/probe_a20_runtime_articulation_once.py",
+            args.timeout,
+        )
+        for flag in ("physics_stepped", "actions_applied", "targets_written", "stage_saved"):
+            runs = result.get("runs", [])
+            result[flag] = not (len(runs) == 3 and all(run.get(flag) is False for run in runs))
+        _atomic_write(output, result)
+    if result.get("status") == _PASS and not is_exact_runtime_pass(result):
+        result["status"], result["ok"] = _FAIL, False
+        errors = result.get("errors") if isinstance(result.get("errors"), list) else []
+        errors.append({"code": "exact_runtime_pass_contract_failed"})
+        result["errors"] = errors
+        _atomic_write(output, result)
+    asset_validator = _load_json_fail_closed(asset_path)
+    try:
+        _atomic_write_text(report_path, format_two_layer_report(asset_validator, layer1, result))
+    except Exception as exc:
+        report_path.unlink(missing_ok=True)
+        if not isinstance(result, dict):
+            result = {}
+        result["status"], result["ok"] = _FAIL, False
+        errors = result.get("errors") if isinstance(result.get("errors"), list) else []
+        errors.append({"code": "report_write_failed", "message": str(exc)})
+        result["errors"] = errors
+        _atomic_write(output, result)
     print(json.dumps(result, indent=2, sort_keys=True))
-    return _exit_code(result["status"])
+    return _exit_code(result.get("status"))
 
 
 if __name__ == "__main__":

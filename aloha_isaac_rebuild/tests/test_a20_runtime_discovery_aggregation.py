@@ -12,7 +12,9 @@ import sys
 import types
 
 import pytest
+import yaml
 
+from aloha_isaac_rebuild.scripts import run_a20_runtime_articulation_discovery as coordinator
 from aloha_isaac_rebuild.scripts.run_a20_runtime_articulation_discovery import _atomic_write
 from aloha_isaac_rebuild.scripts.run_a20_runtime_articulation_discovery import _code_provenance
 from aloha_isaac_rebuild.scripts.run_a20_runtime_articulation_discovery import _execute_probe
@@ -20,6 +22,8 @@ from aloha_isaac_rebuild.scripts.run_a20_runtime_articulation_discovery import _
 from aloha_isaac_rebuild.scripts.run_a20_runtime_articulation_discovery import _trusted_layer1_inputs
 from aloha_isaac_rebuild.scripts.run_a20_runtime_articulation_discovery import aggregate_runtime_runs
 from aloha_isaac_rebuild.scripts.run_a20_runtime_articulation_discovery import check_probe_source
+from aloha_isaac_rebuild.scripts.run_a20_runtime_articulation_discovery import format_two_layer_report
+from aloha_isaac_rebuild.scripts.run_a20_runtime_articulation_discovery import is_exact_runtime_pass
 from aloha_isaac_rebuild.scripts.run_a20_runtime_articulation_discovery import run_three_probes
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -812,3 +816,239 @@ def test_pass_requires_empty_initialization_operations() -> None:
     runs[1]["initialization_operations"] = ["timeline Play"]
     result = aggregate_runtime_runs(_layer1(), runs)
     assert any(error["code"] == "unexpected_initialization_operations" for error in result["errors"])
+
+
+def _asset_validator() -> dict[str, object]:
+    return {
+        "status": "FAIL_A20_ASSET_VALIDATOR_BLOCKING_ISSUES",
+        "ok": False,
+        "blocking_issue_count": 1,
+        "issues": [
+            {
+                "rule": "JointStateChecker",
+                "severity": "FAILURE",
+                "message": 'Joint State for "/aloha/root_joint" is not coherent with transforms',
+                "suggestion": "Change XForms to match Joint State",
+            }
+        ],
+        "stage_path": "/workspace/a19_clean_articulation_candidate.usda",
+        "collision_ready": False,
+        "control_ready": False,
+        "replay_ready": False,
+        "training_eligible": False,
+        "physics_stepped": False,
+    }
+
+
+def _blocked_layer2() -> dict[str, object]:
+    payload = aggregate_runtime_runs(_layer1(), _runs())
+    payload.update(
+        status="BLOCKED_RUNTIME_HANDLE_REQUIRES_UNAPPROVED_INITIALIZATION",
+        ok=False,
+        blocked_run_indices=[0, 1, 2],
+        runs=[
+            {
+                **run,
+                "status": "BLOCKED_RUNTIME_HANDLE_REQUIRES_UNAPPROVED_INITIALIZATION",
+                "valid_handle": False,
+                "requires_unapproved_initialization": True,
+                "initialization_operations": ["timeline Play", "physics simulation step"],
+            }
+            for run in _runs()
+        ],
+    )
+    return payload
+
+
+def test_two_layer_report_keeps_independent_gates_and_readiness_false() -> None:
+    report = format_two_layer_report(_asset_validator(), _layer1(), _blocked_layer2())
+
+    for heading in ("## Asset Validator", "## Layer 1", "## Layer 2", "## Safety and readiness"):
+        assert heading in report
+    assert "Overall: NOT_READY" in report
+    assert "FAIL_A20_ASSET_VALIDATOR_BLOCKING_ISSUES" in report
+    assert "JointStateChecker" in report
+    assert 'Joint State for "/aloha/root_joint" is not coherent with transforms' in report
+    assert "PASS_A20_USD_DOF_METADATA" in report
+    assert "Expected DOFs: 16" in report
+    assert "Observed DOFs: 16" in report
+    assert "Mismatches: 0" in report
+    assert "Three-run determinism: BLOCKED" in report
+    assert "Exit contract: BLOCKED=2, PASS=0, FAIL=1" in report
+    for statement in (
+        "Physics stepped: false",
+        "Actions applied: false",
+        "Targets written: false",
+        "Stage saved: false",
+        "Collision ready: false",
+        "Control ready: false",
+        "Replay ready: false",
+        "Contact ready: false",
+        "Training ready: false",
+    ):
+        assert statement in report
+    assert "A two-layer PASS does not mean Asset Validator is clean" in report
+    assert "timeline Play" in report
+    assert "physics simulation step" in report
+    assert "not approved" in report
+
+
+@pytest.mark.parametrize("bad", [None, [], "bad", {}, {"status": "PASS_A20_USD_DOF_METADATA"}])
+def test_two_layer_report_fails_closed_for_missing_or_malformed_artifacts(bad: object) -> None:
+    report = format_two_layer_report(bad, bad, bad)
+    assert "Overall: NOT_READY" in report
+    assert "MALFORMED_OR_MISSING" in report
+
+
+def test_two_layer_report_summarizes_provenance_without_embedding_logs() -> None:
+    layer2 = _blocked_layer2()
+    layer2["provenance"] = {
+        "git_head": "a" * 40,
+        "probe_sha256": "b" * 64,
+        "coordinator_sha256": "c" * 64,
+    }
+    layer2["runs"][0]["stdout_summary"] = "FULL ISAAC LOG MUST NOT APPEAR"
+    report = format_two_layer_report(_asset_validator(), _layer1(), layer2)
+    assert "aaaaaaaaaaaa" in report
+    assert "bbbbbbbbbbbb" in report
+    assert "/workspace/a19_clean_articulation_candidate.usda" in report
+    assert "FULL ISAAC LOG MUST NOT APPEAR" not in report
+
+
+def test_is_exact_runtime_pass_accepts_only_complete_safe_pass() -> None:
+    exact = aggregate_runtime_runs(_layer1(), _runs())
+    exact.update(
+        runs=_runs(), physics_stepped=False, actions_applied=False, targets_written=False, stage_saved=False
+    )
+    assert is_exact_runtime_pass(exact) is True
+    mutations = [
+        lambda value: value.update(status="BLOCKED_RUNTIME_HANDLE_REQUIRES_UNAPPROVED_INITIALIZATION"),
+        lambda value: value.update(ok=False),
+        lambda value: value["errors"].append({"code": "x"}),
+        lambda value: value["mismatches"].append({"field": "x"}),
+        lambda value: value.update(physics_stepped=True),
+        lambda value: value.pop("actions_applied"),
+    ]
+    for mutation in mutations:
+        candidate = deepcopy(exact)
+        mutation(candidate)
+        assert is_exact_runtime_pass(candidate) is False
+    assert is_exact_runtime_pass(None) is False
+
+
+def test_minimal_fake_pass_artifacts_cannot_render_ready_or_exit_zero(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    fake = {
+        "status": "PASS_A20_RUNTIME_ARTICULATION_DISCOVERY_NO_STEP",
+        "ok": True,
+        "errors": [],
+        "mismatches": [],
+        "physics_stepped": False,
+        "actions_applied": False,
+        "targets_written": False,
+        "stage_saved": False,
+    }
+    assert is_exact_runtime_pass(fake) is False
+    assert "Overall: NOT_READY" in format_two_layer_report(
+        {"status": "PASS_FAKE", "ok": True}, {"status": "PASS_FAKE", "ok": True}, fake
+    )
+
+
+def test_report_never_hides_true_or_unknown_safety_evidence() -> None:
+    layer2 = _blocked_layer2()
+    layer2["physics_stepped"] = True
+    report = format_two_layer_report(_asset_validator(), _layer1(), layer2)
+    assert "Physics stepped: true" in report
+    assert "Overall: NOT_READY" in report
+    report = format_two_layer_report(_asset_validator(), _layer1(), {})
+    assert "Physics stepped: unknown" in report
+
+
+def test_report_write_failure_removes_old_report_and_forces_fail_exit(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    artifacts = tmp_path / "artifacts"
+    reports = tmp_path / "reports"
+    artifacts.mkdir()
+    reports.mkdir()
+    layer1_path = artifacts / "layer1.json"
+    runtime_path = artifacts / "runtime.json"
+    asset_path = artifacts / "asset.json"
+    report_path = reports / "report.md"
+    config_path = tmp_path / "config.yaml"
+    layer1_path.write_text(json.dumps(_layer1()), encoding="utf-8")
+    runtime = aggregate_runtime_runs(_layer1(), _runs())
+    runtime.update(physics_stepped=False, actions_applied=False, targets_written=False, stage_saved=False)
+    runtime_path.write_text(json.dumps(runtime), encoding="utf-8")
+    asset_path.write_text(json.dumps(_asset_validator()), encoding="utf-8")
+    report_path.write_text("STALE PASS", encoding="utf-8")
+    config_path.write_text(
+        yaml.safe_dump(
+            {
+                "outputs": {
+                    "a20_usd_dof_metadata_json": str(layer1_path.relative_to(tmp_path)),
+                    "a20_runtime_articulation_discovery_json": str(runtime_path.relative_to(tmp_path)),
+                    "a20_asset_validator_json": str(asset_path.relative_to(tmp_path)),
+                    "a20_two_layer_articulation_discovery_md": str(report_path.relative_to(tmp_path)),
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(sys, "argv", [str(MODULE), "--config", str(config_path), "--report-from-existing"])
+    monkeypatch.setattr(coordinator, "_atomic_write_text", lambda *_: (_ for _ in ()).throw(OSError("disk full")))
+
+    assert coordinator.main() == 1
+    assert not report_path.exists()
+    rewritten = json.loads(runtime_path.read_text(encoding="utf-8"))
+    assert rewritten["status"] == "FAIL_A20_RUNTIME_ARTICULATION_DISCOVERY"
+    assert rewritten["errors"][-1]["code"] == "report_write_failed"
+
+
+def test_online_main_writes_false_safety_flags_and_exits_zero_only_for_exact_pass(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    artifacts = tmp_path / "artifacts"
+    reports = tmp_path / "reports"
+    artifacts.mkdir()
+    reports.mkdir()
+    layer1_path = artifacts / "layer1.json"
+    runtime_path = artifacts / "runtime.json"
+    asset_path = artifacts / "asset.json"
+    report_path = reports / "report.md"
+    config_path = tmp_path / "config.yaml"
+    layer1_path.write_text(json.dumps(_layer1()), encoding="utf-8")
+    asset = _asset_validator()
+    asset.update(
+        status="PASS_A20_ASSET_VALIDATOR_READ_ONLY_NO_BLOCKING_ISSUES",
+        ok=True,
+        blocking_issue_count=0,
+        issues=[],
+    )
+    asset_path.write_text(json.dumps(asset), encoding="utf-8")
+    config_path.write_text(
+        yaml.safe_dump(
+            {
+                "outputs": {
+                    "a20_usd_dof_metadata_json": str(layer1_path.relative_to(tmp_path)),
+                    "a20_runtime_articulation_discovery_json": str(runtime_path.relative_to(tmp_path)),
+                    "a20_asset_validator_json": str(asset_path.relative_to(tmp_path)),
+                    "a20_two_layer_articulation_discovery_md": str(report_path.relative_to(tmp_path)),
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+    result = aggregate_runtime_runs(_layer1(), _runs())
+    result["runs"] = _runs()
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(sys, "argv", [str(MODULE), "--config", str(config_path)])
+    monkeypatch.setattr(coordinator, "run_three_probes", lambda *_: deepcopy(result))
+
+    assert coordinator.main() == 0
+    written = json.loads(runtime_path.read_text(encoding="utf-8"))
+    assert is_exact_runtime_pass(written) is True
+    for flag in ("physics_stepped", "actions_applied", "targets_written", "stage_saved"):
+        assert written[flag] is False
