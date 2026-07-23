@@ -18,6 +18,12 @@ from aloha_isaac_rebuild.scripts.audit_a21_policy_target_limit_preflight import 
 from aloha_isaac_rebuild.scripts.audit_a21_policy_target_limit_preflight import PASS_STATUS
 from aloha_isaac_rebuild.scripts.audit_a21_policy_target_limit_preflight import SCHEMA_VERSION
 from aloha_isaac_rebuild.scripts.audit_a21_policy_target_limit_preflight import _atomic_write as atomic_write
+from aloha_isaac_rebuild.scripts.audit_a21_policy_target_limit_preflight import (
+    _lstat_regular_or_absent as lstat_regular_or_absent,
+)
+from aloha_isaac_rebuild.scripts.audit_a21_policy_target_limit_preflight import (
+    _require_expected_output_state as require_expected_output_state,
+)
 from aloha_isaac_rebuild.scripts.audit_a21_policy_target_limit_preflight import _sync_directory as sync_directory
 from aloha_isaac_rebuild.scripts.audit_a21_policy_target_limit_preflight import build_reviewed_policy_samples
 from aloha_isaac_rebuild.scripts.audit_a21_policy_target_limit_preflight import evaluate_policy_samples
@@ -1518,6 +1524,72 @@ def test_atomic_write_rejects_fifo_without_reading_or_moving_it(
         )
 
     assert output_path.is_fifo()
+    assert not (tmp_path / ".a21.json.failed-write").exists()
+
+
+@pytest.mark.parametrize("initial_state", ["fail", "absent"])
+@pytest.mark.parametrize("replacement_type", ["regular_pass", "symlink_pass"])
+def test_atomic_write_reconciles_target_swapped_before_final_replace(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    initial_state: str,
+    replacement_type: str,
+) -> None:
+    output_path = tmp_path / "a21.json"
+    if initial_state == "fail":
+        output_path.write_text(
+            json.dumps({"status": FAIL_STATUS, "ok": False}),
+            encoding="utf-8",
+        )
+    replacement = tmp_path / "replacement"
+    pass_content = json.dumps({"status": PASS_STATUS, "ok": True}).encode()
+    symlink_target: Path | None = None
+    if replacement_type == "regular_pass":
+        replacement.write_bytes(pass_content)
+    else:
+        symlink_target = tmp_path / "replacement-target.json"
+        symlink_target.write_bytes(pass_content)
+        replacement.symlink_to(symlink_target)
+
+    expected_call = 2 if initial_state == "fail" else 1
+    output_checks = 0
+    swap_completed = False
+
+    def swap_before_final_check(
+        path: Path,
+        expected: os.stat_result | None,
+    ) -> None:
+        nonlocal output_checks, swap_completed
+        if path == output_path and not swap_completed:
+            output_checks += 1
+            if output_checks == expected_call:
+                os.replace(replacement, output_path)
+                swap_completed = True
+        require_expected_output_state(path, expected)
+
+    monkeypatch.setattr(
+        audit,
+        "_require_expected_output_state",
+        swap_before_final_check,
+    )
+
+    with pytest.raises((RuntimeError, ValueError)):
+        atomic_write(output_path, {"status": PASS_STATUS, "ok": True})
+
+    assert swap_completed is True
+    if replacement_type == "regular_pass":
+        try:
+            current = json.loads(output_path.read_text(encoding="utf-8"))
+        except FileNotFoundError:
+            pass
+        else:
+            assert current["status"] == FAIL_STATUS
+    else:
+        assert symlink_target is not None
+        assert output_path.is_symlink()
+        assert symlink_target.read_bytes() == pass_content
+        with pytest.raises(ValueError, match="regular file"):
+            lstat_regular_or_absent(output_path)
     assert not (tmp_path / ".a21.json.failed-write").exists()
 
 

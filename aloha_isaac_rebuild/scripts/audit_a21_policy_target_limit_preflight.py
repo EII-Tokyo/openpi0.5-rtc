@@ -823,7 +823,6 @@ def _load_json_with_binding(path: Path, *, input_name: str, inputs: dict[str, ob
 def _atomic_write(path: Path, payload: dict[str, object]) -> None:
     path = Path(os.path.abspath(path))
     temporary: str | None = None
-    replaced = False
     previous_was_failure = False
     target_type_checked = False
     initial_state: os.stat_result | None = None
@@ -858,14 +857,15 @@ def _atomic_write(path: Path, payload: dict[str, object]) -> None:
             initial_state if previous_was_failure else None,
         )
         os.replace(temporary, path)
-        replaced = True
         temporary = None
         _sync_directory(path.parent)
     except BaseException:
-        if temporary is not None:
-            _discard_temporary(Path(temporary))
-        if target_type_checked and (replaced or not previous_was_failure):
-            _neutralize_output(path)
+        try:
+            if temporary is not None:
+                _discard_temporary(Path(temporary))
+        finally:
+            if target_type_checked:
+                _reconcile_failed_output(path)
         raise
 
 
@@ -934,6 +934,44 @@ def _read_regular_output(
             chunks.append(chunk)
     finally:
         os.close(descriptor)
+
+
+def _reconcile_failed_output(path: Path) -> None:
+    for _attempt in range(3):
+        try:
+            current = _lstat_regular_or_absent(path)
+        except ValueError:
+            return
+        if current is None:
+            return
+        try:
+            content = _read_regular_output(path, current)
+        except ValueError:
+            return
+        except BaseException:
+            try:
+                _neutralize_output(path)
+            except ValueError:
+                return
+            return
+        if _is_serialized_failure(content):
+            try:
+                _require_expected_output_state(path, current)
+            except ValueError:
+                return
+            except RuntimeError:
+                continue
+            return
+        try:
+            _neutralize_output(path)
+        except ValueError:
+            return
+        return
+
+    try:
+        _neutralize_output(path)
+    except ValueError:
+        return
 
 
 def _neutralize_output(path: Path) -> None:
