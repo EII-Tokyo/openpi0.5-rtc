@@ -12,7 +12,6 @@ import json
 import os
 from pathlib import Path
 
-from isaacsim import SimulationApp
 import yaml
 
 MARKER = "A20_RUNTIME_DISCOVERY_JSON="
@@ -37,14 +36,59 @@ def _now() -> str:
     return datetime.now(UTC).isoformat().replace("+00:00", "Z")
 
 
+def _safe_version(distribution: str) -> str:
+    try:
+        return importlib.metadata.version(distribution)
+    except Exception:
+        return "unknown"
+
+
+def _emit_marker(payload: dict[str, object], printer=print, serializer=json.dumps) -> None:
+    try:
+        encoded = serializer(payload, sort_keys=True, separators=(",", ":"))
+    except Exception as exc:
+        encoded = json.dumps(
+            {
+                "status": "FAIL_A20_RUNTIME_ARTICULATION_DISCOVERY",
+                "errors": [{"code": "marker_serialization_error", "message": str(exc)}],
+            },
+            sort_keys=True,
+            separators=(",", ":"),
+        )
+    try:
+        printer(MARKER + encoded, flush=True)
+    except TypeError:
+        printer(MARKER + encoded)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--invocation-id", required=True)
     args = parser.parse_args()
     started = _now()
-    app = SimulationApp({"headless": True})
-    payload: dict[str, object]
+    payload: dict[str, object] = {
+        "status": "FAIL_A20_RUNTIME_ARTICULATION_DISCOVERY",
+        "probe_returncode": 1,
+        "invocation_id": args.invocation_id,
+        "pid": os.getpid(),
+        "started_at": started,
+        "finished_at": started,
+        "isaac_sim_version": _safe_version("isaacsim"),
+        "inputs": {},
+        "articulation_root": None,
+        "articulation_count": 0,
+        "dof_count": 0,
+        "valid_handle": False,
+        "records": [],
+        "requires_unapproved_initialization": False,
+        "initialization_operations": [],
+        **SAFETY,
+    }
+    app = None
     try:
+        from isaacsim import SimulationApp
+
+        app = SimulationApp({"headless": True})
         from pxr import Usd
         from pxr import UsdPhysics
 
@@ -68,7 +112,7 @@ def main() -> int:
             "pid": os.getpid(),
             "started_at": started,
             "finished_at": _now(),
-            "isaac_sim_version": importlib.metadata.version("isaacsim"),
+            "isaac_sim_version": _safe_version("isaacsim"),
             "inputs": {
                 "config": {"path": str(config_path), "sha256": _digest(config_path)},
                 "mapping": {"path": str(mapping_path), "sha256": _digest(mapping_path)},
@@ -94,7 +138,7 @@ def main() -> int:
             "pid": os.getpid(),
             "started_at": started,
             "finished_at": _now(),
-            "isaac_sim_version": importlib.metadata.version("isaacsim"),
+            "isaac_sim_version": _safe_version("isaacsim"),
             "inputs": {},
             "articulation_root": None,
             "articulation_count": 0,
@@ -107,12 +151,15 @@ def main() -> int:
             **SAFETY,
         }
     finally:
-        print(
-            MARKER
-            + json.dumps(payload, sort_keys=True, separators=(",", ":")),
-            flush=True,
-        )
-        app.close()
+        payload["finished_at"] = _now()
+        try:
+            _emit_marker(payload)
+        finally:
+            if app is not None:
+                try:  # noqa: SIM105 -- close is best-effort after marker emission
+                    app.close()
+                except Exception:
+                    pass
     return 0 if payload["status"] == "BLOCKED_RUNTIME_HANDLE_REQUIRES_UNAPPROVED_INITIALIZATION" else 1
 
 

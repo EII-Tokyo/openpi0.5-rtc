@@ -3,15 +3,22 @@
 from __future__ import annotations
 
 import argparse
+import ast
+from contextlib import suppress
 from datetime import datetime
+import hashlib
+import inspect
 from itertools import pairwise
 import json
 import os
 from pathlib import Path
 import re
+import selectors
+import signal
 import subprocess
 import sys
 import tempfile
+import time
 from typing import Any
 import uuid
 
@@ -260,11 +267,8 @@ def aggregate_runtime_runs(layer1: object, runs: object) -> dict[str, Any]:
                 blocked_runs.append(run_index)
 
         valid_runs = [run for run in runs if isinstance(run, dict)]
-        pids = [run.get("pid") for run in valid_runs]
         invocations = [run.get("invocation_id") for run in valid_runs]
         versions = [run.get("isaac_sim_version") for run in valid_runs]
-        if all(type(pid) is int for pid in pids) and len(set(pids)) != len(pids):
-            errors.append({"code": "duplicate_pid"})
         if all(isinstance(value, str) for value in invocations) and len(set(invocations)) != len(invocations):
             errors.append({"code": "duplicate_invocation"})
         if all(isinstance(value, str) for value in versions) and len(set(versions)) != 1:
@@ -307,6 +311,231 @@ def aggregate_runtime_runs(layer1: object, runs: object) -> dict[str, Any]:
 
 MARKER = "A20_RUNTIME_DISCOVERY_JSON="
 DEFAULT_CONFIG = Path("aloha_isaac_rebuild/configs/physical_reconstruction/stationary_style_rebuild.yaml")
+SCHEMA_VERSION = "a20-runtime-discovery-v2"
+DEFAULT_OUTPUT_CAP = 1024 * 1024
+DEFAULT_MARKER_CAP = 256 * 1024
+
+
+def _digest(path: Path) -> str:
+    value = __import__("hashlib").sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            value.update(chunk)
+    return value.hexdigest()
+
+
+def check_probe_source(source: str) -> dict[str, Any]:
+    """Fail-closed static boundary for the exact probe bytes executed by the parent."""
+    errors: list[str] = []
+    try:
+        tree = ast.parse(source)
+    except SyntaxError as exc:
+        return {"ok": False, "errors": [f"syntax_error:{exc.msg}"]}
+    forbidden_calls = {
+        "play", "step", "reset", "initialize", "initialize_async", "set_joint_positions", "set_joint_velocities",
+        "set_joint_efforts", "apply_action", "save", "Save", "Export", "Flatten",
+        "getattr", "setattr", "__import__", "exec", "eval", "import_module", "update",
+    }
+
+    def is_forbidden(name: str) -> bool:
+        return name in forbidden_calls or name.startswith("set_joint")
+
+    allowed_import_roots = {
+        "__future__", "argparse", "datetime", "hashlib", "importlib", "json", "os",
+        "pathlib", "isaacsim", "pxr", "yaml", "aloha_isaac_rebuild",
+    }
+    aliases: dict[str, str] = {}
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                root = alias.name.split(".")[0]
+                if root not in allowed_import_roots:
+                    errors.append(f"import_not_allowed:{alias.name}")
+                aliases[alias.asname or root] = alias.name
+        elif isinstance(node, ast.ImportFrom):
+            module = node.module or ""
+            if module.split(".")[0] not in allowed_import_roots:
+                errors.append(f"import_not_allowed:{module}")
+            for alias in node.names:
+                aliases[alias.asname or alias.name] = f"{module}.{alias.name}"
+        elif isinstance(node, ast.Call):
+            name = node.func.id if isinstance(node.func, ast.Name) else node.func.attr if isinstance(node.func, ast.Attribute) else "dynamic"
+            if (is_forbidden(name) and name != "update") or name == "dynamic":
+                errors.append(f"call_not_allowed:{name}")
+            if isinstance(node.func, ast.Name) and node.func.id in aliases:
+                target = aliases[node.func.id].rsplit(".", 1)[-1]
+                if is_forbidden(target):
+                    errors.append(f"aliased_call_not_allowed:{target}")
+        elif (
+            isinstance(node, ast.Assign)
+            and isinstance(node.value, ast.Attribute)
+            and is_forbidden(node.value.attr)
+        ):
+            errors.append(f"attribute_alias_not_allowed:{node.value.attr}")
+        elif isinstance(node, ast.Assign) and isinstance(node.value, ast.Name) and is_forbidden(node.value.id):
+            errors.append(f"name_alias_not_allowed:{node.value.id}")
+    return {"ok": not errors, "errors": sorted(set(errors))}
+
+
+def _code_provenance(repo_root: Path, probe_path: Path, coordinator_path: Path) -> dict[str, Any]:
+    probe_bytes = probe_path.read_bytes()
+    checker = check_probe_source(probe_bytes.decode("utf-8"))
+    try:
+        head = subprocess.check_output(
+            ["git", "rev-parse", "HEAD"], cwd=repo_root, text=True, stderr=subprocess.DEVNULL
+        ).strip()
+        dirty = bool(
+            subprocess.check_output(
+                ["git", "status", "--porcelain", "--", str(probe_path), str(coordinator_path)],
+                cwd=repo_root,
+                text=True,
+                stderr=subprocess.DEVNULL,
+            ).strip()
+        )
+    except (OSError, subprocess.CalledProcessError):
+        head, dirty = "unknown", True
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "probe_sha256": hashlib.sha256(probe_bytes).hexdigest(),
+        "coordinator_sha256": hashlib.sha256(coordinator_path.read_bytes()).hexdigest(),
+        "git_head": head,
+        "git_dirty": dirty,
+        "safety_checker": checker,
+        "safety_checker_sha256": hashlib.sha256(inspect.getsource(check_probe_source).encode()).hexdigest(),
+    }
+
+
+def _trusted_layer1_inputs(layer1: dict[str, Any]) -> tuple[dict[str, dict[str, str]], list[dict[str, Any]]]:
+    trusted: dict[str, dict[str, str]] = {}
+    errors: list[dict[str, Any]] = []
+    inputs = layer1.get("inputs") if isinstance(layer1, dict) else None
+    if not isinstance(inputs, dict):
+        return {}, [{"code": "invalid_layer1_inputs"}]
+    for name in ("config", "mapping", "stage"):
+        item = inputs.get(name)
+        raw_path = item.get("path") if isinstance(item, dict) else None
+        expected_hash = item.get("post_sha256") if name == "stage" and isinstance(item, dict) else item.get("sha256") if isinstance(item, dict) else None
+        if not isinstance(raw_path, str) or not Path(raw_path).is_absolute():
+            errors.append({"code": "layer1_path_not_absolute", "input": name})
+            continue
+        path = Path(raw_path).resolve()
+        if str(path) != raw_path:
+            errors.append({"code": "layer1_path_not_canonical", "input": name})
+            continue
+        try:
+            actual_hash = _digest(path)
+        except OSError as exc:
+            errors.append({"code": "layer1_input_unreadable", "input": name, "message": str(exc)})
+            continue
+        if actual_hash != expected_hash:
+            errors.append({"code": "layer1_live_hash_mismatch", "input": name})
+        trusted[name] = {"path": str(path), "sha256": actual_hash}
+    return trusted, errors
+
+
+def _terminate_process_group(process: subprocess.Popen[bytes], grace: float = 1.0) -> bool:
+    def group_active() -> bool:
+        for entry in Path("/proc").iterdir():
+            if not entry.name.isdigit():
+                continue
+            try:
+                fields = (entry / "stat").read_text().split()
+                if int(fields[4]) == process.pid and fields[2] != "Z":
+                    return True
+            except (FileNotFoundError, PermissionError, IndexError, ValueError):
+                continue
+        return False
+
+    if process.poll() is None:
+        with suppress(ProcessLookupError):
+            os.killpg(process.pid, signal.SIGTERM)
+        with suppress(subprocess.TimeoutExpired):
+            process.wait(timeout=grace)
+    deadline = time.monotonic() + grace
+    while group_active() and time.monotonic() < deadline:
+        time.sleep(0.02)
+    if group_active():
+        with suppress(ProcessLookupError):
+            os.killpg(process.pid, signal.SIGKILL)
+        if process.poll() is None:
+            try:
+                process.wait(timeout=max(grace, 1.0))
+            except subprocess.TimeoutExpired:
+                return False
+        deadline = time.monotonic() + max(grace, 1.0)
+        while group_active() and time.monotonic() < deadline:
+            time.sleep(0.02)
+    return not group_active()
+
+
+def _execute_probe(
+    argv: list[str], cwd: Path, timeout_seconds: float, output_cap: int = DEFAULT_OUTPUT_CAP,
+    marker_cap: int = DEFAULT_MARKER_CAP,
+) -> dict[str, Any]:
+    """Execute one probe in a new process group with bounded streaming capture."""
+    started_wall = datetime.now().astimezone().isoformat()
+    started_mono = time.monotonic()
+    process = subprocess.Popen(
+        argv, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        start_new_session=True,
+    )
+    selector = selectors.DefaultSelector()
+    buffers = {"stdout": bytearray(), "stderr": bytearray()}
+    for name, stream in (("stdout", process.stdout), ("stderr", process.stderr)):
+        assert stream is not None
+        os.set_blocking(stream.fileno(), False)
+        selector.register(stream, selectors.EVENT_READ, name)
+    timed_out = False
+    exceeded = False
+    try:
+        while selector.get_map():
+            remaining = timeout_seconds - (time.monotonic() - started_mono)
+            if remaining <= 0:
+                timed_out = True
+                break
+            for key, _ in selector.select(min(0.1, remaining)):
+                chunk = os.read(key.fileobj.fileno(), 65536)
+                if not chunk:
+                    selector.unregister(key.fileobj)
+                    continue
+                target = buffers[key.data]
+                allowed = max(0, output_cap - len(target))
+                target.extend(chunk[:allowed])
+                if len(chunk) > allowed:
+                    exceeded = True
+                    break
+            if exceeded:
+                break
+        if not timed_out and not exceeded:
+            process.wait(timeout=max(0.1, timeout_seconds - (time.monotonic() - started_mono)))
+    except subprocess.TimeoutExpired:
+        timed_out = True
+    finally:
+        selector.close()
+    cleanup_verified = _terminate_process_group(process) if timed_out or exceeded else process.poll() is not None
+    stdout = buffers["stdout"].decode("utf-8", "replace")
+    stderr = buffers["stderr"].decode("utf-8", "replace")
+    marker_bytes = sum(len(line.encode()) for line in stdout.splitlines() if line.startswith(MARKER))
+    if marker_bytes > marker_cap:
+        exceeded = True
+    return {
+        "process_status": "timeout" if timed_out else "output_limit_exceeded" if exceeded else "completed" if process.returncode == 0 else "failed",
+        "returncode": process.returncode if process.returncode is not None else -1,
+        "timed_out": timed_out,
+        "output_limit_exceeded": exceeded,
+        "stdout": stdout,
+        "stderr": stderr,
+        "observed_pid": process.pid,
+        "parent_started_at": started_wall,
+        "parent_finished_at": datetime.now().astimezone().isoformat(),
+        "parent_monotonic_started": started_mono,
+        "parent_monotonic_finished": time.monotonic(),
+        "cleanup_verified": cleanup_verified,
+    }
+
+
+def _exit_code(status: str) -> int:
+    return 0 if status == _PASS else 2 if status == _BLOCKED else 1
 
 
 def _summary(value: object, limit: int = 4000) -> str:
@@ -320,7 +549,7 @@ def run_three_probes(
     interpreter: Path,
     probe_path: Path,
     timeout_seconds: float,
-    run_command=subprocess.run,
+    run_command=None,
     invocation_ids: list[str] | None = None,
 ) -> dict[str, Any]:
     ids = invocation_ids or [str(uuid.uuid4()) for _ in range(3)]
@@ -334,13 +563,35 @@ def run_three_probes(
             "mismatches": [],
         }
     runs: list[dict[str, Any]] = []
+    provenance = _code_provenance(repo_root, probe_path, Path(__file__).resolve())
+    if not provenance["safety_checker"]["ok"]:
+        return {"status": _FAIL, "ok": False, "runs": [], "errors": [{"code": "unsafe_probe_source", "details": provenance["safety_checker"]["errors"]}], "mismatches": [], "provenance": provenance}
+    trusted_inputs: dict[str, dict[str, str]] | None = None
+    if run_command is None:
+        trusted_inputs, trust_errors = _trusted_layer1_inputs(layer1)
+        if trust_errors:
+            return {"status": _FAIL, "ok": False, "runs": [], "errors": trust_errors, "mismatches": [], "provenance": provenance}
     for index, invocation_id in enumerate(ids):
         argv = [str(interpreter), "-u", str(probe_path), "--invocation-id", invocation_id]
         try:
-            completed = run_command(
-                argv, cwd=repo_root, timeout=timeout_seconds, capture_output=True, text=True, check=False
-            )
-            stdout, stderr = completed.stdout or "", completed.stderr or ""
+            if run_command is None:
+                execution = _execute_probe(argv, repo_root, timeout_seconds)
+                stdout, stderr = execution["stdout"], execution["stderr"]
+                returncode = execution["returncode"]
+            else:
+                completed = run_command(argv, cwd=repo_root, timeout=timeout_seconds, check=False)
+                stdout, stderr = completed.stdout or "", completed.stderr or ""
+                returncode = completed.returncode
+                execution = {
+                    "process_status": "completed" if returncode == 0 else "failed",
+                    "timed_out": False,
+                    "observed_pid": None,
+                    "cleanup_verified": True,
+                    "parent_started_at": None,
+                    "parent_finished_at": None,
+                    "parent_monotonic_started": None,
+                    "parent_monotonic_finished": None,
+                }
             markers = [line[len(MARKER) :] for line in stdout.splitlines() if line.startswith(MARKER)]
             if len(markers) != 1:
                 raise ValueError(f"marker_count:{len(markers)}")
@@ -348,14 +599,30 @@ def run_three_probes(
             if not isinstance(payload, dict):
                 raise ValueError("payload_not_object")
             payload.update(
-                process_status="completed" if completed.returncode == 0 else "failed",
-                returncode=completed.returncode,
-                timed_out=False,
+                process_status=execution["process_status"],
+                returncode=returncode,
+                timed_out=execution["timed_out"],
                 stdout_summary=_summary(stdout),
                 stderr_summary=_summary(stderr),
+                observed_pid=execution["observed_pid"] if execution["observed_pid"] is not None else payload.get("pid"),
+                parent_started_at=execution["parent_started_at"],
+                parent_finished_at=execution["parent_finished_at"],
+                parent_monotonic_started=execution["parent_monotonic_started"],
+                parent_monotonic_finished=execution["parent_monotonic_finished"],
+                cleanup_verified=execution["cleanup_verified"],
+                provenance=provenance,
             )
             if payload.get("invocation_id") != invocation_id:
                 errors.append({"code": "invocation_mismatch", "run_index": index})
+            if execution["observed_pid"] is not None and payload.get("pid") != execution["observed_pid"]:
+                errors.append({"code": "observed_pid_mismatch", "run_index": index})
+            if trusted_inputs is not None and payload.get("inputs") != trusted_inputs:
+                errors.append({"code": "layer1_input_path_or_hash_mismatch", "run_index": index})
+            if execution["parent_started_at"] is not None:
+                child_start, child_finish = _timestamp(payload.get("started_at")), _timestamp(payload.get("finished_at"))
+                parent_start, parent_finish = _timestamp(execution["parent_started_at"]), _timestamp(execution["parent_finished_at"])
+                if not child_start or not child_finish or child_start < parent_start or child_finish > parent_finish:
+                    errors.append({"code": "child_timestamp_outside_parent_bounds", "run_index": index})
             runs.append(payload)
         except subprocess.TimeoutExpired as exc:
             runs.append(
@@ -382,8 +649,6 @@ def run_three_probes(
             )
             errors.append({"code": "probe_protocol_error", "run_index": index, "message": str(exc)})
     valid = [run for run in runs if "pid" in run]
-    if len({run.get("pid") for run in valid}) != len(valid):
-        errors.append({"code": "duplicate_pid"})
     if len({run.get("invocation_id") for run in valid}) != len(valid):
         errors.append({"code": "duplicate_invocation"})
     if valid:
@@ -402,6 +667,8 @@ def run_three_probes(
     aggregate = aggregate_runtime_runs(layer1, runs)
     aggregate["runs"] = runs
     aggregate["invocation_ids"] = ids
+    aggregate["schema_version"] = SCHEMA_VERSION
+    aggregate["provenance"] = provenance
     if errors:
         aggregate["status"], aggregate["ok"] = _FAIL, False
         aggregate["errors"] = errors + aggregate["errors"]
@@ -415,7 +682,14 @@ def _atomic_write(path: Path, payload: dict[str, Any]) -> None:
         with os.fdopen(fd, "w", encoding="utf-8") as stream:
             json.dump(payload, stream, indent=2, sort_keys=True)
             stream.write("\n")
+            stream.flush()
+            os.fsync(stream.fileno())
         os.replace(temp, path)
+        directory_fd = os.open(path.parent, os.O_RDONLY)
+        try:
+            os.fsync(directory_fd)
+        finally:
+            os.close(directory_fd)
     except BaseException:
         Path(temp).unlink(missing_ok=True)
         raise
@@ -442,7 +716,7 @@ def main() -> int:
     )
     _atomic_write(output, result)
     print(json.dumps(result, indent=2, sort_keys=True))
-    return 0 if result["status"] in (_PASS, _BLOCKED) else 1
+    return _exit_code(result["status"])
 
 
 if __name__ == "__main__":

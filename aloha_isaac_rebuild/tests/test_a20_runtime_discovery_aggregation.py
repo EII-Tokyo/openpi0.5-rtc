@@ -2,19 +2,219 @@ from __future__ import annotations
 
 import ast
 from copy import deepcopy
+import hashlib
 import json
+import os
 from pathlib import Path
+import runpy
 import subprocess
+import sys
+import types
 
 import pytest
 
+from aloha_isaac_rebuild.scripts.run_a20_runtime_articulation_discovery import _atomic_write
+from aloha_isaac_rebuild.scripts.run_a20_runtime_articulation_discovery import _code_provenance
+from aloha_isaac_rebuild.scripts.run_a20_runtime_articulation_discovery import _execute_probe
+from aloha_isaac_rebuild.scripts.run_a20_runtime_articulation_discovery import _exit_code
+from aloha_isaac_rebuild.scripts.run_a20_runtime_articulation_discovery import _trusted_layer1_inputs
 from aloha_isaac_rebuild.scripts.run_a20_runtime_articulation_discovery import aggregate_runtime_runs
+from aloha_isaac_rebuild.scripts.run_a20_runtime_articulation_discovery import check_probe_source
 from aloha_isaac_rebuild.scripts.run_a20_runtime_articulation_discovery import run_three_probes
 
 ROOT = Path(__file__).resolve().parents[2]
 MODULE = ROOT / "aloha_isaac_rebuild/scripts/run_a20_runtime_articulation_discovery.py"
 PROBE = ROOT / "aloha_isaac_rebuild/scripts/probe_a20_runtime_articulation_once.py"
 MARKER = "A20_RUNTIME_DISCOVERY_JSON="
+
+
+def test_strict_probe_checker_rejects_dynamic_and_alias_bypasses() -> None:
+    assert check_probe_source("import json\njson.dumps({})\n")["ok"] is True
+    for source in (
+        "getattr(stage, 'Save')()\n",
+        "__import__('omni.timeline')\n",
+        "from importlib import import_module\nimport_module('omni')\n",
+        "runner = app.update\nrunner()\n",
+        "runner = eval\nrunner('1 + 1')\n",
+        "from external_helper import inspect_stage\ninspect_stage()\n",
+    ):
+        result = check_probe_source(source)
+        assert result["ok"] is False, source
+
+
+@pytest.mark.parametrize(
+    "call",
+    [
+        "play",
+        "step",
+        "reset",
+        "initialize",
+        "initialize_async",
+        "set_joint_positions",
+        "set_joint_custom_target",
+        "set_joint_efforts",
+        "apply_action",
+        "save",
+        "Export",
+        "Flatten",
+        "exec",
+        "eval",
+    ],
+)
+def test_strict_probe_checker_rejects_every_direct_forbidden_call(call: str) -> None:
+    result = check_probe_source(f"runtime.{call}()\n")
+    assert result["ok"] is False
+
+
+def test_execute_probe_caps_output_with_structured_failure(tmp_path: Path) -> None:
+    helper = tmp_path / "noisy.py"
+    helper.write_text("import sys\nsys.stdout.write('x' * 10000)\n", encoding="utf-8")
+    result = _execute_probe([sys.executable, str(helper)], tmp_path, 5, 512, 256)
+    assert result["process_status"] == "output_limit_exceeded"
+    assert result["output_limit_exceeded"] is True
+    assert len(result["stdout"]) <= 512
+    assert result["cleanup_verified"] is True
+
+
+def test_atomic_write_fsyncs_and_preserves_previous_on_replace_failure(tmp_path: Path, monkeypatch) -> None:
+    target = tmp_path / "evidence.json"
+    target.write_text('{"old": true}\n', encoding="utf-8")
+
+    def fail_replace(source, destination):
+        raise OSError("replace denied")
+
+    monkeypatch.setattr(os, "replace", fail_replace)
+    with pytest.raises(OSError, match="replace denied"):
+        _atomic_write(target, {"new": True})
+    assert target.read_text(encoding="utf-8") == '{"old": true}\n'
+    assert list(tmp_path.glob(".evidence.json.*")) == []
+
+
+@pytest.mark.parametrize(
+    ("status", "expected"),
+    [
+        ("PASS_A20_RUNTIME_ARTICULATION_DISCOVERY_NO_STEP", 0),
+        ("FAIL_A20_RUNTIME_ARTICULATION_DISCOVERY", 1),
+        ("BLOCKED_RUNTIME_HANDLE_REQUIRES_UNAPPROVED_INITIALIZATION", 2),
+    ],
+)
+def test_exit_status_contract(status: str, expected: int) -> None:
+    assert _exit_code(status) == expected
+
+
+def test_code_provenance_binds_exact_probe_and_coordinator_bytes() -> None:
+    provenance = _code_provenance(ROOT, PROBE, MODULE)
+    assert provenance["schema_version"] == "a20-runtime-discovery-v2"
+    assert provenance["probe_sha256"] == hashlib.sha256(PROBE.read_bytes()).hexdigest()
+    assert provenance["coordinator_sha256"] == hashlib.sha256(MODULE.read_bytes()).hexdigest()
+    assert isinstance(provenance["git_head"], str)
+    assert provenance["git_head"]
+    assert isinstance(provenance["git_dirty"], bool)
+    assert provenance["safety_checker"]["ok"] is True
+
+
+def test_execute_probe_records_parent_observed_pid_and_bounds(tmp_path: Path) -> None:
+    helper = tmp_path / "pid.py"
+    helper.write_text("import os\nprint(os.getpid())\n", encoding="utf-8")
+    result = _execute_probe([sys.executable, str(helper)], tmp_path, 5)
+    assert int(result["stdout"].strip()) == result["observed_pid"]
+    assert result["parent_monotonic_started"] <= result["parent_monotonic_finished"]
+    assert result["cleanup_verified"] is True
+
+
+def test_probe_helpers_fail_closed_and_close_even_if_marker_serialization_fails(monkeypatch) -> None:
+    fake_isaac = types.ModuleType("isaacsim")
+    fake_isaac.SimulationApp = object
+    monkeypatch.setitem(sys.modules, "isaacsim", fake_isaac)
+    namespace = runpy.run_path(str(PROBE), run_name="probe_test")
+    assert namespace["_safe_version"]("definitely-missing-distribution") == "unknown"
+    emitted = []
+
+    def broken_serializer(*args, **kwargs):
+        raise TypeError("no json")
+
+    namespace["_emit_marker"]({"status": "FAIL_A20_RUNTIME_ARTICULATION_DISCOVERY"}, emitted.append, broken_serializer)
+    assert emitted
+    assert emitted[0].startswith(MARKER)
+
+
+def test_probe_main_emits_fail_payload_when_app_close_raises(monkeypatch, tmp_path: Path) -> None:
+    closed: list[bool] = []
+
+    class BrokenCloseApp:
+        def __init__(self, options):
+            assert options == {"headless": True}
+
+        def close(self):
+            closed.append(True)
+            raise RuntimeError("close failed")
+
+    fake_isaac = types.ModuleType("isaacsim")
+    fake_isaac.SimulationApp = BrokenCloseApp
+    fake_pxr = types.ModuleType("pxr")
+    fake_pxr.Usd = types.SimpleNamespace()
+    fake_pxr.UsdPhysics = types.SimpleNamespace()
+    monkeypatch.setitem(sys.modules, "isaacsim", fake_isaac)
+    monkeypatch.setitem(sys.modules, "pxr", fake_pxr)
+    namespace = runpy.run_path(str(PROBE), run_name="probe_close_test")
+    emitted: list[dict[str, object]] = []
+    namespace["main"].__globals__["_emit_marker"] = emitted.append
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(sys, "argv", [str(PROBE), "--invocation-id", "close-test"])
+
+    assert namespace["main"]() == 1
+    assert closed == [True]
+    assert emitted[0]["status"] == "FAIL_A20_RUNTIME_ARTICULATION_DISCOVERY"
+
+
+def test_coordinator_production_source_never_uses_subprocess_run_capture_output() -> None:
+    source = MODULE.read_text(encoding="utf-8")
+    assert "run_command=subprocess.run" not in source
+    assert "capture_output=True" not in source
+
+
+def test_timeout_kills_spawned_descendant_process_group(tmp_path: Path) -> None:
+    pid_file = tmp_path / "child.pid"
+    helper = tmp_path / "tree.py"
+    helper.write_text(
+        "import pathlib, subprocess, sys, time\n"
+        "child=subprocess.Popen([sys.executable, '-c', 'import signal,time; signal.signal(signal.SIGTERM, signal.SIG_IGN); time.sleep(60)'])\n"
+        "pathlib.Path(sys.argv[1]).write_text(str(child.pid))\n"
+        "time.sleep(60)\n",
+        encoding="utf-8",
+    )
+    result = _execute_probe([sys.executable, str(helper), str(pid_file)], tmp_path, 0.3)
+    assert result["timed_out"] is True
+    assert result["cleanup_verified"] is True
+    child_pid = int(pid_file.read_text())
+    stat_path = Path(f"/proc/{child_pid}/stat")
+    assert not stat_path.exists() or stat_path.read_text().split()[2] == "Z"
+
+
+def test_trusted_layer1_inputs_require_canonical_paths_and_live_hashes(tmp_path: Path) -> None:
+    paths = {}
+    for name in ("config", "mapping", "stage"):
+        path = tmp_path / f"{name}.bin"
+        path.write_bytes(name.encode())
+        paths[name] = path
+    layer1 = _layer1()
+    layer1["inputs"] = {
+        "config": {"path": str(paths["config"]), "sha256": hashlib.sha256(b"config").hexdigest()},
+        "mapping": {"path": str(paths["mapping"]), "sha256": hashlib.sha256(b"mapping").hexdigest()},
+        "stage": {
+            "path": str(paths["stage"]),
+            "pre_sha256": hashlib.sha256(b"stage").hexdigest(),
+            "post_sha256": hashlib.sha256(b"stage").hexdigest(),
+            "consistent_during_audit": True,
+        },
+    }
+    trusted, errors = _trusted_layer1_inputs(layer1)
+    assert errors == []
+    assert {name: trusted[name]["path"] for name in trusted} == {name: str(path.resolve()) for name, path in paths.items()}
+    layer1["inputs"]["mapping"]["path"] = str(paths["mapping"].parent / "." / paths["mapping"].name)
+    layer1["inputs"]["mapping"]["sha256"] = "0" * 64
+    _, errors = _trusted_layer1_inputs(layer1)
+    assert {error["code"] for error in errors} == {"layer1_live_hash_mismatch"}
 
 
 def _record(index: int) -> dict[str, object]:
@@ -405,7 +605,7 @@ def test_coordinator_runs_three_fresh_sequential_processes_with_strict_argv() ->
     for argv, kwargs in calls:
         assert isinstance(argv, list)
         assert argv[0] == "/isaac/python"
-        assert kwargs == {"cwd": ROOT, "timeout": 9, "capture_output": True, "text": True, "check": False}
+        assert kwargs == {"cwd": ROOT, "timeout": 9, "check": False}
     assert [run["pid"] for run in result["runs"]] == [101, 102, 103]
 
 
@@ -432,7 +632,7 @@ def test_coordinator_protocol_failures_are_structured(mode: str) -> None:
     assert result["errors"]
 
 
-@pytest.mark.parametrize("mutation", ["pid", "version", "hash", "time"])
+@pytest.mark.parametrize("mutation", ["version", "hash", "time"])
 def test_cross_run_identity_version_hash_and_time_must_match(mutation: str) -> None:
     count = 0
 
@@ -442,8 +642,6 @@ def test_cross_run_identity_version_hash_and_time_must_match(mutation: str) -> N
         payload = _probe_payload(
             invocation, 200 + count, f"2026-01-01T00:00:0{count * 2}Z", f"2026-01-01T00:00:0{count * 2 + 1}Z"
         )
-        if count == 1 and mutation == "pid":
-            payload["pid"] = 200
         if count == 1 and mutation == "version":
             payload["isaac_sim_version"] = "5.0.0"
         if count == 1 and mutation == "hash":
@@ -535,13 +733,11 @@ def test_finished_timestamp_cannot_precede_started_timestamp() -> None:
 
 
 @pytest.mark.parametrize(
-    "mutation", ["duplicate_pid", "duplicate_invocation", "version_mismatch", "started_nonmonotonic", "overlap"]
+    "mutation", ["duplicate_invocation", "version_mismatch", "started_nonmonotonic", "overlap"]
 )
 def test_three_run_process_provenance_is_cross_validated(mutation: str) -> None:
     runs = _runs_with_provenance()
-    if mutation == "duplicate_pid":
-        runs[1]["pid"] = runs[0]["pid"]
-    elif mutation == "duplicate_invocation":
+    if mutation == "duplicate_invocation":
         runs[1]["invocation_id"] = runs[0]["invocation_id"]
     elif mutation == "version_mismatch":
         runs[1]["isaac_sim_version"] = "5.0.0"
