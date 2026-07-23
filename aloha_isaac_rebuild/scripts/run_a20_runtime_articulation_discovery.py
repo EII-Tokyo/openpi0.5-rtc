@@ -480,6 +480,43 @@ def _render_bool(payload: object, field: str) -> str:
     return "unknown"
 
 
+def _report_runtime_semantics(layer1: object, layer2: object) -> tuple[str, str]:
+    status = layer2.get("status") if isinstance(layer2, dict) else None
+    if status == _BLOCKED:
+        return "BLOCKED", "BLOCKED"
+    runs = layer2.get("runs") if isinstance(layer2, dict) else None
+    expected = layer1.get("expected") if isinstance(layer1, dict) else None
+    if not (
+        isinstance(runs, list)
+        and len(runs) == 3
+        and all(isinstance(run, dict) for run in runs)
+        and isinstance(expected, list)
+    ):
+        return "FAIL", "FAIL"
+
+    runtime_fields = (
+        "status", "isaac_sim_version", "inputs", "articulation_root", "articulation_count",
+        "dof_count", "valid_handle", "handle_validity_method", "records",
+        "physics_stepped", "actions_applied", "targets_written", "stage_saved",
+    )
+    provenance_fields = (
+        "schema_version", "probe_sha256", "coordinator_sha256", "safety_checker_sha256",
+    )
+    fingerprints = []
+    for run in runs:
+        provenance = run.get("provenance") if isinstance(run.get("provenance"), dict) else {}
+        facts = {field: run.get(field) for field in runtime_fields}
+        facts["provenance"] = {field: provenance.get(field) for field in provenance_fields}
+        fingerprints.append(json.dumps(facts, sort_keys=True, default=repr))
+    determinism = "PASS" if len(set(fingerprints)) == 1 else "FAIL"
+    canonical = "PASS" if all(
+        _compare_runtime_records(expected, run["records"])["ok"]
+        for run in runs
+        if isinstance(run.get("records"), list)
+    ) and all(isinstance(run.get("records"), list) for run in runs) else "FAIL"
+    return determinism, canonical
+
+
 def format_two_layer_report(asset_validator: object, layer1: object, layer2: object) -> str:
     """Render bounded, fail-closed A20 evidence without embedding Isaac logs."""
     asset_status = _artifact_status(asset_validator)
@@ -518,7 +555,7 @@ def format_two_layer_report(asset_validator: object, layer1: object, layer2: obj
     operations = all_operations[:MAX_REPORT_OPERATIONS]
     provenance = layer2.get("provenance", {}) if isinstance(layer2, dict) and isinstance(layer2.get("provenance"), dict) else {}
     blocked = layer2_status == _BLOCKED
-    determinism = "PASS" if is_exact_runtime_pass(layer2, layer1) else ("BLOCKED" if blocked else "FAIL")
+    determinism, canonical_order = _report_runtime_semantics(layer1, layer2)
     next_action = (
         "The runtime handle requires timeline Play and a physics simulation step; these operations were not approved."
         if blocked
@@ -557,6 +594,7 @@ def format_two_layer_report(asset_validator: object, layer1: object, layer2: obj
             f"- Status: {_bounded_field(layer2_status, 120)}",
             f"- Runs: {layer2.get('run_count', 'unknown') if isinstance(layer2, dict) else 'unknown'}",
             f"- Three-run determinism: {determinism}",
+            f"- Canonical order match: {canonical_order}",
             f"- Errors: {_count(layer2, 'errors')}",
             f"- Mismatches: {_count(layer2, 'mismatches')}",
             "- Exit contract: BLOCKED=2, PASS=0, FAIL=1",

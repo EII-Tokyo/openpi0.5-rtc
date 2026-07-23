@@ -1263,6 +1263,7 @@ def test_two_layer_report_keeps_independent_gates_and_readiness_false() -> None:
     assert "Observed DOFs: 16" in report
     assert "Mismatches: 0" in report
     assert "Three-run determinism: BLOCKED" in report
+    assert "Canonical order match: BLOCKED" in report
     assert "Exit contract: BLOCKED=2, PASS=0, FAIL=1" in report
     for statement in (
         "Physics stepped: false",
@@ -1280,6 +1281,26 @@ def test_two_layer_report_keeps_independent_gates_and_readiness_false() -> None:
     assert "timeline Play" in report
     assert "physics simulation step" in report
     assert "not approved" in report
+
+
+def test_report_separates_determinism_from_canonical_order_match() -> None:
+    runs = _runs()
+    for run in runs:
+        run["records"].reverse()
+    layer2 = aggregate_runtime_runs(_layer1(), runs)
+    layer2.update(
+        runs=runs,
+        physics_stepped=False,
+        actions_applied=False,
+        targets_written=False,
+        stage_saved=False,
+    )
+
+    report = format_two_layer_report(_asset_validator(), _layer1(), layer2)
+
+    assert "Overall: NOT_READY" in report
+    assert "Three-run determinism: PASS" in report
+    assert "Canonical order match: FAIL" in report
 
 
 @pytest.mark.parametrize("bad", [None, [], "bad", {}, {"status": "PASS_A20_USD_DOF_METADATA"}])
