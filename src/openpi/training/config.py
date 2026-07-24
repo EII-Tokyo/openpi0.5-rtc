@@ -1166,6 +1166,46 @@ _CONFIGS = [
         batch_size=32,
     ),
     TrainConfig(
+        # LoRA fine-tune on the curated clm_2_swipe export (2026-06-30 .. 2026-07-08 success
+        # episodes, platform-curated: prompts/dropouts/exclusions applied at export time).
+        # Same recipe as pi05_droid_lora_baseline; legacy LeRobot schema.
+        name="pi05_droid_lora_clm2_swipe",
+        model=pi0_config.Pi0Config(
+            pi05=True,
+            action_dim=32,
+            action_horizon=16,
+            paligemma_variant="gemma_2b_lora",
+            action_expert_variant="gemma_300m_lora",
+        ),
+        data=LeRobotDROIDDataConfig(
+            repo_ids=[
+                "michios/clm_2_swipe"
+            ],
+            base_config=DataConfig(prompt_from_task=True),
+            assets=AssetsConfig(
+                assets_dir="gs://openpi-assets/checkpoints/pi05_droid/assets",
+                asset_id="droid",
+            ),
+        ),
+        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_droid/params"),
+        freeze_filter=pi0_config.Pi0Config(
+            pi05=True,
+            action_dim=32,
+            action_horizon=16,
+            paligemma_variant="gemma_2b_lora",
+            action_expert_variant="gemma_300m_lora",
+        ).get_freeze_filter(),
+        ema_decay=None,
+        lr_schedule=_optimizer.CosineDecaySchedule(
+            warmup_steps=5_000,
+            peak_lr=5e-5,
+            decay_steps=95_000,
+            decay_lr=5e-5,
+        ),
+        num_train_steps=100_000,
+        batch_size=32,
+    ),
+    TrainConfig(
         # Full fine-tune conditioned on conveyor belt status and resolved DROID subtasks.
         # This mirrors pi05_droid_lora_conveyor but uses the base pi05-DROID model without LoRA.
         # Batch size is raised for an 8x A100 setup.
