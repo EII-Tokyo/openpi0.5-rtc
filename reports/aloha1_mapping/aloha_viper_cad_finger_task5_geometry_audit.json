@@ -1,0 +1,950 @@
+{
+  "acceptance_boundary": {
+    "attachment_overlap_is_automatically_unexpected": false,
+    "bottle_contact_grasp": "NOT_RUN",
+    "drive_tracking": "FAIL",
+    "dynamic_collision_resolution": "NOT_RUN",
+    "mimic_or_controller_coupling": "FAIL",
+    "task8": "NOT_RUN"
+  },
+  "attachment_component_overlaps": [
+    {
+      "overlap_volume_m3": 8.312486207145187e-06,
+      "role_a": "gripper_bar",
+      "role_b": "left_finger",
+      "signed_chebyshev_margin_m": 0.006787508072946466,
+      "state": "closed"
+    },
+    {
+      "overlap_volume_m3": 8.31246799830906e-06,
+      "role_a": "gripper_bar",
+      "role_b": "right_finger",
+      "signed_chebyshev_margin_m": 0.006787498464270819,
+      "state": "closed"
+    },
+    {
+      "overlap_volume_m3": 8.312494451281982e-06,
+      "role_a": "gripper_bar",
+      "role_b": "left_finger",
+      "signed_chebyshev_margin_m": 0.006787512536989022,
+      "state": "partial"
+    },
+    {
+      "overlap_volume_m3": 8.312462521588218e-06,
+      "role_a": "gripper_bar",
+      "role_b": "right_finger",
+      "signed_chebyshev_margin_m": 0.006787495384539835,
+      "state": "partial"
+    },
+    {
+      "overlap_volume_m3": 8.312487459305858e-06,
+      "role_a": "gripper_bar",
+      "role_b": "left_finger",
+      "signed_chebyshev_margin_m": 0.0067875080922334095,
+      "state": "maximum_legal_aperture"
+    },
+    {
+      "overlap_volume_m3": 8.312454537117544e-06,
+      "role_a": "gripper_bar",
+      "role_b": "right_finger",
+      "signed_chebyshev_margin_m": 0.006787490738496448,
+      "state": "maximum_legal_aperture"
+    }
+  ],
+  "gates": {
+    "all_colliders_convex_hull": true,
+    "no_finger_to_finger_overlap": true,
+    "source_stage_immutable": true,
+    "three_legal_states_audited": true
+  },
+  "method": {
+    "cooked_geometry_model": "UsdPhysics approximation=convexHull represented by scipy.spatial.ConvexHull of world-transformed mesh points",
+    "known_unsafe_api_not_retried": "PhysXSceneQuery.overlap_shape_any",
+    "overlap_volume": "HalfspaceIntersection followed by ConvexHull volume",
+    "pair_test": "normalized halfspace Chebyshev-margin linear program"
+  },
+  "runtime": {
+    "isaac_sim": "5.1.0.0",
+    "kit": "107.3.3",
+    "physx": "107.3.26",
+    "pose_method": "fresh World reset; full legal qpos injection; PhysX transforms synced to unsaved USD session"
+  },
+  "schema_version": 1,
+  "stage": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_convex_hull/aloha_viperx_supplier_cad_task5.usda",
+    "sha256": "8040edd01859af9f8c51285d198d34aae19e66625a2d5f21729879774e1644d9"
+  },
+  "states": [
+    {
+      "colliders": [
+        {
+          "aabb_max_world_m": [
+            0.13046476244926453,
+            0.053535185754299164,
+            0.3123741149902344
+          ],
+          "aabb_min_world_m": [
+            0.08282463997602463,
+            0.013513397425413132,
+            0.2531222701072693
+          ],
+          "approximation": "convexHull",
+          "cooked_convex_face_count": 174,
+          "cooked_convex_vertex_count": 89,
+          "cooked_convex_volume_m3": 7.00898042542695e-05,
+          "instance_proxy": true,
+          "path": "/workcell/vx300s_left/vx300s_left_gripper_link/collisions/vx300s_7_gripper/vx300s_7_gripper",
+          "role": "gripper_shell",
+          "source_point_count": 27000
+        },
+        {
+          "aabb_max_world_m": [
+            0.16601115465164185,
+            0.11003376543521881,
+            0.31267020106315613
+          ],
+          "aabb_min_world_m": [
+            0.1024131253361702,
+            -0.04080379754304886,
+            0.24081873893737793
+          ],
+          "approximation": "convexHull",
+          "cooked_convex_face_count": 172,
+          "cooked_convex_vertex_count": 88,
+          "cooked_convex_volume_m3": 0.00040795484575735947,
+          "instance_proxy": true,
+          "path": "/workcell/vx300s_left/vx300s_left_gripper_link/collisions/vx300s_9_gripper_bar/vx300s_9_gripper_bar",
+          "role": "gripper_bar",
+          "source_point_count": 22764
+        },
+        {
+          "aabb_max_world_m": [
+            0.13988082110881805,
+            0.04422171413898468,
+            0.3049256503582001
+          ],
+          "aabb_min_world_m": [
+            0.1295626014471054,
+            0.02463892661035061,
+            0.2506968080997467
+          ],
+          "approximation": "convexHull",
+          "cooked_convex_face_count": 282,
+          "cooked_convex_vertex_count": 143,
+          "cooked_convex_volume_m3": 3.7077050531234797e-06,
+          "instance_proxy": true,
+          "path": "/workcell/vx300s_left/vx300s_left_gripper_prop_link/collisions/vx300s_8_gripper_prop/vx300s_8_gripper_prop",
+          "role": "sliding_carriage",
+          "source_point_count": 1896
+        },
+        {
+          "aabb_max_world_m": [
+            0.24518337845802307,
+            0.06484058499336243,
+            0.3097461462020874
+          ],
+          "aabb_min_world_m": [
+            0.1483444720506668,
+            0.03876499831676483,
+            0.2547665238380432
+          ],
+          "approximation": "convexHull",
+          "cooked_convex_face_count": 196,
+          "cooked_convex_vertex_count": 100,
+          "cooked_convex_volume_m3": 5.558080220163855e-05,
+          "instance_proxy": false,
+          "path": "/workcell/vx300s_left/vx300s_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh",
+          "role": "left_finger",
+          "source_point_count": 831
+        },
+        {
+          "aabb_max_world_m": [
+            0.24534033238887787,
+            0.034334395080804825,
+            0.3094387650489807
+          ],
+          "aabb_min_world_m": [
+            0.1491488814353943,
+            0.00506338756531477,
+            0.25459131598472595
+          ],
+          "approximation": "convexHull",
+          "cooked_convex_face_count": 194,
+          "cooked_convex_vertex_count": 99,
+          "cooked_convex_volume_m3": 5.5580780699106544e-05,
+          "instance_proxy": false,
+          "path": "/workcell/vx300s_left/vx300s_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh",
+          "role": "right_finger",
+          "source_point_count": 831
+        }
+      ],
+      "pairs": [
+        {
+          "collider_a": "/workcell/vx300s_left/vx300s_left_gripper_link/collisions/vx300s_7_gripper/vx300s_7_gripper",
+          "collider_b": "/workcell/vx300s_left/vx300s_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh",
+          "hull_a": {
+            "face_count": 174,
+            "input_point_count": 27000,
+            "vertex_count": 89,
+            "volume_m3": 7.00898042542695e-05
+          },
+          "hull_b": {
+            "face_count": 196,
+            "input_point_count": 831,
+            "vertex_count": 100,
+            "volume_m3": 5.558080220163855e-05
+          },
+          "intersection_vertex_count": 0,
+          "method": "normalized convex-hull halfspace feasibility LP; positive margin means volumetric intersection",
+          "overlap_volume_m3": 0.0,
+          "relation": "SEPARATED",
+          "role_a": "gripper_shell",
+          "role_b": "left_finger",
+          "scope": "FINGER_TO_ATTACHMENT_COMPONENT_REQUIRES_ASSEMBLY_SEMANTIC_REVIEW",
+          "signed_chebyshev_margin_m": -0.01006249284990068,
+          "tolerance_m": 1e-08
+        },
+        {
+          "collider_a": "/workcell/vx300s_left/vx300s_left_gripper_link/collisions/vx300s_7_gripper/vx300s_7_gripper",
+          "collider_b": "/workcell/vx300s_left/vx300s_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh",
+          "hull_a": {
+            "face_count": 174,
+            "input_point_count": 27000,
+            "vertex_count": 89,
+            "volume_m3": 7.00898042542695e-05
+          },
+          "hull_b": {
+            "face_count": 194,
+            "input_point_count": 831,
+            "vertex_count": 99,
+            "volume_m3": 5.5580780699106544e-05
+          },
+          "intersection_vertex_count": 0,
+          "method": "normalized convex-hull halfspace feasibility LP; positive margin means volumetric intersection",
+          "overlap_volume_m3": 0.0,
+          "relation": "SEPARATED",
+          "role_a": "gripper_shell",
+          "role_b": "right_finger",
+          "scope": "FINGER_TO_ATTACHMENT_COMPONENT_REQUIRES_ASSEMBLY_SEMANTIC_REVIEW",
+          "signed_chebyshev_margin_m": -0.010062507263472242,
+          "tolerance_m": 1e-08
+        },
+        {
+          "collider_a": "/workcell/vx300s_left/vx300s_left_gripper_link/collisions/vx300s_9_gripper_bar/vx300s_9_gripper_bar",
+          "collider_b": "/workcell/vx300s_left/vx300s_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh",
+          "hull_a": {
+            "face_count": 172,
+            "input_point_count": 22764,
+            "vertex_count": 88,
+            "volume_m3": 0.00040795484575735947
+          },
+          "hull_b": {
+            "face_count": 196,
+            "input_point_count": 831,
+            "vertex_count": 100,
+            "volume_m3": 5.558080220163855e-05
+          },
+          "intersection_vertex_count": 140,
+          "method": "normalized convex-hull halfspace feasibility LP; positive margin means volumetric intersection",
+          "overlap_volume_m3": 8.312486207145187e-06,
+          "relation": "OVERLAP",
+          "role_a": "gripper_bar",
+          "role_b": "left_finger",
+          "scope": "FINGER_TO_ATTACHMENT_COMPONENT_REQUIRES_ASSEMBLY_SEMANTIC_REVIEW",
+          "signed_chebyshev_margin_m": 0.006787508072946466,
+          "tolerance_m": 1e-08
+        },
+        {
+          "collider_a": "/workcell/vx300s_left/vx300s_left_gripper_link/collisions/vx300s_9_gripper_bar/vx300s_9_gripper_bar",
+          "collider_b": "/workcell/vx300s_left/vx300s_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh",
+          "hull_a": {
+            "face_count": 172,
+            "input_point_count": 22764,
+            "vertex_count": 88,
+            "volume_m3": 0.00040795484575735947
+          },
+          "hull_b": {
+            "face_count": 194,
+            "input_point_count": 831,
+            "vertex_count": 99,
+            "volume_m3": 5.5580780699106544e-05
+          },
+          "intersection_vertex_count": 139,
+          "method": "normalized convex-hull halfspace feasibility LP; positive margin means volumetric intersection",
+          "overlap_volume_m3": 8.31246799830906e-06,
+          "relation": "OVERLAP",
+          "role_a": "gripper_bar",
+          "role_b": "right_finger",
+          "scope": "FINGER_TO_ATTACHMENT_COMPONENT_REQUIRES_ASSEMBLY_SEMANTIC_REVIEW",
+          "signed_chebyshev_margin_m": 0.006787498464270819,
+          "tolerance_m": 1e-08
+        },
+        {
+          "collider_a": "/workcell/vx300s_left/vx300s_left_gripper_prop_link/collisions/vx300s_8_gripper_prop/vx300s_8_gripper_prop",
+          "collider_b": "/workcell/vx300s_left/vx300s_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh",
+          "hull_a": {
+            "face_count": 282,
+            "input_point_count": 1896,
+            "vertex_count": 143,
+            "volume_m3": 3.7077050531234797e-06
+          },
+          "hull_b": {
+            "face_count": 196,
+            "input_point_count": 831,
+            "vertex_count": 100,
+            "volume_m3": 5.558080220163855e-05
+          },
+          "intersection_vertex_count": 0,
+          "method": "normalized convex-hull halfspace feasibility LP; positive margin means volumetric intersection",
+          "overlap_volume_m3": 0.0,
+          "relation": "SEPARATED",
+          "role_a": "sliding_carriage",
+          "role_b": "left_finger",
+          "scope": "FINGER_TO_ATTACHMENT_COMPONENT_REQUIRES_ASSEMBLY_SEMANTIC_REVIEW",
+          "signed_chebyshev_margin_m": -0.005975372465466148,
+          "tolerance_m": 1e-08
+        },
+        {
+          "collider_a": "/workcell/vx300s_left/vx300s_left_gripper_prop_link/collisions/vx300s_8_gripper_prop/vx300s_8_gripper_prop",
+          "collider_b": "/workcell/vx300s_left/vx300s_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh",
+          "hull_a": {
+            "face_count": 282,
+            "input_point_count": 1896,
+            "vertex_count": 143,
+            "volume_m3": 3.7077050531234797e-06
+          },
+          "hull_b": {
+            "face_count": 194,
+            "input_point_count": 831,
+            "vertex_count": 99,
+            "volume_m3": 5.5580780699106544e-05
+          },
+          "intersection_vertex_count": 0,
+          "method": "normalized convex-hull halfspace feasibility LP; positive margin means volumetric intersection",
+          "overlap_volume_m3": 0.0,
+          "relation": "SEPARATED",
+          "role_a": "sliding_carriage",
+          "role_b": "right_finger",
+          "scope": "FINGER_TO_ATTACHMENT_COMPONENT_REQUIRES_ASSEMBLY_SEMANTIC_REVIEW",
+          "signed_chebyshev_margin_m": -0.005978622534271592,
+          "tolerance_m": 1e-08
+        },
+        {
+          "collider_a": "/workcell/vx300s_left/vx300s_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh",
+          "collider_b": "/workcell/vx300s_left/vx300s_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh",
+          "hull_a": {
+            "face_count": 196,
+            "input_point_count": 831,
+            "vertex_count": 100,
+            "volume_m3": 5.558080220163855e-05
+          },
+          "hull_b": {
+            "face_count": 194,
+            "input_point_count": 831,
+            "vertex_count": 99,
+            "volume_m3": 5.5580780699106544e-05
+          },
+          "intersection_vertex_count": 0,
+          "method": "normalized convex-hull halfspace feasibility LP; positive margin means volumetric intersection",
+          "overlap_volume_m3": 0.0,
+          "relation": "SEPARATED",
+          "role_a": "left_finger",
+          "role_b": "right_finger",
+          "scope": "FINGER_TO_FINGER_UNEXPECTED_IF_OVERLAP",
+          "signed_chebyshev_margin_m": -0.002057297138153567,
+          "tolerance_m": 1e-08
+        }
+      ],
+      "readback_m": [
+        0.020999999716877937,
+        -0.020999999716877937
+      ],
+      "state": "closed",
+      "target_m": [
+        0.021,
+        -0.021
+      ]
+    },
+    {
+      "colliders": [
+        {
+          "aabb_max_world_m": [
+            0.13046476244926453,
+            0.053535185754299164,
+            0.3123741149902344
+          ],
+          "aabb_min_world_m": [
+            0.08282463997602463,
+            0.013513397425413132,
+            0.2531222701072693
+          ],
+          "approximation": "convexHull",
+          "cooked_convex_face_count": 174,
+          "cooked_convex_vertex_count": 89,
+          "cooked_convex_volume_m3": 7.00898042542695e-05,
+          "instance_proxy": true,
+          "path": "/workcell/vx300s_left/vx300s_left_gripper_link/collisions/vx300s_7_gripper/vx300s_7_gripper",
+          "role": "gripper_shell",
+          "source_point_count": 27000
+        },
+        {
+          "aabb_max_world_m": [
+            0.16601115465164185,
+            0.11003376543521881,
+            0.31267020106315613
+          ],
+          "aabb_min_world_m": [
+            0.1024131253361702,
+            -0.04080379754304886,
+            0.24081873893737793
+          ],
+          "approximation": "convexHull",
+          "cooked_convex_face_count": 172,
+          "cooked_convex_vertex_count": 88,
+          "cooked_convex_volume_m3": 0.00040795484575735947,
+          "instance_proxy": true,
+          "path": "/workcell/vx300s_left/vx300s_left_gripper_link/collisions/vx300s_9_gripper_bar/vx300s_9_gripper_bar",
+          "role": "gripper_bar",
+          "source_point_count": 22764
+        },
+        {
+          "aabb_max_world_m": [
+            0.13988082110881805,
+            0.04422171413898468,
+            0.3049256503582001
+          ],
+          "aabb_min_world_m": [
+            0.1295626014471054,
+            0.02463892661035061,
+            0.2506968080997467
+          ],
+          "approximation": "convexHull",
+          "cooked_convex_face_count": 282,
+          "cooked_convex_vertex_count": 143,
+          "cooked_convex_volume_m3": 3.7077050531234797e-06,
+          "instance_proxy": true,
+          "path": "/workcell/vx300s_left/vx300s_left_gripper_prop_link/collisions/vx300s_8_gripper_prop/vx300s_8_gripper_prop",
+          "role": "sliding_carriage",
+          "source_point_count": 1896
+        },
+        {
+          "aabb_max_world_m": [
+            0.2448296844959259,
+            0.08283698558807373,
+            0.3098127543926239
+          ],
+          "aabb_min_world_m": [
+            0.14799077808856964,
+            0.056761402636766434,
+            0.2548331320285797
+          ],
+          "approximation": "convexHull",
+          "cooked_convex_face_count": 190,
+          "cooked_convex_vertex_count": 97,
+          "cooked_convex_volume_m3": 5.5580805032474927e-05,
+          "instance_proxy": false,
+          "path": "/workcell/vx300s_left/vx300s_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh",
+          "role": "left_finger",
+          "source_point_count": 831
+        },
+        {
+          "aabb_max_world_m": [
+            0.24569402635097504,
+            0.016337987035512924,
+            0.3093721270561218
+          ],
+          "aabb_min_world_m": [
+            0.14950257539749146,
+            -0.012933020479977131,
+            0.25452467799186707
+          ],
+          "approximation": "convexHull",
+          "cooked_convex_face_count": 190,
+          "cooked_convex_vertex_count": 97,
+          "cooked_convex_volume_m3": 5.55807820286792e-05,
+          "instance_proxy": false,
+          "path": "/workcell/vx300s_left/vx300s_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh",
+          "role": "right_finger",
+          "source_point_count": 831
+        }
+      ],
+      "pairs": [
+        {
+          "collider_a": "/workcell/vx300s_left/vx300s_left_gripper_link/collisions/vx300s_7_gripper/vx300s_7_gripper",
+          "collider_b": "/workcell/vx300s_left/vx300s_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh",
+          "hull_a": {
+            "face_count": 174,
+            "input_point_count": 27000,
+            "vertex_count": 89,
+            "volume_m3": 7.00898042542695e-05
+          },
+          "hull_b": {
+            "face_count": 190,
+            "input_point_count": 831,
+            "vertex_count": 97,
+            "volume_m3": 5.5580805032474927e-05
+          },
+          "intersection_vertex_count": 0,
+          "method": "normalized convex-hull halfspace feasibility LP; positive margin means volumetric intersection",
+          "overlap_volume_m3": 0.0,
+          "relation": "SEPARATED",
+          "role_a": "gripper_shell",
+          "role_b": "left_finger",
+          "scope": "FINGER_TO_ATTACHMENT_COMPONENT_REQUIRES_ASSEMBLY_SEMANTIC_REVIEW",
+          "signed_chebyshev_margin_m": -0.012272479389327483,
+          "tolerance_m": 1e-08
+        },
+        {
+          "collider_a": "/workcell/vx300s_left/vx300s_left_gripper_link/collisions/vx300s_7_gripper/vx300s_7_gripper",
+          "collider_b": "/workcell/vx300s_left/vx300s_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh",
+          "hull_a": {
+            "face_count": 174,
+            "input_point_count": 27000,
+            "vertex_count": 89,
+            "volume_m3": 7.00898042542695e-05
+          },
+          "hull_b": {
+            "face_count": 190,
+            "input_point_count": 831,
+            "vertex_count": 97,
+            "volume_m3": 5.55807820286792e-05
+          },
+          "intersection_vertex_count": 0,
+          "method": "normalized convex-hull halfspace feasibility LP; positive margin means volumetric intersection",
+          "overlap_volume_m3": 0.0,
+          "relation": "SEPARATED",
+          "role_a": "gripper_shell",
+          "role_b": "right_finger",
+          "scope": "FINGER_TO_ATTACHMENT_COMPONENT_REQUIRES_ASSEMBLY_SEMANTIC_REVIEW",
+          "signed_chebyshev_margin_m": -0.012272479846638257,
+          "tolerance_m": 1e-08
+        },
+        {
+          "collider_a": "/workcell/vx300s_left/vx300s_left_gripper_link/collisions/vx300s_9_gripper_bar/vx300s_9_gripper_bar",
+          "collider_b": "/workcell/vx300s_left/vx300s_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh",
+          "hull_a": {
+            "face_count": 172,
+            "input_point_count": 22764,
+            "vertex_count": 88,
+            "volume_m3": 0.00040795484575735947
+          },
+          "hull_b": {
+            "face_count": 190,
+            "input_point_count": 831,
+            "vertex_count": 97,
+            "volume_m3": 5.5580805032474927e-05
+          },
+          "intersection_vertex_count": 140,
+          "method": "normalized convex-hull halfspace feasibility LP; positive margin means volumetric intersection",
+          "overlap_volume_m3": 8.312494451281982e-06,
+          "relation": "OVERLAP",
+          "role_a": "gripper_bar",
+          "role_b": "left_finger",
+          "scope": "FINGER_TO_ATTACHMENT_COMPONENT_REQUIRES_ASSEMBLY_SEMANTIC_REVIEW",
+          "signed_chebyshev_margin_m": 0.006787512536989022,
+          "tolerance_m": 1e-08
+        },
+        {
+          "collider_a": "/workcell/vx300s_left/vx300s_left_gripper_link/collisions/vx300s_9_gripper_bar/vx300s_9_gripper_bar",
+          "collider_b": "/workcell/vx300s_left/vx300s_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh",
+          "hull_a": {
+            "face_count": 172,
+            "input_point_count": 22764,
+            "vertex_count": 88,
+            "volume_m3": 0.00040795484575735947
+          },
+          "hull_b": {
+            "face_count": 190,
+            "input_point_count": 831,
+            "vertex_count": 97,
+            "volume_m3": 5.55807820286792e-05
+          },
+          "intersection_vertex_count": 138,
+          "method": "normalized convex-hull halfspace feasibility LP; positive margin means volumetric intersection",
+          "overlap_volume_m3": 8.312462521588218e-06,
+          "relation": "OVERLAP",
+          "role_a": "gripper_bar",
+          "role_b": "right_finger",
+          "scope": "FINGER_TO_ATTACHMENT_COMPONENT_REQUIRES_ASSEMBLY_SEMANTIC_REVIEW",
+          "signed_chebyshev_margin_m": 0.006787495384539835,
+          "tolerance_m": 1e-08
+        },
+        {
+          "collider_a": "/workcell/vx300s_left/vx300s_left_gripper_prop_link/collisions/vx300s_8_gripper_prop/vx300s_8_gripper_prop",
+          "collider_b": "/workcell/vx300s_left/vx300s_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh",
+          "hull_a": {
+            "face_count": 282,
+            "input_point_count": 1896,
+            "vertex_count": 143,
+            "volume_m3": 3.7077050531234797e-06
+          },
+          "hull_b": {
+            "face_count": 190,
+            "input_point_count": 831,
+            "vertex_count": 97,
+            "volume_m3": 5.5580805032474927e-05
+          },
+          "intersection_vertex_count": 0,
+          "method": "normalized convex-hull halfspace feasibility LP; positive margin means volumetric intersection",
+          "overlap_volume_m3": 0.0,
+          "relation": "SEPARATED",
+          "role_a": "sliding_carriage",
+          "role_b": "left_finger",
+          "scope": "FINGER_TO_ATTACHMENT_COMPONENT_REQUIRES_ASSEMBLY_SEMANTIC_REVIEW",
+          "signed_chebyshev_margin_m": -0.01072698096866484,
+          "tolerance_m": 1e-08
+        },
+        {
+          "collider_a": "/workcell/vx300s_left/vx300s_left_gripper_prop_link/collisions/vx300s_8_gripper_prop/vx300s_8_gripper_prop",
+          "collider_b": "/workcell/vx300s_left/vx300s_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh",
+          "hull_a": {
+            "face_count": 282,
+            "input_point_count": 1896,
+            "vertex_count": 143,
+            "volume_m3": 3.7077050531234797e-06
+          },
+          "hull_b": {
+            "face_count": 190,
+            "input_point_count": 831,
+            "vertex_count": 97,
+            "volume_m3": 5.55807820286792e-05
+          },
+          "intersection_vertex_count": 0,
+          "method": "normalized convex-hull halfspace feasibility LP; positive margin means volumetric intersection",
+          "overlap_volume_m3": 0.0,
+          "relation": "SEPARATED",
+          "role_a": "sliding_carriage",
+          "role_b": "right_finger",
+          "scope": "FINGER_TO_ATTACHMENT_COMPONENT_REQUIRES_ASSEMBLY_SEMANTIC_REVIEW",
+          "signed_chebyshev_margin_m": -0.010757235880587999,
+          "tolerance_m": 1e-08
+        },
+        {
+          "collider_a": "/workcell/vx300s_left/vx300s_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh",
+          "collider_b": "/workcell/vx300s_left/vx300s_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh",
+          "hull_a": {
+            "face_count": 190,
+            "input_point_count": 831,
+            "vertex_count": 97,
+            "volume_m3": 5.5580805032474927e-05
+          },
+          "hull_b": {
+            "face_count": 190,
+            "input_point_count": 831,
+            "vertex_count": 97,
+            "volume_m3": 5.55807820286792e-05
+          },
+          "intersection_vertex_count": 0,
+          "method": "normalized convex-hull halfspace feasibility LP; positive margin means volumetric intersection",
+          "overlap_volume_m3": 0.0,
+          "relation": "SEPARATED",
+          "role_a": "left_finger",
+          "role_b": "right_finger",
+          "scope": "FINGER_TO_FINGER_UNEXPECTED_IF_OVERLAP",
+          "signed_chebyshev_margin_m": -0.018558622196351002,
+          "tolerance_m": 1e-08
+        }
+      ],
+      "readback_m": [
+        0.039000000804662704,
+        -0.039000000804662704
+      ],
+      "state": "partial",
+      "target_m": [
+        0.039,
+        -0.039
+      ]
+    },
+    {
+      "colliders": [
+        {
+          "aabb_max_world_m": [
+            0.13046476244926453,
+            0.053535185754299164,
+            0.3123741149902344
+          ],
+          "aabb_min_world_m": [
+            0.08282463997602463,
+            0.013513397425413132,
+            0.2531222701072693
+          ],
+          "approximation": "convexHull",
+          "cooked_convex_face_count": 174,
+          "cooked_convex_vertex_count": 89,
+          "cooked_convex_volume_m3": 7.00898042542695e-05,
+          "instance_proxy": true,
+          "path": "/workcell/vx300s_left/vx300s_left_gripper_link/collisions/vx300s_7_gripper/vx300s_7_gripper",
+          "role": "gripper_shell",
+          "source_point_count": 27000
+        },
+        {
+          "aabb_max_world_m": [
+            0.16601115465164185,
+            0.11003376543521881,
+            0.31267020106315613
+          ],
+          "aabb_min_world_m": [
+            0.1024131253361702,
+            -0.04080379754304886,
+            0.24081873893737793
+          ],
+          "approximation": "convexHull",
+          "cooked_convex_face_count": 172,
+          "cooked_convex_vertex_count": 88,
+          "cooked_convex_volume_m3": 0.00040795484575735947,
+          "instance_proxy": true,
+          "path": "/workcell/vx300s_left/vx300s_left_gripper_link/collisions/vx300s_9_gripper_bar/vx300s_9_gripper_bar",
+          "role": "gripper_bar",
+          "source_point_count": 22764
+        },
+        {
+          "aabb_max_world_m": [
+            0.13988082110881805,
+            0.04422171413898468,
+            0.3049256503582001
+          ],
+          "aabb_min_world_m": [
+            0.1295626014471054,
+            0.02463892661035061,
+            0.2506968080997467
+          ],
+          "approximation": "convexHull",
+          "cooked_convex_face_count": 282,
+          "cooked_convex_vertex_count": 143,
+          "cooked_convex_volume_m3": 3.7077050531234797e-06,
+          "instance_proxy": true,
+          "path": "/workcell/vx300s_left/vx300s_left_gripper_prop_link/collisions/vx300s_8_gripper_prop/vx300s_8_gripper_prop",
+          "role": "sliding_carriage",
+          "source_point_count": 1896
+        },
+        {
+          "aabb_max_world_m": [
+            0.24447600543498993,
+            0.10083338618278503,
+            0.3098793923854828
+          ],
+          "aabb_min_world_m": [
+            0.14763709902763367,
+            0.07475779950618744,
+            0.2548997700214386
+          ],
+          "approximation": "convexHull",
+          "cooked_convex_face_count": 190,
+          "cooked_convex_vertex_count": 97,
+          "cooked_convex_volume_m3": 5.5580804753107394e-05,
+          "instance_proxy": false,
+          "path": "/workcell/vx300s_left/vx300s_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh",
+          "role": "left_finger",
+          "source_point_count": 831
+        },
+        {
+          "aabb_max_world_m": [
+            0.2460477203130722,
+            -0.001658417284488678,
+            0.3093055188655853
+          ],
+          "aabb_min_world_m": [
+            0.14985626935958862,
+            -0.03092942386865616,
+            0.25445806980133057
+          ],
+          "approximation": "convexHull",
+          "cooked_convex_face_count": 192,
+          "cooked_convex_vertex_count": 98,
+          "cooked_convex_volume_m3": 5.5580782458678206e-05,
+          "instance_proxy": false,
+          "path": "/workcell/vx300s_left/vx300s_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh",
+          "role": "right_finger",
+          "source_point_count": 831
+        }
+      ],
+      "pairs": [
+        {
+          "collider_a": "/workcell/vx300s_left/vx300s_left_gripper_link/collisions/vx300s_7_gripper/vx300s_7_gripper",
+          "collider_b": "/workcell/vx300s_left/vx300s_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh",
+          "hull_a": {
+            "face_count": 174,
+            "input_point_count": 27000,
+            "vertex_count": 89,
+            "volume_m3": 7.00898042542695e-05
+          },
+          "hull_b": {
+            "face_count": 190,
+            "input_point_count": 831,
+            "vertex_count": 97,
+            "volume_m3": 5.5580804753107394e-05
+          },
+          "intersection_vertex_count": 0,
+          "method": "normalized convex-hull halfspace feasibility LP; positive margin means volumetric intersection",
+          "overlap_volume_m3": 0.0,
+          "relation": "SEPARATED",
+          "role_a": "gripper_shell",
+          "role_b": "left_finger",
+          "scope": "FINGER_TO_ATTACHMENT_COMPONENT_REQUIRES_ASSEMBLY_SEMANTIC_REVIEW",
+          "signed_chebyshev_margin_m": -0.018583916127932358,
+          "tolerance_m": 1e-08
+        },
+        {
+          "collider_a": "/workcell/vx300s_left/vx300s_left_gripper_link/collisions/vx300s_7_gripper/vx300s_7_gripper",
+          "collider_b": "/workcell/vx300s_left/vx300s_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh",
+          "hull_a": {
+            "face_count": 174,
+            "input_point_count": 27000,
+            "vertex_count": 89,
+            "volume_m3": 7.00898042542695e-05
+          },
+          "hull_b": {
+            "face_count": 192,
+            "input_point_count": 831,
+            "vertex_count": 98,
+            "volume_m3": 5.5580782458678206e-05
+          },
+          "intersection_vertex_count": 0,
+          "method": "normalized convex-hull halfspace feasibility LP; positive margin means volumetric intersection",
+          "overlap_volume_m3": 0.0,
+          "relation": "SEPARATED",
+          "role_a": "gripper_shell",
+          "role_b": "right_finger",
+          "scope": "FINGER_TO_ATTACHMENT_COMPONENT_REQUIRES_ASSEMBLY_SEMANTIC_REVIEW",
+          "signed_chebyshev_margin_m": -0.018583914785360808,
+          "tolerance_m": 1e-08
+        },
+        {
+          "collider_a": "/workcell/vx300s_left/vx300s_left_gripper_link/collisions/vx300s_9_gripper_bar/vx300s_9_gripper_bar",
+          "collider_b": "/workcell/vx300s_left/vx300s_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh",
+          "hull_a": {
+            "face_count": 172,
+            "input_point_count": 22764,
+            "vertex_count": 88,
+            "volume_m3": 0.00040795484575735947
+          },
+          "hull_b": {
+            "face_count": 190,
+            "input_point_count": 831,
+            "vertex_count": 97,
+            "volume_m3": 5.5580804753107394e-05
+          },
+          "intersection_vertex_count": 139,
+          "method": "normalized convex-hull halfspace feasibility LP; positive margin means volumetric intersection",
+          "overlap_volume_m3": 8.312487459305858e-06,
+          "relation": "OVERLAP",
+          "role_a": "gripper_bar",
+          "role_b": "left_finger",
+          "scope": "FINGER_TO_ATTACHMENT_COMPONENT_REQUIRES_ASSEMBLY_SEMANTIC_REVIEW",
+          "signed_chebyshev_margin_m": 0.0067875080922334095,
+          "tolerance_m": 1e-08
+        },
+        {
+          "collider_a": "/workcell/vx300s_left/vx300s_left_gripper_link/collisions/vx300s_9_gripper_bar/vx300s_9_gripper_bar",
+          "collider_b": "/workcell/vx300s_left/vx300s_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh",
+          "hull_a": {
+            "face_count": 172,
+            "input_point_count": 22764,
+            "vertex_count": 88,
+            "volume_m3": 0.00040795484575735947
+          },
+          "hull_b": {
+            "face_count": 192,
+            "input_point_count": 831,
+            "vertex_count": 98,
+            "volume_m3": 5.5580782458678206e-05
+          },
+          "intersection_vertex_count": 148,
+          "method": "normalized convex-hull halfspace feasibility LP; positive margin means volumetric intersection",
+          "overlap_volume_m3": 8.312454537117544e-06,
+          "relation": "OVERLAP",
+          "role_a": "gripper_bar",
+          "role_b": "right_finger",
+          "scope": "FINGER_TO_ATTACHMENT_COMPONENT_REQUIRES_ASSEMBLY_SEMANTIC_REVIEW",
+          "signed_chebyshev_margin_m": 0.006787490738496448,
+          "tolerance_m": 1e-08
+        },
+        {
+          "collider_a": "/workcell/vx300s_left/vx300s_left_gripper_prop_link/collisions/vx300s_8_gripper_prop/vx300s_8_gripper_prop",
+          "collider_b": "/workcell/vx300s_left/vx300s_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh",
+          "hull_a": {
+            "face_count": 282,
+            "input_point_count": 1896,
+            "vertex_count": 143,
+            "volume_m3": 3.7077050531234797e-06
+          },
+          "hull_b": {
+            "face_count": 190,
+            "input_point_count": 831,
+            "vertex_count": 97,
+            "volume_m3": 5.5580804753107394e-05
+          },
+          "intersection_vertex_count": 0,
+          "method": "normalized convex-hull halfspace feasibility LP; positive margin means volumetric intersection",
+          "overlap_volume_m3": 0.0,
+          "relation": "SEPARATED",
+          "role_a": "sliding_carriage",
+          "role_b": "left_finger",
+          "scope": "FINGER_TO_ATTACHMENT_COMPONENT_REQUIRES_ASSEMBLY_SEMANTIC_REVIEW",
+          "signed_chebyshev_margin_m": -0.018527300108765715,
+          "tolerance_m": 1e-08
+        },
+        {
+          "collider_a": "/workcell/vx300s_left/vx300s_left_gripper_prop_link/collisions/vx300s_8_gripper_prop/vx300s_8_gripper_prop",
+          "collider_b": "/workcell/vx300s_left/vx300s_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh",
+          "hull_a": {
+            "face_count": 282,
+            "input_point_count": 1896,
+            "vertex_count": 143,
+            "volume_m3": 3.7077050531234797e-06
+          },
+          "hull_b": {
+            "face_count": 192,
+            "input_point_count": 831,
+            "vertex_count": 98,
+            "volume_m3": 5.5580782458678206e-05
+          },
+          "intersection_vertex_count": 0,
+          "method": "normalized convex-hull halfspace feasibility LP; positive margin means volumetric intersection",
+          "overlap_volume_m3": 0.0,
+          "relation": "SEPARATED",
+          "role_a": "sliding_carriage",
+          "role_b": "right_finger",
+          "scope": "FINGER_TO_ATTACHMENT_COMPONENT_REQUIRES_ASSEMBLY_SEMANTIC_REVIEW",
+          "signed_chebyshev_margin_m": -0.018528279551979346,
+          "tolerance_m": 1e-08
+        },
+        {
+          "collider_a": "/workcell/vx300s_left/vx300s_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh",
+          "collider_b": "/workcell/vx300s_left/vx300s_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh",
+          "hull_a": {
+            "face_count": 190,
+            "input_point_count": 831,
+            "vertex_count": 97,
+            "volume_m3": 5.5580804753107394e-05
+          },
+          "hull_b": {
+            "face_count": 192,
+            "input_point_count": 831,
+            "vertex_count": 98,
+            "volume_m3": 5.5580782458678206e-05
+          },
+          "intersection_vertex_count": 0,
+          "method": "normalized convex-hull halfspace feasibility LP; positive margin means volumetric intersection",
+          "overlap_volume_m3": 0.0,
+          "relation": "SEPARATED",
+          "role_a": "left_finger",
+          "role_b": "right_finger",
+          "scope": "FINGER_TO_FINGER_UNEXPECTED_IF_OVERLAP",
+          "signed_chebyshev_margin_m": -0.03505995764013341,
+          "tolerance_m": 1e-08
+        }
+      ],
+      "readback_m": [
+        0.05700000002980232,
+        -0.05700000002980232
+      ],
+      "state": "maximum_legal_aperture",
+      "target_m": [
+        0.057,
+        -0.057
+      ]
+    }
+  ],
+  "status": "PARTIAL"
+}

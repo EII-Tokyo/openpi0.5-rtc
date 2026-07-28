@@ -1,0 +1,182 @@
+{
+  "causal_findings": [
+    {
+      "cause": "disjoint_root_joint_frame",
+      "evidence": "runtime_numeric_ablation",
+      "result": "corrected by computed body-frame relation"
+    },
+    {
+      "cause": "finger_drive_max_force_zero",
+      "evidence": "runtime_readback_and_5N_URDF_effort_ablation",
+      "result": "causal for failed finger tracking"
+    },
+    {
+      "cause": "arm_drive_max_force_zero",
+      "evidence": "runtime_readback_and_generated_URDF_effort_ablation",
+      "result": "causal for arm drift"
+    }
+  ],
+  "classification": "ROOT_FRAME_AND_AUTHORED_MAX_FORCE_CAUSES_ISOLATED_NUMERIC_PASS_AUXILIARY_VIEWPORT_REPLAY_PASS",
+  "evidence_classification": {
+    "diagnostic_only_not_final": [
+      "root-frame layer",
+      "finger maxForce layer",
+      "arm maxForce layer"
+    ],
+    "engineering_inference": [
+      "isolated variable changes establish the listed causal chain"
+    ],
+    "numerical_calculation": [
+      "base translation drift",
+      "arm DOF drift",
+      "finger target/readback errors"
+    ],
+    "official_or_generated_source_direct": [
+      "finger effort limit 5 N from generated follower URDF",
+      "six arm effort limits from generated follower URDF"
+    ],
+    "runtime_readback": [
+      "diagnostic profile metrics and drive readback",
+      "source and diagnostic Stage hashes before/after runtime"
+    ]
+  },
+  "gate": "TASK5_NO_BOTTLE_DYNAMIC_STRUCTURE",
+  "inputs": {
+    "arm_max_force_over_combined": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_cad_finger_task5_drive_probe_arm_max_force_over_combined.json",
+      "sha256": "78438748488d683baaa71aab6209e86ca1d65e1d73ca2dc9b9579eef4c5cfda6"
+    },
+    "baseline": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_cad_finger_task5_drive_probe_baseline.json",
+      "sha256": "9c118a4a7ee07777e5133fae6c98f0ceb0ee4baac704e6fe7f6f69cee2de30d3"
+    },
+    "finger_max_force_only": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_cad_finger_task5_drive_probe_max_force_only.json",
+      "sha256": "be8704e96572ce54e4724a8662bc5765b33d16fff1742dc2771a55f647f7e2e5"
+    },
+    "finger_max_force_plus_root_frame": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_cad_finger_task5_drive_probe_max_force_plus_root_frame_v2.json",
+      "sha256": "1b3eb2a6a2583667f4db1b44158000ca0976183b0495c57cfd007b270345c335"
+    },
+    "root_frame_only": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_cad_finger_task5_drive_probe_root_frame_only.json",
+      "sha256": "8f890c1c77249c6c93e32ca6108cb63d49ed94e519b8e1c29c688f2255938b0a"
+    }
+  },
+  "numeric_structure_gate": "PASS",
+  "profiles": {
+    "arm_max_force_over_combined": {
+      "all_intended_directions_correct": true,
+      "arm_max_force": {
+        "vx300s_left_elbow": 15.0,
+        "vx300s_left_forearm_roll": 2.0,
+        "vx300s_left_shoulder": 20.0,
+        "vx300s_left_waist": 10.0,
+        "vx300s_left_wrist_angle": 5.0,
+        "vx300s_left_wrist_rotate": 1.0
+      },
+      "finger_max_force_n": {
+        "left": 5.0,
+        "right": 5.0
+      },
+      "maximum_arm_dof_drift": 0.00011813640594482422,
+      "maximum_base_translation_drift_m": 2.8704777510466835e-05,
+      "maximum_intended_final_error_m": 4.6566128730773926e-08,
+      "maximum_non_target_finger_drift_m": 7.450580596923828e-07,
+      "no_bottle": true,
+      "profile": "arm_max_force_over_combined",
+      "stage_immutable": true,
+      "status": "PASS"
+    },
+    "baseline": {
+      "all_intended_directions_correct": false,
+      "arm_max_force": {},
+      "finger_max_force_n": {
+        "left": 0.0,
+        "right": 0.0
+      },
+      "maximum_arm_dof_drift": 3.1416146755218506,
+      "maximum_base_translation_drift_m": 0.07621378540066791,
+      "maximum_intended_final_error_m": 0.036000000312924385,
+      "maximum_non_target_finger_drift_m": 0.035193854942917824,
+      "no_bottle": true,
+      "profile": "baseline",
+      "stage_immutable": true,
+      "status": "FAIL"
+    },
+    "finger_max_force_only": {
+      "all_intended_directions_correct": true,
+      "arm_max_force": {},
+      "finger_max_force_n": {
+        "left": 5.0,
+        "right": 5.0
+      },
+      "maximum_arm_dof_drift": 3.141624927520752,
+      "maximum_base_translation_drift_m": 0.07587826770883903,
+      "maximum_intended_final_error_m": 0.0019563771784305573,
+      "maximum_non_target_finger_drift_m": 0.0010578371584415436,
+      "no_bottle": true,
+      "profile": "max_force_only",
+      "stage_immutable": true,
+      "status": "FAIL"
+    },
+    "finger_max_force_plus_root_frame": {
+      "all_intended_directions_correct": true,
+      "arm_max_force": {
+        "vx300s_left_elbow": 0.0,
+        "vx300s_left_forearm_roll": 0.0,
+        "vx300s_left_shoulder": 0.0,
+        "vx300s_left_waist": 0.0,
+        "vx300s_left_wrist_angle": 0.0,
+        "vx300s_left_wrist_rotate": 0.0
+      },
+      "finger_max_force_n": {
+        "left": 5.0,
+        "right": 5.0
+      },
+      "maximum_arm_dof_drift": 2.583995819091797,
+      "maximum_base_translation_drift_m": 0.00016009792266131527,
+      "maximum_intended_final_error_m": 0.0006032977253198624,
+      "maximum_non_target_finger_drift_m": 0.00023367255926132202,
+      "no_bottle": true,
+      "profile": "max_force_plus_root_frame",
+      "stage_immutable": true,
+      "status": "FAIL"
+    },
+    "root_frame_only": {
+      "all_intended_directions_correct": false,
+      "arm_max_force": {},
+      "finger_max_force_n": {
+        "left": 0.0,
+        "right": 0.0
+      },
+      "maximum_arm_dof_drift": 2.911573886871338,
+      "maximum_base_translation_drift_m": 0.0001893070557417628,
+      "maximum_intended_final_error_m": 0.036000000312924385,
+      "maximum_non_target_finger_drift_m": 0.03571098856627941,
+      "no_bottle": true,
+      "profile": "root_frame_only",
+      "stage_immutable": true,
+      "status": "FAIL"
+    }
+  },
+  "promotion": {
+    "allowed": false,
+    "reason": "This remains a diagnostic-only profile; no default/final asset promotion was authorized."
+  },
+  "runtime_screenshot_history": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_cad_finger_task5_runtime_screenshot_blocker.json",
+    "code": "HARD_BLOCKER_RUNTIME_CAMERA_EMPTY_BUFFER_ON_ROOT_FRAME_DIAGNOSTIC"
+  },
+  "schema_version": 1,
+  "scope": {
+    "bottle_contact_grasp": "NOT_RUN",
+    "default_or_final_asset_modified": false,
+    "dynamic_runtime_screenshots": "PASS_AUXILIARY_RUNTIME_READBACK_REPLAY",
+    "static_structure_screenshots": "PASS",
+    "task7": "NOT_RUN",
+    "task8": "NOT_RUN"
+  },
+  "status": "PASS",
+  "visual_runtime_gate": "PASS_AUXILIARY_RUNTIME_READBACK_REPLAY"
+}

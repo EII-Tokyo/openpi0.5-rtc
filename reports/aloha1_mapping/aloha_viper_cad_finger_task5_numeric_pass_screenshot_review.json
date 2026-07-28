@@ -1,0 +1,389 @@
+{
+  "acceptance_boundary": "These Isaac viewport images replay exact readbacks from the machine-readable numeric trajectory in fresh resets. They are valid auxiliary visual evidence for finger state/direction, but are not same-frame physics, contact, collision, or grasp proof.",
+  "capture_count": 3,
+  "captures": [
+    {
+      "annotated": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/task5_numeric_pass_runtime_replay_annotation/screenshots_annotated/open_maximum_legal_aperture_frame_0001_annotated.png",
+        "mode": "RGB",
+        "readable": true,
+        "resolution": [
+          1900,
+          900
+        ],
+        "sha256": "eaa4842299a7bb87df933f09302836af3cfd61455063446dc67c3fb95f1e8b3a"
+      },
+      "camera": {
+        "capture_backend": "omni.kit.viewport.utility.capture_viewport_to_file",
+        "fixed_camera_for_all_phases": true,
+        "orientation_wxyz": [
+          0.7153890132904053,
+          0.4249306619167328,
+          -0.29887449741363525,
+          -0.4672542214393616
+        ],
+        "position_world_m": [
+          -0.6394227147102356,
+          0.3435142934322357,
+          0.5204766988754272
+        ],
+        "resolution": [
+          1280,
+          900
+        ],
+        "target_world_m": [
+          -0.24676114171026128,
+          0.5000032527387931,
+          0.30136218953935967
+        ],
+        "view": "base_oblique"
+      },
+      "capture_name": "open_maximum_legal_aperture_frame_0001",
+      "phase": "open_maximum_legal_aperture",
+      "raw": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/task5_numeric_pass_runtime_replay/screenshots_raw/open_maximum_legal_aperture_frame_0001_raw.png",
+        "mode": "RGBA",
+        "readable": true,
+        "resolution": [
+          1280,
+          900
+        ],
+        "sha256": "6713a5ccd1c57688ab49d982c7cd0d94c26a860cef0568d4f86829eba9f29b2d"
+      },
+      "simulation": {
+        "acceptance_boundary": "AUXILIARY QPOS REPLAY OF NUMERIC-PASS TRACE; NOT SAME-FRAME CONTACT OR GRASP EVIDENCE",
+        "all_dof_readback": [
+          4.138846634305082e-06,
+          -0.959773063659668,
+          1.16013503074646,
+          4.243401053827256e-05,
+          -0.29917800426483154,
+          2.455090179864783e-05,
+          0.05679286643862724,
+          -0.056784503161907196
+        ],
+        "bottle_present": false,
+        "capture_method": "RUNTIME_READBACK_REPLAY_AUXILIARY",
+        "capture_physics_step": false,
+        "command_left_m": 0.056699998676776886,
+        "command_right_m": -0.056699998676776886,
+        "diagnostic_profile": "arm_max_force_over_combined",
+        "isaac_sim": "5.1.0.0",
+        "kit": "107.3.3",
+        "phase": "open_maximum_legal_aperture",
+        "physx": "107.3.26",
+        "readback_left_m": 0.05679286643862724,
+        "readback_right_m": -0.056784503161907196,
+        "runtime_finger_center_world_m": [
+          -0.24676114171026128,
+          0.5000032527387931,
+          0.30136218953935967
+        ],
+        "source_numeric_report": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_cad_finger_task5_drive_probe_arm_max_force_over_combined.json",
+        "source_numeric_report_sha256": "78438748488d683baaa71aab6209e86ca1d65e1d73ca2dc9b9579eef4c5cfda6",
+        "source_runtime_frame": 1,
+        "source_runtime_time_s": 0.016666666666666666,
+        "source_trajectory": "symmetric_close",
+        "stage_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_arm_max_force_over_combined/aloha_viperx_supplier_cad_arm_max_force_over_combined.usda",
+        "stage_sha256": "5bc3bb5ab7fd7ce8fd3028894394ca5915a278e5a996d016a5868a164593ac40"
+      },
+      "visual_model_review": {
+        "annotated": "PASS",
+        "checks": {
+          "annotations_do_not_cover_key_geometry": true,
+          "blue_left_orange_right_mapping_correct": true,
+          "both_handed_fingers_fully_visible": true,
+          "fixed_camera_exact": true,
+          "inward_surfaces_opposed": true,
+          "labels_do_not_overlap": true,
+          "no_critical_crop": true,
+          "no_critical_occlusion": true,
+          "numeric_only_and_auxiliary_wording_explicit": true,
+          "states_visually_distinct": true
+        },
+        "conclusion": "Both handed fingers and inward surfaces are visible; crop, occlusion, color mapping, fixed camera, state distinction, labels, arrows, and auxiliary-evidence wording pass individual visual inspection.",
+        "raw": "PASS",
+        "retake_reason": null,
+        "status": "PASS"
+      }
+    },
+    {
+      "annotated": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/task5_numeric_pass_runtime_replay_annotation/screenshots_annotated/partially_closed_frame_0061_annotated.png",
+        "mode": "RGB",
+        "readable": true,
+        "resolution": [
+          1900,
+          900
+        ],
+        "sha256": "292859bbb570a62883b9f3d4347c768f1b6f7f72263fe07eb5241d0a42e329e4"
+      },
+      "camera": {
+        "capture_backend": "omni.kit.viewport.utility.capture_viewport_to_file",
+        "fixed_camera_for_all_phases": true,
+        "orientation_wxyz": [
+          0.7153890132904053,
+          0.4249306619167328,
+          -0.29887449741363525,
+          -0.4672542214393616
+        ],
+        "position_world_m": [
+          -0.6394227147102356,
+          0.3435142934322357,
+          0.5204766988754272
+        ],
+        "resolution": [
+          1280,
+          900
+        ],
+        "target_world_m": [
+          -0.24676114171026128,
+          0.5000032527387931,
+          0.30136218953935967
+        ],
+        "view": "base_oblique"
+      },
+      "capture_name": "partially_closed_frame_0061",
+      "phase": "partially_closed",
+      "raw": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/task5_numeric_pass_runtime_replay/screenshots_raw/partially_closed_frame_0061_raw.png",
+        "mode": "RGBA",
+        "readable": true,
+        "resolution": [
+          1280,
+          900
+        ],
+        "sha256": "d5380f8de116c099357b5c199cef288be456165663edba0b5006992f224d52be"
+      },
+      "simulation": {
+        "acceptance_boundary": "AUXILIARY QPOS REPLAY OF NUMERIC-PASS TRACE; NOT SAME-FRAME CONTACT OR GRASP EVIDENCE",
+        "all_dof_readback": [
+          1.5915004496491747e-06,
+          -0.9599807262420654,
+          1.159956455230713,
+          3.914915578207001e-05,
+          -0.3001176118850708,
+          1.7042366380337626e-05,
+          0.03859834745526314,
+          -0.038597412407398224
+        ],
+        "bottle_present": false,
+        "capture_method": "RUNTIME_READBACK_REPLAY_AUXILIARY",
+        "capture_physics_step": false,
+        "command_left_m": 0.03869999945163727,
+        "command_right_m": -0.03869999945163727,
+        "diagnostic_profile": "arm_max_force_over_combined",
+        "isaac_sim": "5.1.0.0",
+        "kit": "107.3.3",
+        "phase": "partially_closed",
+        "physx": "107.3.26",
+        "readback_left_m": 0.03859834745526314,
+        "readback_right_m": -0.038597412407398224,
+        "runtime_finger_center_world_m": [
+          -0.24680165169148668,
+          0.49999913743615293,
+          0.30161616455418394
+        ],
+        "source_numeric_report": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_cad_finger_task5_drive_probe_arm_max_force_over_combined.json",
+        "source_numeric_report_sha256": "78438748488d683baaa71aab6209e86ca1d65e1d73ca2dc9b9579eef4c5cfda6",
+        "source_runtime_frame": 61,
+        "source_runtime_time_s": 1.0166666666666666,
+        "source_trajectory": "symmetric_close",
+        "stage_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_arm_max_force_over_combined/aloha_viperx_supplier_cad_arm_max_force_over_combined.usda",
+        "stage_sha256": "5bc3bb5ab7fd7ce8fd3028894394ca5915a278e5a996d016a5868a164593ac40"
+      },
+      "visual_model_review": {
+        "annotated": "PASS",
+        "checks": {
+          "annotations_do_not_cover_key_geometry": true,
+          "blue_left_orange_right_mapping_correct": true,
+          "both_handed_fingers_fully_visible": true,
+          "fixed_camera_exact": true,
+          "inward_surfaces_opposed": true,
+          "labels_do_not_overlap": true,
+          "no_critical_crop": true,
+          "no_critical_occlusion": true,
+          "numeric_only_and_auxiliary_wording_explicit": true,
+          "states_visually_distinct": true
+        },
+        "conclusion": "Both handed fingers and inward surfaces are visible; crop, occlusion, color mapping, fixed camera, state distinction, labels, arrows, and auxiliary-evidence wording pass individual visual inspection.",
+        "raw": "PASS",
+        "retake_reason": null,
+        "status": "PASS"
+      }
+    },
+    {
+      "annotated": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/task5_numeric_pass_runtime_replay_annotation/screenshots_annotated/closed_frame_0120_annotated.png",
+        "mode": "RGB",
+        "readable": true,
+        "resolution": [
+          1900,
+          900
+        ],
+        "sha256": "061f2b28a9a65f0405444c092255061a2bff68c031d781cb00440d28c9294360"
+      },
+      "camera": {
+        "capture_backend": "omni.kit.viewport.utility.capture_viewport_to_file",
+        "fixed_camera_for_all_phases": true,
+        "orientation_wxyz": [
+          0.7153890132904053,
+          0.4249306619167328,
+          -0.29887449741363525,
+          -0.4672542214393616
+        ],
+        "position_world_m": [
+          -0.6394227147102356,
+          0.3435142934322357,
+          0.5204766988754272
+        ],
+        "resolution": [
+          1280,
+          900
+        ],
+        "target_world_m": [
+          -0.24676114171026128,
+          0.5000032527387931,
+          0.30136218953935967
+        ],
+        "view": "base_oblique"
+      },
+      "capture_name": "closed_frame_0120",
+      "phase": "closed",
+      "raw": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/task5_numeric_pass_runtime_replay/screenshots_raw/closed_frame_0120_raw.png",
+        "mode": "RGBA",
+        "readable": true,
+        "resolution": [
+          1280,
+          900
+        ],
+        "sha256": "3643856658f4b454456876a54ce91dc5a457b922d8e4d2574db40d7d81050cb3"
+      },
+      "simulation": {
+        "acceptance_boundary": "AUXILIARY QPOS REPLAY OF NUMERIC-PASS TRACE; NOT SAME-FRAME CONTACT OR GRASP EVIDENCE",
+        "all_dof_readback": [
+          1.592531475580472e-06,
+          -0.9599807262420654,
+          1.159956455230713,
+          4.041336796944961e-05,
+          -0.3001175820827484,
+          1.748606882756576e-05,
+          0.021000046283006668,
+          -0.020999999716877937
+        ],
+        "bottle_present": false,
+        "capture_method": "RUNTIME_READBACK_REPLAY_AUXILIARY",
+        "capture_physics_step": false,
+        "command_left_m": 0.021000001579523087,
+        "command_right_m": -0.021000001579523087,
+        "diagnostic_profile": "arm_max_force_over_combined",
+        "isaac_sim": "5.1.0.0",
+        "kit": "107.3.3",
+        "phase": "closed",
+        "physx": "107.3.26",
+        "readback_left_m": 0.021000046283006668,
+        "readback_right_m": -0.020999999716877937,
+        "runtime_finger_center_world_m": [
+          -0.24680165146734168,
+          0.49999864467573224,
+          0.3016161792580975
+        ],
+        "source_numeric_report": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_cad_finger_task5_drive_probe_arm_max_force_over_combined.json",
+        "source_numeric_report_sha256": "78438748488d683baaa71aab6209e86ca1d65e1d73ca2dc9b9579eef4c5cfda6",
+        "source_runtime_frame": 120,
+        "source_runtime_time_s": 2.0,
+        "source_trajectory": "symmetric_close",
+        "stage_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_arm_max_force_over_combined/aloha_viperx_supplier_cad_arm_max_force_over_combined.usda",
+        "stage_sha256": "5bc3bb5ab7fd7ce8fd3028894394ca5915a278e5a996d016a5868a164593ac40"
+      },
+      "visual_model_review": {
+        "annotated": "PASS",
+        "checks": {
+          "annotations_do_not_cover_key_geometry": true,
+          "blue_left_orange_right_mapping_correct": true,
+          "both_handed_fingers_fully_visible": true,
+          "fixed_camera_exact": true,
+          "inward_surfaces_opposed": true,
+          "labels_do_not_overlap": true,
+          "no_critical_crop": true,
+          "no_critical_occlusion": true,
+          "numeric_only_and_auxiliary_wording_explicit": true,
+          "states_visually_distinct": true
+        },
+        "conclusion": "Both handed fingers and inward surfaces are visible; crop, occlusion, color mapping, fixed camera, state distinction, labels, arrows, and auxiliary-evidence wording pass individual visual inspection.",
+        "raw": "PASS",
+        "retake_reason": null,
+        "status": "PASS"
+      }
+    }
+  ],
+  "gate": "TASK5_NUMERIC_PASS_RUNTIME_READBACK_VISUAL_AUXILIARY",
+  "gates": {
+    "all_annotated_visual_reviews_pass": true,
+    "all_raw_visual_reviews_pass": true,
+    "annotated_images_byte_distinct": true,
+    "capture_count": true,
+    "fixed_camera_exact": true,
+    "left_aperture_monotonic_close": true,
+    "no_bottle": true,
+    "not_same_frame_physics_evidence": true,
+    "numeric_report_immutable": true,
+    "raw_images_byte_distinct": true,
+    "right_aperture_monotonic_close": true,
+    "source_stage_immutable": true
+  },
+  "retake_history": [
+    {
+      "attempt": "sensor_camera_replay_1",
+      "reason": "Camera.get_rgba returned shape=[0]",
+      "status": "REJECTED_ZERO_SIZE_ARRAY_HELPER_ERROR"
+    },
+    {
+      "attempt": "sensor_camera_replay_2",
+      "reason": "Camera.get_rgba remained shape=[0] after render polling",
+      "status": "REJECTED_EMPTY_CAMERA_BUFFER"
+    },
+    {
+      "attempt": "sensor_camera_replay_3",
+      "reason": "fresh process reproduced shape=[0]",
+      "status": "REJECTED_EMPTY_CAMERA_BUFFER"
+    },
+    {
+      "attempt": "viewport_probe_1",
+      "reason": "capture preceded active-camera propagation",
+      "status": "REJECTED_DEFAULT_CAMERA_TOO_DISTANT"
+    },
+    {
+      "attempt": "viewport_probe_2_3_4",
+      "reason": "camera used the pre-root-correction finger center and captured background/table instead of the runtime gripper",
+      "status": "REJECTED_STALE_CAMERA_TARGET"
+    },
+    {
+      "attempt": "viewport_probe_5",
+      "reason": "unfiltered workcell geometry obscured the fingers",
+      "status": "REJECTED_WORKCELL_OCCLUSION"
+    },
+    {
+      "attempt": "viewport_probe_6",
+      "reason": "runtime finger-mesh world center and session-only visual filter produced an inspectable closed-state capture",
+      "status": "ACCEPTED_MINIMAL_PROBE"
+    },
+    {
+      "attempt": "numeric_pass_runtime_replay_final",
+      "reason": "three raw and three annotated captures were individually reviewed with one fixed camera",
+      "status": "ACCEPTED_VISUAL_MODEL_REVIEW"
+    }
+  ],
+  "schema_version": 1,
+  "scope": {
+    "bottle_contact_grasp": "NOT_RUN",
+    "default_or_final_asset_modified": false,
+    "numeric_structure_gate": "PASS",
+    "same_frame_dynamic_capture": "NOT_AVAILABLE",
+    "task7": "NOT_RUN",
+    "task8": "NOT_RUN"
+  },
+  "screenshot_status": "PASS_AUXILIARY_RUNTIME_READBACK_REPLAY",
+  "status": "PASS"
+}

@@ -1,0 +1,745 @@
+{
+  "acceptance_boundary": "Screenshot review validates visibility, installed handedness, phase distinction and annotation integrity only. Runtime contact, pose, velocity, maximum drop, penetration and repeat data remain authoritative for the static-hold result.",
+  "all_annotated_vision_reviews_pass": true,
+  "all_raw_vision_reviews_pass": true,
+  "annotated_capture_count": 4,
+  "fixed_camera_across_phases": true,
+  "gate": "TASK5_SUPPLIER_CAD_BOTTLE_SCREENSHOT_VISUAL_REVIEW",
+  "raw_capture_count": 4,
+  "records": [
+    {
+      "annotated": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/task5_bottle_acceptance_v3_annotation_attempt2/screenshots_annotated/open_annotated.png",
+        "mode": "RGB",
+        "readable": true,
+        "resolution": [
+          1900,
+          900
+        ],
+        "sha256": "514bf2611e198ab90d6c3d151300726d67f6735a5d05d4123e5cad5c378c6d4c",
+        "visual_model_review": "PASS"
+      },
+      "camera": {
+        "capture_backend": "omni.kit.viewport.utility.capture_viewport_to_file",
+        "contact_projection": {},
+        "fixed_camera_for_all_phases": true,
+        "orientation_wxyz": [
+          0.5371320843696594,
+          0.44889500737190247,
+          0.4545191824436188,
+          0.5508127808570862
+        ],
+        "position_world_m": [
+          0.32462286949157715,
+          0.5107553005218506,
+          0.4092475473880768
+        ],
+        "resolution": [
+          1280,
+          900
+        ],
+        "target_world_m": [
+          -0.2475082625138487,
+          0.4999982566896615,
+          0.30224168980236377
+        ],
+        "view": "fixed_tip_end_contact"
+      },
+      "contact_projection_count": 0,
+      "phase": "open",
+      "raw": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/task5_bottle_acceptance_v3/screenshots_raw/open_raw.png",
+        "mode": "RGBA",
+        "readable": true,
+        "resolution": [
+          1280,
+          900
+        ],
+        "sha256": "aa0e3a68d3a739e16d157e17cb1263d353ecd244963423cb92f0be9ca139f3b4",
+        "visual_model_review": "PASS"
+      },
+      "simulation": {
+        "acceptance_boundary": "AUXILIARY PHYSICS SCREENSHOT; MACHINE CONTACT, POSE, VELOCITY, DROP AND PENETRATION DATA ARE AUTHORITATIVE",
+        "bottle": {
+          "angular_speed_rad_s": 0.0,
+          "angular_velocity_world_rad_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "linear_velocity_world_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "orientation_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "position_world_m": [
+            -0.20649629831314087,
+            0.500000536441803,
+            0.3043752610683441
+          ],
+          "vertical_velocity_m_s": 0.0,
+          "z_m": 0.3043752610683441
+        },
+        "capture_physics_state_unchanged": true,
+        "capture_physics_steps_added": 0,
+        "collider_type": "SUPPLIER_CAD_V2_CONVEX_HULL_DIAGNOSTIC",
+        "contact_state": {
+          "bottle_kinematic": true,
+          "left": false,
+          "right": false
+        },
+        "frame": 209,
+        "isaac_sim": "5.1.0.0",
+        "joint_readback": [
+          5.67725692235399e-06,
+          -0.9599964618682861,
+          1.160032033920288,
+          4.954866744810715e-05,
+          -0.30048102140426636,
+          -1.4214139810064808e-05,
+          0.056998223066329956,
+          -0.05699765682220459
+        ],
+        "kit": "107.3.3",
+        "phase": "open",
+        "physx": "107.3.26",
+        "robot": "follower_left",
+        "stage_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_bottle/aloha_viperx_supplier_cad_bottle_task5.usda",
+        "stage_sha256": "62697e4b25a7ec82234cc9ebd79d4a6d530a6ead0165519cbd275c0fa3f32178",
+        "time_s": 3.4833333333333334
+      },
+      "visual_model_review": {
+        "checks": {
+          "annotations_do_not_cover_key_geometry": true,
+          "blue_left_finger_cad_positive_x_mapping_correct": true,
+          "both_fingers_fully_visible": true,
+          "bottle_visible": true,
+          "fixed_camera_pose": true,
+          "inward_surfaces_visible_and_opposed": true,
+          "labels_do_not_overlap": true,
+          "no_critical_crop": true,
+          "no_shell_occlusion_of_contact_geometry": true,
+          "orange_right_finger_cad_negative_x_mapping_correct": true,
+          "pass_wording_limited_to_phase_gate": true
+        },
+        "conclusion": "The supplier-CAD handed fingers, inward surfaces, bottle and phase evidence are visible. Mapping, crop, occlusion, labels, contact projection and phase-limited PASS wording passed individual visual inspection.",
+        "retake_reason": null,
+        "status": "PASS"
+      }
+    },
+    {
+      "annotated": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/task5_bottle_acceptance_v3_annotation_attempt2/screenshots_annotated/bilateral_contact_annotated.png",
+        "mode": "RGB",
+        "readable": true,
+        "resolution": [
+          1900,
+          900
+        ],
+        "sha256": "37d7eae704b9b4f8c9f5e8b4a7e1005e8ebca14d0c818e29684bb1a07867fcc6",
+        "visual_model_review": "PASS"
+      },
+      "camera": {
+        "capture_backend": "omni.kit.viewport.utility.capture_viewport_to_file",
+        "contact_projection": {
+          "left": {
+            "contact_pixel_xy": [
+              820.0979092496743,
+              408.30617920852586
+            ],
+            "normal_arrow_length_world_m": 0.02,
+            "normal_endpoint_pixel_xy": [
+              934.6868696503623,
+              411.3458759674959
+            ],
+            "normal_endpoint_world_m": [
+              -0.20148784905672074,
+              0.5522581136226654,
+              0.31822450262727214
+            ],
+            "normal_world": [
+              0.09540419280529022,
+              0.995438277721405,
+              -0.0007876245072111487
+            ],
+            "position_world_m": [
+              -0.20339593291282654,
+              0.5323493480682373,
+              0.3182402551174164
+            ],
+            "projection_method": "isaacsim.sensors.camera.Camera.get_image_coords_from_world_points"
+          },
+          "right": {
+            "contact_pixel_xy": [
+              451.5061756213313,
+              406.5302735897808
+            ],
+            "normal_arrow_length_world_m": 0.02,
+            "normal_endpoint_pixel_xy": [
+              336.9333066381837,
+              407.2759256547186
+            ],
+            "normal_endpoint_world_m": [
+              -0.20058613687753676,
+              0.44782682657241824,
+              0.3180893178150291
+            ],
+            "normal_world": [
+              0.09530054032802582,
+              -0.9954485297203064,
+              0.00015554510173387825
+            ],
+            "position_world_m": [
+              -0.2024921476840973,
+              0.46773579716682434,
+              0.3180862069129944
+            ],
+            "projection_method": "isaacsim.sensors.camera.Camera.get_image_coords_from_world_points"
+          }
+        },
+        "fixed_camera_for_all_phases": true,
+        "orientation_wxyz": [
+          0.5371320843696594,
+          0.44889500737190247,
+          0.4545191824436188,
+          0.5508127808570862
+        ],
+        "position_world_m": [
+          0.32462286949157715,
+          0.5107553005218506,
+          0.4092475473880768
+        ],
+        "resolution": [
+          1280,
+          900
+        ],
+        "target_world_m": [
+          -0.2475082625138487,
+          0.4999982566896615,
+          0.30224168980236377
+        ],
+        "view": "fixed_tip_end_contact"
+      },
+      "contact_projection_count": 2,
+      "phase": "bilateral_contact",
+      "raw": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/task5_bottle_acceptance_v3/screenshots_raw/bilateral_contact_raw.png",
+        "mode": "RGBA",
+        "readable": true,
+        "resolution": [
+          1280,
+          900
+        ],
+        "sha256": "a3163ae62a895de8b9055266d3e9dd2b39917a28972e3a0f4d6f914ada218c75",
+        "visual_model_review": "PASS"
+      },
+      "simulation": {
+        "acceptance_boundary": "AUXILIARY PHYSICS SCREENSHOT; MACHINE CONTACT, POSE, VELOCITY, DROP AND PENETRATION DATA ARE AUTHORITATIVE",
+        "bottle": {
+          "angular_speed_rad_s": 0.0,
+          "angular_velocity_world_rad_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "linear_velocity_world_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "orientation_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "position_world_m": [
+            -0.20649629831314087,
+            0.500000536441803,
+            0.3043752610683441
+          ],
+          "vertical_velocity_m_s": 0.0,
+          "z_m": 0.3043752610683441
+        },
+        "capture_physics_state_unchanged": true,
+        "capture_physics_steps_added": 0,
+        "collider_type": "SUPPLIER_CAD_V2_CONVEX_HULL_DIAGNOSTIC",
+        "contact_state": {
+          "bottle_kinematic": true,
+          "fixed_stage_not_hold_pass": true,
+          "left": true,
+          "right": true
+        },
+        "frame": 389,
+        "isaac_sim": "5.1.0.0",
+        "joint_readback": [
+          7.4169543040625285e-06,
+          -0.9600147008895874,
+          1.1599875688552856,
+          0.0001994551857933402,
+          -0.30067628622055054,
+          -0.0002697635209187865,
+          0.04684589430689812,
+          -0.04697231948375702
+        ],
+        "kit": "107.3.3",
+        "phase": "bilateral_contact",
+        "physx": "107.3.26",
+        "robot": "follower_left",
+        "stage_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_bottle/aloha_viperx_supplier_cad_bottle_task5.usda",
+        "stage_sha256": "62697e4b25a7ec82234cc9ebd79d4a6d530a6ead0165519cbd275c0fa3f32178",
+        "time_s": 6.483333333333333
+      },
+      "visual_model_review": {
+        "checks": {
+          "annotations_do_not_cover_key_geometry": true,
+          "blue_left_finger_cad_positive_x_mapping_correct": true,
+          "both_fingers_fully_visible": true,
+          "bottle_visible": true,
+          "fixed_camera_pose": true,
+          "inward_surfaces_visible_and_opposed": true,
+          "labels_do_not_overlap": true,
+          "no_critical_crop": true,
+          "no_shell_occlusion_of_contact_geometry": true,
+          "orange_right_finger_cad_negative_x_mapping_correct": true,
+          "pass_wording_limited_to_phase_gate": true
+        },
+        "conclusion": "The supplier-CAD handed fingers, inward surfaces, bottle and phase evidence are visible. Mapping, crop, occlusion, labels, contact projection and phase-limited PASS wording passed individual visual inspection.",
+        "retake_reason": null,
+        "status": "PASS"
+      }
+    },
+    {
+      "annotated": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/task5_bottle_acceptance_v3_annotation_attempt2/screenshots_annotated/release_annotated.png",
+        "mode": "RGB",
+        "readable": true,
+        "resolution": [
+          1900,
+          900
+        ],
+        "sha256": "b3ea4d9b650df80e4d479ff23201a3412e61ced58bb28abd9fe1f4c4fee05893",
+        "visual_model_review": "PASS"
+      },
+      "camera": {
+        "capture_backend": "omni.kit.viewport.utility.capture_viewport_to_file",
+        "contact_projection": {
+          "left": {
+            "contact_pixel_xy": [
+              820.0979092496743,
+              408.30617920852586
+            ],
+            "normal_arrow_length_world_m": 0.02,
+            "normal_endpoint_pixel_xy": [
+              934.6868696503623,
+              411.3458759674959
+            ],
+            "normal_endpoint_world_m": [
+              -0.20148784905672074,
+              0.5522581136226654,
+              0.31822450262727214
+            ],
+            "normal_world": [
+              0.09540419280529022,
+              0.995438277721405,
+              -0.0007876245072111487
+            ],
+            "position_world_m": [
+              -0.20339593291282654,
+              0.5323493480682373,
+              0.3182402551174164
+            ],
+            "projection_method": "isaacsim.sensors.camera.Camera.get_image_coords_from_world_points"
+          },
+          "right": {
+            "contact_pixel_xy": [
+              451.5061756213313,
+              406.5302735897808
+            ],
+            "normal_arrow_length_world_m": 0.02,
+            "normal_endpoint_pixel_xy": [
+              336.9333066381837,
+              407.2759256547186
+            ],
+            "normal_endpoint_world_m": [
+              -0.20058613687753676,
+              0.44782682657241824,
+              0.3180893178150291
+            ],
+            "normal_world": [
+              0.09530054032802582,
+              -0.9954485297203064,
+              0.00015554510173387825
+            ],
+            "position_world_m": [
+              -0.2024921476840973,
+              0.46773579716682434,
+              0.3180862069129944
+            ],
+            "projection_method": "isaacsim.sensors.camera.Camera.get_image_coords_from_world_points"
+          }
+        },
+        "fixed_camera_for_all_phases": true,
+        "orientation_wxyz": [
+          0.5371320843696594,
+          0.44889500737190247,
+          0.4545191824436188,
+          0.5508127808570862
+        ],
+        "position_world_m": [
+          0.32462286949157715,
+          0.5107553005218506,
+          0.4092475473880768
+        ],
+        "resolution": [
+          1280,
+          900
+        ],
+        "target_world_m": [
+          -0.2475082625138487,
+          0.4999982566896615,
+          0.30224168980236377
+        ],
+        "view": "fixed_tip_end_contact"
+      },
+      "contact_projection_count": 2,
+      "phase": "release",
+      "raw": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/task5_bottle_acceptance_v3/screenshots_raw/release_raw.png",
+        "mode": "RGBA",
+        "readable": true,
+        "resolution": [
+          1280,
+          900
+        ],
+        "sha256": "e2028d8e0dc3586371e86614dda4ad6674b901fd2809e7f976f1dd96b9c9e324",
+        "visual_model_review": "PASS"
+      },
+      "simulation": {
+        "acceptance_boundary": "AUXILIARY PHYSICS SCREENSHOT; MACHINE CONTACT, POSE, VELOCITY, DROP AND PENETRATION DATA ARE AUTHORITATIVE",
+        "bottle": {
+          "angular_speed_rad_s": 0.0,
+          "angular_velocity_world_rad_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "linear_velocity_world_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "orientation_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "position_world_m": [
+            -0.20649629831314087,
+            0.500000536441803,
+            0.3043752610683441
+          ],
+          "vertical_velocity_m_s": 0.0,
+          "z_m": 0.3043752610683441
+        },
+        "capture_physics_state_unchanged": true,
+        "capture_physics_steps_added": 0,
+        "collider_type": "SUPPLIER_CAD_V2_CONVEX_HULL_DIAGNOSTIC",
+        "contact_state": {
+          "bottle_kinematic": false,
+          "constraint_found": false,
+          "left": true,
+          "right": true
+        },
+        "frame": 389,
+        "isaac_sim": "5.1.0.0",
+        "joint_readback": [
+          7.4169543040625285e-06,
+          -0.9600147008895874,
+          1.1599875688552856,
+          0.0001994551857933402,
+          -0.30067628622055054,
+          -0.0002697635209187865,
+          0.04684589430689812,
+          -0.04697231948375702
+        ],
+        "kit": "107.3.3",
+        "phase": "release",
+        "physx": "107.3.26",
+        "robot": "follower_left",
+        "stage_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_bottle/aloha_viperx_supplier_cad_bottle_task5.usda",
+        "stage_sha256": "62697e4b25a7ec82234cc9ebd79d4a6d530a6ead0165519cbd275c0fa3f32178",
+        "time_s": 6.483333333333333
+      },
+      "visual_model_review": {
+        "checks": {
+          "annotations_do_not_cover_key_geometry": true,
+          "blue_left_finger_cad_positive_x_mapping_correct": true,
+          "both_fingers_fully_visible": true,
+          "bottle_visible": true,
+          "fixed_camera_pose": true,
+          "inward_surfaces_visible_and_opposed": true,
+          "labels_do_not_overlap": true,
+          "no_critical_crop": true,
+          "no_shell_occlusion_of_contact_geometry": true,
+          "orange_right_finger_cad_negative_x_mapping_correct": true,
+          "pass_wording_limited_to_phase_gate": true
+        },
+        "conclusion": "The supplier-CAD handed fingers, inward surfaces, bottle and phase evidence are visible. Mapping, crop, occlusion, labels, contact projection and phase-limited PASS wording passed individual visual inspection.",
+        "retake_reason": null,
+        "status": "PASS"
+      }
+    },
+    {
+      "annotated": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/task5_bottle_acceptance_v3_annotation_attempt2/screenshots_annotated/hold_end_annotated.png",
+        "mode": "RGB",
+        "readable": true,
+        "resolution": [
+          1900,
+          900
+        ],
+        "sha256": "47af0b523ec3b4aa3d9662138cd3a119ef771c99da3800d644334824c03afcc9",
+        "visual_model_review": "PASS"
+      },
+      "camera": {
+        "capture_backend": "omni.kit.viewport.utility.capture_viewport_to_file",
+        "contact_projection": {
+          "left": {
+            "contact_pixel_xy": [
+              821.4977319173995,
+              409.9988913444465
+            ],
+            "normal_arrow_length_world_m": 0.02,
+            "normal_endpoint_pixel_xy": [
+              936.285729624626,
+              412.85436211069396
+            ],
+            "normal_endpoint_world_m": [
+              -0.20058538928627967,
+              0.5524713873863221,
+              0.3181166369712446
+            ],
+            "normal_world": [
+              0.09505628794431686,
+              0.9954714775085449,
+              0.000888203561771661
+            ],
+            "position_world_m": [
+              -0.20248651504516602,
+              0.5325619578361511,
+              0.31809887290000916
+            ],
+            "projection_method": "isaacsim.sensors.camera.Camera.get_image_coords_from_world_points"
+          },
+          "right": {
+            "contact_pixel_xy": [
+              453.59280300835513,
+              406.31629708380916
+            ],
+            "normal_arrow_length_world_m": 0.02,
+            "normal_endpoint_pixel_xy": [
+              339.15816789460285,
+              407.1309659623612
+            ],
+            "normal_endpoint_world_m": [
+              -0.2012040151655674,
+              0.4481434655189514,
+              0.31801161058829164
+            ],
+            "normal_world": [
+              0.09534069150686264,
+              -0.9954445958137512,
+              -0.00046348170144483447
+            ],
+            "position_world_m": [
+              -0.20311082899570465,
+              0.46805235743522644,
+              0.31802088022232056
+            ],
+            "projection_method": "isaacsim.sensors.camera.Camera.get_image_coords_from_world_points"
+          }
+        },
+        "fixed_camera_for_all_phases": true,
+        "orientation_wxyz": [
+          0.5371320843696594,
+          0.44889500737190247,
+          0.4545191824436188,
+          0.5508127808570862
+        ],
+        "position_world_m": [
+          0.32462286949157715,
+          0.5107553005218506,
+          0.4092475473880768
+        ],
+        "resolution": [
+          1280,
+          900
+        ],
+        "target_world_m": [
+          -0.2475082625138487,
+          0.4999982566896615,
+          0.30224168980236377
+        ],
+        "view": "fixed_tip_end_contact"
+      },
+      "contact_projection_count": 2,
+      "phase": "hold_end",
+      "raw": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/task5_bottle_acceptance_v3/screenshots_raw/hold_end_raw.png",
+        "mode": "RGBA",
+        "readable": true,
+        "resolution": [
+          1280,
+          900
+        ],
+        "sha256": "2525138d1f07e28c1be17c7bbb447d3d47a7b080d3c18d2f7348edc495008cf3",
+        "visual_model_review": "PASS"
+      },
+      "simulation": {
+        "acceptance_boundary": "AUXILIARY PHYSICS SCREENSHOT; MACHINE CONTACT, POSE, VELOCITY, DROP AND PENETRATION DATA ARE AUTHORITATIVE",
+        "bottle": {
+          "angular_speed_rad_s": 0.5712070703863446,
+          "angular_velocity_world_rad_s": [
+            -0.14801336824893951,
+            -0.309678316116333,
+            0.4565839469432831
+          ],
+          "linear_velocity_world_m_s": [
+            -0.010308436118066311,
+            0.023893607780337334,
+            0.06703243404626846
+          ],
+          "orientation_wxyz": [
+            1.0,
+            0.00018533018010202795,
+            0.00018469529459252954,
+            -7.71007253206335e-05
+          ],
+          "position_world_m": [
+            -0.20649948716163635,
+            0.5003072023391724,
+            0.30420753359794617
+          ],
+          "vertical_velocity_m_s": 0.06703243404626846,
+          "z_m": 0.30420753359794617
+        },
+        "capture_physics_state_unchanged": true,
+        "capture_physics_steps_added": 0,
+        "collider_type": "SUPPLIER_CAD_V2_CONVEX_HULL_DIAGNOSTIC",
+        "contact_state": {
+          "bottle_kinematic": false,
+          "drop_gate_m": 0.01,
+          "drop_m": 0.0004539191722869873,
+          "left": true,
+          "right": true
+        },
+        "frame": 509,
+        "isaac_sim": "5.1.0.0",
+        "joint_readback": [
+          3.0223052817746066e-05,
+          -0.9599210023880005,
+          1.1600227355957031,
+          4.316189733799547e-05,
+          -0.2998335659503937,
+          4.488652484724298e-05,
+          0.047200243920087814,
+          -0.046442661434412
+        ],
+        "kit": "107.3.3",
+        "phase": "hold_end",
+        "physx": "107.3.26",
+        "robot": "follower_left",
+        "stage_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_bottle/aloha_viperx_supplier_cad_bottle_task5.usda",
+        "stage_sha256": "62697e4b25a7ec82234cc9ebd79d4a6d530a6ead0165519cbd275c0fa3f32178",
+        "time_s": 8.483333333333333
+      },
+      "visual_model_review": {
+        "checks": {
+          "annotations_do_not_cover_key_geometry": true,
+          "blue_left_finger_cad_positive_x_mapping_correct": true,
+          "both_fingers_fully_visible": true,
+          "bottle_visible": true,
+          "fixed_camera_pose": true,
+          "inward_surfaces_visible_and_opposed": true,
+          "labels_do_not_overlap": true,
+          "no_critical_crop": true,
+          "no_shell_occlusion_of_contact_geometry": true,
+          "orange_right_finger_cad_negative_x_mapping_correct": true,
+          "pass_wording_limited_to_phase_gate": true
+        },
+        "conclusion": "The supplier-CAD handed fingers, inward surfaces, bottle and phase evidence are visible. Mapping, crop, occlusion, labels, contact projection and phase-limited PASS wording passed individual visual inspection.",
+        "retake_reason": null,
+        "status": "PASS"
+      }
+    }
+  ],
+  "retake_history": [
+    {
+      "attempt": "attempt3",
+      "reason": "The gripper shell obscured the supplier-CAD fingers and viewport update calls could advance physics during capture.",
+      "status": "REJECTED_OCCLUSION_AND_UNCOUNTED_STEP_RISK"
+    },
+    {
+      "attempt": "attempt4",
+      "reason": "Session-only shell hiding exposed both fingers; capture paused the timeline and asserted zero physics steps and unchanged state.",
+      "status": "PASS_SMOKE_VIEW_AND_CAPTURE_STATE"
+    },
+    {
+      "attempt": "acceptance_v1",
+      "reason": "The first 20-run batch predated the explicit separation<=0 physical-contact gate and camera projection of contact normals.",
+      "status": "SUPERSEDED_BY_CONTACT_SEMANTICS_AND_PROJECTION"
+    },
+    {
+      "attempt": "acceptance_v2",
+      "reason": "The second batch added contact projection but did not yet use the maximum drop over the complete hold interval.",
+      "status": "SUPERSEDED_BY_FULL_INTERVAL_DROP_GATE"
+    },
+    {
+      "attempt": "v3_annotation_first",
+      "reason": "Open, bilateral-contact and release panels incorrectly repeated the hold-end pose-derived velocity context.",
+      "status": "REJECTED_PHASE_CONTEXT_MISLABEL"
+    },
+    {
+      "attempt": "v3_annotation_attempt2",
+      "reason": "All four raw and all four corrected annotated captures were individually inspected with the vision model.",
+      "status": "PASS"
+    }
+  ],
+  "runtime_repeat_summary": {
+    "all_trials_pass": true,
+    "complete": true,
+    "deterministic": true,
+    "fail_count": 0,
+    "failure_modes": [],
+    "maximum_drop_m": 0.0004539191722869873,
+    "mean_drop_m": 0.0004539191722869873,
+    "minimum_drop_m": 0.0004539191722869873,
+    "pass_count": 20,
+    "required_repeats": 20,
+    "status": "PASS",
+    "trial_count": 20,
+    "unique_signature_count": 1
+  },
+  "runtime_report_status": "PASS",
+  "schema_version": 1,
+  "screenshot_is_auxiliary": true,
+  "source_annotation_metadata": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/task5_bottle_acceptance_v3_annotation_attempt2/annotation_metadata.json",
+    "sha256": "cd2e72f199e14dd11e1c8dc11a8ed5085b4ffc221c4ef0d2d0fc71bd67cf8ca5"
+  },
+  "source_runtime_report": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_cad_finger_task5_bottle.json",
+    "sha256": "36e638256b706bbd8b83a88290a0e67ccd4b97e186cae11cd61ec9ec95a00c75"
+  },
+  "status": "PASS",
+  "task8": "NOT_RUN",
+  "visual_review_method": "Each of four raw and four annotated images was opened and inspected individually with the vision model on 2026-07-29."
+}

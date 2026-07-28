@@ -1,0 +1,93 @@
+{
+  "attempts": [
+    {
+      "accepted_capture": false,
+      "attempt": 1,
+      "error_excerpt": "2026-07-28T21:33:17Z [9,146ms] [Error] [omni.kit.app._impl] [py stderr]: ValueError: zero-size array to reduction operation fmax which has no identity",
+      "failure": "ZERO_SIZE_CAMERA_BUFFER_HELPER_ERROR",
+      "raw_png_count": 0,
+      "raw_screenshot_directory": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/task5_drive_probe_root_frame_only_replay/screenshots_raw",
+      "status": "FAIL",
+      "stderr_log": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-063308_aloha-task5-root-frame-drive-replay-capture/stderr.log",
+        "sha256": "5fc70d70df6bcee51dd3e261bb8edcec69d3fe5be3dfee55b20675277681933d"
+      },
+      "stdout_log": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-063308_aloha-task5-root-frame-drive-replay-capture/stdout.log",
+        "sha256": "8864c7776306585b58f524639ddbfb4425fdd948ec3e4a5d4b289020e573936d"
+      }
+    },
+    {
+      "accepted_capture": false,
+      "attempt": 2,
+      "error_excerpt": "2026-07-28T21:34:37Z [9,604ms] [Error] [omni.kit.app._impl] [py stderr]: RuntimeError: Isaac camera remained blank after render polling: shape=[0], rgb_spread=None",
+      "failure": "CAMERA_REMAINED_EMPTY_AFTER_RENDER_POLLING",
+      "raw_png_count": 0,
+      "raw_screenshot_directory": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/task5_drive_probe_root_frame_only_replay_attempt2/screenshots_raw",
+      "status": "FAIL",
+      "stderr_log": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-063427_aloha-task5-root-frame-drive-replay-capture-attempt2/stderr.log",
+        "sha256": "cc5e73c2e8da698e57a16606c5ad902f2faa4cfffde93a788b2535ac45d851f9"
+      },
+      "stdout_log": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-063427_aloha-task5-root-frame-drive-replay-capture-attempt2/stdout.log",
+        "sha256": "cfaf9842f32cacd5c2f5f1fbf418b23bb89b6dea3168b6568ec39aca812c860d"
+      }
+    },
+    {
+      "accepted_capture": false,
+      "attempt": 3,
+      "error_excerpt": "2026-07-28T21:36:14Z [9,552ms] [Error] [omni.kit.app._impl] [py stderr]: RuntimeError: Isaac camera remained blank after render polling: shape=[0], rgb_spread=None",
+      "failure": "CAMERA_REMAINED_EMPTY_AFTER_RENDER_POLLING",
+      "raw_png_count": 0,
+      "raw_screenshot_directory": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/task5_drive_probe_root_frame_only_replay_attempt3/screenshots_raw",
+      "status": "FAIL",
+      "stderr_log": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-063604_aloha-task5-root-frame-drive-replay-capture-attempt3/stderr.log",
+        "sha256": "f0dc8d1421f6e251a50457385abfd854ae414e6dd1721614d85a8fc000157607"
+      },
+      "stdout_log": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-063604_aloha-task5-root-frame-drive-replay-capture-attempt3/stdout.log",
+        "sha256": "da1a6db058eaee39c3fb0884f96e296224a3f539066614df2bbf3ec659d946db"
+      }
+    }
+  ],
+  "blocker_code": "HARD_BLOCKER_RUNTIME_CAMERA_EMPTY_BUFFER_ON_ROOT_FRAME_DIAGNOSTIC",
+  "consequences": {
+    "bottle_contact_grasp": "NOT_RUN",
+    "bottle_test_allowed": true,
+    "dynamic_runtime_screenshot_gate": "PASS_AUXILIARY_RUNTIME_READBACK_REPLAY",
+    "task7": "NOT_RUN",
+    "task8": "NOT_RUN"
+  },
+  "observed_condition": "The fresh-process Isaac Camera RGBA buffer remained shape=[0] after render polling; no runtime replay PNG was accepted.",
+  "resolution": {
+    "capture_count": 3,
+    "cause": "The Sensor Camera buffer remained empty. The first viewport captures also used the stale pre-root-correction target. Recomputing the camera target from runtime CAD finger mesh world points produced three fixed-camera captures.",
+    "method": "omni.kit.viewport.utility.capture_viewport_to_file",
+    "same_frame_dynamic_capture": "NOT_AVAILABLE",
+    "screenshot_status": "PASS_AUXILIARY_RUNTIME_READBACK_REPLAY",
+    "status": "PASS",
+    "visual_review": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_cad_finger_task5_numeric_pass_screenshot_review.json",
+      "sha256": "5badb6dffab2a0c0c18be7ffaaa63875fd1de77b6883b294370797a0830a23b8"
+    }
+  },
+  "resolution_policy": "Do not retry the failed Sensor Camera path. The viewport replay is auxiliary state/direction evidence and is not same-frame contact or grasp evidence.",
+  "runtime": {
+    "isaac_sim": "5.1.0.0",
+    "kit": "107.3.3",
+    "physx": "107.3.26"
+  },
+  "schema_version": 1,
+  "scope": "TASK5_DYNAMIC_STRUCTURE_SCREENSHOT_GATE",
+  "static_structure_screenshot_evidence": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_cad_finger_task5_structure_screenshot_review.json",
+    "capture_records": 12,
+    "limitation": "Static USD structure visual evidence only; it does not satisfy the dynamic runtime screenshot gate.",
+    "sha256": "c876ac83b309816f5098886e92283ab5fae6824d8e6e524997a9f983c2418dc3",
+    "status": "PASS"
+  },
+  "status": "RESOLVED_WITH_ALTERNATE_VIEWPORT_BACKEND",
+  "three_attempt_stop_rule_applied": true
+}

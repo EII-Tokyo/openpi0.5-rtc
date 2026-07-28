@@ -1,0 +1,1208 @@
+{
+  "acceptance_boundary": "This validates only the isolated supplier-CAD follower_left diagnostic. It does not promote the collider/configuration, claim calibrated dynamics, validate follower_right, or run a lift trajectory.",
+  "all_stage_articulation_roots": [
+    "/workcell/table/table",
+    "/workcell/midair/midair",
+    "/workcell/vx300s_left/vx300s_left",
+    "/workcell/table_frame_T/table_frame_T",
+    "/workcell/placeholder_pipe/placeholder_pipe",
+    "/workcell/worldBody"
+  ],
+  "approved_source": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_assets/aloha_viperx.usd",
+    "sha256": "b24afe3678155654892c69517fc58ecd970108d68cec56b02dc6fdcb8bf4493e"
+  },
+  "checks": [
+    {
+      "evidence": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_assets/aloha_viperx.usd",
+        "actual_sha256": "b24afe3678155654892c69517fc58ecd970108d68cec56b02dc6fdcb8bf4493e",
+        "expected_sha256": "b24afe3678155654892c69517fc58ecd970108d68cec56b02dc6fdcb8bf4493e"
+      },
+      "name": "approved_source_hash_immutable",
+      "status": "PASS"
+    },
+    {
+      "evidence": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_bottle/aloha_viperx_supplier_cad_bottle_task5.usda",
+        "actual_sha256": "62697e4b25a7ec82234cc9ebd79d4a6d530a6ead0165519cbd275c0fa3f32178",
+        "expected_sha256": "62697e4b25a7ec82234cc9ebd79d4a6d530a6ead0165519cbd275c0fa3f32178"
+      },
+      "name": "diagnostic_stage_hash",
+      "status": "PASS"
+    },
+    {
+      "evidence": {
+        "unresolved": []
+      },
+      "name": "external_references_resolve",
+      "status": "PASS"
+    },
+    {
+      "evidence": {
+        "actual": [
+          "/workcell/vx300s_left/vx300s_left"
+        ],
+        "all_stage_articulation_roots": [
+          "/workcell/table/table",
+          "/workcell/midair/midair",
+          "/workcell/vx300s_left/vx300s_left",
+          "/workcell/table_frame_T/table_frame_T",
+          "/workcell/placeholder_pipe/placeholder_pipe",
+          "/workcell/worldBody"
+        ],
+        "expected": [
+          "/workcell/vx300s_left/vx300s_left"
+        ],
+        "note": "Fixed environment assemblies also carry ArticulationRootAPI; the robot-scoped count is the acceptance gate."
+      },
+      "name": "one_robot_articulation_root",
+      "status": "PASS"
+    },
+    {
+      "evidence": {
+        "actual": [
+          "vx300s_left_waist",
+          "vx300s_left_shoulder",
+          "vx300s_left_elbow",
+          "vx300s_left_forearm_roll",
+          "vx300s_left_wrist_angle",
+          "vx300s_left_wrist_rotate",
+          "vx300s_left_left_finger",
+          "vx300s_left_right_finger"
+        ],
+        "expected": [
+          "vx300s_left_waist",
+          "vx300s_left_shoulder",
+          "vx300s_left_elbow",
+          "vx300s_left_forearm_roll",
+          "vx300s_left_wrist_angle",
+          "vx300s_left_wrist_rotate",
+          "vx300s_left_left_finger",
+          "vx300s_left_right_finger"
+        ]
+      },
+      "name": "dof_name_and_order",
+      "status": "PASS"
+    },
+    {
+      "evidence": {
+        "dofs": [
+          {
+            "drive_type": "force",
+            "has_drive": true,
+            "initial_matches_target": false,
+            "max_force": 10.0,
+            "max_velocity": 1000000.0,
+            "mimic": false,
+            "name": "vx300s_left_waist",
+            "path": "/workcell/joints/vx300s_left_waist",
+            "state_position": null,
+            "target_position": 0.0
+          },
+          {
+            "drive_type": "force",
+            "has_drive": true,
+            "initial_matches_target": false,
+            "max_force": 20.0,
+            "max_velocity": 1000000.0,
+            "mimic": false,
+            "name": "vx300s_left_shoulder",
+            "path": "/workcell/joints/vx300s_left_shoulder",
+            "state_position": null,
+            "target_position": 0.0
+          },
+          {
+            "drive_type": "force",
+            "has_drive": true,
+            "initial_matches_target": false,
+            "max_force": 15.0,
+            "max_velocity": 1000000.0,
+            "mimic": false,
+            "name": "vx300s_left_elbow",
+            "path": "/workcell/joints/vx300s_left_elbow",
+            "state_position": null,
+            "target_position": 0.0
+          },
+          {
+            "drive_type": "force",
+            "has_drive": true,
+            "initial_matches_target": false,
+            "max_force": 2.0,
+            "max_velocity": 1000000.0,
+            "mimic": false,
+            "name": "vx300s_left_forearm_roll",
+            "path": "/workcell/joints/vx300s_left_forearm_roll",
+            "state_position": null,
+            "target_position": 0.0
+          },
+          {
+            "drive_type": "force",
+            "has_drive": true,
+            "initial_matches_target": false,
+            "max_force": 5.0,
+            "max_velocity": 1000000.0,
+            "mimic": false,
+            "name": "vx300s_left_wrist_angle",
+            "path": "/workcell/joints/vx300s_left_wrist_angle",
+            "state_position": null,
+            "target_position": 0.0
+          },
+          {
+            "drive_type": "force",
+            "has_drive": true,
+            "initial_matches_target": false,
+            "max_force": 1.0,
+            "max_velocity": 1000000.0,
+            "mimic": false,
+            "name": "vx300s_left_wrist_rotate",
+            "path": "/workcell/joints/vx300s_left_wrist_rotate",
+            "state_position": null,
+            "target_position": 0.0
+          },
+          {
+            "drive_type": "force",
+            "has_drive": true,
+            "initial_matches_target": false,
+            "max_force": 5.0,
+            "max_velocity": 1000000.0,
+            "mimic": false,
+            "name": "vx300s_left_left_finger",
+            "path": "/workcell/joints/vx300s_left_left_finger",
+            "state_position": null,
+            "target_position": 0.0
+          },
+          {
+            "drive_type": "force",
+            "has_drive": true,
+            "initial_matches_target": false,
+            "max_force": 5.0,
+            "max_velocity": 1000000.0,
+            "mimic": false,
+            "name": "vx300s_left_right_finger",
+            "path": "/workcell/joints/vx300s_left_right_finger",
+            "state_position": null,
+            "target_position": 0.0
+          }
+        ]
+      },
+      "name": "all_nonfixed_joints_have_drive_or_mimic",
+      "status": "PASS"
+    },
+    {
+      "evidence": {
+        "dofs": [
+          {
+            "drive_type": "force",
+            "has_drive": true,
+            "initial_matches_target": false,
+            "max_force": 10.0,
+            "max_velocity": 1000000.0,
+            "mimic": false,
+            "name": "vx300s_left_waist",
+            "path": "/workcell/joints/vx300s_left_waist",
+            "state_position": null,
+            "target_position": 0.0
+          },
+          {
+            "drive_type": "force",
+            "has_drive": true,
+            "initial_matches_target": false,
+            "max_force": 20.0,
+            "max_velocity": 1000000.0,
+            "mimic": false,
+            "name": "vx300s_left_shoulder",
+            "path": "/workcell/joints/vx300s_left_shoulder",
+            "state_position": null,
+            "target_position": 0.0
+          },
+          {
+            "drive_type": "force",
+            "has_drive": true,
+            "initial_matches_target": false,
+            "max_force": 15.0,
+            "max_velocity": 1000000.0,
+            "mimic": false,
+            "name": "vx300s_left_elbow",
+            "path": "/workcell/joints/vx300s_left_elbow",
+            "state_position": null,
+            "target_position": 0.0
+          },
+          {
+            "drive_type": "force",
+            "has_drive": true,
+            "initial_matches_target": false,
+            "max_force": 2.0,
+            "max_velocity": 1000000.0,
+            "mimic": false,
+            "name": "vx300s_left_forearm_roll",
+            "path": "/workcell/joints/vx300s_left_forearm_roll",
+            "state_position": null,
+            "target_position": 0.0
+          },
+          {
+            "drive_type": "force",
+            "has_drive": true,
+            "initial_matches_target": false,
+            "max_force": 5.0,
+            "max_velocity": 1000000.0,
+            "mimic": false,
+            "name": "vx300s_left_wrist_angle",
+            "path": "/workcell/joints/vx300s_left_wrist_angle",
+            "state_position": null,
+            "target_position": 0.0
+          },
+          {
+            "drive_type": "force",
+            "has_drive": true,
+            "initial_matches_target": false,
+            "max_force": 1.0,
+            "max_velocity": 1000000.0,
+            "mimic": false,
+            "name": "vx300s_left_wrist_rotate",
+            "path": "/workcell/joints/vx300s_left_wrist_rotate",
+            "state_position": null,
+            "target_position": 0.0
+          },
+          {
+            "drive_type": "force",
+            "has_drive": true,
+            "initial_matches_target": false,
+            "max_force": 5.0,
+            "max_velocity": 1000000.0,
+            "mimic": false,
+            "name": "vx300s_left_left_finger",
+            "path": "/workcell/joints/vx300s_left_left_finger",
+            "state_position": null,
+            "target_position": 0.0
+          },
+          {
+            "drive_type": "force",
+            "has_drive": true,
+            "initial_matches_target": false,
+            "max_force": 5.0,
+            "max_velocity": 1000000.0,
+            "mimic": false,
+            "name": "vx300s_left_right_finger",
+            "path": "/workcell/joints/vx300s_left_right_finger",
+            "state_position": null,
+            "target_position": 0.0
+          }
+        ]
+      },
+      "name": "finite_positive_max_velocity_and_force",
+      "status": "PASS"
+    },
+    {
+      "evidence": {
+        "dofs": [
+          {
+            "drive_type": "force",
+            "has_drive": true,
+            "initial_matches_target": false,
+            "max_force": 10.0,
+            "max_velocity": 1000000.0,
+            "mimic": false,
+            "name": "vx300s_left_waist",
+            "path": "/workcell/joints/vx300s_left_waist",
+            "state_position": null,
+            "target_position": 0.0
+          },
+          {
+            "drive_type": "force",
+            "has_drive": true,
+            "initial_matches_target": false,
+            "max_force": 20.0,
+            "max_velocity": 1000000.0,
+            "mimic": false,
+            "name": "vx300s_left_shoulder",
+            "path": "/workcell/joints/vx300s_left_shoulder",
+            "state_position": null,
+            "target_position": 0.0
+          },
+          {
+            "drive_type": "force",
+            "has_drive": true,
+            "initial_matches_target": false,
+            "max_force": 15.0,
+            "max_velocity": 1000000.0,
+            "mimic": false,
+            "name": "vx300s_left_elbow",
+            "path": "/workcell/joints/vx300s_left_elbow",
+            "state_position": null,
+            "target_position": 0.0
+          },
+          {
+            "drive_type": "force",
+            "has_drive": true,
+            "initial_matches_target": false,
+            "max_force": 2.0,
+            "max_velocity": 1000000.0,
+            "mimic": false,
+            "name": "vx300s_left_forearm_roll",
+            "path": "/workcell/joints/vx300s_left_forearm_roll",
+            "state_position": null,
+            "target_position": 0.0
+          },
+          {
+            "drive_type": "force",
+            "has_drive": true,
+            "initial_matches_target": false,
+            "max_force": 5.0,
+            "max_velocity": 1000000.0,
+            "mimic": false,
+            "name": "vx300s_left_wrist_angle",
+            "path": "/workcell/joints/vx300s_left_wrist_angle",
+            "state_position": null,
+            "target_position": 0.0
+          },
+          {
+            "drive_type": "force",
+            "has_drive": true,
+            "initial_matches_target": false,
+            "max_force": 1.0,
+            "max_velocity": 1000000.0,
+            "mimic": false,
+            "name": "vx300s_left_wrist_rotate",
+            "path": "/workcell/joints/vx300s_left_wrist_rotate",
+            "state_position": null,
+            "target_position": 0.0
+          },
+          {
+            "drive_type": "force",
+            "has_drive": true,
+            "initial_matches_target": false,
+            "max_force": 5.0,
+            "max_velocity": 1000000.0,
+            "mimic": false,
+            "name": "vx300s_left_left_finger",
+            "path": "/workcell/joints/vx300s_left_left_finger",
+            "state_position": null,
+            "target_position": 0.0
+          },
+          {
+            "drive_type": "force",
+            "has_drive": true,
+            "initial_matches_target": false,
+            "max_force": 5.0,
+            "max_velocity": 1000000.0,
+            "mimic": false,
+            "name": "vx300s_left_right_finger",
+            "path": "/workcell/joints/vx300s_left_right_finger",
+            "state_position": null,
+            "target_position": 0.0
+          }
+        ]
+      },
+      "name": "initial_joint_state_matches_drive_target",
+      "status": "FAIL"
+    },
+    {
+      "evidence": {
+        "rigid_bodies": [
+          {
+            "diagonal_inertia": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "finite_positive": false,
+            "mass": 0.0,
+            "path": "/workcell/table/table"
+          },
+          {
+            "diagonal_inertia": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "finite_positive": false,
+            "mass": 0.0,
+            "path": "/workcell/midair/midair"
+          },
+          {
+            "diagonal_inertia": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "finite_positive": false,
+            "mass": 0.0,
+            "path": "/workcell/vx300s_left/vx300s_left"
+          },
+          {
+            "diagonal_inertia": [
+              0.0012015600223094225,
+              0.0011374399764463305,
+              0.0009387999889440835
+            ],
+            "finite_positive": true,
+            "mass": 0.7986140251159668,
+            "path": "/workcell/vx300s_left/vx300s_left_shoulder_link"
+          },
+          {
+            "diagonal_inertia": [
+              0.009113379754126072,
+              0.008925000205636024,
+              0.0007593170157633722
+            ],
+            "finite_positive": true,
+            "mass": 0.7925919890403748,
+            "path": "/workcell/vx300s_left/vx300s_left_upper_arm_link"
+          },
+          {
+            "diagonal_inertia": [
+              0.0014410699950531125,
+              0.0013422799529507756,
+              0.0001520469959359616
+            ],
+            "finite_positive": true,
+            "mass": 0.32222801446914673,
+            "path": "/workcell/vx300s_left/vx300s_left_upper_forearm_link"
+          },
+          {
+            "diagonal_inertia": [
+              0.0005911000189371407,
+              0.0005464929854497313,
+              0.00015570700634270906
+            ],
+            "finite_positive": true,
+            "mass": 0.4148229956626892,
+            "path": "/workcell/vx300s_left/vx300s_left_lower_forearm_link"
+          },
+          {
+            "diagonal_inertia": [
+              5.457070074044168e-05,
+              4.631009869626723e-05,
+              4.326919952291064e-05
+            ],
+            "finite_positive": true,
+            "mass": 0.11539500206708908,
+            "path": "/workcell/vx300s_left/vx300s_left_wrist_link"
+          },
+          {
+            "diagonal_inertia": [
+              0.0006895459955558181,
+              0.0006503160111606121,
+              0.00046814201050437987
+            ],
+            "finite_positive": true,
+            "mass": 0.2516520023345947,
+            "path": "/workcell/vx300s_left/vx300s_left_gripper_link"
+          },
+          {
+            "diagonal_inertia": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "finite_positive": false,
+            "mass": 0.0,
+            "path": "/workcell/vx300s_left/vx300s_left_camera_focus"
+          },
+          {
+            "diagonal_inertia": [
+              4.297899977245834e-06,
+              2.8868000754300738e-06,
+              1.53140001657448e-06
+            ],
+            "finite_positive": true,
+            "mass": 0.00800899975001812,
+            "path": "/workcell/vx300s_left/vx300s_left_gripper_prop_link"
+          },
+          {
+            "diagonal_inertia": [
+              2.4800299797789194e-05,
+              1.4170000213198364e-05,
+              1.2079700354661327e-05
+            ],
+            "finite_positive": true,
+            "mass": 0.03479599952697754,
+            "path": "/workcell/vx300s_left/vx300s_left_left_finger_link"
+          },
+          {
+            "diagonal_inertia": [
+              2.4800199753372e-05,
+              1.4170000213198364e-05,
+              1.2079800399078522e-05
+            ],
+            "finite_positive": true,
+            "mass": 0.03479599952697754,
+            "path": "/workcell/vx300s_left/vx300s_left_right_finger_link"
+          },
+          {
+            "diagonal_inertia": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "finite_positive": false,
+            "mass": 0.0,
+            "path": "/workcell/table_frame_T/table_frame_T"
+          },
+          {
+            "diagonal_inertia": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "finite_positive": false,
+            "mass": 0.0,
+            "path": "/workcell/placeholder_pipe/placeholder_pipe"
+          }
+        ]
+      },
+      "name": "mass_and_inertia_finite_positive",
+      "status": "FAIL"
+    },
+    {
+      "evidence": {
+        "classification": "ROOT_FRAME_AND_AUTHORED_MAX_FORCE_CAUSES_ISOLATED_NUMERIC_PASS_AUXILIARY_VIEWPORT_REPLAY_PASS",
+        "report": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_cad_finger_task5_dynamic_structure_diagnosis.json"
+      },
+      "name": "first_frame_jump_and_static_structure",
+      "status": "PASS"
+    },
+    {
+      "evidence": {
+        "finger_direction": true,
+        "six_arm_dofs": "NOT_RERUN_IN_SUPPLIER_CAD_TASK5; ARM GEOMETRY WAS NOT THE CHANGED CAUSAL VARIABLE"
+      },
+      "name": "one_joint_direction_and_range",
+      "status": "PARTIAL"
+    },
+    {
+      "evidence": {
+        "boundary": "DIAGNOSTIC_ONLY_NOT_FINAL_CONTROL_MAPPING",
+        "control": "explicit_symmetric_finger_targets",
+        "symmetric_residual_m": 0.0007575824856758118
+      },
+      "name": "mimic_or_symmetric_control_mapping",
+      "status": "PARTIAL"
+    },
+    {
+      "evidence": {
+        "attachment_semantics": "finger-to-bar common volume retained for assembly semantic review; not silently classified as an unexpected collision",
+        "geometry_report_status": "PARTIAL",
+        "no_finger_to_finger_overlap": true
+      },
+      "name": "initial_overlap",
+      "status": "PARTIAL"
+    },
+    {
+      "evidence": {
+        "maximum_drop_m": 0.0004539191722869873,
+        "no_constraint": true,
+        "pass_count": 20,
+        "persistent_penetration": false,
+        "trial_count": 20
+      },
+      "name": "bilateral_contact_and_static_hold",
+      "status": "PASS"
+    },
+    {
+      "evidence": {
+        "annotated_count": 4,
+        "raw_count": 4,
+        "report": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_cad_finger_task5_bottle_screenshot_review.json",
+        "screenshot_is_auxiliary": true
+      },
+      "name": "screenshot_visual_review",
+      "status": "PASS"
+    },
+    {
+      "evidence": {
+        "summary": {
+          "all_trials_pass": true,
+          "complete": true,
+          "deterministic": true,
+          "fail_count": 0,
+          "failure_modes": [],
+          "maximum_drop_m": 0.0004539191722869873,
+          "mean_drop_m": 0.0004539191722869873,
+          "minimum_drop_m": 0.0004539191722869873,
+          "pass_count": 20,
+          "required_repeats": 20,
+          "status": "PASS",
+          "trial_count": 20,
+          "unique_signature_count": 1
+        }
+      },
+      "name": "task5_repeat_determinism",
+      "status": "PASS"
+    },
+    {
+      "evidence": {
+        "blocking_issue_count": 17,
+        "warning_count": 17
+      },
+      "name": "IsaacSim.PhysicsRules",
+      "status": "FAIL"
+    },
+    {
+      "evidence": {
+        "blocking_issue_count": 4,
+        "warning_count": 5
+      },
+      "name": "IsaacSim.RobotRules",
+      "status": "FAIL"
+    },
+    {
+      "evidence": {
+        "blocking_issue_count": 0,
+        "warning_count": 0
+      },
+      "name": "IsaacSim.SimReadyAssetRules",
+      "status": "PASS"
+    }
+  ],
+  "dof_records": [
+    {
+      "drive_type": "force",
+      "has_drive": true,
+      "initial_matches_target": false,
+      "max_force": 10.0,
+      "max_velocity": 1000000.0,
+      "mimic": false,
+      "name": "vx300s_left_waist",
+      "path": "/workcell/joints/vx300s_left_waist",
+      "state_position": null,
+      "target_position": 0.0
+    },
+    {
+      "drive_type": "force",
+      "has_drive": true,
+      "initial_matches_target": false,
+      "max_force": 20.0,
+      "max_velocity": 1000000.0,
+      "mimic": false,
+      "name": "vx300s_left_shoulder",
+      "path": "/workcell/joints/vx300s_left_shoulder",
+      "state_position": null,
+      "target_position": 0.0
+    },
+    {
+      "drive_type": "force",
+      "has_drive": true,
+      "initial_matches_target": false,
+      "max_force": 15.0,
+      "max_velocity": 1000000.0,
+      "mimic": false,
+      "name": "vx300s_left_elbow",
+      "path": "/workcell/joints/vx300s_left_elbow",
+      "state_position": null,
+      "target_position": 0.0
+    },
+    {
+      "drive_type": "force",
+      "has_drive": true,
+      "initial_matches_target": false,
+      "max_force": 2.0,
+      "max_velocity": 1000000.0,
+      "mimic": false,
+      "name": "vx300s_left_forearm_roll",
+      "path": "/workcell/joints/vx300s_left_forearm_roll",
+      "state_position": null,
+      "target_position": 0.0
+    },
+    {
+      "drive_type": "force",
+      "has_drive": true,
+      "initial_matches_target": false,
+      "max_force": 5.0,
+      "max_velocity": 1000000.0,
+      "mimic": false,
+      "name": "vx300s_left_wrist_angle",
+      "path": "/workcell/joints/vx300s_left_wrist_angle",
+      "state_position": null,
+      "target_position": 0.0
+    },
+    {
+      "drive_type": "force",
+      "has_drive": true,
+      "initial_matches_target": false,
+      "max_force": 1.0,
+      "max_velocity": 1000000.0,
+      "mimic": false,
+      "name": "vx300s_left_wrist_rotate",
+      "path": "/workcell/joints/vx300s_left_wrist_rotate",
+      "state_position": null,
+      "target_position": 0.0
+    },
+    {
+      "drive_type": "force",
+      "has_drive": true,
+      "initial_matches_target": false,
+      "max_force": 5.0,
+      "max_velocity": 1000000.0,
+      "mimic": false,
+      "name": "vx300s_left_left_finger",
+      "path": "/workcell/joints/vx300s_left_left_finger",
+      "state_position": null,
+      "target_position": 0.0
+    },
+    {
+      "drive_type": "force",
+      "has_drive": true,
+      "initial_matches_target": false,
+      "max_force": 5.0,
+      "max_velocity": 1000000.0,
+      "mimic": false,
+      "name": "vx300s_left_right_finger",
+      "path": "/workcell/joints/vx300s_left_right_finger",
+      "state_position": null,
+      "target_position": 0.0
+    }
+  ],
+  "final_default_collider_modified": false,
+  "hard_blockers": [
+    "HARD_BLOCKER_APPROVED_STAGE_CONTAINS_FOLLOWER_LEFT_ONLY",
+    "HARD_BLOCKER_NO_USER_APPROVED_SUPPLIER_STAGE_LIFT_TRAJECTORY",
+    "HARD_BLOCKER_UNCALIBRATED_FINGER_BOTTLE_FRICTION",
+    "HARD_BLOCKER_INCOMPLETE_BOTTLE_GEOMETRY_AND_INERTIA",
+    "HARD_BLOCKER_PRODUCTION_ANGULAR_TESSELLATION"
+  ],
+  "official_rules": {
+    "categories": [
+      {
+        "blocking_issue_count": 17,
+        "category": "IsaacSim.PhysicsRules",
+        "issues": [
+          {
+            "at": "Prim </workcell/joints/vx300s_left_elbow>",
+            "message": "/workcell/joints/vx300s_left_elbow Has no Joint State API",
+            "rule": "JointHasJointStateAPI",
+            "severity": "ERROR"
+          },
+          {
+            "at": "Prim </workcell/joints/vx300s_left_forearm_roll>",
+            "message": "/workcell/joints/vx300s_left_forearm_roll Has no Joint State API",
+            "rule": "JointHasJointStateAPI",
+            "severity": "ERROR"
+          },
+          {
+            "at": "Prim </workcell/joints/vx300s_left_left_finger>",
+            "message": "/workcell/joints/vx300s_left_left_finger Has no Joint State API",
+            "rule": "JointHasJointStateAPI",
+            "severity": "ERROR"
+          },
+          {
+            "at": "Prim </workcell/joints/vx300s_left_right_finger>",
+            "message": "/workcell/joints/vx300s_left_right_finger Has no Joint State API",
+            "rule": "JointHasJointStateAPI",
+            "severity": "ERROR"
+          },
+          {
+            "at": "Prim </workcell/joints/vx300s_left_shoulder>",
+            "message": "/workcell/joints/vx300s_left_shoulder Has no Joint State API",
+            "rule": "JointHasJointStateAPI",
+            "severity": "ERROR"
+          },
+          {
+            "at": "Prim </workcell/joints/vx300s_left_waist>",
+            "message": "/workcell/joints/vx300s_left_waist Has no Joint State API",
+            "rule": "JointHasJointStateAPI",
+            "severity": "ERROR"
+          },
+          {
+            "at": "Prim </workcell/joints/vx300s_left_wrist_angle>",
+            "message": "/workcell/joints/vx300s_left_wrist_angle Has no Joint State API",
+            "rule": "JointHasJointStateAPI",
+            "severity": "ERROR"
+          },
+          {
+            "at": "Prim </workcell/joints/vx300s_left_wrist_rotate>",
+            "message": "/workcell/joints/vx300s_left_wrist_rotate Has no Joint State API",
+            "rule": "JointHasJointStateAPI",
+            "severity": "ERROR"
+          },
+          {
+            "at": "Prim </workcell/midair/midair>",
+            "message": "Rigid body /workcell/midair/midair has rigid body api but no collision api",
+            "rule": "RigidBodyHasCollider",
+            "severity": "ERROR"
+          },
+          {
+            "at": "Prim </workcell/vx300s_left/vx300s_left>",
+            "message": "Rigid body /workcell/vx300s_left/vx300s_left has rigid body api but no collision api",
+            "rule": "RigidBodyHasCollider",
+            "severity": "ERROR"
+          },
+          {
+            "at": "Prim </workcell/vx300s_left/vx300s_left_camera_focus>",
+            "message": "Rigid body /workcell/vx300s_left/vx300s_left_camera_focus has rigid body api but no collision api",
+            "rule": "RigidBodyHasCollider",
+            "severity": "ERROR"
+          },
+          {
+            "at": "Prim </workcell/midair/midair>",
+            "message": "Rigid body /workcell/midair/midair's principal axes is not normalized, but: 0.0",
+            "rule": "RigidBodyHasMassAPI",
+            "severity": "ERROR"
+          },
+          {
+            "at": "Prim </workcell/placeholder_pipe/placeholder_pipe>",
+            "message": "Rigid body /workcell/placeholder_pipe/placeholder_pipe's principal axes is not normalized, but: 0.0",
+            "rule": "RigidBodyHasMassAPI",
+            "severity": "ERROR"
+          },
+          {
+            "at": "Prim </workcell/table/table>",
+            "message": "Rigid body /workcell/table/table's principal axes is not normalized, but: 0.0",
+            "rule": "RigidBodyHasMassAPI",
+            "severity": "ERROR"
+          },
+          {
+            "at": "Prim </workcell/table_frame_T/table_frame_T>",
+            "message": "Rigid body /workcell/table_frame_T/table_frame_T's principal axes is not normalized, but: 0.0",
+            "rule": "RigidBodyHasMassAPI",
+            "severity": "ERROR"
+          },
+          {
+            "at": "Prim </workcell/vx300s_left/vx300s_left>",
+            "message": "Rigid body /workcell/vx300s_left/vx300s_left's principal axes is not normalized, but: 0.0",
+            "rule": "RigidBodyHasMassAPI",
+            "severity": "ERROR"
+          },
+          {
+            "at": "Prim </workcell/vx300s_left/vx300s_left_camera_focus>",
+            "message": "Rigid body /workcell/vx300s_left/vx300s_left_camera_focus's principal axes is not normalized, but: 0.0",
+            "rule": "RigidBodyHasMassAPI",
+            "severity": "ERROR"
+          },
+          {
+            "at": "Prim </workcell/midair/midair>",
+            "message": "Rigid body /workcell/midair/midair has diagonal inertia of [0, 0, 0]",
+            "rule": "RigidBodyHasMassAPI",
+            "severity": "INFO"
+          },
+          {
+            "at": "Prim </workcell/midair/midair>",
+            "message": "Rigid body /workcell/midair/midair has mass of 0",
+            "rule": "RigidBodyHasMassAPI",
+            "severity": "INFO"
+          },
+          {
+            "at": "Prim </workcell/placeholder_pipe/placeholder_pipe>",
+            "message": "Rigid body /workcell/placeholder_pipe/placeholder_pipe has diagonal inertia of [0, 0, 0]",
+            "rule": "RigidBodyHasMassAPI",
+            "severity": "INFO"
+          },
+          {
+            "at": "Prim </workcell/placeholder_pipe/placeholder_pipe>",
+            "message": "Rigid body /workcell/placeholder_pipe/placeholder_pipe has mass of 0",
+            "rule": "RigidBodyHasMassAPI",
+            "severity": "INFO"
+          },
+          {
+            "at": "Prim </workcell/table/table>",
+            "message": "Rigid body /workcell/table/table has diagonal inertia of [0, 0, 0]",
+            "rule": "RigidBodyHasMassAPI",
+            "severity": "INFO"
+          },
+          {
+            "at": "Prim </workcell/table/table>",
+            "message": "Rigid body /workcell/table/table has mass of 0",
+            "rule": "RigidBodyHasMassAPI",
+            "severity": "INFO"
+          },
+          {
+            "at": "Prim </workcell/table_frame_T/table_frame_T>",
+            "message": "Rigid body /workcell/table_frame_T/table_frame_T has diagonal inertia of [0, 0, 0]",
+            "rule": "RigidBodyHasMassAPI",
+            "severity": "INFO"
+          },
+          {
+            "at": "Prim </workcell/table_frame_T/table_frame_T>",
+            "message": "Rigid body /workcell/table_frame_T/table_frame_T has mass of 0",
+            "rule": "RigidBodyHasMassAPI",
+            "severity": "INFO"
+          },
+          {
+            "at": "Prim </workcell/vx300s_left/vx300s_left>",
+            "message": "Rigid body /workcell/vx300s_left/vx300s_left has diagonal inertia of [0, 0, 0]",
+            "rule": "RigidBodyHasMassAPI",
+            "severity": "INFO"
+          },
+          {
+            "at": "Prim </workcell/vx300s_left/vx300s_left>",
+            "message": "Rigid body /workcell/vx300s_left/vx300s_left has mass of 0",
+            "rule": "RigidBodyHasMassAPI",
+            "severity": "INFO"
+          },
+          {
+            "at": "Prim </workcell/vx300s_left/vx300s_left_camera_focus>",
+            "message": "Rigid body /workcell/vx300s_left/vx300s_left_camera_focus has diagonal inertia of [0, 0, 0]",
+            "rule": "RigidBodyHasMassAPI",
+            "severity": "INFO"
+          },
+          {
+            "at": "Prim </workcell/vx300s_left/vx300s_left_camera_focus>",
+            "message": "Rigid body /workcell/vx300s_left/vx300s_left_camera_focus has mass of 0",
+            "rule": "RigidBodyHasMassAPI",
+            "severity": "INFO"
+          },
+          {
+            "at": "Prim </workcell/placeholder_pipe/placeholder_pipe/collisions/pipe_axis_placeholder/pipe_axis_placeholder>",
+            "message": "Invisible collision mesh /workcell/placeholder_pipe/placeholder_pipe/collisions/pipe_axis_placeholder/pipe_axis_placeholder purpose: [default], not [guide]",
+            "rule": "InvisibleCollisionMeshHasPurposeGuide",
+            "severity": "WARNING"
+          },
+          {
+            "at": "Prim </workcell/placeholder_pipe/placeholder_pipe/collisions/pipe_inlet_placeholder/pipe_inlet_placeholder>",
+            "message": "Invisible collision mesh /workcell/placeholder_pipe/placeholder_pipe/collisions/pipe_inlet_placeholder/pipe_inlet_placeholder purpose: [default], not [guide]",
+            "rule": "InvisibleCollisionMeshHasPurposeGuide",
+            "severity": "WARNING"
+          },
+          {
+            "at": "Prim </workcell/table/table/collisions/tabletop/tabletop>",
+            "message": "Invisible collision mesh /workcell/table/table/collisions/tabletop/tabletop purpose: [default], not [guide]",
+            "rule": "InvisibleCollisionMeshHasPurposeGuide",
+            "severity": "WARNING"
+          },
+          {
+            "at": "Prim </workcell/table_frame_T/table_frame_T/collisions/T_origin/T_origin>",
+            "message": "Invisible collision mesh /workcell/table_frame_T/table_frame_T/collisions/T_origin/T_origin purpose: [default], not [guide]",
+            "rule": "InvisibleCollisionMeshHasPurposeGuide",
+            "severity": "WARNING"
+          },
+          {
+            "at": "Prim </workcell/table_frame_T/table_frame_T/collisions/T_x_axis/T_x_axis>",
+            "message": "Invisible collision mesh /workcell/table_frame_T/table_frame_T/collisions/T_x_axis/T_x_axis purpose: [default], not [guide]",
+            "rule": "InvisibleCollisionMeshHasPurposeGuide",
+            "severity": "WARNING"
+          },
+          {
+            "at": "Prim </workcell/table_frame_T/table_frame_T/collisions/T_y_axis/T_y_axis>",
+            "message": "Invisible collision mesh /workcell/table_frame_T/table_frame_T/collisions/T_y_axis/T_y_axis purpose: [default], not [guide]",
+            "rule": "InvisibleCollisionMeshHasPurposeGuide",
+            "severity": "WARNING"
+          },
+          {
+            "at": "Prim </workcell/table_frame_T/table_frame_T/collisions/T_z_axis/T_z_axis>",
+            "message": "Invisible collision mesh /workcell/table_frame_T/table_frame_T/collisions/T_z_axis/T_z_axis purpose: [default], not [guide]",
+            "rule": "InvisibleCollisionMeshHasPurposeGuide",
+            "severity": "WARNING"
+          },
+          {
+            "at": "Prim </workcell/vx300s_left/vx300s_left_gripper_link/collisions/vx300s_7_gripper/vx300s_7_gripper>",
+            "message": "Invisible collision mesh /workcell/vx300s_left/vx300s_left_gripper_link/collisions/vx300s_7_gripper/vx300s_7_gripper purpose: [default], not [guide]",
+            "rule": "InvisibleCollisionMeshHasPurposeGuide",
+            "severity": "WARNING"
+          },
+          {
+            "at": "Prim </workcell/vx300s_left/vx300s_left_gripper_link/collisions/vx300s_9_gripper_bar/vx300s_9_gripper_bar>",
+            "message": "Invisible collision mesh /workcell/vx300s_left/vx300s_left_gripper_link/collisions/vx300s_9_gripper_bar/vx300s_9_gripper_bar purpose: [default], not [guide]",
+            "rule": "InvisibleCollisionMeshHasPurposeGuide",
+            "severity": "WARNING"
+          },
+          {
+            "at": "Prim </workcell/vx300s_left/vx300s_left_gripper_prop_link/collisions/vx300s_8_gripper_prop/vx300s_8_gripper_prop>",
+            "message": "Invisible collision mesh /workcell/vx300s_left/vx300s_left_gripper_prop_link/collisions/vx300s_8_gripper_prop/vx300s_8_gripper_prop purpose: [default], not [guide]",
+            "rule": "InvisibleCollisionMeshHasPurposeGuide",
+            "severity": "WARNING"
+          },
+          {
+            "at": "Prim </workcell/vx300s_left/vx300s_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh>",
+            "message": "Invisible collision mesh /workcell/vx300s_left/vx300s_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh purpose: [default], not [guide]",
+            "rule": "InvisibleCollisionMeshHasPurposeGuide",
+            "severity": "WARNING"
+          },
+          {
+            "at": "Prim </workcell/vx300s_left/vx300s_left_lower_forearm_link/collisions/vx300s_5_lower_forearm/vx300s_5_lower_forearm>",
+            "message": "Invisible collision mesh /workcell/vx300s_left/vx300s_left_lower_forearm_link/collisions/vx300s_5_lower_forearm/vx300s_5_lower_forearm purpose: [default], not [guide]",
+            "rule": "InvisibleCollisionMeshHasPurposeGuide",
+            "severity": "WARNING"
+          },
+          {
+            "at": "Prim </workcell/vx300s_left/vx300s_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh>",
+            "message": "Invisible collision mesh /workcell/vx300s_left/vx300s_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh purpose: [default], not [guide]",
+            "rule": "InvisibleCollisionMeshHasPurposeGuide",
+            "severity": "WARNING"
+          },
+          {
+            "at": "Prim </workcell/vx300s_left/vx300s_left_shoulder_link/collisions/vx300s_2_shoulder/vx300s_2_shoulder>",
+            "message": "Invisible collision mesh /workcell/vx300s_left/vx300s_left_shoulder_link/collisions/vx300s_2_shoulder/vx300s_2_shoulder purpose: [default], not [guide]",
+            "rule": "InvisibleCollisionMeshHasPurposeGuide",
+            "severity": "WARNING"
+          },
+          {
+            "at": "Prim </workcell/vx300s_left/vx300s_left_upper_arm_link/collisions/vx300s_3_upper_arm/vx300s_3_upper_arm>",
+            "message": "Invisible collision mesh /workcell/vx300s_left/vx300s_left_upper_arm_link/collisions/vx300s_3_upper_arm/vx300s_3_upper_arm purpose: [default], not [guide]",
+            "rule": "InvisibleCollisionMeshHasPurposeGuide",
+            "severity": "WARNING"
+          },
+          {
+            "at": "Prim </workcell/vx300s_left/vx300s_left_upper_forearm_link/collisions/vx300s_4_upper_forearm/vx300s_4_upper_forearm>",
+            "message": "Invisible collision mesh /workcell/vx300s_left/vx300s_left_upper_forearm_link/collisions/vx300s_4_upper_forearm/vx300s_4_upper_forearm purpose: [default], not [guide]",
+            "rule": "InvisibleCollisionMeshHasPurposeGuide",
+            "severity": "WARNING"
+          },
+          {
+            "at": "Prim </workcell/vx300s_left/vx300s_left_wrist_link/collisions/vx300s_6_wrist/vx300s_6_wrist>",
+            "message": "Invisible collision mesh /workcell/vx300s_left/vx300s_left_wrist_link/collisions/vx300s_6_wrist/vx300s_6_wrist purpose: [default], not [guide]",
+            "rule": "InvisibleCollisionMeshHasPurposeGuide",
+            "severity": "WARNING"
+          }
+        ],
+        "rule_count": 12,
+        "rules": [
+          "DriveJointValueReasonable",
+          "HasArticulationRoot",
+          "InvisibleCollisionMeshHasPurposeGuide",
+          "JointHasCorrectTransformAndState",
+          "JointHasJointStateAPI",
+          "MimicAPICheck",
+          "NonAdjacentCollisionMeshesDoNotClash",
+          "PhysicsDriveAndJointState",
+          "PhysicsJointHasDriveOrMimicAPI",
+          "PhysicsJointMaxVelocity",
+          "RigidBodyHasCollider",
+          "RigidBodyHasMassAPI"
+        ],
+        "status": "FAIL",
+        "warning_count": 17
+      },
+      {
+        "blocking_issue_count": 4,
+        "category": "IsaacSim.RobotRules",
+        "issues": [
+          {
+            "at": "Stage </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_bottle/aloha_viperx_supplier_cad_bottle_task5.usda>",
+            "message": "Folder name does not match Robot name: <cad_finger_task5_bottle> != <aloha_viperx_supplier_cad_bottle_task5.usda>",
+            "rule": "RobotNaming",
+            "severity": "ERROR"
+          },
+          {
+            "at": "Prim </workcell>",
+            "message": "DefaultPrim in robot asset </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_bottle/aloha_viperx_supplier_cad_bottle_task5.usda> does not have a RobotAPI",
+            "rule": "RobotSchema",
+            "severity": "ERROR"
+          },
+          {
+            "at": "Prim </workcell>",
+            "message": "DefaultPrim in robot asset </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_bottle/aloha_viperx_supplier_cad_bottle_task5.usda> does not have a isaac:physics:robotJoints relationship",
+            "rule": "RobotSchema",
+            "severity": "ERROR"
+          },
+          {
+            "at": "Prim </workcell>",
+            "message": "DefaultPrim in robot asset </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_bottle/aloha_viperx_supplier_cad_bottle_task5.usda> does not have a isaac:physics:robotLinks relationship",
+            "rule": "RobotSchema",
+            "severity": "ERROR"
+          },
+          {
+            "at": "Stage </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_bottle/aloha_viperx_supplier_cad_bottle_task5.usda>",
+            "message": "No thumbnail found at /home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_bottle/.thumbs/256x256/aloha_viperx_supplier_cad_bottle_task5.usda.png for robot asset </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_bottle/aloha_viperx_supplier_cad_bottle_task5.usda>",
+            "rule": "ThumbnailExists",
+            "severity": "WARNING"
+          },
+          {
+            "at": "Attribute (physics:approximation) Prim </workcell/vx300s_left/vx300s_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh>",
+            "message": "Physics Attribute physics:approximation in robot asset </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_bottle/aloha_viperx_supplier_cad_bottle_task5.usda> has authored value NOT in the physics layer",
+            "rule": "VerifyRobotPhysicsAttributesSourceLayer",
+            "severity": "WARNING"
+          },
+          {
+            "at": "Attribute (physics:approximation) Prim </workcell/vx300s_left/vx300s_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh>",
+            "message": "Physics Attribute physics:approximation in robot asset </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_bottle/aloha_viperx_supplier_cad_bottle_task5.usda> has authored value NOT in the physics layer",
+            "rule": "VerifyRobotPhysicsAttributesSourceLayer",
+            "severity": "WARNING"
+          },
+          {
+            "at": "Attribute (physics:localPos0) Prim </workcell/joints/rootJoint_vx300s_left>",
+            "message": "Physics Attribute physics:localPos0 in robot asset </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_bottle/aloha_viperx_supplier_cad_bottle_task5.usda> has authored value NOT in the physics layer",
+            "rule": "VerifyRobotPhysicsAttributesSourceLayer",
+            "severity": "WARNING"
+          },
+          {
+            "at": "Attribute (physics:localRot0) Prim </workcell/joints/rootJoint_vx300s_left>",
+            "message": "Physics Attribute physics:localRot0 in robot asset </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_bottle/aloha_viperx_supplier_cad_bottle_task5.usda> has authored value NOT in the physics layer",
+            "rule": "VerifyRobotPhysicsAttributesSourceLayer",
+            "severity": "WARNING"
+          }
+        ],
+        "rule_count": 10,
+        "rules": [
+          "CheckRobotRelationships",
+          "CleanFolder",
+          "JointsExist",
+          "LinksExist",
+          "NoOverrides",
+          "RobotNaming",
+          "RobotSchema",
+          "ThumbnailExists",
+          "VerifyRobotPhysicsAttributesSourceLayer",
+          "VerifyRobotPhysicsSchemaSourceLayer"
+        ],
+        "status": "FAIL",
+        "warning_count": 5
+      },
+      {
+        "blocking_issue_count": 0,
+        "category": "IsaacSim.SimReadyAssetRules",
+        "issues": [],
+        "rule_count": 2,
+        "rules": [
+          "MaterialsOnTopLevelOnly",
+          "NoNestedMaterials"
+        ],
+        "status": "PASS",
+        "warning_count": 0
+      }
+    ],
+    "status": "FAIL"
+  },
+  "repeat_determinism": {
+    "fresh_stage_open_each_run": true,
+    "pass": true,
+    "physics_steps": 0,
+    "run_count": 2,
+    "signatures": [
+      "b52db5132cbd96c311df95f31f577fb65c078f51d1bf5e6b8a75ebe87f1abd82",
+      "b52db5132cbd96c311df95f31f577fb65c078f51d1bf5e6b8a75ebe87f1abd82"
+    ]
+  },
+  "robot_articulation_roots": [
+    "/workcell/vx300s_left/vx300s_left"
+  ],
+  "runtime_dof_order": [
+    "vx300s_left_waist",
+    "vx300s_left_shoulder",
+    "vx300s_left_elbow",
+    "vx300s_left_forearm_roll",
+    "vx300s_left_wrist_angle",
+    "vx300s_left_wrist_rotate",
+    "vx300s_left_left_finger",
+    "vx300s_left_right_finger"
+  ],
+  "schema_version": 1,
+  "scope": "SUPPLIER_CAD_FOLLOWER_LEFT_DIAGNOSTIC_ONLY",
+  "source_stage_modified": false,
+  "stage": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_bottle/aloha_viperx_supplier_cad_bottle_task5.usda",
+    "default_prim": "/workcell",
+    "sha256": "62697e4b25a7ec82234cc9ebd79d4a6d530a6ead0165519cbd275c0fa3f32178"
+  },
+  "stage_dof_order": [
+    "vx300s_left_waist",
+    "vx300s_left_shoulder",
+    "vx300s_left_elbow",
+    "vx300s_left_forearm_roll",
+    "vx300s_left_wrist_angle",
+    "vx300s_left_wrist_rotate",
+    "vx300s_left_left_finger",
+    "vx300s_left_right_finger"
+  ],
+  "status": "FAIL",
+  "task5_static_hold": {
+    "drop_gate_m": 0.01,
+    "friction_status": "TEMPORARY_UNCALIBRATED",
+    "maximum_drop_m": 0.0004539191722869873,
+    "pass_count": 20,
+    "status": "PASS",
+    "trial_count": 20,
+    "velocity_readback_status": "RUNTIME_READBACK_DISAGREEMENT_RECORDED_NOT_USED_TO_OVERRIDE_POSITION_DROP_GATE"
+  },
+  "task8": "NOT_RUN"
+}

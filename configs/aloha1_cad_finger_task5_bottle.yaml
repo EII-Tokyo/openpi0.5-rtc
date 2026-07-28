@@ -1,0 +1,61 @@
+schema_version: 1
+scope: supplier-CAD follower-left 20 g bottle Task 5
+runtime:
+  isaac_sim: 5.1.0.0
+  kit: 107.3.3
+  physx: 107.3.26
+approved_source_stage:
+  path: local_eval_assets/aloha_isaac_assets/aloha_viperx.usd
+  sha256: b24afe3678155654892c69517fc58ecd970108d68cec56b02dc6fdcb8bf4493e
+diagnostic_stage:
+  path: assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_bottle/aloha_viperx_supplier_cad_bottle_task5.usda
+parent_stage:
+  path: assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_arm_max_force_over_combined/aloha_viperx_supplier_cad_arm_max_force_over_combined.usda
+  sha256: 5bc3bb5ab7fd7ce8fd3028894394ca5915a278e5a996d016a5868a164593ac40
+frozen:
+  robot: follower_left
+  collider: SUPPLIER_CAD_V2_CONVEX_HULL_DIAGNOSTIC
+  friction: 0.7
+  friction_status: TEMPORARY_UNCALIBRATED
+  restitution: 0.0
+  bottle_shape: cylinder
+  bottle_mass_kg: 0.020
+  bottle_diameter_m: 0.065
+  bottle_height_m: 0.210
+  physics_frequency_hz: 60
+  hold_interval_s: 2.0
+  hold_steps: 120
+  drop_gate_m: 0.010
+  solve_articulation_contact_last: true
+  self_collision: false
+  contact_rest_offsets_authored: false
+  drive_profile: arm_max_force_over_combined
+  finger_max_force_n:
+    left: 5.0
+    right: 5.0
+  control: explicit_symmetric_finger_targets
+  surface_gripper: false
+  fixed_joint: false
+  parent_attachment: false
+motion:
+  settle_steps: 60
+  open_steps: 90
+  close_steps: 120
+  fixed_contact_steps: 60
+  open_targets_m: [0.057, -0.057]
+  closed_targets_m: [0.021, -0.021]
+penetration:
+  maximum_persistent_depth_m: 0.002
+  persistence_steps: 5
+experiment:
+  smoke_repeats: 1
+  acceptance_repeats: 20
+  fresh_world_reset_per_trial: true
+boundaries:
+  fixed_bottle_stage_is_contact_diagnostic_only: true
+  fixed_bottle_is_not_static_hold_pass: true
+  source_stage_modified: false
+  default_configuration_modified: false
+  final_collider_modified: false
+  task7: NOT_RUN
+  task8: NOT_RUN

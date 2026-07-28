@@ -1,0 +1,73 @@
+{
+  "baseline": {
+    "all_intended_directions_correct": false,
+    "max_force_n": {
+      "left": 0.0,
+      "right": 0.0
+    },
+    "maximum_arm_dof_drift": 3.1416146755218506,
+    "maximum_base_translation_drift_m": 0.07621378540066791,
+    "maximum_intended_final_error_m": 0.036000000312924385,
+    "mean_intended_final_error_m": 0.018403072841465473,
+    "status": "FAIL"
+  },
+  "classification": "MAX_FORCE_IMPROVES_FINGER_TRACKING_BUT_DISJOINT_ROOT_JOINT_BLOCKS_DYNAMIC_VALIDATION",
+  "comparisons": {
+    "intended_direction_improved": true,
+    "max_force_only_passes_1mm_gate": false,
+    "mean_finger_error_improved": true,
+    "root_and_arm_failure_persists": true
+  },
+  "evidence_classification": {
+    "engineering_inference": [
+      "maxForce=0 is causal for part of finger tracking failure",
+      "disjoint root/assembly frames are an independent and higher-priority dynamic blocker"
+    ],
+    "official_source_direct": [
+      "URDF effort limit for each follower finger is 5 N",
+      "local USD Physics schema defines maxForce default as inf and requires a non-negative value"
+    ],
+    "runtime_readback": [
+      "both baseline finger drives maxForce=0",
+      "both diagnostic finger drives maxForce=5",
+      "baseline and diagnostic base translation drift exceeds 75 mm",
+      "baseline and diagnostic arm DOF drift exceeds 3.14"
+    ]
+  },
+  "gate": "TASK5_NO_BOTTLE_DYNAMIC_STRUCTURE",
+  "inputs": {
+    "baseline": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_cad_finger_task5_drive_probe_baseline.json",
+      "sha256": "9c118a4a7ee07777e5133fae6c98f0ceb0ee4baac704e6fe7f6f69cee2de30d3"
+    },
+    "max_force_only": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_cad_finger_task5_drive_probe_max_force_only.json",
+      "sha256": "be8704e96572ce54e4724a8662bc5765b33d16fff1742dc2771a55f647f7e2e5"
+    }
+  },
+  "max_force_only": {
+    "all_intended_directions_correct": true,
+    "max_force_n": {
+      "left": 5.0,
+      "right": 5.0
+    },
+    "maximum_arm_dof_drift": 3.141624927520752,
+    "maximum_base_translation_drift_m": 0.07587826770883903,
+    "maximum_intended_final_error_m": 0.0019563771784305573,
+    "mean_intended_final_error_m": 0.0008548330515623093,
+    "status": "FAIL"
+  },
+  "next_gate": {
+    "action": "audit rootJoint_vx300s_left local frames and create a separate frame-only diagnostic layer from computed body transforms; do not tune finger drives further yet",
+    "bottle_test_allowed": false,
+    "requires_parameter_guess": false,
+    "screenshots_required_for_next_runtime_test": true
+  },
+  "schema_version": 1,
+  "scope": {
+    "bottle_contact_grasp": "NOT_RUN",
+    "default_or_final_asset_modified": false,
+    "task8": "NOT_RUN"
+  },
+  "status": "FAIL"
+}

@@ -1,0 +1,56 @@
+{
+  "changed_values": {
+    "left_finger_n": 5.0,
+    "right_finger_n": 5.0
+  },
+  "changed_variable": "drive:linear:physics:maxForce",
+  "frozen_authored_values": {
+    "collider": "SUPPLIER_CAD_V2_CONVEX_HULL_DIAGNOSTIC",
+    "damping": 0.0,
+    "drive_type": "force",
+    "stiffness": 200.0
+  },
+  "gates": {
+    "approved_source_stage_immutable": true,
+    "baseline_diagnostic_stage_immutable": true,
+    "default_or_final_asset_unchanged": true,
+    "only_max_force_authored": true
+  },
+  "inputs": {
+    "approved_source_stage": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_assets/aloha_viperx.usd",
+      "sha256_after": "b24afe3678155654892c69517fc58ecd970108d68cec56b02dc6fdcb8bf4493e",
+      "sha256_before": "b24afe3678155654892c69517fc58ecd970108d68cec56b02dc6fdcb8bf4493e"
+    },
+    "baseline_diagnostic_stage": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_convex_hull/aloha_viperx_supplier_cad_task5.usda",
+      "sha256_after": "8040edd01859af9f8c51285d198d34aae19e66625a2d5f21729879774e1644d9",
+      "sha256_before": "8040edd01859af9f8c51285d198d34aae19e66625a2d5f21729879774e1644d9"
+    }
+  },
+  "outputs": {
+    "configuration_layer": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_max_force_only/configuration/supplier_cad_finger_max_force_only.usda",
+      "sha256": "3576f4a6b2fe1fb6a43458e18c18fe161e9c9ce9c02d44fc6ca7d82ba4980d65"
+    },
+    "diagnostic_stage": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_max_force_only/aloha_viperx_supplier_cad_max_force_only.usda",
+      "sha256": "f23b3ed57f20f7aff613b3c3d4b6030fc3fdba0f771b23b5f30cbf72cc4c8f7a"
+    }
+  },
+  "parameter_evidence": {
+    "semantics": "URDF prismatic joint effort limit",
+    "sources": [
+      "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/follower_left.urdf",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/configs/aloha1_joint_map.yaml"
+    ],
+    "value": 5.0
+  },
+  "profile": "DIAGNOSTIC_ONLY_NOT_FINAL_CONTROL_MAPPING",
+  "schema_version": 1,
+  "scope": {
+    "bottle_contact_grasp": "NOT_RUN",
+    "task8": "NOT_RUN"
+  },
+  "status": "PASS"
+}

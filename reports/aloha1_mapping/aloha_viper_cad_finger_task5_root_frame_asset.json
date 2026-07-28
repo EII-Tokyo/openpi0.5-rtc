@@ -1,0 +1,68 @@
+{
+  "changed_joint": "/workcell/joints/rootJoint_vx300s_left",
+  "changed_variables": [
+    "physics:localPos0",
+    "physics:localRot0"
+  ],
+  "computed_frame": {
+    "body0": "WORLD",
+    "body1": "/workcell/vx300s_left/vx300s_left",
+    "body1_world_orientation_wxyz": [
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "body1_world_position_m": [
+      -0.4690000116825104,
+      0.5,
+      0.0
+    ],
+    "initial_translation_mismatch_m": 0.6855370237690995,
+    "method": "UsdGeom.XformCache.GetLocalToWorldTransform"
+  },
+  "frozen": {
+    "all_collision_attributes": true,
+    "all_drive_attributes": true,
+    "all_material_attributes": true,
+    "bottle": "NOT_PRESENT",
+    "physics_frequency": true,
+    "solver_iterations": true
+  },
+  "gates": {
+    "baseline_immutable": true,
+    "default_or_final_asset_unchanged": true,
+    "frame_computed_not_guessed": true,
+    "only_root_joint_frame_authored": true,
+    "source_immutable": true
+  },
+  "inputs": {
+    "baseline": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_convex_hull/aloha_viperx_supplier_cad_task5.usda",
+      "sha256_after": "8040edd01859af9f8c51285d198d34aae19e66625a2d5f21729879774e1644d9",
+      "sha256_before": "8040edd01859af9f8c51285d198d34aae19e66625a2d5f21729879774e1644d9"
+    },
+    "source": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_assets/aloha_viperx.usd",
+      "sha256_after": "b24afe3678155654892c69517fc58ecd970108d68cec56b02dc6fdcb8bf4493e",
+      "sha256_before": "b24afe3678155654892c69517fc58ecd970108d68cec56b02dc6fdcb8bf4493e"
+    }
+  },
+  "outputs": {
+    "configuration_layer": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_root_frame_only/configuration/supplier_cad_root_frame_only.usda",
+      "sha256": "6aae718643f943e5d732170749844428f87db84acf6c5026c38bef0cd651cfd5"
+    },
+    "diagnostic_stage": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_root_frame_only/aloha_viperx_supplier_cad_root_frame_only.usda",
+      "sha256": "b56c59b8beb5f93c64d0bdbebf148c70cdcb85b42b81103e16a7f3d16297ce8c"
+    }
+  },
+  "profile": "DIAGNOSTIC_ONLY_NOT_FINAL_FRAME_MAPPING",
+  "schema_version": 1,
+  "scope": {
+    "bottle_contact_grasp": "NOT_RUN",
+    "task8": "NOT_RUN"
+  },
+  "status": "PASS"
+}

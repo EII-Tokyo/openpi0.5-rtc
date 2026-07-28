@@ -1,0 +1,122 @@
+schema_version: 1
+scope: supplier-CAD follower-left Task 5 no-bottle drive diagnosis
+runtime:
+  isaac_sim: 5.1.0.0
+  kit: 107.3.3
+  physx: 107.3.26
+approved_source_stage:
+  path: local_eval_assets/aloha_isaac_assets/aloha_viperx.usd
+  sha256: b24afe3678155654892c69517fc58ecd970108d68cec56b02dc6fdcb8bf4493e
+baseline_diagnostic_stage:
+  path: assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_convex_hull/aloha_viperx_supplier_cad_task5.usda
+  sha256: 8040edd01859af9f8c51285d198d34aae19e66625a2d5f21729879774e1644d9
+profiles:
+  baseline:
+    max_force_n:
+      left: 0.0
+      right: 0.0
+    stiffness: 200.0
+    damping: 0.0
+    drive_type: force
+    status: PRESERVED_BASELINE
+  max_force_only:
+    max_force_n:
+      left: 5.0
+      right: 5.0
+    stiffness: 200.0
+    damping: 0.0
+    drive_type: force
+    changed_variable: drive:linear:physics:maxForce
+    status: DIAGNOSTIC_ONLY_NOT_FINAL_CONTROL_MAPPING
+  root_frame_only:
+    changed_variable:
+      - physics:localPos0
+      - physics:localRot0
+    joint: /workcell/joints/rootJoint_vx300s_left
+    local_pos0_m:
+      - -0.4690000116825104
+      - 0.5
+      - 0.0
+    local_rot0_wxyz:
+      - 1.0
+      - 0.0
+      - 0.0
+      - 0.0
+    source: computed from body1 local-to-world transform
+    status: DIAGNOSTIC_ONLY_NOT_FINAL_FRAME_MAPPING
+  max_force_plus_root_frame:
+    parent_profile: max_force_only
+    inherited_max_force_n:
+      left: 5.0
+      right: 5.0
+    changed_variable:
+      - physics:localPos0
+      - physics:localRot0
+    joint: /workcell/joints/rootJoint_vx300s_left
+    local_pos0_m:
+      - -0.4690000116825104
+      - 0.5
+      - 0.0
+    local_rot0_wxyz:
+      - 1.0
+      - 0.0
+      - 0.0
+      - 0.0
+    source: root_frame_only computed diagnostic applied over max_force_only
+    status: DIAGNOSTIC_ONLY_NOT_FINAL_COMPOSED_MAPPING
+  arm_max_force_over_combined:
+    parent_profile: max_force_plus_root_frame
+    changed_variable: drive:angular:physics:maxForce
+    arm_max_force:
+      vx300s_left_waist: 10.0
+      vx300s_left_shoulder: 20.0
+      vx300s_left_elbow: 15.0
+      vx300s_left_forearm_roll: 2.0
+      vx300s_left_wrist_angle: 5.0
+      vx300s_left_wrist_rotate: 1.0
+    source: fixed-commit follower_left URDF effort limits
+    stiffness_policy: INHERIT_UNCHANGED
+    damping_policy: INHERIT_UNCHANGED
+    status: DIAGNOSTIC_ONLY_NOT_FINAL_ARM_HOLD
+parameter_evidence:
+  max_force_n:
+    value: 5.0
+    source:
+      - assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/follower_left.urdf
+      - configs/aloha1_joint_map.yaml
+    source_semantics: URDF prismatic joint effort limit
+  max_force_zero_semantics:
+    source: .venv_issac/lib/python3.11/site-packages/isaacsim/extscache/omni.usd.libs-1.0.1+69cbf6ad.lx64.r.cp311/bin/usd/usdPhysics/resources/generatedSchema.usda
+    schema_default: inf
+    requirement: maxForce must be non-negative
+  root_frame:
+    body0: world
+    body1: /workcell/vx300s_left/vx300s_left
+    authored_local_pos0_before_m:
+      - 0.0
+      - 0.0
+      - 0.0
+    computed_body1_world_position_m:
+      - -0.4690000116825104
+      - 0.5
+      - 0.0
+    initial_frame_translation_mismatch_m: 0.6855370237690995
+    method: UsdGeom.XformCache.GetLocalToWorldTransform
+frozen:
+  collider: SUPPLIER_CAD_V2_CONVEX_HULL_DIAGNOSTIC
+  friction: unchanged
+  stiffness: 200.0
+  damping: 0.0
+  mimic_api: absent
+  control: explicit symmetric finger targets
+  bottle: NOT_PRESENT
+  physics_frequency_hz: 60
+  solver_iterations: unchanged
+  solve_articulation_contact_last: true
+boundaries:
+  source_stage_modified: false
+  baseline_diagnostic_modified: false
+  default_configuration_modified: false
+  final_collider_modified: false
+  bottle_contact_grasp: NOT_RUN
+  task8: NOT_RUN

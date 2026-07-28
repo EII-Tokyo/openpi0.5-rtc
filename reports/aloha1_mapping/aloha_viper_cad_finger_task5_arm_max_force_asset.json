@@ -1,0 +1,86 @@
+{
+  "changed_values_n": {
+    "vx300s_left_elbow": 15.0,
+    "vx300s_left_forearm_roll": 2.0,
+    "vx300s_left_shoulder": 20.0,
+    "vx300s_left_waist": 10.0,
+    "vx300s_left_wrist_angle": 5.0,
+    "vx300s_left_wrist_rotate": 1.0
+  },
+  "changed_variable_relative_to_parent": "drive:angular:physics:maxForce",
+  "evidence": {
+    "joint_map": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/configs/aloha1_joint_map.yaml",
+      "sha256": "0ddb31c7dfba67c65add5ce725862b3a65fa1b1974d5181b4b80054e7b592ad6"
+    },
+    "urdf": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/follower_left.urdf",
+      "joint_effort_values_n": {
+        "vx300s_left_elbow": 15.0,
+        "vx300s_left_forearm_roll": 2.0,
+        "vx300s_left_shoulder": 20.0,
+        "vx300s_left_waist": 10.0,
+        "vx300s_left_wrist_angle": 5.0,
+        "vx300s_left_wrist_rotate": 1.0
+      },
+      "sha256_after": "d9e4b32723ee71dfce26fb4e78546cfcfef147b2d7dbf5e53e3620e3d8aa96bd",
+      "sha256_before": "d9e4b32723ee71dfce26fb4e78546cfcfef147b2d7dbf5e53e3620e3d8aa96bd"
+    }
+  },
+  "frozen": {
+    "arm_damping": "INHERIT_UNCHANGED",
+    "arm_stiffness": "INHERIT_UNCHANGED",
+    "bottle": "NOT_PRESENT",
+    "collider": "SUPPLIER_CAD_V2_CONVEX_HULL_DIAGNOSTIC",
+    "finger_max_force_n": {
+      "left": 5.0,
+      "right": 5.0
+    },
+    "friction": "UNCHANGED",
+    "physics_frequency_hz": 60,
+    "root_joint_frame": "INHERIT_COMPUTED_PARENT",
+    "solver_iterations": "UNCHANGED"
+  },
+  "gates": {
+    "approved_source_stage_immutable": true,
+    "default_or_final_asset_unchanged": true,
+    "only_arm_angular_max_force_authored": true,
+    "parent_diagnostic_stage_immutable": true,
+    "source_urdf_immutable": true,
+    "urdf_efforts_exactly_match_layer": true
+  },
+  "inputs": {
+    "approved_source_stage": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_assets/aloha_viperx.usd",
+      "sha256_after": "b24afe3678155654892c69517fc58ecd970108d68cec56b02dc6fdcb8bf4493e",
+      "sha256_before": "b24afe3678155654892c69517fc58ecd970108d68cec56b02dc6fdcb8bf4493e"
+    },
+    "parent_asset_report": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_cad_finger_task5_combined_asset.json",
+      "sha256": "1deacbb0a545b4c0a93e30191fd66d754ec6bffd6fab90d18995c40ff61e2375"
+    },
+    "parent_diagnostic_stage": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_max_force_plus_root_frame/aloha_viperx_supplier_cad_max_force_plus_root_frame.usda",
+      "sha256_after": "0b7baea2d58829208ae7fb9d842bf495863831d2150e2e81b9f8d00808afcc84",
+      "sha256_before": "0b7baea2d58829208ae7fb9d842bf495863831d2150e2e81b9f8d00808afcc84"
+    }
+  },
+  "outputs": {
+    "configuration_layer": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_arm_max_force_over_combined/configuration/supplier_cad_arm_max_force_only.usda",
+      "sha256": "6d5625cfd43d33f44affbb0b6568f7fa5b4fde146b153e646c5f4b3e137aef11"
+    },
+    "diagnostic_stage": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_arm_max_force_over_combined/aloha_viperx_supplier_cad_arm_max_force_over_combined.usda",
+      "sha256": "5bc3bb5ab7fd7ce8fd3028894394ca5915a278e5a996d016a5868a164593ac40"
+    }
+  },
+  "parent_profile": "max_force_plus_root_frame",
+  "profile": "DIAGNOSTIC_ONLY_NOT_FINAL_ARM_HOLD",
+  "schema_version": 1,
+  "scope": {
+    "bottle_contact_grasp": "NOT_RUN",
+    "task8": "NOT_RUN"
+  },
+  "status": "PASS"
+}

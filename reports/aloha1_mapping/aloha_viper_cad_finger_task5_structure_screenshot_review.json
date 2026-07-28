@@ -1,0 +1,2288 @@
+{
+  "approved_source_stage": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_assets/aloha_viperx.usd",
+    "sha256_after": "b24afe3678155654892c69517fc58ecd970108d68cec56b02dc6fdcb8bf4493e",
+    "sha256_before": "b24afe3678155654892c69517fc58ecd970108d68cec56b02dc6fdcb8bf4493e"
+  },
+  "capture_count": 12,
+  "captures": [
+    {
+      "acceptance_criteria": [
+        "both_handed_fingers_fully_visible",
+        "blue_left_orange_right_mapping_correct",
+        "inward_surfaces_opposed",
+        "no_critical_crop",
+        "no_critical_occlusion",
+        "state_visually_distinct",
+        "paired_camera_pose_exact",
+        "labels_do_not_overlap",
+        "annotations_do_not_cover_key_geometry",
+        "visual_gate_only_wording"
+      ],
+      "annotated": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/task5_structure/annotation_v2/screenshots_annotated/closed_base_oblique_annotated.png",
+        "mode": "RGB",
+        "readable": true,
+        "resolution": [
+          1900,
+          900
+        ],
+        "sha256": "b8de00aa5e726cd5897c6536e3af7774bb2a0ce2e2bc6d60346cafda3831b275"
+      },
+      "camera": {
+        "actual_orientation_wxyz": [
+          0.7153890132904053,
+          0.4249306619167328,
+          -0.29887449741363525,
+          -0.4672542214393616
+        ],
+        "actual_position_world_m": [
+          -0.2031141072511673,
+          -0.11427831649780273,
+          0.4924883544445038
+        ],
+        "finger_projection": {
+          "bbox_center_px": [
+            629.8140944736855,
+            440.00950907770164
+          ],
+          "bbox_max_px": [
+            852.4696640162241,
+            670.7863466389714
+          ],
+          "bbox_min_px": [
+            407.15852493114687,
+            209.23267151643185
+          ],
+          "finite_point_count": 1662,
+          "fully_in_frame": true
+        },
+        "nominal_target_world_m": [
+          0.19680597633123398,
+          0.035051628947257996,
+          0.28209710121154785
+        ],
+        "orientation_wxyz": [
+          0.7153890132904053,
+          0.4249306917190552,
+          -0.29887452721595764,
+          -0.46725425124168396
+        ],
+        "position_world_m": [
+          -0.20311410793245868,
+          -0.11427831934107632,
+          0.4924883457098766
+        ],
+        "recenter_history": [
+          {
+            "iteration": 0,
+            "projection": {
+              "bbox_center_px": [
+                575.8651525450982,
+                508.42901631028906
+              ],
+              "bbox_max_px": [
+                1029.5184360736812,
+                782.4896064007235
+              ],
+              "bbox_min_px": [
+                122.21186901651525,
+                234.36842621985463
+              ],
+              "finite_point_count": 4986,
+              "fully_in_frame": true
+            },
+            "target_world_m": [
+              0.19680597633123398,
+              0.035051628947257996,
+              0.28209710121154785
+            ]
+          },
+          {
+            "iteration": 1,
+            "projection": {
+              "bbox_center_px": [
+                642.8352019236015,
+                452.10738913996244
+              ],
+              "bbox_max_px": [
+                1096.541858921391,
+                729.2583034989866
+              ],
+              "bbox_min_px": [
+                189.12854492581212,
+                174.95647478093827
+              ],
+              "finite_point_count": 4986,
+              "fully_in_frame": true
+            },
+            "target_world_m": [
+              0.18951288197267405,
+              0.04268472245780762,
+              0.2736518318139087
+            ]
+          },
+          {
+            "iteration": 2,
+            "projection": {
+              "bbox_center_px": [
+                639.8720878624696,
+                449.87058231185506
+              ],
+              "bbox_max_px": [
+                1093.5898528142861,
+                726.8784664165844
+              ],
+              "bbox_min_px": [
+                186.15432291065312,
+                172.86269820712567
+              ],
+              "finite_point_count": 4986,
+              "fully_in_frame": true
+            },
+            "target_world_m": [
+              0.1895474527324645,
+              0.04221065432767669,
+              0.2733738112405237
+            ]
+          }
+        ],
+        "recenter_method": "UNION_OF_THREE_LEGAL_CAD_FINGER_STATES_ISAAC51_PINHOLE_PROJECTION",
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 12,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_projection_px": [
+          [
+            640.0000635854681,
+            450.0001396316184
+          ]
+        ],
+        "target_world_m": [
+          0.1895474527324645,
+          0.04221065432767669,
+          0.2733738112405237
+        ],
+        "up_world": [
+          -0.09856688696935509,
+          -0.008179644609408893,
+          0.9950968104698327
+        ],
+        "view": "base_oblique"
+      },
+      "capture_name": "closed_base_oblique",
+      "part": "left/right finger and inward gripping surfaces",
+      "phase": "fresh World reset; full legal pose reinjected; no physics step",
+      "raw": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/task5_structure/screenshots_raw/closed_base_oblique_raw.png",
+        "mode": "RGBA",
+        "readable": true,
+        "resolution": [
+          1280,
+          900
+        ],
+        "sha256": "e70b4d0849468c55576359aaf7fb2cced4d51af7a1e52f840dff4e69c7c65463"
+      },
+      "simulation": {
+        "acceptance_boundary": "STRUCTURE SCREENSHOT; NO CONTACT OR GRASP PASS CLAIM",
+        "bottle_present": false,
+        "capture_physics_stage": "FRESH_WORLD_RESET_REINJECTED_FULL_LEGAL_POSE_NO_PHYSICS_STEP",
+        "capture_world_reset": true,
+        "collider_type": "SUPPLIER_CAD_V2_CONVEX_HULL_DIAGNOSTIC",
+        "dynamic_post_step_failure_preserved_in_report": true,
+        "dynamic_trace_last_frame": 5,
+        "finger_readback_m": [
+          0.020999999716877937,
+          -0.020999999716877937
+        ],
+        "finger_targets_m": [
+          0.021,
+          -0.021
+        ],
+        "frame": 2,
+        "isaac_sim": "5.1.0.0",
+        "kit": "107.3.3",
+        "physx": "107.3.26",
+        "robot": "follower_left",
+        "session_only_hidden_visuals": [
+          "/workcell/vx300s_left/vx300s_left_gripper_link/visuals"
+        ],
+        "stage_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_convex_hull/aloha_viperx_supplier_cad_task5.usda",
+        "stage_sha256": "8040edd01859af9f8c51285d198d34aae19e66625a2d5f21729879774e1644d9",
+        "state": "closed",
+        "surface_gap_m": 0.0044630003030686,
+        "time_s": 0.03333333507180214
+      },
+      "state": "closed",
+      "target": "supplier-CAD handed finger installation",
+      "view": "base_oblique",
+      "visual_model_review": {
+        "annotated": "PASS",
+        "checks": {
+          "annotations_do_not_cover_key_geometry": true,
+          "blue_left_orange_right_mapping_correct": true,
+          "both_handed_fingers_fully_visible": true,
+          "inward_surfaces_opposed": true,
+          "labels_do_not_overlap": true,
+          "no_critical_crop": true,
+          "no_critical_occlusion": true,
+          "paired_camera_pose_exact": true,
+          "state_visually_distinct": true,
+          "visual_gate_only_wording": true
+        },
+        "conclusion": "Vision-model inspection: both handed fingers and inward surfaces are visible; mapping, crop, occlusion, state distinction, camera pairing, labels, and arrows pass. Verdict is limited to the structure visual gate.",
+        "raw": "PASS",
+        "retake_reason": null,
+        "status": "PASS"
+      }
+    },
+    {
+      "acceptance_criteria": [
+        "both_handed_fingers_fully_visible",
+        "blue_left_orange_right_mapping_correct",
+        "inward_surfaces_opposed",
+        "no_critical_crop",
+        "no_critical_occlusion",
+        "state_visually_distinct",
+        "paired_camera_pose_exact",
+        "labels_do_not_overlap",
+        "annotations_do_not_cover_key_geometry",
+        "visual_gate_only_wording"
+      ],
+      "annotated": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/task5_structure/annotation_v2/screenshots_annotated/closed_tip_end_annotated.png",
+        "mode": "RGB",
+        "readable": true,
+        "resolution": [
+          1900,
+          900
+        ],
+        "sha256": "fcdb13debe87205da9e15613f37c58d8ad16b544f4f9e325504d6b5436b3a4a7"
+      },
+      "camera": {
+        "actual_orientation_wxyz": [
+          0.5371320843696594,
+          0.44889500737190247,
+          0.4545191824436188,
+          0.5508127808570862
+        ],
+        "actual_position_world_m": [
+          0.7689371109008789,
+          0.045808665454387665,
+          0.3891029357910156
+        ],
+        "finger_projection": {
+          "bbox_center_px": [
+            643.6995570691208,
+            433.697048162511
+          ],
+          "bbox_max_px": [
+            792.0889668852716,
+            573.1682415246636
+          ],
+          "bbox_min_px": [
+            495.3101472529701,
+            294.2258548003584
+          ],
+          "finite_point_count": 1662,
+          "fully_in_frame": true
+        },
+        "orientation_wxyz": [
+          0.5371320247650146,
+          0.44889500737190247,
+          0.4545191824436188,
+          0.5508127212524414
+        ],
+        "position_world_m": [
+          0.7689371112721903,
+          0.045808667050361955,
+          0.3891029448016128
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 18,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_projection_px": [
+          [
+            640.0001130821216,
+            449.99983132344545
+          ]
+        ],
+        "target_world_m": [
+          0.19680597633123398,
+          0.035051628947257996,
+          0.28209710121154785
+        ],
+        "up_world": [
+          -0.09856688696935509,
+          -0.008179644609408893,
+          0.9950968104698327
+        ],
+        "view": "tip_end"
+      },
+      "capture_name": "closed_tip_end",
+      "part": "left/right finger and inward gripping surfaces",
+      "phase": "fresh World reset; full legal pose reinjected; no physics step",
+      "raw": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/task5_structure/screenshots_raw/closed_tip_end_raw.png",
+        "mode": "RGBA",
+        "readable": true,
+        "resolution": [
+          1280,
+          900
+        ],
+        "sha256": "eb04225f7d3f2cdeec3a19f4ecce4335fd69e74ec45f0800ce3aa35fcff36073"
+      },
+      "simulation": {
+        "acceptance_boundary": "STRUCTURE SCREENSHOT; NO CONTACT OR GRASP PASS CLAIM",
+        "bottle_present": false,
+        "capture_physics_stage": "FRESH_WORLD_RESET_REINJECTED_FULL_LEGAL_POSE_NO_PHYSICS_STEP",
+        "capture_world_reset": true,
+        "collider_type": "SUPPLIER_CAD_V2_CONVEX_HULL_DIAGNOSTIC",
+        "dynamic_post_step_failure_preserved_in_report": true,
+        "dynamic_trace_last_frame": 5,
+        "finger_readback_m": [
+          0.020999999716877937,
+          -0.020999999716877937
+        ],
+        "finger_targets_m": [
+          0.021,
+          -0.021
+        ],
+        "frame": 2,
+        "isaac_sim": "5.1.0.0",
+        "kit": "107.3.3",
+        "physx": "107.3.26",
+        "robot": "follower_left",
+        "session_only_hidden_visuals": [],
+        "stage_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_convex_hull/aloha_viperx_supplier_cad_task5.usda",
+        "stage_sha256": "8040edd01859af9f8c51285d198d34aae19e66625a2d5f21729879774e1644d9",
+        "state": "closed",
+        "surface_gap_m": 0.0044630003030686,
+        "time_s": 0.03333333507180214
+      },
+      "state": "closed",
+      "target": "supplier-CAD handed finger installation",
+      "view": "tip_end",
+      "visual_model_review": {
+        "annotated": "PASS",
+        "checks": {
+          "annotations_do_not_cover_key_geometry": true,
+          "blue_left_orange_right_mapping_correct": true,
+          "both_handed_fingers_fully_visible": true,
+          "inward_surfaces_opposed": true,
+          "labels_do_not_overlap": true,
+          "no_critical_crop": true,
+          "no_critical_occlusion": true,
+          "paired_camera_pose_exact": true,
+          "state_visually_distinct": true,
+          "visual_gate_only_wording": true
+        },
+        "conclusion": "Vision-model inspection: both handed fingers and inward surfaces are visible; mapping, crop, occlusion, state distinction, camera pairing, labels, and arrows pass. Verdict is limited to the structure visual gate.",
+        "raw": "PASS",
+        "retake_reason": null,
+        "status": "PASS"
+      }
+    },
+    {
+      "acceptance_criteria": [
+        "both_handed_fingers_fully_visible",
+        "blue_left_orange_right_mapping_correct",
+        "inward_surfaces_opposed",
+        "no_critical_crop",
+        "no_critical_occlusion",
+        "state_visually_distinct",
+        "paired_camera_pose_exact",
+        "labels_do_not_overlap",
+        "annotations_do_not_cover_key_geometry",
+        "visual_gate_only_wording"
+      ],
+      "annotated": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/task5_structure/annotation_v2/screenshots_annotated/closed_true_bottom_annotated.png",
+        "mode": "RGB",
+        "readable": true,
+        "resolution": [
+          1900,
+          900
+        ],
+        "sha256": "49adb9e5118649b4562a5d91d8eb04dd4fcd884895343df80a10a41f962a92a7"
+      },
+      "camera": {
+        "actual_orientation_wxyz": [
+          0.03236580640077591,
+          0.6992639303207397,
+          0.7131467461585999,
+          0.03747063875198364
+        ],
+        "actual_position_world_m": [
+          0.2904445230960846,
+          0.04282229021191597,
+          -0.6632448434829712
+        ],
+        "finger_projection": {
+          "bbox_center_px": [
+            642.0960281162372,
+            448.9601508837136
+          ],
+          "bbox_max_px": [
+            739.48229432635,
+            603.9346311727571
+          ],
+          "bbox_min_px": [
+            544.7097619061244,
+            293.98567059467
+          ],
+          "finite_point_count": 1662,
+          "fully_in_frame": true
+        },
+        "orientation_wxyz": [
+          0.03236581012606621,
+          0.6992639899253845,
+          0.7131468057632446,
+          0.03747063875198364
+        ],
+        "position_world_m": [
+          0.2904445189521213,
+          0.04282229132619644,
+          -0.6632448687347932
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 48,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_projection_px": [
+          [
+            640.0000254307349,
+            450.0000268586397
+          ]
+        ],
+        "target_world_m": [
+          0.19680597633123398,
+          0.035051628947257996,
+          0.28209710121154785
+        ],
+        "up_world": [
+          0.9949301367059038,
+          0.01925175919581794,
+          0.09870862597685043
+        ],
+        "view": "true_bottom"
+      },
+      "capture_name": "closed_true_bottom",
+      "part": "left/right finger and inward gripping surfaces",
+      "phase": "fresh World reset; full legal pose reinjected; no physics step",
+      "raw": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/task5_structure/screenshots_raw/closed_true_bottom_raw.png",
+        "mode": "RGBA",
+        "readable": true,
+        "resolution": [
+          1280,
+          900
+        ],
+        "sha256": "df0e4a08efc43a3c67e38955f211867ea312d6a2acccab82a58007205f379d7d"
+      },
+      "simulation": {
+        "acceptance_boundary": "STRUCTURE SCREENSHOT; NO CONTACT OR GRASP PASS CLAIM",
+        "bottle_present": false,
+        "capture_physics_stage": "FRESH_WORLD_RESET_REINJECTED_FULL_LEGAL_POSE_NO_PHYSICS_STEP",
+        "capture_world_reset": true,
+        "collider_type": "SUPPLIER_CAD_V2_CONVEX_HULL_DIAGNOSTIC",
+        "dynamic_post_step_failure_preserved_in_report": true,
+        "dynamic_trace_last_frame": 5,
+        "finger_readback_m": [
+          0.020999999716877937,
+          -0.020999999716877937
+        ],
+        "finger_targets_m": [
+          0.021,
+          -0.021
+        ],
+        "frame": 2,
+        "isaac_sim": "5.1.0.0",
+        "kit": "107.3.3",
+        "physx": "107.3.26",
+        "robot": "follower_left",
+        "session_only_hidden_visuals": [],
+        "stage_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_convex_hull/aloha_viperx_supplier_cad_task5.usda",
+        "stage_sha256": "8040edd01859af9f8c51285d198d34aae19e66625a2d5f21729879774e1644d9",
+        "state": "closed",
+        "surface_gap_m": 0.0044630003030686,
+        "time_s": 0.03333333507180214
+      },
+      "state": "closed",
+      "target": "supplier-CAD handed finger installation",
+      "view": "true_bottom",
+      "visual_model_review": {
+        "annotated": "PASS",
+        "checks": {
+          "annotations_do_not_cover_key_geometry": true,
+          "blue_left_orange_right_mapping_correct": true,
+          "both_handed_fingers_fully_visible": true,
+          "inward_surfaces_opposed": true,
+          "labels_do_not_overlap": true,
+          "no_critical_crop": true,
+          "no_critical_occlusion": true,
+          "paired_camera_pose_exact": true,
+          "state_visually_distinct": true,
+          "visual_gate_only_wording": true
+        },
+        "conclusion": "Vision-model inspection: both handed fingers and inward surfaces are visible; mapping, crop, occlusion, state distinction, camera pairing, labels, and arrows pass. Verdict is limited to the structure visual gate.",
+        "raw": "PASS",
+        "retake_reason": null,
+        "status": "PASS"
+      }
+    },
+    {
+      "acceptance_criteria": [
+        "both_handed_fingers_fully_visible",
+        "blue_left_orange_right_mapping_correct",
+        "inward_surfaces_opposed",
+        "no_critical_crop",
+        "no_critical_occlusion",
+        "state_visually_distinct",
+        "paired_camera_pose_exact",
+        "labels_do_not_overlap",
+        "annotations_do_not_cover_key_geometry",
+        "visual_gate_only_wording"
+      ],
+      "annotated": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/task5_structure/annotation_v2/screenshots_annotated/closed_true_top_annotated.png",
+        "mode": "RGB",
+        "readable": true,
+        "resolution": [
+          1900,
+          900
+        ],
+        "sha256": "9c8bd61216e799c99aec29f39a976682c89af376129c590fbf6d6803f75d9d6d"
+      },
+      "camera": {
+        "actual_orientation_wxyz": [
+          0.7131467461585999,
+          0.03747064620256424,
+          -0.032365817576646805,
+          -0.6992639899253845
+        ],
+        "actual_position_world_m": [
+          0.10316743701696396,
+          0.027280965819954872,
+          1.227439045906067
+        ],
+        "finger_projection": {
+          "bbox_center_px": [
+            637.5649377819911,
+            448.95566050278114
+          ],
+          "bbox_max_px": [
+            735.326802353238,
+            604.5180280788634
+          ],
+          "bbox_min_px": [
+            539.8030732107442,
+            293.3932929266989
+          ],
+          "finite_point_count": 1662,
+          "fully_in_frame": true
+        },
+        "orientation_wxyz": [
+          0.7131468057632446,
+          0.03747064247727394,
+          -0.032365813851356506,
+          -0.6992639899253845
+        ],
+        "position_world_m": [
+          0.10316743371034665,
+          0.027280966568319548,
+          1.2274390711578889
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 64,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_projection_px": [
+          [
+            639.9999630057224,
+            449.99998334936635
+          ]
+        ],
+        "target_world_m": [
+          0.19680597633123398,
+          0.035051628947257996,
+          0.28209710121154785
+        ],
+        "up_world": [
+          0.9949301367059038,
+          0.01925175919581794,
+          0.09870862597685043
+        ],
+        "view": "true_top"
+      },
+      "capture_name": "closed_true_top",
+      "part": "left/right finger and inward gripping surfaces",
+      "phase": "fresh World reset; full legal pose reinjected; no physics step",
+      "raw": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/task5_structure/screenshots_raw/closed_true_top_raw.png",
+        "mode": "RGBA",
+        "readable": true,
+        "resolution": [
+          1280,
+          900
+        ],
+        "sha256": "9e39207acb69ad4bb2470fe037e87887ca1361cefc4e8a93d2cc8a86d1eb9946"
+      },
+      "simulation": {
+        "acceptance_boundary": "STRUCTURE SCREENSHOT; NO CONTACT OR GRASP PASS CLAIM",
+        "bottle_present": false,
+        "capture_physics_stage": "FRESH_WORLD_RESET_REINJECTED_FULL_LEGAL_POSE_NO_PHYSICS_STEP",
+        "capture_world_reset": true,
+        "collider_type": "SUPPLIER_CAD_V2_CONVEX_HULL_DIAGNOSTIC",
+        "dynamic_post_step_failure_preserved_in_report": true,
+        "dynamic_trace_last_frame": 5,
+        "finger_readback_m": [
+          0.020999999716877937,
+          -0.020999999716877937
+        ],
+        "finger_targets_m": [
+          0.021,
+          -0.021
+        ],
+        "frame": 2,
+        "isaac_sim": "5.1.0.0",
+        "kit": "107.3.3",
+        "physx": "107.3.26",
+        "robot": "follower_left",
+        "session_only_hidden_visuals": [],
+        "stage_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_convex_hull/aloha_viperx_supplier_cad_task5.usda",
+        "stage_sha256": "8040edd01859af9f8c51285d198d34aae19e66625a2d5f21729879774e1644d9",
+        "state": "closed",
+        "surface_gap_m": 0.0044630003030686,
+        "time_s": 0.03333333507180214
+      },
+      "state": "closed",
+      "target": "supplier-CAD handed finger installation",
+      "view": "true_top",
+      "visual_model_review": {
+        "annotated": "PASS",
+        "checks": {
+          "annotations_do_not_cover_key_geometry": true,
+          "blue_left_orange_right_mapping_correct": true,
+          "both_handed_fingers_fully_visible": true,
+          "inward_surfaces_opposed": true,
+          "labels_do_not_overlap": true,
+          "no_critical_crop": true,
+          "no_critical_occlusion": true,
+          "paired_camera_pose_exact": true,
+          "state_visually_distinct": true,
+          "visual_gate_only_wording": true
+        },
+        "conclusion": "Vision-model inspection: both handed fingers and inward surfaces are visible; mapping, crop, occlusion, state distinction, camera pairing, labels, and arrows pass. Verdict is limited to the structure visual gate.",
+        "raw": "PASS",
+        "retake_reason": null,
+        "status": "PASS"
+      }
+    },
+    {
+      "acceptance_criteria": [
+        "both_handed_fingers_fully_visible",
+        "blue_left_orange_right_mapping_correct",
+        "inward_surfaces_opposed",
+        "no_critical_crop",
+        "no_critical_occlusion",
+        "state_visually_distinct",
+        "paired_camera_pose_exact",
+        "labels_do_not_overlap",
+        "annotations_do_not_cover_key_geometry",
+        "visual_gate_only_wording"
+      ],
+      "annotated": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/task5_structure/annotation_v2/screenshots_annotated/maximum_legal_aperture_base_oblique_annotated.png",
+        "mode": "RGB",
+        "readable": true,
+        "resolution": [
+          1900,
+          900
+        ],
+        "sha256": "0c89d1d1662664f30da3dfe25e95c8b05785ed5aa64218f4c91e740055d203cc"
+      },
+      "camera": {
+        "actual_orientation_wxyz": [
+          0.7153890132904053,
+          0.4249306619167328,
+          -0.29887449741363525,
+          -0.4672542214393616
+        ],
+        "actual_position_world_m": [
+          -0.2031141072511673,
+          -0.11427831649780273,
+          0.4924883544445038
+        ],
+        "finger_projection": {
+          "bbox_center_px": [
+            639.8720878624696,
+            449.87058231185506
+          ],
+          "bbox_max_px": [
+            1093.5898528142861,
+            726.8784664165844
+          ],
+          "bbox_min_px": [
+            186.15432291065312,
+            172.86269820712567
+          ],
+          "finite_point_count": 1662,
+          "fully_in_frame": true
+        },
+        "nominal_target_world_m": [
+          0.19680597633123398,
+          0.035051628947257996,
+          0.28209710121154785
+        ],
+        "orientation_wxyz": [
+          0.7153890132904053,
+          0.4249306917190552,
+          -0.29887452721595764,
+          -0.46725425124168396
+        ],
+        "position_world_m": [
+          -0.20311410793245868,
+          -0.11427831934107632,
+          0.4924883457098766
+        ],
+        "recenter_history": [
+          {
+            "iteration": 0,
+            "projection": {
+              "bbox_center_px": [
+                575.8651525450982,
+                508.42901631028906
+              ],
+              "bbox_max_px": [
+                1029.5184360736812,
+                782.4896064007235
+              ],
+              "bbox_min_px": [
+                122.21186901651525,
+                234.36842621985463
+              ],
+              "finite_point_count": 4986,
+              "fully_in_frame": true
+            },
+            "target_world_m": [
+              0.19680597633123398,
+              0.035051628947257996,
+              0.28209710121154785
+            ]
+          },
+          {
+            "iteration": 1,
+            "projection": {
+              "bbox_center_px": [
+                642.8352019236015,
+                452.10738913996244
+              ],
+              "bbox_max_px": [
+                1096.541858921391,
+                729.2583034989866
+              ],
+              "bbox_min_px": [
+                189.12854492581212,
+                174.95647478093827
+              ],
+              "finite_point_count": 4986,
+              "fully_in_frame": true
+            },
+            "target_world_m": [
+              0.18951288197267405,
+              0.04268472245780762,
+              0.2736518318139087
+            ]
+          },
+          {
+            "iteration": 2,
+            "projection": {
+              "bbox_center_px": [
+                639.8720878624696,
+                449.87058231185506
+              ],
+              "bbox_max_px": [
+                1093.5898528142861,
+                726.8784664165844
+              ],
+              "bbox_min_px": [
+                186.15432291065312,
+                172.86269820712567
+              ],
+              "finite_point_count": 4986,
+              "fully_in_frame": true
+            },
+            "target_world_m": [
+              0.1895474527324645,
+              0.04221065432767669,
+              0.2733738112405237
+            ]
+          }
+        ],
+        "recenter_method": "UNION_OF_THREE_LEGAL_CAD_FINGER_STATES_ISAAC51_PINHOLE_PROJECTION",
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 9,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_projection_px": [
+          [
+            640.0000635854681,
+            450.0001396316184
+          ]
+        ],
+        "target_world_m": [
+          0.1895474527324645,
+          0.04221065432767669,
+          0.2733738112405237
+        ],
+        "up_world": [
+          -0.09856688696935509,
+          -0.008179644609408893,
+          0.9950968104698327
+        ],
+        "view": "base_oblique"
+      },
+      "capture_name": "maximum_legal_aperture_base_oblique",
+      "part": "left/right finger and inward gripping surfaces",
+      "phase": "fresh World reset; full legal pose reinjected; no physics step",
+      "raw": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/task5_structure/screenshots_raw/maximum_legal_aperture_base_oblique_raw.png",
+        "mode": "RGBA",
+        "readable": true,
+        "resolution": [
+          1280,
+          900
+        ],
+        "sha256": "1e34074424ef7e332b8b78e9b341a80d7799c1bb7ed380c794ccc66d4929c7f0"
+      },
+      "simulation": {
+        "acceptance_boundary": "STRUCTURE SCREENSHOT; NO CONTACT OR GRASP PASS CLAIM",
+        "bottle_present": false,
+        "capture_physics_stage": "FRESH_WORLD_RESET_REINJECTED_FULL_LEGAL_POSE_NO_PHYSICS_STEP",
+        "capture_world_reset": true,
+        "collider_type": "SUPPLIER_CAD_V2_CONVEX_HULL_DIAGNOSTIC",
+        "dynamic_post_step_failure_preserved_in_report": true,
+        "dynamic_trace_last_frame": 5,
+        "finger_readback_m": [
+          0.05700000002980232,
+          -0.05700000002980232
+        ],
+        "finger_targets_m": [
+          0.057,
+          -0.057
+        ],
+        "frame": 2,
+        "isaac_sim": "5.1.0.0",
+        "kit": "107.3.3",
+        "physx": "107.3.26",
+        "robot": "follower_left",
+        "session_only_hidden_visuals": [
+          "/workcell/vx300s_left/vx300s_left_gripper_link/visuals"
+        ],
+        "stage_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_convex_hull/aloha_viperx_supplier_cad_task5.usda",
+        "stage_sha256": "8040edd01859af9f8c51285d198d34aae19e66625a2d5f21729879774e1644d9",
+        "state": "maximum_legal_aperture",
+        "surface_gap_m": 0.07647921529137366,
+        "time_s": 0.03333333507180214
+      },
+      "state": "maximum_legal_aperture",
+      "target": "supplier-CAD handed finger installation",
+      "view": "base_oblique",
+      "visual_model_review": {
+        "annotated": "PASS",
+        "checks": {
+          "annotations_do_not_cover_key_geometry": true,
+          "blue_left_orange_right_mapping_correct": true,
+          "both_handed_fingers_fully_visible": true,
+          "inward_surfaces_opposed": true,
+          "labels_do_not_overlap": true,
+          "no_critical_crop": true,
+          "no_critical_occlusion": true,
+          "paired_camera_pose_exact": true,
+          "state_visually_distinct": true,
+          "visual_gate_only_wording": true
+        },
+        "conclusion": "Vision-model inspection: both handed fingers and inward surfaces are visible; mapping, crop, occlusion, state distinction, camera pairing, labels, and arrows pass. Verdict is limited to the structure visual gate.",
+        "raw": "PASS",
+        "retake_reason": null,
+        "status": "PASS"
+      }
+    },
+    {
+      "acceptance_criteria": [
+        "both_handed_fingers_fully_visible",
+        "blue_left_orange_right_mapping_correct",
+        "inward_surfaces_opposed",
+        "no_critical_crop",
+        "no_critical_occlusion",
+        "state_visually_distinct",
+        "paired_camera_pose_exact",
+        "labels_do_not_overlap",
+        "annotations_do_not_cover_key_geometry",
+        "visual_gate_only_wording"
+      ],
+      "annotated": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/task5_structure/annotation_v2/screenshots_annotated/maximum_legal_aperture_tip_end_annotated.png",
+        "mode": "RGB",
+        "readable": true,
+        "resolution": [
+          1900,
+          900
+        ],
+        "sha256": "e65ee9aba7a4f2522dde4445b9bbceaf1ee95d243e3ddb0f665fc9ba228dea89"
+      },
+      "camera": {
+        "actual_orientation_wxyz": [
+          0.5371320843696594,
+          0.44889500737190247,
+          0.4545191824436188,
+          0.5508127808570862
+        ],
+        "actual_position_world_m": [
+          0.7689371109008789,
+          0.045808665454387665,
+          0.3891029357910156
+        ],
+        "finger_projection": {
+          "bbox_center_px": [
+            643.9084122042129,
+            433.83013376797476
+          ],
+          "bbox_max_px": [
+            972.6177754652826,
+            573.635338129192
+          ],
+          "bbox_min_px": [
+            315.1990489431433,
+            294.0249294067575
+          ],
+          "finite_point_count": 1662,
+          "fully_in_frame": true
+        },
+        "orientation_wxyz": [
+          0.5371320247650146,
+          0.44889500737190247,
+          0.4545191824436188,
+          0.5508127212524414
+        ],
+        "position_world_m": [
+          0.7689371112721903,
+          0.045808667050361955,
+          0.3891029448016128
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 22,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_projection_px": [
+          [
+            640.0001130821216,
+            449.99983132344545
+          ]
+        ],
+        "target_world_m": [
+          0.19680597633123398,
+          0.035051628947257996,
+          0.28209710121154785
+        ],
+        "up_world": [
+          -0.09856688696935509,
+          -0.008179644609408893,
+          0.9950968104698327
+        ],
+        "view": "tip_end"
+      },
+      "capture_name": "maximum_legal_aperture_tip_end",
+      "part": "left/right finger and inward gripping surfaces",
+      "phase": "fresh World reset; full legal pose reinjected; no physics step",
+      "raw": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/task5_structure/screenshots_raw/maximum_legal_aperture_tip_end_raw.png",
+        "mode": "RGBA",
+        "readable": true,
+        "resolution": [
+          1280,
+          900
+        ],
+        "sha256": "09d72a7f00ccf2244c581620c8fd234a202f7fcb45f73dd5a17af0201857b79e"
+      },
+      "simulation": {
+        "acceptance_boundary": "STRUCTURE SCREENSHOT; NO CONTACT OR GRASP PASS CLAIM",
+        "bottle_present": false,
+        "capture_physics_stage": "FRESH_WORLD_RESET_REINJECTED_FULL_LEGAL_POSE_NO_PHYSICS_STEP",
+        "capture_world_reset": true,
+        "collider_type": "SUPPLIER_CAD_V2_CONVEX_HULL_DIAGNOSTIC",
+        "dynamic_post_step_failure_preserved_in_report": true,
+        "dynamic_trace_last_frame": 5,
+        "finger_readback_m": [
+          0.05700000002980232,
+          -0.05700000002980232
+        ],
+        "finger_targets_m": [
+          0.057,
+          -0.057
+        ],
+        "frame": 2,
+        "isaac_sim": "5.1.0.0",
+        "kit": "107.3.3",
+        "physx": "107.3.26",
+        "robot": "follower_left",
+        "session_only_hidden_visuals": [],
+        "stage_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_convex_hull/aloha_viperx_supplier_cad_task5.usda",
+        "stage_sha256": "8040edd01859af9f8c51285d198d34aae19e66625a2d5f21729879774e1644d9",
+        "state": "maximum_legal_aperture",
+        "surface_gap_m": 0.07647921529137366,
+        "time_s": 0.03333333507180214
+      },
+      "state": "maximum_legal_aperture",
+      "target": "supplier-CAD handed finger installation",
+      "view": "tip_end",
+      "visual_model_review": {
+        "annotated": "PASS",
+        "checks": {
+          "annotations_do_not_cover_key_geometry": true,
+          "blue_left_orange_right_mapping_correct": true,
+          "both_handed_fingers_fully_visible": true,
+          "inward_surfaces_opposed": true,
+          "labels_do_not_overlap": true,
+          "no_critical_crop": true,
+          "no_critical_occlusion": true,
+          "paired_camera_pose_exact": true,
+          "state_visually_distinct": true,
+          "visual_gate_only_wording": true
+        },
+        "conclusion": "Vision-model inspection: both handed fingers and inward surfaces are visible; mapping, crop, occlusion, state distinction, camera pairing, labels, and arrows pass. Verdict is limited to the structure visual gate.",
+        "raw": "PASS",
+        "retake_reason": null,
+        "status": "PASS"
+      }
+    },
+    {
+      "acceptance_criteria": [
+        "both_handed_fingers_fully_visible",
+        "blue_left_orange_right_mapping_correct",
+        "inward_surfaces_opposed",
+        "no_critical_crop",
+        "no_critical_occlusion",
+        "state_visually_distinct",
+        "paired_camera_pose_exact",
+        "labels_do_not_overlap",
+        "annotations_do_not_cover_key_geometry",
+        "visual_gate_only_wording"
+      ],
+      "annotated": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/task5_structure/annotation_v2/screenshots_annotated/maximum_legal_aperture_true_bottom_annotated.png",
+        "mode": "RGB",
+        "readable": true,
+        "resolution": [
+          1900,
+          900
+        ],
+        "sha256": "8910a03dcef717f45d8e91b7688e0e91612c2e65503fdb8d8dcba1cbd6b039dc"
+      },
+      "camera": {
+        "actual_orientation_wxyz": [
+          0.03236580640077591,
+          0.6992639303207397,
+          0.7131467461585999,
+          0.03747063875198364
+        ],
+        "actual_position_world_m": [
+          0.2904445230960846,
+          0.04282229021191597,
+          -0.6632448434829712
+        ],
+        "finger_projection": {
+          "bbox_center_px": [
+            642.1204107287679,
+            448.96694618698564
+          ],
+          "bbox_max_px": [
+            857.5050166512807,
+            603.9495546217421
+          ],
+          "bbox_min_px": [
+            426.73580480625503,
+            293.9843377522291
+          ],
+          "finite_point_count": 1662,
+          "fully_in_frame": true
+        },
+        "orientation_wxyz": [
+          0.03236581012606621,
+          0.6992639899253845,
+          0.7131468057632446,
+          0.03747063875198364
+        ],
+        "position_world_m": [
+          0.2904445189521213,
+          0.04282229132619644,
+          -0.6632448687347932
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 27,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_projection_px": [
+          [
+            640.0000254307349,
+            450.0000268586397
+          ]
+        ],
+        "target_world_m": [
+          0.19680597633123398,
+          0.035051628947257996,
+          0.28209710121154785
+        ],
+        "up_world": [
+          0.9949301367059038,
+          0.01925175919581794,
+          0.09870862597685043
+        ],
+        "view": "true_bottom"
+      },
+      "capture_name": "maximum_legal_aperture_true_bottom",
+      "part": "left/right finger and inward gripping surfaces",
+      "phase": "fresh World reset; full legal pose reinjected; no physics step",
+      "raw": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/task5_structure/screenshots_raw/maximum_legal_aperture_true_bottom_raw.png",
+        "mode": "RGBA",
+        "readable": true,
+        "resolution": [
+          1280,
+          900
+        ],
+        "sha256": "1c6235179b640d409d1425d855edcaa38d3037875baf1a915613c3c21e72fc3f"
+      },
+      "simulation": {
+        "acceptance_boundary": "STRUCTURE SCREENSHOT; NO CONTACT OR GRASP PASS CLAIM",
+        "bottle_present": false,
+        "capture_physics_stage": "FRESH_WORLD_RESET_REINJECTED_FULL_LEGAL_POSE_NO_PHYSICS_STEP",
+        "capture_world_reset": true,
+        "collider_type": "SUPPLIER_CAD_V2_CONVEX_HULL_DIAGNOSTIC",
+        "dynamic_post_step_failure_preserved_in_report": true,
+        "dynamic_trace_last_frame": 5,
+        "finger_readback_m": [
+          0.05700000002980232,
+          -0.05700000002980232
+        ],
+        "finger_targets_m": [
+          0.057,
+          -0.057
+        ],
+        "frame": 2,
+        "isaac_sim": "5.1.0.0",
+        "kit": "107.3.3",
+        "physx": "107.3.26",
+        "robot": "follower_left",
+        "session_only_hidden_visuals": [],
+        "stage_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_convex_hull/aloha_viperx_supplier_cad_task5.usda",
+        "stage_sha256": "8040edd01859af9f8c51285d198d34aae19e66625a2d5f21729879774e1644d9",
+        "state": "maximum_legal_aperture",
+        "surface_gap_m": 0.07647921529137366,
+        "time_s": 0.03333333507180214
+      },
+      "state": "maximum_legal_aperture",
+      "target": "supplier-CAD handed finger installation",
+      "view": "true_bottom",
+      "visual_model_review": {
+        "annotated": "PASS",
+        "checks": {
+          "annotations_do_not_cover_key_geometry": true,
+          "blue_left_orange_right_mapping_correct": true,
+          "both_handed_fingers_fully_visible": true,
+          "inward_surfaces_opposed": true,
+          "labels_do_not_overlap": true,
+          "no_critical_crop": true,
+          "no_critical_occlusion": true,
+          "paired_camera_pose_exact": true,
+          "state_visually_distinct": true,
+          "visual_gate_only_wording": true
+        },
+        "conclusion": "Vision-model inspection: both handed fingers and inward surfaces are visible; mapping, crop, occlusion, state distinction, camera pairing, labels, and arrows pass. Verdict is limited to the structure visual gate.",
+        "raw": "PASS",
+        "retake_reason": null,
+        "status": "PASS"
+      }
+    },
+    {
+      "acceptance_criteria": [
+        "both_handed_fingers_fully_visible",
+        "blue_left_orange_right_mapping_correct",
+        "inward_surfaces_opposed",
+        "no_critical_crop",
+        "no_critical_occlusion",
+        "state_visually_distinct",
+        "paired_camera_pose_exact",
+        "labels_do_not_overlap",
+        "annotations_do_not_cover_key_geometry",
+        "visual_gate_only_wording"
+      ],
+      "annotated": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/task5_structure/annotation_v2/screenshots_annotated/maximum_legal_aperture_true_top_annotated.png",
+        "mode": "RGB",
+        "readable": true,
+        "resolution": [
+          1900,
+          900
+        ],
+        "sha256": "f4a3e4a5ca5a1f666eb6a80aa6944593150d90aa1b9d224be2ba4dbbb1c6740a"
+      },
+      "camera": {
+        "actual_orientation_wxyz": [
+          0.7131467461585999,
+          0.03747064620256424,
+          -0.032365817576646805,
+          -0.6992639899253845
+        ],
+        "actual_position_world_m": [
+          0.10316743701696396,
+          0.027280965819954872,
+          1.227439045906067
+        ],
+        "finger_projection": {
+          "bbox_center_px": [
+            637.5894621725574,
+            448.96250298453816
+          ],
+          "bbox_max_px": [
+            853.8044652863939,
+            604.5330986867808
+          ],
+          "bbox_min_px": [
+            421.37445905872096,
+            293.3919072822955
+          ],
+          "finite_point_count": 1662,
+          "fully_in_frame": true
+        },
+        "orientation_wxyz": [
+          0.7131468057632446,
+          0.03747064247727394,
+          -0.032365813851356506,
+          -0.6992639899253845
+        ],
+        "position_world_m": [
+          0.10316743371034665,
+          0.027280966568319548,
+          1.2274390711578889
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 26,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_projection_px": [
+          [
+            639.9999630057224,
+            449.99998334936635
+          ]
+        ],
+        "target_world_m": [
+          0.19680597633123398,
+          0.035051628947257996,
+          0.28209710121154785
+        ],
+        "up_world": [
+          0.9949301367059038,
+          0.01925175919581794,
+          0.09870862597685043
+        ],
+        "view": "true_top"
+      },
+      "capture_name": "maximum_legal_aperture_true_top",
+      "part": "left/right finger and inward gripping surfaces",
+      "phase": "fresh World reset; full legal pose reinjected; no physics step",
+      "raw": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/task5_structure/screenshots_raw/maximum_legal_aperture_true_top_raw.png",
+        "mode": "RGBA",
+        "readable": true,
+        "resolution": [
+          1280,
+          900
+        ],
+        "sha256": "b5c9a1f480ed427ea38aed1721c7362e936ad1bf97d582ba728d5f2ccefe5078"
+      },
+      "simulation": {
+        "acceptance_boundary": "STRUCTURE SCREENSHOT; NO CONTACT OR GRASP PASS CLAIM",
+        "bottle_present": false,
+        "capture_physics_stage": "FRESH_WORLD_RESET_REINJECTED_FULL_LEGAL_POSE_NO_PHYSICS_STEP",
+        "capture_world_reset": true,
+        "collider_type": "SUPPLIER_CAD_V2_CONVEX_HULL_DIAGNOSTIC",
+        "dynamic_post_step_failure_preserved_in_report": true,
+        "dynamic_trace_last_frame": 5,
+        "finger_readback_m": [
+          0.05700000002980232,
+          -0.05700000002980232
+        ],
+        "finger_targets_m": [
+          0.057,
+          -0.057
+        ],
+        "frame": 2,
+        "isaac_sim": "5.1.0.0",
+        "kit": "107.3.3",
+        "physx": "107.3.26",
+        "robot": "follower_left",
+        "session_only_hidden_visuals": [],
+        "stage_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_convex_hull/aloha_viperx_supplier_cad_task5.usda",
+        "stage_sha256": "8040edd01859af9f8c51285d198d34aae19e66625a2d5f21729879774e1644d9",
+        "state": "maximum_legal_aperture",
+        "surface_gap_m": 0.07647921529137366,
+        "time_s": 0.03333333507180214
+      },
+      "state": "maximum_legal_aperture",
+      "target": "supplier-CAD handed finger installation",
+      "view": "true_top",
+      "visual_model_review": {
+        "annotated": "PASS",
+        "checks": {
+          "annotations_do_not_cover_key_geometry": true,
+          "blue_left_orange_right_mapping_correct": true,
+          "both_handed_fingers_fully_visible": true,
+          "inward_surfaces_opposed": true,
+          "labels_do_not_overlap": true,
+          "no_critical_crop": true,
+          "no_critical_occlusion": true,
+          "paired_camera_pose_exact": true,
+          "state_visually_distinct": true,
+          "visual_gate_only_wording": true
+        },
+        "conclusion": "Vision-model inspection: both handed fingers and inward surfaces are visible; mapping, crop, occlusion, state distinction, camera pairing, labels, and arrows pass. Verdict is limited to the structure visual gate.",
+        "raw": "PASS",
+        "retake_reason": null,
+        "status": "PASS"
+      }
+    },
+    {
+      "acceptance_criteria": [
+        "both_handed_fingers_fully_visible",
+        "blue_left_orange_right_mapping_correct",
+        "inward_surfaces_opposed",
+        "no_critical_crop",
+        "no_critical_occlusion",
+        "state_visually_distinct",
+        "paired_camera_pose_exact",
+        "labels_do_not_overlap",
+        "annotations_do_not_cover_key_geometry",
+        "visual_gate_only_wording"
+      ],
+      "annotated": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/task5_structure/annotation_v2/screenshots_annotated/partial_base_oblique_annotated.png",
+        "mode": "RGB",
+        "readable": true,
+        "resolution": [
+          1900,
+          900
+        ],
+        "sha256": "6ef773396749dfb79a8e6cb34be4433256740b5e902370d08df9d3e19e58ac07"
+      },
+      "camera": {
+        "actual_orientation_wxyz": [
+          0.7153890132904053,
+          0.4249306619167328,
+          -0.29887449741363525,
+          -0.4672542214393616
+        ],
+        "actual_position_world_m": [
+          -0.2031141072511673,
+          -0.11427831649780273,
+          0.4924883544445038
+        ],
+        "finger_projection": {
+          "bbox_center_px": [
+            633.3821064615679,
+            444.6619977485958
+          ],
+          "bbox_max_px": [
+            971.4956886869581,
+            698.4729810657259
+          ],
+          "bbox_min_px": [
+            295.2685242361777,
+            190.85101443146576
+          ],
+          "finite_point_count": 1662,
+          "fully_in_frame": true
+        },
+        "nominal_target_world_m": [
+          0.19680597633123398,
+          0.035051628947257996,
+          0.28209710121154785
+        ],
+        "orientation_wxyz": [
+          0.7153890132904053,
+          0.4249306917190552,
+          -0.29887452721595764,
+          -0.46725425124168396
+        ],
+        "position_world_m": [
+          -0.20311410793245868,
+          -0.11427831934107632,
+          0.4924883457098766
+        ],
+        "recenter_history": [
+          {
+            "iteration": 0,
+            "projection": {
+              "bbox_center_px": [
+                575.8651525450982,
+                508.42901631028906
+              ],
+              "bbox_max_px": [
+                1029.5184360736812,
+                782.4896064007235
+              ],
+              "bbox_min_px": [
+                122.21186901651525,
+                234.36842621985463
+              ],
+              "finite_point_count": 4986,
+              "fully_in_frame": true
+            },
+            "target_world_m": [
+              0.19680597633123398,
+              0.035051628947257996,
+              0.28209710121154785
+            ]
+          },
+          {
+            "iteration": 1,
+            "projection": {
+              "bbox_center_px": [
+                642.8352019236015,
+                452.10738913996244
+              ],
+              "bbox_max_px": [
+                1096.541858921391,
+                729.2583034989866
+              ],
+              "bbox_min_px": [
+                189.12854492581212,
+                174.95647478093827
+              ],
+              "finite_point_count": 4986,
+              "fully_in_frame": true
+            },
+            "target_world_m": [
+              0.18951288197267405,
+              0.04268472245780762,
+              0.2736518318139087
+            ]
+          },
+          {
+            "iteration": 2,
+            "projection": {
+              "bbox_center_px": [
+                639.8720878624696,
+                449.87058231185506
+              ],
+              "bbox_max_px": [
+                1093.5898528142861,
+                726.8784664165844
+              ],
+              "bbox_min_px": [
+                186.15432291065312,
+                172.86269820712567
+              ],
+              "finite_point_count": 4986,
+              "fully_in_frame": true
+            },
+            "target_world_m": [
+              0.1895474527324645,
+              0.04221065432767669,
+              0.2733738112405237
+            ]
+          }
+        ],
+        "recenter_method": "UNION_OF_THREE_LEGAL_CAD_FINGER_STATES_ISAAC51_PINHOLE_PROJECTION",
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 11,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_projection_px": [
+          [
+            640.0000635854681,
+            450.0001396316184
+          ]
+        ],
+        "target_world_m": [
+          0.1895474527324645,
+          0.04221065432767669,
+          0.2733738112405237
+        ],
+        "up_world": [
+          -0.09856688696935509,
+          -0.008179644609408893,
+          0.9950968104698327
+        ],
+        "view": "base_oblique"
+      },
+      "capture_name": "partial_base_oblique",
+      "part": "left/right finger and inward gripping surfaces",
+      "phase": "fresh World reset; full legal pose reinjected; no physics step",
+      "raw": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/task5_structure/screenshots_raw/partial_base_oblique_raw.png",
+        "mode": "RGBA",
+        "readable": true,
+        "resolution": [
+          1280,
+          900
+        ],
+        "sha256": "ab2410794411bc5261e67f611e7ee415f77c69fe5eb7b77e3f778649ebd636eb"
+      },
+      "simulation": {
+        "acceptance_boundary": "STRUCTURE SCREENSHOT; NO CONTACT OR GRASP PASS CLAIM",
+        "bottle_present": false,
+        "capture_physics_stage": "FRESH_WORLD_RESET_REINJECTED_FULL_LEGAL_POSE_NO_PHYSICS_STEP",
+        "capture_world_reset": true,
+        "collider_type": "SUPPLIER_CAD_V2_CONVEX_HULL_DIAGNOSTIC",
+        "dynamic_post_step_failure_preserved_in_report": true,
+        "dynamic_trace_last_frame": 5,
+        "finger_readback_m": [
+          0.039000000804662704,
+          -0.039000000804662704
+        ],
+        "finger_targets_m": [
+          0.039,
+          -0.039
+        ],
+        "frame": 2,
+        "isaac_sim": "5.1.0.0",
+        "kit": "107.3.3",
+        "physx": "107.3.26",
+        "robot": "follower_left",
+        "session_only_hidden_visuals": [
+          "/workcell/vx300s_left/vx300s_left_gripper_link/visuals"
+        ],
+        "stage_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_convex_hull/aloha_viperx_supplier_cad_task5.usda",
+        "stage_sha256": "8040edd01859af9f8c51285d198d34aae19e66625a2d5f21729879774e1644d9",
+        "state": "partial",
+        "surface_gap_m": 0.04047493134039256,
+        "time_s": 0.03333333507180214
+      },
+      "state": "partial",
+      "target": "supplier-CAD handed finger installation",
+      "view": "base_oblique",
+      "visual_model_review": {
+        "annotated": "PASS",
+        "checks": {
+          "annotations_do_not_cover_key_geometry": true,
+          "blue_left_orange_right_mapping_correct": true,
+          "both_handed_fingers_fully_visible": true,
+          "inward_surfaces_opposed": true,
+          "labels_do_not_overlap": true,
+          "no_critical_crop": true,
+          "no_critical_occlusion": true,
+          "paired_camera_pose_exact": true,
+          "state_visually_distinct": true,
+          "visual_gate_only_wording": true
+        },
+        "conclusion": "Vision-model inspection: both handed fingers and inward surfaces are visible; mapping, crop, occlusion, state distinction, camera pairing, labels, and arrows pass. Verdict is limited to the structure visual gate.",
+        "raw": "PASS",
+        "retake_reason": null,
+        "status": "PASS"
+      }
+    },
+    {
+      "acceptance_criteria": [
+        "both_handed_fingers_fully_visible",
+        "blue_left_orange_right_mapping_correct",
+        "inward_surfaces_opposed",
+        "no_critical_crop",
+        "no_critical_occlusion",
+        "state_visually_distinct",
+        "paired_camera_pose_exact",
+        "labels_do_not_overlap",
+        "annotations_do_not_cover_key_geometry",
+        "visual_gate_only_wording"
+      ],
+      "annotated": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/task5_structure/annotation_v2/screenshots_annotated/partial_tip_end_annotated.png",
+        "mode": "RGB",
+        "readable": true,
+        "resolution": [
+          1900,
+          900
+        ],
+        "sha256": "391d10d197d2a2458d264ea02c86a54da164c721ef9b79950cecda7422d14437"
+      },
+      "camera": {
+        "actual_orientation_wxyz": [
+          0.5371320843696594,
+          0.44889500737190247,
+          0.4545191824436188,
+          0.5508127808570862
+        ],
+        "actual_position_world_m": [
+          0.7689371109008789,
+          0.045808665454387665,
+          0.3891029357910156
+        ],
+        "finger_projection": {
+          "bbox_center_px": [
+            643.6977191874894,
+            433.8297198118008
+          ],
+          "bbox_max_px": [
+            881.9852397452437,
+            573.4018572521715
+          ],
+          "bbox_min_px": [
+            405.4101986297351,
+            294.2575823714302
+          ],
+          "finite_point_count": 1662,
+          "fully_in_frame": true
+        },
+        "orientation_wxyz": [
+          0.5371320247650146,
+          0.44889500737190247,
+          0.4545191824436188,
+          0.5508127212524414
+        ],
+        "position_world_m": [
+          0.7689371112721903,
+          0.045808667050361955,
+          0.3891029448016128
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 22,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_projection_px": [
+          [
+            640.0001130821216,
+            449.99983132344545
+          ]
+        ],
+        "target_world_m": [
+          0.19680597633123398,
+          0.035051628947257996,
+          0.28209710121154785
+        ],
+        "up_world": [
+          -0.09856688696935509,
+          -0.008179644609408893,
+          0.9950968104698327
+        ],
+        "view": "tip_end"
+      },
+      "capture_name": "partial_tip_end",
+      "part": "left/right finger and inward gripping surfaces",
+      "phase": "fresh World reset; full legal pose reinjected; no physics step",
+      "raw": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/task5_structure/screenshots_raw/partial_tip_end_raw.png",
+        "mode": "RGBA",
+        "readable": true,
+        "resolution": [
+          1280,
+          900
+        ],
+        "sha256": "599c17cba2774c3d4436324b0c3a3006d2e1869b0d918deef63594f290fb4cdb"
+      },
+      "simulation": {
+        "acceptance_boundary": "STRUCTURE SCREENSHOT; NO CONTACT OR GRASP PASS CLAIM",
+        "bottle_present": false,
+        "capture_physics_stage": "FRESH_WORLD_RESET_REINJECTED_FULL_LEGAL_POSE_NO_PHYSICS_STEP",
+        "capture_world_reset": true,
+        "collider_type": "SUPPLIER_CAD_V2_CONVEX_HULL_DIAGNOSTIC",
+        "dynamic_post_step_failure_preserved_in_report": true,
+        "dynamic_trace_last_frame": 5,
+        "finger_readback_m": [
+          0.039000000804662704,
+          -0.039000000804662704
+        ],
+        "finger_targets_m": [
+          0.039,
+          -0.039
+        ],
+        "frame": 2,
+        "isaac_sim": "5.1.0.0",
+        "kit": "107.3.3",
+        "physx": "107.3.26",
+        "robot": "follower_left",
+        "session_only_hidden_visuals": [],
+        "stage_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_convex_hull/aloha_viperx_supplier_cad_task5.usda",
+        "stage_sha256": "8040edd01859af9f8c51285d198d34aae19e66625a2d5f21729879774e1644d9",
+        "state": "partial",
+        "surface_gap_m": 0.04047493134039256,
+        "time_s": 0.03333333507180214
+      },
+      "state": "partial",
+      "target": "supplier-CAD handed finger installation",
+      "view": "tip_end",
+      "visual_model_review": {
+        "annotated": "PASS",
+        "checks": {
+          "annotations_do_not_cover_key_geometry": true,
+          "blue_left_orange_right_mapping_correct": true,
+          "both_handed_fingers_fully_visible": true,
+          "inward_surfaces_opposed": true,
+          "labels_do_not_overlap": true,
+          "no_critical_crop": true,
+          "no_critical_occlusion": true,
+          "paired_camera_pose_exact": true,
+          "state_visually_distinct": true,
+          "visual_gate_only_wording": true
+        },
+        "conclusion": "Vision-model inspection: both handed fingers and inward surfaces are visible; mapping, crop, occlusion, state distinction, camera pairing, labels, and arrows pass. Verdict is limited to the structure visual gate.",
+        "raw": "PASS",
+        "retake_reason": null,
+        "status": "PASS"
+      }
+    },
+    {
+      "acceptance_criteria": [
+        "both_handed_fingers_fully_visible",
+        "blue_left_orange_right_mapping_correct",
+        "inward_surfaces_opposed",
+        "no_critical_crop",
+        "no_critical_occlusion",
+        "state_visually_distinct",
+        "paired_camera_pose_exact",
+        "labels_do_not_overlap",
+        "annotations_do_not_cover_key_geometry",
+        "visual_gate_only_wording"
+      ],
+      "annotated": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/task5_structure/annotation_v2/screenshots_annotated/partial_true_bottom_annotated.png",
+        "mode": "RGB",
+        "readable": true,
+        "resolution": [
+          1900,
+          900
+        ],
+        "sha256": "e7055314d667be4925d15c727b11e10efc7557de6b3f25e2096a9e8e0a6c2a66"
+      },
+      "camera": {
+        "actual_orientation_wxyz": [
+          0.03236580640077591,
+          0.6992639303207397,
+          0.7131467461585999,
+          0.03747063875198364
+        ],
+        "actual_position_world_m": [
+          0.2904445230960846,
+          0.04282229021191597,
+          -0.6632448434829712
+        ],
+        "finger_projection": {
+          "bbox_center_px": [
+            642.105304833346,
+            448.9670309551284
+          ],
+          "bbox_max_px": [
+            798.490746992784,
+            603.9421235497359
+          ],
+          "bbox_min_px": [
+            485.7198626739082,
+            293.99193836052086
+          ],
+          "finite_point_count": 1662,
+          "fully_in_frame": true
+        },
+        "orientation_wxyz": [
+          0.03236581012606621,
+          0.6992639899253845,
+          0.7131468057632446,
+          0.03747063875198364
+        ],
+        "position_world_m": [
+          0.2904445189521213,
+          0.04282229132619644,
+          -0.6632448687347932
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 34,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_projection_px": [
+          [
+            640.0000254307349,
+            450.0000268586397
+          ]
+        ],
+        "target_world_m": [
+          0.19680597633123398,
+          0.035051628947257996,
+          0.28209710121154785
+        ],
+        "up_world": [
+          0.9949301367059038,
+          0.01925175919581794,
+          0.09870862597685043
+        ],
+        "view": "true_bottom"
+      },
+      "capture_name": "partial_true_bottom",
+      "part": "left/right finger and inward gripping surfaces",
+      "phase": "fresh World reset; full legal pose reinjected; no physics step",
+      "raw": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/task5_structure/screenshots_raw/partial_true_bottom_raw.png",
+        "mode": "RGBA",
+        "readable": true,
+        "resolution": [
+          1280,
+          900
+        ],
+        "sha256": "52818054c774f068f86f7dafa20aa0e461967a95787adeef11038d285cb70fbb"
+      },
+      "simulation": {
+        "acceptance_boundary": "STRUCTURE SCREENSHOT; NO CONTACT OR GRASP PASS CLAIM",
+        "bottle_present": false,
+        "capture_physics_stage": "FRESH_WORLD_RESET_REINJECTED_FULL_LEGAL_POSE_NO_PHYSICS_STEP",
+        "capture_world_reset": true,
+        "collider_type": "SUPPLIER_CAD_V2_CONVEX_HULL_DIAGNOSTIC",
+        "dynamic_post_step_failure_preserved_in_report": true,
+        "dynamic_trace_last_frame": 5,
+        "finger_readback_m": [
+          0.039000000804662704,
+          -0.039000000804662704
+        ],
+        "finger_targets_m": [
+          0.039,
+          -0.039
+        ],
+        "frame": 2,
+        "isaac_sim": "5.1.0.0",
+        "kit": "107.3.3",
+        "physx": "107.3.26",
+        "robot": "follower_left",
+        "session_only_hidden_visuals": [],
+        "stage_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_convex_hull/aloha_viperx_supplier_cad_task5.usda",
+        "stage_sha256": "8040edd01859af9f8c51285d198d34aae19e66625a2d5f21729879774e1644d9",
+        "state": "partial",
+        "surface_gap_m": 0.04047493134039256,
+        "time_s": 0.03333333507180214
+      },
+      "state": "partial",
+      "target": "supplier-CAD handed finger installation",
+      "view": "true_bottom",
+      "visual_model_review": {
+        "annotated": "PASS",
+        "checks": {
+          "annotations_do_not_cover_key_geometry": true,
+          "blue_left_orange_right_mapping_correct": true,
+          "both_handed_fingers_fully_visible": true,
+          "inward_surfaces_opposed": true,
+          "labels_do_not_overlap": true,
+          "no_critical_crop": true,
+          "no_critical_occlusion": true,
+          "paired_camera_pose_exact": true,
+          "state_visually_distinct": true,
+          "visual_gate_only_wording": true
+        },
+        "conclusion": "Vision-model inspection: both handed fingers and inward surfaces are visible; mapping, crop, occlusion, state distinction, camera pairing, labels, and arrows pass. Verdict is limited to the structure visual gate.",
+        "raw": "PASS",
+        "retake_reason": null,
+        "status": "PASS"
+      }
+    },
+    {
+      "acceptance_criteria": [
+        "both_handed_fingers_fully_visible",
+        "blue_left_orange_right_mapping_correct",
+        "inward_surfaces_opposed",
+        "no_critical_crop",
+        "no_critical_occlusion",
+        "state_visually_distinct",
+        "paired_camera_pose_exact",
+        "labels_do_not_overlap",
+        "annotations_do_not_cover_key_geometry",
+        "visual_gate_only_wording"
+      ],
+      "annotated": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/task5_structure/annotation_v2/screenshots_annotated/partial_true_top_annotated.png",
+        "mode": "RGB",
+        "readable": true,
+        "resolution": [
+          1900,
+          900
+        ],
+        "sha256": "d3a3e92139bb46aa2b1b1605a93a16108cdc72a8763e56d19d715a16295ca313"
+      },
+      "camera": {
+        "actual_orientation_wxyz": [
+          0.7131467461585999,
+          0.03747064620256424,
+          -0.032365817576646805,
+          -0.6992639899253845
+        ],
+        "actual_position_world_m": [
+          0.10316743701696396,
+          0.027280965819954872,
+          1.227439045906067
+        ],
+        "finger_projection": {
+          "bbox_center_px": [
+            637.5742730536628,
+            448.96254519429715
+          ],
+          "bbox_max_px": [
+            794.5627096362344,
+            604.5255632085144
+          ],
+          "bbox_min_px": [
+            480.58583647109106,
+            293.39952718007993
+          ],
+          "finite_point_count": 1662,
+          "fully_in_frame": true
+        },
+        "orientation_wxyz": [
+          0.7131468057632446,
+          0.03747064247727394,
+          -0.032365813851356506,
+          -0.6992639899253845
+        ],
+        "position_world_m": [
+          0.10316743371034665,
+          0.027280966568319548,
+          1.2274390711578889
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 41,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_projection_px": [
+          [
+            639.9999630057224,
+            449.99998334936635
+          ]
+        ],
+        "target_world_m": [
+          0.19680597633123398,
+          0.035051628947257996,
+          0.28209710121154785
+        ],
+        "up_world": [
+          0.9949301367059038,
+          0.01925175919581794,
+          0.09870862597685043
+        ],
+        "view": "true_top"
+      },
+      "capture_name": "partial_true_top",
+      "part": "left/right finger and inward gripping surfaces",
+      "phase": "fresh World reset; full legal pose reinjected; no physics step",
+      "raw": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/task5_structure/screenshots_raw/partial_true_top_raw.png",
+        "mode": "RGBA",
+        "readable": true,
+        "resolution": [
+          1280,
+          900
+        ],
+        "sha256": "357af7a6ea97be112054e51be3d10f55c2ab12d645e0e4ee978cd73358572ac3"
+      },
+      "simulation": {
+        "acceptance_boundary": "STRUCTURE SCREENSHOT; NO CONTACT OR GRASP PASS CLAIM",
+        "bottle_present": false,
+        "capture_physics_stage": "FRESH_WORLD_RESET_REINJECTED_FULL_LEGAL_POSE_NO_PHYSICS_STEP",
+        "capture_world_reset": true,
+        "collider_type": "SUPPLIER_CAD_V2_CONVEX_HULL_DIAGNOSTIC",
+        "dynamic_post_step_failure_preserved_in_report": true,
+        "dynamic_trace_last_frame": 5,
+        "finger_readback_m": [
+          0.039000000804662704,
+          -0.039000000804662704
+        ],
+        "finger_targets_m": [
+          0.039,
+          -0.039
+        ],
+        "frame": 2,
+        "isaac_sim": "5.1.0.0",
+        "kit": "107.3.3",
+        "physx": "107.3.26",
+        "robot": "follower_left",
+        "session_only_hidden_visuals": [],
+        "stage_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_convex_hull/aloha_viperx_supplier_cad_task5.usda",
+        "stage_sha256": "8040edd01859af9f8c51285d198d34aae19e66625a2d5f21729879774e1644d9",
+        "state": "partial",
+        "surface_gap_m": 0.04047493134039256,
+        "time_s": 0.03333333507180214
+      },
+      "state": "partial",
+      "target": "supplier-CAD handed finger installation",
+      "view": "true_top",
+      "visual_model_review": {
+        "annotated": "PASS",
+        "checks": {
+          "annotations_do_not_cover_key_geometry": true,
+          "blue_left_orange_right_mapping_correct": true,
+          "both_handed_fingers_fully_visible": true,
+          "inward_surfaces_opposed": true,
+          "labels_do_not_overlap": true,
+          "no_critical_crop": true,
+          "no_critical_occlusion": true,
+          "paired_camera_pose_exact": true,
+          "state_visually_distinct": true,
+          "visual_gate_only_wording": true
+        },
+        "conclusion": "Vision-model inspection: both handed fingers and inward surfaces are visible; mapping, crop, occlusion, state distinction, camera pairing, labels, and arrows pass. Verdict is limited to the structure visual gate.",
+        "raw": "PASS",
+        "retake_reason": null,
+        "status": "PASS"
+      }
+    }
+  ],
+  "diagnostic_stage": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_convex_hull/aloha_viperx_supplier_cad_task5.usda",
+    "sha256": "8040edd01859af9f8c51285d198d34aae19e66625a2d5f21729879774e1644d9"
+  },
+  "gate": "TASK5_NO_BOTTLE_STRUCTURE_SCREENSHOT_EVIDENCE_ONLY",
+  "gates": {
+    "all_protected_assets_immutable": true,
+    "annotated_visual_model_review": true,
+    "approved_source_stage_immutable": true,
+    "capture_count": true,
+    "dynamic_failure_preserved": true,
+    "paired_camera_pose_exact": true,
+    "raw_visual_model_review": true,
+    "three_state_aperture_monotonic": true,
+    "visual_gate_scope_explicit": true
+  },
+  "paired_state_checks": {
+    "base_oblique": {
+      "camera_pose_exact_across_three_states": true,
+      "surface_gap_strictly_increasing": true
+    },
+    "tip_end": {
+      "camera_pose_exact_across_three_states": true,
+      "surface_gap_strictly_increasing": true
+    },
+    "true_bottom": {
+      "camera_pose_exact_across_three_states": true,
+      "surface_gap_strictly_increasing": true
+    },
+    "true_top": {
+      "camera_pose_exact_across_three_states": true,
+      "surface_gap_strictly_increasing": true
+    }
+  },
+  "retake_history": [
+    {
+      "attempt": "raw_attempt12",
+      "reason": "critical gripper geometry was occluded or cropped",
+      "status": "REJECTED_OCCLUSION_AND_CROPPING"
+    },
+    {
+      "attempt": "raw_attempt13",
+      "reason": "camera-focus debug geometry obscured the target",
+      "status": "REJECTED_CAMERA_FOCUS_OCCLUSION"
+    },
+    {
+      "attempt": "raw_attempt14",
+      "reason": "gripper-prop geometry obscured the target",
+      "status": "REJECTED_GRIPPER_PROP_OCCLUSION"
+    },
+    {
+      "attempt": "raw_attempt15",
+      "reason": "child visibility did not hide all debug geometry",
+      "status": "REJECTED_VISIBILITY_NOT_PROPAGATED"
+    },
+    {
+      "attempt": "raw_attempt16",
+      "reason": "non-target link filtering was incomplete",
+      "status": "REJECTED_INCOMPLETE_LINK_FILTER"
+    },
+    {
+      "attempt": "raw_attempt17",
+      "reason": "render Gprims escaped the visual filter",
+      "status": "REJECTED_GPRIM_FILTER_GAP"
+    },
+    {
+      "attempt": "raw_attempt18",
+      "reason": "instance-proxy debug geometry remained visible",
+      "status": "REJECTED_INSTANCE_PROXY_DEBUG_GEOMETRY"
+    },
+    {
+      "attempt": "raw_attempt19",
+      "reason": "base-oblique framing did not expose finger detail",
+      "status": "REJECTED_BASE_OBLIQUE_TOO_DISTANT"
+    },
+    {
+      "attempt": "raw_attempt20",
+      "reason": "base-oblique target was off center",
+      "status": "REJECTED_BASE_OBLIQUE_OFF_CENTER"
+    },
+    {
+      "attempt": "raw_attempt21",
+      "reason": "camera projection was probed but evidence was not final",
+      "status": "REJECTED_PROJECTION_PROBE_ONLY"
+    },
+    {
+      "attempt": "raw_attempt22",
+      "reason": "post-failure body transforms corrupted static evidence",
+      "status": "REJECTED_POST_DYNAMIC_BODY_DRIFT"
+    },
+    {
+      "attempt": "raw_attempt23",
+      "reason": "fresh World reset and full legal-pose reinjection produced twelve individually reviewed raw images",
+      "status": "ACCEPTED_VISUAL_MODEL_REVIEW"
+    },
+    {
+      "attempt": "annotation_v1",
+      "reason": "a magenta inward-surface annotation leader crossed key finger geometry in base-oblique views",
+      "status": "REJECTED_ANNOTATION_LEADER_OCCLUSION"
+    },
+    {
+      "attempt": "annotation_v2",
+      "reason": "all twelve annotated images were individually reviewed; labels and arrows do not obscure key geometry",
+      "status": "ACCEPTED_VISUAL_MODEL_REVIEW"
+    }
+  ],
+  "schema_version": 1,
+  "scope_boundaries": {
+    "collision_geometry_acceptance": "NOT_RUN",
+    "contact_acceptance": "NOT_RUN",
+    "default_configuration_modified": false,
+    "final_default_collider_modified": false,
+    "grasp_acceptance": "NOT_RUN",
+    "screenshot_pass_unblocks_bottle_test": false,
+    "source_stage_modified": false
+  },
+  "separate_gate_status": {
+    "bottle_contact_grasp": "NOT_RUN",
+    "dynamic_drive_tracking": "FAIL",
+    "mimic_or_controller_coupling": "FAIL",
+    "screenshot_visual_evidence": "PASS",
+    "task8": "NOT_RUN"
+  },
+  "status": "PASS"
+}
