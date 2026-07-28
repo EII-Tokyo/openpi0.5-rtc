@@ -1,0 +1,282 @@
+{
+  "schema_version": 1,
+  "status": "PARTIAL",
+  "determinism_gate": "PASS",
+  "production_tessellation_gate": "HARD_BLOCKER",
+  "production_blocker": "The installed FreeCAD snap cannot load MeshPart, and Part.Shape.tessellate does not accept an angular-deflection parameter. These runs prove linear-only reproducibility, not the requested production tessellation parameter closure.",
+  "scope": "two-fresh-directory linear-deflection-only diagnostic visual mesh comparison; collision and final assets unchanged",
+  "run_a": {
+    "manifest_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/tessellation_determinism/run_a/manifest.json",
+    "manifest_sha256": "2d7af343c075eecd002c8c31aadfd2e5c97555f534ab194a3c5a90ccc9da173f"
+  },
+  "run_b": {
+    "manifest_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/tessellation_determinism/run_b/manifest.json",
+    "manifest_sha256": "7e251e165253901824dcfb51399f079711ccedfdde6fb0d598a3fc47c1648f68"
+  },
+  "mesh_comparisons": {
+    "left_finger": {
+      "all_fields_match": true,
+      "matches": {
+        "obj_sha256": true,
+        "canonical_geometry_sha256": true,
+        "vertex_count": true,
+        "triangle_count": true,
+        "aabb_mm": true,
+        "brep_volume_mm3": true,
+        "connected_components": true,
+        "degenerate_triangle_count": true,
+        "source_placement_matrix_mm": true,
+        "source_placement_determinant": true
+      },
+      "run_a": {
+        "object_name": "Part__Feature007",
+        "label": "Aloha VX Fingers 2024-4-21 v2",
+        "cad_side": "+X",
+        "assembly_path": [
+          "Dummy_Aloha_VX_v3",
+          "Aloha_VX_Fingers_2024_4_21_v2",
+          "Part__Feature007"
+        ],
+        "source_placement_matrix_mm": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0998902576627736
+          ],
+          [
+            0.0,
+            -1.554312234475219e-14,
+            -1.0,
+            -430.29999973392
+          ],
+          [
+            0.0,
+            1.0,
+            -1.554312234475219e-14,
+            426.80133373174
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "source_placement_determinant": 1.0,
+        "obj_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/tessellation_determinism/run_a/left_finger.obj",
+        "obj_sha256": "4ad84fda6be43ef418c05ee7c771ff0b14dbbec2c4cff46bb8d6dd1a95ea63a5",
+        "canonical_geometry_sha256": "b28febf858f3b48396a35f6d4ea0b8ed2b5acb1cdd3bc1277ebfc9e2072aae67",
+        "vertex_count": 1808,
+        "triangle_count": 3616,
+        "aabb_mm": {
+          "XMin": 2.3440294657072607,
+          "YMin": -589.40758784902,
+          "ZMin": 399.8526699371186,
+          "XMax": 29.811279465652177,
+          "YMax": -493.24999973392005,
+          "ZMax": 453.8526699371189,
+          "XLength": 27.467249999944915,
+          "YLength": 96.1575881151,
+          "ZLength": 54.000000000000284
+        },
+        "brep_volume_mm3": 35160.658046734075,
+        "connected_components": 1,
+        "degenerate_triangle_count": 0,
+        "normal_winding_policy": "preserve Part.Shape.tessellate vertex and triangle winding"
+      },
+      "run_b": {
+        "object_name": "Part__Feature007",
+        "label": "Aloha VX Fingers 2024-4-21 v2",
+        "cad_side": "+X",
+        "assembly_path": [
+          "Dummy_Aloha_VX_v3",
+          "Aloha_VX_Fingers_2024_4_21_v2",
+          "Part__Feature007"
+        ],
+        "source_placement_matrix_mm": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0998902576627736
+          ],
+          [
+            0.0,
+            -1.554312234475219e-14,
+            -1.0,
+            -430.29999973392
+          ],
+          [
+            0.0,
+            1.0,
+            -1.554312234475219e-14,
+            426.80133373174
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "source_placement_determinant": 1.0,
+        "obj_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/tessellation_determinism/run_b/left_finger.obj",
+        "obj_sha256": "4ad84fda6be43ef418c05ee7c771ff0b14dbbec2c4cff46bb8d6dd1a95ea63a5",
+        "canonical_geometry_sha256": "b28febf858f3b48396a35f6d4ea0b8ed2b5acb1cdd3bc1277ebfc9e2072aae67",
+        "vertex_count": 1808,
+        "triangle_count": 3616,
+        "aabb_mm": {
+          "XMin": 2.3440294657072607,
+          "YMin": -589.40758784902,
+          "ZMin": 399.8526699371186,
+          "XMax": 29.811279465652177,
+          "YMax": -493.24999973392005,
+          "ZMax": 453.8526699371189,
+          "XLength": 27.467249999944915,
+          "YLength": 96.1575881151,
+          "ZLength": 54.000000000000284
+        },
+        "brep_volume_mm3": 35160.658046734075,
+        "connected_components": 1,
+        "degenerate_triangle_count": 0,
+        "normal_winding_policy": "preserve Part.Shape.tessellate vertex and triangle winding"
+      }
+    },
+    "right_finger": {
+      "all_fields_match": true,
+      "matches": {
+        "obj_sha256": true,
+        "canonical_geometry_sha256": true,
+        "vertex_count": true,
+        "triangle_count": true,
+        "aabb_mm": true,
+        "brep_volume_mm3": true,
+        "connected_components": true,
+        "degenerate_triangle_count": true,
+        "source_placement_matrix_mm": true,
+        "source_placement_determinant": true
+      },
+      "run_a": {
+        "object_name": "Part__Feature008",
+        "label": "Aloha VX Fingers 2024-4-21 v001",
+        "cad_side": "-X",
+        "assembly_path": [
+          "Dummy_Aloha_VX_v3",
+          "Aloha_VX_Fingers_2024_4_21_v2",
+          "Part__Feature008"
+        ],
+        "source_placement_matrix_mm": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0998902576627736
+          ],
+          [
+            0.0,
+            -1.554312234475219e-14,
+            -1.0,
+            -430.29999973392
+          ],
+          [
+            0.0,
+            1.0,
+            -1.554312234475219e-14,
+            426.80133373174
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "source_placement_determinant": 1.0,
+        "obj_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/tessellation_determinism/run_a/right_finger.obj",
+        "obj_sha256": "188e7fd92643242c7e3d90cd45c0dc04794030b54a4f5c751fc20e737427e55e",
+        "canonical_geometry_sha256": "74d4fcf3f86478818d110577fbc7cba123ac8b9b5c7c79f92b4518b9a5ac8aea",
+        "vertex_count": 1808,
+        "triangle_count": 3616,
+        "aabb_mm": {
+          "XMin": -29.611498950326723,
+          "YMin": -589.40758784902,
+          "ZMin": 399.74999752635875,
+          "XMax": -2.1442489503817797,
+          "YMax": -493.24999973392005,
+          "ZMax": 453.7499975263589,
+          "XLength": 27.467249999944944,
+          "YLength": 96.1575881151,
+          "ZLength": 54.00000000000017
+        },
+        "brep_volume_mm3": 35160.65804673401,
+        "connected_components": 1,
+        "degenerate_triangle_count": 0,
+        "normal_winding_policy": "preserve Part.Shape.tessellate vertex and triangle winding"
+      },
+      "run_b": {
+        "object_name": "Part__Feature008",
+        "label": "Aloha VX Fingers 2024-4-21 v001",
+        "cad_side": "-X",
+        "assembly_path": [
+          "Dummy_Aloha_VX_v3",
+          "Aloha_VX_Fingers_2024_4_21_v2",
+          "Part__Feature008"
+        ],
+        "source_placement_matrix_mm": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0998902576627736
+          ],
+          [
+            0.0,
+            -1.554312234475219e-14,
+            -1.0,
+            -430.29999973392
+          ],
+          [
+            0.0,
+            1.0,
+            -1.554312234475219e-14,
+            426.80133373174
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "source_placement_determinant": 1.0,
+        "obj_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/tessellation_determinism/run_b/right_finger.obj",
+        "obj_sha256": "188e7fd92643242c7e3d90cd45c0dc04794030b54a4f5c751fc20e737427e55e",
+        "canonical_geometry_sha256": "74d4fcf3f86478818d110577fbc7cba123ac8b9b5c7c79f92b4518b9a5ac8aea",
+        "vertex_count": 1808,
+        "triangle_count": 3616,
+        "aabb_mm": {
+          "XMin": -29.611498950326723,
+          "YMin": -589.40758784902,
+          "ZMin": 399.74999752635875,
+          "XMax": -2.1442489503817797,
+          "YMax": -493.24999973392005,
+          "ZMax": 453.7499975263589,
+          "XLength": 27.467249999944944,
+          "YLength": 96.1575881151,
+          "ZLength": 54.00000000000017
+        },
+        "brep_volume_mm3": 35160.65804673401,
+        "connected_components": 1,
+        "degenerate_triangle_count": 0,
+        "normal_winding_policy": "preserve Part.Shape.tessellate vertex and triangle winding"
+      }
+    }
+  },
+  "handedness": {
+    "left_source": "embedded handed B-Rep Part__Feature007 / CAD +X",
+    "right_source": "embedded handed B-Rep Part__Feature008 / CAD -X",
+    "single_side_mirror_or_rotation_used": false
+  },
+  "visual_mesh_collision_mesh_separation": "PASS"
+}

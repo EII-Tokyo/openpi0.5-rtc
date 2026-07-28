@@ -28,11 +28,16 @@ cd /home/eii/Documents/Notes/openpi0.5-rtc-reward-learning && npm run check:math
   - Never switch the active Isaac Sim Stage from memory or filename guesses. Before switching, verify the current task's user-approved absolute Stage path, frozen hash, root prim, sublayers, and required key prims; an older/source Stage used for investigation must not replace the user's active review Stage.
   - Historical long "episode 19" replay HDF5: `/home/eii/project/bottles_data/episode_19.hdf5`. It is the default long replay target when the user asks for episode 19 or the historical long replay.
   - User-confirmed bottle grasp window: `/home/eii/project/bottles_data/episode_18.hdf5`, frames `208-244` inclusive. Use this for the open-gripper -> clamp-bottle -> lift-onset calibration task; do not substitute episode 19.
-- Photo-to-Isaac scene reconstruction, camera rack CAD, pipe/table spatial models, generated USD layers, or `scene_reconstruction/` assets:
+- Supplier/measured CAD, STEP/STP/IGES/FCStd, CAD assembly audit, deterministic tessellation, robot-link geometry mapping, or CAD-derived Isaac assets:
+  - Read `docs/agents/cad_to_isaac_asset_mapping.md`.
+  - Use the local `my-robot-cad-to-isaac` skill when available.
+- Photo-to-Isaac scene reconstruction, camera rack layout from photos, pipe/table spatial proxies, visual comparison, or `scene_reconstruction/` assets:
   - Read `docs/agents/scene_reconstruction.md`.
-  - Use the local `photo-to-isaac-cad` skill when available.
+  - Also read `docs/agents/cad_to_isaac_asset_mapping.md` before importing, editing, tessellating, or converting CAD.
+  - Use the local `my-robot-photo-to-isaac-cad` skill when available.
 - FreeCAD CAD review, blank FreeCAD viewports, STEP/FCStd visual checks, or CAD display/debug work:
-  - Read `docs/agents/scene_reconstruction.md`.
+  - Read `docs/agents/cad_to_isaac_asset_mapping.md`.
+  - Also read `docs/agents/scene_reconstruction.md` only for its repository-specific FreeCAD launch workaround or photo-scene history.
 - Visual Tutor, visible GUI teaching, FreeCAD/Isaac step-by-step lessons, `my-gui-teacher`, `my-visual-tutor`, or `visual_tutor/`:
   - Read `docs/agents/visual_tutor.md`.
   - Use the local `my-visual-tutor` skill when available.

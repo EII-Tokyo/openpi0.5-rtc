@@ -1,0 +1,1439 @@
+{
+  "schema_version": 2,
+  "status": "PARTIAL",
+  "orientation_mapping_status": "PASS",
+  "connection_geometry_status": "PASS",
+  "connection_geometry_finding": "SOURCE_CAD_SLIDING_CARRIAGE_COMMON_VOLUME_RECORDED",
+  "scope": "Purchase-confirmed Simple Viper follower gripper orientation, Widow shared-gripper and Stationary cross-validation, and URDF-link mapping; no Isaac asset mutation",
+  "sources": {
+    "freecad_audit": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_assembly_audit.json",
+      "sha256": "93f56348d32f591cb973bfda198e89aa1e2f205a68f366a3282d2edb2fb97a90",
+      "freecad_version": [
+        "1",
+        "1",
+        "1",
+        "44227 +647 (Git)",
+        "Unknown",
+        "2026/04/14 22:09:59",
+        "tag: 1.1.1",
+        "0108fd4b4850cc46e625b60e53cea7a7bbe69f8d"
+      ]
+    },
+    "stationary_step": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/gdrive_source_readonly/Aloha Stationary V2 2024-5-11.step",
+      "sha256": "6d8f787e30b0b989fafedc09fc630beecb6dd896b3d47de06a92a9a86e133001"
+    },
+    "simple_viper_step": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/gdrive_source_readonly/Simple Aloha Viper 2024-5-13.step",
+      "sha256": "337862418769d4ea8b801d26e68930c4412f870050e60769bbf91765194dc571"
+    },
+    "exact_vx_finger_step": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/gdrive_source_readonly/3D Aloha Public/3D-A1 - Aloha VX Finger.step",
+      "sha256": "9df09ff9c224edbc33f0b3bcf4f88c26e77103cf6d07a5be391ca32d53b352cb"
+    },
+    "widow_gripper_crosscheck_step": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/gdrive_source_readonly/Aloha Widow with Gripper 2024-5-13.step",
+      "sha256": "adc6a2c96912ab7973347b6a4587b6001bdc6316ab294dba5c46273139365500",
+      "freecad_audit_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_widow_gripper_assembly_audit.json",
+      "freecad_audit_sha256": "cce793bc7ad7e124d91d20ba995027e4d20e5049b16f4efc7ca4806a082a70a3",
+      "tessellation_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/widow_gripper/widow_gripper_tessellation.json",
+      "tessellation_sha256": "9fab7c474f5427bace96cf1ec4c80c6201f3d5e4b1c116f0e04820f5a79ef508"
+    },
+    "viper_state_report": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/viper_gripper_states.json",
+      "sha256": "038c7c8195fc4a29cf86bb6067cb1890390538e82f7cbee651d6e252b3ad5a11"
+    },
+    "screenshot_review": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_gripper_screenshot_review.json",
+      "sha256": "e4fdcf50e6d2471956fb539c00d59e0107eab0647dc29e3bee049925c8083fa9"
+    }
+  },
+  "unit_conversion": {
+    "cad_unit": "millimetre",
+    "isaac_unit": "metre",
+    "cad_mm_to_isaac_m": 0.001
+  },
+  "toolchain": {
+    "freecad": {
+      "version": [
+        "1",
+        "1",
+        "1",
+        "44227 +647 (Git)",
+        "Unknown",
+        "2026/04/14 22:09:59",
+        "tag: 1.1.1",
+        "0108fd4b4850cc46e625b60e53cea7a7bbe69f8d"
+      ],
+      "executable": "/snap/bin/freecad.cmd"
+    },
+    "opencascade": {
+      "version": "7.8.0"
+    },
+    "blender": {
+      "version": "5.2.0 LTS",
+      "render_engine": "BLENDER_WORKBENCH"
+    },
+    "production_tessellation_gate": "HARD_BLOCKER",
+    "angular_deflection_control": "NOT_APPLIED_HARD_BLOCKER",
+    "probe_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/cad_toolchain_probe_final.json",
+    "probe_sha256": "0c519f12f7c1f50da7a95597ba6f3627f166064d590ce3efcd2940e0fb87ff92"
+  },
+  "visual_evidence": {
+    "status": "PASS",
+    "gate": "CAD_INSTALLATION_VISUAL_EVIDENCE_ONLY",
+    "capture_count": 8,
+    "raw_and_annotated_file_count": 16,
+    "report_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_gripper_screenshot_review.json",
+    "report_sha256": "e4fdcf50e6d2471956fb539c00d59e0107eab0647dc29e3bee049925c8083fa9"
+  },
+  "cad_to_urdf_frame_mapping": {
+    "source": "generated follower URDF gripper_bar visual origin and finger joints",
+    "urdf_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_left.urdf",
+    "urdf_sha256": "d9e4b32723ee71dfce26fb4e78546cfcfef147b2d7dbf5e53e3620e3d8aa96bd",
+    "gripper_bar_visual_rpy_rad": [
+      0.0,
+      0.0,
+      1.5707963267948966
+    ],
+    "gripper_bar_visual_rotation": [
+      [
+        6.123233995736766e-17,
+        -1.0,
+        0.0
+      ],
+      [
+        1.0,
+        6.123233995736766e-17,
+        0.0
+      ],
+      [
+        -0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "cad_positive_x_in_urdf": [
+      6.123233995736766e-17,
+      1.0,
+      0.0
+    ],
+    "cad_negative_x_in_urdf": [
+      -6.123233995736766e-17,
+      -1.0,
+      -0.0
+    ],
+    "left_joint_axis": [
+      0.0,
+      1.0,
+      0.0
+    ],
+    "right_joint_axis": [
+      0.0,
+      1.0,
+      0.0
+    ],
+    "positive_cad_x_link": "left_finger",
+    "negative_cad_x_link": "right_finger",
+    "left_limits_m": [
+      0.021,
+      0.057
+    ],
+    "right_limits_m": [
+      -0.057,
+      -0.021
+    ],
+    "open_delta_mm": 36.00000000000001,
+    "gates": {
+      "gripper_bar_rotation_is_rz_positive_90": true,
+      "cad_positive_x_aligns_left_joint_positive_axis": true,
+      "left_and_right_joint_axes_match": true,
+      "right_is_negative_mimic": true,
+      "finger_ranges_are_signed_mirrors": true
+    }
+  },
+  "primary_follower_installation": {
+    "evidence_class": "PURCHASE_DRAWING_CONFIRMED_VX300S_FOLLOWER",
+    "source_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/gdrive_source_readonly/Simple Aloha Viper 2024-5-13.step",
+    "source_sha256": "337862418769d4ea8b801d26e68930c4412f870050e60769bbf91765194dc571",
+    "root_object": "Dummy_Aloha_VX_v3",
+    "root_label": "Dummy Aloha VX v3",
+    "gripper_shell_object": "Part__Feature006",
+    "gripper_shell_label": "Aloha VX Gripper 2024-4-19 v4",
+    "finger_group_object": "Aloha_VX_Fingers_2024_4_21_v2",
+    "finger_group_label": "Aloha VX Fingers 2024-4-21 v002",
+    "positive_x_finger": {
+      "object_name": "Part__Feature007",
+      "label": "Aloha VX Fingers 2024-4-21 v2",
+      "assembly_path": [
+        "Dummy_Aloha_VX_v3",
+        "Aloha_VX_Fingers_2024_4_21_v2",
+        "Part__Feature007"
+      ],
+      "cad_opening_side": "positive",
+      "mapped_urdf_joint": "left_finger",
+      "shape_bbox_mm": {
+        "XMin": 2.3440294657072607,
+        "YMin": -589.4075878490205,
+        "ZMin": 399.8526699371185,
+        "XMax": 29.81127946565217,
+        "YMax": -493.24999973392005,
+        "ZMax": 453.8526699371189,
+        "XLength": 27.467249999944908,
+        "YLength": 96.15758811510045,
+        "ZLength": 54.0000000000004
+      },
+      "shape_bbox_center_mm": [
+        16.077654465679714,
+        -541.3287937914703,
+        426.85266993711866
+      ],
+      "shape_volume_mm3": 35160.658046734075,
+      "shape_topology_counts": {
+        "vertexes": 283,
+        "edges": 428,
+        "wires": 153,
+        "faces": 149,
+        "shells": 1,
+        "solids": 1,
+        "compsolids": 0,
+        "compounds": 0
+      },
+      "local_placement": {
+        "base_mm": [
+          0.0998902576627736,
+          -430.29999973392,
+          426.80133373174
+        ],
+        "rotation_xyzw": [
+          0.707106781186553,
+          0.0,
+          0.0,
+          0.707106781186542
+        ],
+        "matrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0998902576627736
+          ],
+          [
+            0.0,
+            -1.554312234475219e-14,
+            -1.0,
+            -430.29999973392
+          ],
+          [
+            0.0,
+            1.0,
+            -1.554312234475219e-14,
+            426.80133373174
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    },
+    "negative_x_finger": {
+      "object_name": "Part__Feature008",
+      "label": "Aloha VX Fingers 2024-4-21 v001",
+      "assembly_path": [
+        "Dummy_Aloha_VX_v3",
+        "Aloha_VX_Fingers_2024_4_21_v2",
+        "Part__Feature008"
+      ],
+      "cad_opening_side": "negative",
+      "mapped_urdf_joint": "right_finger",
+      "shape_bbox_mm": {
+        "XMin": -29.61149895032673,
+        "YMin": -589.4075878490205,
+        "ZMin": 399.7499975263587,
+        "XMax": -2.1442489503817797,
+        "YMax": -493.24999973392005,
+        "ZMax": 453.749997526359,
+        "XLength": 27.46724999994495,
+        "YLength": 96.15758811510045,
+        "ZLength": 54.000000000000284
+      },
+      "shape_bbox_center_mm": [
+        -15.877873950354255,
+        -541.3287937914703,
+        426.7499975263588
+      ],
+      "shape_volume_mm3": 35160.65804673401,
+      "shape_topology_counts": {
+        "vertexes": 283,
+        "edges": 428,
+        "wires": 153,
+        "faces": 149,
+        "shells": 1,
+        "solids": 1,
+        "compsolids": 0,
+        "compounds": 0
+      },
+      "local_placement": {
+        "base_mm": [
+          0.0998902576627736,
+          -430.29999973392,
+          426.80133373174
+        ],
+        "rotation_xyzw": [
+          0.707106781186553,
+          0.0,
+          0.0,
+          0.707106781186542
+        ],
+        "matrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0998902576627736
+          ],
+          [
+            0.0,
+            -1.554312234475219e-14,
+            -1.0,
+            -430.29999973392
+          ],
+          [
+            0.0,
+            1.0,
+            -1.554312234475219e-14,
+            426.80133373174
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    },
+    "identical_finger_placement_matrix": true,
+    "finger_placement_maximum_delta": 0.0,
+    "shared_source_placement_matrix": [
+      [
+        1.0,
+        0.0,
+        0.0,
+        0.0998902576627736
+      ],
+      [
+        0.0,
+        -1.554312234475219e-14,
+        -1.0,
+        -430.29999973392
+      ],
+      [
+        0.0,
+        1.0,
+        -1.554312234475219e-14,
+        426.80133373174
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "shared_source_placement_determinant": 1.0,
+    "minimum_pair_x_gap_mm": 4.48827841608904,
+    "installation_rule": "use the two distinct handed B-Reps with their common rigid placement; do not apply an arbitrary per-side roll",
+    "arbitrary_per_side_roll_required": false,
+    "static_supplier_assembly_state": "CLOSED_REFERENCE",
+    "derived_open_state": {
+      "cad_positive_x_finger_translation_mm": [
+        36.0,
+        0.0,
+        0.0
+      ],
+      "cad_negative_x_finger_translation_mm": [
+        -36.0,
+        0.0,
+        0.0
+      ],
+      "shape_or_handedness_changed": false
+    },
+    "source_connection_common_volume_mm3": {
+      "closed": {
+        "cad_positive_x_finger": 8.38110343019704,
+        "cad_negative_x_finger": 0.03588988364631973
+      },
+      "open": {
+        "cad_positive_x_finger": 180.0632188330516,
+        "cad_negative_x_finger": 173.88383692027642
+      }
+    },
+    "source_connection_interpretation": "Boolean common volumes between the supplier gripper shell/sliding carriage and embedded fingers are source-CAD connection geometry. They are recorded numerically and are not classified as an unexpected simulated collision."
+  },
+  "widow_gripper_crosscheck": {
+    "evidence_class": "WX_SHARED_GRIPPER_CROSSCHECK",
+    "source_statement": "The user initially nominated the Widow file, then supplied the purchase drawing and asked for model identification. The drawing directly identifies the purchased follower as VX300S/ViperX, so Widow is retained only as a shared-gripper cross-check.",
+    "root_object": "Dummy_Aloha_WX_with_Fingers_v2",
+    "root_label": "Dummy Aloha WX with Fingers v2",
+    "gripper_shell_object": "Part__Feature006",
+    "gripper_shell_label": "Dummy Aloha WX Gripper 2024-5-13 v2",
+    "gripper_shell_placement": {
+      "base_mm": [
+        0.499998092197629,
+        -412.175000000012,
+        360.250000000054
+      ],
+      "rotation_xyzw": [
+        0.7071067811865495,
+        0.0,
+        0.0,
+        0.7071067811865456
+      ],
+      "matrix": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.499998092197629
+        ],
+        [
+          0.0,
+          -5.551115123125783e-15,
+          -1.0,
+          -412.175000000012
+        ],
+        [
+          0.0,
+          1.0,
+          -5.551115123125783e-15,
+          360.250000000054
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "finger_group_object": "Aloha_VX_Fingers_2024_4_21_v2",
+    "finger_group_label": "Aloha VX Fingers 2024-4-21 v002",
+    "positive_x_finger": {
+      "object_name": "Part__Feature007",
+      "label": "Aloha VX Fingers 2024-4-21 v2",
+      "assembly_path": [
+        "Dummy_Aloha_WX_with_Fingers_v2",
+        "Aloha_VX_Fingers_2024_4_21_v2",
+        "Part__Feature007"
+      ],
+      "cad_opening_side": "positive",
+      "mapped_urdf_joint": "left_finger",
+      "shape_bbox_mm": {
+        "XMin": 2.7442480922527963,
+        "YMin": -523.7075881151126,
+        "ZMin": 333.24955844128186,
+        "XMax": 30.2114980921977,
+        "YMax": -427.55000000001206,
+        "ZMax": 387.2495584412822,
+        "XLength": 27.467249999944904,
+        "YLength": 96.15758811510051,
+        "ZLength": 54.00000000000034
+      },
+      "shape_bbox_center_mm": [
+        16.47787309222525,
+        -475.62879405756235,
+        360.24955844128203
+      ],
+      "shape_volume_mm3": 35160.658046734075,
+      "shape_topology_counts": {
+        "vertexes": 283,
+        "edges": 428,
+        "wires": 153,
+        "faces": 149,
+        "shells": 1,
+        "solids": 1,
+        "compsolids": 0,
+        "compounds": 0
+      },
+      "local_placement": {
+        "base_mm": [
+          0.500108884208306,
+          -364.600000000012,
+          360.198222235903
+        ],
+        "rotation_xyzw": [
+          0.7071067811865518,
+          0.0,
+          0.0,
+          0.7071067811865432
+        ],
+        "matrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.500108884208306
+          ],
+          [
+            0.0,
+            -1.199040866595169e-14,
+            -1.0,
+            -364.600000000012
+          ],
+          [
+            0.0,
+            1.0,
+            -1.199040866595169e-14,
+            360.198222235903
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      "global_placement": {
+        "base_mm": [
+          0.500108884208306,
+          -364.600000000012,
+          360.198222235903
+        ],
+        "rotation_xyzw": [
+          0.7071067811865518,
+          0.0,
+          0.0,
+          0.7071067811865432
+        ],
+        "matrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.500108884208306
+          ],
+          [
+            0.0,
+            -1.199040866595169e-14,
+            -1.0,
+            -364.600000000012
+          ],
+          [
+            0.0,
+            1.0,
+            -1.199040866595169e-14,
+            360.198222235903
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    },
+    "negative_x_finger": {
+      "object_name": "Part__Feature008",
+      "label": "Aloha VX Fingers 2024-4-21 v001",
+      "assembly_path": [
+        "Dummy_Aloha_WX_with_Fingers_v2",
+        "Aloha_VX_Fingers_2024_4_21_v2",
+        "Part__Feature008"
+      ],
+      "cad_opening_side": "negative",
+      "mapped_urdf_joint": "right_finger",
+      "shape_bbox_mm": {
+        "XMin": -29.211280323781196,
+        "YMin": -523.7075881151126,
+        "ZMin": 333.14688603052207,
+        "XMax": -1.744030323836244,
+        "YMax": -427.55000000001206,
+        "ZMax": 387.14688603052235,
+        "XLength": 27.46724999994495,
+        "YLength": 96.15758811510051,
+        "ZLength": 54.000000000000284
+      },
+      "shape_bbox_center_mm": [
+        -15.47765532380872,
+        -475.62879405756235,
+        360.1468860305222
+      ],
+      "shape_volume_mm3": 35160.658046734,
+      "shape_topology_counts": {
+        "vertexes": 283,
+        "edges": 428,
+        "wires": 153,
+        "faces": 149,
+        "shells": 1,
+        "solids": 1,
+        "compsolids": 0,
+        "compounds": 0
+      },
+      "local_placement": {
+        "base_mm": [
+          0.500108884208306,
+          -364.600000000012,
+          360.198222235903
+        ],
+        "rotation_xyzw": [
+          0.7071067811865518,
+          0.0,
+          0.0,
+          0.7071067811865432
+        ],
+        "matrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.500108884208306
+          ],
+          [
+            0.0,
+            -1.199040866595169e-14,
+            -1.0,
+            -364.600000000012
+          ],
+          [
+            0.0,
+            1.0,
+            -1.199040866595169e-14,
+            360.198222235903
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      "global_placement": {
+        "base_mm": [
+          0.500108884208306,
+          -364.600000000012,
+          360.198222235903
+        ],
+        "rotation_xyzw": [
+          0.7071067811865518,
+          0.0,
+          0.0,
+          0.7071067811865432
+        ],
+        "matrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.500108884208306
+          ],
+          [
+            0.0,
+            -1.199040866595169e-14,
+            -1.0,
+            -364.600000000012
+          ],
+          [
+            0.0,
+            1.0,
+            -1.199040866595169e-14,
+            360.198222235903
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    },
+    "identical_finger_placement_matrix": true,
+    "finger_placement_maximum_delta": 0.0,
+    "gripper_to_finger_relative_matrix": [
+      [
+        1.0,
+        0.0,
+        0.0,
+        0.00011079201067704103
+      ],
+      [
+        0.0,
+        1.0,
+        -6.439293542825908e-15,
+        -0.05177776415121116
+      ],
+      [
+        0.0,
+        6.439293542825908e-15,
+        1.0,
+        -47.57499999999999
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "installation_rule": "use the two distinct handed B-Reps with the same rigid placement; do not reuse one side with an arbitrary per-side 180-degree roll",
+    "arbitrary_per_side_roll_required": false,
+    "closed_inner_gap_mm": 4.48827841608904,
+    "mirror_residual_mm": {
+      "method": "AABB-center aligned CAD-X reflection followed by symmetric nearest-vertex distance on FreeCAD 0.20 mm tessellations",
+      "positive_center_mm": [
+        16.47787309222525,
+        -475.628794057562,
+        360.24955844128203
+      ],
+      "negative_center_mm": [
+        -15.47765532380872,
+        -475.628794057562,
+        360.1468860305222
+      ],
+      "maximum": 0.22437622564266088,
+      "rms": 0.05603887286909619,
+      "tessellation_error_note": "residual includes independent tessellation sampling and is not an exact B-Rep surface Hausdorff distance"
+    },
+    "connection_geometry": {
+      "positive_x": {
+        "left_object": "Part__Feature006",
+        "right_object": "Part__Feature007",
+        "minimum_shape_distance_mm": 0.0,
+        "closest_point_pair_count": 142,
+        "common_volume_mm3": 0.0,
+        "common_solid_count": 0,
+        "common_face_count": 0
+      },
+      "negative_x": {
+        "left_object": "Part__Feature006",
+        "right_object": "Part__Feature008",
+        "minimum_shape_distance_mm": 0.0,
+        "closest_point_pair_count": 5,
+        "common_volume_mm3": 8.345213533094192,
+        "common_solid_count": 2,
+        "common_face_count": 64
+      },
+      "finger_to_finger": {
+        "left_object": "Part__Feature007",
+        "right_object": "Part__Feature008",
+        "minimum_shape_distance_mm": 4.488278416089045,
+        "closest_point_pair_count": 2,
+        "common_volume_mm3": 0.0,
+        "common_solid_count": 0,
+        "common_face_count": 0
+      },
+      "one_sided_common_volume_asymmetry": true,
+      "interpretation": "both fingers touch the gripper shell; the negative-X side contains a small nonzero CAD Boolean common volume that must be preserved as a reported source-model finding"
+    },
+    "gates": {
+      "user_confirmed_authority_hash": true,
+      "single_gripper_shell": true,
+      "single_finger_assembly": true,
+      "two_distinct_finger_breps": true,
+      "identical_rigid_placement": true,
+      "positive_x_maps_left": true,
+      "negative_x_maps_right": true,
+      "positive_closed_gap": true,
+      "finger_pair_minimum_distance_matches_inner_gap": true,
+      "both_fingers_contact_gripper_shell": true,
+      "mirror_residual_below_tessellation_deflection_scale": true
+    }
+  },
+  "stationary_vx_followers": [
+    {
+      "object_name": "Dummy_Aloha_VX_SV2_v001",
+      "label": "Dummy Aloha VX SV2 v001",
+      "stationary_parent": [
+        "Aloha_Stationary_V2_2024_4_23_v4"
+      ],
+      "stationary_position_mm": [
+        24.4999999769513,
+        -469.350288299484,
+        20.0000000005095
+      ],
+      "stationary_pose": {
+        "base_mm": [
+          24.4999999769513,
+          -469.350288299484,
+          20.0000000005095
+        ],
+        "rotation_xyzw": [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        "matrix": [
+          [
+            -1.0,
+            0.0,
+            0.0,
+            24.4999999769513
+          ],
+          [
+            0.0,
+            -1.0,
+            0.0,
+            -469.350288299484
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            20.0000000005095
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      "finger_group": "Aloha_VX_Fingers_2024_4_21_v001",
+      "finger_instances": [
+        {
+          "object_name": "Part__Feature651",
+          "label": "Aloha VX Fingers 2024-4-21 v004",
+          "assembly_path": [
+            "Aloha_Stationary_V2_2024_4_23_v4",
+            "Dummy_Aloha_VX_SV2_v001",
+            "Aloha_VX_Fingers_2024_4_21_v001",
+            "Part__Feature651"
+          ],
+          "cad_opening_side": "negative",
+          "mapped_urdf_joint": "right_finger",
+          "shape_hash_code_runtime_only": 501751001,
+          "shape_topology_counts": {
+            "vertexes": 283,
+            "edges": 428,
+            "wires": 153,
+            "faces": 149,
+            "shells": 1,
+            "solids": 1,
+            "compsolids": 0,
+            "compounds": 0
+          },
+          "shape_volume_mm3": 35160.658046734,
+          "shape_area_mm2": 11122.759164508087,
+          "shape_bbox_mm": {
+            "XMin": -29.611498950349404,
+            "YMin": -359.7019537426065,
+            "ZMin": 354.3084356660867,
+            "XMax": -2.144248950404463,
+            "YMax": -263.544365627506,
+            "ZMax": 408.308435666087,
+            "XLength": 27.46724999994494,
+            "YLength": 96.15758811510051,
+            "ZLength": 54.000000000000284
+          },
+          "shape_bbox_center_mm": [
+            -15.877873950376934,
+            -311.6231596850563,
+            381.3084356660869
+          ],
+          "local_placement": {
+            "base_mm": [
+              0.0998902576401095,
+              -200.594365627506,
+              381.359771871468
+            ],
+            "rotation_xyzw": [
+              0.707106781186553,
+              0.0,
+              0.0,
+              0.707106781186542
+            ],
+            "matrix": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0998902576401095
+              ],
+              [
+                0.0,
+                -1.554312234475219e-14,
+                -1.0,
+                -200.594365627506
+              ],
+              [
+                0.0,
+                1.0,
+                -1.554312234475219e-14,
+                381.359771871468
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ]
+          },
+          "global_placement": {
+            "base_mm": [
+              24.400109719311192,
+              -268.75592267197806,
+              401.3597718719775
+            ],
+            "rotation_xyzw": [
+              0.0,
+              0.707106781186553,
+              0.707106781186542,
+              0.0
+            ],
+            "matrix": [
+              [
+                -1.0,
+                0.0,
+                0.0,
+                24.400109719311192
+              ],
+              [
+                0.0,
+                1.554312234475219e-14,
+                1.0,
+                -268.75592267197806
+              ],
+              [
+                0.0,
+                1.0,
+                -1.554312234475219e-14,
+                401.3597718719775
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ]
+          }
+        },
+        {
+          "object_name": "Part__Feature650",
+          "label": "Aloha VX Fingers 2024-4-21 v003",
+          "assembly_path": [
+            "Aloha_Stationary_V2_2024_4_23_v4",
+            "Dummy_Aloha_VX_SV2_v001",
+            "Aloha_VX_Fingers_2024_4_21_v001",
+            "Part__Feature650"
+          ],
+          "cad_opening_side": "positive",
+          "mapped_urdf_joint": "left_finger",
+          "shape_hash_code_runtime_only": 1530628686,
+          "shape_topology_counts": {
+            "vertexes": 283,
+            "edges": 428,
+            "wires": 153,
+            "faces": 149,
+            "shells": 1,
+            "solids": 1,
+            "compsolids": 0,
+            "compounds": 0
+          },
+          "shape_volume_mm3": 35160.658046734105,
+          "shape_area_mm2": 11122.759164508092,
+          "shape_bbox_mm": {
+            "XMin": 2.3440294656845775,
+            "YMin": -359.7019537426065,
+            "ZMin": 354.4111080768465,
+            "XMax": 29.811279465629497,
+            "YMax": -263.54436562750607,
+            "ZMax": 408.4111080768469,
+            "XLength": 27.46724999994492,
+            "YLength": 96.15758811510045,
+            "ZLength": 54.0000000000004
+          },
+          "shape_bbox_center_mm": [
+            16.077654465657037,
+            -311.6231596850563,
+            381.41110807684674
+          ],
+          "local_placement": {
+            "base_mm": [
+              0.0998902576401095,
+              -200.594365627506,
+              381.359771871468
+            ],
+            "rotation_xyzw": [
+              0.707106781186553,
+              0.0,
+              0.0,
+              0.707106781186542
+            ],
+            "matrix": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0998902576401095
+              ],
+              [
+                0.0,
+                -1.554312234475219e-14,
+                -1.0,
+                -200.594365627506
+              ],
+              [
+                0.0,
+                1.0,
+                -1.554312234475219e-14,
+                381.359771871468
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ]
+          },
+          "global_placement": {
+            "base_mm": [
+              24.400109719311192,
+              -268.75592267197806,
+              401.3597718719775
+            ],
+            "rotation_xyzw": [
+              0.0,
+              0.707106781186553,
+              0.707106781186542,
+              0.0
+            ],
+            "matrix": [
+              [
+                -1.0,
+                0.0,
+                0.0,
+                24.400109719311192
+              ],
+              [
+                0.0,
+                1.554312234475219e-14,
+                1.0,
+                -268.75592267197806
+              ],
+              [
+                0.0,
+                1.0,
+                -1.554312234475219e-14,
+                401.3597718719775
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ]
+          }
+        }
+      ],
+      "opening_axis_cad_local": [
+        0.9999948384260502,
+        0.0,
+        0.003212961446667671
+      ],
+      "opening_axis_alignment_to_cad_x": 0.9999948384260502,
+      "closed_inner_gap_mm": 4.48827841608904,
+      "gates": {
+        "exactly_two_finger_instances": true,
+        "one_instance_on_each_opening_side": true,
+        "opening_axis_is_cad_x": true,
+        "positive_side_maps_left": true,
+        "negative_side_maps_right": true,
+        "closed_reference_has_positive_inner_gap": true
+      }
+    },
+    {
+      "object_name": "Dummy_Aloha_VX_SV2_v3",
+      "label": "Dummy Aloha VX SV2 v3",
+      "stationary_parent": [
+        "Aloha_Stationary_V2_2024_4_23_v4"
+      ],
+      "stationary_position_mm": [
+        24.4999999770112,
+        469.350288299459,
+        20.0000001192651
+      ],
+      "stationary_pose": {
+        "base_mm": [
+          24.4999999770112,
+          469.350288299459,
+          20.0000001192651
+        ],
+        "rotation_xyzw": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "matrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            24.4999999770112
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            469.350288299459
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            20.0000001192651
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      "finger_group": "Aloha_VX_Fingers_2024_4_21_v2",
+      "finger_instances": [
+        {
+          "object_name": "Part__Feature641",
+          "label": "Aloha VX Fingers 2024-4-21 v001",
+          "assembly_path": [
+            "Aloha_Stationary_V2_2024_4_23_v4",
+            "Dummy_Aloha_VX_SV2_v3",
+            "Aloha_VX_Fingers_2024_4_21_v2",
+            "Part__Feature641"
+          ],
+          "cad_opening_side": "negative",
+          "mapped_urdf_joint": "right_finger",
+          "shape_hash_code_runtime_only": -534557016,
+          "shape_topology_counts": {
+            "vertexes": 283,
+            "edges": 428,
+            "wires": 153,
+            "faces": 149,
+            "shells": 1,
+            "solids": 1,
+            "compsolids": 0,
+            "compounds": 0
+          },
+          "shape_volume_mm3": 35160.658046734,
+          "shape_area_mm2": 11122.759164508087,
+          "shape_bbox_mm": {
+            "XMin": -29.611498950349358,
+            "YMin": -359.70195374260754,
+            "ZMin": 354.3084356660867,
+            "XMax": -2.144248950404408,
+            "YMax": -263.54436562750703,
+            "ZMax": 408.308435666087,
+            "XLength": 27.46724999994495,
+            "YLength": 96.15758811510051,
+            "ZLength": 54.000000000000284
+          },
+          "shape_bbox_center_mm": [
+            -15.877873950376882,
+            -311.6231596850573,
+            381.3084356660869
+          ],
+          "local_placement": {
+            "base_mm": [
+              0.099890257640145,
+              -200.594365627507,
+              381.359771871468
+            ],
+            "rotation_xyzw": [
+              0.707106781186553,
+              0.0,
+              0.0,
+              0.707106781186542
+            ],
+            "matrix": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.099890257640145
+              ],
+              [
+                0.0,
+                -1.554312234475219e-14,
+                -1.0,
+                -200.594365627507
+              ],
+              [
+                0.0,
+                1.0,
+                -1.554312234475219e-14,
+                381.359771871468
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ]
+          },
+          "global_placement": {
+            "base_mm": [
+              24.599890234651344,
+              268.755922671952,
+              401.3597719907331
+            ],
+            "rotation_xyzw": [
+              0.707106781186553,
+              0.0,
+              0.0,
+              0.707106781186542
+            ],
+            "matrix": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                24.599890234651344
+              ],
+              [
+                0.0,
+                -1.554312234475219e-14,
+                -1.0,
+                268.755922671952
+              ],
+              [
+                0.0,
+                1.0,
+                -1.554312234475219e-14,
+                401.3597719907331
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ]
+          }
+        },
+        {
+          "object_name": "Part__Feature640",
+          "label": "Aloha VX Fingers 2024-4-21 v2",
+          "assembly_path": [
+            "Aloha_Stationary_V2_2024_4_23_v4",
+            "Dummy_Aloha_VX_SV2_v3",
+            "Aloha_VX_Fingers_2024_4_21_v2",
+            "Part__Feature640"
+          ],
+          "cad_opening_side": "positive",
+          "mapped_urdf_joint": "left_finger",
+          "shape_hash_code_runtime_only": -303467485,
+          "shape_topology_counts": {
+            "vertexes": 283,
+            "edges": 428,
+            "wires": 153,
+            "faces": 149,
+            "shells": 1,
+            "solids": 1,
+            "compsolids": 0,
+            "compounds": 0
+          },
+          "shape_volume_mm3": 35160.6580467341,
+          "shape_area_mm2": 11122.759164508092,
+          "shape_bbox_mm": {
+            "XMin": 2.344029465684632,
+            "YMin": -359.70195374260754,
+            "ZMin": 354.4111080768465,
+            "XMax": 29.81127946562954,
+            "YMax": -263.54436562750703,
+            "ZMax": 408.4111080768469,
+            "XLength": 27.467249999944908,
+            "YLength": 96.15758811510051,
+            "ZLength": 54.0000000000004
+          },
+          "shape_bbox_center_mm": [
+            16.077654465657087,
+            -311.6231596850573,
+            381.41110807684674
+          ],
+          "local_placement": {
+            "base_mm": [
+              0.099890257640145,
+              -200.594365627507,
+              381.359771871468
+            ],
+            "rotation_xyzw": [
+              0.707106781186553,
+              0.0,
+              0.0,
+              0.707106781186542
+            ],
+            "matrix": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.099890257640145
+              ],
+              [
+                0.0,
+                -1.554312234475219e-14,
+                -1.0,
+                -200.594365627507
+              ],
+              [
+                0.0,
+                1.0,
+                -1.554312234475219e-14,
+                381.359771871468
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ]
+          },
+          "global_placement": {
+            "base_mm": [
+              24.599890234651344,
+              268.755922671952,
+              401.3597719907331
+            ],
+            "rotation_xyzw": [
+              0.707106781186553,
+              0.0,
+              0.0,
+              0.707106781186542
+            ],
+            "matrix": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                24.599890234651344
+              ],
+              [
+                0.0,
+                -1.554312234475219e-14,
+                -1.0,
+                268.755922671952
+              ],
+              [
+                0.0,
+                1.0,
+                -1.554312234475219e-14,
+                401.3597719907331
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ]
+          }
+        }
+      ],
+      "opening_axis_cad_local": [
+        0.9999948384260502,
+        0.0,
+        0.003212961446667671
+      ],
+      "opening_axis_alignment_to_cad_x": 0.9999948384260502,
+      "closed_inner_gap_mm": 4.48827841608904,
+      "gates": {
+        "exactly_two_finger_instances": true,
+        "one_instance_on_each_opening_side": true,
+        "opening_axis_is_cad_x": true,
+        "positive_side_maps_left": true,
+        "negative_side_maps_right": true,
+        "closed_reference_has_positive_inner_gap": true
+      }
+    }
+  ],
+  "standalone_vs_installed_geometry": {
+    "same_revision": false,
+    "replacement_allowed": false,
+    "standalone_label": "3D-A1 - Aloha VX Finger v3",
+    "standalone_volume_mm3": 28385.49781027805,
+    "standalone_bbox_mm": {
+      "XMin": -20.4273902086793,
+      "YMin": 132.80894562363295,
+      "ZMin": 75.36792340614838,
+      "XMax": 7.03985979126562,
+      "YMax": 186.80894562363306,
+      "ZMax": 157.07551152124847,
+      "XLength": 27.46724999994492,
+      "YLength": 54.000000000000114,
+      "ZLength": 81.7075881151001
+    },
+    "installed_label_family": "Aloha VX Fingers 2024-4-21",
+    "installed_volume_mm3": 35160.658046734,
+    "installed_bbox_mm": {
+      "XMin": -29.611498950349404,
+      "YMin": -359.7019537426065,
+      "ZMin": 354.3084356660867,
+      "XMax": -2.144248950404463,
+      "YMax": -263.544365627506,
+      "ZMax": 408.308435666087,
+      "XLength": 27.46724999994494,
+      "YLength": 96.15758811510051,
+      "ZLength": 54.000000000000284
+    },
+    "policy": "standalone proves supplier shape provenance; purchase-confirmed Simple Viper proves follower installation; Widow and Stationary provide cross-checks",
+    "replacement_prohibition_reason": "the standalone 3D-A1 v3 label, volume, bounds, and revision differ from the supplier assembly's embedded handed v2 pair"
+  },
+  "visualization_state_policy": {
+    "closed": "must be derived from the source follower joint coordinate; the static CAD pose is not relabeled closed from its AABB",
+    "open": "must be derived from the source follower joint coordinate; the purchase drawing's 67.96 mm callout is retained as a geometry cross-check, not silently treated as AABB gap",
+    "default_asset_modified": false
+  },
+  "gates": {
+    "freecad_audit_pass": true,
+    "exactly_two_stationary_vx_followers": true,
+    "primary_is_purchase_confirmed_simple_viper": true,
+    "primary_has_two_handed_finger_breps": true,
+    "primary_fingers_share_rigid_placement": true,
+    "Dummy_Aloha_VX_SV2_v001_exactly_two_finger_instances": true,
+    "Dummy_Aloha_VX_SV2_v001_one_instance_on_each_opening_side": true,
+    "Dummy_Aloha_VX_SV2_v001_opening_axis_is_cad_x": true,
+    "Dummy_Aloha_VX_SV2_v001_positive_side_maps_left": true,
+    "Dummy_Aloha_VX_SV2_v001_negative_side_maps_right": true,
+    "Dummy_Aloha_VX_SV2_v001_closed_reference_has_positive_inner_gap": true,
+    "Dummy_Aloha_VX_SV2_v3_exactly_two_finger_instances": true,
+    "Dummy_Aloha_VX_SV2_v3_one_instance_on_each_opening_side": true,
+    "Dummy_Aloha_VX_SV2_v3_opening_axis_is_cad_x": true,
+    "Dummy_Aloha_VX_SV2_v3_positive_side_maps_left": true,
+    "Dummy_Aloha_VX_SV2_v3_negative_side_maps_right": true,
+    "Dummy_Aloha_VX_SV2_v3_closed_reference_has_positive_inner_gap": true,
+    "urdf_gripper_bar_rotation_is_rz_positive_90": true,
+    "urdf_cad_positive_x_aligns_left_joint_positive_axis": true,
+    "urdf_left_and_right_joint_axes_match": true,
+    "urdf_right_is_negative_mimic": true,
+    "urdf_finger_ranges_are_signed_mirrors": true,
+    "standalone_not_substituted_for_installed_revision": true,
+    "widow_crosscheck_user_confirmed_authority_hash": true,
+    "widow_crosscheck_single_gripper_shell": true,
+    "widow_crosscheck_single_finger_assembly": true,
+    "widow_crosscheck_two_distinct_finger_breps": true,
+    "widow_crosscheck_identical_rigid_placement": true,
+    "widow_crosscheck_positive_x_maps_left": true,
+    "widow_crosscheck_negative_x_maps_right": true,
+    "widow_crosscheck_positive_closed_gap": true,
+    "widow_crosscheck_finger_pair_minimum_distance_matches_inner_gap": true,
+    "widow_crosscheck_both_fingers_contact_gripper_shell": true,
+    "widow_crosscheck_mirror_residual_below_tessellation_deflection_scale": true
+  }
+}

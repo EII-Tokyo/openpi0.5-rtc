@@ -1,6 +1,15 @@
 # Scene Reconstruction Operations
 
-Read this before tasks that build or modify `scene_reconstruction/`, camera rack CAD, pipe/table spatial models, photo-to-USD reconstruction assets, or visual comparison reports.
+**Status: LEGACY_PHOTO_PROXY_WORKFLOW_ONLY.**
+
+Read this only for tasks that build or modify `scene_reconstruction/`,
+camera-rack/table/pipe proxies derived from photos, or the historical visual
+comparison workflow. It is not the CAD-to-Isaac ingestion standard.
+
+For supplier/measured CAD, STEP/IGES/FCStd review, assembly interpretation,
+tessellation, robot-link mapping, or CAD-derived USD, use
+`docs/agents/cad_to_isaac_asset_mapping.md`. That document supersedes this one
+whenever the two overlap.
 
 ## Workspace
 
@@ -9,10 +18,11 @@ Read this before tasks that build or modify `scene_reconstruction/`, camera rack
 - Keep original ALOHA USD assets under `local_eval_assets/` read-only.
 - Do not write generated CAD/USD files into the original Isaac asset directory.
 
-## Current Route
+## Historical Route
 
-- Current first-pass route: OpenUSD / Isaac proxy geometry.
-- Reason: FreeCAD/OpenSCAD/COLMAP are not installed, noninteractive sudo is unavailable, and rack/camera dimensions are still partly estimated.
+- The 2026-07 photo reconstruction used OpenUSD / Isaac proxy geometry.
+- The original reason included missing CAD/photogrammetry capabilities and incomplete rack/camera measurements. That capability statement is historical and must not be reused as a current host fact.
+- Probe FreeCAD, OpenSCAD, COLMAP, Isaac, and Python capabilities at the start of every new task.
 - Generated assets are layered USDA files, not flattened replacements.
 
 ## Required Evidence Style
@@ -59,6 +69,5 @@ python3 scene_reconstruction/scripts/render_visual_comparison.py
 
 ## Skill
 
-- A local Codex skill was installed at `/home/eii/.codex/skills/photo-to-isaac-cad`.
-- Use it for future photo-to-Isaac CAD/USD reconstruction tasks.
-- Rollback: delete `/home/eii/.codex/skills/photo-to-isaac-cad`.
+- Use `/home/eii/.codex/skills/my-robot-photo-to-isaac-cad` only for photo-derived reconstruction.
+- Use `/home/eii/.codex/skills/my-robot-cad-to-isaac` for supplier or measured CAD asset mapping.
