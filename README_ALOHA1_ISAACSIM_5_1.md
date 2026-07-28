@@ -14,15 +14,20 @@ sim-to-real dynamics model and it is not yet accepted for bottle insertion.
 | Isaac Sim 5.1 import | PASS | `reports/aloha1_mapping/import_manifest.json` |
 | Explicit joint/control mapping | PARTIAL | `configs/aloha1_joint_map.yaml`, `control_mapping_report.json` |
 | Physics profiles | PARTIAL | `configs/aloha1_physics_profiles.yaml`, `physics_profiles.json` |
-| Correct custom-finger identity/orientation | PASS | `reports/aloha1_mapping/gripper_orientation_confirmation.json` |
-| Gripper collider experiment execution | **RE-RUN REQUIRED** | prior run used the rejected generic finger mesh |
-| Gripper static bottle hold | **RE-RUN REQUIRED** | prior `FAIL` is historical and non-transferable to the confirmed custom fingers |
-| Gripper collider A/B root cause | **SUPERSEDED INPUT** | prior `neither_resolved` used the rejected generic finger mesh |
+| Supplier CAD model identity | PASS | `Simple Aloha Viper 2024-5-13.step`, SHA-256 `33786241…dc571`; `aloha_purchased_model_identification.json` |
+| Supplier CAD finger installation mapping | PASS | embedded v2 handed pair; `aloha_public_cad_gripper_mapping.json` |
+| Supplier CAD screenshot visual gate | PASS (8 raw + 8 annotated) | `aloha_viper_gripper_screenshot_review.json`; CAD visual evidence only |
+| Finger tessellation determinism | PARTIAL | two-run byte/geometric repeat PASS; angular-controlled production tessellation HARD_BLOCKED |
+| Supplier-CAD Isaac Stage authorization | **HARD_BLOCKER** | `aloha_viper_cad_finger_isaac_stage_gate.json`; no Stage loaded or modified |
+| Supplier-CAD Task 5 / static bottle hold | **NOT_RUN** | waits for an explicitly approved Stage path/hash/root/sublayers/key prims |
+| Prior gym-aloha custom-finger Task 5 | **SUPERSEDED INPUT** | historical 80/80 digital hold cannot accept the newly confirmed supplier installation |
+| Prior collider A/B conclusion | `NO_MEANINGFUL_EFFECT` (historical installation) | default collider remains unchanged; must be rerun after Stage authorization |
 | Gripper hold root cause v2 | **SUPERSEDED INPUT** | prior `inconclusive` used the rejected generic finger mesh |
+| Supplier CAD raw + annotated visual review | PASS (8 pairs) | `aloha_viper_gripper_screenshot_review.json` |
 | Workcell and logical cameras | PARTIAL | `workcell_manifest.json`, `camera_validation.json` |
-| Official and custom Task 7 validation | **FAIL** | `reports/aloha1_mapping/validation_summary.json`, `asset_validator_report.json` |
-| Repeated headless determinism | PASS | `validation_summary.json:determinism`, `gripper_validation.json:determinism` |
-| Task 8 optimization | **BLOCKED / NOT RUN** | `validation_summary.json:optimization_gate` |
+| Supplier-CAD Task 7 validation | **NOT_RUN** | correctly gated behind supplier-CAD Task 5 |
+| CAD render/tessellation determinism | PASS | `aloha_viper_gripper_screenshot_review.json`, `aloha_viper_finger_tessellation.json` |
+| Task 8 optimization | **NOT_RUN** | no mesh merge, collider promotion, instanceable, payload, or performance optimization |
 
 `PASS`, `FAIL`, and `PARTIAL` are literal machine-report values. A clean
 viewport is not an acceptance criterion.
@@ -72,6 +77,7 @@ Primary repositories:
 | `Physical-Intelligence/aloha` | detached/pinned | `d1dc83afd89ded4379851257fe5d85632d31d5ec` | MIT | `/home/eii/project/openpi0.5-rtc/third_party/aloha` |
 | `TrossenRobotics/trossen_arm_description` | `main` | `21d8b360c211c2ad8a065d8f462cbec0207626e7` | recorded in source manifest | `external/trossen_arm_description` |
 | `TrossenRobotics/trossen_ai_isaac` | `main` | `e5fccea5b3d4978bcd0c6c5cff41115eea684427` | BSD-3-Clause | `external/trossen_ai_isaac` |
+| `huggingface/gym-aloha` | `user/aliberts/2024_05_07_remove_upper_bounds` | `51837ba5f7d5b96255f01c3d39d53dea473b4829` | Apache-2.0 | `external/gym-aloha` |
 
 Every individual file has a SHA-256, repository record, license record, and
 absolute local path in `reports/aloha1_mapping/source_manifest.json`.
@@ -80,6 +86,63 @@ The ALOHA and standard arm Xacro files are not assumed identical. The audit
 proved that their Xacro contents have different hashes, while the generated
 joint/link order and referenced mesh hashes are equal for the compared pinned
 sources. See `reports/aloha1_mapping/aloha_vs_standard_diff.json`.
+
+### Purchased hardware identity and first-hand CAD source chain
+
+The purchased follower is identified as **Aloha ViperX 6DOF / Aloha VX300S
+Follower Robot Arm**. This is a direct product-title and dimension match, not
+an appearance-based inference:
+
+- purchase/product page:
+  `https://idminer.com.tw/product/aloha-viperx/`;
+- Trossen ViperX follower sales sheet:
+  `https://drive.google.com/file/d/11KcnA49dhTiOD_MxmmC_SG75Cs97-JKh/view?usp=sharing`;
+- VX300S follower technical drawing:
+  `https://drive.google.com/file/d/11M96-4JDw0y31OZMTQQ3Nqz1qCIqk_DU/view?usp=sharing`;
+- public ALOHA 3D CAD folder:
+  `https://drive.google.com/drive/folders/1mhJuhzT4lBnvZ9VE57UgT6vmJDFPVsBf`;
+- Trossen ALOHA Kits online manual:
+  `https://docs.trossenrobotics.com/aloha_docs/`.
+
+The drawing title directly names `VX300S Follower Robot Arm`. Its
+`204 × 299.46 mm` base matches the FreeCAD AP214 readback of
+`Simple Aloha Viper 2024-5-13.step`
+(`204.000 × 299.462987 mm`). The `Aloha Widow with Gripper` base is only
+`153.072 × 233.536 mm` and its root is WX/Widow, so it must not replace the
+VX300S follower asset.
+
+The Viper and Widow STEP files look similar at the end effector because they
+embed closely related `Aloha VX Fingers 2024-4-21` components. Equal finger labels,
+topology, volume, and pair bounds are a shared-component cross-check; they do
+not identify the arm model. The follower-primary installation source is
+therefore `Simple Aloha Viper`. Widow and Stationary are cross-checks only.
+The standalone `3D-A1 - Aloha VX Finger.step` dimension
+`81.707588 mm` matches the drawing's `81.71 mm` callout, but it is a different
+revision from the embedded 2024 pair and is not substituted until its mounting
+features and installed transform are explicitly aligned. For the confirmed
+Viper assembly, the embedded handed pair is authoritative:
+
+- blue `Part__Feature007`, label `Aloha VX Fingers 2024-4-21 v2`, CAD +X,
+  maps to URDF `left_finger`;
+- orange `Part__Feature008`, label
+  `Aloha VX Fingers 2024-4-21 v001`, CAD -X, maps to URDF `right_finger`;
+- both use the supplier assembly's common rigid placement (rotation
+  determinant `+1`);
+- supplier static state is `CLOSED_REFERENCE`;
+- the diagnostic open state translates the two existing handed B-Reps by
+  `+36 mm` and `-36 mm` along CAD X without changing shape, handedness, or
+  connection.
+
+The supplier gripper-shell/sliding-carriage Boolean common volumes are
+recorded as source connection geometry, not mislabeled as an unexpected
+simulation collision. Full paths, placements, bounds, volumes, topology,
+toolchain versions, and screenshot evidence are in
+`reports/aloha1_mapping/aloha_public_cad_gripper_mapping.json`.
+
+Machine evidence, absolute local paths, Drive IDs, snapshots, hashes, and the
+complete source-link chain are recorded in
+`reports/aloha1_mapping/aloha_purchased_model_identification.json` and
+`reports/aloha1_mapping/aloha_purchased_model_identification.md`.
 
 ### Reused from existing project reports
 
@@ -104,10 +167,11 @@ The current gripper test uses only the available bottle body measurements:
 The cylinder inertia is engineering-derived and uncalibrated. Bottle neck,
 shoulder, base profile, and measured inertia remain unavailable.
 
-### User-confirmed project-reuse geometry
+### Historical project-reuse geometry (superseded for current installation)
 
-On 2026-07-28 the user confirmed the historical Stationary ALOHA 1 custom
-finger geometry and its legal open/closed orientation:
+On 2026-07-28 the user confirmed a historical Stationary ALOHA 1 custom-finger
+diagnostic. The 2026-07-29 supplier CAD review supersedes it for current
+installation acceptance:
 
 - physical-left custom finger:
   `df73ae5b9058e5d50a6409ac2ab687dade75053a86591bb5e23ab051dbf2d659`;
@@ -121,9 +185,12 @@ preload-force, and hold reports remain preserved as historical runs, but
 their physical conclusions are non-transferable to the confirmed custom
 fingers. The exact restart boundary is recorded in
 `reports/aloha1_mapping/gripper_orientation_confirmation.json`.
-Repository, commit, and license provenance for these two installed
-`gym_aloha` mesh files remains a required pre-Task-5 audit; visual
-confirmation does not substitute for that provenance gate.
+Repository, branch, commit, Apache-2.0 license, installed path, STL triangle
+count, and SHA-256 for both `gym_aloha` meshes remain recorded in
+`configs/aloha1_gripper_correct_finger_profiles.yaml` and verified before
+every correct-finger run. Visual confirmation remains a separate gate and
+does not substitute for source identity. Its collider/hold results are
+historical and must not be promoted to the supplier-CAD installation.
 
 ### Engineering inferences and acceptance thresholds
 
@@ -145,14 +212,13 @@ as calibration data.
 
 ### Temporary, uncalibrated values
 
-The fingertip and bottle physics materials are
-`TEMPORARY_UNCALIBRATED`. Earlier collider A/B work used its frozen friction
-profile. The v2 force diagnosis keeps static/dynamic friction at `0.7` and
-restitution at `0.0`; its planned `0.3/0.5/0.7/1.0` friction scan is
-deliberately `NOT_RUN` because no tested preload first established sufficient
-stable bilateral normal force. The `1.0` candidate remains
-`DIAGNOSTIC_ONLY_NOT_CALIBRATED`. Contact/rest offsets were not authored and
-retain the Isaac Sim 5.1 simulation-selected defaults.
+The fingertip and bottle physics materials remain
+`TEMPORARY_UNCALIBRATED`. The correct-finger A/B freezes static/dynamic
+friction at `0.7` and restitution at `0.0`; no friction, drive, mass,
+timestep, mimic, or decomposition-parameter scan was used to obtain the
+current result. Contact/rest offsets were not authored and retain the Isaac
+Sim 5.1 simulation-selected defaults. The earlier generic-finger force and
+friction diagnosis is retained only as historical, non-transferable evidence.
 
 The default physics configuration is
 `debug_acceleration_drive`. The `sim2real_force_drive` layer exists as an
@@ -238,30 +304,21 @@ bash tools/build_aloha1_urdf.sh
 .venv_issac/bin/python tools/generate_aloha1_joint_map.py
 .venv_issac/bin/python tools/build_aloha1_workcell.py
 
-.venv_issac/bin/python tools/validate_aloha1_gripper.py
-.venv_issac/bin/python tools/validate_aloha1_gripper.py
-
-.venv_issac/bin/python tools/compare_aloha1_gripper_colliders.py \
-  > .codex/artifacts/aloha1-gripper-collider-ab/compare_aloha1_gripper_colliders.log 2>&1
-.venv/bin/python tools/compare_aloha1_gripper_colliders.py \
-  --finalize-log .codex/artifacts/aloha1-gripper-collider-ab/compare_aloha1_gripper_colliders.log
-.venv_issac/bin/python tools/validate_aloha1_gripper_collider_ab.py
-
-.venv_issac/bin/python tools/audit_aloha1_contact_semantics.py
-.venv_issac/bin/python tools/measure_aloha1_gripper_preload_force.py
-.venv_issac/bin/python tools/audit_aloha1_gripper_materials.py
-.venv_issac/bin/python tools/validate_aloha1_gripper_hold_v2.py
-.venv_issac/bin/python tools/test_aloha1_gripper_solver_sensitivity.py
-
-.venv_issac/bin/python tools/validate_aloha1_asset.py
-.venv_issac/bin/python tools/validate_aloha1_asset.py
+PYTHONPATH=. .venv/bin/python tools/map_aloha1_public_cad_gripper.py
+PYTHONPATH=. .venv/bin/python \
+  tools/compare_aloha_viper_finger_tessellations.py \
+  --run-a .codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/tessellation_determinism/run_a/manifest.json \
+  --run-b .codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/tessellation_determinism/run_b/manifest.json
+PYTHONPATH=. .venv/bin/python tools/audit_aloha1_cad_finger_isaac_gate.py
 
 .venv/bin/pytest -q tests/aloha1_mapping
 ```
 
-The repeated gripper and Task 7 calls are intentional. Each report stores the
-previous and current exact signatures. The latest reports show deterministic
-`PASS`.
+The supplier-CAD Isaac Task 5 and Task 7 commands are intentionally omitted
+until the Stage authorization gate is cleared. Do not substitute the
+historical gym-aloha diagnostic commands as current acceptance. High-output
+CAD logs are stored under
+`.codex/artifacts/20260729-aloha-finger-palm-orientation/`.
 
 Set `--enable-leaders` only when importing/probing optional leader assets. The
 current final workcell keeps the `Leaders=disabled` variant.
@@ -282,7 +339,173 @@ unclassified errors:
 `IsaacSim.SimReadyAssetRules` passes. Details are in
 `physics_rules_classification.json` and `asset_validator_report.json`.
 
-## Task 5 gripper result
+## Current supplier-CAD Task 5 boundary
+
+The correct current input is the handed finger pair embedded in
+`Simple Aloha Viper 2024-5-13.step`, not the standalone 3D-A1 v3 and not the
+previous gym-aloha diagnostic pair. The CAD installation visual gate passes
+for all four paired views (`true_top`, `true_bottom`, `tip_end`, and
+`base_oblique`) in both `CLOSED_REFERENCE` and the derived 36 mm open state.
+This PASS is limited to CAD identity, handedness, placement, palm orientation,
+and state differentiation; it is not a collider, contact, or grasp PASS.
+
+Two fresh FreeCAD runs produce byte-identical and canonical-geometry-identical
+OBJ diagnostics for each embedded finger. Each has 1,808 vertices, 3,616
+triangles, one connected component, and zero degenerate triangles. This is a
+linear-deflection-only diagnostic (`0.20 mm`). The local snap FreeCAD cannot
+load `MeshPart` because of a libcurl ABI mismatch, while
+`Part.Shape.tessellate` does not accept an angular-deflection value.
+Production angular-controlled tessellation is therefore
+`HARD_BLOCKER`, not silently approximated.
+
+The NVIDIA official Isaac documentation capability was queried through
+MCPJungle before the Isaac gate. Local Isaac Sim 5.1.0 importer `2.4.30`
+source and manifest hashes are recorded separately. No supplier-CAD Isaac
+Stage was loaded, because the post-reset task does not identify a
+user-approved absolute Stage path, frozen hash, root prim, sublayers, and
+required follower/gripper prims. The historical
+`local_eval_assets/aloha_isaac_assets/aloha_viperx.usd` hash remains unchanged
+but is explicitly classified
+`HISTORICAL_CANDIDATE_NOT_AUTHORIZED_CURRENT_TASK`.
+
+Consequently:
+
+- isolated supplier-CAD diagnostic USD: `NOT_RUN`;
+- Isaac open/closed screenshots: `NOT_RUN`;
+- correct supplier-CAD Task 5 and static hold: `NOT_RUN`;
+- Task 7: `NOT_RUN`;
+- Task 8: `NOT_RUN`;
+- original STEP/URDF/imported source USD/default/final collider: unchanged.
+
+Machine evidence:
+
+- `reports/aloha1_mapping/aloha_viper_gripper_screenshot_review.json`;
+- `reports/aloha1_mapping/aloha_public_cad_gripper_mapping.json`;
+- `reports/aloha1_mapping/aloha_viper_finger_tessellation.json`;
+- `reports/aloha1_mapping/aloha_viper_cad_finger_isaac_stage_gate.json`.
+
+## Historical gym-aloha correct-finger Task 5 result (superseded input)
+
+The following result remains reproducible for its frozen historical input, but
+it is not current supplier-CAD acceptance and must not be used to claim the
+present follower installation can hold the bottle.
+
+The current acceptance run starts at
+`TASK5_PREFLIGHT_CORRECT_FINGER_ASSET_IDENTITY_AND_INSTALL_TRANSFORM`.
+It uses only the user-confirmed left/right custom meshes from the pinned
+`gym-aloha` commit. The generic 856-triangle finger is deactivated only in
+independent diagnostic wrappers; the original URDF, imported source USD,
+existing configuration layer, historical reports, and final/default collider
+remain unchanged.
+
+The frozen runtime values are:
+
+- Hull versus Convex Decomposition is the only A/B variable;
+- friction `0.7`, restitution `0`;
+- bottle mass `0.020 kg`, diameter `0.065 m`;
+- `60 Hz`, `set_solve_articulation_contact_last(True)`;
+- unchanged initial qpos, drive, mimic, closure trajectory, and `2 s` hold;
+- unchanged maximum drop gate `0.010 m`;
+- no fixed constraint, parent attachment, or Surface Gripper after release.
+
+The test ran `20` fresh `World` resets for each follower/profile combination,
+or `80` trials:
+
+| Gate | Current result | Machine evidence |
+| --- | --- | --- |
+| Finger motion direction | PASS | `80/80`; left opens positive and right opens negative |
+| Aperture monotonicity | PASS | `80/80`; open gap exceeds closed-against-bottle gap |
+| Mimic accuracy | **FAIL** | maximum sampled `|right + left| = 0.001935087 m`, above the unchanged `0.001 m` gate |
+| Collider geometry audit | PASS (diagnostic) | PhysX cooking readback: Hull `1` piece/finger; Decomposition `32` pieces/finger |
+| Bilateral contact establishment | PASS | `80/80` report both left and right contact before release |
+| Contact persistence | PASS | `80/80`; recorded separately from static hold |
+| Persistent penetration | PASS | `0/80` persistent-penetration failures |
+| Unexpected internal collision | PASS | `0/80` finger/bar/other-finger failures |
+| Static bottle hold | **PASS** | `80/80`; no attachment; Hull drop `0.003963947 m`, Decomposition drop `0.004372358 m` |
+| Determinism | PASS | one exact signature per robot/profile across 20 resets |
+| Screenshot machine manifest | PASS | `36/36` required originals, absolute paths, file/pixel hashes |
+| Screenshot visual-model review | PASS | `36/36` original/annotated pairs individually reviewed |
+
+The report-level Task 5 status remains **FAIL**, not because the bottle is
+dropped, but because mimic/readback exceeds its unchanged tolerance. At the
+open checkpoint the left finger reads `+0.056999922 m`, while the right reads
+`-0.058935009 m`; this also exceeds the right semantic opening limit
+`-0.057 m` by about `1.935 mm`. The joint order, sign, and motion direction
+are correct. Because all `80/80` hold trials pass despite this residual, the
+current evidence classifies it as a runtime mimic/readback and limit
+compliance problem, not the cause of static-hold failure. No parameter was
+tuned to conceal it. See
+`gripper_correct_finger_mimic_classification.json`.
+
+### Correct-finger Hull/Decomposition conclusion
+
+The local Isaac Sim 5.1 probe confirms the NVIDIA-supported tokens
+`convexHull` and `convexDecomposition` and reads all decomposition settings
+from the local PhysX 107.3 schema. No decomposition setting is authored for
+the first A/B round.
+
+The user-confirmed custom fingers cook to:
+
+- Hull: `1` convex piece for each left/right finger;
+- Convex Decomposition: `32` pieces for each finger, reaching the local
+  default `maxConvexHulls=32`;
+- exact approximation token readback in every diagnostic USD;
+- symmetric piece count for the two fingers and both followers.
+
+Both profiles pass the unchanged hold gate in every reset. Hull has slightly
+less drop than Decomposition, so Decomposition is not promoted merely because
+it represents concavities more closely:
+
+`CONVEX_DECOMPOSITION_STATUS = NO_MEANINGFUL_EFFECT`.
+
+The final/default collider is unchanged. Decomposition remains a diagnostic
+candidate, not a preselected correct answer, does not produce an exact
+collider, creates more contacts, and costs more cooking/contact work.
+
+### Screenshot evidence and visual self-review
+
+Screenshot capture is a hard gate but remains auxiliary evidence. Before the
+accepted recapture, the target object, part, physical stage, view, and
+acceptance criteria were written in
+`configs/aloha1_gripper_correct_finger_profiles.yaml`.
+
+The first candidate set was rejected during visual self-review for two
+specific reasons:
+
+- the near-horizontal contact view let the opaque bottle and gripper bar hide
+  the two inner contact bands;
+- release and hold-end cameras followed the bottle, visually masking the
+  measured displacement.
+
+The accepted set uses an elevated contact view and a fixed runtime camera
+anchor shared by open-with-bottle, bilateral contact, release, and hold-end.
+Each original has a separate annotated PNG with boxes, arrows, object labels,
+contact/normal markers, phase, frame/time, camera view, key numeric values,
+and PASS/FAIL. All `36` pairs were inspected individually with the visual
+model. The four release→hold comparisons have the same camera anchor,
+runtime drop below `0.010 m`, and mean absolute image differences of about
+`12.4–13.2` intensity units.
+
+Absolute locations:
+
+- originals:
+  `/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots`;
+- annotations:
+  `/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots_annotated`;
+- full machine screenshot manifest:
+  `/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/gripper_correct_finger_all_screenshot_manifest.json`;
+- visual-model review:
+  `/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/gripper_correct_finger_visual_screenshot_review.json`.
+
+The static-hold conclusion also requires contact, bottle pose, velocity,
+angular velocity, drop, penetration, and deterministic signatures from
+`reports/aloha1_mapping/gripper_correct_finger_task5.json`; screenshots alone
+never pass physics. The complete screenshot review is also tracked at
+`reports/aloha1_mapping/gripper_correct_finger_visual_screenshot_review.json`,
+and the current Task 7 disposition is recorded at
+`reports/aloha1_mapping/validation_summary.json`.
+
+## Historical rejected-generic-finger results (non-transferable)
 
 > **Input supersession notice:** all results in this section and its two
 > follow-up diagnosis sections used the now-rejected generic
@@ -494,6 +717,33 @@ solve static hold. Explicit finger control likewise did not change the prior
 hold result. Task 8 remains `NOT_RUN`, and the final/default collider remains
 unchanged.
 
+## Task 7 disposition
+
+The current supplier-CAD Task 7 is `NOT_RUN`: it is gated behind the
+supplier-CAD Task 5 run, which itself is blocked by the unresolved Stage
+authorization. The validation results below describe only the superseded
+gym-aloha diagnostic input.
+
+Task 7 was rerun twice after the correct-finger Task 5 and screenshot review.
+The second run exactly reproduced signature
+`830c9ee018cc780d622f0e9d1483e0ff767886576143b446857f0c9ea689d8d1`.
+The validation plan now consumes
+`gripper_correct_finger_task5.json`; it no longer mistakes the rejected
+generic-finger `gripper_validation.json` for current Task 5 evidence.
+
+The literal Task 7 result remains **FAIL**:
+
+- correct-finger physical static hold is PASS `80/80`;
+- `Task5.GripperValidation` is FAIL because mimic/readback remains over gate;
+- official `IsaacSim.PhysicsRules` remains FAIL, with all issues classified;
+- `IsaacSim.RobotRules` remains PARTIAL due missing thumbnails;
+- `IsaacSim.SimReadyAssetRules` passes;
+- measurement HARD_BLOCKERs keep calibrated acceptance closed.
+
+This is an expected, evidence-preserving result. The correct diagnostic
+fingers were not silently installed into the final/default asset, and Task 8
+remains `NOT_RUN`.
+
 ## HARD_BLOCKER and measurement checklist
 
 The machine-readable authoritative list is
@@ -515,9 +765,22 @@ The machine-readable authoritative list is
     aperture, and mimic/readback behavior.
 11. Resolve or formally accept the three source mass-only links without
     inventing collision geometry.
-12. Calibrate the physical inner fingertip surface and contact-offset policy;
-    the frozen Hull/Decomposition A/B is complete, but neither collider passes
-    the hold gate.
+12. Calibrate the physical inner fingertip surface and contact-offset policy.
+    The correct-finger Hull/Decomposition A/B is complete and both pass the
+    digital hold gate, but neither is a calibrated physical collider.
+13. Resolve the right-finger runtime mimic/readback and `1.935 mm` semantic
+    opening-limit overshoot without changing the verified sign or joint order.
+14. Explicitly approve the absolute Isaac review Stage path for the
+    supplier-CAD diagnostic, together with its frozen SHA-256, root prim,
+    sublayers, and required follower/gripper prim paths. Until then Stage load,
+    USD authoring, Isaac screenshots, Task 5, and Task 7 are `NOT_RUN`.
+15. Resolve the supplier CAD license/redistribution terms. Public download and
+    user-confirmed local use do not establish a redistribution license; the
+    original STEP/PDF files remain outside Git.
+16. Provide a FreeCAD/OpenCascade path with explicit angular-deflection
+    tessellation control, or repair the local snap `MeshPart` ABI. The current
+    two-run linear-only diagnostic is deterministic but is not promoted to the
+    production visual mesh.
 
 Work that does not depend on these measurements remains reproducible. The
 current workcell therefore retains calibration-pending prims and disabled
