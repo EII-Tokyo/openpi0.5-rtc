@@ -1,0 +1,87 @@
+schema_version: 1
+scope: ALOHA follower digital gripper static hold root-cause diagnosis only
+environment:
+  isaac_sim: 5.1.0.0
+  kit: 107.3.3
+  physx: 107.3.26
+  python: 3.11.13
+diagnostic_root: assets/Trossen/ALOHA1/1.0/diagnostics/gripper_force
+report_root: reports/aloha1_mapping/gripper_force_diagnosis
+frozen:
+  approximation: convexHull
+  friction: 0.7
+  restitution: 0.0
+  bottle_mass_kg: 0.020
+  bottle_diameter_m: 0.065
+  bottle_height_m: 0.21
+  physics_frequency_hz: 60
+  solve_articulation_contact_last: true
+  control_mode: current_mimic
+  self_collision: false
+  contact_offset_policy: PRESERVE_UNAUTHORED_ISAAC_DEFAULT
+  rest_offset_policy: PRESERVE_UNAUTHORED_ISAAC_DEFAULT
+preload:
+  delta_m: [0.0, 0.0005, 0.0010, 0.0015, 0.0020]
+  repeats: 10
+  stable_window_steps: 60
+  close_increment_m: 0.0001
+  maximum_find_contact_steps: 500
+  bilateral_contact_required_steps: 3
+  theoretical_gravity_m_s2: 9.81
+  theoretical_threshold_status: ENGINEERING_DIAGNOSTIC_NOT_REAL_CALIBRATION
+friction_scan:
+  mu: [0.3, 0.5, 0.7, 1.0]
+  repeats: 20
+  diagnostic_only_values:
+    "1.0": DIAGNOSTIC_ONLY_NOT_CALIBRATED
+hold:
+  duration_s: 2.0
+  maximum_drop_m: 0.010
+  repeats: 20
+  penetration_threshold_m: 0.002
+  penetration_required_consecutive_steps: 5
+solver:
+  frequencies_hz: [60, 120, 240]
+  repeats: 10
+  iteration_frequency_policy: LOWEST_BEST_RATE_BASELINE_WINS_TIE
+  position_iterations: [4, 8, 16]
+  velocity_iterations: [1, 2, 4]
+task8: NOT_RUN
+default_asset_collider_modified: false
+protected_baseline:
+  - path: generated/urdf/follower_left.urdf
+    sha256: d9e4b32723ee71dfce26fb4e78546cfcfef147b2d7dbf5e53e3620e3d8aa96bd
+  - path: generated/urdf/follower_right.urdf
+    sha256: 268a5e5b56ce48af679256380008606f64358d6ead2619b52946b37f47fb624b
+  - path: assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/follower_left_imported.usd
+    sha256: 955c34600846c8b4a08bedc639caef7d5e3c1d0e3a02a6900c80d27d52adadec
+  - path: assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/follower_right_imported.usd
+    sha256: 205d3b8fe72532f608446b18e80eccb5c8b0992fb71946b9737145afe4efa7ed
+  - path: assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/configuration/follower_left_debug_acceleration_drive.usd
+    sha256: 7fe1d086c4d79e60cf6f3e10b67f164de4684df8d941603055764d6f230528a2
+  - path: assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/configuration/follower_right_debug_acceleration_drive.usd
+    sha256: 919c8013e9921eaa2aaf8e032aa5ed81bc64cd07c90233ad9418996e9ecea249
+  - path: assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/follower_left.usd
+    sha256: a1e6beb663f70e4c1d6493f5be80da2894e075c931e0fa5211e8c91d59a8205d
+  - path: assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/follower_right.usd
+    sha256: 86d850cea5b35fb2969d3a78834317b51e2ac0d301f09aaaa9dad191f9bb3d5d
+  - path: configs/aloha1_gripper_collision_profiles.yaml
+    sha256: bd13be701ec121112e90c968b9fb00b684e3295576d9c4c419daac4998c666ae
+  - path: assets/Trossen/ALOHA1/1.0/diagnostics/gripper_collision/convex_hull/follower_left/follower_left_convex_hull.usd
+    sha256: f12ae97057aaa5854a70a79d23cc3ecc7006634b087891be6ea17f6e4b3f4887
+  - path: assets/Trossen/ALOHA1/1.0/diagnostics/gripper_collision/convex_hull/follower_right/follower_right_convex_hull.usd
+    sha256: 5d6b3f7f31169c8310b0e1a6aaa7ea53b04deb5b87dd82c3a1f5942f04ed1a50
+  - path: assets/Trossen/ALOHA1/1.0/diagnostics/gripper_collision/convex_decomposition/follower_left/follower_left_convex_decomposition.usd
+    sha256: 5586d234f7d4f475e1086121a59c5bff18acfa8adbc384b266390336bbd5af97
+  - path: assets/Trossen/ALOHA1/1.0/diagnostics/gripper_collision/convex_decomposition/follower_right/follower_right_convex_decomposition.usd
+    sha256: 247d0e0b08bd3dec1f9cec78a1290b542759027ab15c4d0d566dd749f439b47c
+  - path: reports/aloha1_mapping/gripper_collider_ab_results.json
+    sha256: 028a01f580403611b5c4ff261c8d4c4539fc3e98e0cc8f5c6e04a21a5a270958
+  - path: reports/aloha1_mapping/gripper_collider_comparison.json
+    sha256: c7885767712a1685c06fae058eb4a3323f4c8e21b9b9ff974fec7cee1a1a61ea
+  - path: reports/aloha1_mapping/gripper_root_cause_classification.json
+    sha256: 897c955adb5f266f12cec8951f8a5fc95704ef0489ad2b6e33ff6e6388f03c2f
+source_evidence:
+  contact_report_stub: .venv_issac/lib/python3.11/site-packages/isaacsim/extscache/omni.physx-107.3.26+107.3.3.lx64.r.cp311.u353/omni/physx/bindings/_physx.pyi
+  contact_report_guide: .venv_issac/lib/python3.11/site-packages/isaacsim/extscache/omni.physx-107.3.26+107.3.3.lx64.r.cp311.u353/docs/dev_guide/contact_reports.rst
+  physx_schema: .venv_issac/lib/python3.11/site-packages/isaacsim/extscache/omni.usd.schema.physx-107.3.26+107.3.3.lx64.r.cp311.u353/plugins/PhysxSchema/resources/schema.usda
