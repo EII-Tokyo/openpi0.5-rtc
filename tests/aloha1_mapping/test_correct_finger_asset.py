@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pytest
@@ -99,3 +100,44 @@ def test_screenshot_contract_has_required_phases_and_fixed_resolution() -> None:
     }
     assert screenshots["runtime_renderer"] == "ISAAC_SIM_5_1_CAMERA_RGB"
     assert screenshots["missing_capture_gate"] == "FAIL"
+
+
+def test_diagnostic_builder_protects_sources_and_clones_historical_geometry() -> None:
+    source = (
+        PROJECT_ROOT / "tools/build_aloha1_correct_finger_diagnostic.py"
+    ).read_text(encoding="utf-8")
+
+    assert "verify_correct_finger_sources" in source
+    assert "AddReference" in source
+    assert "SetInstanceable(False)" in source
+    assert "SetActive(False)" in source
+    assert "ComputeRelativeTransform" in source
+    assert "source_stage.GetRootLayer().Save" not in source
+
+
+def test_generated_correct_finger_preflight_is_machine_verified() -> None:
+    report = json.loads(
+        (
+            PROJECT_ROOT
+            / "reports/aloha1_mapping/gripper_correct_finger_preflight.json"
+        ).read_text(encoding="utf-8")
+    )
+
+    assert report["status"] == "PASS"
+    assert report["restart_boundary"] == (
+        "TASK5_PREFLIGHT_CORRECT_FINGER_ASSET_IDENTITY_AND_INSTALL_TRANSFORM"
+    )
+    assert len(report["diagnostic_assets"]) == 4
+    for asset in report["diagnostic_assets"]:
+        assert Path(asset["absolute_path"]).is_file()
+        assert asset["status"] == "PASS"
+        assert asset["articulation_root_count"] == 1
+        assert asset["new_finger_colliders"] == 2
+        assert asset["generic_finger_geometry_active"] is False
+        for mesh in asset["correct_finger_meshes"]:
+            assert mesh["point_count"] == 4998
+            assert mesh["face_count"] == 1666
+            assert mesh["approximation"] in {
+                "convexHull",
+                "convexDecomposition",
+            }

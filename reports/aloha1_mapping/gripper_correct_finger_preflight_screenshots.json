@@ -1,0 +1,985 @@
+{
+  "acceptance_note": "Screenshots are required evidence, but numeric aperture and joint readback gates determine kinematic PASS.",
+  "manifest": {
+    "artifact_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots",
+    "captures": [
+      {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/asset_preflight/follower_left_open_closing_axis.png",
+        "artifact_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots",
+        "camera": {
+          "orientation_wxyz": [
+            0.00011963285942329094,
+            0.00010564472177065909,
+            0.6619256734848022,
+            0.7495694756507874
+          ],
+          "position_world_m": [
+            0.25888365507125854,
+            0.2799510061740875,
+            0.3364424407482147
+          ],
+          "render_readback": {
+            "dtype": "uint8",
+            "maximum": 255,
+            "minimum": 1,
+            "shape": [
+              900,
+              1280,
+              4
+            ]
+          },
+          "resolution": [
+            1280,
+            900
+          ],
+          "runtime": "isaacsim.sensors.camera.Camera",
+          "target_world_m": [
+            0.25879427790641785,
+            -4.897080361843109e-05,
+            0.30153585970401764
+          ],
+          "view": "closing_axis"
+        },
+        "capture_gate_status": "PASS",
+        "capture_name": "follower_left_open_closing_axis",
+        "decoded_pixel_sha256": "16298aa2735cf883173e070477945175a69918b3df3ac5b8fbb1725bdaa70d2c",
+        "decoded_rgb_channel_ranges": [
+          238,
+          238,
+          237
+        ],
+        "file_sha256": "ff49437d4bc74d4f924d57b2f29f2d72ce9200b6a01dec3f3d4ed1e79326b203",
+        "file_size_bytes": 393879,
+        "mode": "RGBA",
+        "phase": "asset_preflight",
+        "relative_path": "asset_preflight/follower_left_open_closing_axis.png",
+        "resolution": [
+          1280,
+          900
+        ],
+        "simulation": {
+          "dof_order": [
+            "waist",
+            "shoulder",
+            "elbow",
+            "forearm_roll",
+            "wrist_angle",
+            "wrist_rotate",
+            "gripper",
+            "left_finger",
+            "right_finger"
+          ],
+          "joint_positions": [
+            1.5243711459334008e-05,
+            -0.9599651098251343,
+            1.1611816883087158,
+            0.0010723896557465196,
+            -0.29613107442855835,
+            -7.928500735943089e-07,
+            2.9358275810409395e-08,
+            0.0569942444562912,
+            -0.0570058636367321
+          ],
+          "physics_frequency_hz": 60,
+          "robot": "follower_left",
+          "solve_articulation_contact_last": true,
+          "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_hull/follower_left/follower_left_convex_hull.usd",
+          "state": "open",
+          "surface_gap_m": 0.06918747539249395
+        },
+        "status": "PASS"
+      },
+      {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/asset_preflight/follower_left_open_isometric.png",
+        "artifact_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots",
+        "camera": {
+          "orientation_wxyz": [
+            -0.43497133255004883,
+            -0.2677571475505829,
+            0.4506739675998688,
+            0.7321195602416992
+          ],
+          "position_world_m": [
+            0.019916022196412086,
+            0.13002243638038635,
+            0.43874722719192505
+          ],
+          "render_readback": {
+            "dtype": "uint8",
+            "maximum": 255,
+            "minimum": 1,
+            "shape": [
+              900,
+              1280,
+              4
+            ]
+          },
+          "resolution": [
+            1280,
+            900
+          ],
+          "runtime": "isaacsim.sensors.camera.Camera",
+          "target_world_m": [
+            0.25879427790641785,
+            -4.897080361843109e-05,
+            0.30153585970401764
+          ],
+          "view": "isometric"
+        },
+        "capture_gate_status": "PASS",
+        "capture_name": "follower_left_open_isometric",
+        "decoded_pixel_sha256": "5c3d1a88a65600a1e793146c85827709ae0d88ecc69dbc69006a1e71a2fffe84",
+        "decoded_rgb_channel_ranges": [
+          240,
+          238,
+          241
+        ],
+        "file_sha256": "81cf52d9ab48a00741edd4654bb1784b90c7d58e491282e4897c6c58532c4c71",
+        "file_size_bytes": 349677,
+        "mode": "RGBA",
+        "phase": "asset_preflight",
+        "relative_path": "asset_preflight/follower_left_open_isometric.png",
+        "resolution": [
+          1280,
+          900
+        ],
+        "simulation": {
+          "dof_order": [
+            "waist",
+            "shoulder",
+            "elbow",
+            "forearm_roll",
+            "wrist_angle",
+            "wrist_rotate",
+            "gripper",
+            "left_finger",
+            "right_finger"
+          ],
+          "joint_positions": [
+            1.5243711459334008e-05,
+            -0.9599651098251343,
+            1.1611816883087158,
+            0.0010723896557465196,
+            -0.29613107442855835,
+            -7.928500735943089e-07,
+            2.9358275810409395e-08,
+            0.0569942444562912,
+            -0.0570058636367321
+          ],
+          "physics_frequency_hz": 60,
+          "robot": "follower_left",
+          "solve_articulation_contact_last": true,
+          "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_hull/follower_left/follower_left_convex_hull.usd",
+          "state": "open",
+          "surface_gap_m": 0.06918747539249395
+        },
+        "status": "PASS"
+      },
+      {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/asset_preflight/follower_left_closed_closing_axis.png",
+        "artifact_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots",
+        "camera": {
+          "orientation_wxyz": [
+            0.00032546266447752714,
+            0.00028920258046127856,
+            0.6642386317253113,
+            0.7475205063819885
+          ],
+          "position_world_m": [
+            0.25903788208961487,
+            0.2799469828605652,
+            0.33468565344810486
+          ],
+          "render_readback": {
+            "dtype": "uint8",
+            "maximum": 255,
+            "minimum": 0,
+            "shape": [
+              900,
+              1280,
+              4
+            ]
+          },
+          "resolution": [
+            1280,
+            900
+          ],
+          "runtime": "isaacsim.sensors.camera.Camera",
+          "target_world_m": [
+            0.2587940841913223,
+            -4.67933714389801e-05,
+            0.3015357255935669
+          ],
+          "view": "closing_axis"
+        },
+        "capture_gate_status": "PASS",
+        "capture_name": "follower_left_closed_closing_axis",
+        "decoded_pixel_sha256": "0fb00229dab50f65cdf809a98995fbe2eead3ce7b98743838c7fbdfd68a878c2",
+        "decoded_rgb_channel_ranges": [
+          237,
+          238,
+          239
+        ],
+        "file_sha256": "e577686cbaf5750a6059d06c1b0a7ef5267822e290dd4758d9cdaf14445471ee",
+        "file_size_bytes": 385867,
+        "mode": "RGBA",
+        "phase": "asset_preflight",
+        "relative_path": "asset_preflight/follower_left_closed_closing_axis.png",
+        "resolution": [
+          1280,
+          900
+        ],
+        "simulation": {
+          "dof_order": [
+            "waist",
+            "shoulder",
+            "elbow",
+            "forearm_roll",
+            "wrist_angle",
+            "wrist_rotate",
+            "gripper",
+            "left_finger",
+            "right_finger"
+          ],
+          "joint_positions": [
+            1.5238731975841802e-05,
+            -0.9599652886390686,
+            1.1611820459365845,
+            0.0010924951639026403,
+            -0.2961314022541046,
+            -9.902327064992278e-07,
+            4.4813582178448996e-08,
+            0.02100002020597458,
+            -0.021005425602197647
+          ],
+          "physics_frequency_hz": 60,
+          "robot": "follower_left",
+          "solve_articulation_contact_last": true,
+          "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_hull/follower_left/follower_left_convex_hull.usd",
+          "state": "closed",
+          "surface_gap_m": -0.0031678944967367187
+        },
+        "status": "PASS"
+      },
+      {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/asset_preflight/follower_left_closed_isometric.png",
+        "artifact_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots",
+        "camera": {
+          "orientation_wxyz": [
+            -0.4346187114715576,
+            -0.2682296335697174,
+            0.45153170824050903,
+            0.731627345085144
+          ],
+          "position_world_m": [
+            0.01998753286898136,
+            0.13002318143844604,
+            0.43793147802352905
+          ],
+          "render_readback": {
+            "dtype": "uint8",
+            "maximum": 255,
+            "minimum": 9,
+            "shape": [
+              900,
+              1280,
+              4
+            ]
+          },
+          "resolution": [
+            1280,
+            900
+          ],
+          "runtime": "isaacsim.sensors.camera.Camera",
+          "target_world_m": [
+            0.2587940841913223,
+            -4.67933714389801e-05,
+            0.3015357255935669
+          ],
+          "view": "isometric"
+        },
+        "capture_gate_status": "PASS",
+        "capture_name": "follower_left_closed_isometric",
+        "decoded_pixel_sha256": "1f72321f9b8b85a8a646eaf74cf8f6470096c5a6661eb0dffe3f8a2a67fd813c",
+        "decoded_rgb_channel_ranges": [
+          233,
+          226,
+          226
+        ],
+        "file_sha256": "57c0f49e1f41d079a8322b8d5a70f6db7e12dab8320413ae9151883aea128615",
+        "file_size_bytes": 326377,
+        "mode": "RGBA",
+        "phase": "asset_preflight",
+        "relative_path": "asset_preflight/follower_left_closed_isometric.png",
+        "resolution": [
+          1280,
+          900
+        ],
+        "simulation": {
+          "dof_order": [
+            "waist",
+            "shoulder",
+            "elbow",
+            "forearm_roll",
+            "wrist_angle",
+            "wrist_rotate",
+            "gripper",
+            "left_finger",
+            "right_finger"
+          ],
+          "joint_positions": [
+            1.5238731975841802e-05,
+            -0.9599652886390686,
+            1.1611820459365845,
+            0.0010924951639026403,
+            -0.2961314022541046,
+            -9.902327064992278e-07,
+            4.4813582178448996e-08,
+            0.02100002020597458,
+            -0.021005425602197647
+          ],
+          "physics_frequency_hz": 60,
+          "robot": "follower_left",
+          "solve_articulation_contact_last": true,
+          "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_hull/follower_left/follower_left_convex_hull.usd",
+          "state": "closed",
+          "surface_gap_m": -0.0031678944967367187
+        },
+        "status": "PASS"
+      },
+      {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/asset_preflight/follower_right_open_closing_axis.png",
+        "artifact_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots",
+        "camera": {
+          "orientation_wxyz": [
+            0.00011963285942329094,
+            0.00010564472177065909,
+            0.6619256734848022,
+            0.7495694756507874
+          ],
+          "position_world_m": [
+            0.25888365507125854,
+            0.2799510061740875,
+            0.3364424407482147
+          ],
+          "render_readback": {
+            "dtype": "uint8",
+            "maximum": 255,
+            "minimum": 1,
+            "shape": [
+              900,
+              1280,
+              4
+            ]
+          },
+          "resolution": [
+            1280,
+            900
+          ],
+          "runtime": "isaacsim.sensors.camera.Camera",
+          "target_world_m": [
+            0.25879427790641785,
+            -4.897080361843109e-05,
+            0.30153585970401764
+          ],
+          "view": "closing_axis"
+        },
+        "capture_gate_status": "PASS",
+        "capture_name": "follower_right_open_closing_axis",
+        "decoded_pixel_sha256": "9c3aeca0d96610f3d70167e7df73712fe4ce0e0ca379da30e83ce16b919a1340",
+        "decoded_rgb_channel_ranges": [
+          238,
+          238,
+          239
+        ],
+        "file_sha256": "28ca6246a96d05380c9283f7caabcaeaf817ffd31f4df79d87e1fc0e8094e59c",
+        "file_size_bytes": 392637,
+        "mode": "RGBA",
+        "phase": "asset_preflight",
+        "relative_path": "asset_preflight/follower_right_open_closing_axis.png",
+        "resolution": [
+          1280,
+          900
+        ],
+        "simulation": {
+          "dof_order": [
+            "waist",
+            "shoulder",
+            "elbow",
+            "forearm_roll",
+            "wrist_angle",
+            "wrist_rotate",
+            "gripper",
+            "left_finger",
+            "right_finger"
+          ],
+          "joint_positions": [
+            1.5243711459334008e-05,
+            -0.9599651098251343,
+            1.1611816883087158,
+            0.0010723896557465196,
+            -0.29613107442855835,
+            -7.928500735943089e-07,
+            2.9358275810409395e-08,
+            0.0569942444562912,
+            -0.0570058636367321
+          ],
+          "physics_frequency_hz": 60,
+          "robot": "follower_right",
+          "solve_articulation_contact_last": true,
+          "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_hull/follower_right/follower_right_convex_hull.usd",
+          "state": "open",
+          "surface_gap_m": 0.06918747539249395
+        },
+        "status": "PASS"
+      },
+      {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/asset_preflight/follower_right_open_isometric.png",
+        "artifact_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots",
+        "camera": {
+          "orientation_wxyz": [
+            -0.43497133255004883,
+            -0.2677571475505829,
+            0.4506739675998688,
+            0.7321195602416992
+          ],
+          "position_world_m": [
+            0.019916022196412086,
+            0.13002243638038635,
+            0.43874722719192505
+          ],
+          "render_readback": {
+            "dtype": "uint8",
+            "maximum": 255,
+            "minimum": 1,
+            "shape": [
+              900,
+              1280,
+              4
+            ]
+          },
+          "resolution": [
+            1280,
+            900
+          ],
+          "runtime": "isaacsim.sensors.camera.Camera",
+          "target_world_m": [
+            0.25879427790641785,
+            -4.897080361843109e-05,
+            0.30153585970401764
+          ],
+          "view": "isometric"
+        },
+        "capture_gate_status": "PASS",
+        "capture_name": "follower_right_open_isometric",
+        "decoded_pixel_sha256": "a33f03e8f52f32a56d733e6bd1bdacdc621e4699df449d66a2c38d5a4dae758a",
+        "decoded_rgb_channel_ranges": [
+          240,
+          238,
+          241
+        ],
+        "file_sha256": "6d88634d88dc051d456c59b8bad77ab1f5a0061263d536d9df464658858ebb2c",
+        "file_size_bytes": 345282,
+        "mode": "RGBA",
+        "phase": "asset_preflight",
+        "relative_path": "asset_preflight/follower_right_open_isometric.png",
+        "resolution": [
+          1280,
+          900
+        ],
+        "simulation": {
+          "dof_order": [
+            "waist",
+            "shoulder",
+            "elbow",
+            "forearm_roll",
+            "wrist_angle",
+            "wrist_rotate",
+            "gripper",
+            "left_finger",
+            "right_finger"
+          ],
+          "joint_positions": [
+            1.5243711459334008e-05,
+            -0.9599651098251343,
+            1.1611816883087158,
+            0.0010723896557465196,
+            -0.29613107442855835,
+            -7.928500735943089e-07,
+            2.9358275810409395e-08,
+            0.0569942444562912,
+            -0.0570058636367321
+          ],
+          "physics_frequency_hz": 60,
+          "robot": "follower_right",
+          "solve_articulation_contact_last": true,
+          "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_hull/follower_right/follower_right_convex_hull.usd",
+          "state": "open",
+          "surface_gap_m": 0.06918747539249395
+        },
+        "status": "PASS"
+      },
+      {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/asset_preflight/follower_right_closed_closing_axis.png",
+        "artifact_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots",
+        "camera": {
+          "orientation_wxyz": [
+            0.00032546266447752714,
+            0.00028920258046127856,
+            0.6642386317253113,
+            0.7475205063819885
+          ],
+          "position_world_m": [
+            0.25903788208961487,
+            0.2799469828605652,
+            0.33468565344810486
+          ],
+          "render_readback": {
+            "dtype": "uint8",
+            "maximum": 255,
+            "minimum": 0,
+            "shape": [
+              900,
+              1280,
+              4
+            ]
+          },
+          "resolution": [
+            1280,
+            900
+          ],
+          "runtime": "isaacsim.sensors.camera.Camera",
+          "target_world_m": [
+            0.2587940841913223,
+            -4.67933714389801e-05,
+            0.3015357255935669
+          ],
+          "view": "closing_axis"
+        },
+        "capture_gate_status": "PASS",
+        "capture_name": "follower_right_closed_closing_axis",
+        "decoded_pixel_sha256": "9cebe97b17a7b338da2ed220fc38e3a5af406078c58b4a58b80efe2d6e5d89e0",
+        "decoded_rgb_channel_ranges": [
+          236,
+          238,
+          239
+        ],
+        "file_sha256": "35f59e735deb429b99d33b7db2f5d665f45ac2513fa383a68e5b4ef3e2088ea8",
+        "file_size_bytes": 346278,
+        "mode": "RGBA",
+        "phase": "asset_preflight",
+        "relative_path": "asset_preflight/follower_right_closed_closing_axis.png",
+        "resolution": [
+          1280,
+          900
+        ],
+        "simulation": {
+          "dof_order": [
+            "waist",
+            "shoulder",
+            "elbow",
+            "forearm_roll",
+            "wrist_angle",
+            "wrist_rotate",
+            "gripper",
+            "left_finger",
+            "right_finger"
+          ],
+          "joint_positions": [
+            1.5238731975841802e-05,
+            -0.9599652886390686,
+            1.1611820459365845,
+            0.0010924951639026403,
+            -0.2961314022541046,
+            -9.902327064992278e-07,
+            4.4813582178448996e-08,
+            0.02100002020597458,
+            -0.021005425602197647
+          ],
+          "physics_frequency_hz": 60,
+          "robot": "follower_right",
+          "solve_articulation_contact_last": true,
+          "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_hull/follower_right/follower_right_convex_hull.usd",
+          "state": "closed",
+          "surface_gap_m": -0.0031678944967367187
+        },
+        "status": "PASS"
+      },
+      {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/asset_preflight/follower_right_closed_isometric.png",
+        "artifact_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots",
+        "camera": {
+          "orientation_wxyz": [
+            -0.4346187114715576,
+            -0.2682296335697174,
+            0.45153170824050903,
+            0.731627345085144
+          ],
+          "position_world_m": [
+            0.01998753286898136,
+            0.13002318143844604,
+            0.43793147802352905
+          ],
+          "render_readback": {
+            "dtype": "uint8",
+            "maximum": 255,
+            "minimum": 9,
+            "shape": [
+              900,
+              1280,
+              4
+            ]
+          },
+          "resolution": [
+            1280,
+            900
+          ],
+          "runtime": "isaacsim.sensors.camera.Camera",
+          "target_world_m": [
+            0.2587940841913223,
+            -4.67933714389801e-05,
+            0.3015357255935669
+          ],
+          "view": "isometric"
+        },
+        "capture_gate_status": "PASS",
+        "capture_name": "follower_right_closed_isometric",
+        "decoded_pixel_sha256": "7ae91afa2807d0b3871c4a48db6d60c51620874b38ebb04f5243f0aee8a30608",
+        "decoded_rgb_channel_ranges": [
+          234,
+          229,
+          231
+        ],
+        "file_sha256": "850a7254ebd276bdb581ef43262acaf74d39a4752fc5d9952ca1db6825acce65",
+        "file_size_bytes": 327585,
+        "mode": "RGBA",
+        "phase": "asset_preflight",
+        "relative_path": "asset_preflight/follower_right_closed_isometric.png",
+        "resolution": [
+          1280,
+          900
+        ],
+        "simulation": {
+          "dof_order": [
+            "waist",
+            "shoulder",
+            "elbow",
+            "forearm_roll",
+            "wrist_angle",
+            "wrist_rotate",
+            "gripper",
+            "left_finger",
+            "right_finger"
+          ],
+          "joint_positions": [
+            1.5238731975841802e-05,
+            -0.9599652886390686,
+            1.1611820459365845,
+            0.0010924951639026403,
+            -0.2961314022541046,
+            -9.902327064992278e-07,
+            4.4813582178448996e-08,
+            0.02100002020597458,
+            -0.021005425602197647
+          ],
+          "physics_frequency_hz": 60,
+          "robot": "follower_right",
+          "solve_articulation_contact_last": true,
+          "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_hull/follower_right/follower_right_convex_hull.usd",
+          "state": "closed",
+          "surface_gap_m": -0.0031678944967367187
+        },
+        "status": "PASS"
+      }
+    ],
+    "duplicate_capture_keys": [],
+    "failed_capture_gates": [],
+    "gates": {
+      "all_capture_gates_pass": true,
+      "all_captures_under_declared_root": true,
+      "all_required_captures_present": true,
+      "capture_keys_unique": true
+    },
+    "missing_required_captures": [],
+    "observed_capture_count": 8,
+    "required_capture_count": 8,
+    "required_captures": {
+      "asset_preflight": [
+        "follower_left_open_closing_axis",
+        "follower_left_open_isometric",
+        "follower_left_closed_closing_axis",
+        "follower_left_closed_isometric",
+        "follower_right_open_closing_axis",
+        "follower_right_open_isometric",
+        "follower_right_closed_closing_axis",
+        "follower_right_closed_isometric"
+      ]
+    },
+    "status": "PASS",
+    "wrong_artifact_root_captures": []
+  },
+  "restart_boundary": "TASK5_PREFLIGHT_CORRECT_FINGER_ASSET_IDENTITY_AND_INSTALL_TRANSFORM",
+  "robots": {
+    "follower_left": {
+      "closed": {
+        "centers_world_m": {
+          "left": [
+            0.2437718115887102,
+            0.007864919168911633,
+            0.30023345856868827
+          ],
+          "right": [
+            0.2437580241566422,
+            -0.007968594454661046,
+            0.3003380784706003
+          ]
+        },
+        "closing_axis_world": [
+          -0.0008707559298534173,
+          -0.9999777921033229,
+          0.006607350775780591
+        ],
+        "combined_aabb_max_m": [
+          0.3052694499492645,
+          0.022973818704485893,
+          0.3328980803489685
+        ],
+        "combined_aabb_min_m": [
+          0.21231871843338013,
+          -0.023067405447363853,
+          0.2701733708381653
+        ],
+        "dof_order": [
+          "waist",
+          "shoulder",
+          "elbow",
+          "forearm_roll",
+          "wrist_angle",
+          "wrist_rotate",
+          "gripper",
+          "left_finger",
+          "right_finger"
+        ],
+        "left_finger_readback_m": 0.02100002020597458,
+        "left_finger_target_m": 0.021,
+        "legal_joint_readback": true,
+        "mesh_paths": {
+          "left": "/World/Robot/follower_left_left_finger_link/visuals/correct_custom_finger_left/mesh",
+          "right": "/World/Robot/follower_left_right_finger_link/visuals/correct_custom_finger_right/mesh"
+        },
+        "right_finger_readback_m": -0.021005425602197647,
+        "right_finger_target_m": -0.021,
+        "surface_gap_m": -0.0031678944967367187,
+        "target_world_m": [
+          0.2587940841913223,
+          -4.67933714389801e-05,
+          0.3015357255935669
+        ],
+        "tool_axis_world": [
+          0.9954989544616583,
+          -0.0003035649285068316,
+          0.09477203972733438
+        ]
+      },
+      "gates": {
+        "aperture_monotonic": true,
+        "legal_joint_readback": true
+      },
+      "open": {
+        "centers_world_m": {
+          "left": [
+            0.24377910777026054,
+            0.04386007594464182,
+            0.3002711111614827
+          ],
+          "right": [
+            0.24375107091348044,
+            -0.04396807289525431,
+            0.30030041679042296
+          ]
+        },
+        "closing_axis_world": [
+          -0.00031922400917186407,
+          -0.9999998933801478,
+          0.00033367008416775664
+        ],
+        "combined_aabb_max_m": [
+          0.3052767813205719,
+          0.058969516307115555,
+          0.33286070823669434
+        ],
+        "combined_aabb_min_m": [
+          0.2123117744922638,
+          -0.05906745791435242,
+          0.27021101117134094
+        ],
+        "dof_order": [
+          "waist",
+          "shoulder",
+          "elbow",
+          "forearm_roll",
+          "wrist_angle",
+          "wrist_rotate",
+          "gripper",
+          "left_finger",
+          "right_finger"
+        ],
+        "left_finger_readback_m": 0.0569942444562912,
+        "left_finger_target_m": 0.057,
+        "legal_joint_readback": true,
+        "mesh_paths": {
+          "left": "/World/Robot/follower_left_left_finger_link/visuals/correct_custom_finger_left/mesh",
+          "right": "/World/Robot/follower_left_right_finger_link/visuals/correct_custom_finger_right/mesh"
+        },
+        "right_finger_readback_m": -0.0570058636367321,
+        "right_finger_target_m": -0.057,
+        "surface_gap_m": 0.06918747539249395,
+        "target_world_m": [
+          0.25879427790641785,
+          -4.897080361843109e-05,
+          0.30153585970401764
+        ],
+        "tool_axis_world": [
+          0.9954989756195918,
+          -0.00029758833482071103,
+          0.0947718364363932
+        ]
+      }
+    },
+    "follower_right": {
+      "closed": {
+        "centers_world_m": {
+          "left": [
+            0.2437718115887102,
+            0.007864919168911633,
+            0.30023345856868827
+          ],
+          "right": [
+            0.2437580241566422,
+            -0.007968594454661046,
+            0.3003380784706003
+          ]
+        },
+        "closing_axis_world": [
+          -0.0008707559298534173,
+          -0.9999777921033229,
+          0.006607350775780591
+        ],
+        "combined_aabb_max_m": [
+          0.3052694499492645,
+          0.022973818704485893,
+          0.3328980803489685
+        ],
+        "combined_aabb_min_m": [
+          0.21231871843338013,
+          -0.023067405447363853,
+          0.2701733708381653
+        ],
+        "dof_order": [
+          "waist",
+          "shoulder",
+          "elbow",
+          "forearm_roll",
+          "wrist_angle",
+          "wrist_rotate",
+          "gripper",
+          "left_finger",
+          "right_finger"
+        ],
+        "left_finger_readback_m": 0.02100002020597458,
+        "left_finger_target_m": 0.021,
+        "legal_joint_readback": true,
+        "mesh_paths": {
+          "left": "/World/Robot/follower_right_left_finger_link/visuals/correct_custom_finger_left/mesh",
+          "right": "/World/Robot/follower_right_right_finger_link/visuals/correct_custom_finger_right/mesh"
+        },
+        "right_finger_readback_m": -0.021005425602197647,
+        "right_finger_target_m": -0.021,
+        "surface_gap_m": -0.0031678944967367187,
+        "target_world_m": [
+          0.2587940841913223,
+          -4.67933714389801e-05,
+          0.3015357255935669
+        ],
+        "tool_axis_world": [
+          0.9954989544616583,
+          -0.0003035649285068316,
+          0.09477203972733438
+        ]
+      },
+      "gates": {
+        "aperture_monotonic": true,
+        "legal_joint_readback": true
+      },
+      "open": {
+        "centers_world_m": {
+          "left": [
+            0.24377910777026054,
+            0.04386007594464182,
+            0.3002711111614827
+          ],
+          "right": [
+            0.24375107091348044,
+            -0.04396807289525431,
+            0.30030041679042296
+          ]
+        },
+        "closing_axis_world": [
+          -0.00031922400917186407,
+          -0.9999998933801478,
+          0.00033367008416775664
+        ],
+        "combined_aabb_max_m": [
+          0.3052767813205719,
+          0.058969516307115555,
+          0.33286070823669434
+        ],
+        "combined_aabb_min_m": [
+          0.2123117744922638,
+          -0.05906745791435242,
+          0.27021101117134094
+        ],
+        "dof_order": [
+          "waist",
+          "shoulder",
+          "elbow",
+          "forearm_roll",
+          "wrist_angle",
+          "wrist_rotate",
+          "gripper",
+          "left_finger",
+          "right_finger"
+        ],
+        "left_finger_readback_m": 0.0569942444562912,
+        "left_finger_target_m": 0.057,
+        "legal_joint_readback": true,
+        "mesh_paths": {
+          "left": "/World/Robot/follower_right_left_finger_link/visuals/correct_custom_finger_left/mesh",
+          "right": "/World/Robot/follower_right_right_finger_link/visuals/correct_custom_finger_right/mesh"
+        },
+        "right_finger_readback_m": -0.0570058636367321,
+        "right_finger_target_m": -0.057,
+        "surface_gap_m": 0.06918747539249395,
+        "target_world_m": [
+          0.25879427790641785,
+          -4.897080361843109e-05,
+          0.30153585970401764
+        ],
+        "tool_axis_world": [
+          0.9954989756195918,
+          -0.00029758833482071103,
+          0.0947718364363932
+        ]
+      }
+    }
+  },
+  "runtime": {
+    "isaac_sim": "5.1.0.0",
+    "kit": "107.3.3",
+    "physx": "107.3.26",
+    "urdf_importer": "2.4.30"
+  },
+  "schema_version": 1,
+  "screenshot_root_absolute": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots",
+  "status": "PASS"
+}

@@ -1,0 +1,1632 @@
+{
+  "default_asset_modified": false,
+  "diagnostic_assets": [
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_hull/follower_left/follower_left_convex_hull.usd",
+      "approximation": "convexHull",
+      "articulation_root_count": 1,
+      "articulation_roots": [
+        "/follower_left/root_joint"
+      ],
+      "correct_finger_meshes": [
+        {
+          "approximation": "convexHull",
+          "branch": "visuals",
+          "container_path": "/follower_left/follower_left_left_finger_link/visuals/correct_custom_finger_left",
+          "face_count": 1666,
+          "historical_proxy_path": "/workcell/vx300s_left/vx300s_left_left_finger_link/visuals/vx300s_10_gripper_finger_left/vx300s_10_gripper_finger_left",
+          "historical_reset_xform_stack": false,
+          "maximum_stl_point_error_source_units": 0.0,
+          "mesh_path": "/follower_left/follower_left_left_finger_link/visuals/correct_custom_finger_left/mesh",
+          "point_count": 4998,
+          "relative_transform": [
+            [
+              7.962385228654733e-07,
+              1.592547695951224e-06,
+              0.0009999984623942958,
+              0.0
+            ],
+            [
+              4.425404415609961e-14,
+              -0.0009999987793918217,
+              1.5925482007504427e-06,
+              0.0
+            ],
+            [
+              0.0009999997304995236,
+              -1.2680039127546388e-09,
+              -7.962375132215013e-07,
+              0.0
+            ],
+            [
+              0.004999999888241291,
+              -0.052000001072883606,
+              0.0,
+              1.0
+            ]
+          ],
+          "side": "left"
+        },
+        {
+          "approximation": "convexHull",
+          "branch": "collisions",
+          "container_path": "/follower_left/follower_left_left_finger_link/collisions/correct_custom_finger_left",
+          "face_count": 1666,
+          "historical_proxy_path": "/workcell/vx300s_left/vx300s_left_left_finger_link/collisions/vx300s_10_gripper_finger_left/vx300s_10_gripper_finger_left",
+          "historical_reset_xform_stack": false,
+          "maximum_stl_point_error_source_units": 0.0,
+          "mesh_path": "/follower_left/follower_left_left_finger_link/collisions/correct_custom_finger_left/mesh",
+          "point_count": 4998,
+          "relative_transform": [
+            [
+              7.962385228654733e-07,
+              1.592547695951224e-06,
+              0.0009999984623942958,
+              0.0
+            ],
+            [
+              4.425404415609961e-14,
+              -0.0009999987793918217,
+              1.5925482007504427e-06,
+              0.0
+            ],
+            [
+              0.0009999997304995236,
+              -1.2680039127546388e-09,
+              -7.962375132215013e-07,
+              0.0
+            ],
+            [
+              0.004999999888241291,
+              -0.052000001072883606,
+              0.0,
+              1.0
+            ]
+          ],
+          "side": "left"
+        },
+        {
+          "approximation": "convexHull",
+          "branch": "visuals",
+          "container_path": "/follower_left/follower_left_right_finger_link/visuals/correct_custom_finger_right",
+          "face_count": 1666,
+          "historical_proxy_path": "/workcell/vx300s_left/vx300s_left_right_finger_link/visuals/vx300s_10_gripper_finger_right/vx300s_10_gripper_finger_right",
+          "historical_reset_xform_stack": false,
+          "maximum_stl_point_error_source_units": 0.0,
+          "mesh_path": "/follower_left/follower_left_right_finger_link/visuals/correct_custom_finger_right/mesh",
+          "point_count": 4998,
+          "relative_transform": [
+            [
+              7.962385228654733e-07,
+              1.592547695951224e-06,
+              0.0009999984623942958,
+              0.0
+            ],
+            [
+              4.425404415609961e-14,
+              -0.0009999987793918217,
+              1.5925482007504427e-06,
+              0.0
+            ],
+            [
+              0.0009999997304995236,
+              -1.2680039127546388e-09,
+              -7.962375132215013e-07,
+              0.0
+            ],
+            [
+              0.004999999888241291,
+              0.052000001072883606,
+              0.0,
+              1.0
+            ]
+          ],
+          "side": "right"
+        },
+        {
+          "approximation": "convexHull",
+          "branch": "collisions",
+          "container_path": "/follower_left/follower_left_right_finger_link/collisions/correct_custom_finger_right",
+          "face_count": 1666,
+          "historical_proxy_path": "/workcell/vx300s_left/vx300s_left_right_finger_link/collisions/vx300s_10_gripper_finger_right/vx300s_10_gripper_finger_right",
+          "historical_reset_xform_stack": false,
+          "maximum_stl_point_error_source_units": 0.0,
+          "mesh_path": "/follower_left/follower_left_right_finger_link/collisions/correct_custom_finger_right/mesh",
+          "point_count": 4998,
+          "relative_transform": [
+            [
+              7.962385228654733e-07,
+              1.592547695951224e-06,
+              0.0009999984623942958,
+              0.0
+            ],
+            [
+              4.425404415609961e-14,
+              -0.0009999987793918217,
+              1.5925482007504427e-06,
+              0.0
+            ],
+            [
+              0.0009999997304995236,
+              -1.2680039127546388e-09,
+              -7.962375132215013e-07,
+              0.0
+            ],
+            [
+              0.004999999888241291,
+              0.052000001072883606,
+              0.0,
+              1.0
+            ]
+          ],
+          "side": "right"
+        }
+      ],
+      "deactivated_generic_geometry_paths": [
+        "/follower_left/follower_left_left_finger_link/visuals/gripper_finger",
+        "/follower_left/follower_left_left_finger_link/collisions/gripper_finger",
+        "/follower_left/follower_left_right_finger_link/visuals/gripper_finger",
+        "/follower_left/follower_left_right_finger_link/collisions/gripper_finger"
+      ],
+      "gates": {
+        "all_historical_points_match_fixed_stl": true,
+        "approximation_readback": true,
+        "generic_finger_geometry_inactive": true,
+        "nonfinger_colliders_unchanged": true,
+        "one_articulation_root": true,
+        "two_new_finger_colliders": true
+      },
+      "generic_finger_geometry_active": false,
+      "new_finger_collider_readback": [
+        {
+          "approximation": "convexHull",
+          "path": "/follower_left/follower_left_left_finger_link/collisions/correct_custom_finger_left",
+          "type": "Xform"
+        },
+        {
+          "approximation": "convexHull",
+          "path": "/follower_left/follower_left_right_finger_link/collisions/correct_custom_finger_right",
+          "type": "Xform"
+        }
+      ],
+      "new_finger_colliders": 2,
+      "nonfinger_collider_count": 9,
+      "protected_source_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/configuration/follower_left_debug_acceleration_drive.usd",
+      "protected_source_sha256": "7fe1d086c4d79e60cf6f3e10b67f164de4684df8d941603055764d6f230528a2",
+      "robot": "follower_left",
+      "sha256": "e8a8fbd25b2763fde90a7af1ebe21f917da96e27853762973635c87e1851c763",
+      "status": "PASS"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_decomposition/follower_left/follower_left_convex_decomposition.usd",
+      "approximation": "convexDecomposition",
+      "articulation_root_count": 1,
+      "articulation_roots": [
+        "/follower_left/root_joint"
+      ],
+      "correct_finger_meshes": [
+        {
+          "approximation": "convexDecomposition",
+          "branch": "visuals",
+          "container_path": "/follower_left/follower_left_left_finger_link/visuals/correct_custom_finger_left",
+          "face_count": 1666,
+          "historical_proxy_path": "/workcell/vx300s_left/vx300s_left_left_finger_link/visuals/vx300s_10_gripper_finger_left/vx300s_10_gripper_finger_left",
+          "historical_reset_xform_stack": false,
+          "maximum_stl_point_error_source_units": 0.0,
+          "mesh_path": "/follower_left/follower_left_left_finger_link/visuals/correct_custom_finger_left/mesh",
+          "point_count": 4998,
+          "relative_transform": [
+            [
+              7.962385228654733e-07,
+              1.592547695951224e-06,
+              0.0009999984623942958,
+              0.0
+            ],
+            [
+              4.425404415609961e-14,
+              -0.0009999987793918217,
+              1.5925482007504427e-06,
+              0.0
+            ],
+            [
+              0.0009999997304995236,
+              -1.2680039127546388e-09,
+              -7.962375132215013e-07,
+              0.0
+            ],
+            [
+              0.004999999888241291,
+              -0.052000001072883606,
+              0.0,
+              1.0
+            ]
+          ],
+          "side": "left"
+        },
+        {
+          "approximation": "convexDecomposition",
+          "branch": "collisions",
+          "container_path": "/follower_left/follower_left_left_finger_link/collisions/correct_custom_finger_left",
+          "face_count": 1666,
+          "historical_proxy_path": "/workcell/vx300s_left/vx300s_left_left_finger_link/collisions/vx300s_10_gripper_finger_left/vx300s_10_gripper_finger_left",
+          "historical_reset_xform_stack": false,
+          "maximum_stl_point_error_source_units": 0.0,
+          "mesh_path": "/follower_left/follower_left_left_finger_link/collisions/correct_custom_finger_left/mesh",
+          "point_count": 4998,
+          "relative_transform": [
+            [
+              7.962385228654733e-07,
+              1.592547695951224e-06,
+              0.0009999984623942958,
+              0.0
+            ],
+            [
+              4.425404415609961e-14,
+              -0.0009999987793918217,
+              1.5925482007504427e-06,
+              0.0
+            ],
+            [
+              0.0009999997304995236,
+              -1.2680039127546388e-09,
+              -7.962375132215013e-07,
+              0.0
+            ],
+            [
+              0.004999999888241291,
+              -0.052000001072883606,
+              0.0,
+              1.0
+            ]
+          ],
+          "side": "left"
+        },
+        {
+          "approximation": "convexDecomposition",
+          "branch": "visuals",
+          "container_path": "/follower_left/follower_left_right_finger_link/visuals/correct_custom_finger_right",
+          "face_count": 1666,
+          "historical_proxy_path": "/workcell/vx300s_left/vx300s_left_right_finger_link/visuals/vx300s_10_gripper_finger_right/vx300s_10_gripper_finger_right",
+          "historical_reset_xform_stack": false,
+          "maximum_stl_point_error_source_units": 0.0,
+          "mesh_path": "/follower_left/follower_left_right_finger_link/visuals/correct_custom_finger_right/mesh",
+          "point_count": 4998,
+          "relative_transform": [
+            [
+              7.962385228654733e-07,
+              1.592547695951224e-06,
+              0.0009999984623942958,
+              0.0
+            ],
+            [
+              4.425404415609961e-14,
+              -0.0009999987793918217,
+              1.5925482007504427e-06,
+              0.0
+            ],
+            [
+              0.0009999997304995236,
+              -1.2680039127546388e-09,
+              -7.962375132215013e-07,
+              0.0
+            ],
+            [
+              0.004999999888241291,
+              0.052000001072883606,
+              0.0,
+              1.0
+            ]
+          ],
+          "side": "right"
+        },
+        {
+          "approximation": "convexDecomposition",
+          "branch": "collisions",
+          "container_path": "/follower_left/follower_left_right_finger_link/collisions/correct_custom_finger_right",
+          "face_count": 1666,
+          "historical_proxy_path": "/workcell/vx300s_left/vx300s_left_right_finger_link/collisions/vx300s_10_gripper_finger_right/vx300s_10_gripper_finger_right",
+          "historical_reset_xform_stack": false,
+          "maximum_stl_point_error_source_units": 0.0,
+          "mesh_path": "/follower_left/follower_left_right_finger_link/collisions/correct_custom_finger_right/mesh",
+          "point_count": 4998,
+          "relative_transform": [
+            [
+              7.962385228654733e-07,
+              1.592547695951224e-06,
+              0.0009999984623942958,
+              0.0
+            ],
+            [
+              4.425404415609961e-14,
+              -0.0009999987793918217,
+              1.5925482007504427e-06,
+              0.0
+            ],
+            [
+              0.0009999997304995236,
+              -1.2680039127546388e-09,
+              -7.962375132215013e-07,
+              0.0
+            ],
+            [
+              0.004999999888241291,
+              0.052000001072883606,
+              0.0,
+              1.0
+            ]
+          ],
+          "side": "right"
+        }
+      ],
+      "deactivated_generic_geometry_paths": [
+        "/follower_left/follower_left_left_finger_link/visuals/gripper_finger",
+        "/follower_left/follower_left_left_finger_link/collisions/gripper_finger",
+        "/follower_left/follower_left_right_finger_link/visuals/gripper_finger",
+        "/follower_left/follower_left_right_finger_link/collisions/gripper_finger"
+      ],
+      "gates": {
+        "all_historical_points_match_fixed_stl": true,
+        "approximation_readback": true,
+        "generic_finger_geometry_inactive": true,
+        "nonfinger_colliders_unchanged": true,
+        "one_articulation_root": true,
+        "two_new_finger_colliders": true
+      },
+      "generic_finger_geometry_active": false,
+      "new_finger_collider_readback": [
+        {
+          "approximation": "convexDecomposition",
+          "path": "/follower_left/follower_left_left_finger_link/collisions/correct_custom_finger_left",
+          "type": "Xform"
+        },
+        {
+          "approximation": "convexDecomposition",
+          "path": "/follower_left/follower_left_right_finger_link/collisions/correct_custom_finger_right",
+          "type": "Xform"
+        }
+      ],
+      "new_finger_colliders": 2,
+      "nonfinger_collider_count": 9,
+      "protected_source_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/configuration/follower_left_debug_acceleration_drive.usd",
+      "protected_source_sha256": "7fe1d086c4d79e60cf6f3e10b67f164de4684df8d941603055764d6f230528a2",
+      "robot": "follower_left",
+      "sha256": "a56f4944a2926f52242329d8177aa70fd562a1472abd0f64c5aa7e612d21a525",
+      "status": "PASS"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_hull/follower_right/follower_right_convex_hull.usd",
+      "approximation": "convexHull",
+      "articulation_root_count": 1,
+      "articulation_roots": [
+        "/follower_right/root_joint"
+      ],
+      "correct_finger_meshes": [
+        {
+          "approximation": "convexHull",
+          "branch": "visuals",
+          "container_path": "/follower_right/follower_right_left_finger_link/visuals/correct_custom_finger_left",
+          "face_count": 1666,
+          "historical_proxy_path": "/workcell/vx300s_left/vx300s_left_left_finger_link/visuals/vx300s_10_gripper_finger_left/vx300s_10_gripper_finger_left",
+          "historical_reset_xform_stack": false,
+          "maximum_stl_point_error_source_units": 0.0,
+          "mesh_path": "/follower_right/follower_right_left_finger_link/visuals/correct_custom_finger_left/mesh",
+          "point_count": 4998,
+          "relative_transform": [
+            [
+              7.962385228654733e-07,
+              1.592547695951224e-06,
+              0.0009999984623942958,
+              0.0
+            ],
+            [
+              4.425404415609961e-14,
+              -0.0009999987793918217,
+              1.5925482007504427e-06,
+              0.0
+            ],
+            [
+              0.0009999997304995236,
+              -1.2680039127546388e-09,
+              -7.962375132215013e-07,
+              0.0
+            ],
+            [
+              0.004999999888241291,
+              -0.052000001072883606,
+              0.0,
+              1.0
+            ]
+          ],
+          "side": "left"
+        },
+        {
+          "approximation": "convexHull",
+          "branch": "collisions",
+          "container_path": "/follower_right/follower_right_left_finger_link/collisions/correct_custom_finger_left",
+          "face_count": 1666,
+          "historical_proxy_path": "/workcell/vx300s_left/vx300s_left_left_finger_link/collisions/vx300s_10_gripper_finger_left/vx300s_10_gripper_finger_left",
+          "historical_reset_xform_stack": false,
+          "maximum_stl_point_error_source_units": 0.0,
+          "mesh_path": "/follower_right/follower_right_left_finger_link/collisions/correct_custom_finger_left/mesh",
+          "point_count": 4998,
+          "relative_transform": [
+            [
+              7.962385228654733e-07,
+              1.592547695951224e-06,
+              0.0009999984623942958,
+              0.0
+            ],
+            [
+              4.425404415609961e-14,
+              -0.0009999987793918217,
+              1.5925482007504427e-06,
+              0.0
+            ],
+            [
+              0.0009999997304995236,
+              -1.2680039127546388e-09,
+              -7.962375132215013e-07,
+              0.0
+            ],
+            [
+              0.004999999888241291,
+              -0.052000001072883606,
+              0.0,
+              1.0
+            ]
+          ],
+          "side": "left"
+        },
+        {
+          "approximation": "convexHull",
+          "branch": "visuals",
+          "container_path": "/follower_right/follower_right_right_finger_link/visuals/correct_custom_finger_right",
+          "face_count": 1666,
+          "historical_proxy_path": "/workcell/vx300s_left/vx300s_left_right_finger_link/visuals/vx300s_10_gripper_finger_right/vx300s_10_gripper_finger_right",
+          "historical_reset_xform_stack": false,
+          "maximum_stl_point_error_source_units": 0.0,
+          "mesh_path": "/follower_right/follower_right_right_finger_link/visuals/correct_custom_finger_right/mesh",
+          "point_count": 4998,
+          "relative_transform": [
+            [
+              7.962385228654733e-07,
+              1.592547695951224e-06,
+              0.0009999984623942958,
+              0.0
+            ],
+            [
+              4.425404415609961e-14,
+              -0.0009999987793918217,
+              1.5925482007504427e-06,
+              0.0
+            ],
+            [
+              0.0009999997304995236,
+              -1.2680039127546388e-09,
+              -7.962375132215013e-07,
+              0.0
+            ],
+            [
+              0.004999999888241291,
+              0.052000001072883606,
+              0.0,
+              1.0
+            ]
+          ],
+          "side": "right"
+        },
+        {
+          "approximation": "convexHull",
+          "branch": "collisions",
+          "container_path": "/follower_right/follower_right_right_finger_link/collisions/correct_custom_finger_right",
+          "face_count": 1666,
+          "historical_proxy_path": "/workcell/vx300s_left/vx300s_left_right_finger_link/collisions/vx300s_10_gripper_finger_right/vx300s_10_gripper_finger_right",
+          "historical_reset_xform_stack": false,
+          "maximum_stl_point_error_source_units": 0.0,
+          "mesh_path": "/follower_right/follower_right_right_finger_link/collisions/correct_custom_finger_right/mesh",
+          "point_count": 4998,
+          "relative_transform": [
+            [
+              7.962385228654733e-07,
+              1.592547695951224e-06,
+              0.0009999984623942958,
+              0.0
+            ],
+            [
+              4.425404415609961e-14,
+              -0.0009999987793918217,
+              1.5925482007504427e-06,
+              0.0
+            ],
+            [
+              0.0009999997304995236,
+              -1.2680039127546388e-09,
+              -7.962375132215013e-07,
+              0.0
+            ],
+            [
+              0.004999999888241291,
+              0.052000001072883606,
+              0.0,
+              1.0
+            ]
+          ],
+          "side": "right"
+        }
+      ],
+      "deactivated_generic_geometry_paths": [
+        "/follower_right/follower_right_left_finger_link/visuals/gripper_finger",
+        "/follower_right/follower_right_left_finger_link/collisions/gripper_finger",
+        "/follower_right/follower_right_right_finger_link/visuals/gripper_finger",
+        "/follower_right/follower_right_right_finger_link/collisions/gripper_finger"
+      ],
+      "gates": {
+        "all_historical_points_match_fixed_stl": true,
+        "approximation_readback": true,
+        "generic_finger_geometry_inactive": true,
+        "nonfinger_colliders_unchanged": true,
+        "one_articulation_root": true,
+        "two_new_finger_colliders": true
+      },
+      "generic_finger_geometry_active": false,
+      "new_finger_collider_readback": [
+        {
+          "approximation": "convexHull",
+          "path": "/follower_right/follower_right_left_finger_link/collisions/correct_custom_finger_left",
+          "type": "Xform"
+        },
+        {
+          "approximation": "convexHull",
+          "path": "/follower_right/follower_right_right_finger_link/collisions/correct_custom_finger_right",
+          "type": "Xform"
+        }
+      ],
+      "new_finger_colliders": 2,
+      "nonfinger_collider_count": 9,
+      "protected_source_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/configuration/follower_right_debug_acceleration_drive.usd",
+      "protected_source_sha256": "919c8013e9921eaa2aaf8e032aa5ed81bc64cd07c90233ad9418996e9ecea249",
+      "robot": "follower_right",
+      "sha256": "d9c4e8f64625215746048f67a183f6e4ca84a3ba675c8cb02f55e90209b79732",
+      "status": "PASS"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_decomposition/follower_right/follower_right_convex_decomposition.usd",
+      "approximation": "convexDecomposition",
+      "articulation_root_count": 1,
+      "articulation_roots": [
+        "/follower_right/root_joint"
+      ],
+      "correct_finger_meshes": [
+        {
+          "approximation": "convexDecomposition",
+          "branch": "visuals",
+          "container_path": "/follower_right/follower_right_left_finger_link/visuals/correct_custom_finger_left",
+          "face_count": 1666,
+          "historical_proxy_path": "/workcell/vx300s_left/vx300s_left_left_finger_link/visuals/vx300s_10_gripper_finger_left/vx300s_10_gripper_finger_left",
+          "historical_reset_xform_stack": false,
+          "maximum_stl_point_error_source_units": 0.0,
+          "mesh_path": "/follower_right/follower_right_left_finger_link/visuals/correct_custom_finger_left/mesh",
+          "point_count": 4998,
+          "relative_transform": [
+            [
+              7.962385228654733e-07,
+              1.592547695951224e-06,
+              0.0009999984623942958,
+              0.0
+            ],
+            [
+              4.425404415609961e-14,
+              -0.0009999987793918217,
+              1.5925482007504427e-06,
+              0.0
+            ],
+            [
+              0.0009999997304995236,
+              -1.2680039127546388e-09,
+              -7.962375132215013e-07,
+              0.0
+            ],
+            [
+              0.004999999888241291,
+              -0.052000001072883606,
+              0.0,
+              1.0
+            ]
+          ],
+          "side": "left"
+        },
+        {
+          "approximation": "convexDecomposition",
+          "branch": "collisions",
+          "container_path": "/follower_right/follower_right_left_finger_link/collisions/correct_custom_finger_left",
+          "face_count": 1666,
+          "historical_proxy_path": "/workcell/vx300s_left/vx300s_left_left_finger_link/collisions/vx300s_10_gripper_finger_left/vx300s_10_gripper_finger_left",
+          "historical_reset_xform_stack": false,
+          "maximum_stl_point_error_source_units": 0.0,
+          "mesh_path": "/follower_right/follower_right_left_finger_link/collisions/correct_custom_finger_left/mesh",
+          "point_count": 4998,
+          "relative_transform": [
+            [
+              7.962385228654733e-07,
+              1.592547695951224e-06,
+              0.0009999984623942958,
+              0.0
+            ],
+            [
+              4.425404415609961e-14,
+              -0.0009999987793918217,
+              1.5925482007504427e-06,
+              0.0
+            ],
+            [
+              0.0009999997304995236,
+              -1.2680039127546388e-09,
+              -7.962375132215013e-07,
+              0.0
+            ],
+            [
+              0.004999999888241291,
+              -0.052000001072883606,
+              0.0,
+              1.0
+            ]
+          ],
+          "side": "left"
+        },
+        {
+          "approximation": "convexDecomposition",
+          "branch": "visuals",
+          "container_path": "/follower_right/follower_right_right_finger_link/visuals/correct_custom_finger_right",
+          "face_count": 1666,
+          "historical_proxy_path": "/workcell/vx300s_left/vx300s_left_right_finger_link/visuals/vx300s_10_gripper_finger_right/vx300s_10_gripper_finger_right",
+          "historical_reset_xform_stack": false,
+          "maximum_stl_point_error_source_units": 0.0,
+          "mesh_path": "/follower_right/follower_right_right_finger_link/visuals/correct_custom_finger_right/mesh",
+          "point_count": 4998,
+          "relative_transform": [
+            [
+              7.962385228654733e-07,
+              1.592547695951224e-06,
+              0.0009999984623942958,
+              0.0
+            ],
+            [
+              4.425404415609961e-14,
+              -0.0009999987793918217,
+              1.5925482007504427e-06,
+              0.0
+            ],
+            [
+              0.0009999997304995236,
+              -1.2680039127546388e-09,
+              -7.962375132215013e-07,
+              0.0
+            ],
+            [
+              0.004999999888241291,
+              0.052000001072883606,
+              0.0,
+              1.0
+            ]
+          ],
+          "side": "right"
+        },
+        {
+          "approximation": "convexDecomposition",
+          "branch": "collisions",
+          "container_path": "/follower_right/follower_right_right_finger_link/collisions/correct_custom_finger_right",
+          "face_count": 1666,
+          "historical_proxy_path": "/workcell/vx300s_left/vx300s_left_right_finger_link/collisions/vx300s_10_gripper_finger_right/vx300s_10_gripper_finger_right",
+          "historical_reset_xform_stack": false,
+          "maximum_stl_point_error_source_units": 0.0,
+          "mesh_path": "/follower_right/follower_right_right_finger_link/collisions/correct_custom_finger_right/mesh",
+          "point_count": 4998,
+          "relative_transform": [
+            [
+              7.962385228654733e-07,
+              1.592547695951224e-06,
+              0.0009999984623942958,
+              0.0
+            ],
+            [
+              4.425404415609961e-14,
+              -0.0009999987793918217,
+              1.5925482007504427e-06,
+              0.0
+            ],
+            [
+              0.0009999997304995236,
+              -1.2680039127546388e-09,
+              -7.962375132215013e-07,
+              0.0
+            ],
+            [
+              0.004999999888241291,
+              0.052000001072883606,
+              0.0,
+              1.0
+            ]
+          ],
+          "side": "right"
+        }
+      ],
+      "deactivated_generic_geometry_paths": [
+        "/follower_right/follower_right_left_finger_link/visuals/gripper_finger",
+        "/follower_right/follower_right_left_finger_link/collisions/gripper_finger",
+        "/follower_right/follower_right_right_finger_link/visuals/gripper_finger",
+        "/follower_right/follower_right_right_finger_link/collisions/gripper_finger"
+      ],
+      "gates": {
+        "all_historical_points_match_fixed_stl": true,
+        "approximation_readback": true,
+        "generic_finger_geometry_inactive": true,
+        "nonfinger_colliders_unchanged": true,
+        "one_articulation_root": true,
+        "two_new_finger_colliders": true
+      },
+      "generic_finger_geometry_active": false,
+      "new_finger_collider_readback": [
+        {
+          "approximation": "convexDecomposition",
+          "path": "/follower_right/follower_right_left_finger_link/collisions/correct_custom_finger_left",
+          "type": "Xform"
+        },
+        {
+          "approximation": "convexDecomposition",
+          "path": "/follower_right/follower_right_right_finger_link/collisions/correct_custom_finger_right",
+          "type": "Xform"
+        }
+      ],
+      "new_finger_colliders": 2,
+      "nonfinger_collider_count": 9,
+      "protected_source_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/configuration/follower_right_debug_acceleration_drive.usd",
+      "protected_source_sha256": "919c8013e9921eaa2aaf8e032aa5ed81bc64cd07c90233ad9418996e9ecea249",
+      "robot": "follower_right",
+      "sha256": "2056a9ed49f843a3de05a239a4debe930d94399a6eadddb0669fd9eb709da64b",
+      "status": "PASS"
+    }
+  ],
+  "historical_generic_finger_reports_modified": false,
+  "next_gate": "ISAAC_RUNTIME_OPEN_CLOSED_SCREENSHOT_PREFLIGHT",
+  "restart_boundary": "TASK5_PREFLIGHT_CORRECT_FINGER_ASSET_IDENTITY_AND_INSTALL_TRANSFORM",
+  "runtime": {
+    "isaac_sim": "5.1.0.0",
+    "kit": "107.3.3",
+    "physx": "107.3.26",
+    "urdf_importer": "2.4.30"
+  },
+  "schema_version": 1,
+  "source_evidence_after": {
+    "gates": {
+      "historical_usd_sha256": true,
+      "left_installed_sha256": true,
+      "left_sha256": true,
+      "left_triangle_count": true,
+      "protected::assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/configuration/follower_left_debug_acceleration_drive.usd": true,
+      "protected::assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/follower_left_imported.usd": true,
+      "protected::assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/configuration/follower_right_debug_acceleration_drive.usd": true,
+      "protected::assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/follower_right_imported.usd": true,
+      "protected::configs/aloha1_gripper_collision_profiles.yaml": true,
+      "protected::generated/urdf/follower_left.urdf": true,
+      "protected::generated/urdf/follower_right.urdf": true,
+      "protected::reports/aloha1_mapping/gripper_collider_ab_results.json": true,
+      "protected::reports/aloha1_mapping/gripper_hold_root_cause_v2.json": true,
+      "protected::reports/aloha1_mapping/gripper_orientation_confirmation.json": true,
+      "rejected_generic_sha256": true,
+      "rejected_generic_triangle_count": true,
+      "repository_branch": true,
+      "repository_commit": true,
+      "repository_license": true,
+      "repository_origin": true,
+      "repository_package_version": true,
+      "right_installed_sha256": true,
+      "right_sha256": true,
+      "right_triangle_count": true,
+      "vx300s_left_left_dependency": true,
+      "vx300s_left_left_euler_rad": true,
+      "vx300s_left_left_joint_axis": true,
+      "vx300s_left_left_joint_range_m": true,
+      "vx300s_left_left_mesh_name": true,
+      "vx300s_left_left_position_m": true,
+      "vx300s_left_right_dependency": true,
+      "vx300s_left_right_euler_rad": true,
+      "vx300s_left_right_joint_axis": true,
+      "vx300s_left_right_joint_range_m": true,
+      "vx300s_left_right_mesh_name": true,
+      "vx300s_left_right_position_m": true,
+      "vx300s_right_left_dependency": true,
+      "vx300s_right_left_euler_rad": true,
+      "vx300s_right_left_joint_axis": true,
+      "vx300s_right_left_joint_range_m": true,
+      "vx300s_right_left_mesh_name": true,
+      "vx300s_right_left_position_m": true,
+      "vx300s_right_right_dependency": true,
+      "vx300s_right_right_euler_rad": true,
+      "vx300s_right_right_joint_axis": true,
+      "vx300s_right_right_joint_range_m": true,
+      "vx300s_right_right_mesh_name": true,
+      "vx300s_right_right_position_m": true
+    },
+    "historical_usd": {
+      "actual_sha256": "b24afe3678155654892c69517fc58ecd970108d68cec56b02dc6fdcb8bf4493e",
+      "expected_sha256": "b24afe3678155654892c69517fc58ecd970108d68cec56b02dc6fdcb8bf4493e",
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_assets/aloha_viperx.usd",
+      "role": "USER_CONFIRMED_VISUAL_AND_TRANSFORM_REFERENCE"
+    },
+    "meshes": {
+      "left": {
+        "aabb_m": {
+          "max": [
+            0.0305,
+            -0.02960000038146973,
+            0.08
+          ],
+          "min": [
+            -0.0305,
+            -0.054,
+            -0.01
+          ]
+        },
+        "aabb_source_units": {
+          "max": [
+            30.5,
+            -29.600000381469727,
+            80.0
+          ],
+          "min": [
+            -30.5,
+            -54.0,
+            -10.0
+          ]
+        },
+        "file_size_bytes": 83384,
+        "installed_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv/lib/python3.11/site-packages/gym_aloha/assets/vx300s_10_custom_finger_left.stl",
+        "installed_sha256": "df73ae5b9058e5d50a6409ac2ab687dade75053a86591bb5e23ab051dbf2d659",
+        "manifest_path": "external/gym-aloha/gym_aloha/assets/vx300s_10_custom_finger_left.stl",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/gym-aloha/gym_aloha/assets/vx300s_10_custom_finger_left.stl",
+        "scale": [
+          0.001,
+          0.001,
+          0.001
+        ],
+        "sha256": "df73ae5b9058e5d50a6409ac2ab687dade75053a86591bb5e23ab051dbf2d659",
+        "triangle_count": 1666
+      },
+      "right": {
+        "aabb_m": {
+          "max": [
+            0.0305,
+            0.054,
+            0.08
+          ],
+          "min": [
+            -0.0305,
+            0.02960000038146973,
+            -0.01
+          ]
+        },
+        "aabb_source_units": {
+          "max": [
+            30.5,
+            54.0,
+            80.0
+          ],
+          "min": [
+            -30.5,
+            29.600000381469727,
+            -10.0
+          ]
+        },
+        "file_size_bytes": 83384,
+        "installed_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv/lib/python3.11/site-packages/gym_aloha/assets/vx300s_10_custom_finger_right.stl",
+        "installed_sha256": "56fb3cc1236d4193106038adf8e457c7252ae9e86c7cee6dabf0578c53666358",
+        "manifest_path": "external/gym-aloha/gym_aloha/assets/vx300s_10_custom_finger_right.stl",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/gym-aloha/gym_aloha/assets/vx300s_10_custom_finger_right.stl",
+        "scale": [
+          0.001,
+          0.001,
+          0.001
+        ],
+        "sha256": "56fb3cc1236d4193106038adf8e457c7252ae9e86c7cee6dabf0578c53666358",
+        "triangle_count": 1666
+      }
+    },
+    "mjcf_dependency_meshes": {
+      "vx300s_10_gripper_finger_left": {
+        "file": "vx300s_10_custom_finger_left.stl",
+        "scale": [
+          0.001,
+          0.001,
+          0.001
+        ]
+      },
+      "vx300s_10_gripper_finger_right": {
+        "file": "vx300s_10_custom_finger_right.stl",
+        "scale": [
+          0.001,
+          0.001,
+          0.001
+        ]
+      },
+      "vx300s_1_base": {
+        "file": "vx300s_1_base.stl",
+        "scale": [
+          0.001,
+          0.001,
+          0.001
+        ]
+      },
+      "vx300s_2_shoulder": {
+        "file": "vx300s_2_shoulder.stl",
+        "scale": [
+          0.001,
+          0.001,
+          0.001
+        ]
+      },
+      "vx300s_3_upper_arm": {
+        "file": "vx300s_3_upper_arm.stl",
+        "scale": [
+          0.001,
+          0.001,
+          0.001
+        ]
+      },
+      "vx300s_4_upper_forearm": {
+        "file": "vx300s_4_upper_forearm.stl",
+        "scale": [
+          0.001,
+          0.001,
+          0.001
+        ]
+      },
+      "vx300s_5_lower_forearm": {
+        "file": "vx300s_5_lower_forearm.stl",
+        "scale": [
+          0.001,
+          0.001,
+          0.001
+        ]
+      },
+      "vx300s_6_wrist": {
+        "file": "vx300s_6_wrist.stl",
+        "scale": [
+          0.001,
+          0.001,
+          0.001
+        ]
+      },
+      "vx300s_7_gripper": {
+        "file": "vx300s_7_gripper.stl",
+        "scale": [
+          0.001,
+          0.001,
+          0.001
+        ]
+      },
+      "vx300s_8_gripper_prop": {
+        "file": "vx300s_8_gripper_prop.stl",
+        "scale": [
+          0.001,
+          0.001,
+          0.001
+        ]
+      },
+      "vx300s_9_gripper_bar": {
+        "file": "vx300s_9_gripper_bar.stl",
+        "scale": [
+          0.001,
+          0.001,
+          0.001
+        ]
+      }
+    },
+    "mjcf_installation_readback": {
+      "vx300s_left": {
+        "left": {
+          "body_name": "vx300s_left/left_finger_link",
+          "euler_rad": [
+            3.14,
+            1.57,
+            0.0
+          ],
+          "geom_name": "vx300s_left/10_left_gripper_finger",
+          "joint_axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "joint_name": "vx300s_left/left_finger",
+          "joint_range_m": [
+            0.021,
+            0.057
+          ],
+          "mesh_name": "vx300s_10_gripper_finger_left",
+          "position_m": [
+            0.005,
+            -0.052,
+            0.0
+          ]
+        },
+        "right": {
+          "body_name": "vx300s_left/right_finger_link",
+          "euler_rad": [
+            3.14,
+            1.57,
+            0.0
+          ],
+          "geom_name": "vx300s_left/10_right_gripper_finger",
+          "joint_axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "joint_name": "vx300s_left/right_finger",
+          "joint_range_m": [
+            -0.057,
+            -0.021
+          ],
+          "mesh_name": "vx300s_10_gripper_finger_right",
+          "position_m": [
+            0.005,
+            0.052,
+            0.0
+          ]
+        }
+      },
+      "vx300s_right": {
+        "left": {
+          "body_name": "vx300s_right/left_finger_link",
+          "euler_rad": [
+            3.14,
+            1.57,
+            0.0
+          ],
+          "geom_name": "vx300s_right/10_left_gripper_finger",
+          "joint_axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "joint_name": "vx300s_right/left_finger",
+          "joint_range_m": [
+            0.021,
+            0.057
+          ],
+          "mesh_name": "vx300s_10_gripper_finger_left",
+          "position_m": [
+            0.005,
+            -0.052,
+            0.0
+          ]
+        },
+        "right": {
+          "body_name": "vx300s_right/right_finger_link",
+          "euler_rad": [
+            3.14,
+            1.57,
+            0.0
+          ],
+          "geom_name": "vx300s_right/10_right_gripper_finger",
+          "joint_axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "joint_name": "vx300s_right/right_finger",
+          "joint_range_m": [
+            -0.057,
+            -0.021
+          ],
+          "mesh_name": "vx300s_10_gripper_finger_right",
+          "position_m": [
+            0.005,
+            0.052,
+            0.0
+          ]
+        }
+      }
+    },
+    "protected_baseline": [
+      {
+        "actual_sha256": "d9e4b32723ee71dfce26fb4e78546cfcfef147b2d7dbf5e53e3620e3d8aa96bd",
+        "expected_sha256": "d9e4b32723ee71dfce26fb4e78546cfcfef147b2d7dbf5e53e3620e3d8aa96bd",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_left.urdf"
+      },
+      {
+        "actual_sha256": "268a5e5b56ce48af679256380008606f64358d6ead2619b52946b37f47fb624b",
+        "expected_sha256": "268a5e5b56ce48af679256380008606f64358d6ead2619b52946b37f47fb624b",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_right.urdf"
+      },
+      {
+        "actual_sha256": "955c34600846c8b4a08bedc639caef7d5e3c1d0e3a02a6900c80d27d52adadec",
+        "expected_sha256": "955c34600846c8b4a08bedc639caef7d5e3c1d0e3a02a6900c80d27d52adadec",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/follower_left_imported.usd"
+      },
+      {
+        "actual_sha256": "205d3b8fe72532f608446b18e80eccb5c8b0992fb71946b9737145afe4efa7ed",
+        "expected_sha256": "205d3b8fe72532f608446b18e80eccb5c8b0992fb71946b9737145afe4efa7ed",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/follower_right_imported.usd"
+      },
+      {
+        "actual_sha256": "7fe1d086c4d79e60cf6f3e10b67f164de4684df8d941603055764d6f230528a2",
+        "expected_sha256": "7fe1d086c4d79e60cf6f3e10b67f164de4684df8d941603055764d6f230528a2",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/configuration/follower_left_debug_acceleration_drive.usd"
+      },
+      {
+        "actual_sha256": "919c8013e9921eaa2aaf8e032aa5ed81bc64cd07c90233ad9418996e9ecea249",
+        "expected_sha256": "919c8013e9921eaa2aaf8e032aa5ed81bc64cd07c90233ad9418996e9ecea249",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/configuration/follower_right_debug_acceleration_drive.usd"
+      },
+      {
+        "actual_sha256": "bd13be701ec121112e90c968b9fb00b684e3295576d9c4c419daac4998c666ae",
+        "expected_sha256": "bd13be701ec121112e90c968b9fb00b684e3295576d9c4c419daac4998c666ae",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/configs/aloha1_gripper_collision_profiles.yaml"
+      },
+      {
+        "actual_sha256": "fbf1502f4dc6c387a59f64ccaaa603753b77a80a99da809d2f0ed71698f47bad",
+        "expected_sha256": "fbf1502f4dc6c387a59f64ccaaa603753b77a80a99da809d2f0ed71698f47bad",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/gripper_orientation_confirmation.json"
+      },
+      {
+        "actual_sha256": "028a01f580403611b5c4ff261c8d4c4539fc3e98e0cc8f5c6e04a21a5a270958",
+        "expected_sha256": "028a01f580403611b5c4ff261c8d4c4539fc3e98e0cc8f5c6e04a21a5a270958",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/gripper_collider_ab_results.json"
+      },
+      {
+        "actual_sha256": "74f1f4574060dbb4d385c08a32eb63e2e080ab503c536ae38256fd8254f5382c",
+        "expected_sha256": "74f1f4574060dbb4d385c08a32eb63e2e080ab503c536ae38256fd8254f5382c",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/gripper_hold_root_cause_v2.json"
+      }
+    ],
+    "rejected_generic_mesh": {
+      "aabb_source_units": {
+        "max": [
+          -44.0,
+          30.5,
+          108.19999694824219
+        ],
+        "min": [
+          -64.5,
+          -30.5,
+          27.56999969482422
+        ]
+      },
+      "expected_sha256": "a4baacd9a64df1be60ea5e98f50f3c660e1b7a1fe9684aace6004c5058c09483",
+      "file_size_bytes": 42884,
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_finger.stl",
+      "sha256": "a4baacd9a64df1be60ea5e98f50f3c660e1b7a1fe9684aace6004c5058c09483",
+      "status": "REJECTED_FOR_CURRENT_PHYSICAL_ALOHA_GRIPPER",
+      "triangle_count": 856,
+      "verified_rejected": true
+    },
+    "repository": {
+      "containing_remote_branches": [
+        "origin/user/aliberts/2024_05_07_remove_upper_bounds"
+      ],
+      "head": "51837ba5f7d5b96255f01c3d39d53dea473b4829",
+      "license": "Apache-2.0",
+      "origin": "https://github.com/huggingface/gym-aloha.git",
+      "package_version": "0.1.1",
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/gym-aloha"
+    },
+    "status": "PASS"
+  },
+  "source_evidence_before": {
+    "gates": {
+      "historical_usd_sha256": true,
+      "left_installed_sha256": true,
+      "left_sha256": true,
+      "left_triangle_count": true,
+      "protected::assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/configuration/follower_left_debug_acceleration_drive.usd": true,
+      "protected::assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/follower_left_imported.usd": true,
+      "protected::assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/configuration/follower_right_debug_acceleration_drive.usd": true,
+      "protected::assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/follower_right_imported.usd": true,
+      "protected::configs/aloha1_gripper_collision_profiles.yaml": true,
+      "protected::generated/urdf/follower_left.urdf": true,
+      "protected::generated/urdf/follower_right.urdf": true,
+      "protected::reports/aloha1_mapping/gripper_collider_ab_results.json": true,
+      "protected::reports/aloha1_mapping/gripper_hold_root_cause_v2.json": true,
+      "protected::reports/aloha1_mapping/gripper_orientation_confirmation.json": true,
+      "rejected_generic_sha256": true,
+      "rejected_generic_triangle_count": true,
+      "repository_branch": true,
+      "repository_commit": true,
+      "repository_license": true,
+      "repository_origin": true,
+      "repository_package_version": true,
+      "right_installed_sha256": true,
+      "right_sha256": true,
+      "right_triangle_count": true,
+      "vx300s_left_left_dependency": true,
+      "vx300s_left_left_euler_rad": true,
+      "vx300s_left_left_joint_axis": true,
+      "vx300s_left_left_joint_range_m": true,
+      "vx300s_left_left_mesh_name": true,
+      "vx300s_left_left_position_m": true,
+      "vx300s_left_right_dependency": true,
+      "vx300s_left_right_euler_rad": true,
+      "vx300s_left_right_joint_axis": true,
+      "vx300s_left_right_joint_range_m": true,
+      "vx300s_left_right_mesh_name": true,
+      "vx300s_left_right_position_m": true,
+      "vx300s_right_left_dependency": true,
+      "vx300s_right_left_euler_rad": true,
+      "vx300s_right_left_joint_axis": true,
+      "vx300s_right_left_joint_range_m": true,
+      "vx300s_right_left_mesh_name": true,
+      "vx300s_right_left_position_m": true,
+      "vx300s_right_right_dependency": true,
+      "vx300s_right_right_euler_rad": true,
+      "vx300s_right_right_joint_axis": true,
+      "vx300s_right_right_joint_range_m": true,
+      "vx300s_right_right_mesh_name": true,
+      "vx300s_right_right_position_m": true
+    },
+    "historical_usd": {
+      "actual_sha256": "b24afe3678155654892c69517fc58ecd970108d68cec56b02dc6fdcb8bf4493e",
+      "expected_sha256": "b24afe3678155654892c69517fc58ecd970108d68cec56b02dc6fdcb8bf4493e",
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_assets/aloha_viperx.usd",
+      "role": "USER_CONFIRMED_VISUAL_AND_TRANSFORM_REFERENCE"
+    },
+    "meshes": {
+      "left": {
+        "aabb_m": {
+          "max": [
+            0.0305,
+            -0.02960000038146973,
+            0.08
+          ],
+          "min": [
+            -0.0305,
+            -0.054,
+            -0.01
+          ]
+        },
+        "aabb_source_units": {
+          "max": [
+            30.5,
+            -29.600000381469727,
+            80.0
+          ],
+          "min": [
+            -30.5,
+            -54.0,
+            -10.0
+          ]
+        },
+        "file_size_bytes": 83384,
+        "installed_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv/lib/python3.11/site-packages/gym_aloha/assets/vx300s_10_custom_finger_left.stl",
+        "installed_sha256": "df73ae5b9058e5d50a6409ac2ab687dade75053a86591bb5e23ab051dbf2d659",
+        "manifest_path": "external/gym-aloha/gym_aloha/assets/vx300s_10_custom_finger_left.stl",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/gym-aloha/gym_aloha/assets/vx300s_10_custom_finger_left.stl",
+        "scale": [
+          0.001,
+          0.001,
+          0.001
+        ],
+        "sha256": "df73ae5b9058e5d50a6409ac2ab687dade75053a86591bb5e23ab051dbf2d659",
+        "triangle_count": 1666
+      },
+      "right": {
+        "aabb_m": {
+          "max": [
+            0.0305,
+            0.054,
+            0.08
+          ],
+          "min": [
+            -0.0305,
+            0.02960000038146973,
+            -0.01
+          ]
+        },
+        "aabb_source_units": {
+          "max": [
+            30.5,
+            54.0,
+            80.0
+          ],
+          "min": [
+            -30.5,
+            29.600000381469727,
+            -10.0
+          ]
+        },
+        "file_size_bytes": 83384,
+        "installed_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv/lib/python3.11/site-packages/gym_aloha/assets/vx300s_10_custom_finger_right.stl",
+        "installed_sha256": "56fb3cc1236d4193106038adf8e457c7252ae9e86c7cee6dabf0578c53666358",
+        "manifest_path": "external/gym-aloha/gym_aloha/assets/vx300s_10_custom_finger_right.stl",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/gym-aloha/gym_aloha/assets/vx300s_10_custom_finger_right.stl",
+        "scale": [
+          0.001,
+          0.001,
+          0.001
+        ],
+        "sha256": "56fb3cc1236d4193106038adf8e457c7252ae9e86c7cee6dabf0578c53666358",
+        "triangle_count": 1666
+      }
+    },
+    "mjcf_dependency_meshes": {
+      "vx300s_10_gripper_finger_left": {
+        "file": "vx300s_10_custom_finger_left.stl",
+        "scale": [
+          0.001,
+          0.001,
+          0.001
+        ]
+      },
+      "vx300s_10_gripper_finger_right": {
+        "file": "vx300s_10_custom_finger_right.stl",
+        "scale": [
+          0.001,
+          0.001,
+          0.001
+        ]
+      },
+      "vx300s_1_base": {
+        "file": "vx300s_1_base.stl",
+        "scale": [
+          0.001,
+          0.001,
+          0.001
+        ]
+      },
+      "vx300s_2_shoulder": {
+        "file": "vx300s_2_shoulder.stl",
+        "scale": [
+          0.001,
+          0.001,
+          0.001
+        ]
+      },
+      "vx300s_3_upper_arm": {
+        "file": "vx300s_3_upper_arm.stl",
+        "scale": [
+          0.001,
+          0.001,
+          0.001
+        ]
+      },
+      "vx300s_4_upper_forearm": {
+        "file": "vx300s_4_upper_forearm.stl",
+        "scale": [
+          0.001,
+          0.001,
+          0.001
+        ]
+      },
+      "vx300s_5_lower_forearm": {
+        "file": "vx300s_5_lower_forearm.stl",
+        "scale": [
+          0.001,
+          0.001,
+          0.001
+        ]
+      },
+      "vx300s_6_wrist": {
+        "file": "vx300s_6_wrist.stl",
+        "scale": [
+          0.001,
+          0.001,
+          0.001
+        ]
+      },
+      "vx300s_7_gripper": {
+        "file": "vx300s_7_gripper.stl",
+        "scale": [
+          0.001,
+          0.001,
+          0.001
+        ]
+      },
+      "vx300s_8_gripper_prop": {
+        "file": "vx300s_8_gripper_prop.stl",
+        "scale": [
+          0.001,
+          0.001,
+          0.001
+        ]
+      },
+      "vx300s_9_gripper_bar": {
+        "file": "vx300s_9_gripper_bar.stl",
+        "scale": [
+          0.001,
+          0.001,
+          0.001
+        ]
+      }
+    },
+    "mjcf_installation_readback": {
+      "vx300s_left": {
+        "left": {
+          "body_name": "vx300s_left/left_finger_link",
+          "euler_rad": [
+            3.14,
+            1.57,
+            0.0
+          ],
+          "geom_name": "vx300s_left/10_left_gripper_finger",
+          "joint_axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "joint_name": "vx300s_left/left_finger",
+          "joint_range_m": [
+            0.021,
+            0.057
+          ],
+          "mesh_name": "vx300s_10_gripper_finger_left",
+          "position_m": [
+            0.005,
+            -0.052,
+            0.0
+          ]
+        },
+        "right": {
+          "body_name": "vx300s_left/right_finger_link",
+          "euler_rad": [
+            3.14,
+            1.57,
+            0.0
+          ],
+          "geom_name": "vx300s_left/10_right_gripper_finger",
+          "joint_axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "joint_name": "vx300s_left/right_finger",
+          "joint_range_m": [
+            -0.057,
+            -0.021
+          ],
+          "mesh_name": "vx300s_10_gripper_finger_right",
+          "position_m": [
+            0.005,
+            0.052,
+            0.0
+          ]
+        }
+      },
+      "vx300s_right": {
+        "left": {
+          "body_name": "vx300s_right/left_finger_link",
+          "euler_rad": [
+            3.14,
+            1.57,
+            0.0
+          ],
+          "geom_name": "vx300s_right/10_left_gripper_finger",
+          "joint_axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "joint_name": "vx300s_right/left_finger",
+          "joint_range_m": [
+            0.021,
+            0.057
+          ],
+          "mesh_name": "vx300s_10_gripper_finger_left",
+          "position_m": [
+            0.005,
+            -0.052,
+            0.0
+          ]
+        },
+        "right": {
+          "body_name": "vx300s_right/right_finger_link",
+          "euler_rad": [
+            3.14,
+            1.57,
+            0.0
+          ],
+          "geom_name": "vx300s_right/10_right_gripper_finger",
+          "joint_axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "joint_name": "vx300s_right/right_finger",
+          "joint_range_m": [
+            -0.057,
+            -0.021
+          ],
+          "mesh_name": "vx300s_10_gripper_finger_right",
+          "position_m": [
+            0.005,
+            0.052,
+            0.0
+          ]
+        }
+      }
+    },
+    "protected_baseline": [
+      {
+        "actual_sha256": "d9e4b32723ee71dfce26fb4e78546cfcfef147b2d7dbf5e53e3620e3d8aa96bd",
+        "expected_sha256": "d9e4b32723ee71dfce26fb4e78546cfcfef147b2d7dbf5e53e3620e3d8aa96bd",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_left.urdf"
+      },
+      {
+        "actual_sha256": "268a5e5b56ce48af679256380008606f64358d6ead2619b52946b37f47fb624b",
+        "expected_sha256": "268a5e5b56ce48af679256380008606f64358d6ead2619b52946b37f47fb624b",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_right.urdf"
+      },
+      {
+        "actual_sha256": "955c34600846c8b4a08bedc639caef7d5e3c1d0e3a02a6900c80d27d52adadec",
+        "expected_sha256": "955c34600846c8b4a08bedc639caef7d5e3c1d0e3a02a6900c80d27d52adadec",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/follower_left_imported.usd"
+      },
+      {
+        "actual_sha256": "205d3b8fe72532f608446b18e80eccb5c8b0992fb71946b9737145afe4efa7ed",
+        "expected_sha256": "205d3b8fe72532f608446b18e80eccb5c8b0992fb71946b9737145afe4efa7ed",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/follower_right_imported.usd"
+      },
+      {
+        "actual_sha256": "7fe1d086c4d79e60cf6f3e10b67f164de4684df8d941603055764d6f230528a2",
+        "expected_sha256": "7fe1d086c4d79e60cf6f3e10b67f164de4684df8d941603055764d6f230528a2",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/configuration/follower_left_debug_acceleration_drive.usd"
+      },
+      {
+        "actual_sha256": "919c8013e9921eaa2aaf8e032aa5ed81bc64cd07c90233ad9418996e9ecea249",
+        "expected_sha256": "919c8013e9921eaa2aaf8e032aa5ed81bc64cd07c90233ad9418996e9ecea249",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/configuration/follower_right_debug_acceleration_drive.usd"
+      },
+      {
+        "actual_sha256": "bd13be701ec121112e90c968b9fb00b684e3295576d9c4c419daac4998c666ae",
+        "expected_sha256": "bd13be701ec121112e90c968b9fb00b684e3295576d9c4c419daac4998c666ae",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/configs/aloha1_gripper_collision_profiles.yaml"
+      },
+      {
+        "actual_sha256": "fbf1502f4dc6c387a59f64ccaaa603753b77a80a99da809d2f0ed71698f47bad",
+        "expected_sha256": "fbf1502f4dc6c387a59f64ccaaa603753b77a80a99da809d2f0ed71698f47bad",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/gripper_orientation_confirmation.json"
+      },
+      {
+        "actual_sha256": "028a01f580403611b5c4ff261c8d4c4539fc3e98e0cc8f5c6e04a21a5a270958",
+        "expected_sha256": "028a01f580403611b5c4ff261c8d4c4539fc3e98e0cc8f5c6e04a21a5a270958",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/gripper_collider_ab_results.json"
+      },
+      {
+        "actual_sha256": "74f1f4574060dbb4d385c08a32eb63e2e080ab503c536ae38256fd8254f5382c",
+        "expected_sha256": "74f1f4574060dbb4d385c08a32eb63e2e080ab503c536ae38256fd8254f5382c",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/gripper_hold_root_cause_v2.json"
+      }
+    ],
+    "rejected_generic_mesh": {
+      "aabb_source_units": {
+        "max": [
+          -44.0,
+          30.5,
+          108.19999694824219
+        ],
+        "min": [
+          -64.5,
+          -30.5,
+          27.56999969482422
+        ]
+      },
+      "expected_sha256": "a4baacd9a64df1be60ea5e98f50f3c660e1b7a1fe9684aace6004c5058c09483",
+      "file_size_bytes": 42884,
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_finger.stl",
+      "sha256": "a4baacd9a64df1be60ea5e98f50f3c660e1b7a1fe9684aace6004c5058c09483",
+      "status": "REJECTED_FOR_CURRENT_PHYSICAL_ALOHA_GRIPPER",
+      "triangle_count": 856,
+      "verified_rejected": true
+    },
+    "repository": {
+      "containing_remote_branches": [
+        "origin/user/aliberts/2024_05_07_remove_upper_bounds"
+      ],
+      "head": "51837ba5f7d5b96255f01c3d39d53dea473b4829",
+      "license": "Apache-2.0",
+      "origin": "https://github.com/huggingface/gym-aloha.git",
+      "package_version": "0.1.1",
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/gym-aloha"
+    },
+    "status": "PASS"
+  },
+  "status": "PASS"
+}
