@@ -35,17 +35,23 @@ Collection-level depth sorting is not a reliable representation of
 mutually occluding meshes. The resulting blue/orange overlap can therefore
 look reversed even when the world-space geometry is not.
 
-Runtime USD readback currently shows:
+The first readback used authored USD transforms with both prismatic finger
+coordinates at zero. Runtime inspection subsequently proved that zero is
+outside both imported finger limits:
 
-- the left finger occupies the lower world-Y side;
-- the right finger occupies the higher world-Y side;
-- the principal left inward surface normal points approximately along `+Y`;
-- the principal right inward surface normal points approximately along `-Y`.
+- left finger: `[0.021, 0.057] m`;
+- right finger: `[-0.057, -0.021] m`.
+
+The first blue/orange screenshots therefore did not represent a legal
+articulation state. Isaac Sim 5.1 PhysX link-transform readback at the imported
+limits shows the physical-left finger on `+Y`, the physical-right finger on
+`-Y`, and an open-minus-closed center separation of approximately `0.072 m`.
+The diagnostic must use these runtime link transforms rather than the authored
+zero-state transforms.
 
 A naive cross-assignment of raw left/right mesh point arrays while preserving
-the current mesh transforms moves their centers from approximately
-`Y=0.490/0.510 m` to `Y=0.406/0.594 m`. That experiment would create a much
-larger separation and is rejected as an ungrounded fix.
+the invalid authored transforms creates a much larger separation. That
+experiment remains rejected as an ungrounded fix.
 
 ## Selected Approach
 
@@ -62,9 +68,10 @@ The renderer will:
    custom finger.
 2. Label the fingers by physical world side:
    `physical_left` and `physical_right`.
-3. Preserve the authored closed-state geometry.
-4. Reconstruct an open-state diagnostic using only the original MJCF
-   prismatic-joint endpoints and closure directions.
+3. Set the two finger DOFs to the imported closed endpoints and read the PhysX
+   link transforms.
+4. Set the two finger DOFs to the imported open endpoints and read the PhysX
+   link transforms.
 5. Render both states from identical:
    closing-axis, top, and isometric views.
 6. Keep diagnostic colors out of the source USD.
@@ -77,9 +84,9 @@ The diagnostic must report all of the following before screenshots are shown
 to the user:
 
 - source USD hash is unchanged;
-- physical-left center remains on the lower world-Y side;
-- physical-right center remains on the higher world-Y side;
-- principal inward normals face one another;
+- physical-left center remains on the positive world-Y side of the gripper;
+- physical-right center remains on the negative world-Y side of the gripper;
+- principal left/right inward normals point approximately along `-Y`/`+Y`;
 - open-to-closed aperture decreases monotonically;
 - the open state has positive separation;
 - the two finger meshes do not cross to the opposite physical side;
@@ -110,8 +117,8 @@ diagnostic screenshots.
 
 The diagnostic run will produce an ignored artifact directory containing:
 
-- authored-closed closing-axis, top, and isometric PNGs;
-- reconstructed-open closing-axis, top, and isometric PNGs;
+- runtime legal-closed closing-axis, top, and isometric PNGs;
+- runtime legal-open closing-axis, top, and isometric PNGs;
 - a machine-readable JSON manifest with hashes, transforms, aperture,
   surface-normal evidence, and PASS/FAIL gates;
 - a bounded execution log.
