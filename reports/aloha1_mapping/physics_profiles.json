@@ -1,0 +1,535 @@
+{
+  "default_profile": "debug_acceleration_drive",
+  "hard_blockers": [
+    "measured mass/inertia, motor response, friction, and Gain Tuner evidence are unavailable",
+    "measured Stationary ALOHA 1 fingertip friction"
+  ],
+  "outputs": [
+    {
+      "dofs": [
+        {
+          "axis": "angular",
+          "drive": {
+            "damping_authored": 0.10000000149011612,
+            "max_force": 10.0,
+            "max_velocity_authored": 180.0,
+            "stiffness_authored": 625.0,
+            "target_position_authored": 0.0,
+            "type": "acceleration"
+          },
+          "initial_position_authored": 0.0,
+          "mimic": false,
+          "name": "waist"
+        },
+        {
+          "axis": "angular",
+          "drive": {
+            "damping_authored": 0.10000000149011612,
+            "max_force": 20.0,
+            "max_velocity_authored": 180.0,
+            "stiffness_authored": 625.0,
+            "target_position_authored": -55.00394833255903,
+            "type": "acceleration"
+          },
+          "initial_position_authored": -55.00394833255903,
+          "mimic": false,
+          "name": "shoulder"
+        },
+        {
+          "axis": "angular",
+          "drive": {
+            "damping_authored": 0.10000000149011612,
+            "max_force": 15.0,
+            "max_velocity_authored": 180.0,
+            "stiffness_authored": 625.0,
+            "target_position_authored": 66.46310423517549,
+            "type": "acceleration"
+          },
+          "initial_position_authored": 66.46310423517549,
+          "mimic": false,
+          "name": "elbow"
+        },
+        {
+          "axis": "angular",
+          "drive": {
+            "damping_authored": 0.10000000149011612,
+            "max_force": 2.0,
+            "max_velocity_authored": 180.0,
+            "stiffness_authored": 625.0,
+            "target_position_authored": 0.0,
+            "type": "acceleration"
+          },
+          "initial_position_authored": 0.0,
+          "mimic": false,
+          "name": "forearm_roll"
+        },
+        {
+          "axis": "angular",
+          "drive": {
+            "damping_authored": 0.10000000149011612,
+            "max_force": 5.0,
+            "max_velocity_authored": 180.0,
+            "stiffness_authored": 625.0,
+            "target_position_authored": -17.188733853924695,
+            "type": "acceleration"
+          },
+          "initial_position_authored": -17.188733853924695,
+          "mimic": false,
+          "name": "wrist_angle"
+        },
+        {
+          "axis": "angular",
+          "drive": {
+            "damping_authored": 0.10000000149011612,
+            "max_force": 1.0,
+            "max_velocity_authored": 180.0,
+            "stiffness_authored": 625.0,
+            "target_position_authored": 0.0,
+            "type": "acceleration"
+          },
+          "initial_position_authored": 0.0,
+          "mimic": false,
+          "name": "wrist_rotate"
+        },
+        {
+          "axis": "angular",
+          "drive": {
+            "damping_authored": 0.10000000149011612,
+            "max_force": 1.0,
+            "max_velocity_authored": 180.0,
+            "stiffness_authored": 625.0,
+            "target_position_authored": 0.0,
+            "type": "acceleration"
+          },
+          "initial_position_authored": 0.0,
+          "mimic": false,
+          "name": "gripper"
+        },
+        {
+          "axis": "linear",
+          "drive": {
+            "damping_authored": 0.10000000149011612,
+            "max_force": 5.0,
+            "max_velocity_authored": 1.0,
+            "stiffness_authored": 625.0,
+            "target_position_authored": 0.02239,
+            "type": "acceleration"
+          },
+          "initial_position_authored": 0.02239,
+          "mimic": false,
+          "name": "left_finger"
+        },
+        {
+          "axis": "linear",
+          "drive": null,
+          "initial_position_authored": -0.02239,
+          "mimic": true,
+          "name": "right_finger"
+        }
+      ],
+      "fingertip_material_bound_to": [
+        "/follower_left/follower_left_left_finger_link/collisions",
+        "/follower_left/follower_left_right_finger_link/collisions"
+      ],
+      "profile": "debug_acceleration_drive",
+      "robot": "follower_left",
+      "status": "INTERFACE_DEBUG_ONLY",
+      "usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/configuration/follower_left_debug_acceleration_drive.usd"
+    },
+    {
+      "dofs": [
+        {
+          "axis": "angular",
+          "drive": {
+            "damping_authored": 0.10000000149011612,
+            "max_force": 10.0,
+            "max_velocity_authored": 180.0,
+            "stiffness_authored": 625.0,
+            "target_position_authored": 0.0,
+            "type": "force"
+          },
+          "initial_position_authored": 0.0,
+          "mimic": false,
+          "name": "waist"
+        },
+        {
+          "axis": "angular",
+          "drive": {
+            "damping_authored": 0.10000000149011612,
+            "max_force": 20.0,
+            "max_velocity_authored": 180.0,
+            "stiffness_authored": 625.0,
+            "target_position_authored": -55.00394833255903,
+            "type": "force"
+          },
+          "initial_position_authored": -55.00394833255903,
+          "mimic": false,
+          "name": "shoulder"
+        },
+        {
+          "axis": "angular",
+          "drive": {
+            "damping_authored": 0.10000000149011612,
+            "max_force": 15.0,
+            "max_velocity_authored": 180.0,
+            "stiffness_authored": 625.0,
+            "target_position_authored": 66.46310423517549,
+            "type": "force"
+          },
+          "initial_position_authored": 66.46310423517549,
+          "mimic": false,
+          "name": "elbow"
+        },
+        {
+          "axis": "angular",
+          "drive": {
+            "damping_authored": 0.10000000149011612,
+            "max_force": 2.0,
+            "max_velocity_authored": 180.0,
+            "stiffness_authored": 625.0,
+            "target_position_authored": 0.0,
+            "type": "force"
+          },
+          "initial_position_authored": 0.0,
+          "mimic": false,
+          "name": "forearm_roll"
+        },
+        {
+          "axis": "angular",
+          "drive": {
+            "damping_authored": 0.10000000149011612,
+            "max_force": 5.0,
+            "max_velocity_authored": 180.0,
+            "stiffness_authored": 625.0,
+            "target_position_authored": -17.188733853924695,
+            "type": "force"
+          },
+          "initial_position_authored": -17.188733853924695,
+          "mimic": false,
+          "name": "wrist_angle"
+        },
+        {
+          "axis": "angular",
+          "drive": {
+            "damping_authored": 0.10000000149011612,
+            "max_force": 1.0,
+            "max_velocity_authored": 180.0,
+            "stiffness_authored": 625.0,
+            "target_position_authored": 0.0,
+            "type": "force"
+          },
+          "initial_position_authored": 0.0,
+          "mimic": false,
+          "name": "wrist_rotate"
+        },
+        {
+          "axis": "angular",
+          "drive": {
+            "damping_authored": 0.10000000149011612,
+            "max_force": 1.0,
+            "max_velocity_authored": 180.0,
+            "stiffness_authored": 625.0,
+            "target_position_authored": 0.0,
+            "type": "force"
+          },
+          "initial_position_authored": 0.0,
+          "mimic": false,
+          "name": "gripper"
+        },
+        {
+          "axis": "linear",
+          "drive": {
+            "damping_authored": 0.10000000149011612,
+            "max_force": 5.0,
+            "max_velocity_authored": 1.0,
+            "stiffness_authored": 625.0,
+            "target_position_authored": 0.02239,
+            "type": "force"
+          },
+          "initial_position_authored": 0.02239,
+          "mimic": false,
+          "name": "left_finger"
+        },
+        {
+          "axis": "linear",
+          "drive": null,
+          "initial_position_authored": -0.02239,
+          "mimic": true,
+          "name": "right_finger"
+        }
+      ],
+      "fingertip_material_bound_to": [
+        "/follower_left/follower_left_left_finger_link/collisions",
+        "/follower_left/follower_left_right_finger_link/collisions"
+      ],
+      "profile": "sim2real_force_drive",
+      "robot": "follower_left",
+      "status": "CALIBRATION_PENDING",
+      "usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/configuration/follower_left_sim2real_force_drive.usd"
+    },
+    {
+      "dofs": [
+        {
+          "axis": "angular",
+          "drive": {
+            "damping_authored": 0.10000000149011612,
+            "max_force": 10.0,
+            "max_velocity_authored": 180.0,
+            "stiffness_authored": 625.0,
+            "target_position_authored": 0.0,
+            "type": "acceleration"
+          },
+          "initial_position_authored": 0.0,
+          "mimic": false,
+          "name": "waist"
+        },
+        {
+          "axis": "angular",
+          "drive": {
+            "damping_authored": 0.10000000149011612,
+            "max_force": 20.0,
+            "max_velocity_authored": 180.0,
+            "stiffness_authored": 625.0,
+            "target_position_authored": -55.00394833255903,
+            "type": "acceleration"
+          },
+          "initial_position_authored": -55.00394833255903,
+          "mimic": false,
+          "name": "shoulder"
+        },
+        {
+          "axis": "angular",
+          "drive": {
+            "damping_authored": 0.10000000149011612,
+            "max_force": 15.0,
+            "max_velocity_authored": 180.0,
+            "stiffness_authored": 625.0,
+            "target_position_authored": 66.46310423517549,
+            "type": "acceleration"
+          },
+          "initial_position_authored": 66.46310423517549,
+          "mimic": false,
+          "name": "elbow"
+        },
+        {
+          "axis": "angular",
+          "drive": {
+            "damping_authored": 0.10000000149011612,
+            "max_force": 2.0,
+            "max_velocity_authored": 180.0,
+            "stiffness_authored": 625.0,
+            "target_position_authored": 0.0,
+            "type": "acceleration"
+          },
+          "initial_position_authored": 0.0,
+          "mimic": false,
+          "name": "forearm_roll"
+        },
+        {
+          "axis": "angular",
+          "drive": {
+            "damping_authored": 0.10000000149011612,
+            "max_force": 5.0,
+            "max_velocity_authored": 180.0,
+            "stiffness_authored": 625.0,
+            "target_position_authored": -17.188733853924695,
+            "type": "acceleration"
+          },
+          "initial_position_authored": -17.188733853924695,
+          "mimic": false,
+          "name": "wrist_angle"
+        },
+        {
+          "axis": "angular",
+          "drive": {
+            "damping_authored": 0.10000000149011612,
+            "max_force": 1.0,
+            "max_velocity_authored": 180.0,
+            "stiffness_authored": 625.0,
+            "target_position_authored": 0.0,
+            "type": "acceleration"
+          },
+          "initial_position_authored": 0.0,
+          "mimic": false,
+          "name": "wrist_rotate"
+        },
+        {
+          "axis": "angular",
+          "drive": {
+            "damping_authored": 0.10000000149011612,
+            "max_force": 1.0,
+            "max_velocity_authored": 180.0,
+            "stiffness_authored": 625.0,
+            "target_position_authored": 0.0,
+            "type": "acceleration"
+          },
+          "initial_position_authored": 0.0,
+          "mimic": false,
+          "name": "gripper"
+        },
+        {
+          "axis": "linear",
+          "drive": {
+            "damping_authored": 0.10000000149011612,
+            "max_force": 5.0,
+            "max_velocity_authored": 1.0,
+            "stiffness_authored": 625.0,
+            "target_position_authored": 0.02239,
+            "type": "acceleration"
+          },
+          "initial_position_authored": 0.02239,
+          "mimic": false,
+          "name": "left_finger"
+        },
+        {
+          "axis": "linear",
+          "drive": null,
+          "initial_position_authored": -0.02239,
+          "mimic": true,
+          "name": "right_finger"
+        }
+      ],
+      "fingertip_material_bound_to": [
+        "/follower_right/follower_right_left_finger_link/collisions",
+        "/follower_right/follower_right_right_finger_link/collisions"
+      ],
+      "profile": "debug_acceleration_drive",
+      "robot": "follower_right",
+      "status": "INTERFACE_DEBUG_ONLY",
+      "usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/configuration/follower_right_debug_acceleration_drive.usd"
+    },
+    {
+      "dofs": [
+        {
+          "axis": "angular",
+          "drive": {
+            "damping_authored": 0.10000000149011612,
+            "max_force": 10.0,
+            "max_velocity_authored": 180.0,
+            "stiffness_authored": 625.0,
+            "target_position_authored": 0.0,
+            "type": "force"
+          },
+          "initial_position_authored": 0.0,
+          "mimic": false,
+          "name": "waist"
+        },
+        {
+          "axis": "angular",
+          "drive": {
+            "damping_authored": 0.10000000149011612,
+            "max_force": 20.0,
+            "max_velocity_authored": 180.0,
+            "stiffness_authored": 625.0,
+            "target_position_authored": -55.00394833255903,
+            "type": "force"
+          },
+          "initial_position_authored": -55.00394833255903,
+          "mimic": false,
+          "name": "shoulder"
+        },
+        {
+          "axis": "angular",
+          "drive": {
+            "damping_authored": 0.10000000149011612,
+            "max_force": 15.0,
+            "max_velocity_authored": 180.0,
+            "stiffness_authored": 625.0,
+            "target_position_authored": 66.46310423517549,
+            "type": "force"
+          },
+          "initial_position_authored": 66.46310423517549,
+          "mimic": false,
+          "name": "elbow"
+        },
+        {
+          "axis": "angular",
+          "drive": {
+            "damping_authored": 0.10000000149011612,
+            "max_force": 2.0,
+            "max_velocity_authored": 180.0,
+            "stiffness_authored": 625.0,
+            "target_position_authored": 0.0,
+            "type": "force"
+          },
+          "initial_position_authored": 0.0,
+          "mimic": false,
+          "name": "forearm_roll"
+        },
+        {
+          "axis": "angular",
+          "drive": {
+            "damping_authored": 0.10000000149011612,
+            "max_force": 5.0,
+            "max_velocity_authored": 180.0,
+            "stiffness_authored": 625.0,
+            "target_position_authored": -17.188733853924695,
+            "type": "force"
+          },
+          "initial_position_authored": -17.188733853924695,
+          "mimic": false,
+          "name": "wrist_angle"
+        },
+        {
+          "axis": "angular",
+          "drive": {
+            "damping_authored": 0.10000000149011612,
+            "max_force": 1.0,
+            "max_velocity_authored": 180.0,
+            "stiffness_authored": 625.0,
+            "target_position_authored": 0.0,
+            "type": "force"
+          },
+          "initial_position_authored": 0.0,
+          "mimic": false,
+          "name": "wrist_rotate"
+        },
+        {
+          "axis": "angular",
+          "drive": {
+            "damping_authored": 0.10000000149011612,
+            "max_force": 1.0,
+            "max_velocity_authored": 180.0,
+            "stiffness_authored": 625.0,
+            "target_position_authored": 0.0,
+            "type": "force"
+          },
+          "initial_position_authored": 0.0,
+          "mimic": false,
+          "name": "gripper"
+        },
+        {
+          "axis": "linear",
+          "drive": {
+            "damping_authored": 0.10000000149011612,
+            "max_force": 5.0,
+            "max_velocity_authored": 1.0,
+            "stiffness_authored": 625.0,
+            "target_position_authored": 0.02239,
+            "type": "force"
+          },
+          "initial_position_authored": 0.02239,
+          "mimic": false,
+          "name": "left_finger"
+        },
+        {
+          "axis": "linear",
+          "drive": null,
+          "initial_position_authored": -0.02239,
+          "mimic": true,
+          "name": "right_finger"
+        }
+      ],
+      "fingertip_material_bound_to": [
+        "/follower_right/follower_right_left_finger_link/collisions",
+        "/follower_right/follower_right_right_finger_link/collisions"
+      ],
+      "profile": "sim2real_force_drive",
+      "robot": "follower_right",
+      "status": "CALIBRATION_PENDING",
+      "usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/configuration/follower_right_sim2real_force_drive.usd"
+    }
+  ],
+  "schema_version": 1,
+  "status": "PARTIAL"
+}

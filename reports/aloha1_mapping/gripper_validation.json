@@ -1,0 +1,1860 @@
+{
+  "acceptance_semantics": {
+    "FAIL": "no temporary-friction trial passes the interface gate",
+    "PARTIAL": "machine interface/contact/hold gate passes for at least one temporary friction value, but measured calibration is blocked",
+    "PASS": "interface and calibrated physics gates pass"
+  },
+  "collider_variant": "A_CURRENT_STL_CONVEX_HULL_BASELINE",
+  "determinism": {
+    "artifact_hashes": {
+      "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/gripper_contact_events_follower_left_mu_0.300.json": "acbcb4b46f6b7733ef5304d55ee68e80a176429c9fe705f18ea0e4e73e79cc88",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/gripper_contact_events_follower_left_mu_0.500.json": "bedfca2f01a75f5fd5b051b38c799acd04384212477e53c9bd6e00ebdf936593",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/gripper_contact_events_follower_left_mu_0.700.json": "8ed83ee5727cab94069fe622e1805bd01793e82b9c4fbffe7efd776d8f52d71a",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/gripper_contact_events_follower_right_mu_0.300.json": "f70bf645d202e8b26c96a48d58c2fd0ef4dadb78eaaad8f29704925288d2ed53",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/gripper_contact_events_follower_right_mu_0.500.json": "56e5cb40fda94d433fcf55fdd64da1555eefdf1497729fda302c247d0bb1c35a",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/gripper_contact_events_follower_right_mu_0.700.json": "3f2a373b894a78e1ed1ab1aa3add9f822e61a6d83b7a45bbac3787803a4b730a",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/gripper_curves.csv": "76fb976a78f6d6838635ed224db32ea09e0762efdf928a37ed3c5515a640286c"
+    },
+    "current_signature": "45860d529ba3737fa727b3ae680a4752a85ebd23f2a8f68bdcfc676193c18bf1",
+    "deterministic": true,
+    "previous_signature": "45860d529ba3737fa727b3ae680a4752a85ebd23f2a8f68bdcfc676193c18bf1",
+    "status": "PASS"
+  },
+  "friction_values": [
+    0.3,
+    0.5,
+    0.7
+  ],
+  "optimization_gate": "BLOCKED",
+  "plan": {
+    "bottle_proxy": {
+      "diameter_m": 0.065,
+      "height_m": 0.21,
+      "inertia_status": "ENGINEERING_DERIVED_UNCALIBRATED",
+      "mass_kg": 0.02,
+      "measurement_source": "user-supplied real bottle body diameter, total height, mass; recorded in .codex/TASK_STATE.md",
+      "profile_limitation": "neck, shoulder, base profile and measured inertia unavailable",
+      "shape": "cylinder",
+      "status": "PARTIAL_MEASURED_BODY_PROXY"
+    },
+    "fingertip_material": {
+      "friction_scan": [
+        0.3,
+        0.5,
+        0.7
+      ],
+      "restitution": 0.0,
+      "source": "engineering scan; no measured fingertip/bottle data",
+      "status": "TEMPORARY_UNCALIBRATED"
+    },
+    "hard_blockers": [
+      "measured fingertip/bottle friction",
+      "complete measured bottle collision profile and inertia",
+      "real gripper motor-angle/aperture calibration",
+      "calibrated force-drive response"
+    ],
+    "motion": {
+      "close_steps": 120,
+      "fixed_contact_steps": 60,
+      "mimic_tolerance_m": 0.001,
+      "open_steps": 90,
+      "readback_tolerance_m": 0.002,
+      "settle_steps": 60
+    },
+    "penetration": {
+      "maximum_persistent_depth_m": 0.002,
+      "persistence_steps": 5,
+      "threshold_status": "ENGINEERING_ACCEPTANCE_THRESHOLD"
+    },
+    "physics": {
+      "author_contact_rest_offsets": false,
+      "offset_policy": "preserve Isaac Sim 5.1 defaults; require contactOffset > restOffset before any evidence-based adjustment",
+      "physics_dt_s": 0.016666666666666666,
+      "self_collision": false,
+      "solve_articulation_contact_last": true
+    },
+    "released_hold": {
+      "fixed_constraint_allowed": false,
+      "hold_steps": 120,
+      "hold_time_s": 2.0,
+      "max_drop_m": 0.01,
+      "surface_gripper_allowed": false,
+      "threshold_status": "ENGINEERING_ACCEPTANCE_THRESHOLD"
+    },
+    "robots": [
+      {
+        "asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/configuration/follower_left_debug_acceleration_drive.usd",
+        "closed_left_finger_m": 0.021,
+        "dof_order": [
+          "waist",
+          "shoulder",
+          "elbow",
+          "forearm_roll",
+          "wrist_angle",
+          "wrist_rotate",
+          "gripper",
+          "left_finger",
+          "right_finger"
+        ],
+        "mimic": {
+          "multiplier": -1.0,
+          "offset": 0.0,
+          "reference": "left_finger",
+          "target": "right_finger"
+        },
+        "name": "follower_left",
+        "open_left_finger_m": 0.057
+      },
+      {
+        "asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/configuration/follower_right_debug_acceleration_drive.usd",
+        "closed_left_finger_m": 0.021,
+        "dof_order": [
+          "waist",
+          "shoulder",
+          "elbow",
+          "forearm_roll",
+          "wrist_angle",
+          "wrist_rotate",
+          "gripper",
+          "left_finger",
+          "right_finger"
+        ],
+        "mimic": {
+          "multiplier": -1.0,
+          "offset": 0.0,
+          "reference": "left_finger",
+          "target": "right_finger"
+        },
+        "name": "follower_right",
+        "open_left_finger_m": 0.057
+      }
+    ],
+    "schema_version": 1,
+    "status": "PARTIAL"
+  },
+  "robots": [
+    {
+      "passing_interface_friction_values": [],
+      "robot": "follower_left",
+      "status": "FAIL",
+      "trial_statuses": [
+        {
+          "failed_checks": [
+            "limits_ok",
+            "mimic_ok",
+            "held_for_required_steps"
+          ],
+          "friction": 0.3,
+          "status": "FAIL"
+        },
+        {
+          "failed_checks": [
+            "limits_ok",
+            "mimic_ok",
+            "held_for_required_steps"
+          ],
+          "friction": 0.5,
+          "status": "FAIL"
+        },
+        {
+          "failed_checks": [
+            "limits_ok",
+            "mimic_ok",
+            "held_for_required_steps"
+          ],
+          "friction": 0.7,
+          "status": "FAIL"
+        }
+      ]
+    },
+    {
+      "passing_interface_friction_values": [],
+      "robot": "follower_right",
+      "status": "FAIL",
+      "trial_statuses": [
+        {
+          "failed_checks": [
+            "limits_ok",
+            "mimic_ok",
+            "held_for_required_steps"
+          ],
+          "friction": 0.3,
+          "status": "FAIL"
+        },
+        {
+          "failed_checks": [
+            "limits_ok",
+            "mimic_ok",
+            "held_for_required_steps"
+          ],
+          "friction": 0.5,
+          "status": "FAIL"
+        },
+        {
+          "failed_checks": [
+            "limits_ok",
+            "mimic_ok",
+            "held_for_required_steps"
+          ],
+          "friction": 0.7,
+          "status": "FAIL"
+        }
+      ]
+    }
+  ],
+  "schema_version": 1,
+  "scope": "Stationary ALOHA 1 follower grippers",
+  "status": "FAIL",
+  "trials": [
+    {
+      "aperture": {
+        "closed_against_fixed_bottle": {
+          "center_distance_m": 0.08553158867084582,
+          "closing_axis_world": [
+            -0.0002996798064384214,
+            -0.9999998274137782,
+            -0.0005053359547535937
+          ],
+          "midpoint_world_m": [
+            0.2322064188718591,
+            -0.001033775309369142,
+            0.3043736813104757
+          ],
+          "surface_gap_m": 0.06491272026981014
+        },
+        "left_closed_bounds": {
+          "center_m": [
+            0.23221923491682775,
+            0.0417320116452669,
+            0.304395292403987
+          ],
+          "colliders": [
+            "/World/Robot/follower_left_left_finger_link/collisions/gripper_finger/node_STL_BINARY_"
+          ],
+          "half_extent_m": [
+            0.04365162159139077,
+            0.010278635877516498,
+            0.03507238721867839
+          ],
+          "maximum_m": [
+            0.2758708565082185,
+            0.0520106475227834,
+            0.3394676796226654
+          ],
+          "minimum_m": [
+            0.18856761332543698,
+            0.031453375767750404,
+            0.2693229051853086
+          ],
+          "root": "/World/Robot/follower_left_left_finger_link/collisions"
+        },
+        "left_open_bounds": {
+          "center_m": [
+            0.2475473494454331,
+            0.05370249352600061,
+            0.30364374727641275
+          ],
+          "colliders": [
+            "/World/Robot/follower_left_left_finger_link/collisions/gripper_finger/node_STL_BINARY_"
+          ],
+          "half_extent_m": [
+            0.04301651919726489,
+            0.010294956250811643,
+            0.034181417481028126
+          ],
+          "maximum_m": [
+            0.290563868642698,
+            0.06399744977681225,
+            0.33782516475744084
+          ],
+          "minimum_m": [
+            0.20453083024816823,
+            0.043407537275188965,
+            0.2694623297953846
+          ],
+          "root": "/World/Robot/follower_left_left_finger_link/collisions"
+        },
+        "measurement": "world AABB support distance along measured closing axis",
+        "open": {
+          "center_distance_m": 0.10947545767427287,
+          "closing_axis_world": [
+            -0.00019052871743492741,
+            -0.9999993683947869,
+            -0.0011076591692003868
+          ],
+          "midpoint_world_m": [
+            0.24753692033616248,
+            -0.0010352007385009375,
+            0.3035831165291651
+          ],
+          "surface_gap_m": 0.08879345298045135
+        },
+        "right_closed_bounds": {
+          "center_m": [
+            0.2321936028268905,
+            -0.043799562264005186,
+            0.3043520702169644
+          ],
+          "colliders": [
+            "/World/Robot/follower_left_right_finger_link/collisions/gripper_finger/node_STL_BINARY_"
+          ],
+          "half_extent_m": [
+            0.04365161778646194,
+            0.01027862637742856,
+            0.035072386330865096
+          ],
+          "maximum_m": [
+            0.2758452206133524,
+            -0.033520935886576626,
+            0.3394244565478295
+          ],
+          "minimum_m": [
+            0.18854198504042854,
+            -0.054078188641433746,
+            0.2692796838860993
+          ],
+          "root": "/World/Robot/follower_left_right_finger_link/collisions"
+        },
+        "right_open_bounds": {
+          "center_m": [
+            0.24752649122689183,
+            -0.05577289500300248,
+            0.30352248578191743
+          ],
+          "colliders": [
+            "/World/Robot/follower_left_right_finger_link/collisions/gripper_finger/node_STL_BINARY_"
+          ],
+          "half_extent_m": [
+            0.04301651537506965,
+            0.01029494696373074,
+            0.03418141681024059
+          ],
+          "maximum_m": [
+            0.2905430066019615,
+            -0.04547794803927174,
+            0.33770390259215805
+          ],
+          "minimum_m": [
+            0.20450997585182218,
+            -0.06606784196673322,
+            0.26934106897167687
+          ],
+          "root": "/World/Robot/follower_left_right_finger_link/collisions"
+        }
+      },
+      "asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/configuration/follower_left_debug_acceleration_drive.usd",
+      "bottle": {
+        "axis": "Z",
+        "diameter_m": 0.065,
+        "height_m": 0.21,
+        "inertia_status": "ENGINEERING_DERIVED_UNCALIBRATED",
+        "mass_kg": 0.02,
+        "material": {
+          "dynamic_friction": 0.3,
+          "path": "/World/Materials/temporary_bottle",
+          "restitution": 0.0,
+          "static_friction": 0.3,
+          "status": "TEMPORARY_UNCALIBRATED"
+        },
+        "path": "/World/BottleProxy",
+        "shape": "cylinder",
+        "status": "PARTIAL_MEASURED_BODY_PROXY"
+      },
+      "contact_event_report": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/gripper_contact_events_follower_left_mu_0.300.json",
+      "contact_report_bodies": [
+        "/World/Robot/follower_left_left_finger_link",
+        "/World/Robot/follower_left_right_finger_link"
+      ],
+      "contact_subscription_active_during_trial": true,
+      "contact_summary": {
+        "contact_point_count": 1393,
+        "impulses_finite": true,
+        "left_finger_contact": true,
+        "maximum_excessive_penetration_run_steps": 1,
+        "maximum_penetration_depth_m": 0.014812054112553596,
+        "minimum_separation_m": -0.014812054112553596,
+        "persistent_penetration": false,
+        "right_finger_contact": true,
+        "unexpected_gripper_collision": false,
+        "unexpected_gripper_collision_events": []
+      },
+      "event_count": 637,
+      "failed_checks": [
+        "limits_ok",
+        "mimic_ok",
+        "held_for_required_steps"
+      ],
+      "fixed_bottle_contact": {
+        "contact_point_count": 1252,
+        "impulses_finite": true,
+        "left_finger_contact": true,
+        "maximum_excessive_penetration_run_steps": 0,
+        "maximum_penetration_depth_m": 1.9699336917256005e-05,
+        "minimum_separation_m": -1.9699336917256005e-05,
+        "persistent_penetration": false,
+        "right_finger_contact": true,
+        "unexpected_gripper_collision": false,
+        "unexpected_gripper_collision_events": []
+      },
+      "friction": 0.3,
+      "hard_blockers": [
+        "measured fingertip/bottle friction",
+        "complete measured bottle collision profile and inertia",
+        "real gripper motor-angle/aperture calibration",
+        "calibrated force-drive response"
+      ],
+      "isaac_sim": "5.1.0.0",
+      "kit": "107.3.3",
+      "material": {
+        "bound_to": [
+          "/World/Robot/follower_left_left_finger_link/collisions",
+          "/World/Robot/follower_left_right_finger_link/collisions"
+        ],
+        "dynamic_friction": 0.3,
+        "path": "/World/Materials/temporary_fingertip",
+        "restitution": 0.0,
+        "static_friction": 0.3,
+        "status": "TEMPORARY_UNCALIBRATED"
+      },
+      "metrics": {
+        "aperture_monotonic": true,
+        "bilateral_contact_before_release": true,
+        "close_direction_ok": true,
+        "finite_state": true,
+        "held_for_required_steps": false,
+        "impulses_finite": true,
+        "left_finger_contact": true,
+        "limits_ok": false,
+        "mimic_ok": false,
+        "open_direction_ok": true,
+        "persistent_penetration": false,
+        "readback_ok": true,
+        "released_without_constraint": true,
+        "right_finger_contact": true,
+        "solve_articulation_contact_last_ok": true,
+        "unexpected_gripper_collision": false
+      },
+      "passed_interface_gate": false,
+      "physics": {
+        "contact_rest_offsets_authored": false,
+        "self_collision": false,
+        "solve_articulation_contact_last_readback": true,
+        "solve_articulation_contact_last_requested": true
+      },
+      "released_hold": {
+        "constraint_found": false,
+        "constraint_paths": [],
+        "contact_event_count": 39,
+        "drop_m": 17.413362473249435,
+        "final_position_world_m": [
+          0.4968430697917938,
+          0.01393860299140215,
+          -17.109779357910156
+        ],
+        "maximum_drop_m": 0.01,
+        "release_frame": 390,
+        "release_position_world_m": [
+          0.24753692746162415,
+          -0.0010352007811889052,
+          0.3035831153392792
+        ],
+        "required_steps": 120,
+        "required_time_s": 2.0,
+        "support_surface": "NONE_BOTTLE_STARTED_SUSPENDED",
+        "total_displacement_m": 17.41515347024466
+      },
+      "robot": "follower_left",
+      "schema_version": 1,
+      "states": {
+        "closed_against_fixed_bottle": {
+          "left_finger_m": 0.04503165930509567,
+          "right_finger_m": -0.0469985231757164
+        },
+        "open": {
+          "left_finger_m": 0.056999921798706055,
+          "right_finger_m": -0.0589350089430809
+        },
+        "start": {
+          "left_finger_m": 0.02180425636470318,
+          "right_finger_m": -0.020024938508868217
+        }
+      },
+      "status": "FAIL"
+    },
+    {
+      "aperture": {
+        "closed_against_fixed_bottle": {
+          "center_distance_m": 0.08550981572289769,
+          "closing_axis_world": [
+            -0.0003154482358441706,
+            -0.9999999241386113,
+            -0.00022850641601442577
+          ],
+          "midpoint_world_m": [
+            0.23220765902190302,
+            -0.0010382400913084844,
+            0.30436784604105643
+          ],
+          "surface_gap_m": 0.06492723294325435
+        },
+        "left_closed_bounds": {
+          "center_m": [
+            0.2322211459821616,
+            0.041716664526693675,
+            0.3043776158118189
+          ],
+          "colliders": [
+            "/World/Robot/follower_left_left_finger_link/collisions/gripper_finger/node_STL_BINARY_"
+          ],
+          "half_extent_m": [
+            0.04365018529958209,
+            0.010269509805102398,
+            0.035067275496360434
+          ],
+          "maximum_m": [
+            0.2758713312817437,
+            0.05198617433179607,
+            0.33944489130817934
+          ],
+          "minimum_m": [
+            0.1885709606825795,
+            0.03144715472159128,
+            0.2693103403154585
+          ],
+          "root": "/World/Robot/follower_left_left_finger_link/collisions"
+        },
+        "left_open_bounds": {
+          "center_m": [
+            0.2475473494454331,
+            0.05370249352600061,
+            0.30364374727641275
+          ],
+          "colliders": [
+            "/World/Robot/follower_left_left_finger_link/collisions/gripper_finger/node_STL_BINARY_"
+          ],
+          "half_extent_m": [
+            0.04301651919726489,
+            0.010294956250811643,
+            0.034181417481028126
+          ],
+          "maximum_m": [
+            0.290563868642698,
+            0.06399744977681225,
+            0.33782516475744084
+          ],
+          "minimum_m": [
+            0.20453083024816823,
+            0.043407537275188965,
+            0.2694623297953846
+          ],
+          "root": "/World/Robot/follower_left_left_finger_link/collisions"
+        },
+        "measurement": "world AABB support distance along measured closing axis",
+        "open": {
+          "center_distance_m": 0.10947545767427287,
+          "closing_axis_world": [
+            -0.00019052871743492741,
+            -0.9999993683947869,
+            -0.0011076591692003868
+          ],
+          "midpoint_world_m": [
+            0.24753692033616248,
+            -0.0010352007385009375,
+            0.3035831165291651
+          ],
+          "surface_gap_m": 0.08879345298045135
+        },
+        "right_closed_bounds": {
+          "center_m": [
+            0.23219417206164444,
+            -0.043793144709310644,
+            0.304358076270294
+          ],
+          "colliders": [
+            "/World/Robot/follower_left_right_finger_link/collisions/gripper_finger/node_STL_BINARY_"
+          ],
+          "half_extent_m": [
+            0.043650184109967835,
+            0.010269509590357658,
+            0.03506727504514354
+          ],
+          "maximum_m": [
+            0.2758443561716123,
+            -0.03352363511895298,
+            0.3394253513154375
+          ],
+          "minimum_m": [
+            0.18854398795167662,
+            -0.0540626542996683,
+            0.2692908012251504
+          ],
+          "root": "/World/Robot/follower_left_right_finger_link/collisions"
+        },
+        "right_open_bounds": {
+          "center_m": [
+            0.24752649122689183,
+            -0.05577289500300248,
+            0.30352248578191743
+          ],
+          "colliders": [
+            "/World/Robot/follower_left_right_finger_link/collisions/gripper_finger/node_STL_BINARY_"
+          ],
+          "half_extent_m": [
+            0.04301651537506965,
+            0.01029494696373074,
+            0.03418141681024059
+          ],
+          "maximum_m": [
+            0.2905430066019615,
+            -0.04547794803927174,
+            0.33770390259215805
+          ],
+          "minimum_m": [
+            0.20450997585182218,
+            -0.06606784196673322,
+            0.26934106897167687
+          ],
+          "root": "/World/Robot/follower_left_right_finger_link/collisions"
+        }
+      },
+      "asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/configuration/follower_left_debug_acceleration_drive.usd",
+      "bottle": {
+        "axis": "Z",
+        "diameter_m": 0.065,
+        "height_m": 0.21,
+        "inertia_status": "ENGINEERING_DERIVED_UNCALIBRATED",
+        "mass_kg": 0.02,
+        "material": {
+          "dynamic_friction": 0.5,
+          "path": "/World/Materials/temporary_bottle",
+          "restitution": 0.0,
+          "static_friction": 0.5,
+          "status": "TEMPORARY_UNCALIBRATED"
+        },
+        "path": "/World/BottleProxy",
+        "shape": "cylinder",
+        "status": "PARTIAL_MEASURED_BODY_PROXY"
+      },
+      "contact_event_report": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/gripper_contact_events_follower_left_mu_0.500.json",
+      "contact_report_bodies": [
+        "/World/Robot/follower_left_left_finger_link",
+        "/World/Robot/follower_left_right_finger_link"
+      ],
+      "contact_subscription_active_during_trial": true,
+      "contact_summary": {
+        "contact_point_count": 1416,
+        "impulses_finite": true,
+        "left_finger_contact": true,
+        "maximum_excessive_penetration_run_steps": 1,
+        "maximum_penetration_depth_m": 0.014812054112553596,
+        "minimum_separation_m": -0.014812054112553596,
+        "persistent_penetration": false,
+        "right_finger_contact": true,
+        "unexpected_gripper_collision": false,
+        "unexpected_gripper_collision_events": []
+      },
+      "event_count": 647,
+      "failed_checks": [
+        "limits_ok",
+        "mimic_ok",
+        "held_for_required_steps"
+      ],
+      "fixed_bottle_contact": {
+        "contact_point_count": 1252,
+        "impulses_finite": true,
+        "left_finger_contact": true,
+        "maximum_excessive_penetration_run_steps": 0,
+        "maximum_penetration_depth_m": 1.9989909560536034e-05,
+        "minimum_separation_m": -1.9989909560536034e-05,
+        "persistent_penetration": false,
+        "right_finger_contact": true,
+        "unexpected_gripper_collision": false,
+        "unexpected_gripper_collision_events": []
+      },
+      "friction": 0.5,
+      "hard_blockers": [
+        "measured fingertip/bottle friction",
+        "complete measured bottle collision profile and inertia",
+        "real gripper motor-angle/aperture calibration",
+        "calibrated force-drive response"
+      ],
+      "isaac_sim": "5.1.0.0",
+      "kit": "107.3.3",
+      "material": {
+        "bound_to": [
+          "/World/Robot/follower_left_left_finger_link/collisions",
+          "/World/Robot/follower_left_right_finger_link/collisions"
+        ],
+        "dynamic_friction": 0.5,
+        "path": "/World/Materials/temporary_fingertip",
+        "restitution": 0.0,
+        "static_friction": 0.5,
+        "status": "TEMPORARY_UNCALIBRATED"
+      },
+      "metrics": {
+        "aperture_monotonic": true,
+        "bilateral_contact_before_release": true,
+        "close_direction_ok": true,
+        "finite_state": true,
+        "held_for_required_steps": false,
+        "impulses_finite": true,
+        "left_finger_contact": true,
+        "limits_ok": false,
+        "mimic_ok": false,
+        "open_direction_ok": true,
+        "persistent_penetration": false,
+        "readback_ok": true,
+        "released_without_constraint": true,
+        "right_finger_contact": true,
+        "solve_articulation_contact_last_ok": true,
+        "unexpected_gripper_collision": false
+      },
+      "passed_interface_gate": false,
+      "physics": {
+        "contact_rest_offsets_authored": false,
+        "self_collision": false,
+        "solve_articulation_contact_last_readback": true,
+        "solve_articulation_contact_last_requested": true
+      },
+      "released_hold": {
+        "constraint_found": false,
+        "constraint_paths": [],
+        "contact_event_count": 49,
+        "drop_m": 15.296288460493088,
+        "final_position_world_m": [
+          0.2405977100133896,
+          0.004098908044397831,
+          -14.992705345153809
+        ],
+        "maximum_drop_m": 0.01,
+        "release_frame": 390,
+        "release_position_world_m": [
+          0.24753692746162415,
+          -0.0010352007811889052,
+          0.3035831153392792
+        ],
+        "required_steps": 120,
+        "required_time_s": 2.0,
+        "support_surface": "NONE_BOTTLE_STARTED_SUSPENDED",
+        "total_displacement_m": 15.29629089611028
+      },
+      "robot": "follower_left",
+      "schema_version": 1,
+      "states": {
+        "closed_against_fixed_bottle": {
+          "left_finger_m": 0.04501626640558243,
+          "right_finger_m": -0.04699511453509331
+        },
+        "open": {
+          "left_finger_m": 0.056999921798706055,
+          "right_finger_m": -0.0589350089430809
+        },
+        "start": {
+          "left_finger_m": 0.02180425636470318,
+          "right_finger_m": -0.020024938508868217
+        }
+      },
+      "status": "FAIL"
+    },
+    {
+      "aperture": {
+        "closed_against_fixed_bottle": {
+          "center_distance_m": 0.0855076843576289,
+          "closing_axis_world": [
+            -0.00031805799766936645,
+            -0.9999999347087842,
+            -0.00017152707492745615
+          ],
+          "midpoint_world_m": [
+            0.23220780558635484,
+            -0.0010373695387520948,
+            0.3043634135407881
+          ],
+          "surface_gap_m": 0.0649327145972702
+        },
+        "left_closed_bounds": {
+          "center_m": [
+            0.2322214037877909,
+            0.04171646984861202,
+            0.30437074698227895
+          ],
+          "colliders": [
+            "/World/Robot/follower_left_left_finger_link/collisions/gripper_finger/node_STL_BINARY_"
+          ],
+          "half_extent_m": [
+            0.0436499951087477,
+            0.01026758970106684,
+            0.035066380060572916
+          ],
+          "maximum_m": [
+            0.2758713988965386,
+            0.051984059549678864,
+            0.33943712704285184
+          ],
+          "minimum_m": [
+            0.1885714086790432,
+            0.03144888014754518,
+            0.269304366921706
+          ],
+          "root": "/World/Robot/follower_left_left_finger_link/collisions"
+        },
+        "left_open_bounds": {
+          "center_m": [
+            0.2475473494454331,
+            0.05370249352600061,
+            0.30364374727641275
+          ],
+          "colliders": [
+            "/World/Robot/follower_left_left_finger_link/collisions/gripper_finger/node_STL_BINARY_"
+          ],
+          "half_extent_m": [
+            0.04301651919726489,
+            0.010294956250811643,
+            0.034181417481028126
+          ],
+          "maximum_m": [
+            0.290563868642698,
+            0.06399744977681225,
+            0.33782516475744084
+          ],
+          "minimum_m": [
+            0.20453083024816823,
+            0.043407537275188965,
+            0.2694623297953846
+          ],
+          "root": "/World/Robot/follower_left_left_finger_link/collisions"
+        },
+        "measurement": "world AABB support distance along measured closing axis",
+        "open": {
+          "center_distance_m": 0.10947545767427287,
+          "closing_axis_world": [
+            -0.00019052871743492741,
+            -0.9999993683947869,
+            -0.0011076591692003868
+          ],
+          "midpoint_world_m": [
+            0.24753692033616248,
+            -0.0010352007385009375,
+            0.3035831165291651
+          ],
+          "surface_gap_m": 0.08879345298045135
+        },
+        "right_closed_bounds": {
+          "center_m": [
+            0.23219420738491878,
+            -0.04379120892611621,
+            0.30435608009929727
+          ],
+          "colliders": [
+            "/World/Robot/follower_left_right_finger_link/collisions/gripper_finger/node_STL_BINARY_"
+          ],
+          "half_extent_m": [
+            0.04364999306449288,
+            0.0102675852734028,
+            0.03506638018009381
+          ],
+          "maximum_m": [
+            0.27584420044941166,
+            -0.03352362365271341,
+            0.33942246027939105
+          ],
+          "minimum_m": [
+            0.1885442143204259,
+            -0.054058794199519006,
+            0.26928969991920343
+          ],
+          "root": "/World/Robot/follower_left_right_finger_link/collisions"
+        },
+        "right_open_bounds": {
+          "center_m": [
+            0.24752649122689183,
+            -0.05577289500300248,
+            0.30352248578191743
+          ],
+          "colliders": [
+            "/World/Robot/follower_left_right_finger_link/collisions/gripper_finger/node_STL_BINARY_"
+          ],
+          "half_extent_m": [
+            0.04301651537506965,
+            0.01029494696373074,
+            0.03418141681024059
+          ],
+          "maximum_m": [
+            0.2905430066019615,
+            -0.04547794803927174,
+            0.33770390259215805
+          ],
+          "minimum_m": [
+            0.20450997585182218,
+            -0.06606784196673322,
+            0.26934106897167687
+          ],
+          "root": "/World/Robot/follower_left_right_finger_link/collisions"
+        }
+      },
+      "asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/configuration/follower_left_debug_acceleration_drive.usd",
+      "bottle": {
+        "axis": "Z",
+        "diameter_m": 0.065,
+        "height_m": 0.21,
+        "inertia_status": "ENGINEERING_DERIVED_UNCALIBRATED",
+        "mass_kg": 0.02,
+        "material": {
+          "dynamic_friction": 0.7,
+          "path": "/World/Materials/temporary_bottle",
+          "restitution": 0.0,
+          "static_friction": 0.7,
+          "status": "TEMPORARY_UNCALIBRATED"
+        },
+        "path": "/World/BottleProxy",
+        "shape": "cylinder",
+        "status": "PARTIAL_MEASURED_BODY_PROXY"
+      },
+      "contact_event_report": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/gripper_contact_events_follower_left_mu_0.700.json",
+      "contact_report_bodies": [
+        "/World/Robot/follower_left_left_finger_link",
+        "/World/Robot/follower_left_right_finger_link"
+      ],
+      "contact_subscription_active_during_trial": true,
+      "contact_summary": {
+        "contact_point_count": 1570,
+        "impulses_finite": true,
+        "left_finger_contact": true,
+        "maximum_excessive_penetration_run_steps": 1,
+        "maximum_penetration_depth_m": 0.014812054112553596,
+        "minimum_separation_m": -0.014812054112553596,
+        "persistent_penetration": false,
+        "right_finger_contact": true,
+        "unexpected_gripper_collision": false,
+        "unexpected_gripper_collision_events": []
+      },
+      "event_count": 713,
+      "failed_checks": [
+        "limits_ok",
+        "mimic_ok",
+        "held_for_required_steps"
+      ],
+      "fixed_bottle_contact": {
+        "contact_point_count": 1252,
+        "impulses_finite": true,
+        "left_finger_contact": true,
+        "maximum_excessive_penetration_run_steps": 0,
+        "maximum_penetration_depth_m": 2.010539174079895e-05,
+        "minimum_separation_m": -2.010539174079895e-05,
+        "persistent_penetration": false,
+        "right_finger_contact": true,
+        "unexpected_gripper_collision": false,
+        "unexpected_gripper_collision_events": []
+      },
+      "friction": 0.7,
+      "hard_blockers": [
+        "measured fingertip/bottle friction",
+        "complete measured bottle collision profile and inertia",
+        "real gripper motor-angle/aperture calibration",
+        "calibrated force-drive response"
+      ],
+      "isaac_sim": "5.1.0.0",
+      "kit": "107.3.3",
+      "material": {
+        "bound_to": [
+          "/World/Robot/follower_left_left_finger_link/collisions",
+          "/World/Robot/follower_left_right_finger_link/collisions"
+        ],
+        "dynamic_friction": 0.7,
+        "path": "/World/Materials/temporary_fingertip",
+        "restitution": 0.0,
+        "static_friction": 0.7,
+        "status": "TEMPORARY_UNCALIBRATED"
+      },
+      "metrics": {
+        "aperture_monotonic": true,
+        "bilateral_contact_before_release": true,
+        "close_direction_ok": true,
+        "finite_state": true,
+        "held_for_required_steps": false,
+        "impulses_finite": true,
+        "left_finger_contact": true,
+        "limits_ok": false,
+        "mimic_ok": false,
+        "open_direction_ok": true,
+        "persistent_penetration": false,
+        "readback_ok": true,
+        "released_without_constraint": true,
+        "right_finger_contact": true,
+        "solve_articulation_contact_last_ok": true,
+        "unexpected_gripper_collision": false
+      },
+      "passed_interface_gate": false,
+      "physics": {
+        "contact_rest_offsets_authored": false,
+        "self_collision": false,
+        "solve_articulation_contact_last_readback": true,
+        "solve_articulation_contact_last_requested": true
+      },
+      "released_hold": {
+        "constraint_found": false,
+        "constraint_paths": [],
+        "contact_event_count": 115,
+        "drop_m": 0.049884676933288574,
+        "final_position_world_m": [
+          0.2727723717689514,
+          -0.009030270390212536,
+          0.2536984384059906
+        ],
+        "maximum_drop_m": 0.01,
+        "release_frame": 390,
+        "release_position_world_m": [
+          0.24753692746162415,
+          -0.0010352007811889052,
+          0.3035831153392792
+        ],
+        "required_steps": 120,
+        "required_time_s": 2.0,
+        "support_surface": "NONE_BOTTLE_STARTED_SUSPENDED",
+        "total_displacement_m": 0.056473266066165526
+      },
+      "robot": "follower_left",
+      "schema_version": 1,
+      "states": {
+        "closed_against_fixed_bottle": {
+          "left_finger_m": 0.04501403868198395,
+          "right_finger_m": -0.04699413478374481
+        },
+        "open": {
+          "left_finger_m": 0.056999921798706055,
+          "right_finger_m": -0.0589350089430809
+        },
+        "start": {
+          "left_finger_m": 0.02180425636470318,
+          "right_finger_m": -0.020024938508868217
+        }
+      },
+      "status": "FAIL"
+    },
+    {
+      "aperture": {
+        "closed_against_fixed_bottle": {
+          "center_distance_m": 0.08553158867084582,
+          "closing_axis_world": [
+            -0.0002996798064384214,
+            -0.9999998274137782,
+            -0.0005053359547535937
+          ],
+          "midpoint_world_m": [
+            0.2322064188718591,
+            -0.001033775309369142,
+            0.3043736813104757
+          ],
+          "surface_gap_m": 0.06491272026981014
+        },
+        "left_closed_bounds": {
+          "center_m": [
+            0.23221923491682775,
+            0.0417320116452669,
+            0.304395292403987
+          ],
+          "colliders": [
+            "/World/Robot/follower_right_left_finger_link/collisions/gripper_finger/node_STL_BINARY_"
+          ],
+          "half_extent_m": [
+            0.04365162159139077,
+            0.010278635877516498,
+            0.03507238721867839
+          ],
+          "maximum_m": [
+            0.2758708565082185,
+            0.0520106475227834,
+            0.3394676796226654
+          ],
+          "minimum_m": [
+            0.18856761332543698,
+            0.031453375767750404,
+            0.2693229051853086
+          ],
+          "root": "/World/Robot/follower_right_left_finger_link/collisions"
+        },
+        "left_open_bounds": {
+          "center_m": [
+            0.2475473494454331,
+            0.05370249352600061,
+            0.30364374727641275
+          ],
+          "colliders": [
+            "/World/Robot/follower_right_left_finger_link/collisions/gripper_finger/node_STL_BINARY_"
+          ],
+          "half_extent_m": [
+            0.04301651919726489,
+            0.010294956250811643,
+            0.034181417481028126
+          ],
+          "maximum_m": [
+            0.290563868642698,
+            0.06399744977681225,
+            0.33782516475744084
+          ],
+          "minimum_m": [
+            0.20453083024816823,
+            0.043407537275188965,
+            0.2694623297953846
+          ],
+          "root": "/World/Robot/follower_right_left_finger_link/collisions"
+        },
+        "measurement": "world AABB support distance along measured closing axis",
+        "open": {
+          "center_distance_m": 0.10947545767427287,
+          "closing_axis_world": [
+            -0.00019052871743492741,
+            -0.9999993683947869,
+            -0.0011076591692003868
+          ],
+          "midpoint_world_m": [
+            0.24753692033616248,
+            -0.0010352007385009375,
+            0.3035831165291651
+          ],
+          "surface_gap_m": 0.08879345298045135
+        },
+        "right_closed_bounds": {
+          "center_m": [
+            0.2321936028268905,
+            -0.043799562264005186,
+            0.3043520702169644
+          ],
+          "colliders": [
+            "/World/Robot/follower_right_right_finger_link/collisions/gripper_finger/node_STL_BINARY_"
+          ],
+          "half_extent_m": [
+            0.04365161778646194,
+            0.01027862637742856,
+            0.035072386330865096
+          ],
+          "maximum_m": [
+            0.2758452206133524,
+            -0.033520935886576626,
+            0.3394244565478295
+          ],
+          "minimum_m": [
+            0.18854198504042854,
+            -0.054078188641433746,
+            0.2692796838860993
+          ],
+          "root": "/World/Robot/follower_right_right_finger_link/collisions"
+        },
+        "right_open_bounds": {
+          "center_m": [
+            0.24752649122689183,
+            -0.05577289500300248,
+            0.30352248578191743
+          ],
+          "colliders": [
+            "/World/Robot/follower_right_right_finger_link/collisions/gripper_finger/node_STL_BINARY_"
+          ],
+          "half_extent_m": [
+            0.04301651537506965,
+            0.01029494696373074,
+            0.03418141681024059
+          ],
+          "maximum_m": [
+            0.2905430066019615,
+            -0.04547794803927174,
+            0.33770390259215805
+          ],
+          "minimum_m": [
+            0.20450997585182218,
+            -0.06606784196673322,
+            0.26934106897167687
+          ],
+          "root": "/World/Robot/follower_right_right_finger_link/collisions"
+        }
+      },
+      "asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/configuration/follower_right_debug_acceleration_drive.usd",
+      "bottle": {
+        "axis": "Z",
+        "diameter_m": 0.065,
+        "height_m": 0.21,
+        "inertia_status": "ENGINEERING_DERIVED_UNCALIBRATED",
+        "mass_kg": 0.02,
+        "material": {
+          "dynamic_friction": 0.3,
+          "path": "/World/Materials/temporary_bottle",
+          "restitution": 0.0,
+          "static_friction": 0.3,
+          "status": "TEMPORARY_UNCALIBRATED"
+        },
+        "path": "/World/BottleProxy",
+        "shape": "cylinder",
+        "status": "PARTIAL_MEASURED_BODY_PROXY"
+      },
+      "contact_event_report": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/gripper_contact_events_follower_right_mu_0.300.json",
+      "contact_report_bodies": [
+        "/World/Robot/follower_right_left_finger_link",
+        "/World/Robot/follower_right_right_finger_link"
+      ],
+      "contact_subscription_active_during_trial": true,
+      "contact_summary": {
+        "contact_point_count": 1393,
+        "impulses_finite": true,
+        "left_finger_contact": true,
+        "maximum_excessive_penetration_run_steps": 1,
+        "maximum_penetration_depth_m": 0.014812054112553596,
+        "minimum_separation_m": -0.014812054112553596,
+        "persistent_penetration": false,
+        "right_finger_contact": true,
+        "unexpected_gripper_collision": false,
+        "unexpected_gripper_collision_events": []
+      },
+      "event_count": 637,
+      "failed_checks": [
+        "limits_ok",
+        "mimic_ok",
+        "held_for_required_steps"
+      ],
+      "fixed_bottle_contact": {
+        "contact_point_count": 1252,
+        "impulses_finite": true,
+        "left_finger_contact": true,
+        "maximum_excessive_penetration_run_steps": 0,
+        "maximum_penetration_depth_m": 1.9699336917256005e-05,
+        "minimum_separation_m": -1.9699336917256005e-05,
+        "persistent_penetration": false,
+        "right_finger_contact": true,
+        "unexpected_gripper_collision": false,
+        "unexpected_gripper_collision_events": []
+      },
+      "friction": 0.3,
+      "hard_blockers": [
+        "measured fingertip/bottle friction",
+        "complete measured bottle collision profile and inertia",
+        "real gripper motor-angle/aperture calibration",
+        "calibrated force-drive response"
+      ],
+      "isaac_sim": "5.1.0.0",
+      "kit": "107.3.3",
+      "material": {
+        "bound_to": [
+          "/World/Robot/follower_right_left_finger_link/collisions",
+          "/World/Robot/follower_right_right_finger_link/collisions"
+        ],
+        "dynamic_friction": 0.3,
+        "path": "/World/Materials/temporary_fingertip",
+        "restitution": 0.0,
+        "static_friction": 0.3,
+        "status": "TEMPORARY_UNCALIBRATED"
+      },
+      "metrics": {
+        "aperture_monotonic": true,
+        "bilateral_contact_before_release": true,
+        "close_direction_ok": true,
+        "finite_state": true,
+        "held_for_required_steps": false,
+        "impulses_finite": true,
+        "left_finger_contact": true,
+        "limits_ok": false,
+        "mimic_ok": false,
+        "open_direction_ok": true,
+        "persistent_penetration": false,
+        "readback_ok": true,
+        "released_without_constraint": true,
+        "right_finger_contact": true,
+        "solve_articulation_contact_last_ok": true,
+        "unexpected_gripper_collision": false
+      },
+      "passed_interface_gate": false,
+      "physics": {
+        "contact_rest_offsets_authored": false,
+        "self_collision": false,
+        "solve_articulation_contact_last_readback": true,
+        "solve_articulation_contact_last_requested": true
+      },
+      "released_hold": {
+        "constraint_found": false,
+        "constraint_paths": [],
+        "contact_event_count": 39,
+        "drop_m": 17.413362473249435,
+        "final_position_world_m": [
+          0.4968430697917938,
+          0.01393860299140215,
+          -17.109779357910156
+        ],
+        "maximum_drop_m": 0.01,
+        "release_frame": 390,
+        "release_position_world_m": [
+          0.24753692746162415,
+          -0.0010352007811889052,
+          0.3035831153392792
+        ],
+        "required_steps": 120,
+        "required_time_s": 2.0,
+        "support_surface": "NONE_BOTTLE_STARTED_SUSPENDED",
+        "total_displacement_m": 17.41515347024466
+      },
+      "robot": "follower_right",
+      "schema_version": 1,
+      "states": {
+        "closed_against_fixed_bottle": {
+          "left_finger_m": 0.04503165930509567,
+          "right_finger_m": -0.0469985231757164
+        },
+        "open": {
+          "left_finger_m": 0.056999921798706055,
+          "right_finger_m": -0.0589350089430809
+        },
+        "start": {
+          "left_finger_m": 0.02180425636470318,
+          "right_finger_m": -0.020024938508868217
+        }
+      },
+      "status": "FAIL"
+    },
+    {
+      "aperture": {
+        "closed_against_fixed_bottle": {
+          "center_distance_m": 0.08550981572289769,
+          "closing_axis_world": [
+            -0.0003154482358441706,
+            -0.9999999241386113,
+            -0.00022850641601442577
+          ],
+          "midpoint_world_m": [
+            0.23220765902190302,
+            -0.0010382400913084844,
+            0.30436784604105643
+          ],
+          "surface_gap_m": 0.06492723294325435
+        },
+        "left_closed_bounds": {
+          "center_m": [
+            0.2322211459821616,
+            0.041716664526693675,
+            0.3043776158118189
+          ],
+          "colliders": [
+            "/World/Robot/follower_right_left_finger_link/collisions/gripper_finger/node_STL_BINARY_"
+          ],
+          "half_extent_m": [
+            0.04365018529958209,
+            0.010269509805102398,
+            0.035067275496360434
+          ],
+          "maximum_m": [
+            0.2758713312817437,
+            0.05198617433179607,
+            0.33944489130817934
+          ],
+          "minimum_m": [
+            0.1885709606825795,
+            0.03144715472159128,
+            0.2693103403154585
+          ],
+          "root": "/World/Robot/follower_right_left_finger_link/collisions"
+        },
+        "left_open_bounds": {
+          "center_m": [
+            0.2475473494454331,
+            0.05370249352600061,
+            0.30364374727641275
+          ],
+          "colliders": [
+            "/World/Robot/follower_right_left_finger_link/collisions/gripper_finger/node_STL_BINARY_"
+          ],
+          "half_extent_m": [
+            0.04301651919726489,
+            0.010294956250811643,
+            0.034181417481028126
+          ],
+          "maximum_m": [
+            0.290563868642698,
+            0.06399744977681225,
+            0.33782516475744084
+          ],
+          "minimum_m": [
+            0.20453083024816823,
+            0.043407537275188965,
+            0.2694623297953846
+          ],
+          "root": "/World/Robot/follower_right_left_finger_link/collisions"
+        },
+        "measurement": "world AABB support distance along measured closing axis",
+        "open": {
+          "center_distance_m": 0.10947545767427287,
+          "closing_axis_world": [
+            -0.00019052871743492741,
+            -0.9999993683947869,
+            -0.0011076591692003868
+          ],
+          "midpoint_world_m": [
+            0.24753692033616248,
+            -0.0010352007385009375,
+            0.3035831165291651
+          ],
+          "surface_gap_m": 0.08879345298045135
+        },
+        "right_closed_bounds": {
+          "center_m": [
+            0.23219417206164444,
+            -0.043793144709310644,
+            0.304358076270294
+          ],
+          "colliders": [
+            "/World/Robot/follower_right_right_finger_link/collisions/gripper_finger/node_STL_BINARY_"
+          ],
+          "half_extent_m": [
+            0.043650184109967835,
+            0.010269509590357658,
+            0.03506727504514354
+          ],
+          "maximum_m": [
+            0.2758443561716123,
+            -0.03352363511895298,
+            0.3394253513154375
+          ],
+          "minimum_m": [
+            0.18854398795167662,
+            -0.0540626542996683,
+            0.2692908012251504
+          ],
+          "root": "/World/Robot/follower_right_right_finger_link/collisions"
+        },
+        "right_open_bounds": {
+          "center_m": [
+            0.24752649122689183,
+            -0.05577289500300248,
+            0.30352248578191743
+          ],
+          "colliders": [
+            "/World/Robot/follower_right_right_finger_link/collisions/gripper_finger/node_STL_BINARY_"
+          ],
+          "half_extent_m": [
+            0.04301651537506965,
+            0.01029494696373074,
+            0.03418141681024059
+          ],
+          "maximum_m": [
+            0.2905430066019615,
+            -0.04547794803927174,
+            0.33770390259215805
+          ],
+          "minimum_m": [
+            0.20450997585182218,
+            -0.06606784196673322,
+            0.26934106897167687
+          ],
+          "root": "/World/Robot/follower_right_right_finger_link/collisions"
+        }
+      },
+      "asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/configuration/follower_right_debug_acceleration_drive.usd",
+      "bottle": {
+        "axis": "Z",
+        "diameter_m": 0.065,
+        "height_m": 0.21,
+        "inertia_status": "ENGINEERING_DERIVED_UNCALIBRATED",
+        "mass_kg": 0.02,
+        "material": {
+          "dynamic_friction": 0.5,
+          "path": "/World/Materials/temporary_bottle",
+          "restitution": 0.0,
+          "static_friction": 0.5,
+          "status": "TEMPORARY_UNCALIBRATED"
+        },
+        "path": "/World/BottleProxy",
+        "shape": "cylinder",
+        "status": "PARTIAL_MEASURED_BODY_PROXY"
+      },
+      "contact_event_report": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/gripper_contact_events_follower_right_mu_0.500.json",
+      "contact_report_bodies": [
+        "/World/Robot/follower_right_left_finger_link",
+        "/World/Robot/follower_right_right_finger_link"
+      ],
+      "contact_subscription_active_during_trial": true,
+      "contact_summary": {
+        "contact_point_count": 1416,
+        "impulses_finite": true,
+        "left_finger_contact": true,
+        "maximum_excessive_penetration_run_steps": 1,
+        "maximum_penetration_depth_m": 0.014812054112553596,
+        "minimum_separation_m": -0.014812054112553596,
+        "persistent_penetration": false,
+        "right_finger_contact": true,
+        "unexpected_gripper_collision": false,
+        "unexpected_gripper_collision_events": []
+      },
+      "event_count": 647,
+      "failed_checks": [
+        "limits_ok",
+        "mimic_ok",
+        "held_for_required_steps"
+      ],
+      "fixed_bottle_contact": {
+        "contact_point_count": 1252,
+        "impulses_finite": true,
+        "left_finger_contact": true,
+        "maximum_excessive_penetration_run_steps": 0,
+        "maximum_penetration_depth_m": 1.9989909560536034e-05,
+        "minimum_separation_m": -1.9989909560536034e-05,
+        "persistent_penetration": false,
+        "right_finger_contact": true,
+        "unexpected_gripper_collision": false,
+        "unexpected_gripper_collision_events": []
+      },
+      "friction": 0.5,
+      "hard_blockers": [
+        "measured fingertip/bottle friction",
+        "complete measured bottle collision profile and inertia",
+        "real gripper motor-angle/aperture calibration",
+        "calibrated force-drive response"
+      ],
+      "isaac_sim": "5.1.0.0",
+      "kit": "107.3.3",
+      "material": {
+        "bound_to": [
+          "/World/Robot/follower_right_left_finger_link/collisions",
+          "/World/Robot/follower_right_right_finger_link/collisions"
+        ],
+        "dynamic_friction": 0.5,
+        "path": "/World/Materials/temporary_fingertip",
+        "restitution": 0.0,
+        "static_friction": 0.5,
+        "status": "TEMPORARY_UNCALIBRATED"
+      },
+      "metrics": {
+        "aperture_monotonic": true,
+        "bilateral_contact_before_release": true,
+        "close_direction_ok": true,
+        "finite_state": true,
+        "held_for_required_steps": false,
+        "impulses_finite": true,
+        "left_finger_contact": true,
+        "limits_ok": false,
+        "mimic_ok": false,
+        "open_direction_ok": true,
+        "persistent_penetration": false,
+        "readback_ok": true,
+        "released_without_constraint": true,
+        "right_finger_contact": true,
+        "solve_articulation_contact_last_ok": true,
+        "unexpected_gripper_collision": false
+      },
+      "passed_interface_gate": false,
+      "physics": {
+        "contact_rest_offsets_authored": false,
+        "self_collision": false,
+        "solve_articulation_contact_last_readback": true,
+        "solve_articulation_contact_last_requested": true
+      },
+      "released_hold": {
+        "constraint_found": false,
+        "constraint_paths": [],
+        "contact_event_count": 49,
+        "drop_m": 15.296288460493088,
+        "final_position_world_m": [
+          0.2405977100133896,
+          0.004098908044397831,
+          -14.992705345153809
+        ],
+        "maximum_drop_m": 0.01,
+        "release_frame": 390,
+        "release_position_world_m": [
+          0.24753692746162415,
+          -0.0010352007811889052,
+          0.3035831153392792
+        ],
+        "required_steps": 120,
+        "required_time_s": 2.0,
+        "support_surface": "NONE_BOTTLE_STARTED_SUSPENDED",
+        "total_displacement_m": 15.29629089611028
+      },
+      "robot": "follower_right",
+      "schema_version": 1,
+      "states": {
+        "closed_against_fixed_bottle": {
+          "left_finger_m": 0.04501626640558243,
+          "right_finger_m": -0.04699511453509331
+        },
+        "open": {
+          "left_finger_m": 0.056999921798706055,
+          "right_finger_m": -0.0589350089430809
+        },
+        "start": {
+          "left_finger_m": 0.02180425636470318,
+          "right_finger_m": -0.020024938508868217
+        }
+      },
+      "status": "FAIL"
+    },
+    {
+      "aperture": {
+        "closed_against_fixed_bottle": {
+          "center_distance_m": 0.0855076843576289,
+          "closing_axis_world": [
+            -0.00031805799766936645,
+            -0.9999999347087842,
+            -0.00017152707492745615
+          ],
+          "midpoint_world_m": [
+            0.23220780558635484,
+            -0.0010373695387520948,
+            0.3043634135407881
+          ],
+          "surface_gap_m": 0.0649327145972702
+        },
+        "left_closed_bounds": {
+          "center_m": [
+            0.2322214037877909,
+            0.04171646984861202,
+            0.30437074698227895
+          ],
+          "colliders": [
+            "/World/Robot/follower_right_left_finger_link/collisions/gripper_finger/node_STL_BINARY_"
+          ],
+          "half_extent_m": [
+            0.0436499951087477,
+            0.01026758970106684,
+            0.035066380060572916
+          ],
+          "maximum_m": [
+            0.2758713988965386,
+            0.051984059549678864,
+            0.33943712704285184
+          ],
+          "minimum_m": [
+            0.1885714086790432,
+            0.03144888014754518,
+            0.269304366921706
+          ],
+          "root": "/World/Robot/follower_right_left_finger_link/collisions"
+        },
+        "left_open_bounds": {
+          "center_m": [
+            0.2475473494454331,
+            0.05370249352600061,
+            0.30364374727641275
+          ],
+          "colliders": [
+            "/World/Robot/follower_right_left_finger_link/collisions/gripper_finger/node_STL_BINARY_"
+          ],
+          "half_extent_m": [
+            0.04301651919726489,
+            0.010294956250811643,
+            0.034181417481028126
+          ],
+          "maximum_m": [
+            0.290563868642698,
+            0.06399744977681225,
+            0.33782516475744084
+          ],
+          "minimum_m": [
+            0.20453083024816823,
+            0.043407537275188965,
+            0.2694623297953846
+          ],
+          "root": "/World/Robot/follower_right_left_finger_link/collisions"
+        },
+        "measurement": "world AABB support distance along measured closing axis",
+        "open": {
+          "center_distance_m": 0.10947545767427287,
+          "closing_axis_world": [
+            -0.00019052871743492741,
+            -0.9999993683947869,
+            -0.0011076591692003868
+          ],
+          "midpoint_world_m": [
+            0.24753692033616248,
+            -0.0010352007385009375,
+            0.3035831165291651
+          ],
+          "surface_gap_m": 0.08879345298045135
+        },
+        "right_closed_bounds": {
+          "center_m": [
+            0.23219420738491878,
+            -0.04379120892611621,
+            0.30435608009929727
+          ],
+          "colliders": [
+            "/World/Robot/follower_right_right_finger_link/collisions/gripper_finger/node_STL_BINARY_"
+          ],
+          "half_extent_m": [
+            0.04364999306449288,
+            0.0102675852734028,
+            0.03506638018009381
+          ],
+          "maximum_m": [
+            0.27584420044941166,
+            -0.03352362365271341,
+            0.33942246027939105
+          ],
+          "minimum_m": [
+            0.1885442143204259,
+            -0.054058794199519006,
+            0.26928969991920343
+          ],
+          "root": "/World/Robot/follower_right_right_finger_link/collisions"
+        },
+        "right_open_bounds": {
+          "center_m": [
+            0.24752649122689183,
+            -0.05577289500300248,
+            0.30352248578191743
+          ],
+          "colliders": [
+            "/World/Robot/follower_right_right_finger_link/collisions/gripper_finger/node_STL_BINARY_"
+          ],
+          "half_extent_m": [
+            0.04301651537506965,
+            0.01029494696373074,
+            0.03418141681024059
+          ],
+          "maximum_m": [
+            0.2905430066019615,
+            -0.04547794803927174,
+            0.33770390259215805
+          ],
+          "minimum_m": [
+            0.20450997585182218,
+            -0.06606784196673322,
+            0.26934106897167687
+          ],
+          "root": "/World/Robot/follower_right_right_finger_link/collisions"
+        }
+      },
+      "asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/configuration/follower_right_debug_acceleration_drive.usd",
+      "bottle": {
+        "axis": "Z",
+        "diameter_m": 0.065,
+        "height_m": 0.21,
+        "inertia_status": "ENGINEERING_DERIVED_UNCALIBRATED",
+        "mass_kg": 0.02,
+        "material": {
+          "dynamic_friction": 0.7,
+          "path": "/World/Materials/temporary_bottle",
+          "restitution": 0.0,
+          "static_friction": 0.7,
+          "status": "TEMPORARY_UNCALIBRATED"
+        },
+        "path": "/World/BottleProxy",
+        "shape": "cylinder",
+        "status": "PARTIAL_MEASURED_BODY_PROXY"
+      },
+      "contact_event_report": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/gripper_contact_events_follower_right_mu_0.700.json",
+      "contact_report_bodies": [
+        "/World/Robot/follower_right_left_finger_link",
+        "/World/Robot/follower_right_right_finger_link"
+      ],
+      "contact_subscription_active_during_trial": true,
+      "contact_summary": {
+        "contact_point_count": 1570,
+        "impulses_finite": true,
+        "left_finger_contact": true,
+        "maximum_excessive_penetration_run_steps": 1,
+        "maximum_penetration_depth_m": 0.014812054112553596,
+        "minimum_separation_m": -0.014812054112553596,
+        "persistent_penetration": false,
+        "right_finger_contact": true,
+        "unexpected_gripper_collision": false,
+        "unexpected_gripper_collision_events": []
+      },
+      "event_count": 713,
+      "failed_checks": [
+        "limits_ok",
+        "mimic_ok",
+        "held_for_required_steps"
+      ],
+      "fixed_bottle_contact": {
+        "contact_point_count": 1252,
+        "impulses_finite": true,
+        "left_finger_contact": true,
+        "maximum_excessive_penetration_run_steps": 0,
+        "maximum_penetration_depth_m": 2.010539174079895e-05,
+        "minimum_separation_m": -2.010539174079895e-05,
+        "persistent_penetration": false,
+        "right_finger_contact": true,
+        "unexpected_gripper_collision": false,
+        "unexpected_gripper_collision_events": []
+      },
+      "friction": 0.7,
+      "hard_blockers": [
+        "measured fingertip/bottle friction",
+        "complete measured bottle collision profile and inertia",
+        "real gripper motor-angle/aperture calibration",
+        "calibrated force-drive response"
+      ],
+      "isaac_sim": "5.1.0.0",
+      "kit": "107.3.3",
+      "material": {
+        "bound_to": [
+          "/World/Robot/follower_right_left_finger_link/collisions",
+          "/World/Robot/follower_right_right_finger_link/collisions"
+        ],
+        "dynamic_friction": 0.7,
+        "path": "/World/Materials/temporary_fingertip",
+        "restitution": 0.0,
+        "static_friction": 0.7,
+        "status": "TEMPORARY_UNCALIBRATED"
+      },
+      "metrics": {
+        "aperture_monotonic": true,
+        "bilateral_contact_before_release": true,
+        "close_direction_ok": true,
+        "finite_state": true,
+        "held_for_required_steps": false,
+        "impulses_finite": true,
+        "left_finger_contact": true,
+        "limits_ok": false,
+        "mimic_ok": false,
+        "open_direction_ok": true,
+        "persistent_penetration": false,
+        "readback_ok": true,
+        "released_without_constraint": true,
+        "right_finger_contact": true,
+        "solve_articulation_contact_last_ok": true,
+        "unexpected_gripper_collision": false
+      },
+      "passed_interface_gate": false,
+      "physics": {
+        "contact_rest_offsets_authored": false,
+        "self_collision": false,
+        "solve_articulation_contact_last_readback": true,
+        "solve_articulation_contact_last_requested": true
+      },
+      "released_hold": {
+        "constraint_found": false,
+        "constraint_paths": [],
+        "contact_event_count": 115,
+        "drop_m": 0.049884676933288574,
+        "final_position_world_m": [
+          0.2727723717689514,
+          -0.009030270390212536,
+          0.2536984384059906
+        ],
+        "maximum_drop_m": 0.01,
+        "release_frame": 390,
+        "release_position_world_m": [
+          0.24753692746162415,
+          -0.0010352007811889052,
+          0.3035831153392792
+        ],
+        "required_steps": 120,
+        "required_time_s": 2.0,
+        "support_surface": "NONE_BOTTLE_STARTED_SUSPENDED",
+        "total_displacement_m": 0.056473266066165526
+      },
+      "robot": "follower_right",
+      "schema_version": 1,
+      "states": {
+        "closed_against_fixed_bottle": {
+          "left_finger_m": 0.04501403868198395,
+          "right_finger_m": -0.04699413478374481
+        },
+        "open": {
+          "left_finger_m": 0.056999921798706055,
+          "right_finger_m": -0.0589350089430809
+        },
+        "start": {
+          "left_finger_m": 0.02180425636470318,
+          "right_finger_m": -0.020024938508868217
+        }
+      },
+      "status": "FAIL"
+    }
+  ]
+}

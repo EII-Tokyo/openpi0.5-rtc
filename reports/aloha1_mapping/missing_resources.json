@@ -1,0 +1,106 @@
+{
+  "generated_at": "2026-07-28T15:13:44+09:00",
+  "resources": [
+    {
+      "blocks": [
+        "camera_runtime_config",
+        "calibrated_camera_claim"
+      ],
+      "id": "rs_cam_yaml",
+      "path": "/home/eii/project/openpi0.5-rtc/third_party/aloha/config/rs_cam.yaml",
+      "reason": "required local resource was not found",
+      "status": "HARD_BLOCKER"
+    },
+    {
+      "blocks": [
+        "bringup_argument_equivalence_claim"
+      ],
+      "id": "aloha_bringup_launch_py",
+      "path": "/home/eii/project/openpi0.5-rtc/third_party/aloha/launch/aloha_bringup.launch.py",
+      "reason": "required local resource was not found",
+      "status": "HARD_BLOCKER"
+    },
+    {
+      "blocks": [
+        "motor_limit_and_drive_calibration"
+      ],
+      "id": "aloha_motor_specs_yaml",
+      "path": "/home/eii/project/openpi0.5-rtc/third_party/aloha/config/motor_specs.yaml",
+      "reason": "required local resource was not found",
+      "status": "HARD_BLOCKER"
+    },
+    {
+      "blocks": [
+        "active_ros_environment_claim"
+      ],
+      "id": "active_ros_distribution",
+      "path": null,
+      "reason": "ROS 2 Jazzy and Rolling are installed but ROS_DISTRO is unset; no active distribution can be claimed",
+      "status": "HARD_BLOCKER"
+    },
+    {
+      "blocks": [
+        "final_workcell_extrinsics"
+      ],
+      "id": "follower_base_mount_relation",
+      "path": null,
+      "reason": "a complete measured six-DoF left/right follower mounting calibration is not available",
+      "status": "HARD_BLOCKER"
+    },
+    {
+      "blocks": [
+        "final_table_collision_placement"
+      ],
+      "id": "tabletop_to_base_relation",
+      "path": null,
+      "reason": "table plan dimensions exist in project evidence, but the complete measured table-to-base transform is unavailable",
+      "status": "HARD_BLOCKER"
+    },
+    {
+      "blocks": [
+        "final_pipe_collision_and_pose"
+      ],
+      "id": "pipe_fixture_calibration",
+      "path": null,
+      "reason": "the real pipe geometry and fixture transform are not fully measured",
+      "status": "HARD_BLOCKER"
+    },
+    {
+      "blocks": [
+        "calibrated_bottle_dynamics"
+      ],
+      "id": "bottle_geometry_calibration",
+      "path": null,
+      "reason": "partial bottle measurements exist, but a complete collision profile and inertia measurement are unavailable",
+      "status": "HARD_BLOCKER"
+    },
+    {
+      "blocks": [
+        "calibrated_camera_claim"
+      ],
+      "id": "camera_intrinsics_and_extrinsics",
+      "path": null,
+      "reason": "complete intrinsics, distortion/cropping policy, and mounting extrinsics for all four cameras are unavailable",
+      "status": "HARD_BLOCKER"
+    },
+    {
+      "blocks": [
+        "sim2real_dynamics_claim"
+      ],
+      "id": "measured_link_dynamics",
+      "path": null,
+      "reason": "source URDF dynamics require real-system validation before sim-to-real equivalence can be claimed",
+      "status": "HARD_BLOCKER"
+    },
+    {
+      "blocks": [
+        "calibrated_grasp_friction_claim"
+      ],
+      "id": "measured_fingertip_friction",
+      "path": null,
+      "reason": "no compatible measured fingertip/bottle friction dataset was located",
+      "status": "HARD_BLOCKER"
+    }
+  ],
+  "schema_version": 1
+}

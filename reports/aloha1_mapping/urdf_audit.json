@@ -1,0 +1,2962 @@
+{
+  "robots": [
+    {
+      "dynamics": [
+        {
+          "center_of_mass_xyz": [
+            -0.0534774,
+            -0.000562575,
+            0.0205961
+          ],
+          "inertia": {
+            "ixx": 0.006024,
+            "ixy": 4.713e-05,
+            "ixz": 3.851e-06,
+            "iyy": 0.0017,
+            "iyz": -8.415e-05,
+            "izz": 0.007162
+          },
+          "inertial_origin_rpy": [
+            0.0,
+            0.0,
+            1.5707963267948966
+          ],
+          "link": "follower_left_base_link",
+          "mass": 0.969034,
+          "origin_explicit": true
+        },
+        {
+          "center_of_mass_xyz": [
+            0.000259233,
+            -3.3552e-06,
+            0.0116129
+          ],
+          "inertia": {
+            "ixx": 0.0009388,
+            "ixy": -1e-09,
+            "ixz": -1.91e-08,
+            "iyy": 0.001138,
+            "iyz": 5.9568e-06,
+            "izz": 0.001201
+          },
+          "inertial_origin_rpy": [
+            0.0,
+            0.0,
+            1.5707963267948966
+          ],
+          "link": "follower_left_shoulder_link",
+          "mass": 0.798614,
+          "origin_explicit": true
+        },
+        {
+          "center_of_mass_xyz": [
+            0.0206949,
+            4e-10,
+            0.226459
+          ],
+          "inertia": {
+            "ixx": 0.008925,
+            "ixy": 0.0,
+            "ixz": 0.0,
+            "iyy": 0.008937,
+            "iyz": 0.001201,
+            "izz": 0.0009357
+          },
+          "inertial_origin_rpy": [
+            0.0,
+            0.0,
+            1.5707963267948966
+          ],
+          "link": "follower_left_upper_arm_link",
+          "mass": 0.792592,
+          "origin_explicit": true
+        },
+        {
+          "center_of_mass_xyz": [
+            0.105723,
+            0.0,
+            0.0
+          ],
+          "inertia": {
+            "ixx": 0.0001524,
+            "ixy": -1.883e-05,
+            "ixz": -8.4064e-06,
+            "iyy": 0.001342,
+            "iyz": 1.2564e-06,
+            "izz": 0.001441
+          },
+          "inertial_origin_rpy": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "link": "follower_left_upper_forearm_link",
+          "mass": 0.322228,
+          "origin_explicit": true
+        },
+        {
+          "center_of_mass_xyz": [
+            0.0513477,
+            0.00680462,
+            0.0
+          ],
+          "inertia": {
+            "ixx": 0.0001753,
+            "ixy": -8.528e-05,
+            "ixz": 0.0,
+            "iyy": 0.0005269,
+            "iyz": 0.0,
+            "izz": 0.0005911
+          },
+          "inertial_origin_rpy": [
+            3.141592653589793,
+            0.0,
+            0.0
+          ],
+          "link": "follower_left_lower_forearm_link",
+          "mass": 0.414823,
+          "origin_explicit": true
+        },
+        {
+          "center_of_mass_xyz": [
+            0.046743,
+            -7.6652e-06,
+            0.010565
+          ],
+          "inertia": {
+            "ixx": 4.631e-05,
+            "ixy": 1.95e-08,
+            "ixz": 2.3e-09,
+            "iyy": 4.514e-05,
+            "iyz": 4.2002e-06,
+            "izz": 5.27e-05
+          },
+          "inertial_origin_rpy": [
+            0.0,
+            0.0,
+            1.5707963267948966
+          ],
+          "link": "follower_left_wrist_link",
+          "mass": 0.115395,
+          "origin_explicit": true
+        },
+        {
+          "center_of_mass_xyz": [
+            0.023001,
+            0.0,
+            0.011523
+          ],
+          "inertia": {
+            "ixx": 3.268e-05,
+            "ixy": 0.0,
+            "ixz": 0.0,
+            "iyy": 2.436e-05,
+            "iyz": 2.785e-07,
+            "izz": 2.119e-05
+          },
+          "inertial_origin_rpy": [
+            0.0,
+            0.0,
+            1.5707963267948966
+          ],
+          "link": "follower_left_gripper_link",
+          "mass": 0.097666,
+          "origin_explicit": true
+        },
+        {
+          "center_of_mass_xyz": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "inertia": {
+            "ixx": 0.0001,
+            "ixy": 0.0,
+            "ixz": 0.0,
+            "iyy": 0.0001,
+            "iyz": 0.0,
+            "izz": 0.0001
+          },
+          "inertial_origin_rpy": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "link": "follower_left_ee_arm_link",
+          "mass": 0.001,
+          "origin_explicit": false
+        },
+        {
+          "center_of_mass_xyz": [
+            0.002378,
+            2.85e-08,
+            0.0
+          ],
+          "inertia": {
+            "ixx": 2.0386e-06,
+            "ixy": 0.0,
+            "ixz": 6.559e-07,
+            "iyy": 4.2979e-06,
+            "iyz": 0.0,
+            "izz": 2.3796e-06
+          },
+          "inertial_origin_rpy": [
+            0.0,
+            0.0,
+            1.5707963267948966
+          ],
+          "link": "follower_left_gripper_prop_link",
+          "mass": 0.008009,
+          "origin_explicit": true
+        },
+        {
+          "center_of_mass_xyz": [
+            0.006794,
+            -4.272e-07,
+            -0.000776
+          ],
+          "inertia": {
+            "ixx": 7.895e-05,
+            "ixy": -1.2e-09,
+            "ixz": 1.341e-07,
+            "iyy": 0.0003283,
+            "iyz": 1.7465e-06,
+            "izz": 0.0003095
+          },
+          "inertial_origin_rpy": [
+            0.0,
+            0.0,
+            1.5707963267948966
+          ],
+          "link": "follower_left_gripper_bar_link",
+          "mass": 0.150986,
+          "origin_explicit": true
+        },
+        {
+          "center_of_mass_xyz": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "inertia": {
+            "ixx": 0.0001,
+            "ixy": 0.0,
+            "ixz": 0.0,
+            "iyy": 0.0001,
+            "iyz": 0.0,
+            "izz": 0.0001
+          },
+          "inertial_origin_rpy": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "link": "follower_left_fingers_link",
+          "mass": 0.001,
+          "origin_explicit": false
+        },
+        {
+          "center_of_mass_xyz": [
+            0.017344,
+            -0.0060692,
+            0.0
+          ],
+          "inertia": {
+            "ixx": 2.433e-05,
+            "ixy": -2.4004e-06,
+            "ixz": 0.0,
+            "iyy": 1.255e-05,
+            "iyz": 0.0,
+            "izz": 1.417e-05
+          },
+          "inertial_origin_rpy": [
+            3.141592653589793,
+            3.141592653589793,
+            1.5707963267948966
+          ],
+          "link": "follower_left_left_finger_link",
+          "mass": 0.034796,
+          "origin_explicit": true
+        },
+        {
+          "center_of_mass_xyz": [
+            0.017344,
+            0.0060692,
+            0.0
+          ],
+          "inertia": {
+            "ixx": 2.433e-05,
+            "ixy": 2.4001e-06,
+            "ixz": 0.0,
+            "iyy": 1.255e-05,
+            "iyz": 0.0,
+            "izz": 1.417e-05
+          },
+          "inertial_origin_rpy": [
+            0.0,
+            3.141592653589793,
+            1.5707963267948966
+          ],
+          "link": "follower_left_right_finger_link",
+          "mass": 0.034796,
+          "origin_explicit": true
+        },
+        {
+          "center_of_mass_xyz": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "inertia": {
+            "ixx": 0.0001,
+            "ixy": 0.0,
+            "ixz": 0.0,
+            "iyy": 0.0001,
+            "iyz": 0.0,
+            "izz": 0.0001
+          },
+          "inertial_origin_rpy": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "link": "follower_left_ee_gripper_link",
+          "mass": 0.001,
+          "origin_explicit": false
+        }
+      ],
+      "issues": [],
+      "joint_order": [
+        "waist",
+        "shoulder",
+        "elbow",
+        "forearm_roll",
+        "wrist_angle",
+        "wrist_rotate",
+        "ee_arm",
+        "gripper",
+        "gripper_bar",
+        "ee_bar",
+        "left_finger",
+        "right_finger",
+        "ee_gripper"
+      ],
+      "joints": [
+        {
+          "axis": "0 0 1",
+          "child": "follower_left_shoulder_link",
+          "effort": 10.0,
+          "lower": -3.141582653589793,
+          "mimic_multiplier": null,
+          "mimic_offset": null,
+          "mimic_parent": null,
+          "name": "waist",
+          "origin_rpy": "0 0 0",
+          "origin_xyz": "0 0 0.079",
+          "parent": "follower_left_base_link",
+          "type": "revolute",
+          "upper": 3.141582653589793,
+          "velocity": 3.141592653589793
+        },
+        {
+          "axis": "0 1 0",
+          "child": "follower_left_upper_arm_link",
+          "effort": 20.0,
+          "lower": -1.8500490071139892,
+          "mimic_multiplier": null,
+          "mimic_offset": null,
+          "mimic_parent": null,
+          "name": "shoulder",
+          "origin_rpy": "0 0 0",
+          "origin_xyz": "0 0 0.04805",
+          "parent": "follower_left_shoulder_link",
+          "type": "revolute",
+          "upper": 1.2566370614359172,
+          "velocity": 3.141592653589793
+        },
+        {
+          "axis": "0 1 0",
+          "child": "follower_left_upper_forearm_link",
+          "effort": 15.0,
+          "lower": -1.7627825445142729,
+          "mimic_multiplier": null,
+          "mimic_offset": null,
+          "mimic_parent": null,
+          "name": "elbow",
+          "origin_rpy": "0 0 0",
+          "origin_xyz": "0.05955 0 0.3",
+          "parent": "follower_left_upper_arm_link",
+          "type": "revolute",
+          "upper": 1.6057029118347832,
+          "velocity": 3.141592653589793
+        },
+        {
+          "axis": "1 0 0",
+          "child": "follower_left_lower_forearm_link",
+          "effort": 2.0,
+          "lower": -3.141582653589793,
+          "mimic_multiplier": null,
+          "mimic_offset": null,
+          "mimic_parent": null,
+          "name": "forearm_roll",
+          "origin_rpy": "0 0 0",
+          "origin_xyz": "0.2 0 0",
+          "parent": "follower_left_upper_forearm_link",
+          "type": "revolute",
+          "upper": 3.141582653589793,
+          "velocity": 3.141592653589793
+        },
+        {
+          "axis": "0 1 0",
+          "child": "follower_left_wrist_link",
+          "effort": 5.0,
+          "lower": -1.8675022996339325,
+          "mimic_multiplier": null,
+          "mimic_offset": null,
+          "mimic_parent": null,
+          "name": "wrist_angle",
+          "origin_rpy": "0 0 0",
+          "origin_xyz": "0.1 0 0",
+          "parent": "follower_left_lower_forearm_link",
+          "type": "revolute",
+          "upper": 2.234021442552742,
+          "velocity": 3.141592653589793
+        },
+        {
+          "axis": "1 0 0",
+          "child": "follower_left_gripper_link",
+          "effort": 1.0,
+          "lower": -3.141582653589793,
+          "mimic_multiplier": null,
+          "mimic_offset": null,
+          "mimic_parent": null,
+          "name": "wrist_rotate",
+          "origin_rpy": "0 0 0",
+          "origin_xyz": "0.069744 0 0",
+          "parent": "follower_left_wrist_link",
+          "type": "revolute",
+          "upper": 3.141582653589793,
+          "velocity": 3.141592653589793
+        },
+        {
+          "axis": "1 0 0",
+          "child": "follower_left_ee_arm_link",
+          "effort": null,
+          "lower": null,
+          "mimic_multiplier": null,
+          "mimic_offset": null,
+          "mimic_parent": null,
+          "name": "ee_arm",
+          "origin_rpy": "0 0 0",
+          "origin_xyz": "0.042825 0 0",
+          "parent": "follower_left_gripper_link",
+          "type": "fixed",
+          "upper": null,
+          "velocity": null
+        },
+        {
+          "axis": "1 0 0",
+          "child": "follower_left_gripper_prop_link",
+          "effort": 1.0,
+          "lower": null,
+          "mimic_multiplier": null,
+          "mimic_offset": null,
+          "mimic_parent": null,
+          "name": "gripper",
+          "origin_rpy": "0 0 0",
+          "origin_xyz": "0.005675 0 0",
+          "parent": "follower_left_ee_arm_link",
+          "type": "continuous",
+          "upper": null,
+          "velocity": 3.141592653589793
+        },
+        {
+          "axis": "1 0 0",
+          "child": "follower_left_gripper_bar_link",
+          "effort": null,
+          "lower": null,
+          "mimic_multiplier": null,
+          "mimic_offset": null,
+          "mimic_parent": null,
+          "name": "gripper_bar",
+          "origin_rpy": "0 0 0",
+          "origin_xyz": "0 0 0",
+          "parent": "follower_left_ee_arm_link",
+          "type": "fixed",
+          "upper": null,
+          "velocity": null
+        },
+        {
+          "axis": "1 0 0",
+          "child": "follower_left_fingers_link",
+          "effort": null,
+          "lower": null,
+          "mimic_multiplier": null,
+          "mimic_offset": null,
+          "mimic_parent": null,
+          "name": "ee_bar",
+          "origin_rpy": "0 0 0",
+          "origin_xyz": "0.025875 0 0",
+          "parent": "follower_left_gripper_bar_link",
+          "type": "fixed",
+          "upper": null,
+          "velocity": null
+        },
+        {
+          "axis": "0 1 0",
+          "child": "follower_left_left_finger_link",
+          "effort": 5.0,
+          "lower": 0.021,
+          "mimic_multiplier": null,
+          "mimic_offset": null,
+          "mimic_parent": null,
+          "name": "left_finger",
+          "origin_rpy": "0 0 0",
+          "origin_xyz": "0 0 0",
+          "parent": "follower_left_fingers_link",
+          "type": "prismatic",
+          "upper": 0.057,
+          "velocity": 1.0
+        },
+        {
+          "axis": "0 1 0",
+          "child": "follower_left_right_finger_link",
+          "effort": 5.0,
+          "lower": -0.057,
+          "mimic_multiplier": -1.0,
+          "mimic_offset": 0.0,
+          "mimic_parent": "left_finger",
+          "name": "right_finger",
+          "origin_rpy": "0 0 0",
+          "origin_xyz": "0 0 0",
+          "parent": "follower_left_fingers_link",
+          "type": "prismatic",
+          "upper": -0.021,
+          "velocity": 1.0
+        },
+        {
+          "axis": "1 0 0",
+          "child": "follower_left_ee_gripper_link",
+          "effort": null,
+          "lower": null,
+          "mimic_multiplier": null,
+          "mimic_offset": null,
+          "mimic_parent": null,
+          "name": "ee_gripper",
+          "origin_rpy": "0 0 0",
+          "origin_xyz": "0.0385 0 0",
+          "parent": "follower_left_fingers_link",
+          "type": "fixed",
+          "upper": null,
+          "velocity": null
+        }
+      ],
+      "link_order": [
+        "follower_left_base_link",
+        "follower_left_shoulder_link",
+        "follower_left_upper_arm_link",
+        "follower_left_upper_forearm_link",
+        "follower_left_lower_forearm_link",
+        "follower_left_wrist_link",
+        "follower_left_gripper_link",
+        "follower_left_ee_arm_link",
+        "follower_left_gripper_prop_link",
+        "follower_left_gripper_bar_link",
+        "follower_left_fingers_link",
+        "follower_left_left_finger_link",
+        "follower_left_right_finger_link",
+        "follower_left_ee_gripper_link"
+      ],
+      "meshes": [
+        {
+          "exists": true,
+          "link": "follower_left_base_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/base.stl",
+          "sha256": "d100cafe656671ca8fde98fb6a4cf2d1b746995c51c61c25ad9ea2715635d146",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/base.stl"
+        },
+        {
+          "exists": true,
+          "link": "follower_left_base_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/base.stl",
+          "sha256": "d100cafe656671ca8fde98fb6a4cf2d1b746995c51c61c25ad9ea2715635d146",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/base.stl"
+        },
+        {
+          "exists": true,
+          "link": "follower_left_shoulder_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/shoulder.stl",
+          "sha256": "139745a74055cb0b23430bb5bc032bf68cf7bea5e4975c8f4c04107ae005f7f0",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/shoulder.stl"
+        },
+        {
+          "exists": true,
+          "link": "follower_left_shoulder_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/shoulder.stl",
+          "sha256": "139745a74055cb0b23430bb5bc032bf68cf7bea5e4975c8f4c04107ae005f7f0",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/shoulder.stl"
+        },
+        {
+          "exists": true,
+          "link": "follower_left_upper_arm_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/upper_arm.stl",
+          "sha256": "900f236320dd3d500870c5fde763b2d47502d51e043a5c377875e70237108729",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/upper_arm.stl"
+        },
+        {
+          "exists": true,
+          "link": "follower_left_upper_arm_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/upper_arm.stl",
+          "sha256": "900f236320dd3d500870c5fde763b2d47502d51e043a5c377875e70237108729",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/upper_arm.stl"
+        },
+        {
+          "exists": true,
+          "link": "follower_left_upper_forearm_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/upper_forearm.stl",
+          "sha256": "4104fc54bbfb8a9b533029f1e7e3ade3d54d638372b3195daa0c98f57e0295b5",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/upper_forearm.stl"
+        },
+        {
+          "exists": true,
+          "link": "follower_left_upper_forearm_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/upper_forearm.stl",
+          "sha256": "4104fc54bbfb8a9b533029f1e7e3ade3d54d638372b3195daa0c98f57e0295b5",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/upper_forearm.stl"
+        },
+        {
+          "exists": true,
+          "link": "follower_left_lower_forearm_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/lower_forearm.stl",
+          "sha256": "66814e27fa728056416e25e02e89eb7d34c51d51c51e7c3df873829037ddc6b8",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/lower_forearm.stl"
+        },
+        {
+          "exists": true,
+          "link": "follower_left_lower_forearm_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/lower_forearm.stl",
+          "sha256": "66814e27fa728056416e25e02e89eb7d34c51d51c51e7c3df873829037ddc6b8",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/lower_forearm.stl"
+        },
+        {
+          "exists": true,
+          "link": "follower_left_wrist_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/wrist.stl",
+          "sha256": "90eb145c85627968c3776ae6de23ccff7e112c9dd713c46bc9acdfdaa859a048",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/wrist.stl"
+        },
+        {
+          "exists": true,
+          "link": "follower_left_wrist_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/wrist.stl",
+          "sha256": "90eb145c85627968c3776ae6de23ccff7e112c9dd713c46bc9acdfdaa859a048",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/wrist.stl"
+        },
+        {
+          "exists": true,
+          "link": "follower_left_gripper_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper.stl",
+          "sha256": "786c1077bfd226f14219581b11d5f19464ca95b17132e0bb7532503568f5af90",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper.stl"
+        },
+        {
+          "exists": true,
+          "link": "follower_left_gripper_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper.stl",
+          "sha256": "786c1077bfd226f14219581b11d5f19464ca95b17132e0bb7532503568f5af90",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper.stl"
+        },
+        {
+          "exists": true,
+          "link": "follower_left_gripper_prop_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_prop.stl",
+          "sha256": "d1275a93fe2157c83dbc095617fb7e672888bdd48ec070a35ef4ab9ebd9755b0",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_prop.stl"
+        },
+        {
+          "exists": true,
+          "link": "follower_left_gripper_prop_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_prop.stl",
+          "sha256": "d1275a93fe2157c83dbc095617fb7e672888bdd48ec070a35ef4ab9ebd9755b0",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_prop.stl"
+        },
+        {
+          "exists": true,
+          "link": "follower_left_gripper_bar_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_bar.stl",
+          "sha256": "a4de62c9a2ed2c78433010e4c05530a1254b1774a7651967f406120c9bf8973e",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_bar.stl"
+        },
+        {
+          "exists": true,
+          "link": "follower_left_gripper_bar_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_bar.stl",
+          "sha256": "a4de62c9a2ed2c78433010e4c05530a1254b1774a7651967f406120c9bf8973e",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_bar.stl"
+        },
+        {
+          "exists": true,
+          "link": "follower_left_left_finger_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_finger.stl",
+          "sha256": "a4baacd9a64df1be60ea5e98f50f3c660e1b7a1fe9684aace6004c5058c09483",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_finger.stl"
+        },
+        {
+          "exists": true,
+          "link": "follower_left_left_finger_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_finger.stl",
+          "sha256": "a4baacd9a64df1be60ea5e98f50f3c660e1b7a1fe9684aace6004c5058c09483",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_finger.stl"
+        },
+        {
+          "exists": true,
+          "link": "follower_left_right_finger_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_finger.stl",
+          "sha256": "a4baacd9a64df1be60ea5e98f50f3c660e1b7a1fe9684aace6004c5058c09483",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_finger.stl"
+        },
+        {
+          "exists": true,
+          "link": "follower_left_right_finger_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_finger.stl",
+          "sha256": "a4baacd9a64df1be60ea5e98f50f3c660e1b7a1fe9684aace6004c5058c09483",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_finger.stl"
+        }
+      ],
+      "mimic": [
+        {
+          "joint": "right_finger",
+          "multiplier": -1.0,
+          "offset": 0.0,
+          "parent": "left_finger"
+        }
+      ],
+      "missing_dynamics": [],
+      "robot_name": "follower_left",
+      "root_links": [
+        "follower_left_base_link"
+      ],
+      "status": "PASS",
+      "urdf_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_left.urdf"
+    },
+    {
+      "dynamics": [
+        {
+          "center_of_mass_xyz": [
+            -0.0534774,
+            -0.000562575,
+            0.0205961
+          ],
+          "inertia": {
+            "ixx": 0.006024,
+            "ixy": 4.713e-05,
+            "ixz": 3.851e-06,
+            "iyy": 0.0017,
+            "iyz": -8.415e-05,
+            "izz": 0.007162
+          },
+          "inertial_origin_rpy": [
+            0.0,
+            0.0,
+            1.5707963267948966
+          ],
+          "link": "follower_right_base_link",
+          "mass": 0.969034,
+          "origin_explicit": true
+        },
+        {
+          "center_of_mass_xyz": [
+            0.000259233,
+            -3.3552e-06,
+            0.0116129
+          ],
+          "inertia": {
+            "ixx": 0.0009388,
+            "ixy": -1e-09,
+            "ixz": -1.91e-08,
+            "iyy": 0.001138,
+            "iyz": 5.9568e-06,
+            "izz": 0.001201
+          },
+          "inertial_origin_rpy": [
+            0.0,
+            0.0,
+            1.5707963267948966
+          ],
+          "link": "follower_right_shoulder_link",
+          "mass": 0.798614,
+          "origin_explicit": true
+        },
+        {
+          "center_of_mass_xyz": [
+            0.0206949,
+            4e-10,
+            0.226459
+          ],
+          "inertia": {
+            "ixx": 0.008925,
+            "ixy": 0.0,
+            "ixz": 0.0,
+            "iyy": 0.008937,
+            "iyz": 0.001201,
+            "izz": 0.0009357
+          },
+          "inertial_origin_rpy": [
+            0.0,
+            0.0,
+            1.5707963267948966
+          ],
+          "link": "follower_right_upper_arm_link",
+          "mass": 0.792592,
+          "origin_explicit": true
+        },
+        {
+          "center_of_mass_xyz": [
+            0.105723,
+            0.0,
+            0.0
+          ],
+          "inertia": {
+            "ixx": 0.0001524,
+            "ixy": -1.883e-05,
+            "ixz": -8.4064e-06,
+            "iyy": 0.001342,
+            "iyz": 1.2564e-06,
+            "izz": 0.001441
+          },
+          "inertial_origin_rpy": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "link": "follower_right_upper_forearm_link",
+          "mass": 0.322228,
+          "origin_explicit": true
+        },
+        {
+          "center_of_mass_xyz": [
+            0.0513477,
+            0.00680462,
+            0.0
+          ],
+          "inertia": {
+            "ixx": 0.0001753,
+            "ixy": -8.528e-05,
+            "ixz": 0.0,
+            "iyy": 0.0005269,
+            "iyz": 0.0,
+            "izz": 0.0005911
+          },
+          "inertial_origin_rpy": [
+            3.141592653589793,
+            0.0,
+            0.0
+          ],
+          "link": "follower_right_lower_forearm_link",
+          "mass": 0.414823,
+          "origin_explicit": true
+        },
+        {
+          "center_of_mass_xyz": [
+            0.046743,
+            -7.6652e-06,
+            0.010565
+          ],
+          "inertia": {
+            "ixx": 4.631e-05,
+            "ixy": 1.95e-08,
+            "ixz": 2.3e-09,
+            "iyy": 4.514e-05,
+            "iyz": 4.2002e-06,
+            "izz": 5.27e-05
+          },
+          "inertial_origin_rpy": [
+            0.0,
+            0.0,
+            1.5707963267948966
+          ],
+          "link": "follower_right_wrist_link",
+          "mass": 0.115395,
+          "origin_explicit": true
+        },
+        {
+          "center_of_mass_xyz": [
+            0.023001,
+            0.0,
+            0.011523
+          ],
+          "inertia": {
+            "ixx": 3.268e-05,
+            "ixy": 0.0,
+            "ixz": 0.0,
+            "iyy": 2.436e-05,
+            "iyz": 2.785e-07,
+            "izz": 2.119e-05
+          },
+          "inertial_origin_rpy": [
+            0.0,
+            0.0,
+            1.5707963267948966
+          ],
+          "link": "follower_right_gripper_link",
+          "mass": 0.097666,
+          "origin_explicit": true
+        },
+        {
+          "center_of_mass_xyz": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "inertia": {
+            "ixx": 0.0001,
+            "ixy": 0.0,
+            "ixz": 0.0,
+            "iyy": 0.0001,
+            "iyz": 0.0,
+            "izz": 0.0001
+          },
+          "inertial_origin_rpy": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "link": "follower_right_ee_arm_link",
+          "mass": 0.001,
+          "origin_explicit": false
+        },
+        {
+          "center_of_mass_xyz": [
+            0.002378,
+            2.85e-08,
+            0.0
+          ],
+          "inertia": {
+            "ixx": 2.0386e-06,
+            "ixy": 0.0,
+            "ixz": 6.559e-07,
+            "iyy": 4.2979e-06,
+            "iyz": 0.0,
+            "izz": 2.3796e-06
+          },
+          "inertial_origin_rpy": [
+            0.0,
+            0.0,
+            1.5707963267948966
+          ],
+          "link": "follower_right_gripper_prop_link",
+          "mass": 0.008009,
+          "origin_explicit": true
+        },
+        {
+          "center_of_mass_xyz": [
+            0.006794,
+            -4.272e-07,
+            -0.000776
+          ],
+          "inertia": {
+            "ixx": 7.895e-05,
+            "ixy": -1.2e-09,
+            "ixz": 1.341e-07,
+            "iyy": 0.0003283,
+            "iyz": 1.7465e-06,
+            "izz": 0.0003095
+          },
+          "inertial_origin_rpy": [
+            0.0,
+            0.0,
+            1.5707963267948966
+          ],
+          "link": "follower_right_gripper_bar_link",
+          "mass": 0.150986,
+          "origin_explicit": true
+        },
+        {
+          "center_of_mass_xyz": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "inertia": {
+            "ixx": 0.0001,
+            "ixy": 0.0,
+            "ixz": 0.0,
+            "iyy": 0.0001,
+            "iyz": 0.0,
+            "izz": 0.0001
+          },
+          "inertial_origin_rpy": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "link": "follower_right_fingers_link",
+          "mass": 0.001,
+          "origin_explicit": false
+        },
+        {
+          "center_of_mass_xyz": [
+            0.017344,
+            -0.0060692,
+            0.0
+          ],
+          "inertia": {
+            "ixx": 2.433e-05,
+            "ixy": -2.4004e-06,
+            "ixz": 0.0,
+            "iyy": 1.255e-05,
+            "iyz": 0.0,
+            "izz": 1.417e-05
+          },
+          "inertial_origin_rpy": [
+            3.141592653589793,
+            3.141592653589793,
+            1.5707963267948966
+          ],
+          "link": "follower_right_left_finger_link",
+          "mass": 0.034796,
+          "origin_explicit": true
+        },
+        {
+          "center_of_mass_xyz": [
+            0.017344,
+            0.0060692,
+            0.0
+          ],
+          "inertia": {
+            "ixx": 2.433e-05,
+            "ixy": 2.4001e-06,
+            "ixz": 0.0,
+            "iyy": 1.255e-05,
+            "iyz": 0.0,
+            "izz": 1.417e-05
+          },
+          "inertial_origin_rpy": [
+            0.0,
+            3.141592653589793,
+            1.5707963267948966
+          ],
+          "link": "follower_right_right_finger_link",
+          "mass": 0.034796,
+          "origin_explicit": true
+        },
+        {
+          "center_of_mass_xyz": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "inertia": {
+            "ixx": 0.0001,
+            "ixy": 0.0,
+            "ixz": 0.0,
+            "iyy": 0.0001,
+            "iyz": 0.0,
+            "izz": 0.0001
+          },
+          "inertial_origin_rpy": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "link": "follower_right_ee_gripper_link",
+          "mass": 0.001,
+          "origin_explicit": false
+        }
+      ],
+      "issues": [],
+      "joint_order": [
+        "waist",
+        "shoulder",
+        "elbow",
+        "forearm_roll",
+        "wrist_angle",
+        "wrist_rotate",
+        "ee_arm",
+        "gripper",
+        "gripper_bar",
+        "ee_bar",
+        "left_finger",
+        "right_finger",
+        "ee_gripper"
+      ],
+      "joints": [
+        {
+          "axis": "0 0 1",
+          "child": "follower_right_shoulder_link",
+          "effort": 10.0,
+          "lower": -3.141582653589793,
+          "mimic_multiplier": null,
+          "mimic_offset": null,
+          "mimic_parent": null,
+          "name": "waist",
+          "origin_rpy": "0 0 0",
+          "origin_xyz": "0 0 0.079",
+          "parent": "follower_right_base_link",
+          "type": "revolute",
+          "upper": 3.141582653589793,
+          "velocity": 3.141592653589793
+        },
+        {
+          "axis": "0 1 0",
+          "child": "follower_right_upper_arm_link",
+          "effort": 20.0,
+          "lower": -1.8500490071139892,
+          "mimic_multiplier": null,
+          "mimic_offset": null,
+          "mimic_parent": null,
+          "name": "shoulder",
+          "origin_rpy": "0 0 0",
+          "origin_xyz": "0 0 0.04805",
+          "parent": "follower_right_shoulder_link",
+          "type": "revolute",
+          "upper": 1.2566370614359172,
+          "velocity": 3.141592653589793
+        },
+        {
+          "axis": "0 1 0",
+          "child": "follower_right_upper_forearm_link",
+          "effort": 15.0,
+          "lower": -1.7627825445142729,
+          "mimic_multiplier": null,
+          "mimic_offset": null,
+          "mimic_parent": null,
+          "name": "elbow",
+          "origin_rpy": "0 0 0",
+          "origin_xyz": "0.05955 0 0.3",
+          "parent": "follower_right_upper_arm_link",
+          "type": "revolute",
+          "upper": 1.6057029118347832,
+          "velocity": 3.141592653589793
+        },
+        {
+          "axis": "1 0 0",
+          "child": "follower_right_lower_forearm_link",
+          "effort": 2.0,
+          "lower": -3.141582653589793,
+          "mimic_multiplier": null,
+          "mimic_offset": null,
+          "mimic_parent": null,
+          "name": "forearm_roll",
+          "origin_rpy": "0 0 0",
+          "origin_xyz": "0.2 0 0",
+          "parent": "follower_right_upper_forearm_link",
+          "type": "revolute",
+          "upper": 3.141582653589793,
+          "velocity": 3.141592653589793
+        },
+        {
+          "axis": "0 1 0",
+          "child": "follower_right_wrist_link",
+          "effort": 5.0,
+          "lower": -1.8675022996339325,
+          "mimic_multiplier": null,
+          "mimic_offset": null,
+          "mimic_parent": null,
+          "name": "wrist_angle",
+          "origin_rpy": "0 0 0",
+          "origin_xyz": "0.1 0 0",
+          "parent": "follower_right_lower_forearm_link",
+          "type": "revolute",
+          "upper": 2.234021442552742,
+          "velocity": 3.141592653589793
+        },
+        {
+          "axis": "1 0 0",
+          "child": "follower_right_gripper_link",
+          "effort": 1.0,
+          "lower": -3.141582653589793,
+          "mimic_multiplier": null,
+          "mimic_offset": null,
+          "mimic_parent": null,
+          "name": "wrist_rotate",
+          "origin_rpy": "0 0 0",
+          "origin_xyz": "0.069744 0 0",
+          "parent": "follower_right_wrist_link",
+          "type": "revolute",
+          "upper": 3.141582653589793,
+          "velocity": 3.141592653589793
+        },
+        {
+          "axis": "1 0 0",
+          "child": "follower_right_ee_arm_link",
+          "effort": null,
+          "lower": null,
+          "mimic_multiplier": null,
+          "mimic_offset": null,
+          "mimic_parent": null,
+          "name": "ee_arm",
+          "origin_rpy": "0 0 0",
+          "origin_xyz": "0.042825 0 0",
+          "parent": "follower_right_gripper_link",
+          "type": "fixed",
+          "upper": null,
+          "velocity": null
+        },
+        {
+          "axis": "1 0 0",
+          "child": "follower_right_gripper_prop_link",
+          "effort": 1.0,
+          "lower": null,
+          "mimic_multiplier": null,
+          "mimic_offset": null,
+          "mimic_parent": null,
+          "name": "gripper",
+          "origin_rpy": "0 0 0",
+          "origin_xyz": "0.005675 0 0",
+          "parent": "follower_right_ee_arm_link",
+          "type": "continuous",
+          "upper": null,
+          "velocity": 3.141592653589793
+        },
+        {
+          "axis": "1 0 0",
+          "child": "follower_right_gripper_bar_link",
+          "effort": null,
+          "lower": null,
+          "mimic_multiplier": null,
+          "mimic_offset": null,
+          "mimic_parent": null,
+          "name": "gripper_bar",
+          "origin_rpy": "0 0 0",
+          "origin_xyz": "0 0 0",
+          "parent": "follower_right_ee_arm_link",
+          "type": "fixed",
+          "upper": null,
+          "velocity": null
+        },
+        {
+          "axis": "1 0 0",
+          "child": "follower_right_fingers_link",
+          "effort": null,
+          "lower": null,
+          "mimic_multiplier": null,
+          "mimic_offset": null,
+          "mimic_parent": null,
+          "name": "ee_bar",
+          "origin_rpy": "0 0 0",
+          "origin_xyz": "0.025875 0 0",
+          "parent": "follower_right_gripper_bar_link",
+          "type": "fixed",
+          "upper": null,
+          "velocity": null
+        },
+        {
+          "axis": "0 1 0",
+          "child": "follower_right_left_finger_link",
+          "effort": 5.0,
+          "lower": 0.021,
+          "mimic_multiplier": null,
+          "mimic_offset": null,
+          "mimic_parent": null,
+          "name": "left_finger",
+          "origin_rpy": "0 0 0",
+          "origin_xyz": "0 0 0",
+          "parent": "follower_right_fingers_link",
+          "type": "prismatic",
+          "upper": 0.057,
+          "velocity": 1.0
+        },
+        {
+          "axis": "0 1 0",
+          "child": "follower_right_right_finger_link",
+          "effort": 5.0,
+          "lower": -0.057,
+          "mimic_multiplier": -1.0,
+          "mimic_offset": 0.0,
+          "mimic_parent": "left_finger",
+          "name": "right_finger",
+          "origin_rpy": "0 0 0",
+          "origin_xyz": "0 0 0",
+          "parent": "follower_right_fingers_link",
+          "type": "prismatic",
+          "upper": -0.021,
+          "velocity": 1.0
+        },
+        {
+          "axis": "1 0 0",
+          "child": "follower_right_ee_gripper_link",
+          "effort": null,
+          "lower": null,
+          "mimic_multiplier": null,
+          "mimic_offset": null,
+          "mimic_parent": null,
+          "name": "ee_gripper",
+          "origin_rpy": "0 0 0",
+          "origin_xyz": "0.0385 0 0",
+          "parent": "follower_right_fingers_link",
+          "type": "fixed",
+          "upper": null,
+          "velocity": null
+        }
+      ],
+      "link_order": [
+        "follower_right_base_link",
+        "follower_right_shoulder_link",
+        "follower_right_upper_arm_link",
+        "follower_right_upper_forearm_link",
+        "follower_right_lower_forearm_link",
+        "follower_right_wrist_link",
+        "follower_right_gripper_link",
+        "follower_right_ee_arm_link",
+        "follower_right_gripper_prop_link",
+        "follower_right_gripper_bar_link",
+        "follower_right_fingers_link",
+        "follower_right_left_finger_link",
+        "follower_right_right_finger_link",
+        "follower_right_ee_gripper_link"
+      ],
+      "meshes": [
+        {
+          "exists": true,
+          "link": "follower_right_base_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/base.stl",
+          "sha256": "d100cafe656671ca8fde98fb6a4cf2d1b746995c51c61c25ad9ea2715635d146",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/base.stl"
+        },
+        {
+          "exists": true,
+          "link": "follower_right_base_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/base.stl",
+          "sha256": "d100cafe656671ca8fde98fb6a4cf2d1b746995c51c61c25ad9ea2715635d146",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/base.stl"
+        },
+        {
+          "exists": true,
+          "link": "follower_right_shoulder_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/shoulder.stl",
+          "sha256": "139745a74055cb0b23430bb5bc032bf68cf7bea5e4975c8f4c04107ae005f7f0",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/shoulder.stl"
+        },
+        {
+          "exists": true,
+          "link": "follower_right_shoulder_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/shoulder.stl",
+          "sha256": "139745a74055cb0b23430bb5bc032bf68cf7bea5e4975c8f4c04107ae005f7f0",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/shoulder.stl"
+        },
+        {
+          "exists": true,
+          "link": "follower_right_upper_arm_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/upper_arm.stl",
+          "sha256": "900f236320dd3d500870c5fde763b2d47502d51e043a5c377875e70237108729",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/upper_arm.stl"
+        },
+        {
+          "exists": true,
+          "link": "follower_right_upper_arm_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/upper_arm.stl",
+          "sha256": "900f236320dd3d500870c5fde763b2d47502d51e043a5c377875e70237108729",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/upper_arm.stl"
+        },
+        {
+          "exists": true,
+          "link": "follower_right_upper_forearm_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/upper_forearm.stl",
+          "sha256": "4104fc54bbfb8a9b533029f1e7e3ade3d54d638372b3195daa0c98f57e0295b5",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/upper_forearm.stl"
+        },
+        {
+          "exists": true,
+          "link": "follower_right_upper_forearm_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/upper_forearm.stl",
+          "sha256": "4104fc54bbfb8a9b533029f1e7e3ade3d54d638372b3195daa0c98f57e0295b5",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/upper_forearm.stl"
+        },
+        {
+          "exists": true,
+          "link": "follower_right_lower_forearm_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/lower_forearm.stl",
+          "sha256": "66814e27fa728056416e25e02e89eb7d34c51d51c51e7c3df873829037ddc6b8",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/lower_forearm.stl"
+        },
+        {
+          "exists": true,
+          "link": "follower_right_lower_forearm_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/lower_forearm.stl",
+          "sha256": "66814e27fa728056416e25e02e89eb7d34c51d51c51e7c3df873829037ddc6b8",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/lower_forearm.stl"
+        },
+        {
+          "exists": true,
+          "link": "follower_right_wrist_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/wrist.stl",
+          "sha256": "90eb145c85627968c3776ae6de23ccff7e112c9dd713c46bc9acdfdaa859a048",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/wrist.stl"
+        },
+        {
+          "exists": true,
+          "link": "follower_right_wrist_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/wrist.stl",
+          "sha256": "90eb145c85627968c3776ae6de23ccff7e112c9dd713c46bc9acdfdaa859a048",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/wrist.stl"
+        },
+        {
+          "exists": true,
+          "link": "follower_right_gripper_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper.stl",
+          "sha256": "786c1077bfd226f14219581b11d5f19464ca95b17132e0bb7532503568f5af90",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper.stl"
+        },
+        {
+          "exists": true,
+          "link": "follower_right_gripper_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper.stl",
+          "sha256": "786c1077bfd226f14219581b11d5f19464ca95b17132e0bb7532503568f5af90",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper.stl"
+        },
+        {
+          "exists": true,
+          "link": "follower_right_gripper_prop_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_prop.stl",
+          "sha256": "d1275a93fe2157c83dbc095617fb7e672888bdd48ec070a35ef4ab9ebd9755b0",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_prop.stl"
+        },
+        {
+          "exists": true,
+          "link": "follower_right_gripper_prop_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_prop.stl",
+          "sha256": "d1275a93fe2157c83dbc095617fb7e672888bdd48ec070a35ef4ab9ebd9755b0",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_prop.stl"
+        },
+        {
+          "exists": true,
+          "link": "follower_right_gripper_bar_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_bar.stl",
+          "sha256": "a4de62c9a2ed2c78433010e4c05530a1254b1774a7651967f406120c9bf8973e",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_bar.stl"
+        },
+        {
+          "exists": true,
+          "link": "follower_right_gripper_bar_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_bar.stl",
+          "sha256": "a4de62c9a2ed2c78433010e4c05530a1254b1774a7651967f406120c9bf8973e",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_bar.stl"
+        },
+        {
+          "exists": true,
+          "link": "follower_right_left_finger_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_finger.stl",
+          "sha256": "a4baacd9a64df1be60ea5e98f50f3c660e1b7a1fe9684aace6004c5058c09483",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_finger.stl"
+        },
+        {
+          "exists": true,
+          "link": "follower_right_left_finger_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_finger.stl",
+          "sha256": "a4baacd9a64df1be60ea5e98f50f3c660e1b7a1fe9684aace6004c5058c09483",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_finger.stl"
+        },
+        {
+          "exists": true,
+          "link": "follower_right_right_finger_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_finger.stl",
+          "sha256": "a4baacd9a64df1be60ea5e98f50f3c660e1b7a1fe9684aace6004c5058c09483",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_finger.stl"
+        },
+        {
+          "exists": true,
+          "link": "follower_right_right_finger_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_finger.stl",
+          "sha256": "a4baacd9a64df1be60ea5e98f50f3c660e1b7a1fe9684aace6004c5058c09483",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_finger.stl"
+        }
+      ],
+      "mimic": [
+        {
+          "joint": "right_finger",
+          "multiplier": -1.0,
+          "offset": 0.0,
+          "parent": "left_finger"
+        }
+      ],
+      "missing_dynamics": [],
+      "robot_name": "follower_right",
+      "root_links": [
+        "follower_right_base_link"
+      ],
+      "status": "PASS",
+      "urdf_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_right.urdf"
+    },
+    {
+      "dynamics": [
+        {
+          "center_of_mass_xyz": [
+            -0.0380446,
+            0.000613892,
+            0.0193354
+          ],
+          "inertia": {
+            "ixx": 0.002115,
+            "ixy": -1.635e-05,
+            "ixz": 6.998e-07,
+            "iyy": 0.0006921,
+            "iyz": 4.642e-05,
+            "izz": 0.002524
+          },
+          "inertial_origin_rpy": [
+            0.0,
+            0.0,
+            1.5707963267948966
+          ],
+          "link": "leader_left_base_link",
+          "mass": 0.538736,
+          "origin_explicit": true
+        },
+        {
+          "center_of_mass_xyz": [
+            2.23482e-05,
+            4.14609e-05,
+            0.0066287
+          ],
+          "inertia": {
+            "ixx": 0.000379,
+            "ixy": 2.2e-09,
+            "ixz": -3.561e-07,
+            "iyy": 0.0005557,
+            "iyz": 1.2245e-06,
+            "izz": 0.0005889
+          },
+          "inertial_origin_rpy": [
+            0.0,
+            0.0,
+            1.5707963267948966
+          ],
+          "link": "leader_left_shoulder_link",
+          "mass": 0.480879,
+          "origin_explicit": true
+        },
+        {
+          "center_of_mass_xyz": [
+            0.0171605,
+            2.725e-07,
+            0.191323
+          ],
+          "inertia": {
+            "ixx": 0.003463,
+            "ixy": -1e-10,
+            "ixz": -2e-10,
+            "iyy": 0.003587,
+            "iyz": 0.0004272,
+            "izz": 0.0004566
+          },
+          "inertial_origin_rpy": [
+            0.0,
+            0.0,
+            1.5707963267948966
+          ],
+          "link": "leader_left_upper_arm_link",
+          "mass": 0.430811,
+          "origin_explicit": true
+        },
+        {
+          "center_of_mass_xyz": [
+            0.107963,
+            0.000115876,
+            0.0
+          ],
+          "inertia": {
+            "ixx": 3.971e-05,
+            "ixy": 2.3528e-06,
+            "ixz": 0.0,
+            "iyy": 0.0008878,
+            "iyz": 0.0,
+            "izz": 0.000888
+          },
+          "inertial_origin_rpy": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "link": "leader_left_upper_forearm_link",
+          "mass": 0.234589,
+          "origin_explicit": true
+        },
+        {
+          "center_of_mass_xyz": [
+            0.0374395,
+            0.00522252,
+            0.0
+          ],
+          "inertia": {
+            "ixx": 6.369e-05,
+            "ixy": -2.292e-05,
+            "ixz": 0.0,
+            "iyy": 0.0001677,
+            "iyz": 0.0,
+            "izz": 0.0001834
+          },
+          "inertial_origin_rpy": [
+            3.141592653589793,
+            0.0,
+            0.0
+          ],
+          "link": "leader_left_lower_forearm_link",
+          "mass": 0.220991,
+          "origin_explicit": true
+        },
+        {
+          "center_of_mass_xyz": [
+            0.04236,
+            -1.0663e-05,
+            0.010577
+          ],
+          "inertia": {
+            "ixx": 3.082e-05,
+            "ixy": 1.91e-08,
+            "ixz": 2.3e-09,
+            "iyy": 2.822e-05,
+            "iyz": 2.5481e-06,
+            "izz": 3.152e-05
+          },
+          "inertial_origin_rpy": [
+            0.0,
+            0.0,
+            1.5707963267948966
+          ],
+          "link": "leader_left_wrist_link",
+          "mass": 0.084957,
+          "origin_explicit": true
+        },
+        {
+          "center_of_mass_xyz": [
+            0.021631,
+            2.516e-07,
+            0.01141
+          ],
+          "inertia": {
+            "ixx": 2.537e-05,
+            "ixy": 0.0,
+            "ixz": 0.0,
+            "iyy": 1.836e-05,
+            "iyz": 4.34e-07,
+            "izz": 1.674e-05
+          },
+          "inertial_origin_rpy": [
+            0.0,
+            0.0,
+            1.5707963267948966
+          ],
+          "link": "leader_left_gripper_link",
+          "mass": 0.072885,
+          "origin_explicit": true
+        },
+        {
+          "center_of_mass_xyz": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "inertia": {
+            "ixx": 0.001,
+            "ixy": 0.0,
+            "ixz": 0.0,
+            "iyy": 0.001,
+            "iyz": 0.0,
+            "izz": 0.001
+          },
+          "inertial_origin_rpy": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "link": "leader_left_ee_arm_link",
+          "mass": 0.001,
+          "origin_explicit": false
+        },
+        {
+          "center_of_mass_xyz": [
+            0.000846,
+            -1.6817e-06,
+            4.2e-05
+          ],
+          "inertia": {
+            "ixx": 5.923e-07,
+            "ixy": 0.0,
+            "ixz": 3.195e-07,
+            "iyy": 1.1156e-06,
+            "iyz": -4e-10,
+            "izz": 5.743e-07
+          },
+          "inertial_origin_rpy": [
+            0.0,
+            0.0,
+            1.5707963267948966
+          ],
+          "link": "leader_left_gripper_prop_link",
+          "mass": 0.00434,
+          "origin_explicit": true
+        },
+        {
+          "center_of_mass_xyz": [
+            0.009687,
+            8.177e-07,
+            0.004962
+          ],
+          "inertia": {
+            "ixx": 7.4125e-06,
+            "ixy": -8e-10,
+            "ixz": -6e-10,
+            "iyy": 2.843e-05,
+            "iyz": -1.3889e-06,
+            "izz": 2.86e-05
+          },
+          "inertial_origin_rpy": [
+            0.0,
+            0.0,
+            1.5707963267948966
+          ],
+          "link": "leader_left_gripper_bar_link",
+          "mass": 0.034199,
+          "origin_explicit": true
+        },
+        {
+          "center_of_mass_xyz": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "inertia": {
+            "ixx": 0.001,
+            "ixy": 0.0,
+            "ixz": 0.0,
+            "iyy": 0.001,
+            "iyz": 0.0,
+            "izz": 0.001
+          },
+          "inertial_origin_rpy": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "link": "leader_left_fingers_link",
+          "mass": 0.001,
+          "origin_explicit": false
+        },
+        {
+          "center_of_mass_xyz": [
+            0.013816,
+            0.0,
+            0.0
+          ],
+          "inertia": {
+            "ixx": 4.731e-06,
+            "ixy": -4.56e-07,
+            "ixz": 0.0,
+            "iyy": 1.5506e-06,
+            "iyz": 0.0,
+            "izz": 3.7467e-06
+          },
+          "inertial_origin_rpy": [
+            3.141592653589793,
+            3.141592653589793,
+            1.5707963267948966
+          ],
+          "link": "leader_left_left_finger_link",
+          "mass": 0.016246,
+          "origin_explicit": true
+        },
+        {
+          "center_of_mass_xyz": [
+            0.013816,
+            0.0,
+            0.0
+          ],
+          "inertia": {
+            "ixx": 4.731e-06,
+            "ixy": 4.56e-07,
+            "ixz": 0.0,
+            "iyy": 1.5506e-06,
+            "iyz": 0.0,
+            "izz": 3.7467e-06
+          },
+          "inertial_origin_rpy": [
+            0.0,
+            3.141592653589793,
+            1.5707963267948966
+          ],
+          "link": "leader_left_right_finger_link",
+          "mass": 0.016246,
+          "origin_explicit": true
+        },
+        {
+          "center_of_mass_xyz": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "inertia": {
+            "ixx": 0.001,
+            "ixy": 0.0,
+            "ixz": 0.0,
+            "iyy": 0.001,
+            "iyz": 0.0,
+            "izz": 0.001
+          },
+          "inertial_origin_rpy": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "link": "leader_left_ee_gripper_link",
+          "mass": 0.001,
+          "origin_explicit": false
+        }
+      ],
+      "issues": [],
+      "joint_order": [
+        "waist",
+        "shoulder",
+        "elbow",
+        "forearm_roll",
+        "wrist_angle",
+        "wrist_rotate",
+        "ee_arm",
+        "gripper",
+        "gripper_bar",
+        "ee_bar",
+        "left_finger",
+        "right_finger",
+        "ee_gripper"
+      ],
+      "joints": [
+        {
+          "axis": "0 0 1",
+          "child": "leader_left_shoulder_link",
+          "effort": 10.0,
+          "lower": -3.141582653589793,
+          "mimic_multiplier": null,
+          "mimic_offset": null,
+          "mimic_parent": null,
+          "name": "waist",
+          "origin_rpy": "0 0 0",
+          "origin_xyz": "0 0 0.072",
+          "parent": "leader_left_base_link",
+          "type": "revolute",
+          "upper": 3.141582653589793,
+          "velocity": 3.141592653589793
+        },
+        {
+          "axis": "0 1 0",
+          "child": "leader_left_upper_arm_link",
+          "effort": 20.0,
+          "lower": -1.8849555921538759,
+          "mimic_multiplier": null,
+          "mimic_offset": null,
+          "mimic_parent": null,
+          "name": "shoulder",
+          "origin_rpy": "0 0 0",
+          "origin_xyz": "0 0 0.03865",
+          "parent": "leader_left_shoulder_link",
+          "type": "revolute",
+          "upper": 1.9896753472735358,
+          "velocity": 3.141592653589793
+        },
+        {
+          "axis": "0 1 0",
+          "child": "leader_left_upper_forearm_link",
+          "effort": 15.0,
+          "lower": -2.1467549799530254,
+          "mimic_multiplier": null,
+          "mimic_offset": null,
+          "mimic_parent": null,
+          "name": "elbow",
+          "origin_rpy": "0 0 0",
+          "origin_xyz": "0.04975 0 0.25",
+          "parent": "leader_left_upper_arm_link",
+          "type": "revolute",
+          "upper": 1.6057029118347832,
+          "velocity": 3.141592653589793
+        },
+        {
+          "axis": "1 0 0",
+          "child": "leader_left_lower_forearm_link",
+          "effort": 2.0,
+          "lower": -3.141582653589793,
+          "mimic_multiplier": null,
+          "mimic_offset": null,
+          "mimic_parent": null,
+          "name": "forearm_roll",
+          "origin_rpy": "0 0 0",
+          "origin_xyz": "0.175 0 0",
+          "parent": "leader_left_upper_forearm_link",
+          "type": "revolute",
+          "upper": 3.141582653589793,
+          "velocity": 3.141592653589793
+        },
+        {
+          "axis": "0 1 0",
+          "child": "leader_left_wrist_link",
+          "effort": 5.0,
+          "lower": -1.7453292519943295,
+          "mimic_multiplier": null,
+          "mimic_offset": null,
+          "mimic_parent": null,
+          "name": "wrist_angle",
+          "origin_rpy": "0 0 0",
+          "origin_xyz": "0.075 0 0",
+          "parent": "leader_left_lower_forearm_link",
+          "type": "revolute",
+          "upper": 2.1467549799530254,
+          "velocity": 3.141592653589793
+        },
+        {
+          "axis": "1 0 0",
+          "child": "leader_left_gripper_link",
+          "effort": 1.0,
+          "lower": -3.141582653589793,
+          "mimic_multiplier": null,
+          "mimic_offset": null,
+          "mimic_parent": null,
+          "name": "wrist_rotate",
+          "origin_rpy": "0 0 0",
+          "origin_xyz": "0.065 0 0",
+          "parent": "leader_left_wrist_link",
+          "type": "revolute",
+          "upper": 3.141582653589793,
+          "velocity": 3.141592653589793
+        },
+        {
+          "axis": "1 0 0",
+          "child": "leader_left_ee_arm_link",
+          "effort": null,
+          "lower": null,
+          "mimic_multiplier": null,
+          "mimic_offset": null,
+          "mimic_parent": null,
+          "name": "ee_arm",
+          "origin_rpy": "0 0 0",
+          "origin_xyz": "0.043 0 0",
+          "parent": "leader_left_gripper_link",
+          "type": "fixed",
+          "upper": null,
+          "velocity": null
+        },
+        {
+          "axis": "1 0 0",
+          "child": "leader_left_gripper_prop_link",
+          "effort": 1.0,
+          "lower": null,
+          "mimic_multiplier": null,
+          "mimic_offset": null,
+          "mimic_parent": null,
+          "name": "gripper",
+          "origin_rpy": "0 0 0",
+          "origin_xyz": "0.0055 0 0",
+          "parent": "leader_left_ee_arm_link",
+          "type": "continuous",
+          "upper": null,
+          "velocity": 3.141592653589793
+        },
+        {
+          "axis": "1 0 0",
+          "child": "leader_left_gripper_bar_link",
+          "effort": null,
+          "lower": null,
+          "mimic_multiplier": null,
+          "mimic_offset": null,
+          "mimic_parent": null,
+          "name": "gripper_bar",
+          "origin_rpy": "0 0 0",
+          "origin_xyz": "0 0 0",
+          "parent": "leader_left_ee_arm_link",
+          "type": "fixed",
+          "upper": null,
+          "velocity": null
+        },
+        {
+          "axis": "1 0 0",
+          "child": "leader_left_fingers_link",
+          "effort": null,
+          "lower": null,
+          "mimic_multiplier": null,
+          "mimic_offset": null,
+          "mimic_parent": null,
+          "name": "ee_bar",
+          "origin_rpy": "0 0 0",
+          "origin_xyz": "0.023 0 0",
+          "parent": "leader_left_gripper_bar_link",
+          "type": "fixed",
+          "upper": null,
+          "velocity": null
+        },
+        {
+          "axis": "0 1 0",
+          "child": "leader_left_left_finger_link",
+          "effort": 5.0,
+          "lower": 0.015,
+          "mimic_multiplier": null,
+          "mimic_offset": null,
+          "mimic_parent": null,
+          "name": "left_finger",
+          "origin_rpy": "0 0 0",
+          "origin_xyz": "0 0 0",
+          "parent": "leader_left_fingers_link",
+          "type": "prismatic",
+          "upper": 0.037,
+          "velocity": 1.0
+        },
+        {
+          "axis": "0 1 0",
+          "child": "leader_left_right_finger_link",
+          "effort": 5.0,
+          "lower": -0.037,
+          "mimic_multiplier": -1.0,
+          "mimic_offset": 0.0,
+          "mimic_parent": "left_finger",
+          "name": "right_finger",
+          "origin_rpy": "0 0 0",
+          "origin_xyz": "0 0 0",
+          "parent": "leader_left_fingers_link",
+          "type": "prismatic",
+          "upper": -0.015,
+          "velocity": 1.0
+        },
+        {
+          "axis": "1 0 0",
+          "child": "leader_left_ee_gripper_link",
+          "effort": null,
+          "lower": null,
+          "mimic_multiplier": null,
+          "mimic_offset": null,
+          "mimic_parent": null,
+          "name": "ee_gripper",
+          "origin_rpy": "0 0 0",
+          "origin_xyz": "0.027575 0 0",
+          "parent": "leader_left_fingers_link",
+          "type": "fixed",
+          "upper": null,
+          "velocity": null
+        }
+      ],
+      "link_order": [
+        "leader_left_base_link",
+        "leader_left_shoulder_link",
+        "leader_left_upper_arm_link",
+        "leader_left_upper_forearm_link",
+        "leader_left_lower_forearm_link",
+        "leader_left_wrist_link",
+        "leader_left_gripper_link",
+        "leader_left_ee_arm_link",
+        "leader_left_gripper_prop_link",
+        "leader_left_gripper_bar_link",
+        "leader_left_fingers_link",
+        "leader_left_left_finger_link",
+        "leader_left_right_finger_link",
+        "leader_left_ee_gripper_link"
+      ],
+      "meshes": [
+        {
+          "exists": true,
+          "link": "leader_left_base_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/base.stl",
+          "sha256": "69facd590abff70fa03431497ead2c7f1aabe616d55af594288e9bf36b1fd067",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/base.stl"
+        },
+        {
+          "exists": true,
+          "link": "leader_left_base_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/base.stl",
+          "sha256": "69facd590abff70fa03431497ead2c7f1aabe616d55af594288e9bf36b1fd067",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/base.stl"
+        },
+        {
+          "exists": true,
+          "link": "leader_left_shoulder_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/shoulder.stl",
+          "sha256": "337b4cb7e9b637ee3dca6a737becf831fe5f95b790b34f9a97e5cf11475fc222",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/shoulder.stl"
+        },
+        {
+          "exists": true,
+          "link": "leader_left_shoulder_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/shoulder.stl",
+          "sha256": "337b4cb7e9b637ee3dca6a737becf831fe5f95b790b34f9a97e5cf11475fc222",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/shoulder.stl"
+        },
+        {
+          "exists": true,
+          "link": "leader_left_upper_arm_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/upper_arm.stl",
+          "sha256": "b4550b3a79e83d0ca9e1a65e490ff4e25b667e8a7d8e94bab441851c96eb11fa",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/upper_arm.stl"
+        },
+        {
+          "exists": true,
+          "link": "leader_left_upper_arm_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/upper_arm.stl",
+          "sha256": "b4550b3a79e83d0ca9e1a65e490ff4e25b667e8a7d8e94bab441851c96eb11fa",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/upper_arm.stl"
+        },
+        {
+          "exists": true,
+          "link": "leader_left_upper_forearm_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/upper_forearm.stl",
+          "sha256": "1a64efc97dc129bc277afee75c129de27721e8fedcad45a4ec8b251f44542f23",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/upper_forearm.stl"
+        },
+        {
+          "exists": true,
+          "link": "leader_left_upper_forearm_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/upper_forearm.stl",
+          "sha256": "1a64efc97dc129bc277afee75c129de27721e8fedcad45a4ec8b251f44542f23",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/upper_forearm.stl"
+        },
+        {
+          "exists": true,
+          "link": "leader_left_lower_forearm_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/lower_forearm.stl",
+          "sha256": "1445950b7f5ce2cf374b98711df296acd6c2b4df24c3937b413bcb6beb037603",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/lower_forearm.stl"
+        },
+        {
+          "exists": true,
+          "link": "leader_left_lower_forearm_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/lower_forearm.stl",
+          "sha256": "1445950b7f5ce2cf374b98711df296acd6c2b4df24c3937b413bcb6beb037603",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/lower_forearm.stl"
+        },
+        {
+          "exists": true,
+          "link": "leader_left_wrist_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/wrist.stl",
+          "sha256": "8602fe1313765caceec64faff5ec919ec09c57c614b87f1c1c625dcef1e3df5a",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/wrist.stl"
+        },
+        {
+          "exists": true,
+          "link": "leader_left_wrist_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/wrist.stl",
+          "sha256": "8602fe1313765caceec64faff5ec919ec09c57c614b87f1c1c625dcef1e3df5a",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/wrist.stl"
+        },
+        {
+          "exists": true,
+          "link": "leader_left_gripper_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper.stl",
+          "sha256": "6dbc189d3787ca62e09a8cf3f928ceca70c5c184a95c97ac6587805aa6a1ec6d",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper.stl"
+        },
+        {
+          "exists": true,
+          "link": "leader_left_gripper_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper.stl",
+          "sha256": "6dbc189d3787ca62e09a8cf3f928ceca70c5c184a95c97ac6587805aa6a1ec6d",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper.stl"
+        },
+        {
+          "exists": true,
+          "link": "leader_left_gripper_prop_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_prop.stl",
+          "sha256": "30fcd807817b7c9df6275d2c8100cfe0e7786e2c65b574d22efe177520f1a316",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_prop.stl"
+        },
+        {
+          "exists": true,
+          "link": "leader_left_gripper_prop_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_prop.stl",
+          "sha256": "30fcd807817b7c9df6275d2c8100cfe0e7786e2c65b574d22efe177520f1a316",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_prop.stl"
+        },
+        {
+          "exists": true,
+          "link": "leader_left_gripper_bar_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_bar.stl",
+          "sha256": "b54601da3f60eea180226b695bb95a9b29b187f22f5b74d9a523ac9785d9a518",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_bar.stl"
+        },
+        {
+          "exists": true,
+          "link": "leader_left_gripper_bar_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_bar.stl",
+          "sha256": "b54601da3f60eea180226b695bb95a9b29b187f22f5b74d9a523ac9785d9a518",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_bar.stl"
+        },
+        {
+          "exists": true,
+          "link": "leader_left_left_finger_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_finger.stl",
+          "sha256": "6a459bd4ef07eb5c4687e258bd9564004e741437e2e668af7ed31964567d8f90",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_finger.stl"
+        },
+        {
+          "exists": true,
+          "link": "leader_left_left_finger_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_finger.stl",
+          "sha256": "6a459bd4ef07eb5c4687e258bd9564004e741437e2e668af7ed31964567d8f90",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_finger.stl"
+        },
+        {
+          "exists": true,
+          "link": "leader_left_right_finger_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_finger.stl",
+          "sha256": "6a459bd4ef07eb5c4687e258bd9564004e741437e2e668af7ed31964567d8f90",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_finger.stl"
+        },
+        {
+          "exists": true,
+          "link": "leader_left_right_finger_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_finger.stl",
+          "sha256": "6a459bd4ef07eb5c4687e258bd9564004e741437e2e668af7ed31964567d8f90",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_finger.stl"
+        }
+      ],
+      "mimic": [
+        {
+          "joint": "right_finger",
+          "multiplier": -1.0,
+          "offset": 0.0,
+          "parent": "left_finger"
+        }
+      ],
+      "missing_dynamics": [],
+      "robot_name": "leader_left",
+      "root_links": [
+        "leader_left_base_link"
+      ],
+      "status": "PASS",
+      "urdf_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/leader_left.urdf"
+    },
+    {
+      "dynamics": [
+        {
+          "center_of_mass_xyz": [
+            -0.0380446,
+            0.000613892,
+            0.0193354
+          ],
+          "inertia": {
+            "ixx": 0.002115,
+            "ixy": -1.635e-05,
+            "ixz": 6.998e-07,
+            "iyy": 0.0006921,
+            "iyz": 4.642e-05,
+            "izz": 0.002524
+          },
+          "inertial_origin_rpy": [
+            0.0,
+            0.0,
+            1.5707963267948966
+          ],
+          "link": "leader_right_base_link",
+          "mass": 0.538736,
+          "origin_explicit": true
+        },
+        {
+          "center_of_mass_xyz": [
+            2.23482e-05,
+            4.14609e-05,
+            0.0066287
+          ],
+          "inertia": {
+            "ixx": 0.000379,
+            "ixy": 2.2e-09,
+            "ixz": -3.561e-07,
+            "iyy": 0.0005557,
+            "iyz": 1.2245e-06,
+            "izz": 0.0005889
+          },
+          "inertial_origin_rpy": [
+            0.0,
+            0.0,
+            1.5707963267948966
+          ],
+          "link": "leader_right_shoulder_link",
+          "mass": 0.480879,
+          "origin_explicit": true
+        },
+        {
+          "center_of_mass_xyz": [
+            0.0171605,
+            2.725e-07,
+            0.191323
+          ],
+          "inertia": {
+            "ixx": 0.003463,
+            "ixy": -1e-10,
+            "ixz": -2e-10,
+            "iyy": 0.003587,
+            "iyz": 0.0004272,
+            "izz": 0.0004566
+          },
+          "inertial_origin_rpy": [
+            0.0,
+            0.0,
+            1.5707963267948966
+          ],
+          "link": "leader_right_upper_arm_link",
+          "mass": 0.430811,
+          "origin_explicit": true
+        },
+        {
+          "center_of_mass_xyz": [
+            0.107963,
+            0.000115876,
+            0.0
+          ],
+          "inertia": {
+            "ixx": 3.971e-05,
+            "ixy": 2.3528e-06,
+            "ixz": 0.0,
+            "iyy": 0.0008878,
+            "iyz": 0.0,
+            "izz": 0.000888
+          },
+          "inertial_origin_rpy": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "link": "leader_right_upper_forearm_link",
+          "mass": 0.234589,
+          "origin_explicit": true
+        },
+        {
+          "center_of_mass_xyz": [
+            0.0374395,
+            0.00522252,
+            0.0
+          ],
+          "inertia": {
+            "ixx": 6.369e-05,
+            "ixy": -2.292e-05,
+            "ixz": 0.0,
+            "iyy": 0.0001677,
+            "iyz": 0.0,
+            "izz": 0.0001834
+          },
+          "inertial_origin_rpy": [
+            3.141592653589793,
+            0.0,
+            0.0
+          ],
+          "link": "leader_right_lower_forearm_link",
+          "mass": 0.220991,
+          "origin_explicit": true
+        },
+        {
+          "center_of_mass_xyz": [
+            0.04236,
+            -1.0663e-05,
+            0.010577
+          ],
+          "inertia": {
+            "ixx": 3.082e-05,
+            "ixy": 1.91e-08,
+            "ixz": 2.3e-09,
+            "iyy": 2.822e-05,
+            "iyz": 2.5481e-06,
+            "izz": 3.152e-05
+          },
+          "inertial_origin_rpy": [
+            0.0,
+            0.0,
+            1.5707963267948966
+          ],
+          "link": "leader_right_wrist_link",
+          "mass": 0.084957,
+          "origin_explicit": true
+        },
+        {
+          "center_of_mass_xyz": [
+            0.021631,
+            2.516e-07,
+            0.01141
+          ],
+          "inertia": {
+            "ixx": 2.537e-05,
+            "ixy": 0.0,
+            "ixz": 0.0,
+            "iyy": 1.836e-05,
+            "iyz": 4.34e-07,
+            "izz": 1.674e-05
+          },
+          "inertial_origin_rpy": [
+            0.0,
+            0.0,
+            1.5707963267948966
+          ],
+          "link": "leader_right_gripper_link",
+          "mass": 0.072885,
+          "origin_explicit": true
+        },
+        {
+          "center_of_mass_xyz": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "inertia": {
+            "ixx": 0.001,
+            "ixy": 0.0,
+            "ixz": 0.0,
+            "iyy": 0.001,
+            "iyz": 0.0,
+            "izz": 0.001
+          },
+          "inertial_origin_rpy": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "link": "leader_right_ee_arm_link",
+          "mass": 0.001,
+          "origin_explicit": false
+        },
+        {
+          "center_of_mass_xyz": [
+            0.000846,
+            -1.6817e-06,
+            4.2e-05
+          ],
+          "inertia": {
+            "ixx": 5.923e-07,
+            "ixy": 0.0,
+            "ixz": 3.195e-07,
+            "iyy": 1.1156e-06,
+            "iyz": -4e-10,
+            "izz": 5.743e-07
+          },
+          "inertial_origin_rpy": [
+            0.0,
+            0.0,
+            1.5707963267948966
+          ],
+          "link": "leader_right_gripper_prop_link",
+          "mass": 0.00434,
+          "origin_explicit": true
+        },
+        {
+          "center_of_mass_xyz": [
+            0.009687,
+            8.177e-07,
+            0.004962
+          ],
+          "inertia": {
+            "ixx": 7.4125e-06,
+            "ixy": -8e-10,
+            "ixz": -6e-10,
+            "iyy": 2.843e-05,
+            "iyz": -1.3889e-06,
+            "izz": 2.86e-05
+          },
+          "inertial_origin_rpy": [
+            0.0,
+            0.0,
+            1.5707963267948966
+          ],
+          "link": "leader_right_gripper_bar_link",
+          "mass": 0.034199,
+          "origin_explicit": true
+        },
+        {
+          "center_of_mass_xyz": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "inertia": {
+            "ixx": 0.001,
+            "ixy": 0.0,
+            "ixz": 0.0,
+            "iyy": 0.001,
+            "iyz": 0.0,
+            "izz": 0.001
+          },
+          "inertial_origin_rpy": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "link": "leader_right_fingers_link",
+          "mass": 0.001,
+          "origin_explicit": false
+        },
+        {
+          "center_of_mass_xyz": [
+            0.013816,
+            0.0,
+            0.0
+          ],
+          "inertia": {
+            "ixx": 4.731e-06,
+            "ixy": -4.56e-07,
+            "ixz": 0.0,
+            "iyy": 1.5506e-06,
+            "iyz": 0.0,
+            "izz": 3.7467e-06
+          },
+          "inertial_origin_rpy": [
+            3.141592653589793,
+            3.141592653589793,
+            1.5707963267948966
+          ],
+          "link": "leader_right_left_finger_link",
+          "mass": 0.016246,
+          "origin_explicit": true
+        },
+        {
+          "center_of_mass_xyz": [
+            0.013816,
+            0.0,
+            0.0
+          ],
+          "inertia": {
+            "ixx": 4.731e-06,
+            "ixy": 4.56e-07,
+            "ixz": 0.0,
+            "iyy": 1.5506e-06,
+            "iyz": 0.0,
+            "izz": 3.7467e-06
+          },
+          "inertial_origin_rpy": [
+            0.0,
+            3.141592653589793,
+            1.5707963267948966
+          ],
+          "link": "leader_right_right_finger_link",
+          "mass": 0.016246,
+          "origin_explicit": true
+        },
+        {
+          "center_of_mass_xyz": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "inertia": {
+            "ixx": 0.001,
+            "ixy": 0.0,
+            "ixz": 0.0,
+            "iyy": 0.001,
+            "iyz": 0.0,
+            "izz": 0.001
+          },
+          "inertial_origin_rpy": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "link": "leader_right_ee_gripper_link",
+          "mass": 0.001,
+          "origin_explicit": false
+        }
+      ],
+      "issues": [],
+      "joint_order": [
+        "waist",
+        "shoulder",
+        "elbow",
+        "forearm_roll",
+        "wrist_angle",
+        "wrist_rotate",
+        "ee_arm",
+        "gripper",
+        "gripper_bar",
+        "ee_bar",
+        "left_finger",
+        "right_finger",
+        "ee_gripper"
+      ],
+      "joints": [
+        {
+          "axis": "0 0 1",
+          "child": "leader_right_shoulder_link",
+          "effort": 10.0,
+          "lower": -3.141582653589793,
+          "mimic_multiplier": null,
+          "mimic_offset": null,
+          "mimic_parent": null,
+          "name": "waist",
+          "origin_rpy": "0 0 0",
+          "origin_xyz": "0 0 0.072",
+          "parent": "leader_right_base_link",
+          "type": "revolute",
+          "upper": 3.141582653589793,
+          "velocity": 3.141592653589793
+        },
+        {
+          "axis": "0 1 0",
+          "child": "leader_right_upper_arm_link",
+          "effort": 20.0,
+          "lower": -1.8849555921538759,
+          "mimic_multiplier": null,
+          "mimic_offset": null,
+          "mimic_parent": null,
+          "name": "shoulder",
+          "origin_rpy": "0 0 0",
+          "origin_xyz": "0 0 0.03865",
+          "parent": "leader_right_shoulder_link",
+          "type": "revolute",
+          "upper": 1.9896753472735358,
+          "velocity": 3.141592653589793
+        },
+        {
+          "axis": "0 1 0",
+          "child": "leader_right_upper_forearm_link",
+          "effort": 15.0,
+          "lower": -2.1467549799530254,
+          "mimic_multiplier": null,
+          "mimic_offset": null,
+          "mimic_parent": null,
+          "name": "elbow",
+          "origin_rpy": "0 0 0",
+          "origin_xyz": "0.04975 0 0.25",
+          "parent": "leader_right_upper_arm_link",
+          "type": "revolute",
+          "upper": 1.6057029118347832,
+          "velocity": 3.141592653589793
+        },
+        {
+          "axis": "1 0 0",
+          "child": "leader_right_lower_forearm_link",
+          "effort": 2.0,
+          "lower": -3.141582653589793,
+          "mimic_multiplier": null,
+          "mimic_offset": null,
+          "mimic_parent": null,
+          "name": "forearm_roll",
+          "origin_rpy": "0 0 0",
+          "origin_xyz": "0.175 0 0",
+          "parent": "leader_right_upper_forearm_link",
+          "type": "revolute",
+          "upper": 3.141582653589793,
+          "velocity": 3.141592653589793
+        },
+        {
+          "axis": "0 1 0",
+          "child": "leader_right_wrist_link",
+          "effort": 5.0,
+          "lower": -1.7453292519943295,
+          "mimic_multiplier": null,
+          "mimic_offset": null,
+          "mimic_parent": null,
+          "name": "wrist_angle",
+          "origin_rpy": "0 0 0",
+          "origin_xyz": "0.075 0 0",
+          "parent": "leader_right_lower_forearm_link",
+          "type": "revolute",
+          "upper": 2.1467549799530254,
+          "velocity": 3.141592653589793
+        },
+        {
+          "axis": "1 0 0",
+          "child": "leader_right_gripper_link",
+          "effort": 1.0,
+          "lower": -3.141582653589793,
+          "mimic_multiplier": null,
+          "mimic_offset": null,
+          "mimic_parent": null,
+          "name": "wrist_rotate",
+          "origin_rpy": "0 0 0",
+          "origin_xyz": "0.065 0 0",
+          "parent": "leader_right_wrist_link",
+          "type": "revolute",
+          "upper": 3.141582653589793,
+          "velocity": 3.141592653589793
+        },
+        {
+          "axis": "1 0 0",
+          "child": "leader_right_ee_arm_link",
+          "effort": null,
+          "lower": null,
+          "mimic_multiplier": null,
+          "mimic_offset": null,
+          "mimic_parent": null,
+          "name": "ee_arm",
+          "origin_rpy": "0 0 0",
+          "origin_xyz": "0.043 0 0",
+          "parent": "leader_right_gripper_link",
+          "type": "fixed",
+          "upper": null,
+          "velocity": null
+        },
+        {
+          "axis": "1 0 0",
+          "child": "leader_right_gripper_prop_link",
+          "effort": 1.0,
+          "lower": null,
+          "mimic_multiplier": null,
+          "mimic_offset": null,
+          "mimic_parent": null,
+          "name": "gripper",
+          "origin_rpy": "0 0 0",
+          "origin_xyz": "0.0055 0 0",
+          "parent": "leader_right_ee_arm_link",
+          "type": "continuous",
+          "upper": null,
+          "velocity": 3.141592653589793
+        },
+        {
+          "axis": "1 0 0",
+          "child": "leader_right_gripper_bar_link",
+          "effort": null,
+          "lower": null,
+          "mimic_multiplier": null,
+          "mimic_offset": null,
+          "mimic_parent": null,
+          "name": "gripper_bar",
+          "origin_rpy": "0 0 0",
+          "origin_xyz": "0 0 0",
+          "parent": "leader_right_ee_arm_link",
+          "type": "fixed",
+          "upper": null,
+          "velocity": null
+        },
+        {
+          "axis": "1 0 0",
+          "child": "leader_right_fingers_link",
+          "effort": null,
+          "lower": null,
+          "mimic_multiplier": null,
+          "mimic_offset": null,
+          "mimic_parent": null,
+          "name": "ee_bar",
+          "origin_rpy": "0 0 0",
+          "origin_xyz": "0.023 0 0",
+          "parent": "leader_right_gripper_bar_link",
+          "type": "fixed",
+          "upper": null,
+          "velocity": null
+        },
+        {
+          "axis": "0 1 0",
+          "child": "leader_right_left_finger_link",
+          "effort": 5.0,
+          "lower": 0.015,
+          "mimic_multiplier": null,
+          "mimic_offset": null,
+          "mimic_parent": null,
+          "name": "left_finger",
+          "origin_rpy": "0 0 0",
+          "origin_xyz": "0 0 0",
+          "parent": "leader_right_fingers_link",
+          "type": "prismatic",
+          "upper": 0.037,
+          "velocity": 1.0
+        },
+        {
+          "axis": "0 1 0",
+          "child": "leader_right_right_finger_link",
+          "effort": 5.0,
+          "lower": -0.037,
+          "mimic_multiplier": -1.0,
+          "mimic_offset": 0.0,
+          "mimic_parent": "left_finger",
+          "name": "right_finger",
+          "origin_rpy": "0 0 0",
+          "origin_xyz": "0 0 0",
+          "parent": "leader_right_fingers_link",
+          "type": "prismatic",
+          "upper": -0.015,
+          "velocity": 1.0
+        },
+        {
+          "axis": "1 0 0",
+          "child": "leader_right_ee_gripper_link",
+          "effort": null,
+          "lower": null,
+          "mimic_multiplier": null,
+          "mimic_offset": null,
+          "mimic_parent": null,
+          "name": "ee_gripper",
+          "origin_rpy": "0 0 0",
+          "origin_xyz": "0.027575 0 0",
+          "parent": "leader_right_fingers_link",
+          "type": "fixed",
+          "upper": null,
+          "velocity": null
+        }
+      ],
+      "link_order": [
+        "leader_right_base_link",
+        "leader_right_shoulder_link",
+        "leader_right_upper_arm_link",
+        "leader_right_upper_forearm_link",
+        "leader_right_lower_forearm_link",
+        "leader_right_wrist_link",
+        "leader_right_gripper_link",
+        "leader_right_ee_arm_link",
+        "leader_right_gripper_prop_link",
+        "leader_right_gripper_bar_link",
+        "leader_right_fingers_link",
+        "leader_right_left_finger_link",
+        "leader_right_right_finger_link",
+        "leader_right_ee_gripper_link"
+      ],
+      "meshes": [
+        {
+          "exists": true,
+          "link": "leader_right_base_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/base.stl",
+          "sha256": "69facd590abff70fa03431497ead2c7f1aabe616d55af594288e9bf36b1fd067",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/base.stl"
+        },
+        {
+          "exists": true,
+          "link": "leader_right_base_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/base.stl",
+          "sha256": "69facd590abff70fa03431497ead2c7f1aabe616d55af594288e9bf36b1fd067",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/base.stl"
+        },
+        {
+          "exists": true,
+          "link": "leader_right_shoulder_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/shoulder.stl",
+          "sha256": "337b4cb7e9b637ee3dca6a737becf831fe5f95b790b34f9a97e5cf11475fc222",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/shoulder.stl"
+        },
+        {
+          "exists": true,
+          "link": "leader_right_shoulder_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/shoulder.stl",
+          "sha256": "337b4cb7e9b637ee3dca6a737becf831fe5f95b790b34f9a97e5cf11475fc222",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/shoulder.stl"
+        },
+        {
+          "exists": true,
+          "link": "leader_right_upper_arm_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/upper_arm.stl",
+          "sha256": "b4550b3a79e83d0ca9e1a65e490ff4e25b667e8a7d8e94bab441851c96eb11fa",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/upper_arm.stl"
+        },
+        {
+          "exists": true,
+          "link": "leader_right_upper_arm_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/upper_arm.stl",
+          "sha256": "b4550b3a79e83d0ca9e1a65e490ff4e25b667e8a7d8e94bab441851c96eb11fa",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/upper_arm.stl"
+        },
+        {
+          "exists": true,
+          "link": "leader_right_upper_forearm_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/upper_forearm.stl",
+          "sha256": "1a64efc97dc129bc277afee75c129de27721e8fedcad45a4ec8b251f44542f23",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/upper_forearm.stl"
+        },
+        {
+          "exists": true,
+          "link": "leader_right_upper_forearm_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/upper_forearm.stl",
+          "sha256": "1a64efc97dc129bc277afee75c129de27721e8fedcad45a4ec8b251f44542f23",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/upper_forearm.stl"
+        },
+        {
+          "exists": true,
+          "link": "leader_right_lower_forearm_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/lower_forearm.stl",
+          "sha256": "1445950b7f5ce2cf374b98711df296acd6c2b4df24c3937b413bcb6beb037603",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/lower_forearm.stl"
+        },
+        {
+          "exists": true,
+          "link": "leader_right_lower_forearm_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/lower_forearm.stl",
+          "sha256": "1445950b7f5ce2cf374b98711df296acd6c2b4df24c3937b413bcb6beb037603",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/lower_forearm.stl"
+        },
+        {
+          "exists": true,
+          "link": "leader_right_wrist_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/wrist.stl",
+          "sha256": "8602fe1313765caceec64faff5ec919ec09c57c614b87f1c1c625dcef1e3df5a",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/wrist.stl"
+        },
+        {
+          "exists": true,
+          "link": "leader_right_wrist_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/wrist.stl",
+          "sha256": "8602fe1313765caceec64faff5ec919ec09c57c614b87f1c1c625dcef1e3df5a",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/wrist.stl"
+        },
+        {
+          "exists": true,
+          "link": "leader_right_gripper_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper.stl",
+          "sha256": "6dbc189d3787ca62e09a8cf3f928ceca70c5c184a95c97ac6587805aa6a1ec6d",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper.stl"
+        },
+        {
+          "exists": true,
+          "link": "leader_right_gripper_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper.stl",
+          "sha256": "6dbc189d3787ca62e09a8cf3f928ceca70c5c184a95c97ac6587805aa6a1ec6d",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper.stl"
+        },
+        {
+          "exists": true,
+          "link": "leader_right_gripper_prop_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_prop.stl",
+          "sha256": "30fcd807817b7c9df6275d2c8100cfe0e7786e2c65b574d22efe177520f1a316",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_prop.stl"
+        },
+        {
+          "exists": true,
+          "link": "leader_right_gripper_prop_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_prop.stl",
+          "sha256": "30fcd807817b7c9df6275d2c8100cfe0e7786e2c65b574d22efe177520f1a316",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_prop.stl"
+        },
+        {
+          "exists": true,
+          "link": "leader_right_gripper_bar_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_bar.stl",
+          "sha256": "b54601da3f60eea180226b695bb95a9b29b187f22f5b74d9a523ac9785d9a518",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_bar.stl"
+        },
+        {
+          "exists": true,
+          "link": "leader_right_gripper_bar_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_bar.stl",
+          "sha256": "b54601da3f60eea180226b695bb95a9b29b187f22f5b74d9a523ac9785d9a518",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_bar.stl"
+        },
+        {
+          "exists": true,
+          "link": "leader_right_left_finger_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_finger.stl",
+          "sha256": "6a459bd4ef07eb5c4687e258bd9564004e741437e2e668af7ed31964567d8f90",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_finger.stl"
+        },
+        {
+          "exists": true,
+          "link": "leader_right_left_finger_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_finger.stl",
+          "sha256": "6a459bd4ef07eb5c4687e258bd9564004e741437e2e668af7ed31964567d8f90",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_finger.stl"
+        },
+        {
+          "exists": true,
+          "link": "leader_right_right_finger_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_finger.stl",
+          "sha256": "6a459bd4ef07eb5c4687e258bd9564004e741437e2e668af7ed31964567d8f90",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_finger.stl"
+        },
+        {
+          "exists": true,
+          "link": "leader_right_right_finger_link",
+          "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_finger.stl",
+          "sha256": "6a459bd4ef07eb5c4687e258bd9564004e741437e2e668af7ed31964567d8f90",
+          "uri": "file:///home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_finger.stl"
+        }
+      ],
+      "mimic": [
+        {
+          "joint": "right_finger",
+          "multiplier": -1.0,
+          "offset": 0.0,
+          "parent": "left_finger"
+        }
+      ],
+      "missing_dynamics": [],
+      "robot_name": "leader_right",
+      "root_links": [
+        "leader_right_base_link"
+      ],
+      "status": "PASS",
+      "urdf_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/leader_right.urdf"
+    }
+  ],
+  "schema_version": 1,
+  "status": "PASS"
+}

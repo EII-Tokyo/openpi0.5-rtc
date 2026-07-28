@@ -1,0 +1,50 @@
+schema_version: 1
+
+source:
+  repository_url: https://github.com/j3soon/ros2-essentials.git
+  repository_root: external/ros2-essentials
+  branch: main
+  tag: null
+  commit: 66db34df28ac0037f284c8af1fce7c916c7c8d3a
+  license_path: external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/LICENSE
+  package_name: interbotix_xsarm_descriptions
+  package_path: external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions
+
+xacro:
+  executable: /opt/ros/jazzy/bin/xacro
+  version: 2.0.13
+  package_version: 2.0.13-1noble.20250406.080900
+  python_path: /opt/ros/jazzy/lib/python3.12/site-packages
+  ament_prefix_base: /opt/ros/jazzy
+  license_path: /usr/share/doc/ros-jazzy-xacro/copyright
+
+common_args:
+  base_link_frame: base_link
+  use_gripper: "true"
+  show_gripper_bar: "true"
+  show_gripper_fingers: "true"
+  use_world_frame: "false"
+  external_urdf_loc: ""
+  hardware_type: actual
+
+outputs:
+  directory: generated/urdf
+  report_directory: reports/aloha1_mapping
+
+robots:
+  - name: follower_left
+    model: aloha_vx300s
+    enabled_in_minimal_scene: true
+    xacro: aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/urdf/aloha_vx300s.urdf.xacro
+  - name: follower_right
+    model: aloha_vx300s
+    enabled_in_minimal_scene: true
+    xacro: aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/urdf/aloha_vx300s.urdf.xacro
+  - name: leader_left
+    model: aloha_wx250s
+    enabled_in_minimal_scene: false
+    xacro: aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/urdf/aloha_wx250s.urdf.xacro
+  - name: leader_right
+    model: aloha_wx250s
+    enabled_in_minimal_scene: false
+    xacro: aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/urdf/aloha_wx250s.urdf.xacro

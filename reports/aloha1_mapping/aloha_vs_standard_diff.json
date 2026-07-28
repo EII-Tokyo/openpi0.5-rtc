@@ -1,0 +1,40 @@
+{
+  "comparisons": [
+    {
+      "all_mesh_hashes_equal": true,
+      "aloha_robot": "follower_left",
+      "gripper_joint_differences": [],
+      "joint_differences": [],
+      "joint_order_equal": true,
+      "link_order_equal": true,
+      "mesh_hash_differences": [],
+      "standard_robot": "standard_vx300s",
+      "xacro_source": {
+        "aloha_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/urdf/aloha_vx300s.urdf.xacro",
+        "aloha_sha256": "45dff1e0de2456386dbb64b851c94db2d874b6dbefb6503cb747bc55435177bd",
+        "content_equal": false,
+        "standard_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/urdf/vx300s.urdf.xacro",
+        "standard_sha256": "67ba21db03fcd6e2fa6fe681bd79a1d357e3d7ce55792d60bafd862a0bdd0802"
+      }
+    },
+    {
+      "all_mesh_hashes_equal": true,
+      "aloha_robot": "leader_left",
+      "gripper_joint_differences": [],
+      "joint_differences": [],
+      "joint_order_equal": true,
+      "link_order_equal": true,
+      "mesh_hash_differences": [],
+      "standard_robot": "standard_wx250s",
+      "xacro_source": {
+        "aloha_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/urdf/aloha_wx250s.urdf.xacro",
+        "aloha_sha256": "3cd62a579deea9621879f4d7793b88d755a75f937a747ad9d64055912c3b632e",
+        "content_equal": false,
+        "standard_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/urdf/wx250s.urdf.xacro",
+        "standard_sha256": "b7a7ec26572ee17f6670a244c10ff7fcbdc3d35b8ec9bfbca178541219870586"
+      }
+    }
+  ],
+  "schema_version": 1,
+  "status": "PASS"
+}

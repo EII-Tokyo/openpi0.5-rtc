@@ -1,0 +1,249 @@
+{
+  "categories": [
+    {
+      "category": "IsaacSim.PhysicsRules",
+      "issues": [
+        {
+          "at": "Prim </follower_left/joints/gripper>",
+          "message": "/follower_left/joints/gripper Has no Joint State API",
+          "rule": "JointHasJointStateAPI",
+          "severity": "ERROR"
+        },
+        {
+          "at": "Prim </follower_left/joints/right_finger>",
+          "message": "Joint /follower_left/joints/right_finger's lower limit (-0.013799999840557575) should be > reference joint limits * gear ratio(0.020999999716877937)",
+          "rule": "MimicAPICheck",
+          "severity": "ERROR"
+        },
+        {
+          "at": "Prim </follower_left/follower_left_ee_arm_link>",
+          "message": "Rigid body /follower_left/follower_left_ee_arm_link has rigid body api but no collision api",
+          "rule": "RigidBodyHasCollider",
+          "severity": "ERROR"
+        },
+        {
+          "at": "Prim </follower_left/follower_left_ee_gripper_link>",
+          "message": "Rigid body /follower_left/follower_left_ee_gripper_link has rigid body api but no collision api",
+          "rule": "RigidBodyHasCollider",
+          "severity": "ERROR"
+        },
+        {
+          "at": "Prim </follower_left/follower_left_fingers_link>",
+          "message": "Rigid body /follower_left/follower_left_fingers_link has rigid body api but no collision api",
+          "rule": "RigidBodyHasCollider",
+          "severity": "ERROR"
+        },
+        {
+          "at": "Prim </follower_right/joints/gripper>",
+          "message": "/follower_right/joints/gripper Has no Joint State API",
+          "rule": "JointHasJointStateAPI",
+          "severity": "ERROR"
+        },
+        {
+          "at": "Prim </follower_right/joints/right_finger>",
+          "message": "Joint /follower_right/joints/right_finger's lower limit (-0.013799999840557575) should be > reference joint limits * gear ratio(0.020999999716877937)",
+          "rule": "MimicAPICheck",
+          "severity": "ERROR"
+        },
+        {
+          "at": "Prim </follower_right/follower_right_ee_arm_link>",
+          "message": "Rigid body /follower_right/follower_right_ee_arm_link has rigid body api but no collision api",
+          "rule": "RigidBodyHasCollider",
+          "severity": "ERROR"
+        },
+        {
+          "at": "Prim </follower_right/follower_right_ee_gripper_link>",
+          "message": "Rigid body /follower_right/follower_right_ee_gripper_link has rigid body api but no collision api",
+          "rule": "RigidBodyHasCollider",
+          "severity": "ERROR"
+        },
+        {
+          "at": "Prim </follower_right/follower_right_fingers_link>",
+          "message": "Rigid body /follower_right/follower_right_fingers_link has rigid body api but no collision api",
+          "rule": "RigidBodyHasCollider",
+          "severity": "ERROR"
+        }
+      ],
+      "rule_count": 12,
+      "rules": [
+        "PhysicsJointHasDriveOrMimicAPI",
+        "PhysicsJointMaxVelocity",
+        "PhysicsDriveAndJointState",
+        "DriveJointValueReasonable",
+        "JointHasCorrectTransformAndState",
+        "JointHasJointStateAPI",
+        "MimicAPICheck",
+        "RigidBodyHasMassAPI",
+        "RigidBodyHasCollider",
+        "NonAdjacentCollisionMeshesDoNotClash",
+        "InvisibleCollisionMeshHasPurposeGuide",
+        "HasArticulationRoot"
+      ],
+      "status": "FAIL",
+      "targets": [
+        {
+          "issues": [
+            {
+              "at": "Prim </follower_left/joints/gripper>",
+              "message": "/follower_left/joints/gripper Has no Joint State API",
+              "rule": "JointHasJointStateAPI",
+              "severity": "ERROR"
+            },
+            {
+              "at": "Prim </follower_left/joints/right_finger>",
+              "message": "Joint /follower_left/joints/right_finger's lower limit (-0.013799999840557575) should be > reference joint limits * gear ratio(0.020999999716877937)",
+              "rule": "MimicAPICheck",
+              "severity": "ERROR"
+            },
+            {
+              "at": "Prim </follower_left/follower_left_ee_arm_link>",
+              "message": "Rigid body /follower_left/follower_left_ee_arm_link has rigid body api but no collision api",
+              "rule": "RigidBodyHasCollider",
+              "severity": "ERROR"
+            },
+            {
+              "at": "Prim </follower_left/follower_left_ee_gripper_link>",
+              "message": "Rigid body /follower_left/follower_left_ee_gripper_link has rigid body api but no collision api",
+              "rule": "RigidBodyHasCollider",
+              "severity": "ERROR"
+            },
+            {
+              "at": "Prim </follower_left/follower_left_fingers_link>",
+              "message": "Rigid body /follower_left/follower_left_fingers_link has rigid body api but no collision api",
+              "rule": "RigidBodyHasCollider",
+              "severity": "ERROR"
+            }
+          ],
+          "status": "FAIL",
+          "target": "follower_left"
+        },
+        {
+          "issues": [
+            {
+              "at": "Prim </follower_right/joints/gripper>",
+              "message": "/follower_right/joints/gripper Has no Joint State API",
+              "rule": "JointHasJointStateAPI",
+              "severity": "ERROR"
+            },
+            {
+              "at": "Prim </follower_right/joints/right_finger>",
+              "message": "Joint /follower_right/joints/right_finger's lower limit (-0.013799999840557575) should be > reference joint limits * gear ratio(0.020999999716877937)",
+              "rule": "MimicAPICheck",
+              "severity": "ERROR"
+            },
+            {
+              "at": "Prim </follower_right/follower_right_ee_arm_link>",
+              "message": "Rigid body /follower_right/follower_right_ee_arm_link has rigid body api but no collision api",
+              "rule": "RigidBodyHasCollider",
+              "severity": "ERROR"
+            },
+            {
+              "at": "Prim </follower_right/follower_right_ee_gripper_link>",
+              "message": "Rigid body /follower_right/follower_right_ee_gripper_link has rigid body api but no collision api",
+              "rule": "RigidBodyHasCollider",
+              "severity": "ERROR"
+            },
+            {
+              "at": "Prim </follower_right/follower_right_fingers_link>",
+              "message": "Rigid body /follower_right/follower_right_fingers_link has rigid body api but no collision api",
+              "rule": "RigidBodyHasCollider",
+              "severity": "ERROR"
+            }
+          ],
+          "status": "FAIL",
+          "target": "follower_right"
+        }
+      ]
+    },
+    {
+      "category": "IsaacSim.RobotRules",
+      "issues": [
+        {
+          "at": "Stage </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/follower_left.usd>",
+          "message": "No thumbnail found at /home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/.thumbs/256x256/follower_left.usd.png for robot asset </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/follower_left.usd>",
+          "rule": "ThumbnailExists",
+          "severity": "WARNING"
+        },
+        {
+          "at": "Stage </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/follower_right.usd>",
+          "message": "No thumbnail found at /home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/.thumbs/256x256/follower_right.usd.png for robot asset </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/follower_right.usd>",
+          "rule": "ThumbnailExists",
+          "severity": "WARNING"
+        }
+      ],
+      "rule_count": 10,
+      "rules": [
+        "RobotNaming",
+        "CleanFolder",
+        "NoOverrides",
+        "RobotSchema",
+        "JointsExist",
+        "LinksExist",
+        "ThumbnailExists",
+        "CheckRobotRelationships",
+        "VerifyRobotPhysicsAttributesSourceLayer",
+        "VerifyRobotPhysicsSchemaSourceLayer"
+      ],
+      "status": "PARTIAL",
+      "targets": [
+        {
+          "issues": [
+            {
+              "at": "Stage </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/follower_left.usd>",
+              "message": "No thumbnail found at /home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/.thumbs/256x256/follower_left.usd.png for robot asset </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/follower_left.usd>",
+              "rule": "ThumbnailExists",
+              "severity": "WARNING"
+            }
+          ],
+          "status": "PARTIAL",
+          "target": "follower_left"
+        },
+        {
+          "issues": [
+            {
+              "at": "Stage </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/follower_right.usd>",
+              "message": "No thumbnail found at /home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/.thumbs/256x256/follower_right.usd.png for robot asset </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/follower_right.usd>",
+              "rule": "ThumbnailExists",
+              "severity": "WARNING"
+            }
+          ],
+          "status": "PARTIAL",
+          "target": "follower_right"
+        }
+      ]
+    },
+    {
+      "category": "IsaacSim.SimReadyAssetRules",
+      "issues": [
+        {
+          "at": null,
+          "message": "No Looks prim found in the stage, skipping MaterialsOnTopLevelOnlyRule",
+          "rule": "MaterialsOnTopLevelOnly",
+          "severity": "INFO"
+        }
+      ],
+      "rule_count": 2,
+      "rules": [
+        "NoNestedMaterials",
+        "MaterialsOnTopLevelOnly"
+      ],
+      "status": "PASS",
+      "targets": [
+        {
+          "issues": [
+            {
+              "at": null,
+              "message": "No Looks prim found in the stage, skipping MaterialsOnTopLevelOnlyRule",
+              "rule": "MaterialsOnTopLevelOnly",
+              "severity": "INFO"
+            }
+          ],
+          "status": "PASS",
+          "target": "workcell"
+        }
+      ]
+    }
+  ],
+  "schema_version": 1,
+  "status": "FAIL"
+}

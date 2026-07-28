@@ -1,0 +1,38 @@
+{
+  "camera_prims": [
+    "/aloha1_workcell/Sensors/cam_high",
+    "/aloha1_workcell/Sensors/cam_low",
+    "/aloha1_workcell/Sensors/cam_left_wrist",
+    "/aloha1_workcell/Sensors/cam_right_wrist"
+  ],
+  "follower_references": [
+    {
+      "kind": "follower",
+      "prim": "/aloha1_workcell/Robots/follower_left",
+      "usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/configuration/follower_left_debug_acceleration_drive.usd"
+    },
+    {
+      "kind": "follower",
+      "prim": "/aloha1_workcell/Robots/follower_right",
+      "usd": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/configuration/follower_right_debug_acceleration_drive.usd"
+    }
+  ],
+  "hard_blockers": {
+    "bottle": "measured bottle geometry, mass, and inertia",
+    "camera_calibration": "intrinsics, distortion/cropping, frame rate, and extrinsics for all four cameras",
+    "follower_mount_relation": "measured left/right base transforms and orientations",
+    "pipe_fixture": "measured pipe pose and collision geometry",
+    "tabletop_to_base_relation": "measured tabletop plane relative to both follower bases"
+  },
+  "leader_variant": "disabled",
+  "object_prims": [
+    "/aloha1_workcell/WorkcellObjects/table",
+    "/aloha1_workcell/WorkcellObjects/frame",
+    "/aloha1_workcell/WorkcellObjects/camera_mounts",
+    "/aloha1_workcell/WorkcellObjects/pipe_fixture",
+    "/aloha1_workcell/WorkcellObjects/bottle"
+  ],
+  "schema_version": 1,
+  "stage": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/workcell/aloha1_workcell.usd",
+  "status": "PARTIAL"
+}

@@ -1,0 +1,17 @@
+{
+  "calibration_pending": [
+    "cam_high",
+    "cam_low",
+    "cam_left_wrist",
+    "cam_right_wrist"
+  ],
+  "logical_camera_count": 4,
+  "logical_names_unique": true,
+  "observation_order_matches_camera_order": true,
+  "resolution_interface_contract_wh": [
+    640,
+    480
+  ],
+  "schema_version": 1,
+  "status": "PARTIAL"
+}

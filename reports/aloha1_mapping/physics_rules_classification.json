@@ -1,0 +1,177 @@
+{
+  "fix_required_count": 0,
+  "issue_count": 10,
+  "issues": [
+    {
+      "at": "Prim </follower_left/joints/gripper>",
+      "classification": "CONFIGURATION_LAYER_JOINT_STATE_OMISSION",
+      "evidence": {
+        "authoring_layer": "debug/sim2real configuration layer; raw importer source remains immutable",
+        "isaac_sim_version": "5.1.0.0",
+        "official_source_result_suppressed": false,
+        "validator_action": "PhysxSchema.JointStateAPI.Apply(prim, 'angular')"
+      },
+      "message": "/follower_left/joints/gripper Has no Joint State API",
+      "resolution": "FIXED_IN_CONFIGURATION_LAYER",
+      "rule": "JointHasJointStateAPI",
+      "severity": "ERROR",
+      "target": "follower_left"
+    },
+    {
+      "at": "Prim </follower_left/joints/right_finger>",
+      "classification": "ISAAC_SIM_5_1_MIMIC_VALIDATOR_SCHEMA_CONFLICT",
+      "evidence": {
+        "asset_mutation_allowed": false,
+        "imported_gearing": 1.0,
+        "imported_offset": 0.0,
+        "isaac_sim_version": "5.1.0.0",
+        "kit_version": "107.3.3",
+        "reason": "Changing gearing to satisfy the validator would invert the verified runtime relation.",
+        "runtime_relation": "right_finger ~= -left_finger",
+        "schema_equation": "jointPosition + gearing * referenceJointPosition + offset = 0",
+        "urdf_relation": "right_finger = -1 * left_finger + 0"
+      },
+      "message": "Joint /follower_left/joints/right_finger's lower limit (-0.013799999840557575) should be > reference joint limits * gear ratio(0.020999999716877937)",
+      "resolution": "FORMALLY_RECORDED",
+      "rule": "MimicAPICheck",
+      "severity": "ERROR",
+      "target": "follower_left"
+    },
+    {
+      "at": "Prim </follower_left/follower_left_ee_arm_link>",
+      "classification": "SOURCE_MASS_ONLY_LINK_WITHOUT_GEOMETRY",
+      "evidence": {
+        "asset_mutation_allowed": false,
+        "import_policy": "merge_fixed_joints=false",
+        "reason": "No STL, CAD, or measured geometry exists for a non-guessed collider.",
+        "runtime_articulation_created": true,
+        "source_urdf": "link has inertial data but no visual or collision"
+      },
+      "message": "Rigid body /follower_left/follower_left_ee_arm_link has rigid body api but no collision api",
+      "resolution": "HARD_BLOCKER_NO_GEOMETRY_EVIDENCE",
+      "rule": "RigidBodyHasCollider",
+      "severity": "ERROR",
+      "target": "follower_left"
+    },
+    {
+      "at": "Prim </follower_left/follower_left_ee_gripper_link>",
+      "classification": "SOURCE_MASS_ONLY_LINK_WITHOUT_GEOMETRY",
+      "evidence": {
+        "asset_mutation_allowed": false,
+        "import_policy": "merge_fixed_joints=false",
+        "reason": "No STL, CAD, or measured geometry exists for a non-guessed collider.",
+        "runtime_articulation_created": true,
+        "source_urdf": "link has inertial data but no visual or collision"
+      },
+      "message": "Rigid body /follower_left/follower_left_ee_gripper_link has rigid body api but no collision api",
+      "resolution": "HARD_BLOCKER_NO_GEOMETRY_EVIDENCE",
+      "rule": "RigidBodyHasCollider",
+      "severity": "ERROR",
+      "target": "follower_left"
+    },
+    {
+      "at": "Prim </follower_left/follower_left_fingers_link>",
+      "classification": "SOURCE_MASS_ONLY_LINK_WITHOUT_GEOMETRY",
+      "evidence": {
+        "asset_mutation_allowed": false,
+        "import_policy": "merge_fixed_joints=false",
+        "reason": "No STL, CAD, or measured geometry exists for a non-guessed collider.",
+        "runtime_articulation_created": true,
+        "source_urdf": "link has inertial data but no visual or collision"
+      },
+      "message": "Rigid body /follower_left/follower_left_fingers_link has rigid body api but no collision api",
+      "resolution": "HARD_BLOCKER_NO_GEOMETRY_EVIDENCE",
+      "rule": "RigidBodyHasCollider",
+      "severity": "ERROR",
+      "target": "follower_left"
+    },
+    {
+      "at": "Prim </follower_right/joints/gripper>",
+      "classification": "CONFIGURATION_LAYER_JOINT_STATE_OMISSION",
+      "evidence": {
+        "authoring_layer": "debug/sim2real configuration layer; raw importer source remains immutable",
+        "isaac_sim_version": "5.1.0.0",
+        "official_source_result_suppressed": false,
+        "validator_action": "PhysxSchema.JointStateAPI.Apply(prim, 'angular')"
+      },
+      "message": "/follower_right/joints/gripper Has no Joint State API",
+      "resolution": "FIXED_IN_CONFIGURATION_LAYER",
+      "rule": "JointHasJointStateAPI",
+      "severity": "ERROR",
+      "target": "follower_right"
+    },
+    {
+      "at": "Prim </follower_right/joints/right_finger>",
+      "classification": "ISAAC_SIM_5_1_MIMIC_VALIDATOR_SCHEMA_CONFLICT",
+      "evidence": {
+        "asset_mutation_allowed": false,
+        "imported_gearing": 1.0,
+        "imported_offset": 0.0,
+        "isaac_sim_version": "5.1.0.0",
+        "kit_version": "107.3.3",
+        "reason": "Changing gearing to satisfy the validator would invert the verified runtime relation.",
+        "runtime_relation": "right_finger ~= -left_finger",
+        "schema_equation": "jointPosition + gearing * referenceJointPosition + offset = 0",
+        "urdf_relation": "right_finger = -1 * left_finger + 0"
+      },
+      "message": "Joint /follower_right/joints/right_finger's lower limit (-0.013799999840557575) should be > reference joint limits * gear ratio(0.020999999716877937)",
+      "resolution": "FORMALLY_RECORDED",
+      "rule": "MimicAPICheck",
+      "severity": "ERROR",
+      "target": "follower_right"
+    },
+    {
+      "at": "Prim </follower_right/follower_right_ee_arm_link>",
+      "classification": "SOURCE_MASS_ONLY_LINK_WITHOUT_GEOMETRY",
+      "evidence": {
+        "asset_mutation_allowed": false,
+        "import_policy": "merge_fixed_joints=false",
+        "reason": "No STL, CAD, or measured geometry exists for a non-guessed collider.",
+        "runtime_articulation_created": true,
+        "source_urdf": "link has inertial data but no visual or collision"
+      },
+      "message": "Rigid body /follower_right/follower_right_ee_arm_link has rigid body api but no collision api",
+      "resolution": "HARD_BLOCKER_NO_GEOMETRY_EVIDENCE",
+      "rule": "RigidBodyHasCollider",
+      "severity": "ERROR",
+      "target": "follower_right"
+    },
+    {
+      "at": "Prim </follower_right/follower_right_ee_gripper_link>",
+      "classification": "SOURCE_MASS_ONLY_LINK_WITHOUT_GEOMETRY",
+      "evidence": {
+        "asset_mutation_allowed": false,
+        "import_policy": "merge_fixed_joints=false",
+        "reason": "No STL, CAD, or measured geometry exists for a non-guessed collider.",
+        "runtime_articulation_created": true,
+        "source_urdf": "link has inertial data but no visual or collision"
+      },
+      "message": "Rigid body /follower_right/follower_right_ee_gripper_link has rigid body api but no collision api",
+      "resolution": "HARD_BLOCKER_NO_GEOMETRY_EVIDENCE",
+      "rule": "RigidBodyHasCollider",
+      "severity": "ERROR",
+      "target": "follower_right"
+    },
+    {
+      "at": "Prim </follower_right/follower_right_fingers_link>",
+      "classification": "SOURCE_MASS_ONLY_LINK_WITHOUT_GEOMETRY",
+      "evidence": {
+        "asset_mutation_allowed": false,
+        "import_policy": "merge_fixed_joints=false",
+        "reason": "No STL, CAD, or measured geometry exists for a non-guessed collider.",
+        "runtime_articulation_created": true,
+        "source_urdf": "link has inertial data but no visual or collision"
+      },
+      "message": "Rigid body /follower_right/follower_right_fingers_link has rigid body api but no collision api",
+      "resolution": "HARD_BLOCKER_NO_GEOMETRY_EVIDENCE",
+      "rule": "RigidBodyHasCollider",
+      "severity": "ERROR",
+      "target": "follower_right"
+    }
+  ],
+  "official_status": "FAIL",
+  "official_status_suppressed": false,
+  "schema_version": 1,
+  "status": "PARTIAL",
+  "unclassified_error_count": 0
+}

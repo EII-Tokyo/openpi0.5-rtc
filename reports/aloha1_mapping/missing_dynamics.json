@@ -1,0 +1,1408 @@
+{
+  "default_density_used": false,
+  "links": [
+    {
+      "center_of_mass_xyz": [
+        -0.0534774,
+        -0.000562575,
+        0.0205961
+      ],
+      "inertia": {
+        "ixx": 0.006024,
+        "ixy": 4.713e-05,
+        "ixz": 3.851e-06,
+        "iyy": 0.0017,
+        "iyz": -8.415e-05,
+        "izz": 0.007162
+      },
+      "link": "follower_left_base_link",
+      "mass": 0.969034,
+      "measurement_status": "HARD_BLOCKER",
+      "missing_evidence": [
+        "physical mass measurement",
+        "physical center-of-mass measurement",
+        "physical inertia measurement or identified CAD"
+      ],
+      "robot": "follower_left",
+      "urdf_values_present": true
+    },
+    {
+      "center_of_mass_xyz": [
+        0.000259233,
+        -3.3552e-06,
+        0.0116129
+      ],
+      "inertia": {
+        "ixx": 0.0009388,
+        "ixy": -1e-09,
+        "ixz": -1.91e-08,
+        "iyy": 0.001138,
+        "iyz": 5.9568e-06,
+        "izz": 0.001201
+      },
+      "link": "follower_left_shoulder_link",
+      "mass": 0.798614,
+      "measurement_status": "HARD_BLOCKER",
+      "missing_evidence": [
+        "physical mass measurement",
+        "physical center-of-mass measurement",
+        "physical inertia measurement or identified CAD"
+      ],
+      "robot": "follower_left",
+      "urdf_values_present": true
+    },
+    {
+      "center_of_mass_xyz": [
+        0.0206949,
+        4e-10,
+        0.226459
+      ],
+      "inertia": {
+        "ixx": 0.008925,
+        "ixy": 0.0,
+        "ixz": 0.0,
+        "iyy": 0.008937,
+        "iyz": 0.001201,
+        "izz": 0.0009357
+      },
+      "link": "follower_left_upper_arm_link",
+      "mass": 0.792592,
+      "measurement_status": "HARD_BLOCKER",
+      "missing_evidence": [
+        "physical mass measurement",
+        "physical center-of-mass measurement",
+        "physical inertia measurement or identified CAD"
+      ],
+      "robot": "follower_left",
+      "urdf_values_present": true
+    },
+    {
+      "center_of_mass_xyz": [
+        0.105723,
+        0.0,
+        0.0
+      ],
+      "inertia": {
+        "ixx": 0.0001524,
+        "ixy": -1.883e-05,
+        "ixz": -8.4064e-06,
+        "iyy": 0.001342,
+        "iyz": 1.2564e-06,
+        "izz": 0.001441
+      },
+      "link": "follower_left_upper_forearm_link",
+      "mass": 0.322228,
+      "measurement_status": "HARD_BLOCKER",
+      "missing_evidence": [
+        "physical mass measurement",
+        "physical center-of-mass measurement",
+        "physical inertia measurement or identified CAD"
+      ],
+      "robot": "follower_left",
+      "urdf_values_present": true
+    },
+    {
+      "center_of_mass_xyz": [
+        0.0513477,
+        0.00680462,
+        0.0
+      ],
+      "inertia": {
+        "ixx": 0.0001753,
+        "ixy": -8.528e-05,
+        "ixz": 0.0,
+        "iyy": 0.0005269,
+        "iyz": 0.0,
+        "izz": 0.0005911
+      },
+      "link": "follower_left_lower_forearm_link",
+      "mass": 0.414823,
+      "measurement_status": "HARD_BLOCKER",
+      "missing_evidence": [
+        "physical mass measurement",
+        "physical center-of-mass measurement",
+        "physical inertia measurement or identified CAD"
+      ],
+      "robot": "follower_left",
+      "urdf_values_present": true
+    },
+    {
+      "center_of_mass_xyz": [
+        0.046743,
+        -7.6652e-06,
+        0.010565
+      ],
+      "inertia": {
+        "ixx": 4.631e-05,
+        "ixy": 1.95e-08,
+        "ixz": 2.3e-09,
+        "iyy": 4.514e-05,
+        "iyz": 4.2002e-06,
+        "izz": 5.27e-05
+      },
+      "link": "follower_left_wrist_link",
+      "mass": 0.115395,
+      "measurement_status": "HARD_BLOCKER",
+      "missing_evidence": [
+        "physical mass measurement",
+        "physical center-of-mass measurement",
+        "physical inertia measurement or identified CAD"
+      ],
+      "robot": "follower_left",
+      "urdf_values_present": true
+    },
+    {
+      "center_of_mass_xyz": [
+        0.023001,
+        0.0,
+        0.011523
+      ],
+      "inertia": {
+        "ixx": 3.268e-05,
+        "ixy": 0.0,
+        "ixz": 0.0,
+        "iyy": 2.436e-05,
+        "iyz": 2.785e-07,
+        "izz": 2.119e-05
+      },
+      "link": "follower_left_gripper_link",
+      "mass": 0.097666,
+      "measurement_status": "HARD_BLOCKER",
+      "missing_evidence": [
+        "physical mass measurement",
+        "physical center-of-mass measurement",
+        "physical inertia measurement or identified CAD"
+      ],
+      "robot": "follower_left",
+      "urdf_values_present": true
+    },
+    {
+      "center_of_mass_xyz": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "inertia": {
+        "ixx": 0.0001,
+        "ixy": 0.0,
+        "ixz": 0.0,
+        "iyy": 0.0001,
+        "iyz": 0.0,
+        "izz": 0.0001
+      },
+      "link": "follower_left_ee_arm_link",
+      "mass": 0.001,
+      "measurement_status": "HARD_BLOCKER",
+      "missing_evidence": [
+        "physical mass measurement",
+        "physical center-of-mass measurement",
+        "physical inertia measurement or identified CAD"
+      ],
+      "robot": "follower_left",
+      "urdf_values_present": true
+    },
+    {
+      "center_of_mass_xyz": [
+        0.002378,
+        2.85e-08,
+        0.0
+      ],
+      "inertia": {
+        "ixx": 2.0386e-06,
+        "ixy": 0.0,
+        "ixz": 6.559e-07,
+        "iyy": 4.2979e-06,
+        "iyz": 0.0,
+        "izz": 2.3796e-06
+      },
+      "link": "follower_left_gripper_prop_link",
+      "mass": 0.008009,
+      "measurement_status": "HARD_BLOCKER",
+      "missing_evidence": [
+        "physical mass measurement",
+        "physical center-of-mass measurement",
+        "physical inertia measurement or identified CAD"
+      ],
+      "robot": "follower_left",
+      "urdf_values_present": true
+    },
+    {
+      "center_of_mass_xyz": [
+        0.006794,
+        -4.272e-07,
+        -0.000776
+      ],
+      "inertia": {
+        "ixx": 7.895e-05,
+        "ixy": -1.2e-09,
+        "ixz": 1.341e-07,
+        "iyy": 0.0003283,
+        "iyz": 1.7465e-06,
+        "izz": 0.0003095
+      },
+      "link": "follower_left_gripper_bar_link",
+      "mass": 0.150986,
+      "measurement_status": "HARD_BLOCKER",
+      "missing_evidence": [
+        "physical mass measurement",
+        "physical center-of-mass measurement",
+        "physical inertia measurement or identified CAD"
+      ],
+      "robot": "follower_left",
+      "urdf_values_present": true
+    },
+    {
+      "center_of_mass_xyz": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "inertia": {
+        "ixx": 0.0001,
+        "ixy": 0.0,
+        "ixz": 0.0,
+        "iyy": 0.0001,
+        "iyz": 0.0,
+        "izz": 0.0001
+      },
+      "link": "follower_left_fingers_link",
+      "mass": 0.001,
+      "measurement_status": "HARD_BLOCKER",
+      "missing_evidence": [
+        "physical mass measurement",
+        "physical center-of-mass measurement",
+        "physical inertia measurement or identified CAD"
+      ],
+      "robot": "follower_left",
+      "urdf_values_present": true
+    },
+    {
+      "center_of_mass_xyz": [
+        0.017344,
+        -0.0060692,
+        0.0
+      ],
+      "inertia": {
+        "ixx": 2.433e-05,
+        "ixy": -2.4004e-06,
+        "ixz": 0.0,
+        "iyy": 1.255e-05,
+        "iyz": 0.0,
+        "izz": 1.417e-05
+      },
+      "link": "follower_left_left_finger_link",
+      "mass": 0.034796,
+      "measurement_status": "HARD_BLOCKER",
+      "missing_evidence": [
+        "physical mass measurement",
+        "physical center-of-mass measurement",
+        "physical inertia measurement or identified CAD"
+      ],
+      "robot": "follower_left",
+      "urdf_values_present": true
+    },
+    {
+      "center_of_mass_xyz": [
+        0.017344,
+        0.0060692,
+        0.0
+      ],
+      "inertia": {
+        "ixx": 2.433e-05,
+        "ixy": 2.4001e-06,
+        "ixz": 0.0,
+        "iyy": 1.255e-05,
+        "iyz": 0.0,
+        "izz": 1.417e-05
+      },
+      "link": "follower_left_right_finger_link",
+      "mass": 0.034796,
+      "measurement_status": "HARD_BLOCKER",
+      "missing_evidence": [
+        "physical mass measurement",
+        "physical center-of-mass measurement",
+        "physical inertia measurement or identified CAD"
+      ],
+      "robot": "follower_left",
+      "urdf_values_present": true
+    },
+    {
+      "center_of_mass_xyz": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "inertia": {
+        "ixx": 0.0001,
+        "ixy": 0.0,
+        "ixz": 0.0,
+        "iyy": 0.0001,
+        "iyz": 0.0,
+        "izz": 0.0001
+      },
+      "link": "follower_left_ee_gripper_link",
+      "mass": 0.001,
+      "measurement_status": "HARD_BLOCKER",
+      "missing_evidence": [
+        "physical mass measurement",
+        "physical center-of-mass measurement",
+        "physical inertia measurement or identified CAD"
+      ],
+      "robot": "follower_left",
+      "urdf_values_present": true
+    },
+    {
+      "center_of_mass_xyz": [
+        -0.0534774,
+        -0.000562575,
+        0.0205961
+      ],
+      "inertia": {
+        "ixx": 0.006024,
+        "ixy": 4.713e-05,
+        "ixz": 3.851e-06,
+        "iyy": 0.0017,
+        "iyz": -8.415e-05,
+        "izz": 0.007162
+      },
+      "link": "follower_right_base_link",
+      "mass": 0.969034,
+      "measurement_status": "HARD_BLOCKER",
+      "missing_evidence": [
+        "physical mass measurement",
+        "physical center-of-mass measurement",
+        "physical inertia measurement or identified CAD"
+      ],
+      "robot": "follower_right",
+      "urdf_values_present": true
+    },
+    {
+      "center_of_mass_xyz": [
+        0.000259233,
+        -3.3552e-06,
+        0.0116129
+      ],
+      "inertia": {
+        "ixx": 0.0009388,
+        "ixy": -1e-09,
+        "ixz": -1.91e-08,
+        "iyy": 0.001138,
+        "iyz": 5.9568e-06,
+        "izz": 0.001201
+      },
+      "link": "follower_right_shoulder_link",
+      "mass": 0.798614,
+      "measurement_status": "HARD_BLOCKER",
+      "missing_evidence": [
+        "physical mass measurement",
+        "physical center-of-mass measurement",
+        "physical inertia measurement or identified CAD"
+      ],
+      "robot": "follower_right",
+      "urdf_values_present": true
+    },
+    {
+      "center_of_mass_xyz": [
+        0.0206949,
+        4e-10,
+        0.226459
+      ],
+      "inertia": {
+        "ixx": 0.008925,
+        "ixy": 0.0,
+        "ixz": 0.0,
+        "iyy": 0.008937,
+        "iyz": 0.001201,
+        "izz": 0.0009357
+      },
+      "link": "follower_right_upper_arm_link",
+      "mass": 0.792592,
+      "measurement_status": "HARD_BLOCKER",
+      "missing_evidence": [
+        "physical mass measurement",
+        "physical center-of-mass measurement",
+        "physical inertia measurement or identified CAD"
+      ],
+      "robot": "follower_right",
+      "urdf_values_present": true
+    },
+    {
+      "center_of_mass_xyz": [
+        0.105723,
+        0.0,
+        0.0
+      ],
+      "inertia": {
+        "ixx": 0.0001524,
+        "ixy": -1.883e-05,
+        "ixz": -8.4064e-06,
+        "iyy": 0.001342,
+        "iyz": 1.2564e-06,
+        "izz": 0.001441
+      },
+      "link": "follower_right_upper_forearm_link",
+      "mass": 0.322228,
+      "measurement_status": "HARD_BLOCKER",
+      "missing_evidence": [
+        "physical mass measurement",
+        "physical center-of-mass measurement",
+        "physical inertia measurement or identified CAD"
+      ],
+      "robot": "follower_right",
+      "urdf_values_present": true
+    },
+    {
+      "center_of_mass_xyz": [
+        0.0513477,
+        0.00680462,
+        0.0
+      ],
+      "inertia": {
+        "ixx": 0.0001753,
+        "ixy": -8.528e-05,
+        "ixz": 0.0,
+        "iyy": 0.0005269,
+        "iyz": 0.0,
+        "izz": 0.0005911
+      },
+      "link": "follower_right_lower_forearm_link",
+      "mass": 0.414823,
+      "measurement_status": "HARD_BLOCKER",
+      "missing_evidence": [
+        "physical mass measurement",
+        "physical center-of-mass measurement",
+        "physical inertia measurement or identified CAD"
+      ],
+      "robot": "follower_right",
+      "urdf_values_present": true
+    },
+    {
+      "center_of_mass_xyz": [
+        0.046743,
+        -7.6652e-06,
+        0.010565
+      ],
+      "inertia": {
+        "ixx": 4.631e-05,
+        "ixy": 1.95e-08,
+        "ixz": 2.3e-09,
+        "iyy": 4.514e-05,
+        "iyz": 4.2002e-06,
+        "izz": 5.27e-05
+      },
+      "link": "follower_right_wrist_link",
+      "mass": 0.115395,
+      "measurement_status": "HARD_BLOCKER",
+      "missing_evidence": [
+        "physical mass measurement",
+        "physical center-of-mass measurement",
+        "physical inertia measurement or identified CAD"
+      ],
+      "robot": "follower_right",
+      "urdf_values_present": true
+    },
+    {
+      "center_of_mass_xyz": [
+        0.023001,
+        0.0,
+        0.011523
+      ],
+      "inertia": {
+        "ixx": 3.268e-05,
+        "ixy": 0.0,
+        "ixz": 0.0,
+        "iyy": 2.436e-05,
+        "iyz": 2.785e-07,
+        "izz": 2.119e-05
+      },
+      "link": "follower_right_gripper_link",
+      "mass": 0.097666,
+      "measurement_status": "HARD_BLOCKER",
+      "missing_evidence": [
+        "physical mass measurement",
+        "physical center-of-mass measurement",
+        "physical inertia measurement or identified CAD"
+      ],
+      "robot": "follower_right",
+      "urdf_values_present": true
+    },
+    {
+      "center_of_mass_xyz": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "inertia": {
+        "ixx": 0.0001,
+        "ixy": 0.0,
+        "ixz": 0.0,
+        "iyy": 0.0001,
+        "iyz": 0.0,
+        "izz": 0.0001
+      },
+      "link": "follower_right_ee_arm_link",
+      "mass": 0.001,
+      "measurement_status": "HARD_BLOCKER",
+      "missing_evidence": [
+        "physical mass measurement",
+        "physical center-of-mass measurement",
+        "physical inertia measurement or identified CAD"
+      ],
+      "robot": "follower_right",
+      "urdf_values_present": true
+    },
+    {
+      "center_of_mass_xyz": [
+        0.002378,
+        2.85e-08,
+        0.0
+      ],
+      "inertia": {
+        "ixx": 2.0386e-06,
+        "ixy": 0.0,
+        "ixz": 6.559e-07,
+        "iyy": 4.2979e-06,
+        "iyz": 0.0,
+        "izz": 2.3796e-06
+      },
+      "link": "follower_right_gripper_prop_link",
+      "mass": 0.008009,
+      "measurement_status": "HARD_BLOCKER",
+      "missing_evidence": [
+        "physical mass measurement",
+        "physical center-of-mass measurement",
+        "physical inertia measurement or identified CAD"
+      ],
+      "robot": "follower_right",
+      "urdf_values_present": true
+    },
+    {
+      "center_of_mass_xyz": [
+        0.006794,
+        -4.272e-07,
+        -0.000776
+      ],
+      "inertia": {
+        "ixx": 7.895e-05,
+        "ixy": -1.2e-09,
+        "ixz": 1.341e-07,
+        "iyy": 0.0003283,
+        "iyz": 1.7465e-06,
+        "izz": 0.0003095
+      },
+      "link": "follower_right_gripper_bar_link",
+      "mass": 0.150986,
+      "measurement_status": "HARD_BLOCKER",
+      "missing_evidence": [
+        "physical mass measurement",
+        "physical center-of-mass measurement",
+        "physical inertia measurement or identified CAD"
+      ],
+      "robot": "follower_right",
+      "urdf_values_present": true
+    },
+    {
+      "center_of_mass_xyz": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "inertia": {
+        "ixx": 0.0001,
+        "ixy": 0.0,
+        "ixz": 0.0,
+        "iyy": 0.0001,
+        "iyz": 0.0,
+        "izz": 0.0001
+      },
+      "link": "follower_right_fingers_link",
+      "mass": 0.001,
+      "measurement_status": "HARD_BLOCKER",
+      "missing_evidence": [
+        "physical mass measurement",
+        "physical center-of-mass measurement",
+        "physical inertia measurement or identified CAD"
+      ],
+      "robot": "follower_right",
+      "urdf_values_present": true
+    },
+    {
+      "center_of_mass_xyz": [
+        0.017344,
+        -0.0060692,
+        0.0
+      ],
+      "inertia": {
+        "ixx": 2.433e-05,
+        "ixy": -2.4004e-06,
+        "ixz": 0.0,
+        "iyy": 1.255e-05,
+        "iyz": 0.0,
+        "izz": 1.417e-05
+      },
+      "link": "follower_right_left_finger_link",
+      "mass": 0.034796,
+      "measurement_status": "HARD_BLOCKER",
+      "missing_evidence": [
+        "physical mass measurement",
+        "physical center-of-mass measurement",
+        "physical inertia measurement or identified CAD"
+      ],
+      "robot": "follower_right",
+      "urdf_values_present": true
+    },
+    {
+      "center_of_mass_xyz": [
+        0.017344,
+        0.0060692,
+        0.0
+      ],
+      "inertia": {
+        "ixx": 2.433e-05,
+        "ixy": 2.4001e-06,
+        "ixz": 0.0,
+        "iyy": 1.255e-05,
+        "iyz": 0.0,
+        "izz": 1.417e-05
+      },
+      "link": "follower_right_right_finger_link",
+      "mass": 0.034796,
+      "measurement_status": "HARD_BLOCKER",
+      "missing_evidence": [
+        "physical mass measurement",
+        "physical center-of-mass measurement",
+        "physical inertia measurement or identified CAD"
+      ],
+      "robot": "follower_right",
+      "urdf_values_present": true
+    },
+    {
+      "center_of_mass_xyz": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "inertia": {
+        "ixx": 0.0001,
+        "ixy": 0.0,
+        "ixz": 0.0,
+        "iyy": 0.0001,
+        "iyz": 0.0,
+        "izz": 0.0001
+      },
+      "link": "follower_right_ee_gripper_link",
+      "mass": 0.001,
+      "measurement_status": "HARD_BLOCKER",
+      "missing_evidence": [
+        "physical mass measurement",
+        "physical center-of-mass measurement",
+        "physical inertia measurement or identified CAD"
+      ],
+      "robot": "follower_right",
+      "urdf_values_present": true
+    },
+    {
+      "center_of_mass_xyz": [
+        -0.0380446,
+        0.000613892,
+        0.0193354
+      ],
+      "inertia": {
+        "ixx": 0.002115,
+        "ixy": -1.635e-05,
+        "ixz": 6.998e-07,
+        "iyy": 0.0006921,
+        "iyz": 4.642e-05,
+        "izz": 0.002524
+      },
+      "link": "leader_left_base_link",
+      "mass": 0.538736,
+      "measurement_status": "HARD_BLOCKER",
+      "missing_evidence": [
+        "physical mass measurement",
+        "physical center-of-mass measurement",
+        "physical inertia measurement or identified CAD"
+      ],
+      "robot": "leader_left",
+      "urdf_values_present": true
+    },
+    {
+      "center_of_mass_xyz": [
+        2.23482e-05,
+        4.14609e-05,
+        0.0066287
+      ],
+      "inertia": {
+        "ixx": 0.000379,
+        "ixy": 2.2e-09,
+        "ixz": -3.561e-07,
+        "iyy": 0.0005557,
+        "iyz": 1.2245e-06,
+        "izz": 0.0005889
+      },
+      "link": "leader_left_shoulder_link",
+      "mass": 0.480879,
+      "measurement_status": "HARD_BLOCKER",
+      "missing_evidence": [
+        "physical mass measurement",
+        "physical center-of-mass measurement",
+        "physical inertia measurement or identified CAD"
+      ],
+      "robot": "leader_left",
+      "urdf_values_present": true
+    },
+    {
+      "center_of_mass_xyz": [
+        0.0171605,
+        2.725e-07,
+        0.191323
+      ],
+      "inertia": {
+        "ixx": 0.003463,
+        "ixy": -1e-10,
+        "ixz": -2e-10,
+        "iyy": 0.003587,
+        "iyz": 0.0004272,
+        "izz": 0.0004566
+      },
+      "link": "leader_left_upper_arm_link",
+      "mass": 0.430811,
+      "measurement_status": "HARD_BLOCKER",
+      "missing_evidence": [
+        "physical mass measurement",
+        "physical center-of-mass measurement",
+        "physical inertia measurement or identified CAD"
+      ],
+      "robot": "leader_left",
+      "urdf_values_present": true
+    },
+    {
+      "center_of_mass_xyz": [
+        0.107963,
+        0.000115876,
+        0.0
+      ],
+      "inertia": {
+        "ixx": 3.971e-05,
+        "ixy": 2.3528e-06,
+        "ixz": 0.0,
+        "iyy": 0.0008878,
+        "iyz": 0.0,
+        "izz": 0.000888
+      },
+      "link": "leader_left_upper_forearm_link",
+      "mass": 0.234589,
+      "measurement_status": "HARD_BLOCKER",
+      "missing_evidence": [
+        "physical mass measurement",
+        "physical center-of-mass measurement",
+        "physical inertia measurement or identified CAD"
+      ],
+      "robot": "leader_left",
+      "urdf_values_present": true
+    },
+    {
+      "center_of_mass_xyz": [
+        0.0374395,
+        0.00522252,
+        0.0
+      ],
+      "inertia": {
+        "ixx": 6.369e-05,
+        "ixy": -2.292e-05,
+        "ixz": 0.0,
+        "iyy": 0.0001677,
+        "iyz": 0.0,
+        "izz": 0.0001834
+      },
+      "link": "leader_left_lower_forearm_link",
+      "mass": 0.220991,
+      "measurement_status": "HARD_BLOCKER",
+      "missing_evidence": [
+        "physical mass measurement",
+        "physical center-of-mass measurement",
+        "physical inertia measurement or identified CAD"
+      ],
+      "robot": "leader_left",
+      "urdf_values_present": true
+    },
+    {
+      "center_of_mass_xyz": [
+        0.04236,
+        -1.0663e-05,
+        0.010577
+      ],
+      "inertia": {
+        "ixx": 3.082e-05,
+        "ixy": 1.91e-08,
+        "ixz": 2.3e-09,
+        "iyy": 2.822e-05,
+        "iyz": 2.5481e-06,
+        "izz": 3.152e-05
+      },
+      "link": "leader_left_wrist_link",
+      "mass": 0.084957,
+      "measurement_status": "HARD_BLOCKER",
+      "missing_evidence": [
+        "physical mass measurement",
+        "physical center-of-mass measurement",
+        "physical inertia measurement or identified CAD"
+      ],
+      "robot": "leader_left",
+      "urdf_values_present": true
+    },
+    {
+      "center_of_mass_xyz": [
+        0.021631,
+        2.516e-07,
+        0.01141
+      ],
+      "inertia": {
+        "ixx": 2.537e-05,
+        "ixy": 0.0,
+        "ixz": 0.0,
+        "iyy": 1.836e-05,
+        "iyz": 4.34e-07,
+        "izz": 1.674e-05
+      },
+      "link": "leader_left_gripper_link",
+      "mass": 0.072885,
+      "measurement_status": "HARD_BLOCKER",
+      "missing_evidence": [
+        "physical mass measurement",
+        "physical center-of-mass measurement",
+        "physical inertia measurement or identified CAD"
+      ],
+      "robot": "leader_left",
+      "urdf_values_present": true
+    },
+    {
+      "center_of_mass_xyz": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "inertia": {
+        "ixx": 0.001,
+        "ixy": 0.0,
+        "ixz": 0.0,
+        "iyy": 0.001,
+        "iyz": 0.0,
+        "izz": 0.001
+      },
+      "link": "leader_left_ee_arm_link",
+      "mass": 0.001,
+      "measurement_status": "HARD_BLOCKER",
+      "missing_evidence": [
+        "physical mass measurement",
+        "physical center-of-mass measurement",
+        "physical inertia measurement or identified CAD"
+      ],
+      "robot": "leader_left",
+      "urdf_values_present": true
+    },
+    {
+      "center_of_mass_xyz": [
+        0.000846,
+        -1.6817e-06,
+        4.2e-05
+      ],
+      "inertia": {
+        "ixx": 5.923e-07,
+        "ixy": 0.0,
+        "ixz": 3.195e-07,
+        "iyy": 1.1156e-06,
+        "iyz": -4e-10,
+        "izz": 5.743e-07
+      },
+      "link": "leader_left_gripper_prop_link",
+      "mass": 0.00434,
+      "measurement_status": "HARD_BLOCKER",
+      "missing_evidence": [
+        "physical mass measurement",
+        "physical center-of-mass measurement",
+        "physical inertia measurement or identified CAD"
+      ],
+      "robot": "leader_left",
+      "urdf_values_present": true
+    },
+    {
+      "center_of_mass_xyz": [
+        0.009687,
+        8.177e-07,
+        0.004962
+      ],
+      "inertia": {
+        "ixx": 7.4125e-06,
+        "ixy": -8e-10,
+        "ixz": -6e-10,
+        "iyy": 2.843e-05,
+        "iyz": -1.3889e-06,
+        "izz": 2.86e-05
+      },
+      "link": "leader_left_gripper_bar_link",
+      "mass": 0.034199,
+      "measurement_status": "HARD_BLOCKER",
+      "missing_evidence": [
+        "physical mass measurement",
+        "physical center-of-mass measurement",
+        "physical inertia measurement or identified CAD"
+      ],
+      "robot": "leader_left",
+      "urdf_values_present": true
+    },
+    {
+      "center_of_mass_xyz": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "inertia": {
+        "ixx": 0.001,
+        "ixy": 0.0,
+        "ixz": 0.0,
+        "iyy": 0.001,
+        "iyz": 0.0,
+        "izz": 0.001
+      },
+      "link": "leader_left_fingers_link",
+      "mass": 0.001,
+      "measurement_status": "HARD_BLOCKER",
+      "missing_evidence": [
+        "physical mass measurement",
+        "physical center-of-mass measurement",
+        "physical inertia measurement or identified CAD"
+      ],
+      "robot": "leader_left",
+      "urdf_values_present": true
+    },
+    {
+      "center_of_mass_xyz": [
+        0.013816,
+        0.0,
+        0.0
+      ],
+      "inertia": {
+        "ixx": 4.731e-06,
+        "ixy": -4.56e-07,
+        "ixz": 0.0,
+        "iyy": 1.5506e-06,
+        "iyz": 0.0,
+        "izz": 3.7467e-06
+      },
+      "link": "leader_left_left_finger_link",
+      "mass": 0.016246,
+      "measurement_status": "HARD_BLOCKER",
+      "missing_evidence": [
+        "physical mass measurement",
+        "physical center-of-mass measurement",
+        "physical inertia measurement or identified CAD"
+      ],
+      "robot": "leader_left",
+      "urdf_values_present": true
+    },
+    {
+      "center_of_mass_xyz": [
+        0.013816,
+        0.0,
+        0.0
+      ],
+      "inertia": {
+        "ixx": 4.731e-06,
+        "ixy": 4.56e-07,
+        "ixz": 0.0,
+        "iyy": 1.5506e-06,
+        "iyz": 0.0,
+        "izz": 3.7467e-06
+      },
+      "link": "leader_left_right_finger_link",
+      "mass": 0.016246,
+      "measurement_status": "HARD_BLOCKER",
+      "missing_evidence": [
+        "physical mass measurement",
+        "physical center-of-mass measurement",
+        "physical inertia measurement or identified CAD"
+      ],
+      "robot": "leader_left",
+      "urdf_values_present": true
+    },
+    {
+      "center_of_mass_xyz": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "inertia": {
+        "ixx": 0.001,
+        "ixy": 0.0,
+        "ixz": 0.0,
+        "iyy": 0.001,
+        "iyz": 0.0,
+        "izz": 0.001
+      },
+      "link": "leader_left_ee_gripper_link",
+      "mass": 0.001,
+      "measurement_status": "HARD_BLOCKER",
+      "missing_evidence": [
+        "physical mass measurement",
+        "physical center-of-mass measurement",
+        "physical inertia measurement or identified CAD"
+      ],
+      "robot": "leader_left",
+      "urdf_values_present": true
+    },
+    {
+      "center_of_mass_xyz": [
+        -0.0380446,
+        0.000613892,
+        0.0193354
+      ],
+      "inertia": {
+        "ixx": 0.002115,
+        "ixy": -1.635e-05,
+        "ixz": 6.998e-07,
+        "iyy": 0.0006921,
+        "iyz": 4.642e-05,
+        "izz": 0.002524
+      },
+      "link": "leader_right_base_link",
+      "mass": 0.538736,
+      "measurement_status": "HARD_BLOCKER",
+      "missing_evidence": [
+        "physical mass measurement",
+        "physical center-of-mass measurement",
+        "physical inertia measurement or identified CAD"
+      ],
+      "robot": "leader_right",
+      "urdf_values_present": true
+    },
+    {
+      "center_of_mass_xyz": [
+        2.23482e-05,
+        4.14609e-05,
+        0.0066287
+      ],
+      "inertia": {
+        "ixx": 0.000379,
+        "ixy": 2.2e-09,
+        "ixz": -3.561e-07,
+        "iyy": 0.0005557,
+        "iyz": 1.2245e-06,
+        "izz": 0.0005889
+      },
+      "link": "leader_right_shoulder_link",
+      "mass": 0.480879,
+      "measurement_status": "HARD_BLOCKER",
+      "missing_evidence": [
+        "physical mass measurement",
+        "physical center-of-mass measurement",
+        "physical inertia measurement or identified CAD"
+      ],
+      "robot": "leader_right",
+      "urdf_values_present": true
+    },
+    {
+      "center_of_mass_xyz": [
+        0.0171605,
+        2.725e-07,
+        0.191323
+      ],
+      "inertia": {
+        "ixx": 0.003463,
+        "ixy": -1e-10,
+        "ixz": -2e-10,
+        "iyy": 0.003587,
+        "iyz": 0.0004272,
+        "izz": 0.0004566
+      },
+      "link": "leader_right_upper_arm_link",
+      "mass": 0.430811,
+      "measurement_status": "HARD_BLOCKER",
+      "missing_evidence": [
+        "physical mass measurement",
+        "physical center-of-mass measurement",
+        "physical inertia measurement or identified CAD"
+      ],
+      "robot": "leader_right",
+      "urdf_values_present": true
+    },
+    {
+      "center_of_mass_xyz": [
+        0.107963,
+        0.000115876,
+        0.0
+      ],
+      "inertia": {
+        "ixx": 3.971e-05,
+        "ixy": 2.3528e-06,
+        "ixz": 0.0,
+        "iyy": 0.0008878,
+        "iyz": 0.0,
+        "izz": 0.000888
+      },
+      "link": "leader_right_upper_forearm_link",
+      "mass": 0.234589,
+      "measurement_status": "HARD_BLOCKER",
+      "missing_evidence": [
+        "physical mass measurement",
+        "physical center-of-mass measurement",
+        "physical inertia measurement or identified CAD"
+      ],
+      "robot": "leader_right",
+      "urdf_values_present": true
+    },
+    {
+      "center_of_mass_xyz": [
+        0.0374395,
+        0.00522252,
+        0.0
+      ],
+      "inertia": {
+        "ixx": 6.369e-05,
+        "ixy": -2.292e-05,
+        "ixz": 0.0,
+        "iyy": 0.0001677,
+        "iyz": 0.0,
+        "izz": 0.0001834
+      },
+      "link": "leader_right_lower_forearm_link",
+      "mass": 0.220991,
+      "measurement_status": "HARD_BLOCKER",
+      "missing_evidence": [
+        "physical mass measurement",
+        "physical center-of-mass measurement",
+        "physical inertia measurement or identified CAD"
+      ],
+      "robot": "leader_right",
+      "urdf_values_present": true
+    },
+    {
+      "center_of_mass_xyz": [
+        0.04236,
+        -1.0663e-05,
+        0.010577
+      ],
+      "inertia": {
+        "ixx": 3.082e-05,
+        "ixy": 1.91e-08,
+        "ixz": 2.3e-09,
+        "iyy": 2.822e-05,
+        "iyz": 2.5481e-06,
+        "izz": 3.152e-05
+      },
+      "link": "leader_right_wrist_link",
+      "mass": 0.084957,
+      "measurement_status": "HARD_BLOCKER",
+      "missing_evidence": [
+        "physical mass measurement",
+        "physical center-of-mass measurement",
+        "physical inertia measurement or identified CAD"
+      ],
+      "robot": "leader_right",
+      "urdf_values_present": true
+    },
+    {
+      "center_of_mass_xyz": [
+        0.021631,
+        2.516e-07,
+        0.01141
+      ],
+      "inertia": {
+        "ixx": 2.537e-05,
+        "ixy": 0.0,
+        "ixz": 0.0,
+        "iyy": 1.836e-05,
+        "iyz": 4.34e-07,
+        "izz": 1.674e-05
+      },
+      "link": "leader_right_gripper_link",
+      "mass": 0.072885,
+      "measurement_status": "HARD_BLOCKER",
+      "missing_evidence": [
+        "physical mass measurement",
+        "physical center-of-mass measurement",
+        "physical inertia measurement or identified CAD"
+      ],
+      "robot": "leader_right",
+      "urdf_values_present": true
+    },
+    {
+      "center_of_mass_xyz": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "inertia": {
+        "ixx": 0.001,
+        "ixy": 0.0,
+        "ixz": 0.0,
+        "iyy": 0.001,
+        "iyz": 0.0,
+        "izz": 0.001
+      },
+      "link": "leader_right_ee_arm_link",
+      "mass": 0.001,
+      "measurement_status": "HARD_BLOCKER",
+      "missing_evidence": [
+        "physical mass measurement",
+        "physical center-of-mass measurement",
+        "physical inertia measurement or identified CAD"
+      ],
+      "robot": "leader_right",
+      "urdf_values_present": true
+    },
+    {
+      "center_of_mass_xyz": [
+        0.000846,
+        -1.6817e-06,
+        4.2e-05
+      ],
+      "inertia": {
+        "ixx": 5.923e-07,
+        "ixy": 0.0,
+        "ixz": 3.195e-07,
+        "iyy": 1.1156e-06,
+        "iyz": -4e-10,
+        "izz": 5.743e-07
+      },
+      "link": "leader_right_gripper_prop_link",
+      "mass": 0.00434,
+      "measurement_status": "HARD_BLOCKER",
+      "missing_evidence": [
+        "physical mass measurement",
+        "physical center-of-mass measurement",
+        "physical inertia measurement or identified CAD"
+      ],
+      "robot": "leader_right",
+      "urdf_values_present": true
+    },
+    {
+      "center_of_mass_xyz": [
+        0.009687,
+        8.177e-07,
+        0.004962
+      ],
+      "inertia": {
+        "ixx": 7.4125e-06,
+        "ixy": -8e-10,
+        "ixz": -6e-10,
+        "iyy": 2.843e-05,
+        "iyz": -1.3889e-06,
+        "izz": 2.86e-05
+      },
+      "link": "leader_right_gripper_bar_link",
+      "mass": 0.034199,
+      "measurement_status": "HARD_BLOCKER",
+      "missing_evidence": [
+        "physical mass measurement",
+        "physical center-of-mass measurement",
+        "physical inertia measurement or identified CAD"
+      ],
+      "robot": "leader_right",
+      "urdf_values_present": true
+    },
+    {
+      "center_of_mass_xyz": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "inertia": {
+        "ixx": 0.001,
+        "ixy": 0.0,
+        "ixz": 0.0,
+        "iyy": 0.001,
+        "iyz": 0.0,
+        "izz": 0.001
+      },
+      "link": "leader_right_fingers_link",
+      "mass": 0.001,
+      "measurement_status": "HARD_BLOCKER",
+      "missing_evidence": [
+        "physical mass measurement",
+        "physical center-of-mass measurement",
+        "physical inertia measurement or identified CAD"
+      ],
+      "robot": "leader_right",
+      "urdf_values_present": true
+    },
+    {
+      "center_of_mass_xyz": [
+        0.013816,
+        0.0,
+        0.0
+      ],
+      "inertia": {
+        "ixx": 4.731e-06,
+        "ixy": -4.56e-07,
+        "ixz": 0.0,
+        "iyy": 1.5506e-06,
+        "iyz": 0.0,
+        "izz": 3.7467e-06
+      },
+      "link": "leader_right_left_finger_link",
+      "mass": 0.016246,
+      "measurement_status": "HARD_BLOCKER",
+      "missing_evidence": [
+        "physical mass measurement",
+        "physical center-of-mass measurement",
+        "physical inertia measurement or identified CAD"
+      ],
+      "robot": "leader_right",
+      "urdf_values_present": true
+    },
+    {
+      "center_of_mass_xyz": [
+        0.013816,
+        0.0,
+        0.0
+      ],
+      "inertia": {
+        "ixx": 4.731e-06,
+        "ixy": 4.56e-07,
+        "ixz": 0.0,
+        "iyy": 1.5506e-06,
+        "iyz": 0.0,
+        "izz": 3.7467e-06
+      },
+      "link": "leader_right_right_finger_link",
+      "mass": 0.016246,
+      "measurement_status": "HARD_BLOCKER",
+      "missing_evidence": [
+        "physical mass measurement",
+        "physical center-of-mass measurement",
+        "physical inertia measurement or identified CAD"
+      ],
+      "robot": "leader_right",
+      "urdf_values_present": true
+    },
+    {
+      "center_of_mass_xyz": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "inertia": {
+        "ixx": 0.001,
+        "ixy": 0.0,
+        "ixz": 0.0,
+        "iyy": 0.001,
+        "iyz": 0.0,
+        "izz": 0.001
+      },
+      "link": "leader_right_ee_gripper_link",
+      "mass": 0.001,
+      "measurement_status": "HARD_BLOCKER",
+      "missing_evidence": [
+        "physical mass measurement",
+        "physical center-of-mass measurement",
+        "physical inertia measurement or identified CAD"
+      ],
+      "robot": "leader_right",
+      "urdf_values_present": true
+    }
+  ],
+  "schema_version": 1,
+  "statement": "URDF dynamics are syntactically complete and imported, but no Stationary ALOHA 1 measurement evidence was found; values are not declared calibrated.",
+  "status": "PARTIAL"
+}

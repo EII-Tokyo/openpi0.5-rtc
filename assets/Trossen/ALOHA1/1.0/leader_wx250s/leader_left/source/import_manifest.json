@@ -1,0 +1,113 @@
+{
+  "imported_inspection": {
+    "articulation_roots": [
+      "/leader_left/root_joint"
+    ],
+    "composition_diagnostics": [],
+    "default_prim": "/leader_left",
+    "dependency_assets": [
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/kit/mdl/core/Base/OmniPBR.mdl"
+    ],
+    "dependency_layers": [
+      "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/leader_wx250s/leader_left/source/configuration/leader_left_imported_base.usd",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/leader_wx250s/leader_left/source/configuration/leader_left_imported_physics.usd",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/leader_wx250s/leader_left/source/configuration/leader_left_imported_robot.usd",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/leader_wx250s/leader_left/source/configuration/leader_left_imported_sensor.usd",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/leader_wx250s/leader_left/source/leader_left_imported.usd"
+    ],
+    "invalid_prim_names": [],
+    "joint_paths": [
+      "/leader_left/joints/waist",
+      "/leader_left/joints/shoulder",
+      "/leader_left/joints/elbow",
+      "/leader_left/joints/forearm_roll",
+      "/leader_left/joints/wrist_angle",
+      "/leader_left/joints/wrist_rotate",
+      "/leader_left/joints/ee_arm",
+      "/leader_left/joints/gripper",
+      "/leader_left/joints/gripper_bar",
+      "/leader_left/joints/ee_bar",
+      "/leader_left/joints/ee_gripper",
+      "/leader_left/joints/left_finger",
+      "/leader_left/joints/right_finger",
+      "/leader_left/root_joint"
+    ],
+    "mimic_joint_paths": [
+      "/leader_left/joints/right_finger"
+    ],
+    "unresolved_paths": []
+  },
+  "imported_root": "/leader_left",
+  "isaac_5_1_empty_visual_spec_fix": {
+    "basis": "URDF links without visual elements",
+    "removed_specs": [
+      "/leader_left/leader_left_ee_arm_link/visuals",
+      "/leader_left/leader_left_ee_gripper_link/visuals",
+      "/leader_left/leader_left_fingers_link/visuals"
+    ]
+  },
+  "model": "aloha_wx250s",
+  "output_strategy": "direct_to_stable_destination",
+  "robot": "leader_left",
+  "schema_version": 1,
+  "settings": {
+    "collision_from_visuals": false,
+    "convex_decomp": false,
+    "create_physics_scene": false,
+    "default_drive_strength": 1000.0,
+    "default_drive_type": "JOINT_DRIVE_POSITION",
+    "default_position_drive_damping": 100.0,
+    "density": 0.0,
+    "distance_scale": 1.0,
+    "fix_base": true,
+    "import_inertia_tensor": true,
+    "make_default_prim": true,
+    "merge_fixed_joints": false,
+    "mesh_merge_requested": false,
+    "override_joint_dynamics": false,
+    "parse_mimic": true,
+    "replace_cylinders_with_capsules": false,
+    "requires_complete_urdf_dynamics": true,
+    "self_collision": false
+  },
+  "urdf_sha256": "22f65481becc6bfb71914d8fe9e79bebe7b3b14eb4b11576ebd2e04ed93df692",
+  "wrapper_inspection": {
+    "articulation_roots": [
+      "/leader_left/root_joint"
+    ],
+    "composition_diagnostics": [],
+    "default_prim": "/leader_left",
+    "dependency_assets": [
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/kit/mdl/core/Base/OmniPBR.mdl"
+    ],
+    "dependency_layers": [
+      "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/leader_wx250s/leader_left/leader_left.usd",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/leader_wx250s/leader_left/source/configuration/leader_left_imported_base.usd",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/leader_wx250s/leader_left/source/configuration/leader_left_imported_physics.usd",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/leader_wx250s/leader_left/source/configuration/leader_left_imported_robot.usd",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/leader_wx250s/leader_left/source/configuration/leader_left_imported_sensor.usd",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/leader_wx250s/leader_left/source/leader_left_imported.usd"
+    ],
+    "invalid_prim_names": [],
+    "joint_paths": [
+      "/leader_left/joints/waist",
+      "/leader_left/joints/shoulder",
+      "/leader_left/joints/elbow",
+      "/leader_left/joints/forearm_roll",
+      "/leader_left/joints/wrist_angle",
+      "/leader_left/joints/wrist_rotate",
+      "/leader_left/joints/ee_arm",
+      "/leader_left/joints/gripper",
+      "/leader_left/joints/gripper_bar",
+      "/leader_left/joints/ee_bar",
+      "/leader_left/joints/ee_gripper",
+      "/leader_left/joints/left_finger",
+      "/leader_left/joints/right_finger",
+      "/leader_left/root_joint"
+    ],
+    "mimic_joint_paths": [
+      "/leader_left/joints/right_finger"
+    ],
+    "unresolved_paths": []
+  }
+}

@@ -1,0 +1,3998 @@
+{
+  "checks": [
+    {
+      "evidence": {
+        "composition_diagnostics": [],
+        "dependency_asset_count": 1,
+        "dependency_layer_count": 27,
+        "unresolved": []
+      },
+      "name": "external_references_resolve",
+      "status": "PASS"
+    },
+    {
+      "evidence": {
+        "actual": 2,
+        "expected": 2,
+        "roots": [
+          "/aloha1_workcell/Robots/follower_left/root_joint",
+          "/aloha1_workcell/Robots/follower_right/root_joint"
+        ]
+      },
+      "name": "articulation_count",
+      "status": "PASS"
+    },
+    {
+      "evidence": {
+        "actual": [
+          "/aloha1_workcell/Robots/follower_left/root_joint",
+          "/aloha1_workcell/Robots/follower_right/root_joint"
+        ],
+        "expected": [
+          "/aloha1_workcell/Robots/follower_left/root_joint",
+          "/aloha1_workcell/Robots/follower_right/root_joint"
+        ]
+      },
+      "name": "one_expected_articulation_root_per_robot",
+      "status": "PASS"
+    },
+    {
+      "evidence": {
+        "expected": [
+          "waist",
+          "shoulder",
+          "elbow",
+          "forearm_roll",
+          "wrist_angle",
+          "wrist_rotate",
+          "gripper",
+          "left_finger",
+          "right_finger"
+        ]
+      },
+      "name": "follower_left_dof_names_present",
+      "status": "PASS"
+    },
+    {
+      "evidence": {
+        "dofs": [
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 10.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "waist",
+            "state_position": 0.0,
+            "stiffness": 625.0,
+            "target_position": 0.0
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 20.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "shoulder",
+            "state_position": -55.00394821166992,
+            "stiffness": 625.0,
+            "target_position": -55.00394821166992
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 15.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "elbow",
+            "state_position": 66.46310424804688,
+            "stiffness": 625.0,
+            "target_position": 66.46310424804688
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 2.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "forearm_roll",
+            "state_position": 0.0,
+            "stiffness": 625.0,
+            "target_position": 0.0
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 5.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "wrist_angle",
+            "state_position": -17.18873405456543,
+            "stiffness": 625.0,
+            "target_position": -17.18873405456543
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 1.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "wrist_rotate",
+            "state_position": 0.0,
+            "stiffness": 625.0,
+            "target_position": 0.0
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 1.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "gripper",
+            "state_position": 0.0,
+            "stiffness": 625.0,
+            "target_position": 0.0
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 5.0,
+            "max_velocity": 1.0,
+            "mimic": false,
+            "name": "left_finger",
+            "state_position": 0.022390000522136688,
+            "stiffness": 625.0,
+            "target_position": 0.022390000522136688
+          },
+          {
+            "damping": 0.0,
+            "drive_type": null,
+            "has_drive": false,
+            "initial_matches_target": true,
+            "max_force": null,
+            "max_velocity": 1.0,
+            "mimic": true,
+            "name": "right_finger",
+            "state_position": -0.022390000522136688,
+            "stiffness": 0.0,
+            "target_position": null
+          }
+        ]
+      },
+      "name": "follower_left_drive_or_mimic",
+      "status": "PASS"
+    },
+    {
+      "evidence": {
+        "dofs": [
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 10.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "waist",
+            "state_position": 0.0,
+            "stiffness": 625.0,
+            "target_position": 0.0
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 20.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "shoulder",
+            "state_position": -55.00394821166992,
+            "stiffness": 625.0,
+            "target_position": -55.00394821166992
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 15.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "elbow",
+            "state_position": 66.46310424804688,
+            "stiffness": 625.0,
+            "target_position": 66.46310424804688
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 2.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "forearm_roll",
+            "state_position": 0.0,
+            "stiffness": 625.0,
+            "target_position": 0.0
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 5.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "wrist_angle",
+            "state_position": -17.18873405456543,
+            "stiffness": 625.0,
+            "target_position": -17.18873405456543
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 1.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "wrist_rotate",
+            "state_position": 0.0,
+            "stiffness": 625.0,
+            "target_position": 0.0
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 1.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "gripper",
+            "state_position": 0.0,
+            "stiffness": 625.0,
+            "target_position": 0.0
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 5.0,
+            "max_velocity": 1.0,
+            "mimic": false,
+            "name": "left_finger",
+            "state_position": 0.022390000522136688,
+            "stiffness": 625.0,
+            "target_position": 0.022390000522136688
+          },
+          {
+            "damping": 0.0,
+            "drive_type": null,
+            "has_drive": false,
+            "initial_matches_target": true,
+            "max_force": null,
+            "max_velocity": 1.0,
+            "mimic": true,
+            "name": "right_finger",
+            "state_position": -0.022390000522136688,
+            "stiffness": 0.0,
+            "target_position": null
+          }
+        ]
+      },
+      "name": "follower_left_mimic_has_zero_active_drive",
+      "status": "PASS"
+    },
+    {
+      "evidence": {
+        "dofs": [
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 10.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "waist",
+            "state_position": 0.0,
+            "stiffness": 625.0,
+            "target_position": 0.0
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 20.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "shoulder",
+            "state_position": -55.00394821166992,
+            "stiffness": 625.0,
+            "target_position": -55.00394821166992
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 15.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "elbow",
+            "state_position": 66.46310424804688,
+            "stiffness": 625.0,
+            "target_position": 66.46310424804688
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 2.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "forearm_roll",
+            "state_position": 0.0,
+            "stiffness": 625.0,
+            "target_position": 0.0
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 5.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "wrist_angle",
+            "state_position": -17.18873405456543,
+            "stiffness": 625.0,
+            "target_position": -17.18873405456543
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 1.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "wrist_rotate",
+            "state_position": 0.0,
+            "stiffness": 625.0,
+            "target_position": 0.0
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 1.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "gripper",
+            "state_position": 0.0,
+            "stiffness": 625.0,
+            "target_position": 0.0
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 5.0,
+            "max_velocity": 1.0,
+            "mimic": false,
+            "name": "left_finger",
+            "state_position": 0.022390000522136688,
+            "stiffness": 625.0,
+            "target_position": 0.022390000522136688
+          },
+          {
+            "damping": 0.0,
+            "drive_type": null,
+            "has_drive": false,
+            "initial_matches_target": true,
+            "max_force": null,
+            "max_velocity": 1.0,
+            "mimic": true,
+            "name": "right_finger",
+            "state_position": -0.022390000522136688,
+            "stiffness": 0.0,
+            "target_position": null
+          }
+        ]
+      },
+      "name": "follower_left_finite_positive_limits",
+      "status": "PASS"
+    },
+    {
+      "evidence": {
+        "dofs": [
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 10.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "waist",
+            "state_position": 0.0,
+            "stiffness": 625.0,
+            "target_position": 0.0
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 20.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "shoulder",
+            "state_position": -55.00394821166992,
+            "stiffness": 625.0,
+            "target_position": -55.00394821166992
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 15.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "elbow",
+            "state_position": 66.46310424804688,
+            "stiffness": 625.0,
+            "target_position": 66.46310424804688
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 2.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "forearm_roll",
+            "state_position": 0.0,
+            "stiffness": 625.0,
+            "target_position": 0.0
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 5.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "wrist_angle",
+            "state_position": -17.18873405456543,
+            "stiffness": 625.0,
+            "target_position": -17.18873405456543
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 1.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "wrist_rotate",
+            "state_position": 0.0,
+            "stiffness": 625.0,
+            "target_position": 0.0
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 1.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "gripper",
+            "state_position": 0.0,
+            "stiffness": 625.0,
+            "target_position": 0.0
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 5.0,
+            "max_velocity": 1.0,
+            "mimic": false,
+            "name": "left_finger",
+            "state_position": 0.022390000522136688,
+            "stiffness": 625.0,
+            "target_position": 0.022390000522136688
+          },
+          {
+            "damping": 0.0,
+            "drive_type": null,
+            "has_drive": false,
+            "initial_matches_target": true,
+            "max_force": null,
+            "max_velocity": 1.0,
+            "mimic": true,
+            "name": "right_finger",
+            "state_position": -0.022390000522136688,
+            "stiffness": 0.0,
+            "target_position": null
+          }
+        ]
+      },
+      "name": "follower_left_initial_matches_drive_target",
+      "status": "PASS"
+    },
+    {
+      "evidence": {
+        "expected": [
+          "waist",
+          "shoulder",
+          "elbow",
+          "forearm_roll",
+          "wrist_angle",
+          "wrist_rotate",
+          "gripper",
+          "left_finger",
+          "right_finger"
+        ]
+      },
+      "name": "follower_right_dof_names_present",
+      "status": "PASS"
+    },
+    {
+      "evidence": {
+        "dofs": [
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 10.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "waist",
+            "state_position": 0.0,
+            "stiffness": 625.0,
+            "target_position": 0.0
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 20.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "shoulder",
+            "state_position": -55.00394821166992,
+            "stiffness": 625.0,
+            "target_position": -55.00394821166992
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 15.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "elbow",
+            "state_position": 66.46310424804688,
+            "stiffness": 625.0,
+            "target_position": 66.46310424804688
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 2.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "forearm_roll",
+            "state_position": 0.0,
+            "stiffness": 625.0,
+            "target_position": 0.0
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 5.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "wrist_angle",
+            "state_position": -17.18873405456543,
+            "stiffness": 625.0,
+            "target_position": -17.18873405456543
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 1.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "wrist_rotate",
+            "state_position": 0.0,
+            "stiffness": 625.0,
+            "target_position": 0.0
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 1.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "gripper",
+            "state_position": 0.0,
+            "stiffness": 625.0,
+            "target_position": 0.0
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 5.0,
+            "max_velocity": 1.0,
+            "mimic": false,
+            "name": "left_finger",
+            "state_position": 0.022390000522136688,
+            "stiffness": 625.0,
+            "target_position": 0.022390000522136688
+          },
+          {
+            "damping": 0.0,
+            "drive_type": null,
+            "has_drive": false,
+            "initial_matches_target": true,
+            "max_force": null,
+            "max_velocity": 1.0,
+            "mimic": true,
+            "name": "right_finger",
+            "state_position": -0.022390000522136688,
+            "stiffness": 0.0,
+            "target_position": null
+          }
+        ]
+      },
+      "name": "follower_right_drive_or_mimic",
+      "status": "PASS"
+    },
+    {
+      "evidence": {
+        "dofs": [
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 10.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "waist",
+            "state_position": 0.0,
+            "stiffness": 625.0,
+            "target_position": 0.0
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 20.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "shoulder",
+            "state_position": -55.00394821166992,
+            "stiffness": 625.0,
+            "target_position": -55.00394821166992
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 15.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "elbow",
+            "state_position": 66.46310424804688,
+            "stiffness": 625.0,
+            "target_position": 66.46310424804688
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 2.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "forearm_roll",
+            "state_position": 0.0,
+            "stiffness": 625.0,
+            "target_position": 0.0
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 5.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "wrist_angle",
+            "state_position": -17.18873405456543,
+            "stiffness": 625.0,
+            "target_position": -17.18873405456543
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 1.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "wrist_rotate",
+            "state_position": 0.0,
+            "stiffness": 625.0,
+            "target_position": 0.0
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 1.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "gripper",
+            "state_position": 0.0,
+            "stiffness": 625.0,
+            "target_position": 0.0
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 5.0,
+            "max_velocity": 1.0,
+            "mimic": false,
+            "name": "left_finger",
+            "state_position": 0.022390000522136688,
+            "stiffness": 625.0,
+            "target_position": 0.022390000522136688
+          },
+          {
+            "damping": 0.0,
+            "drive_type": null,
+            "has_drive": false,
+            "initial_matches_target": true,
+            "max_force": null,
+            "max_velocity": 1.0,
+            "mimic": true,
+            "name": "right_finger",
+            "state_position": -0.022390000522136688,
+            "stiffness": 0.0,
+            "target_position": null
+          }
+        ]
+      },
+      "name": "follower_right_mimic_has_zero_active_drive",
+      "status": "PASS"
+    },
+    {
+      "evidence": {
+        "dofs": [
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 10.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "waist",
+            "state_position": 0.0,
+            "stiffness": 625.0,
+            "target_position": 0.0
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 20.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "shoulder",
+            "state_position": -55.00394821166992,
+            "stiffness": 625.0,
+            "target_position": -55.00394821166992
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 15.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "elbow",
+            "state_position": 66.46310424804688,
+            "stiffness": 625.0,
+            "target_position": 66.46310424804688
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 2.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "forearm_roll",
+            "state_position": 0.0,
+            "stiffness": 625.0,
+            "target_position": 0.0
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 5.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "wrist_angle",
+            "state_position": -17.18873405456543,
+            "stiffness": 625.0,
+            "target_position": -17.18873405456543
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 1.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "wrist_rotate",
+            "state_position": 0.0,
+            "stiffness": 625.0,
+            "target_position": 0.0
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 1.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "gripper",
+            "state_position": 0.0,
+            "stiffness": 625.0,
+            "target_position": 0.0
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 5.0,
+            "max_velocity": 1.0,
+            "mimic": false,
+            "name": "left_finger",
+            "state_position": 0.022390000522136688,
+            "stiffness": 625.0,
+            "target_position": 0.022390000522136688
+          },
+          {
+            "damping": 0.0,
+            "drive_type": null,
+            "has_drive": false,
+            "initial_matches_target": true,
+            "max_force": null,
+            "max_velocity": 1.0,
+            "mimic": true,
+            "name": "right_finger",
+            "state_position": -0.022390000522136688,
+            "stiffness": 0.0,
+            "target_position": null
+          }
+        ]
+      },
+      "name": "follower_right_finite_positive_limits",
+      "status": "PASS"
+    },
+    {
+      "evidence": {
+        "dofs": [
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 10.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "waist",
+            "state_position": 0.0,
+            "stiffness": 625.0,
+            "target_position": 0.0
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 20.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "shoulder",
+            "state_position": -55.00394821166992,
+            "stiffness": 625.0,
+            "target_position": -55.00394821166992
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 15.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "elbow",
+            "state_position": 66.46310424804688,
+            "stiffness": 625.0,
+            "target_position": 66.46310424804688
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 2.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "forearm_roll",
+            "state_position": 0.0,
+            "stiffness": 625.0,
+            "target_position": 0.0
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 5.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "wrist_angle",
+            "state_position": -17.18873405456543,
+            "stiffness": 625.0,
+            "target_position": -17.18873405456543
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 1.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "wrist_rotate",
+            "state_position": 0.0,
+            "stiffness": 625.0,
+            "target_position": 0.0
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 1.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "gripper",
+            "state_position": 0.0,
+            "stiffness": 625.0,
+            "target_position": 0.0
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "initial_matches_target": true,
+            "max_force": 5.0,
+            "max_velocity": 1.0,
+            "mimic": false,
+            "name": "left_finger",
+            "state_position": 0.022390000522136688,
+            "stiffness": 625.0,
+            "target_position": 0.022390000522136688
+          },
+          {
+            "damping": 0.0,
+            "drive_type": null,
+            "has_drive": false,
+            "initial_matches_target": true,
+            "max_force": null,
+            "max_velocity": 1.0,
+            "mimic": true,
+            "name": "right_finger",
+            "state_position": -0.022390000522136688,
+            "stiffness": 0.0,
+            "target_position": null
+          }
+        ]
+      },
+      "name": "follower_right_initial_matches_drive_target",
+      "status": "PASS"
+    },
+    {
+      "evidence": {
+        "rigid_bodies": [
+          {
+            "diagonal_inertia": [
+              0.006024506408721209,
+              0.0016981891822069883,
+              0.00716330436989665
+            ],
+            "finite_positive": true,
+            "mass": 0.9690340161323547,
+            "prim": "/aloha1_workcell/Robots/follower_left/follower_left_base_link"
+          },
+          {
+            "diagonal_inertia": [
+              0.0009387999889440835,
+              0.0011374416062608361,
+              0.001201558276079595
+            ],
+            "finite_positive": true,
+            "mass": 0.7986140251159668,
+            "prim": "/aloha1_workcell/Robots/follower_left/follower_left_shoulder_link"
+          },
+          {
+            "diagonal_inertia": [
+              0.008925000205636024,
+              0.009113381616771221,
+              0.0007593173650093377
+            ],
+            "finite_positive": true,
+            "mass": 0.7925919890403748,
+            "prim": "/aloha1_workcell/Robots/follower_left/follower_left_upper_arm_link"
+          },
+          {
+            "diagonal_inertia": [
+              0.00015204747614916414,
+              0.00134227832313627,
+              0.0014410740695893764
+            ],
+            "finite_positive": true,
+            "mass": 0.32222801446914673,
+            "prim": "/aloha1_workcell/Robots/follower_left/follower_left_upper_forearm_link"
+          },
+          {
+            "diagonal_inertia": [
+              0.00015570726827718318,
+              0.0005464926944114268,
+              0.0005911000189371407
+            ],
+            "finite_positive": true,
+            "mass": 0.4148229956626892,
+            "prim": "/aloha1_workcell/Robots/follower_left/follower_left_lower_forearm_link"
+          },
+          {
+            "diagonal_inertia": [
+              4.63100805063732e-05,
+              4.326923590269871e-05,
+              5.4570682550547644e-05
+            ],
+            "finite_positive": true,
+            "mass": 0.11539500206708908,
+            "prim": "/aloha1_workcell/Robots/follower_left/follower_left_wrist_link"
+          },
+          {
+            "diagonal_inertia": [
+              3.268000000389293e-05,
+              2.4384280550293624e-05,
+              2.1165718862903304e-05
+            ],
+            "finite_positive": true,
+            "mass": 0.09766600281000137,
+            "prim": "/aloha1_workcell/Robots/follower_left/follower_left_gripper_link"
+          },
+          {
+            "diagonal_inertia": [
+              9.999999747378752e-05,
+              9.999999747378752e-05,
+              9.999999747378752e-05
+            ],
+            "finite_positive": true,
+            "mass": 0.0010000000474974513,
+            "prim": "/aloha1_workcell/Robots/follower_left/follower_left_ee_arm_link"
+          },
+          {
+            "diagonal_inertia": [
+              1.531401721877046e-06,
+              4.297899977245834e-06,
+              2.8867984838143457e-06
+            ],
+            "finite_positive": true,
+            "mass": 0.00800899975001812,
+            "prim": "/aloha1_workcell/Robots/follower_left/follower_left_gripper_prop_link"
+          },
+          {
+            "diagonal_inertia": [
+              7.894991722423583e-05,
+              0.0003284608537796885,
+              0.0003093391715083271
+            ],
+            "finite_positive": true,
+            "mass": 0.15098600089550018,
+            "prim": "/aloha1_workcell/Robots/follower_left/follower_left_gripper_bar_link"
+          },
+          {
+            "diagonal_inertia": [
+              9.999999747378752e-05,
+              9.999999747378752e-05,
+              9.999999747378752e-05
+            ],
+            "finite_positive": true,
+            "mass": 0.0010000000474974513,
+            "prim": "/aloha1_workcell/Robots/follower_left/follower_left_fingers_link"
+          },
+          {
+            "diagonal_inertia": [
+              9.999999747378752e-05,
+              9.999999747378752e-05,
+              9.999999747378752e-05
+            ],
+            "finite_positive": true,
+            "mass": 0.0010000000474974513,
+            "prim": "/aloha1_workcell/Robots/follower_left/follower_left_ee_gripper_link"
+          },
+          {
+            "diagonal_inertia": [
+              2.4800347091513686e-05,
+              1.2079652151442133e-05,
+              1.4170000213198364e-05
+            ],
+            "finite_positive": true,
+            "mass": 0.03479599952697754,
+            "prim": "/aloha1_workcell/Robots/follower_left/follower_left_left_finger_link"
+          },
+          {
+            "diagonal_inertia": [
+              2.480023613316007e-05,
+              1.2079765838279855e-05,
+              1.4170000213198364e-05
+            ],
+            "finite_positive": true,
+            "mass": 0.03479599952697754,
+            "prim": "/aloha1_workcell/Robots/follower_left/follower_left_right_finger_link"
+          },
+          {
+            "diagonal_inertia": [
+              0.006024506408721209,
+              0.0016981891822069883,
+              0.00716330436989665
+            ],
+            "finite_positive": true,
+            "mass": 0.9690340161323547,
+            "prim": "/aloha1_workcell/Robots/follower_right/follower_right_base_link"
+          },
+          {
+            "diagonal_inertia": [
+              0.0009387999889440835,
+              0.0011374416062608361,
+              0.001201558276079595
+            ],
+            "finite_positive": true,
+            "mass": 0.7986140251159668,
+            "prim": "/aloha1_workcell/Robots/follower_right/follower_right_shoulder_link"
+          },
+          {
+            "diagonal_inertia": [
+              0.008925000205636024,
+              0.009113381616771221,
+              0.0007593173650093377
+            ],
+            "finite_positive": true,
+            "mass": 0.7925919890403748,
+            "prim": "/aloha1_workcell/Robots/follower_right/follower_right_upper_arm_link"
+          },
+          {
+            "diagonal_inertia": [
+              0.00015204747614916414,
+              0.00134227832313627,
+              0.0014410740695893764
+            ],
+            "finite_positive": true,
+            "mass": 0.32222801446914673,
+            "prim": "/aloha1_workcell/Robots/follower_right/follower_right_upper_forearm_link"
+          },
+          {
+            "diagonal_inertia": [
+              0.00015570726827718318,
+              0.0005464926944114268,
+              0.0005911000189371407
+            ],
+            "finite_positive": true,
+            "mass": 0.4148229956626892,
+            "prim": "/aloha1_workcell/Robots/follower_right/follower_right_lower_forearm_link"
+          },
+          {
+            "diagonal_inertia": [
+              4.63100805063732e-05,
+              4.326923590269871e-05,
+              5.4570682550547644e-05
+            ],
+            "finite_positive": true,
+            "mass": 0.11539500206708908,
+            "prim": "/aloha1_workcell/Robots/follower_right/follower_right_wrist_link"
+          },
+          {
+            "diagonal_inertia": [
+              3.268000000389293e-05,
+              2.4384280550293624e-05,
+              2.1165718862903304e-05
+            ],
+            "finite_positive": true,
+            "mass": 0.09766600281000137,
+            "prim": "/aloha1_workcell/Robots/follower_right/follower_right_gripper_link"
+          },
+          {
+            "diagonal_inertia": [
+              9.999999747378752e-05,
+              9.999999747378752e-05,
+              9.999999747378752e-05
+            ],
+            "finite_positive": true,
+            "mass": 0.0010000000474974513,
+            "prim": "/aloha1_workcell/Robots/follower_right/follower_right_ee_arm_link"
+          },
+          {
+            "diagonal_inertia": [
+              1.531401721877046e-06,
+              4.297899977245834e-06,
+              2.8867984838143457e-06
+            ],
+            "finite_positive": true,
+            "mass": 0.00800899975001812,
+            "prim": "/aloha1_workcell/Robots/follower_right/follower_right_gripper_prop_link"
+          },
+          {
+            "diagonal_inertia": [
+              7.894991722423583e-05,
+              0.0003284608537796885,
+              0.0003093391715083271
+            ],
+            "finite_positive": true,
+            "mass": 0.15098600089550018,
+            "prim": "/aloha1_workcell/Robots/follower_right/follower_right_gripper_bar_link"
+          },
+          {
+            "diagonal_inertia": [
+              9.999999747378752e-05,
+              9.999999747378752e-05,
+              9.999999747378752e-05
+            ],
+            "finite_positive": true,
+            "mass": 0.0010000000474974513,
+            "prim": "/aloha1_workcell/Robots/follower_right/follower_right_fingers_link"
+          },
+          {
+            "diagonal_inertia": [
+              9.999999747378752e-05,
+              9.999999747378752e-05,
+              9.999999747378752e-05
+            ],
+            "finite_positive": true,
+            "mass": 0.0010000000474974513,
+            "prim": "/aloha1_workcell/Robots/follower_right/follower_right_ee_gripper_link"
+          },
+          {
+            "diagonal_inertia": [
+              2.4800347091513686e-05,
+              1.2079652151442133e-05,
+              1.4170000213198364e-05
+            ],
+            "finite_positive": true,
+            "mass": 0.03479599952697754,
+            "prim": "/aloha1_workcell/Robots/follower_right/follower_right_left_finger_link"
+          },
+          {
+            "diagonal_inertia": [
+              2.480023613316007e-05,
+              1.2079765838279855e-05,
+              1.4170000213198364e-05
+            ],
+            "finite_positive": true,
+            "mass": 0.03479599952697754,
+            "prim": "/aloha1_workcell/Robots/follower_right/follower_right_right_finger_link"
+          }
+        ]
+      },
+      "name": "mass_and_inertia_finite_positive",
+      "status": "PASS"
+    },
+    {
+      "evidence": {
+        "actual": [
+          "waist",
+          "shoulder",
+          "elbow",
+          "forearm_roll",
+          "wrist_angle",
+          "wrist_rotate",
+          "gripper",
+          "left_finger",
+          "right_finger"
+        ],
+        "expected": [
+          "waist",
+          "shoulder",
+          "elbow",
+          "forearm_roll",
+          "wrist_angle",
+          "wrist_rotate",
+          "gripper",
+          "left_finger",
+          "right_finger"
+        ]
+      },
+      "name": "follower_left_runtime_dof_order",
+      "status": "PASS"
+    },
+    {
+      "evidence": {
+        "after": [
+          2.6151270503760315e-05,
+          -0.959958553314209,
+          1.16194486618042,
+          -0.0005989123019389808,
+          -0.2915351390838623,
+          0.0006599093903787434,
+          2.5676847599243047e-06,
+          0.022094612941145897,
+          -0.013814004138112068
+        ],
+        "before": [
+          0.0,
+          -0.9599999785423279,
+          1.159999966621399,
+          0.0,
+          -0.30000001192092896,
+          0.0,
+          0.0,
+          0.022390000522136688,
+          0.0
+        ],
+        "max_abs_jump": 0.013814004138112068,
+        "tolerance": 0.02
+      },
+      "name": "follower_left_first_frame_jump",
+      "status": "PASS"
+    },
+    {
+      "evidence": {
+        "end": [
+          1.4196622942108661e-05,
+          -0.9599491357803345,
+          1.161252498626709,
+          0.001139635918661952,
+          -0.2958255112171173,
+          -5.780077481176704e-05,
+          2.613641754578566e-06,
+          0.02180425636470318,
+          -0.020024938508868217
+        ],
+        "max_abs_drift": 0.020024938508868217,
+        "start": [
+          0.0,
+          -0.9599999785423279,
+          1.159999966621399,
+          0.0,
+          -0.30000001192092896,
+          0.0,
+          0.0,
+          0.022390000522136688,
+          0.0
+        ],
+        "tolerance": 0.03
+      },
+      "name": "follower_left_static_hold",
+      "status": "PASS"
+    },
+    {
+      "evidence": {
+        "tests": [
+          {
+            "commanded_delta": 0.05,
+            "direction_ok": true,
+            "end": [
+              0.050014544278383255,
+              -0.9599491357803345,
+              1.1612516641616821,
+              0.0011334833689033985,
+              -0.2958284914493561,
+              -3.923120311810635e-05,
+              1.7735425217324519e-06,
+              0.02126629650592804,
+              -0.02011498622596264
+            ],
+            "joint": "waist",
+            "max_unexpected_delta": 0.02011498622596264,
+            "measured_delta": 0.050014544278383255,
+            "range_ok": true,
+            "readback_ok": true,
+            "start": [
+              0.0,
+              -0.9599999785423279,
+              1.159999966621399,
+              0.0,
+              -0.30000001192092896,
+              0.0,
+              0.0,
+              0.022390000522136688,
+              0.0
+            ],
+            "status": "PASS"
+          },
+          {
+            "commanded_delta": 0.050000000000000044,
+            "direction_ok": true,
+            "end": [
+              1.5876948964432813e-05,
+              -0.9099599123001099,
+              1.1612542867660522,
+              0.0011769079137593508,
+              -0.29583579301834106,
+              -5.988671910017729e-05,
+              2.763473275990691e-06,
+              0.02172921784222126,
+              -0.019879614934325218
+            ],
+            "joint": "shoulder",
+            "max_unexpected_delta": 0.019879614934325218,
+            "measured_delta": 0.05004006624221802,
+            "range_ok": true,
+            "readback_ok": true,
+            "start": [
+              0.0,
+              -0.9599999785423279,
+              1.159999966621399,
+              0.0,
+              -0.30000001192092896,
+              0.0,
+              0.0,
+              0.022390000522136688,
+              0.0
+            ],
+            "status": "PASS"
+          },
+          {
+            "commanded_delta": 0.050000000000000044,
+            "direction_ok": true,
+            "end": [
+              1.4613548955821898e-05,
+              -0.9599906802177429,
+              1.2112681865692139,
+              0.0011368843261152506,
+              -0.29602500796318054,
+              -6.197107722982764e-05,
+              2.786453251246712e-06,
+              0.021770823746919632,
+              -0.019881471991539
+            ],
+            "joint": "elbow",
+            "max_unexpected_delta": 0.019881471991539,
+            "measured_delta": 0.05126821994781494,
+            "range_ok": true,
+            "readback_ok": true,
+            "start": [
+              0.0,
+              -0.9599999785423279,
+              1.159999966621399,
+              0.0,
+              -0.30000001192092896,
+              0.0,
+              0.0,
+              0.022390000522136688,
+              0.0
+            ],
+            "status": "PASS"
+          },
+          {
+            "commanded_delta": 0.05,
+            "direction_ok": true,
+            "end": [
+              1.6941536159720272e-05,
+              -0.9599495530128479,
+              1.1612218618392944,
+              0.05089639872312546,
+              -0.2959001660346985,
+              -5.603958561550826e-05,
+              2.5743684091139585e-06,
+              0.02198314294219017,
+              -0.021921388804912567
+            ],
+            "joint": "forearm_roll",
+            "max_unexpected_delta": 0.021921388804912567,
+            "measured_delta": 0.05089639872312546,
+            "range_ok": true,
+            "readback_ok": true,
+            "start": [
+              0.0,
+              -0.9599999785423279,
+              1.159999966621399,
+              0.0,
+              -0.30000001192092896,
+              0.0,
+              0.0,
+              0.022390000522136688,
+              0.0
+            ],
+            "status": "PASS"
+          },
+          {
+            "commanded_delta": 0.04999999999999999,
+            "direction_ok": true,
+            "end": [
+              1.3038284123467747e-05,
+              -0.9599446058273315,
+              1.1613099575042725,
+              0.0013919399352744222,
+              -0.24565339088439941,
+              -5.824003164889291e-05,
+              2.3545758267573547e-06,
+              0.021852031350135803,
+              -0.020103756338357925
+            ],
+            "joint": "wrist_angle",
+            "max_unexpected_delta": 0.020103756338357925,
+            "measured_delta": 0.05434662103652954,
+            "range_ok": true,
+            "readback_ok": true,
+            "start": [
+              0.0,
+              -0.9599999785423279,
+              1.159999966621399,
+              0.0,
+              -0.30000001192092896,
+              0.0,
+              0.0,
+              0.022390000522136688,
+              0.0
+            ],
+            "status": "PASS"
+          },
+          {
+            "commanded_delta": 0.05,
+            "direction_ok": true,
+            "end": [
+              1.6501284335390665e-05,
+              -0.9599493145942688,
+              1.161251187324524,
+              0.0011221106396988034,
+              -0.29582858085632324,
+              0.049942679703235626,
+              2.617138761706883e-06,
+              0.021987497806549072,
+              -0.02203303575515747
+            ],
+            "joint": "wrist_rotate",
+            "max_unexpected_delta": 0.02203303575515747,
+            "measured_delta": 0.049942679703235626,
+            "range_ok": true,
+            "readback_ok": true,
+            "start": [
+              0.0,
+              -0.9599999785423279,
+              1.159999966621399,
+              0.0,
+              -0.30000001192092896,
+              0.0,
+              0.0,
+              0.022390000522136688,
+              0.0
+            ],
+            "status": "PASS"
+          },
+          {
+            "commanded_delta": 0.05,
+            "direction_ok": true,
+            "end": [
+              1.4175934666127432e-05,
+              -0.9599489569664001,
+              1.1612541675567627,
+              0.001140330103226006,
+              -0.29581525921821594,
+              -5.78930921619758e-05,
+              0.05000244453549385,
+              0.021818110719323158,
+              -0.020041516050696373
+            ],
+            "joint": "gripper",
+            "max_unexpected_delta": 0.020041516050696373,
+            "measured_delta": 0.05000244453549385,
+            "range_ok": true,
+            "readback_ok": true,
+            "start": [
+              0.0,
+              -0.9599999785423279,
+              1.159999966621399,
+              0.0,
+              -0.30000001192092896,
+              0.0,
+              0.0,
+              0.022390000522136688,
+              0.0
+            ],
+            "status": "PASS"
+          },
+          {
+            "commanded_delta": 0.0020000000000000018,
+            "direction_ok": true,
+            "end": [
+              1.4242980796552729e-05,
+              -0.959949254989624,
+              1.1612505912780762,
+              0.0011386292753741145,
+              -0.29583877325057983,
+              -5.748774856328964e-05,
+              2.5838139663392212e-06,
+              0.023928888142108917,
+              -0.022145846858620644
+            ],
+            "joint": "left_finger",
+            "max_unexpected_delta": 0.004161238670349121,
+            "measured_delta": 0.001538887619972229,
+            "range_ok": true,
+            "readback_ok": true,
+            "start": [
+              0.0,
+              -0.9599999785423279,
+              1.159999966621399,
+              0.0,
+              -0.30000001192092896,
+              0.0,
+              0.0,
+              0.022390000522136688,
+              0.0
+            ],
+            "status": "PASS"
+          }
+        ]
+      },
+      "name": "follower_left_one_joint_at_a_time",
+      "status": "PASS"
+    },
+    {
+      "evidence": {
+        "actual": [
+          "waist",
+          "shoulder",
+          "elbow",
+          "forearm_roll",
+          "wrist_angle",
+          "wrist_rotate",
+          "gripper",
+          "left_finger",
+          "right_finger"
+        ],
+        "expected": [
+          "waist",
+          "shoulder",
+          "elbow",
+          "forearm_roll",
+          "wrist_angle",
+          "wrist_rotate",
+          "gripper",
+          "left_finger",
+          "right_finger"
+        ]
+      },
+      "name": "follower_right_runtime_dof_order",
+      "status": "PASS"
+    },
+    {
+      "evidence": {
+        "after": [
+          1.4196681149769574e-05,
+          -0.9599491953849792,
+          1.161252498626709,
+          0.0011396497720852494,
+          -0.29582539200782776,
+          -5.780007995781489e-05,
+          2.613635615489329e-06,
+          0.02180425450205803,
+          -0.02002493478357792
+        ],
+        "before": [
+          1.4196681149769574e-05,
+          -0.9599491953849792,
+          1.161252498626709,
+          0.0011396497720852494,
+          -0.29582539200782776,
+          -5.780007995781489e-05,
+          2.613635615489329e-06,
+          0.02180425450205803,
+          -0.02002493478357792
+        ],
+        "max_abs_jump": 0.0,
+        "tolerance": 0.02
+      },
+      "name": "follower_right_first_frame_jump",
+      "status": "PASS"
+    },
+    {
+      "evidence": {
+        "end": [
+          1.4196681149769574e-05,
+          -0.9599491953849792,
+          1.161252498626709,
+          0.0011396497720852494,
+          -0.29582539200782776,
+          -5.780007995781489e-05,
+          2.613635615489329e-06,
+          0.02180425450205803,
+          -0.02002493478357792
+        ],
+        "max_abs_drift": 0.02002493478357792,
+        "start": [
+          0.0,
+          -0.9599999785423279,
+          1.159999966621399,
+          0.0,
+          -0.30000001192092896,
+          0.0,
+          0.0,
+          0.022390000522136688,
+          0.0
+        ],
+        "tolerance": 0.03
+      },
+      "name": "follower_right_static_hold",
+      "status": "PASS"
+    },
+    {
+      "evidence": {
+        "tests": [
+          {
+            "commanded_delta": 0.05,
+            "direction_ok": true,
+            "end": [
+              0.05001454800367355,
+              -0.9599491953849792,
+              1.1612517833709717,
+              0.0011334968730807304,
+              -0.2958277761936188,
+              -3.9231184928212315e-05,
+              1.773629492163309e-06,
+              0.021266283467411995,
+              -0.020114948973059654
+            ],
+            "joint": "waist",
+            "max_unexpected_delta": 0.020114948973059654,
+            "measured_delta": 0.05001454800367355,
+            "range_ok": true,
+            "readback_ok": true,
+            "start": [
+              0.0,
+              -0.9599999785423279,
+              1.159999966621399,
+              0.0,
+              -0.30000001192092896,
+              0.0,
+              0.0,
+              0.022390000522136688,
+              0.0
+            ],
+            "status": "PASS"
+          },
+          {
+            "commanded_delta": 0.050000000000000044,
+            "direction_ok": true,
+            "end": [
+              1.5876899851718917e-05,
+              -0.9099599719047546,
+              1.1612544059753418,
+              0.0011768992990255356,
+              -0.2958366274833679,
+              -5.9886373492190614e-05,
+              2.763451675491524e-06,
+              0.021729223430156708,
+              -0.019879626110196114
+            ],
+            "joint": "shoulder",
+            "max_unexpected_delta": 0.019879626110196114,
+            "measured_delta": 0.05004000663757324,
+            "range_ok": true,
+            "readback_ok": true,
+            "start": [
+              0.0,
+              -0.9599999785423279,
+              1.159999966621399,
+              0.0,
+              -0.30000001192092896,
+              0.0,
+              0.0,
+              0.022390000522136688,
+              0.0
+            ],
+            "status": "PASS"
+          },
+          {
+            "commanded_delta": 0.050000000000000044,
+            "direction_ok": true,
+            "end": [
+              1.4613569874200039e-05,
+              -0.9599906802177429,
+              1.2112681865692139,
+              0.0011368844425305724,
+              -0.29602500796318054,
+              -6.197102629812434e-05,
+              2.7864446110470453e-06,
+              0.02177082747220993,
+              -0.0198814757168293
+            ],
+            "joint": "elbow",
+            "max_unexpected_delta": 0.0198814757168293,
+            "measured_delta": 0.05126821994781494,
+            "range_ok": true,
+            "readback_ok": true,
+            "start": [
+              0.0,
+              -0.9599999785423279,
+              1.159999966621399,
+              0.0,
+              -0.30000001192092896,
+              0.0,
+              0.0,
+              0.022390000522136688,
+              0.0
+            ],
+            "status": "PASS"
+          },
+          {
+            "commanded_delta": 0.05,
+            "direction_ok": true,
+            "end": [
+              1.6941496141953394e-05,
+              -0.9599495530128479,
+              1.1612216234207153,
+              0.05089640989899635,
+              -0.2958999276161194,
+              -5.6039760238491e-05,
+              2.5743684091139585e-06,
+              0.02198314107954502,
+              -0.021921398118138313
+            ],
+            "joint": "forearm_roll",
+            "max_unexpected_delta": 0.021921398118138313,
+            "measured_delta": 0.05089640989899635,
+            "range_ok": true,
+            "readback_ok": true,
+            "start": [
+              0.0,
+              -0.9599999785423279,
+              1.159999966621399,
+              0.0,
+              -0.30000001192092896,
+              0.0,
+              0.0,
+              0.022390000522136688,
+              0.0
+            ],
+            "status": "PASS"
+          },
+          {
+            "commanded_delta": 0.04999999999999999,
+            "direction_ok": true,
+            "end": [
+              1.3038334145676345e-05,
+              -0.9599445462226868,
+              1.161309838294983,
+              0.0013919250341132283,
+              -0.24565334618091583,
+              -5.823993342346512e-05,
+              2.3545926524093375e-06,
+              0.021852029487490654,
+              -0.020103756338357925
+            ],
+            "joint": "wrist_angle",
+            "max_unexpected_delta": 0.020103756338357925,
+            "measured_delta": 0.05434666574001312,
+            "range_ok": true,
+            "readback_ok": true,
+            "start": [
+              0.0,
+              -0.9599999785423279,
+              1.159999966621399,
+              0.0,
+              -0.30000001192092896,
+              0.0,
+              0.0,
+              0.022390000522136688,
+              0.0
+            ],
+            "status": "PASS"
+          },
+          {
+            "commanded_delta": 0.05,
+            "direction_ok": true,
+            "end": [
+              1.6501278878422454e-05,
+              -0.9599493145942688,
+              1.161251187324524,
+              0.0011221107561141253,
+              -0.29582858085632324,
+              0.049942679703235626,
+              2.617119662318146e-06,
+              0.021987490355968475,
+              -0.022033028304576874
+            ],
+            "joint": "wrist_rotate",
+            "max_unexpected_delta": 0.022033028304576874,
+            "measured_delta": 0.049942679703235626,
+            "range_ok": true,
+            "readback_ok": true,
+            "start": [
+              0.0,
+              -0.9599999785423279,
+              1.159999966621399,
+              0.0,
+              -0.30000001192092896,
+              0.0,
+              0.0,
+              0.022390000522136688,
+              0.0
+            ],
+            "status": "PASS"
+          },
+          {
+            "commanded_delta": 0.05,
+            "direction_ok": true,
+            "end": [
+              1.4175965588947292e-05,
+              -0.9599489569664001,
+              1.1612541675567627,
+              0.0011403297539800406,
+              -0.29581499099731445,
+              -5.7892135373549536e-05,
+              0.05000244453549385,
+              0.021818110719323158,
+              -0.020041512325406075
+            ],
+            "joint": "gripper",
+            "max_unexpected_delta": 0.020041512325406075,
+            "measured_delta": 0.05000244453549385,
+            "range_ok": true,
+            "readback_ok": true,
+            "start": [
+              0.0,
+              -0.9599999785423279,
+              1.159999966621399,
+              0.0,
+              -0.30000001192092896,
+              0.0,
+              0.0,
+              0.022390000522136688,
+              0.0
+            ],
+            "status": "PASS"
+          },
+          {
+            "commanded_delta": 0.0020000000000000018,
+            "direction_ok": true,
+            "end": [
+              1.4242973520595115e-05,
+              -0.959949254989624,
+              1.1612505912780762,
+              0.00113862962462008,
+              -0.2958388328552246,
+              -5.7487719459459186e-05,
+              2.5838260171440197e-06,
+              0.023928886279463768,
+              -0.022145846858620644
+            ],
+            "joint": "left_finger",
+            "max_unexpected_delta": 0.004161179065704346,
+            "measured_delta": 0.0015388857573270798,
+            "range_ok": true,
+            "readback_ok": true,
+            "start": [
+              0.0,
+              -0.9599999785423279,
+              1.159999966621399,
+              0.0,
+              -0.30000001192092896,
+              0.0,
+              0.0,
+              0.022390000522136688,
+              0.0
+            ],
+            "status": "PASS"
+          }
+        ]
+      },
+      "name": "follower_right_one_joint_at_a_time",
+      "status": "PASS"
+    },
+    {
+      "evidence": {
+        "accepted_statuses": [
+          "PASS",
+          "PARTIAL"
+        ],
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/gripper_validation.json",
+        "report": {
+          "acceptance_semantics": {
+            "FAIL": "no temporary-friction trial passes the interface gate",
+            "PARTIAL": "machine interface/contact/hold gate passes for at least one temporary friction value, but measured calibration is blocked",
+            "PASS": "interface and calibrated physics gates pass"
+          },
+          "collider_variant": "A_CURRENT_STL_CONVEX_HULL_BASELINE",
+          "determinism": {
+            "artifact_hashes": {
+              "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/gripper_contact_events_follower_left_mu_0.300.json": "acbcb4b46f6b7733ef5304d55ee68e80a176429c9fe705f18ea0e4e73e79cc88",
+              "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/gripper_contact_events_follower_left_mu_0.500.json": "bedfca2f01a75f5fd5b051b38c799acd04384212477e53c9bd6e00ebdf936593",
+              "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/gripper_contact_events_follower_left_mu_0.700.json": "8ed83ee5727cab94069fe622e1805bd01793e82b9c4fbffe7efd776d8f52d71a",
+              "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/gripper_contact_events_follower_right_mu_0.300.json": "f70bf645d202e8b26c96a48d58c2fd0ef4dadb78eaaad8f29704925288d2ed53",
+              "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/gripper_contact_events_follower_right_mu_0.500.json": "56e5cb40fda94d433fcf55fdd64da1555eefdf1497729fda302c247d0bb1c35a",
+              "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/gripper_contact_events_follower_right_mu_0.700.json": "3f2a373b894a78e1ed1ab1aa3add9f822e61a6d83b7a45bbac3787803a4b730a",
+              "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/gripper_curves.csv": "76fb976a78f6d6838635ed224db32ea09e0762efdf928a37ed3c5515a640286c"
+            },
+            "current_signature": "45860d529ba3737fa727b3ae680a4752a85ebd23f2a8f68bdcfc676193c18bf1",
+            "deterministic": true,
+            "previous_signature": "45860d529ba3737fa727b3ae680a4752a85ebd23f2a8f68bdcfc676193c18bf1",
+            "status": "PASS"
+          },
+          "friction_values": [
+            0.3,
+            0.5,
+            0.7
+          ],
+          "optimization_gate": "BLOCKED",
+          "plan": {
+            "bottle_proxy": {
+              "diameter_m": 0.065,
+              "height_m": 0.21,
+              "inertia_status": "ENGINEERING_DERIVED_UNCALIBRATED",
+              "mass_kg": 0.02,
+              "measurement_source": "user-supplied real bottle body diameter, total height, mass; recorded in .codex/TASK_STATE.md",
+              "profile_limitation": "neck, shoulder, base profile and measured inertia unavailable",
+              "shape": "cylinder",
+              "status": "PARTIAL_MEASURED_BODY_PROXY"
+            },
+            "fingertip_material": {
+              "friction_scan": [
+                0.3,
+                0.5,
+                0.7
+              ],
+              "restitution": 0.0,
+              "source": "engineering scan; no measured fingertip/bottle data",
+              "status": "TEMPORARY_UNCALIBRATED"
+            },
+            "hard_blockers": [
+              "measured fingertip/bottle friction",
+              "complete measured bottle collision profile and inertia",
+              "real gripper motor-angle/aperture calibration",
+              "calibrated force-drive response"
+            ],
+            "motion": {
+              "close_steps": 120,
+              "fixed_contact_steps": 60,
+              "mimic_tolerance_m": 0.001,
+              "open_steps": 90,
+              "readback_tolerance_m": 0.002,
+              "settle_steps": 60
+            },
+            "penetration": {
+              "maximum_persistent_depth_m": 0.002,
+              "persistence_steps": 5,
+              "threshold_status": "ENGINEERING_ACCEPTANCE_THRESHOLD"
+            },
+            "physics": {
+              "author_contact_rest_offsets": false,
+              "offset_policy": "preserve Isaac Sim 5.1 defaults; require contactOffset > restOffset before any evidence-based adjustment",
+              "physics_dt_s": 0.016666666666666666,
+              "self_collision": false,
+              "solve_articulation_contact_last": true
+            },
+            "released_hold": {
+              "fixed_constraint_allowed": false,
+              "hold_steps": 120,
+              "hold_time_s": 2.0,
+              "max_drop_m": 0.01,
+              "surface_gripper_allowed": false,
+              "threshold_status": "ENGINEERING_ACCEPTANCE_THRESHOLD"
+            },
+            "robots": [
+              {
+                "asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/configuration/follower_left_debug_acceleration_drive.usd",
+                "closed_left_finger_m": 0.021,
+                "dof_order": [
+                  "waist",
+                  "shoulder",
+                  "elbow",
+                  "forearm_roll",
+                  "wrist_angle",
+                  "wrist_rotate",
+                  "gripper",
+                  "left_finger",
+                  "right_finger"
+                ],
+                "mimic": {
+                  "multiplier": -1.0,
+                  "offset": 0.0,
+                  "reference": "left_finger",
+                  "target": "right_finger"
+                },
+                "name": "follower_left",
+                "open_left_finger_m": 0.057
+              },
+              {
+                "asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/configuration/follower_right_debug_acceleration_drive.usd",
+                "closed_left_finger_m": 0.021,
+                "dof_order": [
+                  "waist",
+                  "shoulder",
+                  "elbow",
+                  "forearm_roll",
+                  "wrist_angle",
+                  "wrist_rotate",
+                  "gripper",
+                  "left_finger",
+                  "right_finger"
+                ],
+                "mimic": {
+                  "multiplier": -1.0,
+                  "offset": 0.0,
+                  "reference": "left_finger",
+                  "target": "right_finger"
+                },
+                "name": "follower_right",
+                "open_left_finger_m": 0.057
+              }
+            ],
+            "schema_version": 1,
+            "status": "PARTIAL"
+          },
+          "robots": [
+            {
+              "passing_interface_friction_values": [],
+              "robot": "follower_left",
+              "status": "FAIL",
+              "trial_statuses": [
+                {
+                  "failed_checks": [
+                    "limits_ok",
+                    "mimic_ok",
+                    "held_for_required_steps"
+                  ],
+                  "friction": 0.3,
+                  "status": "FAIL"
+                },
+                {
+                  "failed_checks": [
+                    "limits_ok",
+                    "mimic_ok",
+                    "held_for_required_steps"
+                  ],
+                  "friction": 0.5,
+                  "status": "FAIL"
+                },
+                {
+                  "failed_checks": [
+                    "limits_ok",
+                    "mimic_ok",
+                    "held_for_required_steps"
+                  ],
+                  "friction": 0.7,
+                  "status": "FAIL"
+                }
+              ]
+            },
+            {
+              "passing_interface_friction_values": [],
+              "robot": "follower_right",
+              "status": "FAIL",
+              "trial_statuses": [
+                {
+                  "failed_checks": [
+                    "limits_ok",
+                    "mimic_ok",
+                    "held_for_required_steps"
+                  ],
+                  "friction": 0.3,
+                  "status": "FAIL"
+                },
+                {
+                  "failed_checks": [
+                    "limits_ok",
+                    "mimic_ok",
+                    "held_for_required_steps"
+                  ],
+                  "friction": 0.5,
+                  "status": "FAIL"
+                },
+                {
+                  "failed_checks": [
+                    "limits_ok",
+                    "mimic_ok",
+                    "held_for_required_steps"
+                  ],
+                  "friction": 0.7,
+                  "status": "FAIL"
+                }
+              ]
+            }
+          ],
+          "schema_version": 1,
+          "scope": "Stationary ALOHA 1 follower grippers",
+          "status": "FAIL",
+          "trials": [
+            {
+              "aperture": {
+                "closed_against_fixed_bottle": {
+                  "center_distance_m": 0.08553158867084582,
+                  "closing_axis_world": [
+                    -0.0002996798064384214,
+                    -0.9999998274137782,
+                    -0.0005053359547535937
+                  ],
+                  "midpoint_world_m": [
+                    0.2322064188718591,
+                    -0.001033775309369142,
+                    0.3043736813104757
+                  ],
+                  "surface_gap_m": 0.06491272026981014
+                },
+                "left_closed_bounds": {
+                  "center_m": [
+                    0.23221923491682775,
+                    0.0417320116452669,
+                    0.304395292403987
+                  ],
+                  "colliders": [
+                    "/World/Robot/follower_left_left_finger_link/collisions/gripper_finger/node_STL_BINARY_"
+                  ],
+                  "half_extent_m": [
+                    0.04365162159139077,
+                    0.010278635877516498,
+                    0.03507238721867839
+                  ],
+                  "maximum_m": [
+                    0.2758708565082185,
+                    0.0520106475227834,
+                    0.3394676796226654
+                  ],
+                  "minimum_m": [
+                    0.18856761332543698,
+                    0.031453375767750404,
+                    0.2693229051853086
+                  ],
+                  "root": "/World/Robot/follower_left_left_finger_link/collisions"
+                },
+                "left_open_bounds": {
+                  "center_m": [
+                    0.2475473494454331,
+                    0.05370249352600061,
+                    0.30364374727641275
+                  ],
+                  "colliders": [
+                    "/World/Robot/follower_left_left_finger_link/collisions/gripper_finger/node_STL_BINARY_"
+                  ],
+                  "half_extent_m": [
+                    0.04301651919726489,
+                    0.010294956250811643,
+                    0.034181417481028126
+                  ],
+                  "maximum_m": [
+                    0.290563868642698,
+                    0.06399744977681225,
+                    0.33782516475744084
+                  ],
+                  "minimum_m": [
+                    0.20453083024816823,
+                    0.043407537275188965,
+                    0.2694623297953846
+                  ],
+                  "root": "/World/Robot/follower_left_left_finger_link/collisions"
+                },
+                "measurement": "world AABB support distance along measured closing axis",
+                "open": {
+                  "center_distance_m": 0.10947545767427287,
+                  "closing_axis_world": [
+                    -0.00019052871743492741,
+                    -0.9999993683947869,
+                    -0.0011076591692003868
+                  ],
+                  "midpoint_world_m": [
+                    0.24753692033616248,
+                    -0.0010352007385009375,
+                    0.3035831165291651
+                  ],
+                  "surface_gap_m": 0.08879345298045135
+                },
+                "right_closed_bounds": {
+                  "center_m": [
+                    0.2321936028268905,
+                    -0.043799562264005186,
+                    0.3043520702169644
+                  ],
+                  "colliders": [
+                    "/World/Robot/follower_left_right_finger_link/collisions/gripper_finger/node_STL_BINARY_"
+                  ],
+                  "half_extent_m": [
+                    0.04365161778646194,
+                    0.01027862637742856,
+                    0.035072386330865096
+                  ],
+                  "maximum_m": [
+                    0.2758452206133524,
+                    -0.033520935886576626,
+                    0.3394244565478295
+                  ],
+                  "minimum_m": [
+                    0.18854198504042854,
+                    -0.054078188641433746,
+                    0.2692796838860993
+                  ],
+                  "root": "/World/Robot/follower_left_right_finger_link/collisions"
+                },
+                "right_open_bounds": {
+                  "center_m": [
+                    0.24752649122689183,
+                    -0.05577289500300248,
+                    0.30352248578191743
+                  ],
+                  "colliders": [
+                    "/World/Robot/follower_left_right_finger_link/collisions/gripper_finger/node_STL_BINARY_"
+                  ],
+                  "half_extent_m": [
+                    0.04301651537506965,
+                    0.01029494696373074,
+                    0.03418141681024059
+                  ],
+                  "maximum_m": [
+                    0.2905430066019615,
+                    -0.04547794803927174,
+                    0.33770390259215805
+                  ],
+                  "minimum_m": [
+                    0.20450997585182218,
+                    -0.06606784196673322,
+                    0.26934106897167687
+                  ],
+                  "root": "/World/Robot/follower_left_right_finger_link/collisions"
+                }
+              },
+              "asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/configuration/follower_left_debug_acceleration_drive.usd",
+              "bottle": {
+                "axis": "Z",
+                "diameter_m": 0.065,
+                "height_m": 0.21,
+                "inertia_status": "ENGINEERING_DERIVED_UNCALIBRATED",
+                "mass_kg": 0.02,
+                "material": {
+                  "dynamic_friction": 0.3,
+                  "path": "/World/Materials/temporary_bottle",
+                  "restitution": 0.0,
+                  "static_friction": 0.3,
+                  "status": "TEMPORARY_UNCALIBRATED"
+                },
+                "path": "/World/BottleProxy",
+                "shape": "cylinder",
+                "status": "PARTIAL_MEASURED_BODY_PROXY"
+              },
+              "contact_event_report": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/gripper_contact_events_follower_left_mu_0.300.json",
+              "contact_report_bodies": [
+                "/World/Robot/follower_left_left_finger_link",
+                "/World/Robot/follower_left_right_finger_link"
+              ],
+              "contact_subscription_active_during_trial": true,
+              "contact_summary": {
+                "contact_point_count": 1393,
+                "impulses_finite": true,
+                "left_finger_contact": true,
+                "maximum_excessive_penetration_run_steps": 1,
+                "maximum_penetration_depth_m": 0.014812054112553596,
+                "minimum_separation_m": -0.014812054112553596,
+                "persistent_penetration": false,
+                "right_finger_contact": true,
+                "unexpected_gripper_collision": false,
+                "unexpected_gripper_collision_events": []
+              },
+              "event_count": 637,
+              "failed_checks": [
+                "limits_ok",
+                "mimic_ok",
+                "held_for_required_steps"
+              ],
+              "fixed_bottle_contact": {
+                "contact_point_count": 1252,
+                "impulses_finite": true,
+                "left_finger_contact": true,
+                "maximum_excessive_penetration_run_steps": 0,
+                "maximum_penetration_depth_m": 1.9699336917256005e-05,
+                "minimum_separation_m": -1.9699336917256005e-05,
+                "persistent_penetration": false,
+                "right_finger_contact": true,
+                "unexpected_gripper_collision": false,
+                "unexpected_gripper_collision_events": []
+              },
+              "friction": 0.3,
+              "hard_blockers": [
+                "measured fingertip/bottle friction",
+                "complete measured bottle collision profile and inertia",
+                "real gripper motor-angle/aperture calibration",
+                "calibrated force-drive response"
+              ],
+              "isaac_sim": "5.1.0.0",
+              "kit": "107.3.3",
+              "material": {
+                "bound_to": [
+                  "/World/Robot/follower_left_left_finger_link/collisions",
+                  "/World/Robot/follower_left_right_finger_link/collisions"
+                ],
+                "dynamic_friction": 0.3,
+                "path": "/World/Materials/temporary_fingertip",
+                "restitution": 0.0,
+                "static_friction": 0.3,
+                "status": "TEMPORARY_UNCALIBRATED"
+              },
+              "metrics": {
+                "aperture_monotonic": true,
+                "bilateral_contact_before_release": true,
+                "close_direction_ok": true,
+                "finite_state": true,
+                "held_for_required_steps": false,
+                "impulses_finite": true,
+                "left_finger_contact": true,
+                "limits_ok": false,
+                "mimic_ok": false,
+                "open_direction_ok": true,
+                "persistent_penetration": false,
+                "readback_ok": true,
+                "released_without_constraint": true,
+                "right_finger_contact": true,
+                "solve_articulation_contact_last_ok": true,
+                "unexpected_gripper_collision": false
+              },
+              "passed_interface_gate": false,
+              "physics": {
+                "contact_rest_offsets_authored": false,
+                "self_collision": false,
+                "solve_articulation_contact_last_readback": true,
+                "solve_articulation_contact_last_requested": true
+              },
+              "released_hold": {
+                "constraint_found": false,
+                "constraint_paths": [],
+                "contact_event_count": 39,
+                "drop_m": 17.413362473249435,
+                "final_position_world_m": [
+                  0.4968430697917938,
+                  0.01393860299140215,
+                  -17.109779357910156
+                ],
+                "maximum_drop_m": 0.01,
+                "release_frame": 390,
+                "release_position_world_m": [
+                  0.24753692746162415,
+                  -0.0010352007811889052,
+                  0.3035831153392792
+                ],
+                "required_steps": 120,
+                "required_time_s": 2.0,
+                "support_surface": "NONE_BOTTLE_STARTED_SUSPENDED",
+                "total_displacement_m": 17.41515347024466
+              },
+              "robot": "follower_left",
+              "schema_version": 1,
+              "states": {
+                "closed_against_fixed_bottle": {
+                  "left_finger_m": 0.04503165930509567,
+                  "right_finger_m": -0.0469985231757164
+                },
+                "open": {
+                  "left_finger_m": 0.056999921798706055,
+                  "right_finger_m": -0.0589350089430809
+                },
+                "start": {
+                  "left_finger_m": 0.02180425636470318,
+                  "right_finger_m": -0.020024938508868217
+                }
+              },
+              "status": "FAIL"
+            },
+            {
+              "aperture": {
+                "closed_against_fixed_bottle": {
+                  "center_distance_m": 0.08550981572289769,
+                  "closing_axis_world": [
+                    -0.0003154482358441706,
+                    -0.9999999241386113,
+                    -0.00022850641601442577
+                  ],
+                  "midpoint_world_m": [
+                    0.23220765902190302,
+                    -0.0010382400913084844,
+                    0.30436784604105643
+                  ],
+                  "surface_gap_m": 0.06492723294325435
+                },
+                "left_closed_bounds": {
+                  "center_m": [
+                    0.2322211459821616,
+                    0.041716664526693675,
+                    0.3043776158118189
+                  ],
+                  "colliders": [
+                    "/World/Robot/follower_left_left_finger_link/collisions/gripper_finger/node_STL_BINARY_"
+                  ],
+                  "half_extent_m": [
+                    0.04365018529958209,
+                    0.010269509805102398,
+                    0.035067275496360434
+                  ],
+                  "maximum_m": [
+                    0.2758713312817437,
+                    0.05198617433179607,
+                    0.33944489130817934
+                  ],
+                  "minimum_m": [
+                    0.1885709606825795,
+                    0.03144715472159128,
+                    0.2693103403154585
+                  ],
+                  "root": "/World/Robot/follower_left_left_finger_link/collisions"
+                },
+                "left_open_bounds": {
+                  "center_m": [
+                    0.2475473494454331,
+                    0.05370249352600061,
+                    0.30364374727641275
+                  ],
+                  "colliders": [
+                    "/World/Robot/follower_left_left_finger_link/collisions/gripper_finger/node_STL_BINARY_"
+                  ],
+                  "half_extent_m": [
+                    0.04301651919726489,
+                    0.010294956250811643,
+                    0.034181417481028126
+                  ],
+                  "maximum_m": [
+                    0.290563868642698,
+                    0.06399744977681225,
+                    0.33782516475744084
+                  ],
+                  "minimum_m": [
+                    0.20453083024816823,
+                    0.043407537275188965,
+                    0.2694623297953846
+                  ],
+                  "root": "/World/Robot/follower_left_left_finger_link/collisions"
+                },
+                "measurement": "world AABB support distance along measured closing axis",
+                "open": {
+                  "center_distance_m": 0.10947545767427287,
+                  "closing_axis_world": [
+                    -0.00019052871743492741,
+                    -0.9999993683947869,
+                    -0.0011076591692003868
+                  ],
+                  "midpoint_world_m": [
+                    0.24753692033616248,
+                    -0.0010352007385009375,
+                    0.3035831165291651
+                  ],
+                  "surface_gap_m": 0.08879345298045135
+                },
+                "right_closed_bounds": {
+                  "center_m": [
+                    0.23219417206164444,
+                    -0.043793144709310644,
+                    0.304358076270294
+                  ],
+                  "colliders": [
+                    "/World/Robot/follower_left_right_finger_link/collisions/gripper_finger/node_STL_BINARY_"
+                  ],
+                  "half_extent_m": [
+                    0.043650184109967835,
+                    0.010269509590357658,
+                    0.03506727504514354
+                  ],
+                  "maximum_m": [
+                    0.2758443561716123,
+                    -0.03352363511895298,
+                    0.3394253513154375
+                  ],
+                  "minimum_m": [
+                    0.18854398795167662,
+                    -0.0540626542996683,
+                    0.2692908012251504
+                  ],
+                  "root": "/World/Robot/follower_left_right_finger_link/collisions"
+                },
+                "right_open_bounds": {
+                  "center_m": [
+                    0.24752649122689183,
+                    -0.05577289500300248,
+                    0.30352248578191743
+                  ],
+                  "colliders": [
+                    "/World/Robot/follower_left_right_finger_link/collisions/gripper_finger/node_STL_BINARY_"
+                  ],
+                  "half_extent_m": [
+                    0.04301651537506965,
+                    0.01029494696373074,
+                    0.03418141681024059
+                  ],
+                  "maximum_m": [
+                    0.2905430066019615,
+                    -0.04547794803927174,
+                    0.33770390259215805
+                  ],
+                  "minimum_m": [
+                    0.20450997585182218,
+                    -0.06606784196673322,
+                    0.26934106897167687
+                  ],
+                  "root": "/World/Robot/follower_left_right_finger_link/collisions"
+                }
+              },
+              "asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/configuration/follower_left_debug_acceleration_drive.usd",
+              "bottle": {
+                "axis": "Z",
+                "diameter_m": 0.065,
+                "height_m": 0.21,
+                "inertia_status": "ENGINEERING_DERIVED_UNCALIBRATED",
+                "mass_kg": 0.02,
+                "material": {
+                  "dynamic_friction": 0.5,
+                  "path": "/World/Materials/temporary_bottle",
+                  "restitution": 0.0,
+                  "static_friction": 0.5,
+                  "status": "TEMPORARY_UNCALIBRATED"
+                },
+                "path": "/World/BottleProxy",
+                "shape": "cylinder",
+                "status": "PARTIAL_MEASURED_BODY_PROXY"
+              },
+              "contact_event_report": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/gripper_contact_events_follower_left_mu_0.500.json",
+              "contact_report_bodies": [
+                "/World/Robot/follower_left_left_finger_link",
+                "/World/Robot/follower_left_right_finger_link"
+              ],
+              "contact_subscription_active_during_trial": true,
+              "contact_summary": {
+                "contact_point_count": 1416,
+                "impulses_finite": true,
+                "left_finger_contact": true,
+                "maximum_excessive_penetration_run_steps": 1,
+                "maximum_penetration_depth_m": 0.014812054112553596,
+                "minimum_separation_m": -0.014812054112553596,
+                "persistent_penetration": false,
+                "right_finger_contact": true,
+                "unexpected_gripper_collision": false,
+                "unexpected_gripper_collision_events": []
+              },
+              "event_count": 647,
+              "failed_checks": [
+                "limits_ok",
+                "mimic_ok",
+                "held_for_required_steps"
+              ],
+              "fixed_bottle_contact": {
+                "contact_point_count": 1252,
+                "impulses_finite": true,
+                "left_finger_contact": true,
+                "maximum_excessive_penetration_run_steps": 0,
+                "maximum_penetration_depth_m": 1.9989909560536034e-05,
+                "minimum_separation_m": -1.9989909560536034e-05,
+                "persistent_penetration": false,
+                "right_finger_contact": true,
+                "unexpected_gripper_collision": false,
+                "unexpected_gripper_collision_events": []
+              },
+              "friction": 0.5,
+              "hard_blockers": [
+                "measured fingertip/bottle friction",
+                "complete measured bottle collision profile and inertia",
+                "real gripper motor-angle/aperture calibration",
+                "calibrated force-drive response"
+              ],
+              "isaac_sim": "5.1.0.0",
+              "kit": "107.3.3",
+              "material": {
+                "bound_to": [
+                  "/World/Robot/follower_left_left_finger_link/collisions",
+                  "/World/Robot/follower_left_right_finger_link/collisions"
+                ],
+                "dynamic_friction": 0.5,
+                "path": "/World/Materials/temporary_fingertip",
+                "restitution": 0.0,
+                "static_friction": 0.5,
+                "status": "TEMPORARY_UNCALIBRATED"
+              },
+              "metrics": {
+                "aperture_monotonic": true,
+                "bilateral_contact_before_release": true,
+                "close_direction_ok": true,
+                "finite_state": true,
+                "held_for_required_steps": false,
+                "impulses_finite": true,
+                "left_finger_contact": true,
+                "limits_ok": false,
+                "mimic_ok": false,
+                "open_direction_ok": true,
+                "persistent_penetration": false,
+                "readback_ok": true,
+                "released_without_constraint": true,
+                "right_finger_contact": true,
+                "solve_articulation_contact_last_ok": true,
+                "unexpected_gripper_collision": false
+              },
+              "passed_interface_gate": false,
+              "physics": {
+                "contact_rest_offsets_authored": false,
+                "self_collision": false,
+                "solve_articulation_contact_last_readback": true,
+                "solve_articulation_contact_last_requested": true
+              },
+              "released_hold": {
+                "constraint_found": false,
+                "constraint_paths": [],
+                "contact_event_count": 49,
+                "drop_m": 15.296288460493088,
+                "final_position_world_m": [
+                  0.2405977100133896,
+                  0.004098908044397831,
+                  -14.992705345153809
+                ],
+                "maximum_drop_m": 0.01,
+                "release_frame": 390,
+                "release_position_world_m": [
+                  0.24753692746162415,
+                  -0.0010352007811889052,
+                  0.3035831153392792
+                ],
+                "required_steps": 120,
+                "required_time_s": 2.0,
+                "support_surface": "NONE_BOTTLE_STARTED_SUSPENDED",
+                "total_displacement_m": 15.29629089611028
+              },
+              "robot": "follower_left",
+              "schema_version": 1,
+              "states": {
+                "closed_against_fixed_bottle": {
+                  "left_finger_m": 0.04501626640558243,
+                  "right_finger_m": -0.04699511453509331
+                },
+                "open": {
+                  "left_finger_m": 0.056999921798706055,
+                  "right_finger_m": -0.0589350089430809
+                },
+                "start": {
+                  "left_finger_m": 0.02180425636470318,
+                  "right_finger_m": -0.020024938508868217
+                }
+              },
+              "status": "FAIL"
+            },
+            {
+              "aperture": {
+                "closed_against_fixed_bottle": {
+                  "center_distance_m": 0.0855076843576289,
+                  "closing_axis_world": [
+                    -0.00031805799766936645,
+                    -0.9999999347087842,
+                    -0.00017152707492745615
+                  ],
+                  "midpoint_world_m": [
+                    0.23220780558635484,
+                    -0.0010373695387520948,
+                    0.3043634135407881
+                  ],
+                  "surface_gap_m": 0.0649327145972702
+                },
+                "left_closed_bounds": {
+                  "center_m": [
+                    0.2322214037877909,
+                    0.04171646984861202,
+                    0.30437074698227895
+                  ],
+                  "colliders": [
+                    "/World/Robot/follower_left_left_finger_link/collisions/gripper_finger/node_STL_BINARY_"
+                  ],
+                  "half_extent_m": [
+                    0.0436499951087477,
+                    0.01026758970106684,
+                    0.035066380060572916
+                  ],
+                  "maximum_m": [
+                    0.2758713988965386,
+                    0.051984059549678864,
+                    0.33943712704285184
+                  ],
+                  "minimum_m": [
+                    0.1885714086790432,
+                    0.03144888014754518,
+                    0.269304366921706
+                  ],
+                  "root": "/World/Robot/follower_left_left_finger_link/collisions"
+                },
+                "left_open_bounds": {
+                  "center_m": [
+                    0.2475473494454331,
+                    0.05370249352600061,
+                    0.30364374727641275
+                  ],
+                  "colliders": [
+                    "/World/Robot/follower_left_left_finger_link/collisions/gripper_finger/node_STL_BINARY_"
+                  ],
+                  "half_extent_m": [
+                    0.04301651919726489,
+                    0.010294956250811643,
+                    0.034181417481028126
+                  ],
+                  "maximum_m": [
+                    0.290563868642698,
+                    0.06399744977681225,
+                    0.33782516475744084
+                  ],
+                  "minimum_m": [
+                    0.20453083024816823,
+                    0.043407537275188965,
+                    0.2694623297953846
+                  ],
+                  "root": "/World/Robot/follower_left_left_finger_link/collisions"
+                },
+                "measurement": "world AABB support distance along measured closing axis",
+                "open": {
+                  "center_distance_m": 0.10947545767427287,
+                  "closing_axis_world": [
+                    -0.00019052871743492741,
+                    -0.9999993683947869,
+                    -0.0011076591692003868
+                  ],
+                  "midpoint_world_m": [
+                    0.24753692033616248,
+                    -0.0010352007385009375,
+                    0.3035831165291651
+                  ],
+                  "surface_gap_m": 0.08879345298045135
+                },
+                "right_closed_bounds": {
+                  "center_m": [
+                    0.23219420738491878,
+                    -0.04379120892611621,
+                    0.30435608009929727
+                  ],
+                  "colliders": [
+                    "/World/Robot/follower_left_right_finger_link/collisions/gripper_finger/node_STL_BINARY_"
+                  ],
+                  "half_extent_m": [
+                    0.04364999306449288,
+                    0.0102675852734028,
+                    0.03506638018009381
+                  ],
+                  "maximum_m": [
+                    0.27584420044941166,
+                    -0.03352362365271341,
+                    0.33942246027939105
+                  ],
+                  "minimum_m": [
+                    0.1885442143204259,
+                    -0.054058794199519006,
+                    0.26928969991920343
+                  ],
+                  "root": "/World/Robot/follower_left_right_finger_link/collisions"
+                },
+                "right_open_bounds": {
+                  "center_m": [
+                    0.24752649122689183,
+                    -0.05577289500300248,
+                    0.30352248578191743
+                  ],
+                  "colliders": [
+                    "/World/Robot/follower_left_right_finger_link/collisions/gripper_finger/node_STL_BINARY_"
+                  ],
+                  "half_extent_m": [
+                    0.04301651537506965,
+                    0.01029494696373074,
+                    0.03418141681024059
+                  ],
+                  "maximum_m": [
+                    0.2905430066019615,
+                    -0.04547794803927174,
+                    0.33770390259215805
+                  ],
+                  "minimum_m": [
+                    0.20450997585182218,
+                    -0.06606784196673322,
+                    0.26934106897167687
+                  ],
+                  "root": "/World/Robot/follower_left_right_finger_link/collisions"
+                }
+              },
+              "asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/configuration/follower_left_debug_acceleration_drive.usd",
+              "bottle": {
+                "axis": "Z",
+                "diameter_m": 0.065,
+                "height_m": 0.21,
+                "inertia_status": "ENGINEERING_DERIVED_UNCALIBRATED",
+                "mass_kg": 0.02,
+                "material": {
+                  "dynamic_friction": 0.7,
+                  "path": "/World/Materials/temporary_bottle",
+                  "restitution": 0.0,
+                  "static_friction": 0.7,
+                  "status": "TEMPORARY_UNCALIBRATED"
+                },
+                "path": "/World/BottleProxy",
+                "shape": "cylinder",
+                "status": "PARTIAL_MEASURED_BODY_PROXY"
+              },
+              "contact_event_report": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/gripper_contact_events_follower_left_mu_0.700.json",
+              "contact_report_bodies": [
+                "/World/Robot/follower_left_left_finger_link",
+                "/World/Robot/follower_left_right_finger_link"
+              ],
+              "contact_subscription_active_during_trial": true,
+              "contact_summary": {
+                "contact_point_count": 1570,
+                "impulses_finite": true,
+                "left_finger_contact": true,
+                "maximum_excessive_penetration_run_steps": 1,
+                "maximum_penetration_depth_m": 0.014812054112553596,
+                "minimum_separation_m": -0.014812054112553596,
+                "persistent_penetration": false,
+                "right_finger_contact": true,
+                "unexpected_gripper_collision": false,
+                "unexpected_gripper_collision_events": []
+              },
+              "event_count": 713,
+              "failed_checks": [
+                "limits_ok",
+                "mimic_ok",
+                "held_for_required_steps"
+              ],
+              "fixed_bottle_contact": {
+                "contact_point_count": 1252,
+                "impulses_finite": true,
+                "left_finger_contact": true,
+                "maximum_excessive_penetration_run_steps": 0,
+                "maximum_penetration_depth_m": 2.010539174079895e-05,
+                "minimum_separation_m": -2.010539174079895e-05,
+                "persistent_penetration": false,
+                "right_finger_contact": true,
+                "unexpected_gripper_collision": false,
+                "unexpected_gripper_collision_events": []
+              },
+              "friction": 0.7,
+              "hard_blockers": [
+                "measured fingertip/bottle friction",
+                "complete measured bottle collision profile and inertia",
+                "real gripper motor-angle/aperture calibration",
+                "calibrated force-drive response"
+              ],
+              "isaac_sim": "5.1.0.0",
+              "kit": "107.3.3",
+              "material": {
+                "bound_to": [
+                  "/World/Robot/follower_left_left_finger_link/collisions",
+                  "/World/Robot/follower_left_right_finger_link/collisions"
+                ],
+                "dynamic_friction": 0.7,
+                "path": "/World/Materials/temporary_fingertip",
+                "restitution": 0.0,
+                "static_friction": 0.7,
+                "status": "TEMPORARY_UNCALIBRATED"
+              },
+              "metrics": {
+                "aperture_monotonic": true,
+                "bilateral_contact_before_release": true,
+                "close_direction_ok": true,
+                "finite_state": true,
+                "held_for_required_steps": false,
+                "impulses_finite": true,
+                "left_finger_contact": true,
+                "limits_ok": false,
+                "mimic_ok": false,
+                "open_direction_ok": true,
+                "persistent_penetration": false,
+                "readback_ok": true,
+                "released_without_constraint": true,
+                "right_finger_contact": true,
+                "solve_articulation_contact_last_ok": true,
+                "unexpected_gripper_collision": false
+              },
+              "passed_interface_gate": false,
+              "physics": {
+                "contact_rest_offsets_authored": false,
+                "self_collision": false,
+                "solve_articulation_contact_last_readback": true,
+                "solve_articulation_contact_last_requested": true
+              },
+              "released_hold": {
+                "constraint_found": false,
+                "constraint_paths": [],
+                "contact_event_count": 115,
+                "drop_m": 0.049884676933288574,
+                "final_position_world_m": [
+                  0.2727723717689514,
+                  -0.009030270390212536,
+                  0.2536984384059906
+                ],
+                "maximum_drop_m": 0.01,
+                "release_frame": 390,
+                "release_position_world_m": [
+                  0.24753692746162415,
+                  -0.0010352007811889052,
+                  0.3035831153392792
+                ],
+                "required_steps": 120,
+                "required_time_s": 2.0,
+                "support_surface": "NONE_BOTTLE_STARTED_SUSPENDED",
+                "total_displacement_m": 0.056473266066165526
+              },
+              "robot": "follower_left",
+              "schema_version": 1,
+              "states": {
+                "closed_against_fixed_bottle": {
+                  "left_finger_m": 0.04501403868198395,
+                  "right_finger_m": -0.04699413478374481
+                },
+                "open": {
+                  "left_finger_m": 0.056999921798706055,
+                  "right_finger_m": -0.0589350089430809
+                },
+                "start": {
+                  "left_finger_m": 0.02180425636470318,
+                  "right_finger_m": -0.020024938508868217
+                }
+              },
+              "status": "FAIL"
+            },
+            {
+              "aperture": {
+                "closed_against_fixed_bottle": {
+                  "center_distance_m": 0.08553158867084582,
+                  "closing_axis_world": [
+                    -0.0002996798064384214,
+                    -0.9999998274137782,
+                    -0.0005053359547535937
+                  ],
+                  "midpoint_world_m": [
+                    0.2322064188718591,
+                    -0.001033775309369142,
+                    0.3043736813104757
+                  ],
+                  "surface_gap_m": 0.06491272026981014
+                },
+                "left_closed_bounds": {
+                  "center_m": [
+                    0.23221923491682775,
+                    0.0417320116452669,
+                    0.304395292403987
+                  ],
+                  "colliders": [
+                    "/World/Robot/follower_right_left_finger_link/collisions/gripper_finger/node_STL_BINARY_"
+                  ],
+                  "half_extent_m": [
+                    0.04365162159139077,
+                    0.010278635877516498,
+                    0.03507238721867839
+                  ],
+                  "maximum_m": [
+                    0.2758708565082185,
+                    0.0520106475227834,
+                    0.3394676796226654
+                  ],
+                  "minimum_m": [
+                    0.18856761332543698,
+                    0.031453375767750404,
+                    0.2693229051853086
+                  ],
+                  "root": "/World/Robot/follower_right_left_finger_link/collisions"
+                },
+                "left_open_bounds": {
+                  "center_m": [
+                    0.2475473494454331,
+                    0.05370249352600061,
+                    0.30364374727641275
+                  ],
+                  "colliders": [
+                    "/World/Robot/follower_right_left_finger_link/collisions/gripper_finger/node_STL_BINARY_"
+                  ],
+                  "half_extent_m": [
+                    0.04301651919726489,
+                    0.010294956250811643,
+                    0.034181417481028126
+                  ],
+                  "maximum_m": [
+                    0.290563868642698,
+                    0.06399744977681225,
+                    0.33782516475744084
+                  ],
+                  "minimum_m": [
+                    0.20453083024816823,
+                    0.043407537275188965,
+                    0.2694623297953846
+                  ],
+                  "root": "/World/Robot/follower_right_left_finger_link/collisions"
+                },
+                "measurement": "world AABB support distance along measured closing axis",
+                "open": {
+                  "center_distance_m": 0.10947545767427287,
+                  "closing_axis_world": [
+                    -0.00019052871743492741,
+                    -0.9999993683947869,
+                    -0.0011076591692003868
+                  ],
+                  "midpoint_world_m": [
+                    0.24753692033616248,
+                    -0.0010352007385009375,
+                    0.3035831165291651
+                  ],
+                  "surface_gap_m": 0.08879345298045135
+                },
+                "right_closed_bounds": {
+                  "center_m": [
+                    0.2321936028268905,
+                    -0.043799562264005186,
+                    0.3043520702169644
+                  ],
+                  "colliders": [
+                    "/World/Robot/follower_right_right_finger_link/collisions/gripper_finger/node_STL_BINARY_"
+                  ],
+                  "half_extent_m": [
+                    0.04365161778646194,
+                    0.01027862637742856,
+                    0.035072386330865096
+                  ],
+                  "maximum_m": [
+                    0.2758452206133524,
+                    -0.033520935886576626,
+                    0.3394244565478295
+                  ],
+                  "minimum_m": [
+                    0.18854198504042854,
+                    -0.054078188641433746,
+                    0.2692796838860993
+                  ],
+                  "root": "/World/Robot/follower_right_right_finger_link/collisions"
+                },
+                "right_open_bounds": {
+                  "center_m": [
+                    0.24752649122689183,
+                    -0.05577289500300248,
+                    0.30352248578191743
+                  ],
+                  "colliders": [
+                    "/World/Robot/follower_right_right_finger_link/collisions/gripper_finger/node_STL_BINARY_"
+                  ],
+                  "half_extent_m": [
+                    0.04301651537506965,
+                    0.01029494696373074,
+                    0.03418141681024059
+                  ],
+                  "maximum_m": [
+                    0.2905430066019615,
+                    -0.04547794803927174,
+                    0.33770390259215805
+                  ],
+                  "minimum_m": [
+                    0.20450997585182218,
+                    -0.06606784196673322,
+                    0.26934106897167687
+                  ],
+                  "root": "/World/Robot/follower_right_right_finger_link/collisions"
+                }
+              },
+              "asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/configuration/follower_right_debug_acceleration_drive.usd",
+              "bottle": {
+                "axis": "Z",
+                "diameter_m": 0.065,
+                "height_m": 0.21,
+                "inertia_status": "ENGINEERING_DERIVED_UNCALIBRATED",
+                "mass_kg": 0.02,
+                "material": {
+                  "dynamic_friction": 0.3,
+                  "path": "/World/Materials/temporary_bottle",
+                  "restitution": 0.0,
+                  "static_friction": 0.3,
+                  "status": "TEMPORARY_UNCALIBRATED"
+                },
+                "path": "/World/BottleProxy",
+                "shape": "cylinder",
+                "status": "PARTIAL_MEASURED_BODY_PROXY"
+              },
+              "contact_event_report": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/gripper_contact_events_follower_right_mu_0.300.json",
+              "contact_report_bodies": [
+                "/World/Robot/follower_right_left_finger_link",
+                "/World/Robot/follower_right_right_finger_link"
+              ],
+              "contact_subscription_active_during_trial": true,
+              "contact_summary": {
+                "contact_point_count": 1393,
+                "impulses_finite": true,
+                "left_finger_contact": true,
+                "maximum_excessive_penetration_run_steps": 1,
+                "maximum_penetration_depth_m": 0.014812054112553596,
+                "minimum_separation_m": -0.014812054112553596,
+                "persistent_penetration": false,
+                "right_finger_contact": true,
+                "unexpected_gripper_collision": false,
+                "unexpected_gripper_collision_events": []
+              },
+              "event_count": 637,
+              "failed_checks": [
+                "limits_ok",
+                "mimic_ok",
+                "held_for_required_steps"
+              ],
+              "fixed_bottle_contact": {
+                "contact_point_count": 1252,
+                "impulses_finite": true,
+                "left_finger_contact": true,
+                "maximum_excessive_penetration_run_steps": 0,
+                "maximum_penetration_depth_m": 1.9699336917256005e-05,
+                "minimum_separation_m": -1.9699336917256005e-05,
+                "persistent_penetration": false,
+                "right_finger_contact": true,
+                "unexpected_gripper_collision": false,
+                "unexpected_gripper_collision_events": []
+              },
+              "friction": 0.3,
+              "hard_blockers": [
+                "measured fingertip/bottle friction",
+                "complete measured bottle collision profile and inertia",
+                "real gripper motor-angle/aperture calibration",
+                "calibrated force-drive response"
+              ],
+              "isaac_sim": "5.1.0.0",
+              "kit": "107.3.3",
+              "material": {
+                "bound_to": [
+                  "/World/Robot/follower_right_left_finger_link/collisions",
+                  "/World/Robot/follower_right_right_finger_link/collisions"
+                ],
+                "dynamic_friction": 0.3,
+                "path": "/World/Materials/temporary_fingertip",
+                "restitution": 0.0,
+                "static_friction": 0.3,
+                "status": "TEMPORARY_UNCALIBRATED"
+              },
+              "metrics": {
+                "aperture_monotonic": true,
+                "bilateral_contact_before_release": true,
+                "close_direction_ok": true,
+                "finite_state": true,
+                "held_for_required_steps": false,
+                "impulses_finite": true,
+                "left_finger_contact": true,
+                "limits_ok": false,
+                "mimic_ok": false,
+                "open_direction_ok": true,
+                "persistent_penetration": false,
+                "readback_ok": true,
+                "released_without_constraint": true,
+                "right_finger_contact": true,
+                "solve_articulation_contact_last_ok": true,
+                "unexpected_gripper_collision": false
+              },
+              "passed_interface_gate": false,
+              "physics": {
+                "contact_rest_offsets_authored": false,
+                "self_collision": false,
+                "solve_articulation_contact_last_readback": true,
+                "solve_articulation_contact_last_requested": true
+              },
+              "released_hold": {
+                "constraint_found": false,
+                "constraint_paths": [],
+                "contact_event_count": 39,
+                "drop_m": 17.413362473249435,
+                "final_position_world_m": [
+                  0.4968430697917938,
+                  0.01393860299140215,
+                  -17.109779357910156
+                ],
+                "maximum_drop_m": 0.01,
+                "release_frame": 390,
+                "release_position_world_m": [
+                  0.24753692746162415,
+                  -0.0010352007811889052,
+                  0.3035831153392792
+                ],
+                "required_steps": 120,
+                "required_time_s": 2.0,
+                "support_surface": "NONE_BOTTLE_STARTED_SUSPENDED",
+                "total_displacement_m": 17.41515347024466
+              },
+              "robot": "follower_right",
+              "schema_version": 1,
+              "states": {
+                "closed_against_fixed_bottle": {
+                  "left_finger_m": 0.04503165930509567,
+                  "right_finger_m": -0.0469985231757164
+                },
+                "open": {
+                  "left_finger_m": 0.056999921798706055,
+                  "right_finger_m": -0.0589350089430809
+                },
+                "start": {
+                  "left_finger_m": 0.02180425636470318,
+                  "right_finger_m": -0.020024938508868217
+                }
+              },
+              "status": "FAIL"
+            },
+            {
+              "aperture": {
+                "closed_against_fixed_bottle": {
+                  "center_distance_m": 0.08550981572289769,
+                  "closing_axis_world": [
+                    -0.0003154482358441706,
+                    -0.9999999241386113,
+                    -0.00022850641601442577
+                  ],
+                  "midpoint_world_m": [
+                    0.23220765902190302,
+                    -0.0010382400913084844,
+                    0.30436784604105643
+                  ],
+                  "surface_gap_m": 0.06492723294325435
+                },
+                "left_closed_bounds": {
+                  "center_m": [
+                    0.2322211459821616,
+                    0.041716664526693675,
+                    0.3043776158118189
+                  ],
+                  "colliders": [
+                    "/World/Robot/follower_right_left_finger_link/collisions/gripper_finger/node_STL_BINARY_"
+                  ],
+                  "half_extent_m": [
+                    0.04365018529958209,
+                    0.010269509805102398,
+                    0.035067275496360434
+                  ],
+                  "maximum_m": [
+                    0.2758713312817437,
+                    0.05198617433179607,
+                    0.33944489130817934
+                  ],
+                  "minimum_m": [
+                    0.1885709606825795,
+                    0.03144715472159128,
+                    0.2693103403154585
+                  ],
+                  "root": "/World/Robot/follower_right_left_finger_link/collisions"
+                },
+                "left_open_bounds": {
+                  "center_m": [
+                    0.2475473494454331,
+                    0.05370249352600061,
+                    0.30364374727641275
+                  ],
+                  "colliders": [
+                    "/World/Robot/follower_right_left_finger_link/collisions/gripper_finger/node_STL_BINARY_"
+                  ],
+                  "half_extent_m": [
+                    0.04301651919726489,
+                    0.010294956250811643,
+                    0.034181417481028126
+                  ],
+                  "maximum_m": [
+                    0.290563868642698,
+                    0.06399744977681225,
+                    0.33782516475744084
+                  ],
+                  "minimum_m": [
+                    0.20453083024816823,
+                    0.043407537275188965,
+                    0.2694623297953846
+                  ],
+                  "root": "/World/Robot/follower_right_left_finger_link/collisions"
+                },
+                "measurement": "world AABB support distance along measured closing axis",
+                "open": {
+                  "center_distance_m": 0.10947545767427287,
+                  "closing_axis_world": [
+                    -0.00019052871743492741,
+                    -0.9999993683947869,
+                    -0.0011076591692003868
+                  ],
+                  "midpoint_world_m": [
+                    0.24753692033616248,
+                    -0.0010352007385009375,
+                    0.3035831165291651
+                  ],
+                  "surface_gap_m": 0.08879345298045135
+                },
+                "right_closed_bounds": {
+                  "center_m": [
+                    0.23219417206164444,
+                    -0.043793144709310644,
+                    0.304358076270294
+                  ],
+                  "colliders": [
+                    "/World/Robot/follower_right_right_finger_link/collisions/gripper_finger/node_STL_BINARY_"
+                  ],
+                  "half_extent_m": [
+                    0.043650184109967835,
+                    0.010269509590357658,
+                    0.03506727504514354
+                  ],
+                  "maximum_m": [
+                    0.2758443561716123,
+                    -0.03352363511895298,
+                    0.3394253513154375
+                  ],
+                  "minimum_m": [
+                    0.18854398795167662,
+                    -0.0540626542996683,
+                    0.2692908012251504
+                  ],
+                  "root": "/World/Robot/follower_right_right_finger_link/collisions"
+                },
+                "right_open_bounds": {
+                  "center_m": [
+                    0.24752649122689183,
+                    -0.05577289500300248,
+                    0.30352248578191743
+                  ],
+                  "colliders": [
+                    "/World/Robot/follower_right_right_finger_link/collisions/gripper_finger/node_STL_BINARY_"
+                  ],
+                  "half_extent_m": [
+                    0.04301651537506965,
+                    0.01029494696373074,
+                    0.03418141681024059
+                  ],
+                  "maximum_m": [
+                    0.2905430066019615,
+                    -0.04547794803927174,
+                    0.33770390259215805
+                  ],
+                  "minimum_m": [
+                    0.20450997585182218,
+                    -0.06606784196673322,
+                    0.26934106897167687
+                  ],
+                  "root": "/World/Robot/follower_right_right_finger_link/collisions"
+                }
+              },
+              "asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/configuration/follower_right_debug_acceleration_drive.usd",
+              "bottle": {
+                "axis": "Z",
+                "diameter_m": 0.065,
+                "height_m": 0.21,
+                "inertia_status": "ENGINEERING_DERIVED_UNCALIBRATED",
+                "mass_kg": 0.02,
+                "material": {
+                  "dynamic_friction": 0.5,
+                  "path": "/World/Materials/temporary_bottle",
+                  "restitution": 0.0,
+                  "static_friction": 0.5,
+                  "status": "TEMPORARY_UNCALIBRATED"
+                },
+                "path": "/World/BottleProxy",
+                "shape": "cylinder",
+                "status": "PARTIAL_MEASURED_BODY_PROXY"
+              },
+              "contact_event_report": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/gripper_contact_events_follower_right_mu_0.500.json",
+              "contact_report_bodies": [
+                "/World/Robot/follower_right_left_finger_link",
+                "/World/Robot/follower_right_right_finger_link"
+              ],
+              "contact_subscription_active_during_trial": true,
+              "contact_summary": {
+                "contact_point_count": 1416,
+                "impulses_finite": true,
+                "left_finger_contact": true,
+                "maximum_excessive_penetration_run_steps": 1,
+                "maximum_penetration_depth_m": 0.014812054112553596,
+                "minimum_separation_m": -0.014812054112553596,
+                "persistent_penetration": false,
+                "right_finger_contact": true,
+                "unexpected_gripper_collision": false,
+                "unexpected_gripper_collision_events": []
+              },
+              "event_count": 647,
+              "failed_checks": [
+                "limits_ok",
+                "mimic_ok",
+                "held_for_required_steps"
+              ],
+              "fixed_bottle_contact": {
+                "contact_point_count": 1252,
+                "impulses_finite": true,
+                "left_finger_contact": true,
+                "maximum_excessive_penetration_run_steps": 0,
+                "maximum_penetration_depth_m": 1.9989909560536034e-05,
+                "minimum_separation_m": -1.9989909560536034e-05,
+                "persistent_penetration": false,
+                "right_finger_contact": true,
+                "unexpected_gripper_collision": false,
+                "unexpected_gripper_collision_events": []
+              },
+              "friction": 0.5,
+              "hard_blockers": [
+                "measured fingertip/bottle friction",
+                "complete measured bottle collision profile and inertia",
+                "real gripper motor-angle/aperture calibration",
+                "calibrated force-drive response"
+              ],
+              "isaac_sim": "5.1.0.0",
+              "kit": "107.3.3",
+              "material": {
+                "bound_to": [
+                  "/World/Robot/follower_right_left_finger_link/collisions",
+                  "/World/Robot/follower_right_right_finger_link/collisions"
+                ],
+                "dynamic_friction": 0.5,
+                "path": "/World/Materials/temporary_fingertip",
+                "restitution": 0.0,
+                "static_friction": 0.5,
+                "status": "TEMPORARY_UNCALIBRATED"
+              },
+              "metrics": {
+                "aperture_monotonic": true,
+                "bilateral_contact_before_release": true,
+                "close_direction_ok": true,
+                "finite_state": true,
+                "held_for_required_steps": false,
+                "impulses_finite": true,
+                "left_finger_contact": true,
+                "limits_ok": false,
+                "mimic_ok": false,
+                "open_direction_ok": true,
+                "persistent_penetration": false,
+                "readback_ok": true,
+                "released_without_constraint": true,
+                "right_finger_contact": true,
+                "solve_articulation_contact_last_ok": true,
+                "unexpected_gripper_collision": false
+              },
+              "passed_interface_gate": false,
+              "physics": {
+                "contact_rest_offsets_authored": false,
+                "self_collision": false,
+                "solve_articulation_contact_last_readback": true,
+                "solve_articulation_contact_last_requested": true
+              },
+              "released_hold": {
+                "constraint_found": false,
+                "constraint_paths": [],
+                "contact_event_count": 49,
+                "drop_m": 15.296288460493088,
+                "final_position_world_m": [
+                  0.2405977100133896,
+                  0.004098908044397831,
+                  -14.992705345153809
+                ],
+                "maximum_drop_m": 0.01,
+                "release_frame": 390,
+                "release_position_world_m": [
+                  0.24753692746162415,
+                  -0.0010352007811889052,
+                  0.3035831153392792
+                ],
+                "required_steps": 120,
+                "required_time_s": 2.0,
+                "support_surface": "NONE_BOTTLE_STARTED_SUSPENDED",
+                "total_displacement_m": 15.29629089611028
+              },
+              "robot": "follower_right",
+              "schema_version": 1,
+              "states": {
+                "closed_against_fixed_bottle": {
+                  "left_finger_m": 0.04501626640558243,
+                  "right_finger_m": -0.04699511453509331
+                },
+                "open": {
+                  "left_finger_m": 0.056999921798706055,
+                  "right_finger_m": -0.0589350089430809
+                },
+                "start": {
+                  "left_finger_m": 0.02180425636470318,
+                  "right_finger_m": -0.020024938508868217
+                }
+              },
+              "status": "FAIL"
+            },
+            {
+              "aperture": {
+                "closed_against_fixed_bottle": {
+                  "center_distance_m": 0.0855076843576289,
+                  "closing_axis_world": [
+                    -0.00031805799766936645,
+                    -0.9999999347087842,
+                    -0.00017152707492745615
+                  ],
+                  "midpoint_world_m": [
+                    0.23220780558635484,
+                    -0.0010373695387520948,
+                    0.3043634135407881
+                  ],
+                  "surface_gap_m": 0.0649327145972702
+                },
+                "left_closed_bounds": {
+                  "center_m": [
+                    0.2322214037877909,
+                    0.04171646984861202,
+                    0.30437074698227895
+                  ],
+                  "colliders": [
+                    "/World/Robot/follower_right_left_finger_link/collisions/gripper_finger/node_STL_BINARY_"
+                  ],
+                  "half_extent_m": [
+                    0.0436499951087477,
+                    0.01026758970106684,
+                    0.035066380060572916
+                  ],
+                  "maximum_m": [
+                    0.2758713988965386,
+                    0.051984059549678864,
+                    0.33943712704285184
+                  ],
+                  "minimum_m": [
+                    0.1885714086790432,
+                    0.03144888014754518,
+                    0.269304366921706
+                  ],
+                  "root": "/World/Robot/follower_right_left_finger_link/collisions"
+                },
+                "left_open_bounds": {
+                  "center_m": [
+                    0.2475473494454331,
+                    0.05370249352600061,
+                    0.30364374727641275
+                  ],
+                  "colliders": [
+                    "/World/Robot/follower_right_left_finger_link/collisions/gripper_finger/node_STL_BINARY_"
+                  ],
+                  "half_extent_m": [
+                    0.04301651919726489,
+                    0.010294956250811643,
+                    0.034181417481028126
+                  ],
+                  "maximum_m": [
+                    0.290563868642698,
+                    0.06399744977681225,
+                    0.33782516475744084
+                  ],
+                  "minimum_m": [
+                    0.20453083024816823,
+                    0.043407537275188965,
+                    0.2694623297953846
+                  ],
+                  "root": "/World/Robot/follower_right_left_finger_link/collisions"
+                },
+                "measurement": "world AABB support distance along measured closing axis",
+                "open": {
+                  "center_distance_m": 0.10947545767427287,
+                  "closing_axis_world": [
+                    -0.00019052871743492741,
+                    -0.9999993683947869,
+                    -0.0011076591692003868
+                  ],
+                  "midpoint_world_m": [
+                    0.24753692033616248,
+                    -0.0010352007385009375,
+                    0.3035831165291651
+                  ],
+                  "surface_gap_m": 0.08879345298045135
+                },
+                "right_closed_bounds": {
+                  "center_m": [
+                    0.23219420738491878,
+                    -0.04379120892611621,
+                    0.30435608009929727
+                  ],
+                  "colliders": [
+                    "/World/Robot/follower_right_right_finger_link/collisions/gripper_finger/node_STL_BINARY_"
+                  ],
+                  "half_extent_m": [
+                    0.04364999306449288,
+                    0.0102675852734028,
+                    0.03506638018009381
+                  ],
+                  "maximum_m": [
+                    0.27584420044941166,
+                    -0.03352362365271341,
+                    0.33942246027939105
+                  ],
+                  "minimum_m": [
+                    0.1885442143204259,
+                    -0.054058794199519006,
+                    0.26928969991920343
+                  ],
+                  "root": "/World/Robot/follower_right_right_finger_link/collisions"
+                },
+                "right_open_bounds": {
+                  "center_m": [
+                    0.24752649122689183,
+                    -0.05577289500300248,
+                    0.30352248578191743
+                  ],
+                  "colliders": [
+                    "/World/Robot/follower_right_right_finger_link/collisions/gripper_finger/node_STL_BINARY_"
+                  ],
+                  "half_extent_m": [
+                    0.04301651537506965,
+                    0.01029494696373074,
+                    0.03418141681024059
+                  ],
+                  "maximum_m": [
+                    0.2905430066019615,
+                    -0.04547794803927174,
+                    0.33770390259215805
+                  ],
+                  "minimum_m": [
+                    0.20450997585182218,
+                    -0.06606784196673322,
+                    0.26934106897167687
+                  ],
+                  "root": "/World/Robot/follower_right_right_finger_link/collisions"
+                }
+              },
+              "asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/configuration/follower_right_debug_acceleration_drive.usd",
+              "bottle": {
+                "axis": "Z",
+                "diameter_m": 0.065,
+                "height_m": 0.21,
+                "inertia_status": "ENGINEERING_DERIVED_UNCALIBRATED",
+                "mass_kg": 0.02,
+                "material": {
+                  "dynamic_friction": 0.7,
+                  "path": "/World/Materials/temporary_bottle",
+                  "restitution": 0.0,
+                  "static_friction": 0.7,
+                  "status": "TEMPORARY_UNCALIBRATED"
+                },
+                "path": "/World/BottleProxy",
+                "shape": "cylinder",
+                "status": "PARTIAL_MEASURED_BODY_PROXY"
+              },
+              "contact_event_report": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/gripper_contact_events_follower_right_mu_0.700.json",
+              "contact_report_bodies": [
+                "/World/Robot/follower_right_left_finger_link",
+                "/World/Robot/follower_right_right_finger_link"
+              ],
+              "contact_subscription_active_during_trial": true,
+              "contact_summary": {
+                "contact_point_count": 1570,
+                "impulses_finite": true,
+                "left_finger_contact": true,
+                "maximum_excessive_penetration_run_steps": 1,
+                "maximum_penetration_depth_m": 0.014812054112553596,
+                "minimum_separation_m": -0.014812054112553596,
+                "persistent_penetration": false,
+                "right_finger_contact": true,
+                "unexpected_gripper_collision": false,
+                "unexpected_gripper_collision_events": []
+              },
+              "event_count": 713,
+              "failed_checks": [
+                "limits_ok",
+                "mimic_ok",
+                "held_for_required_steps"
+              ],
+              "fixed_bottle_contact": {
+                "contact_point_count": 1252,
+                "impulses_finite": true,
+                "left_finger_contact": true,
+                "maximum_excessive_penetration_run_steps": 0,
+                "maximum_penetration_depth_m": 2.010539174079895e-05,
+                "minimum_separation_m": -2.010539174079895e-05,
+                "persistent_penetration": false,
+                "right_finger_contact": true,
+                "unexpected_gripper_collision": false,
+                "unexpected_gripper_collision_events": []
+              },
+              "friction": 0.7,
+              "hard_blockers": [
+                "measured fingertip/bottle friction",
+                "complete measured bottle collision profile and inertia",
+                "real gripper motor-angle/aperture calibration",
+                "calibrated force-drive response"
+              ],
+              "isaac_sim": "5.1.0.0",
+              "kit": "107.3.3",
+              "material": {
+                "bound_to": [
+                  "/World/Robot/follower_right_left_finger_link/collisions",
+                  "/World/Robot/follower_right_right_finger_link/collisions"
+                ],
+                "dynamic_friction": 0.7,
+                "path": "/World/Materials/temporary_fingertip",
+                "restitution": 0.0,
+                "static_friction": 0.7,
+                "status": "TEMPORARY_UNCALIBRATED"
+              },
+              "metrics": {
+                "aperture_monotonic": true,
+                "bilateral_contact_before_release": true,
+                "close_direction_ok": true,
+                "finite_state": true,
+                "held_for_required_steps": false,
+                "impulses_finite": true,
+                "left_finger_contact": true,
+                "limits_ok": false,
+                "mimic_ok": false,
+                "open_direction_ok": true,
+                "persistent_penetration": false,
+                "readback_ok": true,
+                "released_without_constraint": true,
+                "right_finger_contact": true,
+                "solve_articulation_contact_last_ok": true,
+                "unexpected_gripper_collision": false
+              },
+              "passed_interface_gate": false,
+              "physics": {
+                "contact_rest_offsets_authored": false,
+                "self_collision": false,
+                "solve_articulation_contact_last_readback": true,
+                "solve_articulation_contact_last_requested": true
+              },
+              "released_hold": {
+                "constraint_found": false,
+                "constraint_paths": [],
+                "contact_event_count": 115,
+                "drop_m": 0.049884676933288574,
+                "final_position_world_m": [
+                  0.2727723717689514,
+                  -0.009030270390212536,
+                  0.2536984384059906
+                ],
+                "maximum_drop_m": 0.01,
+                "release_frame": 390,
+                "release_position_world_m": [
+                  0.24753692746162415,
+                  -0.0010352007811889052,
+                  0.3035831153392792
+                ],
+                "required_steps": 120,
+                "required_time_s": 2.0,
+                "support_surface": "NONE_BOTTLE_STARTED_SUSPENDED",
+                "total_displacement_m": 0.056473266066165526
+              },
+              "robot": "follower_right",
+              "schema_version": 1,
+              "states": {
+                "closed_against_fixed_bottle": {
+                  "left_finger_m": 0.04501403868198395,
+                  "right_finger_m": -0.04699413478374481
+                },
+                "open": {
+                  "left_finger_m": 0.056999921798706055,
+                  "right_finger_m": -0.0589350089430809
+                },
+                "start": {
+                  "left_finger_m": 0.02180425636470318,
+                  "right_finger_m": -0.020024938508868217
+                }
+              },
+              "status": "FAIL"
+            }
+          ]
+        },
+        "reported_status": "FAIL"
+      },
+      "name": "Task5.GripperValidation",
+      "status": "FAIL"
+    },
+    {
+      "name": "IsaacSim.PhysicsRules",
+      "status": "FAIL"
+    },
+    {
+      "name": "IsaacSim.RobotRules",
+      "status": "PARTIAL"
+    },
+    {
+      "name": "IsaacSim.SimReadyAssetRules",
+      "status": "PASS"
+    },
+    {
+      "evidence": {
+        "artifact_hashes": {
+          "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/asset_validator_report.json": "1a8e9cb8f83dfe610d2a3cc630621b0722fcbc147fc45801390bf8470c49e2a8",
+          "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/collision_report.json": "c7b3df2d8fc884a766caabc56b33ba91fc00b119f4424948055ec4d8ae2475e0",
+          "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/control_mapping_report.json": "8d24ed8e70ee43a44e72f36ce9db9ae4bf2265b8da5168017d4968ad6e19900b",
+          "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/gripper_validation.json": "0d7b47e7802ae4428e98f2840fe9cdcf9acf1d84430d4e659722a7861d70ddeb",
+          "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/one_joint_curves.csv": "6dbc35e7d4f00d209b019b64674b1ef6e4bed99ef9ad6549ce62a75dee438808",
+          "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/physics_report.json": "0ac88ddf1d0583e27d030fa164f92f99d96a52efed083e91ecea503878086ff1",
+          "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/physics_rules_classification.json": "1b3b4dae3b1508612267bcf465114884f174497e524a75f260c8144dc2a044cb"
+        },
+        "current_signature": "db0e31b23867b742209928606a19d51c92ddca300bf9759068a4d1650ce1ad33",
+        "deterministic": true,
+        "previous_signature": "db0e31b23867b742209928606a19d51c92ddca300bf9759068a4d1650ce1ad33",
+        "status": "PASS"
+      },
+      "name": "headless_repeat_deterministic",
+      "status": "PASS"
+    }
+  ],
+  "determinism": {
+    "artifact_hashes": {
+      "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/asset_validator_report.json": "1a8e9cb8f83dfe610d2a3cc630621b0722fcbc147fc45801390bf8470c49e2a8",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/collision_report.json": "c7b3df2d8fc884a766caabc56b33ba91fc00b119f4424948055ec4d8ae2475e0",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/control_mapping_report.json": "8d24ed8e70ee43a44e72f36ce9db9ae4bf2265b8da5168017d4968ad6e19900b",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/gripper_validation.json": "0d7b47e7802ae4428e98f2840fe9cdcf9acf1d84430d4e659722a7861d70ddeb",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/one_joint_curves.csv": "6dbc35e7d4f00d209b019b64674b1ef6e4bed99ef9ad6549ce62a75dee438808",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/physics_report.json": "0ac88ddf1d0583e27d030fa164f92f99d96a52efed083e91ecea503878086ff1",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/physics_rules_classification.json": "1b3b4dae3b1508612267bcf465114884f174497e524a75f260c8144dc2a044cb"
+    },
+    "current_signature": "db0e31b23867b742209928606a19d51c92ddca300bf9759068a4d1650ce1ad33",
+    "deterministic": true,
+    "previous_signature": "db0e31b23867b742209928606a19d51c92ddca300bf9759068a4d1650ce1ad33",
+    "status": "PASS"
+  },
+  "hard_blockers": [
+    "measured follower mounting transforms",
+    "tabletop/base and pipe fixture calibration",
+    "bottle geometry and dynamics",
+    "four-camera intrinsics/extrinsics/frame rates",
+    "measured robot dynamics and fingertip friction",
+    "motor response and Gain Tuner calibration for force drive",
+    "real gripper motor-angle/aperture calibration"
+  ],
+  "isaac_sim": "5.1.0.0",
+  "optimization_gate": "BLOCKED_UNTIL_VALIDATION_PASS",
+  "physics_rules_classification_report": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/physics_rules_classification.json",
+  "schema_version": 1,
+  "status": "FAIL"
+}

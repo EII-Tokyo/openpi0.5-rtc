@@ -1,0 +1,277 @@
+[
+  {
+    "path": ".venv_issac/lib/python3.11/site-packages/isaacsim/VERSION",
+    "role": "isaac_sim_build_version",
+    "provenance_class": "official_source",
+    "license_path": ".venv_issac/lib/python3.11/site-packages/isaacsim/LICENSE.txt",
+    "license_spdx": "LicenseRef-NVIDIA-Isaac-Sim",
+    "required": true,
+    "blocks": ["isaac_import"]
+  },
+  {
+    "path": ".venv_issac/lib/python3.11/site-packages/isaacsim/kit/launcher.toml",
+    "role": "kit_launcher_manifest",
+    "provenance_class": "official_source",
+    "license_path": ".venv_issac/lib/python3.11/site-packages/isaacsim/LICENSE.txt",
+    "license_spdx": "LicenseRef-NVIDIA-Isaac-Sim",
+    "required": true,
+    "blocks": ["isaac_import"]
+  },
+  {
+    "root": ".venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.importer.urdf",
+    "glob": "*",
+    "max_depth": 4,
+    "max_results": 30,
+    "role_prefix": "isaac_5_1_urdf_importer_source_or_doc",
+    "provenance_class": "official_source",
+    "license_path": ".venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.importer.urdf/PACKAGE-LICENSES/isaacsim.asset.importer.urdf-LICENSE.md",
+    "license_spdx": "LicenseRef-NVIDIA-Omniverse",
+    "required": true,
+    "blocks": ["isaac_import_api_confirmation"]
+  },
+  {
+    "path": ".venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.robot.schema/config/extension.toml",
+    "role": "isaac_robot_schema_manifest",
+    "provenance_class": "official_source",
+    "license_path": ".venv_issac/lib/python3.11/site-packages/isaacsim/LICENSE.txt",
+    "license_spdx": "LicenseRef-NVIDIA-Isaac-Sim",
+    "required": true,
+    "blocks": ["robot_schema_validation"]
+  },
+  {
+    "path": ".venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.robot_setup.assembler/config/extension.toml",
+    "role": "isaac_robot_assembler_manifest",
+    "provenance_class": "official_source",
+    "license_path": ".venv_issac/lib/python3.11/site-packages/isaacsim/LICENSE.txt",
+    "license_spdx": "LicenseRef-NVIDIA-Isaac-Sim",
+    "required": true,
+    "blocks": ["robot_assembler_workflow"]
+  },
+  {
+    "path": ".venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.robot_setup.gain_tuner/config/extension.toml",
+    "role": "isaac_gain_tuner_manifest",
+    "provenance_class": "official_source",
+    "license_path": ".venv_issac/lib/python3.11/site-packages/isaacsim/LICENSE.txt",
+    "license_spdx": "LicenseRef-NVIDIA-Isaac-Sim",
+    "required": true,
+    "blocks": ["gain_tuner_workflow"]
+  },
+  {
+    "path": ".venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.validation/config/extension.toml",
+    "role": "isaac_asset_validation_manifest",
+    "provenance_class": "official_source",
+    "license_path": ".venv_issac/lib/python3.11/site-packages/isaacsim/LICENSE.txt",
+    "license_spdx": "LicenseRef-NVIDIA-Isaac-Sim",
+    "required": true,
+    "blocks": ["asset_validation"]
+  },
+  {
+    "path": "external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/LICENSE",
+    "role": "interbotix_ros_manipulators_license",
+    "provenance_class": "official_source",
+    "required": true,
+    "blocks": ["source_license_audit"]
+  },
+  {
+    "path": "external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/package.xml",
+    "role": "interbotix_xsarm_descriptions_package",
+    "provenance_class": "official_source",
+    "required": true,
+    "blocks": ["urdf_generation"]
+  },
+  {
+    "root": "external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/urdf",
+    "glob": "*.xacro",
+    "max_depth": 1,
+    "max_results": 40,
+    "role_prefix": "interbotix_xsarm_xacro",
+    "provenance_class": "official_source",
+    "required": true,
+    "blocks": ["urdf_generation", "aloha_vs_standard_diff"]
+  },
+  {
+    "root": "external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes",
+    "glob": "*.stl",
+    "max_depth": 1,
+    "max_results": 30,
+    "role_prefix": "aloha_vx300s_mesh",
+    "provenance_class": "official_source",
+    "required": true,
+    "blocks": ["follower_urdf_generation"]
+  },
+  {
+    "root": "external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes",
+    "glob": "*.stl",
+    "max_depth": 1,
+    "max_results": 30,
+    "role_prefix": "aloha_wx250s_mesh",
+    "provenance_class": "official_source",
+    "required": true,
+    "blocks": ["leader_urdf_generation"]
+  },
+  {
+    "root": "external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/vx300s_meshes",
+    "glob": "*.stl",
+    "max_depth": 1,
+    "max_results": 30,
+    "role_prefix": "standard_vx300s_mesh",
+    "provenance_class": "official_source",
+    "required": true,
+    "blocks": ["aloha_vs_standard_diff"]
+  },
+  {
+    "root": "external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/wx250s_meshes",
+    "glob": "*.stl",
+    "max_depth": 1,
+    "max_results": 30,
+    "role_prefix": "standard_wx250s_mesh",
+    "provenance_class": "official_source",
+    "required": true,
+    "blocks": ["aloha_vs_standard_diff"]
+  },
+  {
+    "path": "external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/interbotix_black.png",
+    "role": "interbotix_black_texture",
+    "provenance_class": "official_source",
+    "required": true,
+    "blocks": ["urdf_visual_resources"]
+  },
+  {
+    "root": "/home/eii/project/openpi0.5-rtc/third_party/aloha/config",
+    "glob": "*.yaml",
+    "max_depth": 1,
+    "max_results": 20,
+    "role_prefix": "physical_intelligence_aloha_mode_config",
+    "provenance_class": "official_source",
+    "required": true,
+    "blocks": ["control_mapping"]
+  },
+  {
+    "root": "/home/eii/project/openpi0.5-rtc/third_party/aloha/aloha_scripts",
+    "glob": "*.py",
+    "max_depth": 1,
+    "max_results": 30,
+    "role_prefix": "physical_intelligence_aloha_control_or_data_code",
+    "provenance_class": "official_source",
+    "required": true,
+    "blocks": ["control_mapping", "gripper_mapping", "camera_schema"]
+  },
+  {
+    "root": "/home/eii/project/openpi0.5-rtc/third_party/aloha/launch",
+    "glob": "*.launch",
+    "max_depth": 1,
+    "max_results": 10,
+    "role_prefix": "physical_intelligence_aloha_launch",
+    "provenance_class": "official_source",
+    "required": true,
+    "blocks": ["runtime_parameter_audit"]
+  },
+  {
+    "path": "/home/eii/project/openpi0.5-rtc/third_party/aloha/config/rs_cam.yaml",
+    "role": "rs_cam_yaml",
+    "provenance_class": "official_source",
+    "required": true,
+    "blocks": ["camera_runtime_config", "calibrated_camera_claim"]
+  },
+  {
+    "path": "/home/eii/project/openpi0.5-rtc/third_party/aloha/launch/aloha_bringup.launch.py",
+    "role": "aloha_bringup_launch_py",
+    "provenance_class": "official_source",
+    "required": true,
+    "blocks": ["bringup_argument_equivalence_claim"]
+  },
+  {
+    "path": "/home/eii/project/openpi0.5-rtc/third_party/aloha/config/motor_specs.yaml",
+    "role": "aloha_motor_specs_yaml",
+    "provenance_class": "official_source",
+    "required": true,
+    "blocks": ["motor_limit_and_drive_calibration"]
+  },
+  {
+    "root": "external/trossen_arm_description",
+    "glob": "*.xacro",
+    "max_depth": 5,
+    "max_results": 30,
+    "role_prefix": "trossen_arm_description_xacro",
+    "provenance_class": "official_source",
+    "required": false,
+    "blocks": []
+  },
+  {
+    "root": "external/trossen_arm_description/urdf/generated",
+    "glob": "*.urdf",
+    "max_depth": 3,
+    "max_results": 20,
+    "role_prefix": "trossen_arm_description_generated_urdf",
+    "provenance_class": "official_source",
+    "required": false,
+    "blocks": []
+  },
+  {
+    "root": "external/trossen_ai_isaac/assets/robots",
+    "glob": "*.usd",
+    "max_depth": 4,
+    "max_results": 20,
+    "role_prefix": "trossen_ai_isaac_usd",
+    "provenance_class": "official_source",
+    "license_path": "external/trossen_ai_isaac/source/trossen_ai_isaac/setup.py",
+    "license_spdx": "BSD-3-Clause",
+    "required": false,
+    "blocks": []
+  },
+  {
+    "root": "assets/isaac/original_stationary_aloha/generated",
+    "glob": "*.urdf",
+    "max_depth": 1,
+    "max_results": 10,
+    "role_prefix": "project_existing_stationary_aloha_urdf",
+    "provenance_class": "project_reuse",
+    "required": false,
+    "blocks": []
+  },
+  {
+    "root": "aloha_isaac_rebuild/configs",
+    "glob": "*.yaml",
+    "max_depth": 4,
+    "max_results": 50,
+    "role_prefix": "project_existing_aloha_rebuild_config",
+    "provenance_class": "project_reuse",
+    "required": false,
+    "blocks": []
+  },
+  {
+    "path": "aloha_isaac_rebuild/scenes/a19_clean_articulation_candidate.usda",
+    "role": "project_a19_clean_articulation_candidate",
+    "provenance_class": "project_reuse",
+    "required": false,
+    "blocks": []
+  },
+  {
+    "path": "reports/aloha_model_audit/openpi_aloha_mapping.json",
+    "role": "project_existing_openpi_aloha_mapping",
+    "provenance_class": "project_reuse",
+    "required": false,
+    "blocks": []
+  },
+  {
+    "path": "reports/aloha1_isaac_adaptation/phase13_joint_schema_20260718/joint_schema_comparison.json",
+    "role": "project_existing_joint_schema_comparison",
+    "provenance_class": "project_reuse",
+    "required": false,
+    "blocks": []
+  },
+  {
+    "path": "reports/aloha1_isaac_adaptation/phase28_physics_property_comparison_20260718/physics_property_comparison.json",
+    "role": "project_existing_physics_property_comparison",
+    "provenance_class": "project_reuse",
+    "required": false,
+    "blocks": []
+  },
+  {
+    "path": "local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd",
+    "role": "project_user_confirmed_comparison_stage",
+    "provenance_class": "project_reuse",
+    "required": false,
+    "blocks": []
+  }
+]

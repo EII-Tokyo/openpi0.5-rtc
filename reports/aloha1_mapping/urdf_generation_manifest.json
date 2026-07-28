@@ -1,0 +1,680 @@
+{
+  "records": [
+    {
+      "command": [
+        "/opt/ros/jazzy/bin/xacro",
+        "-o",
+        "<temporary>/follower_left.raw.urdf",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/urdf/aloha_vx300s.urdf.xacro",
+        "base_link_frame:=base_link",
+        "use_gripper:=true",
+        "show_gripper_bar:=true",
+        "show_gripper_fingers:=true",
+        "use_world_frame:=false",
+        "external_urdf_loc:=",
+        "hardware_type:=actual",
+        "robot_name:=follower_left"
+      ],
+      "environment": {
+        "AMENT_PREFIX_PATH": "<temporary>/ament:/opt/ros/jazzy",
+        "PYTHONPATH": "/opt/ros/jazzy/lib/python3.12/site-packages"
+      },
+      "preparation": {
+        "name_replacements": {
+          "aloha_vx300s": "follower_left",
+          "follower_left/base_link": "follower_left_base_link",
+          "follower_left/ee_arm_link": "follower_left_ee_arm_link",
+          "follower_left/ee_gripper_link": "follower_left_ee_gripper_link",
+          "follower_left/fingers_link": "follower_left_fingers_link",
+          "follower_left/gripper_bar_link": "follower_left_gripper_bar_link",
+          "follower_left/gripper_link": "follower_left_gripper_link",
+          "follower_left/gripper_prop_link": "follower_left_gripper_prop_link",
+          "follower_left/left_finger_link": "follower_left_left_finger_link",
+          "follower_left/lower_forearm_link": "follower_left_lower_forearm_link",
+          "follower_left/right_finger_link": "follower_left_right_finger_link",
+          "follower_left/shoulder_link": "follower_left_shoulder_link",
+          "follower_left/upper_arm_link": "follower_left_upper_arm_link",
+          "follower_left/upper_forearm_link": "follower_left_upper_forearm_link",
+          "follower_left/wrist_link": "follower_left_wrist_link"
+        },
+        "output_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_left.urdf",
+        "output_sha256": "d9e4b32723ee71dfce26fb4e78546cfcfef147b2d7dbf5e53e3620e3d8aa96bd",
+        "resource_count": 23,
+        "resources": [
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/interbotix_black.png",
+            "sha256": "4cd224156bbaab1ddf1b92b90d46c54835a8b41f61bc258b2f216c2618e062cf",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/interbotix_black.png"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/base.stl",
+            "sha256": "d100cafe656671ca8fde98fb6a4cf2d1b746995c51c61c25ad9ea2715635d146",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/base.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/base.stl",
+            "sha256": "d100cafe656671ca8fde98fb6a4cf2d1b746995c51c61c25ad9ea2715635d146",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/base.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/shoulder.stl",
+            "sha256": "139745a74055cb0b23430bb5bc032bf68cf7bea5e4975c8f4c04107ae005f7f0",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/shoulder.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/shoulder.stl",
+            "sha256": "139745a74055cb0b23430bb5bc032bf68cf7bea5e4975c8f4c04107ae005f7f0",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/shoulder.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/upper_arm.stl",
+            "sha256": "900f236320dd3d500870c5fde763b2d47502d51e043a5c377875e70237108729",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/upper_arm.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/upper_arm.stl",
+            "sha256": "900f236320dd3d500870c5fde763b2d47502d51e043a5c377875e70237108729",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/upper_arm.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/upper_forearm.stl",
+            "sha256": "4104fc54bbfb8a9b533029f1e7e3ade3d54d638372b3195daa0c98f57e0295b5",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/upper_forearm.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/upper_forearm.stl",
+            "sha256": "4104fc54bbfb8a9b533029f1e7e3ade3d54d638372b3195daa0c98f57e0295b5",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/upper_forearm.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/lower_forearm.stl",
+            "sha256": "66814e27fa728056416e25e02e89eb7d34c51d51c51e7c3df873829037ddc6b8",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/lower_forearm.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/lower_forearm.stl",
+            "sha256": "66814e27fa728056416e25e02e89eb7d34c51d51c51e7c3df873829037ddc6b8",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/lower_forearm.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/wrist.stl",
+            "sha256": "90eb145c85627968c3776ae6de23ccff7e112c9dd713c46bc9acdfdaa859a048",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/wrist.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/wrist.stl",
+            "sha256": "90eb145c85627968c3776ae6de23ccff7e112c9dd713c46bc9acdfdaa859a048",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/wrist.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper.stl",
+            "sha256": "786c1077bfd226f14219581b11d5f19464ca95b17132e0bb7532503568f5af90",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper.stl",
+            "sha256": "786c1077bfd226f14219581b11d5f19464ca95b17132e0bb7532503568f5af90",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_prop.stl",
+            "sha256": "d1275a93fe2157c83dbc095617fb7e672888bdd48ec070a35ef4ab9ebd9755b0",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_prop.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_prop.stl",
+            "sha256": "d1275a93fe2157c83dbc095617fb7e672888bdd48ec070a35ef4ab9ebd9755b0",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_prop.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_bar.stl",
+            "sha256": "a4de62c9a2ed2c78433010e4c05530a1254b1774a7651967f406120c9bf8973e",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_bar.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_bar.stl",
+            "sha256": "a4de62c9a2ed2c78433010e4c05530a1254b1774a7651967f406120c9bf8973e",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_bar.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_finger.stl",
+            "sha256": "a4baacd9a64df1be60ea5e98f50f3c660e1b7a1fe9684aace6004c5058c09483",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_finger.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_finger.stl",
+            "sha256": "a4baacd9a64df1be60ea5e98f50f3c660e1b7a1fe9684aace6004c5058c09483",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_finger.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_finger.stl",
+            "sha256": "a4baacd9a64df1be60ea5e98f50f3c660e1b7a1fe9684aace6004c5058c09483",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_finger.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_finger.stl",
+            "sha256": "a4baacd9a64df1be60ea5e98f50f3c660e1b7a1fe9684aace6004c5058c09483",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_finger.stl"
+          }
+        ],
+        "source_path": "/tmp/aloha1-xacro-2l2plvnx/follower_left.raw.urdf",
+        "source_sha256": "a9481c283b1caf99d0b64edbe90e7a8a933e5271361306296ba2a64e6d9d5a6e"
+      },
+      "robot": "follower_left",
+      "source_xacro": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/urdf/aloha_vx300s.urdf.xacro",
+      "source_xacro_sha256": "45dff1e0de2456386dbb64b851c94db2d874b6dbefb6503cb747bc55435177bd",
+      "xacro_stderr": "",
+      "xacro_stdout": ""
+    },
+    {
+      "command": [
+        "/opt/ros/jazzy/bin/xacro",
+        "-o",
+        "<temporary>/follower_right.raw.urdf",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/urdf/aloha_vx300s.urdf.xacro",
+        "base_link_frame:=base_link",
+        "use_gripper:=true",
+        "show_gripper_bar:=true",
+        "show_gripper_fingers:=true",
+        "use_world_frame:=false",
+        "external_urdf_loc:=",
+        "hardware_type:=actual",
+        "robot_name:=follower_right"
+      ],
+      "environment": {
+        "AMENT_PREFIX_PATH": "<temporary>/ament:/opt/ros/jazzy",
+        "PYTHONPATH": "/opt/ros/jazzy/lib/python3.12/site-packages"
+      },
+      "preparation": {
+        "name_replacements": {
+          "aloha_vx300s": "follower_right",
+          "follower_right/base_link": "follower_right_base_link",
+          "follower_right/ee_arm_link": "follower_right_ee_arm_link",
+          "follower_right/ee_gripper_link": "follower_right_ee_gripper_link",
+          "follower_right/fingers_link": "follower_right_fingers_link",
+          "follower_right/gripper_bar_link": "follower_right_gripper_bar_link",
+          "follower_right/gripper_link": "follower_right_gripper_link",
+          "follower_right/gripper_prop_link": "follower_right_gripper_prop_link",
+          "follower_right/left_finger_link": "follower_right_left_finger_link",
+          "follower_right/lower_forearm_link": "follower_right_lower_forearm_link",
+          "follower_right/right_finger_link": "follower_right_right_finger_link",
+          "follower_right/shoulder_link": "follower_right_shoulder_link",
+          "follower_right/upper_arm_link": "follower_right_upper_arm_link",
+          "follower_right/upper_forearm_link": "follower_right_upper_forearm_link",
+          "follower_right/wrist_link": "follower_right_wrist_link"
+        },
+        "output_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_right.urdf",
+        "output_sha256": "268a5e5b56ce48af679256380008606f64358d6ead2619b52946b37f47fb624b",
+        "resource_count": 23,
+        "resources": [
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/interbotix_black.png",
+            "sha256": "4cd224156bbaab1ddf1b92b90d46c54835a8b41f61bc258b2f216c2618e062cf",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/interbotix_black.png"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/base.stl",
+            "sha256": "d100cafe656671ca8fde98fb6a4cf2d1b746995c51c61c25ad9ea2715635d146",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/base.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/base.stl",
+            "sha256": "d100cafe656671ca8fde98fb6a4cf2d1b746995c51c61c25ad9ea2715635d146",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/base.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/shoulder.stl",
+            "sha256": "139745a74055cb0b23430bb5bc032bf68cf7bea5e4975c8f4c04107ae005f7f0",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/shoulder.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/shoulder.stl",
+            "sha256": "139745a74055cb0b23430bb5bc032bf68cf7bea5e4975c8f4c04107ae005f7f0",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/shoulder.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/upper_arm.stl",
+            "sha256": "900f236320dd3d500870c5fde763b2d47502d51e043a5c377875e70237108729",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/upper_arm.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/upper_arm.stl",
+            "sha256": "900f236320dd3d500870c5fde763b2d47502d51e043a5c377875e70237108729",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/upper_arm.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/upper_forearm.stl",
+            "sha256": "4104fc54bbfb8a9b533029f1e7e3ade3d54d638372b3195daa0c98f57e0295b5",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/upper_forearm.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/upper_forearm.stl",
+            "sha256": "4104fc54bbfb8a9b533029f1e7e3ade3d54d638372b3195daa0c98f57e0295b5",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/upper_forearm.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/lower_forearm.stl",
+            "sha256": "66814e27fa728056416e25e02e89eb7d34c51d51c51e7c3df873829037ddc6b8",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/lower_forearm.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/lower_forearm.stl",
+            "sha256": "66814e27fa728056416e25e02e89eb7d34c51d51c51e7c3df873829037ddc6b8",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/lower_forearm.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/wrist.stl",
+            "sha256": "90eb145c85627968c3776ae6de23ccff7e112c9dd713c46bc9acdfdaa859a048",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/wrist.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/wrist.stl",
+            "sha256": "90eb145c85627968c3776ae6de23ccff7e112c9dd713c46bc9acdfdaa859a048",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/wrist.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper.stl",
+            "sha256": "786c1077bfd226f14219581b11d5f19464ca95b17132e0bb7532503568f5af90",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper.stl",
+            "sha256": "786c1077bfd226f14219581b11d5f19464ca95b17132e0bb7532503568f5af90",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_prop.stl",
+            "sha256": "d1275a93fe2157c83dbc095617fb7e672888bdd48ec070a35ef4ab9ebd9755b0",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_prop.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_prop.stl",
+            "sha256": "d1275a93fe2157c83dbc095617fb7e672888bdd48ec070a35ef4ab9ebd9755b0",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_prop.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_bar.stl",
+            "sha256": "a4de62c9a2ed2c78433010e4c05530a1254b1774a7651967f406120c9bf8973e",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_bar.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_bar.stl",
+            "sha256": "a4de62c9a2ed2c78433010e4c05530a1254b1774a7651967f406120c9bf8973e",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_bar.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_finger.stl",
+            "sha256": "a4baacd9a64df1be60ea5e98f50f3c660e1b7a1fe9684aace6004c5058c09483",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_finger.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_finger.stl",
+            "sha256": "a4baacd9a64df1be60ea5e98f50f3c660e1b7a1fe9684aace6004c5058c09483",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_finger.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_finger.stl",
+            "sha256": "a4baacd9a64df1be60ea5e98f50f3c660e1b7a1fe9684aace6004c5058c09483",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_finger.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_finger.stl",
+            "sha256": "a4baacd9a64df1be60ea5e98f50f3c660e1b7a1fe9684aace6004c5058c09483",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_finger.stl"
+          }
+        ],
+        "source_path": "/tmp/aloha1-xacro-2l2plvnx/follower_right.raw.urdf",
+        "source_sha256": "b58ea2aa82614645f6daa321029e753bc2a478181d5f390498c3b68942a39b4e"
+      },
+      "robot": "follower_right",
+      "source_xacro": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/urdf/aloha_vx300s.urdf.xacro",
+      "source_xacro_sha256": "45dff1e0de2456386dbb64b851c94db2d874b6dbefb6503cb747bc55435177bd",
+      "xacro_stderr": "",
+      "xacro_stdout": ""
+    },
+    {
+      "command": [
+        "/opt/ros/jazzy/bin/xacro",
+        "-o",
+        "<temporary>/leader_left.raw.urdf",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/urdf/aloha_wx250s.urdf.xacro",
+        "base_link_frame:=base_link",
+        "use_gripper:=true",
+        "show_gripper_bar:=true",
+        "show_gripper_fingers:=true",
+        "use_world_frame:=false",
+        "external_urdf_loc:=",
+        "hardware_type:=actual",
+        "robot_name:=leader_left"
+      ],
+      "environment": {
+        "AMENT_PREFIX_PATH": "<temporary>/ament:/opt/ros/jazzy",
+        "PYTHONPATH": "/opt/ros/jazzy/lib/python3.12/site-packages"
+      },
+      "preparation": {
+        "name_replacements": {
+          "aloha_wx250s": "leader_left",
+          "leader_left/base_link": "leader_left_base_link",
+          "leader_left/ee_arm_link": "leader_left_ee_arm_link",
+          "leader_left/ee_gripper_link": "leader_left_ee_gripper_link",
+          "leader_left/fingers_link": "leader_left_fingers_link",
+          "leader_left/gripper_bar_link": "leader_left_gripper_bar_link",
+          "leader_left/gripper_link": "leader_left_gripper_link",
+          "leader_left/gripper_prop_link": "leader_left_gripper_prop_link",
+          "leader_left/left_finger_link": "leader_left_left_finger_link",
+          "leader_left/lower_forearm_link": "leader_left_lower_forearm_link",
+          "leader_left/right_finger_link": "leader_left_right_finger_link",
+          "leader_left/shoulder_link": "leader_left_shoulder_link",
+          "leader_left/upper_arm_link": "leader_left_upper_arm_link",
+          "leader_left/upper_forearm_link": "leader_left_upper_forearm_link",
+          "leader_left/wrist_link": "leader_left_wrist_link"
+        },
+        "output_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/leader_left.urdf",
+        "output_sha256": "22f65481becc6bfb71914d8fe9e79bebe7b3b14eb4b11576ebd2e04ed93df692",
+        "resource_count": 23,
+        "resources": [
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/interbotix_black.png",
+            "sha256": "4cd224156bbaab1ddf1b92b90d46c54835a8b41f61bc258b2f216c2618e062cf",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/interbotix_black.png"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/base.stl",
+            "sha256": "69facd590abff70fa03431497ead2c7f1aabe616d55af594288e9bf36b1fd067",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/base.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/base.stl",
+            "sha256": "69facd590abff70fa03431497ead2c7f1aabe616d55af594288e9bf36b1fd067",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/base.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/shoulder.stl",
+            "sha256": "337b4cb7e9b637ee3dca6a737becf831fe5f95b790b34f9a97e5cf11475fc222",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/shoulder.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/shoulder.stl",
+            "sha256": "337b4cb7e9b637ee3dca6a737becf831fe5f95b790b34f9a97e5cf11475fc222",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/shoulder.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/upper_arm.stl",
+            "sha256": "b4550b3a79e83d0ca9e1a65e490ff4e25b667e8a7d8e94bab441851c96eb11fa",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/upper_arm.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/upper_arm.stl",
+            "sha256": "b4550b3a79e83d0ca9e1a65e490ff4e25b667e8a7d8e94bab441851c96eb11fa",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/upper_arm.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/upper_forearm.stl",
+            "sha256": "1a64efc97dc129bc277afee75c129de27721e8fedcad45a4ec8b251f44542f23",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/upper_forearm.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/upper_forearm.stl",
+            "sha256": "1a64efc97dc129bc277afee75c129de27721e8fedcad45a4ec8b251f44542f23",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/upper_forearm.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/lower_forearm.stl",
+            "sha256": "1445950b7f5ce2cf374b98711df296acd6c2b4df24c3937b413bcb6beb037603",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/lower_forearm.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/lower_forearm.stl",
+            "sha256": "1445950b7f5ce2cf374b98711df296acd6c2b4df24c3937b413bcb6beb037603",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/lower_forearm.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/wrist.stl",
+            "sha256": "8602fe1313765caceec64faff5ec919ec09c57c614b87f1c1c625dcef1e3df5a",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/wrist.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/wrist.stl",
+            "sha256": "8602fe1313765caceec64faff5ec919ec09c57c614b87f1c1c625dcef1e3df5a",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/wrist.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper.stl",
+            "sha256": "6dbc189d3787ca62e09a8cf3f928ceca70c5c184a95c97ac6587805aa6a1ec6d",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper.stl",
+            "sha256": "6dbc189d3787ca62e09a8cf3f928ceca70c5c184a95c97ac6587805aa6a1ec6d",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_prop.stl",
+            "sha256": "30fcd807817b7c9df6275d2c8100cfe0e7786e2c65b574d22efe177520f1a316",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_prop.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_prop.stl",
+            "sha256": "30fcd807817b7c9df6275d2c8100cfe0e7786e2c65b574d22efe177520f1a316",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_prop.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_bar.stl",
+            "sha256": "b54601da3f60eea180226b695bb95a9b29b187f22f5b74d9a523ac9785d9a518",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_bar.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_bar.stl",
+            "sha256": "b54601da3f60eea180226b695bb95a9b29b187f22f5b74d9a523ac9785d9a518",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_bar.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_finger.stl",
+            "sha256": "6a459bd4ef07eb5c4687e258bd9564004e741437e2e668af7ed31964567d8f90",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_finger.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_finger.stl",
+            "sha256": "6a459bd4ef07eb5c4687e258bd9564004e741437e2e668af7ed31964567d8f90",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_finger.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_finger.stl",
+            "sha256": "6a459bd4ef07eb5c4687e258bd9564004e741437e2e668af7ed31964567d8f90",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_finger.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_finger.stl",
+            "sha256": "6a459bd4ef07eb5c4687e258bd9564004e741437e2e668af7ed31964567d8f90",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_finger.stl"
+          }
+        ],
+        "source_path": "/tmp/aloha1-xacro-2l2plvnx/leader_left.raw.urdf",
+        "source_sha256": "b8f92bcc71686d84c9e8723234bfa034420c25d6cb44e2b848e7374232a719df"
+      },
+      "robot": "leader_left",
+      "source_xacro": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/urdf/aloha_wx250s.urdf.xacro",
+      "source_xacro_sha256": "3cd62a579deea9621879f4d7793b88d755a75f937a747ad9d64055912c3b632e",
+      "xacro_stderr": "",
+      "xacro_stdout": ""
+    },
+    {
+      "command": [
+        "/opt/ros/jazzy/bin/xacro",
+        "-o",
+        "<temporary>/leader_right.raw.urdf",
+        "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/urdf/aloha_wx250s.urdf.xacro",
+        "base_link_frame:=base_link",
+        "use_gripper:=true",
+        "show_gripper_bar:=true",
+        "show_gripper_fingers:=true",
+        "use_world_frame:=false",
+        "external_urdf_loc:=",
+        "hardware_type:=actual",
+        "robot_name:=leader_right"
+      ],
+      "environment": {
+        "AMENT_PREFIX_PATH": "<temporary>/ament:/opt/ros/jazzy",
+        "PYTHONPATH": "/opt/ros/jazzy/lib/python3.12/site-packages"
+      },
+      "preparation": {
+        "name_replacements": {
+          "aloha_wx250s": "leader_right",
+          "leader_right/base_link": "leader_right_base_link",
+          "leader_right/ee_arm_link": "leader_right_ee_arm_link",
+          "leader_right/ee_gripper_link": "leader_right_ee_gripper_link",
+          "leader_right/fingers_link": "leader_right_fingers_link",
+          "leader_right/gripper_bar_link": "leader_right_gripper_bar_link",
+          "leader_right/gripper_link": "leader_right_gripper_link",
+          "leader_right/gripper_prop_link": "leader_right_gripper_prop_link",
+          "leader_right/left_finger_link": "leader_right_left_finger_link",
+          "leader_right/lower_forearm_link": "leader_right_lower_forearm_link",
+          "leader_right/right_finger_link": "leader_right_right_finger_link",
+          "leader_right/shoulder_link": "leader_right_shoulder_link",
+          "leader_right/upper_arm_link": "leader_right_upper_arm_link",
+          "leader_right/upper_forearm_link": "leader_right_upper_forearm_link",
+          "leader_right/wrist_link": "leader_right_wrist_link"
+        },
+        "output_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/leader_right.urdf",
+        "output_sha256": "6737abf9aafbf74c93db1862f189ec1738265404763561cc0b3fcbe6ee42d95f",
+        "resource_count": 23,
+        "resources": [
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/interbotix_black.png",
+            "sha256": "4cd224156bbaab1ddf1b92b90d46c54835a8b41f61bc258b2f216c2618e062cf",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/interbotix_black.png"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/base.stl",
+            "sha256": "69facd590abff70fa03431497ead2c7f1aabe616d55af594288e9bf36b1fd067",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/base.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/base.stl",
+            "sha256": "69facd590abff70fa03431497ead2c7f1aabe616d55af594288e9bf36b1fd067",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/base.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/shoulder.stl",
+            "sha256": "337b4cb7e9b637ee3dca6a737becf831fe5f95b790b34f9a97e5cf11475fc222",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/shoulder.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/shoulder.stl",
+            "sha256": "337b4cb7e9b637ee3dca6a737becf831fe5f95b790b34f9a97e5cf11475fc222",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/shoulder.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/upper_arm.stl",
+            "sha256": "b4550b3a79e83d0ca9e1a65e490ff4e25b667e8a7d8e94bab441851c96eb11fa",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/upper_arm.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/upper_arm.stl",
+            "sha256": "b4550b3a79e83d0ca9e1a65e490ff4e25b667e8a7d8e94bab441851c96eb11fa",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/upper_arm.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/upper_forearm.stl",
+            "sha256": "1a64efc97dc129bc277afee75c129de27721e8fedcad45a4ec8b251f44542f23",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/upper_forearm.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/upper_forearm.stl",
+            "sha256": "1a64efc97dc129bc277afee75c129de27721e8fedcad45a4ec8b251f44542f23",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/upper_forearm.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/lower_forearm.stl",
+            "sha256": "1445950b7f5ce2cf374b98711df296acd6c2b4df24c3937b413bcb6beb037603",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/lower_forearm.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/lower_forearm.stl",
+            "sha256": "1445950b7f5ce2cf374b98711df296acd6c2b4df24c3937b413bcb6beb037603",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/lower_forearm.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/wrist.stl",
+            "sha256": "8602fe1313765caceec64faff5ec919ec09c57c614b87f1c1c625dcef1e3df5a",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/wrist.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/wrist.stl",
+            "sha256": "8602fe1313765caceec64faff5ec919ec09c57c614b87f1c1c625dcef1e3df5a",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/wrist.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper.stl",
+            "sha256": "6dbc189d3787ca62e09a8cf3f928ceca70c5c184a95c97ac6587805aa6a1ec6d",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper.stl",
+            "sha256": "6dbc189d3787ca62e09a8cf3f928ceca70c5c184a95c97ac6587805aa6a1ec6d",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_prop.stl",
+            "sha256": "30fcd807817b7c9df6275d2c8100cfe0e7786e2c65b574d22efe177520f1a316",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_prop.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_prop.stl",
+            "sha256": "30fcd807817b7c9df6275d2c8100cfe0e7786e2c65b574d22efe177520f1a316",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_prop.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_bar.stl",
+            "sha256": "b54601da3f60eea180226b695bb95a9b29b187f22f5b74d9a523ac9785d9a518",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_bar.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_bar.stl",
+            "sha256": "b54601da3f60eea180226b695bb95a9b29b187f22f5b74d9a523ac9785d9a518",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_bar.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_finger.stl",
+            "sha256": "6a459bd4ef07eb5c4687e258bd9564004e741437e2e668af7ed31964567d8f90",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_finger.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_finger.stl",
+            "sha256": "6a459bd4ef07eb5c4687e258bd9564004e741437e2e668af7ed31964567d8f90",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_finger.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_finger.stl",
+            "sha256": "6a459bd4ef07eb5c4687e258bd9564004e741437e2e668af7ed31964567d8f90",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_finger.stl"
+          },
+          {
+            "resolved_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_finger.stl",
+            "sha256": "6a459bd4ef07eb5c4687e258bd9564004e741437e2e668af7ed31964567d8f90",
+            "source_uri": "package://interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_finger.stl"
+          }
+        ],
+        "source_path": "/tmp/aloha1-xacro-2l2plvnx/leader_right.raw.urdf",
+        "source_sha256": "ed6b405f2fbdf94d6722bab4800864361c6b3b26d8e20ed3ff92d1957784205e"
+      },
+      "robot": "leader_right",
+      "source_xacro": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/urdf/aloha_wx250s.urdf.xacro",
+      "source_xacro_sha256": "3cd62a579deea9621879f4d7793b88d755a75f937a747ad9d64055912c3b632e",
+      "xacro_stderr": "",
+      "xacro_stdout": ""
+    }
+  ],
+  "schema_version": 1,
+  "source_repository": {
+    "branch": "main",
+    "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+    "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+    "url": "https://github.com/j3soon/ros2-essentials.git"
+  },
+  "status": "PASS",
+  "xacro": {
+    "executable": "/opt/ros/jazzy/bin/xacro",
+    "version_constraint": "2.0.13"
+  }
+}

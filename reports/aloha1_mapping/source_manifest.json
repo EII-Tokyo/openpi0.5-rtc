@@ -1,0 +1,2862 @@
+{
+  "generated_at": "2026-07-28T15:13:44+09:00",
+  "schema_version": 1,
+  "sources": [
+    {
+      "license": {
+        "not_applicable_reason": null,
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/LICENSE.txt",
+        "spdx": "LicenseRef-NVIDIA-Isaac-Sim"
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/VERSION",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": null,
+        "commit": null,
+        "dirty": null,
+        "not_applicable_reason": "file is not tracked by containing Git repository",
+        "root": null,
+        "tag": null,
+        "url": null
+      },
+      "role": "isaac_sim_build_version",
+      "sha256": "3608df6c48e6857e9cdcf9cedb5ddf23d3ce76c46bc87b0f6ab3a5241ef5e5e7",
+      "size_bytes": 37
+    },
+    {
+      "license": {
+        "not_applicable_reason": null,
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/LICENSE.txt",
+        "spdx": "LicenseRef-NVIDIA-Isaac-Sim"
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/kit/launcher.toml",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": null,
+        "commit": null,
+        "dirty": null,
+        "not_applicable_reason": "file is not tracked by containing Git repository",
+        "root": null,
+        "tag": null,
+        "url": null
+      },
+      "role": "kit_launcher_manifest",
+      "sha256": "a885eccad0b0a2c82af841ab11e0abcc88dac14dba30d93a2dc5248c46b46ad2",
+      "size_bytes": 1155
+    },
+    {
+      "license": {
+        "not_applicable_reason": null,
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.importer.urdf/PACKAGE-LICENSES/isaacsim.asset.importer.urdf-LICENSE.md",
+        "spdx": "LicenseRef-NVIDIA-Omniverse"
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.importer.urdf/PACKAGE-LICENSES/dependencies/PIP-packages-LICENSES.txt",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": null,
+        "commit": null,
+        "dirty": null,
+        "not_applicable_reason": "file is not tracked by containing Git repository",
+        "root": null,
+        "tag": null,
+        "url": null
+      },
+      "role": "isaac_5_1_urdf_importer_source_or_doc:PACKAGE-LICENSES/dependencies/PIP-packages-LICENSES.txt",
+      "sha256": "ae96254155c1ffb183aa33e5af5856625df9635d4d442e9ab7c1894f7094b70a",
+      "size_bytes": 1591442
+    },
+    {
+      "license": {
+        "not_applicable_reason": null,
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.importer.urdf/PACKAGE-LICENSES/isaacsim.asset.importer.urdf-LICENSE.md",
+        "spdx": "LicenseRef-NVIDIA-Omniverse"
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.importer.urdf/PACKAGE-LICENSES/isaacsim.asset.importer.urdf-LICENSE.md",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": null,
+        "commit": null,
+        "dirty": null,
+        "not_applicable_reason": "file is not tracked by containing Git repository",
+        "root": null,
+        "tag": null,
+        "url": null
+      },
+      "role": "isaac_5_1_urdf_importer_source_or_doc:PACKAGE-LICENSES/isaacsim.asset.importer.urdf-LICENSE.md",
+      "sha256": "5e1f0b8dc89f791cb31cccde4193826f8bdb10ce678273db164045f0c3b0957d",
+      "size_bytes": 412
+    },
+    {
+      "license": {
+        "not_applicable_reason": null,
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.importer.urdf/PACKAGE-LICENSES/isaacsim.asset.importer.urdf-LICENSE.md",
+        "spdx": "LicenseRef-NVIDIA-Omniverse"
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.importer.urdf/bin/libisaacsim.asset.importer.urdf.plugin.so",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": null,
+        "commit": null,
+        "dirty": null,
+        "not_applicable_reason": "file is not tracked by containing Git repository",
+        "root": null,
+        "tag": null,
+        "url": null
+      },
+      "role": "isaac_5_1_urdf_importer_source_or_doc:bin/libisaacsim.asset.importer.urdf.plugin.so",
+      "sha256": "bbebf695896957eef3798037b7bf497c1b12da2ff826c981dc2eeb1d5f027b02",
+      "size_bytes": 785416
+    },
+    {
+      "license": {
+        "not_applicable_reason": null,
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.importer.urdf/PACKAGE-LICENSES/isaacsim.asset.importer.urdf-LICENSE.md",
+        "spdx": "LicenseRef-NVIDIA-Omniverse"
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.importer.urdf/bin/libtinyxml2.so.8",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": null,
+        "commit": null,
+        "dirty": null,
+        "not_applicable_reason": "file is not tracked by containing Git repository",
+        "root": null,
+        "tag": null,
+        "url": null
+      },
+      "role": "isaac_5_1_urdf_importer_source_or_doc:bin/libtinyxml2.so.8",
+      "sha256": "32aa0f0734900ad0fd75414f38efa6d217ebffa1ca6b932cb6dcb3e190ba26c0",
+      "size_bytes": 146952
+    },
+    {
+      "license": {
+        "not_applicable_reason": null,
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.importer.urdf/PACKAGE-LICENSES/isaacsim.asset.importer.urdf-LICENSE.md",
+        "spdx": "LicenseRef-NVIDIA-Omniverse"
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.importer.urdf/bin/libtinyxml2.so.8.0.0",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": null,
+        "commit": null,
+        "dirty": null,
+        "not_applicable_reason": "file is not tracked by containing Git repository",
+        "root": null,
+        "tag": null,
+        "url": null
+      },
+      "role": "isaac_5_1_urdf_importer_source_or_doc:bin/libtinyxml2.so.8.0.0",
+      "sha256": "32aa0f0734900ad0fd75414f38efa6d217ebffa1ca6b932cb6dcb3e190ba26c0",
+      "size_bytes": 146952
+    },
+    {
+      "license": {
+        "not_applicable_reason": null,
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.importer.urdf/PACKAGE-LICENSES/isaacsim.asset.importer.urdf-LICENSE.md",
+        "spdx": "LicenseRef-NVIDIA-Omniverse"
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.importer.urdf/config/extension.toml",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": null,
+        "commit": null,
+        "dirty": null,
+        "not_applicable_reason": "file is not tracked by containing Git repository",
+        "root": null,
+        "tag": null,
+        "url": null
+      },
+      "role": "isaac_5_1_urdf_importer_source_or_doc:config/extension.toml",
+      "sha256": "6ee1a8ab74c492930c792f7cabc657e022fb06dab4198ef413f6e1b359439baf",
+      "size_bytes": 4458
+    },
+    {
+      "license": {
+        "not_applicable_reason": null,
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.importer.urdf/PACKAGE-LICENSES/isaacsim.asset.importer.urdf-LICENSE.md",
+        "spdx": "LicenseRef-NVIDIA-Omniverse"
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.importer.urdf/docs/CHANGELOG.md",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": null,
+        "commit": null,
+        "dirty": null,
+        "not_applicable_reason": "file is not tracked by containing Git repository",
+        "root": null,
+        "tag": null,
+        "url": null
+      },
+      "role": "isaac_5_1_urdf_importer_source_or_doc:docs/CHANGELOG.md",
+      "sha256": "cb8bea6591eebd33f0053a9c1d48299a13d844f66cfba20d9fd1706fa99918f4",
+      "size_bytes": 15771
+    },
+    {
+      "license": {
+        "not_applicable_reason": null,
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.importer.urdf/PACKAGE-LICENSES/isaacsim.asset.importer.urdf-LICENSE.md",
+        "spdx": "LicenseRef-NVIDIA-Omniverse"
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.importer.urdf/docs/README.md",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": null,
+        "commit": null,
+        "dirty": null,
+        "not_applicable_reason": "file is not tracked by containing Git repository",
+        "root": null,
+        "tag": null,
+        "url": null
+      },
+      "role": "isaac_5_1_urdf_importer_source_or_doc:docs/README.md",
+      "sha256": "ef2872d3052ff5e67ff9ea15d8c5c15c026f6f1b7454399882fd92fed843b87e",
+      "size_bytes": 3184
+    },
+    {
+      "license": {
+        "not_applicable_reason": null,
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.importer.urdf/PACKAGE-LICENSES/isaacsim.asset.importer.urdf-LICENSE.md",
+        "spdx": "LicenseRef-NVIDIA-Omniverse"
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.importer.urdf/docs/api.rst",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": null,
+        "commit": null,
+        "dirty": null,
+        "not_applicable_reason": "file is not tracked by containing Git repository",
+        "root": null,
+        "tag": null,
+        "url": null
+      },
+      "role": "isaac_5_1_urdf_importer_source_or_doc:docs/api.rst",
+      "sha256": "ac4c111d48982deb29473dfac2f19970352145dca5c51d7daa252551789f6fbe",
+      "size_bytes": 2224
+    },
+    {
+      "license": {
+        "not_applicable_reason": null,
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.importer.urdf/PACKAGE-LICENSES/isaacsim.asset.importer.urdf-LICENSE.md",
+        "spdx": "LicenseRef-NVIDIA-Omniverse"
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.importer.urdf/docs/index.rst",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": null,
+        "commit": null,
+        "dirty": null,
+        "not_applicable_reason": "file is not tracked by containing Git repository",
+        "root": null,
+        "tag": null,
+        "url": null
+      },
+      "role": "isaac_5_1_urdf_importer_source_or_doc:docs/index.rst",
+      "sha256": "74b50fc7c2503e66f7e419a9e74f7f632a8b4c1fa042cd3ce75f08b7b6fe77bf",
+      "size_bytes": 2964
+    },
+    {
+      "license": {
+        "not_applicable_reason": null,
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.importer.urdf/PACKAGE-LICENSES/isaacsim.asset.importer.urdf-LICENSE.md",
+        "spdx": "LicenseRef-NVIDIA-Omniverse"
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.importer.urdf/icons/icoFileURDF.png",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": null,
+        "commit": null,
+        "dirty": null,
+        "not_applicable_reason": "file is not tracked by containing Git repository",
+        "root": null,
+        "tag": null,
+        "url": null
+      },
+      "role": "isaac_5_1_urdf_importer_source_or_doc:icons/icoFileURDF.png",
+      "sha256": "227c1304a193e9982aa51214af7dc305f0df086c8b7daf195a2cfa80f4acf780",
+      "size_bytes": 14010
+    },
+    {
+      "license": {
+        "not_applicable_reason": null,
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.importer.urdf/PACKAGE-LICENSES/isaacsim.asset.importer.urdf-LICENSE.md",
+        "spdx": "LicenseRef-NVIDIA-Omniverse"
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.importer.urdf/icons/radio_off.svg",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": null,
+        "commit": null,
+        "dirty": null,
+        "not_applicable_reason": "file is not tracked by containing Git repository",
+        "root": null,
+        "tag": null,
+        "url": null
+      },
+      "role": "isaac_5_1_urdf_importer_source_or_doc:icons/radio_off.svg",
+      "sha256": "9113f775043b4d8a450665a7374daf56ef2348211c3fe78b31d484ceea73ac70",
+      "size_bytes": 326
+    },
+    {
+      "license": {
+        "not_applicable_reason": null,
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.importer.urdf/PACKAGE-LICENSES/isaacsim.asset.importer.urdf-LICENSE.md",
+        "spdx": "LicenseRef-NVIDIA-Omniverse"
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.importer.urdf/icons/radio_on.svg",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": null,
+        "commit": null,
+        "dirty": null,
+        "not_applicable_reason": "file is not tracked by containing Git repository",
+        "root": null,
+        "tag": null,
+        "url": null
+      },
+      "role": "isaac_5_1_urdf_importer_source_or_doc:icons/radio_on.svg",
+      "sha256": "fe09142b0217335dcb29111523b116a89381ddfcb545db1ded37fe90dc372442",
+      "size_bytes": 507
+    },
+    {
+      "license": {
+        "not_applicable_reason": null,
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.importer.urdf/PACKAGE-LICENSES/isaacsim.asset.importer.urdf-LICENSE.md",
+        "spdx": "LicenseRef-NVIDIA-Omniverse"
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.importer.urdf/icons/sort_icon.svg",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": null,
+        "commit": null,
+        "dirty": null,
+        "not_applicable_reason": "file is not tracked by containing Git repository",
+        "root": null,
+        "tag": null,
+        "url": null
+      },
+      "role": "isaac_5_1_urdf_importer_source_or_doc:icons/sort_icon.svg",
+      "sha256": "a1d9421f00285b395a5a3bb1299c1025200b8f32c08b49d1002c7fa9ef00b120",
+      "size_bytes": 210
+    },
+    {
+      "license": {
+        "not_applicable_reason": null,
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.importer.urdf/PACKAGE-LICENSES/isaacsim.asset.importer.urdf-LICENSE.md",
+        "spdx": "LicenseRef-NVIDIA-Omniverse"
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.importer.urdf/isaacsim/asset/importer/urdf/__init__.py",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": null,
+        "commit": null,
+        "dirty": null,
+        "not_applicable_reason": "file is not tracked by containing Git repository",
+        "root": null,
+        "tag": null,
+        "url": null
+      },
+      "role": "isaac_5_1_urdf_importer_source_or_doc:isaacsim/asset/importer/urdf/__init__.py",
+      "sha256": "31e1412509bbc289302098df4a34e71aeffb83786475e6b8ed14cbd9b1b4620c",
+      "size_bytes": 744
+    },
+    {
+      "license": {
+        "not_applicable_reason": null,
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.importer.urdf/PACKAGE-LICENSES/isaacsim.asset.importer.urdf-LICENSE.md",
+        "spdx": "LicenseRef-NVIDIA-Omniverse"
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.importer.urdf/isaacsim/asset/importer/urdf/_urdf.cpython-311-x86_64-linux-gnu.so",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": null,
+        "commit": null,
+        "dirty": null,
+        "not_applicable_reason": "file is not tracked by containing Git repository",
+        "root": null,
+        "tag": null,
+        "url": null
+      },
+      "role": "isaac_5_1_urdf_importer_source_or_doc:isaacsim/asset/importer/urdf/_urdf.cpython-311-x86_64-linux-gnu.so",
+      "sha256": "d04b1e2ebdefd5ff93620106bd984b4d7462d6b86a3ceadc0ef127cf5377fb16",
+      "size_bytes": 676016
+    },
+    {
+      "license": {
+        "not_applicable_reason": null,
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/LICENSE.txt",
+        "spdx": "LicenseRef-NVIDIA-Isaac-Sim"
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.robot.schema/config/extension.toml",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": null,
+        "commit": null,
+        "dirty": null,
+        "not_applicable_reason": "file is not tracked by containing Git repository",
+        "root": null,
+        "tag": null,
+        "url": null
+      },
+      "role": "isaac_robot_schema_manifest",
+      "sha256": "d4d2506f04c3dfbb2141d6472fdcfa14a0017436235ba7f79d1330ae3ed40ebc",
+      "size_bytes": 1535
+    },
+    {
+      "license": {
+        "not_applicable_reason": null,
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/LICENSE.txt",
+        "spdx": "LicenseRef-NVIDIA-Isaac-Sim"
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.robot_setup.assembler/config/extension.toml",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": null,
+        "commit": null,
+        "dirty": null,
+        "not_applicable_reason": "file is not tracked by containing Git repository",
+        "root": null,
+        "tag": null,
+        "url": null
+      },
+      "role": "isaac_robot_assembler_manifest",
+      "sha256": "c6f4571d1a9bcea20d7d3895a6dd3664087955b63693384028374b6833a9a021",
+      "size_bytes": 2523
+    },
+    {
+      "license": {
+        "not_applicable_reason": null,
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/LICENSE.txt",
+        "spdx": "LicenseRef-NVIDIA-Isaac-Sim"
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.robot_setup.gain_tuner/config/extension.toml",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": null,
+        "commit": null,
+        "dirty": null,
+        "not_applicable_reason": "file is not tracked by containing Git repository",
+        "root": null,
+        "tag": null,
+        "url": null
+      },
+      "role": "isaac_gain_tuner_manifest",
+      "sha256": "6d02ac74958f6e0fe46e6af4b0abe601913f23a5861276ad8441ea6388952cf6",
+      "size_bytes": 620
+    },
+    {
+      "license": {
+        "not_applicable_reason": null,
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/LICENSE.txt",
+        "spdx": "LicenseRef-NVIDIA-Isaac-Sim"
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.validation/config/extension.toml",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": null,
+        "commit": null,
+        "dirty": null,
+        "not_applicable_reason": "file is not tracked by containing Git repository",
+        "root": null,
+        "tag": null,
+        "url": null
+      },
+      "role": "isaac_asset_validation_manifest",
+      "sha256": "7bfd79e5833dffffc9e4b91453ae3a2933bd2ae925ddd2d2f008baa339b19809",
+      "size_bytes": 765
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/LICENSE",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "interbotix_ros_manipulators_license",
+      "sha256": "4eab000b04ce3f3b2746e2c22c1475c83c67a55ba5caf9becc089db26a2688d4",
+      "size_bytes": 1524
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/package.xml",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "interbotix_xsarm_descriptions_package",
+      "sha256": "a199a3be38ba41a129ddde804f3418e95fcfac1a409d8df23f3358721bfeb1ee",
+      "size_bytes": 991
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/urdf/aloha_vx300s.urdf.xacro",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "interbotix_xsarm_xacro:aloha_vx300s.urdf.xacro",
+      "sha256": "45dff1e0de2456386dbb64b851c94db2d874b6dbefb6503cb747bc55435177bd",
+      "size_bytes": 22343
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/urdf/aloha_wx250s.urdf.xacro",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "interbotix_xsarm_xacro:aloha_wx250s.urdf.xacro",
+      "sha256": "3cd62a579deea9621879f4d7793b88d755a75f937a747ad9d64055912c3b632e",
+      "size_bytes": 22245
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/urdf/ar_tag.urdf.xacro",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "interbotix_xsarm_xacro:ar_tag.urdf.xacro",
+      "sha256": "3d4d6da9acca5ca8e03788979c0f70e581b1c3db94484ef45e339b95257b177c",
+      "size_bytes": 1214
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/urdf/control.urdf.xacro",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "interbotix_xsarm_xacro:control.urdf.xacro",
+      "sha256": "d1118c4ecb5d83afddeb24102d609674d002f47a0ec49d0637572d1455261b63",
+      "size_bytes": 5013
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/urdf/gazebo_configs.urdf.xacro",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "interbotix_xsarm_xacro:gazebo_configs.urdf.xacro",
+      "sha256": "aea022b8eb8e0dfd8c64cd3fa092c27ffb35d31e56d868053a987ad41bd0591a",
+      "size_bytes": 2825
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/urdf/mobile_px100.urdf.xacro",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "interbotix_xsarm_xacro:mobile_px100.urdf.xacro",
+      "sha256": "394762712668375ad17dc1a6328d9774d3e584d2842a8fa9058f4e273aae3c55",
+      "size_bytes": 18910
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/urdf/mobile_wx200.urdf.xacro",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "interbotix_xsarm_xacro:mobile_wx200.urdf.xacro",
+      "sha256": "67e3ddf0c3093a93a5e375f767a9b6b47b53019097869ce4b1dc70f631394b2d",
+      "size_bytes": 20641
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/urdf/mobile_wx250s.urdf.xacro",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "interbotix_xsarm_xacro:mobile_wx250s.urdf.xacro",
+      "sha256": "1aab97486c667492046b75685c77254247d848aa8db9da79c7de85405837a65a",
+      "size_bytes": 22305
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/urdf/px100.urdf.xacro",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "interbotix_xsarm_xacro:px100.urdf.xacro",
+      "sha256": "c912a36d9f58554c6052c8ec632eb32a4009f55fd202591c6f82390a9cf6a707",
+      "size_bytes": 18892
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/urdf/px150.urdf.xacro",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "interbotix_xsarm_xacro:px150.urdf.xacro",
+      "sha256": "6bacf9f6c84d5e567d765c72274ce8fd66656a502f06751c2f7c799435fa2575",
+      "size_bytes": 20561
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/urdf/rx150.urdf.xacro",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "interbotix_xsarm_xacro:rx150.urdf.xacro",
+      "sha256": "7e4bacc1794b1db8f54bafbfc0d31c6d2cca597a0302f775914d65b49283d83c",
+      "size_bytes": 20578
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/urdf/rx200.urdf.xacro",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "interbotix_xsarm_xacro:rx200.urdf.xacro",
+      "sha256": "23ca8fed882325802e1a206b1bf45c8f451b34a0adef8fd970ce850fe4342992",
+      "size_bytes": 20572
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/urdf/vx250.urdf.xacro",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "interbotix_xsarm_xacro:vx250.urdf.xacro",
+      "sha256": "c1ae4b51c193ace056d8c168713e5528b67ebe4b33da4fe892f3b146c986cb99",
+      "size_bytes": 20580
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/urdf/vx300.urdf.xacro",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "interbotix_xsarm_xacro:vx300.urdf.xacro",
+      "sha256": "038f281389422e654bade11b82fe3e8b8290609aa2eb136d1881b0b68f2b32cb",
+      "size_bytes": 20667
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/urdf/vx300s.urdf.xacro",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "interbotix_xsarm_xacro:vx300s.urdf.xacro",
+      "sha256": "67ba21db03fcd6e2fa6fe681bd79a1d357e3d7ce55792d60bafd862a0bdd0802",
+      "size_bytes": 22331
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/urdf/wx200.urdf.xacro",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "interbotix_xsarm_xacro:wx200.urdf.xacro",
+      "sha256": "c515435de826144069af7f9ab2a2500f38a8edd4c653cf442d213d82d850a126",
+      "size_bytes": 20565
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/urdf/wx250.urdf.xacro",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "interbotix_xsarm_xacro:wx250.urdf.xacro",
+      "sha256": "a79ddfb6b02f73bcc2ef5d20f367d2d4ddc76da307ea482cd8ce52c7823ced47",
+      "size_bytes": 20576
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/urdf/wx250s.urdf.xacro",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "interbotix_xsarm_xacro:wx250s.urdf.xacro",
+      "sha256": "b7a7ec26572ee17f6670a244c10ff7fcbdc3d35b8ec9bfbca178541219870586",
+      "size_bytes": 22233
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/base.stl",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "aloha_vx300s_mesh:base.stl",
+      "sha256": "d100cafe656671ca8fde98fb6a4cf2d1b746995c51c61c25ad9ea2715635d146",
+      "size_bytes": 99984
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper.stl",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "aloha_vx300s_mesh:gripper.stl",
+      "sha256": "786c1077bfd226f14219581b11d5f19464ca95b17132e0bb7532503568f5af90",
+      "size_bytes": 450084
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_bar.stl",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "aloha_vx300s_mesh:gripper_bar.stl",
+      "sha256": "a4de62c9a2ed2c78433010e4c05530a1254b1774a7651967f406120c9bf8973e",
+      "size_bytes": 379484
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_finger.stl",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "aloha_vx300s_mesh:gripper_finger.stl",
+      "sha256": "a4baacd9a64df1be60ea5e98f50f3c660e1b7a1fe9684aace6004c5058c09483",
+      "size_bytes": 42884
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_prop.stl",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "aloha_vx300s_mesh:gripper_prop.stl",
+      "sha256": "d1275a93fe2157c83dbc095617fb7e672888bdd48ec070a35ef4ab9ebd9755b0",
+      "size_bytes": 31684
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/lower_forearm.stl",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "aloha_vx300s_mesh:lower_forearm.stl",
+      "sha256": "66814e27fa728056416e25e02e89eb7d34c51d51c51e7c3df873829037ddc6b8",
+      "size_bytes": 99884
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/shoulder.stl",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "aloha_vx300s_mesh:shoulder.stl",
+      "sha256": "139745a74055cb0b23430bb5bc032bf68cf7bea5e4975c8f4c04107ae005f7f0",
+      "size_bytes": 63884
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/upper_arm.stl",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "aloha_vx300s_mesh:upper_arm.stl",
+      "sha256": "900f236320dd3d500870c5fde763b2d47502d51e043a5c377875e70237108729",
+      "size_bytes": 102984
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/upper_forearm.stl",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "aloha_vx300s_mesh:upper_forearm.stl",
+      "sha256": "4104fc54bbfb8a9b533029f1e7e3ade3d54d638372b3195daa0c98f57e0295b5",
+      "size_bytes": 49584
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/wrist.stl",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "aloha_vx300s_mesh:wrist.stl",
+      "sha256": "90eb145c85627968c3776ae6de23ccff7e112c9dd713c46bc9acdfdaa859a048",
+      "size_bytes": 70784
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/base.stl",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "aloha_wx250s_mesh:base.stl",
+      "sha256": "69facd590abff70fa03431497ead2c7f1aabe616d55af594288e9bf36b1fd067",
+      "size_bytes": 75584
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper.stl",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "aloha_wx250s_mesh:gripper.stl",
+      "sha256": "6dbc189d3787ca62e09a8cf3f928ceca70c5c184a95c97ac6587805aa6a1ec6d",
+      "size_bytes": 17684
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_bar.stl",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "aloha_wx250s_mesh:gripper_bar.stl",
+      "sha256": "b54601da3f60eea180226b695bb95a9b29b187f22f5b74d9a523ac9785d9a518",
+      "size_bytes": 36684
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_finger.stl",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "aloha_wx250s_mesh:gripper_finger.stl",
+      "sha256": "6a459bd4ef07eb5c4687e258bd9564004e741437e2e668af7ed31964567d8f90",
+      "size_bytes": 22284
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/gripper_prop.stl",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "aloha_wx250s_mesh:gripper_prop.stl",
+      "sha256": "30fcd807817b7c9df6275d2c8100cfe0e7786e2c65b574d22efe177520f1a316",
+      "size_bytes": 22684
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/lower_forearm.stl",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "aloha_wx250s_mesh:lower_forearm.stl",
+      "sha256": "1445950b7f5ce2cf374b98711df296acd6c2b4df24c3937b413bcb6beb037603",
+      "size_bytes": 149084
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/shoulder.stl",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "aloha_wx250s_mesh:shoulder.stl",
+      "sha256": "337b4cb7e9b637ee3dca6a737becf831fe5f95b790b34f9a97e5cf11475fc222",
+      "size_bytes": 61884
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/upper_arm.stl",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "aloha_wx250s_mesh:upper_arm.stl",
+      "sha256": "b4550b3a79e83d0ca9e1a65e490ff4e25b667e8a7d8e94bab441851c96eb11fa",
+      "size_bytes": 70484
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/upper_forearm.stl",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "aloha_wx250s_mesh:upper_forearm.stl",
+      "sha256": "1a64efc97dc129bc277afee75c129de27721e8fedcad45a4ec8b251f44542f23",
+      "size_bytes": 30084
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_wx250s_meshes/wrist.stl",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "aloha_wx250s_mesh:wrist.stl",
+      "sha256": "8602fe1313765caceec64faff5ec919ec09c57c614b87f1c1c625dcef1e3df5a",
+      "size_bytes": 57684
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/vx300s_meshes/base.stl",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "standard_vx300s_mesh:base.stl",
+      "sha256": "d100cafe656671ca8fde98fb6a4cf2d1b746995c51c61c25ad9ea2715635d146",
+      "size_bytes": 99984
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/vx300s_meshes/gripper.stl",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "standard_vx300s_mesh:gripper.stl",
+      "sha256": "786c1077bfd226f14219581b11d5f19464ca95b17132e0bb7532503568f5af90",
+      "size_bytes": 450084
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/vx300s_meshes/gripper_bar.stl",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "standard_vx300s_mesh:gripper_bar.stl",
+      "sha256": "a4de62c9a2ed2c78433010e4c05530a1254b1774a7651967f406120c9bf8973e",
+      "size_bytes": 379484
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/vx300s_meshes/gripper_finger.stl",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "standard_vx300s_mesh:gripper_finger.stl",
+      "sha256": "a4baacd9a64df1be60ea5e98f50f3c660e1b7a1fe9684aace6004c5058c09483",
+      "size_bytes": 42884
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/vx300s_meshes/gripper_prop.stl",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "standard_vx300s_mesh:gripper_prop.stl",
+      "sha256": "d1275a93fe2157c83dbc095617fb7e672888bdd48ec070a35ef4ab9ebd9755b0",
+      "size_bytes": 31684
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/vx300s_meshes/lower_forearm.stl",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "standard_vx300s_mesh:lower_forearm.stl",
+      "sha256": "66814e27fa728056416e25e02e89eb7d34c51d51c51e7c3df873829037ddc6b8",
+      "size_bytes": 99884
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/vx300s_meshes/shoulder.stl",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "standard_vx300s_mesh:shoulder.stl",
+      "sha256": "139745a74055cb0b23430bb5bc032bf68cf7bea5e4975c8f4c04107ae005f7f0",
+      "size_bytes": 63884
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/vx300s_meshes/upper_arm.stl",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "standard_vx300s_mesh:upper_arm.stl",
+      "sha256": "900f236320dd3d500870c5fde763b2d47502d51e043a5c377875e70237108729",
+      "size_bytes": 102984
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/vx300s_meshes/upper_forearm.stl",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "standard_vx300s_mesh:upper_forearm.stl",
+      "sha256": "4104fc54bbfb8a9b533029f1e7e3ade3d54d638372b3195daa0c98f57e0295b5",
+      "size_bytes": 49584
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/vx300s_meshes/wrist.stl",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "standard_vx300s_mesh:wrist.stl",
+      "sha256": "90eb145c85627968c3776ae6de23ccff7e112c9dd713c46bc9acdfdaa859a048",
+      "size_bytes": 70784
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/wx250s_meshes/base.stl",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "standard_wx250s_mesh:base.stl",
+      "sha256": "69facd590abff70fa03431497ead2c7f1aabe616d55af594288e9bf36b1fd067",
+      "size_bytes": 75584
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/wx250s_meshes/gripper.stl",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "standard_wx250s_mesh:gripper.stl",
+      "sha256": "6dbc189d3787ca62e09a8cf3f928ceca70c5c184a95c97ac6587805aa6a1ec6d",
+      "size_bytes": 17684
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/wx250s_meshes/gripper_bar.stl",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "standard_wx250s_mesh:gripper_bar.stl",
+      "sha256": "b54601da3f60eea180226b695bb95a9b29b187f22f5b74d9a523ac9785d9a518",
+      "size_bytes": 36684
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/wx250s_meshes/gripper_finger.stl",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "standard_wx250s_mesh:gripper_finger.stl",
+      "sha256": "6a459bd4ef07eb5c4687e258bd9564004e741437e2e668af7ed31964567d8f90",
+      "size_bytes": 22284
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/wx250s_meshes/gripper_prop.stl",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "standard_wx250s_mesh:gripper_prop.stl",
+      "sha256": "30fcd807817b7c9df6275d2c8100cfe0e7786e2c65b574d22efe177520f1a316",
+      "size_bytes": 22684
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/wx250s_meshes/lower_forearm.stl",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "standard_wx250s_mesh:lower_forearm.stl",
+      "sha256": "1445950b7f5ce2cf374b98711df296acd6c2b4df24c3937b413bcb6beb037603",
+      "size_bytes": 149084
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/wx250s_meshes/shoulder.stl",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "standard_wx250s_mesh:shoulder.stl",
+      "sha256": "337b4cb7e9b637ee3dca6a737becf831fe5f95b790b34f9a97e5cf11475fc222",
+      "size_bytes": 61884
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/wx250s_meshes/upper_arm.stl",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "standard_wx250s_mesh:upper_arm.stl",
+      "sha256": "b4550b3a79e83d0ca9e1a65e490ff4e25b667e8a7d8e94bab441851c96eb11fa",
+      "size_bytes": 70484
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/wx250s_meshes/upper_forearm.stl",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "standard_wx250s_mesh:upper_forearm.stl",
+      "sha256": "1a64efc97dc129bc277afee75c129de27721e8fedcad45a4ec8b251f44542f23",
+      "size_bytes": 30084
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/wx250s_meshes/wrist.stl",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "standard_wx250s_mesh:wrist.stl",
+      "sha256": "8602fe1313765caceec64faff5ec919ec09c57c614b87f1c1c625dcef1e3df5a",
+      "size_bytes": 57684
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/interbotix_black.png",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials",
+        "tag": null,
+        "url": "https://github.com/j3soon/ros2-essentials.git"
+      },
+      "role": "interbotix_black_texture",
+      "sha256": "4cd224156bbaab1ddf1b92b90d46c54835a8b41f61bc258b2f216c2618e062cf",
+      "size_bytes": 1994
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc/third_party/aloha/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc/third_party/aloha/config/master_modes_left.yaml",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": null,
+        "commit": "d1dc83afd89ded4379851257fe5d85632d31d5ec",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc/third_party/aloha",
+        "tag": null,
+        "url": "https://github.com/Physical-Intelligence/aloha.git"
+      },
+      "role": "physical_intelligence_aloha_mode_config:master_modes_left.yaml",
+      "sha256": "dd755f147fb707ea84b9533e7bbba4bef5348a13a7a807c97f9bf01cda9605e9",
+      "size_bytes": 117
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc/third_party/aloha/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc/third_party/aloha/config/master_modes_right.yaml",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": null,
+        "commit": "d1dc83afd89ded4379851257fe5d85632d31d5ec",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc/third_party/aloha",
+        "tag": null,
+        "url": "https://github.com/Physical-Intelligence/aloha.git"
+      },
+      "role": "physical_intelligence_aloha_mode_config:master_modes_right.yaml",
+      "sha256": "ec95fa410c6a8a2a9427f8566365108550d57c5fc233a6c28a5c8717959cf8bc",
+      "size_bytes": 118
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc/third_party/aloha/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc/third_party/aloha/config/puppet_modes_left.yaml",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": null,
+        "commit": "d1dc83afd89ded4379851257fe5d85632d31d5ec",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc/third_party/aloha",
+        "tag": null,
+        "url": "https://github.com/Physical-Intelligence/aloha.git"
+      },
+      "role": "physical_intelligence_aloha_mode_config:puppet_modes_left.yaml",
+      "sha256": "862940f33e2459255873d5839a401a5f2d0c0576aa9439b6b58d57118a182cb6",
+      "size_bytes": 338
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc/third_party/aloha/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc/third_party/aloha/config/puppet_modes_right.yaml",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": null,
+        "commit": "d1dc83afd89ded4379851257fe5d85632d31d5ec",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc/third_party/aloha",
+        "tag": null,
+        "url": "https://github.com/Physical-Intelligence/aloha.git"
+      },
+      "role": "physical_intelligence_aloha_mode_config:puppet_modes_right.yaml",
+      "sha256": "a744f6a24b9565027c39770d63d1e1381b223db920815ce55c060d28af30503f",
+      "size_bytes": 339
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc/third_party/aloha/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc/third_party/aloha/aloha_scripts/constants.py",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": null,
+        "commit": "d1dc83afd89ded4379851257fe5d85632d31d5ec",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc/third_party/aloha",
+        "tag": null,
+        "url": "https://github.com/Physical-Intelligence/aloha.git"
+      },
+      "role": "physical_intelligence_aloha_control_or_data_code:constants.py",
+      "sha256": "fe70a2886cfbab92aaeacc19f9482b9a56df8d5b2b67495f60ca279cf1826e94",
+      "size_bytes": 3372
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc/third_party/aloha/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc/third_party/aloha/aloha_scripts/one_side_teleop.py",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": null,
+        "commit": "d1dc83afd89ded4379851257fe5d85632d31d5ec",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc/third_party/aloha",
+        "tag": null,
+        "url": "https://github.com/Physical-Intelligence/aloha.git"
+      },
+      "role": "physical_intelligence_aloha_control_or_data_code:one_side_teleop.py",
+      "sha256": "6597c84315dcef661f5a9b01d3a52fda3ab754cbf3ff8234600263c44f6becf2",
+      "size_bytes": 3133
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc/third_party/aloha/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc/third_party/aloha/aloha_scripts/real_env.py",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": null,
+        "commit": "d1dc83afd89ded4379851257fe5d85632d31d5ec",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc/third_party/aloha",
+        "tag": null,
+        "url": "https://github.com/Physical-Intelligence/aloha.git"
+      },
+      "role": "physical_intelligence_aloha_control_or_data_code:real_env.py",
+      "sha256": "0f80ce696453017319fc4661179bee2217a0bc81cfa682eabf3b2adf7be99b15",
+      "size_bytes": 9634
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc/third_party/aloha/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc/third_party/aloha/aloha_scripts/realsense_publisher.py",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": null,
+        "commit": "d1dc83afd89ded4379851257fe5d85632d31d5ec",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc/third_party/aloha",
+        "tag": null,
+        "url": "https://github.com/Physical-Intelligence/aloha.git"
+      },
+      "role": "physical_intelligence_aloha_control_or_data_code:realsense_publisher.py",
+      "sha256": "f31ef6dab37f68549a558175504d8164c2d03488e1093013cc5415fc5008e98b",
+      "size_bytes": 5896
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc/third_party/aloha/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc/third_party/aloha/aloha_scripts/record_episodes.py",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": null,
+        "commit": "d1dc83afd89ded4379851257fe5d85632d31d5ec",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc/third_party/aloha",
+        "tag": null,
+        "url": "https://github.com/Physical-Intelligence/aloha.git"
+      },
+      "role": "physical_intelligence_aloha_control_or_data_code:record_episodes.py",
+      "sha256": "b84cabf12f36a776b79b5f539c0e5d4e64aee05fc2b0c3a8b5cec36041bdbec1",
+      "size_bytes": 9512
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc/third_party/aloha/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc/third_party/aloha/aloha_scripts/replay_episodes.py",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": null,
+        "commit": "d1dc83afd89ded4379851257fe5d85632d31d5ec",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc/third_party/aloha",
+        "tag": null,
+        "url": "https://github.com/Physical-Intelligence/aloha.git"
+      },
+      "role": "physical_intelligence_aloha_control_or_data_code:replay_episodes.py",
+      "sha256": "2af91a03372515cf9e77dc55e5c99c4ba2ec76e347aad7c6dbb58cdddc10f98b",
+      "size_bytes": 1234
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc/third_party/aloha/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc/third_party/aloha/aloha_scripts/robot_utils.py",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": null,
+        "commit": "d1dc83afd89ded4379851257fe5d85632d31d5ec",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc/third_party/aloha",
+        "tag": null,
+        "url": "https://github.com/Physical-Intelligence/aloha.git"
+      },
+      "role": "physical_intelligence_aloha_control_or_data_code:robot_utils.py",
+      "sha256": "455f63b4fe7f2219d6639b3398b6b61a474e385ebff5c7657d7aaccb26e73ab8",
+      "size_bytes": 9917
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc/third_party/aloha/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc/third_party/aloha/aloha_scripts/sleep.py",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": null,
+        "commit": "d1dc83afd89ded4379851257fe5d85632d31d5ec",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc/third_party/aloha",
+        "tag": null,
+        "url": "https://github.com/Physical-Intelligence/aloha.git"
+      },
+      "role": "physical_intelligence_aloha_control_or_data_code:sleep.py",
+      "sha256": "c3901b50f2a0c35f7a71fc04299ae9370147c47b750e87b30cb2ea3543cbfa6e",
+      "size_bytes": 1061
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc/third_party/aloha/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc/third_party/aloha/aloha_scripts/visualize_episodes.py",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": null,
+        "commit": "d1dc83afd89ded4379851257fe5d85632d31d5ec",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc/third_party/aloha",
+        "tag": null,
+        "url": "https://github.com/Physical-Intelligence/aloha.git"
+      },
+      "role": "physical_intelligence_aloha_control_or_data_code:visualize_episodes.py",
+      "sha256": "18232ad5169a57c46b97d74f2515350e5a9a010ffe0b54516118bc7742933cf6",
+      "size_bytes": 6198
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc/third_party/aloha/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc/third_party/aloha/launch/4arms_teleop.launch",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": null,
+        "commit": "d1dc83afd89ded4379851257fe5d85632d31d5ec",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc/third_party/aloha",
+        "tag": null,
+        "url": "https://github.com/Physical-Intelligence/aloha.git"
+      },
+      "role": "physical_intelligence_aloha_launch:4arms_teleop.launch",
+      "sha256": "d8543ec40081a807bfa43c7b149c7945f933856f180f277fb937cffc2cdaa632",
+      "size_bytes": 6802
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc/third_party/aloha/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc/third_party/aloha/launch/ros_nodes.launch",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": null,
+        "commit": "d1dc83afd89ded4379851257fe5d85632d31d5ec",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc/third_party/aloha",
+        "tag": null,
+        "url": "https://github.com/Physical-Intelligence/aloha.git"
+      },
+      "role": "physical_intelligence_aloha_launch:ros_nodes.launch",
+      "sha256": "36310779742ddf5953a0197f5c04c8a0c1402e1f09a761167ec48d2cbce566e5",
+      "size_bytes": 4686
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_arm_description/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_arm_description/urdf/macros/_common.urdf.xacro",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "21d8b360c211c2ad8a065d8f462cbec0207626e7",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_arm_description",
+        "tag": null,
+        "url": "https://github.com/TrossenRobotics/trossen_arm_description.git"
+      },
+      "role": "trossen_arm_description_xacro:urdf/macros/_common.urdf.xacro",
+      "sha256": "2674a4a8f539d587850e749b0c8ec910d186a2ea5d8dacd1710fac62d872449b",
+      "size_bytes": 551
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_arm_description/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_arm_description/urdf/macros/_wxai.ros2_control.xacro",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "21d8b360c211c2ad8a065d8f462cbec0207626e7",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_arm_description",
+        "tag": null,
+        "url": "https://github.com/TrossenRobotics/trossen_arm_description.git"
+      },
+      "role": "trossen_arm_description_xacro:urdf/macros/_wxai.ros2_control.xacro",
+      "sha256": "0a70233ef9fe6d20240a3ae277a450044989791f408bdedd5fe3f883701ebf7a",
+      "size_bytes": 2482
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_arm_description/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_arm_description/urdf/macros/_wxai.urdf.xacro",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "21d8b360c211c2ad8a065d8f462cbec0207626e7",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_arm_description",
+        "tag": null,
+        "url": "https://github.com/TrossenRobotics/trossen_arm_description.git"
+      },
+      "role": "trossen_arm_description_xacro:urdf/macros/_wxai.urdf.xacro",
+      "sha256": "9f90e044b46acc3e90facceefb841822180f9fffd56162de4eaedb0cb47c66e1",
+      "size_bytes": 23254
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_arm_description/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_arm_description/urdf/mobile_ai.urdf.xacro",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "21d8b360c211c2ad8a065d8f462cbec0207626e7",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_arm_description",
+        "tag": null,
+        "url": "https://github.com/TrossenRobotics/trossen_arm_description.git"
+      },
+      "role": "trossen_arm_description_xacro:urdf/mobile_ai.urdf.xacro",
+      "sha256": "2d79cbe243abe0b60bde0adb904f3c7a660e14e9f21e6c14f5e8a32c6227b603",
+      "size_bytes": 8452
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_arm_description/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_arm_description/urdf/peripherals/rs_d405.urdf.xacro",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "21d8b360c211c2ad8a065d8f462cbec0207626e7",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_arm_description",
+        "tag": null,
+        "url": "https://github.com/TrossenRobotics/trossen_arm_description.git"
+      },
+      "role": "trossen_arm_description_xacro:urdf/peripherals/rs_d405.urdf.xacro",
+      "sha256": "36025358b7e2d07abc91189121b6a5cf7dec8ec8c2089a5a217bcf289ace6dbc",
+      "size_bytes": 6962
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_arm_description/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_arm_description/urdf/stationary_ai.urdf.xacro",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "21d8b360c211c2ad8a065d8f462cbec0207626e7",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_arm_description",
+        "tag": null,
+        "url": "https://github.com/TrossenRobotics/trossen_arm_description.git"
+      },
+      "role": "trossen_arm_description_xacro:urdf/stationary_ai.urdf.xacro",
+      "sha256": "15eb856986662cb6caf8d83995d8d5ca50d502d0621a383b0984758ca33759ed",
+      "size_bytes": 5621
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_arm_description/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_arm_description/urdf/wxai.urdf.xacro",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "21d8b360c211c2ad8a065d8f462cbec0207626e7",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_arm_description",
+        "tag": null,
+        "url": "https://github.com/TrossenRobotics/trossen_arm_description.git"
+      },
+      "role": "trossen_arm_description_xacro:urdf/wxai.urdf.xacro",
+      "sha256": "7df533027c5416adb63bc6787a5430d142c7ac2736d0f41c4f8033dfecd15221",
+      "size_bytes": 1425
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_arm_description/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_arm_description/urdf/generated/mobile_ai.urdf",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "21d8b360c211c2ad8a065d8f462cbec0207626e7",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_arm_description",
+        "tag": null,
+        "url": "https://github.com/TrossenRobotics/trossen_arm_description.git"
+      },
+      "role": "trossen_arm_description_generated_urdf:mobile_ai.urdf",
+      "sha256": "a136bac19f424e5d1e8d9e8d0e81ad3fa42b03b3c1c8c81a16bd6851743f1506",
+      "size_bytes": 57413
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_arm_description/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_arm_description/urdf/generated/stationary_ai.urdf",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "21d8b360c211c2ad8a065d8f462cbec0207626e7",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_arm_description",
+        "tag": null,
+        "url": "https://github.com/TrossenRobotics/trossen_arm_description.git"
+      },
+      "role": "trossen_arm_description_generated_urdf:stationary_ai.urdf",
+      "sha256": "26198178c03dd5cc8b0d2b3acc9f2a36849b646e6c90b3498dce2ace10fcf6c8",
+      "size_bytes": 52110
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_arm_description/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_arm_description/urdf/generated/wxai/wxai_base.urdf",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "21d8b360c211c2ad8a065d8f462cbec0207626e7",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_arm_description",
+        "tag": null,
+        "url": "https://github.com/TrossenRobotics/trossen_arm_description.git"
+      },
+      "role": "trossen_arm_description_generated_urdf:wxai/wxai_base.urdf",
+      "sha256": "4c1779d32309fdfef81aeefd3426cebadde0f66aa619b42ce94cef3e4aa29447",
+      "size_bytes": 10746
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_arm_description/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_arm_description/urdf/generated/wxai/wxai_follower.urdf",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "21d8b360c211c2ad8a065d8f462cbec0207626e7",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_arm_description",
+        "tag": null,
+        "url": "https://github.com/TrossenRobotics/trossen_arm_description.git"
+      },
+      "role": "trossen_arm_description_generated_urdf:wxai/wxai_follower.urdf",
+      "sha256": "10176fc822f77783b2f46f2103d300740b80e8d1397b4d306d5aa0aea60e16bf",
+      "size_bytes": 14774
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_arm_description/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_arm_description/urdf/generated/wxai/wxai_leader_left.urdf",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "21d8b360c211c2ad8a065d8f462cbec0207626e7",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_arm_description",
+        "tag": null,
+        "url": "https://github.com/TrossenRobotics/trossen_arm_description.git"
+      },
+      "role": "trossen_arm_description_generated_urdf:wxai/wxai_leader_left.urdf",
+      "sha256": "e087cfb44ca3e3cdc26097178858ace32cdf523c91dc59676949a7c19e792809",
+      "size_bytes": 11506
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_arm_description/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_arm_description/urdf/generated/wxai/wxai_leader_right.urdf",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "21d8b360c211c2ad8a065d8f462cbec0207626e7",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_arm_description",
+        "tag": null,
+        "url": "https://github.com/TrossenRobotics/trossen_arm_description.git"
+      },
+      "role": "trossen_arm_description_generated_urdf:wxai/wxai_leader_right.urdf",
+      "sha256": "f20742aa340d0537142343ab17d7c714276de0c093d33f541ba3deba58508bd2",
+      "size_bytes": 11517
+    },
+    {
+      "license": {
+        "not_applicable_reason": null,
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_ai_isaac/source/trossen_ai_isaac/setup.py",
+        "spdx": "BSD-3-Clause"
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_ai_isaac/assets/robots/mobile_ai/mobile_ai.usd",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "e5fccea5b3d4978bcd0c6c5cff41115eea684427",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_ai_isaac",
+        "tag": null,
+        "url": "https://github.com/TrossenRobotics/trossen_ai_isaac.git"
+      },
+      "role": "trossen_ai_isaac_usd:mobile_ai/mobile_ai.usd",
+      "sha256": "c8b28fe69e2a9192ca1cb34533afe941e85f5ba76d37c8273a2e5bce90ded48e",
+      "size_bytes": 3697892
+    },
+    {
+      "license": {
+        "not_applicable_reason": null,
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_ai_isaac/source/trossen_ai_isaac/setup.py",
+        "spdx": "BSD-3-Clause"
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_ai_isaac/assets/robots/stationary_ai/stationary_ai.usd",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "e5fccea5b3d4978bcd0c6c5cff41115eea684427",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_ai_isaac",
+        "tag": null,
+        "url": "https://github.com/TrossenRobotics/trossen_ai_isaac.git"
+      },
+      "role": "trossen_ai_isaac_usd:stationary_ai/stationary_ai.usd",
+      "sha256": "ed950af8c7d04fcc8d055843bc3456a3a786cf3df07d150e89613f6196ef932b",
+      "size_bytes": 13756487
+    },
+    {
+      "license": {
+        "not_applicable_reason": null,
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_ai_isaac/source/trossen_ai_isaac/setup.py",
+        "spdx": "BSD-3-Clause"
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_ai_isaac/assets/robots/wxai/wxai_base.usd",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "e5fccea5b3d4978bcd0c6c5cff41115eea684427",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_ai_isaac",
+        "tag": null,
+        "url": "https://github.com/TrossenRobotics/trossen_ai_isaac.git"
+      },
+      "role": "trossen_ai_isaac_usd:wxai/wxai_base.usd",
+      "sha256": "01da30ca248275197a2d49a9f351c573080f4b195c1bbad8e5193fa6c418d0d2",
+      "size_bytes": 2009003
+    },
+    {
+      "license": {
+        "not_applicable_reason": null,
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_ai_isaac/source/trossen_ai_isaac/setup.py",
+        "spdx": "BSD-3-Clause"
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_ai_isaac/assets/robots/wxai/wxai_follower.usd",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "e5fccea5b3d4978bcd0c6c5cff41115eea684427",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_ai_isaac",
+        "tag": null,
+        "url": "https://github.com/TrossenRobotics/trossen_ai_isaac.git"
+      },
+      "role": "trossen_ai_isaac_usd:wxai/wxai_follower.usd",
+      "sha256": "947590c649ab44647e1ed00eb578be7c54cbab91dea37db085addbd056c8b00e",
+      "size_bytes": 3262678
+    },
+    {
+      "license": {
+        "not_applicable_reason": null,
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_ai_isaac/source/trossen_ai_isaac/setup.py",
+        "spdx": "BSD-3-Clause"
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_ai_isaac/assets/robots/wxai/wxai_leader_left.usd",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "e5fccea5b3d4978bcd0c6c5cff41115eea684427",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_ai_isaac",
+        "tag": null,
+        "url": "https://github.com/TrossenRobotics/trossen_ai_isaac.git"
+      },
+      "role": "trossen_ai_isaac_usd:wxai/wxai_leader_left.usd",
+      "sha256": "0ae884e8e5d9fe33c98c2d4764d019361e370728ac841ebda734f59e2f61ce8d",
+      "size_bytes": 1989368
+    },
+    {
+      "license": {
+        "not_applicable_reason": null,
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_ai_isaac/source/trossen_ai_isaac/setup.py",
+        "spdx": "BSD-3-Clause"
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_ai_isaac/assets/robots/wxai/wxai_leader_right.usd",
+      "provenance_class": "official_source",
+      "repository": {
+        "branch": "main",
+        "commit": "e5fccea5b3d4978bcd0c6c5cff41115eea684427",
+        "dirty": false,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/trossen_ai_isaac",
+        "tag": null,
+        "url": "https://github.com/TrossenRobotics/trossen_ai_isaac.git"
+      },
+      "role": "trossen_ai_isaac_usd:wxai/wxai_leader_right.usd",
+      "sha256": "15512a9451356cdaa0cd94db5ced2047f625c03b5e3708242bd3232c7fc1c51f",
+      "size_bytes": 2039283
+    },
+    {
+      "license": {
+        "not_applicable_reason": "no containing Git repository",
+        "path": null,
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/isaac/original_stationary_aloha/generated/puppet_left_vx300s_resolved.urdf",
+      "provenance_class": "project_reuse",
+      "repository": {
+        "branch": null,
+        "commit": null,
+        "dirty": null,
+        "not_applicable_reason": "file is not tracked by containing Git repository",
+        "root": null,
+        "tag": null,
+        "url": null
+      },
+      "role": "project_existing_stationary_aloha_urdf:puppet_left_vx300s_resolved.urdf",
+      "sha256": "a65a6a7a17f283a3fd031144c979d1984648240a1db7c13c9a798af1cd76f038",
+      "size_bytes": 21320
+    },
+    {
+      "license": {
+        "not_applicable_reason": "no containing Git repository",
+        "path": null,
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/isaac/original_stationary_aloha/generated/puppet_right_vx300s_resolved.urdf",
+      "provenance_class": "project_reuse",
+      "repository": {
+        "branch": null,
+        "commit": null,
+        "dirty": null,
+        "not_applicable_reason": "file is not tracked by containing Git repository",
+        "root": null,
+        "tag": null,
+        "url": null
+      },
+      "role": "project_existing_stationary_aloha_urdf:puppet_right_vx300s_resolved.urdf",
+      "sha256": "bf5b28ac31769db7f90692f63a79f4131a6c93b3ca2247ab98c348dcf71e1265",
+      "size_bytes": 21361
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/aloha_isaac_rebuild/configs/physical_reconstruction/base_anchor_measurement_worksheet.yaml",
+      "provenance_class": "project_reuse",
+      "repository": {
+        "branch": "paper_actor_sample",
+        "commit": "08e386d343a574fad9e9cc000f127a4b61424c0d",
+        "dirty": true,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning",
+        "tag": null,
+        "url": "git@github.com:EII-Tokyo/openpi0.5-rtc.git"
+      },
+      "role": "project_existing_aloha_rebuild_config:physical_reconstruction/base_anchor_measurement_worksheet.yaml",
+      "sha256": "d388594713a1152632077454d7e99745a8ac0447d98eb76265091176255f648e",
+      "size_bytes": 3108
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/aloha_isaac_rebuild/configs/physical_reconstruction/base_anchor_preview.yaml",
+      "provenance_class": "project_reuse",
+      "repository": {
+        "branch": "paper_actor_sample",
+        "commit": "08e386d343a574fad9e9cc000f127a4b61424c0d",
+        "dirty": true,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning",
+        "tag": null,
+        "url": "git@github.com:EII-Tokyo/openpi0.5-rtc.git"
+      },
+      "role": "project_existing_aloha_rebuild_config:physical_reconstruction/base_anchor_preview.yaml",
+      "sha256": "2f70f890f570515bac30db49ea9e47c4c7878ad45fd5843e95c35c87ce172ac1",
+      "size_bytes": 2380
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/aloha_isaac_rebuild/configs/physical_reconstruction/camera_default_pose_preview.yaml",
+      "provenance_class": "project_reuse",
+      "repository": {
+        "branch": "paper_actor_sample",
+        "commit": "08e386d343a574fad9e9cc000f127a4b61424c0d",
+        "dirty": true,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning",
+        "tag": null,
+        "url": "git@github.com:EII-Tokyo/openpi0.5-rtc.git"
+      },
+      "role": "project_existing_aloha_rebuild_config:physical_reconstruction/camera_default_pose_preview.yaml",
+      "sha256": "91eab7da415bc4e0ffbde3a0b11b97ca007a899780584f4c7535c7e9f57b18b2",
+      "size_bytes": 2949
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/aloha_isaac_rebuild/configs/physical_reconstruction/camera_markers.yaml",
+      "provenance_class": "project_reuse",
+      "repository": {
+        "branch": "paper_actor_sample",
+        "commit": "08e386d343a574fad9e9cc000f127a4b61424c0d",
+        "dirty": true,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning",
+        "tag": null,
+        "url": "git@github.com:EII-Tokyo/openpi0.5-rtc.git"
+      },
+      "role": "project_existing_aloha_rebuild_config:physical_reconstruction/camera_markers.yaml",
+      "sha256": "ec399ed4c52b3203e3dfb96fcaba187a0c357fdb63a9a36d47321922401ede33",
+      "size_bytes": 4344
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/aloha_isaac_rebuild/configs/physical_reconstruction/cameras.yaml",
+      "provenance_class": "project_reuse",
+      "repository": {
+        "branch": "paper_actor_sample",
+        "commit": "08e386d343a574fad9e9cc000f127a4b61424c0d",
+        "dirty": true,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning",
+        "tag": null,
+        "url": "git@github.com:EII-Tokyo/openpi0.5-rtc.git"
+      },
+      "role": "project_existing_aloha_rebuild_config:physical_reconstruction/cameras.yaml",
+      "sha256": "9bf3ca7a225b93ddce0be52faa1e426c56c87a1e8e645f113cc95b3c2740ebcf",
+      "size_bytes": 4060
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/aloha_isaac_rebuild/configs/physical_reconstruction/original_aloha1_visual_baseline.yaml",
+      "provenance_class": "project_reuse",
+      "repository": {
+        "branch": "paper_actor_sample",
+        "commit": "08e386d343a574fad9e9cc000f127a4b61424c0d",
+        "dirty": true,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning",
+        "tag": null,
+        "url": "git@github.com:EII-Tokyo/openpi0.5-rtc.git"
+      },
+      "role": "project_existing_aloha_rebuild_config:physical_reconstruction/original_aloha1_visual_baseline.yaml",
+      "sha256": "1c35b9fe95a228929374bbc6b7a00cc627d2d78ef9cc77bc2ba4d6a270652a15",
+      "size_bytes": 2083
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/aloha_isaac_rebuild/configs/physical_reconstruction/parameter_registry.yaml",
+      "provenance_class": "project_reuse",
+      "repository": {
+        "branch": "paper_actor_sample",
+        "commit": "08e386d343a574fad9e9cc000f127a4b61424c0d",
+        "dirty": true,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning",
+        "tag": null,
+        "url": "git@github.com:EII-Tokyo/openpi0.5-rtc.git"
+      },
+      "role": "project_existing_aloha_rebuild_config:physical_reconstruction/parameter_registry.yaml",
+      "sha256": "a7c623100bf60efe542d2a1791fbb0a1b05d19a99f9849c63b36b1eaf690eff7",
+      "size_bytes": 27869
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/aloha_isaac_rebuild/configs/physical_reconstruction/physical_layout.yaml",
+      "provenance_class": "project_reuse",
+      "repository": {
+        "branch": "paper_actor_sample",
+        "commit": "08e386d343a574fad9e9cc000f127a4b61424c0d",
+        "dirty": true,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning",
+        "tag": null,
+        "url": "git@github.com:EII-Tokyo/openpi0.5-rtc.git"
+      },
+      "role": "project_existing_aloha_rebuild_config:physical_reconstruction/physical_layout.yaml",
+      "sha256": "49321d40ec5787e93f021801656b009d4b4960dac807ea4fe0d4b1bd0905e50b",
+      "size_bytes": 3263
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/aloha_isaac_rebuild/configs/physical_reconstruction/pipe_bottle_measurement_worksheet.yaml",
+      "provenance_class": "project_reuse",
+      "repository": {
+        "branch": "paper_actor_sample",
+        "commit": "08e386d343a574fad9e9cc000f127a4b61424c0d",
+        "dirty": true,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning",
+        "tag": null,
+        "url": "git@github.com:EII-Tokyo/openpi0.5-rtc.git"
+      },
+      "role": "project_existing_aloha_rebuild_config:physical_reconstruction/pipe_bottle_measurement_worksheet.yaml",
+      "sha256": "22e9ff5493f4aa6ceb68579478c245b868dee5634f5321a6fe8573d0743d9651",
+      "size_bytes": 3864
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/aloha_isaac_rebuild/configs/physical_reconstruction/stationary_style_rebuild.yaml",
+      "provenance_class": "project_reuse",
+      "repository": {
+        "branch": "paper_actor_sample",
+        "commit": "08e386d343a574fad9e9cc000f127a4b61424c0d",
+        "dirty": true,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning",
+        "tag": null,
+        "url": "git@github.com:EII-Tokyo/openpi0.5-rtc.git"
+      },
+      "role": "project_existing_aloha_rebuild_config:physical_reconstruction/stationary_style_rebuild.yaml",
+      "sha256": "8b5b898842a4cc6a29ff3cf6605e7b1e2c3331929bd5137af4dfc8035cb2e2d6",
+      "size_bytes": 3659
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/aloha_isaac_rebuild/configs/physical_reconstruction/support_frame.yaml",
+      "provenance_class": "project_reuse",
+      "repository": {
+        "branch": "paper_actor_sample",
+        "commit": "08e386d343a574fad9e9cc000f127a4b61424c0d",
+        "dirty": true,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning",
+        "tag": null,
+        "url": "git@github.com:EII-Tokyo/openpi0.5-rtc.git"
+      },
+      "role": "project_existing_aloha_rebuild_config:physical_reconstruction/support_frame.yaml",
+      "sha256": "190f8d4d97c080f61e194d5e7f29fc73d2f794c79b1448488a225b893ffdc573",
+      "size_bytes": 4738
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/aloha_isaac_rebuild/configs/physical_reconstruction/support_frame_components.yaml",
+      "provenance_class": "project_reuse",
+      "repository": {
+        "branch": "paper_actor_sample",
+        "commit": "08e386d343a574fad9e9cc000f127a4b61424c0d",
+        "dirty": true,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning",
+        "tag": null,
+        "url": "git@github.com:EII-Tokyo/openpi0.5-rtc.git"
+      },
+      "role": "project_existing_aloha_rebuild_config:physical_reconstruction/support_frame_components.yaml",
+      "sha256": "66e9e8bb5eb038ee3e437f3c52c5c1aecdf5991fd82e9a8e12c313788dff44b8",
+      "size_bytes": 8790
+    },
+    {
+      "license": {
+        "not_applicable_reason": "license file has no SPDX identifier",
+        "path": "/home/eii/project/openpi0.5-rtc-reward-learning/LICENSE",
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/aloha_isaac_rebuild/scenes/a19_clean_articulation_candidate.usda",
+      "provenance_class": "project_reuse",
+      "repository": {
+        "branch": "paper_actor_sample",
+        "commit": "08e386d343a574fad9e9cc000f127a4b61424c0d",
+        "dirty": true,
+        "not_applicable_reason": null,
+        "root": "/home/eii/project/openpi0.5-rtc-reward-learning",
+        "tag": null,
+        "url": "git@github.com:EII-Tokyo/openpi0.5-rtc.git"
+      },
+      "role": "project_a19_clean_articulation_candidate",
+      "sha256": "7742a35383820877a67e3663eedb96d9b659c1be710dd05209adf6fa1bee723c",
+      "size_bytes": 47665
+    },
+    {
+      "license": {
+        "not_applicable_reason": "no containing Git repository",
+        "path": null,
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha_model_audit/openpi_aloha_mapping.json",
+      "provenance_class": "project_reuse",
+      "repository": {
+        "branch": null,
+        "commit": null,
+        "dirty": null,
+        "not_applicable_reason": "file is not tracked by containing Git repository",
+        "root": null,
+        "tag": null,
+        "url": null
+      },
+      "role": "project_existing_openpi_aloha_mapping",
+      "sha256": "1d266315bc9d4832c6e1b6eb12f624d89730d5961d2fb2803622e02b2cedfcc4",
+      "size_bytes": 4077
+    },
+    {
+      "license": {
+        "not_applicable_reason": "no containing Git repository",
+        "path": null,
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_isaac_adaptation/phase13_joint_schema_20260718/joint_schema_comparison.json",
+      "provenance_class": "project_reuse",
+      "repository": {
+        "branch": null,
+        "commit": null,
+        "dirty": null,
+        "not_applicable_reason": "file is not tracked by containing Git repository",
+        "root": null,
+        "tag": null,
+        "url": null
+      },
+      "role": "project_existing_joint_schema_comparison",
+      "sha256": "025e5d1e1160fa03620496819cbe3e358779493628b8a938c9e657c86bb96b40",
+      "size_bytes": 38162
+    },
+    {
+      "license": {
+        "not_applicable_reason": "no containing Git repository",
+        "path": null,
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_isaac_adaptation/phase28_physics_property_comparison_20260718/physics_property_comparison.json",
+      "provenance_class": "project_reuse",
+      "repository": {
+        "branch": null,
+        "commit": null,
+        "dirty": null,
+        "not_applicable_reason": "file is not tracked by containing Git repository",
+        "root": null,
+        "tag": null,
+        "url": null
+      },
+      "role": "project_existing_physics_property_comparison",
+      "sha256": "a1c37bb5c094b7d6f54e6e1a95e90f07addfba940c1b2a765f45db8afbdcc0f6",
+      "size_bytes": 146023
+    },
+    {
+      "license": {
+        "not_applicable_reason": "no containing Git repository",
+        "path": null,
+        "spdx": null
+      },
+      "local_path": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd",
+      "provenance_class": "project_reuse",
+      "repository": {
+        "branch": null,
+        "commit": null,
+        "dirty": null,
+        "not_applicable_reason": "file is not tracked by containing Git repository",
+        "root": null,
+        "tag": null,
+        "url": null
+      },
+      "role": "project_user_confirmed_comparison_stage",
+      "sha256": "236d2d133047d665cf7d3ad0e58e04ae218e56dcf70bbe63e110d1307d3f3215",
+      "size_bytes": 11283
+    }
+  ]
+}

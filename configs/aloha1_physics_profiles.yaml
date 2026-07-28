@@ -1,0 +1,183 @@
+schema_version: 1
+status: PARTIAL
+default_profile: debug_acceleration_drive
+profiles:
+  debug_acceleration_drive:
+    drive_type: acceleration
+    target_type: position
+    gain_policy: preserve_isaac_5_1_importer_authored_values
+    status: INTERFACE_DEBUG_ONLY
+    dynamics_fidelity_claim: false
+  sim2real_force_drive:
+    drive_type: force
+    target_type: position
+    gain_policy: temporary_copy_of_importer_authored_values
+    status: CALIBRATION_PENDING
+    dynamics_fidelity_claim: false
+    hard_blocker: measured mass/inertia, motor response, friction, and Gain Tuner
+      evidence are unavailable
+fingertip_material:
+  status: TEMPORARY_PLACEHOLDER
+  static_friction: 0.5
+  dynamic_friction: 0.5
+  restitution: 0.0
+  hard_blocker: measured Stationary ALOHA 1 fingertip friction
+robots:
+- name: follower_left
+  base_usd: /home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/follower_left.usd
+  profile_dir: /home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/configuration
+  home_si:
+  - 0
+  - -0.96
+  - 1.16
+  - 0
+  - -0.3
+  - 0
+  - 0.0
+  - 0.02239
+  - -0.02239
+  home_source: Physical-Intelligence/aloha constants.py START_ARM_POSE; gripper motor
+    DOF has no entry and remains at 0 rad
+  dofs:
+  - name: waist
+    joint_type: revolute
+    home_si: 0
+    velocity_limit_si: 3.141592653589793
+    max_force: 10.0
+    mimic: false
+    author_drive: true
+  - name: shoulder
+    joint_type: revolute
+    home_si: -0.96
+    velocity_limit_si: 3.141592653589793
+    max_force: 20.0
+    mimic: false
+    author_drive: true
+  - name: elbow
+    joint_type: revolute
+    home_si: 1.16
+    velocity_limit_si: 3.141592653589793
+    max_force: 15.0
+    mimic: false
+    author_drive: true
+  - name: forearm_roll
+    joint_type: revolute
+    home_si: 0
+    velocity_limit_si: 3.141592653589793
+    max_force: 2.0
+    mimic: false
+    author_drive: true
+  - name: wrist_angle
+    joint_type: revolute
+    home_si: -0.3
+    velocity_limit_si: 3.141592653589793
+    max_force: 5.0
+    mimic: false
+    author_drive: true
+  - name: wrist_rotate
+    joint_type: revolute
+    home_si: 0
+    velocity_limit_si: 3.141592653589793
+    max_force: 1.0
+    mimic: false
+    author_drive: true
+  - name: gripper
+    joint_type: continuous
+    home_si: 0.0
+    velocity_limit_si: 3.141592653589793
+    max_force: 1.0
+    mimic: false
+    author_drive: true
+  - name: left_finger
+    joint_type: prismatic
+    home_si: 0.02239
+    velocity_limit_si: 1.0
+    max_force: 5.0
+    mimic: false
+    author_drive: true
+  - name: right_finger
+    joint_type: prismatic
+    home_si: -0.02239
+    velocity_limit_si: 1.0
+    max_force: 5.0
+    mimic: true
+    author_drive: false
+- name: follower_right
+  base_usd: /home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/follower_right.usd
+  profile_dir: /home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/configuration
+  home_si:
+  - 0
+  - -0.96
+  - 1.16
+  - 0
+  - -0.3
+  - 0
+  - 0.0
+  - 0.02239
+  - -0.02239
+  home_source: Physical-Intelligence/aloha constants.py START_ARM_POSE; gripper motor
+    DOF has no entry and remains at 0 rad
+  dofs:
+  - name: waist
+    joint_type: revolute
+    home_si: 0
+    velocity_limit_si: 3.141592653589793
+    max_force: 10.0
+    mimic: false
+    author_drive: true
+  - name: shoulder
+    joint_type: revolute
+    home_si: -0.96
+    velocity_limit_si: 3.141592653589793
+    max_force: 20.0
+    mimic: false
+    author_drive: true
+  - name: elbow
+    joint_type: revolute
+    home_si: 1.16
+    velocity_limit_si: 3.141592653589793
+    max_force: 15.0
+    mimic: false
+    author_drive: true
+  - name: forearm_roll
+    joint_type: revolute
+    home_si: 0
+    velocity_limit_si: 3.141592653589793
+    max_force: 2.0
+    mimic: false
+    author_drive: true
+  - name: wrist_angle
+    joint_type: revolute
+    home_si: -0.3
+    velocity_limit_si: 3.141592653589793
+    max_force: 5.0
+    mimic: false
+    author_drive: true
+  - name: wrist_rotate
+    joint_type: revolute
+    home_si: 0
+    velocity_limit_si: 3.141592653589793
+    max_force: 1.0
+    mimic: false
+    author_drive: true
+  - name: gripper
+    joint_type: continuous
+    home_si: 0.0
+    velocity_limit_si: 3.141592653589793
+    max_force: 1.0
+    mimic: false
+    author_drive: true
+  - name: left_finger
+    joint_type: prismatic
+    home_si: 0.02239
+    velocity_limit_si: 1.0
+    max_force: 5.0
+    mimic: false
+    author_drive: true
+  - name: right_finger
+    joint_type: prismatic
+    home_si: -0.02239
+    velocity_limit_si: 1.0
+    max_force: 5.0
+    mimic: true
+    author_drive: false

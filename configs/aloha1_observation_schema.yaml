@@ -1,0 +1,19 @@
+schema_version: 1
+status: PARTIAL
+camera_order:
+- cam_high
+- cam_low
+- cam_left_wrist
+- cam_right_wrist
+image_shape_hwc:
+- 480
+- 640
+- 3
+image_dtype: uint8
+color_semantics: RGB interface target; existing historical datasets may carry BGR-valued
+  JPEG data and require dataset-specific handling
+state_order_reference: configs/aloha1_joint_map.yaml
+state_shape:
+- 14
+action_shape:
+- 14

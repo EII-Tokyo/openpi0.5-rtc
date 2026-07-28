@@ -1,0 +1,53 @@
+schema_version: 1
+status: PARTIAL
+cameras:
+- name: cam_high
+  logical_role: fixed_third_person
+  resolution_wh:
+  - 640
+  - 480
+  resolution_status: CONTROL_CODE_INTERFACE_CONTRACT
+  frame_rate_hz: null
+  intrinsics: null
+  distortion_policy: null
+  mounting_extrinsics: null
+  calibration_status: CALIBRATION_PENDING
+  render_eligible: false
+- name: cam_low
+  logical_role: fixed_third_person
+  resolution_wh:
+  - 640
+  - 480
+  resolution_status: CONTROL_CODE_INTERFACE_CONTRACT
+  frame_rate_hz: null
+  intrinsics: null
+  distortion_policy: null
+  mounting_extrinsics: null
+  calibration_status: CALIBRATION_PENDING
+  render_eligible: false
+- name: cam_left_wrist
+  logical_role: wrist
+  resolution_wh:
+  - 640
+  - 480
+  resolution_status: CONTROL_CODE_INTERFACE_CONTRACT
+  frame_rate_hz: null
+  intrinsics: null
+  distortion_policy: null
+  mounting_extrinsics: null
+  calibration_status: CALIBRATION_PENDING
+  render_eligible: false
+- name: cam_right_wrist
+  logical_role: wrist
+  resolution_wh:
+  - 640
+  - 480
+  resolution_status: CONTROL_CODE_INTERFACE_CONTRACT
+  frame_rate_hz: null
+  intrinsics: null
+  distortion_policy: null
+  mounting_extrinsics: null
+  calibration_status: CALIBRATION_PENDING
+  render_eligible: false
+hard_blocker: intrinsics, distortion/cropping, frame rate, and extrinsics for all
+  four cameras
