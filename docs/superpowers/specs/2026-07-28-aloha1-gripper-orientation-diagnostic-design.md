@@ -28,6 +28,20 @@ the final asset configuration.
 
 The historical USD and both custom finger meshes remain read-only.
 
+## User Confirmation
+
+On 2026-07-28 the user marked this bounded orientation gate as `PASS`.
+The accepted scope is custom-finger visual identity, physical left/right
+installation order, legal open/closed motion, and opposed inner surfaces.
+This does not claim collision accuracy, force delivery, static bottle hold,
+or calibrated physical dimensions.
+
+The prior 856-triangle generic finger is rejected for the current physical
+ALOHA gripper. Existing collider and hold reports that used it remain
+preserved but are classified as historical, non-transferable evidence. The
+restart boundary is the correct-finger asset identity and installation
+transform preflight immediately before Task 5.
+
 ## Root-Cause Evidence Before Implementation
 
 The earlier screenshots used one Matplotlib `Poly3DCollection` per mesh.

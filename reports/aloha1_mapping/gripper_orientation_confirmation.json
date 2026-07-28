@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "status": "PASS",
+  "classification": "PASS_USER_CONFIRMED_VISUAL_AND_RUNTIME_GEOMETRY",
+  "confirmed_at_local_date": "2026-07-28",
+  "confirmed_custom_finger_provenance_status": "PENDING_REPOSITORY_COMMIT_LICENSE_AUDIT",
+  "scope": [
+    "historical Stationary ALOHA 1 follower gripper visual geometry identity",
+    "physical left/right finger installation order",
+    "legal open/closed finger motion direction",
+    "opposed inward gripping-surface normals"
+  ],
+  "explicitly_not_claimed": [
+    "collision geometry accuracy",
+    "absence of collision overlap",
+    "contact-force delivery",
+    "static bottle hold",
+    "real-hardware dimensional calibration"
+  ],
+  "frozen_historical_usd": {
+    "path": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_assets/aloha_viperx.usd",
+    "sha256": "b24afe3678155654892c69517fc58ecd970108d68cec56b02dc6fdcb8bf4493e"
+  },
+  "confirmed_custom_fingers": {
+    "physical_left": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv/lib/python3.11/site-packages/gym_aloha/assets/vx300s_10_custom_finger_left.stl",
+      "sha256": "df73ae5b9058e5d50a6409ac2ab687dade75053a86591bb5e23ab051dbf2d659",
+      "triangle_count": 1666
+    },
+    "physical_right": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv/lib/python3.11/site-packages/gym_aloha/assets/vx300s_10_custom_finger_right.stl",
+      "sha256": "56fb3cc1236d4193106038adf8e457c7252ae9e86c7cee6dabf0578c53666358",
+      "triangle_count": 1666
+    }
+  },
+  "rejected_previous_test_mesh": {
+    "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_finger.stl",
+    "sha256": "a4baacd9a64df1be60ea5e98f50f3c660e1b7a1fe9684aace6004c5058c09483",
+    "triangle_count": 856,
+    "status": "REJECTED_FOR_CURRENT_PHYSICAL_ALOHA_GRIPPER"
+  },
+  "runtime_readback": {
+    "coordinate_frame": "vx300s_left_gripper_link; +X forward, +Y physical left, +Z up",
+    "closed_q_m": {
+      "left": 0.020999999716877937,
+      "right": -0.020999999716877937
+    },
+    "open_q_m": {
+      "left": 0.05700000002980232,
+      "right": -0.05700000002980232
+    },
+    "closed_center_separation_m": 0.021599890468698164,
+    "open_center_separation_m": 0.09359990346807359,
+    "left_inward_normal_y": -0.9999987317063627,
+    "right_inward_normal_y": 0.9999987319913759,
+    "deterministic_rerun": "PASS"
+  },
+  "evidence": {
+    "artifact_manifest": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260728-aloha1-gripper-orientation/orientation_diagnostic_manifest.json",
+    "screenshot_directory": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260728-aloha1-gripper-orientation",
+    "user_visual_confirmation": "PASS"
+  },
+  "prior_gripper_experiment_disposition": {
+    "status": "HISTORICAL_NON_TRANSFERABLE_TO_CONFIRMED_CUSTOM_FINGERS",
+    "reason": "The prior collider and hold experiments used the rejected 856-triangle generic finger mesh.",
+    "preserve_reports": true,
+    "do_not_delete_or_overwrite": true
+  },
+  "restart_boundary": {
+    "id": "TASK5_PREFLIGHT_CORRECT_FINGER_ASSET_IDENTITY_AND_INSTALL_TRANSFORM",
+    "redo_tasks_1_to_4_in_full": false,
+    "task8": "NOT_RUN",
+    "ordered_next_steps": [
+      "Audit repository, commit, license, paths, and mesh/transform lineage for both confirmed custom fingers.",
+      "Create an isolated diagnostic follower asset using the confirmed left/right meshes and legal initial finger q; keep original URDF and imported USD immutable.",
+      "Verify visual and collision mesh paths, articulation DOF order, limits, mimic mapping, aperture, and absence of initial overlap.",
+      "Repeat the Convex Hull versus Convex Decomposition geometry and runtime A/B experiment on the confirmed custom meshes.",
+      "Repeat Task 5 open/close, mimic, aperture, penetration, contact, and static-hold tests.",
+      "Only if corrected Task 5 still fails, repeat contact semantics, preload-force, material, dynamic-hold, and conditional solver diagnosis.",
+      "Rerun Task 7 after the corrected Task 5 gate; keep Task 8 blocked until validation passes."
+    ]
+  }
+}

@@ -367,9 +367,11 @@ def _extract_only() -> None:
 def _render_and_finalize() -> None:
     OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
     previous_capture_hashes = None
+    previous_user_confirmation = None
     if FINAL_MANIFEST.is_file():
         previous_manifest = json.loads(FINAL_MANIFEST.read_text(encoding="utf-8"))
         previous_capture_hashes = [capture["sha256"] for capture in previous_manifest.get("captures", [])]
+        previous_user_confirmation = previous_manifest.get("user_visual_confirmation")
     extraction_log = OUTPUT_ROOT / "isaac_runtime_extraction.log"
     command = [sys.executable, str(Path(__file__).resolve()), "--extract-only"]
     with extraction_log.open("w", encoding="utf-8") as stream:
@@ -431,6 +433,7 @@ def _render_and_finalize() -> None:
         raise RuntimeError("Frozen source USD changed during render")
     capture_hashes = [capture["sha256"] for capture in captures]
     deterministic_rerun = "PASS" if previous_capture_hashes == capture_hashes else "NOT_YET_VERIFIED"
+    user_confirmed = isinstance(previous_user_confirmation, dict) and previous_user_confirmation.get("status") == "PASS"
     manifest.update(
         {
             "captures": captures,
@@ -442,7 +445,12 @@ def _render_and_finalize() -> None:
             "previous_screenshot_status": "INVALID_AUTHORED_ZERO_STATE",
             "screenshot_machine_gate": "PASS",
             "deterministic_rerun": deterministic_rerun,
-            "awaiting": "ASSISTANT_VISUAL_INSPECTION_THEN_USER_CONFIRMATION",
+            "user_visual_confirmation": previous_user_confirmation or {"status": "NOT_RECORDED"},
+            "awaiting": (
+                "CORRECT_FINGER_ASSET_INTEGRATION_BEFORE_TASK5_RERUN"
+                if user_confirmed
+                else "ASSISTANT_VISUAL_INSPECTION_THEN_USER_CONFIRMATION"
+            ),
         }
     )
     FINAL_MANIFEST.write_text(

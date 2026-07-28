@@ -14,10 +14,11 @@ sim-to-real dynamics model and it is not yet accepted for bottle insertion.
 | Isaac Sim 5.1 import | PASS | `reports/aloha1_mapping/import_manifest.json` |
 | Explicit joint/control mapping | PARTIAL | `configs/aloha1_joint_map.yaml`, `control_mapping_report.json` |
 | Physics profiles | PARTIAL | `configs/aloha1_physics_profiles.yaml`, `physics_profiles.json` |
-| Gripper collider experiment execution | PASS | `reports/aloha1_mapping/gripper_collider_ab_results.json:experiment_execution_status` |
-| Gripper static bottle hold | **FAIL** | `gripper_force_diagnosis/hold_v2.json:STATIC_HOLD_STATUS` |
-| Gripper collider A/B root cause | `neither_resolved` | `gripper_root_cause_classification.json` |
-| Gripper hold root cause v2 | `inconclusive` | `gripper_hold_root_cause_v2.json` |
+| Correct custom-finger identity/orientation | PASS | `reports/aloha1_mapping/gripper_orientation_confirmation.json` |
+| Gripper collider experiment execution | **RE-RUN REQUIRED** | prior run used the rejected generic finger mesh |
+| Gripper static bottle hold | **RE-RUN REQUIRED** | prior `FAIL` is historical and non-transferable to the confirmed custom fingers |
+| Gripper collider A/B root cause | **SUPERSEDED INPUT** | prior `neither_resolved` used the rejected generic finger mesh |
+| Gripper hold root cause v2 | **SUPERSEDED INPUT** | prior `inconclusive` used the rejected generic finger mesh |
 | Workcell and logical cameras | PARTIAL | `workcell_manifest.json`, `camera_validation.json` |
 | Official and custom Task 7 validation | **FAIL** | `reports/aloha1_mapping/validation_summary.json`, `asset_validator_report.json` |
 | Repeated headless determinism | PASS | `validation_summary.json:determinism`, `gripper_validation.json:determinism` |
@@ -101,10 +102,28 @@ The current gripper test uses only the available bottle body measurements:
 - mass: `0.020 kg`
 
 The cylinder inertia is engineering-derived and uncalibrated. Bottle neck,
-shoulder, base profile, and measured inertia remain unavailable. The gripper
-finger mesh was independently confirmed as
-`a4baacd9a64df1be60ea5e98f50f3c660e1b7a1fe9684aace6004c5058c09483`;
-the import baseline is the current STL convex hull.
+shoulder, base profile, and measured inertia remain unavailable.
+
+### User-confirmed project-reuse geometry
+
+On 2026-07-28 the user confirmed the historical Stationary ALOHA 1 custom
+finger geometry and its legal open/closed orientation:
+
+- physical-left custom finger:
+  `df73ae5b9058e5d50a6409ac2ab687dade75053a86591bb5e23ab051dbf2d659`;
+- physical-right custom finger:
+  `56fb3cc1236d4193106038adf8e457c7252ae9e86c7cee6dabf0578c53666358`.
+
+The previously tested generic 856-triangle finger
+`a4baacd9a64df1be60ea5e98f50f3c660e1b7a1fe9684aace6004c5058c09483`
+is rejected for the current physical ALOHA gripper. Prior collider, contact,
+preload-force, and hold reports remain preserved as historical runs, but
+their physical conclusions are non-transferable to the confirmed custom
+fingers. The exact restart boundary is recorded in
+`reports/aloha1_mapping/gripper_orientation_confirmation.json`.
+Repository, commit, and license provenance for these two installed
+`gym_aloha` mesh files remains a required pre-Task-5 audit; visual
+confirmation does not substitute for that provenance gate.
 
 ### Engineering inferences and acceptance thresholds
 
@@ -264,6 +283,13 @@ unclassified errors:
 `physics_rules_classification.json` and `asset_validator_report.json`.
 
 ## Task 5 gripper result
+
+> **Input supersession notice:** all results in this section and its two
+> follow-up diagnosis sections used the now-rejected generic
+> `a4baacd9...9483` finger mesh. They remain valid records of those exact
+> simulations, but they are not current acceptance evidence for the
+> user-confirmed custom ALOHA fingers. Restart from
+> `TASK5_PREFLIGHT_CORRECT_FINGER_ASSET_IDENTITY_AND_INSTALL_TRANSFORM`.
 
 The original protected baseline remains
 `reports/aloha1_mapping/gripper_validation.json`.

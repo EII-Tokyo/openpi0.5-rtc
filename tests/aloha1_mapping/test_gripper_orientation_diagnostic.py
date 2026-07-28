@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 import numpy as np
 
 from tools.aloha1_mapping.gripper_orientation import classify_orientation
@@ -9,6 +12,8 @@ from tools.aloha1_mapping.gripper_orientation import inward_surface_normal_y
 from tools.aloha1_mapping.gripper_orientation import obj_text
 from tools.aloha1_mapping.gripper_orientation import physical_side_order
 from tools.aloha1_mapping.gripper_orientation import surface_normal_gate
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
 def test_physical_side_order_requires_left_above_right_y() -> None:
@@ -78,3 +83,18 @@ def test_expected_capture_names_cover_both_states_and_three_views() -> None:
         "open_top.png",
         "open_isometric.png",
     ]
+
+
+def test_user_confirmation_restarts_before_task5_with_correct_meshes() -> None:
+    report = json.loads(
+        (PROJECT_ROOT / "reports/aloha1_mapping/gripper_orientation_confirmation.json").read_text(encoding="utf-8")
+    )
+
+    assert report["status"] == "PASS"
+    assert report["restart_boundary"]["id"] == "TASK5_PREFLIGHT_CORRECT_FINGER_ASSET_IDENTITY_AND_INSTALL_TRANSFORM"
+    assert report["restart_boundary"]["redo_tasks_1_to_4_in_full"] is False
+    assert report["rejected_previous_test_mesh"]["status"] == "REJECTED_FOR_CURRENT_PHYSICAL_ALOHA_GRIPPER"
+    assert (
+        report["prior_gripper_experiment_disposition"]["status"]
+        == "HISTORICAL_NON_TRANSFERABLE_TO_CONFIRMED_CUSTOM_FINGERS"
+    )
