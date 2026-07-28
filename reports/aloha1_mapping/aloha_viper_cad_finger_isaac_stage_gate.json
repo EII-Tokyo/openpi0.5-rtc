@@ -1,0 +1,114 @@
+{
+  "schema_version": 1,
+  "status": "PARTIAL",
+  "scope": "Static authorization and source gate only; no USD Stage was opened, switched, authored, or simulated",
+  "official_isaac_gateway_evidence": {
+    "status": "PASS",
+    "gateway": "mcpjungle_lab",
+    "provider": "NVIDIA official Isaac documentation MCP",
+    "queried_instruction_sets": [
+      "physics",
+      "omniverse_and_usd",
+      "importers_and_exporters",
+      "asset_structure",
+      "api_documentation"
+    ],
+    "applicable_guidance": [
+      "USD Physics and PhysxSchema APIs must be applied/read through schema objects rather than guessed attributes",
+      "source assets remain unchanged and physics/configuration features belong in separate layers",
+      "visual geometry and collision geometry are independent"
+    ],
+    "version_boundary": "Gateway documentation is discovery evidence only; exact API names and defaults are pinned to local Isaac Sim 5.1 source and runtime probes"
+  },
+  "local_isaac_5_1_evidence": {
+    "isaac_sim": "5.1.0.0",
+    "kit": "107.3.3",
+    "physx": "107.3.26",
+    "urdf_importer": "2.4.30",
+    "importer_api_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.importer.urdf/docs/api.rst",
+    "importer_api_sha256": "ac4c111d48982deb29473dfac2f19970352145dca5c51d7daa252551789f6fbe",
+    "importer_manifest_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.importer.urdf/config/extension.toml",
+    "importer_manifest_sha256": "6ee1a8ab74c492930c792f7cabc657e022fb06dab4198ef413f6e1b359439baf",
+    "confirmed_import_config_member": "convex_decomp",
+    "confirmed_command": "URDFCreateImportConfig",
+    "runtime_probe_status": "NOT_RUN_STAGE_NOT_AUTHORIZED"
+  },
+  "input_evidence": {
+    "mapping": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_gripper_mapping.json",
+      "sha256": "972c1575d1551355e79bd402139c909ebeea39654161eb44235eff69abf5f32f",
+      "status": "PARTIAL"
+    },
+    "tessellation": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_finger_tessellation.json",
+      "sha256": "86b386954ba6390b5261adc5d07a506b03fa28d5ae78c9c42cfcd0b95ba822cb",
+      "status": "PARTIAL",
+      "production_tessellation_gate": "HARD_BLOCKER"
+    },
+    "source_manifest": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_source_manifest.json",
+      "sha256": "282c76121e32b6df80618becdeb89845cf294f3e2631e8c7cf4743db15116c70",
+      "status": "PARTIAL",
+      "license_status": "UNKNOWN_HARD_BLOCKER"
+    }
+  },
+  "input_gates": {
+    "cad_installation_mapping_pass": true,
+    "screenshot_visual_gate_pass": true,
+    "two_run_linear_tessellation_deterministic": true,
+    "source_inventory_complete": true,
+    "historical_candidate_hash_unchanged": true
+  },
+  "stage_selection": {
+    "status": "HARD_BLOCKER",
+    "reason": "No absolute Stage path has been user-approved for the post-2026-07-29 supplier-CAD finger diagnostic. The known file is historical evidence, not authorization to load or mutate it for this task.",
+    "historical_candidate": {
+      "classification": "HISTORICAL_CANDIDATE_NOT_AUTHORIZED_CURRENT_TASK",
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_assets/aloha_viperx.usd",
+      "sha256": "b24afe3678155654892c69517fc58ecd970108d68cec56b02dc6fdcb8bf4493e",
+      "expected_frozen_sha256": "b24afe3678155654892c69517fc58ecd970108d68cec56b02dc6fdcb8bf4493e",
+      "root_prim": "UNVERIFIED_NOT_LOADED",
+      "sublayers": "UNVERIFIED_NOT_LOADED",
+      "required_key_prims": "UNVERIFIED_NOT_LOADED"
+    },
+    "required_to_clear": [
+      "user-approved absolute Stage path",
+      "frozen SHA-256",
+      "expected root prim",
+      "expected sublayers",
+      "required follower/gripper prim paths"
+    ]
+  },
+  "diagnostic_asset_plan": {
+    "status": "STATIC_PREPARED_NOT_AUTHORED",
+    "target_directory": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_installation",
+    "source_fingers": {
+      "left_finger": "Simple Viper embedded Part__Feature007 / CAD +X",
+      "right_finger": "Simple Viper embedded Part__Feature008 / CAD -X"
+    },
+    "visual_mesh_policy": "diagnostic only; never auto-promote to collider",
+    "collision_mesh_policy": "NOT_SELECTED; final/default collider remains unchanged",
+    "composition_policy": "separate diagnostic geometry/configuration layer; do not overwrite source USD or final/default configuration"
+  },
+  "execution_status": {
+    "isolated_diagnostic_usd": "NOT_RUN",
+    "isaac_open_closed_screenshots": "NOT_RUN",
+    "task_5_correct_cad_finger": "NOT_RUN",
+    "task_7": "NOT_RUN",
+    "task_8": "NOT_RUN"
+  },
+  "hard_blockers": [
+    {
+      "id": "ISAAC_REVIEW_STAGE_NOT_USER_APPROVED",
+      "scope_blocked": "Stage load/switch, USD authoring against a selected follower, Isaac screenshots, Task 5, and Task 7"
+    },
+    {
+      "id": "CAD_LICENSE_UNKNOWN",
+      "scope_blocked": "committing or redistributing original STEP/PDF files"
+    },
+    {
+      "id": "ANGULAR_TESSELLATION_CONTROL_UNAVAILABLE",
+      "scope_blocked": "promotion of the linear-only diagnostic mesh as the fully parameter-controlled production visual mesh"
+    }
+  ]
+}
