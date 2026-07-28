@@ -1,0 +1,116 @@
+{
+  "schema_version": 1,
+  "review_method": "INDIVIDUAL_CODEX_VISUAL_MODEL_INSPECTION",
+  "reviewed_capture_names": [
+    "follower_left_open_closing_axis",
+    "follower_left_open_isometric",
+    "follower_left_closed_closing_axis",
+    "follower_left_closed_isometric",
+    "follower_right_open_closing_axis",
+    "follower_right_open_isometric",
+    "follower_right_closed_closing_axis",
+    "follower_right_closed_isometric",
+    "follower_left_hull_open_with_bottle_isometric",
+    "follower_left_hull_bilateral_contact_established_closing_axis",
+    "follower_left_hull_bilateral_contact_established_isometric",
+    "follower_left_hull_release_isometric",
+    "follower_left_hull_hold_end_isometric",
+    "follower_right_hull_open_with_bottle_isometric",
+    "follower_right_hull_bilateral_contact_established_closing_axis",
+    "follower_right_hull_bilateral_contact_established_isometric",
+    "follower_right_hull_release_isometric",
+    "follower_right_hull_hold_end_isometric",
+    "follower_left_decomposition_open_with_bottle_isometric",
+    "follower_left_decomposition_bilateral_contact_established_closing_axis",
+    "follower_left_decomposition_bilateral_contact_established_isometric",
+    "follower_left_decomposition_release_isometric",
+    "follower_left_decomposition_hold_end_isometric",
+    "follower_right_decomposition_open_with_bottle_isometric",
+    "follower_right_decomposition_bilateral_contact_established_closing_axis",
+    "follower_right_decomposition_bilateral_contact_established_isometric",
+    "follower_right_decomposition_release_isometric",
+    "follower_right_decomposition_hold_end_isometric",
+    "follower_left_hull_overview",
+    "follower_left_hull_inner_surface",
+    "follower_right_hull_overview",
+    "follower_right_hull_inner_surface",
+    "follower_left_decomposition_overview",
+    "follower_left_decomposition_inner_surface",
+    "follower_right_decomposition_overview",
+    "follower_right_decomposition_inner_surface"
+  ],
+  "defaults_by_phase": {
+    "asset_preflight": {
+      "objects_visible": [
+        "left finger (blue)",
+        "right finger (orange)",
+        "inner gripping geometry",
+        "gripper bar"
+      ],
+      "view_exposes_test_target": true,
+      "conclusion": "Both custom fingers and their inner geometry are visible at inspection scale; paired open/closed images have an obvious aperture change.",
+      "retake_history": []
+    },
+    "runtime_open": {
+      "objects_visible": [
+        "left finger (blue)",
+        "right finger (orange)",
+        "65 mm bottle",
+        "bilateral free gap"
+      ],
+      "view_exposes_test_target": true,
+      "conclusion": "Both fingers, the bottle contact band, and visible bilateral free gaps are exposed before closure.",
+      "retake_history": [
+        {
+          "action": "ADDED_DURING_VISUAL_RECERTIFICATION",
+          "reason": "The earlier evidence set had no open-with-bottle image sharing the runtime camera anchor."
+        }
+      ]
+    },
+    "bilateral_contact": {
+      "objects_visible": [
+        "left finger (blue)",
+        "right finger (orange)",
+        "65 mm bottle",
+        "left contact interface",
+        "right contact interface"
+      ],
+      "view_exposes_test_target": true,
+      "conclusion": "The retaken elevated and isometric views expose both finger-to-bottle interfaces; visual markers agree with bilateral runtime contact data.",
+      "retake_history": [
+        {
+          "action": "RETAKEN",
+          "reason": "The original near-horizontal closing-axis view was rejected because the opaque bottle and gripper bar hid the inner contact bands."
+        }
+      ]
+    },
+    "release_hold": {
+      "objects_visible": [
+        "left finger (blue)",
+        "right finger (orange)",
+        "unconstrained bottle",
+        "release or hold-end pose"
+      ],
+      "view_exposes_test_target": true,
+      "conclusion": "Both fingers and bottle remain visible; release and hold-end differ in pose under an identical fixed camera anchor, with exact drop and velocity stated on the annotation.",
+      "retake_history": [
+        {
+          "action": "RETAKEN",
+          "reason": "The original camera followed the bottle and visually masked the measured displacement between release and hold end."
+        }
+      ]
+    },
+    "collider_geometry": {
+      "objects_visible": [
+        "left cooked finger collider",
+        "right cooked finger collider",
+        "convex piece boundaries",
+        "local metric axes"
+      ],
+      "view_exposes_test_target": true,
+      "conclusion": "Side-by-side overview or inner-region panels expose both cooked colliders, metric axes, and the Hull/Decomposition piece structure.",
+      "retake_history": []
+    }
+  },
+  "capture_overrides": {}
+}

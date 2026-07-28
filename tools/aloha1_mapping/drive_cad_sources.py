@@ -16,6 +16,39 @@ ROOT_FOLDER_URL = (
     "https://drive.google.com/drive/folders/"
     "1mhJuhzT4lBnvZ9VE57UgT6vmJDFPVsBf"
 )
+FIRST_PARTY_SOURCE_CHAIN: dict[str, dict[str, str]] = {
+    "sales_page": {
+        "url": "https://idminer.com.tw/product/aloha-viperx/",
+        "publisher": "采智科技股份有限公司 / IDMiner",
+        "role": "PURCHASE_PRODUCT_PAGE_USER_CONFIRMED_FIRST_HAND",
+    },
+    "sales_catalog": {
+        "url": (
+            "https://drive.google.com/file/d/"
+            "11KcnA49dhTiOD_MxmmC_SG75Cs97-JKh/view?usp=sharing"
+        ),
+        "google_drive_file_id": "11KcnA49dhTiOD_MxmmC_SG75Cs97-JKh",
+        "role": "TROSSEN_VIPERX_FOLLOWER_SALES_SHEET",
+    },
+    "technical_drawing": {
+        "url": (
+            "https://drive.google.com/file/d/"
+            "11M96-4JDw0y31OZMTQQ3Nqz1qCIqk_DU/view?usp=sharing"
+        ),
+        "google_drive_file_id": "11M96-4JDw0y31OZMTQQ3Nqz1qCIqk_DU",
+        "role": "ALOHA_VX300S_FOLLOWER_TECHNICAL_DRAWING",
+    },
+    "public_3d_cad": {
+        "url": ROOT_FOLDER_URL,
+        "google_drive_folder_id": ROOT_FOLDER_ID,
+        "role": "ALOHA_KITS_PUBLIC_3D_CAD",
+    },
+    "trossen_manual": {
+        "url": "https://docs.trossenrobotics.com/aloha_docs/",
+        "publisher": "Trossen Robotics",
+        "role": "ALOHA_KITS_ONLINE_MANUAL",
+    },
+}
 
 EXPECTED_PUBLIC_CAD_FILES: tuple[dict[str, str], ...] = (
     {
@@ -232,6 +265,7 @@ def build_public_cad_manifest(
         "writable_files": writable,
         "non_ap214_files": ap_non_214,
         "source_access_status": "PUBLIC_VENDOR_RELEASE_USER_CONFIRMED",
+        "first_party_source_chain": FIRST_PARTY_SOURCE_CHAIN,
         "project_use_status": "ALLOWED_USER_CONFIRMED",
         "local_read_only_analysis_status": (
             "PASS" if inventory_status == "PASS" else "FAIL"
@@ -300,6 +334,18 @@ def write_public_cad_reports(
             f"`{manifest['present_file_count']}/{manifest['expected_file_count']}`"
         ),
         f"- Read-only source root: `{manifest['source_root']}`",
+        (
+            "- Purchase page: "
+            f"`{manifest['first_party_source_chain']['sales_page']['url']}`"
+        ),
+        (
+            "- VX300S technical drawing: "
+            f"`{manifest['first_party_source_chain']['technical_drawing']['url']}`"
+        ),
+        (
+            "- Public CAD folder: "
+            f"`{manifest['first_party_source_chain']['public_3d_cad']['url']}`"
+        ),
         "",
         (
             "The project-use decision is based on the user's direct statement "

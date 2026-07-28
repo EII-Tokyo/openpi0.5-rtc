@@ -7,6 +7,9 @@
 - Original-file redistribution: `UNKNOWN_HARD_BLOCKER`
 - Files: `14/14`
 - Read-only source root: `/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/gdrive_source_readonly`
+- Purchase page: `https://idminer.com.tw/product/aloha-viperx/`
+- VX300S technical drawing: `https://drive.google.com/file/d/11M96-4JDw0y31OZMTQQ3Nqz1qCIqk_DU/view?usp=sharing`
+- Public CAD folder: `https://drive.google.com/drive/folders/1mhJuhzT4lBnvZ9VE57UgT6vmJDFPVsBf`
 
 The project-use decision is based on the user's direct statement that ALOHA publicly released these resources for all users. No formal SPDX license text was discovered, so this report does not claim an SPDX license or authorize redistribution of the original STEP files.
 

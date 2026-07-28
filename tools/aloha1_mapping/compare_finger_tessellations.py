@@ -49,20 +49,53 @@ def build_comparison(
     all_match = all(
         item["all_fields_match"] for item in mesh_comparisons.values()
     )
+    angular_controlled = all(
+        manifest.get("status") == "PASS"
+        and manifest.get("mesher_api") == "MeshPart.meshFromShape"
+        and isinstance(manifest.get("angular_deflection_rad"), float)
+        and manifest.get("angular_deflection_rad") > 0.0
+        for manifest in (run_a, run_b)
+    )
+    tessellation_parameters_match = all(
+        run_a.get(field) == run_b.get(field)
+        for field in (
+            "freecad_version",
+            "opencascade_version",
+            "mesher_api",
+            "linear_deflection_mm",
+            "angular_deflection_rad",
+            "angular_deflection_deg",
+            "unit_scale_m_per_mm",
+            "weld_sew_policy",
+            "instance_merge_policy",
+        )
+    )
+    production_pass = (
+        all_match and angular_controlled and tessellation_parameters_match
+    )
     return {
         "schema_version": 1,
-        "status": "PARTIAL" if all_match else "FAIL",
-        "determinism_gate": "PASS" if all_match else "FAIL",
-        "production_tessellation_gate": "HARD_BLOCKER",
-        "production_blocker": (
-            "The installed FreeCAD snap cannot load MeshPart, and "
-            "Part.Shape.tessellate does not accept an angular-deflection "
-            "parameter. These runs prove linear-only reproducibility, not "
-            "the requested production tessellation parameter closure."
+        "status": (
+            "PASS"
+            if production_pass
+            else ("PARTIAL" if all_match else "FAIL")
         ),
+        "determinism_gate": "PASS" if all_match else "FAIL",
+        "production_tessellation_gate": (
+            "PASS" if production_pass else "HARD_BLOCKER"
+        ),
+        "production_blocker": None
+        if production_pass
+        else (
+            "The compared manifests do not prove two matching runs with "
+            "explicit MeshPart linear and angular deflection control. "
+            "Linear-only runs remain diagnostic and cannot be promoted."
+        ),
+        "tessellation_parameters_match": tessellation_parameters_match,
+        "angular_controlled": angular_controlled,
         "scope": (
-            "two-fresh-directory linear-deflection-only diagnostic visual "
-            "mesh comparison; collision and final assets unchanged"
+            "two-fresh-directory deterministic supplier-CAD visual mesh "
+            "comparison; collision and final assets unchanged"
         ),
         "run_a": {
             "manifest_path": str(run_a_manifest.resolve()),
@@ -108,7 +141,11 @@ def write_comparison(
         ),
         "- Final/default visual and collision assets modified: `false`",
         "",
-        report["production_blocker"],
+        report["production_blocker"]
+        or (
+            "Both fresh runs used matching explicit MeshPart linear and "
+            "angular deflection parameters."
+        ),
         "",
         "| Finger | Byte hash | Canonical geometry | Vertices | Triangles | Components | Degenerate |",
         "|---|---|---|---:|---:|---:|---:|",

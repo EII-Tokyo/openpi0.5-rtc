@@ -11,7 +11,10 @@ from typing import Any
 import xml.etree.ElementTree as ET
 
 import numpy as np
-from scipy.spatial import cKDTree
+
+from tools.aloha1_mapping.cad_finger_installation import CAD_ASSEMBLY_TO_FINGER_LINK_ROTATION
+from tools.aloha1_mapping.cad_finger_installation import cad_global_to_finger_link_matrix
+from tools.aloha1_mapping.cad_finger_installation import determinant3
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 CAD_ARTIFACT_ROOT = (
@@ -192,8 +195,8 @@ def _mirror_residual(
     mirrored = positive - positive_center
     mirrored[:, 0] *= -1.0
     mirrored += negative_center
-    positive_to_negative = cKDTree(negative).query(mirrored, k=1)[0]
-    negative_to_positive = cKDTree(mirrored).query(negative, k=1)[0]
+    positive_to_negative = _nearest_distances(mirrored, negative)
+    negative_to_positive = _nearest_distances(negative, mirrored)
     combined_squared = np.concatenate(
         (positive_to_negative**2, negative_to_positive**2)
     )
@@ -213,6 +216,24 @@ def _mirror_residual(
             "an exact B-Rep surface Hausdorff distance"
         ),
     }
+
+
+def _nearest_distances(
+    query: np.ndarray,
+    reference: np.ndarray,
+    *,
+    chunk_size: int = 256,
+) -> np.ndarray:
+    """Return exact Euclidean nearest distances without a SciPy ABI dependency."""
+    distances: list[np.ndarray] = []
+    for start in range(0, len(query), chunk_size):
+        chunk = query[start : start + chunk_size]
+        squared = np.sum(
+            (chunk[:, np.newaxis, :] - reference[np.newaxis, :, :]) ** 2,
+            axis=2,
+        )
+        distances.append(np.sqrt(np.min(squared, axis=1)))
+    return np.concatenate(distances)
 
 
 def _authoritative_widow_installation(
@@ -543,6 +564,10 @@ def build_gripper_mapping_report(
     toolchain_probe_path: Path | None = None,
     screenshot_review_path: Path | None = None,
     render_metadata_path: Path | None = None,
+    tessellation_report_path: Path | None = None,
+    mount_registration_path: Path | None = None,
+    isaac_screenshot_review_path: Path | None = None,
+    diagnostic_asset_path: Path | None = None,
 ) -> dict[str, Any]:
     viper_state_path = viper_state_path or (
         CAD_ARTIFACT_ROOT / "viper_gripper/viper_gripper_states.json"
@@ -558,6 +583,24 @@ def build_gripper_mapping_report(
         CAD_ARTIFACT_ROOT
         / "viper_gripper/attempt5_candidate/render_metadata.json"
     )
+    tessellation_report_path = tessellation_report_path or (
+        PROJECT_ROOT
+        / "reports/aloha1_mapping/aloha_viper_finger_tessellation.json"
+    )
+    mount_registration_path = mount_registration_path or (
+        PROJECT_ROOT
+        / "reports/aloha1_mapping/aloha_viper_cad_mount_registration.json"
+    )
+    isaac_screenshot_review_path = isaac_screenshot_review_path or (
+        PROJECT_ROOT
+        / "reports/aloha1_mapping/"
+        "aloha_viper_cad_finger_isaac_screenshot_review.json"
+    )
+    diagnostic_asset_path = diagnostic_asset_path or (
+        PROJECT_ROOT
+        / "reports/aloha1_mapping/"
+        "aloha_viper_cad_finger_diagnostic_asset_v2.json"
+    )
     audit = json.loads(freecad_audit_path.read_text(encoding="utf-8"))
     viper_state_report = json.loads(
         viper_state_path.read_text(encoding="utf-8")
@@ -570,6 +613,18 @@ def build_gripper_mapping_report(
     )
     render_metadata = json.loads(
         render_metadata_path.read_text(encoding="utf-8")
+    )
+    tessellation_report = json.loads(
+        tessellation_report_path.read_text(encoding="utf-8")
+    )
+    mount_registration = json.loads(
+        mount_registration_path.read_text(encoding="utf-8")
+    )
+    isaac_screenshot_review = json.loads(
+        isaac_screenshot_review_path.read_text(encoding="utf-8")
+    )
+    diagnostic_asset = json.loads(
+        diagnostic_asset_path.read_text(encoding="utf-8")
     )
     sources = {
         source["source_label"]: source for source in audit.get("sources", [])
@@ -761,19 +816,26 @@ def build_gripper_mapping_report(
             f"widow_crosscheck_{name}": value
             for name, value in widow_crosscheck["gates"].items()
         },
+        "production_angular_tessellation_pass": (
+            tessellation_report["production_tessellation_gate"] == "PASS"
+        ),
+        "mounting_datum_registration_pass": (
+            mount_registration["status"] == "PASS"
+        ),
+        "isaac_visual_review_pass": (
+            isaac_screenshot_review["status"] == "PASS"
+        ),
+        "isolated_diagnostic_asset_pass": (
+            diagnostic_asset["status"] == "PASS"
+        ),
     }
     connection_geometry_status = "PASS"
-    production_tessellation_gate = toolchain_probe[
+    production_tessellation_gate = tessellation_report[
         "production_tessellation_gate"
     ]
     return {
-        "schema_version": 2,
-        "status": (
-            "PARTIAL"
-            if all(gates.values())
-            and production_tessellation_gate == "HARD_BLOCKER"
-            else ("PASS" if all(gates.values()) else "FAIL")
-        ),
+        "schema_version": 3,
+        "status": "PASS" if all(gates.values()) else "FAIL",
         "orientation_mapping_status": (
             "PASS" if all(gates.values()) else "FAIL"
         ),
@@ -813,6 +875,22 @@ def build_gripper_mapping_report(
                 "path": str(screenshot_review_path.resolve()),
                 "sha256": _sha256(screenshot_review_path),
             },
+            "tessellation_report": {
+                "path": str(tessellation_report_path.resolve()),
+                "sha256": _sha256(tessellation_report_path),
+            },
+            "mount_registration_report": {
+                "path": str(mount_registration_path.resolve()),
+                "sha256": _sha256(mount_registration_path),
+            },
+            "isaac_screenshot_review": {
+                "path": str(isaac_screenshot_review_path.resolve()),
+                "sha256": _sha256(isaac_screenshot_review_path),
+            },
+            "isolated_diagnostic_asset": {
+                "path": str(diagnostic_asset_path.resolve()),
+                "sha256": _sha256(diagnostic_asset_path),
+            },
         },
         "unit_conversion": {
             "cad_unit": "millimetre",
@@ -835,10 +913,16 @@ def build_gripper_mapping_report(
             },
             "production_tessellation_gate": production_tessellation_gate,
             "angular_deflection_control": (
-                "NOT_APPLIED_HARD_BLOCKER"
-                if production_tessellation_gate == "HARD_BLOCKER"
-                else "AVAILABLE"
+                "EXPLICIT_MESHPART_LINEAR_AND_ANGULAR"
             ),
+            "tessellation_report_path": str(
+                tessellation_report_path.resolve()
+            ),
+            "tessellation_report_sha256": _sha256(
+                tessellation_report_path
+            ),
+            "tessellation_run_a": tessellation_report["run_a"],
+            "tessellation_run_b": tessellation_report["run_b"],
             "probe_path": str(toolchain_probe_path.resolve()),
             "probe_sha256": _sha256(toolchain_probe_path),
         },
@@ -851,6 +935,60 @@ def build_gripper_mapping_report(
             ],
             "report_path": str(screenshot_review_path.resolve()),
             "report_sha256": _sha256(screenshot_review_path),
+        },
+        "isaac_visual_evidence": {
+            "status": isaac_screenshot_review["status"],
+            "gate": isaac_screenshot_review["gate"],
+            "capture_count": isaac_screenshot_review["capture_count"],
+            "report_path": str(isaac_screenshot_review_path.resolve()),
+            "report_sha256": _sha256(isaac_screenshot_review_path),
+            "acceptance_boundary": (
+                "CAD installation visual evidence only; no collision, "
+                "contact, dynamics, or grasp acceptance"
+            ),
+        },
+        "mounting_datum_registration": {
+            "status": mount_registration["status"],
+            "method": mount_registration["method"],
+            "threshold_m": mount_registration["threshold_m"],
+            "datums": mount_registration["datums"],
+            "decision_boundary": mount_registration["decision_boundary"],
+            "report_path": str(mount_registration_path.resolve()),
+            "report_sha256": _sha256(mount_registration_path),
+        },
+        "isolated_diagnostic_asset": {
+            "status": diagnostic_asset["status"],
+            "root_usd": diagnostic_asset["diagnostic_outputs"][
+                "root_usd"
+            ],
+            "source_stage": diagnostic_asset["source_stage"],
+            "collision_policy": diagnostic_asset["collision_policy"],
+            "report_path": str(diagnostic_asset_path.resolve()),
+            "report_sha256": _sha256(diagnostic_asset_path),
+        },
+        "cad_to_finger_link_mapping": {
+            "matrix_convention": (
+                "column-vector affine transform from STEP-global metres "
+                "to each closed-state finger-link local frame"
+            ),
+            "left_matrix": [
+                list(row)
+                for row in cad_global_to_finger_link_matrix("left")
+            ],
+            "right_matrix": [
+                list(row)
+                for row in cad_global_to_finger_link_matrix("right")
+            ],
+            "local_axis_mapping": {
+                "cad_local_x": "finger_link_+Y",
+                "cad_local_y": "finger_link_+Z",
+                "cad_local_z": "finger_link_+X",
+            },
+            "determinant": determinant3(
+                CAD_ASSEMBLY_TO_FINGER_LINK_ROTATION
+            ),
+            "mirror_used": False,
+            "single_side_180_degree_rotation_used": False,
         },
         "cad_to_urdf_frame_mapping": urdf,
         "primary_follower_installation": primary_installation,
@@ -916,6 +1054,17 @@ def write_gripper_mapping_reports(
         (
             "- Production angular-controlled tessellation: "
             f"`{report['toolchain']['production_tessellation_gate']}`"
+        ),
+        (
+            "- Supplier-CAD mounting datum registration: "
+            f"`{report['mounting_datum_registration']['status']}` "
+            f"(`{report['mounting_datum_registration']['method']}`)"
+        ),
+        (
+            "- Isaac isolated installation screenshots: "
+            f"`{report['isaac_visual_evidence']['status']}` "
+            f"({report['isaac_visual_evidence']['capture_count']} "
+            "raw/annotated pairs)"
         ),
         "- Isaac/default asset mutation: `false`",
         "- CAD +X opening side → URDF `left_finger` (+Y)",
@@ -984,6 +1133,17 @@ def write_gripper_mapping_reports(
             "- Angular deflection control: "
             f"`{report['toolchain']['angular_deflection_control']}`"
         ),
+        (
+            "- CAD local axes → finger link: "
+            "`+X→+Y`, `+Y→+Z`, `+Z→+X`; determinant "
+            f"`{report['cad_to_finger_link_mapping']['determinant']}`; "
+            "mirror `false`."
+        ),
+        (
+            "- Mounting datum threshold: "
+            f"`{report['mounting_datum_registration']['threshold_m']} m`; "
+            "full-surface ICP was not used for the decision."
+        ),
         "",
         (
             "The standalone 2025 finger STEP is not silently substituted for "
@@ -991,6 +1151,12 @@ def write_gripper_mapping_reports(
             "volumes identify different revisions. Purchase-confirmed Simple "
             "Viper is the follower-primary assembly; Widow and Stationary are "
             "cross-checks."
+        ),
+        "",
+        (
+            "The Isaac screenshot PASS is a CAD-installation visual gate only. "
+            "It does not claim collider, contact, dynamics, or bottle-grasp "
+            "acceptance."
         ),
         "",
         "## Stationary follower instances",

@@ -1,17 +1,19 @@
 {
   "schema_version": 1,
-  "status": "PARTIAL",
+  "status": "PASS",
   "determinism_gate": "PASS",
-  "production_tessellation_gate": "HARD_BLOCKER",
-  "production_blocker": "The installed FreeCAD snap cannot load MeshPart, and Part.Shape.tessellate does not accept an angular-deflection parameter. These runs prove linear-only reproducibility, not the requested production tessellation parameter closure.",
-  "scope": "two-fresh-directory linear-deflection-only diagnostic visual mesh comparison; collision and final assets unchanged",
+  "production_tessellation_gate": "PASS",
+  "production_blocker": null,
+  "tessellation_parameters_match": true,
+  "angular_controlled": true,
+  "scope": "two-fresh-directory deterministic supplier-CAD visual mesh comparison; collision and final assets unchanged",
   "run_a": {
-    "manifest_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/tessellation_determinism/run_a/manifest.json",
-    "manifest_sha256": "2d7af343c075eecd002c8c31aadfd2e5c97555f534ab194a3c5a90ccc9da173f"
+    "manifest_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/tessellation_angular_controlled/run_a/manifest.json",
+    "manifest_sha256": "1479a56e8431c029598dc9560c8aefccaaaef2fbb6f9b9e3d7a0cfb892b1d167"
   },
   "run_b": {
-    "manifest_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/tessellation_determinism/run_b/manifest.json",
-    "manifest_sha256": "7e251e165253901824dcfb51399f079711ccedfdde6fb0d598a3fc47c1648f68"
+    "manifest_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/tessellation_angular_controlled/run_b/manifest.json",
+    "manifest_sha256": "c87a19535c13cec4b462c2f80d9ed14250babbe9462ff0ea71c721174bafc86f"
   },
   "mesh_comparisons": {
     "left_finger": {
@@ -64,11 +66,11 @@
           ]
         ],
         "source_placement_determinant": 1.0,
-        "obj_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/tessellation_determinism/run_a/left_finger.obj",
-        "obj_sha256": "4ad84fda6be43ef418c05ee7c771ff0b14dbbec2c4cff46bb8d6dd1a95ea63a5",
-        "canonical_geometry_sha256": "b28febf858f3b48396a35f6d4ea0b8ed2b5acb1cdd3bc1277ebfc9e2072aae67",
-        "vertex_count": 1808,
-        "triangle_count": 3616,
+        "obj_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/tessellation_angular_controlled/run_a/left_finger.obj",
+        "obj_sha256": "c6710d0fe5b2030a32722d9df5c0b553c771c9d61d92b8ddaec36c94c5963488",
+        "canonical_geometry_sha256": "aa463c46337daa6d0c17699bf1835ed7e21f6517db8f87523e417bdf78b1d9b3",
+        "vertex_count": 831,
+        "triangle_count": 1662,
         "aabb_mm": {
           "XMin": 2.3440294657072607,
           "YMin": -589.40758784902,
@@ -121,11 +123,11 @@
           ]
         ],
         "source_placement_determinant": 1.0,
-        "obj_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/tessellation_determinism/run_b/left_finger.obj",
-        "obj_sha256": "4ad84fda6be43ef418c05ee7c771ff0b14dbbec2c4cff46bb8d6dd1a95ea63a5",
-        "canonical_geometry_sha256": "b28febf858f3b48396a35f6d4ea0b8ed2b5acb1cdd3bc1277ebfc9e2072aae67",
-        "vertex_count": 1808,
-        "triangle_count": 3616,
+        "obj_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/tessellation_angular_controlled/run_b/left_finger.obj",
+        "obj_sha256": "c6710d0fe5b2030a32722d9df5c0b553c771c9d61d92b8ddaec36c94c5963488",
+        "canonical_geometry_sha256": "aa463c46337daa6d0c17699bf1835ed7e21f6517db8f87523e417bdf78b1d9b3",
+        "vertex_count": 831,
+        "triangle_count": 1662,
         "aabb_mm": {
           "XMin": 2.3440294657072607,
           "YMin": -589.40758784902,
@@ -193,11 +195,11 @@
           ]
         ],
         "source_placement_determinant": 1.0,
-        "obj_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/tessellation_determinism/run_a/right_finger.obj",
-        "obj_sha256": "188e7fd92643242c7e3d90cd45c0dc04794030b54a4f5c751fc20e737427e55e",
-        "canonical_geometry_sha256": "74d4fcf3f86478818d110577fbc7cba123ac8b9b5c7c79f92b4518b9a5ac8aea",
-        "vertex_count": 1808,
-        "triangle_count": 3616,
+        "obj_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/tessellation_angular_controlled/run_a/right_finger.obj",
+        "obj_sha256": "b0979c5d55fee448dab512dc75b1251bab17d94892decd01de9a6e76c01482d1",
+        "canonical_geometry_sha256": "99a941cc2439c93fa2d4eaffdd9f3021cb493535e9353640476604bbfa643795",
+        "vertex_count": 831,
+        "triangle_count": 1662,
         "aabb_mm": {
           "XMin": -29.611498950326723,
           "YMin": -589.40758784902,
@@ -250,11 +252,11 @@
           ]
         ],
         "source_placement_determinant": 1.0,
-        "obj_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/tessellation_determinism/run_b/right_finger.obj",
-        "obj_sha256": "188e7fd92643242c7e3d90cd45c0dc04794030b54a4f5c751fc20e737427e55e",
-        "canonical_geometry_sha256": "74d4fcf3f86478818d110577fbc7cba123ac8b9b5c7c79f92b4518b9a5ac8aea",
-        "vertex_count": 1808,
-        "triangle_count": 3616,
+        "obj_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/tessellation_angular_controlled/run_b/right_finger.obj",
+        "obj_sha256": "b0979c5d55fee448dab512dc75b1251bab17d94892decd01de9a6e76c01482d1",
+        "canonical_geometry_sha256": "99a941cc2439c93fa2d4eaffdd9f3021cb493535e9353640476604bbfa643795",
+        "vertex_count": 831,
+        "triangle_count": 1662,
         "aabb_mm": {
           "XMin": -29.611498950326723,
           "YMin": -589.40758784902,

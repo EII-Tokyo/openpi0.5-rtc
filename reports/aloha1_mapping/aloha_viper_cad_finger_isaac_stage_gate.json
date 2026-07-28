@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "status": "PARTIAL",
-  "scope": "Static authorization and source gate only; no USD Stage was opened, switched, authored, or simulated",
+  "scope": "User-approved source Stage frozen read-only; isolated v2 diagnostic USD and CAD-installation screenshots completed. Task 5/7 remain not run and Task 8 remains prohibited.",
   "official_isaac_gateway_evidence": {
     "status": "PASS",
     "gateway": "mcpjungle_lab",
@@ -31,57 +31,85 @@
     "importer_manifest_sha256": "6ee1a8ab74c492930c792f7cabc657e022fb06dab4198ef413f6e1b359439baf",
     "confirmed_import_config_member": "convex_decomp",
     "confirmed_command": "URDFCreateImportConfig",
-    "runtime_probe_status": "NOT_RUN_STAGE_NOT_AUTHORIZED"
+    "runtime_probe_status": "PASS_READ_ONLY_STAGE_AUDIT"
   },
   "input_evidence": {
     "mapping": {
       "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_gripper_mapping.json",
-      "sha256": "972c1575d1551355e79bd402139c909ebeea39654161eb44235eff69abf5f32f",
-      "status": "PARTIAL"
+      "sha256": "9c67d96039f24438d4d5d9b36593fa5747a43f91b32eb31cf0fe1c3e4c53b2a0",
+      "status": "PASS"
     },
     "tessellation": {
       "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_finger_tessellation.json",
-      "sha256": "86b386954ba6390b5261adc5d07a506b03fa28d5ae78c9c42cfcd0b95ba822cb",
-      "status": "PARTIAL",
-      "production_tessellation_gate": "HARD_BLOCKER"
+      "sha256": "f09916af65182e44b1a97f3e6eaff4b20b8954759346a356294e94c33a961678",
+      "status": "PASS",
+      "production_tessellation_gate": "PASS"
     },
     "source_manifest": {
       "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_source_manifest.json",
-      "sha256": "282c76121e32b6df80618becdeb89845cf294f3e2631e8c7cf4743db15116c70",
+      "sha256": "8171ab521fb259aadb2b637445c8d4577b657da7dd5a9446bc2d5e0bc560c152",
       "status": "PARTIAL",
       "license_status": "UNKNOWN_HARD_BLOCKER"
+    },
+    "authorized_stage_audit": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_cad_finger_authorized_stage_audit.json",
+      "sha256": "bd1fedc077837433095e9ac7a8df376e8b715501ff484116a9edbef0ff9e1637",
+      "status": "PASS"
+    },
+    "isolated_diagnostic_asset": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_cad_finger_diagnostic_asset_v2.json",
+      "sha256": "1cf4240249a3c9f7fbbaff643a8bfefd9ec9300170b882f3ebf4b2c7b9c49272",
+      "status": "PASS",
+      "root_usd": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_installation_v2/aloha_viperx_cad_finger_diagnostic.usda",
+        "sha256": "9f64f2ef6e280d3505c900a7b13e649331cf8bb227d910928647762ef4a5edc3"
+      }
+    },
+    "isaac_screenshot_review": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_cad_finger_isaac_screenshot_review.json",
+      "sha256": "5dfff3366dccb796de46bb2f0db9b6a47dc96efe34b5477066aa5ce62edc900c",
+      "status": "PASS",
+      "capture_count": 8,
+      "gate": "ISAAC_CAD_INSTALLATION_VISUAL_EVIDENCE_ONLY"
     }
   },
   "input_gates": {
     "cad_installation_mapping_pass": true,
     "screenshot_visual_gate_pass": true,
     "two_run_linear_tessellation_deterministic": true,
+    "production_angular_tessellation_pass": true,
     "source_inventory_complete": true,
-    "historical_candidate_hash_unchanged": true
+    "historical_candidate_hash_unchanged": true,
+    "authorized_stage_read_only_audit_pass": true,
+    "isolated_diagnostic_asset_pass": true,
+    "isaac_screenshot_review_pass": true
   },
   "stage_selection": {
-    "status": "HARD_BLOCKER",
-    "reason": "No absolute Stage path has been user-approved for the post-2026-07-29 supplier-CAD finger diagnostic. The known file is historical evidence, not authorization to load or mutate it for this task.",
-    "historical_candidate": {
-      "classification": "HISTORICAL_CANDIDATE_NOT_AUTHORIZED_CURRENT_TASK",
+    "status": "PASS",
+    "reason": "The user explicitly approved this frozen Stage for the supplier-CAD finger isolated diagnostic. Authorization permits only an independent diagnostic layer and forbids source/default/final-collider mutation.",
+    "approved_review_stage": {
+      "classification": "USER_APPROVED_ISOLATED_DIAGNOSTIC_REVIEW_STAGE",
       "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_assets/aloha_viperx.usd",
       "sha256": "b24afe3678155654892c69517fc58ecd970108d68cec56b02dc6fdcb8bf4493e",
       "expected_frozen_sha256": "b24afe3678155654892c69517fc58ecd970108d68cec56b02dc6fdcb8bf4493e",
-      "root_prim": "UNVERIFIED_NOT_LOADED",
-      "sublayers": "UNVERIFIED_NOT_LOADED",
-      "required_key_prims": "UNVERIFIED_NOT_LOADED"
+      "read_only": true,
+      "source_sha256_before": "b24afe3678155654892c69517fc58ecd970108d68cec56b02dc6fdcb8bf4493e",
+      "source_sha256_after": "b24afe3678155654892c69517fc58ecd970108d68cec56b02dc6fdcb8bf4493e",
+      "root_prim": "/workcell",
+      "layer_stack_status": "PASS",
+      "required_key_prims_status": "PASS",
+      "instance_proxy_strategy": "DEINSTANCE_VISUAL_BRANCH_IN_DIAGNOSTIC_LAYER_ONLY"
     },
-    "required_to_clear": [
-      "user-approved absolute Stage path",
-      "frozen SHA-256",
-      "expected root prim",
-      "expected sublayers",
-      "required follower/gripper prim paths"
-    ]
+    "authorization_boundary": {
+      "classification": "USER_APPROVED_ISOLATED_DIAGNOSTIC_REVIEW_STAGE",
+      "scope": "Read-only source inspection and independent diagnostic layer composition only",
+      "source_stage_mutation_allowed": false,
+      "default_or_final_collider_mutation_allowed": false
+    }
   },
   "diagnostic_asset_plan": {
-    "status": "STATIC_PREPARED_NOT_AUTHORED",
-    "target_directory": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_installation",
+    "status": "PASS",
+    "target_directory": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_installation_v2",
     "source_fingers": {
       "left_finger": "Simple Viper embedded Part__Feature007 / CAD +X",
       "right_finger": "Simple Viper embedded Part__Feature008 / CAD -X"
@@ -91,24 +119,16 @@
     "composition_policy": "separate diagnostic geometry/configuration layer; do not overwrite source USD or final/default configuration"
   },
   "execution_status": {
-    "isolated_diagnostic_usd": "NOT_RUN",
-    "isaac_open_closed_screenshots": "NOT_RUN",
+    "isolated_diagnostic_usd": "PASS",
+    "isaac_open_closed_screenshots": "PASS",
     "task_5_correct_cad_finger": "NOT_RUN",
     "task_7": "NOT_RUN",
     "task_8": "NOT_RUN"
   },
   "hard_blockers": [
     {
-      "id": "ISAAC_REVIEW_STAGE_NOT_USER_APPROVED",
-      "scope_blocked": "Stage load/switch, USD authoring against a selected follower, Isaac screenshots, Task 5, and Task 7"
-    },
-    {
       "id": "CAD_LICENSE_UNKNOWN",
       "scope_blocked": "committing or redistributing original STEP/PDF files"
-    },
-    {
-      "id": "ANGULAR_TESSELLATION_CONTROL_UNAVAILABLE",
-      "scope_blocked": "promotion of the linear-only diagnostic mesh as the fully parameter-controlled production visual mesh"
     }
   ]
 }

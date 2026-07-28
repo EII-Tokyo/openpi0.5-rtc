@@ -1,0 +1,241 @@
+{
+  "cad_shell": {
+    "cad_global_to_gripper_rotation": [
+      [
+        0.0,
+        -1.0,
+        0.0
+      ],
+      [
+        1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "label": "Aloha VX Gripper 2024-4-19 v4",
+    "obj_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/mounting_reference_probe_v4/Part__Feature006.obj",
+    "obj_sha256": "1379cf5f99efd01043efa9750a997702ec88c60ba5d9793f1761d32ae8f938ea",
+    "object_name": "Part__Feature006",
+    "rotation_determinant": 1.0,
+    "source_placement_matrix_mm": [
+      [
+        1.0,
+        0.0,
+        0.0,
+        0.100001049673413
+      ],
+      [
+        0.0,
+        -6.106226635438361e-14,
+        -1.0,
+        -430.29999973392
+      ],
+      [
+        0.0,
+        1.0,
+        -6.106226635438361e-14,
+        426.749997526362
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "triangle_count": 8522,
+    "vertex_count": 4263
+  },
+  "datums": {
+    "x_min": {
+      "absolute_coordinate_residual_m": 1.1940951283317958e-08,
+      "cad": {
+        "area_m2": 0.0002971337168189038,
+        "axis": "x",
+        "coordinate_m": -1.1940951283317958e-08,
+        "extreme": "min",
+        "plane_tolerance_m": 5e-06,
+        "triangle_count": 34
+      },
+      "nonzero_planar_support": true,
+      "stage": {
+        "area_m2": 0.0016788552351454547,
+        "axis": "x",
+        "coordinate_m": 0.0,
+        "extreme": "min",
+        "plane_tolerance_m": 5e-06,
+        "triangle_count": 79
+      },
+      "status": "PASS",
+      "within_tessellation_threshold": true
+    },
+    "y_max": {
+      "absolute_coordinate_residual_m": 1.0020262359161647e-06,
+      "cad": {
+        "area_m2": 0.0008473279724121088,
+        "axis": "y",
+        "coordinate_m": 0.07499999742444768,
+        "extreme": "max",
+        "plane_tolerance_m": 5e-06,
+        "triangle_count": 6
+      },
+      "nonzero_planar_support": true,
+      "stage": {
+        "area_m2": 0.0008945653510119879,
+        "axis": "y",
+        "coordinate_m": 0.0750009994506836,
+        "extreme": "max",
+        "plane_tolerance_m": 5e-06,
+        "triangle_count": 38
+      },
+      "status": "PASS",
+      "within_tessellation_threshold": true
+    },
+    "y_min": {
+      "absolute_coordinate_residual_m": 1.002026235902287e-06,
+      "cad": {
+        "area_m2": 0.0008473279724121088,
+        "axis": "y",
+        "coordinate_m": -0.07500000257555231,
+        "extreme": "min",
+        "plane_tolerance_m": 5e-06,
+        "triangle_count": 6
+      },
+      "nonzero_planar_support": true,
+      "stage": {
+        "area_m2": 0.0008945141669577864,
+        "axis": "y",
+        "coordinate_m": -0.07499900054931641,
+        "extreme": "min",
+        "plane_tolerance_m": 5e-06,
+        "triangle_count": 30
+      },
+      "status": "PASS",
+      "within_tessellation_threshold": true
+    },
+    "z_max": {
+      "absolute_coordinate_residual_m": 2.4736380166423544e-09,
+      "cad": {
+        "area_m2": 0.00010166136932373056,
+        "axis": "z",
+        "coordinate_m": 0.03525000247363802,
+        "extreme": "max",
+        "plane_tolerance_m": 5e-06,
+        "triangle_count": 2
+      },
+      "nonzero_planar_support": true,
+      "stage": {
+        "area_m2": 0.0011045000000000004,
+        "axis": "z",
+        "coordinate_m": 0.035250000000000004,
+        "extreme": "max",
+        "plane_tolerance_m": 5e-06,
+        "triangle_count": 10
+      },
+      "status": "PASS",
+      "within_tessellation_threshold": true
+    }
+  },
+  "decision_boundary": {
+    "classification": "SUPPLIER_CAD_TO_STAGE_DATUM_REGISTRATION",
+    "full_surface_icp_used": false,
+    "physical_measurement": false,
+    "reason": "Supplier CAD and URDF meshes are different revisions and general ICP admitted local minima; it is retained only as rejected exploratory evidence and cannot select orientation."
+  },
+  "gates": {
+    "all_coordinate_residuals_within_0p20mm": true,
+    "four_nonzero_planar_datums": true,
+    "general_icp_excluded_from_decision": true,
+    "proper_rotation_no_mirror": true,
+    "source_hash_matches_probe": true
+  },
+  "method": "CONTROLLED_ORTHOGONAL_PLANAR_DATUM_REGISTRATION",
+  "schema_version": 1,
+  "source_cad": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/gdrive_source_readonly/Simple Aloha Viper 2024-5-13.step",
+    "freecad_version": [
+      "1",
+      "1",
+      "1",
+      "44227 +647 (Git)",
+      "Unknown",
+      "2026/04/14 22:09:59",
+      "tag: 1.1.1",
+      "0108fd4b4850cc46e625b60e53cea7a7bbe69f8d"
+    ],
+    "opencascade_version": "7.8.0",
+    "sha256": "337862418769d4ea8b801d26e68930c4412f870050e60769bbf91765194dc571"
+  },
+  "stage_reference_geometry": {
+    "follower_urdf_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_left.urdf",
+    "follower_urdf_sha256": "d9e4b32723ee71dfce26fb4e78546cfcfef147b2d7dbf5e53e3620e3d8aa96bd",
+    "gripper_bar_stl": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_bar.stl",
+      "gripper_frame_matrix": [
+        [
+          6.123233995736766e-17,
+          -1.0,
+          0.0,
+          -0.020175
+        ],
+        [
+          1.0,
+          6.123233995736766e-17,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "sha256": "a4de62c9a2ed2c78433010e4c05530a1254b1774a7651967f406120c9bf8973e"
+    },
+    "gripper_stl": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper.stl",
+      "gripper_frame_matrix": [
+        [
+          6.123233995736766e-17,
+          -1.0,
+          0.0,
+          -0.02
+        ],
+        [
+          1.0,
+          6.123233995736766e-17,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "sha256": "786c1077bfd226f14219581b11d5f19464ca95b17132e0bb7532503568f5af90"
+    }
+  },
+  "status": "PASS",
+  "threshold_m": 0.0002,
+  "threshold_source": "fixed supplier-CAD visual tessellation linear deflection 0.20 mm"
+}

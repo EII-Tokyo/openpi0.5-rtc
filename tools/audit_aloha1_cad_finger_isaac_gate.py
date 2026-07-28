@@ -25,6 +25,9 @@ def main() -> int:
         / "local_eval_assets/aloha_isaac_assets/aloha_viperx.usd",
         importer_api_path=IMPORTER_ROOT / "docs/api.rst",
         importer_manifest_path=IMPORTER_ROOT / "config/extension.toml",
+        authorized_stage_audit_path=ROOT
+        / "reports/aloha1_mapping/"
+        "aloha_viper_cad_finger_authorized_stage_audit.json",
     )
     json_path = (
         ROOT

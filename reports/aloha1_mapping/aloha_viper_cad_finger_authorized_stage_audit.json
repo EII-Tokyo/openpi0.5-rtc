@@ -1,0 +1,345 @@
+{
+  "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_assets/aloha_viperx.usd",
+  "read_only": true,
+  "source_sha256_before": "b24afe3678155654892c69517fc58ecd970108d68cec56b02dc6fdcb8bf4493e",
+  "source_sha256_after": "b24afe3678155654892c69517fc58ecd970108d68cec56b02dc6fdcb8bf4493e",
+  "default_prim": "/workcell",
+  "meters_per_unit": 1.0,
+  "up_axis": "Z",
+  "root_payload": "SdfPayloadListOp(Prepended Items: [SdfPayload(configuration/aloha_viperx_physics.usd, , SdfLayerOffset(0, 1))])",
+  "root_variant_selections": {
+    "Physics": "PhysX",
+    "Sensor": "Sensors"
+  },
+  "required_prims": {
+    "/workcell": {
+      "valid": true,
+      "type_name": "Xform",
+      "is_instance": false,
+      "is_instance_proxy": false,
+      "prim_stack": [
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_assets/aloha_viperx.usd",
+          "path": "/workcell",
+          "specifier": "Sdf.SpecifierDef"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_assets/aloha_viperx.usd",
+          "path": "/workcell{Physics=PhysX}",
+          "specifier": "Sdf.SpecifierOver"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_assets/configuration/aloha_viperx_physics.usd",
+          "path": "/workcell",
+          "specifier": "Sdf.SpecifierDef"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_assets/configuration/aloha_viperx_base.usd",
+          "path": "/workcell",
+          "specifier": "Sdf.SpecifierDef"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_assets/configuration/aloha_viperx_robot.usd",
+          "path": "/workcell",
+          "specifier": "Sdf.SpecifierDef"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_assets/aloha_viperx.usd",
+          "path": "/workcell{Sensor=Sensors}",
+          "specifier": "Sdf.SpecifierOver"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_assets/configuration/aloha_viperx_sensor.usd",
+          "path": "/workcell",
+          "specifier": "Sdf.SpecifierDef"
+        }
+      ]
+    },
+    "/workcell/vx300s_left": {
+      "valid": true,
+      "type_name": "Xform",
+      "is_instance": false,
+      "is_instance_proxy": false,
+      "prim_stack": [
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_assets/configuration/aloha_viperx_physics.usd",
+          "path": "/workcell/vx300s_left",
+          "specifier": "Sdf.SpecifierOver"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_assets/configuration/aloha_viperx_base.usd",
+          "path": "/workcell/vx300s_left",
+          "specifier": "Sdf.SpecifierDef"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_assets/configuration/aloha_viperx_robot.usd",
+          "path": "/workcell/vx300s_left",
+          "specifier": "Sdf.SpecifierOver"
+        }
+      ]
+    },
+    "/workcell/vx300s_left/vx300s_left": {
+      "valid": true,
+      "type_name": "Xform",
+      "is_instance": false,
+      "is_instance_proxy": false,
+      "prim_stack": [
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_assets/configuration/aloha_viperx_physics.usd",
+          "path": "/workcell/vx300s_left/vx300s_left",
+          "specifier": "Sdf.SpecifierOver"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_assets/configuration/aloha_viperx_base.usd",
+          "path": "/workcell/vx300s_left/vx300s_left",
+          "specifier": "Sdf.SpecifierDef"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_assets/configuration/aloha_viperx_robot.usd",
+          "path": "/workcell/vx300s_left/vx300s_left",
+          "specifier": "Sdf.SpecifierOver"
+        }
+      ]
+    },
+    "/workcell/vx300s_left/vx300s_left_gripper_link": {
+      "valid": true,
+      "type_name": "Xform",
+      "is_instance": false,
+      "is_instance_proxy": false,
+      "prim_stack": [
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_assets/configuration/aloha_viperx_physics.usd",
+          "path": "/workcell/vx300s_left/vx300s_left_gripper_link",
+          "specifier": "Sdf.SpecifierOver"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_assets/configuration/aloha_viperx_base.usd",
+          "path": "/workcell/vx300s_left/vx300s_left_gripper_link",
+          "specifier": "Sdf.SpecifierDef"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_assets/configuration/aloha_viperx_robot.usd",
+          "path": "/workcell/vx300s_left/vx300s_left_gripper_link",
+          "specifier": "Sdf.SpecifierOver"
+        }
+      ]
+    },
+    "/workcell/vx300s_left/vx300s_left_left_finger_link": {
+      "valid": true,
+      "type_name": "Xform",
+      "is_instance": false,
+      "is_instance_proxy": false,
+      "prim_stack": [
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_assets/configuration/aloha_viperx_physics.usd",
+          "path": "/workcell/vx300s_left/vx300s_left_left_finger_link",
+          "specifier": "Sdf.SpecifierOver"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_assets/configuration/aloha_viperx_base.usd",
+          "path": "/workcell/vx300s_left/vx300s_left_left_finger_link",
+          "specifier": "Sdf.SpecifierDef"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_assets/configuration/aloha_viperx_robot.usd",
+          "path": "/workcell/vx300s_left/vx300s_left_left_finger_link",
+          "specifier": "Sdf.SpecifierOver"
+        }
+      ]
+    },
+    "/workcell/vx300s_left/vx300s_left_right_finger_link": {
+      "valid": true,
+      "type_name": "Xform",
+      "is_instance": false,
+      "is_instance_proxy": false,
+      "prim_stack": [
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_assets/configuration/aloha_viperx_physics.usd",
+          "path": "/workcell/vx300s_left/vx300s_left_right_finger_link",
+          "specifier": "Sdf.SpecifierOver"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_assets/configuration/aloha_viperx_base.usd",
+          "path": "/workcell/vx300s_left/vx300s_left_right_finger_link",
+          "specifier": "Sdf.SpecifierDef"
+        },
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_assets/configuration/aloha_viperx_robot.usd",
+          "path": "/workcell/vx300s_left/vx300s_left_right_finger_link",
+          "specifier": "Sdf.SpecifierOver"
+        }
+      ]
+    },
+    "/workcell/joints/vx300s_left_left_finger": {
+      "valid": true,
+      "type_name": "PhysicsPrismaticJoint",
+      "is_instance": false,
+      "is_instance_proxy": false,
+      "prim_stack": [
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_assets/configuration/aloha_viperx_physics.usd",
+          "path": "/workcell/joints/vx300s_left_left_finger",
+          "specifier": "Sdf.SpecifierDef"
+        }
+      ]
+    },
+    "/workcell/joints/vx300s_left_right_finger": {
+      "valid": true,
+      "type_name": "PhysicsPrismaticJoint",
+      "is_instance": false,
+      "is_instance_proxy": false,
+      "prim_stack": [
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_assets/configuration/aloha_viperx_physics.usd",
+          "path": "/workcell/joints/vx300s_left_right_finger",
+          "specifier": "Sdf.SpecifierDef"
+        }
+      ]
+    }
+  },
+  "used_layers": [
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_assets/aloha_viperx.usd",
+      "exists": true,
+      "sha256": "b24afe3678155654892c69517fc58ecd970108d68cec56b02dc6fdcb8bf4493e",
+      "sublayer_paths": []
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_assets/configuration/aloha_viperx_base.usd",
+      "exists": true,
+      "sha256": "4e73aed0d6a404a016fcb87e4874f75593034334ca23915a55ee8e55d4fecb47",
+      "sublayer_paths": [
+        "aloha_viperx_robot.usd"
+      ]
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_assets/configuration/aloha_viperx_physics.usd",
+      "exists": true,
+      "sha256": "2adb136e5f01b4185a487893ead580fc1f9196ce401efe8b787bec119c6979c0",
+      "sublayer_paths": [
+        "aloha_viperx_base.usd"
+      ]
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_assets/configuration/aloha_viperx_robot.usd",
+      "exists": true,
+      "sha256": "85c711ce7943c037561716b7aa0ebb571d3d75ffd8f368d8a595d8e7b1450467",
+      "sublayer_paths": []
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_assets/configuration/aloha_viperx_sensor.usd",
+      "exists": true,
+      "sha256": "3e9f49229b9592ea8008daf233ada0b765ba61d6820486d926e9b3dba37df808",
+      "sublayer_paths": []
+    }
+  ],
+  "articulation_roots": [
+    "/workcell/table/table",
+    "/workcell/midair/midair",
+    "/workcell/vx300s_left/vx300s_left",
+    "/workcell/table_frame_T/table_frame_T",
+    "/workcell/placeholder_pipe/placeholder_pipe",
+    "/workcell/worldBody"
+  ],
+  "target_follower_articulation_root": "/workcell/vx300s_left/vx300s_left",
+  "finger_branches": {
+    "left": {
+      "link_path": "/workcell/vx300s_left/vx300s_left_left_finger_link",
+      "visuals_path": "/workcell/vx300s_left/vx300s_left_left_finger_link/visuals",
+      "visuals_instanceable": true,
+      "mesh_count": 1,
+      "mesh_path": "/workcell/vx300s_left/vx300s_left_left_finger_link/visuals/vx300s_10_gripper_finger_left/vx300s_10_gripper_finger_left",
+      "mesh_is_instance_proxy": true,
+      "point_count": 4998,
+      "face_count": 1666,
+      "prim_stack": [
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_assets/configuration/aloha_viperx_base.usd",
+          "path": "/meshes/vx300s_10_gripper_finger_left/vx300s_10_gripper_finger_left",
+          "specifier": "Sdf.SpecifierDef"
+        }
+      ],
+      "visual_mesh_is_instance_proxy": true,
+      "collisions_path": "/workcell/vx300s_left/vx300s_left_left_finger_link/collisions",
+      "collisions_instanceable": true,
+      "collision_mesh_path": "/workcell/vx300s_left/vx300s_left_left_finger_link/collisions/vx300s_10_gripper_finger_left/vx300s_10_gripper_finger_left",
+      "collision_mesh_count": 1,
+      "collision_mesh_is_instance_proxy": true,
+      "collision_point_count": 4998,
+      "collision_face_count": 1666
+    },
+    "right": {
+      "link_path": "/workcell/vx300s_left/vx300s_left_right_finger_link",
+      "visuals_path": "/workcell/vx300s_left/vx300s_left_right_finger_link/visuals",
+      "visuals_instanceable": true,
+      "mesh_count": 1,
+      "mesh_path": "/workcell/vx300s_left/vx300s_left_right_finger_link/visuals/vx300s_10_gripper_finger_right/vx300s_10_gripper_finger_right",
+      "mesh_is_instance_proxy": true,
+      "point_count": 4998,
+      "face_count": 1666,
+      "prim_stack": [
+        {
+          "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_assets/configuration/aloha_viperx_base.usd",
+          "path": "/meshes/vx300s_10_gripper_finger_right/vx300s_10_gripper_finger_right",
+          "specifier": "Sdf.SpecifierDef"
+        }
+      ],
+      "visual_mesh_is_instance_proxy": true,
+      "collisions_path": "/workcell/vx300s_left/vx300s_left_right_finger_link/collisions",
+      "collisions_instanceable": true,
+      "collision_mesh_path": "/workcell/vx300s_left/vx300s_left_right_finger_link/collisions/vx300s_10_gripper_finger_right/vx300s_10_gripper_finger_right",
+      "collision_mesh_count": 1,
+      "collision_mesh_is_instance_proxy": true,
+      "collision_point_count": 4998,
+      "collision_face_count": 1666
+    }
+  },
+  "finger_joints": {
+    "left": {
+      "path": "/workcell/joints/vx300s_left_left_finger",
+      "axis": "X",
+      "lower_limit": 0.020999999716877937,
+      "upper_limit": 0.05700000002980232,
+      "body0": [
+        "/workcell/vx300s_left/vx300s_left_gripper_link"
+      ],
+      "body1": [
+        "/workcell/vx300s_left/vx300s_left_left_finger_link"
+      ]
+    },
+    "right": {
+      "path": "/workcell/joints/vx300s_left_right_finger",
+      "axis": "X",
+      "lower_limit": -0.05700000002980232,
+      "upper_limit": -0.020999999716877937,
+      "body0": [
+        "/workcell/vx300s_left/vx300s_left_gripper_link"
+      ],
+      "body1": [
+        "/workcell/vx300s_left/vx300s_left_right_finger_link"
+      ]
+    }
+  },
+  "schema_version": 1,
+  "status": "PASS",
+  "authorization": {
+    "classification": "USER_APPROVED_ISOLATED_DIAGNOSTIC_REVIEW_STAGE",
+    "scope": "Read-only source inspection and independent diagnostic layer composition only",
+    "source_stage_mutation_allowed": false,
+    "default_or_final_collider_mutation_allowed": false
+  },
+  "source_immutable_gate": "PASS",
+  "root_prim_gate": "PASS",
+  "required_key_prims_status": "PASS",
+  "layer_stack_status": "PASS",
+  "instance_structure_status": "PASS",
+  "missing_required_prims": [],
+  "instance_proxy_strategy": "DEINSTANCE_VISUAL_BRANCH_IN_DIAGNOSTIC_LAYER_ONLY",
+  "gates": {
+    "source_immutable_gate": true,
+    "root_prim_gate": true,
+    "required_key_prims_gate": true,
+    "layer_stack_gate": true,
+    "instance_structure_gate": true
+  }
+}

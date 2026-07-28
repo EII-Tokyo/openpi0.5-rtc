@@ -95,6 +95,16 @@ def test_manifest_captures_public_use_evidence_without_inventing_spdx(
     assert manifest["license"]["evidence_text"] == (
         "ALOHA 公司公开发布给所有用户使用的"
     )
+    assert manifest["first_party_source_chain"]["sales_page"]["url"] == (
+        "https://idminer.com.tw/product/aloha-viperx/"
+    )
+    assert manifest["first_party_source_chain"]["technical_drawing"][
+        "google_drive_file_id"
+    ] == "11M96-4JDw0y31OZMTQQ3Nqz1qCIqk_DU"
+    assert manifest["first_party_source_chain"]["public_3d_cad"]["url"] == (
+        "https://drive.google.com/drive/folders/"
+        "1mhJuhzT4lBnvZ9VE57UgT6vmJDFPVsBf"
+    )
     record = manifest["files"][0]
     assert record["local_path"] == str(source.resolve())
     assert record["sha256"] == hashlib.sha256(source.read_bytes()).hexdigest()

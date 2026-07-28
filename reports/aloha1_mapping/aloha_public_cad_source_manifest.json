@@ -13,6 +13,33 @@
   "writable_files": [],
   "non_ap214_files": [],
   "source_access_status": "PUBLIC_VENDOR_RELEASE_USER_CONFIRMED",
+  "first_party_source_chain": {
+    "sales_page": {
+      "url": "https://idminer.com.tw/product/aloha-viperx/",
+      "publisher": "采智科技股份有限公司 / IDMiner",
+      "role": "PURCHASE_PRODUCT_PAGE_USER_CONFIRMED_FIRST_HAND"
+    },
+    "sales_catalog": {
+      "url": "https://drive.google.com/file/d/11KcnA49dhTiOD_MxmmC_SG75Cs97-JKh/view?usp=sharing",
+      "google_drive_file_id": "11KcnA49dhTiOD_MxmmC_SG75Cs97-JKh",
+      "role": "TROSSEN_VIPERX_FOLLOWER_SALES_SHEET"
+    },
+    "technical_drawing": {
+      "url": "https://drive.google.com/file/d/11M96-4JDw0y31OZMTQQ3Nqz1qCIqk_DU/view?usp=sharing",
+      "google_drive_file_id": "11M96-4JDw0y31OZMTQQ3Nqz1qCIqk_DU",
+      "role": "ALOHA_VX300S_FOLLOWER_TECHNICAL_DRAWING"
+    },
+    "public_3d_cad": {
+      "url": "https://drive.google.com/drive/folders/1mhJuhzT4lBnvZ9VE57UgT6vmJDFPVsBf",
+      "google_drive_folder_id": "1mhJuhzT4lBnvZ9VE57UgT6vmJDFPVsBf",
+      "role": "ALOHA_KITS_PUBLIC_3D_CAD"
+    },
+    "trossen_manual": {
+      "url": "https://docs.trossenrobotics.com/aloha_docs/",
+      "publisher": "Trossen Robotics",
+      "role": "ALOHA_KITS_ONLINE_MANUAL"
+    }
+  },
   "project_use_status": "ALLOWED_USER_CONFIRMED",
   "local_read_only_analysis_status": "PASS",
   "redistribution_status": "UNKNOWN_HARD_BLOCKER",

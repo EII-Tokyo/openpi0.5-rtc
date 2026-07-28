@@ -222,8 +222,20 @@ def test_primary_mapping_records_toolchain_transform_and_visual_evidence() -> No
     assert report["toolchain"]["opencascade"]["version"] == "7.8.0"
     assert report["toolchain"]["blender"]["version"] == "5.2.0 LTS"
     assert report["toolchain"]["production_tessellation_gate"] == (
-        "HARD_BLOCKER"
+        "PASS"
     )
+    assert report["mounting_datum_registration"]["status"] == "PASS"
+    assert report["isaac_visual_evidence"]["status"] == "PASS"
+    assert report["isolated_diagnostic_asset"]["status"] == "PASS"
+    assert report["cad_to_finger_link_mapping"]["determinant"] == pytest.approx(
+        1.0
+    )
+    assert report["cad_to_finger_link_mapping"]["mirror_used"] is False
+    assert report["cad_to_finger_link_mapping"]["local_axis_mapping"] == {
+        "cad_local_x": "finger_link_+Y",
+        "cad_local_y": "finger_link_+Z",
+        "cad_local_z": "finger_link_+X",
+    }
     assert report["visual_evidence"]["status"] == "PASS"
     assert report["visual_evidence"]["capture_count"] == 8
     connection = primary["source_connection_common_volume_mm3"]

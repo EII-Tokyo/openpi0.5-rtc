@@ -22,25 +22,42 @@ def _build() -> dict:
         / "local_eval_assets/aloha_isaac_assets/aloha_viperx.usd",
         importer_api_path=IMPORTER_ROOT / "docs/api.rst",
         importer_manifest_path=IMPORTER_ROOT / "config/extension.toml",
+        authorized_stage_audit_path=ROOT
+        / "reports/aloha1_mapping/"
+        "aloha_viper_cad_finger_authorized_stage_audit.json",
     )
 
 
-def test_stage_gate_blocks_unapproved_historical_candidate() -> None:
+def test_stage_gate_accepts_user_approved_read_only_candidate() -> None:
     report = _build()
     assert report["status"] == "PARTIAL"
-    assert report["stage_selection"]["status"] == "HARD_BLOCKER"
-    candidate = report["stage_selection"]["historical_candidate"]
+    assert report["stage_selection"]["status"] == "PASS"
+    candidate = report["stage_selection"]["approved_review_stage"]
     assert candidate["classification"] == (
-        "HISTORICAL_CANDIDATE_NOT_AUTHORIZED_CURRENT_TASK"
+        "USER_APPROVED_ISOLATED_DIAGNOSTIC_REVIEW_STAGE"
     )
-    assert candidate["root_prim"] == "UNVERIFIED_NOT_LOADED"
+    assert candidate["root_prim"] == "/workcell"
+    assert candidate["read_only"] is True
+    assert candidate["source_sha256_before"] == candidate[
+        "source_sha256_after"
+    ]
+    assert candidate["required_key_prims_status"] == "PASS"
+    assert candidate["layer_stack_status"] == "PASS"
     assert report["execution_status"] == {
-        "isolated_diagnostic_usd": "NOT_RUN",
-        "isaac_open_closed_screenshots": "NOT_RUN",
+        "isolated_diagnostic_usd": "PASS",
+        "isaac_open_closed_screenshots": "PASS",
         "task_5_correct_cad_finger": "NOT_RUN",
         "task_7": "NOT_RUN",
         "task_8": "NOT_RUN",
     }
+    assert report["input_gates"]["isolated_diagnostic_asset_pass"] is True
+    assert report["input_gates"]["isaac_screenshot_review_pass"] is True
+    blocker_ids = {entry["id"] for entry in report["hard_blockers"]}
+    assert "ISAAC_REVIEW_STAGE_NOT_USER_APPROVED" not in blocker_ids
+    assert "ANGULAR_TESSELLATION_CONTROL_UNAVAILABLE" not in blocker_ids
+    assert report["input_gates"][
+        "production_angular_tessellation_pass"
+    ] is True
 
 
 def test_saved_stage_gate_matches_recomputed() -> None:

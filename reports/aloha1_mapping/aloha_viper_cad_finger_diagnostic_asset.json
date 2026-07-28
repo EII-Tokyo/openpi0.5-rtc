@@ -1,0 +1,539 @@
+{
+  "schema_version": 1,
+  "status": "PASS",
+  "scope": "ISOLATED_SUPPLIER_CAD_FINGER_VISUAL_DIAGNOSTIC; NOT_FINAL_ASSET; COLLIDERS_UNCHANGED",
+  "source_stage": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_assets/aloha_viperx.usd",
+    "sha256_before": "b24afe3678155654892c69517fc58ecd970108d68cec56b02dc6fdcb8bf4493e",
+    "sha256_after": "b24afe3678155654892c69517fc58ecd970108d68cec56b02dc6fdcb8bf4493e",
+    "explicit_reference_prim": "/workcell"
+  },
+  "diagnostic_outputs": {
+    "root_usd": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_installation/aloha_viperx_cad_finger_diagnostic.usda",
+      "sha256": "9f64f2ef6e280d3505c900a7b13e649331cf8bb227d910928647762ef4a5edc3"
+    },
+    "configuration_layer": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_installation/configuration/supplier_cad_finger_installation.usda",
+      "sha256": "990f8e9a2c32b401d20b2df8e3c1313b34b67365ad87a001b20451c08a13731e",
+      "authored_spec_paths": [
+        "/",
+        "/workcell",
+        "/workcell/vx300s_left",
+        "/workcell/vx300s_left/vx300s_left_left_finger_link",
+        "/workcell/vx300s_left/vx300s_left_left_finger_link/visuals",
+        "/workcell/vx300s_left/vx300s_left_left_finger_link/visuals/diagnostic_supplier_cad_left_finger",
+        "/workcell/vx300s_left/vx300s_left_left_finger_link/visuals/vx300s_10_gripper_finger_left",
+        "/workcell/vx300s_left/vx300s_left_right_finger_link",
+        "/workcell/vx300s_left/vx300s_left_right_finger_link/visuals",
+        "/workcell/vx300s_left/vx300s_left_right_finger_link/visuals/diagnostic_supplier_cad_right_finger",
+        "/workcell/vx300s_left/vx300s_left_right_finger_link/visuals/vx300s_10_gripper_finger_right"
+      ]
+    },
+    "geometry_layer": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_installation/geometry/supplier_cad_finger_visual.usda",
+      "sha256": "7ee2c45faad049dfb50e51019068e8a7d524c8aaed9c4b1c71ab570b1a56d519"
+    }
+  },
+  "mapping": {
+    "source_cad_sha256": "337862418769d4ea8b801d26e68930c4412f870050e60769bbf91765194dc571",
+    "matrix_convention": "column-vector math; points baked from CAD global metres into finger-link local metres",
+    "cad_global_to_finger_link_matrix": [
+      [
+        0.0,
+        -1.0,
+        0.0,
+        -0.49899999973392
+      ],
+      [
+        -1.0,
+        0.0,
+        0.0,
+        9.98902576627736e-05
+      ],
+      [
+        0.0,
+        0.0,
+        -1.0,
+        0.42680133373174
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "linear_determinant": 1.0,
+    "mirror_used": false,
+    "unit_conversion": "OBJ already metres; scale 1.0",
+    "left": "Part__Feature007 / CAD +X / left_finger",
+    "right": "Part__Feature008 / CAD -X / right_finger"
+  },
+  "meshes": {
+    "left": {
+      "source_obj_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/tessellation_angular_controlled/run_a/left_finger.obj",
+      "source_obj_sha256": "c6710d0fe5b2030a32722d9df5c0b553c771c9d61d92b8ddaec36c94c5963488",
+      "point_count": 831,
+      "triangle_count": 1662,
+      "aabb_m": {
+        "x_min": -0.005749999733919986,
+        "x_max": 0.09040759303951745,
+        "x_size": 0.096157592773,
+        "y_min": -0.029711389039212225,
+        "y_max": -0.0022441391689119335,
+        "y_size": 0.02746724987,
+        "z_min": -0.027051327401072522,
+        "z_max": 0.026948672598927526,
+        "z_size": 0.054
+      }
+    },
+    "right": {
+      "source_obj_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/tessellation_angular_controlled/run_a/right_finger.obj",
+      "source_obj_sha256": "b0979c5d55fee448dab512dc75b1251bab17d94892decd01de9a6e76c01482d1",
+      "point_count": 831,
+      "triangle_count": 1662,
+      "aabb_m": {
+        "x_min": -0.005749999733919986,
+        "x_max": 0.09040759303951745,
+        "x_size": 0.096157592773,
+        "y_min": 0.002244139220065117,
+        "y_max": 0.029711390044039727,
+        "y_size": 0.027467250824,
+        "z_min": -0.02694866626825998,
+        "z_max": 0.027051333731740013,
+        "z_size": 0.054
+      }
+    }
+  },
+  "visual_records": {
+    "left": {
+      "visuals_path": "/workcell/vx300s_left/vx300s_left_left_finger_link/visuals",
+      "visuals_is_instance": false,
+      "old_visual_root": "/workcell/vx300s_left/vx300s_left_left_finger_link/visuals/vx300s_10_gripper_finger_left",
+      "old_visual_active": false,
+      "replacement_path": "/workcell/vx300s_left/vx300s_left_left_finger_link/visuals/diagnostic_supplier_cad_left_finger",
+      "replacement_valid": true,
+      "mesh_path": "/workcell/vx300s_left/vx300s_left_left_finger_link/visuals/diagnostic_supplier_cad_left_finger/mesh",
+      "mesh_valid": true,
+      "mesh_is_instance_proxy": false,
+      "mesh_point_count": 831,
+      "mesh_face_count": 1662,
+      "mesh_has_collision_api": false,
+      "mesh_has_rigid_body_api": false
+    },
+    "right": {
+      "visuals_path": "/workcell/vx300s_left/vx300s_left_right_finger_link/visuals",
+      "visuals_is_instance": false,
+      "old_visual_root": "/workcell/vx300s_left/vx300s_left_right_finger_link/visuals/vx300s_10_gripper_finger_right",
+      "old_visual_active": false,
+      "replacement_path": "/workcell/vx300s_left/vx300s_left_right_finger_link/visuals/diagnostic_supplier_cad_right_finger",
+      "replacement_valid": true,
+      "mesh_path": "/workcell/vx300s_left/vx300s_left_right_finger_link/visuals/diagnostic_supplier_cad_right_finger/mesh",
+      "mesh_valid": true,
+      "mesh_is_instance_proxy": false,
+      "mesh_point_count": 831,
+      "mesh_face_count": 1662,
+      "mesh_has_collision_api": false,
+      "mesh_has_rigid_body_api": false
+    }
+  },
+  "collision_policy": {
+    "source_collision_branches": "UNCHANGED",
+    "cad_mesh_role": "VISUAL_ONLY",
+    "new_collision_api_applied": false,
+    "final_default_collider_modified": false
+  },
+  "collision_inventory": {
+    "source": [
+      {
+        "path": "/workcell/placeholder_pipe/placeholder_pipe/collisions/pipe_axis_placeholder/pipe_axis_placeholder",
+        "type_name": "Cylinder",
+        "is_instance_proxy": true,
+        "applied_schemas": [
+          "PhysicsCollisionAPI"
+        ],
+        "approximation": null
+      },
+      {
+        "path": "/workcell/placeholder_pipe/placeholder_pipe/collisions/pipe_inlet_placeholder/pipe_inlet_placeholder",
+        "type_name": "Sphere",
+        "is_instance_proxy": true,
+        "applied_schemas": [
+          "PhysicsCollisionAPI"
+        ],
+        "approximation": null
+      },
+      {
+        "path": "/workcell/table/table/collisions/tabletop/tabletop",
+        "type_name": "Mesh",
+        "is_instance_proxy": true,
+        "applied_schemas": [
+          "PhysicsCollisionAPI",
+          "PhysicsMeshCollisionAPI",
+          "MaterialBindingAPI"
+        ],
+        "approximation": "convexHull"
+      },
+      {
+        "path": "/workcell/table_frame_T/table_frame_T/collisions/T_origin/T_origin",
+        "type_name": "Sphere",
+        "is_instance_proxy": true,
+        "applied_schemas": [
+          "PhysicsCollisionAPI"
+        ],
+        "approximation": null
+      },
+      {
+        "path": "/workcell/table_frame_T/table_frame_T/collisions/T_x_axis/T_x_axis",
+        "type_name": "Cylinder",
+        "is_instance_proxy": true,
+        "applied_schemas": [
+          "PhysicsCollisionAPI"
+        ],
+        "approximation": null
+      },
+      {
+        "path": "/workcell/table_frame_T/table_frame_T/collisions/T_y_axis/T_y_axis",
+        "type_name": "Cylinder",
+        "is_instance_proxy": true,
+        "applied_schemas": [
+          "PhysicsCollisionAPI"
+        ],
+        "approximation": null
+      },
+      {
+        "path": "/workcell/table_frame_T/table_frame_T/collisions/T_z_axis/T_z_axis",
+        "type_name": "Cylinder",
+        "is_instance_proxy": true,
+        "applied_schemas": [
+          "PhysicsCollisionAPI"
+        ],
+        "approximation": null
+      },
+      {
+        "path": "/workcell/vx300s_left/vx300s_left_gripper_link/collisions/vx300s_7_gripper/vx300s_7_gripper",
+        "type_name": "Mesh",
+        "is_instance_proxy": true,
+        "applied_schemas": [
+          "PhysicsCollisionAPI",
+          "PhysicsMeshCollisionAPI",
+          "MaterialBindingAPI"
+        ],
+        "approximation": "convexHull"
+      },
+      {
+        "path": "/workcell/vx300s_left/vx300s_left_gripper_link/collisions/vx300s_9_gripper_bar/vx300s_9_gripper_bar",
+        "type_name": "Mesh",
+        "is_instance_proxy": true,
+        "applied_schemas": [
+          "PhysicsCollisionAPI",
+          "PhysicsMeshCollisionAPI",
+          "MaterialBindingAPI"
+        ],
+        "approximation": "convexHull"
+      },
+      {
+        "path": "/workcell/vx300s_left/vx300s_left_gripper_prop_link/collisions/vx300s_8_gripper_prop/vx300s_8_gripper_prop",
+        "type_name": "Mesh",
+        "is_instance_proxy": true,
+        "applied_schemas": [
+          "PhysicsCollisionAPI",
+          "PhysicsMeshCollisionAPI",
+          "MaterialBindingAPI"
+        ],
+        "approximation": "convexHull"
+      },
+      {
+        "path": "/workcell/vx300s_left/vx300s_left_left_finger_link/collisions/vx300s_10_gripper_finger_left/vx300s_10_gripper_finger_left",
+        "type_name": "Mesh",
+        "is_instance_proxy": true,
+        "applied_schemas": [
+          "PhysicsCollisionAPI",
+          "PhysicsMeshCollisionAPI",
+          "MaterialBindingAPI"
+        ],
+        "approximation": "convexHull"
+      },
+      {
+        "path": "/workcell/vx300s_left/vx300s_left_lower_forearm_link/collisions/vx300s_5_lower_forearm/vx300s_5_lower_forearm",
+        "type_name": "Mesh",
+        "is_instance_proxy": true,
+        "applied_schemas": [
+          "PhysicsCollisionAPI",
+          "PhysicsMeshCollisionAPI",
+          "MaterialBindingAPI"
+        ],
+        "approximation": "convexHull"
+      },
+      {
+        "path": "/workcell/vx300s_left/vx300s_left_right_finger_link/collisions/vx300s_10_gripper_finger_right/vx300s_10_gripper_finger_right",
+        "type_name": "Mesh",
+        "is_instance_proxy": true,
+        "applied_schemas": [
+          "PhysicsCollisionAPI",
+          "PhysicsMeshCollisionAPI",
+          "MaterialBindingAPI"
+        ],
+        "approximation": "convexHull"
+      },
+      {
+        "path": "/workcell/vx300s_left/vx300s_left_shoulder_link/collisions/vx300s_2_shoulder/vx300s_2_shoulder",
+        "type_name": "Mesh",
+        "is_instance_proxy": true,
+        "applied_schemas": [
+          "PhysicsCollisionAPI",
+          "PhysicsMeshCollisionAPI",
+          "MaterialBindingAPI"
+        ],
+        "approximation": "convexHull"
+      },
+      {
+        "path": "/workcell/vx300s_left/vx300s_left_upper_arm_link/collisions/vx300s_3_upper_arm/vx300s_3_upper_arm",
+        "type_name": "Mesh",
+        "is_instance_proxy": true,
+        "applied_schemas": [
+          "PhysicsCollisionAPI",
+          "PhysicsMeshCollisionAPI",
+          "MaterialBindingAPI"
+        ],
+        "approximation": "convexHull"
+      },
+      {
+        "path": "/workcell/vx300s_left/vx300s_left_upper_forearm_link/collisions/vx300s_4_upper_forearm/vx300s_4_upper_forearm",
+        "type_name": "Mesh",
+        "is_instance_proxy": true,
+        "applied_schemas": [
+          "PhysicsCollisionAPI",
+          "PhysicsMeshCollisionAPI",
+          "MaterialBindingAPI"
+        ],
+        "approximation": "convexHull"
+      },
+      {
+        "path": "/workcell/vx300s_left/vx300s_left_wrist_link/collisions/vx300s_6_wrist/vx300s_6_wrist",
+        "type_name": "Mesh",
+        "is_instance_proxy": true,
+        "applied_schemas": [
+          "PhysicsCollisionAPI",
+          "PhysicsMeshCollisionAPI",
+          "MaterialBindingAPI"
+        ],
+        "approximation": "convexHull"
+      }
+    ],
+    "diagnostic": [
+      {
+        "path": "/workcell/placeholder_pipe/placeholder_pipe/collisions/pipe_axis_placeholder/pipe_axis_placeholder",
+        "type_name": "Cylinder",
+        "is_instance_proxy": true,
+        "applied_schemas": [
+          "PhysicsCollisionAPI"
+        ],
+        "approximation": null
+      },
+      {
+        "path": "/workcell/placeholder_pipe/placeholder_pipe/collisions/pipe_inlet_placeholder/pipe_inlet_placeholder",
+        "type_name": "Sphere",
+        "is_instance_proxy": true,
+        "applied_schemas": [
+          "PhysicsCollisionAPI"
+        ],
+        "approximation": null
+      },
+      {
+        "path": "/workcell/table/table/collisions/tabletop/tabletop",
+        "type_name": "Mesh",
+        "is_instance_proxy": true,
+        "applied_schemas": [
+          "PhysicsCollisionAPI",
+          "PhysicsMeshCollisionAPI",
+          "MaterialBindingAPI"
+        ],
+        "approximation": "convexHull"
+      },
+      {
+        "path": "/workcell/table_frame_T/table_frame_T/collisions/T_origin/T_origin",
+        "type_name": "Sphere",
+        "is_instance_proxy": true,
+        "applied_schemas": [
+          "PhysicsCollisionAPI"
+        ],
+        "approximation": null
+      },
+      {
+        "path": "/workcell/table_frame_T/table_frame_T/collisions/T_x_axis/T_x_axis",
+        "type_name": "Cylinder",
+        "is_instance_proxy": true,
+        "applied_schemas": [
+          "PhysicsCollisionAPI"
+        ],
+        "approximation": null
+      },
+      {
+        "path": "/workcell/table_frame_T/table_frame_T/collisions/T_y_axis/T_y_axis",
+        "type_name": "Cylinder",
+        "is_instance_proxy": true,
+        "applied_schemas": [
+          "PhysicsCollisionAPI"
+        ],
+        "approximation": null
+      },
+      {
+        "path": "/workcell/table_frame_T/table_frame_T/collisions/T_z_axis/T_z_axis",
+        "type_name": "Cylinder",
+        "is_instance_proxy": true,
+        "applied_schemas": [
+          "PhysicsCollisionAPI"
+        ],
+        "approximation": null
+      },
+      {
+        "path": "/workcell/vx300s_left/vx300s_left_gripper_link/collisions/vx300s_7_gripper/vx300s_7_gripper",
+        "type_name": "Mesh",
+        "is_instance_proxy": true,
+        "applied_schemas": [
+          "PhysicsCollisionAPI",
+          "PhysicsMeshCollisionAPI",
+          "MaterialBindingAPI"
+        ],
+        "approximation": "convexHull"
+      },
+      {
+        "path": "/workcell/vx300s_left/vx300s_left_gripper_link/collisions/vx300s_9_gripper_bar/vx300s_9_gripper_bar",
+        "type_name": "Mesh",
+        "is_instance_proxy": true,
+        "applied_schemas": [
+          "PhysicsCollisionAPI",
+          "PhysicsMeshCollisionAPI",
+          "MaterialBindingAPI"
+        ],
+        "approximation": "convexHull"
+      },
+      {
+        "path": "/workcell/vx300s_left/vx300s_left_gripper_prop_link/collisions/vx300s_8_gripper_prop/vx300s_8_gripper_prop",
+        "type_name": "Mesh",
+        "is_instance_proxy": true,
+        "applied_schemas": [
+          "PhysicsCollisionAPI",
+          "PhysicsMeshCollisionAPI",
+          "MaterialBindingAPI"
+        ],
+        "approximation": "convexHull"
+      },
+      {
+        "path": "/workcell/vx300s_left/vx300s_left_left_finger_link/collisions/vx300s_10_gripper_finger_left/vx300s_10_gripper_finger_left",
+        "type_name": "Mesh",
+        "is_instance_proxy": true,
+        "applied_schemas": [
+          "PhysicsCollisionAPI",
+          "PhysicsMeshCollisionAPI",
+          "MaterialBindingAPI"
+        ],
+        "approximation": "convexHull"
+      },
+      {
+        "path": "/workcell/vx300s_left/vx300s_left_lower_forearm_link/collisions/vx300s_5_lower_forearm/vx300s_5_lower_forearm",
+        "type_name": "Mesh",
+        "is_instance_proxy": true,
+        "applied_schemas": [
+          "PhysicsCollisionAPI",
+          "PhysicsMeshCollisionAPI",
+          "MaterialBindingAPI"
+        ],
+        "approximation": "convexHull"
+      },
+      {
+        "path": "/workcell/vx300s_left/vx300s_left_right_finger_link/collisions/vx300s_10_gripper_finger_right/vx300s_10_gripper_finger_right",
+        "type_name": "Mesh",
+        "is_instance_proxy": true,
+        "applied_schemas": [
+          "PhysicsCollisionAPI",
+          "PhysicsMeshCollisionAPI",
+          "MaterialBindingAPI"
+        ],
+        "approximation": "convexHull"
+      },
+      {
+        "path": "/workcell/vx300s_left/vx300s_left_shoulder_link/collisions/vx300s_2_shoulder/vx300s_2_shoulder",
+        "type_name": "Mesh",
+        "is_instance_proxy": true,
+        "applied_schemas": [
+          "PhysicsCollisionAPI",
+          "PhysicsMeshCollisionAPI",
+          "MaterialBindingAPI"
+        ],
+        "approximation": "convexHull"
+      },
+      {
+        "path": "/workcell/vx300s_left/vx300s_left_upper_arm_link/collisions/vx300s_3_upper_arm/vx300s_3_upper_arm",
+        "type_name": "Mesh",
+        "is_instance_proxy": true,
+        "applied_schemas": [
+          "PhysicsCollisionAPI",
+          "PhysicsMeshCollisionAPI",
+          "MaterialBindingAPI"
+        ],
+        "approximation": "convexHull"
+      },
+      {
+        "path": "/workcell/vx300s_left/vx300s_left_upper_forearm_link/collisions/vx300s_4_upper_forearm/vx300s_4_upper_forearm",
+        "type_name": "Mesh",
+        "is_instance_proxy": true,
+        "applied_schemas": [
+          "PhysicsCollisionAPI",
+          "PhysicsMeshCollisionAPI",
+          "MaterialBindingAPI"
+        ],
+        "approximation": "convexHull"
+      },
+      {
+        "path": "/workcell/vx300s_left/vx300s_left_wrist_link/collisions/vx300s_6_wrist/vx300s_6_wrist",
+        "type_name": "Mesh",
+        "is_instance_proxy": true,
+        "applied_schemas": [
+          "PhysicsCollisionAPI",
+          "PhysicsMeshCollisionAPI",
+          "MaterialBindingAPI"
+        ],
+        "approximation": "convexHull"
+      }
+    ],
+    "difference": []
+  },
+  "articulation_roots": {
+    "source": [
+      "/workcell/midair/midair",
+      "/workcell/placeholder_pipe/placeholder_pipe",
+      "/workcell/table/table",
+      "/workcell/table_frame_T/table_frame_T",
+      "/workcell/vx300s_left/vx300s_left",
+      "/workcell/worldBody"
+    ],
+    "diagnostic": [
+      "/workcell/midair/midair",
+      "/workcell/placeholder_pipe/placeholder_pipe",
+      "/workcell/table/table",
+      "/workcell/table_frame_T/table_frame_T",
+      "/workcell/vx300s_left/vx300s_left",
+      "/workcell/worldBody"
+    ]
+  },
+  "forbidden_configuration_specs": [],
+  "gates": {
+    "source_stage_immutable": true,
+    "default_prim": true,
+    "units": true,
+    "visual_replacement": true,
+    "collision_inventory_identical": true,
+    "articulation_roots_identical": true,
+    "configuration_has_no_collision_joint_physics_specs": true,
+    "proper_rotation_no_mirror": true
+  },
+  "license": {
+    "status": "UNKNOWN_HARD_BLOCKER",
+    "redistribution_allowed": false,
+    "git_commit_diagnostic_geometry": false
+  },
+  "task8": "NOT_RUN"
+}

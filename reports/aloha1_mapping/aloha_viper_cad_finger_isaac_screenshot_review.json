@@ -1,0 +1,1207 @@
+{
+  "approved_source_stage": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_assets/aloha_viperx.usd",
+    "authorization": "USER_APPROVED_ISOLATED_DIAGNOSTIC_REVIEW_STAGE",
+    "read_only": true,
+    "sha256_after": "b24afe3678155654892c69517fc58ecd970108d68cec56b02dc6fdcb8bf4493e",
+    "sha256_before": "b24afe3678155654892c69517fc58ecd970108d68cec56b02dc6fdcb8bf4493e"
+  },
+  "capture_count": 8,
+  "captures": [
+    {
+      "acceptance_criteria": [
+        "both_fingers_fully_visible",
+        "blue_orange_mapping_correct",
+        "inward_surfaces_opposed",
+        "no_critical_crop",
+        "no_critical_occlusion",
+        "labels_do_not_overlap",
+        "annotations_do_not_cover_key_geometry",
+        "visual_gate_only_wording"
+      ],
+      "annotated": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/v2_attempt5/annotation_v2/screenshots_annotated/closed_base_oblique_annotated.png",
+        "mode": "RGB",
+        "readable": true,
+        "resolution": [
+          1900,
+          900
+        ],
+        "sha256": "9bb03f7b6ff1f655e6c260e49e9da900d793e2f8e151c4ffd5d34e5f1a8cc6cf"
+      },
+      "camera": {
+        "orientation_wxyz": [
+          0.8531484603881836,
+          0.46267521381378174,
+          -0.018311191350221634,
+          -0.24027924239635468
+        ],
+        "position_world_m": [
+          -0.06872380573937567,
+          -0.03666315081603773,
+          0.6029777665921666
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 2,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.05196327855810523,
+          0.33486945927143097,
+          0.3311356157064438
+        ],
+        "view": "base_oblique"
+      },
+      "capture_name": "closed_base_oblique",
+      "part": "left_finger and right_finger inward surfaces",
+      "phase": "Isaac isolated diagnostic visual review",
+      "raw": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/v2_attempt5/screenshots_raw/closed_base_oblique_raw.png",
+        "mode": "RGBA",
+        "readable": true,
+        "resolution": [
+          1280,
+          900
+        ],
+        "sha256": "ba3cd5fd137a6448d0ff036cdfc1e9cee83ce706612c439526ccdb438b0271ba"
+      },
+      "simulation": {
+        "collider_type": "SOURCE_COLLIDER_UNCHANGED",
+        "dof_order": [
+          "vx300s_left_waist",
+          "vx300s_left_shoulder",
+          "vx300s_left_elbow",
+          "vx300s_left_forearm_roll",
+          "vx300s_left_wrist_angle",
+          "vx300s_left_wrist_rotate",
+          "vx300s_left_left_finger",
+          "vx300s_left_right_finger"
+        ],
+        "finger_readback_m": [
+          0.020999999716877937,
+          -0.020999999716877937
+        ],
+        "finger_targets_m": [
+          0.021,
+          -0.021
+        ],
+        "frame": 2,
+        "hidden_session_visuals": [
+          "/workcell/table",
+          "/workcell/table_frame_T",
+          "/workcell/midair",
+          "/workcell/placeholder_pipe",
+          "/workcell/worldBody",
+          "/workcell/vx300s_left/vx300s_left/visuals",
+          "/workcell/vx300s_left/vx300s_left_shoulder_link/visuals",
+          "/workcell/vx300s_left/vx300s_left_upper_arm_link/visuals",
+          "/workcell/vx300s_left/vx300s_left_upper_forearm_link/visuals",
+          "/workcell/vx300s_left/vx300s_left_lower_forearm_link/visuals",
+          "/workcell/vx300s_left/vx300s_left_wrist_link/visuals",
+          "/workcell/vx300s_left/vx300s_left_camera_focus/visuals"
+        ],
+        "isaac_sim": "5.1.0.0",
+        "kit": "107.3.3",
+        "physx": "107.3.26",
+        "robot": "follower_left",
+        "stage_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_installation_v2/aloha_viperx_cad_finger_diagnostic.usda",
+        "stage_sha256": "9f64f2ef6e280d3505c900a7b13e649331cf8bb227d910928647762ef4a5edc3",
+        "state": "closed",
+        "surface_gap_m": 0.0044629832044451034,
+        "time_s": 0.03333333507180214,
+        "view_hidden_visuals": [
+          "/workcell/vx300s_left/vx300s_left_gripper_link/visuals"
+        ],
+        "visual_state_boundary": "Diagnostic render only. The approved source Stage has disjoint authored body/joint frames; this compensates only the added visual Xform in the anonymous session layer. It is not physics motion, collision, contact, or grasp evidence.",
+        "visual_state_method": "VISUAL_SESSION_QPOS_PROJECTION_WITH_USD_LINK_FRAME_COMPENSATION",
+        "visual_type": "SUPPLIER_CAD_V2_VISUAL_ONLY_DIAGNOSTIC"
+      },
+      "state": "closed",
+      "target": "supplier CAD handed finger installation",
+      "view": "base_oblique",
+      "visual_self_review": {
+        "annotated": "PASS",
+        "checks": {
+          "annotations_do_not_cover_key_geometry": true,
+          "blue_orange_mapping_correct": true,
+          "both_fingers_fully_visible": true,
+          "inward_surfaces_opposed": true,
+          "labels_do_not_overlap": true,
+          "no_critical_crop": true,
+          "no_critical_occlusion": true,
+          "visual_gate_only_wording": true
+        },
+        "conclusion": "Base-side features and handed details are visible; the gripper-shell visual was hidden in the capture session only to avoid occlusion.",
+        "raw": "PASS",
+        "retake_reason": null,
+        "status": "PASS"
+      }
+    },
+    {
+      "acceptance_criteria": [
+        "both_fingers_fully_visible",
+        "blue_orange_mapping_correct",
+        "inward_surfaces_opposed",
+        "no_critical_crop",
+        "no_critical_occlusion",
+        "labels_do_not_overlap",
+        "annotations_do_not_cover_key_geometry",
+        "visual_gate_only_wording"
+      ],
+      "annotated": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/v2_attempt5/annotation_v2/screenshots_annotated/closed_tip_end_annotated.png",
+        "mode": "RGB",
+        "readable": true,
+        "resolution": [
+          1900,
+          900
+        ],
+        "sha256": "a808ca9a85ae7255d90ff4bb61e926e7750b66e8756dabeae1cc2d18895d5e21"
+      },
+      "camera": {
+        "orientation_wxyz": [
+          0.2178737074136734,
+          0.3329189419746399,
+          0.6423483490943909,
+          0.6550455093383789
+        ],
+        "position_world_m": [
+          0.3537491227739769,
+          0.6283992190222665,
+          0.3113724081851314
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 1,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.05196327855810523,
+          0.33486945927143097,
+          0.3311356157064438
+        ],
+        "view": "tip_end"
+      },
+      "capture_name": "closed_tip_end",
+      "part": "left_finger and right_finger inward surfaces",
+      "phase": "Isaac isolated diagnostic visual review",
+      "raw": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/v2_attempt5/screenshots_raw/closed_tip_end_raw.png",
+        "mode": "RGBA",
+        "readable": true,
+        "resolution": [
+          1280,
+          900
+        ],
+        "sha256": "fdb64d480f740b13fc8502c5ff0b44cf508c55cec1a9a2c46dfaf837b9067019"
+      },
+      "simulation": {
+        "collider_type": "SOURCE_COLLIDER_UNCHANGED",
+        "dof_order": [
+          "vx300s_left_waist",
+          "vx300s_left_shoulder",
+          "vx300s_left_elbow",
+          "vx300s_left_forearm_roll",
+          "vx300s_left_wrist_angle",
+          "vx300s_left_wrist_rotate",
+          "vx300s_left_left_finger",
+          "vx300s_left_right_finger"
+        ],
+        "finger_readback_m": [
+          0.020999999716877937,
+          -0.020999999716877937
+        ],
+        "finger_targets_m": [
+          0.021,
+          -0.021
+        ],
+        "frame": 2,
+        "hidden_session_visuals": [
+          "/workcell/table",
+          "/workcell/table_frame_T",
+          "/workcell/midair",
+          "/workcell/placeholder_pipe",
+          "/workcell/worldBody",
+          "/workcell/vx300s_left/vx300s_left/visuals",
+          "/workcell/vx300s_left/vx300s_left_shoulder_link/visuals",
+          "/workcell/vx300s_left/vx300s_left_upper_arm_link/visuals",
+          "/workcell/vx300s_left/vx300s_left_upper_forearm_link/visuals",
+          "/workcell/vx300s_left/vx300s_left_lower_forearm_link/visuals",
+          "/workcell/vx300s_left/vx300s_left_wrist_link/visuals",
+          "/workcell/vx300s_left/vx300s_left_camera_focus/visuals"
+        ],
+        "isaac_sim": "5.1.0.0",
+        "kit": "107.3.3",
+        "physx": "107.3.26",
+        "robot": "follower_left",
+        "stage_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_installation_v2/aloha_viperx_cad_finger_diagnostic.usda",
+        "stage_sha256": "9f64f2ef6e280d3505c900a7b13e649331cf8bb227d910928647762ef4a5edc3",
+        "state": "closed",
+        "surface_gap_m": 0.0044629832044451034,
+        "time_s": 0.03333333507180214,
+        "view_hidden_visuals": [],
+        "visual_state_boundary": "Diagnostic render only. The approved source Stage has disjoint authored body/joint frames; this compensates only the added visual Xform in the anonymous session layer. It is not physics motion, collision, contact, or grasp evidence.",
+        "visual_state_method": "VISUAL_SESSION_QPOS_PROJECTION_WITH_USD_LINK_FRAME_COMPENSATION",
+        "visual_type": "SUPPLIER_CAD_V2_VISUAL_ONLY_DIAGNOSTIC"
+      },
+      "state": "closed",
+      "target": "supplier CAD handed finger installation",
+      "view": "tip_end",
+      "visual_self_review": {
+        "annotated": "PASS",
+        "checks": {
+          "annotations_do_not_cover_key_geometry": true,
+          "blue_orange_mapping_correct": true,
+          "both_fingers_fully_visible": true,
+          "inward_surfaces_opposed": true,
+          "labels_do_not_overlap": true,
+          "no_critical_crop": true,
+          "no_critical_occlusion": true,
+          "visual_gate_only_wording": true
+        },
+        "conclusion": "Tip-end view exposes the opposing inner profiles; magenta points remain explicitly non-contact annotation samples.",
+        "raw": "PASS",
+        "retake_reason": null,
+        "status": "PASS"
+      }
+    },
+    {
+      "acceptance_criteria": [
+        "both_fingers_fully_visible",
+        "blue_orange_mapping_correct",
+        "inward_surfaces_opposed",
+        "no_critical_crop",
+        "no_critical_occlusion",
+        "labels_do_not_overlap",
+        "annotations_do_not_cover_key_geometry",
+        "visual_gate_only_wording"
+      ],
+      "annotated": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/v2_attempt5/annotation_v2/screenshots_annotated/closed_true_bottom_annotated.png",
+        "mode": "RGB",
+        "readable": true,
+        "resolution": [
+          1900,
+          900
+        ],
+        "sha256": "0a68ca9936389544285f30dcaf210fc21a841fee0f6e1e70cc7758880f949460"
+      },
+      "camera": {
+        "orientation_wxyz": [
+          -0.09746477007865906,
+          0.38575196266174316,
+          0.9169765710830688,
+          -0.029155170544981956
+        ],
+        "position_world_m": [
+          -0.058718260594341515,
+          0.3468183288351982,
+          -0.20748003706182994
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 2,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.05196327855810523,
+          0.33486945927143097,
+          0.3311356157064438
+        ],
+        "view": "true_bottom"
+      },
+      "capture_name": "closed_true_bottom",
+      "part": "left_finger and right_finger inward surfaces",
+      "phase": "Isaac isolated diagnostic visual review",
+      "raw": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/v2_attempt5/screenshots_raw/closed_true_bottom_raw.png",
+        "mode": "RGBA",
+        "readable": true,
+        "resolution": [
+          1280,
+          900
+        ],
+        "sha256": "acf8f53601ada04f81e29259b89f8c3bfca94e5b6b06ec71952f96110cf59237"
+      },
+      "simulation": {
+        "collider_type": "SOURCE_COLLIDER_UNCHANGED",
+        "dof_order": [
+          "vx300s_left_waist",
+          "vx300s_left_shoulder",
+          "vx300s_left_elbow",
+          "vx300s_left_forearm_roll",
+          "vx300s_left_wrist_angle",
+          "vx300s_left_wrist_rotate",
+          "vx300s_left_left_finger",
+          "vx300s_left_right_finger"
+        ],
+        "finger_readback_m": [
+          0.020999999716877937,
+          -0.020999999716877937
+        ],
+        "finger_targets_m": [
+          0.021,
+          -0.021
+        ],
+        "frame": 2,
+        "hidden_session_visuals": [
+          "/workcell/table",
+          "/workcell/table_frame_T",
+          "/workcell/midair",
+          "/workcell/placeholder_pipe",
+          "/workcell/worldBody",
+          "/workcell/vx300s_left/vx300s_left/visuals",
+          "/workcell/vx300s_left/vx300s_left_shoulder_link/visuals",
+          "/workcell/vx300s_left/vx300s_left_upper_arm_link/visuals",
+          "/workcell/vx300s_left/vx300s_left_upper_forearm_link/visuals",
+          "/workcell/vx300s_left/vx300s_left_lower_forearm_link/visuals",
+          "/workcell/vx300s_left/vx300s_left_wrist_link/visuals",
+          "/workcell/vx300s_left/vx300s_left_camera_focus/visuals"
+        ],
+        "isaac_sim": "5.1.0.0",
+        "kit": "107.3.3",
+        "physx": "107.3.26",
+        "robot": "follower_left",
+        "stage_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_installation_v2/aloha_viperx_cad_finger_diagnostic.usda",
+        "stage_sha256": "9f64f2ef6e280d3505c900a7b13e649331cf8bb227d910928647762ef4a5edc3",
+        "state": "closed",
+        "surface_gap_m": 0.0044629832044451034,
+        "time_s": 0.03333333507180214,
+        "view_hidden_visuals": [],
+        "visual_state_boundary": "Diagnostic render only. The approved source Stage has disjoint authored body/joint frames; this compensates only the added visual Xform in the anonymous session layer. It is not physics motion, collision, contact, or grasp evidence.",
+        "visual_state_method": "VISUAL_SESSION_QPOS_PROJECTION_WITH_USD_LINK_FRAME_COMPENSATION",
+        "visual_type": "SUPPLIER_CAD_V2_VISUAL_ONLY_DIAGNOSTIC"
+      },
+      "state": "closed",
+      "target": "supplier CAD handed finger installation",
+      "view": "true_bottom",
+      "visual_self_review": {
+        "annotated": "PASS",
+        "checks": {
+          "annotations_do_not_cover_key_geometry": true,
+          "blue_orange_mapping_correct": true,
+          "both_fingers_fully_visible": true,
+          "inward_surfaces_opposed": true,
+          "labels_do_not_overlap": true,
+          "no_critical_crop": true,
+          "no_critical_occlusion": true,
+          "visual_gate_only_wording": true
+        },
+        "conclusion": "Closed state is visible from the opposite side; blue/orange screen order reverses consistently with viewpoint.",
+        "raw": "PASS",
+        "retake_reason": null,
+        "status": "PASS"
+      }
+    },
+    {
+      "acceptance_criteria": [
+        "both_fingers_fully_visible",
+        "blue_orange_mapping_correct",
+        "inward_surfaces_opposed",
+        "no_critical_crop",
+        "no_critical_occlusion",
+        "labels_do_not_overlap",
+        "annotations_do_not_cover_key_geometry",
+        "visual_gate_only_wording"
+      ],
+      "annotated": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/v2_attempt5/annotation_v2/screenshots_annotated/closed_true_top_annotated.png",
+        "mode": "RGB",
+        "readable": true,
+        "resolution": [
+          1900,
+          900
+        ],
+        "sha256": "e82d3496b1fa8c06b9758a67f81e45ad87a0a98b1fe05a93626efa7af2d77675"
+      },
+      "camera": {
+        "orientation_wxyz": [
+          0.9169765710830688,
+          -0.029155196622014046,
+          0.09746477007865906,
+          -0.38575196266174316
+        ],
+        "position_world_m": [
+          0.16264481771055198,
+          0.32292058970766374,
+          0.8697512684747175
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 16,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.05196327855810523,
+          0.33486945927143097,
+          0.3311356157064438
+        ],
+        "view": "true_top"
+      },
+      "capture_name": "closed_true_top",
+      "part": "left_finger and right_finger inward surfaces",
+      "phase": "Isaac isolated diagnostic visual review",
+      "raw": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/v2_attempt5/screenshots_raw/closed_true_top_raw.png",
+        "mode": "RGBA",
+        "readable": true,
+        "resolution": [
+          1280,
+          900
+        ],
+        "sha256": "c0dcd42aadeb563cf5247c8233ee7966b721f2947feed7bb4a95515af4763da0"
+      },
+      "simulation": {
+        "collider_type": "SOURCE_COLLIDER_UNCHANGED",
+        "dof_order": [
+          "vx300s_left_waist",
+          "vx300s_left_shoulder",
+          "vx300s_left_elbow",
+          "vx300s_left_forearm_roll",
+          "vx300s_left_wrist_angle",
+          "vx300s_left_wrist_rotate",
+          "vx300s_left_left_finger",
+          "vx300s_left_right_finger"
+        ],
+        "finger_readback_m": [
+          0.020999999716877937,
+          -0.020999999716877937
+        ],
+        "finger_targets_m": [
+          0.021,
+          -0.021
+        ],
+        "frame": 2,
+        "hidden_session_visuals": [
+          "/workcell/table",
+          "/workcell/table_frame_T",
+          "/workcell/midair",
+          "/workcell/placeholder_pipe",
+          "/workcell/worldBody",
+          "/workcell/vx300s_left/vx300s_left/visuals",
+          "/workcell/vx300s_left/vx300s_left_shoulder_link/visuals",
+          "/workcell/vx300s_left/vx300s_left_upper_arm_link/visuals",
+          "/workcell/vx300s_left/vx300s_left_upper_forearm_link/visuals",
+          "/workcell/vx300s_left/vx300s_left_lower_forearm_link/visuals",
+          "/workcell/vx300s_left/vx300s_left_wrist_link/visuals",
+          "/workcell/vx300s_left/vx300s_left_camera_focus/visuals"
+        ],
+        "isaac_sim": "5.1.0.0",
+        "kit": "107.3.3",
+        "physx": "107.3.26",
+        "robot": "follower_left",
+        "stage_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_installation_v2/aloha_viperx_cad_finger_diagnostic.usda",
+        "stage_sha256": "9f64f2ef6e280d3505c900a7b13e649331cf8bb227d910928647762ef4a5edc3",
+        "state": "closed",
+        "surface_gap_m": 0.0044629832044451034,
+        "time_s": 0.03333333507180214,
+        "view_hidden_visuals": [],
+        "visual_state_boundary": "Diagnostic render only. The approved source Stage has disjoint authored body/joint frames; this compensates only the added visual Xform in the anonymous session layer. It is not physics motion, collision, contact, or grasp evidence.",
+        "visual_state_method": "VISUAL_SESSION_QPOS_PROJECTION_WITH_USD_LINK_FRAME_COMPENSATION",
+        "visual_type": "SUPPLIER_CAD_V2_VISUAL_ONLY_DIAGNOSTIC"
+      },
+      "state": "closed",
+      "target": "supplier CAD handed finger installation",
+      "view": "true_top",
+      "visual_self_review": {
+        "annotated": "PASS",
+        "checks": {
+          "annotations_do_not_cover_key_geometry": true,
+          "blue_orange_mapping_correct": true,
+          "both_fingers_fully_visible": true,
+          "inward_surfaces_opposed": true,
+          "labels_do_not_overlap": true,
+          "no_critical_crop": true,
+          "no_critical_occlusion": true,
+          "visual_gate_only_wording": true
+        },
+        "conclusion": "Closed state is legible from true_top; the narrow gap and inward faces are visible without label overlap.",
+        "raw": "PASS",
+        "retake_reason": null,
+        "status": "PASS"
+      }
+    },
+    {
+      "acceptance_criteria": [
+        "both_fingers_fully_visible",
+        "blue_orange_mapping_correct",
+        "inward_surfaces_opposed",
+        "no_critical_crop",
+        "no_critical_occlusion",
+        "labels_do_not_overlap",
+        "annotations_do_not_cover_key_geometry",
+        "visual_gate_only_wording"
+      ],
+      "annotated": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/v2_attempt5/annotation_v2/screenshots_annotated/open_base_oblique_annotated.png",
+        "mode": "RGB",
+        "readable": true,
+        "resolution": [
+          1900,
+          900
+        ],
+        "sha256": "509d33a13dc3111dcf343c5aab19b0b899d6313092829153e405c7a8fc252f6b"
+      },
+      "camera": {
+        "orientation_wxyz": [
+          0.8531484603881836,
+          0.46267521381378174,
+          -0.018311191350221634,
+          -0.24027924239635468
+        ],
+        "position_world_m": [
+          -0.06872380573937567,
+          -0.03666315081603773,
+          0.6029777665921666
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 1,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.05196327855810523,
+          0.33486945927143097,
+          0.3311356157064438
+        ],
+        "view": "base_oblique"
+      },
+      "capture_name": "open_base_oblique",
+      "part": "left_finger and right_finger inward surfaces",
+      "phase": "Isaac isolated diagnostic visual review",
+      "raw": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/v2_attempt5/screenshots_raw/open_base_oblique_raw.png",
+        "mode": "RGBA",
+        "readable": true,
+        "resolution": [
+          1280,
+          900
+        ],
+        "sha256": "39fd09ed3b51b956de17b0ae96834cbe124b39b017fc9b63e06916b6473d56c5"
+      },
+      "simulation": {
+        "collider_type": "SOURCE_COLLIDER_UNCHANGED",
+        "dof_order": [
+          "vx300s_left_waist",
+          "vx300s_left_shoulder",
+          "vx300s_left_elbow",
+          "vx300s_left_forearm_roll",
+          "vx300s_left_wrist_angle",
+          "vx300s_left_wrist_rotate",
+          "vx300s_left_left_finger",
+          "vx300s_left_right_finger"
+        ],
+        "finger_readback_m": [
+          0.05700000002980232,
+          -0.05700000002980232
+        ],
+        "finger_targets_m": [
+          0.057,
+          -0.057
+        ],
+        "frame": 2,
+        "hidden_session_visuals": [
+          "/workcell/table",
+          "/workcell/table_frame_T",
+          "/workcell/midair",
+          "/workcell/placeholder_pipe",
+          "/workcell/worldBody",
+          "/workcell/vx300s_left/vx300s_left/visuals",
+          "/workcell/vx300s_left/vx300s_left_shoulder_link/visuals",
+          "/workcell/vx300s_left/vx300s_left_upper_arm_link/visuals",
+          "/workcell/vx300s_left/vx300s_left_upper_forearm_link/visuals",
+          "/workcell/vx300s_left/vx300s_left_lower_forearm_link/visuals",
+          "/workcell/vx300s_left/vx300s_left_wrist_link/visuals",
+          "/workcell/vx300s_left/vx300s_left_camera_focus/visuals"
+        ],
+        "isaac_sim": "5.1.0.0",
+        "kit": "107.3.3",
+        "physx": "107.3.26",
+        "robot": "follower_left",
+        "stage_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_installation_v2/aloha_viperx_cad_finger_diagnostic.usda",
+        "stage_sha256": "9f64f2ef6e280d3505c900a7b13e649331cf8bb227d910928647762ef4a5edc3",
+        "state": "open",
+        "surface_gap_m": 0.07647919688074123,
+        "time_s": 0.03333333507180214,
+        "view_hidden_visuals": [
+          "/workcell/vx300s_left/vx300s_left_gripper_link/visuals"
+        ],
+        "visual_state_boundary": "Diagnostic render only. The approved source Stage has disjoint authored body/joint frames; this compensates only the added visual Xform in the anonymous session layer. It is not physics motion, collision, contact, or grasp evidence.",
+        "visual_state_method": "VISUAL_SESSION_QPOS_PROJECTION_WITH_USD_LINK_FRAME_COMPENSATION",
+        "visual_type": "SUPPLIER_CAD_V2_VISUAL_ONLY_DIAGNOSTIC"
+      },
+      "state": "open",
+      "target": "supplier CAD handed finger installation",
+      "view": "base_oblique",
+      "visual_self_review": {
+        "annotated": "PASS",
+        "checks": {
+          "annotations_do_not_cover_key_geometry": true,
+          "blue_orange_mapping_correct": true,
+          "both_fingers_fully_visible": true,
+          "inward_surfaces_opposed": true,
+          "labels_do_not_overlap": true,
+          "no_critical_crop": true,
+          "no_critical_occlusion": true,
+          "visual_gate_only_wording": true
+        },
+        "conclusion": "Open base-oblique state preserves full handed geometry and clear separation under the paired camera.",
+        "raw": "PASS",
+        "retake_reason": null,
+        "status": "PASS"
+      }
+    },
+    {
+      "acceptance_criteria": [
+        "both_fingers_fully_visible",
+        "blue_orange_mapping_correct",
+        "inward_surfaces_opposed",
+        "no_critical_crop",
+        "no_critical_occlusion",
+        "labels_do_not_overlap",
+        "annotations_do_not_cover_key_geometry",
+        "visual_gate_only_wording"
+      ],
+      "annotated": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/v2_attempt5/annotation_v2/screenshots_annotated/open_tip_end_annotated.png",
+        "mode": "RGB",
+        "readable": true,
+        "resolution": [
+          1900,
+          900
+        ],
+        "sha256": "325e7b3afecaa4d085b9cd34655423b27fdee21e25ad85abed139ebde93978b3"
+      },
+      "camera": {
+        "orientation_wxyz": [
+          0.2178737074136734,
+          0.3329189419746399,
+          0.6423483490943909,
+          0.6550455093383789
+        ],
+        "position_world_m": [
+          0.3537491227739769,
+          0.6283992190222665,
+          0.3113724081851314
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 1,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.05196327855810523,
+          0.33486945927143097,
+          0.3311356157064438
+        ],
+        "view": "tip_end"
+      },
+      "capture_name": "open_tip_end",
+      "part": "left_finger and right_finger inward surfaces",
+      "phase": "Isaac isolated diagnostic visual review",
+      "raw": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/v2_attempt5/screenshots_raw/open_tip_end_raw.png",
+        "mode": "RGBA",
+        "readable": true,
+        "resolution": [
+          1280,
+          900
+        ],
+        "sha256": "283a0509cdbc9c5ad07659b7ecf1ab85de7ede4506e811d7c594283464383357"
+      },
+      "simulation": {
+        "collider_type": "SOURCE_COLLIDER_UNCHANGED",
+        "dof_order": [
+          "vx300s_left_waist",
+          "vx300s_left_shoulder",
+          "vx300s_left_elbow",
+          "vx300s_left_forearm_roll",
+          "vx300s_left_wrist_angle",
+          "vx300s_left_wrist_rotate",
+          "vx300s_left_left_finger",
+          "vx300s_left_right_finger"
+        ],
+        "finger_readback_m": [
+          0.05700000002980232,
+          -0.05700000002980232
+        ],
+        "finger_targets_m": [
+          0.057,
+          -0.057
+        ],
+        "frame": 2,
+        "hidden_session_visuals": [
+          "/workcell/table",
+          "/workcell/table_frame_T",
+          "/workcell/midair",
+          "/workcell/placeholder_pipe",
+          "/workcell/worldBody",
+          "/workcell/vx300s_left/vx300s_left/visuals",
+          "/workcell/vx300s_left/vx300s_left_shoulder_link/visuals",
+          "/workcell/vx300s_left/vx300s_left_upper_arm_link/visuals",
+          "/workcell/vx300s_left/vx300s_left_upper_forearm_link/visuals",
+          "/workcell/vx300s_left/vx300s_left_lower_forearm_link/visuals",
+          "/workcell/vx300s_left/vx300s_left_wrist_link/visuals",
+          "/workcell/vx300s_left/vx300s_left_camera_focus/visuals"
+        ],
+        "isaac_sim": "5.1.0.0",
+        "kit": "107.3.3",
+        "physx": "107.3.26",
+        "robot": "follower_left",
+        "stage_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_installation_v2/aloha_viperx_cad_finger_diagnostic.usda",
+        "stage_sha256": "9f64f2ef6e280d3505c900a7b13e649331cf8bb227d910928647762ef4a5edc3",
+        "state": "open",
+        "surface_gap_m": 0.07647919688074123,
+        "time_s": 0.03333333507180214,
+        "view_hidden_visuals": [],
+        "visual_state_boundary": "Diagnostic render only. The approved source Stage has disjoint authored body/joint frames; this compensates only the added visual Xform in the anonymous session layer. It is not physics motion, collision, contact, or grasp evidence.",
+        "visual_state_method": "VISUAL_SESSION_QPOS_PROJECTION_WITH_USD_LINK_FRAME_COMPENSATION",
+        "visual_type": "SUPPLIER_CAD_V2_VISUAL_ONLY_DIAGNOSTIC"
+      },
+      "state": "open",
+      "target": "supplier CAD handed finger installation",
+      "view": "tip_end",
+      "visual_self_review": {
+        "annotated": "PASS",
+        "checks": {
+          "annotations_do_not_cover_key_geometry": true,
+          "blue_orange_mapping_correct": true,
+          "both_fingers_fully_visible": true,
+          "inward_surfaces_opposed": true,
+          "labels_do_not_overlap": true,
+          "no_critical_crop": true,
+          "no_critical_occlusion": true,
+          "visual_gate_only_wording": true
+        },
+        "conclusion": "Tip-end open aperture is visibly larger than closed under the same camera and both finger profiles are complete.",
+        "raw": "PASS",
+        "retake_reason": null,
+        "status": "PASS"
+      }
+    },
+    {
+      "acceptance_criteria": [
+        "both_fingers_fully_visible",
+        "blue_orange_mapping_correct",
+        "inward_surfaces_opposed",
+        "no_critical_crop",
+        "no_critical_occlusion",
+        "labels_do_not_overlap",
+        "annotations_do_not_cover_key_geometry",
+        "visual_gate_only_wording"
+      ],
+      "annotated": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/v2_attempt5/annotation_v2/screenshots_annotated/open_true_bottom_annotated.png",
+        "mode": "RGB",
+        "readable": true,
+        "resolution": [
+          1900,
+          900
+        ],
+        "sha256": "22c0f4dfecabaaa296941c428d425acaf9f18782c6dd6ca090e636deb878e6ed"
+      },
+      "camera": {
+        "orientation_wxyz": [
+          -0.09746477007865906,
+          0.38575196266174316,
+          0.9169765710830688,
+          -0.029155170544981956
+        ],
+        "position_world_m": [
+          -0.058718260594341515,
+          0.3468183288351982,
+          -0.20748003706182994
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 11,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.05196327855810523,
+          0.33486945927143097,
+          0.3311356157064438
+        ],
+        "view": "true_bottom"
+      },
+      "capture_name": "open_true_bottom",
+      "part": "left_finger and right_finger inward surfaces",
+      "phase": "Isaac isolated diagnostic visual review",
+      "raw": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/v2_attempt5/screenshots_raw/open_true_bottom_raw.png",
+        "mode": "RGBA",
+        "readable": true,
+        "resolution": [
+          1280,
+          900
+        ],
+        "sha256": "78ef9d8d8b074b153fd8e479ff2621c2def424d7e9f348461ca931a69ee07c90"
+      },
+      "simulation": {
+        "collider_type": "SOURCE_COLLIDER_UNCHANGED",
+        "dof_order": [
+          "vx300s_left_waist",
+          "vx300s_left_shoulder",
+          "vx300s_left_elbow",
+          "vx300s_left_forearm_roll",
+          "vx300s_left_wrist_angle",
+          "vx300s_left_wrist_rotate",
+          "vx300s_left_left_finger",
+          "vx300s_left_right_finger"
+        ],
+        "finger_readback_m": [
+          0.05700000002980232,
+          -0.05700000002980232
+        ],
+        "finger_targets_m": [
+          0.057,
+          -0.057
+        ],
+        "frame": 2,
+        "hidden_session_visuals": [
+          "/workcell/table",
+          "/workcell/table_frame_T",
+          "/workcell/midair",
+          "/workcell/placeholder_pipe",
+          "/workcell/worldBody",
+          "/workcell/vx300s_left/vx300s_left/visuals",
+          "/workcell/vx300s_left/vx300s_left_shoulder_link/visuals",
+          "/workcell/vx300s_left/vx300s_left_upper_arm_link/visuals",
+          "/workcell/vx300s_left/vx300s_left_upper_forearm_link/visuals",
+          "/workcell/vx300s_left/vx300s_left_lower_forearm_link/visuals",
+          "/workcell/vx300s_left/vx300s_left_wrist_link/visuals",
+          "/workcell/vx300s_left/vx300s_left_camera_focus/visuals"
+        ],
+        "isaac_sim": "5.1.0.0",
+        "kit": "107.3.3",
+        "physx": "107.3.26",
+        "robot": "follower_left",
+        "stage_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_installation_v2/aloha_viperx_cad_finger_diagnostic.usda",
+        "stage_sha256": "9f64f2ef6e280d3505c900a7b13e649331cf8bb227d910928647762ef4a5edc3",
+        "state": "open",
+        "surface_gap_m": 0.07647919688074123,
+        "time_s": 0.03333333507180214,
+        "view_hidden_visuals": [],
+        "visual_state_boundary": "Diagnostic render only. The approved source Stage has disjoint authored body/joint frames; this compensates only the added visual Xform in the anonymous session layer. It is not physics motion, collision, contact, or grasp evidence.",
+        "visual_state_method": "VISUAL_SESSION_QPOS_PROJECTION_WITH_USD_LINK_FRAME_COMPENSATION",
+        "visual_type": "SUPPLIER_CAD_V2_VISUAL_ONLY_DIAGNOSTIC"
+      },
+      "state": "open",
+      "target": "supplier CAD handed finger installation",
+      "view": "true_bottom",
+      "visual_self_review": {
+        "annotated": "PASS",
+        "checks": {
+          "annotations_do_not_cover_key_geometry": true,
+          "blue_orange_mapping_correct": true,
+          "both_fingers_fully_visible": true,
+          "inward_surfaces_opposed": true,
+          "labels_do_not_overlap": true,
+          "no_critical_crop": true,
+          "no_critical_occlusion": true,
+          "visual_gate_only_wording": true
+        },
+        "conclusion": "Open state is visibly distinct and neither inner face is hidden by the annotation.",
+        "raw": "PASS",
+        "retake_reason": null,
+        "status": "PASS"
+      }
+    },
+    {
+      "acceptance_criteria": [
+        "both_fingers_fully_visible",
+        "blue_orange_mapping_correct",
+        "inward_surfaces_opposed",
+        "no_critical_crop",
+        "no_critical_occlusion",
+        "labels_do_not_overlap",
+        "annotations_do_not_cover_key_geometry",
+        "visual_gate_only_wording"
+      ],
+      "annotated": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/v2_attempt5/annotation_v2/screenshots_annotated/open_true_top_annotated.png",
+        "mode": "RGB",
+        "readable": true,
+        "resolution": [
+          1900,
+          900
+        ],
+        "sha256": "c7830f38a4905e344756258c3d26d5877658d607e0c4f2789a8cc95ade5f7f5a"
+      },
+      "camera": {
+        "orientation_wxyz": [
+          0.9169765710830688,
+          -0.029155196622014046,
+          0.09746477007865906,
+          -0.38575196266174316
+        ],
+        "position_world_m": [
+          0.16264481771055198,
+          0.32292058970766374,
+          0.8697512684747175
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 11,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.05196327855810523,
+          0.33486945927143097,
+          0.3311356157064438
+        ],
+        "view": "true_top"
+      },
+      "capture_name": "open_true_top",
+      "part": "left_finger and right_finger inward surfaces",
+      "phase": "Isaac isolated diagnostic visual review",
+      "raw": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/isaac_cad_finger/v2_attempt5/screenshots_raw/open_true_top_raw.png",
+        "mode": "RGBA",
+        "readable": true,
+        "resolution": [
+          1280,
+          900
+        ],
+        "sha256": "03007ca0fde4507dcf64cb4f617be7843e56544ca359a4c5c63bc43481016cf3"
+      },
+      "simulation": {
+        "collider_type": "SOURCE_COLLIDER_UNCHANGED",
+        "dof_order": [
+          "vx300s_left_waist",
+          "vx300s_left_shoulder",
+          "vx300s_left_elbow",
+          "vx300s_left_forearm_roll",
+          "vx300s_left_wrist_angle",
+          "vx300s_left_wrist_rotate",
+          "vx300s_left_left_finger",
+          "vx300s_left_right_finger"
+        ],
+        "finger_readback_m": [
+          0.05700000002980232,
+          -0.05700000002980232
+        ],
+        "finger_targets_m": [
+          0.057,
+          -0.057
+        ],
+        "frame": 2,
+        "hidden_session_visuals": [
+          "/workcell/table",
+          "/workcell/table_frame_T",
+          "/workcell/midair",
+          "/workcell/placeholder_pipe",
+          "/workcell/worldBody",
+          "/workcell/vx300s_left/vx300s_left/visuals",
+          "/workcell/vx300s_left/vx300s_left_shoulder_link/visuals",
+          "/workcell/vx300s_left/vx300s_left_upper_arm_link/visuals",
+          "/workcell/vx300s_left/vx300s_left_upper_forearm_link/visuals",
+          "/workcell/vx300s_left/vx300s_left_lower_forearm_link/visuals",
+          "/workcell/vx300s_left/vx300s_left_wrist_link/visuals",
+          "/workcell/vx300s_left/vx300s_left_camera_focus/visuals"
+        ],
+        "isaac_sim": "5.1.0.0",
+        "kit": "107.3.3",
+        "physx": "107.3.26",
+        "robot": "follower_left",
+        "stage_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_installation_v2/aloha_viperx_cad_finger_diagnostic.usda",
+        "stage_sha256": "9f64f2ef6e280d3505c900a7b13e649331cf8bb227d910928647762ef4a5edc3",
+        "state": "open",
+        "surface_gap_m": 0.07647919688074123,
+        "time_s": 0.03333333507180214,
+        "view_hidden_visuals": [],
+        "visual_state_boundary": "Diagnostic render only. The approved source Stage has disjoint authored body/joint frames; this compensates only the added visual Xform in the anonymous session layer. It is not physics motion, collision, contact, or grasp evidence.",
+        "visual_state_method": "VISUAL_SESSION_QPOS_PROJECTION_WITH_USD_LINK_FRAME_COMPENSATION",
+        "visual_type": "SUPPLIER_CAD_V2_VISUAL_ONLY_DIAGNOSTIC"
+      },
+      "state": "open",
+      "target": "supplier CAD handed finger installation",
+      "view": "true_top",
+      "visual_self_review": {
+        "annotated": "PASS",
+        "checks": {
+          "annotations_do_not_cover_key_geometry": true,
+          "blue_orange_mapping_correct": true,
+          "both_fingers_fully_visible": true,
+          "inward_surfaces_opposed": true,
+          "labels_do_not_overlap": true,
+          "no_critical_crop": true,
+          "no_critical_occlusion": true,
+          "visual_gate_only_wording": true
+        },
+        "conclusion": "Open state is visibly distinct from its paired closed capture and the complete handed pair remains in frame.",
+        "raw": "PASS",
+        "retake_reason": null,
+        "status": "PASS"
+      }
+    }
+  ],
+  "diagnostic_stage": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_installation_v2/aloha_viperx_cad_finger_diagnostic.usda",
+    "sha256_after": "9f64f2ef6e280d3505c900a7b13e649331cf8bb227d910928647762ef4a5edc3",
+    "sha256_before": "9f64f2ef6e280d3505c900a7b13e649331cf8bb227d910928647762ef4a5edc3"
+  },
+  "gate": "ISAAC_CAD_INSTALLATION_VISUAL_EVIDENCE_ONLY",
+  "gates": {
+    "annotated_visual_review": true,
+    "approved_source_stage_immutable": true,
+    "capture_count": true,
+    "diagnostic_stage_immutable": true,
+    "open_closed_visually_distinct": true,
+    "paired_camera_pose_exact": true,
+    "raw_visual_review": true,
+    "visual_gate_scope_explicit": true
+  },
+  "open_closed_pair_checks": {
+    "base_oblique": {
+      "camera_pose_exact": true,
+      "open_surface_gap_exceeds_closed": true
+    },
+    "tip_end": {
+      "camera_pose_exact": true,
+      "open_surface_gap_exceeds_closed": true
+    },
+    "true_bottom": {
+      "camera_pose_exact": true,
+      "open_surface_gap_exceeds_closed": true
+    },
+    "true_top": {
+      "camera_pose_exact": true,
+      "open_surface_gap_exceeds_closed": true
+    }
+  },
+  "retake_history": [
+    {
+      "attempt": "historical_v1",
+      "reason": "The prior CAD-to-link rotation inverted the palm-facing orientation.",
+      "status": "REJECTED_WRONG_180_DEG_PALM_FLIP"
+    },
+    {
+      "attempt": "v2_attempt1",
+      "reason": "Camera targeting used runtime PhysX body pose while rendering disjoint authored USD body transforms, yielding blank evidence.",
+      "status": "REJECTED_CAMERA_PHYSX_USD_POSE_MISMATCH"
+    },
+    {
+      "attempt": "v2_attempt2",
+      "reason": "Simple q translation did not compensate the approved Stage's authored link-frame offset; closed surface gap was about 92.5 mm.",
+      "status": "REJECTED_SIMPLE_Q_TRANSLATION_WITH_DISJOINT_LINK_FRAME"
+    },
+    {
+      "attempt": "v2_attempt3",
+      "reason": "Top/open geometry was cropped and the base-side view was obstructed by arm/shell visuals.",
+      "status": "REJECTED_CROPPING_AND_ARM_OCCLUSION"
+    },
+    {
+      "attempt": "v2_attempt4",
+      "reason": "Six views passed, but the gripper-shell visual still hid the base-side finger details.",
+      "status": "REJECTED_BASE_OBLIQUE_GRIPPER_SHELL_OCCLUSION"
+    },
+    {
+      "attempt": "v2_attempt5_raw",
+      "reason": "All eight raw captures were reviewed individually; base-oblique hides only the shell visual in the anonymous capture session.",
+      "status": "PASS"
+    },
+    {
+      "attempt": "annotation_v1",
+      "reason": "The diagnostic Stage hash was truncated in the annotation panel.",
+      "status": "REJECTED_PANEL_HASH_TRUNCATION"
+    },
+    {
+      "attempt": "annotation_v2",
+      "reason": "All eight annotated captures were reviewed individually with full hashes, non-overlapping labels, and explicit visual-only scope.",
+      "status": "PASS"
+    }
+  ],
+  "schema_version": 1,
+  "scope_boundaries": {
+    "collision_acceptance": "NOT_RUN",
+    "contact_acceptance": "NOT_RUN",
+    "final_default_asset_modified": false,
+    "final_default_collider_modified": false,
+    "grasp_acceptance": "NOT_RUN",
+    "physics_acceptance": "NOT_RUN",
+    "task_8": "NOT_RUN"
+  },
+  "status": "PASS"
+}

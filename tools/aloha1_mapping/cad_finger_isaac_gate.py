@@ -29,11 +29,34 @@ def build_gate_report(
     candidate_stage_path: Path,
     importer_api_path: Path,
     importer_manifest_path: Path,
+    authorized_stage_audit_path: Path,
+    diagnostic_asset_path: Path | None = None,
+    isaac_screenshot_review_path: Path | None = None,
 ) -> dict[str, Any]:
+    project_root = mapping_path.resolve().parents[2]
+    diagnostic_asset_path = diagnostic_asset_path or (
+        project_root
+        / "reports/aloha1_mapping/"
+        "aloha_viper_cad_finger_diagnostic_asset_v2.json"
+    )
+    isaac_screenshot_review_path = isaac_screenshot_review_path or (
+        project_root
+        / "reports/aloha1_mapping/"
+        "aloha_viper_cad_finger_isaac_screenshot_review.json"
+    )
     mapping = json.loads(mapping_path.read_text(encoding="utf-8"))
     tessellation = json.loads(tessellation_path.read_text(encoding="utf-8"))
     source_manifest = json.loads(
         source_manifest_path.read_text(encoding="utf-8")
+    )
+    stage_audit = json.loads(
+        authorized_stage_audit_path.read_text(encoding="utf-8")
+    )
+    diagnostic_asset = json.loads(
+        diagnostic_asset_path.read_text(encoding="utf-8")
+    )
+    isaac_screenshot_review = json.loads(
+        isaac_screenshot_review_path.read_text(encoding="utf-8")
     )
     candidate_hash = _sha256(candidate_stage_path)
     input_gates = {
@@ -46,19 +69,48 @@ def build_gate_report(
         "two_run_linear_tessellation_deterministic": (
             tessellation["determinism_gate"] == "PASS"
         ),
+        "production_angular_tessellation_pass": (
+            tessellation["production_tessellation_gate"] == "PASS"
+        ),
         "source_inventory_complete": (
             source_manifest["inventory_status"] == "PASS"
         ),
         "historical_candidate_hash_unchanged": (
             candidate_hash == EXPECTED_CANDIDATE_SHA256
         ),
+        "authorized_stage_read_only_audit_pass": (
+            stage_audit["status"] == "PASS"
+            and stage_audit["absolute_path"]
+            == str(candidate_stage_path.resolve())
+            and stage_audit["source_sha256_before"] == candidate_hash
+            and stage_audit["source_sha256_after"] == candidate_hash
+        ),
+        "isolated_diagnostic_asset_pass": (
+            diagnostic_asset["status"] == "PASS"
+            and diagnostic_asset["source_stage"]["sha256_before"]
+            == candidate_hash
+            and diagnostic_asset["source_stage"]["sha256_after"]
+            == candidate_hash
+        ),
+        "isaac_screenshot_review_pass": (
+            isaac_screenshot_review["status"] == "PASS"
+            and isaac_screenshot_review["approved_source_stage"][
+                "sha256_before"
+            ]
+            == candidate_hash
+            and isaac_screenshot_review["approved_source_stage"][
+                "sha256_after"
+            ]
+            == candidate_hash
+        ),
     }
     return {
         "schema_version": 1,
         "status": "PARTIAL",
         "scope": (
-            "Static authorization and source gate only; no USD Stage was "
-            "opened, switched, authored, or simulated"
+            "User-approved source Stage frozen read-only; isolated v2 "
+            "diagnostic USD and CAD-installation screenshots completed. "
+            "Task 5/7 remain not run and Task 8 remains prohibited."
         ),
         "official_isaac_gateway_evidence": {
             "status": "PASS",
@@ -101,7 +153,7 @@ def build_gate_report(
             "importer_manifest_sha256": _sha256(importer_manifest_path),
             "confirmed_import_config_member": "convex_decomp",
             "confirmed_command": "URDFCreateImportConfig",
-            "runtime_probe_status": "NOT_RUN_STAGE_NOT_AUTHORIZED",
+            "runtime_probe_status": "PASS_READ_ONLY_STAGE_AUDIT",
         },
         "input_evidence": {
             "mapping": {
@@ -123,41 +175,67 @@ def build_gate_report(
                 "status": source_manifest["status"],
                 "license_status": source_manifest["license"]["status"],
             },
+            "authorized_stage_audit": {
+                "path": str(authorized_stage_audit_path.resolve()),
+                "sha256": _sha256(authorized_stage_audit_path),
+                "status": stage_audit["status"],
+            },
+            "isolated_diagnostic_asset": {
+                "path": str(diagnostic_asset_path.resolve()),
+                "sha256": _sha256(diagnostic_asset_path),
+                "status": diagnostic_asset["status"],
+                "root_usd": diagnostic_asset["diagnostic_outputs"][
+                    "root_usd"
+                ],
+            },
+            "isaac_screenshot_review": {
+                "path": str(isaac_screenshot_review_path.resolve()),
+                "sha256": _sha256(isaac_screenshot_review_path),
+                "status": isaac_screenshot_review["status"],
+                "capture_count": isaac_screenshot_review["capture_count"],
+                "gate": isaac_screenshot_review["gate"],
+            },
         },
         "input_gates": input_gates,
         "stage_selection": {
-            "status": "HARD_BLOCKER",
+            "status": "PASS",
             "reason": (
-                "No absolute Stage path has been user-approved for the "
-                "post-2026-07-29 supplier-CAD finger diagnostic. The known "
-                "file is historical evidence, not authorization to load or "
-                "mutate it for this task."
+                "The user explicitly approved this frozen Stage for the "
+                "supplier-CAD finger isolated diagnostic. Authorization "
+                "permits only an independent diagnostic layer and forbids "
+                "source/default/final-collider mutation."
             ),
-            "historical_candidate": {
+            "approved_review_stage": {
                 "classification": (
-                    "HISTORICAL_CANDIDATE_NOT_AUTHORIZED_CURRENT_TASK"
+                    "USER_APPROVED_ISOLATED_DIAGNOSTIC_REVIEW_STAGE"
                 ),
                 "absolute_path": str(candidate_stage_path.resolve()),
                 "sha256": candidate_hash,
                 "expected_frozen_sha256": EXPECTED_CANDIDATE_SHA256,
-                "root_prim": "UNVERIFIED_NOT_LOADED",
-                "sublayers": "UNVERIFIED_NOT_LOADED",
-                "required_key_prims": "UNVERIFIED_NOT_LOADED",
+                "read_only": True,
+                "source_sha256_before": stage_audit[
+                    "source_sha256_before"
+                ],
+                "source_sha256_after": stage_audit["source_sha256_after"],
+                "root_prim": stage_audit["default_prim"],
+                "layer_stack_status": stage_audit["layer_stack_status"],
+                "required_key_prims_status": stage_audit[
+                    "required_key_prims_status"
+                ],
+                "instance_proxy_strategy": stage_audit[
+                    "instance_proxy_strategy"
+                ],
             },
-            "required_to_clear": [
-                "user-approved absolute Stage path",
-                "frozen SHA-256",
-                "expected root prim",
-                "expected sublayers",
-                "required follower/gripper prim paths",
-            ],
+            "authorization_boundary": stage_audit["authorization"],
         },
         "diagnostic_asset_plan": {
-            "status": "STATIC_PREPARED_NOT_AUTHORED",
+            "status": "PASS",
             "target_directory": str(
-                mapping_path.resolve().parents[2]
-                / "assets/Trossen/ALOHA1/1.0/diagnostics/"
-                "cad_finger_installation"
+                Path(
+                    diagnostic_asset["diagnostic_outputs"]["root_usd"][
+                        "absolute_path"
+                    ]
+                ).parent
             ),
             "source_fingers": {
                 "left_finger": (
@@ -179,34 +257,34 @@ def build_gate_report(
             ),
         },
         "execution_status": {
-            "isolated_diagnostic_usd": "NOT_RUN",
-            "isaac_open_closed_screenshots": "NOT_RUN",
+            "isolated_diagnostic_usd": "PASS",
+            "isaac_open_closed_screenshots": "PASS",
             "task_5_correct_cad_finger": "NOT_RUN",
             "task_7": "NOT_RUN",
             "task_8": "NOT_RUN",
         },
         "hard_blockers": [
             {
-                "id": "ISAAC_REVIEW_STAGE_NOT_USER_APPROVED",
-                "scope_blocked": (
-                    "Stage load/switch, USD authoring against a selected "
-                    "follower, Isaac screenshots, Task 5, and Task 7"
-                ),
-            },
-            {
                 "id": "CAD_LICENSE_UNKNOWN",
                 "scope_blocked": (
                     "committing or redistributing original STEP/PDF files"
                 ),
             },
-            {
-                "id": "ANGULAR_TESSELLATION_CONTROL_UNAVAILABLE",
-                "scope_blocked": (
-                    "promotion of the linear-only diagnostic mesh as the "
-                    "fully parameter-controlled production visual mesh"
-                ),
-            },
-        ],
+        ]
+        + (
+            []
+            if tessellation["production_tessellation_gate"] == "PASS"
+            else [
+                {
+                    "id": "ANGULAR_TESSELLATION_CONTROL_UNAVAILABLE",
+                    "scope_blocked": (
+                        "promotion of the linear-only diagnostic mesh as "
+                        "the fully parameter-controlled production visual "
+                        "mesh"
+                    ),
+                }
+            ]
+        ),
     }
 
 
@@ -222,31 +300,43 @@ def write_gate_report(
         encoding="utf-8",
     )
     stage = report["stage_selection"]
-    candidate = stage["historical_candidate"]
+    candidate = stage["approved_review_stage"]
     lines = [
         "# ALOHA Supplier-CAD Finger Isaac Stage Gate",
         "",
         f"- Overall status: `{report['status']}`",
         f"- Stage selection: `{stage['status']}`",
-        "- Stage opened/switched/authored: `false`",
+        "- Source Stage opened read-only for audit: `true`",
+        "- Source Stage switched/authored/saved: `false`",
+        (
+            "- Isolated diagnostic USD / Isaac screenshots: "
+            f"`{report['execution_status']['isolated_diagnostic_usd']}` / "
+            f"`{report['execution_status']['isaac_open_closed_screenshots']}`"
+        ),
         "- Task 5 / Task 7 / Task 8: `NOT_RUN / NOT_RUN / NOT_RUN`",
         "",
         stage["reason"],
         "",
-        "## Historical candidate (not authorized)",
+        "## User-approved isolated diagnostic review Stage",
         "",
         f"- Path: `{candidate['absolute_path']}`",
         f"- Frozen SHA-256: `{candidate['sha256']}`",
         f"- Root prim: `{candidate['root_prim']}`",
-        f"- Sublayers: `{candidate['sublayers']}`",
-        f"- Required key prims: `{candidate['required_key_prims']}`",
+        f"- Layer stack: `{candidate['layer_stack_status']}`",
+        f"- Required key prims: `{candidate['required_key_prims_status']}`",
+        f"- Read only: `{str(candidate['read_only']).lower()}`",
         "",
         "## Independent work completed",
         "",
         "- Supplier CAD installation/orientation mapping: `PASS`",
         "- Raw/annotated CAD screenshot visual gate: `PASS`",
+        "- Isolated supplier-CAD diagnostic asset: `PASS`",
+        "- Isaac raw/annotated installation visual gate: `PASS`",
         "- Two-run linear-only tessellation determinism: `PASS`",
-        "- Production angular-controlled tessellation: `HARD_BLOCKER`",
+        (
+            "- Production angular-controlled tessellation: "
+            f"`{report['input_evidence']['tessellation']['production_tessellation_gate']}`"
+        ),
         "- Source license/redistribution: `UNKNOWN_HARD_BLOCKER`",
     ]
     markdown_path.write_text("\n".join(lines) + "\n", encoding="utf-8")

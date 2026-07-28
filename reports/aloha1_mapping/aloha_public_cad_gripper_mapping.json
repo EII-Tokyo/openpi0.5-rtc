@@ -1,6 +1,6 @@
 {
-  "schema_version": 2,
-  "status": "PARTIAL",
+  "schema_version": 3,
+  "status": "PASS",
   "orientation_mapping_status": "PASS",
   "connection_geometry_status": "PASS",
   "connection_geometry_finding": "SOURCE_CAD_SLIDING_CARRIAGE_COMMON_VOLUME_RECORDED",
@@ -47,6 +47,22 @@
     "screenshot_review": {
       "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_gripper_screenshot_review.json",
       "sha256": "e4fdcf50e6d2471956fb539c00d59e0107eab0647dc29e3bee049925c8083fa9"
+    },
+    "tessellation_report": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_finger_tessellation.json",
+      "sha256": "f09916af65182e44b1a97f3e6eaff4b20b8954759346a356294e94c33a961678"
+    },
+    "mount_registration_report": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_cad_mount_registration.json",
+      "sha256": "8151dbe2f0ebb1ee5bf99f3d8c2724f32a3788e237cb92767e6e6d7afd0008b9"
+    },
+    "isaac_screenshot_review": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_cad_finger_isaac_screenshot_review.json",
+      "sha256": "5dfff3366dccb796de46bb2f0db9b6a47dc96efe34b5477066aa5ce62edc900c"
+    },
+    "isolated_diagnostic_asset": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_cad_finger_diagnostic_asset_v2.json",
+      "sha256": "1cf4240249a3c9f7fbbaff643a8bfefd9ec9300170b882f3ebf4b2c7b9c49272"
     }
   },
   "unit_conversion": {
@@ -75,8 +91,18 @@
       "version": "5.2.0 LTS",
       "render_engine": "BLENDER_WORKBENCH"
     },
-    "production_tessellation_gate": "HARD_BLOCKER",
-    "angular_deflection_control": "NOT_APPLIED_HARD_BLOCKER",
+    "production_tessellation_gate": "PASS",
+    "angular_deflection_control": "EXPLICIT_MESHPART_LINEAR_AND_ANGULAR",
+    "tessellation_report_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_finger_tessellation.json",
+    "tessellation_report_sha256": "f09916af65182e44b1a97f3e6eaff4b20b8954759346a356294e94c33a961678",
+    "tessellation_run_a": {
+      "manifest_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/tessellation_angular_controlled/run_a/manifest.json",
+      "manifest_sha256": "1479a56e8431c029598dc9560c8aefccaaaef2fbb6f9b9e3d7a0cfb892b1d167"
+    },
+    "tessellation_run_b": {
+      "manifest_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/tessellation_angular_controlled/run_b/manifest.json",
+      "manifest_sha256": "c87a19535c13cec4b462c2f80d9ed14250babbe9462ff0ea71c721174bafc86f"
+    },
     "probe_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/cad_toolchain_probe_final.json",
     "probe_sha256": "0c519f12f7c1f50da7a95597ba6f3627f166064d590ce3efcd2940e0fb87ff92"
   },
@@ -87,6 +113,201 @@
     "raw_and_annotated_file_count": 16,
     "report_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_gripper_screenshot_review.json",
     "report_sha256": "e4fdcf50e6d2471956fb539c00d59e0107eab0647dc29e3bee049925c8083fa9"
+  },
+  "isaac_visual_evidence": {
+    "status": "PASS",
+    "gate": "ISAAC_CAD_INSTALLATION_VISUAL_EVIDENCE_ONLY",
+    "capture_count": 8,
+    "report_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_cad_finger_isaac_screenshot_review.json",
+    "report_sha256": "5dfff3366dccb796de46bb2f0db9b6a47dc96efe34b5477066aa5ce62edc900c",
+    "acceptance_boundary": "CAD installation visual evidence only; no collision, contact, dynamics, or grasp acceptance"
+  },
+  "mounting_datum_registration": {
+    "status": "PASS",
+    "method": "CONTROLLED_ORTHOGONAL_PLANAR_DATUM_REGISTRATION",
+    "threshold_m": 0.0002,
+    "datums": {
+      "x_min": {
+        "absolute_coordinate_residual_m": 1.1940951283317958e-08,
+        "cad": {
+          "area_m2": 0.0002971337168189038,
+          "axis": "x",
+          "coordinate_m": -1.1940951283317958e-08,
+          "extreme": "min",
+          "plane_tolerance_m": 5e-06,
+          "triangle_count": 34
+        },
+        "nonzero_planar_support": true,
+        "stage": {
+          "area_m2": 0.0016788552351454547,
+          "axis": "x",
+          "coordinate_m": 0.0,
+          "extreme": "min",
+          "plane_tolerance_m": 5e-06,
+          "triangle_count": 79
+        },
+        "status": "PASS",
+        "within_tessellation_threshold": true
+      },
+      "y_max": {
+        "absolute_coordinate_residual_m": 1.0020262359161647e-06,
+        "cad": {
+          "area_m2": 0.0008473279724121088,
+          "axis": "y",
+          "coordinate_m": 0.07499999742444768,
+          "extreme": "max",
+          "plane_tolerance_m": 5e-06,
+          "triangle_count": 6
+        },
+        "nonzero_planar_support": true,
+        "stage": {
+          "area_m2": 0.0008945653510119879,
+          "axis": "y",
+          "coordinate_m": 0.0750009994506836,
+          "extreme": "max",
+          "plane_tolerance_m": 5e-06,
+          "triangle_count": 38
+        },
+        "status": "PASS",
+        "within_tessellation_threshold": true
+      },
+      "y_min": {
+        "absolute_coordinate_residual_m": 1.002026235902287e-06,
+        "cad": {
+          "area_m2": 0.0008473279724121088,
+          "axis": "y",
+          "coordinate_m": -0.07500000257555231,
+          "extreme": "min",
+          "plane_tolerance_m": 5e-06,
+          "triangle_count": 6
+        },
+        "nonzero_planar_support": true,
+        "stage": {
+          "area_m2": 0.0008945141669577864,
+          "axis": "y",
+          "coordinate_m": -0.07499900054931641,
+          "extreme": "min",
+          "plane_tolerance_m": 5e-06,
+          "triangle_count": 30
+        },
+        "status": "PASS",
+        "within_tessellation_threshold": true
+      },
+      "z_max": {
+        "absolute_coordinate_residual_m": 2.4736380166423544e-09,
+        "cad": {
+          "area_m2": 0.00010166136932373056,
+          "axis": "z",
+          "coordinate_m": 0.03525000247363802,
+          "extreme": "max",
+          "plane_tolerance_m": 5e-06,
+          "triangle_count": 2
+        },
+        "nonzero_planar_support": true,
+        "stage": {
+          "area_m2": 0.0011045000000000004,
+          "axis": "z",
+          "coordinate_m": 0.035250000000000004,
+          "extreme": "max",
+          "plane_tolerance_m": 5e-06,
+          "triangle_count": 10
+        },
+        "status": "PASS",
+        "within_tessellation_threshold": true
+      }
+    },
+    "decision_boundary": {
+      "classification": "SUPPLIER_CAD_TO_STAGE_DATUM_REGISTRATION",
+      "full_surface_icp_used": false,
+      "physical_measurement": false,
+      "reason": "Supplier CAD and URDF meshes are different revisions and general ICP admitted local minima; it is retained only as rejected exploratory evidence and cannot select orientation."
+    },
+    "report_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_cad_mount_registration.json",
+    "report_sha256": "8151dbe2f0ebb1ee5bf99f3d8c2724f32a3788e237cb92767e6e6d7afd0008b9"
+  },
+  "isolated_diagnostic_asset": {
+    "status": "PASS",
+    "root_usd": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_installation_v2/aloha_viperx_cad_finger_diagnostic.usda",
+      "sha256": "9f64f2ef6e280d3505c900a7b13e649331cf8bb227d910928647762ef4a5edc3"
+    },
+    "source_stage": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_assets/aloha_viperx.usd",
+      "sha256_before": "b24afe3678155654892c69517fc58ecd970108d68cec56b02dc6fdcb8bf4493e",
+      "sha256_after": "b24afe3678155654892c69517fc58ecd970108d68cec56b02dc6fdcb8bf4493e",
+      "explicit_reference_prim": "/workcell"
+    },
+    "collision_policy": {
+      "source_collision_branches": "UNCHANGED",
+      "cad_mesh_role": "VISUAL_ONLY",
+      "new_collision_api_applied": false,
+      "final_default_collider_modified": false
+    },
+    "report_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_cad_finger_diagnostic_asset_v2.json",
+    "report_sha256": "1cf4240249a3c9f7fbbaff643a8bfefd9ec9300170b882f3ebf4b2c7b9c49272"
+  },
+  "cad_to_finger_link_mapping": {
+    "matrix_convention": "column-vector affine transform from STEP-global metres to each closed-state finger-link local frame",
+    "left_matrix": [
+      [
+        0.0,
+        -1.0,
+        0.0,
+        -0.49899999973392
+      ],
+      [
+        1.0,
+        0.0,
+        0.0,
+        -0.021099890257662776
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        -0.42680133373174
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "right_matrix": [
+      [
+        0.0,
+        -1.0,
+        0.0,
+        -0.49899999973392
+      ],
+      [
+        1.0,
+        0.0,
+        0.0,
+        0.020900109742337226
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        -0.42680133373174
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "local_axis_mapping": {
+      "cad_local_x": "finger_link_+Y",
+      "cad_local_y": "finger_link_+Z",
+      "cad_local_z": "finger_link_+X"
+    },
+    "determinant": 1.0,
+    "mirror_used": false,
+    "single_side_180_degree_rotation_used": false
   },
   "cad_to_urdf_frame_mapping": {
     "source": "generated follower URDF gripper_bar visual origin and finger joints",
@@ -1434,6 +1655,10 @@
     "widow_crosscheck_positive_closed_gap": true,
     "widow_crosscheck_finger_pair_minimum_distance_matches_inner_gap": true,
     "widow_crosscheck_both_fingers_contact_gripper_shell": true,
-    "widow_crosscheck_mirror_residual_below_tessellation_deflection_scale": true
+    "widow_crosscheck_mirror_residual_below_tessellation_deflection_scale": true,
+    "production_angular_tessellation_pass": true,
+    "mounting_datum_registration_pass": true,
+    "isaac_visual_review_pass": true,
+    "isolated_diagnostic_asset_pass": true
   }
 }

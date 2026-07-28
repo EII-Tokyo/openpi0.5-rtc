@@ -1,12 +1,11 @@
-"""Export the embedded Simple Viper handed finger B-Reps deterministically.
+"""Export embedded Simple Viper handed finger B-Reps deterministically.
 
 Required environment variables:
 ALOHA_VIPER_STEP
 ALOHA_VIPER_TESSELLATION_OUTPUT_DIR
 
-This local FreeCAD snap only exposes linear deflection through
-Part.Shape.tessellate.  The output is therefore a diagnostic visual mesh, not
-an angular-deflection-controlled production mesh and not a collision mesh.
+The output is a parameter-controlled visual mesh generated with the local
+MeshPart API. It is not a collision mesh and is not promoted to a final asset.
 """
 
 from __future__ import annotations
@@ -19,9 +18,12 @@ from pathlib import Path
 
 import FreeCAD as App
 import Import
+import MeshPart
 import Part
 
 LINEAR_DEFLECTION_MM = 0.20
+ANGULAR_DEFLECTION_DEG = 20.0
+ANGULAR_DEFLECTION_RAD = math.radians(ANGULAR_DEFLECTION_DEG)
 EXPECTED_SOURCE_SHA256 = (
     "337862418769d4ea8b801d26e68930c4412f870050e60769bbf91765194dc571"
 )
@@ -189,7 +191,13 @@ for joint_name, expected in FINGERS.items():
             f"{expected['object_name']} / {expected['label']}"
         )
     shape = obj.Shape
-    vertices, facets = shape.tessellate(LINEAR_DEFLECTION_MM)
+    mesh = MeshPart.meshFromShape(
+        Shape=shape,
+        LinearDeflection=LINEAR_DEFLECTION_MM,
+        AngularDeflection=ANGULAR_DEFLECTION_RAD,
+        Relative=False,
+    )
+    vertices, facets = mesh.Topology
     points = [
         [float(point.x), float(point.y), float(point.z)]
         for point in vertices
@@ -236,17 +244,21 @@ for joint_name, expected in FINGERS.items():
 manifest_path = output_dir / "manifest.json"
 manifest = {
     "schema_version": 1,
-    "status": "PARTIAL",
+    "status": "PASS",
     "scope": (
-        "LINEAR_DEFLECTION_ONLY_DIAGNOSTIC_VISUAL_MESH; "
+        "ANGULAR_CONTROLLED_DIAGNOSTIC_VISUAL_MESH; "
         "NOT_COLLISION_MESH; NOT_FINAL_ASSET"
     ),
     "source_path": str(source),
     "source_sha256": source_sha256,
     "freecad_version": list(App.Version()),
     "opencascade_version": str(Part.OCC_VERSION),
+    "mesher_api": "MeshPart.meshFromShape",
+    "meshpart_module_path": str(Path(MeshPart.__file__).resolve()),
     "linear_deflection_mm": LINEAR_DEFLECTION_MM,
-    "angular_deflection": "NOT_APPLIED_HARD_BLOCKER",
+    "angular_deflection_rad": ANGULAR_DEFLECTION_RAD,
+    "angular_deflection_deg": ANGULAR_DEFLECTION_DEG,
+    "relative_deflection": False,
     "unit_scale_m_per_mm": 0.001,
     "weld_sew_policy": "NONE",
     "instance_merge_policy": "NONE",
