@@ -49,8 +49,18 @@ def build_validation_plan(project_root: Path) -> dict[str, Any]:
             "IsaacSim.RobotRules",
             "IsaacSim.SimReadyAssetRules",
         ],
-        "gripper_validation_report": str((root / "reports/aloha1_mapping/gripper_validation.json").resolve()),
+        "gripper_validation_report": str(
+            (
+                root
+                / "reports/aloha1_mapping/"
+                "gripper_correct_finger_task5.json"
+            ).resolve()
+        ),
         "required_task5_gripper_statuses": ["PASS", "PARTIAL"],
+        "task5_asset_scope": (
+            "USER_CONFIRMED_CORRECT_FINGER_DIAGNOSTIC_ASSETS; "
+            "FINAL_DEFAULT_COLLIDER_UNCHANGED"
+        ),
         "runtime": {
             "physics_dt_s": 1.0 / 60.0,
             "first_frame_jump_tolerance": 0.02,

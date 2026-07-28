@@ -1,0 +1,2992 @@
+{
+  "artifact_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots",
+  "captures": [
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/asset_preflight/follower_left_open_closing_axis.png",
+      "artifact_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots",
+      "camera": {
+        "orientation_wxyz": [
+          0.00011963285942329094,
+          0.00010564472177065909,
+          0.6619256734848022,
+          0.7495694756507874
+        ],
+        "position_world_m": [
+          0.25888365507125854,
+          0.2799510061740875,
+          0.3364424407482147
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 1,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.25879427790641785,
+          -4.897080361843109e-05,
+          0.30153585970401764
+        ],
+        "view": "closing_axis"
+      },
+      "capture_gate_status": "PASS",
+      "capture_name": "follower_left_open_closing_axis",
+      "decoded_pixel_sha256": "16298aa2735cf883173e070477945175a69918b3df3ac5b8fbb1725bdaa70d2c",
+      "decoded_rgb_channel_ranges": [
+        238,
+        238,
+        237
+      ],
+      "file_sha256": "ff49437d4bc74d4f924d57b2f29f2d72ce9200b6a01dec3f3d4ed1e79326b203",
+      "file_size_bytes": 393879,
+      "mode": "RGBA",
+      "phase": "asset_preflight",
+      "relative_path": "asset_preflight/follower_left_open_closing_axis.png",
+      "resolution": [
+        1280,
+        900
+      ],
+      "simulation": {
+        "dof_order": [
+          "waist",
+          "shoulder",
+          "elbow",
+          "forearm_roll",
+          "wrist_angle",
+          "wrist_rotate",
+          "gripper",
+          "left_finger",
+          "right_finger"
+        ],
+        "joint_positions": [
+          1.5243711459334008e-05,
+          -0.9599651098251343,
+          1.1611816883087158,
+          0.0010723896557465196,
+          -0.29613107442855835,
+          -7.928500735943089e-07,
+          2.9358275810409395e-08,
+          0.0569942444562912,
+          -0.0570058636367321
+        ],
+        "physics_frequency_hz": 60,
+        "robot": "follower_left",
+        "solve_articulation_contact_last": true,
+        "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_hull/follower_left/follower_left_convex_hull.usd",
+        "state": "open",
+        "surface_gap_m": 0.06918747539249395
+      },
+      "status": "PASS"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/asset_preflight/follower_left_open_isometric.png",
+      "artifact_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots",
+      "camera": {
+        "orientation_wxyz": [
+          -0.43497133255004883,
+          -0.2677571475505829,
+          0.4506739675998688,
+          0.7321195602416992
+        ],
+        "position_world_m": [
+          0.019916022196412086,
+          0.13002243638038635,
+          0.43874722719192505
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 1,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.25879427790641785,
+          -4.897080361843109e-05,
+          0.30153585970401764
+        ],
+        "view": "isometric"
+      },
+      "capture_gate_status": "PASS",
+      "capture_name": "follower_left_open_isometric",
+      "decoded_pixel_sha256": "5c3d1a88a65600a1e793146c85827709ae0d88ecc69dbc69006a1e71a2fffe84",
+      "decoded_rgb_channel_ranges": [
+        240,
+        238,
+        241
+      ],
+      "file_sha256": "81cf52d9ab48a00741edd4654bb1784b90c7d58e491282e4897c6c58532c4c71",
+      "file_size_bytes": 349677,
+      "mode": "RGBA",
+      "phase": "asset_preflight",
+      "relative_path": "asset_preflight/follower_left_open_isometric.png",
+      "resolution": [
+        1280,
+        900
+      ],
+      "simulation": {
+        "dof_order": [
+          "waist",
+          "shoulder",
+          "elbow",
+          "forearm_roll",
+          "wrist_angle",
+          "wrist_rotate",
+          "gripper",
+          "left_finger",
+          "right_finger"
+        ],
+        "joint_positions": [
+          1.5243711459334008e-05,
+          -0.9599651098251343,
+          1.1611816883087158,
+          0.0010723896557465196,
+          -0.29613107442855835,
+          -7.928500735943089e-07,
+          2.9358275810409395e-08,
+          0.0569942444562912,
+          -0.0570058636367321
+        ],
+        "physics_frequency_hz": 60,
+        "robot": "follower_left",
+        "solve_articulation_contact_last": true,
+        "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_hull/follower_left/follower_left_convex_hull.usd",
+        "state": "open",
+        "surface_gap_m": 0.06918747539249395
+      },
+      "status": "PASS"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/asset_preflight/follower_left_closed_closing_axis.png",
+      "artifact_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots",
+      "camera": {
+        "orientation_wxyz": [
+          0.00032546266447752714,
+          0.00028920258046127856,
+          0.6642386317253113,
+          0.7475205063819885
+        ],
+        "position_world_m": [
+          0.25903788208961487,
+          0.2799469828605652,
+          0.33468565344810486
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 0,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.2587940841913223,
+          -4.67933714389801e-05,
+          0.3015357255935669
+        ],
+        "view": "closing_axis"
+      },
+      "capture_gate_status": "PASS",
+      "capture_name": "follower_left_closed_closing_axis",
+      "decoded_pixel_sha256": "0fb00229dab50f65cdf809a98995fbe2eead3ce7b98743838c7fbdfd68a878c2",
+      "decoded_rgb_channel_ranges": [
+        237,
+        238,
+        239
+      ],
+      "file_sha256": "e577686cbaf5750a6059d06c1b0a7ef5267822e290dd4758d9cdaf14445471ee",
+      "file_size_bytes": 385867,
+      "mode": "RGBA",
+      "phase": "asset_preflight",
+      "relative_path": "asset_preflight/follower_left_closed_closing_axis.png",
+      "resolution": [
+        1280,
+        900
+      ],
+      "simulation": {
+        "dof_order": [
+          "waist",
+          "shoulder",
+          "elbow",
+          "forearm_roll",
+          "wrist_angle",
+          "wrist_rotate",
+          "gripper",
+          "left_finger",
+          "right_finger"
+        ],
+        "joint_positions": [
+          1.5238731975841802e-05,
+          -0.9599652886390686,
+          1.1611820459365845,
+          0.0010924951639026403,
+          -0.2961314022541046,
+          -9.902327064992278e-07,
+          4.4813582178448996e-08,
+          0.02100002020597458,
+          -0.021005425602197647
+        ],
+        "physics_frequency_hz": 60,
+        "robot": "follower_left",
+        "solve_articulation_contact_last": true,
+        "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_hull/follower_left/follower_left_convex_hull.usd",
+        "state": "closed",
+        "surface_gap_m": -0.0031678944967367187
+      },
+      "status": "PASS"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/asset_preflight/follower_left_closed_isometric.png",
+      "artifact_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots",
+      "camera": {
+        "orientation_wxyz": [
+          -0.4346187114715576,
+          -0.2682296335697174,
+          0.45153170824050903,
+          0.731627345085144
+        ],
+        "position_world_m": [
+          0.01998753286898136,
+          0.13002318143844604,
+          0.43793147802352905
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 9,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.2587940841913223,
+          -4.67933714389801e-05,
+          0.3015357255935669
+        ],
+        "view": "isometric"
+      },
+      "capture_gate_status": "PASS",
+      "capture_name": "follower_left_closed_isometric",
+      "decoded_pixel_sha256": "1f72321f9b8b85a8a646eaf74cf8f6470096c5a6661eb0dffe3f8a2a67fd813c",
+      "decoded_rgb_channel_ranges": [
+        233,
+        226,
+        226
+      ],
+      "file_sha256": "57c0f49e1f41d079a8322b8d5a70f6db7e12dab8320413ae9151883aea128615",
+      "file_size_bytes": 326377,
+      "mode": "RGBA",
+      "phase": "asset_preflight",
+      "relative_path": "asset_preflight/follower_left_closed_isometric.png",
+      "resolution": [
+        1280,
+        900
+      ],
+      "simulation": {
+        "dof_order": [
+          "waist",
+          "shoulder",
+          "elbow",
+          "forearm_roll",
+          "wrist_angle",
+          "wrist_rotate",
+          "gripper",
+          "left_finger",
+          "right_finger"
+        ],
+        "joint_positions": [
+          1.5238731975841802e-05,
+          -0.9599652886390686,
+          1.1611820459365845,
+          0.0010924951639026403,
+          -0.2961314022541046,
+          -9.902327064992278e-07,
+          4.4813582178448996e-08,
+          0.02100002020597458,
+          -0.021005425602197647
+        ],
+        "physics_frequency_hz": 60,
+        "robot": "follower_left",
+        "solve_articulation_contact_last": true,
+        "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_hull/follower_left/follower_left_convex_hull.usd",
+        "state": "closed",
+        "surface_gap_m": -0.0031678944967367187
+      },
+      "status": "PASS"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/asset_preflight/follower_right_open_closing_axis.png",
+      "artifact_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots",
+      "camera": {
+        "orientation_wxyz": [
+          0.00011963285942329094,
+          0.00010564472177065909,
+          0.6619256734848022,
+          0.7495694756507874
+        ],
+        "position_world_m": [
+          0.25888365507125854,
+          0.2799510061740875,
+          0.3364424407482147
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 1,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.25879427790641785,
+          -4.897080361843109e-05,
+          0.30153585970401764
+        ],
+        "view": "closing_axis"
+      },
+      "capture_gate_status": "PASS",
+      "capture_name": "follower_right_open_closing_axis",
+      "decoded_pixel_sha256": "9c3aeca0d96610f3d70167e7df73712fe4ce0e0ca379da30e83ce16b919a1340",
+      "decoded_rgb_channel_ranges": [
+        238,
+        238,
+        239
+      ],
+      "file_sha256": "28ca6246a96d05380c9283f7caabcaeaf817ffd31f4df79d87e1fc0e8094e59c",
+      "file_size_bytes": 392637,
+      "mode": "RGBA",
+      "phase": "asset_preflight",
+      "relative_path": "asset_preflight/follower_right_open_closing_axis.png",
+      "resolution": [
+        1280,
+        900
+      ],
+      "simulation": {
+        "dof_order": [
+          "waist",
+          "shoulder",
+          "elbow",
+          "forearm_roll",
+          "wrist_angle",
+          "wrist_rotate",
+          "gripper",
+          "left_finger",
+          "right_finger"
+        ],
+        "joint_positions": [
+          1.5243711459334008e-05,
+          -0.9599651098251343,
+          1.1611816883087158,
+          0.0010723896557465196,
+          -0.29613107442855835,
+          -7.928500735943089e-07,
+          2.9358275810409395e-08,
+          0.0569942444562912,
+          -0.0570058636367321
+        ],
+        "physics_frequency_hz": 60,
+        "robot": "follower_right",
+        "solve_articulation_contact_last": true,
+        "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_hull/follower_right/follower_right_convex_hull.usd",
+        "state": "open",
+        "surface_gap_m": 0.06918747539249395
+      },
+      "status": "PASS"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/asset_preflight/follower_right_open_isometric.png",
+      "artifact_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots",
+      "camera": {
+        "orientation_wxyz": [
+          -0.43497133255004883,
+          -0.2677571475505829,
+          0.4506739675998688,
+          0.7321195602416992
+        ],
+        "position_world_m": [
+          0.019916022196412086,
+          0.13002243638038635,
+          0.43874722719192505
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 1,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.25879427790641785,
+          -4.897080361843109e-05,
+          0.30153585970401764
+        ],
+        "view": "isometric"
+      },
+      "capture_gate_status": "PASS",
+      "capture_name": "follower_right_open_isometric",
+      "decoded_pixel_sha256": "a33f03e8f52f32a56d733e6bd1bdacdc621e4699df449d66a2c38d5a4dae758a",
+      "decoded_rgb_channel_ranges": [
+        240,
+        238,
+        241
+      ],
+      "file_sha256": "6d88634d88dc051d456c59b8bad77ab1f5a0061263d536d9df464658858ebb2c",
+      "file_size_bytes": 345282,
+      "mode": "RGBA",
+      "phase": "asset_preflight",
+      "relative_path": "asset_preflight/follower_right_open_isometric.png",
+      "resolution": [
+        1280,
+        900
+      ],
+      "simulation": {
+        "dof_order": [
+          "waist",
+          "shoulder",
+          "elbow",
+          "forearm_roll",
+          "wrist_angle",
+          "wrist_rotate",
+          "gripper",
+          "left_finger",
+          "right_finger"
+        ],
+        "joint_positions": [
+          1.5243711459334008e-05,
+          -0.9599651098251343,
+          1.1611816883087158,
+          0.0010723896557465196,
+          -0.29613107442855835,
+          -7.928500735943089e-07,
+          2.9358275810409395e-08,
+          0.0569942444562912,
+          -0.0570058636367321
+        ],
+        "physics_frequency_hz": 60,
+        "robot": "follower_right",
+        "solve_articulation_contact_last": true,
+        "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_hull/follower_right/follower_right_convex_hull.usd",
+        "state": "open",
+        "surface_gap_m": 0.06918747539249395
+      },
+      "status": "PASS"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/asset_preflight/follower_right_closed_closing_axis.png",
+      "artifact_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots",
+      "camera": {
+        "orientation_wxyz": [
+          0.00032546266447752714,
+          0.00028920258046127856,
+          0.6642386317253113,
+          0.7475205063819885
+        ],
+        "position_world_m": [
+          0.25903788208961487,
+          0.2799469828605652,
+          0.33468565344810486
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 0,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.2587940841913223,
+          -4.67933714389801e-05,
+          0.3015357255935669
+        ],
+        "view": "closing_axis"
+      },
+      "capture_gate_status": "PASS",
+      "capture_name": "follower_right_closed_closing_axis",
+      "decoded_pixel_sha256": "9cebe97b17a7b338da2ed220fc38e3a5af406078c58b4a58b80efe2d6e5d89e0",
+      "decoded_rgb_channel_ranges": [
+        236,
+        238,
+        239
+      ],
+      "file_sha256": "35f59e735deb429b99d33b7db2f5d665f45ac2513fa383a68e5b4ef3e2088ea8",
+      "file_size_bytes": 346278,
+      "mode": "RGBA",
+      "phase": "asset_preflight",
+      "relative_path": "asset_preflight/follower_right_closed_closing_axis.png",
+      "resolution": [
+        1280,
+        900
+      ],
+      "simulation": {
+        "dof_order": [
+          "waist",
+          "shoulder",
+          "elbow",
+          "forearm_roll",
+          "wrist_angle",
+          "wrist_rotate",
+          "gripper",
+          "left_finger",
+          "right_finger"
+        ],
+        "joint_positions": [
+          1.5238731975841802e-05,
+          -0.9599652886390686,
+          1.1611820459365845,
+          0.0010924951639026403,
+          -0.2961314022541046,
+          -9.902327064992278e-07,
+          4.4813582178448996e-08,
+          0.02100002020597458,
+          -0.021005425602197647
+        ],
+        "physics_frequency_hz": 60,
+        "robot": "follower_right",
+        "solve_articulation_contact_last": true,
+        "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_hull/follower_right/follower_right_convex_hull.usd",
+        "state": "closed",
+        "surface_gap_m": -0.0031678944967367187
+      },
+      "status": "PASS"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/asset_preflight/follower_right_closed_isometric.png",
+      "artifact_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots",
+      "camera": {
+        "orientation_wxyz": [
+          -0.4346187114715576,
+          -0.2682296335697174,
+          0.45153170824050903,
+          0.731627345085144
+        ],
+        "position_world_m": [
+          0.01998753286898136,
+          0.13002318143844604,
+          0.43793147802352905
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 9,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.2587940841913223,
+          -4.67933714389801e-05,
+          0.3015357255935669
+        ],
+        "view": "isometric"
+      },
+      "capture_gate_status": "PASS",
+      "capture_name": "follower_right_closed_isometric",
+      "decoded_pixel_sha256": "7ae91afa2807d0b3871c4a48db6d60c51620874b38ebb04f5243f0aee8a30608",
+      "decoded_rgb_channel_ranges": [
+        234,
+        229,
+        231
+      ],
+      "file_sha256": "850a7254ebd276bdb581ef43262acaf74d39a4752fc5d9952ca1db6825acce65",
+      "file_size_bytes": 327585,
+      "mode": "RGBA",
+      "phase": "asset_preflight",
+      "relative_path": "asset_preflight/follower_right_closed_isometric.png",
+      "resolution": [
+        1280,
+        900
+      ],
+      "simulation": {
+        "dof_order": [
+          "waist",
+          "shoulder",
+          "elbow",
+          "forearm_roll",
+          "wrist_angle",
+          "wrist_rotate",
+          "gripper",
+          "left_finger",
+          "right_finger"
+        ],
+        "joint_positions": [
+          1.5238731975841802e-05,
+          -0.9599652886390686,
+          1.1611820459365845,
+          0.0010924951639026403,
+          -0.2961314022541046,
+          -9.902327064992278e-07,
+          4.4813582178448996e-08,
+          0.02100002020597458,
+          -0.021005425602197647
+        ],
+        "physics_frequency_hz": 60,
+        "robot": "follower_right",
+        "solve_articulation_contact_last": true,
+        "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_hull/follower_right/follower_right_convex_hull.usd",
+        "state": "closed",
+        "surface_gap_m": -0.0031678944967367187
+      },
+      "status": "PASS"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/runtime_open/follower_left_hull_open_with_bottle_isometric.png",
+      "artifact_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots",
+      "camera": {
+        "camera_anchor_frozen_across_runtime_phases": true,
+        "current_bottle_target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "orientation_wxyz": [
+          -0.42827364802360535,
+          -0.2670406699180603,
+          0.45676755905151367,
+          0.7325533032417297
+        ],
+        "position_world_m": [
+          -0.059943392872810364,
+          0.17906413972377777,
+          0.4846867024898529
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 0,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "view": "isometric"
+      },
+      "capture_gate_status": "PASS",
+      "capture_name": "follower_left_hull_open_with_bottle_isometric",
+      "decoded_pixel_sha256": "5d313b78b0a5b6203ecd0ec46278c9146d9c3d98cd1325cadd4695dc5906cfb6",
+      "decoded_rgb_channel_ranges": [
+        243,
+        242,
+        242
+      ],
+      "file_sha256": "92ae4068d3929d19d1dddba9d4c6f7a2be2ddc6a1d5247689c75380328e78289",
+      "file_size_bytes": 736856,
+      "mode": "RGBA",
+      "phase": "runtime_open",
+      "relative_path": "runtime_open/follower_left_hull_open_with_bottle_isometric.png",
+      "resolution": [
+        1280,
+        900
+      ],
+      "simulation": {
+        "bottle": {
+          "angular_speed_rad_s": 0.0,
+          "angular_velocity_world_rad_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "linear_velocity_world_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "orientation_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "position_world_m": [
+            0.259998619556427,
+            -0.0010388984810560942,
+            0.3047369718551636
+          ],
+          "vertical_velocity_m_s": 0.0,
+          "z_m": 0.3047369718551636
+        },
+        "frame": 209,
+        "joint_positions": [
+          0.00030465851887129247,
+          -0.973262369632721,
+          1.1645011901855469,
+          0.004357403144240379,
+          -0.28516510128974915,
+          0.00037455465644598007,
+          -0.001114449230954051,
+          0.0569998063147068,
+          -0.05801856517791748
+        ],
+        "physical_state": {
+          "bottle_kinematic": true,
+          "left_finger_contact": false,
+          "right_finger_contact": false,
+          "surface_gap_m": 0.0710679500009886
+        },
+        "physics_frequency_hz": 60,
+        "physics_steps_added_for_capture": 0,
+        "profile": "convex_hull",
+        "robot": "follower_left",
+        "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_hull/follower_left/follower_left_convex_hull.usd",
+        "trial_index": 0
+      },
+      "status": "PASS"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/bilateral_contact/follower_left_hull_bilateral_contact_established_closing_axis.png",
+      "artifact_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots",
+      "camera": {
+        "camera_anchor_frozen_across_runtime_phases": true,
+        "current_bottle_target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "orientation_wxyz": [
+          -0.5455884337425232,
+          -0.2452237457036972,
+          0.32853081822395325,
+          0.7309350371360779
+        ],
+        "position_world_m": [
+          -0.00997560191899538,
+          0.0790480449795723,
+          0.5547146201133728
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 0,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "view": "closing_axis"
+      },
+      "capture_gate_status": "PASS",
+      "capture_name": "follower_left_hull_bilateral_contact_established_closing_axis",
+      "decoded_pixel_sha256": "06da3cc0dd32ea8c3561555a7b68b58e998c171cfb186087e8509d9158852403",
+      "decoded_rgb_channel_ranges": [
+        242,
+        242,
+        243
+      ],
+      "file_sha256": "564af7b39316098337741ec367fba45d321c8c7a83c03ec9806da13d7b336d3a",
+      "file_size_bytes": 494186,
+      "mode": "RGBA",
+      "phase": "bilateral_contact",
+      "relative_path": "bilateral_contact/follower_left_hull_bilateral_contact_established_closing_axis.png",
+      "resolution": [
+        1280,
+        900
+      ],
+      "simulation": {
+        "bottle": {
+          "angular_speed_rad_s": 0.0,
+          "angular_velocity_world_rad_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "linear_velocity_world_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "orientation_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "position_world_m": [
+            0.259998619556427,
+            -0.0010388984810560942,
+            0.3047369718551636
+          ],
+          "vertical_velocity_m_s": 0.0,
+          "z_m": 0.3047369718551636
+        },
+        "frame": 389,
+        "joint_positions": [
+          0.0002866489812731743,
+          -0.9732809662818909,
+          1.1644785404205322,
+          0.0031104551162570715,
+          -0.28510600328445435,
+          -0.0006137768505141139,
+          -0.00018181040650233626,
+          0.053963031619787216,
+          -0.05587176978588104
+        ],
+        "physical_state": {
+          "left_finger_contact": true,
+          "right_finger_contact": true
+        },
+        "physics_frequency_hz": 60,
+        "physics_steps_added_for_capture": 0,
+        "profile": "convex_hull",
+        "robot": "follower_left",
+        "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_hull/follower_left/follower_left_convex_hull.usd",
+        "trial_index": 0
+      },
+      "status": "PASS"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/bilateral_contact/follower_left_hull_bilateral_contact_established_isometric.png",
+      "artifact_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots",
+      "camera": {
+        "camera_anchor_frozen_across_runtime_phases": true,
+        "current_bottle_target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "orientation_wxyz": [
+          -0.42827364802360535,
+          -0.2670406699180603,
+          0.45676755905151367,
+          0.7325533032417297
+        ],
+        "position_world_m": [
+          -0.059943392872810364,
+          0.17906413972377777,
+          0.4846867024898529
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 1,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "view": "isometric"
+      },
+      "capture_gate_status": "PASS",
+      "capture_name": "follower_left_hull_bilateral_contact_established_isometric",
+      "decoded_pixel_sha256": "e524a21506d974e0322bf9e79d09d895694396a5f65e6c3db5edd6a76640e915",
+      "decoded_rgb_channel_ranges": [
+        239,
+        239,
+        242
+      ],
+      "file_sha256": "01759db9791e876375c8ef3c57c98ddfa5100bcf5e6015bce762080a7c56b218",
+      "file_size_bytes": 444582,
+      "mode": "RGBA",
+      "phase": "bilateral_contact",
+      "relative_path": "bilateral_contact/follower_left_hull_bilateral_contact_established_isometric.png",
+      "resolution": [
+        1280,
+        900
+      ],
+      "simulation": {
+        "bottle": {
+          "angular_speed_rad_s": 0.0,
+          "angular_velocity_world_rad_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "linear_velocity_world_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "orientation_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "position_world_m": [
+            0.259998619556427,
+            -0.0010388984810560942,
+            0.3047369718551636
+          ],
+          "vertical_velocity_m_s": 0.0,
+          "z_m": 0.3047369718551636
+        },
+        "frame": 389,
+        "joint_positions": [
+          0.0002866489812731743,
+          -0.9732809662818909,
+          1.1644785404205322,
+          0.0031104551162570715,
+          -0.28510600328445435,
+          -0.0006137768505141139,
+          -0.00018181040650233626,
+          0.053963031619787216,
+          -0.05587176978588104
+        ],
+        "physical_state": {
+          "left_finger_contact": true,
+          "right_finger_contact": true
+        },
+        "physics_frequency_hz": 60,
+        "physics_steps_added_for_capture": 0,
+        "profile": "convex_hull",
+        "robot": "follower_left",
+        "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_hull/follower_left/follower_left_convex_hull.usd",
+        "trial_index": 0
+      },
+      "status": "PASS"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/release_hold/follower_left_hull_release_isometric.png",
+      "artifact_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots",
+      "camera": {
+        "camera_anchor_frozen_across_runtime_phases": true,
+        "current_bottle_target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "orientation_wxyz": [
+          -0.42827364802360535,
+          -0.2670406699180603,
+          0.45676755905151367,
+          0.7325533032417297
+        ],
+        "position_world_m": [
+          -0.059943392872810364,
+          0.17906413972377777,
+          0.4846867024898529
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 1,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "view": "isometric"
+      },
+      "capture_gate_status": "PASS",
+      "capture_name": "follower_left_hull_release_isometric",
+      "decoded_pixel_sha256": "fe6bc907af86226e1c87aed23f58e7b415186ef1c7022914afcd002b521cccdd",
+      "decoded_rgb_channel_ranges": [
+        240,
+        239,
+        240
+      ],
+      "file_sha256": "7a00f3571d361f324dc10f9c91690bf8eae633e02899107f9d723a8795097d14",
+      "file_size_bytes": 434332,
+      "mode": "RGBA",
+      "phase": "release_hold",
+      "relative_path": "release_hold/follower_left_hull_release_isometric.png",
+      "resolution": [
+        1280,
+        900
+      ],
+      "simulation": {
+        "bottle": {
+          "angular_speed_rad_s": 0.0,
+          "angular_velocity_world_rad_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "linear_velocity_world_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "orientation_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "position_world_m": [
+            0.259998619556427,
+            -0.0010388984810560942,
+            0.3047369718551636
+          ],
+          "vertical_velocity_m_s": 0.0,
+          "z_m": 0.3047369718551636
+        },
+        "frame": 389,
+        "joint_positions": [
+          0.0002866489812731743,
+          -0.9732809662818909,
+          1.1644785404205322,
+          0.0031104551162570715,
+          -0.28510600328445435,
+          -0.0006137768505141139,
+          -0.00018181040650233626,
+          0.053963031619787216,
+          -0.05587176978588104
+        ],
+        "physical_state": {
+          "bottle_kinematic": false,
+          "constraint_found": false
+        },
+        "physics_frequency_hz": 60,
+        "physics_steps_added_for_capture": 0,
+        "profile": "convex_hull",
+        "robot": "follower_left",
+        "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_hull/follower_left/follower_left_convex_hull.usd",
+        "trial_index": 0
+      },
+      "status": "PASS"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/release_hold/follower_left_hull_hold_end_isometric.png",
+      "artifact_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots",
+      "camera": {
+        "camera_anchor_frozen_across_runtime_phases": true,
+        "current_bottle_target_world_m": [
+          0.2653035819530487,
+          -0.00934668816626072,
+          0.300773024559021
+        ],
+        "orientation_wxyz": [
+          -0.42827364802360535,
+          -0.2670406699180603,
+          0.45676755905151367,
+          0.7325533032417297
+        ],
+        "position_world_m": [
+          -0.059943392872810364,
+          0.17906413972377777,
+          0.4846867024898529
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 1,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "view": "isometric"
+      },
+      "capture_gate_status": "PASS",
+      "capture_name": "follower_left_hull_hold_end_isometric",
+      "decoded_pixel_sha256": "bd905d36ce6d43f98863ccd537afc44589b8f752ca1e8537557276607b09c69b",
+      "decoded_rgb_channel_ranges": [
+        237,
+        237,
+        241
+      ],
+      "file_sha256": "0629d23561b3526111a58b72ce30088201e37e069f5a3d17772ab3ce1abf6129",
+      "file_size_bytes": 444903,
+      "mode": "RGBA",
+      "phase": "release_hold",
+      "relative_path": "release_hold/follower_left_hull_hold_end_isometric.png",
+      "resolution": [
+        1280,
+        900
+      ],
+      "simulation": {
+        "bottle": {
+          "angular_speed_rad_s": 0.28046673794598787,
+          "angular_velocity_world_rad_s": [
+            -0.017507784068584442,
+            -0.27948588132858276,
+            0.015579176135361195
+          ],
+          "linear_velocity_world_m_s": [
+            0.020274894312024117,
+            -0.0010978246573358774,
+            0.09575510025024414
+          ],
+          "orientation_wxyz": [
+            0.9993425011634827,
+            0.0006203135708346963,
+            0.030307311564683914,
+            0.019893277436494827
+          ],
+          "position_world_m": [
+            0.2653035819530487,
+            -0.00934668816626072,
+            0.300773024559021
+          ],
+          "vertical_velocity_m_s": 0.09575510025024414,
+          "z_m": 0.300773024559021
+        },
+        "frame": 509,
+        "joint_positions": [
+          3.475786797935143e-05,
+          -0.9599354863166809,
+          1.1613153219223022,
+          0.0009671451989561319,
+          -0.29533302783966064,
+          0.0006609606789425015,
+          -5.7803023082669824e-05,
+          0.04558379575610161,
+          -0.06419999897480011
+        ],
+        "physical_state": {
+          "drop_gate_m": 0.01,
+          "drop_m": 0.003963947296142578
+        },
+        "physics_frequency_hz": 60,
+        "physics_steps_added_for_capture": 0,
+        "profile": "convex_hull",
+        "robot": "follower_left",
+        "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_hull/follower_left/follower_left_convex_hull.usd",
+        "trial_index": 0
+      },
+      "status": "PASS"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/runtime_open/follower_right_hull_open_with_bottle_isometric.png",
+      "artifact_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots",
+      "camera": {
+        "camera_anchor_frozen_across_runtime_phases": true,
+        "current_bottle_target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "orientation_wxyz": [
+          -0.42827364802360535,
+          -0.2670406699180603,
+          0.45676755905151367,
+          0.7325533032417297
+        ],
+        "position_world_m": [
+          -0.059943392872810364,
+          0.17906413972377777,
+          0.4846867024898529
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 1,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "view": "isometric"
+      },
+      "capture_gate_status": "PASS",
+      "capture_name": "follower_right_hull_open_with_bottle_isometric",
+      "decoded_pixel_sha256": "e7dd7c42d3e2944468061a8d7568b0be62d148c36217e5e7c5848598ccae8a04",
+      "decoded_rgb_channel_ranges": [
+        240,
+        238,
+        242
+      ],
+      "file_sha256": "ff9995861d2b6d590ddc027b93f9b922ca971be7fad8d2ee74dda6fadc7d8e09",
+      "file_size_bytes": 453590,
+      "mode": "RGBA",
+      "phase": "runtime_open",
+      "relative_path": "runtime_open/follower_right_hull_open_with_bottle_isometric.png",
+      "resolution": [
+        1280,
+        900
+      ],
+      "simulation": {
+        "bottle": {
+          "angular_speed_rad_s": 0.0,
+          "angular_velocity_world_rad_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "linear_velocity_world_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "orientation_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "position_world_m": [
+            0.259998619556427,
+            -0.0010388984810560942,
+            0.3047369718551636
+          ],
+          "vertical_velocity_m_s": 0.0,
+          "z_m": 0.3047369718551636
+        },
+        "frame": 209,
+        "joint_positions": [
+          0.00030465851887129247,
+          -0.973262369632721,
+          1.1645011901855469,
+          0.004357403144240379,
+          -0.28516510128974915,
+          0.00037455465644598007,
+          -0.001114449230954051,
+          0.0569998063147068,
+          -0.05801856517791748
+        ],
+        "physical_state": {
+          "bottle_kinematic": true,
+          "left_finger_contact": false,
+          "right_finger_contact": false,
+          "surface_gap_m": 0.0710679500009886
+        },
+        "physics_frequency_hz": 60,
+        "physics_steps_added_for_capture": 0,
+        "profile": "convex_hull",
+        "robot": "follower_right",
+        "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_hull/follower_right/follower_right_convex_hull.usd",
+        "trial_index": 0
+      },
+      "status": "PASS"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/bilateral_contact/follower_right_hull_bilateral_contact_established_closing_axis.png",
+      "artifact_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots",
+      "camera": {
+        "camera_anchor_frozen_across_runtime_phases": true,
+        "current_bottle_target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "orientation_wxyz": [
+          -0.5455884337425232,
+          -0.2452237457036972,
+          0.32853081822395325,
+          0.7309350371360779
+        ],
+        "position_world_m": [
+          -0.00997560191899538,
+          0.0790480449795723,
+          0.5547146201133728
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 0,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "view": "closing_axis"
+      },
+      "capture_gate_status": "PASS",
+      "capture_name": "follower_right_hull_bilateral_contact_established_closing_axis",
+      "decoded_pixel_sha256": "d20a7989f37c41b03873fc60d60e732182f0e0a3449acb914e8758ab4fa45c2a",
+      "decoded_rgb_channel_ranges": [
+        241,
+        241,
+        242
+      ],
+      "file_sha256": "5b74a1f71623b5c382b6d16d0fda74f275e81a5747585f0890015a658bac0f1f",
+      "file_size_bytes": 481158,
+      "mode": "RGBA",
+      "phase": "bilateral_contact",
+      "relative_path": "bilateral_contact/follower_right_hull_bilateral_contact_established_closing_axis.png",
+      "resolution": [
+        1280,
+        900
+      ],
+      "simulation": {
+        "bottle": {
+          "angular_speed_rad_s": 0.0,
+          "angular_velocity_world_rad_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "linear_velocity_world_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "orientation_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "position_world_m": [
+            0.259998619556427,
+            -0.0010388984810560942,
+            0.3047369718551636
+          ],
+          "vertical_velocity_m_s": 0.0,
+          "z_m": 0.3047369718551636
+        },
+        "frame": 389,
+        "joint_positions": [
+          0.0002866489812731743,
+          -0.9732809662818909,
+          1.1644785404205322,
+          0.0031104551162570715,
+          -0.28510600328445435,
+          -0.0006137768505141139,
+          -0.00018181040650233626,
+          0.053963031619787216,
+          -0.05587176978588104
+        ],
+        "physical_state": {
+          "left_finger_contact": true,
+          "right_finger_contact": true
+        },
+        "physics_frequency_hz": 60,
+        "physics_steps_added_for_capture": 0,
+        "profile": "convex_hull",
+        "robot": "follower_right",
+        "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_hull/follower_right/follower_right_convex_hull.usd",
+        "trial_index": 0
+      },
+      "status": "PASS"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/bilateral_contact/follower_right_hull_bilateral_contact_established_isometric.png",
+      "artifact_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots",
+      "camera": {
+        "camera_anchor_frozen_across_runtime_phases": true,
+        "current_bottle_target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "orientation_wxyz": [
+          -0.42827364802360535,
+          -0.2670406699180603,
+          0.45676755905151367,
+          0.7325533032417297
+        ],
+        "position_world_m": [
+          -0.059943392872810364,
+          0.17906413972377777,
+          0.4846867024898529
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 2,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "view": "isometric"
+      },
+      "capture_gate_status": "PASS",
+      "capture_name": "follower_right_hull_bilateral_contact_established_isometric",
+      "decoded_pixel_sha256": "2cdb1636598efb60040bf443354d480a52be34690c2a4c50bc027708f5b90f2d",
+      "decoded_rgb_channel_ranges": [
+        240,
+        239,
+        242
+      ],
+      "file_sha256": "6d9b25b14960a038d8b192a4e840418f30785ef016d17db97982370649efc579",
+      "file_size_bytes": 446274,
+      "mode": "RGBA",
+      "phase": "bilateral_contact",
+      "relative_path": "bilateral_contact/follower_right_hull_bilateral_contact_established_isometric.png",
+      "resolution": [
+        1280,
+        900
+      ],
+      "simulation": {
+        "bottle": {
+          "angular_speed_rad_s": 0.0,
+          "angular_velocity_world_rad_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "linear_velocity_world_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "orientation_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "position_world_m": [
+            0.259998619556427,
+            -0.0010388984810560942,
+            0.3047369718551636
+          ],
+          "vertical_velocity_m_s": 0.0,
+          "z_m": 0.3047369718551636
+        },
+        "frame": 389,
+        "joint_positions": [
+          0.0002866489812731743,
+          -0.9732809662818909,
+          1.1644785404205322,
+          0.0031104551162570715,
+          -0.28510600328445435,
+          -0.0006137768505141139,
+          -0.00018181040650233626,
+          0.053963031619787216,
+          -0.05587176978588104
+        ],
+        "physical_state": {
+          "left_finger_contact": true,
+          "right_finger_contact": true
+        },
+        "physics_frequency_hz": 60,
+        "physics_steps_added_for_capture": 0,
+        "profile": "convex_hull",
+        "robot": "follower_right",
+        "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_hull/follower_right/follower_right_convex_hull.usd",
+        "trial_index": 0
+      },
+      "status": "PASS"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/release_hold/follower_right_hull_release_isometric.png",
+      "artifact_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots",
+      "camera": {
+        "camera_anchor_frozen_across_runtime_phases": true,
+        "current_bottle_target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "orientation_wxyz": [
+          -0.42827364802360535,
+          -0.2670406699180603,
+          0.45676755905151367,
+          0.7325533032417297
+        ],
+        "position_world_m": [
+          -0.059943392872810364,
+          0.17906413972377777,
+          0.4846867024898529
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 1,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "view": "isometric"
+      },
+      "capture_gate_status": "PASS",
+      "capture_name": "follower_right_hull_release_isometric",
+      "decoded_pixel_sha256": "e3d6dcb146bdbfe575ea3aeb4a77044ad8ce7bcc4d57f9bf33820494e15b50c9",
+      "decoded_rgb_channel_ranges": [
+        240,
+        240,
+        240
+      ],
+      "file_sha256": "1c29a0d9956f95b95f7ebc5113207ba4d63c62f3f18fa4f9c802617e9f5fff3e",
+      "file_size_bytes": 432846,
+      "mode": "RGBA",
+      "phase": "release_hold",
+      "relative_path": "release_hold/follower_right_hull_release_isometric.png",
+      "resolution": [
+        1280,
+        900
+      ],
+      "simulation": {
+        "bottle": {
+          "angular_speed_rad_s": 0.0,
+          "angular_velocity_world_rad_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "linear_velocity_world_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "orientation_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "position_world_m": [
+            0.259998619556427,
+            -0.0010388984810560942,
+            0.3047369718551636
+          ],
+          "vertical_velocity_m_s": 0.0,
+          "z_m": 0.3047369718551636
+        },
+        "frame": 389,
+        "joint_positions": [
+          0.0002866489812731743,
+          -0.9732809662818909,
+          1.1644785404205322,
+          0.0031104551162570715,
+          -0.28510600328445435,
+          -0.0006137768505141139,
+          -0.00018181040650233626,
+          0.053963031619787216,
+          -0.05587176978588104
+        ],
+        "physical_state": {
+          "bottle_kinematic": false,
+          "constraint_found": false
+        },
+        "physics_frequency_hz": 60,
+        "physics_steps_added_for_capture": 0,
+        "profile": "convex_hull",
+        "robot": "follower_right",
+        "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_hull/follower_right/follower_right_convex_hull.usd",
+        "trial_index": 0
+      },
+      "status": "PASS"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/release_hold/follower_right_hull_hold_end_isometric.png",
+      "artifact_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots",
+      "camera": {
+        "camera_anchor_frozen_across_runtime_phases": true,
+        "current_bottle_target_world_m": [
+          0.2653035819530487,
+          -0.00934668816626072,
+          0.300773024559021
+        ],
+        "orientation_wxyz": [
+          -0.42827364802360535,
+          -0.2670406699180603,
+          0.45676755905151367,
+          0.7325533032417297
+        ],
+        "position_world_m": [
+          -0.059943392872810364,
+          0.17906413972377777,
+          0.4846867024898529
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 1,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "view": "isometric"
+      },
+      "capture_gate_status": "PASS",
+      "capture_name": "follower_right_hull_hold_end_isometric",
+      "decoded_pixel_sha256": "fdfc3198942499e30231e0fbc055c8917fe8fd07f44c370e83bcd66d907a86af",
+      "decoded_rgb_channel_ranges": [
+        240,
+        238,
+        242
+      ],
+      "file_sha256": "13020ac6e1b123ea68b9ada461db9445dfc02f5ce06b1ded7a5f3170be0032d2",
+      "file_size_bytes": 442973,
+      "mode": "RGBA",
+      "phase": "release_hold",
+      "relative_path": "release_hold/follower_right_hull_hold_end_isometric.png",
+      "resolution": [
+        1280,
+        900
+      ],
+      "simulation": {
+        "bottle": {
+          "angular_speed_rad_s": 0.28046673794598787,
+          "angular_velocity_world_rad_s": [
+            -0.017507784068584442,
+            -0.27948588132858276,
+            0.015579176135361195
+          ],
+          "linear_velocity_world_m_s": [
+            0.020274894312024117,
+            -0.0010978246573358774,
+            0.09575510025024414
+          ],
+          "orientation_wxyz": [
+            0.9993425011634827,
+            0.0006203135708346963,
+            0.030307311564683914,
+            0.019893277436494827
+          ],
+          "position_world_m": [
+            0.2653035819530487,
+            -0.00934668816626072,
+            0.300773024559021
+          ],
+          "vertical_velocity_m_s": 0.09575510025024414,
+          "z_m": 0.300773024559021
+        },
+        "frame": 509,
+        "joint_positions": [
+          3.475786797935143e-05,
+          -0.9599354863166809,
+          1.1613153219223022,
+          0.0009671451989561319,
+          -0.29533302783966064,
+          0.0006609606789425015,
+          -5.7803023082669824e-05,
+          0.04558379575610161,
+          -0.06419999897480011
+        ],
+        "physical_state": {
+          "drop_gate_m": 0.01,
+          "drop_m": 0.003963947296142578
+        },
+        "physics_frequency_hz": 60,
+        "physics_steps_added_for_capture": 0,
+        "profile": "convex_hull",
+        "robot": "follower_right",
+        "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_hull/follower_right/follower_right_convex_hull.usd",
+        "trial_index": 0
+      },
+      "status": "PASS"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/runtime_open/follower_left_decomposition_open_with_bottle_isometric.png",
+      "artifact_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots",
+      "camera": {
+        "camera_anchor_frozen_across_runtime_phases": true,
+        "current_bottle_target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "orientation_wxyz": [
+          -0.42827364802360535,
+          -0.2670406699180603,
+          0.45676755905151367,
+          0.7325533032417297
+        ],
+        "position_world_m": [
+          -0.059943392872810364,
+          0.17906413972377777,
+          0.4846867024898529
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 0,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "view": "isometric"
+      },
+      "capture_gate_status": "PASS",
+      "capture_name": "follower_left_decomposition_open_with_bottle_isometric",
+      "decoded_pixel_sha256": "41520a83c29933b840eec56d4713db3ff6a475e28524aceaf76fae98992eb23c",
+      "decoded_rgb_channel_ranges": [
+        241,
+        240,
+        240
+      ],
+      "file_sha256": "36a2f3da22de5eb771d32d55577eb9947bc7270190c464156a8e28808b9d0a5b",
+      "file_size_bytes": 454456,
+      "mode": "RGBA",
+      "phase": "runtime_open",
+      "relative_path": "runtime_open/follower_left_decomposition_open_with_bottle_isometric.png",
+      "resolution": [
+        1280,
+        900
+      ],
+      "simulation": {
+        "bottle": {
+          "angular_speed_rad_s": 0.0,
+          "angular_velocity_world_rad_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "linear_velocity_world_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "orientation_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "position_world_m": [
+            0.259998619556427,
+            -0.0010388984810560942,
+            0.3047369718551636
+          ],
+          "vertical_velocity_m_s": 0.0,
+          "z_m": 0.3047369718551636
+        },
+        "frame": 209,
+        "joint_positions": [
+          0.00030465851887129247,
+          -0.973262369632721,
+          1.1645011901855469,
+          0.004357403144240379,
+          -0.28516510128974915,
+          0.00037455465644598007,
+          -0.001114449230954051,
+          0.0569998063147068,
+          -0.05801856517791748
+        ],
+        "physical_state": {
+          "bottle_kinematic": true,
+          "left_finger_contact": false,
+          "right_finger_contact": false,
+          "surface_gap_m": 0.0710679500009886
+        },
+        "physics_frequency_hz": 60,
+        "physics_steps_added_for_capture": 0,
+        "profile": "convex_decomposition",
+        "robot": "follower_left",
+        "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_decomposition/follower_left/follower_left_convex_decomposition.usd",
+        "trial_index": 0
+      },
+      "status": "PASS"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/bilateral_contact/follower_left_decomposition_bilateral_contact_established_closing_axis.png",
+      "artifact_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots",
+      "camera": {
+        "camera_anchor_frozen_across_runtime_phases": true,
+        "current_bottle_target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "orientation_wxyz": [
+          -0.5455884337425232,
+          -0.2452237457036972,
+          0.32853081822395325,
+          0.7309350371360779
+        ],
+        "position_world_m": [
+          -0.00997560191899538,
+          0.0790480449795723,
+          0.5547146201133728
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 0,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "view": "closing_axis"
+      },
+      "capture_gate_status": "PASS",
+      "capture_name": "follower_left_decomposition_bilateral_contact_established_closing_axis",
+      "decoded_pixel_sha256": "489817fdf399453886c431b386c2bc6946c3e8b17da5d665462cc90c58ce1642",
+      "decoded_rgb_channel_ranges": [
+        242,
+        242,
+        243
+      ],
+      "file_sha256": "18355fc265be23d63b5ca80a3e2bea39162aa2c3a412a4d4f740c7c2be80f5ed",
+      "file_size_bytes": 481845,
+      "mode": "RGBA",
+      "phase": "bilateral_contact",
+      "relative_path": "bilateral_contact/follower_left_decomposition_bilateral_contact_established_closing_axis.png",
+      "resolution": [
+        1280,
+        900
+      ],
+      "simulation": {
+        "bottle": {
+          "angular_speed_rad_s": 0.0,
+          "angular_velocity_world_rad_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "linear_velocity_world_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "orientation_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "position_world_m": [
+            0.259998619556427,
+            -0.0010388984810560942,
+            0.3047369718551636
+          ],
+          "vertical_velocity_m_s": 0.0,
+          "z_m": 0.3047369718551636
+        },
+        "frame": 389,
+        "joint_positions": [
+          0.0002901206898968667,
+          -0.9732879400253296,
+          1.164467453956604,
+          0.0031383379828184843,
+          -0.2850683033466339,
+          -0.0005523194558918476,
+          -0.00021295808255672455,
+          0.054477524012327194,
+          -0.055866435170173645
+        ],
+        "physical_state": {
+          "left_finger_contact": true,
+          "right_finger_contact": true
+        },
+        "physics_frequency_hz": 60,
+        "physics_steps_added_for_capture": 0,
+        "profile": "convex_decomposition",
+        "robot": "follower_left",
+        "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_decomposition/follower_left/follower_left_convex_decomposition.usd",
+        "trial_index": 0
+      },
+      "status": "PASS"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/bilateral_contact/follower_left_decomposition_bilateral_contact_established_isometric.png",
+      "artifact_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots",
+      "camera": {
+        "camera_anchor_frozen_across_runtime_phases": true,
+        "current_bottle_target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "orientation_wxyz": [
+          -0.42827364802360535,
+          -0.2670406699180603,
+          0.45676755905151367,
+          0.7325533032417297
+        ],
+        "position_world_m": [
+          -0.059943392872810364,
+          0.17906413972377777,
+          0.4846867024898529
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 2,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "view": "isometric"
+      },
+      "capture_gate_status": "PASS",
+      "capture_name": "follower_left_decomposition_bilateral_contact_established_isometric",
+      "decoded_pixel_sha256": "0c793548d1df3cb4b98a50f534fe5564f1d5bbfba8aef5a3efa82d2ee1ca82dc",
+      "decoded_rgb_channel_ranges": [
+        239,
+        239,
+        241
+      ],
+      "file_sha256": "8b5d9835c7853bdeebf5395d9c1ac38c992c139c7682b6b9da7fb61036e79c0d",
+      "file_size_bytes": 445699,
+      "mode": "RGBA",
+      "phase": "bilateral_contact",
+      "relative_path": "bilateral_contact/follower_left_decomposition_bilateral_contact_established_isometric.png",
+      "resolution": [
+        1280,
+        900
+      ],
+      "simulation": {
+        "bottle": {
+          "angular_speed_rad_s": 0.0,
+          "angular_velocity_world_rad_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "linear_velocity_world_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "orientation_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "position_world_m": [
+            0.259998619556427,
+            -0.0010388984810560942,
+            0.3047369718551636
+          ],
+          "vertical_velocity_m_s": 0.0,
+          "z_m": 0.3047369718551636
+        },
+        "frame": 389,
+        "joint_positions": [
+          0.0002901206898968667,
+          -0.9732879400253296,
+          1.164467453956604,
+          0.0031383379828184843,
+          -0.2850683033466339,
+          -0.0005523194558918476,
+          -0.00021295808255672455,
+          0.054477524012327194,
+          -0.055866435170173645
+        ],
+        "physical_state": {
+          "left_finger_contact": true,
+          "right_finger_contact": true
+        },
+        "physics_frequency_hz": 60,
+        "physics_steps_added_for_capture": 0,
+        "profile": "convex_decomposition",
+        "robot": "follower_left",
+        "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_decomposition/follower_left/follower_left_convex_decomposition.usd",
+        "trial_index": 0
+      },
+      "status": "PASS"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/release_hold/follower_left_decomposition_release_isometric.png",
+      "artifact_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots",
+      "camera": {
+        "camera_anchor_frozen_across_runtime_phases": true,
+        "current_bottle_target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "orientation_wxyz": [
+          -0.42827364802360535,
+          -0.2670406699180603,
+          0.45676755905151367,
+          0.7325533032417297
+        ],
+        "position_world_m": [
+          -0.059943392872810364,
+          0.17906413972377777,
+          0.4846867024898529
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 2,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "view": "isometric"
+      },
+      "capture_gate_status": "PASS",
+      "capture_name": "follower_left_decomposition_release_isometric",
+      "decoded_pixel_sha256": "5790fbe6b3bc5be65056787e3b390bce7cb9c4701d09f7366d5d5f2a7279edf8",
+      "decoded_rgb_channel_ranges": [
+        239,
+        238,
+        239
+      ],
+      "file_sha256": "c387cc92cb00e2f6e6eacb4c5fc60e6810bf1527382bf3d6b1bf25552d20b06c",
+      "file_size_bytes": 436129,
+      "mode": "RGBA",
+      "phase": "release_hold",
+      "relative_path": "release_hold/follower_left_decomposition_release_isometric.png",
+      "resolution": [
+        1280,
+        900
+      ],
+      "simulation": {
+        "bottle": {
+          "angular_speed_rad_s": 0.0,
+          "angular_velocity_world_rad_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "linear_velocity_world_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "orientation_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "position_world_m": [
+            0.259998619556427,
+            -0.0010388984810560942,
+            0.3047369718551636
+          ],
+          "vertical_velocity_m_s": 0.0,
+          "z_m": 0.3047369718551636
+        },
+        "frame": 389,
+        "joint_positions": [
+          0.0002901206898968667,
+          -0.9732879400253296,
+          1.164467453956604,
+          0.0031383379828184843,
+          -0.2850683033466339,
+          -0.0005523194558918476,
+          -0.00021295808255672455,
+          0.054477524012327194,
+          -0.055866435170173645
+        ],
+        "physical_state": {
+          "bottle_kinematic": false,
+          "constraint_found": false
+        },
+        "physics_frequency_hz": 60,
+        "physics_steps_added_for_capture": 0,
+        "profile": "convex_decomposition",
+        "robot": "follower_left",
+        "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_decomposition/follower_left/follower_left_convex_decomposition.usd",
+        "trial_index": 0
+      },
+      "status": "PASS"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/release_hold/follower_left_decomposition_hold_end_isometric.png",
+      "artifact_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots",
+      "camera": {
+        "camera_anchor_frozen_across_runtime_phases": true,
+        "current_bottle_target_world_m": [
+          0.2671036124229431,
+          -0.009363769553601742,
+          0.30036461353302
+        ],
+        "orientation_wxyz": [
+          -0.42827364802360535,
+          -0.2670406699180603,
+          0.45676755905151367,
+          0.7325533032417297
+        ],
+        "position_world_m": [
+          -0.059943392872810364,
+          0.17906413972377777,
+          0.4846867024898529
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 2,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "view": "isometric"
+      },
+      "capture_gate_status": "PASS",
+      "capture_name": "follower_left_decomposition_hold_end_isometric",
+      "decoded_pixel_sha256": "ee1478c189b0a9ca099a07f72d35b439bb8380d627291a754fe6600767fd7479",
+      "decoded_rgb_channel_ranges": [
+        238,
+        236,
+        241
+      ],
+      "file_sha256": "57ab890810d5c3e5513c988155f6b039a9cf4bc8a88cffed48155a14e0aba9a4",
+      "file_size_bytes": 472143,
+      "mode": "RGBA",
+      "phase": "release_hold",
+      "relative_path": "release_hold/follower_left_decomposition_hold_end_isometric.png",
+      "resolution": [
+        1280,
+        900
+      ],
+      "simulation": {
+        "bottle": {
+          "angular_speed_rad_s": 0.04757603112927069,
+          "angular_velocity_world_rad_s": [
+            -0.007785571739077568,
+            0.03612986579537392,
+            -0.029958244413137436
+          ],
+          "linear_velocity_world_m_s": [
+            0.0178915336728096,
+            0.0005214126431383193,
+            0.0953223928809166
+          ],
+          "orientation_wxyz": [
+            0.999774158000946,
+            -0.00014535090303979814,
+            -0.00948163028806448,
+            0.019020939245820045
+          ],
+          "position_world_m": [
+            0.2671036124229431,
+            -0.009363769553601742,
+            0.30036461353302
+          ],
+          "vertical_velocity_m_s": 0.0953223928809166,
+          "z_m": 0.30036461353302
+        },
+        "frame": 509,
+        "joint_positions": [
+          3.426818875595927e-05,
+          -0.9599347710609436,
+          1.1613179445266724,
+          0.0009750901372171938,
+          -0.2953117787837982,
+          0.0006495157722383738,
+          -6.182370998430997e-05,
+          0.046090736985206604,
+          -0.06419999897480011
+        ],
+        "physical_state": {
+          "drop_gate_m": 0.01,
+          "drop_m": 0.004372358322143555
+        },
+        "physics_frequency_hz": 60,
+        "physics_steps_added_for_capture": 0,
+        "profile": "convex_decomposition",
+        "robot": "follower_left",
+        "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_decomposition/follower_left/follower_left_convex_decomposition.usd",
+        "trial_index": 0
+      },
+      "status": "PASS"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/runtime_open/follower_right_decomposition_open_with_bottle_isometric.png",
+      "artifact_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots",
+      "camera": {
+        "camera_anchor_frozen_across_runtime_phases": true,
+        "current_bottle_target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "orientation_wxyz": [
+          -0.42827364802360535,
+          -0.2670406699180603,
+          0.45676755905151367,
+          0.7325533032417297
+        ],
+        "position_world_m": [
+          -0.059943392872810364,
+          0.17906413972377777,
+          0.4846867024898529
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 1,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "view": "isometric"
+      },
+      "capture_gate_status": "PASS",
+      "capture_name": "follower_right_decomposition_open_with_bottle_isometric",
+      "decoded_pixel_sha256": "77163f866220f302577a1012dbda38bee370a9c5c9792b50d89deb8b99cb4ce0",
+      "decoded_rgb_channel_ranges": [
+        241,
+        240,
+        241
+      ],
+      "file_sha256": "e3404427a7e51c2c29d40f35051ada89834382e800f5f7836348c5196fb928cf",
+      "file_size_bytes": 564326,
+      "mode": "RGBA",
+      "phase": "runtime_open",
+      "relative_path": "runtime_open/follower_right_decomposition_open_with_bottle_isometric.png",
+      "resolution": [
+        1280,
+        900
+      ],
+      "simulation": {
+        "bottle": {
+          "angular_speed_rad_s": 0.0,
+          "angular_velocity_world_rad_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "linear_velocity_world_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "orientation_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "position_world_m": [
+            0.259998619556427,
+            -0.0010388984810560942,
+            0.3047369718551636
+          ],
+          "vertical_velocity_m_s": 0.0,
+          "z_m": 0.3047369718551636
+        },
+        "frame": 209,
+        "joint_positions": [
+          0.00030465851887129247,
+          -0.973262369632721,
+          1.1645011901855469,
+          0.004357403144240379,
+          -0.28516510128974915,
+          0.00037455465644598007,
+          -0.001114449230954051,
+          0.0569998063147068,
+          -0.05801856517791748
+        ],
+        "physical_state": {
+          "bottle_kinematic": true,
+          "left_finger_contact": false,
+          "right_finger_contact": false,
+          "surface_gap_m": 0.0710679500009886
+        },
+        "physics_frequency_hz": 60,
+        "physics_steps_added_for_capture": 0,
+        "profile": "convex_decomposition",
+        "robot": "follower_right",
+        "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_decomposition/follower_right/follower_right_convex_decomposition.usd",
+        "trial_index": 0
+      },
+      "status": "PASS"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/bilateral_contact/follower_right_decomposition_bilateral_contact_established_closing_axis.png",
+      "artifact_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots",
+      "camera": {
+        "camera_anchor_frozen_across_runtime_phases": true,
+        "current_bottle_target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "orientation_wxyz": [
+          -0.5455884337425232,
+          -0.2452237457036972,
+          0.32853081822395325,
+          0.7309350371360779
+        ],
+        "position_world_m": [
+          -0.00997560191899538,
+          0.0790480449795723,
+          0.5547146201133728
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 0,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "view": "closing_axis"
+      },
+      "capture_gate_status": "PASS",
+      "capture_name": "follower_right_decomposition_bilateral_contact_established_closing_axis",
+      "decoded_pixel_sha256": "9dc502ff7329214823e9efbc822917e4bc19dda904a6b21ae42b61ecea5e356e",
+      "decoded_rgb_channel_ranges": [
+        242,
+        242,
+        243
+      ],
+      "file_sha256": "e60c1ac12b811a48fd7b513263d331db0cd8ff25bb0252015f1fa4206bb5bd80",
+      "file_size_bytes": 486962,
+      "mode": "RGBA",
+      "phase": "bilateral_contact",
+      "relative_path": "bilateral_contact/follower_right_decomposition_bilateral_contact_established_closing_axis.png",
+      "resolution": [
+        1280,
+        900
+      ],
+      "simulation": {
+        "bottle": {
+          "angular_speed_rad_s": 0.0,
+          "angular_velocity_world_rad_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "linear_velocity_world_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "orientation_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "position_world_m": [
+            0.259998619556427,
+            -0.0010388984810560942,
+            0.3047369718551636
+          ],
+          "vertical_velocity_m_s": 0.0,
+          "z_m": 0.3047369718551636
+        },
+        "frame": 389,
+        "joint_positions": [
+          0.0002901206898968667,
+          -0.9732879400253296,
+          1.164467453956604,
+          0.0031383379828184843,
+          -0.2850683033466339,
+          -0.0005523194558918476,
+          -0.00021295808255672455,
+          0.054477524012327194,
+          -0.055866435170173645
+        ],
+        "physical_state": {
+          "left_finger_contact": true,
+          "right_finger_contact": true
+        },
+        "physics_frequency_hz": 60,
+        "physics_steps_added_for_capture": 0,
+        "profile": "convex_decomposition",
+        "robot": "follower_right",
+        "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_decomposition/follower_right/follower_right_convex_decomposition.usd",
+        "trial_index": 0
+      },
+      "status": "PASS"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/bilateral_contact/follower_right_decomposition_bilateral_contact_established_isometric.png",
+      "artifact_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots",
+      "camera": {
+        "camera_anchor_frozen_across_runtime_phases": true,
+        "current_bottle_target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "orientation_wxyz": [
+          -0.42827364802360535,
+          -0.2670406699180603,
+          0.45676755905151367,
+          0.7325533032417297
+        ],
+        "position_world_m": [
+          -0.059943392872810364,
+          0.17906413972377777,
+          0.4846867024898529
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 2,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "view": "isometric"
+      },
+      "capture_gate_status": "PASS",
+      "capture_name": "follower_right_decomposition_bilateral_contact_established_isometric",
+      "decoded_pixel_sha256": "f87e916b28dce54bd3e1c648012f1a661f55be7e01c81f98bb020779fd163832",
+      "decoded_rgb_channel_ranges": [
+        239,
+        237,
+        241
+      ],
+      "file_sha256": "dea2410746761652644625e1c5f224b00acb1c66d63d2941e263a378d7a02622",
+      "file_size_bytes": 443181,
+      "mode": "RGBA",
+      "phase": "bilateral_contact",
+      "relative_path": "bilateral_contact/follower_right_decomposition_bilateral_contact_established_isometric.png",
+      "resolution": [
+        1280,
+        900
+      ],
+      "simulation": {
+        "bottle": {
+          "angular_speed_rad_s": 0.0,
+          "angular_velocity_world_rad_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "linear_velocity_world_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "orientation_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "position_world_m": [
+            0.259998619556427,
+            -0.0010388984810560942,
+            0.3047369718551636
+          ],
+          "vertical_velocity_m_s": 0.0,
+          "z_m": 0.3047369718551636
+        },
+        "frame": 389,
+        "joint_positions": [
+          0.0002901206898968667,
+          -0.9732879400253296,
+          1.164467453956604,
+          0.0031383379828184843,
+          -0.2850683033466339,
+          -0.0005523194558918476,
+          -0.00021295808255672455,
+          0.054477524012327194,
+          -0.055866435170173645
+        ],
+        "physical_state": {
+          "left_finger_contact": true,
+          "right_finger_contact": true
+        },
+        "physics_frequency_hz": 60,
+        "physics_steps_added_for_capture": 0,
+        "profile": "convex_decomposition",
+        "robot": "follower_right",
+        "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_decomposition/follower_right/follower_right_convex_decomposition.usd",
+        "trial_index": 0
+      },
+      "status": "PASS"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/release_hold/follower_right_decomposition_release_isometric.png",
+      "artifact_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots",
+      "camera": {
+        "camera_anchor_frozen_across_runtime_phases": true,
+        "current_bottle_target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "orientation_wxyz": [
+          -0.42827364802360535,
+          -0.2670406699180603,
+          0.45676755905151367,
+          0.7325533032417297
+        ],
+        "position_world_m": [
+          -0.059943392872810364,
+          0.17906413972377777,
+          0.4846867024898529
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 1,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "view": "isometric"
+      },
+      "capture_gate_status": "PASS",
+      "capture_name": "follower_right_decomposition_release_isometric",
+      "decoded_pixel_sha256": "f18ee947311471982ee58e1b9cf5f9700ea50e26db609d753dc1f84377d51d85",
+      "decoded_rgb_channel_ranges": [
+        239,
+        238,
+        241
+      ],
+      "file_sha256": "5f9147cc2686cf57877ad94465db15fa36d30f72b5782e9ea17b67518f1660bc",
+      "file_size_bytes": 434306,
+      "mode": "RGBA",
+      "phase": "release_hold",
+      "relative_path": "release_hold/follower_right_decomposition_release_isometric.png",
+      "resolution": [
+        1280,
+        900
+      ],
+      "simulation": {
+        "bottle": {
+          "angular_speed_rad_s": 0.0,
+          "angular_velocity_world_rad_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "linear_velocity_world_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "orientation_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "position_world_m": [
+            0.259998619556427,
+            -0.0010388984810560942,
+            0.3047369718551636
+          ],
+          "vertical_velocity_m_s": 0.0,
+          "z_m": 0.3047369718551636
+        },
+        "frame": 389,
+        "joint_positions": [
+          0.0002901206898968667,
+          -0.9732879400253296,
+          1.164467453956604,
+          0.0031383379828184843,
+          -0.2850683033466339,
+          -0.0005523194558918476,
+          -0.00021295808255672455,
+          0.054477524012327194,
+          -0.055866435170173645
+        ],
+        "physical_state": {
+          "bottle_kinematic": false,
+          "constraint_found": false
+        },
+        "physics_frequency_hz": 60,
+        "physics_steps_added_for_capture": 0,
+        "profile": "convex_decomposition",
+        "robot": "follower_right",
+        "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_decomposition/follower_right/follower_right_convex_decomposition.usd",
+        "trial_index": 0
+      },
+      "status": "PASS"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/release_hold/follower_right_decomposition_hold_end_isometric.png",
+      "artifact_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots",
+      "camera": {
+        "camera_anchor_frozen_across_runtime_phases": true,
+        "current_bottle_target_world_m": [
+          0.2671036124229431,
+          -0.009363769553601742,
+          0.30036461353302
+        ],
+        "orientation_wxyz": [
+          -0.42827364802360535,
+          -0.2670406699180603,
+          0.45676755905151367,
+          0.7325533032417297
+        ],
+        "position_world_m": [
+          -0.059943392872810364,
+          0.17906413972377777,
+          0.4846867024898529
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 2,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "view": "isometric"
+      },
+      "capture_gate_status": "PASS",
+      "capture_name": "follower_right_decomposition_hold_end_isometric",
+      "decoded_pixel_sha256": "5843bf2ab4fa67565e4ff866924fca0b809730eafd309ad177059c88d362aa20",
+      "decoded_rgb_channel_ranges": [
+        238,
+        236,
+        239
+      ],
+      "file_sha256": "d49ef1e7852b3bed89b87a0d9ba8c5cffbb828fa90f5b634ad7be4502e49229c",
+      "file_size_bytes": 438333,
+      "mode": "RGBA",
+      "phase": "release_hold",
+      "relative_path": "release_hold/follower_right_decomposition_hold_end_isometric.png",
+      "resolution": [
+        1280,
+        900
+      ],
+      "simulation": {
+        "bottle": {
+          "angular_speed_rad_s": 0.04757603112927069,
+          "angular_velocity_world_rad_s": [
+            -0.007785571739077568,
+            0.03612986579537392,
+            -0.029958244413137436
+          ],
+          "linear_velocity_world_m_s": [
+            0.0178915336728096,
+            0.0005214126431383193,
+            0.0953223928809166
+          ],
+          "orientation_wxyz": [
+            0.999774158000946,
+            -0.00014535090303979814,
+            -0.00948163028806448,
+            0.019020939245820045
+          ],
+          "position_world_m": [
+            0.2671036124229431,
+            -0.009363769553601742,
+            0.30036461353302
+          ],
+          "vertical_velocity_m_s": 0.0953223928809166,
+          "z_m": 0.30036461353302
+        },
+        "frame": 509,
+        "joint_positions": [
+          3.426818875595927e-05,
+          -0.9599347710609436,
+          1.1613179445266724,
+          0.0009750901372171938,
+          -0.2953117787837982,
+          0.0006495157722383738,
+          -6.182370998430997e-05,
+          0.046090736985206604,
+          -0.06419999897480011
+        ],
+        "physical_state": {
+          "drop_gate_m": 0.01,
+          "drop_m": 0.004372358322143555
+        },
+        "physics_frequency_hz": 60,
+        "physics_steps_added_for_capture": 0,
+        "profile": "convex_decomposition",
+        "robot": "follower_right",
+        "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_decomposition/follower_right/follower_right_convex_decomposition.usd",
+        "trial_index": 0
+      },
+      "status": "PASS"
+    }
+  ],
+  "duplicate_capture_keys": [],
+  "failed_capture_gates": [],
+  "gates": {
+    "all_capture_gates_pass": true,
+    "all_captures_under_declared_root": true,
+    "all_required_captures_present": true,
+    "capture_keys_unique": true
+  },
+  "missing_required_captures": [],
+  "observed_capture_count": 28,
+  "required_capture_count": 28,
+  "required_captures": {
+    "asset_preflight": [
+      "follower_left_open_closing_axis",
+      "follower_left_open_isometric",
+      "follower_left_closed_closing_axis",
+      "follower_left_closed_isometric",
+      "follower_right_open_closing_axis",
+      "follower_right_open_isometric",
+      "follower_right_closed_closing_axis",
+      "follower_right_closed_isometric"
+    ],
+    "bilateral_contact": [
+      "follower_left_hull_bilateral_contact_established_closing_axis",
+      "follower_left_hull_bilateral_contact_established_isometric",
+      "follower_left_decomposition_bilateral_contact_established_closing_axis",
+      "follower_left_decomposition_bilateral_contact_established_isometric",
+      "follower_right_hull_bilateral_contact_established_closing_axis",
+      "follower_right_hull_bilateral_contact_established_isometric",
+      "follower_right_decomposition_bilateral_contact_established_closing_axis",
+      "follower_right_decomposition_bilateral_contact_established_isometric"
+    ],
+    "release_hold": [
+      "follower_left_hull_release_isometric",
+      "follower_left_hull_hold_end_isometric",
+      "follower_left_decomposition_release_isometric",
+      "follower_left_decomposition_hold_end_isometric",
+      "follower_right_hull_release_isometric",
+      "follower_right_hull_hold_end_isometric",
+      "follower_right_decomposition_release_isometric",
+      "follower_right_decomposition_hold_end_isometric"
+    ],
+    "runtime_open": [
+      "follower_left_hull_open_with_bottle_isometric",
+      "follower_left_decomposition_open_with_bottle_isometric",
+      "follower_right_hull_open_with_bottle_isometric",
+      "follower_right_decomposition_open_with_bottle_isometric"
+    ]
+  },
+  "status": "PASS",
+  "wrong_artifact_root_captures": []
+}

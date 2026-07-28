@@ -133,6 +133,58 @@ screenshots:
   runtime_renderer: ISAAC_SIM_5_1_CAMERA_RGB
   supplemental_renderer: BLENDER_STATIC_GEOMETRY_ONLY
   missing_capture_gate: FAIL
+  visual_self_review_gate: FAIL
+  capture_intents:
+    asset_preflight:
+      object: user-confirmed custom follower fingers without bottle
+      part: both fingers, inner gripping surfaces, gripper bar
+      physical_stages:
+        - open
+        - closed
+      acceptance:
+        - blue and orange fingers are both visible
+        - inner gripping geometry is not hidden
+        - open and closed images have an obvious aperture difference
+        - the view is close enough to inspect installation orientation
+    runtime_open:
+      object: custom fingers and fixed 65 mm bottle before closure
+      part: both fingers, both inner surfaces, bottle, free aperture
+      physical_stages:
+        - open_with_bottle
+      acceptance:
+        - both fingers and the entire bottle contact band are visible
+        - a nonzero gap exists on both bottle sides
+        - camera anchor matches bilateral contact, release, and hold-end views
+    bilateral_contact:
+      object: custom fingers and fixed bottle after slow closure
+      part: both fingers, inner contact bands, bottle, contact locations
+      physical_stages:
+        - bilateral_contact_established
+      acceptance:
+        - both fingers and bottle are simultaneously visible
+        - the view exposes both finger-to-bottle interfaces
+        - runtime contact data reports left and right contact
+        - contact-focused and isometric views are not duplicates
+    release_hold:
+      object: unconstrained dynamic bottle held by both custom fingers
+      part: both fingers, bottle, release and hold-end bottle pose
+      physical_stages:
+        - release
+        - hold_end
+      acceptance:
+        - release and hold-end use the identical frozen camera anchor
+        - both fingers and bottle remain visible
+        - annotation reports exact runtime drop and velocity
+        - release and hold-end are compared numerically even for subpixel motion
+    collider_geometry:
+      object: local PhysX-cooked custom finger collision geometry
+      part: left and right finger overview and inner gripping region
+      physical_stages:
+        - offline_cooked_geometry
+      acceptance:
+        - both finger sides are shown side by side
+        - convex piece boundaries and local axes are visible
+        - Hull and Decomposition images visibly identify their piece counts
   required_captures:
     asset_preflight:
       - follower_left_open_closing_axis
@@ -152,15 +204,20 @@ screenshots:
       - follower_right_hull_inner_surface
       - follower_right_decomposition_overview
       - follower_right_decomposition_inner_surface
+    runtime_open:
+      - follower_left_hull_open_with_bottle_isometric
+      - follower_left_decomposition_open_with_bottle_isometric
+      - follower_right_hull_open_with_bottle_isometric
+      - follower_right_decomposition_open_with_bottle_isometric
     bilateral_contact:
-      - follower_left_hull_first_bilateral_closing_axis
-      - follower_left_hull_first_bilateral_isometric
-      - follower_left_decomposition_first_bilateral_closing_axis
-      - follower_left_decomposition_first_bilateral_isometric
-      - follower_right_hull_first_bilateral_closing_axis
-      - follower_right_hull_first_bilateral_isometric
-      - follower_right_decomposition_first_bilateral_closing_axis
-      - follower_right_decomposition_first_bilateral_isometric
+      - follower_left_hull_bilateral_contact_established_closing_axis
+      - follower_left_hull_bilateral_contact_established_isometric
+      - follower_left_decomposition_bilateral_contact_established_closing_axis
+      - follower_left_decomposition_bilateral_contact_established_isometric
+      - follower_right_hull_bilateral_contact_established_closing_axis
+      - follower_right_hull_bilateral_contact_established_isometric
+      - follower_right_decomposition_bilateral_contact_established_closing_axis
+      - follower_right_decomposition_bilateral_contact_established_isometric
     release_hold:
       - follower_left_hull_release_isometric
       - follower_left_hull_hold_end_isometric

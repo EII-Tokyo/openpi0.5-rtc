@@ -23,8 +23,12 @@ def test_validation_plan_has_explicit_articulations_and_dof_order() -> None:
         "IsaacSim.RobotRules",
         "IsaacSim.SimReadyAssetRules",
     ]
-    assert Path(plan["gripper_validation_report"]) == (PROJECT_ROOT / "reports/aloha1_mapping/gripper_validation.json")
+    assert Path(plan["gripper_validation_report"]) == (
+        PROJECT_ROOT
+        / "reports/aloha1_mapping/gripper_correct_finger_task5.json"
+    )
     assert plan["required_task5_gripper_statuses"] == ["PASS", "PARTIAL"]
+    assert "FINAL_DEFAULT_COLLIDER_UNCHANGED" in plan["task5_asset_scope"]
 
 
 def test_validation_classification_is_never_vague() -> None:

@@ -85,6 +85,7 @@ def load_correct_finger_profile(
     required_phases = {
         "asset_preflight",
         "collider_geometry",
+        "runtime_open",
         "bilateral_contact",
         "release_hold",
     }

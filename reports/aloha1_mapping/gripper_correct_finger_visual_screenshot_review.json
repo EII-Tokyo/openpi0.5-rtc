@@ -1,0 +1,5237 @@
+{
+  "all_runtime_conclusions_require_numeric_evidence": true,
+  "annotated_screenshot_root_absolute": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots_annotated",
+  "capture_pair_count": 36,
+  "captures": [
+    {
+      "acceptance_criteria": [
+        "blue and orange fingers are both visible",
+        "inner gripping geometry is not hidden",
+        "open and closed images have an obvious aperture difference",
+        "the view is close enough to inspect installation orientation"
+      ],
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots_annotated/asset_preflight/follower_left_open_closing_axis_annotated.png",
+      "annotated_sha256": "1cc6b64a42db2283f824886f84efe34a0be99ebeb2e356ca63fc7007a8287aa0",
+      "annotation": {
+        "contact_annotations": [],
+        "detected_boxes_xyxy": {
+          "left finger (blue)": [
+            63,
+            117,
+            1247,
+            899
+          ],
+          "right finger (orange)": [
+            196,
+            104,
+            1092,
+            697
+          ]
+        }
+      },
+      "camera": {
+        "orientation_wxyz": [
+          0.00011963285942329094,
+          0.00010564472177065909,
+          0.6619256734848022,
+          0.7495694756507874
+        ],
+        "position_world_m": [
+          0.25888365507125854,
+          0.2799510061740875,
+          0.3364424407482147
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 1,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.25879427790641785,
+          -4.897080361843109e-05,
+          0.30153585970401764
+        ],
+        "view": "closing_axis"
+      },
+      "capture_name": "follower_left_open_closing_axis",
+      "detection_target": "user-confirmed custom follower fingers without bottle",
+      "original_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/asset_preflight/follower_left_open_closing_axis.png",
+      "original_sha256": "ff49437d4bc74d4f924d57b2f29f2d72ce9200b6a01dec3f3d4ed1e79326b203",
+      "part": "both fingers, inner gripping surfaces, gripper bar",
+      "phase": "asset_preflight",
+      "physical_stages": [
+        "open",
+        "closed"
+      ],
+      "retake_history": [],
+      "simulation": {
+        "dof_order": [
+          "waist",
+          "shoulder",
+          "elbow",
+          "forearm_roll",
+          "wrist_angle",
+          "wrist_rotate",
+          "gripper",
+          "left_finger",
+          "right_finger"
+        ],
+        "joint_positions": [
+          1.5243711459334008e-05,
+          -0.9599651098251343,
+          1.1611816883087158,
+          0.0010723896557465196,
+          -0.29613107442855835,
+          -7.928500735943089e-07,
+          2.9358275810409395e-08,
+          0.0569942444562912,
+          -0.0570058636367321
+        ],
+        "physics_frequency_hz": 60,
+        "robot": "follower_left",
+        "solve_articulation_contact_last": true,
+        "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_hull/follower_left/follower_left_convex_hull.usd",
+        "state": "open",
+        "surface_gap_m": 0.06918747539249395
+      },
+      "visual_review": {
+        "conclusion": "Both custom fingers and their inner geometry are visible at inspection scale; paired open/closed images have an obvious aperture change.",
+        "objects_visible": [
+          "left finger (blue)",
+          "right finger (orange)",
+          "inner gripping geometry",
+          "gripper bar"
+        ],
+        "retake_history": [],
+        "reviewed_by": "Codex visual model",
+        "reviewed_capture_name": "follower_left_open_closing_axis",
+        "status": "PASS",
+        "view_exposes_test_target": true
+      }
+    },
+    {
+      "acceptance_criteria": [
+        "blue and orange fingers are both visible",
+        "inner gripping geometry is not hidden",
+        "open and closed images have an obvious aperture difference",
+        "the view is close enough to inspect installation orientation"
+      ],
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots_annotated/asset_preflight/follower_left_open_isometric_annotated.png",
+      "annotated_sha256": "35430cb6a71efc2f36c319bf993f6bae313536c7908c8b5527f4aca734b55d58",
+      "annotation": {
+        "contact_annotations": [],
+        "detected_boxes_xyxy": {
+          "left finger (blue)": [
+            129,
+            244,
+            535,
+            756
+          ],
+          "right finger (orange)": [
+            711,
+            129,
+            1279,
+            399
+          ]
+        }
+      },
+      "camera": {
+        "orientation_wxyz": [
+          -0.43497133255004883,
+          -0.2677571475505829,
+          0.4506739675998688,
+          0.7321195602416992
+        ],
+        "position_world_m": [
+          0.019916022196412086,
+          0.13002243638038635,
+          0.43874722719192505
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 1,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.25879427790641785,
+          -4.897080361843109e-05,
+          0.30153585970401764
+        ],
+        "view": "isometric"
+      },
+      "capture_name": "follower_left_open_isometric",
+      "detection_target": "user-confirmed custom follower fingers without bottle",
+      "original_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/asset_preflight/follower_left_open_isometric.png",
+      "original_sha256": "81cf52d9ab48a00741edd4654bb1784b90c7d58e491282e4897c6c58532c4c71",
+      "part": "both fingers, inner gripping surfaces, gripper bar",
+      "phase": "asset_preflight",
+      "physical_stages": [
+        "open",
+        "closed"
+      ],
+      "retake_history": [],
+      "simulation": {
+        "dof_order": [
+          "waist",
+          "shoulder",
+          "elbow",
+          "forearm_roll",
+          "wrist_angle",
+          "wrist_rotate",
+          "gripper",
+          "left_finger",
+          "right_finger"
+        ],
+        "joint_positions": [
+          1.5243711459334008e-05,
+          -0.9599651098251343,
+          1.1611816883087158,
+          0.0010723896557465196,
+          -0.29613107442855835,
+          -7.928500735943089e-07,
+          2.9358275810409395e-08,
+          0.0569942444562912,
+          -0.0570058636367321
+        ],
+        "physics_frequency_hz": 60,
+        "robot": "follower_left",
+        "solve_articulation_contact_last": true,
+        "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_hull/follower_left/follower_left_convex_hull.usd",
+        "state": "open",
+        "surface_gap_m": 0.06918747539249395
+      },
+      "visual_review": {
+        "conclusion": "Both custom fingers and their inner geometry are visible at inspection scale; paired open/closed images have an obvious aperture change.",
+        "objects_visible": [
+          "left finger (blue)",
+          "right finger (orange)",
+          "inner gripping geometry",
+          "gripper bar"
+        ],
+        "retake_history": [],
+        "reviewed_by": "Codex visual model",
+        "reviewed_capture_name": "follower_left_open_isometric",
+        "status": "PASS",
+        "view_exposes_test_target": true
+      }
+    },
+    {
+      "acceptance_criteria": [
+        "blue and orange fingers are both visible",
+        "inner gripping geometry is not hidden",
+        "open and closed images have an obvious aperture difference",
+        "the view is close enough to inspect installation orientation"
+      ],
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots_annotated/asset_preflight/follower_left_closed_closing_axis_annotated.png",
+      "annotated_sha256": "3b36186292d5cb62e845bc51b840b5ca415b6330d8d27946295e61d2df79ad4a",
+      "annotation": {
+        "contact_annotations": [],
+        "detected_boxes_xyxy": {
+          "left finger (blue)": [
+            167,
+            111,
+            1167,
+            830
+          ],
+          "right finger (orange)": [
+            133,
+            108,
+            1126,
+            586
+          ]
+        }
+      },
+      "camera": {
+        "orientation_wxyz": [
+          0.00032546266447752714,
+          0.00028920258046127856,
+          0.6642386317253113,
+          0.7475205063819885
+        ],
+        "position_world_m": [
+          0.25903788208961487,
+          0.2799469828605652,
+          0.33468565344810486
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 0,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.2587940841913223,
+          -4.67933714389801e-05,
+          0.3015357255935669
+        ],
+        "view": "closing_axis"
+      },
+      "capture_name": "follower_left_closed_closing_axis",
+      "detection_target": "user-confirmed custom follower fingers without bottle",
+      "original_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/asset_preflight/follower_left_closed_closing_axis.png",
+      "original_sha256": "e577686cbaf5750a6059d06c1b0a7ef5267822e290dd4758d9cdaf14445471ee",
+      "part": "both fingers, inner gripping surfaces, gripper bar",
+      "phase": "asset_preflight",
+      "physical_stages": [
+        "open",
+        "closed"
+      ],
+      "retake_history": [],
+      "simulation": {
+        "dof_order": [
+          "waist",
+          "shoulder",
+          "elbow",
+          "forearm_roll",
+          "wrist_angle",
+          "wrist_rotate",
+          "gripper",
+          "left_finger",
+          "right_finger"
+        ],
+        "joint_positions": [
+          1.5238731975841802e-05,
+          -0.9599652886390686,
+          1.1611820459365845,
+          0.0010924951639026403,
+          -0.2961314022541046,
+          -9.902327064992278e-07,
+          4.4813582178448996e-08,
+          0.02100002020597458,
+          -0.021005425602197647
+        ],
+        "physics_frequency_hz": 60,
+        "robot": "follower_left",
+        "solve_articulation_contact_last": true,
+        "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_hull/follower_left/follower_left_convex_hull.usd",
+        "state": "closed",
+        "surface_gap_m": -0.0031678944967367187
+      },
+      "visual_review": {
+        "conclusion": "Both custom fingers and their inner geometry are visible at inspection scale; paired open/closed images have an obvious aperture change.",
+        "objects_visible": [
+          "left finger (blue)",
+          "right finger (orange)",
+          "inner gripping geometry",
+          "gripper bar"
+        ],
+        "retake_history": [],
+        "reviewed_by": "Codex visual model",
+        "reviewed_capture_name": "follower_left_closed_closing_axis",
+        "status": "PASS",
+        "view_exposes_test_target": true
+      }
+    },
+    {
+      "acceptance_criteria": [
+        "blue and orange fingers are both visible",
+        "inner gripping geometry is not hidden",
+        "open and closed images have an obvious aperture difference",
+        "the view is close enough to inspect installation orientation"
+      ],
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots_annotated/asset_preflight/follower_left_closed_isometric_annotated.png",
+      "annotated_sha256": "4a8a373e8e51a13fc8b8d3a77c3c3a5f8af594de9aa5265b2abeca5bf6061a69",
+      "annotation": {
+        "contact_annotations": [],
+        "detected_boxes_xyxy": {
+          "left finger (blue)": [
+            445,
+            184,
+            914,
+            492
+          ],
+          "right finger (orange)": [
+            429,
+            185,
+            1049,
+            420
+          ]
+        }
+      },
+      "camera": {
+        "orientation_wxyz": [
+          -0.4346187114715576,
+          -0.2682296335697174,
+          0.45153170824050903,
+          0.731627345085144
+        ],
+        "position_world_m": [
+          0.01998753286898136,
+          0.13002318143844604,
+          0.43793147802352905
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 9,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.2587940841913223,
+          -4.67933714389801e-05,
+          0.3015357255935669
+        ],
+        "view": "isometric"
+      },
+      "capture_name": "follower_left_closed_isometric",
+      "detection_target": "user-confirmed custom follower fingers without bottle",
+      "original_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/asset_preflight/follower_left_closed_isometric.png",
+      "original_sha256": "57c0f49e1f41d079a8322b8d5a70f6db7e12dab8320413ae9151883aea128615",
+      "part": "both fingers, inner gripping surfaces, gripper bar",
+      "phase": "asset_preflight",
+      "physical_stages": [
+        "open",
+        "closed"
+      ],
+      "retake_history": [],
+      "simulation": {
+        "dof_order": [
+          "waist",
+          "shoulder",
+          "elbow",
+          "forearm_roll",
+          "wrist_angle",
+          "wrist_rotate",
+          "gripper",
+          "left_finger",
+          "right_finger"
+        ],
+        "joint_positions": [
+          1.5238731975841802e-05,
+          -0.9599652886390686,
+          1.1611820459365845,
+          0.0010924951639026403,
+          -0.2961314022541046,
+          -9.902327064992278e-07,
+          4.4813582178448996e-08,
+          0.02100002020597458,
+          -0.021005425602197647
+        ],
+        "physics_frequency_hz": 60,
+        "robot": "follower_left",
+        "solve_articulation_contact_last": true,
+        "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_hull/follower_left/follower_left_convex_hull.usd",
+        "state": "closed",
+        "surface_gap_m": -0.0031678944967367187
+      },
+      "visual_review": {
+        "conclusion": "Both custom fingers and their inner geometry are visible at inspection scale; paired open/closed images have an obvious aperture change.",
+        "objects_visible": [
+          "left finger (blue)",
+          "right finger (orange)",
+          "inner gripping geometry",
+          "gripper bar"
+        ],
+        "retake_history": [],
+        "reviewed_by": "Codex visual model",
+        "reviewed_capture_name": "follower_left_closed_isometric",
+        "status": "PASS",
+        "view_exposes_test_target": true
+      }
+    },
+    {
+      "acceptance_criteria": [
+        "blue and orange fingers are both visible",
+        "inner gripping geometry is not hidden",
+        "open and closed images have an obvious aperture difference",
+        "the view is close enough to inspect installation orientation"
+      ],
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots_annotated/asset_preflight/follower_right_open_closing_axis_annotated.png",
+      "annotated_sha256": "38e368387a3944fd544af0fc67859e0b6fe4c4f99544de90d39115b8a9868aa0",
+      "annotation": {
+        "contact_annotations": [],
+        "detected_boxes_xyxy": {
+          "left finger (blue)": [
+            63,
+            117,
+            1247,
+            899
+          ],
+          "right finger (orange)": [
+            196,
+            104,
+            1092,
+            696
+          ]
+        }
+      },
+      "camera": {
+        "orientation_wxyz": [
+          0.00011963285942329094,
+          0.00010564472177065909,
+          0.6619256734848022,
+          0.7495694756507874
+        ],
+        "position_world_m": [
+          0.25888365507125854,
+          0.2799510061740875,
+          0.3364424407482147
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 1,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.25879427790641785,
+          -4.897080361843109e-05,
+          0.30153585970401764
+        ],
+        "view": "closing_axis"
+      },
+      "capture_name": "follower_right_open_closing_axis",
+      "detection_target": "user-confirmed custom follower fingers without bottle",
+      "original_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/asset_preflight/follower_right_open_closing_axis.png",
+      "original_sha256": "28ca6246a96d05380c9283f7caabcaeaf817ffd31f4df79d87e1fc0e8094e59c",
+      "part": "both fingers, inner gripping surfaces, gripper bar",
+      "phase": "asset_preflight",
+      "physical_stages": [
+        "open",
+        "closed"
+      ],
+      "retake_history": [],
+      "simulation": {
+        "dof_order": [
+          "waist",
+          "shoulder",
+          "elbow",
+          "forearm_roll",
+          "wrist_angle",
+          "wrist_rotate",
+          "gripper",
+          "left_finger",
+          "right_finger"
+        ],
+        "joint_positions": [
+          1.5243711459334008e-05,
+          -0.9599651098251343,
+          1.1611816883087158,
+          0.0010723896557465196,
+          -0.29613107442855835,
+          -7.928500735943089e-07,
+          2.9358275810409395e-08,
+          0.0569942444562912,
+          -0.0570058636367321
+        ],
+        "physics_frequency_hz": 60,
+        "robot": "follower_right",
+        "solve_articulation_contact_last": true,
+        "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_hull/follower_right/follower_right_convex_hull.usd",
+        "state": "open",
+        "surface_gap_m": 0.06918747539249395
+      },
+      "visual_review": {
+        "conclusion": "Both custom fingers and their inner geometry are visible at inspection scale; paired open/closed images have an obvious aperture change.",
+        "objects_visible": [
+          "left finger (blue)",
+          "right finger (orange)",
+          "inner gripping geometry",
+          "gripper bar"
+        ],
+        "retake_history": [],
+        "reviewed_by": "Codex visual model",
+        "reviewed_capture_name": "follower_right_open_closing_axis",
+        "status": "PASS",
+        "view_exposes_test_target": true
+      }
+    },
+    {
+      "acceptance_criteria": [
+        "blue and orange fingers are both visible",
+        "inner gripping geometry is not hidden",
+        "open and closed images have an obvious aperture difference",
+        "the view is close enough to inspect installation orientation"
+      ],
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots_annotated/asset_preflight/follower_right_open_isometric_annotated.png",
+      "annotated_sha256": "1628c1ea7b30eae36e525aad51d478aaddd0495cbd58a8df12e5028cddaff97f",
+      "annotation": {
+        "contact_annotations": [],
+        "detected_boxes_xyxy": {
+          "left finger (blue)": [
+            129,
+            244,
+            535,
+            756
+          ],
+          "right finger (orange)": [
+            711,
+            129,
+            1279,
+            399
+          ]
+        }
+      },
+      "camera": {
+        "orientation_wxyz": [
+          -0.43497133255004883,
+          -0.2677571475505829,
+          0.4506739675998688,
+          0.7321195602416992
+        ],
+        "position_world_m": [
+          0.019916022196412086,
+          0.13002243638038635,
+          0.43874722719192505
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 1,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.25879427790641785,
+          -4.897080361843109e-05,
+          0.30153585970401764
+        ],
+        "view": "isometric"
+      },
+      "capture_name": "follower_right_open_isometric",
+      "detection_target": "user-confirmed custom follower fingers without bottle",
+      "original_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/asset_preflight/follower_right_open_isometric.png",
+      "original_sha256": "6d88634d88dc051d456c59b8bad77ab1f5a0061263d536d9df464658858ebb2c",
+      "part": "both fingers, inner gripping surfaces, gripper bar",
+      "phase": "asset_preflight",
+      "physical_stages": [
+        "open",
+        "closed"
+      ],
+      "retake_history": [],
+      "simulation": {
+        "dof_order": [
+          "waist",
+          "shoulder",
+          "elbow",
+          "forearm_roll",
+          "wrist_angle",
+          "wrist_rotate",
+          "gripper",
+          "left_finger",
+          "right_finger"
+        ],
+        "joint_positions": [
+          1.5243711459334008e-05,
+          -0.9599651098251343,
+          1.1611816883087158,
+          0.0010723896557465196,
+          -0.29613107442855835,
+          -7.928500735943089e-07,
+          2.9358275810409395e-08,
+          0.0569942444562912,
+          -0.0570058636367321
+        ],
+        "physics_frequency_hz": 60,
+        "robot": "follower_right",
+        "solve_articulation_contact_last": true,
+        "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_hull/follower_right/follower_right_convex_hull.usd",
+        "state": "open",
+        "surface_gap_m": 0.06918747539249395
+      },
+      "visual_review": {
+        "conclusion": "Both custom fingers and their inner geometry are visible at inspection scale; paired open/closed images have an obvious aperture change.",
+        "objects_visible": [
+          "left finger (blue)",
+          "right finger (orange)",
+          "inner gripping geometry",
+          "gripper bar"
+        ],
+        "retake_history": [],
+        "reviewed_by": "Codex visual model",
+        "reviewed_capture_name": "follower_right_open_isometric",
+        "status": "PASS",
+        "view_exposes_test_target": true
+      }
+    },
+    {
+      "acceptance_criteria": [
+        "blue and orange fingers are both visible",
+        "inner gripping geometry is not hidden",
+        "open and closed images have an obvious aperture difference",
+        "the view is close enough to inspect installation orientation"
+      ],
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots_annotated/asset_preflight/follower_right_closed_closing_axis_annotated.png",
+      "annotated_sha256": "d8afafa6a653bce5dc746c284f7c172ae7691ddafa3daeb6cf8e81225d498289",
+      "annotation": {
+        "contact_annotations": [],
+        "detected_boxes_xyxy": {
+          "left finger (blue)": [
+            167,
+            111,
+            1167,
+            831
+          ],
+          "right finger (orange)": [
+            134,
+            109,
+            1138,
+            598
+          ]
+        }
+      },
+      "camera": {
+        "orientation_wxyz": [
+          0.00032546266447752714,
+          0.00028920258046127856,
+          0.6642386317253113,
+          0.7475205063819885
+        ],
+        "position_world_m": [
+          0.25903788208961487,
+          0.2799469828605652,
+          0.33468565344810486
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 0,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.2587940841913223,
+          -4.67933714389801e-05,
+          0.3015357255935669
+        ],
+        "view": "closing_axis"
+      },
+      "capture_name": "follower_right_closed_closing_axis",
+      "detection_target": "user-confirmed custom follower fingers without bottle",
+      "original_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/asset_preflight/follower_right_closed_closing_axis.png",
+      "original_sha256": "35f59e735deb429b99d33b7db2f5d665f45ac2513fa383a68e5b4ef3e2088ea8",
+      "part": "both fingers, inner gripping surfaces, gripper bar",
+      "phase": "asset_preflight",
+      "physical_stages": [
+        "open",
+        "closed"
+      ],
+      "retake_history": [],
+      "simulation": {
+        "dof_order": [
+          "waist",
+          "shoulder",
+          "elbow",
+          "forearm_roll",
+          "wrist_angle",
+          "wrist_rotate",
+          "gripper",
+          "left_finger",
+          "right_finger"
+        ],
+        "joint_positions": [
+          1.5238731975841802e-05,
+          -0.9599652886390686,
+          1.1611820459365845,
+          0.0010924951639026403,
+          -0.2961314022541046,
+          -9.902327064992278e-07,
+          4.4813582178448996e-08,
+          0.02100002020597458,
+          -0.021005425602197647
+        ],
+        "physics_frequency_hz": 60,
+        "robot": "follower_right",
+        "solve_articulation_contact_last": true,
+        "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_hull/follower_right/follower_right_convex_hull.usd",
+        "state": "closed",
+        "surface_gap_m": -0.0031678944967367187
+      },
+      "visual_review": {
+        "conclusion": "Both custom fingers and their inner geometry are visible at inspection scale; paired open/closed images have an obvious aperture change.",
+        "objects_visible": [
+          "left finger (blue)",
+          "right finger (orange)",
+          "inner gripping geometry",
+          "gripper bar"
+        ],
+        "retake_history": [],
+        "reviewed_by": "Codex visual model",
+        "reviewed_capture_name": "follower_right_closed_closing_axis",
+        "status": "PASS",
+        "view_exposes_test_target": true
+      }
+    },
+    {
+      "acceptance_criteria": [
+        "blue and orange fingers are both visible",
+        "inner gripping geometry is not hidden",
+        "open and closed images have an obvious aperture difference",
+        "the view is close enough to inspect installation orientation"
+      ],
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots_annotated/asset_preflight/follower_right_closed_isometric_annotated.png",
+      "annotated_sha256": "01afcb42bb1dac56499e79d396eb5bfc5c5a85888e6da5df70623c070c8e0f0f",
+      "annotation": {
+        "contact_annotations": [],
+        "detected_boxes_xyxy": {
+          "left finger (blue)": [
+            444,
+            184,
+            911,
+            493
+          ],
+          "right finger (orange)": [
+            429,
+            185,
+            1049,
+            420
+          ]
+        }
+      },
+      "camera": {
+        "orientation_wxyz": [
+          -0.4346187114715576,
+          -0.2682296335697174,
+          0.45153170824050903,
+          0.731627345085144
+        ],
+        "position_world_m": [
+          0.01998753286898136,
+          0.13002318143844604,
+          0.43793147802352905
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 9,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.2587940841913223,
+          -4.67933714389801e-05,
+          0.3015357255935669
+        ],
+        "view": "isometric"
+      },
+      "capture_name": "follower_right_closed_isometric",
+      "detection_target": "user-confirmed custom follower fingers without bottle",
+      "original_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/asset_preflight/follower_right_closed_isometric.png",
+      "original_sha256": "850a7254ebd276bdb581ef43262acaf74d39a4752fc5d9952ca1db6825acce65",
+      "part": "both fingers, inner gripping surfaces, gripper bar",
+      "phase": "asset_preflight",
+      "physical_stages": [
+        "open",
+        "closed"
+      ],
+      "retake_history": [],
+      "simulation": {
+        "dof_order": [
+          "waist",
+          "shoulder",
+          "elbow",
+          "forearm_roll",
+          "wrist_angle",
+          "wrist_rotate",
+          "gripper",
+          "left_finger",
+          "right_finger"
+        ],
+        "joint_positions": [
+          1.5238731975841802e-05,
+          -0.9599652886390686,
+          1.1611820459365845,
+          0.0010924951639026403,
+          -0.2961314022541046,
+          -9.902327064992278e-07,
+          4.4813582178448996e-08,
+          0.02100002020597458,
+          -0.021005425602197647
+        ],
+        "physics_frequency_hz": 60,
+        "robot": "follower_right",
+        "solve_articulation_contact_last": true,
+        "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_hull/follower_right/follower_right_convex_hull.usd",
+        "state": "closed",
+        "surface_gap_m": -0.0031678944967367187
+      },
+      "visual_review": {
+        "conclusion": "Both custom fingers and their inner geometry are visible at inspection scale; paired open/closed images have an obvious aperture change.",
+        "objects_visible": [
+          "left finger (blue)",
+          "right finger (orange)",
+          "inner gripping geometry",
+          "gripper bar"
+        ],
+        "retake_history": [],
+        "reviewed_by": "Codex visual model",
+        "reviewed_capture_name": "follower_right_closed_isometric",
+        "status": "PASS",
+        "view_exposes_test_target": true
+      }
+    },
+    {
+      "acceptance_criteria": [
+        "both fingers and the entire bottle contact band are visible",
+        "a nonzero gap exists on both bottle sides",
+        "camera anchor matches bilateral contact, release, and hold-end views"
+      ],
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots_annotated/runtime_open/follower_left_hull_open_with_bottle_isometric_annotated.png",
+      "annotated_sha256": "afaa0ee8390407187eeb6804e5f43646164a32e6148cf720bb6ee70b1593b999",
+      "annotation": {
+        "contact_annotations": [],
+        "detected_boxes_xyxy": {
+          "bottle": [
+            387,
+            0,
+            882,
+            444
+          ],
+          "left finger (blue)": [
+            257,
+            243,
+            599,
+            692
+          ],
+          "right finger (orange)": [
+            860,
+            213,
+            1184,
+            431
+          ]
+        }
+      },
+      "camera": {
+        "camera_anchor_frozen_across_runtime_phases": true,
+        "current_bottle_target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "orientation_wxyz": [
+          -0.42827364802360535,
+          -0.2670406699180603,
+          0.45676755905151367,
+          0.7325533032417297
+        ],
+        "position_world_m": [
+          -0.059943392872810364,
+          0.17906413972377777,
+          0.4846867024898529
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 0,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "view": "isometric"
+      },
+      "capture_name": "follower_left_hull_open_with_bottle_isometric",
+      "detection_target": "custom fingers and fixed 65 mm bottle before closure",
+      "original_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/runtime_open/follower_left_hull_open_with_bottle_isometric.png",
+      "original_sha256": "92ae4068d3929d19d1dddba9d4c6f7a2be2ddc6a1d5247689c75380328e78289",
+      "part": "both fingers, both inner surfaces, bottle, free aperture",
+      "phase": "runtime_open",
+      "physical_stages": [
+        "open_with_bottle"
+      ],
+      "retake_history": [
+        {
+          "action": "ADDED_DURING_VISUAL_RECERTIFICATION",
+          "reason": "The earlier evidence set had no open-with-bottle image sharing the runtime camera anchor."
+        }
+      ],
+      "simulation": {
+        "bottle": {
+          "angular_speed_rad_s": 0.0,
+          "angular_velocity_world_rad_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "linear_velocity_world_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "orientation_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "position_world_m": [
+            0.259998619556427,
+            -0.0010388984810560942,
+            0.3047369718551636
+          ],
+          "vertical_velocity_m_s": 0.0,
+          "z_m": 0.3047369718551636
+        },
+        "frame": 209,
+        "joint_positions": [
+          0.00030465851887129247,
+          -0.973262369632721,
+          1.1645011901855469,
+          0.004357403144240379,
+          -0.28516510128974915,
+          0.00037455465644598007,
+          -0.001114449230954051,
+          0.0569998063147068,
+          -0.05801856517791748
+        ],
+        "physical_state": {
+          "bottle_kinematic": true,
+          "left_finger_contact": false,
+          "right_finger_contact": false,
+          "surface_gap_m": 0.0710679500009886
+        },
+        "physics_frequency_hz": 60,
+        "physics_steps_added_for_capture": 0,
+        "profile": "convex_hull",
+        "robot": "follower_left",
+        "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_hull/follower_left/follower_left_convex_hull.usd",
+        "trial_index": 0
+      },
+      "visual_review": {
+        "conclusion": "Both fingers, the bottle contact band, and visible bilateral free gaps are exposed before closure.",
+        "objects_visible": [
+          "left finger (blue)",
+          "right finger (orange)",
+          "65 mm bottle",
+          "bilateral free gap"
+        ],
+        "retake_history": [
+          {
+            "action": "ADDED_DURING_VISUAL_RECERTIFICATION",
+            "reason": "The earlier evidence set had no open-with-bottle image sharing the runtime camera anchor."
+          }
+        ],
+        "reviewed_by": "Codex visual model",
+        "reviewed_capture_name": "follower_left_hull_open_with_bottle_isometric",
+        "status": "PASS",
+        "view_exposes_test_target": true
+      }
+    },
+    {
+      "acceptance_criteria": [
+        "both fingers and bottle are simultaneously visible",
+        "the view exposes both finger-to-bottle interfaces",
+        "runtime contact data reports left and right contact",
+        "contact-focused and isometric views are not duplicates"
+      ],
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots_annotated/bilateral_contact/follower_left_hull_bilateral_contact_established_closing_axis_annotated.png",
+      "annotated_sha256": "1e18fc64d309014092cc0a3edc14c9862e8326a0559688300e45e8eab25a6b76",
+      "annotation": {
+        "contact_annotations": [
+          {
+            "contact_marker_policy": "visual approximate interface marker; authoritative world point is recorded separately",
+            "first_contact_position_world_m": [
+              0.26028409600257874,
+              0.032928794622421265,
+              0.3249638080596924
+            ],
+            "normal_screen_direction": [
+              -0.9586564947925906,
+              0.18894182131383006
+            ],
+            "normal_world": [
+              -0.00017589848721399903,
+              1.0,
+              -3.803210347541608e-05
+            ],
+            "side": "left"
+          },
+          {
+            "contact_marker_policy": "visual approximate interface marker; authoritative world point is recorded separately",
+            "first_contact_position_world_m": [
+              0.2599378824234009,
+              -0.03462112694978714,
+              0.2834678888320923
+            ],
+            "normal_screen_direction": [
+              0.9592192585935453,
+              -0.18762210538457022
+            ],
+            "normal_world": [
+              -0.0018083227332681417,
+              -0.9999983906745911,
+              -3.7584410165436566e-05
+            ],
+            "side": "right"
+          }
+        ],
+        "detected_boxes_xyxy": {
+          "bottle": [
+            359,
+            0,
+            925,
+            548
+          ],
+          "left finger (blue)": [
+            207,
+            227,
+            517,
+            834
+          ],
+          "right finger (orange)": [
+            876,
+            211,
+            1220,
+            637
+          ]
+        }
+      },
+      "camera": {
+        "camera_anchor_frozen_across_runtime_phases": true,
+        "current_bottle_target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "orientation_wxyz": [
+          -0.5455884337425232,
+          -0.2452237457036972,
+          0.32853081822395325,
+          0.7309350371360779
+        ],
+        "position_world_m": [
+          -0.00997560191899538,
+          0.0790480449795723,
+          0.5547146201133728
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 0,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "view": "closing_axis"
+      },
+      "capture_name": "follower_left_hull_bilateral_contact_established_closing_axis",
+      "detection_target": "custom fingers and fixed bottle after slow closure",
+      "original_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/bilateral_contact/follower_left_hull_bilateral_contact_established_closing_axis.png",
+      "original_sha256": "564af7b39316098337741ec367fba45d321c8c7a83c03ec9806da13d7b336d3a",
+      "part": "both fingers, inner contact bands, bottle, contact locations",
+      "phase": "bilateral_contact",
+      "physical_stages": [
+        "bilateral_contact_established"
+      ],
+      "retake_history": [
+        {
+          "action": "RETAKEN",
+          "reason": "The original near-horizontal closing-axis view was rejected because the opaque bottle and gripper bar hid the inner contact bands."
+        }
+      ],
+      "simulation": {
+        "bottle": {
+          "angular_speed_rad_s": 0.0,
+          "angular_velocity_world_rad_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "linear_velocity_world_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "orientation_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "position_world_m": [
+            0.259998619556427,
+            -0.0010388984810560942,
+            0.3047369718551636
+          ],
+          "vertical_velocity_m_s": 0.0,
+          "z_m": 0.3047369718551636
+        },
+        "frame": 389,
+        "joint_positions": [
+          0.0002866489812731743,
+          -0.9732809662818909,
+          1.1644785404205322,
+          0.0031104551162570715,
+          -0.28510600328445435,
+          -0.0006137768505141139,
+          -0.00018181040650233626,
+          0.053963031619787216,
+          -0.05587176978588104
+        ],
+        "physical_state": {
+          "left_finger_contact": true,
+          "right_finger_contact": true
+        },
+        "physics_frequency_hz": 60,
+        "physics_steps_added_for_capture": 0,
+        "profile": "convex_hull",
+        "robot": "follower_left",
+        "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_hull/follower_left/follower_left_convex_hull.usd",
+        "trial_index": 0
+      },
+      "visual_review": {
+        "conclusion": "The retaken elevated and isometric views expose both finger-to-bottle interfaces; visual markers agree with bilateral runtime contact data.",
+        "objects_visible": [
+          "left finger (blue)",
+          "right finger (orange)",
+          "65 mm bottle",
+          "left contact interface",
+          "right contact interface"
+        ],
+        "retake_history": [
+          {
+            "action": "RETAKEN",
+            "reason": "The original near-horizontal closing-axis view was rejected because the opaque bottle and gripper bar hid the inner contact bands."
+          }
+        ],
+        "reviewed_by": "Codex visual model",
+        "reviewed_capture_name": "follower_left_hull_bilateral_contact_established_closing_axis",
+        "status": "PASS",
+        "view_exposes_test_target": true
+      }
+    },
+    {
+      "acceptance_criteria": [
+        "both fingers and bottle are simultaneously visible",
+        "the view exposes both finger-to-bottle interfaces",
+        "runtime contact data reports left and right contact",
+        "contact-focused and isometric views are not duplicates"
+      ],
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots_annotated/bilateral_contact/follower_left_hull_bilateral_contact_established_isometric_annotated.png",
+      "annotated_sha256": "9b4100118a543939e42d2038a7ebef6aba39b87c0dfd9f7cd79df25c2e0eb009",
+      "annotation": {
+        "contact_annotations": [
+          {
+            "contact_marker_policy": "visual approximate interface marker; authoritative world point is recorded separately",
+            "first_contact_position_world_m": [
+              0.26028409600257874,
+              0.032928794622421265,
+              0.3249638080596924
+            ],
+            "normal_screen_direction": [
+              -0.8713312954564445,
+              0.21599173354152224
+            ],
+            "normal_world": [
+              -0.00017589848721399903,
+              1.0,
+              -3.803210347541608e-05
+            ],
+            "side": "left"
+          },
+          {
+            "contact_marker_policy": "visual approximate interface marker; authoritative world point is recorded separately",
+            "first_contact_position_world_m": [
+              0.2599378824234009,
+              -0.03462112694978714,
+              0.2834678888320923
+            ],
+            "normal_screen_direction": [
+              0.872303236692454,
+              -0.21516250691262134
+            ],
+            "normal_world": [
+              -0.0018083227332681417,
+              -0.9999983906745911,
+              -3.7584410165436566e-05
+            ],
+            "side": "right"
+          }
+        ],
+        "detected_boxes_xyxy": {
+          "bottle": [
+            387,
+            0,
+            882,
+            438
+          ],
+          "left finger (blue)": [
+            277,
+            255,
+            605,
+            692
+          ],
+          "right finger (orange)": [
+            864,
+            224,
+            1170,
+            430
+          ]
+        }
+      },
+      "camera": {
+        "camera_anchor_frozen_across_runtime_phases": true,
+        "current_bottle_target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "orientation_wxyz": [
+          -0.42827364802360535,
+          -0.2670406699180603,
+          0.45676755905151367,
+          0.7325533032417297
+        ],
+        "position_world_m": [
+          -0.059943392872810364,
+          0.17906413972377777,
+          0.4846867024898529
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 1,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "view": "isometric"
+      },
+      "capture_name": "follower_left_hull_bilateral_contact_established_isometric",
+      "detection_target": "custom fingers and fixed bottle after slow closure",
+      "original_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/bilateral_contact/follower_left_hull_bilateral_contact_established_isometric.png",
+      "original_sha256": "01759db9791e876375c8ef3c57c98ddfa5100bcf5e6015bce762080a7c56b218",
+      "part": "both fingers, inner contact bands, bottle, contact locations",
+      "phase": "bilateral_contact",
+      "physical_stages": [
+        "bilateral_contact_established"
+      ],
+      "retake_history": [
+        {
+          "action": "RETAKEN",
+          "reason": "The original near-horizontal closing-axis view was rejected because the opaque bottle and gripper bar hid the inner contact bands."
+        }
+      ],
+      "simulation": {
+        "bottle": {
+          "angular_speed_rad_s": 0.0,
+          "angular_velocity_world_rad_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "linear_velocity_world_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "orientation_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "position_world_m": [
+            0.259998619556427,
+            -0.0010388984810560942,
+            0.3047369718551636
+          ],
+          "vertical_velocity_m_s": 0.0,
+          "z_m": 0.3047369718551636
+        },
+        "frame": 389,
+        "joint_positions": [
+          0.0002866489812731743,
+          -0.9732809662818909,
+          1.1644785404205322,
+          0.0031104551162570715,
+          -0.28510600328445435,
+          -0.0006137768505141139,
+          -0.00018181040650233626,
+          0.053963031619787216,
+          -0.05587176978588104
+        ],
+        "physical_state": {
+          "left_finger_contact": true,
+          "right_finger_contact": true
+        },
+        "physics_frequency_hz": 60,
+        "physics_steps_added_for_capture": 0,
+        "profile": "convex_hull",
+        "robot": "follower_left",
+        "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_hull/follower_left/follower_left_convex_hull.usd",
+        "trial_index": 0
+      },
+      "visual_review": {
+        "conclusion": "The retaken elevated and isometric views expose both finger-to-bottle interfaces; visual markers agree with bilateral runtime contact data.",
+        "objects_visible": [
+          "left finger (blue)",
+          "right finger (orange)",
+          "65 mm bottle",
+          "left contact interface",
+          "right contact interface"
+        ],
+        "retake_history": [
+          {
+            "action": "RETAKEN",
+            "reason": "The original near-horizontal closing-axis view was rejected because the opaque bottle and gripper bar hid the inner contact bands."
+          }
+        ],
+        "reviewed_by": "Codex visual model",
+        "reviewed_capture_name": "follower_left_hull_bilateral_contact_established_isometric",
+        "status": "PASS",
+        "view_exposes_test_target": true
+      }
+    },
+    {
+      "acceptance_criteria": [
+        "release and hold-end use the identical frozen camera anchor",
+        "both fingers and bottle remain visible",
+        "annotation reports exact runtime drop and velocity",
+        "release and hold-end are compared numerically even for subpixel motion"
+      ],
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots_annotated/release_hold/follower_left_hull_release_isometric_annotated.png",
+      "annotated_sha256": "5e89d0c5bab452dfadee6cfca131e26b0a41230c8565def4f0a11f683325c9e8",
+      "annotation": {
+        "contact_annotations": [
+          {
+            "contact_marker_policy": "visual approximate interface marker; authoritative world point is recorded separately",
+            "first_contact_position_world_m": [
+              0.26028409600257874,
+              0.032928794622421265,
+              0.3249638080596924
+            ],
+            "normal_screen_direction": [
+              -0.8713312954564445,
+              0.21599173354152224
+            ],
+            "normal_world": [
+              -0.00017589848721399903,
+              1.0,
+              -3.803210347541608e-05
+            ],
+            "side": "left"
+          },
+          {
+            "contact_marker_policy": "visual approximate interface marker; authoritative world point is recorded separately",
+            "first_contact_position_world_m": [
+              0.2599378824234009,
+              -0.03462112694978714,
+              0.2834678888320923
+            ],
+            "normal_screen_direction": [
+              0.872303236692454,
+              -0.21516250691262134
+            ],
+            "normal_world": [
+              -0.0018083227332681417,
+              -0.9999983906745911,
+              -3.7584410165436566e-05
+            ],
+            "side": "right"
+          }
+        ],
+        "detected_boxes_xyxy": {
+          "bottle": [
+            387,
+            0,
+            882,
+            438
+          ],
+          "left finger (blue)": [
+            277,
+            257,
+            605,
+            692
+          ],
+          "right finger (orange)": [
+            863,
+            223,
+            1170,
+            430
+          ]
+        }
+      },
+      "camera": {
+        "camera_anchor_frozen_across_runtime_phases": true,
+        "current_bottle_target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "orientation_wxyz": [
+          -0.42827364802360535,
+          -0.2670406699180603,
+          0.45676755905151367,
+          0.7325533032417297
+        ],
+        "position_world_m": [
+          -0.059943392872810364,
+          0.17906413972377777,
+          0.4846867024898529
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 1,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "view": "isometric"
+      },
+      "capture_name": "follower_left_hull_release_isometric",
+      "detection_target": "unconstrained dynamic bottle held by both custom fingers",
+      "original_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/release_hold/follower_left_hull_release_isometric.png",
+      "original_sha256": "7a00f3571d361f324dc10f9c91690bf8eae633e02899107f9d723a8795097d14",
+      "part": "both fingers, bottle, release and hold-end bottle pose",
+      "phase": "release_hold",
+      "physical_stages": [
+        "release",
+        "hold_end"
+      ],
+      "retake_history": [
+        {
+          "action": "RETAKEN",
+          "reason": "The original camera followed the bottle and visually masked the measured displacement between release and hold end."
+        }
+      ],
+      "simulation": {
+        "bottle": {
+          "angular_speed_rad_s": 0.0,
+          "angular_velocity_world_rad_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "linear_velocity_world_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "orientation_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "position_world_m": [
+            0.259998619556427,
+            -0.0010388984810560942,
+            0.3047369718551636
+          ],
+          "vertical_velocity_m_s": 0.0,
+          "z_m": 0.3047369718551636
+        },
+        "frame": 389,
+        "joint_positions": [
+          0.0002866489812731743,
+          -0.9732809662818909,
+          1.1644785404205322,
+          0.0031104551162570715,
+          -0.28510600328445435,
+          -0.0006137768505141139,
+          -0.00018181040650233626,
+          0.053963031619787216,
+          -0.05587176978588104
+        ],
+        "physical_state": {
+          "bottle_kinematic": false,
+          "constraint_found": false
+        },
+        "physics_frequency_hz": 60,
+        "physics_steps_added_for_capture": 0,
+        "profile": "convex_hull",
+        "robot": "follower_left",
+        "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_hull/follower_left/follower_left_convex_hull.usd",
+        "trial_index": 0
+      },
+      "visual_review": {
+        "conclusion": "Both fingers and bottle remain visible; release and hold-end differ in pose under an identical fixed camera anchor, with exact drop and velocity stated on the annotation.",
+        "objects_visible": [
+          "left finger (blue)",
+          "right finger (orange)",
+          "unconstrained bottle",
+          "release or hold-end pose"
+        ],
+        "retake_history": [
+          {
+            "action": "RETAKEN",
+            "reason": "The original camera followed the bottle and visually masked the measured displacement between release and hold end."
+          }
+        ],
+        "reviewed_by": "Codex visual model",
+        "reviewed_capture_name": "follower_left_hull_release_isometric",
+        "status": "PASS",
+        "view_exposes_test_target": true
+      }
+    },
+    {
+      "acceptance_criteria": [
+        "release and hold-end use the identical frozen camera anchor",
+        "both fingers and bottle remain visible",
+        "annotation reports exact runtime drop and velocity",
+        "release and hold-end are compared numerically even for subpixel motion"
+      ],
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots_annotated/release_hold/follower_left_hull_hold_end_isometric_annotated.png",
+      "annotated_sha256": "3f5e2cc3cc9766b9f1829050fecbd3a856dfe35157a95e61268cb597256b533b",
+      "annotation": {
+        "contact_annotations": [
+          {
+            "contact_marker_policy": "visual approximate interface marker; authoritative world point is recorded separately",
+            "first_contact_position_world_m": [
+              0.26028409600257874,
+              0.032928794622421265,
+              0.3249638080596924
+            ],
+            "normal_screen_direction": [
+              -0.8713312954564445,
+              0.21599173354152224
+            ],
+            "normal_world": [
+              -0.00017589848721399903,
+              1.0,
+              -3.803210347541608e-05
+            ],
+            "side": "left"
+          },
+          {
+            "contact_marker_policy": "visual approximate interface marker; authoritative world point is recorded separately",
+            "first_contact_position_world_m": [
+              0.2599378824234009,
+              -0.03462112694978714,
+              0.2834678888320923
+            ],
+            "normal_screen_direction": [
+              0.872303236692454,
+              -0.21516250691262134
+            ],
+            "normal_world": [
+              -0.0018083227332681417,
+              -0.9999983906745911,
+              -3.7584410165436566e-05
+            ],
+            "side": "right"
+          }
+        ],
+        "detected_boxes_xyxy": {
+          "bottle": [
+            421,
+            0,
+            900,
+            417
+          ],
+          "left finger (blue)": [
+            325,
+            251,
+            659,
+            684
+          ],
+          "right finger (orange)": [
+            886,
+            216,
+            1209,
+            415
+          ]
+        }
+      },
+      "camera": {
+        "camera_anchor_frozen_across_runtime_phases": true,
+        "current_bottle_target_world_m": [
+          0.2653035819530487,
+          -0.00934668816626072,
+          0.300773024559021
+        ],
+        "orientation_wxyz": [
+          -0.42827364802360535,
+          -0.2670406699180603,
+          0.45676755905151367,
+          0.7325533032417297
+        ],
+        "position_world_m": [
+          -0.059943392872810364,
+          0.17906413972377777,
+          0.4846867024898529
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 1,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "view": "isometric"
+      },
+      "capture_name": "follower_left_hull_hold_end_isometric",
+      "detection_target": "unconstrained dynamic bottle held by both custom fingers",
+      "original_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/release_hold/follower_left_hull_hold_end_isometric.png",
+      "original_sha256": "0629d23561b3526111a58b72ce30088201e37e069f5a3d17772ab3ce1abf6129",
+      "part": "both fingers, bottle, release and hold-end bottle pose",
+      "phase": "release_hold",
+      "physical_stages": [
+        "release",
+        "hold_end"
+      ],
+      "retake_history": [
+        {
+          "action": "RETAKEN",
+          "reason": "The original camera followed the bottle and visually masked the measured displacement between release and hold end."
+        }
+      ],
+      "simulation": {
+        "bottle": {
+          "angular_speed_rad_s": 0.28046673794598787,
+          "angular_velocity_world_rad_s": [
+            -0.017507784068584442,
+            -0.27948588132858276,
+            0.015579176135361195
+          ],
+          "linear_velocity_world_m_s": [
+            0.020274894312024117,
+            -0.0010978246573358774,
+            0.09575510025024414
+          ],
+          "orientation_wxyz": [
+            0.9993425011634827,
+            0.0006203135708346963,
+            0.030307311564683914,
+            0.019893277436494827
+          ],
+          "position_world_m": [
+            0.2653035819530487,
+            -0.00934668816626072,
+            0.300773024559021
+          ],
+          "vertical_velocity_m_s": 0.09575510025024414,
+          "z_m": 0.300773024559021
+        },
+        "frame": 509,
+        "joint_positions": [
+          3.475786797935143e-05,
+          -0.9599354863166809,
+          1.1613153219223022,
+          0.0009671451989561319,
+          -0.29533302783966064,
+          0.0006609606789425015,
+          -5.7803023082669824e-05,
+          0.04558379575610161,
+          -0.06419999897480011
+        ],
+        "physical_state": {
+          "drop_gate_m": 0.01,
+          "drop_m": 0.003963947296142578
+        },
+        "physics_frequency_hz": 60,
+        "physics_steps_added_for_capture": 0,
+        "profile": "convex_hull",
+        "robot": "follower_left",
+        "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_hull/follower_left/follower_left_convex_hull.usd",
+        "trial_index": 0
+      },
+      "visual_review": {
+        "conclusion": "Both fingers and bottle remain visible; release and hold-end differ in pose under an identical fixed camera anchor, with exact drop and velocity stated on the annotation.",
+        "objects_visible": [
+          "left finger (blue)",
+          "right finger (orange)",
+          "unconstrained bottle",
+          "release or hold-end pose"
+        ],
+        "retake_history": [
+          {
+            "action": "RETAKEN",
+            "reason": "The original camera followed the bottle and visually masked the measured displacement between release and hold end."
+          }
+        ],
+        "reviewed_by": "Codex visual model",
+        "reviewed_capture_name": "follower_left_hull_hold_end_isometric",
+        "status": "PASS",
+        "view_exposes_test_target": true
+      }
+    },
+    {
+      "acceptance_criteria": [
+        "both fingers and the entire bottle contact band are visible",
+        "a nonzero gap exists on both bottle sides",
+        "camera anchor matches bilateral contact, release, and hold-end views"
+      ],
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots_annotated/runtime_open/follower_right_hull_open_with_bottle_isometric_annotated.png",
+      "annotated_sha256": "33a85dc6811d14ec1ad6d634060b81615783f8e98fab4606d0d25ae779b95815",
+      "annotation": {
+        "contact_annotations": [],
+        "detected_boxes_xyxy": {
+          "bottle": [
+            387,
+            0,
+            882,
+            444
+          ],
+          "left finger (blue)": [
+            257,
+            274,
+            582,
+            691
+          ],
+          "right finger (orange)": [
+            870,
+            225,
+            1184,
+            431
+          ]
+        }
+      },
+      "camera": {
+        "camera_anchor_frozen_across_runtime_phases": true,
+        "current_bottle_target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "orientation_wxyz": [
+          -0.42827364802360535,
+          -0.2670406699180603,
+          0.45676755905151367,
+          0.7325533032417297
+        ],
+        "position_world_m": [
+          -0.059943392872810364,
+          0.17906413972377777,
+          0.4846867024898529
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 1,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "view": "isometric"
+      },
+      "capture_name": "follower_right_hull_open_with_bottle_isometric",
+      "detection_target": "custom fingers and fixed 65 mm bottle before closure",
+      "original_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/runtime_open/follower_right_hull_open_with_bottle_isometric.png",
+      "original_sha256": "ff9995861d2b6d590ddc027b93f9b922ca971be7fad8d2ee74dda6fadc7d8e09",
+      "part": "both fingers, both inner surfaces, bottle, free aperture",
+      "phase": "runtime_open",
+      "physical_stages": [
+        "open_with_bottle"
+      ],
+      "retake_history": [
+        {
+          "action": "ADDED_DURING_VISUAL_RECERTIFICATION",
+          "reason": "The earlier evidence set had no open-with-bottle image sharing the runtime camera anchor."
+        }
+      ],
+      "simulation": {
+        "bottle": {
+          "angular_speed_rad_s": 0.0,
+          "angular_velocity_world_rad_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "linear_velocity_world_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "orientation_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "position_world_m": [
+            0.259998619556427,
+            -0.0010388984810560942,
+            0.3047369718551636
+          ],
+          "vertical_velocity_m_s": 0.0,
+          "z_m": 0.3047369718551636
+        },
+        "frame": 209,
+        "joint_positions": [
+          0.00030465851887129247,
+          -0.973262369632721,
+          1.1645011901855469,
+          0.004357403144240379,
+          -0.28516510128974915,
+          0.00037455465644598007,
+          -0.001114449230954051,
+          0.0569998063147068,
+          -0.05801856517791748
+        ],
+        "physical_state": {
+          "bottle_kinematic": true,
+          "left_finger_contact": false,
+          "right_finger_contact": false,
+          "surface_gap_m": 0.0710679500009886
+        },
+        "physics_frequency_hz": 60,
+        "physics_steps_added_for_capture": 0,
+        "profile": "convex_hull",
+        "robot": "follower_right",
+        "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_hull/follower_right/follower_right_convex_hull.usd",
+        "trial_index": 0
+      },
+      "visual_review": {
+        "conclusion": "Both fingers, the bottle contact band, and visible bilateral free gaps are exposed before closure.",
+        "objects_visible": [
+          "left finger (blue)",
+          "right finger (orange)",
+          "65 mm bottle",
+          "bilateral free gap"
+        ],
+        "retake_history": [
+          {
+            "action": "ADDED_DURING_VISUAL_RECERTIFICATION",
+            "reason": "The earlier evidence set had no open-with-bottle image sharing the runtime camera anchor."
+          }
+        ],
+        "reviewed_by": "Codex visual model",
+        "reviewed_capture_name": "follower_right_hull_open_with_bottle_isometric",
+        "status": "PASS",
+        "view_exposes_test_target": true
+      }
+    },
+    {
+      "acceptance_criteria": [
+        "both fingers and bottle are simultaneously visible",
+        "the view exposes both finger-to-bottle interfaces",
+        "runtime contact data reports left and right contact",
+        "contact-focused and isometric views are not duplicates"
+      ],
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots_annotated/bilateral_contact/follower_right_hull_bilateral_contact_established_closing_axis_annotated.png",
+      "annotated_sha256": "0f6558e87aa8fdde887d0dd07967d1b2772968760e9d1bc2ceee6f0e513ebcb4",
+      "annotation": {
+        "contact_annotations": [
+          {
+            "contact_marker_policy": "visual approximate interface marker; authoritative world point is recorded separately",
+            "first_contact_position_world_m": [
+              0.26028409600257874,
+              0.032928794622421265,
+              0.3249638080596924
+            ],
+            "normal_screen_direction": [
+              -0.9586564947925906,
+              0.18894182131383006
+            ],
+            "normal_world": [
+              -0.00017589848721399903,
+              1.0,
+              -3.803210347541608e-05
+            ],
+            "side": "left"
+          },
+          {
+            "contact_marker_policy": "visual approximate interface marker; authoritative world point is recorded separately",
+            "first_contact_position_world_m": [
+              0.2599378824234009,
+              -0.03462112694978714,
+              0.2834678888320923
+            ],
+            "normal_screen_direction": [
+              0.9592192585935453,
+              -0.18762210538457022
+            ],
+            "normal_world": [
+              -0.0018083227332681417,
+              -0.9999983906745911,
+              -3.7584410165436566e-05
+            ],
+            "side": "right"
+          }
+        ],
+        "detected_boxes_xyxy": {
+          "bottle": [
+            358,
+            0,
+            925,
+            546
+          ],
+          "left finger (blue)": [
+            207,
+            234,
+            520,
+            835
+          ],
+          "right finger (orange)": [
+            874,
+            212,
+            1220,
+            635
+          ]
+        }
+      },
+      "camera": {
+        "camera_anchor_frozen_across_runtime_phases": true,
+        "current_bottle_target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "orientation_wxyz": [
+          -0.5455884337425232,
+          -0.2452237457036972,
+          0.32853081822395325,
+          0.7309350371360779
+        ],
+        "position_world_m": [
+          -0.00997560191899538,
+          0.0790480449795723,
+          0.5547146201133728
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 0,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "view": "closing_axis"
+      },
+      "capture_name": "follower_right_hull_bilateral_contact_established_closing_axis",
+      "detection_target": "custom fingers and fixed bottle after slow closure",
+      "original_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/bilateral_contact/follower_right_hull_bilateral_contact_established_closing_axis.png",
+      "original_sha256": "5b74a1f71623b5c382b6d16d0fda74f275e81a5747585f0890015a658bac0f1f",
+      "part": "both fingers, inner contact bands, bottle, contact locations",
+      "phase": "bilateral_contact",
+      "physical_stages": [
+        "bilateral_contact_established"
+      ],
+      "retake_history": [
+        {
+          "action": "RETAKEN",
+          "reason": "The original near-horizontal closing-axis view was rejected because the opaque bottle and gripper bar hid the inner contact bands."
+        }
+      ],
+      "simulation": {
+        "bottle": {
+          "angular_speed_rad_s": 0.0,
+          "angular_velocity_world_rad_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "linear_velocity_world_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "orientation_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "position_world_m": [
+            0.259998619556427,
+            -0.0010388984810560942,
+            0.3047369718551636
+          ],
+          "vertical_velocity_m_s": 0.0,
+          "z_m": 0.3047369718551636
+        },
+        "frame": 389,
+        "joint_positions": [
+          0.0002866489812731743,
+          -0.9732809662818909,
+          1.1644785404205322,
+          0.0031104551162570715,
+          -0.28510600328445435,
+          -0.0006137768505141139,
+          -0.00018181040650233626,
+          0.053963031619787216,
+          -0.05587176978588104
+        ],
+        "physical_state": {
+          "left_finger_contact": true,
+          "right_finger_contact": true
+        },
+        "physics_frequency_hz": 60,
+        "physics_steps_added_for_capture": 0,
+        "profile": "convex_hull",
+        "robot": "follower_right",
+        "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_hull/follower_right/follower_right_convex_hull.usd",
+        "trial_index": 0
+      },
+      "visual_review": {
+        "conclusion": "The retaken elevated and isometric views expose both finger-to-bottle interfaces; visual markers agree with bilateral runtime contact data.",
+        "objects_visible": [
+          "left finger (blue)",
+          "right finger (orange)",
+          "65 mm bottle",
+          "left contact interface",
+          "right contact interface"
+        ],
+        "retake_history": [
+          {
+            "action": "RETAKEN",
+            "reason": "The original near-horizontal closing-axis view was rejected because the opaque bottle and gripper bar hid the inner contact bands."
+          }
+        ],
+        "reviewed_by": "Codex visual model",
+        "reviewed_capture_name": "follower_right_hull_bilateral_contact_established_closing_axis",
+        "status": "PASS",
+        "view_exposes_test_target": true
+      }
+    },
+    {
+      "acceptance_criteria": [
+        "both fingers and bottle are simultaneously visible",
+        "the view exposes both finger-to-bottle interfaces",
+        "runtime contact data reports left and right contact",
+        "contact-focused and isometric views are not duplicates"
+      ],
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots_annotated/bilateral_contact/follower_right_hull_bilateral_contact_established_isometric_annotated.png",
+      "annotated_sha256": "75908447d2310cc1c6a1faab68989b31958a58c45b1036a04ca63e090cbdcf5e",
+      "annotation": {
+        "contact_annotations": [
+          {
+            "contact_marker_policy": "visual approximate interface marker; authoritative world point is recorded separately",
+            "first_contact_position_world_m": [
+              0.26028409600257874,
+              0.032928794622421265,
+              0.3249638080596924
+            ],
+            "normal_screen_direction": [
+              -0.8713312954564445,
+              0.21599173354152224
+            ],
+            "normal_world": [
+              -0.00017589848721399903,
+              1.0,
+              -3.803210347541608e-05
+            ],
+            "side": "left"
+          },
+          {
+            "contact_marker_policy": "visual approximate interface marker; authoritative world point is recorded separately",
+            "first_contact_position_world_m": [
+              0.2599378824234009,
+              -0.03462112694978714,
+              0.2834678888320923
+            ],
+            "normal_screen_direction": [
+              0.872303236692454,
+              -0.21516250691262134
+            ],
+            "normal_world": [
+              -0.0018083227332681417,
+              -0.9999983906745911,
+              -3.7584410165436566e-05
+            ],
+            "side": "right"
+          }
+        ],
+        "detected_boxes_xyxy": {
+          "bottle": [
+            387,
+            0,
+            882,
+            438
+          ],
+          "left finger (blue)": [
+            277,
+            258,
+            605,
+            692
+          ],
+          "right finger (orange)": [
+            866,
+            227,
+            1170,
+            430
+          ]
+        }
+      },
+      "camera": {
+        "camera_anchor_frozen_across_runtime_phases": true,
+        "current_bottle_target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "orientation_wxyz": [
+          -0.42827364802360535,
+          -0.2670406699180603,
+          0.45676755905151367,
+          0.7325533032417297
+        ],
+        "position_world_m": [
+          -0.059943392872810364,
+          0.17906413972377777,
+          0.4846867024898529
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 2,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "view": "isometric"
+      },
+      "capture_name": "follower_right_hull_bilateral_contact_established_isometric",
+      "detection_target": "custom fingers and fixed bottle after slow closure",
+      "original_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/bilateral_contact/follower_right_hull_bilateral_contact_established_isometric.png",
+      "original_sha256": "6d9b25b14960a038d8b192a4e840418f30785ef016d17db97982370649efc579",
+      "part": "both fingers, inner contact bands, bottle, contact locations",
+      "phase": "bilateral_contact",
+      "physical_stages": [
+        "bilateral_contact_established"
+      ],
+      "retake_history": [
+        {
+          "action": "RETAKEN",
+          "reason": "The original near-horizontal closing-axis view was rejected because the opaque bottle and gripper bar hid the inner contact bands."
+        }
+      ],
+      "simulation": {
+        "bottle": {
+          "angular_speed_rad_s": 0.0,
+          "angular_velocity_world_rad_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "linear_velocity_world_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "orientation_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "position_world_m": [
+            0.259998619556427,
+            -0.0010388984810560942,
+            0.3047369718551636
+          ],
+          "vertical_velocity_m_s": 0.0,
+          "z_m": 0.3047369718551636
+        },
+        "frame": 389,
+        "joint_positions": [
+          0.0002866489812731743,
+          -0.9732809662818909,
+          1.1644785404205322,
+          0.0031104551162570715,
+          -0.28510600328445435,
+          -0.0006137768505141139,
+          -0.00018181040650233626,
+          0.053963031619787216,
+          -0.05587176978588104
+        ],
+        "physical_state": {
+          "left_finger_contact": true,
+          "right_finger_contact": true
+        },
+        "physics_frequency_hz": 60,
+        "physics_steps_added_for_capture": 0,
+        "profile": "convex_hull",
+        "robot": "follower_right",
+        "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_hull/follower_right/follower_right_convex_hull.usd",
+        "trial_index": 0
+      },
+      "visual_review": {
+        "conclusion": "The retaken elevated and isometric views expose both finger-to-bottle interfaces; visual markers agree with bilateral runtime contact data.",
+        "objects_visible": [
+          "left finger (blue)",
+          "right finger (orange)",
+          "65 mm bottle",
+          "left contact interface",
+          "right contact interface"
+        ],
+        "retake_history": [
+          {
+            "action": "RETAKEN",
+            "reason": "The original near-horizontal closing-axis view was rejected because the opaque bottle and gripper bar hid the inner contact bands."
+          }
+        ],
+        "reviewed_by": "Codex visual model",
+        "reviewed_capture_name": "follower_right_hull_bilateral_contact_established_isometric",
+        "status": "PASS",
+        "view_exposes_test_target": true
+      }
+    },
+    {
+      "acceptance_criteria": [
+        "release and hold-end use the identical frozen camera anchor",
+        "both fingers and bottle remain visible",
+        "annotation reports exact runtime drop and velocity",
+        "release and hold-end are compared numerically even for subpixel motion"
+      ],
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots_annotated/release_hold/follower_right_hull_release_isometric_annotated.png",
+      "annotated_sha256": "a2c92dd8d0a622c4c8e1d36236ce770b317c7d3bd67afbe893e5d6402a249cbf",
+      "annotation": {
+        "contact_annotations": [
+          {
+            "contact_marker_policy": "visual approximate interface marker; authoritative world point is recorded separately",
+            "first_contact_position_world_m": [
+              0.26028409600257874,
+              0.032928794622421265,
+              0.3249638080596924
+            ],
+            "normal_screen_direction": [
+              -0.8713312954564445,
+              0.21599173354152224
+            ],
+            "normal_world": [
+              -0.00017589848721399903,
+              1.0,
+              -3.803210347541608e-05
+            ],
+            "side": "left"
+          },
+          {
+            "contact_marker_policy": "visual approximate interface marker; authoritative world point is recorded separately",
+            "first_contact_position_world_m": [
+              0.2599378824234009,
+              -0.03462112694978714,
+              0.2834678888320923
+            ],
+            "normal_screen_direction": [
+              0.872303236692454,
+              -0.21516250691262134
+            ],
+            "normal_world": [
+              -0.0018083227332681417,
+              -0.9999983906745911,
+              -3.7584410165436566e-05
+            ],
+            "side": "right"
+          }
+        ],
+        "detected_boxes_xyxy": {
+          "bottle": [
+            387,
+            0,
+            882,
+            438
+          ],
+          "left finger (blue)": [
+            277,
+            257,
+            605,
+            691
+          ],
+          "right finger (orange)": [
+            865,
+            221,
+            1170,
+            430
+          ]
+        }
+      },
+      "camera": {
+        "camera_anchor_frozen_across_runtime_phases": true,
+        "current_bottle_target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "orientation_wxyz": [
+          -0.42827364802360535,
+          -0.2670406699180603,
+          0.45676755905151367,
+          0.7325533032417297
+        ],
+        "position_world_m": [
+          -0.059943392872810364,
+          0.17906413972377777,
+          0.4846867024898529
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 1,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "view": "isometric"
+      },
+      "capture_name": "follower_right_hull_release_isometric",
+      "detection_target": "unconstrained dynamic bottle held by both custom fingers",
+      "original_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/release_hold/follower_right_hull_release_isometric.png",
+      "original_sha256": "1c29a0d9956f95b95f7ebc5113207ba4d63c62f3f18fa4f9c802617e9f5fff3e",
+      "part": "both fingers, bottle, release and hold-end bottle pose",
+      "phase": "release_hold",
+      "physical_stages": [
+        "release",
+        "hold_end"
+      ],
+      "retake_history": [
+        {
+          "action": "RETAKEN",
+          "reason": "The original camera followed the bottle and visually masked the measured displacement between release and hold end."
+        }
+      ],
+      "simulation": {
+        "bottle": {
+          "angular_speed_rad_s": 0.0,
+          "angular_velocity_world_rad_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "linear_velocity_world_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "orientation_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "position_world_m": [
+            0.259998619556427,
+            -0.0010388984810560942,
+            0.3047369718551636
+          ],
+          "vertical_velocity_m_s": 0.0,
+          "z_m": 0.3047369718551636
+        },
+        "frame": 389,
+        "joint_positions": [
+          0.0002866489812731743,
+          -0.9732809662818909,
+          1.1644785404205322,
+          0.0031104551162570715,
+          -0.28510600328445435,
+          -0.0006137768505141139,
+          -0.00018181040650233626,
+          0.053963031619787216,
+          -0.05587176978588104
+        ],
+        "physical_state": {
+          "bottle_kinematic": false,
+          "constraint_found": false
+        },
+        "physics_frequency_hz": 60,
+        "physics_steps_added_for_capture": 0,
+        "profile": "convex_hull",
+        "robot": "follower_right",
+        "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_hull/follower_right/follower_right_convex_hull.usd",
+        "trial_index": 0
+      },
+      "visual_review": {
+        "conclusion": "Both fingers and bottle remain visible; release and hold-end differ in pose under an identical fixed camera anchor, with exact drop and velocity stated on the annotation.",
+        "objects_visible": [
+          "left finger (blue)",
+          "right finger (orange)",
+          "unconstrained bottle",
+          "release or hold-end pose"
+        ],
+        "retake_history": [
+          {
+            "action": "RETAKEN",
+            "reason": "The original camera followed the bottle and visually masked the measured displacement between release and hold end."
+          }
+        ],
+        "reviewed_by": "Codex visual model",
+        "reviewed_capture_name": "follower_right_hull_release_isometric",
+        "status": "PASS",
+        "view_exposes_test_target": true
+      }
+    },
+    {
+      "acceptance_criteria": [
+        "release and hold-end use the identical frozen camera anchor",
+        "both fingers and bottle remain visible",
+        "annotation reports exact runtime drop and velocity",
+        "release and hold-end are compared numerically even for subpixel motion"
+      ],
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots_annotated/release_hold/follower_right_hull_hold_end_isometric_annotated.png",
+      "annotated_sha256": "6208deb64dc1fec52d827ed322ab36a0e9c8927493c7dc006d0499975fa9a262",
+      "annotation": {
+        "contact_annotations": [
+          {
+            "contact_marker_policy": "visual approximate interface marker; authoritative world point is recorded separately",
+            "first_contact_position_world_m": [
+              0.26028409600257874,
+              0.032928794622421265,
+              0.3249638080596924
+            ],
+            "normal_screen_direction": [
+              -0.8713312954564445,
+              0.21599173354152224
+            ],
+            "normal_world": [
+              -0.00017589848721399903,
+              1.0,
+              -3.803210347541608e-05
+            ],
+            "side": "left"
+          },
+          {
+            "contact_marker_policy": "visual approximate interface marker; authoritative world point is recorded separately",
+            "first_contact_position_world_m": [
+              0.2599378824234009,
+              -0.03462112694978714,
+              0.2834678888320923
+            ],
+            "normal_screen_direction": [
+              0.872303236692454,
+              -0.21516250691262134
+            ],
+            "normal_world": [
+              -0.0018083227332681417,
+              -0.9999983906745911,
+              -3.7584410165436566e-05
+            ],
+            "side": "right"
+          }
+        ],
+        "detected_boxes_xyxy": {
+          "bottle": [
+            421,
+            0,
+            900,
+            417
+          ],
+          "left finger (blue)": [
+            325,
+            254,
+            659,
+            684
+          ],
+          "right finger (orange)": [
+            888,
+            216,
+            1210,
+            415
+          ]
+        }
+      },
+      "camera": {
+        "camera_anchor_frozen_across_runtime_phases": true,
+        "current_bottle_target_world_m": [
+          0.2653035819530487,
+          -0.00934668816626072,
+          0.300773024559021
+        ],
+        "orientation_wxyz": [
+          -0.42827364802360535,
+          -0.2670406699180603,
+          0.45676755905151367,
+          0.7325533032417297
+        ],
+        "position_world_m": [
+          -0.059943392872810364,
+          0.17906413972377777,
+          0.4846867024898529
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 1,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "view": "isometric"
+      },
+      "capture_name": "follower_right_hull_hold_end_isometric",
+      "detection_target": "unconstrained dynamic bottle held by both custom fingers",
+      "original_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/release_hold/follower_right_hull_hold_end_isometric.png",
+      "original_sha256": "13020ac6e1b123ea68b9ada461db9445dfc02f5ce06b1ded7a5f3170be0032d2",
+      "part": "both fingers, bottle, release and hold-end bottle pose",
+      "phase": "release_hold",
+      "physical_stages": [
+        "release",
+        "hold_end"
+      ],
+      "retake_history": [
+        {
+          "action": "RETAKEN",
+          "reason": "The original camera followed the bottle and visually masked the measured displacement between release and hold end."
+        }
+      ],
+      "simulation": {
+        "bottle": {
+          "angular_speed_rad_s": 0.28046673794598787,
+          "angular_velocity_world_rad_s": [
+            -0.017507784068584442,
+            -0.27948588132858276,
+            0.015579176135361195
+          ],
+          "linear_velocity_world_m_s": [
+            0.020274894312024117,
+            -0.0010978246573358774,
+            0.09575510025024414
+          ],
+          "orientation_wxyz": [
+            0.9993425011634827,
+            0.0006203135708346963,
+            0.030307311564683914,
+            0.019893277436494827
+          ],
+          "position_world_m": [
+            0.2653035819530487,
+            -0.00934668816626072,
+            0.300773024559021
+          ],
+          "vertical_velocity_m_s": 0.09575510025024414,
+          "z_m": 0.300773024559021
+        },
+        "frame": 509,
+        "joint_positions": [
+          3.475786797935143e-05,
+          -0.9599354863166809,
+          1.1613153219223022,
+          0.0009671451989561319,
+          -0.29533302783966064,
+          0.0006609606789425015,
+          -5.7803023082669824e-05,
+          0.04558379575610161,
+          -0.06419999897480011
+        ],
+        "physical_state": {
+          "drop_gate_m": 0.01,
+          "drop_m": 0.003963947296142578
+        },
+        "physics_frequency_hz": 60,
+        "physics_steps_added_for_capture": 0,
+        "profile": "convex_hull",
+        "robot": "follower_right",
+        "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_hull/follower_right/follower_right_convex_hull.usd",
+        "trial_index": 0
+      },
+      "visual_review": {
+        "conclusion": "Both fingers and bottle remain visible; release and hold-end differ in pose under an identical fixed camera anchor, with exact drop and velocity stated on the annotation.",
+        "objects_visible": [
+          "left finger (blue)",
+          "right finger (orange)",
+          "unconstrained bottle",
+          "release or hold-end pose"
+        ],
+        "retake_history": [
+          {
+            "action": "RETAKEN",
+            "reason": "The original camera followed the bottle and visually masked the measured displacement between release and hold end."
+          }
+        ],
+        "reviewed_by": "Codex visual model",
+        "reviewed_capture_name": "follower_right_hull_hold_end_isometric",
+        "status": "PASS",
+        "view_exposes_test_target": true
+      }
+    },
+    {
+      "acceptance_criteria": [
+        "both fingers and the entire bottle contact band are visible",
+        "a nonzero gap exists on both bottle sides",
+        "camera anchor matches bilateral contact, release, and hold-end views"
+      ],
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots_annotated/runtime_open/follower_left_decomposition_open_with_bottle_isometric_annotated.png",
+      "annotated_sha256": "cef50d12cd7fd31e650670c20ab12332ac3be9347d42cbc6dae623f301be257c",
+      "annotation": {
+        "contact_annotations": [],
+        "detected_boxes_xyxy": {
+          "bottle": [
+            387,
+            0,
+            882,
+            443
+          ],
+          "left finger (blue)": [
+            257,
+            271,
+            582,
+            691
+          ],
+          "right finger (orange)": [
+            868,
+            226,
+            1184,
+            431
+          ]
+        }
+      },
+      "camera": {
+        "camera_anchor_frozen_across_runtime_phases": true,
+        "current_bottle_target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "orientation_wxyz": [
+          -0.42827364802360535,
+          -0.2670406699180603,
+          0.45676755905151367,
+          0.7325533032417297
+        ],
+        "position_world_m": [
+          -0.059943392872810364,
+          0.17906413972377777,
+          0.4846867024898529
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 0,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "view": "isometric"
+      },
+      "capture_name": "follower_left_decomposition_open_with_bottle_isometric",
+      "detection_target": "custom fingers and fixed 65 mm bottle before closure",
+      "original_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/runtime_open/follower_left_decomposition_open_with_bottle_isometric.png",
+      "original_sha256": "36a2f3da22de5eb771d32d55577eb9947bc7270190c464156a8e28808b9d0a5b",
+      "part": "both fingers, both inner surfaces, bottle, free aperture",
+      "phase": "runtime_open",
+      "physical_stages": [
+        "open_with_bottle"
+      ],
+      "retake_history": [
+        {
+          "action": "ADDED_DURING_VISUAL_RECERTIFICATION",
+          "reason": "The earlier evidence set had no open-with-bottle image sharing the runtime camera anchor."
+        }
+      ],
+      "simulation": {
+        "bottle": {
+          "angular_speed_rad_s": 0.0,
+          "angular_velocity_world_rad_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "linear_velocity_world_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "orientation_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "position_world_m": [
+            0.259998619556427,
+            -0.0010388984810560942,
+            0.3047369718551636
+          ],
+          "vertical_velocity_m_s": 0.0,
+          "z_m": 0.3047369718551636
+        },
+        "frame": 209,
+        "joint_positions": [
+          0.00030465851887129247,
+          -0.973262369632721,
+          1.1645011901855469,
+          0.004357403144240379,
+          -0.28516510128974915,
+          0.00037455465644598007,
+          -0.001114449230954051,
+          0.0569998063147068,
+          -0.05801856517791748
+        ],
+        "physical_state": {
+          "bottle_kinematic": true,
+          "left_finger_contact": false,
+          "right_finger_contact": false,
+          "surface_gap_m": 0.0710679500009886
+        },
+        "physics_frequency_hz": 60,
+        "physics_steps_added_for_capture": 0,
+        "profile": "convex_decomposition",
+        "robot": "follower_left",
+        "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_decomposition/follower_left/follower_left_convex_decomposition.usd",
+        "trial_index": 0
+      },
+      "visual_review": {
+        "conclusion": "Both fingers, the bottle contact band, and visible bilateral free gaps are exposed before closure.",
+        "objects_visible": [
+          "left finger (blue)",
+          "right finger (orange)",
+          "65 mm bottle",
+          "bilateral free gap"
+        ],
+        "retake_history": [
+          {
+            "action": "ADDED_DURING_VISUAL_RECERTIFICATION",
+            "reason": "The earlier evidence set had no open-with-bottle image sharing the runtime camera anchor."
+          }
+        ],
+        "reviewed_by": "Codex visual model",
+        "reviewed_capture_name": "follower_left_decomposition_open_with_bottle_isometric",
+        "status": "PASS",
+        "view_exposes_test_target": true
+      }
+    },
+    {
+      "acceptance_criteria": [
+        "both fingers and bottle are simultaneously visible",
+        "the view exposes both finger-to-bottle interfaces",
+        "runtime contact data reports left and right contact",
+        "contact-focused and isometric views are not duplicates"
+      ],
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots_annotated/bilateral_contact/follower_left_decomposition_bilateral_contact_established_closing_axis_annotated.png",
+      "annotated_sha256": "75c0883d567b59f9b06a9a1c2ee3d4d3914d38f66356d9d9f013d6989615c609",
+      "annotation": {
+        "contact_annotations": [
+          {
+            "contact_marker_policy": "visual approximate interface marker; authoritative world point is recorded separately",
+            "first_contact_position_world_m": [
+              0.23781834542751312,
+              0.02956598624587059,
+              0.32615596055984497
+            ],
+            "normal_screen_direction": [
+              -0.614934144023734,
+              0.5235097685890193
+            ],
+            "normal_world": [
+              -0.581129789352417,
+              0.8138108253479004,
+              3.498875571494864e-07
+            ],
+            "side": "left"
+          },
+          {
+            "contact_marker_policy": "visual approximate interface marker; authoritative world point is recorded separately",
+            "first_contact_position_world_m": [
+              0.23837429285049438,
+              -0.031548287719488144,
+              0.2719464898109436
+            ],
+            "normal_screen_direction": [
+              0.957923101731944,
+              0.19071242774895925
+            ],
+            "normal_world": [
+              -0.5476028919219971,
+              -0.8367382884025574,
+              -0.00022290197375696152
+            ],
+            "side": "right"
+          }
+        ],
+        "detected_boxes_xyxy": {
+          "bottle": [
+            359,
+            0,
+            925,
+            550
+          ],
+          "left finger (blue)": [
+            202,
+            232,
+            530,
+            836
+          ],
+          "right finger (orange)": [
+            876,
+            212,
+            1220,
+            636
+          ]
+        }
+      },
+      "camera": {
+        "camera_anchor_frozen_across_runtime_phases": true,
+        "current_bottle_target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "orientation_wxyz": [
+          -0.5455884337425232,
+          -0.2452237457036972,
+          0.32853081822395325,
+          0.7309350371360779
+        ],
+        "position_world_m": [
+          -0.00997560191899538,
+          0.0790480449795723,
+          0.5547146201133728
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 0,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "view": "closing_axis"
+      },
+      "capture_name": "follower_left_decomposition_bilateral_contact_established_closing_axis",
+      "detection_target": "custom fingers and fixed bottle after slow closure",
+      "original_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/bilateral_contact/follower_left_decomposition_bilateral_contact_established_closing_axis.png",
+      "original_sha256": "18355fc265be23d63b5ca80a3e2bea39162aa2c3a412a4d4f740c7c2be80f5ed",
+      "part": "both fingers, inner contact bands, bottle, contact locations",
+      "phase": "bilateral_contact",
+      "physical_stages": [
+        "bilateral_contact_established"
+      ],
+      "retake_history": [
+        {
+          "action": "RETAKEN",
+          "reason": "The original near-horizontal closing-axis view was rejected because the opaque bottle and gripper bar hid the inner contact bands."
+        }
+      ],
+      "simulation": {
+        "bottle": {
+          "angular_speed_rad_s": 0.0,
+          "angular_velocity_world_rad_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "linear_velocity_world_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "orientation_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "position_world_m": [
+            0.259998619556427,
+            -0.0010388984810560942,
+            0.3047369718551636
+          ],
+          "vertical_velocity_m_s": 0.0,
+          "z_m": 0.3047369718551636
+        },
+        "frame": 389,
+        "joint_positions": [
+          0.0002901206898968667,
+          -0.9732879400253296,
+          1.164467453956604,
+          0.0031383379828184843,
+          -0.2850683033466339,
+          -0.0005523194558918476,
+          -0.00021295808255672455,
+          0.054477524012327194,
+          -0.055866435170173645
+        ],
+        "physical_state": {
+          "left_finger_contact": true,
+          "right_finger_contact": true
+        },
+        "physics_frequency_hz": 60,
+        "physics_steps_added_for_capture": 0,
+        "profile": "convex_decomposition",
+        "robot": "follower_left",
+        "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_decomposition/follower_left/follower_left_convex_decomposition.usd",
+        "trial_index": 0
+      },
+      "visual_review": {
+        "conclusion": "The retaken elevated and isometric views expose both finger-to-bottle interfaces; visual markers agree with bilateral runtime contact data.",
+        "objects_visible": [
+          "left finger (blue)",
+          "right finger (orange)",
+          "65 mm bottle",
+          "left contact interface",
+          "right contact interface"
+        ],
+        "retake_history": [
+          {
+            "action": "RETAKEN",
+            "reason": "The original near-horizontal closing-axis view was rejected because the opaque bottle and gripper bar hid the inner contact bands."
+          }
+        ],
+        "reviewed_by": "Codex visual model",
+        "reviewed_capture_name": "follower_left_decomposition_bilateral_contact_established_closing_axis",
+        "status": "PASS",
+        "view_exposes_test_target": true
+      }
+    },
+    {
+      "acceptance_criteria": [
+        "both fingers and bottle are simultaneously visible",
+        "the view exposes both finger-to-bottle interfaces",
+        "runtime contact data reports left and right contact",
+        "contact-focused and isometric views are not duplicates"
+      ],
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots_annotated/bilateral_contact/follower_left_decomposition_bilateral_contact_established_isometric_annotated.png",
+      "annotated_sha256": "20028bbba5c59bcb478a3bfb5acd8847d30a705f2f01f7996dc00378b24b7775",
+      "annotation": {
+        "contact_annotations": [
+          {
+            "contact_marker_policy": "visual approximate interface marker; authoritative world point is recorded separately",
+            "first_contact_position_world_m": [
+              0.23781834542751312,
+              0.02956598624587059,
+              0.32615596055984497
+            ],
+            "normal_screen_direction": [
+              -0.42410055553256043,
+              0.39856569900247585
+            ],
+            "normal_world": [
+              -0.581129789352417,
+              0.8138108253479004,
+              3.498875571494864e-07
+            ],
+            "side": "left"
+          },
+          {
+            "contact_marker_policy": "visual approximate interface marker; authoritative world point is recorded separately",
+            "first_contact_position_world_m": [
+              0.23837429285049438,
+              -0.031548287719488144,
+              0.2719464898109436
+            ],
+            "normal_screen_direction": [
+              0.9977706129193991,
+              0.02957083048531731
+            ],
+            "normal_world": [
+              -0.5476028919219971,
+              -0.8367382884025574,
+              -0.00022290197375696152
+            ],
+            "side": "right"
+          }
+        ],
+        "detected_boxes_xyxy": {
+          "bottle": [
+            387,
+            0,
+            882,
+            439
+          ],
+          "left finger (blue)": [
+            273,
+            247,
+            601,
+            692
+          ],
+          "right finger (orange)": [
+            868,
+            228,
+            1170,
+            429
+          ]
+        }
+      },
+      "camera": {
+        "camera_anchor_frozen_across_runtime_phases": true,
+        "current_bottle_target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "orientation_wxyz": [
+          -0.42827364802360535,
+          -0.2670406699180603,
+          0.45676755905151367,
+          0.7325533032417297
+        ],
+        "position_world_m": [
+          -0.059943392872810364,
+          0.17906413972377777,
+          0.4846867024898529
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 2,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "view": "isometric"
+      },
+      "capture_name": "follower_left_decomposition_bilateral_contact_established_isometric",
+      "detection_target": "custom fingers and fixed bottle after slow closure",
+      "original_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/bilateral_contact/follower_left_decomposition_bilateral_contact_established_isometric.png",
+      "original_sha256": "8b5d9835c7853bdeebf5395d9c1ac38c992c139c7682b6b9da7fb61036e79c0d",
+      "part": "both fingers, inner contact bands, bottle, contact locations",
+      "phase": "bilateral_contact",
+      "physical_stages": [
+        "bilateral_contact_established"
+      ],
+      "retake_history": [
+        {
+          "action": "RETAKEN",
+          "reason": "The original near-horizontal closing-axis view was rejected because the opaque bottle and gripper bar hid the inner contact bands."
+        }
+      ],
+      "simulation": {
+        "bottle": {
+          "angular_speed_rad_s": 0.0,
+          "angular_velocity_world_rad_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "linear_velocity_world_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "orientation_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "position_world_m": [
+            0.259998619556427,
+            -0.0010388984810560942,
+            0.3047369718551636
+          ],
+          "vertical_velocity_m_s": 0.0,
+          "z_m": 0.3047369718551636
+        },
+        "frame": 389,
+        "joint_positions": [
+          0.0002901206898968667,
+          -0.9732879400253296,
+          1.164467453956604,
+          0.0031383379828184843,
+          -0.2850683033466339,
+          -0.0005523194558918476,
+          -0.00021295808255672455,
+          0.054477524012327194,
+          -0.055866435170173645
+        ],
+        "physical_state": {
+          "left_finger_contact": true,
+          "right_finger_contact": true
+        },
+        "physics_frequency_hz": 60,
+        "physics_steps_added_for_capture": 0,
+        "profile": "convex_decomposition",
+        "robot": "follower_left",
+        "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_decomposition/follower_left/follower_left_convex_decomposition.usd",
+        "trial_index": 0
+      },
+      "visual_review": {
+        "conclusion": "The retaken elevated and isometric views expose both finger-to-bottle interfaces; visual markers agree with bilateral runtime contact data.",
+        "objects_visible": [
+          "left finger (blue)",
+          "right finger (orange)",
+          "65 mm bottle",
+          "left contact interface",
+          "right contact interface"
+        ],
+        "retake_history": [
+          {
+            "action": "RETAKEN",
+            "reason": "The original near-horizontal closing-axis view was rejected because the opaque bottle and gripper bar hid the inner contact bands."
+          }
+        ],
+        "reviewed_by": "Codex visual model",
+        "reviewed_capture_name": "follower_left_decomposition_bilateral_contact_established_isometric",
+        "status": "PASS",
+        "view_exposes_test_target": true
+      }
+    },
+    {
+      "acceptance_criteria": [
+        "release and hold-end use the identical frozen camera anchor",
+        "both fingers and bottle remain visible",
+        "annotation reports exact runtime drop and velocity",
+        "release and hold-end are compared numerically even for subpixel motion"
+      ],
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots_annotated/release_hold/follower_left_decomposition_release_isometric_annotated.png",
+      "annotated_sha256": "bf4d5fc957ce30b27c3df6f8bbdbd5c63793b2e8ac80ce67a72b47e628c9163d",
+      "annotation": {
+        "contact_annotations": [
+          {
+            "contact_marker_policy": "visual approximate interface marker; authoritative world point is recorded separately",
+            "first_contact_position_world_m": [
+              0.23781834542751312,
+              0.02956598624587059,
+              0.32615596055984497
+            ],
+            "normal_screen_direction": [
+              -0.42410055553256043,
+              0.39856569900247585
+            ],
+            "normal_world": [
+              -0.581129789352417,
+              0.8138108253479004,
+              3.498875571494864e-07
+            ],
+            "side": "left"
+          },
+          {
+            "contact_marker_policy": "visual approximate interface marker; authoritative world point is recorded separately",
+            "first_contact_position_world_m": [
+              0.23837429285049438,
+              -0.031548287719488144,
+              0.2719464898109436
+            ],
+            "normal_screen_direction": [
+              0.9977706129193991,
+              0.02957083048531731
+            ],
+            "normal_world": [
+              -0.5476028919219971,
+              -0.8367382884025574,
+              -0.00022290197375696152
+            ],
+            "side": "right"
+          }
+        ],
+        "detected_boxes_xyxy": {
+          "bottle": [
+            387,
+            0,
+            882,
+            439
+          ],
+          "left finger (blue)": [
+            274,
+            251,
+            601,
+            691
+          ],
+          "right finger (orange)": [
+            867,
+            225,
+            1170,
+            430
+          ]
+        }
+      },
+      "camera": {
+        "camera_anchor_frozen_across_runtime_phases": true,
+        "current_bottle_target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "orientation_wxyz": [
+          -0.42827364802360535,
+          -0.2670406699180603,
+          0.45676755905151367,
+          0.7325533032417297
+        ],
+        "position_world_m": [
+          -0.059943392872810364,
+          0.17906413972377777,
+          0.4846867024898529
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 2,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "view": "isometric"
+      },
+      "capture_name": "follower_left_decomposition_release_isometric",
+      "detection_target": "unconstrained dynamic bottle held by both custom fingers",
+      "original_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/release_hold/follower_left_decomposition_release_isometric.png",
+      "original_sha256": "c387cc92cb00e2f6e6eacb4c5fc60e6810bf1527382bf3d6b1bf25552d20b06c",
+      "part": "both fingers, bottle, release and hold-end bottle pose",
+      "phase": "release_hold",
+      "physical_stages": [
+        "release",
+        "hold_end"
+      ],
+      "retake_history": [
+        {
+          "action": "RETAKEN",
+          "reason": "The original camera followed the bottle and visually masked the measured displacement between release and hold end."
+        }
+      ],
+      "simulation": {
+        "bottle": {
+          "angular_speed_rad_s": 0.0,
+          "angular_velocity_world_rad_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "linear_velocity_world_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "orientation_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "position_world_m": [
+            0.259998619556427,
+            -0.0010388984810560942,
+            0.3047369718551636
+          ],
+          "vertical_velocity_m_s": 0.0,
+          "z_m": 0.3047369718551636
+        },
+        "frame": 389,
+        "joint_positions": [
+          0.0002901206898968667,
+          -0.9732879400253296,
+          1.164467453956604,
+          0.0031383379828184843,
+          -0.2850683033466339,
+          -0.0005523194558918476,
+          -0.00021295808255672455,
+          0.054477524012327194,
+          -0.055866435170173645
+        ],
+        "physical_state": {
+          "bottle_kinematic": false,
+          "constraint_found": false
+        },
+        "physics_frequency_hz": 60,
+        "physics_steps_added_for_capture": 0,
+        "profile": "convex_decomposition",
+        "robot": "follower_left",
+        "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_decomposition/follower_left/follower_left_convex_decomposition.usd",
+        "trial_index": 0
+      },
+      "visual_review": {
+        "conclusion": "Both fingers and bottle remain visible; release and hold-end differ in pose under an identical fixed camera anchor, with exact drop and velocity stated on the annotation.",
+        "objects_visible": [
+          "left finger (blue)",
+          "right finger (orange)",
+          "unconstrained bottle",
+          "release or hold-end pose"
+        ],
+        "retake_history": [
+          {
+            "action": "RETAKEN",
+            "reason": "The original camera followed the bottle and visually masked the measured displacement between release and hold end."
+          }
+        ],
+        "reviewed_by": "Codex visual model",
+        "reviewed_capture_name": "follower_left_decomposition_release_isometric",
+        "status": "PASS",
+        "view_exposes_test_target": true
+      }
+    },
+    {
+      "acceptance_criteria": [
+        "release and hold-end use the identical frozen camera anchor",
+        "both fingers and bottle remain visible",
+        "annotation reports exact runtime drop and velocity",
+        "release and hold-end are compared numerically even for subpixel motion"
+      ],
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots_annotated/release_hold/follower_left_decomposition_hold_end_isometric_annotated.png",
+      "annotated_sha256": "3a7d3a6a0ea88b146111d4bce06859e1311ca2138bcbca78bfc74825bcae8cb9",
+      "annotation": {
+        "contact_annotations": [
+          {
+            "contact_marker_policy": "visual approximate interface marker; authoritative world point is recorded separately",
+            "first_contact_position_world_m": [
+              0.23781834542751312,
+              0.02956598624587059,
+              0.32615596055984497
+            ],
+            "normal_screen_direction": [
+              -0.42410055553256043,
+              0.39856569900247585
+            ],
+            "normal_world": [
+              -0.581129789352417,
+              0.8138108253479004,
+              3.498875571494864e-07
+            ],
+            "side": "left"
+          },
+          {
+            "contact_marker_policy": "visual approximate interface marker; authoritative world point is recorded separately",
+            "first_contact_position_world_m": [
+              0.23837429285049438,
+              -0.031548287719488144,
+              0.2719464898109436
+            ],
+            "normal_screen_direction": [
+              0.9977706129193991,
+              0.02957083048531731
+            ],
+            "normal_world": [
+              -0.5476028919219971,
+              -0.8367382884025574,
+              -0.00022290197375696152
+            ],
+            "side": "right"
+          }
+        ],
+        "detected_boxes_xyxy": {
+          "bottle": [
+            427,
+            0,
+            907,
+            418
+          ],
+          "left finger (blue)": [
+            322,
+            249,
+            655,
+            685
+          ],
+          "right finger (orange)": [
+            888,
+            205,
+            1210,
+            416
+          ]
+        }
+      },
+      "camera": {
+        "camera_anchor_frozen_across_runtime_phases": true,
+        "current_bottle_target_world_m": [
+          0.2671036124229431,
+          -0.009363769553601742,
+          0.30036461353302
+        ],
+        "orientation_wxyz": [
+          -0.42827364802360535,
+          -0.2670406699180603,
+          0.45676755905151367,
+          0.7325533032417297
+        ],
+        "position_world_m": [
+          -0.059943392872810364,
+          0.17906413972377777,
+          0.4846867024898529
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 2,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "view": "isometric"
+      },
+      "capture_name": "follower_left_decomposition_hold_end_isometric",
+      "detection_target": "unconstrained dynamic bottle held by both custom fingers",
+      "original_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/release_hold/follower_left_decomposition_hold_end_isometric.png",
+      "original_sha256": "57ab890810d5c3e5513c988155f6b039a9cf4bc8a88cffed48155a14e0aba9a4",
+      "part": "both fingers, bottle, release and hold-end bottle pose",
+      "phase": "release_hold",
+      "physical_stages": [
+        "release",
+        "hold_end"
+      ],
+      "retake_history": [
+        {
+          "action": "RETAKEN",
+          "reason": "The original camera followed the bottle and visually masked the measured displacement between release and hold end."
+        }
+      ],
+      "simulation": {
+        "bottle": {
+          "angular_speed_rad_s": 0.04757603112927069,
+          "angular_velocity_world_rad_s": [
+            -0.007785571739077568,
+            0.03612986579537392,
+            -0.029958244413137436
+          ],
+          "linear_velocity_world_m_s": [
+            0.0178915336728096,
+            0.0005214126431383193,
+            0.0953223928809166
+          ],
+          "orientation_wxyz": [
+            0.999774158000946,
+            -0.00014535090303979814,
+            -0.00948163028806448,
+            0.019020939245820045
+          ],
+          "position_world_m": [
+            0.2671036124229431,
+            -0.009363769553601742,
+            0.30036461353302
+          ],
+          "vertical_velocity_m_s": 0.0953223928809166,
+          "z_m": 0.30036461353302
+        },
+        "frame": 509,
+        "joint_positions": [
+          3.426818875595927e-05,
+          -0.9599347710609436,
+          1.1613179445266724,
+          0.0009750901372171938,
+          -0.2953117787837982,
+          0.0006495157722383738,
+          -6.182370998430997e-05,
+          0.046090736985206604,
+          -0.06419999897480011
+        ],
+        "physical_state": {
+          "drop_gate_m": 0.01,
+          "drop_m": 0.004372358322143555
+        },
+        "physics_frequency_hz": 60,
+        "physics_steps_added_for_capture": 0,
+        "profile": "convex_decomposition",
+        "robot": "follower_left",
+        "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_decomposition/follower_left/follower_left_convex_decomposition.usd",
+        "trial_index": 0
+      },
+      "visual_review": {
+        "conclusion": "Both fingers and bottle remain visible; release and hold-end differ in pose under an identical fixed camera anchor, with exact drop and velocity stated on the annotation.",
+        "objects_visible": [
+          "left finger (blue)",
+          "right finger (orange)",
+          "unconstrained bottle",
+          "release or hold-end pose"
+        ],
+        "retake_history": [
+          {
+            "action": "RETAKEN",
+            "reason": "The original camera followed the bottle and visually masked the measured displacement between release and hold end."
+          }
+        ],
+        "reviewed_by": "Codex visual model",
+        "reviewed_capture_name": "follower_left_decomposition_hold_end_isometric",
+        "status": "PASS",
+        "view_exposes_test_target": true
+      }
+    },
+    {
+      "acceptance_criteria": [
+        "both fingers and the entire bottle contact band are visible",
+        "a nonzero gap exists on both bottle sides",
+        "camera anchor matches bilateral contact, release, and hold-end views"
+      ],
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots_annotated/runtime_open/follower_right_decomposition_open_with_bottle_isometric_annotated.png",
+      "annotated_sha256": "b8595c29c9e61738818c99145f03181f39036df6ddeba349e1eede7608088faa",
+      "annotation": {
+        "contact_annotations": [],
+        "detected_boxes_xyxy": {
+          "bottle": [
+            387,
+            0,
+            882,
+            444
+          ],
+          "left finger (blue)": [
+            257,
+            272,
+            582,
+            691
+          ],
+          "right finger (orange)": [
+            867,
+            223,
+            1184,
+            431
+          ]
+        }
+      },
+      "camera": {
+        "camera_anchor_frozen_across_runtime_phases": true,
+        "current_bottle_target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "orientation_wxyz": [
+          -0.42827364802360535,
+          -0.2670406699180603,
+          0.45676755905151367,
+          0.7325533032417297
+        ],
+        "position_world_m": [
+          -0.059943392872810364,
+          0.17906413972377777,
+          0.4846867024898529
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 1,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "view": "isometric"
+      },
+      "capture_name": "follower_right_decomposition_open_with_bottle_isometric",
+      "detection_target": "custom fingers and fixed 65 mm bottle before closure",
+      "original_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/runtime_open/follower_right_decomposition_open_with_bottle_isometric.png",
+      "original_sha256": "e3404427a7e51c2c29d40f35051ada89834382e800f5f7836348c5196fb928cf",
+      "part": "both fingers, both inner surfaces, bottle, free aperture",
+      "phase": "runtime_open",
+      "physical_stages": [
+        "open_with_bottle"
+      ],
+      "retake_history": [
+        {
+          "action": "ADDED_DURING_VISUAL_RECERTIFICATION",
+          "reason": "The earlier evidence set had no open-with-bottle image sharing the runtime camera anchor."
+        }
+      ],
+      "simulation": {
+        "bottle": {
+          "angular_speed_rad_s": 0.0,
+          "angular_velocity_world_rad_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "linear_velocity_world_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "orientation_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "position_world_m": [
+            0.259998619556427,
+            -0.0010388984810560942,
+            0.3047369718551636
+          ],
+          "vertical_velocity_m_s": 0.0,
+          "z_m": 0.3047369718551636
+        },
+        "frame": 209,
+        "joint_positions": [
+          0.00030465851887129247,
+          -0.973262369632721,
+          1.1645011901855469,
+          0.004357403144240379,
+          -0.28516510128974915,
+          0.00037455465644598007,
+          -0.001114449230954051,
+          0.0569998063147068,
+          -0.05801856517791748
+        ],
+        "physical_state": {
+          "bottle_kinematic": true,
+          "left_finger_contact": false,
+          "right_finger_contact": false,
+          "surface_gap_m": 0.0710679500009886
+        },
+        "physics_frequency_hz": 60,
+        "physics_steps_added_for_capture": 0,
+        "profile": "convex_decomposition",
+        "robot": "follower_right",
+        "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_decomposition/follower_right/follower_right_convex_decomposition.usd",
+        "trial_index": 0
+      },
+      "visual_review": {
+        "conclusion": "Both fingers, the bottle contact band, and visible bilateral free gaps are exposed before closure.",
+        "objects_visible": [
+          "left finger (blue)",
+          "right finger (orange)",
+          "65 mm bottle",
+          "bilateral free gap"
+        ],
+        "retake_history": [
+          {
+            "action": "ADDED_DURING_VISUAL_RECERTIFICATION",
+            "reason": "The earlier evidence set had no open-with-bottle image sharing the runtime camera anchor."
+          }
+        ],
+        "reviewed_by": "Codex visual model",
+        "reviewed_capture_name": "follower_right_decomposition_open_with_bottle_isometric",
+        "status": "PASS",
+        "view_exposes_test_target": true
+      }
+    },
+    {
+      "acceptance_criteria": [
+        "both fingers and bottle are simultaneously visible",
+        "the view exposes both finger-to-bottle interfaces",
+        "runtime contact data reports left and right contact",
+        "contact-focused and isometric views are not duplicates"
+      ],
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots_annotated/bilateral_contact/follower_right_decomposition_bilateral_contact_established_closing_axis_annotated.png",
+      "annotated_sha256": "4bdf35e10a0d02fe8eee7a6e00de9ca4af50b856ae08ae9ca20964d29be6e30e",
+      "annotation": {
+        "contact_annotations": [
+          {
+            "contact_marker_policy": "visual approximate interface marker; authoritative world point is recorded separately",
+            "first_contact_position_world_m": [
+              0.23781834542751312,
+              0.02956598624587059,
+              0.32615596055984497
+            ],
+            "normal_screen_direction": [
+              -0.614934144023734,
+              0.5235097685890193
+            ],
+            "normal_world": [
+              -0.581129789352417,
+              0.8138108253479004,
+              3.498875571494864e-07
+            ],
+            "side": "left"
+          },
+          {
+            "contact_marker_policy": "visual approximate interface marker; authoritative world point is recorded separately",
+            "first_contact_position_world_m": [
+              0.23837429285049438,
+              -0.031548287719488144,
+              0.2719464898109436
+            ],
+            "normal_screen_direction": [
+              0.957923101731944,
+              0.19071242774895925
+            ],
+            "normal_world": [
+              -0.5476028919219971,
+              -0.8367382884025574,
+              -0.00022290197375696152
+            ],
+            "side": "right"
+          }
+        ],
+        "detected_boxes_xyxy": {
+          "bottle": [
+            359,
+            0,
+            925,
+            541
+          ],
+          "left finger (blue)": [
+            202,
+            231,
+            525,
+            836
+          ],
+          "right finger (orange)": [
+            876,
+            211,
+            1220,
+            635
+          ]
+        }
+      },
+      "camera": {
+        "camera_anchor_frozen_across_runtime_phases": true,
+        "current_bottle_target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "orientation_wxyz": [
+          -0.5455884337425232,
+          -0.2452237457036972,
+          0.32853081822395325,
+          0.7309350371360779
+        ],
+        "position_world_m": [
+          -0.00997560191899538,
+          0.0790480449795723,
+          0.5547146201133728
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 0,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "view": "closing_axis"
+      },
+      "capture_name": "follower_right_decomposition_bilateral_contact_established_closing_axis",
+      "detection_target": "custom fingers and fixed bottle after slow closure",
+      "original_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/bilateral_contact/follower_right_decomposition_bilateral_contact_established_closing_axis.png",
+      "original_sha256": "e60c1ac12b811a48fd7b513263d331db0cd8ff25bb0252015f1fa4206bb5bd80",
+      "part": "both fingers, inner contact bands, bottle, contact locations",
+      "phase": "bilateral_contact",
+      "physical_stages": [
+        "bilateral_contact_established"
+      ],
+      "retake_history": [
+        {
+          "action": "RETAKEN",
+          "reason": "The original near-horizontal closing-axis view was rejected because the opaque bottle and gripper bar hid the inner contact bands."
+        }
+      ],
+      "simulation": {
+        "bottle": {
+          "angular_speed_rad_s": 0.0,
+          "angular_velocity_world_rad_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "linear_velocity_world_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "orientation_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "position_world_m": [
+            0.259998619556427,
+            -0.0010388984810560942,
+            0.3047369718551636
+          ],
+          "vertical_velocity_m_s": 0.0,
+          "z_m": 0.3047369718551636
+        },
+        "frame": 389,
+        "joint_positions": [
+          0.0002901206898968667,
+          -0.9732879400253296,
+          1.164467453956604,
+          0.0031383379828184843,
+          -0.2850683033466339,
+          -0.0005523194558918476,
+          -0.00021295808255672455,
+          0.054477524012327194,
+          -0.055866435170173645
+        ],
+        "physical_state": {
+          "left_finger_contact": true,
+          "right_finger_contact": true
+        },
+        "physics_frequency_hz": 60,
+        "physics_steps_added_for_capture": 0,
+        "profile": "convex_decomposition",
+        "robot": "follower_right",
+        "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_decomposition/follower_right/follower_right_convex_decomposition.usd",
+        "trial_index": 0
+      },
+      "visual_review": {
+        "conclusion": "The retaken elevated and isometric views expose both finger-to-bottle interfaces; visual markers agree with bilateral runtime contact data.",
+        "objects_visible": [
+          "left finger (blue)",
+          "right finger (orange)",
+          "65 mm bottle",
+          "left contact interface",
+          "right contact interface"
+        ],
+        "retake_history": [
+          {
+            "action": "RETAKEN",
+            "reason": "The original near-horizontal closing-axis view was rejected because the opaque bottle and gripper bar hid the inner contact bands."
+          }
+        ],
+        "reviewed_by": "Codex visual model",
+        "reviewed_capture_name": "follower_right_decomposition_bilateral_contact_established_closing_axis",
+        "status": "PASS",
+        "view_exposes_test_target": true
+      }
+    },
+    {
+      "acceptance_criteria": [
+        "both fingers and bottle are simultaneously visible",
+        "the view exposes both finger-to-bottle interfaces",
+        "runtime contact data reports left and right contact",
+        "contact-focused and isometric views are not duplicates"
+      ],
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots_annotated/bilateral_contact/follower_right_decomposition_bilateral_contact_established_isometric_annotated.png",
+      "annotated_sha256": "7d0a1e43c556d5afe64d12fee3a256c84da549a18aa2d2a9cb71f81bb826f11a",
+      "annotation": {
+        "contact_annotations": [
+          {
+            "contact_marker_policy": "visual approximate interface marker; authoritative world point is recorded separately",
+            "first_contact_position_world_m": [
+              0.23781834542751312,
+              0.02956598624587059,
+              0.32615596055984497
+            ],
+            "normal_screen_direction": [
+              -0.42410055553256043,
+              0.39856569900247585
+            ],
+            "normal_world": [
+              -0.581129789352417,
+              0.8138108253479004,
+              3.498875571494864e-07
+            ],
+            "side": "left"
+          },
+          {
+            "contact_marker_policy": "visual approximate interface marker; authoritative world point is recorded separately",
+            "first_contact_position_world_m": [
+              0.23837429285049438,
+              -0.031548287719488144,
+              0.2719464898109436
+            ],
+            "normal_screen_direction": [
+              0.9977706129193991,
+              0.02957083048531731
+            ],
+            "normal_world": [
+              -0.5476028919219971,
+              -0.8367382884025574,
+              -0.00022290197375696152
+            ],
+            "side": "right"
+          }
+        ],
+        "detected_boxes_xyxy": {
+          "bottle": [
+            387,
+            0,
+            881,
+            439
+          ],
+          "left finger (blue)": [
+            274,
+            254,
+            602,
+            692
+          ],
+          "right finger (orange)": [
+            866,
+            221,
+            1170,
+            431
+          ]
+        }
+      },
+      "camera": {
+        "camera_anchor_frozen_across_runtime_phases": true,
+        "current_bottle_target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "orientation_wxyz": [
+          -0.42827364802360535,
+          -0.2670406699180603,
+          0.45676755905151367,
+          0.7325533032417297
+        ],
+        "position_world_m": [
+          -0.059943392872810364,
+          0.17906413972377777,
+          0.4846867024898529
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 2,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "view": "isometric"
+      },
+      "capture_name": "follower_right_decomposition_bilateral_contact_established_isometric",
+      "detection_target": "custom fingers and fixed bottle after slow closure",
+      "original_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/bilateral_contact/follower_right_decomposition_bilateral_contact_established_isometric.png",
+      "original_sha256": "dea2410746761652644625e1c5f224b00acb1c66d63d2941e263a378d7a02622",
+      "part": "both fingers, inner contact bands, bottle, contact locations",
+      "phase": "bilateral_contact",
+      "physical_stages": [
+        "bilateral_contact_established"
+      ],
+      "retake_history": [
+        {
+          "action": "RETAKEN",
+          "reason": "The original near-horizontal closing-axis view was rejected because the opaque bottle and gripper bar hid the inner contact bands."
+        }
+      ],
+      "simulation": {
+        "bottle": {
+          "angular_speed_rad_s": 0.0,
+          "angular_velocity_world_rad_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "linear_velocity_world_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "orientation_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "position_world_m": [
+            0.259998619556427,
+            -0.0010388984810560942,
+            0.3047369718551636
+          ],
+          "vertical_velocity_m_s": 0.0,
+          "z_m": 0.3047369718551636
+        },
+        "frame": 389,
+        "joint_positions": [
+          0.0002901206898968667,
+          -0.9732879400253296,
+          1.164467453956604,
+          0.0031383379828184843,
+          -0.2850683033466339,
+          -0.0005523194558918476,
+          -0.00021295808255672455,
+          0.054477524012327194,
+          -0.055866435170173645
+        ],
+        "physical_state": {
+          "left_finger_contact": true,
+          "right_finger_contact": true
+        },
+        "physics_frequency_hz": 60,
+        "physics_steps_added_for_capture": 0,
+        "profile": "convex_decomposition",
+        "robot": "follower_right",
+        "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_decomposition/follower_right/follower_right_convex_decomposition.usd",
+        "trial_index": 0
+      },
+      "visual_review": {
+        "conclusion": "The retaken elevated and isometric views expose both finger-to-bottle interfaces; visual markers agree with bilateral runtime contact data.",
+        "objects_visible": [
+          "left finger (blue)",
+          "right finger (orange)",
+          "65 mm bottle",
+          "left contact interface",
+          "right contact interface"
+        ],
+        "retake_history": [
+          {
+            "action": "RETAKEN",
+            "reason": "The original near-horizontal closing-axis view was rejected because the opaque bottle and gripper bar hid the inner contact bands."
+          }
+        ],
+        "reviewed_by": "Codex visual model",
+        "reviewed_capture_name": "follower_right_decomposition_bilateral_contact_established_isometric",
+        "status": "PASS",
+        "view_exposes_test_target": true
+      }
+    },
+    {
+      "acceptance_criteria": [
+        "release and hold-end use the identical frozen camera anchor",
+        "both fingers and bottle remain visible",
+        "annotation reports exact runtime drop and velocity",
+        "release and hold-end are compared numerically even for subpixel motion"
+      ],
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots_annotated/release_hold/follower_right_decomposition_release_isometric_annotated.png",
+      "annotated_sha256": "8e3786ee5543bad1b4371d8ed7481bf1ebaa64dbe24b2c2e9150f69c32f2236c",
+      "annotation": {
+        "contact_annotations": [
+          {
+            "contact_marker_policy": "visual approximate interface marker; authoritative world point is recorded separately",
+            "first_contact_position_world_m": [
+              0.23781834542751312,
+              0.02956598624587059,
+              0.32615596055984497
+            ],
+            "normal_screen_direction": [
+              -0.42410055553256043,
+              0.39856569900247585
+            ],
+            "normal_world": [
+              -0.581129789352417,
+              0.8138108253479004,
+              3.498875571494864e-07
+            ],
+            "side": "left"
+          },
+          {
+            "contact_marker_policy": "visual approximate interface marker; authoritative world point is recorded separately",
+            "first_contact_position_world_m": [
+              0.23837429285049438,
+              -0.031548287719488144,
+              0.2719464898109436
+            ],
+            "normal_screen_direction": [
+              0.9977706129193991,
+              0.02957083048531731
+            ],
+            "normal_world": [
+              -0.5476028919219971,
+              -0.8367382884025574,
+              -0.00022290197375696152
+            ],
+            "side": "right"
+          }
+        ],
+        "detected_boxes_xyxy": {
+          "bottle": [
+            387,
+            0,
+            882,
+            439
+          ],
+          "left finger (blue)": [
+            274,
+            254,
+            601,
+            690
+          ],
+          "right finger (orange)": [
+            864,
+            221,
+            1170,
+            430
+          ]
+        }
+      },
+      "camera": {
+        "camera_anchor_frozen_across_runtime_phases": true,
+        "current_bottle_target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "orientation_wxyz": [
+          -0.42827364802360535,
+          -0.2670406699180603,
+          0.45676755905151367,
+          0.7325533032417297
+        ],
+        "position_world_m": [
+          -0.059943392872810364,
+          0.17906413972377777,
+          0.4846867024898529
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 1,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "view": "isometric"
+      },
+      "capture_name": "follower_right_decomposition_release_isometric",
+      "detection_target": "unconstrained dynamic bottle held by both custom fingers",
+      "original_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/release_hold/follower_right_decomposition_release_isometric.png",
+      "original_sha256": "5f9147cc2686cf57877ad94465db15fa36d30f72b5782e9ea17b67518f1660bc",
+      "part": "both fingers, bottle, release and hold-end bottle pose",
+      "phase": "release_hold",
+      "physical_stages": [
+        "release",
+        "hold_end"
+      ],
+      "retake_history": [
+        {
+          "action": "RETAKEN",
+          "reason": "The original camera followed the bottle and visually masked the measured displacement between release and hold end."
+        }
+      ],
+      "simulation": {
+        "bottle": {
+          "angular_speed_rad_s": 0.0,
+          "angular_velocity_world_rad_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "linear_velocity_world_m_s": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "orientation_wxyz": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "position_world_m": [
+            0.259998619556427,
+            -0.0010388984810560942,
+            0.3047369718551636
+          ],
+          "vertical_velocity_m_s": 0.0,
+          "z_m": 0.3047369718551636
+        },
+        "frame": 389,
+        "joint_positions": [
+          0.0002901206898968667,
+          -0.9732879400253296,
+          1.164467453956604,
+          0.0031383379828184843,
+          -0.2850683033466339,
+          -0.0005523194558918476,
+          -0.00021295808255672455,
+          0.054477524012327194,
+          -0.055866435170173645
+        ],
+        "physical_state": {
+          "bottle_kinematic": false,
+          "constraint_found": false
+        },
+        "physics_frequency_hz": 60,
+        "physics_steps_added_for_capture": 0,
+        "profile": "convex_decomposition",
+        "robot": "follower_right",
+        "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_decomposition/follower_right/follower_right_convex_decomposition.usd",
+        "trial_index": 0
+      },
+      "visual_review": {
+        "conclusion": "Both fingers and bottle remain visible; release and hold-end differ in pose under an identical fixed camera anchor, with exact drop and velocity stated on the annotation.",
+        "objects_visible": [
+          "left finger (blue)",
+          "right finger (orange)",
+          "unconstrained bottle",
+          "release or hold-end pose"
+        ],
+        "retake_history": [
+          {
+            "action": "RETAKEN",
+            "reason": "The original camera followed the bottle and visually masked the measured displacement between release and hold end."
+          }
+        ],
+        "reviewed_by": "Codex visual model",
+        "reviewed_capture_name": "follower_right_decomposition_release_isometric",
+        "status": "PASS",
+        "view_exposes_test_target": true
+      }
+    },
+    {
+      "acceptance_criteria": [
+        "release and hold-end use the identical frozen camera anchor",
+        "both fingers and bottle remain visible",
+        "annotation reports exact runtime drop and velocity",
+        "release and hold-end are compared numerically even for subpixel motion"
+      ],
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots_annotated/release_hold/follower_right_decomposition_hold_end_isometric_annotated.png",
+      "annotated_sha256": "d1f77d6024028f41755e4b8793f1300f8777fee0d7e286547388fd2d2a4ee61e",
+      "annotation": {
+        "contact_annotations": [
+          {
+            "contact_marker_policy": "visual approximate interface marker; authoritative world point is recorded separately",
+            "first_contact_position_world_m": [
+              0.23781834542751312,
+              0.02956598624587059,
+              0.32615596055984497
+            ],
+            "normal_screen_direction": [
+              -0.42410055553256043,
+              0.39856569900247585
+            ],
+            "normal_world": [
+              -0.581129789352417,
+              0.8138108253479004,
+              3.498875571494864e-07
+            ],
+            "side": "left"
+          },
+          {
+            "contact_marker_policy": "visual approximate interface marker; authoritative world point is recorded separately",
+            "first_contact_position_world_m": [
+              0.23837429285049438,
+              -0.031548287719488144,
+              0.2719464898109436
+            ],
+            "normal_screen_direction": [
+              0.9977706129193991,
+              0.02957083048531731
+            ],
+            "normal_world": [
+              -0.5476028919219971,
+              -0.8367382884025574,
+              -0.00022290197375696152
+            ],
+            "side": "right"
+          }
+        ],
+        "detected_boxes_xyxy": {
+          "bottle": [
+            427,
+            0,
+            907,
+            418
+          ],
+          "left finger (blue)": [
+            322,
+            254,
+            655,
+            684
+          ],
+          "right finger (orange)": [
+            887,
+            204,
+            1209,
+            417
+          ]
+        }
+      },
+      "camera": {
+        "camera_anchor_frozen_across_runtime_phases": true,
+        "current_bottle_target_world_m": [
+          0.2671036124229431,
+          -0.009363769553601742,
+          0.30036461353302
+        ],
+        "orientation_wxyz": [
+          -0.42827364802360535,
+          -0.2670406699180603,
+          0.45676755905151367,
+          0.7325533032417297
+        ],
+        "position_world_m": [
+          -0.059943392872810364,
+          0.17906413972377777,
+          0.4846867024898529
+        ],
+        "render_readback": {
+          "dtype": "uint8",
+          "maximum": 255,
+          "minimum": 2,
+          "shape": [
+            900,
+            1280,
+            4
+          ]
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "runtime": "isaacsim.sensors.camera.Camera",
+        "target_world_m": [
+          0.259998619556427,
+          -0.0010388984810560942,
+          0.3047369718551636
+        ],
+        "view": "isometric"
+      },
+      "capture_name": "follower_right_decomposition_hold_end_isometric",
+      "detection_target": "unconstrained dynamic bottle held by both custom fingers",
+      "original_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/release_hold/follower_right_decomposition_hold_end_isometric.png",
+      "original_sha256": "d49ef1e7852b3bed89b87a0d9ba8c5cffbb828fa90f5b634ad7be4502e49229c",
+      "part": "both fingers, bottle, release and hold-end bottle pose",
+      "phase": "release_hold",
+      "physical_stages": [
+        "release",
+        "hold_end"
+      ],
+      "retake_history": [
+        {
+          "action": "RETAKEN",
+          "reason": "The original camera followed the bottle and visually masked the measured displacement between release and hold end."
+        }
+      ],
+      "simulation": {
+        "bottle": {
+          "angular_speed_rad_s": 0.04757603112927069,
+          "angular_velocity_world_rad_s": [
+            -0.007785571739077568,
+            0.03612986579537392,
+            -0.029958244413137436
+          ],
+          "linear_velocity_world_m_s": [
+            0.0178915336728096,
+            0.0005214126431383193,
+            0.0953223928809166
+          ],
+          "orientation_wxyz": [
+            0.999774158000946,
+            -0.00014535090303979814,
+            -0.00948163028806448,
+            0.019020939245820045
+          ],
+          "position_world_m": [
+            0.2671036124229431,
+            -0.009363769553601742,
+            0.30036461353302
+          ],
+          "vertical_velocity_m_s": 0.0953223928809166,
+          "z_m": 0.30036461353302
+        },
+        "frame": 509,
+        "joint_positions": [
+          3.426818875595927e-05,
+          -0.9599347710609436,
+          1.1613179445266724,
+          0.0009750901372171938,
+          -0.2953117787837982,
+          0.0006495157722383738,
+          -6.182370998430997e-05,
+          0.046090736985206604,
+          -0.06419999897480011
+        ],
+        "physical_state": {
+          "drop_gate_m": 0.01,
+          "drop_m": 0.004372358322143555
+        },
+        "physics_frequency_hz": 60,
+        "physics_steps_added_for_capture": 0,
+        "profile": "convex_decomposition",
+        "robot": "follower_right",
+        "stage_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_decomposition/follower_right/follower_right_convex_decomposition.usd",
+        "trial_index": 0
+      },
+      "visual_review": {
+        "conclusion": "Both fingers and bottle remain visible; release and hold-end differ in pose under an identical fixed camera anchor, with exact drop and velocity stated on the annotation.",
+        "objects_visible": [
+          "left finger (blue)",
+          "right finger (orange)",
+          "unconstrained bottle",
+          "release or hold-end pose"
+        ],
+        "retake_history": [
+          {
+            "action": "RETAKEN",
+            "reason": "The original camera followed the bottle and visually masked the measured displacement between release and hold end."
+          }
+        ],
+        "reviewed_by": "Codex visual model",
+        "reviewed_capture_name": "follower_right_decomposition_hold_end_isometric",
+        "status": "PASS",
+        "view_exposes_test_target": true
+      }
+    },
+    {
+      "acceptance_criteria": [
+        "both finger sides are shown side by side",
+        "convex piece boundaries and local axes are visible",
+        "Hull and Decomposition images visibly identify their piece counts"
+      ],
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots_annotated/collider_geometry/follower_left_hull_overview_annotated.png",
+      "annotated_sha256": "9ef421033885f22a2801d2911de81810fc5ee6100cb067c518897f9e75187fc3",
+      "annotation": {
+        "contact_annotations": [],
+        "detected_boxes_xyxy": {}
+      },
+      "camera": {
+        "coordinate_frame": "each collider-local metres",
+        "layout": "left finger | right finger",
+        "not_runtime_contact_evidence": true,
+        "renderer": "MATPLOTLIB_COOKED_PHYSX_GEOMETRY",
+        "view": "full cooked colliders"
+      },
+      "capture_name": "follower_left_hull_overview",
+      "detection_target": "local PhysX-cooked custom finger collision geometry",
+      "original_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/collider_geometry/follower_left_hull_overview.png",
+      "original_sha256": "697a80cf72f44c91a3c33a6882d18b230a84f5f3e08c0525c5e103abdb803959",
+      "part": "left and right finger overview and inner gripping region",
+      "phase": "collider_geometry",
+      "physical_stages": [
+        "offline_cooked_geometry"
+      ],
+      "retake_history": [],
+      "simulation": {
+        "approximation_readback": "convexHull",
+        "asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_hull/follower_left/follower_left_convex_hull.usd",
+        "asset_sha256": "e8a8fbd25b2763fde90a7af1ebe21f917da96e27853762973635c87e1851c763",
+        "collider_paths": [
+          "/follower_left/follower_left_left_finger_link/collisions/correct_custom_finger_left",
+          "/follower_left/follower_left_right_finger_link/collisions/correct_custom_finger_right"
+        ],
+        "physics_steps_added_for_capture": 0,
+        "piece_count_by_side": {
+          "left": 1,
+          "right": 1
+        }
+      },
+      "visual_review": {
+        "conclusion": "Side-by-side overview or inner-region panels expose both cooked colliders, metric axes, and the Hull/Decomposition piece structure.",
+        "objects_visible": [
+          "left cooked finger collider",
+          "right cooked finger collider",
+          "convex piece boundaries",
+          "local metric axes"
+        ],
+        "retake_history": [],
+        "reviewed_by": "Codex visual model",
+        "reviewed_capture_name": "follower_left_hull_overview",
+        "status": "PASS",
+        "view_exposes_test_target": true
+      }
+    },
+    {
+      "acceptance_criteria": [
+        "both finger sides are shown side by side",
+        "convex piece boundaries and local axes are visible",
+        "Hull and Decomposition images visibly identify their piece counts"
+      ],
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots_annotated/collider_geometry/follower_left_hull_inner_surface_annotated.png",
+      "annotated_sha256": "04afab3076666a7dbb168ad7a224c7a3d637ac228b319d82a3ca45e39d1688b9",
+      "annotation": {
+        "contact_annotations": [],
+        "detected_boxes_xyxy": {}
+      },
+      "camera": {
+        "coordinate_frame": "each collider-local metres",
+        "layout": "left finger | right finger",
+        "not_runtime_contact_evidence": true,
+        "renderer": "MATPLOTLIB_COOKED_PHYSX_GEOMETRY",
+        "view": "inner gripping region; deterministic local +X crop"
+      },
+      "capture_name": "follower_left_hull_inner_surface",
+      "detection_target": "local PhysX-cooked custom finger collision geometry",
+      "original_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/collider_geometry/follower_left_hull_inner_surface.png",
+      "original_sha256": "7231bfbde73a5e3f70651e9601d4ca78d4f94bacb706fda9373973c17da63719",
+      "part": "left and right finger overview and inner gripping region",
+      "phase": "collider_geometry",
+      "physical_stages": [
+        "offline_cooked_geometry"
+      ],
+      "retake_history": [],
+      "simulation": {
+        "approximation_readback": "convexHull",
+        "asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_hull/follower_left/follower_left_convex_hull.usd",
+        "asset_sha256": "e8a8fbd25b2763fde90a7af1ebe21f917da96e27853762973635c87e1851c763",
+        "collider_paths": [
+          "/follower_left/follower_left_left_finger_link/collisions/correct_custom_finger_left",
+          "/follower_left/follower_left_right_finger_link/collisions/correct_custom_finger_right"
+        ],
+        "physics_steps_added_for_capture": 0,
+        "piece_count_by_side": {
+          "left": 1,
+          "right": 1
+        }
+      },
+      "visual_review": {
+        "conclusion": "Side-by-side overview or inner-region panels expose both cooked colliders, metric axes, and the Hull/Decomposition piece structure.",
+        "objects_visible": [
+          "left cooked finger collider",
+          "right cooked finger collider",
+          "convex piece boundaries",
+          "local metric axes"
+        ],
+        "retake_history": [],
+        "reviewed_by": "Codex visual model",
+        "reviewed_capture_name": "follower_left_hull_inner_surface",
+        "status": "PASS",
+        "view_exposes_test_target": true
+      }
+    },
+    {
+      "acceptance_criteria": [
+        "both finger sides are shown side by side",
+        "convex piece boundaries and local axes are visible",
+        "Hull and Decomposition images visibly identify their piece counts"
+      ],
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots_annotated/collider_geometry/follower_right_hull_overview_annotated.png",
+      "annotated_sha256": "881dbd35aea57e9aed9cdaf3ecc871e74b6cf2c1a9cd3af2c1783238fdbdba7e",
+      "annotation": {
+        "contact_annotations": [],
+        "detected_boxes_xyxy": {}
+      },
+      "camera": {
+        "coordinate_frame": "each collider-local metres",
+        "layout": "left finger | right finger",
+        "not_runtime_contact_evidence": true,
+        "renderer": "MATPLOTLIB_COOKED_PHYSX_GEOMETRY",
+        "view": "full cooked colliders"
+      },
+      "capture_name": "follower_right_hull_overview",
+      "detection_target": "local PhysX-cooked custom finger collision geometry",
+      "original_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/collider_geometry/follower_right_hull_overview.png",
+      "original_sha256": "3ae8fe9678c71a24c7cf33b77a915c6f195639f8b9ebc4753a18f3f017c8bd83",
+      "part": "left and right finger overview and inner gripping region",
+      "phase": "collider_geometry",
+      "physical_stages": [
+        "offline_cooked_geometry"
+      ],
+      "retake_history": [],
+      "simulation": {
+        "approximation_readback": "convexHull",
+        "asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_hull/follower_right/follower_right_convex_hull.usd",
+        "asset_sha256": "d9c4e8f64625215746048f67a183f6e4ca84a3ba675c8cb02f55e90209b79732",
+        "collider_paths": [
+          "/follower_right/follower_right_left_finger_link/collisions/correct_custom_finger_left",
+          "/follower_right/follower_right_right_finger_link/collisions/correct_custom_finger_right"
+        ],
+        "physics_steps_added_for_capture": 0,
+        "piece_count_by_side": {
+          "left": 1,
+          "right": 1
+        }
+      },
+      "visual_review": {
+        "conclusion": "Side-by-side overview or inner-region panels expose both cooked colliders, metric axes, and the Hull/Decomposition piece structure.",
+        "objects_visible": [
+          "left cooked finger collider",
+          "right cooked finger collider",
+          "convex piece boundaries",
+          "local metric axes"
+        ],
+        "retake_history": [],
+        "reviewed_by": "Codex visual model",
+        "reviewed_capture_name": "follower_right_hull_overview",
+        "status": "PASS",
+        "view_exposes_test_target": true
+      }
+    },
+    {
+      "acceptance_criteria": [
+        "both finger sides are shown side by side",
+        "convex piece boundaries and local axes are visible",
+        "Hull and Decomposition images visibly identify their piece counts"
+      ],
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots_annotated/collider_geometry/follower_right_hull_inner_surface_annotated.png",
+      "annotated_sha256": "d2e5c14f3a9acd8c55a4e5a43f752060f288f86eecbdd44e0a42013fba7d179b",
+      "annotation": {
+        "contact_annotations": [],
+        "detected_boxes_xyxy": {}
+      },
+      "camera": {
+        "coordinate_frame": "each collider-local metres",
+        "layout": "left finger | right finger",
+        "not_runtime_contact_evidence": true,
+        "renderer": "MATPLOTLIB_COOKED_PHYSX_GEOMETRY",
+        "view": "inner gripping region; deterministic local +X crop"
+      },
+      "capture_name": "follower_right_hull_inner_surface",
+      "detection_target": "local PhysX-cooked custom finger collision geometry",
+      "original_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/collider_geometry/follower_right_hull_inner_surface.png",
+      "original_sha256": "af86141905f6e6b3d32f96c4fe608f69bbe8aa655120cefdf4e20b679d2d3262",
+      "part": "left and right finger overview and inner gripping region",
+      "phase": "collider_geometry",
+      "physical_stages": [
+        "offline_cooked_geometry"
+      ],
+      "retake_history": [],
+      "simulation": {
+        "approximation_readback": "convexHull",
+        "asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_hull/follower_right/follower_right_convex_hull.usd",
+        "asset_sha256": "d9c4e8f64625215746048f67a183f6e4ca84a3ba675c8cb02f55e90209b79732",
+        "collider_paths": [
+          "/follower_right/follower_right_left_finger_link/collisions/correct_custom_finger_left",
+          "/follower_right/follower_right_right_finger_link/collisions/correct_custom_finger_right"
+        ],
+        "physics_steps_added_for_capture": 0,
+        "piece_count_by_side": {
+          "left": 1,
+          "right": 1
+        }
+      },
+      "visual_review": {
+        "conclusion": "Side-by-side overview or inner-region panels expose both cooked colliders, metric axes, and the Hull/Decomposition piece structure.",
+        "objects_visible": [
+          "left cooked finger collider",
+          "right cooked finger collider",
+          "convex piece boundaries",
+          "local metric axes"
+        ],
+        "retake_history": [],
+        "reviewed_by": "Codex visual model",
+        "reviewed_capture_name": "follower_right_hull_inner_surface",
+        "status": "PASS",
+        "view_exposes_test_target": true
+      }
+    },
+    {
+      "acceptance_criteria": [
+        "both finger sides are shown side by side",
+        "convex piece boundaries and local axes are visible",
+        "Hull and Decomposition images visibly identify their piece counts"
+      ],
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots_annotated/collider_geometry/follower_left_decomposition_overview_annotated.png",
+      "annotated_sha256": "a5c4c0218dacc900a65f351e068077e137b6f253fcad0daaac40e3814739b659",
+      "annotation": {
+        "contact_annotations": [],
+        "detected_boxes_xyxy": {}
+      },
+      "camera": {
+        "coordinate_frame": "each collider-local metres",
+        "layout": "left finger | right finger",
+        "not_runtime_contact_evidence": true,
+        "renderer": "MATPLOTLIB_COOKED_PHYSX_GEOMETRY",
+        "view": "full cooked colliders"
+      },
+      "capture_name": "follower_left_decomposition_overview",
+      "detection_target": "local PhysX-cooked custom finger collision geometry",
+      "original_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/collider_geometry/follower_left_decomposition_overview.png",
+      "original_sha256": "145052f021d989cda38905fb300e6e3e727b5ea45c8facf9414db06968fa27f8",
+      "part": "left and right finger overview and inner gripping region",
+      "phase": "collider_geometry",
+      "physical_stages": [
+        "offline_cooked_geometry"
+      ],
+      "retake_history": [],
+      "simulation": {
+        "approximation_readback": "convexDecomposition",
+        "asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_decomposition/follower_left/follower_left_convex_decomposition.usd",
+        "asset_sha256": "a56f4944a2926f52242329d8177aa70fd562a1472abd0f64c5aa7e612d21a525",
+        "collider_paths": [
+          "/follower_left/follower_left_left_finger_link/collisions/correct_custom_finger_left",
+          "/follower_left/follower_left_right_finger_link/collisions/correct_custom_finger_right"
+        ],
+        "physics_steps_added_for_capture": 0,
+        "piece_count_by_side": {
+          "left": 32,
+          "right": 32
+        }
+      },
+      "visual_review": {
+        "conclusion": "Side-by-side overview or inner-region panels expose both cooked colliders, metric axes, and the Hull/Decomposition piece structure.",
+        "objects_visible": [
+          "left cooked finger collider",
+          "right cooked finger collider",
+          "convex piece boundaries",
+          "local metric axes"
+        ],
+        "retake_history": [],
+        "reviewed_by": "Codex visual model",
+        "reviewed_capture_name": "follower_left_decomposition_overview",
+        "status": "PASS",
+        "view_exposes_test_target": true
+      }
+    },
+    {
+      "acceptance_criteria": [
+        "both finger sides are shown side by side",
+        "convex piece boundaries and local axes are visible",
+        "Hull and Decomposition images visibly identify their piece counts"
+      ],
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots_annotated/collider_geometry/follower_left_decomposition_inner_surface_annotated.png",
+      "annotated_sha256": "9297ad5e067b5d8a060fd89dce72dea9132e5c3fd416a73f87c16423881cc852",
+      "annotation": {
+        "contact_annotations": [],
+        "detected_boxes_xyxy": {}
+      },
+      "camera": {
+        "coordinate_frame": "each collider-local metres",
+        "layout": "left finger | right finger",
+        "not_runtime_contact_evidence": true,
+        "renderer": "MATPLOTLIB_COOKED_PHYSX_GEOMETRY",
+        "view": "inner gripping region; deterministic local +X crop"
+      },
+      "capture_name": "follower_left_decomposition_inner_surface",
+      "detection_target": "local PhysX-cooked custom finger collision geometry",
+      "original_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/collider_geometry/follower_left_decomposition_inner_surface.png",
+      "original_sha256": "e7cb2ca6e01acbeda8694e21c40e816216f4cd1f056d3b2e86b3d42c494e6103",
+      "part": "left and right finger overview and inner gripping region",
+      "phase": "collider_geometry",
+      "physical_stages": [
+        "offline_cooked_geometry"
+      ],
+      "retake_history": [],
+      "simulation": {
+        "approximation_readback": "convexDecomposition",
+        "asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_decomposition/follower_left/follower_left_convex_decomposition.usd",
+        "asset_sha256": "a56f4944a2926f52242329d8177aa70fd562a1472abd0f64c5aa7e612d21a525",
+        "collider_paths": [
+          "/follower_left/follower_left_left_finger_link/collisions/correct_custom_finger_left",
+          "/follower_left/follower_left_right_finger_link/collisions/correct_custom_finger_right"
+        ],
+        "physics_steps_added_for_capture": 0,
+        "piece_count_by_side": {
+          "left": 32,
+          "right": 32
+        }
+      },
+      "visual_review": {
+        "conclusion": "Side-by-side overview or inner-region panels expose both cooked colliders, metric axes, and the Hull/Decomposition piece structure.",
+        "objects_visible": [
+          "left cooked finger collider",
+          "right cooked finger collider",
+          "convex piece boundaries",
+          "local metric axes"
+        ],
+        "retake_history": [],
+        "reviewed_by": "Codex visual model",
+        "reviewed_capture_name": "follower_left_decomposition_inner_surface",
+        "status": "PASS",
+        "view_exposes_test_target": true
+      }
+    },
+    {
+      "acceptance_criteria": [
+        "both finger sides are shown side by side",
+        "convex piece boundaries and local axes are visible",
+        "Hull and Decomposition images visibly identify their piece counts"
+      ],
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots_annotated/collider_geometry/follower_right_decomposition_overview_annotated.png",
+      "annotated_sha256": "c2425a696911f533663b3e873bf68f4138e6326bb567ee8a0dc099226dec4c3d",
+      "annotation": {
+        "contact_annotations": [],
+        "detected_boxes_xyxy": {}
+      },
+      "camera": {
+        "coordinate_frame": "each collider-local metres",
+        "layout": "left finger | right finger",
+        "not_runtime_contact_evidence": true,
+        "renderer": "MATPLOTLIB_COOKED_PHYSX_GEOMETRY",
+        "view": "full cooked colliders"
+      },
+      "capture_name": "follower_right_decomposition_overview",
+      "detection_target": "local PhysX-cooked custom finger collision geometry",
+      "original_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/collider_geometry/follower_right_decomposition_overview.png",
+      "original_sha256": "caf054058481d3142aacb6137e87d71441bab4ecefe380494c23081ffc6dd749",
+      "part": "left and right finger overview and inner gripping region",
+      "phase": "collider_geometry",
+      "physical_stages": [
+        "offline_cooked_geometry"
+      ],
+      "retake_history": [],
+      "simulation": {
+        "approximation_readback": "convexDecomposition",
+        "asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_decomposition/follower_right/follower_right_convex_decomposition.usd",
+        "asset_sha256": "2056a9ed49f843a3de05a239a4debe930d94399a6eadddb0669fd9eb709da64b",
+        "collider_paths": [
+          "/follower_right/follower_right_left_finger_link/collisions/correct_custom_finger_left",
+          "/follower_right/follower_right_right_finger_link/collisions/correct_custom_finger_right"
+        ],
+        "physics_steps_added_for_capture": 0,
+        "piece_count_by_side": {
+          "left": 32,
+          "right": 32
+        }
+      },
+      "visual_review": {
+        "conclusion": "Side-by-side overview or inner-region panels expose both cooked colliders, metric axes, and the Hull/Decomposition piece structure.",
+        "objects_visible": [
+          "left cooked finger collider",
+          "right cooked finger collider",
+          "convex piece boundaries",
+          "local metric axes"
+        ],
+        "retake_history": [],
+        "reviewed_by": "Codex visual model",
+        "reviewed_capture_name": "follower_right_decomposition_overview",
+        "status": "PASS",
+        "view_exposes_test_target": true
+      }
+    },
+    {
+      "acceptance_criteria": [
+        "both finger sides are shown side by side",
+        "convex piece boundaries and local axes are visible",
+        "Hull and Decomposition images visibly identify their piece counts"
+      ],
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots_annotated/collider_geometry/follower_right_decomposition_inner_surface_annotated.png",
+      "annotated_sha256": "ba05220e23763b1009f4fea89230a3022af06b0f41659c0b945b92169aa45523",
+      "annotation": {
+        "contact_annotations": [],
+        "detected_boxes_xyxy": {}
+      },
+      "camera": {
+        "coordinate_frame": "each collider-local metres",
+        "layout": "left finger | right finger",
+        "not_runtime_contact_evidence": true,
+        "renderer": "MATPLOTLIB_COOKED_PHYSX_GEOMETRY",
+        "view": "inner gripping region; deterministic local +X crop"
+      },
+      "capture_name": "follower_right_decomposition_inner_surface",
+      "detection_target": "local PhysX-cooked custom finger collision geometry",
+      "original_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots/collider_geometry/follower_right_decomposition_inner_surface.png",
+      "original_sha256": "9159eb8f11122de287c855cd60b9cbe901893967be29eb0e2f970a9ab683896d",
+      "part": "left and right finger overview and inner gripping region",
+      "phase": "collider_geometry",
+      "physical_stages": [
+        "offline_cooked_geometry"
+      ],
+      "retake_history": [],
+      "simulation": {
+        "approximation_readback": "convexDecomposition",
+        "asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_decomposition/follower_right/follower_right_convex_decomposition.usd",
+        "asset_sha256": "2056a9ed49f843a3de05a239a4debe930d94399a6eadddb0669fd9eb709da64b",
+        "collider_paths": [
+          "/follower_right/follower_right_left_finger_link/collisions/correct_custom_finger_left",
+          "/follower_right/follower_right_right_finger_link/collisions/correct_custom_finger_right"
+        ],
+        "physics_steps_added_for_capture": 0,
+        "piece_count_by_side": {
+          "left": 32,
+          "right": 32
+        }
+      },
+      "visual_review": {
+        "conclusion": "Side-by-side overview or inner-region panels expose both cooked colliders, metric axes, and the Hull/Decomposition piece structure.",
+        "objects_visible": [
+          "left cooked finger collider",
+          "right cooked finger collider",
+          "convex piece boundaries",
+          "local metric axes"
+        ],
+        "retake_history": [],
+        "reviewed_by": "Codex visual model",
+        "reviewed_capture_name": "follower_right_decomposition_inner_surface",
+        "status": "PASS",
+        "view_exposes_test_target": true
+      }
+    }
+  ],
+  "original_screenshot_root_absolute": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-correct-finger-task5/screenshots",
+  "pending_or_failed_captures": [],
+  "review_decisions_absolute": "/home/eii/project/openpi0.5-rtc-reward-learning/configs/aloha1_gripper_visual_review_decisions.json",
+  "review_method": "VISUAL_MODEL_MANUAL_SELF_REVIEW",
+  "schema_version": 1,
+  "screenshot_role": "AUXILIARY_EVIDENCE_NOT_PHYSICS_ACCEPTANCE",
+  "source_manifest_absolute": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/gripper_correct_finger_all_screenshot_manifest.json",
+  "stage_comparisons": [
+    {
+      "camera_motion_does_not_mask_drop": true,
+      "capture_names": {
+        "contact": "follower_left_hull_bilateral_contact_established_isometric",
+        "hold": "follower_left_hull_hold_end_isometric",
+        "open": "follower_left_hull_open_with_bottle_isometric",
+        "release": "follower_left_hull_release_isometric"
+      },
+      "collider": "hull",
+      "drop_gate_m": 0.01,
+      "open_vs_contact_mean_absolute_pixel_difference": 4.749944733796296,
+      "open_vs_contact_visually_distinct": true,
+      "release_vs_hold_mean_absolute_pixel_difference": 12.467899305555555,
+      "release_vs_hold_runtime_state_distinct": true,
+      "robot": "follower_left",
+      "runtime_drop_m": 0.003963947296142578,
+      "same_camera_anchor": true,
+      "status": "PASS"
+    },
+    {
+      "camera_motion_does_not_mask_drop": true,
+      "capture_names": {
+        "contact": "follower_left_decomposition_bilateral_contact_established_isometric",
+        "hold": "follower_left_decomposition_hold_end_isometric",
+        "open": "follower_left_decomposition_open_with_bottle_isometric",
+        "release": "follower_left_decomposition_release_isometric"
+      },
+      "collider": "decomposition",
+      "drop_gate_m": 0.01,
+      "open_vs_contact_mean_absolute_pixel_difference": 3.874111111111111,
+      "open_vs_contact_visually_distinct": true,
+      "release_vs_hold_mean_absolute_pixel_difference": 13.123610243055555,
+      "release_vs_hold_runtime_state_distinct": true,
+      "robot": "follower_left",
+      "runtime_drop_m": 0.004372358322143555,
+      "same_camera_anchor": true,
+      "status": "PASS"
+    },
+    {
+      "camera_motion_does_not_mask_drop": true,
+      "capture_names": {
+        "contact": "follower_right_hull_bilateral_contact_established_isometric",
+        "hold": "follower_right_hull_hold_end_isometric",
+        "open": "follower_right_hull_open_with_bottle_isometric",
+        "release": "follower_right_hull_release_isometric"
+      },
+      "collider": "hull",
+      "drop_gate_m": 0.01,
+      "open_vs_contact_mean_absolute_pixel_difference": 3.9860240162037037,
+      "open_vs_contact_visually_distinct": true,
+      "release_vs_hold_mean_absolute_pixel_difference": 12.418754050925926,
+      "release_vs_hold_runtime_state_distinct": true,
+      "robot": "follower_right",
+      "runtime_drop_m": 0.003963947296142578,
+      "same_camera_anchor": true,
+      "status": "PASS"
+    },
+    {
+      "camera_motion_does_not_mask_drop": true,
+      "capture_names": {
+        "contact": "follower_right_decomposition_bilateral_contact_established_isometric",
+        "hold": "follower_right_decomposition_hold_end_isometric",
+        "open": "follower_right_decomposition_open_with_bottle_isometric",
+        "release": "follower_right_decomposition_release_isometric"
+      },
+      "collider": "decomposition",
+      "drop_gate_m": 0.01,
+      "open_vs_contact_mean_absolute_pixel_difference": 3.9766903935185187,
+      "open_vs_contact_visually_distinct": true,
+      "release_vs_hold_mean_absolute_pixel_difference": 13.160519097222222,
+      "release_vs_hold_runtime_state_distinct": true,
+      "robot": "follower_right",
+      "runtime_drop_m": 0.004372358322143555,
+      "same_camera_anchor": true,
+      "status": "PASS"
+    }
+  ],
+  "status": "PASS"
+}

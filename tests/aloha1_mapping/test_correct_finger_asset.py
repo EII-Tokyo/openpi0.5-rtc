@@ -95,6 +95,7 @@ def test_screenshot_contract_has_required_phases_and_fixed_resolution() -> None:
     assert set(screenshots["required_captures"]) == {
         "asset_preflight",
         "collider_geometry",
+        "runtime_open",
         "bilateral_contact",
         "release_hold",
     }

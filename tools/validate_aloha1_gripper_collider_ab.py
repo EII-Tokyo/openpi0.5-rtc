@@ -29,6 +29,9 @@ from tools.aloha1_mapping.gripper_collider_ab import summarize_ab_trials
 from tools.aloha1_mapping.gripper_collider_ab import trial_passes_hold_gate
 from tools.aloha1_mapping.gripper_validation import build_gripper_validation_plan
 from tools.aloha1_mapping.gripper_validation import summarize_contact_events
+from tools.aloha1_mapping.isaac_screenshot import look_at_orientation_wxyz
+from tools.aloha1_mapping.isaac_screenshot import save_camera_rgba_png
+from tools.aloha1_mapping.screenshot_manifest import validate_screenshot
 import tools.validate_aloha1_gripper as baseline
 
 
@@ -613,6 +616,127 @@ def _runtime_invariant_audit(
     }
 
 
+def _capture_trial_screenshot(
+    *,
+    world: Any,
+    camera: Any,
+    articulation: Any,
+    bottle: Any,
+    open_aperture: Mapping[str, Any],
+    screenshot_context: dict[str, Any],
+    phase: str,
+    capture_name: str,
+    view: str,
+    frame: int,
+    physical_state: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Render without a physics step and append a verified capture record."""
+
+    current_target = np.asarray(
+        _bottle_state(bottle)["position_world_m"],
+        dtype=np.float64,
+    )
+    if "fixed_camera_target_world_m" not in screenshot_context:
+        screenshot_context["fixed_camera_target_world_m"] = (
+            current_target.tolist()
+        )
+    target = np.asarray(
+        screenshot_context["fixed_camera_target_world_m"],
+        dtype=np.float64,
+    )
+    closing = np.asarray(
+        open_aperture["closing_axis_world"],
+        dtype=np.float64,
+    )
+    closing /= np.linalg.norm(closing)
+    up = np.asarray([0.0, 0.0, 1.0], dtype=np.float64)
+    lateral = np.cross(up, closing)
+    if np.linalg.norm(lateral) < 1.0e-6:
+        lateral = np.asarray([1.0, 0.0, 0.0], dtype=np.float64)
+    lateral /= np.linalg.norm(lateral)
+    if view == "closing_axis":
+        # Elevated contact-focused view. Visual self-review rejected the old
+        # near-horizontal view because the bottle and gripper bar hid both
+        # inner finger-to-bottle interfaces.
+        position = target - 0.27 * lateral - 0.08 * closing + 0.25 * up
+    elif view == "isometric":
+        position = target - 0.32 * lateral - 0.18 * closing + 0.18 * up
+    else:
+        raise ValueError(f"unsupported trial screenshot view: {view}")
+    orientation = look_at_orientation_wxyz(position, target)
+    camera.set_world_pose(
+        position=position,
+        orientation=orientation,
+        camera_axes="usd",
+    )
+    # SimulationContext.render() explicitly disables playSimulations during
+    # the Kit update in local Isaac Sim 5.1; screenshots therefore do not add
+    # hidden physics steps to the frozen trajectory.
+    pixels = None
+    for _ in range(8):
+        world.render()
+    for _ in range(22):
+        candidate = camera.get_rgba()
+        if candidate is not None:
+            candidate_array = np.asarray(candidate)
+            if (
+                candidate_array.ndim == 3
+                and candidate_array.shape[2] == 4
+                and candidate_array.size > 0
+            ):
+                pixels = candidate
+                break
+        world.render()
+    if pixels is None:
+        raise RuntimeError(
+            f"Isaac camera produced no RGBA frame for {capture_name}"
+        )
+    output = (
+        Path(screenshot_context["artifact_root"])
+        / phase
+        / f"{capture_name}.png"
+    )
+    render_readback = save_camera_rgba_png(camera, output, rgba=pixels)
+    camera_position, camera_orientation = camera.get_world_pose(
+        camera_axes="usd"
+    )
+    record = validate_screenshot(
+        output.resolve(strict=True),
+        artifact_root=Path(screenshot_context["artifact_root"]),
+        phase=phase,
+        capture_name=capture_name,
+        gate_status="PASS",
+        camera={
+            "runtime": "isaacsim.sensors.camera.Camera",
+            "view": view,
+            "position_world_m": np.asarray(camera_position).tolist(),
+            "orientation_wxyz": np.asarray(camera_orientation).tolist(),
+            "target_world_m": target.tolist(),
+            "current_bottle_target_world_m": current_target.tolist(),
+            "camera_anchor_frozen_across_runtime_phases": True,
+            "resolution": [1280, 900],
+            "render_readback": render_readback,
+        },
+        simulation={
+            "stage_asset": str(screenshot_context["asset"]),
+            "robot": screenshot_context["robot"],
+            "profile": screenshot_context["profile"],
+            "trial_index": int(screenshot_context["trial_index"]),
+            "frame": int(frame),
+            "physics_frequency_hz": 60,
+            "physics_steps_added_for_capture": 0,
+            "joint_positions": np.asarray(
+                articulation.get_joint_positions(),
+                dtype=np.float64,
+            ).tolist(),
+            "bottle": _bottle_state(bottle),
+            "physical_state": dict(physical_state),
+        },
+    )
+    screenshot_context["captures"].append(record)
+    return record
+
+
 def _run_trial(
     *,
     robot_plan: Mapping[str, Any],
@@ -622,6 +746,7 @@ def _run_trial(
     approximation: str,
     control_mode: str,
     trial_index: int,
+    screenshot_context: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     from isaacsim.core.api import World
     from isaacsim.core.prims import SingleArticulation
@@ -632,6 +757,7 @@ def _run_trial(
     from omni.physx import get_physx_simulation_interface
     from pxr import Gf
     from pxr import UsdGeom
+    from pxr import UsdLux
     from pxr import UsdPhysics
 
     start_time = time.perf_counter()
@@ -680,6 +806,26 @@ def _run_trial(
         reset_xform_properties=False,
     )
     world.scene.add(articulation)
+    camera = None
+    if screenshot_context is not None:
+        from isaacsim.sensors.camera import Camera
+
+        dome = UsdLux.DomeLight.Define(stage, "/World/Lights/Dome")
+        dome.CreateIntensityAttr(650.0)
+        dome.CreateColorAttr(Gf.Vec3f(0.85, 0.88, 1.0))
+        key = UsdLux.DistantLight.Define(stage, "/World/Lights/Key")
+        key.CreateIntensityAttr(1100.0)
+        key.CreateAngleAttr(1.0)
+        camera = Camera(
+            prim_path="/World/DiagnosticCamera",
+            name=(
+                f"{profile_name}_{robot_plan['name']}_"
+                f"{trial_index}_diagnostic_camera"
+            ),
+            resolution=(1280, 900),
+            frequency=60,
+        )
+        world.scene.add(camera)
 
     frame_state = {"frame": -1}
     events: list[dict[str, Any]] = []
@@ -697,6 +843,9 @@ def _run_trial(
         on_contact
     )
     world.reset()
+    if camera is not None:
+        camera.initialize()
+        camera.set_clipping_range(0.01, 10.0)
     # Initialize the rigid-body readback wrapper after reset. Adding a
     # kinematic bottle to Scene before reset makes the Scene reset path attempt
     # to author linear/angular velocity on a kinematic PhysX body.
@@ -777,6 +926,40 @@ def _run_trial(
         telemetry=telemetry,
     )
     placement_frame = frame_state["frame"]
+    trial_screenshots = []
+    if screenshot_context is not None:
+        screenshot_context["fixed_camera_target_world_m"] = np.asarray(
+            _bottle_state(bottle)["position_world_m"],
+            dtype=np.float64,
+        ).tolist()
+        profile_token = (
+            "hull"
+            if profile_name == "convex_hull"
+            else "decomposition"
+        )
+        trial_screenshots.append(
+            _capture_trial_screenshot(
+                world=world,
+                camera=camera,
+                articulation=articulation,
+                bottle=bottle,
+                open_aperture=open_aperture,
+                screenshot_context=screenshot_context,
+                phase="runtime_open",
+                capture_name=(
+                    f"{robot_plan['name']}_{profile_token}_"
+                    "open_with_bottle_isometric"
+                ),
+                view="isometric",
+                frame=frame_state["frame"],
+                physical_state={
+                    "bottle_kinematic": True,
+                    "left_finger_contact": False,
+                    "right_finger_contact": False,
+                    "surface_gap_m": open_aperture["surface_gap_m"],
+                },
+            )
+        )
     _command_fingers(
         articulation,
         left_index=left_index,
@@ -822,6 +1005,33 @@ def _run_trial(
         penetration_limit_m=base_plan["penetration"]["maximum_persistent_depth_m"],
         persistence_steps=base_plan["penetration"]["persistence_steps"],
     )
+    if screenshot_context is not None:
+        for view in ("closing_axis", "isometric"):
+            trial_screenshots.append(
+                _capture_trial_screenshot(
+                    world=world,
+                    camera=camera,
+                    articulation=articulation,
+                    bottle=bottle,
+                    open_aperture=open_aperture,
+                    screenshot_context=screenshot_context,
+                    phase="bilateral_contact",
+                    capture_name=(
+                        f"{robot_plan['name']}_{profile_token}_"
+                        f"bilateral_contact_established_{view}"
+                    ),
+                    view=view,
+                    frame=frame_state["frame"],
+                    physical_state={
+                        "left_finger_contact": fixed_contact[
+                            "left_finger_contact"
+                        ],
+                        "right_finger_contact": fixed_contact[
+                            "right_finger_contact"
+                        ],
+                    },
+                )
+            )
     constraint_found, constraint_paths = baseline._has_bottle_constraint(stage)
     release_state = _bottle_state(bottle)
     UsdPhysics.RigidBodyAPI(bottle_prim).GetKinematicEnabledAttr().Set(
@@ -829,6 +1039,27 @@ def _run_trial(
     )
     get_physx_simulation_interface().flush_changes()
     release_frame = frame_state["frame"] + 1
+    if screenshot_context is not None:
+        trial_screenshots.append(
+            _capture_trial_screenshot(
+                world=world,
+                camera=camera,
+                articulation=articulation,
+                bottle=bottle,
+                open_aperture=open_aperture,
+                screenshot_context=screenshot_context,
+                phase="release_hold",
+                capture_name=(
+                    f"{robot_plan['name']}_{profile_token}_release_isometric"
+                ),
+                view="isometric",
+                frame=frame_state["frame"],
+                physical_state={
+                    "bottle_kinematic": False,
+                    "constraint_found": constraint_found,
+                },
+            )
+        )
     _step(
         world,
         steps=base_plan["released_hold"]["hold_steps"],
@@ -860,6 +1091,27 @@ def _run_trial(
         dt=dt,
     )
     drop_m = float(release_state["z_m"] - final_state["z_m"])
+    if screenshot_context is not None:
+        trial_screenshots.append(
+            _capture_trial_screenshot(
+                world=world,
+                camera=camera,
+                articulation=articulation,
+                bottle=bottle,
+                open_aperture=open_aperture,
+                screenshot_context=screenshot_context,
+                phase="release_hold",
+                capture_name=(
+                    f"{robot_plan['name']}_{profile_token}_hold_end_isometric"
+                ),
+                view="isometric",
+                frame=frame_state["frame"],
+                physical_state={
+                    "drop_m": drop_m,
+                    "drop_gate_m": base_plan["released_hold"]["max_drop_m"],
+                },
+            )
+        )
     metrics = {
         "actual_approximation_token_ok": set(approximation_readback.values())
         == {approximation},
@@ -965,10 +1217,13 @@ def _run_trial(
             "bottle_left_support_surface": "NOT_APPLICABLE",
         },
         "telemetry": telemetry,
+        "screenshots": trial_screenshots,
         "runtime_s": time.perf_counter() - start_time,
         "contact_subscription_active": subscription is not None,
     }
     _augment_trial_derived_fields(trial)
+    if camera is not None:
+        camera.destroy()
     del subscription
     return trial
 

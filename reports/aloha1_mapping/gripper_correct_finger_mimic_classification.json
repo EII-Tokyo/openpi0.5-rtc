@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "status": "FAIL",
+  "classification": "RUNTIME_MIMIC_READBACK_AND_LIMIT_OVERSHOOT",
+  "scope": "user-confirmed correct custom follower fingers",
+  "source_relation": {
+    "reference": "left_finger",
+    "target": "right_finger",
+    "multiplier": -1.0,
+    "offset_m": 0.0,
+    "status": "DIRECTLY_CONFIRMED_FROM_PINNED_SOURCE_AND_IMPORTED_SCHEMA"
+  },
+  "runtime_readback": {
+    "identical_across_robots": true,
+    "identical_open_checkpoint_across_hull_and_decomposition": true,
+    "start": {
+      "left_finger_m": 0.02180425636470318,
+      "right_finger_m": -0.020024938508868217,
+      "absolute_relation_residual_m": 0.001779317855834961
+    },
+    "open": {
+      "left_finger_m": 0.056999921798706055,
+      "right_finger_m": -0.0589350089430809,
+      "absolute_relation_residual_m": 0.0019350871443748474,
+      "right_semantic_limit_m": -0.057,
+      "right_limit_overshoot_m": 0.001935008943080902
+    },
+    "closed_against_fixed_bottle": {
+      "convex_hull": {
+        "left_finger_m": 0.053962089121341705,
+        "right_finger_m": -0.055874302983284,
+        "absolute_relation_residual_m": 0.0019122138619422913
+      },
+      "convex_decomposition": {
+        "left_finger_m": 0.05447745323181152,
+        "right_finger_m": -0.05586622655391693,
+        "absolute_relation_residual_m": 0.0013887733221054077
+      }
+    }
+  },
+  "gate": {
+    "tolerance_m": 0.001,
+    "maximum_sampled_residual_m": 0.0019350871443748474,
+    "status": "FAIL"
+  },
+  "interpretation": {
+    "joint_order_error": false,
+    "sign_error": false,
+    "motion_direction_error": false,
+    "static_hold_cause": false,
+    "static_hold_evidence": "80/80 correct-finger trials pass the unchanged 2 s / 0.010 m hold gate despite the residual",
+    "remaining_issue": "runtime mimic constraint readback exceeds the 1 mm relation gate and the right-finger semantic opening limit",
+    "parameter_tuning_performed": false
+  },
+  "task7_effect": "Task5.GripperValidation remains FAIL",
+  "task8": "NOT_RUN"
+}
