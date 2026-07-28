@@ -168,16 +168,80 @@ authoritative restart boundary:
 - The NVIDIA official Isaac documentation capability was queried through
   MCPJungle. Local Isaac Sim 5.1 importer `2.4.30` source/manifest hashes are
   frozen in the Stage gate report.
-- No absolute Stage path has been user-approved for the post-reset
-  supplier-CAD diagnostic. The historical
-  `local_eval_assets/aloha_isaac_assets/aloha_viperx.usd` remains hash-frozen
-  at `b24afe3678155654892c69517fc58ecd970108d68cec56b02dc6fdcb8bf4493e`
-  but is classified
-  `HISTORICAL_CANDIDATE_NOT_AUTHORIZED_CURRENT_TASK`. It was not loaded,
-  switched, or modified.
-- Therefore isolated diagnostic USD, Isaac screenshots, supplier-CAD Task 5,
-  Task 7, and Task 8 are all `NOT_RUN`. Machine gate:
-  `reports/aloha1_mapping/aloha_viper_cad_finger_isaac_stage_gate.json`.
+- The user approved
+  `/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_assets/aloha_viperx.usd`
+  as the isolated supplier-CAD review Stage. Its SHA-256 remains
+  `b24afe3678155654892c69517fc58ecd970108d68cec56b02dc6fdcb8bf4493e`.
+  The source Stage, default configuration, and final collider remain
+  immutable; all authoring is in independent diagnostic layers.
+- The follower-left CAD finger diagnostic asset is `PARTIAL`: static identity,
+  placement, convex-hull token, protected hashes, and required prims pass.
+  The approved Stage does not contain follower_right, recorded as a bounded
+  `HARD_BLOCKER`.
+- The no-bottle screenshot gate is `PASS`: attempt 23 supplies 12 raw images
+  (closed, partial, maximum legal aperture × four views), annotation v2
+  supplies 12 paired annotated images, and all 24 were individually reviewed
+  with a vision model. This is visual structure evidence only. Report:
+  `aloha_viper_cad_finger_task5_structure_screenshot_review.json`.
+- Numerical convex-hull geometry audit is `PARTIAL`: fingers never overlap;
+  finger-to-shell/carriage are separated; each finger has an invariant
+  approximately `8.31e-6 m³` common volume with the gripper bar. The latter is
+  attachment-semantic evidence, not automatically an unexpected collision.
+- The approved Stage's no-bottle dynamic fault is now separated into three
+  causal components: a disjoint `rootJoint_vx300s_left` frame, both finger
+  drives with `maxForce=0`, and all six arm drives with `maxForce=0`.
+  Independent diagnostic-only layers correct the root frame from the body
+  transforms, set the fingers to the generated URDF `5 N` effort limit, and
+  set the arm to its generated URDF effort limits `10/20/15/2/5/1`.
+- The final combined diagnostic passes all numeric no-bottle gates. Maximum
+  base drift is about `0.0000287 m`, maximum arm drift is about
+  `0.000118 rad`, maximum intended finger error is below
+  `0.000000047 m`, and maximum non-target drift is below
+  `0.000000746 m`. Report:
+  `aloha_viper_cad_finger_task5_dynamic_structure_diagnosis.json`.
+- The Sensor Camera replay path remains rejected after three fresh-process
+  `shape=[0]` buffers, but the image gate is resolved through the installed
+  Isaac 5.1 viewport capture API. The accepted camera target is computed from
+  the runtime CAD finger mesh world points after root correction; one fixed
+  camera captures open/maximum-aperture, partial, and closed exact readbacks.
+- Three raw and three annotated 1280×900 images were individually reviewed
+  with the vision model and pass. They are explicitly
+  `PASS_AUXILIARY_RUNTIME_READBACK_REPLAY`, not same-frame physics/contact
+  evidence. Reports:
+  `aloha_viper_cad_finger_task5_numeric_pass_screenshot_review.json` and
+  `aloha_viper_cad_finger_task5_runtime_screenshot_blocker.json`.
+- Overall supplier-CAD no-bottle dynamic structure is `PASS`: numeric gates
+  plus auxiliary visual state/direction evidence pass.
+- The isolated supplier-CAD `follower_left` 20 g bottle static-suspension gate
+  now passes `20/20` fresh resets with one exact signature. Maximum drop over
+  the complete 120-frame/2-second hold is
+  `0.0004539191722869873 m` against the unchanged `0.010 m` gate. Bilateral
+  physical contact requires `separation <= 0`; positive approximately 10 mm
+  contact-envelope events are retained but not counted as grasp contact.
+- Maximum penetration is `0.00016659701941534877 m` and is not persistent.
+  No fixed joint, Surface Gripper, or parent attachment is used. The fixed
+  bottle phase establishes contact only and is excluded from hold PASS.
+- Four raw and four annotated open/contact/release/hold-end images use one
+  fixed camera and pass individual vision-model review. Report:
+  `aloha_viper_cad_finger_task5_bottle_screenshot_review.json`.
+- The runtime API final vertical velocity
+  (`+0.067032434 m/s`) disagrees with pose-derived final velocity
+  (`+0.000050068 m/s`). This is recorded as
+  `RUNTIME_READBACK_DISAGREEMENT_RECORDED_NOT_USED_TO_OVERRIDE_POSITION_DROP_GATE`;
+  both signals remain visible.
+- Supplier-CAD Task 7 was rerun twice with fresh Stage opens and identical
+  signature
+  `b52db5132cbd96c311df95f31f577fb65c078f51d1bf5e6b8a75ebe87f1abd82`.
+  Its literal status is `FAIL`: Task 5 hold, robot-scoped articulation,
+  eight-DOF order, drive/limit checks and SimReadyAssetRules pass, but missing
+  JointStateAPI, zero/invalid helper-body mass/inertia, PhysicsRules, and
+  RobotRules remain blocking. Report:
+  `aloha_viper_cad_finger_task7_validation.json`.
+- follower_right and a supplier-Stage lift trajectory remain bounded
+  HARD_BLOCKERs. Friction is `TEMPORARY_UNCALIBRATED`; no calibrated dynamics
+  claim is made.
+- Task 8 remains `NOT_RUN`. The source Stage, default configuration, and final
+  collider remain unchanged.
 - Public availability does not establish a redistribution license. Original
   STEP/PDF files stay in `.codex/artifacts`, outside Git; license remains
   `UNKNOWN_HARD_BLOCKER`.

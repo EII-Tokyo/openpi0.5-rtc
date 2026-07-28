@@ -19,8 +19,28 @@ def test_readme_separates_evidence_classes_and_gates_optimization() -> None:
         assert heading in text
     assert "Task 8 was not executed" in text
     assert "Task 8 optimization | **NOT_RUN**" in text
-    assert "Supplier-CAD Task 5 / static bottle hold | **NOT_RUN**" in text
-    assert "Supplier-CAD Task 7 validation | **NOT_RUN**" in text
+    assert "Supplier-CAD Task 5 dynamic structure | **PASS**" in text
+    assert (
+        "HARD_BLOCKER_RUNTIME_CAMERA_EMPTY_BUFFER_ON_ROOT_FRAME_DIAGNOSTIC"
+        in text
+    )
+    assert (
+        "Supplier-CAD follower_left static bottle hold | **PASS**"
+        in text
+    )
+    assert "20/20" in text
+    assert "0.0004539191722869873 m" in text
+    assert "RUNTIME_READBACK_DISAGREEMENT_RECORDED" in text
+    assert "TEMPORARY_UNCALIBRATED" in text
+    assert "aloha_viper_cad_finger_task5_bottle.json" in text
+    assert (
+        "aloha_viper_cad_finger_task5_bottle_screenshot_review.json"
+        in text
+    )
+    assert "PASS_AUXILIARY_RUNTIME_READBACK_REPLAY" in text
+    assert "Supplier-CAD Task 7 validation | **FAIL**" in text
+    assert "aloha_viper_cad_finger_task7_validation.json" in text
+    assert "b52db5132cbd96c311df95f31f577fb65c078f51d1bf5e6b8a75ebe87f1abd82" in text
     assert "Isaac Sim **5.1.0.0 / Kit 107.3.3**" in text
 
 
