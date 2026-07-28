@@ -1,0 +1,193 @@
+schema_version: 1
+scope: Stationary ALOHA 1 follower correct-custom-finger Task 5 restart
+restart_boundary: TASK5_PREFLIGHT_CORRECT_FINGER_ASSET_IDENTITY_AND_INSTALL_TRANSFORM
+runtime:
+  isaac_sim: 5.1.0.0
+  kit: 107.3.3
+  physx: 107.3.26
+  urdf_importer: 2.4.30
+source:
+  repository: https://github.com/huggingface/gym-aloha.git
+  local_repository: external/gym-aloha
+  branch: user/aliberts/2024_05_07_remove_upper_bounds
+  commit: 51837ba5f7d5b96255f01c3d39d53dea473b4829
+  package_version: 0.1.1
+  license: Apache-2.0
+  pyproject: external/gym-aloha/pyproject.toml
+  mesh_scale:
+    - 0.001
+    - 0.001
+    - 0.001
+  meshes:
+    left:
+      path: external/gym-aloha/gym_aloha/assets/vx300s_10_custom_finger_left.stl
+      installed_path: .venv/lib/python3.11/site-packages/gym_aloha/assets/vx300s_10_custom_finger_left.stl
+      sha256: df73ae5b9058e5d50a6409ac2ab687dade75053a86591bb5e23ab051dbf2d659
+      triangle_count: 1666
+    right:
+      path: external/gym-aloha/gym_aloha/assets/vx300s_10_custom_finger_right.stl
+      installed_path: .venv/lib/python3.11/site-packages/gym_aloha/assets/vx300s_10_custom_finger_right.stl
+      sha256: 56fb3cc1236d4193106038adf8e457c7252ae9e86c7cee6dabf0578c53666358
+      triangle_count: 1666
+  mjcf:
+    dependencies: external/gym-aloha/gym_aloha/assets/vx300s_dependencies.xml
+    vx300s_left: external/gym-aloha/gym_aloha/assets/vx300s_left.xml
+    vx300s_right: external/gym-aloha/gym_aloha/assets/vx300s_right.xml
+  historical_usd:
+    path: local_eval_assets/aloha_isaac_assets/aloha_viperx.usd
+    sha256: b24afe3678155654892c69517fc58ecd970108d68cec56b02dc6fdcb8bf4493e
+    role: USER_CONFIRMED_VISUAL_AND_TRANSFORM_REFERENCE
+rejected_generic_mesh:
+  path: external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_finger.stl
+  sha256: a4baacd9a64df1be60ea5e98f50f3c660e1b7a1fe9684aace6004c5058c09483
+  triangle_count: 856
+  status: REJECTED_FOR_CURRENT_PHYSICAL_ALOHA_GRIPPER
+expected_mjcf_readback:
+  left:
+    mesh_name: vx300s_10_gripper_finger_left
+    position_m:
+      - 0.005
+      - -0.052
+      - 0.0
+    euler_rad:
+      - 3.14
+      - 1.57
+      - 0.0
+    joint_axis:
+      - 0.0
+      - 1.0
+      - 0.0
+    joint_range_m:
+      - 0.021
+      - 0.057
+  right:
+    mesh_name: vx300s_10_gripper_finger_right
+    position_m:
+      - 0.005
+      - 0.052
+      - 0.0
+    euler_rad:
+      - 3.14
+      - 1.57
+      - 0.0
+    joint_axis:
+      - 0.0
+      - 1.0
+      - 0.0
+    joint_range_m:
+      - -0.057
+      - -0.021
+frozen:
+  friction: 0.7
+  friction_status: TEMPORARY_UNCALIBRATED
+  restitution: 0.0
+  bottle_mass_kg: 0.020
+  bottle_diameter_m: 0.065
+  bottle_height_m: 0.210
+  bottle_inertia_status: ENGINEERING_DERIVED_UNCALIBRATED
+  physics_frequency_hz: 60
+  solve_articulation_contact_last: true
+  self_collision: false
+  bottle_collision: true
+  initial_state_source: configs/aloha1_joint_map.yaml
+  close_trajectory:
+    settle_steps: 60
+    open_steps: 90
+    fixed_bottle_settle_steps: 60
+    close_steps: 120
+    fixed_contact_steps: 60
+    open_left_finger_m: 0.057
+    closed_left_finger_m: 0.021
+  drive_source:
+    follower_left: assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/configuration/follower_left_debug_acceleration_drive.usd
+    follower_right: assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/configuration/follower_right_debug_acceleration_drive.usd
+  mimic:
+    target: right_finger
+    reference: left_finger
+    multiplier: -1.0
+    offset: 0.0
+  contact_offset_policy: PRESERVE_UNAUTHORED_ISAAC_DEFAULT
+  rest_offset_policy: PRESERVE_UNAUTHORED_ISAAC_DEFAULT
+  hold_interval_s: 2.0
+  hold_steps: 120
+  drop_gate_m: 0.010
+  maximum_persistent_penetration_m: 0.002
+  penetration_persistence_steps: 5
+  surface_gripper_allowed: false
+  post_release_fixed_constraint_allowed: false
+profiles:
+  convex_hull:
+    approximation: convexHull
+  convex_decomposition:
+    approximation: convexDecomposition
+diagnostic_directories:
+  root: assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger
+  source: assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/source
+  convex_hull: assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_hull
+  convex_decomposition: assets/Trossen/ALOHA1/1.0/diagnostics/gripper_correct_finger/convex_decomposition
+  screenshots: .codex/artifacts/20260729-correct-finger-task5/screenshots
+screenshots:
+  resolution:
+    - 1280
+    - 900
+  runtime_renderer: ISAAC_SIM_5_1_CAMERA_RGB
+  supplemental_renderer: BLENDER_STATIC_GEOMETRY_ONLY
+  missing_capture_gate: FAIL
+  required_captures:
+    asset_preflight:
+      - follower_left_open_closing_axis
+      - follower_left_open_isometric
+      - follower_left_closed_closing_axis
+      - follower_left_closed_isometric
+      - follower_right_open_closing_axis
+      - follower_right_open_isometric
+      - follower_right_closed_closing_axis
+      - follower_right_closed_isometric
+    collider_geometry:
+      - follower_left_hull_overview
+      - follower_left_hull_inner_surface
+      - follower_left_decomposition_overview
+      - follower_left_decomposition_inner_surface
+      - follower_right_hull_overview
+      - follower_right_hull_inner_surface
+      - follower_right_decomposition_overview
+      - follower_right_decomposition_inner_surface
+    bilateral_contact:
+      - follower_left_hull_first_bilateral_closing_axis
+      - follower_left_hull_first_bilateral_isometric
+      - follower_left_decomposition_first_bilateral_closing_axis
+      - follower_left_decomposition_first_bilateral_isometric
+      - follower_right_hull_first_bilateral_closing_axis
+      - follower_right_hull_first_bilateral_isometric
+      - follower_right_decomposition_first_bilateral_closing_axis
+      - follower_right_decomposition_first_bilateral_isometric
+    release_hold:
+      - follower_left_hull_release_isometric
+      - follower_left_hull_hold_end_isometric
+      - follower_left_decomposition_release_isometric
+      - follower_left_decomposition_hold_end_isometric
+      - follower_right_hull_release_isometric
+      - follower_right_hull_hold_end_isometric
+      - follower_right_decomposition_release_isometric
+      - follower_right_decomposition_hold_end_isometric
+protected_baseline:
+  - path: generated/urdf/follower_left.urdf
+    sha256: d9e4b32723ee71dfce26fb4e78546cfcfef147b2d7dbf5e53e3620e3d8aa96bd
+  - path: generated/urdf/follower_right.urdf
+    sha256: 268a5e5b56ce48af679256380008606f64358d6ead2619b52946b37f47fb624b
+  - path: assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/follower_left_imported.usd
+    sha256: 955c34600846c8b4a08bedc639caef7d5e3c1d0e3a02a6900c80d27d52adadec
+  - path: assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/follower_right_imported.usd
+    sha256: 205d3b8fe72532f608446b18e80eccb5c8b0992fb71946b9737145afe4efa7ed
+  - path: assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/configuration/follower_left_debug_acceleration_drive.usd
+    sha256: 7fe1d086c4d79e60cf6f3e10b67f164de4684df8d941603055764d6f230528a2
+  - path: assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/configuration/follower_right_debug_acceleration_drive.usd
+    sha256: 919c8013e9921eaa2aaf8e032aa5ed81bc64cd07c90233ad9418996e9ecea249
+  - path: configs/aloha1_gripper_collision_profiles.yaml
+    sha256: bd13be701ec121112e90c968b9fb00b684e3295576d9c4c419daac4998c666ae
+  - path: reports/aloha1_mapping/gripper_orientation_confirmation.json
+    sha256: fbf1502f4dc6c387a59f64ccaaa603753b77a80a99da809d2f0ed71698f47bad
+  - path: reports/aloha1_mapping/gripper_collider_ab_results.json
+    sha256: 028a01f580403611b5c4ff261c8d4c4539fc3e98e0cc8f5c6e04a21a5a270958
+  - path: reports/aloha1_mapping/gripper_hold_root_cause_v2.json
+    sha256: 74f1f4574060dbb4d385c08a32eb63e2e080ab503c536ae38256fd8254f5382c
