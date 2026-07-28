@@ -1,0 +1,1402 @@
+{
+  "schema_version": 1,
+  "status": "PASS",
+  "gate": "CAD_INSTALLATION_VISUAL_EVIDENCE_ONLY",
+  "corrected_installation_status": "AWAITING_USER_VISUAL_CONFIRMATION",
+  "source_classification": "SUPPLIER_PUBLIC_CAD_FIRST_HAND",
+  "source_cad": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/gdrive_source_readonly/Simple Aloha Viper 2024-5-13.step",
+    "sha256": "337862418769d4ea8b801d26e68930c4412f870050e60769bbf91765194dc571",
+    "assembly": "Simple Aloha Viper 2024-5-13.step"
+  },
+  "finger_mapping": {
+    "blue": "left_finger / CAD +X side",
+    "orange": "right_finger / CAD -X side",
+    "geometry": "two distinct handed B-Reps embedded in the supplier assembly",
+    "standalone_3d_a1_v3_used": false,
+    "arbitrary_single_side_180_degree_rotation_used": false
+  },
+  "state_semantics": {
+    "closed": "supplier assembly static CLOSED_REFERENCE",
+    "open": "both embedded fingers translated outward by 36 mm along CAD X"
+  },
+  "capture_count": 8,
+  "raw_and_annotated_file_count": 16,
+  "captures": [
+    {
+      "state_id": "closed",
+      "view_id": "true_top",
+      "target": "supplier-CAD handed finger installation, center-facing inner surfaces, and open/closed aperture",
+      "part": "follower gripper handed finger pair",
+      "phase": "static_CAD_closed",
+      "physical_stage_frame_time": "NOT_APPLICABLE_STATIC_CAD",
+      "acceptance_criteria": {
+        "both_fingers_complete": true,
+        "blue_orange_mapping_correct": true,
+        "inner_surfaces_face_center": true,
+        "not_cropped": true,
+        "critical_geometry_not_shell_occluded": true,
+        "open_closed_visibly_distinct": true,
+        "paired_camera_identical": true,
+        "labels_do_not_overlap": true,
+        "annotations_do_not_hide_critical_geometry": true,
+        "pass_scope_is_cad_visual_only": true
+      },
+      "raw": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/attempt5_candidate/screenshots_raw/closed_true_top_raw.png",
+        "sha256": "8d752ae712440c6ea63ee45837d0088d2670e7801d9ef177b85393c6f2e3af55",
+        "pixel_sha256": "cd110970378c6ceb237f0ff408c9583efb691f10d23e340a682addde6f3162f0",
+        "resolution": [
+          1280,
+          900
+        ],
+        "visual_self_review": "PASS"
+      },
+      "annotated": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/attempt5_candidate/screenshots_annotated_v3/closed_true_top_annotated.png",
+        "sha256": "cdc7dce030465f736db3589747713a47c48bf53c5217fdc0226b596613c343e7",
+        "pixel_sha256": "3398da49583c70fed76198c26be2cd7ccfc704c73c35c45069521de999d818b3",
+        "resolution": [
+          1760,
+          900
+        ],
+        "visual_self_review": "PASS"
+      },
+      "camera": {
+        "camera_forward": [
+          0.0,
+          0.0,
+          -1.0
+        ],
+        "image_up": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "image_right": [
+          1.0,
+          0.0,
+          0.0
+        ],
+        "description": "camera on CAD +Z looking toward CAD -Z",
+        "target_mm": [
+          0.10000104967325996,
+          -509.85379379146974,
+          429.06332313351425
+        ],
+        "camera_location_mm": [
+          0.10000104967325996,
+          -509.85379379146974,
+          885.8106172734838
+        ],
+        "ortho_height_mm": 230.7060027668959,
+        "ortho_width_mm": 328.1152039351408,
+        "resolution": [
+          1280,
+          900
+        ],
+        "margin": 1.45,
+        "camera_to_world_matrix_cad_mm": [
+          [
+            1.0,
+            0.0,
+            -0.0,
+            0.10000104967325996
+          ],
+          [
+            0.0,
+            1.0,
+            -0.0,
+            -509.85379379146974
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            885.8106172734838
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "open_closed_pair_key": "paired_true_top"
+      },
+      "state_translation_mm": {
+        "cad_positive_x_finger": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "cad_negative_x_finger": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "finger_minimum_shape_distance_mm": 4.488278416089045,
+      "annotation_geometry": {
+        "cad_positive_x_finger": {
+          "measured_color_bbox_px": [
+            652,
+            357,
+            804,
+            891
+          ],
+          "inner_surface_sample_px": [
+            652.0,
+            890.1292699752732
+          ]
+        },
+        "cad_negative_x_finger": {
+          "measured_color_bbox_px": [
+            475,
+            357,
+            627,
+            890
+          ],
+          "inner_surface_sample_px": [
+            626.9999999999998,
+            889.1309005558439
+          ]
+        }
+      },
+      "annotation_sample_semantics": "CAD-derived inner/contact-facing surface sample for orientation annotation only; not a physical contact point",
+      "visual_self_review": "PASS",
+      "assistant_vision_conclusion": "Both complete handed fingers and the gripper rail are visible from proven CAD +Z. The center gap grows clearly from closed to open.",
+      "retake_reason": null
+    },
+    {
+      "state_id": "open",
+      "view_id": "true_top",
+      "target": "supplier-CAD handed finger installation, center-facing inner surfaces, and open/closed aperture",
+      "part": "follower gripper handed finger pair",
+      "phase": "static_CAD_open",
+      "physical_stage_frame_time": "NOT_APPLICABLE_STATIC_CAD",
+      "acceptance_criteria": {
+        "both_fingers_complete": true,
+        "blue_orange_mapping_correct": true,
+        "inner_surfaces_face_center": true,
+        "not_cropped": true,
+        "critical_geometry_not_shell_occluded": true,
+        "open_closed_visibly_distinct": true,
+        "paired_camera_identical": true,
+        "labels_do_not_overlap": true,
+        "annotations_do_not_hide_critical_geometry": true,
+        "pass_scope_is_cad_visual_only": true
+      },
+      "raw": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/attempt5_candidate/screenshots_raw/open_true_top_raw.png",
+        "sha256": "c117ea7e925ea2c94754d61c720172aa1ca35b3c750ce6d624bc29a4547b4184",
+        "pixel_sha256": "ffec85accbb03cb3a56d9e76ecabceaaa0116d729b45abf2f57091c2cc053b28",
+        "resolution": [
+          1280,
+          900
+        ],
+        "visual_self_review": "PASS"
+      },
+      "annotated": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/attempt5_candidate/screenshots_annotated_v3/open_true_top_annotated.png",
+        "sha256": "a8451812d6716899ce9edcb17dc6424811d182dfe04395d16db1d83aa3376118",
+        "pixel_sha256": "3da5cf351819c893d9563b659bb90b0f80ad6544d05e4f8cd0c3e266f3a86897",
+        "resolution": [
+          1760,
+          900
+        ],
+        "visual_self_review": "PASS"
+      },
+      "camera": {
+        "camera_forward": [
+          0.0,
+          0.0,
+          -1.0
+        ],
+        "image_up": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "image_right": [
+          1.0,
+          0.0,
+          0.0
+        ],
+        "description": "camera on CAD +Z looking toward CAD -Z",
+        "target_mm": [
+          0.10000104967325996,
+          -509.85379379146974,
+          429.06332313351425
+        ],
+        "camera_location_mm": [
+          0.10000104967325996,
+          -509.85379379146974,
+          885.8106172734838
+        ],
+        "ortho_height_mm": 230.7060027668959,
+        "ortho_width_mm": 328.1152039351408,
+        "resolution": [
+          1280,
+          900
+        ],
+        "margin": 1.45,
+        "camera_to_world_matrix_cad_mm": [
+          [
+            1.0,
+            0.0,
+            -0.0,
+            0.10000104967325996
+          ],
+          [
+            0.0,
+            1.0,
+            -0.0,
+            -509.85379379146974
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            885.8106172734838
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "open_closed_pair_key": "paired_true_top"
+      },
+      "state_translation_mm": {
+        "cad_positive_x_finger": [
+          36.0,
+          0.0,
+          0.0
+        ],
+        "cad_negative_x_finger": [
+          -36.0,
+          0.0,
+          0.0
+        ]
+      },
+      "finger_minimum_shape_distance_mm": 76.48827841608903,
+      "annotation_geometry": {
+        "cad_positive_x_finger": {
+          "measured_color_bbox_px": [
+            852,
+            357,
+            1004,
+            891
+          ],
+          "inner_surface_sample_px": [
+            852.0,
+            890.1292699752732
+          ]
+        },
+        "cad_negative_x_finger": {
+          "measured_color_bbox_px": [
+            275,
+            358,
+            427,
+            890
+          ],
+          "inner_surface_sample_px": [
+            426.9999999999999,
+            889.1325311364145
+          ]
+        }
+      },
+      "annotation_sample_semantics": "CAD-derived inner/contact-facing surface sample for orientation annotation only; not a physical contact point",
+      "visual_self_review": "PASS",
+      "assistant_vision_conclusion": "Both complete handed fingers and the gripper rail are visible from proven CAD +Z. The center gap grows clearly from closed to open.",
+      "retake_reason": null
+    },
+    {
+      "state_id": "closed",
+      "view_id": "true_bottom",
+      "target": "supplier-CAD handed finger installation, center-facing inner surfaces, and open/closed aperture",
+      "part": "follower gripper handed finger pair",
+      "phase": "static_CAD_closed",
+      "physical_stage_frame_time": "NOT_APPLICABLE_STATIC_CAD",
+      "acceptance_criteria": {
+        "both_fingers_complete": true,
+        "blue_orange_mapping_correct": true,
+        "inner_surfaces_face_center": true,
+        "not_cropped": true,
+        "critical_geometry_not_shell_occluded": true,
+        "open_closed_visibly_distinct": true,
+        "paired_camera_identical": true,
+        "labels_do_not_overlap": true,
+        "annotations_do_not_hide_critical_geometry": true,
+        "pass_scope_is_cad_visual_only": true
+      },
+      "raw": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/attempt5_candidate/screenshots_raw/closed_true_bottom_raw.png",
+        "sha256": "20fd5014ff4c377b28ad3dfc871f298e8363d1f5396aed86bd84a72756098f6f",
+        "pixel_sha256": "35b0b68ffba869c17a42363b0ea2656294ccc77c1a7d961f1f81cc40f06bca29",
+        "resolution": [
+          1280,
+          900
+        ],
+        "visual_self_review": "PASS"
+      },
+      "annotated": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/attempt5_candidate/screenshots_annotated_v3/closed_true_bottom_annotated.png",
+        "sha256": "ba4fe3fcf4d2344549a00b5b495ec9e0e563ecda6d3b3ed6dabcb23b40edbbb1",
+        "pixel_sha256": "940fe9aa68c81fdc43cfd8f3f6d6f29d53422a69a24e7d2c2e723cedcd26b919",
+        "resolution": [
+          1760,
+          900
+        ],
+        "visual_self_review": "PASS"
+      },
+      "camera": {
+        "camera_forward": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "image_up": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "image_right": [
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "description": "camera on CAD -Z looking toward CAD +Z",
+        "target_mm": [
+          0.10000104967325996,
+          -509.85379379146974,
+          429.06332313351425
+        ],
+        "camera_location_mm": [
+          0.10000104967325996,
+          -509.85379379146974,
+          -27.68397100645535
+        ],
+        "ortho_height_mm": 230.7060027668959,
+        "ortho_width_mm": 328.1152039351408,
+        "resolution": [
+          1280,
+          900
+        ],
+        "margin": 1.45,
+        "camera_to_world_matrix_cad_mm": [
+          [
+            -1.0,
+            0.0,
+            -0.0,
+            0.10000104967325996
+          ],
+          [
+            0.0,
+            1.0,
+            -0.0,
+            -509.85379379146974
+          ],
+          [
+            0.0,
+            0.0,
+            -1.0,
+            -27.68397100645535
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "open_closed_pair_key": "paired_true_bottom"
+      },
+      "state_translation_mm": {
+        "cad_positive_x_finger": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "cad_negative_x_finger": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "finger_minimum_shape_distance_mm": 4.488278416089045,
+      "annotation_geometry": {
+        "cad_positive_x_finger": {
+          "measured_color_bbox_px": [
+            475,
+            357,
+            627,
+            890
+          ],
+          "inner_surface_sample_px": [
+            627.0,
+            889.1309005558439
+          ]
+        },
+        "cad_negative_x_finger": {
+          "measured_color_bbox_px": [
+            653,
+            357,
+            804,
+            890
+          ],
+          "inner_surface_sample_px": [
+            653.0000000000003,
+            889.1309005558439
+          ]
+        }
+      },
+      "annotation_sample_semantics": "CAD-derived inner/contact-facing surface sample for orientation annotation only; not a physical contact point",
+      "visual_self_review": "PASS",
+      "assistant_vision_conclusion": "The proven CAD -Z view reverses image-side color order as expected without changing the CAD +X/-X role mapping; both fingers remain complete and the paired aperture change is clear.",
+      "retake_reason": null
+    },
+    {
+      "state_id": "open",
+      "view_id": "true_bottom",
+      "target": "supplier-CAD handed finger installation, center-facing inner surfaces, and open/closed aperture",
+      "part": "follower gripper handed finger pair",
+      "phase": "static_CAD_open",
+      "physical_stage_frame_time": "NOT_APPLICABLE_STATIC_CAD",
+      "acceptance_criteria": {
+        "both_fingers_complete": true,
+        "blue_orange_mapping_correct": true,
+        "inner_surfaces_face_center": true,
+        "not_cropped": true,
+        "critical_geometry_not_shell_occluded": true,
+        "open_closed_visibly_distinct": true,
+        "paired_camera_identical": true,
+        "labels_do_not_overlap": true,
+        "annotations_do_not_hide_critical_geometry": true,
+        "pass_scope_is_cad_visual_only": true
+      },
+      "raw": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/attempt5_candidate/screenshots_raw/open_true_bottom_raw.png",
+        "sha256": "daa62676cc0e698c0915862c3fcfd95de3e811994f35816201d868d884bd5ab3",
+        "pixel_sha256": "86cdb35a6e65ae166ac0820a1feadad4fe172b763729725f1e6072c265bac2e8",
+        "resolution": [
+          1280,
+          900
+        ],
+        "visual_self_review": "PASS"
+      },
+      "annotated": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/attempt5_candidate/screenshots_annotated_v3/open_true_bottom_annotated.png",
+        "sha256": "8e8e30270285ff6c146f17d73f5b0ed013e220176153a586e2a8790941e52c1b",
+        "pixel_sha256": "0b34891a4a2359683f4e460b1e7e80fa6f095bef7cdfa7f3e7d13e99ae77c868",
+        "resolution": [
+          1760,
+          900
+        ],
+        "visual_self_review": "PASS"
+      },
+      "camera": {
+        "camera_forward": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "image_up": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "image_right": [
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "description": "camera on CAD -Z looking toward CAD +Z",
+        "target_mm": [
+          0.10000104967325996,
+          -509.85379379146974,
+          429.06332313351425
+        ],
+        "camera_location_mm": [
+          0.10000104967325996,
+          -509.85379379146974,
+          -27.68397100645535
+        ],
+        "ortho_height_mm": 230.7060027668959,
+        "ortho_width_mm": 328.1152039351408,
+        "resolution": [
+          1280,
+          900
+        ],
+        "margin": 1.45,
+        "camera_to_world_matrix_cad_mm": [
+          [
+            -1.0,
+            0.0,
+            -0.0,
+            0.10000104967325996
+          ],
+          [
+            0.0,
+            1.0,
+            -0.0,
+            -509.85379379146974
+          ],
+          [
+            0.0,
+            0.0,
+            -1.0,
+            -27.68397100645535
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "open_closed_pair_key": "paired_true_bottom"
+      },
+      "state_translation_mm": {
+        "cad_positive_x_finger": [
+          36.0,
+          0.0,
+          0.0
+        ],
+        "cad_negative_x_finger": [
+          -36.0,
+          0.0,
+          0.0
+        ]
+      },
+      "finger_minimum_shape_distance_mm": 76.48827841608903,
+      "annotation_geometry": {
+        "cad_positive_x_finger": {
+          "measured_color_bbox_px": [
+            275,
+            357,
+            427,
+            890
+          ],
+          "inner_surface_sample_px": [
+            426.9999999999999,
+            889.1309005558439
+          ]
+        },
+        "cad_negative_x_finger": {
+          "measured_color_bbox_px": [
+            852,
+            358,
+            1004,
+            890
+          ],
+          "inner_surface_sample_px": [
+            852.0000000000001,
+            889.1325311364145
+          ]
+        }
+      },
+      "annotation_sample_semantics": "CAD-derived inner/contact-facing surface sample for orientation annotation only; not a physical contact point",
+      "visual_self_review": "PASS",
+      "assistant_vision_conclusion": "The proven CAD -Z view reverses image-side color order as expected without changing the CAD +X/-X role mapping; both fingers remain complete and the paired aperture change is clear.",
+      "retake_reason": null
+    },
+    {
+      "state_id": "closed",
+      "view_id": "tip_end",
+      "target": "supplier-CAD handed finger installation, center-facing inner surfaces, and open/closed aperture",
+      "part": "follower gripper handed finger pair",
+      "phase": "static_CAD_closed",
+      "physical_stage_frame_time": "NOT_APPLICABLE_STATIC_CAD",
+      "acceptance_criteria": {
+        "both_fingers_complete": true,
+        "blue_orange_mapping_correct": true,
+        "inner_surfaces_face_center": true,
+        "not_cropped": true,
+        "critical_geometry_not_shell_occluded": true,
+        "open_closed_visibly_distinct": true,
+        "paired_camera_identical": true,
+        "labels_do_not_overlap": true,
+        "annotations_do_not_hide_critical_geometry": true,
+        "pass_scope_is_cad_visual_only": true
+      },
+      "raw": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/attempt5_candidate/screenshots_raw/closed_tip_end_raw.png",
+        "sha256": "c1aea3f905e212509b9aeee636e6a86acfbba205fc1dc6ca73eee15f0dfc652d",
+        "pixel_sha256": "58d8b57b65c14872754a6b3e6eea58f3ad1ca3f5028d84804e7e0c8fa5b5bce7",
+        "resolution": [
+          1280,
+          900
+        ],
+        "visual_self_review": "PASS"
+      },
+      "annotated": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/attempt5_candidate/screenshots_annotated_v3/closed_tip_end_annotated.png",
+        "sha256": "9edfbbe73546d37bc065f48e8ea4ca1698900f9bb4ad0d914f4f76f33562f5a3",
+        "pixel_sha256": "77206b1ee9599dbf3fbc20e5cb2438999e2a6faa9254f542d58be60c23cbf945",
+        "resolution": [
+          1760,
+          900
+        ],
+        "visual_self_review": "PASS"
+      },
+      "camera": {
+        "camera_forward": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "image_up": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "image_right": [
+          1.0,
+          0.0,
+          0.0
+        ],
+        "description": "camera at finger-tip CAD -Y end looking toward CAD +Y",
+        "target_mm": [
+          0.10000104967325996,
+          -509.85379379146974,
+          429.06332313351425
+        ],
+        "camera_location_mm": [
+          0.10000104967325996,
+          -966.6010879314393,
+          429.06332313351425
+        ],
+        "ortho_height_mm": 152.9296875000009,
+        "ortho_width_mm": 217.5000000000013,
+        "resolution": [
+          1280,
+          900
+        ],
+        "margin": 1.45,
+        "camera_to_world_matrix_cad_mm": [
+          [
+            1.0,
+            0.0,
+            -0.0,
+            0.10000104967325996
+          ],
+          [
+            0.0,
+            0.0,
+            -1.0,
+            -966.6010879314393
+          ],
+          [
+            0.0,
+            1.0,
+            -0.0,
+            429.06332313351425
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "open_closed_pair_key": "paired_tip_end"
+      },
+      "state_translation_mm": {
+        "cad_positive_x_finger": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "cad_negative_x_finger": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "finger_minimum_shape_distance_mm": 4.488278416089045,
+      "annotation_geometry": {
+        "cad_positive_x_finger": {
+          "measured_color_bbox_px": [
+            658,
+            242,
+            888,
+            693
+          ],
+          "inner_surface_sample_px": [
+            658.0,
+            467.5000000000093
+          ]
+        },
+        "cad_negative_x_finger": {
+          "measured_color_bbox_px": [
+            391,
+            243,
+            620,
+            687
+          ],
+          "inner_surface_sample_px": [
+            619.9999999999999,
+            465.0000000000082
+          ]
+        }
+      },
+      "annotation_sample_semantics": "CAD-derived inner/contact-facing surface sample for orientation annotation only; not a physical contact point",
+      "visual_self_review": "PASS",
+      "assistant_vision_conclusion": "Strongest palm-orientation view: the recessed inner/contact-facing surfaces on both handed B-Reps face each other across the centerline.",
+      "retake_reason": null
+    },
+    {
+      "state_id": "open",
+      "view_id": "tip_end",
+      "target": "supplier-CAD handed finger installation, center-facing inner surfaces, and open/closed aperture",
+      "part": "follower gripper handed finger pair",
+      "phase": "static_CAD_open",
+      "physical_stage_frame_time": "NOT_APPLICABLE_STATIC_CAD",
+      "acceptance_criteria": {
+        "both_fingers_complete": true,
+        "blue_orange_mapping_correct": true,
+        "inner_surfaces_face_center": true,
+        "not_cropped": true,
+        "critical_geometry_not_shell_occluded": true,
+        "open_closed_visibly_distinct": true,
+        "paired_camera_identical": true,
+        "labels_do_not_overlap": true,
+        "annotations_do_not_hide_critical_geometry": true,
+        "pass_scope_is_cad_visual_only": true
+      },
+      "raw": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/attempt5_candidate/screenshots_raw/open_tip_end_raw.png",
+        "sha256": "a745fb806b555bf278865c74d63885d61ba0d20b810f1f11d9c1883e61ec4070",
+        "pixel_sha256": "232585aa46c65fa513120cc1908f39f52cd42fce0d8d7e3cbae3fbebbc1a7b84",
+        "resolution": [
+          1280,
+          900
+        ],
+        "visual_self_review": "PASS"
+      },
+      "annotated": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/attempt5_candidate/screenshots_annotated_v3/open_tip_end_annotated.png",
+        "sha256": "9ecb4f63fbe012bf20d67d8f09da397dd781a9a673b00ef55a4221452d87f8da",
+        "pixel_sha256": "ee1ee1e07960fdbdd1f454ae11ce411f9523eb515f8509ee686f81160afe2300",
+        "resolution": [
+          1760,
+          900
+        ],
+        "visual_self_review": "PASS"
+      },
+      "camera": {
+        "camera_forward": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "image_up": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "image_right": [
+          1.0,
+          0.0,
+          0.0
+        ],
+        "description": "camera at finger-tip CAD -Y end looking toward CAD +Y",
+        "target_mm": [
+          0.10000104967325996,
+          -509.85379379146974,
+          429.06332313351425
+        ],
+        "camera_location_mm": [
+          0.10000104967325996,
+          -966.6010879314393,
+          429.06332313351425
+        ],
+        "ortho_height_mm": 152.9296875000009,
+        "ortho_width_mm": 217.5000000000013,
+        "resolution": [
+          1280,
+          900
+        ],
+        "margin": 1.45,
+        "camera_to_world_matrix_cad_mm": [
+          [
+            1.0,
+            0.0,
+            -0.0,
+            0.10000104967325996
+          ],
+          [
+            0.0,
+            0.0,
+            -1.0,
+            -966.6010879314393
+          ],
+          [
+            0.0,
+            1.0,
+            -0.0,
+            429.06332313351425
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "open_closed_pair_key": "paired_tip_end"
+      },
+      "state_translation_mm": {
+        "cad_positive_x_finger": [
+          36.0,
+          0.0,
+          0.0
+        ],
+        "cad_negative_x_finger": [
+          -36.0,
+          0.0,
+          0.0
+        ]
+      },
+      "finger_minimum_shape_distance_mm": 76.48827841608903,
+      "annotation_geometry": {
+        "cad_positive_x_finger": {
+          "measured_color_bbox_px": [
+            959,
+            242,
+            1189,
+            661
+          ],
+          "inner_surface_sample_px": [
+            959.0,
+            451.50000000000864
+          ]
+        },
+        "cad_negative_x_finger": {
+          "measured_color_bbox_px": [
+            90,
+            243,
+            319,
+            694
+          ],
+          "inner_surface_sample_px": [
+            318.9999999999998,
+            468.5000000000083
+          ]
+        }
+      },
+      "annotation_sample_semantics": "CAD-derived inner/contact-facing surface sample for orientation annotation only; not a physical contact point",
+      "visual_self_review": "PASS",
+      "assistant_vision_conclusion": "Strongest palm-orientation view: the recessed inner/contact-facing surfaces on both handed B-Reps face each other across the centerline.",
+      "retake_reason": null
+    },
+    {
+      "state_id": "closed",
+      "view_id": "base_oblique",
+      "target": "supplier-CAD handed finger installation, center-facing inner surfaces, and open/closed aperture",
+      "part": "follower gripper handed finger pair",
+      "phase": "static_CAD_closed",
+      "physical_stage_frame_time": "NOT_APPLICABLE_STATIC_CAD",
+      "acceptance_criteria": {
+        "both_fingers_complete": true,
+        "blue_orange_mapping_correct": true,
+        "inner_surfaces_face_center": true,
+        "not_cropped": true,
+        "critical_geometry_not_shell_occluded": true,
+        "open_closed_visibly_distinct": true,
+        "paired_camera_identical": true,
+        "labels_do_not_overlap": true,
+        "annotations_do_not_hide_critical_geometry": true,
+        "pass_scope_is_cad_visual_only": true
+      },
+      "raw": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/attempt5_candidate/screenshots_raw/closed_base_oblique_raw.png",
+        "sha256": "cb3596e8ffa4d6e93d3d7dbac14ae1796c4349a8b2b5535f8093b524de56d975",
+        "pixel_sha256": "893aa13a742ab5f342d099dc76966e41bcbdfaf39e247c847d63dfb5543190cc",
+        "resolution": [
+          1280,
+          900
+        ],
+        "visual_self_review": "PASS"
+      },
+      "annotated": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/attempt5_candidate/screenshots_annotated_v3/closed_base_oblique_annotated.png",
+        "sha256": "2f0b8eddf98beb0be1a6f8a0c78756476d1f249ed0e654ce70f6153443573c4a",
+        "pixel_sha256": "b0062a33d54227fe74159b81e31cb5571cd0b8fdfeea5150917ed5b5697fd8ff",
+        "resolution": [
+          1760,
+          900
+        ],
+        "visual_self_review": "PASS"
+      },
+      "camera": {
+        "camera_forward": [
+          0.0,
+          -0.7071067811865476,
+          -0.7071067811865476
+        ],
+        "image_up": [
+          0.0,
+          -0.7071067811865476,
+          0.7071067811865476
+        ],
+        "image_right": [
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "description": "camera on the gripper-base CAD +Y/+Z oblique, looking toward CAD -Y/-Z so the shell does not hide both installed fingers",
+        "target_mm": [
+          0.10000104967325996,
+          -509.85379379146974,
+          429.06332313351425
+        ],
+        "camera_location_mm": [
+          0.10000104967325996,
+          -186.88468481649056,
+          752.0324321084934
+        ],
+        "ortho_height_mm": 186.54794584269825,
+        "ortho_width_mm": 265.31263408739306,
+        "resolution": [
+          1280,
+          900
+        ],
+        "margin": 1.45,
+        "camera_to_world_matrix_cad_mm": [
+          [
+            -1.0,
+            0.0,
+            -0.0,
+            0.10000104967325996
+          ],
+          [
+            0.0,
+            -0.7071067811865476,
+            0.7071067811865476,
+            -186.88468481649056
+          ],
+          [
+            0.0,
+            0.7071067811865476,
+            0.7071067811865476,
+            752.0324321084934
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "open_closed_pair_key": "paired_base_oblique"
+      },
+      "state_translation_mm": {
+        "cad_positive_x_finger": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "cad_negative_x_finger": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "finger_minimum_shape_distance_mm": 4.488278416089045,
+      "annotation_geometry": {
+        "cad_positive_x_finger": {
+          "measured_color_bbox_px": [
+            436,
+            50,
+            624,
+            563
+          ],
+          "inner_surface_sample_px": [
+            624.0,
+            72.91179272417878
+          ]
+        },
+        "cad_negative_x_finger": {
+          "measured_color_bbox_px": [
+            655,
+            51,
+            843,
+            557
+          ],
+          "inner_surface_sample_px": [
+            655.0,
+            73.59915617628553
+          ]
+        }
+      },
+      "annotation_sample_semantics": "CAD-derived inner/contact-facing surface sample for orientation annotation only; not a physical contact point",
+      "visual_self_review": "PASS",
+      "assistant_vision_conclusion": "The documented CAD +Y/+Z oblique exposes both installed fingers, their sliding-carriage relation, and the opening change without the pure base-end shell occlusion.",
+      "retake_reason": null
+    },
+    {
+      "state_id": "open",
+      "view_id": "base_oblique",
+      "target": "supplier-CAD handed finger installation, center-facing inner surfaces, and open/closed aperture",
+      "part": "follower gripper handed finger pair",
+      "phase": "static_CAD_open",
+      "physical_stage_frame_time": "NOT_APPLICABLE_STATIC_CAD",
+      "acceptance_criteria": {
+        "both_fingers_complete": true,
+        "blue_orange_mapping_correct": true,
+        "inner_surfaces_face_center": true,
+        "not_cropped": true,
+        "critical_geometry_not_shell_occluded": true,
+        "open_closed_visibly_distinct": true,
+        "paired_camera_identical": true,
+        "labels_do_not_overlap": true,
+        "annotations_do_not_hide_critical_geometry": true,
+        "pass_scope_is_cad_visual_only": true
+      },
+      "raw": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/attempt5_candidate/screenshots_raw/open_base_oblique_raw.png",
+        "sha256": "72180a3a103def261b141794724cc5cc5763bc0ff6185f47d0ac3c52a3416ccd",
+        "pixel_sha256": "2e444b956564cbbbc6e92878a0cd1aebc8ee8ecfdb40f9e92184f5380aa7a9ac",
+        "resolution": [
+          1280,
+          900
+        ],
+        "visual_self_review": "PASS"
+      },
+      "annotated": {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/attempt5_candidate/screenshots_annotated_v3/open_base_oblique_annotated.png",
+        "sha256": "22e97bbcc35ffd5f63cf68970cb04376dce50a1ee1486e0dcabad8d86c319a8c",
+        "pixel_sha256": "6ce810588f13f73d007234ffd485d29c65205fb6848f1b598766fb5e2eed2d2f",
+        "resolution": [
+          1760,
+          900
+        ],
+        "visual_self_review": "PASS"
+      },
+      "camera": {
+        "camera_forward": [
+          0.0,
+          -0.7071067811865476,
+          -0.7071067811865476
+        ],
+        "image_up": [
+          0.0,
+          -0.7071067811865476,
+          0.7071067811865476
+        ],
+        "image_right": [
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "description": "camera on the gripper-base CAD +Y/+Z oblique, looking toward CAD -Y/-Z so the shell does not hide both installed fingers",
+        "target_mm": [
+          0.10000104967325996,
+          -509.85379379146974,
+          429.06332313351425
+        ],
+        "camera_location_mm": [
+          0.10000104967325996,
+          -186.88468481649056,
+          752.0324321084934
+        ],
+        "ortho_height_mm": 186.54794584269825,
+        "ortho_width_mm": 265.31263408739306,
+        "resolution": [
+          1280,
+          900
+        ],
+        "margin": 1.45,
+        "camera_to_world_matrix_cad_mm": [
+          [
+            -1.0,
+            0.0,
+            -0.0,
+            0.10000104967325996
+          ],
+          [
+            0.0,
+            -0.7071067811865476,
+            0.7071067811865476,
+            -186.88468481649056
+          ],
+          [
+            0.0,
+            0.7071067811865476,
+            0.7071067811865476,
+            752.0324321084934
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "open_closed_pair_key": "paired_base_oblique"
+      },
+      "state_translation_mm": {
+        "cad_positive_x_finger": [
+          36.0,
+          0.0,
+          0.0
+        ],
+        "cad_negative_x_finger": [
+          -36.0,
+          0.0,
+          0.0
+        ]
+      },
+      "finger_minimum_shape_distance_mm": 76.48827841608903,
+      "annotation_geometry": {
+        "cad_positive_x_finger": {
+          "measured_color_bbox_px": [
+            188,
+            50,
+            377,
+            563
+          ],
+          "inner_surface_sample_px": [
+            376.9999999999999,
+            72.91179272417878
+          ]
+        },
+        "cad_negative_x_finger": {
+          "measured_color_bbox_px": [
+            902,
+            51,
+            1090,
+            559
+          ],
+          "inner_surface_sample_px": [
+            902.0000000000001,
+            73.68848090425504
+          ]
+        }
+      },
+      "annotation_sample_semantics": "CAD-derived inner/contact-facing surface sample for orientation annotation only; not a physical contact point",
+      "visual_self_review": "PASS",
+      "assistant_vision_conclusion": "The documented CAD +Y/+Z oblique exposes both installed fingers, their sliding-carriage relation, and the opening change without the pure base-end shell occlusion.",
+      "retake_reason": null
+    }
+  ],
+  "open_closed_pair_checks": {
+    "true_top": {
+      "status": "PASS",
+      "states": [
+        "closed",
+        "open"
+      ],
+      "camera_identical": true,
+      "raw_pixel_hashes_different": true,
+      "minimum_distance_monotonic": true
+    },
+    "true_bottom": {
+      "status": "PASS",
+      "states": [
+        "closed",
+        "open"
+      ],
+      "camera_identical": true,
+      "raw_pixel_hashes_different": true,
+      "minimum_distance_monotonic": true
+    },
+    "tip_end": {
+      "status": "PASS",
+      "states": [
+        "closed",
+        "open"
+      ],
+      "camera_identical": true,
+      "raw_pixel_hashes_different": true,
+      "minimum_distance_monotonic": true
+    },
+    "base_oblique": {
+      "status": "PASS",
+      "states": [
+        "closed",
+        "open"
+      ],
+      "camera_identical": true,
+      "raw_pixel_hashes_different": true,
+      "minimum_distance_monotonic": true
+    }
+  },
+  "repeat_render_determinism": {
+    "schema_version": 1,
+    "status": "PASS",
+    "baseline_metadata": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/attempt5_candidate/render_metadata.json",
+    "repeat_metadata": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/attempt6_determinism/render_metadata.json",
+    "capture_count": 8,
+    "records": [
+      {
+        "state_id": "closed",
+        "view_id": "base_oblique",
+        "baseline_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/attempt5_candidate/screenshots_raw/closed_base_oblique_raw.png",
+        "repeat_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/attempt6_determinism/screenshots_raw/closed_base_oblique_raw.png",
+        "baseline_pixel_sha256": "893aa13a742ab5f342d099dc76966e41bcbdfaf39e247c847d63dfb5543190cc",
+        "repeat_pixel_sha256": "893aa13a742ab5f342d099dc76966e41bcbdfaf39e247c847d63dfb5543190cc",
+        "pixel_hash_equal": true,
+        "resolution_equal": true,
+        "camera_metadata_equal": true
+      },
+      {
+        "state_id": "closed",
+        "view_id": "tip_end",
+        "baseline_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/attempt5_candidate/screenshots_raw/closed_tip_end_raw.png",
+        "repeat_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/attempt6_determinism/screenshots_raw/closed_tip_end_raw.png",
+        "baseline_pixel_sha256": "58d8b57b65c14872754a6b3e6eea58f3ad1ca3f5028d84804e7e0c8fa5b5bce7",
+        "repeat_pixel_sha256": "58d8b57b65c14872754a6b3e6eea58f3ad1ca3f5028d84804e7e0c8fa5b5bce7",
+        "pixel_hash_equal": true,
+        "resolution_equal": true,
+        "camera_metadata_equal": true
+      },
+      {
+        "state_id": "closed",
+        "view_id": "true_bottom",
+        "baseline_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/attempt5_candidate/screenshots_raw/closed_true_bottom_raw.png",
+        "repeat_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/attempt6_determinism/screenshots_raw/closed_true_bottom_raw.png",
+        "baseline_pixel_sha256": "35b0b68ffba869c17a42363b0ea2656294ccc77c1a7d961f1f81cc40f06bca29",
+        "repeat_pixel_sha256": "35b0b68ffba869c17a42363b0ea2656294ccc77c1a7d961f1f81cc40f06bca29",
+        "pixel_hash_equal": true,
+        "resolution_equal": true,
+        "camera_metadata_equal": true
+      },
+      {
+        "state_id": "closed",
+        "view_id": "true_top",
+        "baseline_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/attempt5_candidate/screenshots_raw/closed_true_top_raw.png",
+        "repeat_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/attempt6_determinism/screenshots_raw/closed_true_top_raw.png",
+        "baseline_pixel_sha256": "cd110970378c6ceb237f0ff408c9583efb691f10d23e340a682addde6f3162f0",
+        "repeat_pixel_sha256": "cd110970378c6ceb237f0ff408c9583efb691f10d23e340a682addde6f3162f0",
+        "pixel_hash_equal": true,
+        "resolution_equal": true,
+        "camera_metadata_equal": true
+      },
+      {
+        "state_id": "open",
+        "view_id": "base_oblique",
+        "baseline_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/attempt5_candidate/screenshots_raw/open_base_oblique_raw.png",
+        "repeat_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/attempt6_determinism/screenshots_raw/open_base_oblique_raw.png",
+        "baseline_pixel_sha256": "2e444b956564cbbbc6e92878a0cd1aebc8ee8ecfdb40f9e92184f5380aa7a9ac",
+        "repeat_pixel_sha256": "2e444b956564cbbbc6e92878a0cd1aebc8ee8ecfdb40f9e92184f5380aa7a9ac",
+        "pixel_hash_equal": true,
+        "resolution_equal": true,
+        "camera_metadata_equal": true
+      },
+      {
+        "state_id": "open",
+        "view_id": "tip_end",
+        "baseline_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/attempt5_candidate/screenshots_raw/open_tip_end_raw.png",
+        "repeat_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/attempt6_determinism/screenshots_raw/open_tip_end_raw.png",
+        "baseline_pixel_sha256": "232585aa46c65fa513120cc1908f39f52cd42fce0d8d7e3cbae3fbebbc1a7b84",
+        "repeat_pixel_sha256": "232585aa46c65fa513120cc1908f39f52cd42fce0d8d7e3cbae3fbebbc1a7b84",
+        "pixel_hash_equal": true,
+        "resolution_equal": true,
+        "camera_metadata_equal": true
+      },
+      {
+        "state_id": "open",
+        "view_id": "true_bottom",
+        "baseline_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/attempt5_candidate/screenshots_raw/open_true_bottom_raw.png",
+        "repeat_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/attempt6_determinism/screenshots_raw/open_true_bottom_raw.png",
+        "baseline_pixel_sha256": "86cdb35a6e65ae166ac0820a1feadad4fe172b763729725f1e6072c265bac2e8",
+        "repeat_pixel_sha256": "86cdb35a6e65ae166ac0820a1feadad4fe172b763729725f1e6072c265bac2e8",
+        "pixel_hash_equal": true,
+        "resolution_equal": true,
+        "camera_metadata_equal": true
+      },
+      {
+        "state_id": "open",
+        "view_id": "true_top",
+        "baseline_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/attempt5_candidate/screenshots_raw/open_true_top_raw.png",
+        "repeat_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/attempt6_determinism/screenshots_raw/open_true_top_raw.png",
+        "baseline_pixel_sha256": "ffec85accbb03cb3a56d9e76ecabceaaa0116d729b45abf2f57091c2cc053b28",
+        "repeat_pixel_sha256": "ffec85accbb03cb3a56d9e76ecabceaaa0116d729b45abf2f57091c2cc053b28",
+        "pixel_hash_equal": true,
+        "resolution_equal": true,
+        "camera_metadata_equal": true
+      }
+    ]
+  },
+  "retake_history": [
+    {
+      "attempt": "attempt_2",
+      "status": "FAIL",
+      "disposition": "REJECTED_INSUFFICIENT_ILLUMINATION",
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/screenshots_raw",
+      "log": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/logs/blender_render_attempt2.log",
+      "reason": "Eevee output was too dark to inspect the inner surfaces; file existence and nonzero pixels were not accepted."
+    },
+    {
+      "attempt": "attempt_3",
+      "status": "FAIL",
+      "disposition": "REJECTED_INSUFFICIENT_SURFACE_VISIBILITY",
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/attempt3_metric_scene/screenshots_raw",
+      "log": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/logs/blender_render_attempt3_metric_scene.log",
+      "reason": "Correct mm-to-m rendering units did not make Eevee surface details sufficiently visible for the CAD orientation gate."
+    },
+    {
+      "attempt": "attempt_4",
+      "status": "FAIL",
+      "disposition": "REJECTED_CROPPING_AND_BASE_END_OCCLUSION",
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/attempt4_workbench/screenshots_raw",
+      "log": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/logs/blender_render_attempt4_workbench.log",
+      "reason": "Workbench fixed visibility, but finger tips were cropped, open tip-end fingers touched the frame edge, and the pure base-end view hid both fingers behind the gripper shell."
+    },
+    {
+      "attempt": "attempt_5_raw",
+      "status": "PASS",
+      "disposition": "ACCEPTED_AFTER_PER_IMAGE_VISION_REVIEW",
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/attempt5_candidate/screenshots_raw",
+      "log": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/logs/blender_render_attempt5_candidate.log",
+      "reason": "Eight raw images passed individual visual inspection after increasing the paired frame margin and replacing the occluded base-end view with a proven base oblique."
+    },
+    {
+      "attempt": "attempt_5_annotated_v1",
+      "status": "FAIL",
+      "disposition": "REJECTED_LABEL_OVERLAP",
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/attempt5_candidate/screenshots_annotated",
+      "log": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/logs/annotate_attempt5.log",
+      "reason": "Long local left/right labels overlapped in the closed true-top and closed tip-end evidence."
+    },
+    {
+      "attempt": "attempt_5_annotated_v2",
+      "status": "FAIL",
+      "disposition": "REJECTED_LABEL_OVERLAP",
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/attempt5_candidate/screenshots_annotated_v2",
+      "log": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/logs/annotate_attempt5_v2.log",
+      "reason": "Short L/R tags fixed the first overlap, but the closed base-oblique distance label still covered the R tag."
+    },
+    {
+      "attempt": "attempt_5_annotated_v3",
+      "status": "PASS",
+      "disposition": "ACCEPTED_AFTER_PER_IMAGE_VISION_REVIEW",
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/attempt5_candidate/screenshots_annotated_v3",
+      "log": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/logs/annotate_attempt5_v3.log",
+      "reason": "All eight annotations passed individual visual inspection; local labels are short L/R tags and edge-near measurement labels use collision-free placement."
+    }
+  ],
+  "scope_boundaries": {
+    "isaac_runtime": "NOT_RUN",
+    "collider_validation": "NOT_RUN",
+    "contact_validation": "NOT_RUN",
+    "bottle_hold": "NOT_RUN",
+    "task_8": "NOT_RUN",
+    "final_default_asset_modified": false
+  },
+  "inputs": {
+    "annotation_metadata": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/attempt5_candidate/annotation_metadata_v3.json",
+      "sha256": "6e29e075cd902123c830645b79c5d289841d85b3e0f0a7e260fa8780e32c8d1f"
+    },
+    "determinism_report": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/viper_gripper/attempt6_determinism/determinism_comparison.json",
+      "sha256": "2972c2fc48f262f903d95b7d1063eb4ccedc7090cc4a40d93e3a2612fa35daa4"
+    }
+  }
+}
