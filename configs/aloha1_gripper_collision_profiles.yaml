@@ -1,0 +1,107 @@
+schema_version: 1
+scope: Stationary ALOHA 1 follower gripper collider diagnosis
+runtime:
+  isaac_sim: 5.1.0.0
+  kit: 107.3.3
+  physx: 107.3.26
+  urdf_importer: 2.4.30
+experiment:
+  repeats_per_robot: 20
+  robots:
+    - follower_left
+    - follower_right
+  first_round_control_mode: current_mimic
+  second_round_control_modes:
+    - current_mimic
+    - explicit_symmetric
+  parameter_scan_allowed: false
+frozen:
+  friction: 0.7
+  friction_status: TEMPORARY_UNCALIBRATED
+  restitution: 0.0
+  bottle_mass_kg: 0.020
+  bottle_diameter_m: 0.065
+  bottle_height_m: 0.210
+  bottle_inertia_status: ENGINEERING_DERIVED_UNCALIBRATED
+  physics_frequency_hz: 60
+  solve_articulation_contact_last: true
+  self_collision: false
+  bottle_collision: true
+  initial_state_source: configs/aloha1_joint_map.yaml
+  close_trajectory:
+    settle_steps: 60
+    open_steps: 90
+    fixed_bottle_settle_steps: 60
+    close_steps: 120
+    fixed_contact_steps: 60
+    open_left_finger_m: 0.057
+    closed_left_finger_m: 0.021
+  drive_source:
+    follower_left: assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/configuration/follower_left_debug_acceleration_drive.usd
+    follower_right: assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/configuration/follower_right_debug_acceleration_drive.usd
+  mimic:
+    target: right_finger
+    reference: left_finger
+    multiplier: -1.0
+    offset: 0.0
+  contact_offset_policy: PRESERVE_UNAUTHORED_ISAAC_DEFAULT
+  rest_offset_policy: PRESERVE_UNAUTHORED_ISAAC_DEFAULT
+  hold_interval_s: 2.0
+  hold_steps: 120
+  drop_gate_m: 0.010
+  maximum_persistent_penetration_m: 0.002
+  penetration_persistence_steps: 5
+  surface_gripper_allowed: false
+  post_release_fixed_constraint_allowed: false
+profiles:
+  convex_hull:
+    approximation: convexHull
+  convex_decomposition:
+    approximation: convexDecomposition
+diagnostic_directories:
+  convex_hull: assets/Trossen/ALOHA1/1.0/diagnostics/gripper_collision/convex_hull
+  convex_decomposition: assets/Trossen/ALOHA1/1.0/diagnostics/gripper_collision/convex_decomposition
+control_modes:
+  current_mimic:
+    status: CURRENT_IMPORTED_CONTROL_MAPPING
+    command: left_finger_only
+  explicit_symmetric:
+    status: DIAGNOSTIC_ONLY_NOT_FINAL_CONTROL_MAPPING
+    command: both_fingers
+    right_target_expression: -left_target
+protected_baseline:
+  - path: generated/urdf/follower_left.urdf
+    sha256: d9e4b32723ee71dfce26fb4e78546cfcfef147b2d7dbf5e53e3620e3d8aa96bd
+  - path: generated/urdf/follower_right.urdf
+    sha256: 268a5e5b56ce48af679256380008606f64358d6ead2619b52946b37f47fb624b
+  - path: assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/follower_left_imported.usd
+    sha256: 955c34600846c8b4a08bedc639caef7d5e3c1d0e3a02a6900c80d27d52adadec
+  - path: assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/follower_right_imported.usd
+    sha256: 205d3b8fe72532f608446b18e80eccb5c8b0992fb71946b9737145afe4efa7ed
+  - path: assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/configuration/follower_left_debug_acceleration_drive.usd
+    sha256: 7fe1d086c4d79e60cf6f3e10b67f164de4684df8d941603055764d6f230528a2
+  - path: assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/configuration/follower_right_debug_acceleration_drive.usd
+    sha256: 919c8013e9921eaa2aaf8e032aa5ed81bc64cd07c90233ad9418996e9ecea249
+  - path: reports/aloha1_mapping/gripper_validation.json
+    sha256: 0d7b47e7802ae4428e98f2840fe9cdcf9acf1d84430d4e659722a7861d70ddeb
+  - path: reports/aloha1_mapping/gripper_contact_events_follower_left_mu_0.300.json
+    sha256: acbcb4b46f6b7733ef5304d55ee68e80a176429c9fe705f18ea0e4e73e79cc88
+  - path: reports/aloha1_mapping/gripper_contact_events_follower_left_mu_0.500.json
+    sha256: bedfca2f01a75f5fd5b051b38c799acd04384212477e53c9bd6e00ebdf936593
+  - path: reports/aloha1_mapping/gripper_contact_events_follower_left_mu_0.700.json
+    sha256: 8ed83ee5727cab94069fe622e1805bd01793e82b9c4fbffe7efd776d8f52d71a
+  - path: reports/aloha1_mapping/gripper_contact_events_follower_right_mu_0.300.json
+    sha256: f70bf645d202e8b26c96a48d58c2fd0ef4dadb78eaaad8f29704925288d2ed53
+  - path: reports/aloha1_mapping/gripper_contact_events_follower_right_mu_0.500.json
+    sha256: 56e5cb40fda94d433fcf55fdd64da1555eefdf1497729fda302c247d0bb1c35a
+  - path: reports/aloha1_mapping/gripper_contact_events_follower_right_mu_0.700.json
+    sha256: 3f2a373b894a78e1ed1ab1aa3add9f822e61a6d83b7a45bbac3787803a4b730a
+  - path: reports/aloha1_mapping/gripper_curves.csv
+    sha256: 76fb976a78f6d6838635ed224db32ea09e0762efdf928a37ed3c5515a640286c
+source_mesh:
+  path: external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/meshes/aloha_vx300s_meshes/gripper_finger.stl
+  sha256: a4baacd9a64df1be60ea5e98f50f3c660e1b7a1fe9684aace6004c5058c09483
+  urdf_scale:
+    - 0.001
+    - 0.001
+    - 0.001

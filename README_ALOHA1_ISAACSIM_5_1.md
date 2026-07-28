@@ -14,7 +14,9 @@ sim-to-real dynamics model and it is not yet accepted for bottle insertion.
 | Isaac Sim 5.1 import | PASS | `reports/aloha1_mapping/import_manifest.json` |
 | Explicit joint/control mapping | PARTIAL | `configs/aloha1_joint_map.yaml`, `control_mapping_report.json` |
 | Physics profiles | PARTIAL | `configs/aloha1_physics_profiles.yaml`, `physics_profiles.json` |
-| Gripper contact and hold | **FAIL** | `reports/aloha1_mapping/gripper_validation.json` |
+| Gripper collider experiment execution | PASS | `reports/aloha1_mapping/gripper_collider_ab_results.json:experiment_execution_status` |
+| Gripper static bottle hold | **FAIL** | `gripper_collider_ab_results.json:status` |
+| Gripper collider root cause | `neither_resolved` | `gripper_root_cause_classification.json` |
 | Workcell and logical cameras | PARTIAL | `workcell_manifest.json`, `camera_validation.json` |
 | Official and custom Task 7 validation | **FAIL** | `reports/aloha1_mapping/validation_summary.json`, `asset_validator_report.json` |
 | Repeated headless determinism | PASS | `validation_summary.json:determinism`, `gripper_validation.json:determinism` |
@@ -216,6 +218,12 @@ bash tools/build_aloha1_urdf.sh
 .venv_issac/bin/python tools/validate_aloha1_gripper.py
 .venv_issac/bin/python tools/validate_aloha1_gripper.py
 
+.venv_issac/bin/python tools/compare_aloha1_gripper_colliders.py \
+  > .codex/artifacts/aloha1-gripper-collider-ab/compare_aloha1_gripper_colliders.log 2>&1
+.venv/bin/python tools/compare_aloha1_gripper_colliders.py \
+  --finalize-log .codex/artifacts/aloha1-gripper-collider-ab/compare_aloha1_gripper_colliders.log
+.venv_issac/bin/python tools/validate_aloha1_gripper_collider_ab.py
+
 .venv_issac/bin/python tools/validate_aloha1_asset.py
 .venv_issac/bin/python tools/validate_aloha1_asset.py
 
@@ -247,6 +255,8 @@ unclassified errors:
 
 ## Task 5 gripper result
 
+The original protected baseline remains
+`reports/aloha1_mapping/gripper_validation.json`.
 The baseline uses the existing finger STL convex hull and does not use a
 surface attachment mechanism or a fixed bottle constraint. For both followers
 and all three temporary friction values:
@@ -281,6 +291,100 @@ introduced merely to make the report green. They require evidence that the
 baseline hull over-envelops, contacts early, or produces an unstable contact
 surface.
 
+### Frozen Convex Hull / Convex Decomposition diagnosis
+
+This diagnosis changes only the two follower finger approximation tokens.
+Both diagnostic wrappers reference the unchanged
+`debug_acceleration_drive` configuration. The original URDFs, imported USDs,
+configuration layers, baseline reports, friction, restitution, bottle proxy,
+drives, mimic relation, trajectory, `60 Hz` step, and hold gate retain their
+protected SHA-256 values.
+
+The local Isaac Sim 5.1 probe directly confirms:
+
+- URDF Importer `2.4.30` exposes `ImportConfig.convex_decomp`, whose initial
+  readback is `False`;
+- `UsdPhysics.MeshCollisionAPI.approximation` reads back `convexHull` or
+  `convexDecomposition`;
+- the local Python class is
+  `PhysxSchema.PhysxConvexDecompositionCollisionAPI`; the plugin schema type
+  is `PhysxSchemaPhysxConvexDecompositionCollisionAPI`;
+- local unauthored defaults are `maxConvexHulls=32`,
+  `voxelResolution=500000`, `errorPercentage=10`, `shrinkWrap=false`,
+  `minThickness=0.001`, and `hullVertexLimit=64`.
+
+Convex Decomposition is an NVIDIA-supported collision approximation in this
+local 5.1 schema. It is a diagnostic candidate, not a preselected correct
+answer. It does not create an exact collider, can increase contact count and
+cost, and is accepted as a default only if the unchanged A/B gate supports it.
+No decomposition parameter scan was run.
+
+The cooked geometry audit found:
+
+- Hull: one convex piece, volume about `6.03149e-5 m³`;
+- Decomposition: 32 pieces, volume about `3.70184e-5 m³`;
+- Hull/decomposition volume ratio: about `1.6293`;
+- sampled cooked-to-source p95 over the full mesh:
+  `6.895 mm` Hull versus `2.283 mm` Decomposition;
+- sampled p95 in the inner gripping-side region:
+  `6.789 mm` Hull versus `1.407 mm` Decomposition;
+- the inner direction is mesh-local `+X`, derived from the URDF prismatic
+  closing directions and both collision-origin RPY values, not selected by
+  eye;
+- Decomposition reaches the local default 32-hull cap and its smallest piece
+  has a longest AABB dimension of about `3.60 mm`.
+
+These values support that the single hull bridges STL concavities, including
+the source-mesh inner-side region. They do not prove its excess over a
+calibrated physical finger pad: CAD or measured inner-surface geometry is
+still unavailable. Actual cooked-piece overview, distal, and inner-side
+screenshots and their hashes are in the diagnostic asset directories and
+`gripper_collider_comparison.json`.
+
+The runtime matrix used `20` fresh stage/`World` resets for each robot in each
+of four groups, for `160` trials total:
+
+| Gripper gate | Result | Machine evidence |
+| --- | --- | --- |
+| Finger motion direction | PASS | existing open/close trajectory and per-step readback |
+| Aperture monotonicity | PASS | existing baseline aperture gate |
+| Mimic accuracy | **FAIL** | sampled start/open/closed residual about `1.98 mm`, above the unchanged `1 mm` gate |
+| Collider geometry audit | PARTIAL | cooked geometry is measured; calibrated physical inner surface remains a blocker |
+| Bilateral contact establishment | PASS | `160/160` trials establish left and right contact before release |
+| Contact normal quality | PARTIAL | first normals are opposed and mostly aligned with the closing axis; no calibrated quality threshold exists |
+| Contact persistence | PASS | no contact-loss event before the recorded interval ends; this does not imply hold success |
+| Static bottle hold | **FAIL** | all four groups are `0/40`; unchanged drop gate is `0.010 m` |
+| Determinism | PASS | exact signature repeats within every robot/profile/control group |
+| Performance | PASS (measured) | Decomposition is about `1.83×` slower and produces `20581` versus `2071` contact points per trial |
+
+With current mimic, Hull drops the bottle proxy by
+`0.0519614518 m`; Decomposition drops it by `0.0474101007 m`. The latter is a
+smaller displacement but still fails the unchanged gate in every reset, so it
+is not promoted to an improvement. Explicit symmetric targets produce the
+same state/contact/drop traces as current mimic and are labeled
+`DIAGNOSTIC_ONLY_NOT_FINAL_CONTROL_MAPPING`.
+
+The contact report must not be read as exact zero-gap impact. Representative
+first events have positive separation near `9 mm`; they indicate entry into
+the default contact envelope. Later normal impulses and estimated forces are
+finite. No trial reports persistent penetration or unexpected
+finger/bar/internal-gripper collision, although a one-frame transient maximum
+penetration of about `14.8 mm` is retained in the report and is not hidden.
+
+Final machine classifications:
+
+- `CONVEX_DECOMPOSITION_STATUS = NO_MEANINGFUL_EFFECT`;
+- root cause = `neither_resolved`;
+- experiment execution = `PASS`;
+- physical static-hold gate = `FAIL`;
+- default asset collider modified = `false`;
+- Task 8 = `NOT_RUN`.
+
+Therefore Convex Decomposition is not made the final/default collider. The
+evidence redirects the next diagnosis toward contact-envelope/offset,
+drive-force delivery, mimic/readback under load, and calibrated material or
+bottle dynamics, changing one variable at a time.
+
 ## HARD_BLOCKER and measurement checklist
 
 The machine-readable authoritative list is
@@ -302,8 +406,9 @@ The machine-readable authoritative list is
     aperture, and mimic/readback behavior.
 11. Resolve or formally accept the three source mass-only links without
     inventing collision geometry.
-12. Diagnose the current convex-hull contact/drive hold failure before any
-    collider upgrade.
+12. Calibrate the physical inner fingertip surface and contact-offset policy;
+    the frozen Hull/Decomposition A/B is complete, but neither collider passes
+    the hold gate.
 
 Work that does not depend on these measurements remains reproducible. The
 current workcell therefore retains calibration-pending prims and disabled
