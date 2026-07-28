@@ -1,0 +1,454 @@
+{
+  "NORMAL_FORCE_STATUS": "INSUFFICIENT",
+  "default_asset_collider_modified": false,
+  "diagnostic_config": {
+    "path": "/home/eii/project/openpi0.5-rtc-reward-learning/configs/aloha1_gripper_force_diagnosis.yaml",
+    "sha256": "c21d3e9600e8ece7cabe02f4f59cdbe89bf66ac6603671911c04fc2b32213d0c"
+  },
+  "environment": {
+    "isaac_sim": "5.1.0.0",
+    "kit": "107.3.3",
+    "physx": "107.3.26",
+    "python": "3.11.13"
+  },
+  "fresh_world_reset_per_trial": true,
+  "frozen": {
+    "approximation": "convexHull",
+    "bottle_diameter_m": 0.065,
+    "bottle_height_m": 0.21,
+    "bottle_mass_kg": 0.02,
+    "contact_offset_policy": "PRESERVE_UNAUTHORED_ISAAC_DEFAULT",
+    "control_mode": "current_mimic",
+    "friction": 0.7,
+    "physics_frequency_hz": 60,
+    "rest_offset_policy": "PRESERVE_UNAUTHORED_ISAAC_DEFAULT",
+    "restitution": 0.0,
+    "self_collision": false,
+    "solve_articulation_contact_last": true
+  },
+  "preload_delta_m": [
+    0.0,
+    0.0005,
+    0.001,
+    0.0015,
+    0.002
+  ],
+  "protected_baseline": [
+    {
+      "actual_sha256": "d9e4b32723ee71dfce26fb4e78546cfcfef147b2d7dbf5e53e3620e3d8aa96bd",
+      "expected_sha256": "d9e4b32723ee71dfce26fb4e78546cfcfef147b2d7dbf5e53e3620e3d8aa96bd",
+      "match": true,
+      "path": "generated/urdf/follower_left.urdf"
+    },
+    {
+      "actual_sha256": "268a5e5b56ce48af679256380008606f64358d6ead2619b52946b37f47fb624b",
+      "expected_sha256": "268a5e5b56ce48af679256380008606f64358d6ead2619b52946b37f47fb624b",
+      "match": true,
+      "path": "generated/urdf/follower_right.urdf"
+    },
+    {
+      "actual_sha256": "955c34600846c8b4a08bedc639caef7d5e3c1d0e3a02a6900c80d27d52adadec",
+      "expected_sha256": "955c34600846c8b4a08bedc639caef7d5e3c1d0e3a02a6900c80d27d52adadec",
+      "match": true,
+      "path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/follower_left_imported.usd"
+    },
+    {
+      "actual_sha256": "205d3b8fe72532f608446b18e80eccb5c8b0992fb71946b9737145afe4efa7ed",
+      "expected_sha256": "205d3b8fe72532f608446b18e80eccb5c8b0992fb71946b9737145afe4efa7ed",
+      "match": true,
+      "path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/follower_right_imported.usd"
+    },
+    {
+      "actual_sha256": "7fe1d086c4d79e60cf6f3e10b67f164de4684df8d941603055764d6f230528a2",
+      "expected_sha256": "7fe1d086c4d79e60cf6f3e10b67f164de4684df8d941603055764d6f230528a2",
+      "match": true,
+      "path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/configuration/follower_left_debug_acceleration_drive.usd"
+    },
+    {
+      "actual_sha256": "919c8013e9921eaa2aaf8e032aa5ed81bc64cd07c90233ad9418996e9ecea249",
+      "expected_sha256": "919c8013e9921eaa2aaf8e032aa5ed81bc64cd07c90233ad9418996e9ecea249",
+      "match": true,
+      "path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/configuration/follower_right_debug_acceleration_drive.usd"
+    },
+    {
+      "actual_sha256": "a1e6beb663f70e4c1d6493f5be80da2894e075c931e0fa5211e8c91d59a8205d",
+      "expected_sha256": "a1e6beb663f70e4c1d6493f5be80da2894e075c931e0fa5211e8c91d59a8205d",
+      "match": true,
+      "path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/follower_left.usd"
+    },
+    {
+      "actual_sha256": "86d850cea5b35fb2969d3a78834317b51e2ac0d301f09aaaa9dad191f9bb3d5d",
+      "expected_sha256": "86d850cea5b35fb2969d3a78834317b51e2ac0d301f09aaaa9dad191f9bb3d5d",
+      "match": true,
+      "path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/follower_right.usd"
+    },
+    {
+      "actual_sha256": "bd13be701ec121112e90c968b9fb00b684e3295576d9c4c419daac4998c666ae",
+      "expected_sha256": "bd13be701ec121112e90c968b9fb00b684e3295576d9c4c419daac4998c666ae",
+      "match": true,
+      "path": "configs/aloha1_gripper_collision_profiles.yaml"
+    },
+    {
+      "actual_sha256": "f12ae97057aaa5854a70a79d23cc3ecc7006634b087891be6ea17f6e4b3f4887",
+      "expected_sha256": "f12ae97057aaa5854a70a79d23cc3ecc7006634b087891be6ea17f6e4b3f4887",
+      "match": true,
+      "path": "assets/Trossen/ALOHA1/1.0/diagnostics/gripper_collision/convex_hull/follower_left/follower_left_convex_hull.usd"
+    },
+    {
+      "actual_sha256": "5d6b3f7f31169c8310b0e1a6aaa7ea53b04deb5b87dd82c3a1f5942f04ed1a50",
+      "expected_sha256": "5d6b3f7f31169c8310b0e1a6aaa7ea53b04deb5b87dd82c3a1f5942f04ed1a50",
+      "match": true,
+      "path": "assets/Trossen/ALOHA1/1.0/diagnostics/gripper_collision/convex_hull/follower_right/follower_right_convex_hull.usd"
+    },
+    {
+      "actual_sha256": "5586d234f7d4f475e1086121a59c5bff18acfa8adbc384b266390336bbd5af97",
+      "expected_sha256": "5586d234f7d4f475e1086121a59c5bff18acfa8adbc384b266390336bbd5af97",
+      "match": true,
+      "path": "assets/Trossen/ALOHA1/1.0/diagnostics/gripper_collision/convex_decomposition/follower_left/follower_left_convex_decomposition.usd"
+    },
+    {
+      "actual_sha256": "247d0e0b08bd3dec1f9cec78a1290b542759027ab15c4d0d566dd749f439b47c",
+      "expected_sha256": "247d0e0b08bd3dec1f9cec78a1290b542759027ab15c4d0d566dd749f439b47c",
+      "match": true,
+      "path": "assets/Trossen/ALOHA1/1.0/diagnostics/gripper_collision/convex_decomposition/follower_right/follower_right_convex_decomposition.usd"
+    },
+    {
+      "actual_sha256": "028a01f580403611b5c4ff261c8d4c4539fc3e98e0cc8f5c6e04a21a5a270958",
+      "expected_sha256": "028a01f580403611b5c4ff261c8d4c4539fc3e98e0cc8f5c6e04a21a5a270958",
+      "match": true,
+      "path": "reports/aloha1_mapping/gripper_collider_ab_results.json"
+    },
+    {
+      "actual_sha256": "c7885767712a1685c06fae058eb4a3323f4c8e21b9b9ff974fec7cee1a1a61ea",
+      "expected_sha256": "c7885767712a1685c06fae058eb4a3323f4c8e21b9b9ff974fec7cee1a1a61ea",
+      "match": true,
+      "path": "reports/aloha1_mapping/gripper_collider_comparison.json"
+    },
+    {
+      "actual_sha256": "897c955adb5f266f12cec8951f8a5fc95704ef0489ad2b6e33ff6e6388f03c2f",
+      "expected_sha256": "897c955adb5f266f12cec8951f8a5fc95704ef0489ad2b6e33ff6e6388f03c2f",
+      "match": true,
+      "path": "reports/aloha1_mapping/gripper_root_cause_classification.json"
+    }
+  ],
+  "repeats_per_delta_per_robot": 10,
+  "required_normal_force": {
+    "formula": "N_each = mg / (2 * mu)",
+    "friction": 0.7,
+    "gravity_m_s2": 9.81,
+    "mass_kg": 0.02,
+    "required_each_n": 0.14014285714285715,
+    "status": "ENGINEERING_DIAGNOSTIC_NOT_REAL_CALIBRATION"
+  },
+  "robots": {
+    "follower_left": {
+      "NORMAL_FORCE_STATUS": "INSUFFICIENT",
+      "curves": [
+        {
+          "all_finite": true,
+          "all_fresh_resets": true,
+          "complete": true,
+          "delta_m": 0.0,
+          "failed_trial_count": 0,
+          "left": {
+            "maximum_normal_force_n": 0.03063746365706017,
+            "mean_normal_force_n": 0.03046443973609362,
+            "minimum_stable_normal_force_n": 0.0298639039496189,
+            "sample_count": 600
+          },
+          "left_right_asymmetry_ratio": 0.22935384827926084,
+          "observable": true,
+          "right": {
+            "maximum_normal_force_n": 0.008557613420809409,
+            "mean_normal_force_n": 0.007961495532067172,
+            "minimum_stable_normal_force_n": 0.006849401295487312,
+            "sample_count": 600
+          },
+          "successful_trial_count": 10,
+          "trial_count": 10
+        },
+        {
+          "all_finite": true,
+          "all_fresh_resets": true,
+          "complete": true,
+          "delta_m": 0.0005,
+          "failed_trial_count": 0,
+          "left": {
+            "maximum_normal_force_n": 0.04120901314356026,
+            "mean_normal_force_n": 0.04104676010621961,
+            "minimum_stable_normal_force_n": 0.04077616858455296,
+            "sample_count": 600
+          },
+          "left_right_asymmetry_ratio": 0.15749682331028203,
+          "observable": true,
+          "right": {
+            "maximum_normal_force_n": 0.008213226380621714,
+            "mean_normal_force_n": 0.007487229950810061,
+            "minimum_stable_normal_force_n": 0.006422117018831611,
+            "sample_count": 600
+          },
+          "successful_trial_count": 10,
+          "trial_count": 10
+        },
+        {
+          "all_finite": true,
+          "all_fresh_resets": true,
+          "complete": true,
+          "delta_m": 0.001,
+          "failed_trial_count": 0,
+          "left": {
+            "maximum_normal_force_n": 0.05230462033254676,
+            "mean_normal_force_n": 0.051837536652469124,
+            "minimum_stable_normal_force_n": 0.051196683401061746,
+            "sample_count": 600
+          },
+          "left_right_asymmetry_ratio": 0.12240111961303793,
+          "observable": true,
+          "right": {
+            "maximum_normal_force_n": 0.0077507423647050055,
+            "mean_normal_force_n": 0.007166744227788825,
+            "minimum_stable_normal_force_n": 0.0062665313687641925,
+            "sample_count": 600
+          },
+          "successful_trial_count": 10,
+          "trial_count": 10
+        },
+        {
+          "all_finite": true,
+          "all_fresh_resets": true,
+          "complete": true,
+          "delta_m": 0.0015,
+          "failed_trial_count": 0,
+          "left": {
+            "maximum_normal_force_n": 0.06296129329622652,
+            "mean_normal_force_n": 0.06262906467056537,
+            "minimum_stable_normal_force_n": 0.06108196269729512,
+            "sample_count": 600
+          },
+          "left_right_asymmetry_ratio": 0.10957120863189655,
+          "observable": true,
+          "right": {
+            "maximum_normal_force_n": 0.008415005180211004,
+            "mean_normal_force_n": 0.007328877452017107,
+            "minimum_stable_normal_force_n": 0.006692824478351046,
+            "sample_count": 600
+          },
+          "successful_trial_count": 10,
+          "trial_count": 10
+        },
+        {
+          "all_finite": true,
+          "all_fresh_resets": true,
+          "complete": true,
+          "delta_m": 0.002,
+          "failed_trial_count": 0,
+          "left": {
+            "maximum_normal_force_n": 0.07291698100401872,
+            "mean_normal_force_n": 0.07241261762692403,
+            "minimum_stable_normal_force_n": 0.07164828460109487,
+            "sample_count": 600
+          },
+          "left_right_asymmetry_ratio": 0.09143888702454939,
+          "observable": true,
+          "right": {
+            "maximum_normal_force_n": 0.008095517846361392,
+            "mean_normal_force_n": 0.007610404743437264,
+            "minimum_stable_normal_force_n": 0.006551439401142276,
+            "sample_count": 600
+          },
+          "successful_trial_count": 10,
+          "trial_count": 10
+        }
+      ],
+      "deterministic_within_delta": true,
+      "force_vs_delta": {
+        "left": {
+          "intercept_n": 0.03058235168925304,
+          "observable": true,
+          "r_squared": 0.9996951612064523,
+          "slope_n_per_m": 21.09573206920131
+        },
+        "right": {
+          "intercept_n": 0.00768305719643464,
+          "observable": true,
+          "r_squared": 0.2028412157503553,
+          "slope_n_per_m": -0.17210681521055513
+        }
+      },
+      "normal_force_classification": {
+        "NORMAL_FORCE_STATUS": "INSUFFICIENT",
+        "lowest_sufficient_preload_m": null,
+        "reason": "no_tested_preload_meets_threshold_on_both_sides",
+        "required_each_n": 0.14014285714285715
+      },
+      "selected_contact_target_m": 0.0431,
+      "selected_preload_m": 0.002,
+      "selected_preload_policy": "HIGHEST_TESTED_PRELOAD_NO_SUFFICIENT_GATE",
+      "trial_file": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/gripper_force_diagnosis/preload_trials_follower_left.jsonl",
+      "trial_file_sha256": "f4a1129cd021ee11fa9c503d9cbd3f7b5c95013f88487fa08622b621a229972e"
+    },
+    "follower_right": {
+      "NORMAL_FORCE_STATUS": "INSUFFICIENT",
+      "curves": [
+        {
+          "all_finite": true,
+          "all_fresh_resets": true,
+          "complete": true,
+          "delta_m": 0.0,
+          "failed_trial_count": 0,
+          "left": {
+            "maximum_normal_force_n": 0.03063746365706017,
+            "mean_normal_force_n": 0.03046443973609362,
+            "minimum_stable_normal_force_n": 0.0298639039496189,
+            "sample_count": 600
+          },
+          "left_right_asymmetry_ratio": 0.22935384827926084,
+          "observable": true,
+          "right": {
+            "maximum_normal_force_n": 0.008557613420809409,
+            "mean_normal_force_n": 0.007961495532067172,
+            "minimum_stable_normal_force_n": 0.006849401295487312,
+            "sample_count": 600
+          },
+          "successful_trial_count": 10,
+          "trial_count": 10
+        },
+        {
+          "all_finite": true,
+          "all_fresh_resets": true,
+          "complete": true,
+          "delta_m": 0.0005,
+          "failed_trial_count": 0,
+          "left": {
+            "maximum_normal_force_n": 0.04120901314356026,
+            "mean_normal_force_n": 0.04104676010621961,
+            "minimum_stable_normal_force_n": 0.04077616858455296,
+            "sample_count": 600
+          },
+          "left_right_asymmetry_ratio": 0.15749682331028203,
+          "observable": true,
+          "right": {
+            "maximum_normal_force_n": 0.008213226380621714,
+            "mean_normal_force_n": 0.007487229950810061,
+            "minimum_stable_normal_force_n": 0.006422117018831611,
+            "sample_count": 600
+          },
+          "successful_trial_count": 10,
+          "trial_count": 10
+        },
+        {
+          "all_finite": true,
+          "all_fresh_resets": true,
+          "complete": true,
+          "delta_m": 0.001,
+          "failed_trial_count": 0,
+          "left": {
+            "maximum_normal_force_n": 0.05230462033254676,
+            "mean_normal_force_n": 0.051837536652469124,
+            "minimum_stable_normal_force_n": 0.051196683401061746,
+            "sample_count": 600
+          },
+          "left_right_asymmetry_ratio": 0.12240111961303793,
+          "observable": true,
+          "right": {
+            "maximum_normal_force_n": 0.0077507423647050055,
+            "mean_normal_force_n": 0.007166744227788825,
+            "minimum_stable_normal_force_n": 0.0062665313687641925,
+            "sample_count": 600
+          },
+          "successful_trial_count": 10,
+          "trial_count": 10
+        },
+        {
+          "all_finite": true,
+          "all_fresh_resets": true,
+          "complete": true,
+          "delta_m": 0.0015,
+          "failed_trial_count": 0,
+          "left": {
+            "maximum_normal_force_n": 0.06296129329622652,
+            "mean_normal_force_n": 0.06262906467056537,
+            "minimum_stable_normal_force_n": 0.06108196269729512,
+            "sample_count": 600
+          },
+          "left_right_asymmetry_ratio": 0.10957120863189655,
+          "observable": true,
+          "right": {
+            "maximum_normal_force_n": 0.008415005180211004,
+            "mean_normal_force_n": 0.007328877452017107,
+            "minimum_stable_normal_force_n": 0.006692824478351046,
+            "sample_count": 600
+          },
+          "successful_trial_count": 10,
+          "trial_count": 10
+        },
+        {
+          "all_finite": true,
+          "all_fresh_resets": true,
+          "complete": true,
+          "delta_m": 0.002,
+          "failed_trial_count": 0,
+          "left": {
+            "maximum_normal_force_n": 0.07291698100401872,
+            "mean_normal_force_n": 0.07241261762692403,
+            "minimum_stable_normal_force_n": 0.07164828460109487,
+            "sample_count": 600
+          },
+          "left_right_asymmetry_ratio": 0.09143888702454939,
+          "observable": true,
+          "right": {
+            "maximum_normal_force_n": 0.008095517846361392,
+            "mean_normal_force_n": 0.007610404743437264,
+            "minimum_stable_normal_force_n": 0.006551439401142276,
+            "sample_count": 600
+          },
+          "successful_trial_count": 10,
+          "trial_count": 10
+        }
+      ],
+      "deterministic_within_delta": true,
+      "force_vs_delta": {
+        "left": {
+          "intercept_n": 0.03058235168925304,
+          "observable": true,
+          "r_squared": 0.9996951612064523,
+          "slope_n_per_m": 21.09573206920131
+        },
+        "right": {
+          "intercept_n": 0.00768305719643464,
+          "observable": true,
+          "r_squared": 0.2028412157503553,
+          "slope_n_per_m": -0.17210681521055513
+        }
+      },
+      "normal_force_classification": {
+        "NORMAL_FORCE_STATUS": "INSUFFICIENT",
+        "lowest_sufficient_preload_m": null,
+        "reason": "no_tested_preload_meets_threshold_on_both_sides",
+        "required_each_n": 0.14014285714285715
+      },
+      "selected_contact_target_m": 0.0431,
+      "selected_preload_m": 0.002,
+      "selected_preload_policy": "HIGHEST_TESTED_PRELOAD_NO_SUFFICIENT_GATE",
+      "trial_file": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/gripper_force_diagnosis/preload_trials_follower_right.jsonl",
+      "trial_file_sha256": "bfa7c9386f1432db2e03bdac1c54cb129692836f64a8f8801eb8f1c655abb332"
+    }
+  },
+  "runtime_environment_readback": {
+    "kit_full": "107.3.3+production.229672.69cbf6ad.gl",
+    "normalized": {
+      "isaac_sim": "5.1.0.0",
+      "kit": "107.3.3",
+      "physx": "107.3.26",
+      "python": "3.11.13"
+    },
+    "physx_extension_id": "omni.physx",
+    "physx_extension_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/extscache/omni.physx-107.3.26+107.3.3.lx64.r.cp311.u353/omni/physx",
+    "physx_extension_version": "107.3.26",
+    "source": "ACTIVE_RUNTIME_READBACK"
+  },
+  "schema_version": 1,
+  "scope": "ALOHA follower digital gripper static hold root-cause diagnosis only",
+  "status": "FAIL",
+  "task8": "NOT_RUN"
+}

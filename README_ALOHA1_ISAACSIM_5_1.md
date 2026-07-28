@@ -15,8 +15,9 @@ sim-to-real dynamics model and it is not yet accepted for bottle insertion.
 | Explicit joint/control mapping | PARTIAL | `configs/aloha1_joint_map.yaml`, `control_mapping_report.json` |
 | Physics profiles | PARTIAL | `configs/aloha1_physics_profiles.yaml`, `physics_profiles.json` |
 | Gripper collider experiment execution | PASS | `reports/aloha1_mapping/gripper_collider_ab_results.json:experiment_execution_status` |
-| Gripper static bottle hold | **FAIL** | `gripper_collider_ab_results.json:status` |
-| Gripper collider root cause | `neither_resolved` | `gripper_root_cause_classification.json` |
+| Gripper static bottle hold | **FAIL** | `gripper_force_diagnosis/hold_v2.json:STATIC_HOLD_STATUS` |
+| Gripper collider A/B root cause | `neither_resolved` | `gripper_root_cause_classification.json` |
+| Gripper hold root cause v2 | `inconclusive` | `gripper_hold_root_cause_v2.json` |
 | Workcell and logical cameras | PARTIAL | `workcell_manifest.json`, `camera_validation.json` |
 | Official and custom Task 7 validation | **FAIL** | `reports/aloha1_mapping/validation_summary.json`, `asset_validator_report.json` |
 | Repeated headless determinism | PASS | `validation_summary.json:determinism`, `gripper_validation.json:determinism` |
@@ -126,10 +127,13 @@ as calibration data.
 ### Temporary, uncalibrated values
 
 The fingertip and bottle physics materials are
-`TEMPORARY_UNCALIBRATED`. Static and dynamic friction are scanned at
-`0.3`, `0.5`, and `0.7`; restitution is `0.0`. No value above this scan was
-used to conceal geometry, drive, or contact defects. Contact/rest offsets were
-not authored by the test and therefore retain the Isaac Sim 5.1 defaults.
+`TEMPORARY_UNCALIBRATED`. Earlier collider A/B work used its frozen friction
+profile. The v2 force diagnosis keeps static/dynamic friction at `0.7` and
+restitution at `0.0`; its planned `0.3/0.5/0.7/1.0` friction scan is
+deliberately `NOT_RUN` because no tested preload first established sufficient
+stable bilateral normal force. The `1.0` candidate remains
+`DIAGNOSTIC_ONLY_NOT_CALIBRATED`. Contact/rest offsets were not authored and
+retain the Isaac Sim 5.1 simulation-selected defaults.
 
 The default physics configuration is
 `debug_acceleration_drive`. The `sim2real_force_drive` layer exists as an
@@ -223,6 +227,12 @@ bash tools/build_aloha1_urdf.sh
 .venv/bin/python tools/compare_aloha1_gripper_colliders.py \
   --finalize-log .codex/artifacts/aloha1-gripper-collider-ab/compare_aloha1_gripper_colliders.log
 .venv_issac/bin/python tools/validate_aloha1_gripper_collider_ab.py
+
+.venv_issac/bin/python tools/audit_aloha1_contact_semantics.py
+.venv_issac/bin/python tools/measure_aloha1_gripper_preload_force.py
+.venv_issac/bin/python tools/audit_aloha1_gripper_materials.py
+.venv_issac/bin/python tools/validate_aloha1_gripper_hold_v2.py
+.venv_issac/bin/python tools/test_aloha1_gripper_solver_sensitivity.py
 
 .venv_issac/bin/python tools/validate_aloha1_asset.py
 .venv_issac/bin/python tools/validate_aloha1_asset.py
@@ -384,6 +394,79 @@ Therefore Convex Decomposition is not made the final/default collider. The
 evidence redirects the next diagnosis toward contact-envelope/offset,
 drive-force delivery, mimic/readback under load, and calibrated material or
 bottle dynamics, changing one variable at a time.
+
+### Static-hold root cause diagnosis v2
+
+The follow-up diagnosis keeps the final collider unchanged and uses only the
+protected Hull diagnostic wrapper. It does not modify the URDF, imported
+source USD, existing configuration layer, prior Hull/Decomposition assets, or
+prior reports. Every protected input hash matches the frozen manifest.
+
+The local PhysX 107.3 contact-report source confirms that impulse, position,
+normal, separation, and material IDs are per-contact-point data. Collider and
+material IDs are decoded with `PhysicsSchemaTools.intToSdfPath`; the world
+coordinate interpretation of position/normal is retained as a runtime
+cross-check against the bottle pose and collider AABBs, not mislabeled as a
+statement present in the Python stub. `CONTACT_FOUND`, `CONTACT_PERSIST`, and
+`CONTACT_LOST` are retained per frame. An unauthored
+`PhysxCollisionAPI.contactOffset/restOffset` reads back the Schema default
+`-inf`, meaning the simulation selects the effective value; no guessed offset
+was authored to make the result pass.
+
+The initial `CONTACT_FOUND` separation near `+10.7–10.9 mm` is not treated as
+a direct measured finger-to-bottle surface gap. The independent local
+closest-point probe reaches zero distance within its approximately `0.57 mm`
+sampling error, while load-bearing contact later converges to about
+`-4 to +3 µm` separation with finite nonzero impulse. The report therefore
+separates contact-envelope events from solver load-bearing contact and records
+`CONTACT_SEMANTICS_STATUS = VERIFIED_PHYSICAL_CONTACT`.
+
+The fixed-bottle preload experiment ran `5 × 10 × 2 = 100` fresh World resets
+at `60 Hz`. The theoretical diagnostic reference is
+`mg/(2μ) = 0.140143 N` per side for the temporary `20 g`, `μ=0.7` setup.
+At the largest permitted `2.0 mm` additional closing command:
+
+- left stable minimum normal force: about `0.071648 N`;
+- right stable minimum normal force: about `0.006551 N`;
+- left mean force grows at about `21.10 N/m` with `R²≈0.9997`;
+- right mean force has no useful preload response
+  (`-0.17 N/m`, `R²≈0.20`);
+- the active left drive reads back `maxForce=5.0`, but the available
+  `get_measured_joint_efforts` value is a solver-force readback, not an
+  applied drive-force measurement. It therefore cannot establish whether
+  `maxForce` is saturated.
+
+The two isolated followers produce the same curve. The real release test then
+ran `20 × 2 = 40` fresh resets at the highest tested preload. All `40/40`
+failed the unchanged `2 s / 0.010 m` hold gate. Each run reproduced the same
+first-dynamic-frame release velocity (about
+`[0.541, -0.0039, +0.183] m/s`), lost bilateral contact, and then entered free
+fall. This repeatable kinematic-to-dynamic release transient is retained as a
+secondary diagnostic observation; fixed-bottle contact persistence is not
+called a physical hold pass.
+
+| Gripper v2 gate | Result | Machine evidence |
+| --- | --- | --- |
+| Contact semantics | PASS | `VERIFIED_PHYSICAL_CONTACT`; envelope and load-bearing states are separate |
+| Contact offset audit | PASS | offsets unauthored; Schema defaults and runtime limitation recorded |
+| Normal-force delivery | **FAIL** | `INSUFFICIENT`; neither side reaches `0.140143 N`, with a severe right-side deficit |
+| Material binding | PASS | actual contact materials resolve to the temporary fingertip/bottle materials |
+| Effective friction | PARTIAL | effective `average(0.7,0.7)=0.7`; friction sufficiency scan gated off by insufficient force |
+| Static hold | **FAIL** | `0/40`, no constraint, parent attachment, or Surface Gripper |
+| Mimic accuracy | **FAIL / not causal in prior A/B** | residual remains above its gate, but explicit symmetric control did not change the hold trajectory |
+| Solver sensitivity | NOT_RUN / INCONCLUSIVE | correctly gated off because normal force already explains or blocks the hold |
+| Determinism | PASS | preload curves and all 40 release outcomes repeat exactly |
+
+The v2 machine classification is `root_cause = inconclusive`. The measured
+normal-force delivery is insufficient and material binding/combine behavior
+is working as authored, but the present runtime evidence cannot distinguish
+insufficient commanded preload from `maxForce` saturation. The deterministic
+kinematic-to-dynamic release transient is also unresolved. Friction cannot be
+isolated until stable bilateral normal force exists. Convex Decomposition has
+already been formally A/B tested: it improves geometric fit, but it does not
+solve static hold. Explicit finger control likewise did not change the prior
+hold result. Task 8 remains `NOT_RUN`, and the final/default collider remains
+unchanged.
 
 ## HARD_BLOCKER and measurement checklist
 

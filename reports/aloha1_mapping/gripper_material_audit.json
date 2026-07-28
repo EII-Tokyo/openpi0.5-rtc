@@ -1,0 +1,321 @@
+{
+  "FRICTION_STATUS": "INCONCLUSIVE",
+  "MATERIAL_STATUS": "SUFFICIENT",
+  "binding_override_audit": {
+    "method": "UsdShade.MaterialBindingAPI.ComputeBoundMaterial(materialPurpose=physics) on actual collider prim",
+    "parent_or_stronger_override_detected": false
+  },
+  "combine_rule_evidence": {
+    "allowed_tokens": [
+      "average",
+      "min",
+      "multiply",
+      "max"
+    ],
+    "different_mode_precedence": "NOT_NEEDED_AND_NOT_INFERRED; actual contacting materials read back the same mode",
+    "schema_default": "average"
+  },
+  "contact_report_materials": {
+    "follower_left": {
+      "left": {
+        "material0": "/World/Materials/temporary_fingertip",
+        "material1": "/World/Materials/temporary_bottle"
+      },
+      "right": {
+        "material0": "/World/Materials/temporary_fingertip",
+        "material1": "/World/Materials/temporary_bottle"
+      }
+    },
+    "follower_right": {
+      "left": {
+        "material0": "/World/Materials/temporary_fingertip",
+        "material1": "/World/Materials/temporary_bottle"
+      },
+      "right": {
+        "material0": "/World/Materials/temporary_fingertip",
+        "material1": "/World/Materials/temporary_bottle"
+      }
+    }
+  },
+  "default_asset_collider_modified": false,
+  "diagnostic_config": {
+    "path": "/home/eii/project/openpi0.5-rtc-reward-learning/configs/aloha1_gripper_force_diagnosis.yaml",
+    "sha256": "c21d3e9600e8ece7cabe02f4f59cdbe89bf66ac6603671911c04fc2b32213d0c"
+  },
+  "environment": {
+    "isaac_sim": "5.1.0.0",
+    "kit": "107.3.3",
+    "physx": "107.3.26",
+    "python": "3.11.13"
+  },
+  "pairs": {
+    "follower_left": {
+      "left": {
+        "bottle": {
+          "binding_relationship": "/World/BottleProxy.material:binding:physics",
+          "binding_source": "direct_or_inherited_physics_binding",
+          "binding_strength": "weakerThanDescendants",
+          "collider_path": "/World/BottleProxy",
+          "combine_mode_source": "LOCAL_PHYSX_SCHEMA_107_3_DEFAULT",
+          "dynamic_friction": 0.699999988079071,
+          "friction_combine_mode": "average",
+          "material_path": "/World/Materials/temporary_bottle",
+          "physx_material_api_applied": false,
+          "restitution": 0.0,
+          "restitution_combine_mode": "average",
+          "static_friction": 0.699999988079071
+        },
+        "combine_mode_consistent": true,
+        "contact_materials_match_binding": true,
+        "effective_dynamic_friction": 0.699999988079071,
+        "effective_restitution": 0.0,
+        "effective_static_friction": 0.699999988079071,
+        "expected_values_match": true,
+        "finger": {
+          "binding_relationship": "/World/Robot/follower_left_left_finger_link/collisions.material:binding:physics",
+          "binding_source": "direct_or_inherited_physics_binding",
+          "binding_strength": "weakerThanDescendants",
+          "collider_path": "/World/Robot/follower_left_left_finger_link/collisions/gripper_finger/node_STL_BINARY_",
+          "combine_mode_source": "LOCAL_PHYSX_SCHEMA_107_3_DEFAULT",
+          "dynamic_friction": 0.699999988079071,
+          "friction_combine_mode": "average",
+          "material_path": "/World/Materials/temporary_fingertip",
+          "physx_material_api_applied": false,
+          "restitution": 0.0,
+          "restitution_combine_mode": "average",
+          "static_friction": 0.699999988079071
+        },
+        "material_applied": true
+      },
+      "right": {
+        "bottle": {
+          "binding_relationship": "/World/BottleProxy.material:binding:physics",
+          "binding_source": "direct_or_inherited_physics_binding",
+          "binding_strength": "weakerThanDescendants",
+          "collider_path": "/World/BottleProxy",
+          "combine_mode_source": "LOCAL_PHYSX_SCHEMA_107_3_DEFAULT",
+          "dynamic_friction": 0.699999988079071,
+          "friction_combine_mode": "average",
+          "material_path": "/World/Materials/temporary_bottle",
+          "physx_material_api_applied": false,
+          "restitution": 0.0,
+          "restitution_combine_mode": "average",
+          "static_friction": 0.699999988079071
+        },
+        "combine_mode_consistent": true,
+        "contact_materials_match_binding": true,
+        "effective_dynamic_friction": 0.699999988079071,
+        "effective_restitution": 0.0,
+        "effective_static_friction": 0.699999988079071,
+        "expected_values_match": true,
+        "finger": {
+          "binding_relationship": "/World/Robot/follower_left_right_finger_link/collisions.material:binding:physics",
+          "binding_source": "direct_or_inherited_physics_binding",
+          "binding_strength": "weakerThanDescendants",
+          "collider_path": "/World/Robot/follower_left_right_finger_link/collisions/gripper_finger/node_STL_BINARY_",
+          "combine_mode_source": "LOCAL_PHYSX_SCHEMA_107_3_DEFAULT",
+          "dynamic_friction": 0.699999988079071,
+          "friction_combine_mode": "average",
+          "material_path": "/World/Materials/temporary_fingertip",
+          "physx_material_api_applied": false,
+          "restitution": 0.0,
+          "restitution_combine_mode": "average",
+          "static_friction": 0.699999988079071
+        },
+        "material_applied": true
+      }
+    },
+    "follower_right": {
+      "left": {
+        "bottle": {
+          "binding_relationship": "/World/BottleProxy.material:binding:physics",
+          "binding_source": "direct_or_inherited_physics_binding",
+          "binding_strength": "weakerThanDescendants",
+          "collider_path": "/World/BottleProxy",
+          "combine_mode_source": "LOCAL_PHYSX_SCHEMA_107_3_DEFAULT",
+          "dynamic_friction": 0.699999988079071,
+          "friction_combine_mode": "average",
+          "material_path": "/World/Materials/temporary_bottle",
+          "physx_material_api_applied": false,
+          "restitution": 0.0,
+          "restitution_combine_mode": "average",
+          "static_friction": 0.699999988079071
+        },
+        "combine_mode_consistent": true,
+        "contact_materials_match_binding": true,
+        "effective_dynamic_friction": 0.699999988079071,
+        "effective_restitution": 0.0,
+        "effective_static_friction": 0.699999988079071,
+        "expected_values_match": true,
+        "finger": {
+          "binding_relationship": "/World/Robot/follower_right_left_finger_link/collisions.material:binding:physics",
+          "binding_source": "direct_or_inherited_physics_binding",
+          "binding_strength": "weakerThanDescendants",
+          "collider_path": "/World/Robot/follower_right_left_finger_link/collisions/gripper_finger/node_STL_BINARY_",
+          "combine_mode_source": "LOCAL_PHYSX_SCHEMA_107_3_DEFAULT",
+          "dynamic_friction": 0.699999988079071,
+          "friction_combine_mode": "average",
+          "material_path": "/World/Materials/temporary_fingertip",
+          "physx_material_api_applied": false,
+          "restitution": 0.0,
+          "restitution_combine_mode": "average",
+          "static_friction": 0.699999988079071
+        },
+        "material_applied": true
+      },
+      "right": {
+        "bottle": {
+          "binding_relationship": "/World/BottleProxy.material:binding:physics",
+          "binding_source": "direct_or_inherited_physics_binding",
+          "binding_strength": "weakerThanDescendants",
+          "collider_path": "/World/BottleProxy",
+          "combine_mode_source": "LOCAL_PHYSX_SCHEMA_107_3_DEFAULT",
+          "dynamic_friction": 0.699999988079071,
+          "friction_combine_mode": "average",
+          "material_path": "/World/Materials/temporary_bottle",
+          "physx_material_api_applied": false,
+          "restitution": 0.0,
+          "restitution_combine_mode": "average",
+          "static_friction": 0.699999988079071
+        },
+        "combine_mode_consistent": true,
+        "contact_materials_match_binding": true,
+        "effective_dynamic_friction": 0.699999988079071,
+        "effective_restitution": 0.0,
+        "effective_static_friction": 0.699999988079071,
+        "expected_values_match": true,
+        "finger": {
+          "binding_relationship": "/World/Robot/follower_right_right_finger_link/collisions.material:binding:physics",
+          "binding_source": "direct_or_inherited_physics_binding",
+          "binding_strength": "weakerThanDescendants",
+          "collider_path": "/World/Robot/follower_right_right_finger_link/collisions/gripper_finger/node_STL_BINARY_",
+          "combine_mode_source": "LOCAL_PHYSX_SCHEMA_107_3_DEFAULT",
+          "dynamic_friction": 0.699999988079071,
+          "friction_combine_mode": "average",
+          "material_path": "/World/Materials/temporary_fingertip",
+          "physx_material_api_applied": false,
+          "restitution": 0.0,
+          "restitution_combine_mode": "average",
+          "static_friction": 0.699999988079071
+        },
+        "material_applied": true
+      }
+    }
+  },
+  "protected_baseline": [
+    {
+      "actual_sha256": "d9e4b32723ee71dfce26fb4e78546cfcfef147b2d7dbf5e53e3620e3d8aa96bd",
+      "expected_sha256": "d9e4b32723ee71dfce26fb4e78546cfcfef147b2d7dbf5e53e3620e3d8aa96bd",
+      "match": true,
+      "path": "generated/urdf/follower_left.urdf"
+    },
+    {
+      "actual_sha256": "268a5e5b56ce48af679256380008606f64358d6ead2619b52946b37f47fb624b",
+      "expected_sha256": "268a5e5b56ce48af679256380008606f64358d6ead2619b52946b37f47fb624b",
+      "match": true,
+      "path": "generated/urdf/follower_right.urdf"
+    },
+    {
+      "actual_sha256": "955c34600846c8b4a08bedc639caef7d5e3c1d0e3a02a6900c80d27d52adadec",
+      "expected_sha256": "955c34600846c8b4a08bedc639caef7d5e3c1d0e3a02a6900c80d27d52adadec",
+      "match": true,
+      "path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/follower_left_imported.usd"
+    },
+    {
+      "actual_sha256": "205d3b8fe72532f608446b18e80eccb5c8b0992fb71946b9737145afe4efa7ed",
+      "expected_sha256": "205d3b8fe72532f608446b18e80eccb5c8b0992fb71946b9737145afe4efa7ed",
+      "match": true,
+      "path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/follower_right_imported.usd"
+    },
+    {
+      "actual_sha256": "7fe1d086c4d79e60cf6f3e10b67f164de4684df8d941603055764d6f230528a2",
+      "expected_sha256": "7fe1d086c4d79e60cf6f3e10b67f164de4684df8d941603055764d6f230528a2",
+      "match": true,
+      "path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/configuration/follower_left_debug_acceleration_drive.usd"
+    },
+    {
+      "actual_sha256": "919c8013e9921eaa2aaf8e032aa5ed81bc64cd07c90233ad9418996e9ecea249",
+      "expected_sha256": "919c8013e9921eaa2aaf8e032aa5ed81bc64cd07c90233ad9418996e9ecea249",
+      "match": true,
+      "path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/configuration/follower_right_debug_acceleration_drive.usd"
+    },
+    {
+      "actual_sha256": "a1e6beb663f70e4c1d6493f5be80da2894e075c931e0fa5211e8c91d59a8205d",
+      "expected_sha256": "a1e6beb663f70e4c1d6493f5be80da2894e075c931e0fa5211e8c91d59a8205d",
+      "match": true,
+      "path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/follower_left.usd"
+    },
+    {
+      "actual_sha256": "86d850cea5b35fb2969d3a78834317b51e2ac0d301f09aaaa9dad191f9bb3d5d",
+      "expected_sha256": "86d850cea5b35fb2969d3a78834317b51e2ac0d301f09aaaa9dad191f9bb3d5d",
+      "match": true,
+      "path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/follower_right.usd"
+    },
+    {
+      "actual_sha256": "bd13be701ec121112e90c968b9fb00b684e3295576d9c4c419daac4998c666ae",
+      "expected_sha256": "bd13be701ec121112e90c968b9fb00b684e3295576d9c4c419daac4998c666ae",
+      "match": true,
+      "path": "configs/aloha1_gripper_collision_profiles.yaml"
+    },
+    {
+      "actual_sha256": "f12ae97057aaa5854a70a79d23cc3ecc7006634b087891be6ea17f6e4b3f4887",
+      "expected_sha256": "f12ae97057aaa5854a70a79d23cc3ecc7006634b087891be6ea17f6e4b3f4887",
+      "match": true,
+      "path": "assets/Trossen/ALOHA1/1.0/diagnostics/gripper_collision/convex_hull/follower_left/follower_left_convex_hull.usd"
+    },
+    {
+      "actual_sha256": "5d6b3f7f31169c8310b0e1a6aaa7ea53b04deb5b87dd82c3a1f5942f04ed1a50",
+      "expected_sha256": "5d6b3f7f31169c8310b0e1a6aaa7ea53b04deb5b87dd82c3a1f5942f04ed1a50",
+      "match": true,
+      "path": "assets/Trossen/ALOHA1/1.0/diagnostics/gripper_collision/convex_hull/follower_right/follower_right_convex_hull.usd"
+    },
+    {
+      "actual_sha256": "5586d234f7d4f475e1086121a59c5bff18acfa8adbc384b266390336bbd5af97",
+      "expected_sha256": "5586d234f7d4f475e1086121a59c5bff18acfa8adbc384b266390336bbd5af97",
+      "match": true,
+      "path": "assets/Trossen/ALOHA1/1.0/diagnostics/gripper_collision/convex_decomposition/follower_left/follower_left_convex_decomposition.usd"
+    },
+    {
+      "actual_sha256": "247d0e0b08bd3dec1f9cec78a1290b542759027ab15c4d0d566dd749f439b47c",
+      "expected_sha256": "247d0e0b08bd3dec1f9cec78a1290b542759027ab15c4d0d566dd749f439b47c",
+      "match": true,
+      "path": "assets/Trossen/ALOHA1/1.0/diagnostics/gripper_collision/convex_decomposition/follower_right/follower_right_convex_decomposition.usd"
+    },
+    {
+      "actual_sha256": "028a01f580403611b5c4ff261c8d4c4539fc3e98e0cc8f5c6e04a21a5a270958",
+      "expected_sha256": "028a01f580403611b5c4ff261c8d4c4539fc3e98e0cc8f5c6e04a21a5a270958",
+      "match": true,
+      "path": "reports/aloha1_mapping/gripper_collider_ab_results.json"
+    },
+    {
+      "actual_sha256": "c7885767712a1685c06fae058eb4a3323f4c8e21b9b9ff974fec7cee1a1a61ea",
+      "expected_sha256": "c7885767712a1685c06fae058eb4a3323f4c8e21b9b9ff974fec7cee1a1a61ea",
+      "match": true,
+      "path": "reports/aloha1_mapping/gripper_collider_comparison.json"
+    },
+    {
+      "actual_sha256": "897c955adb5f266f12cec8951f8a5fc95704ef0489ad2b6e33ff6e6388f03c2f",
+      "expected_sha256": "897c955adb5f266f12cec8951f8a5fc95704ef0489ad2b6e33ff6e6388f03c2f",
+      "match": true,
+      "path": "reports/aloha1_mapping/gripper_root_cause_classification.json"
+    }
+  ],
+  "runtime_environment_readback": {
+    "kit_full": "107.3.3+production.229672.69cbf6ad.gl",
+    "normalized": {
+      "isaac_sim": "5.1.0.0",
+      "kit": "107.3.3",
+      "physx": "107.3.26",
+      "python": "3.11.13"
+    },
+    "physx_extension_id": "omni.physx",
+    "physx_extension_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/extscache/omni.physx-107.3.26+107.3.3.lx64.r.cp311.u353/omni/physx",
+    "physx_extension_version": "107.3.26",
+    "source": "ACTIVE_RUNTIME_READBACK"
+  },
+  "schema_version": 1,
+  "scope": "ALOHA follower digital gripper static hold root-cause diagnosis only",
+  "status": "PASS",
+  "task8": "NOT_RUN",
+  "temporary_material_status": "TEMPORARY_UNCALIBRATED"
+}
