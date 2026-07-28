@@ -1,0 +1,980 @@
+{
+  "CONVEX_DECOMPOSITION_STATUS": "NO_MEANINGFUL_EFFECT",
+  "baseline_protection": {
+    "after": [
+      {
+        "actual_sha256": "d9e4b32723ee71dfce26fb4e78546cfcfef147b2d7dbf5e53e3620e3d8aa96bd",
+        "expected_sha256": "d9e4b32723ee71dfce26fb4e78546cfcfef147b2d7dbf5e53e3620e3d8aa96bd",
+        "match": true,
+        "path": "generated/urdf/follower_left.urdf"
+      },
+      {
+        "actual_sha256": "268a5e5b56ce48af679256380008606f64358d6ead2619b52946b37f47fb624b",
+        "expected_sha256": "268a5e5b56ce48af679256380008606f64358d6ead2619b52946b37f47fb624b",
+        "match": true,
+        "path": "generated/urdf/follower_right.urdf"
+      },
+      {
+        "actual_sha256": "955c34600846c8b4a08bedc639caef7d5e3c1d0e3a02a6900c80d27d52adadec",
+        "expected_sha256": "955c34600846c8b4a08bedc639caef7d5e3c1d0e3a02a6900c80d27d52adadec",
+        "match": true,
+        "path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/follower_left_imported.usd"
+      },
+      {
+        "actual_sha256": "205d3b8fe72532f608446b18e80eccb5c8b0992fb71946b9737145afe4efa7ed",
+        "expected_sha256": "205d3b8fe72532f608446b18e80eccb5c8b0992fb71946b9737145afe4efa7ed",
+        "match": true,
+        "path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/follower_right_imported.usd"
+      },
+      {
+        "actual_sha256": "7fe1d086c4d79e60cf6f3e10b67f164de4684df8d941603055764d6f230528a2",
+        "expected_sha256": "7fe1d086c4d79e60cf6f3e10b67f164de4684df8d941603055764d6f230528a2",
+        "match": true,
+        "path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/configuration/follower_left_debug_acceleration_drive.usd"
+      },
+      {
+        "actual_sha256": "919c8013e9921eaa2aaf8e032aa5ed81bc64cd07c90233ad9418996e9ecea249",
+        "expected_sha256": "919c8013e9921eaa2aaf8e032aa5ed81bc64cd07c90233ad9418996e9ecea249",
+        "match": true,
+        "path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/configuration/follower_right_debug_acceleration_drive.usd"
+      },
+      {
+        "actual_sha256": "0d7b47e7802ae4428e98f2840fe9cdcf9acf1d84430d4e659722a7861d70ddeb",
+        "expected_sha256": "0d7b47e7802ae4428e98f2840fe9cdcf9acf1d84430d4e659722a7861d70ddeb",
+        "match": true,
+        "path": "reports/aloha1_mapping/gripper_validation.json"
+      },
+      {
+        "actual_sha256": "acbcb4b46f6b7733ef5304d55ee68e80a176429c9fe705f18ea0e4e73e79cc88",
+        "expected_sha256": "acbcb4b46f6b7733ef5304d55ee68e80a176429c9fe705f18ea0e4e73e79cc88",
+        "match": true,
+        "path": "reports/aloha1_mapping/gripper_contact_events_follower_left_mu_0.300.json"
+      },
+      {
+        "actual_sha256": "bedfca2f01a75f5fd5b051b38c799acd04384212477e53c9bd6e00ebdf936593",
+        "expected_sha256": "bedfca2f01a75f5fd5b051b38c799acd04384212477e53c9bd6e00ebdf936593",
+        "match": true,
+        "path": "reports/aloha1_mapping/gripper_contact_events_follower_left_mu_0.500.json"
+      },
+      {
+        "actual_sha256": "8ed83ee5727cab94069fe622e1805bd01793e82b9c4fbffe7efd776d8f52d71a",
+        "expected_sha256": "8ed83ee5727cab94069fe622e1805bd01793e82b9c4fbffe7efd776d8f52d71a",
+        "match": true,
+        "path": "reports/aloha1_mapping/gripper_contact_events_follower_left_mu_0.700.json"
+      },
+      {
+        "actual_sha256": "f70bf645d202e8b26c96a48d58c2fd0ef4dadb78eaaad8f29704925288d2ed53",
+        "expected_sha256": "f70bf645d202e8b26c96a48d58c2fd0ef4dadb78eaaad8f29704925288d2ed53",
+        "match": true,
+        "path": "reports/aloha1_mapping/gripper_contact_events_follower_right_mu_0.300.json"
+      },
+      {
+        "actual_sha256": "56e5cb40fda94d433fcf55fdd64da1555eefdf1497729fda302c247d0bb1c35a",
+        "expected_sha256": "56e5cb40fda94d433fcf55fdd64da1555eefdf1497729fda302c247d0bb1c35a",
+        "match": true,
+        "path": "reports/aloha1_mapping/gripper_contact_events_follower_right_mu_0.500.json"
+      },
+      {
+        "actual_sha256": "3f2a373b894a78e1ed1ab1aa3add9f822e61a6d83b7a45bbac3787803a4b730a",
+        "expected_sha256": "3f2a373b894a78e1ed1ab1aa3add9f822e61a6d83b7a45bbac3787803a4b730a",
+        "match": true,
+        "path": "reports/aloha1_mapping/gripper_contact_events_follower_right_mu_0.700.json"
+      },
+      {
+        "actual_sha256": "76fb976a78f6d6838635ed224db32ea09e0762efdf928a37ed3c5515a640286c",
+        "expected_sha256": "76fb976a78f6d6838635ed224db32ea09e0762efdf928a37ed3c5515a640286c",
+        "match": true,
+        "path": "reports/aloha1_mapping/gripper_curves.csv"
+      }
+    ],
+    "before": [
+      {
+        "actual_sha256": "d9e4b32723ee71dfce26fb4e78546cfcfef147b2d7dbf5e53e3620e3d8aa96bd",
+        "expected_sha256": "d9e4b32723ee71dfce26fb4e78546cfcfef147b2d7dbf5e53e3620e3d8aa96bd",
+        "match": true,
+        "path": "generated/urdf/follower_left.urdf"
+      },
+      {
+        "actual_sha256": "268a5e5b56ce48af679256380008606f64358d6ead2619b52946b37f47fb624b",
+        "expected_sha256": "268a5e5b56ce48af679256380008606f64358d6ead2619b52946b37f47fb624b",
+        "match": true,
+        "path": "generated/urdf/follower_right.urdf"
+      },
+      {
+        "actual_sha256": "955c34600846c8b4a08bedc639caef7d5e3c1d0e3a02a6900c80d27d52adadec",
+        "expected_sha256": "955c34600846c8b4a08bedc639caef7d5e3c1d0e3a02a6900c80d27d52adadec",
+        "match": true,
+        "path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/follower_left_imported.usd"
+      },
+      {
+        "actual_sha256": "205d3b8fe72532f608446b18e80eccb5c8b0992fb71946b9737145afe4efa7ed",
+        "expected_sha256": "205d3b8fe72532f608446b18e80eccb5c8b0992fb71946b9737145afe4efa7ed",
+        "match": true,
+        "path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/follower_right_imported.usd"
+      },
+      {
+        "actual_sha256": "7fe1d086c4d79e60cf6f3e10b67f164de4684df8d941603055764d6f230528a2",
+        "expected_sha256": "7fe1d086c4d79e60cf6f3e10b67f164de4684df8d941603055764d6f230528a2",
+        "match": true,
+        "path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/configuration/follower_left_debug_acceleration_drive.usd"
+      },
+      {
+        "actual_sha256": "919c8013e9921eaa2aaf8e032aa5ed81bc64cd07c90233ad9418996e9ecea249",
+        "expected_sha256": "919c8013e9921eaa2aaf8e032aa5ed81bc64cd07c90233ad9418996e9ecea249",
+        "match": true,
+        "path": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/configuration/follower_right_debug_acceleration_drive.usd"
+      },
+      {
+        "actual_sha256": "0d7b47e7802ae4428e98f2840fe9cdcf9acf1d84430d4e659722a7861d70ddeb",
+        "expected_sha256": "0d7b47e7802ae4428e98f2840fe9cdcf9acf1d84430d4e659722a7861d70ddeb",
+        "match": true,
+        "path": "reports/aloha1_mapping/gripper_validation.json"
+      },
+      {
+        "actual_sha256": "acbcb4b46f6b7733ef5304d55ee68e80a176429c9fe705f18ea0e4e73e79cc88",
+        "expected_sha256": "acbcb4b46f6b7733ef5304d55ee68e80a176429c9fe705f18ea0e4e73e79cc88",
+        "match": true,
+        "path": "reports/aloha1_mapping/gripper_contact_events_follower_left_mu_0.300.json"
+      },
+      {
+        "actual_sha256": "bedfca2f01a75f5fd5b051b38c799acd04384212477e53c9bd6e00ebdf936593",
+        "expected_sha256": "bedfca2f01a75f5fd5b051b38c799acd04384212477e53c9bd6e00ebdf936593",
+        "match": true,
+        "path": "reports/aloha1_mapping/gripper_contact_events_follower_left_mu_0.500.json"
+      },
+      {
+        "actual_sha256": "8ed83ee5727cab94069fe622e1805bd01793e82b9c4fbffe7efd776d8f52d71a",
+        "expected_sha256": "8ed83ee5727cab94069fe622e1805bd01793e82b9c4fbffe7efd776d8f52d71a",
+        "match": true,
+        "path": "reports/aloha1_mapping/gripper_contact_events_follower_left_mu_0.700.json"
+      },
+      {
+        "actual_sha256": "f70bf645d202e8b26c96a48d58c2fd0ef4dadb78eaaad8f29704925288d2ed53",
+        "expected_sha256": "f70bf645d202e8b26c96a48d58c2fd0ef4dadb78eaaad8f29704925288d2ed53",
+        "match": true,
+        "path": "reports/aloha1_mapping/gripper_contact_events_follower_right_mu_0.300.json"
+      },
+      {
+        "actual_sha256": "56e5cb40fda94d433fcf55fdd64da1555eefdf1497729fda302c247d0bb1c35a",
+        "expected_sha256": "56e5cb40fda94d433fcf55fdd64da1555eefdf1497729fda302c247d0bb1c35a",
+        "match": true,
+        "path": "reports/aloha1_mapping/gripper_contact_events_follower_right_mu_0.500.json"
+      },
+      {
+        "actual_sha256": "3f2a373b894a78e1ed1ab1aa3add9f822e61a6d83b7a45bbac3787803a4b730a",
+        "expected_sha256": "3f2a373b894a78e1ed1ab1aa3add9f822e61a6d83b7a45bbac3787803a4b730a",
+        "match": true,
+        "path": "reports/aloha1_mapping/gripper_contact_events_follower_right_mu_0.700.json"
+      },
+      {
+        "actual_sha256": "76fb976a78f6d6838635ed224db32ea09e0762efdf928a37ed3c5515a640286c",
+        "expected_sha256": "76fb976a78f6d6838635ed224db32ea09e0762efdf928a37ed3c5515a640286c",
+        "match": true,
+        "path": "reports/aloha1_mapping/gripper_curves.csv"
+      }
+    ]
+  },
+  "decomposition_evidence": {
+    "decomposition_success_rate": 0.0,
+    "gate_semantics": "all trials must pass; mixed success is not promoted to a pass",
+    "hull_success_rate": 0.0,
+    "status": "NO_MEANINGFUL_EFFECT"
+  },
+  "default_asset_collider_modified": false,
+  "determinism": {
+    "deterministic_within_every_robot_group": true,
+    "status": "PASS"
+  },
+  "experiment_execution_status": "PASS",
+  "first_round_complete": true,
+  "fresh_reset_per_trial": true,
+  "frozen_manifest": "/home/eii/project/openpi0.5-rtc-reward-learning/configs/aloha1_gripper_collision_profiles.yaml",
+  "frozen_values": {
+    "bottle_collision": true,
+    "bottle_diameter_m": 0.065,
+    "bottle_height_m": 0.21,
+    "bottle_inertia_status": "ENGINEERING_DERIVED_UNCALIBRATED",
+    "bottle_mass_kg": 0.02,
+    "close_trajectory": {
+      "close_steps": 120,
+      "closed_left_finger_m": 0.021,
+      "fixed_bottle_settle_steps": 60,
+      "fixed_contact_steps": 60,
+      "open_left_finger_m": 0.057,
+      "open_steps": 90,
+      "settle_steps": 60
+    },
+    "contact_offset_policy": "PRESERVE_UNAUTHORED_ISAAC_DEFAULT",
+    "drive_source": {
+      "follower_left": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/configuration/follower_left_debug_acceleration_drive.usd",
+      "follower_right": "assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/configuration/follower_right_debug_acceleration_drive.usd"
+    },
+    "drop_gate_m": 0.01,
+    "friction": 0.7,
+    "friction_status": "TEMPORARY_UNCALIBRATED",
+    "hold_interval_s": 2.0,
+    "hold_steps": 120,
+    "initial_state_source": "configs/aloha1_joint_map.yaml",
+    "maximum_persistent_penetration_m": 0.002,
+    "mimic": {
+      "multiplier": -1.0,
+      "offset": 0.0,
+      "reference": "left_finger",
+      "target": "right_finger"
+    },
+    "penetration_persistence_steps": 5,
+    "physics_frequency_hz": 60,
+    "post_release_fixed_constraint_allowed": false,
+    "rest_offset_policy": "PRESERVE_UNAUTHORED_ISAAC_DEFAULT",
+    "restitution": 0.0,
+    "self_collision": false,
+    "solve_articulation_contact_last": true,
+    "surface_gripper_allowed": false
+  },
+  "groups": {
+    "decomposition_current": {
+      "approximation": "convexDecomposition",
+      "combined": {
+        "all_trials_pass_hold_gate": false,
+        "combined_signature_note": "combined signatures include robot identity; determinism is evaluated within each robot/profile/control group",
+        "complete": true,
+        "deterministic_per_robot": true,
+        "deterministic_signatures": [
+          "aaf3989b491266a65447cb772d1b3c6ba0736b152879fe917f2c93b6d2599bf9",
+          "aaf3989b491266a65447cb772d1b3c6ba0736b152879fe917f2c93b6d2599bf9",
+          "aaf3989b491266a65447cb772d1b3c6ba0736b152879fe917f2c93b6d2599bf9",
+          "aaf3989b491266a65447cb772d1b3c6ba0736b152879fe917f2c93b6d2599bf9",
+          "aaf3989b491266a65447cb772d1b3c6ba0736b152879fe917f2c93b6d2599bf9",
+          "aaf3989b491266a65447cb772d1b3c6ba0736b152879fe917f2c93b6d2599bf9",
+          "aaf3989b491266a65447cb772d1b3c6ba0736b152879fe917f2c93b6d2599bf9",
+          "aaf3989b491266a65447cb772d1b3c6ba0736b152879fe917f2c93b6d2599bf9",
+          "aaf3989b491266a65447cb772d1b3c6ba0736b152879fe917f2c93b6d2599bf9",
+          "aaf3989b491266a65447cb772d1b3c6ba0736b152879fe917f2c93b6d2599bf9",
+          "aaf3989b491266a65447cb772d1b3c6ba0736b152879fe917f2c93b6d2599bf9",
+          "aaf3989b491266a65447cb772d1b3c6ba0736b152879fe917f2c93b6d2599bf9",
+          "aaf3989b491266a65447cb772d1b3c6ba0736b152879fe917f2c93b6d2599bf9",
+          "aaf3989b491266a65447cb772d1b3c6ba0736b152879fe917f2c93b6d2599bf9",
+          "aaf3989b491266a65447cb772d1b3c6ba0736b152879fe917f2c93b6d2599bf9",
+          "aaf3989b491266a65447cb772d1b3c6ba0736b152879fe917f2c93b6d2599bf9",
+          "aaf3989b491266a65447cb772d1b3c6ba0736b152879fe917f2c93b6d2599bf9",
+          "aaf3989b491266a65447cb772d1b3c6ba0736b152879fe917f2c93b6d2599bf9",
+          "aaf3989b491266a65447cb772d1b3c6ba0736b152879fe917f2c93b6d2599bf9",
+          "aaf3989b491266a65447cb772d1b3c6ba0736b152879fe917f2c93b6d2599bf9",
+          "20cca3a849fc68b7351f9e57b5c12679540b065e11f4a353e50a95c619e8f8aa",
+          "20cca3a849fc68b7351f9e57b5c12679540b065e11f4a353e50a95c619e8f8aa",
+          "20cca3a849fc68b7351f9e57b5c12679540b065e11f4a353e50a95c619e8f8aa",
+          "20cca3a849fc68b7351f9e57b5c12679540b065e11f4a353e50a95c619e8f8aa",
+          "20cca3a849fc68b7351f9e57b5c12679540b065e11f4a353e50a95c619e8f8aa",
+          "20cca3a849fc68b7351f9e57b5c12679540b065e11f4a353e50a95c619e8f8aa",
+          "20cca3a849fc68b7351f9e57b5c12679540b065e11f4a353e50a95c619e8f8aa",
+          "20cca3a849fc68b7351f9e57b5c12679540b065e11f4a353e50a95c619e8f8aa",
+          "20cca3a849fc68b7351f9e57b5c12679540b065e11f4a353e50a95c619e8f8aa",
+          "20cca3a849fc68b7351f9e57b5c12679540b065e11f4a353e50a95c619e8f8aa",
+          "20cca3a849fc68b7351f9e57b5c12679540b065e11f4a353e50a95c619e8f8aa",
+          "20cca3a849fc68b7351f9e57b5c12679540b065e11f4a353e50a95c619e8f8aa",
+          "20cca3a849fc68b7351f9e57b5c12679540b065e11f4a353e50a95c619e8f8aa",
+          "20cca3a849fc68b7351f9e57b5c12679540b065e11f4a353e50a95c619e8f8aa",
+          "20cca3a849fc68b7351f9e57b5c12679540b065e11f4a353e50a95c619e8f8aa",
+          "20cca3a849fc68b7351f9e57b5c12679540b065e11f4a353e50a95c619e8f8aa",
+          "20cca3a849fc68b7351f9e57b5c12679540b065e11f4a353e50a95c619e8f8aa",
+          "20cca3a849fc68b7351f9e57b5c12679540b065e11f4a353e50a95c619e8f8aa",
+          "20cca3a849fc68b7351f9e57b5c12679540b065e11f4a353e50a95c619e8f8aa",
+          "20cca3a849fc68b7351f9e57b5c12679540b065e11f4a353e50a95c619e8f8aa"
+        ],
+        "exact_signature_repeat": false,
+        "hold_success_count": 0,
+        "hold_success_rate": 0.0,
+        "minimum_repeats": 40,
+        "runtime_mean_s": 4.037534681699617,
+        "status": "FAIL",
+        "trial_count": 40
+      },
+      "control_mode": "current_mimic",
+      "control_status": "CURRENT_IMPORTED_CONTROL_MAPPING",
+      "diagnostic_metrics": {
+        "bilateral_contact_trial_count": 40,
+        "contact_point_count": {
+          "maximum": 20581,
+          "mean": 20581.0,
+          "minimum": 20581
+        },
+        "drop_m": {
+          "maximum": 0.04741010069847107,
+          "mean": 0.04741010069847107,
+          "minimum": 0.04741010069847107,
+          "unique_values": [
+            0.04741010069847107
+          ]
+        },
+        "maximum_estimated_normal_force_n": {
+          "left": 1.2535829331781265,
+          "right": 0.35282757301569595
+        },
+        "maximum_post_command_dynamic_residual_m": 0.01892506331205368,
+        "maximum_sampled_control_residual_m": 0.001976262778043747,
+        "maximum_transient_penetration_depth_m": 0.014812054112553596,
+        "persistent_penetration_trial_count": 0,
+        "unexpected_internal_collision_trial_count": 0
+      },
+      "profile": "convex_decomposition",
+      "robots": {
+        "follower_left": {
+          "summary": {
+            "all_trials_pass_hold_gate": false,
+            "complete": true,
+            "deterministic_signatures": [
+              "aaf3989b491266a65447cb772d1b3c6ba0736b152879fe917f2c93b6d2599bf9",
+              "aaf3989b491266a65447cb772d1b3c6ba0736b152879fe917f2c93b6d2599bf9",
+              "aaf3989b491266a65447cb772d1b3c6ba0736b152879fe917f2c93b6d2599bf9",
+              "aaf3989b491266a65447cb772d1b3c6ba0736b152879fe917f2c93b6d2599bf9",
+              "aaf3989b491266a65447cb772d1b3c6ba0736b152879fe917f2c93b6d2599bf9",
+              "aaf3989b491266a65447cb772d1b3c6ba0736b152879fe917f2c93b6d2599bf9",
+              "aaf3989b491266a65447cb772d1b3c6ba0736b152879fe917f2c93b6d2599bf9",
+              "aaf3989b491266a65447cb772d1b3c6ba0736b152879fe917f2c93b6d2599bf9",
+              "aaf3989b491266a65447cb772d1b3c6ba0736b152879fe917f2c93b6d2599bf9",
+              "aaf3989b491266a65447cb772d1b3c6ba0736b152879fe917f2c93b6d2599bf9",
+              "aaf3989b491266a65447cb772d1b3c6ba0736b152879fe917f2c93b6d2599bf9",
+              "aaf3989b491266a65447cb772d1b3c6ba0736b152879fe917f2c93b6d2599bf9",
+              "aaf3989b491266a65447cb772d1b3c6ba0736b152879fe917f2c93b6d2599bf9",
+              "aaf3989b491266a65447cb772d1b3c6ba0736b152879fe917f2c93b6d2599bf9",
+              "aaf3989b491266a65447cb772d1b3c6ba0736b152879fe917f2c93b6d2599bf9",
+              "aaf3989b491266a65447cb772d1b3c6ba0736b152879fe917f2c93b6d2599bf9",
+              "aaf3989b491266a65447cb772d1b3c6ba0736b152879fe917f2c93b6d2599bf9",
+              "aaf3989b491266a65447cb772d1b3c6ba0736b152879fe917f2c93b6d2599bf9",
+              "aaf3989b491266a65447cb772d1b3c6ba0736b152879fe917f2c93b6d2599bf9",
+              "aaf3989b491266a65447cb772d1b3c6ba0736b152879fe917f2c93b6d2599bf9"
+            ],
+            "exact_signature_repeat": true,
+            "hold_success_count": 0,
+            "hold_success_rate": 0.0,
+            "minimum_repeats": 20,
+            "runtime_mean_s": 4.00063189850116,
+            "status": "FAIL",
+            "trial_count": 20
+          },
+          "trial_file": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/gripper_collider_ab_trials/decomposition_current/follower_left.jsonl",
+          "trial_file_sha256": "5eb419dfdd42774ed0d2b629c4e80768777403cc073f165fb8595c15bf1e1f33"
+        },
+        "follower_right": {
+          "summary": {
+            "all_trials_pass_hold_gate": false,
+            "complete": true,
+            "deterministic_signatures": [
+              "20cca3a849fc68b7351f9e57b5c12679540b065e11f4a353e50a95c619e8f8aa",
+              "20cca3a849fc68b7351f9e57b5c12679540b065e11f4a353e50a95c619e8f8aa",
+              "20cca3a849fc68b7351f9e57b5c12679540b065e11f4a353e50a95c619e8f8aa",
+              "20cca3a849fc68b7351f9e57b5c12679540b065e11f4a353e50a95c619e8f8aa",
+              "20cca3a849fc68b7351f9e57b5c12679540b065e11f4a353e50a95c619e8f8aa",
+              "20cca3a849fc68b7351f9e57b5c12679540b065e11f4a353e50a95c619e8f8aa",
+              "20cca3a849fc68b7351f9e57b5c12679540b065e11f4a353e50a95c619e8f8aa",
+              "20cca3a849fc68b7351f9e57b5c12679540b065e11f4a353e50a95c619e8f8aa",
+              "20cca3a849fc68b7351f9e57b5c12679540b065e11f4a353e50a95c619e8f8aa",
+              "20cca3a849fc68b7351f9e57b5c12679540b065e11f4a353e50a95c619e8f8aa",
+              "20cca3a849fc68b7351f9e57b5c12679540b065e11f4a353e50a95c619e8f8aa",
+              "20cca3a849fc68b7351f9e57b5c12679540b065e11f4a353e50a95c619e8f8aa",
+              "20cca3a849fc68b7351f9e57b5c12679540b065e11f4a353e50a95c619e8f8aa",
+              "20cca3a849fc68b7351f9e57b5c12679540b065e11f4a353e50a95c619e8f8aa",
+              "20cca3a849fc68b7351f9e57b5c12679540b065e11f4a353e50a95c619e8f8aa",
+              "20cca3a849fc68b7351f9e57b5c12679540b065e11f4a353e50a95c619e8f8aa",
+              "20cca3a849fc68b7351f9e57b5c12679540b065e11f4a353e50a95c619e8f8aa",
+              "20cca3a849fc68b7351f9e57b5c12679540b065e11f4a353e50a95c619e8f8aa",
+              "20cca3a849fc68b7351f9e57b5c12679540b065e11f4a353e50a95c619e8f8aa",
+              "20cca3a849fc68b7351f9e57b5c12679540b065e11f4a353e50a95c619e8f8aa"
+            ],
+            "exact_signature_repeat": true,
+            "hold_success_count": 0,
+            "hold_success_rate": 0.0,
+            "minimum_repeats": 20,
+            "runtime_mean_s": 4.0744374648980735,
+            "status": "FAIL",
+            "trial_count": 20
+          },
+          "trial_file": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/gripper_collider_ab_trials/decomposition_current/follower_right.jsonl",
+          "trial_file_sha256": "57b2ff4b58d865b495fa54f6c7fe6a720492ef12fcd734624a4cfd82a9d9dcfa"
+        }
+      }
+    },
+    "decomposition_explicit": {
+      "approximation": "convexDecomposition",
+      "combined": {
+        "all_trials_pass_hold_gate": false,
+        "combined_signature_note": "combined signatures include robot identity; determinism is evaluated within each robot/profile/control group",
+        "complete": true,
+        "deterministic_per_robot": true,
+        "deterministic_signatures": [
+          "6e3f9b56444ef139322bceaf034a12b8b57b94c4bda22ffea4cebc65708bc223",
+          "6e3f9b56444ef139322bceaf034a12b8b57b94c4bda22ffea4cebc65708bc223",
+          "6e3f9b56444ef139322bceaf034a12b8b57b94c4bda22ffea4cebc65708bc223",
+          "6e3f9b56444ef139322bceaf034a12b8b57b94c4bda22ffea4cebc65708bc223",
+          "6e3f9b56444ef139322bceaf034a12b8b57b94c4bda22ffea4cebc65708bc223",
+          "6e3f9b56444ef139322bceaf034a12b8b57b94c4bda22ffea4cebc65708bc223",
+          "6e3f9b56444ef139322bceaf034a12b8b57b94c4bda22ffea4cebc65708bc223",
+          "6e3f9b56444ef139322bceaf034a12b8b57b94c4bda22ffea4cebc65708bc223",
+          "6e3f9b56444ef139322bceaf034a12b8b57b94c4bda22ffea4cebc65708bc223",
+          "6e3f9b56444ef139322bceaf034a12b8b57b94c4bda22ffea4cebc65708bc223",
+          "6e3f9b56444ef139322bceaf034a12b8b57b94c4bda22ffea4cebc65708bc223",
+          "6e3f9b56444ef139322bceaf034a12b8b57b94c4bda22ffea4cebc65708bc223",
+          "6e3f9b56444ef139322bceaf034a12b8b57b94c4bda22ffea4cebc65708bc223",
+          "6e3f9b56444ef139322bceaf034a12b8b57b94c4bda22ffea4cebc65708bc223",
+          "6e3f9b56444ef139322bceaf034a12b8b57b94c4bda22ffea4cebc65708bc223",
+          "6e3f9b56444ef139322bceaf034a12b8b57b94c4bda22ffea4cebc65708bc223",
+          "6e3f9b56444ef139322bceaf034a12b8b57b94c4bda22ffea4cebc65708bc223",
+          "6e3f9b56444ef139322bceaf034a12b8b57b94c4bda22ffea4cebc65708bc223",
+          "6e3f9b56444ef139322bceaf034a12b8b57b94c4bda22ffea4cebc65708bc223",
+          "6e3f9b56444ef139322bceaf034a12b8b57b94c4bda22ffea4cebc65708bc223",
+          "c98afcaed46d23cbe6f85aec505d5ecf08000485b53dbbac5a3fed583ca48bbe",
+          "c98afcaed46d23cbe6f85aec505d5ecf08000485b53dbbac5a3fed583ca48bbe",
+          "c98afcaed46d23cbe6f85aec505d5ecf08000485b53dbbac5a3fed583ca48bbe",
+          "c98afcaed46d23cbe6f85aec505d5ecf08000485b53dbbac5a3fed583ca48bbe",
+          "c98afcaed46d23cbe6f85aec505d5ecf08000485b53dbbac5a3fed583ca48bbe",
+          "c98afcaed46d23cbe6f85aec505d5ecf08000485b53dbbac5a3fed583ca48bbe",
+          "c98afcaed46d23cbe6f85aec505d5ecf08000485b53dbbac5a3fed583ca48bbe",
+          "c98afcaed46d23cbe6f85aec505d5ecf08000485b53dbbac5a3fed583ca48bbe",
+          "c98afcaed46d23cbe6f85aec505d5ecf08000485b53dbbac5a3fed583ca48bbe",
+          "c98afcaed46d23cbe6f85aec505d5ecf08000485b53dbbac5a3fed583ca48bbe",
+          "c98afcaed46d23cbe6f85aec505d5ecf08000485b53dbbac5a3fed583ca48bbe",
+          "c98afcaed46d23cbe6f85aec505d5ecf08000485b53dbbac5a3fed583ca48bbe",
+          "c98afcaed46d23cbe6f85aec505d5ecf08000485b53dbbac5a3fed583ca48bbe",
+          "c98afcaed46d23cbe6f85aec505d5ecf08000485b53dbbac5a3fed583ca48bbe",
+          "c98afcaed46d23cbe6f85aec505d5ecf08000485b53dbbac5a3fed583ca48bbe",
+          "c98afcaed46d23cbe6f85aec505d5ecf08000485b53dbbac5a3fed583ca48bbe",
+          "c98afcaed46d23cbe6f85aec505d5ecf08000485b53dbbac5a3fed583ca48bbe",
+          "c98afcaed46d23cbe6f85aec505d5ecf08000485b53dbbac5a3fed583ca48bbe",
+          "c98afcaed46d23cbe6f85aec505d5ecf08000485b53dbbac5a3fed583ca48bbe",
+          "c98afcaed46d23cbe6f85aec505d5ecf08000485b53dbbac5a3fed583ca48bbe"
+        ],
+        "exact_signature_repeat": false,
+        "hold_success_count": 0,
+        "hold_success_rate": 0.0,
+        "minimum_repeats": 40,
+        "runtime_mean_s": 4.066535958825625,
+        "status": "FAIL",
+        "trial_count": 40
+      },
+      "control_mode": "explicit_symmetric",
+      "control_status": "DIAGNOSTIC_ONLY_NOT_FINAL_CONTROL_MAPPING",
+      "diagnostic_metrics": {
+        "bilateral_contact_trial_count": 40,
+        "contact_point_count": {
+          "maximum": 20581,
+          "mean": 20581.0,
+          "minimum": 20581
+        },
+        "drop_m": {
+          "maximum": 0.04741010069847107,
+          "mean": 0.04741010069847107,
+          "minimum": 0.04741010069847107,
+          "unique_values": [
+            0.04741010069847107
+          ]
+        },
+        "maximum_estimated_normal_force_n": {
+          "left": 1.2535829331781265,
+          "right": 0.35282757301569595
+        },
+        "maximum_post_command_dynamic_residual_m": 0.01892506331205368,
+        "maximum_sampled_control_residual_m": 0.001976262778043747,
+        "maximum_transient_penetration_depth_m": 0.014812054112553596,
+        "persistent_penetration_trial_count": 0,
+        "unexpected_internal_collision_trial_count": 0
+      },
+      "profile": "convex_decomposition",
+      "robots": {
+        "follower_left": {
+          "summary": {
+            "all_trials_pass_hold_gate": false,
+            "complete": true,
+            "deterministic_signatures": [
+              "6e3f9b56444ef139322bceaf034a12b8b57b94c4bda22ffea4cebc65708bc223",
+              "6e3f9b56444ef139322bceaf034a12b8b57b94c4bda22ffea4cebc65708bc223",
+              "6e3f9b56444ef139322bceaf034a12b8b57b94c4bda22ffea4cebc65708bc223",
+              "6e3f9b56444ef139322bceaf034a12b8b57b94c4bda22ffea4cebc65708bc223",
+              "6e3f9b56444ef139322bceaf034a12b8b57b94c4bda22ffea4cebc65708bc223",
+              "6e3f9b56444ef139322bceaf034a12b8b57b94c4bda22ffea4cebc65708bc223",
+              "6e3f9b56444ef139322bceaf034a12b8b57b94c4bda22ffea4cebc65708bc223",
+              "6e3f9b56444ef139322bceaf034a12b8b57b94c4bda22ffea4cebc65708bc223",
+              "6e3f9b56444ef139322bceaf034a12b8b57b94c4bda22ffea4cebc65708bc223",
+              "6e3f9b56444ef139322bceaf034a12b8b57b94c4bda22ffea4cebc65708bc223",
+              "6e3f9b56444ef139322bceaf034a12b8b57b94c4bda22ffea4cebc65708bc223",
+              "6e3f9b56444ef139322bceaf034a12b8b57b94c4bda22ffea4cebc65708bc223",
+              "6e3f9b56444ef139322bceaf034a12b8b57b94c4bda22ffea4cebc65708bc223",
+              "6e3f9b56444ef139322bceaf034a12b8b57b94c4bda22ffea4cebc65708bc223",
+              "6e3f9b56444ef139322bceaf034a12b8b57b94c4bda22ffea4cebc65708bc223",
+              "6e3f9b56444ef139322bceaf034a12b8b57b94c4bda22ffea4cebc65708bc223",
+              "6e3f9b56444ef139322bceaf034a12b8b57b94c4bda22ffea4cebc65708bc223",
+              "6e3f9b56444ef139322bceaf034a12b8b57b94c4bda22ffea4cebc65708bc223",
+              "6e3f9b56444ef139322bceaf034a12b8b57b94c4bda22ffea4cebc65708bc223",
+              "6e3f9b56444ef139322bceaf034a12b8b57b94c4bda22ffea4cebc65708bc223"
+            ],
+            "exact_signature_repeat": true,
+            "hold_success_count": 0,
+            "hold_success_rate": 0.0,
+            "minimum_repeats": 20,
+            "runtime_mean_s": 4.033436215150141,
+            "status": "FAIL",
+            "trial_count": 20
+          },
+          "trial_file": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/gripper_collider_ab_trials/decomposition_explicit/follower_left.jsonl",
+          "trial_file_sha256": "3b51117d898e2b0234fd9f24855fc4ebafe72280dd32d4dd9654982c98fa6b9f"
+        },
+        "follower_right": {
+          "summary": {
+            "all_trials_pass_hold_gate": false,
+            "complete": true,
+            "deterministic_signatures": [
+              "c98afcaed46d23cbe6f85aec505d5ecf08000485b53dbbac5a3fed583ca48bbe",
+              "c98afcaed46d23cbe6f85aec505d5ecf08000485b53dbbac5a3fed583ca48bbe",
+              "c98afcaed46d23cbe6f85aec505d5ecf08000485b53dbbac5a3fed583ca48bbe",
+              "c98afcaed46d23cbe6f85aec505d5ecf08000485b53dbbac5a3fed583ca48bbe",
+              "c98afcaed46d23cbe6f85aec505d5ecf08000485b53dbbac5a3fed583ca48bbe",
+              "c98afcaed46d23cbe6f85aec505d5ecf08000485b53dbbac5a3fed583ca48bbe",
+              "c98afcaed46d23cbe6f85aec505d5ecf08000485b53dbbac5a3fed583ca48bbe",
+              "c98afcaed46d23cbe6f85aec505d5ecf08000485b53dbbac5a3fed583ca48bbe",
+              "c98afcaed46d23cbe6f85aec505d5ecf08000485b53dbbac5a3fed583ca48bbe",
+              "c98afcaed46d23cbe6f85aec505d5ecf08000485b53dbbac5a3fed583ca48bbe",
+              "c98afcaed46d23cbe6f85aec505d5ecf08000485b53dbbac5a3fed583ca48bbe",
+              "c98afcaed46d23cbe6f85aec505d5ecf08000485b53dbbac5a3fed583ca48bbe",
+              "c98afcaed46d23cbe6f85aec505d5ecf08000485b53dbbac5a3fed583ca48bbe",
+              "c98afcaed46d23cbe6f85aec505d5ecf08000485b53dbbac5a3fed583ca48bbe",
+              "c98afcaed46d23cbe6f85aec505d5ecf08000485b53dbbac5a3fed583ca48bbe",
+              "c98afcaed46d23cbe6f85aec505d5ecf08000485b53dbbac5a3fed583ca48bbe",
+              "c98afcaed46d23cbe6f85aec505d5ecf08000485b53dbbac5a3fed583ca48bbe",
+              "c98afcaed46d23cbe6f85aec505d5ecf08000485b53dbbac5a3fed583ca48bbe",
+              "c98afcaed46d23cbe6f85aec505d5ecf08000485b53dbbac5a3fed583ca48bbe",
+              "c98afcaed46d23cbe6f85aec505d5ecf08000485b53dbbac5a3fed583ca48bbe"
+            ],
+            "exact_signature_repeat": true,
+            "hold_success_count": 0,
+            "hold_success_rate": 0.0,
+            "minimum_repeats": 20,
+            "runtime_mean_s": 4.099635702501109,
+            "status": "FAIL",
+            "trial_count": 20
+          },
+          "trial_file": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/gripper_collider_ab_trials/decomposition_explicit/follower_right.jsonl",
+          "trial_file_sha256": "c5c7294e9bbcfac7a48b332e2960d368a2e741a27d68087724a687a2c55e402e"
+        }
+      }
+    },
+    "hull_current": {
+      "approximation": "convexHull",
+      "combined": {
+        "all_trials_pass_hold_gate": false,
+        "combined_signature_note": "combined signatures include robot identity; determinism is evaluated within each robot/profile/control group",
+        "complete": true,
+        "deterministic_per_robot": true,
+        "deterministic_signatures": [
+          "1c40c65f4cee8fc7bb0fb2106dbb8cd1f9fe937b0e1e275681e71a6280be3fdd",
+          "1c40c65f4cee8fc7bb0fb2106dbb8cd1f9fe937b0e1e275681e71a6280be3fdd",
+          "1c40c65f4cee8fc7bb0fb2106dbb8cd1f9fe937b0e1e275681e71a6280be3fdd",
+          "1c40c65f4cee8fc7bb0fb2106dbb8cd1f9fe937b0e1e275681e71a6280be3fdd",
+          "1c40c65f4cee8fc7bb0fb2106dbb8cd1f9fe937b0e1e275681e71a6280be3fdd",
+          "1c40c65f4cee8fc7bb0fb2106dbb8cd1f9fe937b0e1e275681e71a6280be3fdd",
+          "1c40c65f4cee8fc7bb0fb2106dbb8cd1f9fe937b0e1e275681e71a6280be3fdd",
+          "1c40c65f4cee8fc7bb0fb2106dbb8cd1f9fe937b0e1e275681e71a6280be3fdd",
+          "1c40c65f4cee8fc7bb0fb2106dbb8cd1f9fe937b0e1e275681e71a6280be3fdd",
+          "1c40c65f4cee8fc7bb0fb2106dbb8cd1f9fe937b0e1e275681e71a6280be3fdd",
+          "1c40c65f4cee8fc7bb0fb2106dbb8cd1f9fe937b0e1e275681e71a6280be3fdd",
+          "1c40c65f4cee8fc7bb0fb2106dbb8cd1f9fe937b0e1e275681e71a6280be3fdd",
+          "1c40c65f4cee8fc7bb0fb2106dbb8cd1f9fe937b0e1e275681e71a6280be3fdd",
+          "1c40c65f4cee8fc7bb0fb2106dbb8cd1f9fe937b0e1e275681e71a6280be3fdd",
+          "1c40c65f4cee8fc7bb0fb2106dbb8cd1f9fe937b0e1e275681e71a6280be3fdd",
+          "1c40c65f4cee8fc7bb0fb2106dbb8cd1f9fe937b0e1e275681e71a6280be3fdd",
+          "1c40c65f4cee8fc7bb0fb2106dbb8cd1f9fe937b0e1e275681e71a6280be3fdd",
+          "1c40c65f4cee8fc7bb0fb2106dbb8cd1f9fe937b0e1e275681e71a6280be3fdd",
+          "1c40c65f4cee8fc7bb0fb2106dbb8cd1f9fe937b0e1e275681e71a6280be3fdd",
+          "1c40c65f4cee8fc7bb0fb2106dbb8cd1f9fe937b0e1e275681e71a6280be3fdd",
+          "efe53712a755b0ef3c2c19ec510d0623de8726cf6a59d27bee6758c5d2757004",
+          "efe53712a755b0ef3c2c19ec510d0623de8726cf6a59d27bee6758c5d2757004",
+          "efe53712a755b0ef3c2c19ec510d0623de8726cf6a59d27bee6758c5d2757004",
+          "efe53712a755b0ef3c2c19ec510d0623de8726cf6a59d27bee6758c5d2757004",
+          "efe53712a755b0ef3c2c19ec510d0623de8726cf6a59d27bee6758c5d2757004",
+          "efe53712a755b0ef3c2c19ec510d0623de8726cf6a59d27bee6758c5d2757004",
+          "efe53712a755b0ef3c2c19ec510d0623de8726cf6a59d27bee6758c5d2757004",
+          "efe53712a755b0ef3c2c19ec510d0623de8726cf6a59d27bee6758c5d2757004",
+          "efe53712a755b0ef3c2c19ec510d0623de8726cf6a59d27bee6758c5d2757004",
+          "efe53712a755b0ef3c2c19ec510d0623de8726cf6a59d27bee6758c5d2757004",
+          "efe53712a755b0ef3c2c19ec510d0623de8726cf6a59d27bee6758c5d2757004",
+          "efe53712a755b0ef3c2c19ec510d0623de8726cf6a59d27bee6758c5d2757004",
+          "efe53712a755b0ef3c2c19ec510d0623de8726cf6a59d27bee6758c5d2757004",
+          "efe53712a755b0ef3c2c19ec510d0623de8726cf6a59d27bee6758c5d2757004",
+          "efe53712a755b0ef3c2c19ec510d0623de8726cf6a59d27bee6758c5d2757004",
+          "efe53712a755b0ef3c2c19ec510d0623de8726cf6a59d27bee6758c5d2757004",
+          "efe53712a755b0ef3c2c19ec510d0623de8726cf6a59d27bee6758c5d2757004",
+          "efe53712a755b0ef3c2c19ec510d0623de8726cf6a59d27bee6758c5d2757004",
+          "efe53712a755b0ef3c2c19ec510d0623de8726cf6a59d27bee6758c5d2757004",
+          "efe53712a755b0ef3c2c19ec510d0623de8726cf6a59d27bee6758c5d2757004"
+        ],
+        "exact_signature_repeat": false,
+        "hold_success_count": 0,
+        "hold_success_rate": 0.0,
+        "minimum_repeats": 40,
+        "runtime_mean_s": 2.2121294445762034,
+        "status": "FAIL",
+        "trial_count": 40
+      },
+      "control_mode": "current_mimic",
+      "control_status": "CURRENT_IMPORTED_CONTROL_MAPPING",
+      "diagnostic_metrics": {
+        "bilateral_contact_trial_count": 40,
+        "contact_point_count": {
+          "maximum": 2071,
+          "mean": 2071.0,
+          "minimum": 2071
+        },
+        "drop_m": {
+          "maximum": 0.05196145176887512,
+          "mean": 0.05196145176887512,
+          "minimum": 0.05196145176887512,
+          "unique_values": [
+            0.05196145176887512
+          ]
+        },
+        "maximum_estimated_normal_force_n": {
+          "left": 1.2784729309725191,
+          "right": 0.21076133014175624
+        },
+        "maximum_post_command_dynamic_residual_m": 0.018678732216358185,
+        "maximum_sampled_control_residual_m": 0.0019800961017608643,
+        "maximum_transient_penetration_depth_m": 0.014812054112553596,
+        "persistent_penetration_trial_count": 0,
+        "unexpected_internal_collision_trial_count": 0
+      },
+      "profile": "convex_hull",
+      "robots": {
+        "follower_left": {
+          "summary": {
+            "all_trials_pass_hold_gate": false,
+            "complete": true,
+            "deterministic_signatures": [
+              "1c40c65f4cee8fc7bb0fb2106dbb8cd1f9fe937b0e1e275681e71a6280be3fdd",
+              "1c40c65f4cee8fc7bb0fb2106dbb8cd1f9fe937b0e1e275681e71a6280be3fdd",
+              "1c40c65f4cee8fc7bb0fb2106dbb8cd1f9fe937b0e1e275681e71a6280be3fdd",
+              "1c40c65f4cee8fc7bb0fb2106dbb8cd1f9fe937b0e1e275681e71a6280be3fdd",
+              "1c40c65f4cee8fc7bb0fb2106dbb8cd1f9fe937b0e1e275681e71a6280be3fdd",
+              "1c40c65f4cee8fc7bb0fb2106dbb8cd1f9fe937b0e1e275681e71a6280be3fdd",
+              "1c40c65f4cee8fc7bb0fb2106dbb8cd1f9fe937b0e1e275681e71a6280be3fdd",
+              "1c40c65f4cee8fc7bb0fb2106dbb8cd1f9fe937b0e1e275681e71a6280be3fdd",
+              "1c40c65f4cee8fc7bb0fb2106dbb8cd1f9fe937b0e1e275681e71a6280be3fdd",
+              "1c40c65f4cee8fc7bb0fb2106dbb8cd1f9fe937b0e1e275681e71a6280be3fdd",
+              "1c40c65f4cee8fc7bb0fb2106dbb8cd1f9fe937b0e1e275681e71a6280be3fdd",
+              "1c40c65f4cee8fc7bb0fb2106dbb8cd1f9fe937b0e1e275681e71a6280be3fdd",
+              "1c40c65f4cee8fc7bb0fb2106dbb8cd1f9fe937b0e1e275681e71a6280be3fdd",
+              "1c40c65f4cee8fc7bb0fb2106dbb8cd1f9fe937b0e1e275681e71a6280be3fdd",
+              "1c40c65f4cee8fc7bb0fb2106dbb8cd1f9fe937b0e1e275681e71a6280be3fdd",
+              "1c40c65f4cee8fc7bb0fb2106dbb8cd1f9fe937b0e1e275681e71a6280be3fdd",
+              "1c40c65f4cee8fc7bb0fb2106dbb8cd1f9fe937b0e1e275681e71a6280be3fdd",
+              "1c40c65f4cee8fc7bb0fb2106dbb8cd1f9fe937b0e1e275681e71a6280be3fdd",
+              "1c40c65f4cee8fc7bb0fb2106dbb8cd1f9fe937b0e1e275681e71a6280be3fdd",
+              "1c40c65f4cee8fc7bb0fb2106dbb8cd1f9fe937b0e1e275681e71a6280be3fdd"
+            ],
+            "exact_signature_repeat": true,
+            "hold_success_count": 0,
+            "hold_success_rate": 0.0,
+            "minimum_repeats": 20,
+            "runtime_mean_s": 2.18963403170128,
+            "status": "FAIL",
+            "trial_count": 20
+          },
+          "trial_file": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/gripper_collider_ab_trials/hull_current/follower_left.jsonl",
+          "trial_file_sha256": "d74085dea0a98aeae24fa730ec4ed541de93b8e06d2732c54ffa587a25cf9295"
+        },
+        "follower_right": {
+          "summary": {
+            "all_trials_pass_hold_gate": false,
+            "complete": true,
+            "deterministic_signatures": [
+              "efe53712a755b0ef3c2c19ec510d0623de8726cf6a59d27bee6758c5d2757004",
+              "efe53712a755b0ef3c2c19ec510d0623de8726cf6a59d27bee6758c5d2757004",
+              "efe53712a755b0ef3c2c19ec510d0623de8726cf6a59d27bee6758c5d2757004",
+              "efe53712a755b0ef3c2c19ec510d0623de8726cf6a59d27bee6758c5d2757004",
+              "efe53712a755b0ef3c2c19ec510d0623de8726cf6a59d27bee6758c5d2757004",
+              "efe53712a755b0ef3c2c19ec510d0623de8726cf6a59d27bee6758c5d2757004",
+              "efe53712a755b0ef3c2c19ec510d0623de8726cf6a59d27bee6758c5d2757004",
+              "efe53712a755b0ef3c2c19ec510d0623de8726cf6a59d27bee6758c5d2757004",
+              "efe53712a755b0ef3c2c19ec510d0623de8726cf6a59d27bee6758c5d2757004",
+              "efe53712a755b0ef3c2c19ec510d0623de8726cf6a59d27bee6758c5d2757004",
+              "efe53712a755b0ef3c2c19ec510d0623de8726cf6a59d27bee6758c5d2757004",
+              "efe53712a755b0ef3c2c19ec510d0623de8726cf6a59d27bee6758c5d2757004",
+              "efe53712a755b0ef3c2c19ec510d0623de8726cf6a59d27bee6758c5d2757004",
+              "efe53712a755b0ef3c2c19ec510d0623de8726cf6a59d27bee6758c5d2757004",
+              "efe53712a755b0ef3c2c19ec510d0623de8726cf6a59d27bee6758c5d2757004",
+              "efe53712a755b0ef3c2c19ec510d0623de8726cf6a59d27bee6758c5d2757004",
+              "efe53712a755b0ef3c2c19ec510d0623de8726cf6a59d27bee6758c5d2757004",
+              "efe53712a755b0ef3c2c19ec510d0623de8726cf6a59d27bee6758c5d2757004",
+              "efe53712a755b0ef3c2c19ec510d0623de8726cf6a59d27bee6758c5d2757004",
+              "efe53712a755b0ef3c2c19ec510d0623de8726cf6a59d27bee6758c5d2757004"
+            ],
+            "exact_signature_repeat": true,
+            "hold_success_count": 0,
+            "hold_success_rate": 0.0,
+            "minimum_repeats": 20,
+            "runtime_mean_s": 2.2346248574511263,
+            "status": "FAIL",
+            "trial_count": 20
+          },
+          "trial_file": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/gripper_collider_ab_trials/hull_current/follower_right.jsonl",
+          "trial_file_sha256": "d504b68d53423d9b627f0eee8a3b746531f1e2fb844dada31699ca46b610281f"
+        }
+      }
+    },
+    "hull_explicit": {
+      "approximation": "convexHull",
+      "combined": {
+        "all_trials_pass_hold_gate": false,
+        "combined_signature_note": "combined signatures include robot identity; determinism is evaluated within each robot/profile/control group",
+        "complete": true,
+        "deterministic_per_robot": true,
+        "deterministic_signatures": [
+          "477fac63c7239c61c6a445291854dbf423695cef2c70f24633499c33859a2f6e",
+          "477fac63c7239c61c6a445291854dbf423695cef2c70f24633499c33859a2f6e",
+          "477fac63c7239c61c6a445291854dbf423695cef2c70f24633499c33859a2f6e",
+          "477fac63c7239c61c6a445291854dbf423695cef2c70f24633499c33859a2f6e",
+          "477fac63c7239c61c6a445291854dbf423695cef2c70f24633499c33859a2f6e",
+          "477fac63c7239c61c6a445291854dbf423695cef2c70f24633499c33859a2f6e",
+          "477fac63c7239c61c6a445291854dbf423695cef2c70f24633499c33859a2f6e",
+          "477fac63c7239c61c6a445291854dbf423695cef2c70f24633499c33859a2f6e",
+          "477fac63c7239c61c6a445291854dbf423695cef2c70f24633499c33859a2f6e",
+          "477fac63c7239c61c6a445291854dbf423695cef2c70f24633499c33859a2f6e",
+          "477fac63c7239c61c6a445291854dbf423695cef2c70f24633499c33859a2f6e",
+          "477fac63c7239c61c6a445291854dbf423695cef2c70f24633499c33859a2f6e",
+          "477fac63c7239c61c6a445291854dbf423695cef2c70f24633499c33859a2f6e",
+          "477fac63c7239c61c6a445291854dbf423695cef2c70f24633499c33859a2f6e",
+          "477fac63c7239c61c6a445291854dbf423695cef2c70f24633499c33859a2f6e",
+          "477fac63c7239c61c6a445291854dbf423695cef2c70f24633499c33859a2f6e",
+          "477fac63c7239c61c6a445291854dbf423695cef2c70f24633499c33859a2f6e",
+          "477fac63c7239c61c6a445291854dbf423695cef2c70f24633499c33859a2f6e",
+          "477fac63c7239c61c6a445291854dbf423695cef2c70f24633499c33859a2f6e",
+          "477fac63c7239c61c6a445291854dbf423695cef2c70f24633499c33859a2f6e",
+          "8a21df19286bd0f7381211b5faa8f03450036972cdcb6ae768430d0e1a1b04d6",
+          "8a21df19286bd0f7381211b5faa8f03450036972cdcb6ae768430d0e1a1b04d6",
+          "8a21df19286bd0f7381211b5faa8f03450036972cdcb6ae768430d0e1a1b04d6",
+          "8a21df19286bd0f7381211b5faa8f03450036972cdcb6ae768430d0e1a1b04d6",
+          "8a21df19286bd0f7381211b5faa8f03450036972cdcb6ae768430d0e1a1b04d6",
+          "8a21df19286bd0f7381211b5faa8f03450036972cdcb6ae768430d0e1a1b04d6",
+          "8a21df19286bd0f7381211b5faa8f03450036972cdcb6ae768430d0e1a1b04d6",
+          "8a21df19286bd0f7381211b5faa8f03450036972cdcb6ae768430d0e1a1b04d6",
+          "8a21df19286bd0f7381211b5faa8f03450036972cdcb6ae768430d0e1a1b04d6",
+          "8a21df19286bd0f7381211b5faa8f03450036972cdcb6ae768430d0e1a1b04d6",
+          "8a21df19286bd0f7381211b5faa8f03450036972cdcb6ae768430d0e1a1b04d6",
+          "8a21df19286bd0f7381211b5faa8f03450036972cdcb6ae768430d0e1a1b04d6",
+          "8a21df19286bd0f7381211b5faa8f03450036972cdcb6ae768430d0e1a1b04d6",
+          "8a21df19286bd0f7381211b5faa8f03450036972cdcb6ae768430d0e1a1b04d6",
+          "8a21df19286bd0f7381211b5faa8f03450036972cdcb6ae768430d0e1a1b04d6",
+          "8a21df19286bd0f7381211b5faa8f03450036972cdcb6ae768430d0e1a1b04d6",
+          "8a21df19286bd0f7381211b5faa8f03450036972cdcb6ae768430d0e1a1b04d6",
+          "8a21df19286bd0f7381211b5faa8f03450036972cdcb6ae768430d0e1a1b04d6",
+          "8a21df19286bd0f7381211b5faa8f03450036972cdcb6ae768430d0e1a1b04d6",
+          "8a21df19286bd0f7381211b5faa8f03450036972cdcb6ae768430d0e1a1b04d6"
+        ],
+        "exact_signature_repeat": false,
+        "hold_success_count": 0,
+        "hold_success_rate": 0.0,
+        "minimum_repeats": 40,
+        "runtime_mean_s": 2.26546978129918,
+        "status": "FAIL",
+        "trial_count": 40
+      },
+      "control_mode": "explicit_symmetric",
+      "control_status": "DIAGNOSTIC_ONLY_NOT_FINAL_CONTROL_MAPPING",
+      "diagnostic_metrics": {
+        "bilateral_contact_trial_count": 40,
+        "contact_point_count": {
+          "maximum": 2071,
+          "mean": 2071.0,
+          "minimum": 2071
+        },
+        "drop_m": {
+          "maximum": 0.05196145176887512,
+          "mean": 0.05196145176887512,
+          "minimum": 0.05196145176887512,
+          "unique_values": [
+            0.05196145176887512
+          ]
+        },
+        "maximum_estimated_normal_force_n": {
+          "left": 1.2784729309725191,
+          "right": 0.21076133014175624
+        },
+        "maximum_post_command_dynamic_residual_m": 0.018678732216358185,
+        "maximum_sampled_control_residual_m": 0.0019800961017608643,
+        "maximum_transient_penetration_depth_m": 0.014812054112553596,
+        "persistent_penetration_trial_count": 0,
+        "unexpected_internal_collision_trial_count": 0
+      },
+      "profile": "convex_hull",
+      "robots": {
+        "follower_left": {
+          "summary": {
+            "all_trials_pass_hold_gate": false,
+            "complete": true,
+            "deterministic_signatures": [
+              "477fac63c7239c61c6a445291854dbf423695cef2c70f24633499c33859a2f6e",
+              "477fac63c7239c61c6a445291854dbf423695cef2c70f24633499c33859a2f6e",
+              "477fac63c7239c61c6a445291854dbf423695cef2c70f24633499c33859a2f6e",
+              "477fac63c7239c61c6a445291854dbf423695cef2c70f24633499c33859a2f6e",
+              "477fac63c7239c61c6a445291854dbf423695cef2c70f24633499c33859a2f6e",
+              "477fac63c7239c61c6a445291854dbf423695cef2c70f24633499c33859a2f6e",
+              "477fac63c7239c61c6a445291854dbf423695cef2c70f24633499c33859a2f6e",
+              "477fac63c7239c61c6a445291854dbf423695cef2c70f24633499c33859a2f6e",
+              "477fac63c7239c61c6a445291854dbf423695cef2c70f24633499c33859a2f6e",
+              "477fac63c7239c61c6a445291854dbf423695cef2c70f24633499c33859a2f6e",
+              "477fac63c7239c61c6a445291854dbf423695cef2c70f24633499c33859a2f6e",
+              "477fac63c7239c61c6a445291854dbf423695cef2c70f24633499c33859a2f6e",
+              "477fac63c7239c61c6a445291854dbf423695cef2c70f24633499c33859a2f6e",
+              "477fac63c7239c61c6a445291854dbf423695cef2c70f24633499c33859a2f6e",
+              "477fac63c7239c61c6a445291854dbf423695cef2c70f24633499c33859a2f6e",
+              "477fac63c7239c61c6a445291854dbf423695cef2c70f24633499c33859a2f6e",
+              "477fac63c7239c61c6a445291854dbf423695cef2c70f24633499c33859a2f6e",
+              "477fac63c7239c61c6a445291854dbf423695cef2c70f24633499c33859a2f6e",
+              "477fac63c7239c61c6a445291854dbf423695cef2c70f24633499c33859a2f6e",
+              "477fac63c7239c61c6a445291854dbf423695cef2c70f24633499c33859a2f6e"
+            ],
+            "exact_signature_repeat": true,
+            "hold_success_count": 0,
+            "hold_success_rate": 0.0,
+            "minimum_repeats": 20,
+            "runtime_mean_s": 2.2366694879507123,
+            "status": "FAIL",
+            "trial_count": 20
+          },
+          "trial_file": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/gripper_collider_ab_trials/hull_explicit/follower_left.jsonl",
+          "trial_file_sha256": "8eeccc814a4728002c54dce683b30294f43ed24e78e0d8c83a86c091b05ceb2f"
+        },
+        "follower_right": {
+          "summary": {
+            "all_trials_pass_hold_gate": false,
+            "complete": true,
+            "deterministic_signatures": [
+              "8a21df19286bd0f7381211b5faa8f03450036972cdcb6ae768430d0e1a1b04d6",
+              "8a21df19286bd0f7381211b5faa8f03450036972cdcb6ae768430d0e1a1b04d6",
+              "8a21df19286bd0f7381211b5faa8f03450036972cdcb6ae768430d0e1a1b04d6",
+              "8a21df19286bd0f7381211b5faa8f03450036972cdcb6ae768430d0e1a1b04d6",
+              "8a21df19286bd0f7381211b5faa8f03450036972cdcb6ae768430d0e1a1b04d6",
+              "8a21df19286bd0f7381211b5faa8f03450036972cdcb6ae768430d0e1a1b04d6",
+              "8a21df19286bd0f7381211b5faa8f03450036972cdcb6ae768430d0e1a1b04d6",
+              "8a21df19286bd0f7381211b5faa8f03450036972cdcb6ae768430d0e1a1b04d6",
+              "8a21df19286bd0f7381211b5faa8f03450036972cdcb6ae768430d0e1a1b04d6",
+              "8a21df19286bd0f7381211b5faa8f03450036972cdcb6ae768430d0e1a1b04d6",
+              "8a21df19286bd0f7381211b5faa8f03450036972cdcb6ae768430d0e1a1b04d6",
+              "8a21df19286bd0f7381211b5faa8f03450036972cdcb6ae768430d0e1a1b04d6",
+              "8a21df19286bd0f7381211b5faa8f03450036972cdcb6ae768430d0e1a1b04d6",
+              "8a21df19286bd0f7381211b5faa8f03450036972cdcb6ae768430d0e1a1b04d6",
+              "8a21df19286bd0f7381211b5faa8f03450036972cdcb6ae768430d0e1a1b04d6",
+              "8a21df19286bd0f7381211b5faa8f03450036972cdcb6ae768430d0e1a1b04d6",
+              "8a21df19286bd0f7381211b5faa8f03450036972cdcb6ae768430d0e1a1b04d6",
+              "8a21df19286bd0f7381211b5faa8f03450036972cdcb6ae768430d0e1a1b04d6",
+              "8a21df19286bd0f7381211b5faa8f03450036972cdcb6ae768430d0e1a1b04d6",
+              "8a21df19286bd0f7381211b5faa8f03450036972cdcb6ae768430d0e1a1b04d6"
+            ],
+            "exact_signature_repeat": true,
+            "hold_success_count": 0,
+            "hold_success_rate": 0.0,
+            "minimum_repeats": 20,
+            "runtime_mean_s": 2.2942700746476477,
+            "status": "FAIL",
+            "trial_count": 20
+          },
+          "trial_file": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/gripper_collider_ab_trials/hull_explicit/follower_right.jsonl",
+          "trial_file_sha256": "f260064175f4085cc3fdb5b35f7d850a627336f7781306712fb320abaad96899"
+        }
+      }
+    }
+  },
+  "parameter_scan_run": false,
+  "repeats_per_robot": 20,
+  "root_cause_classification": {
+    "classification": "neither_resolved",
+    "resolved_groups": {
+      "decomposition_current": false,
+      "decomposition_explicit": false,
+      "hull_current": false,
+      "hull_explicit": false
+    },
+    "semantics": "resolved means every fresh-reset trial passed the unchanged hold gate",
+    "status": "PASS"
+  },
+  "run_mode": "ACCEPTANCE",
+  "runtime_invariant_audit": {
+    "allowed_first_round_difference": "finger approximation token only",
+    "approximation_tokens": {
+      "decomposition_current": [
+        "convexDecomposition"
+      ],
+      "decomposition_explicit": [
+        "convexDecomposition"
+      ],
+      "hull_current": [
+        "convexHull"
+      ],
+      "hull_explicit": [
+        "convexHull"
+      ]
+    },
+    "drive_mimic_signature_count_per_robot": {
+      "follower_left": 1,
+      "follower_right": 1
+    },
+    "first_round_control_modes": [
+      "current_mimic"
+    ],
+    "initial_qpos_signature_count_per_robot": {
+      "follower_left": 1,
+      "follower_right": 1
+    },
+    "status": "PASS",
+    "trajectory_phase_signature_count_per_robot": {
+      "follower_left": 1,
+      "follower_right": 1
+    },
+    "trial_count": 160,
+    "unique_locked_values": {
+      "bottle_diameter_m": [
+        0.065
+      ],
+      "bottle_mass_kg": [
+        0.02
+      ],
+      "contact_rest_offsets_authored": [
+        false
+      ],
+      "drop_gate_m": [
+        0.01
+      ],
+      "friction": [
+        0.7
+      ],
+      "hold_interval_s": [
+        2.0
+      ],
+      "physics_dt_s": [
+        0.016666666666666666
+      ],
+      "physics_frequency_hz": [
+        60
+      ],
+      "restitution": [
+        0.0
+      ],
+      "self_collision": [
+        false
+      ],
+      "solve_articulation_contact_last_readback": [
+        true
+      ],
+      "solve_articulation_contact_last_requested": [
+        true
+      ]
+    }
+  },
+  "schema_version": 1,
+  "scope": "ALOHA follower gripper collider A/B only",
+  "second_round_complete": true,
+  "status": "FAIL",
+  "status_semantics": {
+    "PARTIAL": "a diagnostic candidate passed the interface gate but calibrated material/bottle dynamics remain blocked",
+    "experiment_execution_status": "whether all requested fresh-reset trials and report writes completed",
+    "status": "physical hold gate; FAIL means no current-control collider profile passed every unchanged hold trial"
+  },
+  "task8": "NOT_RUN"
+}

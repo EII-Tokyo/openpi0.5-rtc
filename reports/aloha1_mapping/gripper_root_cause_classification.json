@@ -1,0 +1,70 @@
+{
+  "CONVEX_DECOMPOSITION_STATUS": "NO_MEANINGFUL_EFFECT",
+  "classification": "neither_resolved",
+  "classification_detail": {
+    "classification": "neither_resolved",
+    "resolved_groups": {
+      "decomposition_current": false,
+      "decomposition_explicit": false,
+      "hull_current": false,
+      "hull_explicit": false
+    },
+    "semantics": "resolved means every fresh-reset trial passed the unchanged hold gate",
+    "status": "PASS"
+  },
+  "control_warning": "explicit_symmetric is DIAGNOSTIC_ONLY_NOT_FINAL_CONTROL_MAPPING",
+  "decomposition_evidence": {
+    "decomposition_success_rate": 0.0,
+    "gate_semantics": "all trials must pass; mixed success is not promoted to a pass",
+    "hull_success_rate": 0.0,
+    "status": "NO_MEANINGFUL_EFFECT"
+  },
+  "default_asset_collider_modified": false,
+  "determinism": {
+    "deterministic_within_every_robot_group": true,
+    "status": "PASS"
+  },
+  "experiment_execution_status": "PASS",
+  "group_evidence": {
+    "decomposition_current": {
+      "bilateral_contact_trial_count": 40,
+      "deterministic_per_robot": true,
+      "hold_success_count": 0,
+      "hold_success_rate": 0.0,
+      "mean_drop_m": 0.04741010069847107,
+      "trial_count": 40
+    },
+    "decomposition_explicit": {
+      "bilateral_contact_trial_count": 40,
+      "deterministic_per_robot": true,
+      "hold_success_count": 0,
+      "hold_success_rate": 0.0,
+      "mean_drop_m": 0.04741010069847107,
+      "trial_count": 40
+    },
+    "hull_current": {
+      "bilateral_contact_trial_count": 40,
+      "deterministic_per_robot": true,
+      "hold_success_count": 0,
+      "hold_success_rate": 0.0,
+      "mean_drop_m": 0.05196145176887512,
+      "trial_count": 40
+    },
+    "hull_explicit": {
+      "bilateral_contact_trial_count": 40,
+      "deterministic_per_robot": true,
+      "hold_success_count": 0,
+      "hold_success_rate": 0.0,
+      "mean_drop_m": 0.05196145176887512,
+      "trial_count": 40
+    }
+  },
+  "physical_hold_status": "FAIL",
+  "schema_version": 1,
+  "status": "PASS",
+  "status_semantics": {
+    "physical_hold_status": "unchanged two-second bottle drop gate",
+    "status": "classification evidence completeness"
+  },
+  "task8": "NOT_RUN"
+}

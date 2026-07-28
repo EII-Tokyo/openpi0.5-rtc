@@ -1,0 +1,62 @@
+{
+  "local_api": {
+    "convex_decomposition_api": {
+      "defaults": {
+        "errorPercentage": {
+          "authored": false,
+          "type": "float",
+          "value": 10.0
+        },
+        "hullVertexLimit": {
+          "authored": false,
+          "type": "int",
+          "value": 64
+        },
+        "maxConvexHulls": {
+          "authored": false,
+          "type": "int",
+          "value": 32
+        },
+        "minThickness": {
+          "authored": false,
+          "type": "float",
+          "value": 0.0010000000474974513
+        },
+        "shrinkWrap": {
+          "authored": false,
+          "type": "bool",
+          "value": false
+        },
+        "voxelResolution": {
+          "authored": false,
+          "type": "int",
+          "value": 500000
+        }
+      },
+      "plugin_schema_type": "PhysxSchemaPhysxConvexDecompositionCollisionAPI",
+      "python_class": "pxr.PhysxSchema.PhysxConvexDecompositionCollisionAPI",
+      "schema_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/extscache/omni.usd.schema.physx-107.3.26+107.3.3.lx64.r.cp311.u353"
+    },
+    "isaac_sim": "5.1.0.0",
+    "kit": "107.3.3",
+    "mesh_collision_api": {
+      "approximation_readback": "convexDecomposition",
+      "python_class": "pxr.UsdPhysics.MeshCollisionAPI",
+      "supported_tokens_tested": [
+        "convexHull",
+        "convexDecomposition"
+      ]
+    },
+    "physx": "107.3.26",
+    "urdf_importer": {
+      "binding": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.importer.urdf/isaacsim/asset/importer/urdf/_urdf.cpython-311-x86_64-linux-gnu.so",
+      "convex_decomp_after_false": false,
+      "convex_decomp_after_true": true,
+      "convex_decomp_initial": false,
+      "root": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.importer.urdf",
+      "version": "2.4.30"
+    }
+  },
+  "schema_version": 1,
+  "status": "PASS"
+}
