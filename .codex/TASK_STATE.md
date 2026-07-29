@@ -1540,3 +1540,69 @@ scene design is reviewed and approved.
 - No source Stage, source USD/CAD, imported asset, final/default collider,
   renderer default, real robot, ROS, camera calibration, pipe/insertion task,
   or Task 8 optimization was modified or executed.
+
+## 2026-07-30 Grasp Editor pre-IK gate
+
+- Active order is Grasp Editor author/test/export → fresh-process
+  geometry/transform closure → ALOHA six-DOF kinematic correspondence → IK →
+  dynamic horizontal pickup/video. Do not skip directly to IK.
+- Frozen Stage remains
+  `/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/aloha1_signal_correspondence_workcell.usda`,
+  SHA-256
+  `d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf`.
+- A session-only Isaac Sim 5.1.0.0 / Kit 107.3.3 / PhysX 107.3.26 /
+  Grasp Editor 2.0.20 scripted GraspTester equivalent is complete. It is
+  explicitly `DIAGNOSTIC_SCRIPTED_EQUIVALENT_NOT_GUI`.
+- Variant A (`dual_active_exact_candidate`) and variant B
+  (`left_active_mimic_observed`) were each run in three fresh Isaac
+  processes. All six are
+  `GRASP_TESTER_PASS_ONLY_NOT_TASK_PASS`.
+  - A: 127 telemetry steps, 3629 contacts, stable trial signature
+    `ca424213e4789515e8ac00b3b853ea57652d353605a9c791607a533596922e9d`,
+    stable native export SHA-256
+    `8b15e490ce7b16e2e89720eb1d5cdf9e58ffef067753e26fee2e0c2f54b14f0c`.
+  - B: 125 telemetry steps, 3567 contacts, stable trial signature
+    `1791d7e9bd45f9801146dc09bf7c51aae26c8202fc07dfa149852edb843001ae`,
+    stable native export SHA-256
+    `6df061054b7fa4dba7398fabdbe557ea3d29bb865e180d228872363805c62528`.
+- Variant B is the recommended input for the actual GUI step. A retains
+  `mimic_commandability_risk=true` and is diagnostic-only. B exports only
+  `left_finger`; `right_finger` remains an observer and mimic accuracy still
+  has no approved tolerance.
+- Runtime contact evidence contains only Bottle500 and the correct
+  supplier-CAD left/right finger colliders. Physics-material readback is
+  41/41 collisions at approximately `0.7/0.7/0.0`; this remains a diagnostic,
+  not real-friction calibration.
+- The runner now fail-closes on:
+  - exact rigid-link prim paths rather than DOF short names;
+  - local USD physics-purpose token semantics;
+  - written native YAML readback, finite values, frame/joint keys and SHA;
+  - AST and source-string no-IK import/call deny gate;
+  - exact session/edit-target/root metadata and dirty-state restoration;
+  - separate deterministic trial and whole-run signatures.
+- Authoritative aggregate reports:
+  `reports/aloha1_mapping/aloha1_grasp_tester_scripted_equivalent.json` and
+  `.md`. Full per-run reports, telemetry, exports and logs:
+  `.codex/artifacts/20260730-aloha1-grasp-editor-ik-evidence/grasp_tester_scripted/`.
+- All six reports were published at
+  `PRE_KIT_SHUTDOWN_AFTER_PHYSICS_CLEANUP`, with frozen hashes and root
+  restoration passing. Each process then exited `139` in the known
+  ROS2/Kit shutdown path. Shell exit is explicitly non-authoritative; this is
+  not a clean Kit-shutdown claim.
+- MCPJungle Gateway and NVIDIA official Isaac documentation are reachable,
+  but the active Gateway group does not expose the reviewed Visual Tutor
+  application probe or Isaac GUI actions. Actual Grasp Editor GUI author and
+  export is
+  `HARD_BLOCKER_VISUAL_TUTOR_GATEWAY_BRIDGE_UNAVAILABLE`. Per the Visual
+  Tutor skill, do not substitute shell clicks or a direct MCP.
+- Current promotion boundary:
+  `PHYSICS_TESTER_REVIEW=PASS`,
+  `OVERALL_STATUS=PARTIAL`,
+  `GUI=PENDING`,
+  `IK=NOT_RUN`,
+  `TASK_PASS=NOT_ESTABLISHED`.
+- No new grasp video was recorded or promoted in this gate. The prior
+  attempt-16 video remains visual PASS / physical FAIL evidence only.
+- No source/default/final USD, collider, friction, drive, mimic, bottle mass,
+  timestep, solver, real robot, ROS, camera, pipe/insertion task, or Task 8
+  optimization was changed.

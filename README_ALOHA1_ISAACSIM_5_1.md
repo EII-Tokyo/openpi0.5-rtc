@@ -17,6 +17,7 @@ sim-to-real dynamics model and it is not yet accepted for bottle insertion.
 | Task 7B.2 horizontal dynamic pickup smoke | **FAIL** | one fresh-reset Bottle500 trial established bilateral contact and held contact, but the actual contact-center line was `79.2245°` rather than `90°±3°` to `AB` and the bottle never left the table; 20-trial acceptance is blocked |
 | Task 7B.2 continuous video evidence | **PASS visual / FAIL physical** | two synchronized 60 fps streams, 288 frames/4.8 s each, no missing physics frames; raw and annotated overview/close-up videos were vision-reviewed; all labels retain `PHYSICAL FAIL` |
 | Task 7B.2 screenshot evidence | **PARTIAL** | seven side-oblique raw/annotated pairs pass; seven true-top pairs remain PARTIAL because the actual wrist/gripper pose occludes the finger inner surfaces; runtime A/B, L/R origins and contact-normal projections are auxiliary |
+| Grasp Editor pre-IK scripted tester | **PARTIAL / tester-only PASS** | A and B each repeat deterministically in three fresh processes, but actual GUI author/export is blocked by the missing reviewed Visual Tutor Gateway bridge; IK and new video are `NOT_RUN` |
 | Current signal screenshots | **PASS (visual 24/24 PASS)** | 12 fresh raw + 12 annotated images match Stage SHA-256 `d8182a6c…c788cf`; the controlled OmniHydra screenshot process has zero `protoPath` errors |
 | Hydra protoPath controlled diagnosis | **PASS / `FSD_7_5_1_PRIMARY`** | A=29 errors, B OmniHydra=0, B repeat deterministic, D materialization=0; default delegate restored and final assets unchanged |
 | Source and environment audit | PARTIAL | `reports/aloha1_mapping/source_audit.md`, `source_manifest.json`, `missing_resources.json` |
@@ -1352,6 +1353,96 @@ frame has a physical contact-report sample.
 
 No source USD, source CAD, imported asset, default/final collider, renderer
 default, or protected Stage was modified. Task 8 remains `NOT_RUN`.
+
+## 2026-07-30 Grasp Editor pre-IK gate
+
+The earlier horizontal-pickup failure is not being sent directly into IK.
+The current order is Grasp Editor configuration and GraspTester evidence
+first, then a fresh-process geometry/transform and ALOHA kinematic
+correspondence gate, and only then IK.
+
+The local Isaac Sim 5.1.0.0 GraspTester scripted equivalent has completed.
+It used Grasp Editor `2.0.20`, Kit `107.3.3`, PhysX `107.3.26`, the frozen
+signal-correspondence Stage, the project Bottle500, the supplier-CAD finger
+colliders, `solve_articulation_contact_last=true`, and a session-only
+anonymous diagnostic layer. It did not modify the frozen Stage or final
+asset.
+
+Two control variants were retained:
+
+- A, `dual_active_exact_candidate`, commands both finger DOFs and remains
+  diagnostic-only because the right finger is a mimic observer in the
+  approved mapping;
+- B, `left_active_mimic_observed`, commands only `left_finger`, observes
+  `right_finger`, and is the recommended input for the future GUI step.
+
+Each variant was run three times in a fresh Isaac process. All six runs
+reached exactly one terminal GraspTester success callback and are classified
+only as `GRASP_TESTER_PASS_ONLY_NOT_TASK_PASS`.
+
+- A: `127` telemetry steps and `3629` contact records per run; stable trial
+  signature
+  `ca424213e4789515e8ac00b3b853ea57652d353605a9c791607a533596922e9d`;
+  native export SHA-256
+  `8b15e490ce7b16e2e89720eb1d5cdf9e58ffef067753e26fee2e0c2f54b14f0c`.
+- B: `125` telemetry steps and `3567` contact records per run; stable trial
+  signature
+  `1791d7e9bd45f9801146dc09bf7c51aae26c8202fc07dfa149852edb843001ae`;
+  native export SHA-256
+  `6df061054b7fa4dba7398fabdbe557ea3d29bb865e180d228872363805c62528`.
+
+Runtime readback directly confirms:
+
+- DOF order remains
+  `waist, shoulder, elbow, forearm_roll, wrist_angle, wrist_rotate,
+  gripper, left_finger, right_finger`;
+- all reported object contacts are between Bottle500 and the two correct
+  supplier-CAD finger colliders; no gripper-bar/base/workcell contact is
+  counted as a tester pass;
+- all `41` Bottle500 colliders resolve the session physics material;
+  static/dynamic friction read back as approximately `0.7`, restitution as
+  `0.0`;
+- root-layer content, root dirty state, session sublayers, edit target, and
+  all frozen file hashes are restored before report publication;
+- the written native YAML is reopened, structurally validated, checked for
+  finite values, and hashed before it is reported as written.
+
+This result is deliberately not promoted:
+
+- `GUI = PENDING`;
+- `IK = NOT_RUN`;
+- `TASK_PASS = NOT_ESTABLISHED`;
+- `arm_hold_status` and `mimic_status` remain inconclusive until their
+  tolerances are approved;
+- the tester disables Bottle gravity and is not the required
+  table-settle → vertical approach → bilateral contact → lift → hold task;
+- the scripted export uses a session-only Bottle frame and is not the
+  authoritative persistent GUI export.
+
+The Gateway is reachable and the NVIDIA official Isaac documentation tool
+was used, but the selected MCPJungle group does not expose the reviewed
+Visual Tutor application probe or Isaac GUI teaching actions. The actual
+Grasp Editor GUI author/export step is therefore
+`HARD_BLOCKER_VISUAL_TUTOR_GATEWAY_BRIDGE_UNAVAILABLE`. The project rule
+forbids replacing that bridge with shell-driven arbitrary clicks or a direct
+MCP. IK and new grasp video recording remain `NOT_RUN`; no new video has been
+promoted during this gate.
+
+Machine reports:
+
+- `reports/aloha1_mapping/aloha1_grasp_tester_scripted_equivalent.json`;
+- `reports/aloha1_mapping/aloha1_grasp_tester_scripted_equivalent.md`.
+
+Full reports, telemetry, native YAML, exit records, and logs are under:
+
+`/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-grasp-editor-ik-evidence/grasp_tester_scripted/`.
+
+All six Isaac processes published their authoritative report before
+`SimulationApp.close()`, then exited `139` in the known ROS2/Kit shutdown
+path. This does not prove a clean Kit shutdown. The report records
+`shell_exit_code_is_not_authoritative=true`; automation must validate the
+report, cleanup, hashes, export, and intended exit instead of treating shell
+`139` as success.
 
 ## HARD_BLOCKER and measurement checklist
 
