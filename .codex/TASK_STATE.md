@@ -73,10 +73,30 @@ The 2026-07-29 signal-correspondence priority is the current handoff:
   and right-finger mimic readback across two fresh deterministic repeats.
 - Three-reset digital small-up/return motion is `PASS`; shoulder `-0.08 rad`
   produces approximately `+0.0116 m` end-effector Z and returns to home.
-- Task 7A is `PARTIAL`: runtime structure/control gates pass, but swept-link
-  collision monitoring is incomplete and the fresh, unsuppressed NVIDIA
-  PhysicsRules/RobotRules results remain `FAIL`. Task 7B and Task 8 are
-  `NOT_RUN`.
+- Task 7A is `FAIL`: runtime structure/control gates pass, but the completed
+  48-record swept-collision run deterministically fails the positive shoulder
+  trajectory on both followers. Each supplier-CAD finger pair physically
+  contacts `user_confirmed_table` before the authored upper target. Task 7B
+  and Task 8 remain `NOT_RUN`.
+- Swept coverage is 48/48 (24 cases × 2 fresh repeats). The two repeat
+  signatures are identical:
+  `49a1c42ce683c7cc449deb6e44b7654b2cef5debfaa07dad51952a7226e7525b`.
+  Four failed records are the same two unique trajectories repeated:
+  `follower_left:shoulder:positive` and
+  `follower_right:shoulder:positive`.
+- The sweep preserved authored self-collision `false`; disabled pairs are not
+  proven geometrically separated. Contact reporting was session-only and no
+  collider, drive, mimic, timestep, solver, source Stage, or final/default
+  asset was modified.
+- The fresh NVIDIA official-rule output was byte-identical to the prior
+  report: 37/37 findings were triaged exactly once, none suppressed, and none
+  inconclusive. Counts are 28 layer-packaging, 6 missing-source-evidence,
+  2 Isaac 5.1 validator/schema conflicts, and 1 non-blocking false positive.
+- A read-only runtime probe loaded the installed
+  `isaacsim.asset.validation 1.1.0` `MimicAPICheck`. It confirmed positive
+  active-finger limits, negative opposite-local-axis limits and gearing `+1`;
+  the local 5.1 rule compares the raw intervals and its diagnostic text labels
+  the self upper limit as a lower limit. Literal NVIDIA FAIL remains visible.
 - Applicable workcell `IsaacSim.SimReadyAssetRules` is `PASS`; its INFO record
   is retained.
 - Current final screenshots: 12 raw + 12 annotated, all individually reviewed
@@ -102,26 +122,37 @@ The 2026-07-29 signal-correspondence priority is the current handoff:
   `reports/aloha1_mapping/aloha1_task7a_7b_validation_summary.json`,
   `aloha1_joint_mapping_validation.json`,
   `aloha1_signal_correspondence_official_rules.json`,
+  `aloha1_task7a_rule_triage.json`,
+  `aloha1_task7a_swept_collision.json`,
+  `aloha1_task7a_swept_collision_curves.csv`,
+  `aloha1_task7a_collision_pair_inventory.csv`,
   `aloha1_signal_correspondence_screenshot_review.json`, and
   `aloha1_signal_screenshot_command_manifest.json`. Hydra evidence:
   `aloha1_hydra_protopath_diagnosis.json`,
   `aloha1_hydra_protopath_diagnosis_matrix.csv`,
   `aloha1_hydra_protopath_input_manifest.json`, and
   `aloha1_hydra_protopath_screenshot_review.json`.
-- Current outcome name:
-  `KINEMATIC_AND_SIGNAL_CORRESPONDENCE_BASELINE_PARTIAL`.
-- Final post-Hydra verification:
-  - fresh Isaac Task 7A validation: `PARTIAL` overall with mapping, both
-    one-joint suites, and up/down `PASS`; Stage SHA-256 remains
-    `d8182a6c...c788cf`;
-  - focused pytest: `7 passed`;
-  - full `tests/aloha1_mapping`: `335 passed`;
+- Current outcome name: `TASK7A_FAIL_SWEPT_FINGER_TABLE_CONTACT`.
+- The earlier post-Hydra verification was `PARTIAL` before swept collision
+  existed. It is superseded by the current Task 7A `FAIL` summary; its logs
+  remain historical evidence under
+  `.codex/artifacts/20260729-aloha1-signal-correspondence/logs/`.
+- Current Task 7A rule/sweep evidence and final verification logs are under
+  `.codex/artifacts/20260729-aloha1-task7a-rules-sweep/`.
+- Final fresh verification:
+  - Isaac Task 7A summary: expected machine `FAIL`; mapping, both 32/32
+    one-joint suites, first-frame/home, drive/mimic structure and small
+    up/down remain `PASS`;
+  - Stage SHA-256 remains
+    `d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf`;
+  - focused pytest: `19 passed`;
+  - full `tests/aloha1_mapping`: `350 passed`;
   - Ruff: `PASS`;
   - `py_compile`: `PASS`;
-  - logs:
-    `.codex/artifacts/20260729-aloha1-signal-correspondence/logs/task7a_post_hydra_final_fresh.log`,
-    `final_focused_pytest.log`, `final_full_pytest.log`, `final_ruff.log`,
-    and `final_pycompile.log`.
+  - logs: `logs/final_fresh_task7a.log`,
+    `logs/final_focused_pytest_v2.log`, `logs/final_full_pytest.log`,
+    `logs/final_ruff_v2.log`, and `logs/final_pycompile_v2.log` beneath the
+    Task 7A artifact root above.
 
 The unoptimized Stationary ALOHA 1 mapping baseline is implemented through
 Task 7. Full diagnostic output is bounded under

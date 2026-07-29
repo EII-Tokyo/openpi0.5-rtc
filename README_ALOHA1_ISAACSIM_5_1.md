@@ -9,8 +9,8 @@ sim-to-real dynamics model and it is not yet accepted for bottle insertion.
 
 | Gate | Status | Evidence |
 | --- | --- | --- |
-| Kinematic and signal-correspondence baseline | **PARTIAL** | both followers pass 32/32 one-joint cases and small up/down; swept-link collision monitoring and unsuppressed official-rule findings remain |
-| Task 7A structure/control signal | **PARTIAL** | joint mapping, drive/mimic structure, first-frame/home readback, both one-joint suites and deterministic up/down PASS; official PhysicsRules/RobotRules remain FAIL |
+| Kinematic and signal-correspondence baseline | **FAIL** | both followers pass 32/32 one-joint cases and small up/down, but the completed deterministic sweep finds supplier-CAD finger/table contact in both positive-shoulder trajectories |
+| Task 7A structure/control signal | **FAIL** | mapping, drive/mimic structure, first-frame/home, both one-joint suites and up/down PASS; 48/48 sweep coverage is deterministic but 4 records (2 unique trajectories × 2 repeats) FAIL, and literal official PhysicsRules/RobotRules remain FAIL |
 | Task 7B full physical task | **NOT_RUN** | bottle hold, calibrated friction/force and full SimReady promotion are outside the current priority |
 | Current signal screenshots | **PASS (visual 24/24 PASS)** | 12 fresh raw + 12 annotated images match Stage SHA-256 `d8182a6c…c788cf`; the controlled OmniHydra screenshot process has zero `protoPath` errors |
 | Hydra protoPath controlled diagnosis | **PASS / `FSD_7_5_1_PRIMARY`** | A=29 errors, B OmniHydra=0, B repeat deterministic, D materialization=0; default delegate restored and final assets unchanged |
@@ -82,20 +82,51 @@ Fresh Isaac Sim 5.1 runtime results:
   `right_finger` mimic readback;
 - small up/down: `PASS`, three fresh resets; shoulder `-0.08 rad` increases
   end-effector Z by approximately `0.0116 m` and returns to home;
-- Task 7A: `PARTIAL`;
+- swept collision: `FAIL`; 48/48 cases were executed across two repeats, with
+  two unique failures reproduced exactly (`follower_left:shoulder:positive`
+  and `follower_right:shoulder:positive`);
+- Task 7A: `FAIL`;
 - Task 7B: `NOT_RUN`;
 - Task 8: `NOT_RUN`.
 
-NVIDIA official results are preserved without suppression. On each robot
+NVIDIA official results are preserved without suppression. The fresh
+official rerun is byte-identical to the prior report and contains 37 findings:
+28 layer-packaging defects, 6 missing-source-evidence findings, 2 Isaac 5.1
+validator/schema conflicts, and 1 non-blocking false positive. On each robot
 asset, `IsaacSim.PhysicsRules` remains `FAIL` because of the gripper
 JointStateAPI omission in the source robot asset, the Isaac Sim 5.1 mimic
 validator/schema conflict, and three mass-only links without evidence-backed
 colliders. `IsaacSim.RobotRules` remains `FAIL` on schema/layer packaging
 findings. The workcell-scoped applicable `IsaacSim.SimReadyAssetRules` run is
-`PASS` (one INFO record). Runtime evidence passes the signal gates, but it
-does not rewrite the official FAIL values; therefore Task 7A is `PARTIAL`,
-not PASS. Full swept-link collision/contact monitoring is also still
-`PARTIAL`.
+`PASS` (one INFO record). No official finding is suppressed.
+
+The read-only mimic probe loaded the installed
+`isaacsim.asset.validation 1.1.0` rule source. It confirmed active-finger
+limits `0.021…0.057 m`, opposite-finger local-axis limits
+`-0.0642…-0.0138 m`, and mimic gearing `+1`. The installed rule compares
+these raw local-axis intervals and its positive-gearing diagnostic labels the
+self upper limit as a lower limit. Runtime mimic readback remains valid, but
+the two literal NVIDIA errors remain visible as a version-specific rule/schema
+boundary.
+
+The swept test applied contact reporting only in an anonymous session layer,
+preserved self-collision `false`, and made no source/default/final edits. It
+completed all 48 records with identical repeat signatures
+`49a1c42ce683c7cc449deb6e44b7654b2cef5debfaa07dad51952a7226e7525b`.
+For both followers, the positive shoulder target was
+`1.194503376 rad`, but the readback stopped near `0.288 rad` when both
+supplier-CAD finger colliders physically contacted
+`user_confirmed_table`. The same two failures occurred in each repeat.
+A separate positive-separation, zero-impulse pair was classified as
+`CONTACT_ENVELOPE_ONLY`, not physical penetration. Because the physical
+finger/table contacts are real and repeatable, Task 7A is `FAIL`.
+Disabled self-collision pairs are not proven geometrically separated.
+
+The final fresh Isaac run reproduced the aggregate `FAIL` while mapping,
+both 32/32 one-joint suites, first-frame/home, drive/mimic structure and
+small up/down remained `PASS`. Focused tests are `19 passed`; the complete
+`tests/aloha1_mapping` suite is `350 passed`; Ruff and `py_compile` pass.
+The frozen Stage hash remains unchanged.
 
 Screenshot evidence was recaptured after the home layer changed the Stage
 hash and again after the controlled Hydra diagnosis. The final 12 raw and 12
@@ -132,10 +163,10 @@ authoritative. Hydra machine evidence is in:
 The superseded Stage-hash-mismatched screenshot batch is preserved under
 `superseded_stage_d9318d1/`.
 
-This result must be called
-`KINEMATIC_AND_SIGNAL_CORRESPONDENCE_BASELINE_PARTIAL`. It is not a calibrated
-physical digital twin and it is not evidence of bottle grasp, leader/camera
-mapping, ROS integration, or insertion.
+This result must be called `TASK7A_FAIL_SWEPT_FINGER_TABLE_CONTACT`. The
+signal sub-gates remain PASS, but the aggregate cannot be called PARTIAL or
+PASS. It is not a calibrated physical digital twin and it is not evidence of
+bottle grasp, leader/camera mapping, ROS integration, or insertion.
 
 ## Version boundary
 
