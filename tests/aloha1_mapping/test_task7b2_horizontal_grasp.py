@@ -9,6 +9,9 @@ import numpy as np
 import pytest
 import yaml
 
+from tools.aloha1_mapping.task7b2_horizontal_grasp import canonical_horizontal_signature
+from tools.aloha1_mapping.task7b2_horizontal_grasp import evaluate_horizontal_trial
+from tools.aloha1_mapping.task7b2_horizontal_grasp import summarize_horizontal_trials
 from tools.probe_aloha1_task7b2_horizontal_kinematics import detect_lift_onset
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -30,6 +33,54 @@ EXPECTED_CSPACE = [
     "wrist_angle",
     "wrist_rotate",
 ]
+
+
+def _passing_horizontal_trial(*, trial_index: int = 0) -> dict:
+    return {
+        "trial_index": trial_index,
+        "fresh_world_reset": True,
+        "bottle_dynamic_during_settle": True,
+        "support_contact_before_grasp": True,
+        "axis_horizontal_pass": True,
+        "gripper_axis_perpendicular_pass": True,
+        "vertical_descent_pass": True,
+        "ik_reachable": True,
+        "left_physical_contact_before_lift": True,
+        "right_physical_contact_before_lift": True,
+        "contact_points_in_body_interval": True,
+        "bottle_left_support": True,
+        "bilateral_contact_through_hold": True,
+        "hold_drop_m": 0.002,
+        "drop_gate_m": 0.010,
+        "finite_state": True,
+        "persistent_penetration": False,
+        "numerical_ejection": False,
+        "forbidden_contact": False,
+        "forbidden_constraint": False,
+        "surface_gripper_used": False,
+        "parent_attachment_used": False,
+        "contact_lost_before_hold": False,
+        "free_fall_after_contact_loss": False,
+        "rotation_induced_escape": False,
+        "normal_force_decay": False,
+        "continuous_slip": False,
+        "phase_frame_counts": {
+            "support_settle": 60,
+            "vertical_descent": 24,
+            "hold_end": 120,
+        },
+        "joint_trajectories": [[0.0, -0.96], [0.01, -0.95]],
+        "contacts": [
+            {"frame": 120, "side": "left", "impulse_ns": 0.01},
+            {"frame": 120, "side": "right", "impulse_ns": 0.01},
+        ],
+        "bottle_poses": [
+            {"frame": 0, "position_m": [0.0, 0.0, 0.0]},
+            {"frame": 240, "position_m": [0.0, 0.0, 0.02]},
+        ],
+        "runtime_seconds": 99.0,
+        "artifact_absolute_path": "/tmp/attempt-a",
+    }
 
 
 def test_horizontal_config_freezes_geometry_and_task_boundaries() -> None:
@@ -281,3 +332,135 @@ def test_kinematics_report_binds_episode_fk_placement_and_ik() -> None:
     assert report["ik"]["position_tolerance_m"] == pytest.approx(0.001)
     assert report["ik"]["orientation_tolerance_rad"] == pytest.approx(0.005)
     assert report["ik"]["waypoints"]
+
+
+def test_horizontal_trial_passes_only_complete_physical_hold() -> None:
+    result = evaluate_horizontal_trial(_passing_horizontal_trial())
+
+    assert result["status"] == "PASS"
+    assert result["failure_mode"] == "stable_hold"
+    assert result["task8"] == "NOT_RUN"
+
+
+@pytest.mark.parametrize(
+    ("updates", "expected"),
+    [
+        ({"support_contact_before_grasp": False}, "support_settle_failed"),
+        ({"axis_horizontal_pass": False}, "horizontal_geometry_failed"),
+        (
+            {"gripper_axis_perpendicular_pass": False},
+            "gripper_axis_correspondence_failed",
+        ),
+        ({"vertical_descent_pass": False}, "vertical_ik_unreachable"),
+        (
+            {"left_physical_contact_before_lift": False},
+            "contact_not_established",
+        ),
+        (
+            {
+                "bilateral_contact_through_hold": False,
+                "contact_lost_before_hold": True,
+                "free_fall_after_contact_loss": True,
+            },
+            "contact_lost_then_free_fall",
+        ),
+        (
+            {
+                "bilateral_contact_through_hold": True,
+                "continuous_slip": True,
+                "hold_drop_m": 0.02,
+            },
+            "bilateral_contact_continuous_slip",
+        ),
+        (
+            {
+                "bilateral_contact_through_hold": False,
+                "rotation_induced_escape": True,
+            },
+            "rotation_induced_escape",
+        ),
+        (
+            {
+                "bilateral_contact_through_hold": False,
+                "normal_force_decay": True,
+            },
+            "normal_force_decay",
+        ),
+        (
+            {"persistent_penetration": True},
+            "numerical_penetration_or_ejection",
+        ),
+        ({"bottle_left_support": False}, "support_clearance_failed"),
+        ({"forbidden_contact": True}, "forbidden_contact"),
+        (
+            {"bilateral_contact_through_hold": False},
+            "inconclusive",
+        ),
+    ],
+)
+def test_horizontal_failure_classifications_are_exact(
+    updates: dict,
+    expected: str,
+) -> None:
+    trial = _passing_horizontal_trial()
+    trial.update(updates)
+
+    result = evaluate_horizontal_trial(trial)
+
+    assert result["status"] == "FAIL"
+    assert result["failure_mode"] == expected
+
+
+def test_horizontal_failure_precedence_is_fail_closed() -> None:
+    trial = _passing_horizontal_trial()
+    trial.update(
+        {
+            "axis_horizontal_pass": False,
+            "support_contact_before_grasp": False,
+            "left_physical_contact_before_lift": False,
+            "persistent_penetration": True,
+            "bottle_left_support": False,
+        }
+    )
+
+    assert evaluate_horizontal_trial(trial)["failure_mode"] == (
+        "horizontal_geometry_failed"
+    )
+
+
+def test_horizontal_signature_excludes_runtime_and_artifact_path() -> None:
+    first = _passing_horizontal_trial()
+    second = _passing_horizontal_trial()
+    second["runtime_seconds"] = 1.0
+    second["artifact_absolute_path"] = "/different/attempt"
+
+    assert canonical_horizontal_signature(first) == (
+        canonical_horizontal_signature(second)
+    )
+
+    second["bottle_poses"][-1]["position_m"][2] = 0.019
+    assert canonical_horizontal_signature(first) != (
+        canonical_horizontal_signature(second)
+    )
+
+
+def test_horizontal_summary_requires_twenty_fresh_deterministic_passes() -> None:
+    smoke = summarize_horizontal_trials([_passing_horizontal_trial()])
+    assert smoke["status"] == "PARTIAL"
+    assert smoke["trial_count"] == 1
+    assert smoke["pass_count"] == 1
+
+    trials = [
+        _passing_horizontal_trial(trial_index=index) for index in range(20)
+    ]
+    accepted = summarize_horizontal_trials(trials)
+    assert accepted["status"] == "PASS"
+    assert accepted["trial_count"] == 20
+    assert accepted["pass_count"] == 20
+    assert accepted["fresh_world_reset_count"] == 20
+    assert accepted["unique_deterministic_signature_count"] == 1
+
+    trials[-1]["hold_drop_m"] = 0.02
+    rejected = summarize_horizontal_trials(trials)
+    assert rejected["status"] == "FAIL"
+    assert rejected["pass_count"] == 19
