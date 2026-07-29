@@ -1,0 +1,816 @@
+{
+  "accepted_capture_count": 49,
+  "all_accepted_images_individually_viewed": true,
+  "expected_accepted_capture_count": 49,
+  "not_claimed": [
+    "visual PASS does not override runtime protoPath errors",
+    "variant D is not a final asset fix",
+    "no physics or collision PASS is inferred from screenshots"
+  ],
+  "records": [
+    {
+      "acceptance_boundary": "screenshot evidence only; runtime protoPath counts and mesh inventories remain authoritative",
+      "detection_target": "complete follower visual geometry, unclipped gripper, and visibly distinct Task 7A pose",
+      "dimensions_px": [
+        1280,
+        900
+      ],
+      "phase": "home_reference",
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/A/exact_capture/screenshots_raw/follower_left/follower_left_home_reference_raw.png",
+      "review_method": "VISION_MODEL_INDIVIDUAL_IMAGE_REVIEW",
+      "sha256": "4193aef7ccad40f2d1df5ec72215453a6315a4138db75cc22db94ad33b599972",
+      "status": "PASS",
+      "variant": "A",
+      "vision_review": "follower, finger pair, and workcell context are visible without cropping; home/up/down/waist phases have visually distinguishable poses"
+    },
+    {
+      "acceptance_boundary": "screenshot evidence only; runtime protoPath counts and mesh inventories remain authoritative",
+      "detection_target": "complete follower visual geometry, unclipped gripper, and visibly distinct Task 7A pose",
+      "dimensions_px": [
+        1280,
+        900
+      ],
+      "phase": "small_up_start",
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/A/exact_capture/screenshots_raw/follower_left/follower_left_small_up_start_raw.png",
+      "review_method": "VISION_MODEL_INDIVIDUAL_IMAGE_REVIEW",
+      "sha256": "c6a0d27d3c6512c0b903b4f8df2a7307fd6ae2db4c034df81aeef4aa64584d45",
+      "status": "PASS",
+      "variant": "A",
+      "vision_review": "follower, finger pair, and workcell context are visible without cropping; home/up/down/waist phases have visually distinguishable poses"
+    },
+    {
+      "acceptance_boundary": "screenshot evidence only; runtime protoPath counts and mesh inventories remain authoritative",
+      "detection_target": "complete follower visual geometry, unclipped gripper, and visibly distinct Task 7A pose",
+      "dimensions_px": [
+        1280,
+        900
+      ],
+      "phase": "small_up_max",
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/A/exact_capture/screenshots_raw/follower_left/follower_left_small_up_max_raw.png",
+      "review_method": "VISION_MODEL_INDIVIDUAL_IMAGE_REVIEW",
+      "sha256": "c003d0b6e837a1a9accfd1cfaba43a6104ef3d98b08b9e01aada2600685ea763",
+      "status": "PASS",
+      "variant": "A",
+      "vision_review": "follower, finger pair, and workcell context are visible without cropping; home/up/down/waist phases have visually distinguishable poses"
+    },
+    {
+      "acceptance_boundary": "screenshot evidence only; runtime protoPath counts and mesh inventories remain authoritative",
+      "detection_target": "complete follower visual geometry, unclipped gripper, and visibly distinct Task 7A pose",
+      "dimensions_px": [
+        1280,
+        900
+      ],
+      "phase": "small_down_return",
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/A/exact_capture/screenshots_raw/follower_left/follower_left_small_down_return_raw.png",
+      "review_method": "VISION_MODEL_INDIVIDUAL_IMAGE_REVIEW",
+      "sha256": "6ead83c03a2e6b883b42aa84de7dcba2f9e31290930ae3ed16b79ee8777c50b4",
+      "status": "PASS",
+      "variant": "A",
+      "vision_review": "follower, finger pair, and workcell context are visible without cropping; home/up/down/waist phases have visually distinguishable poses"
+    },
+    {
+      "acceptance_boundary": "screenshot evidence only; runtime protoPath counts and mesh inventories remain authoritative",
+      "detection_target": "complete follower visual geometry, unclipped gripper, and visibly distinct Task 7A pose",
+      "dimensions_px": [
+        1280,
+        900
+      ],
+      "phase": "waist_positive",
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/A/exact_capture/screenshots_raw/follower_left/follower_left_waist_positive_raw.png",
+      "review_method": "VISION_MODEL_INDIVIDUAL_IMAGE_REVIEW",
+      "sha256": "1030427fb5113e9aca2782847e0ab27755614614053fb48bfe39878baa9e2a7e",
+      "status": "PASS",
+      "variant": "A",
+      "vision_review": "follower, finger pair, and workcell context are visible without cropping; home/up/down/waist phases have visually distinguishable poses"
+    },
+    {
+      "acceptance_boundary": "screenshot evidence only; runtime protoPath counts and mesh inventories remain authoritative",
+      "detection_target": "complete follower visual geometry, unclipped gripper, and visibly distinct Task 7A pose",
+      "dimensions_px": [
+        1280,
+        900
+      ],
+      "phase": "waist_negative",
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/A/exact_capture/screenshots_raw/follower_left/follower_left_waist_negative_raw.png",
+      "review_method": "VISION_MODEL_INDIVIDUAL_IMAGE_REVIEW",
+      "sha256": "c4df805d8b846c0e477fed87c28a641d1cf1dd20d76f3136d03305ab5e4de77d",
+      "status": "PASS",
+      "variant": "A",
+      "vision_review": "follower, finger pair, and workcell context are visible without cropping; home/up/down/waist phases have visually distinguishable poses"
+    },
+    {
+      "acceptance_boundary": "screenshot evidence only; runtime protoPath counts and mesh inventories remain authoritative",
+      "detection_target": "complete follower visual geometry, unclipped gripper, and visibly distinct Task 7A pose",
+      "dimensions_px": [
+        1280,
+        900
+      ],
+      "phase": "home_reference",
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/B/exact_capture/screenshots_raw/follower_left/follower_left_home_reference_raw.png",
+      "review_method": "VISION_MODEL_INDIVIDUAL_IMAGE_REVIEW",
+      "sha256": "a5135d32a078051974a71ab7a1b5eed9cca589c537eb72812355a5e55d4708fe",
+      "status": "PASS",
+      "variant": "B",
+      "vision_review": "follower, finger pair, and workcell context are visible without cropping; home/up/down/waist phases have visually distinguishable poses"
+    },
+    {
+      "acceptance_boundary": "screenshot evidence only; runtime protoPath counts and mesh inventories remain authoritative",
+      "detection_target": "complete follower visual geometry, unclipped gripper, and visibly distinct Task 7A pose",
+      "dimensions_px": [
+        1280,
+        900
+      ],
+      "phase": "small_up_start",
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/B/exact_capture/screenshots_raw/follower_left/follower_left_small_up_start_raw.png",
+      "review_method": "VISION_MODEL_INDIVIDUAL_IMAGE_REVIEW",
+      "sha256": "68b1f2d0880c00dde571d998343d6845df8b6b0a5eadfe1707437d5bd6de6ca1",
+      "status": "PASS",
+      "variant": "B",
+      "vision_review": "follower, finger pair, and workcell context are visible without cropping; home/up/down/waist phases have visually distinguishable poses"
+    },
+    {
+      "acceptance_boundary": "screenshot evidence only; runtime protoPath counts and mesh inventories remain authoritative",
+      "detection_target": "complete follower visual geometry, unclipped gripper, and visibly distinct Task 7A pose",
+      "dimensions_px": [
+        1280,
+        900
+      ],
+      "phase": "small_up_max",
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/B/exact_capture/screenshots_raw/follower_left/follower_left_small_up_max_raw.png",
+      "review_method": "VISION_MODEL_INDIVIDUAL_IMAGE_REVIEW",
+      "sha256": "cb6f552974586a62b53db136c0644d65cbc68c8edf0fb6bb84e66b1243a1433c",
+      "status": "PASS",
+      "variant": "B",
+      "vision_review": "follower, finger pair, and workcell context are visible without cropping; home/up/down/waist phases have visually distinguishable poses"
+    },
+    {
+      "acceptance_boundary": "screenshot evidence only; runtime protoPath counts and mesh inventories remain authoritative",
+      "detection_target": "complete follower visual geometry, unclipped gripper, and visibly distinct Task 7A pose",
+      "dimensions_px": [
+        1280,
+        900
+      ],
+      "phase": "small_down_return",
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/B/exact_capture/screenshots_raw/follower_left/follower_left_small_down_return_raw.png",
+      "review_method": "VISION_MODEL_INDIVIDUAL_IMAGE_REVIEW",
+      "sha256": "37d682269a35122725694938a38072fe5bcdd0cd5116683da9f28e45e9e97678",
+      "status": "PASS",
+      "variant": "B",
+      "vision_review": "follower, finger pair, and workcell context are visible without cropping; home/up/down/waist phases have visually distinguishable poses"
+    },
+    {
+      "acceptance_boundary": "screenshot evidence only; runtime protoPath counts and mesh inventories remain authoritative",
+      "detection_target": "complete follower visual geometry, unclipped gripper, and visibly distinct Task 7A pose",
+      "dimensions_px": [
+        1280,
+        900
+      ],
+      "phase": "waist_positive",
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/B/exact_capture/screenshots_raw/follower_left/follower_left_waist_positive_raw.png",
+      "review_method": "VISION_MODEL_INDIVIDUAL_IMAGE_REVIEW",
+      "sha256": "7f38e6c97cc65f57fb83de4bdd74bfcc41423b159a7b67e59702c5ff9f2a74af",
+      "status": "PASS",
+      "variant": "B",
+      "vision_review": "follower, finger pair, and workcell context are visible without cropping; home/up/down/waist phases have visually distinguishable poses"
+    },
+    {
+      "acceptance_boundary": "screenshot evidence only; runtime protoPath counts and mesh inventories remain authoritative",
+      "detection_target": "complete follower visual geometry, unclipped gripper, and visibly distinct Task 7A pose",
+      "dimensions_px": [
+        1280,
+        900
+      ],
+      "phase": "waist_negative",
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/B/exact_capture/screenshots_raw/follower_left/follower_left_waist_negative_raw.png",
+      "review_method": "VISION_MODEL_INDIVIDUAL_IMAGE_REVIEW",
+      "sha256": "1afa684cc8463ce9261e5a3521e42a799e4ed29474d3837e5bdf70aa1054b31d",
+      "status": "PASS",
+      "variant": "B",
+      "vision_review": "follower, finger pair, and workcell context are visible without cropping; home/up/down/waist phases have visually distinguishable poses"
+    },
+    {
+      "acceptance_boundary": "screenshot evidence only; runtime protoPath counts and mesh inventories remain authoritative",
+      "detection_target": "complete follower visual geometry, unclipped gripper, and visibly distinct Task 7A pose",
+      "dimensions_px": [
+        1280,
+        900
+      ],
+      "phase": "home_reference",
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/C1/exact_capture/screenshots_raw/follower_left/follower_left_home_reference_raw.png",
+      "review_method": "VISION_MODEL_INDIVIDUAL_IMAGE_REVIEW",
+      "sha256": "c2588f3799d8a1a3d7f233af4babed15aa7c12be9e46ef20ab36fee6f9c4d162",
+      "status": "PASS",
+      "variant": "C1",
+      "vision_review": "follower, finger pair, and workcell context are visible without cropping; home/up/down/waist phases have visually distinguishable poses"
+    },
+    {
+      "acceptance_boundary": "screenshot evidence only; runtime protoPath counts and mesh inventories remain authoritative",
+      "detection_target": "complete follower visual geometry, unclipped gripper, and visibly distinct Task 7A pose",
+      "dimensions_px": [
+        1280,
+        900
+      ],
+      "phase": "small_up_start",
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/C1/exact_capture/screenshots_raw/follower_left/follower_left_small_up_start_raw.png",
+      "review_method": "VISION_MODEL_INDIVIDUAL_IMAGE_REVIEW",
+      "sha256": "0811303a260db97c3e633acbd5be49ee8b8ec9247bd30699f40b994e5895841e",
+      "status": "PASS",
+      "variant": "C1",
+      "vision_review": "follower, finger pair, and workcell context are visible without cropping; home/up/down/waist phases have visually distinguishable poses"
+    },
+    {
+      "acceptance_boundary": "screenshot evidence only; runtime protoPath counts and mesh inventories remain authoritative",
+      "detection_target": "complete follower visual geometry, unclipped gripper, and visibly distinct Task 7A pose",
+      "dimensions_px": [
+        1280,
+        900
+      ],
+      "phase": "small_up_max",
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/C1/exact_capture/screenshots_raw/follower_left/follower_left_small_up_max_raw.png",
+      "review_method": "VISION_MODEL_INDIVIDUAL_IMAGE_REVIEW",
+      "sha256": "16025f81192785bdd5f4bd06b6f9bea6d91702528acf03c63dd9e9ecd35b4564",
+      "status": "PASS",
+      "variant": "C1",
+      "vision_review": "follower, finger pair, and workcell context are visible without cropping; home/up/down/waist phases have visually distinguishable poses"
+    },
+    {
+      "acceptance_boundary": "screenshot evidence only; runtime protoPath counts and mesh inventories remain authoritative",
+      "detection_target": "complete follower visual geometry, unclipped gripper, and visibly distinct Task 7A pose",
+      "dimensions_px": [
+        1280,
+        900
+      ],
+      "phase": "small_down_return",
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/C1/exact_capture/screenshots_raw/follower_left/follower_left_small_down_return_raw.png",
+      "review_method": "VISION_MODEL_INDIVIDUAL_IMAGE_REVIEW",
+      "sha256": "d398c0ab5b5bec0fee0785264e1023c4578adef8daaf708a262bbbb69d04d157",
+      "status": "PASS",
+      "variant": "C1",
+      "vision_review": "follower, finger pair, and workcell context are visible without cropping; home/up/down/waist phases have visually distinguishable poses"
+    },
+    {
+      "acceptance_boundary": "screenshot evidence only; runtime protoPath counts and mesh inventories remain authoritative",
+      "detection_target": "complete follower visual geometry, unclipped gripper, and visibly distinct Task 7A pose",
+      "dimensions_px": [
+        1280,
+        900
+      ],
+      "phase": "waist_positive",
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/C1/exact_capture/screenshots_raw/follower_left/follower_left_waist_positive_raw.png",
+      "review_method": "VISION_MODEL_INDIVIDUAL_IMAGE_REVIEW",
+      "sha256": "5f35e2300f9e47b9a036210891d2a210e744cad1cc77b2a501bfbc0a948efff4",
+      "status": "PASS",
+      "variant": "C1",
+      "vision_review": "follower, finger pair, and workcell context are visible without cropping; home/up/down/waist phases have visually distinguishable poses"
+    },
+    {
+      "acceptance_boundary": "screenshot evidence only; runtime protoPath counts and mesh inventories remain authoritative",
+      "detection_target": "complete follower visual geometry, unclipped gripper, and visibly distinct Task 7A pose",
+      "dimensions_px": [
+        1280,
+        900
+      ],
+      "phase": "waist_negative",
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/C1/exact_capture/screenshots_raw/follower_left/follower_left_waist_negative_raw.png",
+      "review_method": "VISION_MODEL_INDIVIDUAL_IMAGE_REVIEW",
+      "sha256": "c4c4f536d8cc8513d1c8dcffd8b7c7d4c5ff4c5d78ed8212f6d353b811c56e18",
+      "status": "PASS",
+      "variant": "C1",
+      "vision_review": "follower, finger pair, and workcell context are visible without cropping; home/up/down/waist phases have visually distinguishable poses"
+    },
+    {
+      "acceptance_boundary": "screenshot evidence only; runtime protoPath counts and mesh inventories remain authoritative",
+      "detection_target": "complete follower visual geometry, unclipped gripper, and visibly distinct Task 7A pose",
+      "dimensions_px": [
+        1280,
+        900
+      ],
+      "phase": "home_reference",
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/C2/exact_capture/screenshots_raw/follower_left/follower_left_home_reference_raw.png",
+      "review_method": "VISION_MODEL_INDIVIDUAL_IMAGE_REVIEW",
+      "sha256": "7b78bc55cd705afcf3dc6ecaf689d373ec195b3255f4e3ce08b0b094640b7c22",
+      "status": "PASS",
+      "variant": "C2",
+      "vision_review": "follower, finger pair, and workcell context are visible without cropping; home/up/down/waist phases have visually distinguishable poses"
+    },
+    {
+      "acceptance_boundary": "screenshot evidence only; runtime protoPath counts and mesh inventories remain authoritative",
+      "detection_target": "complete follower visual geometry, unclipped gripper, and visibly distinct Task 7A pose",
+      "dimensions_px": [
+        1280,
+        900
+      ],
+      "phase": "small_up_start",
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/C2/exact_capture/screenshots_raw/follower_left/follower_left_small_up_start_raw.png",
+      "review_method": "VISION_MODEL_INDIVIDUAL_IMAGE_REVIEW",
+      "sha256": "20daba9640ac23ffdb2ba18d6abaa201bd2a0843de3564f9573f727409a7876d",
+      "status": "PASS",
+      "variant": "C2",
+      "vision_review": "follower, finger pair, and workcell context are visible without cropping; home/up/down/waist phases have visually distinguishable poses"
+    },
+    {
+      "acceptance_boundary": "screenshot evidence only; runtime protoPath counts and mesh inventories remain authoritative",
+      "detection_target": "complete follower visual geometry, unclipped gripper, and visibly distinct Task 7A pose",
+      "dimensions_px": [
+        1280,
+        900
+      ],
+      "phase": "small_up_max",
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/C2/exact_capture/screenshots_raw/follower_left/follower_left_small_up_max_raw.png",
+      "review_method": "VISION_MODEL_INDIVIDUAL_IMAGE_REVIEW",
+      "sha256": "cc248c1af71b175762edbfed21a517a9550d59085b46e14017b0ed9af534f8dd",
+      "status": "PASS",
+      "variant": "C2",
+      "vision_review": "follower, finger pair, and workcell context are visible without cropping; home/up/down/waist phases have visually distinguishable poses"
+    },
+    {
+      "acceptance_boundary": "screenshot evidence only; runtime protoPath counts and mesh inventories remain authoritative",
+      "detection_target": "complete follower visual geometry, unclipped gripper, and visibly distinct Task 7A pose",
+      "dimensions_px": [
+        1280,
+        900
+      ],
+      "phase": "small_down_return",
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/C2/exact_capture/screenshots_raw/follower_left/follower_left_small_down_return_raw.png",
+      "review_method": "VISION_MODEL_INDIVIDUAL_IMAGE_REVIEW",
+      "sha256": "5b6ce9c5c84489fa31324d8e7086772723f40550ba4c95089d22c1ad2ba1af5b",
+      "status": "PASS",
+      "variant": "C2",
+      "vision_review": "follower, finger pair, and workcell context are visible without cropping; home/up/down/waist phases have visually distinguishable poses"
+    },
+    {
+      "acceptance_boundary": "screenshot evidence only; runtime protoPath counts and mesh inventories remain authoritative",
+      "detection_target": "complete follower visual geometry, unclipped gripper, and visibly distinct Task 7A pose",
+      "dimensions_px": [
+        1280,
+        900
+      ],
+      "phase": "waist_positive",
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/C2/exact_capture/screenshots_raw/follower_left/follower_left_waist_positive_raw.png",
+      "review_method": "VISION_MODEL_INDIVIDUAL_IMAGE_REVIEW",
+      "sha256": "30b5973963fb3678eabd6f04c5eea9ae15a99e4c5670c1a4f6e86d0d4b457741",
+      "status": "PASS",
+      "variant": "C2",
+      "vision_review": "follower, finger pair, and workcell context are visible without cropping; home/up/down/waist phases have visually distinguishable poses"
+    },
+    {
+      "acceptance_boundary": "screenshot evidence only; runtime protoPath counts and mesh inventories remain authoritative",
+      "detection_target": "complete follower visual geometry, unclipped gripper, and visibly distinct Task 7A pose",
+      "dimensions_px": [
+        1280,
+        900
+      ],
+      "phase": "waist_negative",
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/C2/exact_capture/screenshots_raw/follower_left/follower_left_waist_negative_raw.png",
+      "review_method": "VISION_MODEL_INDIVIDUAL_IMAGE_REVIEW",
+      "sha256": "34adf3fe5e1cb49fcd5790c774c81f3cecc226388f136f7c71173761f77f2778",
+      "status": "PASS",
+      "variant": "C2",
+      "vision_review": "follower, finger pair, and workcell context are visible without cropping; home/up/down/waist phases have visually distinguishable poses"
+    },
+    {
+      "acceptance_boundary": "screenshot evidence only; runtime protoPath counts and mesh inventories remain authoritative",
+      "detection_target": "complete follower visual geometry, unclipped gripper, and visibly distinct Task 7A pose",
+      "dimensions_px": [
+        1280,
+        900
+      ],
+      "phase": "home_reference",
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/C3_RESUME1/exact_capture/screenshots_raw/follower_left/follower_left_home_reference_raw.png",
+      "review_method": "VISION_MODEL_INDIVIDUAL_IMAGE_REVIEW",
+      "sha256": "c064cf759219a1e9e26029dc20188625f537167294b708fa01a63316e1285ca4",
+      "status": "PASS",
+      "variant": "C3_RESUME1",
+      "vision_review": "follower, finger pair, and workcell context are visible without cropping; home/up/down/waist phases have visually distinguishable poses"
+    },
+    {
+      "acceptance_boundary": "screenshot evidence only; runtime protoPath counts and mesh inventories remain authoritative",
+      "detection_target": "complete follower visual geometry, unclipped gripper, and visibly distinct Task 7A pose",
+      "dimensions_px": [
+        1280,
+        900
+      ],
+      "phase": "small_up_start",
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/C3_RESUME1/exact_capture/screenshots_raw/follower_left/follower_left_small_up_start_raw.png",
+      "review_method": "VISION_MODEL_INDIVIDUAL_IMAGE_REVIEW",
+      "sha256": "5a03a98064001e4583f43fbb8e8a43490af179938c9f987779deeaf50426a5df",
+      "status": "PASS",
+      "variant": "C3_RESUME1",
+      "vision_review": "follower, finger pair, and workcell context are visible without cropping; home/up/down/waist phases have visually distinguishable poses"
+    },
+    {
+      "acceptance_boundary": "screenshot evidence only; runtime protoPath counts and mesh inventories remain authoritative",
+      "detection_target": "complete follower visual geometry, unclipped gripper, and visibly distinct Task 7A pose",
+      "dimensions_px": [
+        1280,
+        900
+      ],
+      "phase": "small_up_max",
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/C3_RESUME1/exact_capture/screenshots_raw/follower_left/follower_left_small_up_max_raw.png",
+      "review_method": "VISION_MODEL_INDIVIDUAL_IMAGE_REVIEW",
+      "sha256": "810ab5a3bb767a09abae6b1c9dfc62671617676f687c22bfe1437eba42d38ba7",
+      "status": "PASS",
+      "variant": "C3_RESUME1",
+      "vision_review": "follower, finger pair, and workcell context are visible without cropping; home/up/down/waist phases have visually distinguishable poses"
+    },
+    {
+      "acceptance_boundary": "screenshot evidence only; runtime protoPath counts and mesh inventories remain authoritative",
+      "detection_target": "complete follower visual geometry, unclipped gripper, and visibly distinct Task 7A pose",
+      "dimensions_px": [
+        1280,
+        900
+      ],
+      "phase": "small_down_return",
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/C3_RESUME1/exact_capture/screenshots_raw/follower_left/follower_left_small_down_return_raw.png",
+      "review_method": "VISION_MODEL_INDIVIDUAL_IMAGE_REVIEW",
+      "sha256": "628dd77dd58b5c439b7416cbe4371eb3879529f3e61b66db053ecbd1789cb4d3",
+      "status": "PASS",
+      "variant": "C3_RESUME1",
+      "vision_review": "follower, finger pair, and workcell context are visible without cropping; home/up/down/waist phases have visually distinguishable poses"
+    },
+    {
+      "acceptance_boundary": "screenshot evidence only; runtime protoPath counts and mesh inventories remain authoritative",
+      "detection_target": "complete follower visual geometry, unclipped gripper, and visibly distinct Task 7A pose",
+      "dimensions_px": [
+        1280,
+        900
+      ],
+      "phase": "waist_positive",
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/C3_RESUME1/exact_capture/screenshots_raw/follower_left/follower_left_waist_positive_raw.png",
+      "review_method": "VISION_MODEL_INDIVIDUAL_IMAGE_REVIEW",
+      "sha256": "b66970a9d9a4d4dc00cc675e43895b91c28ba59d9be92712930caec43166f468",
+      "status": "PASS",
+      "variant": "C3_RESUME1",
+      "vision_review": "follower, finger pair, and workcell context are visible without cropping; home/up/down/waist phases have visually distinguishable poses"
+    },
+    {
+      "acceptance_boundary": "screenshot evidence only; runtime protoPath counts and mesh inventories remain authoritative",
+      "detection_target": "complete follower visual geometry, unclipped gripper, and visibly distinct Task 7A pose",
+      "dimensions_px": [
+        1280,
+        900
+      ],
+      "phase": "waist_negative",
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/C3_RESUME1/exact_capture/screenshots_raw/follower_left/follower_left_waist_negative_raw.png",
+      "review_method": "VISION_MODEL_INDIVIDUAL_IMAGE_REVIEW",
+      "sha256": "1af6689ba2959c7094665248e61cb5bb2736d94b1a8078dddc682cb137c752d0",
+      "status": "PASS",
+      "variant": "C3_RESUME1",
+      "vision_review": "follower, finger pair, and workcell context are visible without cropping; home/up/down/waist phases have visually distinguishable poses"
+    },
+    {
+      "acceptance_boundary": "screenshot evidence only; runtime protoPath counts and mesh inventories remain authoritative",
+      "detection_target": "complete follower visual geometry, unclipped gripper, and visibly distinct Task 7A pose",
+      "dimensions_px": [
+        1280,
+        900
+      ],
+      "phase": "home_reference",
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/C4/exact_capture/screenshots_raw/follower_left/follower_left_home_reference_raw.png",
+      "review_method": "VISION_MODEL_INDIVIDUAL_IMAGE_REVIEW",
+      "sha256": "1183a97281d7cbb593015d18c2d5e672cdca80b2bc08191712f9c0dde463ffc0",
+      "status": "PASS",
+      "variant": "C4",
+      "vision_review": "follower, finger pair, and workcell context are visible without cropping; home/up/down/waist phases have visually distinguishable poses"
+    },
+    {
+      "acceptance_boundary": "screenshot evidence only; runtime protoPath counts and mesh inventories remain authoritative",
+      "detection_target": "complete follower visual geometry, unclipped gripper, and visibly distinct Task 7A pose",
+      "dimensions_px": [
+        1280,
+        900
+      ],
+      "phase": "small_up_start",
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/C4/exact_capture/screenshots_raw/follower_left/follower_left_small_up_start_raw.png",
+      "review_method": "VISION_MODEL_INDIVIDUAL_IMAGE_REVIEW",
+      "sha256": "3c78e11dc763158fc3c929406cc42b38f256a57c68c47979b35c8b7a0f1949c1",
+      "status": "PASS",
+      "variant": "C4",
+      "vision_review": "follower, finger pair, and workcell context are visible without cropping; home/up/down/waist phases have visually distinguishable poses"
+    },
+    {
+      "acceptance_boundary": "screenshot evidence only; runtime protoPath counts and mesh inventories remain authoritative",
+      "detection_target": "complete follower visual geometry, unclipped gripper, and visibly distinct Task 7A pose",
+      "dimensions_px": [
+        1280,
+        900
+      ],
+      "phase": "small_up_max",
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/C4/exact_capture/screenshots_raw/follower_left/follower_left_small_up_max_raw.png",
+      "review_method": "VISION_MODEL_INDIVIDUAL_IMAGE_REVIEW",
+      "sha256": "9dc7fed3533292e970072f0fb9142619dfddd71ff9f6923bf302018e5bd74310",
+      "status": "PASS",
+      "variant": "C4",
+      "vision_review": "follower, finger pair, and workcell context are visible without cropping; home/up/down/waist phases have visually distinguishable poses"
+    },
+    {
+      "acceptance_boundary": "screenshot evidence only; runtime protoPath counts and mesh inventories remain authoritative",
+      "detection_target": "complete follower visual geometry, unclipped gripper, and visibly distinct Task 7A pose",
+      "dimensions_px": [
+        1280,
+        900
+      ],
+      "phase": "small_down_return",
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/C4/exact_capture/screenshots_raw/follower_left/follower_left_small_down_return_raw.png",
+      "review_method": "VISION_MODEL_INDIVIDUAL_IMAGE_REVIEW",
+      "sha256": "ae25ece30d43100c7698c967f0bc9f1b8bcb7ed2fe399338bb7c195e4de82fc8",
+      "status": "PASS",
+      "variant": "C4",
+      "vision_review": "follower, finger pair, and workcell context are visible without cropping; home/up/down/waist phases have visually distinguishable poses"
+    },
+    {
+      "acceptance_boundary": "screenshot evidence only; runtime protoPath counts and mesh inventories remain authoritative",
+      "detection_target": "complete follower visual geometry, unclipped gripper, and visibly distinct Task 7A pose",
+      "dimensions_px": [
+        1280,
+        900
+      ],
+      "phase": "waist_positive",
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/C4/exact_capture/screenshots_raw/follower_left/follower_left_waist_positive_raw.png",
+      "review_method": "VISION_MODEL_INDIVIDUAL_IMAGE_REVIEW",
+      "sha256": "73337b37795e48a290f642bac93010c0558f310e9a89479e4fecc8636a6b39ae",
+      "status": "PASS",
+      "variant": "C4",
+      "vision_review": "follower, finger pair, and workcell context are visible without cropping; home/up/down/waist phases have visually distinguishable poses"
+    },
+    {
+      "acceptance_boundary": "screenshot evidence only; runtime protoPath counts and mesh inventories remain authoritative",
+      "detection_target": "complete follower visual geometry, unclipped gripper, and visibly distinct Task 7A pose",
+      "dimensions_px": [
+        1280,
+        900
+      ],
+      "phase": "waist_negative",
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/C4/exact_capture/screenshots_raw/follower_left/follower_left_waist_negative_raw.png",
+      "review_method": "VISION_MODEL_INDIVIDUAL_IMAGE_REVIEW",
+      "sha256": "af56260711636daa96a567cda4cb19c23818e9790f655fe6be0ced234edf79a9",
+      "status": "PASS",
+      "variant": "C4",
+      "vision_review": "follower, finger pair, and workcell context are visible without cropping; home/up/down/waist phases have visually distinguishable poses"
+    },
+    {
+      "acceptance_boundary": "screenshot evidence only; runtime protoPath counts and mesh inventories remain authoritative",
+      "detection_target": "complete follower visual geometry, unclipped gripper, and visibly distinct Task 7A pose",
+      "dimensions_px": [
+        1280,
+        900
+      ],
+      "phase": "home_reference",
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/B_REPEAT/exact_capture/screenshots_raw/follower_left/follower_left_home_reference_raw.png",
+      "review_method": "VISION_MODEL_INDIVIDUAL_IMAGE_REVIEW",
+      "sha256": "999a12506412b3e0036cd90274ac4625f1e78e3b8b6a71fef90685fd8e6dd3a9",
+      "status": "PASS",
+      "variant": "B_REPEAT",
+      "vision_review": "follower, finger pair, and workcell context are visible without cropping; home/up/down/waist phases have visually distinguishable poses"
+    },
+    {
+      "acceptance_boundary": "screenshot evidence only; runtime protoPath counts and mesh inventories remain authoritative",
+      "detection_target": "complete follower visual geometry, unclipped gripper, and visibly distinct Task 7A pose",
+      "dimensions_px": [
+        1280,
+        900
+      ],
+      "phase": "small_up_start",
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/B_REPEAT/exact_capture/screenshots_raw/follower_left/follower_left_small_up_start_raw.png",
+      "review_method": "VISION_MODEL_INDIVIDUAL_IMAGE_REVIEW",
+      "sha256": "3d3ae474205461ae340f0a66c544e3a1b0df1f2259866abaa55f0696b572532b",
+      "status": "PASS",
+      "variant": "B_REPEAT",
+      "vision_review": "follower, finger pair, and workcell context are visible without cropping; home/up/down/waist phases have visually distinguishable poses"
+    },
+    {
+      "acceptance_boundary": "screenshot evidence only; runtime protoPath counts and mesh inventories remain authoritative",
+      "detection_target": "complete follower visual geometry, unclipped gripper, and visibly distinct Task 7A pose",
+      "dimensions_px": [
+        1280,
+        900
+      ],
+      "phase": "small_up_max",
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/B_REPEAT/exact_capture/screenshots_raw/follower_left/follower_left_small_up_max_raw.png",
+      "review_method": "VISION_MODEL_INDIVIDUAL_IMAGE_REVIEW",
+      "sha256": "67e81e0ad86426a1cc4c354581e5d8fba1f63ae58f9b0a693c6296f2a5400fff",
+      "status": "PASS",
+      "variant": "B_REPEAT",
+      "vision_review": "follower, finger pair, and workcell context are visible without cropping; home/up/down/waist phases have visually distinguishable poses"
+    },
+    {
+      "acceptance_boundary": "screenshot evidence only; runtime protoPath counts and mesh inventories remain authoritative",
+      "detection_target": "complete follower visual geometry, unclipped gripper, and visibly distinct Task 7A pose",
+      "dimensions_px": [
+        1280,
+        900
+      ],
+      "phase": "small_down_return",
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/B_REPEAT/exact_capture/screenshots_raw/follower_left/follower_left_small_down_return_raw.png",
+      "review_method": "VISION_MODEL_INDIVIDUAL_IMAGE_REVIEW",
+      "sha256": "ccb4f038151fee31c94bee35cf314314ace2f175016ad6544ea803bc003cf760",
+      "status": "PASS",
+      "variant": "B_REPEAT",
+      "vision_review": "follower, finger pair, and workcell context are visible without cropping; home/up/down/waist phases have visually distinguishable poses"
+    },
+    {
+      "acceptance_boundary": "screenshot evidence only; runtime protoPath counts and mesh inventories remain authoritative",
+      "detection_target": "complete follower visual geometry, unclipped gripper, and visibly distinct Task 7A pose",
+      "dimensions_px": [
+        1280,
+        900
+      ],
+      "phase": "waist_positive",
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/B_REPEAT/exact_capture/screenshots_raw/follower_left/follower_left_waist_positive_raw.png",
+      "review_method": "VISION_MODEL_INDIVIDUAL_IMAGE_REVIEW",
+      "sha256": "f8c163254a0022c523085c5b33d1f5cf1b9095c67923015ad4d8097df0fb1034",
+      "status": "PASS",
+      "variant": "B_REPEAT",
+      "vision_review": "follower, finger pair, and workcell context are visible without cropping; home/up/down/waist phases have visually distinguishable poses"
+    },
+    {
+      "acceptance_boundary": "screenshot evidence only; runtime protoPath counts and mesh inventories remain authoritative",
+      "detection_target": "complete follower visual geometry, unclipped gripper, and visibly distinct Task 7A pose",
+      "dimensions_px": [
+        1280,
+        900
+      ],
+      "phase": "waist_negative",
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/B_REPEAT/exact_capture/screenshots_raw/follower_left/follower_left_waist_negative_raw.png",
+      "review_method": "VISION_MODEL_INDIVIDUAL_IMAGE_REVIEW",
+      "sha256": "b6554bffb90de6d369caee4f07c35c8da0013e4a361a0cf5b7358eb80c04df8b",
+      "status": "PASS",
+      "variant": "B_REPEAT",
+      "vision_review": "follower, finger pair, and workcell context are visible without cropping; home/up/down/waist phases have visually distinguishable poses"
+    },
+    {
+      "acceptance_boundary": "screenshot evidence only; runtime protoPath counts and mesh inventories remain authoritative",
+      "detection_target": "complete follower visual geometry, unclipped gripper, and visibly distinct Task 7A pose",
+      "dimensions_px": [
+        1280,
+        900
+      ],
+      "phase": "home_reference",
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/RESTORE/exact_capture/screenshots_raw/follower_left/follower_left_home_reference_raw.png",
+      "review_method": "VISION_MODEL_INDIVIDUAL_IMAGE_REVIEW",
+      "sha256": "4407e13f065ee56d3642031dd21a283abeca9ebb026fbb793602ab4c0874ad9e",
+      "status": "PASS",
+      "variant": "RESTORE",
+      "vision_review": "follower, finger pair, and workcell context are visible without cropping; home/up/down/waist phases have visually distinguishable poses"
+    },
+    {
+      "acceptance_boundary": "screenshot evidence only; runtime protoPath counts and mesh inventories remain authoritative",
+      "detection_target": "complete follower visual geometry, unclipped gripper, and visibly distinct Task 7A pose",
+      "dimensions_px": [
+        1280,
+        900
+      ],
+      "phase": "small_up_start",
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/RESTORE/exact_capture/screenshots_raw/follower_left/follower_left_small_up_start_raw.png",
+      "review_method": "VISION_MODEL_INDIVIDUAL_IMAGE_REVIEW",
+      "sha256": "a84b25a232c8674d6875dc1a5517572792c5f7bc78ef98441591cf9585949026",
+      "status": "PASS",
+      "variant": "RESTORE",
+      "vision_review": "follower, finger pair, and workcell context are visible without cropping; home/up/down/waist phases have visually distinguishable poses"
+    },
+    {
+      "acceptance_boundary": "screenshot evidence only; runtime protoPath counts and mesh inventories remain authoritative",
+      "detection_target": "complete follower visual geometry, unclipped gripper, and visibly distinct Task 7A pose",
+      "dimensions_px": [
+        1280,
+        900
+      ],
+      "phase": "small_up_max",
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/RESTORE/exact_capture/screenshots_raw/follower_left/follower_left_small_up_max_raw.png",
+      "review_method": "VISION_MODEL_INDIVIDUAL_IMAGE_REVIEW",
+      "sha256": "7436ce5bfb87a971e84bde358cb5bf31efd1e54629de517d8b2591ba380ddf2e",
+      "status": "PASS",
+      "variant": "RESTORE",
+      "vision_review": "follower, finger pair, and workcell context are visible without cropping; home/up/down/waist phases have visually distinguishable poses"
+    },
+    {
+      "acceptance_boundary": "screenshot evidence only; runtime protoPath counts and mesh inventories remain authoritative",
+      "detection_target": "complete follower visual geometry, unclipped gripper, and visibly distinct Task 7A pose",
+      "dimensions_px": [
+        1280,
+        900
+      ],
+      "phase": "small_down_return",
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/RESTORE/exact_capture/screenshots_raw/follower_left/follower_left_small_down_return_raw.png",
+      "review_method": "VISION_MODEL_INDIVIDUAL_IMAGE_REVIEW",
+      "sha256": "055721a89cdc055c5f4fc7a096da21143c4a415a69239f06aa3727733c24f4a9",
+      "status": "PASS",
+      "variant": "RESTORE",
+      "vision_review": "follower, finger pair, and workcell context are visible without cropping; home/up/down/waist phases have visually distinguishable poses"
+    },
+    {
+      "acceptance_boundary": "screenshot evidence only; runtime protoPath counts and mesh inventories remain authoritative",
+      "detection_target": "complete follower visual geometry, unclipped gripper, and visibly distinct Task 7A pose",
+      "dimensions_px": [
+        1280,
+        900
+      ],
+      "phase": "waist_positive",
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/RESTORE/exact_capture/screenshots_raw/follower_left/follower_left_waist_positive_raw.png",
+      "review_method": "VISION_MODEL_INDIVIDUAL_IMAGE_REVIEW",
+      "sha256": "6852ddeb4b986ec0167aae78808b1a30e52fcca96b65477db0e4faae5ed3a2d9",
+      "status": "PASS",
+      "variant": "RESTORE",
+      "vision_review": "follower, finger pair, and workcell context are visible without cropping; home/up/down/waist phases have visually distinguishable poses"
+    },
+    {
+      "acceptance_boundary": "screenshot evidence only; runtime protoPath counts and mesh inventories remain authoritative",
+      "detection_target": "complete follower visual geometry, unclipped gripper, and visibly distinct Task 7A pose",
+      "dimensions_px": [
+        1280,
+        900
+      ],
+      "phase": "waist_negative",
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/RESTORE/exact_capture/screenshots_raw/follower_left/follower_left_waist_negative_raw.png",
+      "review_method": "VISION_MODEL_INDIVIDUAL_IMAGE_REVIEW",
+      "sha256": "e9e4674863f1d6069f6892dce6172c315de00b0f8512ce7ed69ed9e98ba257cf",
+      "status": "PASS",
+      "variant": "RESTORE",
+      "vision_review": "follower, finger pair, and workcell context are visible without cropping; home/up/down/waist phases have visually distinguishable poses"
+    },
+    {
+      "acceptance_boundary": "screenshot evidence only; runtime protoPath counts and mesh inventories remain authoritative",
+      "detection_target": "complete left/right materialized visual meshes without workcell occlusion",
+      "dimensions_px": [
+        960,
+        720
+      ],
+      "phase": "materialized_visuals",
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/D_RETAKE8/native_raw.png",
+      "review_method": "VISION_MODEL_INDIVIDUAL_IMAGE_REVIEW",
+      "sha256": "b4be898de66ca1e0ccf746215898c063a877a601de89f71ecc2ab1cc0f638351",
+      "status": "PASS",
+      "variant": "D_RETAKE8",
+      "vision_review": "blue and orange materialized followers are both fully in frame; the diagnostic environment was hidden session-only to remove rack occlusion"
+    }
+  ],
+  "retake_history": [
+    {
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/D/native_raw.png",
+      "reason": "both followers were too small to inspect link-mesh completeness",
+      "sha256": "5c4bb87642bb94b3e820f9ad765a96c951cbe7351c2c944b8f6ee915b8894acd",
+      "status": "REJECTED_VIEW_TOO_DISTANT",
+      "variant": "D"
+    },
+    {
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/D_RETAKE1/native_raw.png",
+      "reason": "camera change did not affect the active viewport",
+      "sha256": "e9ce54b37cdfad1328aa7e070267fb4ca8b2144133ae9d1e355fe880e1d8b12c",
+      "status": "REJECTED_CAMERA_NOT_ACTIVE",
+      "variant": "D_RETAKE1"
+    },
+    {
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/D_RETAKE2/native_raw.png",
+      "reason": "focal-length change did not affect the active viewport",
+      "sha256": "7337c6f074c0fc25be458cb7f93c9ee92ba6d52d93d349306f27903767222457",
+      "status": "REJECTED_CAMERA_NOT_ACTIVE",
+      "variant": "D_RETAKE2"
+    },
+    {
+      "raw_path": null,
+      "reason": "local Sdf import error prevented capture",
+      "sha256": null,
+      "status": "REJECTED_CAPTURE_NOT_CREATED",
+      "variant": "D_RETAKE3"
+    },
+    {
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/D_RETAKE4/native_raw.png",
+      "reason": "viewport remained on the default distant camera",
+      "sha256": "200c3098fcb3e510c96bf31fd2005d5b4963cfdba0ae3161ce535626918d3810",
+      "status": "REJECTED_CAMERA_NOT_ACTIVE",
+      "variant": "D_RETAKE4"
+    },
+    {
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/D_RETAKE5/native_raw.png",
+      "reason": "active camera exposed only a close workcell-frame segment",
+      "sha256": "ce4d134b0f669ecb27c9868f95cbdffabd6593dc4aca512948e70ee653ed9ec3",
+      "status": "REJECTED_WRONG_TARGET",
+      "variant": "D_RETAKE5"
+    },
+    {
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/D_RETAKE6/native_raw.png",
+      "reason": "follower base and distal links were cropped",
+      "sha256": "664600db84c68a2af2d396a4d10b9a095b68eaec7730baee1bab2e68bddf89c3",
+      "status": "REJECTED_CROPPED",
+      "variant": "D_RETAKE6"
+    },
+    {
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/D_RETAKE7/native_raw.png",
+      "reason": "rack occluded the gripper and the base was cropped",
+      "sha256": "c4cdf43e8438c0a0b81d4049629256ec9a72736c14f8da6b7a17f90cb3da5050",
+      "status": "REJECTED_OCCLUDED_AND_CROPPED",
+      "variant": "D_RETAKE7"
+    },
+    {
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/hydra_protopath_diagnosis/D_RETAKE8/native_raw.png",
+      "reason": "session-only environment visibility isolation exposes both complete materialized followers",
+      "sha256": "b4be898de66ca1e0ccf746215898c063a877a601de89f71ecc2ab1cc0f638351",
+      "status": "PASS",
+      "variant": "D_RETAKE8"
+    }
+  ],
+  "review_method": "VISION_MODEL_INDIVIDUAL_IMAGE_REVIEW",
+  "schema_version": 1,
+  "scope": "Hydra protoPath controlled diagnosis screenshot evidence",
+  "status": "PASS"
+}
