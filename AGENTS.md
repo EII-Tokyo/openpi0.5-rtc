@@ -46,6 +46,7 @@ cd /home/eii/Documents/Notes/openpi0.5-rtc-reward-learning && npm run check:math
   - Also read `docs/agents/remote_103_operations.md` for any `192.168.1.103` work and `docs/agents/aloha_hardware_debug.md` before any action that can affect the real ALOHA robot.
 - Backend pytest, local test environment variables, segment DB test paths, or container-vs-host path assumptions:
   - Read `docs/agents/backend_test_environment.md`.
+  - Run project Python tests with `.venv/bin/python -m pytest` or `uv run pytest`; never treat collection from system Python or user-site NumPy/SciPy as project evidence.
 - VLA/RLToken checkpoint selection, `z_rl` dimensions, same-forward runtime, sidecar RLToken bans, actor/critic startup, or re-encoding decisions:
   - Read `docs/agents/rlt_checkpoints.md`.
 - Local offline key-region annotation, local data mounts, cleaned 2026-06-22 data, or syncing annotation data:
