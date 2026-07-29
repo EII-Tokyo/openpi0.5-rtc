@@ -10,7 +10,10 @@ from pathlib import Path
 import shutil
 from typing import Any
 
-VIEWS = ("overview", "gripper_closeup")
+SOURCE_VIEWS = ("overview", "gripper_closeup")
+COMPOSITE_VIEW = "full_arm_composite"
+VIEWS = (*SOURCE_VIEWS, COMPOSITE_VIEW)
+LAYOUT = "FULL_ARM_WITH_SYNCHRONIZED_GRIPPER_INSET"
 
 
 def _sha256(path: Path) -> str:
@@ -35,56 +38,84 @@ def finalize_video_review(
     decisions_path: Path,
     verified_root: Path,
     promote: bool,
+    user_confirmed_video_sha256: str | None = None,
 ) -> dict[str, Any]:
-    """Validate review decisions and optionally copy visually accepted videos."""
+    """Validate visual review and require hash-bound user confirmation to close."""
     candidate = _load(candidate_manifest_path)
     decisions = _load(decisions_path)
     if candidate["attempt_id"] != decisions["attempt_id"]:
         raise ValueError("attempt identifiers differ")
     records = {item["view_name"]: item for item in candidate["videos"]}
     if set(records) != set(VIEWS):
-        raise ValueError("candidate must contain exactly two required views")
+        raise ValueError("candidate must contain synchronized sources and composite")
+    primary = records[COMPOSITE_VIEW]
+    if primary.get("evidence_role") != "PRIMARY_FULL_ARM_EVIDENCE":
+        raise ValueError("composite is not marked as primary full-arm evidence")
+    if primary.get("layout") != LAYOUT:
+        raise ValueError("composite layout mismatch")
+    if list(primary.get("source_views", [])) != list(SOURCE_VIEWS):
+        raise ValueError("composite synchronized source views mismatch")
     decision_views = decisions.get("views", {})
-    if set(decision_views) != set(VIEWS):
-        raise ValueError("review must contain exactly two required views")
+    if set(decision_views) != {COMPOSITE_VIEW}:
+        raise ValueError("review must contain exactly the primary composite view")
     signatures = {str(records[view]["runtime_trial_signature"]) for view in VIEWS}
     if len(signatures) != 1:
         raise ValueError("view runtime signatures differ")
 
-    all_pass = True
     videos = []
     for view in VIEWS:
         source = dict(records[view])
-        decision = decision_views[view]
-        status = str(decision["status"])
-        if status not in {"PASS", "FAIL"}:
-            raise ValueError(f"invalid review status for {view}: {status}")
-        reviewed_frames = [int(value) for value in decision["reviewed_sample_frames"]]
-        if not reviewed_frames:
-            raise ValueError(f"{view} has no reviewed samples")
-        source["vision_review_status"] = status
-        source["reviewed_sample_frames"] = reviewed_frames
-        source["retake_reason"] = decision.get("retake_reason")
-        source["visual_review"] = {
-            key: value
-            for key, value in decision.items()
-            if key not in {"status", "reviewed_sample_frames", "retake_reason"}
-        }
-        if status != "PASS":
-            all_pass = False
+        if view == COMPOSITE_VIEW:
+            decision = decision_views[view]
+            status = str(decision["status"])
+            if status not in {"PASS", "FAIL"}:
+                raise ValueError(f"invalid review status for {view}: {status}")
+            reviewed_frames = [int(value) for value in decision["reviewed_sample_frames"]]
+            if not reviewed_frames:
+                raise ValueError(f"{view} has no reviewed samples")
+            source["vision_review_status"] = status
+            source["reviewed_sample_frames"] = reviewed_frames
+            source["retake_reason"] = decision.get("retake_reason")
+            source["visual_review"] = {
+                key: value
+                for key, value in decision.items()
+                if key not in {"status", "reviewed_sample_frames", "retake_reason"}
+            }
+        else:
+            source["vision_review_status"] = "SYNCHRONIZED_SOURCE_NOT_PRIMARY"
+            source["reviewed_sample_frames"] = []
+            source["retake_reason"] = None
         videos.append(source)
 
-    if not all_pass:
+    visual_pass = str(decision_views[COMPOSITE_VIEW]["status"]) == "PASS"
+    confirmation_target = {
+        "view_name": COMPOSITE_VIEW,
+        "kind": "annotated",
+        "sha256": str(primary["annotated_candidate_sha256"]),
+    }
+    if not visual_pass:
+        user_video_confirmation = "BLOCKED_BY_VISUAL_REVIEW"
+    elif user_confirmed_video_sha256 is None:
+        user_video_confirmation = "PENDING"
+    elif user_confirmed_video_sha256 != confirmation_target["sha256"]:
+        raise ValueError("confirmed video hash does not match composite candidate")
+    else:
+        user_video_confirmation = "CONFIRMED"
+
+    if not visual_pass:
         promotion_status = "REJECTED_VISUAL_REVIEW"
         report_status = "FAIL"
+    elif user_video_confirmation == "PENDING":
+        promotion_status = "AWAITING_USER_VIDEO_CONFIRMATION"
+        report_status = "PARTIAL"
     elif candidate["physical_trial_status"] == "PASS":
         promotion_status = "PROMOTED_VISUAL_EVIDENCE_PHYSICAL_PASS"
         report_status = "PASS"
     else:
         promotion_status = "PROMOTED_VISUAL_EVIDENCE_PHYSICAL_FAIL"
-        report_status = "PASS"
+        report_status = "FAIL"
 
-    if promote and all_pass:
+    if promote and visual_pass and user_video_confirmation == "CONFIRMED":
         verified_root.mkdir(parents=True, exist_ok=True)
         for record in videos:
             view = record["view_name"]
@@ -104,6 +135,7 @@ def finalize_video_review(
     return {
         "schema_version": 1,
         "status": report_status,
+        "visual_review_status": "PASS" if visual_pass else "FAIL",
         "attempt_id": candidate["attempt_id"],
         "reviewed_by": decisions["reviewed_by"],
         "review_method": (
@@ -113,6 +145,11 @@ def finalize_video_review(
         "physical_trial_status": candidate["physical_trial_status"],
         "machine_conclusion": candidate["machine_conclusion"],
         "promotion_status": promotion_status,
+        "user_video_confirmation": user_video_confirmation,
+        "user_confirmation_target": confirmation_target,
+        "user_confirmed_video_sha256": (
+            user_confirmed_video_sha256 if user_video_confirmation == "CONFIRMED" else None
+        ),
         "scope": ("VISUAL_CAPTURE_VALIDATION_ONLY; machine physics result unchanged"),
         "attempt_history": decisions.get("attempt_history", []),
         "reviewed_contact_sheets": decisions.get("reviewed_contact_sheets", []),
@@ -128,15 +165,17 @@ def _markdown(report: dict[str, Any]) -> str:
     lines = [
         "# ALOHA1 Horizontal Bottle Grasp Video Review",
         "",
-        f"- Visual review: `{report['status']}`",
+        f"- Overall status: `{report['status']}`",
+        f"- Visual review: `{report['visual_review_status']}`",
         f"- Physical trial: `{report['physical_trial_status']}`",
         f"- Machine conclusion: `{report['machine_conclusion']}`",
         f"- Promotion: `{report['promotion_status']}`",
+        f"- User video confirmation: `{report['user_video_confirmation']}`",
         "",
         (
-            "This PASS, when present, certifies only that the continuous "
-            "video exposes the complete recorded trial. It does not convert "
-            "a failed pickup into a physical grasp PASS."
+            "Visual PASS certifies only that the primary composite exposes "
+            "the complete recorded trial. The report remains PARTIAL until "
+            "the user confirms the exact annotated composite video hash."
         ),
         "",
         "| View | visual review | raw | annotated |",
@@ -157,6 +196,7 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--report-json", type=Path, required=True)
     parser.add_argument("--report-md", type=Path, required=True)
     parser.add_argument("--promote", action="store_true")
+    parser.add_argument("--user-confirmed-video-sha256")
     return parser.parse_args()
 
 
@@ -167,6 +207,7 @@ def main() -> int:
         decisions_path=args.decisions.resolve(strict=True),
         verified_root=args.verified_root.resolve(),
         promote=args.promote,
+        user_confirmed_video_sha256=args.user_confirmed_video_sha256,
     )
     args.report_json.parent.mkdir(parents=True, exist_ok=True)
     args.report_json.write_text(
@@ -185,7 +226,7 @@ def main() -> int:
             sort_keys=True,
         )
     )
-    return 0 if report["status"] == "PASS" else 1
+    return 0 if report["status"] in {"PASS", "PARTIAL"} else 1
 
 
 if __name__ == "__main__":
