@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Remove both category-based Asset Browsers from the active Isaac Sim 5.1 startup dependency graph while retaining their on-demand menus and verifying the official Content Browser as the default.
+**Goal:** Remove the legacy Isaac Asset Browser from automatic startup while retaining both on-demand Asset menus and verifying the official Content Browser as the default.
 
-**Architecture:** Patch the Base/Full App dependency graphs that cause the Isaac and NVIDIA Assets browsers to load automatically. Preserve timestamped backups, extension source trees, and both lazy menu triggers, then validate the static dependency graph and fresh Kit sessions with bounded log probes.
+**Architecture:** Patch the Base App dependency graph that causes the legacy Isaac browser and compatibility shims to load automatically. Preserve the NVIDIA Assets Full App dependency, timestamped backups, extension source trees, and both lazy menu triggers, then validate the static dependency graph and fresh Kit sessions with bounded log probes.
 
 **Tech Stack:** Isaac Sim 5.1 Kit configuration, TOML, Python 3.11 `tomllib`, Kit startup logs, POSIX process control.
 
@@ -309,14 +309,13 @@ Verify the second PID is alive and corresponds to the Full app command. Leave th
 
 Report both backup paths, both Kit log paths, both evidence artifact paths, startup times, warning counts, and the final PID. Do not delete backups or global Kit/shader caches.
 
-### Task 5: Remove NVIDIA Assets from Automatic Startup
+### Task 5: Diagnose NVIDIA Assets Manual Traversal
 
 The second repaired GUI was intentionally left running. At 96 seconds, opening
 `Window/Browsers/Assets` instantiated `omni.kit.browser.asset`, queued eight
 remote S3 roots, and produced 17,892 thumbnail mismatch warnings. This is the
 expected cost of explicitly opening that category browser, not an automatic
-startup defect. Its direct Full App dependency is still unnecessary because
-Content Browser is the selected default.
+startup defect.
 
 **Files:**
 - Modify: `/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/apps/isaacsim.exp.full.kit`
@@ -361,3 +360,16 @@ menus be removed.
 - [ ] Restart Isaac Sim and verify Content Browser starts once, neither Asset
   Browser starts before manual interaction, and both menu triggers remain in
   the parsed TOML.
+
+### Task 7: Restore the NVIDIA Assets Full App Dependency
+
+The trigger manifest alone did not make `Window/Browsers/Assets` reliably
+visible. Restore `"omni.kit.browser.asset" = {}` in
+`isaacsim.exp.full.kit` so the extension registers its menu at startup.
+
+- [ ] Require `isaacsim.exp.full.kit` to be byte-identical to its pre-edit
+  backup.
+- [ ] Restart Isaac Sim and require one `omni.kit.browser.asset` startup.
+- [ ] Before manual menu interaction, require zero remote Assets folder queue
+  entries.
+- [ ] Leave the verified GUI running for the user.
