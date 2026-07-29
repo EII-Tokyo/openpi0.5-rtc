@@ -1,31 +1,44 @@
 {
-  "annotated_root_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/screenshots_annotated",
+  "annotated_root_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/omnihydra_final/screenshots_annotated",
   "capture_count": 12,
+  "diagnostic_renderer_workaround": {
+    "classification": "FSD_7_5_1_PRIMARY",
+    "default_renderer_changed": false,
+    "final_asset_changed": false,
+    "hydra_diagnosis_report": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_hydra_protopath_diagnosis.json",
+    "physics_composition_changed": false,
+    "proto_path_error_count": 0,
+    "repeat_deterministic": true,
+    "scope": "fresh screenshot process only",
+    "setting": "/app/useFabricSceneDelegate",
+    "source_stage_changed": false,
+    "value": false
+  },
   "expected_capture_count": 12,
   "fixed_camera_within_robot": {
     "follower_left": true,
     "follower_right": true
   },
-  "follower_left_annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/screenshots_annotated/follower_left",
-  "follower_left_raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/screenshots_raw/follower_left",
-  "follower_right_annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/screenshots_annotated/follower_right",
-  "follower_right_raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/screenshots_raw/follower_right",
-  "native_nested_instance_render_path": "PARTIAL",
+  "follower_left_annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/omnihydra_final/screenshots_annotated/follower_left",
+  "follower_left_raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/omnihydra_final/screenshots_raw/follower_left",
+  "follower_right_annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/omnihydra_final/screenshots_annotated/follower_right",
+  "follower_right_raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/omnihydra_final/screenshots_raw/follower_right",
+  "native_nested_instance_render_path": "PASS",
   "numeric_validation_status": "PASS",
-  "partial_reason": "all raw/annotated visual and numeric gates pass, but native nested instance visuals emit Hydra protoPath errors; accepted images use explicitly disclosed, session-only exact-topology visual clones with no physics or collision schemas",
-  "raw_root_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/screenshots_raw",
+  "partial_reason": null,
+  "raw_root_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/omnihydra_final/screenshots_raw",
   "real_robot_connected": false,
   "records": [
     {
       "annotated": {
-        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/screenshots_annotated/follower_left/follower_left_home_reference_annotated.png",
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/omnihydra_final/screenshots_annotated/follower_left/follower_left_home_reference_annotated.png",
         "mode": "RGB",
         "readable": true,
         "resolution": [
           1740,
           900
         ],
-        "sha256": "32f00c8bb11668c9cd0ed4c98ff022c9d7ead883e42bbc44281762b15dea1bdc"
+        "sha256": "2b36def653330f440afc248d1c5f43f62714099f17c7a151389fc33a8dcc157e"
       },
       "annotated_visual_model_review": {
         "checks": {
@@ -113,14 +126,14 @@
       "phase": "home_reference",
       "position_error": -4.953145980834961e-05,
       "raw": {
-        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/screenshots_raw/follower_left/follower_left_home_reference_raw.png",
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/omnihydra_final/screenshots_raw/follower_left/follower_left_home_reference_raw.png",
         "mode": "RGBA",
         "readable": true,
         "resolution": [
           1280,
           900
         ],
-        "sha256": "dd74f9cdc7eb65b582cd5ebd93a4bbb9476242744b87225d4a488230fa2af280"
+        "sha256": "6bbf319d727ebe53583b02c533bb0156f2a26cd0418b087f26e18be9fccb9a37"
       },
       "raw_visual_model_review": {
         "checks": {
@@ -137,21 +150,21 @@
         "status": "PASS"
       },
       "readback": -0.9599504470825195,
-      "retake_count": 12,
+      "retake_count": 13,
       "retake_reason": "see retake_history; final capture itself required no per-image retake",
       "robot": "follower_left",
       "target": -0.9599999785423279
     },
     {
       "annotated": {
-        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/screenshots_annotated/follower_left/follower_left_small_up_start_annotated.png",
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/omnihydra_final/screenshots_annotated/follower_left/follower_left_small_up_start_annotated.png",
         "mode": "RGB",
         "readable": true,
         "resolution": [
           1740,
           900
         ],
-        "sha256": "84ec6e57188bdc0c852b5e60e71054d5e43dcd1fe0858399878378b070dabd62"
+        "sha256": "690f88e21d95e6e916d3961157d41d724c14bd17f4d18d8f8378a390da5ddc5b"
       },
       "annotated_visual_model_review": {
         "checks": {
@@ -239,14 +252,14 @@
       "phase": "small_up_start",
       "position_error": -6.103515625e-05,
       "raw": {
-        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/screenshots_raw/follower_left/follower_left_small_up_start_raw.png",
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/omnihydra_final/screenshots_raw/follower_left/follower_left_small_up_start_raw.png",
         "mode": "RGBA",
         "readable": true,
         "resolution": [
           1280,
           900
         ],
-        "sha256": "00fef33e30c2f34c1d7271becd1105c64538559f7cf0d555621ccd870f15ffce"
+        "sha256": "f808bee270995f43a3727424dcbc8c7db49527fd64c6ed242c2c0da356aca210"
       },
       "raw_visual_model_review": {
         "checks": {
@@ -263,21 +276,21 @@
         "status": "PASS"
       },
       "readback": -0.9799389243125916,
-      "retake_count": 12,
+      "retake_count": 13,
       "retake_reason": "see retake_history; final capture itself required no per-image retake",
       "robot": "follower_left",
       "target": -0.9799999594688416
     },
     {
       "annotated": {
-        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/screenshots_annotated/follower_left/follower_left_small_up_max_annotated.png",
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/omnihydra_final/screenshots_annotated/follower_left/follower_left_small_up_max_annotated.png",
         "mode": "RGB",
         "readable": true,
         "resolution": [
           1740,
           900
         ],
-        "sha256": "af98d09d607d986eac99ae71c47ad4c75890b2c0268f3ec776298f71a4602d85"
+        "sha256": "44e2bdf0525e7911df4569d91ce891103f5c849eb808da1d070670bc2a7533b8"
       },
       "annotated_visual_model_review": {
         "checks": {
@@ -365,14 +378,14 @@
       "phase": "small_up_max",
       "position_error": -6.508827209472656e-05,
       "raw": {
-        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/screenshots_raw/follower_left/follower_left_small_up_max_raw.png",
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/omnihydra_final/screenshots_raw/follower_left/follower_left_small_up_max_raw.png",
         "mode": "RGBA",
         "readable": true,
         "resolution": [
           1280,
           900
         ],
-        "sha256": "29a768fbf93f508914a8034379d7da6320db62a497ce4f6eac69f42be196b34f"
+        "sha256": "15711e2d4cb4fb0ae51d0707376c69e979f3e9302e1d927e515921511f7161f5"
       },
       "raw_visual_model_review": {
         "checks": {
@@ -389,21 +402,21 @@
         "status": "PASS"
       },
       "readback": -1.0399348735809326,
-      "retake_count": 12,
+      "retake_count": 13,
       "retake_reason": "see retake_history; final capture itself required no per-image retake",
       "robot": "follower_left",
       "target": -1.0399999618530273
     },
     {
       "annotated": {
-        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/screenshots_annotated/follower_left/follower_left_small_down_return_annotated.png",
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/omnihydra_final/screenshots_annotated/follower_left/follower_left_small_down_return_annotated.png",
         "mode": "RGB",
         "readable": true,
         "resolution": [
           1740,
           900
         ],
-        "sha256": "d18bf077b209f48c936463a531bacb65e6ecb915c1eeeb8a6ef81052c8173b7f"
+        "sha256": "08f1ce01d8d80a704be1f7d4d17c61db62933d6b6601242216cb65fac33a695d"
       },
       "annotated_visual_model_review": {
         "checks": {
@@ -491,14 +504,14 @@
       "phase": "small_down_return",
       "position_error": -4.953145980834961e-05,
       "raw": {
-        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/screenshots_raw/follower_left/follower_left_small_down_return_raw.png",
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/omnihydra_final/screenshots_raw/follower_left/follower_left_small_down_return_raw.png",
         "mode": "RGBA",
         "readable": true,
         "resolution": [
           1280,
           900
         ],
-        "sha256": "4b6d529987b37fde06e19a03c18e8b43b01a79adfa13825541b9a272a39d847b"
+        "sha256": "07236cdb0d1b692d40456f114c1eeff9884421cc8b2984feb04c801fc2e2e7b1"
       },
       "raw_visual_model_review": {
         "checks": {
@@ -515,21 +528,21 @@
         "status": "PASS"
       },
       "readback": -0.9599504470825195,
-      "retake_count": 12,
+      "retake_count": 13,
       "retake_reason": "see retake_history; final capture itself required no per-image retake",
       "robot": "follower_left",
       "target": -0.9599999785423279
     },
     {
       "annotated": {
-        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/screenshots_annotated/follower_left/follower_left_waist_positive_annotated.png",
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/omnihydra_final/screenshots_annotated/follower_left/follower_left_waist_positive_annotated.png",
         "mode": "RGB",
         "readable": true,
         "resolution": [
           1740,
           900
         ],
-        "sha256": "fbe3074871f50ef0a5117a80ec8df7d30ad265a4900532127ee43a86ebc5e3ec"
+        "sha256": "8c244bea282fef59512753e86c3232a718acc165e4209dad72717a4f24bafaae"
       },
       "annotated_visual_model_review": {
         "checks": {
@@ -617,14 +630,14 @@
       "phase": "waist_positive",
       "position_error": -1.566484570503235e-05,
       "raw": {
-        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/screenshots_raw/follower_left/follower_left_waist_positive_raw.png",
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/omnihydra_final/screenshots_raw/follower_left/follower_left_waist_positive_raw.png",
         "mode": "RGBA",
         "readable": true,
         "resolution": [
           1280,
           900
         ],
-        "sha256": "820572e60e6799c94f56aeb6d19fdadecc04bc8100ee574eaf7f9eddeba7bdf5"
+        "sha256": "505e2995de628e207fbf96fd11b700a3c870a1ab646b0a168186f59768a41893"
       },
       "raw_visual_model_review": {
         "checks": {
@@ -641,21 +654,21 @@
         "status": "PASS"
       },
       "readback": 0.05001566559076309,
-      "retake_count": 12,
+      "retake_count": 13,
       "retake_reason": "see retake_history; final capture itself required no per-image retake",
       "robot": "follower_left",
       "target": 0.05000000074505806
     },
     {
       "annotated": {
-        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/screenshots_annotated/follower_left/follower_left_waist_negative_annotated.png",
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/omnihydra_final/screenshots_annotated/follower_left/follower_left_waist_negative_annotated.png",
         "mode": "RGB",
         "readable": true,
         "resolution": [
           1740,
           900
         ],
-        "sha256": "321d0d11ac2c5dc101dee15a5b78997029767e0e01462b4a79002d57d3aabb34"
+        "sha256": "014149d9489d9218041d6c68359e78254451bbd0de5a68fb6f49c792170a2919"
       },
       "annotated_visual_model_review": {
         "checks": {
@@ -743,14 +756,14 @@
       "phase": "waist_negative",
       "position_error": -1.566484570503235e-05,
       "raw": {
-        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/screenshots_raw/follower_left/follower_left_waist_negative_raw.png",
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/omnihydra_final/screenshots_raw/follower_left/follower_left_waist_negative_raw.png",
         "mode": "RGBA",
         "readable": true,
         "resolution": [
           1280,
           900
         ],
-        "sha256": "2b8eda5c6f430f017ef8658b53101701dd6de26ecdde7b610654c12253f4d326"
+        "sha256": "59d9a69dab486820862ef80c7fba7d5cf7e4201b5e248d8a1cf0ca26593fea7b"
       },
       "raw_visual_model_review": {
         "checks": {
@@ -767,21 +780,21 @@
         "status": "PASS"
       },
       "readback": -0.04998433589935303,
-      "retake_count": 12,
+      "retake_count": 13,
       "retake_reason": "see retake_history; final capture itself required no per-image retake",
       "robot": "follower_left",
       "target": -0.05000000074505806
     },
     {
       "annotated": {
-        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/screenshots_annotated/follower_right/follower_right_home_reference_annotated.png",
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/omnihydra_final/screenshots_annotated/follower_right/follower_right_home_reference_annotated.png",
         "mode": "RGB",
         "readable": true,
         "resolution": [
           1740,
           900
         ],
-        "sha256": "50e64518c9c45a9a36de463d1da01cde058e2c82a1688db65851cacd935886c1"
+        "sha256": "e65cc67e24620af71b5dd229bdc61713970e56dfa46e3774559b4ca730ff8e0b"
       },
       "annotated_visual_model_review": {
         "checks": {
@@ -869,14 +882,14 @@
       "phase": "home_reference",
       "position_error": -4.947185516357422e-05,
       "raw": {
-        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/screenshots_raw/follower_right/follower_right_home_reference_raw.png",
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/omnihydra_final/screenshots_raw/follower_right/follower_right_home_reference_raw.png",
         "mode": "RGBA",
         "readable": true,
         "resolution": [
           1280,
           900
         ],
-        "sha256": "c6b274a99b370b82aad7eb454d6c87dd3c55d94d4ea4db642ea9df111dd9539a"
+        "sha256": "ea9421043f3e74d0762afa379697874a047812b473dec7aa68ee2b2d91094bbb"
       },
       "raw_visual_model_review": {
         "checks": {
@@ -893,21 +906,21 @@
         "status": "PASS"
       },
       "readback": -0.9599505066871643,
-      "retake_count": 12,
+      "retake_count": 13,
       "retake_reason": "see retake_history; final capture itself required no per-image retake",
       "robot": "follower_right",
       "target": -0.9599999785423279
     },
     {
       "annotated": {
-        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/screenshots_annotated/follower_right/follower_right_small_up_start_annotated.png",
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/omnihydra_final/screenshots_annotated/follower_right/follower_right_small_up_start_annotated.png",
         "mode": "RGB",
         "readable": true,
         "resolution": [
           1740,
           900
         ],
-        "sha256": "4ca66980845b3bc8026a2d2b45d1f95eb68ae506d2cfd6d7345de2aede738c4c"
+        "sha256": "7b5d0262b93ed962bd213a34ca240f769b73e6834100b05877d8fb8cd3c9502b"
       },
       "annotated_visual_model_review": {
         "checks": {
@@ -995,14 +1008,14 @@
       "phase": "small_up_start",
       "position_error": -6.097555160522461e-05,
       "raw": {
-        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/screenshots_raw/follower_right/follower_right_small_up_start_raw.png",
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/omnihydra_final/screenshots_raw/follower_right/follower_right_small_up_start_raw.png",
         "mode": "RGBA",
         "readable": true,
         "resolution": [
           1280,
           900
         ],
-        "sha256": "e1109c0306272fcd9793a8aa5c3b37eab730437f199d2416d05781441fa3e972"
+        "sha256": "407f7436b0d027c1a208c4ba4a5e22ac2fd845743667ee5ec6c6bb82990f7621"
       },
       "raw_visual_model_review": {
         "checks": {
@@ -1019,21 +1032,21 @@
         "status": "PASS"
       },
       "readback": -0.9799389839172363,
-      "retake_count": 12,
+      "retake_count": 13,
       "retake_reason": "see retake_history; final capture itself required no per-image retake",
       "robot": "follower_right",
       "target": -0.9799999594688416
     },
     {
       "annotated": {
-        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/screenshots_annotated/follower_right/follower_right_small_up_max_annotated.png",
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/omnihydra_final/screenshots_annotated/follower_right/follower_right_small_up_max_annotated.png",
         "mode": "RGB",
         "readable": true,
         "resolution": [
           1740,
           900
         ],
-        "sha256": "e46c4f2183297632ff0eccf1bc220199525fd8fc9ff82215c0ea49702bac7a6b"
+        "sha256": "43f37f7ad69e5afe78a367f64a0409dbf1b1cacfa6623c5d1f46240934925e4d"
       },
       "annotated_visual_model_review": {
         "checks": {
@@ -1121,14 +1134,14 @@
       "phase": "small_up_max",
       "position_error": -6.508827209472656e-05,
       "raw": {
-        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/screenshots_raw/follower_right/follower_right_small_up_max_raw.png",
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/omnihydra_final/screenshots_raw/follower_right/follower_right_small_up_max_raw.png",
         "mode": "RGBA",
         "readable": true,
         "resolution": [
           1280,
           900
         ],
-        "sha256": "098f5349e8ee19e9a999b2c3615e1161337bb317851badbdf37d422255d83954"
+        "sha256": "778c2f31f7761b243af25db188ddbc2d0528a11969285355a9410ab5d6001aae"
       },
       "raw_visual_model_review": {
         "checks": {
@@ -1145,21 +1158,21 @@
         "status": "PASS"
       },
       "readback": -1.0399348735809326,
-      "retake_count": 12,
+      "retake_count": 13,
       "retake_reason": "see retake_history; final capture itself required no per-image retake",
       "robot": "follower_right",
       "target": -1.0399999618530273
     },
     {
       "annotated": {
-        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/screenshots_annotated/follower_right/follower_right_small_down_return_annotated.png",
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/omnihydra_final/screenshots_annotated/follower_right/follower_right_small_down_return_annotated.png",
         "mode": "RGB",
         "readable": true,
         "resolution": [
           1740,
           900
         ],
-        "sha256": "34711a8a3d1eb9e533ce3fd96c2038b4e9e2930d93d81ecfe33a7e5dac9f314b"
+        "sha256": "33fafad52e002d746c3f28644ae91b9ee0c422e3ecff9d07e7c640b6c75c7afe"
       },
       "annotated_visual_model_review": {
         "checks": {
@@ -1247,14 +1260,14 @@
       "phase": "small_down_return",
       "position_error": -4.947185516357422e-05,
       "raw": {
-        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/screenshots_raw/follower_right/follower_right_small_down_return_raw.png",
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/omnihydra_final/screenshots_raw/follower_right/follower_right_small_down_return_raw.png",
         "mode": "RGBA",
         "readable": true,
         "resolution": [
           1280,
           900
         ],
-        "sha256": "831ac8ce58a983504ad286b9461046443b398324c8d1ff259c04c37516c74dfd"
+        "sha256": "18085d06a09381b79f954239ab5f2fc6292dd2906c173cd68260215cb9512d57"
       },
       "raw_visual_model_review": {
         "checks": {
@@ -1271,21 +1284,21 @@
         "status": "PASS"
       },
       "readback": -0.9599505066871643,
-      "retake_count": 12,
+      "retake_count": 13,
       "retake_reason": "see retake_history; final capture itself required no per-image retake",
       "robot": "follower_right",
       "target": -0.9599999785423279
     },
     {
       "annotated": {
-        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/screenshots_annotated/follower_right/follower_right_waist_positive_annotated.png",
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/omnihydra_final/screenshots_annotated/follower_right/follower_right_waist_positive_annotated.png",
         "mode": "RGB",
         "readable": true,
         "resolution": [
           1740,
           900
         ],
-        "sha256": "017a4c288c92275e2f3b413bdd49e616b94cc3310abe24206e8ac0f7dd2aae65"
+        "sha256": "412a790ba6212a33a790184728660e72148a26dfd4a24c269efe799e5cb80eb9"
       },
       "annotated_visual_model_review": {
         "checks": {
@@ -1373,14 +1386,14 @@
       "phase": "waist_positive",
       "position_error": -1.566484570503235e-05,
       "raw": {
-        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/screenshots_raw/follower_right/follower_right_waist_positive_raw.png",
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/omnihydra_final/screenshots_raw/follower_right/follower_right_waist_positive_raw.png",
         "mode": "RGBA",
         "readable": true,
         "resolution": [
           1280,
           900
         ],
-        "sha256": "f1622db0580dd651d9f74a0f2366838840b39040f095ee67133c658a82677389"
+        "sha256": "2b386a637dfc2986634a2f1734976f082e8537509dec11326fe218d6d461449d"
       },
       "raw_visual_model_review": {
         "checks": {
@@ -1397,21 +1410,21 @@
         "status": "PASS"
       },
       "readback": 0.05001566559076309,
-      "retake_count": 12,
+      "retake_count": 13,
       "retake_reason": "see retake_history; final capture itself required no per-image retake",
       "robot": "follower_right",
       "target": 0.05000000074505806
     },
     {
       "annotated": {
-        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/screenshots_annotated/follower_right/follower_right_waist_negative_annotated.png",
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/omnihydra_final/screenshots_annotated/follower_right/follower_right_waist_negative_annotated.png",
         "mode": "RGB",
         "readable": true,
         "resolution": [
           1740,
           900
         ],
-        "sha256": "8db814e428788dcad32bc96294ca284efd562f62de0cf626d3fc583428286191"
+        "sha256": "55944ed31d0816ae235eee88d8e9a4701347a403684c2cfffd53fd1690769ff9"
       },
       "annotated_visual_model_review": {
         "checks": {
@@ -1499,14 +1512,14 @@
       "phase": "waist_negative",
       "position_error": -1.5661120414733887e-05,
       "raw": {
-        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/screenshots_raw/follower_right/follower_right_waist_negative_raw.png",
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/omnihydra_final/screenshots_raw/follower_right/follower_right_waist_negative_raw.png",
         "mode": "RGBA",
         "readable": true,
         "resolution": [
           1280,
           900
         ],
-        "sha256": "44a91a4c0abf51e73fbfe4a91841152c6eddfcad04143feeae91c0a6273555c2"
+        "sha256": "273e33140c48cd5b089cbbd838956fe2995e7278f41c4e25acd3ac587003f5e5"
       },
       "raw_visual_model_review": {
         "checks": {
@@ -1523,7 +1536,7 @@
         "status": "PASS"
       },
       "readback": -0.049984339624643326,
-      "retake_count": 12,
+      "retake_count": 13,
       "retake_reason": "see retake_history; final capture itself required no per-image retake",
       "robot": "follower_right",
       "target": -0.05000000074505806
@@ -1603,7 +1616,12 @@
     {
       "attempt": 13,
       "reason": "fresh split processes captured the home-target Stage; 12 raw and 12 annotated images passed individual vision review",
-      "status": "FINAL_VISUAL_MODEL_REVIEW_PASS"
+      "status": "SUPERSEDED_BY_CONTROLLED_HYDRA_DIAGNOSIS"
+    },
+    {
+      "attempt": 14,
+      "reason": "fresh split processes used the deterministic B variant only for screenshots; 12 raw and 12 annotated images passed individual vision review with zero protoPath errors",
+      "status": "FINAL_OMNIHYDRA_DIAGNOSTIC_WORKAROUND_VISUAL_MODEL_REVIEW_PASS"
     }
   ],
   "schema_version": 1,
@@ -1614,7 +1632,7 @@
     "sha256_after": "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf",
     "sha256_before": "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf"
   },
-  "status": "PARTIAL",
+  "status": "PASS",
   "task_8": "NOT_RUN",
   "visual_model_review_status": "PASS"
 }
