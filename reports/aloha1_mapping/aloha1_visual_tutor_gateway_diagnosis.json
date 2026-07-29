@@ -1,0 +1,154 @@
+{
+  "schema_version": "aloha1-visual-tutor-gateway-diagnosis/v1",
+  "date": "2026-07-30",
+  "overall_status": "HARD_BLOCKER",
+  "classification": "DRY_RUN_STDIO_PROTOTYPE_NO_LIVE_ISAAC_ACTION_BRIDGE",
+  "scope": {
+    "real_robot": "NOT_TOUCHED",
+    "ros": "NOT_TOUCHED",
+    "isaac_gui": "NOT_STARTED",
+    "stage_modified": false,
+    "ik": "NOT_RUN",
+    "dynamic_grasp_video": "NOT_RUN",
+    "task8": "NOT_RUN"
+  },
+  "gateway_runtime_readback": {
+    "gateway_reachable": true,
+    "gateway_only": true,
+    "codex_mcp_connection_count": 1,
+    "connection_name": "mcpjungle_lab",
+    "endpoint": "http://127.0.0.1:18080/v0/groups/codex-research/mcp",
+    "active_group": "codex-research",
+    "visual_tutor_server_registered": false,
+    "visual_tutor_tools_in_active_group": false,
+    "authority": [
+      "codex mcp list",
+      "MCPJungle live server registry",
+      "MCPJungle live codex-research group readback"
+    ]
+  },
+  "visual_tutor_source_audit": {
+    "server_path": "/home/eii/project/openpi0.5-rtc-reward-learning/visual_tutor/my_gui_teacher/server.py",
+    "transport": "stdio_json_rpc_lines",
+    "protocol_version": "2024-11-05",
+    "server_name": "my-gui-teacher",
+    "server_version": "0.1.0",
+    "streamable_http_implemented": false,
+    "live_isaac_application_probe": false,
+    "live_isaac_gui_actions": false,
+    "extension_command_ack_channel": false,
+    "screenshot_capture": false,
+    "current_probe_scope": "FILESYSTEM_PATH_EXISTENCE_ONLY",
+    "current_isaac_action_scope": "DRY_RUN_RETURN_ONLY",
+    "current_extension_scope": "PASSIVE_STATUS_PANEL_AND_JSON_SNAPSHOT",
+    "tool_count": 13,
+    "security_positive_evidence": [
+      "no arbitrary click tool",
+      "no shell tool",
+      "no sudo tool",
+      "no Python execution tool",
+      "no ROS publish tool",
+      "no real robot control tool"
+    ],
+    "security_gaps": [
+      "timeline_starts_paused is declared but not enforced at extension startup",
+      "action_kind has no allowlist",
+      "lesson and checkpoint paths do not enforce approved-root containment",
+      "retry_limit has no server-side maximum",
+      "timeout_seconds is not enforced",
+      "extension snapshot has no freshness or ownership validation"
+    ]
+  },
+  "tests": {
+    "command": "env PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=visual_tutor .venv/bin/python -m pytest -q -p no:cacheprovider visual_tutor/tests",
+    "result": "PASS",
+    "passed": 7,
+    "failed": 0,
+    "classification": "DRY_RUN_AND_STATIC_CONTRACT_TESTS_ONLY",
+    "does_not_verify": [
+      "Streamable HTTP",
+      "MCPJungle registration",
+      "live Isaac process",
+      "extension heartbeat",
+      "live timeline state",
+      "real GUI action",
+      "Grasp Editor round trip"
+    ],
+    "log": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-grasp-editor-ik-evidence/visual_tutor_gateway_diagnosis/visual_tutor_tests.log"
+  },
+  "grasp_editor_2_0_20_native_contract": {
+    "isaac_sim": "5.1.0.0",
+    "kit": "107.3.3",
+    "physx": "107.3.26",
+    "extension": "isaacsim.robot_setup.grasp_editor",
+    "extension_version": "2.0.20",
+    "variant_b_active_joints": [
+      "left_finger"
+    ],
+    "variant_b_observer_joints_project_semantics": [
+      "right_finger"
+    ],
+    "native_grasp_name": "grasp_0",
+    "native_cspace_keys": [
+      "left_finger"
+    ],
+    "native_pregrasp_cspace_keys": [
+      "left_finger"
+    ],
+    "right_finger_native_exported": false,
+    "raw_export_can_be_evidence": true,
+    "canonical_promotion_allowed": false
+  },
+  "canonical_schema_conflict": {
+    "status": "HARD_BLOCKER_CANONICAL_SCHEMA_MISMATCH",
+    "project_loader_path": "/home/eii/project/openpi0.5-rtc-reward-learning/tools/aloha1_mapping/isaac_grasp_spec.py",
+    "project_required_grasp_name": "horizontal_body_grasp",
+    "project_required_cspace_keys": [
+      "left_finger",
+      "right_finger"
+    ],
+    "conflicts": [
+      "native grasp name grasp_0 does not equal horizontal_body_grasp",
+      "native Variant B export omits right_finger by design",
+      "right_finger mimic accuracy has no approved tolerance"
+    ],
+    "forbidden_workarounds": [
+      "silently rename grasp_0",
+      "guess right_finger as negative left_finger",
+      "promote the existing dual-active candidate as a Variant B GUI export",
+      "switch to Variant A only to satisfy the old parser",
+      "overwrite the canonical config before an approved contract exists"
+    ]
+  },
+  "required_bridge_capabilities": {
+    "transport": "STREAMABLE_HTTP_VIA_MCPJUNGLE",
+    "recommended_group": "codex-visual-tutor",
+    "separate_from_codex_research": true,
+    "minimum_allowlist": [
+      "live Isaac application/status probe",
+      "open approved Grasp Editor",
+      "select approved gripper and object paths",
+      "set approved Variant B fields",
+      "run GraspTester",
+      "export to an approved raw-evidence path",
+      "capture and read back state"
+    ],
+    "forbidden_capabilities": [
+      "arbitrary screen coordinates",
+      "arbitrary shell",
+      "arbitrary Python",
+      "file deletion",
+      "Stage overwrite",
+      "ROS publication",
+      "real robot control"
+    ],
+    "new_codex_session_required_after_group_registration": true
+  },
+  "next_authorization_gate": {
+    "reason": "Implementing the live bridge and choosing a long-term canonical schema change behavior and external Gateway state.",
+    "required_decisions": [
+      "approve a restricted live Visual Tutor bridge design",
+      "approve loader-native observer semantics or a deterministic raw-to-canonical promotion schema"
+    ]
+  }
+}

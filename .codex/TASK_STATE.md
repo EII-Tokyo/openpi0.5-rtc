@@ -1606,3 +1606,53 @@ scene design is reviewed and approved.
 - No source/default/final USD, collider, friction, drive, mimic, bottle mass,
   timestep, solver, real robot, ROS, camera, pipe/insertion task, or Task 8
   optimization was changed.
+
+## 2026-07-30 Visual Tutor Gateway and native-schema diagnosis
+
+- The Visual Tutor blocker is more specific than a missing group entry. The
+  current `visual_tutor/my_gui_teacher/server.py` is a stdio JSON-RPC dry-run
+  prototype. It has no Streamable HTTP endpoint, live Isaac heartbeat,
+  extension command/ack channel, real GUI action, or screenshot capture.
+- The current Isaac adapter returns dry-run success for arbitrary
+  `simulation_only` action strings. The Isaac extension is a passive status
+  panel and JSON snapshot writer; it is not connected to the MCP server.
+- Fresh project-environment validation is `7 passed`, but this proves only
+  dry-run/static contracts. It does not prove MCPJungle registration, live
+  Isaac, timeline state, or Grasp Editor GUI control.
+- The active Codex connection remains strict Gateway-only:
+  - only `mcpjungle_lab`;
+  - endpoint
+    `http://127.0.0.1:18080/v0/groups/codex-research/mcp`;
+  - MCPJungle and NVIDIA docs are reachable;
+  - the live registry/group contains no `my-gui-teacher`, live Visual Tutor
+    probe, or Isaac GUI teaching action.
+- Registering the existing stdio server directly would not solve the task and
+  is forbidden by the managed Visual Tutor skill. Chrome liveview and shell
+  clicks are not substitutes.
+- A second independent blocker was confirmed from local Grasp Editor 2.0.20:
+  - approved Variant B commands only `left_finger`;
+  - native export names the first grasp `grasp_0`;
+  - native c-space/pregrasp maps contain only `left_finger`;
+  - the current canonical loader requires `horizontal_body_grasp` and exact
+    `left_finger` + `right_finger` mappings.
+- This is now recorded as
+  `HARD_BLOCKER_CANONICAL_SCHEMA_MISMATCH`. Do not silently rename the grasp,
+  guess `right_finger=-left_finger`, use dual-active Variant A just to satisfy
+  the parser, or overwrite the canonical config.
+- Machine-readable diagnosis:
+  `reports/aloha1_mapping/aloha1_visual_tutor_gateway_diagnosis.json` and
+  `.md`. Full validation logs:
+  `.codex/artifacts/20260730-aloha1-grasp-editor-ik-evidence/visual_tutor_gateway_diagnosis/`.
+- Required authorization/design gate:
+  1. approve a restricted live Visual Tutor Streamable HTTP bridge in an
+     independent `codex-visual-tutor` MCPJungle group;
+  2. approve either loader-native left-active/right-observer semantics or a
+     deterministic raw-to-canonical promotion schema.
+- Current status remains:
+  `ACTUAL_GRASP_EDITOR_GUI=NOT_RUN`,
+  `CANONICAL_PROMOTION=BLOCKED_SCHEMA_MISMATCH`,
+  `PRE_IK_GEOMETRY=NOT_RUN`,
+  `IK=NOT_RUN`,
+  `DYNAMIC_GRASP_VIDEO=NOT_RUN`,
+  `TASK_PASS=NOT_ESTABLISHED`,
+  `TASK8=NOT_RUN`.

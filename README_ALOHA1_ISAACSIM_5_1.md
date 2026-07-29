@@ -1428,10 +1428,28 @@ forbids replacing that bridge with shell-driven arbitrary clicks or a direct
 MCP. IK and new grasp video recording remain `NOT_RUN`; no new video has been
 promoted during this gate.
 
+The follow-up source and Gateway audit established that registration alone is
+not sufficient. The current Visual Tutor server is a stdio dry-run prototype:
+its Isaac probe checks local paths, its action adapter returns dry-run
+success, and its passive Isaac extension has no command/ack channel to the
+server. It has no Streamable HTTP endpoint, live extension heartbeat, real
+Grasp Editor action, or screenshot capture. Its `7/7` focused tests validate
+only dry-run/static contracts.
+
+A separate Grasp Editor 2.0.20 schema blocker also remains. Approved Variant B
+commands only `left_finger`, so the native writer produces `grasp_0` with only
+`left_finger` in the c-space maps. The current project loader requires
+`horizontal_body_grasp` with both `left_finger` and `right_finger`. This is
+`HARD_BLOCKER_CANONICAL_SCHEMA_MISMATCH`; the raw GUI file may become
+evidence, but it must not be silently renamed, supplemented with a guessed
+right-finger value, or promoted over the canonical config.
+
 Machine reports:
 
 - `reports/aloha1_mapping/aloha1_grasp_tester_scripted_equivalent.json`;
 - `reports/aloha1_mapping/aloha1_grasp_tester_scripted_equivalent.md`.
+- `reports/aloha1_mapping/aloha1_visual_tutor_gateway_diagnosis.json`;
+- `reports/aloha1_mapping/aloha1_visual_tutor_gateway_diagnosis.md`.
 
 Full reports, telemetry, native YAML, exit records, and logs are under:
 
