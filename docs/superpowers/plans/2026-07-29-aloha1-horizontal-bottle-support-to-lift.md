@@ -657,17 +657,20 @@ map hash, Stage hash, articulation path, base frame, and EE frame.
 
 - [ ] **Step 2: Write RED robust lift-onset tests**
 
-Given FK `delta_z`, compute the open/pre-close baseline:
+Given FK `delta_z`, compute the one-sided upward-noise baseline. Frames
+208-222 contain intentional downward approach, so negative descent samples
+must not inflate the threshold for a positive lift:
 
 ```python
-baseline = delta_z[frames <= close_command_start_frame]
+baseline = maximum(delta_z[frames <= close_command_start_frame], 0.0)
 threshold = median(baseline) + 5.0 * MAD(baseline)
 ```
 
 The lift onset is the first frame after readback response with two consecutive
 positive `delta_z` values above that threshold and positive cumulative Z
 through frame 244. Record the threshold and every candidate; do not hard-code
-frame 237.
+the selected frame. Also record the rejected non-directional threshold and
+the evidence that it was dominated by the downward approach.
 
 - [ ] **Step 3: Derive the digital grasp pose**
 
