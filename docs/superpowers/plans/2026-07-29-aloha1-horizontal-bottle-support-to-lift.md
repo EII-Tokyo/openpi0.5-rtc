@@ -4,7 +4,7 @@
 
 **Goal:** Build and execute a machine-verifiable Isaac Sim 5.1 diagnostic in which follower-left approaches the project Bottle500 vertically, grasps it while it lies dynamically on the table, lifts it, and holds it for two seconds.
 
-**Architecture:** Preserve the historical upright/shoulder-sweep Task 7B.2 files and add a separately named horizontal-grasp v2 pipeline. Pure Python modules own CAD-axis geometry, episode 18 phase extraction, deterministic placement, and trial classification; a pinned Isaac 5.1 Lula probe validates URDF/USD FK correspondence before a separate runtime process performs session-only bottle composition, constrained IK, contact collection, lift, hold, and screenshots.
+**Architecture:** Preserve the historical upright/shoulder-sweep Task 7B.2 files and add a separately named horizontal-grasp v2 pipeline. Pure Python modules own CAD-axis geometry, episode 18 phase extraction, deterministic placement, and trial classification; a pinned Isaac 5.1 Lula probe validates URDF/USD FK correspondence before a separate runtime process performs session-only bottle composition, constrained IK, contact collection, lift, hold, synchronized screenshots, and continuous two-view video evidence.
 
 **Tech Stack:** Python 3.11, project `.venv`, Isaac `.venv_issac`, NumPy, SciPy 1.15.3, h5py, PyYAML, pytest, Pillow, OpenUSD, Isaac Sim 5.1.0.0, Kit 107.3.3, PhysX 107.3.26, `isaacsim.robot_motion.motion_generation` 8.0.26.
 
@@ -37,6 +37,12 @@ Create focused files rather than expanding the historical upright runner:
   adds machine-data overlays to raw captures without inferring physical PASS.
 - `tools/finalize_aloha1_task7b2_horizontal_screenshot_review.py`
   validates the human/vision review records and writes the durable review.
+- `tools/build_aloha1_task7b2_horizontal_video.py`
+  encodes synchronized overview and gripper-close-up frame streams without
+  dropping or reordering runtime frames.
+- `tools/finalize_aloha1_task7b2_horizontal_video_review.py`
+  validates per-phase visual-model review records and promotes only accepted
+  candidate videos to the final verified directory.
 - `tests/aloha1_mapping/test_horizontal_bottle_geometry.py`
   tests pure CAD/world geometry.
 - `tests/aloha1_mapping/test_episode18_grasp_window.py`
@@ -45,6 +51,9 @@ Create focused files rather than expanding the historical upright runner:
   tests config, classification, aggregation, and runtime source boundaries.
 - `tests/aloha1_mapping/test_task7b2_horizontal_screenshots.py`
   tests screenshot manifest and annotation contracts.
+- `tests/aloha1_mapping/test_task7b2_horizontal_video.py`
+  tests complete-action coverage, synchronization, review, rejection, and
+  promotion contracts.
 
 Durable outputs:
 
@@ -56,6 +65,8 @@ Durable outputs:
 - `reports/aloha1_mapping/aloha1_task7b2_horizontal_grasp.md`
 - `reports/aloha1_mapping/aloha1_task7b2_horizontal_screenshot_review.json`
 - `reports/aloha1_mapping/aloha1_task7b2_horizontal_screenshot_review.md`
+- `reports/aloha1_mapping/aloha1_task7b2_horizontal_video_review.json`
+- `reports/aloha1_mapping/aloha1_task7b2_horizontal_video_review.md`
 
 All large logs, intermediate arrays, raw images, and annotations go under:
 
@@ -959,6 +970,20 @@ phase is excluded from acceptance. Every runtime phase records joint
 target/readback, bottle pose, velocities, A/B world coordinates, geometry
 angles, contacts, offsets, and stage frame/time.
 
+Render and retain one frame for each physics step from two fixed cameras:
+
+```text
+overview
+gripper_closeup
+```
+
+Both streams begin before `release_dynamic` and end only after `hold_end`.
+Each rendered frame is indexed by the same trial signature, physics frame,
+time, and phase as the machine trace. Record camera matrices, resolution,
+render FPS, missing-frame count, and exact phase-to-frame ranges. Rendering
+may not alter the control trajectory, physics timestep, solver, bottle,
+collider, material, drive, or mimic state.
+
 - [ ] **Step 6: Decode contact reports**
 
 For each contact-data entry, use header actor paths plus collider IDs to emit:
@@ -1088,14 +1113,19 @@ physical PASS.
 Only `physical_trial_status=PASS` permits the 20-fresh-reset run. A smoke
 aggregate remains `PARTIAL`, never `PASS`.
 
-### Task 9: Capture, annotate, and visually review evidence
+### Task 9: Capture, annotate, and visually review screenshot and video evidence
 
 **Files:**
 - Create: `tools/annotate_aloha1_task7b2_horizontal_grasp.py`
 - Create: `tools/finalize_aloha1_task7b2_horizontal_screenshot_review.py`
+- Create: `tools/build_aloha1_task7b2_horizontal_video.py`
+- Create: `tools/finalize_aloha1_task7b2_horizontal_video_review.py`
 - Create: `tests/aloha1_mapping/test_task7b2_horizontal_screenshots.py`
+- Create: `tests/aloha1_mapping/test_task7b2_horizontal_video.py`
 - Create: `reports/aloha1_mapping/aloha1_task7b2_horizontal_screenshot_review.json`
 - Create: `reports/aloha1_mapping/aloha1_task7b2_horizontal_screenshot_review.md`
+- Create: `reports/aloha1_mapping/aloha1_task7b2_horizontal_video_review.json`
+- Create: `reports/aloha1_mapping/aloha1_task7b2_horizontal_video_review.md`
 
 - [ ] **Step 1: Write RED screenshot-contract tests**
 
@@ -1143,7 +1173,69 @@ retake_reason
 
 Require paired views to use the same camera matrix for comparable phases.
 
-- [ ] **Step 2: Implement annotation without pixel-based physics inference**
+- [ ] **Step 2: Write RED continuous-video contract tests**
+
+Require two complete candidate streams:
+
+```text
+overview
+gripper_closeup
+```
+
+Each stream must begin before `release_dynamic`, end after `hold_end`, and
+contain every physics frame for:
+
+```text
+release_dynamic
+support_settle
+open_pregrasp
+vertical_descent
+bilateral_contact
+closing_preload
+vertical_lift
+support_clear
+hold_end
+```
+
+Each video record must contain:
+
+```text
+attempt_id
+view_name
+runtime_trial_signature
+raw_candidate_absolute_path
+raw_candidate_sha256
+annotated_candidate_absolute_path
+annotated_candidate_sha256
+verified_raw_absolute_path
+verified_raw_sha256
+verified_annotated_absolute_path
+verified_annotated_sha256
+resolution
+fps
+frame_count
+duration_s
+first_physics_frame
+last_physics_frame
+missing_physics_frames
+camera_world_matrix
+phase_frame_ranges
+source_frame_manifest_sha256
+encoder_name
+encoder_version
+encoder_command
+vision_review_status
+reviewed_sample_frames
+retake_reason
+promotion_status
+```
+
+Require `fps=60`, `missing_physics_frames=[]`, identical phase/frame mappings
+between raw and annotated videos, and identical runtime-trial signatures
+between the two views. Reject any record promoted before its visual review is
+`PASS`.
+
+- [ ] **Step 3: Implement annotation without pixel-based physics inference**
 
 The annotator reads runtime metadata and draws:
 
@@ -1162,14 +1254,31 @@ The annotator reads runtime metadata and draws:
 It writes `PENDING_VISUAL_MODEL_REVIEW` until the image is reviewed. It never
 changes the machine result.
 
-- [ ] **Step 3: Generate candidate captures**
+- [ ] **Step 4: Generate candidate captures and continuous videos**
 
 Use the already proven screenshot-only OmniHydra workaround
 `/app/useFabricSceneDelegate=false` only in screenshot processes. Record the
 delegate readback and zero `protoPath` error gate. Do not change the default
 renderer, Stage instance authoring, physics composition, or final asset.
 
-- [ ] **Step 4: Inspect every image with the vision model**
+Write each complete attempt beneath:
+
+```text
+.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/
+  video_candidates/attempt_N/
+```
+
+Encode raw and annotated MP4 files from the same ordered frame manifests.
+Record the exact encoder version and command. Do not overwrite an earlier
+attempt. The accepted files may be copied to:
+
+```text
+.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/video_verified/
+```
+
+only after both views pass the visual review.
+
+- [ ] **Step 5: Inspect every image and each video with the vision model**
 
 For each raw and annotated image, explicitly check:
 
@@ -1186,21 +1295,48 @@ For each raw and annotated image, explicitly check:
 Retake any failed view and record its reason. File/hash checks alone cannot
 pass this step.
 
-- [ ] **Step 5: Finalize review and commit tools/tests**
+For each candidate video, extract every required phase boundary plus uniform
+samples at intervals no greater than 0.5 seconds and build a contact sheet.
+Visually verify:
+
+- the sequence is continuous from release through hold end;
+- the overview contains the table, robot, and complete bottle motion;
+- the close-up exposes both finger inner surfaces, the bottle, bilateral
+  contact, support clearance, and hold;
+- settle, open, descent, contact, lift, and hold are visibly distinct;
+- no required phase is cropped, occluded, frozen, duplicated, or skipped;
+- raw and annotated streams show the same trial and frame sequence;
+- annotations do not obscure the finger/bottle contact geometry; and
+- any `PASS` label is limited to its machine-supported scope.
+
+If either view fails, mark the whole attempt rejected, save its review and
+retake reason, and record a fresh complete simulation attempt. Do not splice
+successful pieces from different trials. Rejected attempts remain evidence
+but are never placed in `video_verified`.
+
+- [ ] **Step 6: Finalize reviews and commit tools/tests**
 
 ```bash
 .venv/bin/python -m pytest -q \
-  tests/aloha1_mapping/test_task7b2_horizontal_screenshots.py
+  tests/aloha1_mapping/test_task7b2_horizontal_screenshots.py \
+  tests/aloha1_mapping/test_task7b2_horizontal_video.py
 .venv/bin/python -m ruff check \
   tools/annotate_aloha1_task7b2_horizontal_grasp.py \
   tools/finalize_aloha1_task7b2_horizontal_screenshot_review.py \
-  tests/aloha1_mapping/test_task7b2_horizontal_screenshots.py
+  tools/build_aloha1_task7b2_horizontal_video.py \
+  tools/finalize_aloha1_task7b2_horizontal_video_review.py \
+  tests/aloha1_mapping/test_task7b2_horizontal_screenshots.py \
+  tests/aloha1_mapping/test_task7b2_horizontal_video.py
 git add -f \
   tools/annotate_aloha1_task7b2_horizontal_grasp.py \
-  tools/finalize_aloha1_task7b2_horizontal_screenshot_review.py
-git add tests/aloha1_mapping/test_task7b2_horizontal_screenshots.py
+  tools/finalize_aloha1_task7b2_horizontal_screenshot_review.py \
+  tools/build_aloha1_task7b2_horizontal_video.py \
+  tools/finalize_aloha1_task7b2_horizontal_video_review.py
+git add \
+  tests/aloha1_mapping/test_task7b2_horizontal_screenshots.py \
+  tests/aloha1_mapping/test_task7b2_horizontal_video.py
 git diff --cached --check
-git commit -m "feat: review horizontal pickup screenshots"
+git commit -m "feat: review horizontal pickup visual evidence"
 ```
 
 ### Task 10: Run 20-trial acceptance only after smoke PASS
@@ -1255,7 +1391,9 @@ git add -f \
   reports/aloha1_mapping/aloha1_task7b2_horizontal_grasp_trials.jsonl \
   reports/aloha1_mapping/aloha1_task7b2_horizontal_grasp.md \
   reports/aloha1_mapping/aloha1_task7b2_horizontal_screenshot_review.json \
-  reports/aloha1_mapping/aloha1_task7b2_horizontal_screenshot_review.md
+  reports/aloha1_mapping/aloha1_task7b2_horizontal_screenshot_review.md \
+  reports/aloha1_mapping/aloha1_task7b2_horizontal_video_review.json \
+  reports/aloha1_mapping/aloha1_task7b2_horizontal_video_review.md
 git diff --cached --check
 git commit -m "docs: record horizontal Bottle500 pickup evidence"
 ```
@@ -1335,6 +1473,7 @@ Run:
   tests/aloha1_mapping/test_episode18_grasp_window.py \
   tests/aloha1_mapping/test_task7b2_horizontal_grasp.py \
   tests/aloha1_mapping/test_task7b2_horizontal_screenshots.py \
+  tests/aloha1_mapping/test_task7b2_horizontal_video.py \
   tests/aloha1_mapping/test_readme.py
 .venv/bin/python -m pytest -q tests/aloha1_mapping
 .venv/bin/python -m ruff check \
@@ -1345,10 +1484,13 @@ Run:
   tools/validate_aloha1_task7b2_horizontal_grasp.py \
   tools/annotate_aloha1_task7b2_horizontal_grasp.py \
   tools/finalize_aloha1_task7b2_horizontal_screenshot_review.py \
+  tools/build_aloha1_task7b2_horizontal_video.py \
+  tools/finalize_aloha1_task7b2_horizontal_video_review.py \
   tests/aloha1_mapping/test_horizontal_bottle_geometry.py \
   tests/aloha1_mapping/test_episode18_grasp_window.py \
   tests/aloha1_mapping/test_task7b2_horizontal_grasp.py \
-  tests/aloha1_mapping/test_task7b2_horizontal_screenshots.py
+  tests/aloha1_mapping/test_task7b2_horizontal_screenshots.py \
+  tests/aloha1_mapping/test_task7b2_horizontal_video.py
 .venv/bin/python -m py_compile \
   tools/aloha1_mapping/horizontal_bottle_geometry.py \
   tools/aloha1_mapping/episode18_grasp_window.py \
@@ -1356,7 +1498,9 @@ Run:
   tools/probe_aloha1_task7b2_horizontal_kinematics.py \
   tools/validate_aloha1_task7b2_horizontal_grasp.py \
   tools/annotate_aloha1_task7b2_horizontal_grasp.py \
-  tools/finalize_aloha1_task7b2_horizontal_screenshot_review.py
+  tools/finalize_aloha1_task7b2_horizontal_screenshot_review.py \
+  tools/build_aloha1_task7b2_horizontal_video.py \
+  tools/finalize_aloha1_task7b2_horizontal_video_review.py
 ```
 
 Expected: focused tests, full mapping tests, Ruff, and py_compile pass. A

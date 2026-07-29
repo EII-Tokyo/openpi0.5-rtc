@@ -372,6 +372,49 @@ model. Retake views that hide the fingers, contact region, bottle/table
 interface, or state change. Screenshots are supporting evidence; runtime
 contact, pose, velocity, drop, and deterministic data remain authoritative.
 
+## Continuous Video Evidence
+
+Every dynamic pickup attempt used for acceptance evidence must record the
+complete action continuously. Recording starts before the one-time
+kinematic-to-dynamic bottle release and continues through dynamic settle,
+open pregrasp, vertical descent, bilateral contact, closing preload, vertical
+lift, support clearance, and the complete two-second hold.
+
+Record two fixed-camera evidence streams:
+
+- an overview that keeps the follower arm, gripper, bottle, and table support
+  visible; and
+- a gripper close-up that exposes both fingers, their inward surfaces, the
+  bottle body, bilateral contact region, and support clearance.
+
+The cameras must not move during the recorded sequence. Each encoded frame is
+bound to a physics frame and the same runtime trial signature. Record frame
+rate, resolution, frame count, duration, camera matrices, phase-to-frame
+mapping, source image hashes, video hash, and the exact encoder command and
+version.
+
+Candidate videos are written to numbered attempt directories. Before a video
+is promoted to the final verified directory, extract every required phase
+frame plus uniform interval samples and review the resulting frames/contact
+sheets with the vision model. Reject and re-record an attempt when:
+
+- any required physical phase is absent;
+- the motion is discontinuous or the beginning/end is truncated;
+- the arm, either finger, the bottle, the contact region, or the table
+  interface is cropped or occluded;
+- descent, lift, or support clearance cannot be distinguished visually;
+- the overview and close-up do not correspond to the recorded deterministic
+  trial; or
+- annotations conceal the geometry.
+
+Preserve rejected attempts as explicitly rejected diagnostic evidence, but do
+not place them in the final verified-video directory. Save both raw and
+annotated accepted videos only after visual review passes.
+
+Video remains auxiliary evidence. It cannot override runtime contact, pose,
+velocity, drop, penetration, joint target/readback, or deterministic-signature
+failure.
+
 ## Evidence Classification And Blockers
 
 Reports must distinguish:
