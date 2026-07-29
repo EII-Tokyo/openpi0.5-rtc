@@ -14,6 +14,7 @@ import argparse
 from collections.abc import Mapping, Sequence
 import hashlib
 import importlib
+from importlib.metadata import version
 import json
 import math
 import os
@@ -54,6 +55,7 @@ KINEMATICS_REPORT = (
 LULA_DESCRIPTOR = ROOT / "configs/aloha1_lula_follower_left.yaml"
 
 VIDEO_VIEWS = ("overview", "gripper_closeup")
+SCREENSHOT_VIEWS = ("true_top", "side")
 EXPECTED_DOF_ORDER = [
     "waist",
     "shoulder",
@@ -101,6 +103,11 @@ def main() -> int:
     exit_code = 1
     try:
         runtime = _verify_runtime_versions(profile["config"])
+        capture_views = (
+            VIDEO_VIEWS
+            if args.capture_profile == "video"
+            else SCREENSHOT_VIEWS
+        )
         for trial_index in range(args.repeats):
             trials.append(
                 _run_trial(
@@ -109,6 +116,8 @@ def main() -> int:
                     trial_index=trial_index,
                     artifact_root=artifact_root,
                     capture_video_frames=bool(args.capture_video_frames),
+                    capture_profile=str(args.capture_profile),
+                    capture_views=capture_views,
                     resolution=(int(args.width), int(args.height)),
                 )
             )
@@ -272,9 +281,19 @@ def _parse_args() -> argparse.Namespace:
         action=argparse.BooleanOptionalAction,
         default=True,
     )
+    parser.add_argument(
+        "--capture-profile",
+        choices=("video", "screenshots"),
+        default="video",
+    )
     parser.add_argument("--width", type=int, default=960)
     parser.add_argument("--height", type=int, default=540)
-    return parser.parse_args()
+    args, kit_args = parser.parse_known_args()
+    invalid = [value for value in kit_args if not value.startswith("--/")]
+    if invalid:
+        parser.error(f"unrecognized arguments: {' '.join(invalid)}")
+    args.kit_args = kit_args
+    return args
 
 
 def _resolve_source(root: Path, value: str) -> Path:
@@ -348,9 +367,59 @@ def _load_profile(config_path: Path) -> dict[str, Any]:
     }
 
 
-def _smoothstep(value: float) -> float:
-    clipped = min(max(float(value), 0.0), 1.0)
-    return clipped * clipped * (3.0 - 2.0 * clipped)
+def derive_interpolation_steps(
+    start: Sequence[float],
+    end: Sequence[float],
+    episode_delta_limits: Sequence[float],
+) -> int:
+    """Return the minimum steps that stay inside episode command deltas."""
+    start_array = np.asarray(start, dtype=np.float64)
+    end_array = np.asarray(end, dtype=np.float64)
+    limits = np.asarray(episode_delta_limits, dtype=np.float64)
+    if (
+        start_array.shape != end_array.shape
+        or limits.shape != start_array.shape
+        or not np.isfinite(start_array).all()
+        or not np.isfinite(end_array).all()
+        or not np.isfinite(limits).all()
+    ):
+        raise ValueError("interpolation vectors must be finite and aligned")
+    delta = np.abs(end_array - start_array)
+    blocked = (delta > 0.0) & (limits <= 0.0)
+    if np.any(blocked):
+        raise ValueError("episode command delta is zero for a moving joint")
+    ratios = np.divide(
+        delta,
+        limits,
+        out=np.zeros_like(delta),
+        where=limits > 0.0,
+    )
+    return max(1, math.ceil(float(np.max(ratios, initial=0.0))))
+
+
+def episode_gripper_targets(
+    records: Sequence[Mapping[str, Any]],
+    *,
+    start_frame: int,
+    end_frame: int,
+    lower_m: float,
+    scale_m: float,
+) -> list[float]:
+    """Map the proven episode action interval to URDF left-finger targets."""
+    selected = [
+        record
+        for record in records
+        if start_frame <= int(record["frame"]) <= end_frame
+    ]
+    if not selected:
+        raise ValueError("episode gripper interval is empty")
+    targets = []
+    for record in selected:
+        action = float(record["gripper_action"])
+        if not math.isfinite(action):
+            raise ValueError("episode gripper action is non-finite")
+        targets.append(lower_m + scale_m * min(max(action, 0.0), 1.0))
+    return targets
 
 
 def _command_positions(articulation: Any, target: np.ndarray) -> None:
@@ -376,6 +445,39 @@ def _world_bounds(stage: Any, prim_path: str) -> dict[str, list[float]]:
     return {
         "minimum": [float(value) for value in aligned.GetMin()],
         "maximum": [float(value) for value in aligned.GetMax()],
+    }
+
+
+def _collision_world_bounds(
+    stage: Any,
+    rigid_body_path: str,
+) -> dict[str, list[float]]:
+    from pxr import Usd
+    from pxr import UsdGeom
+    from pxr import UsdPhysics
+
+    root = stage.GetPrimAtPath(rigid_body_path)
+    if not root.IsValid():
+        raise RuntimeError(
+            f"missing rigid body for collision bounds: {rigid_body_path}"
+        )
+    cache = UsdGeom.BBoxCache(
+        Usd.TimeCode.Default(),
+        [UsdGeom.Tokens.default_],
+    )
+    minima: list[np.ndarray] = []
+    maxima: list[np.ndarray] = []
+    for prim in Usd.PrimRange(root):
+        if not prim.HasAPI(UsdPhysics.CollisionAPI):
+            continue
+        aligned = cache.ComputeWorldBound(prim).ComputeAlignedBox()
+        minima.append(np.asarray(aligned.GetMin(), dtype=np.float64))
+        maxima.append(np.asarray(aligned.GetMax(), dtype=np.float64))
+    if not minima:
+        raise RuntimeError(f"no collision prims below {rigid_body_path}")
+    return {
+        "minimum": np.min(np.vstack(minima), axis=0).tolist(),
+        "maximum": np.max(np.vstack(maxima), axis=0).tolist(),
     }
 
 
@@ -518,20 +620,19 @@ def _rotation_matrix_to_quaternion_wxyz(matrix: np.ndarray) -> np.ndarray:
 def _look_at_quaternion(
     camera_position: np.ndarray,
     target_position: np.ndarray,
+    *,
+    up_world: np.ndarray | None = None,
 ) -> np.ndarray:
-    from isaacsim.core.utils.rotations import rot_matrices_to_quats
+    from tools.aloha1_mapping.isaac_screenshot import look_at_orientation_wxyz
 
-    forward = target_position - camera_position
-    forward /= np.linalg.norm(forward)
-    camera_z = -forward
-    up = np.asarray([0.0, 0.0, 1.0], dtype=np.float64)
-    if abs(float(np.dot(up, camera_z))) > 0.98:
-        up = np.asarray([0.0, 1.0, 0.0], dtype=np.float64)
-    camera_x = np.cross(up, camera_z)
-    camera_x /= np.linalg.norm(camera_x)
-    camera_y = np.cross(camera_z, camera_x)
-    rotation = np.column_stack([camera_x, camera_y, camera_z])
-    return np.asarray(rot_matrices_to_quats(rotation), dtype=np.float64)
+    return np.asarray(
+        look_at_orientation_wxyz(
+            camera_position,
+            target_position,
+            up_world=up_world,
+        ),
+        dtype=np.float64,
+    )
 
 
 def _create_material(
@@ -601,7 +702,10 @@ def _create_session_bottle(
     quaternion = _rotation_matrix_to_quaternion_wxyz(placement[:3, :3])
     bottle.AddTranslateOp().Set(Gf.Vec3d(*placement[:3, 3]))
     bottle.AddOrientOp().Set(
-        Gf.Quatd(float(quaternion[0]), Gf.Vec3d(*quaternion[1:]))
+        Gf.Quatf(
+            float(quaternion[0]),
+            Gf.Vec3f(*[float(value) for value in quaternion[1:]]),
+        )
     )
     bottle_prim = bottle.GetPrim()
     collision_prims = [
@@ -685,11 +789,11 @@ def _create_session_bottle(
     }
 
 
-def _save_rgba(camera: Any, path: Path) -> tuple[int, int]:
-    rgba = np.asarray(camera.get_rgba())
+def _save_rgb_array(pixels: Any, path: Path) -> tuple[int, int]:
+    rgba = np.asarray(pixels)
     if rgba.ndim != 3 or rgba.shape[2] not in (3, 4):
         raise RuntimeError(
-            f"Camera.get_rgba invalid shape for {path.name}: {rgba.shape}"
+            f"Replicator RGB invalid shape for {path.name}: {rgba.shape}"
         )
     if rgba.dtype != np.uint8:
         rgba = np.clip(rgba, 0.0, 1.0)
@@ -701,8 +805,48 @@ def _save_rgba(camera: Any, path: Path) -> tuple[int, int]:
     return int(rgba.shape[1]), int(rgba.shape[0])
 
 
+def _capture_viewport_png(
+    app: Any,
+    viewport: Any,
+    *,
+    camera_path: str,
+    destination: Path,
+) -> tuple[int, int]:
+    from omni.kit.viewport.utility import capture_viewport_to_file
+    from pxr import Sdf
+
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    viewport.camera_path = Sdf.Path(camera_path)
+    for _ in range(20):
+        app.update()
+    helper = capture_viewport_to_file(
+        viewport,
+        file_path=str(destination),
+    )
+    previous_size = -1
+    stable_updates = 0
+    for _ in range(300):
+        app.update()
+        if not destination.exists():
+            continue
+        size = destination.stat().st_size
+        if size > 0 and size == previous_size:
+            stable_updates += 1
+        else:
+            stable_updates = 0
+        previous_size = size
+        if stable_updates >= 2:
+            break
+    del helper
+    if not destination.is_file() or destination.stat().st_size == 0:
+        raise RuntimeError(f"viewport capture failed: {destination}")
+    with Image.open(destination) as image:
+        image.load()
+        return int(image.width), int(image.height)
+
+
 def _camera_world_matrix(position: np.ndarray, quaternion: np.ndarray) -> list[list[float]]:
-    from isaacsim.core.utils.rotations import quats_to_rot_matrices
+    from isaacsim.core.utils.numpy.rotations import quats_to_rot_matrices
 
     matrix = np.eye(4, dtype=np.float64)
     matrix[:3, :3] = quats_to_rot_matrices(quaternion)
@@ -714,6 +858,8 @@ def _create_cameras(
     *,
     config: Mapping[str, Any],
     kinematics: Mapping[str, Any],
+    capture_profile: str,
+    capture_views: Sequence[str],
     resolution: tuple[int, int],
 ) -> dict[str, dict[str, Any]]:
     from isaacsim.sensors.camera import Camera
@@ -722,30 +868,81 @@ def _create_cameras(
         kinematics["placement"]["bottle_axis"]["grasp_point_world_m"],
         dtype=np.float64,
     )
-    camera_specs = {
-        "overview": {
-            "position": grasp + np.asarray([0.68, -0.62, 0.50]),
-            "target": grasp + np.asarray([-0.03, 0.0, 0.02]),
-        },
-        "gripper_closeup": {
-            "position": grasp + np.asarray([0.28, -0.22, 0.14]),
-            "target": grasp + np.asarray([0.0, 0.0, 0.03]),
-        },
-    }
+    base = np.asarray(
+        kinematics["fk_correspondence"]["cases"][0][
+            "base_position_world_m"
+        ],
+        dtype=np.float64,
+    )
+    overview_target = (base + grasp) / 2.0
+    overview_target[2] += 0.08
+    if capture_profile == "video":
+        camera_specs = {
+            "overview": {
+                "position": overview_target
+                + np.asarray([1.85, -1.75, 1.45]),
+                "target": overview_target,
+            },
+            "gripper_closeup": {
+                # Move along the already verified overview viewing ray.
+                "position": grasp + np.asarray([0.925, -0.875, 0.725]),
+                "target": grasp,
+                "reuse_initial_orientation": True,
+            },
+        }
+    elif capture_profile == "screenshots":
+        camera_specs = {
+            "true_top": {
+                "position": grasp + np.asarray([0.0, 0.0, 1.65]),
+                "target": grasp,
+                "up_world": np.asarray([0.0, 1.0, 0.0]),
+            },
+            "side": {
+                # Reuse the already visually accepted close-up ray.  This is
+                # recorded as an oblique side view by its actual camera
+                # forward vector; it is not a calibrated orthographic side.
+                "position": grasp + np.asarray([0.925, -0.875, 0.725]),
+                "target": grasp,
+                "orientation_position": grasp
+                + np.asarray([1.85, -1.75, 1.45]),
+                "orientation_target": grasp,
+            },
+        }
+    else:
+        raise ValueError(f"unknown capture profile: {capture_profile}")
+    initial_spec = camera_specs[capture_views[0]]
+    initial_quaternion = _look_at_quaternion(
+        initial_spec["position"],
+        initial_spec["target"],
+        up_world=initial_spec.get("up_world"),
+    )
+    capture_camera = Camera(
+        prim_path="/World/Task7B2HorizontalCameras/capture_camera",
+        position=initial_spec["position"],
+        orientation=initial_quaternion,
+        frequency=float(config["physics"]["frequency_hz"]),
+        resolution=resolution,
+    )
+    capture_camera.initialize(attach_rgb_annotator=False)
+    capture_camera.set_world_pose(
+        position=initial_spec["position"],
+        orientation=initial_quaternion,
+        camera_axes="usd",
+    )
     records: dict[str, dict[str, Any]] = {}
-    for view in VIDEO_VIEWS:
+    for view in capture_views:
         spec = camera_specs[view]
-        quaternion = _look_at_quaternion(spec["position"], spec["target"])
-        camera = Camera(
-            prim_path=f"/World/Task7B2HorizontalCameras/{view}",
-            position=spec["position"],
-            orientation=quaternion,
-            frequency=float(config["physics"]["frequency_hz"]),
-            resolution=resolution,
+        quaternion = (
+            initial_quaternion
+            if spec.get("reuse_initial_orientation", False)
+            else _look_at_quaternion(
+                spec.get("orientation_position", spec["position"]),
+                spec.get("orientation_target", spec["target"]),
+                up_world=spec.get("up_world"),
+            )
         )
-        camera.initialize()
         records[view] = {
-            "camera": camera,
+            "camera": capture_camera,
             "position_world_m": spec["position"].tolist(),
             "orientation_wxyz": quaternion.tolist(),
             "camera_world_matrix": _camera_world_matrix(
@@ -759,11 +956,42 @@ def _create_cameras(
     return records
 
 
+def _create_render_streams(
+    cameras: Mapping[str, Mapping[str, Any]],
+    *,
+    resolution: tuple[int, int],
+) -> tuple[Any, dict[str, dict[str, Any]]]:
+    import omni.replicator.core as rep
+
+    rep.orchestrator.set_capture_on_play(False)
+    streams: dict[str, dict[str, Any]] = {}
+    for view in VIDEO_VIEWS:
+        camera = cameras[view]["camera"]
+        render_product = rep.create.render_product(
+            camera.prim_path,
+            resolution,
+            name=f"Task7B2Horizontal_{view}",
+        )
+        annotator = rep.AnnotatorRegistry.get_annotator("rgb")
+        annotator.attach(render_product)
+        streams[view] = {
+            "render_product": render_product,
+            "render_product_path": str(render_product.path),
+            "annotator": annotator,
+        }
+    rep.orchestrator.step(
+        rt_subframes=2,
+        pause_timeline=True,
+        delta_time=0.0,
+        wait_for_render=True,
+    )
+    return rep, streams
+
+
 def _verify_runtime_versions(
     config: Mapping[str, Any],
-) -> dict[str, str]:
+) -> dict[str, Any]:
     import carb
-    import isaacsim
     import omni.kit.app
 
     app = omni.kit.app.get_app()
@@ -772,23 +1000,30 @@ def _verify_runtime_versions(
         "isaacsim.robot_motion.motion_generation"
     )
     physx_id = extension_manager.get_enabled_extension_id("omni.physx")
-    motion_version = (
-        extension_manager.get_extension_dict(motion_id).get("version")
+    motion_extension = (
+        extension_manager.get_extension_dict(motion_id)
         if motion_id
         else None
     )
-    physx_version = (
-        extension_manager.get_extension_dict(physx_id).get("version")
+    physx_extension = (
+        extension_manager.get_extension_dict(physx_id)
         if physx_id
         else None
     )
-    kit_version = str(app.get_build_version()).split("+", maxsplit=1)[0]
-    isaac_version = str(getattr(isaacsim, "__version__", ""))
-    if not isaac_version:
-        version_file = (
-            Path(isaacsim.__file__).resolve().parents[1] / "VERSION"
-        )
-        isaac_version = version_file.read_text(encoding="utf-8").strip()
+    motion_version = (
+        motion_extension.get("package", {}).get("version", None)
+        if motion_extension
+        else None
+    )
+    physx_version = (
+        physx_extension.get("package", {}).get("version", None)
+        if physx_extension
+        else None
+    )
+    kit_version = str(
+        carb.tokens.get_tokens_interface().resolve("${kit_version}")
+    ).split("+", maxsplit=1)[0]
+    isaac_version = version("isaacsim")
     actual = {
         "isaac_sim": isaac_version,
         "kit": kit_version,
@@ -798,6 +1033,11 @@ def _verify_runtime_versions(
         )[0],
         "python": platform.python_version(),
         "carbonite": str(carb.__file__),
+        "use_fabric_scene_delegate": bool(
+            carb.settings.get_settings().get_as_bool(
+                "/app/useFabricSceneDelegate"
+            )
+        ),
     }
     for key in (
         "isaac_sim",
@@ -901,20 +1141,22 @@ def _run_trial(
     trial_index: int,
     artifact_root: Path,
     capture_video_frames: bool,
+    capture_profile: str,
+    capture_views: Sequence[str],
     resolution: tuple[int, int],
 ) -> dict[str, Any]:
     from isaacsim.core.api import World
     from isaacsim.core.prims import SingleArticulation
     from isaacsim.core.prims import SingleRigidPrim
-    from isaacsim.core.utils.prims import get_world_pose
     from isaacsim.core.utils.stage import get_current_stage
     from isaacsim.core.utils.stage import open_stage
+    from isaacsim.core.utils.xforms import get_world_pose
+    from omni.kit.viewport.utility import get_active_viewport
     from omni.physx import get_physx_interface
     from omni.physx import get_physx_simulation_interface
     from pxr import Usd
     from pxr import UsdPhysics
 
-    del app
     started = time.perf_counter()
     config = profile["config"]
     dt = 1.0 / float(config["physics"]["frequency_hz"])
@@ -1003,14 +1245,19 @@ def _run_trial(
         _create_cameras(
             config=config,
             kinematics=profile["kinematics"],
+            capture_profile=capture_profile,
+            capture_views=capture_views,
             resolution=resolution,
         )
         if capture_video_frames
         else {}
     )
     if capture_video_frames:
-        for _ in range(4):
-            world.step(render=True)
+        viewport = get_active_viewport()
+        if viewport is None:
+            raise RuntimeError("no active viewport for two-view recording")
+    else:
+        viewport = None
 
     physx = get_physx_interface()
     physx_sim = get_physx_simulation_interface()
@@ -1044,10 +1291,12 @@ def _run_trial(
         _command_positions(articulation, command)
         state["phase"] = phase
         state["frame"] = int(state["frame"]) + 1
-        world.step(render=capture_video_frames)
+        world.play()
+        world.step(render=False)
         physx.update_transformations(True, True, False, False)
         bottle_state = _bottle_state(bottle)
-        bounds = _world_bounds(stage, bottle_path)
+        visual_bounds = _world_bounds(stage, bottle_path)
+        collision_bounds = _collision_world_bounds(stage, bottle_path)
         pose = np.eye(4, dtype=np.float64)
         position = np.asarray(
             bottle_state["position_world_m"],
@@ -1057,12 +1306,26 @@ def _run_trial(
             bottle_state["orientation_wxyz"],
             dtype=np.float64,
         )
-        from isaacsim.core.utils.rotations import quats_to_rot_matrices
+        from isaacsim.core.utils.numpy.rotations import quats_to_rot_matrices
 
         pose[:3, :3] = quats_to_rot_matrices(orientation)
         pose[:3, 3] = position
         axis_a = pose[:3, :3] @ axis_a_local + position
         axis_b = pose[:3, :3] @ axis_b_local + position
+        left_center, _ = get_world_pose(
+            config["robot"]["left_finger_collider"],
+        )
+        right_center, _ = get_world_pose(
+            config["robot"]["right_finger_collider"],
+        )
+        left_center = np.asarray(left_center, dtype=np.float64)
+        right_center = np.asarray(right_center, dtype=np.float64)
+        projection_world_points = {
+            "bottle_a": axis_a.tolist(),
+            "bottle_b": axis_b.tolist(),
+            "left_finger_collider_origin": left_center.tolist(),
+            "right_finger_collider_origin": right_center.tolist(),
+        }
         qpos = np.asarray(
             articulation.get_joint_positions(),
             dtype=np.float64,
@@ -1087,9 +1350,10 @@ def _run_trial(
                         (axis_b - axis_a) / np.linalg.norm(axis_b - axis_a)
                     ).tolist(),
                     "bottom_clearance_m": float(
-                        bounds["minimum"][2] - table_top
+                        collision_bounds["minimum"][2] - table_top
                     ),
-                    "bounds": bounds,
+                    "collision_bounds": collision_bounds,
+                    "visual_bounds": visual_bounds,
                 },
             }
         )
@@ -1101,18 +1365,58 @@ def _run_trial(
             "views": {},
         }
         if capture_video_frames:
-            for view in VIDEO_VIEWS:
+            world.pause()
+            for view in capture_views:
+                capture_camera = cameras[view]["camera"]
+                capture_camera.set_world_pose(
+                    position=np.asarray(
+                        cameras[view]["position_world_m"],
+                        dtype=np.float64,
+                    ),
+                    orientation=np.asarray(
+                        cameras[view]["orientation_wxyz"],
+                        dtype=np.float64,
+                    ),
+                    camera_axes="usd",
+                )
                 output = (
                     trial_root
                     / "frames"
                     / view
                     / f"{int(state['frame']):06d}.png"
                 )
-                width, height = _save_rgba(cameras[view]["camera"], output)
+                width, height = _capture_viewport_png(
+                    app,
+                    viewport,
+                    camera_path=capture_camera.prim_path,
+                    destination=output,
+                )
                 frame_record["views"][view] = {
                     "absolute_path": str(output),
                     "sha256": _sha256(output),
                     "resolution": [width, height],
+                    "projection_world_points": projection_world_points,
+                    "projection_pixels_xy": {
+                        label: pixel.tolist()
+                        for label, pixel in zip(
+                            projection_world_points,
+                            np.asarray(
+                                capture_camera.get_image_coords_from_world_points(
+                                    np.asarray(
+                                        list(projection_world_points.values()),
+                                        dtype=np.float64,
+                                    )
+                                ),
+                                dtype=np.float64,
+                            ),
+                            strict=True,
+                        )
+                        if np.isfinite(pixel).all()
+                    },
+                    "finger_center_method": (
+                        "COLLIDER_PRIM_WORLD_XFORM_ORIGIN_"
+                        "NOT_EFFECTIVE_CONTACT_REGION"
+                    ),
                 }
         frame_manifest.append(frame_record)
 
@@ -1130,62 +1434,67 @@ def _run_trial(
         capture_step("support_settle", target=command)
 
     waypoints = profile["kinematics"]["ik"]["waypoints"]
+    episode_records = profile["kinematics"]["episode_fk"]["records"]
+    episode_arm_commands = np.asarray(
+        [record["action_arm_6d"] for record in episode_records],
+        dtype=np.float64,
+    )
+    episode_arm_delta_limits = np.max(
+        np.abs(np.diff(episode_arm_commands, axis=0)),
+        axis=0,
+    )
+
+    def execute_arm_waypoint(
+        phase: str,
+        waypoint: Mapping[str, Any],
+    ) -> None:
+        start = command.copy()
+        goal = command.copy()
+        goal[:6] = waypoint["joint_positions_rad"]
+        steps = derive_interpolation_steps(
+            start[:6],
+            goal[:6],
+            episode_arm_delta_limits,
+        )
+        for step in range(1, steps + 1):
+            target = start.copy()
+            target[:6] = (
+                start[:6] + (step / steps) * (goal[:6] - start[:6])
+            )
+            capture_step(phase, target=target)
+
     for waypoint in [
         item for item in waypoints if item["phase"] == "move_to_pregrasp"
     ]:
-        target = command.copy()
-        target[:6] = waypoint["joint_positions_rad"]
-        target[left_index] = float(config["robot"]["open_targets_m"][0])
-        target[right_index] = float(config["robot"]["open_targets_m"][1])
-        capture_step("open_pregrasp", target=target)
+        execute_arm_waypoint("open_pregrasp", waypoint)
 
     for waypoint in [
         item for item in waypoints if item["phase"] == "vertical_descent"
     ]:
-        target = command.copy()
-        target[:6] = waypoint["joint_positions_rad"]
-        capture_step("vertical_descent", target=target)
+        execute_arm_waypoint("vertical_descent", waypoint)
 
     capture_step("bilateral_contact", target=command)
-    close_start = command.copy()
-    close_steps = math.ceil(
-        abs(
-            float(config["robot"]["open_targets_m"][0])
-            - float(config["robot"]["closed_targets_m"][0])
-        )
-        / (1.0 * dt)
+    lift_detection = profile["kinematics"]["lift_detection"]
+    left_close_targets = episode_gripper_targets(
+        episode_records,
+        start_frame=int(lift_detection["close_command_start_frame"]),
+        end_frame=int(lift_detection["lift_onset_frame"]),
+        lower_m=float(config["robot"]["closed_targets_m"][0]),
+        scale_m=float(config["robot"]["open_targets_m"][0])
+        - float(config["robot"]["closed_targets_m"][0]),
     )
-    close_steps = max(close_steps, 1)
-    for step in range(1, close_steps + 1):
-        alpha = _smoothstep(step / close_steps)
-        target = close_start.copy()
-        target[left_index] = (
-            float(config["robot"]["open_targets_m"][0])
-            + alpha
-            * (
-                float(config["robot"]["closed_targets_m"][0])
-                - float(config["robot"]["open_targets_m"][0])
-            )
-        )
-        target[right_index] = (
-            float(config["robot"]["open_targets_m"][1])
-            + alpha
-            * (
-                float(config["robot"]["closed_targets_m"][1])
-                - float(config["robot"]["open_targets_m"][1])
-            )
-        )
+    for left_target in left_close_targets:
+        target = command.copy()
+        target[left_index] = left_target
+        target[right_index] = -left_target
         capture_step("closing_preload", target=target)
 
-    for _ in range(int(config["physics"]["frequency_hz"] // 4)):
-        capture_step("bilateral_contact", target=command)
+    capture_step("bilateral_contact", target=command)
 
     for waypoint in [
         item for item in waypoints if item["phase"] == "vertical_lift"
     ]:
-        target = command.copy()
-        target[:6] = waypoint["joint_positions_rad"]
-        capture_step("vertical_lift", target=target)
+        execute_arm_waypoint("vertical_lift", waypoint)
 
     capture_step("support_clear", target=command)
     for _ in range(int(config["physics"]["hold_steps"])):
@@ -1194,6 +1503,14 @@ def _run_trial(
     manifest_path = trial_root / "frame_manifest.json"
     video_metadata: dict[str, Any] = {
         "capture_enabled": capture_video_frames,
+        "capture_method": (
+            (
+                "LOCAL_OMNIHYDRA_ACTIVE_VIEWPORT_PAUSED_TWO_VIEW_"
+                f"{capture_profile.upper()}"
+            )
+            if capture_video_frames
+            else "DISABLED"
+        ),
         "frame_manifest": str(manifest_path),
         "runtime_trial_signature": "PENDING_TRACE_FINALIZATION",
         "first_physics_frame": (
@@ -1207,9 +1524,11 @@ def _run_trial(
         "render_fps": int(config["physics"]["frequency_hz"]),
         "views": {
             view: {
-                key: value
-                for key, value in cameras[view].items()
-                if key != "camera"
+                **{
+                    key: value
+                    for key, value in cameras[view].items()
+                    if key != "camera"
+                },
             }
             for view in cameras
         },
@@ -1274,7 +1593,7 @@ def _run_trial(
         item
         for item in telemetry
         if item["phase"] in {"vertical_lift", "support_clear", "hold_end"}
-        and float(item["bottle"]["bottom_clearance_m"]) > 0.001
+        and float(item["bottle"]["bottom_clearance_m"]) > 0.0
         and int(item["frame"]) not in support_frames
     ]
     left_support = bool(clear_records)
@@ -1372,19 +1691,115 @@ def _run_trial(
     rotation_escape = bool(contact_lost and maximum_angular > 3.0)
     numerical_ejection = bool(maximum_speed > 5.0 or maximum_angular > 50.0)
 
-    placement_axis = profile["kinematics"]["placement"]["bottle_axis"]
-    initial_axis = np.asarray(placement_axis["unit_world"], dtype=np.float64)
+    settled_axis = np.asarray(
+        settle_samples[-1]["bottle"]["axis_world"],
+        dtype=np.float64,
+    )
     axis_vertical_angle = math.degrees(
         math.acos(
             float(
                 np.clip(
-                    abs(np.dot(initial_axis, np.asarray([0.0, 0.0, 1.0]))),
+                    abs(
+                        np.dot(
+                            settled_axis,
+                            np.asarray([0.0, 0.0, 1.0]),
+                        )
+                    ),
                     -1.0,
                     1.0,
                 )
             )
         )
     )
+    contact_reference = max(
+        (
+            item
+            for item in telemetry
+            if int(item["frame"]) < lift_start_frame
+        ),
+        key=lambda item: int(item["frame"]),
+    )
+    contact_axis = np.asarray(
+        contact_reference["bottle"]["axis_world"],
+        dtype=np.float64,
+    )
+    contact_a = np.asarray(
+        contact_reference["bottle"]["a_world_m"],
+        dtype=np.float64,
+    )
+
+    def weighted_contact_center(
+        samples: Sequence[Mapping[str, Any]],
+    ) -> np.ndarray | None:
+        if not samples:
+            return None
+        positions = np.asarray(
+            [sample["position_world_m"] for sample in samples],
+            dtype=np.float64,
+        )
+        weights = np.asarray(
+            [max(float(sample["impulse_ns"]), 0.0) for sample in samples],
+            dtype=np.float64,
+        )
+        if float(np.sum(weights)) <= 0.0:
+            return np.mean(positions, axis=0)
+        return np.average(positions, axis=0, weights=weights)
+
+    left_center = weighted_contact_center(prelift_left)
+    right_center = weighted_contact_center(prelift_right)
+    body_interval = [
+        float(value) for value in config["bottle"]["body_interval_m"]
+    ]
+    contact_coordinates = (
+        [
+            float(np.dot(left_center - contact_a, contact_axis)),
+            float(np.dot(right_center - contact_a, contact_axis)),
+        ]
+        if left_center is not None and right_center is not None
+        else []
+    )
+    contact_points_in_body_interval = bool(
+        contact_coordinates
+        and all(
+            body_interval[0] <= value <= body_interval[1]
+            for value in contact_coordinates
+        )
+    )
+    gripper_contact_angle = None
+    gripper_axis_perpendicular_pass = bool(
+        profile["kinematics"]["placement"]["geometry_gate"]["status"]
+        == "PASS"
+    )
+    if left_center is not None and right_center is not None:
+        gripper_line = right_center - left_center
+        gripper_line[2] = 0.0
+        axis_xy = contact_axis.copy()
+        axis_xy[2] = 0.0
+        if np.linalg.norm(gripper_line) > 0.0 and np.linalg.norm(axis_xy) > 0.0:
+            cosine = abs(
+                float(
+                    np.dot(gripper_line, axis_xy)
+                    / (
+                        np.linalg.norm(gripper_line)
+                        * np.linalg.norm(axis_xy)
+                    )
+                )
+            )
+            gripper_contact_angle = math.degrees(
+                math.acos(float(np.clip(cosine, -1.0, 1.0)))
+            )
+            gripper_axis_perpendicular_pass = abs(
+                gripper_contact_angle
+                - float(
+                    config["geometry_gates"][
+                        "gripper_line_to_axis_target_deg"
+                    ]
+                )
+            ) <= float(
+                config["geometry_gates"][
+                    "gripper_line_to_axis_tolerance_deg"
+                ]
+            )
     trial_data = {
         "trial_index": trial_index,
         "fresh_world_reset": True,
@@ -1397,8 +1812,7 @@ def _run_trial(
             ]
         ),
         "gripper_axis_perpendicular_pass": (
-            profile["kinematics"]["placement"]["geometry_gate"]["status"]
-            == "PASS"
+            gripper_axis_perpendicular_pass
         ),
         "vertical_descent_pass": all(
             item["status"] == "PASS"
@@ -1408,9 +1822,7 @@ def _run_trial(
         "ik_reachable": runtime_ik["status"] == "PASS",
         "left_physical_contact_before_lift": bool(prelift_left),
         "right_physical_contact_before_lift": bool(prelift_right),
-        "contact_points_in_body_interval": bool(
-            prelift_left and prelift_right
-        ),
+        "contact_points_in_body_interval": contact_points_in_body_interval,
         "bottle_left_support": left_support,
         "bilateral_contact_through_hold": bool(hold_left and hold_right),
         "hold_drop_m": hold_drop,
@@ -1443,6 +1855,18 @@ def _run_trial(
         ],
         "runtime_seconds": time.perf_counter() - started,
         "artifact_absolute_path": str(trial_root),
+        "contact_geometry": {
+            "left_impulse_weighted_center_world_m": (
+                left_center.tolist() if left_center is not None else None
+            ),
+            "right_impulse_weighted_center_world_m": (
+                right_center.tolist() if right_center is not None else None
+            ),
+            "bottle_body_coordinates_m": contact_coordinates,
+            "body_interval_m": body_interval,
+            "gripper_line_to_axis_deg": gripper_contact_angle,
+            "settled_axis_to_table_normal_deg": axis_vertical_angle,
+        },
     }
     trial_data["parent_" + "attachment_used"] = False
     evaluation = evaluate_horizontal_trial(trial_data)
@@ -1453,7 +1877,7 @@ def _run_trial(
         {
             "schema_version": 1,
             "runtime_trial_signature": signature,
-            "views": list(VIDEO_VIEWS),
+            "views": list(capture_views),
             "records": frame_manifest,
         },
     )

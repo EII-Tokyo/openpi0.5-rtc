@@ -13,6 +13,8 @@ from tools.aloha1_mapping.task7b2_horizontal_grasp import canonical_horizontal_s
 from tools.aloha1_mapping.task7b2_horizontal_grasp import evaluate_horizontal_trial
 from tools.aloha1_mapping.task7b2_horizontal_grasp import summarize_horizontal_trials
 from tools.probe_aloha1_task7b2_horizontal_kinematics import detect_lift_onset
+from tools.validate_aloha1_task7b2_horizontal_grasp import derive_interpolation_steps
+from tools.validate_aloha1_task7b2_horizontal_grasp import episode_gripper_targets
 
 ROOT = Path(__file__).resolve().parents[2]
 CONFIG = ROOT / "configs/aloha1_task7b2_horizontal_grasp.yaml"
@@ -558,9 +560,50 @@ def test_horizontal_runtime_constructs_simulation_app_before_isaac_imports() -> 
 def test_horizontal_runtime_requires_complete_two_view_frame_streams() -> None:
     source = RUNTIME_SCRIPT.read_text(encoding="utf-8")
     assert 'VIDEO_VIEWS = ("overview", "gripper_closeup")' in source
+    assert 'prim_path="/World/Task7B2HorizontalCameras/capture_camera"' in source
+    assert "capture_camera.set_world_pose(" in source
     assert '"missing_physics_frames"' in source
     assert '"phase_frame_ranges"' in source
     assert '"camera_world_matrix"' in source
     assert '"render_fps"' in source
     assert '"first_physics_frame"' in source
     assert '"last_physics_frame"' in source
+
+
+def test_horizontal_runtime_supports_true_top_and_side_evidence_profile() -> None:
+    source = RUNTIME_SCRIPT.read_text(encoding="utf-8")
+    assert 'SCREENSHOT_VIEWS = ("true_top", "side")' in source
+    assert '"--capture-profile"' in source
+    assert '"screenshots"' in source
+    assert '"up_world": np.asarray([0.0, 1.0, 0.0]' in source
+    assert "get_image_coords_from_world_points" in source
+    assert '"projection_world_points"' in source
+    assert '"projection_pixels_xy"' in source
+
+
+def test_runtime_time_scaling_uses_episode_command_delta_envelope() -> None:
+    start = np.zeros(3, dtype=np.float64)
+    end = np.asarray([0.10, 0.02, -0.03], dtype=np.float64)
+    episode_delta = np.asarray([0.02, 0.01, 0.01], dtype=np.float64)
+
+    assert derive_interpolation_steps(start, end, episode_delta) == 5
+
+
+def test_runtime_gripper_close_replays_episode_action_mapping() -> None:
+    records = [
+        {"frame": 221, "gripper_action": 0.95},
+        {"frame": 222, "gripper_action": 0.90},
+        {"frame": 223, "gripper_action": 0.50},
+        {"frame": 234, "gripper_action": 0.05},
+        {"frame": 235, "gripper_action": 0.04},
+    ]
+
+    targets = episode_gripper_targets(
+        records,
+        start_frame=222,
+        end_frame=234,
+        lower_m=0.021,
+        scale_m=0.036,
+    )
+
+    assert targets == pytest.approx([0.0534, 0.039, 0.0228])
