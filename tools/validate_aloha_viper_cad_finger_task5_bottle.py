@@ -31,6 +31,7 @@ import tools.validate_aloha1_gripper as baseline
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG = ROOT / "configs/aloha1_cad_finger_task5_bottle.yaml"
+TASK7B_CONFIG = ROOT / "configs/aloha1_task7b_bottle_geometry_ab.yaml"
 OUTPUT = (
     ROOT
     / "reports/aloha1_mapping/"
@@ -148,6 +149,135 @@ def _resolve_profile(config_path: Path) -> dict[str, Any]:
     }
 
 
+def _resolve_task7b_bottle_profile(profile_name: str) -> dict[str, Any]:
+    config_path = TASK7B_CONFIG.resolve(strict=True)
+    document = yaml.safe_load(config_path.read_text(encoding="utf-8"))
+    causal_profile = document["profiles"][profile_name]
+    frozen_sources = {
+        name: {
+            "path": (ROOT / record["path"]).resolve(strict=True),
+            "sha256": str(record["sha256"]),
+        }
+        for name, record in document["frozen_inputs"].items()
+        if "path" in record and "sha256" in record
+    }
+    for name, record in frozen_sources.items():
+        if _sha256(record["path"]) != record["sha256"]:
+            raise RuntimeError(f"Task 7B frozen input hash mismatch: {name}")
+    asset_path = causal_profile["geometry"]["asset_path"]
+    bottle_asset = (
+        (ROOT / asset_path).resolve(strict=True)
+        if asset_path is not None
+        else None
+    )
+    return {
+        "name": profile_name,
+        "config_path": config_path,
+        "config_sha256": _sha256(config_path),
+        "document": document,
+        "causal_profile": causal_profile,
+        "bottle_asset": bottle_asset,
+        "frozen_sources": frozen_sources,
+    }
+
+
+def _validate_task7b_causal_profile(
+    task5_config: Mapping[str, Any],
+    causal_profile: Mapping[str, Any],
+) -> None:
+    frozen = task5_config["frozen"]
+    motion = task5_config["motion"]
+    expected_actual = {
+        "robot.name": (causal_profile["robot"]["name"], frozen["robot"]),
+        "robot.collider": (
+            causal_profile["robot"]["collider"],
+            frozen["collider"],
+        ),
+        "physics.bottle_mass_kg": (
+            causal_profile["physics"]["bottle_mass_kg"],
+            frozen["bottle_mass_kg"],
+        ),
+        "physics.friction": (
+            causal_profile["physics"]["friction"],
+            frozen["friction"],
+        ),
+        "physics.restitution": (
+            causal_profile["physics"]["restitution"],
+            frozen["restitution"],
+        ),
+        "physics.physics_frequency_hz": (
+            causal_profile["physics"]["physics_frequency_hz"],
+            frozen["physics_frequency_hz"],
+        ),
+        "physics.hold_interval_s": (
+            causal_profile["physics"]["hold_interval_s"],
+            frozen["hold_interval_s"],
+        ),
+        "physics.hold_steps": (
+            causal_profile["physics"]["hold_steps"],
+            frozen["hold_steps"],
+        ),
+        "physics.drop_gate_m": (
+            causal_profile["physics"]["drop_gate_m"],
+            frozen["drop_gate_m"],
+        ),
+        "physics.solve_articulation_contact_last": (
+            causal_profile["physics"]["solve_articulation_contact_last"],
+            frozen["solve_articulation_contact_last"],
+        ),
+        "physics.self_collision": (
+            causal_profile["physics"]["self_collision"],
+            frozen["self_collision"],
+        ),
+        "control.drive_profile": (
+            causal_profile["control"]["drive_profile"],
+            frozen["drive_profile"],
+        ),
+        "control.finger_max_force_n": (
+            causal_profile["control"]["finger_max_force_n"],
+            frozen["finger_max_force_n"],
+        ),
+        "control.mode": (
+            causal_profile["control"]["mode"],
+            frozen["control"],
+        ),
+        "control.open_targets_m": (
+            causal_profile["control"]["open_targets_m"],
+            motion["open_targets_m"],
+        ),
+        "control.closed_targets_m": (
+            causal_profile["control"]["closed_targets_m"],
+            motion["closed_targets_m"],
+        ),
+        "control.settle_steps": (
+            causal_profile["control"]["settle_steps"],
+            motion["settle_steps"],
+        ),
+        "control.open_steps": (
+            causal_profile["control"]["open_steps"],
+            motion["open_steps"],
+        ),
+        "control.close_steps": (
+            causal_profile["control"]["close_steps"],
+            motion["close_steps"],
+        ),
+        "control.fixed_contact_steps": (
+            causal_profile["control"]["fixed_contact_steps"],
+            motion["fixed_contact_steps"],
+        ),
+    }
+    mismatches = {
+        name: {"task7b": pair[0], "task5": pair[1]}
+        for name, pair in expected_actual.items()
+        if pair[0] != pair[1]
+    }
+    if mismatches:
+        raise RuntimeError(
+            "Task 7B causal profile diverges from Task 5 baseline: "
+            + json.dumps(mismatches, sort_keys=True)
+        )
+
+
 def _material_readback(stage: Any, path: str) -> dict[str, Any]:
     from pxr import UsdPhysics
 
@@ -180,24 +310,152 @@ def _create_material(
     return material
 
 
-def _bind_material(prim: Any, material: Any) -> None:
+def _bind_material(
+    prim: Any,
+    material: Any,
+    *,
+    stronger_than_descendants: bool = False,
+) -> None:
     from pxr import UsdShade
 
     binding = UsdShade.MaterialBindingAPI.Apply(prim)
     binding.Bind(
         material,
-        UsdShade.Tokens.weakerThanDescendants,
-        "physics",
+        bindingStrength=(
+            UsdShade.Tokens.strongerThanDescendants
+            if stronger_than_descendants
+            else UsdShade.Tokens.weakerThanDescendants
+        ),
+        materialPurpose="physics",
     )
+
+
+def _bound_physics_material_readback(prim: Any) -> dict[str, Any]:
+    from pxr import UsdShade
+
+    material, relationship = UsdShade.MaterialBindingAPI(
+        prim
+    ).ComputeBoundMaterial("physics")
+    material_path = (
+        str(material.GetPath()) if material.GetPrim().IsValid() else None
+    )
+    relationship_path = (
+        str(relationship.GetPath())
+        if relationship and relationship.IsValid()
+        else None
+    )
+    strength = (
+        str(
+            UsdShade.MaterialBindingAPI.GetMaterialBindingStrength(
+                relationship
+            )
+        )
+        if relationship and relationship.IsValid()
+        else None
+    )
+    return {
+        "prim_path": str(prim.GetPath()),
+        "material_path": material_path,
+        "relationship_path": relationship_path,
+        "binding_strength": strength,
+    }
+
+
+def _create_bottle_geometry(
+    stage: Any,
+    bottle_profile: Mapping[str, Any],
+) -> tuple[Any, dict[str, Any]]:
+    from pxr import Gf
+    from pxr import Usd
+    from pxr import UsdGeom
+    from pxr import UsdPhysics
+
+    profile_name = str(bottle_profile["name"])
+    causal_profile = bottle_profile["causal_profile"]
+    geometry = causal_profile["geometry"]
+    dimensions = [float(value) for value in geometry["dimensions_m"]]
+    if profile_name == "procedural_cylinder":
+        bottle = UsdGeom.Cylinder.Define(stage, BOTTLE_PATH)
+        bottle.CreateAxisAttr(UsdGeom.Tokens.z)
+        bottle.CreateRadiusAttr(dimensions[0] / 2.0)
+        bottle.CreateHeightAttr(dimensions[2])
+        bottle.CreateDisplayColorAttr([Gf.Vec3f(0.25, 0.85, 0.30)])
+        bottle.AddTranslateOp().Set(Gf.Vec3d(0.0, 0.0, 10.0))
+        UsdPhysics.CollisionAPI.Apply(bottle.GetPrim())
+        bottle_prim = bottle.GetPrim()
+        reference_asset = None
+        reference_prim = None
+    elif profile_name == "project_bottle500":
+        bottle_asset = bottle_profile["bottle_asset"]
+        if bottle_asset is None:
+            raise RuntimeError("project Bottle500 asset path is missing")
+        if _sha256(bottle_asset) != geometry["asset_sha256"]:
+            raise RuntimeError("project Bottle500 asset hash mismatch")
+        bottle = UsdGeom.Xform.Define(stage, BOTTLE_PATH)
+        added = bottle.GetPrim().GetReferences().AddReference(
+            str(bottle_asset),
+            str(geometry["reference_prim"]),
+        )
+        if not added:
+            raise RuntimeError("failed to add explicit /Bottle500 reference")
+        bottle.AddTranslateOp().Set(Gf.Vec3d(0.0, 0.0, 10.0))
+        bottle_prim = bottle.GetPrim()
+        reference_asset = str(bottle_asset)
+        reference_prim = str(geometry["reference_prim"])
+    else:
+        raise ValueError(f"unsupported bottle profile: {profile_name}")
+
+    collision_prims = [
+        prim
+        for prim in Usd.PrimRange(bottle_prim)
+        if prim.HasAPI(UsdPhysics.CollisionAPI)
+    ]
+    mesh_prims = [
+        prim for prim in Usd.PrimRange(bottle_prim) if prim.IsA(UsdGeom.Mesh)
+    ]
+    expected_collision_count = int(geometry["collision_prim_count"])
+    if len(collision_prims) != expected_collision_count:
+        raise RuntimeError(
+            "bottle collision count mismatch: "
+            f"{len(collision_prims)} != {expected_collision_count}"
+        )
+    bbox = UsdGeom.BBoxCache(
+        Usd.TimeCode.Default(),
+        [UsdGeom.Tokens.default_, UsdGeom.Tokens.render],
+        useExtentsHint=True,
+    ).ComputeWorldBound(bottle_prim).ComputeAlignedRange()
+    minimum = [float(value) for value in bbox.GetMin()]
+    maximum = [float(value) for value in bbox.GetMax()]
+    if not all(math.isfinite(value) for value in minimum + maximum):
+        raise RuntimeError("bottle AABB is not finite")
+    if not all(
+        high > low
+        for low, high in zip(minimum, maximum, strict=True)
+    ):
+        raise RuntimeError("bottle AABB is empty")
+    bottle_asset_readback = {
+        "provider": profile_name,
+        "reference_asset": reference_asset,
+        "reference_prim": reference_prim,
+        "collision_prim_count": len(collision_prims),
+        "collision_prim_paths": [
+            str(prim.GetPath()) for prim in collision_prims
+        ],
+        "mesh_prim_count": len(mesh_prims),
+        "mesh_prim_paths": [str(prim.GetPath()) for prim in mesh_prims],
+        "aabb_minimum_m": minimum,
+        "aabb_maximum_m": maximum,
+        "dimensions_m": dimensions,
+    }
+    return bottle_prim, bottle_asset_readback
 
 
 def _create_session_physics(
     stage: Any,
     frozen: Mapping[str, Any],
+    bottle_profile: Mapping[str, Any],
 ) -> tuple[Any, dict[str, Any]]:
-    from pxr import Gf
     from pxr import PhysxSchema
-    from pxr import UsdGeom
     from pxr import UsdPhysics
 
     stage.DefinePrim(MATERIAL_ROOT, "Scope")
@@ -235,34 +493,74 @@ def _create_session_physics(
         report_api.CreateThresholdAttr().Set(0.0)
         report_bodies.append(path)
 
-    bottle = UsdGeom.Cylinder.Define(stage, BOTTLE_PATH)
-    bottle.CreateAxisAttr(UsdGeom.Tokens.z)
-    bottle.CreateRadiusAttr(float(frozen["bottle_diameter_m"]) / 2.0)
-    bottle.CreateHeightAttr(float(frozen["bottle_height_m"]))
-    bottle.CreateDisplayColorAttr([Gf.Vec3f(0.25, 0.85, 0.30)])
-    bottle.AddTranslateOp().Set(Gf.Vec3d(0.0, 0.0, 10.0))
-    UsdPhysics.CollisionAPI.Apply(bottle.GetPrim())
-    rigid = UsdPhysics.RigidBodyAPI.Apply(bottle.GetPrim())
+    bottle_prim, bottle_asset_readback = _create_bottle_geometry(
+        stage,
+        bottle_profile,
+    )
+    rigid = (
+        UsdPhysics.RigidBodyAPI(bottle_prim)
+        if bottle_prim.HasAPI(UsdPhysics.RigidBodyAPI)
+        else UsdPhysics.RigidBodyAPI.Apply(bottle_prim)
+    )
     rigid.CreateKinematicEnabledAttr(True)  # noqa: FBT003
-    mass = UsdPhysics.MassAPI.Apply(bottle.GetPrim())
+    mass = (
+        UsdPhysics.MassAPI(bottle_prim)
+        if bottle_prim.HasAPI(UsdPhysics.MassAPI)
+        else UsdPhysics.MassAPI.Apply(bottle_prim)
+    )
     mass.CreateMassAttr(float(frozen["bottle_mass_kg"]))
-    bottle_report = PhysxSchema.PhysxContactReportAPI.Apply(bottle.GetPrim())
+    bottle_mass_override_readback_kg = float(mass.GetMassAttr().Get())
+    if not math.isclose(
+        bottle_mass_override_readback_kg,
+        float(frozen["bottle_mass_kg"]),
+        rel_tol=0.0,
+        abs_tol=1e-8,
+    ):
+        raise RuntimeError("bottle mass override readback mismatch")
+    bottle_report = PhysxSchema.PhysxContactReportAPI.Apply(bottle_prim)
     bottle_report.CreateThresholdAttr().Set(0.0)
-    _bind_material(bottle.GetPrim(), bottle_material)
-    return bottle.GetPrim(), {
+    _bind_material(
+        bottle_prim,
+        bottle_material,
+        stronger_than_descendants=(
+            bottle_profile["name"] == "project_bottle500"
+        ),
+    )
+    bottle_colliders = [
+        stage.GetPrimAtPath(path)
+        for path in bottle_asset_readback["collision_prim_paths"]
+    ]
+    bottle_material_bindings = [
+        _bound_physics_material_readback(prim)
+        for prim in bottle_colliders
+    ]
+    if any(
+        record["material_path"] != bottle_material_path
+        for record in bottle_material_bindings
+    ):
+        raise RuntimeError("Task 7B bottle material did not bind effectively")
+    return bottle_prim, {
         "bottle": {
             "path": BOTTLE_PATH,
-            "shape": "cylinder",
+            "shape": bottle_profile["name"],
             "axis": "Z",
-            "diameter_m": float(frozen["bottle_diameter_m"]),
-            "height_m": float(frozen["bottle_height_m"]),
             "mass_kg": float(frozen["bottle_mass_kg"]),
+            "bottle_mass_override_readback_kg": (
+                bottle_mass_override_readback_kg
+            ),
             "kinematic_initial": True,
         },
+        "bottle_asset_readback": bottle_asset_readback,
         "materials": {
             "finger": _material_readback(stage, finger_material_path),
             "bottle": _material_readback(stage, bottle_material_path),
-            "binding_strength": "weakerThanDescendants",
+            "finger_binding_strength": "weakerThanDescendants",
+            "bottle_binding_strength": (
+                "strongerThanDescendants"
+                if bottle_profile["name"] == "project_bottle500"
+                else "weakerThanDescendants"
+            ),
+            "bottle_effective_bindings": bottle_material_bindings,
             "combine_mode": "SCHEMA_DEFAULT_UNAUTHORED",
         },
         "finger_material_bound_to": bound,
@@ -766,6 +1064,7 @@ def _run_trial(
     *,
     app: Any,
     profile: Mapping[str, Any],
+    bottle_profile: Mapping[str, Any],
     trial_index: int,
     screenshot_root: Path | None,
 ) -> dict[str, Any]:
@@ -805,7 +1104,11 @@ def _run_trial(
         hidden_visuals.extend(
             _set_view_visibility(stage, "base_oblique")
         )
-        bottle_prim, session = _create_session_physics(stage, frozen)
+        bottle_prim, session = _create_session_physics(
+            stage,
+            frozen,
+            bottle_profile,
+        )
         dome = UsdLux.DomeLight.Define(
             stage, "/workcell/Task5BottleSession/Dome"
         )
@@ -1300,6 +1603,8 @@ def _run_trial(
     evaluation = evaluate_bottle_trial(metrics)
     failure_mode = classify_hold_failure_mode(metrics)
     trial = {
+        "bottle_profile": bottle_profile["name"],
+        "causal_profile": bottle_profile["causal_profile"],
         "schema_version": 1,
         "status": evaluation["status"],
         "trial_index": trial_index,
@@ -1422,6 +1727,11 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--report", type=Path, default=OUTPUT)
     parser.add_argument("--trials", type=Path, default=TRIAL_OUTPUT)
     parser.add_argument("--screenshot-root", type=Path, default=SCREENSHOT_ROOT)
+    parser.add_argument(
+        "--bottle-profile",
+        choices=("procedural_cylinder", "project_bottle500"),
+        default="procedural_cylinder",
+    )
     parser.add_argument("--repeats", type=int)
     parser.add_argument("--smoke", action="store_true")
     return parser.parse_args()
@@ -1432,6 +1742,11 @@ def main() -> int:
     config_path = args.config.resolve(strict=True)
     profile = _resolve_profile(config_path)
     config = profile["document"]
+    bottle_profile = _resolve_task7b_bottle_profile(args.bottle_profile)
+    _validate_task7b_causal_profile(
+        config,
+        bottle_profile["causal_profile"],
+    )
     required = int(
         config["experiment"][
             "smoke_repeats" if args.smoke else "acceptance_repeats"
@@ -1470,6 +1785,7 @@ def main() -> int:
             trial = _run_trial(
                 app=app,
                 profile=profile,
+                bottle_profile=bottle_profile,
                 trial_index=trial_index,
                 screenshot_root=(
                     screenshot_root if trial_index == 0 else None
@@ -1501,13 +1817,34 @@ def main() -> int:
             },
             artifact_root=screenshot_root,
         )
+        task7b_hashes_before = {
+            "task7b_config": bottle_profile["config_sha256"],
+            **{
+                f"task7b_{name}": record["sha256"]
+                for name, record in bottle_profile[
+                    "frozen_sources"
+                ].items()
+            },
+        }
+        hashes_before = {
+            **profile["hashes"],
+            **task7b_hashes_before,
+        }
         hashes_after = {
+            "config": _sha256(config_path),
             "diagnostic_stage": _sha256(profile["stage"]),
             "parent_stage": _sha256(profile["parent"]),
             "approved_source_stage": _sha256(profile["source"]),
+            "task7b_config": _sha256(bottle_profile["config_path"]),
+            **{
+                f"task7b_{name}": _sha256(record["path"])
+                for name, record in bottle_profile[
+                    "frozen_sources"
+                ].items()
+            },
         }
         protected_immutable = all(
-            hashes_after[name] == profile["hashes"][name]
+            hashes_after[name] == hashes_before[name]
             for name in hashes_after
         )
         report = {
@@ -1521,11 +1858,20 @@ def main() -> int:
                 if args.smoke
                 else summary["status"]
             ),
-            "scope": "supplier-CAD follower-left 20 g bottle Task 5",
+            "scope": (
+                "supplier-CAD follower-left 20 g bottle "
+                "Task 7B geometry A/B"
+            ),
             "run_mode": "NON_ACCEPTANCE_SMOKE" if args.smoke else "ACCEPTANCE",
+            "bottle_profile": bottle_profile["name"],
+            "causal_profile": bottle_profile["causal_profile"],
             "config": {
                 "absolute_path": str(config_path),
                 "sha256": profile["hashes"]["config"],
+            },
+            "task7b_config": {
+                "absolute_path": str(bottle_profile["config_path"]),
+                "sha256": bottle_profile["config_sha256"],
             },
             "stages": {
                 "approved_source": {
@@ -1542,6 +1888,19 @@ def main() -> int:
                     "absolute_path": str(profile["stage"]),
                     "sha256": profile["hashes"]["diagnostic_stage"],
                 },
+                "project_bottle_asset": (
+                    {
+                        "absolute_path": str(
+                            bottle_profile["bottle_asset"]
+                        ),
+                        "sha256": bottle_profile["causal_profile"][
+                            "geometry"
+                        ]["asset_sha256"],
+                        "reference_prim": "/Bottle500",
+                    }
+                    if bottle_profile["bottle_asset"] is not None
+                    else None
+                ),
             },
             "frozen": config["frozen"],
             "summary": summary,
@@ -1550,7 +1909,7 @@ def main() -> int:
             "screenshots": screenshot_manifest,
             "visual_model_review": "PENDING_VISUAL_MODEL_REVIEW",
             "baseline_protection": {
-                "hashes_before": profile["hashes"],
+                "hashes_before": hashes_before,
                 "hashes_after": hashes_after,
                 "protected_assets_immutable": protected_immutable,
                 "source_stage_modified": False,
@@ -1570,6 +1929,8 @@ def main() -> int:
                     "LIFT_TRAJECTORY"
                 ),
                 "task7": "NOT_RUN",
+                "task7a": "UNCHANGED",
+                "task7b": "STATIC_HOLD_GEOMETRY_AB",
                 "task8": "NOT_RUN",
             },
         }

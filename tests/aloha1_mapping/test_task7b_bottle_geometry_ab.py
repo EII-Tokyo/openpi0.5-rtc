@@ -16,6 +16,7 @@ from tools.aloha1_mapping.task7b_bottle_geometry_ab import validate_single_geome
 ROOT = Path(__file__).resolve().parents[2]
 CONFIG = ROOT / "configs/aloha1_task7b_bottle_geometry_ab.yaml"
 COMBINER = ROOT / "tools/validate_aloha1_task7b_bottle_geometry_ab.py"
+RUNTIME = ROOT / "tools/validate_aloha_viper_cad_finger_task5_bottle.py"
 
 
 @pytest.fixture
@@ -146,6 +147,18 @@ def test_markdown_does_not_claim_pickup() -> None:
     assert "PROJECT_BOTTLE_MATCHES_BASELINE" in markdown
     assert "STATIC_FREE_BOTTLE_HOLD_ONLY_NOT_SUPPORT_TO_LIFT_PICKUP" in markdown
     assert "Task 8" in markdown
+
+
+def test_existing_task5_runtime_exposes_bottle_geometry_provider() -> None:
+    source = RUNTIME.read_text(encoding="utf-8")
+    assert "--bottle-profile" in source
+    assert '"procedural_cylinder"' in source
+    assert '"project_bottle500"' in source
+    assert "AddReference" in source
+    assert "UsdShade.Tokens.strongerThanDescendants" in source
+    assert '"bottle_asset_readback"' in source
+    assert '"bottle_mass_override_readback_kg"' in source
+    assert 'default="procedural_cylinder"' in source
 
 
 def test_combiner_writes_40_profiled_trials(tmp_path: Path) -> None:
