@@ -1468,3 +1468,75 @@ scene design is reviewed and approved.
   `z=1.5 cm` is tabletop thickness; `735 mm -> 939 mm -> x=±469.5 mm` is
   approved; bottle must be a parametric visual proxy. A23 Batch 2 may proceed
   independently as visual-only authoring with no collision or physics.
+
+## 2026-07-29 Task 7B.2 Horizontal Bottle500 Dynamic Pickup
+
+- The upright/suspended Task 7B.2 geometry is historical and acceptance
+  ineligible. The active default uses the project Bottle500 horizontally on
+  `user_confirmed_table`, dynamic under gravity, with vertical descent and
+  lift semantics derived from CAD, episode 18 frames `208-244`, and local
+  Isaac 5.1 Lula/FK/IK evidence.
+- Frozen Stage:
+  `/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/aloha1_signal_correspondence_workcell.usda`,
+  SHA-256
+  `d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf`.
+  Post-run protected hashes are unchanged.
+- Fresh-process smoke runtime signature:
+  `4e740e1863c3432b150c193920515bfc7ba6fd1f27316d8c08d97ef201dc59c1`.
+- Physical smoke result: `FAIL`,
+  `gripper_axis_correspondence_failed`.
+  - horizontal bottle axis: PASS;
+  - primarily world `-Z` descent: PASS;
+  - left/right physical contact before lift: PASS;
+  - contact body interval: PASS;
+  - bilateral contact through reported hold: PASS;
+  - impulse-weighted contact-center line to bottle axis:
+    `79.22454424338142°`, outside `90°±3°`;
+  - bottle left table support: FAIL;
+  - hold drop: `0.0007704421877861023 m`;
+  - persistent penetration, numerical ejection, forbidden contact, fixed
+    joint, SurfaceGripper and parent attachment: absent.
+- Do not describe contact persistence or the small drop as a successful
+  pickup. The bottle never cleared the table. The angular gate is the first
+  failure, but it is not yet proven to be the sole root cause.
+- The 20-fresh-reset acceptance is blocked and remains `NOT_RUN`. Do not tune
+  collider, friction, drive, mimic, bottle mass, timestep, solver iterations
+  or lift distance together. The next diagnostic should compare intended
+  contact-region geometry with runtime finger origins and impulse-weighted
+  contact centers one variable at a time.
+- Continuous video evidence:
+  - visual review `PASS`, physical trial `FAIL`;
+  - two synchronized views (`overview`, `gripper_closeup`);
+  - raw and annotated MP4 for each;
+  - `288` frames, `60 fps`, `4.8 s`, no missing physics frames;
+  - all required phase boundaries plus samples at intervals `<=0.5 s` were
+    inspected with the vision model;
+  - attempts 5-15 are preserved with explicit rejection reasons;
+  - attempt 16 is promoted only as
+    `PROMOTED_VISUAL_EVIDENCE_PHYSICAL_FAIL`.
+- Verified videos:
+  - `.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/video_verified/attempt_16_overview_raw_visual_evidence.mp4`;
+  - `.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/video_verified/attempt_16_overview_annotated_visual_evidence.mp4`;
+  - `.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/video_verified/attempt_16_gripper_closeup_raw_visual_evidence.mp4`;
+  - `.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/video_verified/attempt_16_gripper_closeup_annotated_visual_evidence.mp4`.
+- Screenshot evidence:
+  - total gate `PARTIAL`;
+  - seven chronological side-oblique raw/annotated pairs: visual PASS;
+  - seven true-top raw/annotated pairs: PARTIAL because the actual
+    wrist/gripper pose occludes the finger inner surfaces;
+  - A/B, L/R collider origins and exact-frame contact normal arrows come from
+    runtime camera projection readback; L/R origins are explicitly not
+    effective contact-region centers.
+- Durable reports:
+  - `reports/aloha1_mapping/aloha1_task7b2_horizontal_grasp.json`;
+  - `reports/aloha1_mapping/aloha1_task7b2_horizontal_grasp.md`;
+  - `reports/aloha1_mapping/aloha1_task7b2_horizontal_video_review.json`;
+  - `reports/aloha1_mapping/aloha1_task7b2_horizontal_video_review.md`;
+  - `reports/aloha1_mapping/aloha1_task7b2_horizontal_screenshot_review.json`;
+  - `reports/aloha1_mapping/aloha1_task7b2_horizontal_screenshot_review.md`.
+- Final focused verification:
+  `.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/verification/final_focused_pytest.log`,
+  `62 passed`.
+- No source Stage, source USD/CAD, imported asset, final/default collider,
+  renderer default, real robot, ROS, camera calibration, pipe/insertion task,
+  or Task 8 optimization was modified or executed.

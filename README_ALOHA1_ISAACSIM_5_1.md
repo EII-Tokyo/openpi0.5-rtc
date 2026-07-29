@@ -14,6 +14,9 @@ sim-to-real dynamics model and it is not yet accepted for bottle insertion.
 | Task 7A asset-promotion readiness | **PARTIAL** | literal official status remains FAIL: 28 packaging findings, 6 source-geometry boundaries, 2 Isaac 5.1 validator/schema conflicts and 1 INFO record; no finding is suppressed |
 | Task 7A aggregate | **PARTIAL** | runtime control and workcell physics pass, but the current package is not ready for SimReady promotion |
 | Task 7B project-bottle static-hold geometry A/B | **PASS** | cylinder A `20/20`, Bottle500 B `20/20`, both deterministic; only bottle geometry/collider changed; `PROJECT_BOTTLE_MATCHES_BASELINE` |
+| Task 7B.2 horizontal dynamic pickup smoke | **FAIL** | one fresh-reset Bottle500 trial established bilateral contact and held contact, but the actual contact-center line was `79.2245°` rather than `90°±3°` to `AB` and the bottle never left the table; 20-trial acceptance is blocked |
+| Task 7B.2 continuous video evidence | **PASS visual / FAIL physical** | two synchronized 60 fps streams, 288 frames/4.8 s each, no missing physics frames; raw and annotated overview/close-up videos were vision-reviewed; all labels retain `PHYSICAL FAIL` |
+| Task 7B.2 screenshot evidence | **PARTIAL** | seven side-oblique raw/annotated pairs pass; seven true-top pairs remain PARTIAL because the actual wrist/gripper pose occludes the finger inner surfaces; runtime A/B, L/R origins and contact-normal projections are auxiliary |
 | Current signal screenshots | **PASS (visual 24/24 PASS)** | 12 fresh raw + 12 annotated images match Stage SHA-256 `d8182a6c…c788cf`; the controlled OmniHydra screenshot process has zero `protoPath` errors |
 | Hydra protoPath controlled diagnosis | **PASS / `FSD_7_5_1_PRIMARY`** | A=29 errors, B OmniHydra=0, B repeat deterministic, D materialization=0; default delegate restored and final assets unchanged |
 | Source and environment audit | PARTIAL | `reports/aloha1_mapping/source_audit.md`, `source_manifest.json`, `missing_resources.json` |
@@ -1283,6 +1286,72 @@ Machine reports:
 - `reports/aloha1_mapping/aloha_viper_task7_aggregate_validation.md`.
 
 Task 8 remains `NOT_RUN`.
+
+## 2026-07-29 horizontal Bottle500 dynamic pickup
+
+The default pickup geometry is now a table-supported horizontal Bottle500,
+not the historical upright or suspended setup. The run used the frozen
+signal-correspondence Stage at SHA-256
+`d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf`,
+the project-authored `/Bottle500`, the episode 18 frames `208-244`, a
+session-only `0.020 kg` mass override, friction `0.7`, `60 Hz`, and the
+existing supplier-CAD finger/drive configuration. These mass and friction
+values remain `TEMPORARY_UNCALIBRATED`.
+
+The fresh-process smoke trial is a machine `FAIL`, not a successful pickup:
+
+- the CAD bottle axis was horizontal and the commanded approach was
+  primarily world `-Z`;
+- both fingers established physical contact before lift, accepted contacts
+  lay in the CAD body interval, and bilateral contact persisted through the
+  reported hold interval;
+- the impulse-weighted contact-center line was `79.22454424338142°` to the
+  settled bottle axis, outside the `90°±3°` gate;
+- the bottle did not leave the support surface;
+- full hold-interval drop was `0.0007704421877861023 m`;
+- there was no persistent penetration, numerical ejection, forbidden
+  attachment, SurfaceGripper, fixed joint, or parent attachment.
+
+`gripper_axis_correspondence_failed` is the first machine failure
+classification. It is not yet proof that this angular mismatch is the sole
+physical root cause of the missing lift. The next controlled diagnostic must
+compare the intended gripper/contact-region line against runtime finger
+origins and impulse-weighted contact centers without simultaneously changing
+collider, friction, drive, mimic, bottle mass, timestep, solver iterations,
+or lift distance. The 20-trial acceptance run is therefore `NOT_RUN`.
+
+The complete attempt 16 videos were retained only after encoded-MP4 visual
+review at every required phase boundary and at intervals no greater than
+`0.5 s`. Each stream has `288` frames at `60 fps`, duration `4.8 s`, no
+missing physics frames, and the same runtime signature
+`4e740e1863c3432b150c193920515bfc7ba6fd1f27316d8c08d97ef201dc59c1`.
+The video review `PASS` certifies capture quality only; every annotated frame
+states `PHYSICAL FAIL`.
+
+Machine reports:
+
+- `reports/aloha1_mapping/aloha1_task7b2_horizontal_grasp.json`;
+- `reports/aloha1_mapping/aloha1_task7b2_horizontal_grasp.md`;
+- `reports/aloha1_mapping/aloha1_task7b2_horizontal_video_review.json`;
+- `reports/aloha1_mapping/aloha1_task7b2_horizontal_video_review.md`;
+- `reports/aloha1_mapping/aloha1_task7b2_horizontal_screenshot_review.json`;
+- `reports/aloha1_mapping/aloha1_task7b2_horizontal_screenshot_review.md`.
+
+Vision-reviewed raw and annotated MP4 files:
+
+- `/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/video_verified/attempt_16_overview_raw_visual_evidence.mp4`;
+- `/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/video_verified/attempt_16_overview_annotated_visual_evidence.mp4`;
+- `/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/video_verified/attempt_16_gripper_closeup_raw_visual_evidence.mp4`;
+- `/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/video_verified/attempt_16_gripper_closeup_annotated_visual_evidence.mp4`.
+
+The screenshot gate is `PARTIAL`: all seven side-oblique pairs pass, while
+the true-top pairs truthfully retain the actual gripper-pose occlusion.
+Projected L/R markers are collider-prim world origins and are explicitly not
+effective contact-region centers. Contact arrows appear only when an exact
+frame has a physical contact-report sample.
+
+No source USD, source CAD, imported asset, default/final collider, renderer
+default, or protected Stage was modified. Task 8 remains `NOT_RUN`.
 
 ## HARD_BLOCKER and measurement checklist
 
