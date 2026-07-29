@@ -1,0 +1,25 @@
+# Isaac Sim 5.1 Lula descriptor for the Stationary ALOHA 1 follower-left arm.
+# Joint order is copied explicitly from the generated URDF and joint map.
+api_version: 1.0
+
+cspace:
+  - waist
+  - shoulder
+  - elbow
+  - forearm_roll
+  - wrist_angle
+  - wrist_rotate
+
+root_link: follower_left_base_link
+
+default_q: [0.0, -0.96, 1.16, 0.0, -0.3, 0.0]
+
+# The arm-only kinematics model fixes the non-cspace gripper joints at the
+# frozen open diagnostic state. These values are not sim-to-real calibration.
+cspace_to_urdf_rules:
+  - {name: gripper, rule: fixed, value: 0.0}
+  - {name: left_finger, rule: fixed, value: 0.057}
+  - {name: right_finger, rule: fixed, value: -0.057}
+
+composite_task_spaces: []
+collision_spheres: []

@@ -11,7 +11,7 @@ frozen_inputs:
     path: assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/aloha1_signal_correspondence_workcell.usda
     sha256: d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf
     default_prim: /World
-    articulation_path: /World/follower_left/vx300s_left
+    articulation_path: /World/follower_left/vx300s_left/root_joint
     support_path: /World/environment/worldBody/user_confirmed_table
   project_bottle_cad:
     path: assets/bottle_500ml/cad/bottle_500ml.FCStd
@@ -36,7 +36,7 @@ frozen_inputs:
     sha256: f073a21c6a790e738e36085d791482924a82832ca6d80cece04a26353b9fc745
 robot:
   name: follower_left
-  articulation_path: /World/follower_left/vx300s_left
+  articulation_path: /World/follower_left/vx300s_left/root_joint
   base_frame: follower_left_base_link
   end_effector_frame: follower_left_gripper_link
   cspace_joint_order:
