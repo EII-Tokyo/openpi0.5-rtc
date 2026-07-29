@@ -1,0 +1,1660 @@
+{
+  "capture_status": "PASS",
+  "captures": [
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/task7_robot_scope/pose_evidence_attempt5/screenshots_raw/full_arm_oblique_open_maximum_legal_aperture_raw.png",
+      "artifact_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/task7_robot_scope/pose_evidence_attempt5",
+      "camera": {
+        "capture_backend": "omni.kit.viewport.utility.capture_viewport_to_file",
+        "fixed_camera_within_view": true,
+        "orientation_wxyz": [
+          0.7810447812080383,
+          0.4623778164386749,
+          -0.21382221579551697,
+          -0.3611867129802704
+        ],
+        "position_world_m": [
+          -1.7311066389083862,
+          -0.5919559597969055,
+          1.1089227199554443
+        ],
+        "projections": {
+          "left_finger": {
+            "bbox_center_px": [
+              814.3073427355033,
+              146.32876867617182
+            ],
+            "bbox_max_px": [
+              872.082744967113,
+              189.21610270665025
+            ],
+            "bbox_min_px": [
+              756.5319405038937,
+              103.44143464569338
+            ],
+            "finite_point_count": 831,
+            "fully_in_frame": true
+          },
+          "right_finger": {
+            "bbox_center_px": [
+              929.5682056725028,
+              185.2303956067989
+            ],
+            "bbox_max_px": [
+              965.9162452306746,
+              233.76432913242493
+            ],
+            "bbox_min_px": [
+              893.220166114331,
+              136.69646208117288
+            ],
+            "finite_point_count": 831,
+            "fully_in_frame": true
+          },
+          "robot": {
+            "bbox_center_px": [
+              609.0388919788273,
+              484.7346531068347
+            ],
+            "bbox_max_px": [
+              965.9162452306746,
+              866.027871567976
+            ],
+            "bbox_min_px": [
+              252.1615387269801,
+              103.44143464569338
+            ],
+            "finite_point_count": 80622,
+            "fully_in_frame": true
+          }
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "target_world_m": [
+          -0.4464528039097786,
+          0.49999983608722687,
+          0.18397197691956535
+        ],
+        "view": "full_arm_oblique"
+      },
+      "capture_gate_status": "PASS",
+      "capture_name": "full_arm_oblique_open_maximum_legal_aperture",
+      "decoded_pixel_sha256": "b9cfcf1c04e5097cb5ec21320fbf9959feab202da4fe5d3ba64cab59b69252ba",
+      "decoded_rgb_channel_ranges": [
+        224,
+        203,
+        223
+      ],
+      "file_sha256": "028fde7e6c0976702e353c611ddd3c9d063308be05292e306e37346ff873fc51",
+      "file_size_bytes": 268648,
+      "mode": "RGBA",
+      "phase": "task7_certified_left_arm_pose_replay",
+      "relative_path": "screenshots_raw/full_arm_oblique_open_maximum_legal_aperture_raw.png",
+      "resolution": [
+        1280,
+        900
+      ],
+      "simulation": {
+        "acceptance_boundary": "POSE/DIRECTION AUXILIARY EVIDENCE ONLY; RUNTIME NUMERIC REPORT REMAINS AUTHORITATIVE",
+        "all_dof_readback": [
+          4.138846634305082e-06,
+          -0.959773063659668,
+          1.16013503074646,
+          4.243401053827256e-05,
+          -0.29917800426483154,
+          2.455090179864783e-05,
+          0.05679286643862724,
+          -0.056784503161907196
+        ],
+        "capture_method": "CERTIFIED_RUNTIME_READBACK_REPLAY_AUXILIARY",
+        "isaac_sim": "5.1.0.0",
+        "kit": "107.3.3",
+        "phase": "open_maximum_legal_aperture",
+        "physics_steps_added": 0,
+        "physx": "107.3.26",
+        "readback_left_m": 0.05679286643862724,
+        "readback_right_m": -0.056784503161907196,
+        "robot": "follower_left",
+        "source_numeric_report": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_cad_finger_task5_drive_probe_arm_max_force_over_combined.json",
+        "source_numeric_report_sha256": "78438748488d683baaa71aab6209e86ca1d65e1d73ca2dc9b9579eef4c5cfda6",
+        "source_runtime_frame": 1,
+        "source_runtime_time_s": 0.016666666666666666,
+        "source_trajectory": "symmetric_close",
+        "stage_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_arm_max_force_over_combined/aloha_viperx_supplier_cad_arm_max_force_over_combined.usda",
+        "stage_sha256": "5bc3bb5ab7fd7ce8fd3028894394ca5915a278e5a996d016a5868a164593ac40"
+      },
+      "status": "PASS"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/task7_robot_scope/pose_evidence_attempt5/screenshots_raw/full_arm_oblique_partially_closed_raw.png",
+      "artifact_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/task7_robot_scope/pose_evidence_attempt5",
+      "camera": {
+        "capture_backend": "omni.kit.viewport.utility.capture_viewport_to_file",
+        "fixed_camera_within_view": true,
+        "orientation_wxyz": [
+          0.7810447812080383,
+          0.4623778164386749,
+          -0.21382221579551697,
+          -0.3611867129802704
+        ],
+        "position_world_m": [
+          -1.7311066389083862,
+          -0.5919559597969055,
+          1.1089227199554443
+        ],
+        "projections": {
+          "left_finger": {
+            "bbox_center_px": [
+              835.8934865852566,
+              152.9163421789334
+            ],
+            "bbox_max_px": [
+              893.6883818211537,
+              196.0020835247718
+            ],
+            "bbox_min_px": [
+              778.0985913493594,
+              109.83060083309499
+            ],
+            "finite_point_count": 831,
+            "fully_in_frame": true
+          },
+          "right_finger": {
+            "bbox_center_px": [
+              906.9762258998746,
+              177.56332349840767
+            ],
+            "bbox_max_px": [
+              943.571426442344,
+              225.8123217828668
+            ],
+            "bbox_min_px": [
+              870.3810253574054,
+              129.31432521394856
+            ],
+            "finite_point_count": 831,
+            "fully_in_frame": true
+          },
+          "robot": {
+            "bbox_center_px": [
+              597.84299184199,
+              487.9292362005355
+            ],
+            "bbox_max_px": [
+              943.571426442344,
+              866.027871567976
+            ],
+            "bbox_min_px": [
+              252.11455724163622,
+              109.83060083309499
+            ],
+            "finite_point_count": 80622,
+            "fully_in_frame": true
+          }
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "target_world_m": [
+          -0.4464528039097786,
+          0.49999983608722687,
+          0.18397197691956535
+        ],
+        "view": "full_arm_oblique"
+      },
+      "capture_gate_status": "PASS",
+      "capture_name": "full_arm_oblique_partially_closed",
+      "decoded_pixel_sha256": "1169f835e0192efce2a644a7275cb3aa4f40ed4ec15ced4d8a9a2576f336521b",
+      "decoded_rgb_channel_ranges": [
+        220,
+        195,
+        217
+      ],
+      "file_sha256": "c6c3d8c2a46389694705ea1f6522f43f36f6ebde874009cf323350b0b730c3e3",
+      "file_size_bytes": 267520,
+      "mode": "RGBA",
+      "phase": "task7_certified_left_arm_pose_replay",
+      "relative_path": "screenshots_raw/full_arm_oblique_partially_closed_raw.png",
+      "resolution": [
+        1280,
+        900
+      ],
+      "simulation": {
+        "acceptance_boundary": "POSE/DIRECTION AUXILIARY EVIDENCE ONLY; RUNTIME NUMERIC REPORT REMAINS AUTHORITATIVE",
+        "all_dof_readback": [
+          1.5915004496491747e-06,
+          -0.9599807262420654,
+          1.159956455230713,
+          3.914915578207001e-05,
+          -0.3001176118850708,
+          1.7042366380337626e-05,
+          0.03859834745526314,
+          -0.038597412407398224
+        ],
+        "capture_method": "CERTIFIED_RUNTIME_READBACK_REPLAY_AUXILIARY",
+        "isaac_sim": "5.1.0.0",
+        "kit": "107.3.3",
+        "phase": "partially_closed",
+        "physics_steps_added": 0,
+        "physx": "107.3.26",
+        "readback_left_m": 0.03859834745526314,
+        "readback_right_m": -0.038597412407398224,
+        "robot": "follower_left",
+        "source_numeric_report": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_cad_finger_task5_drive_probe_arm_max_force_over_combined.json",
+        "source_numeric_report_sha256": "78438748488d683baaa71aab6209e86ca1d65e1d73ca2dc9b9579eef4c5cfda6",
+        "source_runtime_frame": 61,
+        "source_runtime_time_s": 1.0166666666666666,
+        "source_trajectory": "symmetric_close",
+        "stage_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_arm_max_force_over_combined/aloha_viperx_supplier_cad_arm_max_force_over_combined.usda",
+        "stage_sha256": "5bc3bb5ab7fd7ce8fd3028894394ca5915a278e5a996d016a5868a164593ac40"
+      },
+      "status": "PASS"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/task7_robot_scope/pose_evidence_attempt5/screenshots_raw/full_arm_oblique_closed_raw.png",
+      "artifact_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/task7_robot_scope/pose_evidence_attempt5",
+      "camera": {
+        "capture_backend": "omni.kit.viewport.utility.capture_viewport_to_file",
+        "fixed_camera_within_view": true,
+        "orientation_wxyz": [
+          0.7810447812080383,
+          0.4623778164386749,
+          -0.21382221579551697,
+          -0.3611867129802704
+        ],
+        "position_world_m": [
+          -1.7311066389083862,
+          -0.5919559597969055,
+          1.1089227199554443
+        ],
+        "projections": {
+          "left_finger": {
+            "bbox_center_px": [
+              857.016151245374,
+              159.71772098401405
+            ],
+            "bbox_max_px": [
+              914.811008662748,
+              202.999888519086
+            ],
+            "bbox_min_px": [
+              799.2212938279998,
+              116.43555344894209
+            ],
+            "finite_point_count": 831,
+            "fully_in_frame": true
+          },
+          "right_finger": {
+            "bbox_center_px": [
+              885.362151351306,
+              170.62149495607088
+            ],
+            "bbox_max_px": [
+              922.1742522862504,
+              218.53075861998497
+            ],
+            "bbox_min_px": [
+              848.5500504163615,
+              122.71223129215682
+            ],
+            "finite_point_count": 831,
+            "fully_in_frame": true
+          },
+          "robot": {
+            "bbox_center_px": [
+              593.7646496898782,
+              491.23171250845905
+            ],
+            "bbox_max_px": [
+              935.4147421381202,
+              866.027871567976
+            ],
+            "bbox_min_px": [
+              252.11455724163622,
+              116.43555344894209
+            ],
+            "finite_point_count": 80622,
+            "fully_in_frame": true
+          }
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "target_world_m": [
+          -0.4464528039097786,
+          0.49999983608722687,
+          0.18397197691956535
+        ],
+        "view": "full_arm_oblique"
+      },
+      "capture_gate_status": "PASS",
+      "capture_name": "full_arm_oblique_closed",
+      "decoded_pixel_sha256": "d12ab643d65829dac5c8e596c4ba0fec713d453546fb50ecfcb46c6412750301",
+      "decoded_rgb_channel_ranges": [
+        223,
+        200,
+        221
+      ],
+      "file_sha256": "28e56df0ca10d03ae975a6736a4b8dcca20de088c161c236184a40bcca48c8a3",
+      "file_size_bytes": 277153,
+      "mode": "RGBA",
+      "phase": "task7_certified_left_arm_pose_replay",
+      "relative_path": "screenshots_raw/full_arm_oblique_closed_raw.png",
+      "resolution": [
+        1280,
+        900
+      ],
+      "simulation": {
+        "acceptance_boundary": "POSE/DIRECTION AUXILIARY EVIDENCE ONLY; RUNTIME NUMERIC REPORT REMAINS AUTHORITATIVE",
+        "all_dof_readback": [
+          1.592531475580472e-06,
+          -0.9599807262420654,
+          1.159956455230713,
+          4.041336796944961e-05,
+          -0.3001175820827484,
+          1.748606882756576e-05,
+          0.021000046283006668,
+          -0.020999999716877937
+        ],
+        "capture_method": "CERTIFIED_RUNTIME_READBACK_REPLAY_AUXILIARY",
+        "isaac_sim": "5.1.0.0",
+        "kit": "107.3.3",
+        "phase": "closed",
+        "physics_steps_added": 0,
+        "physx": "107.3.26",
+        "readback_left_m": 0.021000046283006668,
+        "readback_right_m": -0.020999999716877937,
+        "robot": "follower_left",
+        "source_numeric_report": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_cad_finger_task5_drive_probe_arm_max_force_over_combined.json",
+        "source_numeric_report_sha256": "78438748488d683baaa71aab6209e86ca1d65e1d73ca2dc9b9579eef4c5cfda6",
+        "source_runtime_frame": 120,
+        "source_runtime_time_s": 2.0,
+        "source_trajectory": "symmetric_close",
+        "stage_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_arm_max_force_over_combined/aloha_viperx_supplier_cad_arm_max_force_over_combined.usda",
+        "stage_sha256": "5bc3bb5ab7fd7ce8fd3028894394ca5915a278e5a996d016a5868a164593ac40"
+      },
+      "status": "PASS"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/task7_robot_scope/pose_evidence_attempt5/screenshots_raw/gripper_closeup_open_maximum_legal_aperture_raw.png",
+      "artifact_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/task7_robot_scope/pose_evidence_attempt5",
+      "camera": {
+        "capture_backend": "omni.kit.viewport.utility.capture_viewport_to_file",
+        "fixed_camera_within_view": true,
+        "orientation_wxyz": [
+          0.7153890132904053,
+          0.4249306619167328,
+          -0.29887449741363525,
+          -0.4672542214393616
+        ],
+        "position_world_m": [
+          -0.6394227147102356,
+          0.3435142934322357,
+          0.5204766988754272
+        ],
+        "projections": {
+          "left_finger": {
+            "bbox_center_px": [
+              447.5689897567022,
+              315.8879259576797
+            ],
+            "bbox_max_px": [
+              636.0346224782115,
+              492.92631057365077
+            ],
+            "bbox_min_px": [
+              259.1033570351929,
+              138.84954134170871
+            ],
+            "finite_point_count": 831,
+            "fully_in_frame": true
+          },
+          "right_finger": {
+            "bbox_center_px": [
+              1010.9876984446983,
+              430.8377981699269
+            ],
+            "bbox_max_px": [
+              1100.4096418494987,
+              646.4878735176361
+            ],
+            "bbox_min_px": [
+              921.5657550398978,
+              215.18772282221764
+            ],
+            "finite_point_count": 831,
+            "fully_in_frame": true
+          },
+          "robot": {
+            "bbox_center_px": [
+              679.7564994423458,
+              392.6687074296724
+            ],
+            "bbox_max_px": [
+              1100.4096418494987,
+              646.4878735176361
+            ],
+            "bbox_min_px": [
+              259.1033570351929,
+              138.84954134170871
+            ],
+            "finite_point_count": 1662,
+            "fully_in_frame": true
+          }
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "target_world_m": [
+          -0.24676114171026128,
+          0.5000032527387931,
+          0.30136218953935967
+        ],
+        "view": "gripper_closeup"
+      },
+      "capture_gate_status": "PASS",
+      "capture_name": "gripper_closeup_open_maximum_legal_aperture",
+      "decoded_pixel_sha256": "e5fa551db59e7f0a9ba9fe5dbbdccc3e639c067504eff98f4efbb9b526601495",
+      "decoded_rgb_channel_ranges": [
+        239,
+        204,
+        239
+      ],
+      "file_sha256": "4624f26761bd5060759e34506c2afe12ff517604c410ec685ed0402a50740c6e",
+      "file_size_bytes": 261865,
+      "mode": "RGBA",
+      "phase": "task7_certified_left_arm_pose_replay",
+      "relative_path": "screenshots_raw/gripper_closeup_open_maximum_legal_aperture_raw.png",
+      "resolution": [
+        1280,
+        900
+      ],
+      "simulation": {
+        "acceptance_boundary": "POSE/DIRECTION AUXILIARY EVIDENCE ONLY; RUNTIME NUMERIC REPORT REMAINS AUTHORITATIVE",
+        "all_dof_readback": [
+          4.138846634305082e-06,
+          -0.959773063659668,
+          1.16013503074646,
+          4.243401053827256e-05,
+          -0.29917800426483154,
+          2.455090179864783e-05,
+          0.05679286643862724,
+          -0.056784503161907196
+        ],
+        "capture_method": "CERTIFIED_RUNTIME_READBACK_REPLAY_AUXILIARY",
+        "isaac_sim": "5.1.0.0",
+        "kit": "107.3.3",
+        "phase": "open_maximum_legal_aperture",
+        "physics_steps_added": 0,
+        "physx": "107.3.26",
+        "readback_left_m": 0.05679286643862724,
+        "readback_right_m": -0.056784503161907196,
+        "robot": "follower_left",
+        "source_numeric_report": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_cad_finger_task5_drive_probe_arm_max_force_over_combined.json",
+        "source_numeric_report_sha256": "78438748488d683baaa71aab6209e86ca1d65e1d73ca2dc9b9579eef4c5cfda6",
+        "source_runtime_frame": 1,
+        "source_runtime_time_s": 0.016666666666666666,
+        "source_trajectory": "symmetric_close",
+        "stage_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_arm_max_force_over_combined/aloha_viperx_supplier_cad_arm_max_force_over_combined.usda",
+        "stage_sha256": "5bc3bb5ab7fd7ce8fd3028894394ca5915a278e5a996d016a5868a164593ac40"
+      },
+      "status": "PASS"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/task7_robot_scope/pose_evidence_attempt5/screenshots_raw/gripper_closeup_partially_closed_raw.png",
+      "artifact_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/task7_robot_scope/pose_evidence_attempt5",
+      "camera": {
+        "capture_backend": "omni.kit.viewport.utility.capture_viewport_to_file",
+        "fixed_camera_within_view": true,
+        "orientation_wxyz": [
+          0.7153890132904053,
+          0.4249306619167328,
+          -0.29887449741363525,
+          -0.4672542214393616
+        ],
+        "position_world_m": [
+          -0.6394227147102356,
+          0.3435142934322357,
+          0.5204766988754272
+        ],
+        "projections": {
+          "left_finger": {
+            "bbox_center_px": [
+              545.0581667271058,
+              334.50448458159383
+            ],
+            "bbox_max_px": [
+              728.9441019118542,
+              514.9048115214658
+            ],
+            "bbox_min_px": [
+              361.1722315423575,
+              154.10415764172188
+            ],
+            "finite_point_count": 831,
+            "fully_in_frame": true
+          },
+          "right_finger": {
+            "bbox_center_px": [
+              897.8571054779338,
+              406.817786095903
+            ],
+            "bbox_max_px": [
+              985.9497550391239,
+              618.6304484377963
+            ],
+            "bbox_min_px": [
+              809.7644559167436,
+              195.00512375400962
+            ],
+            "finite_point_count": 831,
+            "fully_in_frame": true
+          },
+          "robot": {
+            "bbox_center_px": [
+              673.5609932907407,
+              386.3673030397591
+            ],
+            "bbox_max_px": [
+              985.9497550391239,
+              618.6304484377963
+            ],
+            "bbox_min_px": [
+              361.1722315423575,
+              154.10415764172188
+            ],
+            "finite_point_count": 1662,
+            "fully_in_frame": true
+          }
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "target_world_m": [
+          -0.24676114171026128,
+          0.5000032527387931,
+          0.30136218953935967
+        ],
+        "view": "gripper_closeup"
+      },
+      "capture_gate_status": "PASS",
+      "capture_name": "gripper_closeup_partially_closed",
+      "decoded_pixel_sha256": "d2e5172f48625153a21d19b8398a413e412c4136cbcfe7aea5693c3eda2a2eca",
+      "decoded_rgb_channel_ranges": [
+        240,
+        204,
+        240
+      ],
+      "file_sha256": "d0d23a4e485e1016bfd9b2c7a0a59d8e8afc4762f8238feafa0a89eb65c6eca7",
+      "file_size_bytes": 328511,
+      "mode": "RGBA",
+      "phase": "task7_certified_left_arm_pose_replay",
+      "relative_path": "screenshots_raw/gripper_closeup_partially_closed_raw.png",
+      "resolution": [
+        1280,
+        900
+      ],
+      "simulation": {
+        "acceptance_boundary": "POSE/DIRECTION AUXILIARY EVIDENCE ONLY; RUNTIME NUMERIC REPORT REMAINS AUTHORITATIVE",
+        "all_dof_readback": [
+          1.5915004496491747e-06,
+          -0.9599807262420654,
+          1.159956455230713,
+          3.914915578207001e-05,
+          -0.3001176118850708,
+          1.7042366380337626e-05,
+          0.03859834745526314,
+          -0.038597412407398224
+        ],
+        "capture_method": "CERTIFIED_RUNTIME_READBACK_REPLAY_AUXILIARY",
+        "isaac_sim": "5.1.0.0",
+        "kit": "107.3.3",
+        "phase": "partially_closed",
+        "physics_steps_added": 0,
+        "physx": "107.3.26",
+        "readback_left_m": 0.03859834745526314,
+        "readback_right_m": -0.038597412407398224,
+        "robot": "follower_left",
+        "source_numeric_report": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_cad_finger_task5_drive_probe_arm_max_force_over_combined.json",
+        "source_numeric_report_sha256": "78438748488d683baaa71aab6209e86ca1d65e1d73ca2dc9b9579eef4c5cfda6",
+        "source_runtime_frame": 61,
+        "source_runtime_time_s": 1.0166666666666666,
+        "source_trajectory": "symmetric_close",
+        "stage_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_arm_max_force_over_combined/aloha_viperx_supplier_cad_arm_max_force_over_combined.usda",
+        "stage_sha256": "5bc3bb5ab7fd7ce8fd3028894394ca5915a278e5a996d016a5868a164593ac40"
+      },
+      "status": "PASS"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/task7_robot_scope/pose_evidence_attempt5/screenshots_raw/gripper_closeup_closed_raw.png",
+      "artifact_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/task7_robot_scope/pose_evidence_attempt5",
+      "camera": {
+        "capture_backend": "omni.kit.viewport.utility.capture_viewport_to_file",
+        "fixed_camera_within_view": true,
+        "orientation_wxyz": [
+          0.7153890132904053,
+          0.4249306619167328,
+          -0.29887449741363525,
+          -0.4672542214393616
+        ],
+        "position_world_m": [
+          -0.6394227147102356,
+          0.3435142934322357,
+          0.5204766988754272
+        ],
+        "projections": {
+          "left_finger": {
+            "bbox_center_px": [
+              641.8943386858838,
+              354.46573787064295
+            ],
+            "bbox_max_px": [
+              821.2037623014331,
+              537.9778651296725
+            ],
+            "bbox_min_px": [
+              462.5849150703345,
+              170.95361061161339
+            ],
+            "finite_point_count": 831,
+            "fully_in_frame": true
+          },
+          "right_finger": {
+            "bbox_center_px": [
+              791.0177069489166,
+              385.6531799663862
+            ],
+            "bbox_max_px": [
+              877.8752546957113,
+              593.6496295384471
+            ],
+            "bbox_min_px": [
+              704.1601592021218,
+              177.65673039432522
+            ],
+            "finite_point_count": 831,
+            "fully_in_frame": true
+          },
+          "robot": {
+            "bbox_center_px": [
+              670.2300848830229,
+              382.30162007503026
+            ],
+            "bbox_max_px": [
+              877.8752546957113,
+              593.6496295384471
+            ],
+            "bbox_min_px": [
+              462.5849150703345,
+              170.95361061161339
+            ],
+            "finite_point_count": 1662,
+            "fully_in_frame": true
+          }
+        },
+        "resolution": [
+          1280,
+          900
+        ],
+        "target_world_m": [
+          -0.24676114171026128,
+          0.5000032527387931,
+          0.30136218953935967
+        ],
+        "view": "gripper_closeup"
+      },
+      "capture_gate_status": "PASS",
+      "capture_name": "gripper_closeup_closed",
+      "decoded_pixel_sha256": "130bd0339ccc81773552a6a069e596a7cc060121938371869c927a07ed4be3eb",
+      "decoded_rgb_channel_ranges": [
+        239,
+        206,
+        239
+      ],
+      "file_sha256": "c6caf6a742cba4b52ee069819d9299ee0df6a6be8f623c9f5bc04ad77ff95be6",
+      "file_size_bytes": 433960,
+      "mode": "RGBA",
+      "phase": "task7_certified_left_arm_pose_replay",
+      "relative_path": "screenshots_raw/gripper_closeup_closed_raw.png",
+      "resolution": [
+        1280,
+        900
+      ],
+      "simulation": {
+        "acceptance_boundary": "POSE/DIRECTION AUXILIARY EVIDENCE ONLY; RUNTIME NUMERIC REPORT REMAINS AUTHORITATIVE",
+        "all_dof_readback": [
+          1.592531475580472e-06,
+          -0.9599807262420654,
+          1.159956455230713,
+          4.041336796944961e-05,
+          -0.3001175820827484,
+          1.748606882756576e-05,
+          0.021000046283006668,
+          -0.020999999716877937
+        ],
+        "capture_method": "CERTIFIED_RUNTIME_READBACK_REPLAY_AUXILIARY",
+        "isaac_sim": "5.1.0.0",
+        "kit": "107.3.3",
+        "phase": "closed",
+        "physics_steps_added": 0,
+        "physx": "107.3.26",
+        "readback_left_m": 0.021000046283006668,
+        "readback_right_m": -0.020999999716877937,
+        "robot": "follower_left",
+        "source_numeric_report": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_cad_finger_task5_drive_probe_arm_max_force_over_combined.json",
+        "source_numeric_report_sha256": "78438748488d683baaa71aab6209e86ca1d65e1d73ca2dc9b9579eef4c5cfda6",
+        "source_runtime_frame": 120,
+        "source_runtime_time_s": 2.0,
+        "source_trajectory": "symmetric_close",
+        "stage_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_arm_max_force_over_combined/aloha_viperx_supplier_cad_arm_max_force_over_combined.usda",
+        "stage_sha256": "5bc3bb5ab7fd7ce8fd3028894394ca5915a278e5a996d016a5868a164593ac40"
+      },
+      "status": "PASS"
+    }
+  ],
+  "fixed_camera_within_each_view": {
+    "full_arm_oblique": true,
+    "gripper_closeup": true
+  },
+  "manifest": {
+    "artifact_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/task7_robot_scope/pose_evidence_attempt5",
+    "captures": [
+      {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/task7_robot_scope/pose_evidence_attempt5/screenshots_raw/full_arm_oblique_open_maximum_legal_aperture_raw.png",
+        "artifact_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/task7_robot_scope/pose_evidence_attempt5",
+        "camera": {
+          "capture_backend": "omni.kit.viewport.utility.capture_viewport_to_file",
+          "fixed_camera_within_view": true,
+          "orientation_wxyz": [
+            0.7810447812080383,
+            0.4623778164386749,
+            -0.21382221579551697,
+            -0.3611867129802704
+          ],
+          "position_world_m": [
+            -1.7311066389083862,
+            -0.5919559597969055,
+            1.1089227199554443
+          ],
+          "projections": {
+            "left_finger": {
+              "bbox_center_px": [
+                814.3073427355033,
+                146.32876867617182
+              ],
+              "bbox_max_px": [
+                872.082744967113,
+                189.21610270665025
+              ],
+              "bbox_min_px": [
+                756.5319405038937,
+                103.44143464569338
+              ],
+              "finite_point_count": 831,
+              "fully_in_frame": true
+            },
+            "right_finger": {
+              "bbox_center_px": [
+                929.5682056725028,
+                185.2303956067989
+              ],
+              "bbox_max_px": [
+                965.9162452306746,
+                233.76432913242493
+              ],
+              "bbox_min_px": [
+                893.220166114331,
+                136.69646208117288
+              ],
+              "finite_point_count": 831,
+              "fully_in_frame": true
+            },
+            "robot": {
+              "bbox_center_px": [
+                609.0388919788273,
+                484.7346531068347
+              ],
+              "bbox_max_px": [
+                965.9162452306746,
+                866.027871567976
+              ],
+              "bbox_min_px": [
+                252.1615387269801,
+                103.44143464569338
+              ],
+              "finite_point_count": 80622,
+              "fully_in_frame": true
+            }
+          },
+          "resolution": [
+            1280,
+            900
+          ],
+          "target_world_m": [
+            -0.4464528039097786,
+            0.49999983608722687,
+            0.18397197691956535
+          ],
+          "view": "full_arm_oblique"
+        },
+        "capture_gate_status": "PASS",
+        "capture_name": "full_arm_oblique_open_maximum_legal_aperture",
+        "decoded_pixel_sha256": "b9cfcf1c04e5097cb5ec21320fbf9959feab202da4fe5d3ba64cab59b69252ba",
+        "decoded_rgb_channel_ranges": [
+          224,
+          203,
+          223
+        ],
+        "file_sha256": "028fde7e6c0976702e353c611ddd3c9d063308be05292e306e37346ff873fc51",
+        "file_size_bytes": 268648,
+        "mode": "RGBA",
+        "phase": "task7_certified_left_arm_pose_replay",
+        "relative_path": "screenshots_raw/full_arm_oblique_open_maximum_legal_aperture_raw.png",
+        "resolution": [
+          1280,
+          900
+        ],
+        "simulation": {
+          "acceptance_boundary": "POSE/DIRECTION AUXILIARY EVIDENCE ONLY; RUNTIME NUMERIC REPORT REMAINS AUTHORITATIVE",
+          "all_dof_readback": [
+            4.138846634305082e-06,
+            -0.959773063659668,
+            1.16013503074646,
+            4.243401053827256e-05,
+            -0.29917800426483154,
+            2.455090179864783e-05,
+            0.05679286643862724,
+            -0.056784503161907196
+          ],
+          "capture_method": "CERTIFIED_RUNTIME_READBACK_REPLAY_AUXILIARY",
+          "isaac_sim": "5.1.0.0",
+          "kit": "107.3.3",
+          "phase": "open_maximum_legal_aperture",
+          "physics_steps_added": 0,
+          "physx": "107.3.26",
+          "readback_left_m": 0.05679286643862724,
+          "readback_right_m": -0.056784503161907196,
+          "robot": "follower_left",
+          "source_numeric_report": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_cad_finger_task5_drive_probe_arm_max_force_over_combined.json",
+          "source_numeric_report_sha256": "78438748488d683baaa71aab6209e86ca1d65e1d73ca2dc9b9579eef4c5cfda6",
+          "source_runtime_frame": 1,
+          "source_runtime_time_s": 0.016666666666666666,
+          "source_trajectory": "symmetric_close",
+          "stage_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_arm_max_force_over_combined/aloha_viperx_supplier_cad_arm_max_force_over_combined.usda",
+          "stage_sha256": "5bc3bb5ab7fd7ce8fd3028894394ca5915a278e5a996d016a5868a164593ac40"
+        },
+        "status": "PASS"
+      },
+      {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/task7_robot_scope/pose_evidence_attempt5/screenshots_raw/full_arm_oblique_partially_closed_raw.png",
+        "artifact_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/task7_robot_scope/pose_evidence_attempt5",
+        "camera": {
+          "capture_backend": "omni.kit.viewport.utility.capture_viewport_to_file",
+          "fixed_camera_within_view": true,
+          "orientation_wxyz": [
+            0.7810447812080383,
+            0.4623778164386749,
+            -0.21382221579551697,
+            -0.3611867129802704
+          ],
+          "position_world_m": [
+            -1.7311066389083862,
+            -0.5919559597969055,
+            1.1089227199554443
+          ],
+          "projections": {
+            "left_finger": {
+              "bbox_center_px": [
+                835.8934865852566,
+                152.9163421789334
+              ],
+              "bbox_max_px": [
+                893.6883818211537,
+                196.0020835247718
+              ],
+              "bbox_min_px": [
+                778.0985913493594,
+                109.83060083309499
+              ],
+              "finite_point_count": 831,
+              "fully_in_frame": true
+            },
+            "right_finger": {
+              "bbox_center_px": [
+                906.9762258998746,
+                177.56332349840767
+              ],
+              "bbox_max_px": [
+                943.571426442344,
+                225.8123217828668
+              ],
+              "bbox_min_px": [
+                870.3810253574054,
+                129.31432521394856
+              ],
+              "finite_point_count": 831,
+              "fully_in_frame": true
+            },
+            "robot": {
+              "bbox_center_px": [
+                597.84299184199,
+                487.9292362005355
+              ],
+              "bbox_max_px": [
+                943.571426442344,
+                866.027871567976
+              ],
+              "bbox_min_px": [
+                252.11455724163622,
+                109.83060083309499
+              ],
+              "finite_point_count": 80622,
+              "fully_in_frame": true
+            }
+          },
+          "resolution": [
+            1280,
+            900
+          ],
+          "target_world_m": [
+            -0.4464528039097786,
+            0.49999983608722687,
+            0.18397197691956535
+          ],
+          "view": "full_arm_oblique"
+        },
+        "capture_gate_status": "PASS",
+        "capture_name": "full_arm_oblique_partially_closed",
+        "decoded_pixel_sha256": "1169f835e0192efce2a644a7275cb3aa4f40ed4ec15ced4d8a9a2576f336521b",
+        "decoded_rgb_channel_ranges": [
+          220,
+          195,
+          217
+        ],
+        "file_sha256": "c6c3d8c2a46389694705ea1f6522f43f36f6ebde874009cf323350b0b730c3e3",
+        "file_size_bytes": 267520,
+        "mode": "RGBA",
+        "phase": "task7_certified_left_arm_pose_replay",
+        "relative_path": "screenshots_raw/full_arm_oblique_partially_closed_raw.png",
+        "resolution": [
+          1280,
+          900
+        ],
+        "simulation": {
+          "acceptance_boundary": "POSE/DIRECTION AUXILIARY EVIDENCE ONLY; RUNTIME NUMERIC REPORT REMAINS AUTHORITATIVE",
+          "all_dof_readback": [
+            1.5915004496491747e-06,
+            -0.9599807262420654,
+            1.159956455230713,
+            3.914915578207001e-05,
+            -0.3001176118850708,
+            1.7042366380337626e-05,
+            0.03859834745526314,
+            -0.038597412407398224
+          ],
+          "capture_method": "CERTIFIED_RUNTIME_READBACK_REPLAY_AUXILIARY",
+          "isaac_sim": "5.1.0.0",
+          "kit": "107.3.3",
+          "phase": "partially_closed",
+          "physics_steps_added": 0,
+          "physx": "107.3.26",
+          "readback_left_m": 0.03859834745526314,
+          "readback_right_m": -0.038597412407398224,
+          "robot": "follower_left",
+          "source_numeric_report": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_cad_finger_task5_drive_probe_arm_max_force_over_combined.json",
+          "source_numeric_report_sha256": "78438748488d683baaa71aab6209e86ca1d65e1d73ca2dc9b9579eef4c5cfda6",
+          "source_runtime_frame": 61,
+          "source_runtime_time_s": 1.0166666666666666,
+          "source_trajectory": "symmetric_close",
+          "stage_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_arm_max_force_over_combined/aloha_viperx_supplier_cad_arm_max_force_over_combined.usda",
+          "stage_sha256": "5bc3bb5ab7fd7ce8fd3028894394ca5915a278e5a996d016a5868a164593ac40"
+        },
+        "status": "PASS"
+      },
+      {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/task7_robot_scope/pose_evidence_attempt5/screenshots_raw/full_arm_oblique_closed_raw.png",
+        "artifact_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/task7_robot_scope/pose_evidence_attempt5",
+        "camera": {
+          "capture_backend": "omni.kit.viewport.utility.capture_viewport_to_file",
+          "fixed_camera_within_view": true,
+          "orientation_wxyz": [
+            0.7810447812080383,
+            0.4623778164386749,
+            -0.21382221579551697,
+            -0.3611867129802704
+          ],
+          "position_world_m": [
+            -1.7311066389083862,
+            -0.5919559597969055,
+            1.1089227199554443
+          ],
+          "projections": {
+            "left_finger": {
+              "bbox_center_px": [
+                857.016151245374,
+                159.71772098401405
+              ],
+              "bbox_max_px": [
+                914.811008662748,
+                202.999888519086
+              ],
+              "bbox_min_px": [
+                799.2212938279998,
+                116.43555344894209
+              ],
+              "finite_point_count": 831,
+              "fully_in_frame": true
+            },
+            "right_finger": {
+              "bbox_center_px": [
+                885.362151351306,
+                170.62149495607088
+              ],
+              "bbox_max_px": [
+                922.1742522862504,
+                218.53075861998497
+              ],
+              "bbox_min_px": [
+                848.5500504163615,
+                122.71223129215682
+              ],
+              "finite_point_count": 831,
+              "fully_in_frame": true
+            },
+            "robot": {
+              "bbox_center_px": [
+                593.7646496898782,
+                491.23171250845905
+              ],
+              "bbox_max_px": [
+                935.4147421381202,
+                866.027871567976
+              ],
+              "bbox_min_px": [
+                252.11455724163622,
+                116.43555344894209
+              ],
+              "finite_point_count": 80622,
+              "fully_in_frame": true
+            }
+          },
+          "resolution": [
+            1280,
+            900
+          ],
+          "target_world_m": [
+            -0.4464528039097786,
+            0.49999983608722687,
+            0.18397197691956535
+          ],
+          "view": "full_arm_oblique"
+        },
+        "capture_gate_status": "PASS",
+        "capture_name": "full_arm_oblique_closed",
+        "decoded_pixel_sha256": "d12ab643d65829dac5c8e596c4ba0fec713d453546fb50ecfcb46c6412750301",
+        "decoded_rgb_channel_ranges": [
+          223,
+          200,
+          221
+        ],
+        "file_sha256": "28e56df0ca10d03ae975a6736a4b8dcca20de088c161c236184a40bcca48c8a3",
+        "file_size_bytes": 277153,
+        "mode": "RGBA",
+        "phase": "task7_certified_left_arm_pose_replay",
+        "relative_path": "screenshots_raw/full_arm_oblique_closed_raw.png",
+        "resolution": [
+          1280,
+          900
+        ],
+        "simulation": {
+          "acceptance_boundary": "POSE/DIRECTION AUXILIARY EVIDENCE ONLY; RUNTIME NUMERIC REPORT REMAINS AUTHORITATIVE",
+          "all_dof_readback": [
+            1.592531475580472e-06,
+            -0.9599807262420654,
+            1.159956455230713,
+            4.041336796944961e-05,
+            -0.3001175820827484,
+            1.748606882756576e-05,
+            0.021000046283006668,
+            -0.020999999716877937
+          ],
+          "capture_method": "CERTIFIED_RUNTIME_READBACK_REPLAY_AUXILIARY",
+          "isaac_sim": "5.1.0.0",
+          "kit": "107.3.3",
+          "phase": "closed",
+          "physics_steps_added": 0,
+          "physx": "107.3.26",
+          "readback_left_m": 0.021000046283006668,
+          "readback_right_m": -0.020999999716877937,
+          "robot": "follower_left",
+          "source_numeric_report": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_cad_finger_task5_drive_probe_arm_max_force_over_combined.json",
+          "source_numeric_report_sha256": "78438748488d683baaa71aab6209e86ca1d65e1d73ca2dc9b9579eef4c5cfda6",
+          "source_runtime_frame": 120,
+          "source_runtime_time_s": 2.0,
+          "source_trajectory": "symmetric_close",
+          "stage_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_arm_max_force_over_combined/aloha_viperx_supplier_cad_arm_max_force_over_combined.usda",
+          "stage_sha256": "5bc3bb5ab7fd7ce8fd3028894394ca5915a278e5a996d016a5868a164593ac40"
+        },
+        "status": "PASS"
+      },
+      {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/task7_robot_scope/pose_evidence_attempt5/screenshots_raw/gripper_closeup_open_maximum_legal_aperture_raw.png",
+        "artifact_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/task7_robot_scope/pose_evidence_attempt5",
+        "camera": {
+          "capture_backend": "omni.kit.viewport.utility.capture_viewport_to_file",
+          "fixed_camera_within_view": true,
+          "orientation_wxyz": [
+            0.7153890132904053,
+            0.4249306619167328,
+            -0.29887449741363525,
+            -0.4672542214393616
+          ],
+          "position_world_m": [
+            -0.6394227147102356,
+            0.3435142934322357,
+            0.5204766988754272
+          ],
+          "projections": {
+            "left_finger": {
+              "bbox_center_px": [
+                447.5689897567022,
+                315.8879259576797
+              ],
+              "bbox_max_px": [
+                636.0346224782115,
+                492.92631057365077
+              ],
+              "bbox_min_px": [
+                259.1033570351929,
+                138.84954134170871
+              ],
+              "finite_point_count": 831,
+              "fully_in_frame": true
+            },
+            "right_finger": {
+              "bbox_center_px": [
+                1010.9876984446983,
+                430.8377981699269
+              ],
+              "bbox_max_px": [
+                1100.4096418494987,
+                646.4878735176361
+              ],
+              "bbox_min_px": [
+                921.5657550398978,
+                215.18772282221764
+              ],
+              "finite_point_count": 831,
+              "fully_in_frame": true
+            },
+            "robot": {
+              "bbox_center_px": [
+                679.7564994423458,
+                392.6687074296724
+              ],
+              "bbox_max_px": [
+                1100.4096418494987,
+                646.4878735176361
+              ],
+              "bbox_min_px": [
+                259.1033570351929,
+                138.84954134170871
+              ],
+              "finite_point_count": 1662,
+              "fully_in_frame": true
+            }
+          },
+          "resolution": [
+            1280,
+            900
+          ],
+          "target_world_m": [
+            -0.24676114171026128,
+            0.5000032527387931,
+            0.30136218953935967
+          ],
+          "view": "gripper_closeup"
+        },
+        "capture_gate_status": "PASS",
+        "capture_name": "gripper_closeup_open_maximum_legal_aperture",
+        "decoded_pixel_sha256": "e5fa551db59e7f0a9ba9fe5dbbdccc3e639c067504eff98f4efbb9b526601495",
+        "decoded_rgb_channel_ranges": [
+          239,
+          204,
+          239
+        ],
+        "file_sha256": "4624f26761bd5060759e34506c2afe12ff517604c410ec685ed0402a50740c6e",
+        "file_size_bytes": 261865,
+        "mode": "RGBA",
+        "phase": "task7_certified_left_arm_pose_replay",
+        "relative_path": "screenshots_raw/gripper_closeup_open_maximum_legal_aperture_raw.png",
+        "resolution": [
+          1280,
+          900
+        ],
+        "simulation": {
+          "acceptance_boundary": "POSE/DIRECTION AUXILIARY EVIDENCE ONLY; RUNTIME NUMERIC REPORT REMAINS AUTHORITATIVE",
+          "all_dof_readback": [
+            4.138846634305082e-06,
+            -0.959773063659668,
+            1.16013503074646,
+            4.243401053827256e-05,
+            -0.29917800426483154,
+            2.455090179864783e-05,
+            0.05679286643862724,
+            -0.056784503161907196
+          ],
+          "capture_method": "CERTIFIED_RUNTIME_READBACK_REPLAY_AUXILIARY",
+          "isaac_sim": "5.1.0.0",
+          "kit": "107.3.3",
+          "phase": "open_maximum_legal_aperture",
+          "physics_steps_added": 0,
+          "physx": "107.3.26",
+          "readback_left_m": 0.05679286643862724,
+          "readback_right_m": -0.056784503161907196,
+          "robot": "follower_left",
+          "source_numeric_report": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_cad_finger_task5_drive_probe_arm_max_force_over_combined.json",
+          "source_numeric_report_sha256": "78438748488d683baaa71aab6209e86ca1d65e1d73ca2dc9b9579eef4c5cfda6",
+          "source_runtime_frame": 1,
+          "source_runtime_time_s": 0.016666666666666666,
+          "source_trajectory": "symmetric_close",
+          "stage_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_arm_max_force_over_combined/aloha_viperx_supplier_cad_arm_max_force_over_combined.usda",
+          "stage_sha256": "5bc3bb5ab7fd7ce8fd3028894394ca5915a278e5a996d016a5868a164593ac40"
+        },
+        "status": "PASS"
+      },
+      {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/task7_robot_scope/pose_evidence_attempt5/screenshots_raw/gripper_closeup_partially_closed_raw.png",
+        "artifact_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/task7_robot_scope/pose_evidence_attempt5",
+        "camera": {
+          "capture_backend": "omni.kit.viewport.utility.capture_viewport_to_file",
+          "fixed_camera_within_view": true,
+          "orientation_wxyz": [
+            0.7153890132904053,
+            0.4249306619167328,
+            -0.29887449741363525,
+            -0.4672542214393616
+          ],
+          "position_world_m": [
+            -0.6394227147102356,
+            0.3435142934322357,
+            0.5204766988754272
+          ],
+          "projections": {
+            "left_finger": {
+              "bbox_center_px": [
+                545.0581667271058,
+                334.50448458159383
+              ],
+              "bbox_max_px": [
+                728.9441019118542,
+                514.9048115214658
+              ],
+              "bbox_min_px": [
+                361.1722315423575,
+                154.10415764172188
+              ],
+              "finite_point_count": 831,
+              "fully_in_frame": true
+            },
+            "right_finger": {
+              "bbox_center_px": [
+                897.8571054779338,
+                406.817786095903
+              ],
+              "bbox_max_px": [
+                985.9497550391239,
+                618.6304484377963
+              ],
+              "bbox_min_px": [
+                809.7644559167436,
+                195.00512375400962
+              ],
+              "finite_point_count": 831,
+              "fully_in_frame": true
+            },
+            "robot": {
+              "bbox_center_px": [
+                673.5609932907407,
+                386.3673030397591
+              ],
+              "bbox_max_px": [
+                985.9497550391239,
+                618.6304484377963
+              ],
+              "bbox_min_px": [
+                361.1722315423575,
+                154.10415764172188
+              ],
+              "finite_point_count": 1662,
+              "fully_in_frame": true
+            }
+          },
+          "resolution": [
+            1280,
+            900
+          ],
+          "target_world_m": [
+            -0.24676114171026128,
+            0.5000032527387931,
+            0.30136218953935967
+          ],
+          "view": "gripper_closeup"
+        },
+        "capture_gate_status": "PASS",
+        "capture_name": "gripper_closeup_partially_closed",
+        "decoded_pixel_sha256": "d2e5172f48625153a21d19b8398a413e412c4136cbcfe7aea5693c3eda2a2eca",
+        "decoded_rgb_channel_ranges": [
+          240,
+          204,
+          240
+        ],
+        "file_sha256": "d0d23a4e485e1016bfd9b2c7a0a59d8e8afc4762f8238feafa0a89eb65c6eca7",
+        "file_size_bytes": 328511,
+        "mode": "RGBA",
+        "phase": "task7_certified_left_arm_pose_replay",
+        "relative_path": "screenshots_raw/gripper_closeup_partially_closed_raw.png",
+        "resolution": [
+          1280,
+          900
+        ],
+        "simulation": {
+          "acceptance_boundary": "POSE/DIRECTION AUXILIARY EVIDENCE ONLY; RUNTIME NUMERIC REPORT REMAINS AUTHORITATIVE",
+          "all_dof_readback": [
+            1.5915004496491747e-06,
+            -0.9599807262420654,
+            1.159956455230713,
+            3.914915578207001e-05,
+            -0.3001176118850708,
+            1.7042366380337626e-05,
+            0.03859834745526314,
+            -0.038597412407398224
+          ],
+          "capture_method": "CERTIFIED_RUNTIME_READBACK_REPLAY_AUXILIARY",
+          "isaac_sim": "5.1.0.0",
+          "kit": "107.3.3",
+          "phase": "partially_closed",
+          "physics_steps_added": 0,
+          "physx": "107.3.26",
+          "readback_left_m": 0.03859834745526314,
+          "readback_right_m": -0.038597412407398224,
+          "robot": "follower_left",
+          "source_numeric_report": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_cad_finger_task5_drive_probe_arm_max_force_over_combined.json",
+          "source_numeric_report_sha256": "78438748488d683baaa71aab6209e86ca1d65e1d73ca2dc9b9579eef4c5cfda6",
+          "source_runtime_frame": 61,
+          "source_runtime_time_s": 1.0166666666666666,
+          "source_trajectory": "symmetric_close",
+          "stage_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_arm_max_force_over_combined/aloha_viperx_supplier_cad_arm_max_force_over_combined.usda",
+          "stage_sha256": "5bc3bb5ab7fd7ce8fd3028894394ca5915a278e5a996d016a5868a164593ac40"
+        },
+        "status": "PASS"
+      },
+      {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/task7_robot_scope/pose_evidence_attempt5/screenshots_raw/gripper_closeup_closed_raw.png",
+        "artifact_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/task7_robot_scope/pose_evidence_attempt5",
+        "camera": {
+          "capture_backend": "omni.kit.viewport.utility.capture_viewport_to_file",
+          "fixed_camera_within_view": true,
+          "orientation_wxyz": [
+            0.7153890132904053,
+            0.4249306619167328,
+            -0.29887449741363525,
+            -0.4672542214393616
+          ],
+          "position_world_m": [
+            -0.6394227147102356,
+            0.3435142934322357,
+            0.5204766988754272
+          ],
+          "projections": {
+            "left_finger": {
+              "bbox_center_px": [
+                641.8943386858838,
+                354.46573787064295
+              ],
+              "bbox_max_px": [
+                821.2037623014331,
+                537.9778651296725
+              ],
+              "bbox_min_px": [
+                462.5849150703345,
+                170.95361061161339
+              ],
+              "finite_point_count": 831,
+              "fully_in_frame": true
+            },
+            "right_finger": {
+              "bbox_center_px": [
+                791.0177069489166,
+                385.6531799663862
+              ],
+              "bbox_max_px": [
+                877.8752546957113,
+                593.6496295384471
+              ],
+              "bbox_min_px": [
+                704.1601592021218,
+                177.65673039432522
+              ],
+              "finite_point_count": 831,
+              "fully_in_frame": true
+            },
+            "robot": {
+              "bbox_center_px": [
+                670.2300848830229,
+                382.30162007503026
+              ],
+              "bbox_max_px": [
+                877.8752546957113,
+                593.6496295384471
+              ],
+              "bbox_min_px": [
+                462.5849150703345,
+                170.95361061161339
+              ],
+              "finite_point_count": 1662,
+              "fully_in_frame": true
+            }
+          },
+          "resolution": [
+            1280,
+            900
+          ],
+          "target_world_m": [
+            -0.24676114171026128,
+            0.5000032527387931,
+            0.30136218953935967
+          ],
+          "view": "gripper_closeup"
+        },
+        "capture_gate_status": "PASS",
+        "capture_name": "gripper_closeup_closed",
+        "decoded_pixel_sha256": "130bd0339ccc81773552a6a069e596a7cc060121938371869c927a07ed4be3eb",
+        "decoded_rgb_channel_ranges": [
+          239,
+          206,
+          239
+        ],
+        "file_sha256": "c6caf6a742cba4b52ee069819d9299ee0df6a6be8f623c9f5bc04ad77ff95be6",
+        "file_size_bytes": 433960,
+        "mode": "RGBA",
+        "phase": "task7_certified_left_arm_pose_replay",
+        "relative_path": "screenshots_raw/gripper_closeup_closed_raw.png",
+        "resolution": [
+          1280,
+          900
+        ],
+        "simulation": {
+          "acceptance_boundary": "POSE/DIRECTION AUXILIARY EVIDENCE ONLY; RUNTIME NUMERIC REPORT REMAINS AUTHORITATIVE",
+          "all_dof_readback": [
+            1.592531475580472e-06,
+            -0.9599807262420654,
+            1.159956455230713,
+            4.041336796944961e-05,
+            -0.3001175820827484,
+            1.748606882756576e-05,
+            0.021000046283006668,
+            -0.020999999716877937
+          ],
+          "capture_method": "CERTIFIED_RUNTIME_READBACK_REPLAY_AUXILIARY",
+          "isaac_sim": "5.1.0.0",
+          "kit": "107.3.3",
+          "phase": "closed",
+          "physics_steps_added": 0,
+          "physx": "107.3.26",
+          "readback_left_m": 0.021000046283006668,
+          "readback_right_m": -0.020999999716877937,
+          "robot": "follower_left",
+          "source_numeric_report": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_cad_finger_task5_drive_probe_arm_max_force_over_combined.json",
+          "source_numeric_report_sha256": "78438748488d683baaa71aab6209e86ca1d65e1d73ca2dc9b9579eef4c5cfda6",
+          "source_runtime_frame": 120,
+          "source_runtime_time_s": 2.0,
+          "source_trajectory": "symmetric_close",
+          "stage_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_arm_max_force_over_combined/aloha_viperx_supplier_cad_arm_max_force_over_combined.usda",
+          "stage_sha256": "5bc3bb5ab7fd7ce8fd3028894394ca5915a278e5a996d016a5868a164593ac40"
+        },
+        "status": "PASS"
+      }
+    ],
+    "duplicate_capture_keys": [],
+    "failed_capture_gates": [],
+    "gates": {
+      "all_capture_gates_pass": true,
+      "all_captures_under_declared_root": true,
+      "all_required_captures_present": true,
+      "capture_keys_unique": true
+    },
+    "missing_required_captures": [],
+    "observed_capture_count": 6,
+    "required_capture_count": 6,
+    "required_captures": {
+      "task7_certified_left_arm_pose_replay": [
+        "full_arm_oblique_open_maximum_legal_aperture",
+        "full_arm_oblique_partially_closed",
+        "full_arm_oblique_closed",
+        "gripper_closeup_open_maximum_legal_aperture",
+        "gripper_closeup_partially_closed",
+        "gripper_closeup_closed"
+      ]
+    },
+    "status": "PASS",
+    "wrong_artifact_root_captures": []
+  },
+  "right_arm": {
+    "blocker": "HARD_BLOCKER_APPROVED_STAGE_MISSING_FOLLOWER_RIGHT",
+    "status": "NOT_RUN"
+  },
+  "schema_version": 1,
+  "session_hidden_by_view": {
+    "full_arm_oblique": [
+      "/workcell/table",
+      "/workcell/table_frame_T",
+      "/workcell/midair",
+      "/workcell/placeholder_pipe",
+      "/workcell/worldBody",
+      "/workcell/vx300s_left/vx300s_left_gripper_prop_link",
+      "/workcell/vx300s_left/vx300s_left_camera_focus",
+      "/workcell/vx300s_left/vx300s_left/visuals",
+      "/workcell/vx300s_left/vx300s_left/collisions",
+      "/workcell/vx300s_left/vx300s_left_shoulder_link/visuals",
+      "/workcell/vx300s_left/vx300s_left_shoulder_link/collisions",
+      "/workcell/vx300s_left/vx300s_left_upper_arm_link/visuals",
+      "/workcell/vx300s_left/vx300s_left_upper_arm_link/collisions",
+      "/workcell/vx300s_left/vx300s_left_upper_forearm_link/visuals",
+      "/workcell/vx300s_left/vx300s_left_upper_forearm_link/collisions",
+      "/workcell/vx300s_left/vx300s_left_lower_forearm_link/visuals",
+      "/workcell/vx300s_left/vx300s_left_lower_forearm_link/collisions",
+      "/workcell/vx300s_left/vx300s_left_wrist_link/visuals",
+      "/workcell/vx300s_left/vx300s_left_wrist_link/collisions",
+      "/workcell/vx300s_left/vx300s_left_gripper_link/sites",
+      "/workcell/vx300s_left/vx300s_left_gripper_link/collisions",
+      "/workcell/vx300s_left/vx300s_left_camera_focus/visuals",
+      "/workcell/vx300s_left/vx300s_left_camera_focus/sites",
+      "/workcell/vx300s_left/vx300s_left_camera_focus/collisions",
+      "/workcell/vx300s_left/vx300s_left_gripper_prop_link/collisions",
+      "/workcell/vx300s_left/vx300s_left_left_finger_link/collisions",
+      "/workcell/vx300s_left/vx300s_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh",
+      "/workcell/vx300s_left/vx300s_left_right_finger_link/collisions",
+      "/workcell/vx300s_left/vx300s_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh",
+      "/workcell/table/table/collisions",
+      "/workcell/midair/midair/sites",
+      "/workcell/midair/midair/sites/midair",
+      "/workcell/midair/midair/collisions",
+      "/workcell/vx300s_left/vx300s_left/collisions",
+      "/workcell/vx300s_left/vx300s_left_shoulder_link/collisions",
+      "/workcell/vx300s_left/vx300s_left_upper_arm_link/collisions",
+      "/workcell/vx300s_left/vx300s_left_upper_forearm_link/collisions",
+      "/workcell/vx300s_left/vx300s_left_lower_forearm_link/collisions",
+      "/workcell/vx300s_left/vx300s_left_wrist_link/collisions",
+      "/workcell/vx300s_left/vx300s_left_gripper_link/sites",
+      "/workcell/vx300s_left/vx300s_left_gripper_link/sites/cali_left_site1",
+      "/workcell/vx300s_left/vx300s_left_gripper_link/sites/cali_left_site2",
+      "/workcell/vx300s_left/vx300s_left_gripper_link/sites/cali_left_site3",
+      "/workcell/vx300s_left/vx300s_left_gripper_link/collisions",
+      "/workcell/vx300s_left/vx300s_left_camera_focus",
+      "/workcell/vx300s_left/vx300s_left_camera_focus/visuals",
+      "/workcell/vx300s_left/vx300s_left_camera_focus/sites",
+      "/workcell/vx300s_left/vx300s_left_camera_focus/sites/left_cam_focus",
+      "/workcell/vx300s_left/vx300s_left_camera_focus/collisions",
+      "/workcell/vx300s_left/vx300s_left_gripper_prop_link",
+      "/workcell/vx300s_left/vx300s_left_gripper_prop_link/visuals",
+      "/workcell/vx300s_left/vx300s_left_gripper_prop_link/collisions",
+      "/workcell/vx300s_left/vx300s_left_left_finger_link/visuals/diagnostic_supplier_cad_left_finger",
+      "/workcell/vx300s_left/vx300s_left_left_finger_link/collisions",
+      "/workcell/vx300s_left/vx300s_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger",
+      "/workcell/vx300s_left/vx300s_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh",
+      "/workcell/vx300s_left/vx300s_left_right_finger_link/visuals/diagnostic_supplier_cad_right_finger",
+      "/workcell/vx300s_left/vx300s_left_right_finger_link/collisions",
+      "/workcell/vx300s_left/vx300s_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger",
+      "/workcell/vx300s_left/vx300s_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh",
+      "/workcell/joints/vx300s_left_camera_focus",
+      "/workcell/joints/vx300s_left_gripper_prop_link",
+      "/workcell/table_frame_T/table_frame_T/collisions",
+      "/workcell/placeholder_pipe/placeholder_pipe/collisions"
+    ],
+    "gripper_closeup": [
+      "/workcell/midair",
+      "/workcell/placeholder_pipe",
+      "/workcell/table",
+      "/workcell/table_frame_T",
+      "/workcell/vx300s_left/vx300s_left/collisions",
+      "/workcell/vx300s_left/vx300s_left/visuals",
+      "/workcell/vx300s_left/vx300s_left_camera_focus",
+      "/workcell/vx300s_left/vx300s_left_camera_focus/collisions",
+      "/workcell/vx300s_left/vx300s_left_camera_focus/sites",
+      "/workcell/vx300s_left/vx300s_left_camera_focus/visuals",
+      "/workcell/vx300s_left/vx300s_left_gripper_link/collisions",
+      "/workcell/vx300s_left/vx300s_left_gripper_link/sites",
+      "/workcell/vx300s_left/vx300s_left_gripper_link/visuals",
+      "/workcell/vx300s_left/vx300s_left_gripper_prop_link",
+      "/workcell/vx300s_left/vx300s_left_gripper_prop_link/collisions",
+      "/workcell/vx300s_left/vx300s_left_left_finger_link/collisions",
+      "/workcell/vx300s_left/vx300s_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh",
+      "/workcell/vx300s_left/vx300s_left_lower_forearm_link/collisions",
+      "/workcell/vx300s_left/vx300s_left_lower_forearm_link/visuals",
+      "/workcell/vx300s_left/vx300s_left_right_finger_link/collisions",
+      "/workcell/vx300s_left/vx300s_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh",
+      "/workcell/vx300s_left/vx300s_left_shoulder_link/collisions",
+      "/workcell/vx300s_left/vx300s_left_shoulder_link/visuals",
+      "/workcell/vx300s_left/vx300s_left_upper_arm_link/collisions",
+      "/workcell/vx300s_left/vx300s_left_upper_arm_link/visuals",
+      "/workcell/vx300s_left/vx300s_left_upper_forearm_link/collisions",
+      "/workcell/vx300s_left/vx300s_left_upper_forearm_link/visuals",
+      "/workcell/vx300s_left/vx300s_left_wrist_link/collisions",
+      "/workcell/vx300s_left/vx300s_left_wrist_link/visuals",
+      "/workcell/worldBody"
+    ]
+  },
+  "source_report_immutable": true,
+  "source_stage_immutable": true,
+  "status": "PARTIAL",
+  "task7": "PARTIAL",
+  "task8": "NOT_RUN",
+  "visual_model_review": "PENDING"
+}

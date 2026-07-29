@@ -1,0 +1,1013 @@
+{
+  "annotated_capture_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/task7_robot_scope/pose_evidence_attempt5/screenshots_annotated_v2",
+  "final_default_collider_modified": false,
+  "left_arm": {
+    "certified_action": "symmetric_close",
+    "certified_phases": [
+      "open_maximum_legal_aperture",
+      "partially_closed",
+      "closed"
+    ],
+    "fixed_camera_within_each_view": true,
+    "records": [
+      {
+        "annotated": {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/task7_robot_scope/pose_evidence_attempt5/screenshots_annotated_v2/full_arm_oblique_open_maximum_legal_aperture_annotated.png",
+          "mode": "RGB",
+          "readable": true,
+          "resolution": [
+            1920,
+            900
+          ],
+          "sha256": "8ab02bf0435a6a07940eb87364dd9f51b96cc37baa172515354edf4943172812",
+          "visual_model_review": "PASS"
+        },
+        "annotated_visual_review": {
+          "checks": {
+            "arrows_do_not_occlude_inward_surfaces": true,
+            "entire_left_arm_visible": true,
+            "finger_boxes_match_visible_geometry": true,
+            "labels_do_not_overlap": true,
+            "panel_values_match_runtime_metadata": true,
+            "pass_scope_is_limited_to_pose_visual_gate": true
+          },
+          "retake_reason": null,
+          "status": "PASS"
+        },
+        "camera": {
+          "capture_backend": "omni.kit.viewport.utility.capture_viewport_to_file",
+          "fixed_camera_within_view": true,
+          "orientation_wxyz": [
+            0.7810447812080383,
+            0.4623778164386749,
+            -0.21382221579551697,
+            -0.3611867129802704
+          ],
+          "position_world_m": [
+            -1.7311066389083862,
+            -0.5919559597969055,
+            1.1089227199554443
+          ],
+          "projections": {
+            "left_finger": {
+              "bbox_center_px": [
+                814.3073427355033,
+                146.32876867617182
+              ],
+              "bbox_max_px": [
+                872.082744967113,
+                189.21610270665025
+              ],
+              "bbox_min_px": [
+                756.5319405038937,
+                103.44143464569338
+              ],
+              "finite_point_count": 831,
+              "fully_in_frame": true
+            },
+            "right_finger": {
+              "bbox_center_px": [
+                929.5682056725028,
+                185.2303956067989
+              ],
+              "bbox_max_px": [
+                965.9162452306746,
+                233.76432913242493
+              ],
+              "bbox_min_px": [
+                893.220166114331,
+                136.69646208117288
+              ],
+              "finite_point_count": 831,
+              "fully_in_frame": true
+            },
+            "robot": {
+              "bbox_center_px": [
+                609.0388919788273,
+                484.7346531068347
+              ],
+              "bbox_max_px": [
+                965.9162452306746,
+                866.027871567976
+              ],
+              "bbox_min_px": [
+                252.1615387269801,
+                103.44143464569338
+              ],
+              "finite_point_count": 80622,
+              "fully_in_frame": true
+            }
+          },
+          "resolution": [
+            1280,
+            900
+          ],
+          "target_world_m": [
+            -0.4464528039097786,
+            0.49999983608722687,
+            0.18397197691956535
+          ],
+          "view": "full_arm_oblique"
+        },
+        "capture_name": "full_arm_oblique_open_maximum_legal_aperture",
+        "phase": "open_maximum_legal_aperture",
+        "raw": {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/task7_robot_scope/pose_evidence_attempt5/screenshots_raw/full_arm_oblique_open_maximum_legal_aperture_raw.png",
+          "mode": "RGBA",
+          "readable": true,
+          "resolution": [
+            1280,
+            900
+          ],
+          "sha256": "028fde7e6c0976702e353c611ddd3c9d063308be05292e306e37346ff873fc51",
+          "visual_model_review": "PASS"
+        },
+        "raw_visual_review": {
+          "checks": {
+            "both_handed_fingers_visible": true,
+            "entire_left_arm_visible_from_base_to_fingers": true,
+            "no_critical_crop": true,
+            "no_debug_geometry": true,
+            "no_environment_occlusion": true,
+            "phase_visually_consistent_with_readback": true
+          },
+          "retake_reason": null,
+          "status": "PASS"
+        },
+        "simulation": {
+          "acceptance_boundary": "POSE/DIRECTION AUXILIARY EVIDENCE ONLY; RUNTIME NUMERIC REPORT REMAINS AUTHORITATIVE",
+          "all_dof_readback": [
+            4.138846634305082e-06,
+            -0.959773063659668,
+            1.16013503074646,
+            4.243401053827256e-05,
+            -0.29917800426483154,
+            2.455090179864783e-05,
+            0.05679286643862724,
+            -0.056784503161907196
+          ],
+          "capture_method": "CERTIFIED_RUNTIME_READBACK_REPLAY_AUXILIARY",
+          "isaac_sim": "5.1.0.0",
+          "kit": "107.3.3",
+          "phase": "open_maximum_legal_aperture",
+          "physics_steps_added": 0,
+          "physx": "107.3.26",
+          "readback_left_m": 0.05679286643862724,
+          "readback_right_m": -0.056784503161907196,
+          "robot": "follower_left",
+          "source_numeric_report": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_cad_finger_task5_drive_probe_arm_max_force_over_combined.json",
+          "source_numeric_report_sha256": "78438748488d683baaa71aab6209e86ca1d65e1d73ca2dc9b9579eef4c5cfda6",
+          "source_runtime_frame": 1,
+          "source_runtime_time_s": 0.016666666666666666,
+          "source_trajectory": "symmetric_close",
+          "stage_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_arm_max_force_over_combined/aloha_viperx_supplier_cad_arm_max_force_over_combined.usda",
+          "stage_sha256": "5bc3bb5ab7fd7ce8fd3028894394ca5915a278e5a996d016a5868a164593ac40"
+        },
+        "view": "full_arm_oblique"
+      },
+      {
+        "annotated": {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/task7_robot_scope/pose_evidence_attempt5/screenshots_annotated_v2/full_arm_oblique_partially_closed_annotated.png",
+          "mode": "RGB",
+          "readable": true,
+          "resolution": [
+            1920,
+            900
+          ],
+          "sha256": "7be825cc39f473202fed61b60dbf071bccd37e1f01ad44ab098d91e102455e4b",
+          "visual_model_review": "PASS"
+        },
+        "annotated_visual_review": {
+          "checks": {
+            "arrows_do_not_occlude_inward_surfaces": true,
+            "entire_left_arm_visible": true,
+            "finger_boxes_match_visible_geometry": true,
+            "labels_do_not_overlap": true,
+            "panel_values_match_runtime_metadata": true,
+            "pass_scope_is_limited_to_pose_visual_gate": true
+          },
+          "retake_reason": null,
+          "status": "PASS"
+        },
+        "camera": {
+          "capture_backend": "omni.kit.viewport.utility.capture_viewport_to_file",
+          "fixed_camera_within_view": true,
+          "orientation_wxyz": [
+            0.7810447812080383,
+            0.4623778164386749,
+            -0.21382221579551697,
+            -0.3611867129802704
+          ],
+          "position_world_m": [
+            -1.7311066389083862,
+            -0.5919559597969055,
+            1.1089227199554443
+          ],
+          "projections": {
+            "left_finger": {
+              "bbox_center_px": [
+                835.8934865852566,
+                152.9163421789334
+              ],
+              "bbox_max_px": [
+                893.6883818211537,
+                196.0020835247718
+              ],
+              "bbox_min_px": [
+                778.0985913493594,
+                109.83060083309499
+              ],
+              "finite_point_count": 831,
+              "fully_in_frame": true
+            },
+            "right_finger": {
+              "bbox_center_px": [
+                906.9762258998746,
+                177.56332349840767
+              ],
+              "bbox_max_px": [
+                943.571426442344,
+                225.8123217828668
+              ],
+              "bbox_min_px": [
+                870.3810253574054,
+                129.31432521394856
+              ],
+              "finite_point_count": 831,
+              "fully_in_frame": true
+            },
+            "robot": {
+              "bbox_center_px": [
+                597.84299184199,
+                487.9292362005355
+              ],
+              "bbox_max_px": [
+                943.571426442344,
+                866.027871567976
+              ],
+              "bbox_min_px": [
+                252.11455724163622,
+                109.83060083309499
+              ],
+              "finite_point_count": 80622,
+              "fully_in_frame": true
+            }
+          },
+          "resolution": [
+            1280,
+            900
+          ],
+          "target_world_m": [
+            -0.4464528039097786,
+            0.49999983608722687,
+            0.18397197691956535
+          ],
+          "view": "full_arm_oblique"
+        },
+        "capture_name": "full_arm_oblique_partially_closed",
+        "phase": "partially_closed",
+        "raw": {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/task7_robot_scope/pose_evidence_attempt5/screenshots_raw/full_arm_oblique_partially_closed_raw.png",
+          "mode": "RGBA",
+          "readable": true,
+          "resolution": [
+            1280,
+            900
+          ],
+          "sha256": "c6c3d8c2a46389694705ea1f6522f43f36f6ebde874009cf323350b0b730c3e3",
+          "visual_model_review": "PASS"
+        },
+        "raw_visual_review": {
+          "checks": {
+            "both_handed_fingers_visible": true,
+            "entire_left_arm_visible_from_base_to_fingers": true,
+            "no_critical_crop": true,
+            "no_debug_geometry": true,
+            "no_environment_occlusion": true,
+            "phase_visually_consistent_with_readback": true
+          },
+          "retake_reason": null,
+          "status": "PASS"
+        },
+        "simulation": {
+          "acceptance_boundary": "POSE/DIRECTION AUXILIARY EVIDENCE ONLY; RUNTIME NUMERIC REPORT REMAINS AUTHORITATIVE",
+          "all_dof_readback": [
+            1.5915004496491747e-06,
+            -0.9599807262420654,
+            1.159956455230713,
+            3.914915578207001e-05,
+            -0.3001176118850708,
+            1.7042366380337626e-05,
+            0.03859834745526314,
+            -0.038597412407398224
+          ],
+          "capture_method": "CERTIFIED_RUNTIME_READBACK_REPLAY_AUXILIARY",
+          "isaac_sim": "5.1.0.0",
+          "kit": "107.3.3",
+          "phase": "partially_closed",
+          "physics_steps_added": 0,
+          "physx": "107.3.26",
+          "readback_left_m": 0.03859834745526314,
+          "readback_right_m": -0.038597412407398224,
+          "robot": "follower_left",
+          "source_numeric_report": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_cad_finger_task5_drive_probe_arm_max_force_over_combined.json",
+          "source_numeric_report_sha256": "78438748488d683baaa71aab6209e86ca1d65e1d73ca2dc9b9579eef4c5cfda6",
+          "source_runtime_frame": 61,
+          "source_runtime_time_s": 1.0166666666666666,
+          "source_trajectory": "symmetric_close",
+          "stage_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_arm_max_force_over_combined/aloha_viperx_supplier_cad_arm_max_force_over_combined.usda",
+          "stage_sha256": "5bc3bb5ab7fd7ce8fd3028894394ca5915a278e5a996d016a5868a164593ac40"
+        },
+        "view": "full_arm_oblique"
+      },
+      {
+        "annotated": {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/task7_robot_scope/pose_evidence_attempt5/screenshots_annotated_v2/full_arm_oblique_closed_annotated.png",
+          "mode": "RGB",
+          "readable": true,
+          "resolution": [
+            1920,
+            900
+          ],
+          "sha256": "f56bf6f35bfdd181db36df8f84de045c68180167ad5c0b574f3da7f2f875585a",
+          "visual_model_review": "PASS"
+        },
+        "annotated_visual_review": {
+          "checks": {
+            "arrows_do_not_occlude_inward_surfaces": true,
+            "entire_left_arm_visible": true,
+            "finger_boxes_match_visible_geometry": true,
+            "labels_do_not_overlap": true,
+            "panel_values_match_runtime_metadata": true,
+            "pass_scope_is_limited_to_pose_visual_gate": true
+          },
+          "retake_reason": null,
+          "status": "PASS"
+        },
+        "camera": {
+          "capture_backend": "omni.kit.viewport.utility.capture_viewport_to_file",
+          "fixed_camera_within_view": true,
+          "orientation_wxyz": [
+            0.7810447812080383,
+            0.4623778164386749,
+            -0.21382221579551697,
+            -0.3611867129802704
+          ],
+          "position_world_m": [
+            -1.7311066389083862,
+            -0.5919559597969055,
+            1.1089227199554443
+          ],
+          "projections": {
+            "left_finger": {
+              "bbox_center_px": [
+                857.016151245374,
+                159.71772098401405
+              ],
+              "bbox_max_px": [
+                914.811008662748,
+                202.999888519086
+              ],
+              "bbox_min_px": [
+                799.2212938279998,
+                116.43555344894209
+              ],
+              "finite_point_count": 831,
+              "fully_in_frame": true
+            },
+            "right_finger": {
+              "bbox_center_px": [
+                885.362151351306,
+                170.62149495607088
+              ],
+              "bbox_max_px": [
+                922.1742522862504,
+                218.53075861998497
+              ],
+              "bbox_min_px": [
+                848.5500504163615,
+                122.71223129215682
+              ],
+              "finite_point_count": 831,
+              "fully_in_frame": true
+            },
+            "robot": {
+              "bbox_center_px": [
+                593.7646496898782,
+                491.23171250845905
+              ],
+              "bbox_max_px": [
+                935.4147421381202,
+                866.027871567976
+              ],
+              "bbox_min_px": [
+                252.11455724163622,
+                116.43555344894209
+              ],
+              "finite_point_count": 80622,
+              "fully_in_frame": true
+            }
+          },
+          "resolution": [
+            1280,
+            900
+          ],
+          "target_world_m": [
+            -0.4464528039097786,
+            0.49999983608722687,
+            0.18397197691956535
+          ],
+          "view": "full_arm_oblique"
+        },
+        "capture_name": "full_arm_oblique_closed",
+        "phase": "closed",
+        "raw": {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/task7_robot_scope/pose_evidence_attempt5/screenshots_raw/full_arm_oblique_closed_raw.png",
+          "mode": "RGBA",
+          "readable": true,
+          "resolution": [
+            1280,
+            900
+          ],
+          "sha256": "28e56df0ca10d03ae975a6736a4b8dcca20de088c161c236184a40bcca48c8a3",
+          "visual_model_review": "PASS"
+        },
+        "raw_visual_review": {
+          "checks": {
+            "both_handed_fingers_visible": true,
+            "entire_left_arm_visible_from_base_to_fingers": true,
+            "no_critical_crop": true,
+            "no_debug_geometry": true,
+            "no_environment_occlusion": true,
+            "phase_visually_consistent_with_readback": true
+          },
+          "retake_reason": null,
+          "status": "PASS"
+        },
+        "simulation": {
+          "acceptance_boundary": "POSE/DIRECTION AUXILIARY EVIDENCE ONLY; RUNTIME NUMERIC REPORT REMAINS AUTHORITATIVE",
+          "all_dof_readback": [
+            1.592531475580472e-06,
+            -0.9599807262420654,
+            1.159956455230713,
+            4.041336796944961e-05,
+            -0.3001175820827484,
+            1.748606882756576e-05,
+            0.021000046283006668,
+            -0.020999999716877937
+          ],
+          "capture_method": "CERTIFIED_RUNTIME_READBACK_REPLAY_AUXILIARY",
+          "isaac_sim": "5.1.0.0",
+          "kit": "107.3.3",
+          "phase": "closed",
+          "physics_steps_added": 0,
+          "physx": "107.3.26",
+          "readback_left_m": 0.021000046283006668,
+          "readback_right_m": -0.020999999716877937,
+          "robot": "follower_left",
+          "source_numeric_report": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_cad_finger_task5_drive_probe_arm_max_force_over_combined.json",
+          "source_numeric_report_sha256": "78438748488d683baaa71aab6209e86ca1d65e1d73ca2dc9b9579eef4c5cfda6",
+          "source_runtime_frame": 120,
+          "source_runtime_time_s": 2.0,
+          "source_trajectory": "symmetric_close",
+          "stage_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_arm_max_force_over_combined/aloha_viperx_supplier_cad_arm_max_force_over_combined.usda",
+          "stage_sha256": "5bc3bb5ab7fd7ce8fd3028894394ca5915a278e5a996d016a5868a164593ac40"
+        },
+        "view": "full_arm_oblique"
+      },
+      {
+        "annotated": {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/task7_robot_scope/pose_evidence_attempt5/screenshots_annotated_v2/gripper_closeup_open_maximum_legal_aperture_annotated.png",
+          "mode": "RGB",
+          "readable": true,
+          "resolution": [
+            1920,
+            900
+          ],
+          "sha256": "32b7f957c9119a486c75f479c1d92b5c6077abb9bb6188e1759b0f47ee4445e8",
+          "visual_model_review": "PASS"
+        },
+        "annotated_visual_review": {
+          "checks": {
+            "arrows_do_not_occlude_inward_surfaces": true,
+            "blue_left_orange_right_mapping_clear": true,
+            "inward_surfaces_visible": true,
+            "labels_do_not_overlap": true,
+            "panel_values_match_runtime_metadata": true,
+            "pass_scope_is_limited_to_pose_visual_gate": true
+          },
+          "retake_reason": null,
+          "status": "PASS"
+        },
+        "camera": {
+          "capture_backend": "omni.kit.viewport.utility.capture_viewport_to_file",
+          "fixed_camera_within_view": true,
+          "orientation_wxyz": [
+            0.7153890132904053,
+            0.4249306619167328,
+            -0.29887449741363525,
+            -0.4672542214393616
+          ],
+          "position_world_m": [
+            -0.6394227147102356,
+            0.3435142934322357,
+            0.5204766988754272
+          ],
+          "projections": {
+            "left_finger": {
+              "bbox_center_px": [
+                447.5689897567022,
+                315.8879259576797
+              ],
+              "bbox_max_px": [
+                636.0346224782115,
+                492.92631057365077
+              ],
+              "bbox_min_px": [
+                259.1033570351929,
+                138.84954134170871
+              ],
+              "finite_point_count": 831,
+              "fully_in_frame": true
+            },
+            "right_finger": {
+              "bbox_center_px": [
+                1010.9876984446983,
+                430.8377981699269
+              ],
+              "bbox_max_px": [
+                1100.4096418494987,
+                646.4878735176361
+              ],
+              "bbox_min_px": [
+                921.5657550398978,
+                215.18772282221764
+              ],
+              "finite_point_count": 831,
+              "fully_in_frame": true
+            },
+            "robot": {
+              "bbox_center_px": [
+                679.7564994423458,
+                392.6687074296724
+              ],
+              "bbox_max_px": [
+                1100.4096418494987,
+                646.4878735176361
+              ],
+              "bbox_min_px": [
+                259.1033570351929,
+                138.84954134170871
+              ],
+              "finite_point_count": 1662,
+              "fully_in_frame": true
+            }
+          },
+          "resolution": [
+            1280,
+            900
+          ],
+          "target_world_m": [
+            -0.24676114171026128,
+            0.5000032527387931,
+            0.30136218953935967
+          ],
+          "view": "gripper_closeup"
+        },
+        "capture_name": "gripper_closeup_open_maximum_legal_aperture",
+        "phase": "open_maximum_legal_aperture",
+        "raw": {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/task7_robot_scope/pose_evidence_attempt5/screenshots_raw/gripper_closeup_open_maximum_legal_aperture_raw.png",
+          "mode": "RGBA",
+          "readable": true,
+          "resolution": [
+            1280,
+            900
+          ],
+          "sha256": "4624f26761bd5060759e34506c2afe12ff517604c410ec685ed0402a50740c6e",
+          "visual_model_review": "PASS"
+        },
+        "raw_visual_review": {
+          "checks": {
+            "blue_left_finger_complete": true,
+            "inward_surfaces_visible_and_opposed": true,
+            "no_critical_crop": true,
+            "no_shell_occlusion": true,
+            "orange_right_finger_complete": true,
+            "phase_visually_consistent_with_readback": true
+          },
+          "retake_reason": null,
+          "status": "PASS"
+        },
+        "simulation": {
+          "acceptance_boundary": "POSE/DIRECTION AUXILIARY EVIDENCE ONLY; RUNTIME NUMERIC REPORT REMAINS AUTHORITATIVE",
+          "all_dof_readback": [
+            4.138846634305082e-06,
+            -0.959773063659668,
+            1.16013503074646,
+            4.243401053827256e-05,
+            -0.29917800426483154,
+            2.455090179864783e-05,
+            0.05679286643862724,
+            -0.056784503161907196
+          ],
+          "capture_method": "CERTIFIED_RUNTIME_READBACK_REPLAY_AUXILIARY",
+          "isaac_sim": "5.1.0.0",
+          "kit": "107.3.3",
+          "phase": "open_maximum_legal_aperture",
+          "physics_steps_added": 0,
+          "physx": "107.3.26",
+          "readback_left_m": 0.05679286643862724,
+          "readback_right_m": -0.056784503161907196,
+          "robot": "follower_left",
+          "source_numeric_report": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_cad_finger_task5_drive_probe_arm_max_force_over_combined.json",
+          "source_numeric_report_sha256": "78438748488d683baaa71aab6209e86ca1d65e1d73ca2dc9b9579eef4c5cfda6",
+          "source_runtime_frame": 1,
+          "source_runtime_time_s": 0.016666666666666666,
+          "source_trajectory": "symmetric_close",
+          "stage_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_arm_max_force_over_combined/aloha_viperx_supplier_cad_arm_max_force_over_combined.usda",
+          "stage_sha256": "5bc3bb5ab7fd7ce8fd3028894394ca5915a278e5a996d016a5868a164593ac40"
+        },
+        "view": "gripper_closeup"
+      },
+      {
+        "annotated": {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/task7_robot_scope/pose_evidence_attempt5/screenshots_annotated_v2/gripper_closeup_partially_closed_annotated.png",
+          "mode": "RGB",
+          "readable": true,
+          "resolution": [
+            1920,
+            900
+          ],
+          "sha256": "a467df973db5aeeab70adcacb71a6d5aa7f16e35b5921d9a3f22641061e76a99",
+          "visual_model_review": "PASS"
+        },
+        "annotated_visual_review": {
+          "checks": {
+            "arrows_do_not_occlude_inward_surfaces": true,
+            "blue_left_orange_right_mapping_clear": true,
+            "inward_surfaces_visible": true,
+            "labels_do_not_overlap": true,
+            "panel_values_match_runtime_metadata": true,
+            "pass_scope_is_limited_to_pose_visual_gate": true
+          },
+          "retake_reason": null,
+          "status": "PASS"
+        },
+        "camera": {
+          "capture_backend": "omni.kit.viewport.utility.capture_viewport_to_file",
+          "fixed_camera_within_view": true,
+          "orientation_wxyz": [
+            0.7153890132904053,
+            0.4249306619167328,
+            -0.29887449741363525,
+            -0.4672542214393616
+          ],
+          "position_world_m": [
+            -0.6394227147102356,
+            0.3435142934322357,
+            0.5204766988754272
+          ],
+          "projections": {
+            "left_finger": {
+              "bbox_center_px": [
+                545.0581667271058,
+                334.50448458159383
+              ],
+              "bbox_max_px": [
+                728.9441019118542,
+                514.9048115214658
+              ],
+              "bbox_min_px": [
+                361.1722315423575,
+                154.10415764172188
+              ],
+              "finite_point_count": 831,
+              "fully_in_frame": true
+            },
+            "right_finger": {
+              "bbox_center_px": [
+                897.8571054779338,
+                406.817786095903
+              ],
+              "bbox_max_px": [
+                985.9497550391239,
+                618.6304484377963
+              ],
+              "bbox_min_px": [
+                809.7644559167436,
+                195.00512375400962
+              ],
+              "finite_point_count": 831,
+              "fully_in_frame": true
+            },
+            "robot": {
+              "bbox_center_px": [
+                673.5609932907407,
+                386.3673030397591
+              ],
+              "bbox_max_px": [
+                985.9497550391239,
+                618.6304484377963
+              ],
+              "bbox_min_px": [
+                361.1722315423575,
+                154.10415764172188
+              ],
+              "finite_point_count": 1662,
+              "fully_in_frame": true
+            }
+          },
+          "resolution": [
+            1280,
+            900
+          ],
+          "target_world_m": [
+            -0.24676114171026128,
+            0.5000032527387931,
+            0.30136218953935967
+          ],
+          "view": "gripper_closeup"
+        },
+        "capture_name": "gripper_closeup_partially_closed",
+        "phase": "partially_closed",
+        "raw": {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/task7_robot_scope/pose_evidence_attempt5/screenshots_raw/gripper_closeup_partially_closed_raw.png",
+          "mode": "RGBA",
+          "readable": true,
+          "resolution": [
+            1280,
+            900
+          ],
+          "sha256": "d0d23a4e485e1016bfd9b2c7a0a59d8e8afc4762f8238feafa0a89eb65c6eca7",
+          "visual_model_review": "PASS"
+        },
+        "raw_visual_review": {
+          "checks": {
+            "blue_left_finger_complete": true,
+            "inward_surfaces_visible_and_opposed": true,
+            "no_critical_crop": true,
+            "no_shell_occlusion": true,
+            "orange_right_finger_complete": true,
+            "phase_visually_consistent_with_readback": true
+          },
+          "retake_reason": null,
+          "status": "PASS"
+        },
+        "simulation": {
+          "acceptance_boundary": "POSE/DIRECTION AUXILIARY EVIDENCE ONLY; RUNTIME NUMERIC REPORT REMAINS AUTHORITATIVE",
+          "all_dof_readback": [
+            1.5915004496491747e-06,
+            -0.9599807262420654,
+            1.159956455230713,
+            3.914915578207001e-05,
+            -0.3001176118850708,
+            1.7042366380337626e-05,
+            0.03859834745526314,
+            -0.038597412407398224
+          ],
+          "capture_method": "CERTIFIED_RUNTIME_READBACK_REPLAY_AUXILIARY",
+          "isaac_sim": "5.1.0.0",
+          "kit": "107.3.3",
+          "phase": "partially_closed",
+          "physics_steps_added": 0,
+          "physx": "107.3.26",
+          "readback_left_m": 0.03859834745526314,
+          "readback_right_m": -0.038597412407398224,
+          "robot": "follower_left",
+          "source_numeric_report": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_cad_finger_task5_drive_probe_arm_max_force_over_combined.json",
+          "source_numeric_report_sha256": "78438748488d683baaa71aab6209e86ca1d65e1d73ca2dc9b9579eef4c5cfda6",
+          "source_runtime_frame": 61,
+          "source_runtime_time_s": 1.0166666666666666,
+          "source_trajectory": "symmetric_close",
+          "stage_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_arm_max_force_over_combined/aloha_viperx_supplier_cad_arm_max_force_over_combined.usda",
+          "stage_sha256": "5bc3bb5ab7fd7ce8fd3028894394ca5915a278e5a996d016a5868a164593ac40"
+        },
+        "view": "gripper_closeup"
+      },
+      {
+        "annotated": {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/task7_robot_scope/pose_evidence_attempt5/screenshots_annotated_v2/gripper_closeup_closed_annotated.png",
+          "mode": "RGB",
+          "readable": true,
+          "resolution": [
+            1920,
+            900
+          ],
+          "sha256": "d92fbb27440cd36a0b32eea24004c8e5e9eb1e1cec02290435268d3e6d9c7c6f",
+          "visual_model_review": "PASS"
+        },
+        "annotated_visual_review": {
+          "checks": {
+            "arrows_do_not_occlude_inward_surfaces": true,
+            "blue_left_orange_right_mapping_clear": true,
+            "inward_surfaces_visible": true,
+            "labels_do_not_overlap": true,
+            "panel_values_match_runtime_metadata": true,
+            "pass_scope_is_limited_to_pose_visual_gate": true
+          },
+          "retake_reason": null,
+          "status": "PASS"
+        },
+        "camera": {
+          "capture_backend": "omni.kit.viewport.utility.capture_viewport_to_file",
+          "fixed_camera_within_view": true,
+          "orientation_wxyz": [
+            0.7153890132904053,
+            0.4249306619167328,
+            -0.29887449741363525,
+            -0.4672542214393616
+          ],
+          "position_world_m": [
+            -0.6394227147102356,
+            0.3435142934322357,
+            0.5204766988754272
+          ],
+          "projections": {
+            "left_finger": {
+              "bbox_center_px": [
+                641.8943386858838,
+                354.46573787064295
+              ],
+              "bbox_max_px": [
+                821.2037623014331,
+                537.9778651296725
+              ],
+              "bbox_min_px": [
+                462.5849150703345,
+                170.95361061161339
+              ],
+              "finite_point_count": 831,
+              "fully_in_frame": true
+            },
+            "right_finger": {
+              "bbox_center_px": [
+                791.0177069489166,
+                385.6531799663862
+              ],
+              "bbox_max_px": [
+                877.8752546957113,
+                593.6496295384471
+              ],
+              "bbox_min_px": [
+                704.1601592021218,
+                177.65673039432522
+              ],
+              "finite_point_count": 831,
+              "fully_in_frame": true
+            },
+            "robot": {
+              "bbox_center_px": [
+                670.2300848830229,
+                382.30162007503026
+              ],
+              "bbox_max_px": [
+                877.8752546957113,
+                593.6496295384471
+              ],
+              "bbox_min_px": [
+                462.5849150703345,
+                170.95361061161339
+              ],
+              "finite_point_count": 1662,
+              "fully_in_frame": true
+            }
+          },
+          "resolution": [
+            1280,
+            900
+          ],
+          "target_world_m": [
+            -0.24676114171026128,
+            0.5000032527387931,
+            0.30136218953935967
+          ],
+          "view": "gripper_closeup"
+        },
+        "capture_name": "gripper_closeup_closed",
+        "phase": "closed",
+        "raw": {
+          "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/task7_robot_scope/pose_evidence_attempt5/screenshots_raw/gripper_closeup_closed_raw.png",
+          "mode": "RGBA",
+          "readable": true,
+          "resolution": [
+            1280,
+            900
+          ],
+          "sha256": "c6caf6a742cba4b52ee069819d9299ee0df6a6be8f623c9f5bc04ad77ff95be6",
+          "visual_model_review": "PASS"
+        },
+        "raw_visual_review": {
+          "checks": {
+            "blue_left_finger_complete": true,
+            "inward_surfaces_visible_and_opposed": true,
+            "no_critical_crop": true,
+            "no_shell_occlusion": true,
+            "orange_right_finger_complete": true,
+            "phase_visually_consistent_with_readback": true
+          },
+          "retake_reason": null,
+          "status": "PASS"
+        },
+        "simulation": {
+          "acceptance_boundary": "POSE/DIRECTION AUXILIARY EVIDENCE ONLY; RUNTIME NUMERIC REPORT REMAINS AUTHORITATIVE",
+          "all_dof_readback": [
+            1.592531475580472e-06,
+            -0.9599807262420654,
+            1.159956455230713,
+            4.041336796944961e-05,
+            -0.3001175820827484,
+            1.748606882756576e-05,
+            0.021000046283006668,
+            -0.020999999716877937
+          ],
+          "capture_method": "CERTIFIED_RUNTIME_READBACK_REPLAY_AUXILIARY",
+          "isaac_sim": "5.1.0.0",
+          "kit": "107.3.3",
+          "phase": "closed",
+          "physics_steps_added": 0,
+          "physx": "107.3.26",
+          "readback_left_m": 0.021000046283006668,
+          "readback_right_m": -0.020999999716877937,
+          "robot": "follower_left",
+          "source_numeric_report": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_cad_finger_task5_drive_probe_arm_max_force_over_combined.json",
+          "source_numeric_report_sha256": "78438748488d683baaa71aab6209e86ca1d65e1d73ca2dc9b9579eef4c5cfda6",
+          "source_runtime_frame": 120,
+          "source_runtime_time_s": 2.0,
+          "source_trajectory": "symmetric_close",
+          "stage_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_arm_max_force_over_combined/aloha_viperx_supplier_cad_arm_max_force_over_combined.usda",
+          "stage_sha256": "5bc3bb5ab7fd7ce8fd3028894394ca5915a278e5a996d016a5868a164593ac40"
+        },
+        "view": "gripper_closeup"
+      }
+    ],
+    "states_visually_distinct": true,
+    "status": "PASS"
+  },
+  "raw_capture_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/task7_robot_scope/pose_evidence_attempt5/screenshots_raw",
+  "retake_history": [
+    {
+      "attempt": "pose_evidence_rejected_attempt1",
+      "reason": "full-arm view framed only the wrist/gripper; camera-focus and other non-target geometry remained; closeup was occluded",
+      "status": "REJECTED_FRAMING_DEBUG_GEOMETRY_AND_OCCLUSION"
+    },
+    {
+      "attempt": "pose_evidence_attempt2",
+      "reason": "instance-proxy bounds fixed the full-arm framing, but a red debug object and table edge remained",
+      "status": "REJECTED_NON_TARGET_RED_GEOMETRY_AND_TABLE_EDGE"
+    },
+    {
+      "attempt": "pose_evidence_attempt3",
+      "reason": "site debug axes remained above the gripper",
+      "status": "REJECTED_BLUE_SITE_DEBUG_AXES"
+    },
+    {
+      "attempt": "pose_evidence_attempt4",
+      "reason": "hiding gripper-prop did not remove the axes; audit traced the issue to the /sites container root",
+      "status": "REJECTED_SITE_ROOT_PATH_BOUNDARY"
+    },
+    {
+      "attempt": "pose_evidence_attempt5_raw",
+      "reason": "six raw images show the complete follower_left or unobstructed finger closeup with distinct certified states",
+      "status": "PASS_INDIVIDUAL_VISUAL_MODEL_REVIEW"
+    },
+    {
+      "attempt": "pose_evidence_attempt5_annotated_v1",
+      "reason": "closed closeup arrows and centerline crossed the inner contact region",
+      "status": "REJECTED_ANNOTATION_OCCLUDES_INWARD_SURFACE"
+    },
+    {
+      "attempt": "pose_evidence_attempt5_annotated_v2",
+      "reason": "arrows moved above geometry and centerline breaks around the finger boxes",
+      "status": "PASS_INDIVIDUAL_VISUAL_MODEL_REVIEW"
+    }
+  ],
+  "right_arm": {
+    "blocker": "HARD_BLOCKER_APPROVED_STAGE_MISSING_FOLLOWER_RIGHT",
+    "reason": "The user-approved frozen supplier-CAD review Stage contains follower_left only. No transform, placement, or supplier-CAD right-arm Stage was approved, so no image was fabricated.",
+    "status": "NOT_RUN"
+  },
+  "schema_version": 1,
+  "screenshot_role": "AUXILIARY_EVIDENCE_NOT_PHYSICS_ACCEPTANCE",
+  "source_runtime_evidence": {
+    "bottle_phases": [
+      "open",
+      "bilateral_contact",
+      "release",
+      "hold_end"
+    ],
+    "bottle_report": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_cad_finger_task5_bottle.json",
+    "bottle_report_sha256": "36e638256b706bbd8b83a88290a0e67ccd4b97e186cae11cd61ec9ec95a00c75",
+    "bottle_screenshot_review": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_cad_finger_task5_bottle_screenshot_review.json",
+    "bottle_screenshot_review_sha256": "d91953acfbf84ba62a78054e6b5dd4145d3aabf63f348375f578a9b33bba2c8c",
+    "bottle_static_hold": "PASS",
+    "numeric_report": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_cad_finger_task5_drive_probe_arm_max_force_over_combined.json",
+    "numeric_report_sha256": "78438748488d683baaa71aab6209e86ca1d65e1d73ca2dc9b9579eef4c5cfda6",
+    "numeric_structure": "PASS",
+    "task7_validation": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_cad_finger_task7_validation.json",
+    "task7_validation_sha256": "5fa7b8cd51029b4362449fe3b302f58b4fa10de575ac239fd3f56e771455071e"
+  },
+  "status": "PARTIAL",
+  "task7": "PARTIAL",
+  "task8": "NOT_RUN"
+}
