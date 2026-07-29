@@ -43,7 +43,7 @@ rg -n '^\[\[trigger\]\]|^menu\.name = "Window/Browsers/Isaac"|^menu\.window = "I
   /home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.browser/config/extension.toml
 ```
 
-Expected: both legacy dependencies, the official Content Browser dependency, and all three trigger lines are present.
+Expected: all three legacy dependencies, the official Content Browser dependency, and all three trigger lines are present.
 
 - [ ] **Step 4: Run the RED configuration probe**
 
@@ -62,6 +62,7 @@ deps = base_data["dependencies"]
 assert "isaacsim.gui.content_browser" in deps
 assert "isaacsim.asset.browser" not in deps
 assert "omni.isaac.asset_browser" not in deps
+assert "omni.isaac.assets_check" not in deps
 assert "trigger" not in legacy_data
 PY
 ```
@@ -93,7 +94,7 @@ cp -a /home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11
 
 Assert that both backups exist, are regular files, and are byte-identical to their originals with `cmp`.
 
-- [ ] **Step 3: Remove the two legacy dependencies**
+- [ ] **Step 3: Remove the three legacy dependencies**
 
 Apply this exact patch:
 
@@ -110,7 +111,8 @@ Apply the second exact hunk:
 ```diff
  # Deprecated extensions for backwards compatibility
 -"omni.isaac.asset_browser" = {}
- "omni.isaac.assets_check" = {}
+-"omni.isaac.assets_check" = {}
+ "omni.isaac.cloner" = {}
 ```
 
 Do not change `"isaacsim.gui.content_browser" = {}`.
@@ -214,6 +216,7 @@ is present, while these startup/apply-settings patterns are absent:
 ```text
 About to startup: [ext: isaacsim.asset.browser-
 About to startup: [ext: omni.isaac.asset_browser-
+About to startup: [ext: omni.isaac.assets_check-
 [ext: isaacsim.asset.browser-1.3.23] applying settings
 [ext: omni.isaac.asset_browser-1.0.6] applying settings
 ```
@@ -284,6 +287,7 @@ Require zero matches for all of these patterns:
 ```text
 About to startup: [ext: isaacsim.asset.browser-
 About to startup: [ext: omni.isaac.asset_browser-
+About to startup: [ext: omni.isaac.assets_check-
 [ext: isaacsim.asset.browser-1.3.23] applying settings
 [ext: omni.isaac.asset_browser-1.0.6] applying settings
 Thumbnail .* does not belong to file

@@ -22,11 +22,12 @@ the legacy remote traversal and thumbnail-warning storm no longer occur.
 
 The active application inherits its extension dependencies from
 `isaacsim/apps/isaacsim.exp.base.kit`. The repair will make a timestamped backup
-of that file and remove exactly these two dependency entries:
+of that file and remove exactly these three dependency entries:
 
 ```toml
 "isaacsim.asset.browser" = {}
 "omni.isaac.asset_browser" = {}
+"omni.isaac.assets_check" = {}
 ```
 
 The existing official dependency remains unchanged:
@@ -34,6 +35,11 @@ The existing official dependency remains unchanged:
 ```toml
 "isaacsim.gui.content_browser" = {}
 ```
+
+`omni.isaac.assets_check` is a deprecated compatibility extension whose
+manifest depends on `isaacsim.asset.browser`. Removing only the two browser
+entries leaves this indirect dependency able to start the old browser, so all
+three entries must be removed from the Base App graph.
 
 The legacy extension manifest also declares a lazy-loading `[[trigger]]` for
 `Window/Browsers/Isaac`. The repair will back up that manifest and remove only
@@ -60,10 +66,10 @@ write Asset Browser cache data.
 3. Stop only the authorized Isaac Sim GUI process and verify it exits.
 4. Create timestamped backups of `isaacsim.exp.base.kit` and the legacy
    extension's `config/extension.toml`.
-5. Remove only the two legacy dependency lines and the three-line lazy trigger
+5. Remove only the three legacy dependency lines and the three-line lazy trigger
    block with deterministic patches.
 6. Validate both TOML files and assert that Content Browser remains enabled
-   while both legacy dependencies and the legacy menu trigger are absent.
+   while all three legacy dependencies and the legacy menu trigger are absent.
 7. Start Isaac Sim with the same Full app entry point and verify application
    readiness.
 8. Inspect the new Kit log for extension registration/startup and traversal
@@ -76,6 +82,7 @@ write Asset Browser cache data.
 - `isaacsim.gui.content_browser` registers and starts.
 - Neither `isaacsim.asset.browser` nor `omni.isaac.asset_browser` is selected,
   enabled, or started.
+- The deprecated `omni.isaac.assets_check` shim is not selected or started.
 - `Window/Browsers/Isaac` is absent while the official Content Browser remains
   available.
 - No request traverses the legacy hard-coded
