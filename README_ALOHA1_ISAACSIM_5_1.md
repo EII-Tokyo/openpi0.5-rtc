@@ -19,7 +19,7 @@ sim-to-real dynamics model and it is not yet accepted for bottle insertion.
 | Supplier CAD screenshot visual gate | PASS (8 raw + 8 annotated) | `aloha_viper_gripper_screenshot_review.json`; CAD visual evidence only |
 | Finger tessellation determinism | PASS | project-pinned FreeCAD 1.1.1 / OCCT 7.8.1; `MeshPart.meshFromShape`, 0.20 mm linear and 20° angular deflection; fresh-run manifest PASS |
 | Supplier-CAD Isaac Stage authorization | PASS | user-approved `local_eval_assets/aloha_isaac_assets/aloha_viperx.usd`, SHA-256 `b24afe…493e`; source remains immutable |
-| Supplier-CAD isolated diagnostic asset | PARTIAL | follower_left CAD visual/collider mapping and static geometry pass; approved Stage has no follower_right |
+| Supplier-CAD isolated diagnostic assets | PARTIAL | follower_left remains validated; an independent follower_right robot-local Stage now exists and passes arm motion/structure, but mimic accuracy fails and workcell placement is unverified |
 | Supplier-CAD no-bottle screenshot gate | PASS (12 raw + 12 annotated) | `aloha_viper_cad_finger_task5_structure_screenshot_review.json`; visual evidence only |
 | Supplier-CAD Task 5 dynamic structure | **PASS** | numeric isolated diagnostic PASS plus fixed-camera auxiliary runtime-readback viewport replay PASS; not final-asset promotion |
 | Supplier-CAD follower_left static bottle hold | **PASS** | isolated 20 g diagnostic: `20/20`, maximum full-interval drop `0.0004539191722869873 m`; friction remains `TEMPORARY_UNCALIBRATED`, no lift/final promotion claim |
@@ -28,8 +28,8 @@ sim-to-real dynamics model and it is not yet accepted for bottle insertion.
 | Gripper hold root cause v2 | **SUPERSEDED INPUT** | prior `inconclusive` used the rejected generic finger mesh |
 | Supplier CAD raw + annotated visual review | PASS (8 pairs) | `aloha_viper_gripper_screenshot_review.json` |
 | Workcell and logical cameras | PARTIAL | `workcell_manifest.json`, `camera_validation.json` |
-| Supplier-CAD Task 7 validation | **PARTIAL** | follower_left structure/DOF/20-run hold preserved; PhysicsRules and RobotRules have 0 blocking findings, SimReady passes; remaining warnings and bounded evidence gaps are retained |
-| Task 7 certified-pose screenshots | **PARTIAL** | follower_left PASS: 6 raw + 6 annotated, individually vision-reviewed; follower_right NOT_RUN because the approved Stage contains no right follower |
+| Supplier-CAD Task 7 aggregate | **FAIL** | follower_left remains PARTIAL; follower_right robot-local is FAIL from mimic error plus 5 PhysicsRules and 4 RobotRules blocking findings; SimReady passes; workcell placement remains separate |
+| Task 7 certified-pose screenshots | **PARTIAL** | follower_left: 6 raw + 6 annotated PASS; follower_right robot-local: 7 raw + 7 annotated visual PASS, while numeric runtime remains PARTIAL because mimic accuracy fails |
 | CAD render/tessellation determinism | PASS | `aloha_viper_gripper_screenshot_review.json`, `aloha_viper_finger_tessellation.json` |
 | Task 8 optimization | **NOT_RUN** | no mesh merge, collider promotion, instanceable, payload, or performance optimization |
 
@@ -382,9 +382,17 @@ The user explicitly approved
 as the supplier-CAD isolated review Stage. Its SHA-256 remains
 `b24afe3678155654892c69517fc58ecd970108d68cec56b02dc6fdcb8bf4493e`;
 the source Stage, default configuration, and final collider were not modified.
-All changes are independent diagnostic layers. The approved Stage contains
-`follower_left` but no `follower_right`, which remains a bounded
-`HARD_BLOCKER` for right-follower runtime validation.
+All changes are independent diagnostic layers. That approved review Stage
+contains `follower_left` but no `follower_right`; this fact is only a boundary
+of that Stage and is not evidence that the supplier CAD lacks a right arm.
+The STEP audit classifies `Simple Aloha Viper 2024-5-13.step` as
+`VERIFIED_SINGLE_REUSABLE_ROBOT_PRODUCT`: both Stationary ALOHA followers use
+the same robot-local ViperX product, with independent instance names and
+workcell transforms. A separate, non-mirrored follower_right diagnostic Stage
+has therefore been generated at
+`assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/supplier_cad_follower_right.usda`.
+Only the measured or calibrated follower_right workcell installation transform
+remains `HARD_BLOCKER_FOLLOWER_RIGHT_WORKCELL_INSTALL_TRANSFORM`.
 
 Consequently:
 
@@ -404,14 +412,23 @@ Consequently:
 - correct supplier-CAD follower_left static bottle hold: `PASS` for `20/20`
   fresh resets, with maximum full-interval drop
   `0.0004539191722869873 m` against the unchanged `0.010 m` gate;
-- Task 7: `PARTIAL`; two fresh validations have identical signature and
+- follower_left Task 7: `PARTIAL`; two fresh validations have identical signature and
   preserve the passing Task 5 hold. PhysicsRules and RobotRules each have zero
   blocking findings after validating the physical diagnostic and schema-only
   robot wrapper at their correct scopes; warnings and bounded evidence gaps
   remain visible;
+- follower_right robot-local runtime: all 24 six-arm one-joint cases,
+  motion direction, aperture monotonicity, legal range, first-frame jump,
+  2-second pose hold, initial-overlap disposition, and deterministic repeat
+  pass; mimic accuracy fails because the maximum residual
+  `0.0017154589295387268 m` exceeds the unchanged `0.001 m` gate;
+- two-follower Task 7 aggregate: `FAIL`, because the follower_right
+  robot-local mimic gate and official PhysicsRules/RobotRules are not yet
+  closed; this does not demote the independent follower_left result;
 - Task 7 certified-pose screenshots: follower_left `PASS` for six raw and six
-  annotated images; follower_right `NOT_RUN` because it is absent from the
-  approved Stage;
+  annotated images; follower_right robot-local visual evidence `PASS` for
+  seven raw and seven annotated images. The right screenshot report remains
+  overall `PARTIAL` because numeric mimic evidence is authoritative;
 - Task 8: `NOT_RUN`;
 - original STEP/URDF/imported source USD/default/final collider: unchanged.
 
@@ -844,8 +861,10 @@ unchanged.
 
 ## Task 7 disposition
 
-The current supplier-CAD Task 7 result is **PARTIAL**. Two independent fresh
-Stage opens produced the identical signature
+The two-follower Task 7 aggregate is **FAIL**. This is not a missing-CAD
+failure and it does not invalidate the previously verified follower_left
+result. The follower_left diagnostic remains **PARTIAL**: two independent
+fresh Stage opens produced the identical signature
 `34c2c067682987edac88049f60e0b69511fe0c008ddb1cf95f5c2b8f3085139b`.
 No physics step was added by this static/official-rule validation.
 
@@ -894,9 +913,8 @@ Current machine results:
   products;
 - six-arm one-joint range replay, source mimic promotion semantics, and the
   attachment-volume overlap disposition remain `PARTIAL`;
-- follower_right, a user-approved supplier-Stage lift trajectory, calibrated
-  fingertip/bottle friction, and complete bottle geometry/inertia remain
-  `HARD_BLOCKER`.
+- a user-approved supplier-Stage lift trajectory, calibrated fingertip/bottle
+  friction, and complete bottle geometry/inertia remain bounded evidence gaps.
 
 The already machine-verified follower_left symmetric-close action now has
 separate auxiliary pose evidence:
@@ -912,10 +930,40 @@ separate auxiliary pose evidence:
 
 These screenshots are auxiliary pose/direction evidence only. Task 5 runtime
 joint/contact/position/drop data remains authoritative for structure and
-grasp acceptance. The approved Stage contains no follower_right, so no
-right-arm image was mirrored or manufactured; right-arm screenshot evidence
-is `NOT_RUN` with
-`HARD_BLOCKER_APPROVED_STAGE_MISSING_FOLLOWER_RIGHT`.
+grasp acceptance. The historical follower_left screenshot report correctly
+records that its approved source Stage contains no right follower; it must not
+be reinterpreted as evidence that the supplier CAD lacks a right arm.
+
+The new follower_right robot-local result is **FAIL**:
+
+- CAD identity: `VERIFIED_SINGLE_REUSABLE_ROBOT_PRODUCT`;
+- diagnostic Stage:
+  `assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/supplier_cad_follower_right.usda`,
+  SHA-256
+  `95c7878f794f5f557b70997a2240b6476836b8ffbeed5a4992cb114a169487ea`;
+- 24/24 arm one-joint cases, direction/range/readback, aperture monotonicity,
+  legal range, first-frame jump, 2-second static hold, initial-overlap
+  disposition, and deterministic repeat pass;
+- mimic accuracy fails: maximum absolute left/right symmetry residual is
+  `0.0017154589295387268 m`, above the unchanged `0.001 m` gate, and a separate
+  120-frame settle probe shows the residual persists;
+- `IsaacSim.PhysicsRules`: `FAIL`, 5 blocking findings: missing JointStateAPI
+  on the auxiliary `gripper` joint, one mimic-limit incompatibility, and three
+  helper rigid bodies without colliders;
+- `IsaacSim.RobotRules`: `FAIL`, 4 blocking `NoOverrides` findings on the two
+  diagnostic finger collider hierarchies, plus 7 warnings;
+- `IsaacSim.SimReadyAssetRules`: `PASS`;
+- both official-rule runs use fresh Stage opens and have identical signature
+  `8b9c8c758abb3a14a07cbc94abc41cf51f7a277deb0ca013df34d0f1db60300a`;
+- seven raw and seven annotated follower_right images were individually
+  vision-reviewed `PASS`. They validate robot-local installation and pose
+  visibility only; they do not override the numeric mimic failure or prove a
+  dual-arm workcell transform.
+
+The remaining right-side placement blocker is exactly
+`HARD_BLOCKER_FOLLOWER_RIGHT_WORKCELL_INSTALL_TRANSFORM`. The robot-local
+Stage is not mirrored and is explicitly
+`ROBOT_LOCAL_DIAGNOSTIC_NOT_WORKCELL_PLACEMENT`.
 
 Machine reports:
 
@@ -923,6 +971,12 @@ Machine reports:
 - `reports/aloha1_mapping/aloha_viper_cad_finger_task7_validation.md`;
 - `reports/aloha1_mapping/aloha_viper_cad_finger_task7_pose_screenshot_review.json`;
 - `reports/aloha1_mapping/aloha_viper_cad_finger_task7_pose_screenshot_review.md`.
+- `reports/aloha1_mapping/aloha_viper_follower_right_task7_validation.json`;
+- `reports/aloha1_mapping/aloha_viper_follower_right_task7_validation.md`;
+- `reports/aloha1_mapping/aloha_viper_follower_right_pose_screenshot_review.json`;
+- `reports/aloha1_mapping/aloha_viper_follower_right_pose_screenshot_review.md`;
+- `reports/aloha1_mapping/aloha_viper_task7_aggregate_validation.json`;
+- `reports/aloha1_mapping/aloha_viper_task7_aggregate_validation.md`.
 
 Task 8 remains `NOT_RUN`.
 

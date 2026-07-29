@@ -57,6 +57,45 @@ Task 7. Full diagnostic output is bounded under
 `.codex/artifacts/aloha1_mapping/`. Existing unrelated dirty files remain
 preserved.
 
+The 2026-07-29 follower_right correction is now authoritative:
+
+- `Simple Aloha Viper 2024-5-13.step` contains one reusable ViperX robot
+  product, not a left-only robot design. The CAD identity classification is
+  `VERIFIED_SINGLE_REUSABLE_ROBOT_PRODUCT`; generated follower-left and
+  follower-right URDF robot-local structures normalize identically.
+- The fact that the user-approved
+  `local_eval_assets/aloha_isaac_assets/aloha_viperx.usd` contains only
+  `follower_left` is now explicitly scoped to that review Stage. It does not
+  mean supplier CAD lacks a right arm.
+- A non-mirrored, robot-local follower_right diagnostic exists at
+  `assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/supplier_cad_follower_right.usda`,
+  SHA-256
+  `95c7878f794f5f557b70997a2240b6476836b8ffbeed5a4992cb114a169487ea`.
+  It is `ROBOT_LOCAL_DIAGNOSTIC_NOT_WORKCELL_PLACEMENT`.
+- Runtime validation is `PARTIAL`: all 24 arm one-joint cases, gripper motion
+  direction, aperture monotonicity, legal range, first-frame jump, 2-second
+  pose hold, initial-overlap disposition, and deterministic repeat pass.
+  Mimic accuracy fails because the maximum residual is
+  `0.0017154589295387268 m`, above the unchanged `0.001 m` gate. A separate
+  120-frame settle probe confirms that waiting longer does not remove it.
+- Final attempt 4 screenshot evidence contains seven raw and seven annotated
+  images. Every image passed individual visual-model review. The visual gate
+  is auxiliary and does not override numeric mimic failure. Raw root:
+  `.codex/artifacts/20260729-aloha-finger-palm-orientation/follower_right_pose_evidence/attempt4_final/screenshots_raw`;
+  annotated root:
+  `.codex/artifacts/20260729-aloha-finger-palm-orientation/follower_right_pose_evidence/attempt4_final/screenshots_annotated_v2`.
+- follower_right Task 7 is `FAIL`: two fresh official-rule runs have identical
+  signature
+  `8b9c8c758abb3a14a07cbc94abc41cf51f7a277deb0ca013df34d0f1db60300a`.
+  PhysicsRules has 5 blocking findings, RobotRules has 4 blocking findings,
+  and SimReadyAssetRules passes. The two-follower Task 7 aggregate is
+  therefore `FAIL`; the prior follower_left Task 7 result remains `PARTIAL`.
+- The only right-side placement blocker is
+  `HARD_BLOCKER_FOLLOWER_RIGHT_WORKCELL_INSTALL_TRANSFORM`. Robot-local
+  validation must not be described as dual-arm workcell validation.
+- Task 8 remains `NOT_RUN`; no final/default collider or protected source
+  Stage was changed.
+
 The 2026-07-29 CAD-source reset is the current gripper-orientation boundary:
 
 - The user rejected all four local 180-degree finger-roll combinations. Do not
@@ -177,8 +216,8 @@ authoritative restart boundary:
   immutable; all authoring is in independent diagnostic layers.
 - The follower-left CAD finger diagnostic asset is `PARTIAL`: static identity,
   placement, convex-hull token, protected hashes, and required prims pass.
-  The approved Stage does not contain follower_right, recorded as a bounded
-  `HARD_BLOCKER`.
+  Its approved Stage does not contain follower_right; this remains a
+  historical Stage-scope fact, not a supplier-CAD resource blocker.
 - The no-bottle screenshot gate is `PASS`: attempt 23 supplies 12 raw images
   (closed, partial, maximum legal aperture × four views), annotation v2
   supplies 12 paired annotated images, and all 24 were individually reviewed
@@ -252,14 +291,15 @@ authoritative restart boundary:
   `/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/task7_robot_scope/pose_evidence_attempt5/screenshots_raw`.
   Annotated root:
   `/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/task7_robot_scope/pose_evidence_attempt5/screenshots_annotated_v2`.
-  The approved Stage has no follower_right; right-arm evidence remains
-  `NOT_RUN` under
-  `HARD_BLOCKER_APPROVED_STAGE_MISSING_FOLLOWER_RIGHT`. No right arm was
-  mirrored or synthesized. Report:
+  This historical report records follower_right as `NOT_RUN` only within the
+  approved follower_left Stage. It is superseded for current right-arm
+  coverage by the independent robot-local follower_right report; no right arm
+  was mirrored. Report:
   `aloha_viper_cad_finger_task7_pose_screenshot_review.json`.
-- follower_right and a supplier-Stage lift trajectory remain bounded
-  HARD_BLOCKERs. Friction is `TEMPORARY_UNCALIBRATED`; no calibrated dynamics
-  claim is made.
+- follower_right robot-local validation is no longer a resource blocker.
+  Only its workcell installation transform and a supplier-Stage lift
+  trajectory remain bounded HARD_BLOCKERs. Friction is
+  `TEMPORARY_UNCALIBRATED`; no calibrated dynamics claim is made.
 - Task 8 remains `NOT_RUN`. The source Stage, default configuration, and final
   collider remain unchanged.
 - Public availability does not establish a redistribution license. Original
