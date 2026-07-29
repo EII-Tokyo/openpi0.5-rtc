@@ -1,0 +1,826 @@
+{
+  "allowed_classifications": [
+    "ASSET_AUTHORING_DEFECT",
+    "INCONCLUSIVE",
+    "ISAAC_5_1_VALIDATOR_SCHEMA_CONFLICT",
+    "LAYER_PACKAGING_DEFECT",
+    "MISSING_SOURCE_EVIDENCE",
+    "NON_APPLICABLE_FALSE_POSITIVE"
+  ],
+  "classification_counts": {
+    "ISAAC_5_1_VALIDATOR_SCHEMA_CONFLICT": 2,
+    "LAYER_PACKAGING_DEFECT": 28,
+    "MISSING_SOURCE_EVIDENCE": 6,
+    "NON_APPLICABLE_FALSE_POSITIVE": 1
+  },
+  "duplicate_issue_count": 0,
+  "home_layer_evidence": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/configuration/aloha1_signal_home_targets.usda",
+    "expected_occurrences": 2,
+    "gripper_joint_state_api_occurrences": 2,
+    "sha256": "484f17e3c638ea729a260eb67a666954f346b37a69987d9fe4f15cf7fad9d141",
+    "status": "PASS"
+  },
+  "installed_source_manifest": {
+    "extension": "isaacsim.asset.validation",
+    "files": [
+      {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.validation/config/extension.toml",
+        "sha256": "7bfd79e5833dffffc9e4b91453ae3a2933bd2ae925ddd2d2f008baa339b19809",
+        "size_bytes": 765
+      },
+      {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.validation/isaacsim/asset/validation/joint_rules.py",
+        "sha256": "6dc43a4ed0284f61d85d22c5c24775e40c5f373facdc408236a25385109ab1ef",
+        "size_bytes": 18024
+      },
+      {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.validation/isaacsim/asset/validation/physics_rules.py",
+        "sha256": "85bbe0873043eb3b229c87551b10d6e0117709e3e0f1db613b070c5540dae067",
+        "size_bytes": 14487
+      },
+      {
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.validation/isaacsim/asset/validation/robot_rules.py",
+        "sha256": "1fa939582107d25d4f4de14c618efac078124f6695d09179996faa25253acbb6",
+        "size_bytes": 15348
+      }
+    ],
+    "version": "1.1.0"
+  },
+  "issues": [
+    {
+      "at": "Prim </follower_left/vx300s_left/joints/gripper>",
+      "category": "IsaacSim.PhysicsRules",
+      "classification": "LAYER_PACKAGING_DEFECT",
+      "closure": "FORMALLY_RECORDED_CHILD_TARGET_BOUNDARY",
+      "installed_rule_source": {
+        "class": "JointHasJointStateAPI",
+        "file": "joint_rules.py"
+      },
+      "issue_key": "33e7f3d6ff5a4d4562ae20f5adf5000e380ca097a60d1f35cc81bad471d9b3be",
+      "message": "/follower_left/vx300s_left/joints/gripper Has no Joint State API",
+      "official_result_suppressed": false,
+      "official_severity": "ERROR",
+      "provenance_class": "LOCAL_ISAAC_5_1_RULE_PLUS_RUNTIME_EVIDENCE",
+      "rule": "JointHasJointStateAPI",
+      "runtime_evidence_required": "gripper target/readback one-joint validation",
+      "severity": "ERROR",
+      "target_name": "follower_left",
+      "task7a_applicability": "DIRECT_LAYER_BOUNDARY",
+      "workcell_home_layer_has_required_api": true
+    },
+    {
+      "at": "Prim </follower_left/vx300s_left/joints/right_finger>",
+      "category": "IsaacSim.PhysicsRules",
+      "classification": "ISAAC_5_1_VALIDATOR_SCHEMA_CONFLICT",
+      "closure": "FORMALLY_RECORDED_VERSION_SPECIFIC_CONFLICT",
+      "installed_rule_source": {
+        "class": "MimicAPICheck",
+        "file": "joint_rules.py"
+      },
+      "issue_key": "0f1bf0ce9028fa1f813f47f95995e6d53e14222078c4afba33e2f0897d8d55d0",
+      "message": "Joint /follower_left/vx300s_left/joints/right_finger's lower limit (-0.013799999840557575) should be > reference joint limits * gear ratio(0.020999999716877937)",
+      "official_result_suppressed": false,
+      "official_severity": "ERROR",
+      "provenance_class": "LOCAL_ISAAC_5_1_RULE_PLUS_RUNTIME_EVIDENCE",
+      "rule": "MimicAPICheck",
+      "runtime_evidence_required": "opposed local-axis limits, mimic target/readback, and zero active drive",
+      "runtime_probe_interpretation": "OPPOSED_LOCAL_JOINT_AXES_NOT_MODELED_BY_NUMERIC_LIMIT_RULE",
+      "runtime_probe_status": "PASS",
+      "severity": "ERROR",
+      "target_name": "follower_left",
+      "task7a_applicability": "DIRECT_RUNTIME_CROSS_CHECK"
+    },
+    {
+      "at": "Prim </follower_left/vx300s_left/follower_left_ee_arm_link>",
+      "category": "IsaacSim.PhysicsRules",
+      "classification": "MISSING_SOURCE_EVIDENCE",
+      "closure": "HARD_BLOCKER_NO_SOURCE_COLLIDER_GEOMETRY",
+      "installed_rule_source": {
+        "class": "RigidBodyHasCollider",
+        "file": "physics_rules.py"
+      },
+      "invent_collider_allowed": false,
+      "issue_key": "0ca086ee4cdeca525921c68b9707f9360683ce80c86d05b8a37dc8898d52c044",
+      "message": "Rigid body /follower_left/vx300s_left/follower_left_ee_arm_link has rigid body api but no collision api",
+      "official_result_suppressed": false,
+      "official_severity": "ERROR",
+      "provenance_class": "LOCAL_ISAAC_5_1_RULE_PLUS_RUNTIME_EVIDENCE",
+      "rule": "RigidBodyHasCollider",
+      "severity": "ERROR",
+      "target_name": "follower_left",
+      "task7a_applicability": "OUT_OF_SCOPE_GEOMETRY_BOUNDARY"
+    },
+    {
+      "at": "Prim </follower_left/vx300s_left/follower_left_ee_gripper_link>",
+      "category": "IsaacSim.PhysicsRules",
+      "classification": "MISSING_SOURCE_EVIDENCE",
+      "closure": "HARD_BLOCKER_NO_SOURCE_COLLIDER_GEOMETRY",
+      "installed_rule_source": {
+        "class": "RigidBodyHasCollider",
+        "file": "physics_rules.py"
+      },
+      "invent_collider_allowed": false,
+      "issue_key": "501cc30df072b208f32aab1d2ad8aa6addc8981a63b75cd074a1c4273c6fe4be",
+      "message": "Rigid body /follower_left/vx300s_left/follower_left_ee_gripper_link has rigid body api but no collision api",
+      "official_result_suppressed": false,
+      "official_severity": "ERROR",
+      "provenance_class": "LOCAL_ISAAC_5_1_RULE_PLUS_RUNTIME_EVIDENCE",
+      "rule": "RigidBodyHasCollider",
+      "severity": "ERROR",
+      "target_name": "follower_left",
+      "task7a_applicability": "OUT_OF_SCOPE_GEOMETRY_BOUNDARY"
+    },
+    {
+      "at": "Prim </follower_left/vx300s_left/follower_left_fingers_link>",
+      "category": "IsaacSim.PhysicsRules",
+      "classification": "MISSING_SOURCE_EVIDENCE",
+      "closure": "HARD_BLOCKER_NO_SOURCE_COLLIDER_GEOMETRY",
+      "installed_rule_source": {
+        "class": "RigidBodyHasCollider",
+        "file": "physics_rules.py"
+      },
+      "invent_collider_allowed": false,
+      "issue_key": "e8fda6e2c0ddb1d3433a4835475430c6fb3a42789a7892cd26d866d7bf67ba21",
+      "message": "Rigid body /follower_left/vx300s_left/follower_left_fingers_link has rigid body api but no collision api",
+      "official_result_suppressed": false,
+      "official_severity": "ERROR",
+      "provenance_class": "LOCAL_ISAAC_5_1_RULE_PLUS_RUNTIME_EVIDENCE",
+      "rule": "RigidBodyHasCollider",
+      "severity": "ERROR",
+      "target_name": "follower_left",
+      "task7a_applicability": "OUT_OF_SCOPE_GEOMETRY_BOUNDARY"
+    },
+    {
+      "at": "Prim </follower_left/vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh>",
+      "category": "IsaacSim.RobotRules",
+      "classification": "LAYER_PACKAGING_DEFECT",
+      "closure": "FORMALLY_RECORDED_PACKAGE_STRUCTURE_BOUNDARY",
+      "installed_rule_source": {
+        "class": "NoOverrides",
+        "file": "robot_rules.py"
+      },
+      "issue_key": "94065d0d28dc1cbc78202488627d12d33a084166ce203bb676bfb229224b26c5",
+      "message": "Prim is overridden: /follower_left/vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh, ['physics:approximation', 'purpose']",
+      "official_result_suppressed": false,
+      "official_severity": "ERROR",
+      "provenance_class": "LOCAL_ISAAC_5_1_RULE_PLUS_RUNTIME_EVIDENCE",
+      "rule": "NoOverrides",
+      "severity": "ERROR",
+      "target_name": "follower_left",
+      "task7a_applicability": "PACKAGE_NOT_CONTROL_SIGNAL"
+    },
+    {
+      "at": "Prim </follower_left/vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger>",
+      "category": "IsaacSim.RobotRules",
+      "classification": "LAYER_PACKAGING_DEFECT",
+      "closure": "FORMALLY_RECORDED_PACKAGE_STRUCTURE_BOUNDARY",
+      "installed_rule_source": {
+        "class": "NoOverrides",
+        "file": "robot_rules.py"
+      },
+      "issue_key": "6baee4cb745c484eca1f4ac3b879ba8658015c51a90cd42e4a984cfcd817b246",
+      "message": "Prim is overridden: /follower_left/vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger, ['visibility']",
+      "official_result_suppressed": false,
+      "official_severity": "ERROR",
+      "provenance_class": "LOCAL_ISAAC_5_1_RULE_PLUS_RUNTIME_EVIDENCE",
+      "rule": "NoOverrides",
+      "severity": "ERROR",
+      "target_name": "follower_left",
+      "task7a_applicability": "PACKAGE_NOT_CONTROL_SIGNAL"
+    },
+    {
+      "at": "Prim </follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh>",
+      "category": "IsaacSim.RobotRules",
+      "classification": "LAYER_PACKAGING_DEFECT",
+      "closure": "FORMALLY_RECORDED_PACKAGE_STRUCTURE_BOUNDARY",
+      "installed_rule_source": {
+        "class": "NoOverrides",
+        "file": "robot_rules.py"
+      },
+      "issue_key": "bd5a5503299e5d6297206e17918616ec1205401933e9f636b61743852d7f722d",
+      "message": "Prim is overridden: /follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh, ['physics:approximation', 'purpose']",
+      "official_result_suppressed": false,
+      "official_severity": "ERROR",
+      "provenance_class": "LOCAL_ISAAC_5_1_RULE_PLUS_RUNTIME_EVIDENCE",
+      "rule": "NoOverrides",
+      "severity": "ERROR",
+      "target_name": "follower_left",
+      "task7a_applicability": "PACKAGE_NOT_CONTROL_SIGNAL"
+    },
+    {
+      "at": "Prim </follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger>",
+      "category": "IsaacSim.RobotRules",
+      "classification": "LAYER_PACKAGING_DEFECT",
+      "closure": "FORMALLY_RECORDED_PACKAGE_STRUCTURE_BOUNDARY",
+      "installed_rule_source": {
+        "class": "NoOverrides",
+        "file": "robot_rules.py"
+      },
+      "issue_key": "693af2adb3cfd7b69a2a56221740fcdb4145f270ca184951528acab87fb28475",
+      "message": "Prim is overridden: /follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger, ['visibility']",
+      "official_result_suppressed": false,
+      "official_severity": "ERROR",
+      "provenance_class": "LOCAL_ISAAC_5_1_RULE_PLUS_RUNTIME_EVIDENCE",
+      "rule": "NoOverrides",
+      "severity": "ERROR",
+      "target_name": "follower_left",
+      "task7a_applicability": "PACKAGE_NOT_CONTROL_SIGNAL"
+    },
+    {
+      "at": "Stage </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/follower_left_asset/aloha1_signal_follower_left.usda>",
+      "category": "IsaacSim.RobotRules",
+      "classification": "LAYER_PACKAGING_DEFECT",
+      "closure": "FORMALLY_RECORDED_PACKAGE_STRUCTURE_BOUNDARY",
+      "installed_rule_source": {
+        "class": "RobotNaming",
+        "file": "robot_rules.py"
+      },
+      "issue_key": "bbf57309f812363b16d94c76e833998415516fde44f75a2604345e972ec48c8e",
+      "message": "Folder name does not match Robot name: <follower_left_asset> != <aloha1_signal_follower_left.usda>",
+      "official_result_suppressed": false,
+      "official_severity": "ERROR",
+      "provenance_class": "LOCAL_ISAAC_5_1_RULE_PLUS_RUNTIME_EVIDENCE",
+      "rule": "RobotNaming",
+      "severity": "ERROR",
+      "target_name": "follower_left",
+      "task7a_applicability": "PACKAGE_NOT_CONTROL_SIGNAL"
+    },
+    {
+      "at": "Prim </follower_left>",
+      "category": "IsaacSim.RobotRules",
+      "classification": "LAYER_PACKAGING_DEFECT",
+      "closure": "FORMALLY_RECORDED_PACKAGE_STRUCTURE_BOUNDARY",
+      "installed_rule_source": {
+        "class": "RobotSchema",
+        "file": "robot_rules.py"
+      },
+      "issue_key": "cd440ebbf45d7ecb77e104ff6fd55c9f9d65700f2f2a2487eeed84e5744be543",
+      "message": "DefaultPrim in robot asset </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/follower_left_asset/aloha1_signal_follower_left.usda> does not have a RobotAPI",
+      "official_result_suppressed": false,
+      "official_severity": "ERROR",
+      "provenance_class": "LOCAL_ISAAC_5_1_RULE_PLUS_RUNTIME_EVIDENCE",
+      "rule": "RobotSchema",
+      "severity": "ERROR",
+      "target_name": "follower_left",
+      "task7a_applicability": "PACKAGE_NOT_CONTROL_SIGNAL"
+    },
+    {
+      "at": "Prim </follower_left>",
+      "category": "IsaacSim.RobotRules",
+      "classification": "LAYER_PACKAGING_DEFECT",
+      "closure": "FORMALLY_RECORDED_PACKAGE_STRUCTURE_BOUNDARY",
+      "installed_rule_source": {
+        "class": "RobotSchema",
+        "file": "robot_rules.py"
+      },
+      "issue_key": "68a7816ae92ed54fd3dbbbbb4b866b9f17d169bee3e4a2d3ddbcaa878bc21a4a",
+      "message": "DefaultPrim in robot asset </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/follower_left_asset/aloha1_signal_follower_left.usda> does not have a isaac:physics:robotJoints relationship",
+      "official_result_suppressed": false,
+      "official_severity": "ERROR",
+      "provenance_class": "LOCAL_ISAAC_5_1_RULE_PLUS_RUNTIME_EVIDENCE",
+      "rule": "RobotSchema",
+      "severity": "ERROR",
+      "target_name": "follower_left",
+      "task7a_applicability": "PACKAGE_NOT_CONTROL_SIGNAL"
+    },
+    {
+      "at": "Prim </follower_left>",
+      "category": "IsaacSim.RobotRules",
+      "classification": "LAYER_PACKAGING_DEFECT",
+      "closure": "FORMALLY_RECORDED_PACKAGE_STRUCTURE_BOUNDARY",
+      "installed_rule_source": {
+        "class": "RobotSchema",
+        "file": "robot_rules.py"
+      },
+      "issue_key": "a2f259582bbe3ad168f6262230bda104535df3a045ca7fa837641a8b5aa8206b",
+      "message": "DefaultPrim in robot asset </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/follower_left_asset/aloha1_signal_follower_left.usda> does not have a isaac:physics:robotLinks relationship",
+      "official_result_suppressed": false,
+      "official_severity": "ERROR",
+      "provenance_class": "LOCAL_ISAAC_5_1_RULE_PLUS_RUNTIME_EVIDENCE",
+      "rule": "RobotSchema",
+      "severity": "ERROR",
+      "target_name": "follower_left",
+      "task7a_applicability": "PACKAGE_NOT_CONTROL_SIGNAL"
+    },
+    {
+      "at": "Stage </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/follower_left_asset/aloha1_signal_follower_left.usda>",
+      "category": "IsaacSim.RobotRules",
+      "classification": "LAYER_PACKAGING_DEFECT",
+      "closure": "FORMALLY_RECORDED_PACKAGE_STRUCTURE_BOUNDARY",
+      "installed_rule_source": {
+        "class": "ThumbnailExists",
+        "file": "robot_rules.py"
+      },
+      "issue_key": "7eb2280442aad383c885ddaaf227b42687f3e092e74b4a226d6c482bc4a610c4",
+      "message": "No thumbnail found at /home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/follower_left_asset/.thumbs/256x256/aloha1_signal_follower_left.usda.png for robot asset </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/follower_left_asset/aloha1_signal_follower_left.usda>",
+      "official_result_suppressed": false,
+      "official_severity": "WARNING",
+      "provenance_class": "LOCAL_ISAAC_5_1_RULE_PLUS_RUNTIME_EVIDENCE",
+      "rule": "ThumbnailExists",
+      "severity": "WARNING",
+      "target_name": "follower_left",
+      "task7a_applicability": "PACKAGE_NOT_CONTROL_SIGNAL"
+    },
+    {
+      "at": "Attribute (physics:approximation) Prim </follower_left/vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh>",
+      "category": "IsaacSim.RobotRules",
+      "classification": "LAYER_PACKAGING_DEFECT",
+      "closure": "FORMALLY_RECORDED_PACKAGE_STRUCTURE_BOUNDARY",
+      "installed_rule_source": {
+        "class": "VerifyRobotPhysicsAttributesSourceLayer",
+        "file": "robot_rules.py"
+      },
+      "issue_key": "65da656900331fd99038848d9dd8d965846ff7a3edba6ec5b9f44280b3f4e275",
+      "message": "Physics Attribute physics:approximation in robot asset </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/follower_left_asset/aloha1_signal_follower_left.usda> has authored value NOT in the physics layer",
+      "official_result_suppressed": false,
+      "official_severity": "WARNING",
+      "provenance_class": "LOCAL_ISAAC_5_1_RULE_PLUS_RUNTIME_EVIDENCE",
+      "rule": "VerifyRobotPhysicsAttributesSourceLayer",
+      "severity": "WARNING",
+      "target_name": "follower_left",
+      "task7a_applicability": "PACKAGE_NOT_CONTROL_SIGNAL"
+    },
+    {
+      "at": "Attribute (physics:approximation) Prim </follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh>",
+      "category": "IsaacSim.RobotRules",
+      "classification": "LAYER_PACKAGING_DEFECT",
+      "closure": "FORMALLY_RECORDED_PACKAGE_STRUCTURE_BOUNDARY",
+      "installed_rule_source": {
+        "class": "VerifyRobotPhysicsAttributesSourceLayer",
+        "file": "robot_rules.py"
+      },
+      "issue_key": "eec9c9325a5f575dade7cedfea77e53a864e1f1b35fc96928db48ed68a04d1bc",
+      "message": "Physics Attribute physics:approximation in robot asset </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/follower_left_asset/aloha1_signal_follower_left.usda> has authored value NOT in the physics layer",
+      "official_result_suppressed": false,
+      "official_severity": "WARNING",
+      "provenance_class": "LOCAL_ISAAC_5_1_RULE_PLUS_RUNTIME_EVIDENCE",
+      "rule": "VerifyRobotPhysicsAttributesSourceLayer",
+      "severity": "WARNING",
+      "target_name": "follower_left",
+      "task7a_applicability": "PACKAGE_NOT_CONTROL_SIGNAL"
+    },
+    {
+      "at": "Prim </follower_left/vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh>",
+      "category": "IsaacSim.RobotRules",
+      "classification": "LAYER_PACKAGING_DEFECT",
+      "closure": "FORMALLY_RECORDED_PACKAGE_STRUCTURE_BOUNDARY",
+      "installed_rule_source": {
+        "class": "VerifyRobotPhysicsSchemaSourceLayer",
+        "file": "robot_rules.py"
+      },
+      "issue_key": "4581d78e59b775af9ad4ab1ce8110054e3c86f734bdfc4dc259f385f60e8f844",
+      "message": "Physics Schema [PhysicsCollisionAPI] on /follower_left/vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh in robot asset </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/follower_left_asset/aloha1_signal_follower_left.usda> has applied schema NOT in the physics layer",
+      "official_result_suppressed": false,
+      "official_severity": "WARNING",
+      "provenance_class": "LOCAL_ISAAC_5_1_RULE_PLUS_RUNTIME_EVIDENCE",
+      "rule": "VerifyRobotPhysicsSchemaSourceLayer",
+      "severity": "WARNING",
+      "target_name": "follower_left",
+      "task7a_applicability": "PACKAGE_NOT_CONTROL_SIGNAL"
+    },
+    {
+      "at": "Prim </follower_left/vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh>",
+      "category": "IsaacSim.RobotRules",
+      "classification": "LAYER_PACKAGING_DEFECT",
+      "closure": "FORMALLY_RECORDED_PACKAGE_STRUCTURE_BOUNDARY",
+      "installed_rule_source": {
+        "class": "VerifyRobotPhysicsSchemaSourceLayer",
+        "file": "robot_rules.py"
+      },
+      "issue_key": "cb6d75e461d27c2401fbb4df1615e382e895f195a86d1b7dff2a9d68e4e90ed6",
+      "message": "Physics Schema [PhysicsMeshCollisionAPI] on /follower_left/vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh in robot asset </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/follower_left_asset/aloha1_signal_follower_left.usda> has applied schema NOT in the physics layer",
+      "official_result_suppressed": false,
+      "official_severity": "WARNING",
+      "provenance_class": "LOCAL_ISAAC_5_1_RULE_PLUS_RUNTIME_EVIDENCE",
+      "rule": "VerifyRobotPhysicsSchemaSourceLayer",
+      "severity": "WARNING",
+      "target_name": "follower_left",
+      "task7a_applicability": "PACKAGE_NOT_CONTROL_SIGNAL"
+    },
+    {
+      "at": "Prim </follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh>",
+      "category": "IsaacSim.RobotRules",
+      "classification": "LAYER_PACKAGING_DEFECT",
+      "closure": "FORMALLY_RECORDED_PACKAGE_STRUCTURE_BOUNDARY",
+      "installed_rule_source": {
+        "class": "VerifyRobotPhysicsSchemaSourceLayer",
+        "file": "robot_rules.py"
+      },
+      "issue_key": "3debc18383b3ce1bf07b55fe077cdcb55164b09b972bcdebacfcbae8b7c4d531",
+      "message": "Physics Schema [PhysicsCollisionAPI] on /follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh in robot asset </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/follower_left_asset/aloha1_signal_follower_left.usda> has applied schema NOT in the physics layer",
+      "official_result_suppressed": false,
+      "official_severity": "WARNING",
+      "provenance_class": "LOCAL_ISAAC_5_1_RULE_PLUS_RUNTIME_EVIDENCE",
+      "rule": "VerifyRobotPhysicsSchemaSourceLayer",
+      "severity": "WARNING",
+      "target_name": "follower_left",
+      "task7a_applicability": "PACKAGE_NOT_CONTROL_SIGNAL"
+    },
+    {
+      "at": "Prim </follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh>",
+      "category": "IsaacSim.RobotRules",
+      "classification": "LAYER_PACKAGING_DEFECT",
+      "closure": "FORMALLY_RECORDED_PACKAGE_STRUCTURE_BOUNDARY",
+      "installed_rule_source": {
+        "class": "VerifyRobotPhysicsSchemaSourceLayer",
+        "file": "robot_rules.py"
+      },
+      "issue_key": "ceb1f2a420c7ce64046bb933ffe82ace80d07f7524ea4af9ccf136fd09c826bd",
+      "message": "Physics Schema [PhysicsMeshCollisionAPI] on /follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh in robot asset </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/follower_left_asset/aloha1_signal_follower_left.usda> has applied schema NOT in the physics layer",
+      "official_result_suppressed": false,
+      "official_severity": "WARNING",
+      "provenance_class": "LOCAL_ISAAC_5_1_RULE_PLUS_RUNTIME_EVIDENCE",
+      "rule": "VerifyRobotPhysicsSchemaSourceLayer",
+      "severity": "WARNING",
+      "target_name": "follower_left",
+      "task7a_applicability": "PACKAGE_NOT_CONTROL_SIGNAL"
+    },
+    {
+      "at": "Prim </follower_right/vx300s_right/joints/gripper>",
+      "category": "IsaacSim.PhysicsRules",
+      "classification": "LAYER_PACKAGING_DEFECT",
+      "closure": "FORMALLY_RECORDED_CHILD_TARGET_BOUNDARY",
+      "installed_rule_source": {
+        "class": "JointHasJointStateAPI",
+        "file": "joint_rules.py"
+      },
+      "issue_key": "0e2bd5abf4fee649d76e81bdef5e61378227b15e24e0ff1eb51de7fa406591b3",
+      "message": "/follower_right/vx300s_right/joints/gripper Has no Joint State API",
+      "official_result_suppressed": false,
+      "official_severity": "ERROR",
+      "provenance_class": "LOCAL_ISAAC_5_1_RULE_PLUS_RUNTIME_EVIDENCE",
+      "rule": "JointHasJointStateAPI",
+      "runtime_evidence_required": "gripper target/readback one-joint validation",
+      "severity": "ERROR",
+      "target_name": "follower_right",
+      "task7a_applicability": "DIRECT_LAYER_BOUNDARY",
+      "workcell_home_layer_has_required_api": true
+    },
+    {
+      "at": "Prim </follower_right/vx300s_right/joints/right_finger>",
+      "category": "IsaacSim.PhysicsRules",
+      "classification": "ISAAC_5_1_VALIDATOR_SCHEMA_CONFLICT",
+      "closure": "FORMALLY_RECORDED_VERSION_SPECIFIC_CONFLICT",
+      "installed_rule_source": {
+        "class": "MimicAPICheck",
+        "file": "joint_rules.py"
+      },
+      "issue_key": "c4841a432b1a7f0056ec13624dd07c9eff7af8652c3afe2f1b23dd24feed0c9e",
+      "message": "Joint /follower_right/vx300s_right/joints/right_finger's lower limit (-0.013799999840557575) should be > reference joint limits * gear ratio(0.020999999716877937)",
+      "official_result_suppressed": false,
+      "official_severity": "ERROR",
+      "provenance_class": "LOCAL_ISAAC_5_1_RULE_PLUS_RUNTIME_EVIDENCE",
+      "rule": "MimicAPICheck",
+      "runtime_evidence_required": "opposed local-axis limits, mimic target/readback, and zero active drive",
+      "runtime_probe_interpretation": "OPPOSED_LOCAL_JOINT_AXES_NOT_MODELED_BY_NUMERIC_LIMIT_RULE",
+      "runtime_probe_status": "PASS",
+      "severity": "ERROR",
+      "target_name": "follower_right",
+      "task7a_applicability": "DIRECT_RUNTIME_CROSS_CHECK"
+    },
+    {
+      "at": "Prim </follower_right/vx300s_right/follower_right_ee_arm_link>",
+      "category": "IsaacSim.PhysicsRules",
+      "classification": "MISSING_SOURCE_EVIDENCE",
+      "closure": "HARD_BLOCKER_NO_SOURCE_COLLIDER_GEOMETRY",
+      "installed_rule_source": {
+        "class": "RigidBodyHasCollider",
+        "file": "physics_rules.py"
+      },
+      "invent_collider_allowed": false,
+      "issue_key": "0d9dde990381f692d2b0ec84f102c415fde15ff3236f8370f5d60036243f6d7a",
+      "message": "Rigid body /follower_right/vx300s_right/follower_right_ee_arm_link has rigid body api but no collision api",
+      "official_result_suppressed": false,
+      "official_severity": "ERROR",
+      "provenance_class": "LOCAL_ISAAC_5_1_RULE_PLUS_RUNTIME_EVIDENCE",
+      "rule": "RigidBodyHasCollider",
+      "severity": "ERROR",
+      "target_name": "follower_right",
+      "task7a_applicability": "OUT_OF_SCOPE_GEOMETRY_BOUNDARY"
+    },
+    {
+      "at": "Prim </follower_right/vx300s_right/follower_right_ee_gripper_link>",
+      "category": "IsaacSim.PhysicsRules",
+      "classification": "MISSING_SOURCE_EVIDENCE",
+      "closure": "HARD_BLOCKER_NO_SOURCE_COLLIDER_GEOMETRY",
+      "installed_rule_source": {
+        "class": "RigidBodyHasCollider",
+        "file": "physics_rules.py"
+      },
+      "invent_collider_allowed": false,
+      "issue_key": "ce1f1b407b2297fa3ff13a47e76c1d31be0c801f27f556db6bb0c686bf073240",
+      "message": "Rigid body /follower_right/vx300s_right/follower_right_ee_gripper_link has rigid body api but no collision api",
+      "official_result_suppressed": false,
+      "official_severity": "ERROR",
+      "provenance_class": "LOCAL_ISAAC_5_1_RULE_PLUS_RUNTIME_EVIDENCE",
+      "rule": "RigidBodyHasCollider",
+      "severity": "ERROR",
+      "target_name": "follower_right",
+      "task7a_applicability": "OUT_OF_SCOPE_GEOMETRY_BOUNDARY"
+    },
+    {
+      "at": "Prim </follower_right/vx300s_right/follower_right_fingers_link>",
+      "category": "IsaacSim.PhysicsRules",
+      "classification": "MISSING_SOURCE_EVIDENCE",
+      "closure": "HARD_BLOCKER_NO_SOURCE_COLLIDER_GEOMETRY",
+      "installed_rule_source": {
+        "class": "RigidBodyHasCollider",
+        "file": "physics_rules.py"
+      },
+      "invent_collider_allowed": false,
+      "issue_key": "7271885e6448a006384251f9e800d68327ffe09dfee1e47a68db9661ced0caff",
+      "message": "Rigid body /follower_right/vx300s_right/follower_right_fingers_link has rigid body api but no collision api",
+      "official_result_suppressed": false,
+      "official_severity": "ERROR",
+      "provenance_class": "LOCAL_ISAAC_5_1_RULE_PLUS_RUNTIME_EVIDENCE",
+      "rule": "RigidBodyHasCollider",
+      "severity": "ERROR",
+      "target_name": "follower_right",
+      "task7a_applicability": "OUT_OF_SCOPE_GEOMETRY_BOUNDARY"
+    },
+    {
+      "at": "Prim </follower_right/vx300s_right/follower_right_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh>",
+      "category": "IsaacSim.RobotRules",
+      "classification": "LAYER_PACKAGING_DEFECT",
+      "closure": "FORMALLY_RECORDED_PACKAGE_STRUCTURE_BOUNDARY",
+      "installed_rule_source": {
+        "class": "NoOverrides",
+        "file": "robot_rules.py"
+      },
+      "issue_key": "ce2b79eef22e5697d7c80fcd675a3b72f894d4143fecc95ced063fcc1b030c59",
+      "message": "Prim is overridden: /follower_right/vx300s_right/follower_right_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh, ['physics:approximation', 'purpose']",
+      "official_result_suppressed": false,
+      "official_severity": "ERROR",
+      "provenance_class": "LOCAL_ISAAC_5_1_RULE_PLUS_RUNTIME_EVIDENCE",
+      "rule": "NoOverrides",
+      "severity": "ERROR",
+      "target_name": "follower_right",
+      "task7a_applicability": "PACKAGE_NOT_CONTROL_SIGNAL"
+    },
+    {
+      "at": "Prim </follower_right/vx300s_right/follower_right_left_finger_link/collisions/diagnostic_supplier_cad_left_finger>",
+      "category": "IsaacSim.RobotRules",
+      "classification": "LAYER_PACKAGING_DEFECT",
+      "closure": "FORMALLY_RECORDED_PACKAGE_STRUCTURE_BOUNDARY",
+      "installed_rule_source": {
+        "class": "NoOverrides",
+        "file": "robot_rules.py"
+      },
+      "issue_key": "06e6d2d9eafe224548bed81a147aed02d82757205bd14e739a538de79f2b27d1",
+      "message": "Prim is overridden: /follower_right/vx300s_right/follower_right_left_finger_link/collisions/diagnostic_supplier_cad_left_finger, ['visibility']",
+      "official_result_suppressed": false,
+      "official_severity": "ERROR",
+      "provenance_class": "LOCAL_ISAAC_5_1_RULE_PLUS_RUNTIME_EVIDENCE",
+      "rule": "NoOverrides",
+      "severity": "ERROR",
+      "target_name": "follower_right",
+      "task7a_applicability": "PACKAGE_NOT_CONTROL_SIGNAL"
+    },
+    {
+      "at": "Prim </follower_right/vx300s_right/follower_right_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh>",
+      "category": "IsaacSim.RobotRules",
+      "classification": "LAYER_PACKAGING_DEFECT",
+      "closure": "FORMALLY_RECORDED_PACKAGE_STRUCTURE_BOUNDARY",
+      "installed_rule_source": {
+        "class": "NoOverrides",
+        "file": "robot_rules.py"
+      },
+      "issue_key": "37b3d2fa1f329477577cc15c74b037ad087ac6866a4351c1c6fe5b1e78e1337f",
+      "message": "Prim is overridden: /follower_right/vx300s_right/follower_right_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh, ['physics:approximation', 'purpose']",
+      "official_result_suppressed": false,
+      "official_severity": "ERROR",
+      "provenance_class": "LOCAL_ISAAC_5_1_RULE_PLUS_RUNTIME_EVIDENCE",
+      "rule": "NoOverrides",
+      "severity": "ERROR",
+      "target_name": "follower_right",
+      "task7a_applicability": "PACKAGE_NOT_CONTROL_SIGNAL"
+    },
+    {
+      "at": "Prim </follower_right/vx300s_right/follower_right_right_finger_link/collisions/diagnostic_supplier_cad_right_finger>",
+      "category": "IsaacSim.RobotRules",
+      "classification": "LAYER_PACKAGING_DEFECT",
+      "closure": "FORMALLY_RECORDED_PACKAGE_STRUCTURE_BOUNDARY",
+      "installed_rule_source": {
+        "class": "NoOverrides",
+        "file": "robot_rules.py"
+      },
+      "issue_key": "d03556d4a699cfab11a649f45cbf97dbff928e664cf8cd6c9cdbef5a0b15903f",
+      "message": "Prim is overridden: /follower_right/vx300s_right/follower_right_right_finger_link/collisions/diagnostic_supplier_cad_right_finger, ['visibility']",
+      "official_result_suppressed": false,
+      "official_severity": "ERROR",
+      "provenance_class": "LOCAL_ISAAC_5_1_RULE_PLUS_RUNTIME_EVIDENCE",
+      "rule": "NoOverrides",
+      "severity": "ERROR",
+      "target_name": "follower_right",
+      "task7a_applicability": "PACKAGE_NOT_CONTROL_SIGNAL"
+    },
+    {
+      "at": "Stage </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/supplier_cad_follower_right.usda>",
+      "category": "IsaacSim.RobotRules",
+      "classification": "LAYER_PACKAGING_DEFECT",
+      "closure": "FORMALLY_RECORDED_PACKAGE_STRUCTURE_BOUNDARY",
+      "installed_rule_source": {
+        "class": "ThumbnailExists",
+        "file": "robot_rules.py"
+      },
+      "issue_key": "b45a871e2603a19795afb56efe7842f36ade330f61a7c2c04971a142433ce238",
+      "message": "No thumbnail found at /home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/.thumbs/256x256/supplier_cad_follower_right.usda.png for robot asset </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/supplier_cad_follower_right.usda>",
+      "official_result_suppressed": false,
+      "official_severity": "WARNING",
+      "provenance_class": "LOCAL_ISAAC_5_1_RULE_PLUS_RUNTIME_EVIDENCE",
+      "rule": "ThumbnailExists",
+      "severity": "WARNING",
+      "target_name": "follower_right",
+      "task7a_applicability": "PACKAGE_NOT_CONTROL_SIGNAL"
+    },
+    {
+      "at": "Attribute (physics:approximation) Prim </follower_right/vx300s_right/follower_right_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh>",
+      "category": "IsaacSim.RobotRules",
+      "classification": "LAYER_PACKAGING_DEFECT",
+      "closure": "FORMALLY_RECORDED_PACKAGE_STRUCTURE_BOUNDARY",
+      "installed_rule_source": {
+        "class": "VerifyRobotPhysicsAttributesSourceLayer",
+        "file": "robot_rules.py"
+      },
+      "issue_key": "6e656c7f419b5b9bcfcbe4c167e0a4f6c44b66d17cfbd23f2928e7dde429caa3",
+      "message": "Physics Attribute physics:approximation in robot asset </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/supplier_cad_follower_right.usda> has authored value NOT in the physics layer",
+      "official_result_suppressed": false,
+      "official_severity": "WARNING",
+      "provenance_class": "LOCAL_ISAAC_5_1_RULE_PLUS_RUNTIME_EVIDENCE",
+      "rule": "VerifyRobotPhysicsAttributesSourceLayer",
+      "severity": "WARNING",
+      "target_name": "follower_right",
+      "task7a_applicability": "PACKAGE_NOT_CONTROL_SIGNAL"
+    },
+    {
+      "at": "Attribute (physics:approximation) Prim </follower_right/vx300s_right/follower_right_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh>",
+      "category": "IsaacSim.RobotRules",
+      "classification": "LAYER_PACKAGING_DEFECT",
+      "closure": "FORMALLY_RECORDED_PACKAGE_STRUCTURE_BOUNDARY",
+      "installed_rule_source": {
+        "class": "VerifyRobotPhysicsAttributesSourceLayer",
+        "file": "robot_rules.py"
+      },
+      "issue_key": "c8283486f76d0ba389946ed049e17b0f1792a4c9f496fbee1e3ba45de872feeb",
+      "message": "Physics Attribute physics:approximation in robot asset </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/supplier_cad_follower_right.usda> has authored value NOT in the physics layer",
+      "official_result_suppressed": false,
+      "official_severity": "WARNING",
+      "provenance_class": "LOCAL_ISAAC_5_1_RULE_PLUS_RUNTIME_EVIDENCE",
+      "rule": "VerifyRobotPhysicsAttributesSourceLayer",
+      "severity": "WARNING",
+      "target_name": "follower_right",
+      "task7a_applicability": "PACKAGE_NOT_CONTROL_SIGNAL"
+    },
+    {
+      "at": "Prim </follower_right/vx300s_right/follower_right_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh>",
+      "category": "IsaacSim.RobotRules",
+      "classification": "LAYER_PACKAGING_DEFECT",
+      "closure": "FORMALLY_RECORDED_PACKAGE_STRUCTURE_BOUNDARY",
+      "installed_rule_source": {
+        "class": "VerifyRobotPhysicsSchemaSourceLayer",
+        "file": "robot_rules.py"
+      },
+      "issue_key": "3086d938fd21f297437cf42d4c031dea3465b94309df8308a8b9d567fd58b4a7",
+      "message": "Physics Schema [PhysicsCollisionAPI] on /follower_right/vx300s_right/follower_right_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh in robot asset </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/supplier_cad_follower_right.usda> has applied schema NOT in the physics layer",
+      "official_result_suppressed": false,
+      "official_severity": "WARNING",
+      "provenance_class": "LOCAL_ISAAC_5_1_RULE_PLUS_RUNTIME_EVIDENCE",
+      "rule": "VerifyRobotPhysicsSchemaSourceLayer",
+      "severity": "WARNING",
+      "target_name": "follower_right",
+      "task7a_applicability": "PACKAGE_NOT_CONTROL_SIGNAL"
+    },
+    {
+      "at": "Prim </follower_right/vx300s_right/follower_right_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh>",
+      "category": "IsaacSim.RobotRules",
+      "classification": "LAYER_PACKAGING_DEFECT",
+      "closure": "FORMALLY_RECORDED_PACKAGE_STRUCTURE_BOUNDARY",
+      "installed_rule_source": {
+        "class": "VerifyRobotPhysicsSchemaSourceLayer",
+        "file": "robot_rules.py"
+      },
+      "issue_key": "2e0a81816357d97b16f911d6da4ed7e5dbb1307f18e58e61fd39d5f4f063a510",
+      "message": "Physics Schema [PhysicsMeshCollisionAPI] on /follower_right/vx300s_right/follower_right_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh in robot asset </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/supplier_cad_follower_right.usda> has applied schema NOT in the physics layer",
+      "official_result_suppressed": false,
+      "official_severity": "WARNING",
+      "provenance_class": "LOCAL_ISAAC_5_1_RULE_PLUS_RUNTIME_EVIDENCE",
+      "rule": "VerifyRobotPhysicsSchemaSourceLayer",
+      "severity": "WARNING",
+      "target_name": "follower_right",
+      "task7a_applicability": "PACKAGE_NOT_CONTROL_SIGNAL"
+    },
+    {
+      "at": "Prim </follower_right/vx300s_right/follower_right_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh>",
+      "category": "IsaacSim.RobotRules",
+      "classification": "LAYER_PACKAGING_DEFECT",
+      "closure": "FORMALLY_RECORDED_PACKAGE_STRUCTURE_BOUNDARY",
+      "installed_rule_source": {
+        "class": "VerifyRobotPhysicsSchemaSourceLayer",
+        "file": "robot_rules.py"
+      },
+      "issue_key": "d26986b0a9e125713f30955c9ac9b805cea90e7e2d97c74d51043989cfe4c457",
+      "message": "Physics Schema [PhysicsCollisionAPI] on /follower_right/vx300s_right/follower_right_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh in robot asset </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/supplier_cad_follower_right.usda> has applied schema NOT in the physics layer",
+      "official_result_suppressed": false,
+      "official_severity": "WARNING",
+      "provenance_class": "LOCAL_ISAAC_5_1_RULE_PLUS_RUNTIME_EVIDENCE",
+      "rule": "VerifyRobotPhysicsSchemaSourceLayer",
+      "severity": "WARNING",
+      "target_name": "follower_right",
+      "task7a_applicability": "PACKAGE_NOT_CONTROL_SIGNAL"
+    },
+    {
+      "at": "Prim </follower_right/vx300s_right/follower_right_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh>",
+      "category": "IsaacSim.RobotRules",
+      "classification": "LAYER_PACKAGING_DEFECT",
+      "closure": "FORMALLY_RECORDED_PACKAGE_STRUCTURE_BOUNDARY",
+      "installed_rule_source": {
+        "class": "VerifyRobotPhysicsSchemaSourceLayer",
+        "file": "robot_rules.py"
+      },
+      "issue_key": "178545de61cb5971a0ad6ef45e80beab4c15000fd52347bed2d44d35840bdd18",
+      "message": "Physics Schema [PhysicsMeshCollisionAPI] on /follower_right/vx300s_right/follower_right_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh in robot asset </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/supplier_cad_follower_right.usda> has applied schema NOT in the physics layer",
+      "official_result_suppressed": false,
+      "official_severity": "WARNING",
+      "provenance_class": "LOCAL_ISAAC_5_1_RULE_PLUS_RUNTIME_EVIDENCE",
+      "rule": "VerifyRobotPhysicsSchemaSourceLayer",
+      "severity": "WARNING",
+      "target_name": "follower_right",
+      "task7a_applicability": "PACKAGE_NOT_CONTROL_SIGNAL"
+    },
+    {
+      "at": null,
+      "category": "IsaacSim.SimReadyAssetRules",
+      "classification": "NON_APPLICABLE_FALSE_POSITIVE",
+      "closure": "OFFICIAL_NON_BLOCKING_INFORMATION_RECORDED",
+      "issue_key": "1bcbc5e45e4b2088a15da6078c1f9e3ae8fb1566b299826c030d9c7875f3cfa1",
+      "message": "No Looks prim found in the stage, skipping MaterialsOnTopLevelOnlyRule",
+      "official_result_suppressed": false,
+      "official_severity": "INFO",
+      "provenance_class": "LOCAL_ISAAC_5_1_RULE_PLUS_RUNTIME_EVIDENCE",
+      "rule": "MaterialsOnTopLevelOnly",
+      "severity": "INFO",
+      "target_name": "dual_follower_workcell",
+      "task7a_applicability": "NON_BLOCKING"
+    }
+  ],
+  "mimic_runtime_probe": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7a-rules-sweep/mimic_rule_runtime_probe.json",
+    "interpretation": "OPPOSED_LOCAL_JOINT_AXES_NOT_MODELED_BY_NUMERIC_LIMIT_RULE",
+    "loaded_rule_module": {
+      "MimicAPICheck_source_sha256": "4a35dd749cb395139b98103d5a2b4a5f09e0a807a4411f807d6ebe0ceab74d8c",
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.validation/isaacsim/asset/validation/joint_rules.py",
+      "file_sha256": "6dc43a4ed0284f61d85d22c5c24775e40c5f373facdc408236a25385109ab1ef",
+      "source_first_line": 252
+    },
+    "official_result_suppressed": false,
+    "robot_limits": {
+      "follower_left": {
+        "left_finger_runtime_limits": [
+          0.020999999716877937,
+          0.05700000002980232
+        ],
+        "mimic_gearing": 1.0,
+        "right_finger_runtime_limits": [
+          -0.06419999897480011,
+          -0.013799999840557575
+        ]
+      },
+      "follower_right": {
+        "left_finger_runtime_limits": [
+          0.020999999716877937,
+          0.05700000002980232
+        ],
+        "mimic_gearing": 1.0,
+        "right_finger_runtime_limits": [
+          -0.06419999897480011,
+          -0.013799999840557575
+        ]
+      }
+    },
+    "sha256": "16c956474e5aff3280d45c2cdb4dbae9b19ce903276e149173ffb7d751b80bf1",
+    "stage_modified": false,
+    "stage_sha256": "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf",
+    "status": "PASS"
+  },
+  "official_report": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_signal_correspondence_official_rules.json",
+    "sha256": "a7acb1e7363d1306b01b7f9609f9a5250f0b535771a3de8523246ae3cd31756f"
+  },
+  "official_status": "FAIL",
+  "official_status_suppressed": false,
+  "real_robot_connected": false,
+  "remote_192_168_1_103_accessed": false,
+  "runtime": {
+    "asset_validation_extension": "1.1.0",
+    "isaac_sim": "5.1.0.0",
+    "kit": "107.3.3",
+    "physx": "107.3.26"
+  },
+  "schema_version": 1,
+  "source_issue_count": 37,
+  "status": "PARTIAL",
+  "task_8": "NOT_RUN",
+  "triaged_issue_count": 37,
+  "unclassified_issue_count": 0
+}
