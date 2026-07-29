@@ -1,0 +1,867 @@
+{
+  "bottle_geometry": {
+    "axis_a_task_m": [
+      -0.05807794104743008,
+      -0.1749411778934298,
+      0.032911078006096196
+    ],
+    "axis_b_task_m": [
+      0.1461293533847878,
+      -0.14782327051337052,
+      0.032911078006096196
+    ],
+    "axis_unit_task": [
+      0.9912975457874654,
+      0.13164032708766643,
+      0.0
+    ],
+    "body_interval_m": [
+      0.018,
+      0.12
+    ],
+    "grasp_coordinate_m": 0.069,
+    "grasp_point_task_m": [
+      0.010321589611905047,
+      -0.1658579953243808,
+      0.032911078006096196
+    ],
+    "section_diameter_m": 0.068
+  },
+  "classification": "INCONCLUSIVE",
+  "compatibility_gate": {
+    "failed_gates": [],
+    "grasp_tester_execution_claim": false,
+    "meaning": "STRUCTURAL_API_AND_NON_EXECUTING_COMPATIBILITY_ONLY",
+    "readback": {
+      "actual_isaac_grasp_export_status": "NOT_RUN",
+      "classification": "INCONCLUSIVE",
+      "evidence_scope": "LOCAL_SOURCE_STRUCTURAL_API_AND_SYNTHETIC_SERIALIZER_ONLY",
+      "grasp_tester_execution_status": "NOT_RUN",
+      "gui_evidence_status": "GUI_PENDING",
+      "status": "PARTIAL",
+      "structural_api_classification": "FULL_ARTICULATION_EMBEDDED_GRIPPER_SUPPORTED",
+      "structural_api_probe_status": "PASS"
+    },
+    "status": "PASS",
+    "synthetic_serializer_boundary": {
+      "classification": "SYNTHETIC_SERIALIZER_ONLY_NOT_GRASP_TESTER",
+      "synthetic": true,
+      "uses_grasp_tester_output": false
+    }
+  },
+  "contact_region_samples": {
+    "frame_recovery": {
+      "approach_axis_to_world_negative_z_deg": 18.370662001624552,
+      "approach_axis_world_at_reference": [
+        0.07277672677787322,
+        -0.30664530931174305,
+        -0.949037513650859
+      ],
+      "base_from_gripper_reference": [
+        [
+          0.07277672677787322,
+          -0.1263220382348994,
+          0.9893160721911269,
+          0.47109456686686296
+        ],
+        [
+          -0.30664530931174305,
+          0.9410632781209153,
+          0.14271846709316355,
+          -0.1315971859597434
+        ],
+        [
+          -0.949037513650859,
+          -0.31375571584992284,
+          0.029751444585065137,
+          0.0396446389668661
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "method": "INDEPENDENT_INTERBOTIX_ALOHA_VX300S_POE_FK",
+      "runtime_frame": 234,
+      "runtime_readback_q_rad": [
+        -0.16720470786094666,
+        0.5324101448059082,
+        -0.017540352419018745,
+        -0.3624092638492584,
+        0.9591664671897888,
+        -0.11042828112840652
+      ],
+      "source_file": "external/ros2-essentials/aloha_ws/src/interbotix_ros_toolboxes/interbotix_xs_toolbox/interbotix_xs_modules/interbotix_xs_modules/xs_robot/mr_descriptions.py",
+      "source_sha256": "9412f1496f0cf1f3e23995ba3f0c10f250624cdd3798274a7191b1cad6248388",
+      "world_from_base": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.4695
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.019
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.02
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "world_from_gripper_reference": [
+        [
+          0.07277672677787322,
+          -0.1263220382348994,
+          0.9893160721911269,
+          0.0015945668668629898
+        ],
+        [
+          -0.30664530931174305,
+          0.9410632781209153,
+          0.14271846709316355,
+          -0.1505971859597434
+        ],
+        [
+          -0.949037513650859,
+          -0.31375571584992284,
+          0.029751444585065137,
+          0.0596446389668661
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "gripper_approach_axis": {
+      "axis_gripper": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "source": "USER_CONFIRMED_RUNTIME_FRAME_+X_FORWARD_FROM_GRIPPER_ORIENTATION_CONFIRMATION"
+    },
+    "left_gripper_m": [
+      0.05175075359603422,
+      0.038137152917932765,
+      0.005051372018781507
+    ],
+    "open_aperture_m": 0.0764981250695501,
+    "reference_frame": "/World/follower_left/vx300s_left/follower_left_gripper_link",
+    "right_gripper_m": [
+      0.05175077136357113,
+      -0.03836090331427272,
+      0.004948747214066514
+    ],
+    "source_method": "MINIMUM_EUCLIDEAN_DISTANCE_BETWEEN_COMPOSED_SUPPLIER_CAD_COLLIDER_VERTICES",
+    "status": "CAD_COLLIDER_CLOSEST_OPPOSING_POINTS_USED_AS_DIAGNOSTIC_SAMPLES"
+  },
+  "diagnostic_classification": "DIAGNOSTIC_ONLY_PENDING_GRASP_EDITOR_SIMULATION",
+  "ee_from_gripper": {
+    "ee_frame": "/World/follower_left/vx300s_left/follower_left_gripper_link",
+    "gripper_frame": "/World/follower_left/vx300s_left/follower_left_gripper_link",
+    "hard_blocker": false,
+    "matrix": [
+      [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "source": "IDENTITY_ALLOWED_FRAME_PATHS_IDENTICAL"
+  },
+  "evidence_boundaries": {
+    "actual_grasp_editor_import_preview_export": "NOT_RUN",
+    "grasp_editor_simulation_stability": "NOT_RUN",
+    "historical_report_use": "GEOMETRY_INPUT_ONLY_NOT_HOLD_ACCEPTANCE",
+    "ik": "NOT_RUN",
+    "numeric_transform_chain": "PASS",
+    "physics_grasp": "NOT_RUN",
+    "pre_ik_geometry": "PASS",
+    "real_calibration": "HARD_BLOCKER_NOT_MEASURED"
+  },
+  "grasp_candidate": {
+    "authoritative_after_gui_simulation": false,
+    "diagnostic_confidence": {
+      "semantics": "UNTESTED_CANDIDATE_GRASP_TESTER_NOT_RUN",
+      "value": 0.0
+    },
+    "format": "isaac_grasp",
+    "format_version": 1.0,
+    "gripper_frame": "/World/follower_left/vx300s_left/follower_left_gripper_link",
+    "name": "horizontal_body_grasp",
+    "object_frame": "/World/ALOHA1GraspEditorSession/Bottle500",
+    "path": "/home/eii/project/openpi0.5-rtc-reward-learning/configs/aloha1_grasps/bottle500_horizontal_body_grasp.isaac_grasp.yaml",
+    "pregrasp_cspace_position_m": {
+      "left_finger": 0.057,
+      "right_finger": -0.057
+    },
+    "requested_close_candidate_m": {
+      "left_finger": 0.021,
+      "right_finger": -0.021
+    },
+    "sha256": "3b14e643570d963f6abb53c0a26128c76de93b83069e98defe8cec1db098237a",
+    "stable_cspace_position_m": null,
+    "stable_cspace_position_status": "NOT_ESTABLISHED_GRASP_TESTER_NOT_RUN",
+    "status": "PRE_GUI_DIAGNOSTIC_CANDIDATE",
+    "yaml_cspace_position_semantics": "REQUESTED_CLOSE_CANDIDATE_NOT_STABLE_CSPACE"
+  },
+  "matrices": {
+    "base_from_ee": [
+      [
+        -3.0574924140550384e-08,
+        0.13297006759029767,
+        -0.9911200538406186,
+        0.48479212660307947
+      ],
+      [
+        2.3023983557091298e-07,
+        -0.991120053840592,
+        -0.1329700675903012,
+        -0.14630403072675008
+      ],
+      [
+        -0.999999999999973,
+        -2.3226086795683575e-07,
+        -3.1158603748901725e-10,
+        -0.02623816106440771
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "ee_from_gripper": [
+      [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "gripper_reference_from_world": [
+      [
+        0.07277672677787335,
+        -0.30664530931174294,
+        -0.9490375136508589,
+        0.010309031840415412
+      ],
+      [
+        -0.12632203823489943,
+        0.9410632781209153,
+        -0.31375571584992296,
+        0.16063675682744447
+      ],
+      [
+        0.9893160721911273,
+        0.14271846709316358,
+        0.029751444585065005,
+        0.01814095472812874
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "object_from_gripper": [
+      [
+        0.9912975152125145,
+        0.13164043886987434,
+        0.00017660023008436124,
+        -0.05128655796807438
+      ],
+      [
+        0.13164055732749838,
+        -0.9912966231869051,
+        -0.0013298589190343954,
+        -0.006916751347251837
+      ],
+      [
+        -4.6702008579813103e-17,
+        0.0013415335947344665,
+        -0.9999991001434023,
+        0.07400020520142417
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "task_from_base": [
+      [
+        1.0,
+        0.0,
+        0.0,
+        -0.4695
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        -0.019
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        0.11090000152587891
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "task_from_gripper": [
+      [
+        -3.0574924140550384e-08,
+        0.13297006759029767,
+        -0.9911200538406186,
+        0.015292126603079492
+      ],
+      [
+        2.3023983557091298e-07,
+        -0.991120053840592,
+        -0.1329700675903012,
+        -0.16530403072675007
+      ],
+      [
+        -0.999999999999973,
+        -2.3226086795683575e-07,
+        -3.1158603748901725e-10,
+        0.0846618404614712
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "task_from_object": [
+      [
+        0.01732917571574788,
+        -0.13049473316866286,
+        0.9912975457874655,
+        -0.05807794104743008
+      ],
+      [
+        -0.13049473316866286,
+        0.9826708242842522,
+        0.13164032708766638,
+        -0.1749411778934298
+      ],
+      [
+        -0.9912975457874655,
+        -0.13164032708766638,
+        0.0,
+        0.032911078006096196
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "world_from_gripper_reference": [
+      [
+        0.07277672677787322,
+        -0.1263220382348994,
+        0.9893160721911269,
+        0.0015945668668629898
+      ],
+      [
+        -0.30664530931174305,
+        0.9410632781209153,
+        0.14271846709316355,
+        -0.1505971859597434
+      ],
+      [
+        -0.949037513650859,
+        -0.31375571584992284,
+        0.029751444585065137,
+        0.0596446389668661
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ]
+  },
+  "pre_ik_geometry": {
+    "failed_gates": [],
+    "left_contact_task_m": [
+      0.015356708714779442,
+      -0.2037741971437746,
+      0.032911078006096196
+    ],
+    "metrics": {
+      "axial_tolerance_m": 0.005,
+      "body_interval_m": [
+        0.018,
+        0.12
+      ],
+      "contact_envelope_allowance_m": 0.0,
+      "expected_axis_coordinate_m": 0.069,
+      "gripper_line_to_axis_deg": 90.0,
+      "left_axis_coordinate_m": 0.06900000000000002,
+      "left_radial_signed_m": -0.03824906253477504,
+      "open_aperture_m": 0.0764981250695501,
+      "perpendicular_tolerance_deg": 3.0,
+      "right_axis_coordinate_m": 0.06900000000000002,
+      "right_radial_signed_m": 0.038249062534775065,
+      "section_diameter_m": 0.068
+    },
+    "right_contact_task_m": [
+      0.0052864705090306515,
+      -0.127941793504987,
+      0.032911078006096196
+    ],
+    "status": "PASS"
+  },
+  "schema_version": 1,
+  "scope": "pre-IK numeric Bottle500 horizontal-body grasp candidate",
+  "source_categories": {
+    "engineering_diagnostic": [
+      "5 mm axial tolerance",
+      "3 degree perpendicular tolerance"
+    ],
+    "hard_blocker": [
+      "physical tabletop/base calibration not measured"
+    ],
+    "numeric_calculation": [
+      "task-frame conversion",
+      "T_WT_G",
+      "T_O_G",
+      "T_B_G",
+      "closure and determinant gates"
+    ],
+    "runtime_readback": [
+      "table/base transforms",
+      "reference gripper pose",
+      "supplier-CAD collider samples"
+    ]
+  },
+  "source_manifest": {
+    "bottle_usd": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/bottle_500ml/isaac/bottle_500ml_sim.usd",
+      "sha256": "16427135f152ec951de2321fd689366d745a2dd389cbe260976631783952533e"
+    },
+    "grasp_editor_compatibility": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_grasp_editor_compatibility.json",
+      "sha256": "e7c7eded3cb310bc5958c8d005c0e49e55deade6c27e376e2ed7e9008b7a8a67"
+    },
+    "gripper_orientation_confirmation": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/gripper_orientation_confirmation.json",
+      "sha256": "fbf1502f4dc6c387a59f64ccaaa603753b77a80a99da809d2f0ed71698f47bad"
+    },
+    "historical_horizontal_kinematics_geometry": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7b2_horizontal_kinematics.json",
+      "sha256": "df662a133c154bbb13fdf2ba6d81306a438ead17e32411b3f22efb44617020e4"
+    },
+    "interbotix_aloha_vx300s_kinematics": {
+      "class": "aloha_vx300s",
+      "expected_sha256": "9412f1496f0cf1f3e23995ba3f0c10f250624cdd3798274a7191b1cad6248388",
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_toolboxes/interbotix_xs_toolbox/interbotix_xs_modules/interbotix_xs_modules/xs_robot/mr_descriptions.py",
+      "sha256": "9412f1496f0cf1f3e23995ba3f0c10f250624cdd3798274a7191b1cad6248388"
+    },
+    "stationary_baseline": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/configs/aloha1_stationary_user_confirmed_baseline_v1.yaml",
+      "sha256": "071149f1f92c23e34f7589e0c7a18dd51e74bcbe091f5d8cb407ec1ef8db250d"
+    },
+    "task_frame_config": {
+      "path": "/home/eii/project/openpi0.5-rtc-reward-learning/configs/aloha1_table_task_frame.yaml",
+      "sha256": "d823c9e2d066e732c9eb6fed7bb806719dd85ba128f454953636ee55dc50ec39"
+    }
+  },
+  "source_stage": {
+    "expected_sha256": "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf",
+    "immutable": true,
+    "path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/aloha1_signal_correspondence_workcell.usda",
+    "root_prim": "/World",
+    "sha256_after": "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf",
+    "sha256_before": "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf"
+  },
+  "status": "PARTIAL",
+  "task8": "NOT_RUN",
+  "task_frame": {
+    "name": "W_T",
+    "origin_policy": "TABLETOP_GEOMETRIC_CENTER",
+    "status": "DIGITAL_STAGE_READBACK_NOT_REAL_CALIBRATION",
+    "tabletop_top_world_m": [
+      0.0,
+      0.0,
+      -0.0909000015258789
+    ],
+    "world_from_task": [
+      [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        -0.0909000015258789
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ]
+  },
+  "transform_chain": {
+    "base_ee_gripper_closure": {
+      "rotation_rad": 9.342365049734471e-18,
+      "translation_m": 3.555125210177728e-17
+    },
+    "base_target_closure": {
+      "rotation_rad": 9.342365049734471e-18,
+      "translation_m": 2.964296775167217e-17
+    },
+    "convention": "T_A_B maps column vectors from B into A",
+    "determinants": {
+      "base_from_ee": 1.0000000000000002,
+      "base_from_gripper": 1.0000000000000002,
+      "ee_from_gripper": 1.0,
+      "object_from_gripper": 1.0000000000000002,
+      "table_from_base": 1.0,
+      "table_from_base_ee_gripper": 1.0000000000000002,
+      "table_from_gripper": 1.0000000000000002,
+      "table_from_object": 1.0
+    },
+    "double_base_transform_applied": false,
+    "double_base_transform_gate": "PASS_SINGLE_INVERSE_TABLE_FROM_BASE_APPLICATION",
+    "ee_frame": "/World/follower_left/vx300s_left/follower_left_gripper_link",
+    "ee_from_gripper_source": "IDENTITY_ALLOWED_FRAME_PATHS_IDENTICAL",
+    "failed_gates": [],
+    "gripper_frame": "/World/follower_left/vx300s_left/follower_left_gripper_link",
+    "inverse_closures": {
+      "base_from_ee": {
+        "rotation_rad": 6.2499982595381e-18,
+        "translation_m": 6.216025217875883e-17
+      },
+      "base_from_gripper": {
+        "rotation_rad": 1.0080892634710093e-18,
+        "translation_m": 3.469446951953614e-18
+      },
+      "ee_from_gripper": {
+        "rotation_rad": 0.0,
+        "translation_m": 0.0
+      },
+      "object_from_gripper": {
+        "rotation_rad": 1.393841153380698e-19,
+        "translation_m": 1.3904866443919908e-17
+      },
+      "table_from_base": {
+        "rotation_rad": 0.0,
+        "translation_m": 0.0
+      },
+      "table_from_gripper": {
+        "rotation_rad": 1.0080892634710093e-18,
+        "translation_m": 0.0
+      },
+      "table_from_object": {
+        "rotation_rad": 9.134631177544068e-18,
+        "translation_m": 6.938893903907228e-18
+      }
+    },
+    "length_unit": "m",
+    "matrices": {
+      "base_from_ee": [
+        [
+          -3.0574924140550384e-08,
+          0.13297006759029767,
+          -0.9911200538406186,
+          0.48479212660307947
+        ],
+        [
+          2.3023983557091298e-07,
+          -0.991120053840592,
+          -0.1329700675903012,
+          -0.14630403072675008
+        ],
+        [
+          -0.999999999999973,
+          -2.3226086795683575e-07,
+          -3.1158603748901725e-10,
+          -0.02623816106440771
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "base_from_gripper": [
+        [
+          -3.057492409406083e-08,
+          0.13297006759029767,
+          -0.9911200538406187,
+          0.48479212660307947
+        ],
+        [
+          2.3023983557883422e-07,
+          -0.9911200538405919,
+          -0.1329700675903012,
+          -0.14630403072675005
+        ],
+        [
+          -0.999999999999973,
+          -2.322608679440459e-07,
+          -3.1158599078077023e-10,
+          -0.026238161064407697
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "ee_from_gripper": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "object_from_gripper": [
+        [
+          0.9912975152125145,
+          0.13164043886987434,
+          0.00017660023008436124,
+          -0.05128655796807438
+        ],
+        [
+          0.13164055732749838,
+          -0.9912966231869051,
+          -0.0013298589190343954,
+          -0.006916751347251837
+        ],
+        [
+          -4.6702008579813103e-17,
+          0.0013415335947344665,
+          -0.9999991001434023,
+          0.07400020520142417
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "table_from_base": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.4695
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.019
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.11090000152587891
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "table_from_base_ee_gripper": [
+        [
+          -3.0574924140550384e-08,
+          0.13297006759029767,
+          -0.9911200538406186,
+          0.015292126603079492
+        ],
+        [
+          2.3023983557091298e-07,
+          -0.991120053840592,
+          -0.1329700675903012,
+          -0.16530403072675007
+        ],
+        [
+          -0.999999999999973,
+          -2.3226086795683575e-07,
+          -3.1158603748901725e-10,
+          0.0846618404614712
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "table_from_gripper": [
+        [
+          -3.057492409406083e-08,
+          0.13297006759029767,
+          -0.9911200538406187,
+          0.015292126603079506
+        ],
+        [
+          2.3023983557883422e-07,
+          -0.9911200538405919,
+          -0.1329700675903012,
+          -0.16530403072675004
+        ],
+        [
+          -0.999999999999973,
+          -2.322608679440459e-07,
+          -3.1158599078077023e-10,
+          0.08466184046147121
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "table_from_object": [
+        [
+          0.01732917571574788,
+          -0.13049473316866286,
+          0.9912975457874655,
+          -0.05807794104743008
+        ],
+        [
+          -0.13049473316866286,
+          0.9826708242842522,
+          0.13164032708766638,
+          -0.1749411778934298
+        ],
+        [
+          -0.9912975457874655,
+          -0.13164032708766638,
+          0.0,
+          0.032911078006096196
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "multiplication_order": {
+      "base_from_ee": "base_from_gripper @ inverse(ee_from_gripper)",
+      "base_from_gripper": "inverse(table_from_base) @ table_from_gripper",
+      "table_from_gripper": "table_from_object @ object_from_gripper"
+    },
+    "status": "PASS",
+    "thresholds": {
+      "max_rotation_error_rad": 1e-09,
+      "max_translation_error_m": 1e-09
+    },
+    "world_object_gripper_closure": {
+      "rotation_rad": 1.2324490670347976e-19,
+      "translation_m": 0.0
+    }
+  }
+}

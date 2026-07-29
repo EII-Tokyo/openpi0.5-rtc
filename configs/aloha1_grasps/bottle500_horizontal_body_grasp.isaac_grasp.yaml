@@ -1,0 +1,23 @@
+format: isaac_grasp
+format_version: 1.0
+object_frame: /World/ALOHA1GraspEditorSession/Bottle500
+gripper_frame: /World/follower_left/vx300s_left/follower_left_gripper_link
+grasps:
+  horizontal_body_grasp:
+    confidence: 0.0
+    position:
+    - -0.05128655796807438
+    - -0.006916751347251837
+    - 0.07400020520142417
+    orientation:
+      w: 0.0006693060225319319
+      xyz:
+      - 0.9978217825021187
+      - 0.06596393284208889
+      - 4.424643588193555e-05
+    cspace_position:
+      left_finger: 0.021
+      right_finger: -0.021
+    pregrasp_cspace_position:
+      left_finger: 0.057
+      right_finger: -0.057
