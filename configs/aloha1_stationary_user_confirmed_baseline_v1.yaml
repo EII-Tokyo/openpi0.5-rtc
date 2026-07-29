@@ -1,0 +1,80 @@
+schema_version: 1
+baseline_id: ALOHA1_STATIONARY_USER_CONFIRMED_BASELINE_V1
+classification: USER_CONFIRMED_PROJECT_BASELINE
+status: PASS
+coordinate_system:
+  units: m
+  up_axis: Z
+  handedness: right
+  x_positive: left_to_right_along_support_frame
+  y_positive: robot_base_toward_frame_extension
+table:
+  dimensions_m: [1.100, 0.600, 0.015]
+  top_plane_z_m: -0.09090000152587889
+  center_z_m: -0.09840000152587889
+  source_status:
+    dimensions: USER_CONFIRMED_PROJECT_BASELINE
+    top_plane: RUNTIME_READBACK_FROM_USER_CONFIRMED_SOURCE_STAGE
+support_frame:
+  outer_size_m: [1.220, 0.625]
+  square_tube_width_m: 0.020
+  cam_low_extension_inner_gap_m: 0.260
+  cam_low_vertical_support_height_m: 0.100
+  source_status: USER_CONFIRMED_PROJECT_BASELINE
+followers:
+  model: aloha_vx300s
+  identity_status: VERIFIED_SINGLE_REUSABLE_ROBOT_PRODUCT
+  facing_inner_edge_gap_m: 0.735
+  original_anchor_to_inner_visual_edge_offset_m: 0.102
+  anchor_spacing_m: 0.939
+  installation_status: USER_CONFIRMED_PROJECT_BASELINE
+  follower_left:
+    translation_m: [-0.4695, -0.019, 0.020]
+    rotation_rpy_rad: [0.0, 0.0, 0.0]
+    mirrored: false
+    asset: assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_left/1.6/supplier_cad_follower_left.usda
+    expected_sha256: 232ea1f61dc07f391baf7497b0cf6c2455593f9655ae9b3f541fde81c8ef73ad
+  follower_right:
+    translation_m: [0.4695, -0.019, 0.020]
+    rotation_rpy_rad: [0.0, 0.0, 3.141592653589793]
+    mirrored: false
+    asset: assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/supplier_cad_follower_right.usda
+    expected_sha256: 95c7878f794f5f557b70997a2240b6476836b8ffbeed5a4992cb114a169487ea
+main_bottle:
+  asset: assets/bottle_500ml/cad/bottle_500ml.FCStd
+  role: SCENE_RESOURCE_NOT_TASK7A_GATE
+  expected_sha256: 3594f60200e54181bc8480a229484293a0d386c146d3f235b32e31a0c16bbf8a
+sources:
+  user_confirmed_source_stage:
+    path: local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd
+    expected_sha256: 236d2d133047d665cf7d3ad0e58e04ae218e56dcf70bbe63e110d1307d3f3215
+    root_prim: /scene
+    required_prims:
+      - /scene/left_base_link
+      - /scene/right_base_link
+      - /scene/worldBody
+      - /scene/worldBody/table
+    mutation_policy: READ_ONLY_REFERENCE
+  transform_audit:
+    path: scene_reconstruction/audit/original_aloha_transforms.json
+    expected_sha256: 7f4d0d356afe889db2162f85f54a92d8daa3796f07c66c8d0c1c01b8c766a346
+  project_confirmation_record:
+    path: .codex/TASK_STATE.md
+  a23_reconciliation_git_object:
+    commit: a925a1ba657bc2d650059369865c5b35c1bcb95a
+    path: aloha_isaac_rebuild/configs/physical_reconstruction/a23_scene_parameter_reconciliation.yaml
+    git_blob: 9a4d6d94759723eb55e88513c4b860112558ef51
+scope:
+  task_7a: IN_PROGRESS
+  task_7b: NOT_RUN
+  task_8: NOT_RUN
+  real_robot_connection: false
+  remote_192_168_1_103_access: false
+  calibrated_physics_twin_claim: false
+supersedes_for_signal_baseline:
+  - assets/Trossen/ALOHA1/1.0/workcell/aloha1_workcell.usd
+  - reports/aloha1_mapping/workcell_manifest.json
+notes:
+  - The superseded files remain immutable historical evidence.
+  - The right follower is yaw-rotated, never mirrored.
+  - Bottle grasp and material calibration do not gate Task 7A.

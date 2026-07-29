@@ -4,7 +4,7 @@ scope: Stationary ALOHA 1 followers
 order_policy: explicit_source_order_never_alphabetical
 sources:
   urdf_generation_report: /home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/urdf_generation_manifest.json
-  isaac_runtime_report: /home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/usd_dof_inventory.json
+  isaac_runtime_report: /home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_signal_correspondence_runtime_inventory.json
   control_constants:
     local_path: /home/eii/project/openpi0.5-rtc/third_party/aloha/aloha_scripts/constants.py
     sha256: fe70a2886cfbab92aaeacc19f9482b9a56df8d5b2b67495f60ca279cf1826e94
@@ -70,6 +70,9 @@ gripper:
 robots:
   follower_left:
     side: left
+    robot_prefix: follower_left
+    base_frame: follower_left_base_link
+    end_effector_frame: follower_left_gripper_link
     urdf_nonfixed_joint_order:
     - waist
     - shoulder
@@ -90,7 +93,7 @@ robots:
     - gripper
     - left_finger
     - right_finger
-    ros_joint_state_order: &id001
+    ros_joint_state_order:
     - waist
     - shoulder
     - elbow
@@ -380,6 +383,9 @@ robots:
         damping: 0.0
   follower_right:
     side: right
+    robot_prefix: follower_right
+    base_frame: follower_right_base_link
+    end_effector_frame: follower_right_gripper_link
     urdf_nonfixed_joint_order:
     - waist
     - shoulder
@@ -400,7 +406,16 @@ robots:
     - gripper
     - left_finger
     - right_finger
-    ros_joint_state_order: *id001
+    ros_joint_state_order:
+    - waist
+    - shoulder
+    - elbow
+    - forearm_roll
+    - wrist_angle
+    - wrist_rotate
+    - gripper
+    - left_finger
+    - right_finger
     dataset_order:
     - right_waist
     - right_shoulder

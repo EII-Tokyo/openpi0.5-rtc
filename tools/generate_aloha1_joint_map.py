@@ -20,13 +20,20 @@ def main(argv: Sequence[str] | None = None) -> int:
         type=Path,
         default=Path("configs/aloha1_joint_map.yaml"),
     )
+    parser.add_argument(
+        "--runtime-report",
+        type=Path,
+        default=Path("reports/aloha1_mapping/usd_dof_inventory.json"),
+        help="Runtime DOF inventory relative to --project-root.",
+    )
     arguments = parser.parse_args(argv)
     output = (
-        arguments.output
-        if arguments.output.is_absolute()
-        else arguments.project_root / arguments.output
+        arguments.output if arguments.output.is_absolute() else arguments.project_root / arguments.output
     ).resolve()
-    mapping = build_joint_map(arguments.project_root)
+    mapping = build_joint_map(
+        arguments.project_root,
+        runtime_report_relative=arguments.runtime_report,
+    )
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(
         yaml.safe_dump(mapping, sort_keys=False, allow_unicode=True),

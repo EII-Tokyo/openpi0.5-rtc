@@ -1,0 +1,132 @@
+{
+  "baseline_id": "ALOHA1_STATIONARY_USER_CONFIRMED_BASELINE_V1",
+  "classification": "USER_CONFIRMED_PROJECT_BASELINE",
+  "config": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/configs/aloha1_stationary_user_confirmed_baseline_v1.yaml",
+    "sha256": "071149f1f92c23e34f7589e0c7a18dd51e74bcbe091f5d8cb407ec1ef8db250d"
+  },
+  "coordinate_system": {
+    "handedness": "right",
+    "units": "m",
+    "up_axis": "Z",
+    "x_positive": "left_to_right_along_support_frame",
+    "y_positive": "robot_base_toward_frame_extension"
+  },
+  "evidence_policy": {
+    "conflict_status": "NONE_FOUND",
+    "historical_assets_mutated": false,
+    "values_are_not_reestimated_from_photos": true
+  },
+  "followers": {
+    "anchor_spacing_m": 0.939,
+    "facing_inner_edge_gap_m": 0.735,
+    "follower_left": {
+      "asset_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_left/1.6/supplier_cad_follower_left.usda",
+      "asset_sha256": "232ea1f61dc07f391baf7497b0cf6c2455593f9655ae9b3f541fde81c8ef73ad",
+      "mirrored": false,
+      "rotation_rpy_rad": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "translation_m": [
+        -0.4695,
+        -0.019,
+        0.02
+      ]
+    },
+    "follower_right": {
+      "asset_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/supplier_cad_follower_right.usda",
+      "asset_sha256": "95c7878f794f5f557b70997a2240b6476836b8ffbeed5a4992cb114a169487ea",
+      "mirrored": false,
+      "rotation_rpy_rad": [
+        0.0,
+        0.0,
+        3.141592653589793
+      ],
+      "translation_m": [
+        0.4695,
+        -0.019,
+        0.02
+      ]
+    },
+    "identity_status": "VERIFIED_SINGLE_REUSABLE_ROBOT_PRODUCT",
+    "installation_status": "USER_CONFIRMED_PROJECT_BASELINE",
+    "model": "aloha_vx300s",
+    "original_anchor_to_inner_visual_edge_offset_m": 0.102
+  },
+  "main_bottle": {
+    "asset_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/bottle_500ml/cad/bottle_500ml.FCStd",
+    "asset_sha256": "3594f60200e54181bc8480a229484293a0d386c146d3f235b32e31a0c16bbf8a",
+    "role": "SCENE_RESOURCE_NOT_TASK7A_GATE"
+  },
+  "notes": [
+    "The superseded files remain immutable historical evidence.",
+    "The right follower is yaw-rotated, never mirrored.",
+    "Bottle grasp and material calibration do not gate Task 7A."
+  ],
+  "schema_version": 1,
+  "scope": {
+    "calibrated_physics_twin_claim": false,
+    "real_robot_connection": false,
+    "remote_192_168_1_103_access": false,
+    "task_7a": "IN_PROGRESS",
+    "task_7b": "NOT_RUN",
+    "task_8": "NOT_RUN"
+  },
+  "sources": {
+    "a23_reconciliation_git_object": {
+      "commit": "a925a1ba657bc2d650059369865c5b35c1bcb95a",
+      "git_blob": "9a4d6d94759723eb55e88513c4b860112558ef51",
+      "path": "aloha_isaac_rebuild/configs/physical_reconstruction/a23_scene_parameter_reconciliation.yaml"
+    },
+    "project_confirmation_record": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/TASK_STATE.md",
+      "sha256": "86236e0e3e3147bcb0e19fbd5522c20aacf6bece0c262f41d30dddec7101d939"
+    },
+    "transform_audit": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/scene_reconstruction/audit/original_aloha_transforms.json",
+      "sha256": "7f4d0d356afe889db2162f85f54a92d8daa3796f07c66c8d0c1c01b8c766a346"
+    },
+    "user_confirmed_source_stage": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd",
+      "mutation_policy": "READ_ONLY_REFERENCE",
+      "required_prims": [
+        "/scene/left_base_link",
+        "/scene/right_base_link",
+        "/scene/worldBody",
+        "/scene/worldBody/table"
+      ],
+      "root_prim": "/scene",
+      "sha256": "236d2d133047d665cf7d3ad0e58e04ae218e56dcf70bbe63e110d1307d3f3215"
+    }
+  },
+  "status": "PASS",
+  "supersedes_for_signal_baseline": [
+    "assets/Trossen/ALOHA1/1.0/workcell/aloha1_workcell.usd",
+    "reports/aloha1_mapping/workcell_manifest.json"
+  ],
+  "support_frame": {
+    "cam_low_extension_inner_gap_m": 0.26,
+    "cam_low_vertical_support_height_m": 0.1,
+    "outer_size_m": [
+      1.22,
+      0.625
+    ],
+    "source_status": "USER_CONFIRMED_PROJECT_BASELINE",
+    "square_tube_width_m": 0.02
+  },
+  "table": {
+    "center_z_m": -0.0984000015258789,
+    "dimensions_m": [
+      1.1,
+      0.6,
+      0.015
+    ],
+    "source_status": {
+      "dimensions": "USER_CONFIRMED_PROJECT_BASELINE",
+      "top_plane": "RUNTIME_READBACK_FROM_USER_CONFIRMED_SOURCE_STAGE"
+    },
+    "top_plane_z_m": -0.09090000152587889
+  }
+}

@@ -40,3 +40,37 @@ def test_joint_map_records_gripper_semantic_mismatch_without_hiding_it() -> None
     assert gripper["urdf_left_finger_limit_m"]["closed"] == 0.021
     assert gripper["calibration_status"] == "HARD_BLOCKER"
     assert mapping["status"] == "PARTIAL"
+
+
+def test_joint_map_names_robot_frames_and_prefixes_explicitly() -> None:
+    mapping = build_joint_map(PROJECT_ROOT)
+
+    left = mapping["robots"]["follower_left"]
+    right = mapping["robots"]["follower_right"]
+    assert left["robot_prefix"] == "follower_left"
+    assert right["robot_prefix"] == "follower_right"
+    assert left["base_frame"] == "follower_left_base_link"
+    assert right["base_frame"] == "follower_right_base_link"
+    assert left["end_effector_frame"] == "follower_left_gripper_link"
+    assert right["end_effector_frame"] == "follower_right_gripper_link"
+
+
+def test_joint_map_can_select_the_frozen_signal_runtime_inventory() -> None:
+    relative = Path("reports/aloha1_mapping/aloha1_signal_correspondence_runtime_inventory.json")
+    mapping = build_joint_map(
+        PROJECT_ROOT,
+        runtime_report_relative=relative,
+    )
+
+    assert mapping["sources"]["isaac_runtime_report"] == str((PROJECT_ROOT / relative).resolve())
+    assert mapping["robots"]["follower_left"]["isaac_dof_order"] == [
+        "waist",
+        "shoulder",
+        "elbow",
+        "forearm_roll",
+        "wrist_angle",
+        "wrist_rotate",
+        "gripper",
+        "left_finger",
+        "right_finger",
+    ]

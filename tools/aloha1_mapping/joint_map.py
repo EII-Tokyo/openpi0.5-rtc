@@ -20,16 +20,11 @@ ROS_EXTRA_JOINTS = ["gripper", "left_finger", "right_finger"]
 
 
 def _control_source_path(project_root: Path) -> Path:
-    specifications = json.loads(
-        (project_root / "configs/aloha1_source_audit_paths.json").read_text(
-            encoding="utf-8"
-        )
-    )
+    specifications = json.loads((project_root / "configs/aloha1_source_audit_paths.json").read_text(encoding="utf-8"))
     scripts_root = next(
         Path(item["root"])
         for item in specifications
-        if item.get("role_prefix")
-        == "physical_intelligence_aloha_control_or_data_code"
+        if item.get("role_prefix") == "physical_intelligence_aloha_control_or_data_code"
     )
     return scripts_root / "constants.py"
 
@@ -38,11 +33,7 @@ def _literal_assignments(path: Path) -> dict[str, Any]:
     tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
     assignments: dict[str, Any] = {}
     for node in tree.body:
-        if (
-            isinstance(node, ast.Assign)
-            and len(node.targets) == 1
-            and isinstance(node.targets[0], ast.Name)
-        ):
+        if isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
             try:
                 assignments[node.targets[0].id] = ast.literal_eval(node.value)
             except (ValueError, TypeError):
@@ -64,22 +55,10 @@ def _urdf_nonfixed_joints(path: Path) -> list[dict[str, Any]]:
             {
                 "name": joint.attrib["name"],
                 "type": joint_type,
-                "axis": (
-                    [float(item) for item in axis.attrib["xyz"].split()]
-                    if axis is not None
-                    else None
-                ),
+                "axis": ([float(item) for item in axis.attrib["xyz"].split()] if axis is not None else None),
                 "position_limit": {
-                    "lower": (
-                        float(limit.attrib["lower"])
-                        if limit is not None and "lower" in limit.attrib
-                        else None
-                    ),
-                    "upper": (
-                        float(limit.attrib["upper"])
-                        if limit is not None and "upper" in limit.attrib
-                        else None
-                    ),
+                    "lower": (float(limit.attrib["lower"]) if limit is not None and "lower" in limit.attrib else None),
+                    "upper": (float(limit.attrib["upper"]) if limit is not None and "upper" in limit.attrib else None),
                 },
                 "velocity_limit": float(limit.attrib["velocity"]),
                 "effort_limit": float(limit.attrib["effort"]),
@@ -99,9 +78,7 @@ def _urdf_nonfixed_joints(path: Path) -> list[dict[str, Any]]:
 
 def _source_record(manifest: dict[str, Any], path: Path) -> dict[str, Any]:
     resolved = str(path.resolve())
-    source = next(
-        item for item in manifest["sources"] if item["local_path"] == resolved
-    )
+    source = next(item for item in manifest["sources"] if item["local_path"] == resolved)
     return {
         "local_path": resolved,
         "sha256": source["sha256"],
@@ -154,26 +131,63 @@ def _dataset_transform(name: str) -> dict[str, Any] | None:
     return None
 
 
-def build_joint_map(project_root: Path) -> dict[str, Any]:
+def _runtime_robots(report: dict[str, Any]) -> list[dict[str, Any]]:
+    """Normalize legacy and signal-baseline runtime inventory schemas."""
+    robots = report["robots"]
+    if isinstance(robots, list):
+        return robots
+    normalized = []
+    for name, record in robots.items():
+        dofs = [
+            {
+                "name": item.get("name", item["runtime_name"]),
+                "lower": item["lower"],
+                "upper": item["upper"],
+                "max_velocity": item.get(
+                    "max_velocity",
+                    item.get("maxVelocity"),
+                ),
+                "max_effort": item.get(
+                    "max_effort",
+                    item.get("maxEffort"),
+                ),
+                "drive_mode": item.get(
+                    "drive_mode",
+                    item.get("driveMode"),
+                ),
+                "stiffness": item["stiffness"],
+                "damping": item["damping"],
+            }
+            for item in record["dof_properties"]
+        ]
+        normalized.append(
+            {
+                "name": name,
+                "dof_order": record["runtime_dof_order"],
+                "dofs": dofs,
+            }
+        )
+    return normalized
+
+
+def build_joint_map(
+    project_root: Path,
+    *,
+    runtime_report_relative: Path = Path("reports/aloha1_mapping/usd_dof_inventory.json"),
+) -> dict[str, Any]:
     root = project_root.resolve(strict=True)
     runtime_report_path = (
-        root / "reports/aloha1_mapping/usd_dof_inventory.json"
-    )
+        runtime_report_relative if runtime_report_relative.is_absolute() else root / runtime_report_relative
+    ).resolve(strict=True)
     runtime_report = json.loads(runtime_report_path.read_text(encoding="utf-8"))
-    source_manifest = json.loads(
-        (root / "reports/aloha1_mapping/source_manifest.json").read_text(
-            encoding="utf-8"
-        )
-    )
+    source_manifest = json.loads((root / "reports/aloha1_mapping/source_manifest.json").read_text(encoding="utf-8"))
     constants_path = _control_source_path(root)
     constants = _literal_assignments(constants_path)
     if constants["JOINT_NAMES"] != ARM_JOINTS:
-        raise ValueError(
-            f"unexpected ALOHA control joint order: {constants['JOINT_NAMES']}"
-        )
+        raise ValueError(f"unexpected ALOHA control joint order: {constants['JOINT_NAMES']}")
     ros_order = list(constants["JOINT_NAMES"]) + ROS_EXTRA_JOINTS
     robots: dict[str, Any] = {}
-    for robot_runtime in runtime_report["robots"]:
+    for robot_runtime in _runtime_robots(runtime_report):
         name = robot_runtime["name"]
         side = "left" if name.endswith("_left") else "right"
         urdf_path = root / "generated/urdf" / f"{name}.urdf"
@@ -181,18 +195,11 @@ def build_joint_map(project_root: Path) -> dict[str, Any]:
         urdf_order = [item["name"] for item in urdf_joints]
         isaac_order = robot_runtime["dof_order"]
         if urdf_order != isaac_order:
-            raise ValueError(
-                f"{name} URDF/Isaac order mismatch: "
-                f"{urdf_order} != {isaac_order}"
-            )
+            raise ValueError(f"{name} URDF/Isaac order mismatch: {urdf_order} != {isaac_order}")
         if ros_order != isaac_order:
-            raise ValueError(
-                f"{name} ROS/Isaac order mismatch: {ros_order} != {isaac_order}"
-            )
+            raise ValueError(f"{name} ROS/Isaac order mismatch: {ros_order} != {isaac_order}")
         urdf_by_name = {item["name"]: item for item in urdf_joints}
-        runtime_by_name = {
-            item["name"]: item for item in robot_runtime["dofs"]
-        }
+        runtime_by_name = {item["name"]: item for item in robot_runtime["dofs"]}
         dofs = []
         for index, dof_name in enumerate(isaac_order):
             urdf = urdf_by_name[dof_name]
@@ -228,13 +235,13 @@ def build_joint_map(project_root: Path) -> dict[str, Any]:
             )
         robots[name] = {
             "side": side,
+            "robot_prefix": name,
+            "base_frame": f"{name}_base_link",
+            "end_effector_frame": f"{name}_gripper_link",
             "urdf_nonfixed_joint_order": urdf_order,
             "isaac_dof_order": isaac_order,
             "ros_joint_state_order": list(ros_order),
-            "dataset_order": (
-                [f"{side}_{joint}" for joint in ARM_JOINTS]
-                + [f"{side}_gripper_normalized"]
-            ),
+            "dataset_order": ([f"{side}_{joint}" for joint in ARM_JOINTS] + [f"{side}_gripper_normalized"]),
             "dofs": dofs,
         }
     return {
@@ -243,14 +250,9 @@ def build_joint_map(project_root: Path) -> dict[str, Any]:
         "scope": "Stationary ALOHA 1 followers",
         "order_policy": "explicit_source_order_never_alphabetical",
         "sources": {
-            "urdf_generation_report": str(
-                (root / "reports/aloha1_mapping/urdf_generation_manifest.json")
-                .resolve()
-            ),
+            "urdf_generation_report": str((root / "reports/aloha1_mapping/urdf_generation_manifest.json").resolve()),
             "isaac_runtime_report": str(runtime_report_path.resolve()),
-            "control_constants": _source_record(
-                source_manifest, constants_path
-            ),
+            "control_constants": _source_record(source_manifest, constants_path),
         },
         "dataset_14d_order": (
             [f"left_{joint}" for joint in ARM_JOINTS]
