@@ -1,0 +1,102 @@
+{
+  "annotated_root_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/screenshots_annotated",
+  "commands": [
+    {
+      "actual_screenshot_count": 6,
+      "command": "env OMNI_KIT_ACCEPT_EULA=YES PYTHONPATH=/home/eii/project/openpi0.5-rtc-reward-learning /home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/bin/python /home/eii/project/openpi0.5-rtc-reward-learning/tools/capture_aloha1_signal_correspondence_screenshots.py --robot follower_left --metadata /home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/metadata/aloha1_signal_screenshot_metadata_left.json",
+      "cwd": "/home/eii/project/openpi0.5-rtc-reward-learning",
+      "end_utc": "2026-07-29T06:29:38Z",
+      "environment": {
+        "OMNI_KIT_ACCEPT_EULA": "YES",
+        "PYTHONPATH": "/home/eii/project/openpi0.5-rtc-reward-learning"
+      },
+      "executable_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/bin/python",
+      "exit_code": 0,
+      "expected_screenshot_count": 6,
+      "id": "home_layer_recapture_follower_left",
+      "isaac_sim_version": "5.1.0.0",
+      "kit_version": "107.3.3",
+      "log_findings": {
+        "error_lines": 29,
+        "prototype_resolution_errors": 29,
+        "tracebacks": 0
+      },
+      "metadata_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/metadata/aloha1_signal_screenshot_metadata_left.json",
+      "metadata_sha256": "a8ee7f665271089cc8e35792e18b7c7d8b05b5626e5f521904be69fe9d729a1a",
+      "physx_version": "107.3.26",
+      "script_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/tools/capture_aloha1_signal_correspondence_screenshots.py",
+      "stage_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/aloha1_signal_correspondence_workcell.usda",
+      "stage_sha256": "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf",
+      "start_utc": "2026-07-29T06:29:13Z",
+      "status": "PARTIAL",
+      "stderr_log_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/logs/screenshot_capture_home_layer_left_v2_stderr.log",
+      "stdout_log_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/logs/screenshot_capture_home_layer_left_v2_stdout.log"
+    },
+    {
+      "actual_screenshot_count": 6,
+      "command": "env OMNI_KIT_ACCEPT_EULA=YES PYTHONPATH=/home/eii/project/openpi0.5-rtc-reward-learning /home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/bin/python /home/eii/project/openpi0.5-rtc-reward-learning/tools/capture_aloha1_signal_correspondence_screenshots.py --robot follower_right --metadata /home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/metadata/aloha1_signal_screenshot_metadata_right.json",
+      "cwd": "/home/eii/project/openpi0.5-rtc-reward-learning",
+      "end_utc": "2026-07-29T06:30:27Z",
+      "environment": {
+        "OMNI_KIT_ACCEPT_EULA": "YES",
+        "PYTHONPATH": "/home/eii/project/openpi0.5-rtc-reward-learning"
+      },
+      "executable_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/bin/python",
+      "exit_code": 0,
+      "expected_screenshot_count": 6,
+      "id": "home_layer_recapture_follower_right",
+      "isaac_sim_version": "5.1.0.0",
+      "kit_version": "107.3.3",
+      "log_findings": {
+        "error_lines": 29,
+        "prototype_resolution_errors": 29,
+        "tracebacks": 0
+      },
+      "metadata_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/metadata/aloha1_signal_screenshot_metadata_right.json",
+      "metadata_sha256": "71387a71d70f2f066d7e7b2ca34ee6ce593c835e723c42d86500efa7be571af8",
+      "physx_version": "107.3.26",
+      "script_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/tools/capture_aloha1_signal_correspondence_screenshots.py",
+      "stage_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/aloha1_signal_correspondence_workcell.usda",
+      "stage_sha256": "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf",
+      "start_utc": "2026-07-29T06:30:00Z",
+      "status": "PARTIAL",
+      "stderr_log_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/logs/screenshot_capture_home_layer_right_v2_stderr.log",
+      "stdout_log_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/logs/screenshot_capture_home_layer_right_v2_stdout.log"
+    },
+    {
+      "actual_screenshot_count": 12,
+      "command": "PYTHONPATH=/home/eii/project/openpi0.5-rtc-reward-learning /home/eii/project/openpi0.5-rtc-reward-learning/.venv/bin/python /home/eii/project/openpi0.5-rtc-reward-learning/tools/annotate_aloha1_signal_correspondence_screenshots.py",
+      "cwd": "/home/eii/project/openpi0.5-rtc-reward-learning",
+      "executable_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv/bin/python",
+      "exit_code": 0,
+      "expected_screenshot_count": 12,
+      "id": "home_layer_annotation",
+      "script_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/tools/annotate_aloha1_signal_correspondence_screenshots.py",
+      "status": "PASS",
+      "stderr_log_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/logs/screenshot_annotation_home_layer_stderr.log",
+      "stdout_log_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/logs/screenshot_annotation_home_layer_stdout.log"
+    },
+    {
+      "actual_screenshot_count": 24,
+      "command": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv/bin/python /home/eii/project/openpi0.5-rtc-reward-learning/tools/review_aloha1_signal_correspondence_screenshots.py",
+      "cwd": "/home/eii/project/openpi0.5-rtc-reward-learning",
+      "executable_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv/bin/python",
+      "exit_code": 0,
+      "expected_screenshot_count": 24,
+      "id": "visual_review",
+      "script_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/tools/review_aloha1_signal_correspondence_screenshots.py",
+      "status": "PASS"
+    }
+  ],
+  "log_root_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/logs",
+  "partial_reason": "capture commands completed with 6/6 files each but emitted known Hydra nested-instance protoPath errors",
+  "raw_root_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/screenshots_raw",
+  "real_robot_connected": false,
+  "review_json_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_signal_correspondence_screenshot_review.json",
+  "review_md_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_signal_correspondence_screenshot_review.md",
+  "schema_version": 1,
+  "stage_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/aloha1_signal_correspondence_workcell.usda",
+  "stage_sha256": "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf",
+  "status": "PARTIAL",
+  "task_8": "NOT_RUN"
+}
