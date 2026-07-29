@@ -1,0 +1,270 @@
+{
+  "classification": "FULL_ARTICULATION_EMBEDDED_GRIPPER_SUPPORTED",
+  "error": null,
+  "probe": {
+    "articulation": {
+      "active_joint_indices": [
+        7,
+        8
+      ],
+      "active_joint_names": [
+        "left_finger",
+        "right_finger"
+      ],
+      "arm_joint_delta": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "arm_joint_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "arm_joint_mutation": false,
+      "arm_joint_names": [
+        "waist",
+        "shoulder",
+        "elbow",
+        "forearm_roll",
+        "wrist_angle",
+        "wrist_rotate"
+      ],
+      "dof_count": 9,
+      "dof_names": [
+        "waist",
+        "shoulder",
+        "elbow",
+        "forearm_roll",
+        "wrist_angle",
+        "wrist_rotate",
+        "gripper",
+        "left_finger",
+        "right_finger"
+      ],
+      "dof_properties": [
+        {
+          "index": 0,
+          "name": "waist",
+          "properties": {
+            "damping": 5.729578018188477,
+            "driveMode": 2,
+            "hasLimits": true,
+            "lower": -3.141582489013672,
+            "maxEffort": 10.0,
+            "maxVelocity": 3.1415927410125732,
+            "stiffness": 35809.86328125,
+            "type": 0,
+            "upper": 3.141582489013672
+          }
+        },
+        {
+          "index": 1,
+          "name": "shoulder",
+          "properties": {
+            "damping": 5.729578018188477,
+            "driveMode": 2,
+            "hasLimits": true,
+            "lower": -1.8500488996505737,
+            "maxEffort": 20.0,
+            "maxVelocity": 3.1415927410125732,
+            "stiffness": 35809.86328125,
+            "type": 0,
+            "upper": 1.2566370964050293
+          }
+        },
+        {
+          "index": 2,
+          "name": "elbow",
+          "properties": {
+            "damping": 5.729578018188477,
+            "driveMode": 2,
+            "hasLimits": true,
+            "lower": -1.7627824544906616,
+            "maxEffort": 15.0,
+            "maxVelocity": 3.1415927410125732,
+            "stiffness": 35809.86328125,
+            "type": 0,
+            "upper": 1.6057027578353882
+          }
+        },
+        {
+          "index": 3,
+          "name": "forearm_roll",
+          "properties": {
+            "damping": 5.729578018188477,
+            "driveMode": 2,
+            "hasLimits": true,
+            "lower": -3.141582489013672,
+            "maxEffort": 2.0,
+            "maxVelocity": 3.1415927410125732,
+            "stiffness": 35809.86328125,
+            "type": 0,
+            "upper": 3.141582489013672
+          }
+        },
+        {
+          "index": 4,
+          "name": "wrist_angle",
+          "properties": {
+            "damping": 5.729578018188477,
+            "driveMode": 2,
+            "hasLimits": true,
+            "lower": -1.8675020933151245,
+            "maxEffort": 5.0,
+            "maxVelocity": 3.1415927410125732,
+            "stiffness": 35809.86328125,
+            "type": 0,
+            "upper": 2.2340211868286133
+          }
+        },
+        {
+          "index": 5,
+          "name": "wrist_rotate",
+          "properties": {
+            "damping": 5.729578018188477,
+            "driveMode": 2,
+            "hasLimits": true,
+            "lower": -3.141582489013672,
+            "maxEffort": 1.0,
+            "maxVelocity": 3.1415927410125732,
+            "stiffness": 35809.86328125,
+            "type": 0,
+            "upper": 3.141582489013672
+          }
+        },
+        {
+          "index": 6,
+          "name": "gripper",
+          "properties": {
+            "damping": 5.729578018188477,
+            "driveMode": 2,
+            "hasLimits": true,
+            "lower": -3.4028234663852886e+38,
+            "maxEffort": 1.0,
+            "maxVelocity": 3.1415927410125732,
+            "stiffness": 35809.86328125,
+            "type": 0,
+            "upper": 3.4028234663852886e+38
+          }
+        },
+        {
+          "index": 7,
+          "name": "left_finger",
+          "properties": {
+            "damping": 0.10000000149011612,
+            "driveMode": 2,
+            "hasLimits": true,
+            "lower": 0.020999999716877937,
+            "maxEffort": 5.0,
+            "maxVelocity": 1.0,
+            "stiffness": 625.0,
+            "type": 0,
+            "upper": 0.05700000002980232
+          }
+        },
+        {
+          "index": 8,
+          "name": "right_finger",
+          "properties": {
+            "damping": 0.0,
+            "driveMode": 0,
+            "hasLimits": true,
+            "lower": -0.06419999897480011,
+            "maxEffort": 0.0,
+            "maxVelocity": 3.4028234663852886e+38,
+            "stiffness": 0.0,
+            "type": 0,
+            "upper": -0.013799999840557575
+          }
+        }
+      ],
+      "mutation_measurement_boundary": "IMMEDIATE_BEFORE_AFTER_SUBSET_SETTINGS_AND_YAML",
+      "passive_physics_update_arm_delta": [
+        -8.517169044353068e-05,
+        7.301568984985352e-05,
+        9.000301361083984e-05,
+        -0.0005870654713362455,
+        0.000745922327041626,
+        0.0006725848652422428
+      ],
+      "passive_physics_update_excluded_from_editor_mutation": true,
+      "path": "/World/follower_left/vx300s_left/root_joint"
+    },
+    "extension": {
+      "enabled_id": "isaacsim.robot_setup.grasp_editor-2.0.20",
+      "expected_local_version": "2.0.20",
+      "implementation_authority": "LOCAL_ISAAC_SIM_5_1_SOURCE_AND_RUNTIME",
+      "mcp_version_mismatch": true,
+      "official_mcp_index_version": "2.2.0",
+      "requested_id": "isaacsim.robot_setup.grasp_editor",
+      "runtime_version": "2.0.20"
+    },
+    "isaac_grasp_roundtrip": {
+      "bytes_equal": true,
+      "first_sha256": "ed8ccc50895b42c51d4fff3489eb01e84ad44bca51cf6bf874dba0e4e0dcc3b2",
+      "format": "isaac_grasp",
+      "format_version": 1.0,
+      "import_error_first": "",
+      "import_error_second": "",
+      "pass": true,
+      "second_sha256": "ed8ccc50895b42c51d4fff3489eb01e84ad44bca51cf6bf874dba0e4e0dcc3b2",
+      "semantic_equal": true
+    },
+    "local_source_contract": {
+      "DataWriter_format": "isaac_grasp",
+      "DataWriter_format_version": 1.0,
+      "GraspTestSettings_active_joints": [
+        "left_finger",
+        "right_finger"
+      ],
+      "GraspTestSettings_close_velocities": [
+        -0.02,
+        0.02
+      ],
+      "GraspTestSettings_closed_positions": [
+        0.021,
+        -0.021
+      ],
+      "GraspTestSettings_open_positions": [
+        0.057,
+        -0.057
+      ]
+    },
+    "runtime": {
+      "isaac_sim": "5.1.0.0",
+      "kit": "107.3.3"
+    },
+    "runtime_pass": true,
+    "stage": {
+      "required_prims": {
+        "/World": true,
+        "/World/follower_left/vx300s_left/follower_left_gripper_link": true,
+        "/World/follower_left/vx300s_left/follower_left_left_finger_link": true,
+        "/World/follower_left/vx300s_left/follower_left_right_finger_link": true,
+        "/World/follower_left/vx300s_left/root_joint": true
+      },
+      "root_prim": "/World",
+      "sublayers": [
+        "configuration/aloha1_signal_home_targets.usda"
+      ]
+    }
+  },
+  "schema_version": 1,
+  "scope": "ALOHA1 follower-left Grasp Editor compatibility",
+  "source_stage": {
+    "expected_sha256": "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf",
+    "immutable": true,
+    "path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/aloha1_signal_correspondence_workcell.usda",
+    "sha256_after": "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf",
+    "sha256_before": "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf"
+  },
+  "status": "PASS",
+  "task8": "NOT_RUN"
+}
