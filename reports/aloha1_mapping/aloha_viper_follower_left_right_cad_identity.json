@@ -1,0 +1,339 @@
+{
+  "brep_validity": {
+    "interpretation": "B-Rep validity is recorded separately from product identity; invalid source solids are not silently healed.",
+    "invalid_object_names": [
+      "Dummy_Aloha_VX_v3",
+      "Part__Feature005"
+    ],
+    "invalid_objects": [
+      {
+        "geometry_signature_sha256": "6199b5991f65dd81bd05b3b97f5defccd75909ced7b32cb81fc520e066577457",
+        "label": "Simple VX Wrist Tilt v3",
+        "name": "Part__Feature005",
+        "shape_type": "Solid",
+        "type_id": "Part::Feature"
+      },
+      {
+        "geometry_signature_sha256": "12df8e61d64e98aca536d5edd1c920c27ef42b11b0b0bc8b011963ff4e80831c",
+        "label": "Dummy Aloha VX v3",
+        "name": "Dummy_Aloha_VX_v3",
+        "shape_type": "Compound",
+        "type_id": "App::Part"
+      }
+    ],
+    "no_silent_healing": true,
+    "status": "PARTIAL"
+  },
+  "cad_product_inventory": {
+    "app_link_count": 0,
+    "freecad_object_count": 27,
+    "instance_count": 0,
+    "interpretation": "The STEP contains one complete ViperX robot product, not two workcell arm instances. Project Xacro and supplier purchase evidence identify it as the reusable robot-local product for both aloha_vx300s followers.",
+    "root_product_count": 1,
+    "root_products": [
+      {
+        "child_names": [
+          "Aloha_VX_Fingers_2024_4_21_v2",
+          "Origin002",
+          "Part__Feature",
+          "Part__Feature001",
+          "Part__Feature002",
+          "Part__Feature003",
+          "Part__Feature004",
+          "Part__Feature005",
+          "Part__Feature006"
+        ],
+        "complete_viper_product": true,
+        "geometry_signature": "12df8e61d64e98aca536d5edd1c920c27ef42b11b0b0bc8b011963ff4e80831c",
+        "label": "Dummy Aloha VX v3",
+        "mirror": false,
+        "name": "Dummy_Aloha_VX_v3",
+        "placement_determinant": 1.0,
+        "placement_matrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "required_labels_missing": [],
+        "required_labels_present": [
+          "Aloha VX Fingers 2024-4-21 v001",
+          "Aloha VX Fingers 2024-4-21 v2",
+          "Aloha VX Gripper 2024-4-19 v4",
+          "Simple VX Base v3",
+          "Simple VX Forearm v3",
+          "Simple VX Shoulder v3",
+          "Simple VX Upper Arm v3",
+          "Simple VX Wrist Tilt v3",
+          "Simple VX Wrist Twist v3"
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "shape_valid": false
+      }
+    ],
+    "step_item_defined_transform_count": 8,
+    "step_next_assembly_usage_count": 8,
+    "step_product_record_count": 9
+  },
+  "classification": "VERIFIED_SINGLE_REUSABLE_ROBOT_PRODUCT",
+  "classification_gates": {
+    "handed_finger_and_gripper_semantics": true,
+    "normalized_urdf_equal": true,
+    "same_aloha_vx300s_model": true,
+    "same_xacro": true,
+    "single_complete_product": true,
+    "supplier_sales_pair_identity": true,
+    "two_identical_instances": false
+  },
+  "evidence_classes": {
+    "cad_tree_and_brep": "LOCAL_RUNTIME_READBACK",
+    "purchase_identity": "SUPPLIER_AND_SELLER_FIRST_HAND_CHAIN",
+    "urdf_model_and_kinematics": "VERSION_PINNED_PROJECT_SOURCE",
+    "workcell_placement": "HARD_BLOCKER"
+  },
+  "hard_blockers": [
+    "HARD_BLOCKER_FOLLOWER_RIGHT_WORKCELL_INSTALL_TRANSFORM"
+  ],
+  "identity_boundary": {
+    "diagnostic_label": "ROBOT_LOCAL_DIAGNOSTIC_NOT_WORKCELL_PLACEMENT",
+    "left_right_instance_names_different": true,
+    "right_stage_may_be_generated_locally": true,
+    "robot_geometry_mirrored": false,
+    "robot_local_geometry_same": true,
+    "workcell_transform_from_supplier_cad": false
+  },
+  "license": {
+    "public_download_is_license_evidence": false,
+    "redistribution": "NOT_AUTHORIZED_BY_AVAILABLE_LICENSE_EVIDENCE",
+    "source_cad_git_policy": "DO_NOT_COMMIT_OR_REDISTRIBUTE",
+    "status": "UNKNOWN_HARD_BLOCKER"
+  },
+  "robot_local_identity_verified": true,
+  "schema_version": 1,
+  "scope": "SUPPLIER_CAD_ROBOT_LOCAL_PRODUCT_IDENTITY;NOT_WORKCELL_PLACEMENT",
+  "source_cad": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/gdrive_source_readonly/Simple Aloha Viper 2024-5-13.step",
+    "evidence_class": "SUPPLIER_PUBLIC_CAD_USER_CONFIRMED",
+    "read_only": true,
+    "sha256": "337862418769d4ea8b801d26e68930c4412f870050e60769bbf91765194dc571",
+    "sha256_after": "337862418769d4ea8b801d26e68930c4412f870050e60769bbf91765194dc571",
+    "step_schema": "'AUTOMOTIVE_DESIGN { 1 0 10303 214 3 1 1 }'"
+  },
+  "status": "PARTIAL",
+  "supplier_fingers": {
+    "gripper_assembly_semantics_verified": true,
+    "handed_pair_verified": true,
+    "left_finger": {
+      "aabb_mm": {
+        "XLength": 27.467249999944915,
+        "XMax": 29.811279465652177,
+        "XMin": 2.3440294657072607,
+        "YLength": 96.1575881151,
+        "YMax": -493.24999973392005,
+        "YMin": -589.40758784902,
+        "ZLength": 54.000000000000284,
+        "ZMax": 453.8526699371189,
+        "ZMin": 399.8526699371186
+      },
+      "assembly_path": [
+        "Dummy_Aloha_VX_v3",
+        "Aloha_VX_Fingers_2024_4_21_v2",
+        "Part__Feature007"
+      ],
+      "brep_volume_mm3": 35160.658046734075,
+      "cad_side": "+X",
+      "canonical_geometry_sha256": "aa463c46337daa6d0c17699bf1835ed7e21f6517db8f87523e417bdf78b1d9b3",
+      "connected_components": 1,
+      "degenerate_triangle_count": 0,
+      "label": "Aloha VX Fingers 2024-4-21 v2",
+      "normal_winding_policy": "preserve Part.Shape.tessellate vertex and triangle winding",
+      "obj_path": "/home/eii/project/openpi0.5-rtc-reward-learning/local_tools/freecad-tessellation/validation/final_fresh_tessellation/left_finger.obj",
+      "obj_sha256": "c6710d0fe5b2030a32722d9df5c0b553c771c9d61d92b8ddaec36c94c5963488",
+      "object_name": "Part__Feature007",
+      "source_placement_determinant": 1.0,
+      "source_placement_matrix_mm": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0998902576627736
+        ],
+        [
+          0.0,
+          -1.554312234475219e-14,
+          -1.0,
+          -430.29999973392
+        ],
+        [
+          0.0,
+          1.0,
+          -1.554312234475219e-14,
+          426.80133373174
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "triangle_count": 1662,
+      "vertex_count": 831
+    },
+    "mapping": {
+      "CAD +X": "left_finger",
+      "CAD -X": "right_finger"
+    },
+    "policy": "Reuse the embedded v2 handed pair unchanged for each robot-local follower instance; do not mirror and do not substitute standalone v3 or historical generic meshes.",
+    "right_finger": {
+      "aabb_mm": {
+        "XLength": 27.467249999944944,
+        "XMax": -2.1442489503817797,
+        "XMin": -29.611498950326723,
+        "YLength": 96.1575881151,
+        "YMax": -493.24999973392005,
+        "YMin": -589.40758784902,
+        "ZLength": 54.00000000000017,
+        "ZMax": 453.7499975263589,
+        "ZMin": 399.74999752635875
+      },
+      "assembly_path": [
+        "Dummy_Aloha_VX_v3",
+        "Aloha_VX_Fingers_2024_4_21_v2",
+        "Part__Feature008"
+      ],
+      "brep_volume_mm3": 35160.65804673401,
+      "cad_side": "-X",
+      "canonical_geometry_sha256": "99a941cc2439c93fa2d4eaffdd9f3021cb493535e9353640476604bbfa643795",
+      "connected_components": 1,
+      "degenerate_triangle_count": 0,
+      "label": "Aloha VX Fingers 2024-4-21 v001",
+      "normal_winding_policy": "preserve Part.Shape.tessellate vertex and triangle winding",
+      "obj_path": "/home/eii/project/openpi0.5-rtc-reward-learning/local_tools/freecad-tessellation/validation/final_fresh_tessellation/right_finger.obj",
+      "obj_sha256": "b0979c5d55fee448dab512dc75b1251bab17d94892decd01de9a6e76c01482d1",
+      "object_name": "Part__Feature008",
+      "source_placement_determinant": 1.0,
+      "source_placement_matrix_mm": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0998902576627736
+        ],
+        [
+          0.0,
+          -1.554312234475219e-14,
+          -1.0,
+          -430.29999973392
+        ],
+        [
+          0.0,
+          1.0,
+          -1.554312234475219e-14,
+          426.80133373174
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "triangle_count": 1662,
+      "vertex_count": 831
+    }
+  },
+  "supplier_product_evidence": {
+    "classification": "SIMPLE_ALOHA_VIPER_2024_5_13_STEP",
+    "drawing_identity": {
+      "drawing_date": "2024-05-13",
+      "drawn_by": "AIDAN WEDDLE",
+      "evidence_methods": [
+        "PDF text-layer readback",
+        "visual review of rendered drawing",
+        "FreeCAD AP214 numeric comparison"
+      ],
+      "google_drive_file_id": "11M96-4JDw0y31OZMTQQ3Nqz1qCIqk_DU",
+      "project": "Aloha ViperX 6DOF",
+      "revision": "A",
+      "source_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/purchased_aloha_reference/Aloha VX300 6DOF Drawing 2024-5-13.pdf",
+      "source_sha256": "b7cca2d069254e29b6b9081304ba405c4384580b47df5b2f82c012d5c7b7357e",
+      "title": "Aloha VX300S Follower Robot Arm"
+    },
+    "evidence_class": "SUPPLIER_AND_SELLER_FIRST_HAND_CHAIN",
+    "sales_page": {
+      "accessed_date": "2026-07-29",
+      "linked_product_identity": "Aloha ViperX follower set; pair of ViperX 300 6DOF arms",
+      "linked_specs": {
+        "aloha_gripper": true,
+        "degrees_of_freedom": 6,
+        "payload_g": 750,
+        "power": "12V, 10A",
+        "reach_mm": 750,
+        "servos": "6X XM540-W270-T | 2X XM430-W350-T",
+        "span_mm": 1500
+      },
+      "local_snapshot_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/purchased_aloha_reference/sales_page/aloha-viperx.html",
+      "local_snapshot_sha256": "6b1e7c05b9fd1abab49b232002c08c54d05440f9fbebf764222bf53a7bf83a06",
+      "publisher": "\u63a1\u667a\u79d1\u6280\u80a1\u4efd\u6709\u9650\u516c\u53f8 / IDMiner",
+      "role": "PURCHASE_PRODUCT_PAGE_USER_CONFIRMED_FIRST_HAND",
+      "url": "https://idminer.com.tw/product/aloha-viperx/"
+    }
+  },
+  "task8": "NOT_RUN",
+  "toolchain": {
+    "angular_deflection_deg": 20.0,
+    "freecad_commit": "0108fd4b4850cc46e625b60e53cea7a7bbe69f8d",
+    "freecad_executable": "/home/eii/project/openpi0.5-rtc-reward-learning/local_tools/freecad-tessellation/freecadcmd",
+    "freecad_version": "1.1.1",
+    "linear_deflection_mm": 0.2,
+    "opencascade_version": "7.8.1",
+    "python_version": "3.11.14",
+    "relative_deflection": false
+  },
+  "urdf_identity": {
+    "follower_models": {
+      "follower_left": "aloha_vx300s",
+      "follower_right": "aloha_vx300s"
+    },
+    "normalization": "replace the explicit follower_left/follower_right instance prefix with follower and collapse XML inter-tag whitespace",
+    "normalized_equal": true,
+    "normalized_sha256": {
+      "follower_left": "679f2c90bc7395f649127aedc85404a5705661130d5232d467c2bcbf1b7102c3",
+      "follower_right": "679f2c90bc7395f649127aedc85404a5705661130d5232d467c2bcbf1b7102c3"
+    },
+    "source_sha256": {
+      "follower_left": "d9e4b32723ee71dfce26fb4e78546cfcfef147b2d7dbf5e53e3620e3d8aa96bd",
+      "follower_right": "268a5e5b56ce48af679256380008606f64358d6ead2619b52946b37f47fb624b"
+    },
+    "xacro_paths": {
+      "follower_left": "aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/urdf/aloha_vx300s.urdf.xacro",
+      "follower_right": "aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/urdf/aloha_vx300s.urdf.xacro"
+    }
+  },
+  "workcell_placement_verified": false
+}
