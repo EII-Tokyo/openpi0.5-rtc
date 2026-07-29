@@ -67,7 +67,9 @@ configs/aloha1_cad_finger_task5_bottle.yaml
 
 The manifest must assert the parent diagnostic SHA-256 is
 `5bc3bb5ab7fd7ce8fd3028894394ca5915a278e5a996d016a5868a164593ac40`
-and the Bottle500 default prim is `/Bottle500`. Abort the Isaac run if either assertion fails.
+and the Bottle500 product prim is `/Bottle500`. The source layer default prim
+is `/World` and includes a test gauge, so the experiment must explicitly
+reference `/Bottle500`. Abort the Isaac run if either assertion fails.
 
 - [ ] **Step 4: Verify source immutability baseline**
 
@@ -436,7 +438,8 @@ def _create_bottle_geometry(
 The project provider must:
 
 1. Define `/workcell/Task5BottleSession/BottleProxy` as an Xform.
-2. Add a reference to the frozen Bottle500 USD and its verified default prim.
+2. Add a reference to the frozen Bottle500 USD explicitly at `/Bottle500`;
+   do not reference the source layer default prim `/World`.
 3. Apply a session-layer mass opinion of `0.020 kg` to the referenced rigid-body root.
 4. Apply the contact report API at the rigid-body root.
 5. Bind the common temporary bottle physics material with the locally verified binding-strength token required to override the source descendant material.

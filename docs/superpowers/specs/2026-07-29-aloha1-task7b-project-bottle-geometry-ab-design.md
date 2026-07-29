@@ -35,7 +35,10 @@ task, or Task 8 optimization.
   `assets/bottle_500ml/cad/bottle_500ml.FCStd`
 - Isaac asset:
   `assets/bottle_500ml/isaac/bottle_500ml_sim.usd`
-- Expected default prim: `/Bottle500`
+- Referenced product prim: `/Bottle500`
+- Runtime-read root-layer default prim: `/World`. The root layer also contains
+  a test gauge, so Task 7B must explicitly reference `/Bottle500`; it must not
+  use the root layer default prim.
 - Geometry: project-authored 68 mm maximum-diameter, 206 mm-high bottle.
 - Collision: the existing 41-piece collision hierarchy is used unchanged.
 - Diagnostic mass override: `0.020 kg`, authored only in the isolated
@@ -89,7 +92,8 @@ contact and hold logic.
 
 - Profile A retains the existing procedural cylinder.
 - Profile B creates an Xform at the same bottle session path and adds a USD
-  reference to `/Bottle500`.
+  reference explicitly to `/Bottle500`. The source layer default prim is
+  `/World` and is intentionally not referenced.
 - Profile B reads back the composed visual/collision hierarchy, rigid-body
   API, collision APIs, material bindings, AABB, and effective mass.
 - A session-only/local diagnostic opinion overrides mass to `0.020 kg` and
