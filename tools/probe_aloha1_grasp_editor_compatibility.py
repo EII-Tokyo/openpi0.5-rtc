@@ -413,6 +413,9 @@ def main() -> int:
         "scope": "ALOHA1 follower-left Grasp Editor compatibility",
         "status": "INCONCLUSIVE",
         "classification": "INCONCLUSIVE",
+        "compatibility_probe_status": "NOT_RUN",
+        "grasp_tester_execution_status": "NOT_RUN",
+        "gui_evidence_status": "GUI_PENDING",
         "task8": "NOT_RUN",
         "source_stage": {
             "path": str(stage_path),
@@ -453,18 +456,24 @@ def main() -> int:
         if classification not in VALID_CLASSIFICATIONS:
             raise RuntimeError(f"invalid classification: {classification}")
         payload["classification"] = classification
-        payload["status"] = (
+        payload["compatibility_probe_status"] = (
             "PASS"
             if classification
             == "FULL_ARTICULATION_EMBEDDED_GRIPPER_SUPPORTED"
             else "PARTIAL"
         )
-        exit_code = 0 if payload["status"] == "PASS" else 2
+        payload["status"] = "PARTIAL"
+        exit_code = (
+            0
+            if payload["compatibility_probe_status"] == "PASS"
+            else 2
+        )
     except Exception as error:
         payload["error"] = {
             "type": type(error).__name__,
             "message": str(error),
         }
+        payload["compatibility_probe_status"] = "FAIL"
         if stage_path.is_file():
             payload["source_stage"]["sha256_after"] = _sha256(stage_path)
             payload["source_stage"]["immutable"] = (

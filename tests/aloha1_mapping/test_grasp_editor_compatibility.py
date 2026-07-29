@@ -30,6 +30,8 @@ def test_probe_uses_local_grasp_editor_and_frozen_stage() -> None:
     assert '"left_finger"' in source
     assert '"right_finger"' in source
     assert '"waist"' in source
+    assert '"GUI_PENDING"' in source
+    assert '"NOT_RUN"' in source
 
 
 def test_launcher_never_saves_the_source_stage() -> None:

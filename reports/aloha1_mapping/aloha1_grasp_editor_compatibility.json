@@ -1,6 +1,9 @@
 {
   "classification": "FULL_ARTICULATION_EMBEDDED_GRIPPER_SUPPORTED",
+  "compatibility_probe_status": "PASS",
   "error": null,
+  "grasp_tester_execution_status": "NOT_RUN",
+  "gui_evidence_status": "GUI_PENDING",
   "probe": {
     "articulation": {
       "active_joint_indices": [
@@ -265,6 +268,6 @@
     "sha256_after": "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf",
     "sha256_before": "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf"
   },
-  "status": "PASS",
+  "status": "PARTIAL",
   "task8": "NOT_RUN"
 }
