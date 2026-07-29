@@ -1,3 +1,4 @@
+from tools.aloha1_mapping import task7a_swept_collision as sweep
 from tools.aloha1_mapping.task7a_swept_collision import ARM_JOINTS
 from tools.aloha1_mapping.task7a_swept_collision import build_sweep_cases
 from tools.aloha1_mapping.task7a_swept_collision import classify_contact_observation
@@ -71,6 +72,74 @@ def test_contact_pair_classification_distinguishes_safety_boundaries() -> None:
         "/World/environment/table",
         adjacent,
     )["classification"] == "ROBOT_ENVIRONMENT_CONTACT"
+
+
+def test_user_confirmed_finger_table_contact_is_allowed_workspace_boundary() -> None:
+    result = classify_contact_pair(
+        (
+            "/World/follower_left/vx300s_left/"
+            "follower_left_left_finger_link"
+        ),
+        "/World/environment/worldBody/user_confirmed_table",
+        set(),
+    )
+    generic = classify_contact_pair(
+        "/World/follower_left/vx300s_left/upper_arm",
+        "/World/environment/worldBody/user_confirmed_table",
+        set(),
+    )
+
+    assert result["classification"] == (
+        "USER_CONFIRMED_ALLOWED_FINGER_TABLE_CONTACT"
+    )
+    assert result["allowed"] is True
+    assert result["policy_evidence"] == "USER_CONFIRMATION_2026_07_29"
+    assert generic["classification"] == "ROBOT_ENVIRONMENT_CONTACT"
+    assert generic["allowed"] is False
+
+
+def test_allowed_table_contact_limits_workcell_reach_without_control_fail() -> None:
+    partial = sweep.classify_sweep_case(
+        direction_pass=True,
+        target_reached=False,
+        non_target_drift_pass=True,
+        legal=True,
+        finite=True,
+        unexpected_contact_count=0,
+        allowed_workspace_contact_count=2,
+    )
+    forbidden = sweep.classify_sweep_case(
+        direction_pass=True,
+        target_reached=False,
+        non_target_drift_pass=True,
+        legal=True,
+        finite=True,
+        unexpected_contact_count=1,
+        allowed_workspace_contact_count=2,
+    )
+    unexplained = sweep.classify_sweep_case(
+        direction_pass=True,
+        target_reached=False,
+        non_target_drift_pass=True,
+        legal=True,
+        finite=True,
+        unexpected_contact_count=0,
+        allowed_workspace_contact_count=0,
+    )
+
+    assert partial == {
+        "status": "PASS",
+        "motion_status": "CONTACT_LIMITED_WORKCELL_REACHABILITY",
+        "control_direction_status": "PASS",
+        "collision_policy_status": "PASS",
+        "target_reachability_status": (
+            "CONTACT_LIMITED_BY_ALLOWED_WORKCELL_CONTACT"
+        ),
+    }
+    assert forbidden["status"] == "FAIL"
+    assert forbidden["collision_policy_status"] == "FAIL"
+    assert unexplained["status"] == "FAIL"
+    assert unexplained["motion_status"] == "UNEXPLAINED_TARGET_SHORTFALL"
 
 
 def test_positive_separation_zero_impulse_is_contact_envelope_only() -> None:
@@ -174,3 +243,34 @@ def test_summary_requires_24_cases_per_repeat_and_identical_signatures() -> None
     cases[-1] = {**cases[-1], "status": "FAIL"}
     failed = summarize_sweep_cases(cases, repeat_count=2)
     assert failed["status"] == "FAIL"
+
+
+def test_summary_preserves_partial_contact_limited_cases() -> None:
+    plans = build_sweep_cases(_limits())
+    cases = []
+    for repeat in range(2):
+        cases.extend(
+            [
+                {
+                    **plan,
+                    "repeat": repeat,
+                    "status": "PASS",
+                    "motion_status": (
+                        "CONTACT_LIMITED_WORKCELL_REACHABILITY"
+                        if plan["case_id"].endswith("shoulder:positive")
+                        else "TARGET_REACHED"
+                    ),
+                    "final_readback": plan["target"],
+                    "maximum_non_target_drift": 0.0,
+                    "contact_pairs": [],
+                }
+                for plan in plans
+            ]
+        )
+
+    report = summarize_sweep_cases(cases, repeat_count=2)
+
+    assert report["status"] == "PASS"
+    assert report["failed_case_count"] == 0
+    assert report["partial_case_count"] == 0
+    assert report["contact_limited_case_count"] == 4

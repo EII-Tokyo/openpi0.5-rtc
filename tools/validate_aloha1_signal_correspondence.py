@@ -734,8 +734,10 @@ def main() -> int:
             "official_rules_unsuppressed_status": official_rules["official_status"],
             "collision_swept_path": swept_collision["status"],
             "reason_if_partial": (
-                "NVIDIA official PhysicsRules/RobotRules findings remain "
-                "unsuppressed; runtime signal gates are separately PASS"
+                "user-confirmed finger/table contact limits two positive-"
+                "shoulder workcell trajectories without indicating a "
+                "control failure; NVIDIA official PhysicsRules/RobotRules "
+                "findings also remain unsuppressed"
             ),
             "reason_if_fail": (
                 "deterministic positive-shoulder sweeps on both followers "

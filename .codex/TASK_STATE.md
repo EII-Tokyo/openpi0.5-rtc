@@ -73,17 +73,23 @@ The 2026-07-29 signal-correspondence priority is the current handoff:
   and right-finger mimic readback across two fresh deterministic repeats.
 - Three-reset digital small-up/return motion is `PASS`; shoulder `-0.08 rad`
   produces approximately `+0.0116 m` end-effector Z and returns to home.
-- Task 7A is `FAIL`: runtime structure/control gates pass, but the completed
-  48-record swept-collision run deterministically fails the positive shoulder
-  trajectory on both followers. Each supplier-CAD finger pair physically
-  contacts `user_confirmed_table` before the authored upper target. Task 7B
-  and Task 8 remain `NOT_RUN`.
+- Task 7A is `PARTIAL`: runtime structure/control gates pass. The user
+  confirmed that supplier-CAD finger contact with `user_confirmed_table` is
+  allowed physical workcell behavior, so it is no longer classified as a
+  control or collider failure. Task 7B and Task 8 remain `NOT_RUN`.
 - Swept coverage is 48/48 (24 cases × 2 fresh repeats). The two repeat
   signatures are identical:
-  `49a1c42ce683c7cc449deb6e44b7654b2cef5debfaa07dad51952a7226e7525b`.
-  Four failed records are the same two unique trajectories repeated:
+  `5b6ca2a5d2c0b8b07ff57e022bb357fdea5116c243079ecd50ebd3a3e17c09ce`.
+  Collision-policy results are 48 PASS and 0 FAIL. Four records separately
+  carry `CONTACT_LIMITED_BY_ALLOWED_WORKCELL_CONTACT`; they are the same two
+  unique trajectories repeated:
   `follower_left:shoulder:positive` and
   `follower_right:shoulder:positive`.
+- The previous `TASK7A_FAIL_SWEPT_FINGER_TABLE_CONTACT` conclusion used a
+  dead rule that marked every robot/environment contact forbidden. It is
+  superseded by contact-policy revision 2. Only the exact user-confirmed
+  finger/table pair is allowed; generic robot/environment contact,
+  non-adjacent self-contact and cross-follower contact remain FAIL.
 - The sweep preserved authored self-collision `false`; disabled pairs are not
   proven geometrically separated. Contact reporting was session-only and no
   collider, drive, mimic, timestep, solver, source Stage, or final/default
@@ -132,26 +138,32 @@ The 2026-07-29 signal-correspondence priority is the current handoff:
   `aloha1_hydra_protopath_diagnosis_matrix.csv`,
   `aloha1_hydra_protopath_input_manifest.json`, and
   `aloha1_hydra_protopath_screenshot_review.json`.
-- Current outcome name: `TASK7A_FAIL_SWEPT_FINGER_TABLE_CONTACT`.
+- Current outcome name:
+  `TASK7A_PARTIAL_USER_CONFIRMED_WORKCELL_CONTACT_BOUNDARY`.
 - The earlier post-Hydra verification was `PARTIAL` before swept collision
-  existed. It is superseded by the current Task 7A `FAIL` summary; its logs
+  existed. It is superseded by the current policy-v2 Task 7A `PARTIAL`
+  summary; its logs
   remain historical evidence under
   `.codex/artifacts/20260729-aloha1-signal-correspondence/logs/`.
 - Current Task 7A rule/sweep evidence and final verification logs are under
   `.codex/artifacts/20260729-aloha1-task7a-rules-sweep/`.
 - Final fresh verification:
-  - Isaac Task 7A summary: expected machine `FAIL`; mapping, both 32/32
+  - Isaac Task 7A summary: `PARTIAL`; mapping, both 32/32
     one-joint suites, first-frame/home, drive/mimic structure and small
-    up/down remain `PASS`;
+    up/down remain `PASS`; swept collision policy is `PASS`;
   - Stage SHA-256 remains
     `d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf`;
-  - focused pytest: `19 passed`;
-  - full `tests/aloha1_mapping`: `350 passed`;
+  - focused pytest: `16 passed`;
+  - full `tests/aloha1_mapping`: `353 passed`;
   - Ruff: `PASS`;
   - `py_compile`: `PASS`;
-  - logs: `logs/final_fresh_task7a.log`,
-    `logs/final_focused_pytest_v2.log`, `logs/final_full_pytest.log`,
-    `logs/final_ruff_v2.log`, and `logs/final_pycompile_v2.log` beneath the
+  - current policy-v2 logs:
+    `logs/workspace_contact_policy_v2_final_sweep.log`,
+    `logs/workspace_contact_policy_v2_final_task7a.log`,
+    `logs/workspace_contact_policy_v2_final_focused_pytest.log`,
+    `logs/workspace_contact_policy_v2_final_full_pytest.log`,
+    `logs/workspace_contact_policy_v2_final_ruff.log`, and
+    `logs/workspace_contact_policy_v2_final_pycompile.log` beneath the
     Task 7A artifact root above.
 
 The unoptimized Stationary ALOHA 1 mapping baseline is implemented through

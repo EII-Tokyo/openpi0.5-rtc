@@ -25,6 +25,7 @@ from tools.aloha1_mapping.task7a_swept_collision import build_sweep_cases
 from tools.aloha1_mapping.task7a_swept_collision import canonical_pair
 from tools.aloha1_mapping.task7a_swept_collision import classify_contact_observation
 from tools.aloha1_mapping.task7a_swept_collision import classify_contact_pair
+from tools.aloha1_mapping.task7a_swept_collision import classify_sweep_case
 from tools.aloha1_mapping.task7a_swept_collision import summarize_sweep_cases
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -423,29 +424,37 @@ def _write_csv(path: Path, rows: Sequence[dict[str, Any]]) -> None:
 
 def _write_markdown(report: dict[str, Any], path: Path) -> None:
     summary = report["summary"]
-    failed = [
-        case for case in report["cases"] if case["status"] == "FAIL"
+    contact_limited = [
+        case
+        for case in report["cases"]
+        if case.get("motion_status")
+        == "CONTACT_LIMITED_WORKCELL_REACHABILITY"
     ]
-    unique_failed = sorted({case["case_id"] for case in failed})
+    unique_contact_limited = sorted(
+        {case["case_id"] for case in contact_limited}
+    )
     envelope_pairs = [
         pair
         for pair in report["pair_inventory"]
         if pair["classification"] == "CONTACT_ENVELOPE_ONLY"
     ]
-    failed_rows = []
-    for case_id in unique_failed:
+    allowed_table_pairs = [
+        pair
+        for pair in report["pair_inventory"]
+        if pair["classification"]
+        == "USER_CONFIRMED_ALLOWED_FINGER_TABLE_CONTACT"
+    ]
+    contact_limited_rows = []
+    for case_id in unique_contact_limited:
         representative = next(
-            case for case in failed if case["case_id"] == case_id
+            case
+            for case in contact_limited
+            if case["case_id"] == case_id
         )
-        physical_pairs = [
-            pair
-            for pair in representative["contact_pairs"]
-            if pair.get("physical_contact") is True
-        ]
-        failed_rows.append(
+        contact_limited_rows.append(
             f"| `{case_id}` | `{representative['target']:.9f}` | "
             f"`{representative['final_readback']:.9f}` | "
-            f"`{len(physical_pairs)}` |"
+            f"`{representative['status']}` |"
         )
     path.write_text(
         "\n".join(
@@ -456,6 +465,7 @@ def _write_markdown(report: dict[str, Any], path: Path) -> None:
                 f"- Stage SHA-256: `{report['stage']['sha256_after']}`",
                 f"- Cases: `{summary['case_count']}`",
                 f"- Failed cases: `{summary['failed_case_count']}`",
+                f"- Partial cases: `{summary['partial_case_count']}`",
                 (
                     "- Determinism: "
                     f"`{summary['determinism']['status']}`"
@@ -465,25 +475,31 @@ def _write_markdown(report: dict[str, Any], path: Path) -> None:
                     f"`{str(report['runtime']['solve_articulation_contact_last']).lower()}`"
                 ),
                 (
-                    "- Unique failed trajectories: "
-                    f"`{len(unique_failed)}`"
+                    "- Contact-limited workcell trajectories: "
+                    f"`{len(unique_contact_limited)}`"
                 ),
                 (
                     "- Contact-envelope-only pairs: "
                     f"`{len(envelope_pairs)}`"
                 ),
+                (
+                    "- User-confirmed allowed finger/table contacts: "
+                    f"`{len(allowed_table_pairs)}`"
+                ),
                 "",
-                "## Deterministic failures",
+                "## Workcell reachability boundary",
                 "",
-                "| Case | Target (rad) | Final readback (rad) | Physical pairs |",
-                "|---|---:|---:|---:|",
-                *failed_rows,
+                "| Case | Target (rad) | Final readback (rad) | Status |",
+                "|---|---:|---:|---|",
+                *contact_limited_rows,
                 "",
                 (
-                    "Both positive-shoulder trajectories are stopped near "
-                    "`0.288 rad` when both supplier-CAD finger colliders "
-                    "physically contact `user_confirmed_table`. The same "
-                    "two failures reproduce in both fresh repeats."
+                    "The user confirmed that finger/table contact is allowed "
+                    "physical workcell behavior. These trajectories record "
+                    "a contact-limited workcell reachability boundary, not a "
+                    "control-direction or collider failure. Other robot/"
+                    "environment contacts remain forbidden unless separately "
+                    "classified with evidence."
                 ),
                 "",
                 "## Interpretation boundary",
@@ -584,6 +600,12 @@ def _run_cases(
                 adjacent,
             )
             unexpected = [item for item in pairs if not item["allowed"]]
+            allowed_workspace = [
+                item
+                for item in pairs
+                if item["classification"]
+                == "USER_CONFIRMED_ALLOWED_FINGER_TABLE_CONTACT"
+            ]
             span = float(plan["upper"] - plan["lower"])
             target_error_gate = max(
                 TARGET_ERROR_MINIMUM_RAD,
@@ -603,19 +625,22 @@ def _run_cases(
                 plan["upper"]
             )
             finite = bool(np.isfinite(end).all())
-            case_pass = (
-                direction_pass
-                and target_error <= target_error_gate
-                and non_target_drift <= NON_TARGET_DRIFT_GATE
-                and legal
-                and finite
-                and not unexpected
+            assessment = classify_sweep_case(
+                direction_pass=direction_pass,
+                target_reached=target_error <= target_error_gate,
+                non_target_drift_pass=(
+                    non_target_drift <= NON_TARGET_DRIFT_GATE
+                ),
+                legal=legal,
+                finite=finite,
+                unexpected_contact_count=len(unexpected),
+                allowed_workspace_contact_count=len(allowed_workspace),
             )
             cases.append(
                 {
                     **plan,
                     "repeat": repeat,
-                    "status": "PASS" if case_pass else "FAIL",
+                    **assessment,
                     "fresh_world_reset": True,
                     "start": start.tolist(),
                     "end": end.tolist(),
@@ -635,6 +660,9 @@ def _run_cases(
                     "contact_event_count": len(event_state["events"]),
                     "contact_pairs": pairs,
                     "unexpected_contact_pair_count": len(unexpected),
+                    "allowed_workspace_contact_pair_count": len(
+                        allowed_workspace
+                    ),
                     "contact_events": list(event_state["events"]),
                 }
             )
@@ -764,7 +792,7 @@ def main(args: argparse.Namespace, preflight: dict[str, Any]) -> int:
     report = {
         "schema_version": 1,
         "status": summary["status"],
-        "scope": "TASK_7A_CURRENT_COLLISION_SEMANTICS",
+        "scope": "TASK_7A_WORKCELL_CONTACT_POLICY_V2",
         "stage": {
             **preflight,
             "sha256_before": hash_before,
@@ -788,6 +816,30 @@ def main(args: argparse.Namespace, preflight: dict[str, Any]) -> int:
             "authored collision filters and self-collision settings preserved; "
             "disabled pairs are not proven geometrically separated"
         ),
+        "contact_policy": {
+            "revision": 2,
+            "user_confirmation": "2026-07-29",
+            "allowed_pair": (
+                "supplier-CAD finger link <-> user_confirmed_table"
+            ),
+            "allowed_classification": (
+                "USER_CONFIRMED_ALLOWED_FINGER_TABLE_CONTACT"
+            ),
+            "allowed_contact_meaning": (
+                "physical workcell behavior; collision-policy case remains "
+                "PASS while target reachability records the allowed "
+                "contact-limited boundary"
+            ),
+            "generic_robot_environment_contact": "FAIL",
+            "non_adjacent_self_contact": "FAIL",
+            "cross_follower_contact": "FAIL",
+            "superseded_policy": (
+                "all robot-environment physical contacts were FAIL"
+            ),
+            "superseded_conclusion": (
+                "TASK7A_FAIL_SWEPT_FINGER_TABLE_CONTACT"
+            ),
+        },
         "adjacent_body_pairs": [
             list(pair) for pair in sorted(adjacent)
         ],
@@ -829,7 +881,7 @@ def main(args: argparse.Namespace, preflight: dict[str, Any]) -> int:
         ),
         flush=True,
     )
-    return 0 if report["status"] == "PASS" else 1
+    return 0 if report["status"] in {"PASS", "PARTIAL"} else 1
 
 
 def run() -> int:

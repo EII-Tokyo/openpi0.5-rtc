@@ -23,9 +23,9 @@
     "sha256_after": "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf",
     "sha256_before": "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf"
   },
-  "status": "FAIL",
+  "status": "PARTIAL",
   "task_7a": {
-    "collision_swept_path": "FAIL",
+    "collision_swept_path": "PASS",
     "drive_mimic_structure": "PASS",
     "follower_left_one_joint": "PASS",
     "follower_right_one_joint": "PASS",
@@ -33,10 +33,10 @@
     "joint_mapping": "PASS",
     "official_rules": "PARTIAL",
     "official_rules_unsuppressed_status": "FAIL",
-    "reason_if_fail": "deterministic positive-shoulder sweeps on both followers produce physical CAD-finger/table contact before the authored upper joint target",
-    "reason_if_partial": "NVIDIA official PhysicsRules/RobotRules findings remain unsuppressed; runtime signal gates are separately PASS",
+    "reason_if_fail": null,
+    "reason_if_partial": "user-confirmed finger/table contact limits two positive-shoulder workcell trajectories without indicating a control failure; NVIDIA official PhysicsRules/RobotRules findings also remain unsuppressed",
     "small_up_down": "PASS",
-    "status": "FAIL",
+    "status": "PARTIAL",
     "structure_and_runtime_order": "PASS"
   },
   "task_7b": {

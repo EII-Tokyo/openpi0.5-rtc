@@ -42,5 +42,7 @@ def test_runtime_source_keeps_contact_reporting_session_only() -> None:
     assert ".Save(" not in source
     assert "SurfaceGripper" not in source
     assert "set_enabled_self_collisions" not in source
-    assert "Unique failed trajectories" in source
+    assert "Contact-limited workcell trajectories" in source
     assert "Contact-envelope-only pairs" in source
+    assert "User-confirmed allowed finger/table contacts" in source
+    assert "Both positive-shoulder trajectories are stopped" not in source

@@ -118,3 +118,11 @@ def test_task7a_status_requires_swept_collision_and_preserves_rules() -> None:
         )
         == "PASS"
     )
+    assert (
+        classify_task7a_status(
+            **common,
+            swept_collision_status="PARTIAL",
+            official_task7a_status="PASS",
+        )
+        == "PARTIAL"
+    )

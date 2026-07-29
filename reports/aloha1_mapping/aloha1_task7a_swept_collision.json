@@ -123,10 +123,13 @@
   },
   "cases": [
     {
+      "allowed_workspace_contact_pair_count": 0,
       "case_id": "follower_left:waist:negative",
+      "collision_policy_status": "PASS",
       "contact_event_count": 0,
       "contact_events": [],
       "contact_pairs": [],
+      "control_direction_status": "PASS",
       "direction": "negative",
       "direction_status": "PASS",
       "end": [
@@ -150,6 +153,7 @@
       "limit_margin": 0.12566329956054687,
       "lower": -3.141582489013672,
       "maximum_non_target_drift": 0.0022318940609693527,
+      "motion_status": "TARGET_REACHED",
       "non_target_drift_gate": 0.03,
       "readback_delta": -3.015920102770906,
       "repeat": 0,
@@ -169,15 +173,19 @@
       "target": -3.015919189453125,
       "target_error": 1.4762878417950986e-05,
       "target_error_gate": 0.1884949493408203,
+      "target_reachability_status": "REACHED",
       "unexpected_contact_pair_count": 0,
       "unit": "rad",
       "upper": 3.141582489013672
     },
     {
+      "allowed_workspace_contact_pair_count": 0,
       "case_id": "follower_left:waist:positive",
+      "collision_policy_status": "PASS",
       "contact_event_count": 0,
       "contact_events": [],
       "contact_pairs": [],
+      "control_direction_status": "PASS",
       "direction": "positive",
       "direction_status": "PASS",
       "end": [
@@ -201,6 +209,7 @@
       "limit_margin": 0.12566329956054687,
       "lower": -3.141582489013672,
       "maximum_non_target_drift": 0.0017619635909795761,
+      "motion_status": "TARGET_REACHED",
       "non_target_drift_gate": 0.03,
       "readback_delta": 3.015921413723845,
       "repeat": 0,
@@ -220,15 +229,19 @@
       "target": 3.015919189453125,
       "target_error": 1.7900466918963076e-05,
       "target_error_gate": 0.1884949493408203,
+      "target_reachability_status": "REACHED",
       "unexpected_contact_pair_count": 0,
       "unit": "rad",
       "upper": 3.141582489013672
     },
     {
+      "allowed_workspace_contact_pair_count": 0,
       "case_id": "follower_left:shoulder:negative",
+      "collision_policy_status": "PASS",
       "contact_event_count": 0,
       "contact_events": [],
       "contact_pairs": [],
+      "control_direction_status": "PASS",
       "direction": "negative",
       "direction_status": "PASS",
       "end": [
@@ -252,6 +265,7 @@
       "limit_margin": 0.06213371992111206,
       "lower": -1.8500488996505737,
       "maximum_non_target_drift": 0.0016833978006616235,
+      "motion_status": "TARGET_REACHED",
       "non_target_drift_gate": 0.03,
       "readback_delta": -0.8279300928115845,
       "repeat": 0,
@@ -271,12 +285,15 @@
       "target": -1.7879151797294617,
       "target_error": 3.46398353576749e-05,
       "target_error_gate": 0.09320057988166809,
+      "target_reachability_status": "REACHED",
       "unexpected_contact_pair_count": 0,
       "unit": "rad",
       "upper": 1.2566370964050293
     },
     {
+      "allowed_workspace_contact_pair_count": 2,
       "case_id": "follower_left:shoulder:positive",
+      "collision_policy_status": "PASS",
       "contact_event_count": 286,
       "contact_events": [
         {
@@ -27086,8 +27103,8 @@
             "/World/environment/worldBody/user_confirmed_table",
             "/World/follower_left/vx300s_left/follower_left_left_finger_link"
           ],
-          "allowed": false,
-          "classification": "ROBOT_ENVIRONMENT_CONTACT",
+          "allowed": true,
+          "classification": "USER_CONFIRMED_ALLOWED_FINGER_TABLE_CONTACT",
           "collider_pair": [
             "/World/environment/worldBody/user_confirmed_table",
             "/World/follower_left/vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh"
@@ -27095,12 +27112,13 @@
           "contact_point_count": 570,
           "event_count": 143,
           "first_frame": 98,
-          "geometric_classification": "ROBOT_ENVIRONMENT_CONTACT",
+          "geometric_classification": "USER_CONFIRMED_ALLOWED_FINGER_TABLE_CONTACT",
           "last_frame": 240,
           "maximum_impulse_norm_n_s": 1.3438866430145184,
           "maximum_penetration_m": 2.2279098629951477e-05,
           "minimum_separation_m": -2.2279098629951477e-05,
           "physical_contact": true,
+          "policy_evidence": "USER_CONFIRMATION_2026_07_29",
           "robot0": "follower_left",
           "robot1": null
         },
@@ -27109,8 +27127,8 @@
             "/World/environment/worldBody/user_confirmed_table",
             "/World/follower_left/vx300s_left/follower_left_right_finger_link"
           ],
-          "allowed": false,
-          "classification": "ROBOT_ENVIRONMENT_CONTACT",
+          "allowed": true,
+          "classification": "USER_CONFIRMED_ALLOWED_FINGER_TABLE_CONTACT",
           "collider_pair": [
             "/World/environment/worldBody/user_confirmed_table",
             "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh"
@@ -27118,16 +27136,18 @@
           "contact_point_count": 570,
           "event_count": 143,
           "first_frame": 98,
-          "geometric_classification": "ROBOT_ENVIRONMENT_CONTACT",
+          "geometric_classification": "USER_CONFIRMED_ALLOWED_FINGER_TABLE_CONTACT",
           "last_frame": 240,
           "maximum_impulse_norm_n_s": 1.2497200965881348,
           "maximum_penetration_m": 5.198578583076596e-05,
           "minimum_separation_m": -5.198578583076596e-05,
           "physical_contact": true,
+          "policy_evidence": "USER_CONFIRMATION_2026_07_29",
           "robot0": "follower_left",
           "robot1": null
         }
       ],
+      "control_direction_status": "PASS",
       "direction": "positive",
       "direction_status": "PASS",
       "end": [
@@ -27151,6 +27171,7 @@
       "limit_margin": 0.06213371992111206,
       "lower": -1.8500488996505737,
       "maximum_non_target_drift": 0.005334737550413138,
+      "motion_status": "CONTACT_LIMITED_WORKCELL_REACHABILITY",
       "non_target_drift_gate": 0.03,
       "readback_delta": 1.2479210197925568,
       "repeat": 0,
@@ -27166,19 +27187,23 @@
         0.022378355264663696,
         -0.0224023275077343
       ],
-      "status": "FAIL",
+      "status": "PASS",
       "target": 1.1945033764839172,
       "target_error": 0.90653280377388,
       "target_error_gate": 0.09320057988166809,
-      "unexpected_contact_pair_count": 2,
+      "target_reachability_status": "CONTACT_LIMITED_BY_ALLOWED_WORKCELL_CONTACT",
+      "unexpected_contact_pair_count": 0,
       "unit": "rad",
       "upper": 1.2566370964050293
     },
     {
+      "allowed_workspace_contact_pair_count": 0,
       "case_id": "follower_left:elbow:negative",
+      "collision_policy_status": "PASS",
       "contact_event_count": 0,
       "contact_events": [],
       "contact_pairs": [],
+      "control_direction_status": "PASS",
       "direction": "negative",
       "direction_status": "PASS",
       "end": [
@@ -27202,6 +27227,7 @@
       "limit_margin": 0.067369704246521,
       "lower": -1.7627824544906616,
       "maximum_non_target_drift": 0.007356524467468262,
+      "motion_status": "TARGET_REACHED",
       "non_target_drift_gate": 0.03,
       "readback_delta": -2.8624961376190186,
       "repeat": 0,
@@ -27221,15 +27247,19 @@
       "target": -1.6954127502441407,
       "target_error": 0.005837802886962784,
       "target_error_gate": 0.10105455636978149,
+      "target_reachability_status": "REACHED",
       "unexpected_contact_pair_count": 0,
       "unit": "rad",
       "upper": 1.6057027578353882
     },
     {
+      "allowed_workspace_contact_pair_count": 0,
       "case_id": "follower_left:elbow:positive",
+      "collision_policy_status": "PASS",
       "contact_event_count": 0,
       "contact_events": [],
       "contact_pairs": [],
+      "control_direction_status": "PASS",
       "direction": "positive",
       "direction_status": "PASS",
       "end": [
@@ -27253,6 +27283,7 @@
       "limit_margin": 0.067369704246521,
       "lower": -1.7627824544906616,
       "maximum_non_target_drift": 0.0009609460830688477,
+      "motion_status": "TARGET_REACHED",
       "non_target_drift_gate": 0.03,
       "readback_delta": 0.37836897373199463,
       "repeat": 0,
@@ -27272,15 +27303,19 @@
       "target": 1.5383330535888673,
       "target_error": 0.0012815046310423739,
       "target_error_gate": 0.10105455636978149,
+      "target_reachability_status": "REACHED",
       "unexpected_contact_pair_count": 0,
       "unit": "rad",
       "upper": 1.6057027578353882
     },
     {
+      "allowed_workspace_contact_pair_count": 0,
       "case_id": "follower_left:forearm_roll:negative",
+      "collision_policy_status": "PASS",
       "contact_event_count": 0,
       "contact_events": [],
       "contact_pairs": [],
+      "control_direction_status": "PASS",
       "direction": "negative",
       "direction_status": "PASS",
       "end": [
@@ -27304,6 +27339,7 @@
       "limit_margin": 0.12566329956054687,
       "lower": -3.141582489013672,
       "maximum_non_target_drift": 0.009206891059875488,
+      "motion_status": "TARGET_REACHED",
       "non_target_drift_gate": 0.03,
       "readback_delta": -3.0173742616316304,
       "repeat": 0,
@@ -27323,15 +27359,19 @@
       "target": -3.015919189453125,
       "target_error": 0.0003411960601806818,
       "target_error_gate": 0.1884949493408203,
+      "target_reachability_status": "REACHED",
       "unexpected_contact_pair_count": 0,
       "unit": "rad",
       "upper": 3.141582489013672
     },
     {
+      "allowed_workspace_contact_pair_count": 0,
       "case_id": "follower_left:forearm_roll:positive",
+      "collision_policy_status": "PASS",
       "contact_event_count": 0,
       "contact_events": [],
       "contact_pairs": [],
+      "control_direction_status": "PASS",
       "direction": "positive",
       "direction_status": "PASS",
       "end": [
@@ -27355,6 +27395,7 @@
       "limit_margin": 0.12566329956054687,
       "lower": -3.141582489013672,
       "maximum_non_target_drift": 0.009243786334991455,
+      "motion_status": "TARGET_REACHED",
       "non_target_drift_gate": 0.03,
       "readback_delta": 3.0133900797227398,
       "repeat": 0,
@@ -27374,15 +27415,19 @@
       "target": 3.015919189453125,
       "target_error": 0.0014152336120605291,
       "target_error_gate": 0.1884949493408203,
+      "target_reachability_status": "REACHED",
       "unexpected_contact_pair_count": 0,
       "unit": "rad",
       "upper": 3.141582489013672
     },
     {
+      "allowed_workspace_contact_pair_count": 0,
       "case_id": "follower_left:wrist_angle:negative",
+      "collision_policy_status": "PASS",
       "contact_event_count": 0,
       "contact_events": [],
       "contact_pairs": [],
+      "control_direction_status": "PASS",
       "direction": "negative",
       "direction_status": "PASS",
       "end": [
@@ -27406,6 +27451,7 @@
       "limit_margin": 0.08203046560287476,
       "lower": -1.8675020933151245,
       "maximum_non_target_drift": 0.001256704330444336,
+      "motion_status": "TARGET_REACHED",
       "non_target_drift_gate": 0.03,
       "readback_delta": -1.4900828301906586,
       "repeat": 0,
@@ -27425,15 +27471,19 @@
       "target": -1.7854716277122498,
       "target_error": 0.0004842782020568759,
       "target_error_gate": 0.12304569840431213,
+      "target_reachability_status": "REACHED",
       "unexpected_contact_pair_count": 0,
       "unit": "rad",
       "upper": 2.2340211868286133
     },
     {
+      "allowed_workspace_contact_pair_count": 0,
       "case_id": "follower_left:wrist_angle:positive",
+      "collision_policy_status": "PASS",
       "contact_event_count": 0,
       "contact_events": [],
       "contact_pairs": [],
+      "control_direction_status": "PASS",
       "direction": "positive",
       "direction_status": "PASS",
       "end": [
@@ -27457,6 +27507,7 @@
       "limit_margin": 0.08203046560287476,
       "lower": -1.8675020933151245,
       "maximum_non_target_drift": 0.0011211633682250977,
+      "motion_status": "TARGET_REACHED",
       "non_target_drift_gate": 0.03,
       "readback_delta": 2.44763246178627,
       "repeat": 0,
@@ -27476,15 +27527,19 @@
       "target": 2.1519907212257383,
       "target_error": 0.00023133516311624192,
       "target_error_gate": 0.12304569840431213,
+      "target_reachability_status": "REACHED",
       "unexpected_contact_pair_count": 0,
       "unit": "rad",
       "upper": 2.2340211868286133
     },
     {
+      "allowed_workspace_contact_pair_count": 0,
       "case_id": "follower_left:wrist_rotate:negative",
+      "collision_policy_status": "PASS",
       "contact_event_count": 0,
       "contact_events": [],
       "contact_pairs": [],
+      "control_direction_status": "PASS",
       "direction": "negative",
       "direction_status": "PASS",
       "end": [
@@ -27508,6 +27563,7 @@
       "limit_margin": 0.12566329956054687,
       "lower": -3.141582489013672,
       "maximum_non_target_drift": 0.0062861815094947815,
+      "motion_status": "TARGET_REACHED",
       "non_target_drift_gate": 0.03,
       "readback_delta": -3.0158941511324997,
       "repeat": 0,
@@ -27527,15 +27583,19 @@
       "target": -3.015919189453125,
       "target_error": 2.453804016111505e-05,
       "target_error_gate": 0.1884949493408203,
+      "target_reachability_status": "REACHED",
       "unexpected_contact_pair_count": 0,
       "unit": "rad",
       "upper": 3.141582489013672
     },
     {
+      "allowed_workspace_contact_pair_count": 0,
       "case_id": "follower_left:wrist_rotate:positive",
+      "collision_policy_status": "PASS",
       "contact_event_count": 0,
       "contact_events": [],
       "contact_pairs": [],
+      "control_direction_status": "PASS",
       "direction": "positive",
       "direction_status": "PASS",
       "end": [
@@ -27559,6 +27619,7 @@
       "limit_margin": 0.12566329956054687,
       "lower": -3.141582489013672,
       "maximum_non_target_drift": 0.0064927078783512115,
+      "motion_status": "TARGET_REACHED",
       "non_target_drift_gate": 0.03,
       "readback_delta": 3.015892529089058,
       "repeat": 0,
@@ -27578,15 +27639,19 @@
       "target": 3.015919189453125,
       "target_error": 2.7160644531232236e-05,
       "target_error_gate": 0.1884949493408203,
+      "target_reachability_status": "REACHED",
       "unexpected_contact_pair_count": 0,
       "unit": "rad",
       "upper": 3.141582489013672
     },
     {
+      "allowed_workspace_contact_pair_count": 0,
       "case_id": "follower_right:waist:negative",
+      "collision_policy_status": "PASS",
       "contact_event_count": 0,
       "contact_events": [],
       "contact_pairs": [],
+      "control_direction_status": "PASS",
       "direction": "negative",
       "direction_status": "PASS",
       "end": [
@@ -27610,6 +27675,7 @@
       "limit_margin": 0.12566329956054687,
       "lower": -3.141582489013672,
       "maximum_non_target_drift": 0.0022308044135570526,
+      "motion_status": "TARGET_REACHED",
       "non_target_drift_gate": 0.03,
       "readback_delta": -3.0159201028254756,
       "repeat": 0,
@@ -27629,12 +27695,15 @@
       "target": -3.015919189453125,
       "target_error": 1.4762878417950986e-05,
       "target_error_gate": 0.1884949493408203,
+      "target_reachability_status": "REACHED",
       "unexpected_contact_pair_count": 0,
       "unit": "rad",
       "upper": 3.141582489013672
     },
     {
+      "allowed_workspace_contact_pair_count": 0,
       "case_id": "follower_right:waist:positive",
+      "collision_policy_status": "PASS",
       "contact_event_count": 4,
       "contact_events": [
         {
@@ -27828,6 +27897,7 @@
           "robot1": null
         }
       ],
+      "control_direction_status": "PASS",
       "direction": "positive",
       "direction_status": "PASS",
       "end": [
@@ -27851,6 +27921,7 @@
       "limit_margin": 0.12566329956054687,
       "lower": -3.141582489013672,
       "maximum_non_target_drift": 0.0017619524151086807,
+      "motion_status": "TARGET_REACHED",
       "non_target_drift_gate": 0.03,
       "readback_delta": 3.0159214136692754,
       "repeat": 0,
@@ -27870,15 +27941,19 @@
       "target": 3.015919189453125,
       "target_error": 1.7900466918963076e-05,
       "target_error_gate": 0.1884949493408203,
+      "target_reachability_status": "REACHED",
       "unexpected_contact_pair_count": 0,
       "unit": "rad",
       "upper": 3.141582489013672
     },
     {
+      "allowed_workspace_contact_pair_count": 0,
       "case_id": "follower_right:shoulder:negative",
+      "collision_policy_status": "PASS",
       "contact_event_count": 0,
       "contact_events": [],
       "contact_pairs": [],
+      "control_direction_status": "PASS",
       "direction": "negative",
       "direction_status": "PASS",
       "end": [
@@ -27902,6 +27977,7 @@
       "limit_margin": 0.06213371992111206,
       "lower": -1.8500488996505737,
       "maximum_non_target_drift": 0.0016831550165079534,
+      "motion_status": "TARGET_REACHED",
       "non_target_drift_gate": 0.03,
       "readback_delta": -0.8279302716255188,
       "repeat": 0,
@@ -27921,12 +27997,15 @@
       "target": -1.7879151797294617,
       "target_error": 3.4401416778573335e-05,
       "target_error_gate": 0.09320057988166809,
+      "target_reachability_status": "REACHED",
       "unexpected_contact_pair_count": 0,
       "unit": "rad",
       "upper": 1.2566370964050293
     },
     {
+      "allowed_workspace_contact_pair_count": 2,
       "case_id": "follower_right:shoulder:positive",
+      "collision_policy_status": "PASS",
       "contact_event_count": 286,
       "contact_events": [
         {
@@ -54736,8 +54815,8 @@
             "/World/environment/worldBody/user_confirmed_table",
             "/World/follower_right/vx300s_right/follower_right_left_finger_link"
           ],
-          "allowed": false,
-          "classification": "ROBOT_ENVIRONMENT_CONTACT",
+          "allowed": true,
+          "classification": "USER_CONFIRMED_ALLOWED_FINGER_TABLE_CONTACT",
           "collider_pair": [
             "/World/environment/worldBody/user_confirmed_table",
             "/World/follower_right/vx300s_right/follower_right_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh"
@@ -54745,12 +54824,13 @@
           "contact_point_count": 570,
           "event_count": 143,
           "first_frame": 98,
-          "geometric_classification": "ROBOT_ENVIRONMENT_CONTACT",
+          "geometric_classification": "USER_CONFIRMED_ALLOWED_FINGER_TABLE_CONTACT",
           "last_frame": 240,
           "maximum_impulse_norm_n_s": 1.3443472713547315,
           "maximum_penetration_m": 2.2311200154945254e-05,
           "minimum_separation_m": -2.2311200154945254e-05,
           "physical_contact": true,
+          "policy_evidence": "USER_CONFIRMATION_2026_07_29",
           "robot0": "follower_right",
           "robot1": null
         },
@@ -54759,8 +54839,8 @@
             "/World/environment/worldBody/user_confirmed_table",
             "/World/follower_right/vx300s_right/follower_right_right_finger_link"
           ],
-          "allowed": false,
-          "classification": "ROBOT_ENVIRONMENT_CONTACT",
+          "allowed": true,
+          "classification": "USER_CONFIRMED_ALLOWED_FINGER_TABLE_CONTACT",
           "collider_pair": [
             "/World/environment/worldBody/user_confirmed_table",
             "/World/follower_right/vx300s_right/follower_right_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh"
@@ -54768,16 +54848,18 @@
           "contact_point_count": 570,
           "event_count": 143,
           "first_frame": 98,
-          "geometric_classification": "ROBOT_ENVIRONMENT_CONTACT",
+          "geometric_classification": "USER_CONFIRMED_ALLOWED_FINGER_TABLE_CONTACT",
           "last_frame": 240,
           "maximum_impulse_norm_n_s": 1.248957514762914,
           "maximum_penetration_m": 5.206259083934128e-05,
           "minimum_separation_m": -5.206259083934128e-05,
           "physical_contact": true,
+          "policy_evidence": "USER_CONFIRMATION_2026_07_29",
           "robot0": "follower_right",
           "robot1": null
         }
       ],
+      "control_direction_status": "PASS",
       "direction": "positive",
       "direction_status": "PASS",
       "end": [
@@ -54801,6 +54883,7 @@
       "limit_margin": 0.06213371992111206,
       "lower": -1.8500488996505737,
       "maximum_non_target_drift": 0.005343462459336479,
+      "motion_status": "CONTACT_LIMITED_WORKCELL_REACHABILITY",
       "non_target_drift_gate": 0.03,
       "readback_delta": 1.2479245066642761,
       "repeat": 0,
@@ -54816,19 +54899,23 @@
         0.022378355264663696,
         -0.02240232564508915
       ],
-      "status": "FAIL",
+      "status": "PASS",
       "target": 1.1945033764839172,
       "target_error": 0.9065293765068054,
       "target_error_gate": 0.09320057988166809,
-      "unexpected_contact_pair_count": 2,
+      "target_reachability_status": "CONTACT_LIMITED_BY_ALLOWED_WORKCELL_CONTACT",
+      "unexpected_contact_pair_count": 0,
       "unit": "rad",
       "upper": 1.2566370964050293
     },
     {
+      "allowed_workspace_contact_pair_count": 0,
       "case_id": "follower_right:elbow:negative",
+      "collision_policy_status": "PASS",
       "contact_event_count": 0,
       "contact_events": [],
       "contact_pairs": [],
+      "control_direction_status": "PASS",
       "direction": "negative",
       "direction_status": "PASS",
       "end": [
@@ -54852,6 +54939,7 @@
       "limit_margin": 0.067369704246521,
       "lower": -1.7627824544906616,
       "maximum_non_target_drift": 0.007356196641921997,
+      "motion_status": "TARGET_REACHED",
       "non_target_drift_gate": 0.03,
       "readback_delta": -2.8624956607818604,
       "repeat": 0,
@@ -54871,15 +54959,19 @@
       "target": -1.6954127502441407,
       "target_error": 0.005837445259094132,
       "target_error_gate": 0.10105455636978149,
+      "target_reachability_status": "REACHED",
       "unexpected_contact_pair_count": 0,
       "unit": "rad",
       "upper": 1.6057027578353882
     },
     {
+      "allowed_workspace_contact_pair_count": 0,
       "case_id": "follower_right:elbow:positive",
+      "collision_policy_status": "PASS",
       "contact_event_count": 0,
       "contact_events": [],
       "contact_pairs": [],
+      "control_direction_status": "PASS",
       "direction": "positive",
       "direction_status": "PASS",
       "end": [
@@ -54903,6 +54995,7 @@
       "limit_margin": 0.067369704246521,
       "lower": -1.7627824544906616,
       "maximum_non_target_drift": 0.0009608268737792969,
+      "motion_status": "TARGET_REACHED",
       "non_target_drift_gate": 0.03,
       "readback_delta": 0.37836921215057373,
       "repeat": 0,
@@ -54922,15 +55015,19 @@
       "target": 1.5383330535888673,
       "target_error": 0.0012816238403319247,
       "target_error_gate": 0.10105455636978149,
+      "target_reachability_status": "REACHED",
       "unexpected_contact_pair_count": 0,
       "unit": "rad",
       "upper": 1.6057027578353882
     },
     {
+      "allowed_workspace_contact_pair_count": 0,
       "case_id": "follower_right:forearm_roll:negative",
+      "collision_policy_status": "PASS",
       "contact_event_count": 0,
       "contact_events": [],
       "contact_pairs": [],
+      "control_direction_status": "PASS",
       "direction": "negative",
       "direction_status": "PASS",
       "end": [
@@ -54954,6 +55051,7 @@
       "limit_margin": 0.12566329956054687,
       "lower": -3.141582489013672,
       "maximum_non_target_drift": 0.009206771850585938,
+      "motion_status": "TARGET_REACHED",
       "non_target_drift_gate": 0.03,
       "readback_delta": -3.0173745005158707,
       "repeat": 0,
@@ -54973,15 +55071,19 @@
       "target": -3.015919189453125,
       "target_error": 0.0003414344787597834,
       "target_error_gate": 0.1884949493408203,
+      "target_reachability_status": "REACHED",
       "unexpected_contact_pair_count": 0,
       "unit": "rad",
       "upper": 3.141582489013672
     },
     {
+      "allowed_workspace_contact_pair_count": 0,
       "case_id": "follower_right:forearm_roll:positive",
+      "collision_policy_status": "PASS",
       "contact_event_count": 0,
       "contact_events": [],
       "contact_pairs": [],
+      "control_direction_status": "PASS",
       "direction": "positive",
       "direction_status": "PASS",
       "end": [
@@ -55005,6 +55107,7 @@
       "limit_margin": 0.12566329956054687,
       "lower": -3.141582489013672,
       "maximum_non_target_drift": 0.009244382381439209,
+      "motion_status": "TARGET_REACHED",
       "non_target_drift_gate": 0.03,
       "readback_delta": 3.0133898408384994,
       "repeat": 0,
@@ -55024,15 +55127,19 @@
       "target": 3.015919189453125,
       "target_error": 0.0014154720306396307,
       "target_error_gate": 0.1884949493408203,
+      "target_reachability_status": "REACHED",
       "unexpected_contact_pair_count": 0,
       "unit": "rad",
       "upper": 3.141582489013672
     },
     {
+      "allowed_workspace_contact_pair_count": 0,
       "case_id": "follower_right:wrist_angle:negative",
+      "collision_policy_status": "PASS",
       "contact_event_count": 0,
       "contact_events": [],
       "contact_pairs": [],
+      "control_direction_status": "PASS",
       "direction": "negative",
       "direction_status": "PASS",
       "end": [
@@ -55056,6 +55163,7 @@
       "limit_margin": 0.08203046560287476,
       "lower": -1.8675020933151245,
       "maximum_non_target_drift": 0.0012568235397338867,
+      "motion_status": "TARGET_REACHED",
       "non_target_drift_gate": 0.03,
       "readback_delta": -1.4900848865509033,
       "repeat": 0,
@@ -55075,15 +55183,19 @@
       "target": -1.7854716277122498,
       "target_error": 0.00048642396926878995,
       "target_error_gate": 0.12304569840431213,
+      "target_reachability_status": "REACHED",
       "unexpected_contact_pair_count": 0,
       "unit": "rad",
       "upper": 2.2340211868286133
     },
     {
+      "allowed_workspace_contact_pair_count": 0,
       "case_id": "follower_right:wrist_angle:positive",
+      "collision_policy_status": "PASS",
       "contact_event_count": 0,
       "contact_events": [],
       "contact_pairs": [],
+      "control_direction_status": "PASS",
       "direction": "positive",
       "direction_status": "PASS",
       "end": [
@@ -55107,6 +55219,7 @@
       "limit_margin": 0.08203046560287476,
       "lower": -1.8675020933151245,
       "maximum_non_target_drift": 0.0011206865310668945,
+      "motion_status": "TARGET_REACHED",
       "non_target_drift_gate": 0.03,
       "readback_delta": 2.4476301670074463,
       "repeat": 0,
@@ -55126,15 +55239,19 @@
       "target": 2.1519907212257383,
       "target_error": 0.00023371934890725754,
       "target_error_gate": 0.12304569840431213,
+      "target_reachability_status": "REACHED",
       "unexpected_contact_pair_count": 0,
       "unit": "rad",
       "upper": 2.2340211868286133
     },
     {
+      "allowed_workspace_contact_pair_count": 0,
       "case_id": "follower_right:wrist_rotate:negative",
+      "collision_policy_status": "PASS",
       "contact_event_count": 0,
       "contact_events": [],
       "contact_pairs": [],
+      "control_direction_status": "PASS",
       "direction": "negative",
       "direction_status": "PASS",
       "end": [
@@ -55158,6 +55275,7 @@
       "limit_margin": 0.12566329956054687,
       "lower": -3.141582489013672,
       "maximum_non_target_drift": 0.0062864311039447784,
+      "motion_status": "TARGET_REACHED",
       "non_target_drift_gate": 0.03,
       "readback_delta": -3.015894151411544,
       "repeat": 0,
@@ -55177,15 +55295,19 @@
       "target": -3.015919189453125,
       "target_error": 2.453804016111505e-05,
       "target_error_gate": 0.1884949493408203,
+      "target_reachability_status": "REACHED",
       "unexpected_contact_pair_count": 0,
       "unit": "rad",
       "upper": 3.141582489013672
     },
     {
+      "allowed_workspace_contact_pair_count": 0,
       "case_id": "follower_right:wrist_rotate:positive",
+      "collision_policy_status": "PASS",
       "contact_event_count": 0,
       "contact_events": [],
       "contact_pairs": [],
+      "control_direction_status": "PASS",
       "direction": "positive",
       "direction_status": "PASS",
       "end": [
@@ -55209,6 +55331,7 @@
       "limit_margin": 0.12566329956054687,
       "lower": -3.141582489013672,
       "maximum_non_target_drift": 0.0064927153289318085,
+      "motion_status": "TARGET_REACHED",
       "non_target_drift_gate": 0.03,
       "readback_delta": 3.0158925288100136,
       "repeat": 0,
@@ -55228,15 +55351,19 @@
       "target": 3.015919189453125,
       "target_error": 2.7160644531232236e-05,
       "target_error_gate": 0.1884949493408203,
+      "target_reachability_status": "REACHED",
       "unexpected_contact_pair_count": 0,
       "unit": "rad",
       "upper": 3.141582489013672
     },
     {
+      "allowed_workspace_contact_pair_count": 0,
       "case_id": "follower_left:waist:negative",
+      "collision_policy_status": "PASS",
       "contact_event_count": 0,
       "contact_events": [],
       "contact_pairs": [],
+      "control_direction_status": "PASS",
       "direction": "negative",
       "direction_status": "PASS",
       "end": [
@@ -55260,6 +55387,7 @@
       "limit_margin": 0.12566329956054687,
       "lower": -3.141582489013672,
       "maximum_non_target_drift": 0.0022318940609693527,
+      "motion_status": "TARGET_REACHED",
       "non_target_drift_gate": 0.03,
       "readback_delta": -3.015920102770906,
       "repeat": 1,
@@ -55279,15 +55407,19 @@
       "target": -3.015919189453125,
       "target_error": 1.4762878417950986e-05,
       "target_error_gate": 0.1884949493408203,
+      "target_reachability_status": "REACHED",
       "unexpected_contact_pair_count": 0,
       "unit": "rad",
       "upper": 3.141582489013672
     },
     {
+      "allowed_workspace_contact_pair_count": 0,
       "case_id": "follower_left:waist:positive",
+      "collision_policy_status": "PASS",
       "contact_event_count": 0,
       "contact_events": [],
       "contact_pairs": [],
+      "control_direction_status": "PASS",
       "direction": "positive",
       "direction_status": "PASS",
       "end": [
@@ -55311,6 +55443,7 @@
       "limit_margin": 0.12566329956054687,
       "lower": -3.141582489013672,
       "maximum_non_target_drift": 0.0017619635909795761,
+      "motion_status": "TARGET_REACHED",
       "non_target_drift_gate": 0.03,
       "readback_delta": 3.015921413723845,
       "repeat": 1,
@@ -55330,15 +55463,19 @@
       "target": 3.015919189453125,
       "target_error": 1.7900466918963076e-05,
       "target_error_gate": 0.1884949493408203,
+      "target_reachability_status": "REACHED",
       "unexpected_contact_pair_count": 0,
       "unit": "rad",
       "upper": 3.141582489013672
     },
     {
+      "allowed_workspace_contact_pair_count": 0,
       "case_id": "follower_left:shoulder:negative",
+      "collision_policy_status": "PASS",
       "contact_event_count": 0,
       "contact_events": [],
       "contact_pairs": [],
+      "control_direction_status": "PASS",
       "direction": "negative",
       "direction_status": "PASS",
       "end": [
@@ -55362,6 +55499,7 @@
       "limit_margin": 0.06213371992111206,
       "lower": -1.8500488996505737,
       "maximum_non_target_drift": 0.0016833978006616235,
+      "motion_status": "TARGET_REACHED",
       "non_target_drift_gate": 0.03,
       "readback_delta": -0.8279300928115845,
       "repeat": 1,
@@ -55381,12 +55519,15 @@
       "target": -1.7879151797294617,
       "target_error": 3.46398353576749e-05,
       "target_error_gate": 0.09320057988166809,
+      "target_reachability_status": "REACHED",
       "unexpected_contact_pair_count": 0,
       "unit": "rad",
       "upper": 1.2566370964050293
     },
     {
+      "allowed_workspace_contact_pair_count": 2,
       "case_id": "follower_left:shoulder:positive",
+      "collision_policy_status": "PASS",
       "contact_event_count": 286,
       "contact_events": [
         {
@@ -82196,8 +82337,8 @@
             "/World/environment/worldBody/user_confirmed_table",
             "/World/follower_left/vx300s_left/follower_left_left_finger_link"
           ],
-          "allowed": false,
-          "classification": "ROBOT_ENVIRONMENT_CONTACT",
+          "allowed": true,
+          "classification": "USER_CONFIRMED_ALLOWED_FINGER_TABLE_CONTACT",
           "collider_pair": [
             "/World/environment/worldBody/user_confirmed_table",
             "/World/follower_left/vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh"
@@ -82205,12 +82346,13 @@
           "contact_point_count": 570,
           "event_count": 143,
           "first_frame": 98,
-          "geometric_classification": "ROBOT_ENVIRONMENT_CONTACT",
+          "geometric_classification": "USER_CONFIRMED_ALLOWED_FINGER_TABLE_CONTACT",
           "last_frame": 240,
           "maximum_impulse_norm_n_s": 1.3438866430145184,
           "maximum_penetration_m": 2.2279098629951477e-05,
           "minimum_separation_m": -2.2279098629951477e-05,
           "physical_contact": true,
+          "policy_evidence": "USER_CONFIRMATION_2026_07_29",
           "robot0": "follower_left",
           "robot1": null
         },
@@ -82219,8 +82361,8 @@
             "/World/environment/worldBody/user_confirmed_table",
             "/World/follower_left/vx300s_left/follower_left_right_finger_link"
           ],
-          "allowed": false,
-          "classification": "ROBOT_ENVIRONMENT_CONTACT",
+          "allowed": true,
+          "classification": "USER_CONFIRMED_ALLOWED_FINGER_TABLE_CONTACT",
           "collider_pair": [
             "/World/environment/worldBody/user_confirmed_table",
             "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh"
@@ -82228,16 +82370,18 @@
           "contact_point_count": 570,
           "event_count": 143,
           "first_frame": 98,
-          "geometric_classification": "ROBOT_ENVIRONMENT_CONTACT",
+          "geometric_classification": "USER_CONFIRMED_ALLOWED_FINGER_TABLE_CONTACT",
           "last_frame": 240,
           "maximum_impulse_norm_n_s": 1.2497200965881348,
           "maximum_penetration_m": 5.198578583076596e-05,
           "minimum_separation_m": -5.198578583076596e-05,
           "physical_contact": true,
+          "policy_evidence": "USER_CONFIRMATION_2026_07_29",
           "robot0": "follower_left",
           "robot1": null
         }
       ],
+      "control_direction_status": "PASS",
       "direction": "positive",
       "direction_status": "PASS",
       "end": [
@@ -82261,6 +82405,7 @@
       "limit_margin": 0.06213371992111206,
       "lower": -1.8500488996505737,
       "maximum_non_target_drift": 0.005334737550413138,
+      "motion_status": "CONTACT_LIMITED_WORKCELL_REACHABILITY",
       "non_target_drift_gate": 0.03,
       "readback_delta": 1.2479210197925568,
       "repeat": 1,
@@ -82276,19 +82421,23 @@
         0.022378355264663696,
         -0.0224023275077343
       ],
-      "status": "FAIL",
+      "status": "PASS",
       "target": 1.1945033764839172,
       "target_error": 0.90653280377388,
       "target_error_gate": 0.09320057988166809,
-      "unexpected_contact_pair_count": 2,
+      "target_reachability_status": "CONTACT_LIMITED_BY_ALLOWED_WORKCELL_CONTACT",
+      "unexpected_contact_pair_count": 0,
       "unit": "rad",
       "upper": 1.2566370964050293
     },
     {
+      "allowed_workspace_contact_pair_count": 0,
       "case_id": "follower_left:elbow:negative",
+      "collision_policy_status": "PASS",
       "contact_event_count": 0,
       "contact_events": [],
       "contact_pairs": [],
+      "control_direction_status": "PASS",
       "direction": "negative",
       "direction_status": "PASS",
       "end": [
@@ -82312,6 +82461,7 @@
       "limit_margin": 0.067369704246521,
       "lower": -1.7627824544906616,
       "maximum_non_target_drift": 0.007356524467468262,
+      "motion_status": "TARGET_REACHED",
       "non_target_drift_gate": 0.03,
       "readback_delta": -2.8624961376190186,
       "repeat": 1,
@@ -82331,15 +82481,19 @@
       "target": -1.6954127502441407,
       "target_error": 0.005837802886962784,
       "target_error_gate": 0.10105455636978149,
+      "target_reachability_status": "REACHED",
       "unexpected_contact_pair_count": 0,
       "unit": "rad",
       "upper": 1.6057027578353882
     },
     {
+      "allowed_workspace_contact_pair_count": 0,
       "case_id": "follower_left:elbow:positive",
+      "collision_policy_status": "PASS",
       "contact_event_count": 0,
       "contact_events": [],
       "contact_pairs": [],
+      "control_direction_status": "PASS",
       "direction": "positive",
       "direction_status": "PASS",
       "end": [
@@ -82363,6 +82517,7 @@
       "limit_margin": 0.067369704246521,
       "lower": -1.7627824544906616,
       "maximum_non_target_drift": 0.0009609460830688477,
+      "motion_status": "TARGET_REACHED",
       "non_target_drift_gate": 0.03,
       "readback_delta": 0.37836897373199463,
       "repeat": 1,
@@ -82382,15 +82537,19 @@
       "target": 1.5383330535888673,
       "target_error": 0.0012815046310423739,
       "target_error_gate": 0.10105455636978149,
+      "target_reachability_status": "REACHED",
       "unexpected_contact_pair_count": 0,
       "unit": "rad",
       "upper": 1.6057027578353882
     },
     {
+      "allowed_workspace_contact_pair_count": 0,
       "case_id": "follower_left:forearm_roll:negative",
+      "collision_policy_status": "PASS",
       "contact_event_count": 0,
       "contact_events": [],
       "contact_pairs": [],
+      "control_direction_status": "PASS",
       "direction": "negative",
       "direction_status": "PASS",
       "end": [
@@ -82414,6 +82573,7 @@
       "limit_margin": 0.12566329956054687,
       "lower": -3.141582489013672,
       "maximum_non_target_drift": 0.009206891059875488,
+      "motion_status": "TARGET_REACHED",
       "non_target_drift_gate": 0.03,
       "readback_delta": -3.0173742616316304,
       "repeat": 1,
@@ -82433,15 +82593,19 @@
       "target": -3.015919189453125,
       "target_error": 0.0003411960601806818,
       "target_error_gate": 0.1884949493408203,
+      "target_reachability_status": "REACHED",
       "unexpected_contact_pair_count": 0,
       "unit": "rad",
       "upper": 3.141582489013672
     },
     {
+      "allowed_workspace_contact_pair_count": 0,
       "case_id": "follower_left:forearm_roll:positive",
+      "collision_policy_status": "PASS",
       "contact_event_count": 0,
       "contact_events": [],
       "contact_pairs": [],
+      "control_direction_status": "PASS",
       "direction": "positive",
       "direction_status": "PASS",
       "end": [
@@ -82465,6 +82629,7 @@
       "limit_margin": 0.12566329956054687,
       "lower": -3.141582489013672,
       "maximum_non_target_drift": 0.009243786334991455,
+      "motion_status": "TARGET_REACHED",
       "non_target_drift_gate": 0.03,
       "readback_delta": 3.0133900797227398,
       "repeat": 1,
@@ -82484,15 +82649,19 @@
       "target": 3.015919189453125,
       "target_error": 0.0014152336120605291,
       "target_error_gate": 0.1884949493408203,
+      "target_reachability_status": "REACHED",
       "unexpected_contact_pair_count": 0,
       "unit": "rad",
       "upper": 3.141582489013672
     },
     {
+      "allowed_workspace_contact_pair_count": 0,
       "case_id": "follower_left:wrist_angle:negative",
+      "collision_policy_status": "PASS",
       "contact_event_count": 0,
       "contact_events": [],
       "contact_pairs": [],
+      "control_direction_status": "PASS",
       "direction": "negative",
       "direction_status": "PASS",
       "end": [
@@ -82516,6 +82685,7 @@
       "limit_margin": 0.08203046560287476,
       "lower": -1.8675020933151245,
       "maximum_non_target_drift": 0.001256704330444336,
+      "motion_status": "TARGET_REACHED",
       "non_target_drift_gate": 0.03,
       "readback_delta": -1.4900828301906586,
       "repeat": 1,
@@ -82535,15 +82705,19 @@
       "target": -1.7854716277122498,
       "target_error": 0.0004842782020568759,
       "target_error_gate": 0.12304569840431213,
+      "target_reachability_status": "REACHED",
       "unexpected_contact_pair_count": 0,
       "unit": "rad",
       "upper": 2.2340211868286133
     },
     {
+      "allowed_workspace_contact_pair_count": 0,
       "case_id": "follower_left:wrist_angle:positive",
+      "collision_policy_status": "PASS",
       "contact_event_count": 0,
       "contact_events": [],
       "contact_pairs": [],
+      "control_direction_status": "PASS",
       "direction": "positive",
       "direction_status": "PASS",
       "end": [
@@ -82567,6 +82741,7 @@
       "limit_margin": 0.08203046560287476,
       "lower": -1.8675020933151245,
       "maximum_non_target_drift": 0.0011211633682250977,
+      "motion_status": "TARGET_REACHED",
       "non_target_drift_gate": 0.03,
       "readback_delta": 2.44763246178627,
       "repeat": 1,
@@ -82586,15 +82761,19 @@
       "target": 2.1519907212257383,
       "target_error": 0.00023133516311624192,
       "target_error_gate": 0.12304569840431213,
+      "target_reachability_status": "REACHED",
       "unexpected_contact_pair_count": 0,
       "unit": "rad",
       "upper": 2.2340211868286133
     },
     {
+      "allowed_workspace_contact_pair_count": 0,
       "case_id": "follower_left:wrist_rotate:negative",
+      "collision_policy_status": "PASS",
       "contact_event_count": 0,
       "contact_events": [],
       "contact_pairs": [],
+      "control_direction_status": "PASS",
       "direction": "negative",
       "direction_status": "PASS",
       "end": [
@@ -82618,6 +82797,7 @@
       "limit_margin": 0.12566329956054687,
       "lower": -3.141582489013672,
       "maximum_non_target_drift": 0.0062861815094947815,
+      "motion_status": "TARGET_REACHED",
       "non_target_drift_gate": 0.03,
       "readback_delta": -3.0158941511324997,
       "repeat": 1,
@@ -82637,15 +82817,19 @@
       "target": -3.015919189453125,
       "target_error": 2.453804016111505e-05,
       "target_error_gate": 0.1884949493408203,
+      "target_reachability_status": "REACHED",
       "unexpected_contact_pair_count": 0,
       "unit": "rad",
       "upper": 3.141582489013672
     },
     {
+      "allowed_workspace_contact_pair_count": 0,
       "case_id": "follower_left:wrist_rotate:positive",
+      "collision_policy_status": "PASS",
       "contact_event_count": 0,
       "contact_events": [],
       "contact_pairs": [],
+      "control_direction_status": "PASS",
       "direction": "positive",
       "direction_status": "PASS",
       "end": [
@@ -82669,6 +82853,7 @@
       "limit_margin": 0.12566329956054687,
       "lower": -3.141582489013672,
       "maximum_non_target_drift": 0.0064927078783512115,
+      "motion_status": "TARGET_REACHED",
       "non_target_drift_gate": 0.03,
       "readback_delta": 3.015892529089058,
       "repeat": 1,
@@ -82688,15 +82873,19 @@
       "target": 3.015919189453125,
       "target_error": 2.7160644531232236e-05,
       "target_error_gate": 0.1884949493408203,
+      "target_reachability_status": "REACHED",
       "unexpected_contact_pair_count": 0,
       "unit": "rad",
       "upper": 3.141582489013672
     },
     {
+      "allowed_workspace_contact_pair_count": 0,
       "case_id": "follower_right:waist:negative",
+      "collision_policy_status": "PASS",
       "contact_event_count": 0,
       "contact_events": [],
       "contact_pairs": [],
+      "control_direction_status": "PASS",
       "direction": "negative",
       "direction_status": "PASS",
       "end": [
@@ -82720,6 +82909,7 @@
       "limit_margin": 0.12566329956054687,
       "lower": -3.141582489013672,
       "maximum_non_target_drift": 0.0022308044135570526,
+      "motion_status": "TARGET_REACHED",
       "non_target_drift_gate": 0.03,
       "readback_delta": -3.0159201028254756,
       "repeat": 1,
@@ -82739,12 +82929,15 @@
       "target": -3.015919189453125,
       "target_error": 1.4762878417950986e-05,
       "target_error_gate": 0.1884949493408203,
+      "target_reachability_status": "REACHED",
       "unexpected_contact_pair_count": 0,
       "unit": "rad",
       "upper": 3.141582489013672
     },
     {
+      "allowed_workspace_contact_pair_count": 0,
       "case_id": "follower_right:waist:positive",
+      "collision_policy_status": "PASS",
       "contact_event_count": 4,
       "contact_events": [
         {
@@ -82938,6 +83131,7 @@
           "robot1": null
         }
       ],
+      "control_direction_status": "PASS",
       "direction": "positive",
       "direction_status": "PASS",
       "end": [
@@ -82961,6 +83155,7 @@
       "limit_margin": 0.12566329956054687,
       "lower": -3.141582489013672,
       "maximum_non_target_drift": 0.0017619524151086807,
+      "motion_status": "TARGET_REACHED",
       "non_target_drift_gate": 0.03,
       "readback_delta": 3.0159214136692754,
       "repeat": 1,
@@ -82980,15 +83175,19 @@
       "target": 3.015919189453125,
       "target_error": 1.7900466918963076e-05,
       "target_error_gate": 0.1884949493408203,
+      "target_reachability_status": "REACHED",
       "unexpected_contact_pair_count": 0,
       "unit": "rad",
       "upper": 3.141582489013672
     },
     {
+      "allowed_workspace_contact_pair_count": 0,
       "case_id": "follower_right:shoulder:negative",
+      "collision_policy_status": "PASS",
       "contact_event_count": 0,
       "contact_events": [],
       "contact_pairs": [],
+      "control_direction_status": "PASS",
       "direction": "negative",
       "direction_status": "PASS",
       "end": [
@@ -83012,6 +83211,7 @@
       "limit_margin": 0.06213371992111206,
       "lower": -1.8500488996505737,
       "maximum_non_target_drift": 0.0016831550165079534,
+      "motion_status": "TARGET_REACHED",
       "non_target_drift_gate": 0.03,
       "readback_delta": -0.8279302716255188,
       "repeat": 1,
@@ -83031,12 +83231,15 @@
       "target": -1.7879151797294617,
       "target_error": 3.4401416778573335e-05,
       "target_error_gate": 0.09320057988166809,
+      "target_reachability_status": "REACHED",
       "unexpected_contact_pair_count": 0,
       "unit": "rad",
       "upper": 1.2566370964050293
     },
     {
+      "allowed_workspace_contact_pair_count": 2,
       "case_id": "follower_right:shoulder:positive",
+      "collision_policy_status": "PASS",
       "contact_event_count": 286,
       "contact_events": [
         {
@@ -109846,8 +110049,8 @@
             "/World/environment/worldBody/user_confirmed_table",
             "/World/follower_right/vx300s_right/follower_right_left_finger_link"
           ],
-          "allowed": false,
-          "classification": "ROBOT_ENVIRONMENT_CONTACT",
+          "allowed": true,
+          "classification": "USER_CONFIRMED_ALLOWED_FINGER_TABLE_CONTACT",
           "collider_pair": [
             "/World/environment/worldBody/user_confirmed_table",
             "/World/follower_right/vx300s_right/follower_right_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh"
@@ -109855,12 +110058,13 @@
           "contact_point_count": 570,
           "event_count": 143,
           "first_frame": 98,
-          "geometric_classification": "ROBOT_ENVIRONMENT_CONTACT",
+          "geometric_classification": "USER_CONFIRMED_ALLOWED_FINGER_TABLE_CONTACT",
           "last_frame": 240,
           "maximum_impulse_norm_n_s": 1.3443472713547315,
           "maximum_penetration_m": 2.2311200154945254e-05,
           "minimum_separation_m": -2.2311200154945254e-05,
           "physical_contact": true,
+          "policy_evidence": "USER_CONFIRMATION_2026_07_29",
           "robot0": "follower_right",
           "robot1": null
         },
@@ -109869,8 +110073,8 @@
             "/World/environment/worldBody/user_confirmed_table",
             "/World/follower_right/vx300s_right/follower_right_right_finger_link"
           ],
-          "allowed": false,
-          "classification": "ROBOT_ENVIRONMENT_CONTACT",
+          "allowed": true,
+          "classification": "USER_CONFIRMED_ALLOWED_FINGER_TABLE_CONTACT",
           "collider_pair": [
             "/World/environment/worldBody/user_confirmed_table",
             "/World/follower_right/vx300s_right/follower_right_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh"
@@ -109878,16 +110082,18 @@
           "contact_point_count": 570,
           "event_count": 143,
           "first_frame": 98,
-          "geometric_classification": "ROBOT_ENVIRONMENT_CONTACT",
+          "geometric_classification": "USER_CONFIRMED_ALLOWED_FINGER_TABLE_CONTACT",
           "last_frame": 240,
           "maximum_impulse_norm_n_s": 1.248957514762914,
           "maximum_penetration_m": 5.206259083934128e-05,
           "minimum_separation_m": -5.206259083934128e-05,
           "physical_contact": true,
+          "policy_evidence": "USER_CONFIRMATION_2026_07_29",
           "robot0": "follower_right",
           "robot1": null
         }
       ],
+      "control_direction_status": "PASS",
       "direction": "positive",
       "direction_status": "PASS",
       "end": [
@@ -109911,6 +110117,7 @@
       "limit_margin": 0.06213371992111206,
       "lower": -1.8500488996505737,
       "maximum_non_target_drift": 0.005343462459336479,
+      "motion_status": "CONTACT_LIMITED_WORKCELL_REACHABILITY",
       "non_target_drift_gate": 0.03,
       "readback_delta": 1.2479245066642761,
       "repeat": 1,
@@ -109926,19 +110133,23 @@
         0.022378355264663696,
         -0.02240232564508915
       ],
-      "status": "FAIL",
+      "status": "PASS",
       "target": 1.1945033764839172,
       "target_error": 0.9065293765068054,
       "target_error_gate": 0.09320057988166809,
-      "unexpected_contact_pair_count": 2,
+      "target_reachability_status": "CONTACT_LIMITED_BY_ALLOWED_WORKCELL_CONTACT",
+      "unexpected_contact_pair_count": 0,
       "unit": "rad",
       "upper": 1.2566370964050293
     },
     {
+      "allowed_workspace_contact_pair_count": 0,
       "case_id": "follower_right:elbow:negative",
+      "collision_policy_status": "PASS",
       "contact_event_count": 0,
       "contact_events": [],
       "contact_pairs": [],
+      "control_direction_status": "PASS",
       "direction": "negative",
       "direction_status": "PASS",
       "end": [
@@ -109962,6 +110173,7 @@
       "limit_margin": 0.067369704246521,
       "lower": -1.7627824544906616,
       "maximum_non_target_drift": 0.007356196641921997,
+      "motion_status": "TARGET_REACHED",
       "non_target_drift_gate": 0.03,
       "readback_delta": -2.8624956607818604,
       "repeat": 1,
@@ -109981,15 +110193,19 @@
       "target": -1.6954127502441407,
       "target_error": 0.005837445259094132,
       "target_error_gate": 0.10105455636978149,
+      "target_reachability_status": "REACHED",
       "unexpected_contact_pair_count": 0,
       "unit": "rad",
       "upper": 1.6057027578353882
     },
     {
+      "allowed_workspace_contact_pair_count": 0,
       "case_id": "follower_right:elbow:positive",
+      "collision_policy_status": "PASS",
       "contact_event_count": 0,
       "contact_events": [],
       "contact_pairs": [],
+      "control_direction_status": "PASS",
       "direction": "positive",
       "direction_status": "PASS",
       "end": [
@@ -110013,6 +110229,7 @@
       "limit_margin": 0.067369704246521,
       "lower": -1.7627824544906616,
       "maximum_non_target_drift": 0.0009608268737792969,
+      "motion_status": "TARGET_REACHED",
       "non_target_drift_gate": 0.03,
       "readback_delta": 0.37836921215057373,
       "repeat": 1,
@@ -110032,15 +110249,19 @@
       "target": 1.5383330535888673,
       "target_error": 0.0012816238403319247,
       "target_error_gate": 0.10105455636978149,
+      "target_reachability_status": "REACHED",
       "unexpected_contact_pair_count": 0,
       "unit": "rad",
       "upper": 1.6057027578353882
     },
     {
+      "allowed_workspace_contact_pair_count": 0,
       "case_id": "follower_right:forearm_roll:negative",
+      "collision_policy_status": "PASS",
       "contact_event_count": 0,
       "contact_events": [],
       "contact_pairs": [],
+      "control_direction_status": "PASS",
       "direction": "negative",
       "direction_status": "PASS",
       "end": [
@@ -110064,6 +110285,7 @@
       "limit_margin": 0.12566329956054687,
       "lower": -3.141582489013672,
       "maximum_non_target_drift": 0.009206771850585938,
+      "motion_status": "TARGET_REACHED",
       "non_target_drift_gate": 0.03,
       "readback_delta": -3.0173745005158707,
       "repeat": 1,
@@ -110083,15 +110305,19 @@
       "target": -3.015919189453125,
       "target_error": 0.0003414344787597834,
       "target_error_gate": 0.1884949493408203,
+      "target_reachability_status": "REACHED",
       "unexpected_contact_pair_count": 0,
       "unit": "rad",
       "upper": 3.141582489013672
     },
     {
+      "allowed_workspace_contact_pair_count": 0,
       "case_id": "follower_right:forearm_roll:positive",
+      "collision_policy_status": "PASS",
       "contact_event_count": 0,
       "contact_events": [],
       "contact_pairs": [],
+      "control_direction_status": "PASS",
       "direction": "positive",
       "direction_status": "PASS",
       "end": [
@@ -110115,6 +110341,7 @@
       "limit_margin": 0.12566329956054687,
       "lower": -3.141582489013672,
       "maximum_non_target_drift": 0.009244382381439209,
+      "motion_status": "TARGET_REACHED",
       "non_target_drift_gate": 0.03,
       "readback_delta": 3.0133898408384994,
       "repeat": 1,
@@ -110134,15 +110361,19 @@
       "target": 3.015919189453125,
       "target_error": 0.0014154720306396307,
       "target_error_gate": 0.1884949493408203,
+      "target_reachability_status": "REACHED",
       "unexpected_contact_pair_count": 0,
       "unit": "rad",
       "upper": 3.141582489013672
     },
     {
+      "allowed_workspace_contact_pair_count": 0,
       "case_id": "follower_right:wrist_angle:negative",
+      "collision_policy_status": "PASS",
       "contact_event_count": 0,
       "contact_events": [],
       "contact_pairs": [],
+      "control_direction_status": "PASS",
       "direction": "negative",
       "direction_status": "PASS",
       "end": [
@@ -110166,6 +110397,7 @@
       "limit_margin": 0.08203046560287476,
       "lower": -1.8675020933151245,
       "maximum_non_target_drift": 0.0012568235397338867,
+      "motion_status": "TARGET_REACHED",
       "non_target_drift_gate": 0.03,
       "readback_delta": -1.4900848865509033,
       "repeat": 1,
@@ -110185,15 +110417,19 @@
       "target": -1.7854716277122498,
       "target_error": 0.00048642396926878995,
       "target_error_gate": 0.12304569840431213,
+      "target_reachability_status": "REACHED",
       "unexpected_contact_pair_count": 0,
       "unit": "rad",
       "upper": 2.2340211868286133
     },
     {
+      "allowed_workspace_contact_pair_count": 0,
       "case_id": "follower_right:wrist_angle:positive",
+      "collision_policy_status": "PASS",
       "contact_event_count": 0,
       "contact_events": [],
       "contact_pairs": [],
+      "control_direction_status": "PASS",
       "direction": "positive",
       "direction_status": "PASS",
       "end": [
@@ -110217,6 +110453,7 @@
       "limit_margin": 0.08203046560287476,
       "lower": -1.8675020933151245,
       "maximum_non_target_drift": 0.0011206865310668945,
+      "motion_status": "TARGET_REACHED",
       "non_target_drift_gate": 0.03,
       "readback_delta": 2.4476301670074463,
       "repeat": 1,
@@ -110236,15 +110473,19 @@
       "target": 2.1519907212257383,
       "target_error": 0.00023371934890725754,
       "target_error_gate": 0.12304569840431213,
+      "target_reachability_status": "REACHED",
       "unexpected_contact_pair_count": 0,
       "unit": "rad",
       "upper": 2.2340211868286133
     },
     {
+      "allowed_workspace_contact_pair_count": 0,
       "case_id": "follower_right:wrist_rotate:negative",
+      "collision_policy_status": "PASS",
       "contact_event_count": 0,
       "contact_events": [],
       "contact_pairs": [],
+      "control_direction_status": "PASS",
       "direction": "negative",
       "direction_status": "PASS",
       "end": [
@@ -110268,6 +110509,7 @@
       "limit_margin": 0.12566329956054687,
       "lower": -3.141582489013672,
       "maximum_non_target_drift": 0.0062864311039447784,
+      "motion_status": "TARGET_REACHED",
       "non_target_drift_gate": 0.03,
       "readback_delta": -3.015894151411544,
       "repeat": 1,
@@ -110287,15 +110529,19 @@
       "target": -3.015919189453125,
       "target_error": 2.453804016111505e-05,
       "target_error_gate": 0.1884949493408203,
+      "target_reachability_status": "REACHED",
       "unexpected_contact_pair_count": 0,
       "unit": "rad",
       "upper": 3.141582489013672
     },
     {
+      "allowed_workspace_contact_pair_count": 0,
       "case_id": "follower_right:wrist_rotate:positive",
+      "collision_policy_status": "PASS",
       "contact_event_count": 0,
       "contact_events": [],
       "contact_pairs": [],
+      "control_direction_status": "PASS",
       "direction": "positive",
       "direction_status": "PASS",
       "end": [
@@ -110319,6 +110565,7 @@
       "limit_margin": 0.12566329956054687,
       "lower": -3.141582489013672,
       "maximum_non_target_drift": 0.0064927153289318085,
+      "motion_status": "TARGET_REACHED",
       "non_target_drift_gate": 0.03,
       "readback_delta": 3.0158925288100136,
       "repeat": 1,
@@ -110338,12 +110585,25 @@
       "target": 3.015919189453125,
       "target_error": 2.7160644531232236e-05,
       "target_error_gate": 0.1884949493408203,
+      "target_reachability_status": "REACHED",
       "unexpected_contact_pair_count": 0,
       "unit": "rad",
       "upper": 3.141582489013672
     }
   ],
   "collider_modified": false,
+  "contact_policy": {
+    "allowed_classification": "USER_CONFIRMED_ALLOWED_FINGER_TABLE_CONTACT",
+    "allowed_contact_meaning": "physical workcell behavior; collision-policy case remains PASS while target reachability records the allowed contact-limited boundary",
+    "allowed_pair": "supplier-CAD finger link <-> user_confirmed_table",
+    "cross_follower_contact": "FAIL",
+    "generic_robot_environment_contact": "FAIL",
+    "non_adjacent_self_contact": "FAIL",
+    "revision": 2,
+    "superseded_conclusion": "TASK7A_FAIL_SWEPT_FINGER_TABLE_CONTACT",
+    "superseded_policy": "all robot-environment physical contacts were FAIL",
+    "user_confirmation": "2026-07-29"
+  },
   "contact_report_setup": {
     "rigid_body_count": 62,
     "rigid_body_paths": [
@@ -110410,7 +110670,7 @@
       "/World/follower_right/vx300s_right/follower_right_upper_forearm_link",
       "/World/follower_right/vx300s_right/follower_right_wrist_link"
     ],
-    "session_layer_identifier": "anon:0x613e966d01f0:aloha1_task7a_swept_contact_reports.usda",
+    "session_layer_identifier": "anon:0x5f60763a9890:aloha1_task7a_swept_contact_reports.usda",
     "session_only": true
   },
   "coverage_boundary": "authored collision filters and self-collision settings preserved; disabled pairs are not proven geometrically separated",
@@ -110420,9 +110680,9 @@
     {
       "actor0": "/World/environment/worldBody/user_confirmed_table",
       "actor1": "/World/follower_left/vx300s_left/follower_left_left_finger_link",
-      "allowed": false,
+      "allowed": true,
       "case_count": 2,
-      "classification": "ROBOT_ENVIRONMENT_CONTACT",
+      "classification": "USER_CONFIRMED_ALLOWED_FINGER_TABLE_CONTACT",
       "collider0": "/World/environment/worldBody/user_confirmed_table",
       "collider1": "/World/follower_left/vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh",
       "maximum_impulse_norm_n_s": 1.3438866430145184,
@@ -110431,9 +110691,9 @@
     {
       "actor0": "/World/environment/worldBody/user_confirmed_table",
       "actor1": "/World/follower_left/vx300s_left/follower_left_right_finger_link",
-      "allowed": false,
+      "allowed": true,
       "case_count": 2,
-      "classification": "ROBOT_ENVIRONMENT_CONTACT",
+      "classification": "USER_CONFIRMED_ALLOWED_FINGER_TABLE_CONTACT",
       "collider0": "/World/environment/worldBody/user_confirmed_table",
       "collider1": "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh",
       "maximum_impulse_norm_n_s": 1.2497200965881348,
@@ -110453,9 +110713,9 @@
     {
       "actor0": "/World/environment/worldBody/user_confirmed_table",
       "actor1": "/World/follower_right/vx300s_right/follower_right_left_finger_link",
-      "allowed": false,
+      "allowed": true,
       "case_count": 2,
-      "classification": "ROBOT_ENVIRONMENT_CONTACT",
+      "classification": "USER_CONFIRMED_ALLOWED_FINGER_TABLE_CONTACT",
       "collider0": "/World/environment/worldBody/user_confirmed_table",
       "collider1": "/World/follower_right/vx300s_right/follower_right_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh",
       "maximum_impulse_norm_n_s": 1.3443472713547315,
@@ -110464,9 +110724,9 @@
     {
       "actor0": "/World/environment/worldBody/user_confirmed_table",
       "actor1": "/World/follower_right/vx300s_right/follower_right_right_finger_link",
-      "allowed": false,
+      "allowed": true,
       "case_count": 2,
-      "classification": "ROBOT_ENVIRONMENT_CONTACT",
+      "classification": "USER_CONFIRMED_ALLOWED_FINGER_TABLE_CONTACT",
       "collider0": "/World/environment/worldBody/user_confirmed_table",
       "collider1": "/World/follower_right/vx300s_right/follower_right_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh",
       "maximum_impulse_norm_n_s": 1.248957514762914,
@@ -110800,13 +111060,13 @@
     "trajectory_steps": 180
   },
   "schema_version": 1,
-  "scope": "TASK_7A_CURRENT_COLLISION_SEMANTICS",
+  "scope": "TASK_7A_WORKCELL_CONTACT_POLICY_V2",
   "source_stage_modified": false,
   "stage": {
     "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/aloha1_signal_correspondence_workcell.usda",
     "composition": {
       "layer_stack": [
-        "anon:0x613e950592c0",
+        "anon:0x5f6072e31d90",
         "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/aloha1_signal_correspondence_workcell.usda",
         "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/configuration/aloha1_signal_home_targets.usda"
       ],
@@ -110894,25 +111154,27 @@
     "sha256_before": "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf",
     "status": "PASS"
   },
-  "status": "FAIL",
+  "status": "PASS",
   "summary": {
     "case_count": 48,
     "case_count_per_repeat": [
       24,
       24
     ],
+    "contact_limited_case_count": 4,
     "coverage_status": "PASS",
     "determinism": {
       "repeat_count": 2,
       "signatures": [
-        "49a1c42ce683c7cc449deb6e44b7654b2cef5debfaa07dad51952a7226e7525b",
-        "49a1c42ce683c7cc449deb6e44b7654b2cef5debfaa07dad51952a7226e7525b"
+        "5b6ca2a5d2c0b8b07ff57e022bb357fdea5116c243079ecd50ebd3a3e17c09ce",
+        "5b6ca2a5d2c0b8b07ff57e022bb357fdea5116c243079ecd50ebd3a3e17c09ce"
       ],
       "status": "PASS"
     },
     "expected_case_count": 48,
-    "failed_case_count": 4,
-    "status": "FAIL"
+    "failed_case_count": 0,
+    "partial_case_count": 0,
+    "status": "PASS"
   },
   "task_8": "NOT_RUN"
 }

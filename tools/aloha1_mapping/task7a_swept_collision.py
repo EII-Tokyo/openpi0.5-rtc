@@ -121,17 +121,93 @@ def classify_contact_pair(
         classification = "CROSS_FOLLOWER_CONTACT"
         allowed = False
     elif (robot0 is None) != (robot1 is None):
-        classification = "ROBOT_ENVIRONMENT_CONTACT"
-        allowed = False
+        robot_path = actor0 if robot0 is not None else actor1
+        environment_path = actor1 if robot0 is not None else actor0
+        if (
+            environment_path.endswith("/user_confirmed_table")
+            and robot_path.endswith("_finger_link")
+        ):
+            classification = (
+                "USER_CONFIRMED_ALLOWED_FINGER_TABLE_CONTACT"
+            )
+            allowed = True
+        else:
+            classification = "ROBOT_ENVIRONMENT_CONTACT"
+            allowed = False
     else:
         classification = "NON_ROBOT_CONTACT"
         allowed = True
-    return {
+    result = {
         "actor_pair": list(pair),
         "classification": classification,
         "allowed": allowed,
         "robot0": robot0,
         "robot1": robot1,
+    }
+    if classification == "USER_CONFIRMED_ALLOWED_FINGER_TABLE_CONTACT":
+        result["policy_evidence"] = "USER_CONFIRMATION_2026_07_29"
+    return result
+
+
+def classify_sweep_case(
+    *,
+    direction_pass: bool,
+    target_reached: bool,
+    non_target_drift_pass: bool,
+    legal: bool,
+    finite: bool,
+    unexpected_contact_count: int,
+    allowed_workspace_contact_count: int,
+) -> dict[str, str]:
+    """Separate control correctness from contact-limited workcell reach."""
+    if unexpected_contact_count:
+        return {
+            "status": "FAIL",
+            "motion_status": "BLOCKED_BY_FORBIDDEN_CONTACT",
+            "control_direction_status": (
+                "PASS" if direction_pass else "FAIL"
+            ),
+            "collision_policy_status": "FAIL",
+            "target_reachability_status": (
+                "BLOCKED_BY_FORBIDDEN_CONTACT"
+            ),
+        }
+    if not (direction_pass and non_target_drift_pass and legal and finite):
+        return {
+            "status": "FAIL",
+            "motion_status": "CONTROL_OR_READBACK_GATE_FAILED",
+            "control_direction_status": (
+                "PASS" if direction_pass else "FAIL"
+            ),
+            "collision_policy_status": "PASS",
+            "target_reachability_status": (
+                "NOT_EVALUATED_CONTROL_OR_READBACK_FAILURE"
+            ),
+        }
+    if target_reached:
+        return {
+            "status": "PASS",
+            "motion_status": "TARGET_REACHED",
+            "control_direction_status": "PASS",
+            "collision_policy_status": "PASS",
+            "target_reachability_status": "REACHED",
+        }
+    if allowed_workspace_contact_count:
+        return {
+            "status": "PASS",
+            "motion_status": "CONTACT_LIMITED_WORKCELL_REACHABILITY",
+            "control_direction_status": "PASS",
+            "collision_policy_status": "PASS",
+            "target_reachability_status": (
+                "CONTACT_LIMITED_BY_ALLOWED_WORKCELL_CONTACT"
+            ),
+        }
+    return {
+        "status": "FAIL",
+        "motion_status": "UNEXPLAINED_TARGET_SHORTFALL",
+        "control_direction_status": "PASS",
+        "collision_policy_status": "PASS",
+        "target_reachability_status": "UNEXPLAINED_SHORTFALL",
     }
 
 
@@ -273,8 +349,13 @@ def summarize_sweep_cases(
         len(repeat_signatures) == repeat_count
         and len(set(repeat_signatures)) == 1
     )
-    all_pass = all(item.get("status") == "PASS" for item in cases)
-    status = "PASS" if coverage and deterministic and all_pass else "FAIL"
+    statuses = [item.get("status") for item in cases]
+    if not coverage or not deterministic or "FAIL" in statuses:
+        status = "FAIL"
+    elif "PARTIAL" in statuses:
+        status = "PARTIAL"
+    else:
+        status = "PASS"
     return {
         "status": status,
         "case_count": len(cases),
@@ -282,7 +363,15 @@ def summarize_sweep_cases(
         "case_count_per_repeat": count_per_repeat,
         "coverage_status": "PASS" if coverage else "FAIL",
         "failed_case_count": sum(
-            item.get("status") != "PASS" for item in cases
+            item.get("status") == "FAIL" for item in cases
+        ),
+        "partial_case_count": sum(
+            item.get("status") == "PARTIAL" for item in cases
+        ),
+        "contact_limited_case_count": sum(
+            item.get("motion_status")
+            == "CONTACT_LIMITED_WORKCELL_REACHABILITY"
+            for item in cases
         ),
         "determinism": {
             "status": "PASS" if deterministic else "FAIL",

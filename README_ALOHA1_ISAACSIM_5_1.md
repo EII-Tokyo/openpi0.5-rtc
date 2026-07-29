@@ -9,8 +9,8 @@ sim-to-real dynamics model and it is not yet accepted for bottle insertion.
 
 | Gate | Status | Evidence |
 | --- | --- | --- |
-| Kinematic and signal-correspondence baseline | **FAIL** | both followers pass 32/32 one-joint cases and small up/down, but the completed deterministic sweep finds supplier-CAD finger/table contact in both positive-shoulder trajectories |
-| Task 7A structure/control signal | **FAIL** | mapping, drive/mimic structure, first-frame/home, both one-joint suites and up/down PASS; 48/48 sweep coverage is deterministic but 4 records (2 unique trajectories × 2 repeats) FAIL, and literal official PhysicsRules/RobotRules remain FAIL |
+| Kinematic and signal-correspondence baseline | **PARTIAL** | both followers pass 32/32 one-joint cases and small up/down; the deterministic workcell collision-policy sweep is 48/48 PASS, with four separately recorded allowed-contact reachability boundaries |
+| Task 7A structure/control signal | **PARTIAL** | mapping, drive/mimic structure, first-frame/home, both one-joint suites and up/down PASS; allowed finger/table contact is a workcell reachability boundary, while literal official PhysicsRules/RobotRules remain FAIL |
 | Task 7B full physical task | **NOT_RUN** | bottle hold, calibrated friction/force and full SimReady promotion are outside the current priority |
 | Current signal screenshots | **PASS (visual 24/24 PASS)** | 12 fresh raw + 12 annotated images match Stage SHA-256 `d8182a6c…c788cf`; the controlled OmniHydra screenshot process has zero `protoPath` errors |
 | Hydra protoPath controlled diagnosis | **PASS / `FSD_7_5_1_PRIMARY`** | A=29 errors, B OmniHydra=0, B repeat deterministic, D materialization=0; default delegate restored and final assets unchanged |
@@ -82,10 +82,10 @@ Fresh Isaac Sim 5.1 runtime results:
   `right_finger` mimic readback;
 - small up/down: `PASS`, three fresh resets; shoulder `-0.08 rad` increases
   end-effector Z by approximately `0.0116 m` and returns to home;
-- swept collision: `FAIL`; 48/48 cases were executed across two repeats, with
-  two unique failures reproduced exactly (`follower_left:shoulder:positive`
-  and `follower_right:shoulder:positive`);
-- Task 7A: `FAIL`;
+- swept collision policy: `PASS`; 48/48 cases were executed across two
+  repeats with 0 forbidden contacts; four cases separately record
+  `CONTACT_LIMITED_BY_ALLOWED_WORKCELL_CONTACT`;
+- Task 7A: `PARTIAL`;
 - Task 7B: `NOT_RUN`;
 - Task 8: `NOT_RUN`.
 
@@ -110,23 +110,29 @@ the two literal NVIDIA errors remain visible as a version-specific rule/schema
 boundary.
 
 The swept test applied contact reporting only in an anonymous session layer,
-preserved self-collision `false`, and made no source/default/final edits. It
-completed all 48 records with identical repeat signatures
-`49a1c42ce683c7cc449deb6e44b7654b2cef5debfaa07dad51952a7226e7525b`.
-For both followers, the positive shoulder target was
-`1.194503376 rad`, but the readback stopped near `0.288 rad` when both
-supplier-CAD finger colliders physically contacted
-`user_confirmed_table`. The same two failures occurred in each repeat.
-A separate positive-separation, zero-impulse pair was classified as
-`CONTACT_ENVELOPE_ONLY`, not physical penetration. Because the physical
-finger/table contacts are real and repeatable, Task 7A is `FAIL`.
-Disabled self-collision pairs are not proven geometrically separated.
+preserved self-collision `false`, and made no source/default/final edits. The
+original v1 policy incorrectly treated every physical robot/environment
+contact as forbidden and therefore produced
+`TASK7A_FAIL_SWEPT_FINGER_TABLE_CONTACT`. The user confirmed on 2026-07-29
+that supplier-CAD finger contact with `user_confirmed_table` is allowed
+physical workcell behavior. That v1 conclusion is superseded.
 
-The final fresh Isaac run reproduced the aggregate `FAIL` while mapping,
-both 32/32 one-joint suites, first-frame/home, drive/mimic structure and
-small up/down remained `PASS`. Focused tests are `19 passed`; the complete
-`tests/aloha1_mapping` suite is `350 passed`; Ruff and `py_compile` pass.
-The frozen Stage hash remains unchanged.
+The v2 policy permits only the exact evidence-backed finger/table pair.
+Generic robot/environment contact, non-adjacent self-contact and
+cross-follower contact remain FAIL. All 48 records reproduced with identical
+repeat signatures
+`5b6ca2a5d2c0b8b07ff57e022bb357fdea5116c243079ecd50ebd3a3e17c09ce`:
+48 PASS and 0 FAIL. The two positive shoulder trajectories, repeated twice,
+carry a separate
+`target_reachability_status = CONTACT_LIMITED_BY_ALLOWED_WORKCELL_CONTACT`.
+They are not control-direction, joint-map or collider failures. A separate
+positive-separation, zero-impulse pair remains `CONTACT_ENVELOPE_ONLY`.
+
+Task 7A is therefore `PARTIAL`, principally because official
+PhysicsRules/RobotRules findings remain unsuppressed and workcell-wide
+reachability is not a robot-local joint-range claim. Disabled self-collision
+pairs are not proven geometrically separated. The frozen Stage hash remains
+unchanged.
 
 Screenshot evidence was recaptured after the home layer changed the Stage
 hash and again after the controlled Hydra diagnosis. The final 12 raw and 12
@@ -163,10 +169,11 @@ authoritative. Hydra machine evidence is in:
 The superseded Stage-hash-mismatched screenshot batch is preserved under
 `superseded_stage_d9318d1/`.
 
-This result must be called `TASK7A_FAIL_SWEPT_FINGER_TABLE_CONTACT`. The
-signal sub-gates remain PASS, but the aggregate cannot be called PARTIAL or
-PASS. It is not a calibrated physical digital twin and it is not evidence of
-bottle grasp, leader/camera mapping, ROS integration, or insertion.
+This result is `TASK7A_PARTIAL_USER_CONFIRMED_WORKCELL_CONTACT_BOUNDARY`.
+The superseded v1 FAIL remains in Git history and in the v2 policy manifest;
+it must not be cited as the current conclusion. The model is not a calibrated
+physical digital twin and it is not evidence of leader/camera mapping, ROS
+integration, or insertion.
 
 ## Version boundary
 

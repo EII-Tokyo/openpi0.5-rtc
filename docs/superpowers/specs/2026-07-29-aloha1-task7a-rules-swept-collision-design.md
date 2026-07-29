@@ -67,10 +67,12 @@ inside each finite legal limit. Each case records:
 - complete per-frame curve rows and a deterministic signature.
 
 Allowed contacts are limited to explicitly classified same-body or directly
-joint-adjacent pairs. Cross-follower, non-adjacent self-contact, and
-unclassified robot-environment contact fail the case. The test records the
-authored articulation self-collision readback so a disabled setting remains an
-explicit coverage boundary.
+joint-adjacent pairs plus the user-confirmed supplier-CAD finger contact with
+`user_confirmed_table`. That exact workcell pair is a contact-limited
+reachability boundary, not a control failure. Cross-follower, non-adjacent
+self-contact, and all other unclassified robot-environment contacts fail the
+case. The test records the authored articulation self-collision readback so a
+disabled setting remains an explicit coverage boundary.
 
 ## Error Handling
 
