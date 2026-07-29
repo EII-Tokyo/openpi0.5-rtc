@@ -3,6 +3,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
+from tools.aloha1_mapping.aloha_kinematics_reference import fk_space
 from tools.aloha1_mapping.grasp_pose_geometry import derive_gripper_pose
 from tools.aloha1_mapping.grasp_pose_geometry import evaluate_pre_ik_grasp
 
@@ -34,20 +35,51 @@ def test_grasp_pose_maps_contact_midpoint_and_radial_line() -> None:
 
 
 def test_real_supplier_cad_sample_preserves_handedness() -> None:
-    left_gripper = np.asarray(
+    left_world_at_lift_onset = np.asarray(
         [0.005540657957598394, -0.1298559135889289, -0.0012842316550211036],
         dtype=np.float64,
     )
-    right_gripper = np.asarray(
+    right_world_at_lift_onset = np.asarray(
         [0.015102521266211703, -0.2018600770598328, 0.022714400640992588],
         dtype=np.float64,
     )
-    target = np.asarray([0.010321589611905047, -0.1658579953243808, 0.033], dtype=np.float64)
+    lift_onset_q = np.asarray(
+        [
+            -0.16720470786094666,
+            0.5324101448059082,
+            -0.017540352419018745,
+            -0.3624092638492584,
+            0.9591664671897888,
+            -0.11042828112840652,
+        ],
+        dtype=np.float64,
+    )
+    world_from_gripper_at_lift_onset = fk_space(lift_onset_q)
+    world_from_gripper_at_lift_onset[:3, 3] += np.asarray(
+        [-0.4695, -0.019, 0.02],
+        dtype=np.float64,
+    )
+    gripper_from_world = np.linalg.inv(world_from_gripper_at_lift_onset)
+    left_gripper = _point(gripper_from_world, left_world_at_lift_onset)
+    right_gripper = _point(gripper_from_world, right_world_at_lift_onset)
+    target = np.asarray(
+        [0.010321589611905047, -0.1658579953243808, -0.05798892351978271],
+        dtype=np.float64,
+    )
+
+    assert left_gripper == pytest.approx(
+        [0.05175075, 0.03813715, 0.00505137],
+        abs=1e-8,
+    )
+    assert right_gripper == pytest.approx(
+        [0.05175077, -0.03836090, 0.00494875],
+        abs=1e-8,
+    )
 
     world_from_gripper = derive_gripper_pose(
         left_contact_gripper_m=left_gripper,
         right_contact_gripper_m=right_gripper,
-        gripper_approach_axis=[0.0, 0.0, -1.0],
+        gripper_approach_axis=[1.0, 0.0, 0.0],
         bottle_axis_world=[0.9912975457874654, 0.13164032708766643, 0.0],
         grasp_point_world_m=target,
         table_up_world=[0.0, 0.0, 1.0],
@@ -57,8 +89,10 @@ def test_real_supplier_cad_sample_preserves_handedness() -> None:
     right_world = _point(world_from_gripper, right_gripper)
     assert (left_world + right_world) / 2.0 == pytest.approx(target)
     assert np.linalg.det(world_from_gripper[:3, :3]) == pytest.approx(1.0)
-    assert np.linalg.norm(right_world - left_world) == pytest.approx(
-        np.linalg.norm(right_gripper - left_gripper)
+    assert np.linalg.norm(right_world - left_world) == pytest.approx(np.linalg.norm(right_gripper - left_gripper))
+    assert world_from_gripper[:3, :3] @ [1.0, 0.0, 0.0] == pytest.approx(
+        [0.0, 0.0, -1.0],
+        abs=2e-3,
     )
 
 
