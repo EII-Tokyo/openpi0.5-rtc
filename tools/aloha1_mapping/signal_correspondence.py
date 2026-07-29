@@ -76,6 +76,31 @@ RUNTIME_SPECS = {
 }
 
 
+def classify_task7a_status(
+    *,
+    mapping_status: str,
+    structure_status: str,
+    drive_mimic_status: str,
+    small_up_down_status: str,
+    swept_collision_status: str,
+    official_task7a_status: str,
+) -> str:
+    """Combine Task 7A gates without suppressing official or collision FAIL."""
+    direct_gates = (
+        mapping_status,
+        structure_status,
+        drive_mimic_status,
+        small_up_down_status,
+        swept_collision_status,
+        official_task7a_status,
+    )
+    if "FAIL" in direct_gates:
+        return "FAIL"
+    if "PARTIAL" in direct_gates or "NOT_RUN" in direct_gates:
+        return "PARTIAL"
+    return "PASS"
+
+
 def _sha256(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as stream:

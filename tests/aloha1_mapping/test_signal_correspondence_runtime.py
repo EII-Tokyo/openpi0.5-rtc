@@ -7,6 +7,7 @@ from tools.aloha1_mapping.signal_correspondence import build_fixed_oblique_camer
 from tools.aloha1_mapping.signal_correspondence import build_signal_mapping_plan
 from tools.aloha1_mapping.signal_correspondence import build_small_up_down_targets
 from tools.aloha1_mapping.signal_correspondence import canonical_dof_name
+from tools.aloha1_mapping.signal_correspondence import classify_task7a_status
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
@@ -83,3 +84,37 @@ def test_fixed_oblique_camera_is_derived_from_robot_geometry() -> None:
     assert left["position_world_m"][0] < left["target_world_m"][0]
     assert right["position_world_m"][0] > right["target_world_m"][0]
     assert left["position_world_m"] != right["position_world_m"]
+
+
+def test_task7a_status_requires_swept_collision_and_preserves_rules() -> None:
+    common = {
+        "mapping_status": "PASS",
+        "structure_status": "PASS",
+        "drive_mimic_status": "PASS",
+        "small_up_down_status": "PASS",
+    }
+
+    assert (
+        classify_task7a_status(
+            **common,
+            swept_collision_status="FAIL",
+            official_task7a_status="PARTIAL",
+        )
+        == "FAIL"
+    )
+    assert (
+        classify_task7a_status(
+            **common,
+            swept_collision_status="PASS",
+            official_task7a_status="PARTIAL",
+        )
+        == "PARTIAL"
+    )
+    assert (
+        classify_task7a_status(
+            **common,
+            swept_collision_status="PASS",
+            official_task7a_status="PASS",
+        )
+        == "PASS"
+    )

@@ -7,7 +7,8 @@
     "follower_right_one_joint": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_follower_right_one_joint_validation.json",
     "joint_mapping": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_joint_mapping_validation.json",
     "official_rules": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_signal_correspondence_official_rules.json",
-    "structure": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_signal_task7a_structure_validation.json"
+    "structure": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_signal_task7a_structure_validation.json",
+    "swept_collision": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7a_swept_collision.json"
   },
   "runtime": {
     "isaac_sim": "5.1.0.0",
@@ -22,9 +23,9 @@
     "sha256_after": "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf",
     "sha256_before": "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf"
   },
-  "status": "PARTIAL",
+  "status": "FAIL",
   "task_7a": {
-    "collision_swept_path": "PARTIAL",
+    "collision_swept_path": "FAIL",
     "drive_mimic_structure": "PASS",
     "follower_left_one_joint": "PASS",
     "follower_right_one_joint": "PASS",
@@ -32,9 +33,10 @@
     "joint_mapping": "PASS",
     "official_rules": "PARTIAL",
     "official_rules_unsuppressed_status": "FAIL",
-    "reason_if_partial": "swept-link contact monitoring remains incomplete and NVIDIA official PhysicsRules/RobotRules findings remain unsuppressed; runtime signal gates are separately PASS",
+    "reason_if_fail": "deterministic positive-shoulder sweeps on both followers produce physical CAD-finger/table contact before the authored upper joint target",
+    "reason_if_partial": "NVIDIA official PhysicsRules/RobotRules findings remain unsuppressed; runtime signal gates are separately PASS",
     "small_up_down": "PASS",
-    "status": "PARTIAL",
+    "status": "FAIL",
     "structure_and_runtime_order": "PASS"
   },
   "task_7b": {

@@ -22,6 +22,7 @@ from tools.aloha1_mapping.signal_correspondence import RUNTIME_SPECS
 from tools.aloha1_mapping.signal_correspondence import build_signal_mapping_plan
 from tools.aloha1_mapping.signal_correspondence import build_small_up_down_targets
 from tools.aloha1_mapping.signal_correspondence import canonical_dof_name
+from tools.aloha1_mapping.signal_correspondence import classify_task7a_status
 
 ROOT = Path(__file__).resolve().parents[1]
 STAGE = (
@@ -37,6 +38,9 @@ UP_DOWN_STEPS = 60
 UP_DOWN_REPEATS = 3
 ONE_JOINT_REPEATS = 2
 OFFICIAL_RULES_REPORT = REPORT_ROOT / "aloha1_signal_correspondence_official_rules.json"
+SWEPT_COLLISION_REPORT = (
+    REPORT_ROOT / "aloha1_task7a_swept_collision.json"
+)
 
 
 def _sha256(path: Path) -> str:
@@ -697,15 +701,20 @@ def main() -> int:
     )
 
     official_rules = json.loads(OFFICIAL_RULES_REPORT.resolve(strict=True).read_text(encoding="utf-8"))
-    task7a_status = (
-        "FAIL"
-        if mapping["status"] != "PASS"
-        or structure["status"] != "PASS"
-        or drive_mimic["status"] != "PASS"
-        or official_rules["task7a_applicable_status"] == "FAIL"
-        else "PARTIAL"
-        if up_down["collision_gate"]["status"] != "PASS" or official_rules["task7a_applicable_status"] == "PARTIAL"
-        else "PASS"
+    swept_collision = json.loads(
+        SWEPT_COLLISION_REPORT.resolve(strict=True).read_text(
+            encoding="utf-8"
+        )
+    )
+    if swept_collision["stage"]["sha256_after"] != stage_hash_after:
+        raise RuntimeError("swept-collision report Stage hash mismatch")
+    task7a_status = classify_task7a_status(
+        mapping_status=mapping["status"],
+        structure_status=structure["status"],
+        drive_mimic_status=drive_mimic["status"],
+        small_up_down_status=up_down["status"],
+        swept_collision_status=swept_collision["status"],
+        official_task7a_status=official_rules["task7a_applicable_status"],
     )
     summary = {
         "schema_version": 1,
@@ -723,11 +732,17 @@ def main() -> int:
             "initial_target_readback_first_frame": structure["status"],
             "official_rules": official_rules["task7a_applicable_status"],
             "official_rules_unsuppressed_status": official_rules["official_status"],
-            "collision_swept_path": up_down["collision_gate"]["status"],
+            "collision_swept_path": swept_collision["status"],
             "reason_if_partial": (
-                "swept-link contact monitoring remains incomplete and "
                 "NVIDIA official PhysicsRules/RobotRules findings remain "
                 "unsuppressed; runtime signal gates are separately PASS"
+            ),
+            "reason_if_fail": (
+                "deterministic positive-shoulder sweeps on both followers "
+                "produce physical CAD-finger/table contact before the "
+                "authored upper joint target"
+                if swept_collision["status"] == "FAIL"
+                else None
             ),
         },
         "task_7b": {
@@ -757,6 +772,7 @@ def main() -> int:
             "digital_up_down": str(up_down_json.resolve()),
             "structure": str(structure_path.resolve()),
             "official_rules": str(OFFICIAL_RULES_REPORT.resolve()),
+            "swept_collision": str(SWEPT_COLLISION_REPORT.resolve()),
         },
     }
     summary_path = REPORT_ROOT / "aloha1_task7a_7b_validation_summary.json"
