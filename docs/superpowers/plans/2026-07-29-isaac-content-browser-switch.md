@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Remove both category-based Asset Browsers from the active Isaac Sim 5.1 runtime and menus while retaining and verifying the official Content Browser across clean launches.
+**Goal:** Remove both category-based Asset Browsers from the active Isaac Sim 5.1 startup dependency graph while retaining their on-demand menus and verifying the official Content Browser as the default.
 
-**Architecture:** Patch the vendor-owned TOML inputs that cause the Isaac and NVIDIA Assets browsers to load: the Base/Full App dependency graphs and both lazy menu triggers. Preserve timestamped backups and the extension source trees, then validate the static dependency graph and fresh Kit sessions with bounded log probes.
+**Architecture:** Patch the Base/Full App dependency graphs that cause the Isaac and NVIDIA Assets browsers to load automatically. Preserve timestamped backups, extension source trees, and both lazy menu triggers, then validate the static dependency graph and fresh Kit sessions with bounded log probes.
 
 **Tech Stack:** Isaac Sim 5.1 Kit configuration, TOML, Python 3.11 `tomllib`, Kit startup logs, POSIX process control.
 
@@ -309,13 +309,14 @@ Verify the second PID is alive and corresponds to the Full app command. Leave th
 
 Report both backup paths, both Kit log paths, both evidence artifact paths, startup times, warning counts, and the final PID. Do not delete backups or global Kit/shader caches.
 
-### Task 5: Remove the NVIDIA Assets Browser Exposed by the Persistence Check
+### Task 5: Remove NVIDIA Assets from Automatic Startup
 
 The second repaired GUI was intentionally left running. At 96 seconds, opening
 `Window/Browsers/Assets` instantiated `omni.kit.browser.asset`, queued eight
 remote S3 roots, and produced 17,892 thumbnail mismatch warnings. This is the
-category panel shown in the original screenshot, so it must be removed as part
-of the switch to Content Browser.
+expected cost of explicitly opening that category browser, not an automatic
+startup defect. Its direct Full App dependency is still unnecessary because
+Content Browser is the selected default.
 
 **Files:**
 - Modify: `/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/apps/isaacsim.exp.full.kit`
@@ -325,27 +326,38 @@ of the switch to Content Browser.
 
 - [ ] **Step 1: Run a RED probe and stop only the authorized GUI**
 
-Assert that `omni.kit.browser.asset` is absent from the Full App dependencies
-and that its manifest has no `trigger`. Require this probe to fail, then send
-`SIGTERM` only to the verified Full App PID.
+Assert that `omni.kit.browser.asset` is absent from the Full App dependencies.
+Require this probe to fail, then send `SIGTERM` only to the verified Full App
+PID.
 
-- [ ] **Step 2: Back up and apply the minimal patch**
+- [ ] **Step 2: Back up and apply the startup-only patch**
 
 Create and byte-verify both timestamped backups. Remove only
-`"omni.kit.browser.asset" = {}` from `isaacsim.exp.full.kit` and remove only
-the `Window/Browsers/Assets` three-line trigger block from the extension
-manifest.
+`"omni.kit.browser.asset" = {}` from `isaacsim.exp.full.kit`.
 
 - [ ] **Step 3: Run the GREEN probe**
 
-Parse all four edited TOML files. Require the official Content Browser
-dependency, require all four Asset Browser dependencies to be absent, and
-require both Asset Browser manifests to have no lazy menu trigger.
+Parse all four TOML files. Require the official Content Browser dependency,
+require all four Asset Browser startup dependencies to be absent, and require
+both Asset Browser manifests to retain their original lazy menu triggers.
 
-- [ ] **Step 4: Start the final GUI and observe beyond the prior trigger time**
+- [ ] **Step 4: Start the final GUI and verify the pre-interaction state**
 
-Start the Full App, require `app ready` and `Isaac Sim Full App is loaded`, and
-leave it running for more than 100 seconds. Require one
+Start the Full App and require `app ready` and
+`Isaac Sim Full App is loaded`. Before manual browser interaction, require one
 `isaacsim.gui.content_browser` startup and zero matches for both Asset Browser
-startups, both cache files, remote-folder queueing, and thumbnail mismatch
-warnings. Leave this final repaired GUI running for the user.
+startups, both Asset Browser cache files, and Asset remote-folder queueing.
+Leave this final repaired GUI running for the user.
+
+### Task 6: Restore Both On-Demand Menus Per User Direction
+
+The user clarified that the remote traversal observed during verification was
+caused by their manual menu action and explicitly requested that no browser
+menus be removed.
+
+- [ ] Restore `Window/Browsers/Isaac` and `Window/Browsers/Assets` trigger
+  blocks from their verified backups.
+- [ ] Require both manifests to be byte-identical to their pre-edit backups.
+- [ ] Restart Isaac Sim and verify Content Browser starts once, neither Asset
+  Browser starts before manual interaction, and both menu triggers remain in
+  the parsed TOML.
