@@ -1,0 +1,362 @@
+{
+  "attempt_history": [
+    {
+      "attempt_id": "attempt_5",
+      "status": "REJECTED_BLANK_FSD_RENDER"
+    },
+    {
+      "attempt_id": "attempt_6",
+      "status": "REJECTED_BLANK_CAMERA_SENSOR_RENDER"
+    },
+    {
+      "attempt_id": "attempt_7",
+      "status": "REJECTED_VIEWPORT_STREAM_TURNED_GREY"
+    },
+    {
+      "attempt_id": "attempt_8",
+      "status": "REJECTED_BLANK_REPLICATOR_RENDER"
+    },
+    {
+      "attempt_id": "attempt_9",
+      "status": "REJECTED_GREY_CUSTOM_CAMERA"
+    },
+    {
+      "attempt_id": "attempt_10",
+      "status": "REJECTED_CAMERA_POSE_NOT_APPLIED"
+    },
+    {
+      "attempt_id": "attempt_11",
+      "status": "REJECTED_WRONG_FRAMING_AND_TABLE_OCCLUSION"
+    },
+    {
+      "attempt_id": "attempt_12",
+      "status": "REJECTED_BOTTLE_CROPPED_AND_CLOSEUP_OCCLUDED"
+    },
+    {
+      "attempt_id": "attempt_13",
+      "status": "REJECTED_CLOSEUP_OCCLUDED"
+    },
+    {
+      "attempt_id": "attempt_14",
+      "status": "REJECTED_SECOND_CAMERA_GREY"
+    },
+    {
+      "attempt_id": "attempt_15",
+      "status": "REJECTED_DEGENERATE_LOOK_AT_ORIENTATION"
+    },
+    {
+      "attempt_id": "attempt_16",
+      "status": "PASS_VISUAL_CAPTURE_PHYSICAL_FAIL"
+    }
+  ],
+  "attempt_id": "attempt_16",
+  "candidate_manifest_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/video_candidates/attempt_16/candidate_manifest.json",
+  "candidate_manifest_sha256": "ff7dae8d78d7466be54f9268eecd343c21963e9dff879865df0c61ffbed67089",
+  "decisions_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/video_candidates/attempt_16/visual_review_decisions.json",
+  "decisions_sha256": "fbdf32ef53e24e82fdd9f33d39166e52a1994cfb719920b6fd2f556ca27cdd8a",
+  "machine_conclusion": "HORIZONTAL_PICKUP_NOT_VERIFIED",
+  "physical_trial_status": "FAIL",
+  "promotion_status": "PROMOTED_VISUAL_EVIDENCE_PHYSICAL_FAIL",
+  "review_method": "Codex vision model inspected phase boundaries and uniform samples at intervals no greater than 0.5 seconds.",
+  "reviewed_by": "Codex visual model",
+  "reviewed_contact_sheets": [
+    "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/video_candidates/attempt_16/visual_review_encoded/overview_raw_review_sheet.png",
+    "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/video_candidates/attempt_16/visual_review_encoded/overview_annotated_review_sheet.png",
+    "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/video_candidates/attempt_16/visual_review_encoded/gripper_closeup_raw_review_sheet.png",
+    "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/video_candidates/attempt_16/visual_review_encoded/gripper_closeup_annotated_review_sheet.png"
+  ],
+  "schema_version": 1,
+  "scope": "VISUAL_CAPTURE_VALIDATION_ONLY; machine physics result unchanged",
+  "status": "PASS",
+  "videos": [
+    {
+      "annotated_candidate_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/video_candidates/attempt_16/overview_annotated_candidate.mp4",
+      "annotated_candidate_sha256": "895b98a72487a163dcac1cc2d38aecab9c90aa7384e4d94e31f29e8b5db97a96",
+      "annotated_resolution": [
+        960,
+        636
+      ],
+      "attempt_id": "attempt_16",
+      "camera_world_matrix": [
+        [
+          0.6871998125156725,
+          -0.3594606915303923,
+          0.6313037532938613,
+          1.6204107921833482
+        ],
+        [
+          0.7264684560794253,
+          0.3400303205594136,
+          -0.5971791719591686,
+          -1.8424289973567165
+        ],
+        [
+          2.0517117116369832e-08,
+          0.8690036779811432,
+          0.49480562613539975,
+          1.5110055324286558
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "duration_s": 4.8,
+      "encoder_command": {
+        "annotated": "ffmpeg -hide_banner -loglevel info -y -framerate 60 -start_number 0 -i /home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/video_candidates/attempt_16/annotated_frames/overview/%06d.png -frames:v 288 -an -c:v libx264 -preset slow -crf 18 -pix_fmt yuv420p -movflags +faststart /home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/video_candidates/attempt_16/overview_annotated_candidate.mp4",
+        "raw": "ffmpeg -hide_banner -loglevel info -y -framerate 60 -start_number 0 -i /home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/smoke/attempt_16/trial_000/frames/overview/%06d.png -frames:v 288 -an -c:v libx264 -preset slow -crf 18 -pix_fmt yuv420p -movflags +faststart /home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/video_candidates/attempt_16/overview_raw_candidate.mp4"
+      },
+      "encoder_name": "ffmpeg/libx264",
+      "encoder_version": "ffmpeg version 6.1.1-3ubuntu5+esm10 Copyright (c) 2000-2023 the FFmpeg developers",
+      "first_physics_frame": 0,
+      "fps": 60,
+      "frame_count": 288,
+      "last_physics_frame": 287,
+      "machine_failure_mode": "gripper_axis_correspondence_failed",
+      "machine_status": "FAIL",
+      "missing_physics_frames": [],
+      "phase_frame_ranges": {
+        "bilateral_contact": [
+          151,
+          165
+        ],
+        "closing_preload": [
+          152,
+          164
+        ],
+        "hold_end": [
+          168,
+          287
+        ],
+        "open_pregrasp": [
+          122,
+          131
+        ],
+        "release_dynamic": [
+          1,
+          1
+        ],
+        "setup_kinematic": [
+          0,
+          0
+        ],
+        "support_clear": [
+          167,
+          167
+        ],
+        "support_settle": [
+          2,
+          121
+        ],
+        "vertical_descent": [
+          132,
+          150
+        ],
+        "vertical_lift": [
+          166,
+          166
+        ]
+      },
+      "promotion_status": "PROMOTED_VISUAL_EVIDENCE_PHYSICAL_FAIL",
+      "raw_candidate_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/video_candidates/attempt_16/overview_raw_candidate.mp4",
+      "raw_candidate_sha256": "e9d573c7d13862e7dc6ab8df388a597e30263e5a6c4b3fe0e8f8f3cf05f33a9d",
+      "resolution": [
+        960,
+        540
+      ],
+      "retake_reason": null,
+      "reviewed_sample_frames": [
+        0,
+        1,
+        2,
+        30,
+        60,
+        90,
+        120,
+        121,
+        122,
+        131,
+        132,
+        150,
+        151,
+        152,
+        164,
+        165,
+        166,
+        167,
+        168,
+        180,
+        210,
+        240,
+        270,
+        287
+      ],
+      "runtime_trial_signature": "4e740e1863c3432b150c193920515bfc7ba6fd1f27316d8c08d97ef201dc59c1",
+      "source_frame_manifest_sha256": "f26e8e69895da31368b9aecc23d53d96044ec29e22459010cdc40663999c4841",
+      "verified_annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/video_verified/attempt_16_overview_annotated_visual_evidence.mp4",
+      "verified_annotated_sha256": "895b98a72487a163dcac1cc2d38aecab9c90aa7384e4d94e31f29e8b5db97a96",
+      "verified_raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/video_verified/attempt_16_overview_raw_visual_evidence.mp4",
+      "verified_raw_sha256": "e9d573c7d13862e7dc6ab8df388a597e30263e5a6c4b3fe0e8f8f3cf05f33a9d",
+      "view_name": "overview",
+      "vision_review_status": "PASS",
+      "visual_review": {
+        "annotation_obscures_geometry": false,
+        "bottle_never_cropped": true,
+        "complete_sequence_visible": true,
+        "frozen_or_duplicated_stream_detected": false,
+        "lift_failure_visually_consistent_with_machine_data": true,
+        "notes": "The overview exposes the table, follower-left, both colored fingers, the complete Bottle500 body, vertical descent, closure, and the lack of support clearance. The uppermost arm segment is near the top boundary but the commanded grasp motion remains visible throughout.",
+        "physical_scope_label_correct": true,
+        "robot_table_and_bottle_visible": true,
+        "settle_open_descent_contact_and_hold_distinguishable": true
+      }
+    },
+    {
+      "annotated_candidate_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/video_candidates/attempt_16/gripper_closeup_annotated_candidate.mp4",
+      "annotated_candidate_sha256": "c72f54e503bfbae418c1cbced8906f0e51240f6c35551c1695a6e682d9c90765",
+      "annotated_resolution": [
+        960,
+        636
+      ],
+      "attempt_id": "attempt_16",
+      "camera_world_matrix": [
+        [
+          0.6871998125156725,
+          -0.3594606915303923,
+          0.6313037532938613,
+          0.9353215896119051
+        ],
+        [
+          0.7264684560794253,
+          0.3400303205594136,
+          -0.5971791719591686,
+          -1.0408579953243808
+        ],
+        [
+          2.0517117116369832e-08,
+          0.8690036779811432,
+          0.49480562613539975,
+          0.6670110764802173
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "duration_s": 4.8,
+      "encoder_command": {
+        "annotated": "ffmpeg -hide_banner -loglevel info -y -framerate 60 -start_number 0 -i /home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/video_candidates/attempt_16/annotated_frames/gripper_closeup/%06d.png -frames:v 288 -an -c:v libx264 -preset slow -crf 18 -pix_fmt yuv420p -movflags +faststart /home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/video_candidates/attempt_16/gripper_closeup_annotated_candidate.mp4",
+        "raw": "ffmpeg -hide_banner -loglevel info -y -framerate 60 -start_number 0 -i /home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/smoke/attempt_16/trial_000/frames/gripper_closeup/%06d.png -frames:v 288 -an -c:v libx264 -preset slow -crf 18 -pix_fmt yuv420p -movflags +faststart /home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/video_candidates/attempt_16/gripper_closeup_raw_candidate.mp4"
+      },
+      "encoder_name": "ffmpeg/libx264",
+      "encoder_version": "ffmpeg version 6.1.1-3ubuntu5+esm10 Copyright (c) 2000-2023 the FFmpeg developers",
+      "first_physics_frame": 0,
+      "fps": 60,
+      "frame_count": 288,
+      "last_physics_frame": 287,
+      "machine_failure_mode": "gripper_axis_correspondence_failed",
+      "machine_status": "FAIL",
+      "missing_physics_frames": [],
+      "phase_frame_ranges": {
+        "bilateral_contact": [
+          151,
+          165
+        ],
+        "closing_preload": [
+          152,
+          164
+        ],
+        "hold_end": [
+          168,
+          287
+        ],
+        "open_pregrasp": [
+          122,
+          131
+        ],
+        "release_dynamic": [
+          1,
+          1
+        ],
+        "setup_kinematic": [
+          0,
+          0
+        ],
+        "support_clear": [
+          167,
+          167
+        ],
+        "support_settle": [
+          2,
+          121
+        ],
+        "vertical_descent": [
+          132,
+          150
+        ],
+        "vertical_lift": [
+          166,
+          166
+        ]
+      },
+      "promotion_status": "PROMOTED_VISUAL_EVIDENCE_PHYSICAL_FAIL",
+      "raw_candidate_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/video_candidates/attempt_16/gripper_closeup_raw_candidate.mp4",
+      "raw_candidate_sha256": "b62c43bb437b7f004fa684e2c1a26585d612ea7b2502e72ebd026ab9ba6b11e4",
+      "resolution": [
+        960,
+        540
+      ],
+      "retake_reason": null,
+      "reviewed_sample_frames": [
+        0,
+        1,
+        2,
+        30,
+        60,
+        90,
+        120,
+        121,
+        122,
+        131,
+        132,
+        150,
+        151,
+        152,
+        164,
+        165,
+        166,
+        167,
+        168,
+        180,
+        210,
+        240,
+        270,
+        287
+      ],
+      "runtime_trial_signature": "4e740e1863c3432b150c193920515bfc7ba6fd1f27316d8c08d97ef201dc59c1",
+      "source_frame_manifest_sha256": "f26e8e69895da31368b9aecc23d53d96044ec29e22459010cdc40663999c4841",
+      "verified_annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/video_verified/attempt_16_gripper_closeup_annotated_visual_evidence.mp4",
+      "verified_annotated_sha256": "c72f54e503bfbae418c1cbced8906f0e51240f6c35551c1695a6e682d9c90765",
+      "verified_raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/video_verified/attempt_16_gripper_closeup_raw_visual_evidence.mp4",
+      "verified_raw_sha256": "b62c43bb437b7f004fa684e2c1a26585d612ea7b2502e72ebd026ab9ba6b11e4",
+      "view_name": "gripper_closeup",
+      "vision_review_status": "PASS",
+      "visual_review": {
+        "annotation_obscures_geometry": false,
+        "bilateral_contact_region_visible": true,
+        "both_supplier_cad_fingers_visible": true,
+        "complete_bottle_and_table_interface_visible": true,
+        "complete_sequence_visible": true,
+        "frozen_or_duplicated_stream_detected": false,
+        "inward_surfaces_visible": true,
+        "notes": "Both orange and blue supplier-CAD fingers and their inward-facing regions remain visible before and during closure. Peripheral black instance artifacts are present at the right and lower edges but do not cover the fingers, bottle, contact region, or table interface.",
+        "physical_scope_label_correct": true,
+        "support_clearance_failure_visible": true
+      }
+    }
+  ]
+}

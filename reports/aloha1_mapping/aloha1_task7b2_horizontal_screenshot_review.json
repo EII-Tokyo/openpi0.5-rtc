@@ -1,0 +1,1573 @@
+{
+  "attempt_history": [
+    {
+      "attempt_id": "attempt_1",
+      "status": "REJECTED_SIDE_OCCLUDED"
+    },
+    {
+      "attempt_id": "attempt_2",
+      "status": "REJECTED_SIDE_GREY"
+    },
+    {
+      "attempt_id": "attempt_3",
+      "status": "REJECTED_MISSING_RUNTIME_PROJECTIONS"
+    },
+    {
+      "attempt_id": "attempt_4",
+      "status": "REJECTED_ZERO_FINGER_AABB"
+    },
+    {
+      "attempt_id": "attempt_5",
+      "status": "REJECTED_PROJECTION_FIELD_MISLABEL"
+    },
+    {
+      "attempt_id": "attempt_6_annotated_v1",
+      "status": "REJECTED_LR_MARKER_AMBIGUITY"
+    },
+    {
+      "attempt_id": "attempt_6_annotated_v2",
+      "status": "PARTIAL_TRUE_TOP_OCCLUSION"
+    }
+  ],
+  "candidate_manifest_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/screenshot_candidates/attempt_6/annotated_v2/screenshot_candidate_manifest.json",
+  "candidate_manifest_sha256": "3590dc038eeff0062be2c465b8526fbb448dc7f8e215b930709fc6a2662e9360",
+  "capture_count": 14,
+  "captures": [
+    {
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/screenshot_candidates/attempt_6/annotated_v2/true_top/release_dynamic_000001_annotated.png",
+      "annotated_resolution": [
+        960,
+        670
+      ],
+      "annotated_sha256": "5af36b137e14e9896a0ca16d9f33a949363cdcd366a5c1e8820fa495581d5ed6",
+      "bottle_a_world": [
+        -0.05832795798778534,
+        -0.17482928931713104,
+        -0.05915013700723648
+      ],
+      "bottle_axis_world": [
+        0.9912468611148613,
+        0.13177158842919348,
+        0.00811842427951341
+      ],
+      "bottle_b_world": [
+        0.14586889540187611,
+        -0.14768434210071718,
+        -0.05747774160565672
+      ],
+      "bottle_z_m": -0.05915013700723648,
+      "camera_forward_world": [
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "camera_world_matrix": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.010321589611905047
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.1658579953243808
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          1.5920110764802171
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "contact_records": {
+        "left": null,
+        "right": null
+      },
+      "frame": 1,
+      "left_finger_origin_world": [
+        -0.007797949481755495,
+        -0.08528247475624084,
+        0.07934622466564178
+      ],
+      "machine_failure_mode": "gripper_axis_correspondence_failed",
+      "machine_status": "FAIL",
+      "phase": "release_dynamic",
+      "projection_model": {
+        "method": "FIT_FROM_ISAAC_CAMERA_RUNTIME_PROJECTION_READBACK",
+        "rms_error_px": 3.707013163315451e-07,
+        "u_center": 480.0000027538961,
+        "u_scale": 2290.622777383672,
+        "v_center": 269.99998985691866,
+        "v_scale": -2290.6227786452855
+      },
+      "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/screenshot_candidates/attempt_6/trial_000/frames/true_top/000001.png",
+      "raw_sha256": "3acfbc695bae78797d41c4190b2241c335621ada6dbaf32adae096d27061dfc1",
+      "resolution": [
+        960,
+        540
+      ],
+      "retake_reason": "actual wrist/gripper pose occludes finger inner surfaces in true top projection",
+      "right_finger_origin_world": [
+        0.0060559785924851894,
+        -0.18969644606113434,
+        0.11424146592617035
+      ],
+      "support_clearance_m": -0.0027321655405408013,
+      "time_s": 0.016666666666666666,
+      "view_name": "true_top",
+      "vision_review": {
+        "bottle_axis_visible": true,
+        "finger_inner_surfaces_visible": false,
+        "finger_origins_projected": true
+      },
+      "vision_review_status": "PARTIAL"
+    },
+    {
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/screenshot_candidates/attempt_6/annotated_v2/side/release_dynamic_000001_annotated.png",
+      "annotated_resolution": [
+        960,
+        670
+      ],
+      "annotated_sha256": "4352d6288bd38d6886318fb39b7a82be15ec262b5f9f1698690f5854bb548c42",
+      "bottle_a_world": [
+        -0.05832795798778534,
+        -0.17482928931713104,
+        -0.05915013700723648
+      ],
+      "bottle_axis_world": [
+        0.9912468611148613,
+        0.13177158842919348,
+        0.00811842427951341
+      ],
+      "bottle_b_world": [
+        0.14586889540187611,
+        -0.14768434210071718,
+        -0.05747774160565672
+      ],
+      "bottle_z_m": -0.05915013700723648,
+      "camera_forward_world": [
+        -0.6313037762273362,
+        0.5971791891301034,
+        -0.4948055761519035
+      ],
+      "camera_world_matrix": [
+        [
+          0.6871998111280022,
+          -0.35946065390629767,
+          0.6313037762273362,
+          0.9353215896119051
+        ],
+        [
+          0.7264684573920863,
+          0.34003028759843495,
+          -0.5971791891301034,
+          -1.0408579953243808
+        ],
+        [
+          1.723138043363548e-08,
+          0.8690037064414525,
+          0.4948055761519035,
+          0.6670110764802173
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "contact_records": {
+        "left": null,
+        "right": null
+      },
+      "frame": 1,
+      "left_finger_origin_world": [
+        -0.007797949481755495,
+        -0.08528247475624084,
+        0.07934622466564178
+      ],
+      "machine_failure_mode": "gripper_axis_correspondence_failed",
+      "machine_status": "FAIL",
+      "phase": "release_dynamic",
+      "projection_model": {
+        "method": "FIT_FROM_ISAAC_CAMERA_RUNTIME_PROJECTION_READBACK",
+        "rms_error_px": 4.1053826929285895e-06,
+        "u_center": 480.0000866073609,
+        "u_scale": 2290.6228744749865,
+        "v_center": 269.99993454914716,
+        "v_scale": -2290.622560660995
+      },
+      "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/screenshot_candidates/attempt_6/trial_000/frames/side/000001.png",
+      "raw_sha256": "0921b5d862aa5c7c82087dba6368e6dc7d8f50a8f7d684ac99ffe334f9b33466",
+      "resolution": [
+        960,
+        540
+      ],
+      "retake_reason": null,
+      "right_finger_origin_world": [
+        0.0060559785924851894,
+        -0.18969644606113434,
+        0.11424146592617035
+      ],
+      "support_clearance_m": -0.0027321655405408013,
+      "time_s": 0.016666666666666666,
+      "view_name": "side",
+      "vision_review": {
+        "annotations_clear": true,
+        "objects_visible": true,
+        "state_distinct": true
+      },
+      "vision_review_status": "PASS"
+    },
+    {
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/screenshot_candidates/attempt_6/annotated_v2/true_top/support_settle_000121_annotated.png",
+      "annotated_resolution": [
+        960,
+        670
+      ],
+      "annotated_sha256": "c7de92ca8c005908a5cf033b391b4946a02c71f83eb00e31726a4670f9e9d510",
+      "bottle_a_world": [
+        -0.058546923100948334,
+        -0.17296840250492096,
+        -0.059464287012815475
+      ],
+      "bottle_axis_world": [
+        0.9914254013840498,
+        0.13042654287798552,
+        0.00803681549948681
+      ],
+      "bottle_b_world": [
+        0.1456867095841659,
+        -0.14610053467205594,
+        -0.05780870301992119
+      ],
+      "bottle_z_m": -0.059464287012815475,
+      "camera_forward_world": [
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "camera_world_matrix": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.010321589611905047
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.1658579953243808
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          1.5920110764802171
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "contact_records": {
+        "left": null,
+        "right": null
+      },
+      "frame": 121,
+      "left_finger_origin_world": [
+        -0.00806309562176466,
+        -0.08535420149564743,
+        0.07920607179403305
+      ],
+      "machine_failure_mode": "gripper_axis_correspondence_failed",
+      "machine_status": "FAIL",
+      "phase": "support_settle",
+      "projection_model": {
+        "method": "FIT_FROM_ISAAC_CAMERA_RUNTIME_PROJECTION_READBACK",
+        "rms_error_px": 3.6145892928378017e-07,
+        "u_center": 480.0000027526835,
+        "u_scale": 2290.622777376329,
+        "v_center": 269.9999898858344,
+        "v_scale": -2290.622780096953
+      },
+      "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/screenshot_candidates/attempt_6/trial_000/frames/true_top/000121.png",
+      "raw_sha256": "cf42372a03df90ebce3fc8995ffaa65a70b55f9d035836915af574bb90d75224",
+      "resolution": [
+        960,
+        540
+      ],
+      "retake_reason": "actual wrist/gripper pose occludes finger inner surfaces in true top projection",
+      "right_finger_origin_world": [
+        0.004774250090122223,
+        -0.18185125291347504,
+        0.1114836111664772
+      ],
+      "support_clearance_m": -0.0038389187117635337,
+      "time_s": 2.0166666666666666,
+      "view_name": "true_top",
+      "vision_review": {
+        "bottle_axis_visible": true,
+        "finger_inner_surfaces_visible": false,
+        "finger_origins_projected": true
+      },
+      "vision_review_status": "PARTIAL"
+    },
+    {
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/screenshot_candidates/attempt_6/annotated_v2/side/support_settle_000121_annotated.png",
+      "annotated_resolution": [
+        960,
+        670
+      ],
+      "annotated_sha256": "5b2d07797937e2212ce92dfaff55e172da54ccc3835ff49266d1fb5ecfde8a1e",
+      "bottle_a_world": [
+        -0.058546923100948334,
+        -0.17296840250492096,
+        -0.059464287012815475
+      ],
+      "bottle_axis_world": [
+        0.9914254013840498,
+        0.13042654287798552,
+        0.00803681549948681
+      ],
+      "bottle_b_world": [
+        0.1456867095841659,
+        -0.14610053467205594,
+        -0.05780870301992119
+      ],
+      "bottle_z_m": -0.059464287012815475,
+      "camera_forward_world": [
+        -0.6313037762273362,
+        0.5971791891301034,
+        -0.4948055761519035
+      ],
+      "camera_world_matrix": [
+        [
+          0.6871998111280022,
+          -0.35946065390629767,
+          0.6313037762273362,
+          0.9353215896119051
+        ],
+        [
+          0.7264684573920863,
+          0.34003028759843495,
+          -0.5971791891301034,
+          -1.0408579953243808
+        ],
+        [
+          1.723138043363548e-08,
+          0.8690037064414525,
+          0.4948055761519035,
+          0.6670110764802173
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "contact_records": {
+        "left": null,
+        "right": null
+      },
+      "frame": 121,
+      "left_finger_origin_world": [
+        -0.00806309562176466,
+        -0.08535420149564743,
+        0.07920607179403305
+      ],
+      "machine_failure_mode": "gripper_axis_correspondence_failed",
+      "machine_status": "FAIL",
+      "phase": "support_settle",
+      "projection_model": {
+        "method": "FIT_FROM_ISAAC_CAMERA_RUNTIME_PROJECTION_READBACK",
+        "rms_error_px": 3.947270199083631e-06,
+        "u_center": 480.00008616086956,
+        "u_scale": 2290.6228803167305,
+        "v_center": 269.9999344849139,
+        "v_scale": -2290.622561737231
+      },
+      "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/screenshot_candidates/attempt_6/trial_000/frames/side/000121.png",
+      "raw_sha256": "b057e569258824e37a7fea042e5a888403f9d1de370666be5d57b93700e547f9",
+      "resolution": [
+        960,
+        540
+      ],
+      "retake_reason": null,
+      "right_finger_origin_world": [
+        0.004774250090122223,
+        -0.18185125291347504,
+        0.1114836111664772
+      ],
+      "support_clearance_m": -0.0038389187117635337,
+      "time_s": 2.0166666666666666,
+      "view_name": "side",
+      "vision_review": {
+        "annotations_clear": true,
+        "objects_visible": true,
+        "state_distinct": true
+      },
+      "vision_review_status": "PASS"
+    },
+    {
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/screenshot_candidates/attempt_6/annotated_v2/true_top/open_pregrasp_000131_annotated.png",
+      "annotated_resolution": [
+        960,
+        670
+      ],
+      "annotated_sha256": "b3276671bc96c7e0a32ba7a436d52a1357ac51b188a36d722cbea788fe6f0e6c",
+      "bottle_a_world": [
+        -0.05854681134223938,
+        -0.17296889424324036,
+        -0.059464167803525925
+      ],
+      "bottle_axis_world": [
+        0.9914256065249807,
+        0.13042509522065185,
+        0.008035002380709155
+      ],
+      "bottle_b_world": [
+        0.14568686360190664,
+        -0.14610132462778608,
+        -0.05780895731309984
+      ],
+      "bottle_z_m": -0.059464167803525925,
+      "camera_forward_world": [
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "camera_world_matrix": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.010321589611905047
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.1658579953243808
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          1.5920110764802171
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "contact_records": {
+        "left": null,
+        "right": null
+      },
+      "frame": 131,
+      "left_finger_origin_world": [
+        -0.00839726161211729,
+        -0.08598388731479645,
+        0.05416211485862732
+      ],
+      "machine_failure_mode": "gripper_axis_correspondence_failed",
+      "machine_status": "FAIL",
+      "phase": "open_pregrasp",
+      "projection_model": {
+        "method": "FIT_FROM_ISAAC_CAMERA_RUNTIME_PROJECTION_READBACK",
+        "rms_error_px": 2.9677898244992024e-07,
+        "u_center": 480.00000272580644,
+        "u_scale": 2290.622777540846,
+        "v_center": 269.9999899719432,
+        "v_scale": -2290.62278005748
+      },
+      "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/screenshot_candidates/attempt_6/trial_000/frames/true_top/000131.png",
+      "raw_sha256": "dacd67a3024738b4b265516588562b9c035393ff05249e7b162c7c0b29c95096",
+      "resolution": [
+        960,
+        540
+      ],
+      "retake_reason": "actual wrist/gripper pose occludes finger inner surfaces in true top projection",
+      "right_finger_origin_world": [
+        0.004039973020553589,
+        -0.17896492779254913,
+        0.08509591221809387
+      ],
+      "support_clearance_m": -0.003838340614318328,
+      "time_s": 2.183333333333333,
+      "view_name": "true_top",
+      "vision_review": {
+        "bottle_axis_visible": true,
+        "finger_inner_surfaces_visible": false,
+        "finger_origins_projected": true
+      },
+      "vision_review_status": "PARTIAL"
+    },
+    {
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/screenshot_candidates/attempt_6/annotated_v2/side/open_pregrasp_000131_annotated.png",
+      "annotated_resolution": [
+        960,
+        670
+      ],
+      "annotated_sha256": "84d055fae779a5b8aa9e0b048b4d88fa8fca09585e8c548949d88ddab05e2f9c",
+      "bottle_a_world": [
+        -0.05854681134223938,
+        -0.17296889424324036,
+        -0.059464167803525925
+      ],
+      "bottle_axis_world": [
+        0.9914256065249807,
+        0.13042509522065185,
+        0.008035002380709155
+      ],
+      "bottle_b_world": [
+        0.14568686360190664,
+        -0.14610132462778608,
+        -0.05780895731309984
+      ],
+      "bottle_z_m": -0.059464167803525925,
+      "camera_forward_world": [
+        -0.6313037762273362,
+        0.5971791891301034,
+        -0.4948055761519035
+      ],
+      "camera_world_matrix": [
+        [
+          0.6871998111280022,
+          -0.35946065390629767,
+          0.6313037762273362,
+          0.9353215896119051
+        ],
+        [
+          0.7264684573920863,
+          0.34003028759843495,
+          -0.5971791891301034,
+          -1.0408579953243808
+        ],
+        [
+          1.723138043363548e-08,
+          0.8690037064414525,
+          0.4948055761519035,
+          0.6670110764802173
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "contact_records": {
+        "left": null,
+        "right": null
+      },
+      "frame": 131,
+      "left_finger_origin_world": [
+        -0.00839726161211729,
+        -0.08598388731479645,
+        0.05416211485862732
+      ],
+      "machine_failure_mode": "gripper_axis_correspondence_failed",
+      "machine_status": "FAIL",
+      "phase": "open_pregrasp",
+      "projection_model": {
+        "method": "FIT_FROM_ISAAC_CAMERA_RUNTIME_PROJECTION_READBACK",
+        "rms_error_px": 3.774823002000347e-06,
+        "u_center": 480.0000862286058,
+        "u_scale": 2290.6228828749,
+        "v_center": 269.9999344807405,
+        "v_scale": -2290.622567675472
+      },
+      "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/screenshot_candidates/attempt_6/trial_000/frames/side/000131.png",
+      "raw_sha256": "12e019d5b7f3b2ff204ba6d660b54d019f75b31d3f1e5f5830842e98c6945a54",
+      "resolution": [
+        960,
+        540
+      ],
+      "retake_reason": null,
+      "right_finger_origin_world": [
+        0.004039973020553589,
+        -0.17896492779254913,
+        0.08509591221809387
+      ],
+      "support_clearance_m": -0.003838340614318328,
+      "time_s": 2.183333333333333,
+      "view_name": "side",
+      "vision_review": {
+        "annotations_clear": true,
+        "objects_visible": true,
+        "state_distinct": true
+      },
+      "vision_review_status": "PASS"
+    },
+    {
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/screenshot_candidates/attempt_6/annotated_v2/true_top/vertical_descent_000150_annotated.png",
+      "annotated_resolution": [
+        960,
+        670
+      ],
+      "annotated_sha256": "df4fa28533dd1649b6f2816857b6e3a1ca57d734848a2d57ff6c970b35391312",
+      "bottle_a_world": [
+        -0.05752026289701462,
+        -0.18069864809513092,
+        -0.058863624930381775
+      ],
+      "bottle_axis_world": [
+        0.9916960199479313,
+        0.12835305099935415,
+        0.008031084521378976
+      ],
+      "bottle_b_world": [
+        0.14676911721225924,
+        -0.15425791958926396,
+        -0.057209221518977706
+      ],
+      "bottle_z_m": -0.058863624930381775,
+      "camera_forward_world": [
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "camera_world_matrix": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.010321589611905047
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.1658579953243808
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          1.5920110764802171
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "contact_records": {
+        "left": null,
+        "right": null
+      },
+      "frame": 150,
+      "left_finger_origin_world": [
+        -0.008940458297729492,
+        -0.08487962186336517,
+        0.00765637680888176
+      ],
+      "machine_failure_mode": "gripper_axis_correspondence_failed",
+      "machine_status": "FAIL",
+      "phase": "vertical_descent",
+      "projection_model": {
+        "method": "FIT_FROM_ISAAC_CAMERA_RUNTIME_PROJECTION_READBACK",
+        "rms_error_px": 2.0208756963288057e-07,
+        "u_center": 480.00000268157515,
+        "u_scale": 2290.6227778325892,
+        "v_center": 269.999990077248,
+        "v_scale": -2290.622777655521
+      },
+      "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/screenshot_candidates/attempt_6/trial_000/frames/true_top/000150.png",
+      "raw_sha256": "6f2c5dfdcc1660fad9645914d3d5294a7f1b85eebcc7dc6e72f26565e3dce68e",
+      "resolution": [
+        960,
+        540
+      ],
+      "retake_reason": "actual wrist/gripper pose occludes finger inner surfaces in true top projection",
+      "right_finger_origin_world": [
+        0.005735323764383793,
+        -0.19315148890018463,
+        0.043711621314287186
+      ],
+      "support_clearance_m": -0.0018558939876120173,
+      "time_s": 2.5,
+      "view_name": "true_top",
+      "vision_review": {
+        "bottle_axis_visible": true,
+        "finger_inner_surfaces_visible": false,
+        "finger_origins_projected": true
+      },
+      "vision_review_status": "PARTIAL"
+    },
+    {
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/screenshot_candidates/attempt_6/annotated_v2/side/vertical_descent_000150_annotated.png",
+      "annotated_resolution": [
+        960,
+        670
+      ],
+      "annotated_sha256": "e1c0e90c2d36bf2df5b82eb310be0a20aff76effba03208d7852f4caf3be2581",
+      "bottle_a_world": [
+        -0.05752026289701462,
+        -0.18069864809513092,
+        -0.058863624930381775
+      ],
+      "bottle_axis_world": [
+        0.9916960199479313,
+        0.12835305099935415,
+        0.008031084521378976
+      ],
+      "bottle_b_world": [
+        0.14676911721225924,
+        -0.15425791958926396,
+        -0.057209221518977706
+      ],
+      "bottle_z_m": -0.058863624930381775,
+      "camera_forward_world": [
+        -0.6313037762273362,
+        0.5971791891301034,
+        -0.4948055761519035
+      ],
+      "camera_world_matrix": [
+        [
+          0.6871998111280022,
+          -0.35946065390629767,
+          0.6313037762273362,
+          0.9353215896119051
+        ],
+        [
+          0.7264684573920863,
+          0.34003028759843495,
+          -0.5971791891301034,
+          -1.0408579953243808
+        ],
+        [
+          1.723138043363548e-08,
+          0.8690037064414525,
+          0.4948055761519035,
+          0.6670110764802173
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "contact_records": {
+        "left": null,
+        "right": null
+      },
+      "frame": 150,
+      "left_finger_origin_world": [
+        -0.008940458297729492,
+        -0.08487962186336517,
+        0.00765637680888176
+      ],
+      "machine_failure_mode": "gripper_axis_correspondence_failed",
+      "machine_status": "FAIL",
+      "phase": "vertical_descent",
+      "projection_model": {
+        "method": "FIT_FROM_ISAAC_CAMERA_RUNTIME_PROJECTION_READBACK",
+        "rms_error_px": 4.009513180031185e-06,
+        "u_center": 480.0000876116993,
+        "u_scale": 2290.6228730714297,
+        "v_center": 269.9999346415006,
+        "v_scale": -2290.62258281297
+      },
+      "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/screenshot_candidates/attempt_6/trial_000/frames/side/000150.png",
+      "raw_sha256": "8c0fc0ab3409e72e3e3733b0ab672a474c981b41c7cc819c931f7961376e8261",
+      "resolution": [
+        960,
+        540
+      ],
+      "retake_reason": null,
+      "right_finger_origin_world": [
+        0.005735323764383793,
+        -0.19315148890018463,
+        0.043711621314287186
+      ],
+      "support_clearance_m": -0.0018558939876120173,
+      "time_s": 2.5,
+      "view_name": "side",
+      "vision_review": {
+        "annotations_clear": true,
+        "objects_visible": true,
+        "state_distinct": true
+      },
+      "vision_review_status": "PASS"
+    },
+    {
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/screenshot_candidates/attempt_6/annotated_v2/true_top/bilateral_contact_000165_annotated.png",
+      "annotated_resolution": [
+        960,
+        670
+      ],
+      "annotated_sha256": "9a7a67a0bd862e841d9adb432cef442b607b8a5191aad3603d5af542d1d51a45",
+      "bottle_a_world": [
+        -0.05662141367793083,
+        -0.18013082444667816,
+        -0.059068258851766586
+      ],
+      "bottle_axis_world": [
+        0.9934413462408088,
+        0.11408216568927725,
+        0.007716932738692289
+      ],
+      "bottle_b_world": [
+        0.14802750364767583,
+        -0.15662989831468704,
+        -0.057478570707595975
+      ],
+      "bottle_z_m": -0.059068258851766586,
+      "camera_forward_world": [
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "camera_world_matrix": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.010321589611905047
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.1658579953243808
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          1.5920110764802171
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "contact_records": {
+        "left": {
+          "contact_pixel_xy": [
+            460.8680129849697,
+            237.10750124113443
+          ],
+          "impulse_ns": 0.0037224370555529983,
+          "normal_endpoint_pixel_xy": [
+            457.208408540228,
+            206.2188971432838
+          ],
+          "normal_world": [
+            -0.11008625477552414,
+            0.9062631726264954,
+            -0.40812769532203674
+          ],
+          "position_world_m": [
+            -0.0035356245934963226,
+            -0.142034113407135,
+            -0.06707671284675598
+          ],
+          "separation_m": -2.530403435230255e-06
+        },
+        "right": {
+          "contact_pixel_xy": [
+            485.92970271497654,
+            320.1196430666663
+          ],
+          "impulse_ns": 0.0022646300696593734,
+          "normal_endpoint_pixel_xy": [
+            489.05230453248083,
+            351.86093493020326
+          ],
+          "normal_world": [
+            0.08761918544769287,
+            -0.8926109671592712,
+            0.4422313868999481
+          ],
+          "position_world_m": [
+            0.014564193785190582,
+            -0.2017177939414978,
+            -0.04689235985279083
+          ],
+          "separation_m": -1.0330229997634888e-05
+        }
+      },
+      "frame": 165,
+      "left_finger_origin_world": [
+        -0.007489180192351341,
+        -0.09597092121839523,
+        0.012424834072589874
+      ],
+      "machine_failure_mode": "gripper_axis_correspondence_failed",
+      "machine_status": "FAIL",
+      "phase": "bilateral_contact",
+      "projection_model": {
+        "method": "FIT_FROM_ISAAC_CAMERA_RUNTIME_PROJECTION_READBACK",
+        "rms_error_px": 2.0683467549908203e-07,
+        "u_center": 480.0000026843933,
+        "u_scale": 2290.6227778069983,
+        "v_center": 269.9999900705881,
+        "v_scale": -2290.6227778948514
+      },
+      "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/screenshot_candidates/attempt_6/trial_000/frames/true_top/000165.png",
+      "raw_sha256": "9fbb59fc490e53206fd0f8f9fd32f7431c0af6f6bfe1eb0ba89ba04c31664d79",
+      "resolution": [
+        960,
+        540
+      ],
+      "retake_reason": "actual wrist/gripper pose occludes finger inner surfaces in true top projection",
+      "right_finger_origin_world": [
+        0.005429085344076157,
+        -0.1927235871553421,
+        0.04463488608598709
+      ],
+      "support_clearance_m": -0.00260716851049482,
+      "time_s": 2.75,
+      "view_name": "true_top",
+      "vision_review": {
+        "bottle_axis_visible": true,
+        "finger_inner_surfaces_visible": false,
+        "finger_origins_projected": true
+      },
+      "vision_review_status": "PARTIAL"
+    },
+    {
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/screenshot_candidates/attempt_6/annotated_v2/side/bilateral_contact_000165_annotated.png",
+      "annotated_resolution": [
+        960,
+        670
+      ],
+      "annotated_sha256": "c3733c4360d6471269bd7e0fd54b1f7044c9de0c171f3b971ef4ca91f73c2525",
+      "bottle_a_world": [
+        -0.05662141367793083,
+        -0.18013082444667816,
+        -0.059068258851766586
+      ],
+      "bottle_axis_world": [
+        0.9934413462408088,
+        0.11408216568927725,
+        0.007716932738692289
+      ],
+      "bottle_b_world": [
+        0.14802750364767583,
+        -0.15662989831468704,
+        -0.057478570707595975
+      ],
+      "bottle_z_m": -0.059068258851766586,
+      "camera_forward_world": [
+        -0.6313037762273362,
+        0.5971791891301034,
+        -0.4948055761519035
+      ],
+      "camera_world_matrix": [
+        [
+          0.6871998111280022,
+          -0.35946065390629767,
+          0.6313037762273362,
+          0.9353215896119051
+        ],
+        [
+          0.7264684573920863,
+          0.34003028759843495,
+          -0.5971791891301034,
+          -1.0408579953243808
+        ],
+        [
+          1.723138043363548e-08,
+          0.8690037064414525,
+          0.4948055761519035,
+          0.6670110764802173
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "contact_records": {
+        "left": {
+          "contact_pixel_xy": [
+            491.94612830328117,
+            262.0439333708724
+          ],
+          "impulse_ns": 0.0037224370555529983,
+          "normal_endpoint_pixel_xy": [
+            513.8409743670428,
+            262.4132776965488
+          ],
+          "normal_world": [
+            -0.11008625477552414,
+            0.9062631726264954,
+            -0.40812769532203674
+          ],
+          "position_world_m": [
+            -0.0035356245934963226,
+            -0.142034113407135,
+            -0.06707671284675598
+          ],
+          "separation_m": -2.530403435230255e-06
+        },
+        "right": {
+          "contact_pixel_xy": [
+            443.08649997614623,
+            276.50271875822534
+          ],
+          "impulse_ns": 0.0022646300696593734,
+          "normal_endpoint_pixel_xy": [
+            418.76158884408164,
+            274.6012757840621
+          ],
+          "normal_world": [
+            0.08761918544769287,
+            -0.8926109671592712,
+            0.4422313868999481
+          ],
+          "position_world_m": [
+            0.014564193785190582,
+            -0.2017177939414978,
+            -0.04689235985279083
+          ],
+          "separation_m": -1.0330229997634888e-05
+        }
+      },
+      "frame": 165,
+      "left_finger_origin_world": [
+        -0.007489180192351341,
+        -0.09597092121839523,
+        0.012424834072589874
+      ],
+      "machine_failure_mode": "gripper_axis_correspondence_failed",
+      "machine_status": "FAIL",
+      "phase": "bilateral_contact",
+      "projection_model": {
+        "method": "FIT_FROM_ISAAC_CAMERA_RUNTIME_PROJECTION_READBACK",
+        "rms_error_px": 3.7034944769827633e-06,
+        "u_center": 480.00008783606467,
+        "u_scale": 2290.622884204187,
+        "v_center": 269.9999347030801,
+        "v_scale": -2290.6225805820673
+      },
+      "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/screenshot_candidates/attempt_6/trial_000/frames/side/000165.png",
+      "raw_sha256": "2a3967cc4bdbd2541c3996ce3e338b4ff357e1dfdcb66a8cd2a6c9ffe522e31a",
+      "resolution": [
+        960,
+        540
+      ],
+      "retake_reason": null,
+      "right_finger_origin_world": [
+        0.005429085344076157,
+        -0.1927235871553421,
+        0.04463488608598709
+      ],
+      "support_clearance_m": -0.00260716851049482,
+      "time_s": 2.75,
+      "view_name": "side",
+      "vision_review": {
+        "annotations_clear": true,
+        "objects_visible": true,
+        "state_distinct": true
+      },
+      "vision_review_status": "PASS"
+    },
+    {
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/screenshot_candidates/attempt_6/annotated_v2/true_top/support_clear_000167_annotated.png",
+      "annotated_resolution": [
+        960,
+        670
+      ],
+      "annotated_sha256": "33495ab021077f7d37066a13c4df9772f5f5cc50e1db6cada5a41c87213772ba",
+      "bottle_a_world": [
+        -0.05892401561141014,
+        -0.1840226650238037,
+        -0.05596964433789253
+      ],
+      "bottle_axis_world": [
+        0.9899534245220218,
+        0.14045292083465655,
+        -0.01628478756801775
+      ],
+      "bottle_b_world": [
+        0.14500638984012637,
+        -0.15508936333186446,
+        -0.05932431057690419
+      ],
+      "bottle_z_m": -0.05596964433789253,
+      "camera_forward_world": [
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "camera_world_matrix": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.010321589611905047
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.1658579953243808
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          1.5920110764802171
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "contact_records": {
+        "left": null,
+        "right": {
+          "contact_pixel_xy": [
+            481.3876896176078,
+            316.7767191243425
+          ],
+          "impulse_ns": 0.0008257960732908061,
+          "normal_endpoint_pixel_xy": [
+            485.5946076084769,
+            351.09423123519434
+          ],
+          "normal_world": [
+            0.11930602788925171,
+            -0.9699442982673645,
+            0.21207113564014435
+          ],
+          "position_world_m": [
+            0.011309713125228882,
+            -0.19916607439517975,
+            -0.03906159847974777
+          ],
+          "separation_m": -3.2883137464523315e-05
+        }
+      },
+      "frame": 167,
+      "left_finger_origin_world": [
+        -0.0036584315821528435,
+        -0.09652506560087204,
+        0.019122308120131493
+      ],
+      "machine_failure_mode": "gripper_axis_correspondence_failed",
+      "machine_status": "FAIL",
+      "phase": "support_clear",
+      "projection_model": {
+        "method": "FIT_FROM_ISAAC_CAMERA_RUNTIME_PROJECTION_READBACK",
+        "rms_error_px": 2.2132740599301468e-07,
+        "u_center": 480.00000269131067,
+        "u_scale": 2290.622777782891,
+        "v_center": 269.9999900487291,
+        "v_scale": -2290.6227782474216
+      },
+      "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/screenshot_candidates/attempt_6/trial_000/frames/true_top/000167.png",
+      "raw_sha256": "12b216f9a7277b49ada2192c0c0f79e914f586b0cae91b537621f63da29f9ba2",
+      "resolution": [
+        960,
+        540
+      ],
+      "retake_reason": "actual wrist/gripper pose occludes finger inner surfaces in true top projection",
+      "right_finger_origin_world": [
+        0.008127651177346706,
+        -0.1912464052438736,
+        0.05193919315934181
+      ],
+      "support_clearance_m": -0.003945384364285751,
+      "time_s": 2.783333333333333,
+      "view_name": "true_top",
+      "vision_review": {
+        "bottle_axis_visible": true,
+        "finger_inner_surfaces_visible": false,
+        "finger_origins_projected": true
+      },
+      "vision_review_status": "PARTIAL"
+    },
+    {
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/screenshot_candidates/attempt_6/annotated_v2/side/support_clear_000167_annotated.png",
+      "annotated_resolution": [
+        960,
+        670
+      ],
+      "annotated_sha256": "f3a0491f2f9f48525c71e771ca64ec5d263b749c77200ca65c26f226ed49862f",
+      "bottle_a_world": [
+        -0.05892401561141014,
+        -0.1840226650238037,
+        -0.05596964433789253
+      ],
+      "bottle_axis_world": [
+        0.9899534245220218,
+        0.14045292083465655,
+        -0.01628478756801775
+      ],
+      "bottle_b_world": [
+        0.14500638984012637,
+        -0.15508936333186446,
+        -0.05932431057690419
+      ],
+      "bottle_z_m": -0.05596964433789253,
+      "camera_forward_world": [
+        -0.6313037762273362,
+        0.5971791891301034,
+        -0.4948055761519035
+      ],
+      "camera_world_matrix": [
+        [
+          0.6871998111280022,
+          -0.35946065390629767,
+          0.6313037762273362,
+          0.9353215896119051
+        ],
+        [
+          0.7264684573920863,
+          0.34003028759843495,
+          -0.5971791891301034,
+          -1.0408579953243808
+        ],
+        [
+          1.723138043363548e-08,
+          0.8690037064414525,
+          0.4948055761519035,
+          0.6670110764802173
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "contact_records": {
+        "left": null,
+        "right": {
+          "contact_pixel_xy": [
+            442.46808413387805,
+            262.39258935237126
+          ],
+          "impulse_ns": 0.0008257960732908061,
+          "normal_endpoint_pixel_xy": [
+            416.79029957233433,
+            269.9081608988962
+          ],
+          "normal_world": [
+            0.11930602788925171,
+            -0.9699442982673645,
+            0.21207113564014435
+          ],
+          "position_world_m": [
+            0.011309713125228882,
+            -0.19916607439517975,
+            -0.03906159847974777
+          ],
+          "separation_m": -3.2883137464523315e-05
+        }
+      },
+      "frame": 167,
+      "left_finger_origin_world": [
+        -0.0036584315821528435,
+        -0.09652506560087204,
+        0.019122308120131493
+      ],
+      "machine_failure_mode": "gripper_axis_correspondence_failed",
+      "machine_status": "FAIL",
+      "phase": "support_clear",
+      "projection_model": {
+        "method": "FIT_FROM_ISAAC_CAMERA_RUNTIME_PROJECTION_READBACK",
+        "rms_error_px": 3.6359667563557747e-06,
+        "u_center": 480.00008788694726,
+        "u_scale": 2290.6228788962067,
+        "v_center": 269.99993470591954,
+        "v_scale": -2290.6225760637185
+      },
+      "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/screenshot_candidates/attempt_6/trial_000/frames/side/000167.png",
+      "raw_sha256": "f251edcd32e70ae4bbdce89ee401bc6eaa7c5d43974743cbed8f5c34251efa2b",
+      "resolution": [
+        960,
+        540
+      ],
+      "retake_reason": null,
+      "right_finger_origin_world": [
+        0.008127651177346706,
+        -0.1912464052438736,
+        0.05193919315934181
+      ],
+      "support_clearance_m": -0.003945384364285751,
+      "time_s": 2.783333333333333,
+      "view_name": "side",
+      "vision_review": {
+        "annotations_clear": true,
+        "objects_visible": true,
+        "state_distinct": true
+      },
+      "vision_review_status": "PASS"
+    },
+    {
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/screenshot_candidates/attempt_6/annotated_v2/true_top/hold_end_000287_annotated.png",
+      "annotated_resolution": [
+        960,
+        670
+      ],
+      "annotated_sha256": "477da5a88a4e2bded1b6e58dd0260a721739cbf86002e9a7778f41035195fac5",
+      "bottle_a_world": [
+        -0.05974004417657852,
+        -0.18542912602424622,
+        -0.05922374874353409
+      ],
+      "bottle_axis_world": [
+        0.9905327026847395,
+        0.1370380981379498,
+        0.008094724874830487
+      ],
+      "bottle_b_world": [
+        0.14430969257647785,
+        -0.15719927780782855,
+        -0.05755623541931901
+      ],
+      "bottle_z_m": -0.05922374874353409,
+      "camera_forward_world": [
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "camera_world_matrix": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.010321589611905047
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.1658579953243808
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          1.5920110764802171
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "contact_records": {
+        "left": {
+          "contact_pixel_xy": [
+            475.28068867633806,
+            239.6840310638115
+          ],
+          "impulse_ns": 0.003389491371869388,
+          "normal_endpoint_pixel_xy": [
+            470.2810165509425,
+            205.48506684490212
+          ],
+          "normal_world": [
+            -0.14452698826789856,
+            0.9885625243186951,
+            -0.043081704527139664
+          ],
+          "position_world_m": [
+            0.006915338337421417,
+            -0.14397689700126648,
+            -0.06128784269094467
+          ],
+          "separation_m": -1.52694592543412e-05
+        },
+        "right": null
+      },
+      "frame": 287,
+      "left_finger_origin_world": [
+        -0.007003135047852993,
+        -0.09919394552707672,
+        0.018216844648122787
+      ],
+      "machine_failure_mode": "gripper_axis_correspondence_failed",
+      "machine_status": "FAIL",
+      "phase": "hold_end",
+      "projection_model": {
+        "method": "FIT_FROM_ISAAC_CAMERA_RUNTIME_PROJECTION_READBACK",
+        "rms_error_px": 2.1980001678025372e-07,
+        "u_center": 480.0000026889395,
+        "u_scale": 2290.622777806109,
+        "v_center": 269.99999005565553,
+        "v_scale": -2290.62277837794
+      },
+      "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/screenshot_candidates/attempt_6/trial_000/frames/true_top/000287.png",
+      "raw_sha256": "07db4afb9fa630b24c0baae8831298edbbc2db370eb69ec294982dc3d3cf35b3",
+      "resolution": [
+        960,
+        540
+      ],
+      "retake_reason": "actual wrist/gripper pose occludes finger inner surfaces in true top projection",
+      "right_finger_origin_world": [
+        0.005410136189311743,
+        -0.19331428408622742,
+        0.04981468617916107
+      ],
+      "support_clearance_m": -0.002927138886688066,
+      "time_s": 4.783333333333333,
+      "view_name": "true_top",
+      "vision_review": {
+        "bottle_axis_visible": true,
+        "finger_inner_surfaces_visible": false,
+        "finger_origins_projected": true
+      },
+      "vision_review_status": "PARTIAL"
+    },
+    {
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/screenshot_candidates/attempt_6/annotated_v2/side/hold_end_000287_annotated.png",
+      "annotated_resolution": [
+        960,
+        670
+      ],
+      "annotated_sha256": "969b4383f695313f5853fbaeb1ea766bae277c3c798c029322a1a84200f8aae1",
+      "bottle_a_world": [
+        -0.05974004417657852,
+        -0.18542912602424622,
+        -0.05922374874353409
+      ],
+      "bottle_axis_world": [
+        0.9905327026847395,
+        0.1370380981379498,
+        0.008094724874830487
+      ],
+      "bottle_b_world": [
+        0.14430969257647785,
+        -0.15719927780782855,
+        -0.05755623541931901
+      ],
+      "bottle_z_m": -0.05922374874353409,
+      "camera_forward_world": [
+        -0.6313037762273362,
+        0.5971791891301034,
+        -0.4948055761519035
+      ],
+      "camera_world_matrix": [
+        [
+          0.6871998111280022,
+          -0.35946065390629767,
+          0.6313037762273362,
+          0.9353215896119051
+        ],
+        [
+          0.7264684573920863,
+          0.34003028759843495,
+          -0.5971791891301034,
+          -1.0408579953243808
+        ],
+        [
+          1.723138043363548e-08,
+          0.8690037064414525,
+          0.4948055761519035,
+          0.6670110764802173
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "contact_records": {
+        "left": {
+          "contact_pixel_xy": [
+            500.9504174513689,
+            261.03912390494213
+          ],
+          "impulse_ns": 0.003389491371869388,
+          "normal_endpoint_pixel_xy": [
+            524.3360365266631,
+            247.75398536853456
+          ],
+          "normal_world": [
+            -0.14452698826789856,
+            0.9885625243186951,
+            -0.043081704527139664
+          ],
+          "position_world_m": [
+            0.006915338337421417,
+            -0.14397689700126648,
+            -0.06128784269094467
+          ],
+          "separation_m": -1.52694592543412e-05
+        },
+        "right": null
+      },
+      "frame": 287,
+      "left_finger_origin_world": [
+        -0.007003135047852993,
+        -0.09919394552707672,
+        0.018216844648122787
+      ],
+      "machine_failure_mode": "gripper_axis_correspondence_failed",
+      "machine_status": "FAIL",
+      "phase": "hold_end",
+      "projection_model": {
+        "method": "FIT_FROM_ISAAC_CAMERA_RUNTIME_PROJECTION_READBACK",
+        "rms_error_px": 3.6365987434218608e-06,
+        "u_center": 480.00008806807375,
+        "u_scale": 2290.6228807829443,
+        "v_center": 269.99993471116204,
+        "v_scale": -2290.6225770349306
+      },
+      "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/screenshot_candidates/attempt_6/trial_000/frames/side/000287.png",
+      "raw_sha256": "8127c28593b7e5f26d5fb24a271f9722ad50c1cc3142bb1689ceba634d2bb8ab",
+      "resolution": [
+        960,
+        540
+      ],
+      "retake_reason": null,
+      "right_finger_origin_world": [
+        0.005410136189311743,
+        -0.19331428408622742,
+        0.04981468617916107
+      ],
+      "support_clearance_m": -0.002927138886688066,
+      "time_s": 4.783333333333333,
+      "view_name": "side",
+      "vision_review": {
+        "annotations_clear": true,
+        "objects_visible": true,
+        "state_distinct": true
+      },
+      "vision_review_status": "PASS"
+    }
+  ],
+  "decisions_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b2-horizontal-grasp/screenshot_candidates/attempt_6/visual_review_decisions.json",
+  "decisions_sha256": "c22b1a2183f9e87c793517aadc3cdfc971160588589b0bfaa66807d18b3df9f6",
+  "machine_conclusion": "HORIZONTAL_PICKUP_NOT_VERIFIED",
+  "physical_trial_status": "FAIL",
+  "review_method": "All 14 raw images and all 14 annotated-v2 images were inspected by phase; chronological contact sheets were also compared to confirm distinct simulation states.",
+  "reviewed_by": "Codex visual model",
+  "runtime_trial_signature": "4e740e1863c3432b150c193920515bfc7ba6fd1f27316d8c08d97ef201dc59c1",
+  "schema_version": 1,
+  "scope": "SCREENSHOT_VISUAL_EVIDENCE_ONLY; runtime physics result unchanged",
+  "status": "PARTIAL"
+}
