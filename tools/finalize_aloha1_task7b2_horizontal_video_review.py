@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+from collections.abc import Mapping
 import hashlib
 import json
 from pathlib import Path
@@ -14,6 +15,8 @@ SOURCE_VIEWS = ("overview", "gripper_closeup")
 COMPOSITE_VIEW = "full_arm_composite"
 VIEWS = (*SOURCE_VIEWS, COMPOSITE_VIEW)
 LAYOUT = "FULL_ARM_WITH_SYNCHRONIZED_GRIPPER_INSET"
+NUMERIC_EVIDENCE_SCOPE = "WORLD_AABB_CAMERA_FRUSTUM_AND_IMAGE_BOUNDS_ONLY"
+OCCLUSION_EVALUATION_STATUS = "NOT_EVALUATED_REQUIRES_VISUAL_REVIEW"
 
 
 def _sha256(path: Path) -> str:
@@ -55,12 +58,58 @@ def finalize_video_review(
         raise ValueError("composite layout mismatch")
     if list(primary.get("source_views", [])) != list(SOURCE_VIEWS):
         raise ValueError("composite synchronized source views mismatch")
+    layout_regions = primary.get("layout_regions")
+    if not isinstance(layout_regions, Mapping):
+        raise ValueError("composite layout regions are missing")
+    full_arm_region = layout_regions.get("full_arm")
+    inset_region = layout_regions.get("gripper_inset")
+    if not isinstance(full_arm_region, Mapping) or (
+        full_arm_region.get("source_view") != "overview"
+        or full_arm_region.get("width_fraction") != 2 / 3
+    ):
+        raise ValueError("composite full-arm width fraction must be two thirds")
+    if not isinstance(inset_region, Mapping) or (
+        inset_region.get("source_view") != "gripper_closeup"
+        or inset_region.get("width_fraction") != 1 / 3
+    ):
+        raise ValueError("composite gripper inset width fraction must be one third")
+    framing_input = primary.get("framing_evidence_input")
+    if not isinstance(framing_input, Mapping):
+        raise ValueError("composite framing evidence input is missing")
+    if "visible_prims" in framing_input or "visible_links" in framing_input:
+        raise ValueError("legacy visible framing fields are forbidden")
+    if framing_input.get("numeric_evidence_scope") != NUMERIC_EVIDENCE_SCOPE:
+        raise ValueError("composite numeric evidence scope mismatch")
+    if (
+        framing_input.get("occlusion_evaluation_status")
+        != OCCLUSION_EVALUATION_STATUS
+    ):
+        raise ValueError("composite occlusion evaluation status mismatch")
+    if framing_input.get("validated_for_every_physics_frame") is not True:
+        raise ValueError("composite projection was not validated for every frame")
+    primary_annotated = Path(
+        primary["annotated_candidate_absolute_path"]
+    ).resolve(strict=True)
+    if _sha256(primary_annotated) != primary["annotated_candidate_sha256"]:
+        raise ValueError("composite annotated candidate hash mismatch")
     decision_views = decisions.get("views", {})
     if set(decision_views) != {COMPOSITE_VIEW}:
         raise ValueError("review must contain exactly the primary composite view")
     signatures = {str(records[view]["runtime_trial_signature"]) for view in VIEWS}
-    if len(signatures) != 1:
+    if len(signatures) != 1 or signatures != {
+        str(candidate.get("runtime_trial_signature"))
+    }:
         raise ValueError("view runtime signatures differ")
+    frame_ranges = {
+        (
+            int(records[view]["frame_count"]),
+            int(records[view]["first_physics_frame"]),
+            int(records[view]["last_physics_frame"]),
+        )
+        for view in VIEWS
+    }
+    if len(frame_ranges) != 1:
+        raise ValueError("view physics frame ranges differ")
 
     videos = []
     for view in VIEWS:
@@ -73,6 +122,28 @@ def finalize_video_review(
             reviewed_frames = [int(value) for value in decision["reviewed_sample_frames"]]
             if not reviewed_frames:
                 raise ValueError(f"{view} has no reviewed samples")
+            if decision.get("reviewed_entire_video") is not True:
+                raise ValueError(f"{view} review did not cover the entire video")
+            if (
+                decision.get("reviewed_annotated_video_sha256")
+                != primary["annotated_candidate_sha256"]
+            ):
+                raise ValueError(f"{view} reviewed video hash mismatch")
+            complete_full_arm = decision.get("complete_full_arm_confirmed")
+            no_occlusion = decision.get("no_full_arm_occlusion_confirmed")
+            if not isinstance(complete_full_arm, bool) or not isinstance(
+                no_occlusion,
+                bool,
+            ):
+                raise ValueError(f"{view} visual confirmation fields must be boolean")
+            if status == "PASS" and complete_full_arm is not True:
+                raise ValueError(f"{view} PASS did not confirm the complete full arm")
+            if status == "PASS" and no_occlusion is not True:
+                raise ValueError(f"{view} PASS did not confirm no full-arm occlusion")
+            if status == "FAIL" and complete_full_arm and no_occlusion:
+                raise ValueError(f"{view} FAIL has no failed full-arm visual gate")
+            if status == "FAIL" and not str(decision.get("retake_reason", "")).strip():
+                raise ValueError(f"{view} FAIL requires a retake reason")
             source["vision_review_status"] = status
             source["reviewed_sample_frames"] = reviewed_frames
             source["retake_reason"] = decision.get("retake_reason")
@@ -139,9 +210,28 @@ def finalize_video_review(
         "attempt_id": candidate["attempt_id"],
         "reviewed_by": decisions["reviewed_by"],
         "review_method": (
-            "Codex vision model inspected phase boundaries and uniform "
-            "samples at intervals no greater than 0.5 seconds."
+            "Codex vision model reviewed the entire primary annotated composite "
+            "and confirmed the complete full arm and absence of occlusion for PASS."
         ),
+        "visual_review_contract": {
+            "reviewed_entire_video": bool(
+                decision_views[COMPOSITE_VIEW]["reviewed_entire_video"]
+            ),
+            "reviewed_annotated_video_sha256": str(
+                decision_views[COMPOSITE_VIEW][
+                    "reviewed_annotated_video_sha256"
+                ]
+            ),
+            "complete_full_arm_confirmed": bool(
+                decision_views[COMPOSITE_VIEW]["complete_full_arm_confirmed"]
+            ),
+            "no_full_arm_occlusion_confirmed": bool(
+                decision_views[COMPOSITE_VIEW][
+                    "no_full_arm_occlusion_confirmed"
+                ]
+            ),
+            "numeric_projection_is_visibility_evidence": False,
+        },
         "physical_trial_status": candidate["physical_trial_status"],
         "machine_conclusion": candidate["machine_conclusion"],
         "promotion_status": promotion_status,
@@ -173,9 +263,11 @@ def _markdown(report: dict[str, Any]) -> str:
         f"- User video confirmation: `{report['user_video_confirmation']}`",
         "",
         (
-            "Visual PASS certifies only that the primary composite exposes "
-            "the complete recorded trial. The report remains PARTIAL until "
-            "the user confirms the exact annotated composite video hash."
+            "Visual PASS requires review of the entire primary composite, "
+            "confirmation that the full arm is complete and unoccluded, and "
+            "does not infer visibility from numeric projection. The report "
+            "remains PARTIAL until the user confirms the exact annotated "
+            "composite video hash."
         ),
         "",
         "| View | visual review | raw | annotated |",

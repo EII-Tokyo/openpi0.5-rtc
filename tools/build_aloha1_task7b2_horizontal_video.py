@@ -21,6 +21,8 @@ VIEWS = ("overview", "gripper_closeup")
 COMPOSITE_VIEW = "full_arm_composite"
 ALL_VIEWS = (*VIEWS, COMPOSITE_VIEW)
 LAYOUT = "FULL_ARM_WITH_SYNCHRONIZED_GRIPPER_INSET"
+NUMERIC_EVIDENCE_SCOPE = "WORLD_AABB_CAMERA_FRUSTUM_AND_IMAGE_BOUNDS_ONLY"
+OCCLUSION_EVALUATION_STATUS = "NOT_EVALUATED_REQUIRES_VISUAL_REVIEW"
 REQUIRED_PHASES = (
     "release_dynamic",
     "support_settle",
@@ -108,10 +110,21 @@ def validate_frame_manifest(
         framing = views["overview"].get("framing_evidence")
         if not isinstance(framing, Mapping):
             raise ValueError(f"frame {frame} missing overview framing_evidence")
-        visible_prims = set(framing.get("visible_prims", []))
-        visible_links = set(framing.get("visible_links", []))
-        missing_prims = sorted(set(required_prims) - visible_prims)
-        missing_links = sorted(set(required_links) - visible_links)
+        if "visible_prims" in framing or "visible_links" in framing:
+            raise ValueError(
+                f"frame {frame} legacy framing fields "
+                "visible_prims/visible_links are forbidden"
+            )
+        if (
+            framing.get("numeric_evidence_scope") != NUMERIC_EVIDENCE_SCOPE
+            or framing.get("occlusion_evaluation_status")
+            != OCCLUSION_EVALUATION_STATUS
+        ):
+            raise ValueError(f"frame {frame} invalid overview framing evidence")
+        projected_prims = set(framing.get("projected_in_frame_prims", []))
+        projected_links = set(framing.get("projected_in_frame_links", []))
+        missing_prims = sorted(set(required_prims) - projected_prims)
+        missing_links = sorted(set(required_links) - projected_links)
         if missing_prims:
             raise ValueError(f"frame {frame} full-arm framing missing prims: {missing_prims}")
         if missing_links:
@@ -131,6 +144,8 @@ def validate_frame_manifest(
         "views": list(VIEWS),
         "required_full_arm_prims": required_prims,
         "required_full_arm_links": required_links,
+        "numeric_evidence_scope": NUMERIC_EVIDENCE_SCOPE,
+        "occlusion_evaluation_status": OCCLUSION_EVALUATION_STATUS,
         "phase_frame_ranges": phase_ranges,
         "runtime_trial_signature": signature,
     }
@@ -187,6 +202,19 @@ def compose_synchronized_frames(
         frame = int(record["physics_frame"])
         time_s = float(record["time_s"])
         views = record["views"]
+        for view in VIEWS:
+            view_record = views[view]
+            if int(view_record.get("physics_frame", -1)) != frame:
+                raise ValueError(f"frame {frame}/{view} physics_frame mismatch")
+            if float(view_record.get("time_s", float("nan"))) != time_s:
+                raise ValueError(f"frame {frame}/{view} time_s mismatch")
+            if (
+                str(view_record.get("runtime_trial_signature"))
+                != runtime_trial_signature
+            ):
+                raise ValueError(
+                    f"frame {frame}/{view} runtime_trial_signature mismatch"
+                )
         with Image.open(views["overview"]["absolute_path"]) as image:
             overview = image.convert("RGB")
         with Image.open(views["gripper_closeup"]["absolute_path"]) as image:
@@ -510,6 +538,10 @@ def build_candidate_videos(
                         "source_frame_manifest_absolute_path": str(frame_manifest_path.resolve()),
                         "source_frame_manifest_sha256": _sha256(frame_manifest_path),
                         "validated_for_every_physics_frame": True,
+                        "numeric_evidence_scope": validated["numeric_evidence_scope"],
+                        "occlusion_evaluation_status": validated[
+                            "occlusion_evaluation_status"
+                        ],
                     },
                     "source_camera_world_matrices": {
                         source_view: trial["video_capture"]["views"][source_view]["camera_world_matrix"]
