@@ -55,6 +55,14 @@ cd /home/eii/Documents/Notes/openpi0.5-rtc-reward-learning && npm run check:math
   - Read `docs/agents/canonical_rlt_replay_data.md`.
 - Image channel order, HDF5/LeRobot conversion, runtime camera path, gripper normalization, or gripper actuation:
   - Read `docs/agents/image_and_gripper_flow.md`.
+- ALOHA digital bottle grasp geometry, Bottle500 pickup, horizontal bottle
+  placement, bottle-axis/finger-line correspondence, vertical approach, or
+  support-to-lift validation:
+  - Read `docs/agents/aloha_horizontal_bottle_grasp_geometry.md`.
+  - The default is a dynamically supported horizontal bottle, a vertical
+    gripper approach, and episode 18 frames 208-244 as the current real-data
+    calibration boundary. Upright or suspended placement is invalid unless
+    the user explicitly requests a different pose.
 - Historical training benchmark facts:
   - Read `docs/agents/training_notes.md`.
 
