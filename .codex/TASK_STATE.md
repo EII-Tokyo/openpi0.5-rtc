@@ -94,10 +94,12 @@ The 2026-07-29 CAD-source reset is the current gripper-orientation boundary:
   and must not be used to infer exact CAD geometry or installation transforms.
 - CAD processing has completed the immutable source manifest, license audit,
   AP214 hierarchy/placement audit, embedded-instance-to-URDF mapping, CAD
-  screenshot visual gate, and two-run linear-only tessellation determinism.
-  Isaac USD authoring remains gated by the unresolved user-approved Stage and
-  production angular-tessellation blockers. A standalone finger file proves
-  shape only, not installed handedness.
+  screenshot visual gate, and angular-controlled tessellation determinism.
+  The project-pinned
+  `local_tools/freecad-tessellation/freecadcmd` is FreeCAD 1.1.1 with
+  OpenCascade 7.8.1 and uses `MeshPart.meshFromShape` with 0.20 mm linear and
+  20 degree angular deflection. A standalone finger file proves shape only,
+  not installed handedness.
 
 The 2026-07-28 historical gripper-orientation diagnostic is preserved but
 superseded. It was once user-confirmed `PASS` within its bounded
@@ -156,15 +158,14 @@ authoritative restart boundary:
   `reports/aloha1_mapping/aloha_public_cad_gripper_mapping.json`.
 - The standalone `3D-A1 - Aloha VX Finger v3` differs in revision, label,
   volume, and bounds and must not replace the installed v2 handed pair.
-- Two fresh FreeCAD tessellation directories produce identical OBJ byte hashes
-  and canonical geometry signatures. Each handed finger has 1,808 vertices,
-  3,616 triangles, one connected component, and zero degenerate triangles.
-  Determinism is `PASS`, but the output is a linear-deflection-only diagnostic.
-- The local snap FreeCAD cannot import `MeshPart` because its available
-  libcurl has an incompatible ABI; `Part.Shape.tessellate` does not expose
-  angular-deflection control. Production angular-controlled tessellation is
-  `HARD_BLOCKER`. Report:
-  `reports/aloha1_mapping/aloha_viper_finger_tessellation.json`.
+- The project-pinned FreeCAD 1.1.1 / OpenCascade 7.8.1 runtime completed two
+  fresh `MeshPart.meshFromShape` tessellations with explicit 0.20 mm linear
+  and 20 degree angular deflection. The final fresh manifest reports 831
+  vertices, 1,662 triangles, one connected component, and zero degenerate
+  triangles for each handed finger. Determinism and the angular-controlled
+  production tessellation gate are `PASS`. The older Snap-FreeCAD/libcurl
+  blocker and 1,808-vertex linear-only output are historical diagnostics.
+  Report: `reports/aloha1_mapping/aloha_viper_finger_tessellation.json`.
 - The NVIDIA official Isaac documentation capability was queried through
   MCPJungle. Local Isaac Sim 5.1 importer `2.4.30` source/manifest hashes are
   frozen in the Stage gate report.
@@ -231,12 +232,26 @@ authoritative restart boundary:
   both signals remain visible.
 - Supplier-CAD Task 7 was rerun twice with fresh Stage opens and identical
   signature
-  `b52db5132cbd96c311df95f31f577fb65c078f51d1bf5e6b8a75ebe87f1abd82`.
-  Its literal status is `FAIL`: Task 5 hold, robot-scoped articulation,
-  eight-DOF order, drive/limit checks and SimReadyAssetRules pass, but missing
-  JointStateAPI, zero/invalid helper-body mass/inertia, PhysicsRules, and
-  RobotRules remain blocking. Report:
+  `3b3ff2ef91f222d3bf167734723fb58b72a7729d37457a279f10e9058f3f2004`.
+  Its literal status is `PARTIAL`: Task 5 hold, robot-scoped articulation,
+  eight-DOF order, drive/limit, initial-state, mass/inertia, and
+  SimReadyAssetRules checks pass. PhysicsRules validates the isolated physical
+  v1.3 diagnostic and RobotRules validates a schema-only wrapper of the same
+  hierarchy; each has zero blocking findings, with 11 and 5 warnings
+  respectively. Report:
   `aloha_viper_cad_finger_task7_validation.json`.
+- The certified follower_left symmetric-close action has six raw and six
+  annotated screenshots covering maximum legal aperture, partial close, and
+  closed in full-arm and gripper-closeup views. Every image was individually
+  vision-reviewed `PASS`. Raw root:
+  `/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/task7_robot_scope/pose_evidence_attempt5/screenshots_raw`.
+  Annotated root:
+  `/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/task7_robot_scope/pose_evidence_attempt5/screenshots_annotated_v2`.
+  The approved Stage has no follower_right; right-arm evidence remains
+  `NOT_RUN` under
+  `HARD_BLOCKER_APPROVED_STAGE_MISSING_FOLLOWER_RIGHT`. No right arm was
+  mirrored or synthesized. Report:
+  `aloha_viper_cad_finger_task7_pose_screenshot_review.json`.
 - follower_right and a supplier-Stage lift trajectory remain bounded
   HARD_BLOCKERs. Friction is `TEMPORARY_UNCALIBRATED`; no calibrated dynamics
   claim is made.

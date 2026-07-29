@@ -17,7 +17,7 @@ sim-to-real dynamics model and it is not yet accepted for bottle insertion.
 | Supplier CAD model identity | PASS | `Simple Aloha Viper 2024-5-13.step`, SHA-256 `33786241…dc571`; `aloha_purchased_model_identification.json` |
 | Supplier CAD finger installation mapping | PASS | embedded v2 handed pair; `aloha_public_cad_gripper_mapping.json` |
 | Supplier CAD screenshot visual gate | PASS (8 raw + 8 annotated) | `aloha_viper_gripper_screenshot_review.json`; CAD visual evidence only |
-| Finger tessellation determinism | PARTIAL | two-run byte/geometric repeat PASS; angular-controlled production tessellation HARD_BLOCKED |
+| Finger tessellation determinism | PASS | project-pinned FreeCAD 1.1.1 / OCCT 7.8.1; `MeshPart.meshFromShape`, 0.20 mm linear and 20° angular deflection; fresh-run manifest PASS |
 | Supplier-CAD Isaac Stage authorization | PASS | user-approved `local_eval_assets/aloha_isaac_assets/aloha_viperx.usd`, SHA-256 `b24afe…493e`; source remains immutable |
 | Supplier-CAD isolated diagnostic asset | PARTIAL | follower_left CAD visual/collider mapping and static geometry pass; approved Stage has no follower_right |
 | Supplier-CAD no-bottle screenshot gate | PASS (12 raw + 12 annotated) | `aloha_viper_cad_finger_task5_structure_screenshot_review.json`; visual evidence only |
@@ -28,7 +28,8 @@ sim-to-real dynamics model and it is not yet accepted for bottle insertion.
 | Gripper hold root cause v2 | **SUPERSEDED INPUT** | prior `inconclusive` used the rejected generic finger mesh |
 | Supplier CAD raw + annotated visual review | PASS (8 pairs) | `aloha_viper_gripper_screenshot_review.json` |
 | Workcell and logical cameras | PARTIAL | `workcell_manifest.json`, `camera_validation.json` |
-| Supplier-CAD Task 7 validation | **FAIL** | follower_left structure/DOF/20-run hold preserved; initial JointState, mass/inertia, PhysicsRules and RobotRules fail; `aloha_viper_cad_finger_task7_validation.json` |
+| Supplier-CAD Task 7 validation | **PARTIAL** | follower_left structure/DOF/20-run hold preserved; PhysicsRules and RobotRules have 0 blocking findings, SimReady passes; remaining warnings and bounded evidence gaps are retained |
+| Task 7 certified-pose screenshots | **PARTIAL** | follower_left PASS: 6 raw + 6 annotated, individually vision-reviewed; follower_right NOT_RUN because the approved Stage contains no right follower |
 | CAD render/tessellation determinism | PASS | `aloha_viper_gripper_screenshot_review.json`, `aloha_viper_finger_tessellation.json` |
 | Task 8 optimization | **NOT_RUN** | no mesh merge, collider promotion, instanceable, payload, or performance optimization |
 
@@ -362,14 +363,16 @@ for all four paired views (`true_top`, `true_bottom`, `tip_end`, and
 This PASS is limited to CAD identity, handedness, placement, palm orientation,
 and state differentiation; it is not a collider, contact, or grasp PASS.
 
-Two fresh FreeCAD runs produce byte-identical and canonical-geometry-identical
-OBJ diagnostics for each embedded finger. Each has 1,808 vertices, 3,616
-triangles, one connected component, and zero degenerate triangles. This is a
-linear-deflection-only diagnostic (`0.20 mm`). The local snap FreeCAD cannot
-load `MeshPart` because of a libcurl ABI mismatch, while
-`Part.Shape.tessellate` does not accept an angular-deflection value.
-Production angular-controlled tessellation is therefore
-`HARD_BLOCKER`, not silently approximated.
+The project-pinned runtime
+`/home/eii/project/openpi0.5-rtc-reward-learning/local_tools/freecad-tessellation/freecadcmd`
+is FreeCAD `1.1.1` with OpenCascade `7.8.1`. It uses
+`MeshPart.meshFromShape` with explicit `0.20 mm` linear deflection and
+`20°` (`0.3490658503988659 rad`) angular deflection. Two fresh runs pass the
+determinism gate. The final fresh manifest reports 831 vertices, 1,662
+triangles, one connected component, and zero degenerate triangles for each
+handed finger. This supersedes the earlier Snap-FreeCAD/libcurl blocker; the
+older 1,808-vertex linear-only meshes remain historical diagnostics and are
+not promoted.
 
 The user explicitly approved
 `/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_assets/aloha_viperx.usd`
@@ -398,9 +401,14 @@ Consequently:
 - correct supplier-CAD follower_left static bottle hold: `PASS` for `20/20`
   fresh resets, with maximum full-interval drop
   `0.0004539191722869873 m` against the unchanged `0.010 m` gate;
-- Task 7: `FAIL`; repeated static/official-rule inspection has identical
-  signature and preserves the passing Task 5 hold, but does not hide
-  JointState, dynamics, and official-rule failures;
+- Task 7: `PARTIAL`; two fresh validations have identical signature and
+  preserve the passing Task 5 hold. PhysicsRules and RobotRules each have zero
+  blocking findings after validating the physical diagnostic and schema-only
+  robot wrapper at their correct scopes; warnings and bounded evidence gaps
+  remain visible;
+- Task 7 certified-pose screenshots: follower_left `PASS` for six raw and six
+  annotated images; follower_right `NOT_RUN` because it is absent from the
+  approved Stage;
 - Task 8: `NOT_RUN`;
 - original STEP/URDF/imported source USD/default/final collider: unchanged.
 
@@ -833,72 +841,73 @@ unchanged.
 
 ## Task 7 disposition
 
-The current supplier-CAD Task 7 has been rerun against the isolated
-`follower_left` diagnostic and its literal result is **FAIL**. Two independent
+The current supplier-CAD Task 7 result is **PARTIAL**. Two independent fresh
 Stage opens produced the identical signature
-`b52db5132cbd96c311df95f31f577fb65c078f51d1bf5e6b8a75ebe87f1abd82`.
-No physics step was added by the Task 7 static/official-rule pass.
+`3b3ff2ef91f222d3bf167734723fb58b72a7729d37457a279f10e9058f3f2004`.
+No physics step was added by this static/official-rule validation.
 
-The following gates remain positive:
+The rule target is intentionally split according to the installed Isaac Sim
+5.1 Robot Schema and Asset Validation semantics:
 
-- source and diagnostic Stage hashes are unchanged;
-- one robot-scoped articulation root is present at
-  `/workcell/vx300s_left/vx300s_left`;
-- Stage joint traversal and the Task 5 runtime readback agree on the explicit
-  eight-DOF order;
-- all eight non-fixed joints have a drive or mimic and finite positive
-  max-velocity/max-force data under the isolated diagnostic profile;
-- the no-bottle first-frame/static structure gate is PASS;
-- the supplier-CAD static hold remains `20/20 PASS`, maximum drop
-  `0.0004539191722869873 m`;
-- the four raw and four annotated physical screenshots retain their visual
-  review PASS;
-- `IsaacSim.SimReadyAssetRules` is PASS.
+- `IsaacSim.PhysicsRules` and `IsaacSim.SimReadyAssetRules` validate the
+  isolated physical diagnostic
+  `assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_left/1.3/supplier_cad_follower_left.usda`;
+- `IsaacSim.RobotRules` validates the schema-only wrapper
+  `assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_left_robot_schema/1.0/supplier_cad_follower_left_robot_schema.usda`.
 
-The literal FAIL is caused by preserved evidence:
+This prevents diagnostic mass, inertia, drive, and collider opinions from
+being misclassified as prohibited overrides in a Robot-Schema source layer.
+It does not modify or promote the approved source Stage, default
+configuration, or final collider.
 
-- all eight joints lack an authored `JointStateAPI`, so static initial-state
-  versus drive-target validation fails and PhysicsRules reports eight
-  `JointHasJointStateAPI` errors;
-- six fixed/root helper rigid bodies read zero mass and inertia and have
-  invalid zero principal-axis readback; three also lack colliders;
-- `IsaacSim.PhysicsRules` reports 17 blocking issues and 17 warnings;
-- `IsaacSim.RobotRules` reports four blocking issues and five warnings because
-  this isolated workcell diagnostic is not a promoted Robot-Schema asset and
-  its diagnostic filename/folder does not satisfy the final robot naming rule;
-- six-arm one-joint range replay, source mimic promotion semantics and the
-  attachment-volume overlap disposition remain PARTIAL;
-- follower_right, a user-approved lift trajectory, calibrated friction,
-  complete bottle inertia and production angular tessellation remain
-  HARD_BLOCKERs.
+Current machine results:
+
+- source, Task 5, physical diagnostic, schema diagnostic, and angular
+  tessellation hashes pass their immutable-input checks;
+- one robot-scoped articulation root, the explicit eight-DOF order, drive or
+  mimic coverage, finite positive limits, initial JointState/drive targets,
+  and positive mass/inertia all pass;
+- the no-bottle first-frame/static structure gate passes;
+- the supplier-CAD 20 g static hold remains `20/20 PASS`, maximum full-interval
+  drop `0.0004539191722869873 m`;
+- `IsaacSim.PhysicsRules`: `PARTIAL`, 0 blocking findings, 11 warnings for
+  collision-mesh purpose metadata;
+- `IsaacSim.RobotRules`: `PARTIAL`, 0 blocking findings, 5 warnings for the
+  missing diagnostic thumbnail and physics-attribute layer placement;
+- `IsaacSim.SimReadyAssetRules`: `PASS`, 0 blocking findings, 0 warnings;
+- six-arm one-joint range replay, source mimic promotion semantics, and the
+  attachment-volume overlap disposition remain `PARTIAL`;
+- follower_right, a user-approved supplier-Stage lift trajectory, calibrated
+  fingertip/bottle friction, and complete bottle geometry/inertia remain
+  `HARD_BLOCKER`.
+
+The already machine-verified follower_left symmetric-close action now has
+separate auxiliary pose evidence:
+
+- phases: maximum legal aperture, partially closed, and closed;
+- views: full-arm oblique and gripper close-up;
+- six raw and six annotated images were individually reviewed with the visual
+  model;
+- raw root:
+  `/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/task7_robot_scope/pose_evidence_attempt5/screenshots_raw`;
+- annotated root:
+  `/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/task7_robot_scope/pose_evidence_attempt5/screenshots_annotated_v2`.
+
+These screenshots are auxiliary pose/direction evidence only. Task 5 runtime
+joint/contact/position/drop data remains authoritative for structure and
+grasp acceptance. The approved Stage contains no follower_right, so no
+right-arm image was mirrored or manufactured; right-arm screenshot evidence
+is `NOT_RUN` with
+`HARD_BLOCKER_APPROVED_STAGE_MISSING_FOLLOWER_RIGHT`.
 
 Machine reports:
 
 - `reports/aloha1_mapping/aloha_viper_cad_finger_task7_validation.json`;
-- `reports/aloha1_mapping/aloha_viper_cad_finger_task7_validation.md`.
+- `reports/aloha1_mapping/aloha_viper_cad_finger_task7_validation.md`;
+- `reports/aloha1_mapping/aloha_viper_cad_finger_task7_pose_screenshot_review.json`;
+- `reports/aloha1_mapping/aloha_viper_cad_finger_task7_pose_screenshot_review.md`.
 
-The validation results below describe only the superseded gym-aloha
-diagnostic input.
-
-Task 7 was rerun twice after the correct-finger Task 5 and screenshot review.
-The second run exactly reproduced signature
-`830c9ee018cc780d622f0e9d1483e0ff767886576143b446857f0c9ea689d8d1`.
-The validation plan now consumes
-`gripper_correct_finger_task5.json`; it no longer mistakes the rejected
-generic-finger `gripper_validation.json` for current Task 5 evidence.
-
-The literal Task 7 result remains **FAIL**:
-
-- correct-finger physical static hold is PASS `80/80`;
-- `Task5.GripperValidation` is FAIL because mimic/readback remains over gate;
-- official `IsaacSim.PhysicsRules` remains FAIL, with all issues classified;
-- `IsaacSim.RobotRules` remains PARTIAL due missing thumbnails;
-- `IsaacSim.SimReadyAssetRules` passes;
-- measurement HARD_BLOCKERs keep calibrated acceptance closed.
-
-This is an expected, evidence-preserving result. The correct diagnostic
-fingers were not silently installed into the final/default asset, and Task 8
-remains `NOT_RUN`.
+Task 8 remains `NOT_RUN`.
 
 ## HARD_BLOCKER and measurement checklist
 
@@ -934,10 +943,10 @@ The machine-readable authoritative list is
 15. Resolve the supplier CAD license/redistribution terms. Public download and
     user-confirmed local use do not establish a redistribution license; the
     original STEP/PDF files remain outside Git.
-16. Provide a FreeCAD/OpenCascade path with explicit angular-deflection
-    tessellation control, or repair the local snap `MeshPart` ABI. The current
-    two-run linear-only diagnostic is deterministic but is not promoted to the
-    production visual mesh.
+16. Preserve the project-pinned FreeCAD 1.1.1 / OpenCascade 7.8.1
+    angular-controlled tessellation manifest when regenerating the diagnostic
+    visual mesh. The former Snap-FreeCAD `MeshPart` ABI blocker is resolved;
+    this does not by itself authorize final-asset promotion.
 
 Work that does not depend on these measurements remains reproducible. The
 current workcell therefore retains calibration-pending prims and disabled

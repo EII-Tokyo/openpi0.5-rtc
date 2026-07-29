@@ -38,9 +38,14 @@ def test_readme_separates_evidence_classes_and_gates_optimization() -> None:
         in text
     )
     assert "PASS_AUXILIARY_RUNTIME_READBACK_REPLAY" in text
-    assert "Supplier-CAD Task 7 validation | **FAIL**" in text
+    assert "Supplier-CAD Task 7 validation | **PARTIAL**" in text
+    assert "PhysicsRules and RobotRules have 0 blocking findings" in text
+    assert "Task 7 certified-pose screenshots | **PARTIAL**" in text
+    assert "follower_left PASS: 6 raw + 6 annotated" in text
+    assert "follower_right NOT_RUN" in text
+    assert "HARD_BLOCKER_APPROVED_STAGE_MISSING_FOLLOWER_RIGHT" in text
     assert "aloha_viper_cad_finger_task7_validation.json" in text
-    assert "b52db5132cbd96c311df95f31f577fb65c078f51d1bf5e6b8a75ebe87f1abd82" in text
+    assert "3b3ff2ef91f222d3bf167734723fb58b72a7729d37457a279f10e9058f3f2004" in text
     assert "Isaac Sim **5.1.0.0 / Kit 107.3.3**" in text
 
 
