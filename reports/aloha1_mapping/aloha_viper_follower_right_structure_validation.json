@@ -1,0 +1,289 @@
+{
+  "articulation_count": 1,
+  "articulation_root": "/follower_right/vx300s_right/root_joint",
+  "classification": "RIGHT_ROBOT_LOCAL_STRUCTURE_PARTIAL_MIMIC_ACCURACY_FAILED",
+  "determinism": {
+    "repeat_count": 2,
+    "signatures": [
+      "19b764e16470204029a907c9f64a2092dc69d2438ee9e7e49adcfa93c84c0f2b",
+      "19b764e16470204029a907c9f64a2092dc69d2438ee9e7e49adcfa93c84c0f2b"
+    ],
+    "status": "PASS",
+    "unique_signature_count": 1,
+    "unique_signatures": [
+      "19b764e16470204029a907c9f64a2092dc69d2438ee9e7e49adcfa93c84c0f2b"
+    ]
+  },
+  "dof_order": [
+    "waist",
+    "shoulder",
+    "elbow",
+    "forearm_roll",
+    "wrist_angle",
+    "wrist_rotate",
+    "gripper",
+    "left_finger",
+    "right_finger"
+  ],
+  "first_frame_jump": {
+    "absolute_delta": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "after_first_frame": [
+      1.568652987771202e-05,
+      -0.9599504470825195,
+      1.161245346069336,
+      0.0010992552852258086,
+      -0.2958734631538391,
+      -4.3588522657955764e-07,
+      1.715617337083586e-08,
+      0.04998817667365074,
+      -0.050012171268463135
+    ],
+    "maximum_delta": 0.0,
+    "start": [
+      1.568652987771202e-05,
+      -0.9599504470825195,
+      1.161245346069336,
+      0.0010992552852258086,
+      -0.2958734631538391,
+      -4.3588522657955764e-07,
+      1.715617337083586e-08,
+      0.04998817667365074,
+      -0.050012171268463135
+    ],
+    "status": "PASS",
+    "threshold": 0.01
+  },
+  "generic_finger_deactivated": true,
+  "gripper": {
+    "all_repeats": [
+      {
+        "aperture_m": 0.04318271763622761,
+        "fresh_world_reset": true,
+        "legal_range": true,
+        "mimic_residual_m": 0.0011666473001241684,
+        "readback_left_m": 0.02100803516805172,
+        "readback_right_m": -0.022174682468175888,
+        "repeat": 0,
+        "state": "closed",
+        "status": "FAIL",
+        "target_left_m": 0.021,
+        "terminal_target_settle_steps": 30,
+        "test": "gripper_closed"
+      },
+      {
+        "aperture_m": 0.08143207058310509,
+        "fresh_world_reset": true,
+        "legal_range": true,
+        "mimic_residual_m": 0.0015670843422412872,
+        "readback_left_m": 0.0399324931204319,
+        "readback_right_m": -0.04149957746267319,
+        "repeat": 0,
+        "state": "partially_closed",
+        "status": "FAIL",
+        "target_left_m": 0.039,
+        "terminal_target_settle_steps": 30,
+        "test": "gripper_partially_closed"
+      },
+      {
+        "aperture_m": 0.10112025588750839,
+        "fresh_world_reset": true,
+        "legal_range": true,
+        "mimic_residual_m": 0.0009673014283180237,
+        "readback_left_m": 0.05104377865791321,
+        "readback_right_m": -0.050076477229595184,
+        "repeat": 0,
+        "state": "open",
+        "status": "PASS",
+        "target_left_m": 0.052,
+        "terminal_target_settle_steps": 30,
+        "test": "gripper_open"
+      },
+      {
+        "aperture_m": 0.11012737452983856,
+        "fresh_world_reset": true,
+        "legal_range": true,
+        "mimic_residual_m": 0.0017154589295387268,
+        "readback_left_m": 0.055921416729688644,
+        "readback_right_m": -0.05420595780014992,
+        "repeat": 0,
+        "state": "maximum_legal_aperture",
+        "status": "FAIL",
+        "target_left_m": 0.057,
+        "terminal_target_settle_steps": 30,
+        "test": "gripper_maximum_legal_aperture"
+      },
+      {
+        "aperture_m": 0.04318271763622761,
+        "fresh_world_reset": true,
+        "legal_range": true,
+        "mimic_residual_m": 0.0011666473001241684,
+        "readback_left_m": 0.02100803516805172,
+        "readback_right_m": -0.022174682468175888,
+        "repeat": 1,
+        "state": "closed",
+        "status": "FAIL",
+        "target_left_m": 0.021,
+        "terminal_target_settle_steps": 30,
+        "test": "gripper_closed"
+      },
+      {
+        "aperture_m": 0.08143207058310509,
+        "fresh_world_reset": true,
+        "legal_range": true,
+        "mimic_residual_m": 0.0015670843422412872,
+        "readback_left_m": 0.0399324931204319,
+        "readback_right_m": -0.04149957746267319,
+        "repeat": 1,
+        "state": "partially_closed",
+        "status": "FAIL",
+        "target_left_m": 0.039,
+        "terminal_target_settle_steps": 30,
+        "test": "gripper_partially_closed"
+      },
+      {
+        "aperture_m": 0.10112025588750839,
+        "fresh_world_reset": true,
+        "legal_range": true,
+        "mimic_residual_m": 0.0009673014283180237,
+        "readback_left_m": 0.05104377865791321,
+        "readback_right_m": -0.050076477229595184,
+        "repeat": 1,
+        "state": "open",
+        "status": "PASS",
+        "target_left_m": 0.052,
+        "terminal_target_settle_steps": 30,
+        "test": "gripper_open"
+      },
+      {
+        "aperture_m": 0.11012737452983856,
+        "fresh_world_reset": true,
+        "legal_range": true,
+        "mimic_residual_m": 0.0017154589295387268,
+        "readback_left_m": 0.055921416729688644,
+        "readback_right_m": -0.05420595780014992,
+        "repeat": 1,
+        "state": "maximum_legal_aperture",
+        "status": "FAIL",
+        "target_left_m": 0.057,
+        "terminal_target_settle_steps": 30,
+        "test": "gripper_maximum_legal_aperture"
+      }
+    ],
+    "aperture_monotonicity": "PASS",
+    "control_mode": "SOURCE_URDF_MIMIC_LEFT_DRIVEN",
+    "legal_range": "PASS",
+    "maximum_mimic_residual_m": 0.0017154589295387268,
+    "mimic_multiplier": -1.0,
+    "mimic_offset": 0.0,
+    "mimic_parent": "left_finger",
+    "motion_direction": "PASS",
+    "states": {
+      "closed": {
+        "aperture_m": 0.04318271763622761,
+        "fresh_world_reset": true,
+        "legal_range": true,
+        "mimic_residual_m": 0.0011666473001241684,
+        "readback_left_m": 0.02100803516805172,
+        "readback_right_m": -0.022174682468175888,
+        "repeat": 0,
+        "state": "closed",
+        "status": "FAIL",
+        "target_left_m": 0.021,
+        "terminal_target_settle_steps": 30,
+        "test": "gripper_closed"
+      },
+      "maximum_legal_aperture": {
+        "aperture_m": 0.11012737452983856,
+        "fresh_world_reset": true,
+        "legal_range": true,
+        "mimic_residual_m": 0.0017154589295387268,
+        "readback_left_m": 0.055921416729688644,
+        "readback_right_m": -0.05420595780014992,
+        "repeat": 0,
+        "state": "maximum_legal_aperture",
+        "status": "FAIL",
+        "target_left_m": 0.057,
+        "terminal_target_settle_steps": 30,
+        "test": "gripper_maximum_legal_aperture"
+      },
+      "open": {
+        "aperture_m": 0.10112025588750839,
+        "fresh_world_reset": true,
+        "legal_range": true,
+        "mimic_residual_m": 0.0009673014283180237,
+        "readback_left_m": 0.05104377865791321,
+        "readback_right_m": -0.050076477229595184,
+        "repeat": 0,
+        "state": "open",
+        "status": "PASS",
+        "target_left_m": 0.052,
+        "terminal_target_settle_steps": 30,
+        "test": "gripper_open"
+      },
+      "partially_closed": {
+        "aperture_m": 0.08143207058310509,
+        "fresh_world_reset": true,
+        "legal_range": true,
+        "mimic_residual_m": 0.0015670843422412872,
+        "readback_left_m": 0.0399324931204319,
+        "readback_right_m": -0.04149957746267319,
+        "repeat": 0,
+        "state": "partially_closed",
+        "status": "FAIL",
+        "target_left_m": 0.039,
+        "terminal_target_settle_steps": 30,
+        "test": "gripper_partially_closed"
+      }
+    },
+    "status": "FAIL"
+  },
+  "hard_blockers": [
+    "HARD_BLOCKER_FOLLOWER_RIGHT_WORKCELL_INSTALL_TRANSFORM"
+  ],
+  "initial_overlap": {
+    "attachment_common_volume_retained": true,
+    "boundary": "Supplier finger-to-gripper-bar common volume is retained as attachment semantics; this is not a workcell collision claim.",
+    "evidence_method": "VERIFIED_ROBOT_LOCAL_GEOMETRY_EQUIVALENCE_TO_FOLLOWER_LEFT",
+    "identity_reference_xform": true,
+    "identity_report": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_follower_left_right_cad_identity.json",
+    "left_geometry_report": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_cad_finger_task5_geometry_audit.json",
+    "no_finger_to_finger_overlap": true,
+    "same_normalized_urdf": true,
+    "same_supplier_geometry_layer": true,
+    "status": "PASS",
+    "unexpected_overlap": false
+  },
+  "one_joint_direction_and_range": "PASS",
+  "schema_version": 1,
+  "screenshots": "PENDING_SEPARATE_RAW_AND_ANNOTATED_EVIDENCE",
+  "stage": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/supplier_cad_follower_right.usda",
+    "immutable": true,
+    "sha256_after": "95c7878f794f5f557b70997a2240b6476836b8ffbeed5a4992cb114a169487ea",
+    "sha256_before": "95c7878f794f5f557b70997a2240b6476836b8ffbeed5a4992cb114a169487ea"
+  },
+  "static_pose_hold": {
+    "arm_threshold": 0.02,
+    "duration_s": 2.0,
+    "finger_threshold": 0.002,
+    "frame_count": 120,
+    "maximum_arm_drift": 0.0,
+    "maximum_auxiliary_gripper_drift": 0.0,
+    "maximum_finger_drift": 0.0,
+    "status": "PASS"
+  },
+  "status": "PARTIAL",
+  "supplier_finger_identity": "PASS",
+  "task8": "NOT_RUN",
+  "workcell_placement_verified": false
+}

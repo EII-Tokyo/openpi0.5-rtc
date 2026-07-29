@@ -1,0 +1,35 @@
+{
+  "corrected_interpretation": "The approved follower_left review Stage omits follower_right, but the supplier CAD is a verified reusable ViperX robot product. The right Stage is generated and validated in robot-local coordinates; only its workcell installation transform is blocked.",
+  "dual_arm_workcell_placement": {
+    "hard_blocker": "HARD_BLOCKER_FOLLOWER_RIGHT_WORKCELL_INSTALL_TRANSFORM",
+    "status": "PARTIAL",
+    "verified": false
+  },
+  "follower_left": {
+    "report": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_cad_finger_task7_validation.json",
+    "report_sha256": "0f2624ab91d33ba1c0855406c1d2791a39f5f544205d5ccb0890dfb004a9306f",
+    "scope": "SUPPLIER_CAD_FOLLOWER_LEFT_DIAGNOSTIC_ONLY",
+    "status": "PARTIAL"
+  },
+  "follower_right_robot_local": {
+    "arm_one_joint": "PASS",
+    "cad_available": true,
+    "cad_identity": "VERIFIED_SINGLE_REUSABLE_ROBOT_PRODUCT",
+    "mimic_accuracy": "FAIL",
+    "official_rules": "FAIL",
+    "report": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_follower_right_task7_validation.json",
+    "report_sha256": "d2c216d57c4fcce6a635c18f1d7231c9a6f9c0f879233ce18b2e9af82b9dc787",
+    "scope": "ROBOT_LOCAL_DIAGNOSTIC_NOT_WORKCELL_PLACEMENT",
+    "status": "FAIL"
+  },
+  "hard_blockers": [
+    "HARD_BLOCKER_FOLLOWER_RIGHT_WORKCELL_INSTALL_TRANSFORM",
+    "HARD_BLOCKER_INCOMPLETE_BOTTLE_GEOMETRY_AND_INERTIA",
+    "HARD_BLOCKER_NO_USER_APPROVED_SUPPLIER_STAGE_LIFT_TRAJECTORY",
+    "HARD_BLOCKER_UNCALIBRATED_FINGER_BOTTLE_FRICTION"
+  ],
+  "schema_version": 1,
+  "scope": "TWO_FOLLOWER_TASK7_AGGREGATE_WITH_ROBOT_LOCAL_AND_WORKCELL_BOUNDARIES",
+  "status": "FAIL",
+  "task8": "NOT_RUN"
+}

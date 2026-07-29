@@ -1,0 +1,2102 @@
+{
+  "arm_one_joint_cases": [
+    {
+      "actual_delta": [
+        -0.049199044036868145,
+        2.0265579223632812e-06,
+        6.67572021484375e-06,
+        -3.822334110736847e-05,
+        4.750490188598633e-05,
+        9.931535601026553e-06,
+        -3.899606380031173e-07,
+        2.0306557416915894e-05,
+        0.0017922408878803253
+      ],
+      "commanded_delta": [
+        -0.05
+      ],
+      "commanded_indices": [
+        0
+      ],
+      "commanded_names": [
+        "waist"
+      ],
+      "direction": "negative",
+      "direction_ok": true,
+      "dof_names": [
+        "waist",
+        "shoulder",
+        "elbow",
+        "forearm_roll",
+        "wrist_angle",
+        "wrist_rotate",
+        "gripper",
+        "left_finger",
+        "right_finger"
+      ],
+      "end": [
+        -0.04918335750699043,
+        -0.9599484205245972,
+        1.1612520217895508,
+        0.0010610319441184402,
+        -0.2958259582519531,
+        9.495650374446996e-06,
+        -3.7280446463228145e-07,
+        0.05000848323106766,
+        -0.04821993038058281
+      ],
+      "fresh_world_reset": true,
+      "isolation_ok": true,
+      "joint_name": "waist",
+      "max_unexpected_delta": 0.0017922408878803253,
+      "range_ok": true,
+      "readback_ok": true,
+      "repeat": 0,
+      "start": [
+        1.568652987771202e-05,
+        -0.9599504470825195,
+        1.161245346069336,
+        0.0010992552852258086,
+        -0.2958734631538391,
+        -4.3588522657955764e-07,
+        1.715617337083586e-08,
+        0.04998817667365074,
+        -0.050012171268463135
+      ],
+      "status": "PASS",
+      "symmetric_residual": null,
+      "symmetry_ok": true,
+      "target": -0.04998431347012229,
+      "target_error": 0.000800955963131858,
+      "target_ok": true,
+      "test": "waist_negative"
+    },
+    {
+      "actual_delta": [
+        0.04923403329848952,
+        4.172325134277344e-07,
+        6.9141387939453125e-06,
+        3.425416070967913e-05,
+        5.030632019042969e-05,
+        -7.799415584486269e-06,
+        3.015654446159033e-07,
+        1.360476016998291e-05,
+        -0.0017078183591365814
+      ],
+      "commanded_delta": [
+        0.05
+      ],
+      "commanded_indices": [
+        0
+      ],
+      "commanded_names": [
+        "waist"
+      ],
+      "direction": "positive",
+      "direction_ok": true,
+      "dof_names": [
+        "waist",
+        "shoulder",
+        "elbow",
+        "forearm_roll",
+        "wrist_angle",
+        "wrist_rotate",
+        "gripper",
+        "left_finger",
+        "right_finger"
+      ],
+      "end": [
+        0.04924971982836723,
+        -0.9599500298500061,
+        1.1612522602081299,
+        0.0011335094459354877,
+        -0.2958231568336487,
+        -8.235300811065827e-06,
+        3.1872161798673915e-07,
+        0.050001781433820724,
+        -0.051719989627599716
+      ],
+      "fresh_world_reset": true,
+      "isolation_ok": true,
+      "joint_name": "waist",
+      "max_unexpected_delta": 0.0017078183591365814,
+      "range_ok": true,
+      "readback_ok": true,
+      "repeat": 0,
+      "start": [
+        1.568652987771202e-05,
+        -0.9599504470825195,
+        1.161245346069336,
+        0.0010992552852258086,
+        -0.2958734631538391,
+        -4.3588522657955764e-07,
+        1.715617337083586e-08,
+        0.04998817667365074,
+        -0.050012171268463135
+      ],
+      "status": "PASS",
+      "symmetric_residual": null,
+      "symmetry_ok": true,
+      "target": 0.050015686529877715,
+      "target_error": 0.0007659667015104815,
+      "target_ok": true,
+      "test": "waist_positive"
+    },
+    {
+      "actual_delta": [
+        -1.541790879855398e-06,
+        -0.05015718936920166,
+        7.3909759521484375e-06,
+        -3.86133324354887e-05,
+        2.1725893020629883e-05,
+        8.979179995094455e-07,
+        -3.428064943022946e-08,
+        -1.70096755027771e-05,
+        -2.4009495973587036e-05
+      ],
+      "commanded_delta": [
+        -0.050000000000000044
+      ],
+      "commanded_indices": [
+        1
+      ],
+      "commanded_names": [
+        "shoulder"
+      ],
+      "direction": "negative",
+      "direction_ok": true,
+      "dof_names": [
+        "waist",
+        "shoulder",
+        "elbow",
+        "forearm_roll",
+        "wrist_angle",
+        "wrist_rotate",
+        "gripper",
+        "left_finger",
+        "right_finger"
+      ],
+      "end": [
+        1.414473899785662e-05,
+        -1.0101076364517212,
+        1.161252737045288,
+        0.00106064195279032,
+        -0.2958517372608185,
+        4.6203277292988787e-07,
+        -1.71244760593936e-08,
+        0.049971166998147964,
+        -0.05003618076443672
+      ],
+      "fresh_world_reset": true,
+      "isolation_ok": true,
+      "joint_name": "shoulder",
+      "max_unexpected_delta": 3.86133324354887e-05,
+      "range_ok": true,
+      "readback_ok": true,
+      "repeat": 0,
+      "start": [
+        1.568652987771202e-05,
+        -0.9599504470825195,
+        1.161245346069336,
+        0.0010992552852258086,
+        -0.2958734631538391,
+        -4.3588522657955764e-07,
+        1.715617337083586e-08,
+        0.04998817667365074,
+        -0.050012171268463135
+      ],
+      "status": "PASS",
+      "symmetric_residual": null,
+      "symmetry_ok": true,
+      "target": -1.0099504470825196,
+      "target_error": 0.00015718936920161575,
+      "target_ok": true,
+      "test": "shoulder_negative"
+    },
+    {
+      "actual_delta": [
+        1.8598275346448645e-06,
+        0.050315678119659424,
+        2.1219253540039062e-05,
+        3.629771526902914e-05,
+        0.0001933574676513672,
+        2.2813258055975894e-06,
+        -9.075890794463248e-08,
+        -2.561509609222412e-05,
+        -3.324076533317566e-05
+      ],
+      "commanded_delta": [
+        0.050000000000000044
+      ],
+      "commanded_indices": [
+        1
+      ],
+      "commanded_names": [
+        "shoulder"
+      ],
+      "direction": "positive",
+      "direction_ok": true,
+      "dof_names": [
+        "waist",
+        "shoulder",
+        "elbow",
+        "forearm_roll",
+        "wrist_angle",
+        "wrist_rotate",
+        "gripper",
+        "left_finger",
+        "right_finger"
+      ],
+      "end": [
+        1.7546357412356883e-05,
+        -0.9096347689628601,
+        1.161266565322876,
+        0.0011355530004948378,
+        -0.29568010568618774,
+        1.8454405790180317e-06,
+        -7.360273457379662e-08,
+        0.04996256157755852,
+        -0.05004541203379631
+      ],
+      "fresh_world_reset": true,
+      "isolation_ok": true,
+      "joint_name": "shoulder",
+      "max_unexpected_delta": 0.0001933574676513672,
+      "range_ok": true,
+      "readback_ok": true,
+      "repeat": 0,
+      "start": [
+        1.568652987771202e-05,
+        -0.9599504470825195,
+        1.161245346069336,
+        0.0010992552852258086,
+        -0.2958734631538391,
+        -4.3588522657955764e-07,
+        1.715617337083586e-08,
+        0.04998817667365074,
+        -0.050012171268463135
+      ],
+      "status": "PASS",
+      "symmetric_residual": null,
+      "symmetry_ok": true,
+      "target": -0.9099504470825195,
+      "target_error": 0.0003156781196593794,
+      "target_ok": true,
+      "test": "shoulder_positive"
+    },
+    {
+      "actual_delta": [
+        -8.177921699825674e-07,
+        5.233287811279297e-05,
+        -0.04908275604248047,
+        -3.914348781108856e-06,
+        0.00028228759765625,
+        8.089972141078761e-07,
+        -3.075775190097829e-08,
+        -1.8015503883361816e-05,
+        -2.5682151317596436e-05
+      ],
+      "commanded_delta": [
+        -0.050000000000000044
+      ],
+      "commanded_indices": [
+        2
+      ],
+      "commanded_names": [
+        "elbow"
+      ],
+      "direction": "negative",
+      "direction_ok": true,
+      "dof_names": [
+        "waist",
+        "shoulder",
+        "elbow",
+        "forearm_roll",
+        "wrist_angle",
+        "wrist_rotate",
+        "gripper",
+        "left_finger",
+        "right_finger"
+      ],
+      "end": [
+        1.4868737707729451e-05,
+        -0.9598981142044067,
+        1.1121625900268555,
+        0.0010953409364446998,
+        -0.29559117555618286,
+        3.731119875283184e-07,
+        -1.3601578530142433e-08,
+        0.04997016116976738,
+        -0.05003785341978073
+      ],
+      "fresh_world_reset": true,
+      "isolation_ok": true,
+      "joint_name": "elbow",
+      "max_unexpected_delta": 0.00028228759765625,
+      "range_ok": true,
+      "readback_ok": true,
+      "repeat": 0,
+      "start": [
+        1.568652987771202e-05,
+        -0.9599504470825195,
+        1.161245346069336,
+        0.0010992552852258086,
+        -0.2958734631538391,
+        -4.3588522657955764e-07,
+        1.715617337083586e-08,
+        0.04998817667365074,
+        -0.050012171268463135
+      ],
+      "status": "PASS",
+      "symmetric_residual": null,
+      "symmetry_ok": true,
+      "target": 1.111245346069336,
+      "target_error": 0.0009172439575195757,
+      "target_ok": true,
+      "test": "elbow_negative"
+    },
+    {
+      "actual_delta": [
+        9.491031960351393e-07,
+        -4.2438507080078125e-05,
+        0.05155444145202637,
+        6.098998710513115e-07,
+        0.00017464160919189453,
+        2.4130953306666925e-06,
+        -9.443661319608054e-08,
+        -2.2806227207183838e-05,
+        -3.0212104320526123e-05
+      ],
+      "commanded_delta": [
+        0.050000000000000044
+      ],
+      "commanded_indices": [
+        2
+      ],
+      "commanded_names": [
+        "elbow"
+      ],
+      "direction": "positive",
+      "direction_ok": true,
+      "dof_names": [
+        "waist",
+        "shoulder",
+        "elbow",
+        "forearm_roll",
+        "wrist_angle",
+        "wrist_rotate",
+        "gripper",
+        "left_finger",
+        "right_finger"
+      ],
+      "end": [
+        1.6635633073747158e-05,
+        -0.9599928855895996,
+        1.2127997875213623,
+        0.00109986518509686,
+        -0.2956988215446472,
+        1.977210104087135e-06,
+        -7.728043982524468e-08,
+        0.04996537044644356,
+        -0.05004238337278366
+      ],
+      "fresh_world_reset": true,
+      "isolation_ok": true,
+      "joint_name": "elbow",
+      "max_unexpected_delta": 0.00017464160919189453,
+      "range_ok": true,
+      "readback_ok": true,
+      "repeat": 0,
+      "start": [
+        1.568652987771202e-05,
+        -0.9599504470825195,
+        1.161245346069336,
+        0.0010992552852258086,
+        -0.2958734631538391,
+        -4.3588522657955764e-07,
+        1.715617337083586e-08,
+        0.04998817667365074,
+        -0.050012171268463135
+      ],
+      "status": "PASS",
+      "symmetric_residual": null,
+      "symmetry_ok": true,
+      "target": 1.211245346069336,
+      "target_error": 0.0015544414520263228,
+      "target_ok": true,
+      "test": "elbow_positive"
+    },
+    {
+      "actual_delta": [
+        -1.574214365973603e-06,
+        2.980232238769531e-07,
+        2.5033950805664062e-05,
+        -0.04638303106185049,
+        3.838539123535156e-05,
+        4.273414458566549e-05,
+        -1.6529537898435365e-06,
+        0.0001252591609954834,
+        0.00021830573678016663
+      ],
+      "commanded_delta": [
+        -0.05
+      ],
+      "commanded_indices": [
+        3
+      ],
+      "commanded_names": [
+        "forearm_roll"
+      ],
+      "direction": "negative",
+      "direction_ok": true,
+      "dof_names": [
+        "waist",
+        "shoulder",
+        "elbow",
+        "forearm_roll",
+        "wrist_angle",
+        "wrist_rotate",
+        "gripper",
+        "left_finger",
+        "right_finger"
+      ],
+      "end": [
+        1.4112315511738416e-05,
+        -0.9599501490592957,
+        1.1612703800201416,
+        -0.04528377577662468,
+        -0.29583507776260376,
+        4.229825935908593e-05,
+        -1.6357976164727006e-06,
+        0.050113435834646225,
+        -0.04979386553168297
+      ],
+      "fresh_world_reset": true,
+      "isolation_ok": true,
+      "joint_name": "forearm_roll",
+      "max_unexpected_delta": 0.00021830573678016663,
+      "range_ok": true,
+      "readback_ok": true,
+      "repeat": 0,
+      "start": [
+        1.568652987771202e-05,
+        -0.9599504470825195,
+        1.161245346069336,
+        0.0010992552852258086,
+        -0.2958734631538391,
+        -4.3588522657955764e-07,
+        1.715617337083586e-08,
+        0.04998817667365074,
+        -0.050012171268463135
+      ],
+      "status": "PASS",
+      "symmetric_residual": null,
+      "symmetry_ok": true,
+      "target": -0.048900744714774194,
+      "target_error": 0.0036169689381495146,
+      "target_ok": true,
+      "test": "forearm_roll_negative"
+    },
+    {
+      "actual_delta": [
+        1.795091520762071e-06,
+        2.3245811462402344e-06,
+        -1.5497207641601562e-05,
+        0.04856750706676394,
+        3.018975257873535e-05,
+        -4.226239173021895e-05,
+        1.6538611706806705e-06,
+        -0.00012526661157608032,
+        -0.0002603866159915924
+      ],
+      "commanded_delta": [
+        0.05
+      ],
+      "commanded_indices": [
+        3
+      ],
+      "commanded_names": [
+        "forearm_roll"
+      ],
+      "direction": "positive",
+      "direction_ok": true,
+      "dof_names": [
+        "waist",
+        "shoulder",
+        "elbow",
+        "forearm_roll",
+        "wrist_angle",
+        "wrist_rotate",
+        "gripper",
+        "left_finger",
+        "right_finger"
+      ],
+      "end": [
+        1.748162139847409e-05,
+        -0.9599481225013733,
+        1.1612298488616943,
+        0.049666762351989746,
+        -0.2958432734012604,
+        -4.269827695679851e-05,
+        1.6710173440515064e-06,
+        0.04986291006207466,
+        -0.05027255788445473
+      ],
+      "fresh_world_reset": true,
+      "isolation_ok": true,
+      "joint_name": "forearm_roll",
+      "max_unexpected_delta": 0.0002603866159915924,
+      "range_ok": true,
+      "readback_ok": true,
+      "repeat": 0,
+      "start": [
+        1.568652987771202e-05,
+        -0.9599504470825195,
+        1.161245346069336,
+        0.0010992552852258086,
+        -0.2958734631538391,
+        -4.3588522657955764e-07,
+        1.715617337083586e-08,
+        0.04998817667365074,
+        -0.050012171268463135
+      ],
+      "status": "PASS",
+      "symmetric_residual": null,
+      "symmetry_ok": true,
+      "target": 0.05109925528522581,
+      "target_error": 0.0014324929332360653,
+      "target_ok": true,
+      "test": "forearm_roll_positive"
+    },
+    {
+      "actual_delta": [
+        3.47661625710316e-07,
+        -6.616115570068359e-06,
+        -6.413459777832031e-05,
+        -0.00018841674318537116,
+        -0.04609730839729309,
+        1.5150200169955497e-06,
+        -6.318732381771497e-08,
+        -2.1148473024368286e-05,
+        -2.796575427055359e-05
+      ],
+      "commanded_delta": [
+        -0.04999999999999999
+      ],
+      "commanded_indices": [
+        4
+      ],
+      "commanded_names": [
+        "wrist_angle"
+      ],
+      "direction": "negative",
+      "direction_ok": true,
+      "dof_names": [
+        "waist",
+        "shoulder",
+        "elbow",
+        "forearm_roll",
+        "wrist_angle",
+        "wrist_rotate",
+        "gripper",
+        "left_finger",
+        "right_finger"
+      ],
+      "end": [
+        1.6034191503422335e-05,
+        -0.9599570631980896,
+        1.1611812114715576,
+        0.0009108385420404375,
+        -0.3419707715511322,
+        1.079134790415992e-06,
+        -4.603115044687911e-08,
+        0.04996702820062637,
+        -0.05004013702273369
+      ],
+      "fresh_world_reset": true,
+      "isolation_ok": true,
+      "joint_name": "wrist_angle",
+      "max_unexpected_delta": 0.00018841674318537116,
+      "range_ok": true,
+      "readback_ok": true,
+      "repeat": 0,
+      "start": [
+        1.568652987771202e-05,
+        -0.9599504470825195,
+        1.161245346069336,
+        0.0010992552852258086,
+        -0.2958734631538391,
+        -4.3588522657955764e-07,
+        1.715617337083586e-08,
+        0.04998817667365074,
+        -0.050012171268463135
+      ],
+      "status": "PASS",
+      "symmetric_residual": null,
+      "symmetry_ok": true,
+      "target": -0.3458734631538391,
+      "target_error": 0.003902691602706898,
+      "target_ok": true,
+      "test": "wrist_angle_negative"
+    },
+    {
+      "actual_delta": [
+        -5.691663318430074e-07,
+        1.5020370483398438e-05,
+        7.021427154541016e-05,
+        0.0002710755215957761,
+        0.05465966463088989,
+        1.6671009461788344e-06,
+        -5.994282226140513e-08,
+        -2.1927058696746826e-05,
+        -2.941116690635681e-05
+      ],
+      "commanded_delta": [
+        0.04999999999999999
+      ],
+      "commanded_indices": [
+        4
+      ],
+      "commanded_names": [
+        "wrist_angle"
+      ],
+      "direction": "positive",
+      "direction_ok": true,
+      "dof_names": [
+        "waist",
+        "shoulder",
+        "elbow",
+        "forearm_roll",
+        "wrist_angle",
+        "wrist_rotate",
+        "gripper",
+        "left_finger",
+        "right_finger"
+      ],
+      "end": [
+        1.5117363545869011e-05,
+        -0.9599354267120361,
+        1.1613155603408813,
+        0.0013703308068215847,
+        -0.24121379852294922,
+        1.2312157195992768e-06,
+        -4.278664889056927e-08,
+        0.049966249614953995,
+        -0.05004158243536949
+      ],
+      "fresh_world_reset": true,
+      "isolation_ok": true,
+      "joint_name": "wrist_angle",
+      "max_unexpected_delta": 0.0002710755215957761,
+      "range_ok": true,
+      "readback_ok": true,
+      "repeat": 0,
+      "start": [
+        1.568652987771202e-05,
+        -0.9599504470825195,
+        1.161245346069336,
+        0.0010992552852258086,
+        -0.2958734631538391,
+        -4.3588522657955764e-07,
+        1.715617337083586e-08,
+        0.04998817667365074,
+        -0.050012171268463135
+      ],
+      "status": "PASS",
+      "symmetric_residual": null,
+      "symmetry_ok": true,
+      "target": -0.24587346315383912,
+      "target_error": 0.004659664630889904,
+      "target_ok": true,
+      "test": "wrist_angle_positive"
+    },
+    {
+      "actual_delta": [
+        1.2439977581379935e-06,
+        1.4901161193847656e-06,
+        6.318092346191406e-06,
+        1.2008706107735634e-05,
+        5.367398262023926e-05,
+        -0.04764181745406404,
+        -2.0211677220771662e-06,
+        4.0512531995773315e-05,
+        8.013471961021423e-05
+      ],
+      "commanded_delta": [
+        -0.05
+      ],
+      "commanded_indices": [
+        5
+      ],
+      "commanded_names": [
+        "wrist_rotate"
+      ],
+      "direction": "negative",
+      "direction_ok": true,
+      "dof_names": [
+        "waist",
+        "shoulder",
+        "elbow",
+        "forearm_roll",
+        "wrist_angle",
+        "wrist_rotate",
+        "gripper",
+        "left_finger",
+        "right_finger"
+      ],
+      "end": [
+        1.6930527635850012e-05,
+        -0.9599489569664001,
+        1.1612516641616821,
+        0.0011112639913335443,
+        -0.29581978917121887,
+        -0.04764225333929062,
+        -2.0040115487063304e-06,
+        0.050028689205646515,
+        -0.04993203654885292
+      ],
+      "fresh_world_reset": true,
+      "isolation_ok": true,
+      "joint_name": "wrist_rotate",
+      "max_unexpected_delta": 8.013471961021423e-05,
+      "range_ok": true,
+      "readback_ok": true,
+      "repeat": 0,
+      "start": [
+        1.568652987771202e-05,
+        -0.9599504470825195,
+        1.161245346069336,
+        0.0010992552852258086,
+        -0.2958734631538391,
+        -4.3588522657955764e-07,
+        1.715617337083586e-08,
+        0.04998817667365074,
+        -0.050012171268463135
+      ],
+      "status": "PASS",
+      "symmetric_residual": null,
+      "symmetry_ok": true,
+      "target": -0.05000043588522658,
+      "target_error": 0.0023581825459359634,
+      "target_ok": true,
+      "test": "wrist_rotate_negative"
+    },
+    {
+      "actual_delta": [
+        -1.1536976671777666e-06,
+        1.3709068298339844e-06,
+        6.4373016357421875e-06,
+        -1.2970645911991596e-05,
+        4.667043685913086e-05,
+        0.04764307665470824,
+        1.953089702411148e-06,
+        -5.2638351917266846e-05,
+        -0.00010336562991142273
+      ],
+      "commanded_delta": [
+        0.05
+      ],
+      "commanded_indices": [
+        5
+      ],
+      "commanded_names": [
+        "wrist_rotate"
+      ],
+      "direction": "positive",
+      "direction_ok": true,
+      "dof_names": [
+        "waist",
+        "shoulder",
+        "elbow",
+        "forearm_roll",
+        "wrist_angle",
+        "wrist_rotate",
+        "gripper",
+        "left_finger",
+        "right_finger"
+      ],
+      "end": [
+        1.4532832210534252e-05,
+        -0.9599490761756897,
+        1.1612517833709717,
+        0.001086284639313817,
+        -0.29582679271698,
+        0.04764264076948166,
+        1.970245875781984e-06,
+        0.049935538321733475,
+        -0.05011553689837456
+      ],
+      "fresh_world_reset": true,
+      "isolation_ok": true,
+      "joint_name": "wrist_rotate",
+      "max_unexpected_delta": 0.00010336562991142273,
+      "range_ok": true,
+      "readback_ok": true,
+      "repeat": 0,
+      "start": [
+        1.568652987771202e-05,
+        -0.9599504470825195,
+        1.161245346069336,
+        0.0010992552852258086,
+        -0.2958734631538391,
+        -4.3588522657955764e-07,
+        1.715617337083586e-08,
+        0.04998817667365074,
+        -0.050012171268463135
+      ],
+      "status": "PASS",
+      "symmetric_residual": null,
+      "symmetry_ok": true,
+      "target": 0.04999956411477342,
+      "target_error": 0.0023569233452917643,
+      "target_ok": true,
+      "test": "wrist_rotate_positive"
+    },
+    {
+      "actual_delta": [
+        -0.049199044036868145,
+        2.0265579223632812e-06,
+        6.67572021484375e-06,
+        -3.822334110736847e-05,
+        4.750490188598633e-05,
+        9.931535601026553e-06,
+        -3.899606380031173e-07,
+        2.0306557416915894e-05,
+        0.0017922408878803253
+      ],
+      "commanded_delta": [
+        -0.05
+      ],
+      "commanded_indices": [
+        0
+      ],
+      "commanded_names": [
+        "waist"
+      ],
+      "direction": "negative",
+      "direction_ok": true,
+      "dof_names": [
+        "waist",
+        "shoulder",
+        "elbow",
+        "forearm_roll",
+        "wrist_angle",
+        "wrist_rotate",
+        "gripper",
+        "left_finger",
+        "right_finger"
+      ],
+      "end": [
+        -0.04918335750699043,
+        -0.9599484205245972,
+        1.1612520217895508,
+        0.0010610319441184402,
+        -0.2958259582519531,
+        9.495650374446996e-06,
+        -3.7280446463228145e-07,
+        0.05000848323106766,
+        -0.04821993038058281
+      ],
+      "fresh_world_reset": true,
+      "isolation_ok": true,
+      "joint_name": "waist",
+      "max_unexpected_delta": 0.0017922408878803253,
+      "range_ok": true,
+      "readback_ok": true,
+      "repeat": 1,
+      "start": [
+        1.568652987771202e-05,
+        -0.9599504470825195,
+        1.161245346069336,
+        0.0010992552852258086,
+        -0.2958734631538391,
+        -4.3588522657955764e-07,
+        1.715617337083586e-08,
+        0.04998817667365074,
+        -0.050012171268463135
+      ],
+      "status": "PASS",
+      "symmetric_residual": null,
+      "symmetry_ok": true,
+      "target": -0.04998431347012229,
+      "target_error": 0.000800955963131858,
+      "target_ok": true,
+      "test": "waist_negative"
+    },
+    {
+      "actual_delta": [
+        0.04923403329848952,
+        4.172325134277344e-07,
+        6.9141387939453125e-06,
+        3.425416070967913e-05,
+        5.030632019042969e-05,
+        -7.799415584486269e-06,
+        3.015654446159033e-07,
+        1.360476016998291e-05,
+        -0.0017078183591365814
+      ],
+      "commanded_delta": [
+        0.05
+      ],
+      "commanded_indices": [
+        0
+      ],
+      "commanded_names": [
+        "waist"
+      ],
+      "direction": "positive",
+      "direction_ok": true,
+      "dof_names": [
+        "waist",
+        "shoulder",
+        "elbow",
+        "forearm_roll",
+        "wrist_angle",
+        "wrist_rotate",
+        "gripper",
+        "left_finger",
+        "right_finger"
+      ],
+      "end": [
+        0.04924971982836723,
+        -0.9599500298500061,
+        1.1612522602081299,
+        0.0011335094459354877,
+        -0.2958231568336487,
+        -8.235300811065827e-06,
+        3.1872161798673915e-07,
+        0.050001781433820724,
+        -0.051719989627599716
+      ],
+      "fresh_world_reset": true,
+      "isolation_ok": true,
+      "joint_name": "waist",
+      "max_unexpected_delta": 0.0017078183591365814,
+      "range_ok": true,
+      "readback_ok": true,
+      "repeat": 1,
+      "start": [
+        1.568652987771202e-05,
+        -0.9599504470825195,
+        1.161245346069336,
+        0.0010992552852258086,
+        -0.2958734631538391,
+        -4.3588522657955764e-07,
+        1.715617337083586e-08,
+        0.04998817667365074,
+        -0.050012171268463135
+      ],
+      "status": "PASS",
+      "symmetric_residual": null,
+      "symmetry_ok": true,
+      "target": 0.050015686529877715,
+      "target_error": 0.0007659667015104815,
+      "target_ok": true,
+      "test": "waist_positive"
+    },
+    {
+      "actual_delta": [
+        -1.541790879855398e-06,
+        -0.05015718936920166,
+        7.3909759521484375e-06,
+        -3.86133324354887e-05,
+        2.1725893020629883e-05,
+        8.979179995094455e-07,
+        -3.428064943022946e-08,
+        -1.70096755027771e-05,
+        -2.4009495973587036e-05
+      ],
+      "commanded_delta": [
+        -0.050000000000000044
+      ],
+      "commanded_indices": [
+        1
+      ],
+      "commanded_names": [
+        "shoulder"
+      ],
+      "direction": "negative",
+      "direction_ok": true,
+      "dof_names": [
+        "waist",
+        "shoulder",
+        "elbow",
+        "forearm_roll",
+        "wrist_angle",
+        "wrist_rotate",
+        "gripper",
+        "left_finger",
+        "right_finger"
+      ],
+      "end": [
+        1.414473899785662e-05,
+        -1.0101076364517212,
+        1.161252737045288,
+        0.00106064195279032,
+        -0.2958517372608185,
+        4.6203277292988787e-07,
+        -1.71244760593936e-08,
+        0.049971166998147964,
+        -0.05003618076443672
+      ],
+      "fresh_world_reset": true,
+      "isolation_ok": true,
+      "joint_name": "shoulder",
+      "max_unexpected_delta": 3.86133324354887e-05,
+      "range_ok": true,
+      "readback_ok": true,
+      "repeat": 1,
+      "start": [
+        1.568652987771202e-05,
+        -0.9599504470825195,
+        1.161245346069336,
+        0.0010992552852258086,
+        -0.2958734631538391,
+        -4.3588522657955764e-07,
+        1.715617337083586e-08,
+        0.04998817667365074,
+        -0.050012171268463135
+      ],
+      "status": "PASS",
+      "symmetric_residual": null,
+      "symmetry_ok": true,
+      "target": -1.0099504470825196,
+      "target_error": 0.00015718936920161575,
+      "target_ok": true,
+      "test": "shoulder_negative"
+    },
+    {
+      "actual_delta": [
+        1.8598275346448645e-06,
+        0.050315678119659424,
+        2.1219253540039062e-05,
+        3.629771526902914e-05,
+        0.0001933574676513672,
+        2.2813258055975894e-06,
+        -9.075890794463248e-08,
+        -2.561509609222412e-05,
+        -3.324076533317566e-05
+      ],
+      "commanded_delta": [
+        0.050000000000000044
+      ],
+      "commanded_indices": [
+        1
+      ],
+      "commanded_names": [
+        "shoulder"
+      ],
+      "direction": "positive",
+      "direction_ok": true,
+      "dof_names": [
+        "waist",
+        "shoulder",
+        "elbow",
+        "forearm_roll",
+        "wrist_angle",
+        "wrist_rotate",
+        "gripper",
+        "left_finger",
+        "right_finger"
+      ],
+      "end": [
+        1.7546357412356883e-05,
+        -0.9096347689628601,
+        1.161266565322876,
+        0.0011355530004948378,
+        -0.29568010568618774,
+        1.8454405790180317e-06,
+        -7.360273457379662e-08,
+        0.04996256157755852,
+        -0.05004541203379631
+      ],
+      "fresh_world_reset": true,
+      "isolation_ok": true,
+      "joint_name": "shoulder",
+      "max_unexpected_delta": 0.0001933574676513672,
+      "range_ok": true,
+      "readback_ok": true,
+      "repeat": 1,
+      "start": [
+        1.568652987771202e-05,
+        -0.9599504470825195,
+        1.161245346069336,
+        0.0010992552852258086,
+        -0.2958734631538391,
+        -4.3588522657955764e-07,
+        1.715617337083586e-08,
+        0.04998817667365074,
+        -0.050012171268463135
+      ],
+      "status": "PASS",
+      "symmetric_residual": null,
+      "symmetry_ok": true,
+      "target": -0.9099504470825195,
+      "target_error": 0.0003156781196593794,
+      "target_ok": true,
+      "test": "shoulder_positive"
+    },
+    {
+      "actual_delta": [
+        -8.177921699825674e-07,
+        5.233287811279297e-05,
+        -0.04908275604248047,
+        -3.914348781108856e-06,
+        0.00028228759765625,
+        8.089972141078761e-07,
+        -3.075775190097829e-08,
+        -1.8015503883361816e-05,
+        -2.5682151317596436e-05
+      ],
+      "commanded_delta": [
+        -0.050000000000000044
+      ],
+      "commanded_indices": [
+        2
+      ],
+      "commanded_names": [
+        "elbow"
+      ],
+      "direction": "negative",
+      "direction_ok": true,
+      "dof_names": [
+        "waist",
+        "shoulder",
+        "elbow",
+        "forearm_roll",
+        "wrist_angle",
+        "wrist_rotate",
+        "gripper",
+        "left_finger",
+        "right_finger"
+      ],
+      "end": [
+        1.4868737707729451e-05,
+        -0.9598981142044067,
+        1.1121625900268555,
+        0.0010953409364446998,
+        -0.29559117555618286,
+        3.731119875283184e-07,
+        -1.3601578530142433e-08,
+        0.04997016116976738,
+        -0.05003785341978073
+      ],
+      "fresh_world_reset": true,
+      "isolation_ok": true,
+      "joint_name": "elbow",
+      "max_unexpected_delta": 0.00028228759765625,
+      "range_ok": true,
+      "readback_ok": true,
+      "repeat": 1,
+      "start": [
+        1.568652987771202e-05,
+        -0.9599504470825195,
+        1.161245346069336,
+        0.0010992552852258086,
+        -0.2958734631538391,
+        -4.3588522657955764e-07,
+        1.715617337083586e-08,
+        0.04998817667365074,
+        -0.050012171268463135
+      ],
+      "status": "PASS",
+      "symmetric_residual": null,
+      "symmetry_ok": true,
+      "target": 1.111245346069336,
+      "target_error": 0.0009172439575195757,
+      "target_ok": true,
+      "test": "elbow_negative"
+    },
+    {
+      "actual_delta": [
+        9.491031960351393e-07,
+        -4.2438507080078125e-05,
+        0.05155444145202637,
+        6.098998710513115e-07,
+        0.00017464160919189453,
+        2.4130953306666925e-06,
+        -9.443661319608054e-08,
+        -2.2806227207183838e-05,
+        -3.0212104320526123e-05
+      ],
+      "commanded_delta": [
+        0.050000000000000044
+      ],
+      "commanded_indices": [
+        2
+      ],
+      "commanded_names": [
+        "elbow"
+      ],
+      "direction": "positive",
+      "direction_ok": true,
+      "dof_names": [
+        "waist",
+        "shoulder",
+        "elbow",
+        "forearm_roll",
+        "wrist_angle",
+        "wrist_rotate",
+        "gripper",
+        "left_finger",
+        "right_finger"
+      ],
+      "end": [
+        1.6635633073747158e-05,
+        -0.9599928855895996,
+        1.2127997875213623,
+        0.00109986518509686,
+        -0.2956988215446472,
+        1.977210104087135e-06,
+        -7.728043982524468e-08,
+        0.04996537044644356,
+        -0.05004238337278366
+      ],
+      "fresh_world_reset": true,
+      "isolation_ok": true,
+      "joint_name": "elbow",
+      "max_unexpected_delta": 0.00017464160919189453,
+      "range_ok": true,
+      "readback_ok": true,
+      "repeat": 1,
+      "start": [
+        1.568652987771202e-05,
+        -0.9599504470825195,
+        1.161245346069336,
+        0.0010992552852258086,
+        -0.2958734631538391,
+        -4.3588522657955764e-07,
+        1.715617337083586e-08,
+        0.04998817667365074,
+        -0.050012171268463135
+      ],
+      "status": "PASS",
+      "symmetric_residual": null,
+      "symmetry_ok": true,
+      "target": 1.211245346069336,
+      "target_error": 0.0015544414520263228,
+      "target_ok": true,
+      "test": "elbow_positive"
+    },
+    {
+      "actual_delta": [
+        -1.574214365973603e-06,
+        2.980232238769531e-07,
+        2.5033950805664062e-05,
+        -0.04638303106185049,
+        3.838539123535156e-05,
+        4.273414458566549e-05,
+        -1.6529537898435365e-06,
+        0.0001252591609954834,
+        0.00021830573678016663
+      ],
+      "commanded_delta": [
+        -0.05
+      ],
+      "commanded_indices": [
+        3
+      ],
+      "commanded_names": [
+        "forearm_roll"
+      ],
+      "direction": "negative",
+      "direction_ok": true,
+      "dof_names": [
+        "waist",
+        "shoulder",
+        "elbow",
+        "forearm_roll",
+        "wrist_angle",
+        "wrist_rotate",
+        "gripper",
+        "left_finger",
+        "right_finger"
+      ],
+      "end": [
+        1.4112315511738416e-05,
+        -0.9599501490592957,
+        1.1612703800201416,
+        -0.04528377577662468,
+        -0.29583507776260376,
+        4.229825935908593e-05,
+        -1.6357976164727006e-06,
+        0.050113435834646225,
+        -0.04979386553168297
+      ],
+      "fresh_world_reset": true,
+      "isolation_ok": true,
+      "joint_name": "forearm_roll",
+      "max_unexpected_delta": 0.00021830573678016663,
+      "range_ok": true,
+      "readback_ok": true,
+      "repeat": 1,
+      "start": [
+        1.568652987771202e-05,
+        -0.9599504470825195,
+        1.161245346069336,
+        0.0010992552852258086,
+        -0.2958734631538391,
+        -4.3588522657955764e-07,
+        1.715617337083586e-08,
+        0.04998817667365074,
+        -0.050012171268463135
+      ],
+      "status": "PASS",
+      "symmetric_residual": null,
+      "symmetry_ok": true,
+      "target": -0.048900744714774194,
+      "target_error": 0.0036169689381495146,
+      "target_ok": true,
+      "test": "forearm_roll_negative"
+    },
+    {
+      "actual_delta": [
+        1.795091520762071e-06,
+        2.3245811462402344e-06,
+        -1.5497207641601562e-05,
+        0.04856750706676394,
+        3.018975257873535e-05,
+        -4.226239173021895e-05,
+        1.6538611706806705e-06,
+        -0.00012526661157608032,
+        -0.0002603866159915924
+      ],
+      "commanded_delta": [
+        0.05
+      ],
+      "commanded_indices": [
+        3
+      ],
+      "commanded_names": [
+        "forearm_roll"
+      ],
+      "direction": "positive",
+      "direction_ok": true,
+      "dof_names": [
+        "waist",
+        "shoulder",
+        "elbow",
+        "forearm_roll",
+        "wrist_angle",
+        "wrist_rotate",
+        "gripper",
+        "left_finger",
+        "right_finger"
+      ],
+      "end": [
+        1.748162139847409e-05,
+        -0.9599481225013733,
+        1.1612298488616943,
+        0.049666762351989746,
+        -0.2958432734012604,
+        -4.269827695679851e-05,
+        1.6710173440515064e-06,
+        0.04986291006207466,
+        -0.05027255788445473
+      ],
+      "fresh_world_reset": true,
+      "isolation_ok": true,
+      "joint_name": "forearm_roll",
+      "max_unexpected_delta": 0.0002603866159915924,
+      "range_ok": true,
+      "readback_ok": true,
+      "repeat": 1,
+      "start": [
+        1.568652987771202e-05,
+        -0.9599504470825195,
+        1.161245346069336,
+        0.0010992552852258086,
+        -0.2958734631538391,
+        -4.3588522657955764e-07,
+        1.715617337083586e-08,
+        0.04998817667365074,
+        -0.050012171268463135
+      ],
+      "status": "PASS",
+      "symmetric_residual": null,
+      "symmetry_ok": true,
+      "target": 0.05109925528522581,
+      "target_error": 0.0014324929332360653,
+      "target_ok": true,
+      "test": "forearm_roll_positive"
+    },
+    {
+      "actual_delta": [
+        3.47661625710316e-07,
+        -6.616115570068359e-06,
+        -6.413459777832031e-05,
+        -0.00018841674318537116,
+        -0.04609730839729309,
+        1.5150200169955497e-06,
+        -6.318732381771497e-08,
+        -2.1148473024368286e-05,
+        -2.796575427055359e-05
+      ],
+      "commanded_delta": [
+        -0.04999999999999999
+      ],
+      "commanded_indices": [
+        4
+      ],
+      "commanded_names": [
+        "wrist_angle"
+      ],
+      "direction": "negative",
+      "direction_ok": true,
+      "dof_names": [
+        "waist",
+        "shoulder",
+        "elbow",
+        "forearm_roll",
+        "wrist_angle",
+        "wrist_rotate",
+        "gripper",
+        "left_finger",
+        "right_finger"
+      ],
+      "end": [
+        1.6034191503422335e-05,
+        -0.9599570631980896,
+        1.1611812114715576,
+        0.0009108385420404375,
+        -0.3419707715511322,
+        1.079134790415992e-06,
+        -4.603115044687911e-08,
+        0.04996702820062637,
+        -0.05004013702273369
+      ],
+      "fresh_world_reset": true,
+      "isolation_ok": true,
+      "joint_name": "wrist_angle",
+      "max_unexpected_delta": 0.00018841674318537116,
+      "range_ok": true,
+      "readback_ok": true,
+      "repeat": 1,
+      "start": [
+        1.568652987771202e-05,
+        -0.9599504470825195,
+        1.161245346069336,
+        0.0010992552852258086,
+        -0.2958734631538391,
+        -4.3588522657955764e-07,
+        1.715617337083586e-08,
+        0.04998817667365074,
+        -0.050012171268463135
+      ],
+      "status": "PASS",
+      "symmetric_residual": null,
+      "symmetry_ok": true,
+      "target": -0.3458734631538391,
+      "target_error": 0.003902691602706898,
+      "target_ok": true,
+      "test": "wrist_angle_negative"
+    },
+    {
+      "actual_delta": [
+        -5.691663318430074e-07,
+        1.5020370483398438e-05,
+        7.021427154541016e-05,
+        0.0002710755215957761,
+        0.05465966463088989,
+        1.6671009461788344e-06,
+        -5.994282226140513e-08,
+        -2.1927058696746826e-05,
+        -2.941116690635681e-05
+      ],
+      "commanded_delta": [
+        0.04999999999999999
+      ],
+      "commanded_indices": [
+        4
+      ],
+      "commanded_names": [
+        "wrist_angle"
+      ],
+      "direction": "positive",
+      "direction_ok": true,
+      "dof_names": [
+        "waist",
+        "shoulder",
+        "elbow",
+        "forearm_roll",
+        "wrist_angle",
+        "wrist_rotate",
+        "gripper",
+        "left_finger",
+        "right_finger"
+      ],
+      "end": [
+        1.5117363545869011e-05,
+        -0.9599354267120361,
+        1.1613155603408813,
+        0.0013703308068215847,
+        -0.24121379852294922,
+        1.2312157195992768e-06,
+        -4.278664889056927e-08,
+        0.049966249614953995,
+        -0.05004158243536949
+      ],
+      "fresh_world_reset": true,
+      "isolation_ok": true,
+      "joint_name": "wrist_angle",
+      "max_unexpected_delta": 0.0002710755215957761,
+      "range_ok": true,
+      "readback_ok": true,
+      "repeat": 1,
+      "start": [
+        1.568652987771202e-05,
+        -0.9599504470825195,
+        1.161245346069336,
+        0.0010992552852258086,
+        -0.2958734631538391,
+        -4.3588522657955764e-07,
+        1.715617337083586e-08,
+        0.04998817667365074,
+        -0.050012171268463135
+      ],
+      "status": "PASS",
+      "symmetric_residual": null,
+      "symmetry_ok": true,
+      "target": -0.24587346315383912,
+      "target_error": 0.004659664630889904,
+      "target_ok": true,
+      "test": "wrist_angle_positive"
+    },
+    {
+      "actual_delta": [
+        1.2439977581379935e-06,
+        1.4901161193847656e-06,
+        6.318092346191406e-06,
+        1.2008706107735634e-05,
+        5.367398262023926e-05,
+        -0.04764181745406404,
+        -2.0211677220771662e-06,
+        4.0512531995773315e-05,
+        8.013471961021423e-05
+      ],
+      "commanded_delta": [
+        -0.05
+      ],
+      "commanded_indices": [
+        5
+      ],
+      "commanded_names": [
+        "wrist_rotate"
+      ],
+      "direction": "negative",
+      "direction_ok": true,
+      "dof_names": [
+        "waist",
+        "shoulder",
+        "elbow",
+        "forearm_roll",
+        "wrist_angle",
+        "wrist_rotate",
+        "gripper",
+        "left_finger",
+        "right_finger"
+      ],
+      "end": [
+        1.6930527635850012e-05,
+        -0.9599489569664001,
+        1.1612516641616821,
+        0.0011112639913335443,
+        -0.29581978917121887,
+        -0.04764225333929062,
+        -2.0040115487063304e-06,
+        0.050028689205646515,
+        -0.04993203654885292
+      ],
+      "fresh_world_reset": true,
+      "isolation_ok": true,
+      "joint_name": "wrist_rotate",
+      "max_unexpected_delta": 8.013471961021423e-05,
+      "range_ok": true,
+      "readback_ok": true,
+      "repeat": 1,
+      "start": [
+        1.568652987771202e-05,
+        -0.9599504470825195,
+        1.161245346069336,
+        0.0010992552852258086,
+        -0.2958734631538391,
+        -4.3588522657955764e-07,
+        1.715617337083586e-08,
+        0.04998817667365074,
+        -0.050012171268463135
+      ],
+      "status": "PASS",
+      "symmetric_residual": null,
+      "symmetry_ok": true,
+      "target": -0.05000043588522658,
+      "target_error": 0.0023581825459359634,
+      "target_ok": true,
+      "test": "wrist_rotate_negative"
+    },
+    {
+      "actual_delta": [
+        -1.1536976671777666e-06,
+        1.3709068298339844e-06,
+        6.4373016357421875e-06,
+        -1.2970645911991596e-05,
+        4.667043685913086e-05,
+        0.04764307665470824,
+        1.953089702411148e-06,
+        -5.2638351917266846e-05,
+        -0.00010336562991142273
+      ],
+      "commanded_delta": [
+        0.05
+      ],
+      "commanded_indices": [
+        5
+      ],
+      "commanded_names": [
+        "wrist_rotate"
+      ],
+      "direction": "positive",
+      "direction_ok": true,
+      "dof_names": [
+        "waist",
+        "shoulder",
+        "elbow",
+        "forearm_roll",
+        "wrist_angle",
+        "wrist_rotate",
+        "gripper",
+        "left_finger",
+        "right_finger"
+      ],
+      "end": [
+        1.4532832210534252e-05,
+        -0.9599490761756897,
+        1.1612517833709717,
+        0.001086284639313817,
+        -0.29582679271698,
+        0.04764264076948166,
+        1.970245875781984e-06,
+        0.049935538321733475,
+        -0.05011553689837456
+      ],
+      "fresh_world_reset": true,
+      "isolation_ok": true,
+      "joint_name": "wrist_rotate",
+      "max_unexpected_delta": 0.00010336562991142273,
+      "range_ok": true,
+      "readback_ok": true,
+      "repeat": 1,
+      "start": [
+        1.568652987771202e-05,
+        -0.9599504470825195,
+        1.161245346069336,
+        0.0010992552852258086,
+        -0.2958734631538391,
+        -4.3588522657955764e-07,
+        1.715617337083586e-08,
+        0.04998817667365074,
+        -0.050012171268463135
+      ],
+      "status": "PASS",
+      "symmetric_residual": null,
+      "symmetry_ok": true,
+      "target": 0.04999956411477342,
+      "target_error": 0.0023569233452917643,
+      "target_ok": true,
+      "test": "wrist_rotate_positive"
+    }
+  ],
+  "articulation_path": "/follower_right/vx300s_right/root_joint",
+  "component_status": {
+    "aperture_monotonicity": "PASS",
+    "arm_one_joint_direction_range": "PASS",
+    "determinism": "PASS",
+    "first_frame_jump": "PASS",
+    "gripper_motion_direction": "PASS",
+    "mimic_accuracy": "FAIL",
+    "static_pose_hold": "PASS"
+  },
+  "curve_csv": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_follower_right_one_joint_curves.csv",
+  "determinism": {
+    "repeat_count": 2,
+    "signatures": [
+      "19b764e16470204029a907c9f64a2092dc69d2438ee9e7e49adcfa93c84c0f2b",
+      "19b764e16470204029a907c9f64a2092dc69d2438ee9e7e49adcfa93c84c0f2b"
+    ],
+    "status": "PASS",
+    "unique_signature_count": 1,
+    "unique_signatures": [
+      "19b764e16470204029a907c9f64a2092dc69d2438ee9e7e49adcfa93c84c0f2b"
+    ]
+  },
+  "dof_order": [
+    "waist",
+    "shoulder",
+    "elbow",
+    "forearm_roll",
+    "wrist_angle",
+    "wrist_rotate",
+    "gripper",
+    "left_finger",
+    "right_finger"
+  ],
+  "dof_properties": [
+    {
+      "damping": 5.729578018188477,
+      "hasLimits": true,
+      "index": 0,
+      "lower": -3.141582489013672,
+      "maxEffort": 10.0,
+      "maxVelocity": 3.1415927410125732,
+      "name": "waist",
+      "stiffness": 35809.86328125,
+      "upper": 3.141582489013672
+    },
+    {
+      "damping": 5.729578018188477,
+      "hasLimits": true,
+      "index": 1,
+      "lower": -1.8500488996505737,
+      "maxEffort": 20.0,
+      "maxVelocity": 3.1415927410125732,
+      "name": "shoulder",
+      "stiffness": 35809.86328125,
+      "upper": 1.2566370964050293
+    },
+    {
+      "damping": 5.729578018188477,
+      "hasLimits": true,
+      "index": 2,
+      "lower": -1.7627824544906616,
+      "maxEffort": 15.0,
+      "maxVelocity": 3.1415927410125732,
+      "name": "elbow",
+      "stiffness": 35809.86328125,
+      "upper": 1.6057027578353882
+    },
+    {
+      "damping": 5.729578018188477,
+      "hasLimits": true,
+      "index": 3,
+      "lower": -3.141582489013672,
+      "maxEffort": 2.0,
+      "maxVelocity": 3.1415927410125732,
+      "name": "forearm_roll",
+      "stiffness": 35809.86328125,
+      "upper": 3.141582489013672
+    },
+    {
+      "damping": 5.729578018188477,
+      "hasLimits": true,
+      "index": 4,
+      "lower": -1.8675020933151245,
+      "maxEffort": 5.0,
+      "maxVelocity": 3.1415927410125732,
+      "name": "wrist_angle",
+      "stiffness": 35809.86328125,
+      "upper": 2.2340211868286133
+    },
+    {
+      "damping": 5.729578018188477,
+      "hasLimits": true,
+      "index": 5,
+      "lower": -3.141582489013672,
+      "maxEffort": 1.0,
+      "maxVelocity": 3.1415927410125732,
+      "name": "wrist_rotate",
+      "stiffness": 35809.86328125,
+      "upper": 3.141582489013672
+    },
+    {
+      "damping": 5.729578018188477,
+      "hasLimits": true,
+      "index": 6,
+      "lower": -3.4028234663852886e+38,
+      "maxEffort": 1.0,
+      "maxVelocity": 3.1415927410125732,
+      "name": "gripper",
+      "stiffness": 35809.86328125,
+      "upper": 3.4028234663852886e+38
+    },
+    {
+      "damping": 0.10000000149011612,
+      "hasLimits": true,
+      "index": 7,
+      "lower": 0.020999999716877937,
+      "maxEffort": 5.0,
+      "maxVelocity": 1.0,
+      "name": "left_finger",
+      "stiffness": 625.0,
+      "upper": 0.05700000002980232
+    },
+    {
+      "damping": 0.0,
+      "hasLimits": true,
+      "index": 8,
+      "lower": -0.06419999897480011,
+      "maxEffort": 0.0,
+      "maxVelocity": 3.4028234663852886e+38,
+      "name": "right_finger",
+      "stiffness": 0.0,
+      "upper": -0.013799999840557575
+    }
+  ],
+  "first_frame_jump": {
+    "absolute_delta": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "after_first_frame": [
+      1.568652987771202e-05,
+      -0.9599504470825195,
+      1.161245346069336,
+      0.0010992552852258086,
+      -0.2958734631538391,
+      -4.3588522657955764e-07,
+      1.715617337083586e-08,
+      0.04998817667365074,
+      -0.050012171268463135
+    ],
+    "maximum_delta": 0.0,
+    "start": [
+      1.568652987771202e-05,
+      -0.9599504470825195,
+      1.161245346069336,
+      0.0010992552852258086,
+      -0.2958734631538391,
+      -4.3588522657955764e-07,
+      1.715617337083586e-08,
+      0.04998817667365074,
+      -0.050012171268463135
+    ],
+    "status": "PASS",
+    "threshold": 0.01
+  },
+  "gripper_validation": {
+    "all_repeats": [
+      {
+        "aperture_m": 0.04318271763622761,
+        "fresh_world_reset": true,
+        "legal_range": true,
+        "mimic_residual_m": 0.0011666473001241684,
+        "readback_left_m": 0.02100803516805172,
+        "readback_right_m": -0.022174682468175888,
+        "repeat": 0,
+        "state": "closed",
+        "status": "FAIL",
+        "target_left_m": 0.021,
+        "terminal_target_settle_steps": 30,
+        "test": "gripper_closed"
+      },
+      {
+        "aperture_m": 0.08143207058310509,
+        "fresh_world_reset": true,
+        "legal_range": true,
+        "mimic_residual_m": 0.0015670843422412872,
+        "readback_left_m": 0.0399324931204319,
+        "readback_right_m": -0.04149957746267319,
+        "repeat": 0,
+        "state": "partially_closed",
+        "status": "FAIL",
+        "target_left_m": 0.039,
+        "terminal_target_settle_steps": 30,
+        "test": "gripper_partially_closed"
+      },
+      {
+        "aperture_m": 0.10112025588750839,
+        "fresh_world_reset": true,
+        "legal_range": true,
+        "mimic_residual_m": 0.0009673014283180237,
+        "readback_left_m": 0.05104377865791321,
+        "readback_right_m": -0.050076477229595184,
+        "repeat": 0,
+        "state": "open",
+        "status": "PASS",
+        "target_left_m": 0.052,
+        "terminal_target_settle_steps": 30,
+        "test": "gripper_open"
+      },
+      {
+        "aperture_m": 0.11012737452983856,
+        "fresh_world_reset": true,
+        "legal_range": true,
+        "mimic_residual_m": 0.0017154589295387268,
+        "readback_left_m": 0.055921416729688644,
+        "readback_right_m": -0.05420595780014992,
+        "repeat": 0,
+        "state": "maximum_legal_aperture",
+        "status": "FAIL",
+        "target_left_m": 0.057,
+        "terminal_target_settle_steps": 30,
+        "test": "gripper_maximum_legal_aperture"
+      },
+      {
+        "aperture_m": 0.04318271763622761,
+        "fresh_world_reset": true,
+        "legal_range": true,
+        "mimic_residual_m": 0.0011666473001241684,
+        "readback_left_m": 0.02100803516805172,
+        "readback_right_m": -0.022174682468175888,
+        "repeat": 1,
+        "state": "closed",
+        "status": "FAIL",
+        "target_left_m": 0.021,
+        "terminal_target_settle_steps": 30,
+        "test": "gripper_closed"
+      },
+      {
+        "aperture_m": 0.08143207058310509,
+        "fresh_world_reset": true,
+        "legal_range": true,
+        "mimic_residual_m": 0.0015670843422412872,
+        "readback_left_m": 0.0399324931204319,
+        "readback_right_m": -0.04149957746267319,
+        "repeat": 1,
+        "state": "partially_closed",
+        "status": "FAIL",
+        "target_left_m": 0.039,
+        "terminal_target_settle_steps": 30,
+        "test": "gripper_partially_closed"
+      },
+      {
+        "aperture_m": 0.10112025588750839,
+        "fresh_world_reset": true,
+        "legal_range": true,
+        "mimic_residual_m": 0.0009673014283180237,
+        "readback_left_m": 0.05104377865791321,
+        "readback_right_m": -0.050076477229595184,
+        "repeat": 1,
+        "state": "open",
+        "status": "PASS",
+        "target_left_m": 0.052,
+        "terminal_target_settle_steps": 30,
+        "test": "gripper_open"
+      },
+      {
+        "aperture_m": 0.11012737452983856,
+        "fresh_world_reset": true,
+        "legal_range": true,
+        "mimic_residual_m": 0.0017154589295387268,
+        "readback_left_m": 0.055921416729688644,
+        "readback_right_m": -0.05420595780014992,
+        "repeat": 1,
+        "state": "maximum_legal_aperture",
+        "status": "FAIL",
+        "target_left_m": 0.057,
+        "terminal_target_settle_steps": 30,
+        "test": "gripper_maximum_legal_aperture"
+      }
+    ],
+    "aperture_monotonicity": "PASS",
+    "control_mode": "SOURCE_URDF_MIMIC_LEFT_DRIVEN",
+    "legal_range": "PASS",
+    "maximum_mimic_residual_m": 0.0017154589295387268,
+    "mimic_multiplier": -1.0,
+    "mimic_offset": 0.0,
+    "mimic_parent": "left_finger",
+    "motion_direction": "PASS",
+    "states": {
+      "closed": {
+        "aperture_m": 0.04318271763622761,
+        "fresh_world_reset": true,
+        "legal_range": true,
+        "mimic_residual_m": 0.0011666473001241684,
+        "readback_left_m": 0.02100803516805172,
+        "readback_right_m": -0.022174682468175888,
+        "repeat": 0,
+        "state": "closed",
+        "status": "FAIL",
+        "target_left_m": 0.021,
+        "terminal_target_settle_steps": 30,
+        "test": "gripper_closed"
+      },
+      "maximum_legal_aperture": {
+        "aperture_m": 0.11012737452983856,
+        "fresh_world_reset": true,
+        "legal_range": true,
+        "mimic_residual_m": 0.0017154589295387268,
+        "readback_left_m": 0.055921416729688644,
+        "readback_right_m": -0.05420595780014992,
+        "repeat": 0,
+        "state": "maximum_legal_aperture",
+        "status": "FAIL",
+        "target_left_m": 0.057,
+        "terminal_target_settle_steps": 30,
+        "test": "gripper_maximum_legal_aperture"
+      },
+      "open": {
+        "aperture_m": 0.10112025588750839,
+        "fresh_world_reset": true,
+        "legal_range": true,
+        "mimic_residual_m": 0.0009673014283180237,
+        "readback_left_m": 0.05104377865791321,
+        "readback_right_m": -0.050076477229595184,
+        "repeat": 0,
+        "state": "open",
+        "status": "PASS",
+        "target_left_m": 0.052,
+        "terminal_target_settle_steps": 30,
+        "test": "gripper_open"
+      },
+      "partially_closed": {
+        "aperture_m": 0.08143207058310509,
+        "fresh_world_reset": true,
+        "legal_range": true,
+        "mimic_residual_m": 0.0015670843422412872,
+        "readback_left_m": 0.0399324931204319,
+        "readback_right_m": -0.04149957746267319,
+        "repeat": 0,
+        "state": "partially_closed",
+        "status": "FAIL",
+        "target_left_m": 0.039,
+        "terminal_target_settle_steps": 30,
+        "test": "gripper_partially_closed"
+      }
+    },
+    "status": "FAIL"
+  },
+  "hard_blockers": [
+    "HARD_BLOCKER_FOLLOWER_RIGHT_WORKCELL_INSTALL_TRANSFORM"
+  ],
+  "protocol": {
+    "home_settle_steps": 30,
+    "motion_steps": 60,
+    "terminal_target_held_constant": true,
+    "terminal_target_settle_steps": 30
+  },
+  "runtime": {
+    "isaac_sim": "5.1.0.0",
+    "kit": "107.3.3",
+    "physics_frequency_hz": 60,
+    "physx": "107.3.26",
+    "solve_articulation_contact_last": true
+  },
+  "schema_version": 1,
+  "scope": "ROBOT_LOCAL_DIAGNOSTIC_NOT_WORKCELL_PLACEMENT",
+  "screenshots": "PENDING_SEPARATE_RAW_AND_ANNOTATED_EVIDENCE",
+  "stage": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/supplier_cad_follower_right.usda",
+    "immutable": true,
+    "sha256_after": "95c7878f794f5f557b70997a2240b6476836b8ffbeed5a4992cb114a169487ea",
+    "sha256_before": "95c7878f794f5f557b70997a2240b6476836b8ffbeed5a4992cb114a169487ea"
+  },
+  "static_pose_hold": {
+    "arm_threshold": 0.02,
+    "duration_s": 2.0,
+    "finger_threshold": 0.002,
+    "frame_count": 120,
+    "maximum_arm_drift": 0.0,
+    "maximum_auxiliary_gripper_drift": 0.0,
+    "maximum_finger_drift": 0.0,
+    "status": "PASS"
+  },
+  "status": "PARTIAL",
+  "task8": "NOT_RUN",
+  "workcell_placement_verified": false
+}

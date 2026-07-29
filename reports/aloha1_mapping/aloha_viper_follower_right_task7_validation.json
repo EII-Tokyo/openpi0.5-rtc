@@ -1,0 +1,260 @@
+{
+  "acceptance_boundary": "This report validates only the isolated follower_right robot product in its local frame. It does not validate a dual-arm workcell placement. Visual screenshots are auxiliary; numeric runtime and official-rule results are authoritative.",
+  "dual_arm_workcell_placement": {
+    "reason": "Robot-local product identity is verified; no supplier CAD or measured follower_right workcell installation transform has been accepted.",
+    "status": "PARTIAL",
+    "verified": false
+  },
+  "final_default_collider_modified": false,
+  "hard_blockers": [
+    "HARD_BLOCKER_FOLLOWER_RIGHT_WORKCELL_INSTALL_TRANSFORM"
+  ],
+  "mcp_gateway_verification": {
+    "gateway": "mcpjungle_lab",
+    "source": "NVIDIA official Isaac Sim documentation capability",
+    "status": "PASS",
+    "verified_behaviors": [
+      "Usd.Stage.Open for read-only Stage validation",
+      "ValidationRulesRegistry category enumeration",
+      "ValidationEngine explicit rule enablement",
+      "fresh Stage open for deterministic repeat"
+    ],
+    "version_boundary": "Isaac Sim 5.1.0.0 / Kit 107.3.3"
+  },
+  "official_rules": {
+    "categories": [
+      {
+        "blocking_issue_count": 5,
+        "category": "IsaacSim.PhysicsRules",
+        "issues": [
+          {
+            "at": "Prim </follower_right/vx300s_right/joints/gripper>",
+            "message": "/follower_right/vx300s_right/joints/gripper Has no Joint State API",
+            "rule": "JointHasJointStateAPI",
+            "severity": "ERROR"
+          },
+          {
+            "at": "Prim </follower_right/vx300s_right/joints/right_finger>",
+            "message": "Joint /follower_right/vx300s_right/joints/right_finger's lower limit (-0.013799999840557575) should be > reference joint limits * gear ratio(0.020999999716877937)",
+            "rule": "MimicAPICheck",
+            "severity": "ERROR"
+          },
+          {
+            "at": "Prim </follower_right/vx300s_right/follower_right_ee_arm_link>",
+            "message": "Rigid body /follower_right/vx300s_right/follower_right_ee_arm_link has rigid body api but no collision api",
+            "rule": "RigidBodyHasCollider",
+            "severity": "ERROR"
+          },
+          {
+            "at": "Prim </follower_right/vx300s_right/follower_right_ee_gripper_link>",
+            "message": "Rigid body /follower_right/vx300s_right/follower_right_ee_gripper_link has rigid body api but no collision api",
+            "rule": "RigidBodyHasCollider",
+            "severity": "ERROR"
+          },
+          {
+            "at": "Prim </follower_right/vx300s_right/follower_right_fingers_link>",
+            "message": "Rigid body /follower_right/vx300s_right/follower_right_fingers_link has rigid body api but no collision api",
+            "rule": "RigidBodyHasCollider",
+            "severity": "ERROR"
+          }
+        ],
+        "rule_count": 12,
+        "rules": [
+          "DriveJointValueReasonable",
+          "HasArticulationRoot",
+          "InvisibleCollisionMeshHasPurposeGuide",
+          "JointHasCorrectTransformAndState",
+          "JointHasJointStateAPI",
+          "MimicAPICheck",
+          "NonAdjacentCollisionMeshesDoNotClash",
+          "PhysicsDriveAndJointState",
+          "PhysicsJointHasDriveOrMimicAPI",
+          "PhysicsJointMaxVelocity",
+          "RigidBodyHasCollider",
+          "RigidBodyHasMassAPI"
+        ],
+        "status": "FAIL",
+        "target": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/supplier_cad_follower_right.usda",
+        "warning_count": 0
+      },
+      {
+        "blocking_issue_count": 4,
+        "category": "IsaacSim.RobotRules",
+        "issues": [
+          {
+            "at": "Prim </follower_right/vx300s_right/follower_right_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh>",
+            "message": "Prim is overridden: /follower_right/vx300s_right/follower_right_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh, ['physics:approximation', 'purpose']",
+            "rule": "NoOverrides",
+            "severity": "ERROR"
+          },
+          {
+            "at": "Prim </follower_right/vx300s_right/follower_right_left_finger_link/collisions/diagnostic_supplier_cad_left_finger>",
+            "message": "Prim is overridden: /follower_right/vx300s_right/follower_right_left_finger_link/collisions/diagnostic_supplier_cad_left_finger, ['visibility']",
+            "rule": "NoOverrides",
+            "severity": "ERROR"
+          },
+          {
+            "at": "Prim </follower_right/vx300s_right/follower_right_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh>",
+            "message": "Prim is overridden: /follower_right/vx300s_right/follower_right_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh, ['physics:approximation', 'purpose']",
+            "rule": "NoOverrides",
+            "severity": "ERROR"
+          },
+          {
+            "at": "Prim </follower_right/vx300s_right/follower_right_right_finger_link/collisions/diagnostic_supplier_cad_right_finger>",
+            "message": "Prim is overridden: /follower_right/vx300s_right/follower_right_right_finger_link/collisions/diagnostic_supplier_cad_right_finger, ['visibility']",
+            "rule": "NoOverrides",
+            "severity": "ERROR"
+          },
+          {
+            "at": "Stage </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/supplier_cad_follower_right.usda>",
+            "message": "No thumbnail found at /home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/.thumbs/256x256/supplier_cad_follower_right.usda.png for robot asset </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/supplier_cad_follower_right.usda>",
+            "rule": "ThumbnailExists",
+            "severity": "WARNING"
+          },
+          {
+            "at": "Attribute (physics:approximation) Prim </follower_right/vx300s_right/follower_right_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh>",
+            "message": "Physics Attribute physics:approximation in robot asset </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/supplier_cad_follower_right.usda> has authored value NOT in the physics layer",
+            "rule": "VerifyRobotPhysicsAttributesSourceLayer",
+            "severity": "WARNING"
+          },
+          {
+            "at": "Attribute (physics:approximation) Prim </follower_right/vx300s_right/follower_right_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh>",
+            "message": "Physics Attribute physics:approximation in robot asset </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/supplier_cad_follower_right.usda> has authored value NOT in the physics layer",
+            "rule": "VerifyRobotPhysicsAttributesSourceLayer",
+            "severity": "WARNING"
+          },
+          {
+            "at": "Prim </follower_right/vx300s_right/follower_right_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh>",
+            "message": "Physics Schema [PhysicsCollisionAPI] on /follower_right/vx300s_right/follower_right_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh in robot asset </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/supplier_cad_follower_right.usda> has applied schema NOT in the physics layer",
+            "rule": "VerifyRobotPhysicsSchemaSourceLayer",
+            "severity": "WARNING"
+          },
+          {
+            "at": "Prim </follower_right/vx300s_right/follower_right_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh>",
+            "message": "Physics Schema [PhysicsMeshCollisionAPI] on /follower_right/vx300s_right/follower_right_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh in robot asset </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/supplier_cad_follower_right.usda> has applied schema NOT in the physics layer",
+            "rule": "VerifyRobotPhysicsSchemaSourceLayer",
+            "severity": "WARNING"
+          },
+          {
+            "at": "Prim </follower_right/vx300s_right/follower_right_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh>",
+            "message": "Physics Schema [PhysicsCollisionAPI] on /follower_right/vx300s_right/follower_right_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh in robot asset </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/supplier_cad_follower_right.usda> has applied schema NOT in the physics layer",
+            "rule": "VerifyRobotPhysicsSchemaSourceLayer",
+            "severity": "WARNING"
+          },
+          {
+            "at": "Prim </follower_right/vx300s_right/follower_right_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh>",
+            "message": "Physics Schema [PhysicsMeshCollisionAPI] on /follower_right/vx300s_right/follower_right_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh in robot asset </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/supplier_cad_follower_right.usda> has applied schema NOT in the physics layer",
+            "rule": "VerifyRobotPhysicsSchemaSourceLayer",
+            "severity": "WARNING"
+          }
+        ],
+        "rule_count": 10,
+        "rules": [
+          "CheckRobotRelationships",
+          "CleanFolder",
+          "JointsExist",
+          "LinksExist",
+          "NoOverrides",
+          "RobotNaming",
+          "RobotSchema",
+          "ThumbnailExists",
+          "VerifyRobotPhysicsAttributesSourceLayer",
+          "VerifyRobotPhysicsSchemaSourceLayer"
+        ],
+        "status": "FAIL",
+        "target": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/supplier_cad_follower_right.usda",
+        "warning_count": 7
+      },
+      {
+        "blocking_issue_count": 0,
+        "category": "IsaacSim.SimReadyAssetRules",
+        "issues": [
+          {
+            "at": null,
+            "message": "No Looks prim found in the stage, skipping MaterialsOnTopLevelOnlyRule",
+            "rule": "MaterialsOnTopLevelOnly",
+            "severity": "INFO"
+          }
+        ],
+        "rule_count": 2,
+        "rules": [
+          "MaterialsOnTopLevelOnly",
+          "NoNestedMaterials"
+        ],
+        "status": "PASS",
+        "target": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/supplier_cad_follower_right.usda",
+        "warning_count": 0
+      }
+    ],
+    "status": "FAIL"
+  },
+  "repeat_determinism": {
+    "fresh_stage_open_each_run": true,
+    "pass": true,
+    "run_count": 2,
+    "signatures": [
+      "8b9c8c758abb3a14a07cbc94abc41cf51f7a277deb0ca013df34d0f1db60300a",
+      "8b9c8c758abb3a14a07cbc94abc41cf51f7a277deb0ca013df34d0f1db60300a"
+    ]
+  },
+  "robot_local": {
+    "aperture_monotonicity": "PASS",
+    "arm_one_joint": "PASS",
+    "articulation_count": "PASS",
+    "determinism": "PASS",
+    "dof_name_and_order": "PASS",
+    "first_frame_jump": "PASS",
+    "gripper_motion_direction": "PASS",
+    "initial_overlap": "PASS",
+    "legal_range": "PASS",
+    "mimic_accuracy": "FAIL",
+    "overall": "PARTIAL",
+    "screenshot_evidence": {
+      "annotated_count": 7,
+      "auxiliary_only": true,
+      "numeric_runtime_authoritative": true,
+      "raw_count": 7,
+      "report": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_follower_right_pose_screenshot_review.json",
+      "status": "PASS"
+    },
+    "static_pose_hold": "PASS"
+  },
+  "schema_version": 1,
+  "scope": "ROBOT_LOCAL_DIAGNOSTIC_NOT_WORKCELL_PLACEMENT",
+  "source_reports": {
+    "asset": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_supplier_cad_follower_right_asset.json",
+      "sha256": "caa1734e0cf4a052543fc0808bf7b2a3a9d583a300176e0b840cee2111038d7d"
+    },
+    "runtime": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_follower_right_one_joint_validation.json",
+      "sha256": "9ea6cfc05cb58ad34d7691ef58b54096f3eedd8c70809df0a781ccdb98abb8d4"
+    },
+    "screenshots": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_follower_right_pose_screenshot_review.json",
+      "sha256": "8b778cdf1e300ebdbe99717e364f50316ae6e3a232b93535aadb8a3d7401e036"
+    },
+    "structure": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_follower_right_structure_validation.json",
+      "sha256": "9de9b7b979cd73a66a11e7bb462eef82efc18258594b1eb5f050f5d63b50a54e"
+    }
+  },
+  "source_stage_modified": false,
+  "stage": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/supplier_cad_follower_right.usda",
+    "articulation_roots": [
+      "/follower_right/vx300s_right/root_joint"
+    ],
+    "immutable": true,
+    "root_prim": "/follower_right",
+    "sha256_after": "95c7878f794f5f557b70997a2240b6476836b8ffbeed5a4992cb114a169487ea",
+    "sha256_before": "95c7878f794f5f557b70997a2240b6476836b8ffbeed5a4992cb114a169487ea"
+  },
+  "status": "FAIL",
+  "task8": "NOT_RUN",
+  "versions": {
+    "isaac_sim": "5.1.0.0",
+    "kit": "107.3.3",
+    "physx": "107.3.26"
+  }
+}
