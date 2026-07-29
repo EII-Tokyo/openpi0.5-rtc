@@ -12,8 +12,8 @@ the legacy remote traversal and thumbnail-warning storm no longer occur.
   `/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac`.
 - Remove the legacy browser from the runtime dependency graph, including its
   deprecated compatibility alias.
-- Preserve the installed `isaacsim-asset` wheel files so package metadata,
-  upgrades, and repair installs remain valid.
+- Preserve the installed legacy extension source directory rather than
+  physically deleting files from the `isaacsim-asset` distribution.
 - Preserve the current Stage and project assets. Do not open, replace, save, or
   modify a Stage.
 - Do not change robot, ROS, physics, or rendering behavior.
@@ -35,9 +35,20 @@ The existing official dependency remains unchanged:
 "isaacsim.gui.content_browser" = {}
 ```
 
-The extension source directories will not be physically deleted. In this
-design, “remove the old browser” means it is absent from the resolved runtime
-extension graph: it does not register, start, create menus, traverse S3, or
+The legacy extension manifest also declares a lazy-loading `[[trigger]]` for
+`Window/Browsers/Isaac`. The repair will back up that manifest and remove only
+this trigger block so the old menu cannot re-enable the extension:
+
+```toml
+[[trigger]]
+menu.name = "Window/Browsers/Isaac"
+menu.window = "Isaac Sim Assets"
+```
+
+The extension source directories will not be physically deleted. Kit may still
+emit discovery or registration lines for installed extension manifests. In
+this design, “remove the old browser” means it is not selected, enabled,
+started, presented as a browser menu, allowed to traverse S3, or allowed to
 write Asset Browser cache data.
 
 ## Execution Flow
@@ -47,10 +58,12 @@ write Asset Browser cache data.
 2. Run a failing pre-repair probe that asserts the legacy dependencies are
    absent; it must fail because both are currently present.
 3. Stop only the authorized Isaac Sim GUI process and verify it exits.
-4. Create a timestamped backup of `isaacsim.exp.base.kit`.
-5. Remove only the two legacy dependency lines with a deterministic patch.
-6. Validate TOML syntax and assert that Content Browser remains enabled while
-   both legacy dependencies are absent.
+4. Create timestamped backups of `isaacsim.exp.base.kit` and the legacy
+   extension's `config/extension.toml`.
+5. Remove only the two legacy dependency lines and the three-line lazy trigger
+   block with deterministic patches.
+6. Validate both TOML files and assert that Content Browser remains enabled
+   while both legacy dependencies and the legacy menu trigger are absent.
 7. Start Isaac Sim with the same Full app entry point and verify application
    readiness.
 8. Inspect the new Kit log for extension registration/startup and traversal
@@ -61,8 +74,10 @@ write Asset Browser cache data.
 ## Acceptance Criteria
 
 - `isaacsim.gui.content_browser` registers and starts.
-- Neither `isaacsim.asset.browser` nor `omni.isaac.asset_browser` registers or
-  starts.
+- Neither `isaacsim.asset.browser` nor `omni.isaac.asset_browser` is selected,
+  enabled, or started.
+- `Window/Browsers/Isaac` is absent while the official Content Browser remains
+  available.
 - No request traverses the legacy hard-coded
   `.../Assets/Isaac/5.1/Isaac/Robots` or `Environments` roots on behalf of
   `isaacsim.asset.browser`.
@@ -72,17 +87,17 @@ write Asset Browser cache data.
   `isaacsim.asset.browser.cache.json`.
 - Isaac Sim reaches its normal ready signal on both the first and second
   post-repair launches.
-- The installed `isaacsim-asset` distribution remains present and its extension
-  source files remain intact.
+- The installed `isaacsim-asset` distribution remains present and its legacy
+  extension source directory remains available for rollback or package repair.
 
 ## Failure Handling and Rollback
 
-- If the edited TOML fails validation, restore the backup before starting
-  Isaac Sim.
+- If either edited TOML file fails validation, restore both backups before
+  starting Isaac Sim.
 - If Isaac Sim does not reach readiness or Content Browser fails to start,
-  stop the failed process, restore the backup, restart the original
+  stop the failed process, restore both backups, restart the original
   configuration, and report the failed acceptance signal.
-- Never delete the backup during this task.
+- Never delete either backup during this task.
 - Do not clear global Kit or shader caches; they are unrelated to the confirmed
   root cause and clearing them would make startup slower.
 
