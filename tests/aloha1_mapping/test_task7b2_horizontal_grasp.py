@@ -25,6 +25,7 @@ KINEMATICS_PROBE = (
 KINEMATICS_REPORT = (
     ROOT / "reports/aloha1_mapping/aloha1_task7b2_horizontal_kinematics.json"
 )
+RUNTIME_SCRIPT = ROOT / "tools/validate_aloha1_task7b2_horizontal_grasp.py"
 EXPECTED_CSPACE = [
     "waist",
     "shoulder",
@@ -464,3 +465,102 @@ def test_horizontal_summary_requires_twenty_fresh_deterministic_passes() -> None
     rejected = summarize_horizontal_trials(trials)
     assert rejected["status"] == "FAIL"
     assert rejected["pass_count"] == 19
+
+
+def test_horizontal_runtime_source_contract() -> None:
+    assert RUNTIME_SCRIPT.is_file(), (
+        f"missing Isaac 5.1 horizontal runtime: {RUNTIME_SCRIPT}"
+    )
+    source = RUNTIME_SCRIPT.read_text(encoding="utf-8")
+    required = {
+        "SimulationApp",
+        "open_stage",
+        "set_solve_articulation_contact_last(True)",
+        "LulaKinematicsSolver",
+        "compute_inverse_kinematics",
+        "/Bottle500",
+        "user_confirmed_table",
+        "GetKinematicEnabledAttr().Set(False)",
+        "support_settle",
+        "open_pregrasp",
+        "vertical_descent",
+        "bilateral_contact",
+        "release_dynamic",
+        "support_clear",
+        "hold_end",
+        "subscribe_contact_report_events",
+        "overview",
+        "gripper_closeup",
+        "frame_manifest",
+        "runtime_trial_signature",
+    }
+    for token in required:
+        assert token in source, f"missing required runtime token: {token}"
+
+    forbidden = {
+        "SurfaceGripper",
+        "CreateFixedJoint",
+        "parent_attachment",
+        "APPROACH_FRAME = 98",
+        "LIFT_DELTA = -0.08",
+        "source_layer.Save",
+    }
+    for token in forbidden:
+        assert token not in source, f"forbidden runtime token: {token}"
+
+
+def test_horizontal_runtime_constructs_simulation_app_before_isaac_imports() -> None:
+    source = RUNTIME_SCRIPT.read_text(encoding="utf-8")
+    tree = ast.parse(source)
+    simulation_app_lines = [
+        node.lineno
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Call)
+        and (
+            (
+                isinstance(node.func, ast.Name)
+                and node.func.id == "SimulationApp"
+            )
+            or (
+                isinstance(node.func, ast.Attribute)
+                and node.func.attr == "SimulationApp"
+            )
+        )
+    ]
+    assert simulation_app_lines, "SimulationApp construction not found"
+    first_app_line = min(simulation_app_lines)
+
+    protected_import_lines: list[int] = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            protected_import_lines.extend(
+                node.lineno
+                for alias in node.names
+                if alias.name.split(".", maxsplit=1)[0]
+                in {"pxr", "omni", "isaacsim"}
+            )
+        elif (
+            isinstance(node, ast.ImportFrom)
+            and node.module
+            and node.module.split(".", maxsplit=1)[0]
+            in {
+                "pxr",
+                "omni",
+                "isaacsim",
+            }
+        ):
+            protected_import_lines.append(node.lineno)
+
+    assert protected_import_lines
+    assert first_app_line < min(protected_import_lines)
+
+
+def test_horizontal_runtime_requires_complete_two_view_frame_streams() -> None:
+    source = RUNTIME_SCRIPT.read_text(encoding="utf-8")
+    assert 'VIDEO_VIEWS = ("overview", "gripper_closeup")' in source
+    assert '"missing_physics_frames"' in source
+    assert '"phase_frame_ranges"' in source
+    assert '"camera_world_matrix"' in source
+    assert '"render_fps"' in source
+    assert '"first_physics_frame"' in source
+    assert '"last_physics_frame"' in source
