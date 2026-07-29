@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import hashlib
 import json
 from pathlib import Path
 import subprocess
@@ -20,6 +21,28 @@ RUNTIME = ROOT / "tools/validate_aloha_viper_cad_finger_task5_bottle.py"
 ANNOTATOR = (
     ROOT / "tools/annotate_aloha_viper_cad_finger_task5_bottle.py"
 )
+FINAL_REPORT = (
+    ROOT
+    / "reports/aloha1_mapping/aloha1_task7b_bottle_geometry_ab.json"
+)
+FINAL_TRIALS = (
+    ROOT
+    / "reports/aloha1_mapping/"
+    "aloha1_task7b_bottle_geometry_ab_trials.jsonl"
+)
+SCREENSHOT_REVIEW = (
+    ROOT
+    / "reports/aloha1_mapping/"
+    "aloha1_task7b_bottle_geometry_ab_screenshot_review.json"
+)
+
+
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 @pytest.fixture
@@ -285,3 +308,41 @@ def test_combiner_writes_40_profiled_trials(tmp_path: Path) -> None:
         item["bottle_profile"] == "project_bottle500"
         for item in combined
     ) == 20
+
+
+def test_final_task7b_reports_are_complete_and_visually_reviewed() -> None:
+    report = json.loads(FINAL_REPORT.read_text(encoding="utf-8"))
+    assert report["status"] == "PASS"
+    assert report["conclusion"] == "PROJECT_BOTTLE_MATCHES_BASELINE"
+    assert report["single_variable_audit"]["status"] == "PASS"
+    assert report["screenshot_review"]["status"] == "PASS"
+    assert report["asset_promotion"] == "PARTIAL"
+    assert report["task8"] == "NOT_RUN"
+    for profile in ("procedural_cylinder", "project_bottle500"):
+        group = report["groups"][profile]
+        assert group["status"] == "PASS"
+        assert group["pass_count"] == 20
+        assert group["trial_count"] == 20
+        assert group["deterministic"] is True
+        assert group["unique_signature_count"] == 1
+
+    trials = [
+        json.loads(line)
+        for line in FINAL_TRIALS.read_text(encoding="utf-8").splitlines()
+    ]
+    assert len(trials) == 40
+
+    review = json.loads(SCREENSHOT_REVIEW.read_text(encoding="utf-8"))
+    assert review["status"] == "PASS"
+    assert review["reviewed_raw_image_count"] == 8
+    assert review["reviewed_annotated_image_count"] == 8
+    assert len(review["records"]) == 8
+    for record in review["records"]:
+        raw = Path(record["raw_absolute_path"])
+        annotated = Path(record["annotated_absolute_path"])
+        assert raw.is_file()
+        assert annotated.is_file()
+        assert _sha256(raw) == record["raw_sha256"]
+        assert _sha256(annotated) == record["annotated_sha256"]
+        assert record["visual_review_status"] == "PASS"
+        assert all(record["review_checks"].values())

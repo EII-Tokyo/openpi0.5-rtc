@@ -69,6 +69,12 @@ def _green_cylinder_bbox(
     )
 
 
+def _bottle_bbox(image: Image.Image) -> tuple[int, int, int, int]:
+    """Preserve the original Task 5 green-cylinder helper contract."""
+
+    return _green_cylinder_bbox(image)
+
+
 def _project_bottle_contact_region_bbox(
     image: Image.Image,
     finger_boxes: dict[str, tuple[int, int, int, int]],
@@ -100,14 +106,14 @@ def _project_bottle_contact_region_bbox(
     )
 
 
-def _bottle_bbox(
+def _profile_bottle_bbox(
     image: Image.Image,
     *,
     bottle_profile: str,
     finger_boxes: dict[str, tuple[int, int, int, int]],
 ) -> tuple[tuple[int, int, int, int], str]:
     if bottle_profile == "procedural_cylinder":
-        return _green_cylinder_bbox(image), "GREEN_CYLINDER_SEGMENTATION"
+        return _bottle_bbox(image), "GREEN_CYLINDER_SEGMENTATION"
     if bottle_profile == "project_bottle500":
         return (
             _project_bottle_contact_region_bbox(image, finger_boxes),
@@ -203,7 +209,7 @@ def _draw_annotations(
         "bottle_profile",
         "procedural_cylinder",
     )
-    bottle_box, bottle_bbox_method = _bottle_bbox(
+    bottle_box, bottle_bbox_method = _profile_bottle_bbox(
         raw,
         bottle_profile=bottle_profile,
         finger_boxes=boxes,
