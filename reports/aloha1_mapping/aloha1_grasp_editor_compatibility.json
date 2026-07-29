@@ -1,9 +1,20 @@
 {
-  "classification": "FULL_ARTICULATION_EMBEDDED_GRIPPER_SUPPORTED",
-  "compatibility_probe_status": "PASS",
+  "actual_isaac_grasp_export_status": "NOT_RUN",
+  "arm_hold_during_grasp_test_status": "NOT_RUN",
+  "classification": "INCONCLUSIVE",
   "error": null,
+  "evidence_scope": "LOCAL_SOURCE_STRUCTURAL_API_AND_SYNTHETIC_SERIALIZER_ONLY",
   "grasp_tester_execution_status": "NOT_RUN",
   "gui_evidence_status": "GUI_PENDING",
+  "ik_execution_status": "NOT_RUN",
+  "mimic_commandability_status": "GUI_PENDING",
+  "must_not_claim": [
+    "GUI_COMPLETED",
+    "GRASP_TESTER_PASSED",
+    "BOTTLE500_PHYSICS_TESTED",
+    "ARM_HOLD_DURING_GRASP_TEST_PASSED",
+    "ACTUAL_ISAAC_GRASP_EXPORTED"
+  ],
   "probe": {
     "articulation": {
       "active_joint_indices": [
@@ -30,7 +41,6 @@
         4,
         5
       ],
-      "arm_joint_mutation": false,
       "arm_joint_names": [
         "waist",
         "shoulder",
@@ -198,7 +208,8 @@
         0.0006725848652422428
       ],
       "passive_physics_update_excluded_from_editor_mutation": true,
-      "path": "/World/follower_left/vx300s_left/root_joint"
+      "path": "/World/follower_left/vx300s_left/root_joint",
+      "structural_setup_arm_joint_mutation": false
     },
     "extension": {
       "enabled_id": "isaacsim.robot_setup.grasp_editor-2.0.20",
@@ -208,17 +219,6 @@
       "official_mcp_index_version": "2.2.0",
       "requested_id": "isaacsim.robot_setup.grasp_editor",
       "runtime_version": "2.0.20"
-    },
-    "isaac_grasp_roundtrip": {
-      "bytes_equal": true,
-      "first_sha256": "ed8ccc50895b42c51d4fff3489eb01e84ad44bca51cf6bf874dba0e4e0dcc3b2",
-      "format": "isaac_grasp",
-      "format_version": 1.0,
-      "import_error_first": "",
-      "import_error_second": "",
-      "pass": true,
-      "second_sha256": "ed8ccc50895b42c51d4fff3489eb01e84ad44bca51cf6bf874dba0e4e0dcc3b2",
-      "semantic_equal": true
     },
     "local_source_contract": {
       "DataWriter_format": "isaac_grasp",
@@ -244,7 +244,6 @@
       "isaac_sim": "5.1.0.0",
       "kit": "107.3.3"
     },
-    "runtime_pass": true,
     "stage": {
       "required_prims": {
         "/World": true,
@@ -257,10 +256,27 @@
       "sublayers": [
         "configuration/aloha1_signal_home_targets.usda"
       ]
+    },
+    "structural_api_runtime_pass": true,
+    "synthetic_serializer_parse_probe": {
+      "bytes_equal": true,
+      "confidence": 0.0,
+      "exercises_gui_import_remap": false,
+      "first_sha256": "b8f105e8bf3a7f6e408a267e7f1efee654425a647e9c05eeb68f86a1c7b847aa",
+      "format": "isaac_grasp",
+      "format_version": 1.0,
+      "import_error_first": "",
+      "import_error_second": "",
+      "pass": true,
+      "second_sha256": "b8f105e8bf3a7f6e408a267e7f1efee654425a647e9c05eeb68f86a1c7b847aa",
+      "semantic_equal": true,
+      "synthetic": true,
+      "uses_grasp_tester_output": false
     }
   },
-  "schema_version": 1,
-  "scope": "ALOHA1 follower-left Grasp Editor compatibility",
+  "schema_version": 2,
+  "scope": "ALOHA1 follower-left Grasp Editor structural API and synthetic serializer probe",
+  "session_bottle500_composition_status": "NOT_RUN",
   "source_stage": {
     "expected_sha256": "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf",
     "immutable": true,
@@ -269,5 +285,8 @@
     "sha256_before": "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf"
   },
   "status": "PARTIAL",
-  "task8": "NOT_RUN"
+  "structural_api_classification": "FULL_ARTICULATION_EMBEDDED_GRIPPER_SUPPORTED",
+  "structural_api_probe_status": "PASS",
+  "task8": "NOT_RUN",
+  "timeline_physics_execution_status": "NOT_RUN"
 }

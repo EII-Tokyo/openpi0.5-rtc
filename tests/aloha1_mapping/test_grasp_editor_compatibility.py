@@ -1,12 +1,16 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 from pathlib import Path
 
 import pytest
 
 PROBE = Path("tools/probe_aloha1_grasp_editor_compatibility.py")
 LAUNCHER = Path("tools/open_aloha1_grasp_editor_diagnostic.py")
+REPORT = Path(
+    "reports/aloha1_mapping/aloha1_grasp_editor_compatibility.json"
+)
 
 
 def _load_probe_module():
@@ -32,6 +36,36 @@ def test_probe_uses_local_grasp_editor_and_frozen_stage() -> None:
     assert '"waist"' in source
     assert '"GUI_PENDING"' in source
     assert '"NOT_RUN"' in source
+    assert '"structural_api_classification"' in source
+    assert '"structural_api_probe_status"' in source
+    assert '"synthetic_serializer_parse_probe"' in source
+
+
+def test_generated_report_keeps_structural_and_behavioral_gates_separate() -> None:
+    report = json.loads(REPORT.read_text(encoding="utf-8"))
+    assert report["schema_version"] == 2
+    assert report["status"] == "PARTIAL"
+    assert report["classification"] == "INCONCLUSIVE"
+    assert (
+        report["structural_api_classification"]
+        == "FULL_ARTICULATION_EMBEDDED_GRIPPER_SUPPORTED"
+    )
+    assert report["structural_api_probe_status"] == "PASS"
+    assert report["grasp_tester_execution_status"] == "NOT_RUN"
+    assert report["timeline_physics_execution_status"] == "NOT_RUN"
+    assert report["session_bottle500_composition_status"] == "NOT_RUN"
+    assert report["arm_hold_during_grasp_test_status"] == "NOT_RUN"
+    assert report["actual_isaac_grasp_export_status"] == "NOT_RUN"
+    assert report["mimic_commandability_status"] == "GUI_PENDING"
+    assert report["gui_evidence_status"] == "GUI_PENDING"
+    assert (
+        report["classification"]
+        != report["structural_api_classification"]
+    )
+    serializer = report["probe"]["synthetic_serializer_parse_probe"]
+    assert serializer["synthetic"] is True
+    assert serializer["uses_grasp_tester_output"] is False
+    assert serializer["exercises_gui_import_remap"] is False
 
 
 def test_launcher_never_saves_the_source_stage() -> None:
@@ -41,7 +75,7 @@ def test_launcher_never_saves_the_source_stage() -> None:
     assert "save_stage" not in source
 
 
-def test_classification_accepts_only_exact_full_articulation_contract() -> None:
+def test_structural_classification_accepts_only_exact_contract() -> None:
     module = _load_probe_module()
     expected = [
         "waist",
@@ -55,12 +89,12 @@ def test_classification_accepts_only_exact_full_articulation_contract() -> None:
         "right_finger",
     ]
     assert (
-        module.classify_compatibility(
+        module.classify_structural_api_compatibility(
             extension_version="2.0.20",
             dof_names=expected,
             active_joint_names=["left_finger", "right_finger"],
-            arm_joint_mutation=False,
-            settings_roundtrip=True,
+            structural_setup_arm_joint_mutation=False,
+            synthetic_serializer_parse_pass=True,
             stage_immutable=True,
         )
         == "FULL_ARTICULATION_EMBEDDED_GRIPPER_SUPPORTED"
@@ -73,8 +107,11 @@ def test_classification_accepts_only_exact_full_articulation_contract() -> None:
         ({"extension_version": "2.2.0"}, "INCOMPATIBLE"),
         ({"dof_names": ["left_finger", "right_finger"]}, "INCOMPATIBLE"),
         ({"active_joint_names": ["left_finger"]}, "INCOMPATIBLE"),
-        ({"arm_joint_mutation": True}, "REQUIRES_DIAGNOSTIC_GRIPPER_ONLY"),
-        ({"settings_roundtrip": False}, "INCOMPATIBLE"),
+        (
+            {"structural_setup_arm_joint_mutation": True},
+            "REQUIRES_DIAGNOSTIC_GRIPPER_ONLY",
+        ),
+        ({"synthetic_serializer_parse_pass": False}, "INCOMPATIBLE"),
         ({"stage_immutable": False}, "INCOMPATIBLE"),
     ],
 )
@@ -87,9 +124,9 @@ def test_classification_fails_closed(
         "extension_version": "2.0.20",
         "dof_names": list(module.EXPECTED_DOF_NAMES),
         "active_joint_names": ["left_finger", "right_finger"],
-        "arm_joint_mutation": False,
-        "settings_roundtrip": True,
+        "structural_setup_arm_joint_mutation": False,
+        "synthetic_serializer_parse_pass": True,
         "stage_immutable": True,
     }
     values.update(overrides)
-    assert module.classify_compatibility(**values) == expected
+    assert module.classify_structural_api_compatibility(**values) == expected

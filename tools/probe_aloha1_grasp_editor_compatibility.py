@@ -97,25 +97,25 @@ def _json_value(value: Any) -> Any:
     return str(value)
 
 
-def classify_compatibility(
+def classify_structural_api_compatibility(
     *,
     extension_version: str,
     dof_names: list[str],
     active_joint_names: list[str],
-    arm_joint_mutation: bool,
-    settings_roundtrip: bool,
+    structural_setup_arm_joint_mutation: bool,
+    synthetic_serializer_parse_pass: bool,
     stage_immutable: bool,
 ) -> str:
-    """Classify the exact local source/runtime contract and fail closed."""
+    """Classify only the exact local structural API contract."""
     if (
         extension_version != EXPECTED_EXTENSION_VERSION
         or dof_names != EXPECTED_DOF_NAMES
         or active_joint_names != ACTIVE_JOINT_NAMES
-        or not settings_roundtrip
+        or not synthetic_serializer_parse_pass
         or not stage_immutable
     ):
         return "INCOMPATIBLE"
-    if arm_joint_mutation:
+    if structural_setup_arm_joint_mutation:
         return "REQUIRES_DIAGNOSTIC_GRIPPER_ONLY"
     return "FULL_ARTICULATION_EMBEDDED_GRIPPER_SUPPORTED"
 
@@ -148,7 +148,7 @@ def _dof_properties(articulation: Any) -> list[dict[str, Any]]:
     return result
 
 
-def _roundtrip_grasp(
+def _probe_synthetic_serializer(
     *,
     grasp_test_results_type: Any,
     data_writer_type: Any,
@@ -162,7 +162,7 @@ def _roundtrip_grasp(
         np.asarray([1.0, 0.0, 0.0, 0.0], dtype=np.float64),
         np.asarray(CLOSED_POSITIONS_M, dtype=np.float64),
         1.0,
-        True,  # noqa: FBT003 - local NVIDIA constructor is positional-only.
+        False,  # noqa: FBT003 - synthetic data is not a passing grasp.
     )
     with tempfile.TemporaryDirectory(
         prefix="aloha1-grasp-editor-roundtrip-"
@@ -171,8 +171,8 @@ def _roundtrip_grasp(
         second_path = Path(directory) / "second.yaml"
         first = data_writer_type(GRIPPER_FRAME_PATH, BOTTLE_SESSION_PATH)
         second = data_writer_type(GRIPPER_FRAME_PATH, BOTTLE_SESSION_PATH)
-        first.write_grasp_to_file(result, 1.0, str(first_path))
-        second.write_grasp_to_file(result, 1.0, str(second_path))
+        first.write_grasp_to_file(result, 0.0, str(first_path))
+        second.write_grasp_to_file(result, 0.0, str(second_path))
         importer_a = data_writer_type(
             GRIPPER_FRAME_PATH,
             BOTTLE_SESSION_PATH,
@@ -191,6 +191,10 @@ def _roundtrip_grasp(
             == _json_value(importer_b.data["grasps"])
         )
         return {
+            "synthetic": True,
+            "uses_grasp_tester_output": False,
+            "exercises_gui_import_remap": False,
+            "confidence": 0.0,
             "format": "isaac_grasp",
             "format_version": 1.0,
             "first_sha256": _sha256(first_path),
@@ -293,7 +297,7 @@ def _runtime_probe(stage_path: Path) -> dict[str, Any]:
             0.0,
             0.0,
         )
-        roundtrip = _roundtrip_grasp(
+        serializer_probe = _probe_synthetic_serializer(
             grasp_test_results_type=GraspTestResults,
             data_writer_type=DataWriter,
             settings=settings,
@@ -304,7 +308,7 @@ def _runtime_probe(stage_path: Path) -> dict[str, Any]:
         ).copy()
         arm_indices = [dof_names.index(name) for name in ARM_JOINT_NAMES]
         arm_delta = after[arm_indices] - before[arm_indices]
-        arm_joint_mutation = not np.array_equal(
+        structural_setup_arm_joint_mutation = not np.array_equal(
             after[arm_indices],
             before[arm_indices],
         )
@@ -369,7 +373,9 @@ def _runtime_probe(stage_path: Path) -> dict[str, Any]:
                 "active_joint_indices": subset_indices,
                 "arm_joint_names": list(ARM_JOINT_NAMES),
                 "arm_joint_indices": arm_indices,
-                "arm_joint_mutation": arm_joint_mutation,
+                "structural_setup_arm_joint_mutation": (
+                    structural_setup_arm_joint_mutation
+                ),
                 "arm_joint_delta": [
                     float(value) for value in arm_delta
                 ],
@@ -382,13 +388,13 @@ def _runtime_probe(stage_path: Path) -> dict[str, Any]:
                 "passive_physics_update_excluded_from_editor_mutation": True,
             },
             "local_source_contract": source_readback,
-            "isaac_grasp_roundtrip": roundtrip,
-            "runtime_pass": (
+            "synthetic_serializer_parse_probe": serializer_probe,
+            "structural_api_runtime_pass": (
                 extension_version == EXPECTED_EXTENSION_VERSION
                 and dof_names == EXPECTED_DOF_NAMES
                 and list(subset.joint_names) == ACTIVE_JOINT_NAMES
-                and not arm_joint_mutation
-                and roundtrip["pass"]
+                and not structural_setup_arm_joint_mutation
+                and serializer_probe["pass"]
             ),
         }
     finally:
@@ -409,13 +415,33 @@ def main() -> int:
     stage_path = args.stage.resolve()
     report_path = args.report.resolve()
     payload: dict[str, Any] = {
-        "schema_version": 1,
-        "scope": "ALOHA1 follower-left Grasp Editor compatibility",
-        "status": "INCONCLUSIVE",
+        "schema_version": 2,
+        "scope": (
+            "ALOHA1 follower-left Grasp Editor structural API and "
+            "synthetic serializer probe"
+        ),
+        "evidence_scope": (
+            "LOCAL_SOURCE_STRUCTURAL_API_AND_SYNTHETIC_SERIALIZER_ONLY"
+        ),
+        "status": "PARTIAL",
         "classification": "INCONCLUSIVE",
-        "compatibility_probe_status": "NOT_RUN",
+        "structural_api_classification": "INCONCLUSIVE",
+        "structural_api_probe_status": "NOT_RUN",
         "grasp_tester_execution_status": "NOT_RUN",
+        "timeline_physics_execution_status": "NOT_RUN",
+        "session_bottle500_composition_status": "NOT_RUN",
+        "arm_hold_during_grasp_test_status": "NOT_RUN",
+        "actual_isaac_grasp_export_status": "NOT_RUN",
+        "mimic_commandability_status": "GUI_PENDING",
+        "ik_execution_status": "NOT_RUN",
         "gui_evidence_status": "GUI_PENDING",
+        "must_not_claim": [
+            "GUI_COMPLETED",
+            "GRASP_TESTER_PASSED",
+            "BOTTLE500_PHYSICS_TESTED",
+            "ARM_HOLD_DURING_GRASP_TEST_PASSED",
+            "ACTUAL_ISAAC_GRASP_EXPORTED",
+        ],
         "task8": "NOT_RUN",
         "source_stage": {
             "path": str(stage_path),
@@ -441,22 +467,27 @@ def main() -> int:
         payload["source_stage"]["sha256_after"] = after_hash
         immutable = before_hash == after_hash
         payload["source_stage"]["immutable"] = immutable
-        classification = classify_compatibility(
+        classification = classify_structural_api_compatibility(
             extension_version=runtime["extension"]["runtime_version"],
             dof_names=runtime["articulation"]["dof_names"],
             active_joint_names=runtime["articulation"][
                 "active_joint_names"
             ],
-            arm_joint_mutation=runtime["articulation"][
-                "arm_joint_mutation"
+            structural_setup_arm_joint_mutation=runtime["articulation"][
+                "structural_setup_arm_joint_mutation"
             ],
-            settings_roundtrip=runtime["isaac_grasp_roundtrip"]["pass"],
+            synthetic_serializer_parse_pass=runtime[
+                "synthetic_serializer_parse_probe"
+            ]["pass"],
             stage_immutable=immutable,
         )
         if classification not in VALID_CLASSIFICATIONS:
             raise RuntimeError(f"invalid classification: {classification}")
-        payload["classification"] = classification
-        payload["compatibility_probe_status"] = (
+        payload["structural_api_classification"] = classification
+        # Full GraspTester physics execution and GUI selection have not run.
+        # Keep the overall behavioral classification fail-closed.
+        payload["classification"] = "INCONCLUSIVE"
+        payload["structural_api_probe_status"] = (
             "PASS"
             if classification
             == "FULL_ARTICULATION_EMBEDDED_GRIPPER_SUPPORTED"
@@ -465,7 +496,7 @@ def main() -> int:
         payload["status"] = "PARTIAL"
         exit_code = (
             0
-            if payload["compatibility_probe_status"] == "PASS"
+            if payload["structural_api_probe_status"] == "PASS"
             else 2
         )
     except Exception as error:
@@ -473,7 +504,7 @@ def main() -> int:
             "type": type(error).__name__,
             "message": str(error),
         }
-        payload["compatibility_probe_status"] = "FAIL"
+        payload["structural_api_probe_status"] = "FAIL"
         if stage_path.is_file():
             payload["source_stage"]["sha256_after"] = _sha256(stage_path)
             payload["source_stage"]["immutable"] = (
