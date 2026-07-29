@@ -1,0 +1,81 @@
+#usda 1.0
+
+over "follower_left"
+{
+    over "vx300s_left"
+    {
+        over "follower_left_left_finger_link"
+        {
+            over "visuals" (
+                instanceable = false
+            )
+            {
+                def Xform "diagnostic_supplier_cad_left_finger" (
+                    customData = {
+                        dictionary aloha1 = {
+                            string diagnosticRole = "SUPPLIER_CAD_V2_VISUAL_DIAGNOSTIC_NOT_FINAL"
+                            string sourceObjSha256 = "c6710d0fe5b2030a32722d9df5c0b553c771c9d61d92b8ddaec36c94c5963488"
+                        }
+                    }
+                    prepend references = @../../../../cad_finger_task5_convex_hull/geometry/supplier_cad_finger_mesh.usda@</CadFingerGeometry/left_finger>
+                )
+                {
+                }
+            }
+
+            over "collisions" (
+                instanceable = false
+            )
+            {
+                def Xform "diagnostic_supplier_cad_left_finger" (
+                    customData = {
+                        dictionary aloha1 = {
+                            string diagnosticRole = "SUPPLIER_CAD_V2_CONVEX_HULL_DIAGNOSTIC_NOT_FINAL"
+                            string sourceObjSha256 = "c6710d0fe5b2030a32722d9df5c0b553c771c9d61d92b8ddaec36c94c5963488"
+                        }
+                    }
+                    prepend references = @../../../../cad_finger_task5_convex_hull/geometry/supplier_cad_finger_mesh.usda@</CadFingerGeometry/left_finger>
+                )
+                {
+                }
+            }
+        }
+
+        over "follower_left_right_finger_link"
+        {
+            over "visuals" (
+                instanceable = false
+            )
+            {
+                def Xform "diagnostic_supplier_cad_right_finger" (
+                    customData = {
+                        dictionary aloha1 = {
+                            string diagnosticRole = "SUPPLIER_CAD_V2_VISUAL_DIAGNOSTIC_NOT_FINAL"
+                            string sourceObjSha256 = "b0979c5d55fee448dab512dc75b1251bab17d94892decd01de9a6e76c01482d1"
+                        }
+                    }
+                    prepend references = @../../../../cad_finger_task5_convex_hull/geometry/supplier_cad_finger_mesh.usda@</CadFingerGeometry/right_finger>
+                )
+                {
+                }
+            }
+
+            over "collisions" (
+                instanceable = false
+            )
+            {
+                def Xform "diagnostic_supplier_cad_right_finger" (
+                    customData = {
+                        dictionary aloha1 = {
+                            string diagnosticRole = "SUPPLIER_CAD_V2_CONVEX_HULL_DIAGNOSTIC_NOT_FINAL"
+                            string sourceObjSha256 = "b0979c5d55fee448dab512dc75b1251bab17d94892decd01de9a6e76c01482d1"
+                        }
+                    }
+                    prepend references = @../../../../cad_finger_task5_convex_hull/geometry/supplier_cad_finger_mesh.usda@</CadFingerGeometry/right_finger>
+                )
+                {
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,49 @@
+{
+  "real_robot_connected": false,
+  "remote_192_168_1_103_accessed": false,
+  "reports": {
+    "digital_up_down": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_digital_up_down_motion.json",
+    "follower_left_one_joint": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_follower_left_one_joint_validation.json",
+    "follower_right_one_joint": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_follower_right_one_joint_validation.json",
+    "joint_mapping": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_joint_mapping_validation.json",
+    "official_rules": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_signal_correspondence_official_rules.json",
+    "structure": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_signal_task7a_structure_validation.json"
+  },
+  "runtime": {
+    "isaac_sim": "5.1.0.0",
+    "kit": "107.3.3",
+    "physx": "107.3.26",
+    "solve_articulation_contact_last": true
+  },
+  "schema_version": 1,
+  "stage": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/aloha1_signal_correspondence_workcell.usda",
+    "immutable": true,
+    "sha256_after": "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf",
+    "sha256_before": "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf"
+  },
+  "status": "PARTIAL",
+  "task_7a": {
+    "collision_swept_path": "PARTIAL",
+    "drive_mimic_structure": "PASS",
+    "follower_left_one_joint": "PASS",
+    "follower_right_one_joint": "PASS",
+    "initial_target_readback_first_frame": "PASS",
+    "joint_mapping": "PASS",
+    "official_rules": "PARTIAL",
+    "official_rules_unsuppressed_status": "FAIL",
+    "reason_if_partial": "swept-link contact monitoring remains incomplete and NVIDIA official PhysicsRules/RobotRules findings remain unsuppressed; runtime signal gates are separately PASS",
+    "small_up_down": "PASS",
+    "status": "PARTIAL",
+    "structure_and_runtime_order": "PASS"
+  },
+  "task_7b": {
+    "deferred": [
+      "bottle_static_hold",
+      "friction_calibration",
+      "full_simready"
+    ],
+    "status": "NOT_RUN"
+  },
+  "task_8": "NOT_RUN"
+}

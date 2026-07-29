@@ -1,0 +1,42 @@
+#usda 1.0
+
+over "follower_left"
+{
+    over "vx300s_left"
+    {
+        over "follower_left_left_finger_link"
+        {
+            over "collisions"
+            {
+                over "diagnostic_supplier_cad_left_finger"
+                {
+                    token visibility = "invisible"
+                    over "mesh" (
+                        prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                    )
+                    {
+                        uniform token physics:approximation = "convexHull"
+                        uniform token purpose = "guide"
+                    }
+                }
+            }
+        }
+        over "follower_left_right_finger_link"
+        {
+            over "collisions"
+            {
+                over "diagnostic_supplier_cad_right_finger"
+                {
+                    token visibility = "invisible"
+                    over "mesh" (
+                        prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+                    )
+                    {
+                        uniform token physics:approximation = "convexHull"
+                        uniform token purpose = "guide"
+                    }
+                }
+            }
+        }
+    }
+}

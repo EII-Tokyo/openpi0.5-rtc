@@ -1,0 +1,499 @@
+{
+  "collision_gate": {
+    "reason": "end-effector/table clearance is numeric; full swept-link contact monitoring remains pending",
+    "status": "PARTIAL"
+  },
+  "curve_csv": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_digital_up_down_motion_curves.csv",
+  "determinism": {
+    "repeat_count": 3,
+    "signatures": [
+      "76d2cf5456f794ada275b48774b72ffa86bdf2f4a75c87ad34de70b867bed7e8",
+      "76d2cf5456f794ada275b48774b72ffa86bdf2f4a75c87ad34de70b867bed7e8",
+      "76d2cf5456f794ada275b48774b72ffa86bdf2f4a75c87ad34de70b867bed7e8"
+    ],
+    "status": "PASS"
+  },
+  "dynamic_response": "RECORDED_NOT_SIM2REAL_CALIBRATED",
+  "physics_frequency_hz": 60,
+  "real_robot_connected": false,
+  "runs": [
+    {
+      "fresh_world_reset": true,
+      "repeat": 0,
+      "robots": {
+        "follower_left": {
+          "end_effector_z_direction": "PASS",
+          "minimum_end_effector_clearance_m": 0.40539175033569336,
+          "minimum_table_clearance_method": "END_EFFECTOR_Z_MINUS_USER_CONFIRMED_TABLE_TOP_ONLY",
+          "phases": {
+            "home": {
+              "end_effector_position_m": [
+                -0.3177180886268616,
+                -0.019020242616534233,
+                0.31449636816978455
+              ],
+              "qpos": [
+                1.5676196198910475e-05,
+                -0.9599504470825195,
+                1.161245584487915,
+                0.001113876118324697,
+                -0.29587307572364807,
+                -5.002804641662806e-07,
+                2.276431132486323e-08,
+                0.022378355264663696,
+                -0.0224023275077343
+              ]
+            },
+            "return_home": {
+              "delta_z_from_home_m": -4.6193599700927734e-06,
+              "end_effector_position_m": [
+                -0.3177172541618347,
+                -0.01902039349079132,
+                0.31449174880981445
+              ],
+              "qpos": [
+                1.5619922123732977e-05,
+                -0.9599432945251465,
+                1.1612576246261597,
+                0.0011222294997423887,
+                -0.29577159881591797,
+                2.171070718759438e-06,
+                -9.734208106237929e-08,
+                0.02234705723822117,
+                -0.02245006151497364
+              ],
+              "shoulder_readback_rad": -0.9599432945251465,
+              "shoulder_target_rad": -0.96
+            },
+            "small_up": {
+              "delta_z_from_home_m": 0.011608749628067017,
+              "end_effector_position_m": [
+                -0.33158308267593384,
+                -0.01901947893202305,
+                0.32610511779785156
+              ],
+              "qpos": [
+                1.3043746548646595e-05,
+                -1.0399391651153564,
+                1.1612188816070557,
+                0.0010489628184586763,
+                -0.29585346579551697,
+                4.1694960373206413e-07,
+                -1.7698786436426417e-08,
+                0.022366497665643692,
+                -0.022420963272452354
+              ],
+              "shoulder_readback_rad": -1.0399391651153564,
+              "shoulder_target_rad": -1.04
+            }
+          },
+          "return_to_home": "PASS",
+          "status": "PASS",
+          "target_readback": "PASS"
+        },
+        "follower_right": {
+          "end_effector_z_direction": "PASS",
+          "minimum_end_effector_clearance_m": 0.4053918695449829,
+          "minimum_table_clearance_method": "END_EFFECTOR_Z_MINUS_USER_CONFIRMED_TABLE_TOP_ONLY",
+          "phases": {
+            "home": {
+              "end_effector_position_m": [
+                0.31771814823150635,
+                -0.018979776650667194,
+                0.31449633836746216
+              ],
+              "qpos": [
+                1.567625076859258e-05,
+                -0.9599505066871643,
+                1.1612454652786255,
+                0.0011138765839859843,
+                -0.29587316513061523,
+                -5.000014198230929e-07,
+                2.27693099930093e-08,
+                0.022378355264663696,
+                -0.02240232564508915
+              ]
+            },
+            "return_home": {
+              "delta_z_from_home_m": -4.470348358154297e-06,
+              "end_effector_position_m": [
+                0.3177173435688019,
+                -0.018979683518409732,
+                0.314491868019104
+              ],
+              "qpos": [
+                1.5619925761711784e-05,
+                -0.9599433541297913,
+                1.1612576246261597,
+                0.0011222366010770202,
+                -0.2957713007926941,
+                2.170678271795623e-06,
+                -9.734337425015838e-08,
+                0.022347062826156616,
+                -0.02245005965232849
+              ],
+              "shoulder_readback_rad": -0.9599433541297913,
+              "shoulder_target_rad": -0.96
+            },
+            "small_up": {
+              "delta_z_from_home_m": 0.011608749628067017,
+              "end_effector_position_m": [
+                0.3315831422805786,
+                -0.01898057386279106,
+                0.3261050879955292
+              ],
+              "qpos": [
+                1.3043741091678385e-05,
+                -1.0399391651153564,
+                1.1612188816070557,
+                0.0010489635169506073,
+                -0.2958528995513916,
+                4.173756451564259e-07,
+                -1.7738798874233908e-08,
+                0.02236650139093399,
+                -0.022420963272452354
+              ],
+              "shoulder_readback_rad": -1.0399391651153564,
+              "shoulder_target_rad": -1.04
+            }
+          },
+          "return_to_home": "PASS",
+          "status": "PASS",
+          "target_readback": "PASS"
+        }
+      },
+      "status": "PASS"
+    },
+    {
+      "fresh_world_reset": true,
+      "repeat": 1,
+      "robots": {
+        "follower_left": {
+          "end_effector_z_direction": "PASS",
+          "minimum_end_effector_clearance_m": 0.40539175033569336,
+          "minimum_table_clearance_method": "END_EFFECTOR_Z_MINUS_USER_CONFIRMED_TABLE_TOP_ONLY",
+          "phases": {
+            "home": {
+              "end_effector_position_m": [
+                -0.3177180886268616,
+                -0.019020242616534233,
+                0.31449636816978455
+              ],
+              "qpos": [
+                1.5676196198910475e-05,
+                -0.9599504470825195,
+                1.161245584487915,
+                0.001113876118324697,
+                -0.29587307572364807,
+                -5.002804641662806e-07,
+                2.276431132486323e-08,
+                0.022378355264663696,
+                -0.0224023275077343
+              ]
+            },
+            "return_home": {
+              "delta_z_from_home_m": -4.6193599700927734e-06,
+              "end_effector_position_m": [
+                -0.3177172541618347,
+                -0.01902039349079132,
+                0.31449174880981445
+              ],
+              "qpos": [
+                1.5619922123732977e-05,
+                -0.9599432945251465,
+                1.1612576246261597,
+                0.0011222294997423887,
+                -0.29577159881591797,
+                2.171070718759438e-06,
+                -9.734208106237929e-08,
+                0.02234705723822117,
+                -0.02245006151497364
+              ],
+              "shoulder_readback_rad": -0.9599432945251465,
+              "shoulder_target_rad": -0.96
+            },
+            "small_up": {
+              "delta_z_from_home_m": 0.011608749628067017,
+              "end_effector_position_m": [
+                -0.33158308267593384,
+                -0.01901947893202305,
+                0.32610511779785156
+              ],
+              "qpos": [
+                1.3043746548646595e-05,
+                -1.0399391651153564,
+                1.1612188816070557,
+                0.0010489628184586763,
+                -0.29585346579551697,
+                4.1694960373206413e-07,
+                -1.7698786436426417e-08,
+                0.022366497665643692,
+                -0.022420963272452354
+              ],
+              "shoulder_readback_rad": -1.0399391651153564,
+              "shoulder_target_rad": -1.04
+            }
+          },
+          "return_to_home": "PASS",
+          "status": "PASS",
+          "target_readback": "PASS"
+        },
+        "follower_right": {
+          "end_effector_z_direction": "PASS",
+          "minimum_end_effector_clearance_m": 0.4053918695449829,
+          "minimum_table_clearance_method": "END_EFFECTOR_Z_MINUS_USER_CONFIRMED_TABLE_TOP_ONLY",
+          "phases": {
+            "home": {
+              "end_effector_position_m": [
+                0.31771814823150635,
+                -0.018979776650667194,
+                0.31449633836746216
+              ],
+              "qpos": [
+                1.567625076859258e-05,
+                -0.9599505066871643,
+                1.1612454652786255,
+                0.0011138765839859843,
+                -0.29587316513061523,
+                -5.000014198230929e-07,
+                2.27693099930093e-08,
+                0.022378355264663696,
+                -0.02240232564508915
+              ]
+            },
+            "return_home": {
+              "delta_z_from_home_m": -4.470348358154297e-06,
+              "end_effector_position_m": [
+                0.3177173435688019,
+                -0.018979683518409732,
+                0.314491868019104
+              ],
+              "qpos": [
+                1.5619925761711784e-05,
+                -0.9599433541297913,
+                1.1612576246261597,
+                0.0011222366010770202,
+                -0.2957713007926941,
+                2.170678271795623e-06,
+                -9.734337425015838e-08,
+                0.022347062826156616,
+                -0.02245005965232849
+              ],
+              "shoulder_readback_rad": -0.9599433541297913,
+              "shoulder_target_rad": -0.96
+            },
+            "small_up": {
+              "delta_z_from_home_m": 0.011608749628067017,
+              "end_effector_position_m": [
+                0.3315831422805786,
+                -0.01898057386279106,
+                0.3261050879955292
+              ],
+              "qpos": [
+                1.3043741091678385e-05,
+                -1.0399391651153564,
+                1.1612188816070557,
+                0.0010489635169506073,
+                -0.2958528995513916,
+                4.173756451564259e-07,
+                -1.7738798874233908e-08,
+                0.02236650139093399,
+                -0.022420963272452354
+              ],
+              "shoulder_readback_rad": -1.0399391651153564,
+              "shoulder_target_rad": -1.04
+            }
+          },
+          "return_to_home": "PASS",
+          "status": "PASS",
+          "target_readback": "PASS"
+        }
+      },
+      "status": "PASS"
+    },
+    {
+      "fresh_world_reset": true,
+      "repeat": 2,
+      "robots": {
+        "follower_left": {
+          "end_effector_z_direction": "PASS",
+          "minimum_end_effector_clearance_m": 0.40539175033569336,
+          "minimum_table_clearance_method": "END_EFFECTOR_Z_MINUS_USER_CONFIRMED_TABLE_TOP_ONLY",
+          "phases": {
+            "home": {
+              "end_effector_position_m": [
+                -0.3177180886268616,
+                -0.019020242616534233,
+                0.31449636816978455
+              ],
+              "qpos": [
+                1.5676196198910475e-05,
+                -0.9599504470825195,
+                1.161245584487915,
+                0.001113876118324697,
+                -0.29587307572364807,
+                -5.002804641662806e-07,
+                2.276431132486323e-08,
+                0.022378355264663696,
+                -0.0224023275077343
+              ]
+            },
+            "return_home": {
+              "delta_z_from_home_m": -4.6193599700927734e-06,
+              "end_effector_position_m": [
+                -0.3177172541618347,
+                -0.01902039349079132,
+                0.31449174880981445
+              ],
+              "qpos": [
+                1.5619922123732977e-05,
+                -0.9599432945251465,
+                1.1612576246261597,
+                0.0011222294997423887,
+                -0.29577159881591797,
+                2.171070718759438e-06,
+                -9.734208106237929e-08,
+                0.02234705723822117,
+                -0.02245006151497364
+              ],
+              "shoulder_readback_rad": -0.9599432945251465,
+              "shoulder_target_rad": -0.96
+            },
+            "small_up": {
+              "delta_z_from_home_m": 0.011608749628067017,
+              "end_effector_position_m": [
+                -0.33158308267593384,
+                -0.01901947893202305,
+                0.32610511779785156
+              ],
+              "qpos": [
+                1.3043746548646595e-05,
+                -1.0399391651153564,
+                1.1612188816070557,
+                0.0010489628184586763,
+                -0.29585346579551697,
+                4.1694960373206413e-07,
+                -1.7698786436426417e-08,
+                0.022366497665643692,
+                -0.022420963272452354
+              ],
+              "shoulder_readback_rad": -1.0399391651153564,
+              "shoulder_target_rad": -1.04
+            }
+          },
+          "return_to_home": "PASS",
+          "status": "PASS",
+          "target_readback": "PASS"
+        },
+        "follower_right": {
+          "end_effector_z_direction": "PASS",
+          "minimum_end_effector_clearance_m": 0.4053918695449829,
+          "minimum_table_clearance_method": "END_EFFECTOR_Z_MINUS_USER_CONFIRMED_TABLE_TOP_ONLY",
+          "phases": {
+            "home": {
+              "end_effector_position_m": [
+                0.31771814823150635,
+                -0.018979776650667194,
+                0.31449633836746216
+              ],
+              "qpos": [
+                1.567625076859258e-05,
+                -0.9599505066871643,
+                1.1612454652786255,
+                0.0011138765839859843,
+                -0.29587316513061523,
+                -5.000014198230929e-07,
+                2.27693099930093e-08,
+                0.022378355264663696,
+                -0.02240232564508915
+              ]
+            },
+            "return_home": {
+              "delta_z_from_home_m": -4.470348358154297e-06,
+              "end_effector_position_m": [
+                0.3177173435688019,
+                -0.018979683518409732,
+                0.314491868019104
+              ],
+              "qpos": [
+                1.5619925761711784e-05,
+                -0.9599433541297913,
+                1.1612576246261597,
+                0.0011222366010770202,
+                -0.2957713007926941,
+                2.170678271795623e-06,
+                -9.734337425015838e-08,
+                0.022347062826156616,
+                -0.02245005965232849
+              ],
+              "shoulder_readback_rad": -0.9599433541297913,
+              "shoulder_target_rad": -0.96
+            },
+            "small_up": {
+              "delta_z_from_home_m": 0.011608749628067017,
+              "end_effector_position_m": [
+                0.3315831422805786,
+                -0.01898057386279106,
+                0.3261050879955292
+              ],
+              "qpos": [
+                1.3043741091678385e-05,
+                -1.0399391651153564,
+                1.1612188816070557,
+                0.0010489635169506073,
+                -0.2958528995513916,
+                4.173756451564259e-07,
+                -1.7738798874233908e-08,
+                0.02236650139093399,
+                -0.022420963272452354
+              ],
+              "shoulder_readback_rad": -1.0399391651153564,
+              "shoulder_target_rad": -1.04
+            }
+          },
+          "return_to_home": "PASS",
+          "status": "PASS",
+          "target_readback": "PASS"
+        }
+      },
+      "status": "PASS"
+    }
+  ],
+  "schema_version": 1,
+  "scope": "DIGITAL_ONLY_NO_REAL_ROBOT_CONNECTION",
+  "stage": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/aloha1_signal_correspondence_workcell.usda",
+  "stage_sha256": "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf",
+  "status": "PASS",
+  "target_plan": {
+    "direction_status": "PENDING_RUNTIME_END_EFFECTOR_Z_READBACK",
+    "home": [
+      0.0,
+      -0.96,
+      1.16,
+      0.0,
+      -0.3,
+      0.0
+    ],
+    "joint": "shoulder",
+    "maximum_absolute_delta_rad": 0.08,
+    "return_home": [
+      0.0,
+      -0.96,
+      1.16,
+      0.0,
+      -0.3,
+      0.0
+    ],
+    "small_up": [
+      0.0,
+      -1.04,
+      1.16,
+      0.0,
+      -0.3,
+      0.0
+    ],
+    "trajectory": "cubic_smoothstep",
+    "unit": "rad"
+  },
+  "task_8": "NOT_RUN"
+}

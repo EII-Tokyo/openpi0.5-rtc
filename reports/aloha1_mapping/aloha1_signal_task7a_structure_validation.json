@@ -1,0 +1,285 @@
+{
+  "articulation_count": 2,
+  "drive_mimic_structure": {
+    "official_rule_results_suppressed": false,
+    "robots": {
+      "follower_left": {
+        "dofs": [
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "max_force": 10.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "waist",
+            "prim_path": "/World/follower_left/vx300s_left/joints/waist",
+            "status": "PASS",
+            "stiffness": 625.0
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "max_force": 20.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "shoulder",
+            "prim_path": "/World/follower_left/vx300s_left/joints/shoulder",
+            "status": "PASS",
+            "stiffness": 625.0
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "max_force": 15.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "elbow",
+            "prim_path": "/World/follower_left/vx300s_left/joints/elbow",
+            "status": "PASS",
+            "stiffness": 625.0
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "max_force": 2.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "forearm_roll",
+            "prim_path": "/World/follower_left/vx300s_left/joints/forearm_roll",
+            "status": "PASS",
+            "stiffness": 625.0
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "max_force": 5.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "wrist_angle",
+            "prim_path": "/World/follower_left/vx300s_left/joints/wrist_angle",
+            "status": "PASS",
+            "stiffness": 625.0
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "max_force": 1.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "wrist_rotate",
+            "prim_path": "/World/follower_left/vx300s_left/joints/wrist_rotate",
+            "status": "PASS",
+            "stiffness": 625.0
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "max_force": 1.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "gripper",
+            "prim_path": "/World/follower_left/vx300s_left/joints/gripper",
+            "status": "PASS",
+            "stiffness": 625.0
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "max_force": 5.0,
+            "max_velocity": 1.0,
+            "mimic": false,
+            "name": "left_finger",
+            "prim_path": "/World/follower_left/vx300s_left/joints/left_finger",
+            "status": "PASS",
+            "stiffness": 625.0
+          },
+          {
+            "damping": 0.0,
+            "drive_type": null,
+            "has_drive": false,
+            "max_force": null,
+            "max_velocity": 1000000.0,
+            "mimic": true,
+            "name": "right_finger",
+            "prim_path": "/World/follower_left/vx300s_left/joints/right_finger",
+            "status": "PASS",
+            "stiffness": 0.0
+          }
+        ],
+        "status": "PASS"
+      },
+      "follower_right": {
+        "dofs": [
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "max_force": 10.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "waist",
+            "prim_path": "/World/follower_right/vx300s_right/joints/waist",
+            "status": "PASS",
+            "stiffness": 625.0
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "max_force": 20.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "shoulder",
+            "prim_path": "/World/follower_right/vx300s_right/joints/shoulder",
+            "status": "PASS",
+            "stiffness": 625.0
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "max_force": 15.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "elbow",
+            "prim_path": "/World/follower_right/vx300s_right/joints/elbow",
+            "status": "PASS",
+            "stiffness": 625.0
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "max_force": 2.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "forearm_roll",
+            "prim_path": "/World/follower_right/vx300s_right/joints/forearm_roll",
+            "status": "PASS",
+            "stiffness": 625.0
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "max_force": 5.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "wrist_angle",
+            "prim_path": "/World/follower_right/vx300s_right/joints/wrist_angle",
+            "status": "PASS",
+            "stiffness": 625.0
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "max_force": 1.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "wrist_rotate",
+            "prim_path": "/World/follower_right/vx300s_right/joints/wrist_rotate",
+            "status": "PASS",
+            "stiffness": 625.0
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "max_force": 1.0,
+            "max_velocity": 180.0,
+            "mimic": false,
+            "name": "gripper",
+            "prim_path": "/World/follower_right/vx300s_right/joints/gripper",
+            "status": "PASS",
+            "stiffness": 625.0
+          },
+          {
+            "damping": 0.10000000149011612,
+            "drive_type": "acceleration",
+            "has_drive": true,
+            "max_force": 5.0,
+            "max_velocity": 1.0,
+            "mimic": false,
+            "name": "left_finger",
+            "prim_path": "/World/follower_right/vx300s_right/joints/left_finger",
+            "status": "PASS",
+            "stiffness": 625.0
+          },
+          {
+            "damping": 0.0,
+            "drive_type": null,
+            "has_drive": false,
+            "max_force": null,
+            "max_velocity": 1000000.0,
+            "mimic": true,
+            "name": "right_finger",
+            "prim_path": "/World/follower_right/vx300s_right/joints/right_finger",
+            "status": "PASS",
+            "stiffness": 0.0
+          }
+        ],
+        "status": "PASS"
+      }
+    },
+    "schema_version": 1,
+    "stage": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/aloha1_signal_correspondence_workcell.usda",
+    "stage_sha256": "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf",
+    "status": "PASS"
+  },
+  "expected_articulation_count": 2,
+  "robots": {
+    "follower_left": {
+      "articulation_path": "/World/follower_left/vx300s_left/root_joint",
+      "dof_order": [
+        "waist",
+        "shoulder",
+        "elbow",
+        "forearm_roll",
+        "wrist_angle",
+        "wrist_rotate",
+        "gripper",
+        "left_finger",
+        "right_finger"
+      ],
+      "finite_positive_active_max_velocity_and_force": true,
+      "first_frame_jump_rad_or_m": 0.014105996116995811,
+      "first_frame_jump_tolerance": 0.02,
+      "home_target_readback_max_error": 0.004126936197280884,
+      "home_target_readback_tolerance": 0.02,
+      "mimic_home_error_m": 2.3972243070602417e-05,
+      "status": "PASS"
+    },
+    "follower_right": {
+      "articulation_path": "/World/follower_right/vx300s_right/root_joint",
+      "dof_order": [
+        "waist",
+        "shoulder",
+        "elbow",
+        "forearm_roll",
+        "wrist_angle",
+        "wrist_rotate",
+        "gripper",
+        "left_finger",
+        "right_finger"
+      ],
+      "finite_positive_active_max_velocity_and_force": true,
+      "first_frame_jump_rad_or_m": 0.01410599984228611,
+      "first_frame_jump_tolerance": 0.02,
+      "home_target_readback_max_error": 0.004126846790313721,
+      "home_target_readback_tolerance": 0.02,
+      "mimic_home_error_m": 2.3970380425453186e-05,
+      "status": "PASS"
+    }
+  },
+  "schema_version": 1,
+  "status": "PASS"
+}

@@ -1,0 +1,81 @@
+{
+  "articulation_roots": [
+    "/World/follower_left/vx300s_left/root_joint",
+    "/World/follower_right/vx300s_right/root_joint"
+  ],
+  "baseline_id": "ALOHA1_STATIONARY_USER_CONFIRMED_BASELINE_V1",
+  "environment": {
+    "legacy_table_deactivated": true,
+    "source_prim": "/scene",
+    "source_stage": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd",
+    "source_stage_sha256": "236d2d133047d665cf7d3ad0e58e04ae218e56dcf70bbe63e110d1307d3f3215",
+    "table_dimensions_m": [
+      1.1,
+      0.6,
+      0.015
+    ],
+    "table_top_plane_z_m": -0.09090000152587889
+  },
+  "environment_layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/workcell/aloha1_signal_correspondence_environment.usda",
+  "environment_layer_sha256": "43840c44fae108be1872ef97e38d806f90f99bd595b68a3aaaa4be6cf75b213b",
+  "followers": [
+    {
+      "asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/follower_left_asset/aloha1_signal_follower_left.usda",
+      "asset_sha256": "34badd857a3327b3605dc4ffd2fc40eb9c4c72a31c427c20967a3273f003aa7c",
+      "construction": "PINNED_FOLLOWER_LEFT_IMPORT_PLUS_SUPPLIER_CAD_HANDED_FINGERS",
+      "mirrored": false,
+      "name": "follower_left",
+      "rotation_rpy_rad": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "source_import_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/follower_left.usd",
+      "source_import_asset_sha256": "a1e6beb663f70e4c1d6493f5be80da2894e075c931e0fa5211e8c91d59a8205d",
+      "supplier_cad_evidence_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_left/1.6/supplier_cad_follower_left.usda",
+      "supplier_cad_evidence_asset_sha256": "232ea1f61dc07f391baf7497b0cf6c2455593f9655ae9b3f541fde81c8ef73ad",
+      "supplier_finger_geometry": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_convex_hull/geometry/supplier_cad_finger_mesh.usda",
+      "supplier_finger_geometry_sha256": "781613d408843737b17d9f9a75e8c1b037ecc45749358d4b34ab48a8a7e98d4f",
+      "translation_m": [
+        -0.4695,
+        -0.019,
+        0.02
+      ]
+    },
+    {
+      "asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/supplier_cad_follower_right.usda",
+      "asset_sha256": "95c7878f794f5f557b70997a2240b6476836b8ffbeed5a4992cb114a169487ea",
+      "mirrored": false,
+      "name": "follower_right",
+      "rotation_rpy_rad": [
+        0.0,
+        0.0,
+        3.141592653589793
+      ],
+      "translation_m": [
+        0.4695,
+        -0.019,
+        0.02
+      ]
+    }
+  ],
+  "home_configuration_layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/configuration/aloha1_signal_home_targets.usda",
+  "home_configuration_layer_sha256": "484f17e3c638ea729a260eb67a666954f346b37a69987d9fe4f15cf7fad9d141",
+  "left_asset_layer_sha256": {
+    "configuration": "5e2da1b91ee561b5202ef71b6f1d4b91be02abab83368584b22f84332e31d267",
+    "geometry": "c5b1fec30df75daa7541f6de1818514dafb612d1b5af92a6a2ce8fc81112a86a",
+    "physics": "7aa18a04fe453253d6482852a0b47b60202f3fa6197d8cfb8b0b23f50b813d42",
+    "wrapper": "34badd857a3327b3605dc4ffd2fc40eb9c4c72a31c427c20967a3273f003aa7c"
+  },
+  "left_asset_layers": {
+    "configuration": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/follower_left_asset/configuration/aloha1_signal_follower_left_configuration.usda",
+    "geometry": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/follower_left_asset/geometry/aloha1_signal_follower_left_geometry.usda",
+    "physics": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/follower_left_asset/physics/aloha1_signal_follower_left_physics.usda",
+    "wrapper": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/follower_left_asset/aloha1_signal_follower_left.usda"
+  },
+  "root_layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/aloha1_signal_correspondence_workcell.usda",
+  "root_layer_sha256": "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf",
+  "root_prim": "/World",
+  "schema_version": 1,
+  "status": "PASS"
+}

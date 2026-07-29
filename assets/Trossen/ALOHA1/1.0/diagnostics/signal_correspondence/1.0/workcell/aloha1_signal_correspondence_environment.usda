@@ -1,0 +1,54 @@
+#usda 1.0
+(
+    defaultPrim = "environment"
+    metersPerUnit = 1
+    upAxis = "Z"
+)
+
+def Xform "environment" (
+    prepend references = @../../../../../../../../local_eval_assets/aloha_isaac_menagerie_deep_black_real_start_pose/aloha2_menagerie_scene_deep_black_real_start_pose.usd@</scene>
+)
+{
+    over "left_base_link" (
+        active = false
+    )
+    {
+    }
+
+    over "right_base_link" (
+        active = false
+    )
+    {
+    }
+
+    over "joints" (
+        active = false
+    )
+    {
+    }
+
+    over "worldBody"
+    {
+        over "table" (
+            active = false
+        )
+        {
+        }
+
+        def Cube "user_confirmed_table" (
+            prepend apiSchemas = ["PhysicsCollisionAPI"]
+            customData = {
+                dictionary aloha1 = {
+                    string classification = "USER_CONFIRMED_PROJECT_BASELINE"
+                }
+            }
+        )
+        {
+            double size = 1
+            color3f[] primvars:displayColor = [(0.12, 0.10, 0.08)]
+            double3 xformOp:scale = (1.1, 0.6, 0.015)
+            double3 xformOp:translate = (0, 0, -0.0984000015258789)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+        }
+    }
+}
