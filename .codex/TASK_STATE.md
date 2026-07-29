@@ -77,6 +77,31 @@ The 2026-07-29 signal-correspondence priority is the current handoff:
   confirmed that supplier-CAD finger contact with `user_confirmed_table` is
   allowed physical workcell behavior, so it is no longer classified as a
   control or collider failure. Task 7B and Task 8 remain `NOT_RUN`.
+- The current Task 7A result is now explicitly split:
+  `TASK7A_RUNTIME_CONTROL=PASS`,
+  `TASK7A_WORKCELL_PHYSICS=PASS`,
+  `ASSET_PROMOTION_READINESS=PARTIAL`, and aggregate `PARTIAL`. The
+  authoritative reports are
+  `aloha1_task7_runtime_acceptance.json`,
+  `aloha1_task7_asset_promotion_readiness.json`, and
+  `aloha1_task7_official_rule_applicability.json`.
+- The six `RigidBodyHasCollider` findings were traced through the pinned
+  Xacro, generated URDFs and composed USD prim stacks. For both followers,
+  `ee_arm_link` and `fingers_link` are geometry-free kinematic helper frames;
+  `ee_gripper_link` is a fixed frame alias. Each has the source 0.001 kg
+  inertial block, zero visual/collision elements, composed
+  `PhysicsRigidBodyAPI`/`PhysicsMassAPI`, and zero descendant colliders.
+  Supplier CAD maps geometry to the handed finger links, not these helper
+  frames. Report:
+  `reports/aloha1_mapping/aloha1_task7a_helper_link_semantics.json`.
+- No helper collider was invented and no `RigidBodyAPI` was removed. The
+  promotion candidate disposition is
+  `NOT_CREATED_EVIDENCE_INSUFFICIENT_FOR_HELPER_LINK_MUTATION`.
+- Five fresh Isaac Sim 5.1 validator processes reproduced the exact prior
+  official output: 37 findings and byte-identical combined JSON SHA-256
+  `a7acb1e7363d1306b01b7f9609f9a5250f0b535771a3de8523246ae3cd31756f`.
+  Fresh logs and the frozen input manifest are under
+  `.codex/artifacts/20260729-aloha1-task7a-acceptance-separation/`.
 - Swept coverage is 48/48 (24 cases × 2 fresh repeats). The two repeat
   signatures are identical:
   `5b6ca2a5d2c0b8b07ff57e022bb357fdea5116c243079ecd50ebd3a3e17c09ce`.

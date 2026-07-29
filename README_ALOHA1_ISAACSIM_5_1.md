@@ -9,8 +9,10 @@ sim-to-real dynamics model and it is not yet accepted for bottle insertion.
 
 | Gate | Status | Evidence |
 | --- | --- | --- |
-| Kinematic and signal-correspondence baseline | **PARTIAL** | both followers pass 32/32 one-joint cases and small up/down; the deterministic workcell collision-policy sweep is 48/48 PASS, with four separately recorded allowed-contact reachability boundaries |
-| Task 7A structure/control signal | **PARTIAL** | mapping, drive/mimic structure, first-frame/home, both one-joint suites and up/down PASS; allowed finger/table contact is a workcell reachability boundary, while literal official PhysicsRules/RobotRules remain FAIL |
+| Task 7A runtime control | **PASS** | mapping, drive/mimic structure, first-frame/home, both 32/32 one-joint suites and small up/down are machine PASS |
+| Task 7A workcell physics | **PASS** | deterministic collision-policy sweep is 48/48 PASS with 0 forbidden contacts; four allowed supplier-CAD finger/table reachability boundaries remain explicitly recorded |
+| Task 7A asset-promotion readiness | **PARTIAL** | literal official status remains FAIL: 28 packaging findings, 6 source-geometry boundaries, 2 Isaac 5.1 validator/schema conflicts and 1 INFO record; no finding is suppressed |
+| Task 7A aggregate | **PARTIAL** | runtime control and workcell physics pass, but the current package is not ready for SimReady promotion |
 | Task 7B full physical task | **NOT_RUN** | bottle hold, calibrated friction/force and full SimReady promotion are outside the current priority |
 | Current signal screenshots | **PASS (visual 24/24 PASS)** | 12 fresh raw + 12 annotated images match Stage SHA-256 `d8182a6c…c788cf`; the controlled OmniHydra screenshot process has zero `protoPath` errors |
 | Hydra protoPath controlled diagnosis | **PASS / `FSD_7_5_1_PRIMARY`** | A=29 errors, B OmniHydra=0, B repeat deterministic, D materialization=0; default delegate restored and final assets unchanged |
@@ -35,7 +37,7 @@ sim-to-real dynamics model and it is not yet accepted for bottle insertion.
 | Gripper hold root cause v2 | **SUPERSEDED INPUT** | prior `inconclusive` used the rejected generic finger mesh |
 | Supplier CAD raw + annotated visual review | PASS (8 pairs) | `aloha_viper_gripper_screenshot_review.json` |
 | Workcell and logical cameras | PARTIAL | `workcell_manifest.json`, `camera_validation.json` |
-| Supplier-CAD Task 7 aggregate | **FAIL** | follower_left remains PARTIAL; follower_right robot-local is FAIL from mimic error plus 5 PhysicsRules and 4 RobotRules blocking findings; SimReady passes; workcell placement remains separate |
+| Supplier-CAD Task 7 aggregate | **FAIL** | historical isolated supplier-CAD robot-package validation; follower_left remains PARTIAL and follower_right robot-local remains FAIL there with 5 PhysicsRules and 4 RobotRules blocking findings. This is not the current frozen dual-follower Task 7A runtime result |
 | Task 7 certified-pose screenshots | **PARTIAL** | follower_left: 6 raw + 6 annotated PASS; follower_right robot-local: 7 raw + 7 annotated visual PASS, while numeric runtime remains PARTIAL because mimic accuracy fails |
 | CAD render/tessellation determinism | PASS | `aloha_viper_gripper_screenshot_review.json`, `aloha_viper_finger_tessellation.json` |
 | Task 8 optimization | **NOT_RUN** | no mesh merge, collider promotion, instanceable, payload, or performance optimization |
@@ -85,7 +87,10 @@ Fresh Isaac Sim 5.1 runtime results:
 - swept collision policy: `PASS`; 48/48 cases were executed across two
   repeats with 0 forbidden contacts; four cases separately record
   `CONTACT_LIMITED_BY_ALLOWED_WORKCELL_CONTACT`;
-- Task 7A: `PARTIAL`;
+- Task 7A runtime control: `PASS`;
+- Task 7A workcell physics: `PASS`;
+- Task 7A asset-promotion readiness: `PARTIAL`;
+- Task 7A aggregate: `PARTIAL`;
 - Task 7B: `NOT_RUN`;
 - Task 8: `NOT_RUN`.
 
@@ -128,11 +133,52 @@ carry a separate
 They are not control-direction, joint-map or collider failures. A separate
 positive-separation, zero-impulse pair remains `CONTACT_ENVELOPE_ONLY`.
 
-Task 7A is therefore `PARTIAL`, principally because official
-PhysicsRules/RobotRules findings remain unsuppressed and workcell-wide
-reachability is not a robot-local joint-range claim. Disabled self-collision
+Task 7A is therefore `PARTIAL` only at the aggregate level. Its measured
+runtime-control layer is `PASS`, and its policy-v2 workcell-physics layer is
+`PASS`. Asset-promotion readiness remains `PARTIAL` because literal official
+PhysicsRules/RobotRules findings remain unsuppressed. Disabled self-collision
 pairs are not proven geometrically separated. The frozen Stage hash remains
 unchanged.
+
+### Task 7A three-layer acceptance and helper-link audit
+
+The authoritative split prevents package-structure findings from being
+misreported as controller or workcell failures:
+
+- `TASK7A_RUNTIME_CONTROL = PASS`;
+- `TASK7A_WORKCELL_PHYSICS = PASS`;
+- `ASSET_PROMOTION_READINESS = PARTIAL`;
+- `TASK7A_AGGREGATE = PARTIAL`;
+- Task 7B and Task 8 remain `NOT_RUN`.
+
+The six literal `RigidBodyHasCollider` findings were audited through the
+pinned `aloha_vx300s.urdf.xacro`, both generated URDFs, the composed USD prim
+stacks, the installed Isaac Sim 5.1 validation rule and the supplier-CAD
+mapping report. On both followers:
+
+- `ee_arm_link` and `fingers_link` are geometry-free
+  `VIRTUAL_KINEMATIC_HELPER` frames;
+- `ee_gripper_link` is a geometry-free `FIXED_FRAME_ALIAS`;
+- each source link has one 0.001 kg inertial block but zero visual and zero
+  collision elements;
+- the composed prim has `PhysicsRigidBodyAPI`/`PhysicsMassAPI` and zero
+  descendant colliders;
+- supplier CAD maps physical geometry to `left_finger` and `right_finger`,
+  not to these helper frames.
+
+This makes the official failures real, but it does not provide a shape from
+which a collider can be authored. No collider was guessed and no
+`RigidBodyAPI` was removed. The isolated promotion candidate is therefore
+`NOT_CREATED_EVIDENCE_INSUFFICIENT_FOR_HELPER_LINK_MUTATION`; changing either
+property could alter articulation semantics and requires a separate
+source-backed candidate plus complete regression.
+
+Machine reports:
+
+- `reports/aloha1_mapping/aloha1_task7_runtime_acceptance.json`;
+- `reports/aloha1_mapping/aloha1_task7_asset_promotion_readiness.json`;
+- `reports/aloha1_mapping/aloha1_task7_official_rule_applicability.json`;
+- `reports/aloha1_mapping/aloha1_task7a_helper_link_semantics.json`.
 
 Screenshot evidence was recaptured after the home layer changed the Stage
 hash and again after the controlled Hydra diagnosis. The final 12 raw and 12
