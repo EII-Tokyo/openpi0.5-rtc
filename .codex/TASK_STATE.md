@@ -52,6 +52,77 @@ explicitly pending when measured data is absent.
 
 ### Current Work
 
+The 2026-07-29 signal-correspondence priority is the current handoff:
+
+- Scope is digital-only Stationary ALOHA1 followers. No real robot was
+  connected or controlled and `192.168.1.103` was not accessed.
+- Frozen Stage:
+  `assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/aloha1_signal_correspondence_workcell.usda`,
+  SHA-256
+  `d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf`.
+- An independent
+  `configuration/aloha1_signal_home_targets.usda` layer authors the approved
+  home state and matching drive targets. Source URDF/import USD and final
+  collider were not modified.
+- `configs/aloha1_joint_map.yaml` now uses the current signal runtime
+  inventory and explicitly contains prefix, base/EE frames, all source
+  orders/indices, units, signs, offsets, limits, max force, mimic and
+  gripper-normalization semantics.
+- follower_left one-joint is `PASS`, 32/32 cases; follower_right one-joint is
+  `PASS`, 32/32 cases. Each includes six arm DOFs, gripper, left-finger drive
+  and right-finger mimic readback across two fresh deterministic repeats.
+- Three-reset digital small-up/return motion is `PASS`; shoulder `-0.08 rad`
+  produces approximately `+0.0116 m` end-effector Z and returns to home.
+- Task 7A is `PARTIAL`: runtime structure/control gates pass, but swept-link
+  collision monitoring is incomplete and the fresh, unsuppressed NVIDIA
+  PhysicsRules/RobotRules results remain `FAIL`. Task 7B and Task 8 are
+  `NOT_RUN`.
+- Applicable workcell `IsaacSim.SimReadyAssetRules` is `PASS`; its INFO record
+  is retained.
+- Current final screenshots: 12 raw + 12 annotated, all individually reviewed
+  by the vision model and `PASS`. They were captured in fresh processes with
+  the controlled OmniHydra diagnostic workaround
+  `/app/useFabricSceneDelegate=false`; both processes recorded zero
+  `protoPath` errors. Roots:
+  `.codex/artifacts/20260729-aloha1-signal-correspondence/omnihydra_final/screenshots_raw`
+  and
+  `.codex/artifacts/20260729-aloha1-signal-correspondence/omnihydra_final/screenshots_annotated`.
+- The inserted Hydra matrix is complete. Classification is
+  `FSD_7_5_1_PRIMARY`: default FSD A=29 errors; OmniHydra B=0; B repeat=0
+  with the same deterministic signature; C1-C4 each remain 29; diagnostic
+  visual materialization D=0. The default delegate was restored and a fresh
+  restore run reproduced 29. The workaround is screenshot-process-only and
+  did not modify the Stage, physics composition, collider, instanceable
+  authoring, or final/default asset.
+- All 49 accepted Hydra matrix screenshots were individually reviewed by the
+  vision model. The first D screenshot and seven retakes were rejected with
+  recorded reasons before `D_RETAKE8` passed with session-only environment
+  visibility isolation.
+- Authoritative reports:
+  `reports/aloha1_mapping/aloha1_task7a_7b_validation_summary.json`,
+  `aloha1_joint_mapping_validation.json`,
+  `aloha1_signal_correspondence_official_rules.json`,
+  `aloha1_signal_correspondence_screenshot_review.json`, and
+  `aloha1_signal_screenshot_command_manifest.json`. Hydra evidence:
+  `aloha1_hydra_protopath_diagnosis.json`,
+  `aloha1_hydra_protopath_diagnosis_matrix.csv`,
+  `aloha1_hydra_protopath_input_manifest.json`, and
+  `aloha1_hydra_protopath_screenshot_review.json`.
+- Current outcome name:
+  `KINEMATIC_AND_SIGNAL_CORRESPONDENCE_BASELINE_PARTIAL`.
+- Final post-Hydra verification:
+  - fresh Isaac Task 7A validation: `PARTIAL` overall with mapping, both
+    one-joint suites, and up/down `PASS`; Stage SHA-256 remains
+    `d8182a6c...c788cf`;
+  - focused pytest: `7 passed`;
+  - full `tests/aloha1_mapping`: `335 passed`;
+  - Ruff: `PASS`;
+  - `py_compile`: `PASS`;
+  - logs:
+    `.codex/artifacts/20260729-aloha1-signal-correspondence/logs/task7a_post_hydra_final_fresh.log`,
+    `final_focused_pytest.log`, `final_full_pytest.log`, `final_ruff.log`,
+    and `final_pycompile.log`.
+
 The unoptimized Stationary ALOHA 1 mapping baseline is implemented through
 Task 7. Full diagnostic output is bounded under
 `.codex/artifacts/aloha1_mapping/`. Existing unrelated dirty files remain

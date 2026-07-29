@@ -9,6 +9,11 @@ sim-to-real dynamics model and it is not yet accepted for bottle insertion.
 
 | Gate | Status | Evidence |
 | --- | --- | --- |
+| Kinematic and signal-correspondence baseline | **PARTIAL** | both followers pass 32/32 one-joint cases and small up/down; swept-link collision monitoring and unsuppressed official-rule findings remain |
+| Task 7A structure/control signal | **PARTIAL** | joint mapping, drive/mimic structure, first-frame/home readback, both one-joint suites and deterministic up/down PASS; official PhysicsRules/RobotRules remain FAIL |
+| Task 7B full physical task | **NOT_RUN** | bottle hold, calibrated friction/force and full SimReady promotion are outside the current priority |
+| Current signal screenshots | **PASS (visual 24/24 PASS)** | 12 fresh raw + 12 annotated images match Stage SHA-256 `d8182a6c…c788cf`; the controlled OmniHydra screenshot process has zero `protoPath` errors |
+| Hydra protoPath controlled diagnosis | **PASS / `FSD_7_5_1_PRIMARY`** | A=29 errors, B OmniHydra=0, B repeat deterministic, D materialization=0; default delegate restored and final assets unchanged |
 | Source and environment audit | PARTIAL | `reports/aloha1_mapping/source_audit.md`, `source_manifest.json`, `missing_resources.json` |
 | Four reproducible URDFs | PASS | `reports/aloha1_mapping/urdf_audit.json`, `urdf_generation_manifest.json` |
 | Isaac Sim 5.1 import | PASS | `reports/aloha1_mapping/import_manifest.json` |
@@ -38,6 +43,100 @@ sim-to-real dynamics model and it is not yet accepted for bottle insertion.
 `PASS`, `FAIL`, and `PARTIAL` are literal machine-report values. A clean
 viewport is not an acceptance criterion.
 
+## 2026-07-29 kinematic and signal-correspondence baseline
+
+The active, isolated dual-follower Stage is:
+
+`/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/aloha1_signal_correspondence_workcell.usda`
+
+Its current SHA-256 is
+`d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf`.
+It references two independent, non-mirrored `aloha_vx300s` articulations.
+The user-confirmed project baseline places them at X `-0.4695/+0.4695 m`,
+Y `-0.019 m`, Z `0.020 m`; the right robot uses yaw π. These are
+`USER_CONFIRMED_PROJECT_BASELINE` values, not newly inferred measurements.
+
+An independent home-target configuration layer now authors the approved
+reference pose and matching drive targets before Play:
+
+`assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/configuration/aloha1_signal_home_targets.usda`
+
+This removes the raw zero-state limit projection seen before the layer was
+added. Runtime readback now passes the first-frame, home target/readback,
+finite max velocity/max force, and drive/mimic structure gates. It does not
+calibrate real dynamics.
+
+The explicit joint map is `configs/aloha1_joint_map.yaml`. It records, for
+both followers, the non-alphabetical URDF/Isaac/ROS order, Isaac and ROS
+indices, dataset state/action indices, robot prefix, unit/sign/offset,
+position and velocity limits, max force, mimic relation, gripper normalized
+mapping, base frame and end-effector frame. The real motor-angle/aperture
+calibration remains a `HARD_BLOCKER`; the normalized gripper mapping is an
+engineering simulation mapping, not measured sim-to-real calibration.
+
+Fresh Isaac Sim 5.1 runtime results:
+
+- follower_left one-joint: `PASS`, 32/32 cases, two deterministic repeats;
+- follower_right one-joint: `PASS`, 32/32 cases, two deterministic repeats;
+- tested signals per follower: six arm DOFs, `gripper`, `left_finger`, and
+  `right_finger` mimic readback;
+- small up/down: `PASS`, three fresh resets; shoulder `-0.08 rad` increases
+  end-effector Z by approximately `0.0116 m` and returns to home;
+- Task 7A: `PARTIAL`;
+- Task 7B: `NOT_RUN`;
+- Task 8: `NOT_RUN`.
+
+NVIDIA official results are preserved without suppression. On each robot
+asset, `IsaacSim.PhysicsRules` remains `FAIL` because of the gripper
+JointStateAPI omission in the source robot asset, the Isaac Sim 5.1 mimic
+validator/schema conflict, and three mass-only links without evidence-backed
+colliders. `IsaacSim.RobotRules` remains `FAIL` on schema/layer packaging
+findings. The workcell-scoped applicable `IsaacSim.SimReadyAssetRules` run is
+`PASS` (one INFO record). Runtime evidence passes the signal gates, but it
+does not rewrite the official FAIL values; therefore Task 7A is `PARTIAL`,
+not PASS. Full swept-link collision/contact monitoring is also still
+`PARTIAL`.
+
+Screenshot evidence was recaptured after the home layer changed the Stage
+hash and again after the controlled Hydra diagnosis. The final 12 raw and 12
+annotated images were inspected individually with the vision model and passed
+the pose/signal visual gate. The final raw and annotated roots are:
+
+- `/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/omnihydra_final/screenshots_raw`;
+- `/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-signal-correspondence/omnihydra_final/screenshots_annotated`.
+
+The screenshot report is now `PASS`, but only for auxiliary pose/signal
+evidence. A controlled fresh-process matrix identified the local
+`omni.hydra.usdrt_delegate 7.5.1` FSD path as the primary boundary:
+the unchanged Stage produced 29 native `cannot find protoPath` records under
+the default FSD and zero under `/app/useFabricSceneDelegate=false`. A second
+fresh OmniHydra run produced the same deterministic signature. None of the
+single-variable FSD population options removed the 29 records. Diagnostic
+visual materialization also removed the records, but was not selected as the
+workaround and was not promoted.
+
+The final captures therefore use OmniHydra only as a
+`DIAGNOSTIC_ONLY_SCREENSHOT_WORKAROUND` in fresh screenshot processes. The
+default delegate was restored and verified, the approved Stage hash and Task
+7A numeric report hashes did not change, and no source/configuration/physics,
+collider, instanceable authoring, or final/default asset was modified.
+Session-only exact-source-topology visual clones remain explicitly disclosed
+and contain no physics or collision schemas. Numeric JSON/CSV remains
+authoritative. Hydra machine evidence is in:
+
+- `reports/aloha1_mapping/aloha1_hydra_protopath_diagnosis.json`;
+- `reports/aloha1_mapping/aloha1_hydra_protopath_diagnosis_matrix.csv`;
+- `reports/aloha1_mapping/aloha1_hydra_protopath_input_manifest.json`;
+- `reports/aloha1_mapping/aloha1_hydra_protopath_screenshot_review.json`.
+
+The superseded Stage-hash-mismatched screenshot batch is preserved under
+`superseded_stage_d9318d1/`.
+
+This result must be called
+`KINEMATIC_AND_SIGNAL_CORRESPONDENCE_BASELINE_PARTIAL`. It is not a calibrated
+physical digital twin and it is not evidence of bottle grasp, leader/camera
+mapping, ROS integration, or insertion.
+
 ## Version boundary
 
 The implementation is restricted to the installed Isaac Sim 5.1 tree:
@@ -53,6 +152,8 @@ The implementation is restricted to the installed Isaac Sim 5.1 tree:
 - Gain Tuner: `3.0.6`
 - Isaac Asset Validation: `1.1.0`
 - PhysX extension/API line: `107.3.26`
+- Hydra USD-RT delegate: `omni.hydra.usdrt_delegate 7.5.1`
+- USD-RT scenegraph: `usdrt.scenegraph 7.6.1`
 - ROS installations found: Jazzy and Rolling
 - Active ROS distribution: `UNSELECTED` because `ROS_DISTRO` was unset
 
