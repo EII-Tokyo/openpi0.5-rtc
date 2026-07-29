@@ -1,0 +1,24 @@
+schema_version: 1
+status: DIGITAL_STAGE_READBACK_NOT_REAL_CALIBRATION
+stage:
+  path: assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/aloha1_signal_correspondence_workcell.usda
+  sha256: d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf
+usd_world:
+  prim_path: /World
+  meters_per_unit: 1.0
+  up_axis: Z
+table:
+  prim_path: /World/environment/worldBody/user_confirmed_table
+  center_world_m: [0.0, 0.0, -0.0984000015258789]
+  size_world_m: [1.1, 0.6, 0.015]
+task_world:
+  name: W_T
+  origin_policy: TABLETOP_GEOMETRIC_CENTER
+  x_axis_policy: FOLLOWER_LEFT_BASE_TO_FOLLOWER_RIGHT_BASE
+  z_axis_policy: TABLE_NORMAL_UP
+  world_from_task_translation_m: [0.0, 0.0, -0.0909000015258789]
+  world_from_task_quaternion_wxyz: [1.0, 0.0, 0.0, 0.0]
+boundaries:
+  source_stage_modified: false
+  real_calibration_complete: false
+  task8: NOT_RUN
