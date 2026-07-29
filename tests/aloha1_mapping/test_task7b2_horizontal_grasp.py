@@ -9,6 +9,7 @@ import numpy as np
 import pytest
 import yaml
 
+from tools import validate_aloha1_task7b2_horizontal_grasp as horizontal_runtime
 from tools.aloha1_mapping.task7b2_horizontal_grasp import canonical_horizontal_signature
 from tools.aloha1_mapping.task7b2_horizontal_grasp import evaluate_horizontal_trial
 from tools.aloha1_mapping.task7b2_horizontal_grasp import summarize_horizontal_trials
@@ -568,6 +569,307 @@ def test_horizontal_runtime_requires_complete_two_view_frame_streams() -> None:
     assert '"render_fps"' in source
     assert '"first_physics_frame"' in source
     assert '"last_physics_frame"' in source
+
+
+def test_horizontal_runtime_full_arm_links_resolve_to_real_stage_prims() -> None:
+    expected = {
+        "base": (
+            "/World/follower_left/vx300s_left/follower_left_base_link",
+        ),
+        "shoulder": (
+            "/World/follower_left/vx300s_left/follower_left_shoulder_link",
+            "/World/follower_left/vx300s_left/follower_left_upper_arm_link",
+        ),
+        "elbow": (
+            "/World/follower_left/vx300s_left/follower_left_upper_forearm_link",
+        ),
+        "forearm": (
+            "/World/follower_left/vx300s_left/follower_left_lower_forearm_link",
+        ),
+        "wrist": (
+            "/World/follower_left/vx300s_left/follower_left_wrist_link",
+        ),
+        "gripper": (
+            "/World/follower_left/vx300s_left/follower_left_gripper_link",
+            "/World/follower_left/vx300s_left/follower_left_left_finger_link",
+            "/World/follower_left/vx300s_left/follower_left_right_finger_link",
+        ),
+    }
+
+    assert expected == horizontal_runtime.FULL_ARM_LINK_PRIMS
+
+
+def test_horizontal_runtime_full_arm_contract_uses_actual_bottle_and_table_paths() -> (
+    None
+):
+    config = yaml.safe_load(CONFIG.read_text(encoding="utf-8"))
+    bottle_path = config["bottle"]["session_path"]
+    table_path = config["frozen_inputs"]["task7a_stage"]["support_path"]
+    required_prims, required_links = (
+        horizontal_runtime._required_full_arm_contract(  # noqa: SLF001
+            bottle_path=bottle_path,
+            table_path=table_path,
+        )
+    )
+
+    assert required_links == (
+        "base",
+        "shoulder",
+        "elbow",
+        "forearm",
+        "wrist",
+        "gripper",
+    )
+    assert required_prims[-2:] == (
+        bottle_path,
+        table_path,
+    )
+    assert bottle_path == "/World/Task7B2HorizontalSession/Bottle500"
+    assert table_path == "/World/environment/worldBody/user_confirmed_table"
+    assert set(required_prims[:-2]) == {
+        prim_path
+        for prim_paths in horizontal_runtime.FULL_ARM_LINK_PRIMS.values()
+        for prim_path in prim_paths
+    }
+
+
+def test_horizontal_runtime_framing_evidence_uses_projection_and_fails_closed(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    class Prim:
+        def __init__(self, path: str) -> None:
+            self._path = path
+
+        def IsValid(self) -> bool:  # noqa: N802
+            return self._path != "/World/missing"
+
+    class Stage:
+        def GetPrimAtPath(self, path: str) -> Prim:  # noqa: N802
+            return Prim(path)
+
+    class Camera:
+        def get_clipping_range(self) -> tuple[float, float]:
+            return (0.1, 100.0)
+
+        def get_image_coords_from_world_points(
+            self,
+            points: np.ndarray,
+        ) -> np.ndarray:
+            depth = -points[:, 2]
+            return np.column_stack(
+                [
+                    50.0 + 40.0 * points[:, 0] / depth,
+                    50.0 - 40.0 * points[:, 1] / depth,
+                ]
+            )
+
+    bounds = {
+        "/World/visible": {
+            "minimum": [-0.1, -0.1, -2.1],
+            "maximum": [0.1, 0.1, -1.9],
+        },
+        "/World/offscreen": {
+            "minimum": [10.0, -0.1, -2.1],
+            "maximum": [10.2, 0.1, -1.9],
+        },
+        "/World/behind": {
+            "minimum": [-0.1, -0.1, 1.9],
+            "maximum": [0.1, 0.1, 2.1],
+        },
+        "/World/near_clipped": {
+            "minimum": [-0.01, -0.01, -0.06],
+            "maximum": [0.01, 0.01, -0.04],
+        },
+        "/World/far_clipped": {
+            "minimum": [-0.1, -0.1, -102.0],
+            "maximum": [0.1, 0.1, -101.0],
+        },
+        "/World/Bottle500": {
+            "minimum": [-0.2, -0.2, -2.2],
+            "maximum": [0.2, 0.2, -1.8],
+        },
+        "/World/Table": {
+            "minimum": [-0.5, -0.5, -2.5],
+            "maximum": [0.5, 0.5, -2.0],
+        },
+    }
+    monkeypatch.setattr(
+        horizontal_runtime,
+        "_world_bounds",
+        lambda _stage, path: bounds[path],
+    )
+
+    evidence = horizontal_runtime._full_arm_framing_evidence(  # noqa: SLF001
+        stage=Stage(),
+        camera=Camera(),
+        camera_world_matrix=np.eye(4),
+        resolution=(100, 100),
+        required_link_prims={
+            "base": ("/World/visible",),
+            "shoulder": ("/World/offscreen",),
+            "elbow": ("/World/behind",),
+            "forearm": ("/World/near_clipped",),
+            "wrist": ("/World/missing",),
+            "gripper": ("/World/far_clipped",),
+        },
+        required_scene_prims=("/World/Bottle500", "/World/Table"),
+    )
+
+    assert evidence["method"] == (
+        "WORLD_AABB_27_POINT_USD_CAMERA_CLIPPED_PROJECTION_IN_FRAME"
+    )
+    assert evidence["projected_in_frame_prims"] == [
+        "/World/visible",
+        "/World/Bottle500",
+        "/World/Table",
+    ]
+    assert evidence["projected_in_frame_links"] == ["base"]
+    assert evidence["numeric_evidence_scope"] == (
+        "WORLD_AABB_CAMERA_FRUSTUM_AND_IMAGE_BOUNDS_ONLY"
+    )
+    assert evidence["occlusion_evaluation_status"] == (
+        "NOT_EVALUATED_REQUIRES_VISUAL_REVIEW"
+    )
+    assert "visible_prims" not in evidence
+    assert "visible_links" not in evidence
+    assert evidence["projection_by_prim"]["/World/visible"][
+        "in_frame_sample_count"
+    ] == 27
+    assert evidence["projection_by_prim"]["/World/offscreen"]["status"] == (
+        "OUTSIDE_IMAGE"
+    )
+    assert evidence["projection_by_prim"]["/World/behind"]["status"] == (
+        "BEHIND_CAMERA"
+    )
+    assert evidence["projection_by_prim"]["/World/near_clipped"]["status"] == (
+        "OUTSIDE_CLIPPING_RANGE"
+    )
+    assert evidence["projection_by_prim"]["/World/far_clipped"]["status"] == (
+        "OUTSIDE_CLIPPING_RANGE"
+    )
+    assert evidence["projection_by_prim"]["/World/missing"]["status"] == (
+        "MISSING_STAGE_PRIM"
+    )
+
+
+def test_horizontal_runtime_finalizes_synchronized_view_manifest_fields() -> None:
+    records = [
+        {
+            "physics_frame": 12,
+            "time_s": 0.2,
+            "phase": "vertical_descent",
+            "views": {
+                "overview": {
+                    "absolute_path": "/tmp/overview.png",
+                    "framing_evidence": {
+                        "projected_in_frame_prims": [
+                            "/World/arm",
+                            "/World/Bottle500",
+                            "/World/Table",
+                        ],
+                        "projected_in_frame_links": ["base", "gripper"],
+                        "numeric_evidence_scope": (
+                            "WORLD_AABB_CAMERA_FRUSTUM_AND_IMAGE_BOUNDS_ONLY"
+                        ),
+                        "occlusion_evaluation_status": (
+                            "NOT_EVALUATED_REQUIRES_VISUAL_REVIEW"
+                        ),
+                    },
+                },
+                "gripper_closeup": {"absolute_path": "/tmp/closeup.png"},
+            },
+        }
+    ]
+
+    manifest = horizontal_runtime._finalize_frame_manifest(  # noqa: SLF001
+        frame_records=records,
+        capture_views=("overview", "gripper_closeup"),
+        runtime_trial_signature="trial-signature",
+        required_full_arm_prims=(
+            "/World/arm",
+            "/World/Bottle500",
+            "/World/Table",
+        ),
+        required_full_arm_links=("base", "gripper"),
+    )
+
+    assert manifest["required_full_arm_prims"] == [
+        "/World/arm",
+        "/World/Bottle500",
+        "/World/Table",
+    ]
+    assert manifest["required_full_arm_links"] == ["base", "gripper"]
+    for view in ("overview", "gripper_closeup"):
+        assert manifest["records"][0]["views"][view] == {
+            "absolute_path": (
+                "/tmp/overview.png"
+                if view == "overview"
+                else "/tmp/closeup.png"
+            ),
+            **(
+                {
+                    "framing_evidence": {
+                        "projected_in_frame_prims": [
+                            "/World/arm",
+                            "/World/Bottle500",
+                            "/World/Table",
+                        ],
+                        "projected_in_frame_links": ["base", "gripper"],
+                        "numeric_evidence_scope": (
+                            "WORLD_AABB_CAMERA_FRUSTUM_AND_IMAGE_BOUNDS_ONLY"
+                        ),
+                        "occlusion_evaluation_status": (
+                            "NOT_EVALUATED_REQUIRES_VISUAL_REVIEW"
+                        ),
+                    }
+                }
+                if view == "overview"
+                else {}
+            ),
+            "physics_frame": 12,
+            "time_s": 0.2,
+            "runtime_trial_signature": "trial-signature",
+        }
+
+
+def test_horizontal_runtime_manifest_fails_closed_on_missing_full_arm_framing() -> (
+    None
+):
+    records = [
+        {
+            "physics_frame": 12,
+            "time_s": 0.2,
+            "phase": "vertical_descent",
+            "views": {
+                "overview": {
+                    "framing_evidence": {
+                        "projected_in_frame_prims": ["/World/arm"],
+                        "projected_in_frame_links": ["base"],
+                        "numeric_evidence_scope": (
+                            "WORLD_AABB_CAMERA_FRUSTUM_AND_IMAGE_BOUNDS_ONLY"
+                        ),
+                        "occlusion_evaluation_status": (
+                            "NOT_EVALUATED_REQUIRES_VISUAL_REVIEW"
+                        ),
+                    }
+                },
+                "gripper_closeup": {},
+            },
+        }
+    ]
+
+    with pytest.raises(ValueError, match="Bottle500.*Table.*gripper"):
+        horizontal_runtime._finalize_frame_manifest(  # noqa: SLF001
+            frame_records=records,
+            capture_views=("overview", "gripper_closeup"),
+            runtime_trial_signature="trial-signature",
+            required_full_arm_prims=(
+                "/World/arm",
+                "/World/Bottle500",
+                "/World/Table",
+            ),
+            required_full_arm_links=("base", "gripper"),
+        )
 
 
 def test_horizontal_runtime_supports_true_top_and_side_evidence_profile() -> None:

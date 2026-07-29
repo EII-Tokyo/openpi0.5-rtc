@@ -56,6 +56,35 @@ LULA_DESCRIPTOR = ROOT / "configs/aloha1_lula_follower_left.yaml"
 
 VIDEO_VIEWS = ("overview", "gripper_closeup")
 SCREENSHOT_VIEWS = ("true_top", "side")
+FULL_ARM_LINK_PRIMS = {
+    "base": (
+        "/World/follower_left/vx300s_left/follower_left_base_link",
+    ),
+    "shoulder": (
+        "/World/follower_left/vx300s_left/follower_left_shoulder_link",
+        "/World/follower_left/vx300s_left/follower_left_upper_arm_link",
+    ),
+    "elbow": (
+        "/World/follower_left/vx300s_left/follower_left_upper_forearm_link",
+    ),
+    "forearm": (
+        "/World/follower_left/vx300s_left/follower_left_lower_forearm_link",
+    ),
+    "wrist": (
+        "/World/follower_left/vx300s_left/follower_left_wrist_link",
+    ),
+    "gripper": (
+        "/World/follower_left/vx300s_left/follower_left_gripper_link",
+        "/World/follower_left/vx300s_left/follower_left_left_finger_link",
+        "/World/follower_left/vx300s_left/follower_left_right_finger_link",
+    ),
+}
+FULL_ARM_NUMERIC_EVIDENCE_SCOPE = (
+    "WORLD_AABB_CAMERA_FRUSTUM_AND_IMAGE_BOUNDS_ONLY"
+)
+FULL_ARM_OCCLUSION_EVALUATION_STATUS = (
+    "NOT_EVALUATED_REQUIRES_VISUAL_REVIEW"
+)
 EXPECTED_DOF_ORDER = [
     "waist",
     "shoulder",
@@ -854,6 +883,306 @@ def _camera_world_matrix(position: np.ndarray, quaternion: np.ndarray) -> list[l
     return matrix.tolist()
 
 
+def _required_full_arm_contract(
+    *,
+    bottle_path: str,
+    table_path: str,
+) -> tuple[tuple[str, ...], tuple[str, ...]]:
+    required_links = tuple(FULL_ARM_LINK_PRIMS)
+    required_prims = tuple(
+        dict.fromkeys(
+            [
+                prim_path
+                for prim_paths in FULL_ARM_LINK_PRIMS.values()
+                for prim_path in prim_paths
+            ]
+            + [bottle_path, table_path]
+        )
+    )
+    return required_prims, required_links
+
+
+def _full_arm_framing_evidence(
+    *,
+    stage: Any,
+    camera: Any,
+    camera_world_matrix: Sequence[Sequence[float]],
+    resolution: tuple[int, int],
+    required_link_prims: Mapping[str, Sequence[str]],
+    required_scene_prims: Sequence[str],
+) -> dict[str, Any]:
+    width, height = (int(value) for value in resolution)
+    projection_by_prim: dict[str, dict[str, Any]] = {}
+    projected_in_frame_prims: list[str] = []
+    candidate_prims = list(
+        dict.fromkeys(
+            [
+                prim_path
+                for prim_paths in required_link_prims.values()
+                for prim_path in prim_paths
+            ]
+            + list(required_scene_prims)
+        )
+    )
+    try:
+        matrix = np.asarray(camera_world_matrix, dtype=np.float64)
+        if matrix.shape != (4, 4) or not np.isfinite(matrix).all():
+            raise ValueError("camera world matrix must be finite 4x4")
+        world_to_camera = np.linalg.inv(matrix)
+    except (ValueError, np.linalg.LinAlgError):
+        world_to_camera = None
+    try:
+        clipping_range = np.asarray(
+            camera.get_clipping_range(),
+            dtype=np.float64,
+        )
+        if (
+            clipping_range.shape != (2,)
+            or not np.isfinite(clipping_range).all()
+            or clipping_range[0] < 0.0
+            or clipping_range[1] <= clipping_range[0]
+        ):
+            raise ValueError("invalid camera clipping range")
+        near_distance, far_distance = clipping_range
+    except (AttributeError, RuntimeError, TypeError, ValueError):
+        near_distance = None
+        far_distance = None
+
+    for prim_path in candidate_prims:
+        try:
+            prim = stage.GetPrimAtPath(prim_path)
+            prim_valid = bool(prim.IsValid())
+        except Exception:
+            prim_valid = False
+        if not prim_valid:
+            projection_by_prim[prim_path] = {
+                "status": "MISSING_STAGE_PRIM",
+                "sample_count": 0,
+                "front_facing_sample_count": 0,
+                "in_frame_sample_count": 0,
+            }
+            continue
+        if world_to_camera is None:
+            projection_by_prim[prim_path] = {
+                "status": "INVALID_CAMERA_TRANSFORM",
+                "sample_count": 0,
+                "front_facing_sample_count": 0,
+                "in_frame_sample_count": 0,
+            }
+            continue
+        if near_distance is None or far_distance is None:
+            projection_by_prim[prim_path] = {
+                "status": "INVALID_CAMERA_CLIPPING_RANGE",
+                "sample_count": 0,
+                "front_facing_sample_count": 0,
+                "in_frame_sample_count": 0,
+            }
+            continue
+        try:
+            bounds = _world_bounds(stage, prim_path)
+            minimum = np.asarray(bounds["minimum"], dtype=np.float64)
+            maximum = np.asarray(bounds["maximum"], dtype=np.float64)
+            if (
+                minimum.shape != (3,)
+                or maximum.shape != (3,)
+                or not np.isfinite(minimum).all()
+                or not np.isfinite(maximum).all()
+                or np.any(maximum < minimum)
+            ):
+                raise ValueError("invalid world bounds")
+            grid = np.meshgrid(
+                *[
+                    np.linspace(low, high, num=3)
+                    for low, high in zip(minimum, maximum, strict=True)
+                ],
+                indexing="ij",
+            )
+            world_points = np.column_stack(
+                [coordinates.reshape(-1) for coordinates in grid]
+            )
+        except (KeyError, RuntimeError, TypeError, ValueError):
+            projection_by_prim[prim_path] = {
+                "status": "WORLD_BOUNDS_UNAVAILABLE",
+                "sample_count": 0,
+                "front_facing_sample_count": 0,
+                "in_frame_sample_count": 0,
+            }
+            continue
+
+        homogeneous = np.column_stack(
+            [world_points, np.ones(len(world_points), dtype=np.float64)]
+        )
+        camera_points = (world_to_camera @ homogeneous.T).T[:, :3]
+        front_mask = camera_points[:, 2] < -1.0e-9
+        front_count = int(np.count_nonzero(front_mask))
+        if not front_count:
+            projection_by_prim[prim_path] = {
+                "status": "BEHIND_CAMERA",
+                "sample_count": len(world_points),
+                "front_facing_sample_count": 0,
+                "in_frame_sample_count": 0,
+            }
+            continue
+        depths = -camera_points[:, 2]
+        clipping_mask = (
+            front_mask
+            & (depths >= near_distance)
+            & (depths <= far_distance)
+        )
+        projection_points = world_points[clipping_mask]
+        if not len(projection_points):
+            projection_by_prim[prim_path] = {
+                "status": "OUTSIDE_CLIPPING_RANGE",
+                "sample_count": len(world_points),
+                "front_facing_sample_count": front_count,
+                "within_clipping_range_sample_count": 0,
+                "in_frame_sample_count": 0,
+                "clipping_range_m": clipping_range.tolist(),
+            }
+            continue
+        try:
+            pixels = np.asarray(
+                camera.get_image_coords_from_world_points(projection_points),
+                dtype=np.float64,
+            )
+            if pixels.shape != (len(projection_points), 2):
+                raise ValueError("unexpected camera projection shape")
+        except (RuntimeError, TypeError, ValueError):
+            projection_by_prim[prim_path] = {
+                "status": "PROJECTION_UNAVAILABLE",
+                "sample_count": len(world_points),
+                "front_facing_sample_count": front_count,
+                "within_clipping_range_sample_count": len(
+                    projection_points
+                ),
+                "in_frame_sample_count": 0,
+            }
+            continue
+        finite_mask = np.isfinite(pixels).all(axis=1)
+        in_frame_mask = (
+            finite_mask
+            & (pixels[:, 0] >= 0.0)
+            & (pixels[:, 0] < width)
+            & (pixels[:, 1] >= 0.0)
+            & (pixels[:, 1] < height)
+        )
+        in_frame_count = int(np.count_nonzero(in_frame_mask))
+        finite_pixels = pixels[finite_mask]
+        projection_by_prim[prim_path] = {
+            "status": (
+                "PROJECTED_IN_FRAME" if in_frame_count else "OUTSIDE_IMAGE"
+            ),
+            "sample_count": len(world_points),
+            "front_facing_sample_count": front_count,
+            "within_clipping_range_sample_count": len(projection_points),
+            "in_frame_sample_count": in_frame_count,
+            "clipping_range_m": clipping_range.tolist(),
+            "projected_pixel_min_xy": (
+                np.min(finite_pixels, axis=0).tolist()
+                if len(finite_pixels)
+                else None
+            ),
+            "projected_pixel_max_xy": (
+                np.max(finite_pixels, axis=0).tolist()
+                if len(finite_pixels)
+                else None
+            ),
+        }
+        if in_frame_count:
+            projected_in_frame_prims.append(prim_path)
+
+    projected_prim_set = set(projected_in_frame_prims)
+    projected_in_frame_links = [
+        link_name
+        for link_name, prim_paths in required_link_prims.items()
+        if prim_paths
+        and all(path in projected_prim_set for path in prim_paths)
+    ]
+    return {
+        "method": (
+            "WORLD_AABB_27_POINT_USD_CAMERA_CLIPPED_PROJECTION_IN_FRAME"
+        ),
+        "numeric_evidence_scope": FULL_ARM_NUMERIC_EVIDENCE_SCOPE,
+        "occlusion_evaluation_status": (
+            FULL_ARM_OCCLUSION_EVALUATION_STATUS
+        ),
+        "projected_in_frame_prims": projected_in_frame_prims,
+        "projected_in_frame_links": projected_in_frame_links,
+        "projection_by_prim": projection_by_prim,
+    }
+
+
+def _finalize_frame_manifest(
+    *,
+    frame_records: Sequence[dict[str, Any]],
+    capture_views: Sequence[str],
+    runtime_trial_signature: str,
+    required_full_arm_prims: Sequence[str],
+    required_full_arm_links: Sequence[str],
+) -> dict[str, Any]:
+    video_manifest = tuple(capture_views) == VIDEO_VIEWS
+    for record in frame_records:
+        physics_frame = int(record["physics_frame"])
+        time_s = float(record["time_s"])
+        missing_views = [
+            view for view in capture_views if view not in record["views"]
+        ]
+        if missing_views:
+            raise ValueError(
+                f"physics frame {physics_frame} missing views {missing_views}"
+            )
+        if video_manifest:
+            framing = record["views"]["overview"].get("framing_evidence")
+            if not isinstance(framing, Mapping):
+                raise ValueError(
+                    f"physics frame {physics_frame} missing overview "
+                    "framing_evidence"
+                )
+            if (
+                framing.get("numeric_evidence_scope")
+                != FULL_ARM_NUMERIC_EVIDENCE_SCOPE
+                or framing.get("occlusion_evaluation_status")
+                != FULL_ARM_OCCLUSION_EVALUATION_STATUS
+            ):
+                raise ValueError(
+                    f"physics frame {physics_frame} invalid overview "
+                    "framing evidence scope"
+                )
+            projected_prims = set(
+                framing.get("projected_in_frame_prims", ())
+            )
+            projected_links = set(
+                framing.get("projected_in_frame_links", ())
+            )
+            missing_prims = sorted(
+                set(required_full_arm_prims) - projected_prims
+            )
+            missing_links = sorted(
+                set(required_full_arm_links) - projected_links
+            )
+            if missing_prims or missing_links:
+                raise ValueError(
+                    f"physics frame {physics_frame} full-arm framing missing "
+                    f"prims {missing_prims}; links {missing_links}"
+                )
+        for view in capture_views:
+            record["views"][view].update(
+                {
+                    "physics_frame": physics_frame,
+                    "time_s": time_s,
+                    "runtime_trial_signature": runtime_trial_signature,
+                }
+            )
+    return {
+        "schema_version": 1,
+        "runtime_trial_signature": runtime_trial_signature,
+        "views": list(capture_views),
+        "required_full_arm_prims": list(required_full_arm_prims),
+        "required_full_arm_links": list(required_full_arm_links),
+        "records": list(frame_records),
+    }
+
+
 def _create_cameras(
     *,
     config: Mapping[str, Any],
@@ -1166,6 +1495,12 @@ def _run_trial(
     table_path = str(
         config["frozen_inputs"]["task7a_stage"]["support_path"]
     )
+    required_full_arm_prims, required_full_arm_links = (
+        _required_full_arm_contract(
+            bottle_path=bottle_path,
+            table_path=table_path,
+        )
+    )
     trial_root = (artifact_root / f"trial_{trial_index:03d}").resolve()
     trial_root.mkdir(parents=True, exist_ok=True)
 
@@ -1391,7 +1726,7 @@ def _run_trial(
                     camera_path=capture_camera.prim_path,
                     destination=output,
                 )
-                frame_record["views"][view] = {
+                view_record = {
                     "absolute_path": str(output),
                     "sha256": _sha256(output),
                     "resolution": [width, height],
@@ -1418,6 +1753,20 @@ def _run_trial(
                         "NOT_EFFECTIVE_CONTACT_REGION"
                     ),
                 }
+                if capture_profile == "video" and view == "overview":
+                    view_record["framing_evidence"] = (
+                        _full_arm_framing_evidence(
+                            stage=stage,
+                            camera=capture_camera,
+                            camera_world_matrix=cameras[view][
+                                "camera_world_matrix"
+                            ],
+                            resolution=(width, height),
+                            required_link_prims=FULL_ARM_LINK_PRIMS,
+                            required_scene_prims=(bottle_path, table_path),
+                        )
+                    )
+                frame_record["views"][view] = view_record
         frame_manifest.append(frame_record)
 
     capture_step("setup_kinematic", target=command)
@@ -1874,12 +2223,13 @@ def _run_trial(
     video_metadata["runtime_trial_signature"] = signature
     _atomic_json(
         manifest_path,
-        {
-            "schema_version": 1,
-            "runtime_trial_signature": signature,
-            "views": list(capture_views),
-            "records": frame_manifest,
-        },
+        _finalize_frame_manifest(
+            frame_records=frame_manifest,
+            capture_views=(capture_views if capture_video_frames else ()),
+            runtime_trial_signature=signature,
+            required_full_arm_prims=required_full_arm_prims,
+            required_full_arm_links=required_full_arm_links,
+        ),
     )
 
     trial = {
