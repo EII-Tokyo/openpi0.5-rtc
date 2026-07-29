@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Annotate supplier-CAD Task 5 bottle screenshots from runtime readback."""
+"""Annotate supplier-CAD Task 5/7B bottle screenshots from runtime readback."""
 
 from __future__ import annotations
 
@@ -25,7 +25,6 @@ from tools.annotate_aloha_viper_cad_finger_isaac import _finger_boxes
 from tools.annotate_aloha_viper_cad_finger_isaac import _font
 from tools.annotate_aloha_viper_cad_finger_isaac import _sha256
 from tools.annotate_aloha_viper_cad_finger_isaac import _wrap
-from tools.annotate_aloha_viper_cad_finger_isaac import _write_panel_lines
 
 ROOT = Path(__file__).resolve().parents[1]
 RAW_REPORT = (
@@ -39,8 +38,15 @@ OUTPUT_ROOT = (
     "isaac_cad_finger/task5_bottle_acceptance_v2_annotation"
 )
 
+PROFILE_LABELS = {
+    "procedural_cylinder": "Profile A — procedural 65 mm cylinder",
+    "project_bottle500": "Profile B — project Bottle500 CAD geometry",
+}
 
-def _bottle_bbox(image: Image.Image) -> tuple[int, int, int, int]:
+
+def _green_cylinder_bbox(
+    image: Image.Image,
+) -> tuple[int, int, int, int]:
     """Detect the green diagnostic bottle in the rendered evidence."""
 
     rgba = np.asarray(image.convert("RGBA"), dtype=np.int16)
@@ -61,6 +67,53 @@ def _bottle_bbox(image: Image.Image) -> tuple[int, int, int, int]:
         int(columns.max()),
         int(rows.max()),
     )
+
+
+def _project_bottle_contact_region_bbox(
+    image: Image.Image,
+    finger_boxes: dict[str, tuple[int, int, int, int]],
+) -> tuple[int, int, int, int]:
+    """Detect the neutral Bottle500 region between the two fingers."""
+
+    rgb = np.asarray(image.convert("RGB"), dtype=np.float32)
+    ordered = sorted(finger_boxes.values(), key=lambda box: box[0])
+    left_edge = int(ordered[0][2])
+    right_edge = int(ordered[1][0])
+    if right_edge - left_edge < 100:
+        raise RuntimeError("Bottle500 contact-region ROI is too narrow")
+    background = np.median(
+        rgb[700:880, left_edge:right_edge],
+        axis=(0, 1),
+    )
+    region = rgb[:, left_edge:right_edge]
+    difference = np.linalg.norm(region - background, axis=2)
+    saturation = region.max(axis=2) - region.min(axis=2)
+    mask = (difference > 8.0) & (saturation < 35.0)
+    rows, columns = np.nonzero(mask)
+    if columns.size < 1000:
+        raise RuntimeError("Bottle500 contact region is not detectable")
+    return (
+        int(columns.min()) + left_edge,
+        int(rows.min()),
+        int(columns.max()) + left_edge,
+        int(rows.max()),
+    )
+
+
+def _bottle_bbox(
+    image: Image.Image,
+    *,
+    bottle_profile: str,
+    finger_boxes: dict[str, tuple[int, int, int, int]],
+) -> tuple[tuple[int, int, int, int], str]:
+    if bottle_profile == "procedural_cylinder":
+        return _green_cylinder_bbox(image), "GREEN_CYLINDER_SEGMENTATION"
+    if bottle_profile == "project_bottle500":
+        return (
+            _project_bottle_contact_region_bbox(image, finger_boxes),
+            "NEUTRAL_BOTTLE_CONTACT_REGION_BETWEEN_FINGERS",
+        )
+    raise ValueError(f"unsupported bottle profile: {bottle_profile}")
 
 
 def _draw_contact_projection(
@@ -89,6 +142,30 @@ def _draw_contact_projection(
         )
         draw.line((point, endpoint), fill=color, width=4)
         _arrow_head(draw, tip=endpoint, toward=point)
+
+
+def _write_task7b_panel_lines(
+    draw: ImageDraw.ImageDraw,
+    *,
+    x: int,
+    image_height: int,
+    lines: list[tuple[str, tuple[int, int, int, int], bool]],
+) -> int:
+    """Write a compact panel and fail instead of silently clipping text."""
+
+    y = 12
+    for text, color, bold in lines:
+        if not text:
+            y += 5
+            continue
+        font = _font(13 if not bold else 14, bold=bold)
+        draw.text((x, y), text, fill=color, font=font)
+        y += 18 if not bold else 20
+    if y > image_height - 8:
+        raise RuntimeError(
+            f"Task 7B annotation panel overflow: {y}>{image_height - 8}"
+        )
+    return y
 
 
 def _phase_gate(phase: str) -> tuple[str, tuple[int, int, int, int]]:
@@ -122,7 +199,15 @@ def _draw_annotations(
     with Image.open(raw_path) as opened:
         raw = opened.convert("RGBA")
     boxes = _finger_boxes(raw)
-    bottle_box = _bottle_bbox(raw)
+    bottle_profile = report.get(
+        "bottle_profile",
+        "procedural_cylinder",
+    )
+    bottle_box, bottle_bbox_method = _bottle_bbox(
+        raw,
+        bottle_profile=bottle_profile,
+        finger_boxes=boxes,
+    )
     canvas = Image.new(
         "RGBA",
         (raw.width + PANEL_WIDTH, raw.height),
@@ -232,7 +317,10 @@ def _draw_annotations(
 
     lines: list[tuple[str, tuple[int, int, int, int], bool]] = [
         ("ALOHA ViperX follower_left", WHITE, True),
-        ("Supplier-CAD finger — 20 g bottle Task 5", WHITE, True),
+        ("Supplier-CAD finger — 20 g bottle Task 7B", WHITE, True),
+        (PROFILE_LABELS[bottle_profile], WHITE, True),
+        ("STATIC HOLD ONLY", ORANGE, True),
+        ("NOT SUPPORT-TO-LIFT PICKUP", ORANGE, True),
         (gate_text, gate_color, True),
         (
             "FIXED BOTTLE; NOT HOLD"
@@ -244,7 +332,18 @@ def _draw_annotations(
         ("", WHITE, False),
         ("Blue = left_finger / CAD +X", BLUE, True),
         ("Orange = right_finger / CAD -X", ORANGE, True),
-        ("Green = 20 g bottle proxy", GREEN, True),
+        (
+            "Green = procedural cylinder"
+            if bottle_profile == "procedural_cylinder"
+            else "Neutral glass = project Bottle500",
+            GREEN if bottle_profile == "procedural_cylinder" else WHITE,
+            True,
+        ),
+        (
+            f"Bottle bbox method={bottle_bbox_method}",
+            MUTED,
+            False,
+        ),
         (
             "Magenta dot = projected physical contact"
             if projection
@@ -353,7 +452,12 @@ def _draw_annotations(
             ),
         ]
     )
-    _write_panel_lines(draw, x=raw.width + 18, lines=lines)
+    panel_final_y = _write_task7b_panel_lines(
+        draw,
+        x=raw.width + 18,
+        image_height=raw.height,
+        lines=lines,
+    )
 
     destination.parent.mkdir(parents=True, exist_ok=True)
     canvas.convert("RGB").save(
@@ -374,12 +478,14 @@ def _draw_annotations(
             side: list(box) for side, box in boxes.items()
         },
         "bottle_bbox_xyxy": list(bottle_box),
+        "bottle_bbox_method": bottle_bbox_method,
+        "bottle_profile": bottle_profile,
+        "panel_final_y": panel_final_y,
+        "panel_overflow": False,
         "contact_projection": projection,
         "camera": capture["camera"],
         "simulation": simulation,
-        "raw_visual_self_review": (
-            "PASS_BY_VISION_MODEL_2026-07-29"
-        ),
+        "raw_visual_self_review": "PENDING_VISUAL_MODEL_REVIEW",
         "annotated_visual_self_review": "PENDING_VISUAL_MODEL_REVIEW",
         "retake_reason": None,
     }
@@ -393,6 +499,12 @@ def main() -> int:
 
     report_path = args.raw_report.resolve(strict=True)
     report = json.loads(report_path.read_text(encoding="utf-8"))
+    bottle_profile = report.get(
+        "bottle_profile",
+        "procedural_cylinder",
+    )
+    if bottle_profile not in PROFILE_LABELS:
+        raise RuntimeError(f"unsupported bottle profile: {bottle_profile}")
     if report["run_mode"] != "ACCEPTANCE" or report["status"] != "PASS":
         raise RuntimeError("annotation requires a PASS acceptance report")
     if report["summary"]["pass_count"] != 20:
@@ -430,6 +542,7 @@ def main() -> int:
             "absolute_path": str(report_path),
             "sha256": _sha256(report_path),
         },
+        "bottle_profile": bottle_profile,
         "records": records,
         "visual_model_review": "PENDING_VISUAL_MODEL_REVIEW",
         "acceptance_boundary": (

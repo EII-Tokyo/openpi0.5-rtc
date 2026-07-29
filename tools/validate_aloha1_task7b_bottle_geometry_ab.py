@@ -88,6 +88,7 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--baseline-trials", type=Path, required=True)
     parser.add_argument("--project-report", type=Path, required=True)
     parser.add_argument("--project-trials", type=Path, required=True)
+    parser.add_argument("--screenshot-review", type=Path, required=True)
     parser.add_argument("--output-json", type=Path, required=True)
     parser.add_argument("--output-markdown", type=Path, required=True)
     parser.add_argument("--output-trials", type=Path, required=True)
@@ -104,11 +105,13 @@ def main() -> int:
             ("baseline_trials", args.baseline_trials),
             ("project_report", args.project_report),
             ("project_trials", args.project_trials),
+            ("screenshot_review", args.screenshot_review),
         )
     }
     config = yaml.safe_load(paths["config"].read_text(encoding="utf-8"))
     baseline_report = _load_json(paths["baseline_report"])
     project_report = _load_json(paths["project_report"])
+    screenshot_review = _load_json(paths["screenshot_review"])
     baseline_trials = _load_jsonl(paths["baseline_trials"])
     project_trials = _load_jsonl(paths["project_trials"])
 
@@ -144,11 +147,17 @@ def main() -> int:
         baseline_report["summary"],
         project_report["summary"],
     )
+    screenshot_review_pass = (
+        screenshot_review.get("status") == "PASS"
+        and screenshot_review.get("reviewed_raw_image_count") == 8
+        and screenshot_review.get("reviewed_annotated_image_count") == 8
+    )
     contract_pass = (
         configured_audit["status"] == "PASS"
         and runtime_audit["status"] == "PASS"
         and runtime_profiles_match_config
         and not any(input_failures.values())
+        and screenshot_review_pass
     )
     report = {
         "schema_version": 1,
@@ -170,7 +179,22 @@ def main() -> int:
             }
             for name, path in paths.items()
         },
-        "screenshot_review": "PENDING_VISUAL_MODEL_REVIEW",
+        "screenshot_review": {
+            "status": (
+                "PASS" if screenshot_review_pass else "FAIL"
+            ),
+            "absolute_path": str(paths["screenshot_review"]),
+            "sha256": _sha256(paths["screenshot_review"]),
+            "reviewed_raw_image_count": screenshot_review.get(
+                "reviewed_raw_image_count"
+            ),
+            "reviewed_annotated_image_count": screenshot_review.get(
+                "reviewed_annotated_image_count"
+            ),
+            "visual_model_review": screenshot_review.get(
+                "visual_model_review"
+            ),
+        },
         "asset_promotion": "PARTIAL",
         "boundaries": {
             "static_hold_is_pickup": False,

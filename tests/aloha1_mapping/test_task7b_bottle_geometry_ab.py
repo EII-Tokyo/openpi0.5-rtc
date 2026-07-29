@@ -17,6 +17,9 @@ ROOT = Path(__file__).resolve().parents[2]
 CONFIG = ROOT / "configs/aloha1_task7b_bottle_geometry_ab.yaml"
 COMBINER = ROOT / "tools/validate_aloha1_task7b_bottle_geometry_ab.py"
 RUNTIME = ROOT / "tools/validate_aloha_viper_cad_finger_task5_bottle.py"
+ANNOTATOR = (
+    ROOT / "tools/annotate_aloha_viper_cad_finger_task5_bottle.py"
+)
 
 
 @pytest.fixture
@@ -161,6 +164,16 @@ def test_existing_task5_runtime_exposes_bottle_geometry_provider() -> None:
     assert 'default="procedural_cylinder"' in source
 
 
+def test_annotation_declares_task7b_profile_and_static_hold_boundary() -> None:
+    source = ANNOTATOR.read_text(encoding="utf-8")
+    assert '"procedural_cylinder"' in source
+    assert '"project_bottle500"' in source
+    assert "STATIC HOLD ONLY" in source
+    assert "NOT SUPPORT-TO-LIFT PICKUP" in source
+    assert '"bottle_profile"' in source
+    assert '"PENDING_VISUAL_MODEL_REVIEW"' in source
+
+
 def test_combiner_writes_40_profiled_trials(tmp_path: Path) -> None:
     baseline_report = tmp_path / "baseline_report.json"
     project_report = tmp_path / "project_report.json"
@@ -169,6 +182,7 @@ def test_combiner_writes_40_profiled_trials(tmp_path: Path) -> None:
     output_json = tmp_path / "result.json"
     output_markdown = tmp_path / "result.md"
     output_trials = tmp_path / "trials.jsonl"
+    screenshot_review = tmp_path / "screenshot_review.json"
 
     config = yaml.safe_load(CONFIG.read_text(encoding="utf-8"))
     common_report = {
@@ -214,6 +228,16 @@ def test_combiner_writes_40_profiled_trials(tmp_path: Path) -> None:
         + "\n",
         encoding="utf-8",
     )
+    screenshot_review.write_text(
+        json.dumps(
+            {
+                "status": "PASS",
+                "reviewed_raw_image_count": 8,
+                "reviewed_annotated_image_count": 8,
+            }
+        ),
+        encoding="utf-8",
+    )
 
     completed = subprocess.run(
         [
@@ -229,6 +253,8 @@ def test_combiner_writes_40_profiled_trials(tmp_path: Path) -> None:
             str(project_report),
             "--project-trials",
             str(project_trials),
+            "--screenshot-review",
+            str(screenshot_review),
             "--output-json",
             str(output_json),
             "--output-markdown",
@@ -245,6 +271,7 @@ def test_combiner_writes_40_profiled_trials(tmp_path: Path) -> None:
     result = json.loads(output_json.read_text(encoding="utf-8"))
     assert result["status"] == "PASS"
     assert result["conclusion"] == "PROJECT_BOTTLE_MATCHES_BASELINE"
+    assert result["screenshot_review"]["status"] == "PASS"
     combined = [
         json.loads(line)
         for line in output_trials.read_text(encoding="utf-8").splitlines()
