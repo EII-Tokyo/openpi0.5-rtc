@@ -1,0 +1,142 @@
+schema_version: 2
+scope: ALOHA1 follower-left horizontal Bottle500 support-to-lift diagnostic
+task_geometry: HORIZONTAL_DYNAMIC_TABLE_SUPPORTED
+runtime:
+  isaac_sim: 5.1.0.0
+  kit: 107.3.3
+  physx: 107.3.26
+  motion_generation_extension: 8.0.26
+frozen_inputs:
+  task7a_stage:
+    path: assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/aloha1_signal_correspondence_workcell.usda
+    sha256: d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf
+    default_prim: /World
+    articulation_path: /World/follower_left/vx300s_left
+    support_path: /World/environment/worldBody/user_confirmed_table
+  project_bottle_cad:
+    path: assets/bottle_500ml/cad/bottle_500ml.FCStd
+    sha256: 3594f60200e54181bc8480a229484293a0d386c146d3f235b32e31a0c16bbf8a
+  project_bottle_usd:
+    path: assets/bottle_500ml/isaac/bottle_500ml_sim.usd
+    sha256: 16427135f152ec951de2321fd689366d745a2dd389cbe260976631783952533e
+    reference_prim: /Bottle500
+    collision_prim_count: 41
+  follower_left_urdf:
+    path: generated/urdf/follower_left.urdf
+    sha256: d9e4b32723ee71dfce26fb4e78546cfcfef147b2d7dbf5e53e3620e3d8aa96bd
+  joint_map:
+    path: configs/aloha1_joint_map.yaml
+    sha256: 2c40a637d95d0ae960d11ae4f120f0ca06a77146917ef50051baca1d3a8c496d
+  task7b_static_hold_report:
+    path: reports/aloha1_mapping/aloha1_task7b_bottle_geometry_ab.json
+    sha256: 9b0f9366b2abe5664da794d7a40911108db3aee3c100d43d0c8760c500452567
+    required_status: PASS
+  episode18:
+    path: /home/eii/project/bottles_data/episode_18.hdf5
+    sha256: f073a21c6a790e738e36085d791482924a82832ca6d80cece04a26353b9fc745
+robot:
+  name: follower_left
+  articulation_path: /World/follower_left/vx300s_left
+  base_frame: follower_left_base_link
+  end_effector_frame: follower_left_gripper_link
+  cspace_joint_order:
+    - waist
+    - shoulder
+    - elbow
+    - forearm_roll
+    - wrist_angle
+    - wrist_rotate
+  approved_home_arm_qpos_rad: [0.0, -0.96, 1.16, 0.0, -0.3, 0.0]
+  left_finger_dof: left_finger
+  right_finger_dof: right_finger
+  open_targets_m: [0.057, -0.057]
+  closed_targets_m: [0.021, -0.021]
+  left_finger_collider: /World/follower_left/vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh
+  right_finger_collider: /World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh
+bottle:
+  session_path: /World/Task7B2HorizontalSession/Bottle500
+  axis:
+    source: PROJECT_CAD_REVOLUTION_AXIS
+    a_semantics: bottle_bottom_axis_point
+    b_semantics: bottle_mouth_axis_point
+    a_local_m: [0.0, 0.0, 0.0]
+    b_local_m: [0.0, 0.0, 0.206]
+  body_interval_m: [0.018, 0.120]
+  grasp_coordinate_m: 0.069
+  grasp_coordinate_source: MIDPOINT_OF_CAD_CONSTANT_RADIUS_BODY_INTERVAL
+  canonical_direction_policy: WORLD_POSITIVE_X_THEN_POSITIVE_Y_TIE_BREAK
+  canonical_direction_status: DIAGNOSTIC_CANONICAL_NOT_REAL_CALIBRATION
+  roll_policy: CAD_AUTHORED_ZERO_SHORTEST_ARC_TO_HORIZONTAL
+episode18:
+  path: /home/eii/project/bottles_data/episode_18.hdf5
+  sha256: f073a21c6a790e738e36085d791482924a82832ca6d80cece04a26353b9fc745
+  frames_inclusive: [208, 244]
+  action_dataset: /action
+  qpos_dataset: /observations/qpos
+  left_arm_indices: [0, 1, 2, 3, 4, 5]
+  left_gripper_index: 6
+  use_action_as_command: true
+  use_qpos_as_readback: true
+  frame_rate_status: NOT_EMITTED_UNTIL_SOURCE_PROVEN
+geometry_gates:
+  axis_to_table_normal_target_deg: 90.0
+  axis_to_table_normal_tolerance_deg: 1.0
+  gripper_line_to_axis_target_deg: 90.0
+  gripper_line_to_axis_tolerance_deg: 3.0
+  approach_direction_tolerance_deg: 3.0
+  lift_direction_tolerance_deg: 3.0
+  tolerance_status: ENGINEERING_DIAGNOSTIC_NOT_PHYSICAL_MEASUREMENT
+motion:
+  approach_direction_world: [0.0, 0.0, -1.0]
+  lift_direction_world: [0.0, 0.0, 1.0]
+  pregrasp_clearance_policy: COMPOSED_GEOMETRY_PLUS_CONTACT_ENVELOPE
+  lift_distance_policy: EPISODE18_FK_LIFT_INTERVAL
+  ik_position_tolerance_m: 0.001
+  ik_orientation_tolerance_rad: 0.005
+  ik_tolerance_source: LOCAL_NVIDIA_ISAAC_5_1_KINEMATICS_TEST
+physics:
+  mass_kg: 0.020
+  mass_status: TEMPORARY_UNCALIBRATED
+  friction: 0.7
+  friction_status: TEMPORARY_UNCALIBRATED
+  restitution: 0.0
+  frequency_hz: 60
+  hold_interval_s: 2.0
+  hold_steps: 120
+  drop_gate_m: 0.010
+  solve_articulation_contact_last: true
+  contact_rest_offsets_authored: false
+  initial_self_collision: false
+experiment:
+  smoke_repeats: 1
+  acceptance_repeats: 20
+  fresh_world_reset_per_trial: true
+  one_variable_at_a_time: true
+screenshots:
+  required_views: [true_top, side]
+  phases:
+    - release_dynamic
+    - support_settle
+    - open_pregrasp
+    - vertical_descent
+    - bilateral_contact
+    - support_clear
+    - hold_end
+legacy:
+  upright_shoulder_sweep:
+    config_path: configs/aloha1_task7b2_support_to_lift.yaml
+    config_sha256: 378b3cf26bdd5fc94de219548e376cc3d28f48a8e68ce269b946b3d0ca0f10cb
+    acceptance_eligible: false
+    disposition: INVALIDATED_BY_HORIZONTAL_BOTTLE_REQUIREMENT
+boundaries:
+  source_assets_modified: false
+  default_configuration_modified: false
+  final_collider_modified: false
+  surface_gripper: false
+  fixed_joint: false
+  parent_attachment: false
+  real_robot_access: false
+  remote_103_access: false
+  task7a: UNCHANGED
+  asset_promotion: PARTIAL
+  task8: NOT_RUN
