@@ -4,7 +4,7 @@
 
 **Goal:** Establish a machine-verifiable Isaac Sim 5.1 gate proving whether follower-left can lift the project Bottle500 from `user_confirmed_table` and hold it for two seconds.
 
-**Architecture:** Add a pure Python gate module and a dedicated Isaac runtime validator instead of changing the completed Task 7B static-hold runner. The runtime loads the frozen Task 7A Stage, composes Bottle500 only in the session layer, derives placement from composed AABBs, applies only the validated shoulder small-up signal, and emits deterministic trial data plus screenshot metadata.
+**Architecture:** Add a pure Python gate module and a dedicated Isaac runtime validator instead of changing the completed Task 7B static-hold runner. The runtime loads the frozen Task 7A Stage, derives Bottle500 X/Y from the no-bottle frame-98 aperture midpoint of the validated shoulder sweep, composes Bottle500 only in the session layer, replays that exact approach prefix, applies only the validated `-0.08 rad` shoulder small-up signal, and emits deterministic trial data plus screenshot metadata.
 
 **Tech Stack:** Python 3.11, uv, SciPy 1.15.3, pytest, YAML, OpenUSD 0.24.5, Isaac Sim 5.1.0.0, Kit 107.3.3, PhysX 107.3.26, Pillow.
 
@@ -74,9 +74,12 @@ assert config["frozen_inputs"]["task7a_stage"]["sha256"] == (
 assert config["support"]["prim_path"] == (
     "/World/environment/worldBody/user_confirmed_table"
 )
+assert config["approach"]["sweep_steps"] == 180
+assert config["approach"]["approach_frame"] == 98
+assert config["approach"]["approach_target_rad"] == 0.2605069595575333
 assert config["lift"]["joint"] == "shoulder"
-assert config["lift"]["home_target_rad"] == -0.96
-assert config["lift"]["lift_target_rad"] == -1.04
+assert config["lift"]["start_target_rad"] == 0.2605069595575333
+assert config["lift"]["lift_target_rad"] == 0.18050695955753326
 assert config["lift"]["delta_rad"] == -0.08
 assert config["physics"]["friction"] == 0.7
 assert config["physics"]["mass_kg"] == 0.020
@@ -223,7 +226,23 @@ Verify explicit `/Bottle500` reference, 41 colliders, composed AABB, rigid
 body API, session mass override, material binding, and source hash before and
 after.
 
-- [ ] **Step 4: Stop on unresolved support identity**
+- [ ] **Step 4: Reproduce the evidence-derived approach**
+
+Replay the first 98 frames with the exact Task 7A constants:
+
+```text
+home shoulder = -0.96 rad
+sweep target = 1.1945033764839172 rad
+sweep frames = 180
+trajectory = cubic smoothstep
+```
+
+Require the frame-98 command to reproduce the frozen curve within floating
+point tolerance, the open finger span to overlap Bottle500's supported
+vertical span, and a subsequent shoulder delta of `-0.08 rad` to move the
+finger midpoint upward.
+
+- [ ] **Step 5: Stop on unresolved support identity**
 
 If the support collider or supplier-CAD finger paths are absent, emit
 `HARD_BLOCKER_SUPPORT_TO_GRASP_POSE` and do not implement a substitute
@@ -286,16 +305,19 @@ The runtime must:
 
 - [ ] **Step 4: Implement evidence-derived support placement**
 
-Use world-space bounds to compute Bottle500 root translation. Switch the
-bottle dynamic before support settle, then record table contact, bottom/table
-gap, pose, velocity, and angular velocity on every frame.
+First replay the no-bottle approach prefix and use its runtime open-finger
+aperture midpoint for X/Y. Return to home/open, then use world-space bounds to
+compute Bottle500 root translation. Switch the bottle dynamic before support
+settle, replay the exact approach prefix, then record table contact,
+bottom/table gap, pose, velocity, and angular velocity on every frame.
 
 - [ ] **Step 5: Implement close and lift**
 
-Preserve all home targets except:
+Preserve all home targets except shoulder. Replay the Task 7A approach prefix,
+close at the approach target, then lift with:
 
 ```python
-desired_shoulder = -0.96 + smoothstep(frame, lift_steps) * -0.08
+desired_shoulder = approach_target + smoothstep(frame, lift_steps) * -0.08
 ```
 
 Finger targets stay at `[0.021, -0.021]`. Record target/readback and non-target

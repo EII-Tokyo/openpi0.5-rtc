@@ -30,8 +30,14 @@ sim-to-real dynamics, bottle insertion, final asset promotion, or Task 8.
   symmetric finger targets, friction `0.7`, restitution `0`, `60 Hz`,
   solver settings, mimic disposition, and self-collision setting remain
   unchanged.
-- Lift signal: follower-left shoulder target changes from `-0.96 rad` to
-  `-1.04 rad`, the already validated `-0.08 rad` Task 7A small-up signal.
+- Approach signal: replay the first 98 frames of the already validated Task 7A
+  `follower_left:shoulder:positive` sweep (`180` sweep frames, target
+  `1.1945033764839172 rad`). Starting from the frozen home target
+  `-0.96 rad`, this produces an approach target of
+  `0.2605069595575333 rad`.
+- Lift signal: from that approach target, change only follower-left shoulder
+  by the already validated `-0.08 rad` small-up direction, ending at
+  `0.18050695955753326 rad`.
 
 ## Approaches Considered
 
@@ -73,13 +79,21 @@ No bottle height or table height is manually guessed.
    top.
 4. Read Bottle500's composed world AABB and calculate the root translation
    that puts its minimum Z on the support top.
-5. Use the runtime midpoint between the open left/right finger colliders for
-   bottle X/Y. This is a derived diagnostic placement, not a measured
-   workcell grasp pose.
-6. Make the bottle dynamic before the support-settle phase. Kinematic setup
+5. With no bottle present, replay the frozen Task 7A shoulder trajectory to
+   frame 98 and read the runtime midpoint between the open left/right finger
+   colliders. Use that approach-pose midpoint for bottle X/Y. The corrected
+   fresh-process probe read back shoulder `0.2680850625 rad`, found the
+   lowest finger point `0.0049044243 m` above the table, and reproduced the
+   source command within `2.15e-5 rad`.
+6. Return the robot to home/open before composing the bottle. This no-bottle
+   geometry probe contributes placement evidence only and cannot contribute
+   to pickup PASS.
+7. This is a single evidence-derived diagnostic placement, not a measured
+   workcell grasp pose. Do not search alternative arm poses.
+8. Make the bottle dynamic before the support-settle phase. Kinematic setup
    is allowed only to author the initial transform and cannot contribute to
    pickup PASS.
-7. Let the bottle settle under gravity. Require table contact, finite state,
+9. Let the bottle settle under gravity. Require table contact, finite state,
    and a stable pose before closing the fingers.
 
 If this single evidence-derived placement cannot establish bilateral finger
@@ -92,19 +106,24 @@ timestep, solver, or support transform, classify the result as
 Each trial uses a fresh Isaac process/world reset:
 
 1. Load and verify the frozen Stage.
-2. Initialize follower-left at the approved home state with open fingers.
-3. Compose Bottle500 and place it on `user_confirmed_table` by the AABB
+2. Initialize follower-left at the approved home state with open fingers,
+   replay the Task 7A approach trajectory without a bottle, and derive the
+   approach-pose aperture midpoint.
+3. Return follower-left to home/open, compose Bottle500, and place it on
+   `user_confirmed_table` by the AABB
    procedure above.
 4. Switch Bottle500 to dynamic and settle it on the support.
 5. Record `support_settle`.
-6. Close both fingers with the existing explicit symmetric targets.
-7. Require physical left and right finger contact before lift and record
+6. With fingers open, replay the exact 98-frame approach trajectory.
+7. Close both fingers with the existing explicit symmetric targets.
+8. Require physical left and right finger contact before lift and record
    `bilateral_contact_on_support`.
-8. Keep the closed finger targets unchanged.
-9. Ramp only the shoulder target from `-0.96` to `-1.04 rad`.
-10. Record `lift_start`, the first verified support-clear frame, and
+9. Keep the closed finger targets unchanged.
+10. Ramp only the shoulder target from `0.2605069595575333` to
+    `0.18050695955753326 rad`.
+11. Record `lift_start`, the first verified support-clear frame, and
     `lift_end`.
-11. Hold the arm and gripper targets for 120 steps (`2 s`) and record
+12. Hold the arm and gripper targets for 120 steps (`2 s`) and record
     `hold_end`.
 
 No SurfaceGripper, fixed joint, parent attachment, bottle teleport during
@@ -117,8 +136,9 @@ A trial is `PASS` only when all checks pass:
 - Bottle500 starts dynamic on `user_confirmed_table`.
 - Support contact exists during the pre-grasp settle interval.
 - Both supplier-CAD fingers establish physical bottle contact before lift.
-- The commanded shoulder delta is exactly `-0.08 rad`, and all other arm
-  targets remain at home.
+- The approach trajectory is the frozen 98-frame Task 7A prefix; the lift
+  shoulder delta is exactly `-0.08 rad`; all other arm targets remain at
+  home.
 - The bottle loses support contact after lift begins.
 - Bottle bottom rises above the table top by more than the effective contact
   envelope and at least `0.005 m`.

@@ -67,10 +67,29 @@ def test_config_freezes_stage_support_signal_and_task8() -> None:
     assert config["robot"]["articulation_path"] == (
         "/World/follower_left/vx300s_left"
     )
-    assert config["lift"] == {
+    assert config["robot"]["left_finger_dof"] == "left_finger"
+    assert config["robot"]["right_finger_dof"] == "right_finger"
+    assert config["approach"] == {
+        "source_case_id": "follower_left:shoulder:positive",
+        "source_report_sha256": (
+            "fb9340469c957c3f14ed4bc994209121f39cb738ccf21f749b4a6e36e78e4299"
+        ),
+        "source_curve_sha256": (
+            "28187a5032f36fb1572b5b0aa671aec3f011963706f588de8ec80b8cf1c3d0be"
+        ),
         "joint": "shoulder",
         "home_target_rad": -0.96,
-        "lift_target_rad": -1.04,
+        "sweep_target_rad": 1.1945033764839172,
+        "sweep_steps": 180,
+        "approach_frame": 98,
+        "approach_target_rad": 0.2605069595575333,
+        "trajectory": "cubic_smoothstep",
+        "placement_xy_policy": "RUNTIME_APPROACH_APERTURE_MIDPOINT",
+    }
+    assert config["lift"] == {
+        "joint": "shoulder",
+        "start_target_rad": 0.2605069595575333,
+        "lift_target_rad": 0.18050695955753326,
         "delta_rad": -0.08,
         "steps": 120,
         "trajectory": "cubic_smoothstep",
