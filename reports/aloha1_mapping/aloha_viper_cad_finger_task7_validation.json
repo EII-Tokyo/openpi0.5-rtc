@@ -73,7 +73,7 @@
     },
     {
       "evidence": {
-        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_left/1.3/supplier_cad_follower_left.usda",
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_left/1.6/supplier_cad_follower_left.usda",
         "actual_sha256": "232ea1f61dc07f391baf7497b0cf6c2455593f9655ae9b3f541fde81c8ef73ad",
         "expected_sha256": "232ea1f61dc07f391baf7497b0cf6c2455593f9655ae9b3f541fde81c8ef73ad"
       },
@@ -82,9 +82,9 @@
     },
     {
       "evidence": {
-        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_left_robot_schema/1.0/supplier_cad_follower_left_robot_schema.usda",
-        "actual_sha256": "c8e5c647a784744375cecbd88b51b6f3bfeee79bb53fcd0b85cea20f12f81d48",
-        "expected_sha256": "c8e5c647a784744375cecbd88b51b6f3bfeee79bb53fcd0b85cea20f12f81d48",
+        "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_left_robot_schema/1.2/supplier_cad_follower_left_robot_schema.usda",
+        "actual_sha256": "686dbae526f6643e8b6cfa4b198605f04185563d0b839c49bb794fa80907643f",
+        "expected_sha256": "686dbae526f6643e8b6cfa4b198605f04185563d0b839c49bb794fa80907643f",
         "physics_layer_excluded": true
       },
       "name": "robot_schema_diagnostic_hash",
@@ -709,7 +709,7 @@
     {
       "evidence": {
         "blocking_issue_count": 0,
-        "warning_count": 11
+        "warning_count": 9
       },
       "name": "IsaacSim.PhysicsRules",
       "status": "PARTIAL"
@@ -717,7 +717,7 @@
     {
       "evidence": {
         "blocking_issue_count": 0,
-        "warning_count": 5
+        "warning_count": 4
       },
       "name": "IsaacSim.RobotRules",
       "status": "PARTIAL"
@@ -867,20 +867,8 @@
             "severity": "WARNING"
           },
           {
-            "at": "Prim </supplier_cad_follower_left/vx300s_left/vx300s_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh>",
-            "message": "Invisible collision mesh /supplier_cad_follower_left/vx300s_left/vx300s_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh purpose: [default], not [guide]",
-            "rule": "InvisibleCollisionMeshHasPurposeGuide",
-            "severity": "WARNING"
-          },
-          {
             "at": "Prim </supplier_cad_follower_left/vx300s_left/vx300s_left_lower_forearm_link/collisions/vx300s_5_lower_forearm/vx300s_5_lower_forearm>",
             "message": "Invisible collision mesh /supplier_cad_follower_left/vx300s_left/vx300s_left_lower_forearm_link/collisions/vx300s_5_lower_forearm/vx300s_5_lower_forearm purpose: [default], not [guide]",
-            "rule": "InvisibleCollisionMeshHasPurposeGuide",
-            "severity": "WARNING"
-          },
-          {
-            "at": "Prim </supplier_cad_follower_left/vx300s_left/vx300s_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh>",
-            "message": "Invisible collision mesh /supplier_cad_follower_left/vx300s_left/vx300s_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh purpose: [default], not [guide]",
             "rule": "InvisibleCollisionMeshHasPurposeGuide",
             "severity": "WARNING"
           },
@@ -925,40 +913,34 @@
           "RigidBodyHasMassAPI"
         ],
         "status": "PARTIAL",
-        "target": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_left/1.3/supplier_cad_follower_left.usda",
-        "warning_count": 11
+        "target": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_left/1.6/supplier_cad_follower_left.usda",
+        "warning_count": 9
       },
       {
         "blocking_issue_count": 0,
         "category": "IsaacSim.RobotRules",
         "issues": [
           {
-            "at": "Stage </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_left_robot_schema/1.0/supplier_cad_follower_left_robot_schema.usda>",
-            "message": "No thumbnail found at /home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_left_robot_schema/1.0/.thumbs/256x256/supplier_cad_follower_left_robot_schema.usda.png for robot asset </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_left_robot_schema/1.0/supplier_cad_follower_left_robot_schema.usda>",
-            "rule": "ThumbnailExists",
-            "severity": "WARNING"
-          },
-          {
             "at": "Attribute (physics:approximation) Prim </supplier_cad_follower_left/vx300s_left/vx300s_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh>",
-            "message": "Physics Attribute physics:approximation in robot asset </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_left_robot_schema/1.0/supplier_cad_follower_left_robot_schema.usda> has authored value NOT in the physics layer",
+            "message": "Physics Attribute physics:approximation in robot asset </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_left_robot_schema/1.2/supplier_cad_follower_left_robot_schema.usda> has authored value NOT in the physics layer",
             "rule": "VerifyRobotPhysicsAttributesSourceLayer",
             "severity": "WARNING"
           },
           {
             "at": "Attribute (physics:approximation) Prim </supplier_cad_follower_left/vx300s_left/vx300s_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh>",
-            "message": "Physics Attribute physics:approximation in robot asset </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_left_robot_schema/1.0/supplier_cad_follower_left_robot_schema.usda> has authored value NOT in the physics layer",
+            "message": "Physics Attribute physics:approximation in robot asset </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_left_robot_schema/1.2/supplier_cad_follower_left_robot_schema.usda> has authored value NOT in the physics layer",
             "rule": "VerifyRobotPhysicsAttributesSourceLayer",
             "severity": "WARNING"
           },
           {
             "at": "Attribute (physics:localPos0) Prim </supplier_cad_follower_left/joints/rootJoint_vx300s_left>",
-            "message": "Physics Attribute physics:localPos0 in robot asset </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_left_robot_schema/1.0/supplier_cad_follower_left_robot_schema.usda> has authored value NOT in the physics layer",
+            "message": "Physics Attribute physics:localPos0 in robot asset </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_left_robot_schema/1.2/supplier_cad_follower_left_robot_schema.usda> has authored value NOT in the physics layer",
             "rule": "VerifyRobotPhysicsAttributesSourceLayer",
             "severity": "WARNING"
           },
           {
             "at": "Attribute (physics:localRot0) Prim </supplier_cad_follower_left/joints/rootJoint_vx300s_left>",
-            "message": "Physics Attribute physics:localRot0 in robot asset </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_left_robot_schema/1.0/supplier_cad_follower_left_robot_schema.usda> has authored value NOT in the physics layer",
+            "message": "Physics Attribute physics:localRot0 in robot asset </home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_left_robot_schema/1.2/supplier_cad_follower_left_robot_schema.usda> has authored value NOT in the physics layer",
             "rule": "VerifyRobotPhysicsAttributesSourceLayer",
             "severity": "WARNING"
           }
@@ -977,8 +959,8 @@
           "VerifyRobotPhysicsSchemaSourceLayer"
         ],
         "status": "PARTIAL",
-        "target": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_left_robot_schema/1.0/supplier_cad_follower_left_robot_schema.usda",
-        "warning_count": 5
+        "target": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_left_robot_schema/1.2/supplier_cad_follower_left_robot_schema.usda",
+        "warning_count": 4
       },
       {
         "blocking_issue_count": 0,
@@ -990,7 +972,7 @@
           "NoNestedMaterials"
         ],
         "status": "PASS",
-        "target": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_left/1.3/supplier_cad_follower_left.usda",
+        "target": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_left/1.6/supplier_cad_follower_left.usda",
         "warning_count": 0
       }
     ],
@@ -1002,8 +984,8 @@
     "physics_steps": 0,
     "run_count": 2,
     "signatures": [
-      "3b3ff2ef91f222d3bf167734723fb58b72a7729d37457a279f10e9058f3f2004",
-      "3b3ff2ef91f222d3bf167734723fb58b72a7729d37457a279f10e9058f3f2004"
+      "34c2c067682987edac88049f60e0b69511fe0c008ddb1cf95f5c2b8f3085139b",
+      "34c2c067682987edac88049f60e0b69511fe0c008ddb1cf95f5c2b8f3085139b"
     ]
   },
   "robot_articulation_roots": [
@@ -1174,10 +1156,10 @@
     }
   ],
   "robot_schema_stage": {
-    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_left_robot_schema/1.0/supplier_cad_follower_left_robot_schema.usda",
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_left_robot_schema/1.2/supplier_cad_follower_left_robot_schema.usda",
     "default_prim": "/supplier_cad_follower_left",
     "scope": "ROBOTRULES_SCHEMA_ONLY_DIAGNOSTIC",
-    "sha256": "c8e5c647a784744375cecbd88b51b6f3bfeee79bb53fcd0b85cea20f12f81d48"
+    "sha256": "686dbae526f6643e8b6cfa4b198605f04185563d0b839c49bb794fa80907643f"
   },
   "runtime_dof_order": [
     "vx300s_left_waist",
@@ -1193,7 +1175,7 @@
   "scope": "SUPPLIER_CAD_FOLLOWER_LEFT_DIAGNOSTIC_ONLY",
   "source_stage_modified": false,
   "stage": {
-    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_left/1.3/supplier_cad_follower_left.usda",
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_left/1.6/supplier_cad_follower_left.usda",
     "default_prim": "/supplier_cad_follower_left",
     "sha256": "232ea1f61dc07f391baf7497b0cf6c2455593f9655ae9b3f541fde81c8ef73ad"
   },
@@ -1224,8 +1206,8 @@
   },
   "task8": "NOT_RUN",
   "validation_targets": {
-    "IsaacSim.PhysicsRules": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_left/1.3/supplier_cad_follower_left.usda",
-    "IsaacSim.RobotRules": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_left_robot_schema/1.0/supplier_cad_follower_left_robot_schema.usda",
-    "IsaacSim.SimReadyAssetRules": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_left/1.3/supplier_cad_follower_left.usda"
+    "IsaacSim.PhysicsRules": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_left/1.6/supplier_cad_follower_left.usda",
+    "IsaacSim.RobotRules": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_left_robot_schema/1.2/supplier_cad_follower_left_robot_schema.usda",
+    "IsaacSim.SimReadyAssetRules": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_left/1.6/supplier_cad_follower_left.usda"
   }
 }

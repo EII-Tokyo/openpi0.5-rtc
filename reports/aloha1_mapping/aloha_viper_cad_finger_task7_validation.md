@@ -1,10 +1,10 @@
 # Supplier-CAD follower_left Task 7 validation
 
 - Status: `PARTIAL`
-- Stage: `/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_left/1.3/supplier_cad_follower_left.usda`
+- Stage: `/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_left/1.6/supplier_cad_follower_left.usda`
 - Stage SHA-256: `232ea1f61dc07f391baf7497b0cf6c2455593f9655ae9b3f541fde81c8ef73ad`
 - Task 5 static hold: `20/20 PASS`, maximum drop `0.000453919172 m`
-- Repeat validation signature: `3b3ff2ef91f222d3bf167734723fb58b72a7729d37457a279f10e9058f3f2004`
+- Repeat validation signature: `34c2c067682987edac88049f60e0b69511fe0c008ddb1cf95f5c2b8f3085139b`
 - Task 8: `NOT_RUN`
 
 | Check | Status |
@@ -34,8 +34,8 @@
 
 | Official category | Status | Blocking | Warnings |
 |---|---|---:|---:|
-| IsaacSim.PhysicsRules | PARTIAL | 0 | 11 |
-| IsaacSim.RobotRules | PARTIAL | 0 | 5 |
+| IsaacSim.PhysicsRules | PARTIAL | 0 | 9 |
+| IsaacSim.RobotRules | PARTIAL | 0 | 4 |
 | IsaacSim.SimReadyAssetRules | PASS | 0 | 0 |
 
 ## HARD_BLOCKER

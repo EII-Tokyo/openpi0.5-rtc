@@ -1,0 +1,420 @@
+{
+  "approved_source": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_isaac_assets/aloha_viperx.usd",
+    "modified": false,
+    "sha256": "b24afe3678155654892c69517fc58ecd970108d68cec56b02dc6fdcb8bf4493e"
+  },
+  "base_evidence": {
+    "center_of_mass": [
+      -0.05347739905118942,
+      -0.0005625750054605305,
+      0.020596100017428398
+    ],
+    "collision_destination": "/supplier_cad_follower_left/vx300s_left/vx300s_left/collisions",
+    "collision_source": "/follower_left/follower_left_base_link/collisions",
+    "destination_prim": "/supplier_cad_follower_left/vx300s_left/vx300s_left",
+    "diagonal_inertia": [
+      0.006024506408721209,
+      0.0016981891822069883,
+      0.00716330436989665
+    ],
+    "frame_evidence": {
+      "approved_joint_axis_expression": "X_WITH_MINUS_90_DEGREE_Y_JOINT_FRAME",
+      "base_frame_rotation": "IDENTITY_IN_BOTH_ASSETS",
+      "classification": "EQUIVALENT_LOCAL_BASE_FRAME",
+      "imported_joint_axis_expression": "Z_WITH_IDENTITY_JOINT_FRAME",
+      "waist_local_position_m": [
+        0.0,
+        0.0,
+        0.07900000363588333
+      ]
+    },
+    "mass": 0.9690340161323547,
+    "principal_axes": {
+      "imaginary": [
+        0.004501733463257551,
+        0.006382371764630079,
+        0.7109382748603821
+      ],
+      "real": 0.7032111287117004
+    },
+    "source_asset": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/follower_left.usd",
+    "source_asset_sha256": "a1e6beb663f70e4c1d6493f5be80da2894e075c931e0fa5211e8c91d59a8205d",
+    "source_prim": "/follower_left/follower_left_base_link",
+    "status": "PASS"
+  },
+  "collision_purpose": {
+    "authored_count": 2,
+    "authored_layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_left/1.6/configuration/supplier_cad_follower_left_configuration.usda",
+    "authored_paths": [
+      "/supplier_cad_follower_left/vx300s_left/vx300s_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh",
+      "/supplier_cad_follower_left/vx300s_left/vx300s_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh"
+    ],
+    "physics_behavior_changed": false,
+    "policy": "DIRECT_EDITABLE_INVISIBLE_COLLIDERS_USE_GUIDE_PURPOSE",
+    "readback": [
+      {
+        "path": "/supplier_cad_follower_left/vx300s_left/vx300s_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger/mesh",
+        "purpose": "guide",
+        "visibility": "invisible"
+      },
+      {
+        "path": "/supplier_cad_follower_left/vx300s_left/vx300s_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger/mesh",
+        "purpose": "guide",
+        "visibility": "invisible"
+      }
+    ],
+    "readback_count": 2,
+    "remaining": [
+      {
+        "classification": "SOURCE_INSTANCE_PROXY_NOT_AUTHORABLE_IN_DIAGNOSTIC_LAYER",
+        "is_instance_proxy": true,
+        "path": "/supplier_cad_follower_left/vx300s_left/vx300s_left/collisions/base/node_STL_BINARY_",
+        "purpose": "default",
+        "visibility": "invisible"
+      },
+      {
+        "classification": "SOURCE_INSTANCE_PROXY_NOT_AUTHORABLE_IN_DIAGNOSTIC_LAYER",
+        "is_instance_proxy": true,
+        "path": "/supplier_cad_follower_left/vx300s_left/vx300s_left_shoulder_link/collisions/vx300s_2_shoulder/vx300s_2_shoulder",
+        "purpose": "default",
+        "visibility": "invisible"
+      },
+      {
+        "classification": "SOURCE_INSTANCE_PROXY_NOT_AUTHORABLE_IN_DIAGNOSTIC_LAYER",
+        "is_instance_proxy": true,
+        "path": "/supplier_cad_follower_left/vx300s_left/vx300s_left_upper_arm_link/collisions/vx300s_3_upper_arm/vx300s_3_upper_arm",
+        "purpose": "default",
+        "visibility": "invisible"
+      },
+      {
+        "classification": "SOURCE_INSTANCE_PROXY_NOT_AUTHORABLE_IN_DIAGNOSTIC_LAYER",
+        "is_instance_proxy": true,
+        "path": "/supplier_cad_follower_left/vx300s_left/vx300s_left_upper_forearm_link/collisions/vx300s_4_upper_forearm/vx300s_4_upper_forearm",
+        "purpose": "default",
+        "visibility": "invisible"
+      },
+      {
+        "classification": "SOURCE_INSTANCE_PROXY_NOT_AUTHORABLE_IN_DIAGNOSTIC_LAYER",
+        "is_instance_proxy": true,
+        "path": "/supplier_cad_follower_left/vx300s_left/vx300s_left_lower_forearm_link/collisions/vx300s_5_lower_forearm/vx300s_5_lower_forearm",
+        "purpose": "default",
+        "visibility": "invisible"
+      },
+      {
+        "classification": "SOURCE_INSTANCE_PROXY_NOT_AUTHORABLE_IN_DIAGNOSTIC_LAYER",
+        "is_instance_proxy": true,
+        "path": "/supplier_cad_follower_left/vx300s_left/vx300s_left_wrist_link/collisions/vx300s_6_wrist/vx300s_6_wrist",
+        "purpose": "default",
+        "visibility": "invisible"
+      },
+      {
+        "classification": "SOURCE_INSTANCE_PROXY_NOT_AUTHORABLE_IN_DIAGNOSTIC_LAYER",
+        "is_instance_proxy": true,
+        "path": "/supplier_cad_follower_left/vx300s_left/vx300s_left_gripper_link/collisions/vx300s_7_gripper/vx300s_7_gripper",
+        "purpose": "default",
+        "visibility": "invisible"
+      },
+      {
+        "classification": "SOURCE_INSTANCE_PROXY_NOT_AUTHORABLE_IN_DIAGNOSTIC_LAYER",
+        "is_instance_proxy": true,
+        "path": "/supplier_cad_follower_left/vx300s_left/vx300s_left_gripper_link/collisions/vx300s_9_gripper_bar/vx300s_9_gripper_bar",
+        "purpose": "default",
+        "visibility": "invisible"
+      },
+      {
+        "classification": "SOURCE_INSTANCE_PROXY_NOT_AUTHORABLE_IN_DIAGNOSTIC_LAYER",
+        "is_instance_proxy": true,
+        "path": "/supplier_cad_follower_left/vx300s_left/vx300s_left_gripper_prop_link/collisions/vx300s_8_gripper_prop/vx300s_8_gripper_prop",
+        "purpose": "default",
+        "visibility": "invisible"
+      }
+    ],
+    "remaining_count": 9,
+    "remaining_disposition": "FORMALLY_RECORDED_SOURCE_INSTANCE_PROXY_WARNING"
+  },
+  "configuration": {
+    "deactivated": [
+      "/supplier_cad_follower_left/table",
+      "/supplier_cad_follower_left/midair",
+      "/supplier_cad_follower_left/table_frame_T",
+      "/supplier_cad_follower_left/placeholder_pipe",
+      "/supplier_cad_follower_left/worldBody",
+      "/supplier_cad_follower_left/vx300s_left/vx300s_left_camera_focus",
+      "/supplier_cad_follower_left/joints/vx300s_left_camera_focus",
+      "/supplier_cad_follower_left/joints/rootJoint_table",
+      "/supplier_cad_follower_left/joints/rootJoint_midair",
+      "/supplier_cad_follower_left/joints/rootJoint_table_frame_T",
+      "/supplier_cad_follower_left/joints/rootJoint_placeholder_pipe"
+    ],
+    "joint_paths": [
+      "/supplier_cad_follower_left/joints/rootJoint_vx300s_left",
+      "/supplier_cad_follower_left/joints/vx300s_left_waist",
+      "/supplier_cad_follower_left/joints/vx300s_left_shoulder",
+      "/supplier_cad_follower_left/joints/vx300s_left_elbow",
+      "/supplier_cad_follower_left/joints/vx300s_left_forearm_roll",
+      "/supplier_cad_follower_left/joints/vx300s_left_wrist_angle",
+      "/supplier_cad_follower_left/joints/vx300s_left_wrist_rotate",
+      "/supplier_cad_follower_left/joints/vx300s_left_gripper_prop_link",
+      "/supplier_cad_follower_left/joints/vx300s_left_left_finger",
+      "/supplier_cad_follower_left/joints/vx300s_left_right_finger"
+    ],
+    "link_paths": [
+      "/supplier_cad_follower_left/vx300s_left/vx300s_left",
+      "/supplier_cad_follower_left/vx300s_left/vx300s_left_shoulder_link",
+      "/supplier_cad_follower_left/vx300s_left/vx300s_left_upper_arm_link",
+      "/supplier_cad_follower_left/vx300s_left/vx300s_left_upper_forearm_link",
+      "/supplier_cad_follower_left/vx300s_left/vx300s_left_lower_forearm_link",
+      "/supplier_cad_follower_left/vx300s_left/vx300s_left_wrist_link",
+      "/supplier_cad_follower_left/vx300s_left/vx300s_left_gripper_link",
+      "/supplier_cad_follower_left/vx300s_left/vx300s_left_gripper_prop_link",
+      "/supplier_cad_follower_left/vx300s_left/vx300s_left_left_finger_link",
+      "/supplier_cad_follower_left/vx300s_left/vx300s_left_right_finger_link"
+    ],
+    "relationships": {
+      "isaac:physics:robotJoints": [
+        "/supplier_cad_follower_left/joints/rootJoint_vx300s_left",
+        "/supplier_cad_follower_left/joints/vx300s_left_waist",
+        "/supplier_cad_follower_left/joints/vx300s_left_shoulder",
+        "/supplier_cad_follower_left/joints/vx300s_left_elbow",
+        "/supplier_cad_follower_left/joints/vx300s_left_forearm_roll",
+        "/supplier_cad_follower_left/joints/vx300s_left_wrist_angle",
+        "/supplier_cad_follower_left/joints/vx300s_left_wrist_rotate",
+        "/supplier_cad_follower_left/joints/vx300s_left_gripper_prop_link",
+        "/supplier_cad_follower_left/joints/vx300s_left_left_finger",
+        "/supplier_cad_follower_left/joints/vx300s_left_right_finger"
+      ],
+      "isaac:physics:robotLinks": [
+        "/supplier_cad_follower_left/vx300s_left/vx300s_left",
+        "/supplier_cad_follower_left/vx300s_left/vx300s_left_shoulder_link",
+        "/supplier_cad_follower_left/vx300s_left/vx300s_left_upper_arm_link",
+        "/supplier_cad_follower_left/vx300s_left/vx300s_left_upper_forearm_link",
+        "/supplier_cad_follower_left/vx300s_left/vx300s_left_lower_forearm_link",
+        "/supplier_cad_follower_left/vx300s_left/vx300s_left_wrist_link",
+        "/supplier_cad_follower_left/vx300s_left/vx300s_left_gripper_link",
+        "/supplier_cad_follower_left/vx300s_left/vx300s_left_gripper_prop_link",
+        "/supplier_cad_follower_left/vx300s_left/vx300s_left_left_finger_link",
+        "/supplier_cad_follower_left/vx300s_left/vx300s_left_right_finger_link"
+      ]
+    }
+  },
+  "files": {
+    "configuration": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_left/1.6/configuration/supplier_cad_follower_left_configuration.usda",
+      "sha256": "6d72e5d50319bdcfcae607bf8af4afd0e756149a778ca77b84bd48736c181af6"
+    },
+    "physics": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_left/1.6/physics/supplier_cad_follower_left_physics.usd",
+      "sha256": "c10b56a989019396085269b5b207424d07e3554f7ed2017763ef8f0f1c40f95e"
+    },
+    "wrapper": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_left/1.6/supplier_cad_follower_left.usda",
+      "sha256": "232ea1f61dc07f391baf7497b0cf6c2455593f9655ae9b3f541fde81c8ef73ad"
+    }
+  },
+  "final_default_collider_modified": false,
+  "imported_follower_asset": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/follower_left.usd",
+    "modified": false,
+    "sha256": "a1e6beb663f70e4c1d6493f5be80da2894e075c931e0fa5211e8c91d59a8205d"
+  },
+  "joint_states": [
+    {
+      "authored_value_policy": "SCHEMA_FALLBACK_ZERO_MATCHES_DRIVE_TARGET",
+      "axis": "angular",
+      "path": "/supplier_cad_follower_left/joints/vx300s_left_waist",
+      "position": 0.0,
+      "velocity": 0.0
+    },
+    {
+      "authored_value_policy": "SCHEMA_FALLBACK_ZERO_MATCHES_DRIVE_TARGET",
+      "axis": "angular",
+      "path": "/supplier_cad_follower_left/joints/vx300s_left_shoulder",
+      "position": 0.0,
+      "velocity": 0.0
+    },
+    {
+      "authored_value_policy": "SCHEMA_FALLBACK_ZERO_MATCHES_DRIVE_TARGET",
+      "axis": "angular",
+      "path": "/supplier_cad_follower_left/joints/vx300s_left_elbow",
+      "position": 0.0,
+      "velocity": 0.0
+    },
+    {
+      "authored_value_policy": "SCHEMA_FALLBACK_ZERO_MATCHES_DRIVE_TARGET",
+      "axis": "angular",
+      "path": "/supplier_cad_follower_left/joints/vx300s_left_forearm_roll",
+      "position": 0.0,
+      "velocity": 0.0
+    },
+    {
+      "authored_value_policy": "SCHEMA_FALLBACK_ZERO_MATCHES_DRIVE_TARGET",
+      "axis": "angular",
+      "path": "/supplier_cad_follower_left/joints/vx300s_left_wrist_angle",
+      "position": 0.0,
+      "velocity": 0.0
+    },
+    {
+      "authored_value_policy": "SCHEMA_FALLBACK_ZERO_MATCHES_DRIVE_TARGET",
+      "axis": "angular",
+      "path": "/supplier_cad_follower_left/joints/vx300s_left_wrist_rotate",
+      "position": 0.0,
+      "velocity": 0.0
+    },
+    {
+      "authored_value_policy": "SCHEMA_FALLBACK_ZERO_MATCHES_DRIVE_TARGET",
+      "axis": "linear",
+      "path": "/supplier_cad_follower_left/joints/vx300s_left_left_finger",
+      "position": 0.0,
+      "velocity": 0.0
+    },
+    {
+      "authored_value_policy": "SCHEMA_FALLBACK_ZERO_MATCHES_DRIVE_TARGET",
+      "axis": "linear",
+      "path": "/supplier_cad_follower_left/joints/vx300s_left_right_finger",
+      "position": 0.0,
+      "velocity": 0.0
+    }
+  ],
+  "readback": {
+    "base": {
+      "collider_count": 1,
+      "diagonal_inertia": [
+        0.006024506408721209,
+        0.0016981891822069883,
+        0.00716330436989665
+      ],
+      "mass": 0.9690340161323547
+    },
+    "deactivated": [
+      "/supplier_cad_follower_left/table",
+      "/supplier_cad_follower_left/midair",
+      "/supplier_cad_follower_left/table_frame_T",
+      "/supplier_cad_follower_left/placeholder_pipe",
+      "/supplier_cad_follower_left/worldBody",
+      "/supplier_cad_follower_left/vx300s_left/vx300s_left_camera_focus",
+      "/supplier_cad_follower_left/joints/vx300s_left_camera_focus",
+      "/supplier_cad_follower_left/joints/rootJoint_table",
+      "/supplier_cad_follower_left/joints/rootJoint_midair",
+      "/supplier_cad_follower_left/joints/rootJoint_table_frame_T",
+      "/supplier_cad_follower_left/joints/rootJoint_placeholder_pipe"
+    ],
+    "default_prim": "/supplier_cad_follower_left",
+    "joint_states": [
+      {
+        "applied": true,
+        "authored_value_policy": "SCHEMA_FALLBACK_ZERO_MATCHES_DRIVE_TARGET",
+        "axis": "angular",
+        "path": "/supplier_cad_follower_left/joints/vx300s_left_waist",
+        "position": 0.0,
+        "position_readback": 0.0,
+        "velocity": 0.0,
+        "velocity_readback": 0.0
+      },
+      {
+        "applied": true,
+        "authored_value_policy": "SCHEMA_FALLBACK_ZERO_MATCHES_DRIVE_TARGET",
+        "axis": "angular",
+        "path": "/supplier_cad_follower_left/joints/vx300s_left_shoulder",
+        "position": 0.0,
+        "position_readback": 0.0,
+        "velocity": 0.0,
+        "velocity_readback": 0.0
+      },
+      {
+        "applied": true,
+        "authored_value_policy": "SCHEMA_FALLBACK_ZERO_MATCHES_DRIVE_TARGET",
+        "axis": "angular",
+        "path": "/supplier_cad_follower_left/joints/vx300s_left_elbow",
+        "position": 0.0,
+        "position_readback": 0.0,
+        "velocity": 0.0,
+        "velocity_readback": 0.0
+      },
+      {
+        "applied": true,
+        "authored_value_policy": "SCHEMA_FALLBACK_ZERO_MATCHES_DRIVE_TARGET",
+        "axis": "angular",
+        "path": "/supplier_cad_follower_left/joints/vx300s_left_forearm_roll",
+        "position": 0.0,
+        "position_readback": 0.0,
+        "velocity": 0.0,
+        "velocity_readback": 0.0
+      },
+      {
+        "applied": true,
+        "authored_value_policy": "SCHEMA_FALLBACK_ZERO_MATCHES_DRIVE_TARGET",
+        "axis": "angular",
+        "path": "/supplier_cad_follower_left/joints/vx300s_left_wrist_angle",
+        "position": 0.0,
+        "position_readback": 0.0,
+        "velocity": 0.0,
+        "velocity_readback": 0.0
+      },
+      {
+        "applied": true,
+        "authored_value_policy": "SCHEMA_FALLBACK_ZERO_MATCHES_DRIVE_TARGET",
+        "axis": "angular",
+        "path": "/supplier_cad_follower_left/joints/vx300s_left_wrist_rotate",
+        "position": 0.0,
+        "position_readback": 0.0,
+        "velocity": 0.0,
+        "velocity_readback": 0.0
+      },
+      {
+        "applied": true,
+        "authored_value_policy": "SCHEMA_FALLBACK_ZERO_MATCHES_DRIVE_TARGET",
+        "axis": "linear",
+        "path": "/supplier_cad_follower_left/joints/vx300s_left_left_finger",
+        "position": 0.0,
+        "position_readback": 0.0,
+        "velocity": 0.0,
+        "velocity_readback": 0.0
+      },
+      {
+        "applied": true,
+        "authored_value_policy": "SCHEMA_FALLBACK_ZERO_MATCHES_DRIVE_TARGET",
+        "axis": "linear",
+        "path": "/supplier_cad_follower_left/joints/vx300s_left_right_finger",
+        "position": 0.0,
+        "position_readback": 0.0,
+        "velocity": 0.0,
+        "velocity_readback": 0.0
+      }
+    ],
+    "robot_api": true,
+    "robot_joints": [
+      "/supplier_cad_follower_left/joints/rootJoint_vx300s_left",
+      "/supplier_cad_follower_left/joints/vx300s_left_waist",
+      "/supplier_cad_follower_left/joints/vx300s_left_shoulder",
+      "/supplier_cad_follower_left/joints/vx300s_left_elbow",
+      "/supplier_cad_follower_left/joints/vx300s_left_forearm_roll",
+      "/supplier_cad_follower_left/joints/vx300s_left_wrist_angle",
+      "/supplier_cad_follower_left/joints/vx300s_left_wrist_rotate",
+      "/supplier_cad_follower_left/joints/vx300s_left_gripper_prop_link",
+      "/supplier_cad_follower_left/joints/vx300s_left_left_finger",
+      "/supplier_cad_follower_left/joints/vx300s_left_right_finger"
+    ],
+    "robot_links": [
+      "/supplier_cad_follower_left/vx300s_left/vx300s_left",
+      "/supplier_cad_follower_left/vx300s_left/vx300s_left_shoulder_link",
+      "/supplier_cad_follower_left/vx300s_left/vx300s_left_upper_arm_link",
+      "/supplier_cad_follower_left/vx300s_left/vx300s_left_upper_forearm_link",
+      "/supplier_cad_follower_left/vx300s_left/vx300s_left_lower_forearm_link",
+      "/supplier_cad_follower_left/vx300s_left/vx300s_left_wrist_link",
+      "/supplier_cad_follower_left/vx300s_left/vx300s_left_gripper_link",
+      "/supplier_cad_follower_left/vx300s_left/vx300s_left_gripper_prop_link",
+      "/supplier_cad_follower_left/vx300s_left/vx300s_left_left_finger_link",
+      "/supplier_cad_follower_left/vx300s_left/vx300s_left_right_finger_link"
+    ]
+  },
+  "schema_version": 1,
+  "scope": "DIAGNOSTIC_ONLY_NOT_FINAL",
+  "status": "PASS",
+  "task5_stage": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_bottle/aloha_viperx_supplier_cad_bottle_task5.usda",
+    "modified": false,
+    "sha256": "62697e4b25a7ec82234cc9ebd79d4a6d530a6ead0165519cbd275c0fa3f32178"
+  },
+  "task8": "NOT_RUN"
+}

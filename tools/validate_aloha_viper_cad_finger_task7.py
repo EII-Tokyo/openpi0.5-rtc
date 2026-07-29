@@ -22,24 +22,24 @@ TASK5_DIAGNOSTIC_STAGE = (
 ROBOT_ASSET = (
     ROOT
     / "assets/Trossen/ALOHA1/1.0/diagnostics/"
-    "supplier_cad_follower_left/1.3/"
+    "supplier_cad_follower_left/1.6/"
     "supplier_cad_follower_left.usda"
 )
 ROBOT_ASSET_REPORT = (
     ROOT
     / "reports/aloha1_mapping/"
-    "aloha_viper_cad_finger_task7_robot_asset_v1_3.json"
+    "aloha_viper_cad_finger_task7_robot_asset_v1_6.json"
 )
 ROBOT_SCHEMA_ASSET = (
     ROOT
     / "assets/Trossen/ALOHA1/1.0/diagnostics/"
-    "supplier_cad_follower_left_robot_schema/1.0/"
+    "supplier_cad_follower_left_robot_schema/1.2/"
     "supplier_cad_follower_left_robot_schema.usda"
 )
 ROBOT_SCHEMA_ASSET_REPORT = (
     ROOT
     / "reports/aloha1_mapping/"
-    "aloha_viper_cad_finger_task7_robot_schema_asset.json"
+    "aloha_viper_cad_finger_task7_robot_schema_asset_v1_2.json"
 )
 ANGULAR_TESSELLATION = (
     ROOT

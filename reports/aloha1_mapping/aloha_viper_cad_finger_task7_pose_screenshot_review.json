@@ -1005,7 +1005,7 @@
     "numeric_report_sha256": "78438748488d683baaa71aab6209e86ca1d65e1d73ca2dc9b9579eef4c5cfda6",
     "numeric_structure": "PASS",
     "task7_validation": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_viper_cad_finger_task7_validation.json",
-    "task7_validation_sha256": "5fa7b8cd51029b4362449fe3b302f58b4fa10de575ac239fd3f56e771455071e"
+    "task7_validation_sha256": "0f2624ab91d33ba1c0855406c1d2791a39f5f544205d5ccb0890dfb004a9306f"
   },
   "status": "PARTIAL",
   "task7": "PARTIAL",

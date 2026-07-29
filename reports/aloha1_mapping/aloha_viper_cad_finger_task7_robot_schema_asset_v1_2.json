@@ -1,0 +1,71 @@
+{
+  "excluded_layers": [
+    "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_left/1.6/physics/supplier_cad_follower_left_physics.usd",
+    "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_left/1.6/configuration/supplier_cad_follower_left_configuration.usda"
+  ],
+  "excluded_physical_configuration": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_left/1.6/configuration/supplier_cad_follower_left_configuration.usda",
+    "modified": false,
+    "sha256": "6d72e5d50319bdcfcae607bf8af4afd0e756149a778ca77b84bd48736c181af6"
+  },
+  "final_default_collider_modified": false,
+  "readback": {
+    "robot_api": true,
+    "robot_joints": [
+      "/supplier_cad_follower_left/joints/rootJoint_vx300s_left",
+      "/supplier_cad_follower_left/joints/vx300s_left_waist",
+      "/supplier_cad_follower_left/joints/vx300s_left_shoulder",
+      "/supplier_cad_follower_left/joints/vx300s_left_elbow",
+      "/supplier_cad_follower_left/joints/vx300s_left_forearm_roll",
+      "/supplier_cad_follower_left/joints/vx300s_left_wrist_angle",
+      "/supplier_cad_follower_left/joints/vx300s_left_wrist_rotate",
+      "/supplier_cad_follower_left/joints/vx300s_left_gripper_prop_link",
+      "/supplier_cad_follower_left/joints/vx300s_left_left_finger",
+      "/supplier_cad_follower_left/joints/vx300s_left_right_finger"
+    ],
+    "robot_links": [
+      "/supplier_cad_follower_left/vx300s_left/vx300s_left",
+      "/supplier_cad_follower_left/vx300s_left/vx300s_left_shoulder_link",
+      "/supplier_cad_follower_left/vx300s_left/vx300s_left_upper_arm_link",
+      "/supplier_cad_follower_left/vx300s_left/vx300s_left_upper_forearm_link",
+      "/supplier_cad_follower_left/vx300s_left/vx300s_left_lower_forearm_link",
+      "/supplier_cad_follower_left/vx300s_left/vx300s_left_wrist_link",
+      "/supplier_cad_follower_left/vx300s_left/vx300s_left_gripper_link",
+      "/supplier_cad_follower_left/vx300s_left/vx300s_left_gripper_prop_link",
+      "/supplier_cad_follower_left/vx300s_left/vx300s_left_left_finger_link",
+      "/supplier_cad_follower_left/vx300s_left/vx300s_left_right_finger_link"
+    ]
+  },
+  "reason": "RobotRules validates a dedicated schema-only layer containing RobotAPI, LinkAPI, JointAPI, relationships, and helper deactivation without the diagnostic configuration or physics overrides required by PhysicsRules.",
+  "schema_layer": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_left_robot_schema/1.2/configuration/supplier_cad_follower_left_robot_schema_robot.usda",
+    "sha256": "454c6c3367027a7ecae3efc7079321ee5c420301c896aa6a1fb0bd05c5033c95"
+  },
+  "schema_version": 1,
+  "scope": "ROBOTRULES_SCHEMA_ONLY_DIAGNOSTIC",
+  "status": "PASS",
+  "task5_stage": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_bottle/aloha_viperx_supplier_cad_bottle_task5.usda",
+    "modified": false,
+    "sha256": "62697e4b25a7ec82234cc9ebd79d4a6d530a6ead0165519cbd275c0fa3f32178"
+  },
+  "task8": "NOT_RUN",
+  "thumbnail": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_left_robot_schema/1.2/.thumbs/256x256/supplier_cad_follower_left_robot_schema.usda.png",
+    "mode": "RGB",
+    "resolution": [
+      256,
+      256
+    ],
+    "scope": "ASSET_BROWSER_METADATA_NOT_PHYSICS_ACCEPTANCE",
+    "sha256": "30867bd251155a49eef1a3639405d6bc0d74d3304f7fd0b6db146f0c7ad2e4f3",
+    "source_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-finger-palm-orientation/task7_robot_scope/pose_evidence_attempt5/screenshots_raw/full_arm_oblique_open_maximum_legal_aperture_raw.png",
+    "source_sha256": "028fde7e6c0976702e353c611ddd3c9d063308be05292e306e37346ff873fc51",
+    "source_visual_review": "PASS"
+  },
+  "wrapper": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_left_robot_schema/1.2/supplier_cad_follower_left_robot_schema.usda",
+    "default_prim": "/supplier_cad_follower_left",
+    "sha256": "686dbae526f6643e8b6cfa4b198605f04185563d0b839c49bb794fa80907643f"
+  }
+}

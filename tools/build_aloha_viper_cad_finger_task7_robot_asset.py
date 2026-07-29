@@ -29,12 +29,12 @@ IMPORTED_FOLLOWER_ASSET = (
 OUTPUT_ROOT = (
     ROOT
     / "assets/Trossen/ALOHA1/1.0/diagnostics/"
-    "supplier_cad_follower_left/1.3"
+    "supplier_cad_follower_left/1.6"
 )
 OUTPUT_REPORT = (
     ROOT
     / "reports/aloha1_mapping/"
-    "aloha_viper_cad_finger_task7_robot_asset_v1_3.json"
+    "aloha_viper_cad_finger_task7_robot_asset_v1_6.json"
 )
 EXPECTED_APPROVED_SOURCE_HASH = (
     "b24afe3678155654892c69517fc58ecd970108d68cec56b02dc6fdcb8bf4493e"
@@ -304,6 +304,97 @@ def _author_joint_states(
     return records
 
 
+def _author_invisible_collider_purpose(
+    *,
+    wrapper_path: Path,
+    configuration_path: Path,
+) -> dict[str, Any]:
+    from pxr import Usd
+    from pxr import UsdGeom
+    from pxr import UsdPhysics
+
+    stage = Usd.Stage.Open(str(wrapper_path), Usd.Stage.LoadAll)
+    if stage is None:
+        raise RuntimeError(f"unable to compose wrapper: {wrapper_path}")
+    target = _layer_for_path(stage, configuration_path)
+    stage.SetEditTarget(target)
+
+    authored_paths = []
+    for prim in stage.Traverse():
+        if not prim.HasAPI(UsdPhysics.CollisionAPI):
+            continue
+        imageable = UsdGeom.Imageable(prim)
+        if imageable.ComputeVisibility() != UsdGeom.Tokens.invisible:
+            continue
+        imageable.CreatePurposeAttr().Set(UsdGeom.Tokens.guide)
+        authored_paths.append(str(prim.GetPath()))
+    if not authored_paths:
+        raise RuntimeError("no invisible colliders found for purpose policy")
+    target.Save()
+
+    readback_stage = Usd.Stage.Open(str(wrapper_path), Usd.Stage.LoadAll)
+    if readback_stage is None:
+        raise RuntimeError("unable to reopen purpose diagnostic")
+    readback = []
+    for path in authored_paths:
+        imageable = UsdGeom.Imageable(readback_stage.GetPrimAtPath(path))
+        readback.append(
+            {
+                "path": path,
+                "visibility": str(imageable.ComputeVisibility()),
+                "purpose": str(imageable.GetPurposeAttr().Get()),
+            }
+        )
+    if any(
+        item["visibility"] != str(UsdGeom.Tokens.invisible)
+        or item["purpose"] != str(UsdGeom.Tokens.guide)
+        for item in readback
+    ):
+        raise RuntimeError("invisible collider purpose readback failed")
+
+    remaining = []
+    root = readback_stage.GetDefaultPrim()
+    for prim in Usd.PrimRange(root, Usd.TraverseInstanceProxies()):
+        if not prim.HasAPI(UsdPhysics.CollisionAPI):
+            continue
+        imageable = UsdGeom.Imageable(prim)
+        if imageable.ComputeVisibility() != UsdGeom.Tokens.invisible:
+            continue
+        if imageable.GetPurposeAttr().Get() == UsdGeom.Tokens.guide:
+            continue
+        remaining.append(
+            {
+                "path": str(prim.GetPath()),
+                "visibility": str(imageable.ComputeVisibility()),
+                "purpose": str(imageable.GetPurposeAttr().Get()),
+                "is_instance_proxy": prim.IsInstanceProxy(),
+                "classification": (
+                    "SOURCE_INSTANCE_PROXY_NOT_AUTHORABLE_IN_DIAGNOSTIC_LAYER"
+                    if prim.IsInstanceProxy()
+                    else "UNEXPECTED_EDITABLE_PRIM_NOT_AUTHORED"
+                ),
+            }
+        )
+    if any(not item["is_instance_proxy"] for item in remaining):
+        raise RuntimeError("editable invisible collider purpose was missed")
+    return {
+        "policy": (
+            "DIRECT_EDITABLE_INVISIBLE_COLLIDERS_USE_GUIDE_PURPOSE"
+        ),
+        "physics_behavior_changed": False,
+        "authored_layer": str(configuration_path.resolve()),
+        "authored_count": len(authored_paths),
+        "authored_paths": authored_paths,
+        "readback_count": len(readback),
+        "readback": readback,
+        "remaining_count": len(remaining),
+        "remaining": remaining,
+        "remaining_disposition": (
+            "FORMALLY_RECORDED_SOURCE_INSTANCE_PROXY_WARNING"
+        ),
+    }
+
+
 def _author_base_evidence(
     *,
     wrapper_path: Path,
@@ -505,6 +596,10 @@ def build(
         wrapper_path=wrapper_path,
         physics_path=physics_path,
     )
+    collision_purpose = _author_invisible_collider_purpose(
+        wrapper_path=wrapper_path,
+        configuration_path=configuration_path,
+    )
     readback = _readback(
         wrapper_path=wrapper_path,
         configuration=configuration,
@@ -547,6 +642,7 @@ def build(
         },
         "files": files,
         "configuration": configuration,
+        "collision_purpose": collision_purpose,
         "joint_states": joint_states,
         "base_evidence": base_evidence,
         "readback": readback,

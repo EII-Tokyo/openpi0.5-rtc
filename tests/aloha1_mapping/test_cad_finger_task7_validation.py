@@ -17,12 +17,12 @@ SCRIPT = ROOT / "tools/validate_aloha_viper_cad_finger_task7.py"
 ROBOT_ASSET = (
     ROOT
     / "assets/Trossen/ALOHA1/1.0/diagnostics/"
-    "supplier_cad_follower_left/1.3/supplier_cad_follower_left.usda"
+    "supplier_cad_follower_left/1.6/supplier_cad_follower_left.usda"
 )
 ROBOT_SCHEMA_ASSET = (
     ROOT
     / "assets/Trossen/ALOHA1/1.0/diagnostics/"
-    "supplier_cad_follower_left_robot_schema/1.0/"
+    "supplier_cad_follower_left_robot_schema/1.2/"
     "supplier_cad_follower_left_robot_schema.usda"
 )
 
