@@ -23,6 +23,8 @@ sim-to-real dynamics model and it is not yet accepted for bottle insertion.
 | Supplier-CAD no-bottle screenshot gate | PASS (12 raw + 12 annotated) | `aloha_viper_cad_finger_task5_structure_screenshot_review.json`; visual evidence only |
 | Supplier-CAD Task 5 dynamic structure | **PASS** | numeric isolated diagnostic PASS plus fixed-camera auxiliary runtime-readback viewport replay PASS; not final-asset promotion |
 | Supplier-CAD follower_left static bottle hold | **PASS** | isolated 20 g diagnostic: `20/20`, maximum full-interval drop `0.0004539191722869873 m`; friction remains `TEMPORARY_UNCALIBRATED`, no lift/final promotion claim |
+| Bottle CAD source selection | **PASS** | project-authored `assets/bottle_500ml/cad/bottle_500ml.FCStd` is primary for future grasp tests; downloaded `500mlbottle.step` is geometry reference only |
+| Bottle CAD visual evidence | **PASS (6 raw + 6 annotated)** | all images individually self-reviewed; user review pending; no collision/physics claim |
 | Prior gym-aloha custom-finger Task 5 | **SUPERSEDED INPUT** | historical 80/80 digital hold cannot accept the newly confirmed supplier installation |
 | Prior collider A/B conclusion | `NO_MEANINGFUL_EFFECT` (historical installation) | default collider remains unchanged; must be rerun after Stage authorization |
 | Gripper hold root cause v2 | **SUPERSEDED INPUT** | prior `inconclusive` used the rejected generic finger mesh |
@@ -106,7 +108,16 @@ an appearance-based inference:
 - public ALOHA 3D CAD folder:
   `https://drive.google.com/drive/folders/1mhJuhzT4lBnvZ9VE57UgT6vmJDFPVsBf`;
 - Trossen ALOHA Kits online manual:
-  `https://docs.trossenrobotics.com/aloha_docs/`.
+  `https://docs.trossenrobotics.com/aloha_docs/`;
+- Trossen ViperX-300 6DOF specification:
+  `https://docs.trossenrobotics.com/interbotix_xsarms_docs/specifications/vx300s.html#viperx-300-6dof`.
+
+The ViperX specification is a first-party cross-check for the 6-DOF product
+identity, 750 mm reach, default joint limits, nine-servo ID/model table and
+published gripper range. It does not override the pinned URDF joint order,
+Isaac DOF readback, supplier-CAD finger installation, workcell placement,
+mass/inertia or drive gains. The extracted facts and scope are recorded in
+`reports/aloha1_mapping/aloha_vx300s_official_reference_manifest.json`.
 
 The drawing title directly names `VX300S Follower Robot Arm`. Its
 `204 × 299.46 mm` base matches the FreeCAD AP214 readback of
@@ -147,6 +158,48 @@ Machine evidence, absolute local paths, Drive IDs, snapshots, hashes, and the
 complete source-link chain are recorded in
 `reports/aloha1_mapping/aloha_purchased_model_identification.json` and
 `reports/aloha1_mapping/aloha_purchased_model_identification.md`.
+
+### Primary bottle CAD and downloaded geometry reference
+
+The user selected the existing project-authored Bottle500 CAD as the primary
+geometry for future follower bottle-grasp tests:
+
+- build script:
+  `assets/bottle_500ml/scripts/build_bottle_freecad.py`, SHA-256
+  `b077b03839b8d3e7395a98fe85d8388ed8553d344300f97cd4886c83771e7945`;
+- FCStd:
+  `assets/bottle_500ml/cad/bottle_500ml.FCStd`, SHA-256
+  `3594f60200e54181bc8480a229484293a0d386c146d3f235b32e31a0c16bbf8a`;
+- exported STEP:
+  `assets/bottle_500ml/cad/bottle_500ml.step`, SHA-256
+  `863001b4d939d7d8c879497b5054fe93f426662761e6fb7a80550096fd9bc780`.
+
+Project-pinned FreeCAD 1.1.1 / OCCT 7.8.1 confirms a valid one-solid
+`BottleMaster`, `68 × 68 × 206 mm`, CAD `+Z`, with FCStd and STEP bounds,
+area, volume and topology matching. Two fresh `0.20 mm / 20°` visual
+tessellations are byte- and geometry-signature deterministic.
+
+The user-provided `/home/eii/Downloads/500mlbottle.step`, SHA-256
+`88a341eb493211b46ede5b1b5c448da06a9845d93b328613719521c242f36416`,
+is retained under ignored `local_eval_assets/aloha_bottle_cad/` as a detailed
+geometry reference, not the default grasp bottle. Its ordinary B-Rep
+`BoundBox` overbounds its B-Spline surfaces; the locally verified
+`Part.Shape.optimalBoundingBox()` result is
+`60.054922 × 60.054922 × 192.734401 mm` after mapping CAD `+Y` to display
+`+Z`. The raw downloaded STEP has no accompanying license text, so committing
+or redistributing it remains `UNKNOWN_HARD_BLOCKER`.
+
+Six raw and six annotated CAD images passed individual visual-model
+self-review. This is CAD visual evidence only. The project bottle's existing
+USD/collider, mass, material and static hold must still be revalidated with
+the current supplier-CAD gripper. Its FCStd `25 g` parameter is uncalibrated
+and does not silently replace the current `20 g` Task 5 diagnostic profile.
+See:
+
+- `configs/aloha1_bottle_asset.yaml`;
+- `reports/aloha1_mapping/aloha_project_bottle_cad_audit.json`;
+- `reports/aloha1_mapping/aloha_bottle_cad_comparison.json`;
+- `reports/aloha1_mapping/aloha_bottle_cad_screenshot_review.json`.
 
 ### Reused from existing project reports
 

@@ -1,0 +1,164 @@
+{
+  "schema_version": 1,
+  "status": "PASS",
+  "recorded_at_utc": "2026-07-29T04:07:29Z",
+  "source": {
+    "publisher": "Trossen Robotics",
+    "title": "ViperX-300 6DOF — Interbotix X-Series Arms Documentation",
+    "url": "https://docs.trossenrobotics.com/interbotix_xsarms_docs/specifications/vx300s.html#viperx-300-6dof",
+    "evidence_class": "FIRST_PARTY_OFFICIAL_DOCUMENTATION",
+    "access_status": "PASS",
+    "license_status": "LINK_AND_FACT_CITATION_ONLY"
+  },
+  "official_facts": {
+    "degrees_of_freedom": 6,
+    "reach_mm": 750,
+    "total_span_mm": 1500,
+    "repeatability_mm": 1,
+    "accuracy_mm": [
+      5,
+      8
+    ],
+    "working_payload_g": 750,
+    "working_payload_caveat": "For 750 g, Trossen recommends no more than 50 percent extension.",
+    "total_servos": 9,
+    "default_joint_limits": [
+      {
+        "joint": "waist",
+        "min_deg": -180,
+        "max_deg": 180,
+        "servo_ids": [
+          1
+        ]
+      },
+      {
+        "joint": "shoulder",
+        "min_deg": -101,
+        "max_deg": 101,
+        "servo_ids": [
+          2,
+          3
+        ]
+      },
+      {
+        "joint": "elbow",
+        "min_deg": -101,
+        "max_deg": 92,
+        "servo_ids": [
+          4,
+          5
+        ]
+      },
+      {
+        "joint": "wrist_angle",
+        "min_deg": -107,
+        "max_deg": 130,
+        "servo_ids": [
+          6
+        ]
+      },
+      {
+        "joint": "forearm_roll",
+        "min_deg": -180,
+        "max_deg": 180,
+        "servo_ids": [
+          7
+        ]
+      },
+      {
+        "joint": "wrist_rotate",
+        "min_deg": -180,
+        "max_deg": 180,
+        "servo_ids": [
+          8
+        ]
+      },
+      {
+        "joint": "gripper",
+        "min_mm": 42,
+        "max_mm": 116,
+        "servo_ids": [
+          9
+        ]
+      }
+    ],
+    "default_servo_configuration": [
+      {
+        "id": 1,
+        "joint_name": "waist",
+        "model": "XM540-W270",
+        "baudrate": "1Mbps"
+      },
+      {
+        "id": 2,
+        "joint_name": "shoulder",
+        "model": "XM540-W270",
+        "baudrate": "1Mbps"
+      },
+      {
+        "id": 3,
+        "joint_name": "shoulder_shadow",
+        "model": "XM540-W270",
+        "baudrate": "1Mbps"
+      },
+      {
+        "id": 4,
+        "joint_name": "elbow",
+        "model": "XM540-W270",
+        "baudrate": "1Mbps"
+      },
+      {
+        "id": 5,
+        "joint_name": "elbow_shadow",
+        "model": "XM540-W270",
+        "baudrate": "1Mbps"
+      },
+      {
+        "id": 6,
+        "joint_name": "forearm_roll",
+        "model": "XM540-W270",
+        "baudrate": "1Mbps"
+      },
+      {
+        "id": 7,
+        "joint_name": "wrist_angle",
+        "model": "XM540-W270",
+        "baudrate": "1Mbps"
+      },
+      {
+        "id": 8,
+        "joint_name": "wrist_rotate",
+        "model": "XM430-W350",
+        "baudrate": "1Mbps"
+      },
+      {
+        "id": 9,
+        "joint_name": "gripper",
+        "model": "XM430-W350",
+        "baudrate": "1Mbps"
+      }
+    ],
+    "kinematic_properties_present": [
+      "M",
+      "Slist"
+    ],
+    "official_drawing_and_cad_links_present": true
+  },
+  "use_boundary": {
+    "supports": [
+      "vx300s_product_identity",
+      "official_default_joint_limit_cross_check",
+      "official_servo_id_and_model_cross_check",
+      "reach_payload_and_repeatability_context"
+    ],
+    "does_not_override": [
+      "pinned_urdf_joint_order",
+      "runtime_isaac_dof_order",
+      "supplier_cad_finger_installation",
+      "measured_workcell_transform",
+      "mass_inertia",
+      "isaac_drive_gains",
+      "gripper_raw_to_normalized_mapping"
+    ]
+  }
+}

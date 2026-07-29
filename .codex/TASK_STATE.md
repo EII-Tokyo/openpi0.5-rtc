@@ -96,6 +96,49 @@ The 2026-07-29 follower_right correction is now authoritative:
 - Task 8 remains `NOT_RUN`; no final/default collider or protected source
   Stage was changed.
 
+The 2026-07-29 bottle CAD selection is now authoritative:
+
+- Future follower bottle-grasp tests use the project-authored
+  `assets/bottle_500ml/cad/bottle_500ml.FCStd` as their primary geometry,
+  SHA-256
+  `3594f60200e54181bc8480a229484293a0d386c146d3f235b32e31a0c16bbf8a`.
+  Its exported STEP SHA-256 is
+  `863001b4d939d7d8c879497b5054fe93f426662761e6fb7a80550096fd9bc780`.
+- Project-pinned FreeCAD 1.1.1 / OCCT 7.8.1 confirms a valid one-solid
+  `BottleMaster`, `68 x 68 x 206 mm`, CAD `+Z`. FCStd and STEP bounds, area,
+  volume and topology match.
+- `/home/eii/Downloads/500mlbottle.step`, SHA-256
+  `88a341eb493211b46ede5b1b5c448da06a9845d93b328613719521c242f36416`,
+  is preserved in ignored
+  `local_eval_assets/aloha_bottle_cad/500mlbottle.step` as
+  `GEOMETRY_REFERENCE_ONLY_NOT_DEFAULT_FOR_GRASP`.
+- The downloaded reference's standard `Shape.BoundBox` is a conservative
+  B-Spline overbound. `Part.Shape.optimalBoundingBox()` gives
+  `60.054922 x 192.734401 x 60.054922 mm` in source CAD axes and agrees with
+  the controlled surface mesh. Its CAD long axis is `+Y`; diagnostic display
+  uses a recorded `+90 degree` X rotation to `+Z`.
+- Two fresh FreeCAD tessellation runs at `0.20 mm / 20 degrees` produced
+  byte-identical visual OBJ files for both bottles. These meshes are visual
+  diagnostics, not accepted colliders.
+- A final fresh rerun after the manifest boundary correction again produced
+  byte-identical OBJ hashes and identical canonical geometry signatures,
+  topology counts, and AABBs. Its manifests are
+  `.codex/artifacts/20260729-aloha-bottle-cad-comparison/final_determinism/run_a.SIiFoN/manifest.json`
+  and
+  `.codex/artifacts/20260729-aloha-bottle-cad-comparison/final_determinism/run_b.sVLAES/manifest.json`.
+- Six raw and six annotated bottle comparison screenshots passed individual
+  visual-model self-review; user review is pending. Absolute paths and hashes
+  are in
+  `reports/aloha1_mapping/aloha_bottle_cad_screenshot_review.json`.
+- The project bottle's existing USD/collider is not newly physics-validated
+  by this CAD audit. Its FCStd `25 g` parameter remains uncalibrated and does
+  not replace the `20 g` Task 5 diagnostic profile.
+- The downloaded STEP has no accompanying formal license text. Local
+  read-only audit is complete, but committing or redistributing that raw STEP
+  remains `UNKNOWN_HARD_BLOCKER`.
+- The Trossen first-party ViperX-300 6DOF specification is registered at
+  `reports/aloha1_mapping/aloha_vx300s_official_reference_manifest.json`.
+
 The 2026-07-29 CAD-source reset is the current gripper-orientation boundary:
 
 - The user rejected all four local 180-degree finger-roll combinations. Do not
