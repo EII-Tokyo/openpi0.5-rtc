@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# ruff: noqa: PLC0415
 """Run Task 7 against the isolated supplier-CAD follower-left diagnostic."""
 
 from __future__ import annotations
@@ -12,11 +13,38 @@ import traceback
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
-DIAGNOSTIC_STAGE = (
+TASK5_DIAGNOSTIC_STAGE = (
     ROOT
     / "assets/Trossen/ALOHA1/1.0/diagnostics/"
     "cad_finger_task5_bottle/"
     "aloha_viperx_supplier_cad_bottle_task5.usda"
+)
+ROBOT_ASSET = (
+    ROOT
+    / "assets/Trossen/ALOHA1/1.0/diagnostics/"
+    "supplier_cad_follower_left/1.3/"
+    "supplier_cad_follower_left.usda"
+)
+ROBOT_ASSET_REPORT = (
+    ROOT
+    / "reports/aloha1_mapping/"
+    "aloha_viper_cad_finger_task7_robot_asset_v1_3.json"
+)
+ROBOT_SCHEMA_ASSET = (
+    ROOT
+    / "assets/Trossen/ALOHA1/1.0/diagnostics/"
+    "supplier_cad_follower_left_robot_schema/1.0/"
+    "supplier_cad_follower_left_robot_schema.usda"
+)
+ROBOT_SCHEMA_ASSET_REPORT = (
+    ROOT
+    / "reports/aloha1_mapping/"
+    "aloha_viper_cad_finger_task7_robot_schema_asset.json"
+)
+ANGULAR_TESSELLATION = (
+    ROOT
+    / "local_tools/freecad-tessellation/validation/"
+    "final_fresh_tessellation/manifest.json"
 )
 APPROVED_SOURCE = (
     ROOT / "local_eval_assets/aloha_isaac_assets/aloha_viperx.usd"
@@ -54,7 +82,10 @@ EXPECTED_SOURCE_HASH = (
 EXPECTED_STAGE_HASH = (
     "62697e4b25a7ec82234cc9ebd79d4a6d530a6ead0165519cbd275c0fa3f32178"
 )
-ROBOT_ROOT = "/workcell/vx300s_left/vx300s_left"
+ROBOT_ASSET_ROOT = "/supplier_cad_follower_left"
+ROBOT_BODY_PREFIX = f"{ROBOT_ASSET_ROOT}/vx300s_left/"
+ROBOT_JOINT_PREFIX = f"{ROBOT_ASSET_ROOT}/joints/"
+ROBOT_ROOT = f"{ROBOT_BODY_PREFIX}vx300s_left"
 EXPECTED_DOF_ORDER = [
     "vx300s_left_waist",
     "vx300s_left_shoulder",
@@ -101,12 +132,15 @@ def _serialize_issue(issue: Any) -> dict[str, Any]:
     }
 
 
-def _run_official_rules(stage: Any) -> dict[str, Any]:
+def _run_official_rules(
+    stages_by_category: dict[str, Any],
+) -> dict[str, Any]:
     import isaacsim.asset.validation  # noqa: F401
     import omni.asset_validator.core as av_core
 
     categories = []
     for category in OFFICIAL_RULE_CATEGORIES:
+        stage = stages_by_category[category]
         rules = list(
             av_core.ValidationRulesRegistry.rules(
                 category,
@@ -137,6 +171,7 @@ def _run_official_rules(stage: Any) -> dict[str, Any]:
         categories.append(
             {
                 "category": category,
+                "target": stage.GetRootLayer().realPath,
                 "status": status,
                 "rule_count": len(rules),
                 "rules": sorted(rule.__name__ for rule in rules),
@@ -171,18 +206,43 @@ def _build_once() -> dict[str, Any]:
     from pxr import UsdPhysics
     from pxr import UsdUtils
 
+    from tools.aloha1_mapping.cad_finger_task7 import classify_rigid_body_scope
     from tools.aloha1_mapping.cad_finger_task7 import classify_task7
 
-    stage_path = DIAGNOSTIC_STAGE.resolve(strict=True)
+    stage_path = ROBOT_ASSET.resolve(strict=True)
+    task5_stage_path = TASK5_DIAGNOSTIC_STAGE.resolve(strict=True)
     source_path = APPROVED_SOURCE.resolve(strict=True)
     source_hash = _sha256(source_path)
-    stage_hash = _sha256(stage_path)
+    task5_stage_hash = _sha256(task5_stage_path)
+    robot_asset_hash = _sha256(stage_path)
+    robot_asset_report = _load(ROBOT_ASSET_REPORT)
+    robot_schema_path = ROBOT_SCHEMA_ASSET.resolve(strict=True)
+    robot_schema_hash = _sha256(robot_schema_path)
+    robot_schema_report = _load(ROBOT_SCHEMA_ASSET_REPORT)
+    expected_robot_schema_hash = robot_schema_report["wrapper"]["sha256"]
+    base_evidence = robot_asset_report["base_evidence"]
+    angular_tessellation = _load(ANGULAR_TESSELLATION)
+    expected_robot_asset_hash = robot_asset_report["files"]["wrapper"][
+        "sha256"
+    ]
     stage = Usd.Stage.Open(str(stage_path))
     if stage is None:
-        raise RuntimeError(f"unable to open diagnostic Stage: {stage_path}")
+        raise RuntimeError(f"unable to open robot diagnostic: {stage_path}")
+    robot_schema_stage = Usd.Stage.Open(str(robot_schema_path))
+    if robot_schema_stage is None:
+        raise RuntimeError(
+            f"unable to open RobotRules diagnostic: {robot_schema_path}"
+        )
 
     _layers, _assets, unresolved = UsdUtils.ComputeAllDependencies(
         stage.GetRootLayer().identifier
+    )
+    (
+        _schema_layers,
+        _schema_assets,
+        schema_unresolved,
+    ) = UsdUtils.ComputeAllDependencies(
+        robot_schema_stage.GetRootLayer().identifier
     )
     all_articulation_roots = [
         str(prim.GetPath())
@@ -192,13 +252,13 @@ def _build_once() -> dict[str, Any]:
     robot_articulation_roots = [
         path
         for path in all_articulation_roots
-        if path.startswith("/workcell/vx300s_left/")
+        if path.startswith(ROBOT_BODY_PREFIX)
     ]
     joints = [
         prim
         for prim in stage.Traverse()
         if (
-            str(prim.GetPath()).startswith("/workcell/joints/")
+            str(prim.GetPath()).startswith(ROBOT_JOINT_PREFIX)
             and (
                 prim.IsA(UsdPhysics.RevoluteJoint)
                 or prim.IsA(UsdPhysics.PrismaticJoint)
@@ -261,10 +321,34 @@ def _build_once() -> dict[str, Any]:
             }
         )
 
+    joint_target_types: dict[str, set[str]] = {}
+    for prim in stage.Traverse():
+        if not prim.IsA(UsdPhysics.Joint):
+            continue
+        joint_type = (
+            "fixed"
+            if prim.IsA(UsdPhysics.FixedJoint)
+            else "articulation"
+        )
+        joint = UsdPhysics.Joint(prim)
+        targets = (
+            list(joint.GetBody0Rel().GetTargets())
+            + list(joint.GetBody1Rel().GetTargets())
+        )
+        for target in targets:
+            joint_target_types.setdefault(str(target), set()).add(
+                joint_type
+            )
+
     mass_records = []
     for prim in stage.Traverse():
-        if not prim.HasAPI(UsdPhysics.RigidBodyAPI):
+        prim_path = str(prim.GetPath())
+        if (
+            not prim_path.startswith(ROBOT_BODY_PREFIX)
+            or not prim.HasAPI(UsdPhysics.RigidBodyAPI)
+        ):
             continue
+        rigid = UsdPhysics.RigidBodyAPI(prim)
         mass_api = UsdPhysics.MassAPI(prim)
         mass = mass_api.GetMassAttr().Get()
         inertia = mass_api.GetDiagonalInertiaAttr().Get()
@@ -273,11 +357,31 @@ def _build_once() -> dict[str, Any]:
             if inertia is not None
             else []
         )
+        collider_count = sum(
+            int(candidate.HasAPI(UsdPhysics.CollisionAPI))
+            for candidate in Usd.PrimRange(
+                prim,
+                Usd.TraverseInstanceProxies(),
+            )
+        )
+        target_types = joint_target_types.get(prim_path, set())
         mass_records.append(
             {
-                "path": str(prim.GetPath()),
+                "path": prim_path,
                 "mass": float(mass) if mass is not None else None,
                 "diagonal_inertia": inertia_values,
+                "collider_count": collider_count,
+                "joint_body_target": bool(target_types),
+                "joint_target_types": sorted(target_types),
+                "classification": classify_rigid_body_scope(
+                    path=prim_path,
+                    rigid_body_enabled=bool(
+                        rigid.GetRigidBodyEnabledAttr().Get()
+                    ),
+                    joint_body_target=bool(target_types),
+                    only_fixed_joint_targets=target_types == {"fixed"},
+                    collider_count=collider_count,
+                ),
                 "finite_positive": (
                     _finite_positive(mass)
                     and len(inertia_values) == 3
@@ -291,7 +395,18 @@ def _build_once() -> dict[str, Any]:
     bottle = _load(TASK5_BOTTLE)
     screenshots = _load(SCREENSHOT_REVIEW)
     first_trial = bottle["first_trial"]
-    official_rules = _run_official_rules(stage)
+    validation_targets = {
+        "IsaacSim.PhysicsRules": str(stage_path),
+        "IsaacSim.RobotRules": str(robot_schema_path),
+        "IsaacSim.SimReadyAssetRules": str(stage_path),
+    }
+    official_rules = _run_official_rules(
+        {
+            "IsaacSim.PhysicsRules": stage,
+            "IsaacSim.RobotRules": robot_schema_stage,
+            "IsaacSim.SimReadyAssetRules": stage,
+        }
+    )
 
     checks = [
         _check(
@@ -302,16 +417,60 @@ def _build_once() -> dict[str, Any]:
             actual_sha256=source_hash,
         ),
         _check(
-            "diagnostic_stage_hash",
-            "PASS" if stage_hash == EXPECTED_STAGE_HASH else "FAIL",
-            absolute_path=str(stage_path),
+            "task5_diagnostic_stage_hash_immutable",
+            (
+                "PASS"
+                if task5_stage_hash == EXPECTED_STAGE_HASH
+                else "FAIL"
+            ),
+            absolute_path=str(task5_stage_path),
             expected_sha256=EXPECTED_STAGE_HASH,
-            actual_sha256=stage_hash,
+            actual_sha256=task5_stage_hash,
+        ),
+        _check(
+            "robot_scoped_diagnostic_hash",
+            (
+                "PASS"
+                if robot_asset_hash == expected_robot_asset_hash
+                else "FAIL"
+            ),
+            absolute_path=str(stage_path),
+            expected_sha256=expected_robot_asset_hash,
+            actual_sha256=robot_asset_hash,
+        ),
+        _check(
+            "robot_schema_diagnostic_hash",
+            (
+                "PASS"
+                if robot_schema_hash == expected_robot_schema_hash
+                else "FAIL"
+            ),
+            absolute_path=str(robot_schema_path),
+            expected_sha256=expected_robot_schema_hash,
+            actual_sha256=robot_schema_hash,
+            physics_layer_excluded=True,
+        ),
+        _check(
+            "angular_controlled_tessellation",
+            (
+                "PASS"
+                if angular_tessellation["status"] == "PASS"
+                else "FAIL"
+            ),
+            manifest=str(ANGULAR_TESSELLATION.resolve()),
+            manifest_status=angular_tessellation["status"],
         ),
         _check(
             "external_references_resolve",
-            "PASS" if not unresolved else "FAIL",
-            unresolved=[str(item.path) for item in unresolved],
+            (
+                "PASS"
+                if not unresolved and not schema_unresolved
+                else "FAIL"
+            ),
+            physical_unresolved=[str(item.path) for item in unresolved],
+            robot_schema_unresolved=[
+                str(item.path) for item in schema_unresolved
+            ],
         ),
         _check(
             "one_robot_articulation_root",
@@ -476,7 +635,6 @@ def _build_once() -> dict[str, Any]:
         "HARD_BLOCKER_NO_USER_APPROVED_SUPPLIER_STAGE_LIFT_TRAJECTORY",
         "HARD_BLOCKER_UNCALIBRATED_FINGER_BOTTLE_FRICTION",
         "HARD_BLOCKER_INCOMPLETE_BOTTLE_GEOMETRY_AND_INERTIA",
-        "HARD_BLOCKER_PRODUCTION_ANGULAR_TESSELLATION",
     ]
     return {
         "schema_version": 1,
@@ -484,18 +642,43 @@ def _build_once() -> dict[str, Any]:
         "scope": "SUPPLIER_CAD_FOLLOWER_LEFT_DIAGNOSTIC_ONLY",
         "stage": {
             "absolute_path": str(stage_path),
-            "sha256": stage_hash,
+            "sha256": robot_asset_hash,
             "default_prim": str(stage.GetDefaultPrim().GetPath()),
+        },
+        "robot_schema_stage": {
+            "absolute_path": str(robot_schema_path),
+            "sha256": robot_schema_hash,
+            "default_prim": str(
+                robot_schema_stage.GetDefaultPrim().GetPath()
+            ),
+            "scope": robot_schema_report["scope"],
+        },
+        "task5_stage": {
+            "absolute_path": str(task5_stage_path),
+            "sha256": task5_stage_hash,
+            "modified": False,
         },
         "approved_source": {
             "absolute_path": str(source_path),
             "sha256": source_hash,
         },
+        "angular_tessellation": {
+            "status": angular_tessellation["status"],
+            "manifest": str(ANGULAR_TESSELLATION.resolve()),
+            "runtime": (
+                "/home/eii/project/openpi0.5-rtc-reward-learning/"
+                "local_tools/freecad-tessellation/freecadcmd"
+            ),
+            "stale_blocker_removed": True,
+        },
+        "base_evidence": base_evidence,
+        "validation_targets": validation_targets,
         "all_stage_articulation_roots": all_articulation_roots,
         "robot_articulation_roots": robot_articulation_roots,
         "runtime_dof_order": first_trial["states"]["dof_order"],
         "stage_dof_order": dof_order,
         "dof_records": dof_records,
+        "robot_rigid_body_records": mass_records,
         "checks": checks,
         "official_rules": official_rules,
         "task5_static_hold": {
@@ -514,10 +697,14 @@ def _build_once() -> dict[str, Any]:
         "final_default_collider_modified": False,
         "source_stage_modified": False,
         "acceptance_boundary": (
-            "This validates only the isolated supplier-CAD follower_left "
-            "diagnostic. It does not promote the collider/configuration, "
-            "claim calibrated dynamics, validate follower_right, or run a "
-            "lift trajectory."
+            "PhysicsRules and SimReadyAssetRules run on the isolated physical "
+            "supplier-CAD follower_left diagnostic. RobotRules runs on the "
+            "schema-only wrapper of the same robot hierarchy so diagnostic "
+            "physics opinions are not misclassified as prohibited robot "
+            "schema overrides. Task 5 runtime evidence remains on the "
+            "immutable bottle workcell. This does not promote the collider or "
+            "configuration, claim calibrated dynamics, validate "
+            "follower_right, or run a lift trajectory."
         ),
     }
 

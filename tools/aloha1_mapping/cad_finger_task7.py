@@ -8,6 +8,31 @@ import json
 from typing import Any
 
 
+def classify_rigid_body_scope(
+    *,
+    path: str,
+    rigid_body_enabled: bool,
+    joint_body_target: bool,
+    only_fixed_joint_targets: bool,
+    collider_count: int,
+) -> str:
+    """Classify a rigid body without inventing mass, inertia, or colliders."""
+
+    if not rigid_body_enabled:
+        return "DISABLED_RIGID_BODY"
+    if joint_body_target and collider_count > 0:
+        return "ROBOT_RIGID_BODY"
+    if joint_body_target and only_fixed_joint_targets:
+        return "FIXED_REFERENCE_HELPER_EXCLUDE_FROM_ROBOT_DIAGNOSTIC"
+    if joint_body_target:
+        return "PARTICIPATING_BODY_MISSING_COLLIDER_HARD_BLOCKER"
+    if collider_count == 0:
+        return (
+            "NONPHYSICAL_HELPER_REMOVE_RIGID_BODY_API_IN_DIAGNOSTIC_LAYER"
+        )
+    return "NON_ROBOT_COLLIDER_EXCLUDE_FROM_ROBOT_SCOPE"
+
+
 def classify_task7(
     checks: Sequence[Mapping[str, Any]],
     hard_blockers: Sequence[str],

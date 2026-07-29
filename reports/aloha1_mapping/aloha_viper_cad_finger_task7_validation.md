@@ -1,23 +1,26 @@
 # Supplier-CAD follower_left Task 7 validation
 
-- Status: `FAIL`
-- Stage: `/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_bottle/aloha_viperx_supplier_cad_bottle_task5.usda`
-- Stage SHA-256: `62697e4b25a7ec82234cc9ebd79d4a6d530a6ead0165519cbd275c0fa3f32178`
+- Status: `PARTIAL`
+- Stage: `/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_left/1.3/supplier_cad_follower_left.usda`
+- Stage SHA-256: `232ea1f61dc07f391baf7497b0cf6c2455593f9655ae9b3f541fde81c8ef73ad`
 - Task 5 static hold: `20/20 PASS`, maximum drop `0.000453919172 m`
-- Repeat validation signature: `b52db5132cbd96c311df95f31f577fb65c078f51d1bf5e6b8a75ebe87f1abd82`
+- Repeat validation signature: `3b3ff2ef91f222d3bf167734723fb58b72a7729d37457a279f10e9058f3f2004`
 - Task 8: `NOT_RUN`
 
 | Check | Status |
 |---|---|
 | approved_source_hash_immutable | PASS |
-| diagnostic_stage_hash | PASS |
+| task5_diagnostic_stage_hash_immutable | PASS |
+| robot_scoped_diagnostic_hash | PASS |
+| robot_schema_diagnostic_hash | PASS |
+| angular_controlled_tessellation | PASS |
 | external_references_resolve | PASS |
 | one_robot_articulation_root | PASS |
 | dof_name_and_order | PASS |
 | all_nonfixed_joints_have_drive_or_mimic | PASS |
 | finite_positive_max_velocity_and_force | PASS |
-| initial_joint_state_matches_drive_target | FAIL |
-| mass_and_inertia_finite_positive | FAIL |
+| initial_joint_state_matches_drive_target | PASS |
+| mass_and_inertia_finite_positive | PASS |
 | first_frame_jump_and_static_structure | PASS |
 | one_joint_direction_and_range | PARTIAL |
 | mimic_or_symmetric_control_mapping | PARTIAL |
@@ -25,14 +28,14 @@
 | bilateral_contact_and_static_hold | PASS |
 | screenshot_visual_review | PASS |
 | task5_repeat_determinism | PASS |
-| IsaacSim.PhysicsRules | FAIL |
-| IsaacSim.RobotRules | FAIL |
+| IsaacSim.PhysicsRules | PARTIAL |
+| IsaacSim.RobotRules | PARTIAL |
 | IsaacSim.SimReadyAssetRules | PASS |
 
 | Official category | Status | Blocking | Warnings |
 |---|---|---:|---:|
-| IsaacSim.PhysicsRules | FAIL | 17 | 17 |
-| IsaacSim.RobotRules | FAIL | 4 | 5 |
+| IsaacSim.PhysicsRules | PARTIAL | 0 | 11 |
+| IsaacSim.RobotRules | PARTIAL | 0 | 5 |
 | IsaacSim.SimReadyAssetRules | PASS | 0 | 0 |
 
 ## HARD_BLOCKER
@@ -41,6 +44,5 @@
 - `HARD_BLOCKER_NO_USER_APPROVED_SUPPLIER_STAGE_LIFT_TRAJECTORY`
 - `HARD_BLOCKER_UNCALIBRATED_FINGER_BOTTLE_FRICTION`
 - `HARD_BLOCKER_INCOMPLETE_BOTTLE_GEOMETRY_AND_INERTIA`
-- `HARD_BLOCKER_PRODUCTION_ANGULAR_TESSELLATION`
 
-This validates only the isolated supplier-CAD follower_left diagnostic. It does not promote the collider/configuration, claim calibrated dynamics, validate follower_right, or run a lift trajectory.
+PhysicsRules and SimReadyAssetRules run on the isolated physical supplier-CAD follower_left diagnostic. RobotRules runs on the schema-only wrapper of the same robot hierarchy so diagnostic physics opinions are not misclassified as prohibited robot schema overrides. Task 5 runtime evidence remains on the immutable bottle workcell. This does not promote the collider or configuration, claim calibrated dynamics, validate follower_right, or run a lift trajectory.

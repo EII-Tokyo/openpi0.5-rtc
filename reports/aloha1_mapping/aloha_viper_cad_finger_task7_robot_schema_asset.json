@@ -1,0 +1,53 @@
+{
+  "configuration": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_left/1.3/configuration/supplier_cad_follower_left_configuration.usda",
+    "modified": false,
+    "sha256": "454c6c3367027a7ecae3efc7079321ee5c420301c896aa6a1fb0bd05c5033c95"
+  },
+  "excluded_layers": [
+    "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_left/1.3/physics/supplier_cad_follower_left_physics.usd"
+  ],
+  "final_default_collider_modified": false,
+  "readback": {
+    "robot_api": true,
+    "robot_joints": [
+      "/supplier_cad_follower_left/joints/rootJoint_vx300s_left",
+      "/supplier_cad_follower_left/joints/vx300s_left_waist",
+      "/supplier_cad_follower_left/joints/vx300s_left_shoulder",
+      "/supplier_cad_follower_left/joints/vx300s_left_elbow",
+      "/supplier_cad_follower_left/joints/vx300s_left_forearm_roll",
+      "/supplier_cad_follower_left/joints/vx300s_left_wrist_angle",
+      "/supplier_cad_follower_left/joints/vx300s_left_wrist_rotate",
+      "/supplier_cad_follower_left/joints/vx300s_left_gripper_prop_link",
+      "/supplier_cad_follower_left/joints/vx300s_left_left_finger",
+      "/supplier_cad_follower_left/joints/vx300s_left_right_finger"
+    ],
+    "robot_links": [
+      "/supplier_cad_follower_left/vx300s_left/vx300s_left",
+      "/supplier_cad_follower_left/vx300s_left/vx300s_left_shoulder_link",
+      "/supplier_cad_follower_left/vx300s_left/vx300s_left_upper_arm_link",
+      "/supplier_cad_follower_left/vx300s_left/vx300s_left_upper_forearm_link",
+      "/supplier_cad_follower_left/vx300s_left/vx300s_left_lower_forearm_link",
+      "/supplier_cad_follower_left/vx300s_left/vx300s_left_wrist_link",
+      "/supplier_cad_follower_left/vx300s_left/vx300s_left_gripper_link",
+      "/supplier_cad_follower_left/vx300s_left/vx300s_left_gripper_prop_link",
+      "/supplier_cad_follower_left/vx300s_left/vx300s_left_left_finger_link",
+      "/supplier_cad_follower_left/vx300s_left/vx300s_left_right_finger_link"
+    ]
+  },
+  "reason": "RobotRules validates RobotAPI and ordered relationships without the diagnostic physics overrides required by PhysicsRules.",
+  "schema_version": 1,
+  "scope": "ROBOTRULES_SCHEMA_ONLY_DIAGNOSTIC",
+  "status": "PASS",
+  "task5_stage": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/cad_finger_task5_bottle/aloha_viperx_supplier_cad_bottle_task5.usda",
+    "modified": false,
+    "sha256": "62697e4b25a7ec82234cc9ebd79d4a6d530a6ead0165519cbd275c0fa3f32178"
+  },
+  "task8": "NOT_RUN",
+  "wrapper": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_left_robot_schema/1.0/supplier_cad_follower_left_robot_schema.usda",
+    "default_prim": "/supplier_cad_follower_left",
+    "sha256": "c8e5c647a784744375cecbd88b51b6f3bfeee79bb53fcd0b85cea20f12f81d48"
+  }
+}
