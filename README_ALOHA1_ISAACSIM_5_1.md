@@ -337,11 +337,13 @@ acceptance. High-output CAD and Isaac logs are stored under
 Set `--enable-leaders` only when importing/probing optional leader assets. The
 current final workcell keeps the `Leaders=disabled` variant.
 
-## PhysicsRules disposition
+## Legacy imported-baseline PhysicsRules disposition
 
-Official `IsaacSim.PhysicsRules` is preserved as **FAIL**; errors are not
-deleted or silently suppressed. The separate classification report has zero
-unclassified errors:
+The original imported two-follower baseline remains **FAIL** under
+`IsaacSim.PhysicsRules`; those historical findings are not deleted or
+silently suppressed. This is distinct from the current supplier-CAD
+follower-left Task 7 diagnostic described below. The legacy classification
+report has zero unclassified errors:
 
 | Official issue | Count | Disposition |
 | --- | ---: | --- |
@@ -349,9 +351,10 @@ unclassified errors:
 | `MimicAPICheck` on `right_finger` | 2 | `FORMALLY_RECORDED` Isaac Sim 5.1 validator/schema conflict; the schema equation and runtime motion require the imported positive gearing, so it is not changed to satisfy the rule |
 | `RigidBodyHasCollider` on `ee_arm_link`, `fingers_link`, `ee_gripper_link` | 6 | `HARD_BLOCKER_NO_GEOMETRY_EVIDENCE`; the source links have mass/inertia but no collision geometry, so no guessed primitive is authored |
 
-`IsaacSim.RobotRules` is `PARTIAL` only because thumbnails are absent.
+For that legacy baseline, `IsaacSim.RobotRules` is `PARTIAL` and
 `IsaacSim.SimReadyAssetRules` passes. Details are in
-`physics_rules_classification.json` and `asset_validator_report.json`.
+`physics_rules_classification.json` and `asset_validator_report.json`. Do not
+reuse those legacy counts as the supplier-CAD Task 7 result.
 
 ## Current supplier-CAD Task 5 boundary
 
@@ -843,7 +846,7 @@ unchanged.
 
 The current supplier-CAD Task 7 result is **PARTIAL**. Two independent fresh
 Stage opens produced the identical signature
-`3b3ff2ef91f222d3bf167734723fb58b72a7729d37457a279f10e9058f3f2004`.
+`34c2c067682987edac88049f60e0b69511fe0c008ddb1cf95f5c2b8f3085139b`.
 No physics step was added by this static/official-rule validation.
 
 The rule target is intentionally split according to the installed Isaac Sim
@@ -851,14 +854,17 @@ The rule target is intentionally split according to the installed Isaac Sim
 
 - `IsaacSim.PhysicsRules` and `IsaacSim.SimReadyAssetRules` validate the
   isolated physical diagnostic
-  `assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_left/1.3/supplier_cad_follower_left.usda`;
+  `assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_left/1.6/supplier_cad_follower_left.usda`;
 - `IsaacSim.RobotRules` validates the schema-only wrapper
-  `assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_left_robot_schema/1.0/supplier_cad_follower_left_robot_schema.usda`.
+  `assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_left_robot_schema/1.2/supplier_cad_follower_left_robot_schema.usda`.
 
-This prevents diagnostic mass, inertia, drive, and collider opinions from
-being misclassified as prohibited overrides in a Robot-Schema source layer.
-It does not modify or promote the approved source Stage, default
-configuration, or final collider.
+The v1.2 RobotRules wrapper sublayers one dedicated schema-only layer. That
+layer contains only RobotAPI, LinkAPI, JointAPI, ordered robot
+relationships, and helper deactivation. It explicitly excludes the physical
+configuration and physics layers, preventing diagnostic mass, inertia,
+drive, collider, and collision-purpose opinions from being misclassified as
+Robot-Schema overrides. It does not modify or promote the approved source
+Stage, default configuration, or final collider.
 
 Current machine results:
 
@@ -870,11 +876,22 @@ Current machine results:
 - the no-bottle first-frame/static structure gate passes;
 - the supplier-CAD 20 g static hold remains `20/20 PASS`, maximum full-interval
   drop `0.0004539191722869873 m`;
-- `IsaacSim.PhysicsRules`: `PARTIAL`, 0 blocking findings, 11 warnings for
-  collision-mesh purpose metadata;
-- `IsaacSim.RobotRules`: `PARTIAL`, 0 blocking findings, 5 warnings for the
-  missing diagnostic thumbnail and physics-attribute layer placement;
+- `IsaacSim.PhysicsRules`: `PARTIAL`, 0 blocking findings, 9 warnings. These
+  are invisible imported collision-mesh instance proxies whose source
+  `purpose=default` cannot be authored through the isolated diagnostic layer
+  without de-instancing or changing the protected source. The two directly
+  editable supplier-CAD finger colliders read back `purpose=guide`;
+- `IsaacSim.RobotRules`: `PARTIAL`, 0 blocking findings, 4 warnings. The
+  deterministic 256×256 thumbnail exists and passes readback, so
+  `ThumbnailExists` no longer warns. The four remaining warnings are the two
+  existing finger `physics:approximation` opinions and the root-joint
+  `physics:localPos0/localRot0` opinions whose property stacks originate in
+  protected diagnostic physics/configuration layers with filenames that do
+  not satisfy the rule's literal `_physics.usd` suffix check;
 - `IsaacSim.SimReadyAssetRules`: `PASS`, 0 blocking findings, 0 warnings;
+- two fresh physical rebuilds and two fresh schema rebuilds are byte
+  identical for their configuration/physics/schema/wrapper/thumbnail
+  products;
 - six-arm one-joint range replay, source mimic promotion semantics, and the
   attachment-volume overlap disposition remain `PARTIAL`;
 - follower_right, a user-approved supplier-Stage lift trajectory, calibrated

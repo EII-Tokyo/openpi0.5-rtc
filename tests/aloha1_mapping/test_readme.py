@@ -45,7 +45,7 @@ def test_readme_separates_evidence_classes_and_gates_optimization() -> None:
     assert "follower_right NOT_RUN" in text
     assert "HARD_BLOCKER_APPROVED_STAGE_MISSING_FOLLOWER_RIGHT" in text
     assert "aloha_viper_cad_finger_task7_validation.json" in text
-    assert "3b3ff2ef91f222d3bf167734723fb58b72a7729d37457a279f10e9058f3f2004" in text
+    assert "34c2c067682987edac88049f60e0b69511fe0c008ddb1cf95f5c2b8f3085139b" in text
     assert "Isaac Sim **5.1.0.0 / Kit 107.3.3**" in text
 
 

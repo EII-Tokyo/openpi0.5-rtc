@@ -232,13 +232,18 @@ authoritative restart boundary:
   both signals remain visible.
 - Supplier-CAD Task 7 was rerun twice with fresh Stage opens and identical
   signature
-  `3b3ff2ef91f222d3bf167734723fb58b72a7729d37457a279f10e9058f3f2004`.
+  `34c2c067682987edac88049f60e0b69511fe0c008ddb1cf95f5c2b8f3085139b`.
   Its literal status is `PARTIAL`: Task 5 hold, robot-scoped articulation,
   eight-DOF order, drive/limit, initial-state, mass/inertia, and
   SimReadyAssetRules checks pass. PhysicsRules validates the isolated physical
-  v1.3 diagnostic and RobotRules validates a schema-only wrapper of the same
-  hierarchy; each has zero blocking findings, with 11 and 5 warnings
-  respectively. Report:
+  v1.6 diagnostic and RobotRules validates the v1.2 schema-only wrapper of the
+  same hierarchy; each has zero blocking findings, with 9 and 4 warnings
+  respectively. Two directly editable supplier-CAD finger colliders now read
+  back `purpose=guide`; the 9 remaining purpose warnings are protected source
+  instance proxies. The RobotRules thumbnail warning is closed by a
+  deterministic 256×256 thumbnail; the 4 remaining warnings are protected
+  physics-property source-layer filename classifications. Two fresh physical
+  rebuilds and two fresh schema rebuilds are byte-identical. Report:
   `aloha_viper_cad_finger_task7_validation.json`.
 - The certified follower_left symmetric-close action has six raw and six
   annotated screenshots covering maximum legal aperture, partial close, and
