@@ -1,0 +1,1295 @@
+{
+  "coverage": {
+    "expected_each": 6,
+    "helper_records": 6,
+    "official_findings": 6
+  },
+  "decision": {
+    "asset_promotion_effect": "PARTIAL_LITERAL_RULE_FAILURE_REMAINS",
+    "promotion_candidate_action": "DO_NOT_INVENT_COLLIDER_OR_REMOVE_RIGID_BODY_API",
+    "runtime_control_effect": "NON_BLOCKING_SOURCE_GEOMETRY_BOUNDARY"
+  },
+  "helpers": [
+    {
+      "asset_prim_path": "/follower_left/vx300s_left/follower_left_ee_arm_link",
+      "composed_prim_path": "/World/follower_left/vx300s_left/follower_left_ee_arm_link",
+      "invent_collider_allowed": false,
+      "official_rule": {
+        "category": "IsaacSim.PhysicsRules",
+        "message": "Rigid body /follower_left/vx300s_left/follower_left_ee_arm_link has rigid body api but no collision api",
+        "severity": "ERROR",
+        "target_name": "follower_left"
+      },
+      "remove_rigid_body_api_allowed": false,
+      "robot": "follower_left",
+      "supplier_cad_geometry_mapped_to_helper": false,
+      "urdf": {
+        "child_joints": [
+          {
+            "child": "follower_left_gripper_prop_link",
+            "name": "gripper",
+            "parent": "follower_left_ee_arm_link",
+            "type": "continuous"
+          },
+          {
+            "child": "follower_left_gripper_bar_link",
+            "name": "gripper_bar",
+            "parent": "follower_left_ee_arm_link",
+            "type": "fixed"
+          }
+        ],
+        "collision_count": 0,
+        "decision_basis": "Source URDF/Xacro has no visual or collision geometry for this frame. Placeholder inertial values do not define a physical shape, and changing body semantics requires a separate source-backed articulation regression.",
+        "inertial_count": 1,
+        "invent_collider_allowed": false,
+        "link_name": "follower_left_ee_arm_link",
+        "mass_kg": 0.001,
+        "parent_joints": [
+          {
+            "child": "follower_left_ee_arm_link",
+            "name": "ee_arm",
+            "parent": "follower_left_gripper_link",
+            "type": "fixed"
+          }
+        ],
+        "remove_rigid_body_api_allowed": false,
+        "semantic_class": "VIRTUAL_KINEMATIC_HELPER",
+        "urdf_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_left.urdf",
+        "visual_count": 0
+      },
+      "usd": {
+        "applied_schemas": [
+          "PhysicsRigidBodyAPI",
+          "PhysicsMassAPI",
+          "IsaacLinkAPI"
+        ],
+        "child_prim_names": [
+          "collisions"
+        ],
+        "descendant_collision_api_count": 0,
+        "descendant_collision_api_paths": [],
+        "has_rigid_body_api": true,
+        "prim_path": "/World/follower_left/vx300s_left/follower_left_ee_arm_link",
+        "prim_stack": [
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/configuration/follower_left_imported_physics.usd",
+            "path": "/follower_left/follower_left_ee_arm_link",
+            "specifier": "Sdf.SpecifierOver"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/configuration/follower_left_imported_base.usd",
+            "path": "/follower_left/follower_left_ee_arm_link",
+            "specifier": "Sdf.SpecifierDef"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/configuration/follower_left_imported_robot.usd",
+            "path": "/follower_left/follower_left_ee_arm_link",
+            "specifier": "Sdf.SpecifierOver"
+          }
+        ],
+        "type_name": "Xform"
+      }
+    },
+    {
+      "asset_prim_path": "/follower_left/vx300s_left/follower_left_fingers_link",
+      "composed_prim_path": "/World/follower_left/vx300s_left/follower_left_fingers_link",
+      "invent_collider_allowed": false,
+      "official_rule": {
+        "category": "IsaacSim.PhysicsRules",
+        "message": "Rigid body /follower_left/vx300s_left/follower_left_fingers_link has rigid body api but no collision api",
+        "severity": "ERROR",
+        "target_name": "follower_left"
+      },
+      "remove_rigid_body_api_allowed": false,
+      "robot": "follower_left",
+      "supplier_cad_geometry_mapped_to_helper": false,
+      "urdf": {
+        "child_joints": [
+          {
+            "child": "follower_left_left_finger_link",
+            "name": "left_finger",
+            "parent": "follower_left_fingers_link",
+            "type": "prismatic"
+          },
+          {
+            "child": "follower_left_right_finger_link",
+            "name": "right_finger",
+            "parent": "follower_left_fingers_link",
+            "type": "prismatic"
+          },
+          {
+            "child": "follower_left_ee_gripper_link",
+            "name": "ee_gripper",
+            "parent": "follower_left_fingers_link",
+            "type": "fixed"
+          }
+        ],
+        "collision_count": 0,
+        "decision_basis": "Source URDF/Xacro has no visual or collision geometry for this frame. Placeholder inertial values do not define a physical shape, and changing body semantics requires a separate source-backed articulation regression.",
+        "inertial_count": 1,
+        "invent_collider_allowed": false,
+        "link_name": "follower_left_fingers_link",
+        "mass_kg": 0.001,
+        "parent_joints": [
+          {
+            "child": "follower_left_fingers_link",
+            "name": "ee_bar",
+            "parent": "follower_left_gripper_bar_link",
+            "type": "fixed"
+          }
+        ],
+        "remove_rigid_body_api_allowed": false,
+        "semantic_class": "VIRTUAL_KINEMATIC_HELPER",
+        "urdf_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_left.urdf",
+        "visual_count": 0
+      },
+      "usd": {
+        "applied_schemas": [
+          "PhysicsRigidBodyAPI",
+          "PhysicsMassAPI",
+          "IsaacLinkAPI"
+        ],
+        "child_prim_names": [
+          "collisions"
+        ],
+        "descendant_collision_api_count": 0,
+        "descendant_collision_api_paths": [],
+        "has_rigid_body_api": true,
+        "prim_path": "/World/follower_left/vx300s_left/follower_left_fingers_link",
+        "prim_stack": [
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/configuration/follower_left_imported_physics.usd",
+            "path": "/follower_left/follower_left_fingers_link",
+            "specifier": "Sdf.SpecifierOver"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/configuration/follower_left_imported_base.usd",
+            "path": "/follower_left/follower_left_fingers_link",
+            "specifier": "Sdf.SpecifierDef"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/configuration/follower_left_imported_robot.usd",
+            "path": "/follower_left/follower_left_fingers_link",
+            "specifier": "Sdf.SpecifierOver"
+          }
+        ],
+        "type_name": "Xform"
+      }
+    },
+    {
+      "asset_prim_path": "/follower_left/vx300s_left/follower_left_ee_gripper_link",
+      "composed_prim_path": "/World/follower_left/vx300s_left/follower_left_ee_gripper_link",
+      "invent_collider_allowed": false,
+      "official_rule": {
+        "category": "IsaacSim.PhysicsRules",
+        "message": "Rigid body /follower_left/vx300s_left/follower_left_ee_gripper_link has rigid body api but no collision api",
+        "severity": "ERROR",
+        "target_name": "follower_left"
+      },
+      "remove_rigid_body_api_allowed": false,
+      "robot": "follower_left",
+      "supplier_cad_geometry_mapped_to_helper": false,
+      "urdf": {
+        "child_joints": [],
+        "collision_count": 0,
+        "decision_basis": "Source URDF/Xacro has no visual or collision geometry for this frame. Placeholder inertial values do not define a physical shape, and changing body semantics requires a separate source-backed articulation regression.",
+        "inertial_count": 1,
+        "invent_collider_allowed": false,
+        "link_name": "follower_left_ee_gripper_link",
+        "mass_kg": 0.001,
+        "parent_joints": [
+          {
+            "child": "follower_left_ee_gripper_link",
+            "name": "ee_gripper",
+            "parent": "follower_left_fingers_link",
+            "type": "fixed"
+          }
+        ],
+        "remove_rigid_body_api_allowed": false,
+        "semantic_class": "FIXED_FRAME_ALIAS",
+        "urdf_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_left.urdf",
+        "visual_count": 0
+      },
+      "usd": {
+        "applied_schemas": [
+          "PhysicsRigidBodyAPI",
+          "PhysicsMassAPI",
+          "IsaacLinkAPI"
+        ],
+        "child_prim_names": [
+          "collisions"
+        ],
+        "descendant_collision_api_count": 0,
+        "descendant_collision_api_paths": [],
+        "has_rigid_body_api": true,
+        "prim_path": "/World/follower_left/vx300s_left/follower_left_ee_gripper_link",
+        "prim_stack": [
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/configuration/follower_left_imported_physics.usd",
+            "path": "/follower_left/follower_left_ee_gripper_link",
+            "specifier": "Sdf.SpecifierOver"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/configuration/follower_left_imported_base.usd",
+            "path": "/follower_left/follower_left_ee_gripper_link",
+            "specifier": "Sdf.SpecifierDef"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_left/source/configuration/follower_left_imported_robot.usd",
+            "path": "/follower_left/follower_left_ee_gripper_link",
+            "specifier": "Sdf.SpecifierOver"
+          }
+        ],
+        "type_name": "Xform"
+      }
+    },
+    {
+      "asset_prim_path": "/follower_right/vx300s_right/follower_right_ee_arm_link",
+      "composed_prim_path": "/World/follower_right/vx300s_right/follower_right_ee_arm_link",
+      "invent_collider_allowed": false,
+      "official_rule": {
+        "category": "IsaacSim.PhysicsRules",
+        "message": "Rigid body /follower_right/vx300s_right/follower_right_ee_arm_link has rigid body api but no collision api",
+        "severity": "ERROR",
+        "target_name": "follower_right"
+      },
+      "remove_rigid_body_api_allowed": false,
+      "robot": "follower_right",
+      "supplier_cad_geometry_mapped_to_helper": false,
+      "urdf": {
+        "child_joints": [
+          {
+            "child": "follower_right_gripper_prop_link",
+            "name": "gripper",
+            "parent": "follower_right_ee_arm_link",
+            "type": "continuous"
+          },
+          {
+            "child": "follower_right_gripper_bar_link",
+            "name": "gripper_bar",
+            "parent": "follower_right_ee_arm_link",
+            "type": "fixed"
+          }
+        ],
+        "collision_count": 0,
+        "decision_basis": "Source URDF/Xacro has no visual or collision geometry for this frame. Placeholder inertial values do not define a physical shape, and changing body semantics requires a separate source-backed articulation regression.",
+        "inertial_count": 1,
+        "invent_collider_allowed": false,
+        "link_name": "follower_right_ee_arm_link",
+        "mass_kg": 0.001,
+        "parent_joints": [
+          {
+            "child": "follower_right_ee_arm_link",
+            "name": "ee_arm",
+            "parent": "follower_right_gripper_link",
+            "type": "fixed"
+          }
+        ],
+        "remove_rigid_body_api_allowed": false,
+        "semantic_class": "VIRTUAL_KINEMATIC_HELPER",
+        "urdf_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_right.urdf",
+        "visual_count": 0
+      },
+      "usd": {
+        "applied_schemas": [
+          "IsaacLinkAPI",
+          "PhysicsRigidBodyAPI",
+          "PhysicsMassAPI"
+        ],
+        "child_prim_names": [
+          "collisions"
+        ],
+        "descendant_collision_api_count": 0,
+        "descendant_collision_api_paths": [],
+        "has_rigid_body_api": true,
+        "prim_path": "/World/follower_right/vx300s_right/follower_right_ee_arm_link",
+        "prim_stack": [
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/configuration/supplier_cad_follower_right_configuration.usda",
+            "path": "/follower_right/vx300s_right/follower_right_ee_arm_link",
+            "specifier": "Sdf.SpecifierOver"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_physics.usd",
+            "path": "/follower_right/follower_right_ee_arm_link",
+            "specifier": "Sdf.SpecifierOver"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_base.usd",
+            "path": "/follower_right/follower_right_ee_arm_link",
+            "specifier": "Sdf.SpecifierDef"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_robot.usd",
+            "path": "/follower_right/follower_right_ee_arm_link",
+            "specifier": "Sdf.SpecifierOver"
+          }
+        ],
+        "type_name": "Xform"
+      }
+    },
+    {
+      "asset_prim_path": "/follower_right/vx300s_right/follower_right_fingers_link",
+      "composed_prim_path": "/World/follower_right/vx300s_right/follower_right_fingers_link",
+      "invent_collider_allowed": false,
+      "official_rule": {
+        "category": "IsaacSim.PhysicsRules",
+        "message": "Rigid body /follower_right/vx300s_right/follower_right_fingers_link has rigid body api but no collision api",
+        "severity": "ERROR",
+        "target_name": "follower_right"
+      },
+      "remove_rigid_body_api_allowed": false,
+      "robot": "follower_right",
+      "supplier_cad_geometry_mapped_to_helper": false,
+      "urdf": {
+        "child_joints": [
+          {
+            "child": "follower_right_left_finger_link",
+            "name": "left_finger",
+            "parent": "follower_right_fingers_link",
+            "type": "prismatic"
+          },
+          {
+            "child": "follower_right_right_finger_link",
+            "name": "right_finger",
+            "parent": "follower_right_fingers_link",
+            "type": "prismatic"
+          },
+          {
+            "child": "follower_right_ee_gripper_link",
+            "name": "ee_gripper",
+            "parent": "follower_right_fingers_link",
+            "type": "fixed"
+          }
+        ],
+        "collision_count": 0,
+        "decision_basis": "Source URDF/Xacro has no visual or collision geometry for this frame. Placeholder inertial values do not define a physical shape, and changing body semantics requires a separate source-backed articulation regression.",
+        "inertial_count": 1,
+        "invent_collider_allowed": false,
+        "link_name": "follower_right_fingers_link",
+        "mass_kg": 0.001,
+        "parent_joints": [
+          {
+            "child": "follower_right_fingers_link",
+            "name": "ee_bar",
+            "parent": "follower_right_gripper_bar_link",
+            "type": "fixed"
+          }
+        ],
+        "remove_rigid_body_api_allowed": false,
+        "semantic_class": "VIRTUAL_KINEMATIC_HELPER",
+        "urdf_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_right.urdf",
+        "visual_count": 0
+      },
+      "usd": {
+        "applied_schemas": [
+          "IsaacLinkAPI",
+          "PhysicsRigidBodyAPI",
+          "PhysicsMassAPI"
+        ],
+        "child_prim_names": [
+          "collisions"
+        ],
+        "descendant_collision_api_count": 0,
+        "descendant_collision_api_paths": [],
+        "has_rigid_body_api": true,
+        "prim_path": "/World/follower_right/vx300s_right/follower_right_fingers_link",
+        "prim_stack": [
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/configuration/supplier_cad_follower_right_configuration.usda",
+            "path": "/follower_right/vx300s_right/follower_right_fingers_link",
+            "specifier": "Sdf.SpecifierOver"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_physics.usd",
+            "path": "/follower_right/follower_right_fingers_link",
+            "specifier": "Sdf.SpecifierOver"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_base.usd",
+            "path": "/follower_right/follower_right_fingers_link",
+            "specifier": "Sdf.SpecifierDef"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_robot.usd",
+            "path": "/follower_right/follower_right_fingers_link",
+            "specifier": "Sdf.SpecifierOver"
+          }
+        ],
+        "type_name": "Xform"
+      }
+    },
+    {
+      "asset_prim_path": "/follower_right/vx300s_right/follower_right_ee_gripper_link",
+      "composed_prim_path": "/World/follower_right/vx300s_right/follower_right_ee_gripper_link",
+      "invent_collider_allowed": false,
+      "official_rule": {
+        "category": "IsaacSim.PhysicsRules",
+        "message": "Rigid body /follower_right/vx300s_right/follower_right_ee_gripper_link has rigid body api but no collision api",
+        "severity": "ERROR",
+        "target_name": "follower_right"
+      },
+      "remove_rigid_body_api_allowed": false,
+      "robot": "follower_right",
+      "supplier_cad_geometry_mapped_to_helper": false,
+      "urdf": {
+        "child_joints": [],
+        "collision_count": 0,
+        "decision_basis": "Source URDF/Xacro has no visual or collision geometry for this frame. Placeholder inertial values do not define a physical shape, and changing body semantics requires a separate source-backed articulation regression.",
+        "inertial_count": 1,
+        "invent_collider_allowed": false,
+        "link_name": "follower_right_ee_gripper_link",
+        "mass_kg": 0.001,
+        "parent_joints": [
+          {
+            "child": "follower_right_ee_gripper_link",
+            "name": "ee_gripper",
+            "parent": "follower_right_fingers_link",
+            "type": "fixed"
+          }
+        ],
+        "remove_rigid_body_api_allowed": false,
+        "semantic_class": "FIXED_FRAME_ALIAS",
+        "urdf_path": "/home/eii/project/openpi0.5-rtc-reward-learning/generated/urdf/follower_right.urdf",
+        "visual_count": 0
+      },
+      "usd": {
+        "applied_schemas": [
+          "IsaacLinkAPI",
+          "PhysicsRigidBodyAPI",
+          "PhysicsMassAPI"
+        ],
+        "child_prim_names": [
+          "collisions"
+        ],
+        "descendant_collision_api_count": 0,
+        "descendant_collision_api_paths": [],
+        "has_rigid_body_api": true,
+        "prim_path": "/World/follower_right/vx300s_right/follower_right_ee_gripper_link",
+        "prim_stack": [
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/supplier_cad_follower_right/1.0/configuration/supplier_cad_follower_right_configuration.usda",
+            "path": "/follower_right/vx300s_right/follower_right_ee_gripper_link",
+            "specifier": "Sdf.SpecifierOver"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_physics.usd",
+            "path": "/follower_right/follower_right_ee_gripper_link",
+            "specifier": "Sdf.SpecifierOver"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_base.usd",
+            "path": "/follower_right/follower_right_ee_gripper_link",
+            "specifier": "Sdf.SpecifierDef"
+          },
+          {
+            "layer": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/follower_vx300s/follower_right/source/configuration/follower_right_imported_robot.usd",
+            "path": "/follower_right/follower_right_ee_gripper_link",
+            "specifier": "Sdf.SpecifierOver"
+          }
+        ],
+        "type_name": "Xform"
+      }
+    }
+  ],
+  "official_rule_source": {
+    "finding_count": 6,
+    "installed_python_source": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.venv_issac/lib/python3.11/site-packages/isaacsim/exts/isaacsim.asset.validation/isaacsim/asset/validation/physics_rules.py",
+      "class_first_line": 104,
+      "class_name": "RigidBodyHasCollider",
+      "sha256": "85bbe0873043eb3b229c87551b10d6e0117709e3e0f1db613b070c5540dae067"
+    },
+    "literal_status": "FAIL",
+    "report": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_signal_correspondence_official_rules.json",
+    "report_sha256": "a7acb1e7363d1306b01b7f9609f9a5250f0b535771a3de8523246ae3cd31756f",
+    "suppressed": false
+  },
+  "real_robot_connected": false,
+  "remote_192_168_1_103_accessed": false,
+  "runtime": {
+    "asset_validation_extension": "1.1.0",
+    "isaac_sim": "5.1.0.0",
+    "kit": "107.3.3",
+    "physx": "107.3.26"
+  },
+  "schema_version": 1,
+  "source_xacro": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators/interbotix_ros_xsarms/interbotix_xsarm_descriptions/urdf/aloha_vx300s.urdf.xacro",
+    "first_matching_lines": {
+      "/ee_arm_link": 462,
+      "/ee_gripper_link": 744,
+      "/fingers_link": 598
+    },
+    "repository": {
+      "branch": "main",
+      "commit": "66db34df28ac0037f284c8af1fce7c916c7c8d3a",
+      "dirty": false,
+      "remote": "https://github.com/j3soon/ros2-essentials.git",
+      "root": "/home/eii/project/openpi0.5-rtc-reward-learning/external/ros2-essentials/aloha_ws/src/interbotix_ros_manipulators"
+    },
+    "sha256": "45dff1e0de2456386dbb64b851c94db2d874b6dbefb6503cb747bc55435177bd"
+  },
+  "stage": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/aloha1_signal_correspondence_workcell.usda",
+    "default_prim": "/World",
+    "root_references": {
+      "/World/environment": [
+        {
+          "asset_path": "workcell/aloha1_signal_correspondence_environment.usda",
+          "prim_path": "/environment"
+        }
+      ],
+      "/World/environment/worldBody/_/visuals/_/_": [
+        {
+          "asset_path": "",
+          "prim_path": "/meshes/tabletop"
+        }
+      ],
+      "/World/environment/worldBody/__1/visuals/__1/__1": [
+        {
+          "asset_path": "",
+          "prim_path": "/meshes/tablelegs"
+        }
+      ],
+      "/World/environment/worldBody/__10/collisions/__10": [
+        {
+          "asset_path": "",
+          "prim_path": "/collisions/__10"
+        }
+      ],
+      "/World/environment/worldBody/__10/visuals/__10/__10": [
+        {
+          "asset_path": "",
+          "prim_path": "/meshes/corner_bracket"
+        }
+      ],
+      "/World/environment/worldBody/__11/collisions/__11": [
+        {
+          "asset_path": "",
+          "prim_path": "/collisions/__11"
+        }
+      ],
+      "/World/environment/worldBody/__11/visuals/__11/__11": [
+        {
+          "asset_path": "",
+          "prim_path": "/meshes/extrusion_2040_1000"
+        }
+      ],
+      "/World/environment/worldBody/__12/collisions/__12": [
+        {
+          "asset_path": "",
+          "prim_path": "/collisions/__12"
+        }
+      ],
+      "/World/environment/worldBody/__12/visuals/__12/__12": [
+        {
+          "asset_path": "",
+          "prim_path": "/meshes/corner_bracket"
+        }
+      ],
+      "/World/environment/worldBody/__13/collisions/__13": [
+        {
+          "asset_path": "",
+          "prim_path": "/collisions/__13"
+        }
+      ],
+      "/World/environment/worldBody/__13/visuals/__13/__13": [
+        {
+          "asset_path": "",
+          "prim_path": "/meshes/angled_extrusion"
+        }
+      ],
+      "/World/environment/worldBody/__14/collisions/__14": [
+        {
+          "asset_path": "",
+          "prim_path": "/collisions/__14"
+        }
+      ],
+      "/World/environment/worldBody/__14/visuals/__14/__14": [
+        {
+          "asset_path": "",
+          "prim_path": "/meshes/extrusion_150"
+        }
+      ],
+      "/World/environment/worldBody/__15/collisions/__15": [
+        {
+          "asset_path": "",
+          "prim_path": "/collisions/__15"
+        }
+      ],
+      "/World/environment/worldBody/__15/visuals/__15/__15": [
+        {
+          "asset_path": "",
+          "prim_path": "/meshes/extrusion_600"
+        }
+      ],
+      "/World/environment/worldBody/__16/collisions/__16": [
+        {
+          "asset_path": "",
+          "prim_path": "/collisions/__16"
+        }
+      ],
+      "/World/environment/worldBody/__16/visuals/__16/__16": [
+        {
+          "asset_path": "",
+          "prim_path": "/meshes/extrusion_150"
+        }
+      ],
+      "/World/environment/worldBody/__17/collisions/__17": [
+        {
+          "asset_path": "",
+          "prim_path": "/collisions/__17"
+        }
+      ],
+      "/World/environment/worldBody/__17/visuals/__17/__17": [
+        {
+          "asset_path": "",
+          "prim_path": "/meshes/overhead_mount"
+        }
+      ],
+      "/World/environment/worldBody/__18/collisions/__18": [
+        {
+          "asset_path": "",
+          "prim_path": "/collisions/__18"
+        }
+      ],
+      "/World/environment/worldBody/__18/visuals/__18/__18": [
+        {
+          "asset_path": "",
+          "prim_path": "/meshes/extrusion_1000"
+        }
+      ],
+      "/World/environment/worldBody/__19/collisions/__19": [
+        {
+          "asset_path": "",
+          "prim_path": "/collisions/__19"
+        }
+      ],
+      "/World/environment/worldBody/__19/visuals/__19/__19": [
+        {
+          "asset_path": "",
+          "prim_path": "/meshes/angled_extrusion"
+        }
+      ],
+      "/World/environment/worldBody/__2/collisions/__2": [
+        {
+          "asset_path": "",
+          "prim_path": "/collisions/__2"
+        }
+      ],
+      "/World/environment/worldBody/__2/visuals/__2/__2": [
+        {
+          "asset_path": "",
+          "prim_path": "/meshes/extrusion_2040_880"
+        }
+      ],
+      "/World/environment/worldBody/__20/collisions/__20": [
+        {
+          "asset_path": "",
+          "prim_path": "/collisions/__20"
+        }
+      ],
+      "/World/environment/worldBody/__20/visuals/__20/__20": [
+        {
+          "asset_path": "",
+          "prim_path": "/meshes/extrusion_150"
+        }
+      ],
+      "/World/environment/worldBody/__21/collisions/__21": [
+        {
+          "asset_path": "",
+          "prim_path": "/collisions/__21"
+        }
+      ],
+      "/World/environment/worldBody/__21/visuals/__21/__21": [
+        {
+          "asset_path": "",
+          "prim_path": "/meshes/corner_bracket"
+        }
+      ],
+      "/World/environment/worldBody/__22/collisions/__22": [
+        {
+          "asset_path": "",
+          "prim_path": "/collisions/__22"
+        }
+      ],
+      "/World/environment/worldBody/__22/visuals/__22/__22": [
+        {
+          "asset_path": "",
+          "prim_path": "/meshes/extrusion_1220"
+        }
+      ],
+      "/World/environment/worldBody/__23/collisions/__23": [
+        {
+          "asset_path": "",
+          "prim_path": "/collisions/__23"
+        }
+      ],
+      "/World/environment/worldBody/__23/visuals/__23/__23": [
+        {
+          "asset_path": "",
+          "prim_path": "/meshes/extrusion_1000"
+        }
+      ],
+      "/World/environment/worldBody/__24/collisions/__24": [
+        {
+          "asset_path": "",
+          "prim_path": "/collisions/__24"
+        }
+      ],
+      "/World/environment/worldBody/__24/visuals/__24/__24": [
+        {
+          "asset_path": "",
+          "prim_path": "/meshes/extrusion_1000"
+        }
+      ],
+      "/World/environment/worldBody/__25/collisions/__25": [
+        {
+          "asset_path": "",
+          "prim_path": "/collisions/__25"
+        }
+      ],
+      "/World/environment/worldBody/__25/visuals/__25/__25": [
+        {
+          "asset_path": "",
+          "prim_path": "/meshes/extrusion_150"
+        }
+      ],
+      "/World/environment/worldBody/__26/collisions/__26": [
+        {
+          "asset_path": "",
+          "prim_path": "/collisions/__26"
+        }
+      ],
+      "/World/environment/worldBody/__26/visuals/__26/__26": [
+        {
+          "asset_path": "",
+          "prim_path": "/meshes/corner_bracket"
+        }
+      ],
+      "/World/environment/worldBody/__27/collisions/__27": [
+        {
+          "asset_path": "",
+          "prim_path": "/collisions/__27"
+        }
+      ],
+      "/World/environment/worldBody/__27/visuals/__27/__27": [
+        {
+          "asset_path": "",
+          "prim_path": "/meshes/extrusion_1000"
+        }
+      ],
+      "/World/environment/worldBody/__28/collisions/__28": [
+        {
+          "asset_path": "",
+          "prim_path": "/collisions/__28"
+        }
+      ],
+      "/World/environment/worldBody/__28/visuals/__28/__28": [
+        {
+          "asset_path": "",
+          "prim_path": "/meshes/extrusion_600"
+        }
+      ],
+      "/World/environment/worldBody/__29/collisions/__29": [
+        {
+          "asset_path": "",
+          "prim_path": "/collisions/__29"
+        }
+      ],
+      "/World/environment/worldBody/__29/visuals/__29/__29": [
+        {
+          "asset_path": "",
+          "prim_path": "/meshes/angled_extrusion"
+        }
+      ],
+      "/World/environment/worldBody/__3/collisions/__3": [
+        {
+          "asset_path": "",
+          "prim_path": "/collisions/__3"
+        }
+      ],
+      "/World/environment/worldBody/__3/visuals/__3/__3": [
+        {
+          "asset_path": "",
+          "prim_path": "/meshes/extrusion_150"
+        }
+      ],
+      "/World/environment/worldBody/__30/collisions/__30": [
+        {
+          "asset_path": "",
+          "prim_path": "/collisions/__30"
+        }
+      ],
+      "/World/environment/worldBody/__30/visuals/__30/__30": [
+        {
+          "asset_path": "",
+          "prim_path": "/meshes/angled_extrusion"
+        }
+      ],
+      "/World/environment/worldBody/__31/collisions/__31": [
+        {
+          "asset_path": "",
+          "prim_path": "/collisions/__31"
+        }
+      ],
+      "/World/environment/worldBody/__31/visuals/__31/__31": [
+        {
+          "asset_path": "",
+          "prim_path": "/meshes/extrusion_2040_1000"
+        }
+      ],
+      "/World/environment/worldBody/__32/collisions/__32": [
+        {
+          "asset_path": "",
+          "prim_path": "/collisions/__32"
+        }
+      ],
+      "/World/environment/worldBody/__32/visuals/__32/__32": [
+        {
+          "asset_path": "",
+          "prim_path": "/meshes/wormseye_mount"
+        }
+      ],
+      "/World/environment/worldBody/__4/collisions/__4": [
+        {
+          "asset_path": "",
+          "prim_path": "/collisions/__4"
+        }
+      ],
+      "/World/environment/worldBody/__4/visuals/__4/__4": [
+        {
+          "asset_path": "",
+          "prim_path": "/meshes/d405_solid"
+        }
+      ],
+      "/World/environment/worldBody/__5/collisions/__5": [
+        {
+          "asset_path": "",
+          "prim_path": "/collisions/__5"
+        }
+      ],
+      "/World/environment/worldBody/__5/visuals/__5/__5": [
+        {
+          "asset_path": "",
+          "prim_path": "/meshes/corner_bracket"
+        }
+      ],
+      "/World/environment/worldBody/__6/collisions/__6": [
+        {
+          "asset_path": "",
+          "prim_path": "/collisions/__6"
+        }
+      ],
+      "/World/environment/worldBody/__6/visuals/__6/__6": [
+        {
+          "asset_path": "",
+          "prim_path": "/meshes/extrusion_1220"
+        }
+      ],
+      "/World/environment/worldBody/__7/collisions/__7": [
+        {
+          "asset_path": "",
+          "prim_path": "/collisions/__7"
+        }
+      ],
+      "/World/environment/worldBody/__7/visuals/__7/__7": [
+        {
+          "asset_path": "",
+          "prim_path": "/meshes/extrusion_150"
+        }
+      ],
+      "/World/environment/worldBody/__8/collisions/__8": [
+        {
+          "asset_path": "",
+          "prim_path": "/collisions/__8"
+        }
+      ],
+      "/World/environment/worldBody/__8/visuals/__8/__8": [
+        {
+          "asset_path": "",
+          "prim_path": "/meshes/corner_bracket"
+        }
+      ],
+      "/World/environment/worldBody/__9/collisions/__9": [
+        {
+          "asset_path": "",
+          "prim_path": "/collisions/__9"
+        }
+      ],
+      "/World/environment/worldBody/__9/visuals/__9/__9": [
+        {
+          "asset_path": "",
+          "prim_path": "/meshes/d405_solid"
+        }
+      ],
+      "/World/environment/worldBody/floor/visuals/floor/floor": [
+        {
+          "asset_path": "",
+          "prim_path": "/meshes/floor"
+        }
+      ],
+      "/World/environment/worldBody/sites/worldref": [
+        {
+          "asset_path": "",
+          "prim_path": "/meshes/worldref"
+        }
+      ],
+      "/World/follower_left": [
+        {
+          "asset_path": "follower_left_asset/aloha1_signal_follower_left.usda",
+          "prim_path": "/follower_left"
+        }
+      ],
+      "/World/follower_left/vx300s_left": [
+        {
+          "asset_path": "../../../../follower_vx300s/follower_left/follower_left.usd",
+          "prim_path": "/follower_left"
+        }
+      ],
+      "/World/follower_left/vx300s_left/follower_left_base_link/collisions": [
+        {
+          "asset_path": "",
+          "prim_path": "/colliders/follower_left_base_link"
+        }
+      ],
+      "/World/follower_left/vx300s_left/follower_left_base_link/visuals": [
+        {
+          "asset_path": "",
+          "prim_path": "/visuals/follower_left_base_link"
+        }
+      ],
+      "/World/follower_left/vx300s_left/follower_left_gripper_bar_link/collisions": [
+        {
+          "asset_path": "",
+          "prim_path": "/colliders/follower_left_gripper_bar_link"
+        }
+      ],
+      "/World/follower_left/vx300s_left/follower_left_gripper_bar_link/visuals": [
+        {
+          "asset_path": "",
+          "prim_path": "/visuals/follower_left_gripper_bar_link"
+        }
+      ],
+      "/World/follower_left/vx300s_left/follower_left_gripper_link/collisions": [
+        {
+          "asset_path": "",
+          "prim_path": "/colliders/follower_left_gripper_link"
+        }
+      ],
+      "/World/follower_left/vx300s_left/follower_left_gripper_link/visuals": [
+        {
+          "asset_path": "",
+          "prim_path": "/visuals/follower_left_gripper_link"
+        }
+      ],
+      "/World/follower_left/vx300s_left/follower_left_gripper_prop_link/collisions": [
+        {
+          "asset_path": "",
+          "prim_path": "/colliders/follower_left_gripper_prop_link"
+        }
+      ],
+      "/World/follower_left/vx300s_left/follower_left_gripper_prop_link/visuals": [
+        {
+          "asset_path": "",
+          "prim_path": "/visuals/follower_left_gripper_prop_link"
+        }
+      ],
+      "/World/follower_left/vx300s_left/follower_left_left_finger_link/collisions": [
+        {
+          "asset_path": "",
+          "prim_path": "/colliders/follower_left_left_finger_link"
+        }
+      ],
+      "/World/follower_left/vx300s_left/follower_left_left_finger_link/collisions/diagnostic_supplier_cad_left_finger": [
+        {
+          "asset_path": "../../../../cad_finger_task5_convex_hull/geometry/supplier_cad_finger_mesh.usda",
+          "prim_path": "/CadFingerGeometry/left_finger"
+        }
+      ],
+      "/World/follower_left/vx300s_left/follower_left_left_finger_link/visuals": [
+        {
+          "asset_path": "",
+          "prim_path": "/visuals/follower_left_left_finger_link"
+        }
+      ],
+      "/World/follower_left/vx300s_left/follower_left_left_finger_link/visuals/diagnostic_supplier_cad_left_finger": [
+        {
+          "asset_path": "../../../../cad_finger_task5_convex_hull/geometry/supplier_cad_finger_mesh.usda",
+          "prim_path": "/CadFingerGeometry/left_finger"
+        }
+      ],
+      "/World/follower_left/vx300s_left/follower_left_lower_forearm_link/collisions": [
+        {
+          "asset_path": "",
+          "prim_path": "/colliders/follower_left_lower_forearm_link"
+        }
+      ],
+      "/World/follower_left/vx300s_left/follower_left_lower_forearm_link/visuals": [
+        {
+          "asset_path": "",
+          "prim_path": "/visuals/follower_left_lower_forearm_link"
+        }
+      ],
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions": [
+        {
+          "asset_path": "",
+          "prim_path": "/colliders/follower_left_right_finger_link"
+        }
+      ],
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link/collisions/diagnostic_supplier_cad_right_finger": [
+        {
+          "asset_path": "../../../../cad_finger_task5_convex_hull/geometry/supplier_cad_finger_mesh.usda",
+          "prim_path": "/CadFingerGeometry/right_finger"
+        }
+      ],
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link/visuals": [
+        {
+          "asset_path": "",
+          "prim_path": "/visuals/follower_left_right_finger_link"
+        }
+      ],
+      "/World/follower_left/vx300s_left/follower_left_right_finger_link/visuals/diagnostic_supplier_cad_right_finger": [
+        {
+          "asset_path": "../../../../cad_finger_task5_convex_hull/geometry/supplier_cad_finger_mesh.usda",
+          "prim_path": "/CadFingerGeometry/right_finger"
+        }
+      ],
+      "/World/follower_left/vx300s_left/follower_left_shoulder_link/collisions": [
+        {
+          "asset_path": "",
+          "prim_path": "/colliders/follower_left_shoulder_link"
+        }
+      ],
+      "/World/follower_left/vx300s_left/follower_left_shoulder_link/visuals": [
+        {
+          "asset_path": "",
+          "prim_path": "/visuals/follower_left_shoulder_link"
+        }
+      ],
+      "/World/follower_left/vx300s_left/follower_left_upper_arm_link/collisions": [
+        {
+          "asset_path": "",
+          "prim_path": "/colliders/follower_left_upper_arm_link"
+        }
+      ],
+      "/World/follower_left/vx300s_left/follower_left_upper_arm_link/visuals": [
+        {
+          "asset_path": "",
+          "prim_path": "/visuals/follower_left_upper_arm_link"
+        }
+      ],
+      "/World/follower_left/vx300s_left/follower_left_upper_forearm_link/collisions": [
+        {
+          "asset_path": "",
+          "prim_path": "/colliders/follower_left_upper_forearm_link"
+        }
+      ],
+      "/World/follower_left/vx300s_left/follower_left_upper_forearm_link/visuals": [
+        {
+          "asset_path": "",
+          "prim_path": "/visuals/follower_left_upper_forearm_link"
+        }
+      ],
+      "/World/follower_left/vx300s_left/follower_left_wrist_link/collisions": [
+        {
+          "asset_path": "",
+          "prim_path": "/colliders/follower_left_wrist_link"
+        }
+      ],
+      "/World/follower_left/vx300s_left/follower_left_wrist_link/visuals": [
+        {
+          "asset_path": "",
+          "prim_path": "/visuals/follower_left_wrist_link"
+        }
+      ],
+      "/World/follower_right": [
+        {
+          "asset_path": "../../supplier_cad_follower_right/1.0/supplier_cad_follower_right.usda",
+          "prim_path": "/follower_right"
+        }
+      ],
+      "/World/follower_right/vx300s_right": [
+        {
+          "asset_path": "../../../follower_vx300s/follower_right/follower_right.usd",
+          "prim_path": "/follower_right"
+        }
+      ],
+      "/World/follower_right/vx300s_right/follower_right_base_link/collisions": [
+        {
+          "asset_path": "",
+          "prim_path": "/colliders/follower_right_base_link"
+        }
+      ],
+      "/World/follower_right/vx300s_right/follower_right_base_link/visuals": [
+        {
+          "asset_path": "",
+          "prim_path": "/visuals/follower_right_base_link"
+        }
+      ],
+      "/World/follower_right/vx300s_right/follower_right_gripper_bar_link/collisions": [
+        {
+          "asset_path": "",
+          "prim_path": "/colliders/follower_right_gripper_bar_link"
+        }
+      ],
+      "/World/follower_right/vx300s_right/follower_right_gripper_bar_link/visuals": [
+        {
+          "asset_path": "",
+          "prim_path": "/visuals/follower_right_gripper_bar_link"
+        }
+      ],
+      "/World/follower_right/vx300s_right/follower_right_gripper_link/collisions": [
+        {
+          "asset_path": "",
+          "prim_path": "/colliders/follower_right_gripper_link"
+        }
+      ],
+      "/World/follower_right/vx300s_right/follower_right_gripper_link/visuals": [
+        {
+          "asset_path": "",
+          "prim_path": "/visuals/follower_right_gripper_link"
+        }
+      ],
+      "/World/follower_right/vx300s_right/follower_right_gripper_prop_link/collisions": [
+        {
+          "asset_path": "",
+          "prim_path": "/colliders/follower_right_gripper_prop_link"
+        }
+      ],
+      "/World/follower_right/vx300s_right/follower_right_gripper_prop_link/visuals": [
+        {
+          "asset_path": "",
+          "prim_path": "/visuals/follower_right_gripper_prop_link"
+        }
+      ],
+      "/World/follower_right/vx300s_right/follower_right_left_finger_link/collisions": [
+        {
+          "asset_path": "",
+          "prim_path": "/colliders/follower_right_left_finger_link"
+        }
+      ],
+      "/World/follower_right/vx300s_right/follower_right_left_finger_link/collisions/diagnostic_supplier_cad_left_finger": [
+        {
+          "asset_path": "../../../cad_finger_task5_convex_hull/geometry/supplier_cad_finger_mesh.usda",
+          "prim_path": "/CadFingerGeometry/left_finger"
+        }
+      ],
+      "/World/follower_right/vx300s_right/follower_right_left_finger_link/visuals": [
+        {
+          "asset_path": "",
+          "prim_path": "/visuals/follower_right_left_finger_link"
+        }
+      ],
+      "/World/follower_right/vx300s_right/follower_right_left_finger_link/visuals/diagnostic_supplier_cad_left_finger": [
+        {
+          "asset_path": "../../../cad_finger_task5_convex_hull/geometry/supplier_cad_finger_mesh.usda",
+          "prim_path": "/CadFingerGeometry/left_finger"
+        }
+      ],
+      "/World/follower_right/vx300s_right/follower_right_lower_forearm_link/collisions": [
+        {
+          "asset_path": "",
+          "prim_path": "/colliders/follower_right_lower_forearm_link"
+        }
+      ],
+      "/World/follower_right/vx300s_right/follower_right_lower_forearm_link/visuals": [
+        {
+          "asset_path": "",
+          "prim_path": "/visuals/follower_right_lower_forearm_link"
+        }
+      ],
+      "/World/follower_right/vx300s_right/follower_right_right_finger_link/collisions": [
+        {
+          "asset_path": "",
+          "prim_path": "/colliders/follower_right_right_finger_link"
+        }
+      ],
+      "/World/follower_right/vx300s_right/follower_right_right_finger_link/collisions/diagnostic_supplier_cad_right_finger": [
+        {
+          "asset_path": "../../../cad_finger_task5_convex_hull/geometry/supplier_cad_finger_mesh.usda",
+          "prim_path": "/CadFingerGeometry/right_finger"
+        }
+      ],
+      "/World/follower_right/vx300s_right/follower_right_right_finger_link/visuals": [
+        {
+          "asset_path": "",
+          "prim_path": "/visuals/follower_right_right_finger_link"
+        }
+      ],
+      "/World/follower_right/vx300s_right/follower_right_right_finger_link/visuals/diagnostic_supplier_cad_right_finger": [
+        {
+          "asset_path": "../../../cad_finger_task5_convex_hull/geometry/supplier_cad_finger_mesh.usda",
+          "prim_path": "/CadFingerGeometry/right_finger"
+        }
+      ],
+      "/World/follower_right/vx300s_right/follower_right_shoulder_link/collisions": [
+        {
+          "asset_path": "",
+          "prim_path": "/colliders/follower_right_shoulder_link"
+        }
+      ],
+      "/World/follower_right/vx300s_right/follower_right_shoulder_link/visuals": [
+        {
+          "asset_path": "",
+          "prim_path": "/visuals/follower_right_shoulder_link"
+        }
+      ],
+      "/World/follower_right/vx300s_right/follower_right_upper_arm_link/collisions": [
+        {
+          "asset_path": "",
+          "prim_path": "/colliders/follower_right_upper_arm_link"
+        }
+      ],
+      "/World/follower_right/vx300s_right/follower_right_upper_arm_link/visuals": [
+        {
+          "asset_path": "",
+          "prim_path": "/visuals/follower_right_upper_arm_link"
+        }
+      ],
+      "/World/follower_right/vx300s_right/follower_right_upper_forearm_link/collisions": [
+        {
+          "asset_path": "",
+          "prim_path": "/colliders/follower_right_upper_forearm_link"
+        }
+      ],
+      "/World/follower_right/vx300s_right/follower_right_upper_forearm_link/visuals": [
+        {
+          "asset_path": "",
+          "prim_path": "/visuals/follower_right_upper_forearm_link"
+        }
+      ],
+      "/World/follower_right/vx300s_right/follower_right_wrist_link/collisions": [
+        {
+          "asset_path": "",
+          "prim_path": "/colliders/follower_right_wrist_link"
+        }
+      ],
+      "/World/follower_right/vx300s_right/follower_right_wrist_link/visuals": [
+        {
+          "asset_path": "",
+          "prim_path": "/visuals/follower_right_wrist_link"
+        }
+      ]
+    },
+    "root_sublayers": [
+      "configuration/aloha1_signal_home_targets.usda"
+    ],
+    "sha256_after": "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf",
+    "sha256_before": "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf",
+    "stage_modified": false
+  },
+  "status": "PASS",
+  "supplier_cad_crosscheck": {
+    "helper_geometry_mapping": "NONE_RECORDED",
+    "mapped_links": {
+      "CAD +X": "left_finger",
+      "CAD -X": "right_finger"
+    },
+    "report": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_public_cad_gripper_mapping.json",
+    "report_sha256": "9c67d96039f24438d4d5d9b36593fa5747a43f91b32eb31cf0fe1c3e4c53b2a0"
+  },
+  "task_7b": "NOT_RUN",
+  "task_8": "NOT_RUN"
+}

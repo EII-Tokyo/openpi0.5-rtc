@@ -1,0 +1,51 @@
+{
+  "asset_promotion_status": "PARTIAL",
+  "input_manifest": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7a-acceptance-separation/input_manifest.json",
+  "real_robot_connected": false,
+  "remote_192_168_1_103_accessed": false,
+  "runtime_control": {
+    "acceptance_boundary": "Runtime motion, order, target/readback, drive/mimic, and determinism only. Asset packaging is reported separately.",
+    "failed_gates": [],
+    "gates": {
+      "drive_mimic_structure": "PASS",
+      "follower_left_one_joint": "PASS",
+      "follower_right_one_joint": "PASS",
+      "initial_target_readback_first_frame": "PASS",
+      "joint_mapping": "PASS",
+      "small_up_down": "PASS",
+      "structure_and_runtime_order": "PASS"
+    },
+    "official_asset_rules_included": false,
+    "partial_or_not_run_gates": [],
+    "status": "PASS"
+  },
+  "schema_version": 1,
+  "stage": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/aloha1_signal_correspondence_workcell.usda",
+    "sha256": "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf"
+  },
+  "task_7a_aggregate": "PARTIAL",
+  "task_7b": "NOT_RUN",
+  "task_8": "NOT_RUN",
+  "workcell_physics": {
+    "acceptance_boundary": "A user-confirmed supplier-CAD finger/table contact is a workcell reachability boundary, not a controller failure. All other robot/environment, non-adjacent self, and cross-follower contacts remain forbidden.",
+    "allowed_contact_meaning": "physical workcell behavior; collision-policy case remains PASS while target reachability records the allowed contact-limited boundary",
+    "allowed_pair": "supplier-CAD finger link <-> user_confirmed_table",
+    "checks": {
+      "case_count": "PASS",
+      "coverage": "PASS",
+      "determinism": "PASS",
+      "forbidden_contact_cases": "PASS",
+      "policy_revision": "PASS",
+      "swept_report": "PASS",
+      "unclassified_partial_cases": "PASS"
+    },
+    "contact_limited_case_count": 4,
+    "forbidden_contact_policy": {
+      "cross_follower_contact": "FAIL",
+      "generic_robot_environment_contact": "FAIL",
+      "non_adjacent_self_contact": "FAIL"
+    },
+    "status": "PASS"
+  }
+}

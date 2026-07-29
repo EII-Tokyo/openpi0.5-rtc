@@ -1,0 +1,31 @@
+{
+  "acceptance_boundary": "PARTIAL means the runtime asset is not ready for promotion. Literal NVIDIA rule failures remain visible and must be closed in an isolated, regression-tested package.",
+  "classification_counts": {
+    "ISAAC_5_1_VALIDATOR_SCHEMA_CONFLICT": 2,
+    "LAYER_PACKAGING_DEFECT": 28,
+    "MISSING_SOURCE_EVIDENCE": 6,
+    "NON_APPLICABLE_FALSE_POSITIVE": 1
+  },
+  "helper_link_audit_status": "PASS",
+  "helper_link_decision": {
+    "asset_promotion_effect": "PARTIAL_LITERAL_RULE_FAILURE_REMAINS",
+    "promotion_candidate_action": "DO_NOT_INVENT_COLLIDER_OR_REMOVE_RIGID_BODY_API",
+    "runtime_control_effect": "NON_BLOCKING_SOURCE_GEOMETRY_BOUNDARY"
+  },
+  "input_manifest": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7a-acceptance-separation/input_manifest.json",
+  "official_status": "FAIL",
+  "official_status_suppressed": false,
+  "promotion_candidate": "NOT_CREATED_EVIDENCE_INSUFFICIENT_FOR_HELPER_LINK_MUTATION",
+  "ready_for_promotion": false,
+  "real_robot_connected": false,
+  "remote_192_168_1_103_accessed": false,
+  "schema_version": 1,
+  "stage": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/aloha1_signal_correspondence_workcell.usda",
+    "sha256": "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf"
+  },
+  "status": "PARTIAL",
+  "task_7b": "NOT_RUN",
+  "task_8": "NOT_RUN",
+  "unclassified_issue_count": 0
+}
