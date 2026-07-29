@@ -1,0 +1,96 @@
+schema_version: 1
+asset_id: aloha1_project_bottle500
+selection_status: ACTIVE_PRIMARY_FOR_FUTURE_DIGITAL_GRASP_TESTS
+selection_scope:
+  - follower_left_bottle_grasp
+  - follower_right_bottle_grasp
+  - bilateral_contact
+  - lift
+  - static_hold
+excluded_scope:
+  - pipe_insertion
+  - final_collider_promotion
+  - sim_to_real_mass_calibration
+
+primary_cad:
+  evidence_class: PROJECT_AUTHORED_PARAMETRIC_CAD
+  build_script_absolute_path: /home/eii/project/openpi0.5-rtc-reward-learning/assets/bottle_500ml/scripts/build_bottle_freecad.py
+  build_script_sha256: b077b03839b8d3e7395a98fe85d8388ed8553d344300f97cd4886c83771e7945
+  fcstd_absolute_path: /home/eii/project/openpi0.5-rtc-reward-learning/assets/bottle_500ml/cad/bottle_500ml.FCStd
+  fcstd_sha256: 3594f60200e54181bc8480a229484293a0d386c146d3f235b32e31a0c16bbf8a
+  exported_step_absolute_path: /home/eii/project/openpi0.5-rtc-reward-learning/assets/bottle_500ml/cad/bottle_500ml.step
+  exported_step_sha256: 863001b4d939d7d8c879497b5054fe93f426662761e6fb7a80550096fd9bc780
+  cad_object: BottleMaster
+  units: millimetre
+  cad_long_axis: +Z
+  optimal_bbox_mm:
+    x: 68.0
+    y: 68.0
+    z: 206.0
+  mouth_inner_diameter_mm: 25.0
+  solid_count: 1
+  face_count: 27
+  fcstd_to_step_geometry_match: PASS
+  source_control_status: PROJECT_TRACKED
+
+downloaded_reference_cad:
+  status: GEOMETRY_REFERENCE_ONLY_NOT_DEFAULT_FOR_GRASP
+  evidence_class: USER_PROVIDED_LOCAL_STEP
+  original_absolute_path: /home/eii/Downloads/500mlbottle.step
+  canonical_local_absolute_path: /home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_bottle_cad/500mlbottle.step
+  sha256: 88a341eb493211b46ede5b1b5c448da06a9845d93b328613719521c242f36416
+  size_bytes: 7842101
+  format: ISO_10303_21_AP214
+  units: millimetre
+  cad_long_axis: +Y
+  optimal_bbox_mm:
+    x: 60.05492227750102
+    y: 192.7344012859301
+    z: 60.054922277501014
+  standard_bound_box_status: CONSERVATIVE_OVERBOUND_NOT_PHYSICAL_EXTENT
+  license_status: UNKNOWN_HARD_BLOCKER
+  redistribution_status: LOCAL_USE_ONLY_NOT_FOR_REDISTRIBUTION
+  raw_file_git_policy: DO_NOT_COMMIT
+
+visual_evidence:
+  status: PASS
+  tessellation_runtime: FreeCAD_1.1.1_OCCT_7.8.1
+  linear_deflection_mm: 0.20
+  angular_deflection_deg: 20.0
+  deterministic_fresh_run_count: 2
+  screenshot_pair_count: 6
+  screenshot_review_status: PASS_SELF_REVIEW_USER_REVIEW_PENDING
+  artifact_root: /home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-bottle-cad-comparison
+
+isaac_mapping:
+  project_bottle_existing_usd_absolute_path: /home/eii/project/openpi0.5-rtc-reward-learning/assets/bottle_500ml/isaac/bottle_500ml_sim.usd
+  existing_usd_status: PARTIAL_REQUIRES_CURRENT_GRIPPER_REGRESSION
+  collision_prim_count_recorded: 41
+  collision_revalidation_status: NOT_RUN_THIS_AUDIT
+  diagnostic_mass_kg: 0.020
+  diagnostic_mass_status: TEMPORARY_TASK5_BASELINE_NOT_PHYSICAL_CALIBRATION
+  fcstd_parameter_initial_mass_kg: 0.025
+  fcstd_parameter_mass_status: TEMPORARY_REQUIRES_MEASUREMENT
+  inertia_kg_m2: null
+  material: null
+  fill_state: null
+  physics_material_status: NOT_RUN_THIS_AUDIT
+
+hard_blockers:
+  - id: DOWNLOADED_REFERENCE_STEP_FORMAL_LICENSE_TEXT_MISSING
+    blocks:
+      - commit_downloaded_raw_step
+      - redistribute_downloaded_raw_step
+  - id: PRIMARY_BOTTLE_MASS_FILL_STATE_NOT_CONFIRMED
+    blocks:
+      - calibrated_static_hold_claim
+      - inertia_calibration
+  - id: PRIMARY_BOTTLE_MATERIAL_AND_WALL_PROPERTIES_NOT_CONFIRMED
+    blocks:
+      - calibrated_contact_material_claim
+      - deformable_or_compliant_bottle_claim
+  - id: PRIMARY_BOTTLE_COLLIDER_NOT_REVALIDATED_WITH_CURRENT_GRIPPER
+    blocks:
+      - canonical_grasp_regression_promotion
+
+task8_status: NOT_RUN

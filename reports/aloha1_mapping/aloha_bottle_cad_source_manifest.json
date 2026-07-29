@@ -1,0 +1,166 @@
+{
+  "schema_version": 1,
+  "status": "PARTIAL",
+  "asset_id": "downloaded_500ml_mineral_water_bottle_reference_cad",
+  "recorded_at_utc": "2026-07-29T04:07:29Z",
+  "selection": {
+    "status": "GEOMETRY_REFERENCE_ONLY_NOT_DEFAULT_FOR_GRASP",
+    "scope": [
+      "geometry_comparison",
+      "dimensional_cross_check",
+      "visual_reference"
+    ],
+    "excludes": [
+      "follower_left_bottle_grasp_default",
+      "follower_right_bottle_grasp_default",
+      "bilateral_contact_default",
+      "lift_default",
+      "static_hold_default",
+      "pipe_insertion",
+      "final_collider_promotion",
+      "sim_to_real_mass_calibration"
+    ]
+  },
+  "source": {
+    "evidence_class": "USER_PROVIDED_LOCAL_STEP",
+    "provider": "USER_PROVIDED",
+    "original_absolute_path": "/home/eii/Downloads/500mlbottle.step",
+    "canonical_local_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/local_eval_assets/aloha_bottle_cad/500mlbottle.step",
+    "original_sha256": "88a341eb493211b46ede5b1b5c448da06a9845d93b328613719521c242f36416",
+    "canonical_copy_sha256": "88a341eb493211b46ede5b1b5c448da06a9845d93b328613719521c242f36416",
+    "copy_hash_match": true,
+    "size_bytes": 7842101,
+    "source_mtime": "2026-07-29T12:36:56.611257524+09:00",
+    "source_mode_octal": "0664",
+    "canonical_copy_mode_octal": "0664",
+    "read_only_policy": true,
+    "git_ignore_evidence": ".gitignore:49:local_eval_assets/",
+    "raw_file_committed": false,
+    "source_url": null
+  },
+  "license": {
+    "status": "UNKNOWN_HARD_BLOCKER",
+    "spdx": null,
+    "evidence": "No license text accompanied the user-provided STEP.",
+    "local_read_only_audit_allowed": true,
+    "original_may_be_committed": false,
+    "original_may_be_redistributed": false
+  },
+  "step_header": {
+    "encoding": "ISO-10303-21",
+    "ap_standard": "AP214",
+    "schema": "AUTOMOTIVE_DESIGN { 1 0 10303 214 1 1 1 1 }",
+    "embedded_file_name": "Open CASCADE Shape Model",
+    "embedded_timestamp": "2025-05-09T15:38:33",
+    "preprocessor": "Open CASCADE STEP processor 7.6",
+    "length_unit": "millimetre",
+    "angle_unit": "radian",
+    "product_record_count": 1,
+    "assembly_occurrence_count": 0
+  },
+  "audit": {
+    "status": "PASS",
+    "tool": "/home/eii/project/openpi0.5-rtc-reward-learning/tools/aloha1_mapping/audit_aloha_bottle_cad_freecad.py",
+    "runtime_report": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-500ml-bottle-source/freecad_audit.json",
+    "bounded_log": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-132355_20260729-aloha-500ml-bottle-optimal-bbox-audit-v8",
+    "runtime": {
+      "freecad_version": "1.1.1",
+      "freecad_build": "20260414 (Git shallow)",
+      "opencascade_version": "7.8.1",
+      "python_version": "3.11.14"
+    },
+    "aggregate_shape": {
+      "shape_type": "Compound",
+      "is_valid": true,
+      "brep_sha256": "84db52faedc8f42d8771e6e6b725522be511d4bdaad1475349fb82a17bc5d6d8",
+      "solid_count": 2,
+      "shell_count": 2,
+      "face_count": 1599,
+      "edge_count": 3929,
+      "vertex_count": 2411,
+      "wire_count": 1678,
+      "bbox_mm": {
+        "x_min": -32.21594766113,
+        "x_max": 33.22294789434,
+        "x_length": 65.43889555547,
+        "y_min": -3.842857644768,
+        "y_max": 192.73440108593,
+        "y_length": 196.577258730698,
+        "z_min": -32.22483864937,
+        "z_max": 32.220605827854,
+        "z_length": 64.445444477224
+      },
+      "bbox_interpretation": "Part.Shape.BoundBox is a conservative overbound for this B-Spline-heavy STEP and is not used as the physical extent.",
+      "optimal_bbox_mm": {
+        "x_min": -30.027461138750013,
+        "x_max": 30.027461138751008,
+        "x_length": 60.05492227750102,
+        "y_min": -1.0000000505845365e-07,
+        "y_max": 192.7344011859301,
+        "y_length": 192.7344012859301,
+        "z_min": -30.02746113875001,
+        "z_max": 30.027461138751004,
+        "z_length": 60.054922277501014,
+        "api": "Part.Shape.optimalBoundingBox()"
+      },
+      "area_mm2": 82327.65288824745,
+      "volume_mm3": 13107.844274397974,
+      "center_of_mass_mm": null,
+      "cad_long_axis": "+Y"
+    },
+    "solid_records": [
+      {
+        "role": "CAP_LIKE_SOLID_ENGINEERING_INFERENCE",
+        "brep_sha256": "9af804f4594a83f9b806d40a5b920a326d961cacc5ae3844e0e031c2106476c0",
+        "face_count": 589,
+        "bbox_lengths_mm": [
+          32.599112548201,
+          13.95861857656999,
+          32.599112548201
+        ],
+        "volume_mm3": 2241.76255252979
+      },
+      {
+        "role": "BODY_LIKE_SOLID_ENGINEERING_INFERENCE",
+        "brep_sha256": "a5b08a0f696c8e3af269c212239489b3e7583dc6784d9e4b1dff91dc6bf77df9",
+        "face_count": 1010,
+        "bbox_lengths_mm": [
+          65.43889555547,
+          194.715090604268,
+          64.445444477224
+        ],
+        "volume_mm3": 10865.716026691887
+      }
+    ]
+  },
+  "evidence_boundary": {
+    "cad_geometry": "SOURCE_DIRECTLY_CONFIRMED",
+    "nominal_capacity_ml": "USER_DESIGNATION_AND_FILENAME_ONLY",
+    "cap_and_body_roles": "ENGINEERING_INFERENCE",
+    "mass": "HARD_BLOCKER_UNMEASURED",
+    "fill_state": "HARD_BLOCKER_UNSPECIFIED",
+    "material": "HARD_BLOCKER_UNMEASURED",
+    "wall_thickness": "HARD_BLOCKER_UNMEASURED",
+    "cad_to_display_axis_transform": "PASS_DIAGNOSTIC_ONLY_+90_DEG_ABOUT_X",
+    "visual_tessellation": "PASS_DIAGNOSTIC_ONLY_NOT_COLLISION",
+    "visual_screenshot_self_review": "PASS_USER_REVIEW_PENDING",
+    "collision": "NOT_RUN",
+    "isaac_runtime": "NOT_RUN"
+  },
+  "project_primary_asset": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/bottle_500ml",
+    "status": "ACTIVE_PRIMARY_FOR_FUTURE_DIGITAL_GRASP_TESTS",
+    "recorded_height_m": 0.206,
+    "recorded_max_diameter_m": 0.068,
+    "recorded_mouth_inner_diameter_m": 0.025,
+    "recorded_initial_mass_kg": 0.025
+  },
+  "hard_blockers": [
+    "BOTTLE_STEP_FORMAL_LICENSE_TEXT_MISSING",
+    "BOTTLE_MASS_FILL_STATE_NOT_CONFIRMED",
+    "BOTTLE_MATERIAL_AND_WALL_PROPERTIES_NOT_CONFIRMED",
+    "DOWNLOADED_REFERENCE_CAD_NOT_SELECTED_FOR_ISAAC_PROMOTION",
+    "PRIMARY_BOTTLE_COLLIDER_NOT_REVALIDATED_WITH_CURRENT_GRIPPER"
+  ],
+  "task8_status": "NOT_RUN"
+}

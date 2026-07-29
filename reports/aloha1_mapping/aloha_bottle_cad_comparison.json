@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "status": "PASS",
+  "comparison_scope": "CAD_GEOMETRY_AND_DIAGNOSTIC_VISUAL_MESH_ONLY",
+  "selection_decision": {
+    "primary": "project_main_bottle",
+    "primary_status": "ACTIVE_PRIMARY_FOR_FUTURE_DIGITAL_GRASP_TESTS",
+    "reference": "downloaded_reference_bottle",
+    "reference_status": "GEOMETRY_REFERENCE_ONLY_NOT_DEFAULT_FOR_GRASP",
+    "decision_source": "USER_DIRECT_INSTRUCTION"
+  },
+  "project_main_bottle": {
+    "source_type": "PROJECT_AUTHORED_PARAMETRIC_FCSTD",
+    "source_sha256": "3594f60200e54181bc8480a229484293a0d386c146d3f235b32e31a0c16bbf8a",
+    "cad_long_axis": "+Z",
+    "optimal_bbox_mm": [
+      68.0,
+      68.0,
+      206.0
+    ],
+    "solid_count": 1,
+    "face_count": 27,
+    "visual_vertex_count": 1418,
+    "visual_triangle_count": 2832
+  },
+  "downloaded_reference_bottle": {
+    "source_type": "USER_PROVIDED_AP214_STEP",
+    "source_sha256": "88a341eb493211b46ede5b1b5c448da06a9845d93b328613719521c242f36416",
+    "cad_long_axis": "+Y",
+    "display_transform": "+90_DEG_ABOUT_X_TO_+Z",
+    "standard_bbox_mm": [
+      65.43889555547,
+      196.577258730698,
+      64.445444477224
+    ],
+    "standard_bbox_status": "CONSERVATIVE_OVERBOUND_NOT_PHYSICAL_EXTENT",
+    "optimal_bbox_mm": [
+      60.05492227750102,
+      192.7344012859301,
+      60.054922277501014
+    ],
+    "solid_count": 2,
+    "face_count": 1599,
+    "visual_vertex_count": 27090,
+    "visual_triangle_count": 54260
+  },
+  "dimension_difference_main_minus_reference_mm": {
+    "display_x": 7.94507772249898,
+    "display_y": 7.945077722498986,
+    "display_z": 13.2655987140699
+  },
+  "interpretation": [
+    "The project bottle is wider and taller than the downloaded reference.",
+    "The project bottle is a simplified rotational shell with an open mouth.",
+    "The downloaded reference contains substantially more local surface detail, including ribs and wave features.",
+    "Visual-detail superiority does not override the user selection of the project bottle as the primary grasp asset.",
+    "Neither visual mesh is accepted as a collision mesh by this report."
+  ],
+  "tessellation": {
+    "status": "PASS",
+    "freecad_version": "1.1.1",
+    "opencascade_version": "7.8.1",
+    "linear_deflection_mm": 0.2,
+    "angular_deflection_deg": 20.0,
+    "fresh_run_count": 2,
+    "project_obj_sha256": "248949c0231efd182f46d9e42011905aa44a9b522e429eb2a8bffc6e7bb49233",
+    "reference_obj_sha256": "96dc3d72a5eea655c4f4a0e8f429895f60ce36e6fbdc4e9aee193e1250f8539d",
+    "byte_deterministic": true,
+    "geometry_signature_deterministic": true,
+    "final_fresh_run_manifest_paths": [
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-bottle-cad-comparison/final_determinism/run_a.SIiFoN/manifest.json",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-bottle-cad-comparison/final_determinism/run_b.sVLAES/manifest.json"
+    ],
+    "final_fresh_run_log_paths": [
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-133455_20260729-bottle-determinism-final-a-v2",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-133511_20260729-bottle-determinism-final-b"
+    ]
+  },
+  "screenshot_review": {
+    "status": "PASS",
+    "raw_count": 6,
+    "annotated_count": 6,
+    "visual_model_self_review": "PASS",
+    "user_review": "PENDING",
+    "report": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha_bottle_cad_screenshot_review.json"
+  },
+  "physics_status": "NOT_RUN_THIS_AUDIT",
+  "task8_status": "NOT_RUN"
+}

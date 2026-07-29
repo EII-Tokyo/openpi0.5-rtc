@@ -1,0 +1,163 @@
+{
+  "schema_version": 1,
+  "status": "PASS",
+  "scope": "CAD_VISUAL_COMPARISON_ONLY_NOT_PHYSICS_VALIDATION",
+  "visual_model_self_review": "PASS",
+  "user_review": "PENDING",
+  "renderer": {
+    "blender_version": "5.2.0 LTS",
+    "engine": "BLENDER_WORKBENCH",
+    "raw_resolution_px": [
+      1280,
+      960
+    ],
+    "annotated_resolution_px": [
+      1800,
+      960
+    ]
+  },
+  "sources": {
+    "tessellation_manifest": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-bottle-cad-comparison/meshes/manifest.json",
+      "sha256": "5e9aaba8c18be3384a0e09d30b5cc5c633dff5f0468b741f769990a780f46809"
+    },
+    "render_metadata": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-bottle-cad-comparison/render_metadata.json",
+      "sha256": "88ac22ddc6568d1bfd033f922e825e7f2fc0b5837ba42a85a91d14b4aa68463c"
+    }
+  },
+  "retake_history": [
+    {
+      "batch": "render_v1",
+      "status": "REJECTED_INSUFFICIENT_FRAME_MARGIN",
+      "reason": "Single-bottle front captures had insufficient top/bottom margin."
+    },
+    {
+      "batch": "annotate_v2",
+      "status": "REJECTED_LABEL_CROPPING",
+      "reason": "MAIN label in comparison_isometric crossed the upper image boundary."
+    },
+    {
+      "batch": "render_v2",
+      "status": "REJECTED_CONSERVATIVE_BBOX_MARGIN",
+      "reason": "Visible geometry was present, but conservative projected AABBs exceeded or approached the image boundary."
+    },
+    {
+      "batch": "render_v3_annotate_v6",
+      "status": "PASS",
+      "reason": "All raw and annotated captures passed per-image visual review."
+    }
+  ],
+  "review_checks": {
+    "intended_asset_visible": true,
+    "complete_geometry_visible": true,
+    "mouth_and_neck_visible_in_isometric_views": true,
+    "front_and_isometric_views_materially_different": true,
+    "same_view_camera_profiles_match": true,
+    "reference_axis_transform_visible_and_consistent": true,
+    "labels_do_not_occlude_geometry": true,
+    "labels_not_cropped": true,
+    "annotation_states_visual_only": true,
+    "physics_claim_made": false
+  },
+  "camera_profiles": {
+    "front": {
+      "projection": "ORTHOGRAPHIC",
+      "location_m": [
+        0.0,
+        -0.699999988079071,
+        0.10499999672174454
+      ],
+      "target_m": [
+        0.0,
+        0.0,
+        0.10499999672174454
+      ],
+      "orthographic_scale_m": 0.3100000023841858
+    },
+    "isometric_single": {
+      "projection": "ORTHOGRAPHIC",
+      "location_m": [
+        0.3799999952316284,
+        -0.5,
+        0.3199999928474426
+      ],
+      "target_m": [
+        0.0,
+        0.0,
+        0.10499999672174454
+      ],
+      "orthographic_scale_m": 0.3199999928474426
+    },
+    "isometric_pair": {
+      "projection": "ORTHOGRAPHIC",
+      "location_m": [
+        0.3799999952316284,
+        -0.5,
+        0.3199999928474426
+      ],
+      "target_m": [
+        0.0,
+        0.0,
+        0.10499999672174454
+      ],
+      "orthographic_scale_m": 0.3499999940395355
+    }
+  },
+  "captures": [
+    {
+      "capture_id": "project_main_front",
+      "status": "PASS",
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-bottle-cad-comparison/screenshots_raw/project_main_front_raw.png",
+      "raw_sha256": "94d34138ef3ea2e60ba1fe4ee3d7bb911de10869e693d54314c06ecb54b4c20e",
+      "annotated_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-bottle-cad-comparison/screenshots_annotated/project_main_front_annotated.png",
+      "annotated_sha256": "0ac2c5f58ecc7f8bd6f03eaba0f6555940e8a9a25c5030b7f7abad3c3d0e5a67",
+      "visual_self_review": "PASS"
+    },
+    {
+      "capture_id": "downloaded_reference_front",
+      "status": "PASS",
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-bottle-cad-comparison/screenshots_raw/downloaded_reference_front_raw.png",
+      "raw_sha256": "023f9f07a6c86feefcf380b326d691714ef0c5b4142c27a72a85fe024fb2075d",
+      "annotated_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-bottle-cad-comparison/screenshots_annotated/downloaded_reference_front_annotated.png",
+      "annotated_sha256": "17f75c34d426fcd3cb6ca4aabdd0f1c829e621a186c6aebe3d4f85cb4e907deb",
+      "visual_self_review": "PASS"
+    },
+    {
+      "capture_id": "project_main_isometric",
+      "status": "PASS",
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-bottle-cad-comparison/screenshots_raw/project_main_isometric_raw.png",
+      "raw_sha256": "2843935c30ac58d23299177b72277e94987a993c130aaed5eb36b483c76778f3",
+      "annotated_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-bottle-cad-comparison/screenshots_annotated/project_main_isometric_annotated.png",
+      "annotated_sha256": "049360108fa0510981b51c9c495a0872b8deaf2bfd2cc7f533201c113ad8320b",
+      "visual_self_review": "PASS"
+    },
+    {
+      "capture_id": "downloaded_reference_isometric",
+      "status": "PASS",
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-bottle-cad-comparison/screenshots_raw/downloaded_reference_isometric_raw.png",
+      "raw_sha256": "6d9f5df6bcf3eb2260ba7ddc01afd1565b738ba1f29345706d020aa8a3d7b117",
+      "annotated_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-bottle-cad-comparison/screenshots_annotated/downloaded_reference_isometric_annotated.png",
+      "annotated_sha256": "be4f8c50260ca4a77e343ef0156733d1f17fc66cc1e09e26beee184d6e87b970",
+      "visual_self_review": "PASS"
+    },
+    {
+      "capture_id": "comparison_front",
+      "status": "PASS",
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-bottle-cad-comparison/screenshots_raw/comparison_front_raw.png",
+      "raw_sha256": "92aace7ba1bba7caeed8c53b5ce6e9e9b10dcaf78fbeb9159dad526601e6e8e3",
+      "annotated_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-bottle-cad-comparison/screenshots_annotated/comparison_front_annotated.png",
+      "annotated_sha256": "bc2145f6811043f544454db7c71d596169a54898d4b375cc4198d929cb5ee1c6",
+      "visual_self_review": "PASS"
+    },
+    {
+      "capture_id": "comparison_isometric",
+      "status": "PASS",
+      "raw_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-bottle-cad-comparison/screenshots_raw/comparison_isometric_raw.png",
+      "raw_sha256": "511e39e2b29a29e46d803e6ce5f406bb6a00d465ee7930914fc38d865c458d57",
+      "annotated_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-bottle-cad-comparison/screenshots_annotated/comparison_isometric_annotated.png",
+      "annotated_sha256": "b96c23ceebb17846d1c558dea6d6ff5f0c093d1cb40d7a146a890507bc020684",
+      "visual_self_review": "PASS"
+    }
+  ]
+}

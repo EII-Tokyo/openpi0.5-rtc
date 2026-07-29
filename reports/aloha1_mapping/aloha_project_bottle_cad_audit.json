@@ -1,0 +1,126 @@
+{
+  "schema_version": 1,
+  "status": "PASS",
+  "selection_status": "ACTIVE_PRIMARY_FOR_FUTURE_DIGITAL_GRASP_TESTS",
+  "asset_id": "aloha1_project_bottle500",
+  "sources": {
+    "build_script": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/bottle_500ml/scripts/build_bottle_freecad.py",
+      "sha256": "b077b03839b8d3e7395a98fe85d8388ed8553d344300f97cd4886c83771e7945"
+    },
+    "fcstd": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/bottle_500ml/cad/bottle_500ml.FCStd",
+      "sha256": "3594f60200e54181bc8480a229484293a0d386c146d3f235b32e31a0c16bbf8a",
+      "size_bytes": 9282
+    },
+    "exported_step": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/bottle_500ml/cad/bottle_500ml.step",
+      "sha256": "863001b4d939d7d8c879497b5054fe93f426662761e6fb7a80550096fd9bc780",
+      "size_bytes": 26240
+    },
+    "visual_obj": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/bottle_500ml/cad/bottle_500ml_visual.obj",
+      "sha256": "65920fa13ba338ff3050a162b0b8618eda78f22238e3d2f5971efa28bc842018"
+    },
+    "existing_isaac_usd": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/bottle_500ml/isaac/bottle_500ml_sim.usd",
+      "sha256": "16427135f152ec951de2321fd689366d745a2dd389cbe260976631783952533e",
+      "status": "PARTIAL_REQUIRES_CURRENT_GRIPPER_REGRESSION"
+    }
+  },
+  "runtime": {
+    "freecad_version": "1.1.1",
+    "freecad_build": "20260414 (Git shallow)",
+    "opencascade_version": "7.8.1",
+    "python_version": "3.11.14"
+  },
+  "fcstd": {
+    "document": "bottle_500ml",
+    "object_count": 4,
+    "objects": [
+      "Parameters",
+      "OuterRevolution",
+      "InnerRevolution",
+      "BottleMaster"
+    ],
+    "parameters": {
+      "height_mm": 206.0,
+      "maximum_diameter_mm": 68.0,
+      "mouth_inner_diameter_mm": 25.0,
+      "thread_outer_diameter_mm": 30.0,
+      "support_outer_diameter_mm": 34.0,
+      "bottom_thickness_mm": 3.0,
+      "nominal_volume_ml": 500.0,
+      "initial_mass_kg": 0.025
+    },
+    "parameter_evidence_boundary": {
+      "geometry": "PROJECT_AUTHORED_PARAMETER",
+      "nominal_volume": "PROJECT_AUTHORED_LABEL_NOT_VOLUME_REMEASUREMENT",
+      "initial_mass": "TEMPORARY_REQUIRES_MEASUREMENT"
+    }
+  },
+  "bottle_master": {
+    "shape_type": "Compound",
+    "is_valid": true,
+    "solid_count": 1,
+    "shell_count": 1,
+    "face_count": 27,
+    "edge_count": 49,
+    "vertex_count": 26,
+    "standard_bbox_mm": {
+      "x": 68.0,
+      "y": 68.0,
+      "z": 206.0
+    },
+    "optimal_bbox_mm": {
+      "x": 68.0,
+      "y": 68.0,
+      "z": 206.0,
+      "api": "Part.Shape.optimalBoundingBox()"
+    },
+    "volume_mm3": 62849.88581362739,
+    "area_mm2": 80794.2402836997,
+    "brep_sha256": "3f489afa2ed123352620168c97446d147bdf63234397d7ecf6f0952bb60d82a2",
+    "cad_long_axis": "+Z"
+  },
+  "fcstd_to_step_comparison": {
+    "status": "PASS",
+    "bbox_length_match": true,
+    "volume_match": true,
+    "area_match": true,
+    "topology_match": true,
+    "brep_byte_hash_match": false,
+    "brep_byte_hash_match_required": false,
+    "reason": "FCStd compound and STEP solid serialization differ while geometry metrics and topology agree within recorded tolerances."
+  },
+  "visual_tessellation": {
+    "status": "PASS",
+    "scope": "DIAGNOSTIC_VISUAL_MESH_NOT_COLLISION",
+    "linear_deflection_mm": 0.2,
+    "angular_deflection_deg": 20.0,
+    "vertex_count": 1418,
+    "triangle_count": 2832,
+    "connected_components": 1,
+    "degenerate_triangle_count": 0,
+    "obj_sha256": "248949c0231efd182f46d9e42011905aa44a9b522e429eb2a8bffc6e7bb49233",
+    "canonical_geometry_sha256": "cf976e629cf0b851b26322314ec4aa0901ffdedd8393c8c771aba59d32832b67",
+    "fresh_run_count": 2,
+    "fresh_run_byte_hash_match": true,
+    "fresh_run_geometry_signature_match": true
+  },
+  "evidence": {
+    "machine_audit": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-500ml-bottle-source/project_bottle_fcstd_audit.json",
+    "audit_log": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-132415_20260729-aloha-project-bottle-optimal-bbox-audit-v3",
+    "comparison_artifact_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha-bottle-cad-comparison"
+  },
+  "physics_boundary": {
+    "cad_geometry_audit": "PASS",
+    "visual_screenshot_self_review": "PASS",
+    "collision_revalidated_this_audit": "NOT_RUN",
+    "mass_calibrated": false,
+    "material_calibrated": false,
+    "fill_state_confirmed": false,
+    "static_hold_revalidated_with_current_gripper": "NOT_RUN"
+  },
+  "task8_status": "NOT_RUN"
+}
