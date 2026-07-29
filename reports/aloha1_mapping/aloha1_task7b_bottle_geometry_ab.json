@@ -1,0 +1,123 @@
+{
+  "acceptance_boundary": "STATIC_FREE_BOTTLE_HOLD_ONLY_NOT_SUPPORT_TO_LIFT_PICKUP",
+  "asset_promotion": "PARTIAL",
+  "boundaries": {
+    "static_hold_is_pickup": false,
+    "support_to_lift": "NOT_RUN",
+    "task8": "NOT_RUN"
+  },
+  "conclusion": "PROJECT_BOTTLE_MATCHES_BASELINE",
+  "groups": {
+    "procedural_cylinder": {
+      "complete_acceptance_group": true,
+      "deterministic": true,
+      "failure_modes": [],
+      "maximum_drop_m": 0.0004539191722869873,
+      "mean_drop_m": 0.0004539191722869873,
+      "minimum_drop_m": 0.0004539191722869873,
+      "pass_count": 20,
+      "status": "PASS",
+      "trial_count": 20,
+      "unique_signature_count": 1
+    },
+    "project_bottle500": {
+      "complete_acceptance_group": true,
+      "deterministic": true,
+      "failure_modes": [],
+      "maximum_drop_m": 0.0002377927303314209,
+      "mean_drop_m": 0.0002377927303314209,
+      "minimum_drop_m": 0.0002377927303314209,
+      "pass_count": 20,
+      "status": "PASS",
+      "trial_count": 20,
+      "unique_signature_count": 1
+    }
+  },
+  "inputs": {
+    "baseline_report": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b-project-bottle-geometry-ab/acceptance/procedural_cylinder/report.json",
+      "sha256": "99afbfddf63fa925876a361db136369fa7a909ed8a0b5411ea0983850a51cf40"
+    },
+    "baseline_trials": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b-project-bottle-geometry-ab/acceptance/procedural_cylinder/trials.jsonl",
+      "sha256": "155eedb4b6329e9ed74758dd3fd474a8a2c8e4a6a7b7b57bb122a9455adbc43d"
+    },
+    "config": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/configs/aloha1_task7b_bottle_geometry_ab.yaml",
+      "sha256": "87fd3493853c90159c9e0263db97446d1d71ea0323308a489012b73708942f9c"
+    },
+    "project_report": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b-project-bottle-geometry-ab/acceptance/project_bottle500/report.json",
+      "sha256": "259ba717d6cb8e8b8d3f40e774e69b253354036ef06691a3b2e436a8f5541b66"
+    },
+    "project_trials": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b-project-bottle-geometry-ab/acceptance/project_bottle500/trials.jsonl",
+      "sha256": "52e1cd45df0abf1f432bcc5d9752893442cded756f531fc0ab1cef07fc1983b9"
+    },
+    "screenshot_review": {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7b_bottle_geometry_ab_screenshot_review.json",
+      "sha256": "5125343c6c249a121caf315be0c2f3c334508befc8382f932bd46238c300bf78"
+    }
+  },
+  "schema_version": 1,
+  "screenshot_review": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7b_bottle_geometry_ab_screenshot_review.json",
+    "reviewed_annotated_image_count": 8,
+    "reviewed_raw_image_count": 8,
+    "sha256": "5125343c6c249a121caf315be0c2f3c334508befc8382f932bd46238c300bf78",
+    "status": "PASS",
+    "visual_model_review": "INDIVIDUAL_IMAGE_REVIEW_COMPLETED_2026-07-29"
+  },
+  "single_variable_audit": {
+    "configured_profiles": {
+      "allowed_differences": [
+        "geometry.asset_path",
+        "geometry.asset_sha256",
+        "geometry.collision_prim_count",
+        "geometry.dimensions_m",
+        "geometry.provider",
+        "geometry.reference_prim"
+      ],
+      "differences": [
+        "geometry.asset_path",
+        "geometry.asset_sha256",
+        "geometry.collision_prim_count",
+        "geometry.dimensions_m",
+        "geometry.provider",
+        "geometry.reference_prim"
+      ],
+      "missing_expected_differences": [],
+      "status": "PASS",
+      "unexpected_differences": []
+    },
+    "input_failures": {
+      "procedural_cylinder": [],
+      "project_bottle500": []
+    },
+    "runtime_profiles": {
+      "allowed_differences": [
+        "geometry.asset_path",
+        "geometry.asset_sha256",
+        "geometry.collision_prim_count",
+        "geometry.dimensions_m",
+        "geometry.provider",
+        "geometry.reference_prim"
+      ],
+      "differences": [
+        "geometry.asset_path",
+        "geometry.asset_sha256",
+        "geometry.collision_prim_count",
+        "geometry.dimensions_m",
+        "geometry.provider",
+        "geometry.reference_prim"
+      ],
+      "missing_expected_differences": [],
+      "status": "PASS",
+      "unexpected_differences": []
+    },
+    "runtime_profiles_match_config": true,
+    "status": "PASS"
+  },
+  "status": "PASS",
+  "task8": "NOT_RUN"
+}

@@ -76,7 +76,8 @@ The 2026-07-29 signal-correspondence priority is the current handoff:
 - Task 7A is `PARTIAL`: runtime structure/control gates pass. The user
   confirmed that supplier-CAD finger contact with `user_confirmed_table` is
   allowed physical workcell behavior, so it is no longer classified as a
-  control or collider failure. Task 7B and Task 8 remain `NOT_RUN`.
+  control or collider failure. Task 7B static-hold geometry A/B is now
+  `PASS`; Task 8 remains `NOT_RUN`.
 - The current Task 7A result is now explicitly split:
   `TASK7A_RUNTIME_CONTROL=PASS`,
   `TASK7A_WORKCELL_PHYSICS=PASS`,
@@ -190,6 +191,51 @@ The 2026-07-29 signal-correspondence priority is the current handoff:
     `logs/workspace_contact_policy_v2_final_ruff.log`, and
     `logs/workspace_contact_policy_v2_final_pycompile.log` beneath the
     Task 7A artifact root above.
+
+The 2026-07-29 Task 7B project-bottle geometry A/B is now authoritative:
+
+- Scope is static free-bottle hold only. It is not support-to-lift pickup,
+  calibrated dynamics, final asset promotion, insertion or Task 8.
+- A is the current procedural `0.065 m × 0.210 m` cylinder. B explicitly
+  references `/Bottle500` from
+  `assets/bottle_500ml/isaac/bottle_500ml_sim.usd`, SHA-256
+  `16427135f152ec951de2321fd689366d745a2dd389cbe260976631783952533e`.
+  The source layer default prim is `/World` and includes a test gauge, so it
+  is not referenced.
+- B runtime readback confirms 41 Bottle500 collision prims and effective
+  session mass `0.019999999552965164 kg`. The source USD `0.025 kg` value was
+  not edited.
+- The single-variable audit is `PASS`: only provider, asset path/hash,
+  reference prim, collision count and dimensions differ. Friction `0.7`,
+  restitution `0`, drive, targets, `60 Hz`, solver, `2 s` hold and `0.010 m`
+  drop gate are identical.
+- A acceptance is `20/20 PASS`, one deterministic signature, maximum/mean
+  drop `0.0004539191722869873 m`.
+- B acceptance is `20/20 PASS`, one deterministic signature, maximum/mean
+  drop `0.0002377927303314209 m`.
+- Conclusion is `PROJECT_BOTTLE_MATCHES_BASELINE`. The lower B drop does not
+  calibrate friction, force or sim-to-real dynamics.
+- Eight raw and eight annotated acceptance images passed individual
+  visual-model review. Annotation v1 was rejected for panel-text cropping and
+  is preserved; v2 passes.
+- Reports:
+  `aloha1_task7b_bottle_geometry_ab.json`,
+  `aloha1_task7b_bottle_geometry_ab.md`,
+  `aloha1_task7b_bottle_geometry_ab_trials.jsonl`,
+  `aloha1_task7b_bottle_geometry_ab_screenshot_review.json`, and
+  `aloha1_task7b_bottle_geometry_ab_screenshot_review.md`; command results,
+  exit codes, counts and log hashes are frozen in
+  `aloha1_task7b_verification.json`.
+- Full logs and images:
+  `.codex/artifacts/20260729-aloha1-task7b-project-bottle-geometry-ab/`.
+- Final project-`.venv` verification: focused `23 passed`; full
+  `tests/aloha1_mapping` `382 passed`; Ruff `PASS`; py_compile `PASS`; fresh
+  input manifest `PASS`. The initial system-`pytest` ABI failure is preserved
+  separately and was caused by system SciPy versus NumPy 2.2.4, not a test
+  assertion.
+- Task 7A and frozen Stage hash are unchanged; asset-promotion readiness
+  remains `PARTIAL`; final/default colliders are unchanged; Task 8 remains
+  `NOT_RUN`.
 
 The unoptimized Stationary ALOHA 1 mapping baseline is implemented through
 Task 7. Full diagnostic output is bounded under

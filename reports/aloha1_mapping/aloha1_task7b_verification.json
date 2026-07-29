@@ -1,0 +1,100 @@
+{
+  "schema_version": 1,
+  "task": "Task 7B project Bottle500 static-hold geometry A/B",
+  "generated_at": "2026-07-29",
+  "status": "PASS",
+  "project_root": "/home/eii/project/openpi0.5-rtc-reward-learning",
+  "scope": {
+    "validated": "static free-bottle hold geometry A/B",
+    "not_validated": [
+      "support-to-lift pickup",
+      "sim-to-real dynamics calibration",
+      "final asset promotion",
+      "Task 8"
+    ],
+    "task8": "NOT_RUN"
+  },
+  "fresh_final_checks": [
+    {
+      "name": "focused_pytest",
+      "status": "PASS",
+      "exit_code": 0,
+      "result": "23 passed in 1.28s",
+      "log_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b-project-bottle-geometry-ab/verification/final_focused_pytest.log",
+      "log_sha256": "937cae0838f98cedcc85f333f1ecba8974762b64374f64f7b8e62794753a2469"
+    },
+    {
+      "name": "aloha1_mapping_full_pytest",
+      "status": "PASS",
+      "exit_code": 0,
+      "result": "382 passed in 5.90s",
+      "log_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b-project-bottle-geometry-ab/verification/final_pytest_aloha1_mapping.log",
+      "log_sha256": "684bbcb8ec7888c4f3fa5b498e18bc8c391a66601729c061fbf0f10e483ccce5"
+    },
+    {
+      "name": "ruff",
+      "status": "PASS",
+      "exit_code": 0,
+      "result": "All checks passed!",
+      "log_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b-project-bottle-geometry-ab/verification/final_ruff.log",
+      "log_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+    },
+    {
+      "name": "py_compile",
+      "status": "PASS",
+      "exit_code": 0,
+      "result": "no diagnostics",
+      "log_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b-project-bottle-geometry-ab/verification/final_py_compile.log",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "frozen_input_probe",
+      "status": "PASS",
+      "exit_code": 0,
+      "result": "manifest prim assertions pass; live Bottle500, Task 7A and robot-parent hashes unchanged",
+      "log_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b-project-bottle-geometry-ab/verification/final_frozen_input_probe.log",
+      "log_sha256": "89c545030ffbdcae329d6d8230f0c68c8c8ddb4c55c763c51dc8d34cc0a91574"
+    }
+  ],
+  "preserved_failed_checks": [
+    {
+      "name": "system_python_pytest",
+      "status": "FAIL_ENVIRONMENT_ABI",
+      "result": "collection stopped with 2 errors because system SciPy is incompatible with NumPy 2.2.4",
+      "log_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b-project-bottle-geometry-ab/verification/pytest_aloha1_mapping.log"
+    },
+    {
+      "name": "project_venv_pre_fix_regression",
+      "status": "FAIL_FIXED_AND_RETESTED",
+      "result": "2 failed, 380 passed; compatibility helper and required README evidence heading were restored before the fresh final run",
+      "log_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b-project-bottle-geometry-ab/verification/pytest_aloha1_mapping_project_venv.log"
+    }
+  ],
+  "authoritative_reports": [
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7b_bottle_geometry_ab.json",
+      "sha256": "9b0f9366b2abe5664da794d7a40911108db3aee3c100d43d0c8760c500452567"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7b_bottle_geometry_ab.md",
+      "sha256": "1ba1ad85f1e3e2348837f151ea8380ff5a9acf388692f3f0618c1225710f5333"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7b_bottle_geometry_ab_trials.jsonl",
+      "sha256": "acf53e3c0d698f25b6d284bd46cadcba30a9a4dc1cef2c551952db26bbd70a86"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7b_bottle_geometry_ab_screenshot_review.json",
+      "sha256": "5125343c6c249a121caf315be0c2f3c334508befc8382f932bd46238c300bf78"
+    },
+    {
+      "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_task7b_bottle_geometry_ab_screenshot_review.md",
+      "sha256": "135fdcc3caef9ada7284b1e223ca7a0af6eef82a57d957c6635d5e2745d90dcd"
+    }
+  ],
+  "input_manifest": {
+    "absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260729-aloha1-task7b-project-bottle-geometry-ab/input_manifest.json",
+    "sha256": "cc81abccd7d0c3a7d0959efa09b4fcda3f10413075fc8c2e62e901fad4ea18a2",
+    "status": "PASS"
+  }
+}

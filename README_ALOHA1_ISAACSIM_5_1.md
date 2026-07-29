@@ -13,7 +13,7 @@ sim-to-real dynamics model and it is not yet accepted for bottle insertion.
 | Task 7A workcell physics | **PASS** | deterministic collision-policy sweep is 48/48 PASS with 0 forbidden contacts; four allowed supplier-CAD finger/table reachability boundaries remain explicitly recorded |
 | Task 7A asset-promotion readiness | **PARTIAL** | literal official status remains FAIL: 28 packaging findings, 6 source-geometry boundaries, 2 Isaac 5.1 validator/schema conflicts and 1 INFO record; no finding is suppressed |
 | Task 7A aggregate | **PARTIAL** | runtime control and workcell physics pass, but the current package is not ready for SimReady promotion |
-| Task 7B full physical task | **NOT_RUN** | bottle hold, calibrated friction/force and full SimReady promotion are outside the current priority |
+| Task 7B project-bottle static-hold geometry A/B | **PASS** | cylinder A `20/20`, Bottle500 B `20/20`, both deterministic; only bottle geometry/collider changed; `PROJECT_BOTTLE_MATCHES_BASELINE` |
 | Current signal screenshots | **PASS (visual 24/24 PASS)** | 12 fresh raw + 12 annotated images match Stage SHA-256 `d8182a6c…c788cf`; the controlled OmniHydra screenshot process has zero `protoPath` errors |
 | Hydra protoPath controlled diagnosis | **PASS / `FSD_7_5_1_PRIMARY`** | A=29 errors, B OmniHydra=0, B repeat deterministic, D materialization=0; default delegate restored and final assets unchanged |
 | Source and environment audit | PARTIAL | `reports/aloha1_mapping/source_audit.md`, `source_manifest.json`, `missing_resources.json` |
@@ -30,8 +30,10 @@ sim-to-real dynamics model and it is not yet accepted for bottle insertion.
 | Supplier-CAD no-bottle screenshot gate | PASS (12 raw + 12 annotated) | `aloha_viper_cad_finger_task5_structure_screenshot_review.json`; visual evidence only |
 | Supplier-CAD Task 5 dynamic structure | **PASS** | numeric isolated diagnostic PASS plus fixed-camera auxiliary runtime-readback viewport replay PASS; not final-asset promotion |
 | Supplier-CAD follower_left static bottle hold | **PASS** | isolated 20 g diagnostic: `20/20`, maximum full-interval drop `0.0004539191722869873 m`; friction remains `TEMPORARY_UNCALIBRATED`, no lift/final promotion claim |
+| Project Bottle500 static bottle hold | **PASS** | isolated 20 g mass override: `20/20`, maximum full-interval drop `0.0002377927303314209 m`, 41-collider readback; static hold only, not pickup |
 | Bottle CAD source selection | **PASS** | project-authored `assets/bottle_500ml/cad/bottle_500ml.FCStd` is primary for future grasp tests; downloaded `500mlbottle.step` is geometry reference only |
 | Bottle CAD visual evidence | **PASS (6 raw + 6 annotated)** | all images individually self-reviewed; user review pending; no collision/physics claim |
+| Task 7B hold screenshots | **PASS (8 raw + 8 annotated)** | all images individually reviewed by the vision model; one rejected annotation batch is preserved; runtime data remain authoritative |
 | Prior gym-aloha custom-finger Task 5 | **SUPERSEDED INPUT** | historical 80/80 digital hold cannot accept the newly confirmed supplier installation |
 | Prior collider A/B conclusion | `NO_MEANINGFUL_EFFECT` (historical installation) | default collider remains unchanged; must be rerun after Stage authorization |
 | Gripper hold root cause v2 | **SUPERSEDED INPUT** | prior `inconclusive` used the rejected generic finger mesh |
@@ -91,7 +93,7 @@ Fresh Isaac Sim 5.1 runtime results:
 - Task 7A workcell physics: `PASS`;
 - Task 7A asset-promotion readiness: `PARTIAL`;
 - Task 7A aggregate: `PARTIAL`;
-- Task 7B: `NOT_RUN`;
+- Task 7B static-hold geometry A/B: `PASS`;
 - Task 8: `NOT_RUN`.
 
 NVIDIA official results are preserved without suppression. The fresh
@@ -149,7 +151,7 @@ misreported as controller or workcell failures:
 - `TASK7A_WORKCELL_PHYSICS = PASS`;
 - `ASSET_PROMOTION_READINESS = PARTIAL`;
 - `TASK7A_AGGREGATE = PARTIAL`;
-- Task 7B and Task 8 remain `NOT_RUN`.
+- Task 7B static-hold geometry A/B is `PASS`; Task 8 remains `NOT_RUN`.
 
 The six literal `RigidBodyHasCollider` findings were audited through the
 pinned `aloha_vx300s.urdf.xacro`, both generated URDFs, the composed USD prim
@@ -375,16 +377,75 @@ geometry reference, not the default grasp bottle. Its ordinary B-Rep
 or redistributing it remains `UNKNOWN_HARD_BLOCKER`.
 
 Six raw and six annotated CAD images passed individual visual-model
-self-review. This is CAD visual evidence only. The project bottle's existing
-USD/collider, mass, material and static hold must still be revalidated with
-the current supplier-CAD gripper. Its FCStd `25 g` parameter is uncalibrated
-and does not silently replace the current `20 g` Task 5 diagnostic profile.
+self-review. That CAD review alone is visual evidence only. The subsequent
+Task 7B controlled A/B revalidated the existing project Bottle500 USD,
+41-collider hierarchy, session-only `0.020 kg` mass override, material
+binding and static hold with the current supplier-CAD gripper. The FCStd/USD
+`0.025 kg` source value remains uncalibrated and was not edited or silently
+promoted.
 See:
 
 - `configs/aloha1_bottle_asset.yaml`;
 - `reports/aloha1_mapping/aloha_project_bottle_cad_audit.json`;
 - `reports/aloha1_mapping/aloha_bottle_cad_comparison.json`;
 - `reports/aloha1_mapping/aloha_bottle_cad_screenshot_review.json`.
+
+### Task 7B project Bottle500 geometry A/B
+
+Task 7B compared two isolated bottle providers in separate fresh Isaac Sim
+5.1 processes while keeping the robot, supplier-CAD finger collider, friction
+`0.7`, restitution `0`, finger drive, explicit symmetric targets, bottle mass
+`0.020 kg`, `60 Hz`, solver settings, trajectory, `2 s` hold interval and
+`0.010 m` drop gate unchanged:
+
+- A: procedural cylinder, `0.065 × 0.065 × 0.210 m`, one collider;
+- B: project-authored Bottle500, `0.068 × 0.068 × 0.206 m`, explicit
+  `/Bottle500` reference and 41 collider prims.
+
+The Bottle500 root layer default prim is `/World`, which also contains a test
+gauge. Runtime composition therefore explicitly references `/Bottle500`; the
+test gauge is not imported. The source Bottle500 USD SHA-256 remains
+`16427135f152ec951de2321fd689366d745a2dd389cbe260976631783952533e`.
+Its authored `0.025 kg` mass is overridden only in the diagnostic session
+layer and reads back as `0.019999999552965164 kg`.
+
+Both groups pass the unchanged static-hold gate in all 20 fresh resets with
+one deterministic signature per group:
+
+- A maximum/mean drop: `0.0004539191722869873 m`;
+- B maximum/mean drop: `0.0002377927303314209 m`;
+- conclusion: `PROJECT_BOTTLE_MATCHES_BASELINE`.
+
+The smaller B drop is numerical evidence from this geometry A/B, not a
+friction, force or sim-to-real calibration result. Friction `0.7` remains
+`TEMPORARY_UNCALIBRATED`. No SurfaceGripper, fixed joint or parent attachment
+was used. The bottle began suspended between the fingers, so this proves
+static free-bottle hold, not support-to-lift pickup. A later pickup claim
+requires a validated support surface and grasp pose.
+
+Eight raw and eight annotated acceptance screenshots were inspected
+individually with the vision model. The first annotation batch was rejected
+for information-panel text cropping and is preserved in the artifact tree;
+the compact v2 batch passes. Authoritative evidence:
+
+- `configs/aloha1_task7b_bottle_geometry_ab.yaml`;
+- `reports/aloha1_mapping/aloha1_task7b_bottle_geometry_ab.json`;
+- `reports/aloha1_mapping/aloha1_task7b_bottle_geometry_ab_trials.jsonl`;
+- `reports/aloha1_mapping/aloha1_task7b_bottle_geometry_ab_screenshot_review.json`;
+- `reports/aloha1_mapping/aloha1_task7b_verification.json`;
+- `.codex/artifacts/20260729-aloha1-task7b-project-bottle-geometry-ab/`.
+
+Task 7A remains unchanged, asset-promotion readiness remains `PARTIAL`, the
+final/default bottle and finger colliders were not changed, and Task 8 remains
+`NOT_RUN`.
+
+Final verification used the project `.venv`: focused checks are `23 passed`,
+the full `tests/aloha1_mapping` regression is `382 passed`, Ruff is `PASS`,
+py_compile is `PASS`, and a fresh USD/input probe again confirms every frozen
+hash and all 41 Bottle500 colliders. The failed system-`pytest` ABI attempt is
+preserved separately; it mixed system SciPy with NumPy 2.2.4 and did not run
+the suite. Successful and failed logs are both under the Task 7B artifact
+root.
 
 ### Reused from existing project reports
 
@@ -400,14 +461,19 @@ dirty repository state alone, identify reused inputs.
 
 ### Physical measurements
 
-The current gripper test uses only the available bottle body measurements:
+Task 7B adds no new physical measurement. It uses two different geometry
+sources and one shared diagnostic mass:
 
-- body diameter: `0.065 m`
-- total height: `0.210 m`
-- mass: `0.020 kg`
+- A procedural dimensions: `0.065 m` diameter and `0.210 m` height;
+- B supplier-project CAD dimensions: `0.068 m` maximum diameter and
+  `0.206 m` height;
+- shared Task 7B diagnostic mass override: `0.020 kg`.
 
-The cylinder inertia is engineering-derived and uncalibrated. Bottle neck,
-shoulder, base profile, and measured inertia remain unavailable.
+The cylinder inertia and both mass values are not calibrated sim-to-real
+dynamics. The project USD's `0.025 kg` value remains
+`TEMPORARY_REQUIRES_MEASUREMENT`; Task 7B did not modify it. Measured center of
+mass, inertia, material coefficients and loaded real-bottle variation remain
+unavailable.
 
 ### Historical project-reuse geometry (superseded for current installation)
 
