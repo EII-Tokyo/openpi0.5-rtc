@@ -1,0 +1,584 @@
+{
+  "audit_generated_utc": "2026-07-30T07:31:21.426112+00:00",
+  "date_window_utc": [
+    "2026-04-01T00:00:00Z",
+    "2026-05-31T23:59:59Z"
+  ],
+  "selection_rule": "W&B project openpi; keep runs whose run/config name explicitly contains bottle baseline (no-rinse/twist) or rinse/water task tokens.",
+  "summary": {
+    "all_selected": {
+      "run_attempts": 41,
+      "unique_run_names": 33,
+      "unique_config_names": 14,
+      "states": {
+        "crashed": 33,
+        "finished": 3,
+        "failed": 5
+      },
+      "runs_with_any_history": 25,
+      "runs_reaching_1000_steps": 15,
+      "runs_reaching_10000_steps": 12,
+      "runs_reaching_25000_steps": 6,
+      "batch_sizes": [
+        4,
+        8,
+        32,
+        128,
+        256,
+        512
+      ],
+      "seeds": [
+        42
+      ]
+    }
+  },
+  "family_summary": {
+    "baseline_bottle_sorting": {
+      "run_attempts": 23,
+      "unique_run_names": 18,
+      "unique_config_names": 10,
+      "states": {
+        "crashed": 19,
+        "failed": 3,
+        "finished": 1
+      },
+      "runs_with_any_history": 16,
+      "runs_reaching_1000_steps": 10,
+      "runs_reaching_10000_steps": 9,
+      "runs_reaching_25000_steps": 6,
+      "batch_sizes": [
+        4,
+        8,
+        128,
+        256,
+        512
+      ],
+      "seeds": [
+        42
+      ]
+    },
+    "rinse_or_insertion_exploration": {
+      "run_attempts": 18,
+      "unique_run_names": 15,
+      "unique_config_names": 4,
+      "states": {
+        "crashed": 14,
+        "finished": 2,
+        "failed": 2
+      },
+      "runs_with_any_history": 9,
+      "runs_reaching_1000_steps": 5,
+      "runs_reaching_10000_steps": 3,
+      "runs_reaching_25000_steps": 0,
+      "batch_sizes": [
+        32,
+        128,
+        256
+      ],
+      "seeds": [
+        42
+      ]
+    }
+  },
+  "runs": [
+    {
+      "id": "y3q0mik6",
+      "name": "pi05-twist-100k-train-action-true-no-fast-bs4-save1000-20260422-015401",
+      "config_name": "twist_only_lora_triplet_100k_no_fast_action_tokens",
+      "family": "baseline_bottle_sorting",
+      "created_at": "2026-04-22T01:54:06Z",
+      "state": "crashed",
+      "last_step": 11150,
+      "batch_size": 4,
+      "seed": 42,
+      "summary_loss": 0.5480607151985168
+    },
+    {
+      "id": "ujoccc65",
+      "name": "pi05-twist-100k-fast-action-scale1-bs4-save1000-20260423-023949",
+      "config_name": "twist_only_lora_triplet_100k_fast_action_tokens_scale1",
+      "family": "baseline_bottle_sorting",
+      "created_at": "2026-04-23T02:40:00Z",
+      "state": "crashed",
+      "last_step": 1160,
+      "batch_size": 4,
+      "seed": 42,
+      "summary_loss": 7.3521409034729
+    },
+    {
+      "id": "h9xc8lmk",
+      "name": "pi05-twist-100k-fast-action-scale1-bs8-ga1-wandb-restart-save1000-20260423-055040",
+      "config_name": "twist_only_lora_triplet_100k_fast_action_tokens_scale1",
+      "family": "baseline_bottle_sorting",
+      "created_at": "2026-04-23T05:50:51Z",
+      "state": "crashed",
+      "last_step": 11200,
+      "batch_size": 8,
+      "seed": 42,
+      "summary_loss": 4.468005180358887
+    },
+    {
+      "id": "sbjto6bh",
+      "name": "rinse_bottle_cam4_f6s4_bs64_20260428",
+      "config_name": "eii_rinse_cam4_lora",
+      "family": "rinse_or_insertion_exploration",
+      "created_at": "2026-04-28T14:25:23Z",
+      "state": "crashed",
+      "last_step": 7710,
+      "batch_size": 32,
+      "seed": 42,
+      "summary_loss": 0.007922179996967316
+    },
+    {
+      "id": "w6iszlf5",
+      "name": "h200_fullft_13repos_bs128_nw8_f6_s5_log1_20260430_082915",
+      "config_name": "eii_rinse_cam4_lora",
+      "family": "rinse_or_insertion_exploration",
+      "created_at": "2026-04-30T08:29:24Z",
+      "state": "crashed",
+      "last_step": -1,
+      "batch_size": 128,
+      "seed": 42,
+      "summary_loss": null
+    },
+    {
+      "id": "alxhdblm",
+      "name": "h200_fullft_13repos_bs128_nw8_f6_s5_log1_20260430_083003",
+      "config_name": "eii_rinse_cam4_lora",
+      "family": "rinse_or_insertion_exploration",
+      "created_at": "2026-04-30T08:30:12Z",
+      "state": "finished",
+      "last_step": 7,
+      "batch_size": 128,
+      "seed": 42,
+      "summary_loss": 0.14955194294452667
+    },
+    {
+      "id": "e68ok9xu",
+      "name": "h200_fullft_13repos_bs256_nw8_f6_s5_log1_20260430_084618",
+      "config_name": "eii_rinse_cam4_lora",
+      "family": "rinse_or_insertion_exploration",
+      "created_at": "2026-04-30T08:46:28Z",
+      "state": "finished",
+      "last_step": 7,
+      "batch_size": 256,
+      "seed": 42,
+      "summary_loss": 0.09565803408622742
+    },
+    {
+      "id": "qbm97ykn",
+      "name": "h200_fullft_13repos_bs128_nw16_f6_s5_log10_20260430_085556",
+      "config_name": "eii_rinse_cam4_lora",
+      "family": "rinse_or_insertion_exploration",
+      "created_at": "2026-04-30T08:56:05Z",
+      "state": "crashed",
+      "last_step": 10660,
+      "batch_size": 128,
+      "seed": 42,
+      "summary_loss": 0.005038553383201361
+    },
+    {
+      "id": "j81dvx7o",
+      "name": "pro6000_fullft_13repos_bs128_nw16_f6_s5_log1_20260501",
+      "config_name": "eii_rinse_cam4_lora",
+      "family": "rinse_or_insertion_exploration",
+      "created_at": "2026-05-01T03:09:56Z",
+      "state": "crashed",
+      "last_step": -1,
+      "batch_size": 128,
+      "seed": 42,
+      "summary_loss": null
+    },
+    {
+      "id": "lx6v24pv",
+      "name": "pro6000_fullft_1repo_bs128_nw16_f6_s5_log1_20260501",
+      "config_name": "eii_rinse_cam4_lora",
+      "family": "rinse_or_insertion_exploration",
+      "created_at": "2026-05-01T03:14:32Z",
+      "state": "crashed",
+      "last_step": -1,
+      "batch_size": 128,
+      "seed": 42,
+      "summary_loss": null
+    },
+    {
+      "id": "g81wswdd",
+      "name": "pro6000_fullft_1repo_bs128_nw16_f6_s5_log1_1gpu_20260501",
+      "config_name": "eii_rinse_cam4_lora",
+      "family": "rinse_or_insertion_exploration",
+      "created_at": "2026-05-01T03:20:41Z",
+      "state": "crashed",
+      "last_step": -1,
+      "batch_size": 128,
+      "seed": 42,
+      "summary_loss": null
+    },
+    {
+      "id": "rt5tie9r",
+      "name": "pro6000_fullft_1repo_bs128_nw16_f6_s5_log1_cuda0_20260501",
+      "config_name": "eii_rinse_cam4_lora",
+      "family": "rinse_or_insertion_exploration",
+      "created_at": "2026-05-01T03:23:17Z",
+      "state": "failed",
+      "last_step": 0,
+      "batch_size": 128,
+      "seed": 42,
+      "summary_loss": null
+    },
+    {
+      "id": "cxg5ik7w",
+      "name": "twist_rinse_lora_triplet_remote_20260501_0524",
+      "config_name": "twist_rinse_lora_triplet_remote",
+      "family": "rinse_or_insertion_exploration",
+      "created_at": "2026-05-01T05:22:56Z",
+      "state": "crashed",
+      "last_step": 90,
+      "batch_size": 32,
+      "seed": 42,
+      "summary_loss": 1.2474571466445925
+    },
+    {
+      "id": "tv5ujqy3",
+      "name": "twist_direction_full_ft_bs256_8xh200",
+      "config_name": "twist_direction_full_finetune_triplet_27_datasets",
+      "family": "baseline_bottle_sorting",
+      "created_at": "2026-05-02T14:02:07Z",
+      "state": "crashed",
+      "last_step": -1,
+      "batch_size": 256,
+      "seed": 42,
+      "summary_loss": null
+    },
+    {
+      "id": "3t59co93",
+      "name": "twist_direction_full_ft_bs256_8xh200_fsdp8",
+      "config_name": "twist_direction_full_finetune_triplet_27_datasets",
+      "family": "baseline_bottle_sorting",
+      "created_at": "2026-05-02T14:04:30Z",
+      "state": "crashed",
+      "last_step": 10,
+      "batch_size": 256,
+      "seed": 42,
+      "summary_loss": 1.2940996885299685
+    },
+    {
+      "id": "ph0lrdqu",
+      "name": "twist_direction_full_ft_bs256_8xh200_fsdp8_nw32",
+      "config_name": "twist_direction_full_finetune_triplet_27_datasets",
+      "family": "baseline_bottle_sorting",
+      "created_at": "2026-05-02T14:11:17Z",
+      "state": "failed",
+      "last_step": 28000,
+      "batch_size": 256,
+      "seed": 42,
+      "summary_loss": 0.07219026237726212
+    },
+    {
+      "id": "w8za36n4",
+      "name": "rinse_lora_6repo_cam4_bs32_20260506",
+      "config_name": "eii_rinse_cam4_lora",
+      "family": "rinse_or_insertion_exploration",
+      "created_at": "2026-05-06T12:57:07Z",
+      "state": "crashed",
+      "last_step": -1,
+      "batch_size": 32,
+      "seed": 42,
+      "summary_loss": null
+    },
+    {
+      "id": "1hh98ega",
+      "name": "rinse_lora_6repo_cam4_bs32_log10_20260506",
+      "config_name": "eii_rinse_cam4_lora",
+      "family": "rinse_or_insertion_exploration",
+      "created_at": "2026-05-06T13:01:56Z",
+      "state": "crashed",
+      "last_step": -1,
+      "batch_size": 32,
+      "seed": 42,
+      "summary_loss": null
+    },
+    {
+      "id": "8raql7zk",
+      "name": "rinse_lora_6repo_cam4_bs32_log10_20260506",
+      "config_name": "eii_rinse_cam4_lora",
+      "family": "rinse_or_insertion_exploration",
+      "created_at": "2026-05-06T13:03:11Z",
+      "state": "crashed",
+      "last_step": -1,
+      "batch_size": 32,
+      "seed": 42,
+      "summary_loss": null
+    },
+    {
+      "id": "14m6s752",
+      "name": "rinse_lora_6repo_cam4_bs32_log10_20260506",
+      "config_name": "eii_rinse_cam4_lora",
+      "family": "rinse_or_insertion_exploration",
+      "created_at": "2026-05-06T13:06:19Z",
+      "state": "failed",
+      "last_step": -1,
+      "batch_size": 32,
+      "seed": 42,
+      "summary_loss": null
+    },
+    {
+      "id": "f5gtdu2l",
+      "name": "rinse_lora_6repo_cam4_bs32_log10_20260506",
+      "config_name": "eii_rinse_cam4_lora",
+      "family": "rinse_or_insertion_exploration",
+      "created_at": "2026-05-06T13:08:39Z",
+      "state": "crashed",
+      "last_step": 120,
+      "batch_size": 32,
+      "seed": 42,
+      "summary_loss": 0.043214473873376846
+    },
+    {
+      "id": "djdal88t",
+      "name": "rinse_lora_6repo_cam4_bs32_nw16_log10_20260506",
+      "config_name": "eii_rinse_cam4_lora",
+      "family": "rinse_or_insertion_exploration",
+      "created_at": "2026-05-06T13:24:02Z",
+      "state": "crashed",
+      "last_step": 18400,
+      "batch_size": 32,
+      "seed": 42,
+      "summary_loss": 0.005804727785289288
+    },
+    {
+      "id": "3xay0u7o",
+      "name": "no_rinse_cam3_fullft_30repo_bs128_20260507",
+      "config_name": "eii_data_system_no_tear_cam3_lora",
+      "family": "baseline_bottle_sorting",
+      "created_at": "2026-05-07T12:21:35Z",
+      "state": "crashed",
+      "last_step": -1,
+      "batch_size": 128,
+      "seed": 42,
+      "summary_loss": null
+    },
+    {
+      "id": "xgbxn9wo",
+      "name": "no_rinse_cam3_fullft_30repo_bs128_20260507",
+      "config_name": "eii_data_system_no_tear_cam3_lora",
+      "family": "baseline_bottle_sorting",
+      "created_at": "2026-05-07T12:22:32Z",
+      "state": "failed",
+      "last_step": -1,
+      "batch_size": 128,
+      "seed": 42,
+      "summary_loss": null
+    },
+    {
+      "id": "ae3628ov",
+      "name": "no_rinse_cam3_fullft_30repo_bs128_20260507",
+      "config_name": "eii_data_system_no_tear_cam3_lora",
+      "family": "baseline_bottle_sorting",
+      "created_at": "2026-05-07T12:24:18Z",
+      "state": "crashed",
+      "last_step": 30,
+      "batch_size": 128,
+      "seed": 42,
+      "summary_loss": 0.06137868762016296
+    },
+    {
+      "id": "yvz76s3w",
+      "name": "no_rinse_cam3_formal_30repo_cam3_fullft_bs256_nw32_fsdp4_20260507",
+      "config_name": "eii_data_system_no_tear_cam3_lora",
+      "family": "baseline_bottle_sorting",
+      "created_at": "2026-05-07T13:25:18Z",
+      "state": "crashed",
+      "last_step": 30,
+      "batch_size": 256,
+      "seed": 42,
+      "summary_loss": 0.06430049240589142
+    },
+    {
+      "id": "tuv0tvwm",
+      "name": "no_rinse_cam3_fullft_36repo_bs256_nw128_fsdp8_20260510",
+      "config_name": "eii_data_system_no_tear_cam3_lora",
+      "family": "baseline_bottle_sorting",
+      "created_at": "2026-05-10T03:47:28Z",
+      "state": "crashed",
+      "last_step": -1,
+      "batch_size": 256,
+      "seed": 42,
+      "summary_loss": null
+    },
+    {
+      "id": "etfza8tl",
+      "name": "no_rinse_cam3_fullft_36repo_bs256_nw128_fsdp8_20260510",
+      "config_name": "eii_data_system_without_rinse_cam3_fullft_h200",
+      "family": "baseline_bottle_sorting",
+      "created_at": "2026-05-10T03:52:54Z",
+      "state": "crashed",
+      "last_step": 20230,
+      "batch_size": 256,
+      "seed": 42,
+      "summary_loss": 0.003060727147385478
+    },
+    {
+      "id": "520etrno",
+      "name": "eii_rinse_9repo_cam4_lora_wandb_bs32_acc2_nw16_nomem_20260510_093635",
+      "config_name": "eii_rinse_9repo_cam4_lora",
+      "family": "rinse_or_insertion_exploration",
+      "created_at": "2026-05-10T09:36:39Z",
+      "state": "crashed",
+      "last_step": 15600,
+      "batch_size": 32,
+      "seed": 42,
+      "summary_loss": 0.00526373041793704
+    },
+    {
+      "id": "zpduww3j",
+      "name": "no_rinse_cam3_fullft_34repo_bs256_nw128_fsdp4_20260513",
+      "config_name": "eii_data_system_without_rinse_cam3_fullft_h200_34repo",
+      "family": "baseline_bottle_sorting",
+      "created_at": "2026-05-13T03:45:08Z",
+      "state": "crashed",
+      "last_step": -1,
+      "batch_size": 256,
+      "seed": 42,
+      "summary_loss": null
+    },
+    {
+      "id": "c3rv6so6",
+      "name": "no_rinse_cam3_fullft_34repo_bs256_nw32_fsdp4_20260513",
+      "config_name": "eii_data_system_without_rinse_cam3_fullft_h200_34repo",
+      "family": "baseline_bottle_sorting",
+      "created_at": "2026-05-13T03:50:27Z",
+      "state": "crashed",
+      "last_step": 110,
+      "batch_size": 256,
+      "seed": 42,
+      "summary_loss": 0.046065378934144974
+    },
+    {
+      "id": "icacn7hx",
+      "name": "no_rinse_cam3_fullft_34repo_bs512_nw32_fsdp4_20260513",
+      "config_name": "eii_data_system_without_rinse_cam3_fullft_h200_34repo",
+      "family": "baseline_bottle_sorting",
+      "created_at": "2026-05-13T04:03:18Z",
+      "state": "crashed",
+      "last_step": 40,
+      "batch_size": 512,
+      "seed": 42,
+      "summary_loss": 0.06440885365009308
+    },
+    {
+      "id": "71ulhhg7",
+      "name": "no_rinse_cam3_fullft_34repo_bs256_nw32_fsdp4_20260513",
+      "config_name": "eii_data_system_without_rinse_cam3_fullft_h200_34repo",
+      "family": "baseline_bottle_sorting",
+      "created_at": "2026-05-13T04:17:00Z",
+      "state": "crashed",
+      "last_step": -1,
+      "batch_size": 256,
+      "seed": 42,
+      "summary_loss": null
+    },
+    {
+      "id": "arvvt7o9",
+      "name": "no_rinse_cam3_fullft_34repo_freespinx6_bs256_nw32_fsdp4_20260513",
+      "config_name": "eii_data_system_without_rinse_cam3_fullft_h200_34repo",
+      "family": "baseline_bottle_sorting",
+      "created_at": "2026-05-13T04:20:15Z",
+      "state": "crashed",
+      "last_step": 260,
+      "batch_size": 256,
+      "seed": 42,
+      "summary_loss": 0.026320789009332657
+    },
+    {
+      "id": "oy2thu3h",
+      "name": "no_rinse_cam3_fullft_34repo_freespinx6_bs256_nw64_fsdp4_20260513",
+      "config_name": "eii_data_system_without_rinse_cam3_fullft_h200_34repo",
+      "family": "baseline_bottle_sorting",
+      "created_at": "2026-05-13T04:37:40Z",
+      "state": "crashed",
+      "last_step": 28650,
+      "batch_size": 256,
+      "seed": 42,
+      "summary_loss": 0.001607241458259523
+    },
+    {
+      "id": "rpx491fg",
+      "name": "rinse_11repo_insertx5_fullft_bs256_nw64_fsdp8_20260513",
+      "config_name": "eii_rinse_11repo_cam4_fullft",
+      "family": "rinse_or_insertion_exploration",
+      "created_at": "2026-05-13T07:08:25Z",
+      "state": "crashed",
+      "last_step": 9210,
+      "batch_size": 256,
+      "seed": 42,
+      "summary_loss": 0.003320961957797408
+    },
+    {
+      "id": "ip1e9era",
+      "name": "no_rinse_cam3_fullft_25repo_bs256_nw64_fsdp4_20260514",
+      "config_name": "eii_data_system_without_rinse_cam3_fullft_h200_25repo",
+      "family": "baseline_bottle_sorting",
+      "created_at": "2026-05-14T14:29:29Z",
+      "state": "crashed",
+      "last_step": 30010,
+      "batch_size": 256,
+      "seed": 42,
+      "summary_loss": 0.0015742380637675524
+    },
+    {
+      "id": "wuvk5r7r",
+      "name": "no_rinse_cam3_fullft_merged_adjust_pickup_36repo_bs256_nw64_fsdp4_20260516",
+      "config_name": "eii_data_system_without_rinse_cam3_fullft_h200_merged_adjust_pickup_36repo",
+      "family": "baseline_bottle_sorting",
+      "created_at": "2026-05-15T16:03:26Z",
+      "state": "failed",
+      "last_step": 33000,
+      "batch_size": 256,
+      "seed": 42,
+      "summary_loss": 0.0012461896985769272
+    },
+    {
+      "id": "nx2zkxvt",
+      "name": "no_rinse_cam3_fullft_return_home_29repo_bs256_nw64_fsdp4_20260520",
+      "config_name": "eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo",
+      "family": "baseline_bottle_sorting",
+      "created_at": "2026-05-20T07:54:38Z",
+      "state": "finished",
+      "last_step": 59990,
+      "batch_size": 256,
+      "seed": 42,
+      "summary_loss": 0.0006710937595926225
+    },
+    {
+      "id": "grh7hmsa",
+      "name": "no_rinse_cam3_fullft_have_cap_water_return_home_49repo_bs256_nw64_fsdp4_20260527",
+      "config_name": "eii_data_system_without_rinse_cam3_fullft_h200_have_cap_water_return_home_49repo",
+      "family": "baseline_bottle_sorting",
+      "created_at": "2026-05-27T05:21:04Z",
+      "state": "crashed",
+      "last_step": -1,
+      "batch_size": 256,
+      "seed": 42,
+      "summary_loss": null
+    },
+    {
+      "id": "38ni02cn",
+      "name": "no_rinse_cam3_fullft_have_cap_water_return_home_49repo_bs256_nw64_fsdp4_20260527",
+      "config_name": "eii_data_system_without_rinse_cam3_fullft_h200_have_cap_water_return_home_49repo",
+      "family": "baseline_bottle_sorting",
+      "created_at": "2026-05-27T05:21:17Z",
+      "state": "crashed",
+      "last_step": 25760,
+      "batch_size": 256,
+      "seed": 42,
+      "summary_loss": 0.001639530062675476
+    }
+  ],
+  "interpretation_limits": [
+    "A W&B run is an experiment attempt, not necessarily a completed training.",
+    "Repeated names may be retries and are retained to measure engineering effort.",
+    "Losses from different objectives, model heads or datasets are not ranked.",
+    "Run state crashed/failed does not by itself identify the root cause.",
+    "All selected runs use one recorded seed unless a row says otherwise."
+  ]
+}

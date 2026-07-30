@@ -1,0 +1,53 @@
+{
+  "recorded_for_report_date": "2026-07-30",
+  "evidence_type": "user-supplied field observation",
+  "task_observed": [
+    "桌面铺放多种瓶子",
+    "左侧工作臂随机抓取瓶子",
+    "右侧工作臂拧下瓶盖",
+    "左侧工作臂将瓶身投入一个回收盒",
+    "右侧工作臂将瓶盖投入另一个回收盒"
+  ],
+  "observed_capabilities": {
+    "complete_long_horizon_cycle_seen": true,
+    "continuous_operation": {
+      "approximate_lower_bound_hours": 1,
+      "qualifier": "大致估计"
+    },
+    "throughput": {
+      "approximate_bottles_per_minute": 2,
+      "qualifier": "大致估计"
+    },
+    "initial_generalization_assessment": "现场在多瓶随机桌面条件下观察到初步泛化表现"
+  },
+  "known_failures": [
+    {
+      "failure": "无盖瓶被拾取后仍执行空拧动作",
+      "frequency": "该指标尚未记录"
+    },
+    {
+      "failure": "部分瓶子会被倒着抓起",
+      "frequency": "该指标尚未记录"
+    }
+  ],
+  "missing_formal_evidence": [
+    "完整演示录像",
+    "逐瓶计数表",
+    "标准化测试记录",
+    "固定初始条件",
+    "逐次成功/失败标签",
+    "多次重复试验",
+    "置信区间"
+  ],
+  "allowed_report_wording": [
+    "根据现场展示观察，系统曾连续运行一小时以上",
+    "现场吞吐量大致估计为每分钟约两瓶",
+    "这些数值不是正式成功率或标准化产能测试结果"
+  ],
+  "forbidden_inference": [
+    "将估计值写成精确测量",
+    "据此计算正式成功率",
+    "据此声称稳定通过一小时耐久测试",
+    "据此声称对所有瓶型均已泛化"
+  ]
+}
