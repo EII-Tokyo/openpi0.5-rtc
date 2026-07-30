@@ -1,0 +1,33 @@
+claim_id,报告章节,报告中的结论,证据类型,证据文件,行号或字段,实验编号,可信度,是否需要补充验证
+E01,2,任务为左臂取瓶稳瓶右臂旋盖并分别投放瓶身和瓶盖,现场任务说明+运行配置,artifacts/field_observation_claims.json,observed_capabilities.complete_cycle,FIELD-OBS,中高,是
+E02,3,采集软件具备连续采集异步保存重采多触发健康检查和安全停止,源代码+Git历史,audit/project_audit.md,5.2数据采集,ALOHA-CAPTURE-CURRENT,高,否
+E03,3,数据中心有51个有效项目2413条轨迹2907804帧约16.15小时,数据库聚合,artifacts/datacenter_aloha_audit.json,project_totals+active_project_episode_totals,DATACENTER-ACTIVE,高,否
+E04,3,正式训练子集为25个唯一仓库1051条轨迹879852帧约4.89小时,Hub元数据+训练配置,artifacts/hf_training_dataset_audit.json,totals,BASELINE-DATA,高,否
+E05,3,全量数值检查未发现非有限值全零行时间戳或帧号问题,Parquet全量扫描,artifacts/hf_training_numeric_quality.json,totals/duplicate_summary,BASELINE-DATA-QA,高,是
+E06,4,正式模型输入三路画面和14维状态并输出50x14动作,训练配置+模型/数据代码,artifacts/baseline_wandb_audit.json,run.config.model+data,BASELINE-TRAIN,高,否
+E07,2,运行控制50Hz并在动作片段执行中重规划,部署命令+控制代码,artifacts/baseline_policy_audit.json,runtime.control_and_chunking,BASELINE-DEPLOY,高,否
+E08,4/6,正式训练有6059条记录覆盖0到59990步约51.4小时,训练平台原始历史,artifacts/baseline_wandb_audit.json,run.history_rows+history_summary,BASELINE-TRAIN,高,否
+E09,4,正式部署保存点目录19000含838358468参数和14维归一化统计,Checkpoint metadata+部署命令,artifacts/baseline_policy_audit.json,deployed_baseline_checkpoint,BASELINE-CKPT-19000,高,否
+E10,摘要/6,现场观察到完整循环且超过1小时约2瓶每分钟为估计,用户确认的现场观察,artifacts/field_observation_claims.json,continuous_operation+throughput,FIELD-OBS,中,是
+E11,3/6/7,6个无盖仓库158条轨迹仍全部使用无条件拧盖指令,配置+Hub任务交叉检查,artifacts/dataset_condition_coverage.json,no_cap_prompt_cross_check,BASELINE-DATA-PROMPT,高,是
+E12,4/6,9份清单含8223个真实三相机注意力样本但无结果标签,真实运行输出,artifacts/attention_audit.json,manifest_count+total_samples+does_not_support,ATTN-REAL,高,是
+E13,5,两个月窗口有41次运行尝试33个名称14组配置但多数中断,训练平台运行谱系,artifacts/wandb_experiment_inventory.json,summary+family_summary,TRAIN-INVENTORY,高,否
+E14,1/2,正式设备照片显示双示教臂双工作臂相机架和工作台且为静止状态,原始照片+处理来源,artifacts/official_photo_provenance.json,source+prohibition,FORMAL-PHOTO,高,否
+E15,5,强化学习研究数据含835条冲洗轨迹238816个片段和人工终止奖励,数据审计,artifacts/dataset_statistics.json,raw_dataset+training_replay,RLT-DATA,高,是
+E16,5/6,强化学习round28到32离线动作误差相对下降约6.7%但无真机对照,训练日志+Checkpoint,artifacts/plot_data/round_eval.csv,round28 step0 vs round32 step299,RLT-R28-32,高,是
+E17,3,正式训练过滤后844102帧约4.69小时且35750帧排除,Hub元数据+过滤范围,artifacts/hf_training_dataset_audit.json,totals.trainable_frames,BASELINE-DATA,高,否
+E18,3,29个采样条目等效1495条轨迹暴露不是新增轨迹,训练配置+元数据,artifacts/hf_training_dataset_audit.json,totals.sampling_entries_after_weights+weighted_episode_exposure,BASELINE-DATA,高,否
+E19,3,原始仓库均含4路640x480视频且训练仅用3路224x224,Hub features+训练配置,artifacts/hf_training_dataset_audit.json,camera_set_counts+recipe_config,BASELINE-DATA,高,否
+E20,3,基础训练数据只有train split且没有reward或success字段,Hub metadata,artifacts/hf_training_dataset_audit.json,repositories.features+interpretation_limits,BASELINE-DATA,高,是
+E21,4,训练损失首值0.067703最低0.000499末值0.000671,训练历史,artifacts/baseline_wandb_audit.json,history_summary.loss,BASELINE-TRAIN,高,否
+E22,4,训练配置为batch256四张H200全参数微调seed42,训练平台保存配置,artifacts/baseline_wandb_audit.json,run.config,BASELINE-TRAIN,高,否
+E23,4,模型使用flow matching目标和10步Euler推理,模型源代码+部署参数,audit/project_audit.md,9模型审计,BASELINE-MODEL,高,否
+E24,4,注意力三路份额范围顶部22.9到25.9左腕32.9到36.4右腕37.7到43.4,注意力清单全量统计,artifacts/attention_audit.json,runs.mean_camera_share,ATTN-REAL,高,否
+E25,4,注意力记录开销中位约40到55ms且不能当作完整推理延迟,注意力清单,artifacts/attention_audit.json,runs.capture_ms_after_first,ATTN-REAL,高,是
+E26,5,运行状态为crashed33 failed5 finished3且finished不代表任务成功,训练平台运行谱系,artifacts/wandb_experiment_inventory.json,summary.all_selected.states,TRAIN-INVENTORY,高,否
+E27,3,训练轨迹中位时长12.2秒中间80%约4.9到28.4秒,固定版本episode长度,artifacts/plot_data/baseline_training_episode_lengths.csv,length/50 quantiles,BASELINE-DATA,高,否
+E28,4,保存模型无optimizer state且无独立EMA副本,Checkpoint metadata,artifacts/baseline_policy_audit.json,deployed_baseline_checkpoint.optimizer_state_present+ema_present,BASELINE-CKPT-19000,高,否
+E29,5,RLT round32有61541926参数optimizer和target存在无EMA,Checkpoint metadata,artifacts/checkpoint_metadata.json,total_parameters+optimizer_state_exists+target_parameters_exist,RLT-ROUND32,高,否
+E30,7,没有正式任务成功率失败频率标准吞吐量或置信区间,缺失记录+现场声明,audit/missing_information.md,P0 rows,GLOBAL,高,是
+E31,9,未来插管清洗的毫米级精度是目标而非已测能力,项目计划+缺失几何测量,audit/missing_information.md,insertion geometry tolerance,NEXT-YEAR,高,是
+E32,附录,浏览器网关不可用导致数据中心与HF视口截图缺失,Gateway错误,audit/missing_information.md,Browser screenshot blocker,SCREENSHOT,高,是

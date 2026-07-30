@@ -1,0 +1,136 @@
+\documentclass[UTF8,openany,11pt]{ctexrep}
+\usepackage[a4paper,top=20mm,bottom=21mm,left=22mm,right=22mm,headheight=15pt]{geometry}
+\usepackage{booktabs,longtable,tabularx,array,multirow,makecell}
+\usepackage{graphicx,subcaption,float,placeins}
+\usepackage{amsmath,amssymb}
+\usepackage{siunitx}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,fit,shapes.geometric,calc}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepackage{hyperref}
+\usepackage[nameinlink,noabbrev]{cleveref}
+\usepackage{xurl}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+\usepackage{setspace}
+\usepackage{microtype}
+\usepackage{caption}
+\usepackage{titlesec}
+
+\definecolor{ReportNavy}{HTML}{142B4A}
+\definecolor{ReportBlue}{HTML}{2474B5}
+\definecolor{ReportTeal}{HTML}{168B83}
+\definecolor{ReportAmber}{HTML}{E69F35}
+\definecolor{ReportRed}{HTML}{C6534C}
+\definecolor{ReportGreen}{HTML}{4C956C}
+\definecolor{ReportGray}{HTML}{667085}
+\definecolor{ReportLight}{HTML}{F2F6F8}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=ReportBlue,
+  urlcolor=ReportBlue,
+  citecolor=ReportBlue,
+  pdftitle={ALOHA机器人拧瓶盖项目现阶段技术报告},
+  pdfsubject={第一年度工作总结与下一年度计划},
+  pdfauthor={待填写}
+}
+\graphicspath{{figures/}}
+\setlength{\emergencystretch}{2.5em}
+\setlength{\parindent}{2em}
+\setlength{\parskip}{0.25em}
+\setstretch{1.17}
+\setlist{topsep=3pt,itemsep=2pt,parsep=0pt,leftmargin=2em}
+\captionsetup{font=small,labelfont=bf,labelsep=quad}
+\renewcommand{\arraystretch}{1.22}
+\setlength{\tabcolsep}{5pt}
+\setcounter{tocdepth}{2}
+\setcounter{secnumdepth}{2}
+
+\titleformat{\chapter}[display]
+  {\bfseries\color{ReportNavy}}
+  {\filleft\Large 第\thechapter 章}
+  {0.3ex}
+  {\titlerule\vspace{0.8ex}\Huge}
+\titleformat{\section}{\Large\bfseries\color{ReportNavy}}{\thesection}{0.7em}{}
+\titleformat{\subsection}{\large\bfseries\color{ReportBlue}}{\thesubsection}{0.7em}{}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small ALOHA 机器人拧瓶盖项目现阶段技术报告}
+\fancyhead[R]{\small\color{ReportGray}\leftmark}
+\fancyfoot[C]{\color{ReportGray}\thepage}
+\renewcommand{\headrulewidth}{0.3pt}
+
+\newcommand{\ev}[1]{\textcolor{ReportBlue}{\textsuperscript{[#1]}}}
+\newcommand{\plain}[1]{\par\smallskip\noindent
+  \colorbox{ReportLight}{\parbox{\dimexpr\linewidth-2\fboxsep}{\textbf{先说人话：}#1}}\par\smallskip}
+\newcommand{\limitbox}[1]{\par\smallskip\noindent
+  \fcolorbox{ReportAmber}{white}{\parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule}{\textbf{\color{ReportAmber}证据边界：}#1}}\par\smallskip}
+\newcommand{\resultbox}[1]{\par\smallskip\noindent
+  \fcolorbox{ReportGreen}{white}{\parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule}{\textbf{\color{ReportGreen}本阶段结论：}#1}}\par\smallskip}
+\newcommand{\missing}{\textcolor{ReportRed}{当前证据中未找到直接记录}}
+\newcommand{\figfull}[3][0.94\textwidth]{
+  \begin{figure}[tbp]
+    \centering
+    \includegraphics[width=#1]{#2}
+    \caption{#3}
+  \end{figure}
+}
+
+\begin{document}
+\begin{titlepage}
+\thispagestyle{empty}
+\begin{tikzpicture}[remember picture,overlay]
+  \fill[ReportNavy] (current page.north west) rectangle ([yshift=-44mm]current page.north east);
+  \fill[ReportTeal] ([yshift=-44mm]current page.north west) rectangle ([yshift=-47mm]current page.north east);
+  \fill[ReportLight] (current page.south west) rectangle ([yshift=20mm]current page.south east);
+\end{tikzpicture}
+\vspace*{8mm}
+{\color{white}\Large 第一年度工作总结与现阶段技术评审\par}
+\vspace{11mm}
+{\color{white}\fontsize{28}{34}\selectfont\bfseries
+ALOHA 机器人拧瓶盖项目\\[2mm]现阶段技术报告\par}
+\vspace{7mm}
+\begin{center}
+\includegraphics[width=.88\textwidth,height=.28\textheight,keepaspectratio]{cover_concept.png}
+
+{\footnotesize\color{ReportGray}封面为任务概念示意图，不是实验照片。}
+\end{center}
+\vspace{4mm}
+\begin{tabularx}{\textwidth}{>{\bfseries\color{ReportNavy}}p{32mm}X}
+项目阶段 & 第一年工作总结与下一年度工作设计\\
+正式部署模型 & 2026年5月训练、现场采用第19,000步保存版本\\
+事实源版本 & 主仓库审计提交：\texttt{c90f1854}（完整编号见内部审计）\\
+报告日期 & 2026年7月30日\\
+报告版本 & v2.0（无演示视频、证据分级版）\\
+作者 & \underline{\hspace{75mm}}\\
+\end{tabularx}
+\vspace{3mm}
+{\small\color{ReportGray}用途：项目汇报、内部技术评审、后续论文材料整理\par}
+\end{titlepage}
+
+\pagenumbering{Roman}
+\input{sections/00_executive_summary}
+\tableofcontents
+\listoffigures
+\listoftables
+\clearpage
+\pagenumbering{arabic}
+
+\input{sections/01_background}
+\input{sections/02_system}
+\input{sections/03_data}
+\input{sections/04_model}
+\input{sections/05_experiments}
+\input{sections/06_results}
+\input{sections/07_discussion}
+\input{sections/08_conclusion}
+\input{sections/09_plan}
+\input{sections/10_appendix}
+
+\bibliographystyle{plain}
+\bibliography{bibliography/references}
+\end{document}

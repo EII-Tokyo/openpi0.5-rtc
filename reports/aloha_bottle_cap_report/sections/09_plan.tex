@@ -1,0 +1,177 @@
+\chapter{未来一年工作计划}
+
+\figfull[.97\textwidth]{next_year_roadmap.pdf}{未来一年优先级路线。顺序由当前证据缺口决定：先让结果可信，再修复基础能力，再验证强化学习，最后推进高精度插管清洗。}
+
+\section{P0：解除当前阻塞——让结果可信}
+
+\begingroup\small\setlength{\tabcolsep}{2pt}
+\begin{longtable}{>{\bfseries\raggedright\arraybackslash}p{16mm}>{\raggedright\arraybackslash}p{25mm}>{\raggedright\arraybackslash}p{36mm}>{\raggedright\arraybackslash}p{31mm}>{\raggedright\arraybackslash}p{28mm}}
+\caption{P0 工作包}\\
+\toprule
+目标 & 操作 & 验证指标 & 前置条件/风险 & 预计产出\\
+\midrule\endfirsthead
+\toprule
+目标 & 操作 & 验证指标 & 前置条件/风险 & 预计产出\\
+\midrule\endhead
+固定测试协议 &
+规定瓶型、数量、姿态、密度、光照、回收盒位置和每组重复次数 &
+每次测试都有场景编号、起止时间、逐瓶结果和异常原因 &
+需冻结一批不进入训练的数据；避免测试过程中继续改规则 &
+标准测试手册与不可变测试清单\\
+\addlinespace
+成功判定 &
+分别记录抓瓶、抓盖、稳定瓶身、旋转、完全脱离、瓶/盖进正确盒 &
+各阶段自动/人工一致率；完整任务成功率与95\%置信区间 &
+仅靠一名观察者可能有偏差；需要双人复核或视频复核 &
+阶段化结果表与自动统计面板\\
+\addlinespace
+运行记录 &
+为每轮任务记录时间、模型版本、数据版本、瓶子编号、结果和恢复 &
+零缺失记录；每次展示可追溯到保存模型与测试场景 &
+注意隐私和设备信息脱敏 &
+统一实验台账与日报\\
+\addlinespace
+端到端性能 &
+记录推理延迟、控制丢帧、动作片段切换和设备中止 &
+延迟 p50/p95/p99、控制频率、切换跳变和中止次数 &
+测量工具本身不能影响实时运行 &
+性能基准与告警阈值\\
+\bottomrule
+\end{longtable}
+\endgroup
+
+\section{P1：提高基础模型成功率}
+
+\begingroup\small\setlength{\tabcolsep}{2pt}
+\begin{longtable}{>{\bfseries\raggedright\arraybackslash}p{16mm}>{\raggedright\arraybackslash}p{25mm}>{\raggedright\arraybackslash}p{36mm}>{\raggedright\arraybackslash}p{31mm}>{\raggedright\arraybackslash}p{28mm}}
+\caption{P1 工作包}\\
+\toprule
+目标 & 操作 & 验证指标 & 前置条件/风险 & 预计产出\\
+\midrule\endfirsthead
+\toprule
+目标 & 操作 & 验证指标 & 前置条件/风险 & 预计产出\\
+\midrule\endhead
+修复空拧 &
+采集同瓶型有盖/无盖配对轨迹；无盖明确要求跳过旋拧；加入判断阶段 &
+无盖误进入旋拧率；有盖漏拧率；完整任务成功率 &
+条件指令必须与实际动作一致；防止模型只记瓶型 &
+无盖条件数据版本与对照报告\\
+\addlinespace
+修复倒抓 &
+按瓶口方向和可抓取面分层采集；增加抓取后朝向确认和重新抓取 &
+倒抓率、抓取后可旋盖率、重新抓取成功率 &
+需要逐帧朝向/抓取端标签；避免只增加同一方向样本 &
+方向平衡数据与抓取诊断表\\
+\addlinespace
+提高接触稳定性 &
+分开标注接近、夹盖、转动、脱离；记录夹爪电流与视觉瓶盖角 &
+抓盖率、开始转动率、完全脱离率、掉落率 &
+瓶盖类型和摩擦差异大；视觉角度估计需标定 &
+接触阶段数据集与阶段模型对比\\
+\addlinespace
+优化动作片段 &
+比较不同执行长度、重规划时刻和异常打断策略 &
+完成时间、切换跳变、失败后恢复率、控制丢帧 &
+不能同时改变数据和模型，以免无法归因 &
+动作片段消融报告\\
+\addlinespace
+增加多视角鲁棒性 &
+在不改变其他条件下比较顶部、腕部缺失或遮挡 &
+三相机消融下的阶段完成率和动作偏差 &
+注意力不能替代遮挡实验；需保证安全 &
+相机贡献报告与最小传感器配置\\
+\bottomrule
+\end{longtable}
+\endgroup
+
+\section{P2：建立可靠比较并推进强化学习}
+
+强化学习应建立在可用的基础模型和统一测试协议上。下一年度先冻结一个基础模型版本，再在同一数据、同一瓶子、同一初始条件和同一测试次数下比较基础模型与强化学习模型。
+
+\begingroup\small\setlength{\tabcolsep}{2pt}
+\begin{longtable}{>{\bfseries\raggedright\arraybackslash}p{16mm}>{\raggedright\arraybackslash}p{25mm}>{\raggedright\arraybackslash}p{36mm}>{\raggedright\arraybackslash}p{31mm}>{\raggedright\arraybackslash}p{28mm}}
+\caption{P2 工作包}\\
+\toprule
+目标 & 操作 & 验证指标 & 前置条件/风险 & 预计产出\\
+\midrule\endfirsthead
+\toprule
+目标 & 操作 & 验证指标 & 前置条件/风险 & 预计产出\\
+\midrule\endhead
+同条件基础对照 &
+冻结基础模型和测试集；强化学习只改变一个因素 &
+完整任务与各阶段成功率差值、置信区间、耗时与碰撞 &
+基础模型仍快速变化会使对照失效 &
+可复核基础模型基线\\
+\addlinespace
+改进奖励 &
+把人工终止标签拆为阶段奖励，检查重复/错误标签 &
+标签一致率、价值判断校准、离线排序正确率 &
+错误奖励会放大错误行为 &
+奖励规范与清洗数据\\
+\addlinespace
+多随机种子 &
+至少 3 个随机种子重复关键配置 &
+均值、标准差和95\%置信区间 &
+计算成本高，应先缩小候选配置 &
+多种子实验表\\
+\addlinespace
+安全真机验证 &
+先离线筛选，再小批量真机；设置动作边界和人工急停 &
+相对基础模型的阶段增益、异常次数与恢复率 &
+真机探索存在碰撞和设备磨损风险 &
+强化学习真机评估报告\\
+\bottomrule
+\end{longtable}
+\endgroup
+
+\section{P3：推进空瓶插入水管清洗}
+
+未来一年计划把空瓶瓶口插入水管进行清洗。该任务比拧盖更依赖精确的瓶口中心、管口中心、轴线方向和接触顺应。当前“毫米级”是工程目标，不是已经测得的系统精度。
+
+\begingroup\small\setlength{\tabcolsep}{2pt}
+\begin{longtable}{>{\bfseries\raggedright\arraybackslash}p{16mm}>{\raggedright\arraybackslash}p{25mm}>{\raggedright\arraybackslash}p{36mm}>{\raggedright\arraybackslash}p{31mm}>{\raggedright\arraybackslash}p{28mm}}
+\caption{P3 工作包}\\
+\toprule
+目标 & 操作 & 验证指标 & 前置条件/风险 & 预计产出\\
+\midrule\endfirsthead
+\toprule
+目标 & 操作 & 验证指标 & 前置条件/风险 & 预计产出\\
+\midrule\endhead
+真实几何标定 &
+测量瓶口、管口、相机和机器人坐标；记录重复定位误差 &
+位置/角度误差均值、95分位和重复性 &
+不同瓶型尺寸变化；标定漂移 &
+几何基准与误差预算\\
+\addlinespace
+数字孪生 &
+建立瓶子、水管、工作台和双臂碰撞模型；冻结审核场景 &
+真实照片/测量对齐误差、碰撞一致率、轨迹可执行率 &
+仿真外观相似不等于接触真实 &
+可复核数字孪生场景\\
+\addlinespace
+分阶段插入 &
+先定位，再对轴，再接触，再小距离插入，最后完成清洗 &
+各阶段成功率、最大接触力、插入深度和完成时间 &
+无力觉时应采用保守速度和视觉反馈 &
+分阶段插入策略与安全规范\\
+\addlinespace
+数据与强化学习 &
+采集毫米级失败边界与恢复；在安全仿真/离线数据中先优化 &
+相对基础模仿模型的插入误差、恢复率和真机增益 &
+仿真到真实差距；奖励设计可能诱导危险动作 &
+插管数据集、对照实验和研究论文材料\\
+\bottomrule
+\end{longtable}
+\endgroup
+
+\section{未来一年验收主线}
+
+未来一年不以“训练了更多步”作为验收，而以以下可复核结果为主线：
+
+\begin{enumerate}
+  \item 任何模型都能在固定测试集上给出完整任务和分阶段结果；
+  \item 空拧和倒抓都有条件化错误率，并能被数据/方法修改显著降低；
+  \item 基础模仿模型与强化学习模型有同条件、多随机种子比较；
+  \item 插管任务有真实几何误差预算、分阶段指标和安全测试；
+  \item 每一张结果图都能回到原始数据、模型版本和测试记录。
+\end{enumerate}
