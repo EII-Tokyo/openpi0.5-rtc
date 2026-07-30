@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import time
 
 import carb.eventdispatcher
 import omni.ext
@@ -10,6 +11,7 @@ import omni.timeline
 import omni.ui as ui
 import omni.usd
 
+from .grasp_editor_bridge import APPROVED_MANIFEST_SHA256
 from .grasp_editor_bridge import ApprovedGraspEditorBridge
 
 _extension_instance: VisualTutorExtension | None = None
@@ -57,6 +59,8 @@ class VisualTutorExtension(omni.ext.IExt):
     def on_shutdown(self) -> None:
         global _extension_instance  # noqa: PLW0603 - Kit module accessor.
 
+        if self._live_bridge is not None:
+            self._live_bridge.shutdown()
         self._update_subscription = None
         self._live_bridge = None
         self._window = None
@@ -70,13 +74,19 @@ class VisualTutorExtension(omni.ext.IExt):
     def _on_app_update(self, _event: object) -> None:
         if self._live_bridge is not None:
             self._live_bridge.note_app_update()
+            ack = self._live_bridge.process_next_request()
+            if ack is not None:
+                self._write_payload(ack)
 
     def _build_ui(self) -> None:
         with self._window.frame, ui.VStack(spacing=8):
             ui.Label("My Isaac Visual Tutor", height=24)
             ui.Label("simulation_only = true", height=22)
             ui.Label("timeline_starts_paused = true", height=22)
-            ui.Button("Capture State", clicked_fn=self._capture_state)
+            ui.Button(
+                "Capture State",
+                clicked_fn=self._request_capture_state_from_panel,
+            )
             ui.Button("Pause Timeline", clicked_fn=self._pause_timeline)
             ui.Button("Clear Status", clicked_fn=self._clear_status)
 
@@ -89,16 +99,23 @@ class VisualTutorExtension(omni.ext.IExt):
         timeline = omni.timeline.get_timeline_interface()
         timeline.pause()
         self._status = "timeline_paused"
-        self._capture_state()
+        self._request_capture_state_from_panel()
 
     def _clear_status(self) -> None:
         self._status = "idle"
-        self._capture_state()
+        self._request_capture_state_from_panel()
 
-    def _capture_state(self) -> None:
+    def _request_capture_state_from_panel(self) -> None:
         if self._live_bridge is None:
             return
-        payload = self._live_bridge.capture_state()
+        payload = self._live_bridge.request_capture_state(
+            f"panel-{time.monotonic_ns()}",
+            APPROVED_MANIFEST_SHA256,
+        )
+        self._write_payload(payload)
+
+    def _write_payload(self, payload: dict[str, object]) -> None:
+        payload = dict(payload)
         payload["panel_status"] = self._status
         payload["safety"] = {
             "simulation_only": True,
