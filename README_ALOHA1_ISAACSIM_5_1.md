@@ -17,7 +17,7 @@ sim-to-real dynamics model and it is not yet accepted for bottle insertion.
 | Task 7B.2 horizontal dynamic pickup smoke | **FAIL** | one fresh-reset Bottle500 trial established bilateral contact and held contact, but the actual contact-center line was `79.2245°` rather than `90°±3°` to `AB` and the bottle never left the table; 20-trial acceptance is blocked |
 | Task 7B.2 continuous video evidence | **PASS visual / FAIL physical** | two synchronized 60 fps streams, 288 frames/4.8 s each, no missing physics frames; raw and annotated overview/close-up videos were vision-reviewed; all labels retain `PHYSICAL FAIL` |
 | Task 7B.2 screenshot evidence | **PARTIAL** | seven side-oblique raw/annotated pairs pass; seven true-top pairs remain PARTIAL because the actual wrist/gripper pose occludes the finger inner surfaces; runtime A/B, L/R origins and contact-normal projections are auxiliary |
-| Grasp Editor pre-IK scripted tester | **PARTIAL / tester-only PASS** | A and B each repeat deterministically in three fresh processes, but actual GUI author/export is blocked by the missing reviewed Visual Tutor Gateway bridge; IK and new video are `NOT_RUN` |
+| Grasp Editor pre-IK GUI/export | **PARTIAL / mimic-blocked** | actual Grasp Editor 2.0.20 GUI plus external close and native `Skip Sim` established 125 bilateral contact points and exported validated raw/derived YAML; right-finger mimic residual is `1.779459 mm > 1 mm`, so IK and five random-bottle videos remain `NOT_RUN` |
 | Current signal screenshots | **PASS (visual 24/24 PASS)** | 12 fresh raw + 12 annotated images match Stage SHA-256 `d8182a6c…c788cf`; the controlled OmniHydra screenshot process has zero `protoPath` errors |
 | Hydra protoPath controlled diagnosis | **PASS / `FSD_7_5_1_PRIMARY`** | A=29 errors, B OmniHydra=0, B repeat deterministic, D materialization=0; default delegate restored and final assets unchanged |
 | Source and environment audit | PARTIAL | `reports/aloha1_mapping/source_audit.md`, `source_manifest.json`, `missing_resources.json` |
@@ -1357,110 +1357,122 @@ default, or protected Stage was modified. Task 8 remains `NOT_RUN`.
 ## 2026-07-30 Grasp Editor pre-IK gate
 
 The earlier horizontal-pickup failure is not being sent directly into IK.
-The current order is Grasp Editor configuration and GraspTester evidence
-first, then a fresh-process geometry/transform and ALOHA kinematic
-correspondence gate, and only then IK.
+The active order remains Grasp Editor frame/closure validation → ALOHA
+six-DOF kinematic correspondence → IK → five fresh random horizontal-bottle
+pickup videos. The pre-IK GUI gate has now advanced beyond the historical
+scripted-equivalent and deprecated Visual Tutor route.
 
-The local Isaac Sim 5.1.0.0 GraspTester scripted equivalent has completed.
-It used Grasp Editor `2.0.20`, Kit `107.3.3`, PhysX `107.3.26`, the frozen
-signal-correspondence Stage, the project Bottle500, the supplier-CAD finger
-colliders, `solve_articulation_contact_last=true`, and a session-only
-anonymous diagnostic layer. It did not modify the frozen Stage or final
-asset.
+The actual local Isaac Sim GUI was run with Isaac Sim `5.1.0.0`, Kit
+`107.3.3`, PhysX `107.3.26`, and Grasp Editor `2.0.20` against the frozen
+table/support-aligned diagnostic Stage:
 
-Two control variants were retained:
+`/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/table_support_alignment/1.0/aloha1_table_support_aligned_workcell.usda`
 
-- A, `dual_active_exact_candidate`, commands both finger DOFs and remains
-  diagnostic-only because the right finger is a mimic observer in the
-  approved mapping;
-- B, `left_active_mimic_observed`, commands only `left_finger`, observes
-  `right_finger`, and is the recommended input for the future GUI step.
+Its SHA-256 remains
+`2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c`.
+The source Stage was not modified.
 
-Each variant was run three times in a fresh Isaac process. All six runs
-reached exactly one terminal GraspTester success callback and are classified
-only as `GRASP_TESTER_PASS_ONLY_NOT_TASK_PASS`.
+The local source and runtime readback establish the following coordinate and
+joint contract:
 
-- A: `127` telemetry steps and `3629` contact records per run; stable trial
-  signature
-  `ca424213e4789515e8ac00b3b853ea57652d353605a9c791607a533596922e9d`;
-  native export SHA-256
-  `8b15e490ce7b16e2e89720eb1d5cdf9e58ffef067753e26fee2e0c2f54b14f0c`.
-- B: `125` telemetry steps and `3567` contact records per run; stable trial
-  signature
-  `1791d7e9bd45f9801146dc09bf7c51aae26c8202fc07dfa149852edb843001ae`;
-  native export SHA-256
-  `6df061054b7fa4dba7398fabdbe557ea3d29bb865e180d228872363805c62528`.
+- Bottle500 object frame: bottle bottom center, local `+Z` from bottom to
+  mouth;
+- Grasp Editor and IK gripper frame:
+  `/World/follower_left/vx300s_left/follower_left_ee_gripper_link`;
+- stored YAML transform: `T_O_G`;
+- application: `T_W_G = T_W_O @ T_O_G`;
+- authoring inverse: `T_W_O = T_W_G @ inverse(T_O_G)`;
+- the supplier-CAD contact helper is offset by `0.0283208044 m` from the
+  canonical EE frame and is not itself the Grasp Editor/IK gripper frame;
+- only `left_finger` is active/exported; `right_finger` remains a runtime
+  mimic observer;
+- `Position When Closed = 0.021 m`, directly read from the USD/runtime lower
+  limit;
+- supplier-CAD bilateral contact candidate
+  `left_finger = 0.048316874538855845 m`;
+- verified open pregrasp `left_finger = 0.057 m`.
 
-Runtime readback directly confirms:
+The previous use of the CAD contact candidate as `Position When Closed` was
+incorrect and is now formally corrected. Local GraspTester source also proves
+that native `SIMULATE` is not a sufficient ALOHA grasp gate: the tester fails
+when the active joint reaches its fully-closed target, but otherwise has no
+direct contact-pair requirement. A session-only no-object-contact control
+returned native success with zero physical Bottle500 contact points. The old
+control image that moved the bottle upward is explicitly rejected as task
+geometry; it must not be used as horizontal placement, IK, pickup, or hold
+evidence.
 
-- DOF order remains
-  `waist, shoulder, elbow, forearm_roll, wrist_angle, wrist_rotate,
-  gripper, left_finger, right_finger`;
-- all reported object contacts are between Bottle500 and the two correct
-  supplier-CAD finger colliders; no gripper-bar/base/workcell contact is
-  counted as a tester pass;
-- all `41` Bottle500 colliders resolve the session physics material;
-  static/dynamic friction read back as approximately `0.7`, restitution as
-  `0.0`;
-- root-layer content, root dirty state, session sublayers, edit target, and
-  all frozen file hashes are restored before report publication;
-- the written native YAML is reopened, structurally validated, checked for
-  finite values, and hashed before it is reported as written.
+Following the official coupled-gripper fallback, the accepted diagnostic
+path externally drives only `left_finger`, observes the right-finger mimic,
+then invokes native `Skip Sim` for export. The final fresh run records:
 
-This result is deliberately not promoted:
+- bilateral supplier-CAD finger/Bottle500 contact: `PASS`;
+- physical contact point count: `125`;
+- maximum finite impulse:
+  `0.0005472996575105919 N·s`;
+- minimum separation:
+  `-0.00012263594544492662 m`;
+- unexpected robot contact: `false`;
+- native raw YAML validation: `PASS`;
+- derived YAML validation: `PASS`, with only the verified open pregrasp
+  restored and classification
+  `DIAGNOSTIC_ONLY_NOT_FINAL_CONTROL_MAPPING`;
+- right-finger mimic residual:
+  `0.0017794594168663025 m`, exceeding the unchanged `0.001 m` gate;
+- overall external-close gate: `FAIL_MIMIC_ACCURACY`.
 
-- `GUI = PENDING`;
-- `IK = NOT_RUN`;
-- `TASK_PASS = NOT_ESTABLISHED`;
-- `arm_hold_status` and `mimic_status` remain inconclusive until their
-  tolerances are approved;
-- the tester disables Bottle gravity and is not the required
-  table-settle → vertical approach → bilateral contact → lift → hold task;
-- the scripted export uses a session-only Bottle frame and is not the
-  authoritative persistent GUI export.
+Four raw and four annotated images were inspected pixel-by-pixel with the
+vision model. Both full-arm images pass only as context; both fixed-camera
+close-ups visibly distinguish open and bilateral-contact states. The
+annotated images preserve the numeric mimic failure and explicitly identify
+the vertical bottle as a robot-local authoring setup, not the required
+horizontal dynamic pickup task.
 
-The Gateway is reachable and the NVIDIA official Isaac documentation tool
-was used, but the selected MCPJungle group does not expose the reviewed
-Visual Tutor application probe or Isaac GUI teaching actions. The actual
-Grasp Editor GUI author/export step is therefore
-`HARD_BLOCKER_VISUAL_TUTOR_GATEWAY_BRIDGE_UNAVAILABLE`. The project rule
-forbids replacing that bridge with shell-driven arbitrary clicks or a direct
-MCP. IK and new grasp video recording remain `NOT_RUN`; no new video has been
-promoted during this gate.
+The local PhysX `107.3.26` schema declares only `referenceJoint`,
+`referenceJointAxis`, `gearing`, and `offset` for
+`PhysxMimicJointAPI`. Runtime custom properties `naturalFrequency` and
+`dampingRatio` are visible to the local Gain Tuner UI, but they are not
+declared by that schema and their solver effect is unverified. No mimic,
+drive, friction, collider, bottle, timestep, or solver parameter was tuned.
+Without measured or supplier-confirmed mimic parameters, changing them to
+make the gate pass is not authorized.
 
-The follow-up source and Gateway audit established that registration alone is
-not sufficient. The current Visual Tutor server is a stdio dry-run prototype:
-its Isaac probe checks local paths, its action adapter returns dry-run
-success, and its passive Isaac extension has no command/ack channel to the
-server. It has no Streamable HTTP endpoint, live extension heartbeat, real
-Grasp Editor action, or screenshot capture. Its `7/7` focused tests validate
-only dry-run/static contracts.
+Current promotion boundary:
 
-A separate Grasp Editor 2.0.20 schema blocker also remains. Approved Variant B
-commands only `left_finger`, so the native writer produces `grasp_0` with only
-`left_finger` in the c-space maps. The current project loader requires
-`horizontal_body_grasp` with both `left_finger` and `right_finger`. This is
-`HARD_BLOCKER_CANONICAL_SCHEMA_MISMATCH`; the raw GUI file may become
-evidence, but it must not be silently renamed, supplemented with a guessed
-right-finger value, or promoted over the canonical config.
+- actual Grasp Editor GUI: `PASS`;
+- coordinate-transform closure: `PASS`;
+- bilateral-contact establishment: `PASS`;
+- native raw and diagnostic derived exports: `PASS`;
+- mimic accuracy: `FAIL`;
+- IK: `NOT_RUN`;
+- five random horizontal-bottle pickup videos: `NOT_RUN`;
+- horizontal dynamic pickup task: `NOT_ESTABLISHED`;
+- Task 8: `NOT_RUN`.
+
+The earlier three-repeat scripted GraspTester A/B evidence remains historical
+diagnostic evidence only. It is not the current promotion gate and does not
+override the runtime mimic failure.
 
 Machine reports:
 
 - `reports/aloha1_mapping/aloha1_grasp_tester_scripted_equivalent.json`;
-- `reports/aloha1_mapping/aloha1_grasp_tester_scripted_equivalent.md`.
+- `reports/aloha1_mapping/aloha1_grasp_tester_scripted_equivalent.md`;
 - `reports/aloha1_mapping/aloha1_visual_tutor_gateway_diagnosis.json`;
-- `reports/aloha1_mapping/aloha1_visual_tutor_gateway_diagnosis.md`.
+- `reports/aloha1_mapping/aloha1_visual_tutor_gateway_diagnosis.md`;
+- `reports/aloha1_mapping/aloha1_grasp_editor_semantics_audit.json`;
+- `reports/aloha1_mapping/aloha1_grasp_editor_semantics_audit.md`;
+- `reports/aloha1_mapping/aloha1_grasp_editor_external_skip_sim_screenshot_review.json`;
+- `reports/aloha1_mapping/aloha1_grasp_editor_external_skip_sim_screenshot_review.md`.
 
-Full reports, telemetry, native YAML, exit records, and logs are under:
+The final actual-GUI raw/derived YAML, report, telemetry, logs, and raw and
+annotated screenshots are under:
 
-`/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-grasp-editor-ik-evidence/grasp_tester_scripted/`.
+`/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-grasp-editor-ik-evidence/frame_contract_correction/external_contact_skip_sim_run03_cross_axis/`.
 
-All six Isaac processes published their authoritative report before
-`SimulationApp.close()`, then exited `139` in the known ROS2/Kit shutdown
-path. This does not prove a clean Kit shutdown. The report records
-`shell_exit_code_is_not_authoritative=true`; automation must validate the
-report, cleanup, hashes, export, and intended exit instead of treating shell
-`139` as success.
+The final Isaac process published and validated its report, exports, cleanup
+state, screenshots, and frozen hashes before the known Kit shutdown path
+returned shell exit `139`. This does not prove a clean Kit shutdown and shell
+exit alone is not an acceptance signal.
 
 ## HARD_BLOCKER and measurement checklist
 
@@ -1486,8 +1498,10 @@ The machine-readable authoritative list is
 12. Calibrate the physical inner fingertip surface and contact-offset policy.
     The correct-finger Hull/Decomposition A/B is complete and both pass the
     digital hold gate, but neither is a calibrated physical collider.
-13. Resolve the right-finger runtime mimic/readback and `1.935 mm` semantic
-    opening-limit overshoot without changing the verified sign or joint order.
+13. Resolve the right-finger runtime mimic/readback. The current actual-GUI
+    external-close residual is `1.779459 mm`, above the unchanged `1 mm`
+    gate. Do not change the verified sign, joint order, drive, or uncalibrated
+    mimic parameters merely to make this report pass.
 14. The Sensor Camera empty-buffer path remains a historical backend issue,
     but the screenshot gate is resolved with the local Isaac 5.1 viewport
     capture API and a runtime-geometry-derived fixed camera target. Preserve

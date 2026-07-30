@@ -1749,3 +1749,76 @@ scene design is reviewed and approved.
 - Next mainline step: rerun the actual Grasp Editor Variant B on the aligned
   Stage, validate the native raw YAML and coordinate transforms, then perform
   the ALOHA six-DOF kinematic/IK correspondence. Task 8 remains `NOT_RUN`.
+
+## 2026-07-30 Grasp Editor actual GUI external-close / Skip Sim gate
+
+- The historical Visual Tutor-only blocker is superseded for the current
+  Grasp Editor task. The actual Isaac Sim 5.1.0.0 GUI and Grasp Editor 2.0.20
+  were exercised through the reviewed project-native runner on workspace 2.
+- Frozen input Stage:
+  `/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/table_support_alignment/1.0/aloha1_table_support_aligned_workcell.usda`,
+  SHA-256
+  `2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c`.
+  Post-run readback confirms that it was not modified.
+- Coordinate contract is machine `PASS`:
+  Bottle500 object frame is bottom center with local `+Z` toward the mouth;
+  the canonical Grasp Editor/IK frame is
+  `/World/follower_left/vx300s_left/follower_left_ee_gripper_link`;
+  YAML stores `T_O_G`; application uses
+  `T_W_G = T_W_O @ T_O_G`; authoring uses
+  `T_W_O = T_W_G @ inverse(T_O_G)`.
+- The supplier-CAD contact helper is not the canonical gripper frame. It is
+  offset `0.0283208044 m` in the canonical EE frame.
+- `Position When Closed` was corrected from the CAD contact candidate to the
+  USD/runtime left-finger lower limit `0.021 m`. The CAD bilateral-contact
+  candidate remains `0.048316874538855845 m`; verified open is `0.057 m`.
+- Local GraspTester source and a fresh no-object-contact control prove native
+  `SIMULATE` can report success without any physical Bottle500 contact.
+  Classification:
+  `NATIVE_SIMULATE_NOT_ACCEPTABLE_AS_SOLE_ALOHA_GRASP_GATE`.
+- The old no-contact screenshot in which Bottle500 was translated along
+  world `+Z` and appeared near `cam_high` is
+  `NO_OBJECT_CONTACT_CONTROL_NOT_TASK_PLACEMENT`. It is rejected as grasp,
+  horizontal-placement, IK, pickup, or hold evidence.
+- The official coupled-gripper fallback was implemented:
+  externally close only active `left_finger`, observe mimic
+  `right_finger`, then invoke native `Skip Sim`.
+- Final run:
+  `.codex/artifacts/20260730-aloha1-grasp-editor-ik-evidence/frame_contract_correction/external_contact_skip_sim_run03_cross_axis/`.
+  It records 125 physical contact points, bilateral correct-finger contact,
+  finite maximum impulse `0.0005472996575105919 N·s`, minimum separation
+  `-0.00012263594544492662 m`, no unexpected robot contact, and validated
+  native raw and diagnostic derived YAML.
+- The derived YAML only restores the verified open pregrasp and remains
+  `DIAGNOSTIC_ONLY_NOT_FINAL_CONTROL_MAPPING`; `right_finger` is a runtime
+  mimic observer and is not invented as an exported active field.
+- Numeric blocker: right-finger mimic residual
+  `0.0017794594168663025 m` exceeds the unchanged `0.001 m` tolerance.
+  External close therefore remains `FAIL_MIMIC_ACCURACY` and is not eligible
+  for IK promotion.
+- Local PhysX 107.3.26 schema declares only `referenceJoint`,
+  `referenceJointAxis`, `gearing`, and `offset` for the mimic API.
+  Runtime custom `naturalFrequency` and `dampingRatio` properties are
+  visible, but their solver effect is `INCONCLUSIVE`; no parameter tuning was
+  performed because no measured or supplier-confirmed values authorize it.
+- Screenshot audit is `PARTIAL_NUMERIC_MIMIC_FAIL`: four raw and four
+  annotated images pass individual visual review. Full-arm images are
+  context-only; fixed-camera close-ups prove visibly distinct open/contact
+  states. The vertical bottle is explicitly labeled robot-local authoring,
+  not horizontal task evidence.
+- Authoritative reports:
+  `reports/aloha1_mapping/aloha1_grasp_editor_semantics_audit.json/.md` and
+  `reports/aloha1_mapping/aloha1_grasp_editor_external_skip_sim_screenshot_review.json/.md`.
+- Current mainline boundary:
+  `GRASP_EDITOR_GUI=PASS`,
+  `COORDINATE_CONTRACT=PASS`,
+  `BILATERAL_CONTACT=PASS`,
+  `RAW_DERIVED_EXPORT=PASS`,
+  `MIMIC_ACCURACY=FAIL`,
+  `IK=NOT_RUN`,
+  `FIVE_RANDOM_HORIZONTAL_BOTTLE_VIDEOS=NOT_RUN`,
+  `TASK_PASS=NOT_ESTABLISHED`,
+  `TASK8=NOT_RUN`.
+- No source/default/final USD, collider, friction, drive, mimic, bottle mass,
+  timestep, solver, real robot, ROS, camera, pipe/insertion task, or Task 8
+  optimization was modified or executed.
