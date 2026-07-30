@@ -1,0 +1,27 @@
+{
+  "review_date": "2026-07-30",
+  "pdf_pages": 42,
+  "render_dpi": 105,
+  "pages_visually_reviewed": 42,
+  "figure_contract": "B",
+  "checks": {
+    "fatal_latex_errors": 0,
+    "overfull_boxes": 0,
+    "undefined_references": 0,
+    "missing_images": 0,
+    "blank_pages": 0,
+    "figure_text_overlaps": 0,
+    "duplicate_canvas_caption_meaning": 0,
+    "orphan_content_pages_after_revision": 0
+  },
+  "notable_fixes": [
+    "训练试验漏斗删除图内说明段和重叠文字，边界统一并入图注",
+    "前置目录压缩为连续可读页面",
+    "第1章删除重复范围表和孤立证据框页",
+    "未来一年路线图固定在第9章正文起始页",
+    "第8章删除与正文重复的演示条件表"
+  ],
+  "unresolved_external_evidence": [
+    "日语数据中心的两个浏览器视口截图因受审网关工具组404而未取得"
+  ]
+}

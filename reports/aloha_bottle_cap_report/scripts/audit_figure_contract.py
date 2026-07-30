@@ -48,6 +48,12 @@ CONTRACTS = {
         "当前软件能力不代表历史数据都使用了全部后来功能。",
         "artifacts/plot_manifest.json",
     ),
+    "engineering_workload_dashboard.pdf": (
+        "第一年度投入形成了哪些可核验工程资产？",
+        "工作覆盖数据、训练、部署、视觉审查与强化学习七类资产。",
+        "七张卡片使用不同单位，不能直接相加或排序比较。",
+        "artifacts/engineering_workload.json",
+    ),
     "data_scope.pdf": (
         "数据总资产、正式训练子集和过滤后输入分别有多大？",
         "三层数据口径必须分开统计。",

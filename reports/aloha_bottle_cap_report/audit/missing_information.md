@@ -15,7 +15,7 @@
 | P1 | 逐帧语义标签 | 定量分析 no-cap、orientation、phase | 文件名只支持启发式覆盖 | 标瓶盖存在、瓶口方向、active arm、contact phase、outcome |
 | P1 | 力/扭矩/瓶盖角度 | 区分滑动、卡住、未转动 | 当前不能断言摩擦原因 | 记录 gripper current、视觉角标或 force/torque/tactile |
 | P1 | 完整端到端延迟 | 判断50Hz与action chunk匹配 | attention capture overhead 不是 inference latency | 记录视觉、网络、推理、handoff、control p50/p95/p99 |
-| P1 | 数据中心/HF browser viewport screenshots | 满足界面证据与可视化数据展示 | 数据库/代码功能已核验，缺真实网页视口 | 修复 reviewed MCPJungle Chrome group 后按浏览器显示区域截图 |
+| P1 | 日语界面的数据中心/HF browser viewport screenshots | 满足界面证据与可视化数据展示 | 数据库/代码功能已核验，缺真实网页视口 | 修复 reviewed MCPJungle Chrome group；切换日语；分别截取“数据集合总览”和“左侧四相机、右侧虚拟演示、下方时间轴”的单集合页面 |
 | P1 | RLT same-condition BC baseline | 验证 reinforcement learning gain | 只能确认 offline loop | 冻结 BC/RLT，同场景同次数比较 task/stage metrics |
 | P2 | ROS/Isaac Sim actual version manifest | 环境复现 | 本报告没有使用其结果 | 从实际运行容器导出 immutable manifest |
 | P2 | insertion geometry tolerance | 验证“毫米级”要求 | 只能作为目标 | 测瓶口/管口/外参，建立误差预算和重复插入基准 |
@@ -25,8 +25,7 @@
 按项目 Gateway-only 规则调用 MCPJungle Chrome DevTools：
 
 - tool discovery 成功；
-- `navigate("https://ai.swm-eii.com/")` 初始化失败；
+- 两次调用 `navigate("https://ai.swm-eii.com/")` 均在初始化阶段失败；
 - HTTP 404：`tool group not found: codex-research`。
 
-未用本地 Selenium/Playwright 或其他直接 MCP 绕过。报告用数据库聚合、公开固定版本数据和真实训练关键帧继续完成，但没有把替代图伪装成网站截图。
-
+未用本地 Selenium/Playwright 或其他直接 MCP 绕过。报告用数据库聚合、公开固定版本数据和真实训练关键帧继续完成，但没有把替代图伪装成网站截图。恢复网关后仍需补采日语界面的两张浏览器可见区域截图，并对数据集合、四相机、虚拟演示和时间轴作标注说明。

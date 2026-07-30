@@ -1,6 +1,6 @@
 {
   "status": "PASS",
-  "referenced_figure_count": 18,
+  "referenced_figure_count": 19,
   "entries": [
     {
       "figure": "figures/aloha_formal_photo_annotated.png",
@@ -80,6 +80,15 @@
       "claim": "三层数据口径必须分开统计。",
       "evidence_boundary": "总资产不能写成正式模型训练量。",
       "source_artifact": "artifacts/dataset_statistics.json",
+      "dimensions_px": null,
+      "visual_status": "PASS"
+    },
+    {
+      "figure": "figures/engineering_workload_dashboard.pdf",
+      "question": "第一年度投入形成了哪些可核验工程资产？",
+      "claim": "工作覆盖数据、训练、部署、视觉审查与强化学习七类资产。",
+      "evidence_boundary": "七张卡片使用不同单位，不能直接相加或排序比较。",
+      "source_artifact": "artifacts/engineering_workload.json",
       "dimensions_px": null,
       "visual_status": "PASS"
     },

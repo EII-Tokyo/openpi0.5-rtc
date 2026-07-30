@@ -31,3 +31,5 @@ E29,5,RLT round32有61541926参数optimizer和target存在无EMA,Checkpoint meta
 E30,7,没有正式任务成功率失败频率标准吞吐量或置信区间,缺失记录+现场声明,audit/missing_information.md,P0 rows,GLOBAL,高,是
 E31,9,未来插管清洗的毫米级精度是目标而非已测能力,项目计划+缺失几何测量,audit/missing_information.md,insertion geometry tolerance,NEXT-YEAR,高,是
 E32,附录,浏览器网关不可用导致数据中心与HF视口截图缺失,Gateway错误,audit/missing_information.md,Browser screenshot blocker,SCREENSHOT,高,是
+E33,7,第一年度形成数据训练部署视觉审查与强化学习七类可核验工程资产,多类审计统计汇总,artifacts/engineering_workload.json,cards+source_artifacts,WORKLOAD-SUMMARY,高,否
+E34,全报告,正文19张实际引用图均建立唯一问题结论边界与来源审查,逐图自动审计+人工视觉检查,artifacts/figure_audit.json,status+entries,FIGURE-AUDIT,高,否

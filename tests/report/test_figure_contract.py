@@ -71,3 +71,13 @@ def test_every_figure_contract_source_exists() -> None:
         if not (REPORT / item["source_artifact"]).is_file()
     ]
     assert missing == []
+
+
+def test_engineering_workload_dashboard_is_generated_and_referenced() -> None:
+    source = GENERATOR.read_text(encoding="utf-8")
+    report_text = "\n".join(
+        path.read_text(encoding="utf-8")
+        for path in [REPORT / "aloha_bottle_cap_report.tex", *sorted((REPORT / "sections").glob("*.tex"))]
+    )
+    assert "def figure_engineering_workload()" in source
+    assert "engineering_workload_dashboard.pdf" in report_text

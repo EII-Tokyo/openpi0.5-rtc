@@ -120,5 +120,4 @@ cd /home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha_bottle_cap_repo
 - 强化学习与基础模型的同条件真机对照；
 - 空瓶插水管的真实几何误差预算。
 
-数据中心和 Hugging Face 的浏览器视口截图仍缺失：受审 MCPJungle Chrome DevTools 工具组在编写期间返回 404。报告没有使用绕过方式，也没有把替代图伪装成网页截图。
-
+数据中心和 Hugging Face 的浏览器视口截图仍缺失：受审 MCPJungle Chrome DevTools 工具组在两次访问时均返回 404。报告没有使用绕过方式，也没有把替代图伪装成网页截图。恢复网关后应将界面切换为日语，分别补采“数据集合总览”和“单集合四相机/虚拟演示/时间轴”两个浏览器可见区域，并按标注流程解释其训练用途。

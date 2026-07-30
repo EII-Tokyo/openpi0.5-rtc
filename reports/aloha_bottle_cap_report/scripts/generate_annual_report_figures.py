@@ -440,6 +440,78 @@ def figure_software_pipeline() -> None:
     save(fig, "software_data_pipeline")
 
 
+def figure_engineering_workload() -> None:
+    dataset = load_json("dataset_statistics.json")
+    runs = load_json("wandb_experiment_inventory.json")["summary"]["all_selected"]
+    attention = load_json("attention_audit.json")
+    checkpoint = load_json("checkpoint_metadata.json")
+    rlt = load_json("rlt_dataset_statistics.json")
+    platform = dataset["platform_aloha_assets"]
+    deployed = dataset["deployed_training_dataset"]
+
+    cards = [
+        ("数据资产", f"{platform['projects']} 个项目", f"{platform['declared_episodes']:,} 条轨迹｜约 16.15 小时", NAVY),
+        ("正式训练数据", f"{deployed['unique_episodes']:,} 条轨迹", f"{deployed['unique_frames']:,} 帧｜25 个固定版本", BLUE),
+        ("训练探索", f"{runs['run_attempts']} 次尝试", f"{runs['unique_config_names']} 组配置｜6 种批量规模", TEAL),
+        ("正式训练", "59,990 步", "6,059 条记录｜约 51.4 小时", AMBER),
+        ("部署模型", "8.38 亿参数", f"第 {checkpoint['directory_step']:,} 步｜三路视觉", GREEN),
+        ("视觉审查", f"{attention['total_samples']:,} 个样本", f"{attention['manifest_count']} 份清单｜三路视野", CYAN),
+        ("强化学习研究", f"{rlt['raw_dataset']['episodes']} 条轨迹", f"{rlt['training_replay']['transitions']['sum']:,} 个片段｜5 个轮次", RED),
+    ]
+    positions = [
+        (.02, .57), (.265, .57), (.51, .57), (.755, .57),
+        (.14, .16), (.39, .16), (.64, .16),
+    ]
+    fig, ax = plt.subplots(figsize=(11.2, 6.1))
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1)
+    ax.axis("off")
+    for (title, value, detail, color), (x, y) in zip(cards, positions):
+        patch = FancyBboxPatch(
+            (x, y), .225, .28,
+            boxstyle="round,pad=0.018,rounding_size=0.025",
+            facecolor="white", edgecolor=color, linewidth=1.8,
+        )
+        ax.add_patch(patch)
+        ax.add_patch(
+            FancyBboxPatch(
+                (x, y + .225), .225, .055,
+                boxstyle="round,pad=0.018,rounding_size=0.025",
+                facecolor=color, edgecolor=color, linewidth=0,
+            )
+        )
+        ax.text(x + .1125, y + .252, title, ha="center", va="center",
+                color="white", fontsize=10, weight="bold")
+        ax.text(x + .1125, y + .145, value, ha="center", va="center",
+                color=color, fontsize=15, weight="bold")
+        ax.text(x + .1125, y + .065, detail, ha="center", va="center",
+                color=INK, fontsize=8.5)
+    ax.set_title("从数据生产到现场部署：第一年度形成 7 类可核验工程资产",
+                 loc="left", pad=12)
+    save(fig, "engineering_workload_dashboard")
+    (ART / "engineering_workload.json").write_text(
+        json.dumps(
+            {
+                "cards": [
+                    {"title": title, "value": value, "detail": detail}
+                    for title, value, detail, _ in cards
+                ],
+                "source_artifacts": [
+                    "artifacts/dataset_statistics.json",
+                    "artifacts/wandb_experiment_inventory.json",
+                    "artifacts/attention_audit.json",
+                    "artifacts/checkpoint_metadata.json",
+                    "artifacts/rlt_dataset_statistics.json",
+                ],
+                "interpretation_limit": "The cards use different units and must not be summed.",
+            },
+            ensure_ascii=False,
+            indent=2,
+        ) + "\n",
+        encoding="utf-8",
+    )
+
+
 def figure_roadmap() -> None:
     fig, ax = plt.subplots(figsize=(11.2, 5.2))
     ax.set_xlim(0, 1)
@@ -583,6 +655,7 @@ def write_plot_manifest() -> None:
         ("model_dataflow", "方法", "观察到双臂动作的完整数据流"),
         ("task_timeline", "任务难度", "七阶段长流程与误差累积"),
         ("software_data_pipeline", "平台工作量", "采集、编辑、发布、训练、部署闭环"),
+        ("engineering_workload_dashboard", "工程工作强度", "七类可核验工程资产"),
         ("next_year_roadmap", "未来一年", "优先级与依赖关系"),
         ("training_demonstration_keyframes", "真实训练图像", "展示数据覆盖而非自主成功"),
         ("aloha_formal_photo_annotated", "正式设备", "静止状态设备组成"),
@@ -610,6 +683,7 @@ def main() -> None:
     figure_model_dataflow()
     figure_task_timeline()
     figure_software_pipeline()
+    figure_engineering_workload()
     figure_roadmap()
     annotated_photo()
     training_keyframe_grid()

@@ -1,12 +1,12 @@
-1. 生成文件：中文 LaTeX/PDF、10 个分章、17 张正文图、29 张表、机器可读统计、绘图脚本、项目/Checkpoint 审计、结论—证据矩阵和缺失信息清单。
-2. PDF 页数：49 页。
+1. 生成文件：中文 LaTeX/PDF、10 个分章、18 张编号图、29 张表、机器可读统计、绘图脚本、项目/Checkpoint 审计、结论—证据矩阵和缺失信息清单。
+2. PDF 页数：42 页。
 3. 真实图像：16 张（1 张正式设备照片、12 张训练示教关键帧、1 组三视野注意力图中的 3 个真实视野）；另有 1 张明确标注的概念封面。
-4. 科学图：15 张问题驱动的数据图、架构/流程图、注意力可视化或路线图。
+4. 科学图：16 张问题驱动的数据图、架构/流程图、注意力可视化或路线图。
 5. 表格：29 张。
 6. Checkpoint：正式部署基础模型第 19,000 步目录，838,358,468 参数；另审计 RLT round-32 作为探索性研究。
 7. 正式训练数据：25 个唯一仓库、1,051 条轨迹、879,852 帧、约 4.89 小时；过滤后 844,102 帧、约 4.69 小时。
 8. 实验：找到 41 次训练运行尝试、33 个运行名称、14 组配置；不把运行尝试当作成功实验。
 9. 当前最好结果：现场观察到完整分拣循环；>1 小时、约 2 瓶/分钟均为估计，没有正式成功率。
 10. 关键缺失：完整录像/计数、自动成功判定、独立测试集、多随机种子、条件配对实验、网页视口截图和 RLT 同条件真机对照。
-11. PDF 完整路径：/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha_bottle_cap_report/aloha_bottle_cap_report.pdf
+11. PDF 完整路径：/home/eii/.config/superpowers/worktrees/openpi0.5-rtc-reward-learning/aloha-report-visual-revision/reports/aloha_bottle_cap_report/aloha_bottle_cap_report.pdf
 12. 编译与验证：成功（PASS）。

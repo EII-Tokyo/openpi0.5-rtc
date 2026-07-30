@@ -1,4 +1,4 @@
-\documentclass[UTF8,openany,11pt]{ctexrep}
+\documentclass[UTF8,openany,10pt]{ctexrep}
 \usepackage[a4paper,top=20mm,bottom=21mm,left=22mm,right=22mm,headheight=15pt]{geometry}
 \usepackage{booktabs,longtable,tabularx,array,multirow,makecell}
 \usepackage{graphicx,subcaption,float,placeins}
@@ -114,9 +114,14 @@ ALOHA 机器人拧瓶盖项目\\[2mm]现阶段技术报告\par}
 
 \pagenumbering{Roman}
 \input{sections/00_executive_summary}
+\begingroup
+\footnotesize
+\setlength{\parskip}{0pt}
+\linespread{0.86}\selectfont
 \tableofcontents
 \listoffigures
 \listoftables
+\endgroup
 \clearpage
 \pagenumbering{arabic}
 

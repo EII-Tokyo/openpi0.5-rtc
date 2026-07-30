@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999995 (TeX Live 2023/Debian) (preloaded format=xelatex 2026.4.27)  30 JUL 2026 16:53
+This is XeTeX, Version 3.141592653-2.6-0.999995 (TeX Live 2023/Debian) (preloaded format=xelatex 2026.4.27)  30 JUL 2026 18:11
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -47,8 +47,8 @@ File: ctexopts.cfg 2022/07/14 v2.5.10 Option configuration file (CTEX)
 )
 (/usr/share/texlive/texmf-dist/tex/latex/base/report.cls
 Document Class: report 2023/05/17 v1.4n Standard LaTeX document class
-(/usr/share/texlive/texmf-dist/tex/latex/base/size11.clo
-File: size11.clo 2023/05/17 v1.4n Standard LaTeX file (size option)
+(/usr/share/texlive/texmf-dist/tex/latex/base/size10.clo
+File: size10.clo 2023/05/17 v1.4n Standard LaTeX file (size option)
 )
 \c@part=\count190
 \c@chapter=\count191
@@ -1256,12 +1256,12 @@ LaTeX Font Info:    Overwriting math alphabet `\mathtt' in version `bold'
 * \topmargin=-55.36449pt
 * \headheight=15.0pt
 * \headsep=25.0pt
-* \topskip=11.0pt
+* \topskip=10.0pt
 * \footskip=30.0pt
-* \marginparwidth=59.0pt
-* \marginparsep=10.0pt
+* \marginparwidth=65.0pt
+* \marginparsep=11.0pt
 * \columnsep=10.0pt
-* \skip\footins=10.0pt plus 4.0pt minus 2.0pt
+* \skip\footins=9.0pt plus 4.0pt minus 2.0pt
 * \hoffset=0.0pt
 * \voffset=0.0pt
 * \mag=1000
@@ -1341,86 +1341,82 @@ File: figures/evidence_grade.pdf Graphic file (type pdf)
 <use figures/evidence_grade.pdf>
 
 Underfull \hbox (badness 10000) in paragraph at lines 34--34
-[]|\TU/FandolSong-Regular(0)/m/n/10.95 观 察 到 取 瓶、|  旋 盖、|
+[]|\TU/FandolSong-Regular(0)/m/n/10 观 察 到 取 瓶、|  旋 盖、|
  []
 
+) [1
 
-Underfull \hbox (badness 4595) in paragraph at lines 34--34
-\TU/FandolSong-Regular(0)/m/n/10.95 瓶\TU/lmr/m/n/10.95 /\TU/FandolSong-Regular(
-0)/m/n/10.95 盖 分 箱 的 连 续 循
- []
+] [2] (./aloha_bottle_cap_report.toc [3
 
-
-Underfull \hbox (badness 1199) in paragraph at lines 34--34
-[]|\TU/lmr/m/n/10.95 41 \TU/FandolSong-Regular(0)/m/n/10.95 次 可 追 溯 运 行 尝
- []
-
-[1
-
-]) [2] (./aloha_bottle_cap_report.toc [3
-
-] [4])
+])
 \tf@toc=\write5
 \openout5 = `aloha_bottle_cap_report.toc'.
 
- [5]
-(./aloha_bottle_cap_report.lof [6
-
-])
+ [4]
+(./aloha_bottle_cap_report.lof)
 \tf@lof=\write6
 \openout6 = `aloha_bottle_cap_report.lof'.
 
- [7] (./aloha_bottle_cap_report.lot [8
+ [5
 
-])
+] (./aloha_bottle_cap_report.lot)
 \tf@lot=\write7
 \openout7 = `aloha_bottle_cap_report.lot'.
 
+ [6
 
-[9] (./sections/01_background.tex
+]
+(./sections/01_background.tex
 第一章
 File: figures/aloha_formal_photo_annotated.png Graphic file (type bmp)
 <figures/aloha_formal_photo_annotated.png>
 File: figures/task_timeline.pdf Graphic file (type pdf)
 <use figures/task_timeline.pdf>
-[1
+) (./sections/02_system.tex [1
 
 
-] [2]) (./sections/02_system.tex [3]
+] [2]
 第二章
 
-Underfull \hbox (badness 10000) in paragraph at lines 39--39
-[]|\TU/FandolSong-Regular(0)/b/n/10.95 左 侧 工 作 臂 与 夹
+Underfull \hbox (badness 10000) in paragraph at lines 19--19
+[]|\TU/FandolSong-Regular(0)/m/n/10 采 集 与 控 制 软 件 具 备 停
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 39--39
-[]|\TU/FandolSong-Regular(0)/b/n/10.95 右 侧 工 作 臂 与 夹
+Underfull \hbox (badness 2020) in paragraph at lines 39--39
+[]|\TU/FandolSong-Regular(0)/m/n/10 提 供 随 机 瓶 堆 和 瓶\TU/lmr/m/n/10 /\TU/FandolSo
+ng-Regular(0)/m/n/10 盖 分
  []
 
-
-Underfull \hbox (badness 3503) in paragraph at lines 39--39
-[]|\TU/FandolSong-Regular(0)/m/n/10.95 提 供 随 机 瓶 堆 和 瓶\TU/lmr/m/n/10.95 /\TU/Fa
-ndolSong-Regular(0)/m/n/10.95 盖
- []
-
-[4
-
-]
 File: figures/software_data_pipeline.pdf Graphic file (type pdf)
 <use figures/software_data_pipeline.pdf>
- [5]) (./sections/03_data.tex [6]
-第三章
-File: figures/data_scope.pdf Graphic file (type pdf)
-<use figures/data_scope.pdf>
+[3
 
-Underfull \hbox (badness 10000) in paragraph at lines 40--40
-[]|\TU/lmr/m/n/10.95 4 \TU/FandolSong-Regular(0)/m/n/10.95 路，| \TU/lmr/m/n/10.9
-5 640$\OMS/cmsy/m/n/10.95 ^^B$\TU/lmr/m/n/10.95 480\TU/FandolSong-Regular(0)/m/
-n/10.95 ，| \TU/lmr/m/n/10.95 50
+]) (./sections/03_data.tex [4]
+第三章
+
+Underfull \hbox (badness 1895) in paragraph at lines 31--31
+[]|\TU/FandolSong-Regular(0)/m/n/10 查 看 单 条 轨 迹 和 同 步 多 视 角
  []
 
-[7
+
+Underfull \hbox (badness 1895) in paragraph at lines 31--31
+[]|\TU/FandolSong-Regular(0)/m/n/10 从 审 查 后 的 轨 迹 生 成 固 定 数
+ []
+
+
+Underfull \hbox (badness 1895) in paragraph at lines 31--31
+[]|\TU/FandolSong-Regular(0)/m/n/10 同 一 平 台 管 理 不 同 机 器 人 数
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 31--31
+[]|\TU/FandolSong-Regular(0)/m/n/10 使 平 台 投 入 可 服 务 后 续 更 多 任 务，|  而 不 局 限 于
+ []
+
+File: figures/data_scope.pdf Graphic file (type pdf)
+<use figures/data_scope.pdf>
+[5
 
 ]
 File: figures/sampling_exposure.pdf Graphic file (type pdf)
@@ -1429,167 +1425,183 @@ File: figures/condition_coverage.pdf Graphic file (type pdf)
 <use figures/condition_coverage.pdf>
 File: figures/baseline_episode_length_distribution.pdf Graphic file (type pdf)
 <use figures/baseline_episode_length_distribution.pdf>
- [8] [9]
 File: figures/training_demonstration_keyframes.png Graphic file (type bmp)
 <figures/training_demonstration_keyframes.png>
-
-Underfull \hbox (badness 4927) in paragraph at lines 81--81
-[]|\TU/FandolSong-Regular(0)/b/n/10.95 状 态 或 动 作 中 的 非 有 限
- []
-
-[10] [11]) (./sections/04_model.tex [12]
+ [6] [7]) (./sections/04_model.tex [8] [9] [10]
 第四章
 File: figures/model_dataflow.pdf Graphic file (type pdf)
 <use figures/model_dataflow.pdf>
-[13
+[11
 
-] [14]
+] [12]
 File: figures/attention_real_example.png Graphic file (type bmp)
 <figures/attention_real_example.png>
 File: figures/attention_camera_share.pdf Graphic file (type pdf)
 <use figures/attention_camera_share.pdf>
- [15] [16]) (./sections/05_experiments.tex [17]
+) (./sections/05_experiments.tex [13] [14]
 第五章
 File: figures/experiment_funnel.pdf Graphic file (type pdf)
 <use figures/experiment_funnel.pdf>
 
-Underfull \hbox (badness 3343) in paragraph at lines 34--34
-\TU/FandolSong-Regular(0)/m/n/10.95 数\TU/lmr/m/n/10.95 /\TU/FandolSong-Regular(
-0)/m/n/10.95 轻 量 训 练、|  相 机
+Underfull \hbox (badness 7151) in paragraph at lines 34--34
+[]|\TU/FandolSong-Regular(0)/m/n/10 探 索 批 量 规 模、|  全 参
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 34--34
-[]|\TU/FandolSong-Regular(0)/m/n/10.95 探 索 冲 洗 和 后 续 插
+Underfull \hbox (badness 4792) in paragraph at lines 34--34
+[]|\TU/FandolSong-Regular(0)/m/n/10 探 索 冲 洗 和 后 续 插 入
+ []
+
+[15
+
+] [16]
+Underfull \hbox (badness 7832) in paragraph at lines 87--87
+[]|\TU/FandolSong-Regular(0)/b/n/10 真 实 数 据 与 人 工 奖
  []
 
 
-Underfull \hbox (badness 5667) in paragraph at lines 34--34
-\TU/FandolSong-Regular(0)/m/n/10.95 入 任 务；|  目 标 不 同，|
+Underfull \hbox (badness 7832) in paragraph at lines 87--87
+[]|\TU/FandolSong-Regular(0)/b/n/10 同 条 件 基 础 模 型 对
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 34--34
-\TU/FandolSong-Regular(0)/m/n/10.95 损 失 不 可 与 分 拣 直
- []
-
-[18
-
-] [19]
-Underfull \hbox (badness 6157) in paragraph at lines 103--103
-[]|\TU/FandolSong-Regular(0)/b/n/10.95 已 建 立 真 实 数 据 到 训
+Underfull \hbox (badness 3579) in paragraph at lines 103--103
+[]|\TU/FandolSong-Regular(0)/b/n/10 已 建 立 真 实 数 据 到 训 练
  []
 
 
-Underfull \hbox (badness 6157) in paragraph at lines 103--103
-[]|\TU/FandolSong-Regular(0)/b/n/10.95 固 定 离 线 验 证 动 作 误
+Underfull \hbox (badness 3579) in paragraph at lines 103--103
+[]|\TU/FandolSong-Regular(0)/b/n/10 固 定 离 线 验 证 动 作 误 差
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 103--103
-[]|\TU/FandolSong-Regular(0)/b/n/10.95 人 工 正 标 签 占
+Underfull \hbox (badness 3579) in paragraph at lines 103--103
+[]|\TU/FandolSong-Regular(0)/b/n/10 强 化 学 习 已 经 提 高 真 机
  []
 
 
-Underfull \hbox (badness 6157) in paragraph at lines 103--103
-[]|\TU/FandolSong-Regular(0)/b/n/10.95 强 化 学 习 已 经 提 高 真
+Underfull \hbox (badness 3579) in paragraph at lines 103--103
+[]|\TU/FandolSong-Regular(0)/b/n/10 单 条 正 标 签 轨 迹 证 明 方
  []
 
-
-Underfull \hbox (badness 6157) in paragraph at lines 103--103
-[]|\TU/FandolSong-Regular(0)/b/n/10.95 单 条 正 标 签 轨 迹 证 明
- []
-
-) (./sections/06_results.tex [20]
+) (./sections/06_results.tex [17]
 第六章
 File: figures/baseline_training_loss.pdf Graphic file (type pdf)
 <use figures/baseline_training_loss.pdf>
 File: figures/prompt_condition_gap.pdf Graphic file (type pdf)
 <use figures/prompt_condition_gap.pdf>
 
-Underfull \hbox (badness 8000) in paragraph at lines 42--42
-[]|\TU/FandolSong-Regular(0)/m/n/10.95 已 在 现 场 展 示 中 观
+Underfull \hbox (badness 2913) in paragraph at lines 42--42
+[]|\TU/FandolSong-Regular(0)/m/n/10 已 在 现 场 展 示 中 观 察
  []
 
 
-Underfull \hbox (badness 8000) in paragraph at lines 42--42
-[]|\TU/FandolSong-Regular(0)/m/n/10.95 对 随 机 桌 面 位 置 和
+Underfull \hbox (badness 2913) in paragraph at lines 42--42
+[]|\TU/FandolSong-Regular(0)/m/n/10 对 随 机 桌 面 位 置 和 一
  []
 
 
-Underfull \hbox (badness 8000) in paragraph at lines 42--42
-\TU/FandolSong-Regular(0)/m/n/10.95 一 定 条 件 变 化 显 示
+Underfull \hbox (badness 2913) in paragraph at lines 42--42
+\TU/FandolSong-Regular(0)/m/n/10 定 条 件 变 化 显 示 适 应
  []
 
-[21
+[18
 
-] [22]
+] [19]
 File: figures/rlt_offline_validation.pdf Graphic file (type pdf)
 <use figures/rlt_offline_validation.pdf>
- [23]) (./sections/07_discussion.tex [24]
+ [20]) (./sections/07_discussion.tex [21]
 第七章
-[25
+File: figures/engineering_workload_dashboard.pdf Graphic file (type pdf)
+<use figures/engineering_workload_dashboard.pdf>
+
+Underfull \hbox (badness 1048) in paragraph at lines 44--44
+[]|\TU/FandolSong-Regular(0)/m/n/10 能 从 桌 面 多 瓶 场 景 中 选 择 并 接 近
+ []
+
+
+Underfull \hbox (badness 1048) in paragraph at lines 44--44
+[]|\TU/FandolSong-Regular(0)/m/n/10 对 多 种 摆 放 与 瓶 盖 条 件 形 成 初 步
+ []
+
+
+Underfull \hbox (badness 1048) in paragraph at lines 44--44
+[]|\TU/FandolSong-Regular(0)/m/n/10 已 观 察 到 超 过 单 次 动 作 的 连 续 循
+ []
+
+
+Underfull \hbox (badness 1048) in paragraph at lines 44--44
+[]|\TU/FandolSong-Regular(0)/m/n/10 可 审 查 全 局 与 腕 部 视 野 的 使 用 情
+ []
+
+[22
 
 ]
-Underfull \hbox (badness 10000) in paragraph at lines 52--52
-[]|\TU/FandolSong-Regular(0)/m/n/10.95 不 能 区 分 视 觉 朝 向 误 判、|
+Underfull \hbox (badness 7151) in paragraph at lines 65--65
+[]|\TU/FandolSong-Regular(0)/m/n/10 已 有 数 据 与 现 场
+ []
+
+[23]
+Underfull \hbox (badness 10000) in paragraph at lines 85--85
+[]|\TU/FandolSong-Regular(0)/b/n/10 无 盖 瓶 仍 进 入 旋
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 52--52
-\TU/FandolSong-Regular(0)/m/n/10.95 间 戳 和 自 动\TU/lmr/m/n/10.95 /\TU/FandolSong-
-Regular(0)/m/n/10.95 人 工 阶 段
+Underfull \hbox (badness 10000) in paragraph at lines 85--85
+[]|\TU/FandolSong-Regular(0)/b/n/10 部 分 瓶 子 方 向 相
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 52--52
-[]|\TU/FandolSong-Regular(0)/m/n/10.95 当 前 没 有 自 动 成 功\TU/lmr/m/n/10.95 /\TU/Fa
-ndolSong-Regular(0)/m/n/10.95 结
+Underfull \hbox (badness 1895) in paragraph at lines 85--85
+[]|\TU/FandolSong-Regular(0)/m/n/10 增 加 瓶 盖 角 度 与 夹 爪 负 载 记
  []
 
-[26] [27]) (./sections/08_conclusion.tex [28]
+
+Underfull \hbox (badness 1895) in paragraph at lines 85--85
+[]|\TU/FandolSong-Regular(0)/m/n/10 增 加 阶 段 时 间 戳 与 异 常 恢 复
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 85--85
+[]|\TU/FandolSong-Regular(0)/b/n/10 评 测 结 果 可 复 核
+ []
+
+[24]) (./sections/08_conclusion.tex [25]
 第八章
-[29
+) (./sections/09_plan.tex [26
 
-]
-Underfull \hbox (badness 10000) in paragraph at lines 57--57
-[]|\TU/FandolSong-Regular(0)/m/n/10.95 无 计 数 表\TU/lmr/m/n/10.95 /\TU/FandolSong
--Regular(0)/m/n/10.95 录
- []
-
-) (./sections/09_plan.tex [30]
+] [27]
 第九章
 File: figures/next_year_roadmap.pdf Graphic file (type pdf)
 <use figures/next_year_roadmap.pdf>
+[28
+
+] [29]) (./sections/10_appendix.tex [30]
+附录 A
+
+Underfull \hbox (badness 1460) in paragraph at lines 17--17
+[]|\TU/FandolSong-Regular(0)/m/n/10 主 要 训 练 仓 库、|  历 史 版 本、|
+ []
+
 [31
 
-] [32] [33]) (./sections/10_appendix.tex [34]
-附录 A
-[35
-
 ]
-Underfull \hbox (badness 1888) in paragraph at lines 85--85
-[]|\TU/lmr/m/n/10.95 1,495 \TU/FandolSong-Regular(0)/m/n/10.95 条 轨 迹 等
+Underfull \hbox (badness 1596) in paragraph at lines 82--83
+[]|\TU/lmr/m/n/10 51 \TU/FandolSong-Regular(0)/m/n/10 个 有 效 项 目，|  不 含 项 目 外
+ []
+
+[32]
+Underfull \hbox (badness 4621) in paragraph at lines 114--114
+[]|\TU/lmr/bx/n/10 OpenCV / LeR-
  []
 
 
-Underfull \hbox (badness 5274) in paragraph at lines 87--88
-[]|\TU/FandolSong-Regular(0)/m/n/10.95 约 \TU/lmr/m/n/10.95 51.4 \TU/FandolSong-
-Regular(0)/m/n/10.95 小 时；|  现 场 部 署
+Underfull \hbox (badness 6510) in paragraph at lines 129--129
+[]|\TU/FandolSong-Regular(0)/m/n/10 无 盖\TU/lmr/m/n/10 /\TU/FandolSong-Regular(0
+)/m/n/10 有 盖 与 正 反 方 向 配
  []
 
-[36]
-Underfull \hbox (badness 3492) in paragraph at lines 114--114
-[]|\TU/lmr/m/n/10.95 0.10.2 / 0.11.13 /
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 129--129
-[]|\TU/FandolSong-Regular(0)/m/n/10.95 无 盖\TU/lmr/m/n/10.95 /\TU/FandolSong-Reg
-ular(0)/m/n/10.95 有 盖 与 正 反 方 向
- []
-
-[37]) (./aloha_bottle_cap_report.bbl [38]) [39
+[33]) (./aloha_bottle_cap_report.bbl [34]) [35
 
 ] (./aloha_bottle_cap_report.aux)
  ***********
@@ -1598,15 +1610,15 @@ L3 programming layer <2022/07/14>
  ***********
 Package rerunfilecheck Info: File `aloha_bottle_cap_report.out' has not changed
 .
-(rerunfilecheck)             Checksum: 2BA588F473DDB161CD65B85D86C79B75;8635.
+(rerunfilecheck)             Checksum: 1679C21DECF6F7972DEDA8C828498976;9369.
  ) 
 Here is how much of TeX's memory you used:
- 48367 strings out of 474878
- 1224170 string characters out of 5762516
- 1952627 words of memory out of 5000000
- 69636 multiletter control sequences out of 15000+600000
- 567788 words of font info for 104 fonts, out of 8000000 for 9000
+ 48549 strings out of 474878
+ 1234387 string characters out of 5762516
+ 1955627 words of memory out of 5000000
+ 69806 multiletter control sequences out of 15000+600000
+ 567955 words of font info for 109 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
  93i,13n,102p,3273b,995s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
-Output written on aloha_bottle_cap_report.pdf (49 pages).
+Output written on aloha_bottle_cap_report.pdf (42 pages).

@@ -1,0 +1,47 @@
+{
+  "cards": [
+    {
+      "title": "数据资产",
+      "value": "51 个项目",
+      "detail": "2,413 条轨迹｜约 16.15 小时"
+    },
+    {
+      "title": "正式训练数据",
+      "value": "1,051 条轨迹",
+      "detail": "879,852 帧｜25 个固定版本"
+    },
+    {
+      "title": "训练探索",
+      "value": "41 次尝试",
+      "detail": "14 组配置｜6 种批量规模"
+    },
+    {
+      "title": "正式训练",
+      "value": "59,990 步",
+      "detail": "6,059 条记录｜约 51.4 小时"
+    },
+    {
+      "title": "部署模型",
+      "value": "8.38 亿参数",
+      "detail": "第 19,000 步｜三路视觉"
+    },
+    {
+      "title": "视觉审查",
+      "value": "8,223 个样本",
+      "detail": "9 份清单｜三路视野"
+    },
+    {
+      "title": "强化学习研究",
+      "value": "835 条轨迹",
+      "detail": "238,816 个片段｜5 个轮次"
+    }
+  ],
+  "source_artifacts": [
+    "artifacts/dataset_statistics.json",
+    "artifacts/wandb_experiment_inventory.json",
+    "artifacts/attention_audit.json",
+    "artifacts/checkpoint_metadata.json",
+    "artifacts/rlt_dataset_statistics.json"
+  ],
+  "interpretation_limit": "The cards use different units and must not be summed."
+}

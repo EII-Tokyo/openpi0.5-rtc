@@ -70,6 +70,11 @@
     "purpose": "采集、编辑、发布、训练、部署闭环"
   },
   {
+    "figure": "engineering_workload_dashboard",
+    "question": "工程工作强度",
+    "purpose": "七类可核验工程资产"
+  },
+  {
     "figure": "next_year_roadmap",
     "question": "未来一年",
     "purpose": "优先级与依赖关系"
