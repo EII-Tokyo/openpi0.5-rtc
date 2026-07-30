@@ -1,0 +1,3213 @@
+===== src/openpi/rlt/actor_critic.py =====
+     1	from __future__ import annotations
+     2	
+     3	import dataclasses
+     4	from typing import Any
+     5	
+     6	import jax
+     7	import jax.numpy as jnp
+     8	import numpy as np
+     9	
+    10	
+    11	Params = dict[str, Any]
+    12	
+    13	ALOHA_GRIPPER_ACTION_INDICES = (6, 13)
+    14	
+    15	
+    16	@dataclasses.dataclass(frozen=True)
+    17	class RLTActorCriticConfig:
+    18	    token_dim: int = 2048
+    19	    state_dim: int = 14
+    20	    action_dim: int = 14
+    21	    action_horizon: int = 25
+    22	    rlt_chunk_horizon: int = 25
+    23	    action_start_index: int = 10
+    24	    hidden_dim: int = 512
+    25	    actor_hidden_layers: int = 2
+    26	    critic_hidden_layers: int = 2
+    27	    gamma: float = 0.99
+    28	    tau: float = 0.005
+    29	    target_bootstrap_steps: int = 0
+    30	    rl_loss_coef: float = 1.0
+    31	    critic_loss_coef: float = 1.0
+    32	    actor_update_period: int = 2
+    33	    actor_lr: float = 3e-4
+    34	    critic_lr: float = 3e-4
+    35	    actor_clip_gradient_norm: float = 0.0
+    36	    critic_clip_gradient_norm: float = 0.0
+    37	    target_policy_noise: float = 0.0
+    38	    target_policy_noise_clip: float = 0.15
+    39	    critic_num_bins: int = 100
+    40	    critic_value_min: float = -1.0
+    41	    critic_value_max: float = 1.0
+    42	    reference_deviation_threshold: float = 0.047
+    43	    reference_deviation_penalty_coef: float = 1000.0
+    44	    reference_action_dropout: float = 0.5
+    45	
+    46	    def __post_init__(self) -> None:
+    47	        if self.rlt_chunk_horizon != self.action_horizon:
+    48	            raise ValueError(
+    49	                f"RLT actor currently expects full C-step chunks: "
+    50	                f"rlt_chunk_horizon={self.rlt_chunk_horizon}, action_horizon={self.action_horizon}"
+    51	            )
+    52	        if self.action_start_index < 0:
+    53	            raise ValueError(f"action_start_index must be non-negative, got {self.action_start_index}")
+    54	        if self.target_bootstrap_steps < 0:
+    55	            raise ValueError(f"target_bootstrap_steps must be non-negative, got {self.target_bootstrap_steps}")
+    56	        if self.rl_loss_coef < 0:
+    57	            raise ValueError(f"rl_loss_coef must be non-negative, got {self.rl_loss_coef}")
+    58	        if self.actor_clip_gradient_norm < 0:
+    59	            raise ValueError(f"actor_clip_gradient_norm must be non-negative, got {self.actor_clip_gradient_norm}")
+    60	        if self.critic_clip_gradient_norm < 0:
+    61	            raise ValueError(f"critic_clip_gradient_norm must be non-negative, got {self.critic_clip_gradient_norm}")
+    62	        if self.critic_loss_coef <= 0:
+    63	            raise ValueError(f"critic_loss_coef must be positive, got {self.critic_loss_coef}")
+    64	        if self.actor_update_period <= 0:
+    65	            raise ValueError(f"actor_update_period must be positive, got {self.actor_update_period}")
+    66	        if self.actor_hidden_layers < 0:
+    67	            raise ValueError(f"actor_hidden_layers must be non-negative, got {self.actor_hidden_layers}")
+    68	        if self.critic_hidden_layers < 0:
+    69	            raise ValueError(f"critic_hidden_layers must be non-negative, got {self.critic_hidden_layers}")
+    70	        if self.critic_num_bins < 2:
+    71	            raise ValueError(f"critic_num_bins must be at least 2, got {self.critic_num_bins}")
+    72	        if self.critic_value_max <= self.critic_value_min:
+    73	            raise ValueError(
+    74	                f"critic_value_max must be greater than critic_value_min, got "
+    75	                f"{self.critic_value_min}..{self.critic_value_max}"
+    76	            )
+    77	        if self.reference_deviation_threshold < 0:
+    78	            raise ValueError(
+    79	                f"reference_deviation_threshold must be non-negative, got {self.reference_deviation_threshold}"
+    80	            )
+    81	        if self.reference_deviation_penalty_coef < 0:
+    82	            raise ValueError(
+    83	                f"reference_deviation_penalty_coef must be non-negative, got {self.reference_deviation_penalty_coef}"
+    84	            )
+    85	        if self.reference_deviation_threshold <= 0:
+    86	            raise ValueError("reference_deviation_threshold must be positive")
+    87	        if not 0.0 <= self.reference_action_dropout < 1.0:
+    88	            raise ValueError(
+    89	                f"reference_action_dropout must be in [0, 1), got {self.reference_action_dropout}"
+    90	            )
+    91	
+    92	    @property
+    93	    def action_size(self) -> int:
+    94	        return self.rlt_chunk_horizon * self.action_dim
+    95	
+    96	    @property
+    97	    def obs_size(self) -> int:
+    98	        return self.token_dim + self.state_dim + self.action_size
+    99	
+   100	    @property
+   101	    def critic_input_size(self) -> int:
+   102	        return self.token_dim + self.state_dim + self.action_size
+   103	
+   104	
+   105	def _linear_params(rng: jax.Array, in_dim: int, out_dim: int) -> Params:
+   106	    scale = np.sqrt(2.0 / float(in_dim + out_dim))
+   107	    return {"w": jax.random.normal(rng, (in_dim, out_dim), dtype=jnp.float32) * scale, "b": jnp.zeros((out_dim,), dtype=jnp.float32)}
+   108	
+   109	
+   110	def _linear(params: Params, x: jax.Array) -> jax.Array:
+   111	    return x @ params["w"] + params["b"]
+   112	
+   113	
+   114	def _mlp_params(rng: jax.Array, dims: list[int]) -> list[Params]:
+   115	    keys = jax.random.split(rng, len(dims) - 1)
+   116	    return [_linear_params(key, dims[i], dims[i + 1]) for i, key in enumerate(keys)]
+   117	
+   118	
+   119	def _mlp(params: list[Params], x: jax.Array) -> jax.Array:
+   120	    for i, layer in enumerate(params):
+   121	        x = _linear(layer, x)
+   122	        if i != len(params) - 1:
+   123	            x = jax.nn.gelu(x)
+   124	    return x
+   125	
+   126	
+   127	def layernorm_rlt_token(rlt_token: jax.Array) -> jax.Array:
+   128	    return jax.nn.standardize(rlt_token, axis=-1, epsilon=1e-6)
+   129	
+   130	
+   131	def gripper_action_mask(config: RLTActorCriticConfig) -> jax.Array:
+   132	    mask = jnp.ones((config.action_dim,), dtype=jnp.float32)
+   133	    for index in ALOHA_GRIPPER_ACTION_INDICES:
+   134	        if index < config.action_dim:
+   135	            mask = mask.at[index].set(0.0)
+   136	    return mask
+   137	
+   138	
+   139	def action_window(action_chunk: jax.Array, config: RLTActorCriticConfig) -> jax.Array:
+   140	    """Return the C-step action window controlled by RLT.
+   141	
+   142	    In inference-time RTC, a newly sampled chunk starts executing only after
+   143	    the handoff delay. With the current robot settings, the actor/critic window
+   144	    is therefore 10:35 inside the VLA 50-step chunk. Replay shards may already
+   145	    store only this C-step window; in that case return the leading C steps.
+   146	    """
+   147	    horizon = config.rlt_chunk_horizon
+   148	    start = config.action_start_index
+   149	    if action_chunk.shape[1] >= start + horizon:
+   150	        return action_chunk[:, start : start + horizon, : config.action_dim]
+   151	    return action_chunk[:, :horizon, : config.action_dim]
+   152	
+   153	
+   154	def preserve_gripper_actions(action_chunk: jax.Array, reference_action_chunk: jax.Array, config: RLTActorCriticConfig) -> jax.Array:
+   155	    """Keep ALOHA gripper dimensions equal to the reference/VLA action window."""
+   156	    reference = action_window(reference_action_chunk, config)
+   157	    action = action_chunk[:, : config.rlt_chunk_horizon, : config.action_dim]
+   158	    for index in ALOHA_GRIPPER_ACTION_INDICES:
+   159	        if index < config.action_dim:
+   160	            action = action.at[:, :, index].set(reference[:, :, index])
+   161	    return action
+   162	
+   163	
+   164	def init_actor_critic_params(rng: jax.Array, config: RLTActorCriticConfig) -> Params:
+   165	    actor_rng, q1_rng, q2_rng = jax.random.split(rng, 3)
+   166	    actor_dims = [config.obs_size, *([config.hidden_dim] * config.actor_hidden_layers), config.action_size]
+   167	    critic_dims = [config.critic_input_size, *([config.hidden_dim] * config.critic_hidden_layers), config.critic_num_bins]
+   168	    return {"actor": _mlp_params(actor_rng, actor_dims), "critic1": _mlp_params(q1_rng, critic_dims), "critic2": _mlp_params(q2_rng, critic_dims)}
+   169	
+   170	
+   171	def make_actor_input(rlt_token: jax.Array, state: jax.Array, reference_action_chunk: jax.Array, config: RLTActorCriticConfig) -> jax.Array:
+   172	    rlt_token = layernorm_rlt_token(rlt_token)
+   173	    ref = action_window(reference_action_chunk, config).reshape(reference_action_chunk.shape[0], -1)
+   174	    state = state[:, : config.state_dim]
+   175	    return jnp.concatenate([rlt_token, state, ref], axis=-1)
+   176	
+   177	
+   178	def actor_apply(
+   179	    actor_params: list[Params],
+   180	    rlt_token: jax.Array,
+   181	    state: jax.Array,
+   182	    reference_action_chunk: jax.Array,
+   183	    config: RLTActorCriticConfig,
+   184	    *,
+   185	    reference_action_input: jax.Array | None = None,
+   186	) -> jax.Array:
+   187	    if reference_action_input is None:
+   188	        reference_action_input = reference_action_chunk
+   189	    x = make_actor_input(rlt_token, state, reference_action_input, config)
+   190	    action = _mlp(actor_params, x).reshape((-1, config.rlt_chunk_horizon, config.action_dim))
+   191	    return preserve_gripper_actions(action, reference_action_chunk, config)
+   192	
+   193	
+   194	def maybe_drop_reference_action_input(
+   195	    reference_action_chunk: jax.Array, config: RLTActorCriticConfig, rng: jax.Array
+   196	) -> jax.Array:
+   197	    if config.reference_action_dropout <= 0.0:
+   198	        return reference_action_chunk
+   199	    keep = jax.random.bernoulli(
+   200	        rng,
+   201	        1.0 - config.reference_action_dropout,
+   202	        (reference_action_chunk.shape[0], 1, 1),
+   203	    )
+   204	    return jnp.where(keep, reference_action_chunk, jnp.zeros_like(reference_action_chunk))
+   205	
+   206	
+   207	def make_critic_input(rlt_token: jax.Array, state: jax.Array, action_chunk: jax.Array, config: RLTActorCriticConfig) -> jax.Array:
+   208	    rlt_token = layernorm_rlt_token(rlt_token)
+   209	    state = state[:, : config.state_dim]
+   210	    action = action_window(action_chunk, config).reshape(action_chunk.shape[0], -1)
+   211	    return jnp.concatenate([rlt_token, state, action], axis=-1)
+   212	
+   213	
+   214	def critic_support(config: RLTActorCriticConfig) -> jax.Array:
+   215	    return jnp.linspace(config.critic_value_min, config.critic_value_max, config.critic_num_bins, dtype=jnp.float32)
+   216	
+   217	
+   218	def critic_logits_apply(
+   219	    critic_params: list[Params], rlt_token: jax.Array, state: jax.Array, action_chunk: jax.Array, config: RLTActorCriticConfig
+   220	) -> jax.Array:
+   221	    x = make_critic_input(rlt_token, state, action_chunk, config)
+   222	    return _mlp(critic_params, x)
+   223	
+   224	
+   225	def critic_apply(critic_params: list[Params], rlt_token: jax.Array, state: jax.Array, action_chunk: jax.Array, config: RLTActorCriticConfig) -> jax.Array:
+   226	    logits = critic_logits_apply(critic_params, rlt_token, state, action_chunk, config)
+   227	    if logits.shape[-1] == 1:
+   228	        return logits[:, 0]
+   229	    probs = jax.nn.softmax(logits, axis=-1)
+   230	    return jnp.sum(probs * critic_support(config)[None, :], axis=-1)
+   231	
+   232	
+   233	def _two_hot_value_target(values: jax.Array, config: RLTActorCriticConfig) -> jax.Array:
+   234	    support = critic_support(config)
+   235	    clipped = jnp.clip(values, support[0], support[-1])
+   236	    bin_width = (support[-1] - support[0]) / (config.critic_num_bins - 1)
+   237	    fractional = (clipped - support[0]) / bin_width
+   238	    lower = jnp.floor(fractional).astype(jnp.int32)
+   239	    upper = jnp.clip(lower + 1, 0, config.critic_num_bins - 1)
+   240	    lower = jnp.clip(lower, 0, config.critic_num_bins - 1)
+   241	    upper_weight = fractional - lower.astype(jnp.float32)
+   242	    lower_weight = 1.0 - upper_weight
+   243	    target = jnp.zeros((values.shape[0], config.critic_num_bins), dtype=jnp.float32)
+   244	    target = target.at[jnp.arange(values.shape[0]), lower].add(lower_weight)
+   245	    target = target.at[jnp.arange(values.shape[0]), upper].add(upper_weight)
+   246	    return target
+   247	
+   248	
+   249	def critic_loss(params: Params, target_params: Params, batch, config: RLTActorCriticConfig, rng: jax.Array) -> tuple[jax.Array, dict[str, jax.Array]]:
+   250	    next_ref = batch.normalized_next_reference_action_chunk
+   251	    next_ref_input = maybe_drop_reference_action_input(next_ref, config, rng)
+   252	    next_action = actor_apply(
+   253	        params["actor"],
+   254	        batch.next_rlt_token,
+   255	        batch.normalized_next_state,
+   256	        next_ref,
+   257	        config,
+   258	        reference_action_input=next_ref_input,
+   259	    )
+   260	    if config.target_policy_noise > 0.0:
+   261	        noise = jax.random.normal(rng, next_action.shape, dtype=next_action.dtype) * config.target_policy_noise
+   262	        noise = jnp.clip(noise, -config.target_policy_noise_clip, config.target_policy_noise_clip)
+   263	        next_action = preserve_gripper_actions(next_action + noise, next_ref, config)
+   264	    target_q1 = critic_apply(target_params["critic1"], batch.next_rlt_token, batch.normalized_next_state, next_action, config)
+   265	    target_q2 = critic_apply(target_params["critic2"], batch.next_rlt_token, batch.normalized_next_state, next_action, config)
+   266	    bootstrap_steps = config.target_bootstrap_steps or config.rlt_chunk_horizon
+   267	    bootstrap_discount = config.gamma**bootstrap_steps
+   268	    target_q = batch.td_reward + bootstrap_discount * (1.0 - batch.done.astype(jnp.float32)) * jnp.minimum(target_q1, target_q2)
+   269	    logits1 = critic_logits_apply(params["critic1"], batch.rlt_token, batch.normalized_state, batch.normalized_executed_action_chunk, config)
+   270	    logits2 = critic_logits_apply(params["critic2"], batch.rlt_token, batch.normalized_state, batch.normalized_executed_action_chunk, config)
+   271	    target_dist = _two_hot_value_target(target_q, config)
+   272	    loss1 = -jnp.sum(target_dist * jax.nn.log_softmax(logits1, axis=-1), axis=-1)
+   273	    loss2 = -jnp.sum(target_dist * jax.nn.log_softmax(logits2, axis=-1), axis=-1)
+   274	    unweighted_loss = jnp.mean(loss1) + jnp.mean(loss2)
+   275	    loss = config.critic_loss_coef * unweighted_loss
+   276	    q1 = jnp.sum(jax.nn.softmax(logits1, axis=-1) * critic_support(config)[None, :], axis=-1)
+   277	    return loss, {
+   278	        "critic_loss": loss,
+   279	        "critic_loss_unweighted": unweighted_loss,
+   280	        "q1": jnp.mean(q1),
+   281	        "target_q": jnp.mean(target_q),
+   282	        "target_q_clipped_fraction": jnp.mean(
+   283	            ((target_q < config.critic_value_min) | (target_q > config.critic_value_max)).astype(jnp.float32)
+   284	        ),
+   285	    }
+   286	
+   287	
+   288	def actor_loss(
+   289	    params: Params,
+   290	    batch,
+   291	    config: RLTActorCriticConfig,
+   292	    rng: jax.Array,
+   293	    reference_deviation_penalty_coef: jax.Array | None = None,
+   294	) -> tuple[jax.Array, dict[str, jax.Array]]:
+   295	    ref = batch.normalized_reference_action_chunk
+   296	    ref_input = maybe_drop_reference_action_input(ref, config, rng)
+   297	    action = actor_apply(
+   298	        params["actor"],
+   299	        batch.rlt_token,
+   300	        batch.normalized_state,
+   301	        ref,
+   302	        config,
+   303	        reference_action_input=ref_input,
+   304	    )
+   305	    q1 = critic_apply(params["critic1"], batch.rlt_token, batch.normalized_state, action, config)
+   306	    q2 = critic_apply(params["critic2"], batch.rlt_token, batch.normalized_state, action, config)
+   307	    q = jnp.minimum(q1, q2)
+   308	    non_gripper_mask = gripper_action_mask(config)[None, None, :]
+   309	    rl_loss = -jnp.mean(q)
+   310	    rl_loss_weighted = config.rl_loss_coef * rl_loss
+   311	    loss = rl_loss_weighted
+   312	    action_reference = action_window(batch.normalized_reference_action_chunk, config)
+   313	    reference_deviation_abs = jnp.abs(action - action_reference) * non_gripper_mask
+   314	    reference_deviation_abs_max = jnp.max(reference_deviation_abs)
+   315	    reference_deviation_abs_mean = jnp.sum(reference_deviation_abs) / jnp.maximum(
+   316	        jnp.sum(jnp.ones_like(reference_deviation_abs) * non_gripper_mask), 1.0
+   317	    )
+   318	    reference_deviation_excess = jnp.maximum(
+   319	        reference_deviation_abs - config.reference_deviation_threshold, 0.0
+   320	    ) * non_gripper_mask
+   321	    reference_deviation_penalty = jnp.sum(jnp.square(reference_deviation_excess)) / jnp.maximum(
+   322	        jnp.sum(jnp.ones_like(reference_deviation_excess) * non_gripper_mask), 1.0
+   323	    )
+   324	    if reference_deviation_penalty_coef is None:
+   325	        reference_deviation_penalty_coef = jnp.asarray(config.reference_deviation_penalty_coef, dtype=jnp.float32)
+   326	    reference_deviation_penalty_weighted = reference_deviation_penalty_coef * reference_deviation_penalty
+   327	    loss = loss + reference_deviation_penalty_weighted
+   328	    return loss, {
+   329	        "actor_loss": loss,
+   330	        "actor_rl_loss": rl_loss,
+   331	        "actor_rl_loss_weighted": rl_loss_weighted,
+   332	        "actor_q": jnp.mean(q),
+   333	        "actor_q1": jnp.mean(q1),
+   334	        "actor_q2": jnp.mean(q2),
+   335	        "reference_deviation_abs_max": reference_deviation_abs_max,
+   336	        "reference_deviation_abs_mean": reference_deviation_abs_mean,
+   337	        "reference_deviation_penalty": reference_deviation_penalty,
+   338	        "reference_deviation_penalty_weighted": reference_deviation_penalty_weighted,
+   339	        "reference_deviation_penalty_coef": reference_deviation_penalty_coef,
+   340	    }
+   341	
+   342	
+   343	def soft_update(params: Params, target_params: Params, tau: float) -> Params:
+   344	    return jax.tree.map(lambda p, t: tau * p + (1.0 - tau) * t, params, target_params)
+===== src/openpi/rlt/policy.py =====
+     1	from __future__ import annotations
+     2	
+     3	import time
+     4	from typing import Any
+     5	
+     6	import jax
+     7	import jax.numpy as jnp
+     8	import numpy as np
+     9	from typing_extensions import override
+    10	
+    11	from openpi.rlt import actor_critic
+    12	from openpi.rlt import token_model
+    13	from openpi.serving import base_policy as _base_policy
+    14	
+    15	
+    16	class RLTPolicy(_base_policy.BasePolicy):
+    17	    def __init__(
+    18	        self,
+    19	        base_policy: _base_policy.BasePolicy,
+    20	        *,
+    21	        token_params,
+    22	        token_config: token_model.RLTTokenConfig,
+    23	        actor_params=None,
+    24	        actor_config: actor_critic.RLTActorCriticConfig | None = None,
+    25	        actor_inference_reference_clip: float | None = None,
+    26	        enabled: bool = True,
+    27	        metadata: dict[str, Any] | None = None,
+    28	    ):
+    29	        if token_params is None or token_config is None:
+    30	            raise ValueError("RLTPolicy requires token_params and token_config.")
+    31	        self._base_policy = base_policy
+    32	        self._token_params = token_params
+    33	        self._actor_params = actor_params
+    34	        self._token_config = token_config
+    35	        self._actor_config = actor_config
+    36	        self._actor_inference_reference_clip = actor_inference_reference_clip
+    37	        base_metadata = getattr(base_policy, "metadata", {})
+    38	        self._metadata = {**base_metadata, **(metadata or {})}
+    39	        self._actor_enabled = (
+    40	            enabled
+    41	            and actor_params is not None
+    42	            and actor_config is not None
+    43	        )
+    44	        token_config = self._token_config
+    45	
+    46	        @jax.jit
+    47	        def encode_rlt_token(token_params, embeddings, mask):
+    48	            return token_model.encode(token_params, embeddings, mask, token_config)
+    49	
+    50	        self._encode_rlt_token = encode_rlt_token
+    51	
+    52	        self._apply_actor = None
+    53	        if self._actor_enabled:
+    54	            actor_config = self._actor_config
+    55	            inference_reference_clip = (
+    56	                None
+    57	                if self._actor_inference_reference_clip is None
+    58	                else float(self._actor_inference_reference_clip)
+    59	            )
+    60	
+    61	            @jax.jit
+    62	            def apply_actor(actor_params, rlt_token, state, reference):
+    63	                actor_network_params = actor_params["actor"] if isinstance(actor_params, dict) and "actor" in actor_params else actor_params
+    64	                refined = actor_critic.actor_apply(actor_network_params, rlt_token, state, reference, actor_config)
+    65	                action_start = actor_config.action_start_index
+    66	                action_end = action_start + actor_config.rlt_chunk_horizon
+    67	                reference_window = actor_critic.action_window(reference, actor_config)
+    68	                if inference_reference_clip is not None:
+    69	                    refined = reference_window + jnp.clip(
+    70	                        refined - reference_window,
+    71	                        -inference_reference_clip,
+    72	                        inference_reference_clip,
+    73	                    )
+    74	                refined = actor_critic.preserve_gripper_actions(refined, reference, actor_config)
+    75	                full_actions = jnp.asarray(reference).at[
+    76	                    :, action_start:action_end, : actor_config.action_dim
+    77	                ].set(refined)
+    78	                q1 = actor_critic.critic_apply(actor_params["critic1"], rlt_token, state, full_actions, actor_config)
+    79	                q2 = actor_critic.critic_apply(actor_params["critic2"], rlt_token, state, full_actions, actor_config)
+    80	                return full_actions, q1, q2
+    81	
+    82	            self._apply_actor = apply_actor
+    83	
+    84	            @jax.jit
+    85	            def score_action_chunk(actor_params, rlt_token, state, action_chunk):
+    86	                q1 = actor_critic.critic_apply(actor_params["critic1"], rlt_token, state, action_chunk, actor_config)
+    87	                q2 = actor_critic.critic_apply(actor_params["critic2"], rlt_token, state, action_chunk, actor_config)
+    88	                return q1, q2
+    89	
+    90	            self._score_action_chunk = score_action_chunk
+    91	
+    92	    @property
+    93	    def actor_available(self) -> bool:
+    94	        return self._actor_enabled
+    95	
+    96	    @staticmethod
+    97	    def _attach_replay_chunk(
+    98	        out: dict,
+    99	        *,
+   100	        rlt_token: jax.Array,
+   101	        embeddings: jax.Array,
+   102	        mask: jax.Array,
+   103	        state: jax.Array,
+   104	        reference: jax.Array,
+   105	        policy_actions: jax.Array,
+   106	        actor_enabled: bool,
+   107	        noise: np.ndarray | None = None,
+   108	        q1: jax.Array | None = None,
+   109	        q2: jax.Array | None = None,
+   110	        vla_q1: jax.Array | None = None,
+   111	        vla_q2: jax.Array | None = None,
+   112	        actor_q1: jax.Array | None = None,
+   113	        actor_q2: jax.Array | None = None,
+   114	    ) -> None:
+   115	        out["rlt_token"] = np.asarray(rlt_token[0])
+   116	        out["rlt_embeddings"] = np.asarray(embeddings[0], dtype=np.float32)
+   117	        out["rlt_mask"] = np.asarray(mask[0], dtype=np.bool_)
+   118	        out["rlt_state"] = np.asarray(state[0])
+   119	        out["rlt_state_is_normalized"] = True
+   120	        out["rlt_state_normalization"] = "policy_input_transform"
+   121	        out["rlt_reference_action_chunk"] = np.asarray(reference[0])
+   122	        out["rlt_policy_action_chunk"] = np.asarray(policy_actions[0])
+   123	        out["rlt_actor_enabled"] = actor_enabled
+   124	        if noise is not None:
+   125	            out["rlt_noise"] = np.asarray(noise, dtype=np.float32)
+   126	        if q1 is not None and q2 is not None:
+   127	            q1_value = float(np.asarray(q1[0]))
+   128	            q2_value = float(np.asarray(q2[0]))
+   129	            out["rlt_chunk_q1"] = q1_value
+   130	            out["rlt_chunk_q2"] = q2_value
+   131	            out["rlt_chunk_q_min"] = min(q1_value, q2_value)
+   132	        if vla_q1 is not None and vla_q2 is not None:
+   133	            q1_value = float(np.asarray(vla_q1[0]))
+   134	            q2_value = float(np.asarray(vla_q2[0]))
+   135	            out["rlt_vla_chunk_q1"] = q1_value
+   136	            out["rlt_vla_chunk_q2"] = q2_value
+   137	            out["rlt_vla_chunk_q_min"] = min(q1_value, q2_value)
+   138	        if actor_q1 is not None and actor_q2 is not None:
+   139	            q1_value = float(np.asarray(actor_q1[0]))
+   140	            q2_value = float(np.asarray(actor_q2[0]))
+   141	            out["rlt_actor_chunk_q1"] = q1_value
+   142	            out["rlt_actor_chunk_q2"] = q2_value
+   143	            out["rlt_actor_chunk_q_min"] = min(q1_value, q2_value)
+   144	
+   145	    @override
+   146	    def infer(self, obs: dict, **kwargs) -> dict:
+   147	        start = time.monotonic()
+   148	        actor_requested = bool(kwargs.get("rlt_actor_enabled", False))
+   149	        chunking_mode = kwargs.get("chunking_mode", "inference_time")
+   150	        if chunking_mode != "inference_time":
+   151	            raise ValueError("RLTPolicy only supports chunking_mode='inference_time' for robot runtime.")
+   152	        base_kwargs = {
+   153	            "chunking_mode": "inference_time",
+   154	            "return_rlt_state": True,
+   155	        }
+   156	        if "prev_action" in kwargs:
+   157	            base_kwargs["prev_action"] = kwargs["prev_action"]
+   158	        if "noise" in kwargs:
+   159	            base_kwargs["noise"] = kwargs["noise"]
+   160	        base = self._base_policy.infer(obs, **base_kwargs)
+   161	        model_noise = base.get("model_noise")
+   162	        model_state = base.get("model_state", base["state"])
+   163	        state = jnp.asarray(model_state)[None, ...] if np.asarray(model_state).ndim == 1 else jnp.asarray(model_state)
+   164	        model_actions = base["model_actions"]
+   165	        reference = jnp.asarray(model_actions)[None, ...] if np.asarray(model_actions).ndim == 2 else jnp.asarray(model_actions)
+   166	        embeddings = jnp.asarray(base["rlt_embeddings"])
+   167	        if embeddings.ndim == 2:
+   168	            embeddings = embeddings[None, ...]
+   169	        mask = jnp.asarray(base["rlt_mask"])
+   170	        if mask.ndim == 1:
+   171	            mask = mask[None, ...]
+   172	        rlt_token = self._encode_rlt_token(self._token_params, embeddings, mask)
+   173	        base.pop("rlt_embeddings", None)
+   174	        base.pop("rlt_mask", None)
+   175	        vla_q1 = vla_q2 = actor_q1 = actor_q2 = None
+   176	        actor_actions = None
+   177	        if self._actor_enabled:
+   178	            vla_q1, vla_q2 = self._score_action_chunk(self._actor_params, rlt_token, state, reference)
+   179	            actor_actions, actor_q1, actor_q2 = self._apply_actor(self._actor_params, rlt_token, state, reference)
+   180	
+   181	        if not actor_requested or not self._actor_enabled:
+   182	            timing = base.setdefault("policy_timing", {})
+   183	            timing["rlt_ms"] = (time.monotonic() - start) * 1000.0
+   184	            timing["rlt_enabled"] = False
+   185	            timing["rlt_actor_requested"] = actor_requested
+   186	            timing["rlt_actor_available"] = self._actor_enabled
+   187	            self._attach_replay_chunk(
+   188	                base,
+   189	                rlt_token=rlt_token,
+   190	                embeddings=embeddings,
+   191	                mask=mask,
+   192	                state=state,
+   193	                reference=reference,
+   194	                policy_actions=reference,
+   195	                actor_enabled=False,
+   196	                noise=model_noise,
+   197	                q1=vla_q1,
+   198	                q2=vla_q2,
+   199	                vla_q1=vla_q1,
+   200	                vla_q2=vla_q2,
+   201	                actor_q1=actor_q1,
+   202	                actor_q2=actor_q2,
+   203	            )
+   204	            return base
+   205	        full_actions = actor_actions
+   206	        if not hasattr(self._base_policy, "transform_model_outputs"):
+   207	            raise NotImplementedError("RLT actor inference requires base policy output transforms.")
+   208	        out = self._base_policy.transform_model_outputs(
+   209	            state=np.asarray(model_state),
+   210	            actions=np.asarray(full_actions[0]),
+   211	        )
+   212	        self._attach_replay_chunk(
+   213	            out,
+   214	            rlt_token=rlt_token,
+   215	            embeddings=embeddings,
+   216	            mask=mask,
+   217	            state=state,
+   218	            reference=reference,
+   219	            policy_actions=full_actions,
+   220	            actor_enabled=True,
+   221	            noise=model_noise,
+   222	            q1=actor_q1,
+   223	            q2=actor_q2,
+   224	            vla_q1=vla_q1,
+   225	            vla_q2=vla_q2,
+   226	            actor_q1=actor_q1,
+   227	            actor_q2=actor_q2,
+   228	        )
+   229	        out.setdefault("policy_timing", {})["rlt_ms"] = (time.monotonic() - start) * 1000.0
+   230	        out["policy_timing"]["rlt_enabled"] = True
+   231	        out["policy_timing"]["rlt_actor_requested"] = actor_requested
+   232	        out["policy_timing"]["rlt_actor_available"] = self._actor_enabled
+   233	        return out
+   234	
+   235	    @override
+   236	    def reset(self) -> None:
+   237	        self._base_policy.reset()
+   238	
+   239	    @property
+   240	    def metadata(self) -> dict[str, Any]:
+   241	        return self._metadata
+===== src/openpi/rlt/replay.py =====
+     1	from __future__ import annotations
+     2	
+     3	from pathlib import Path
+     4	
+     5	from flax import struct
+     6	
+     7	import jax
+     8	import jax.numpy as jnp
+     9	import numpy as np
+    10	from torch.utils import data as torch_data
+    11	
+    12	
+    13	@struct.dataclass
+    14	class ReplayBatch:
+    15	    rlt_token: jax.Array
+    16	    next_rlt_token: jax.Array
+    17	    normalized_state: jax.Array
+    18	    normalized_next_state: jax.Array
+    19	    normalized_reference_action_chunk: jax.Array
+    20	    normalized_next_reference_action_chunk: jax.Array
+    21	    normalized_executed_action_chunk: jax.Array
+    22	    executed_action_mask: jax.Array
+    23	    td_reward: jax.Array
+    24	    done: jax.Array
+    25	    episode_id: jax.Array
+    26	    step_index: jax.Array
+    27	    sample_index: jax.Array
+    28	    is_intervention: jax.Array
+    29	
+    30	
+    31	REPLAY_BATCH_FIELDS = tuple(ReplayBatch.__dataclass_fields__)
+    32	
+    33	
+    34	class ReplayDataset(torch_data.Dataset):
+    35	    def __init__(self, path: str | Path):
+    36	        self.path = Path(path)
+    37	        files = sorted(self.path.glob("*.npz")) if self.path.is_dir() else [self.path]
+    38	        if not files:
+    39	            raise FileNotFoundError(f"No replay .npz files found under {self.path}")
+    40	        arrays = [np.load(file) for file in files]
+    41	        optional_defaults = {"sample_index": lambda arr: np.zeros((arr[REPLAY_BATCH_FIELDS[0]].shape[0],), dtype=np.int32)}
+    42	        missing = [key for key in REPLAY_BATCH_FIELDS if key not in arrays[0].files and key not in optional_defaults]
+    43	        if missing:
+    44	            raise KeyError("Replay shard " + str(files[0]) + " missing required fields: " + str(tuple(missing)))
+    45	
+    46	        def _field_array(arr, key: str) -> np.ndarray:
+    47	            if key in arr.files:
+    48	                return arr[key]
+    49	            if key in optional_defaults:
+    50	                return optional_defaults[key](arr)
+    51	            raise KeyError(key)
+    52	
+    53	        self.data = {key: np.concatenate([_field_array(arr, key) for arr in arrays], axis=0) for key in REPLAY_BATCH_FIELDS}
+    54	        self.source_files = [str(file) for file in files]
+    55	        self.split_episode_id = np.concatenate(
+    56	            [np.full((arr[REPLAY_BATCH_FIELDS[0]].shape[0],), file_idx, dtype=np.int32) for file_idx, arr in enumerate(arrays)],
+    57	            axis=0,
+    58	        )
+    59	        self.size = int(next(iter(self.data.values())).shape[0])
+    60	
+    61	    def __len__(self) -> int:
+    62	        return self.size
+    63	
+    64	    def __getitem__(self, idx: int) -> dict[str, np.ndarray]:
+    65	        return {key: value[idx] for key, value in self.data.items()}
+    66	
+    67	
+    68	def collate_replay_batch(samples: list[dict[str, np.ndarray]]) -> ReplayBatch:
+    69	    # This runs inside PyTorch DataLoader workers when num_workers > 0.
+    70	    # Keep it numpy-only; touching JAX in forked workers can crash CUDA.
+    71	    data = {}
+    72	    for key in REPLAY_BATCH_FIELDS:
+    73	        data[key] = np.stack([sample[key] for sample in samples], axis=0)
+    74	    return ReplayBatch(**data)
+    75	
+    76	
+    77	def batch_to_jax(batch: ReplayBatch) -> ReplayBatch:
+    78	    return ReplayBatch(**{key: jnp.asarray(getattr(batch, key)) for key in REPLAY_BATCH_FIELDS})
+===== src/openpi/models/pi0.py =====
+     1	import logging
+     2	
+     3	import einops
+     4	import flax.nnx as nnx
+     5	import flax.nnx.bridge as nnx_bridge
+     6	import jax
+     7	import jax.numpy as jnp
+     8	from typing_extensions import override
+     9	
+    10	from openpi.models import model as _model
+    11	from openpi.models import pi0_config
+    12	import openpi.models.gemma as _gemma
+    13	import openpi.models.siglip as _siglip
+    14	from openpi.shared import array_typing as at
+    15	
+    16	logger = logging.getLogger("openpi")
+    17	
+    18	
+    19	def make_attn_mask(input_mask, mask_ar):
+    20	    """Adapted from big_vision.
+    21	
+    22	    Tokens can attend to valid inputs tokens which have a cumulative mask_ar
+    23	    smaller or equal to theirs. This way `mask_ar` bool[?B, N] can be used to
+    24	    setup several types of attention, for example:
+    25	
+    26	      [[1 1 1 1 1 1]]: pure causal attention.
+    27	
+    28	      [[0 0 0 1 1 1]]: prefix-lm attention. The first 3 tokens can attend between
+    29	          themselves and the last 3 tokens have a causal attention. The first
+    30	          entry could also be a 1 without changing behaviour.
+    31	
+    32	      [[1 0 1 0 1 0 0 1 0 0]]: causal attention between 4 blocks. Tokens of a
+    33	          block can attend all previous blocks and all tokens on the same block.
+    34	
+    35	    Args:
+    36	      input_mask: bool[B, N] true if its part of the input, false if padding.
+    37	      mask_ar: bool[?B, N] mask that's true where previous tokens cannot depend on
+    38	        it and false where it shares the same attention mask as the previous token.
+    39	    """
+    40	    mask_ar = jnp.broadcast_to(mask_ar, input_mask.shape)
+    41	    cumsum = jnp.cumsum(mask_ar, axis=1)
+    42	    attn_mask = cumsum[:, None, :] <= cumsum[:, :, None]
+    43	    valid_mask = input_mask[:, None, :] * input_mask[:, :, None]
+    44	    return jnp.logical_and(attn_mask, valid_mask)
+    45	
+    46	
+    47	@at.typecheck
+    48	def posemb_sincos(
+    49	    pos: at.Real[at.Array, "..."], embedding_dim: int, min_period: float, max_period: float
+    50	) -> at.Float[at.Array, "..."]:
+    51	    """Computes sine-cosine positional embedding vectors for scalar or tokenwise positions."""
+    52	    if embedding_dim % 2 != 0:
+    53	        raise ValueError(f"embedding_dim ({embedding_dim}) must be divisible by 2")
+    54	
+    55	    fraction = jnp.linspace(0.0, 1.0, embedding_dim // 2)
+    56	    period = min_period * (max_period / min_period) ** fraction
+    57	    scale = 1.0 / period * 2 * jnp.pi
+    58	    if pos.ndim == 1:
+    59	        sinusoid_input = jnp.einsum("i,j->ij", pos, scale, precision=jax.lax.Precision.HIGHEST)
+    60	    else:
+    61	        sinusoid_input = pos[..., None] * scale
+    62	    return jnp.concatenate([jnp.sin(sinusoid_input), jnp.cos(sinusoid_input)], axis=-1)
+    63	
+    64	
+    65	class Pi0(_model.BaseModel):
+    66	    def __init__(self, config: pi0_config.Pi0Config, rngs: nnx.Rngs):
+    67	        super().__init__(config.action_dim, config.action_horizon, config.max_token_len)
+    68	        self.image_resolution = config.image_resolution
+    69	        self.training_time_rtc = config.training_time_rtc
+    70	        self.rtc_max_delay = config.rtc_max_delay
+    71	        paligemma_config = _gemma.get_config(config.paligemma_variant)
+    72	        action_expert_config = _gemma.get_config(config.action_expert_variant)
+    73	        # TODO: rewrite gemma in NNX. For now, use bridge.
+    74	        llm = nnx_bridge.ToNNX(
+    75	            _gemma.Module(
+    76	                configs=[paligemma_config, action_expert_config],
+    77	                embed_dtype=config.dtype,
+    78	                adarms=True,
+    79	            )
+    80	        )
+    81	        llm.lazy_init(rngs=rngs, method="init", use_adarms=[False, True])
+    82	        img = nnx_bridge.ToNNX(
+    83	            _siglip.Module(
+    84	                num_classes=paligemma_config.width,
+    85	                variant="So400m/14",
+    86	                pool_type="none",
+    87	                scan=True,
+    88	                dtype_mm=config.dtype,
+    89	            )
+    90	        )
+    91	        img.lazy_init(next(iter(config.fake_obs().images.values())), train=False, rngs=rngs)
+    92	        self.PaliGemma = nnx.Dict(llm=llm, img=img)
+    93	        self.action_in_proj = nnx.Linear(config.action_dim, action_expert_config.width, rngs=rngs)
+    94	        self.time_mlp_in = nnx.Linear(action_expert_config.width, action_expert_config.width, rngs=rngs)
+    95	        self.time_mlp_out = nnx.Linear(action_expert_config.width, action_expert_config.width, rngs=rngs)
+    96	        self.action_out_proj = nnx.Linear(action_expert_config.width, config.action_dim, rngs=rngs)
+    97	
+    98	        # This attribute gets automatically set by model.train() and model.eval().
+    99	        self.deterministic = True
+   100	
+   101	    @at.typecheck
+   102	    def embed_prefix(
+   103	        self, obs: _model.Observation
+   104	    ) -> tuple[at.Float[at.Array, "b s emb"], at.Bool[at.Array, "b s"], at.Bool[at.Array, " s"]]:
+   105	        input_mask = []
+   106	        ar_mask = []
+   107	        tokens = []
+   108	        # embed images
+   109	        for name in obs.images:
+   110	            image_tokens, _ = self.PaliGemma.img(obs.images[name], train=False)
+   111	
+   112	            tokens.append(image_tokens)
+   113	            input_mask.append(
+   114	                einops.repeat(
+   115	                    obs.image_masks[name],
+   116	                    "b -> b s",
+   117	                    s=image_tokens.shape[1],
+   118	                )
+   119	            )
+   120	            # image tokens attend to each other
+   121	            ar_mask += [False] * image_tokens.shape[1]
+   122	        # add language (aka tokenized inputs)
+   123	        if obs.tokenized_prompt is not None:
+   124	            tokenized_inputs = self.PaliGemma.llm(obs.tokenized_prompt, method="embed")
+   125	            tokens.append(tokenized_inputs)
+   126	            input_mask.append(obs.tokenized_prompt_mask)
+   127	            # full attention between image and language inputs
+   128	            ar_mask += [False] * tokenized_inputs.shape[1]
+   129	        tokens = jnp.concatenate(tokens, axis=1)
+   130	        input_mask = jnp.concatenate(input_mask, axis=1)
+   131	        ar_mask = jnp.array(ar_mask)
+   132	        return tokens, input_mask, ar_mask
+   133	
+   134	    @at.typecheck
+   135	    def encode_rlt_state(
+   136	        self, obs: _model.Observation
+   137	    ) -> dict[str, at.Array]:
+   138	        """Return frozen VLA prefix representations for RLT heads.
+   139	
+   140	        The returned embeddings are the PaliGemma prefix hidden states after image/text
+   141	        fusion. They are stop-gradient by construction so RLT training can consume them
+   142	        without updating the base VLA.
+   143	        """
+   144	        prefix_tokens, prefix_mask, prefix_ar_mask = self.embed_prefix(obs)
+   145	        prefix_attn_mask = make_attn_mask(prefix_mask, prefix_ar_mask)
+   146	        positions = jnp.cumsum(prefix_mask, axis=1) - 1
+   147	        (prefix_out, _), _ = self.PaliGemma.llm([prefix_tokens, None], mask=prefix_attn_mask, positions=positions)
+   148	        return {
+   149	            "embeddings": jax.lax.stop_gradient(prefix_out.astype(jnp.float32)),
+   150	            "mask": jax.lax.stop_gradient(prefix_mask),
+   151	            "state": jax.lax.stop_gradient(obs.state.astype(jnp.float32)),
+   152	        }
+   153	
+   154	    @at.typecheck
+   155	    def embed_suffix(
+   156	        self, obs: _model.Observation, noisy_actions: _model.Actions, timestep: at.Float[at.Array, "..."]
+   157	    ) -> tuple[
+   158	        at.Float[at.Array, "b s emb"],
+   159	        at.Bool[at.Array, "b s"],
+   160	        at.Bool[at.Array, " s"],
+   161	        at.Float[at.Array, "..."] | None,
+   162	    ]:
+   163	        input_mask = []
+   164	        ar_mask = []
+   165	        tokens = []
+   166	
+   167	        action_tokens = self.action_in_proj(noisy_actions)
+   168	        # embed timestep using sine-cosine positional encoding with sensitivity in the range [0, 1]
+   169	        time_emb = posemb_sincos(timestep, self.action_in_proj.out_features, min_period=4e-3, max_period=4.0)
+   170	        time_emb = self.time_mlp_in(time_emb)
+   171	        time_emb = nnx.swish(time_emb)
+   172	        time_emb = self.time_mlp_out(time_emb)
+   173	        time_emb = nnx.swish(time_emb)
+   174	        action_expert_tokens = action_tokens
+   175	        adarms_cond = time_emb
+   176	        tokens.append(action_expert_tokens)
+   177	        input_mask.append(jnp.ones(action_expert_tokens.shape[:2], dtype=jnp.bool_))
+   178	        # image/language/state inputs do not attend to action tokens
+   179	        ar_mask += [True] + ([False] * (self.action_horizon - 1))
+   180	        tokens = jnp.concatenate(tokens, axis=1)
+   181	        input_mask = jnp.concatenate(input_mask, axis=1)
+   182	        ar_mask = jnp.array(ar_mask)
+   183	        return tokens, input_mask, ar_mask, adarms_cond
+   184	
+   185	    @override
+   186	    def compute_loss(
+   187	        self, rng: at.KeyArrayLike, observation: _model.Observation, actions: _model.Actions, *, train: bool = False
+   188	    ) -> at.Float[at.Array, "*b ah"]:
+   189	        batch_shape = actions.shape[:-2]
+   190	        _, noise_rng, time_rng = jax.random.split(rng, 3)
+   191	        delay_rng = jax.random.fold_in(rng, 0)
+   192	
+   193	        noise = jax.random.normal(noise_rng, actions.shape)
+   194	        time = jax.random.beta(time_rng, 1.5, 1, batch_shape) * 0.999 + 0.001
+   195	        u_t = noise - actions
+   196	
+   197	        if self.training_time_rtc and train:
+   198	            max_delay = jnp.minimum(self.rtc_max_delay, self.action_horizon - 1)
+   199	            delay = jax.random.randint(delay_rng, batch_shape, minval=0, maxval=max_delay + 1)
+   200	            rtc_prefix_mask = jnp.arange(self.action_horizon) < delay[..., None]
+   201	            token_time = jnp.broadcast_to(time[..., None], actions.shape[:-1])
+   202	            # This repo uses t=1 as noise and t=0 as clean action. Setting prefix time to 0
+   203	            # makes the prefix exactly clean without a second explicit replacement.
+   204	            token_time = jnp.where(rtc_prefix_mask, 0.0, token_time)
+   205	            x_t = token_time[..., None] * noise + (1 - token_time[..., None]) * actions
+   206	            timestep = token_time
+   207	        else:
+   208	            rtc_prefix_mask = None
+   209	            time_expanded = time[..., None, None]
+   210	            x_t = time_expanded * noise + (1 - time_expanded) * actions
+   211	            timestep = time
+   212	
+   213	        # one big forward pass of prefix + suffix at once
+   214	        prefix_tokens, prefix_mask, prefix_ar_mask = self.embed_prefix(observation)
+   215	        suffix_tokens, suffix_mask, suffix_ar_mask, adarms_cond = self.embed_suffix(observation, x_t, timestep)
+   216	        input_mask = jnp.concatenate([prefix_mask, suffix_mask], axis=1)
+   217	        ar_mask = jnp.concatenate([prefix_ar_mask, suffix_ar_mask], axis=0)
+   218	        attn_mask = make_attn_mask(input_mask, ar_mask)
+   219	        positions = jnp.cumsum(input_mask, axis=1) - 1
+   220	        (prefix_out, suffix_out), _ = self.PaliGemma.llm(
+   221	            [prefix_tokens, suffix_tokens], mask=attn_mask, positions=positions, adarms_cond=[None, adarms_cond]
+   222	        )
+   223	        v_t = self.action_out_proj(suffix_out[:, -self.action_horizon :])
+   224	
+   225	        loss = jnp.mean(jnp.square(v_t - u_t), axis=-1)
+   226	        if rtc_prefix_mask is not None:
+   227	            loss = jnp.where(rtc_prefix_mask, 0.0, loss)
+   228	        return loss
+   229	
+   230	    @override
+   231	    def sample_action_chunk(
+   232	        self,
+   233	        rng: at.KeyArrayLike,
+   234	        observation: _model.Observation,
+   235	        *,
+   236	        denoising_steps: int | at.Int[at.Array, ""] = 10,
+   237	        noise: at.Float[at.Array, "b ah ad"] | None = None,
+   238	    ) -> _model.Actions:
+   239	        # note that we use the convention more common in diffusion literature, where t=1 is noise and t=0 is the target
+   240	        # distribution. yes, this is the opposite of the pi0 paper, and I'm sorry.
+   241	        dt = -1.0 / denoising_steps
+   242	        batch_size = observation.state.shape[0]
+   243	        if noise is None:
+   244	            noise = jax.random.normal(rng, (batch_size, self.action_horizon, self.action_dim))
+   245	
+   246	        prefix_tokens, prefix_mask, prefix_ar_mask = self.embed_prefix(observation)
+   247	        prefix_attn_mask = make_attn_mask(prefix_mask, prefix_ar_mask)
+   248	        positions = jnp.cumsum(prefix_mask, axis=1) - 1
+   249	        _, kv_cache = self.PaliGemma.llm([prefix_tokens, None], mask=prefix_attn_mask, positions=positions)
+   250	
+   251	        def step(carry):
+   252	            x_t, time = carry
+   253	            suffix_tokens, suffix_mask, suffix_ar_mask, adarms_cond = self.embed_suffix(
+   254	                observation, x_t, jnp.broadcast_to(time, batch_size)
+   255	            )
+   256	            suffix_attn_mask = make_attn_mask(suffix_mask, suffix_ar_mask)
+   257	            prefix_attn_mask = einops.repeat(prefix_mask, "b p -> b s p", s=suffix_tokens.shape[1])
+   258	            full_attn_mask = jnp.concatenate([prefix_attn_mask, suffix_attn_mask], axis=-1)
+   259	            assert full_attn_mask.shape == (
+   260	                batch_size,
+   261	                suffix_tokens.shape[1],
+   262	                prefix_tokens.shape[1] + suffix_tokens.shape[1],
+   263	            )
+   264	            positions = jnp.sum(prefix_mask, axis=-1)[:, None] + jnp.cumsum(suffix_mask, axis=-1) - 1
+   265	
+   266	            (prefix_out, suffix_out), _ = self.PaliGemma.llm(
+   267	                [None, suffix_tokens],
+   268	                mask=full_attn_mask,
+   269	                positions=positions,
+   270	                kv_cache=kv_cache,
+   271	                adarms_cond=[None, adarms_cond],
+   272	            )
+   273	            assert prefix_out is None
+   274	            v_t = self.action_out_proj(suffix_out[:, -self.action_horizon :])
+   275	            return x_t + dt * v_t, time + dt
+   276	
+   277	        def cond(carry):
+   278	            x_t, time = carry
+   279	            return time >= -dt / 2
+   280	
+   281	        x_0, _ = jax.lax.while_loop(cond, step, (noise, 1.0))
+   282	        return x_0
+   283	
+   284	    def sample_action_chunk_with_rlt_context(
+   285	        self,
+   286	        rng: at.KeyArrayLike,
+   287	        observation: _model.Observation,
+   288	        *,
+   289	        denoising_steps: int | at.Int[at.Array, ""] = 10,
+   290	        noise: at.Float[at.Array, "b ah ad"] | None = None,
+   291	    ) -> dict[str, at.Array]:
+   292	        """Sample actions and return RLT prefix context with a single prefix pass."""
+   293	        dt = -1.0 / denoising_steps
+   294	        batch_size = observation.state.shape[0]
+   295	        if noise is None:
+   296	            noise = jax.random.normal(rng, (batch_size, self.action_horizon, self.action_dim))
+   297	
+   298	        prefix_tokens, prefix_mask, prefix_ar_mask = self.embed_prefix(observation)
+   299	        prefix_attn_mask = make_attn_mask(prefix_mask, prefix_ar_mask)
+   300	        prefix_positions = jnp.cumsum(prefix_mask, axis=1) - 1
+   301	        (prefix_out, _), kv_cache = self.PaliGemma.llm(
+   302	            [prefix_tokens, None],
+   303	            mask=prefix_attn_mask,
+   304	            positions=prefix_positions,
+   305	        )
+   306	
+   307	        def step(carry):
+   308	            x_t, time = carry
+   309	            suffix_tokens, suffix_mask, suffix_ar_mask, adarms_cond = self.embed_suffix(
+   310	                observation, x_t, jnp.broadcast_to(time, batch_size)
+   311	            )
+   312	            suffix_attn_mask = make_attn_mask(suffix_mask, suffix_ar_mask)
+   313	            prefix_attn_mask = einops.repeat(prefix_mask, "b p -> b s p", s=suffix_tokens.shape[1])
+   314	            full_attn_mask = jnp.concatenate([prefix_attn_mask, suffix_attn_mask], axis=-1)
+   315	            assert full_attn_mask.shape == (
+   316	                batch_size,
+   317	                suffix_tokens.shape[1],
+   318	                prefix_tokens.shape[1] + suffix_tokens.shape[1],
+   319	            )
+   320	            positions = jnp.sum(prefix_mask, axis=-1)[:, None] + jnp.cumsum(suffix_mask, axis=-1) - 1
+   321	
+   322	            (prefix_step_out, suffix_out), _ = self.PaliGemma.llm(
+   323	                [None, suffix_tokens],
+   324	                mask=full_attn_mask,
+   325	                positions=positions,
+   326	                kv_cache=kv_cache,
+   327	                adarms_cond=[None, adarms_cond],
+   328	            )
+   329	            assert prefix_step_out is None
+   330	            v_t = self.action_out_proj(suffix_out[:, -self.action_horizon :])
+   331	            return x_t + dt * v_t, time + dt
+   332	
+   333	        def cond(carry):
+   334	            x_t, time = carry
+   335	            return time >= -dt / 2
+   336	
+   337	        x_0, _ = jax.lax.while_loop(cond, step, (noise, 1.0))
+   338	        return {
+   339	            "actions": x_0,
+   340	            "rlt_embeddings": jax.lax.stop_gradient(prefix_out.astype(jnp.float32)),
+   341	            "rlt_mask": jax.lax.stop_gradient(prefix_mask),
+   342	            "rlt_state": jax.lax.stop_gradient(observation.state.astype(jnp.float32)),
+   343	        }
+   344	
+   345	    def sample_action_chunk_with_training_time_rtc(
+   346	        self,
+   347	        rng: at.KeyArrayLike,
+   348	        observation: _model.Observation,
+   349	        *,
+   350	        action_prefix: _model.Actions,
+   351	        handoff_delay_steps: int | at.Int[at.Array, ""],
+   352	        denoising_steps: int | at.Int[at.Array, ""] = 10,
+   353	        noise: at.Float[at.Array, "b ah ad"] | None = None,
+   354	    ) -> _model.Actions:
+   355	        # Hard-prefix sampling used by training-time RTC. The prefix is already in model action space.
+   356	        dt = -1.0 / denoising_steps
+   357	        batch_size = observation.state.shape[0]
+   358	        if noise is None:
+   359	            noise = jax.random.normal(rng, (batch_size, self.action_horizon, self.action_dim))
+   360	
+   361	        action_prefix = jnp.asarray(action_prefix)
+   362	        prefix_mask = (jnp.arange(self.action_horizon) < handoff_delay_steps)[None, :, None]
+   363	
+   364	        def preserve_prefix(actions):
+   365	            return jnp.where(prefix_mask, action_prefix, actions)
+   366	
+   367	        prefix_tokens, prefix_mask_tokens, prefix_ar_mask = self.embed_prefix(observation)
+   368	        prefix_attn_mask = make_attn_mask(prefix_mask_tokens, prefix_ar_mask)
+   369	        positions = jnp.cumsum(prefix_mask_tokens, axis=1) - 1
+   370	        _, kv_cache = self.PaliGemma.llm([prefix_tokens, None], mask=prefix_attn_mask, positions=positions)
+   371	
+   372	        def step(carry):
+   373	            x_t, time = carry
+   374	            token_time = jnp.broadcast_to(time, (batch_size, self.action_horizon))
+   375	            token_time = jnp.where(prefix_mask[..., 0], 0.0, token_time)
+   376	            suffix_tokens, suffix_mask, suffix_ar_mask, adarms_cond = self.embed_suffix(observation, x_t, token_time)
+   377	            suffix_attn_mask = make_attn_mask(suffix_mask, suffix_ar_mask)
+   378	            prefix_attn_mask = einops.repeat(prefix_mask_tokens, "b p -> b s p", s=suffix_tokens.shape[1])
+   379	            full_attn_mask = jnp.concatenate([prefix_attn_mask, suffix_attn_mask], axis=-1)
+   380	            assert full_attn_mask.shape == (
+   381	                batch_size,
+   382	                suffix_tokens.shape[1],
+   383	                prefix_tokens.shape[1] + suffix_tokens.shape[1],
+   384	            )
+   385	            positions = jnp.sum(prefix_mask_tokens, axis=-1)[:, None] + jnp.cumsum(suffix_mask, axis=-1) - 1
+   386	
+   387	            (prefix_out, suffix_out), _ = self.PaliGemma.llm(
+   388	                [None, suffix_tokens],
+   389	                mask=full_attn_mask,
+   390	                positions=positions,
+   391	                kv_cache=kv_cache,
+   392	                adarms_cond=[None, adarms_cond],
+   393	            )
+   394	            assert prefix_out is None
+   395	            v_t = self.action_out_proj(suffix_out[:, -self.action_horizon :])
+   396	            return preserve_prefix(x_t + dt * v_t), time + dt
+   397	
+   398	        def cond(carry):
+   399	            x_t, time = carry
+   400	            return time >= -dt / 2
+   401	
+   402	        x_0, _ = jax.lax.while_loop(cond, step, (preserve_prefix(noise), 1.0))
+   403	        return x_0
+   404	
+   405	    def _sample_action_chunk_with_inference_time_rtc_and_context(
+   406	        self,
+   407	        rng: at.KeyArrayLike,
+   408	        prev_action_chunk: _model.Actions,
+   409	        observation: _model.Observation,
+   410	        *,
+   411	        denoising_steps: int | at.Int[at.Array, ""] = 10,
+   412	        replan_start_step: int = 25,
+   413	        handoff_delay_steps: int = 10,
+   414	        guidance_scale: float = 8.0,
+   415	        noise: at.Float[at.Array, "b ah ad"] | None = None,
+   416	    ) -> tuple[_model.Actions, at.Array, at.Array]:
+   417	        # note that we use the convention more common in diffusion literature, where t=1 is noise and t=0 is the target
+   418	        # distribution. yes, this is the opposite of the pi0 paper, and I'm sorry.
+   419	        dt = -1.0 / denoising_steps
+   420	        batch_size = observation.state.shape[0]
+   421	        if noise is None:
+   422	            noise = jax.random.normal(rng, (batch_size, self.action_horizon, self.action_dim))
+   423	
+   424	        guidance_indices = jnp.arange(self.action_horizon) + replan_start_step
+   425	        guidance_mask = guidance_indices < self.action_horizon
+   426	        guidance_indices = jnp.minimum(guidance_indices, self.action_horizon - 1)
+   427	        prev_action_guidance = jnp.take(prev_action_chunk, guidance_indices, axis=1)
+   428	        prev_action_guidance = jnp.where(guidance_mask[None, :, None], prev_action_guidance, 0.0)
+   429	
+   430	        def make_W(handoff_delay_steps: int, replan_start_step: int) -> jnp.ndarray:
+   431	            """Generate the inference-time RTC weighting matrix."""
+   432	            H = self.action_horizon
+   433	            i = jnp.arange(H)
+   434	            cond_1 = i < handoff_delay_steps
+   435	            cond_2 = (i >= handoff_delay_steps) & (i < H - replan_start_step)
+   436	            w1 = jnp.ones_like(i, dtype=float)
+   437	            c_i = (H - replan_start_step - i) / (H - replan_start_step - handoff_delay_steps + 1)
+   438	            w2 = jnp.exp(c_i) - 1
+   439	            w2 = c_i * w2 / (jnp.e - 1)
+   440	            w3 = jnp.zeros_like(i, dtype=float)
+   441	            W = jnp.where(cond_1, w1, jnp.where(cond_2, w2, w3))
+   442	            D = jnp.diag(W)
+   443	            return jnp.stack([D] * 1, axis=0)
+   444	
+   445	        diag_W = make_W(handoff_delay_steps, replan_start_step)
+   446	
+   447	        prefix_tokens, prefix_mask, prefix_ar_mask = self.embed_prefix(observation)
+   448	        prefix_attn_mask = make_attn_mask(prefix_mask, prefix_ar_mask)
+   449	        positions = jnp.cumsum(prefix_mask, axis=1) - 1
+   450	        (prefix_out, _), kv_cache = self.PaliGemma.llm([prefix_tokens, None], mask=prefix_attn_mask, positions=positions)
+   451	
+   452	        def func_a_1_prime(x_t, time):
+   453	            suffix_tokens, suffix_mask, suffix_ar_mask, adarms_cond = self.embed_suffix(
+   454	                observation, x_t, jnp.broadcast_to(time, batch_size)
+   455	            )
+   456	            suffix_attn_mask = make_attn_mask(suffix_mask, suffix_ar_mask)
+   457	            prefix_attn_mask = einops.repeat(prefix_mask, "b p -> b s p", s=suffix_tokens.shape[1])
+   458	            full_attn_mask = jnp.concatenate([prefix_attn_mask, suffix_attn_mask], axis=-1)
+   459	            assert full_attn_mask.shape == (
+   460	                batch_size,
+   461	                suffix_tokens.shape[1],
+   462	                prefix_tokens.shape[1] + suffix_tokens.shape[1],
+   463	            )
+   464	            positions = jnp.sum(prefix_mask, axis=-1)[:, None] + jnp.cumsum(suffix_mask, axis=-1) - 1
+   465	
+   466	            (prefix_out, suffix_out), _ = self.PaliGemma.llm(
+   467	                [None, suffix_tokens],
+   468	                mask=full_attn_mask,
+   469	                positions=positions,
+   470	                kv_cache=kv_cache,
+   471	                adarms_cond=[None, adarms_cond],
+   472	            )
+   473	            assert prefix_out is None
+   474	            v_t = self.action_out_proj(suffix_out[:, -self.action_horizon :])
+   475	            return x_t - time * v_t, v_t
+   476	
+   477	        def step(carry):
+   478	            x_t, time = carry
+   479	            (a_1_prime, v_t), f_vjp = jax.vjp(func_a_1_prime, x_t, time)
+   480	            e = prev_action_guidance - a_1_prime
+   481	            e = jnp.matmul(diag_W, e)
+   482	            grad_a_1_prime_x_t = f_vjp((e, jnp.zeros_like(v_t)))
+   483	            r_t = time * time / (time * time + (1 - time) * (1 - time))
+   484	            a_2_prime = x_t + dt * (
+   485	                v_t
+   486	                - jax.lax.min(guidance_scale, time / ((1 - time) * r_t * r_t + 1e-6)) * grad_a_1_prime_x_t[0]
+   487	            )
+   488	            return a_2_prime, time + dt
+   489	
+   490	        def cond(carry):
+   491	            x_t, time = carry
+   492	            return time >= -dt / 2
+   493	
+   494	        x_0, _ = jax.lax.while_loop(cond, step, (noise, 1.0))
+   495	        return x_0, prefix_out, prefix_mask
+   496	
+   497	    def sample_action_chunk_with_inference_time_rtc(
+   498	        self,
+   499	        rng: at.KeyArrayLike,
+   500	        prev_action_chunk: _model.Actions,
+   501	        observation: _model.Observation,
+   502	        *,
+   503	        denoising_steps: int | at.Int[at.Array, ""] = 10,
+   504	        replan_start_step: int = 25,
+   505	        handoff_delay_steps: int = 10,
+   506	        guidance_scale: float = 8.0,
+   507	        noise: at.Float[at.Array, "b ah ad"] | None = None,
+   508	    ) -> _model.Actions:
+   509	        x_0, _, _ = self._sample_action_chunk_with_inference_time_rtc_and_context(
+   510	            rng,
+   511	            prev_action_chunk,
+   512	            observation,
+   513	            denoising_steps=denoising_steps,
+   514	            replan_start_step=replan_start_step,
+   515	            handoff_delay_steps=handoff_delay_steps,
+   516	            guidance_scale=guidance_scale,
+   517	            noise=noise,
+   518	        )
+   519	        return x_0
+   520	
+   521	    def sample_action_chunk_with_inference_time_rtc_context(
+   522	        self,
+   523	        rng: at.KeyArrayLike,
+   524	        prev_action_chunk: _model.Actions,
+   525	        observation: _model.Observation,
+   526	        *,
+   527	        denoising_steps: int | at.Int[at.Array, ""] = 10,
+   528	        replan_start_step: int = 25,
+   529	        handoff_delay_steps: int = 10,
+   530	        guidance_scale: float = 8.0,
+   531	        noise: at.Float[at.Array, "b ah ad"] | None = None,
+   532	    ) -> dict[str, at.Array]:
+   533	        x_0, prefix_out, prefix_mask = self._sample_action_chunk_with_inference_time_rtc_and_context(
+   534	            rng,
+   535	            prev_action_chunk,
+   536	            observation,
+   537	            denoising_steps=denoising_steps,
+   538	            replan_start_step=replan_start_step,
+   539	            handoff_delay_steps=handoff_delay_steps,
+   540	            guidance_scale=guidance_scale,
+   541	            noise=noise,
+   542	        )
+   543	        return {
+   544	            "actions": x_0,
+   545	            "rlt_embeddings": jax.lax.stop_gradient(prefix_out.astype(jnp.float32)),
+   546	            "rlt_mask": jax.lax.stop_gradient(prefix_mask),
+   547	            "rlt_state": jax.lax.stop_gradient(observation.state.astype(jnp.float32)),
+   548	        }
+===== src/openpi/models/pi0_config.py =====
+     1	import dataclasses
+     2	from typing import TYPE_CHECKING
+     3	
+     4	import flax.nnx as nnx
+     5	import jax
+     6	import jax.numpy as jnp
+     7	from typing_extensions import override
+     8	
+     9	from openpi.models import model as _model
+    10	import openpi.models.gemma as _gemma
+    11	from openpi.shared import array_typing as at
+    12	import openpi.shared.nnx_utils as nnx_utils
+    13	
+    14	if TYPE_CHECKING:
+    15	    from openpi.models.pi0 import Pi0
+    16	
+    17	
+    18	@dataclasses.dataclass(frozen=True)
+    19	class Pi0Config(_model.BaseModelConfig):
+    20	    dtype: str = "bfloat16"
+    21	    paligemma_variant: _gemma.Variant = "gemma_2b"
+    22	    action_expert_variant: _gemma.Variant = "gemma_300m"
+    23	
+    24	    # Set the model specific defaults.
+    25	    action_dim: int = 32
+    26	    action_horizon: int = 50
+    27	    max_token_len: int = None  # type: ignore
+    28	    # PI05 puts state in the discrete language tokens and uses adaRMSNorm for the action expert.
+    29	    discrete_state_input: bool = None  # type: ignore
+    30	    image_resolution: tuple[int, int] = (224, 224)
+    31	    image_keys: tuple[str, ...] = ("cam_high", "cam_low", "cam_left_wrist", "cam_right_wrist")
+    32	    training_time_rtc: bool = False
+    33	    rtc_max_delay: int = 10
+    34	
+    35	    def __post_init__(self):
+    36	        if self.max_token_len is None:
+    37	            object.__setattr__(self, "max_token_len", 200)
+    38	        if self.discrete_state_input is None:
+    39	            object.__setattr__(self, "discrete_state_input", True)
+    40	
+    41	    @property
+    42	    @override
+    43	    def model_type(self) -> _model.ModelType:
+    44	        return _model.ModelType.PI05
+    45	
+    46	    @override
+    47	    def create(self, rng: at.KeyArrayLike) -> "Pi0":
+    48	        from openpi.models.pi0 import Pi0
+    49	
+    50	        return Pi0(self, rngs=nnx.Rngs(rng))
+    51	
+    52	    @override
+    53	    def inputs_spec(self, *, batch_size: int = 1) -> tuple[_model.Observation, _model.Actions]:
+    54	        image_spec = jax.ShapeDtypeStruct([batch_size, *self.image_resolution, 3], jnp.float32)
+    55	        image_mask_spec = jax.ShapeDtypeStruct([batch_size], jnp.bool_)
+    56	
+    57	        with at.disable_typechecking():
+    58	            observation_spec = _model.Observation(
+    59	                images={key: image_spec for key in self.image_keys},
+    60	                image_masks={key: image_mask_spec for key in self.image_keys},
+    61	                state=jax.ShapeDtypeStruct([batch_size, self.action_dim], jnp.float32),
+    62	                tokenized_prompt=jax.ShapeDtypeStruct([batch_size, self.max_token_len], jnp.int32),
+    63	                tokenized_prompt_mask=jax.ShapeDtypeStruct([batch_size, self.max_token_len], bool),
+    64	            )
+    65	        action_spec = jax.ShapeDtypeStruct([batch_size, self.action_horizon, self.action_dim], jnp.float32)
+    66	
+    67	        return observation_spec, action_spec
+    68	
+    69	    def get_freeze_filter(self) -> nnx.filterlib.Filter:
+    70	        """Returns the freeze filter based on the model config."""
+    71	        filters = []
+    72	        has_lora = False
+    73	        gemma_params_filter = nnx_utils.PathRegex(".*llm.*")
+    74	        action_expert_params_filter = nnx_utils.PathRegex(".*llm.*_1.*")
+    75	        if "lora" in self.paligemma_variant:
+    76	            filters.append(
+    77	                gemma_params_filter,
+    78	            )
+    79	            if "lora" not in self.action_expert_variant:
+    80	                # If only freeze gemma params, exclude action expert params.
+    81	                filters.append(
+    82	                    nnx.Not(action_expert_params_filter),
+    83	                )
+    84	            has_lora = True
+    85	        elif "lora" in self.action_expert_variant:
+    86	            filters.append(
+    87	                action_expert_params_filter,
+    88	            )
+    89	            has_lora = True
+    90	
+    91	        if has_lora:
+    92	            # If any lora is used, exclude all lora params.
+    93	            filters.append(
+    94	                nnx.Not(nnx_utils.PathRegex(".*lora.*")),
+    95	            )
+    96	        if not filters:
+    97	            return nnx.Nothing
+    98	        return nnx.All(*filters)
+===== src/openpi/serving/policy.py =====
+     1	from collections.abc import Callable, Sequence
+     2	import logging
+     3	import pathlib
+     4	import time
+     5	from typing import Any, TypeAlias
+     6	
+     7	import flax
+     8	import flax.traverse_util
+     9	import jax
+    10	import jax.numpy as jnp
+    11	import numpy as np
+    12	from openpi.serving import base_policy as _base_policy
+    13	from typing_extensions import override
+    14	
+    15	from openpi.data import transforms as _transforms
+    16	from openpi.models import model as _model
+    17	from openpi.shared import array_typing as at
+    18	from openpi.shared import nnx_utils
+    19	
+    20	BasePolicy: TypeAlias = _base_policy.BasePolicy
+    21	
+    22	
+    23	class Policy(BasePolicy):
+    24	    def __init__(
+    25	        self,
+    26	        model: _model.BaseModel,
+    27	        *,
+    28	        rng: at.KeyArrayLike | None = None,
+    29	        transforms: Sequence[_transforms.DataTransformFn] = (),
+    30	        output_transforms: Sequence[_transforms.DataTransformFn] = (),
+    31	        observation_transform: Callable[[_model.Observation], _model.Observation] | None = None,
+    32	        sample_kwargs: dict[str, Any] | None = None,
+    33	        metadata: dict[str, Any] | None = None,
+    34	    ):
+    35	        """Initialize the Policy.
+    36	
+    37	        Args:
+    38	            model: The model to use for action sampling.
+    39	            rng: Random number generator key.
+    40	            transforms: Input data transformations to apply before inference.
+    41	            output_transforms: Output data transformations to apply after inference.
+    42	            sample_kwargs: Additional keyword arguments to pass to the RLT context samplers.
+    43	            metadata: Additional metadata to store with the policy.
+    44	        """
+    45	        self._model = model
+    46	        self._input_transform = _transforms.compose(transforms)
+    47	        self._output_transform = _transforms.compose(output_transforms)
+    48	        self._observation_transform = observation_transform or (lambda observation: observation)
+    49	        self._sample_kwargs = sample_kwargs or {}
+    50	        self._metadata = metadata or {}
+    51	        self._action_horizon = int(model.action_horizon)
+    52	        self._action_dim = int(model.action_dim)
+    53	        if not hasattr(model, "sample_action_chunk_with_rlt_context"):
+    54	            raise NotImplementedError("Policy requires sample_action_chunk_with_rlt_context().")
+    55	        if not hasattr(model, "sample_action_chunk_with_inference_time_rtc_context"):
+    56	            raise NotImplementedError("Policy requires sample_action_chunk_with_inference_time_rtc_context().")
+    57	        self._sample_action_chunk_with_rlt_context = nnx_utils.module_jit(model.sample_action_chunk_with_rlt_context)
+    58	        self._sample_action_chunk_with_inference_time_rtc_context = nnx_utils.module_jit(
+    59	            model.sample_action_chunk_with_inference_time_rtc_context
+    60	        )
+    61	        self._rng = rng or jax.random.key(0)
+    62	
+    63	    @override
+    64	    def infer(
+    65	        self,
+    66	        obs: dict,
+    67	        prev_action: np.ndarray | None = None,
+    68	        noise: np.ndarray | None = None,
+    69	        *,
+    70	        chunking_mode: str | None = None,
+    71	        action_prefix: np.ndarray | None = None,
+    72	        handoff_delay_steps: int | None = None,
+    73	        return_rlt_state: bool = False,
+    74	    ) -> dict:  # type: ignore[misc]
+    75	        # Make a copy since transformations may modify the inputs in place.
+    76	        inputs = jax.tree.map(lambda x: x, obs)
+    77	        inputs = self._input_transform(inputs)
+    78	        inputs = jax.tree.map(lambda x: jnp.asarray(x)[np.newaxis, ...], inputs)
+    79	        self._rng, sample_rng = jax.random.split(self._rng)
+    80	
+    81	        def _batch_action(value: np.ndarray | None):
+    82	            if value is None:
+    83	                return None
+    84	            batched = jnp.asarray(value)
+    85	            if batched.ndim == 2:
+    86	                batched = batched[None, ...]
+    87	            return batched
+    88	
+    89	        sample_kwargs = dict(self._sample_kwargs)
+    90	        if noise is not None:
+    91	            noise = jnp.asarray(noise)
+    92	            if noise.ndim == 2:
+    93	                noise = noise[None, ...]
+    94	        else:
+    95	            noise = jax.random.normal(sample_rng, (1, self._action_horizon, self._action_dim))
+    96	        sample_kwargs["noise"] = noise
+    97	
+    98	        if chunking_mode is None:
+    99	            chunking_mode = "inference_time"
+   100	        if chunking_mode != "inference_time":
+   101	            raise ValueError("Policy only supports chunking_mode='inference_time'.")
+   102	
+   103	        def _inference_time_sampling_kwargs(kwargs: dict[str, Any]) -> dict[str, Any]:
+   104	            return dict(kwargs)
+   105	
+   106	        def _plain_sampling_kwargs(kwargs: dict[str, Any]) -> dict[str, Any]:
+   107	            kwargs = dict(kwargs)
+   108	            for key in ("replan_start_step", "handoff_delay_steps", "guidance_scale"):
+   109	                kwargs.pop(key, None)
+   110	            return kwargs
+   111	
+   112	        observation = self._observation_transform(_model.Observation.from_dict(inputs))
+   113	        start_time = time.monotonic()
+   114	        batched_prev_action = _batch_action(prev_action)
+   115	        if batched_prev_action is None:
+   116	            fused_outputs = self._sample_action_chunk_with_rlt_context(
+   117	                sample_rng,
+   118	                observation,
+   119	                **_plain_sampling_kwargs(sample_kwargs),
+   120	            )
+   121	        else:
+   122	            fused_outputs = self._sample_action_chunk_with_inference_time_rtc_context(
+   123	                sample_rng,
+   124	                batched_prev_action,
+   125	                observation,
+   126	                **_inference_time_sampling_kwargs(sample_kwargs),
+   127	            )
+   128	        model_actions = fused_outputs["actions"]
+   129	        rlt_outputs = {
+   130	            "rlt_embeddings": fused_outputs["rlt_embeddings"],
+   131	            "rlt_mask": fused_outputs["rlt_mask"],
+   132	        }
+   133	
+   134	        batched_model_outputs = {
+   135	            "state": inputs["state"],
+   136	            "actions": model_actions,
+   137	        }
+   138	        model_time = time.monotonic() - start_time
+   139	        model_outputs = jax.tree.map(lambda x: np.asarray(x[0, ...]), batched_model_outputs)
+   140	        transformed_outputs = self._output_transform(model_outputs)
+   141	        transformed_outputs["model_actions"] = model_outputs["actions"]
+   142	        transformed_outputs["model_state"] = model_outputs["state"]
+   143	        transformed_outputs["model_noise"] = np.asarray(noise[0, ...])
+   144	        if return_rlt_state:
+   145	            transformed_outputs.update(jax.tree.map(lambda x: np.asarray(x[0, ...]), rlt_outputs))
+   146	        transformed_outputs["policy_timing"] = {
+   147	            "infer_ms": model_time * 1000,
+   148	        }
+   149	        return transformed_outputs
+   150	
+   151	    def transform_model_outputs(
+   152	        self,
+   153	        *,
+   154	        state: np.ndarray,
+   155	        actions: np.ndarray,
+   156	    ) -> dict:
+   157	        model_outputs = {
+   158	            "state": state,
+   159	            "actions": actions,
+   160	        }
+   161	        transformed_outputs = self._output_transform(model_outputs)
+   162	        transformed_outputs["model_actions"] = actions
+   163	        transformed_outputs["model_state"] = state
+   164	        return transformed_outputs
+   165	
+   166	    @property
+   167	    def metadata(self) -> dict[str, Any]:
+   168	        return self._metadata
+   169	
+   170	
+   171	class PolicyRecorder(_base_policy.BasePolicy):
+   172	    """Records the policy's behavior to disk."""
+   173	
+   174	    def __init__(self, policy: _base_policy.BasePolicy, record_dir: str):
+   175	        self._policy = policy
+   176	
+   177	        logging.info(f"Dumping policy records to: {record_dir}")
+   178	        self._record_dir = pathlib.Path(record_dir)
+   179	        self._record_dir.mkdir(parents=True, exist_ok=True)
+   180	        self._record_step = 0
+   181	
+   182	    @override
+   183	    def infer(self, obs: dict) -> dict:  # type: ignore[misc]
+   184	        results = self._policy.infer(obs)
+   185	
+   186	        data = {"inputs": obs, "outputs": results}
+   187	        data = flax.traverse_util.flatten_dict(data, sep="/")
+   188	
+   189	        output_path = self._record_dir / f"step_{self._record_step}"
+   190	        self._record_step += 1
+   191	
+   192	        np.save(output_path, np.asarray(data))
+   193	        return results
+===== src/openpi/robot/aloha_real/real_env.py =====
+     1	# Ignore lint errors because this file is mostly copied from ACT (https://github.com/tonyzhaozh/act).
+     2	# ruff: noqa
+     3	import collections
+     4	import copy
+     5	import time
+     6	from typing import Optional, List
+     7	import dm_env
+     8	from interbotix_xs_modules.arm import InterbotixManipulatorXS
+     9	from interbotix_xs_msgs.msg import JointSingleCommand
+    10	import numpy as np
+    11	
+    12	from openpi.robot.aloha_real import constants
+    13	from openpi.robot.aloha_real import robot_utils
+    14	import logging
+    15	
+    16	# This is the reset position that is used by the standard Aloha runtime.
+    17	DEFAULT_RESET_POSITION = [0, -0.96, 1.16, 0, -0.3, 0]
+    18	_DEFAULT_ACTION_UNWRAPPER = robot_utils.JointPositionUnwrapper()
+    19	
+    20	
+    21	class RealEnv:
+    22	    """
+    23	    Environment for real robot bi-manual manipulation
+    24	    Action space:      [left_arm_qpos (6),             # absolute joint position
+    25	                        left_gripper_positions (1),    # normalized gripper position (0: close, 1: open)
+    26	                        right_arm_qpos (6),            # absolute joint position
+    27	                        right_gripper_positions (1),]  # normalized gripper position (0: close, 1: open)
+    28	
+    29	    Observation space: {"qpos": Concat[ left_arm_qpos (6),          # absolute joint position
+    30	                                        left_gripper_position (1),  # normalized gripper position (0: close, 1: open)
+    31	                                        right_arm_qpos (6),         # absolute joint position
+    32	                                        right_gripper_qpos (1)]     # normalized gripper position (0: close, 1: open)
+    33	                        "qvel": Concat[ left_arm_qvel (6),         # absolute joint velocity (rad)
+    34	                                        left_gripper_velocity (1),  # normalized gripper velocity (pos: opening, neg: closing)
+    35	                                        right_arm_qvel (6),         # absolute joint velocity (rad)
+    36	                                        right_gripper_qvel (1)]     # normalized gripper velocity (pos: opening, neg: closing)
+    37	                        "images": {"cam_high": (480x640x3),        # h, w, c, dtype='uint8'
+    38	                                   "cam_low": (480x640x3),         # h, w, c, dtype='uint8'
+    39	                                   "cam_left_wrist": (480x640x3),  # h, w, c, dtype='uint8'
+    40	                                   "cam_right_wrist": (480x640x3)} # h, w, c, dtype='uint8'
+    41	    """
+    42	
+    43	    def __init__(
+    44	        self,
+    45	        init_node,
+    46	        *,
+    47	        reset_position: Optional[List[List[float]]] = None,
+    48	        gripper_current_limits: Optional[List[int]] = None,
+    49	        setup_robots: bool = True,
+    50	        video_memory_num_frames: int = 1,
+    51	        video_memory_stride_seconds: float = 1.0,
+    52	        continuous_roll_joints: bool = True,
+    53	    ):
+    54	        # reset_position = START_ARM_POSE[:6]
+    55	        # self._reset_position = reset_position[:6] if reset_position else DEFAULT_RESET_POSITION
+    56	
+    57	        self._reset_position = reset_position
+    58	        self._gripper_current_limits = gripper_current_limits
+    59	        self._continuous_roll_joints = continuous_roll_joints
+    60	        self.puppet_bot_left = InterbotixManipulatorXS(
+    61	            robot_model="vx300s",
+    62	            group_name="arm",
+    63	            gripper_name="gripper",
+    64	            robot_name="puppet_left",
+    65	            init_node=init_node,
+    66	        )
+    67	        self.puppet_bot_right = InterbotixManipulatorXS(
+    68	            robot_model="vx300s", group_name="arm", gripper_name="gripper", robot_name="puppet_right", init_node=False
+    69	        )
+    70	        self.master_bot_left = InterbotixManipulatorXS(
+    71	            robot_model="wx250s", group_name="arm", gripper_name="gripper", robot_name="master_left", init_node=False
+    72	        )
+    73	        self.master_bot_right = InterbotixManipulatorXS(
+    74	            robot_model="wx250s", group_name="arm", gripper_name="gripper", robot_name="master_right", init_node=False
+    75	        )
+    76	        if setup_robots:
+    77	            self.setup_robots()
+    78	
+    79	        self.recorder_left = robot_utils.Recorder("left", init_node=False)
+    80	        self.recorder_right = robot_utils.Recorder("right", init_node=False)
+    81	        self.image_recorder = robot_utils.ImageRecorder(
+    82	            init_node=False,
+    83	            history_num_frames=video_memory_num_frames,
+    84	            history_stride_seconds=video_memory_stride_seconds,
+    85	        )
+    86	        self.gripper_command = JointSingleCommand(name="gripper")
+    87	        self.last_left_gripper_error = [0]
+    88	        self.last_right_gripper_error = [0]
+    89	        self.last_left_gripper_desired_pos_normalized = 0.0
+    90	        self.last_right_gripper_desired_pos_normalized = 0.0
+    91	
+    92	    def setup_robots(self):
+    93	        robot_utils.setup_puppet_bot(
+    94	            self.puppet_bot_left,
+    95	            current_limit=self._gripper_current_limits[0],
+    96	            continuous_roll_joints=self._continuous_roll_joints,
+    97	        )
+    98	        robot_utils.setup_puppet_bot(
+    99	            self.puppet_bot_right,
+   100	            current_limit=self._gripper_current_limits[1],
+   101	            continuous_roll_joints=self._continuous_roll_joints,
+   102	        )
+   103	        robot_utils.setup_master_bot(
+   104	            self.master_bot_left,
+   105	            continuous_roll_joints=self._continuous_roll_joints,
+   106	        )
+   107	        robot_utils.setup_master_bot(
+   108	            self.master_bot_right,
+   109	            continuous_roll_joints=self._continuous_roll_joints,
+   110	        )
+   111	        
+   112	    def get_qpos(self):
+   113	        left_qpos_raw = self.recorder_left.qpos
+   114	        right_qpos_raw = self.recorder_right.qpos
+   115	        left_arm_qpos = left_qpos_raw[:6]
+   116	        right_arm_qpos = right_qpos_raw[:6]
+   117	        # print(left_qpos_raw[7], right_qpos_raw[7])
+   118	        
+   119	        left_gripper_qpos = [
+   120	            constants.PUPPET_GRIPPER_JOINT_NORMALIZE_FN(left_qpos_raw[6])
+   121	            # constants.PUPPET_GRIPPER_POSITION_NORMALIZE_FN(left_qpos_raw[7])
+   122	        ]  # this is position not joint
+   123	        right_gripper_qpos = [
+   124	            # constants.PUPPET_GRIPPER_POSITION_NORMALIZE_FN(right_qpos_raw[7])
+   125	            constants.PUPPET_GRIPPER_JOINT_NORMALIZE_FN(right_qpos_raw[6])
+   126	        ]  # this is position not joint
+   127	        return np.concatenate([left_arm_qpos, left_gripper_qpos, right_arm_qpos, right_gripper_qpos])
+   128	
+   129	    def get_qvel(self):
+   130	        left_qvel_raw = self.recorder_left.qvel
+   131	        right_qvel_raw = self.recorder_right.qvel
+   132	        left_arm_qvel = left_qvel_raw[:6]
+   133	        right_arm_qvel = right_qvel_raw[:6]
+   134	        left_gripper_qvel = [constants.PUPPET_GRIPPER_VELOCITY_NORMALIZE_FN(left_qvel_raw[7])]
+   135	        right_gripper_qvel = [constants.PUPPET_GRIPPER_VELOCITY_NORMALIZE_FN(right_qvel_raw[7])]
+   136	        return np.concatenate([left_arm_qvel, left_gripper_qvel, right_arm_qvel, right_gripper_qvel])
+   137	
+   138	    def get_effort(self):
+   139	        left_effort_raw = self.recorder_left.effort
+   140	        right_effort_raw = self.recorder_right.effort
+   141	        left_robot_effort = left_effort_raw[:7]
+   142	        right_robot_effort = right_effort_raw[:7]
+   143	        return np.concatenate([left_robot_effort, right_robot_effort])
+   144	
+   145	    def get_images(self):
+   146	        return self.image_recorder.get_images()
+   147	
+   148	    def set_gripper_pose(self, left_gripper_desired_pos_normalized, right_gripper_desired_pos_normalized):
+   149	        left_gripper_desired_joint = constants.PUPPET_GRIPPER_JOINT_UNNORMALIZE_FN(left_gripper_desired_pos_normalized)
+   150	        self.gripper_command.cmd = left_gripper_desired_joint
+   151	        self.puppet_bot_left.gripper.core.pub_single.publish(self.gripper_command)
+   152	
+   153	        right_gripper_desired_joint = constants.PUPPET_GRIPPER_JOINT_UNNORMALIZE_FN(
+   154	            right_gripper_desired_pos_normalized
+   155	        )
+   156	        self.gripper_command.cmd = right_gripper_desired_joint
+   157	        self.puppet_bot_right.gripper.core.pub_single.publish(self.gripper_command)
+   158	        # left_gripper_error = self.puppet_bot_left.dxl.robot_get_motor_registers(
+   159	        #     "single",
+   160	        #     "gripper",
+   161	        #     "Hardware_Error_Status"
+   162	        # )
+   163	        # right_gripper_error = self.puppet_bot_right.dxl.robot_get_motor_registers(
+   164	        #     "single",
+   165	        #     "gripper",
+   166	        #     "Present_Current"
+   167	        # )
+   168	        # print(f"right gripper present current: {right_gripper_error}")
+   169	        # if left_gripper_error.values[0] != 0 :
+   170	        #     print("left gripper error occured")
+   171	        #     print(f"left gripper error: {left_gripper_error}")
+   172	        #     print(f"last left gripper command: {self.last_left_gripper_desired_pos_normalized}")           
+   173	        #     print(f"current left gripper command: {left_gripper_desired_pos_normalized}")
+   174	        #     # robot_utils.setup_puppet_bot(self.puppet_bot_left, current_limit=self._gripper_current_limits[0])
+   175	        #     # time.sleep(0.5)
+   176	        #     robot_utils.restart_puppet_bot_gripper(self.puppet_bot_left, current_limit=self._gripper_current_limits[0])
+   177	        #     self.gripper_command.cmd = constants.PUPPET_GRIPPER_JOINT_OPEN
+   178	        #     self.puppet_bot_left.gripper.core.pub_single.publish(self.gripper_command)
+   179	        #     print("left gripper motor rebooted")
+   180	        # if right_gripper_error.values[0] != 0:
+   181	        #     print("right gripper error occured")
+   182	        #     print(f"right gripper error: {right_gripper_error}")
+   183	        #     print(f"last right gripper command: {self.last_right_gripper_desired_pos_normalized}")
+   184	        #     print(f"current right gripper command: {right_gripper_desired_pos_normalized}")
+   185	        #     # robot_utils.setup_puppet_bot(self.puppet_bot_right, current_limit=self._gripper_current_limits[1])
+   186	        #     # time.sleep(0.5)
+   187	        #     robot_utils.restart_puppet_bot_gripper(self.puppet_bot_right, current_limit=self._gripper_current_limits[1])
+   188	        #     self.gripper_command.cmd = constants.PUPPET_GRIPPER_JOINT_OPEN
+   189	        #     self.puppet_bot_right.gripper.core.pub_single.publish(self.gripper_command)
+   190	        #     print("right gripper motor rebooted")
+   191	
+   192	        # if abs(left_gripper_desired_pos_normalized - self.last_left_gripper_desired_pos_normalized) > 0.2:
+   193	        #     print("left gripper command changed larger than 0.2")
+   194	        #     print(f"last left gripper command: {self.last_left_gripper_desired_pos_normalized}")
+   195	        #     print(f"left gripper command changed: {left_gripper_desired_pos_normalized}")
+   196	        # if abs(right_gripper_desired_pos_normalized - self.last_right_gripper_desired_pos_normalized) > 0.2:
+   197	        #     print("right gripper command changed larger than 0.2")
+   198	        #     print(f"last right gripper command: {self.last_right_gripper_desired_pos_normalized}")
+   199	        #     print(f"right gripper command changed: {right_gripper_desired_pos_normalized}")
+   200	        # self.last_left_gripper_error = left_gripper_error
+   201	        # self.last_right_gripper_error = right_gripper_error
+   202	        # self.last_left_gripper_desired_pos_normalized = left_gripper_desired_pos_normalized
+   203	        # self.last_right_gripper_desired_pos_normalized = right_gripper_desired_pos_normalized
+   204	
+   205	    def _reset_joints(self):
+   206	        robot_utils.move_arms(
+   207	            [self.puppet_bot_left, self.puppet_bot_right],
+   208	            self._reset_position,
+   209	            move_time=1,
+   210	            continuous_roll_joints=self._continuous_roll_joints,
+   211	        )
+   212	
+   213	    def _reset_gripper(self):
+   214	        """Set to position mode and do position resets: first close then open. Then change back to PWM mode
+   215	
+   216	        NOTE: This diverges from the original Aloha code which first opens then closes the gripper. Pi internal aloha data
+   217	        was collected with the gripper starting in the open position. Leaving the grippers fully closed was also found to
+   218	        increase the frequency of motor faults.
+   219	        """
+   220	        robot_utils.move_grippers(
+   221	            [self.puppet_bot_left, self.puppet_bot_right], [constants.PUPPET_GRIPPER_JOINT_CLOSE] * 2, move_time=1
+   222	        )
+   223	        robot_utils.move_grippers(
+   224	            [self.puppet_bot_left, self.puppet_bot_right], [constants.PUPPET_GRIPPER_JOINT_OPEN] * 2, move_time=0.5
+   225	        )
+   226	
+   227	    def get_observation(self):
+   228	        obs = collections.OrderedDict()
+   229	        obs["qpos"] = self.get_qpos()
+   230	        obs["qvel"] = self.get_qvel()
+   231	        obs["effort"] = self.get_effort()
+   232	        obs["images"] = self.get_images()
+   233	        return obs
+   234	
+   235	    def get_reward(self):
+   236	        return 0
+   237	
+   238	    def reset(self):
+   239	        # Reboot puppet robot gripper motors
+   240	        self.puppet_bot_left.dxl.robot_reboot_motors("single", "gripper", True)
+   241	        self.puppet_bot_right.dxl.robot_reboot_motors("single", "gripper", True)
+   242	        self._reset_joints()
+   243	        self._reset_gripper()
+   244	        return dm_env.TimeStep(
+   245	            step_type=dm_env.StepType.FIRST, reward=self.get_reward(), discount=None, observation=self.get_observation()
+   246	        )
+   247	
+   248	    def stop(self):
+   249	        robot_utils.move_arms(
+   250	            [self.puppet_bot_left, self.puppet_bot_right],
+   251	            self._reset_position,
+   252	            move_time=1,
+   253	            continuous_roll_joints=self._continuous_roll_joints,
+   254	        )
+   255	        robot_utils.move_grippers(
+   256	            [self.puppet_bot_left, self.puppet_bot_right], [constants.PUPPET_GRIPPER_JOINT_OPEN] * 2, move_time=0.5
+   257	        )
+   258	        return dm_env.TimeStep(
+   259	            step_type=dm_env.StepType.MID, reward=self.get_reward(), discount=None, observation=self.get_observation()
+   260	        )
+   261	
+   262	    def sleep_arms(self):
+   263	        robot_utils.torque_on(self.master_bot_left)
+   264	        robot_utils.torque_on(self.master_bot_right)
+   265	        robot_utils.move_arms(
+   266	            [self.puppet_bot_left, self.puppet_bot_right],
+   267	            [[0.0, -1.8399999952316284, 1.600000023841858, 0.0, -1.600000023841858, 0.0]] * 2,
+   268	            move_time=1,
+   269	            continuous_roll_joints=self._continuous_roll_joints,
+   270	        )
+   271	        robot_utils.move_arms(
+   272	            [self.master_bot_left, self.master_bot_right],
+   273	            [[0.0, -1.8399999952316284, 1.600000023841858, 0.0, -1.600000023841858, 0.0]] * 2,
+   274	            move_time=1,
+   275	            continuous_roll_joints=self._continuous_roll_joints,
+   276	        )
+   277	        robot_utils.move_grippers(
+   278	            [self.puppet_bot_left, self.puppet_bot_right], [constants.PUPPET_GRIPPER_JOINT_OPEN] * 2, move_time=1
+   279	        )
+   280	        robot_utils.move_grippers(
+   281	            [self.master_bot_left, self.master_bot_right], [constants.MASTER_GRIPPER_JOINT_OPEN] * 2, move_time=1
+   282	        )
+   283	        return dm_env.TimeStep(
+   284	            step_type=dm_env.StepType.MID, reward=self.get_reward(), discount=None, observation=self.get_observation()
+   285	        )
+   286	        
+   287	    def step(self, action):
+   288	        joint_limits_lower = np.asarray(self.puppet_bot_left.arm.group_info.joint_lower_limits, dtype=float)
+   289	        joint_limits_upper = np.asarray(self.puppet_bot_left.arm.group_info.joint_upper_limits, dtype=float)
+   290	        state_len = int(len(action) / 2)
+   291	        left_action = action[:state_len]
+   292	        right_action = action[state_len:]
+   293	
+   294	        left_arm_positions = robot_utils.clip_arm_joint_positions(
+   295	            left_action[:6],
+   296	            joint_limits_lower,
+   297	            joint_limits_upper,
+   298	            continuous_roll_joints=self._continuous_roll_joints,
+   299	        )
+   300	        right_arm_positions = robot_utils.clip_arm_joint_positions(
+   301	            right_action[:6],
+   302	            joint_limits_lower,
+   303	            joint_limits_upper,
+   304	            continuous_roll_joints=self._continuous_roll_joints,
+   305	        )
+   306	        if self._continuous_roll_joints:
+   307	            robot_utils.publish_arm_positions(self.puppet_bot_left, left_arm_positions)
+   308	            robot_utils.publish_arm_positions(self.puppet_bot_right, right_arm_positions)
+   309	        else:
+   310	            self.puppet_bot_left.arm.set_joint_positions(left_arm_positions, blocking=False)
+   311	            self.puppet_bot_right.arm.set_joint_positions(right_arm_positions, blocking=False)
+   312	        self.set_gripper_pose(left_action[-1], right_action[-1])
+   313	        return dm_env.TimeStep(
+   314	            step_type=dm_env.StepType.MID, reward=self.get_reward(), discount=None, observation=self.get_observation()
+   315	        )
+   316	
+   317	
+   318	
+   319	class AlohaRealEnvironment:
+   320	    """An environment for an Aloha robot on real hardware."""
+   321	
+   322	    def __init__(
+   323	        self,
+   324	        reset_position: list[list[float]] | None = None,
+   325	        gripper_current_limits: list[int] | None = None,
+   326	        render_height: int = 224,
+   327	        render_width: int = 224,
+   328	        video_memory_num_frames: int = 1,
+   329	        video_memory_stride_seconds: float = 1.0,
+   330	        continuous_roll_joints: bool = True,
+   331	    ) -> None:
+   332	        self._env = make_real_env(
+   333	            init_node=True,
+   334	            reset_position=reset_position,
+   335	            gripper_current_limits=gripper_current_limits,
+   336	            video_memory_num_frames=video_memory_num_frames,
+   337	            video_memory_stride_seconds=video_memory_stride_seconds,
+   338	            continuous_roll_joints=continuous_roll_joints,
+   339	        )
+   340	        self._render_height = render_height
+   341	        self._render_width = render_width
+   342	
+   343	        self._ts = None
+   344	
+   345	    def reset(self) -> None:
+   346	        self._ts = self._env.reset()
+   347	
+   348	    def is_episode_complete(self) -> bool:
+   349	        return False
+   350	
+   351	    def get_observation(self) -> dict:
+   352	        if self._ts is None:
+   353	            raise RuntimeError("Timestep is not set. Call reset() first.")
+   354	        origin_observation = copy.deepcopy(self._ts.observation)
+   355	        obs = self._ts.observation
+   356	        for k in list(obs["images"].keys()):
+   357	            if "_depth" in k:
+   358	                del obs["images"][k]
+   359	
+   360	        return {
+   361	            "state": obs["qpos"],
+   362	            "qpos": obs["qpos"],
+   363	            "qvel": obs["qvel"],
+   364	            "effort": obs["effort"],
+   365	            "images": obs["images"],
+   366	            "origin_observation": origin_observation,
+   367	        }
+   368	
+   369	    def apply_action(self, action: dict) -> None:
+   370	        self._ts = self._env.step(action["actions"])
+   371	
+   372	    def stop(self) -> None:
+   373	        """Stop the environment."""
+   374	        self._ts = self._env.stop()
+   375	
+   376	    def sleep_arms(self) -> None:
+   377	        """Sleep the arms."""
+   378	        self._ts = self._env.sleep_arms()
+   379	
+   380	def get_action(master_bot_left, master_bot_right, *, joint_unwrapper=None, use_continuous_joints=True):
+   381	    action = np.zeros(14)  # 6 joint + 1 gripper, for two arms
+   382	    # Arm actions
+   383	    left_arm = np.asarray(master_bot_left.dxl.joint_states.position[:6], dtype=float)
+   384	    right_arm = np.asarray(master_bot_right.dxl.joint_states.position[:6], dtype=float)
+   385	    if use_continuous_joints:
+   386	        joint_unwrapper = joint_unwrapper or _DEFAULT_ACTION_UNWRAPPER
+   387	        left_arm = joint_unwrapper.unwrap(left_arm)
+   388	        right_arm = joint_unwrapper.unwrap(right_arm)
+   389	    action[:6] = left_arm
+   390	    action[7 : 7 + 6] = right_arm
+   391	    # Gripper actions
+   392	    action[6] = constants.MASTER_GRIPPER_JOINT_NORMALIZE_FN(master_bot_left.dxl.joint_states.position[6])
+   393	    action[7 + 6] = constants.MASTER_GRIPPER_JOINT_NORMALIZE_FN(master_bot_right.dxl.joint_states.position[6])
+   394	
+   395	    return action
+   396	
+   397	
+   398	def make_real_env(
+   399	    init_node,
+   400	    *,
+   401	    reset_position: Optional[List[List[float]]] = None,
+   402	    gripper_current_limits: Optional[List[int]] = None,
+   403	    setup_robots: bool = True,
+   404	    video_memory_num_frames: int = 1,
+   405	    video_memory_stride_seconds: float = 1.0,
+   406	    continuous_roll_joints: bool = True,
+   407	) -> RealEnv:
+   408	    return RealEnv(
+   409	        init_node,
+   410	        reset_position=reset_position,
+   411	        gripper_current_limits=gripper_current_limits,
+   412	        setup_robots=setup_robots,
+   413	        video_memory_num_frames=video_memory_num_frames,
+   414	        video_memory_stride_seconds=video_memory_stride_seconds,
+   415	        continuous_roll_joints=continuous_roll_joints,
+   416	    )
+===== src/openpi/training/config.py =====
+     1	"""See _CONFIGS for the list of available configs."""
+     2	
+     3	import dataclasses
+     4	import difflib
+     5	import pathlib
+     6	from typing import Any, Literal, TypeAlias
+     7	
+     8	import flax.nnx as nnx
+     9	import tyro
+    10	
+    11	import openpi.models.model as _model
+    12	import openpi.models.pi0_config as pi0_config
+    13	import openpi.training.optimizer as _optimizer
+    14	import openpi.training.weight_loaders as weight_loaders
+    15	from openpi.data import transforms as _transforms
+    16	
+    17	Filter: TypeAlias = nnx.filterlib.Filter
+    18	
+    19	_TROSSEN_RESET_POSE = {"reset_pose": [0, -1.5, 1.5, 0, 0, 0]}
+    20	_PI05_BASE_PARAMS = "gs://openpi-assets/checkpoints/pi05_base/params"
+    21	
+    22	_EII_RINSE_11REPO_REPO_IDS = [
+    23	    "lyl472324464/2026-05-01_turn_over-lerobot-with-rinse",
+    24	    "lyl472324464/2026-05-01_water1-lerobot-with-rinse",
+    25	    "lyl472324464/2026-05-03_turn_over-lerobot-with-rinse",
+    26	    "lyl472324464/2026-05-04_direction-twist-water-lerobot-with-rinse",
+    27	    "lyl472324464/2026-05-04_turn_over-lerobot-with-rinse",
+    28	    "lyl472324464/2026-05-04_direction-lerobot-with-rinse",
+    29	    "lyl472324464/2026-05-05_direction-water-lerobot-with-rinse",
+    30	    "lyl472324464/2026-05-05_water-lerobot-with-rinse",
+    31	    "lyl472324464/2026-05-07_water-lerobot-with-rinse",
+    32	    "lyl472324464/2026-05-12_insert-to-nozzle_realign-lerobot-with-rinse",
+    33	    "lyl472324464/2026-05-13-insert-to-nozzle-no-cap-with-rinse",
+    34	]
+    35	
+    36	_EII_RINSE_INSERT_REALIGN_REPO_ID = "lyl472324464/2026-05-12_insert-to-nozzle_realign-lerobot-with-rinse"
+    37	_EII_RINSE_INSERT_NO_CAP_REPO_ID = "lyl472324464/2026-05-13-insert-to-nozzle-no-cap-with-rinse"
+    38	
+    39	_EII_RINSE_11REPO_INSERT_X5_REPO_IDS = [
+    40	    *_EII_RINSE_11REPO_REPO_IDS,
+    41	    *([_EII_RINSE_INSERT_REALIGN_REPO_ID] * 4),
+    42	    *([_EII_RINSE_INSERT_NO_CAP_REPO_ID] * 4),
+    43	]
+    44	
+    45	_EII_DATA_SYSTEM_WITHOUT_RINSE_41_REPO_IDS = [
+    46	    "lyl472324464/2025-09-15-twist-one-bottle-no-box-in-the-front-without-rinse",
+    47	    "lyl472324464/2025-11-06-twist-many-bottles-without-rinse",
+    48	    "lyl472324464/2025-11-14-twist-two-bottles",
+    49	    "lyl472324464/2025-11-18-twist-two-bottles",
+    50	    "lyl472324464/2025-11-26-twist-two-bottles",
+    51	    "lyl472324464/2025-12-10-twist-one-bottle",
+    52	    "lyl472324464/2025-12-23-twist-one-bottle",
+    53	    "lyl472324464/2026-01-20-twist-one-bottle",
+    54	    "lyl472324464/2026-01-28-twist-many-bottle",
+    55	    "lyl472324464/2026-02-03-no-cap-and-direction-without-rinse",
+    56	    "lyl472324464/2026-03-04-one-direction-lerobot-without-rinse",
+    57	    "lyl472324464/2026-03-05-two-direction-lerobot-without-rinse",
+    58	    "lyl472324464/2026-03-12-one-havent-cap",
+    59	    "lyl472324464/2026-03-12-one-havent-cap-direction",
+    60	    "lyl472324464/2026-04-21_direction-lerobot-without-rinse",
+    61	    "lyl472324464/2026-04-21_direction_2-lerobot-without-rinse",
+    62	    "lyl472324464/2026-04-21_direction_haven-t_cap-lerobot-without-rinse",
+    63	    "lyl472324464/2026-04-21_direction_havent_cap_water-lerobot-without-rinse",
+    64	    "lyl472324464/2026-04-23_direction_have_cap_water-lerobot-without-rinse",
+    65	    "lyl472324464/2026-04-23_direction_havent_cap_water-lerobot-without-rinse",
+    66	    "lyl472324464/2026-04-27_direction_have_cap_water2-lerobot-without-rinse",
+    67	    "lyl472324464/2026-04-27direction_have_cap_water-lerobot-without-rinse",
+    68	    "lyl472324464/2026-04-28_direction_have_cap_water-lerobot-without-rinse",
+    69	    "lyl472324464/2026-04-28_direction_have_cap_water2-lerobot-without-rinse",
+    70	    "lyl472324464/2026-05-01_turn_over-lerobot-without-rinse",
+    71	    "lyl472324464/2026-05-03_turn_over-lerobot-without-rinse",
+    72	    "lyl472324464/2026-05-04_direction-lerobot-without-rinse",
+    73	    "lyl472324464/2026-05-04_direction-twist-water-lerobot-without-rinse",
+    74	    "lyl472324464/2026-05-04_turn_over-lerobot-without-rinse",
+    75	    "lyl472324464/2026-05-05_direction-water-lerobot-without-rinse",
+    76	    "lyl472324464/2026-05-11_cap-lerobot-without-rinse",
+    77	    "lyl472324464/2026-05-11_free-spinning-lerobot-without-rinse",
+    78	    "lyl472324464/2026-05-11_twist-lerobot-without-rinse",
+    79	    "lyl472324464/2026-05-12_twist-lerobot-without-rinse",
+    80	    "lyl472324464/2026-05-12_twist2-lerobot-without-rinse",
+    81	    "lyl472324464/2026.03.12_one_have_cap-lerobot-without-rinse",
+    82	    "lyl472324464/2026.03.12_one_have_cap_direction-lerobot-without-rinse",
+    83	    "lyl472324464/2026.03.12_two_have_all_left-lerobot-without-rinse",
+    84	    "lyl472324464/2026.03.12_two_have_cap_all_right-lerobot-without-rinse",
+    85	    "lyl472324464/2026.03.12_two_have_cap_one_right-lerobot-without-rinse",
+    86	    "lyl472324464/2026.03.16_twist_many-lerobot-without-rinse",
+    87	]
+    88	
+    89	_EII_DATA_SYSTEM_WITHOUT_RINSE_RETURN_HOME_29_REPO_IDS = [
+    90	    "lyl472324464/2025-09-15-twist-one-bottle-no-box-in-the-front-without-rinse-merged-adjust-pickup",
+    91	    "lyl472324464/2025-12-10-twist-one-bottle-merged-adjust-pickup",
+    92	    "lyl472324464/2025-12-23-twist-one-bottle-without-rinse-merged-adjust-pickup",
+    93	    "lyl472324464/2026-01-20-twist-one-bottle-merged-adjust-pickup",
+    94	    "lyl472324464/2026-02-03-no-cap-and-direction-without-rinse-merged-adjust-pickup",
+    95	    "lyl472324464/2026-03-04-one-direction-lerobot-without-rinse-merged-adjust-pickup",
+    96	    "lyl472324464/2026.03.12_one_have_cap-lerobot-without-rinse-merged-adjust-pickup",
+    97	    "lyl472324464/2026.03.12_one_have_cap_direction-lerobot-without-rinse-merged-adjust-pickup",
+    98	    "lyl472324464/2026-03-12-one-havent-cap-merged-adjust-pickup",
+    99	    "lyl472324464/2026-03-12-one-havent-cap-direction-merged-adjust-pickup",
+   100	    "lyl472324464/2026-04-21_direction-lerobot-without-rinse-merged-adjust-pickup",
+   101	    "lyl472324464/2026-04-21_direction_2-lerobot-without-rinse-merged-adjust-pickup",
+   102	    "lyl472324464/2026-04-21_direction_haven-t_cap-lerobot-without-rinse-merged-adjust-pickup",
+   103	    "lyl472324464/2026-04-21_direction_havent_cap_water-lerobot-without-rinse-merged-adjust-pickup",
+   104	    "lyl472324464/2026-04-23_direction_havent_cap_water-lerobot-without-rinse-merged-adjust-pickup",
+   105	    "lyl472324464/2026-04-28_direction_have_cap_water-lerobot-without-rinse-merged-adjust-pickup",
+   106	    "lyl472324464/2026-04-28_direction_have_cap_water2-lerobot-without-rinse-merged-adjust-pickup",
+   107	    "lyl472324464/2026-05-11_free-spinning-lerobot-without-rinse-merged-adjust-pickup",
+   108	    "lyl472324464/2026-05-11_free-spinning-lerobot-without-rinse-merged-adjust-pickup",
+   109	    "lyl472324464/2026-05-11_free-spinning-lerobot-without-rinse-merged-adjust-pickup",
+   110	    "lyl472324464/2026-05-11_free-spinning-lerobot-without-rinse-merged-adjust-pickup",
+   111	    "lyl472324464/2026-05-11_free-spinning-lerobot-without-rinse-merged-adjust-pickup",
+   112	    "lyl472324464/2026-05-11_cap-lerobot-without-rinse-merged-adjust-pickup",
+   113	    "lyl472324464/2026-05-11_twist-lerobot-truncated-return-home-exp-truncated-return-home-20260520-095140",
+   114	    "lyl472324464/2026-05-12_twist-lerobot-truncated-return-home-exp-truncated-return-home-20260520-095140",
+   115	    "lyl472324464/2026-05-12_twist2-lerobot-truncated-return-home-exp-truncated-return-home-20260520-095140",
+   116	    "lyl472324464/2026-05-04_turn_over-lerobot-without-rinse",
+   117	    "lyl472324464/2026-05-03_turn_over-lerobot-without-rinse",
+   118	    "lyl472324464/2026-05-01_turn_over-lerobot-without-rinse",
+   119	]
+   120	
+   121	_EII_DATA_SYSTEM_WITHOUT_RINSE_HAVE_CAP_WATER_RETURN_HOME_49_REPO_IDS = [
+   122	    "lyl472324464/2025-09-15-twist-one-bottle-no-box-in-the-front-without-rinse-merged-adjust-pickup",
+   123	    "lyl472324464/2025-12-10-twist-one-bottle-merged-adjust-pickup",
+   124	    "lyl472324464/2025-12-23-twist-one-bottle-without-rinse-merged-adjust-pickup",
+   125	    "lyl472324464/2026-01-20-twist-one-bottle-merged-adjust-pickup",
+   126	    "lyl472324464/2026-02-03-no-cap-and-direction-without-rinse-merged-adjust-pickup",
+   127	    "lyl472324464/2026-03-04-one-direction-lerobot-without-rinse-merged-adjust-pickup",
+   128	    "lyl472324464/2026.03.12_one_have_cap-lerobot-without-rinse-merged-adjust-pickup",
+   129	    "lyl472324464/2026.03.12_one_have_cap_direction-lerobot-without-rinse-merged-adjust-pickup",
+   130	    "lyl472324464/2026-03-12-one-havent-cap-merged-adjust-pickup",
+   131	    "lyl472324464/2026-03-12-one-havent-cap-direction-merged-adjust-pickup",
+   132	    "lyl472324464/2026-04-21_direction-lerobot-without-rinse-merged-adjust-pickup",
+   133	    "lyl472324464/2026-04-21_direction_2-lerobot-without-rinse-merged-adjust-pickup",
+   134	    "lyl472324464/2026-04-21_direction_haven-t_cap-lerobot-without-rinse-merged-adjust-pickup",
+   135	    "lyl472324464/2026-04-21_direction_havent_cap_water-lerobot-without-rinse-merged-adjust-pickup",
+   136	    "lyl472324464/2026-04-23_direction_have_cap_water-lerobot-without-rinse",
+   137	    "lyl472324464/2026-04-23_direction_havent_cap_water-lerobot-without-rinse-merged-adjust-pickup",
+   138	    "lyl472324464/2026-04-27direction_have_cap_water-lerobot-without-rinse",
+   139	    "lyl472324464/2026-04-27_direction_have_cap_water2-lerobot-without-rinse",
+   140	    "lyl472324464/2026-04-28_direction_have_cap_water-lerobot-without-rinse-merged-adjust-pickup",
+   141	    "lyl472324464/2026-04-28_direction_have_cap_water2-lerobot-without-rinse-merged-adjust-pickup",
+   142	    "lyl472324464/2026-05-01_turn_over-lerobot-without-rinse",
+   143	    "lyl472324464/2026-05-03_turn_over-lerobot-without-rinse",
+   144	    "lyl472324464/2026-05-04_turn_over-lerobot-without-rinse",
+   145	    "lyl472324464/2026-05-01_turn_over-lerobot-without-rinse",
+   146	    "lyl472324464/2026-05-03_turn_over-lerobot-without-rinse",
+   147	    "lyl472324464/2026-05-04_turn_over-lerobot-without-rinse",
+   148	    "lyl472324464/2026-05-01_turn_over-lerobot-without-rinse",
+   149	    "lyl472324464/2026-05-03_turn_over-lerobot-without-rinse",
+   150	    "lyl472324464/2026-05-04_turn_over-lerobot-without-rinse",
+   151	    "lyl472324464/2026-05-01_turn_over-lerobot-without-rinse",
+   152	    "lyl472324464/2026-05-03_turn_over-lerobot-without-rinse",
+   153	    "lyl472324464/2026-05-04_turn_over-lerobot-without-rinse",
+   154	    "lyl472324464/2026-05-01_turn_over-lerobot-without-rinse",
+   155	    "lyl472324464/2026-05-03_turn_over-lerobot-without-rinse",
+   156	    "lyl472324464/2026-05-04_turn_over-lerobot-without-rinse",
+   157	    "lyl472324464/2026-05-11_free-spinning-lerobot-without-rinse-merged-adjust-pickup",
+   158	    "lyl472324464/2026-05-11_free-spinning-lerobot-without-rinse-merged-adjust-pickup",
+   159	    "lyl472324464/2026-05-11_free-spinning-lerobot-without-rinse-merged-adjust-pickup",
+   160	    "lyl472324464/2026-05-11_free-spinning-lerobot-without-rinse-merged-adjust-pickup",
+   161	    "lyl472324464/2026-05-11_free-spinning-lerobot-without-rinse-merged-adjust-pickup",
+   162	    "lyl472324464/2026-05-11_free-spinning-lerobot-without-rinse-merged-adjust-pickup",
+   163	    "lyl472324464/2026-05-11_free-spinning-lerobot-without-rinse-merged-adjust-pickup",
+   164	    "lyl472324464/2026-05-11_free-spinning-lerobot-without-rinse-merged-adjust-pickup",
+   165	    "lyl472324464/2026-05-11_free-spinning-lerobot-without-rinse-merged-adjust-pickup",
+   166	    "lyl472324464/2026-05-11_free-spinning-lerobot-without-rinse-merged-adjust-pickup",
+   167	    "lyl472324464/2026-05-11_cap-lerobot-without-rinse-merged-adjust-pickup",
+   168	    "lyl472324464/2026-05-11_twist-lerobot-truncated-return-home-exp-truncated-return-home-20260520-095140",
+   169	    "lyl472324464/2026-05-12_twist-lerobot-truncated-return-home-exp-truncated-return-home-20260520-095140",
+   170	    "lyl472324464/2026-05-12_twist2-lerobot-truncated-return-home-exp-truncated-return-home-20260520-095140",
+   171	]
+   172	
+   173	_EII_TURN_OVER_WITHOUT_RINSE_REPO_IDS = [
+   174	    "lyl472324464/2026-05-04_turn_over-lerobot-without-rinse",
+   175	    "lyl472324464/2026-05-03_turn_over-lerobot-without-rinse",
+   176	    "lyl472324464/2026-05-01_turn_over-lerobot-without-rinse",
+   177	]
+   178	
+   179	# Used by `eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo`:
+   180	# the base list above has 29 entries, then the three turn_over repos are repeated
+   181	# four extra times each, and free-spinning is repeated ten extra times.
+   182	_EII_DATA_SYSTEM_WITHOUT_RINSE_RETURN_HOME_TURN_OVER_X5_REPO_IDS = [
+   183	    *_EII_DATA_SYSTEM_WITHOUT_RINSE_RETURN_HOME_29_REPO_IDS,
+   184	    *[repo_id for repo_id in _EII_TURN_OVER_WITHOUT_RINSE_REPO_IDS for _ in range(4)],
+   185	]
+   186	
+   187	_EII_FREE_SPINNING_MERGED_ADJUST_PICKUP_REPO_ID = (
+   188	    "lyl472324464/2026-05-11_free-spinning-lerobot-without-rinse-merged-adjust-pickup"
+   189	)
+   190	
+   191	_EII_DATA_SYSTEM_WITHOUT_RINSE_RETURN_HOME_TURN_OVER_X5_FREE_SPIN_PLUS10_REPO_IDS = [
+   192	    *_EII_DATA_SYSTEM_WITHOUT_RINSE_RETURN_HOME_TURN_OVER_X5_REPO_IDS,
+   193	    *([_EII_FREE_SPINNING_MERGED_ADJUST_PICKUP_REPO_ID] * 10),
+   194	]
+   195	
+   196	@dataclasses.dataclass(frozen=True)
+   197	class LeRobotAlohaDataConfig:
+   198	    repo_ids: list[str]
+   199	    transform_pipeline: _transforms.AlohaTransformPipeline
+   200	
+   201	
+   202	@dataclasses.dataclass(frozen=True)
+   203	class TrainConfig:
+   204	    name: tyro.conf.Suppress[str]
+   205	    project_name: str = "openpi"
+   206	    exp_name: str = tyro.MISSING
+   207	    model: _model.BaseModelConfig = dataclasses.field(default_factory=pi0_config.Pi0Config)
+   208	    weight_loader: weight_loaders.WeightLoader = dataclasses.field(default_factory=weight_loaders.NoOpWeightLoader)
+   209	    lr_schedule: _optimizer.LRScheduleConfig = dataclasses.field(default_factory=_optimizer.CosineDecaySchedule)
+   210	    optimizer: _optimizer.OptimizerConfig = dataclasses.field(default_factory=_optimizer.AdamW)
+   211	    ema_decay: float | None = 0.99
+   212	    freeze_filter: tyro.conf.Suppress[Filter] = dataclasses.field(default_factory=nnx.Nothing)
+   213	    data: LeRobotAlohaDataConfig = tyro.MISSING
+   214	    checkpoint_base_dir: str = "./checkpoints"
+   215	    seed: int = 42
+   216	    batch_size: int = 32
+   217	    gradient_accumulation_steps: int = 1
+   218	    num_workers: int = 2
+   219	    num_train_steps: int = 30_000
+   220	    log_interval: int = 100
+   221	    save_interval: int = 1000
+   222	    keep_period: int | None = 5000
+   223	    overwrite: bool = False
+   224	    resume: bool = False
+   225	    wandb_enabled: bool = True
+   226	    policy_metadata: dict[str, Any] | None = None
+   227	    fsdp_devices: int = 1
+   228	
+   229	    @property
+   230	    def checkpoint_dir(self) -> pathlib.Path:
+   231	        if not self.exp_name:
+   232	            raise ValueError("--exp_name must be set")
+   233	        return (pathlib.Path(self.checkpoint_base_dir) / self.name / self.exp_name).resolve()
+   234	
+   235	    @property
+   236	    def trainable_filter(self) -> nnx.filterlib.Filter:
+   237	        return nnx.All(nnx.Param, nnx.Not(self.freeze_filter))
+   238	
+   239	def _make_twist_train_config(
+   240	    name: str,
+   241	    *,
+   242	    repo_ids: list[str],
+   243	    lora: bool,
+   244	    batch_size: int,
+   245	    num_workers: int,
+   246	    fsdp_devices: int = 1,
+   247	    include_low: bool = True,
+   248	    include_subtask: bool = True,
+   249	    gradient_accumulation_steps: int = 1,
+   250	    image_resolution: tuple[int, int] = (224, 224),
+   251	    max_token_len: int | None = None,
+   252	    video_memory_num_frames: int = 1,
+   253	    video_memory_stride_seconds: float = 1.0,
+   254	    training_time_rtc: bool = False,
+   255	    rtc_max_delay: int = 10,
+   256	    assets: _transforms.AssetsConfig = tyro.MISSING,
+   257	    exp_name: str = tyro.MISSING,
+   258	    checkpoint_base_dir: str = "./checkpoints",
+   259	    wandb_enabled: bool = True,
+   260	    overwrite: bool = False,
+   261	    resume: bool = False,
+   262	    num_train_steps: int = 40_000,
+   263	) -> TrainConfig:
+   264	    if lora:
+   265	        model = pi0_config.Pi0Config(
+   266	            paligemma_variant="gemma_2b_lora",
+   267	            action_expert_variant="gemma_300m_lora",
+   268	            image_resolution=image_resolution,
+   269	            max_token_len=max_token_len,
+   270	            training_time_rtc=training_time_rtc,
+   271	            rtc_max_delay=rtc_max_delay,
+   272	        )
+   273	        freeze_filter = pi0_config.Pi0Config(
+   274	            paligemma_variant="gemma_2b_lora",
+   275	            action_expert_variant="gemma_300m_lora",
+   276	        ).get_freeze_filter()
+   277	        ema_decay = None
+   278	    else:
+   279	        model = pi0_config.Pi0Config(
+   280	            image_resolution=image_resolution,
+   281	            max_token_len=max_token_len,
+   282	            training_time_rtc=training_time_rtc,
+   283	            rtc_max_delay=rtc_max_delay,
+   284	        )
+   285	        freeze_filter = nnx.Nothing()
+   286	        ema_decay = 0.99
+   287	
+   288	    return TrainConfig(
+   289	        name=name,
+   290	        exp_name=exp_name,
+   291	        model=model,
+   292	        lr_schedule=_optimizer.CosineDecaySchedule(
+   293	            warmup_steps=10_000,
+   294	            peak_lr=2.5e-5,
+   295	            decay_steps=40_000,
+   296	            decay_lr=2.5e-6,
+   297	        ),
+   298	        log_interval=10,
+   299	        data=LeRobotAlohaDataConfig(
+   300	            repo_ids=repo_ids,
+   301	            transform_pipeline=_transforms.AlohaTransformPipeline(
+   302	                include_low=include_low,
+   303	                include_subtask=include_subtask,
+   304	                image_resolution=model.image_resolution,
+   305	                max_token_len=model.max_token_len,
+   306	                discrete_state_input=model.discrete_state_input,
+   307	                assets=assets,
+   308	                use_quantile_norm=True,
+   309	                video_memory_num_frames=video_memory_num_frames,
+   310	                video_memory_stride_seconds=video_memory_stride_seconds,
+   311	                adapt_to_pi=True,
+   312	                use_delta_joint_actions=True,
+   313	                action_dim=model.action_dim,
+   314	            ),
+   315	        ),
+   316	        weight_loader=weight_loaders.CheckpointWeightLoader(_PI05_BASE_PARAMS),
+   317	        freeze_filter=freeze_filter,
+   318	        ema_decay=ema_decay,
+   319	        save_interval=1000,
+   320	        num_train_steps=num_train_steps,
+   321	        batch_size=batch_size,
+   322	        num_workers=num_workers,
+   323	        fsdp_devices=fsdp_devices,
+   324	        gradient_accumulation_steps=gradient_accumulation_steps,
+   325	        checkpoint_base_dir=checkpoint_base_dir,
+   326	        wandb_enabled=wandb_enabled,
+   327	        overwrite=overwrite,
+   328	        resume=resume,
+   329	    )
+   330	
+   331	
+   332	_CONFIGS = [
+   333	    _make_twist_train_config(
+   334	        "eii_data_system_without_rinse_cam3_fullft_h200_41repo",
+   335	        repo_ids=_EII_DATA_SYSTEM_WITHOUT_RINSE_41_REPO_IDS,
+   336	        lora=False,
+   337	        batch_size=256,
+   338	        num_workers=128,
+   339	        fsdp_devices=8,
+   340	        include_low=False,
+   341	        include_subtask=False,
+   342	        gradient_accumulation_steps=1,
+   343	        exp_name="no_rinse_cam3_fullft_41repo_bs256_nw128_fsdp8_20260513",
+   344	        checkpoint_base_dir="/workspace/openpi0.5-rtc/checkpoints",
+   345	        wandb_enabled=True,
+   346	        overwrite=True,
+   347	        resume=False,
+   348	        # 2026-05-13 setup for the 41-repo production run. Matches the
+   349	        # 36-repo H200 full fine-tune shape: 3 cameras, no temporal memory,
+   350	        # full fine-tune, fsdp=8, bs=256, nw=128, 40k steps.
+   351	        assets=_transforms.AssetsConfig(
+   352	            assets_dir="assets/eii_data_system_without_rinse_cam3_fullft_h200_41repo",
+   353	            asset_id="trossen",
+   354	        ),
+   355	    ),
+   356	    _make_twist_train_config(
+   357	        "eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo",
+   358	        repo_ids=_EII_DATA_SYSTEM_WITHOUT_RINSE_RETURN_HOME_TURN_OVER_X5_FREE_SPIN_PLUS10_REPO_IDS,
+   359	        lora=False,
+   360	        batch_size=256,
+   361	        num_workers=64,
+   362	        fsdp_devices=4,
+   363	        include_low=False,
+   364	        include_subtask=False,
+   365	        gradient_accumulation_steps=1,
+   366	        exp_name="no_rinse_cam3_fullft_return_home_29repo_bs256_nw64_fsdp4_20260520",
+   367	        checkpoint_base_dir="/workspace/openpi0.5-rtc/checkpoints",
+   368	        wandb_enabled=True,
+   369	        overwrite=False,
+   370	        resume=True,
+   371	        # 2026-05-22 resume setup: keep the same checkpoint directory and
+   372	        # continue from the latest saved step. The three turn-over no-rinse
+   373	        # repos remain weighted to five total copies each, and free-spinning
+   374	        # merged-adjust-pickup has ten additional copies.
+   375	        num_train_steps=60_000,
+   376	        assets=_transforms.AssetsConfig(
+   377	            assets_dir="assets/eii_data_system_without_rinse_cam3_fullft_h200_return_home_29repo",
+   378	            asset_id="trossen",
+   379	        ),
+   380	    ),
+   381	    _make_twist_train_config(
+   382	        "eii_data_system_without_rinse_cam3_fullft_h200_have_cap_water_return_home_49repo",
+   383	        repo_ids=_EII_DATA_SYSTEM_WITHOUT_RINSE_HAVE_CAP_WATER_RETURN_HOME_49_REPO_IDS,
+   384	        lora=False,
+   385	        batch_size=256,
+   386	        num_workers=64,
+   387	        fsdp_devices=4,
+   388	        include_low=False,
+   389	        include_subtask=True,
+   390	        gradient_accumulation_steps=1,
+   391	        exp_name="no_rinse_cam3_fullft_have_cap_water_return_home_49repo_bs256_nw64_fsdp4_20260527",
+   392	        checkpoint_base_dir="/workspace/openpi0.5-rtc/checkpoints",
+   393	        wandb_enabled=True,
+   394	        overwrite=True,
+   395	        resume=False,
+   396	        num_train_steps=60_000,
+   397	        assets=_transforms.AssetsConfig(
+   398	            assets_dir="assets/eii_data_system_without_rinse_cam3_fullft_h200_have_cap_water_return_home_49repo",
+   399	            asset_id="aloha",
+   400	        ),
+   401	    ),
+   402	    _make_twist_train_config(
+   403	        "debug_training_time_rtc_lora",
+   404	        repo_ids=["lyl472324464/2026-04-23_direction_have_cap_water-lerobot-without-rinse"],
+   405	        lora=True,
+   406	        batch_size=1,
+   407	        num_workers=0,
+   408	        fsdp_devices=1,
+   409	        include_low=False,
+   410	        include_subtask=True,
+   411	        gradient_accumulation_steps=1,
+   412	        training_time_rtc=True,
+   413	        rtc_max_delay=10,
+   414	        video_memory_num_frames=5,
+   415	        video_memory_stride_seconds=1.0,
+   416	        exp_name="debug_training_time_rtc_lora_bs1",
+   417	        checkpoint_base_dir="/home/eii/openpi0.5-rtc/checkpoints",
+   418	        wandb_enabled=False,
+   419	        overwrite=True,
+   420	        resume=False,
+   421	        num_train_steps=10,
+   422	        assets=_transforms.AssetsConfig(
+   423	            assets_dir="assets/eii_data_system_without_rinse_cam3_fullft_h200_have_cap_water_return_home_49repo",
+   424	            asset_id="aloha",
+   425	        ),
+   426	    ),
+   427	    _make_twist_train_config(
+   428	        "debug_image_resolution_448_lora",
+   429	        repo_ids=["lyl472324464/2026-04-23_direction_have_cap_water-lerobot-without-rinse"],
+   430	        lora=True,
+   431	        batch_size=1,
+   432	        num_workers=0,
+   433	        fsdp_devices=1,
+   434	        include_low=False,
+   435	        include_subtask=True,
+   436	        gradient_accumulation_steps=1,
+   437	        image_resolution=(448, 448),
+   438	        exp_name="debug_image_resolution_448_lora_bs1",
+   439	        checkpoint_base_dir="/home/eii/openpi0.5-rtc/checkpoints",
+   440	        wandb_enabled=False,
+   441	        overwrite=True,
+   442	        resume=False,
+   443	        num_train_steps=10,
+   444	        assets=_transforms.AssetsConfig(
+   445	            assets_dir="assets/eii_data_system_without_rinse_cam3_fullft_h200_have_cap_water_return_home_49repo",
+   446	            asset_id="aloha",
+   447	        ),
+   448	    ),
+   449	    _make_twist_train_config(
+   450	        "eii_rinse_11repo_cam4_fullft",
+   451	        repo_ids=_EII_RINSE_11REPO_INSERT_X5_REPO_IDS,
+   452	        lora=False,
+   453	        batch_size=256,
+   454	        num_workers=128,
+   455	        include_low=True,
+   456	        include_subtask=True,
+   457	        gradient_accumulation_steps=1,
+   458	        assets=_transforms.AssetsConfig(
+   459	            assets_dir="assets/eii_rinse_11repo_cam4_fullft",
+   460	            asset_id="trossen",
+   461	        ),
+   462	    ),
+   463	    TrainConfig(
+   464	        name="debug",
+   465	        data=LeRobotAlohaDataConfig(
+   466	            repo_ids=["lyl472324464/2026-03-09-inference-with-and-without-cap"],
+   467	            transform_pipeline=_transforms.AlohaTransformPipeline(
+   468	                include_low=False,
+   469	                include_subtask=False,
+   470	                image_resolution=(224, 224),
+   471	                max_token_len=200,
+   472	                discrete_state_input=True,
+   473	                assets=_transforms.AssetsConfig(
+   474	                    assets_dir="assets/debug",
+   475	                    asset_id="trossen",
+   476	                ),
+   477	                use_quantile_norm=True,
+   478	                video_memory_num_frames=1,
+   479	                video_memory_stride_seconds=1.0,
+   480	                adapt_to_pi=True,
+   481	                use_delta_joint_actions=True,
+   482	                action_dim=32,
+   483	            ),
+   484	        ),
+   485	        batch_size=2,
+   486	        model=pi0_config.Pi0Config(
+   487	            paligemma_variant="dummy",
+   488	            action_expert_variant="dummy",
+   489	        ),
+   490	        save_interval=100,
+   491	        overwrite=True,
+   492	        exp_name="debug",
+   493	        num_train_steps=10,
+   494	        wandb_enabled=False,
+   495	    ),
+   496	]
+   497	
+   498	_CONFIGS[0] = dataclasses.replace(_CONFIGS[0], policy_metadata=_TROSSEN_RESET_POSE)
+   499	
+   500	if len({config.name for config in _CONFIGS}) != len(_CONFIGS):
+   501	    raise ValueError("Config names must be unique.")
+   502	
+   503	_CONFIGS_DICT = {config.name: config for config in _CONFIGS}
+   504	
+   505	
+   506	def cli() -> TrainConfig:
+   507	    return tyro.extras.overridable_config_cli({k: (k, v) for k, v in _CONFIGS_DICT.items()})
+   508	
+   509	
+   510	def get_config(config_name: str) -> TrainConfig:
+   511	    """Get a config by name."""
+   512	    if config_name not in _CONFIGS_DICT:
+   513	        closest = difflib.get_close_matches(config_name, _CONFIGS_DICT.keys(), n=1, cutoff=0.0)
+   514	        closest_str = f" Did you mean '{closest[0]}'? " if closest else ""
+   515	        raise ValueError(f"Config '{config_name}' not found.{closest_str}")
+   516	    return _CONFIGS_DICT[config_name]
+===== scripts/rlt_generate_offline_tokens.py =====
+     1	from __future__ import annotations
+     2	
+     3	import argparse
+     4	import dataclasses
+     5	import json
+     6	import logging
+     7	from pathlib import Path
+     8	import time
+     9	
+    10	import cv2
+    11	import numpy as np
+    12	import orbax.checkpoint as ocp
+    13	
+    14	from openpi.data import transforms as _transforms
+    15	from openpi.rlt import policy as rlt_policy
+    16	from openpi.rlt import token_model
+    17	from openpi.serving import policy_config as _policy_config
+    18	from openpi.training import config as _config
+    19	
+    20	
+    21	DEFAULT_BASE_CONFIG = "eii_rinse_11repo_cam4_fullft"
+    22	DEFAULT_BASE_CHECKPOINT = (
+    23	    "/app/checkpoints/eii_rinse_11repo_cam4_fullft/"
+    24	    "rinse_11repo_insertx5_fullft_bs256_nw64_fsdp8_20260513/9000"
+    25	)
+    26	DEFAULT_RLT_TOKEN_CHECKPOINT = "/app/rlt_runs/rlt_token_rinse_9000_bs64_nw4_warmup2000_10000_abs/9999"
+    27	DEFAULT_REPLAY_DIR = "/app/data/rlt_online_replay/rinse_smoke"
+    28	
+    29	
+    30	def _load_token(path: Path):
+    31	    config_path = path / "rlt_token_config.json"
+    32	    if not config_path.exists():
+    33	        config_path = path / "config.json"
+    34	    config = token_model.RLTTokenConfig(**json.loads(config_path.read_text()))
+    35	    params = ocp.StandardCheckpointer().restore(path / "params")
+    36	    if isinstance(params, dict) and set(params) == {"params"}:
+    37	        params = params["params"]
+    38	    return params, config
+    39	
+    40	
+    41	
+    42	def _metadata(data: np.lib.npyio.NpzFile, path: Path | None = None) -> dict:
+    43	    if "metadata_json" not in data:
+    44	        metadata = {}
+    45	    else:
+    46	        metadata = json.loads(str(data["metadata_json"]))
+    47	    if path is not None:
+    48	        for suffix in (".label.json", ".trim.json"):
+    49	            sidecar = path.with_suffix(path.suffix + suffix)
+    50	            if sidecar.exists():
+    51	                metadata.update(json.loads(sidecar.read_text()))
+    52	    return metadata
+    53	
+    54	
+    55	def _image_keys(data: np.lib.npyio.NpzFile, metadata: dict | None = None) -> list[str]:
+    56	    metadata = metadata or {}
+    57	    video_files = metadata.get("video_files", {})
+    58	    if isinstance(video_files, dict) and video_files:
+    59	        return sorted(str(key) for key in video_files)
+    60	    return []
+    61	
+    62	
+    63	def _decode_video_rgb(path: Path, *, expected_frames: int) -> np.ndarray:
+    64	    cap = cv2.VideoCapture(str(path))
+    65	    if not cap.isOpened():
+    66	        raise RuntimeError(f"failed to open replay video: {path}")
+    67	    frames = []
+    68	    try:
+    69	        while True:
+    70	            ok, frame_bgr = cap.read()
+    71	            if not ok:
+    72	                break
+    73	            frames.append(cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2RGB))
+    74	    finally:
+    75	        cap.release()
+    76	    if not frames:
+    77	        raise RuntimeError(f"replay video has no frames: {path}")
+    78	    if len(frames) < expected_frames:
+    79	        frames.extend([frames[-1]] * (expected_frames - len(frames)))
+    80	    elif len(frames) > expected_frames:
+    81	        frames = frames[:expected_frames]
+    82	    return np.asarray(frames, dtype=np.uint8)
+    83	
+    84	
+    85	def _episode_image_arrays(
+    86	    data: np.lib.npyio.NpzFile,
+    87	    metadata: dict,
+    88	    episode_path: Path,
+    89	    *,
+    90	    expected_frames: int,
+    91	) -> dict[str, np.ndarray]:
+    92	    video_files = metadata.get("video_files", {})
+    93	    if not isinstance(video_files, dict) or not video_files:
+    94	        raise KeyError(f"{episode_path} has no video_files metadata")
+    95	
+    96	    image_arrays = {}
+    97	    episode_dir = episode_path.parent.resolve()
+    98	    for key, video_name in sorted(video_files.items()):
+    99	        video_path = (episode_path.parent / str(video_name)).resolve()
+   100	        if episode_dir not in (video_path, *video_path.parents):
+   101	            raise ValueError(f"video path escapes episode directory: {video_path}")
+   102	        image_arrays[str(key)] = _decode_video_rgb(video_path, expected_frames=expected_frames)
+   103	    return image_arrays
+   104	
+   105	
+   106	def _observation_at(
+   107	    data: np.lib.npyio.NpzFile,
+   108	    image_arrays: dict[str, np.ndarray],
+   109	    step: int,
+   110	    *,
+   111	    task: str,
+   112	    subtask: str,
+   113	) -> dict:
+   114	    images = {}
+   115	    for key, value in image_arrays.items():
+   116	        frame = value[step]
+   117	        if frame.size:
+   118	            images[key] = frame
+   119	    return {
+   120	        "state": np.asarray(data["raw_state"][step], dtype=np.float32),
+   121	        "images": images,
+   122	        "task": task,
+   123	        "subtask": subtask,
+   124	    }
+   125	
+   126	
+   127	def _action_chunk(actions: np.ndarray, start: int, horizon: int) -> tuple[np.ndarray, np.ndarray]:
+   128	    action_dim = actions.shape[-1]
+   129	    chunk = np.zeros((horizon, action_dim), dtype=np.float32)
+   130	    mask = np.zeros((horizon,), dtype=np.bool_)
+   131	    end = min(start + horizon, actions.shape[0])
+   132	    valid = max(end - start, 0)
+   133	    if valid:
+   134	        chunk[:valid] = actions[start:end]
+   135	        mask[:valid] = True
+   136	    return chunk, mask
+   137	
+   138	
+   139	def _pad_action_dim(chunk: np.ndarray, action_dim: int) -> np.ndarray:
+   140	    if chunk.shape[-1] == action_dim:
+   141	        return chunk
+   142	    if chunk.shape[-1] > action_dim:
+   143	        return chunk[..., :action_dim]
+   144	    padded = np.zeros((*chunk.shape[:-1], action_dim), dtype=chunk.dtype)
+   145	    padded[..., : chunk.shape[-1]] = chunk
+   146	    return padded
+   147	
+   148	
+   149	def _terminal_label(meta: dict) -> tuple[str, int]:
+   150	    label = str(meta.get("terminal_label", "unlabeled"))
+   151	    if label == "success":
+   152	        return label, 1
+   153	    if label == "failure":
+   154	        return label, 0
+   155	    return label, -1
+   156	
+   157	
+   158	def _frame_returns(meta: dict, raw_num_steps: int) -> dict[int, float]:
+   159	    raw = meta.get("frame_rewards", {})
+   160	    if not isinstance(raw, dict):
+   161	        return {}
+   162	    returns = {}
+   163	    for step, value in raw.items():
+   164	        step_index = max(0, min(int(step), max(raw_num_steps - 1, 0)))
+   165	        returns[step_index] = float(value)
+   166	    return returns
+   167	
+   168	
+   169	def _total_frame_reward(frame_returns: dict[int, float]) -> float:
+   170	    return float(sum(float(value) for value in frame_returns.values()))
+   171	
+   172	
+   173	def _discounted_transition_return(
+   174	    frame_returns: dict[int, float], source_step: int, next_offset_steps: int, gamma: float
+   175	) -> float:
+   176	    total = 0.0
+   177	    for offset in range(next_offset_steps):
+   178	        frame_return = frame_returns.get(source_step + offset)
+   179	        if frame_return is not None:
+   180	            total += float(gamma**offset) * float(frame_return)
+   181	    return total
+   182	
+   183	
+   184	def _output_path(
+   185	    path: Path,
+   186	    output_dir: Path | None,
+   187	    *,
+   188	    stride: int,
+   189	    train_action_horizon: int,
+   190	    next_offset_steps: int,
+   191	    samples_per_step: int = 1,
+   192	) -> Path:
+   193	    sample_suffix = f"_s{samples_per_step}" if samples_per_step > 1 else ""
+   194	    name = f"{path.stem}.replay_stride{stride}_h{train_action_horizon}_next{next_offset_steps}{sample_suffix}.npz"
+   195	    if output_dir is None:
+   196	        return path.with_name(name)
+   197	    output_dir.mkdir(parents=True, exist_ok=True)
+   198	    return output_dir / name
+   199	
+   200	
+   201	def _discounted_terminal_td_reward(terminal_success: int, next_offset_steps: int, gamma: float) -> float:
+   202	    if terminal_success < 0:
+   203	        return 0.0
+   204	    return float(terminal_success) * float(gamma ** max(next_offset_steps - 1, 0))
+   205	
+   206	
+   207	def _sampling_offset_from_recorded_chunks(
+   208	    data: np.lib.npyio.NpzFile,
+   209	    *,
+   210	    trim_start_step: int,
+   211	    num_steps: int,
+   212	    stride: int,
+   213	    handoff_delay_steps: int,
+   214	) -> int:
+   215	    if stride <= 1 or "chunk_start_step" not in data:
+   216	        return 0
+   217	    for source_chunk_start in np.asarray(data["chunk_start_step"], dtype=np.int32):
+   218	        local_generation_step = int(source_chunk_start) - trim_start_step - handoff_delay_steps
+   219	        if 0 <= local_generation_step < num_steps:
+   220	            return local_generation_step % stride
+   221	    return 0
+   222	
+   223	
+   224	def _recorded_noise_by_generation_step(
+   225	    data: np.lib.npyio.NpzFile,
+   226	    *,
+   227	    trim_start_step: int,
+   228	    num_steps: int,
+   229	    handoff_delay_steps: int,
+   230	) -> dict[int, np.ndarray]:
+   231	    if "chunk_start_step" not in data or "rlt_noise" not in data:
+   232	        return {}
+   233	    noise_by_step = {}
+   234	    for source_chunk_start, noise in zip(
+   235	        np.asarray(data["chunk_start_step"], dtype=np.int32),
+   236	        np.asarray(data["rlt_noise"], dtype=np.float32),
+   237	        strict=False,
+   238	    ):
+   239	        local_generation_step = int(source_chunk_start) - trim_start_step - handoff_delay_steps
+   240	        if 0 <= local_generation_step < num_steps:
+   241	            noise_by_step[int(source_chunk_start) - handoff_delay_steps] = noise
+   242	    return noise_by_step
+   243	
+   244	
+   245	def _make_action_transform(train_config: _config.TrainConfig, checkpoint_dir: str | Path):
+   246	    checkpoint_dir = Path(checkpoint_dir)
+   247	    transform_pipeline = train_config.data.transform_pipeline
+   248	    if transform_pipeline is None:
+   249	        raise ValueError("A transform pipeline is required for RLT replay generation.")
+   250	    checkpoint_assets = _transforms.AssetsConfig(
+   251	        assets_dir=str(checkpoint_dir / "assets"),
+   252	        asset_id=transform_pipeline.assets.asset_id,
+   253	    )
+   254	    transform_pipeline = dataclasses.replace(transform_pipeline, assets=checkpoint_assets)
+   255	    return _transforms.compose(
+   256	        [
+   257	            *transform_pipeline.raw_state_action_transforms(),
+   258	            _transforms.Normalize(transform_pipeline._require_norm_stats(), use_quantiles=transform_pipeline.use_quantile_norm),
+   259	        ]
+   260	    )
+   261	
+   262	
+   263	def _normalized_action_chunk(
+   264	    action_transform,
+   265	    *,
+   266	    data: np.lib.npyio.NpzFile,
+   267	    image_arrays: dict[str, np.ndarray],
+   268	    actions: np.ndarray,
+   269	    local_step: int,
+   270	    source_step: int,
+   271	    horizon: int,
+   272	    action_dim: int,
+   273	) -> tuple[np.ndarray, np.ndarray]:
+   274	    raw_chunk, mask = _action_chunk(actions, local_step, horizon)
+   275	    task = str(data["task"][source_step])
+   276	    subtask = str(data["subtask"][source_step])
+   277	    sample = {
+   278	        "observation": {
+   279	            "state": np.asarray(data["raw_state"][source_step], dtype=np.float32),
+   280	            "images": {key: value[source_step] for key, value in image_arrays.items()},
+   281	        },
+   282	        "action": raw_chunk,
+   283	        "task": task,
+   284	        "subtask": subtask,
+   285	    }
+   286	    transformed = action_transform(sample)
+   287	    return np.asarray(transformed["actions"], dtype=np.float32)[..., :action_dim], mask
+   288	
+   289	
+   290	def _normalized_action_chunk_for_policy(
+   291	    action_transform,
+   292	    *,
+   293	    data: np.lib.npyio.NpzFile,
+   294	    image_arrays: dict[str, np.ndarray],
+   295	    actions: np.ndarray,
+   296	    local_start: int,
+   297	    source_step: int,
+   298	    horizon: int,
+   299	    model_action_dim: int,
+   300	) -> tuple[np.ndarray, np.ndarray]:
+   301	    action_dim = actions.shape[-1]
+   302	    chunk = np.zeros((horizon, action_dim), dtype=np.float32)
+   303	    mask = np.zeros((horizon,), dtype=np.bool_)
+   304	    src_start = max(local_start, 0)
+   305	    src_end = min(local_start + horizon, actions.shape[0])
+   306	    if src_end > src_start:
+   307	        dst_start = src_start - local_start
+   308	        dst_end = dst_start + (src_end - src_start)
+   309	        chunk[dst_start:dst_end] = actions[src_start:src_end]
+   310	        mask[dst_start:dst_end] = True
+   311	
+   312	    task = str(data["task"][source_step])
+   313	    subtask = str(data["subtask"][source_step])
+   314	    sample = {
+   315	        "observation": {
+   316	            "state": np.asarray(data["raw_state"][source_step], dtype=np.float32),
+   317	            "images": {key: value[source_step] for key, value in image_arrays.items()},
+   318	        },
+   319	        "action": chunk,
+   320	        "task": task,
+   321	        "subtask": subtask,
+   322	    }
+   323	    transformed = action_transform(sample)
+   324	    return _pad_action_dim(np.asarray(transformed["actions"], dtype=np.float32), model_action_dim), mask
+   325	
+   326	
+   327	def _process_episode(
+   328	    policy: rlt_policy.RLTPolicy,
+   329	    episode_path: Path,
+   330	    *,
+   331	    output_dir: Path | None,
+   332	    stride: int,
+   333	    train_action_horizon: int,
+   334	    model_action_horizon: int,
+   335	    model_action_dim: int,
+   336	    rtc_replan_start_step: int,
+   337	    handoff_delay_steps: int,
+   338	    action_dim: int,
+   339	    next_offset_steps: int,
+   340	    gamma: float,
+   341	    action_transform,
+   342	    max_transitions: int | None,
+   343	    samples_per_step: int,
+   344	    force: bool,
+   345	    save_embeddings: bool,
+   346	) -> Path | None:
+   347	    output_path = _output_path(
+   348	        episode_path,
+   349	        output_dir,
+   350	        stride=stride,
+   351	        train_action_horizon=train_action_horizon,
+   352	        next_offset_steps=next_offset_steps,
+   353	        samples_per_step=samples_per_step,
+   354	    )
+   355	    if output_path.exists() and not force:
+   356	        logging.info("Skipping existing output: %s", output_path)
+   357	        return output_path
+   358	
+   359	    start_time = time.monotonic()
+   360	    logging.info("Loading episode: %s", episode_path)
+   361	    with np.load(episode_path, allow_pickle=False) as data:
+   362	        meta = _metadata(data, episode_path)
+   363	        label, terminal_success = _terminal_label(meta)
+   364	        if "raw_state" not in data or "executed_action" not in data:
+   365	            raise KeyError(f"{episode_path} missing raw_state or executed_action")
+   366	        if "task" not in data or "subtask" not in data:
+   367	            raise KeyError(f"{episode_path} missing task or subtask; collect replay with task/subtask fields")
+   368	        image_keys = _image_keys(data, meta)
+   369	        if not image_keys:
+   370	            raise KeyError(f"{episode_path} has no video_files metadata")
+   371	        all_actions = np.asarray(data["executed_action"], dtype=np.float32)
+   372	        raw_num_steps = int(all_actions.shape[0])
+   373	        image_arrays = _episode_image_arrays(data, meta, episode_path, expected_frames=raw_num_steps)
+   374	        frame_returns = _frame_returns(meta, raw_num_steps)
+   375	        trim_start_step = int(meta.get("trim_start_step", 0) or 0)
+   376	        trim_end_step = int(meta.get("trim_end_step", raw_num_steps) or raw_num_steps)
+   377	        trim_start_step = max(0, min(trim_start_step, raw_num_steps - 1))
+   378	        trim_end_step = max(trim_start_step + 1, min(trim_end_step, raw_num_steps))
+   379	        crop_num_steps = trim_end_step - trim_start_step
+   380	        if crop_num_steps <= 0:
+   381	            raise ValueError(f"{episode_path} has no usable crop: {trim_start_step}:{trim_end_step}")
+   382	
+   383	        max_next_source_step = raw_num_steps - train_action_horizon
+   384	        max_training_source_step = max_next_source_step - next_offset_steps
+   385	        max_training_source_step = min(max_training_source_step, trim_end_step - 1)
+   386	        if max_training_source_step < trim_start_step:
+   387	            raise ValueError(
+   388	                f"{episode_path} crop {trim_start_step}:{trim_end_step} has no valid training step; "
+   389	                f"need source step <= {raw_num_steps - train_action_horizon - next_offset_steps} "
+   390	                f"for next_offset_steps={next_offset_steps} and action_horizon={train_action_horizon}"
+   391	            )
+   392	
+   393	        terminal_source_step = max_training_source_step
+   394	        sampling_offset = _sampling_offset_from_recorded_chunks(
+   395	            data,
+   396	            trim_start_step=trim_start_step,
+   397	            num_steps=crop_num_steps,
+   398	            stride=stride,
+   399	            handoff_delay_steps=handoff_delay_steps,
+   400	        )
+   401	        source_training_steps = np.arange(
+   402	            trim_start_step + sampling_offset,
+   403	            max_training_source_step + 1,
+   404	            stride,
+   405	            dtype=np.int32,
+   406	        )
+   407	        if max_transitions is not None:
+   408	            source_training_steps = source_training_steps[:max_transitions]
+   409	        if len(source_training_steps) == 0:
+   410	            raise ValueError(f"{episode_path} has no valid source_training_steps after applying stride={stride}")
+   411	        source_next_steps = (source_training_steps + next_offset_steps).astype(np.int32)
+   412	        if np.any(source_next_steps > max_next_source_step):
+   413	            raise AssertionError(
+   414	                f"source_next_steps must be <= {max_next_source_step}, got max {int(source_next_steps.max())}"
+   415	            )
+   416	        steps = (source_training_steps - trim_start_step).astype(np.int32)
+   417	        transition_sample_indices = np.tile(np.arange(samples_per_step, dtype=np.int32), len(source_training_steps))
+   418	        transition_source_steps = np.repeat(source_training_steps, samples_per_step).astype(np.int32)
+   419	        transition_next_steps = np.repeat(source_next_steps, samples_per_step).astype(np.int32)
+   420	        transition_steps = np.repeat(steps, samples_per_step).astype(np.int32)
+   421	        required_source_steps = np.unique(np.concatenate([source_training_steps, source_next_steps])).astype(np.int32)
+   422	        recorded_noise_by_step = _recorded_noise_by_generation_step(
+   423	            data,
+   424	            trim_start_step=trim_start_step,
+   425	            num_steps=raw_num_steps - trim_start_step,
+   426	            handoff_delay_steps=handoff_delay_steps,
+   427	        )
+   428	
+   429	        tokens_by_step = {}
+   430	        embeddings_by_step = {}
+   431	        masks_by_step = {}
+   432	        normalized_states_by_step = {}
+   433	        normalized_reference_by_step = {}
+   434	        normalized_model_reference_by_step = {}
+   435	        diffusion_noise_by_step = {}
+   436	        normalized_prev_action_by_step = {}
+   437	        normalized_prev_action_mask_by_step = {}
+   438	        task_by_step = {}
+   439	        subtask_by_step = {}
+   440	        total_policy_contexts = len(required_source_steps) * samples_per_step
+   441	        generated_contexts = 0
+   442	        for idx, step in enumerate(required_source_steps):
+   443	            step_task = str(data["task"][int(step)])
+   444	            step_subtask = str(data["subtask"][int(step)])
+   445	            obs = _observation_at(data, image_arrays, int(step), task=step_task, subtask=step_subtask)
+   446	            local_start = int(step) - rtc_replan_start_step
+   447	            normalized_prev_action, normalized_prev_action_mask = _normalized_action_chunk_for_policy(
+   448	                action_transform,
+   449	                data=data,
+   450	                image_arrays=image_arrays,
+   451	                actions=all_actions,
+   452	                local_start=local_start,
+   453	                source_step=max(int(step) - 1, 0),
+   454	                horizon=model_action_horizon,
+   455	                model_action_dim=model_action_dim,
+   456	            )
+   457	            for sample_idx in range(samples_per_step):
+   458	                infer_kwargs = {
+   459	                    "chunking_mode": "inference_time",
+   460	                    "prev_action": normalized_prev_action,
+   461	                }
+   462	                recorded_noise = recorded_noise_by_step.get(int(step))
+   463	                if sample_idx == 0 and recorded_noise is not None:
+   464	                    infer_kwargs["noise"] = recorded_noise
+   465	
+   466	                out = policy.infer(obs, **infer_kwargs)
+   467	                token = np.asarray(out["rlt_token"], dtype=np.float32)
+   468	                normalized_state = np.asarray(out["rlt_state"], dtype=np.float32)
+   469	                normalized_model_reference = np.asarray(out["rlt_reference_action_chunk"], dtype=np.float32)
+   470	                normalized_reference = normalized_model_reference[..., :action_dim]
+   471	
+   472	                step_key = (int(step), int(sample_idx))
+   473	                tokens_by_step[step_key] = token
+   474	                if save_embeddings:
+   475	                    embeddings_by_step[step_key] = np.asarray(out["rlt_embeddings"], dtype=np.float32)
+   476	                    masks_by_step[step_key] = np.asarray(out["rlt_mask"], dtype=np.bool_)
+   477	                normalized_states_by_step[step_key] = normalized_state
+   478	                action_window_start = handoff_delay_steps
+   479	                action_window_end = action_window_start + train_action_horizon
+   480	                normalized_reference_by_step[step_key] = normalized_reference[action_window_start:action_window_end]
+   481	                normalized_model_reference_by_step[step_key] = normalized_model_reference[:model_action_horizon]
+   482	                if "model_noise" in out:
+   483	                    diffusion_noise_by_step[step_key] = np.asarray(out["model_noise"], dtype=np.float32)
+   484	                normalized_prev_action_by_step[step_key] = normalized_prev_action
+   485	                normalized_prev_action_mask_by_step[step_key] = normalized_prev_action_mask
+   486	                task_by_step[step_key] = step_task
+   487	                subtask_by_step[step_key] = step_subtask
+   488	                generated_contexts += 1
+   489	                if generated_contexts == 1 or generated_contexts % 30 == 0:
+   490	                    logging.info(
+   491	                        "%s generated %d/%d policy contexts last_step=%d sample=%d",
+   492	                        episode_path.name,
+   493	                        generated_contexts,
+   494	                        total_policy_contexts,
+   495	                        int(step),
+   496	                        int(sample_idx),
+   497	                    )
+   498	
+   499	        transition_keys = [(int(step), int(sample_idx)) for step, sample_idx in zip(transition_source_steps, transition_sample_indices, strict=False)]
+   500	        next_transition_keys = [(int(step), int(sample_idx)) for step, sample_idx in zip(transition_next_steps, transition_sample_indices, strict=False)]
+   501	        token_arr = np.asarray([tokens_by_step[key] for key in transition_keys], dtype=np.float32)
+   502	        next_token_arr = np.asarray([tokens_by_step[key] for key in next_transition_keys], dtype=np.float32)
+   503	        normalized_state_arr = np.asarray([normalized_states_by_step[key] for key in transition_keys], dtype=np.float32)
+   504	        normalized_next_state_arr = np.asarray([normalized_states_by_step[key] for key in next_transition_keys], dtype=np.float32)
+   505	        normalized_ref_arr = np.asarray([normalized_reference_by_step[key] for key in transition_keys], dtype=np.float32)
+   506	        normalized_next_ref_arr = np.asarray([normalized_reference_by_step[key] for key in next_transition_keys], dtype=np.float32)
+   507	        normalized_model_ref_arr = np.asarray(
+   508	            [normalized_model_reference_by_step[key] for key in transition_keys], dtype=np.float32
+   509	        )
+   510	        normalized_next_model_ref_arr = np.asarray(
+   511	            [normalized_model_reference_by_step[key] for key in next_transition_keys], dtype=np.float32
+   512	        )
+   513	        diffusion_noise_arr = np.asarray([diffusion_noise_by_step[key] for key in transition_keys], dtype=np.float32)
+   514	        next_diffusion_noise_arr = np.asarray([diffusion_noise_by_step[key] for key in next_transition_keys], dtype=np.float32)
+   515	        normalized_prev_action_arr = np.asarray(
+   516	            [normalized_prev_action_by_step[key] for key in transition_keys], dtype=np.float32
+   517	        )
+   518	        normalized_prev_action_mask_arr = np.asarray(
+   519	            [normalized_prev_action_mask_by_step[key] for key in transition_keys], dtype=np.bool_
+   520	        )
+   521	
+   522	        normalized_executed_chunks = []
+   523	        normalized_executed_masks = []
+   524	        for source_step in transition_source_steps:
+   525	            normalized_executed, normalized_executed_mask = _normalized_action_chunk(
+   526	                action_transform,
+   527	                data=data,
+   528	                image_arrays=image_arrays,
+   529	                actions=all_actions,
+   530	                local_step=int(source_step) + handoff_delay_steps,
+   531	                source_step=int(source_step),
+   532	                horizon=train_action_horizon,
+   533	                action_dim=action_dim,
+   534	            )
+   535	            normalized_executed_chunks.append(normalized_executed[:train_action_horizon])
+   536	            normalized_executed_masks.append(normalized_executed_mask[:train_action_horizon])
+   537	        task_arr = np.asarray([task_by_step[key] for key in transition_keys])
+   538	        subtask_arr = np.asarray([subtask_by_step[key] for key in transition_keys])
+   539	
+   540	    normalized_executed_arr = np.asarray(normalized_executed_chunks, dtype=np.float32)
+   541	    normalized_executed_mask_arr = np.asarray(normalized_executed_masks, dtype=np.bool_)
+   542	    done = np.zeros((len(transition_steps),), dtype=np.float32)
+   543	    td_reward = np.zeros((len(transition_steps),), dtype=np.float32)
+   544	    if frame_returns:
+   545	        for idx, source_step in enumerate(transition_source_steps):
+   546	            td_reward[idx] = _discounted_transition_return(frame_returns, int(source_step), next_offset_steps, gamma)
+   547	        td_reward_source = "frame_returns"
+   548	    else:
+   549	        td_reward_source = "terminal_label"
+   550	    if len(steps):
+   551	        # Do not bootstrap once the next state is beyond the last source step
+   552	        # that can itself form a valid next transition.
+   553	        done = (transition_next_steps > max_training_source_step).astype(np.float32)
+   554	        if not frame_returns and bool(np.any(done)):
+   555	            td_reward[done.astype(bool)] = _discounted_terminal_td_reward(terminal_success, next_offset_steps, gamma)
+   556	    source_episode = np.asarray(str(episode_path))
+   557	    output_meta = {
+   558	        "format": "rlt_replay_buffer_v1",
+   559	        "source_episode": str(episode_path),
+   560	        "stride": stride,
+   561	        "sampling_offset": sampling_offset,
+   562	        "next_offset_steps": next_offset_steps,
+   563	        "action_horizon": train_action_horizon,
+   564	        "train_action_horizon": train_action_horizon,
+   565	        "model_action_horizon": model_action_horizon,
+   566	        "model_action_dim": model_action_dim,
+   567	        "action_dim": action_dim,
+   568	        "raw_num_steps": raw_num_steps,
+   569	        "trim_start_step": trim_start_step,
+   570	        "trim_end_step": trim_end_step,
+   571	        "cropped_num_steps": crop_num_steps,
+   572	        "max_next_source_step": max_next_source_step,
+   573	        "max_training_source_step": max_training_source_step,
+   574	        "terminal_step": terminal_source_step,
+   575	        "context_sampling_mode": "inference_time_rtc",
+   576	        "context_prev_action_source": "current_executing_chunk_at_rtc_replan_step",
+   577	        "context_prev_action_start_offset": -rtc_replan_start_step,
+   578	        "rtc_replan_start_step": rtc_replan_start_step,
+   579	        "rtc_handoff_delay_steps": handoff_delay_steps,
+   580	        "actor_action_window_start": handoff_delay_steps,
+   581	        "actor_action_window_end": handoff_delay_steps + train_action_horizon,
+   582	        "recorded_noise_matches": len(recorded_noise_by_step),
+   583	        "samples_per_step": samples_per_step,
+   584	        "recorded_noise_sample_index": 0,
+   585	        "extra_samples_noise_source": "policy_rng",
+   586	        "executed_action_source_space": "aloha_output_space_absolute_joint_targets_plus_normalized_grippers",
+   587	        "normalized_executed_action_chunk_space": "model_normalized_space",
+   588	        "normalized_prev_action_chunk_space": "model_normalized_space",
+   589	        "normalized_prev_action_chunk_source_dim": action_dim,
+   590	        "normalized_prev_action_chunk_dim": model_action_dim,
+   591	        "normalized_reference_action_chunk_space": "model_normalized_space",
+   592	        "normalized_model_reference_action_chunk_space": "model_normalized_space",
+   593	        "normalized_state_space": "model_input_transform_space",
+   594	        "diffusion_noise_space": "standard_normal_initial_flow_noise",
+   595	        "gamma": gamma,
+   596	        "save_embeddings": save_embeddings,
+   597	        "terminal_label": label,
+   598	        "terminal_success": terminal_success,
+   599	        "total_reward": _total_frame_reward(frame_returns),
+   600	        "frame_rewards": {str(step): value for step, value in sorted(frame_returns.items())},
+   601	        "td_reward_source": td_reward_source,
+   602	        "td_reward_semantics": "discounted_immediate_reward_for_td_target",
+   603	        "td_reward_horizon_steps": next_offset_steps,
+   604	        "created_at": time.time(),
+   605	    }
+   606	    payload = {
+   607	        "metadata_json": np.asarray(json.dumps(output_meta, ensure_ascii=False)),
+   608	        "task": task_arr,
+   609	        "subtask": subtask_arr,
+   610	        "rlt_token": token_arr,
+   611	        "next_rlt_token": next_token_arr,
+   612	        "normalized_state": normalized_state_arr,
+   613	        "normalized_next_state": normalized_next_state_arr,
+   614	        "normalized_reference_action_chunk": normalized_ref_arr,
+   615	        "normalized_next_reference_action_chunk": normalized_next_ref_arr,
+   616	        "normalized_model_reference_action_chunk": normalized_model_ref_arr,
+   617	        "normalized_next_model_reference_action_chunk": normalized_next_model_ref_arr,
+   618	        "diffusion_noise": diffusion_noise_arr,
+   619	        "next_diffusion_noise": next_diffusion_noise_arr,
+   620	        "normalized_prev_action_chunk": normalized_prev_action_arr,
+   621	        "normalized_prev_action_mask": normalized_prev_action_mask_arr,
+   622	        "normalized_executed_action_chunk": normalized_executed_arr,
+   623	        "normalized_executed_action_mask": normalized_executed_mask_arr,
+   624	        "executed_action_mask": normalized_executed_mask_arr,
+   625	        "td_reward": td_reward,
+   626	        "done": done,
+   627	        "episode_id": np.full((len(transition_steps),), int(episode_path.stem.split("_")[-1]), dtype=np.int32),
+   628	        "step_index": transition_source_steps,
+   629	        "local_step_index": transition_steps,
+   630	        "next_step_index": transition_next_steps,
+   631	        "sample_index": transition_sample_indices,
+   632	        "is_intervention": np.zeros((len(transition_steps),), dtype=np.float32),
+   633	        "source_episode": source_episode,
+   634	    }
+   635	    if save_embeddings:
+   636	        embeddings_arr = np.asarray([embeddings_by_step[key] for key in transition_keys], dtype=np.float32)
+   637	        next_embeddings_arr = np.asarray([embeddings_by_step[key] for key in next_transition_keys], dtype=np.float32)
+   638	        mask_arr = np.asarray([masks_by_step[key] for key in transition_keys], dtype=np.bool_)
+   639	        next_mask_arr = np.asarray([masks_by_step[key] for key in next_transition_keys], dtype=np.bool_)
+   640	        payload.update(
+   641	            {
+   642	                "rlt_embeddings": embeddings_arr,
+   643	                "rlt_mask": mask_arr,
+   644	                "next_rlt_embeddings": next_embeddings_arr,
+   645	                "next_rlt_mask": next_mask_arr,
+   646	            }
+   647	        )
+   648	    tmp_path = output_path.with_name(f".{output_path.name}.tmp")
+   649	    with tmp_path.open("wb") as f:
+   650	        np.savez(f, **payload)
+   651	    tmp_path.replace(output_path)
+   652	    logging.info(
+   653	        "Saved %s transitions=%d size=%.1fMB elapsed=%.1fs",
+   654	        output_path,
+   655	        len(transition_steps),
+   656	        output_path.stat().st_size / 1e6,
+   657	        time.monotonic() - start_time,
+   658	    )
+   659	    return output_path
+   660	
+   661	
+   662	def main() -> None:
+   663	    parser = argparse.ArgumentParser()
+   664	    parser.add_argument("--replay-dir", default=DEFAULT_REPLAY_DIR)
+   665	    parser.add_argument("--output-dir", default="")
+   666	    parser.add_argument("--base-config", default=DEFAULT_BASE_CONFIG)
+   667	    parser.add_argument("--base-checkpoint", default=DEFAULT_BASE_CHECKPOINT)
+   668	    parser.add_argument("--rlt-token-checkpoint", default=DEFAULT_RLT_TOKEN_CHECKPOINT)
+   669	    parser.add_argument("--stride", type=int, default=5)
+   670	    parser.add_argument("--chunk-size", type=int, default=None, help="Deprecated alias for --train-action-horizon.")
+   671	    parser.add_argument("--train-action-horizon", type=int, default=25)
+   672	    parser.add_argument("--model-action-horizon", type=int, default=50)
+   673	    parser.add_argument("--model-action-dim", type=int, default=32)
+   674	    parser.add_argument("--next-offset-steps", type=int, default=25)
+   675	    parser.add_argument("--action-dim", type=int, default=14)
+   676	    parser.add_argument("--gamma", type=float, default=0.99)
+   677	    parser.add_argument("--denoising-steps", type=int, default=10)
+   678	    parser.add_argument("--rtc-replan-start-step", type=int, default=25)
+   679	    parser.add_argument("--rtc-handoff-delay-steps", type=int, default=10)
+   680	    parser.add_argument("--rtc-guidance-scale", type=float, default=8.0)
+   681	    parser.add_argument("--episode-name", default="")
+   682	    parser.add_argument("--episode-ids", default="", help="Comma-separated episode ids to process, e.g. 329,330,331.")
+   683	    parser.add_argument("--save-embeddings", action="store_true")
+   684	    parser.add_argument("--max-episodes", type=int, default=0)
+   685	    parser.add_argument("--max-transitions", type=int, default=0)
+   686	    parser.add_argument("--samples-per-step", type=int, default=1)
+   687	    parser.add_argument("--force", action="store_true")
+   688	    args = parser.parse_args()
+   689	    if args.chunk_size is not None:
+   690	        logging.warning("--chunk-size is deprecated; use --train-action-horizon instead.")
+   691	        args.train_action_horizon = args.chunk_size
+   692	    if args.train_action_horizon <= 0:
+   693	        raise ValueError(f"--train-action-horizon must be positive; got {args.train_action_horizon}")
+   694	    if args.model_action_horizon <= 0:
+   695	        raise ValueError(f"--model-action-horizon must be positive; got {args.model_action_horizon}")
+   696	    if args.model_action_dim <= 0:
+   697	        raise ValueError(f"--model-action-dim must be positive; got {args.model_action_dim}")
+   698	    if args.next_offset_steps <= 0:
+   699	        raise ValueError(f"--next-offset-steps must be positive; got {args.next_offset_steps}")
+   700	    if args.samples_per_step <= 0:
+   701	        raise ValueError(f"--samples-per-step must be positive; got {args.samples_per_step}")
+   702	    if args.rtc_replan_start_step >= args.model_action_horizon:
+   703	        raise ValueError(
+   704	            f"--rtc-replan-start-step must be smaller than --model-action-horizon; "
+   705	            f"got {args.rtc_replan_start_step} >= {args.model_action_horizon}"
+   706	        )
+   707	
+   708	    replay_dir = Path(args.replay_dir)
+   709	    output_dir = Path(args.output_dir) if args.output_dir else None
+   710	    episodes = sorted(
+   711	        path
+   712	        for path in replay_dir.glob("episode_*.npz")
+   713	        if ".rlt_tokens_stride" not in path.name
+   714	        and ".replay_stride" not in path.name
+   715	        and not path.name.startswith(".")
+   716	    )
+   717	    if args.episode_name:
+   718	        episodes = [path for path in episodes if path.name == args.episode_name]
+   719	    if args.episode_ids:
+   720	        requested = {int(item.strip()) for item in args.episode_ids.split(",") if item.strip()}
+   721	        episodes = [path for path in episodes if int(path.stem.split("_")[-1]) in requested]
+   722	        present = {int(path.stem.split("_")[-1]) for path in episodes}
+   723	        missing = sorted(requested - present)
+   724	        if missing:
+   725	            raise FileNotFoundError(f"Requested --episode-ids not found under {replay_dir}: {missing}")
+   726	    if args.max_episodes > 0:
+   727	        episodes = episodes[: args.max_episodes]
+   728	    if not episodes:
+   729	        raise FileNotFoundError(f"No episode_*.npz files found under {replay_dir}")
+   730	
+   731	    train_config = _config.get_config(args.base_config)
+   732	    action_transform = _make_action_transform(train_config, args.base_checkpoint)
+   733	    base_policy = _policy_config.create_trained_policy(
+   734	        train_config,
+   735	        args.base_checkpoint,
+   736	        sample_kwargs={
+   737	            "denoising_steps": args.denoising_steps,
+   738	            "replan_start_step": args.rtc_replan_start_step,
+   739	            "handoff_delay_steps": args.rtc_handoff_delay_steps,
+   740	            "guidance_scale": args.rtc_guidance_scale,
+   741	        },
+   742	    )
+   743	    token_params, token_config = _load_token(Path(args.rlt_token_checkpoint))
+   744	    policy = rlt_policy.RLTPolicy(base_policy, token_params=token_params, token_config=token_config)
+   745	
+   746	    for episode in episodes:
+   747	        _process_episode(
+   748	            policy,
+   749	            episode,
+   750	            output_dir=output_dir,
+   751	            stride=args.stride,
+   752	            train_action_horizon=args.train_action_horizon,
+   753	            model_action_horizon=args.model_action_horizon,
+   754	            model_action_dim=args.model_action_dim,
+   755	            rtc_replan_start_step=args.rtc_replan_start_step,
+   756	            handoff_delay_steps=args.rtc_handoff_delay_steps,
+   757	            action_dim=args.action_dim,
+   758	            next_offset_steps=args.next_offset_steps,
+   759	            gamma=args.gamma,
+   760	            action_transform=action_transform,
+   761	            max_transitions=args.max_transitions if args.max_transitions > 0 else None,
+   762	            samples_per_step=args.samples_per_step,
+   763	            force=args.force,
+   764	            save_embeddings=args.save_embeddings,
+   765	        )
+   766	
+   767	
+   768	if __name__ == "__main__":
+   769	    logging.basicConfig(level=logging.INFO, force=True)
+   770	    main()

@@ -1,0 +1,87 @@
+[
+  {
+    "figure": "data_scope",
+    "question": "数据资产口径",
+    "purpose": "总资产与正式训练子集的区别"
+  },
+  {
+    "figure": "sampling_exposure",
+    "question": "重点采样",
+    "purpose": "真实轨迹与采样暴露的区别"
+  },
+  {
+    "figure": "baseline_episode_length_distribution",
+    "question": "示教长度",
+    "purpose": "轨迹长度是否单一"
+  },
+  {
+    "figure": "baseline_training_loss",
+    "question": "训练真实性",
+    "purpose": "训练误差下降但无验证成功率"
+  },
+  {
+    "figure": "experiment_funnel",
+    "question": "工程工作量",
+    "purpose": "运行尝试与可用训练的区别"
+  },
+  {
+    "figure": "condition_coverage",
+    "question": "条件覆盖",
+    "purpose": "方向、无盖、翻转等数据分布"
+  },
+  {
+    "figure": "prompt_condition_gap",
+    "question": "空拧风险",
+    "purpose": "无盖数据仍使用无条件拧盖指令"
+  },
+  {
+    "figure": "attention_camera_share",
+    "question": "视觉利用",
+    "purpose": "三路视野的注意力份额"
+  },
+  {
+    "figure": "attention_real_example",
+    "question": "真实注意力",
+    "purpose": "展示真实热区与解释边界"
+  },
+  {
+    "figure": "rlt_offline_validation",
+    "question": "强化学习探索",
+    "purpose": "只证明离线训练闭环"
+  },
+  {
+    "figure": "evidence_grade",
+    "question": "结论可信度",
+    "purpose": "区分核验事实、现场估计和缺失指标"
+  },
+  {
+    "figure": "model_dataflow",
+    "question": "方法",
+    "purpose": "观察到双臂动作的完整数据流"
+  },
+  {
+    "figure": "task_timeline",
+    "question": "任务难度",
+    "purpose": "七阶段长流程与误差累积"
+  },
+  {
+    "figure": "software_data_pipeline",
+    "question": "平台工作量",
+    "purpose": "采集、编辑、发布、训练、部署闭环"
+  },
+  {
+    "figure": "next_year_roadmap",
+    "question": "未来一年",
+    "purpose": "优先级与依赖关系"
+  },
+  {
+    "figure": "training_demonstration_keyframes",
+    "question": "真实训练图像",
+    "purpose": "展示数据覆盖而非自主成功"
+  },
+  {
+    "figure": "aloha_formal_photo_annotated",
+    "question": "正式设备",
+    "purpose": "静止状态设备组成"
+  }
+]

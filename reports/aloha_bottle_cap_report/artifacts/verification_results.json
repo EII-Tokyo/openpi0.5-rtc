@@ -1,0 +1,139 @@
+{
+  "generated_utc": "2026-07-30T08:00:22.206466+00:00",
+  "status": "PASS",
+  "checks": {
+    "pdf_pages": 49,
+    "pdf_bytes": 9581817,
+    "latex_issue_counts": {
+      "overfull": 0,
+      "undefined_reference": 0,
+      "undefined_citation": 0,
+      "missing_file": 0,
+      "fatal": 0
+    },
+    "pdf_text_characters": 39206,
+    "forbidden_public_terms": {
+      "absolute_home_path": 0,
+      "python_source_name": 0,
+      "json_source_name": 0,
+      "internal_source_prefix": 0,
+      "remote_project_dir": 0,
+      "container_command": 0
+    },
+    "page_text_characters": [
+      198,
+      1251,
+      562,
+      1156,
+      1621,
+      429,
+      1264,
+      195,
+      1294,
+      174,
+      722,
+      328,
+      429,
+      333,
+      772,
+      447,
+      585,
+      892,
+      484,
+      641,
+      105,
+      305,
+      551,
+      720,
+      868,
+      267,
+      469,
+      606,
+      730,
+      612,
+      699,
+      521,
+      852,
+      366,
+      443,
+      859,
+      893,
+      229,
+      588,
+      381,
+      429,
+      768,
+      779,
+      329,
+      419,
+      746,
+      682,
+      772,
+      777
+    ],
+    "referenced_images": 18,
+    "missing_images": [],
+    "raster_images": [
+      {
+        "path": "figures/cover_concept.png",
+        "width": 1536,
+        "height": 1024
+      },
+      {
+        "path": "figures/aloha_formal_photo_annotated.png",
+        "width": 1702,
+        "height": 1276
+      },
+      {
+        "path": "figures/training_demonstration_keyframes.png",
+        "width": 2199,
+        "height": 2001
+      },
+      {
+        "path": "figures/attention_real_example.png",
+        "width": 2288,
+        "height": 754
+      }
+    ],
+    "canonical_numeric_checks": {
+      "unique_episodes": {
+        "actual": 1051,
+        "expected": 1051,
+        "match": true
+      },
+      "unique_frames": {
+        "actual": 879852,
+        "expected": 879852,
+        "match": true
+      },
+      "trainable_frames": {
+        "actual": 844102,
+        "expected": 844102,
+        "match": true
+      },
+      "checkpoint_step": {
+        "actual": 19000,
+        "expected": 19000,
+        "match": true
+      },
+      "checkpoint_parameters": {
+        "actual": 838358468,
+        "expected": 838358468,
+        "match": true
+      }
+    },
+    "claim_count": 32,
+    "missing_claim_sources": [],
+    "evidence_boundary_phrases": {
+      "现场观测估计": true,
+      "不能代替真机成功率": true,
+      "没有完整录像": true,
+      "没有独立验证和测试集": true,
+      "强化学习已经提高真机能力": true
+    },
+    "figure_count": 17,
+    "table_count": 29
+  },
+  "warnings": [],
+  "failures": []
+}

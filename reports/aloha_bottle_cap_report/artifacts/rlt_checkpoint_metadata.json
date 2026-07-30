@@ -1,0 +1,707 @@
+{
+  "evidence_host": "192.168.1.103",
+  "repository": "/home/eii/openpi0.5-rlt",
+  "selected_checkpoint": "rlt_runs/rlt_rtc_window10_35_s4_reward1_clean_835eps_widedeep1536x8_online_round32_constantlr3e-4_coef10_tdposbalanced_val11/rlt_actor_critic",
+  "format": "Python pickle parameter tree + optimizer_state.pkl + JSON config/split/target_diff",
+  "saved_step": 300,
+  "epoch": 0,
+  "parameter_tensors": 54,
+  "total_parameters": 61541926,
+  "trainable_parameters": 61541926,
+  "parameters_by_root": {
+    "actor": 20770142,
+    "critic1": 20385892,
+    "critic2": 20385892
+  },
+  "parameter_entries": [
+    {
+      "name": "actor/0/b",
+      "shape": [
+        1536
+      ],
+      "dtype": "float32",
+      "count": 1536
+    },
+    {
+      "name": "actor/0/w",
+      "shape": [
+        2412,
+        1536
+      ],
+      "dtype": "float32",
+      "count": 3704832
+    },
+    {
+      "name": "actor/1/b",
+      "shape": [
+        1536
+      ],
+      "dtype": "float32",
+      "count": 1536
+    },
+    {
+      "name": "actor/1/w",
+      "shape": [
+        1536,
+        1536
+      ],
+      "dtype": "float32",
+      "count": 2359296
+    },
+    {
+      "name": "actor/2/b",
+      "shape": [
+        1536
+      ],
+      "dtype": "float32",
+      "count": 1536
+    },
+    {
+      "name": "actor/2/w",
+      "shape": [
+        1536,
+        1536
+      ],
+      "dtype": "float32",
+      "count": 2359296
+    },
+    {
+      "name": "actor/3/b",
+      "shape": [
+        1536
+      ],
+      "dtype": "float32",
+      "count": 1536
+    },
+    {
+      "name": "actor/3/w",
+      "shape": [
+        1536,
+        1536
+      ],
+      "dtype": "float32",
+      "count": 2359296
+    },
+    {
+      "name": "actor/4/b",
+      "shape": [
+        1536
+      ],
+      "dtype": "float32",
+      "count": 1536
+    },
+    {
+      "name": "actor/4/w",
+      "shape": [
+        1536,
+        1536
+      ],
+      "dtype": "float32",
+      "count": 2359296
+    },
+    {
+      "name": "actor/5/b",
+      "shape": [
+        1536
+      ],
+      "dtype": "float32",
+      "count": 1536
+    },
+    {
+      "name": "actor/5/w",
+      "shape": [
+        1536,
+        1536
+      ],
+      "dtype": "float32",
+      "count": 2359296
+    },
+    {
+      "name": "actor/6/b",
+      "shape": [
+        1536
+      ],
+      "dtype": "float32",
+      "count": 1536
+    },
+    {
+      "name": "actor/6/w",
+      "shape": [
+        1536,
+        1536
+      ],
+      "dtype": "float32",
+      "count": 2359296
+    },
+    {
+      "name": "actor/7/b",
+      "shape": [
+        1536
+      ],
+      "dtype": "float32",
+      "count": 1536
+    },
+    {
+      "name": "actor/7/w",
+      "shape": [
+        1536,
+        1536
+      ],
+      "dtype": "float32",
+      "count": 2359296
+    },
+    {
+      "name": "actor/8/b",
+      "shape": [
+        350
+      ],
+      "dtype": "float32",
+      "count": 350
+    },
+    {
+      "name": "actor/8/w",
+      "shape": [
+        1536,
+        350
+      ],
+      "dtype": "float32",
+      "count": 537600
+    },
+    {
+      "name": "critic1/0/b",
+      "shape": [
+        1536
+      ],
+      "dtype": "float32",
+      "count": 1536
+    },
+    {
+      "name": "critic1/0/w",
+      "shape": [
+        2412,
+        1536
+      ],
+      "dtype": "float32",
+      "count": 3704832
+    },
+    {
+      "name": "critic1/1/b",
+      "shape": [
+        1536
+      ],
+      "dtype": "float32",
+      "count": 1536
+    },
+    {
+      "name": "critic1/1/w",
+      "shape": [
+        1536,
+        1536
+      ],
+      "dtype": "float32",
+      "count": 2359296
+    },
+    {
+      "name": "critic1/2/b",
+      "shape": [
+        1536
+      ],
+      "dtype": "float32",
+      "count": 1536
+    },
+    {
+      "name": "critic1/2/w",
+      "shape": [
+        1536,
+        1536
+      ],
+      "dtype": "float32",
+      "count": 2359296
+    },
+    {
+      "name": "critic1/3/b",
+      "shape": [
+        1536
+      ],
+      "dtype": "float32",
+      "count": 1536
+    },
+    {
+      "name": "critic1/3/w",
+      "shape": [
+        1536,
+        1536
+      ],
+      "dtype": "float32",
+      "count": 2359296
+    },
+    {
+      "name": "critic1/4/b",
+      "shape": [
+        1536
+      ],
+      "dtype": "float32",
+      "count": 1536
+    },
+    {
+      "name": "critic1/4/w",
+      "shape": [
+        1536,
+        1536
+      ],
+      "dtype": "float32",
+      "count": 2359296
+    },
+    {
+      "name": "critic1/5/b",
+      "shape": [
+        1536
+      ],
+      "dtype": "float32",
+      "count": 1536
+    },
+    {
+      "name": "critic1/5/w",
+      "shape": [
+        1536,
+        1536
+      ],
+      "dtype": "float32",
+      "count": 2359296
+    },
+    {
+      "name": "critic1/6/b",
+      "shape": [
+        1536
+      ],
+      "dtype": "float32",
+      "count": 1536
+    },
+    {
+      "name": "critic1/6/w",
+      "shape": [
+        1536,
+        1536
+      ],
+      "dtype": "float32",
+      "count": 2359296
+    },
+    {
+      "name": "critic1/7/b",
+      "shape": [
+        1536
+      ],
+      "dtype": "float32",
+      "count": 1536
+    },
+    {
+      "name": "critic1/7/w",
+      "shape": [
+        1536,
+        1536
+      ],
+      "dtype": "float32",
+      "count": 2359296
+    },
+    {
+      "name": "critic1/8/b",
+      "shape": [
+        100
+      ],
+      "dtype": "float32",
+      "count": 100
+    },
+    {
+      "name": "critic1/8/w",
+      "shape": [
+        1536,
+        100
+      ],
+      "dtype": "float32",
+      "count": 153600
+    },
+    {
+      "name": "critic2/0/b",
+      "shape": [
+        1536
+      ],
+      "dtype": "float32",
+      "count": 1536
+    },
+    {
+      "name": "critic2/0/w",
+      "shape": [
+        2412,
+        1536
+      ],
+      "dtype": "float32",
+      "count": 3704832
+    },
+    {
+      "name": "critic2/1/b",
+      "shape": [
+        1536
+      ],
+      "dtype": "float32",
+      "count": 1536
+    },
+    {
+      "name": "critic2/1/w",
+      "shape": [
+        1536,
+        1536
+      ],
+      "dtype": "float32",
+      "count": 2359296
+    },
+    {
+      "name": "critic2/2/b",
+      "shape": [
+        1536
+      ],
+      "dtype": "float32",
+      "count": 1536
+    },
+    {
+      "name": "critic2/2/w",
+      "shape": [
+        1536,
+        1536
+      ],
+      "dtype": "float32",
+      "count": 2359296
+    },
+    {
+      "name": "critic2/3/b",
+      "shape": [
+        1536
+      ],
+      "dtype": "float32",
+      "count": 1536
+    },
+    {
+      "name": "critic2/3/w",
+      "shape": [
+        1536,
+        1536
+      ],
+      "dtype": "float32",
+      "count": 2359296
+    },
+    {
+      "name": "critic2/4/b",
+      "shape": [
+        1536
+      ],
+      "dtype": "float32",
+      "count": 1536
+    },
+    {
+      "name": "critic2/4/w",
+      "shape": [
+        1536,
+        1536
+      ],
+      "dtype": "float32",
+      "count": 2359296
+    },
+    {
+      "name": "critic2/5/b",
+      "shape": [
+        1536
+      ],
+      "dtype": "float32",
+      "count": 1536
+    },
+    {
+      "name": "critic2/5/w",
+      "shape": [
+        1536,
+        1536
+      ],
+      "dtype": "float32",
+      "count": 2359296
+    },
+    {
+      "name": "critic2/6/b",
+      "shape": [
+        1536
+      ],
+      "dtype": "float32",
+      "count": 1536
+    },
+    {
+      "name": "critic2/6/w",
+      "shape": [
+        1536,
+        1536
+      ],
+      "dtype": "float32",
+      "count": 2359296
+    },
+    {
+      "name": "critic2/7/b",
+      "shape": [
+        1536
+      ],
+      "dtype": "float32",
+      "count": 1536
+    },
+    {
+      "name": "critic2/7/w",
+      "shape": [
+        1536,
+        1536
+      ],
+      "dtype": "float32",
+      "count": 2359296
+    },
+    {
+      "name": "critic2/8/b",
+      "shape": [
+        100
+      ],
+      "dtype": "float32",
+      "count": 100
+    },
+    {
+      "name": "critic2/8/w",
+      "shape": [
+        1536,
+        100
+      ],
+      "dtype": "float32",
+      "count": 153600
+    }
+  ],
+  "optimizer_state_exists": true,
+  "target_parameters_exist": true,
+  "ema_parameters_exist": false,
+  "normalization_statistics_in_checkpoint": false,
+  "config": {
+    "action_dim": 14,
+    "action_horizon": 25,
+    "action_start_index": 10,
+    "actor_clip_gradient_norm": 0.0,
+    "actor_hidden_layers": 8,
+    "actor_lr": 0.0003,
+    "actor_update_period": 2,
+    "critic_clip_gradient_norm": 0.0,
+    "critic_hidden_layers": 8,
+    "critic_loss_coef": 1.0,
+    "critic_lr": 0.0003,
+    "critic_num_bins": 100,
+    "critic_value_max": 1.0,
+    "critic_value_min": -1.0,
+    "gamma": 0.99,
+    "hidden_dim": 1536,
+    "reference_action_dropout": 0.5,
+    "reference_deviation_penalty_coef": 10.0,
+    "reference_deviation_threshold": 0.047,
+    "rl_loss_coef": 1.0,
+    "rlt_chunk_horizon": 25,
+    "state_dim": 14,
+    "target_bootstrap_steps": 0,
+    "target_policy_noise": 0.0,
+    "target_policy_noise_clip": 0.15,
+    "tau": 0.005,
+    "token_dim": 2048,
+    "training": {
+      "args": {
+        "action_dim": null,
+        "action_horizon": 25,
+        "action_start_index": null,
+        "actor_clip_gradient_norm": null,
+        "actor_hidden_layers": 8,
+        "actor_lr": 0.0003,
+        "actor_lr_decay_steps": null,
+        "actor_lr_schedule": "constant",
+        "actor_lr_warmup_steps": 0,
+        "actor_update_period": null,
+        "balance_train_episode_labels": false,
+        "batch_size": 256,
+        "checkpoint_every": 300,
+        "critic_clip_gradient_norm": null,
+        "critic_hidden_layers": 8,
+        "critic_loss_coef": null,
+        "critic_lr": 0.0003,
+        "critic_lr_decay_steps": null,
+        "critic_lr_schedule": "constant",
+        "critic_lr_warmup_steps": 0,
+        "critic_num_bins": 100,
+        "critic_value_max": 1.0,
+        "critic_value_min": -1.0,
+        "drop_last": false,
+        "gamma": null,
+        "hidden_dim": 1536,
+        "init_actor_critic_checkpoint": "/home/eii/openpi0.5-rlt/rlt_runs/rlt_rtc_window10_35_s4_reward1_clean_816eps_widedeep1536x8_online_round31_constantlr3e-4_coef10_tdposbalanced_val11/rlt_actor_critic",
+        "max_steps": 300,
+        "near_terminal_sample_weight": 1.0,
+        "near_terminal_window": 0,
+        "no_shuffle": false,
+        "num_workers": 4,
+        "output_dir": "/home/eii/openpi0.5-rlt/rlt_runs/rlt_rtc_window10_35_s4_reward1_clean_835eps_widedeep1536x8_online_round32_constantlr3e-4_coef10_tdposbalanced_val11",
+        "oversample_success_train_episodes": false,
+        "q_curve_every": 300,
+        "recent_episode_min_id": null,
+        "recent_episode_sample_weight": 1.0,
+        "reference_action_dropout": 0.5,
+        "reference_deviation_penalty_coef": 10.0,
+        "reference_deviation_penalty_coef_final": 10.0,
+        "reference_deviation_threshold": 0.047,
+        "repeat_success_train_episodes": 1,
+        "replay_dir": "/home/eii/openpi0.5-rlt/data/rlt_replay_buffer/rinse_smoke_rtc_window10_35_stride5_h25_next25_s4_reward1_clean_plus_online339_840",
+        "reset_optimizer_state": false,
+        "rl_loss_coef": null,
+        "rlt_chunk_horizon": 25,
+        "seed": 0,
+        "start_step": 0,
+        "state_dim": null,
+        "target_bootstrap_steps": null,
+        "target_policy_noise": null,
+        "td_reward_positive_sample_weight": 85.76176470588236,
+        "token_dim": null,
+        "train_episode_label_filter": "all",
+        "val_episode_ids": "19,103,115,196,238,304,625,634,641,714,728",
+        "val_every": 100,
+        "val_max_batches": 16,
+        "wandb_entity": null,
+        "wandb_name": null,
+        "wandb_project": null,
+        "wandb_tag": []
+      },
+      "argv": [
+        "scripts/rlt_train_offline.py",
+        "--replay-dir",
+        "/home/eii/openpi0.5-rlt/data/rlt_replay_buffer/rinse_smoke_rtc_window10_35_stride5_h25_next25_s4_reward1_clean_plus_online339_840",
+        "--output-dir",
+        "/home/eii/openpi0.5-rlt/rlt_runs/rlt_rtc_window10_35_s4_reward1_clean_835eps_widedeep1536x8_online_round32_constantlr3e-4_coef10_tdposbalanced_val11",
+        "--max-steps",
+        "300",
+        "--batch-size",
+        "256",
+        "--num-workers",
+        "4",
+        "--action-horizon",
+        "25",
+        "--rlt-chunk-horizon",
+        "25",
+        "--reference-deviation-threshold",
+        "0.047",
+        "--reference-deviation-penalty-coef",
+        "10",
+        "--reference-deviation-penalty-coef-final",
+        "10",
+        "--td-reward-positive-sample-weight",
+        "85.76176470588236",
+        "--critic-num-bins",
+        "100",
+        "--critic-value-min",
+        "-1.0",
+        "--critic-value-max",
+        "1.0",
+        "--checkpoint-every",
+        "300",
+        "--q-curve-every",
+        "300",
+        "--hidden-dim",
+        "1536",
+        "--actor-hidden-layers",
+        "8",
+        "--critic-hidden-layers",
+        "8",
+        "--actor-lr",
+        "0.0003",
+        "--critic-lr",
+        "0.0003",
+        "--actor-lr-schedule",
+        "constant",
+        "--critic-lr-schedule",
+        "constant",
+        "--actor-lr-warmup-steps",
+        "0",
+        "--critic-lr-warmup-steps",
+        "0",
+        "--val-episode-ids",
+        "19,103,115,196,238,304,625,634,641,714,728",
+        "--init-actor-critic-checkpoint",
+        "/home/eii/openpi0.5-rlt/rlt_runs/rlt_rtc_window10_35_s4_reward1_clean_816eps_widedeep1536x8_online_round31_constantlr3e-4_coef10_tdposbalanced_val11/rlt_actor_critic"
+      ],
+      "config_overrides": {
+        "action_horizon": 25,
+        "actor_hidden_layers": 8,
+        "actor_lr": 0.0003,
+        "critic_hidden_layers": 8,
+        "critic_lr": 0.0003,
+        "critic_num_bins": 100,
+        "critic_value_max": 1.0,
+        "critic_value_min": -1.0,
+        "hidden_dim": 1536,
+        "reference_action_dropout": 0.5,
+        "reference_deviation_penalty_coef": 10.0,
+        "reference_deviation_threshold": 0.047,
+        "rlt_chunk_horizon": 25
+      },
+      "effective_runtime": {
+        "reference_deviation_penalty_coef_schedule": {
+          "final": 10.0,
+          "start": 10.0,
+          "steps": 300,
+          "type": "linear"
+        },
+        "rlt_token_layernorm": "model",
+        "shuffle": true,
+        "split_by_episode": true,
+        "val_episode_ids": [
+          19,
+          103,
+          115,
+          196,
+          238,
+          304,
+          625,
+          634,
+          641,
+          714,
+          728
+        ],
+        "val_episode_policy": "explicit_source_episode_ids"
+      }
+    }
+  },
+  "token_encoder_checkpoint": {
+    "path": "rlt_runs/rlt_token_rinse_9000_bs64_nw4_warmup2000_10000_abs/9999",
+    "format": "Orbax",
+    "saved_step": 9999,
+    "checkpoint_metadata_exists": true,
+    "config": {
+      "input_dim": 2048,
+      "token_dim": 2048,
+      "hidden_dim": 8192,
+      "num_layers": 2,
+      "num_heads": 8
+    },
+    "training": {
+      "optimizer": {
+        "b1": 0.9,
+        "b2": 0.95,
+        "eps": 1e-08,
+        "weight_decay": 1e-10,
+        "clip_gradient_norm": 1.0
+      },
+      "lr_schedule": {
+        "warmup_steps": 2000,
+        "peak_lr": 2.5e-05,
+        "decay_steps": 10000,
+        "decay_lr": 2.5e-06
+      },
+      "ema_decay": 0.99
+    }
+  },
+  "load_check": "params.pkl successfully unpickled in the remote project .venv",
+  "limitations": [
+    "The VLA checkpoint configured under /data/openpi0.5-rtc/checkpoints is outside the user-authorized /home/eii/openpi0.5-rlt audit boundary and was not loaded.",
+    "Epoch is inferred from the final training log (epoch=0); the checkpoint config does not persist an explicit epoch field.",
+    "All actor/critic parameter arrays are treated as trainable because the offline trainer exposes no frozen parameter mask for this checkpoint."
+  ]
+}

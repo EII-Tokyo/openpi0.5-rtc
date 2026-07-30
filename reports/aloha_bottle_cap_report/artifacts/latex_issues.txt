@@ -1,0 +1,31 @@
+Package: infwarerr 2019/12/03 v1.5 Providing info/warning/error messages (HO)
+Package pdftexcmds Info: \pdfdraftmode not found.
+(/usr/share/texlive/texmf-dist/tex/generic/pgfplots/pgfplots.errorbars.code.tex
+Underfull \hbox (badness 10000) in paragraph at lines 34--34
+Underfull \hbox (badness 4595) in paragraph at lines 34--34
+Underfull \hbox (badness 1199) in paragraph at lines 34--34
+Underfull \hbox (badness 10000) in paragraph at lines 39--39
+Underfull \hbox (badness 10000) in paragraph at lines 39--39
+Underfull \hbox (badness 3503) in paragraph at lines 39--39
+Underfull \hbox (badness 10000) in paragraph at lines 40--40
+Underfull \hbox (badness 4927) in paragraph at lines 81--81
+Underfull \hbox (badness 3343) in paragraph at lines 34--34
+Underfull \hbox (badness 10000) in paragraph at lines 34--34
+Underfull \hbox (badness 5667) in paragraph at lines 34--34
+Underfull \hbox (badness 10000) in paragraph at lines 34--34
+Underfull \hbox (badness 6157) in paragraph at lines 103--103
+Underfull \hbox (badness 6157) in paragraph at lines 103--103
+Underfull \hbox (badness 10000) in paragraph at lines 103--103
+Underfull \hbox (badness 6157) in paragraph at lines 103--103
+Underfull \hbox (badness 6157) in paragraph at lines 103--103
+Underfull \hbox (badness 8000) in paragraph at lines 42--42
+Underfull \hbox (badness 8000) in paragraph at lines 42--42
+Underfull \hbox (badness 8000) in paragraph at lines 42--42
+Underfull \hbox (badness 10000) in paragraph at lines 52--52
+Underfull \hbox (badness 10000) in paragraph at lines 52--52
+Underfull \hbox (badness 10000) in paragraph at lines 52--52
+Underfull \hbox (badness 10000) in paragraph at lines 57--57
+Underfull \hbox (badness 1888) in paragraph at lines 85--85
+Underfull \hbox (badness 5274) in paragraph at lines 87--88
+Underfull \hbox (badness 3492) in paragraph at lines 114--114
+Underfull \hbox (badness 10000) in paragraph at lines 129--129

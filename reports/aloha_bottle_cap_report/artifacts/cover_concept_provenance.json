@@ -1,0 +1,8 @@
+{
+  "role": "cover conceptual illustration only; not experimental evidence",
+  "generator": "built-in image generation tool",
+  "generated_in_session": "019fb066-588d-7350-bc1c-cef2c7ee9f34",
+  "output": "figures/cover_concept.png",
+  "prompt": "Premium flat-vector-meets-isometric technical illustration of a dual-arm tabletop robot performing a bottle-cap sorting workflow; left arm stabilizes a bottle, right arm handles the detached cap, with separate bins, restrained navy/teal/amber palette, left negative space, no people, text, logos or watermark.",
+  "evidence_policy": "The PDF explicitly labels this image as a conceptual illustration. It is never used to support task completion, hardware identity or experimental results."
+}

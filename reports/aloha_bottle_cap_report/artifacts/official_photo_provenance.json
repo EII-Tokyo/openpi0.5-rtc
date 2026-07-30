@@ -1,0 +1,14 @@
+{
+  "source": "/home/eii/Downloads/aloha-home.jpg",
+  "source_dimensions": [
+    1702,
+    1276
+  ],
+  "output": "figures/aloha_formal_photo_annotated.png",
+  "allowed_edits": [
+    "labels",
+    "arrows",
+    "operation-region overlay"
+  ],
+  "prohibition": "Not an execution or success image; no scene content was synthesized."
+}
