@@ -318,10 +318,86 @@ def test_probe_freezes_baseline_before_enable_and_compares_complete_state() -> N
         "timeline_current_time",
         "default_prim_path",
         "required_prims",
+        "used_layer_closure",
+        "composed_reference_inventory",
     ):
         assert field in text
     assert "root_authored_reference_lines" not in text
     assert "runtime_baseline_after_ack" in text
+    assert "runtime_baseline_after_cleanup" in text
+    assert text.count("runtime_baseline_before_enable,") >= 2
+
+
+def test_dependency_closure_is_sorted_bounded_and_detects_used_layer_change() -> None:
+    module = _load_probe_module()
+
+    class FakeLayer:
+        def __init__(self, identifier: str, serialized: str) -> None:
+            self.identifier = identifier
+            self.realPath = identifier
+            self.resolvedPath = identifier
+            self.dirty = False
+            self.subLayerPaths: list[str] = []
+            self.serialized = serialized
+
+        def ExportToString(self) -> str:  # noqa: N802 - USD API fake.
+            return self.serialized
+
+    class FakePrim:
+        def __init__(
+            self,
+            path: str,
+            references: str | None,
+        ) -> None:
+            self.path = path
+            self.references = references
+
+        def HasMetadata(self, key: str) -> bool:  # noqa: N802 - USD API fake.
+            return key == "references" and self.references is not None
+
+        def GetMetadata(  # noqa: N802 - USD API fake.
+            self,
+            key: str,
+        ) -> str | None:
+            assert key == "references"
+            return self.references
+
+        def GetPath(self) -> str:  # noqa: N802 - USD API fake.
+            return self.path
+
+    non_root = FakeLayer("/layers/z_asset.usda", "z-v1")
+    root = FakeLayer("/layers/a_root.usda", "root")
+    stage = type(
+        "FakeStage",
+        (),
+        {
+            "GetUsedLayers": lambda self: [non_root, root],
+            "Traverse": lambda self: [
+                FakePrim("/World/NoReference", None),
+                FakePrim("/World/Z", "refs-z"),
+                FakePrim("/World/A", "refs-a"),
+            ],
+        },
+    )()
+
+    before_layers = module._used_layer_closure(stage)  # noqa: SLF001
+    references = module._composed_reference_inventory(stage)  # noqa: SLF001
+    non_root.serialized = "z-v2"
+    after_layers = module._used_layer_closure(stage)  # noqa: SLF001
+
+    assert [item["identifier"] for item in before_layers] == [
+        "/layers/a_root.usda",
+        "/layers/z_asset.usda",
+    ]
+    assert references == [
+        {"prim_path": "/World/A", "references": "refs-a"},
+        {"prim_path": "/World/Z", "references": "refs-z"},
+    ]
+    assert before_layers != after_layers
+    assert before_layers[0] == after_layers[0]
+    assert before_layers[1]["serialized_sha256"] != after_layers[1][
+        "serialized_sha256"
+    ]
 
 
 def test_probe_preflights_report_before_app_and_disables_extension() -> None:

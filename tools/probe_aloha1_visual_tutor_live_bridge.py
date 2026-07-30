@@ -116,6 +116,26 @@ def _layer_state(layer: Any) -> dict[str, Any]:
     }
 
 
+def _used_layer_closure(stage: Any) -> list[dict[str, Any]]:
+    layers = sorted(
+        stage.GetUsedLayers(),
+        key=lambda layer: str(layer.identifier),
+    )
+    return [_layer_state(layer) for layer in layers]
+
+
+def _composed_reference_inventory(stage: Any) -> list[dict[str, str]]:
+    inventory = [
+        {
+            "prim_path": str(prim.GetPath()),
+            "references": str(prim.GetMetadata("references")),
+        }
+        for prim in stage.Traverse()
+        if prim.HasMetadata("references")
+    ]
+    return sorted(inventory, key=lambda item: item["prim_path"])
+
+
 def _capture_runtime_baseline(
     *,
     context: Any,
@@ -128,6 +148,8 @@ def _capture_runtime_baseline(
     session_layer = stage.GetSessionLayer()
     edit_target = stage.GetEditTarget().GetLayer()
     default_prim = stage.GetDefaultPrim()
+    composed_reference_inventory = _composed_reference_inventory(stage)
+    used_layer_closure = _used_layer_closure(stage)
     return {
         "stage_identifier": str(context.get_stage_url()),
         "root_layer": _layer_state(root_layer),
@@ -143,6 +165,8 @@ def _capture_runtime_baseline(
             path: bool(stage.GetPrimAtPath(path).IsValid())
             for path in REQUIRED_CAPTURE_PRIMS
         },
+        "used_layer_closure": used_layer_closure,
+        "composed_reference_inventory": composed_reference_inventory,
     }
 
 
