@@ -1,0 +1,83 @@
+schema_version: 1
+classification: DIAGNOSTIC_ONLY_NOT_FINAL_CONTROL_MAPPING
+runtime:
+  isaac_sim: 5.1.0.0
+  kit: 107.3.3
+  physx: 107.3.26
+stage:
+  path: assets/Trossen/ALOHA1/1.0/diagnostics/table_support_alignment/1.0/aloha1_table_support_aligned_workcell.usda
+  sha256: 2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c
+  root_prim: /World
+  articulation_prim: /World/follower_left/vx300s_left/root_joint
+  table_prim: /World/environment/worldBody/user_confirmed_table
+bottle:
+  path: assets/bottle_500ml/isaac/bottle_500ml_sim.usd
+  sha256: 16427135f152ec951de2321fd689366d745a2dd389cbe260976631783952533e
+  reference_prim: /Bottle500
+  session_prim: /World/ALOHA1Grasp20cmSession/Bottle500
+frozen_inputs:
+  grasp_editor_semantics:
+    path: reports/aloha1_mapping/aloha1_grasp_editor_semantics_audit_v2.json
+    sha256: 61f2e23f54fca02d3b47b12a9f29f9b97446a1aa5e79049e73e7192db71416f9
+  grasp_editor_variant_b_raw:
+    path: .codex/artifacts/20260730-aloha1-official-gripper-unattended/stage4/grasp_editor_passing_coupling_run00/grasp_editor_variant_b_native_raw.yaml
+    sha256: fa1270a547e0ac89da2e7afc3965b1d6e7bcc34aab46005d6c65f977e3f69e5e
+  kinematics_report:
+    path: reports/aloha1_mapping/aloha1_task7b2_horizontal_kinematics_v2.json
+    sha256: c5bf60b04065de31fcb5d1700e058d51a9f0d70da5db98a5c65bd00f795fa0cb
+  ik_correspondence_report:
+    path: reports/aloha1_mapping/aloha1_ik_correspondence_v2.json
+    sha256: 6b9af0569b2e1cb829da208b69e36c18fe0dd2ba1d22b12e42b84dc625c279f9
+  coupling_report:
+    path: reports/aloha1_mapping/aloha1_gripper_coupling_ab.json
+    sha256: df8a1857b7cd945fd38e9d0c921f736c766aadc854534eab6b04eac935f7f90c
+  follower_left_urdf:
+    path: generated/urdf/follower_left.urdf
+    sha256: d9e4b32723ee71dfce26fb4e78546cfcfef147b2d7dbf5e53e3620e3d8aa96bd
+  joint_map:
+    path: configs/aloha1_joint_map.yaml
+    sha256: f56be097d859f7361b804705af6659e0d51d9e480d1c721a60040ab787530308
+robot:
+  name: follower_left
+  articulation_prim: /World/follower_left/vx300s_left/root_joint
+  end_effector_prim: /World/follower_left/vx300s_left/follower_left_ee_gripper_link
+  left_finger_prim: /World/follower_left/vx300s_left/follower_left_left_finger_link
+  right_finger_prim: /World/follower_left/vx300s_left/follower_left_right_finger_link
+  dof_order:
+    - waist
+    - shoulder
+    - elbow
+    - forearm_roll
+    - wrist_angle
+    - wrist_rotate
+    - gripper
+    - left_finger
+    - right_finger
+target:
+  measurement: BOTTLE_COLLISION_MIN_WORLD_Z_MINUS_TABLE_TOP_WORLD_Z
+  clearance_m: 0.200
+  hold_duration_s: 2.0
+  hold_drop_gate_m: 0.010
+physics:
+  frequency_hz: 60
+  mass_kg: 0.020
+  friction: 0.7
+  restitution: 0.0
+  solve_articulation_contact_last: true
+evidence:
+  full_arm_view: overview
+  contact_view: gripper_closeup
+  collision_overlay_phases:
+    - RELEASE_DYNAMIC
+    - OPEN_PREGRASP
+    - BILATERAL_CONTACT
+    - HEIGHT_REACHED
+    - HOLD
+  video_fps: 60
+  user_confirmation_required: true
+boundaries:
+  real_robot: false
+  remote_103: false
+  source_stage_modified: false
+  final_collider_modified: false
+  task8: NOT_RUN
