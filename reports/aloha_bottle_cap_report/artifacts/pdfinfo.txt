@@ -3,7 +3,7 @@ Subject:         第一年度工作总结与下一年度计划
 Author:          待填写
 Creator:         LaTeX with hyperref
 Producer:        xdvipdfmx (20220710)
-CreationDate:    Thu Jul 30 18:12:08 2026 JST
+CreationDate:    Thu Jul 30 18:14:27 2026 JST
 Custom Metadata: no
 Metadata Stream: no
 Tagged:          no
@@ -15,6 +15,6 @@ Pages:           42
 Encrypted:       no
 Page size:       595.28 x 841.89 pts (A4)
 Page rot:        0
-File size:       9697441 bytes
+File size:       9697435 bytes
 Optimized:       no
 PDF version:     1.5
