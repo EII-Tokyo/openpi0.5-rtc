@@ -39,9 +39,16 @@ cd /home/eii/Documents/Notes/openpi0.5-rtc-reward-learning && npm run check:math
 - FreeCAD CAD review, blank FreeCAD viewports, STEP/FCStd visual checks, or CAD display/debug work:
   - Read `docs/agents/cad_to_isaac_asset_mapping.md`.
   - Also read `docs/agents/scene_reconstruction.md` only for its repository-specific FreeCAD launch workaround or photo-scene history.
-- Visual Tutor, visible GUI teaching, FreeCAD/Isaac step-by-step lessons, `my-gui-teacher`, `my-visual-tutor`, or `visual_tutor/`:
-  - Read `docs/agents/visual_tutor.md`.
-  - Use the local `my-visual-tutor` skill when available.
+  - Default to the pinned project-local FreeCAD 1.1.1 runtime at `/home/eii/project/openpi0.5-rtc-reward-learning/local_tools/freecad-tessellation/`; use its `freecadcmd` wrapper for headless CAD/tessellation and do not fall back to `/snap/bin/freecad` except for an explicitly requested legacy reproduction.
+- Legacy Visual Tutor, `my-gui-teacher`, `my-visual-tutor`, and `visual_tutor/`:
+  - These paths are deprecated for this project. Do not invoke them or treat
+    `docs/agents/visual_tutor.md` as an active GUI-control route.
+  - For Isaac Sim GUI launch/review, follow
+    `docs/agents/isaac_mcp_toolchain.md`, load only the verified user-approved
+    Stage through a project-reviewed application-native launcher/runtime path,
+    keep the timeline paused, and place the Isaac window on workspace 2 so
+    workspace 1 remains available to the user. For FreeCAD review, follow
+    `docs/agents/cad_to_isaac_asset_mapping.md`.
 - ROS MCP, `robotmcp/ros-mcp-server`, rosbridge, rosapi, or MCP-based ROS inspection/control:
   - Read `docs/agents/ros_mcp.md`.
   - Also read `docs/agents/remote_103_operations.md` for any `192.168.1.103` work and `docs/agents/aloha_hardware_debug.md` before any action that can affect the real ALOHA robot.

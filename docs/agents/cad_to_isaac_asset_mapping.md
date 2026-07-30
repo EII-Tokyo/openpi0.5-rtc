@@ -176,6 +176,83 @@ hashes and a canonical geometric signature. If byte-identical output is not
 available, document why and enforce explicit topology, bounds, and sampled
 surface-deviation tolerances.
 
+### Pinned Project-Local FreeCAD Runtime
+
+Use the project-local, self-contained FreeCAD runtime for scripted CAD
+inspection and tessellation:
+
+```text
+/home/eii/project/openpi0.5-rtc-reward-learning/local_tools/freecad-tessellation/
+```
+
+The required headless entry point is:
+
+```bash
+/home/eii/project/openpi0.5-rtc-reward-learning/local_tools/freecad-tessellation/freecadcmd --version
+```
+
+Do not use `/snap/bin/freecad` or the Snap `freecad.cmd` entry point for a new
+deterministic tessellation run. The Snap path is retained only for explicitly
+requested legacy reproduction. The project-local wrapper removes inherited
+`LD_LIBRARY_PATH` and `PYTHONPATH` before starting the bundled `freecadcmd`;
+this prevents the old Snap-specific libcurl override and Isaac Sim Python
+paths from entering the CAD process.
+
+Before use, require all of the following:
+
+- `local_tools/freecad-tessellation/manifest.json` exists and has
+  `status: PASS`;
+- the wrapper is executable;
+- the AppImage SHA-256 is
+  `e2006138400b2fa85fa2e160e872d00767eb32964e85075830f7e198a3a876e1`;
+- runtime readback is FreeCAD `1.1.1`, commit
+  `0108fd4b4850cc46e625b60e53cea7a7bbe69f8d`, Python `3.11.14`, and
+  OpenCascade `7.8.1`;
+- `MeshPart.meshFromShape` accepts explicit linear and angular deflection
+  without an external library override.
+
+The official Linux x86_64 AppImage and its extracted runtime are local-only:
+
+```text
+local_tools/freecad-tessellation/FreeCAD_1.1.1-Linux-x86_64-py311.AppImage
+local_tools/freecad-tessellation/runtime/
+```
+
+The host AppImageLauncher cannot read this official AppImage's zstd-compressed
+SquashFS payload. The verified local installation therefore uses
+`unsquashfs 4.6.1`, offset `944632`, instead of modifying AppImageLauncher or
+system libraries.
+
+Current installation validation is recorded at:
+
+```text
+local_tools/freecad-tessellation/manifest.json
+local_tools/freecad-tessellation/validation/final_meshpart_probe.json
+local_tools/freecad-tessellation/validation/final_fresh_tessellation/manifest.json
+```
+
+The final fresh supplier-finger run used `LinearDeflection=0.2 mm`,
+`AngularDeflection=20 degrees`, and `Relative=False`. Its outputs match both
+independent project-local runs and the earlier Snap diagnostic byte-for-byte:
+
+- left finger OBJ SHA-256:
+  `c6710d0fe5b2030a32722d9df5c0b553c771c9d61d92b8ddaec36c94c5963488`;
+- right finger OBJ SHA-256:
+  `b0979c5d55fee448dab512dc75b1251bab17d94892decd01de9a6e76c01482d1`;
+- each finger has 831 vertices, 1662 triangles, one connected component, and
+  zero degenerate triangles.
+
+The earlier Snap plus local-libcurl override did produce a valid
+angular-controlled `PASS`, but its override dependency was not completely
+manifested. Treat old `PARTIAL` or `HARD_BLOCKER` text about unavailable
+angular deflection as stale. The self-contained project-local runtime is the
+default going forward.
+
+The bundled AppImage, extracted runtime, and validation outputs are excluded
+locally through `.git/info/exclude`; do not commit these large binaries.
+Installing this toolchain did not modify `.venv_issac`, Snap FreeCAD, system
+libraries, source CAD, source USD, or final/default colliders.
+
 ## USD And Isaac Composition
 
 - Use meters, kilograms, seconds, right-handed coordinates, `+Z` up, and
