@@ -372,6 +372,11 @@ def test_api_evidence_closes_official_and_local_5_1_provenance() -> None:
             "Layer.CreateAnonymous Isaac Sim extension example author changes "
             "into session diagnostic layer"
         ),
+        (
+            "Isaac Sim extension on_update main thread Kit update event stream "
+            "create_subscription_to_pop main run loop callback official code "
+            "example"
+        ),
     ]
     capture = evidence["local_isaac_5_1_cross_checks"]["benchmark_capture"]
     assert capture["installed_signature"] == (
@@ -387,9 +392,6 @@ def test_api_evidence_closes_official_and_local_5_1_provenance() -> None:
     next_update = evidence["official_findings"]["kit_update_loop"]
     assert next_update["capability"] == "Yield to the Kit update loop"
     assert "main thread" not in next_update["capability"].lower()
-    assert evidence["open_items"] == [
-        "Task 2 must perform live Stage runtime readback before bridge actions."
-    ]
 
 
 def test_api_evidence_keeps_task2_composed_stage_checks_out_of_task1() -> None:
@@ -403,4 +405,47 @@ def test_api_evidence_keeps_task2_composed_stage_checks_out_of_task1() -> None:
         "required composed prims",
         "live Stage runtime readback",
         "immediate output preflight recheck before export",
+    ]
+
+
+def test_api_evidence_requires_live_update_callback_thread_gate() -> None:
+    evidence = json.loads(API_EVIDENCE.read_text(encoding="utf-8"))
+    q3 = evidence["gateway_search"]["queries"][2]
+    assert q3["id"] == "Q3"
+    assert q3["official_results"] == [
+        {
+            "source": "isaacsim.simulation_app.SimulationApp.run_coroutine",
+            "file": "isaacsim/simulation_app.py",
+            "lines": "10-60",
+            "returned_behavior": (
+                "The Kit async engine runs on every IApp update; with "
+                "run_until_complete=False the call returns asyncio.Task from "
+                "the main thread and Future from other threads."
+            ),
+        },
+        {
+            "source": "Gain Tuner extension GLOBAL_EVENT_UPDATE callback example",
+            "file": "isaacsim/robot_setup/gain_tuner/extension.py",
+            "lines": "15-65",
+        },
+    ]
+    callback = evidence["official_findings"]["update_callback"]
+    assert callback["thread_identity_proven"] is False
+    gate = evidence["task2_live_hard_gates"]["update_callback_thread_identity"]
+    assert gate == {
+        "callback_measurement": "threading.get_ident()",
+        "runner_measurement": "threading.main_thread().ident",
+        "required_relation": "callback_measurement == runner_measurement",
+        "progress_requirements": [
+            "heartbeat advances",
+            "update number advances",
+        ],
+        "failure_outcome": "live attempt FAIL",
+    }
+    assert evidence["open_items"] == [
+        (
+            "Task 2 live hard gate: capture_state callback threading.get_ident() "
+            "must equal runner threading.main_thread().ident, and heartbeat/update "
+            "number must advance; otherwise live attempt FAIL."
+        )
     ]

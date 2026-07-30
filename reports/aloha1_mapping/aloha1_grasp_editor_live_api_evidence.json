@@ -59,6 +59,23 @@
           }
         ],
         "set_edit_target_example_found": false
+      },
+      {
+        "id": "Q3",
+        "text": "Isaac Sim extension on_update main thread Kit update event stream create_subscription_to_pop main run loop callback official code example",
+        "official_results": [
+          {
+            "source": "isaacsim.simulation_app.SimulationApp.run_coroutine",
+            "file": "isaacsim/simulation_app.py",
+            "lines": "10-60",
+            "returned_behavior": "The Kit async engine runs on every IApp update; with run_until_complete=False the call returns asyncio.Task from the main thread and Future from other threads."
+          },
+          {
+            "source": "Gain Tuner extension GLOBAL_EVENT_UPDATE callback example",
+            "file": "isaacsim/robot_setup/gain_tuner/extension.py",
+            "lines": "15-65"
+          }
+        ]
       }
     ],
     "prior_queries": [
@@ -93,6 +110,16 @@
       "pattern": "await omni.kit.app.get_app().next_update_async()",
       "thread_identity_proven": false,
       "status": "VERIFIED_BY_NVIDIA_OFFICIAL_SEARCH"
+    },
+    "update_callback": {
+      "capability": "Subscribe to a Kit GLOBAL_EVENT_UPDATE callback",
+      "official_examples": [
+        "isaacsim.simulation_app.SimulationApp.run_coroutine",
+        "Gain Tuner extension GLOBAL_EVENT_UPDATE callback"
+      ],
+      "thread_identity_proven": false,
+      "evidence_limit": "The official patterns do not by themselves prove the thread identity of this project's capture_state callback.",
+      "status": "OFFICIAL_PATTERN_VERIFIED_LOCAL_LIVE_MEASUREMENT_REQUIRED"
     },
     "benchmark_capture": {
       "capability": "Capture the next rendered frame",
@@ -192,8 +219,20 @@
       "immediate output preflight recheck before export"
     ]
   },
+  "task2_live_hard_gates": {
+    "update_callback_thread_identity": {
+      "callback_measurement": "threading.get_ident()",
+      "runner_measurement": "threading.main_thread().ident",
+      "required_relation": "callback_measurement == runner_measurement",
+      "progress_requirements": [
+        "heartbeat advances",
+        "update number advances"
+      ],
+      "failure_outcome": "live attempt FAIL"
+    }
+  },
   "open_items": [
-    "Task 2 must perform live Stage runtime readback before bridge actions."
+    "Task 2 live hard gate: capture_state callback threading.get_ident() must equal runner threading.main_thread().ident, and heartbeat/update number must advance; otherwise live attempt FAIL."
   ],
   "tdd_evidence": {
     "initial_red": {
@@ -215,6 +254,16 @@
       "command": "env PYTHONPATH=visual_tutor .venv/bin/python -m pytest -q visual_tutor/tests/test_aloha1_grasp_editor_manifest.py",
       "exit_code": 0,
       "result": "44 passed in 0.15s"
+    },
+    "callback_gate_red": {
+      "command": "env PYTHONPATH=visual_tutor .venv/bin/python -m pytest -q visual_tutor/tests/test_aloha1_grasp_editor_manifest.py",
+      "exit_code": 1,
+      "result": "2 failed, 43 passed in 0.16s"
+    },
+    "callback_gate_green": {
+      "command": "env PYTHONPATH=visual_tutor .venv/bin/python -m pytest -q visual_tutor/tests/test_aloha1_grasp_editor_manifest.py",
+      "exit_code": 0,
+      "result": "45 passed in 0.19s"
     }
   },
   "secrets_included": false
