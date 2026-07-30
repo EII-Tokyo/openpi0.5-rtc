@@ -9,66 +9,212 @@
       "grasp_editor_extension": "isaacsim.robot_setup.grasp_editor",
       "grasp_editor_version": "2.0.20"
     },
-    "source": "Parent agent query through MCPJungle to NVIDIA official Isaac search",
-    "compatibility_ceiling": "Record 5.1-compatible patterns only; this report does not claim latest API behavior."
+    "compatibility_ceiling": "Isaac Sim 5.1 local runtime behavior; no latest or Isaac Sim 6.0 claim."
   },
-  "findings": [
-    {
-      "capability": "Enable or disable a Kit extension immediately",
-      "verified_pattern": "extension_manager.is_extension_enabled(extension_id); extension_manager.set_extension_enabled_immediate(extension_id, enabled)",
-      "official_search_status": "VERIFIED_BY_PARENT_AGENT",
-      "local_isaac_5_1_source_cross_check": "PENDING"
+  "gateway_search": {
+    "connection": "mcpjungle_lab",
+    "exposed_tool_id": "mcp__mcpjungle_lab.nvidia_isaac_docs__search_isaac_67cf06aed1ad",
+    "logical_tool_name": "nvidia_isaac_docs__search_isaac_sim_code_examples",
+    "queries": [
+      {
+        "id": "Q1",
+        "text": "Isaac Sim 5.1 standalone Python exact code examples get extension manager add local extension path enable immediately execute action next_update_async USD Stage GetSessionLayer SetEditTarget session layer screenshot capture next frame",
+        "official_results": [
+          {
+            "source": "isaacsim.core.api.simulation_context.simulation_context.SimulationContext.stage",
+            "file": "isaacsim/core/api/simulation_context/simulation_context.py",
+            "lines": "3-53"
+          },
+          {
+            "source": "isaacsim.sensors.physics.examples.imu_sensor.Extension.create_scenario",
+            "file_display": "isaacsim/examples/interactive/...",
+            "lines": "27-77",
+            "note": "The saved search response displayed the class path and this abbreviated file path."
+          },
+          {
+            "source": "isaacsim.benchmark.services.utils.capture_next_frame",
+            "file": "isaacsim/benchmark/services/utils.py",
+            "lines": "26-76"
+          },
+          {
+            "source": "isaacsim.robot_setup.assembler.session_layer_util.remove_session_sublayer",
+            "file": "isaacsim/robot_setup/assembler/session_layer_util.py",
+            "lines": "11-61"
+          }
+        ]
+      },
+      {
+        "id": "Q2",
+        "text": "USD Python stage SetEditTarget EditTarget session layer Sdf Layer.CreateAnonymous Isaac Sim extension example author changes into session diagnostic layer",
+        "official_results": [
+          {
+            "source": "isaacsim.core.api.simulation_context.simulation_context.SimulationContext.stage",
+            "file": "isaacsim/core/api/simulation_context/simulation_context.py",
+            "lines": "3-53"
+          },
+          {
+            "source": "isaacsim.robot_setup.assembler.session_layer_util.remove_session_sublayer",
+            "file": "isaacsim/robot_setup/assembler/session_layer_util.py",
+            "lines": "11-61"
+          }
+        ],
+        "set_edit_target_example_found": false
+      }
+    ],
+    "prior_queries": [
+      {
+        "id": "Q0a",
+        "text": "Isaac Sim extension manager enable extension action registry execute action Kit next_update_async viewport capture screenshot"
+      },
+      {
+        "id": "Q0b",
+        "text": "omni.kit.actions.core get_action_registry execute_action extension manager set_extension_enabled_immediate USD edit target session layer example",
+        "official_result": "Robot Wizard example uses omni.kit.app.get_app().get_extension_manager(), is_extension_enabled, set_extension_enabled_immediate, and get_action_registry().execute_action(...).",
+        "source_location": "official_search_result_snippet_no_stable_file_line_in_saved_response"
+      }
+    ]
+  },
+  "official_findings": {
+    "extension_manager": {
+      "capability": "Inspect and immediately change Kit extension enabled state",
+      "patterns": [
+        "extension_manager.is_extension_enabled(extension_id)",
+        "extension_manager.set_extension_enabled_immediate(extension_id, enabled)"
+      ],
+      "status": "VERIFIED_BY_NVIDIA_OFFICIAL_SEARCH"
     },
-    {
+    "action_registry": {
       "capability": "Execute a registered Kit action",
-      "verified_pattern": "omni.kit.actions.core.get_action_registry().execute_action(...)",
-      "official_search_status": "VERIFIED_BY_PARENT_AGENT",
-      "local_isaac_5_1_source_cross_check": "PENDING"
+      "pattern": "omni.kit.actions.core.get_action_registry().execute_action(...)",
+      "status": "VERIFIED_BY_NVIDIA_OFFICIAL_SEARCH"
     },
-    {
-      "capability": "Yield to the Kit update loop on the main thread",
-      "verified_pattern": "await omni.kit.app.get_app().next_update_async()",
-      "official_search_status": "VERIFIED_BY_PARENT_AGENT",
-      "local_isaac_5_1_source_cross_check": "PENDING"
+    "kit_update_loop": {
+      "capability": "Yield to the Kit update loop",
+      "pattern": "await omni.kit.app.get_app().next_update_async()",
+      "thread_identity_proven": false,
+      "status": "VERIFIED_BY_NVIDIA_OFFICIAL_SEARCH"
     },
-    {
-      "capability": "Capture the next rendered frame to a file",
-      "verified_pattern": "isaacsim.benchmark.services.utils.capture_next_frame(app, capture_file_path, timeout_sec=2.0)",
-      "official_search_status": "VERIFIED_BY_PARENT_AGENT",
-      "local_isaac_5_1_source_cross_check": "PENDING",
-      "official_example_internals": "Uses omni.renderer_capture and omni.kit.viewport_legacy."
+    "benchmark_capture": {
+      "capability": "Capture the next rendered frame",
+      "official_index_pattern": "isaacsim.benchmark.services.utils.capture_next_frame(app, capture_file_path, timeout_sec=2.0)",
+      "official_example_internals": [
+        "omni.renderer_capture",
+        "omni.kit.viewport_legacy"
+      ],
+      "status": "VERIFIED_BY_NVIDIA_OFFICIAL_SEARCH"
     },
-    {
-      "capability": "Session layer and edit-target handling",
-      "verified_pattern": null,
-      "official_search_status": "NOT_CONFIRMED_BY_CURRENT_OFFICIAL_SEARCH",
-      "local_isaac_5_1_source_cross_check": "LOCAL_RUNTIME_READBACK_REQUIRED"
+    "session_layer": {
+      "capability": "Obtain and manage the USD Stage session layer",
+      "get_session_layer_confirmed": true,
+      "set_edit_target_example_confirmed": false,
+      "status": "GET_SESSION_LAYER_ONLY_CONFIRMED_BY_CURRENT_OFFICIAL_SEARCH"
     }
-  ],
-  "local_source_observations": [
-    {
-      "target": "Installed isaacsim.robot_setup.grasp_editor 2.0.20 source",
-      "observation": "The Grasp Editor READY transition can mutate the Stage.",
-      "classification": "LOCAL_SOURCE_OBSERVATION_AND_ENGINEERING_INFERENCE",
-      "implication": "Capture and validate Stage, root-layer, session-layer, and edit-target identifiers through local runtime readback before and after the READY transition.",
-      "official_search_confirmation": false
+  },
+  "local_isaac_5_1_cross_checks": {
+    "extension_manager": {
+      "source": ".venv_issac/.../kit/kernel/py/omni/ext/_extensions.pyi",
+      "symbols": [
+        "ExtensionManager.add_path",
+        "ExtensionManager.is_extension_enabled",
+        "ExtensionManager.set_extension_enabled_immediate"
+      ],
+      "status": "VERIFIED_INSTALLED_5_1_SOURCE"
+    },
+    "action_registry": {
+      "source": "installed omni.kit.actions.core-1.0.0.../_kit_actions_core.pyi",
+      "line": 173,
+      "symbol": "execute_action",
+      "status": "VERIFIED_INSTALLED_5_1_SOURCE"
+    },
+    "benchmark_capture": {
+      "source": "installed isaacsim/benchmark/services/utils.py",
+      "line": 77,
+      "installed_signature": "capture_next_frame(app, capture_file_path: str)",
+      "official_index_signature": "capture_next_frame(app, capture_file_path, timeout_sec=2.0)",
+      "status": "OFFICIAL_INDEX_LOCAL_SOURCE_SIGNATURE_DISCREPANCY",
+      "implementation_requirement": "Task 2 must use the installed Isaac Sim 5.1 two-argument signature."
+    },
+    "assembler_session_layer": {
+      "source": "installed isaacsim/robot_setup/assembler/session_layer_util.py",
+      "lines": [
+        45,
+        99
+      ],
+      "confirmed_behavior": "GetSessionLayer",
+      "status": "VERIFIED_INSTALLED_5_1_SOURCE"
     }
-  ],
+  },
+  "session_edit_target": {
+    "status": "VERIFIED_LOCAL_5_1_BINDING_RUNTIME_PROBE",
+    "official_search_get_session_layer_confirmation": true,
+    "official_search_set_edit_target_confirmation": false,
+    "probe": {
+      "operations": [
+        "Usd.Stage.CreateInMemory",
+        "stage.GetSessionLayer",
+        "Sdf.Layer.CreateAnonymous",
+        "session.subLayerPaths.append",
+        "stage.SetEditTarget(Usd.EditTarget(diag))"
+      ],
+      "results": {
+        "edit_target": "diag",
+        "root_has_probe": false,
+        "diag_has_probe": true
+      }
+    }
+  },
+  "local_grasp_editor_source_observation": {
+    "target": "Installed isaacsim.robot_setup.grasp_editor 2.0.20 source",
+    "observation": "The Grasp Editor READY transition can mutate the Stage.",
+    "classification": "LOCAL_SOURCE_OBSERVATION_AND_ENGINEERING_INFERENCE",
+    "official_search_confirmation": false
+  },
+  "output_preflight": {
+    "target_must_not_exist": true,
+    "precreate_raw_yaml": false,
+    "toctou_claim": false,
+    "task2_requirement": "Re-run validate_new_output_path immediately before Grasp Editor export."
+  },
+  "task_boundaries": {
+    "task1_pure_loader_verified": [
+      "manifest schema and frozen fields",
+      "exact approved Stage and Bottle paths",
+      "Stage and Bottle file hashes",
+      "local output path preflight"
+    ],
+    "task2_live_gate": [
+      "dependency closure",
+      "root prim",
+      "sublayers",
+      "references",
+      "required composed prims",
+      "live Stage runtime readback",
+      "immediate output preflight recheck before export"
+    ]
+  },
   "open_items": [
-    "Cross-check every pattern against the installed Isaac Sim 5.1 source and extension bindings before live bridge implementation.",
-    "Confirm session-layer and edit-target behavior through local Isaac Sim 5.1 runtime readback; current official search did not confirm an example.",
-    "Do not interpret NVIDIA official search results as proof of latest or Isaac Sim 6.0 behavior."
+    "Task 2 must perform live Stage runtime readback before bridge actions."
   ],
   "tdd_evidence": {
-    "red": {
+    "initial_red": {
       "command": "env PYTHONPATH=visual_tutor .venv/bin/python -m pytest -q visual_tutor/tests/test_aloha1_grasp_editor_manifest.py",
       "exit_code": 2,
       "expected_failure": "ModuleNotFoundError: No module named 'my_visual_tutor.grasp_editor_manifest'"
     },
-    "green": {
+    "initial_green": {
       "command": "env PYTHONPATH=visual_tutor .venv/bin/python -m pytest -q visual_tutor/tests/test_aloha1_grasp_editor_manifest.py",
       "exit_code": 0,
       "result": "3 passed in 0.03s"
+    },
+    "review_fix_red": {
+      "command": "env PYTHONPATH=visual_tutor .venv/bin/python -m pytest -q visual_tutor/tests/test_aloha1_grasp_editor_manifest.py",
+      "exit_code": 1,
+      "result": "40 failed, 4 passed in 0.29s"
+    },
+    "review_fix_green": {
+      "command": "env PYTHONPATH=visual_tutor .venv/bin/python -m pytest -q visual_tutor/tests/test_aloha1_grasp_editor_manifest.py",
+      "exit_code": 0,
+      "result": "44 passed in 0.15s"
     }
   },
   "secrets_included": false
