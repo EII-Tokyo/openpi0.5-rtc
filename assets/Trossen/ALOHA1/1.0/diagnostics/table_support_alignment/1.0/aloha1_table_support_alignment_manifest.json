@@ -1,0 +1,48 @@
+{
+  "alignment": {
+    "classification": "ALIGNED_WITHIN_TOLERANCE",
+    "signed_gap_m": 0.0,
+    "support_contact_z_m": 0.0,
+    "table_top_z_m": 0.0,
+    "tolerance_m": 1e-06
+  },
+  "boundaries": {
+    "physics_or_collider_modified": false,
+    "robot_geometry_modified": false,
+    "source_stage_modified": false,
+    "support_geometry_modified": false,
+    "task8": "NOT_RUN"
+  },
+  "configuration_layer": {
+    "modified_prim": "/World/environment/worldBody/user_confirmed_table",
+    "path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/table_support_alignment/1.0/configuration/aloha1_tabletop_world_zero.usda",
+    "sha256": "c9f8c656ed3a1b2722bfe0fb18dd2e5056da0320782e5dd3a7d4df2d7e845afc"
+  },
+  "diagnostic_stage": {
+    "default_prim": "/World",
+    "path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/table_support_alignment/1.0/aloha1_table_support_aligned_workcell.usda",
+    "sha256": "2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c",
+    "sublayers": [
+      "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/table_support_alignment/1.0/configuration/aloha1_tabletop_world_zero.usda",
+      "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/aloha1_signal_correspondence_workcell.usda"
+    ]
+  },
+  "schema_version": 1,
+  "scope": "DIAGNOSTIC_ONLY_NOT_FINAL_ASSET",
+  "source_stage": {
+    "path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/aloha1_signal_correspondence_workcell.usda",
+    "sha256_after": "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf",
+    "sha256_before": "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf"
+  },
+  "status": "PASS",
+  "table": {
+    "dimensions_m": [
+      1.1,
+      0.6,
+      0.015
+    ],
+    "prim_path": "/World/environment/worldBody/user_confirmed_table",
+    "target_center_z_m": -0.0075,
+    "target_top_z_m": 0.0
+  }
+}

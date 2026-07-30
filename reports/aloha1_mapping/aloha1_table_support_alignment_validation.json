@@ -1,0 +1,367 @@
+{
+  "alignment": {
+    "new_table_top_z_m": 0.0,
+    "old_table_top_z_m": -0.0909000015258789,
+    "removed_positive_gap_m": 0.0909000015258789,
+    "support_stacks": {
+      "follower_left": {
+        "base_aabb_world_m": {
+          "maximum": [
+            -0.3674999916639486,
+            0.08300000833605138,
+            0.09870386116010764
+          ],
+          "minimum": [
+            -0.666962995048034,
+            -0.12100001160361022,
+            0.019999999999997117
+          ]
+        },
+        "base_path": "/World/follower_left/vx300s_left/follower_left_base_link",
+        "metrics": {
+          "classification": "STACK_ALIGNED",
+          "robot_base_bottom_z_m": 0.019999999999997117,
+          "support_bottom_z_m": -3.955169475596301e-18,
+          "support_to_robot_base_gap_m": 4.4703150556268945e-10,
+          "support_top_z_m": 0.019999999552965612,
+          "table_to_support_gap_m": -3.955169475596301e-18,
+          "table_top_z_m": 0.0,
+          "tolerance_m": 1e-06
+        },
+        "support_members": [
+          {
+            "aabb_world_m": {
+              "maximum": [
+                -0.43999996781349193,
+                -0.05599999986588954,
+                0.0199999995529652
+              ],
+              "minimum": [
+                -0.5899999737739564,
+                -0.07599999941885473,
+                -2.600679512856674e-18
+              ]
+            },
+            "path": "/World/environment/worldBody/__14"
+          },
+          {
+            "aabb_world_m": {
+              "maximum": [
+                -0.42000000737607474,
+                0.35900002717971813,
+                0.019999999552965612
+              ],
+              "minimum": [
+                -0.4400000069290401,
+                -0.6409999728202821,
+                -3.955169475596301e-18
+              ]
+            },
+            "path": "/World/environment/worldBody/__18"
+          }
+        ]
+      },
+      "follower_right": {
+        "base_aabb_world_m": {
+          "maximum": [
+            0.666962995048034,
+            0.08300001160361023,
+            0.09870386116010764
+          ],
+          "minimum": [
+            0.3674999916639486,
+            -0.1210000083360514,
+            0.019999999999997117
+          ]
+        },
+        "base_path": "/World/follower_right/vx300s_right/follower_right_base_link",
+        "metrics": {
+          "classification": "STACK_ALIGNED",
+          "robot_base_bottom_z_m": 0.019999999999997117,
+          "support_bottom_z_m": -5.134281415659173e-09,
+          "support_to_robot_base_gap_m": 4.470317310767413e-10,
+          "support_top_z_m": 0.019999999552965386,
+          "table_to_support_gap_m": -5.134281415659173e-09,
+          "table_top_z_m": 0.0,
+          "tolerance_m": 1e-06
+        },
+        "support_members": [
+          {
+            "aabb_world_m": {
+              "maximum": [
+                0.590000003918564,
+                -0.055999999865889535,
+                0.019999999552965157
+              ],
+              "minimum": [
+                0.43999999727352884,
+                -0.0759999994188547,
+                -5.134281415659173e-09
+              ]
+            },
+            "path": "/World/environment/worldBody/__20"
+          },
+          {
+            "aabb_world_m": {
+              "maximum": [
+                0.44000000692904007,
+                0.35900002717971824,
+                0.019999999552965386
+              ],
+              "minimum": [
+                0.4200000073760748,
+                -0.640999972820282,
+                -3.469446951953611e-18
+              ]
+            },
+            "path": "/World/environment/worldBody/__23"
+          }
+        ]
+      }
+    },
+    "zero_plane_support_members": [
+      {
+        "aabb_world_m": {
+          "maximum": [
+            0.6100000143051149,
+            -0.38100000284612173,
+            2.7349510387414196e-16
+          ],
+          "minimum": [
+            -0.6100000143051149,
+            -0.401000002399087,
+            -0.019999999552965164
+          ]
+        },
+        "path": "/World/environment/worldBody/__6",
+        "type": "Xform"
+      },
+      {
+        "aabb_world_m": {
+          "maximum": [
+            -0.43999996781349193,
+            -0.05599999986588954,
+            0.0199999995529652
+          ],
+          "minimum": [
+            -0.5899999737739564,
+            -0.07599999941885473,
+            -2.600679512856674e-18
+          ]
+        },
+        "path": "/World/environment/worldBody/__14",
+        "type": "Xform"
+      },
+      {
+        "aabb_world_m": {
+          "maximum": [
+            0.590000003918564,
+            -0.6209999825805426,
+            0.019999999552965157
+          ],
+          "minimum": [
+            0.43999999727352884,
+            -0.6409999821335077,
+            -5.134281415659173e-09
+          ]
+        },
+        "path": "/World/environment/worldBody/__16",
+        "type": "Xform"
+      },
+      {
+        "aabb_world_m": {
+          "maximum": [
+            -0.42000000737607474,
+            0.35900002717971813,
+            0.019999999552965612
+          ],
+          "minimum": [
+            -0.4400000069290401,
+            -0.6409999728202821,
+            -3.955169475596301e-18
+          ]
+        },
+        "path": "/World/environment/worldBody/__18",
+        "type": "Xform"
+      },
+      {
+        "aabb_world_m": {
+          "maximum": [
+            0.590000003918564,
+            -0.055999999865889535,
+            0.019999999552965157
+          ],
+          "minimum": [
+            0.43999999727352884,
+            -0.0759999994188547,
+            -5.134281415659173e-09
+          ]
+        },
+        "path": "/World/environment/worldBody/__20",
+        "type": "Xform"
+      },
+      {
+        "aabb_world_m": {
+          "maximum": [
+            0.6100000143051149,
+            0.3789999876171351,
+            0.019999999552965435
+          ],
+          "minimum": [
+            -0.6100000143051149,
+            0.35899998806416983,
+            -2.600679512856677e-18
+          ]
+        },
+        "path": "/World/environment/worldBody/__22",
+        "type": "Xform"
+      },
+      {
+        "aabb_world_m": {
+          "maximum": [
+            0.44000000692904007,
+            0.35900002717971824,
+            0.019999999552965386
+          ],
+          "minimum": [
+            0.4200000073760748,
+            -0.640999972820282,
+            -3.469446951953611e-18
+          ]
+        },
+        "path": "/World/environment/worldBody/__23",
+        "type": "Xform"
+      },
+      {
+        "aabb_world_m": {
+          "maximum": [
+            0.6100000236183407,
+            0.35900002717971824,
+            0.019999999552965386
+          ],
+          "minimum": [
+            0.5900000240653754,
+            -0.640999972820282,
+            -1.734723475976803e-18
+          ]
+        },
+        "path": "/World/environment/worldBody/__24",
+        "type": "Xform"
+      },
+      {
+        "aabb_world_m": {
+          "maximum": [
+            -0.43999996781349193,
+            -0.6209999825805426,
+            0.0199999995529652
+          ],
+          "minimum": [
+            -0.5899999737739564,
+            -0.6409999821335077,
+            -2.60067951285667e-18
+          ]
+        },
+        "path": "/World/environment/worldBody/__25",
+        "type": "Xform"
+      },
+      {
+        "aabb_world_m": {
+          "maximum": [
+            -0.5900000240653753,
+            0.35900002717971824,
+            0.019999999552965386
+          ],
+          "minimum": [
+            -0.6100000236183406,
+            -0.640999972820282,
+            -1.7347234759768113e-18
+          ]
+        },
+        "path": "/World/environment/worldBody/__27",
+        "type": "Xform"
+      }
+    ]
+  },
+  "boundaries": {
+    "collider_or_physics_parameters_modified": false,
+    "robot_geometry_modified": false,
+    "source_stage_modified": false,
+    "support_geometry_modified": false,
+    "table_translation_only": true,
+    "task8": "NOT_RUN"
+  },
+  "diagnostic_stage": {
+    "articulation_roots": [
+      "/World/environment/worldBody",
+      "/World/follower_left/vx300s_left/root_joint",
+      "/World/follower_right/vx300s_right/root_joint"
+    ],
+    "default_prim": "/World",
+    "follower_articulation_roots": [
+      "/World/follower_left/vx300s_left/root_joint",
+      "/World/follower_right/vx300s_right/root_joint"
+    ],
+    "path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/table_support_alignment/1.0/aloha1_table_support_aligned_workcell.usda",
+    "sha256": "2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c",
+    "sublayers": [
+      "configuration/aloha1_tabletop_world_zero.usda",
+      "../../signal_correspondence/1.0/aloha1_signal_correspondence_workcell.usda"
+    ],
+    "table_aabb_world_m": {
+      "maximum": [
+        0.55,
+        0.3,
+        0.0
+      ],
+      "minimum": [
+        -0.55,
+        -0.3,
+        -0.015
+      ]
+    }
+  },
+  "gates": {
+    "articulation_roots_unchanged": true,
+    "default_prim_is_world": true,
+    "left_table_support_base_stack_aligned": true,
+    "right_table_support_base_stack_aligned": true,
+    "source_stage_hash_unchanged": true,
+    "support_has_zero_plane_members": true,
+    "table_center_matches_thickness": true,
+    "table_top_is_world_zero": true,
+    "two_follower_articulations": true
+  },
+  "runtime": {
+    "method": "LOCAL_ISAAC_SIM_5_1_USD_24_05_COMPOSITION_READBACK",
+    "usd_version": "0.24.5"
+  },
+  "schema_version": 1,
+  "scope": "DIAGNOSTIC_ONLY_NOT_FINAL_ASSET",
+  "source_stage": {
+    "articulation_roots": [
+      "/World/environment/worldBody",
+      "/World/follower_left/vx300s_left/root_joint",
+      "/World/follower_right/vx300s_right/root_joint"
+    ],
+    "follower_articulation_roots": [
+      "/World/follower_left/vx300s_left/root_joint",
+      "/World/follower_right/vx300s_right/root_joint"
+    ],
+    "path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/aloha1_signal_correspondence_workcell.usda",
+    "sha256_after": "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf",
+    "sha256_before": "d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf",
+    "table_aabb_world_m": {
+      "maximum": [
+        0.55,
+        0.3,
+        -0.0909000015258789
+      ],
+      "minimum": [
+        -0.55,
+        -0.3,
+        -0.10590000152587889
+      ]
+    }
+  },
+  "status": "PASS"
+}

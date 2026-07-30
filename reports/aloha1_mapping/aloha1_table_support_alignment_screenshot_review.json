@@ -1,0 +1,193 @@
+{
+  "boundaries": {
+    "not_claimed": [
+      "grasp_pass",
+      "dynamics_pass",
+      "final_asset_promotion"
+    ],
+    "task8": "NOT_RUN",
+    "visual_pass_means": "TABLE_SUPPORT_INSTALLATION_VISUAL_GATE"
+  },
+  "captures": [
+    {
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha-support-table-alignment/screenshots_annotated_v2/aligned_overview_annotated.png",
+      "annotated_sha256": "6b4249df9c46defd9bff99e1cf35b8919c0080ba4eeea45d954db2958626de8b",
+      "annotated_size_px": [
+        4468,
+        2022
+      ],
+      "attempt_status": "ACCEPTED_FINAL_VISUAL_PASS",
+      "camera": {
+        "eye_world_m": [
+          -1.15,
+          2.75,
+          1.35
+        ],
+        "name": "Overview",
+        "target_world_m": [
+          0.0,
+          0.0,
+          0.2
+        ]
+      },
+      "id": "aligned_overview",
+      "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha-support-table-alignment/screenshots_raw/aligned_overview_raw.png",
+      "raw_sha256": "9bb6b5c1b0fe52a62310da8ed0bed36b89ae56142ef49462c431768e706f0908",
+      "raw_size_px": [
+        3708,
+        2022
+      ],
+      "review_goal": "Both follower bases, lower support frame and tabletop visible in one view; old air gap absent.",
+      "vision_model_review": {
+        "reason": "Raw and annotated images were individually inspected with the vision model. Both follower bases, the tabletop and the lower support frame are visible; the prior vertical air gap is absent, and the concise callouts do not obscure either base interface.",
+        "status": "PASS"
+      }
+    },
+    {
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha-support-table-alignment/screenshots_annotated_v2/aligned_support_side_annotated.png",
+      "annotated_sha256": "c5170e2281293005d5b0257766b6b0faad5ebc7cd92893464b9e9550df173e40",
+      "annotated_size_px": [
+        4468,
+        2022
+      ],
+      "attempt_status": "REJECTED_SUPPORT_INTERFACE_OCCLUDED",
+      "camera": {
+        "eye_world_m": [
+          0.0,
+          1.65,
+          0.16
+        ],
+        "name": "SupportSide",
+        "target_world_m": [
+          0.0,
+          0.0,
+          0.055
+        ]
+      },
+      "id": "aligned_support_side_attempt1",
+      "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha-support-table-alignment/screenshots_raw/aligned_support_side_raw.png",
+      "raw_sha256": "86619d49eca076db29272c06dadc485d5905271574b08336f3c0731e16e8ade6",
+      "raw_size_px": [
+        3708,
+        2022
+      ],
+      "review_goal": "Strict side view of table/support plane; rejected because the front extrusion hides the critical interface.",
+      "vision_model_review": {
+        "reason": "Raw and annotated images were individually inspected with the vision model. The front support extrusion occludes the critical table/support interface, so this view is retained only as rejected retake history.",
+        "status": "REJECTED"
+      }
+    },
+    {
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha-support-table-alignment/screenshots_annotated_v2/aligned_left_base_side_annotated.png",
+      "annotated_sha256": "f3ce4f9651ac5b74d0993db5c996f446dd5b086aafd70b455f086600277c1250",
+      "annotated_size_px": [
+        4468,
+        2022
+      ],
+      "attempt_status": "ACCEPTED_FINAL_VISUAL_PASS",
+      "camera": {
+        "eye_world_m": [
+          -0.47,
+          1.1,
+          0.16
+        ],
+        "name": "LeftBaseSide",
+        "target_world_m": [
+          -0.47,
+          -0.02,
+          0.055
+        ]
+      },
+      "id": "aligned_left_base_side",
+      "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha-support-table-alignment/screenshots_raw/aligned_left_base_side_raw.png",
+      "raw_sha256": "40cb23c06dbc89b3527ac5626103f7f2926062f0ffea47232a23e0873ed663c7",
+      "raw_size_px": [
+        3708,
+        2022
+      ],
+      "review_goal": "Left robot base, supporting extrusions and tabletop are all visible at the vertical stack interface.",
+      "vision_model_review": {
+        "reason": "Raw and annotated images were individually inspected with the vision model. The left base, 20 mm support member and tabletop interface are visible; the region box and three short callouts do not overlap the measured interface.",
+        "status": "PASS"
+      }
+    },
+    {
+      "annotated_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha-support-table-alignment/screenshots_annotated_v2/aligned_right_base_side_annotated.png",
+      "annotated_sha256": "c8820b991c93c9fc6a38a046fdf95c548e1f7226c18543cefb8281667380f0c7",
+      "annotated_size_px": [
+        4468,
+        2022
+      ],
+      "attempt_status": "ACCEPTED_FINAL_VISUAL_PASS",
+      "camera": {
+        "eye_world_m": [
+          0.47,
+          1.1,
+          0.16
+        ],
+        "name": "RightBaseSide",
+        "target_world_m": [
+          0.47,
+          -0.02,
+          0.055
+        ]
+      },
+      "id": "aligned_right_base_side",
+      "raw_absolute_path": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha-support-table-alignment/screenshots_raw/aligned_right_base_side_raw.png",
+      "raw_sha256": "e3be59b3937fe936c218260ceeea04cf759341b7b4b4db4a5580cd11264e0b09",
+      "raw_size_px": [
+        3708,
+        2022
+      ],
+      "review_goal": "Right robot base, supporting extrusions and tabletop are all visible at the vertical stack interface.",
+      "vision_model_review": {
+        "reason": "Raw and annotated images were individually inspected with the vision model. The right base, 20 mm support member and tabletop interface are visible; the region box and three short callouts do not overlap the measured interface.",
+        "status": "PASS"
+      }
+    }
+  ],
+  "final_evidence_set": {
+    "all_required_raw_and_annotated_vision_reviewed": true,
+    "all_required_status": "PASS",
+    "required_capture_ids": [
+      "aligned_overview",
+      "aligned_left_base_side",
+      "aligned_right_base_side"
+    ]
+  },
+  "machine_validation_report": "/home/eii/project/openpi0.5-rtc-reward-learning/reports/aloha1_mapping/aloha1_table_support_alignment_validation.json",
+  "retake_history": [
+    {
+      "batch": "screenshots_annotated",
+      "raw_images_modified": false,
+      "reason": "The first annotated batch placed large overlapping region boxes over the left/right base interfaces.",
+      "status": "REJECTED_OVERLAPPING_REGION_BOXES"
+    },
+    {
+      "capture_id": "aligned_support_side_attempt1",
+      "reason": "The strict side camera put the front support extrusion between the camera and the table/support interface.",
+      "replacement_captures": [
+        "aligned_left_base_side",
+        "aligned_right_base_side"
+      ],
+      "status": "REJECTED_SUPPORT_INTERFACE_OCCLUDED"
+    }
+  ],
+  "schema_version": 1,
+  "stage": {
+    "path": "/home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/table_support_alignment/1.0/aloha1_table_support_aligned_workcell.usda",
+    "sha256": "2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c"
+  },
+  "status": "PASS",
+  "user_review": {
+    "basis": "USER_CONFIRMED_VISUALLY_IN_ISAAC_GUI",
+    "confirmed_stage_sha256": "2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c",
+    "required_before_final_asset_promotion": true,
+    "status": "PASS"
+  },
+  "workspace_policy": {
+    "isaac_gui_workspace_number": 2,
+    "user_active_desktop_during_capture": 0,
+    "x11_desktop_index": 1
+  }
+}

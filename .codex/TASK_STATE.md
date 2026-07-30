@@ -1700,3 +1700,52 @@ scene design is reviewed and approved.
   `reports/aloha1_mapping/codex_isaac_runtime_mcp_routing_20260730.json`
   and `.md`. Evidence:
   `.codex/artifacts/20260730-codex-isaac-runtime-mcp/`.
+
+## 2026-07-30 Table/support alignment correction gate
+
+- The user visually identified that the robot support stack appeared suspended
+  above the tabletop. Numeric AABB readback confirmed this was a real Stage
+  placement defect, not a viewport illusion: the frozen signal-correspondence
+  Stage placed the table top at `world Z=-0.0909000015258789 m`, while the
+  support members begin at approximately `world Z=0 m`.
+- The frozen source Stage remains unchanged:
+  `assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/aloha1_signal_correspondence_workcell.usda`,
+  SHA-256
+  `d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf`.
+- An isolated diagnostic composition raises only the 15 mm tabletop so its
+  top is at the user-defined world origin `Z=0`; neither follower, support
+  geometry, collider, articulation, drive nor physics setting is changed:
+  `assets/Trossen/ALOHA1/1.0/diagnostics/table_support_alignment/1.0/aloha1_table_support_aligned_workcell.usda`,
+  SHA-256
+  `2b3f76365ed67532f478d995ae859a88b5639975ac07cb7ac8a53ac679e8205c`.
+- Machine validation is `PASS`. Left/right table-to-support gaps are
+  approximately `-3.96e-18 m` and `-5.13e-09 m`; support-to-base gaps are
+  approximately `4.47e-10 m` on both sides, all within the unchanged
+  `1e-6 m` diagnostic tolerance. The two follower articulation roots and
+  their paths are unchanged.
+- Screenshot evidence is `PASS` for the final three-view set: overview,
+  left-base side and right-base side. Every accepted raw and annotated image
+  was inspected individually with the vision model. The strict side attempt
+  is retained as `REJECTED_SUPPORT_INTERFACE_OCCLUDED`; the first annotation
+  batch is retained as `REJECTED_OVERLAPPING_REGION_BOXES`.
+- Every Isaac GUI window used for this gate was placed on workspace 2 (X11
+  desktop index 1), leaving workspace 1 available to the user. The screenshot
+  capture process was stopped before its post-run hash verification. A later
+  user-review process loaded the same frozen Stage hash on workspace 2 with
+  the timeline paused and produced runtime status `READY`.
+- Authoritative reports:
+  `reports/aloha1_mapping/aloha1_table_support_alignment_validation.json`,
+  `aloha1_table_support_alignment_screenshot_review.json`, and
+  `aloha1_table_support_alignment_screenshot_review.md`. Full logs and images:
+  `.codex/artifacts/20260730-aloha-support-table-alignment/`.
+- This is still `DIAGNOSTIC_ONLY_NOT_FINAL_ASSET`; the default/final Stage was
+  not promoted or modified. The previous raw Grasp Editor Variant B export
+  was generated against the superseded table-height baseline and is not
+  eligible to enter IK.
+- The user visually confirmed the aligned table/support/base relationship in
+  the live Isaac GUI on 2026-07-30. This records
+  `USER_REVIEW=PASS` for the installation visual gate only; it is not grasp,
+  dynamics, IK or final-asset promotion approval.
+- Next mainline step: rerun the actual Grasp Editor Variant B on the aligned
+  Stage, validate the native raw YAML and coordinate transforms, then perform
+  the ALOHA six-DOF kinematic/IK correspondence. Task 8 remains `NOT_RUN`.
