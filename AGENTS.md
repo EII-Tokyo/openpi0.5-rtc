@@ -25,6 +25,7 @@ cd /home/eii/Documents/Notes/openpi0.5-rtc-reward-learning && npm run check:math
 - Isaac Sim, Isaac Lab, Claude Code MCP, Codex MCP, or the local MCP installation on machine `101`:
   - Read `docs/agents/isaac_mcp_toolchain.md`.
   - NVIDIA official Isaac MCP is mandatory before modifying Isaac Sim code, USD stages, scene-generation scripts, physics setup, GUI controls, or Isaac runtime behavior. Read-only investigation does not require starting Isaac MCP unless the answer depends on official Isaac API behavior.
+  - Use the isolated `codex-isaac` profile for direct NVIDIA official Isaac MCP access as `isaac-sim-mcp`; do not route NVIDIA Isaac queries through MCPJungle. Its other external MCP tools continue through `mcpjungle_lab`.
   - Never switch the active Isaac Sim Stage from memory or filename guesses. Before switching, verify the current task's user-approved absolute Stage path, frozen hash, root prim, sublayers, and required key prims; an older/source Stage used for investigation must not replace the user's active review Stage.
   - Historical long "episode 19" replay HDF5: `/home/eii/project/bottles_data/episode_19.hdf5`. It is the default long replay target when the user asks for episode 19 or the historical long replay.
   - User-confirmed bottle grasp window: `/home/eii/project/bottles_data/episode_18.hdf5`, frames `208-244` inclusive. Use this for the open-gripper -> clamp-bottle -> lift-onset calibration task; do not substitute episode 19.

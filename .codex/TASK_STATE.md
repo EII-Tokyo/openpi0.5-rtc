@@ -54,6 +54,26 @@ explicitly pending when measured data is absent.
 
 The 2026-07-29 signal-correspondence priority is the current handoff:
 
+- On 2026-07-30 the old `codex-research` profile was replaced by
+  `/home/eii/.local/bin/codex-isaac`. It uses isolated `CODEX_HOME`
+  `/home/eii/mcpjungle-lab/state/codex-home-codex-isaac`, full local Codex
+  permissions, direct NVIDIA official Isaac documentation as `isaac-sim-mcp`
+  at `http://127.0.0.1:9904/mcp`, and the `mcpjungle_lab` `codex-isaac` group
+  for every other external MCP. The Jungle group contains 20 non-NVIDIA tools
+  and zero NVIDIA tools. Direct NVIDIA and Jungle read-only SDK calls passed,
+  deterministic profile generation passed, and Codex read back exactly the
+  two approved MCP server entries. The old runtime group is absent and its
+  profile home was moved to a recoverable backup. The current conversation
+  predates this change, so start a new `codex-isaac` process and perform one
+  in-session direct NVIDIA read-only query before resuming the Visual Tutor
+  live attempt. Full local permission does not authorize real-robot/103
+  mutation. Report:
+  `reports/aloha1_mapping/codex_isaac_mcp_configuration_20260730.json`.
+  The `bee` session store is bridged into the new isolated home through
+  `/home/eii/mcpjungle-lab/state/codex-session-home`; `session_index` readback
+  confirms thread ID `019fa738-940b-7960-b831-f3a07329028f`. After the current
+  process exits normally, resume it with `codex-isaac resume bee`. Do not run
+  both processes against the same thread concurrently.
 - Scope is digital-only Stationary ALOHA1 followers. No real robot was
   connected or controlled and `192.168.1.103` was not accessed.
 - Frozen Stage:
@@ -1619,13 +1639,13 @@ scene design is reviewed and approved.
 - Fresh project-environment validation is `7 passed`, but this proves only
   dry-run/static contracts. It does not prove MCPJungle registration, live
   Isaac, timeline state, or Grasp Editor GUI control.
-- The active Codex connection remains strict Gateway-only:
-  - only `mcpjungle_lab`;
-  - endpoint
-    `http://127.0.0.1:18080/v0/groups/codex-research/mcp`;
-  - MCPJungle and NVIDIA docs are reachable;
-  - the live registry/group contains no `my-gui-teacher`, live Visual Tutor
-    probe, or Isaac GUI teaching action.
+- This section's former strict-Gateway-only `codex-research` connection is
+  historical and superseded by the isolated `codex-isaac` routing described
+  at the top of this file. The current `codex-isaac` process uses direct
+  NVIDIA official documentation and MCPJungle for all other MCP tools. The
+  live Jungle group still contains no `my-gui-teacher`, live Visual Tutor
+  probe, or Isaac GUI teaching action, so this routing change does not by
+  itself clear the Visual Tutor bridge blocker.
 - Registering the existing stdio server directly would not solve the task and
   is forbidden by the managed Visual Tutor skill. Chrome liveview and shell
   clicks are not substitutes.

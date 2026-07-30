@@ -33,6 +33,13 @@ Read this before using, changing, debugging, or reinstalling Isaac Sim / Isaac L
 - `isaacsim-python` for Isaac Python execution and Kit log reading.
 - `isaaclab` for local safe Isaac Lab probes.
 
+## Codex MCP Routing
+- Launch Isaac-focused Codex work with `codex-isaac`. It uses the isolated `CODEX_HOME` `/home/eii/mcpjungle-lab/state/codex-home-codex-isaac` and is the only profile configured to connect directly to the NVIDIA official Isaac MCP as `isaac-sim-mcp` at `http://127.0.0.1:9904/mcp`.
+- `codex-isaac` launches Codex with `--dangerously-bypass-approvals-and-sandbox`; this grants full local machine access but does not override project rules for real robots, remote `192.168.1.103`, secrets, or destructive actions.
+- Do not route NVIDIA Isaac documentation/API queries through MCPJungle.
+- All other MCP tools available to `codex-isaac` continue through the `mcpjungle_lab` group `codex-isaac`. That Jungle group must expose zero `nvidia-isaac-docs__*` tools.
+- The Codex global configuration is `/home/eii/.codex/config.toml`; after changing MCP entries, start a new Codex session or restart the client so its tool registry is rebuilt.
+
 ## Security Constraints
 - Do not expose MCP ports to public interfaces; keep all network services bound to `127.0.0.1` / localhost.
 - Do not print or commit `NVIDIA_API_KEY` or `NGC_API_KEY`; API keys are stored outside this repository.

@@ -1,0 +1,130 @@
+{
+  "schema_version": "aloha1-codex-isaac-mcp-configuration/v2",
+  "status": "CONFIGURED_NEW_CODEX_ISAAC_SESSION_REQUIRED",
+  "configured_at_local_date": "2026-07-30",
+  "codex": {
+    "version": "0.145.0",
+    "launcher": "/home/eii/.local/bin/codex-isaac",
+    "isolated_codex_home": "/home/eii/mcpjungle-lab/state/codex-home-codex-isaac",
+    "generated_config_path": "/home/eii/mcpjungle-lab/state/codex-home-codex-isaac/config.toml",
+    "generated_config_sha256": "00993670375f0312de5c4aab198ceb6bc766ada73f45f8c4a31616b5534d26c9",
+    "sandbox_mode_readback": "danger-full-access",
+    "approval_policy_readback": "never",
+    "launcher_permission_flag": "--dangerously-bypass-approvals-and-sandbox",
+    "launcher_live_mcp_list": "PASS",
+    "tool_registry_reload_required_for_current_conversation": true,
+    "session_resume": {
+      "thread_name": "bee",
+      "thread_id": "019fa738-940b-7960-b831-f3a07329028f",
+      "stable_session_home": "/home/eii/mcpjungle-lab/state/codex-session-home",
+      "session_bridge_status": "CONFIGURED",
+      "resume_command": "codex-isaac resume bee",
+      "concurrent_resume_allowed": false
+    }
+  },
+  "routing_policy": {
+    "nvidia_isaac_official_docs": "DIRECT_ONLY_IN_CODEX_ISAAC",
+    "all_other_external_mcp": "MCPJUNGLE_ONLY",
+    "default_codex_config_direct_mcp_count": 0,
+    "codex_full_mcp_server_count": 0,
+    "non_isaac_launchers_alias_codex_isaac": false,
+    "real_robot_or_192_168_1_103_mutation_authorized": false
+  },
+  "direct_nvidia_mcp": {
+    "codex_server_name": "isaac-sim-mcp",
+    "transport": "streamable_http",
+    "url": "http://127.0.0.1:9904/mcp",
+    "enabled": true,
+    "startup_timeout_sec": 20,
+    "tool_timeout_sec": 300,
+    "listener_scope": "127.0.0.1",
+    "mcp_client_sdk_version": "1.25.0",
+    "server_name_readback": "NeMo Agent Toolkit MCP",
+    "server_version_readback": "1.25.0",
+    "tools_listed": [
+      "get_isaac_sim_extension_details",
+      "get_isaac_sim_instructions",
+      "search_isaac_sim_code_examples",
+      "search_isaac_sim_extensions",
+      "search_isaac_sim_settings"
+    ],
+    "read_only_query": {
+      "tool": "get_isaac_sim_instructions",
+      "is_error": false,
+      "content_nonempty": true
+    }
+  },
+  "mcpjungle": {
+    "codex_server_name": "mcpjungle_lab",
+    "url": "http://127.0.0.1:18080/v0/groups/codex-isaac/mcp",
+    "enabled": true,
+    "runtime_group": "codex-isaac",
+    "runtime_group_config_sha256": "9bef303d433e7258e8e5a2ec5ef3cb6bc8091ce7d64c673376f3cc5da9c8e738",
+    "runtime_tool_counts": {
+      "nvidia_isaac_docs": 0,
+      "context7": 2,
+      "aloha103_read_only": 15,
+      "chrome_devtools_liveview": 3,
+      "total": 20
+    },
+    "context7_read_only_call": "PASS",
+    "aloha103_tool_call_performed": false,
+    "nvidia_queries_via_jungle": "DISABLED_BY_GROUP_ALLOWLIST"
+  },
+  "persistence": {
+    "profile_generator_source": "/home/eii/mcpjungle-lab/managed/codex/prepare_gateway_home.py",
+    "profile_generator_source_sha256": "07ae0cd84b06c930448e0866018caf99dea3e4798c66ba495d3bb29b8167c0bc",
+    "profile_generator_deployed": "/home/eii/.codex/gateway/prepare_gateway_home.py",
+    "deployed_matches_source": true,
+    "launcher_source_sha256": "288ca67920adecfe3a2d3a5c06c861cbc1caf32d7a3855037ac2172dbec7536b",
+    "launcher_deployed_matches_source": true,
+    "approved_servers": [
+      "isaac-sim-mcp",
+      "mcpjungle_lab"
+    ],
+    "other_direct_servers_removed_on_profile_rebuild": true,
+    "two_consecutive_profile_rebuild_hashes_equal": true
+  },
+  "retirement": {
+    "old_runtime_group": "codex-research",
+    "old_runtime_group_status": "ABSENT",
+    "old_launcher_status": "ALREADY_ABSENT",
+    "old_profile_backup": "/home/eii/mcpjungle-lab/backups/codex-research-retired-20260730/codex-home-codex-research",
+    "recoverable": true
+  },
+  "verification": {
+    "unit_tests": {
+      "status": "PASS",
+      "passed": 43,
+      "failed": 0
+    },
+    "ruff": "PASS",
+    "py_compile": "PASS",
+    "bash_n": "PASS",
+    "shellcheck": "SKIP_NOT_INSTALLED",
+    "group_json_validation": "PASS",
+    "direct_initialize": "PASS",
+    "direct_tools_list": "PASS",
+    "direct_read_only_tool_call": "PASS",
+    "jungle_runtime_group_validation": "PASS",
+    "jungle_context7_read_only_tool_call": "PASS",
+    "isolated_profile_determinism": "PASS",
+    "codex_launcher_live_mcp_list": "PASS",
+    "non_isaac_launcher_isolation": "PASS",
+    "bee_session_index_readback": "PASS",
+    "bee_session_bridge_links": "PASS",
+    "bee_resume_dry_run": "PASS"
+  },
+  "evidence_root": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-direct-nvidia-mcp-config",
+  "backups": [
+    "/home/eii/mcpjungle-lab/backups/codex-isaac-20260730",
+    "/home/eii/mcpjungle-lab/backups/codex-research-retired-20260730",
+    "/home/eii/mcpjungle-lab/backups/codex-full-no-alias-20260730",
+    "/home/eii/mcpjungle-lab/backups/codex-full-dryrun-20260730",
+    "/home/eii/mcpjungle-lab/backups/codex-isaac-session-bridge-20260730"
+  ],
+  "limitations": [
+    "The current conversation loaded its MCP tool registry before codex-isaac was created, so a new codex-isaac process is required for an in-conversation direct tool call.",
+    "Full local machine permission does not authorize real-robot control, remote 192.168.1.103 mutation, secret disclosure, or unrelated destructive operations."
+  ]
+}
