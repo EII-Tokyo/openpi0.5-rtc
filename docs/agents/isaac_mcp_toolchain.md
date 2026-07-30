@@ -24,7 +24,7 @@ Read this before using, changing, debugging, or reinstalling Isaac Sim / Isaac L
 
 ## Verified State
 - `nvidia-isaac-docs` is healthy and responds to MCP initialize on `http://127.0.0.1:9904/mcp`.
-- `isaacsim-control` and `isaacsim-python` are installed and registered, but are only partially testable until the corresponding Isaac Sim internal extensions are enabled.
+- `isaacsim-control` and `isaacsim-python` are installed, registered through the MCPJungle `codex-isaac` group, and exposed through Docker-bridge-only host wrappers at `172.20.0.1:18766` and `172.20.0.1:18226`. MCP initialize, tool listing, and a no-side-effect runtime connection probe pass. Live Stage access remains unavailable until the corresponding Isaac Sim internal extension sockets listen on `127.0.0.1:8766` and `127.0.0.1:8226`.
 - `isaaclab` local tests passed and the install probe sees Isaac Sim `5.1.0.0` and Isaac Lab `0.54.4`; task listing currently has a known `pxr` import issue.
 
 ## Claude Code And Codex Names
@@ -38,10 +38,12 @@ Read this before using, changing, debugging, or reinstalling Isaac Sim / Isaac L
 - `codex-isaac` launches Codex with `--dangerously-bypass-approvals-and-sandbox`; this grants full local machine access but does not override project rules for real robots, remote `192.168.1.103`, secrets, or destructive actions.
 - Do not route NVIDIA Isaac documentation/API queries through MCPJungle.
 - All other MCP tools available to `codex-isaac` continue through the `mcpjungle_lab` group `codex-isaac`. That Jungle group must expose zero `nvidia-isaac-docs__*` tools.
+- The runtime bridge lifecycle is managed by `/home/eii/mcpjungle-lab/bin/start-isaac-runtime-bridges`; `/home/eii/mcpjungle-lab/bin/sync-isaac-runtime` registers both runtime MCPs and verifies the expected local tool counts (`42` control and `3` Python tools).
+- The runtime wrappers are transient user services named `mcpjungle-isaacsim-control.service` and `mcpjungle-isaacsim-python.service`. They expose only the Docker bridge address `172.20.0.1`, not the LAN interface.
 - The Codex global configuration is `/home/eii/.codex/config.toml`; after changing MCP entries, start a new Codex session or restart the client so its tool registry is rebuilt.
 
 ## Security Constraints
-- Do not expose MCP ports to public interfaces; keep all network services bound to `127.0.0.1` / localhost.
+- Do not expose MCP ports to public interfaces. Direct services remain on `127.0.0.1`; an MCPJungle host wrapper may bind only to the verified private Docker bridge address used by its container network, never to `0.0.0.0`, the LAN interface, or a public interface.
 - Do not print or commit `NVIDIA_API_KEY` or `NGC_API_KEY`; API keys are stored outside this repository.
 - Treat `isaacsim-python` and `isaacsim-control` as high-privilege because they can execute Python or scene operations inside Isaac Sim.
 - Do not connect MCP tools to the real ALOHA robot by default.

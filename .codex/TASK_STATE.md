@@ -1676,3 +1676,27 @@ scene design is reviewed and approved.
   `DYNAMIC_GRASP_VIDEO=NOT_RUN`,
   `TASK_PASS=NOT_ESTABLISHED`,
   `TASK8=NOT_RUN`.
+
+## 2026-07-30 codex-isaac runtime MCP routing
+
+- Direct NVIDIA official MCP remains available only as
+  `mcp__isaac_sim_mcp` at `127.0.0.1:9904`; its fresh
+  `development_tools` call passed and did not traverse MCPJungle.
+- MCPJungle group `codex-isaac` now includes the non-NVIDIA servers
+  `isaacsim-control` and `isaacsim-python`. Fresh SDK verification reports
+  65 total tools, zero NVIDIA tools, 42 control tools, and 3 Python tools.
+- Docker-only Streamable HTTP wrappers are active as transient user services:
+  `mcpjungle-isaacsim-control.service` on `172.20.0.1:18766` and
+  `mcpjungle-isaacsim-python.service` on `172.20.0.1:18226`.
+- The group successfully routed a no-side-effect Python connection probe and
+  a control `get_scene_info` probe. Both correctly reported that the current
+  Isaac backends are absent: `127.0.0.1:8226` refused and the control server
+  could not reach `127.0.0.1:8766`.
+- Status is `PARTIAL_RUNTIME_BACKEND_NOT_RUNNING`, not a routing failure.
+  No Isaac process was started, no Stage was switched, and Stage readback is
+  `NOT_RUN`. A fresh `codex-isaac` session is required to load the expanded
+  Jungle tool registry after the Isaac internal extensions are enabled.
+- Report:
+  `reports/aloha1_mapping/codex_isaac_runtime_mcp_routing_20260730.json`
+  and `.md`. Evidence:
+  `.codex/artifacts/20260730-codex-isaac-runtime-mcp/`.

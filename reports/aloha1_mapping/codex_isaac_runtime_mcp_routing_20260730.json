@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-07-30T12:05:00+09:00",
+  "scope": "codex-isaac MCP routing and no-side-effect runtime connectivity",
+  "overall_status": "PARTIAL_RUNTIME_BACKEND_NOT_RUNNING",
+  "routing_status": "PASS",
+  "mcpjungle_implementation_commit": "440dafd",
+  "direct_nvidia_mcp": {
+    "status": "PASS",
+    "namespace": "mcp__isaac_sim_mcp",
+    "endpoint": "http://127.0.0.1:9904/mcp",
+    "mcpjungle_used": false,
+    "verification_call": "get_isaac_sim_instructions(development_tools)"
+  },
+  "mcpjungle": {
+    "status": "PASS",
+    "endpoint": "http://127.0.0.1:18080/v0/groups/codex-isaac/mcp",
+    "group": "codex-isaac",
+    "total_tool_count": 65,
+    "nvidia_tool_count": 0,
+    "isaacsim_control_tool_count": 42,
+    "isaacsim_python_tool_count": 3
+  },
+  "runtime_bridges": [
+    {
+      "name": "isaacsim-control",
+      "source_repository": "https://github.com/whats2000/isaacsim-mcp-server",
+      "source_commit": "c293900cd38ee7029dd9c65d61167420419b85e2",
+      "license": "MIT",
+      "local_path": "/home/eii/isaac_mcp_setup/repos/isaacsim-mcp-server",
+      "mcp_version": "1.28.1",
+      "package_version": "0.5.2",
+      "systemd_unit": "mcpjungle-isaacsim-control.service",
+      "bridge_endpoint": "http://172.20.0.1:18766/mcp",
+      "backend_endpoint": "127.0.0.1:8766",
+      "bridge_status": "PASS",
+      "backend_status": "NOT_LISTENING",
+      "backend_probe": "{\"status\": \"error\", \"message\": \"Could not connect to Isaac. Make sure the Isaac addon is running.\"}"
+    },
+    {
+      "name": "isaacsim-python",
+      "source_repository": "https://github.com/mochan-b/isaacsim-mcp",
+      "source_commit": "14e1e753a3a40e568ef149696a018811170d8c54",
+      "license": "MIT",
+      "local_path": "/home/eii/isaac_mcp_setup/repos/isaacsim-mcp",
+      "mcp_version": "1.28.1",
+      "package_version": "0.1.0",
+      "systemd_unit": "mcpjungle-isaacsim-python.service",
+      "bridge_endpoint": "http://172.20.0.1:18226/mcp",
+      "backend_endpoint": "127.0.0.1:8226",
+      "bridge_status": "PASS",
+      "backend_status": "NOT_LISTENING",
+      "backend_probe": "Isaac Sim is NOT reachable at 127.0.0.1:8226 — connection refused"
+    }
+  ],
+  "configuration_hashes": {
+    "/home/eii/mcpjungle-lab/configs/groups/codex-isaac.json": "18593793b0f05e53bec847d2ce6bb1eeca9749823b4caa8416d23abff95aca7c",
+    "/home/eii/mcpjungle-lab/configs/groups/codex-isaac-context7-only.json": "4a952069566432a8f70bbf296af0fd3c1df7ce01af9f8d2a407669398078a690",
+    "/home/eii/mcpjungle-lab/configs/servers/isaacsim-control.json": "3dd59cf170d838b30d0028918ba999cfffa365d546a8ed8b6ef5cfc46d071387",
+    "/home/eii/mcpjungle-lab/configs/servers/isaacsim-python.json": "16c0d4c1418fd549dee79f693b4aacecfc2ba2fedfd9264c84b0abccd977392e",
+    "/home/eii/mcpjungle-lab/managed/isaac_runtime_http_bridge.py": "33f422422de7e8d14720d6f96b6914234f0007fd2ef1c672733627cc752fa240"
+  },
+  "runtime_validation": {
+    "stage_readback": "NOT_RUN",
+    "stage_switch": "NOT_PERFORMED",
+    "reason": "No Isaac Sim GUI/runtime process or 8766/8226 backend listener was present.",
+    "current_codex_registry_reload_required": true
+  },
+  "evidence": {
+    "gateway_sdk_probe": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-codex-isaac-runtime-mcp/gateway_sdk_probe.json",
+    "gateway_sdk_stderr": "/home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-codex-isaac-runtime-mcp/gateway_sdk_probe.stderr",
+    "control_bridge_log": "/home/eii/mcpjungle-lab/logs/isaac-runtime/isaacsim-control.log",
+    "python_bridge_log": "/home/eii/mcpjungle-lab/logs/isaac-runtime/isaacsim-python.log",
+    "sync_log": "/home/eii/mcpjungle-lab/logs/isaac-runtime/sync.log"
+  },
+  "prohibited_actions_confirmed_absent": [
+    "No real robot connection or command",
+    "No connection initiated to 192.168.1.103 for this validation",
+    "No Isaac Stage switch",
+    "No USD, collider, physics, or final asset modification",
+    "No arbitrary Python executed inside Isaac Sim"
+  ]
+}
