@@ -120,6 +120,50 @@ class _FakeApp:
         self._events.append("close")
 
 
+class _FakeExtensionManager:
+    def __init__(
+        self,
+        *,
+        extension_id: str,
+        version: str,
+        extension_path: Path,
+    ) -> None:
+        self.extension_id = extension_id
+        self.version = version
+        self.extension_path = extension_path
+        self.enabled = False
+        self.paths: list[str] = []
+        self.enable_calls: list[tuple[str, bool]] = []
+
+    def add_path(self, path: str) -> None:
+        self.paths.append(path)
+
+    def is_extension_enabled(self, extension_id: str) -> bool:
+        assert extension_id == self.extension_id
+        return self.enabled
+
+    def set_extension_enabled_immediate(
+        self,
+        extension_id: str,
+        enabled: bool,  # noqa: FBT001 - mirrors local Kit API.
+    ) -> bool:
+        self.enable_calls.append((extension_id, enabled))
+        self.enabled = enabled
+        return True
+
+    def get_enabled_extension_id(self, extension_id: str) -> str | None:
+        assert extension_id == self.extension_id
+        return extension_id if self.enabled else None
+
+    def get_extension_dict(self, enabled_id: str) -> dict[str, object]:
+        assert enabled_id == self.extension_id
+        return {"package": {"version": self.version}}
+
+    def get_extension_path(self, enabled_id: str) -> str:
+        assert enabled_id == self.extension_id
+        return str(self.extension_path)
+
+
 def test_probe_uses_local_grasp_editor_and_frozen_stage() -> None:
     source = PROBE.read_text(encoding="utf-8")
     assert "isaacsim.robot_setup.grasp_editor" in source
@@ -171,6 +215,84 @@ def test_launcher_never_saves_the_source_stage() -> None:
     assert "session_layer" in source
     assert "save_as_stage" not in source
     assert "save_stage" not in source
+
+
+def test_launcher_enables_exact_runtime_extension_path_and_version(
+    tmp_path: Path,
+) -> None:
+    module = _load_launcher_module()
+    extension_parent = tmp_path / "extensions"
+    extension_path = extension_parent / "isaac.sim.mcp_extension"
+    extension_path.mkdir(parents=True)
+    manager = _FakeExtensionManager(
+        extension_id="isaac.sim.mcp_extension",
+        version="0.4.1",
+        extension_path=extension_path,
+    )
+
+    enabled_id, version = module._enable_extension_exact(  # noqa: SLF001
+        manager,
+        extension_id="isaac.sim.mcp_extension",
+        expected_version="0.4.1",
+        extension_parent=extension_parent,
+        expected_extension_path=extension_path,
+    )
+
+    assert enabled_id == "isaac.sim.mcp_extension"
+    assert version == "0.4.1"
+    assert manager.paths == [str(extension_parent.resolve())]
+    assert manager.enable_calls == [("isaac.sim.mcp_extension", True)]
+
+
+def test_launcher_rejects_runtime_extension_version_mismatch(
+    tmp_path: Path,
+) -> None:
+    module = _load_launcher_module()
+    extension_path = tmp_path / "isaac.sim.mcp_extension"
+    extension_path.mkdir()
+    manager = _FakeExtensionManager(
+        extension_id="isaac.sim.mcp_extension",
+        version="9.9.9",
+        extension_path=extension_path,
+    )
+
+    with pytest.raises(RuntimeError, match="version mismatch"):
+        module._enable_extension_exact(  # noqa: SLF001
+            manager,
+            extension_id="isaac.sim.mcp_extension",
+            expected_version="0.4.1",
+            expected_extension_path=extension_path,
+        )
+
+
+def test_launcher_adds_external_reference_with_local_usd_signature(
+    tmp_path: Path,
+) -> None:
+    module = _load_launcher_module()
+    calls: list[tuple[str, object]] = []
+
+    class _FakeReferences:
+        def AddReference(  # noqa: N802 - mirrors USD API.
+            self,
+            asset_path: str,
+            prim_path: object,
+        ) -> None:
+            calls.append((asset_path, prim_path))
+
+    class _FakePrim:
+        def GetReferences(self) -> _FakeReferences:  # noqa: N802
+            return _FakeReferences()
+
+    asset_path = tmp_path / "bottle.usd"
+    prim_path = object()
+    module._add_external_reference(  # noqa: SLF001
+        _FakePrim(),
+        asset_path,
+        prim_path,
+    )
+
+    assert calls == [(str(asset_path.resolve()), prim_path)]
+    assert isinstance(calls[0][0], str)
 
 
 def test_stage_guard_rejects_edit_target_escape() -> None:
@@ -474,8 +596,8 @@ def test_launcher_keeps_grasp_editor_authored_opinions_in_anonymous_layer() -> N
     assert "while app.is_running():\n            _guarded_app_update(" in source
     assert "bottle_sha256_before = _sha256(bottle_path)" in source
     assert "diagnostic_layer.Save(" not in source
-    assert "bottle.GetReferences().AddReference(" in source
-    assert "Sdf.AssetPath(str(bottle_path))" in source
+    assert "_add_external_reference(" in source
+    assert "str(asset_path.resolve())" in source
     assert 'Sdf.Path("/Bottle500")' in source
 
 

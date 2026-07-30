@@ -9,6 +9,7 @@ import hashlib
 from pathlib import Path
 import subprocess
 import time
+import traceback
 
 ROOT = Path(__file__).resolve().parents[1]
 STAGE_PATH = (
@@ -26,6 +27,16 @@ EXPECTED_BOTTLE_SHA256 = (
 EXTENSION_ID = "isaacsim.robot_setup.grasp_editor"
 EXTENSION_VERSION = "2.0.20"
 WINDOW_TITLE = "Grasp Editor"
+CONTROL_EXTENSION_ID = "isaac.sim.mcp_extension"
+CONTROL_EXTENSION_VERSION = "0.4.1"
+CONTROL_EXTENSION_PARENT = Path(
+    "/home/eii/isaac_mcp_setup/repos/isaacsim-mcp-server"
+)
+CONTROL_EXTENSION_PATH = (
+    CONTROL_EXTENSION_PARENT / CONTROL_EXTENSION_ID
+)
+PYTHON_EXTENSION_ID = "isaacsim.code_editor.vscode"
+PYTHON_EXTENSION_VERSION = "1.1.0"
 
 
 def _sha256(path: Path) -> str:
@@ -34,6 +45,71 @@ def _sha256(path: Path) -> str:
         for chunk in iter(lambda: stream.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def _enable_extension_exact(
+    manager,
+    *,
+    extension_id: str,
+    expected_version: str,
+    extension_parent: Path | None = None,
+    expected_extension_path: Path | None = None,
+) -> tuple[str, str]:
+    """Enable one pinned local extension and fail closed on mismatches."""
+    if extension_parent is not None:
+        resolved_parent = extension_parent.resolve()
+        if not resolved_parent.is_dir():
+            raise RuntimeError(
+                f"extension parent does not exist: {resolved_parent}"
+            )
+        manager.add_path(str(resolved_parent))
+
+    if not manager.is_extension_enabled(extension_id):
+        enabled = manager.set_extension_enabled_immediate(
+            extension_id,
+            True,  # noqa: FBT003 - local Kit binding is positional-only.
+        )
+        if enabled is not True:
+            raise RuntimeError(
+                f"failed to enable required extension: {extension_id}"
+            )
+
+    enabled_id = manager.get_enabled_extension_id(extension_id)
+    if not enabled_id:
+        raise RuntimeError(
+            f"required extension is not enabled: {extension_id}"
+        )
+    extension = manager.get_extension_dict(enabled_id) or {}
+    version = str(extension.get("package", {}).get("version"))
+    if version != expected_version:
+        raise RuntimeError(
+            f"{extension_id} version mismatch: expected "
+            f"{expected_version}, got {version}"
+        )
+
+    if expected_extension_path is not None:
+        actual_path = Path(
+            manager.get_extension_path(enabled_id)
+        ).resolve()
+        required_path = expected_extension_path.resolve()
+        if actual_path != required_path:
+            raise RuntimeError(
+                f"{extension_id} path mismatch: expected "
+                f"{required_path}, got {actual_path}"
+            )
+    return str(enabled_id), version
+
+
+def _add_external_reference(
+    prim,
+    asset_path: Path,
+    prim_path,
+) -> None:
+    """Add a reference using the exact local USD 24.05 Python signature."""
+    prim.GetReferences().AddReference(
+        str(asset_path.resolve()),
+        prim_path,
+    )
 
 
 def _move_isaac_to_workspace_two() -> None:
@@ -326,18 +402,24 @@ def main() -> int:
         from pxr import UsdGeom
 
         manager = omni.kit.app.get_app().get_extension_manager()
-        manager.set_extension_enabled_immediate(
-            EXTENSION_ID,
-            True,  # noqa: FBT003 - local Kit binding is positional-only.
+        control_enabled_id, control_version = _enable_extension_exact(
+            manager,
+            extension_id=CONTROL_EXTENSION_ID,
+            expected_version=CONTROL_EXTENSION_VERSION,
+            extension_parent=CONTROL_EXTENSION_PARENT,
+            expected_extension_path=CONTROL_EXTENSION_PATH,
+        )
+        python_enabled_id, python_version = _enable_extension_exact(
+            manager,
+            extension_id=PYTHON_EXTENSION_ID,
+            expected_version=PYTHON_EXTENSION_VERSION,
+        )
+        enabled_id, version = _enable_extension_exact(
+            manager,
+            extension_id=EXTENSION_ID,
+            expected_version=EXTENSION_VERSION,
         )
         app.update()
-        enabled_id = manager.get_enabled_extension_id(EXTENSION_ID)
-        extension = manager.get_extension_dict(enabled_id)
-        version = extension.get("package", {}).get("version")
-        if str(version) != EXTENSION_VERSION:
-            raise RuntimeError(
-                f"local Grasp Editor version mismatch: {version}"
-            )
         if not open_stage(str(stage_path)):
             raise RuntimeError(f"failed to open Stage: {stage_path}")
         app.update()
@@ -380,8 +462,9 @@ def main() -> int:
             "/World/ALOHA1GraspEditorSession/Bottle500",
             "Xform",
         )
-        bottle.GetReferences().AddReference(
-            Sdf.AssetPath(str(bottle_path)),
+        _add_external_reference(
+            bottle,
+            bottle_path,
             Sdf.Path("/Bottle500"),
         )
         bottle.SetCustomDataByKey(
@@ -436,6 +519,14 @@ def main() -> int:
         print(f"Stage SHA-256: {EXPECTED_STAGE_SHA256}")
         print(f"Extension: {enabled_id}")
         print(f"Extension version: {version}")
+        print(
+            f"Control MCP extension: {control_enabled_id} "
+            f"{control_version}"
+        )
+        print(
+            f"Python MCP extension: {python_enabled_id} "
+            f"{python_version}"
+        )
         print(f"Window: {WINDOW_TITLE}")
         print(f"Previous edit target: {previous_edit_target_identifier}")
         print(f"Root layer: {root_identifier}")
@@ -451,6 +542,7 @@ def main() -> int:
                 diagnostic_layer,
             )
     except BaseException as error:
+        traceback.print_exception(error)
         primary_error = error
         primary_traceback = error.__traceback__
     finally:
