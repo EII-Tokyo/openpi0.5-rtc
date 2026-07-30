@@ -1,0 +1,75 @@
+{
+  "schema_version": "aloha1-grasp-editor-live-api-evidence/v1",
+  "recorded_date": "2026-07-30",
+  "scope": {
+    "target_runtime": {
+      "isaac_sim": "5.1.0.0",
+      "kit": "107.3.3",
+      "physx": "107.3.26",
+      "grasp_editor_extension": "isaacsim.robot_setup.grasp_editor",
+      "grasp_editor_version": "2.0.20"
+    },
+    "source": "Parent agent query through MCPJungle to NVIDIA official Isaac search",
+    "compatibility_ceiling": "Record 5.1-compatible patterns only; this report does not claim latest API behavior."
+  },
+  "findings": [
+    {
+      "capability": "Enable or disable a Kit extension immediately",
+      "verified_pattern": "extension_manager.is_extension_enabled(extension_id); extension_manager.set_extension_enabled_immediate(extension_id, enabled)",
+      "official_search_status": "VERIFIED_BY_PARENT_AGENT",
+      "local_isaac_5_1_source_cross_check": "PENDING"
+    },
+    {
+      "capability": "Execute a registered Kit action",
+      "verified_pattern": "omni.kit.actions.core.get_action_registry().execute_action(...)",
+      "official_search_status": "VERIFIED_BY_PARENT_AGENT",
+      "local_isaac_5_1_source_cross_check": "PENDING"
+    },
+    {
+      "capability": "Yield to the Kit update loop on the main thread",
+      "verified_pattern": "await omni.kit.app.get_app().next_update_async()",
+      "official_search_status": "VERIFIED_BY_PARENT_AGENT",
+      "local_isaac_5_1_source_cross_check": "PENDING"
+    },
+    {
+      "capability": "Capture the next rendered frame to a file",
+      "verified_pattern": "isaacsim.benchmark.services.utils.capture_next_frame(app, capture_file_path, timeout_sec=2.0)",
+      "official_search_status": "VERIFIED_BY_PARENT_AGENT",
+      "local_isaac_5_1_source_cross_check": "PENDING",
+      "official_example_internals": "Uses omni.renderer_capture and omni.kit.viewport_legacy."
+    },
+    {
+      "capability": "Session layer and edit-target handling",
+      "verified_pattern": null,
+      "official_search_status": "NOT_CONFIRMED_BY_CURRENT_OFFICIAL_SEARCH",
+      "local_isaac_5_1_source_cross_check": "LOCAL_RUNTIME_READBACK_REQUIRED"
+    }
+  ],
+  "local_source_observations": [
+    {
+      "target": "Installed isaacsim.robot_setup.grasp_editor 2.0.20 source",
+      "observation": "The Grasp Editor READY transition can mutate the Stage.",
+      "classification": "LOCAL_SOURCE_OBSERVATION_AND_ENGINEERING_INFERENCE",
+      "implication": "Capture and validate Stage, root-layer, session-layer, and edit-target identifiers through local runtime readback before and after the READY transition.",
+      "official_search_confirmation": false
+    }
+  ],
+  "open_items": [
+    "Cross-check every pattern against the installed Isaac Sim 5.1 source and extension bindings before live bridge implementation.",
+    "Confirm session-layer and edit-target behavior through local Isaac Sim 5.1 runtime readback; current official search did not confirm an example.",
+    "Do not interpret NVIDIA official search results as proof of latest or Isaac Sim 6.0 behavior."
+  ],
+  "tdd_evidence": {
+    "red": {
+      "command": "env PYTHONPATH=visual_tutor .venv/bin/python -m pytest -q visual_tutor/tests/test_aloha1_grasp_editor_manifest.py",
+      "exit_code": 2,
+      "expected_failure": "ModuleNotFoundError: No module named 'my_visual_tutor.grasp_editor_manifest'"
+    },
+    "green": {
+      "command": "env PYTHONPATH=visual_tutor .venv/bin/python -m pytest -q visual_tutor/tests/test_aloha1_grasp_editor_manifest.py",
+      "exit_code": 0,
+      "result": "3 passed in 0.03s"
+    }
+  },
+  "secrets_included": false
+}

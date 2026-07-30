@@ -1,0 +1,31 @@
+schema_version: aloha1-grasp-editor-live-manifest/v1
+isaac:
+  version: 5.1.0.0
+  kit: 107.3.3
+  physx: 107.3.26
+  grasp_editor_extension: isaacsim.robot_setup.grasp_editor
+  grasp_editor_version: 2.0.20
+stage:
+  path: /home/eii/project/openpi0.5-rtc-reward-learning/assets/Trossen/ALOHA1/1.0/diagnostics/signal_correspondence/1.0/aloha1_signal_correspondence_workcell.usda
+  sha256: d8182a6c5f49bacc5ce20765cecb3ee7dcd1414f24081e533c312d7543c788cf
+prims:
+  articulation: /World/follower_left/vx300s_left/root_joint
+  gripper_frame: /World/follower_left/vx300s_left/follower_left_gripper_link
+  object: /World/ALOHA1GraspEditorSession/Bottle500
+bottle:
+  usd_path: /home/eii/project/openpi0.5-rtc-reward-learning/assets/bottle_500ml/isaac/bottle_500ml_sim.usd
+  sha256: 16427135f152ec951de2321fd689366d745a2dd389cbe260976631783952533e
+  body_coordinate_mm: 69.0
+variant_b:
+  active_joint: left_finger
+  observer_joint: right_finger
+  open_position_m: 0.057
+  closed_position_m: 0.021
+  observer_setup_position_m: -0.057
+  max_speed_m_s: 0.02
+  max_effort_n: 5.0
+output:
+  root: /home/eii/project/openpi0.5-rtc-reward-learning/.codex/artifacts/20260730-aloha1-grasp-editor-ik-evidence/grasp_editor_gui_raw
+status:
+  ik: NOT_RUN
+  task8: NOT_RUN
